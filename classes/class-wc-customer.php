@@ -488,7 +488,7 @@ class WC_Customer {
 					if ( ! $_product || $_product->id != $result->product_id ) :
 						// new product
 						$file_number = 0;
-						$_product = new WC_Product( $result->product_id );
+						$_product = get_product( $result->product_id );
 					endif;
 
 					if ( ! $_product->exists() ) continue;

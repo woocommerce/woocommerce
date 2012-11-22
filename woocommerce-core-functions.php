@@ -20,6 +20,19 @@ add_filter( 'woocommerce_coupon_code', 'strtolower' ); // Coupons case-insensiti
 add_filter( 'woocommerce_stock_amount', 'absint' ); // Stock amounts are integers by default
 
 /**
+ * Main function for returning products, uses the WC_Product_Factory class. 
+ * 
+ * @access public
+ * @param mixed $the_product Post object or post ID of the product.
+ * @param array $args (default: array()) Contains all arguments to be used to get this product.
+ * @return void
+ */
+function get_product( $the_product = false, $args = array() ) {
+	global $woocommerce;
+	return $woocommerce->product_factory->get_product( $the_product, $args );
+}
+
+/**
  * woocommerce_get_dimension function.
  *
  * Normalise dimensions, unify to cm then convert to wanted unit value

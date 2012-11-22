@@ -192,7 +192,7 @@ class ShareYourCartWooCommerce extends ShareYourCartWordpressPlugin{
     }
       
     private function _getProductDetails($product_id){
-        $product = new WC_Product($product_id);
+        $product = get_product($product_id);
 
 		//WooCommerce actually echoes the image
         ob_start();

@@ -80,6 +80,11 @@ class Woocommerce {
 	var $shipping;
 
 	/**
+	 * @var WC_Product_Factory
+	 */
+	var $product_factory;
+
+	/**
 	 * @var WC_Cart
 	 */
 	var $cart;
@@ -171,8 +176,15 @@ class Woocommerce {
 		include( 'widgets/widget-init.php' );					// Widget classes
 		include( 'classes/class-wc-countries.php' );			// Defines countries and states
 		include( 'classes/class-wc-order.php' );				// Single order class
-		include( 'classes/class-wc-product.php' );				// Product class
+		
+		include( 'classes/class-wc-product-factory.php' );		// Product factory
+		include( 'classes/class-wc-product.php' );				// Product class abstract
+		include( 'classes/class-wc-product-simple.php' );		// Simple product type class
+		include( 'classes/class-wc-product-external.php' );		// External product type class
+		include( 'classes/class-wc-product-variable.php' );		// Variable product type class
+		include( 'classes/class-wc-product-grouped.php' );		// Grouped product type class
 		include( 'classes/class-wc-product-variation.php' );	// Product variation class
+		
 		include( 'classes/class-wc-tax.php' );					// Tax class
 		include( 'classes/class-wc-settings-api.php' );			// Settings API
 
@@ -289,6 +301,7 @@ class Woocommerce {
 		// Load class instances
 		$this->payment_gateways 	= new WC_Payment_gateways();	// Payment gateways. Loads and stores payment methods
 		$this->shipping 			= new WC_Shipping();			// Shipping class. loads and stores shipping methods
+		$this->product_factory 		= new WC_Product_Factory();     // Product Factory to create new product instances
 		$this->countries 			= new WC_Countries();			// Countries class
 		$this->integrations			= new WC_Integrations();		// Integrations class
 
@@ -499,7 +512,7 @@ class Woocommerce {
 		if ( is_int( $post ) ) $post = get_post( $post );
 		if ( $post->post_type !== 'product' ) return;
 		unset( $GLOBALS['product'] );
-		$GLOBALS['product'] = new WC_Product( $post->ID );
+		$GLOBALS['product'] = get_product( $post );
 		return $GLOBALS['product'];
 	}
 
