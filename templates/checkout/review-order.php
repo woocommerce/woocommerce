@@ -256,7 +256,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 			<?php if (woocommerce_get_page_id('terms')>0) : ?>
 			<p class="form-row terms">
-				<label for="terms" class="checkbox"><?php _e( 'I accept the', 'woocommerce' ); ?> <a href="<?php echo esc_url( get_permalink(woocommerce_get_page_id('terms')) ); ?>" target="_blank"><?php _e( 'terms &amp; conditions', 'woocommerce' ); ?></a></label>
+				<label for="terms" class="checkbox"><?php _e( 'I have read and accept the', 'woocommerce' ); ?> <a href="<?php echo esc_url( get_permalink(woocommerce_get_page_id('terms')) ); ?>" target="_blank"><?php _e( 'terms &amp; conditions', 'woocommerce' ); ?></a></label>
 				<input type="checkbox" class="input-checkbox" name="terms" <?php if (isset($_POST['terms'])) echo 'checked="checked"'; ?> id="terms" />
 			</p>
 			<?php endif; ?>
