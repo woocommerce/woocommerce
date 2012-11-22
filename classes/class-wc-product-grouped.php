@@ -27,12 +27,7 @@ class WC_Product_Grouped extends WC_Product {
 	 */
 	function __construct( $product ) {
 		
-		if ( is_object( $product ) ) {
-			$this->id = absint( $product->ID );
-			$this->post = $product;
-		} else {
-			$this->id = absint( $product );
-		}
+		parent::__construct( $product );
 		
 		$this->product_type = 'grouped';
 		$this->product_custom_fields = get_post_custom( $this->id );

@@ -1,6 +1,6 @@
 <?php
 /**
- * Product Class
+ * Abstract Product Class
  *
  * The WooCommerce product class handles individual product data.
  *
@@ -11,7 +11,7 @@
  */
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class WC_Product {
+abstract class WC_Product {
 
 	/** @var int The product (post) ID. */
 	var $id;
@@ -111,44 +111,12 @@ class WC_Product {
 	 * @param mixed $product
 	 */
 	function __construct( $product ) {
-		
 		if ( is_object( $product ) ) {
 			$this->id = absint( $product->ID );
 			$this->post = $product;
 		} else {
 			$this->id = absint( $product );
 		}
-		
-		$this->product_type = 'simple';
-		$this->product_custom_fields = get_post_custom( $this->id );
-		
-		// Load data from custom fields
-		$this->load_product_data( array(
-			'sku'			=> '',
-			'downloadable' 	=> 'no',
-			'virtual' 		=> 'no',
-			'price' 		=> '',
-			'visibility'	=> 'hidden',
-			'stock'			=> 0,
-			'stock_status'	=> 'instock',
-			'backorders'	=> 'no',
-			'manage_stock'	=> 'no',
-			'sale_price'	=> '',
-			'regular_price' => '',
-			'weight'		=> '',
-			'length'		=> '',
-			'width'			=> '',
-			'height'		=> '',
-			'tax_status'	=> 'taxable',
-			'tax_class'		=> '',
-			'upsell_ids'	=> array(),
-			'crosssell_ids' => array(),
-			'sale_price_dates_from' => '',
-			'sale_price_dates_to' 	=> '',
-			'featured'		=> 'no'
-		) );
-
-		$this->check_sale_price();
 	}
 	
 	

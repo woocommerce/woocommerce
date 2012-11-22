@@ -1,17 +1,17 @@
 <?php
 /**
- * External Product Class
+ * Simple Product Class
  *
- * External products cannot be bought; they link offsite.
+ * The default product type kinda product
  *
- * @class 		WC_Product_External
+ * @class 		WC_Product_Simple
  * @version		1.7.0
  * @package		WooCommerce/Classes/Products
  * @author 		WooThemes
  */
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class WC_Product_External extends WC_Product {
+class WC_Product_Simple extends WC_Product {
 
 	/**
 	 * __construct function.
@@ -23,7 +23,7 @@ class WC_Product_External extends WC_Product {
 
 		parent::__construct( $product );
 		
-		$this->product_type = 'external';
+		$this->product_type = 'simple';
 		$this->product_custom_fields = get_post_custom( $this->id );
 		
 		// Load data from custom fields
@@ -53,15 +53,5 @@ class WC_Product_External extends WC_Product {
 		) );
 		
 		$this->check_sale_price();
-	}
-
-	/**
-	 * Returns false if the product cannot be bought.
-	 *
-	 * @access public
-	 * @return cool
-	 */
-	function is_purchasable() {
-		return apply_filters( 'woocommerce_is_purchasable', false, $this );
 	}
 }

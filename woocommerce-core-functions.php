@@ -60,7 +60,7 @@ function get_product( $the_product = false, $parent_id = '', $meta = '' ) {
 			return new $classname( $the_product );
 		} else {
 			// Use simple
-			return new WC_Product( $the_product );
+			return new WC_Product_Simple( $the_product );
 		}
 	}
 }
