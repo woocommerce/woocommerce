@@ -415,11 +415,11 @@ function woocommerce_product_add_to_cart( $atts ) {
 
 	} elseif ($product_data->post_type=='product_variation') {
 
-		$product = new WC_Product( $product_data->post_parent );
+		$product = get_product( $product_data->post_parent );
 
 		$GLOBALS['product'] = $product;
 
-		$variation = new WC_Product_Variation( $product_data->ID );
+		$variation = get_product( $product_data );
 
 		ob_start();
 		?>
@@ -474,7 +474,7 @@ function woocommerce_product_add_to_cart_url( $atts ){
 
 	if ($product_data->post_type!=='product') return;
 
-	$_product = new WC_Product( $product_data->ID );
+	$_product = get_product( $product_data );
 
 	return esc_url( $_product->add_to_cart_url() );
 }

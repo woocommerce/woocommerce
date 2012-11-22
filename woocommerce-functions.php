@@ -46,7 +46,7 @@ function woocommerce_redirects() {
 	// Redirect to the product page if we have a single product
 	if (is_search() && is_post_type_archive('product') && get_option('woocommerce_redirect_on_single_search_result')=='yes') {
 		if ($wp_query->post_count==1) {
-			$product = new WC_Product($wp_query->post->ID);
+			$product = get_product( $wp_query->post );
 			if ($product->is_visible()) wp_safe_redirect( get_permalink($product->id), 302 );
 			exit;
 		}
@@ -246,7 +246,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 	
 	$product_id			= apply_filters('woocommerce_add_to_cart_product_id', absint( $_REQUEST['add-to-cart'] ) );
 	$was_added_to_cart 	= false;
-	$adding_to_cart 	= new WC_Product( $product_id );
+	$adding_to_cart 	= get_product( $product_id );
     
     // Variable product handling
     if ( $adding_to_cart->is_type( 'variable' ) ) {
@@ -843,7 +843,7 @@ function woocommerce_download_product() {
 		$order_key 		= urldecode( $_GET['order'] );
 		$email 			= sanitize_email( str_replace( ' ', '+', urldecode( $_GET['email'] ) ) );
 		$download_id 	= isset( $_GET['key'] ) ? urldecode( $_GET['key'] ) : '';  // backwards compatibility for existing download URLs
-		$_product	 	= new WC_Product( $product_id );
+		$_product	 	= get_product( $product_id );
 
 		if ( ! is_email( $email) )
 			wp_die( __( 'Invalid email address.', 'woocommerce' ) . ' <a href="' . home_url() . '">' . __( 'Go to homepage &rarr;', 'woocommerce' ) . '</a>' );

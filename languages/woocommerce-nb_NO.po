@@ -2532,7 +2532,7 @@ msgstr "Dette kontrolerer beskrivelsen kunden får i kassen."
 #: classes/gateways/paypal/class-wc-paypal.php:116
 #@ woocommerce
 msgid "Pay via PayPal; you can pay with your credit card if you don't have a PayPal account"
-msgstr "Betala via PayPal; du kan betale med ditt kredittkort hvis du ikke har paypal-konto."
+msgstr "Betale via PayPal; du kan betale med ditt kredittkort hvis du ikke har paypal-konto."
 
 #: classes/gateways/paypal/class-wc-paypal.php:119
 #@ woocommerce
@@ -10829,7 +10829,7 @@ msgstr "Avansert"
 #: admin/post-types/writepanels/writepanel-product_data.php:91
 #@ woocommerce
 msgid "SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased."
-msgstr "SKU refererer til en lagerhold enhet (Stock-keeping unit), en unig identifikasjon for hvert enkelt produkt og service som kan kjøpes."
+msgstr "SKU refererer til en lagerhold enhet (Stock-keeping unit), en unik identifikasjon for hvert enkelt produkt og service som kan kjøpes."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:143
 #@ woocommerce
@@ -11326,4 +11326,3 @@ msgstr "Brukernavn eller e-post adresse"
 #@ woocommerce
 msgid "1.6.3"
 msgstr "1.6.3"
-

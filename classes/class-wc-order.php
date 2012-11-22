@@ -850,12 +850,7 @@ class WC_Order {
 	 * @return WC_Product
 	 */
 	function get_product_from_item( $item ) {
-
-		if (isset($item['variation_id']) && $item['variation_id']>0) :
-			$_product = new WC_Product_Variation( $item['variation_id'] );
-		else :
-			$_product = new WC_Product( $item['product_id'] );
-		endif;
+		$_product = get_product( $item['variation_id'] ? $item['variation_id'] : $item['product_id'] );
 
 		return $_product;
 
@@ -1126,7 +1121,7 @@ class WC_Order {
 		global $wpdb;
 
 	 	$download_file = $variation_id > 0 ? $variation_id : $product_id;
-		$_product = new WC_Product( $download_file );
+		$_product = get_product( $download_file );
 
 	 	$user_email = $this->billing_email;
 

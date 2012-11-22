@@ -115,7 +115,7 @@ add_filter('manage_edit-product_columns', 'woocommerce_edit_product_columns');
  */
 function woocommerce_custom_product_columns( $column ) {
 	global $post, $woocommerce;
-	$product = new WC_Product($post->ID);
+	$product = get_product($post);
 
 	switch ($column) {
 		case "thumb" :
@@ -712,7 +712,7 @@ function woocommerce_admin_product_quick_edit_save( $post_id, $post ) {
 
 	global $woocommerce, $wpdb;
 
-	$product = new WC_Product( $post_id );
+	$product = get_product( $post );
 
 	// Save fields
 	if(isset($_POST['_sku'])) update_post_meta($post_id, '_sku', esc_html(stripslashes($_POST['_sku'])));
@@ -1003,7 +1003,7 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 
 	global $woocommerce, $wpdb;
 
-	$product = new WC_Product( $post_id );
+	$product = get_product( $post );
 
 	// Save fields
 	if ( ! empty( $_REQUEST['change_weight'] ) && isset( $_REQUEST['_weight'] ) )

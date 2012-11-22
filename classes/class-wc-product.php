@@ -1,6 +1,6 @@
 <?php
 /**
- * Product Class
+ * Abstract Product Class
  *
  * The WooCommerce product class handles individual product data.
  *
@@ -9,7 +9,9 @@
  * @package		WooCommerce/Classes
  * @author 		WooThemes
  */
-class WC_Product {
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
+abstract class WC_Product {
 
 	/** @var int The product (post) ID. */
 	var $id;
@@ -19,9 +21,6 @@ class WC_Product {
 
 	/** @var array Array of product attributes. */
 	var $attributes;
-
-	/** @var array Array of child products/posts/variations. */
-	var $children;
 
 	/** @var object The actual post object. */
 	var $post;
@@ -86,32 +85,11 @@ class WC_Product {
 	/** @var string The product's type (simple, variable etc). */
 	var $product_type;
 
-	/** @var string The product's total stock, including that of its children. */
-	var $total_stock;
-
 	/** @var string Date a sale starts. */
 	var $sale_price_dates_from;
 
 	/** @var string Data a sale ends. */
 	var $sale_price_dates_to;
-
-	/** @var string Used for variation prices. */
-	var $min_variation_price;
-
-	/** @var string Used for variation prices. */
-	var $max_variation_price;
-
-	/** @var string Used for variation prices. */
-	var $min_variation_regular_price;
-
-	/** @var string Used for variation prices. */
-	var $max_variation_regular_price;
-
-	/** @var string Used for variation prices. */
-	var $min_variation_sale_price;
-
-	/** @var string Used for variation prices. */
-	var $max_variation_sale_price;
 
 	/** @var string "Yes" for featured products. */
 	var $featured;
@@ -125,66 +103,37 @@ class WC_Product {
 	/** @var string Formatted LxWxH. */
 	var $dimensions;
 
+
 	/**
-	 * Loads all product data from custom fields.
-	 *
-	 * @param int $id ID of the product to load
+	 * __construct function.
+	 * 
+	 * @access public
+	 * @param mixed $product
 	 */
-	function __construct( $id ) {
-
-		$this->id = absint( $id );
-
-		$this->product_custom_fields = get_post_custom( $this->id );
-
-		// Define the data we're going to load: Key => Default value
-		$load_data = array(
-			'sku'			=> '',
-			'downloadable' 	=> 'no',
-			'virtual' 		=> 'no',
-			'price' 		=> '',
-			'visibility'	=> 'hidden',
-			'stock'			=> 0,
-			'stock_status'	=> 'instock',
-			'backorders'	=> 'no',
-			'manage_stock'	=> 'no',
-			'sale_price'	=> '',
-			'regular_price' => '',
-			'weight'		=> '',
-			'length'		=> '',
-			'width'		=> '',
-			'height'		=> '',
-			'tax_status'	=> 'taxable',
-			'tax_class'		=> '',
-			'upsell_ids'	=> array(),
-			'crosssell_ids' => array(),
-			'sale_price_dates_from' => '',
-			'sale_price_dates_to' 	=> '',
-			'min_variation_price'	=> '',
-			'max_variation_price'	=> '',
-			'min_variation_regular_price'	=> '',
-			'max_variation_regular_price'	=> '',
-			'min_variation_sale_price'	=> '',
-			'max_variation_sale_price'	=> '',
-			'featured'		=> 'no'
-		);
-
-		// Load the data from the custom fields
-		foreach ($load_data as $key => $default) $this->$key = (isset($this->product_custom_fields['_' . $key][0]) && $this->product_custom_fields['_' . $key][0]!=='') ? $this->product_custom_fields['_' . $key][0] : $default;
-
-		// Get product type
-		$transient_name = 'wc_product_type_' . $this->id;
-
-		if ( false === ( $this->product_type = get_transient( $transient_name ) ) ) :
-			$terms = wp_get_object_terms( $id, 'product_type', array('fields' => 'names') );
-			$this->product_type = (isset($terms[0])) ? sanitize_title($terms[0]) : 'simple';
-			set_transient( $transient_name, $this->product_type );
-		endif;
-
-		// Check sale dates
-		$this->check_sale_price();
+	function __construct( $product ) {
+		if ( is_object( $product ) ) {
+			$this->id = absint( $product->ID );
+			$this->post = $product;
+		} else {
+			$this->id = absint( $product );
+		}
 	}
-
-
+	
+	
+	/**
+	 * Load the data from the custom fields
+	 * 
+	 * @access public
+	 * @param mixed $fields
+	 * @return void
+	 */
+	function load_product_data( $fields ) {
+		if ( $fields )
+			foreach ( $fields as $key => $default ) 
+				$this->$key = isset( $this->product_custom_fields[ '_' . $key ][0] ) && $this->product_custom_fields[ '_' . $key ][0] !== '' ? $this->product_custom_fields[ '_' . $key ][0] : $default;
+	}
+	
+	
 	/**
      * Get SKU (Stock-keeping unit) - product unique ID.
      *
@@ -196,88 +145,28 @@ class WC_Product {
 
 
     /**
-     * Get total stock.
+     * Returns number of items available for sale.
      *
-     * This is the stock of parent and children combined.
+     * @access public
+     * @return int
+     */
+    function get_stock_quantity() {
+    	if ( ! $this->managing_stock() )
+    		return '';
+
+        return apply_filters( 'woocommerce_stock_amount', $this->stock );
+    }
+    
+    
+    /**
+     * Get total stock.
      *
      * @access public
      * @return int
      */
     function get_total_stock() {
-
-        if ( is_null( $this->total_stock ) ) {
-
-        	$transient_name = 'wc_product_total_stock_' . $this->id;
-
-        	if ( false === ( $this->total_stock = get_transient( $transient_name ) ) ) {
-		        $this->total_stock = $this->stock;
-
-				if ( sizeof( $this->get_children() ) > 0 ) {
-					foreach ($this->get_children() as $child_id) {
-						$stock = get_post_meta( $child_id, '_stock', true );
-
-						if ( $stock != '' ) {
-							$this->total_stock += intval( $stock );
-						}
-					}
-				}
-
-				set_transient( $transient_name, $this->total_stock );
-			}
-		}
-
-		return apply_filters( 'woocommerce_stock_amount', $this->total_stock );
+		return $this->get_stock_quantity();
     }
-
-	/**
-	 * Return the products children posts.
-	 *
-	 * @access public
-	 * @return array
-	 */
-	function get_children() {
-
-		if (!is_array($this->children)) :
-
-			$this->children = array();
-
-			if ($this->is_type('variable') || $this->is_type('grouped')) :
-
-				$child_post_type = ($this->is_type('variable')) ? 'product_variation' : 'product';
-
-				$transient_name = 'wc_product_children_ids_' . $this->id;
-
-	        	if ( false === ( $this->children = get_transient( $transient_name ) ) ) :
-
-			        $this->children = get_posts( 'post_parent=' . $this->id . '&post_type=' . $child_post_type . '&orderby=menu_order&order=ASC&fields=ids&post_status=any&numberposts=-1' );
-
-					set_transient( $transient_name, $this->children );
-
-				endif;
-
-			endif;
-
-		endif;
-
-		return (array) $this->children;
-	}
-
-
-	/**
-	 * get_child function.
-	 *
-	 * @access public
-	 * @param mixed $child_id
-	 * @return object WC_Product or WC_Product_variation
-	 */
-	function get_child( $child_id ) {
-		if ($this->is_type('variable')) :
-			$child = new WC_Product_Variation( $child_id, $this->id, $this->product_custom_fields );
-		else :
-			$child = new WC_Product( $child_id );
-		endif;
-		return $child;
-	}
 
 
 	/**
@@ -290,20 +179,18 @@ class WC_Product {
 	function reduce_stock( $by = 1 ) {
 		global $woocommerce;
 
-		if ($this->managing_stock()) :
+		if ( $this->managing_stock() ) {
 			$this->stock = $this->stock - $by;
-			$this->total_stock = $this->get_total_stock() - $by;
-			update_post_meta($this->id, '_stock', $this->stock);
+			update_post_meta( $this->id, '_stock', $this->stock );
 
 			// Out of stock attribute
-			if ($this->managing_stock() && !$this->backorders_allowed() && $this->get_total_stock()<=0) :
-				update_post_meta($this->id, '_stock_status', 'outofstock');
-			endif;
+			if ( $this->managing_stock() && ! $this->backorders_allowed() && $this->get_total_stock() <= 0 )
+				update_post_meta( $this->id, '_stock_status', 'outofstock' );
 
 			$woocommerce->clear_product_transients( $this->id ); // Clear transient
 
-			return apply_filters( 'woocommerce_stock_amount', $this->stock );
-		endif;
+			return $this->get_stock_quantity();
+		}
 	}
 
 
@@ -317,20 +204,18 @@ class WC_Product {
 	function increase_stock( $by = 1 ) {
 		global $woocommerce;
 
-		if ($this->managing_stock()) :
+		if ( $this->managing_stock() ) {
 			$this->stock = $this->stock + $by;
-			$this->total_stock = $this->get_total_stock() + $by;
-			update_post_meta($this->id, '_stock', $this->stock);
+			update_post_meta( $this->id, '_stock', $this->stock );
 
 			// Out of stock attribute
-			if ($this->managing_stock() && ($this->backorders_allowed() || $this->get_total_stock()>0)) :
+			if ( $this->managing_stock() && ( $this->backorders_allowed() || $this->get_total_stock() > 0 ) )
 				update_post_meta($this->id, '_stock_status', 'instock');
-			endif;
 
 			$woocommerce->clear_product_transients( $this->id ); // Clear transient
 
-			return apply_filters( 'woocommerce_stock_amount', $this->stock );
-		endif;
+			return $this->get_stock_quantity();
+		}
 	}
 
 
@@ -344,8 +229,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	function is_type( $type ) {
-		if ( is_array( $type ) && in_array( $this->product_type, $type ) ) return true;
-		if ( $this->product_type == $type ) return true;
+		if ( $this->product_type == $type || ( is_array( $type ) && in_array( $this->product_type, $type ) ) ) return true;
 		return false;
 	}
 
@@ -357,7 +241,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	function is_downloadable() {
-		if ( $this->downloadable == 'yes' ) return true; else return false;
+		return $this->downloadable == 'yes' ? true : false;
 	}
 
 
@@ -390,14 +274,16 @@ class WC_Product {
 	 */
 	function get_file_download_path( $download_id ) {
 		
-		$file_path = '';
-		$file_paths = apply_filters( 'woocommerce_file_download_paths', get_post_meta( $this->id, '_file_paths', true ), $this->id, null, null );
+		$file_paths = isset( $this->product_custom_fields['_file_paths'][0] ) ? $this->product_custom_fields['_file_paths'][0] : '';
+		$file_paths = apply_filters( 'woocommerce_file_download_paths', $file_paths, $this->id, null, null );
 
 		if ( ! $download_id && count( $file_paths ) == 1 ) {
 			// backwards compatibility for old-style download URLs and template files
 			$file_path = array_shift( $file_paths );
 		} elseif ( isset( $file_paths[ $download_id ] ) ) {
 			$file_path = $file_paths[ $download_id ];
+		} else {
+			$file_path = '';
 		}
 
 		// allow overriding based on the particular file being requested
@@ -412,7 +298,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	function is_virtual() {
-		if ( $this->virtual == 'yes' ) return true; else return false;
+		return $this->virtual == 'yes' ? true : false;
 	}
 
 
@@ -423,9 +309,10 @@ class WC_Product {
 	 * @return bool
 	 */
 	function needs_shipping() {
-		if ( $this->is_virtual() ) return false; else return true;
+		return $this->is_virtual() ? false : true;
 	}
-
+	
+	
 	/**
 	 * Check if a product is sold individually (no quantities)
 	 *
@@ -443,7 +330,17 @@ class WC_Product {
 		return apply_filters( 'woocommerce_is_sold_individually', $return, $this );
 	}
 
-
+	/**
+	 * get_children function.
+	 * 
+	 * @access public
+	 * @return bool
+	 */
+	function get_children() {
+		return array();
+	}
+	
+	
 	/**
 	 * Returns whether or not the product has any child product.
 	 *
@@ -451,7 +348,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	function has_child() {
-		return sizeof( $this->get_children() ) ? true : false;
+		return false;
 	}
 
 
@@ -463,8 +360,8 @@ class WC_Product {
 	 */
 	function exists() {
 		global $wpdb;
-		if ( $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE ID = %d LIMIT 1;", $this->id ) ) > 0 ) return true;
-		return false;
+		
+		return ! empty( $this->post ) || $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE ID = %d LIMIT 1;", $this->id ) ) > 0 ? true : false;
 	}
 
 
@@ -475,8 +372,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	function is_taxable() {
-		if ($this->tax_status=='taxable' && get_option('woocommerce_calc_taxes')=='yes') return true;
-		return false;
+		return $this->tax_status == 'taxable' && get_option('woocommerce_calc_taxes') == 'yes' ? true : false;
 	}
 
 
@@ -487,8 +383,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	function is_shipping_taxable() {
-		if ($this->tax_status=='taxable' || $this->tax_status=='shipping') return true;
-		return false;
+		return $this->tax_status=='taxable' || $this->tax_status=='shipping' ? true : false;
 	}
 
 
@@ -584,8 +479,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	function backorders_allowed() {
-		if ($this->backorders=='yes' || $this->backorders=='notify') return true;
-		return false;
+		return $this->backorders=='yes' || $this->backorders=='notify' ? true : false;
 	}
 
 
@@ -596,8 +490,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	function backorders_require_notification() {
-		if ($this->managing_stock() && $this->backorders=='notify') return true;
-		return false;
+		return $this->managing_stock() && $this->backorders=='notify' ? true : false;
 	}
 
 
@@ -609,23 +502,8 @@ class WC_Product {
 	 * @return bool
 	 */
 	function is_on_backorder( $qty_in_cart = 0 ) {
-		if ( $this->managing_stock() && $this->backorders_allowed() && ( $this->get_total_stock() - $qty_in_cart ) < 0 ) return true;
-		return false;
+		return $this->managing_stock() && $this->backorders_allowed() && ( $this->get_total_stock() - $qty_in_cart ) < 0 ? true : false;
 	}
-
-
-    /**
-     * Returns number of items available for sale.
-     *
-     * @access public
-     * @return int
-     */
-    function get_stock_quantity() {
-    	if ( get_option( 'woocommerce_manage_stock' ) == 'no' || ! $this->managing_stock() )
-    		return '';
-
-        return apply_filters( 'woocommerce_stock_amount', $this->stock );
-    }
 
 
 	/**
@@ -636,17 +514,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	function has_enough_stock( $quantity ) {
-
-		if (!$this->managing_stock()) return true;
-
-		if ($this->backorders_allowed()) return true;
-
-		if ($this->stock >= $quantity) :
-			return true;
-		endif;
-
-		return false;
-
+		return ! $this->managing_stock() || $this->backorders_allowed() || $this->stock >= $quantity ? true : false;
 	}
 
 
@@ -718,7 +586,7 @@ class WC_Product {
 			endif;
 		endif;
 
-		return apply_filters( 'woocommerce_get_availability', array( 'availability' => $availability, 'class' => $class), $this );
+		return apply_filters( 'woocommerce_get_availability', array( 'availability' => $availability, 'class' => $class ), $this );
 	}
 
 
@@ -729,7 +597,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	function is_featured() {
-		if ($this->featured=='yes') return true; else return false;
+		return $this->featured == 'yes' ? true : false;
 	}
 
 
@@ -744,19 +612,19 @@ class WC_Product {
 		$visible = true;
 
 		// Out of stock visibility
-		if (get_option('woocommerce_hide_out_of_stock_items')=='yes' && !$this->is_in_stock()) $visible = false;
+		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' && ! $this->is_in_stock() ) $visible = false;
 
 		// visibility setting
-		elseif ($this->visibility=='hidden') $visible = false;
-		elseif ($this->visibility=='visible') $visible = true;
+		elseif ( $this->visibility == 'hidden' ) $visible = false;
+		elseif ( $this->visibility == 'visible' ) $visible = true;
 
 		// Visibility in loop
-		elseif ($this->visibility=='search' && is_search()) $visible = true;
-		elseif ($this->visibility=='search' && !is_search()) $visible = false;
-		elseif ($this->visibility=='catalog' && is_search()) $visible = false;
-		elseif ($this->visibility=='catalog' && !is_search()) $visible = true;
+		elseif ( $this->visibility == 'search' && is_search() ) $visible = true;
+		elseif ( $this->visibility == 'search' && ! is_search() ) $visible = false;
+		elseif ( $this->visibility == 'catalog' && is_search() ) $visible = false;
+		elseif ( $this->visibility == 'catalog' && ! is_search() ) $visible = true;
 
-		return apply_filters('woocommerce_product_is_visible', $visible, $this->id);
+		return apply_filters( 'woocommerce_product_is_visible', $visible, $this->id );
 	}
 
 
@@ -767,19 +635,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	function is_on_sale() {
-		if ($this->has_child()) :
-
-			foreach ($this->get_children() as $child_id) :
-				$sale_price = get_post_meta( $child_id, '_sale_price', true );
-				if ( $sale_price!=="" && $sale_price >= 0 ) return true;
-			endforeach;
-
-		else :
-
-			if ( $this->sale_price && $this->sale_price==$this->price ) return true;
-
-		endif;
-		return false;
+		return $this->sale_price && $this->sale_price == $this->price ? true : false;
 	}
 
 
@@ -790,7 +646,7 @@ class WC_Product {
 	 * @return string
 	 */
 	function get_weight() {
-		if ($this->weight) return $this->weight;
+		if ( $this->weight ) return $this->weight;
 	}
 
 
@@ -845,10 +701,6 @@ class WC_Product {
 		if ( ! $this->exists() )
 			$purchasable = false;
 
-		// External and grouped products cannot be bought
-		elseif ( $this->is_type( array( 'grouped', 'external' ) ) )
-			$purchasable = false;
-
 		// Other products types need a price to be set
 		elseif ( $this->get_price() === '' )
 			$purchasable = false;
@@ -889,7 +741,7 @@ class WC_Product {
 	 * @return string
 	 */
 	function get_tax_class() {
-		return apply_filters('woocommerce_product_tax_class', $this->tax_class, $this);
+		return apply_filters( 'woocommerce_product_tax_class', $this->tax_class, $this );
 	}
 
 
@@ -912,118 +764,41 @@ class WC_Product {
 	 * @return string
 	 */
 	function get_price_html( $price = '' ) {
-		if ( $this->is_type( 'grouped' ) ) {
 
-			$child_prices = array();
+		if ( $this->price > 0 ) {
+			if ( $this->is_on_sale() && isset( $this->regular_price ) ) {
 
-			foreach ( $this->get_children() as $child_id ) $child_prices[] = get_post_meta( $child_id, '_price', true );
+				$price .= $this->get_price_html_from_to( $this->regular_price, $this->get_price() );
 
-			$child_prices = array_unique( $child_prices );
+				$price = apply_filters( 'woocommerce_sale_price_html', $price, $this );
 
-			if ( ! empty( $child_prices ) ) {
-				$min_price = min( $child_prices );
 			} else {
-				$min_price = '';
-			}
 
-			if ( sizeof( $child_prices ) > 1 ) $price .= $this->get_price_html_from_text();
+				$price .= woocommerce_price( $this->get_price() );
 
-			$price .= woocommerce_price( $min_price );
-
-			$price = apply_filters( 'woocommerce_grouped_price_html', $price, $this );
-
-		} elseif ( $this->is_type( 'variable' ) ) {
-
-			// Ensure variation prices are synced with variations
-			if ( $this->min_variation_price === '' || $this->min_variation_regular_price === '' ) {
-				$this->variable_product_sync();
-				$this->price = $this->min_variation_price;
-			}
-
-			// Get the price
-			if ($this->price > 0) {
-				if ( $this->is_on_sale() && isset( $this->min_variation_price ) && $this->min_variation_regular_price !== $this->get_price() ) {
-
-					if ( ! $this->min_variation_price || $this->min_variation_price !== $this->max_variation_price )
-						$price .= $this->get_price_html_from_text();
-
-					$price .= $this->get_price_html_from_to( $this->min_variation_regular_price, $this->get_price() );
-
-					$price = apply_filters( 'woocommerce_variable_sale_price_html', $price, $this );
-
-				} else {
-
-					if ( ! $this->min_variation_price || $this->min_variation_price !== $this->max_variation_price )
-						$price .= $this->get_price_html_from_text();
-
-					$price .= woocommerce_price( $this->get_price() );
-
-					$price = apply_filters('woocommerce_variable_price_html', $price, $this);
-
-				}
-			} elseif ($this->price === '' ) {
-
-				$price = apply_filters('woocommerce_variable_empty_price_html', '', $this);
-
-			} elseif ($this->price == 0 ) {
-
-				if ( $this->is_on_sale() && isset( $this->min_variation_regular_price ) && $this->min_variation_regular_price !== $this->get_price() ) {
-
-					if ( ! $this->min_variation_price || $this->min_variation_price !== $this->max_variation_price )
-						$price .= $this->get_price_html_from_text();
-
-					$price .= $this->get_price_html_from_to( $this->min_variation_regular_price, __( 'Free!', 'woocommerce' ) );
-
-					$price = apply_filters( 'woocommerce_variable_free_sale_price_html', $price, $this );
-
-				} else {
-
-					if ( ! $this->min_variation_price || $this->min_variation_price !== $this->max_variation_price )
-						$price .= $this->get_price_html_from_text();
-
-					$price .= __( 'Free!', 'woocommerce' );
-
-					$price = apply_filters( 'woocommerce_variable_free_price_html', $price, $this );
-
-				}
+				$price = apply_filters( 'woocommerce_price_html', $price, $this );
 
 			}
-		} else {
-			if ( $this->price > 0 ) {
-				if ( $this->is_on_sale() && isset( $this->regular_price ) ) {
+		} elseif ($this->price === '' ) {
 
-					$price .= $this->get_price_html_from_to( $this->regular_price, $this->get_price() );
+			$price = apply_filters( 'woocommerce_empty_price_html', '', $this );
 
-					$price = apply_filters( 'woocommerce_sale_price_html', $price, $this );
+		} elseif ($this->price == 0 ) {
 
-				} else {
+			if ( $this->is_on_sale() && isset( $this->regular_price ) ) {
 
-					$price .= woocommerce_price( $this->get_price() );
+				$price .= $this->get_price_html_from_to( $this->regular_price, __( 'Free!', 'woocommerce' ) );
 
-					$price = apply_filters( 'woocommerce_price_html', $price, $this );
+				$price = apply_filters( 'woocommerce_free_sale_price_html', $price, $this );
 
-				}
-			} elseif ($this->price === '' ) {
+			} else {
 
-				$price = apply_filters( 'woocommerce_empty_price_html', '', $this );
+				$price = __( 'Free!', 'woocommerce' );
 
-			} elseif ($this->price == 0 ) {
-
-				if ( $this->is_on_sale() && isset( $this->regular_price ) ) {
-
-					$price .= $this->get_price_html_from_to( $this->regular_price, __( 'Free!', 'woocommerce' ) );
-
-					$price = apply_filters( 'woocommerce_free_sale_price_html', $price, $this );
-
-				} else {
-
-					$price = __( 'Free!', 'woocommerce' );
-
-					$price = apply_filters( 'woocommerce_free_price_html', $price, $this );
-
-				}
+				$price = apply_filters( 'woocommerce_free_price_html', $price, $this );
 
 			}
+
 		}
 
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
@@ -1061,10 +836,12 @@ class WC_Product {
 	 */
 	function get_rating_html( $location = '' ) {
 
-		if ($location) $location = '_'.$location;
-		$star_size = apply_filters('woocommerce_star_rating_size'.$location, 16);
+		if ( $location ) 
+			$location = '_' . $location;
+			
+		$star_size = apply_filters( 'woocommerce_star_rating_size' . $location, 16 );
 
-		if ( false === ( $average_rating = get_transient( 'wc_average_rating_' . $this->id ) ) ) :
+		if ( false === ( $average_rating = get_transient( 'wc_average_rating_' . $this->id ) ) ) {
 
 			global $wpdb;
 
@@ -1085,21 +862,18 @@ class WC_Product {
 				AND comment_approved = '1'
 			"), $this->id );
 
-			if ( $count>0 ) :
+			if ( $count > 0 )
 				$average_rating = number_format($ratings / $count, 2);
-			else :
+			else
 				$average_rating = '';
-			endif;
 
 			set_transient( 'wc_average_rating_' . $this->id, $average_rating );
+		}
 
-		endif;
-
-		if ( $average_rating>0 ) :
-			return '<div class="star-rating" title="'.sprintf(__( 'Rated %s out of 5', 'woocommerce' ), $average_rating).'"><span style="width:'.($average_rating*$star_size).'px"><span class="rating">'.$average_rating.'</span> '.__( 'out of 5', 'woocommerce' ).'</span></div>';
-		else :
+		if ( $average_rating > 0 )
+			return '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $average_rating ) . '"><span style="width:' . ( $average_rating * $star_size ) . 'px"><span class="rating">' . $average_rating . '</span> ' . __( 'out of 5', 'woocommerce' ) . '</span></div>';
+		else
 			return '';
-		endif;
 	}
 
 
@@ -1162,10 +936,13 @@ class WC_Product {
 	 * @return string
 	 */
 	function get_shipping_class() {
-		if ( ! $this->shipping_class ) :
+		if ( ! $this->shipping_class ) {
 			$classes = get_the_terms( $this->id, 'product_shipping_class' );
-			if ($classes && !is_wp_error($classes)) $this->shipping_class = current($classes)->slug; else $this->shipping_class = '';
-		endif;
+			if ( $classes && ! is_wp_error( $classes ) ) 
+				$this->shipping_class = current( $classes )->slug; 
+			else 
+				$this->shipping_class = '';
+		}
 		return $this->shipping_class;
 	}
 
@@ -1292,7 +1069,6 @@ class WC_Product {
 				$this->attributes = maybe_unserialize( maybe_unserialize( $this->product_custom_fields['_product_attributes'][0] ));
 			else
 				$this->attributes = array();
-
 		}
 
 		return (array) $this->attributes;
@@ -1306,11 +1082,12 @@ class WC_Product {
 	 * @return mixed
 	 */
 	function has_attributes() {
-		if (sizeof($this->get_attributes())>0) :
-			foreach ($this->get_attributes() as $attribute) :
-				if (isset($attribute['is_visible']) && $attribute['is_visible']) return true;
-			endforeach;
-		endif;
+		if ( sizeof( $this->get_attributes() ) > 0 ) {
+			foreach ( $this->get_attributes() as $attribute ) {
+				if ( isset( $attribute['is_visible'] ) && $attribute['is_visible'] ) 
+					return true;
+			}
+		}
 		return false;
 	}
 
@@ -1322,8 +1099,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	function enable_dimensions_display() {
-		if (get_option('woocommerce_enable_dimension_product_attributes')=='yes') return true;
-		return false;
+		return get_option( 'woocommerce_enable_dimension_product_attributes' ) == 'yes' ? true : false;
 	}
 
 
@@ -1334,8 +1110,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	function has_dimensions() {
-		if ($this->get_dimensions()) return true;
-		return false;
+		return $this->get_dimensions() ? true : false;
 	}
 
 
@@ -1346,8 +1121,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	function has_weight() {
-		if ($this->get_weight()) return true;
-		return false;
+		return $this->get_weight() ? true : false;
 	}
 
 
@@ -1358,18 +1132,18 @@ class WC_Product {
 	 * @return string
 	 */
 	function get_dimensions() {
-		if (!$this->dimensions) :
+		if ( ! $this->dimensions ) :
 			$this->dimensions = '';
 
 			// Show length
-			if ($this->length) {
+			if ( $this->length ) {
 				$this->dimensions = $this->length;
 				// Show width also
-				if ($this->width) {
-					$this->dimensions .= ' × '.$this->width;
+				if ( $this->width ) {
+					$this->dimensions .= ' x ' . $this->width;
 					// Show height also
-					if ($this->height) {
-						$this->dimensions .= ' × '.$this->height;
+					if ( $this->height ) {
+						$this->dimensions .= ' x ' . $this->height;
 					}
 				}
 				// Append the unit
@@ -1387,154 +1161,10 @@ class WC_Product {
 	 * @return void
 	 */
 	function list_attributes() {
-		woocommerce_get_template('single-product/product-attributes.php', array(
+		woocommerce_get_template( 'single-product/product-attributes.php', array(
 			'product' => $this
-		));
+		) );
 	}
-
-
-    /**
-     * Return an array of attributes used for variations, as well as their possible values.
-     *
-     * @access public
-     * @return array of attributes and their available values
-     */
-    function get_variation_attributes() {
-
-	    $variation_attributes = array();
-
-        if ( ! $this->is_type('variable') || ! $this->has_child() )
-        	return $variation_attributes;
-
-        $attributes = $this->get_attributes();
-
-        foreach ( $attributes as $attribute ) {
-            if ( ! $attribute['is_variation'] )
-            	continue;
-
-            $values = array();
-            $attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
-
-            foreach ( $this->get_children() as $child_id ) {
-
-                if ( get_post_status( $child_id ) != 'publish' )
-                	continue; // Disabled
-
-            	$child = $this->get_child( $child_id );
-
-                $child_variation_attributes = $child->get_variation_attributes();
-
-                foreach ( $child_variation_attributes as $name => $value )
-                    if ( $name == $attribute_field_name )
-                    	$values[] = $value;
-            }
-
-            // empty value indicates that all options for given attribute are available
-            if ( in_array( '', $values ) ) {
-
-            	$values = array();
-
-            	// Get all options
-            	if ( $attribute['is_taxonomy'] ) {
-	            	$post_terms = wp_get_post_terms( $this->id, $attribute['name'] );
-					foreach ( $post_terms as $term )
-						$values[] = $term->slug;
-				} else {
-					$values = explode( '|', $attribute['value'] );
-				}
-
-				$values = array_unique( array_map( 'trim', $values ) );
-
-			// Order custom attributes (non taxonomy) as defined
-            } else {
-
-	            if ( ! $attribute['is_taxonomy'] ) {
-	            	$options 	= array_map( 'trim', explode( '|', $attribute['value'] ) );
-	            	$values 	= array_intersect( $options, $values );
-	            }
-
-            }
-
-            $variation_attributes[ $attribute['name'] ] = array_unique( $values );
-        }
-
-        return $variation_attributes;
-    }
-
-    /**
-     * If set, get the default attributes for a variable product.
-     *
-     * @access public
-     * @return array
-     */
-    function get_variation_default_attributes() {
-
-    	$default = isset( $this->product_custom_fields['_default_attributes'][0] ) ? $this->product_custom_fields['_default_attributes'][0] : '';
-
-	    return apply_filters( 'woocommerce_product_default_attributes', (array) maybe_unserialize( $default ), $this );
-    }
-
-    /**
-     * Get an array of available variations for the current product.
-     *
-     * @access public
-     * @return array
-     */
-    function get_available_variations() {
-
-	    $available_variations = array();
-
-		foreach ( $this->get_children() as $child_id ) {
-
-			$variation = $this->get_child( $child_id );
-
-			if ( $variation instanceof WC_Product_Variation ) {
-
-				if ( get_post_status( $variation->get_variation_id() ) != 'publish' || ! $variation->is_visible() )
-					continue; // Disabled or hidden
-
-				$variation_attributes 	= $variation->get_variation_attributes();
-				$availability 			= $variation->get_availability();
-				$availability_html 		= empty( $availability['availability'] ) ? '' : apply_filters( 'woocommerce_stock_html', '<p class="stock ' . esc_attr( $availability['class'] ) . '">'. wp_kses_post( $availability['availability'] ).'</p>', wp_kses_post( $availability['availability'] ) );
-
-				if ( has_post_thumbnail( $variation->get_variation_id() ) ) {
-					$attachment_id = get_post_thumbnail_id( $variation->get_variation_id() );
-
-					$attachment = wp_get_attachment_image_src( $attachment_id, apply_filters( 'single_product_large_thumbnail_size', 'shop_single' )  );
-					$image = $attachment ? current( $attachment ) : '';
-
-					$attachment = wp_get_attachment_image_src( $attachment_id, 'full'  );
-					$image_link = $attachment ? current( $attachment ) : '';
-
-					$image_title = get_the_title( $attachment_id );
-				} else {
-					$image = $image_link = $image_title = '';
-				}
-
-				$available_variations[] = apply_filters( 'woocommerce_available_variation', array(
-					'variation_id' 			=> $child_id,
-					'attributes' 			=> $variation_attributes,
-					'image_src' 			=> $image,
-					'image_link' 			=> $image_link,
-					'image_title'			=> $image_title,
-					'price_html' 			=> $this->min_variation_price != $this->max_variation_price ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
-					'availability_html' 	=> $availability_html,
-					'sku' 					=> $variation->get_sku(),
-					'weight'				=> $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ),
-					'dimensions'			=> $variation->get_dimensions(),
-					'min_qty' 				=> 1,
-					'max_qty' 				=> $this->backorders_allowed() ? '' : $variation->stock,
-					'backorders_allowed' 	=> $this->backorders_allowed(),
-					'is_in_stock'			=> $variation->is_in_stock(),
-					'is_downloadable' 		=> $variation->is_downloadable() ,
-					'is_virtual' 			=> $variation->is_virtual(),
-					'is_sold_individually' 	=> $variation->is_sold_individually() ? 'yes' : 'no',
-				), $this, $variation );
-			}
-		}
-
-		return $available_variations;
-    }
 
 
     /**
@@ -1568,17 +1198,14 @@ class WC_Product {
      * @return void
      */
     function check_sale_price() {
-
+    
     	if ( $this->sale_price_dates_from && $this->sale_price_dates_from < current_time('timestamp') ) {
 
     		if ( $this->sale_price && $this->price !== $this->sale_price ) {
-
+	    		
     			// Update price
     			$this->price = $this->sale_price;
     			update_post_meta( $this->id, '_price', $this->price );
-
-    			// Grouped product prices and sale status are affected by children
-    			$this->grouped_product_sync();
     		}
 
     	}
@@ -1594,103 +1221,8 @@ class WC_Product {
 				update_post_meta( $this->id, '_sale_price', '' );
 				update_post_meta( $this->id, '_sale_price_dates_from', '' );
 				update_post_meta( $this->id, '_sale_price_dates_to', '' );
-
-				// Grouped product prices and sale status are affected by children
-    			$this->grouped_product_sync();
 			}
 
     	}
     }
-
-
-	/**
-	 * Sync grouped products with the childs lowest price (so they can be sorted by price accurately).
-	 *
-	 * @access public
-	 * @return void
-	 */
-	function grouped_product_sync() {
-		global $wpdb, $woocommerce;
-		$post_parent = $wpdb->get_var( $wpdb->prepare( "SELECT post_parent FROM $wpdb->posts WHERE ID = %d;"), $this->id );
-
-		if (!$post_parent) return;
-
-		$children_by_price = get_posts( array(
-			'post_parent' 	=> $post_parent,
-			'orderby' 	=> 'meta_value_num',
-			'order'		=> 'asc',
-			'meta_key'	=> '_price',
-			'posts_per_page' => 1,
-			'post_type' 	=> 'product',
-			'fields' 		=> 'ids'
-		));
-		if ($children_by_price) :
-			foreach ($children_by_price as $child) :
-				$child_price = get_post_meta($child, '_price', true);
-				update_post_meta( $post_parent, '_price', $child_price );
-			endforeach;
-		endif;
-
-		$woocommerce->clear_product_transients( $this->id );
-	}
-
-
-	/**
-	 * Sync variable product prices with the childs lowest/highest prices.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	function variable_product_sync() {
-		global $woocommerce;
-
-		$children = get_posts( array(
-			'post_parent' 	=> $this->id,
-			'posts_per_page'=> -1,
-			'post_type' 	=> 'product_variation',
-			'fields' 		=> 'ids',
-			'post_status'	=> 'publish'
-		));
-
-		$this->min_variation_price = $this->min_variation_regular_price = $this->min_variation_sale_price = $this->max_variation_price = $this->max_variation_regular_price = $this->max_variation_sale_price = '';
-
-		if ($children) {
-			foreach ( $children as $child ) {
-
-				$child_price 			= get_post_meta( $child, '_price', true );
-				$child_regular_price 	= get_post_meta( $child, '_regular_price', true );
-				$child_sale_price 		= get_post_meta( $child, '_sale_price', true );
-				
-				// Regular prices
-				if ( ! is_numeric( $this->min_variation_regular_price ) || $child_regular_price < $this->min_variation_regular_price ) 
-					$this->min_variation_regular_price = $child_regular_price;
-					
-				if ( ! is_numeric( $this->max_variation_regular_price ) || $child_regular_price > $this->max_variation_regular_price ) 
-					$this->max_variation_regular_price = $child_regular_price;
-				
-				// Sale prices
-				if ( $child_price == $child_sale_price ) {
-					if ( $child_sale_price !== '' && ( ! is_numeric( $this->min_variation_sale_price ) || $child_sale_price < $this->min_variation_sale_price ) ) 
-						$this->min_variation_sale_price = $child_sale_price;
-					
-					if ( $child_sale_price !== '' && ( ! is_numeric( $this->max_variation_sale_price ) || $child_sale_price > $this->max_variation_sale_price ) ) 
-						$this->max_variation_sale_price = $child_sale_price;
-				}
-			}
-
-	    	$this->min_variation_price = $this->min_variation_sale_price === '' || $this->min_variation_regular_price < $this->min_variation_sale_price ? $this->min_variation_regular_price : $this->min_variation_sale_price;
-	    	
-			$this->max_variation_price = $this->max_variation_sale_price === '' || $this->max_variation_regular_price > $this->max_variation_sale_price ? $this->max_variation_regular_price : $this->max_variation_sale_price;
-		}
-
-		update_post_meta( $this->id, '_price', $this->min_variation_price );
-		update_post_meta( $this->id, '_min_variation_price', $this->min_variation_price );
-		update_post_meta( $this->id, '_max_variation_price', $this->max_variation_price );
-		update_post_meta( $this->id, '_min_variation_regular_price', $this->min_variation_regular_price );
-		update_post_meta( $this->id, '_max_variation_regular_price', $this->max_variation_regular_price );
-		update_post_meta( $this->id, '_min_variation_sale_price', $this->min_variation_sale_price );
-		update_post_meta( $this->id, '_max_variation_sale_price', $this->max_variation_sale_price );
-
-		$woocommerce->clear_product_transients( $this->id );
-	}
 }

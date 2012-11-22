@@ -36,7 +36,7 @@ function woocommerce_order_downloads_meta_box() {
 				if ( $download_permissions && sizeof( $download_permissions ) > 0 ) foreach ( $download_permissions as $download ) {
 
 					if ( ! $product || $product->id != $download->product_id ) {
-						$product = new WC_Product( absint( $download->product_id ) );
+						$product = get_product( absint( $download->product_id ) );
 						$file_count = $loop = 0;
 					}
 
