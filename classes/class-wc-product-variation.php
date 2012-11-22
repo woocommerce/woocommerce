@@ -65,7 +65,9 @@ class WC_Product_Variation extends WC_Product {
 	 * @param array $parent_custom_fields (default: '') Array of the parent products meta data
 	 * @return void
 	 */
-	function __construct( $variation, $parent_id = '', $parent_custom_fields = '' ) {
+	function __construct( $variation, $args ) {
+		$parent_id = $args['parent_id'];
+		$parent_custom_fields = $args['meta'];
 
 		if ( is_object( $variation ) ) {
 			$this->variation_id = absint( $variation->ID );

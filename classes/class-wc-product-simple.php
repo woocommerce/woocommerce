@@ -19,7 +19,7 @@ class WC_Product_Simple extends WC_Product {
 	 * @access public
 	 * @param mixed $product
 	 */
-	function __construct( $product ) {
+	function __construct( $product, $args ) {
 
 		parent::__construct( $product );
 		

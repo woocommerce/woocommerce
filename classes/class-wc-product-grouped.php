@@ -25,7 +25,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @access public
 	 * @param mixed $product
 	 */
-	function __construct( $product ) {
+	function __construct( $product, $args ) {
 		
 		parent::__construct( $product );
 		
