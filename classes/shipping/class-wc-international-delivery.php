@@ -101,7 +101,11 @@ class WC_International_Delivery extends WC_Flat_Rate {
 						),
 			'cost' => array(
 							'title' 		=> __( 'Default Cost', 'woocommerce' ),
-							'type' 			=> 'text',
+							'type' 			=> 'number',
+							'custom_attributes' => array(
+								'step'	=> 'any',
+								'min'	=> '0'
+							),
 							'description'	=> __( 'Cost excluding tax. Enter an amount, e.g. 2.50.', 'woocommerce' ),
 							'default' 		=> ''
 						),

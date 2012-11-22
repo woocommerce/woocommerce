@@ -55,7 +55,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 							<tr>
 								<td>
 									<label><?php _e( 'Stock Qty:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enter a quantity to enable stock management for this variation, or leave blank to use the variable product stock options.', 'woocommerce' ); ?>" href="#">[?]</a></label>
-									<input type="text" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if ( isset( $_stock ) ) echo esc_attr( $_stock ); ?>" />
+									<input type="number" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if ( isset( $_stock ) ) echo esc_attr( $_stock ); ?>" step="any" />
 								</td>
 								<td>&nbsp;</td>
 							</tr>
@@ -64,22 +64,22 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 						<tr>
 							<td>
 								<label><?php _e( 'Price:', 'woocommerce' ); ?></label>
-								<input type="text" size="5" name="variable_regular_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_regular_price ) ) echo esc_attr( $_regular_price ); ?>" />
+								<input type="number" size="5" name="variable_regular_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_regular_price ) ) echo esc_attr( $_regular_price ); ?>" step="any" min="0" />
 							</td>
 							<td>
 								<label><?php _e( 'Sale Price:', 'woocommerce' ); ?> <a href="#" class="sale_schedule"><?php _e( 'Schedule', 'woocommerce' ); ?></a><a href="#" class="cancel_sale_schedule" style="display:none"><?php _e( 'Cancel schedule', 'woocommerce' ); ?></a></label>
-								<input type="text" size="5" name="variable_sale_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_sale_price ) ) echo esc_attr( $_sale_price ); ?>" /> 
+								<input type="number" size="5" name="variable_sale_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_sale_price ) ) echo esc_attr( $_sale_price ); ?>" step="any" min="0" /> 
 							</td>
 						</tr>
 						
 						<tr class="sale_price_dates_fields" style="display:none">
 							<td>
 								<label><?php _e( 'Sale start date:', 'woocommerce' ) ?></label>
-								<input type="text" class="sale_price_dates_from" name="variable_sale_price_dates_from[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_from ) ? date_i18n( 'Y-m-d', $_sale_price_dates_from ) : ''; ?>" placeholder="<?php echo _x( 'From&hellip;', 'placeholder', 'woocommerce' ) ?>" maxlength="10" />
+								<input type="text" class="sale_price_dates_from" name="variable_sale_price_dates_from[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_from ) ? date_i18n( 'Y-m-d', $_sale_price_dates_from ) : ''; ?>" placeholder="<?php echo _x( 'From&hellip;', 'placeholder', 'woocommerce' ) ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
 							</td>
 							<td>
 								<label><?php _e( 'Sale end date:', 'woocommerce' ) ?></label>
-								<input type="text" name="variable_sale_price_dates_to[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_to ) ? date_i18n( 'Y-m-d', $_sale_price_dates_to ) : ''; ?>" placeholder="<?php echo _x('To&hellip;', 'placeholder', 'woocommerce') ?>" maxlength="10" />
+								<input type="text" name="variable_sale_price_dates_to[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_to ) ? date_i18n( 'Y-m-d', $_sale_price_dates_to ) : ''; ?>" placeholder="<?php echo _x('To&hellip;', 'placeholder', 'woocommerce') ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
 							</td>
 						</tr>
 						
@@ -88,7 +88,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 								<?php if ( get_option( 'woocommerce_enable_weight', true ) !== 'no' ) : ?>
 									<td class="hide_if_variation_virtual">
 										<label><?php _e( 'Weight', 'woocommerce' ) . ' (' . esc_html( get_option( 'woocommerce_weight_unit' ) ) . '):'; ?> <a class="tips" data-tip="<?php _e( 'Enter a weight for this variation or leave blank to use the parent product weight.', 'woocommerce' ); ?>" href="#">[?]</a></label>
-										<input type="text" size="5" name="variable_weight[<?php echo $loop; ?>]" value="<?php if ( isset( $_weight ) ) echo esc_attr( $_weight ); ?>" placeholder="<?php echo esc_attr( $parent_data['weight'] ); ?>" />
+										<input type="number" size="5" name="variable_weight[<?php echo $loop; ?>]" value="<?php if ( isset( $_weight ) ) echo esc_attr( $_weight ); ?>" placeholder="<?php echo esc_attr( $parent_data['weight'] ); ?>" step="any" min="0" />
 									</td>
 								<?php else : ?>
 									<td>&nbsp;</td>
@@ -96,9 +96,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 								<?php if ( get_option( 'woocommerce_enable_dimensions', true ) !== 'no' ) : ?>
 									<td class="dimensions_field hide_if_variation_virtual">
 										<label for"product_length"><?php echo __( 'Dimensions (L&times;W&times;H)', 'woocommerce' ); ?></label>
-										<input id="product_length" class="input-text" size="6" type="text" name="variable_length[<?php echo $loop; ?>]" value="<?php if ( isset( $_length ) ) echo esc_attr( $_length ); ?>" placeholder="<?php echo esc_attr( $parent_data['length'] ); ?>" />
-										<input class="input-text" size="6" type="text" name="variable_width[<?php echo $loop; ?>]" value="<?php if ( isset( $_width ) ) echo esc_attr( $_width ); ?>" placeholder="<?php echo esc_attr( $parent_data['width'] ); ?>" />
-										<input class="input-text last" size="6" type="text" name="variable_height[<?php echo $loop; ?>]" value="<?php if ( isset( $_height ) ) echo esc_attr( $_height ); ?>" placeholder="<?php echo esc_attr( $parent_data['height'] ); ?>" />
+										<input id="product_length" class="input-text" size="6" type="number" step="any" min="0" name="variable_length[<?php echo $loop; ?>]" value="<?php if ( isset( $_length ) ) echo esc_attr( $_length ); ?>" placeholder="<?php echo esc_attr( $parent_data['length'] ); ?>" />
+										<input class="input-text" size="6" type="number" step="any" min="0" name="variable_width[<?php echo $loop; ?>]" value="<?php if ( isset( $_width ) ) echo esc_attr( $_width ); ?>" placeholder="<?php echo esc_attr( $parent_data['width'] ); ?>" />
+										<input class="input-text last" size="6" type="number" step="any" min="0" name="variable_height[<?php echo $loop; ?>]" value="<?php if ( isset( $_height ) ) echo esc_attr( $_height ); ?>" placeholder="<?php echo esc_attr( $parent_data['height'] ); ?>" />
 									</td>
 								<?php else : ?>
 									<td>&nbsp;</td>
@@ -138,7 +138,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 							<td>
 								<div>
 									<label><?php _e( 'Download Limit:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Leave blank for unlimited re-downloads.', 'woocommerce' ); ?>" href="#">[?]</a></label>
-									<input type="text" size="5" name="variable_download_limit[<?php echo $loop; ?>]" value="<?php if ( isset( $_download_limit ) ) echo esc_attr( $_download_limit ); ?>" placeholder="<?php _e( 'Unlimited', 'woocommerce' ); ?>" />
+									<input type="number" size="5" name="variable_download_limit[<?php echo $loop; ?>]" value="<?php if ( isset( $_download_limit ) ) echo esc_attr( $_download_limit ); ?>" placeholder="<?php _e( 'Unlimited', 'woocommerce' ); ?>" step="1" min="0" />
 								</div>
 							</td>
 						</tr>
@@ -146,7 +146,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 							<td>
 								<div>
 									<label><?php _e( 'Download Expiry:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enter the number of days before a download link expires, or leave blank.', 'woocommerce' ); ?>" href="#">[?]</a></label>
-									<input type="text" size="5" name="variable_download_expiry[<?php echo $loop; ?>]" value="<?php if ( isset( $_download_expiry ) ) echo esc_attr( $_download_expiry ); ?>" placeholder="<?php _e( 'Unlimited', 'woocommerce' ); ?>" />
+									<input type="number" size="5" name="variable_download_expiry[<?php echo $loop; ?>]" value="<?php if ( isset( $_download_expiry ) ) echo esc_attr( $_download_expiry ); ?>" placeholder="<?php _e( 'Unlimited', 'woocommerce' ); ?>" step="1" min="0" />
 								</div>
 							</td>
 						</tr>

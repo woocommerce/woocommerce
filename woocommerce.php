@@ -666,7 +666,7 @@ class Woocommerce {
 	        array('product'),
 	        array(
 	            'hierarchical' 			=> true,
-	            'update_count_callback' => 'woocommerce_manual_category_count',
+	            'update_count_callback' => '_update_post_term_count',
 	            'label' 				=> __( 'Product Categories', 'woocommerce'),
 	            'labels' => array(
 	                    'name' 				=> __( 'Product Categories', 'woocommerce'),

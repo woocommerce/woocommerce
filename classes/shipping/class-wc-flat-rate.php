@@ -93,7 +93,11 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 						),
 			'cost_per_order' => array(
 							'title' 		=> __( 'Cost per order', 'woocommerce' ),
-							'type' 			=> 'text',
+							'type' 			=> 'number',
+							'custom_attributes' => array(
+								'step'	=> 'any',
+								'min'	=> '0'
+							),
 							'description'	=> __( 'Enter a cost per order, e.g. 5.00. Leave blank to disable.', 'woocommerce' ),
 							'default'		=> '',
 						),
@@ -138,7 +142,11 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 						),
 			'cost' => array(
 							'title' 		=> __( 'Default Cost', 'woocommerce' ),
-							'type' 			=> 'text',
+							'type' 			=> 'number',
+							'custom_attributes' => array(
+								'step'	=> 'any',
+								'min'	=> '0'
+							),
 							'description'	=> __( 'Cost excluding tax. Enter an amount, e.g. 2.50.', 'woocommerce' ),
 							'default' 		=> '',
 						),
@@ -150,7 +158,11 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 						),
 			'minimum_fee' => array(
 							'title' 		=> __( 'Minimum Fee', 'woocommerce' ),
-							'type' 			=> 'text',
+							'type' 			=> 'number',
+							'custom_attributes' => array(
+								'step'	=> 'any',
+								'min'	=> '0'
+							),
 							'description'	=> __( 'Enter a minimum fee amount. Fee\'s less than this will be increased. Leave blank to disable.', 'woocommerce' ),
 							'default'		=> '',
 						),
@@ -175,36 +187,54 @@ class WC_Flat_Rate extends WC_Shipping_Method {
     function calculate_shipping( $package = array() ) {
     	global $woocommerce;
 
-    	$this->rates = array();
-    	$cost_per_order = ( isset( $this->cost_per_order ) && ! empty( $this->cost_per_order ) ) ? $this->cost_per_order : 0;
+    	$this->rates 		= array();
+    	$cost_per_order 	= ( isset( $this->cost_per_order ) && ! empty( $this->cost_per_order ) ) ? $this->cost_per_order : 0;
 
     	if ( $this->type == 'order' ) {
+    		
     		$shipping_total = $this->order_shipping( $package );
-
-    		$rate = array(
-				'id' 	=> $this->id,
-				'label' => $this->title,
-				'cost' 	=> $shipping_total + $cost_per_order,
-			);
+    		
+    		if ( ! is_null( $shipping_total ) || $cost_per_order > 0 )
+	    		$rate = array(
+					'id' 	=> $this->id,
+					'label' => $this->title,
+					'cost' 	=> $shipping_total + $cost_per_order,
+				);
+			
 		} elseif ( $this->type == 'class' ) {
+			
 			$shipping_total = $this->class_shipping( $package );
 
-    		$rate = array(
-				'id' 	=> $this->id,
-				'label' => $this->title,
-				'cost' 	=> $shipping_total + $cost_per_order,
-			);
+			if ( ! is_null( $shipping_total ) || $cost_per_order > 0 )
+	    		$rate = array(
+					'id' 	=> $this->id,
+					'label' => $this->title,
+					'cost' 	=> $shipping_total + $cost_per_order,
+				);
+			
 		} elseif ( $this->type == 'item' ) {
+			
 			$costs = $this->item_shipping( $package );
-			$costs['order'] = $cost_per_order;
-
-			$rate = array(
-				'id' 		=> $this->id,
-				'label' 	=> $this->title,
-				'cost' 		=> $costs,
-				'calc_tax' 	=> 'per_item',
-			);
+			
+			if ( ! is_null( $costs ) || $cost_per_order > 0 ) {
+				
+				if ( ! is_array( $costs ) )
+					$costs = array();
+				
+				$costs['order'] = $cost_per_order;
+	
+				$rate = array(
+					'id' 		=> $this->id,
+					'label' 	=> $this->title,
+					'cost' 		=> $costs,
+					'calc_tax' 	=> 'per_item',
+				);
+			
+			}
 		}
+		
+		if ( ! isset( $rate ) )
+			return;
 
 		// Register the rate
 		$this->add_rate( $rate );
@@ -286,7 +316,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
     				}
     			} else {
     				// No matching classes so use defaults
-    				if ( $this->cost > $cost ) {
+    				if ( ! empty( $this->cost ) && $this->cost > $cost ) {
     					$cost 	= $this->cost;
     					$fee	= $this->fee;
     				}
@@ -295,11 +325,14 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 
 		}
 
-		// Default rates
-		if ( is_null( $cost ) ) {
-			$cost = $this->cost;
-			$fee = $this->fee;
-		}
+		// Default rates if set
+		if ( is_null( $cost ) && $this->cost !== '' ) {
+			$cost 	= $this->cost;
+			$fee 	= $this->fee;
+		} elseif ( is_null( $cost ) ) {
+			// No match
+			return null;
+		} 
 
 		// Shipping for whole order
 		return $cost + $this->get_fee( $fee, $package['contents_cost'] );
@@ -334,22 +367,29 @@ class WC_Flat_Rate extends WC_Shipping_Method {
     		}
 
     		$found_shipping_classes = array_unique( $found_shipping_classes );
-
+    		
+    		$matched = false;
+    		
     		// For each found class, add up the costs and fees
     		foreach ( $found_shipping_classes as $shipping_class => $class_price ) {
     			if ( isset( $this->flat_rates[ $shipping_class ] ) ) {
     				$cost 	+= $this->flat_rates[ $shipping_class ]['cost'];
     				$fee	+= $this->get_fee( $this->flat_rates[ $shipping_class ]['fee'], $class_price );
-    			} else {
-    				// Class not set so we use default rate
+    				$matched = true;
+    			} elseif ( $this->cost !== '' ) {
+    				// Class not set so we use default rate if its set
     				$cost 	+= $this->cost;
     				$fee	+= $this->get_fee( $this->fee, $class_price );
+    				$matched = true;
     			}
     		}
 		}
 
 		// Total
-		return $cost + $fee;
+		if ( $matched )
+			return $cost + $fee;
+		else
+			return null;
     }
 
 
@@ -363,6 +403,8 @@ class WC_Flat_Rate extends WC_Shipping_Method {
     function item_shipping( $package ) {
 		// Per item shipping so we pass an array of costs (per item) instead of a single value
 		$costs = array();
+		
+		$matched = false;
 
 		// Shipping per item
 		foreach ( $package['contents'] as $item_id => $values ) {
@@ -370,20 +412,27 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 
 			if ( $values['quantity'] > 0 && $_product->needs_shipping() ) {
 				$shipping_class = $_product->get_shipping_class();
-
+				
+				$fee = $cost = 0;
+				
 				if ( isset( $this->flat_rates[ $shipping_class ] ) ) {
 					$cost 	= $this->flat_rates[ $shipping_class ]['cost'];
     				$fee	= $this->get_fee( $this->flat_rates[ $shipping_class ]['fee'], $_product->get_price() );
-				} else {
+    				$matched = true;
+				} elseif ( $this->cost !== '' ) {
 					$cost 	= $this->cost;
 					$fee	= $this->get_fee( $this->fee, $_product->get_price() );
+					$matched = true;
 				}
 
 				$costs[ $item_id ] = ( ( $cost + $fee ) * $values['quantity'] );
 			}
 		}
-
-		return $costs;
+		
+		if ( $matched )
+			return $costs;
+		else
+			return null;
     }
 
 
@@ -445,7 +494,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 
 				                echo '</select>
 				               		</td>
-				                    <td><input type="text" value="' . esc_attr( $rate['cost'] ) . '" name="' . esc_attr( $this->id .'_cost[' . $i . ']' ) . '" placeholder="'.__( '0.00', 'woocommerce' ).'" size="4" /></td>
+				                    <td><input type="number" step="any" min="0" value="' . esc_attr( $rate['cost'] ) . '" name="' . esc_attr( $this->id .'_cost[' . $i . ']' ) . '" placeholder="'.__( '0.00', 'woocommerce' ).'" size="4" /></td>
 				                    <td><input type="text" value="' . esc_attr( $rate['fee'] ) . '" name="' . esc_attr( $this->id .'_fee[' . $i . ']' ) . '" placeholder="'.__( '0.00', 'woocommerce' ).'" size="4" /></td>
 			                    </tr>';
 	                		}
@@ -478,7 +527,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 	               				?>\
 	               			</select>\
 	               		</td>\
-	                    <td><input type="text" name="<?php echo $this->id; ?>_cost[' + size + ']" placeholder="0.00" size="4" /></td>\
+	                    <td><input type="number" step="any" min="0" name="<?php echo $this->id; ?>_cost[' + size + ']" placeholder="0.00" size="4" /></td>\
 	                    <td><input type="text" name="<?php echo $this->id; ?>_fee[' + size + ']" placeholder="0.00" size="4" /></td>\
                     </tr>').appendTo('#<?php echo $this->id; ?>_flat_rates table tbody');
 

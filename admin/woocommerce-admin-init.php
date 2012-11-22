@@ -183,7 +183,7 @@ function woocommerce_admin_install_notices() {
 		
 			include( 'includes/notice-install.php' );
 			
-		} elseif ( ! isset( $_GET['page'] ) || $_GET['page'] != 'woocommerce' ) {
+		} elseif ( ! isset( $_GET['page'] ) || $_GET['page'] != 'woocommerce_settings' ) {
 		
 			include( 'includes/notice-installed.php' );
 			

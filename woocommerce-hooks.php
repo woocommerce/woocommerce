@@ -81,13 +81,6 @@ if ( ! is_admin() || defined('DOING_AJAX') ) {
 	add_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price', 10 );
 
 	/**
-	 * Categories
-	 *
-	 * @see wc_get_terms_count_filter()
-	 */
-	add_filter( 'get_terms', 'wc_get_terms_count_filter', 10, 2 );
-
-	/**
 	 * Subcategories
 	 *
 	 * @see woocommerce_subcategory_thumbnail()
@@ -324,7 +317,7 @@ add_action( 'comment_post', 'woocommerce_add_comment_rating', 1 );
 add_filter( 'preprocess_comment', 'woocommerce_check_comment_rating', 0 );
 
 /**
- * Text filters
+ * Filters
  */
 add_filter( 'woocommerce_short_description', 'wptexturize'        );
 add_filter( 'woocommerce_short_description', 'convert_smilies'    );

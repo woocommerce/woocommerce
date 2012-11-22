@@ -33,7 +33,10 @@ if ( ! $product->is_purchasable() ) return;
 
 	 	<?php
 	 		if ( ! $product->is_sold_individually() )
-	 			woocommerce_quantity_input( array( 'min_value' => 1, 'max_value' => $product->backorders_allowed() ? '' : $product->get_stock_quantity() ) );
+	 			woocommerce_quantity_input( array( 
+	 				'min_value' => apply_filters( 'woocommerce_quantity_input_min', 1, $product ),
+	 				'max_value' => apply_filters( 'woocommerce_quantity_input_max', $product->backorders_allowed() ? '' : $product->get_stock_quantity(), $product )
+	 			) );
 	 	?>
 
 	 	<button type="submit" class="single_add_to_cart_button button alt"><?php echo apply_filters('single_add_to_cart_text', __( 'Add to cart', 'woocommerce' ), $product->product_type); ?></button>

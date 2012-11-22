@@ -207,37 +207,3 @@ foreach ( $order_tax_rows as $order_tax_row ) {
 		}
 	}
 }
-
-// Update manual counters for product categories (only counting visible products, so visibility: 'visible' or 'catalog')
-// Loop through all products and put the IDs in array with each product category term id as index
-$products_query_args = array(
-		'post_type'      => 'product',
-		'posts_per_page' => -1,
-		'meta_query' => array(
-	 		array(
-	 			'key' => '_visibility',
-	 			'value' => array( 'visible', 'catalog' ),
-	 			'compare' => 'IN',
-	 		),
-	 	),
-	);
-
-$products_query = new WP_Query( $products_query_args );
-
-$counted_ids = array();
-
-foreach( $products_query->posts as $visible_product ) {
-	$product_terms = wp_get_post_terms( $visible_product->ID, 'product_cat', array( 'fields' => 'ids' ) );
-
-	foreach ( $product_terms as $product_term_id ) {
-		if ( ! isset( $counted_ids[ $product_term_id ] ) || ! is_array( $counted_ids[ $product_term_id ] ) ) {
-			$counted_ids[ $product_term_id ] = array();
-		}
-
-		if ( ! in_array( $visible_product->ID, $counted_ids[ $product_term_id ] ) ) {
-			array_push( $counted_ids[ $product_term_id ], $visible_product->ID );
-		}
-	}
-}
-
-update_option( 'wc_prod_cat_counts', $counted_ids );

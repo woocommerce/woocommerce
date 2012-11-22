@@ -186,9 +186,11 @@ mark.amount {
 	background: transparent none;
 	color: inherit;
 }
-input.wc-error {
-	color: #D8000C;
-	background-color: #FFBABA;
+.postbox, .woocommerce {
+	input:invalid {
+		border: 1px solid #cc010b;
+		background: #ffebe8 url(../images/icons/invalid.png) right center no-repeat;
+	}
 }
 
 /* Status page */
@@ -291,6 +293,9 @@ table.wc_status_table {
 
 
 /* Orders */
+.tablenav .actions {
+	overflow: visible;
+}
 .alignleft.actions .chzn-container-single {
 	display: inline-block;
 	vertical-align: middle;
