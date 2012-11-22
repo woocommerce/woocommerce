@@ -65,8 +65,6 @@ class WC_Product_Variation extends WC_Product {
 	 * @return void
 	 */
 	function __construct( $variation, $args ) {
-		$parent_id = $args['parent_id'];
-		$parent_custom_fields = $args['meta'];
 
 		if ( is_object( $variation ) ) {
 			$this->variation_id = absint( $variation->ID );
@@ -87,9 +85,8 @@ class WC_Product_Variation extends WC_Product {
 		}
 
 		/* Get main product data from parent */
-		$this->id = ( $parent_id > 0 ) ? intval( $parent_id ) : wp_get_post_parent_id( $this->variation_id );
-		
-		if ( ! $parent_custom_fields ) $parent_custom_fields = get_post_custom( $this->id );
+		$this->id = ! empty( $args['parent_id'] ) ? intval( $args['parent_id'] ) : wp_get_post_parent_id( $this->variation_id );
+		$parent_custom_fields = ! empty( $args['meta'] ) ? $args['meta'] : get_post_custom( $this->id );
 
 		// Define the data we're going to load from the parent: Key => Default value
 		$load_data = array(
