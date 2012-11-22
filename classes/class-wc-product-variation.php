@@ -61,8 +61,7 @@ class WC_Product_Variation extends WC_Product {
 	 *
 	 * @access public
 	 * @param int $variation_id ID of the variation to load
-	 * @param int $parent_id (default: '') ID of the parent product
-	 * @param array $parent_custom_fields (default: '') Array of the parent products meta data
+	 * @param array $args Array of the arguments containing parent product data
 	 * @return void
 	 */
 	function __construct( $variation, $args ) {

@@ -24,18 +24,12 @@ add_filter( 'woocommerce_stock_amount', 'absint' ); // Stock amounts are integer
  * 
  * @access public
  * @param mixed $the_product Post object or post ID of the product.
- * @param string $parent_id (default: '') Used when calling variations
- * @param string $meta (default: '') Used when calling variations
+ * @param array $args (default: array()) Contains all arguments to be used to get this product.
  * @return void
  */
-function get_product( $the_product = false, $parent_id = '', $meta = '' ) {
-	$args = array(
-		'parent_id' => $parent_id,
-		'meta'      => $meta,
-	);
-	
+function get_product( $the_product = false, $args = array() ) {
 	$factory = new WC_Product_Factory();
-	return $factory->get_product( $the_product, $parent_id, $meta );
+	return $factory->get_product( $the_product, $args );
 }
 
 /**

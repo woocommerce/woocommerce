@@ -42,6 +42,7 @@ class WC_Product_Variable extends WC_Product {
 	 * 
 	 * @access public
 	 * @param mixed $product
+	 * @param array $args Contains arguments to set up this product
 	 */
 	function __construct( $product, $args ) {
 
@@ -209,7 +210,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return object WC_Product or WC_Product_variation
 	 */
 	function get_child( $child_id ) {
-		return get_product( $child_id, $this->id, $this->product_custom_fields );
+		return get_product( $child_id, array( 'parent_id' => $this->id, 'meta' => $this->product_custom_fields ) );
 	}
 
 
