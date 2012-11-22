@@ -80,6 +80,11 @@ class Woocommerce {
 	var $shipping;
 
 	/**
+	 * @var WC_Product_Factory
+	 */
+	var $product_factory;
+
+	/**
 	 * @var WC_Cart
 	 */
 	var $cart;
@@ -296,6 +301,7 @@ class Woocommerce {
 		// Load class instances
 		$this->payment_gateways 	= new WC_Payment_gateways();	// Payment gateways. Loads and stores payment methods
 		$this->shipping 			= new WC_Shipping();			// Shipping class. loads and stores shipping methods
+		$this->product_factory 		= new WC_Product_Factory();     // Product Factory to create new product instances
 		$this->countries 			= new WC_Countries();			// Countries class
 		$this->integrations			= new WC_Integrations();		// Integrations class
 

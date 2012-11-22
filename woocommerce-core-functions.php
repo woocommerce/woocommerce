@@ -28,8 +28,8 @@ add_filter( 'woocommerce_stock_amount', 'absint' ); // Stock amounts are integer
  * @return void
  */
 function get_product( $the_product = false, $args = array() ) {
-	$factory = new WC_Product_Factory();
-	return $factory->get_product( $the_product, $args );
+	global $woocommerce;
+	return $woocommerce->product_factory->get_product( $the_product, $args );
 }
 
 /**
