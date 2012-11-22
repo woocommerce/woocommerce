@@ -1177,3 +1177,23 @@ function woocommerce_default_sorting_link( $views ) {
 }
 
 add_filter( 'views_edit-product', 'woocommerce_default_sorting_link' );
+
+
+/**
+ * woocommerce_disable_checked_ontop function.
+ * 
+ * @access public
+ * @param mixed $args
+ * @param mixed $post_id
+ * @return void
+ */
+function woocommerce_disable_checked_ontop( $args ) {
+	
+	if ( $args['taxonomy'] == 'product_cat' ) {
+		$args['checked_ontop'] = false;
+	}
+	
+	return $args;
+}
+
+add_filter( 'wp_terms_checklist_args', 'woocommerce_disable_checked_ontop' );
