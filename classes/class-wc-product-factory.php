@@ -31,7 +31,7 @@ class WC_Product_Factory {
 			$product_type = 'variation';
 		} else {
 			$terms 			= get_the_terms( $product_id, 'product_type' );
-			$product_type 	= isset( current( $terms )->name ) ? sanitize_title( current( $terms )->name ) : 'simple';
+			$product_type 	= ( ! empty( $terms ) && isset( current( $terms )->name ) ) ? sanitize_title( current( $terms )->name ) : 'simple';
 		}
 		
 		// Filter classname so that the class can be overridden if extended.
