@@ -269,11 +269,17 @@ class WC_Order {
 	 * Gets the order number for display (by default, order ID)
 	 *
 	 * @access public
-	 * @return string
-	 */
-	function get_order_number() {
-		return apply_filters( 'woocommerce_order_number', _x( '#', 'hash before order number', 'woocommerce' ) . $this->id, $this );
-	}
+	 * @param bool $prefix
+   * @return string
+   */
+  function get_order_number( $prefix = TRUE ) {
+    if($prefix) {
+      return apply_filters( 'woocommerce_order_number', _x( '#', 'hash before order number', 'woocommerce' ) . $this->id, $this );
+    }
+    else {
+      return apply_filters( 'woocommerce_order_number', $this->id, $this );
+    }
+  }
 
 	/**
 	 * Get a formatted billing address for the order.
