@@ -114,7 +114,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							
 							echo '<tr class="tax">
 								<th>' . __( 'Tax', 'woocommerce' ) . '</th>
-								<td>' . __x( 'N/A', 'Relating to tax', 'woocommerce' ) . '</td>
+								<td>' . _x( 'N/A', 'Relating to tax', 'woocommerce' ) . '</td>
 							</tr>';
 						}
 					}
