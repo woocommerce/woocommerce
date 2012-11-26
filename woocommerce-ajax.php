@@ -481,6 +481,9 @@ function woocommerce_add_variation() {
 		if ( ! $parent_data['height'] )
 			$parent_data['height'] = '0';
 			
+		$_tax_class = '';
+		$image_id = 0;
+			
 		include( 'admin/post-types/writepanels/variation-admin-html.php' );
 	}
 
