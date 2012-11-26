@@ -26,12 +26,12 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 	array(
 		'name' => __( 'Base Country/Region', 'woocommerce' ),
-		'desc' 		=> __( 'This is the base country for your business. Tax rates will be based on this country.', 'woocommerce' ),
+		'desc' 		=> '2 descriptions',
 		'id' 		=> 'woocommerce_default_country',
 		'css' 		=> 'min-width:300px;',
 		'std' 		=> 'GB',
 		'type' 		=> 'single_select_country',
-		'desc_tip'	=>  true,
+		'desc_tip'	=>  __( 'This is the base country for your business. Tax rates will be based on this country.', 'woocommerce' ),
 	),
 
 	array(
@@ -40,9 +40,9 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'id' 		=> 'woocommerce_currency',
 		'css' 		=> 'min-width:300px;',
 		'std' 		=> 'GBP',
-		'type' 		=> 'select',
-		'class'		=> 'chosen_select',
-		'desc_tip'	=>  true,
+		'type' 		=> 'radio',
+		'class'		=> '',
+		'desc_tip'	=>  'Abother desc',
 		'options' => array_unique( apply_filters( 'woocommerce_currencies', array(
 			'USD' => __( 'US Dollars (&#36;)', 'woocommerce' ),
 			'EUR' => __( 'Euros (&euro;)', 'woocommerce' ),
