@@ -23,8 +23,9 @@ class WC_COD extends WC_Payment_Gateway {
      */
 	function __construct() {
 		$this->id = 'cod';
+		$this->icon 		= apply_filters('woocommerce_cod_icon', '');
 		$this->method_title = __( 'Cash on Delivery', 'woocommerce' );
-		$this->has_fields 		= false;
+		$this->has_fields 	= false;
 
 		// Load the form fields.
 		$this->init_form_fields();
