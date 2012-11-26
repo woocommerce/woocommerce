@@ -47,13 +47,13 @@ function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 	switch ( $column_name ) :
 		case "woocommerce_order_count" :
 
-			$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*)
+			$count = $wpdb->get_var( "SELECT COUNT(*)
 			FROM $wpdb->posts
 			LEFT JOIN $wpdb->postmeta ON $wpdb->posts.ID = $wpdb->postmeta.post_id
 			WHERE meta_value = $user_id
 			AND meta_key = '_customer_user'
 			AND post_type IN ('shop_order')
-			AND post_status = 'publish'" ) );
+			AND post_status = 'publish'" );
 
 			$value = '<a href="' . admin_url( 'edit.php?post_status=all&post_type=shop_order&_customer_user=' . absint( $user_id ) . '' ) . '">' . absint( $count ) . '</a>';
 

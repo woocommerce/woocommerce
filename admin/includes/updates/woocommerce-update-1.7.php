@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 global $wpdb, $woocommerce;
 
 // Upgrade old style files paths to support multiple file paths
-$existing_file_paths = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM ". $wpdb->postmeta . " WHERE meta_key = '_file_path'" ) );
+$existing_file_paths = $wpdb->get_results( "SELECT * FROM ". $wpdb->postmeta . " WHERE meta_key = '_file_path'" );
 
 if ( $existing_file_paths ) {
 	
@@ -34,9 +34,9 @@ if ( $existing_file_paths ) {
 }
 
 // Update table primary keys
-$wpdb->query( $wpdb->prepare( "ALTER TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions DROP PRIMARY KEY" ) );
+$wpdb->query( "ALTER TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions DROP PRIMARY KEY" );
 
-$wpdb->query( $wpdb->prepare( "ALTER TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions ADD PRIMARY KEY (  `product_id` ,  `order_id` ,  `order_key` ,  `download_id` )" ) );
+$wpdb->query( "ALTER TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions ADD PRIMARY KEY (  `product_id` ,  `order_id` ,  `order_key` ,  `download_id` )" );
 
 // Setup default permalinks if shop page is defined
 $permalinks 	= get_option( 'woocommerce_permalinks' );
@@ -92,10 +92,10 @@ if ( get_option( 'woocommerce_show_subcategories' ) == 'yes' ) {
 
 // Now its time for the massive update to line items - move them to the new DB tables
 // Reverse with UPDATE `wpwc_postmeta` SET meta_key = '_order_items' WHERE meta_key = '_order_items_old'
-$order_item_rows = $wpdb->get_results( $wpdb->prepare( "
+$order_item_rows = $wpdb->get_results( "
 	SELECT * FROM {$wpdb->postmeta}
 	WHERE meta_key = '_order_items'
-" ) );
+" );
 
 foreach ( $order_item_rows as $order_item_row ) {
 	
@@ -168,10 +168,10 @@ foreach ( $order_item_rows as $order_item_row ) {
 
 // Do the same kind of update for order_taxes - move to lines
 // Reverse with UPDATE `wpwc_postmeta` SET meta_key = '_order_taxes' WHERE meta_key = '_order_taxes_old'
-$order_tax_rows = $wpdb->get_results( $wpdb->prepare( "
+$order_tax_rows = $wpdb->get_results( "
 	SELECT * FROM {$wpdb->postmeta}
 	WHERE meta_key = '_order_taxes'
-" ) );
+" );
 
 foreach ( $order_tax_rows as $order_tax_row ) {
 	

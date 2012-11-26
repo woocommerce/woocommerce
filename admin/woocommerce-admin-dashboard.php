@@ -255,7 +255,7 @@ function woocommerce_dashboard_recent_orders() {
  */
 function woocommerce_dashboard_recent_reviews() {
 	global $wpdb;
-	$comments = $wpdb->get_results( $wpdb->prepare( "SELECT *, SUBSTRING(comment_content,1,100) AS comment_excerpt
+	$comments = $wpdb->get_results( "SELECT *, SUBSTRING(comment_content,1,100) AS comment_excerpt
 	FROM $wpdb->comments
 	LEFT JOIN $wpdb->posts ON ($wpdb->comments.comment_post_ID = $wpdb->posts.ID)
 	WHERE comment_approved = '1'
@@ -263,7 +263,7 @@ function woocommerce_dashboard_recent_reviews() {
 	AND post_password = ''
 	AND post_type = 'product'
 	ORDER BY comment_date_gmt DESC
-	LIMIT 5" ) );
+	LIMIT 5" );
 
 	if ( $comments ) {
 		echo '<ul>';
