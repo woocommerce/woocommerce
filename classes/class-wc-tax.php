@@ -246,17 +246,17 @@ class WC_Tax {
 				'tax_class' => $tax_class
 			) );
 
-			return $matched_tax_rates;
-
 		} else {
-			
+
 			// Prices which include tax should always use the base rate if we don't know where the user is located
 			// Prices exlcuding tax however should just not add any taxes, as they will be added during checkout
-			if ( $woocommerce->cart->prices_include_tax )
-				return $this->get_shop_base_rate( $tax_class );
-			else
-				return array();
+			$matched_tax_rates = $woocommerce->cart->prices_include_tax
+				? $this->get_shop_base_rate( $tax_class )
+				: array();
+
 		}
+
+		return apply_filters('woocommerce_matched_rates', $matched_tax_rates, $tax_class);
 
 	}
 
