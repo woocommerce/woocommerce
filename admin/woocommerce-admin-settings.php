@@ -642,10 +642,11 @@ function woocommerce_admin_fields( $options ) {
 					<th scope="row" class="titledesc">
 						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['name'] ); ?></label>
 					</th>
-                    <td class="forminp">
-                    	<?php if ( ! empty( $value['desc'] ) ) echo '<p style="margin-top:0;">' . wp_kses_post( $value['desc'] ) . '</p>'; ?>
+                    <td class="forminp forminp-textarea">
+                    	<?php if ( ! empty( $value['desc'] ) && $value['desc_tip'] !== true ) 
+                    		echo '<p style="margin-top:0;">' . wp_kses_post( $value['desc'] ) . '</p>'; ?>
                     	
-                        <textarea <?php if ( isset($value['args']) ) echo $value['args'] . ' '; ?>name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" <?php echo implode( ' ', $custom_attributes ); ?>><?php if (false !== get_option($value['id'])) echo esc_textarea(stripslashes(get_option($value['id']))); else echo esc_textarea( $value['std'] ); ?></textarea>
+                        <textarea <?php if ( isset($value['args']) ) echo $value['args'] . ' '; ?>name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" <?php echo implode( ' ', $custom_attributes ); ?>><?php if (false !== get_option($value['id'])) echo esc_textarea(stripslashes(get_option($value['id']))); else echo esc_textarea( $value['std'] ); ?></textarea> <?php if ( $value['desc_tip'] === true ) echo $description; ?>
                     </td>
                 </tr><?php
             break;
