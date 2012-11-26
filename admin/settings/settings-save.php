@@ -55,6 +55,8 @@ function woocommerce_update_options( $options ) {
 	    	break;
 	    	
 	    	case "text" :
+	    	case 'email':
+            case 'number':
 	    	case "select" :
 	    	case "color" :
 	    	case "single_select_page" :
