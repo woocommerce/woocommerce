@@ -64,7 +64,7 @@ class WC_Product_Variation extends WC_Product {
 	 * @param array $args Array of the arguments containing parent product data
 	 * @return void
 	 */
-	function __construct( $variation, $args ) {
+	function __construct( $variation, $args = array() ) {
 
 		if ( is_object( $variation ) ) {
 			$this->variation_id = absint( $variation->ID );
