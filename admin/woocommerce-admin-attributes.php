@@ -130,10 +130,10 @@ function woocommerce_attributes() {
 				$wpdb->update(
 					$wpdb->postmeta,
 					array(
-						'meta_key' 	=> 'attribute_' . sanitize_title( $attribute_name )
+						'meta_key' 	=> 'attribute_pa_' . sanitize_title( $attribute_name )
 					),
 					array(
-						'meta_key' 	=> 'attribute_' . sanitize_title( $old_attribute_name )
+						'meta_key' 	=> 'attribute_pa_' . sanitize_title( $old_attribute_name )
 					)
 				);
 			}
