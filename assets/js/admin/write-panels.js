@@ -1264,6 +1264,36 @@ jQuery( function($){
 			return false;
 
 		});
+		
+		// Save attributes and update variations
+		$('.save_attributes').on('click', function(){
+			
+			$('.woocommerce_attributes').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+			
+			var data = {
+				post_id: 		woocommerce_writepanel_params.post_id,
+				data:			$('.woocommerce_attributes').find('input, select').serialize(),
+				action: 		'woocommerce_save_attributes',
+				security: 		woocommerce_writepanel_params.save_attributes_nonce
+			};
+
+			$.post( woocommerce_writepanel_params.ajax_url, data, function( response ) {
+
+				var this_page = window.location.toString();
+				
+				this_page = this_page.replace( 'post-new.php?', 'post.php?post=' + woocommerce_writepanel_params.post_id + '&action=edit&' );
+				
+				// Load variations panel
+				$('#variable_product_options').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+				$('#variable_product_options').load( this_page + ' #variable_product_options_inner', function() {
+					$('#variable_product_options').unblock();
+				} );
+
+				$('.woocommerce_attributes').unblock();
+
+			});
+			
+		});
 
 	// Uploading files
 	var file_path_field;

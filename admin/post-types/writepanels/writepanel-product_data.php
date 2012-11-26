@@ -487,6 +487,8 @@ function woocommerce_product_data_box() {
 					    }
 					?>
 				</select>
+				
+				<button type="button" class="button save_attributes"><?php _e( 'Save attributes', 'woocommerce' ); ?></button>
 			</p>
 		</div>
 		<div id="linked_product_data" class="panel woocommerce_options_panel">

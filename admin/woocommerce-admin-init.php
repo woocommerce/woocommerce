@@ -428,6 +428,7 @@ function woocommerce_admin_scripts() {
 			'ajax_url' 						=> admin_url('admin-ajax.php'),
 			'order_item_nonce' 				=> wp_create_nonce("order-item"),
 			'add_attribute_nonce' 			=> wp_create_nonce("add-attribute"),
+			'save_attributes_nonce' 		=> wp_create_nonce("save-attributes"),
 			'calc_totals_nonce' 			=> wp_create_nonce("calc-totals"),
 			'get_customer_details_nonce' 	=> wp_create_nonce("get-customer-details"),
 			'search_products_nonce' 		=> wp_create_nonce("search-products"),

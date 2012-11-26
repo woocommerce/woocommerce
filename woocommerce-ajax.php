@@ -414,6 +414,116 @@ function woocommerce_remove_variations() {
 add_action('wp_ajax_woocommerce_remove_variations', 'woocommerce_remove_variations');
 
 
+function woocommerce_save_attributes() {
+	global $woocommerce;
+	
+	check_ajax_referer( 'save-attributes', 'security' );
+
+	// Get post ID
+	$post_id 	= absint( $_POST['post_id'] );
+	parse_str( $_POST['data'], $data );
+	
+	// Save Attributes
+	$attributes = array();
+
+	if ( isset( $data['attribute_names'] ) ) {
+		$attribute_names = $data['attribute_names'];
+		$attribute_values = $data['attribute_values'];
+		
+		if ( isset( $data['attribute_visibility'] ) ) 
+			$attribute_visibility = $data['attribute_visibility'];
+			
+		if ( isset( $data['attribute_variation'] ) ) 
+			$attribute_variation = $data['attribute_variation'];
+		
+		$attribute_is_taxonomy = $data['attribute_is_taxonomy'];
+		$attribute_position = $data['attribute_position'];
+
+		$attribute_names_count = sizeof( $attribute_names );
+
+		for ( $i=0; $i < $attribute_names_count; $i++ ) {
+			if ( ! $attribute_names[ $i ] ) 
+				continue;
+
+			$is_visible 	= isset( $attribute_visibility[ $i ] ) ? 1 : 0;
+			$is_variation 	= isset( $attribute_variation[ $i ] ) ? 1 : 0;
+			$is_taxonomy 	= $attribute_is_taxonomy[ $i ] ? 1 : 0;
+
+			if ( $is_taxonomy ) {
+
+				if ( isset( $attribute_values[ $i ] ) ) {
+
+			 		// Format values
+			 		if ( is_array( $attribute_values[ $i ] ) ) {
+				 		$values = array_map('htmlspecialchars', array_map('stripslashes', $attribute_values[ $i ]));
+				 	} else {
+				 		// Text based, separate by pipe
+				 		$values = htmlspecialchars( stripslashes( $attribute_values[ $i ] ) );
+				 		$values = explode( '|', $values );
+				 		$values = array_map( 'trim', $values );
+				 	}
+
+				 	// Remove empty items in the array
+				 	$values = array_filter( $values );
+
+			 	} else {
+			 		$values = array();
+			 	}
+
+		 		// Update post terms
+		 		if ( taxonomy_exists( $attribute_names[ $i ] ) )
+		 			wp_set_object_terms( $post_id, $values, $attribute_names[ $i ] );
+
+		 		if ( $values ) {
+			 		// Add attribute to array, but don't set values
+			 		$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
+				 		'name' 			=> htmlspecialchars( stripslashes( $attribute_names[ $i ] ) ),
+				 		'value' 		=> '',
+				 		'position' 		=> $attribute_position[ $i ],
+				 		'is_visible' 	=> $is_visible,
+				 		'is_variation' 	=> $is_variation,
+				 		'is_taxonomy' 	=> $is_taxonomy
+				 	);
+			 	}
+
+		 	} else {
+		 		if ( ! $attribute_values[ $i ] ) continue;
+		 		// Format values
+		 		$values = esc_html( stripslashes( $attribute_values[ $i ] ) );
+		 		// Text based, separate by pipe
+		 		$values = explode( '|', $values );
+		 		$values = array_map( 'trim', $values );
+		 		$values = implode( '|', $values );
+
+		 		// Custom attribute - Add attribute to array and set the values
+			 	$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
+			 		'name' 			=> htmlspecialchars( stripslashes( $attribute_names[ $i ] ) ),
+			 		'value' 		=> $values,
+			 		'position' 		=> $attribute_position[ $i ],
+			 		'is_visible' 	=> $is_visible,
+			 		'is_variation' 	=> $is_variation,
+			 		'is_taxonomy' 	=> $is_taxonomy
+			 	);
+		 	}
+
+		 }
+	}
+
+	if ( ! function_exists( 'attributes_cmp' ) ) {
+		function attributes_cmp( $a, $b ) {
+		    if ( $a['position'] == $b['position'] ) return 0;
+		    return ( $a['position'] < $b['position'] ) ? -1 : 1;
+		}
+	}
+	uasort( $attributes, 'attributes_cmp' );
+
+	update_post_meta( $post_id, '_product_attributes', $attributes );
+
+	die();
+}
+
+add_action('wp_ajax_woocommerce_save_attributes', 'woocommerce_save_attributes');
+
 /**
  * Add variation via ajax function
  *

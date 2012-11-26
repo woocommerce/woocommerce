@@ -56,7 +56,7 @@ function variable_product_type_options() {
 		foreach ( $tax_classes as $class )
 			$tax_class_options[ sanitize_title( $class ) ] = esc_attr( $class );
 	?>
-	<div id="variable_product_options" class="panel wc-metaboxes-wrapper">
+	<div id="variable_product_options" class="panel wc-metaboxes-wrapper"><div id="variable_product_options_inner">
 
 		<?php if ( ! $variation_attribute_found ) : ?>
 
@@ -222,7 +222,7 @@ function variable_product_type_options() {
 			</p>
 
 		<?php endif; ?>
-	</div>
+	</div></div>
 	<?php
 	/**
 	 * Product Type Javascript
@@ -230,18 +230,6 @@ function variable_product_type_options() {
 	ob_start();
 	?>
 	jQuery(function(){
-
-		<?php if ( ! $attributes || ( is_array( $attributes ) && sizeof( $attributes ) == 0 ) ) : ?>
-
-			jQuery('#variable_product_options').on('click', 'button.link_all_variations, button.add_variation', function(){
-
-				alert('<?php _e( 'You must add some attributes via the "Product Data" panel and save before adding a new variation.', 'woocommerce' ); ?>');
-
-				return false;
-
-			});
-
-		<?php else : ?>
 
 		// Add a variation
 		jQuery('#variable_product_options').on('click', 'button.add_variation', function(){
@@ -464,8 +452,6 @@ function variable_product_type_options() {
 				$('.variation_menu_order', el).val( parseInt( $(el).index('.woocommerce_variations .woocommerce_variation') ) );
 			});
 		};
-
-		<?php endif; ?>
 
 		var current_field_wrapper;
 
