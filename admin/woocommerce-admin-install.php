@@ -111,14 +111,8 @@ function woocommerce_default_options() {
 
 	foreach ( $woocommerce_settings as $section ) {
 		foreach ( $section as $value ) {
-	        if ( isset( $value['std'] ) && isset( $value['id'] ) ) {
-	        	if ( $value['type'] == 'image_width' ) {
-	        		add_option( $value['id'] . '_width', $value['std'] );
-	        		add_option( $value['id'] . '_height', $value['std'] );
-	        		add_option( $value['id'] . '_crop', 1 );
-	        	} else {
-	        		add_option( $value['id'], $value['std'] );
-	        	}
+	        if ( isset( $value['default'] ) && isset( $value['id'] ) ) {
+	        	add_option( $value['id'], $value['default'] );
 	        }
         }
     }

@@ -394,17 +394,12 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	 * @return string
 	 */
 	function woocommerce_get_product_thumbnail( $size = 'shop_catalog', $placeholder_width = 0, $placeholder_height = 0  ) {
-		global $post, $woocommerce;
-
-		if ( ! $placeholder_width )
-			$placeholder_width = $woocommerce->get_image_size( 'shop_catalog_image_width' );
-		if ( ! $placeholder_height )
-			$placeholder_height = $woocommerce->get_image_size( 'shop_catalog_image_height' );
+		global $post;
 
 		if ( has_post_thumbnail() )
 			return get_the_post_thumbnail( $post->ID, $size );
 		elseif ( woocommerce_placeholder_img_src() )
-			return '<img src="'. woocommerce_placeholder_img_src() .'" alt="Placeholder" width="' . $placeholder_width . '" height="' . $placeholder_height . '" />';
+			return woocommerce_placeholder_img( $size );
 	}
 }
 
@@ -1176,14 +1171,12 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 	 * @subpackage	Loop
 	 * @return void
 	 */
-	function woocommerce_subcategory_thumbnail( $category  ) {
+	function woocommerce_subcategory_thumbnail( $category ) {
 		global $woocommerce;
 
-		$small_thumbnail_size  = apply_filters( 'single_product_small_thumbnail_size', 'shop_catalog' );
-		$image_width    = $woocommerce->get_image_size( 'shop_catalog_image_width' );
-		$image_height    = $woocommerce->get_image_size( 'shop_catalog_image_height' );
-
-		$thumbnail_id  = get_woocommerce_term_meta( $category->term_id, 'thumbnail_id', true  );
+		$small_thumbnail_size  	= apply_filters( 'single_product_small_thumbnail_size', 'shop_catalog' );
+		$dimensions    			= $woocommerce->get_image_size( $small_thumbnail_size );
+		$thumbnail_id  			= get_woocommerce_term_meta( $category->term_id, 'thumbnail_id', true  );
 
 		if ( $thumbnail_id ) {
 			$image = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size  );
@@ -1193,7 +1186,7 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 		}
 
 		if ( $image )
-			echo '<img src="' . $image . '" alt="' . $category->name . '" width="' . $image_width . '" height="' . $image_height . '" />';
+			echo '<img src="' . $image . '" alt="' . $category->name . '" width="' . $dimensions['width'] . '" height="' . $dimensions['height'] . '" />';
 	}
 }
 

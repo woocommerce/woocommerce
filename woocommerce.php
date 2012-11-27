@@ -1002,14 +1002,13 @@ class Woocommerce {
 	 * @return void
 	 */
 	function init_image_sizes() {
-		// Image sizes
-		$shop_thumbnail_crop 	= get_option('woocommerce_thumbnail_image_crop') == 1 ? true : false;
-		$shop_catalog_crop 		= get_option('woocommerce_catalog_image_crop') == 1 ? true : false;
-		$shop_single_crop 		= get_option('woocommerce_single_image_crop') == 1 ? true : false;
+		$shop_thumbnail = $this->get_image_size( 'shop_thumbnail' );
+		$shop_catalog	= $this->get_image_size( 'shop_catalog' );
+		$shop_single	= $this->get_image_size( 'shop_single' );
 
-		add_image_size( 'shop_thumbnail', $this->get_image_size('shop_thumbnail_image_width'), $this->get_image_size('shop_thumbnail_image_height'), $shop_thumbnail_crop );
-		add_image_size( 'shop_catalog', $this->get_image_size('shop_catalog_image_width'), $this->get_image_size('shop_catalog_image_height'), $shop_catalog_crop );
-		add_image_size( 'shop_single', $this->get_image_size('shop_single_image_width'), $this->get_image_size('shop_single_image_height'), $shop_single_crop );
+		add_image_size( 'shop_thumbnail', $shop_thumbnail['width'], $shop_thumbnail['height'], $shop_thumbnail['crop'] );
+		add_image_size( 'shop_catalog', $shop_catalog['width'], $shop_catalog['height'], $shop_catalog['crop'] );
+		add_image_size( 'shop_single', $shop_single['width'], $shop_single['height'], $shop_single['crop'] );
 	}
 
 
@@ -1276,16 +1275,18 @@ class Woocommerce {
 	 * @return string
 	 */
 	function get_image_size( $image_size ) {
-		$return = '';
-		switch ( $image_size ) {
-			case "shop_thumbnail_image_width" : $return = get_option('woocommerce_thumbnail_image_width'); break;
-			case "shop_thumbnail_image_height" : $return = get_option('woocommerce_thumbnail_image_height'); break;
-			case "shop_catalog_image_width" : $return = get_option('woocommerce_catalog_image_width'); break;
-			case "shop_catalog_image_height" : $return = get_option('woocommerce_catalog_image_height'); break;
-			case "shop_single_image_width" : $return = get_option('woocommerce_single_image_width'); break;
-			case "shop_single_image_height" : $return = get_option('woocommerce_single_image_height'); break;
-		}
-		return apply_filters( 'woocommerce_get_image_size_' . $image_size, $return );
+		
+		// Only return sizes we define in settings
+		if ( ! in_array( $image_size, array( 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ) )
+			return apply_filters( 'woocommerce_get_image_size_' . $image_size, '' );
+
+		$size = get_option( $image_size . '_image', array() );
+		
+		$size['width'] 	= isset( $size['width'] ) ? $size['width'] : '300';
+		$size['height'] = isset( $size['height'] ) ? $size['height'] : '300';
+		$size['crop'] 	= isset( $size['crop'] ) ? $size['crop'] : 1;
+
+		return apply_filters( 'woocommerce_get_image_size_' . $image_size, $size );
 	}
 
 	/** Messages ****************************************************************/

@@ -491,6 +491,45 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 
 
 /**
+ * Get a setting from the settings API.
+ * 
+ * @access public
+ * @param mixed $option
+ * @return void
+ */
+function woocommerce_settings_get_option( $option_name, $default = '' ) {
+	// Array value
+	if ( strstr( $option_name, '[' ) ) {
+		
+		parse_str( $option_name, $option_array );
+		
+		// Option name is first key
+		$option_name = current( array_keys( $option_array ) );
+		
+		// Get value
+		$option_values = get_option( $option_name, '' );
+		
+		$key = key( $option_array[ $option_name ] );
+		
+		if ( isset( $option_values[ $key ] ) )
+			$option_value = $option_values[ $key ];
+		else
+			$option_value = null;
+	
+	// Single value
+	} else {
+		$option_value = get_option( $option_name, null );
+	}
+	
+	if ( is_array( $option_value ) )
+		$option_value = array_map( 'stripslashes', $option_value );
+	elseif ( $option_value )
+		$option_value = stripslashes( $option_value );
+
+	return $option_value == null ? $default : $option_value;
+}
+
+/**
  * Output admin fields.
  *
  * Loops though the woocommerce options array and outputs each field.
@@ -505,10 +544,10 @@ function woocommerce_admin_fields( $options ) {
     foreach ( $options as $value ) {
     	if ( ! isset( $value['type'] ) ) continue;
     	if ( ! isset( $value['id'] ) ) $value['id'] = '';
-    	if ( ! isset( $value['name'] ) ) $value['name'] = '';
+    	if ( ! isset( $value['title'] ) ) $value['title'] = '';
     	if ( ! isset( $value['class'] ) ) $value['class'] = '';
     	if ( ! isset( $value['css'] ) ) $value['css'] = '';
-    	if ( ! isset( $value['std'] ) ) $value['std'] = '';
+    	if ( ! isset( $value['default'] ) ) $value['default'] = '';
     	if ( ! isset( $value['desc'] ) ) $value['desc'] = '';
     	if ( ! isset( $value['desc_tip'] ) ) $value['desc_tip'] = false;
     	
@@ -550,7 +589,7 @@ function woocommerce_admin_fields( $options ) {
         	
         	// Section Titles
             case 'title':
-            	if ( ! empty( $value['name'] ) ) echo '<h3>' . esc_html( $value['name'] ) . '</h3>';
+            	if ( ! empty( $value['title'] ) ) echo '<h3>' . esc_html( $value['title'] ) . '</h3>';
             	if ( ! empty( $value['desc'] ) ) echo wpautop( wptexturize( wp_kses_post( $value['desc'] ) ) );
             	echo '<table class="form-table">'. "\n\n";
             	if ( ! empty( $value['id'] ) ) do_action( 'woocommerce_settings_' . sanitize_title( $value['id'] ) );
@@ -571,7 +610,7 @@ function woocommerce_admin_fields( $options ) {
             
             	$type 			= $value['type'];
             	$class 			= '';
-            	$option_value 	= get_option( $value['id'], null ) !== null ? esc_attr( stripslashes( get_option($value['id'] ) ) ) : esc_attr( $value['std'] );
+            	$option_value 	= woocommerce_settings_get_option( $value['id'], $value['default'] );
             	
             	if ( $value['type'] == 'color' ) {
             		$type = 'text';
@@ -581,7 +620,7 @@ function woocommerce_admin_fields( $options ) {
             
             	?><tr valign="top">
 					<th scope="row" class="titledesc">
-						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['name'] ); ?></label>
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
 						<?php echo $tip; ?>
 					</th>
                     <td class="forminp forminp-<?php echo sanitize_title( $value['type'] ) ?>">
@@ -590,7 +629,7 @@ function woocommerce_admin_fields( $options ) {
                     		id="<?php echo esc_attr( $value['id'] ); ?>" 
                     		type="<?php echo esc_attr( $type ); ?>" 
                     		style="<?php echo esc_attr( $value['css'] ); ?>" 
-                    		value="<?php echo $option_value; ?>" 
+                    		value="<?php echo esc_attr( $option_value ); ?>" 
                     		class="<?php echo esc_attr( $value['class'] ); ?>"
                     		<?php echo implode( ' ', $custom_attributes ); ?> 
                     		/> <?php echo $description; ?>
@@ -600,9 +639,12 @@ function woocommerce_admin_fields( $options ) {
             
             // Textarea
             case 'textarea':
+            
+            	$option_value 	= woocommerce_settings_get_option( $value['id'], $value['default'] );
+            	
             	?><tr valign="top">
 					<th scope="row" class="titledesc">
-						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['name'] ); ?></label>
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
 						<?php echo $tip; ?>
 					</th>
                     <td class="forminp forminp-<?php echo sanitize_title( $value['type'] ) ?>">
@@ -614,12 +656,7 @@ function woocommerce_admin_fields( $options ) {
                         	style="<?php echo esc_attr( $value['css'] ); ?>" 
                         	class="<?php echo esc_attr( $value['class'] ); ?>"
                         	<?php echo implode( ' ', $custom_attributes ); ?>
-                        	><?php 
-                        		if ( false !== get_option($value['id'] ) ) 
-                        			echo esc_textarea( stripslashes( get_option( $value['id'] ) ) ); 
-                        		else 
-                        			echo esc_textarea( $value['std'] ); 
-                        	?></textarea>
+                        	><?php echo esc_textarea( $option_value );  ?></textarea>
                     </td>
                 </tr><?php
             break;
@@ -628,13 +665,11 @@ function woocommerce_admin_fields( $options ) {
             case 'select' :
             case 'multiselect' :
             
-            	$option_value = get_option( $value['id'] );
-            	if ( ! $option_value )
-					$option_value = $value['std'];
+            	$option_value 	= woocommerce_settings_get_option( $value['id'], $value['default'] );
             
             	?><tr valign="top">
 					<th scope="row" class="titledesc">
-						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['name'] ); ?></label>
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
 						<?php echo $tip; ?>
 					</th>
                     <td class="forminp forminp-<?php echo sanitize_title( $value['type'] ) ?>">
@@ -668,13 +703,11 @@ function woocommerce_admin_fields( $options ) {
             // Radio inputs
             case 'radio' :
             
-            	$option_value = get_option( $value['id'] );
-            	if ( ! $option_value )
-					$option_value = $value['std'];
+            	$option_value 	= woocommerce_settings_get_option( $value['id'], $value['default'] );
             
             	?><tr valign="top">
 					<th scope="row" class="titledesc">
-						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['name'] ); ?></label>
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
 						<?php echo $tip; ?>
 					</th>
                     <td class="forminp forminp-<?php echo sanitize_title( $value['type'] ) ?>">
@@ -706,6 +739,8 @@ function woocommerce_admin_fields( $options ) {
             
             // Checkbox input
             case 'checkbox' :
+            
+            	$option_value 	= woocommerce_settings_get_option( $value['id'], $value['default'] );
 
             	if ( ! isset( $value['hide_if_checked'] ) ) $value['hide_if_checked'] = false;
             	if ( ! isset( $value['show_if_checked'] ) ) $value['show_if_checked'] = false;
@@ -717,7 +752,7 @@ function woocommerce_admin_fields( $options ) {
             			if ( $value['hide_if_checked'] == 'option' ) echo 'hide_options_if_checked';
             			if ( $value['show_if_checked'] == 'option' ) echo 'show_options_if_checked';
             		?>">
-					<th scope="row" class="titledesc"><?php echo esc_html( $value['name'] ) ?></th>
+					<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?></th>
 					<td class="forminp forminp-checkbox">
 						<fieldset>
 					<?php
@@ -732,7 +767,7 @@ function woocommerce_admin_fields( $options ) {
             	}
 
             	?>
-		            <legend class="screen-reader-text"><span><?php echo esc_html( $value['name'] ) ?></span></legend>
+		            <legend class="screen-reader-text"><span><?php echo esc_html( $value['title'] ) ?></span></legend>
 					
 					<label for="<?php echo $value['id'] ?>">
 					<input 
@@ -740,7 +775,7 @@ function woocommerce_admin_fields( $options ) {
 						id="<?php echo esc_attr( $value['id'] ); ?>" 
 						type="checkbox" 
 						value="1" 
-						<?php checked(get_option($value['id']), 'yes'); ?> 
+						<?php checked( $option_value, 'yes'); ?> 
 						<?php echo implode( ' ', $custom_attributes ); ?> 
 					/> <?php echo wp_kses_post( $value['desc'] ) ?></label> <?php echo $tip; ?><br />
 				<?php
@@ -762,19 +797,19 @@ function woocommerce_admin_fields( $options ) {
             // Image width settings
             case 'image_width' :
             	
-            	$width 	= get_option( $value['id'] . '_width', null ) !== null ? esc_attr( stripslashes( get_option( $value['id'] . '_width' ) ) ) : esc_attr( $value['std'] );
-            	$height = get_option( $value['id'] . '_height', null ) !== null ? esc_attr( stripslashes( get_option( $value['id'] . '_height' ) ) ) : esc_attr( $value['std'] );
-            	$crop 	= get_option( $value['id'] . '_crop', null ) !== null ? checked( get_option( $value['id'] . '_crop'), 1, false ) : checked( 1, 1, false );
+            	$width 	= woocommerce_settings_get_option( $value['id'] . '[width]', $value['default']['width'] );
+            	$height = woocommerce_settings_get_option( $value['id'] . '[height]', $value['default']['height'] );
+            	$crop 	= checked( 1, woocommerce_settings_get_option( $value['id'] . '[crop]', $value['default']['crop'] ), false );
             	            	
             	?><tr valign="top">
-					<th scope="row" class="titledesc"><?php echo esc_html( $value['name'] ) ?></th>
+					<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?></th>
                     <td class="forminp">
 
-                    	<?php _e( 'Width', 'woocommerce' ); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_width" id="<?php echo esc_attr( $value['id'] ); ?>_width" type="text" size="3" value="<?php echo $width; ?>" />
+                    	<?php _e( 'Width', 'woocommerce' ); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>[width]" id="<?php echo esc_attr( $value['id'] ); ?>-width" type="text" size="3" value="<?php echo $width; ?>" />
 
-                    	<?php _e( 'Height', 'woocommerce' ); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_height" id="<?php echo esc_attr( $value['id'] ); ?>_height" type="text" size="3" value="<?php echo $height; ?>" />
+                    	<?php _e( 'Height', 'woocommerce' ); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>[height]" id="<?php echo esc_attr( $value['id'] ); ?>-height" type="text" size="3" value="<?php echo $height; ?>" />
 
-                    	<label><?php _e( 'Hard Crop', 'woocommerce' ); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_crop" id="<?php echo esc_attr( $value['id'] ); ?>_crop" type="checkbox" <?php echo $crop; ?> /></label>
+                    	<label><?php _e( 'Hard Crop', 'woocommerce' ); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>[crop]" id="<?php echo esc_attr( $value['id'] ); ?>-crop" type="checkbox" <?php echo $crop; ?> /></label>
 
                     	<?php echo $description; ?></td>
                 </tr><?php
@@ -782,22 +817,22 @@ function woocommerce_admin_fields( $options ) {
             
             // Single page selects
             case 'single_select_page' :
-
-            	$args = array( 'name'				=> $value['id'],
+            
+            	$args = array( 'title'				=> $value['id'],
             				   'id'					=> $value['id'],
             				   'sort_column' 		=> 'menu_order',
             				   'sort_order'			=> 'ASC',
             				   'show_option_none' 	=> ' ',
             				   'class'				=> $value['class'],
             				   'echo' 				=> false,
-            				   'selected'			=> absint( get_option( $value['id'] ) ) 
+            				   'selected'			=> absint( woocommerce_settings_get_option( $value['id'] ) )
             				   );
 
             	if( isset( $value['args'] ) ) 
             		$args = wp_parse_args( $value['args'], $args );
 
             	?><tr valign="top" class="single_select_page">
-                    <th scope="row" class="titledesc"><?php echo esc_html( $value['name'] ) ?> <?php echo $tip; ?></th>
+                    <th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?> <?php echo $tip; ?></th>
                     <td class="forminp">
 			        	<?php echo str_replace(' id=', " data-placeholder='" . __( 'Select a page&hellip;', 'woocommerce' ) .  "' style='" . $value['css'] . "' class='" . $value['class'] . "' id=", wp_dropdown_pages( $args ) ); ?> <?php echo $description; ?>
 			        </td>
@@ -806,8 +841,10 @@ function woocommerce_admin_fields( $options ) {
             
             // Single country selects
             case 'single_select_country' :
+            
+            	$country_setting = (string) woocommerce_settings_get_option( $value['id'] );
+            	
             	$countries = $woocommerce->countries->countries;
-            	$country_setting = (string) get_option($value['id']);
             	if (strstr($country_setting, ':')) :
             		$country = current(explode(':', $country_setting));
             		$state = end(explode(':', $country_setting));
@@ -817,7 +854,7 @@ function woocommerce_admin_fields( $options ) {
             	endif;
             	?><tr valign="top">
 					<th scope="row" class="titledesc">
-						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['name'] ); ?></label>
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
 						<?php echo $tip; ?>
 					</th>
                     <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php _e( 'Choose a country&hellip;', 'woocommerce' ); ?>" title="Country" class="chosen_select">
@@ -829,12 +866,14 @@ function woocommerce_admin_fields( $options ) {
             
             // Country multiselects
             case 'multi_select_countries' :
+            
+            	$selections = (array) woocommerce_settings_get_option( $value['id'] );
+            	
             	$countries = $woocommerce->countries->countries;
             	asort( $countries );
-            	$selections = (array) get_option( $value['id'] );
             	?><tr valign="top">
 					<th scope="row" class="titledesc">
-						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['name'] ); ?></label>
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
 						<?php echo $tip; ?>
 					</th>
                     <td class="forminp">

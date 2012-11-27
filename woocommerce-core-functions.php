@@ -137,7 +137,7 @@ function woocommerce_get_weight( $weight, $to_unit ) {
 
 
 /**
- * Get the placeholder for products etc
+ * Get the placeholder image URL for products etc
  *
  * @access public
  * @return string
@@ -146,6 +146,21 @@ function woocommerce_placeholder_img_src() {
 	global $woocommerce;
 
 	return apply_filters('woocommerce_placeholder_img_src', $woocommerce->plugin_url() . '/assets/images/placeholder.png' );
+}
+
+
+/**
+ * Get the placeholder image
+ *
+ * @access public
+ * @return string
+ */
+function woocommerce_placeholder_img( $size = 'shop_thumbnail' ) {
+	global $woocommerce;
+	
+	$dimensions = $woocommerce->get_image_size( $size );
+	
+	return apply_filters('woocommerce_placeholder_img', '<img src="' . woocommerce_placeholder_img_src() . '" alt="Placeholder" width="' . $dimensions['width'] . '" height="' . $dimensions['height'] . '" />' );
 }
 
 
