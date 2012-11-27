@@ -544,7 +544,7 @@ function woocommerce_admin_fields( $options ) {
     foreach ( $options as $value ) {
     	if ( ! isset( $value['type'] ) ) continue;
     	if ( ! isset( $value['id'] ) ) $value['id'] = '';
-    	if ( ! isset( $value['title'] ) ) $value['title'] = '';
+    	if ( ! isset( $value['title'] ) ) $value['title'] = isset( $value['name'] ) ? $value['name'] : '';
     	if ( ! isset( $value['class'] ) ) $value['class'] = '';
     	if ( ! isset( $value['css'] ) ) $value['css'] = '';
     	if ( ! isset( $value['default'] ) ) $value['default'] = '';
