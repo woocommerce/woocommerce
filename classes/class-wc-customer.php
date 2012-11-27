@@ -39,10 +39,14 @@ class WC_Customer {
 				'state' 				=> '',
 				'postcode' 				=> '',
 				'city'					=> '',
+				'address' 				=> '',
+				'address_2' 			=> '',
 				'shipping_country' 		=> esc_html( $country ),
 				'shipping_state' 		=> '',
 				'shipping_postcode' 	=> '',
 				'shipping_city'			=> '',
+				'shipping_address'		=> '',
+				'shipping_address_2'	=> '',
 				'is_vat_exempt' 		=> false,
 				'calculated_shipping'	=> false
 			);
@@ -228,6 +232,25 @@ class WC_Customer {
 		if ( isset( $this->_data['city'] ) ) return $this->_data['city'];
 	}
 
+	/**
+	 * Gets the address from the current session.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function get_address() {
+		if ( isset( $this->_data['address'] ) ) return $this->_data['address'];
+	}
+		
+	/**
+	 * Gets the address_2 from the current session.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function get_address_2() {
+		if ( isset( $this->_data['address_2'] ) ) return $this->_data['address_2'];
+	}
 
 	/**
 	 * Gets the state from the current session.
@@ -274,6 +297,25 @@ class WC_Customer {
 		if ( isset( $this->_data['shipping_city'] ) ) return $this->_data['shipping_city'];
 	}
 	
+	/**
+	 * Gets the address from the current session.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function get_shipping_address() {
+		if ( isset( $this->_data['shipping_address'] ) ) return $this->_data['shipping_address'];
+	}
+		
+	/**
+	 * Gets the address_2 from the current session.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function get_shipping_address_2() {
+		if ( isset( $this->_data['shipping_address_2'] ) ) return $this->_data['shipping_address_2'];
+	}
 	
 	/**
 	 * get_taxable_address function.
@@ -363,6 +405,28 @@ class WC_Customer {
 	}
 
 	/**
+	 * Sets session data for the address.
+	 *
+	 * @access public
+	 * @param mixed $address
+	 * @return void
+	 */
+	function set_address( $address ) {
+		$this->_data['address'] = $address;
+	}
+
+	/**
+	 * Sets session data for the address_2.
+	 *
+	 * @access public
+	 * @param mixed $address_2
+	 * @return void
+	 */
+	function set_address_2( $address_2 ) {
+		$this->_data['address_2'] = $address_2;
+	}
+
+	/**
 	 * Sets session data for the location.
 	 *
 	 * @access public
@@ -425,6 +489,28 @@ class WC_Customer {
 	 */
 	function set_shipping_city( $city ) {
 		$this->_data['shipping_city'] = $city;
+	}
+
+	/**
+	 * Sets session data for the address.
+	 *
+	 * @access public
+	 * @param mixed $address
+	 * @return void
+	 */
+	function set_shipping_address( $address ) {
+		$this->_data['shipping_address'] = $address;
+	}
+
+	/**
+	 * Sets session data for the address_2.
+	 *
+	 * @access public
+	 * @param mixed $address_2
+	 * @return void
+	 */
+	function set_shipping_address_2( $address_2 ) {
+		$this->_data['shipping_address_2'] = $address_2;
 	}
 
 

@@ -171,6 +171,12 @@ function woocommerce_ajax_update_order_review() {
 		
 	if ( isset( $_POST['city'] ) ) 
 		$woocommerce->customer->set_city( $_POST['city'] );
+				
+	if ( isset( $_POST['address'] ) ) 
+		$woocommerce->customer->set_address( $_POST['address'] );
+				
+	if ( isset( $_POST['address_2'] ) ) 
+		$woocommerce->customer->set_address_2( $_POST['address_2'] );
 		
 	if ( isset( $_POST['s_country'] ) ) 
 		$woocommerce->customer->set_shipping_country( $_POST['s_country'] );
@@ -183,6 +189,12 @@ function woocommerce_ajax_update_order_review() {
 	
 	if ( isset( $_POST['s_city'] ) ) 
 		$woocommerce->customer->set_shipping_city( $_POST['s_city'] );
+	
+	if ( isset( $_POST['s_address'] ) ) 
+		$woocommerce->customer->set_shipping_address( $_POST['s_address'] );
+	
+	if ( isset( $_POST['s_address_2'] ) ) 
+		$woocommerce->customer->set_shipping_address_2( $_POST['s_address_2'] );
 
 	$woocommerce->cart->calculate_totals();
 
