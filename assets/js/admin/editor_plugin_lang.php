@@ -1,5 +1,5 @@
 <?php
-	
+
 $strings = 'tinyMCE.addI18n({' . _WP_Editors::$mce_locale . ':{
     woocommerce:{
         insert: "' . esc_js( __( 'Insert Shortcode', 'woocommerce' ) ) . '",

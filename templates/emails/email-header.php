@@ -8,7 +8,7 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
- 
+
 // Load colours
 $bg 		= get_option( 'woocommerce_email_background_color' );
 $body		= get_option( 'woocommerce_email_body_background_color' );
@@ -22,8 +22,8 @@ $text_lighter_20 = woocommerce_hex_lighter( $text, 20 );
 
 // For gmail compatibility, including CSS styles in head/body are stripped out therefore styles need to be inline. These variables contain rules which are added to the template inline. !important; is a gmail hack to prevent styles being stripped if it doesn't like something.
 $wrapper = "
-	background-color: " . esc_attr( $bg ) . "; 
-	width:100%; 
+	background-color: " . esc_attr( $bg ) . ";
+	width:100%;
 	-webkit-text-size-adjust:none !important;
 	margin:0;
 	padding: 70px 0 70px 0;
@@ -31,12 +31,12 @@ $wrapper = "
 $template_container = "
 	-webkit-box-shadow:0 0 0 3px rgba(0,0,0,0.025) !important;
 	box-shadow:0 0 0 3px rgba(0,0,0,0.025) !important;
-	-webkit-border-radius:6px !important; 
-	border-radius:6px !important; 
+	-webkit-border-radius:6px !important;
+	border-radius:6px !important;
 	background-color: " . esc_attr( $body ) . ";
 	border: 1px solid $bg_darker_10;
-	-webkit-border-radius:6px !important; 
-	border-radius:6px !important; 
+	-webkit-border-radius:6px !important;
+	border-radius:6px !important;
 ";
 $template_header = "
 	background-color: " . esc_attr( $base ) .";
@@ -46,9 +46,9 @@ $template_header = "
 	border-top-left-radius:6px !important;
 	border-top-right-radius:6px !important;
 	border-bottom: 0;
-	font-family:Arial; 
-	font-weight:bold; 
-	line-height:100%; 
+	font-family:Arial;
+	font-weight:bold;
+	line-height:100%;
 	vertical-align:middle;
 ";
 $body_content = "
@@ -64,15 +64,15 @@ $body_content_inner = "
 	text-align:left;
 ";
 $header_content_h1 = "
-	color: " . esc_attr( $base_text ) . "; 
-	margin:0; 
+	color: " . esc_attr( $base_text ) . ";
+	margin:0;
 	padding: 28px 24px;
 	text-shadow: 0 1px 0 $base_lighter_20;
-	display:block; 
-	font-family:Arial; 
-	font-size:30px; 
-	font-weight:bold; 
-	text-align:left; 
+	display:block;
+	font-family:Arial;
+	font-size:30px;
+	font-weight:bold;
+	text-align:left;
 	line-height: 150%;
 ";
 ?>

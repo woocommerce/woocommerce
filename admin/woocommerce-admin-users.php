@@ -73,9 +73,9 @@ function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 
 			$formatted_address = $woocommerce->countries->get_formatted_address( $address );
 
-			if ( ! $formatted_address ) 
-				$value = __( 'N/A', 'woocommerce' ); 
-			else 
+			if ( ! $formatted_address )
+				$value = __( 'N/A', 'woocommerce' );
+			else
 				$value = $formatted_address;
 
 			$value = wpautop( $value );
@@ -95,9 +95,9 @@ function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 
 			$formatted_address = $woocommerce->countries->get_formatted_address( $address );
 
-			if ( ! $formatted_address ) 
-				$value = __( 'N/A', 'woocommerce' ); 
-			else 
+			if ( ! $formatted_address )
+				$value = __( 'N/A', 'woocommerce' );
+			else
 				$value = $formatted_address;
 
 			$value = wpautop( $value );
@@ -106,9 +106,9 @@ function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 
 			$paying_customer = get_user_meta( $user_id, 'paying_customer', true );
 
-			if ( $paying_customer ) 
+			if ( $paying_customer )
 				$value = '<img src="' . $woocommerce->plugin_url() . '/assets/images/success.png" alt="yes" />';
-			else 
+			else
 				$value = '<img src="' . $woocommerce->plugin_url() . '/assets/images/success-off.png" alt="no" />';
 
 		break;

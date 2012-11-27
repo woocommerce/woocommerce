@@ -144,13 +144,13 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 	 */
 	function is_available( $package ) {
 		global $woocommerce;
-		
+
 		$is_available = true;
-		
+
     	if ( $this->enabled == "no" ) {
-	    	
+
 	    	$is_available = false;
-	    	
+
     	} else {
 
 			// If post codes are listed, let's use them.
@@ -160,35 +160,35 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 					$codes[] = $this->clean( $code );
 				}
 			}
-			
+
 			if ( is_array( $codes ) ) {
-				
+
 				$found_match = false;
-				
+
 				if ( in_array( $this->clean( $package['destination']['postcode'] ), $codes ) )
 					$found_match = true;
-				
+
 				// Wildcard search
 				if ( ! $found_match ) {
-					
+
 					$customer_postcode = $this->clean( $package['destination']['postcode'] );
 					$customer_postcode_length = strlen( $customer_postcode );
-					
+
 					for ( $i = 0; $i <= $customer_postcode_length; $i++ ) {
-						
-						if ( in_array( $customer_postcode, $codes ) ) 
+
+						if ( in_array( $customer_postcode, $codes ) )
 							$found_match = true;
-						
+
 						$customer_postcode = substr( $customer_postcode, 0, -2 ) . '*';
 					}
 				}
-				
+
 				if ( ! $found_match ) {
-					
+
 					$is_available = false;
-					
+
 				} else {
-					
+
 					$ship_to_countries = '';
 
 					if ( $this->availability == 'specific' ) {
@@ -196,56 +196,56 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 					} elseif ( get_option( 'woocommerce_allowed_countries' ) == 'specific' ) {
 						$ship_to_countries = get_option( 'woocommerce_specific_allowed_countries' );
 					}
-		
+
 					if ( is_array( $ship_to_countries ) && ! in_array( $package['destination']['country'], $ship_to_countries ) ) {
 						$is_available = false;
 					}
-					
+
 				}
 			}
-		
+
 		}
 
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available, $package );
 	}
-	
-	
+
+
 	/**
 	 * taxable_address function.
-	 * 
+	 *
 	 * @access public
 	 * @param mixed $address
 	 * @return void
 	 */
 	function taxable_address( $address ) {
 		global $woocommerce;
-		
+
 		if ( ! empty( $woocommerce->session->chosen_shipping_method ) && $woocommerce->session->chosen_shipping_method == 'local_pickup' ) {
 			if ( ! empty( $this->settings['apply_base_tax'] ) && $this->settings['apply_base_tax'] == 'yes' ) {
-				
+
 				$country 	= $woocommerce->countries->get_base_country();
 				$state 		= $woocommerce->countries->get_base_state();
-				
-				$address = array( $country, $state, '', '' );				
+
+				$address = array( $country, $state, '', '' );
 			}
 		}
 		return $address;
 	}
-	
+
 	/**
 	 * Refresh totals when chosen so we can refresh the tax if we are using local pickup.
-	 * 
+	 *
 	 * @access public
 	 * @return void
 	 */
 	function method_chosen( $method ) {
 		global $woocommerce;
-		
+
 		if ( $method == 'local_pickup' && ! empty( $this->settings['apply_base_tax'] ) && $this->settings['apply_base_tax'] == 'yes' ) {
 			$woocommerce->cart->calculate_totals();
 		}
 	}
-	
+
     /**
      * clean function.
      *
@@ -256,7 +256,7 @@ class WC_Local_Pickup extends WC_Shipping_Method {
     function clean( $code ) {
     	return str_replace( '-', '', sanitize_title( $code ) ) . ( strstr( $code, '*' ) ? '*' : '' );
     }
-    
+
 }
 
 /**

@@ -46,7 +46,7 @@ function woocommerce_status() {
 					break;
 					case "reset_roles" :
 						// Remove then re-add caps and roles
-						woocommerce_remove_roles();						
+						woocommerce_remove_roles();
 						woocommerce_init_roles();
 
 						echo '<div class="updated"><p>' . __( 'Roles successfully reset', 'woocommerce' ) . '</p></div>';
@@ -253,7 +253,7 @@ function woocommerce_status() {
                 <tr>
                     <td><?php _e('PHP Version','woocommerce')?></td>
                     <td><?php
-                    	if ( function_exists( 'phpversion' ) ) 
+                    	if ( function_exists( 'phpversion' ) )
                     		echo esc_html( phpversion() );
                     ?></td>
                 </tr>
@@ -334,7 +334,7 @@ function woocommerce_status() {
             		$posting['fsockopen_curl']['note'] = __( 'Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce' ). '</mark>';
             		$posting['fsockopen_curl']['success'] = false;
             	}
-            	
+
             	// SOAP
             	$posting['soap_client']['name'] = __( 'SOAP Client','woocommerce' );
 				if ( class_exists( 'SoapClient' ) ) {

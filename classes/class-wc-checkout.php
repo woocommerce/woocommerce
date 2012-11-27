@@ -122,7 +122,7 @@ class WC_Checkout {
 	function process_checkout() {
 		global $wpdb, $woocommerce;
 
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) 
+		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) )
 			define( 'WOOCOMMERCE_CHECKOUT', true );
 
 		$woocommerce->verify_nonce( 'process_checkout' );
@@ -142,7 +142,7 @@ class WC_Checkout {
 		$this->posted['shipping_method']	= isset( $_POST['shipping_method'] ) ? woocommerce_clean( $_POST['shipping_method'] ) : '';
 
 		// Ship to billing only option
-		if ( $woocommerce->cart->ship_to_billing_address_only() ) 
+		if ( $woocommerce->cart->ship_to_billing_address_only() )
 			$this->posted['shiptobilling'] = 1;
 
 		// Update customer shipping and payment method to posted method
@@ -398,7 +398,7 @@ class WC_Checkout {
 					'post_password'	=> uniqid( 'order_' )	// Protects the post just in case
 				) );
 
-				if ( $woocommerce->error_count() > 0 ) 
+				if ( $woocommerce->error_count() > 0 )
 					throw new MyException();
 
 				// Insert or update the post data
@@ -431,15 +431,15 @@ class WC_Checkout {
 					else
 						do_action( 'woocommerce_new_order', $order_id ); // Inserted successfully
 				}
-				
+
 				// DELETE ANY ITEMS IN CURRENT ORDER
-				
+
 				$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d )", $order_id ) );
-				
+
 				$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order_id ) );
-	
+
 				// SAVE LINE ITEMS
-				
+
 				foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $values ) {
 
 					$_product = $values['data'];
@@ -449,7 +449,7 @@ class WC_Checkout {
 				 		'order_item_name' 		=> $_product->get_title(),
 				 		'order_item_type' 		=> 'line_item'
 				 	) );
-				 	
+
 				 	// Add line item meta
 				 	if ( $item_id ) {
 					 	woocommerce_add_order_item_meta( $item_id, '_qty', apply_filters( 'woocommerce_stock_amount', $values['quantity'] ) );
@@ -460,39 +460,39 @@ class WC_Checkout {
 					 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal_tax', woocommerce_format_decimal( $values['line_subtotal_tax'] ) );
 					 	woocommerce_add_order_item_meta( $item_id, '_line_total', woocommerce_format_decimal( $values['line_total'] ) );
 					 	woocommerce_add_order_item_meta( $item_id, '_line_tax', woocommerce_format_decimal( $values['line_tax'] ) );
-					 	
+
 					 	// Store variation data in meta so admin can view it
 						if ( $values['variation'] && is_array( $values['variation'] ) )
 							foreach ( $values['variation'] as $key => $value )
 								woocommerce_add_order_item_meta( $item_id, esc_attr( str_replace( 'attribute_', '', $key ) ), $value );
-					 	
+
 					 	// Add line item meta for backorder status
 					 	if ( $_product->backorders_require_notification() && $_product->is_on_backorder( $values['quantity'] ) )
 					 		woocommerce_add_order_item_meta( $item_id, __( 'Backordered', 'woocommerce' ), $values['quantity'] - max( 0, $_product->get_total_stock() ) );
-				 	
+
 					 	//allow plugins to add order item meta
 					 	do_action( 'woocommerce_add_order_item_meta', $item_id, $values );
 				 	}
 				}
-				
+
 				// Store fees
 				foreach ( $woocommerce->cart->get_fees() as $fee ) {
 					$item_id = woocommerce_add_order_item( $order_id, array(
 				 		'order_item_name' 		=> $fee->name,
 				 		'order_item_type' 		=> 'fee'
 				 	) );
-				 	
+
 				 	if ( $fee->taxable )
 				 		woocommerce_add_order_item_meta( $item_id, '_tax_class', $fee->tax_class );
 				 	else
 				 		woocommerce_add_order_item_meta( $item_id, '_tax_class', '0' );
-				 		
+
 				 	woocommerce_add_order_item_meta( $item_id, '_line_total', woocommerce_format_decimal( $fee->amount ) );
 					woocommerce_add_order_item_meta( $item_id, '_line_tax', woocommerce_format_decimal( $fee->tax ) );
 				}
-				
+
 				// UPDATE USER META
-				
+
 				// Save billing and shipping first, also save to user meta if logged in
 				if ( $this->checkout_fields['billing'] ) {
 					foreach ( $this->checkout_fields['billing'] as $key => $field ) {
@@ -507,7 +507,7 @@ class WC_Checkout {
 							// Special fields
 							switch ( $key ) {
 								case "billing_email" :
-									if ( ! email_exists( $this->posted[ $key ] ) ) 
+									if ( ! email_exists( $this->posted[ $key ] ) )
 										wp_update_user( array ( 'ID' => $user_id, 'user_email' => $this->posted[ $key ] ) ) ;
 								break;
 								case "billing_first_name" :
@@ -541,11 +541,11 @@ class WC_Checkout {
 				}
 
 				// Save any other user meta
-				if ( $user_id ) 
+				if ( $user_id )
 					do_action( 'woocommerce_checkout_update_user_meta', $user_id, $this->posted );
-				
+
 				// UPDATE ORDER META
-				
+
 				// Get better formatted shipping method (title)
 				$shipping_method = $this->posted['shipping_method'];
 				if ( isset( $available_methods[ $this->posted['shipping_method'] ] ) )
@@ -555,15 +555,15 @@ class WC_Checkout {
 				$payment_method = $this->posted['payment_method'];
 				if ( isset( $available_gateways[ $this->posted['payment_method'] ] ) )
 					$payment_method = $available_gateways[ $this->posted['payment_method'] ]->get_title();
-					
+
 				// Store tax rows
 				foreach ( array_keys( $woocommerce->cart->taxes + $woocommerce->cart->shipping_taxes ) as $key ) {
-					
+
 					$item_id = woocommerce_add_order_item( $order_id, array(
 				 		'order_item_name' 		=> $woocommerce->cart->tax->get_rate_label( $key ),
 				 		'order_item_type' 		=> 'tax'
 				 	) );
-				 	
+
 				 	// Add line item meta
 				 	if ( $item_id ) {
 					 	woocommerce_add_order_item_meta( $item_id, 'compound', absint( $woocommerce->cart->tax->is_compound( $key ) ? 1 : 0 ) );
@@ -677,10 +677,10 @@ class WC_Checkout {
 				}
 
 			} catch ( Exception $e ) {
-				
+
 				if ( ! empty( $e ) )
 					$woocommerce->add_error( $e );
-				
+
 			}
 
 		} // endif
@@ -722,7 +722,7 @@ class WC_Checkout {
 
 		} elseif ( is_user_logged_in() ) {
 
-			if ( $meta = get_user_meta( get_current_user_id(), $input, true ) ) 
+			if ( $meta = get_user_meta( get_current_user_id(), $input, true ) )
 				return $meta;
 
 			$current_user = wp_get_current_user();

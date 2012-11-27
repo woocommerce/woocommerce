@@ -10,13 +10,13 @@
  * @author 		WooThemes
  */
 class WC_Emails {
-	
+
 	/**
 	 * @var array Array of email notification classes.
 	 * @access public
 	 */
 	public $emails;
-	
+
 	/**
 	 * @var string Stores the emailer's address.
 	 * @access private
@@ -28,7 +28,7 @@ class WC_Emails {
 	 * @access private
 	 */
 	private $_from_name;
-	
+
 	/**
 	 * @var mixed Content type for sent emails
 	 * @access private
@@ -42,7 +42,7 @@ class WC_Emails {
 	 * @return void
 	 */
 	function __construct() {
-		
+
 		// Include email classes
 		include_once( 'class-wc-email.php' );
 		include_once( 'class-wc-email-customer-completed-order.php' );
@@ -52,7 +52,7 @@ class WC_Emails {
 		include_once( 'class-wc-email-customer-reset-password.php' );
 		include_once( 'class-wc-email-customer-processing-order.php' );
 		include_once( 'class-wc-email-new-order.php' );
-		
+
 		$this->emails['WC_Email_New_Order'] = new WC_Email_New_Order();
 		$this->emails['WC_Email_Customer_Processing_Order'] = new WC_Email_Customer_Processing_Order();
 		$this->emails['WC_Email_Customer_Completed_Order'] = new WC_Email_Customer_Completed_Order();
@@ -60,7 +60,7 @@ class WC_Emails {
 		$this->emails['WC_Email_Customer_Note'] = new WC_Email_Customer_Note();
 		$this->emails['WC_Email_Customer_Reset_Password'] = new WC_Email_Customer_Reset_Password();
 		$this->emails['WC_Email_Customer_New_Account'] = new WC_Email_Customer_New_Account();
-		
+
 		$this->emails = apply_filters( 'woocommerce_email_classes', $this->emails );
 
 		// Email Header, Footer and content hooks
@@ -72,14 +72,14 @@ class WC_Emails {
 		add_action( 'woocommerce_low_stock_notification', array( &$this, 'low_stock' ) );
 		add_action( 'woocommerce_no_stock_notification', array( &$this, 'no_stock' ) );
 		add_action( 'woocommerce_product_on_backorder_notification', array( &$this, 'backorder' ));
-		
+
 		// Let 3rd parties unhook the above via this hook
 		do_action( 'woocommerce_email', $this );
 	}
-	
+
 	/**
 	 * Return the email classes - used in admin to load settings.
-	 * 
+	 *
 	 * @access public
 	 * @return array
 	 */
@@ -96,7 +96,7 @@ class WC_Emails {
 	function get_from_name() {
 		if ( ! $this->_from_name )
 			$this->_from_name = get_option( 'woocommerce_email_from_name' );
-			
+
 		return $this->_from_name;
 	}
 
@@ -109,7 +109,7 @@ class WC_Emails {
 	function get_from_address() {
 		if ( ! $this->_from_address )
 			$this->_from_address = get_option( 'woocommerce_email_from_address' );
-			
+
 		return $this->_from_address;
 	}
 
@@ -181,15 +181,15 @@ class WC_Emails {
 	 * @return void
 	 */
 	function send( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "", $content_type = 'text/html' ) {
-		
+
 		// Set content type
 		$this->_content_type = $content_type;
-		
+
 		// Filters for the email
 		add_filter( 'wp_mail_from', array( &$this, 'get_from_address' ) );
 		add_filter( 'wp_mail_from_name', array( &$this, 'get_from_name' ) );
 		add_filter( 'wp_mail_content_type', array( &$this, 'get_content_type' ) );
-		
+
 		// Send
 		wp_mail( $to, $subject, $message, $headers, $attachments );
 
@@ -198,7 +198,7 @@ class WC_Emails {
 		remove_filter( 'wp_mail_from_name', array( &$this, 'get_from_name' ) );
 		remove_filter( 'wp_mail_content_type', array( &$this, 'get_content_type' ) );
 	}
-	
+
 	/**
 	 * Prepare and send the customer invoice email on demand.
 	 *
@@ -210,7 +210,7 @@ class WC_Emails {
 		$email = $this->emails['WC_Email_Customer_Invoice'];
 		$email->trigger( $order );
 	}
-	
+
 	/**
 	 * Customer new account welcome email.
 	 *
@@ -220,16 +220,16 @@ class WC_Emails {
 	 * @return void
 	 */
 	function customer_new_account( $user_id, $plaintext_pass ) {
-		if ( ! $user_id || ! $plaintext_pass) 
+		if ( ! $user_id || ! $plaintext_pass)
 			return;
-		
+
 		$email = $this->emails['WC_Email_Customer_New_Account'];
 		$email->trigger( $user_id, $plaintext_pass );
-	}	
-	 
+	}
+
 	/**
 	 * Add order meta to email templates.
-	 * 
+	 *
 	 * @access public
 	 * @param mixed $order
 	 * @param bool $sent_to_admin (default: false)
@@ -244,20 +244,20 @@ class WC_Emails {
 		if ( $order->customer_note )
 			$meta[ __( 'Note', 'woocommerce' ) ] = wptexturize( $order->customer_note );
 
-		if ( $show_fields ) 
+		if ( $show_fields )
 			foreach ( $show_fields as $field ) {
 				$value = get_post_meta( $order->id, $field, true );
-				if ( $value ) 
+				if ( $value )
 					$meta[ ucwords( esc_attr( $field ) ) ] = wptexturize( $value );
 			}
 
 		if ( sizeof( $meta ) > 0 ) {
-		
+
 			if ( $plain_text ) {
-				
+
 				foreach ( $meta as $key => $value )
 					echo $key . ': ' . $value . "\n";
-				
+
 			} else {
 
 				foreach ( $meta as $key => $value )

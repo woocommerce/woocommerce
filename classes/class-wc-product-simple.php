@@ -15,7 +15,7 @@ class WC_Product_Simple extends WC_Product {
 
 	/**
 	 * __construct function.
-	 * 
+	 *
 	 * @access public
 	 * @param mixed $product
 	 * @param array $args Contains arguments to set up this product
@@ -23,10 +23,10 @@ class WC_Product_Simple extends WC_Product {
 	function __construct( $product, $args ) {
 
 		parent::__construct( $product );
-		
+
 		$this->product_type = 'simple';
 		$this->product_custom_fields = get_post_custom( $this->id );
-		
+
 		// Load data from custom fields
 		$this->load_product_data( array(
 			'sku'			=> '',
@@ -52,7 +52,7 @@ class WC_Product_Simple extends WC_Product {
 			'sale_price_dates_to' 	=> '',
 			'featured'		=> 'no'
 		) );
-		
+
 		$this->check_sale_price();
 	}
 }

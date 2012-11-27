@@ -34,7 +34,7 @@ function woocommerce_order_notes_meta_box() {
 	if ( $notes ) {
 		foreach( $notes as $note ) {
 			$note_classes = get_comment_meta( $note->comment_ID, 'is_customer_note', true ) ? array( 'customer-note', 'note' ) : array( 'note' );
-			
+
 			?>
 			<li rel="<?php echo absint( $note->comment_ID ) ; ?>" class="<?php echo implode( ' ', $note_classes ); ?>">
 				<div class="note_content">

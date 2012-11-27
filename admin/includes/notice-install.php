@@ -1,5 +1,5 @@
-<?php 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly 	
+<?php
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 ?>
 <div id="message" class="updated woocommerce-message wc-connect">
 	<div class="squeezer">

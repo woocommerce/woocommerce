@@ -1,4 +1,4 @@
-<?php 
+<?php
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 ?>
 <div class="tax_row" data-order_item_id="<?php echo $item_id; ?>">

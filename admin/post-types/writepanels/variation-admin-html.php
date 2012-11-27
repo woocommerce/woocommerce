@@ -1,4 +1,4 @@
-<?php 
+<?php
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 ?>
 <div class="woocommerce_variation wc-metabox closed">
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			foreach ( $parent_data['attributes'] as $attribute ) {
 
 				// Only deal with attributes that are variations
-				if ( ! $attribute['is_variation'] ) 
+				if ( ! $attribute['is_variation'] )
 					continue;
 
 				// Get current value for variation (if set)
@@ -60,7 +60,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 								<td>&nbsp;</td>
 							</tr>
 						<?php endif; ?>
-						
+
 						<tr>
 							<td>
 								<label><?php _e( 'Price:', 'woocommerce' ); ?></label>
@@ -68,10 +68,10 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 							</td>
 							<td>
 								<label><?php _e( 'Sale Price:', 'woocommerce' ); ?> <a href="#" class="sale_schedule"><?php _e( 'Schedule', 'woocommerce' ); ?></a><a href="#" class="cancel_sale_schedule" style="display:none"><?php _e( 'Cancel schedule', 'woocommerce' ); ?></a></label>
-								<input type="number" size="5" name="variable_sale_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_sale_price ) ) echo esc_attr( $_sale_price ); ?>" step="any" min="0" /> 
+								<input type="number" size="5" name="variable_sale_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_sale_price ) ) echo esc_attr( $_sale_price ); ?>" step="any" min="0" />
 							</td>
 						</tr>
-						
+
 						<tr class="sale_price_dates_fields" style="display:none">
 							<td>
 								<label><?php _e( 'Sale start date:', 'woocommerce' ) ?></label>
@@ -82,7 +82,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 								<input type="text" name="variable_sale_price_dates_to[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_to ) ? date_i18n( 'Y-m-d', $_sale_price_dates_to ) : ''; ?>" placeholder="<?php echo _x('To&hellip;', 'placeholder', 'woocommerce') ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
 							</td>
 						</tr>
-						
+
 						<?php if ( get_option( 'woocommerce_enable_weight', true ) !== 'no' || get_option( 'woocommerce_enable_dimensions', true ) !== 'no' ) : ?>
 							<tr>
 								<?php if ( get_option( 'woocommerce_enable_weight', true ) !== 'no' ) : ?>
@@ -116,11 +116,11 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 									'selected'			=> isset( $shipping_class ) ? esc_attr( $shipping_class ) : '',
 									'echo'				=> 0
 								);
-								
+
 								echo wp_dropdown_categories( $args );
 							?></td>
 							<td>
-								<label><?php _e( 'Tax class:', 'woocommerce' ); ?></label> 
+								<label><?php _e( 'Tax class:', 'woocommerce' ); ?></label>
 								<select name="variable_tax_class[<?php echo $loop; ?>]"><?php
 									foreach ( $parent_data['tax_class_options'] as $key => $value )
 										echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key, $_tax_class, false ) . '>' . esc_html( $value ) . '</option>';
@@ -131,7 +131,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 							<td rowspan="2">
 								<div class="file_path_field">
 									<label><?php _e( 'File paths:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enter one or more File Paths, one per line, to make this variation a downloadable product, or leave blank.', 'woocommerce' ); ?>" href="#">[?]</a></label>
-									<textarea style="float:left;" class="short file_paths" cols="20" rows="2" placeholder="<?php _e( 'File paths/URLs, one per line', 'woocommerce' ); ?>" name="variable_file_paths[<?php echo $loop; ?>]" wrap="off"><?php if ( isset( $_file_paths ) ) echo esc_textarea( $_file_paths ); ?></textarea> 
+									<textarea style="float:left;" class="short file_paths" cols="20" rows="2" placeholder="<?php _e( 'File paths/URLs, one per line', 'woocommerce' ); ?>" name="variable_file_paths[<?php echo $loop; ?>]" wrap="off"><?php if ( isset( $_file_paths ) ) echo esc_textarea( $_file_paths ); ?></textarea>
 									<input type="button"  class="upload_file_button button" value="<?php _e( 'Upload a file', 'woocommerce' ); ?>" title="<?php _e( 'Upload', 'woocommerce' ); ?>" />
 								</div>
 							</td>
