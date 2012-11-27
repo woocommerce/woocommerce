@@ -50,57 +50,57 @@ class WooCommerce_Widget_Layered_Nav_Filters extends WP_Widget {
 	 */
 	function widget( $args, $instance ) {
 		global $_chosen_attributes, $woocommerce, $_attributes_array;
-		
+
 		extract( $args );
 
-		if ( ! is_post_type_archive( 'product' ) && ! is_tax( array_merge( $_attributes_array, array( 'product_cat', 'product_tag' ) ) ) ) 
+		if ( ! is_post_type_archive( 'product' ) && ! is_tax( array_merge( $_attributes_array, array( 'product_cat', 'product_tag' ) ) ) )
 			return;
-			
+
 		$current_term 	= $_attributes_array && is_tax( $_attributes_array ) ? get_queried_object()->term_id : '';
 		$current_tax 	= $_attributes_array && is_tax( $_attributes_array ) ? get_queried_object()->taxonomy : '';
-		
+
 		$title = __( 'Active filters', 'woocommerce' );
 		//$title = apply_filters('widget_title', $instance['title'], $instance, $this->id_base );
-		
+
 		// Price
 		$post_min = isset( $woocommerce->session->min_price ) ? $woocommerce->session->min_price : 0;
 		$post_max = isset( $woocommerce->session->max_price ) ? $woocommerce->session->max_price : 0;
-			
+
 		if ( count( $_chosen_attributes ) > 0 || $post_min > 0 || $post_max > 0 ) {
-			
+
 			echo $before_widget . $before_title . $title . $after_title;
 
 			echo "<ul>";
-			
+
 			// Attributes
 			foreach ( $_chosen_attributes as $taxonomy => $data ) {
-					
+
 				foreach ( $data['terms'] as $term_id ) {
 					$term 				= get_term( $term_id, $taxonomy );
 					$taxonomy_filter 	= str_replace( 'pa_', '', $taxonomy );
 					$current_filter 	= ! empty( $_GET[ 'filter_' . $taxonomy_filter ] ) ? $_GET[ 'filter_' . $taxonomy_filter ] : '';
 					$new_filter			= array_map( 'absint', explode( ',', $current_filter ) );
 					$new_filter			= array_diff( $new_filter, array( $term_id ) );
-					
+
 					$link = remove_query_arg( 'filter_' . $taxonomy_filter );
-					
+
 					if ( sizeof( $new_filter ) > 0 )
 						$link = add_query_arg( 'filter_' . $taxonomy_filter, implode( ',', $new_filter ), $link );
-					
+
 					echo '<li><a title="' . __( 'Remove filter', 'woocommerce' ) . '" href="' . $link . '">' . $term->name . '</a></li>';
 				}
 			}
-			
+
 			if ( $post_min ) {
 				$link = remove_query_arg( 'min_price' );
 				echo '<li><a title="' . __( 'Remove filter', 'woocommerce' ) . '" href="' . $link . '">' . __( 'Min', 'woocommerce' ) . ' ' . woocommerce_price( $post_min ) . '</a></li>';
 			}
-				
-			if ( $post_max ) {	
+
+			if ( $post_max ) {
 				$link = remove_query_arg( 'max_price' );
 				echo '<li><a title="' . __( 'Remove filter', 'woocommerce' ) . '" href="' . $link . '">' . __( 'Max', 'woocommerce' ) . ' ' . woocommerce_price( $post_max ) . '</a></li>';
 			}
-			
+
 			echo "</ul>";
 
 			echo $after_widget;

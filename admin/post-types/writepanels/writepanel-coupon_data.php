@@ -35,9 +35,9 @@ function woocommerce_coupon_data_meta_box( $post ) {
 
 			// Description
 			woocommerce_wp_text_input( array( 'id' => 'coupon_description', 'label' => __( 'Coupon description', 'woocommerce' ), 'description' => __( 'Optionally enter a description for this coupon for your reference.', 'woocommerce' ), 'value' => $post->post_excerpt, 'name' => 'excerpt' ) );
-			
+
 			echo '</div><div class="options_group">';
-			
+
 			// Type
     		woocommerce_wp_select( array( 'id' => 'discount_type', 'label' => __( 'Discount type', 'woocommerce' ), 'options' => $woocommerce->get_coupon_discount_types() ) );
 
@@ -46,7 +46,7 @@ function woocommerce_coupon_data_meta_box( $post ) {
 					'step' 	=> 'any',
 					'min'	=> '0'
 				)  ) );
-			
+
 			// Free Shipping
 			woocommerce_wp_checkbox( array( 'id' => 'free_shipping', 'label' => __( 'Enable free shipping', 'woocommerce' ), 'description' => sprintf(__( 'Check this box if the coupon grants free shipping. The <a href="%s">free shipping method</a> must be enabled with the "must use coupon" setting checked.', 'woocommerce' ), admin_url('admin.php?page=woocommerce_settings&tab=shipping&section=WC_Free_Shipping')) ) );
 
@@ -55,7 +55,7 @@ function woocommerce_coupon_data_meta_box( $post ) {
 
 			// Apply before tax
 			woocommerce_wp_checkbox( array( 'id' => 'apply_before_tax', 'label' => __( 'Apply before tax', 'woocommerce' ), 'description' => __( 'Check this box if the coupon should be applied before calculating cart tax.', 'woocommerce' ) ) );
-			
+
 			echo '</div><div class="options_group">';
 
 			// minimum spend
@@ -78,10 +78,10 @@ function woocommerce_coupon_data_meta_box( $post ) {
 							$title 	= get_the_title( $product_id );
 							$sku 	= get_post_meta( $product_id, '_sku', true );
 
-							if ( ! $title ) 
+							if ( ! $title )
 								continue;
 
-							if ( ! empty( $sku ) ) 
+							if ( ! empty( $sku ) )
 								$sku = ' (SKU: ' . $sku . ')';
 
 							echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $title . $sku ) . '</option>';
@@ -103,10 +103,10 @@ function woocommerce_coupon_data_meta_box( $post ) {
 							$title 	= get_the_title( $product_id );
 							$sku 	= get_post_meta( $product_id, '_sku', true );
 
-							if ( ! $title ) 
+							if ( ! $title )
 								continue;
 
-							if ( ! empty( $sku ) ) 
+							if ( ! empty( $sku ) )
 								$sku = ' (SKU: ' . $sku . ')';
 
 							echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $title . $sku ) . '</option>';
@@ -183,11 +183,11 @@ function woocommerce_coupon_data_meta_box( $post ) {
  */
 function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 	global $wpdb, $woocommerce_errors;
-	
+
 	// Ensure coupon code is correctly formatted
 	$post->post_title = apply_filters( 'woocommerce_coupon_code', $post->post_title );
 	$wpdb->update( $wpdb->posts, array( 'post_title' => $post->post_title ), array( 'ID' => $post_id ) );
-	
+
 	// Check for dupe coupons
 	$coupon_found = $wpdb->get_var( $wpdb->prepare( "
 		SELECT $wpdb->posts.ID
@@ -197,7 +197,7 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 	    AND $wpdb->posts.post_title = '%s'
 	    AND $wpdb->posts.ID != %s
 	 ", $post->post_title, $post_id ) );
-	 
+
 	if ( $coupon_found )
 		$woocommerce_errors[] = __( 'Coupon code already exists - customers will use the latest coupon with this code.', 'woocommerce' );
 

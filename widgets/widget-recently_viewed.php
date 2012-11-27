@@ -92,10 +92,10 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 		<ul class="product_list_widget">
 		<?php  while ($r->have_posts()) : $r->the_post(); global $product; ?>
 		<li><a href="<?php the_permalink() ?>" title="<?php echo esc_attr(get_the_title() ? get_the_title() : get_the_ID()); ?>">
-			<?php 
-				if ( has_post_thumbnail() ) 
-					the_post_thumbnail( 'shop_thumbnail' ); 
-				else 
+			<?php
+				if ( has_post_thumbnail() )
+					the_post_thumbnail( 'shop_thumbnail' );
+				else
 					echo woocommerce_placeholder_img( 'shop_thumbnail' );
 			?>
 			<?php if ( get_the_title() ) the_title(); else the_ID(); ?>
@@ -178,18 +178,18 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
  */
 function woocommerce_track_product_view() {
 	global $post, $product, $woocommerce;
-	
+
 	$viewed_products = $woocommerce->session->viewed_products;
 
-	if ( empty( $woocommerce->session->viewed_products ) ) 
+	if ( empty( $woocommerce->session->viewed_products ) )
 		$viewed_products = array();
 
-	if ( ! in_array( $post->ID, $viewed_products ) ) 
+	if ( ! in_array( $post->ID, $viewed_products ) )
 		$viewed_products[] = $post->ID;
 
-	if ( sizeof( $viewed_products ) > 15 ) 
+	if ( sizeof( $viewed_products ) > 15 )
 		array_shift( $viewed_products );
-		
+
 	$woocommerce->session->viewed_products = $viewed_products;
 }
 

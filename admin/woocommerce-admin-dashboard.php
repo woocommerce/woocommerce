@@ -44,7 +44,7 @@ function woocommerce_init_dashboard_widgets() {
 		wp_add_dashboard_widget( 'woocommerce_dashboard_recent_orders', __( 'WooCommerce Recent Orders', 'woocommerce' ), 'woocommerce_dashboard_recent_orders');
 		wp_add_dashboard_widget( 'woocommerce_dashboard_recent_reviews', __( 'WooCommerce Recent Reviews', 'woocommerce' ), 'woocommerce_dashboard_recent_reviews' );
 	}
-	
+
 	if ( current_user_can( 'view_woocommerce_reports' ) || current_user_can( 'publish_shop_orders' ) ) {
 		wp_add_dashboard_widget( 'woocommerce_dashboard_sales', $sales_heading, 'woocommerce_dashboard_sales' );
 	}

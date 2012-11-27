@@ -53,7 +53,7 @@ class WC_Cart {
 
 	/** @var float Discounts after tax. */
 	var $discount_total;
-	
+
 	/** @var float Total for additonal fees. */
 	var $fee_total;
 
@@ -68,7 +68,7 @@ class WC_Cart {
 
 	/** @var WC_Tax */
 	var $tax;
-	
+
 	/** @var array An array of fees. */
 	var $fees;
 
@@ -240,7 +240,7 @@ class WC_Cart {
 
 			$this->cart_contents = array();
 			$this->reset();
-			
+
 			unset( $woocommerce->session->order_awaiting_payment, $woocommerce->session->coupons, $woocommerce->session->cart );
 
 			if ( $clear_persistent_cart && get_current_user_id() )
@@ -749,17 +749,17 @@ class WC_Cart {
 
 			// Stock check - only check if we're managing stock and backorders are not allowed
 			if ( ! $product_data->is_in_stock() ) {
-			
+
 				$woocommerce->add_error( sprintf( __( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woocommerce' ), $product_data->get_title() ) );
-				
+
 				return false;
 			} elseif ( ! $product_data->has_enough_stock( $quantity ) ) {
-			
+
 				$woocommerce->add_error( sprintf(__( 'You cannot add that amount of &quot;%s&quot; to the cart because there is not enough stock (%s remaining).', 'woocommerce' ), $product_data->get_title(), $product_data->get_stock_quantity() ));
-				
+
 				return false;
-				
-			} 
+
+			}
 
 			// Downloadable/virtual qty check
 			if ( $product_data->is_sold_individually() ) {
@@ -1380,19 +1380,19 @@ class WC_Cart {
 					}
 				}
 			}
-			
+
 			// Add fees
 			foreach ( $this->get_fees() as $fee ) {
 				$this->fee_total += $fee->amount;
-				
+
 				if ( $fee->taxable ) {
 					// Get tax rates
 					$tax_rates 				= $this->tax->get_rates();
 					$fee_taxes				= $this->tax->calc_tax( $fee->amount, $tax_rates, false );
-					
+
 					// Store
 					$fee->tax 				= array_sum( $fee_taxes );
-					
+
 					// Tax rows - merge the totals we just got
 					foreach ( array_keys( $this->taxes + $fee_taxes ) as $key ) {
 					    $this->taxes[ $key ] = ( isset( $fee_taxes[ $key ] ) ? $fee_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
@@ -1407,7 +1407,7 @@ class WC_Cart {
 			if ( $woocommerce->customer->is_vat_exempt() ) {
 				$this->shipping_tax_total = $this->tax_total = 0;
 				$this->taxes = $this->shipping_taxes = array();
-				
+
 				foreach ( $this->cart_contents as $cart_item_key => $item )
 					$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = $this->cart_contents[ $cart_item_key ]['line_tax'] = 0;
 			}
@@ -1440,8 +1440,8 @@ class WC_Cart {
 			 * Based on discounted product prices, discounted tax, shipping cost + tax, and any discounts to be added after tax (e.g. store credit)
 			 */
 			$this->total = apply_filters( 'woocommerce_calculated_total', number_format( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total - $this->discount_total + $this->fee_total, $this->dp, '.', '' ), $this );
-			
-			if ( $this->total < 0 ) 
+
+			if ( $this->total < 0 )
 				$this->total = 0;
 		}
 
@@ -1673,7 +1673,7 @@ class WC_Cart {
 				}
 
 				$this->applied_coupons[] = $coupon_code;
-				
+
 				// Choose free shipping
 				if ( $the_coupon->enable_free_shipping() ) {
 					$woocommerce->session->chosen_shipping_method = 'free_shipping';
@@ -1741,7 +1741,7 @@ class WC_Cart {
 
 		/**
 		 * add_fee function.
-		 * 
+		 *
 		 * @access public
 		 * @param mixed $name
 		 * @param mixed $amount
@@ -1750,10 +1750,10 @@ class WC_Cart {
 		 * @return void
 		 */
 		function add_fee( $name, $amount, $taxable = false, $tax_class = '' ) {
-			
-			if ( empty( $this->fees ) ) 
+
+			if ( empty( $this->fees ) )
 				$this->fees = array();
-				
+
 			$new_fee 			= new stdClass();
 			$new_fee->id 		= sanitize_title( $name );
 			$new_fee->name 		= esc_attr( $name );
@@ -1761,13 +1761,13 @@ class WC_Cart {
 			$new_fee->tax_class	= $tax_class;
 			$new_fee->taxable	= $taxable ? true : false;
 			$new_fee->tax		= 0;
-			
+
 			$this->fees[] 		= $new_fee;
 		}
-		
+
 		/**
 		 * get_fees function.
-		 * 
+		 *
 		 * @access public
 		 * @return void
 		 */

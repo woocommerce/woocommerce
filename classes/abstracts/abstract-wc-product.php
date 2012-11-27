@@ -106,7 +106,7 @@ abstract class WC_Product {
 
 	/**
 	 * __construct function.
-	 * 
+	 *
 	 * @access public
 	 * @param mixed $product
 	 */
@@ -118,22 +118,22 @@ abstract class WC_Product {
 			$this->id = absint( $product );
 		}
 	}
-	
-	
+
+
 	/**
 	 * Load the data from the custom fields
-	 * 
+	 *
 	 * @access public
 	 * @param mixed $fields
 	 * @return void
 	 */
 	function load_product_data( $fields ) {
 		if ( $fields )
-			foreach ( $fields as $key => $default ) 
+			foreach ( $fields as $key => $default )
 				$this->$key = isset( $this->product_custom_fields[ '_' . $key ][0] ) && $this->product_custom_fields[ '_' . $key ][0] !== '' ? $this->product_custom_fields[ '_' . $key ][0] : $default;
 	}
-	
-	
+
+
 	/**
      * Get SKU (Stock-keeping unit) - product unique ID.
      *
@@ -156,8 +156,8 @@ abstract class WC_Product {
 
         return apply_filters( 'woocommerce_stock_amount', $this->stock );
     }
-    
-    
+
+
     /**
      * Get total stock.
      *
@@ -263,17 +263,17 @@ abstract class WC_Product {
 
 		return false;
 	}
-	
-	
+
+
 	/**
 	 * Get file download path identified by $download_id
-	 * 
+	 *
 	 * @access public
 	 * @param string $download_id file identifier
 	 * @return array
 	 */
 	function get_file_download_path( $download_id ) {
-		
+
 		$file_paths = isset( $this->product_custom_fields['_file_paths'][0] ) ? $this->product_custom_fields['_file_paths'][0] : '';
 		$file_paths = apply_filters( 'woocommerce_file_download_paths', $file_paths, $this->id, null, null );
 
@@ -311,8 +311,8 @@ abstract class WC_Product {
 	function needs_shipping() {
 		return $this->is_virtual() ? false : true;
 	}
-	
-	
+
+
 	/**
 	 * Check if a product is sold individually (no quantities)
 	 *
@@ -332,15 +332,15 @@ abstract class WC_Product {
 
 	/**
 	 * get_children function.
-	 * 
+	 *
 	 * @access public
 	 * @return bool
 	 */
 	function get_children() {
 		return array();
 	}
-	
-	
+
+
 	/**
 	 * Returns whether or not the product has any child product.
 	 *
@@ -360,7 +360,7 @@ abstract class WC_Product {
 	 */
 	function exists() {
 		global $wpdb;
-		
+
 		return ! empty( $this->post ) || $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE ID = %d LIMIT 1;", $this->id ) ) > 0 ? true : false;
 	}
 
@@ -836,9 +836,9 @@ abstract class WC_Product {
 	 */
 	function get_rating_html( $location = '' ) {
 
-		if ( $location ) 
+		if ( $location )
 			$location = '_' . $location;
-			
+
 		$star_size = apply_filters( 'woocommerce_star_rating_size' . $location, 16 );
 
 		if ( false === ( $average_rating = get_transient( 'wc_average_rating_' . $this->id ) ) ) {
@@ -938,9 +938,9 @@ abstract class WC_Product {
 	function get_shipping_class() {
 		if ( ! $this->shipping_class ) {
 			$classes = get_the_terms( $this->id, 'product_shipping_class' );
-			if ( $classes && ! is_wp_error( $classes ) ) 
-				$this->shipping_class = current( $classes )->slug; 
-			else 
+			if ( $classes && ! is_wp_error( $classes ) )
+				$this->shipping_class = current( $classes )->slug;
+			else
 				$this->shipping_class = '';
 		}
 		return $this->shipping_class;
@@ -1084,7 +1084,7 @@ abstract class WC_Product {
 	function has_attributes() {
 		if ( sizeof( $this->get_attributes() ) > 0 ) {
 			foreach ( $this->get_attributes() as $attribute ) {
-				if ( isset( $attribute['is_visible'] ) && $attribute['is_visible'] ) 
+				if ( isset( $attribute['is_visible'] ) && $attribute['is_visible'] )
 					return true;
 			}
 		}
@@ -1198,11 +1198,11 @@ abstract class WC_Product {
      * @return void
      */
     function check_sale_price() {
-    
+
     	if ( $this->sale_price_dates_from && $this->sale_price_dates_from < current_time('timestamp') ) {
 
     		if ( $this->sale_price && $this->price !== $this->sale_price ) {
-	    		
+
     			// Update price
     			$this->price = $this->sale_price;
     			update_post_meta( $this->id, '_price', $this->price );

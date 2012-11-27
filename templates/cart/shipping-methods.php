@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * Shipping Methods Display
  *
@@ -6,7 +6,7 @@
  * @package 	WooCommerce/Templates
  * @version     1.7.0
  */
- 
+
 global $woocommerce;
 
 // If at least one shipping method is available
@@ -45,7 +45,7 @@ if ( $available_methods ) {
 			echo '<option value="' . esc_attr( $method->id ) . '" ' . selected( $method->id, $woocommerce->session->chosen_shipping_method, false ) . '>' . wp_kses_post( $method->full_label ) . '</option>';
 
 		echo '</select>';
-		
+
 	// Show radio buttons for methods
 	} else {
 

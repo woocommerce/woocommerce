@@ -20,8 +20,8 @@ add_filter( 'woocommerce_coupon_code', 'strtolower' ); // Coupons case-insensiti
 add_filter( 'woocommerce_stock_amount', 'absint' ); // Stock amounts are integers by default
 
 /**
- * Main function for returning products, uses the WC_Product_Factory class. 
- * 
+ * Main function for returning products, uses the WC_Product_Factory class.
+ *
  * @access public
  * @param mixed $the_product Post object or post ID of the product.
  * @param array $args (default: array()) Contains all arguments to be used to get this product.
@@ -157,9 +157,9 @@ function woocommerce_placeholder_img_src() {
  */
 function woocommerce_placeholder_img( $size = 'shop_thumbnail' ) {
 	global $woocommerce;
-	
+
 	$dimensions = $woocommerce->get_image_size( $size );
-	
+
 	return apply_filters('woocommerce_placeholder_img', '<img src="' . woocommerce_placeholder_img_src() . '" alt="Placeholder" width="' . $dimensions['width'] . '" height="' . $dimensions['height'] . '" />' );
 }
 
@@ -390,8 +390,8 @@ if ( ! function_exists( 'is_filtered' ) ) {
 	 * @return bool
 	 */
 	function is_filtered() {
-		global $_chosen_attributes;	
-			
+		global $_chosen_attributes;
+
 		return ( sizeof( $_chosen_attributes ) > 0 || ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) ) ? true : false;
 	}
 }
@@ -572,7 +572,7 @@ function woocommerce_price( $price, $args = array() ) {
 
 	if ( get_option( 'woocommerce_price_trim_zeros' ) == 'yes' && $num_decimals > 0 )
 		$price = woocommerce_trim_zeros( $price );
-		
+
 	$return = '<span class="amount">' . sprintf( get_woocommerce_price_format(), $currency_symbol, $price ) . '</span>';
 
 	if ( $ex_tax_label && get_option( 'woocommerce_calc_taxes' ) == 'yes' )
@@ -583,7 +583,7 @@ function woocommerce_price( $price, $args = array() ) {
 
 function get_woocommerce_price_format() {
 	$currency_pos = get_option( 'woocommerce_currency_pos' );
-	
+
 	switch ( $currency_pos ) {
 		case 'left' :
 			return '%1$s%2$s';
@@ -618,10 +618,10 @@ function woocommerce_trim_zeros( $price ) {
  */
 function woocommerce_format_decimal( $number ) {
 	$number = number_format( (float) $number, get_option( 'woocommerce_price_num_decimals' ), '.', '' );
-	
+
 	if ( strstr( $number, '.' ) )
 		$number = rtrim( rtrim( $number, '0' ), '.' );
-		
+
 	return $number;
 }
 
@@ -993,7 +993,7 @@ add_action('woocommerce_order_status_completed', 'woocommerce_downloadable_produ
 
 /**
  * Grant downloadable product access to the file identified by $download_id
- * 
+ *
  * @access public
  * @param string $download_id file identifier
  * @param int $product_id product identifier
@@ -1083,11 +1083,11 @@ function woocommerce_product_post_type_link( $permalink, $post ) {
     // Abort if post is not a product
     if ( $post->post_type !== 'product' )
     	return $permalink;
-    	
+
     // Abort early if the placeholder rewrite tag isn't in the generated URL
     if ( false === strpos( $permalink, '%' ) )
     	return $permalink;
-    	
+
     // Get the custom taxonomy terms in use by this post
     $terms = get_the_terms( $post->ID, 'product_cat' );
 
@@ -1099,7 +1099,7 @@ function woocommerce_product_post_type_link( $permalink, $post ) {
         $first_term = array_shift( $terms );
         $product_cat = $first_term->slug;
     }
-    
+
     $find = array(
     	'%year%',
     	'%monthnum%',
@@ -1111,7 +1111,7 @@ function woocommerce_product_post_type_link( $permalink, $post ) {
     	'%category%',
     	'%product_cat%'
     );
-    
+
     $replace = array(
     	date_i18n( 'Y', strtotime( $post->post_date ) ),
     	date_i18n( 'm', strtotime( $post->post_date ) ),
@@ -1122,10 +1122,10 @@ function woocommerce_product_post_type_link( $permalink, $post ) {
     	$post->ID,
     	$product_cat,
     	$product_cat
-    );	
-    
+    );
+
     $replace = array_map( 'sanitize_title', $replace );
-    
+
     $permalink = str_replace( $find, $replace, $permalink );
 
     return $permalink;
@@ -1316,10 +1316,10 @@ function woocommerce_taxonomy_metadata_wpdbfix() {
 	global $wpdb;
 	$termmeta_name = 'woocommerce_termmeta';
 	$itemmeta_name = 'woocommerce_order_itemmeta';
-	
+
 	$wpdb->woocommerce_termmeta = $wpdb->prefix . $termmeta_name;
 	$wpdb->order_itemmeta = $wpdb->prefix . $itemmeta_name;
-	
+
 	$wpdb->tables[] = 'woocommerce_termmeta';
 	$wpdb->tables[] = 'order_itemmeta';
 }
@@ -1471,7 +1471,7 @@ function woocommerce_set_term_order( $term_id, $index, $taxonomy, $recursive = f
 		$index ++;
 		$index = woocommerce_set_term_order($term->term_id, $index, $taxonomy, true);
 	}
-	
+
 	clean_term_cache( $term_id, $taxonomy );
 
 	return $index;
@@ -1534,7 +1534,7 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
 		return false;
 
 	return $wpdb->get_var( $wpdb->prepare( "
-		SELECT COUNT( order_items.order_item_id ) 
+		SELECT COUNT( order_items.order_item_id )
 		FROM {$wpdb->prefix}woocommerce_order_items as order_items
 		LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS itemmeta ON order_items.order_item_id = itemmeta.order_item_id
 		LEFT JOIN {$wpdb->postmeta} AS postmeta ON order_items.order_id = postmeta.post_id
@@ -1545,22 +1545,22 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
 		AND 	tax.taxonomy		= 'shop_order_status'
 		AND		(
 					(
-						itemmeta.meta_key = '_variation_id' 
+						itemmeta.meta_key = '_variation_id'
 						AND itemmeta.meta_value = %s
-					) OR ( 
-						itemmeta.meta_key = '_product_id' 
+					) OR (
+						itemmeta.meta_key = '_product_id'
 						AND itemmeta.meta_value = %s
 					)
 		)
-		AND 	( 
+		AND 	(
 					(
-						postmeta.meta_key = '_billing_email' 
-						AND postmeta.meta_value IN ( '" . implode( "','", array_unique( $emails ) ) . "' ) 
-					) OR ( 
-						postmeta.meta_key = '_customer_user' 
-						AND postmeta.meta_value = %s AND postmeta.meta_value > 0 
+						postmeta.meta_key = '_billing_email'
+						AND postmeta.meta_value IN ( '" . implode( "','", array_unique( $emails ) ) . "' )
+					) OR (
+						postmeta.meta_key = '_customer_user'
+						AND postmeta.meta_value = %s AND postmeta.meta_value > 0
 					)
-				) 
+				)
 	", $product_id, $product_id, $user_id ) );
 }
 
@@ -1590,24 +1590,24 @@ function woocommerce_processing_order_count() {
 
 /**
  * Get capabilities for WooCommerce - these are assigned to admin/shop manager during installation or reset
- * 
+ *
  * @access public
  * @return void
  */
 function woocommerce_get_core_capabilities() {
 	$capabilities = array();
-			
+
 	$capabilities['core'] = array(
-		"manage_woocommerce", 
+		"manage_woocommerce",
 		"view_woocommerce_reports"
 	);
-	
+
 	$capability_types = array( 'product', 'shop_order', 'shop_coupon' );
-	
+
 	foreach( $capability_types as $capability_type ) {
-	
+
 		$capabilities[ $capability_type ] = array(
-			
+
 			// Post type
 			"edit_{$capability_type}",
 			"read_{$capability_type}",
@@ -1622,7 +1622,7 @@ function woocommerce_get_core_capabilities() {
 			"delete_others_{$capability_type}s",
 			"edit_private_{$capability_type}s",
 			"edit_published_{$capability_type}s",
-			
+
 			// Terms
 			"manage_{$capability_type}_terms",
 			"edit_{$capability_type}_terms",
@@ -1630,22 +1630,22 @@ function woocommerce_get_core_capabilities() {
 			"assign_{$capability_type}_terms"
 		);
 	}
-	
+
 	return $capabilities;
 }
 
 
 /**
  * woocommerce_init_roles function.
- * 
+ *
  * @access public
  * @return void
  */
 function woocommerce_init_roles() {
 	global $wp_roles;
 
-	if ( class_exists('WP_Roles') ) 
-		if ( ! isset( $wp_roles ) ) 
+	if ( class_exists('WP_Roles') )
+		if ( ! isset( $wp_roles ) )
 			$wp_roles = new WP_Roles();
 
 	if ( is_object( $wp_roles ) ) {
@@ -1689,9 +1689,9 @@ function woocommerce_init_roles() {
 		   	'export'					=> true,
 			'import'					=> true
 		) );
-		
+
 		$capabilities = woocommerce_get_core_capabilities();
-		
+
 		foreach( $capabilities as $cap_group ) {
 			foreach( $cap_group as $cap ) {
 				$wp_roles->add_cap( 'shop_manager', $cap );
@@ -1703,28 +1703,28 @@ function woocommerce_init_roles() {
 
 /**
  * woocommerce_remove_roles function.
- * 
+ *
  * @access public
  * @return void
  */
 function woocommerce_remove_roles() {
 	global $wp_roles;
 
-	if ( class_exists('WP_Roles') ) 
-		if ( ! isset( $wp_roles ) ) 
+	if ( class_exists('WP_Roles') )
+		if ( ! isset( $wp_roles ) )
 			$wp_roles = new WP_Roles();
 
 	if ( is_object( $wp_roles ) ) {
 
 		$capabilities = woocommerce_get_core_capabilities();
-		
+
 		foreach( $capabilities as $cap_group ) {
 			foreach( $cap_group as $cap ) {
 				$wp_roles->remove_cap( 'shop_manager', $cap );
 				$wp_roles->remove_cap( 'administrator', $cap );
 			}
 		}
-		
+
 		remove_role( 'customer' );
 		remove_role( 'shop_manager' );
 	}
@@ -1733,7 +1733,7 @@ function woocommerce_remove_roles() {
 
 /**
  * Add a item to an order (for example a line item).
- * 
+ *
  * @access public
  * @param int $order_id
  * @param array $data
@@ -1741,9 +1741,9 @@ function woocommerce_remove_roles() {
  */
 function woocommerce_add_order_item( $order_id, $item ) {
 	global $wpdb;
-	
+
 	$order_id = absint( $order_id );
-	
+
 	if ( ! $order_id )
 		return false;
 
@@ -1753,45 +1753,45 @@ function woocommerce_add_order_item( $order_id, $item ) {
 	);
 
 	$item = wp_parse_args( $item, $defaults );
-	
-	$wpdb->insert( 
+
+	$wpdb->insert(
 		$wpdb->prefix . "woocommerce_order_items",
-		array( 
+		array(
 			'order_item_name' 		=> $item['order_item_name'],
 			'order_item_type' 		=> $item['order_item_type'],
 			'order_id'				=> $order_id
-		), 
+		),
 		array(
 			'%s', '%s', '%d'
 		)
 	);
-	
+
 	do_action( 'woocommerce_new_order_item', absint( $wpdb->insert_id ) );
-	
+
 	return absint( $wpdb->insert_id );
 }
 
 /**
  * woocommerce_delete_order_item function.
- * 
+ *
  * @access public
  * @param int $item_id
  * @return bool
  */
 function woocommerce_delete_order_item( $item_id ) {
 	global $wpdb;
-	
+
 	$item_id = absint( $item_id );
-	
+
 	if ( ! $item_id )
 		return false;
-	
+
 	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d", $item_id ) );
 	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d", $item_id ) );
-	
+
 	do_action( 'woocommerce_delete_order_item', $item_id );
-	
-	return true;	
+
+	return true;
 }
 
 /**

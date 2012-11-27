@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 function woocommerce_tax_rates_setting() {
 	global $woocommerce;
-	
+
 	woocommerce_export_tax_rates();
 
 	$tax_classes 		= array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
@@ -28,12 +28,12 @@ function woocommerce_tax_rates_setting() {
 	?><tr valign="top">
 		<th scope="row" class="titledesc"><?php _e( 'Tax Rates', 'woocommerce' ) ?></th>
 	    <td class="forminp">
-	    
+
 		    <a class="button export_rates" href="<?php echo add_query_arg( 'wc_export_tax_rates', 1 ); ?>"><?php _e( 'Export rates', 'woocommerce' ); ?></a>
 	    	<a class="button import_rates" href="<?php echo admin_url( 'admin.php?import=woocommerce_tax_rate_csv' ); ?>"><?php _e( 'Import rates', 'woocommerce' ); ?></a>
-	    					
+
 	    	<p style="margin-top:0;"><?php _e( 'Define tax rates for countries and states below. You can also export and import from CSV files.', 'woocommerce' ); ?></p>
-	    		    	
+
 	    	<table class="taxrows widefat" cellspacing="0">
 	    		<thead>
 	    			<tr>
@@ -53,8 +53,8 @@ function woocommerce_tax_rates_setting() {
 	    				</th>
 	    				<th colspan="6">
 	    					<small><?php _e( 'All matching rates will be applied, and non-compound rates will be summed.', 'woocommerce' ); ?></small>
-	    					
-	    					<a href="#" class="dupe button"><?php _e( 'Duplicate selected', 'woocommerce' ); ?></a> 
+
+	    					<a href="#" class="dupe button"><?php _e( 'Duplicate selected', 'woocommerce' ); ?></a>
 	    					<a href="#" class="remove button"><?php _e( 'Delete selected', 'woocommerce' ); ?></a>
 	    				</th>
 	    			</tr>
@@ -102,7 +102,7 @@ function woocommerce_tax_rates_setting() {
 
 	    		</tbody>
 	    	</table>
-	    	
+
 	    	<?php if ( empty( $local_tax_rates ) ) : ?>
 	    	<p style="margin: 1em 0 0;"><a href="#" data-tip="<?php _e( 'Add local tax rates to define rules for specific zip codes and cities.', 'woocommerce' ); ?>" class="tips toggle_local_tax_rates">+ <?php _e( 'Local tax rates', 'woocommerce' ); ?></a></p>
 	    	<?php endif; ?>
@@ -113,9 +113,9 @@ function woocommerce_tax_rates_setting() {
 	    <td class="forminp">
 	    	<a class="button export_rates" href="<?php echo add_query_arg( 'wc_export_tax_rates', 2 ); ?>"><?php _e( 'Export rates', 'woocommerce' ); ?></a>
 	    	<a class="button import_rates" href="<?php echo admin_url( 'admin.php?import=woocommerce_tax_rate_csv' ); ?>"><?php _e( 'Import rates', 'woocommerce' ); ?></a>
-	    					
+
 	    	<p style="margin-top:0;"><?php _e( 'Define local tax rates for specific post/zip codes below. You can also export and import from CSV files.', 'woocommerce' ); ?></p>
-	    	
+
 	    	<table class="taxrows widefat" cellspacing="0">
 	    		<thead>
 	    			<tr>
@@ -139,10 +139,10 @@ function woocommerce_tax_rates_setting() {
 	    		</tfoot>
 	    		<tbody id="local_tax_rates">
 
-	    			<?php 
-	    			$i = -1; 
-	    			if ($local_tax_rates && is_array($local_tax_rates)) foreach( $local_tax_rates as $rate ) : 
-	    				$i++; 
+	    			<?php
+	    			$i = -1;
+	    			if ($local_tax_rates && is_array($local_tax_rates)) foreach( $local_tax_rates as $rate ) :
+	    				$i++;
 		    			$rate['locations'] = isset( $rate['locations'] ) ? $rate['locations'] : $rate['postcode']; // Backwards compat
 		    			$rate['location_type'] = isset( $rate['location_type'] ) ? $rate['location_type'] : 'postcode';
 		    			?>
@@ -374,7 +374,7 @@ function woocommerce_tax_rates_setting() {
 			}
 			return false;
 		});
-		
+
 		// Show local rates
 		jQuery( 'a.toggle_local_tax_rates' ).click(function(){
 			jQuery(this).closest('p').hide();
@@ -414,7 +414,7 @@ function woocommerce_tax_row_label( $selected ) {
 			$states_count+=sizeof($value);
 		endif;
 
-		if ( ! in_array( $country, $counties_array ) ) 
+		if ( ! in_array( $country, $counties_array ) )
 			$counties_array[] = esc_html( $woocommerce->countries->countries[ $country ] );
 
 	endforeach;
@@ -446,33 +446,33 @@ function woocommerce_tax_row_label( $selected ) {
 
 /**
  * woocommerce_export_tax_rates function.
- * 
+ *
  * @access public
  * @return void
  */
 function woocommerce_export_tax_rates() {
-	
+
 	if ( empty( $_GET['wc_export_tax_rates'] ) )
 		return;
-		
+
 	global $woocommerce;
-	
+
 	if ( ! class_exists('WC_CSV_Exporter') )
 		include( $woocommerce->plugin_path() . '/admin/includes/class-wc-csv-exporter.php' );
 
 	$export = absint( $_GET['wc_export_tax_rates'] );
-		
+
 	if ( $export == 1 ) {
-	
+
 		$tax_rates = get_option('woocommerce_tax_rates');
-		
+
 		$csv = new WC_CSV_Exporter( array( 'countries', 'class', 'label', 'rate', 'compound', 'shipping' ), true, 'tax_rates.csv' );
-		
+
 		if ( $tax_rates )
 			foreach( $tax_rates as $rate ) {
-			
+
 				$countries = array();
-				
+
 				foreach ( $rate['countries'] as $country => $states ) {
 					foreach( $states as $state ) {
 						if ( $state == '*' ) {
@@ -482,8 +482,8 @@ function woocommerce_export_tax_rates() {
 						}
 					}
 				}
-			
-				$csv->add_row( array( 
+
+				$csv->add_row( array(
 					implode( ' | ', $countries ),
 					$rate['class'],
 					$rate['label'],
@@ -492,18 +492,18 @@ function woocommerce_export_tax_rates() {
 					$rate['shipping'] == 'yes' ? 1 : 0
 				) );
 			}
-		
+
 		$csv->end();
-	
+
 	} else {
 
 		$tax_rates = get_option('woocommerce_local_tax_rates');
-				
+
 		$csv = new WC_CSV_Exporter( array( 'country', 'state', 'postcode', 'class', 'label', 'rate', 'compound', 'shipping' ), true, 'local_tax_rates.csv' );
-		
+
 		if ( $tax_rates )
 			foreach( $tax_rates as $rate ) {
-				$csv->add_row( array( 
+				$csv->add_row( array(
 					$rate['country'],
 					$rate['state'],
 					implode( ' | ', $rate['postcode'] ),
@@ -514,8 +514,8 @@ function woocommerce_export_tax_rates() {
 					$rate['shipping'] == 'yes' ? 1 : 0
 				) );
 			}
-		
+
 		$csv->end();
-	
+
 	}
 }

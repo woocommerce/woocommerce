@@ -341,11 +341,11 @@ if ( $shop_page_id > 0 && sizeof(get_pages("child_of=$shop_page_id")) > 0 )
 
 $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', array(
 
-	array( 
-		'title' => __( 'Page Setup', 'woocommerce' ), 
-		'type' => 'title', 
-		'desc' => sprintf( __( 'Set up core WooCommerce pages here, for example the base page. The base page can also be used in your %sproduct permalinks%s.', 'woocommerce' ), '<a target="_blank" href="' . admin_url( 'options-permalink.php' ) . '">', '</a>' ), 
-		'id' => 'page_options' 
+	array(
+		'title' => __( 'Page Setup', 'woocommerce' ),
+		'type' => 'title',
+		'desc' => sprintf( __( 'Set up core WooCommerce pages here, for example the base page. The base page can also be used in your %sproduct permalinks%s.', 'woocommerce' ), '<a target="_blank" href="' . admin_url( 'options-permalink.php' ) . '">', '</a>' ),
+		'id' => 'page_options'
 	),
 
 	array(
@@ -515,7 +515,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		)),
 		'desc_tip'	=>  true,
 	),
-	
+
 	array(
 		'title' => __( 'Shop Page Display', 'woocommerce' ),
 		'desc' 		=> __( 'This controls what is shown on the product archive.', 'woocommerce' ),
@@ -530,7 +530,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		),
 		'desc_tip'	=>  true,
 	),
-	
+
 	array(
 		'title' => __( 'Default Category Display', 'woocommerce' ),
 		'desc' 		=> __( 'This controls what is shown on category archives.', 'woocommerce' ),
@@ -948,7 +948,7 @@ $woocommerce_settings['payment_gateways'] = apply_filters('woocommerce_payment_g
 
 $tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
 $classes_options = array();
-if ( $tax_classes ) 
+if ( $tax_classes )
 	foreach ( $tax_classes as $class )
 		$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
 
@@ -963,7 +963,7 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		'default'	=> 'no',
 		'type' 		=> 'checkbox'
 	),
-	
+
 	array(
 		'title' => __( 'Calculation Settings', 'woocommerce' ),
 		'desc' 		=> __( 'Calculate tax based on the customer shipping address', 'woocommerce' ),
@@ -972,7 +972,7 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'start'
 	),
-	
+
 	array(
 		'desc' 		=> __( 'Round tax at subtotal level, instead of rounding per line', 'woocommerce' ),
 		'id' 		=> 'woocommerce_tax_round_at_subtotal',
@@ -980,7 +980,7 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> ''
 	),
-	
+
 	array(
 		'desc'          => sprintf( __( 'Display the tax total when tax is %s', 'woocommerce' ), woocommerce_price( 0 ) ),
 		'id'            => 'woocommerce_display_cart_taxes_if_zero',
@@ -1027,7 +1027,7 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		'options' 	=> array( '' => 'Shipping tax class based on cart items', 'standard' => __( 'Standard', 'woocommerce' ) ) + $classes_options,
 		'desc_tip'	=>  true,
 	),
-	
+
 	array(
 		'title' 		=> __( 'Additional Tax classes', 'woocommerce' ),
 		'desc' 		=> __( 'List additonal tax classes below (1 per line). This is in addition to the default <code>Standard Rate</code>.', 'woocommerce' ),

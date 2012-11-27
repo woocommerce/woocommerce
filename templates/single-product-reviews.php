@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 <?php if ( comments_open() ) : ?><div id="reviews"><?php
 
 	echo '<div id="comments">';
-	
+
 	if ( get_option('woocommerce_enable_review_rating') == 'yes' ) {
 
 		$count = $wpdb->get_var( $wpdb->prepare("
@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			AND comment_approved = '1'
 			AND meta_value > 0
 		"), $post->ID );
-	
+
 		$rating = $wpdb->get_var( $wpdb->prepare("
 			SELECT SUM(meta_value) FROM $wpdb->commentmeta
 			LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
@@ -33,29 +33,29 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			AND comment_post_ID = %d
 			AND comment_approved = '1'
 		"), $post->ID );
-	
+
 		if ( $count > 0 ) {
-	
+
 			$average = number_format($rating / $count, 2);
-	
+
 			echo '<div itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">';
-	
+
 			echo '<div class="star-rating" title="'.sprintf(__( 'Rated %s out of 5', 'woocommerce' ), $average).'"><span style="width:'.($average*16).'px"><span itemprop="ratingValue" class="rating">'.$average.'</span> '.__( 'out of 5', 'woocommerce' ).'</span></div>';
-	
+
 			echo '<h2>'.sprintf( _n('%s review for %s', '%s reviews for %s', $count, 'woocommerce'), '<span itemprop="ratingCount" class="count">'.$count.'</span>', wptexturize($post->post_title) ).'</h2>';
-	
+
 			echo '</div>';
-	
+
 		} else {
-	
+
 			echo '<h2>'.__( 'Reviews', 'woocommerce' ).'</h2>';
-	
+
 		}
-		
+
 	} else {
-		
+
 		echo '<h2>'.__( 'Reviews', 'woocommerce' ).'</h2>';
-		
+
 	}
 
 	$title_reply = '';

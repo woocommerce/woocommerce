@@ -48,7 +48,7 @@ global $woocommerce;
 						<td class="product-thumbnail">
 							<?php
 								$thumbnail = apply_filters( 'woocommerce_in_cart_product_thumbnail', $_product->get_image(), $values, $cart_item_key );
-								
+
 								if ( ! $_product->is_visible() || ( ! empty( $_product->variation_id ) && ! $_product->parent_is_visible() ) )
 									echo $thumbnail;
 								else
@@ -88,7 +88,7 @@ global $woocommerce;
 								if ( $_product->is_sold_individually() ) {
 									$product_quantity = sprintf( '1 <input type="hidden" name="cart[%s][qty]" value="1" />', $cart_item_key );
 								} else {
-									
+
 									$step	= apply_filters( 'woocommerce_quantity_input_step', '1', $_product );
 									$min 	= apply_filters( 'woocommerce_quantity_input_min', '', $_product );
 									$max 	= apply_filters( 'woocommerce_quantity_input_max', $_product->backorders_allowed() ? '' : $_product->get_stock_quantity(), $_product );

@@ -76,16 +76,16 @@ function woocommerce_custom_order_columns( $column ) {
 		break;
 		case "order_title" :
 
-			if ( $order->user_id ) 
+			if ( $order->user_id )
 				$user_info = get_userdata( $order->user_id );
 
 			if ( ! empty( $user_info ) ) {
 
             	$user = '<a href="user-edit.php?user_id=' . absint( $user_info->ID ) . '">';
 
-            	if ( $user_info->first_name || $user_info->last_name ) 
+            	if ( $user_info->first_name || $user_info->last_name )
             		$user .= esc_html( $user_info->first_name . ' ' . $user_info->last_name );
-            	else 
+            	else
             		$user .= esc_html( $user_info->display_name );
 
             	$user .= '</a>';
@@ -98,7 +98,7 @@ function woocommerce_custom_order_columns( $column ) {
 
            	if ( $order->billing_email )
         		echo '<small class="meta">' . __( 'Email:', 'woocommerce' ) . ' ' . '<a href="' . esc_url( 'mailto:' . $order->billing_email ) . '">' . esc_html( $order->billing_email ) . '</a></small>';
-        	
+
         	if ( $order->billing_phone )
         		echo '<small class="meta">' . __( 'Tel:', 'woocommerce' ) . ' ' . esc_html( $order->billing_phone ) . '</small>';
 
@@ -394,7 +394,7 @@ add_filter( "manage_edit-shop_order_sortable_columns", 'woocommerce_custom_shop_
  */
 function woocommerce_custom_shop_order_orderby( $vars ) {
 	global $typenow, $wp_query;
-    if ( $typenow != 'shop_order' ) 
+    if ( $typenow != 'shop_order' )
     	return $vars;
 
     // Sorting
@@ -443,9 +443,9 @@ function woocommerce_shop_order_search_custom_fields( $wp ) {
 	) ) );
 
 	// Query matching custom fields - this seems faster than meta_query
-	$post_ids = $wpdb->get_col( 
-		$wpdb->prepare( 
-			"SELECT post_id FROM " . $wpdb->postmeta . " WHERE meta_key IN ('" . implode( "','", $search_fields ) . "') AND meta_value LIKE '%%%s%%'", esc_attr( $_GET['s'] ) 
+	$post_ids = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT post_id FROM " . $wpdb->postmeta . " WHERE meta_key IN ('" . implode( "','", $search_fields ) . "') AND meta_value LIKE '%%%s%%'", esc_attr( $_GET['s'] )
 		)
 	);
 
@@ -473,7 +473,7 @@ function woocommerce_shop_order_search_custom_fields( $wp ) {
 
 	// Add ID
 	$search_order_id = str_replace( 'Order #', '', $_GET['s'] );
-	if ( is_numeric( $search_order_id ) ) 
+	if ( is_numeric( $search_order_id ) )
 		$post_ids[] = $search_order_id;
 
 	// Add blank ID so not all results are returned if the search finds nothing

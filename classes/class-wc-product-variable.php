@@ -12,13 +12,13 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 class WC_Product_Variable extends WC_Product {
-	
+
 	/** @var array Array of child products/posts/variations. */
 	var $children;
 
 	/** @var string The product's total stock, including that of its children. */
 	var $total_stock;
-	
+
 	/** @var string Used for variation prices. */
 	var $min_variation_price;
 
@@ -36,10 +36,10 @@ class WC_Product_Variable extends WC_Product {
 
 	/** @var string Used for variation prices. */
 	var $max_variation_sale_price;
-	
+
 	/**
 	 * __construct function.
-	 * 
+	 *
 	 * @access public
 	 * @param mixed $product
 	 * @param array $args Contains arguments to set up this product
@@ -47,7 +47,7 @@ class WC_Product_Variable extends WC_Product {
 	function __construct( $product, $args ) {
 
 		parent::__construct( $product );
-		
+
 		$this->product_type = 'variable';
 		$this->product_custom_fields = get_post_custom( $this->id );
 
@@ -82,7 +82,7 @@ class WC_Product_Variable extends WC_Product {
 			'min_variation_sale_price'	=> '',
 			'max_variation_sale_price'	=> '',
 		) );
-		
+
 		$this->check_sale_price();
 	}
 
@@ -172,8 +172,8 @@ class WC_Product_Variable extends WC_Product {
 			return apply_filters( 'woocommerce_stock_amount', $this->stock );
 		endif;
 	}
-	
-	
+
+
 	/**
 	 * Return the products children posts.
 	 *
@@ -484,26 +484,26 @@ class WC_Product_Variable extends WC_Product {
 				$child_price 			= get_post_meta( $child, '_price', true );
 				$child_regular_price 	= get_post_meta( $child, '_regular_price', true );
 				$child_sale_price 		= get_post_meta( $child, '_sale_price', true );
-				
+
 				// Regular prices
-				if ( ! is_numeric( $this->min_variation_regular_price ) || $child_regular_price < $this->min_variation_regular_price ) 
+				if ( ! is_numeric( $this->min_variation_regular_price ) || $child_regular_price < $this->min_variation_regular_price )
 					$this->min_variation_regular_price = $child_regular_price;
-					
-				if ( ! is_numeric( $this->max_variation_regular_price ) || $child_regular_price > $this->max_variation_regular_price ) 
+
+				if ( ! is_numeric( $this->max_variation_regular_price ) || $child_regular_price > $this->max_variation_regular_price )
 					$this->max_variation_regular_price = $child_regular_price;
-				
+
 				// Sale prices
 				if ( $child_price == $child_sale_price ) {
-					if ( $child_sale_price !== '' && ( ! is_numeric( $this->min_variation_sale_price ) || $child_sale_price < $this->min_variation_sale_price ) ) 
+					if ( $child_sale_price !== '' && ( ! is_numeric( $this->min_variation_sale_price ) || $child_sale_price < $this->min_variation_sale_price ) )
 						$this->min_variation_sale_price = $child_sale_price;
-					
-					if ( $child_sale_price !== '' && ( ! is_numeric( $this->max_variation_sale_price ) || $child_sale_price > $this->max_variation_sale_price ) ) 
+
+					if ( $child_sale_price !== '' && ( ! is_numeric( $this->max_variation_sale_price ) || $child_sale_price > $this->max_variation_sale_price ) )
 						$this->max_variation_sale_price = $child_sale_price;
 				}
 			}
 
 	    	$this->min_variation_price = $this->min_variation_sale_price === '' || $this->min_variation_regular_price < $this->min_variation_sale_price ? $this->min_variation_regular_price : $this->min_variation_sale_price;
-	    	
+
 			$this->max_variation_price = $this->max_variation_sale_price === '' || $this->max_variation_regular_price > $this->max_variation_sale_price ? $this->max_variation_regular_price : $this->max_variation_sale_price;
 		}
 

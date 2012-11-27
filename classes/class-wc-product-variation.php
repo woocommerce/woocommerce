@@ -34,7 +34,7 @@ class WC_Product_Variation extends WC_Product {
 
 	/** @var bool True if the variation has a price. */
 	var $variation_has_price;
-	
+
 	/** @var bool True if the variation has a regular price. */
 	var $variation_has_regular_price;
 
@@ -148,7 +148,7 @@ class WC_Product_Variation extends WC_Product {
 			$this->variation_has_height = true;
 			$this->height = $product_custom_fields['_height'][0];
 		}
-		
+
 		if ( isset( $product_custom_fields['_downloadable'][0] ) && $product_custom_fields['_downloadable'][0] == 'yes' ) {
 			$this->downloadable = 'yes';
 		} else {
@@ -165,42 +165,42 @@ class WC_Product_Variation extends WC_Product {
 			$this->variation_has_tax_class = true;
 			$this->tax_class = $product_custom_fields['_tax_class'][0];
 		}
-		
+
 		if ( isset( $product_custom_fields['_price'][0] ) && $product_custom_fields['_price'][0] !== '' ) {
 			$this->variation_has_price = true;
 			$this->price = $product_custom_fields['_price'][0];
 		}
-		
+
 		if ( isset( $product_custom_fields['_regular_price'][0] ) && $product_custom_fields['_regular_price'][0] !== '' ) {
 			$this->variation_has_regular_price = true;
 			$this->regular_price = $product_custom_fields['_regular_price'][0];
 		}
-		
+
 		if ( isset( $product_custom_fields['_sale_price'][0] ) && $product_custom_fields['_sale_price'][0] !== '' ) {
 			$this->variation_has_sale_price = true;
 			$this->sale_price = $product_custom_fields['_sale_price'][0];
 		}
-		
+
 		// Backwards compat for prices
 		if ( $this->variation_has_price && ! $this->variation_has_regular_price ) {
 			update_post_meta( $this->variation_id, '_regular_price', $this->price );
 			$this->variation_has_regular_price = true;
 			$this->regular_price = $this->price;
-			
+
 			if ( $this->variation_has_sale_price && $this->sale_price < $this->regular_price ) {
 				update_post_meta( $this->variation_id, '_price', $this->sale_price );
 				$this->price = $this->sale_price;
 			}
 		}
-		
+
 		if ( isset( $product_custom_fields['_sale_price_dates_from'][0] ) )
 			$this->sale_price_dates_from = $product_custom_fields['_sale_price_dates_from'][0];
-			
+
 		if ( isset( $product_custom_fields['_sale_price_dates_to'][0] ) )
 			$this->sale_price_dates_from = $product_custom_fields['_sale_price_dates_to'][0];
-		
+
 		$this->total_stock = $this->stock;
-		
+
 		// Check sale dates
 		$this->check_sale_price();
 	}
@@ -384,7 +384,7 @@ class WC_Product_Variation extends WC_Product {
 	function get_shipping_class() {
 		if ( ! $this->variation_shipping_class ) {
 			$classes = get_the_terms( $this->variation_id, 'product_shipping_class' );
-			
+
 			if ( $classes && ! is_wp_error( $classes ) ) {
 				$this->variation_shipping_class = esc_attr( current( $classes )->slug );
 			} else {
@@ -418,13 +418,13 @@ class WC_Product_Variation extends WC_Product {
 
 	/**
 	 * Get file download path identified by $download_id
-	 * 
+	 *
 	 * @access public
 	 * @param string $download_id file identifier
 	 * @return array
 	 */
 	function get_file_download_path( $download_id ) {
-		
+
 		$file_path = '';
 		$file_paths = apply_filters( 'woocommerce_file_download_paths', get_post_meta( $this->variation_id, '_file_paths', true ), $this->variation_id, null, null );
 
@@ -438,7 +438,7 @@ class WC_Product_Variation extends WC_Product {
 		// allow overriding based on the particular file being requested
 		return apply_filters( 'woocommerce_file_download_path', $file_path, $this->variation_id, $download_id );
 	}
-	
+
     /**
      * Checks sale data to see if the product is due to go on sale/sale has expired, and updates the main price.
      *

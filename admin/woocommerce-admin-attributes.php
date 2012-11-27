@@ -298,7 +298,7 @@ function woocommerce_add_attribute() {
 				        					</td>
 				        					<td><?php echo esc_html( $tax->attribute_name ); ?></td>
 				        					<td><?php echo esc_html( ucwords( $tax->attribute_type ) ); ?></td>
-				        					<td><?php 
+				        					<td><?php
 					        					switch ( $tax->attribute_orderby ) {
 						        					case 'name' :
 						        						_e( 'Name', 'woocommerce' );
@@ -306,7 +306,7 @@ function woocommerce_add_attribute() {
 						        					case 'id' :
 						        						_e( 'Term ID', 'woocommerce' );
 						        					break;
-						        					default: 
+						        					default:
 						        						_e( 'Custom ordering', 'woocommerce' );
 						        					break;
 					        					}
@@ -364,7 +364,7 @@ function woocommerce_add_attribute() {
 								</select>
 								<p class="description"><?php _e( 'Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>.', 'woocommerce' ); ?></p>
 							</div>
-							
+
 							<div class="form-field">
 								<label for="attribute_orderby"><?php _e( 'Default sort order', 'woocommerce' ); ?></label>
 								<select name="attribute_orderby" id="attribute_orderby">

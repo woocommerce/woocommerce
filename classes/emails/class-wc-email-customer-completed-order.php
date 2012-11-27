@@ -19,23 +19,23 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 	 * Constructor
 	 */
 	function __construct() {
-		
+
 		$this->id 				= 'customer_completed_order';
 		$this->title 			= __( 'Completed order', 'woocommerce' );
 		$this->description		= __( 'Order complete emails are sent to the customer when the order is marked complete and usual indicates that the order has been shipped.', 'woocommerce' );
-		
+
 		$this->heading 			= __( 'Your order is complete', 'woocommerce' );
 		$this->subject      	= __( 'Your {blogname} order from {order_date} is complete', 'woocommerce' );
-		
+
 		$this->heading_downloadable	= __( 'Your order is complete - download your files', 'woocommerce' );
 		$this->subject_downloadable = __( 'Your {blogname} order from {order_date} is complete - download your files', 'woocommerce' );
-		
+
 		$this->template_html 	= 'emails/customer-completed-order.php';
 		$this->template_plain 	= 'emails/plain/customer-completed-order.php';
-		
+
 		// Triggers for this email
 		add_action( 'woocommerce_order_status_completed_notification', array( &$this, 'trigger' ) );
-		
+
 		// Call parent constuctor
 		parent::__construct();
 
@@ -46,33 +46,33 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 
 	/**
 	 * trigger function.
-	 * 
+	 *
 	 * @access public
 	 * @return void
 	 */
 	function trigger( $order_id ) {
 		global $woocommerce;
-		
+
 		if ( $order_id ) {
 			$this->object 		= new WC_Order( $order_id );
 			$this->recipient	= $this->object->billing_email;
-			
+
 			$this->find[] = '{order_date}';
 			$this->replace[] = date_i18n( woocommerce_date_format(), strtotime( $this->object->order_date ) );
-			
+
 			$this->find[] = '{order_number}';
 			$this->replace[] = $this->object->get_order_number();
 		}
-		
+
 		if ( ! $this->is_enabled() || ! $this->get_recipient() )
 			return;
-			
+
 		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 	}
-	
+
 	/**
 	 * get_subject function.
-	 * 
+	 *
 	 * @access public
 	 * @return string
 	 */
@@ -85,7 +85,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 
 	/**
 	 * get_heading function.
-	 * 
+	 *
 	 * @access public
 	 * @return string
 	 */
@@ -98,7 +98,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 
 	/**
 	 * get_content_html function.
-	 * 
+	 *
 	 * @access public
 	 * @return string
 	 */
@@ -110,10 +110,10 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 		) );
 		return ob_get_clean();
 	}
-	
+
 	/**
 	 * get_content_plain function.
-	 * 
+	 *
 	 * @access public
 	 * @return string
 	 */
@@ -125,7 +125,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 		) );
 		return ob_get_clean();
 	}
-	
+
     /**
      * Initialise Settings Form Fields
      *

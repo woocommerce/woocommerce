@@ -21,46 +21,46 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 function woocommerce_update_options( $options ) {
 
-    if ( empty( $_POST ) ) 
+    if ( empty( $_POST ) )
     	return false;
-    	
+
     // Options to update will be stored here
     $update_options = array();
-    
+
     // Loop options and get values to save
     foreach ( $options as $value ) {
-    	
+
     	if ( ! isset( $value['id'] ) )
     		continue;
-    	
+
     	$type = isset( $value['type'] ) ? sanitize_title( $value['type'] ) : '';
-    	
+
     	// Get the option name
     	$option_value = null;
-    
+
     	switch ( $type ) {
-    	
+
 	    	// Standard types
 	    	case "checkbox" :
-	    		
+
 	    		if ( isset( $_POST[$value['id']] ) ) {
 	    			$option_value = 'yes';
 	            } else {
 	            	$option_value = 'no';
 	            }
-	            
+
 	    	break;
-	    	
+
 	    	case "textarea" :
-	    	
+
 		    	if ( isset( $_POST[$value['id']] ) ) {
 		    		$option_value = wp_kses_post( $_POST[ $value['id'] ] );
 	            } else {
 	                $option_value = '';
 	            }
-            
+
 	    	break;
-	    	
+
 	    	case "text" :
 	    	case 'email':
             case 'number':
@@ -69,7 +69,7 @@ function woocommerce_update_options( $options ) {
 	    	case "single_select_page" :
 	    	case "single_select_country" :
 	    	case 'radio' :
-	    	
+
 	    		if ( $value['id'] == 'woocommerce_price_thousand_sep' || $value['id'] == 'woocommerce_price_decimal_sep' ) {
 
 					// price separators get a special treatment as they should allow a spaces (don't trim)
@@ -78,19 +78,19 @@ function woocommerce_update_options( $options ) {
 					} else {
 		               $option_value = '';
 		            }
-		            
+
 		        } else {
-			        
+
 			       if ( isset( $_POST[$value['id']] ) ) {
 		            	$option_value = woocommerce_clean( $_POST[ $value['id'] ] );
 		            } else {
 		                $option_value = '';
-		            } 
-			        
+		            }
+
 		        }
-	    	
+
 	    	break;
-	    	
+
 	    	// Special types
 	    	case "tax_rates" :
 
@@ -104,36 +104,36 @@ function woocommerce_update_options( $options ) {
 	    		$tax_compound 		= isset( $_POST['tax_compound'] ) ? $_POST['tax_compound'] : array();
 	    		$tax_label 			= isset( $_POST['tax_label'] ) ? $_POST['tax_label'] : array();
 				$tax_classes_count	= sizeof( $tax_classes );
-				
+
 				for ( $i = 0; $i < $tax_classes_count; $i ++ ) {
-	
+
 					if ( isset( $tax_classes[ $i ] ) && isset( $tax_countries[ $i ] ) && isset( $tax_rate[ $i ] ) && is_numeric( $tax_rate[ $i ] ) ) {
-	
+
 						$rate = woocommerce_clean( $tax_rate[ $i ] );
 						$rate = number_format( $rate, 4, '.', '' );
-	
+
 						$class = woocommerce_clean( $tax_classes[ $i ] );
-						
+
 						$shipping = empty( $tax_shipping[ $i ] ) ? 'no' : 'yes';
 						$compound = empty( $tax_compound[ $i ] ) ? 'no' : 'yes';
-	
+
 						// Handle countries
 						$counties_array = array();
 						$countries = $tax_countries[ $i ];
 						if ( $countries ) foreach ( $countries as $country ) {
-	
+
 							$country = woocommerce_clean( $country );
 							$state = '*';
-	
+
 							if ( strstr( $country, ':' ) ) {
 								$cr = explode( ':', $country );
 								$country = current( $cr );
 								$state = end( $cr );
 							}
-	
+
 							$counties_array[ woocommerce_clean( $country ) ][] = woocommerce_clean( $state );
 						}
-	
+
 						$tax_rates[] = array(
 							'countries' => $counties_array,
 							'rate' 		=> $rate,
@@ -144,9 +144,9 @@ function woocommerce_update_options( $options ) {
 						);
 					}
 				}
-				
+
 				$update_options[ 'woocommerce_tax_rates' ] = $tax_rates;
-	
+
 	    		// Local tax rates saving
 	    		$local_tax_rates 	= array();
 	    		$tax_classes 		= isset( $_POST['local_tax_class'] ) ? $_POST['local_tax_class'] : array();
@@ -160,36 +160,36 @@ function woocommerce_update_options( $options ) {
 	    		$tax_label 			= isset( $_POST['local_tax_label'] ) ? $_POST['local_tax_label'] : array();
 				$tax_classes_count	= sizeof( $tax_classes );
 				for ( $i = 0; $i < $tax_classes_count; $i ++ ) {
-	
+
 					if ( isset( $tax_classes[ $i ] ) && isset( $tax_countries[ $i ] ) && isset( $tax_rate[ $i ] ) && is_numeric( $tax_rate[ $i ] ) ) {
-	
+
 						$rate = woocommerce_clean( $tax_rate[ $i ] );
 						$rate = number_format( $rate, 4, '.', '' );
-	
+
 						$class = woocommerce_clean( $tax_classes[ $i ] );
-	
+
 						if ( ! empty( $tax_shipping[ $i ] ) ) $shipping = 'yes'; else $shipping = 'no';
 						if ( ! empty( $tax_compound[ $i ] ) ) $compound = 'yes'; else $compound = 'no';
-	
+
 						// Handle country
 						$country = woocommerce_clean( $tax_countries[ $i ] );
 						$state = '*';
-	
+
 						if ( strstr( $country, ':' ) ) {
 							$cr = explode( ':', $country );
 							$country = current( $cr );
 							$state = end( $cr );
 						}
-	
+
 						// Handle postcodes/cities
 						$location_type = $tax_location_type[ $i ] == 'city' ? 'city' : 'postcode';
 						$locations = explode( "\n", $tax_location[ $i ] );
 						$locations = array_filter( array_map( 'woocommerce_clean', $locations ) );
-						
+
 						if ( $location_type == 'city' ) {
 							$locations = array_map( 'sanitize_title', $locations );
 						}
-	
+
 						$local_tax_rates[] = array(
 							'country' => $country,
 							'state' => $state,
@@ -203,86 +203,86 @@ function woocommerce_update_options( $options ) {
 						);
 					}
 				}
-				
+
 				$update_options[ 'woocommerce_local_tax_rates' ] = $local_tax_rates;
-			
+
 	    	break;
-	    	
+
 	    	case "multi_select_countries" :
-	    		
+
 	    		// Get countries array
-				if ( isset( $_POST[ $value['id'] ] ) ) 
-					$selected_countries = array_map( 'woocommerce_clean', (array) $_POST[ $value['id'] ] ); 
-				else 
+				if ( isset( $_POST[ $value['id'] ] ) )
+					$selected_countries = array_map( 'woocommerce_clean', (array) $_POST[ $value['id'] ] );
+				else
 					$selected_countries = array();
-					
+
 				$option_value = $selected_countries;
-			
+
 	    	break;
-	    	
+
 	    	case "image_width" :
 
 		    	if ( isset( $_POST[$value['id'] ]['width'] ) ) {
-	              	
+
 	              	$update_options[ $value['id'] ]['width'] = woocommerce_clean( $_POST[$value['id'] ]['width'] );
 	              	$update_options[ $value['id'] ]['height'] = woocommerce_clean( $_POST[$value['id'] ]['height'] );
-					
+
 					if ( isset( $_POST[ $value['id'] ]['crop'] ) )
 						$update_options[ $value['id'] ]['crop'] = 1;
 					else
 						$update_options[ $value['id'] ]['crop'] = 0;
-					
+
 	            } else {
 	            	$update_options[ $value['id'] ]['width'] 	= $value['default']['width'];
 	            	$update_options[ $value['id'] ]['height'] 	= $value['default']['height'];
 	            	$update_options[ $value['id'] ]['crop'] 	= $value['default']['crop'];
 	            }
-            
+
 	    	break;
-	    	
+
 	    	// Custom handling
 	    	default :
-	    	
+
 	    		do_action( 'woocommerce_update_option_' . $type, $value );
-	    	
+
 	    	break;
 
     	}
-    	
+
     	if ( ! is_null( $option_value ) ) {
 	    	// Check if option is an array
 			if ( strstr( $value['id'], '[' ) ) {
-			
+
 				parse_str( $value['id'], $option_array );
-	    		
+
 	    		// Option name is first key
 	    		$option_name = current( array_keys( $option_array ) );
-	    		
+
 	    		// Get old option value
 	    		if ( ! isset( $update_options[ $option_name ] ) )
 	    			 $update_options[ $option_name ] = get_option( $option_name, array() );
-	    			 
+
 	    		if ( ! is_array( $update_options[ $option_name ] ) )
 	    			$update_options[ $option_name ] = array();
-	    		    		
+
 	    		// Set keys and value
 	    		$key = key( $option_array[ $option_name ] );
-	    		
+
 	    		$update_options[ $option_name ][ $key ] = $option_value;
-			
+
 			// Single value
 			} else {
 				$update_options[ $value['id'] ] = $option_value;
 			}
 		}
-    	
+
     	// Custom handling
     	do_action( 'woocommerce_update_option', $value );
     }
-    
+
     // Now save the options
     foreach( $update_options as $name => $value )
     	update_option( $name, $value, true );
-    
+
     return true;
 }

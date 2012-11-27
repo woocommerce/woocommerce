@@ -191,18 +191,18 @@ class WC_Flat_Rate extends WC_Shipping_Method {
     	$cost_per_order 	= ( isset( $this->cost_per_order ) && ! empty( $this->cost_per_order ) ) ? $this->cost_per_order : 0;
 
     	if ( $this->type == 'order' ) {
-    		
+
     		$shipping_total = $this->order_shipping( $package );
-    		
+
     		if ( ! is_null( $shipping_total ) || $cost_per_order > 0 )
 	    		$rate = array(
 					'id' 	=> $this->id,
 					'label' => $this->title,
 					'cost' 	=> $shipping_total + $cost_per_order,
 				);
-			
+
 		} elseif ( $this->type == 'class' ) {
-			
+
 			$shipping_total = $this->class_shipping( $package );
 
 			if ( ! is_null( $shipping_total ) || $cost_per_order > 0 )
@@ -211,28 +211,28 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 					'label' => $this->title,
 					'cost' 	=> $shipping_total + $cost_per_order,
 				);
-			
+
 		} elseif ( $this->type == 'item' ) {
-			
+
 			$costs = $this->item_shipping( $package );
-			
+
 			if ( ! is_null( $costs ) || $cost_per_order > 0 ) {
-				
+
 				if ( ! is_array( $costs ) )
 					$costs = array();
-				
+
 				$costs['order'] = $cost_per_order;
-	
+
 				$rate = array(
 					'id' 		=> $this->id,
 					'label' 	=> $this->title,
 					'cost' 		=> $costs,
 					'calc_tax' 	=> 'per_item',
 				);
-			
+
 			}
 		}
-		
+
 		if ( ! isset( $rate ) )
 			return;
 
@@ -332,7 +332,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 		} elseif ( is_null( $cost ) ) {
 			// No match
 			return null;
-		} 
+		}
 
 		// Shipping for whole order
 		return $cost + $this->get_fee( $fee, $package['contents_cost'] );
@@ -367,9 +367,9 @@ class WC_Flat_Rate extends WC_Shipping_Method {
     		}
 
     		$found_shipping_classes = array_unique( $found_shipping_classes );
-    		
+
     		$matched = false;
-    		
+
     		// For each found class, add up the costs and fees
     		foreach ( $found_shipping_classes as $shipping_class => $class_price ) {
     			if ( isset( $this->flat_rates[ $shipping_class ] ) ) {
@@ -403,7 +403,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
     function item_shipping( $package ) {
 		// Per item shipping so we pass an array of costs (per item) instead of a single value
 		$costs = array();
-		
+
 		$matched = false;
 
 		// Shipping per item
@@ -412,9 +412,9 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 
 			if ( $values['quantity'] > 0 && $_product->needs_shipping() ) {
 				$shipping_class = $_product->get_shipping_class();
-				
+
 				$fee = $cost = 0;
-				
+
 				if ( isset( $this->flat_rates[ $shipping_class ] ) ) {
 					$cost 	= $this->flat_rates[ $shipping_class ]['cost'];
     				$fee	= $this->get_fee( $this->flat_rates[ $shipping_class ]['fee'], $_product->get_price() );
@@ -428,7 +428,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 				$costs[ $item_id ] = ( ( $cost + $fee ) * $values['quantity'] );
 			}
 		}
-		
+
 		if ( $matched )
 			return $costs;
 		else

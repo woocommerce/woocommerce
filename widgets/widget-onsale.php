@@ -135,10 +135,10 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 		<ul class="product_list_widget">
 		<?php  while ($r->have_posts()) : $r->the_post(); global $product; ?>
 		<li><a href="<?php the_permalink() ?>" title="<?php echo esc_attr(get_the_title() ? get_the_title() : get_the_ID()); ?>">
-			<?php 
-				if ( has_post_thumbnail() ) 
-					the_post_thumbnail( 'shop_thumbnail' ); 
-				else 
+			<?php
+				if ( has_post_thumbnail() )
+					the_post_thumbnail( 'shop_thumbnail' );
+				else
 					echo woocommerce_placeholder_img( 'shop_thumbnail' );
 			?>
 			<?php if ( get_the_title() ) the_title(); else the_ID(); ?>

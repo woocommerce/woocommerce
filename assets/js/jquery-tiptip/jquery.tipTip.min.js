@@ -10,7 +10,7 @@
  * browser tooltip. It is extremely lightweight and very smart in
  * that it detects the edges of the browser window and will make sure
  * the tooltip stays within the current window size. As a result the
- * tooltip will adjust itself to be displayed above, below, to the left 
+ * tooltip will adjust itself to be displayed above, below, to the left
  * or to the right depending on what is necessary to stay within the
  * browser window. It is completely customizable as well via CSS.
  *

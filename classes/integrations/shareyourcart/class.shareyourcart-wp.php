@@ -30,7 +30,7 @@ if(!class_exists('ShareYourCartWordpressPlugin',false)){
 			//if there is installed another plugin with a never version
 			//do not load this one further
 			if(!$this->canLoad()) return;
-			
+
 			//make sure we add this instance
 			self::$_INSTANCES []= $this;
 			$this->_PLUGIN_PATH  = WP_PLUGIN_URL.'/'.str_replace(basename( __FILE__),"",plugin_basename(__FILE__));
@@ -57,10 +57,10 @@ if(!class_exists('ShareYourCartWordpressPlugin',false)){
 	*
 	*/
 		protected function getPluginVersion(){
-			
+
 			return self::$_VERSION;
 		}
-		
+
 		/**
 	*
 	* Return the project's URL
@@ -109,15 +109,15 @@ if(!class_exists('ShareYourCartWordpressPlugin',false)){
 
 			return $plugin;
 		}
-	
+
 	/**
 	*
-	* Get the upload directory 
+	* Get the upload directory
 	*
 	*/
 	public function getUploadDir(){
 		$dir = wp_upload_dir();
-		
+
       return (!empty($dir['path']) ? $dir['path'] : parent::getUploadDir());
     }
 
@@ -131,14 +131,14 @@ if(!class_exists('ShareYourCartWordpressPlugin',false)){
 			if(substr($sql,0,12) == "CREATE TABLE"){
 
 				require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-				
+
 				//if this is a create table command, use the special function which compares tables
 				dbDelta($sql);
 
 			} else {
-				
+
 				global $wpdb;
-				
+
 				//use the normal query
 				$wpdb->query($sql);
 			}
@@ -154,7 +154,7 @@ if(!class_exists('ShareYourCartWordpressPlugin',false)){
 		protected function getRow($sql){
 
 			global $wpdb;
-			
+
 			//get the row as an associative array
 			return $wpdb->get_row($sql,ARRAY_A);
 		}
@@ -251,7 +251,7 @@ if(!class_exists('ShareYourCartWordpressPlugin',false)){
 		public function deactivateHook() {
 
 			if(!$this->isCartActive()) return;
-			
+
 			$message = '';
 
 			$this->deactivate($message);
@@ -275,7 +275,7 @@ if(!class_exists('ShareYourCartWordpressPlugin',false)){
 				//get the old app_key and client_id
 				$settings = $wpdb->get_row("SELECT app_key, client_id FROM ".$wpdb->base_prefix."shareyourcart_settings LIMIT 1");
 				if($settings) {
-					
+
 					$this->setConfigValue('appKey', $settings->app_key);
 					$this->setConfigValue('clientId', $settings->client_id);
 				}
@@ -297,7 +297,7 @@ if(!class_exists('ShareYourCartWordpressPlugin',false)){
 			//this hook is required by WordPress to be static
 			//so call uninstall on the first instance
 			if(!empty(self::$_INSTANCES)){
-				
+
 				self::$_INSTANCES[0]->uninstall();
 			} else {
 
@@ -315,15 +315,15 @@ if(!class_exists('ShareYourCartWordpressPlugin',false)){
 
 			//this is a single call function
 			if(!$this->isFirstCall(__FUNCTION__)) return;
-			
+
 			//first, check the SDK status
 			$this->checkSDKStatus();
-			
+
 			//see if we need to show the update notification
 			$notification = null;
 			if($this->hasNewerVersion())
 			$notification = "<span class='update-plugins count-$warning_count'><span class='update-count'>" . number_format_i18n(1) . "</span></span>";
-			
+
 			$page = add_menu_page(
 			__('Share your cart settings'),
 			__('ShareYourCart').$notification,
@@ -334,7 +334,7 @@ if(!class_exists('ShareYourCartWordpressPlugin',false)){
 			);
 			add_action( 'admin_head-'.$page, array(&$this, 'showAdminHeader'));
 
-			if($this->isActive()) 
+			if($this->isActive())
 			{
 				//show the rest of the menu ONLY if the plugin is active
 				$page = add_submenu_page(

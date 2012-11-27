@@ -149,7 +149,7 @@ function woocommerce_nav_menu_items( $items, $args ) {
  */
 function woocommerce_update_catalog_ordering() {
 	global $woocommerce;
-	
+
 	if ( isset( $_REQUEST['sort'] ) && $_REQUEST['sort'] != '' )
 		$woocommerce->session->orderby = esc_attr( $_REQUEST['sort'] );
 }
@@ -191,9 +191,9 @@ function woocommerce_update_cart_action() {
 
 				// Sanitize
 				$quantity = preg_replace( "/[^0-9\.]/", "", $cart_totals[ $cart_item_key ]['qty'] );
-				
+
 				if ( $quantity == "" )
-					continue;				
+					continue;
 
 				// Update cart validation
 	    		$passed_validation 	= apply_filters( 'woocommerce_update_cart_validation', true, $cart_item_key, $values, $quantity );
@@ -238,19 +238,19 @@ function woocommerce_update_cart_action() {
  * @return void
  */
 function woocommerce_add_to_cart_action( $url = false ) {
-	
-	if ( empty( $_REQUEST['add-to-cart'] ) || ! is_numeric( $_REQUEST['add-to-cart'] ) ) 
+
+	if ( empty( $_REQUEST['add-to-cart'] ) || ! is_numeric( $_REQUEST['add-to-cart'] ) )
 		return;
 
 	global $woocommerce;
-	
+
 	$product_id			= apply_filters('woocommerce_add_to_cart_product_id', absint( $_REQUEST['add-to-cart'] ) );
 	$was_added_to_cart 	= false;
 	$adding_to_cart 	= get_product( $product_id );
-    
+
     // Variable product handling
     if ( $adding_to_cart->is_type( 'variable' ) ) {
-    
+
     	$variation_id 		= empty( $_REQUEST['variation_id'] ) ? '' : absint( $_REQUEST['variation_id'] );
     	$quantity 			= empty( $_REQUEST['quantity'] ) ? 1 : apply_filters( 'woocommerce_stock_amount', $_REQUEST['quantity'] );
     	$all_variations_set = true;
@@ -262,12 +262,12 @@ function woocommerce_add_to_cart_action( $url = false ) {
 			wp_redirect( get_permalink( $product_id ) );
 			exit;
 		}
-		
+
 		$attributes = (array) maybe_unserialize( get_post_meta( $product_id, '_product_attributes', true ) );
 
 		// Verify all attributes for the variable product were set
 		foreach ( $attributes as $attribute ) {
-            if ( ! $attribute['is_variation'] ) 
+            if ( ! $attribute['is_variation'] )
             	continue;
 
             $taxonomy = 'attribute_' . sanitize_title( $attribute['name'] );
@@ -302,19 +302,19 @@ function woocommerce_add_to_cart_action( $url = false ) {
     } elseif ( $adding_to_cart->is_type( 'grouped' ) ) {
 
 		if ( ! empty( $_REQUEST['quantity'] ) && is_array( $_REQUEST['quantity'] ) ) {
-		
+
 			$quantity_set = false;
 			$added_to_cart = array();
-		
+
 			foreach ( $_REQUEST['quantity'] as $item => $quantity ) {
-				if ( $quantity <= 0 ) 
+				if ( $quantity <= 0 )
 					continue;
-		
+
 				$quantity_set = true;
-		
+
 				// Add to cart validation
 				$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $item, $quantity );
-		
+
 				if ( $passed_validation ) {
 					if ( $woocommerce->cart->add_to_cart( $item, $quantity ) ) {
 						$was_added_to_cart = true;
@@ -322,24 +322,24 @@ function woocommerce_add_to_cart_action( $url = false ) {
 					}
 				}
 			}
-			
+
 			if ( $was_added_to_cart ) {
 				woocommerce_add_to_cart_message( $added_to_cart );
 			}
-			
+
 			if ( ! $was_added_to_cart && ! $quantity_set ) {
 				$woocommerce->add_error( __( 'Please choose the quantity of items you wish to add to your cart&hellip;', 'woocommerce' ) );
 				wp_redirect( get_permalink( $product_id ) );
 				exit;
 			}
-		
+
 		} elseif ( $product_id ) {
-		
+
 			/* Link on product archives */
 			$woocommerce->add_error( __( 'Please choose a product to add to your cart&hellip;', 'woocommerce' ) );
 			wp_redirect( get_permalink( $product_id ) );
 			exit;
-		
+
 		}
 
 	// Simple Products
@@ -376,7 +376,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 			wp_safe_redirect( $woocommerce->cart->get_cart_url() );
 			exit;
 		}
-		
+
 		// Redirect to page without querystring args
 		elseif ( wp_get_referer() ) {
 			wp_safe_redirect( remove_query_arg( array( 'add-to-cart', 'quantity', 'product_id' ), wp_get_referer() ) );
@@ -396,17 +396,17 @@ function woocommerce_add_to_cart_action( $url = false ) {
  */
 function woocommerce_add_to_cart_message( $product_id ) {
 	global $woocommerce;
-	
+
 	if ( is_array( $product_id ) ) {
-	
+
 		$titles = array();
-		
+
 		foreach ( $product_id as $id ) {
 			$titles[] = get_the_title( $id );
 		}
 
 		$added_text = sprintf( __( 'Added &quot;%s&quot; to your cart.', 'woocommerce' ), join( __('&quot; and &quot;'), array_filter( array_merge( array( join( '&quot;, &quot;', array_slice( $titles, 0, -1 ) ) ), array_slice( $titles, -1 ) ) ) ) );
-		
+
 	} else {
 		$added_text = sprintf( __( '&quot;%s&quot; was successfully added to your cart.', 'woocommerce' ), get_the_title( $product_id ) );
 	}
@@ -516,13 +516,13 @@ function woocommerce_pay_action() {
 		if ( $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, array( 'pending', 'failed' ) ) ) {
 
 			// Set customer location to order location
-			if ( $order->billing_country ) 
+			if ( $order->billing_country )
 				$woocommerce->customer->set_country( $order->billing_country );
-			if ( $order->billing_state ) 
+			if ( $order->billing_state )
 				$woocommerce->customer->set_state( $order->billing_state );
-			if ( $order->billing_postcode ) 
+			if ( $order->billing_postcode )
 				$woocommerce->customer->set_postcode( $order->billing_postcode );
-			if ( $order->billing_city ) 
+			if ( $order->billing_city )
 				$woocommerce->customer->set_city( $order->billing_city );
 
 			// Update payment method
@@ -533,18 +533,18 @@ function woocommerce_pay_action() {
 
 				// Update meta
 				update_post_meta( $order_id, '_payment_method', $payment_method );
-				
+
 				if ( isset( $available_gateways[ $payment_method ] ) )
 					$payment_method_title = $available_gateways[ $payment_method ]->get_title();
-				
+
 				update_post_meta( $order_id, '_payment_method_title', $payment_method_title);
-				
+
 				// Validate
 				$available_gateways[ $payment_method ]->validate_fields();
-				
+
 				// Process
 				if ( $woocommerce->error_count() == 0 ) {
-					
+
 					$result = $available_gateways[ $payment_method ]->process_payment( $order_id );
 
 					// Redirect to success/confirmation/payment page
@@ -552,9 +552,9 @@ function woocommerce_pay_action() {
 						wp_redirect( $result['redirect'] );
 						exit;
 					}
-				
+
 				}
-				
+
 			} else {
 
 				// No payment was required for order
@@ -697,7 +697,7 @@ function woocommerce_process_registration() {
 
                 // Change role
                 wp_update_user( array ('ID' => $user_id, 'role' => 'customer') ) ;
-                
+
                 // Action
 	            do_action( 'woocommerce_created_customer', $user_id );
 
@@ -878,13 +878,13 @@ function woocommerce_download_product() {
 		$access_expires 		= $download_result->access_expires;
 
 		if ( $user_id && get_option( 'woocommerce_downloads_require_login' ) == 'yes' ) {
-		
+
 			if ( ! is_user_logged_in() )
 				wp_die( __( 'You must be logged in to download files.', 'woocommerce' ) . ' <a href="' . wp_login_url( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) ) . '">' . __( 'Login &rarr;', 'woocommerce' ) . '</a>' );
-			
+
 			elseif ( $user_id != get_current_user_id() )
 				wp_die( __( 'This is not your download link.', 'woocommerce' ) );
-		
+
 		}
 
 		if ( ! get_post( $product_id ) )
@@ -892,7 +892,7 @@ function woocommerce_download_product() {
 
 		if ( $order_id ) {
 			$order = new WC_Order( $order_id );
-			
+
 			if ( ! $order->is_download_permitted() && $order->status != 'publish' )
 				wp_die( __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . home_url() . '">' . __( 'Go to homepage &rarr;', 'woocommerce' ) . '</a>' );
 		}
@@ -911,7 +911,7 @@ function woocommerce_download_product() {
 				'user_email' 	=> $email,
 				'order_key' 	=> $order_key,
 				'product_id' 	=> $product_id,
-				'download_id' 	=> $download_id 
+				'download_id' 	=> $download_id
 			), array( '%d' ), array( '%s', '%s', '%d', '%s' ) );
 		}
 
@@ -931,7 +931,7 @@ function woocommerce_download_product() {
 		if ( ! $file_path ) exit;
 
 		$file_download_method = apply_filters( 'woocommerce_file_download_method', get_option( 'woocommerce_file_download_method' ), $product_id );
-		
+
 		// Redirect to download location
 		if ( $file_download_method == 'redirect' ) {
 			header( 'Location: ' . $file_path );
@@ -980,7 +980,7 @@ function woocommerce_download_product() {
 		}
 
 		if ( $file_download_method == 'xsendfile' ) {
-			
+
 			// Path fix - kudos to Jason Judge
          	if ( getcwd() )
          		$file_path = trim( preg_replace( '`^' . getcwd() . '`' , '', $file_path ), '/' );
@@ -1024,7 +1024,7 @@ function woocommerce_download_product() {
 				$cnt = 0;
 
 				$handle = fopen( $file, 'r' );
-				if ( $handle === FALSE ) 
+				if ( $handle === FALSE )
 					return FALSE;
 
 				while ( ! feof( $handle ) ) {
@@ -1032,14 +1032,14 @@ function woocommerce_download_product() {
 					echo $buffer;
 					ob_flush();
 					flush();
-					
-					if ( $retbytes ) 
+
+					if ( $retbytes )
 						$cnt += strlen( $buffer );
 				}
 
 				$status = fclose( $handle );
 
-				if ( $retbytes && $status ) 
+				if ( $retbytes && $status )
 					return $cnt;
 
 				return $status;
@@ -1047,13 +1047,13 @@ function woocommerce_download_product() {
 		}
 
         @session_write_close();
-        if ( function_exists( 'apache_setenv' ) ) 
+        if ( function_exists( 'apache_setenv' ) )
         	@apache_setenv( 'no-gzip', 1 );
         @ini_set( 'zlib.output_compression', 'Off' );
 		@set_time_limit(0);
 		@set_magic_quotes_runtime(0);
 		@ob_end_clean();
-		if ( ob_get_level() ) 
+		if ( ob_get_level() )
 			@ob_end_clean(); // Zip corruption fix
 
 		header( "Pragma: no-cache" );
@@ -1065,7 +1065,7 @@ function woocommerce_download_product() {
 		header( "Content-Disposition: attachment; filename=\"" . basename( $file_path ) . "\";" );
 		header( "Content-Transfer-Encoding: binary" );
 
-        if ( $size = @filesize( $file_path ) ) 
+        if ( $size = @filesize( $file_path ) )
         	header( "Content-Length: " . $size );
 
         // Serve it
@@ -1213,10 +1213,10 @@ function woocommerce_check_comment_rating($comment_data) {
 
 
 /**
- * Finds an Order ID based on an order key. 
+ * Finds an Order ID based on an order key.
  *
  * @access public
- * @param string $order_key An order key has generated by 
+ * @param string $order_key An order key has generated by
  * @return int The ID of an order, or 0 if the order could not be found
  */
 function woocommerce_get_order_id_by_order_key( $order_key ) {

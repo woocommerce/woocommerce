@@ -86,11 +86,11 @@ class WC_Logger {
 		if ( $this->open( $handle ) )
 			ftruncate( $this->handles[ $handle ], 0 );
 	}
-	
-	
+
+
 	/**
 	 * file_name function.
-	 * 
+	 *
 	 * @access private
 	 * @param mixed $handle
 	 * @return void

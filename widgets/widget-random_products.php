@@ -77,10 +77,10 @@ class WooCommerce_Widget_Random_Products extends WP_Widget {
 				<?php while ($query->have_posts()) : $query->the_post(); global $product; ?>
 					<li>
 						<a href="<?php the_permalink() ?>">
-							<?php 
-								if ( has_post_thumbnail() ) 
-									the_post_thumbnail( 'shop_thumbnail' ); 
-								else 
+							<?php
+								if ( has_post_thumbnail() )
+									the_post_thumbnail( 'shop_thumbnail' );
+								else
 									echo woocommerce_placeholder_img( 'shop_thumbnail' );
 							?>
 							<?php the_title() ?>

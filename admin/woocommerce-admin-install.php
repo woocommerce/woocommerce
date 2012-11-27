@@ -20,12 +20,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 function do_install_woocommerce() {
 	global $woocommerce_settings, $woocommerce;
-	
+
 	// Do install
 	woocommerce_default_options();
 	woocommerce_tables_install();
 	woocommerce_init_roles();
-	
+
 	// Register post types
 	$woocommerce->init_taxonomy();
 
@@ -34,7 +34,7 @@ function do_install_woocommerce() {
 
 	// Install files and folders for uploading files and prevent hotlinking
 	$upload_dir =  wp_upload_dir();
-	
+
 	$files = array(
 		array(
 			'base' 		=> $upload_dir['basedir'] . '/woocommerce_uploads',
@@ -57,7 +57,7 @@ function do_install_woocommerce() {
 			'content' 	=> ''
 		)
 	);
-	
+
 	foreach ( $files as $file ) {
 		if ( wp_mkdir_p( $file['base'] ) && ! file_exists( trailingslashit( $file['base'] ) . $file['file'] ) ) {
 			if ( $file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'w' ) ) {
@@ -77,19 +77,19 @@ function do_install_woocommerce() {
 
 		if ( ( ! empty( $colors['primary'] ) && ! empty( $colors['secondary'] ) && ! empty( $colors['highlight'] ) && ! empty( $colors['content_bg'] ) && ! empty( $colors['subtext'] ) ) && ( $colors['primary'] != '#ad74a2' || $colors['secondary'] != '#f7f6f7' || $colors['highlight'] != '#85ad74' || $colors['content_bg'] != '#ffffff' || $colors['subtext'] != '#777777' ) )
 			woocommerce_compile_less_styles();
-			
+
 	}
 
 	// Queue upgrades
 	$current_version = get_option( 'woocommerce_version', null );
 	$current_db_version = get_option( 'woocommerce_db_version', null );
-	
+
 	if ( version_compare( $current_db_version, '1.7', '<' ) && null !== $current_version ) {
 		update_option( 'woocommerce_needs_update', 1 );
 	} else {
 		update_option( 'woocommerce_db_version', $woocommerce->version );
 	}
-	
+
 	// Update version
 	update_option( 'woocommerce_version', $woocommerce->version );
 }
@@ -217,9 +217,9 @@ function woocommerce_tables_install() {
 
 	$collate = '';
     if ( $wpdb->has_cap( 'collation' ) ) {
-		if( ! empty($wpdb->charset ) ) 
+		if( ! empty($wpdb->charset ) )
 			$collate .= "DEFAULT CHARACTER SET $wpdb->charset";
-		if( ! empty($wpdb->collate ) ) 
+		if( ! empty($wpdb->collate ) )
 			$collate .= " COLLATE $wpdb->collate";
     }
 
@@ -249,7 +249,7 @@ CREATE TABLE ". $wpdb->prefix . "woocommerce_termmeta (
 ) $collate;
 ";
     dbDelta( $sql );
-    
+
     // Table for storing user and guest download permissions
     // KEY(order_id, product_id, download_id) used for organizing downloads on the My Account page
     $sql = "
@@ -269,19 +269,19 @@ CREATE TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions (
 ) $collate;
 ";
     dbDelta( $sql );
-    
+
     // Order line items are stored in a table to make them easily queryable for reports
     $sql = "
 CREATE TABLE ". $wpdb->prefix . "woocommerce_order_items (
   order_item_id bigint(20) NOT NULL auto_increment,
   order_item_name longtext NOT NULL DEFAULT '',
   order_item_type varchar(200) NOT NULL DEFAULT '',
-  order_id bigint(20) NOT NULL, 
+  order_id bigint(20) NOT NULL,
   PRIMARY KEY  (order_item_id)
 ) $collate;
 ";
     dbDelta( $sql );
-    
+
     // Order line item meta is stored in a table for storing extra data.
     $sql = "
 CREATE TABLE ". $wpdb->prefix . "woocommerce_order_itemmeta (

@@ -9,7 +9,7 @@
  * @package 	WooCommerce/Admin/WritePanels
  * @version     1.7.0
  */
- 
+
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /** Product data writepanel */
@@ -49,7 +49,7 @@ function woocommerce_meta_boxes() {
 	remove_meta_box( 'product_shipping_classdiv', 'product', 'side' );
 	remove_meta_box( 'pageparentdiv', 'product', 'side' );
 	remove_meta_box( 'postimagediv', 'product', 'side' );
-	
+
 	// Excerpt
 	if ( function_exists('wp_editor') ) {
 		remove_meta_box( 'postexcerpt', 'product', 'normal' );
@@ -223,9 +223,9 @@ add_filter('wp_insert_post_data', 'woocommerce_order_data');
 
 
 /**
- * Grant downloadable file access to any newly added files on any existing 
+ * Grant downloadable file access to any newly added files on any existing
  * orders for this product that have previously been granted downloadable file access
- * 
+ *
  * @access public
  * @param int $product_id product identifier
  * @param int $variation_id optional product variation identifier
@@ -234,7 +234,7 @@ add_filter('wp_insert_post_data', 'woocommerce_order_data');
 function woocommerce_process_product_file_download_paths( $product_id, $variation_id, $file_paths ) {
 	global $wpdb;
 
-	if ( $variation_id ) 
+	if ( $variation_id )
 		$product_id = $variation_id;
 
 	// determine whether any new files have been added
@@ -248,10 +248,10 @@ function woocommerce_process_product_file_download_paths( $product_id, $variatio
 		foreach ( $existing_permissions as $existing_permission ) {
 			$order = new WC_Order( $existing_permission->order_id );
 
-			if ( $order->id ) { 
+			if ( $order->id ) {
 				foreach ( $new_download_ids as $new_download_id ) {
 					// grant permission if it doesn't already exist
-					if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT true FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->id, $product_id, $new_download_id ) ) ) { 
+					if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT true FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->id, $product_id, $new_download_id ) ) ) {
 						woocommerce_downloadable_file_permission( $new_download_id, $product_id, $order );
 					}
 				}
@@ -313,21 +313,21 @@ add_action( 'admin_notices', 'woocommerce_meta_boxes_show_errors' );
  */
 function woocommerce_wp_text_input( $field ) {
 	global $thepostid, $post, $woocommerce;
-	
+
 	$thepostid 				= empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['placeholder'] 	= isset( $field['placeholder'] ) ? $field['placeholder'] : '';
 	$field['class'] 		= isset( $field['class'] ) ? $field['class'] : 'short';
 	$field['value'] 		= isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['name'] 			= isset( $field['name'] ) ? $field['name'] : $field['id'];
 	$field['type'] 			= isset( $field['type'] ) ? $field['type'] : 'text';
-	
+
 	// Custom attribute handling
 	$custom_attributes = array();
-	
+
 	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) )
 		foreach ( $field['custom_attributes'] as $attribute => $value )
 			$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
-				
+
 	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><input type="' . esc_attr( $field['type'] ) . '" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" ' . implode( ' ', $custom_attributes ) . ' /> ';
 
 	if ( ! empty( $field['description'] ) ) {
@@ -352,11 +352,11 @@ function woocommerce_wp_text_input( $field ) {
  */
 function woocommerce_wp_hidden_input( $field ) {
 	global $thepostid, $post;
-	
+
 	$thepostid = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['value'] = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['class'] = isset( $field['class'] ) ? $field['class'] : '';
-	
+
 	echo '<input type="hidden" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) .  '" /> ';
 }
 

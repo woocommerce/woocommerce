@@ -19,13 +19,13 @@ global $post;
 		<?php echo get_avatar( $GLOBALS['comment'], $size='60' ); ?>
 
 		<div class="comment-text">
-		
+
 			<?php if ( get_option('woocommerce_enable_review_rating') == 'yes' ) : ?>
 
 				<div itemprop="reviewRating" itemscope itemtype="http://schema.org/Rating" class="star-rating" title="<?php echo esc_attr( get_comment_meta( $GLOBALS['comment']->comment_ID, 'rating', true ) ); ?>">
 					<span style="width:<?php echo intval( get_comment_meta( $GLOBALS['comment']->comment_ID, 'rating', true ) ) * 16; ?>px"><span itemprop="ratingValue"><?php echo intval( get_comment_meta( $GLOBALS['comment']->comment_ID, 'rating', true ) ); ?></span> <?php _e( 'out of 5', 'woocommerce' ); ?></span>
 				</div>
-			
+
 			<?php endif; ?>
 
 			<?php if ($GLOBALS['comment']->comment_approved == '0') : ?>

@@ -18,18 +18,18 @@ class WC_Product_Grouped extends WC_Product {
 
 	/** @var string The product's total stock, including that of its children. */
 	var $total_stock;
-	
+
 	/**
 	 * __construct function.
-	 * 
+	 *
 	 * @access public
 	 * @param mixed $product
 	 * @param array $args Contains arguments to set up this product
 	 */
 	function __construct( $product, $args ) {
-		
+
 		parent::__construct( $product );
-		
+
 		$this->product_type = 'grouped';
 		$this->product_custom_fields = get_post_custom( $this->id );
 
@@ -58,7 +58,7 @@ class WC_Product_Grouped extends WC_Product {
 			'sale_price_dates_to' 	=> '',
 			'featured'		=> 'no'
 		) );
-		
+
 		$this->check_sale_price();
 	}
 

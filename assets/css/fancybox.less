@@ -3,10 +3,10 @@
  * Simple and fancy lightbox alternative
  *
  * Examples and documentation at: http://fancybox.net
- * 
+ *
  * Copyright (c) 2008 - 2010 Janis Skarnelis
  * That said, it is hardly a one-person project. Many people have submitted bugs, code, and offered their advice freely. Their support is greatly appreciated.
- * 
+ *
  * Version: 1.3.4 (11/11/2010)
  * Requires: jQuery v1.3+
  *
