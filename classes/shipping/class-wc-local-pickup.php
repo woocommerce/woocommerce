@@ -42,6 +42,7 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 		// Define user set variables
 		$this->enabled		= $this->settings['enabled'];
 		$this->title		= $this->settings['title'];
+		$this->codes		= empty( $this->settings['codes'] ) ? '' : $this->settings['codes'];
 		$this->availability	= $this->settings['availability'];
 		$this->countries	= $this->settings['countries'];
 
@@ -85,6 +86,12 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 				'type' 			=> 'text',
 				'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 				'default'		=> __( 'Local Pickup', 'woocommerce' )
+			),
+			'codes' => array(
+				'title' 		=> __( 'Zip/Post Codes', 'woocommerce' ),
+				'type' 			=> 'textarea',
+				'description' 	=> __( 'What zip/post codes would you like to offer delivery to? Separate codes with a comma. Accepts wildcards, e.g. P* will match a postcode of PE30.', 'woocommerce' ),
+				'default'		=> ''
 			),
 			'availability' => array(
 				'title' 		=> __( 'Method availability', 'woocommerce' ),
@@ -137,22 +144,66 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 	 */
 	function is_available( $package ) {
 		global $woocommerce;
+		
 		$is_available = true;
+		
+    	if ( $this->enabled == "no" ) {
+	    	
+	    	$is_available = false;
+	    	
+    	} else {
 
-		if ( $this->enabled == 'no' ) {
-			$is_available = false;
-		} else {
-			$ship_to_countries = '';
-
-			if ( $this->availability == 'specific' ) {
-				$ship_to_countries = $this->countries;
-			} elseif ( get_option( 'woocommerce_allowed_countries' ) == 'specific' ) {
-				$ship_to_countries = get_option( 'woocommerce_specific_allowed_countries' );
+			// If post codes are listed, let's use them.
+			$codes = '';
+			if ( $this->codes != '' ) {
+				foreach( explode( ',', $this->codes ) as $code ) {
+					$codes[] = $this->clean( $code );
+				}
 			}
+			
+			if ( is_array( $codes ) ) {
+				
+				$found_match = false;
+				
+				if ( in_array( $this->clean( $package['destination']['postcode'] ), $codes ) )
+					$found_match = true;
+				
+				// Wildcard search
+				if ( ! $found_match ) {
+					
+					$customer_postcode = $this->clean( $package['destination']['postcode'] );
+					$customer_postcode_length = strlen( $customer_postcode );
+					
+					for ( $i = 0; $i <= $customer_postcode_length; $i++ ) {
+						
+						if ( in_array( $customer_postcode, $codes ) ) 
+							$found_match = true;
+						
+						$customer_postcode = substr( $customer_postcode, 0, -2 ) . '*';
+					}
+				}
+				
+				if ( ! $found_match ) {
+					
+					$is_available = false;
+					
+				} else {
+					
+					$ship_to_countries = '';
 
-			if ( is_array( $ship_to_countries ) && ! in_array( $package['destination']['country'], $ship_to_countries ) ) {
-				$is_available = false;
+					if ( $this->availability == 'specific' ) {
+						$ship_to_countries = $this->countries;
+					} elseif ( get_option( 'woocommerce_allowed_countries' ) == 'specific' ) {
+						$ship_to_countries = get_option( 'woocommerce_specific_allowed_countries' );
+					}
+		
+					if ( is_array( $ship_to_countries ) && ! in_array( $package['destination']['country'], $ship_to_countries ) ) {
+						$is_available = false;
+					}
+					
+				}
 			}
+		
 		}
 
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available, $package );
@@ -194,6 +245,18 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 			$woocommerce->cart->calculate_totals();
 		}
 	}
+	
+    /**
+     * clean function.
+     *
+     * @access public
+     * @param mixed $code
+     * @return string
+     */
+    function clean( $code ) {
+    	return str_replace( '-', '', sanitize_title( $code ) ) . ( strstr( $code, '*' ) ? '*' : '' );
+    }
+    
 }
 
 /**
