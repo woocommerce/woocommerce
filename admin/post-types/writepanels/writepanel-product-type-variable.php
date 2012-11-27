@@ -599,11 +599,16 @@ function process_product_meta_variable( $post_id ) {
 					'post_type' 	=> 'product_variation',
 					'menu_order' 	=> $variable_menu_order[ $i ]
 				);
+				
 				$variation_id = wp_insert_post( $variation );
+				
+				do_action( 'woocommerce_create_product_variation', $variation_id );
 
 			} else {
 
 				$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status, 'post_title' => $variation_post_title, 'menu_order' => $variable_menu_order[ $i ] ), array( 'ID' => $variation_id ) );
+				
+				do_action( 'woocommerce_update_product_variation', $variation_id );
 
 			}
 
@@ -709,6 +714,8 @@ function process_product_meta_variable( $post_id ) {
 				}
 
 			}
+			
+			do_action( 'woocommerce_save_product_variation', $variation_id );
 
 		 }
 

@@ -561,6 +561,8 @@ function woocommerce_add_variation() {
 	
 	$variation_id = wp_insert_post( $variation );
 	
+	do_action( 'woocommerce_create_product_variation', $variation_id );
+	
 	if ( $variation_id ) {
 	
 		$variation_post_status = 'publish';

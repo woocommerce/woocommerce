@@ -230,7 +230,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Active plugins display on status page.
 
 * Localization - French update by Arnaud Cheminand and absoluteweb.
-* Localization - Romanian update by silviu-bucsa.
+* Localization - Romanian update by silviu-bucsa and a1ur3l.
 * Localization - Dutch updates by Ramoonus.
 * Localization - Localized shortcode button.
 * Localization - Norwegian translation by frilyd.
