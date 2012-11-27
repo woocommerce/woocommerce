@@ -28,6 +28,8 @@ if ( $available_methods ) {
 					$method->full_label .= ' '.$woocommerce->countries->inc_tax_or_vat();
 				}
 			}
+		} elseif ( $method->id !== 'free_shipping' ) {
+			$method->full_label .= ' (' . __( 'Free', 'woocommerce' ) . ')';
 		}
 	}
 
