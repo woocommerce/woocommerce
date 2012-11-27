@@ -115,6 +115,7 @@ function woocommerce_default_options() {
 	        	if ( $value['type'] == 'image_width' ) {
 	        		add_option( $value['id'] . '_width', $value['std'] );
 	        		add_option( $value['id'] . '_height', $value['std'] );
+	        		add_option( $value['id'] . '_crop', 1 );
 	        	} else {
 	        		add_option( $value['id'], $value['std'] );
 	        	}
