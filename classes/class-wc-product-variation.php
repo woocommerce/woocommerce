@@ -72,6 +72,12 @@ class WC_Product_Variation extends WC_Product {
 			$this->variation_id = absint( $variation );
 		}
 
+		/* Get main product data from parent */
+		$this->id = ! empty( $args['parent_id'] ) ? intval( $args['parent_id'] ) : wp_get_post_parent_id( $this->variation_id );
+
+		// The post doesn't have a parent id, so it must be the parent
+		if ( empty( $this->id ) ) return false;
+
 		$product_custom_fields = get_post_custom( $this->variation_id );
 
 		$this->variation_data = array();
@@ -84,8 +90,6 @@ class WC_Product_Variation extends WC_Product {
 
 		}
 
-		/* Get main product data from parent */
-		$this->id = ! empty( $args['parent_id'] ) ? intval( $args['parent_id'] ) : wp_get_post_parent_id( $this->variation_id );
 		$parent_custom_fields = ! empty( $args['meta'] ) ? $args['meta'] : get_post_custom( $this->id );
 
 		// Define the data we're going to load from the parent: Key => Default value
