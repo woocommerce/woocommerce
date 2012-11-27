@@ -21,11 +21,11 @@ $template_footer = "
 ";
 
 $credit = "
-	border:0; 
-	color: $base_lighter_40; 
-	font-family: Arial; 
-	font-size:12px; 
-	line-height:125%; 
+	border:0;
+	color: $base_lighter_40;
+	font-family: Arial;
+	font-size:12px;
+	line-height:125%;
 	text-align:center;
 ";
 ?>

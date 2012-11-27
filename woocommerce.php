@@ -176,7 +176,7 @@ class Woocommerce {
 		include( 'widgets/widget-init.php' );					// Widget classes
 		include( 'classes/class-wc-countries.php' );			// Defines countries and states
 		include( 'classes/class-wc-order.php' );				// Single order class
-		
+
 		include( 'classes/class-wc-product-factory.php' );		// Product factory
 		include( 'classes/abstracts/abstract-wc-product.php' );	// Product class abstract
 		include( 'classes/class-wc-product-simple.php' );		// Simple product type class
@@ -184,7 +184,7 @@ class Woocommerce {
 		include( 'classes/class-wc-product-variable.php' );		// Variable product type class
 		include( 'classes/class-wc-product-grouped.php' );		// Grouped product type class
 		include( 'classes/class-wc-product-variation.php' );	// Product variation class
-		
+
 		include( 'classes/class-wc-tax.php' );					// Tax class
 		include( 'classes/class-wc-settings-api.php' );			// Settings API
 
@@ -1625,7 +1625,7 @@ class Woocommerce {
 
 		$before 	= empty( $wrapper['before'] ) ? '<div class="' . $wrapper['class'] . '">' : $wrapper['before'];
 		$after 		= empty( $wrapper['after'] ) ? '</div>' : $wrapper['after'];
-		
+
 		echo $before;
 		call_user_func( $function, $atts );
 		echo $after;

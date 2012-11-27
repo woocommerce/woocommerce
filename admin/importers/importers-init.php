@@ -14,7 +14,7 @@ register_importer( 'woocommerce_tax_rate_csv', __( 'WooCommerce Tax Rates (CSV)'
 
 /**
  * woocommerce_tax_rates_importer function.
- * 
+ *
  * @access public
  * @return void
  */
@@ -25,7 +25,7 @@ function woocommerce_tax_rates_importer() {
 
 	if ( ! class_exists( 'WP_Importer' ) ) {
 		$class_wp_importer = ABSPATH . 'wp-admin/includes/class-wp-importer.php';
-		if ( file_exists( $class_wp_importer ) ) 
+		if ( file_exists( $class_wp_importer ) )
 			require $class_wp_importer;
 	}
 

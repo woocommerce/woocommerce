@@ -14,9 +14,9 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 class WC_Paypal extends WC_Payment_Gateway {
-	
+
 	var $notify_url;
-	
+
     /**
      * Constructor for the gateway.
      *
@@ -59,7 +59,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 		add_action( 'valid-paypal-standard-ipn-request', array( &$this, 'successful_request' ) );
 		add_action( 'woocommerce_receipt_paypal', array( &$this, 'receipt_page' ) );
 		add_action( 'woocommerce_update_options_payment_gateways', array( &$this, 'process_admin_options' ) );
-		
+
 		// Payment listener/API hook
 		add_action( 'woocommerce_api_wc_paypal', array( &$this, 'check_ipn_response' ) );
 
@@ -218,7 +218,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 
 		$order_id = $order->id;
 
-		if ( $this->debug == 'yes' ) 
+		if ( $this->debug == 'yes' )
 			$this->log->add( 'paypal', 'Generating payment form for order ' . $order->get_order_number() . '. Notify URL: ' . $this->notify_url );
 
 		if ( in_array( $order->billing_country, array( 'US','CA' ) ) ) {
@@ -303,9 +303,9 @@ class WC_Paypal extends WC_Payment_Gateway {
 			// Don't pass items - paypal borks tax due to prices including tax. PayPal has no option for tax inclusive pricing sadly. Pass 1 item for the order items overall
 			$item_names = array();
 
-			if ( sizeof( $order->get_items() ) > 0 ) 
+			if ( sizeof( $order->get_items() ) > 0 )
 				foreach ( $order->get_items() as $item )
-					if ( $item['qty'] ) 
+					if ( $item['qty'] )
 						$item_names[] = $item['name'] . ' x ' . $item['qty'];
 
 			$paypal_args['item_name_1'] 	= sprintf( __( 'Order %s' , 'woocommerce'), $order->get_order_number() ) . " - " . implode( ', ', $item_names );
@@ -333,32 +333,32 @@ class WC_Paypal extends WC_Payment_Gateway {
 			if ( sizeof( $order->get_items() ) > 0 ) {
 				foreach ( $order->get_items() as $item ) {
 					if ( $item['qty'] ) {
-	
+
 						$item_loop++;
-	
+
 						$product = $order->get_product_from_item( $item );
-	
+
 						$item_name 	= $item['name'];
-	
+
 						$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
 						if ( $meta = $item_meta->display( true, true ) )
 							$item_name .= ' ( ' . $meta . ' )';
-	
+
 						$paypal_args[ 'item_name_' . $item_loop ] 	= $item_name;
 						$paypal_args[ 'quantity_' . $item_loop ] 	= $item['qty'];
 						$paypal_args[ 'amount_' . $item_loop ] 		= $order->get_item_total( $item, false );
-						
-						if ( $product->get_sku() ) 
+
+						if ( $product->get_sku() )
 							$paypal_args[ 'item_number_' . $item_loop ] = $product->get_sku();
 					}
 				}
 			}
-			
+
 			// Fees
 			if ( sizeof( $order->get_fees() ) > 0 ) {
 				foreach ( $order->get_fees() as $item ) {
 					$item_loop++;
-	
+
 					$paypal_args[ 'item_name_' . $item_loop ] 	= $item['name'];
 					$paypal_args[ 'quantity_' . $item_loop ] 	= 1;
 					$paypal_args[ 'amount_' . $item_loop ] 		= $item['line_total'];
@@ -496,7 +496,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 	function check_ipn_request_is_valid() {
 		global $woocommerce;
 
-		if ( $this->debug == 'yes' ) 
+		if ( $this->debug == 'yes' )
 			$this->log->add( 'paypal', 'Checking IPN response is valid...' );
 
     	// Get recieved values from post data
@@ -522,14 +522,14 @@ class WC_Paypal extends WC_Payment_Gateway {
 		// Post back to get a response
         $response = wp_remote_post( $paypal_adr, $params );
 
-        if ( $this->debug == 'yes' ) 
+        if ( $this->debug == 'yes' )
         	$this->log->add( 'paypal', 'IPN Response: ' . print_r( $response, true ) );
 
         // check to see if the request was valid
         if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 && ( strcmp( $response['body'], "VERIFIED" ) == 0 ) ) {
-            if ( $this->debug == 'yes' ) 
+            if ( $this->debug == 'yes' )
             	$this->log->add( 'paypal', 'Received valid response from PayPal' );
-            	
+
             return true;
         }
 
@@ -582,18 +582,18 @@ class WC_Paypal extends WC_Payment_Gateway {
 
 		// Custom holds post ID
 	    if ( ! empty( $posted['invoice'] ) && ! empty( $posted['custom'] ) ) {
-		    
+
 		    $order = $this->get_paypal_order( $posted );
-		    
+
 		    // Lowercase returned variables
 	        $posted['payment_status'] 	= strtolower( $posted['payment_status'] );
 	        $posted['txn_type'] 		= strtolower( $posted['txn_type'] );
-		    
+
 		    // Sandbox fix
-	        if ( $posted['test_ipn'] == 1 && $posted['payment_status'] == 'pending' ) 
+	        if ( $posted['test_ipn'] == 1 && $posted['payment_status'] == 'pending' )
 	        	$posted['payment_status'] = 'completed';
 
-	        if ( $this->debug == 'yes' ) 
+	        if ( $this->debug == 'yes' )
 	        	$this->log->add( 'paypal', 'Payment status: ' . $posted['payment_status'] );
 
 	        // We are here so lets check status and do actions
@@ -602,7 +602,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 
 	            	// Check order not already completed
 	            	if ( $order->status == 'completed' ) {
-	            		 if ( $this->debug == 'yes' ) 
+	            		 if ( $this->debug == 'yes' )
 	            		 	$this->log->add( 'paypal', 'Aborting, Order #' . $order_id . ' is already complete.' );
 	            		 exit;
 	            	}
@@ -610,22 +610,22 @@ class WC_Paypal extends WC_Payment_Gateway {
 	            	// Check valid txn_type
 	            	$accepted_types = array( 'cart', 'instant', 'express_checkout', 'web_accept', 'masspay', 'send_money' );
 					if ( ! in_array( $posted['txn_type'], $accepted_types ) ) {
-						if ( $this->debug == 'yes' ) 
+						if ( $this->debug == 'yes' )
 							$this->log->add( 'paypal', 'Aborting, Invalid type:' . $posted['txn_type'] );
 						exit;
 					}
-					
+
 					// Validate Amount
 				    if ( $order->get_total() != $posted['mc_gross'] ) {
-				    	
-				    	if ( $this->debug == 'yes' ) 
+
+				    	if ( $this->debug == 'yes' )
 				    		$this->log->add( 'paypal', 'Payment error: Amounts do not match (gross ' . $posted['mc_gross'] . ')' );
-				    
+
 				    	// Put this order on-hold for manual checking
 				    	$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal amounts do not match (gross %s).', 'woocommerce' ), $posted['mc_gross'] ) );
-				    	
+
 				    	exit;
-				    }	
+				    }
 
 					 // Store PP Details
 	                if ( ! empty( $posted['payer_email'] ) )
@@ -643,7 +643,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 	                $order->add_order_note( __( 'IPN payment completed', 'woocommerce' ) );
 	                $order->payment_complete();
 
-	                if ( $this->debug == 'yes' ) 
+	                if ( $this->debug == 'yes' )
 	                	$this->log->add( 'paypal', 'Payment complete.' );
 
 	            break;
@@ -699,11 +699,11 @@ class WC_Paypal extends WC_Payment_Gateway {
 	    }
 
 	}
-	
+
 
 	/**
 	 * get_paypal_order function.
-	 * 
+	 *
 	 * @access public
 	 * @param mixed $posted
 	 * @return void
@@ -724,19 +724,19 @@ class WC_Paypal extends WC_Payment_Gateway {
 
 		$order = new WC_Order( $order_id );
 
-		if ( ! isset( $order->id ) ) { 
+		if ( ! isset( $order->id ) ) {
 			// We have an invalid $order_id, probably because invoice_prefix has changed
 			$order_id 	= woocommerce_get_order_id_by_order_key( $order_key );
 			$order 		= new WC_Order( $order_id );
 		}
-		
+
 		// Validate key
 		if ( $order->order_key !== $order_key ) {
-        	if ( $this->debug=='yes' ) 
+        	if ( $this->debug=='yes' )
         		$this->log->add( 'paypal', 'Error: Order Key does not match invoice.' );
         	exit;
         }
-        
+
         return $order;
 	}
 

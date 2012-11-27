@@ -173,18 +173,18 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
  */
 function woocommerce_track_product_view() {
 	global $post, $product, $woocommerce;
-	
+
 	$viewed_products = $woocommerce->session->viewed_products;
 
-	if ( empty( $woocommerce->session->viewed_products ) ) 
+	if ( empty( $woocommerce->session->viewed_products ) )
 		$viewed_products = array();
 
-	if ( ! in_array( $post->ID, $viewed_products ) ) 
+	if ( ! in_array( $post->ID, $viewed_products ) )
 		$viewed_products[] = $post->ID;
 
-	if ( sizeof( $viewed_products ) > 15 ) 
+	if ( sizeof( $viewed_products ) > 15 )
 		array_shift( $viewed_products );
-		
+
 	$woocommerce->session->viewed_products = $viewed_products;
 }
 

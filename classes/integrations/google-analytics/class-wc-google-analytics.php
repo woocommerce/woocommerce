@@ -268,7 +268,7 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @return void
 	 */
 	function loop_add_to_cart() {
-		
+
 		if ( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) return;
 
 		$parameters = array();
@@ -293,7 +293,7 @@ class WC_Google_Analytics extends WC_Integration {
 		global $woocommerce;
 
 		$parameters = apply_filters( 'woocommerce_ga_event_tracking_parameters', $parameters );
-		
+
 		$woocommerce->add_inline_js("
 			$('" . $selector . "').click(function() {
 				" . sprintf( "_gaq.push(['_trackEvent', %s, %s, %s]);", $parameters['category'], $parameters['action'], $parameters['label'] ) . "

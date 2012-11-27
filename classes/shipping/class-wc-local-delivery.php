@@ -191,29 +191,29 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 				$codes[] = $this->clean( $code );
 			}
 		}
-		
+
 		if ( is_array( $codes ) ) {
-			
+
 			$found_match = false;
-			
+
 			if ( in_array( $this->clean( $package['destination']['postcode'] ), $codes ) )
 				$found_match = true;
-			
+
 			// Wildcard search
 			if ( ! $found_match ) {
-				
+
 				$customer_postcode = $this->clean( $package['destination']['postcode'] );
 				$customer_postcode_length = strlen( $customer_postcode );
-				
+
 				for ( $i = 0; $i <= $customer_postcode_length; $i++ ) {
-					
-					if ( in_array( $customer_postcode, $codes ) ) 
+
+					if ( in_array( $customer_postcode, $codes ) )
 						$found_match = true;
-					
+
 					$customer_postcode = substr( $customer_postcode, 0, -2 ) . '*';
 				}
 			}
-			
+
 			if ( ! $found_match )
 				return false;
 		}

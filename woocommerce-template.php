@@ -219,30 +219,30 @@ if ( ! function_exists( 'woocommerce_page_title' ) ) {
 
 	/**
 	 * woocommerce_page_title function.
-	 * 
+	 *
 	 * @access public
 	 * @return void
 	 */
 	function woocommerce_page_title() {
-		
+
 		if ( is_search() ) {
 			$page_title = sprintf( __( 'Search Results: &ldquo;%s&rdquo;', 'woocommerce' ), get_search_query() );
-			
+
 			if ( get_query_var( 'paged' ) )
 				$page_title .= sprintf( __( '&nbsp;&ndash; Page %s', 'woocommerce' ), get_query_var( 'paged' ) );
-		
+
 		} elseif ( is_tax() ) {
-			
+
 			$page_title = single_term_title( "", false );
-		
+
 		} else {
-	
+
 			$shop_page = get_post( woocommerce_get_page_id( 'shop' ) );
-	
+
 			$page_title = apply_filters( 'the_title', ( $shop_page_title = get_option( 'woocommerce_shop_page_title' ) ) ? $shop_page_title : $shop_page->post_title, $shop_page->ID );
-			
+
 		}
-				
+
 	    echo apply_filters( 'woocommerce_page_title', $page_title );
 	}
 }
@@ -260,7 +260,7 @@ if ( ! function_exists( 'woocommerce_product_loop_start' ) ) {
 		woocommerce_get_template( 'loop/loop-start.php' );
 		if ( $echo )
 			echo ob_get_clean();
-		else 
+		else
 			return ob_get_clean();
 	}
 }
@@ -277,7 +277,7 @@ if ( ! function_exists( 'woocommerce_product_loop_end' ) ) {
 		woocommerce_get_template( 'loop/loop-end.php' );
 		if ( $echo )
 			echo ob_get_clean();
-		else 
+		else
 			return ob_get_clean();
 	}
 }
@@ -433,10 +433,10 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 	 */
 	function woocommerce_catalog_ordering() {
 		global $woocommerce;
-		
+
 		if ( ! isset( $woocommerce->session->orderby ) )
 			$woocommerce->session->orderby = apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
-			
+
 		woocommerce_get_template( 'loop/sorting.php' );
 	}
 }
@@ -673,7 +673,7 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 	 */
 	function woocommerce_quantity_input( $args = array() ) {
 		global $product;
-		
+
 		$defaults = array(
 			'input_name'  	=> 'quantity',
 			'input_value'  	=> '1',
@@ -798,10 +798,10 @@ if ( ! function_exists( 'woocommerce_output_related_products' ) ) {
 }
 
 if ( ! function_exists( 'woocommerce_related_products' ) ) {
-	 
+
 	/**
 	 * Output the related products.
-	 * 
+	 *
 	 * @access public
 	 * @param int $posts_per_page (default: 2)
 	 * @param int $columns (default: 2)
@@ -821,7 +821,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 
 	/**
 	 * Output product up sells.
-	 * 
+	 *
 	 * @access public
 	 * @param int $posts_per_page (default: -1)
 	 * @param int $columns (default: 2)
@@ -1005,19 +1005,19 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 	 */
 	function woocommerce_products_will_display() {
 		global $woocommerce, $wpdb;
-		
+
 		if ( ! is_product_category() && ! is_shop() )
 			return false;
-			
+
 		if ( is_search() || is_filtered() || is_paged() )
 			return true;
-			
+
 		if ( is_shop() && get_option( 'woocommerce_shop_page_display' ) != 'subcategories' )
 			return true;
-			
+
 		$term = get_queried_object();
-			
-		if ( is_product_category() ) {			
+
+		if ( is_product_category() ) {
 			switch ( get_woocommerce_term_meta( $term->term_id, 'display_type', true ) ) {
 				case 'products' :
 				case 'both' :
@@ -1029,10 +1029,10 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 				break;
 			}
 		}
-			
+
 		$parent_id 		= empty( $term->term_id ) ? 0 : $term->term_id;
 		$has_children 	= $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE parent = %d", $parent_id ) );
-	
+
 		if ( $has_children ) {
 			// Check terms have products inside
 			$children = array();
@@ -1041,7 +1041,7 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 				$children[] = $term;
 			}
 			$objects = get_objects_in_term( $children, 'product_cat' );
-			
+
 			if ( sizeof( $objects ) > 0 ) {
 				return false;
 			} else {
@@ -1080,17 +1080,17 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 
 		// Don't show when filtering, searching or when on page > 1 and ensure we're on a product archive
 		if ( is_search() || is_filtered() || is_paged() || ( ! is_product_category() && ! is_shop() ) ) return;
-		
+
 		// Check categories are enabled
 		if ( is_shop() && get_option( 'woocommerce_shop_page_display' ) == '' ) return;
-		
+
 		// Find the category + category parent, if applicable
 		$term 			= get_queried_object();
 		$parent_id 		= empty( $term->term_id ) ? 0 : $term->term_id;
-		
+
 		if ( is_product_category() ) {
 			$display_type = get_woocommerce_term_meta( $term->term_id, 'display_type', true );
-			
+
 			switch ( $display_type ) {
 				case 'products' :
 					return;
@@ -1140,7 +1140,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 		if ( $product_category_found ) {
 			if ( is_product_category() ) {
 				$display_type = get_woocommerce_term_meta( $term->term_id, 'display_type', true );
-				
+
 				switch ( $display_type ) {
 					case 'subcategories' :
 						$wp_query->post_count = 0;
@@ -1158,7 +1158,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 				$wp_query->post_count = 0;
 				$wp_query->max_num_pages = 0;
 			}
-			
+
 			echo esc_html( $after );
 			return true;
 		}
@@ -1252,44 +1252,44 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 		$required = ( $args['required']  ) ? ' <abbr class="required" title="' . esc_attr__( 'required', 'woocommerce'  ) . '">*</abbr>' : '';
 		$args['maxlength'] = ( $args['maxlength'] ) ? 'maxlength="' . absint( $args['maxlength'] ) . '"' : '';
-		
+
 		// Custom attribute handling
 		$custom_attributes = array();
-		
+
 		if ( ! empty( $args['custom_attributes'] ) && is_array( $args['custom_attributes'] ) )
 			foreach ( $args['custom_attributes'] as $attribute => $value )
 				$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
-		
+
 		switch ( $args['type'] ) {
 		case "country" :
-		
+
 			if ( sizeof( $woocommerce->countries->get_allowed_countries() ) == 1 ) {
-			
+
 				$field = '<p class="form-row ' . esc_attr( implode( ' ', $args['class'] ) ) .'" id="' . esc_attr( $key ) . '_field">
 						<label class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label']  . '</label>';
-				
+
 				$field .= '<strong>' . current( array_values( $woocommerce->countries->get_allowed_countries() ) ) . '</strong>';
-	
+
 				$field .= '<input type="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" value="' . current( array_keys( $woocommerce->countries->get_allowed_countries() ) ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
-	
+
 				$field .= '</p>' . $after;
-				
+
 			} else {
 
 				$field = '<p class="form-row ' . esc_attr( implode( ' ', $args['class'] ) ) .'" id="' . esc_attr( $key ) . '_field">
 						<label for="' . esc_attr( $key ) . '" class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label']. $required  . '</label>
 						<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" class="country_to_state country_select" ' . implode( ' ', $custom_attributes ) . '>
 							<option value="">'.__( 'Select a country&hellip;', 'woocommerce' ) .'</option>';
-	
+
 				foreach ( $woocommerce->countries->get_allowed_countries() as $ckey => $cvalue )
 					$field .= '<option value="' . $ckey . '" '.selected( $value, $ckey, false ) .'>'.__( $cvalue, 'woocommerce' ) .'</option>';
-	
+
 				$field .= '</select>';
-	
+
 				$field .= '<noscript><input type="submit" name="woocommerce_checkout_update_totals" value="' . __( 'Update country', 'woocommerce' ) . '" /></noscript>';
-	
+
 				$field .= '</p>' . $after;
-			
+
 			}
 
 			break;

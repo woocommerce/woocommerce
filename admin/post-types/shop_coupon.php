@@ -56,34 +56,34 @@ function woocommerce_custom_coupon_columns( $column ) {
 		case "products" :
 			$product_ids = get_post_meta( $post->ID, 'product_ids', true );
 			$product_ids = $product_ids ? array_map( 'absint', explode( ',', $product_ids ) ) : array();
-			if ( sizeof( $product_ids ) > 0 ) 
-				echo esc_html( implode( ', ', $product_ids ) ); 
-			else 
+			if ( sizeof( $product_ids ) > 0 )
+				echo esc_html( implode( ', ', $product_ids ) );
+			else
 				echo '&ndash;';
 		break;
 		case "usage_limit" :
 			$usage_limit = get_post_meta( $post->ID, 'usage_limit', true );
-			
-			if ( $usage_limit ) 
-				echo esc_html( $usage_limit ); 
-			else 
+
+			if ( $usage_limit )
+				echo esc_html( $usage_limit );
+			else
 				echo '&ndash;';
 		break;
 		case "usage" :
 			$usage_count = absint( get_post_meta( $post->ID, 'usage_count', true ) );
 			$usage_limit = esc_html( get_post_meta($post->ID, 'usage_limit', true) );
-			
-			if ( $usage_limit ) 
+
+			if ( $usage_limit )
 				printf( __( '%s / %s', 'woocommerce' ), $usage_count, $usage_limit );
 			else
 				printf( __( '%s / &infin;', 'woocommerce' ), $usage_count );
 		break;
 		case "expiry_date" :
 			$expiry_date = get_post_meta($post->ID, 'expiry_date', true);
-			
-			if ( $expiry_date ) 
-				echo esc_html( date_i18n( 'F j, Y', strtotime( $expiry_date ) ) ); 
-			else 
+
+			if ( $expiry_date )
+				echo esc_html( date_i18n( 'F j, Y', strtotime( $expiry_date ) ) );
+			else
 				echo '&ndash;';
 		break;
 		case "description" :

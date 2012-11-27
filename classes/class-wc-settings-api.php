@@ -193,10 +193,10 @@ class WC_Settings_API {
     	$data['css'] 			= isset( $data['css'] ) ? $data['css'] : '';
     	$data['placeholder'] 	= isset( $data['placeholder'] ) ? $data['placeholder'] : '';
     	$data['type'] 			= isset( $data['type'] ) ? $data['type'] : 'text';
-    	
+
     	// Custom attribute handling
 		$custom_attributes = array();
-		
+
 		if ( ! empty( $data['custom_attributes'] ) && is_array( $data['custom_attributes'] ) )
 			foreach ( $data['custom_attributes'] as $attribute => $attribute_value )
 				$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $attribute_value ) . '"';
@@ -233,10 +233,10 @@ class WC_Settings_API {
     	$data['disabled']		= empty( $data['disabled'] ) ? false : true;
     	$data['class'] 			= isset( $data['class'] ) ? $data['class'] : '';
     	$data['css'] 			= isset( $data['css'] ) ? $data['css'] : '';
-    	
+
     	// Custom attribute handling
 		$custom_attributes = array();
-		
+
 		if ( ! empty( $data['custom_attributes'] ) && is_array( $data['custom_attributes'] ) )
 			foreach ( $data['custom_attributes'] as $attribute => $attribute_value )
 				$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $attribute_value ) . '"';
@@ -274,10 +274,10 @@ class WC_Settings_API {
     	if ( ! isset( $this->settings[$key] ) ) $this->settings[$key] = '';
     	$data['class']			= isset( $data['class'] ) ? $data['class'] : '';
     	$data['css'] 			= isset( $data['css'] ) ? $data['css'] : '';
-    	
+
     	// Custom attribute handling
 		$custom_attributes = array();
-		
+
 		if ( ! empty( $data['custom_attributes'] ) && is_array( $data['custom_attributes'] ) )
 			foreach ( $data['custom_attributes'] as $attribute => $attribute_value )
 				$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $attribute_value ) . '"';
@@ -315,10 +315,10 @@ class WC_Settings_API {
     	$data['disabled']		= empty( $data['disabled'] ) ? false : true;
     	$data['class'] 		= isset( $data['class'] ) ? $data['class'] : '';
     	$data['css'] 		= isset( $data['css'] ) ? $data['css'] : '';
-    	
+
     	// Custom attribute handling
 		$custom_attributes = array();
-		
+
 		if ( ! empty( $data['custom_attributes'] ) && is_array( $data['custom_attributes'] ) )
 			foreach ( $data['custom_attributes'] as $attribute => $attribute_value )
 				$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $attribute_value ) . '"';
@@ -354,10 +354,10 @@ class WC_Settings_API {
     	$data['options'] 		= isset( $data['options'] ) ? (array) $data['options'] : array();
     	$data['class'] 			= isset( $data['class'] ) ? $data['class'] : '';
     	$data['css'] 			= isset( $data['css'] ) ? $data['css'] : '';
-    	
+
     	// Custom attribute handling
 		$custom_attributes = array();
-		
+
 		if ( ! empty( $data['custom_attributes'] ) && is_array( $data['custom_attributes'] ) )
 			foreach ( $data['custom_attributes'] as $attribute => $attribute_value )
 				$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $attribute_value ) . '"';
@@ -400,10 +400,10 @@ class WC_Settings_API {
     	$data['options'] 		= isset( $data['options'] ) ? (array) $data['options'] : array();
     	$data['class'] 			= isset( $data['class'] ) ? $data['class'] : '';
     	$data['css'] 			= isset( $data['css'] ) ? $data['css'] : '';
-    	
+
     	// Custom attribute handling
 		$custom_attributes = array();
-		
+
 		if ( ! empty( $data['custom_attributes'] ) && is_array( $data['custom_attributes'] ) )
 			foreach ( $data['custom_attributes'] as $attribute => $attribute_value )
 				$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $attribute_value ) . '"';
@@ -474,7 +474,7 @@ class WC_Settings_API {
     	$this->sanitized_fields = array();
 
     	foreach ( $form_fields as $k => $v ) {
-    		if ( empty( $v['type'] ) ) 
+    		if ( empty( $v['type'] ) )
     			$v['type'] == 'text'; // Default to "text" field type.
 
     		if ( method_exists( $this, 'validate_' . $v['type'] . '_field' ) ) {

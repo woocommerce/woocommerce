@@ -3,11 +3,11 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 class Mijireh_Address extends Mijireh_Model {
-    
+
   public function __construct() {
     $this->init();
   }
-  
+
   public function init() {
     $this->_data = array(
       'first_name' => '',
@@ -22,15 +22,15 @@ class Mijireh_Address extends Mijireh_Model {
       'phone' => ''
     );
   }
-  
+
   public function validate() {
     $is_valid = $this->_check_required_fields();
     return $is_valid;
   }
-  
+
   /**
    * Return true if all of the required fields have a non-empty value
-   * 
+   *
    * @return boolean
    */
   private function _check_required_fields() {
@@ -44,5 +44,5 @@ class Mijireh_Address extends Mijireh_Model {
     }
     return $pass;
   }
-  
+
 }

@@ -11,7 +11,7 @@
     					<legend class="screen-reader-text"><span><?php _e( 'Button style', 'woocommerce' ); ?></span></legend>
 						<p>
 							<label>
-								<input type="radio" value="1" id="button_type_1" <?php if ($current_button_type == '1'||$current_button_type == '') echo 'checked' ?> name="button_type" class="tog" /> 
+								<input type="radio" value="1" id="button_type_1" <?php if ($current_button_type == '1'||$current_button_type == '') echo 'checked' ?> name="button_type" class="tog" />
 								<?php echo SyC::t('sdk','Use Standard Button'); ?>
 							</label>
 						</p>
@@ -37,7 +37,7 @@
 								</label>
 							</li>
 						</ul>
-						
+
 						<p>
 							<label>
 								<input type="radio" value="2" id="button_type_2" name="button_type" <?php if ($current_button_type == '2') echo 'checked' ?> class="tog" />
@@ -51,7 +51,7 @@
 									<?php if ( ! empty( $button_img ) ): ?>
 										<img src="<?php echo $button_img ?>" height="40" /><br/>
 									<?php endif; ?>
-									
+
 									<input type="hidden" name="MAX_FILE_SIZE" value="100000000000" />
 									<input type="file" accept="image/gif, image/jpeg, image/jpg, image/png" name="button-img" id="button-img" />
 								</label>
@@ -62,13 +62,13 @@
 									<?php if ( ! empty( $button_img_hover ) ): ?>
 										<img src="<?php echo $button_img_hover ?>" height="40" /><br/>
 									<?php endif; ?>
-									
+
 									<input type="hidden" name="MAX_FILE_SIZE" value="100000000000" />
 									<input type="file" accept="image/gif, image/jpeg, image/jpg, image/png" name="button-img-hover" id="button-img-hover" />
 								</label>
 							</li>
 						</ul>
-						
+
 						<p>
 							<label>
 								<input type="radio" value="3" id="button_type_3" name="button_type" <?php if ($current_button_type == '3') echo 'checked' ?> class="tog" />
@@ -83,12 +83,12 @@
 								</label>
 							</li>
 						</ul>
-					</fieldset>	
+					</fieldset>
         		</td>
     		</tr>
     	</table>
-    	<?php echo $html; ?> 
-    	 
+    	<?php echo $html; ?>
+
         <fieldset>
             <table class="form-table " name="shareyourcart_settings">
                 <tr>
@@ -96,7 +96,7 @@
                     <td>
                         <input class="buttonCheckbox" name="show_on_product" <?php echo $show_on_product ? 'checked="checked"' : ''; ?>  type='checkbox'><?php echo SyC::t('sdk','Product page'); ?></input>
                         <br />
-                        <input class="buttonCheckbox" name="show_on_checkout" <?php echo $show_on_checkout ? 'checked="checked"' : ''; ?> type='checkbox'><?php echo SyC::t('sdk','Checkout page'); ?></input>                        
+                        <input class="buttonCheckbox" name="show_on_checkout" <?php echo $show_on_checkout ? 'checked="checked"' : ''; ?> type='checkbox'><?php echo SyC::t('sdk','Checkout page'); ?></input>
                     </td>
                 </tr>
     			 <tr>
@@ -114,10 +114,10 @@
                     </td>
                 </tr>
             </table>
-        </fieldset> 
-        
+        </fieldset>
+
         <div class="submit">
         	<input type="submit" class="button button-primary" name="syc-visual-form" value="<?php _e('Save changes', 'woocommerce'); ?>" />
-        </div> 
+        </div>
     </div>
 </div>

@@ -38,7 +38,7 @@ foreach ($items as $item) :
 					echo '<br/><small>';
 					if ( count( $download_file_urls ) > 1 ) {
 						echo sprintf( __('Download %d:', 'woocommerce' ), $i + 1 );
-					} elseif ( $i == 0 ) 
+					} elseif ( $i == 0 )
 						echo __( 'Download:', 'woocommerce' );
 					echo ' <a href="' . $download_file_url . '" target="_blank">' . $download_file_url . '</a></small>';
 				endforeach;

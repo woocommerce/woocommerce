@@ -23,41 +23,41 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 		$this->id 				= 'customer_processing_order';
 		$this->title 			= __( 'Processing order', 'woocommerce' );
 		$this->description		= __( 'This is an order notification sent to the customer after payment containing order details.', 'woocommerce' );
-		
+
 		$this->heading 			= __( 'Thank you for your order', 'woocommerce' );
 		$this->subject      	= __( 'Your {blogname} order receipt from {order_date}', 'woocommerce' );
-		
+
 		$this->template_html 	= 'emails/customer-processing-order.php';
 		$this->template_plain 	= 'emails/plain/customer-processing-order.php';
-		
+
 		// Triggers for this email
 		add_action( 'woocommerce_order_status_pending_to_processing_notification', array( &$this, 'trigger' ) );
 		add_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( &$this, 'trigger' ) );
-		
+
 		// Call parent constuctor
 		parent::__construct();
 	}
 
 	/**
 	 * trigger function.
-	 * 
+	 *
 	 * @access public
 	 * @return void
 	 */
 	function trigger( $order_id ) {
 		global $woocommerce;
-		
+
 		if ( $order_id ) {
 			$this->object 		= new WC_Order( $order_id );
 			$this->recipient	= $this->object->billing_email;
-			
+
 			$this->find[] = '{order_date}';
 			$this->replace[] = date_i18n( woocommerce_date_format(), strtotime( $this->object->order_date ) );
-			
+
 			$this->find[] = '{order_number}';
 			$this->replace[] = $this->object->get_order_number();
 		}
-		
+
 		if ( ! $this->is_enabled() || ! $this->get_recipient() )
 			return;
 
@@ -66,7 +66,7 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 
 	/**
 	 * get_content_html function.
-	 * 
+	 *
 	 * @access public
 	 * @return string
 	 */
@@ -78,10 +78,10 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 		) );
 		return ob_get_clean();
 	}
-	
+
 	/**
 	 * get_content_plain function.
-	 * 
+	 *
 	 * @access public
 	 * @return string
 	 */

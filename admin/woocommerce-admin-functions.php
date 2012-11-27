@@ -84,7 +84,7 @@ function woocommerce_ms_protect_download_rewite_rules( $rewrite ) {
  */
 function woocommerce_delete_post( $id ) {
 	global $woocommerce;
-	
+
 	if ( ! current_user_can( 'delete_posts' ) ) return;
 
 	if ( $id > 0 ) :
@@ -104,7 +104,7 @@ function woocommerce_delete_post( $id ) {
 		endif;
 
 	endif;
-	
+
 	$woocommerce->clear_product_transients();
 	delete_transient( 'woocommerce_processing_order_count' );
 }
@@ -265,7 +265,7 @@ function woocommerce_add_shortcode_button() {
 
 /**
  * woocommerce_add_tinymce_lang function.
- * 
+ *
  * @access public
  * @param mixed $arr
  * @return void
@@ -330,9 +330,9 @@ function woocommerce_refresh_mce( $ver ) {
  */
 function woocommerce_create_term( $term_id, $tt_id = '', $taxonomy = '' ) {
 
-	if ( ! $taxonomy == 'product_cat' && ! strstr( $taxonomy, 'pa_' ) ) 
+	if ( ! $taxonomy == 'product_cat' && ! strstr( $taxonomy, 'pa_' ) )
 		return;
-	
+
 	$meta_name = strstr( $taxonomy, 'pa_' ) ? 'order_' . esc_attr( $taxonomy ) : 'order';
 
 	update_woocommerce_term_meta( $term_id, $meta_name, 0 );
@@ -350,7 +350,7 @@ function woocommerce_delete_term( $term_id ) {
 
 	$term_id = (int) $term_id;
 
-	if ( ! $term_id ) 
+	if ( ! $term_id )
 		return;
 
 	global $wpdb;

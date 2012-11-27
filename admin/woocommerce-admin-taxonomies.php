@@ -39,7 +39,7 @@ function woocommerce_add_category_fields() {
 			<button type="submit" class="remove_image_button button"><?php _e( 'Remove image', 'woocommerce' ); ?></button>
 		</div>
 		<script type="text/javascript">
-			
+
 			 // Only show the "remove image" button when needed
 			 if ( ! jQuery('#product_cat_thumbnail_id').val() )
 				 jQuery('.remove_image_button').hide();
@@ -100,7 +100,7 @@ add_action( 'product_cat_add_form_fields', 'woocommerce_add_category_fields' );
  */
 function woocommerce_edit_category_fields( $term, $taxonomy ) {
 	global $woocommerce;
-	
+
 	$display_type	= get_woocommerce_term_meta( $term->term_id, 'display_type', true );
 	$image 			= '';
 	$thumbnail_id 	= absint( get_woocommerce_term_meta( $term->term_id, 'thumbnail_id', true ) );
@@ -186,7 +186,7 @@ add_action( 'product_cat_edit_form_fields', 'woocommerce_edit_category_fields', 
 function woocommerce_category_fields_save( $term_id, $tt_id, $taxonomy ) {
 	if ( isset( $_POST['display_type'] ) )
 		update_woocommerce_term_meta( $term_id, 'display_type', esc_attr( $_POST['display_type'] ) );
-		
+
 	if ( isset( $_POST['product_cat_thumbnail_id'] ) )
 		update_woocommerce_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) );
 }

@@ -1,6 +1,6 @@
-<?php 
+<?php
 	if(!class_exists('ShareYourCartBase',false)) die('Access Denied');
-	
+
 	// If only the hover is uploaded
     if((!$button_img or !$button_img_width or !$button_img_height) and ($button_img_hover and $button_img_hover_width and $button_img_hover_height)) {
         $button_img = $button_img_hover;
@@ -10,9 +10,9 @@
         $button_img_hover_width = null;
         $button_img_hover_height = null;
     }
-	
+
 	$callbackDataAttr = '';
-	
+
 	if(isset($callback_url) && !empty($callback_url)) {
 		$callbackDataAttr = 'data-syc-callback_url="' . $callback_url .'"';
 	}
@@ -30,7 +30,7 @@
 		height: <?php echo $button_img_height; ?>px;
 		text-indent: -9999px;
 	}
-	
+
 	<?php
 		if($button_img_hover and $button_img_hover_width and $button_img_hover_height) {
 	?>

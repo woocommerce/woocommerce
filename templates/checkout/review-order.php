@@ -42,28 +42,28 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 			<?php if ( $woocommerce->cart->needs_shipping() && $woocommerce->cart->show_shipping() ) : ?>
 
 				<?php do_action('woocommerce_review_order_before_shipping'); ?>
-	
+
 				<tr class="shipping">
 					<th colspan="2"><?php _e( 'Shipping', 'woocommerce' ); ?></th>
 					<td><?php woocommerce_get_template( 'cart/shipping-methods.php', array( 'available_methods' => $available_methods ) ); ?></td>
 				</tr>
-	
+
 				<?php do_action('woocommerce_review_order_after_shipping'); ?>
 
 			<?php endif; ?>
-			
+
 			<?php foreach ( $woocommerce->cart->get_fees() as $fee ) : ?>
-					
+
 				<tr class="fee fee-<?php echo $fee->id ?>">
 					<th colspan="2"><?php echo $fee->name ?></th>
-					<td><?php 
+					<td><?php
 						if ( $woocommerce->cart->display_totals_ex_tax || ! $woocommerce->cart->prices_include_tax )
 							echo woocommerce_price( $fee->amount );
 						else
 							echo woocommerce_price( $fee->amount + $fee->tax );
 					?></td>
 				</tr>
-				
+
 			<?php endforeach; ?>
 
 			<?php
@@ -79,7 +79,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 							foreach ( $taxes as $key => $tax ) {
 								if ( $woocommerce->cart->tax->is_compound( $key ) ) {
-									$has_compound_tax = true; 
+									$has_compound_tax = true;
 									continue;
 								}
 								?>
@@ -100,7 +100,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							}
 
 							foreach ( $taxes as $key => $tax ) {
-								if ( ! $woocommerce->cart->tax->is_compound( $key ) ) 
+								if ( ! $woocommerce->cart->tax->is_compound( $key ) )
 									continue;
 								?>
 								<tr class="tax-rate tax-rate-<?php echo $key; ?>">
@@ -110,7 +110,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 								<?php
 							}
 
-						} else { 
+						} else {
 							?>
 							<tr class="tax">
 								<th colspan="2" colspan="2"><?php _e( 'Tax', 'woocommerce' ); ?></th>
@@ -118,7 +118,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							</tr>
 							<?php
 						}
-						
+
 					} elseif ( get_option( 'woocommerce_display_cart_taxes_if_zero' ) == 'yes' ) {
 						?>
 						<tr class="tax">
@@ -148,11 +148,11 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					<?php
 						// If prices are tax inclusive, show taxes here
 						if ( ! $woocommerce->cart->display_totals_ex_tax && $woocommerce->cart->prices_include_tax ) {
-							
+
 							if ( $woocommerce->cart->get_cart_tax() ) {
 								$tax_string_array = array();
 								$taxes = $woocommerce->cart->get_formatted_taxes();
-								
+
 								if ( sizeof( $taxes ) > 0 ) {
 									foreach ( $taxes as $key => $tax ) {
 										$tax_string_array[] = sprintf( '%s %s', $tax, $woocommerce->cart->tax->get_rate_label( $key ) );
@@ -160,14 +160,14 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 								} else {
 									$tax_string_array[] = sprintf( '%s tax', $tax );
 								}
-								
+
 								if ( ! empty( $tax_string_array ) ) {
-									?><small class="includes_tax"><?php printf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) ); ?></small><?php	
+									?><small class="includes_tax"><?php printf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) ); ?></small><?php
 								}
 							} elseif ( get_option( 'woocommerce_display_cart_taxes_if_zero' ) == 'yes' ) {
 								?><small class="includes_tax"><?php printf( __( '(Includes %s tax)', 'woocommerce' ), woocommerce_price( 0 ) ); ?></small><?php
 							}
-							
+
 						}
 					?>
 				</td>
@@ -206,7 +206,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					// Chosen Method
 					if (sizeof($available_gateways)) :
 						$default_gateway = get_option('woocommerce_default_gateway');
-						
+
 						if ( isset( $woocommerce->session->chosen_payment_method ) && isset( $available_gateways[ $woocommerce->session->chosen_payment_method ] ) ) {
 							$available_gateways[ $woocommerce->session->chosen_payment_method ]->set_current();
 						} elseif ( isset( $available_gateways[ $default_gateway ] ) ) {
@@ -214,7 +214,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 						} else {
 							current( $available_gateways )->set_current();
 						}
-						
+
 					endif;
 					foreach ($available_gateways as $gateway ) :
 						?>
