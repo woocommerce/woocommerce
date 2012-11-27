@@ -809,8 +809,8 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 	}
 
 	// Save meta
-	$meta_keys 		= isset( $_POST['meta_key'] ) ? $_POST['meta_key'] : '';
-	$meta_values 	= isset( $_POST['meta_value'] ) ? $_POST['meta_value'] : '';
+	$meta_keys 		= isset( $_POST['meta_key'] ) ? $_POST['meta_key'] : array();
+	$meta_values 	= isset( $_POST['meta_value'] ) ? $_POST['meta_value'] : array();
 
 	foreach ( $meta_keys as $id => $value ) {
 		$wpdb->update(
