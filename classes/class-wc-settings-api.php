@@ -481,7 +481,8 @@ class WC_Settings_API {
     			$field = $this->{'validate_' . $v['type'] . '_field'}( $k );
     			$this->sanitized_fields[ $k ] = $field;
     		} else {
-    			$this->sanitized_fields[ $k ] = $this->settings[ $k ];
+    			$field = $this->{'validate_text_field'}( $k );
+    			$this->sanitized_fields[ $k ] = $field;
     		}
     	}
     }
