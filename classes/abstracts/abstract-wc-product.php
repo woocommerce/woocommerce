@@ -1193,15 +1193,15 @@ abstract class WC_Product {
      * @param string $size (default: 'shop_thumbnail')
      * @return string
      */
-    function get_image( $size = 'shop_thumbnail' ) {
+    function get_image( $size = 'shop_thumbnail', $attr = array() ) {
     	global $woocommerce;
 
     	$image = '';
 
 		if ( has_post_thumbnail( $this->id ) ) {
-			$image = get_the_post_thumbnail( $this->id, $size );
+			$image = get_the_post_thumbnail( $this->id, $size, $attr );
 		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->id ) ) && has_post_thumbnail( $parent_id ) ) {
-			$image = get_the_post_thumbnail( $parent_id, $size );
+			$image = get_the_post_thumbnail( $parent_id, $size, $attr );
 		} else {
 			$image = woocommerce_placeholder_img( $size );
 		}
