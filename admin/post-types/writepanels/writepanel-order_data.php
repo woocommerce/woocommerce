@@ -538,8 +538,14 @@ function woocommerce_order_totals_meta_box( $post ) {
 
 						if ( $woocommerce->shipping ) {
 							foreach ( $woocommerce->shipping->load_shipping_methods() as $method ) {
-								echo '<option value="' . esc_attr( $method->id ) . '" ' . selected( ( strpos( $chosen_method, $method->id ) === 0 ), true, false ) . '>' . esc_html( $method->get_title() ) . '</option>';
+
 								if ( strpos( $chosen_method, $method->id ) === 0 )
+									$value = $chosen_method;
+								else
+									$value = $method->id;
+
+								echo '<option value="' . esc_attr( $value ) . '" ' . selected( $chosen_method == $value, true, false ) . '>' . esc_html( $method->get_title() ) . '</option>';
+								if ( $chosen_method == $value )
 									$found_method = true;
 							}
 						}
