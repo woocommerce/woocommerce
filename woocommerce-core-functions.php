@@ -1065,10 +1065,16 @@ function woocommerce_paying_customer( $order_id ) {
 
 	$order = new WC_Order( $order_id );
 
-	if ( $order->user_id > 0 ) update_user_meta( $order->user_id, 'paying_customer', 1 );
+	if ( $order->user_id > 0 ) {
+		update_user_meta( $order->user_id, 'paying_customer', 1 );
+
+		$old_count = absint( get_user_meta( $order->user_id, '_order_count', true ) );
+		update_user_meta( $order->user_id, '_order_count', $old_count + 1 );
+	}
+
 }
 
-add_action('woocommerce_order_status_completed', 'woocommerce_paying_customer');
+add_action( 'woocommerce_order_status_completed', 'woocommerce_paying_customer' );
 
 
 /**
