@@ -134,6 +134,22 @@ add_action( 'save_post', 'woocommerce_meta_boxes_save', 1, 2 );
 
 
 /**
+ * Some functions, like the term recount, require the visibility to be set prior. Lets save that here.
+ *
+ * @access public
+ * @param mixed $post_id
+ * @return void
+ */
+function woocommerce_pre_post_update( $post_id ) {
+	if ( isset( $_POST['_visibility'] ) )
+		update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
+	if ( isset( $_POST['_stock_status'] ) )
+		update_post_meta( $post_id, '_stock_status', stripslashes( $_POST['_stock_status'] ) );
+}
+add_action( 'pre_post_update', 'woocommerce_pre_post_update' );
+
+
+/**
  * Product Short Description.
  *
  * Replaces excerpt with a visual editor.
