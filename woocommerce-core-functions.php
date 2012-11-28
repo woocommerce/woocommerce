@@ -1996,20 +1996,18 @@ function _woocommerce_term_recount( $terms, $taxonomy, $callback = true, $terms_
  */
 function woocommerce_recount_after_stock_change( $product_id ) {
 
-	// Get terms
-	$terms = array();
+	$product_cats = $product_tags = array();
+
 	$product_terms = get_the_terms( $product_id, 'product_cat' );
 	foreach ( $product_terms as $term )
-		$terms[ $term->term_id ] = $term->parent;
+		$product_cats[ $term->term_id ] = $term->parent;
 
-	_woocommerce_term_recount( $terms, get_taxonomy( 'product_cat' ), false, false );
-
-	$terms = array();
 	$product_terms = get_the_terms( $product_id, 'product_tag' );
 	foreach ( $product_terms as $term )
-		$terms[ $term->term_id ] = $term->parent;
+		$product_tags[ $term->term_id ] = $term->parent;
 
-	_woocommerce_term_recount( $terms, get_taxonomy( 'product_tag' ), false, false );
+	_woocommerce_term_recount( $product_cats, get_taxonomy( 'product_cat' ), false, false );
+	_woocommerce_term_recount( $product_tags, get_taxonomy( 'product_tag' ), false, false );
 }
 
 add_action( 'woocommerce_product_set_stock_status', 'woocommerce_recount_after_stock_change' );
