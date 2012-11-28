@@ -23,6 +23,11 @@ function woocommerce_status() {
 			'button'	=> __('Clear Transients','woocommerce'),
 			'desc'		=> __( 'This tool will clear the product/shop transients cache.', 'woocommerce' ),
 		),
+		'recount_terms' => array(
+			'name'		=> __('Term counts','woocommerce'),
+			'button'	=> __('Recount Terms','woocommerce'),
+			'desc'		=> __( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', 'woocommerce' ),
+		),
 		'reset_roles' => array(
 			'name'		=> __('Capabilities','woocommerce'),
 			'button'	=> __('Reset Capabilities','woocommerce'),
@@ -50,6 +55,18 @@ function woocommerce_status() {
 						woocommerce_init_roles();
 
 						echo '<div class="updated"><p>' . __( 'Roles successfully reset', 'woocommerce' ) . '</p></div>';
+					break;
+					case "recount_terms" :
+
+						$product_cats = get_terms( 'product_cat', array( 'hide_empty' => false, 'fields' => 'id=>parent' ) );
+
+						_woocommerce_term_recount( $product_cats, get_taxonomy( 'product_cat' ), false );
+
+						$product_tags = get_terms( 'product_tag', array( 'hide_empty' => false, 'fields' => 'id=>parent' ) );
+
+						_woocommerce_term_recount( $product_cats, get_taxonomy( 'product_tag' ), false );
+
+						echo '<div class="updated"><p>' . __( 'Terms successfully recounted', 'woocommerce' ) . '</p></div>';
 					break;
 					default:
 						$action = esc_attr( $_GET['action'] );

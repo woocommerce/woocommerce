@@ -1870,7 +1870,7 @@ function woocommerce_date_format() {
  * @param mixed $taxonomy
  * @return void
  */
-function _woocommerce_term_recount( $terms, $taxonomy ) {
+function _woocommerce_term_recount( $terms, $taxonomy, $terms_are_term_taxonomy_ids = true ) {
 	global $wpdb;
 
 	// Stock query
@@ -1912,29 +1912,44 @@ function _woocommerce_term_recount( $terms, $taxonomy ) {
 	$counted_terms = array();
 	$maybe_count_parents = array();
 
+	// Pre-process term taxonomy ids
+	if ( $terms_are_term_taxonomy_ids ) {
+		$term_ids = array();
+
+		foreach ( (array) $terms as $term ) {
+			$the_term = $wpdb->get_row("SELECT term_id, parent FROM $wpdb->term_taxonomy WHERE term_taxonomy_id = $term AND taxonomy = '$taxonomy->name'");
+			$term_ids[ $the_term->term_id ] = $the_term->parent;
+		}
+
+		$terms = $term_ids;
+	}
+
 	// Count those terms!
-	foreach ( (array) $terms as $term ) {
+	foreach ( (array) $terms as $term_id => $parent_id ) {
 
 		$term_ids 		= array();
-		$counting_term 	= $wpdb->get_row("SELECT term_id, parent FROM $wpdb->term_taxonomy WHERE term_taxonomy_id = $term AND taxonomy = '$taxonomy->name'");
 
 		if ( is_taxonomy_hierarchical( $taxonomy->name ) ) {
 
 			// Grab the parents to count later
-			$parent = $counting_term->parent;
+			$parent = $parent_id;
 
-			while ( $parent > 0 ) {
+			while ( ! empty( $parent ) && $parent > 0 ) {
 				$maybe_count_parents[] = $parent;
 
 				$parent_term = get_term_by( 'id', $parent, $taxonomy->name );
-				$parent = $parent_term->parent;
+
+				if ( $parent_term )
+					$parent = $parent_term->parent;
+				else
+					$parent = 0;
 			}
 
 			// We need to get the $term's hierarchy so we can count its children too
-			$term_ids   = get_term_children( $counting_term->term_id, $taxonomy->name );
+			$term_ids   = get_term_children( $term_id, $taxonomy->name );
 		}
 
-		$term_ids[] = absint( $counting_term->term_id );
+		$term_ids[] = absint( $term_id );
 
 		// Generate term query
 		$term_query = 'AND term.term_id IN ( ' . implode( ',', $term_ids ) . ' )';
@@ -1942,9 +1957,9 @@ function _woocommerce_term_recount( $terms, $taxonomy ) {
 		// Get the count
 		$count = $wpdb->get_var( $count_query . $term_query );
 
-		update_woocommerce_term_meta( $counting_term->term_id, 'product_count_' . $taxonomy->name, absint( $count ) );
+		update_woocommerce_term_meta( $term_id, 'product_count_' . $taxonomy->name, absint( $count ) );
 
-		$counted_terms[] = $counting_term->term_id;
+		$counted_terms[] = $term_id;
 	}
 
 	// Re-count parents
