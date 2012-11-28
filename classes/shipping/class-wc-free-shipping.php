@@ -42,10 +42,20 @@ class WC_Free_Shipping extends WC_Shipping_Method {
 		// Define user set variables
         $this->enabled		= $this->settings['enabled'];
 		$this->title 		= $this->settings['title'];
-		$this->min_amount 	= $this->settings['min_amount'];
+		$this->min_amount 	= $this->settings['min_amount'] ? $this->settings['min_amount'] : 0;
 		$this->availability = $this->settings['availability'];
 		$this->countries 	= $this->settings['countries'];
-		$this->requires_coupon 	= $this->settings['requires_coupon'];
+		$this->requires		= isset( $this->settings['requires'] ) ? $this->settings['requires'] : '';
+
+		// Backwards compat
+		if ( ! isset( $this->settings['requires'] ) ) {
+			if ( $this->settings['requires_coupon'] && $this->min_amount )
+				$this->requires = 'either';
+			elseif ( $this->settings['requires_coupon'] )
+				$this->requires = 'coupon';
+			elseif ( $this->min_amount )
+				$this->requires = 'min_amount';
+		}
 
 		// Actions
 		add_action('woocommerce_update_options_shipping_'.$this->id, array(&$this, 'process_admin_options'));
@@ -74,23 +84,6 @@ class WC_Free_Shipping extends WC_Shipping_Method {
 							'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 							'default'		=> __( 'Free Shipping', 'woocommerce' )
 						),
-			'min_amount' => array(
-							'title' 		=> __( 'Minimum Order Amount', 'woocommerce' ),
-							'type' 			=> 'number',
-							'custom_attributes' => array(
-								'step'	=> 'any',
-								'min'	=> '0'
-							),
-							'description' 	=> __( 'Users will need to spend this amount to get free shipping. Leave blank to disable.', 'woocommerce' ),
-							'default' 		=> ''
-						),
-			'requires_coupon' => array(
-							'title' 		=> __( 'Coupon', 'woocommerce' ),
-							'type' 			=> 'checkbox',
-							'label' 		=> __( 'Free shipping requires a free shipping coupon', 'woocommerce' ),
-							'description' 	=> __( 'Users will need to enter a valid free shipping coupon code to use this method. If a coupon is used, the minimum order amount will be ignored.', 'woocommerce' ),
-							'default' 		=> 'no'
-						),
 			'availability' => array(
 							'title' 		=> __( 'Method availability', 'woocommerce' ),
 							'type' 			=> 'select',
@@ -108,6 +101,28 @@ class WC_Free_Shipping extends WC_Shipping_Method {
 							'css'			=> 'width: 450px;',
 							'default' 		=> '',
 							'options'		=> $woocommerce->countries->countries
+						),
+			'requires' => array(
+							'title' 		=> __( 'Free Shipping Requires...', 'woocommerce' ),
+							'type' 			=> 'select',
+							'default' 		=> '',
+							'options'		=> array(
+								'' 				=> __( 'N/A', 'woocommerce' ),
+								'coupon'		=> __( 'A valid free shipping coupon', 'woocommerce' ),
+								'min_amount' 	=> __( 'A minimum order amount (defined below)', 'woocommerce' ),
+								'either' 		=> __( 'A minimum order amount OR a coupon', 'woocommerce' ),
+								'both' 			=> __( 'A minimum order amount AND a coupon', 'woocommerce' ),
+							)
+						),
+			'min_amount' => array(
+							'title' 		=> __( 'Minimum Order Amount', 'woocommerce' ),
+							'type' 			=> 'number',
+							'custom_attributes' => array(
+								'step'	=> 'any',
+								'min'	=> '0'
+							),
+							'description' 	=> __( 'Users will need to spend this amount to get free shipping (if enabled above).', 'woocommerce' ),
+							'default' 		=> '0'
 						)
 			);
 
@@ -163,36 +178,52 @@ class WC_Free_Shipping extends WC_Shipping_Method {
 				return false;
 
 		// Enabled logic
-		$is_available = true;
+		$is_available 		= false;
+		$has_coupon 		= false;
+		$has_met_min_amount = false;
 
-		if ( $this->requires_coupon == "yes" ) {
+		if ( in_array( $this->requires, array( 'coupon', 'either', 'both' ) ) ) {
 
 			if ( $woocommerce->cart->applied_coupons ) {
 				foreach ($woocommerce->cart->applied_coupons as $code) {
 					$coupon = new WC_Coupon( $code );
 
 					if ( $coupon->enable_free_shipping() )
-						return true;
+						$has_coupon = true;
 				}
 			}
-
-			// No coupon found, as it stands, free shipping is disabled
-			$is_available = false;
-
 		}
 
-		if ( isset( $woocommerce->cart->cart_contents_total ) && ! empty( $this->min_amount ) ) {
+		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ) ) ) {
 
-			if ( $woocommerce->cart->prices_include_tax )
-				$total = $woocommerce->cart->tax_total + $woocommerce->cart->cart_contents_total;
-			else
-				$total = $woocommerce->cart->cart_contents_total;
+			if ( isset( $woocommerce->cart->cart_contents_total ) ) {
 
-			if ( $this->min_amount > $total )
-				$is_available = false;
-			else
+				if ( $woocommerce->cart->prices_include_tax )
+					$total = $woocommerce->cart->tax_total + $woocommerce->cart->cart_contents_total;
+				else
+					$total = $woocommerce->cart->cart_contents_total;
+
+				if ( $total >= $this->min_amount )
+					$has_met_min_amount = true;
+			}
+		}
+
+		switch ( $this->requires ) {
+			case 'min_amount' :
+				if ( $has_met_min_amount ) $is_available = true;
+			break;
+			case 'coupon' :
+				if ( $has_coupon ) $is_available = true;
+			break;
+			case 'both' :
+				if ( $has_met_min_amount && $has_coupon ) $is_available = true;
+			break;
+			case 'either' :
+				if ( $has_met_min_amount || $has_coupon ) $is_available = true;
+			break;
+			default :
 				$is_available = true;
-
+			break;
 		}
 
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available );

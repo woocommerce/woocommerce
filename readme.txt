@@ -184,6 +184,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - is_order_received_page() courtesy of Lee Willis.
 * Feature - Inline saving of attributes to make creating variable products easier.
 * Feature - Zip code restriction for local pickup.
+* Feature - New free shipping logic - coupon, min-amount, Both or Either.
 
 * Templating - Revised pagination, sorting areas (sorting is now above products, numbered pagination below) and added a result count.
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
