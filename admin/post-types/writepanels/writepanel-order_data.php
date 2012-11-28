@@ -340,7 +340,7 @@ function woocommerce_order_items_meta_box( $post ) {
 
 				<?php
 					// List order items
-					$order_items = $order->get_items( array( 'line_item', 'fee' ) );
+					$order_items = $order->get_items( apply_filters( 'woocommerce_admin_order_item_types', array( 'line_item', 'fee' ) ) );
 
 					foreach ( $order_items as $item_id => $item ) {
 
@@ -355,6 +355,8 @@ function woocommerce_order_items_meta_box( $post ) {
 								include( 'order-fee-html.php' );
 							break;
 						}
+
+						do_action( 'woocommerce_order_item_' . $item['type'] . '_html' );
 
 					}
 				?>
