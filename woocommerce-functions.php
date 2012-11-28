@@ -590,7 +590,18 @@ function woocommerce_process_login() {
 		if ($woocommerce->error_count()==0) :
 
 			$creds = array();
-			$creds['user_login'] 	= $_POST['username'];
+
+			if ( is_email( $_POST['username'] ) ) {
+				$user = get_user_by( 'email', $_POST['username'] );
+
+				if ( isset( $user->user_login ) )
+					$creds['user_login'] 	= $user->user_login;
+				else
+					$creds['user_login'] 	= '';
+			} else {
+				$creds['user_login'] 	= $_POST['username'];
+			}
+
 			$creds['user_password'] = $_POST['password'];
 			$creds['remember'] = true;
 			$secure_cookie = is_ssl() ? true : false;
