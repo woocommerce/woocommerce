@@ -1861,3 +1861,140 @@ function woocommerce_get_order_item_meta( $item_id, $key, $single = true ) {
 function woocommerce_date_format() {
 	return apply_filters( 'woocommerce_date_format', get_option( 'date_format' ) );
 }
+
+/**
+ * Function for recounting product terms, ignoring hidden products.
+ *
+ * @access public
+ * @param mixed $term
+ * @param mixed $taxonomy
+ * @return void
+ */
+function _woocommerce_term_recount( $terms, $taxonomy ) {
+	global $wpdb;
+
+	// Stock query
+	if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' ) {
+		$stock_join  = "LEFT JOIN {$wpdb->postmeta} AS meta_stock ON posts.ID = meta_stock.post_id";
+		$stock_query = "
+		AND (
+			meta_stock.meta_key = '_stock_status'
+			AND
+			meta_stock.meta_value = 'instock'
+		)";
+	} else {
+		$stock_query = $stock_join = '';
+	}
+
+	// Main query
+	$count_query = $wpdb->prepare( "
+		SELECT COUNT( DISTINCT posts.ID ) FROM {$wpdb->posts} as posts
+
+		LEFT JOIN {$wpdb->postmeta} AS meta_visibilty ON posts.ID = meta_visibilty.post_id
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
+		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+		$stock_join
+
+		WHERE 	posts.post_status 	= 'publish'
+		AND 	posts.post_type 	= 'product'
+		AND 	(
+			meta_visibilty.meta_key = '_visibility'
+			AND
+			meta_visibilty.meta_value IN ( 'visible', 'catalog' )
+		)
+		AND 	tax.taxonomy	= %s
+		$stock_query
+	", $taxonomy->name );
+
+	// Store terms + counts here
+	$term_counts = array();
+	$counted_terms = array();
+	$maybe_count_parents = array();
+
+	// Count those terms!
+	foreach ( (array) $terms as $term ) {
+
+		$term_ids 		= array();
+		$counting_term 	= $wpdb->get_row("SELECT term_id, parent FROM $wpdb->term_taxonomy WHERE term_taxonomy_id = $term AND taxonomy = '$taxonomy->name'");
+
+		if ( is_taxonomy_hierarchical( $taxonomy->name ) ) {
+
+			// Grab the parents to count later
+			$parent = $counting_term->parent;
+
+			while ( $parent > 0 ) {
+				$maybe_count_parents[] = $parent;
+
+				$parent_term = get_term_by( 'id', $parent, $taxonomy->name );
+				$parent = $parent_term->parent;
+			}
+
+			// We need to get the $term's hierarchy so we can count its children too
+			$term_ids   = get_term_children( $counting_term->term_id, $taxonomy->name );
+		}
+
+		$term_ids[] = absint( $counting_term->term_id );
+
+		// Generate term query
+		$term_query = 'AND term.term_id IN ( ' . implode( ',', $term_ids ) . ' )';
+
+		// Get the count
+		$count = $wpdb->get_var( $count_query . $term_query );
+
+		update_woocommerce_term_meta( $counting_term->term_id, 'product_count_' . $taxonomy->name, absint( $count ) );
+
+		$counted_terms[] = $counting_term->term_id;
+	}
+
+	// Re-count parents
+	if ( is_taxonomy_hierarchical( $taxonomy->name ) ) {
+
+		$terms = array_diff( $maybe_count_parents, $counted_terms );
+
+		foreach ( (array) $terms as $term ) {
+
+			$term_ids   = get_term_children( $term, $taxonomy->name );
+			$term_ids[] = $term;
+
+			// Generate term query
+			$term_query = 'AND term.term_id IN ( ' . implode( ',', $term_ids ) . ' )';
+
+			// Get the count
+			$count = $wpdb->get_var( $count_query . $term_query );
+
+			update_woocommerce_term_meta( $term, 'product_count_' . $taxonomy->name, absint( $count ) );
+		}
+
+	}
+
+	// Standard callback
+	_update_post_term_count( $terms, $taxonomy );
+}
+
+/**
+ * woocommerce_change_term_counts function.
+ *
+ * @access public
+ * @param mixed $terms
+ * @param mixed $taxonomies
+ * @param mixed $args
+ * @return void
+ */
+function woocommerce_change_term_counts( $terms, $taxonomies, $args ) {
+
+	if ( ! in_array( $taxonomies[0], apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag' ) ) ) )
+		return $terms;
+
+	foreach ( $terms as &$term ) {
+		$count = get_woocommerce_term_meta( $term->term_id, 'product_count_' . $taxonomies[0] , true );
+
+		if ( $count != '' )
+			$term->count = $count;
+	}
+
+	return $terms;
+}
+
+if ( ! is_admin() && ! is_ajax() )
+	add_filter( 'get_terms', 'woocommerce_change_term_counts', 10, 3 );

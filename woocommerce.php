@@ -679,7 +679,7 @@ class Woocommerce {
 	        array('product'),
 	        array(
 	            'hierarchical' 			=> true,
-	            'update_count_callback' => '_update_post_term_count',
+	            'update_count_callback' => '_woocommerce_term_recount',
 	            'label' 				=> __( 'Product Categories', 'woocommerce'),
 	            'labels' => array(
 	                    'name' 				=> __( 'Product Categories', 'woocommerce'),
@@ -710,7 +710,7 @@ class Woocommerce {
 	        array('product'),
 	        array(
 	            'hierarchical' 			=> false,
-	            'update_count_callback' => '_update_post_term_count',
+	            'update_count_callback' => '_woocommerce_term_recount',
 	            'label' 				=> __( 'Product Tags', 'woocommerce'),
 	            'labels' => array(
 	                    'name' 				=> __( 'Product Tags', 'woocommerce'),
