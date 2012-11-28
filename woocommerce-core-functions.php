@@ -1870,7 +1870,7 @@ function woocommerce_date_format() {
  * @param mixed $taxonomy
  * @return void
  */
-function _woocommerce_term_recount( $terms, $taxonomy, $terms_are_term_taxonomy_ids = true ) {
+function _woocommerce_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_taxonomy_ids = true ) {
 	global $wpdb;
 
 	// Stock query
@@ -1984,8 +1984,35 @@ function _woocommerce_term_recount( $terms, $taxonomy, $terms_are_term_taxonomy_
 	}
 
 	// Standard callback
-	_update_post_term_count( $terms, $taxonomy );
+	if ( $callback )
+		_update_post_term_count( $terms, $taxonomy );
 }
+
+/**
+ * woocommerce_recount_after_stock_change function.
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_recount_after_stock_change( $product_id ) {
+
+	// Get terms
+	$terms = array();
+	$product_terms = get_the_terms( $product_id, 'product_cat' );
+	foreach ( $product_terms as $term )
+		$terms[ $term->term_id ] = $term->parent;
+
+	_woocommerce_term_recount( $terms, get_taxonomy( 'product_cat' ), false, false );
+
+	$terms = array();
+	$product_terms = get_the_terms( $product_id, 'product_tag' );
+	foreach ( $product_terms as $term )
+		$terms[ $term->term_id ] = $term->parent;
+
+	_woocommerce_term_recount( $terms, get_taxonomy( 'product_tag' ), false, false );
+}
+
+add_action( 'woocommerce_product_set_stock_status', 'woocommerce_recount_after_stock_change' );
 
 /**
  * woocommerce_change_term_counts function.

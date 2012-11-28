@@ -185,9 +185,11 @@ abstract class WC_Product {
 
 			// Out of stock attribute
 			if ( $this->managing_stock() && ! $this->backorders_allowed() && $this->get_total_stock() <= 0 )
-				update_post_meta( $this->id, '_stock_status', 'outofstock' );
+				$this->set_stock_status( 'outofstock' );
 
 			$woocommerce->clear_product_transients( $this->id ); // Clear transient
+
+			do_action(  );
 
 			return $this->get_stock_quantity();
 		}
@@ -210,11 +212,28 @@ abstract class WC_Product {
 
 			// Out of stock attribute
 			if ( $this->managing_stock() && ( $this->backorders_allowed() || $this->get_total_stock() > 0 ) )
-				update_post_meta($this->id, '_stock_status', 'instock');
+				$this->set_stock_status( 'instock' );
 
 			$woocommerce->clear_product_transients( $this->id ); // Clear transient
 
 			return $this->get_stock_quantity();
+		}
+	}
+
+
+	/**
+	 * set_stock_status function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function set_stock_status( $status ) {
+		$status = 'outofstock' ? 'outofstock' : 'instock';
+
+		if ( $this->stock_status != $status ) {
+			update_post_meta( $this->id, '_stock_status', $status );
+
+			do_action( 'woocommerce_product_set_stock_status', $this->id, $status );
 		}
 	}
 

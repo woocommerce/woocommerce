@@ -333,11 +333,8 @@ class WC_Product_Variation extends WC_Product {
 					$parent_product = get_product( $this->id );
 
 					// Only continue if the parent has backorders off
-					if ( ! $parent_product->backorders_allowed() && $parent_product->get_total_stock() <= 0 ) {
-
-						update_post_meta( $this->id, '_stock_status', 'outofstock' );
-
-					}
+					if ( ! $parent_product->backorders_allowed() && $parent_product->get_total_stock() <= 0 )
+						$this->set_stock_status( 'outofstock' );
 
 				}
 
@@ -369,7 +366,7 @@ class WC_Product_Variation extends WC_Product {
 
 				// Parents out of stock attribute
 				if ( $this->is_in_stock() )
-					update_post_meta( $this->id, '_stock_status', 'instock' );
+					$this->set_stock_status( 'instock' );
 
 				return apply_filters( 'woocommerce_stock_amount', $this->stock );
 			endif;

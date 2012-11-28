@@ -136,9 +136,8 @@ class WC_Product_Variable extends WC_Product {
 			update_post_meta($this->id, '_stock', $this->stock);
 
 			// Out of stock attribute
-			if ($this->managing_stock() && !$this->backorders_allowed() && $this->get_total_stock()<=0) :
-				update_post_meta($this->id, '_stock_status', 'outofstock');
-			endif;
+			if ($this->managing_stock() && !$this->backorders_allowed() && $this->get_total_stock()<=0)
+				$this->set_stock_status( 'outofstock' );
 
 			$woocommerce->clear_product_transients( $this->id ); // Clear transient
 
@@ -163,9 +162,8 @@ class WC_Product_Variable extends WC_Product {
 			update_post_meta($this->id, '_stock', $this->stock);
 
 			// Out of stock attribute
-			if ($this->managing_stock() && ($this->backorders_allowed() || $this->get_total_stock()>0)) :
-				update_post_meta($this->id, '_stock_status', 'instock');
-			endif;
+			if ($this->managing_stock() && ($this->backorders_allowed() || $this->get_total_stock()>0))
+				$this->set_stock_status( 'instock' );
 
 			$woocommerce->clear_product_transients( $this->id ); // Clear transient
 
