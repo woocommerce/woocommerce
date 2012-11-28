@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 global $wpdb, $woocommerce;
 
 // Update woocommerce_downloadable_product_permissions table to include order ID's as well as keys
-$results = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_downloadable_product_permissions WHERE order_id = 0;" );
+$results = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = 0;" );
 
 if ( $results ) foreach ( $results as $result ) {
 

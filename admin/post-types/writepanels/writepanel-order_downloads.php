@@ -27,10 +27,10 @@ function woocommerce_order_downloads_meta_box() {
 		<div class="wc-metaboxes">
 
 			<?php
-				$download_permissions = $wpdb->get_results( "
+				$download_permissions = $wpdb->get_results( $wpdb->prepare( "
 					SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-					WHERE order_id = $post->ID ORDER BY product_id
-				" );
+					WHERE order_id = %d ORDER BY product_id
+				", $post->ID ) );
 
 				$product = null;
 				if ( $download_permissions && sizeof( $download_permissions ) > 0 ) foreach ( $download_permissions as $download ) {
