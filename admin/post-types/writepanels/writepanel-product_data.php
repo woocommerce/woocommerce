@@ -170,7 +170,7 @@ function woocommerce_product_data_box() {
 
 			echo '</div>';
 
-			echo '<div class="options_group show_if_simple show_if_variable">';
+			echo '<div class="options_group show_if_simple show_if_external show_if_variable">';
 
 				// Tax
 				woocommerce_wp_select( array( 'id' => '_tax_status', 'label' => __( 'Tax Status', 'woocommerce' ), 'options' => array(

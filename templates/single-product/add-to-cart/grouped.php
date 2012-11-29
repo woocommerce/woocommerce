@@ -36,13 +36,9 @@ foreach ( $product->get_children() as $child_id ) {
 			<?php foreach ( $grouped_products as $child_product ) : ?>
 				<tr>
 					<td>
-						<?php if ( $child_product['product']->is_type('external') ) :
+						<?php if ( $child_product['product']->is_type('external') ) : ?>
 
-							$product_url = get_post_meta( $child_product['product']->id, '_product_url', true );
-							$button_text = get_post_meta( $child_product['product']->id, '_button_text', true );
-							?>
-
-							<a href="<?php echo esc_url( $product_url ); ?>" rel="nofollow" class="button alt"><?php echo apply_filters('single_add_to_cart_text', esc_html( $button_text ), 'external'); ?></a>
+							<a href="<?php echo esc_url( $child_product['product']->get_product_url() ); ?>" rel="nofollow" class="button alt"><?php echo apply_filters('single_add_to_cart_text', esc_html( $child_product['product']->get_button_text() ), 'external'); ?></a>
 
 						<?php elseif ( ! $quantites_required ) : ?>
 

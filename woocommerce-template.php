@@ -645,14 +645,11 @@ if ( ! function_exists( 'woocommerce_external_add_to_cart' ) ) {
 	function woocommerce_external_add_to_cart() {
 		global $product;
 
-		$product_url = get_post_meta( $product->id, '_product_url', true  );
-		$button_text = get_post_meta( $product->id, '_button_text', true  );
-
-		if ( ! $product_url ) return;
+		if ( ! $product->get_product_url() ) return;
 
 		woocommerce_get_template( 'single-product/add-to-cart/external.php', array(
-				'product_url' => $product_url,
-				'button_text' => ( $button_text ) ? $button_text : __( 'Buy product', 'woocommerce' ) ,
+				'product_url' => $product->get_product_url(),
+				'button_text' => $product->get_button_text()
 			) );
 	}
 }

@@ -5,7 +5,7 @@
  * The WooCommerce product variation class handles product variation data.
  *
  * @class 		WC_Product_Variation
- * @version		1.6.4
+ * @version		1.7.0
  * @package		WooCommerce/Classes
  * @author 		WooThemes
  */
@@ -56,6 +56,12 @@ class WC_Product_Variation extends WC_Product {
 	/** @var bool True if the variation has a tax class. */
 	var $variation_has_tax_class;
 
+	/** @var array Array of custom fields (meta) containing product data. */
+	var $parent_custom_fields;
+
+	/** @var object Parent Variable product object. */
+	var $parent;
+
 	/**
 	 * Loads all product data from custom fields
 	 *
@@ -66,130 +72,130 @@ class WC_Product_Variation extends WC_Product {
 	 */
 	function __construct( $variation, $args = array() ) {
 
+		$this->product_type = 'variable';
+
 		if ( is_object( $variation ) ) {
 			$this->variation_id = absint( $variation->ID );
 		} else {
 			$this->variation_id = absint( $variation );
 		}
 
-		/* Get main product data from parent */
-		$this->id = ! empty( $args['parent_id'] ) ? intval( $args['parent_id'] ) : wp_get_post_parent_id( $this->variation_id );
+		/* Get main product data from parent (args) */
+		$this->id   = ! empty( $args['parent_id'] ) ? intval( $args['parent_id'] ) : wp_get_post_parent_id( $this->variation_id );
 
-		// The post doesn't have a parent id, so it must be the parent
+		// The post doesn't have a parent id, therefore its invalid.
 		if ( empty( $this->id ) ) return false;
 
-		$product_custom_fields = get_post_custom( $this->variation_id );
+		// Get post data
+		$this->parent = ! empty( $args['parent'] ) ? $args['parent'] : get_product( $this->id );
+		$this->post   = $this->parent->post;
 
+		// Get custom fields
+		$this->product_custom_fields = get_post_custom( $this->variation_id );
+		$this->parent_custom_fields  = ! empty( $args['meta'] ) ? $args['meta'] : get_post_custom( $this->id );
+
+		$this->load_product_data( array(
+			'sku'           => '',
+			'price'         => 0,
+			'visibility'    => 'hidden',
+			'stock'         => 0,
+			'stock_status'  => 'instock',
+			'backorders'    => 'no',
+			'manage_stock'  => 'no',
+			'sale_price'    => '',
+			'regular_price' => '',
+			'weight'        => '',
+			'length'        => '',
+			'width'         => '',
+			'height'        => '',
+			'tax_status'    => 'taxable',
+			'tax_class'     => '',
+			'upsell_ids'    => array(),
+			'crosssell_ids' => array()
+		), $this->parent_custom_fields );
+
+		// Get the variation attributes from meta
 		$this->variation_data = array();
 
-		foreach ( $product_custom_fields as $name => $value ) {
+		foreach ( $this->product_custom_fields as $name => $value ) {
 
 			if ( ! strstr( $name, 'attribute_' ) ) continue;
 
 			$this->variation_data[ $name ] = $value[0];
-
 		}
 
-		$parent_custom_fields = ! empty( $args['meta'] ) ? $args['meta'] : get_post_custom( $this->id );
-
-		// Define the data we're going to load from the parent: Key => Default value
-		$load_data = array(
-			'sku'			=> '',
-			'price' 		=> 0,
-			'visibility'	=> 'hidden',
-			'stock'			=> 0,
-			'stock_status'	=> 'instock',
-			'backorders'	=> 'no',
-			'manage_stock'	=> 'no',
-			'sale_price'	=> '',
-			'regular_price' => '',
-			'weight'		=> '',
-			'length'		=> '',
-			'width'			=> '',
-			'height'		=> '',
-			'tax_status'	=> 'taxable',
-			'tax_class'		=> '',
-			'upsell_ids'	=> array(),
-			'crosssell_ids' => array()
-		);
-
-		// Load the data from the custom fields
-		foreach ( $load_data as $key => $default )
-			$this->$key = ( isset( $parent_custom_fields['_' . $key ][0] ) && $parent_custom_fields['_' . $key ][0] !== '' ) ? $parent_custom_fields['_' . $key ][0] : $default;
-
-		$this->product_type = 'variable';
-
+		// Now get variation meta and override the parent variable product
 		$this->variation_has_sku = $this->variation_has_stock = $this->variation_has_weight = $this->variation_has_length = $this->variation_has_width = $this->variation_has_height = $this->variation_has_price = $this->variation_has_regular_price = $this->variation_has_sale_price = false;
 
 		/* Override parent data with variation */
-		if ( isset( $product_custom_fields['_sku'][0] ) && ! empty( $product_custom_fields['_sku'][0] ) ) {
+		if ( ! empty( $this->product_custom_fields['_sku'][0] ) ) {
 			$this->variation_has_sku = true;
-			$this->sku = $product_custom_fields['_sku'][0];
+			$this->sku               = $this->product_custom_fields['_sku'][0];
 		}
 
-		if ( isset( $product_custom_fields['_stock'][0] ) && $product_custom_fields['_stock'][0] !== '' ) {
+		if ( isset( $this->product_custom_fields['_stock'][0] ) && $this->product_custom_fields['_stock'][0] !== '' ) {
 			$this->variation_has_stock = true;
-			$this->manage_stock = 'yes';
-			$this->stock = $product_custom_fields['_stock'][0];
+			$this->manage_stock        = 'yes';
+			$this->stock               = $this->product_custom_fields['_stock'][0];
 		}
 
-		if ( isset( $product_custom_fields['_weight'][0] ) && $product_custom_fields['_weight'][0] !== '' ) {
+		if ( isset( $this->product_custom_fields['_weight'][0] ) && $this->product_custom_fields['_weight'][0] !== '' ) {
 			$this->variation_has_weight = true;
-			$this->weight = $product_custom_fields['_weight'][0];
+			$this->weight               = $this->product_custom_fields['_weight'][0];
 		}
 
-		if ( isset( $product_custom_fields['_length'][0] ) && $product_custom_fields['_length'][0] !== '' ) {
+		if ( isset( $this->product_custom_fields['_length'][0] ) && $this->product_custom_fields['_length'][0] !== '' ) {
 			$this->variation_has_length = true;
-			$this->length = $product_custom_fields['_length'][0];
+			$this->length               = $this->product_custom_fields['_length'][0];
 		}
 
-		if ( isset( $product_custom_fields['_width'][0] ) && $product_custom_fields['_width'][0] !== '' ) {
+		if ( isset( $this->product_custom_fields['_width'][0] ) && $this->product_custom_fields['_width'][0] !== '' ) {
 			$this->variation_has_width = true;
-			$this->width = $product_custom_fields['_width'][0];
+			$this->width               = $this->product_custom_fields['_width'][0];
 		}
 
-		if ( isset( $product_custom_fields['_height'][0] ) && $product_custom_fields['_height'][0] !== '' ) {
+		if ( isset( $this->product_custom_fields['_height'][0] ) && $this->product_custom_fields['_height'][0] !== '' ) {
 			$this->variation_has_height = true;
-			$this->height = $product_custom_fields['_height'][0];
+			$this->height               = $this->product_custom_fields['_height'][0];
 		}
 
-		if ( isset( $product_custom_fields['_downloadable'][0] ) && $product_custom_fields['_downloadable'][0] == 'yes' ) {
+		if ( isset( $this->product_custom_fields['_downloadable'][0] ) && $this->product_custom_fields['_downloadable'][0] == 'yes' ) {
 			$this->downloadable = 'yes';
 		} else {
 			$this->downloadable = 'no';
 		}
 
-		if ( isset( $product_custom_fields['_virtual'][0] ) && $product_custom_fields['_virtual'][0] == 'yes' ) {
+		if ( isset( $this->product_custom_fields['_virtual'][0] ) && $this->product_custom_fields['_virtual'][0] == 'yes' ) {
 			$this->virtual = 'yes';
 		} else {
 			$this->virtual = 'no';
 		}
 
-		if ( isset( $product_custom_fields['_tax_class'][0] ) ) {
+		if ( isset( $this->product_custom_fields['_tax_class'][0] ) ) {
 			$this->variation_has_tax_class = true;
-			$this->tax_class = $product_custom_fields['_tax_class'][0];
+			$this->tax_class               = $this->product_custom_fields['_tax_class'][0];
 		}
 
-		if ( isset( $product_custom_fields['_price'][0] ) && $product_custom_fields['_price'][0] !== '' ) {
+		if ( isset( $this->product_custom_fields['_price'][0] ) && $this->product_custom_fields['_price'][0] !== '' ) {
 			$this->variation_has_price = true;
-			$this->price = $product_custom_fields['_price'][0];
+			$this->price               = $this->product_custom_fields['_price'][0];
 		}
 
-		if ( isset( $product_custom_fields['_regular_price'][0] ) && $product_custom_fields['_regular_price'][0] !== '' ) {
+		if ( isset( $this->product_custom_fields['_regular_price'][0] ) && $this->product_custom_fields['_regular_price'][0] !== '' ) {
 			$this->variation_has_regular_price = true;
-			$this->regular_price = $product_custom_fields['_regular_price'][0];
+			$this->regular_price               = $this->product_custom_fields['_regular_price'][0];
 		}
 
-		if ( isset( $product_custom_fields['_sale_price'][0] ) && $product_custom_fields['_sale_price'][0] !== '' ) {
+		if ( isset( $this->product_custom_fields['_sale_price'][0] ) && $this->product_custom_fields['_sale_price'][0] !== '' ) {
 			$this->variation_has_sale_price = true;
-			$this->sale_price = $product_custom_fields['_sale_price'][0];
+			$this->sale_price               = $this->product_custom_fields['_sale_price'][0];
 		}
 
 		// Backwards compat for prices
 		if ( $this->variation_has_price && ! $this->variation_has_regular_price ) {
 			update_post_meta( $this->variation_id, '_regular_price', $this->price );
 			$this->variation_has_regular_price = true;
-			$this->regular_price = $this->price;
+			$this->regular_price               = $this->price;
 
 			if ( $this->variation_has_sale_price && $this->sale_price < $this->regular_price ) {
 				update_post_meta( $this->variation_id, '_price', $this->sale_price );
@@ -197,11 +203,11 @@ class WC_Product_Variation extends WC_Product {
 			}
 		}
 
-		if ( isset( $product_custom_fields['_sale_price_dates_from'][0] ) )
-			$this->sale_price_dates_from = $product_custom_fields['_sale_price_dates_from'][0];
+		if ( isset( $this->product_custom_fields['_sale_price_dates_from'][0] ) )
+			$this->sale_price_dates_from = $this->product_custom_fields['_sale_price_dates_from'][0];
 
-		if ( isset( $product_custom_fields['_sale_price_dates_to'][0] ) )
-			$this->sale_price_dates_from = $product_custom_fields['_sale_price_dates_to'][0];
+		if ( isset( $this->product_custom_fields['_sale_price_dates_to'][0] ) )
+			$this->sale_price_dates_from = $this->product_custom_fields['_sale_price_dates_to'][0];
 
 		$this->total_stock = $this->stock;
 
@@ -266,7 +272,7 @@ class WC_Product_Variation extends WC_Product {
 			$price = '';
 
 			if ( $this->price !== '' ) {
-				if ( $this->price == $this->sale_price ) {
+				if ( $this->price == $this->sale_price && $this->sale_price < $this->regular_price ) {
 					$price .= '<del>' . woocommerce_price( $this->regular_price ) . '</del> <ins>' . woocommerce_price( $this->sale_price ) . '</ins>';
 					$price = apply_filters( 'woocommerce_variation_sale_price_html', $price, $this );
 				} else {
@@ -457,7 +463,7 @@ class WC_Product_Variation extends WC_Product {
     			update_post_meta( $this->variation_id, '_price', $this->price );
 
     			// Variable product prices and sale status are affected by children
-    			$this->variable_product_sync();
+    			$this->parent->variable_product_sync();
     		}
 
     	}
@@ -475,7 +481,7 @@ class WC_Product_Variation extends WC_Product {
 				update_post_meta( $this->variation_id, '_sale_price_dates_to', '' );
 
 				// Variable product prices and sale status are affected by children
-    			$this->variable_product_sync();
+    			$this->parent->variable_product_sync();
 			}
 
     	}

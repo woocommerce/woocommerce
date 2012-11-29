@@ -2,7 +2,7 @@
 /**
  * External Product Class
  *
- * External products cannot be bought; they link offsite.
+ * External products cannot be bought; they link offsite. Extends simple products.
  *
  * @class 		WC_Product_External
  * @version		1.7.0
@@ -11,7 +11,13 @@
  */
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class WC_Product_External extends WC_Product {
+class WC_Product_External extends WC_Product_Simple {
+
+	/** @var string URL to external product. */
+	var $product_url;
+
+	/** @var string Text for the buy/link button. */
+	var $button_text;
 
 	/**
 	 * __construct function.
@@ -22,38 +28,23 @@ class WC_Product_External extends WC_Product {
 	 */
 	function __construct( $product, $args ) {
 
-		parent::__construct( $product );
+		parent::__construct( $product, $args );
 
 		$this->product_type = 'external';
-		$this->product_custom_fields = get_post_custom( $this->id );
+		$this->downloadable = 'no';
+		$this->virtual      = 'no';
+		$this->stock        = '';
+		$this->stock_status = 'instock';
+		$this->manage_stock = 'no';
+		$this->weight       = '';
+		$this->length       = '';
+		$this->width        = '';
+		$this->height       = '';
 
-		// Load data from custom fields
 		$this->load_product_data( array(
-			'sku'			=> '',
-			'downloadable' 	=> 'no',
-			'virtual' 		=> 'no',
-			'price' 		=> '',
-			'visibility'	=> 'hidden',
-			'stock'			=> 0,
-			'stock_status'	=> 'instock',
-			'backorders'	=> 'no',
-			'manage_stock'	=> 'no',
-			'sale_price'	=> '',
-			'regular_price' => '',
-			'weight'		=> '',
-			'length'		=> '',
-			'width'		=> '',
-			'height'		=> '',
-			'tax_status'	=> 'taxable',
-			'tax_class'		=> '',
-			'upsell_ids'	=> array(),
-			'crosssell_ids' => array(),
-			'sale_price_dates_from' => '',
-			'sale_price_dates_to' 	=> '',
-			'featured'		=> 'no'
+			'product_url' => '',
+			'button_text' => 'no'
 		) );
-
-		$this->check_sale_price();
 	}
 
 	/**
@@ -64,5 +55,25 @@ class WC_Product_External extends WC_Product {
 	 */
 	function is_purchasable() {
 		return apply_filters( 'woocommerce_is_purchasable', false, $this );
+	}
+
+	/**
+	 * get_product_url function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function get_product_url() {
+		return $this->product_url;
+	}
+
+	/**
+	 * get_button_text function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function get_button_text() {
+		return $this->button_text ? $this->button_text : __( 'Buy product', 'woocommerce' );
 	}
 }

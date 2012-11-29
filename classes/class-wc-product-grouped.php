@@ -32,34 +32,27 @@ class WC_Product_Grouped extends WC_Product {
 
 		$this->product_type = 'grouped';
 		$this->product_custom_fields = get_post_custom( $this->id );
+		$this->downloadable = 'no';
+		$this->virtual = 'no';
+		$this->stock        = '';
+		$this->stock_status = 'instock';
+		$this->manage_stock = 'no';
+		$this->weight       = '';
+		$this->length       = '';
+		$this->width        = '';
+		$this->height       = '';
 
 		// Load data from custom fields
 		$this->load_product_data( array(
-			'sku'			=> '',
-			'downloadable' 	=> 'no',
-			'virtual' 		=> 'no',
-			'price' 		=> '',
-			'visibility'	=> 'hidden',
-			'stock'			=> 0,
-			'stock_status'	=> 'instock',
-			'backorders'	=> 'no',
-			'manage_stock'	=> 'no',
-			'sale_price'	=> '',
-			'regular_price' => '',
-			'weight'		=> '',
-			'length'		=> '',
-			'width'		=> '',
-			'height'		=> '',
-			'tax_status'	=> 'taxable',
-			'tax_class'		=> '',
-			'upsell_ids'	=> array(),
-			'crosssell_ids' => array(),
-			'sale_price_dates_from' => '',
-			'sale_price_dates_to' 	=> '',
-			'featured'		=> 'no'
+			'sku'                   => '',
+			'price'                 => '',
+			'visibility'            => 'hidden',
+			'sale_price'            => '',
+			'regular_price'         => '',
+			'upsell_ids'            => array(),
+			'crosssell_ids'         => array(),
+			'featured'              => 'no'
 		) );
-
-		$this->check_sale_price();
 	}
 
     /**
@@ -153,18 +146,20 @@ class WC_Product_Grouped extends WC_Product {
 	 * @return bool
 	 */
 	function is_on_sale() {
-		if ($this->has_child()) :
+		if ( $this->has_child() ) {
 
-			foreach ($this->get_children() as $child_id) :
+			foreach ( $this->get_children() as $child_id ) {
 				$sale_price = get_post_meta( $child_id, '_sale_price', true );
-				if ( $sale_price!=="" && $sale_price >= 0 ) return true;
-			endforeach;
+				if ( $sale_price !== "" && $sale_price >= 0 )
+					return true;
+			}
 
-		else :
+		} else {
 
-			if ( $this->sale_price && $this->sale_price==$this->price ) return true;
+			if ( $this->sale_price && $this->sale_price == $this->price )
+				return true;
 
-		endif;
+		}
 		return false;
 	}
 
@@ -191,7 +186,8 @@ class WC_Product_Grouped extends WC_Product {
 
 		$child_prices = array();
 
-		foreach ( $this->get_children() as $child_id ) $child_prices[] = get_post_meta( $child_id, '_price', true );
+		foreach ( $this->get_children() as $child_id )
+			$child_prices[] = get_post_meta( $child_id, '_price', true );
 
 		$child_prices = array_unique( $child_prices );
 
@@ -208,79 +204,5 @@ class WC_Product_Grouped extends WC_Product {
 		$price = apply_filters( 'woocommerce_grouped_price_html', $price, $this );
 
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
-	}
-
-
-    /**
-     * Checks sale data to see if the product is due to go on sale/sale has expired, and updates the main price.
-     *
-     * @access public
-     * @return void
-     */
-    function check_sale_price() {
-
-    	if ( $this->sale_price_dates_from && $this->sale_price_dates_from < current_time('timestamp') ) {
-
-    		if ( $this->sale_price && $this->price !== $this->sale_price ) {
-
-    			// Update price
-    			$this->price = $this->sale_price;
-    			update_post_meta( $this->id, '_price', $this->price );
-
-    			// Grouped product prices and sale status are affected by children
-    			$this->grouped_product_sync();
-    		}
-
-    	}
-
-    	if ( $this->sale_price_dates_to && $this->sale_price_dates_to < current_time('timestamp') ) {
-
-    		if ( $this->regular_price && $this->price !== $this->regular_price ) {
-
-    			$this->price = $this->regular_price;
-    			update_post_meta( $this->id, '_price', $this->price );
-
-				// Sale has expired - clear the schedule boxes
-				update_post_meta( $this->id, '_sale_price', '' );
-				update_post_meta( $this->id, '_sale_price_dates_from', '' );
-				update_post_meta( $this->id, '_sale_price_dates_to', '' );
-
-				// Grouped product prices and sale status are affected by children
-    			$this->grouped_product_sync();
-			}
-
-    	}
-    }
-
-
-	/**
-	 * Sync grouped products with the childs lowest price (so they can be sorted by price accurately).
-	 *
-	 * @access public
-	 * @return void
-	 */
-	function grouped_product_sync() {
-		global $wpdb, $woocommerce;
-		$post_parent = $wpdb->get_var( $wpdb->prepare( "SELECT post_parent FROM $wpdb->posts WHERE ID = %d;"), $this->id );
-
-		if (!$post_parent) return;
-
-		$children_by_price = get_posts( array(
-			'post_parent' 	=> $post_parent,
-			'orderby' 	=> 'meta_value_num',
-			'order'		=> 'asc',
-			'meta_key'	=> '_price',
-			'posts_per_page' => 1,
-			'post_type' 	=> 'product',
-			'fields' 		=> 'ids'
-		));
-		if ($children_by_price) :
-			foreach ($children_by_price as $child) :
-				$child_price = get_post_meta($child, '_price', true);
-				update_post_meta( $post_parent, '_price', $child_price );
-			endforeach;
-		endif;
-
-		$woocommerce->clear_product_transients( $this->id );
 	}
 }

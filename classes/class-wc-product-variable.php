@@ -53,37 +53,32 @@ class WC_Product_Variable extends WC_Product {
 
 		// Load data from custom fields
 		$this->load_product_data( array(
-			'sku'			=> '',
-			'downloadable' 	=> 'no',
-			'virtual' 		=> 'no',
-			'price' 		=> '',
-			'visibility'	=> 'hidden',
-			'stock'			=> 0,
-			'stock_status'	=> 'instock',
-			'backorders'	=> 'no',
-			'manage_stock'	=> 'no',
-			'sale_price'	=> '',
-			'regular_price' => '',
-			'weight'		=> '',
-			'length'		=> '',
-			'width'			=> '',
-			'height'		=> '',
-			'tax_status'	=> 'taxable',
-			'tax_class'		=> '',
-			'upsell_ids'	=> array(),
-			'crosssell_ids' => array(),
-			'sale_price_dates_from' => '',
-			'sale_price_dates_to' 	=> '',
-			'featured'		=> 'no',
-			'min_variation_price'	=> '',
-			'max_variation_price'	=> '',
-			'min_variation_regular_price'	=> '',
-			'max_variation_regular_price'	=> '',
-			'min_variation_sale_price'	=> '',
-			'max_variation_sale_price'	=> '',
+			'sku'                         => '',
+			'price'                       => '',
+			'sale_price'                  => '',
+			'regular_price'               => '',
+			'visibility'                  => 'hidden',
+			'stock'                       => 0,
+			'stock_status'                => 'instock',
+			'backorders'                  => 'no',
+			'manage_stock'                => 'no',
+			'weight'                      => '',
+			'length'                      => '',
+			'width'                       => '',
+			'height'                      => '',
+			'tax_status'                  => 'taxable',
+			'tax_class'                   => '',
+			'upsell_ids'                  => array(),
+			'crosssell_ids'               => array(),
+			'featured'                    => 'no',
+			'min_variation_price'         => '',
+			'max_variation_price'         => '',
+			'min_variation_regular_price' => '',
+			'max_variation_regular_price' => '',
+			'min_variation_sale_price'    => '',
+			'max_variation_sale_price'    => '',
+			'sold_individually'           => 'no'
 		) );
-
-		$this->check_sale_price();
 	}
 
     /**
@@ -116,7 +111,6 @@ class WC_Product_Variable extends WC_Product {
 				set_transient( $transient_name, $this->total_stock );
 			}
 		}
-
 		return apply_filters( 'woocommerce_stock_amount', $this->total_stock );
     }
 
@@ -208,7 +202,11 @@ class WC_Product_Variable extends WC_Product {
 	 * @return object WC_Product or WC_Product_variation
 	 */
 	function get_child( $child_id ) {
-		return get_product( $child_id, array( 'parent_id' => $this->id, 'meta' => $this->product_custom_fields ) );
+		return get_product( $child_id, array(
+			'parent_id' => $this->id,
+			'parent' 	=> $this,
+			'meta'      => $this->product_custom_fields
+			) );
 	}
 
 
@@ -230,18 +228,20 @@ class WC_Product_Variable extends WC_Product {
 	 * @return bool
 	 */
 	function is_on_sale() {
-		if ($this->has_child()) :
+		if ( $this->has_child() ) {
 
-			foreach ($this->get_children() as $child_id) :
+			foreach ( $this->get_children() as $child_id ) {
 				$sale_price = get_post_meta( $child_id, '_sale_price', true );
-				if ( $sale_price!=="" && $sale_price >= 0 ) return true;
-			endforeach;
+				if ( $sale_price !== "" && $sale_price >= 0 )
+					return true;
+			}
 
-		else :
+		} else {
 
-			if ( $this->sale_price && $this->sale_price==$this->price ) return true;
+			if ( $this->sale_price && $this->sale_price == $this->price )
+				return true;
 
-		endif;
+		}
 		return false;
 	}
 
