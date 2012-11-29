@@ -818,7 +818,7 @@ function woocommerce_admin_fields( $options ) {
             // Single page selects
             case 'single_select_page' :
 
-            	$args = array( 'title'				=> $value['id'],
+            	$args = array( 'name'				=> $value['id'],
             				   'id'					=> $value['id'],
             				   'sort_column' 		=> 'menu_order',
             				   'sort_order'			=> 'ASC',
