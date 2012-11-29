@@ -22,9 +22,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 function woocommerce_reports() {
 
-	$current_tab 	= isset( $_GET['tab'] ) ? sanitize_title( urldecode( $_GET['tab'] ) ) : 'sales';
-	$current_chart 	= isset( $_GET['chart'] ) ? absint( urldecode( $_GET['chart'] ) ) : 0;
-
 	$charts = apply_filters( 'woocommerce_reports_charts', array(
 		'sales' => array(
 			'title' 	=>  __( 'Sales', 'woocommerce' ),
@@ -100,6 +97,13 @@ function woocommerce_reports() {
 			)
 		)
 	) );
+
+	$first_tab = array_keys($charts);
+	$first_chart = array_keys($charts[$first_tab[0]]['charts']);
+
+	$current_tab 	= isset( $_GET['tab'] ) ? sanitize_title( urldecode( $_GET['tab'] ) ) : $first_tab[0];
+	$current_chart 	= isset( $_GET['chart'] ) ? absint( urldecode( $_GET['chart'] ) ) : $first_chart[0];
+
     ?>
 	<div class="wrap woocommerce">
 		<div class="icon32 icon32-woocommerce-reports" id="icon-woocommerce"><br /></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
