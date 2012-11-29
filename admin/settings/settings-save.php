@@ -136,11 +136,11 @@ function woocommerce_update_options( $options ) {
 
 						$tax_rates[] = array(
 							'countries' => $counties_array,
-							'rate' 		=> $rate,
-							'shipping' 	=> $shipping,
-							'compound' 	=> $compound,
-							'class' 	=> $class,
-							'label' 	=> woocommerce_clean( $tax_label[ $i ] )
+							'rate'      => $rate,
+							'shipping'  => $shipping,
+							'compound'  => $compound,
+							'class'     => $class,
+							'label'     => woocommerce_clean( $tax_label[ $i ] )
 						);
 					}
 				}

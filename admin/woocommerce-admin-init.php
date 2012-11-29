@@ -403,42 +403,42 @@ function woocommerce_admin_scripts() {
 		wp_enqueue_script( 'plupload-all' );
 
 		$woocommerce_witepanel_params = array(
-			'remove_item_notice' 			=> __( 'Are you sure you want to remove the selected items? If you have previously reduced this item\'s stock, or this order was submitted by a customer, you will need to manually restore the item\'s stock.', 'woocommerce' ),
-			'remove_item_meta'				=> __( 'Remove this item meta?', 'woocommerce' ),
-			'remove_attribute'				=> __( 'Remove this attribute?', 'woocommerce' ),
-			'refund_item_notice' 			=> __( 'Are you sure you want to refund the selected items? The item\'s stock will not be affected.', 'woocommerce' ),
-			'name_label'					=> __( 'Name', 'woocommerce' ),
-			'remove_label'					=> __( 'Remove', 'woocommerce' ),
-			'click_to_toggle'				=> __( 'Click to toggle', 'woocommerce' ),
-			'values_label'					=> __( 'Value(s)', 'woocommerce' ),
-			'text_attribute_tip'			=> __( 'Enter some text, or some attributes by pipe (|) separating values.', 'woocommerce' ),
-			'visible_label'					=> __( 'Visible on the product page', 'woocommerce' ),
-			'used_for_variations_label'		=> __( 'Used for variations', 'woocommerce' ),
-			'new_attribute_prompt'			=> __( 'Enter a name for the new attribute term:', 'woocommerce' ),
-			'calc_totals' 					=> __( 'Calculate totals based on order items, discounts, and shipping?', 'woocommerce' ),
-			'calc_line_taxes' 				=> __( 'Calculate line taxes? This will calculate taxes based on the customers country. If no billing/shipping is set it will use the store base country.', 'woocommerce' ),
-			'copy_billing' 					=> __( 'Copy billing information to shipping information? This will remove any currently entered shipping information.', 'woocommerce' ),
-			'load_billing' 					=> __( 'Load the customer\'s billing information? This will remove any currently entered billing information.', 'woocommerce' ),
-			'load_shipping' 				=> __( 'Load the customer\'s shipping information? This will remove any currently entered shipping information.', 'woocommerce' ),
-			'featured_label'				=> __( 'Featured', 'woocommerce' ),
-			'prices_include_tax' 			=> esc_attr( get_option('woocommerce_prices_include_tax') ),
-			'round_at_subtotal'				=> esc_attr( get_option( 'woocommerce_tax_round_at_subtotal' ) ),
-			'no_customer_selected'			=> __( 'No customer selected', 'woocommerce' ),
-			'plugin_url' 					=> $woocommerce->plugin_url(),
-			'ajax_url' 						=> admin_url('admin-ajax.php'),
-			'order_item_nonce' 				=> wp_create_nonce("order-item"),
-			'add_attribute_nonce' 			=> wp_create_nonce("add-attribute"),
-			'save_attributes_nonce' 		=> wp_create_nonce("save-attributes"),
-			'calc_totals_nonce' 			=> wp_create_nonce("calc-totals"),
-			'get_customer_details_nonce' 	=> wp_create_nonce("get-customer-details"),
-			'search_products_nonce' 		=> wp_create_nonce("search-products"),
-			'calendar_image'				=> $woocommerce->plugin_url().'/assets/images/calendar.png',
-			'post_id'						=> $post->ID,
-			'currency_format_num_decimals'	=> absint( get_option( 'woocommerce_price_num_decimals' ) ),
-			'currency_format_symbol'		=> get_woocommerce_currency_symbol(),
-			'currency_format_decimal_sep'	=> esc_attr( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ) ),
-			'currency_format_thousand_sep'	=> esc_attr( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ) ),
-			'currency_format'				=> esc_attr( str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) ) // For accounting JS
+			'remove_item_notice'           => __( 'Are you sure you want to remove the selected items? If you have previously reduced this item\'s stock, or this order was submitted by a customer, you will need to manually restore the item\'s stock.', 'woocommerce' ),
+			'remove_item_meta'             => __( 'Remove this item meta?', 'woocommerce' ),
+			'remove_attribute'             => __( 'Remove this attribute?', 'woocommerce' ),
+			'refund_item_notice'           => __( 'Are you sure you want to refund the selected items? The item\'s stock will not be affected.', 'woocommerce' ),
+			'name_label'                   => __( 'Name', 'woocommerce' ),
+			'remove_label'                 => __( 'Remove', 'woocommerce' ),
+			'click_to_toggle'              => __( 'Click to toggle', 'woocommerce' ),
+			'values_label'                 => __( 'Value(s)', 'woocommerce' ),
+			'text_attribute_tip'           => __( 'Enter some text, or some attributes by pipe (|) separating values.', 'woocommerce' ),
+			'visible_label'                => __( 'Visible on the product page', 'woocommerce' ),
+			'used_for_variations_label'    => __( 'Used for variations', 'woocommerce' ),
+			'new_attribute_prompt'         => __( 'Enter a name for the new attribute term:', 'woocommerce' ),
+			'calc_totals'                  => __( 'Calculate totals based on order items, discounts, and shipping?', 'woocommerce' ),
+			'calc_line_taxes'              => __( 'Calculate line taxes? This will calculate taxes based on the customers country. If no billing/shipping is set it will use the store base country.', 'woocommerce' ),
+			'copy_billing'                 => __( 'Copy billing information to shipping information? This will remove any currently entered shipping information.', 'woocommerce' ),
+			'load_billing'                 => __( 'Load the customer\'s billing information? This will remove any currently entered billing information.', 'woocommerce' ),
+			'load_shipping'                => __( 'Load the customer\'s shipping information? This will remove any currently entered shipping information.', 'woocommerce' ),
+			'featured_label'               => __( 'Featured', 'woocommerce' ),
+			'prices_include_tax'           => esc_attr( get_option('woocommerce_prices_include_tax') ),
+			'round_at_subtotal'            => esc_attr( get_option( 'woocommerce_tax_round_at_subtotal' ) ),
+			'no_customer_selected'         => __( 'No customer selected', 'woocommerce' ),
+			'plugin_url'                   => $woocommerce->plugin_url(),
+			'ajax_url'                     => admin_url('admin-ajax.php'),
+			'order_item_nonce'             => wp_create_nonce("order-item"),
+			'add_attribute_nonce'          => wp_create_nonce("add-attribute"),
+			'save_attributes_nonce'        => wp_create_nonce("save-attributes"),
+			'calc_totals_nonce'            => wp_create_nonce("calc-totals"),
+			'get_customer_details_nonce'   => wp_create_nonce("get-customer-details"),
+			'search_products_nonce'        => wp_create_nonce("search-products"),
+			'calendar_image'               => $woocommerce->plugin_url().'/assets/images/calendar.png',
+			'post_id'                      => $post->ID,
+			'currency_format_num_decimals' => absint( get_option( 'woocommerce_price_num_decimals' ) ),
+			'currency_format_symbol'       => get_woocommerce_currency_symbol(),
+			'currency_format_decimal_sep'  => esc_attr( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ) ),
+			'currency_format_thousand_sep' => esc_attr( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ) ),
+			'currency_format'              => esc_attr( str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) ) // For accounting JS
 		 );
 
 		wp_localize_script( 'woocommerce_writepanel', 'woocommerce_writepanel_params', $woocommerce_witepanel_params );
@@ -454,7 +454,7 @@ function woocommerce_admin_scripts() {
 		$taxonomy = isset( $_GET['taxonomy'] ) ? woocommerce_clean( $_GET['taxonomy'] ) : '';
 
 		$woocommerce_term_order_params = array(
-			'taxonomy' 			=>  $taxonomy
+			'taxonomy' =>  $taxonomy
 		 );
 
 		wp_localize_script( 'woocommerce_term_ordering', 'woocommerce_term_ordering_params', $woocommerce_term_order_params );

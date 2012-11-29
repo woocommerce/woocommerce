@@ -197,39 +197,39 @@ class WC_Order {
 
 		// Define the data we're going to load: Key => Default value
 		$load_data = apply_filters( 'woocommerce_load_order_data', array(
-			'order_key'				=> '',
-			'billing_first_name'	=> '',
-			'billing_last_name' 	=> '',
-			'billing_company'		=> '',
-			'billing_address_1'		=> '',
-			'billing_address_2'		=> '',
-			'billing_city'			=> '',
-			'billing_postcode'		=> '',
-			'billing_country'		=> '',
-			'billing_state' 		=> '',
-			'billing_email'			=> '',
-			'billing_phone'			=> '',
-			'shipping_first_name'	=> '',
-			'shipping_last_name'	=> '',
-			'shipping_company'		=> '',
-			'shipping_address_1'	=> '',
-			'shipping_address_2'	=> '',
-			'shipping_city'			=> '',
-			'shipping_postcode'		=> '',
-			'shipping_country'		=> '',
-			'shipping_state'		=> '',
-			'shipping_method'		=> '',
-			'shipping_method_title'	=> '',
-			'payment_method'		=> '',
-			'payment_method_title' 	=> '',
-			'order_discount'		=> '',
-			'cart_discount'			=> '',
-			'order_tax'				=> '',
-			'order_shipping'		=> '',
-			'order_shipping_tax'	=> '',
-			'order_total'			=> '',
-			'customer_user'			=> '',
-			'completed_date'		=> $this->modified_date
+			'order_key'             => '',
+			'billing_first_name'    => '',
+			'billing_last_name'     => '',
+			'billing_company'       => '',
+			'billing_address_1'     => '',
+			'billing_address_2'     => '',
+			'billing_city'          => '',
+			'billing_postcode'      => '',
+			'billing_country'       => '',
+			'billing_state'         => '',
+			'billing_email'         => '',
+			'billing_phone'         => '',
+			'shipping_first_name'   => '',
+			'shipping_last_name'    => '',
+			'shipping_company'      => '',
+			'shipping_address_1'    => '',
+			'shipping_address_2'    => '',
+			'shipping_city'         => '',
+			'shipping_postcode'     => '',
+			'shipping_country'      => '',
+			'shipping_state'        => '',
+			'shipping_method'       => '',
+			'shipping_method_title' => '',
+			'payment_method'        => '',
+			'payment_method_title'  => '',
+			'order_discount'        => '',
+			'cart_discount'         => '',
+			'order_tax'             => '',
+			'order_shipping'        => '',
+			'order_shipping_tax'    => '',
+			'order_total'           => '',
+			'customer_user'         => '',
+			'completed_date'        => $this->modified_date
 		) );
 
 		// Load the data from the custom fields
@@ -287,15 +287,15 @@ class WC_Order {
 
 			// Formatted Addresses
 			$address = array(
-				'first_name' 	=> $this->billing_first_name,
-				'last_name'		=> $this->billing_last_name,
-				'company'		=> $this->billing_company,
-				'address_1'		=> $this->billing_address_1,
-				'address_2'		=> $this->billing_address_2,
-				'city'			=> $this->billing_city,
-				'state'			=> $this->billing_state,
-				'postcode'		=> $this->billing_postcode,
-				'country'		=> $this->billing_country
+				'first_name' => $this->billing_first_name,
+				'last_name'  => $this->billing_last_name,
+				'company'    => $this->billing_company,
+				'address_1'  => $this->billing_address_1,
+				'address_2'  => $this->billing_address_2,
+				'city'       => $this->billing_city,
+				'state'      => $this->billing_state,
+				'postcode'   => $this->billing_postcode,
+				'country'    => $this->billing_country
 			);
 
 			$this->formatted_billing_address = $woocommerce->countries->get_formatted_address( $address );
@@ -313,12 +313,12 @@ class WC_Order {
 		if ( ! $this->billing_address ) {
 			// Formatted Addresses
 			$address = array(
-				'address_1'		=> $this->billing_address_1,
-				'address_2'		=> $this->billing_address_2,
-				'city'			=> $this->billing_city,
-				'state'			=> $this->billing_state,
-				'postcode'		=> $this->billing_postcode,
-				'country'		=> $this->billing_country
+				'address_1' => $this->billing_address_1,
+				'address_2' => $this->billing_address_2,
+				'city'      => $this->billing_city,
+				'state'     => $this->billing_state,
+				'postcode'  => $this->billing_postcode,
+				'country'   => $this->billing_country
 			);
 			$joined_address = array();
 			foreach ($address as $part) if (!empty($part)) $joined_address[] = $part;
@@ -340,15 +340,15 @@ class WC_Order {
 
 				// Formatted Addresses
 				$address = array(
-					'first_name' 	=> $this->shipping_first_name,
-					'last_name'		=> $this->shipping_last_name,
-					'company'		=> $this->shipping_company,
-					'address_1'		=> $this->shipping_address_1,
-					'address_2'		=> $this->shipping_address_2,
-					'city'			=> $this->shipping_city,
-					'state'			=> $this->shipping_state,
-					'postcode'		=> $this->shipping_postcode,
-					'country'		=> $this->shipping_country
+					'first_name' => $this->shipping_first_name,
+					'last_name'  => $this->shipping_last_name,
+					'company'    => $this->shipping_company,
+					'address_1'  => $this->shipping_address_1,
+					'address_2'  => $this->shipping_address_2,
+					'city'       => $this->shipping_city,
+					'state'      => $this->shipping_state,
+					'postcode'   => $this->shipping_postcode,
+					'country'    => $this->shipping_country
 				);
 
 				$this->formatted_shipping_address = $woocommerce->countries->get_formatted_address( $address );
@@ -369,12 +369,12 @@ class WC_Order {
 			if ( $this->shipping_address_1 ) {
 				// Formatted Addresses
 				$address = array(
-					'address_1'		=> $this->shipping_address_1,
-					'address_2'		=> $this->shipping_address_2,
-					'city'			=> $this->shipping_city,
-					'state'			=> $this->shipping_state,
-					'postcode'		=> $this->shipping_postcode,
-					'country'		=> $this->shipping_country
+					'address_1' => $this->shipping_address_1,
+					'address_2' => $this->shipping_address_2,
+					'city'      => $this->shipping_city,
+					'state'     => $this->shipping_state,
+					'postcode'  => $this->shipping_postcode,
+					'country'   => $this->shipping_country
 				);
 				$joined_address = array();
 				foreach ($address as $part) if (!empty($part)) $joined_address[] = $part;
@@ -871,19 +871,19 @@ class WC_Order {
 		if ( $subtotal = $this->get_subtotal_to_display() )
 			$total_rows['cart_subtotal'] = array(
 				'label' => __( 'Cart Subtotal:', 'woocommerce' ),
-				'value'	=> $subtotal
+				'value' => $subtotal
 			);
 
 		if ( $this->get_cart_discount() > 0 )
 			$total_rows['cart_discount'] = array(
 				'label' => __( 'Cart Discount:', 'woocommerce' ),
-				'value'	=> '-' . $this->get_cart_discount_to_display()
+				'value' => '-' . $this->get_cart_discount_to_display()
 			);
 
 		if ( $this->get_shipping_method() )
 			$total_rows['shipping'] = array(
 				'label' => __( 'Shipping:', 'woocommerce' ),
-				'value'	=> $this->get_shipping_to_display()
+				'value' => $this->get_shipping_to_display()
 			);
 
 		if ( $fees = $this->get_fees() )
@@ -893,14 +893,14 @@ class WC_Order {
 
 					$total_rows[ 'fee_' . $id ] = array(
 						'label' => $fee['name'],
-						'value'	=> woocommerce_price( $fee['line_total'] )
+						'value' => woocommerce_price( $fee['line_total'] )
 					);
 
 				} else {
 
 					$total_rows[ 'fee_' . $id ] = array(
 						'label' => $fee['name'],
-						'value'	=> woocommerce_price( $fee['line_total'] + $fee['line_tax'] )
+						'value' => woocommerce_price( $fee['line_total'] + $fee['line_tax'] )
 					);
 
 				}
@@ -926,7 +926,7 @@ class WC_Order {
 
 						$total_rows[ sanitize_title( $tax[ 'name' ] ) ] = array(
 							'label' => $tax[ 'name' ] . ':',
-							'value'	=> woocommerce_price( ( $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ] ) )
+							'value' => woocommerce_price( ( $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ] ) )
 						);
 					}
 
@@ -934,7 +934,7 @@ class WC_Order {
 						if ( $subtotal = $this->get_subtotal_to_display( true ) ) {
 							$total_rows['subtotal'] = array(
 								'label' => __( 'Subtotal:', 'woocommerce' ),
-								'value'	=> $subtotal
+								'value' => $subtotal
 							);
 						}
 					}
@@ -948,20 +948,20 @@ class WC_Order {
 
 						$total_rows[ sanitize_title( $tax[ 'name' ] ) ] = array(
 							'label' => $tax[ 'name' ] . ':',
-							'value'	=> woocommerce_price( ( $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ] ) )
+							'value' => woocommerce_price( ( $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ] ) )
 						);
 					}
 				} else {
 					$total_rows['tax'] = array(
 						'label' => $woocommerce->countries->tax_or_vat(),
-						'value'	=> woocommerce_price( $this->get_total_tax() )
+						'value' => woocommerce_price( $this->get_total_tax() )
 					);
 				}
 
 			} elseif ( get_option( 'woocommerce_display_cart_taxes_if_zero' ) == 'yes' ) {
 				$total_rows['tax'] = array(
 					'label' => $woocommerce->countries->tax_or_vat(),
-					'value'	=> _x( 'N/A', 'Relating to tax', 'woocommerce' )
+					'value' => _x( 'N/A', 'Relating to tax', 'woocommerce' )
 				);
 			}
 
@@ -970,12 +970,12 @@ class WC_Order {
 		if ( $this->get_order_discount() > 0 )
 			$total_rows['order_discount'] = array(
 				'label' => __( 'Order Discount:', 'woocommerce' ),
-				'value'	=> '-' . $this->get_order_discount_to_display()
+				'value' => '-' . $this->get_order_discount_to_display()
 			);
 
 		$total_rows['order_total'] = array(
 			'label' => __( 'Order Total:', 'woocommerce' ),
-			'value'	=> $this->get_formatted_order_total()
+			'value' => $this->get_formatted_order_total()
 		);
 
 		// Tax for inclusive prices
@@ -1033,13 +1033,13 @@ class WC_Order {
 		$template = $plain_text ? 'emails/plain/email-order-items.php' : 'emails/email-order-items.php';
 
 		woocommerce_get_template( $template, array(
-			'order'					=> $this,
-			'items' 				=> $this->get_items(),
-			'show_download_links'	=> $show_download_links,
-			'show_sku'				=> $show_sku,
-			'show_purchase_note'	=> $show_purchase_note,
-			'show_image' 			=> $show_image,
-			'image_size'			=> $image_size
+			'order'               => $this,
+			'items'               => $this->get_items(),
+			'show_download_links' => $show_download_links,
+			'show_sku'            => $show_sku,
+			'show_purchase_note'  => $show_purchase_note,
+			'show_image'          => $show_image,
+			'image_size'          => $image_size
 		) );
 
 		$return = apply_filters( 'woocommerce_email_order_items_table', ob_get_clean() );

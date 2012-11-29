@@ -81,14 +81,14 @@ class WC_Mijireh_Checkout extends WC_Payment_Gateway {
 		if ( $slurp_page_installed != 1 ) {
 			if( ! get_page_by_path( 'mijireh-secure-checkout' ) ) {
 				$page = array(
-					'post_title' 		=> 'Mijireh Secure Checkout',
-					'post_name' 		=> 'mijireh-secure-checkout',
-					'post_parent' 		=> 0,
-					'post_status' 		=> 'private',
-					'post_type' 		=> 'page',
-					'comment_status' 	=> 'closed',
-					'ping_status' 		=> 'closed',
-					'post_content' 		=> "<h1>Checkout</h1>\n\n{{mj-checkout-form}}",
+					'post_title'     => 'Mijireh Secure Checkout',
+					'post_name'      => 'mijireh-secure-checkout',
+					'post_parent'    => 0,
+					'post_status'    => 'private',
+					'post_type'      => 'page',
+					'comment_status' => 'closed',
+					'ping_status'    => 'closed',
+					'post_content'   => "<h1>Checkout</h1>\n\n{{mj-checkout-form}}",
 				);
 				wp_insert_post( $page );
 			}

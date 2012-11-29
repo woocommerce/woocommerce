@@ -432,23 +432,23 @@ class WC_Product_Variable extends WC_Product {
 				}
 
 				$available_variations[] = apply_filters( 'woocommerce_available_variation', array(
-					'variation_id' 			=> $child_id,
-					'attributes' 			=> $variation_attributes,
-					'image_src' 			=> $image,
-					'image_link' 			=> $image_link,
-					'image_title'			=> $image_title,
-					'price_html' 			=> $this->min_variation_price != $this->max_variation_price ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
-					'availability_html' 	=> $availability_html,
-					'sku' 					=> $variation->get_sku(),
-					'weight'				=> $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ),
-					'dimensions'			=> $variation->get_dimensions(),
-					'min_qty' 				=> 1,
-					'max_qty' 				=> $this->backorders_allowed() ? '' : $variation->stock,
-					'backorders_allowed' 	=> $this->backorders_allowed(),
-					'is_in_stock'			=> $variation->is_in_stock(),
-					'is_downloadable' 		=> $variation->is_downloadable() ,
-					'is_virtual' 			=> $variation->is_virtual(),
-					'is_sold_individually' 	=> $variation->is_sold_individually() ? 'yes' : 'no',
+					'variation_id'         => $child_id,
+					'attributes'           => $variation_attributes,
+					'image_src'            => $image,
+					'image_link'           => $image_link,
+					'image_title'          => $image_title,
+					'price_html'           => $this->min_variation_price != $this->max_variation_price ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
+					'availability_html'    => $availability_html,
+					'sku'                  => $variation->get_sku(),
+					'weight'               => $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ),
+					'dimensions'           => $variation->get_dimensions(),
+					'min_qty'              => 1,
+					'max_qty'              => $this->backorders_allowed() ? '' : $variation->stock,
+					'backorders_allowed'   => $this->backorders_allowed(),
+					'is_in_stock'          => $variation->is_in_stock(),
+					'is_downloadable'      => $variation->is_downloadable() ,
+					'is_virtual'           => $variation->is_virtual(),
+					'is_sold_individually' => $variation->is_sold_individually() ? 'yes' : 'no',
 				), $this, $variation );
 			}
 		}
@@ -467,11 +467,11 @@ class WC_Product_Variable extends WC_Product {
 		global $woocommerce;
 
 		$children = get_posts( array(
-			'post_parent' 	=> $this->id,
-			'posts_per_page'=> -1,
-			'post_type' 	=> 'product_variation',
-			'fields' 		=> 'ids',
-			'post_status'	=> 'publish'
+			'post_parent'    => $this->id,
+			'posts_per_page' => -1,
+			'post_type'      => 'product_variation',
+			'fields'         => 'ids',
+			'post_status'    => 'publish'
 		));
 
 		$this->min_variation_price = $this->min_variation_regular_price = $this->min_variation_sale_price = $this->max_variation_price = $this->max_variation_regular_price = $this->max_variation_sale_price = '';

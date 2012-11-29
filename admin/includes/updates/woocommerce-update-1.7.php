@@ -64,10 +64,10 @@ if ( empty( $permalinks ) && $shop_page_id > 0 ) {
 		$product_base .= trailingslashit('%product_cat%');
 
 	$permalinks = array(
-		'product_base' 		=> untrailingslashit( $product_base ),
-		'category_base' 	=> untrailingslashit( $category_base . $category_slug ),
-		'attribute_base' 	=> untrailingslashit( $category_base ),
-		'tag_base' 			=> untrailingslashit( $category_base . $tag_slug )
+		'product_base'   => untrailingslashit( $product_base ),
+		'category_base'  => untrailingslashit( $category_base . $category_slug ),
+		'attribute_base' => untrailingslashit( $category_base ),
+		'tag_base'       => untrailingslashit( $category_base . $tag_slug )
 	);
 
 	update_option( 'woocommerce_permalinks', $permalinks );
@@ -104,20 +104,20 @@ foreach ( $order_item_rows as $order_item_row ) {
 	foreach ( $order_items as $order_item ) {
 
 		if ( ! isset( $order_item['line_total'] ) && isset( $order_item['taxrate'] ) && isset( $order_item['cost'] ) ) {
-			$order_item['line_tax'] 			= number_format( ( $order_item['cost'] * $order_item['qty'] ) * ( $order_item['taxrate'] / 100 ), 2, '.', '' );
-			$order_item['line_total'] 			= $order_item['cost'] * $order_item['qty'];
-			$order_item['line_subtotal_tax'] 	= $order_item['line_tax'];
-			$order_item['line_subtotal'] 		= $order_item['line_total'];
+			$order_item['line_tax']          = number_format( ( $order_item['cost'] * $order_item['qty'] ) * ( $order_item['taxrate'] / 100 ), 2, '.', '' );
+			$order_item['line_total']        = $order_item['cost'] * $order_item['qty'];
+			$order_item['line_subtotal_tax'] = $order_item['line_tax'];
+			$order_item['line_subtotal']     = $order_item['line_total'];
 		}
 
-		$order_item['line_tax'] 			= isset( $order_item['line_tax'] ) ? $order_item['line_tax'] : 0;
-		$order_item['line_total']			= isset( $order_item['line_total'] ) ? $order_item['line_total'] : 0;
-		$order_item['line_subtotal_tax'] 	= isset( $order_item['line_subtotal_tax'] ) ? $order_item['line_subtotal_tax'] : 0;
-		$order_item['line_subtotal'] 		= isset( $order_item['line_subtotal'] ) ? $order_item['line_subtotal'] : 0;
+		$order_item['line_tax']          = isset( $order_item['line_tax'] ) ? $order_item['line_tax'] : 0;
+		$order_item['line_total']        = isset( $order_item['line_total'] ) ? $order_item['line_total'] : 0;
+		$order_item['line_subtotal_tax'] = isset( $order_item['line_subtotal_tax'] ) ? $order_item['line_subtotal_tax'] : 0;
+		$order_item['line_subtotal']     = isset( $order_item['line_subtotal'] ) ? $order_item['line_subtotal'] : 0;
 
 		$item_id = woocommerce_add_order_item( $order_item_row->post_id, array(
-	 		'order_item_name' 		=> $order_item['name'],
-	 		'order_item_type' 		=> 'line_item'
+	 		'order_item_name' => $order_item['name'],
+	 		'order_item_type' => 'line_item'
 	 	) );
 
 	 	// Add line item meta
@@ -184,8 +184,8 @@ foreach ( $order_tax_rows as $order_tax_row ) {
 				continue;
 
 			$item_id = woocommerce_add_order_item( $order_tax_row->post_id, array(
-		 		'order_item_name' 		=> $order_tax['label'],
-		 		'order_item_type' 		=> 'tax'
+		 		'order_item_name' => $order_tax['label'],
+		 		'order_item_type' => 'tax'
 		 	) );
 
 		 	// Add line item meta

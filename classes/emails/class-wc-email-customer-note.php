@@ -54,8 +54,8 @@ class WC_Email_Customer_Note extends WC_Email {
 		if ( $args ) {
 
 			$defaults = array(
-				'order_id' 		=> '',
-				'customer_note'	=> ''
+				'order_id'      => '',
+				'customer_note' => ''
 			);
 
 			$args = wp_parse_args( $args, $defaults );
@@ -88,7 +88,7 @@ class WC_Email_Customer_Note extends WC_Email {
 	function get_content_html() {
 		ob_start();
 		woocommerce_get_template( $this->template_html, array(
-			'order' 		=> $this->object,
+			'order'         => $this->object,
 			'email_heading' => $this->get_heading(),
 			'customer_note' => $this->customer_note
 		) );
@@ -104,7 +104,7 @@ class WC_Email_Customer_Note extends WC_Email {
 	function get_content_plain() {
 		ob_start();
 		woocommerce_get_template( $this->template_plain, array(
-			'order' 		=> $this->object,
+			'order'         => $this->object,
 			'email_heading' => $this->get_heading(),
 			'customer_note' => $this->customer_note
 		) );

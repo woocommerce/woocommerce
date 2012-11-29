@@ -153,22 +153,22 @@ function woocommerce_custom_order_columns( $column ) {
 
 					if ( in_array( $order->status, array( 'pending', 'on-hold' ) ) )
 						$actions[] = array(
-							'url' 		=> wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce-mark-order-processing&order_id=' . $post->ID ), 'woocommerce-mark-order-processing' ),
-							'name' 		=> __( 'Processing', 'woocommerce' ),
-							'action' 	=> "processing"
+							'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce-mark-order-processing&order_id=' . $post->ID ), 'woocommerce-mark-order-processing' ),
+							'name'   => __( 'Processing', 'woocommerce' ),
+							'action' => "processing"
 						);
 
 					if ( in_array( $order->status, array( 'pending', 'on-hold', 'processing' ) ) )
 						$actions[] = array(
-							'url' 		=> wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce-mark-order-complete&order_id=' . $post->ID ), 'woocommerce-mark-order-complete' ),
-							'name' 		=> __( 'Complete', 'woocommerce' ),
-							'action' 	=> "complete"
+							'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce-mark-order-complete&order_id=' . $post->ID ), 'woocommerce-mark-order-complete' ),
+							'name'   => __( 'Complete', 'woocommerce' ),
+							'action' => "complete"
 						);
 
 					$actions[] = array(
-							'url' 		=> admin_url( 'post.php?post=' . $post->ID . '&action=edit' ),
-							'name' 		=> __( 'View', 'woocommerce' ),
-							'action' 	=> "view"
+							'url'    => admin_url( 'post.php?post=' . $post->ID . '&action=edit' ),
+							'name'   => __( 'View', 'woocommerce' ),
+							'action' => "view"
 						);
 
 					$actions = apply_filters( 'woocommerce_admin_order_actions', $actions, $order );
@@ -374,9 +374,9 @@ add_filter( 'request', 'woocommerce_orders_by_customer_query' );
  */
 function woocommerce_custom_shop_order_sort( $columns ) {
 	$custom = array(
-		'order_title'	=> 'ID',
-		'order_total'	=> 'order_total',
-		'order_date'	=> 'date'
+		'order_title' => 'ID',
+		'order_total' => 'order_total',
+		'order_date'  => 'date'
 	);
 	unset( $columns['comments'] );
 	return wp_parse_args( $custom, $columns );
@@ -401,8 +401,8 @@ function woocommerce_custom_shop_order_orderby( $vars ) {
 	if ( isset( $vars['orderby'] ) ) {
 		if ( 'order_total' == $vars['orderby'] ) {
 			$vars = array_merge( $vars, array(
-				'meta_key' 	=> '_order_total',
-				'orderby' 	=> 'meta_value_num'
+				'meta_key' => '_order_total',
+				'orderby'  => 'meta_value_num'
 			) );
 		}
 	}

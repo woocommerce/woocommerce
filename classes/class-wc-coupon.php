@@ -116,20 +116,20 @@ class WC_Coupon {
             $this->coupon_custom_fields = get_post_custom( $this->id );
 
             $load_data = array(
-            	'discount_type'					=> 'fixed_cart',
-            	'coupon_amount'					=> 0,
-            	'individual_use'				=> 'no',
-            	'product_ids'					=> '',
-            	'exclude_product_ids'			=> '',
-            	'usage_limit'					=> '',
-            	'usage_count'					=> '',
-            	'expiry_date'					=> '',
-            	'apply_before_tax'				=> 'yes',
-            	'free_shipping'					=> 'no',
-            	'product_categories'			=> array(),
-            	'exclude_product_categories'	=> array(),
-            	'minimum_amount'				=> '',
-            	'customer_email'				=> array()
+            	'discount_type'              => 'fixed_cart',
+            	'coupon_amount'              => 0,
+            	'individual_use'             => 'no',
+            	'product_ids'                => '',
+            	'exclude_product_ids'        => '',
+            	'usage_limit'                => '',
+            	'usage_count'                => '',
+            	'expiry_date'                => '',
+            	'apply_before_tax'           => 'yes',
+            	'free_shipping'              => 'no',
+            	'product_categories'         => array(),
+            	'exclude_product_categories' => array(),
+            	'minimum_amount'             => '',
+            	'customer_email'             => array()
             );
 
             foreach ( $load_data as $key => $default )

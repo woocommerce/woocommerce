@@ -30,28 +30,28 @@ class WC_Product_Grouped extends WC_Product {
 
 		parent::__construct( $product );
 
-		$this->product_type = 'grouped';
+		$this->product_type          = 'grouped';
 		$this->product_custom_fields = get_post_custom( $this->id );
-		$this->downloadable = 'no';
-		$this->virtual = 'no';
-		$this->stock        = '';
-		$this->stock_status = 'instock';
-		$this->manage_stock = 'no';
-		$this->weight       = '';
-		$this->length       = '';
-		$this->width        = '';
-		$this->height       = '';
+		$this->downloadable          = 'no';
+		$this->virtual               = 'no';
+		$this->stock                 = '';
+		$this->stock_status          = 'instock';
+		$this->manage_stock          = 'no';
+		$this->weight                = '';
+		$this->length                = '';
+		$this->width                 = '';
+		$this->height                = '';
 
 		// Load data from custom fields
 		$this->load_product_data( array(
-			'sku'                   => '',
-			'price'                 => '',
-			'visibility'            => 'hidden',
-			'sale_price'            => '',
-			'regular_price'         => '',
-			'upsell_ids'            => array(),
-			'crosssell_ids'         => array(),
-			'featured'              => 'no'
+			'sku'           => '',
+			'price'         => '',
+			'visibility'    => 'hidden',
+			'sale_price'    => '',
+			'regular_price' => '',
+			'upsell_ids'    => array(),
+			'crosssell_ids' => array(),
+			'featured'      => 'no'
 		) );
 	}
 

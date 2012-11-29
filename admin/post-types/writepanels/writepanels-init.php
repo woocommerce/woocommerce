@@ -161,11 +161,11 @@ add_action( 'pre_post_update', 'woocommerce_pre_post_update' );
 function woocommerce_product_short_description_meta_box( $post ) {
 
 	$settings = array(
-		'quicktags' 	=> array( 'buttons' => 'em,strong,link' ),
-		'textarea_name'	=> 'excerpt',
-		'quicktags' 	=> true,
-		'tinymce' 		=> true,
-		'editor_css'	=> '<style>#wp-excerpt-editor-container .wp-editor-area{height:175px; width:100%;}</style>'
+		'quicktags'     => array( 'buttons' => 'em,strong,link' ),
+		'textarea_name' => 'excerpt',
+		'quicktags'     => true,
+		'tinymce'       => true,
+		'editor_css'    => '<style>#wp-excerpt-editor-container .wp-editor-area{height:175px; width:100%;}</style>'
 		);
 
 	wp_editor( htmlspecialchars_decode( $post->post_excerpt ), 'excerpt', $settings );

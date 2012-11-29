@@ -61,29 +61,29 @@ class WC_Google_Analytics extends WC_Integration {
 
     	$this->form_fields = array(
 			'ga_id' => array(
-				'title' 			=> __( 'Google Analytics ID', 'woocommerce' ),
-				'description' 		=> __( 'Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woocommerce' ),
-				'type' 				=> 'text',
-		    	'default' 			=> get_option('woocommerce_ga_id') // Backwards compat
+				'title'       => __( 'Google Analytics ID', 'woocommerce' ),
+				'description' => __( 'Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woocommerce' ),
+				'type'        => 'text',
+		    	'default'     => get_option('woocommerce_ga_id') // Backwards compat
 			),
 			'ga_standard_tracking_enabled' => array(
-				'title' 			=> __( 'Tracking code', 'woocommerce' ),
-				'label' 			=> __( 'Add tracking code to your site\'s footer. You don\'t need to enable this if using a 3rd party analytics plugin.', 'woocommerce' ),
-				'type' 				=> 'checkbox',
-				'checkboxgroup'		=> 'start',
-				'default' 			=> get_option('woocommerce_ga_standard_tracking_enabled') ? get_option('woocommerce_ga_standard_tracking_enabled') : 'no'  // Backwards compat
+				'title'         => __( 'Tracking code', 'woocommerce' ),
+				'label'         => __( 'Add tracking code to your site\'s footer. You don\'t need to enable this if using a 3rd party analytics plugin.', 'woocommerce' ),
+				'type'          => 'checkbox',
+				'checkboxgroup' => 'start',
+				'default'       => get_option('woocommerce_ga_standard_tracking_enabled') ? get_option('woocommerce_ga_standard_tracking_enabled') : 'no'  // Backwards compat
 			),
 			'ga_ecommerce_tracking_enabled' => array(
-				'label' 			=> __( 'Add eCommerce tracking code to the thankyou page', 'woocommerce' ),
-				'type' 				=> 'checkbox',
-				'checkboxgroup'		=> '',
-				'default' 			=> get_option('woocommerce_ga_ecommerce_tracking_enabled') ? get_option('woocommerce_ga_ecommerce_tracking_enabled') : 'no'  // Backwards compat
+				'label'         => __( 'Add eCommerce tracking code to the thankyou page', 'woocommerce' ),
+				'type'          => 'checkbox',
+				'checkboxgroup' => '',
+				'default'       => get_option('woocommerce_ga_ecommerce_tracking_enabled') ? get_option('woocommerce_ga_ecommerce_tracking_enabled') : 'no'  // Backwards compat
 			),
 			'ga_event_tracking_enabled' => array(
-				'label' 			=> __( 'Add event tracking code for add to cart actions', 'woocommerce' ),
-				'type' 				=> 'checkbox',
-				'checkboxgroup'		=> 'end',
-				'default' 			=> 'no'
+				'label'         => __( 'Add event tracking code for add to cart actions', 'woocommerce' ),
+				'type'          => 'checkbox',
+				'checkboxgroup' => 'end',
+				'default'       => 'no'
 			)
 		);
 

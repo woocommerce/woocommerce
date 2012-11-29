@@ -37,24 +37,24 @@ function do_install_woocommerce() {
 
 	$files = array(
 		array(
-			'base' 		=> $upload_dir['basedir'] . '/woocommerce_uploads',
-			'file' 		=> '.htaccess',
-			'content' 	=> 'deny from all'
+			'base'    => $upload_dir['basedir'] . '/woocommerce_uploads',
+			'file'    => '.htaccess',
+			'content' => 'deny from all'
 		),
 		array(
-			'base' 		=> $upload_dir['basedir'] . '/woocommerce_uploads',
-			'file' 		=> 'index.html',
-			'content' 	=> ''
+			'base'    => $upload_dir['basedir'] . '/woocommerce_uploads',
+			'file'    => 'index.html',
+			'content' => ''
 		),
 		array(
-			'base' 		=> WP_PLUGIN_DIR . "/" . plugin_basename( dirname( dirname( __FILE__ ) ) ) . '/logs',
-			'file' 		=> '.htaccess',
-			'content' 	=> 'deny from all'
+			'base'    => WP_PLUGIN_DIR . "/" . plugin_basename( dirname( dirname( __FILE__ ) ) ) . '/logs',
+			'file'    => '.htaccess',
+			'content' => 'deny from all'
 		),
 		array(
-			'base' 		=> WP_PLUGIN_DIR . "/" . plugin_basename( dirname( dirname( __FILE__ ) ) ) . '/logs',
-			'file' 		=> 'index.html',
-			'content' 	=> ''
+			'base'    => WP_PLUGIN_DIR . "/" . plugin_basename( dirname( dirname( __FILE__ ) ) ) . '/logs',
+			'file'    => 'index.html',
+			'content' => ''
 		)
 	);
 
@@ -146,14 +146,14 @@ function woocommerce_create_page( $slug, $option, $page_title = '', $page_conten
 	}
 
 	$page_data = array(
-        'post_status' 		=> 'publish',
-        'post_type' 		=> 'page',
-        'post_author' 		=> 1,
-        'post_name' 		=> $slug,
-        'post_title' 		=> $page_title,
-        'post_content' 		=> $page_content,
-        'post_parent' 		=> $post_parent,
-        'comment_status' 	=> 'closed'
+        'post_status'    => 'publish',
+        'post_type'      => 'page',
+        'post_author'    => 1,
+        'post_name'      => $slug,
+        'post_title'     => $page_title,
+        'post_content'   => $page_content,
+        'post_parent'    => $post_parent,
+        'comment_status' => 'closed'
     );
     $page_id = wp_insert_post( $page_data );
 

@@ -13,14 +13,14 @@ global $post, $woocommerce;
 ?>
 <div class="thumbnails"><?php
 	$attachments = get_posts( array(
-		'post_type' 	=> 'attachment',
-		'numberposts' 	=> -1,
-		'post_status' 	=> null,
-		'post_parent' 	=> $post->ID,
-		'post__not_in'	=> array( get_post_thumbnail_id() ),
-		'post_mime_type'=> 'image',
-		'orderby'		=> 'menu_order',
-		'order'			=> 'ASC'
+		'post_type'      => 'attachment',
+		'numberposts'    => -1,
+		'post_status'    => null,
+		'post_parent'    => $post->ID,
+		'post__not_in'   => array( get_post_thumbnail_id() ),
+		'post_mime_type' => 'image',
+		'orderby'        => 'menu_order',
+		'order'          => 'ASC'
 	) );
 	if ($attachments) {
 

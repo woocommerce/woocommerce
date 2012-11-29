@@ -49,71 +49,71 @@ class WC_International_Delivery extends WC_Flat_Rate {
 
     	$this->form_fields = array(
 			'enabled' => array(
-							'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
-							'type' 			=> 'checkbox',
-							'label' 		=> __( 'Enable this shipping method', 'woocommerce' ),
-							'default' 		=> 'no'
+							'title'   => __( 'Enable/Disable', 'woocommerce' ),
+							'type'    => 'checkbox',
+							'label'   => __( 'Enable this shipping method', 'woocommerce' ),
+							'default' => 'no'
 						),
 			'title' => array(
-							'title' 		=> __( 'Method Title', 'woocommerce' ),
-							'type' 			=> 'text',
-							'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-							'default'		=> __( 'International Delivery', 'woocommerce' )
+							'title'       => __( 'Method Title', 'woocommerce' ),
+							'type'        => 'text',
+							'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
+							'default'     => __( 'International Delivery', 'woocommerce' )
 						),
 			'availability' => array(
-							'title' 		=> __( 'Availability', 'woocommerce' ),
-							'type' 			=> 'select',
-							'description' 	=> '',
-							'default' 		=> 'including',
-							'options' 		=> array(
-								'including' 	=> __( 'Selected countries', 'woocommerce' ),
-								'excluding' 	=> __( 'Excluding selected countries', 'woocommerce' ),
+							'title'       => __( 'Availability', 'woocommerce' ),
+							'type'        => 'select',
+							'description' => '',
+							'default'     => 'including',
+							'options'     => array(
+								'including' => __( 'Selected countries', 'woocommerce' ),
+								'excluding' => __( 'Excluding selected countries', 'woocommerce' ),
 							)
 						),
 			'countries' => array(
-							'title' 		=> __( 'Countries', 'woocommerce' ),
-							'type' 			=> 'multiselect',
-							'class'			=> 'chosen_select',
-							'css'			=> 'width: 450px;',
-							'default' 		=> '',
-							'options'		=> $woocommerce->countries->countries
+							'title'   => __( 'Countries', 'woocommerce' ),
+							'type'    => 'multiselect',
+							'class'   => 'chosen_select',
+							'css'     => 'width: 450px;',
+							'default' => '',
+							'options' => $woocommerce->countries->countries
 						),
 			'type' => array(
-							'title' 		=> __( 'Calculation Type', 'woocommerce' ),
-							'type' 			=> 'select',
-							'description' 	=> '',
-							'default' 		=> 'order',
-							'options' 		=> array(
-								'order' 	=> __( 'Per Order - charge shipping for the entire order as a whole', 'woocommerce' ),
-								'item' 		=> __( 'Per Item - charge shipping for each item individually', 'woocommerce' ),
-								'class' 	=> __( 'Per Class - charge shipping for each shipping class in an order', 'woocommerce' )
+							'title'       => __( 'Calculation Type', 'woocommerce' ),
+							'type'        => 'select',
+							'description' => '',
+							'default'     => 'order',
+							'options'     => array(
+								'order' => __( 'Per Order - charge shipping for the entire order as a whole', 'woocommerce' ),
+								'item'  => __( 'Per Item - charge shipping for each item individually', 'woocommerce' ),
+								'class' => __( 'Per Class - charge shipping for each shipping class in an order', 'woocommerce' )
 							)
 						),
 			'tax_status' => array(
-							'title' 		=> __( 'Tax Status', 'woocommerce' ),
-							'type' 			=> 'select',
-							'description' 	=> '',
-							'default' 		=> 'taxable',
-							'options'		=> array(
-								'taxable' 	=> __( 'Taxable', 'woocommerce' ),
-								'none' 		=> __( 'None', 'woocommerce' )
+							'title'       => __( 'Tax Status', 'woocommerce' ),
+							'type'        => 'select',
+							'description' => '',
+							'default'     => 'taxable',
+							'options'     => array(
+								'taxable' => __( 'Taxable', 'woocommerce' ),
+								'none'    => __( 'None', 'woocommerce' )
 							)
 						),
 			'cost' => array(
-							'title' 		=> __( 'Default Cost', 'woocommerce' ),
-							'type' 			=> 'number',
+							'title' => __( 'Default Cost', 'woocommerce' ),
+							'type'  => 'number',
 							'custom_attributes' => array(
-								'step'	=> 'any',
-								'min'	=> '0'
+								'step' => 'any',
+								'min'  => '0'
 							),
-							'description'	=> __( 'Cost excluding tax. Enter an amount, e.g. 2.50.', 'woocommerce' ),
-							'default' 		=> ''
+							'description' => __( 'Cost excluding tax. Enter an amount, e.g. 2.50.', 'woocommerce' ),
+							'default'     => ''
 						),
 			'fee' => array(
-							'title' 		=> __( 'Default Handling Fee', 'woocommerce' ),
-							'type' 			=> 'text',
-							'description'	=> __( 'Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable.', 'woocommerce' ),
-							'default'		=> ''
+							'title'       => __( 'Default Handling Fee', 'woocommerce' ),
+							'type'        => 'text',
+							'description' => __( 'Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable.', 'woocommerce' ),
+							'default'     => ''
 						),
 			);
 

@@ -19,19 +19,19 @@ function woocommerce_status() {
 
 	$tools = apply_filters( 'wc_debug_tools', array(
 		'clear_transients' => array(
-			'name'		=> __( 'Transients','woocommerce'),
-			'button'	=> __('Clear Transients','woocommerce'),
-			'desc'		=> __( 'This tool will clear the product/shop transients cache.', 'woocommerce' ),
+			'name'   => __( 'Transients','woocommerce'),
+			'button' => __('Clear Transients','woocommerce'),
+			'desc'   => __( 'This tool will clear the product/shop transients cache.', 'woocommerce' ),
 		),
 		'recount_terms' => array(
-			'name'		=> __('Term counts','woocommerce'),
-			'button'	=> __('Recount Terms','woocommerce'),
-			'desc'		=> __( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', 'woocommerce' ),
+			'name'   => __('Term counts','woocommerce'),
+			'button' => __('Recount Terms','woocommerce'),
+			'desc'   => __( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', 'woocommerce' ),
 		),
 		'reset_roles' => array(
-			'name'		=> __('Capabilities','woocommerce'),
-			'button'	=> __('Reset Capabilities','woocommerce'),
-			'desc'		=> __( 'This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages.', 'woocommerce' ),
+			'name'   => __('Capabilities','woocommerce'),
+			'button' => __('Reset Capabilities','woocommerce'),
+			'desc'   => __( 'This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages.', 'woocommerce' ),
 		),
 	) );
 
@@ -366,10 +366,10 @@ function woocommerce_status() {
 				$posting['wp_remote_post']['name'] = __( 'WP Remote Post Check','woocommerce');
 				$request['cmd'] = '_notify-validate';
 				$params = array(
-					'sslverify' 	=> false,
-		        	'timeout' 		=> 60,
-		        	'user-agent'	=> 'WooCommerce/' . $woocommerce->version,
-		        	'body'			=> $request
+					'sslverify'  => false,
+		        	'timeout'    => 60,
+		        	'user-agent' => 'WooCommerce/' . $woocommerce->version,
+		        	'body'       => $request
 				);
 				$response = wp_remote_post( 'https://www.paypal.com/cgi-bin/webscr', $params );
 

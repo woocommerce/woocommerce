@@ -93,15 +93,15 @@ function variable_product_type_options() {
 				<?php
 				// Get parent data
 				$parent_data = array(
-					'id'		=> $post->ID,
-					'attributes' => $attributes,
+					'id'                => $post->ID,
+					'attributes'        => $attributes,
 					'tax_class_options' => $tax_class_options,
-					'sku' 		=> get_post_meta( $post->ID, '_sku', true ),
-					'weight' 	=> get_post_meta( $post->ID, '_weight', true ),
-					'length' 	=> get_post_meta( $post->ID, '_length', true ),
-					'width' 	=> get_post_meta( $post->ID, '_width', true ),
-					'height' 	=> get_post_meta( $post->ID, '_height', true ),
-					'tax_class' => get_post_meta( $post->ID, '_tax_class', true )
+					'sku'               => get_post_meta( $post->ID, '_sku', true ),
+					'weight'            => get_post_meta( $post->ID, '_weight', true ),
+					'length'            => get_post_meta( $post->ID, '_length', true ),
+					'width'             => get_post_meta( $post->ID, '_width', true ),
+					'height'            => get_post_meta( $post->ID, '_height', true ),
+					'tax_class'         => get_post_meta( $post->ID, '_tax_class', true )
 				);
 
 				if ( ! $parent_data['weight'] )
@@ -118,12 +118,12 @@ function variable_product_type_options() {
 
 				// Get variations
 				$args = array(
-					'post_type'		=> 'product_variation',
-					'post_status' 	=> array( 'private', 'publish' ),
-					'numberposts' 	=> -1,
-					'orderby' 		=> 'menu_order',
-					'order' 		=> 'asc',
-					'post_parent' 	=> $post->ID
+					'post_type'   => 'product_variation',
+					'post_status' => array( 'private', 'publish' ),
+					'numberposts' => -1,
+					'orderby'     => 'menu_order',
+					'order'       => 'asc',
+					'post_parent' => $post->ID
 				);
 				$variations = get_posts( $args );
 				$loop = 0;
@@ -591,13 +591,13 @@ function process_product_meta_variable( $post_id ) {
 			if ( ! $variation_id ) {
 
 				$variation = array(
-					'post_title' 	=> $variation_post_title,
-					'post_content' 	=> '',
-					'post_status' 	=> $post_status,
-					'post_author' 	=> get_current_user_id(),
-					'post_parent' 	=> $post_id,
-					'post_type' 	=> 'product_variation',
-					'menu_order' 	=> $variable_menu_order[ $i ]
+					'post_title'   => $variation_post_title,
+					'post_content' => '',
+					'post_status'  => $post_status,
+					'post_author'  => get_current_user_id(),
+					'post_parent'  => $post_id,
+					'post_type'    => 'product_variation',
+					'menu_order'   => $variable_menu_order[ $i ]
 				);
 
 				$variation_id = wp_insert_post( $variation );
@@ -725,11 +725,11 @@ function process_product_meta_variable( $post_id ) {
 	$post_parent = $post_id;
 
 	$children = get_posts( array(
-		'post_parent' 	=> $post_parent,
-		'posts_per_page'=> -1,
-		'post_type' 	=> 'product_variation',
-		'fields' 		=> 'ids',
-		'post_status'	=> 'publish'
+		'post_parent'    => $post_parent,
+		'posts_per_page' => -1,
+		'post_type'      => 'product_variation',
+		'fields'         => 'ids',
+		'post_status'    => 'publish'
 	) );
 
 	$lowest_price = $lowest_regular_price = $lowest_sale_price = $highest_price = $highest_regular_price = $highest_sale_price = '';

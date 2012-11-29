@@ -73,15 +73,15 @@ function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 		break;
 		case "woocommerce_billing_address" :
 			$address = array(
-				'first_name' 	=> get_user_meta( $user_id, 'billing_first_name', true ),
-				'last_name'		=> get_user_meta( $user_id, 'billing_last_name', true ),
-				'company'		=> get_user_meta( $user_id, 'billing_company', true ),
-				'address_1'		=> get_user_meta( $user_id, 'billing_address_1', true ),
-				'address_2'		=> get_user_meta( $user_id, 'billing_address_2', true ),
-				'city'			=> get_user_meta( $user_id, 'billing_city', true ),
-				'state'			=> get_user_meta( $user_id, 'billing_state', true ),
-				'postcode'		=> get_user_meta( $user_id, 'billing_postcode', true ),
-				'country'		=> get_user_meta( $user_id, 'billing_country', true )
+				'first_name' => get_user_meta( $user_id, 'billing_first_name', true ),
+				'last_name'  => get_user_meta( $user_id, 'billing_last_name', true ),
+				'company'    => get_user_meta( $user_id, 'billing_company', true ),
+				'address_1'  => get_user_meta( $user_id, 'billing_address_1', true ),
+				'address_2'  => get_user_meta( $user_id, 'billing_address_2', true ),
+				'city'       => get_user_meta( $user_id, 'billing_city', true ),
+				'state'      => get_user_meta( $user_id, 'billing_state', true ),
+				'postcode'   => get_user_meta( $user_id, 'billing_postcode', true ),
+				'country'    => get_user_meta( $user_id, 'billing_country', true )
 			);
 
 			$formatted_address = $woocommerce->countries->get_formatted_address( $address );
@@ -95,15 +95,15 @@ function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 		break;
 		case "woocommerce_shipping_address" :
 			$address = array(
-				'first_name' 	=> get_user_meta( $user_id, 'shipping_first_name', true ),
-				'last_name'		=> get_user_meta( $user_id, 'shipping_last_name', true ),
-				'company'		=> get_user_meta( $user_id, 'shipping_company', true ),
-				'address_1'		=> get_user_meta( $user_id, 'shipping_address_1', true ),
-				'address_2'		=> get_user_meta( $user_id, 'shipping_address_2', true ),
-				'city'			=> get_user_meta( $user_id, 'shipping_city', true ),
-				'state'			=> get_user_meta( $user_id, 'shipping_state', true ),
-				'postcode'		=> get_user_meta( $user_id, 'shipping_postcode', true ),
-				'country'		=> get_user_meta( $user_id, 'shipping_country', true )
+				'first_name' => get_user_meta( $user_id, 'shipping_first_name', true ),
+				'last_name'  => get_user_meta( $user_id, 'shipping_last_name', true ),
+				'company'    => get_user_meta( $user_id, 'shipping_company', true ),
+				'address_1'  => get_user_meta( $user_id, 'shipping_address_1', true ),
+				'address_2'  => get_user_meta( $user_id, 'shipping_address_2', true ),
+				'city'       => get_user_meta( $user_id, 'shipping_city', true ),
+				'state'      => get_user_meta( $user_id, 'shipping_state', true ),
+				'postcode'   => get_user_meta( $user_id, 'shipping_postcode', true ),
+				'country'    => get_user_meta( $user_id, 'shipping_country', true )
 			);
 
 			$formatted_address = $woocommerce->countries->get_formatted_address( $address );

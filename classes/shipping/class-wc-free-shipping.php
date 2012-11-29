@@ -73,56 +73,56 @@ class WC_Free_Shipping extends WC_Shipping_Method {
 
     	$this->form_fields = array(
 			'enabled' => array(
-							'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
-							'type' 			=> 'checkbox',
-							'label' 		=> __( 'Enable Free Shipping', 'woocommerce' ),
-							'default' 		=> 'yes'
+							'title'   => __( 'Enable/Disable', 'woocommerce' ),
+							'type'    => 'checkbox',
+							'label'   => __( 'Enable Free Shipping', 'woocommerce' ),
+							'default' => 'yes'
 						),
 			'title' => array(
-							'title' 		=> __( 'Method Title', 'woocommerce' ),
-							'type' 			=> 'text',
-							'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-							'default'		=> __( 'Free Shipping', 'woocommerce' )
+							'title'       => __( 'Method Title', 'woocommerce' ),
+							'type'        => 'text',
+							'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
+							'default'     => __( 'Free Shipping', 'woocommerce' )
 						),
 			'availability' => array(
-							'title' 		=> __( 'Method availability', 'woocommerce' ),
-							'type' 			=> 'select',
-							'default' 		=> 'all',
-							'class'			=> 'availability',
-							'options'		=> array(
-								'all' 		=> __( 'All allowed countries', 'woocommerce' ),
-								'specific' 	=> __( 'Specific Countries', 'woocommerce' )
+							'title'   => __( 'Method availability', 'woocommerce' ),
+							'type'    => 'select',
+							'default' => 'all',
+							'class'   => 'availability',
+							'options' => array(
+								'all'      => __( 'All allowed countries', 'woocommerce' ),
+								'specific' => __( 'Specific Countries', 'woocommerce' )
 							)
 						),
 			'countries' => array(
-							'title' 		=> __( 'Specific Countries', 'woocommerce' ),
-							'type' 			=> 'multiselect',
-							'class'			=> 'chosen_select',
-							'css'			=> 'width: 450px;',
-							'default' 		=> '',
-							'options'		=> $woocommerce->countries->countries
+							'title'   => __( 'Specific Countries', 'woocommerce' ),
+							'type'    => 'multiselect',
+							'class'   => 'chosen_select',
+							'css'     => 'width: 450px;',
+							'default' => '',
+							'options' => $woocommerce->countries->countries
 						),
 			'requires' => array(
-							'title' 		=> __( 'Free Shipping Requires...', 'woocommerce' ),
-							'type' 			=> 'select',
-							'default' 		=> '',
-							'options'		=> array(
-								'' 				=> __( 'N/A', 'woocommerce' ),
-								'coupon'		=> __( 'A valid free shipping coupon', 'woocommerce' ),
-								'min_amount' 	=> __( 'A minimum order amount (defined below)', 'woocommerce' ),
-								'either' 		=> __( 'A minimum order amount OR a coupon', 'woocommerce' ),
-								'both' 			=> __( 'A minimum order amount AND a coupon', 'woocommerce' ),
+							'title'   => __( 'Free Shipping Requires...', 'woocommerce' ),
+							'type'    => 'select',
+							'default' => '',
+							'options' => array(
+								''           => __( 'N/A', 'woocommerce' ),
+								'coupon'     => __( 'A valid free shipping coupon', 'woocommerce' ),
+								'min_amount' => __( 'A minimum order amount (defined below)', 'woocommerce' ),
+								'either'     => __( 'A minimum order amount OR a coupon', 'woocommerce' ),
+								'both'       => __( 'A minimum order amount AND a coupon', 'woocommerce' ),
 							)
 						),
 			'min_amount' => array(
-							'title' 		=> __( 'Minimum Order Amount', 'woocommerce' ),
-							'type' 			=> 'number',
+							'title' => __( 'Minimum Order Amount', 'woocommerce' ),
+							'type'  => 'number',
 							'custom_attributes' => array(
-								'step'	=> 'any',
-								'min'	=> '0'
+								'step' => 'any',
+								'min'  => '0'
 							),
-							'description' 	=> __( 'Users will need to spend this amount to get free shipping (if enabled above).', 'woocommerce' ),
-							'default' 		=> '0'
+							'description' => __( 'Users will need to spend this amount to get free shipping (if enabled above).', 'woocommerce' ),
+							'default'     => '0'
 						)
 			);
 
@@ -238,9 +238,9 @@ class WC_Free_Shipping extends WC_Shipping_Method {
      */
     function calculate_shipping() {
     	$args = array(
-    		'id' 	=> $this->id,
+    		'id'    => $this->id,
     		'label' => $this->title,
-    		'cost' 	=> 0,
+    		'cost'  => 0,
     		'taxes' => false
     	);
     	$this->add_rate( $args );

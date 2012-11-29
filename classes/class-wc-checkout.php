@@ -45,26 +45,26 @@ class WC_Checkout {
 		if ( get_option( 'woocommerce_registration_email_for_username' ) == 'no' ) {
 
 			$this->checkout_fields['account']['account_username'] = array(
-				'type' 			=> 'text',
-				'label' 		=> __( 'Account username', 'woocommerce' ),
-				'placeholder' 	=> _x( 'Username', 'placeholder', 'woocommerce' )
+				'type'        => 'text',
+				'label'       => __( 'Account username', 'woocommerce' ),
+				'placeholder' => _x( 'Username', 'placeholder', 'woocommerce' )
 			);
 
 		}
 
 		$this->checkout_fields['account']['account_password'] = array(
-			'type' 				=> 'password',
-			'label' 			=> __( 'Account password', 'woocommerce' ),
-			'placeholder' 		=> _x( 'Password', 'placeholder', 'woocommerce' ),
-			'class' 			=> array( 'form-row-first' )
+			'type'        => 'password',
+			'label'       => __( 'Account password', 'woocommerce' ),
+			'placeholder' => _x( 'Password', 'placeholder', 'woocommerce' ),
+			'class'       => array( 'form-row-first' )
 		);
 
 		$this->checkout_fields['account']['account_password-2'] = array(
-			'type' 				=> 'password',
-			'label' 			=> __( 'Account password', 'woocommerce' ),
-			'placeholder' 		=> _x( 'Password', 'placeholder', 'woocommerce' ),
-			'class' 			=> array( 'form-row-last' ),
-			'label_class' 		=> array( 'hidden' )
+			'type'        => 'password',
+			'label'       => __( 'Account password', 'woocommerce' ),
+			'placeholder' => _x( 'Password', 'placeholder', 'woocommerce' ),
+			'class'       => array( 'form-row-last' ),
+			'label_class' => array( 'hidden' )
 		);
 
 		$this->checkout_fields['order']	= array(
@@ -389,13 +389,13 @@ class WC_Checkout {
 
 				// Create Order (send cart variable so we can record items and reduce inventory). Only create if this is a new order, not if the payment was rejected last time.
 				$order_data = apply_filters( 'woocommerce_new_order_data', array(
-					'post_type' 	=> 'shop_order',
-					'post_title' 	=> sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) ),
-					'post_status' 	=> 'publish',
-					'ping_status'	=> 'closed',
-					'post_excerpt' 	=> isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : '',
-					'post_author' 	=> 1,
-					'post_password'	=> uniqid( 'order_' )	// Protects the post just in case
+					'post_type'     => 'shop_order',
+					'post_title'    => sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) ),
+					'post_status'   => 'publish',
+					'ping_status'   => 'closed',
+					'post_excerpt'  => isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : '',
+					'post_author'   => 1,
+					'post_password' => uniqid( 'order_' )	// Protects the post just in case
 				) );
 
 				if ( $woocommerce->error_count() > 0 )
@@ -446,8 +446,8 @@ class WC_Checkout {
 
                    	// Add line item
                    	$item_id = woocommerce_add_order_item( $order_id, array(
-				 		'order_item_name' 		=> $_product->get_title(),
-				 		'order_item_type' 		=> 'line_item'
+				 		'order_item_name' => $_product->get_title(),
+				 		'order_item_type' => 'line_item'
 				 	) );
 
 				 	// Add line item meta
@@ -478,8 +478,8 @@ class WC_Checkout {
 				// Store fees
 				foreach ( $woocommerce->cart->get_fees() as $fee ) {
 					$item_id = woocommerce_add_order_item( $order_id, array(
-				 		'order_item_name' 		=> $fee->name,
-				 		'order_item_type' 		=> 'fee'
+				 		'order_item_name' => $fee->name,
+				 		'order_item_type' => 'fee'
 				 	) );
 
 				 	if ( $fee->taxable )
@@ -560,8 +560,8 @@ class WC_Checkout {
 				foreach ( array_keys( $woocommerce->cart->taxes + $woocommerce->cart->shipping_taxes ) as $key ) {
 
 					$item_id = woocommerce_add_order_item( $order_id, array(
-				 		'order_item_name' 		=> $woocommerce->cart->tax->get_rate_label( $key ),
-				 		'order_item_type' 		=> 'tax'
+				 		'order_item_name' => $woocommerce->cart->tax->get_rate_label( $key ),
+				 		'order_item_type' => 'tax'
 				 	) );
 
 				 	// Add line item meta
@@ -662,7 +662,7 @@ class WC_Checkout {
 					if ( is_ajax() ) {
 						echo json_encode(
 							array(
-								'result' 	=> 'success',
+								'result'   => 'success',
 								'redirect' => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order)
 							)
 						);
@@ -694,9 +694,9 @@ class WC_Checkout {
 
 			echo json_encode(
 				array(
-					'result'	=> 'failure',
-					'messages' 	=> $messages,
-					'refresh' 	=> isset( $woocommerce->session->refresh_totals ) ? 'true' : 'false'
+					'result'   => 'failure',
+					'messages' => $messages,
+					'refresh'  => isset( $woocommerce->session->refresh_totals ) ? 'true' : 'false'
 				)
 			);
 

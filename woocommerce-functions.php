@@ -919,10 +919,10 @@ function woocommerce_download_product() {
 			$wpdb->update( $wpdb->prefix . "woocommerce_downloadable_product_permissions", array(
 				'downloads_remaining' => $downloads_remaining - 1,
 			), array(
-				'user_email' 	=> $email,
-				'order_key' 	=> $order_key,
-				'product_id' 	=> $product_id,
-				'download_id' 	=> $download_id
+				'user_email'  => $email,
+				'order_key'   => $order_key,
+				'product_id'  => $product_id,
+				'download_id' => $download_id
 			), array( '%d' ), array( '%s', '%s', '%d', '%s' ) );
 		}
 
@@ -930,10 +930,10 @@ function woocommerce_download_product() {
 		$wpdb->update( $wpdb->prefix . "woocommerce_downloadable_product_permissions", array(
 			'download_count' => $download_count + 1,
 		), array(
-			'user_email' 	=> $email,
-			'order_key' 	=> $order_key,
-			'product_id' 	=> $product_id,
-			'download_id' 	=> $download_id
+			'user_email'  => $email,
+			'order_key'   => $order_key,
+			'product_id'  => $product_id,
+			'download_id' => $download_id
 		), array( '%d' ), array( '%s', '%s', '%d', '%s' ) );
 
 		// Get the download URL and try to replace the url with a path

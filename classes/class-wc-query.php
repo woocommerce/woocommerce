@@ -270,12 +270,12 @@ class WC_Query {
 				array_merge(
 					$current_wp_query,
 					array(
-						'post_type' 	=> 'product',
-						'numberposts' 	=> -1,
-						'post_status' 	=> 'publish',
-						'meta_query' 	=> $this->meta_query,
-						'fields' 		=> 'ids',
-						'no_found_rows' => true,
+						'post_type'              => 'product',
+						'numberposts'            => -1,
+						'post_status'            => 'publish',
+						'meta_query'             => $this->meta_query,
+						'fields'                 => 'ids',
+						'no_found_rows'          => true,
 						'update_post_meta_cache' => false,
 						'update_post_term_cache' => false
 					)
@@ -383,9 +383,9 @@ class WC_Query {
 		$meta_query = array();
 		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' ) {
 			 $meta_query = array(
-		        'key' 		=> '_stock_status',
-				'value' 	=> $status,
-				'compare' 	=> '='
+		        'key'     => '_stock_status',
+				'value'   => $status,
+				'compare' => '='
 		    );
 		}
 		return $meta_query;

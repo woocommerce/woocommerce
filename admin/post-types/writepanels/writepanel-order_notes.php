@@ -22,9 +22,9 @@ function woocommerce_order_notes_meta_box() {
 	global $woocommerce, $post;
 
 	$args = array(
-		'post_id' 	=> $post->ID,
-		'approve' 	=> 'approve',
-		'type' 		=> 'order_note'
+		'post_id' => $post->ID,
+		'approve' => 'approve',
+		'type'    => 'order_note'
 	);
 
 	$notes = get_comments( $args );

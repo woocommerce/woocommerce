@@ -81,18 +81,18 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 			$meta_query = array();
 
 		    $meta_query[] = array(
-		    	'key' => '_sale_price',
-		        'value' 	=> 0,
-				'compare' 	=> '>',
-				'type'		=> 'NUMERIC'
+		    	'key'     => '_sale_price',
+		        'value'   => 0,
+				'compare' => '>',
+				'type'    => 'NUMERIC'
 		    );
 
 			$on_sale = get_posts(array(
-				'post_type' 		=> array('product', 'product_variation'),
-				'posts_per_page' 	=> -1,
-				'post_status' 		=> 'publish',
-				'meta_query' 		=> $meta_query,
-				'fields' 			=> 'id=>parent'
+				'post_type'      => array('product', 'product_variation'),
+				'posts_per_page' => -1,
+				'post_status'    => 'publish',
+				'meta_query'     => $meta_query,
+				'fields'         => 'id=>parent'
 			));
 
 			$product_ids 	= array_keys( $on_sale );
@@ -116,14 +116,14 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 	    $meta_query[] = $woocommerce->query->stock_status_meta_query();
 
     	$query_args = array(
-    		'posts_per_page' 	=> $number,
-    		'no_found_rows' => 1,
-    		'post_status' 	=> 'publish',
-    		'post_type' 	=> 'product',
-    		'orderby' 		=> 'date',
-    		'order' 		=> 'ASC',
-    		'meta_query' 	=> $meta_query,
-    		'post__in'		=> $product_ids_on_sale
+    		'posts_per_page' => $number,
+    		'no_found_rows'  => 1,
+    		'post_status'    => 'publish',
+    		'post_type'      => 'product',
+    		'orderby'        => 'date',
+    		'order'          => 'ASC',
+    		'meta_query'     => $meta_query,
+    		'post__in'       => $product_ids_on_sale
     	);
 
 		$r = new WP_Query($query_args);

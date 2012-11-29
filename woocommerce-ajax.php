@@ -369,13 +369,13 @@ function woocommerce_add_new_attribute() {
 
 		if ( is_wp_error($result) ) {
    			echo json_encode(array(
-				'error'			=> $result->get_error_message()
+				'error' => $result->get_error_message()
 			));
    		} else {
 	   		echo json_encode(array(
-				'term_id'		=> $result['term_id'],
-				'name'			=> $term,
-				'slug'  		=> sanitize_title( $term ),
+				'term_id' => $result['term_id'],
+				'name'    => $term,
+				'slug'    => sanitize_title( $term ),
 			));
 		}
 	}
@@ -489,12 +489,12 @@ function woocommerce_save_attributes() {
 		 		if ( $values ) {
 			 		// Add attribute to array, but don't set values
 			 		$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
-				 		'name' 			=> htmlspecialchars( stripslashes( $attribute_names[ $i ] ) ),
-				 		'value' 		=> '',
-				 		'position' 		=> $attribute_position[ $i ],
-				 		'is_visible' 	=> $is_visible,
-				 		'is_variation' 	=> $is_variation,
-				 		'is_taxonomy' 	=> $is_taxonomy
+				 		'name'         => htmlspecialchars( stripslashes( $attribute_names[ $i ] ) ),
+				 		'value'        => '',
+				 		'position'     => $attribute_position[ $i ],
+				 		'is_visible'   => $is_visible,
+				 		'is_variation' => $is_variation,
+				 		'is_taxonomy'  => $is_taxonomy
 				 	);
 			 	}
 
@@ -509,12 +509,12 @@ function woocommerce_save_attributes() {
 
 		 		// Custom attribute - Add attribute to array and set the values
 			 	$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
-			 		'name' 			=> htmlspecialchars( stripslashes( $attribute_names[ $i ] ) ),
-			 		'value' 		=> $values,
-			 		'position' 		=> $attribute_position[ $i ],
-			 		'is_visible' 	=> $is_visible,
-			 		'is_variation' 	=> $is_variation,
-			 		'is_taxonomy' 	=> $is_taxonomy
+			 		'name'         => htmlspecialchars( stripslashes( $attribute_names[ $i ] ) ),
+			 		'value'        => $values,
+			 		'position'     => $attribute_position[ $i ],
+			 		'is_visible'   => $is_visible,
+			 		'is_variation' => $is_variation,
+			 		'is_taxonomy'  => $is_taxonomy
 			 	);
 		 	}
 
@@ -551,12 +551,12 @@ function woocommerce_add_variation() {
 	$loop = intval( $_POST['loop'] );
 
 	$variation = array(
-		'post_title' 	=> 'Product #' . $post_id . ' Variation',
-		'post_content' 	=> '',
-		'post_status' 	=> 'publish',
-		'post_author' 	=> get_current_user_id(),
-		'post_parent' 	=> $post_id,
-		'post_type' 	=> 'product_variation'
+		'post_title'   => 'Product #' . $post_id . ' Variation',
+		'post_content' => '',
+		'post_status'  => 'publish',
+		'post_author'  => get_current_user_id(),
+		'post_parent'  => $post_id,
+		'post_type'    => 'product_variation'
 	);
 
 	$variation_id = wp_insert_post( $variation );
@@ -582,15 +582,15 @@ function woocommerce_add_variation() {
 
 		// Get parent data
 		$parent_data = array(
-			'id'		=> $post_id,
-			'attributes' => $attributes,
+			'id'                => $post_id,
+			'attributes'        => $attributes,
 			'tax_class_options' => $tax_class_options,
-			'sku' 		=> get_post_meta( $post_id, '_sku', true ),
-			'weight' 	=> get_post_meta( $post_id, '_weight', true ),
-			'length' 	=> get_post_meta( $post_id, '_length', true ),
-			'width' 	=> get_post_meta( $post_id, '_width', true ),
-			'height' 	=> get_post_meta( $post_id, '_height', true ),
-			'tax_class' => get_post_meta( $post_id, '_tax_class', true )
+			'sku'               => get_post_meta( $post_id, '_sku', true ),
+			'weight'            => get_post_meta( $post_id, '_weight', true ),
+			'length'            => get_post_meta( $post_id, '_length', true ),
+			'width'             => get_post_meta( $post_id, '_width', true ),
+			'height'            => get_post_meta( $post_id, '_height', true ),
+			'tax_class'         => get_post_meta( $post_id, '_tax_class', true )
 		);
 
 		if ( ! $parent_data['weight'] )
@@ -846,15 +846,15 @@ function woocommerce_grant_access_to_download() {
 		foreach ( $file_paths as $download_id => $file_path ) {
 
 		    $data = array(
-		    	'download_id'			=> $download_id,
-		        'product_id' 			=> $product_id,
-		        'user_id' 				=> (int) $order->user_id,
-		        'user_email' 			=> $user_email,
-		        'order_id' 				=> $order->id,
-		        'order_key' 			=> $order->order_key,
-		        'downloads_remaining' 	=> $limit,
-		        'access_granted'		=> current_time( 'mysql' ),
-		        'download_count'		=> 0
+		    	'download_id'         => $download_id,
+		        'product_id'          => $product_id,
+		        'user_id'             => (int) $order->user_id,
+		        'user_email'          => $user_email,
+		        'order_id'            => $order->id,
+		        'order_key'           => $order->order_key,
+		        'downloads_remaining' => $limit,
+		        'access_granted'      => current_time( 'mysql' ),
+		        'download_count'      => 0
 		    );
 
 		    $format = array(
@@ -986,8 +986,8 @@ function woocommerce_ajax_add_order_item() {
 
 	// Add line item
    	$item_id = woocommerce_add_order_item( $order_id, array(
- 		'order_item_name' 		=> $item['name'],
- 		'order_item_type' 		=> 'line_item'
+ 		'order_item_name' => $item['name'],
+ 		'order_item_type' => 'line_item'
  	) );
 
  	// Add line item meta
@@ -1027,8 +1027,8 @@ function woocommerce_ajax_add_order_fee() {
 
 	// Add line item
    	$item_id = woocommerce_add_order_item( $order_id, array(
- 		'order_item_name' 		=> '',
- 		'order_item_type' 		=> 'fee'
+ 		'order_item_name' => '',
+ 		'order_item_type' => 'fee'
  	) );
 
  	// Add line item meta
@@ -1333,10 +1333,10 @@ function woocommerce_calc_line_taxes() {
 			if ( $item_tax_status == 'taxable' ) {
 
 				$tax_rates = $tax->find_rates( array(
-					'country' 	=> $country,
-					'state' 	=> $state,
-					'postcode' 	=> $postcode,
-					'city'		=> $city,
+					'country'   => $country,
+					'state'     => $state,
+					'postcode'  => $postcode,
+					'city'      => $city,
 					'tax_class' => $tax_class
 				) );
 
@@ -1354,7 +1354,7 @@ function woocommerce_calc_line_taxes() {
 
 				$item_taxes[ $item_id ] = array(
 					'line_subtotal_tax' => $line_subtotal_tax,
-					'line_tax' 			=> $line_tax
+					'line_tax'          => $line_tax
 				);
 
 				$item_tax += $line_tax;
@@ -1371,10 +1371,10 @@ function woocommerce_calc_line_taxes() {
 	$matched_tax_rates = array();
 
 	$tax_rates = $tax->find_rates( array(
-		'country' 	=> $country,
-		'state' 	=> $state,
-		'postcode' 	=> $postcode,
-		'city'		=> $city,
+		'country'   => $country,
+		'state'     => $state,
+		'postcode'  => $postcode,
+		'city'      => $city,
 		'tax_class' => ''
 	) );
 
@@ -1407,8 +1407,8 @@ function woocommerce_calc_line_taxes() {
 
 		// Add line item
 	   	$item_id = woocommerce_add_order_item( $order_id, array(
-	 		'order_item_name' 		=> $item['name'],
-	 		'order_item_type' 		=> 'tax'
+	 		'order_item_name' => $item['name'],
+	 		'order_item_type' => 'tax'
 	 	) );
 
 	 	// Add line item meta
@@ -1425,10 +1425,10 @@ function woocommerce_calc_line_taxes() {
 
 	// Return
 	echo json_encode( array(
-		'item_tax' 		=> $item_tax,
-		'item_taxes' 	=> $item_taxes,
-		'shipping_tax' 	=> $shipping_tax,
-		'tax_row_html' 	=> $tax_row_html
+		'item_tax'     => $item_tax,
+		'item_taxes'   => $item_taxes,
+		'shipping_tax' => $shipping_tax,
+		'tax_row_html' => $tax_row_html
 	) );
 
 	// Quit out
@@ -1453,8 +1453,8 @@ function woocommerce_add_line_tax() {
 
 	// Add line item
    	$item_id = woocommerce_add_order_item( $order_id, array(
- 		'order_item_name' 		=> '',
- 		'order_item_type' 		=> 'tax'
+ 		'order_item_name' => '',
+ 		'order_item_type' => 'tax'
  	) );
 
  	// Add line item meta
@@ -1575,33 +1575,33 @@ function woocommerce_json_search_products( $x = '', $post_types = array('product
 	if ( is_numeric( $term ) ) {
 
 		$args = array(
-			'post_type'			=> $post_types,
-			'post_status'	 	=> 'publish',
-			'posts_per_page' 	=> -1,
-			'post__in' 			=> array(0, $term),
-			'fields'			=> 'ids'
+			'post_type'      => $post_types,
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'post__in'       => array(0, $term),
+			'fields'         => 'ids'
 		);
 
 		$args2 = array(
-			'post_type'			=> $post_types,
-			'post_status'	 	=> 'publish',
-			'posts_per_page' 	=> -1,
-			'post_parent' 		=> $term,
-			'fields'			=> 'ids'
+			'post_type'      => $post_types,
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'post_parent'    => $term,
+			'fields'         => 'ids'
 		);
 
 		$args3 = array(
-			'post_type'			=> $post_types,
-			'post_status' 		=> 'publish',
-			'posts_per_page' 	=> -1,
-			'meta_query' 		=> array(
+			'post_type'      => $post_types,
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'meta_query'     => array(
 				array(
-				'key' 	=> '_sku',
-				'value' => $term,
+				'key'     => '_sku',
+				'value'   => $term,
 				'compare' => 'LIKE'
 				)
 			),
-			'fields'			=> 'ids'
+			'fields' => 'ids'
 		);
 
 		$posts = array_unique(array_merge( get_posts( $args ), get_posts( $args2 ), get_posts( $args3 ) ));
@@ -1609,25 +1609,25 @@ function woocommerce_json_search_products( $x = '', $post_types = array('product
 	} else {
 
 		$args = array(
-			'post_type'			=> $post_types,
-			'post_status' 		=> 'publish',
-			'posts_per_page' 	=> -1,
-			's' 				=> $term,
-			'fields'			=> 'ids'
+			'post_type'      => $post_types,
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			's'              => $term,
+			'fields'         => 'ids'
 		);
 
 		$args2 = array(
-			'post_type'			=> $post_types,
-			'post_status' 		=> 'publish',
-			'posts_per_page' 	=> -1,
-			'meta_query' 		=> array(
+			'post_type'      => $post_types,
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'meta_query'     => array(
 				array(
-				'key' 	=> '_sku',
-				'value' => $term,
+				'key'     => '_sku',
+				'value'   => $term,
 				'compare' => 'LIKE'
 				)
 			),
-			'fields'			=> 'ids'
+			'fields' => 'ids'
 		);
 
 		$posts = array_unique(array_merge( get_posts( $args ), get_posts( $args2 ) ));
@@ -1689,10 +1689,10 @@ function woocommerce_json_search_customers() {
 	$found_customers = array( '' => $default );
 
 	$customers_query = new WP_User_Query( array(
-		'fields'			=> 'all',
-		'orderby'			=> 'display_name',
-		'search'			=> '*' . $term . '*',
-		'search_columns'	=> array( 'ID', 'user_login', 'user_email', 'user_nicename' )
+		'fields'         => 'all',
+		'orderby'        => 'display_name',
+		'search'         => '*' . $term . '*',
+		'search_columns' => array( 'ID', 'user_login', 'user_email', 'user_nicename' )
 	) );
 
 	$customers = $customers_query->get_results();
@@ -1728,19 +1728,19 @@ function woocommerce_upsell_crosssell_search_products() {
 	if (is_numeric($search)) :
 
 		$args = array(
-			'post_type'	=> 'product',
-			'post_status' => 'publish',
+			'post_type'      => 'product',
+			'post_status'    => 'publish',
 			'posts_per_page' => 15,
-			'post__in' => array(0, $search)
+			'post__in'       => array(0, $search)
 		);
 
 	else :
 
 		$args = array(
-			'post_type'	=> 'product',
-			'post_status' => 'publish',
+			'post_type'      => 'product',
+			'post_status'    => 'publish',
 			'posts_per_page' => 15,
-			's' => $search
+			's'              => $search
 		);
 
 	endif;
@@ -1912,11 +1912,11 @@ function woocommerce_product_images_box_upload() {
 		require_once( ABSPATH . 'wp-admin/includes/image.php' );
 
 		$attachment_id = wp_insert_attachment( array(
-			'post_mime_type' 	=> $upload['type'],
-			'post_title' 		=> preg_replace( '/\.[^.]+$/', '', basename( $upload['file'] ) ),
-			'post_content' 		=> '',
-			'post_status' 		=> 'inherit',
-			'menu_order'		=> ( $gallery_size + 1 )
+			'post_mime_type' => $upload['type'],
+			'post_title'     => preg_replace( '/\.[^.]+$/', '', basename( $upload['file'] ) ),
+			'post_content'   => '',
+			'post_status'    => 'inherit',
+			'menu_order'     => ( $gallery_size + 1 )
 		), $upload['file'], $post_id );
 
 		$attachment_data = wp_generate_attachment_metadata( $attachment_id, $upload['file'] );
@@ -1926,14 +1926,14 @@ function woocommerce_product_images_box_upload() {
 		$image = wp_get_attachment_image_src( $attachment_id, 'full' );
 
 		$result = array(
-			'src'		=> $image[0],
-			'post_id' 	=> $attachment_id,
-			'edit_url'	=> admin_url( 'media-upload.php?post_id=' . $post_id . '&attachment_id=' . $attachment_id . '&tab=library&width=640&height=553&TB_iframe=1' )
+			'src'      => $image[0],
+			'post_id'  => $attachment_id,
+			'edit_url' => admin_url( 'media-upload.php?post_id=' . $post_id . '&attachment_id=' . $attachment_id . '&tab=library&width=640&height=553&TB_iframe=1' )
 		);
 
 	} else {
 		$result = array(
-			'error'		=> $upload['error']
+			'error' => $upload['error']
 		);
 	}
 

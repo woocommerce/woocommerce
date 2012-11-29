@@ -24,75 +24,75 @@ function woocommerce_reports() {
 
 	$charts = apply_filters( 'woocommerce_reports_charts', array(
 		'sales' => array(
-			'title' 	=>  __( 'Sales', 'woocommerce' ),
-			'charts' 	=> array(
+			'title'  =>  __( 'Sales', 'woocommerce' ),
+			'charts' => array(
 				array(
-					'title' => __( 'Overview', 'woocommerce' ),
+					'title'       => __( 'Overview', 'woocommerce' ),
 					'description' => '',
-					'hide_title' => true,
-					'function' => 'woocommerce_sales_overview'
+					'hide_title'  => true,
+					'function'    => 'woocommerce_sales_overview'
 				),
 				array(
-					'title' => __( 'Sales by day', 'woocommerce' ),
+					'title'       => __( 'Sales by day', 'woocommerce' ),
 					'description' => '',
-					'function' => 'woocommerce_daily_sales'
+					'function'    => 'woocommerce_daily_sales'
 				),
 				array(
-					'title' => __( 'Sales by month', 'woocommerce' ),
+					'title'       => __( 'Sales by month', 'woocommerce' ),
 					'description' => '',
-					'function' => 'woocommerce_monthly_sales'
+					'function'    => 'woocommerce_monthly_sales'
 				),
 				array(
-					'title' => __( 'Taxes by month', 'woocommerce' ),
+					'title'       => __( 'Taxes by month', 'woocommerce' ),
 					'description' => '',
-					'function' => 'woocommerce_monthly_taxes'
+					'function'    => 'woocommerce_monthly_taxes'
 				),
 				array(
-					'title' => __( 'Product Sales', 'woocommerce' ),
+					'title'       => __( 'Product Sales', 'woocommerce' ),
 					'description' => '',
-					'function' => 'woocommerce_product_sales'
+					'function'    => 'woocommerce_product_sales'
 				),
 				array(
-					'title' => __( 'Top sellers', 'woocommerce' ),
+					'title'       => __( 'Top sellers', 'woocommerce' ),
 					'description' => '',
-					'function' => 'woocommerce_top_sellers'
+					'function'    => 'woocommerce_top_sellers'
 				),
 				array(
-					'title' => __( 'Top earners', 'woocommerce' ),
+					'title'       => __( 'Top earners', 'woocommerce' ),
 					'description' => '',
-					'function' => 'woocommerce_top_earners'
+					'function'    => 'woocommerce_top_earners'
 				),
 				array(
-					'title' => __( 'Sales by category', 'woocommerce' ),
+					'title'       => __( 'Sales by category', 'woocommerce' ),
 					'description' => '',
-					'function' => 'woocommerce_category_sales'
+					'function'    => 'woocommerce_category_sales'
 				),
 				array(
-					'title' => __( 'Sales by coupon', 'woocommerce' ),
+					'title'       => __( 'Sales by coupon', 'woocommerce' ),
 					'description' => '',
-					'function' => 'woocommerce_coupon_sales'
+					'function'    => 'woocommerce_coupon_sales'
 				)
 			)
 		),
 		'customers' => array(
-			'title' 	=>  __( 'Customers', 'woocommerce' ),
-			'charts' 	=> array(
+			'title'  =>  __( 'Customers', 'woocommerce' ),
+			'charts' => array(
 				array(
-					'title' => __( 'Overview', 'woocommerce' ),
+					'title'       => __( 'Overview', 'woocommerce' ),
 					'description' => '',
-					'hide_title' => true,
-					'function' => 'woocommerce_customer_overview'
+					'hide_title'  => true,
+					'function'    => 'woocommerce_customer_overview'
 				),
 			)
 		),
 		'stock' => array(
-			'title' 	=>  __( 'Stock', 'woocommerce' ),
-			'charts' 	=> array(
+			'title'  =>  __( 'Stock', 'woocommerce' ),
+			'charts' => array(
 				array(
-					'title' => __( 'Overview', 'woocommerce' ),
+					'title'       => __( 'Overview', 'woocommerce' ),
 					'description' => '',
-					'hide_title' => true,
-					'function' => 'woocommerce_stock_overview'
+					'hide_title'  => true,
+					'function'    => 'woocommerce_stock_overview'
 				),
 			)
 		)
@@ -1458,27 +1458,27 @@ function woocommerce_stock_overview() {
 
 	// Get low in stock simple/downloadable/virtual products. Grouped don't have stock. Variations need a separate query.
 	$args = array(
-		'post_type'			=> 'product',
-		'post_status' 		=> 'publish',
-		'posts_per_page' 	=> -1,
-		'meta_query' => array(
+		'post_type'      => 'product',
+		'post_status'    => 'publish',
+		'posts_per_page' => -1,
+		'meta_query'     => array(
 			array(
-				'key' 		=> '_manage_stock',
-				'value' 	=> 'yes'
+				'key'   => '_manage_stock',
+				'value' => 'yes'
 			),
 			array(
-				'key' 		=> '_stock',
-				'value' 	=> $lowstockamount,
-				'compare' 	=> '<=',
-				'type' 		=> 'NUMERIC'
+				'key'     => '_stock',
+				'value'   => $lowstockamount,
+				'compare' => '<=',
+				'type'    => 'NUMERIC'
 			)
 		),
 		'tax_query' => array(
 			array(
-				'taxonomy' 	=> 'product_type',
-				'field' 	=> 'slug',
-				'terms' 	=> array('simple'),
-				'operator' 	=> 'IN'
+				'taxonomy' => 'product_type',
+				'field'    => 'slug',
+				'terms'    => array('simple'),
+				'operator' => 'IN'
 			)
 		)
 	);
@@ -1486,20 +1486,20 @@ function woocommerce_stock_overview() {
 
 	// Get low stock product variations
 	$args = array(
-		'post_type'			=> 'product_variation',
-		'post_status' 		=> 'publish',
-		'posts_per_page' 	=> -1,
-		'meta_query' => array(
+		'post_type'      => 'product_variation',
+		'post_status'    => 'publish',
+		'posts_per_page' => -1,
+		'meta_query'     => array(
 			array(
-				'key' 		=> '_stock',
-				'value' 	=> $lowstockamount,
-				'compare' 	=> '<=',
-				'type' 		=> 'NUMERIC'
+				'key'     => '_stock',
+				'value'   => $lowstockamount,
+				'compare' => '<=',
+				'type'    => 'NUMERIC'
 			),
 			array(
-				'key' 		=> '_stock',
-				'value' 	=> array('', false, null),
-				'compare' 	=> 'NOT IN'
+				'key'     => '_stock',
+				'value'   => array('', false, null),
+				'compare' => 'NOT IN'
 			)
 		)
 	);
@@ -1507,28 +1507,28 @@ function woocommerce_stock_overview() {
 
 	// Finally, get low stock variable products (where stock is set for the parent)
 	$args = array(
-		'post_type'			=> array('product'),
-		'post_status' 		=> 'publish',
-		'posts_per_page' 	=> -1,
-		'meta_query' => array(
+		'post_type'      => array('product'),
+		'post_status'    => 'publish',
+		'posts_per_page' => -1,
+		'meta_query'     => array(
 			'relation' => 'AND',
 			array(
-				'key' 		=> '_manage_stock',
-				'value' 	=> 'yes'
+				'key'   => '_manage_stock',
+				'value' => 'yes'
 			),
 			array(
-				'key' 		=> '_stock',
-				'value' 	=> $lowstockamount,
-				'compare' 	=> '<=',
-				'type' 		=> 'NUMERIC'
+				'key'     => '_stock',
+				'value'   => $lowstockamount,
+				'compare' => '<=',
+				'type'    => 'NUMERIC'
 			)
 		),
 		'tax_query' => array(
 			array(
-				'taxonomy' 	=> 'product_type',
-				'field' 	=> 'slug',
-				'terms' 	=> array('variable'),
-				'operator' 	=> 'IN'
+				'taxonomy' => 'product_type',
+				'field'    => 'slug',
+				'terms'    => array('variable'),
+				'operator' => 'IN'
 			)
 		)
 	);
@@ -1741,12 +1741,12 @@ function woocommerce_monthly_taxes() {
 		}
 
 		$taxes[ date( 'M', strtotime( $month . '01' ) ) ] = array(
-			'gross'			=> $gross,
-			'shipping'		=> $shipping,
-			'order_tax' 	=> $order_tax,
-			'shipping_tax' 	=> $shipping_tax,
-			'total_tax' 	=> $shipping_tax + $order_tax,
-			'tax_rows'		=> $tax_rows
+			'gross'        => $gross,
+			'shipping'     => $shipping,
+			'order_tax'    => $order_tax,
+			'shipping_tax' => $shipping_tax,
+			'total_tax'    => $shipping_tax + $order_tax,
+			'tax_rows'     => $tax_rows
 		);
 
 		$total_sales_tax += $order_tax;

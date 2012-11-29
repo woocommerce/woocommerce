@@ -69,11 +69,11 @@ class WC_Shipping_Method extends WC_Settings_API {
 		global $woocommerce;
 
 		$defaults = array(
-			'id' 		=> '',			// ID for the rate
-			'label' 	=> '',			// Label for the rate
-			'cost' 		=> '0',			// Amount or array of costs (per item shipping)
-			'taxes' 	=> '',			// Pass taxes, nothing to have it calculated for you, or 'false' to calc no tax
-			'calc_tax'	=> 'per_order'	// Calc tax per_order or per_item. Per item needs an array of costs
+			'id'       => '',			// ID for the rate
+			'label'    => '',			// Label for the rate
+			'cost'     => '0',			// Amount or array of costs (per item shipping)
+			'taxes'    => '',			// Pass taxes, nothing to have it calculated for you, or 'false' to calc no tax
+			'calc_tax' => 'per_order'	// Calc tax per_order or per_item. Per item needs an array of costs
 		);
 
 		$args = wp_parse_args( $args, $defaults );

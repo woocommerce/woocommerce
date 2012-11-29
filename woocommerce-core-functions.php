@@ -558,7 +558,7 @@ function woocommerce_price( $price, $args = array() ) {
 	global $woocommerce;
 
 	extract( shortcode_atts( array(
-		'ex_tax_label' 	=> '0'
+		'ex_tax_label' => '0'
 	), $args ) );
 
 	$return = '';
@@ -1015,15 +1015,15 @@ function woocommerce_downloadable_file_permission( $download_id, $product_id, $o
 	if ( $expiry ) $expiry = date_i18n( "Y-m-d", strtotime( 'NOW + ' . $expiry . ' DAY' ) );
 
     $data = array(
-    	'download_id'			=> $download_id,
-		'product_id' 			=> $product_id,
-		'user_id' 				=> $order->user_id,
-		'user_email' 			=> $user_email,
-		'order_id' 				=> $order->id,
-		'order_key' 			=> $order->order_key,
-		'downloads_remaining' 	=> $limit,
-		'access_granted'		=> current_time( 'mysql' ),
-		'download_count'		=> 0
+    	'download_id'         => $download_id,
+		'product_id'          => $product_id,
+		'user_id'             => $order->user_id,
+		'user_email'          => $user_email,
+		'order_id'            => $order->id,
+		'order_key'           => $order->order_key,
+		'downloads_remaining' => $limit,
+		'access_granted'      => current_time( 'mysql' ),
+		'download_count'      => 0
     );
 
     $format = array(
@@ -1658,42 +1658,42 @@ function woocommerce_init_roles() {
 
 		// Customer role
 		add_role( 'customer', __( 'Customer', 'woocommerce' ), array(
-		    'read' 						=> true,
-		    'edit_posts' 				=> false,
-		    'delete_posts' 				=> false
+		    'read'         => true,
+		    'edit_posts'   => false,
+		    'delete_posts' => false
 		) );
 
 		// Shop manager role
 		add_role( 'shop_manager', __( 'Shop Manager', 'woocommerce' ), array(
-		    'read' 						=> true,
-		    'read_private_pages'		=> true,
-		    'read_private_posts'		=> true,
-		    'edit_users'				=> true,
-		    'edit_posts' 				=> true,
-		    'edit_pages' 				=> true,
-		    'edit_published_posts'		=> true,
-		    'edit_published_pages'		=> true,
-		    'edit_private_pages'		=> true,
-		    'edit_private_posts'		=> true,
-		    'edit_others_posts' 		=> true,
-		    'edit_others_pages' 		=> true,
-		    'publish_posts' 			=> true,
-		    'publish_pages'				=> true,
-		    'delete_posts' 				=> true,
-		    'delete_pages' 				=> true,
-		    'delete_private_pages'		=> true,
-		    'delete_private_posts'		=> true,
-		    'delete_published_pages'	=> true,
-		    'delete_published_posts'	=> true,
-		    'delete_others_posts' 		=> true,
-		    'delete_others_pages' 		=> true,
-		    'manage_categories' 		=> true,
-		    'manage_links'				=> true,
-		    'moderate_comments'			=> true,
-		    'unfiltered_html'			=> true,
-		    'upload_files'				=> true,
-		   	'export'					=> true,
-			'import'					=> true
+		    'read'                   => true,
+		    'read_private_pages'     => true,
+		    'read_private_posts'     => true,
+		    'edit_users'             => true,
+		    'edit_posts'             => true,
+		    'edit_pages'             => true,
+		    'edit_published_posts'   => true,
+		    'edit_published_pages'   => true,
+		    'edit_private_pages'     => true,
+		    'edit_private_posts'     => true,
+		    'edit_others_posts'      => true,
+		    'edit_others_pages'      => true,
+		    'publish_posts'          => true,
+		    'publish_pages'          => true,
+		    'delete_posts'           => true,
+		    'delete_pages'           => true,
+		    'delete_private_pages'   => true,
+		    'delete_private_posts'   => true,
+		    'delete_published_pages' => true,
+		    'delete_published_posts' => true,
+		    'delete_others_posts'    => true,
+		    'delete_others_pages'    => true,
+		    'manage_categories'      => true,
+		    'manage_links'           => true,
+		    'moderate_comments'      => true,
+		    'unfiltered_html'        => true,
+		    'upload_files'           => true,
+		   	'export'                 => true,
+			'import'                 => true
 		) );
 
 		$capabilities = woocommerce_get_core_capabilities();
@@ -1754,8 +1754,8 @@ function woocommerce_add_order_item( $order_id, $item ) {
 		return false;
 
 	$defaults = array(
-		'order_item_name' 		=> '',
-		'order_item_type' 		=> 'line_item',
+		'order_item_name' => '',
+		'order_item_type' => 'line_item',
 	);
 
 	$item = wp_parse_args( $item, $defaults );
@@ -1763,9 +1763,9 @@ function woocommerce_add_order_item( $order_id, $item ) {
 	$wpdb->insert(
 		$wpdb->prefix . "woocommerce_order_items",
 		array(
-			'order_item_name' 		=> $item['order_item_name'],
-			'order_item_type' 		=> $item['order_item_type'],
-			'order_id'				=> $order_id
+			'order_item_name' => $item['order_item_name'],
+			'order_item_type' => $item['order_item_type'],
+			'order_id'        => $order_id
 		),
 		array(
 			'%s', '%s', '%d'

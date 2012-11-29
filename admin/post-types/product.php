@@ -283,11 +283,11 @@ add_action('manage_product_posts_custom_column', 'woocommerce_custom_product_col
  */
 function woocommerce_custom_product_sort($columns) {
 	$custom = array(
-		'is_in_stock' 	=> 'inventory',
-		'price'			=> 'price',
-		'featured'		=> 'featured',
-		'sku'			=> 'sku',
-		'name'			=> 'title'
+		'is_in_stock' => 'inventory',
+		'price'       => 'price',
+		'featured'    => 'featured',
+		'sku'         => 'sku',
+		'name'        => 'title'
 	);
 	return wp_parse_args( $custom, $columns );
 }
@@ -308,26 +308,26 @@ function woocommerce_custom_product_orderby( $vars ) {
 	if (isset( $vars['orderby'] )) :
 		if ( 'inventory' == $vars['orderby'] ) :
 			$vars = array_merge( $vars, array(
-				'meta_key' 	=> '_stock',
-				'orderby' 	=> 'meta_value_num'
+				'meta_key' => '_stock',
+				'orderby'  => 'meta_value_num'
 			) );
 		endif;
 		if ( 'price' == $vars['orderby'] ) :
 			$vars = array_merge( $vars, array(
-				'meta_key' 	=> '_price',
-				'orderby' 	=> 'meta_value_num'
+				'meta_key' => '_price',
+				'orderby'  => 'meta_value_num'
 			) );
 		endif;
 		if ( 'featured' == $vars['orderby'] ) :
 			$vars = array_merge( $vars, array(
-				'meta_key' 	=> '_featured',
-				'orderby' 	=> 'meta_value'
+				'meta_key' => '_featured',
+				'orderby'  => 'meta_value'
 			) );
 		endif;
 		if ( 'sku' == $vars['orderby'] ) :
 			$vars = array_merge( $vars, array(
-				'meta_key' 	=> '_sku',
-				'orderby' 	=> 'meta_value'
+				'meta_key' => '_sku',
+				'orderby'  => 'meta_value'
 			) );
 		endif;
 	endif;
@@ -788,7 +788,7 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 				    	<select class="change_regular_price change_to" name="change_regular_price">
 						<?php
 							$options = array(
-								'' 	=> __( '— No Change —', 'woocommerce' ),
+								''  => __( '— No Change —', 'woocommerce' ),
 								'1' => __( 'Change to:', 'woocommerce' ),
 								'2' => __( 'Increase by (fixed amount or %):', 'woocommerce' ),
 								'3' => __( 'Decrease by (fixed amount or %):', 'woocommerce' )
@@ -812,7 +812,7 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 				    	<select class="change_sale_price change_to" name="change_sale_price">
 						<?php
 							$options = array(
-								'' 	=> __( '— No Change —', 'woocommerce' ),
+								''  => __( '— No Change —', 'woocommerce' ),
 								'1' => __( 'Change to:', 'woocommerce' ),
 								'2' => __( 'Increase by (fixed amount or %):', 'woocommerce' ),
 								'3' => __( 'Decrease by (fixed amount or %):', 'woocommerce' ),
@@ -838,7 +838,7 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 					    	<select class="change_weight change_to" name="change_weight">
 							<?php
 								$options = array(
-									'' 	=> __( '— No Change —', 'woocommerce' ),
+									''  => __( '— No Change —', 'woocommerce' ),
 									'1' => __( 'Change to:', 'woocommerce' )
 								);
 								foreach ($options as $key => $value) {
@@ -862,7 +862,7 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 					    	<select class="change_dimensions change_to" name="change_dimensions">
 							<?php
 								$options = array(
-									'' 	=> __( '— No Change —', 'woocommerce' ),
+									''  => __( '— No Change —', 'woocommerce' ),
 									'1' => __( 'Change to:', 'woocommerce' )
 								);
 								foreach ($options as $key => $value) {
@@ -960,7 +960,7 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 					    	<select class="change_stock change_to" name="change_stock">
 							<?php
 								$options = array(
-									'' 	=> __( '— No Change —', 'woocommerce' ),
+									''  => __( '— No Change —', 'woocommerce' ),
 									'1' => __( 'Change to:', 'woocommerce' )
 								);
 								foreach ($options as $key => $value) {

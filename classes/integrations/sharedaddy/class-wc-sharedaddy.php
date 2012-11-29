@@ -53,10 +53,10 @@ class WC_ShareDaddy extends WC_Integration {
 
     	$this->form_fields = array(
 			'enabled' => array(
-				'title' 		=> __( 'Output ShareDaddy button?', 'woocommerce' ),
-				'description' 	=> __( 'Enable this option to show the ShareDaddy button on the product page.', 'woocommerce' ),
-				'type' 			=> 'checkbox',
-				'default' 		=> get_option('woocommerce_sharedaddy') ? get_option('woocommerce_sharedaddy') : 'no'
+				'title'       => __( 'Output ShareDaddy button?', 'woocommerce' ),
+				'description' => __( 'Enable this option to show the ShareDaddy button on the product page.', 'woocommerce' ),
+				'type'        => 'checkbox',
+				'default'     => get_option('woocommerce_sharedaddy') ? get_option('woocommerce_sharedaddy') : 'no'
 			)
 		);
 
