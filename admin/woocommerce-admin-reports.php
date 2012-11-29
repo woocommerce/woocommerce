@@ -286,7 +286,7 @@ function woocommerce_sales_overview() {
 
 	$total_sales = $total_orders = $order_items = $discount_total = $shipping_total = 0;
 
-	$order_totals = $wpdb->get_row( "
+	$order_totals = apply_filters('woocommerce_sales_overview_total_orders', $wpdb->get_row( "
 		SELECT SUM(meta.meta_value) AS total_sales, COUNT(posts.ID) AS total_orders FROM {$wpdb->posts} AS posts
 
 		LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -299,12 +299,12 @@ function woocommerce_sales_overview() {
 		AND 	posts.post_status 	= 'publish'
 		AND 	tax.taxonomy		= 'shop_order_status'
 		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-	" );
+	" ) );
 
 	$total_sales 	= $order_totals->total_sales;
 	$total_orders 	= absint( $order_totals->total_orders );
 
-	$discount_total = $wpdb->get_var( "
+	$discount_total = apply_filters('woocommerce_sales_overview_discount', $wpdb->get_var( "
 		SELECT SUM(meta.meta_value) AS total_sales FROM {$wpdb->posts} AS posts
 
 		LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -317,9 +317,9 @@ function woocommerce_sales_overview() {
 		AND 	posts.post_status 	= 'publish'
 		AND 	tax.taxonomy		= 'shop_order_status'
 		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-	" );
+	" ) );
 
-	$shipping_total = $wpdb->get_var( "
+	$shipping_total = apply_filters('woocommerce_sales_overview_shipping', $wpdb->get_var( "
 		SELECT SUM(meta.meta_value) AS total_sales FROM {$wpdb->posts} AS posts
 
 		LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -332,9 +332,9 @@ function woocommerce_sales_overview() {
 		AND 	posts.post_status 	= 'publish'
 		AND 	tax.taxonomy		= 'shop_order_status'
 		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-	" );
+	" ) );
 
-	$order_items = absint( $wpdb->get_var( "
+	$order_items = apply_filters('woocommerce_sales_overview_order_items', absint( $wpdb->get_var( "
 		SELECT SUM( order_item_meta.meta_value )
 		FROM {$wpdb->prefix}woocommerce_order_items as order_items
 		LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
@@ -347,7 +347,7 @@ function woocommerce_sales_overview() {
 		AND 	tax.taxonomy		= 'shop_order_status'
 		AND 	order_items.order_item_type = 'line_item'
 		AND 	order_item_meta.meta_key = '_qty'
-	" ) );
+	" ) ) );
 	?>
 	<div id="poststuff" class="woocommerce-reports-wrap">
 		<div class="woocommerce-reports-sidebar">
@@ -421,7 +421,7 @@ function woocommerce_sales_overview() {
 	}
 
 	// Get order ids and dates in range
-	$orders = $wpdb->get_results( "
+	$orders = apply_filters('woocommerce_sales_overview_orders', $wpdb->get_results( "
 		SELECT posts.ID, posts.post_date FROM {$wpdb->posts} AS posts
 
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
@@ -435,7 +435,7 @@ function woocommerce_sales_overview() {
 		AND 	post_date > '" . date('Y-m-d', $start_date ) . "'
 		AND 	post_date < '" . date('Y-m-d', strtotime('+1 day', $end_date ) ) . "'
 		ORDER BY post_date ASC
-	" );
+	" ) );
 
 	if ( $orders ) {
 		foreach ( $orders as $order ) {
@@ -558,7 +558,7 @@ function woocommerce_daily_sales() {
 	}
 
 	// Get order ids and dates in range
-	$orders = $wpdb->get_results( "
+	$orders = apply_filters('woocommerce_daily_sales_orders', $wpdb->get_results( "
 		SELECT posts.ID, posts.post_date, meta.meta_value AS total_sales FROM {$wpdb->posts} AS posts
 
 		LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -576,7 +576,7 @@ function woocommerce_daily_sales() {
 
 		GROUP BY posts.ID
 		ORDER BY post_date ASC
-	" );
+	" ), $start_date, $end_date );
 
 	if ( $orders ) {
 
@@ -591,14 +591,14 @@ function woocommerce_daily_sales() {
 			$total_sales += $order->total_sales;
 
 			// Get items
-			$order_items += absint( $wpdb->get_var( $wpdb->prepare( "
+			$order_items += apply_filters('woocommerce_daily_sales_order_items', absint( $wpdb->get_var( $wpdb->prepare( "
 				SELECT SUM( order_item_meta.meta_value )
 				FROM {$wpdb->prefix}woocommerce_order_items as order_items
 				LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
 				WHERE	order_id = %d
 				AND 	order_items.order_item_type = 'line_item'
 				AND 	order_item_meta.meta_key = '_qty'
-			", $order->ID ) ) );
+			", $order->ID ) ) ), $order->ID );
 
 			// Set times
 			if ( isset( $order_counts[ $time ] ) )
@@ -745,7 +745,7 @@ function woocommerce_monthly_sales() {
 
 		$month = date( 'Ym', strtotime(date('Ym', strtotime('+ '.$count.' MONTH', $start_date)).'01') );
 
-		$months_orders = $wpdb->get_row( $wpdb->prepare( "
+		$months_orders = apply_filters('woocommerce_monthly_sales_orders', $wpdb->get_row( $wpdb->prepare( "
 			SELECT SUM(meta.meta_value) AS total_sales, COUNT(posts.ID) AS total_orders FROM {$wpdb->posts} AS posts
 
 			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -759,7 +759,9 @@ function woocommerce_monthly_sales() {
 			AND 	tax.taxonomy		= 'shop_order_status'
 			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			AND		%s 					= date_format(posts.post_date,'%%Y%%m')
-		", $month ) );
+		", $month ) ), $month );
+
+
 
 		$order_counts[ $time ] 	= (int) $months_orders->total_orders;
 		$order_amounts[ $time ] = (float) $months_orders->total_sales;
@@ -768,7 +770,7 @@ function woocommerce_monthly_sales() {
 		$total_sales			+= (float) $months_orders->total_sales;
 
 		// Count order items
-		$order_items += absint( $wpdb->get_var( $wpdb->prepare( "
+		$order_items += apply_filters('woocommerce_monthly_sales_order_items', absint( $wpdb->get_var( $wpdb->prepare( "
 			SELECT SUM( order_item_meta.meta_value )
 			FROM {$wpdb->prefix}woocommerce_order_items as order_items
 			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
@@ -782,7 +784,7 @@ function woocommerce_monthly_sales() {
 			AND		%s		 			= date_format( posts.post_date, '%%Y%%m' )
 			AND 	order_items.order_item_type = 'line_item'
 			AND 	order_item_meta.meta_key = '_qty'
-		", $month ) ) );
+		", $month ) ) ), $month );
 	}
 	?>
 	<form method="post" action="">
@@ -910,7 +912,7 @@ function woocommerce_top_sellers() {
 	$end_date = strtotime( $end_date );
 
 	// Get order ids and dates in range
-	$order_items = $wpdb->get_results( "
+	$order_items = apply_filters('woocommerce_top_sellers_order_items', $wpdb->get_results( "
 		SELECT order_item_meta_2.meta_value as product_id, SUM( order_item_meta.meta_value ) as item_quantity FROM {$wpdb->prefix}woocommerce_order_items as order_items
 
 		LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
@@ -930,7 +932,7 @@ function woocommerce_top_sellers() {
 		AND 	order_item_meta.meta_key = '_qty'
 		AND 	order_item_meta_2.meta_key = '_product_id'
 		GROUP BY order_item_meta_2.meta_value
-	" );
+	" ), $start_date, $end_date );
 
 	$found_products = array();
 
@@ -1006,7 +1008,7 @@ function woocommerce_top_earners() {
 	$end_date = strtotime( $end_date );
 
 	// Get order ids and dates in range
-	$order_items = $wpdb->get_results( "
+	$order_items = apply_filters('woocommerce_top_earners_order_items', $wpdb->get_results( "
 		SELECT order_item_meta_2.meta_value as product_id, SUM( order_item_meta.meta_value ) as line_total FROM {$wpdb->prefix}woocommerce_order_items as order_items
 
 		LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
@@ -1026,7 +1028,7 @@ function woocommerce_top_earners() {
 		AND 	order_item_meta.meta_key = '_line_total'
 		AND 	order_item_meta_2.meta_key = '_product_id'
 		GROUP BY order_item_meta_2.meta_value
-	" );
+	" ), $start_date, $end_date );
 
 	$found_products = array();
 
@@ -1112,7 +1114,7 @@ function woocommerce_product_sales() {
 		}
 
 		// Get order items
-		$order_items = $wpdb->get_results( "
+		$order_items = apply_filters('woocommerce_product_sales_order_items', $wpdb->get_results( "
 			SELECT order_item_meta_2.meta_value as product_id, posts.post_date, SUM( order_item_meta.meta_value ) as item_quantity, SUM( order_item_meta_3.meta_value ) as line_total
 			FROM {$wpdb->prefix}woocommerce_order_items as order_items
 
@@ -1135,7 +1137,7 @@ function woocommerce_product_sales() {
 			AND 	order_item_meta_3.meta_key = '_line_total'
 			GROUP BY order_items.order_id
 			ORDER BY posts.post_date ASC
-		" );
+		" ), array_merge( $chosen_product_ids, $children_ids ) );
 
 		$found_products = array();
 
@@ -1947,7 +1949,7 @@ function woocommerce_category_sales() {
 	// Get order items
 	$start_date = date( 'Ym', strtotime( date( 'Ym', strtotime( '-1 year', $start_date ) ) . '01' ) );
 
-	$order_items = $wpdb->get_results( $wpdb->prepare( "
+	$order_items = apply_filters('woocommerce_category_sales_orders', $wpdb->get_results( $wpdb->prepare( "
 		SELECT order_item_meta_2.meta_value as product_id, posts.post_date, SUM( order_item_meta.meta_value ) as line_total
 		FROM {$wpdb->prefix}woocommerce_order_items as order_items
 
@@ -1968,7 +1970,7 @@ function woocommerce_category_sales() {
 		AND 	order_item_meta_2.meta_key = '_product_id'
 		GROUP BY order_items.order_id
 		ORDER BY posts.post_date ASC
-	", $start_date ) );
+	", $start_date ) ) );
 
 	if ( $order_items ) {
 		foreach ( $order_items as $order_item ) {
@@ -2282,7 +2284,7 @@ function woocommerce_coupon_sales() {
 
 	foreach( $coupons as $coupon ) :
 
-		$monthly_sales = $wpdb->get_results( $wpdb->prepare( "
+		$monthly_sales = apply_filters('woocommerce_coupon_sales_order_items', $wpdb->get_results( $wpdb->prepare( "
 			SELECT SUM(postmeta.meta_value) AS order_total, date_format(posts.post_date, '%%Y%%m') as month FROM {$wpdb->posts} AS posts
 
 			INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID=postmeta.post_ID
@@ -2302,7 +2304,7 @@ function woocommerce_coupon_sales() {
 												WHERE 	meta.meta_key 		= 'coupons'
 												AND		meta.meta_value		= '%s'
 											)
-			GROUP BY month", $coupon ), OBJECT );
+			GROUP BY month", $coupon ), OBJECT ), $order_statuses, $current_year, $coupon);
 
 		foreach( $monthly_sales as $sales ) {
 			$month = $sales->month;
