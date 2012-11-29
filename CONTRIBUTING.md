@@ -1,6 +1,6 @@
 # How to contribute
 
-Community made patches, localisations, bug reports and contributions are always welcome are are crucial to ensure WooCommerce remains the #1 eCommerce platform for WordPress ;)
+Community made patches, localisations, bug reports and contributions are always welcome and are crucial to ensure WooCommerce remains the #1 eCommerce platform for WordPress ;)
 
 When contributing please ensure you follow the guidelines below so that we can keep on top of things.
 
