@@ -1879,6 +1879,10 @@ function woocommerce_date_format() {
 function _woocommerce_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_taxonomy_ids = true ) {
 	global $wpdb;
 
+	// Standard callback
+	if ( $callback )
+		_update_post_term_count( $terms, $taxonomy );
+
 	// Stock query
 	if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' ) {
 		$stock_join  = "LEFT JOIN {$wpdb->postmeta} AS meta_stock ON posts.ID = meta_stock.post_id";
@@ -1988,10 +1992,6 @@ function _woocommerce_term_recount( $terms, $taxonomy, $callback = true, $terms_
 		}
 
 	}
-
-	// Standard callback
-	if ( $callback )
-		_update_post_term_count( $terms, $taxonomy );
 }
 
 /**
