@@ -141,7 +141,6 @@ class WC_Free_Shipping extends WC_Shipping_Method {
 
     	?>
     	<h3><?php _e( 'Free Shipping', 'woocommerce' ); ?></h3>
-    	<p><?php _e( 'Free Shipping - does what it says on the tin.', 'woocommerce' ); ?></p>
     	<table class="form-table">
     	<?php
     		// Generate the HTML For the settings form.
