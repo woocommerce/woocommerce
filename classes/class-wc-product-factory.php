@@ -29,6 +29,9 @@ class WC_Product_Factory {
 			$the_product = get_post( $the_product );
 		}
 
+		if ( ! $the_product )
+			return false;
+
 		$product_id = absint( $the_product->ID );
 		$post_type  = $the_product->post_type;
 
