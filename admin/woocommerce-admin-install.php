@@ -293,6 +293,36 @@ CREATE TABLE ". $wpdb->prefix . "woocommerce_order_itemmeta (
 ) $collate;
 ";
     dbDelta( $sql );
+
+    // Tax Rates are stored inside 2 tables making tax queries simple and efficient.
+    $sql = "
+CREATE TABLE ". $wpdb->prefix . "woocommerce_tax_rates (
+  tax_rate_id bigint(20) NOT NULL auto_increment,
+  tax_rate_country varchar(200) NOT NULL DEFAULT '',
+  tax_rate_state varchar(200) NOT NULL DEFAULT '',
+  tax_rate varchar(200) NOT NULL DEFAULT '',
+  tax_rate_name varchar(200) NOT NULL DEFAULT '',
+  tax_rate_priority bigint(20) NOT NULL,
+  tax_rate_compound int(1) NOT NULL DEFAULT 0,
+  tax_rate_shipping int(1) NOT NULL DEFAULT 1,
+  tax_rate_order bigint(20) NOT NULL,
+  tax_rate_class varchar(200) NOT NULL DEFAULT '',
+  PRIMARY KEY  (tax_rate_id)
+) $collate;
+";
+    dbDelta( $sql );
+
+    // Each rate can be applied to more than one postcode/city hence the second table.
+    $sql = "
+CREATE TABLE ". $wpdb->prefix . "woocommerce_tax_rate_locations (
+  location_id bigint(20) NOT NULL auto_increment,
+  location_code varchar(255) NOT NULL,
+  tax_rate_id bigint(20) NOT NULL,
+  location_type varchar(40) NOT NULL,
+  PRIMARY KEY  (location_id)
+) $collate;
+";
+    dbDelta( $sql );
 }
 
 
