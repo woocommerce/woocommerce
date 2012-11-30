@@ -64,57 +64,47 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				<?php
 					// Show the tax row if showing prices exclusive of tax only
 					if ( $woocommerce->cart->display_totals_ex_tax || ! $woocommerce->cart->prices_include_tax ) {
-						if ( $woocommerce->cart->get_cart_tax() ) {
+						$taxes = $woocommerce->cart->get_formatted_taxes();
 
-							$taxes = $woocommerce->cart->get_formatted_taxes();
+						if ( sizeof( $taxes ) > 0 ) {
 
-							if ( sizeof( $taxes ) > 0 ) {
+							$has_compound_tax = false;
 
-								$has_compound_tax = false;
-
-								foreach ( $taxes as $key => $tax ) {
-									if ( $woocommerce->cart->tax->is_compound( $key ) ) {
-										$has_compound_tax = true;
-										continue;
-									}
-
-									echo '<tr class="tax-rate tax-rate-' . $key . '">
-										<th>' . $woocommerce->cart->tax->get_rate_label( $key ) . '</th>
-										<td>' . $tax . '</td>
-									</tr>';
+							foreach ( $taxes as $key => $tax ) {
+								if ( $woocommerce->cart->tax->is_compound( $key ) ) {
+									$has_compound_tax = true;
+									continue;
 								}
 
-								if ( $has_compound_tax ) {
-
-									echo '<tr class="order-subtotal">
-										<th><strong>' . __( 'Subtotal', 'woocommerce' ) . '</strong></th>
-										<td><strong>' . $woocommerce->cart->get_cart_subtotal( true ) . '</strong></td>
-									</tr>';
-								}
-
-								foreach ( $taxes as $key => $tax ) {
-									if ( ! $woocommerce->cart->tax->is_compound( $key ) )
-										continue;
-
-									echo '<tr class="tax-rate tax-rate-' . $key . '">
-										<th>' . $woocommerce->cart->tax->get_rate_label( $key ) . '</th>
-										<td>' . $tax . '</td>
-									</tr>';
-								}
-
-							} else {
-
-								echo '<tr class="tax">
-									<th>' . __( 'Tax', 'woocommerce' ) . '</th>
-									<td>' . $woocommerce->cart->get_cart_tax() . '</td>
+								echo '<tr class="tax-rate tax-rate-' . $key . '">
+									<th>' . $woocommerce->cart->tax->get_rate_label( $key ) . '</th>
+									<td>' . $tax . '</td>
 								</tr>';
 							}
 
-						} elseif ( get_option( 'woocommerce_display_cart_taxes_if_zero' ) == 'yes' ) {
+							if ( $has_compound_tax ) {
+
+								echo '<tr class="order-subtotal">
+									<th><strong>' . __( 'Subtotal', 'woocommerce' ) . '</strong></th>
+									<td><strong>' . $woocommerce->cart->get_cart_subtotal( true ) . '</strong></td>
+								</tr>';
+							}
+
+							foreach ( $taxes as $key => $tax ) {
+								if ( ! $woocommerce->cart->tax->is_compound( $key ) )
+									continue;
+
+								echo '<tr class="tax-rate tax-rate-' . $key . '">
+									<th>' . $woocommerce->cart->tax->get_rate_label( $key ) . '</th>
+									<td>' . $tax . '</td>
+								</tr>';
+							}
+
+						} elseif ( $woocommerce->cart->get_cart_tax() > 0 ) {
 
 							echo '<tr class="tax">
 								<th>' . __( 'Tax', 'woocommerce' ) . '</th>
-								<td>' . _x( 'N/A', 'Relating to tax', 'woocommerce' ) . '</td>
+								<td>' . $woocommerce->cart->get_cart_tax() . '</td>
 							</tr>';
 						}
 					}
@@ -136,22 +126,17 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 						<?php
 							// If prices are tax inclusive, show taxes here
 							if ( ! $woocommerce->cart->display_totals_ex_tax && $woocommerce->cart->prices_include_tax ) {
+								$tax_string_array = array();
+								$taxes = $woocommerce->cart->get_formatted_taxes();
 
-								if ( $woocommerce->cart->get_cart_tax() ) {
-									$tax_string_array = array();
-									$taxes = $woocommerce->cart->get_formatted_taxes();
+								if ( sizeof( $taxes ) > 0 )
+									foreach ( $taxes as $key => $tax )
+										$tax_string_array[] = sprintf( '%s %s', $tax, $woocommerce->cart->tax->get_rate_label( $key ) );
+								elseif ( $woocommerce->cart->get_cart_tax() )
+									$tax_string_array[] = sprintf( '%s tax', $tax );
 
-									if ( sizeof( $taxes ) > 0 )
-										foreach ( $taxes as $key => $tax )
-											$tax_string_array[] = sprintf( '%s %s', $tax, $woocommerce->cart->tax->get_rate_label( $key ) );
-									else
-										$tax_string_array[] = sprintf( '%s tax', $tax );
-
-									if ( ! empty( $tax_string_array ) ) {
-										echo '<small class="includes_tax">' . sprintf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) ) . '</small>';
-									}
-								} elseif ( get_option( 'woocommerce_display_cart_taxes_if_zero' ) == 'yes' ) {
-									echo '<small class="includes_tax">' . sprintf( __( '(Includes %s tax)', 'woocommerce' ), woocommerce_price( 0 ) ) . '</small>';
+								if ( ! empty( $tax_string_array ) ) {
+									echo '<small class="includes_tax">' . sprintf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) ) . '</small>';
 								}
 							}
 						?>
