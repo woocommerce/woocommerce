@@ -577,7 +577,7 @@ class WC_Customer {
 						$_product = get_product( $result->product_id );
 					endif;
 
-					if ( ! $_product->exists() ) continue;
+					if ( ! $_product || ! $_product->exists() ) continue;
 
 					if ( ! $_product->has_file( $result->download_id ) ) continue;
 
