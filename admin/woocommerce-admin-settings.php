@@ -30,7 +30,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 	 * @return void
 	 */
 	function woocommerce_settings() {
-	    global $woocommerce, $woocommerce_settings;
+	    global $woocommerce, $woocommerce_settings, $current_section, $current_tab;
 
 	    do_action( 'woocommerce_settings_start' );
 
@@ -112,6 +112,13 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 					} else {
 						do_action( 'woocommerce_update_options_' . $current_tab . '_' . $current_section );
 					}
+
+				// Save tax
+				} elseif ( $current_tab == 'tax' ) {
+
+					include_once('settings/settings-tax-rates.php');
+
+					woocommerce_tax_rates_setting_save();
 
 				} else {
 
@@ -238,8 +245,29 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 							woocommerce_admin_fields( $woocommerce_settings[$current_tab] );
 						break;
 						case "tax" :
-							include('settings/settings-tax-rates.php');
-							woocommerce_admin_fields( $woocommerce_settings[$current_tab] );
+
+							$links = array(
+								'<a href="' . admin_url( 'admin.php?page=woocommerce_settings&tab=tax' ) . '" class="' . ( $current_section == '' ? 'current' : '' ) . '">' . __( 'Tax Options', 'woocommerce' ) . '</a>'
+							);
+
+							// Get tax classes and display as links
+							$tax_classes = array_merge( array( __( 'Standard', 'woocommerce' ) ), array_filter( array_map( 'trim', explode( "\n", get_option('woocommerce_tax_classes' ) ) ) ) );
+
+							if ( $tax_classes )
+								foreach ( $tax_classes as $class )
+									$links[] = '<a href="' . admin_url( 'admin.php?page=woocommerce_settings&tab=tax&section=' . sanitize_title( $class ) ) . '" class="' . ( $current_section == sanitize_title( $class ) ? 'current' : '' ) . '">' . $class . ' ' . __( 'Tax Rates', 'woocommerce' ) . '</a>';
+
+							echo '<ul class="subsubsub"><li>' . implode( ' | </li><li>', $links ) . '</li></ul><br class="clear" />';
+
+							if ( in_array( $current_section, array_map( 'sanitize_title', $tax_classes ) ) ) {
+
+								include_once('settings/settings-tax-rates.php');
+
+								woocommerce_tax_rates_setting();
+
+							} else {
+								woocommerce_admin_fields( $woocommerce_settings[ $current_tab ] );
+							}
 						break;
 						case "pages" :
 						case "catalog" :

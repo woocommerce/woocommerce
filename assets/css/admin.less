@@ -81,7 +81,7 @@
 }
 
 #woocommerce_extensions {
-	background-color: #f1f1f1; 
+	background-color: #f1f1f1;
 	background-image: url(../images/icons/wc_icon.png);
 	background-repeat: no-repeat;
 	background-position: 4px 4px;
@@ -862,7 +862,7 @@ table.wc_status_table {
 			text-align: center;
 			white-space: nowrap;
 			padding: 0 2px;
-			
+
 			background: #999;
 			font-size:11px;
 			line-height: 1.75;
@@ -1261,84 +1261,64 @@ a.export_rates, a.import_rates {
 	margin-top: -2px;
 	margin-bottom: 0;
 }
-.woocommerce table.shippingrows, .woocommerce table.taxrows {
-	td, th {
-		vertical-align: top;
-		line-height: 25px;
-		margin-bottom: 9px;
-	}
-	a.remove {
-		margin: 0 !important;
-	}
-	.dupe, .remove {
-		float: right;
-		margin-left: 9px;
-	}
-	tbody .check-column {
-		padding-top: 8px;
+table.wc_tax_rates {
+	td {
+		padding: 0;
+		border-right: 1px solid #DFDFDF;
+		border-bottom: 1px solid #DFDFDF;
+		border-top: 0;
+		background: #fff;
 		input {
-			margin: 0 0 0 8px;
-		}
-	}
-	input {
-		width: auto;
-	}
-	td.apply_to_shipping {
-		padding-top: 8px;
-	}
-	td.country {
-		overflow: visible !important;
-		p {
-			line-height: 25px;
-			margin: 0;
-			color: #666;
-		}
-		button.edit_options {
-			float: right;
-		}
-		select {
-			margin: 9px 0;
 			width: 100%;
-			height: 160px !important;
+			padding: 5px 7px;
+			margin: 0;
+			border: 0;
+			background: transparent none;
 		}
-		p.edit, .options {
-			min-width: 400px;
-		}
-		.chzn-container {
-			width: 100% !important;
-			margin: 9px 0 5px;
-			.chzn-drop {
-				width: 100% !important;
-				-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-				-moz-box-sizing: border-box;    /* Firefox, other Gecko */
-				box-sizing: border-box;         /* Opera/IE 8+ */
-			}
-			.search-field input {
-				width: 150px !important;
+
+		&.compound, &.apply_to_shipping {
+			padding: 5px 7px;
+			vertical-align: middle;
+
+			input {
+				width: auto;
+				padding: 0;
 			}
 		}
 	}
-	td.local_country {
-		overflow: visible !important;
-		select {
-			width: 198px !important;
-			margin-bottom: 3px;
-			margin-right: 4px;
-			float: left;
-		}
-		select.type {
-			margin-right: 0;
-		}
-		textarea {
-			height: 80px;
-			width: 400px;
-			font-size: 13px;
-			line-height: 16px;
-			display: block;
+	td:last-child {
+		border-right: 0;
+	}
+	tr.current td {
+		background-color: #fefbcc;
+	}
+	.item_cost, .cost {
+		text-align: right;
+		input {
+			text-align: right;
 		}
 	}
-	td.rate {
-		white-space: nowrap;
+	th.sort {
+		width: 17px;
+		padding: 0;
+	}
+	td.sort {
+		width: 16px;
+		padding: 0;
+		cursor: move;
+		background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAHUlEQVQYV2O8f//+fwY8gJGgAny6QXKETRgEVgAAXxAVsa5Xr3QAAAAASUVORK5CYII=) no-repeat center;
+	}
+	.button {
+		float: left;
+		margin-right: 5px;
+	}
+	.export, .import {
+		float: right;
+		margin-right: 0;
+		margin-left: 5px;
+	}
+	span.tips {
+		padding: 0 3px;
 	}
 }
 table.wc_gateways, table.wc_shipping {
@@ -1698,12 +1678,12 @@ img.help_tip {
 	position: relative;
 	padding: 0 0 10px;
 	margin-left: -153px;
-	
+
 	li {
 		display:block;
 		padding: 0;
 		margin: 0;
-		
+
 		a {
 			padding: 5px;
 			line-height: 18px !important;
@@ -1714,13 +1694,13 @@ img.help_tip {
 			border-bottom: 1px solid #f1f1f1;
 			border-top: 1px solid #f1f1f1;
 		}
-		
+
 		&:first-child {
 			a {
 				border-top: 0 !important;
 			}
 		}
-		
+
 		&.general_options, &.tax_options, &.inventory_options, &.shipping_options, &.linked_product_options, &.attribute_options, &.variation_options, &.advanced_options {
 			a {
 				padding: 5px 5px 5px 28px;
@@ -1796,8 +1776,8 @@ img.help_tip {
 			width: 28px;
 			border-right: 1px solid #DFDFDF;
 		}
-	}	
-	
+	}
+
 	#woocommerce-product-data ul.product_data_tabs, .woocommerce ul.wc-tabs {
 		width: 28px;
 		margin-left: -35px;
