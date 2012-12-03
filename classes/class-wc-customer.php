@@ -324,17 +324,37 @@ class WC_Customer {
 	 * @return void
 	 */
 	function get_taxable_address() {
-		if ( get_option( 'woocommerce_tax_shipping_address' ) == 'yes' ) {
-			$country 	= $this->get_shipping_country();
-			$state 		= $this->get_shipping_state();
-			$postcode   = $this->get_shipping_postcode();
-			$city   	= $this->get_shipping_city();
-		} else {
+		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
+
+		if ( $tax_based_on == 'base' ) {
+
+			$default = get_option( 'woocommerce_default_country' );
+	    	if ( strstr( $default, ':' ) ) {
+	    		list( $country, $state ) = explode( ':', $default );
+	    	} else {
+	    		$country = $default;
+	    		$state = '';
+	    	}
+
+			$postcode   = '';
+			$city   	= '';
+
+		} elseif ( $tax_based_on == 'billing' ) {
+
 			$country 	= $this->get_country();
 			$state 		= $this->get_state();
 			$postcode   = $this->get_postcode();
 			$city   	= $this->get_city();
+
+		} else {
+
+			$country 	= $this->get_shipping_country();
+			$state 		= $this->get_shipping_state();
+			$postcode   = $this->get_shipping_postcode();
+			$city   	= $this->get_shipping_city();
+
 		}
+
 		return apply_filters( 'woocommerce_customer_taxable_address', array( $country, $state, $postcode, $city ) );
 	}
 
