@@ -5,7 +5,7 @@
  * WooCommerce Emails Class which handles the sending on transactional emails and email templates. This class loads in available emails.
  *
  * @class 		WC_Emails
- * @version		1.7.0
+ * @version		2.0.0
  * @package		WooCommerce/Classes/Emails
  * @author 		WooThemes
  */

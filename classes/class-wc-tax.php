@@ -3,7 +3,7 @@
  * Performs tax calculations and loads tax rates.
  *
  * @class 		WC_Tax
- * @version		1.7.0
+ * @version		2.0.0
  * @package		WooCommerce/Classes
  * @author 		WooThemes
  */

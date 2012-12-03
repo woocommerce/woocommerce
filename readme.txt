@@ -150,7 +150,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.7.0 =
+= 2.0.0 =
 * Feature - Securi audited and secured.
 * Feature - Added sales by category report.
 * Feature - Added sales by coupon report (kudos Max Rice).
@@ -1143,7 +1143,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Upgrade Notice ==
 
-= 1.7.0 =
+= 2.0.0 =
 There are many improvements in this major release - see the changelog for full details.
 
 The biggest change is that we're redone order item storage making them easier (and faster) to access for reporting and querying purchases; there are huge performance gains for reports.

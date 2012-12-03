@@ -5,7 +5,7 @@
  * @author 		WooThemes
  * @category 	Widgets
  * @package 	WooCommerce/Widgets
- * @version 	1.7.0
+ * @version 	2.0.0
  * @extends 	WP_Widget
  */
 

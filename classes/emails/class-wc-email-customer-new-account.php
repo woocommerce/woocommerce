@@ -5,7 +5,7 @@
  * An email sent to the customer when they create an account.
  *
  * @class 		WC_Email_Customer_New_Account
- * @version		1.7.0
+ * @version		2.0.0
  * @package		WooCommerce/Classes/Emails
  * @author 		WooThemes
  * @extends 	WC_Email

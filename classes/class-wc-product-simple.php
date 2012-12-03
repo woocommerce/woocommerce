@@ -5,7 +5,7 @@
  * The default product type kinda product.
  *
  * @class 		WC_Product_Simple
- * @version		1.7.0
+ * @version		2.0.0
  * @package		WooCommerce/Classes/Products
  * @author 		WooThemes
  */

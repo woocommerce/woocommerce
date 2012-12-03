@@ -1,11 +1,11 @@
 <?php
 /**
- * Update WC to 1.7
+ * Update WC to 2.0
  *
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce/Admin/Updates
- * @version     1.7.0
+ * @version     2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly

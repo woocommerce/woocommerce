@@ -5,7 +5,7 @@
  * An email sent to the admin when a new order is received/paid for.
  *
  * @class 		WC_Email_Customer_Processing_Order
- * @version		1.7.0
+ * @version		2.0.0
  * @package		WooCommerce/Classes/Emails
  * @author 		WooThemes
  * @extends 	WC_Email

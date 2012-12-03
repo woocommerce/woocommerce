@@ -5,7 +5,7 @@
  * Order complete emails are sent to the customer when the order is marked complete and usual indicates that the order has been shipped.
  *
  * @class 		WC_Email_Customer_Completed_Order
- * @version		1.7.0
+ * @version		2.0.0
  * @package		WooCommerce/Classes/Emails
  * @author 		WooThemes
  * @extends 	WC_Email

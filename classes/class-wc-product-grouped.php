@@ -5,7 +5,7 @@
  * Grouped products cannot be purchased - they are wrappers for other products.
  *
  * @class 		WC_Product_Grouped
- * @version		1.7.0
+ * @version		2.0.0
  * @package		WooCommerce/Classes/Products
  * @author 		WooThemes
  */

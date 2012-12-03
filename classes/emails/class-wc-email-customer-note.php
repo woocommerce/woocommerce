@@ -5,7 +5,7 @@
  * Customer note emails are sent when you add a note to an order.
  *
  * @class 		WC_Email_Customer_Note
- * @version		1.7.0
+ * @version		2.0.0
  * @package		WooCommerce/Classes/Emails
  * @author 		WooThemes
  * @extends 	WC_Email

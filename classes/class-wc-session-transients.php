@@ -4,7 +4,7 @@
  * Implements the WC_Session abstract class
  *
  * @class 		WC_Session_Transients
- * @version		1.7
+ * @version		2.0.0
  * @package		WooCommerce/Classes
  * @author 		WooThemes
  */

@@ -3,7 +3,7 @@
  * Handle data for the current customers session.
  *
  * @class 		WC_Session
- * @version		1.7
+ * @version		2.0.0
  * @package		WooCommerce/Classes/Abstracts
  * @author 		WooThemes
  */
