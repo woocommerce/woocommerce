@@ -581,7 +581,7 @@ function woocommerce_admin_fields( $options ) {
 		if ( $tip && in_array( $value['type'], array( 'checkbox' ) ) ) {
 			$tip = '<span class="help_tip" data-tip="' . esc_attr( $tip ) . '">[?]</span>';
 		} elseif ( $tip ) {
-			$tip = '<img class="help_tip" data-tip="' . esc_attr( $tip ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" />';
+			$tip = '<img class="help_tip" data-tip="' . esc_attr( $tip ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
 		}
 
 		// Switch based on type
