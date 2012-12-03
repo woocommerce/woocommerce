@@ -437,7 +437,18 @@ class WC_Countries {
 				'AE' => __( 'Armed Forces (AE)', 'woocommerce' ) ,
 				'AP' => __( 'Armed Forces (AP)', 'woocommerce' )
 			),
-			'VN' => array()
+			'VN' => array(),
+			'ZA' => array(
+				'EC' => __('Eastern Cape', 'woocommerce') ,
+				'FS' => __('Free State', 'woocommerce') ,
+				'GP' => __('Gauteng', 'woocommerce') ,
+				'KZN' => __('KwaZulu-Natal', 'woocommerce') ,
+				'LP' => __('Limpopo', 'woocommerce') ,
+				'MP' => __('Mpumalanga', 'woocommerce') ,
+				'NC' => __('Northern Cape', 'woocommerce') ,
+				'NW' => __('North West', 'woocommerce') ,
+				'WC' => __('Western Cape', 'woocommerce')
+			)
 		));
 	}
 
