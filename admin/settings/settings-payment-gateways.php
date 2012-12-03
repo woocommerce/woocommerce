@@ -47,9 +47,9 @@ function woocommerce_payment_gateways_setting() {
 		        			<td>';
 
 		        		if ( $gateway->enabled == 'yes' )
-		        			echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/success.png" alt="yes" />';
+		        			echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/success.png" width="16" height="14" alt="yes" />';
 						else
-							echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/success-off.png" alt="no" />';
+							echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/success-off.png" width="16" height="14" alt="no" />';
 
 		        		echo '</td>
 		        		</tr>';
