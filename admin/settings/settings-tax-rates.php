@@ -37,7 +37,7 @@ function woocommerce_tax_rates_setting() {
 
 				<th width="8%"><?php _e( 'State&nbsp;Code', 'woocommerce' ); ?>&nbsp;<span class="tips" data-tip="<?php _e('A 2 digit state code, e.g. AL. Leave blank to apply to all.', 'woocommerce'); ?>">[?]</span></th>
 
-				<th><?php _e( 'ZIP/Postcode', 'woocommerce' ); ?>&nbsp;<span class="tips" data-tip="<?php _e('Postcode for this rule. Wildcards (*) can be used, as well as numeric postcodes with ranges (e.g. 12345-12350). Semi-colon (;) separate multiple values. Leave blank to apply to all areas.', 'woocommerce'); ?>">[?]</span></th>
+				<th><?php _e( 'ZIP/Postcode', 'woocommerce' ); ?>&nbsp;<span class="tips" data-tip="<?php _e('Postcode for this rule. Semi-colon (;) separate multiple values. Leave blank to apply to all areas. Wildcards (*) can be used. Ranges for numeric postcodes (e.g. 12345-12350) will be expanded into individual postcodes.', 'woocommerce'); ?>">[?]</span></th>
 
 				<th><?php _e( 'City', 'woocommerce' ); ?>&nbsp;<span class="tips" data-tip="<?php _e('Cities for this rule. Semi-colon (;) separate multiple values. Leave blank to apply to all cities.', 'woocommerce'); ?>">[?]</span></th>
 
@@ -87,7 +87,7 @@ function woocommerce_tax_rates_setting() {
 
 						<td class="postcode">
 							<input type="text" value="<?php
-								$locations = $wpdb->get_col( $wpdb->prepare( "SELECT location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE location_type='postcode' AND tax_rate_id = %d", $rate->tax_rate_id ) );
+								$locations = $wpdb->get_col( $wpdb->prepare( "SELECT location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE location_type='postcode' AND tax_rate_id = %d ORDER BY location_code", $rate->tax_rate_id ) );
 
 								echo esc_attr( implode( '; ', $locations ) );
 							?>" placeholder="*" data-name="tax_rate_postcode[<?php echo $rate->tax_rate_id ?>]" />
@@ -95,7 +95,7 @@ function woocommerce_tax_rates_setting() {
 
 						<td class="city">
 							<input type="text" value="<?php
-								$locations = $wpdb->get_col( $wpdb->prepare( "SELECT location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE location_type='city' AND tax_rate_id = %d", $rate->tax_rate_id ) );
+								$locations = $wpdb->get_col( $wpdb->prepare( "SELECT location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE location_type='city' AND tax_rate_id = %d ORDER BY location_code", $rate->tax_rate_id ) );
 								echo esc_attr( implode( '; ', $locations ) );
 							?>" placeholder="*" data-name="tax_rate_city[<?php echo $rate->tax_rate_id ?>]" />
 						</td>
@@ -426,16 +426,24 @@ function woocommerce_tax_rates_setting_save() {
 				$postcode  = woocommerce_clean( $tax_rate_postcode[ $key ] );
 				$postcodes = explode( ';', $postcode );
 				$postcodes = array_map( 'strtoupper', array_map( 'woocommerce_clean', $postcodes ) );
-				foreach( $postcodes as $postcode ) {
-					$wpdb->insert(
-					$wpdb->prefix . "woocommerce_tax_rate_locations",
-						array(
-							'location_code' => $postcode,
-							'tax_rate_id'   => $tax_rate_id,
-							'location_type' => 'postcode',
-						)
-					);
-				}
+
+				$postcode_query = array();
+
+				foreach( $postcodes as $postcode )
+					if ( strstr( $postcode, '-' ) ) {
+						$postcode_parts = explode( '-', $postcode );
+
+						if ( is_numeric( $postcode_parts[0] ) && is_numeric( $postcode_parts[1] ) && $postcode_parts[1] > $postcode_parts[0] ) {
+							for ( $i = $postcode_parts[0]; $i <= $postcode_parts[1]; $i ++ ) {
+								$postcode_query[] = "( '$i', $tax_rate_id, 'postcode' )";
+							}
+						}
+					} else {
+						$postcode_query[] = "( '$postcode', $tax_rate_id, 'postcode' )";
+					}
+
+				$wpdb->query( "INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES " . implode( ',', $postcode_query ) );
+
 			}
 
 			if ( isset( $tax_rate_city[ $key ] ) ) {
