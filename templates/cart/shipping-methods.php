@@ -17,7 +17,7 @@ if ( $available_methods ) {
 		$method->full_label = $method->label;
 
 		if ( $method->cost > 0 ) {
-			if ( $woocommerce->cart->display_totals_ex_tax || ! $woocommerce->cart->prices_include_tax || $woocommerce->customer->is_vat_exempt() ) {
+			if ( $woocommerce->cart->tax_display_cart == 'excl' ) {
 				$method->full_label .= ': ' . woocommerce_price( $method->cost );
 				if ( $method->get_shipping_tax() > 0 && $woocommerce->cart->prices_include_tax ) {
 					$method->full_label .= ' '.$woocommerce->countries->ex_tax_or_vat();

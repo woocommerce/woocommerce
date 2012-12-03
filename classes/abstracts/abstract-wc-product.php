@@ -715,12 +715,67 @@ abstract class WC_Product {
 
 
 	/**
-	 * Returns the price (excluding tax) - ignores tax_class filters since the price may *include* tax and thus needs subtracting.
+	 * Returns the price (including tax). Uses customer tax rates. Can work for a specific $qty for more accurate taxes.
 	 *
 	 * @access public
 	 * @return string
 	 */
-	function get_price_excluding_tax() {
+	function get_price_including_tax( $qty = 1 ) {
+		global $woocommerce;
+
+		$_tax  = new WC_Tax();
+		$price = $this->get_price();
+
+		if ( $this->is_taxable() ) {
+
+			if ( get_option('woocommerce_prices_include_tax') == 'no' ) {
+
+				$tax_rates  = $_tax->get_rates( $this->get_tax_class() );
+				$taxes      = $_tax->calc_tax( $price * $qty, $tax_rates, false );
+				$tax_amount = $_tax->get_tax_total( $taxes );
+				$price      = round( $price * $qty + $tax_amount, 2 );
+
+			} else {
+
+				$tax_rates      = $_tax->get_rates( $this->get_tax_class() );
+				$base_tax_rates = $_tax->get_shop_base_rate( $this->tax_class );
+
+				if ( $woocommerce->customer->is_vat_exempt() ) {
+
+					$base_taxes 		= $_tax->calc_tax( $price * $qty, $base_tax_rates, true );
+					$base_tax_amount	= array_sum( $base_taxes );
+					$price      		= round( $price * $qty - $base_tax_amount, 2 );
+
+				} elseif ( $tax_rates !== $base_tax_rates ) {
+
+					$base_taxes			= $_tax->calc_tax( $price * $qty, $base_tax_rates, true, true );
+					$modded_taxes		= $_tax->calc_tax( $price * $qty - array_sum( $base_taxes ), $tax_rates, false );
+					$price      		= round( $price * $qty - array_sum( $base_taxes ) + array_sum( $modded_taxes ), 2 );
+
+				} else {
+
+					$price = $price * $qty;
+
+				}
+
+			}
+
+		} else {
+			$price = $price * $qty;
+		}
+
+		return apply_filters( 'woocommerce_get_price_including_tax', $price, $qty, $this );
+	}
+
+
+	/**
+	 * Returns the price (excluding tax) - ignores tax_class filters since the price may *include* tax and thus needs subtracting.
+	 * Uses store base tax rates. Can work for a specific $qty for more accurate taxes.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	function get_price_excluding_tax( $qty = 1 ) {
 
 		$price = $this->get_price();
 
@@ -728,12 +783,15 @@ abstract class WC_Product {
 
 			$_tax       = new WC_Tax();
 			$tax_rates  = $_tax->get_shop_base_rate( $this->tax_class );
-			$taxes      = $_tax->calc_tax( $price, $tax_rates, true );
+			$taxes      = $_tax->calc_tax( $price * $qty, $tax_rates, true );
 			$tax_amount = $_tax->get_tax_total( $taxes );
-			$price      = round( $price - $tax_amount, 2);
+			$price      = round( $price * $qty - $tax_amount, 2 );
+
+		} else {
+			$price = $price * $qty;
 		}
 
-		return apply_filters( 'woocommerce_get_price_excluding_tax', $price, $this );
+		return apply_filters( 'woocommerce_get_price_excluding_tax', $price, $qty, $this );
 	}
 
 

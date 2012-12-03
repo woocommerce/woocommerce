@@ -4,7 +4,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @version     1.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -52,7 +52,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					<tr class="fee fee-<?php echo $fee->id ?>">
 						<th><?php echo $fee->name ?></th>
 						<td><?php
-							if ( $woocommerce->cart->display_totals_ex_tax || ! $woocommerce->cart->prices_include_tax )
+							if ( $woocommerce->cart->tax_display_cart == 'excl' )
 								echo woocommerce_price( $fee->amount );
 							else
 								echo woocommerce_price( $fee->amount + $fee->tax );
@@ -63,7 +63,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 				<?php
 					// Show the tax row if showing prices exclusive of tax only
-					if ( $woocommerce->cart->display_totals_ex_tax || ! $woocommerce->cart->prices_include_tax ) {
+					if ( $woocommerce->cart->tax_display_cart == 'excl' ) {
 						$taxes = $woocommerce->cart->get_formatted_taxes();
 
 						if ( sizeof( $taxes ) > 0 ) {
@@ -125,7 +125,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 						<strong><?php echo $woocommerce->cart->get_total(); ?></strong>
 						<?php
 							// If prices are tax inclusive, show taxes here
-							if ( ! $woocommerce->cart->display_totals_ex_tax && $woocommerce->cart->prices_include_tax ) {
+							if (  $woocommerce->cart->tax_display_cart == 'incl' ) {
 								$tax_string_array = array();
 								$taxes = $woocommerce->cart->get_formatted_taxes();
 

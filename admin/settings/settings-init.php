@@ -1028,26 +1028,6 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		),
 	),
 
-	/*array(
-		'title'		=> __( 'Tax Display', 'woocommerce' ),
-		'desc' 		=> __( 'Display cart items excluding tax', 'woocommerce' ),
-		'id' 		=> 'woocommerce_display_cart_prices_excluding_tax',
-		'default'	=> 'yes',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start',
-	),
-
-	array(
-		'desc' 		=> __( 'Display cart totals excluding tax', 'woocommerce' ),
-		'id' 		=> 'woocommerce_display_totals_excluding_tax',
-		'default'	=> 'yes',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end',
-		'show_if_checked' 	=> 'yes',
-	),*/
-
-
-
 	array( 'type' => 'sectionend', 'id' => 'tax_options' ),
 
 )); // End tax settings
