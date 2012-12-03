@@ -199,6 +199,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - get_order_number support for PayPal (thanks Justin)
 * Tweak - Taxes - removed woocommerce_display_cart_taxes option in favour of never showing tax until we know where the user is (for tax exclusive prices). Tax inclusive continues to use base so prices remain correct.
 * Tweak - Taxes - tweaked display of tax when using inclusive pricing to avoid confusion.
+* Tweak - Taxes - improved admin interface and simplified options.
 * Tweak - More granular capabilities for admin/shop manager covering products, orders and coupons.
 * Tweak - Added some calculations to the order page when manually entering rows. Also added accounting.js for more accurate rounding of floats.
 * Tweak - Order page can now calculate tax rows for you.
