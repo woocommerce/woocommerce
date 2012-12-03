@@ -251,7 +251,7 @@ if ( class_exists( 'WP_Importer' ) ) {
 		 * @return void
 		 */
 		function header() {
-			echo '<div class="wrap"><div class="icon32" id="icon-woocommerce-importer"><br></div>';
+			echo '<div class="wrap"><div class="icon32 icon32-woocommerce-importer" id="icon-woocommerce"><br></div>';
 			echo '<h2>' . __( 'Import Tax Rates', 'woocommerce' ) . '</h2>';
 		}
 
