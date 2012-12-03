@@ -81,7 +81,10 @@
 }
 
 #woocommerce_extensions {
-	background: #f1f1f1 url(../images/icons/wc_icon.png) no-repeat 4px 4px;
+	background-color: #f1f1f1; 
+	background-image: url(../images/icons/wc_icon.png);
+	background-repeat: no-repeat;
+	background-position: 4px 4px;
 	padding: 4px 18px 4px 28px;
 	-webkit-border-radius:4px;
 	-moz-border-radius:4px;
@@ -110,6 +113,14 @@
 	}
 }
 
+@media only screen and (-webkit-min-device-pixel-ratio: 2) {
+	#woocommerce_extensions {
+		background-image: url(../images/icons/wc_icon@2x.png);
+		background-size: 16px 17px;
+		background-position: 6px 6px;
+	}
+}
+
 #wc_get_started  { position: relative; margin: 1em 0 2em; padding: 15px 15px 15px 90px; border: 1px solid #d9d9d9; background: #f5f5f5 url(../images/gear.png) no-repeat 15px 15px; border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #fff; -moz-box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #fff; -webkit-box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #fff; }
 #wc_get_started span  { display: block; text-shadow: 1px 1px 0 #fff; font-size: 14px; line-height: 22px; color: #595959; }
 #wc_get_started span.main  { margin-top: 2px; font-weight: bold; font-size: 16px; }
@@ -129,7 +140,7 @@
 	background-size: auto !important;
 }
 
-@media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+@media only screen and (-webkit-min-device-pixel-ratio: 2) {
 	#icon-woocommerce, .woocommerce_icon, .icon32-posts-product, .icon32-posts-shop_order, .icon32-posts-shop_coupon, .icon32-posts-product_variation {
 		background-image: url(../images/icons/woocommerce-icons-x2.png) !important;
 		background-size: 986px 45px !important;
@@ -999,7 +1010,7 @@ table.wp-list-table {
 	.column-is_in_stock {
 		text-align: left !important;
 	}
-	@media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+	@media only screen and (-webkit-min-device-pixel-ratio: 2) {
 		span.product-type {
 			background-image: url(../images/product_types-x2.png) !important;
 			background-size:96px 16px !important;
@@ -1666,7 +1677,7 @@ img.help_tip {
 	}
 }
 
-@media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+@media only screen and (-webkit-min-device-pixel-ratio: 2) {
 	#woocommerce-product-data ul.product_data_tabs li {
 		&.general_options, &.tax_options, &.inventory_options, &.shipping_options, &.linked_product_options, &.attribute_options, &.variation_options, &.advanced_options {
 			a {
