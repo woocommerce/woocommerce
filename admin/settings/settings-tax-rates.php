@@ -184,14 +184,22 @@ function woocommerce_tax_rates_setting() {
 				jQuery('#rates tr:visible').each(function() {
 					var row = '';
 					jQuery(this).find('td:not(.sort) input').each(function() {
-						var val = jQuery(this).val();
-						if ( ! val )
-							val = jQuery(this).attr('placeholder');
 
-						if ( val == 'on' )
-							val = 1;
-						if ( val == 'off' )
-							val = 0;
+						if ( jQuery(this).is('.checkbox') ) {
+
+							if ( jQuery(this).is(':checked') ) {
+								val = 1;
+							} else {
+								val = 0;
+							}
+
+						} else {
+
+							var val = jQuery(this).val();
+
+							if ( ! val )
+								val = jQuery(this).attr('placeholder');
+						}
 
 						row = row + val + ',';
 					});
