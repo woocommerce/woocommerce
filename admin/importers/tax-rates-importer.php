@@ -112,81 +112,70 @@ if ( class_exists( 'WP_Importer' ) ) {
 
 				$header = fgetcsv( $handle, 0, $this->delimiter );
 
-				if ( sizeof( $header ) == 6 ) {
+				if ( sizeof( $header ) == 10 ) {
 
-					$rates = get_option( 'woocommerce_tax_rates' );
-
-					while ( ( $row = fgetcsv( $handle, 0, $this->delimiter ) ) !== FALSE ) {
-
-						$rate = array();
-
-						list( $rate['countries'], $rate['class'], $rate['label'], $rate['rate'], $rate['compound'], $rate['shipping'] ) = $row;
-
-						$parsed_countries 	= array();
-						$rate['countries'] 	= array_map( 'trim', explode( '|', $rate['countries'] ) );
-
-						foreach( $rate['countries'] as $country ) {
-							if ( strstr( $country, ':' ) ) {
-								list( $country, $state ) = array_map( 'trim', explode( ':', $country ) );
-
-								if ( ! isset( $parsed_countries[ $country ] ) )
-									$parsed_countries[ $country ] = array();
-
-								$parsed_countries[ $country ][] = $state;
-							} else {
-
-								if ( ! isset( $parsed_countries[ $country ] ) )
-									$parsed_countries[ $country ] = array();
-
-								$parsed_countries[ $country ][] = '*';
-							}
-						}
-
-						$rate['countries']	= $parsed_countries;
-						$rate['shipping'] 	= $rate['shipping'] ? 'yes' : 'no';
-						$rate['compound'] 	= $rate['compound'] ? 'yes' : 'no';
-
-						$new_rates[] = $rate;
-
-						unset( $rate, $row );
-
-						$this->imported++;
-				    }
-
-				    $rates = array_merge( $rates, $new_rates );
-
-					update_option( 'woocommerce_tax_rates', $rates );
-
-				} elseif ( sizeof( $header ) == 8 ) {
-
-					$rates = get_option( 'woocommerce_local_tax_rates' );
+					$loop = 0;
 
 					while ( ( $row = fgetcsv( $handle, 0, $this->delimiter ) ) !== FALSE ) {
 
-						$rate = array();
+						list( $country, $state, $postcode, $city, $rate, $name, $priority, $compound, $shipping, $class ) = $row;
 
-						list( $rate['country'], $rate['state'], $rate['postcode'], $rate['class'], $rate['label'], $rate['rate'], $rate['compound'], $rate['shipping'] ) = $row;
+						$country = trim( strtoupper( $country ) );
+						$state   = trim( strtoupper( $state ) );
 
-						if ( ! $rate['country'] || ! $rate['postcode'] || ! $rate['rate'] ) {
-							$this->skipped++;
-							continue;
+						if ( $country == '*' )
+							$country = '';
+						if ( $state == '*' )
+							$state = '';
+
+						$wpdb->insert(
+							$wpdb->prefix . "woocommerce_tax_rates",
+							array(
+								'tax_rate_country'  => $country,
+								'tax_rate_state'    => $state,
+								'tax_rate'          => number_format( $rate, 4, '.', '' ),
+								'tax_rate_name'     => trim( $name ),
+								'tax_rate_priority' => absint( $priority ),
+								'tax_rate_compound' => $compound ? 1 : 0,
+								'tax_rate_shipping' => $shipping ? 1 : 0,
+								'tax_rate_order'    => $loop,
+								'tax_rate_class'    => sanitize_title( $class )
+							)
+						);
+
+						$tax_rate_id = $wpdb->insert_id;
+
+						$postcode  = woocommerce_clean( $postcode );
+						$postcodes = explode( ';', $postcode );
+						$postcodes = array_map( 'strtoupper', array_map( 'woocommerce_clean', $postcodes ) );
+						foreach( $postcodes as $postcode ) {
+							$wpdb->insert(
+							$wpdb->prefix . "woocommerce_tax_rate_locations",
+								array(
+									'location_code' => $postcode,
+									'tax_rate_id'   => $tax_rate_id,
+									'location_type' => 'postcode',
+								)
+							);
 						}
 
-						$rate['state']		= $rate['state'] ? $rate['state'] : '*';
-						$rate['shipping'] 	= $rate['shipping'] ? 'yes' : 'no';
-						$rate['compound'] 	= $rate['compound'] ? 'yes' : 'no';
-						$rate['postcode'] 	= array_map( 'trim', explode( '|', $rate['postcode'] ) );
+						$city   = woocommerce_clean( $city );
+						$cities = explode( ';', $city );
+						$cities = array_map( 'strtoupper', array_map( 'woocommerce_clean', $cities ) );
+						foreach( $cities as $city ) {
+							$wpdb->insert(
+							$wpdb->prefix . "woocommerce_tax_rate_locations",
+								array(
+									'location_code' => $city,
+									'tax_rate_id'   => $tax_rate_id,
+									'location_type' => 'city',
+								)
+							);
+						}
 
-						$new_rates[] = $rate;
-
-						unset( $rate, $row );
-
+						$loop ++;
 						$this->imported++;
 				    }
-
-				    $rates = array_merge( $rates, $new_rates );
-
-					update_option( 'woocommerce_local_tax_rates', $rates );
 
 				} else {
 
@@ -288,9 +277,7 @@ if ( class_exists( 'WP_Importer' ) ) {
 			echo '<div class="narrow">';
 			echo '<p>' . __( 'Hi there! Upload a CSV file containing tax rates to import the contents into your shop. Choose a .csv file to upload, then click "Upload file and import".', 'woocommerce' ).'</p>';
 
-			echo '<p>' . sprintf( __( 'Tax rates need to be defined with columns in a specific order (6 columns). <a href="%s">Click here to download a sample</a>.', 'woocommerce' ), $woocommerce->plugin_url() . '/admin/importers/samples/sample_tax_rates.csv' ) . '</p>';
-
-			echo '<p>' . sprintf( __( 'Local tax rates also need to be defined with columns in a specific order (8 columns). <a href="%s">Click here to download a sample</a>.', 'woocommerce' ), $woocommerce->plugin_url() . '/admin/importers/samples/sample_local_tax_rates.csv' ) . '</p>';
+			echo '<p>' . sprintf( __( 'Tax rates need to be defined with columns in a specific order (10 columns). <a href="%s">Click here to download a sample</a>.', 'woocommerce' ), $woocommerce->plugin_url() . '/admin/importers/samples/sample_tax_rates.csv' ) . '</p>';
 
 			$action = 'admin.php?import=woocommerce_tax_rate_csv&step=1';
 

@@ -75,11 +75,10 @@ function woocommerce_tax_rates_setting() {
 				foreach ( $rates as $rate ) {
 					?>
 					<tr>
-						<td class="sort">&nbsp;</td>
+						<td class="sort"><input type="hidden" class="remove_tax_rate" name="remove_tax_rate[<?php echo $rate->tax_rate_id ?>]" value="0" /></td>
 
 						<td class="country" width="8%">
 							<input type="text" value="<?php echo esc_attr( $rate->tax_rate_country ) ?>" placeholder="*" name="tax_rate_country[<?php echo $rate->tax_rate_id ?>]" />
-							<input type="hidden" class="remove_tax_rate" name="remove_tax_rate[<?php echo $rate->tax_rate_id ?>]" value="0" />
 						</td>
 
 						<td class="state" width="8%">
@@ -182,16 +181,18 @@ function woocommerce_tax_rates_setting() {
 
 				var csv_data = "data:application/csv;charset=utf-8,<?php _e( 'Country Code', 'woocommerce' ); ?>,<?php _e( 'State Code', 'woocommerce' ); ?>,<?php _e( 'ZIP/Postcode', 'woocommerce' ); ?>,<?php _e( 'City', 'woocommerce' ); ?>,<?php _e( 'Rate %', 'woocommerce' ); ?>,<?php _e( 'Tax Name', 'woocommerce' ); ?>,<?php _e( 'Priority', 'woocommerce' ); ?>,<?php _e( 'Compound', 'woocommerce' ); ?>,<?php _e( 'Shipping', 'woocommerce' ); ?>,<?php _e( 'Tax Class', 'woocommerce' ); ?>\n";
 
-				jQuery('#rates tr').each(function() {
+				jQuery('#rates tr:visible').each(function() {
 					var row = '';
 					jQuery(this).find('td:not(.sort) input').each(function() {
 						var val = jQuery(this).val();
 						if ( ! val )
 							val = jQuery(this).attr('placeholder');
-						else if ( val == 'on' )
+
+						if ( val == 'on' )
 							val = 1;
-						else if ( val == 'off' )
+						if ( val == 'off' )
 							val = 0;
+
 						row = row + val + ',';
 					});
 					row = row + '<?php echo $current_class; ?>';

@@ -251,15 +251,17 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 							);
 
 							// Get tax classes and display as links
-							$tax_classes = array_merge( array( __( 'Standard', 'woocommerce' ) ), array_filter( array_map( 'trim', explode( "\n", get_option('woocommerce_tax_classes' ) ) ) ) );
+							$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option('woocommerce_tax_classes' ) ) ) );
+
+							$links[] = __( 'Tax Rates', 'woocommerce' ) . ': <a href="' . admin_url( 'admin.php?page=woocommerce_settings&tab=tax&section=standard' ) . '" class="' . ( $current_section == 'standard' ? 'current' : '' ) . '">' . __( 'Standard', 'woocommerce' ) . '</a>';
 
 							if ( $tax_classes )
 								foreach ( $tax_classes as $class )
-									$links[] = '<a href="' . admin_url( 'admin.php?page=woocommerce_settings&tab=tax&section=' . sanitize_title( $class ) ) . '" class="' . ( $current_section == sanitize_title( $class ) ? 'current' : '' ) . '">' . $class . ' ' . __( 'Tax Rates', 'woocommerce' ) . '</a>';
+									$links[] = '<a href="' . admin_url( 'admin.php?page=woocommerce_settings&tab=tax&section=' . sanitize_title( $class ) ) . '" class="' . ( $current_section == sanitize_title( $class ) ? 'current' : '' ) . '">' . $class  . '</a>';
 
 							echo '<ul class="subsubsub"><li>' . implode( ' | </li><li>', $links ) . '</li></ul><br class="clear" />';
 
-							if ( in_array( $current_section, array_map( 'sanitize_title', $tax_classes ) ) ) {
+							if ( $current_section == 'standard' || in_array( $current_section, array_map( 'sanitize_title', $tax_classes ) ) ) {
 
 								include_once('settings/settings-tax-rates.php');
 
