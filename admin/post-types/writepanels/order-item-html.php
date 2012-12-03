@@ -28,6 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 				echo '<br/>' . woocommerce_get_formatted_variation( $_product->variation_data, true );
 		?>
 		<table class="meta" cellspacing="0">
+			
 			<tfoot>
 				<tr>
 					<td colspan="4"><button class="add_order_item_meta button"><?php _e( 'Add&nbsp;meta', 'woocommerce' ); ?></button></td>
@@ -36,6 +37,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			<tbody class="meta_items">
 			<?php
 				if ( $metadata = $order->has_meta( $item_id )) {
+
+					do_action('woocommerce_display_order_item_meta', absint( $item_id ) ); 
+
 					foreach ( $metadata as $meta ) {
 
 						// Skip hidden core fields
