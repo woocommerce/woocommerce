@@ -78,38 +78,38 @@ class WC_COD extends WC_Payment_Gateway {
 
     	$this->form_fields = array(
 			'enabled' => array(
-				'title' => __( 'Enable COD', 'woocommerce' ),
-				'label' => __( 'Enable Cash on Delivery', 'woocommerce' ),
-				'type' => 'checkbox',
+				'title'       => __( 'Enable COD', 'woocommerce' ),
+				'label'       => __( 'Enable Cash on Delivery', 'woocommerce' ),
+				'type'        => 'checkbox',
 				'description' => '',
-				'default' => 'no'
+				'default'     => 'no'
 			),
 			'title' => array(
-				'title' => __( 'Title', 'woocommerce' ),
-				'type' => 'text',
+				'title'       => __( 'Title', 'woocommerce' ),
+				'type'        => 'text',
 				'description' => __( 'Payment method title that the customer will see on your website.', 'woocommerce' ),
-				'default' => __( 'Cash on Delivery', 'woocommerce' )
+				'default'     => __( 'Cash on Delivery', 'woocommerce' )
 			),
 			'description' => array(
-				'title' => __( 'Description', 'woocommerce' ),
-				'type' => 'textarea',
+				'title'       => __( 'Description', 'woocommerce' ),
+				'type'        => 'textarea',
 				'description' => __( 'Payment method description that the customer will see on your website.', 'woocommerce' ),
-				'default' => 'Pay with cash upon delivery.'
+				'default'     => 'Pay with cash upon delivery.'
 			),
 			'instructions' => array(
-				'title' => __( 'Instructions', 'woocommerce' ),
-				'type' => 'textarea',
+				'title'       => __( 'Instructions', 'woocommerce' ),
+				'type'        => 'textarea',
 				'description' => __( 'Instructions that will be added to the thank you page.', 'woocommerce' ),
-				'default' => 'Pay with cash upon delivery.'
+				'default'     => 'Pay with cash upon delivery.'
 			),
 			'enable_for_methods' => array(
-				'title' 		=> __( 'Enable for shipping methods', 'woocommerce' ),
-				'type' 			=> 'multiselect',
-				'class'			=> 'chosen_select',
-				'css'			=> 'width: 450px;',
-				'default' 		=> '',
-				'description' 	=> __( 'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'woocommerce' ),
-				'options'		=> $shipping_methods
+				'title'       => __( 'Enable for shipping methods', 'woocommerce' ),
+				'type'        => 'multiselect',
+				'class'       => 'chosen_select',
+				'css'         => 'width: 450px;',
+				'default'     => '',
+				'description' => __( 'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'woocommerce' ),
+				'options'     => $shipping_methods
 			)
  	   );
     }
@@ -182,8 +182,8 @@ class WC_COD extends WC_Payment_Gateway {
 
 		// Return thankyou redirect
 		return array(
-			'result' 	=> 'success',
-			'redirect'	=> add_query_arg('key', $order->order_key, add_query_arg('order', $order_id, get_permalink(woocommerce_get_page_id('thanks'))))
+			'result'   => 'success',
+			'redirect' => add_query_arg('key', $order->order_key, add_query_arg('order', $order_id, get_permalink(woocommerce_get_page_id('thanks'))))
 		);
 	}
 

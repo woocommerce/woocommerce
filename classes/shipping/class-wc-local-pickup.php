@@ -60,8 +60,8 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 	 */
 	function calculate_shipping() {
 		$rate = array(
-			'id' 		=> $this->id,
-			'label' 	=> $this->title,
+			'id'    => $this->id,
+			'label' => $this->title,
 		);
 		$this->add_rate($rate);
 	}
@@ -76,46 +76,46 @@ class WC_Local_Pickup extends WC_Shipping_Method {
     	global $woocommerce;
     	$this->form_fields = array(
 			'enabled' => array(
-				'title' 		=> __( 'Enable', 'woocommerce' ),
-				'type' 			=> 'checkbox',
-				'label' 		=> __( 'Enable local pickup', 'woocommerce' ),
-				'default' 		=> 'no'
+				'title'   => __( 'Enable', 'woocommerce' ),
+				'type'    => 'checkbox',
+				'label'   => __( 'Enable local pickup', 'woocommerce' ),
+				'default' => 'no'
 			),
 			'title' => array(
-				'title' 		=> __( 'Title', 'woocommerce' ),
-				'type' 			=> 'text',
-				'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-				'default'		=> __( 'Local Pickup', 'woocommerce' )
+				'title'       => __( 'Title', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
+				'default'     => __( 'Local Pickup', 'woocommerce' )
 			),
 			'codes' => array(
-				'title' 		=> __( 'Zip/Post Codes', 'woocommerce' ),
-				'type' 			=> 'textarea',
-				'description' 	=> __( 'What zip/post codes would you like to offer delivery to? Separate codes with a comma. Accepts wildcards, e.g. P* will match a postcode of PE30.', 'woocommerce' ),
-				'default'		=> ''
+				'title'       => __( 'Zip/Post Codes', 'woocommerce' ),
+				'type'        => 'textarea',
+				'description' => __( 'What zip/post codes would you like to offer delivery to? Separate codes with a comma. Accepts wildcards, e.g. P* will match a postcode of PE30.', 'woocommerce' ),
+				'default'     => ''
 			),
 			'availability' => array(
-				'title' 		=> __( 'Method availability', 'woocommerce' ),
-				'type' 			=> 'select',
-				'default' 		=> 'all',
-				'class'			=> 'availability',
-				'options'		=> array(
-					'all' 		=> __( 'All allowed countries', 'woocommerce' ),
-					'specific' 	=> __( 'Specific Countries', 'woocommerce' )
+				'title'   => __( 'Method availability', 'woocommerce' ),
+				'type'    => 'select',
+				'default' => 'all',
+				'class'   => 'availability',
+				'options' => array(
+					'all'      => __( 'All allowed countries', 'woocommerce' ),
+					'specific' => __( 'Specific Countries', 'woocommerce' )
 				)
 			),
 			'countries' => array(
-				'title' 		=> __( 'Specific Countries', 'woocommerce' ),
-				'type' 			=> 'multiselect',
-				'class'			=> 'chosen_select',
-				'css'			=> 'width: 450px;',
-				'default' 		=> '',
-				'options'		=> $woocommerce->countries->countries
+				'title'   => __( 'Specific Countries', 'woocommerce' ),
+				'type'    => 'multiselect',
+				'class'   => 'chosen_select',
+				'css'     => 'width: 450px;',
+				'default' => '',
+				'options' => $woocommerce->countries->countries
 			),
 			'apply_base_tax' => array(
-				'title' 		=> __( 'Apply base tax rate', 'woocommerce' ),
-				'type' 			=> 'checkbox',
-				'label' 		=> __( 'When this shipping method is chosen, apply the base tax rate rather than for the customer\'s given address.', 'woocommerce' ),
-				'default' 		=> 'no'
+				'title'   => __( 'Apply base tax rate', 'woocommerce' ),
+				'type'    => 'checkbox',
+				'label'   => __( 'When this shipping method is chosen, apply the base tax rate rather than for the customer\'s given address.', 'woocommerce' ),
+				'default' => 'no'
 			),
 		);
 	}

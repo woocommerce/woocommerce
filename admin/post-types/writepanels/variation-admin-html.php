@@ -108,13 +108,13 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 						<tr>
 							<td><label><?php _e( 'Shipping class:', 'woocommerce' ); ?></label> <?php
 								$args = array(
-									'taxonomy' 			=> 'product_shipping_class',
-									'hide_empty'		=> 0,
-									'show_option_all' 	=> __( 'Same as parent', 'woocommerce' ),
-									'name' 				=> 'variable_shipping_class[' . $loop . ']',
-									'id'				=> '',
-									'selected'			=> isset( $shipping_class ) ? esc_attr( $shipping_class ) : '',
-									'echo'				=> 0
+									'taxonomy'        => 'product_shipping_class',
+									'hide_empty'      => 0,
+									'show_option_all' => __( 'Same as parent', 'woocommerce' ),
+									'name'            => 'variable_shipping_class[' . $loop . ']',
+									'id'              => '',
+									'selected'        => isset( $shipping_class ) ? esc_attr( $shipping_class ) : '',
+									'echo'            => 0
 								);
 
 								echo wp_dropdown_categories( $args );

@@ -43,8 +43,8 @@ function woocommerce_coupon_data_meta_box( $post ) {
 
 			// Amount
 			woocommerce_wp_text_input( array( 'id' => 'coupon_amount', 'label' => __( 'Coupon amount', 'woocommerce' ), 'placeholder' => '0.00', 'description' => __( 'Enter an amount e.g. 2.99', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
-					'step' 	=> 'any',
-					'min'	=> '0'
+					'step' => 'any',
+					'min'  => '0'
 				)  ) );
 
 			// Free Shipping
@@ -60,8 +60,8 @@ function woocommerce_coupon_data_meta_box( $post ) {
 
 			// minimum spend
 			woocommerce_wp_text_input( array( 'id' => 'minimum_amount', 'label' => __( 'Minimum amount', 'woocommerce' ), 'placeholder' => __( 'No minimum', 'woocommerce' ), 'description' => __( 'This field allows you to set the minimum subtotal needed to use the coupon.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
-					'step' 	=> 'any',
-					'min'	=> '0'
+					'step' => 'any',
+					'min'  => '0'
 				) ) );
 
 			echo '</div><div class="options_group">';
@@ -150,15 +150,15 @@ function woocommerce_coupon_data_meta_box( $post ) {
 
 			// Customers
 			woocommerce_wp_text_input( array( 'id' => 'customer_email', 'label' => __( 'Customer emails', 'woocommerce' ), 'placeholder' => __( 'Any customer', 'woocommerce' ), 'description' => __( 'Comma separate email addresses to restrict this coupon to specific billing and user emails.', 'woocommerce' ), 'value' => implode(', ', (array) get_post_meta( $post->ID, 'customer_email', true ) ), 'type' => 'email', 'custom_attributes' => array(
-					'multiple' 	=> 'multiple'
+					'multiple' => 'multiple'
 				) ) );
 
 			echo '</div><div class="options_group">';
 
 			// Usage limit
 			woocommerce_wp_text_input( array( 'id' => 'usage_limit', 'label' => __( 'Usage limit', 'woocommerce' ), 'placeholder' => _x('Unlimited usage', 'placeholder', 'woocommerce'), 'description' => __( 'How many times this coupon can be used before it is void.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
-					'step' 	=> '1',
-					'min'	=> '0'
+					'step' => '1',
+					'min'  => '0'
 				) ) );
 
 			// Expiry date

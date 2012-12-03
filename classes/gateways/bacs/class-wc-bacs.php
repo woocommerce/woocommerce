@@ -162,12 +162,12 @@ class WC_BACS extends WC_Payment_Gateway {
 		echo '<ul class="order_details bacs_details">';
 
 		$fields = apply_filters('woocommerce_bacs_fields', array(
-			'account_name' 	=> __( 'Account Name', 'woocommerce' ),
-			'account_number'=> __( 'Account Number', 'woocommerce' ),
-			'sort_code'		=> __( 'Sort Code', 'woocommerce' ),
-			'bank_name'		=> __( 'Bank Name', 'woocommerce' ),
-			'iban'			=> __( 'IBAN', 'woocommerce' ),
-			'bic'			=> __( 'BIC', 'woocommerce' )
+			'account_name'   => __( 'Account Name', 'woocommerce' ),
+			'account_number' => __( 'Account Number', 'woocommerce' ),
+			'sort_code'      => __( 'Sort Code', 'woocommerce' ),
+			'bank_name'      => __( 'Bank Name', 'woocommerce' ),
+			'iban'           => __( 'IBAN', 'woocommerce' ),
+			'bic'            => __( 'BIC', 'woocommerce' )
 		));
 
 		foreach ( $fields as $key=>$value ) {
@@ -202,12 +202,12 @@ class WC_BACS extends WC_Payment_Gateway {
 		?><h2><?php _e( 'Our Details', 'woocommerce' ) ?></h2><ul class="order_details bacs_details"><?php
 
 		$fields = apply_filters('woocommerce_bacs_fields', array(
-			'account_name' 	=> __( 'Account Name', 'woocommerce' ),
-			'account_number'=> __( 'Account Number', 'woocommerce' ),
-			'sort_code'		=> __( 'Sort Code', 'woocommerce' ),
-			'bank_name'		=> __( 'Bank Name', 'woocommerce' ),
-			'iban'			=> __( 'IBAN', 'woocommerce' ),
-			'bic'			=> __( 'BIC', 'woocommerce' )
+			'account_name'   => __( 'Account Name', 'woocommerce' ),
+			'account_number' => __( 'Account Number', 'woocommerce' ),
+			'sort_code'      => __( 'Sort Code', 'woocommerce' ),
+			'bank_name'      => __( 'Bank Name', 'woocommerce' ),
+			'iban'           => __( 'IBAN', 'woocommerce' ),
+			'bic'            => __( 'BIC', 'woocommerce' )
 		));
 
 		foreach ($fields as $key=>$value) :
@@ -243,8 +243,8 @@ class WC_BACS extends WC_Payment_Gateway {
 
 		// Return thankyou redirect
 		return array(
-			'result' 	=> 'success',
-			'redirect'	=> add_query_arg('key', $order->order_key, add_query_arg('order', $order->id, get_permalink(woocommerce_get_page_id('thanks'))))
+			'result'   => 'success',
+			'redirect' => add_query_arg('key', $order->order_key, add_query_arg('order', $order->id, get_permalink(woocommerce_get_page_id('thanks'))))
 		);
     }
 

@@ -70,9 +70,9 @@ class WooCommerce_Widget_Login extends WP_Widget {
 			do_action('woocommerce_login_widget_logged_in_before_links');
 
 			$links = apply_filters( 'woocommerce_login_widget_logged_in_links', array(
-				__( 'My account', 'woocommerce' ) 	=> get_permalink(woocommerce_get_page_id('myaccount')),
+				__( 'My account', 'woocommerce' )         => get_permalink(woocommerce_get_page_id('myaccount')),
 				__( 'Change my password', 'woocommerce' ) => get_permalink(woocommerce_get_page_id('change_password')),
-				__( 'Logout', 'woocommerce' )		=> wp_logout_url(home_url())
+				__( 'Logout', 'woocommerce' )             => wp_logout_url(home_url())
 			));
 
 			if (sizeof($links>0)) :

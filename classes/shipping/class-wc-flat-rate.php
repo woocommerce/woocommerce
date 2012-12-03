@@ -80,97 +80,97 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 
     	$this->form_fields = array(
 			'enabled' => array(
-							'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
-							'type' 			=> 'checkbox',
-							'label' 		=> __( 'Enable this shipping method', 'woocommerce' ),
-							'default' 		=> 'no',
+							'title'   => __( 'Enable/Disable', 'woocommerce' ),
+							'type'    => 'checkbox',
+							'label'   => __( 'Enable this shipping method', 'woocommerce' ),
+							'default' => 'no',
 						),
 			'title' => array(
-							'title' 		=> __( 'Method Title', 'woocommerce' ),
-							'type' 			=> 'text',
-							'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-							'default'		=> __( 'Flat Rate', 'woocommerce' ),
+							'title'       => __( 'Method Title', 'woocommerce' ),
+							'type'        => 'text',
+							'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
+							'default'     => __( 'Flat Rate', 'woocommerce' ),
 						),
 			'cost_per_order' => array(
-							'title' 		=> __( 'Cost per order', 'woocommerce' ),
-							'type' 			=> 'number',
+							'title' => __( 'Cost per order', 'woocommerce' ),
+							'type'  => 'number',
 							'custom_attributes' => array(
-								'step'	=> 'any',
-								'min'	=> '0'
+								'step' => 'any',
+								'min'  => '0'
 							),
-							'description'	=> __( 'Enter a cost per order, e.g. 5.00. Leave blank to disable.', 'woocommerce' ),
-							'default'		=> '',
+							'description' => __( 'Enter a cost per order, e.g. 5.00. Leave blank to disable.', 'woocommerce' ),
+							'default'     => '',
 						),
 			'availability' => array(
-							'title' 		=> __( 'Method availability', 'woocommerce' ),
-							'type' 			=> 'select',
-							'default' 		=> 'all',
-							'class'			=> 'availability',
-							'options'		=> array(
-								'all' 		=> __( 'All allowed countries', 'woocommerce' ),
-								'specific' 	=> __( 'Specific Countries', 'woocommerce' ),
+							'title'   => __( 'Method availability', 'woocommerce' ),
+							'type'    => 'select',
+							'default' => 'all',
+							'class'   => 'availability',
+							'options' => array(
+								'all'      => __( 'All allowed countries', 'woocommerce' ),
+								'specific' => __( 'Specific Countries', 'woocommerce' ),
 							),
 						),
 			'countries' => array(
-							'title' 		=> __( 'Specific Countries', 'woocommerce' ),
-							'type' 			=> 'multiselect',
-							'class'			=> 'chosen_select',
-							'css'			=> 'width: 450px;',
-							'default' 		=> '',
-							'options'		=> $woocommerce->countries->countries,
+							'title'   => __( 'Specific Countries', 'woocommerce' ),
+							'type'    => 'multiselect',
+							'class'   => 'chosen_select',
+							'css'     => 'width: 450px;',
+							'default' => '',
+							'options' => $woocommerce->countries->countries,
 						),
 			'type' => array(
-							'title' 		=> __( 'Calculation Type', 'woocommerce' ),
-							'type' 			=> 'select',
-							'description' 	=> '',
-							'default' 		=> 'order',
-							'options' 		=> array(
-								'order' 	=> __( 'Per Order - charge shipping for the entire order as a whole', 'woocommerce' ),
-								'item' 		=> __( 'Per Item - charge shipping for each item individually', 'woocommerce' ),
-								'class' 	=> __( 'Per Class - charge shipping for each shipping class in an order', 'woocommerce' ),
+							'title'       => __( 'Calculation Type', 'woocommerce' ),
+							'type'        => 'select',
+							'description' => '',
+							'default'     => 'order',
+							'options'     => array(
+								'order' => __( 'Per Order - charge shipping for the entire order as a whole', 'woocommerce' ),
+								'item'  => __( 'Per Item - charge shipping for each item individually', 'woocommerce' ),
+								'class' => __( 'Per Class - charge shipping for each shipping class in an order', 'woocommerce' ),
 							),
 						),
 			'tax_status' => array(
-							'title' 		=> __( 'Tax Status', 'woocommerce' ),
-							'type' 			=> 'select',
-							'description' 	=> '',
-							'default' 		=> 'taxable',
-							'options'		=> array(
-								'taxable' 	=> __( 'Taxable', 'woocommerce' ),
-								'none' 		=> __( 'None', 'woocommerce' ),
+							'title'       => __( 'Tax Status', 'woocommerce' ),
+							'type'        => 'select',
+							'description' => '',
+							'default'     => 'taxable',
+							'options'     => array(
+								'taxable' => __( 'Taxable', 'woocommerce' ),
+								'none'    => __( 'None', 'woocommerce' ),
 							),
 						),
 			'cost' => array(
-							'title' 		=> __( 'Default Cost', 'woocommerce' ),
-							'type' 			=> 'number',
+							'title' => __( 'Default Cost', 'woocommerce' ),
+							'type'  => 'number',
 							'custom_attributes' => array(
-								'step'	=> 'any',
-								'min'	=> '0'
+								'step' => 'any',
+								'min'  => '0'
 							),
-							'description'	=> __( 'Cost excluding tax. Enter an amount, e.g. 2.50.', 'woocommerce' ),
-							'default' 		=> '',
+							'description' => __( 'Cost excluding tax. Enter an amount, e.g. 2.50.', 'woocommerce' ),
+							'default'     => '',
 						),
 			'fee' => array(
-							'title' 		=> __( 'Default Handling Fee', 'woocommerce' ),
-							'type' 			=> 'text',
-							'description'	=> __( 'Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable.', 'woocommerce' ),
-							'default'		=> '',
+							'title'       => __( 'Default Handling Fee', 'woocommerce' ),
+							'type'        => 'text',
+							'description' => __( 'Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable.', 'woocommerce' ),
+							'default'     => '',
 						),
 			'minimum_fee' => array(
-							'title' 		=> __( 'Minimum Fee', 'woocommerce' ),
-							'type' 			=> 'number',
+							'title' => __( 'Minimum Fee', 'woocommerce' ),
+							'type'  => 'number',
 							'custom_attributes' => array(
-								'step'	=> 'any',
-								'min'	=> '0'
+								'step' => 'any',
+								'min'  => '0'
 							),
-							'description'	=> __( 'Enter a minimum fee amount. Fee\'s less than this will be increased. Leave blank to disable.', 'woocommerce' ),
-							'default'		=> '',
+							'description' => __( 'Enter a minimum fee amount. Fee\'s less than this will be increased. Leave blank to disable.', 'woocommerce' ),
+							'default'     => '',
 						),
 			'options' => array(
-							'title' 		=> __( 'Shipping Options', 'woocommerce' ),
-							'type' 			=> 'textarea',
-							'description'	=> __( 'Optional extra shipping options with additional costs (one per line). Example: <code>Option Name|Cost|Per-order (yes or no)</code>. Example: <code>Priority Mail|6.95|yes</code>. If per-order is set to no, it will use the "Calculation Type" setting.', 'woocommerce' ),
-							'default'		=> '',
+							'title'       => __( 'Shipping Options', 'woocommerce' ),
+							'type'        => 'textarea',
+							'description' => __( 'Optional extra shipping options with additional costs (one per line). Example: <code>Option Name|Cost|Per-order (yes or no)</code>. Example: <code>Priority Mail|6.95|yes</code>. If per-order is set to no, it will use the "Calculation Type" setting.', 'woocommerce' ),
+							'default'     => '',
 						),
 			);
 
@@ -196,9 +196,9 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 
     		if ( ! is_null( $shipping_total ) || $cost_per_order > 0 )
 	    		$rate = array(
-					'id' 	=> $this->id,
+					'id'    => $this->id,
 					'label' => $this->title,
-					'cost' 	=> $shipping_total + $cost_per_order,
+					'cost'  => $shipping_total + $cost_per_order,
 				);
 
 		} elseif ( $this->type == 'class' ) {
@@ -207,9 +207,9 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 
 			if ( ! is_null( $shipping_total ) || $cost_per_order > 0 )
 	    		$rate = array(
-					'id' 	=> $this->id,
+					'id'    => $this->id,
 					'label' => $this->title,
-					'cost' 	=> $shipping_total + $cost_per_order,
+					'cost'  => $shipping_total + $cost_per_order,
 				);
 
 		} elseif ( $this->type == 'item' ) {
@@ -224,10 +224,10 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 				$costs['order'] = $cost_per_order;
 
 				$rate = array(
-					'id' 		=> $this->id,
-					'label' 	=> $this->title,
-					'cost' 		=> $costs,
-					'calc_tax' 	=> 'per_item',
+					'id'       => $this->id,
+					'label'    => $this->title,
+					'cost'     => $costs,
+					'calc_tax' => 'per_item',
 				);
 
 			}

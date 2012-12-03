@@ -78,11 +78,11 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 					$subtext 		= ( ! empty( $_POST['woocommerce_frontend_css_subtext'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_subtext'] ) : '';
 
 					$colors = array(
-						'primary' 		=> $primary,
-						'secondary' 	=> $secondary,
-						'highlight' 	=> $highlight,
-						'content_bg' 	=> $content_bg,
-						'subtext' 		=> $subtext
+						'primary'    => $primary,
+						'secondary'  => $secondary,
+						'highlight'  => $highlight,
+						'content_bg' => $content_bg,
+						'subtext'    => $subtext
 					);
 
 					$old_colors = get_option( 'woocommerce_frontend_css_colors' );
@@ -818,14 +818,14 @@ function woocommerce_admin_fields( $options ) {
             // Single page selects
             case 'single_select_page' :
 
-            	$args = array( 'name'				=> $value['id'],
-            				   'id'					=> $value['id'],
-            				   'sort_column' 		=> 'menu_order',
-            				   'sort_order'			=> 'ASC',
-            				   'show_option_none' 	=> ' ',
-            				   'class'				=> $value['class'],
-            				   'echo' 				=> false,
-            				   'selected'			=> absint( woocommerce_settings_get_option( $value['id'] ) )
+            	$args = array( 'title'            => $value['id'],
+            				   'id'               => $value['id'],
+            				   'sort_column'      => 'menu_order',
+            				   'sort_order'       => 'ASC',
+            				   'show_option_none' => ' ',
+            				   'class'            => $value['class'],
+            				   'echo'             => false,
+            				   'selected'         => absint( woocommerce_settings_get_option( $value['id'] ) )
             				   );
 
             	if( isset( $value['args'] ) )

@@ -354,35 +354,35 @@ class WC_Email extends WC_Settings_API {
     function init_form_fields() {
     	$this->form_fields = array(
 			'enabled' => array(
-				'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
-				'type' 			=> 'checkbox',
-				'label' 		=> __( 'Enable this email notification', 'woocommerce' ),
-				'default' 		=> 'yes'
+				'title'   => __( 'Enable/Disable', 'woocommerce' ),
+				'type'    => 'checkbox',
+				'label'   => __( 'Enable this email notification', 'woocommerce' ),
+				'default' => 'yes'
 			),
 			'subject' => array(
-				'title' 		=> __( 'Email subject', 'woocommerce' ),
-				'type' 			=> 'text',
-				'description' 	=> sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject ),
-				'placeholder' 	=> '',
-				'default' 		=> ''
+				'title'       => __( 'Email subject', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject ),
+				'placeholder' => '',
+				'default'     => ''
 			),
 			'heading' => array(
-				'title' 		=> __( 'Email heading', 'woocommerce' ),
-				'type' 			=> 'text',
-				'description' 	=> sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading ),
-				'placeholder' 	=> '',
-				'default' 		=> ''
+				'title'       => __( 'Email heading', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading ),
+				'placeholder' => '',
+				'default'     => ''
 			),
 			'email_type' => array(
-				'title' 		=> __( 'Email type', 'woocommerce' ),
-				'type' 			=> 'select',
-				'description' 	=> __( 'Choose which format of email to send.', 'woocommerce' ),
-				'default' 		=> 'html',
-				'class'			=> 'email_type',
-				'options'		=> array(
-					'plain' 		=> __( 'Plain text', 'woocommerce' ),
-					'html' 			=> __( 'HTML', 'woocommerce' ),
-					'multipart' 	=> __( 'Multipart', 'woocommerce' ),
+				'title'       => __( 'Email type', 'woocommerce' ),
+				'type'        => 'select',
+				'description' => __( 'Choose which format of email to send.', 'woocommerce' ),
+				'default'     => 'html',
+				'class'       => 'email_type',
+				'options'     => array(
+					'plain'     => __( 'Plain text', 'woocommerce' ),
+					'html'      => __( 'HTML', 'woocommerce' ),
+					'multipart' => __( 'Multipart', 'woocommerce' ),
 				)
 			)
 		);
@@ -495,8 +495,8 @@ class WC_Email extends WC_Settings_API {
 			<div id="template">
 			<?php
 				$templates = array(
-					'template_html' 	=> __( 'HTML template', 'woocommerce' ),
-					'template_plain' 	=> __( 'Plain text template', 'woocommerce' )
+					'template_html'  => __( 'HTML template', 'woocommerce' ),
+					'template_plain' => __( 'Plain text template', 'woocommerce' )
 				);
 				foreach ( $templates as $template => $title ) :
 					if ( empty( $this->$template ) )

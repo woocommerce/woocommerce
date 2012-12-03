@@ -82,7 +82,7 @@ class WC_Email_New_Order extends WC_Email {
 	function get_content_html() {
 		ob_start();
 		woocommerce_get_template( $this->template_html, array(
-			'order' 		=> $this->object,
+			'order'         => $this->object,
 			'email_heading' => $this->get_heading()
 		) );
 		return ob_get_clean();
@@ -97,7 +97,7 @@ class WC_Email_New_Order extends WC_Email {
 	function get_content_plain() {
 		ob_start();
 		woocommerce_get_template( $this->template_plain, array(
-			'order' 		=> $this->object,
+			'order'         => $this->object,
 			'email_heading' => $this->get_heading()
 		) );
 		return ob_get_clean();
@@ -112,42 +112,42 @@ class WC_Email_New_Order extends WC_Email {
     function init_form_fields() {
     	$this->form_fields = array(
 			'enabled' => array(
-				'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
-				'type' 			=> 'checkbox',
-				'label' 		=> __( 'Enable this email notification', 'woocommerce' ),
-				'default' 		=> 'yes'
+				'title'   => __( 'Enable/Disable', 'woocommerce' ),
+				'type'    => 'checkbox',
+				'label'   => __( 'Enable this email notification', 'woocommerce' ),
+				'default' => 'yes'
 			),
 			'recipient' => array(
-				'title' 		=> __( 'Recipient(s)', 'woocommerce' ),
-				'type' 			=> 'text',
-				'description' 	=> sprintf( __( 'Enter recipients (comma separated) for this email. Defaults to <code>%s</code>.', 'woocommerce' ), esc_attr( get_option('admin_email') ) ),
-				'placeholder' 	=> '',
-				'default' 		=> ''
+				'title'       => __( 'Recipient(s)', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => sprintf( __( 'Enter recipients (comma separated) for this email. Defaults to <code>%s</code>.', 'woocommerce' ), esc_attr( get_option('admin_email') ) ),
+				'placeholder' => '',
+				'default'     => ''
 			),
 			'subject' => array(
-				'title' 		=> __( 'Subject', 'woocommerce' ),
-				'type' 			=> 'text',
-				'description' 	=> sprintf( __( 'This controls the email subject line. Leave blank to use the default subject: <code>%s</code>.', 'woocommerce' ), $this->subject ),
-				'placeholder' 	=> '',
-				'default' 		=> ''
+				'title'       => __( 'Subject', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => sprintf( __( 'This controls the email subject line. Leave blank to use the default subject: <code>%s</code>.', 'woocommerce' ), $this->subject ),
+				'placeholder' => '',
+				'default'     => ''
 			),
 			'heading' => array(
-				'title' 		=> __( 'Email Heading', 'woocommerce' ),
-				'type' 			=> 'text',
-				'description' 	=> sprintf( __( 'This controls the main heading contained within the email notification. Leave blank to use the default heading: <code>%s</code>.', 'woocommerce' ), $this->heading ),
-				'placeholder' 	=> '',
-				'default' 		=> ''
+				'title'       => __( 'Email Heading', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => sprintf( __( 'This controls the main heading contained within the email notification. Leave blank to use the default heading: <code>%s</code>.', 'woocommerce' ), $this->heading ),
+				'placeholder' => '',
+				'default'     => ''
 			),
 			'email_type' => array(
-				'title' 		=> __( 'Email type', 'woocommerce' ),
-				'type' 			=> 'select',
-				'description' 	=> __( 'Choose which format of email to send.', 'woocommerce' ),
-				'default' 		=> 'html',
-				'class'			=> 'email_type',
-				'options'		=> array(
-					'plain'		 	=> __( 'Plain text', 'woocommerce' ),
-					'html' 			=> __( 'HTML', 'woocommerce' ),
-					'multipart' 	=> __( 'Multipart', 'woocommerce' ),
+				'title'         => __( 'Email type', 'woocommerce' ),
+				'type'          => 'select',
+				'description'   => __( 'Choose which format of email to send.', 'woocommerce' ),
+				'default'       => 'html',
+				'class'         => 'email_type',
+				'options'       => array(
+					'plain'     => __( 'Plain text', 'woocommerce' ),
+					'html'      => __( 'HTML', 'woocommerce' ),
+					'multipart' => __( 'Multipart', 'woocommerce' ),
 				)
 			)
 		);

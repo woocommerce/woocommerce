@@ -131,11 +131,11 @@ class WC_Cart {
 
 						// Put session data into array. Run through filter so other plugins can load their own session data
 						$this->cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', array(
-							'product_id'	=> $values['product_id'],
-							'variation_id'	=> $values['variation_id'],
-							'variation' 	=> $values['variation'],
-							'quantity' 		=> $values['quantity'],
-							'data'			=> $_product
+							'product_id'   => $values['product_id'],
+							'variation_id' => $values['variation_id'],
+							'variation'    => $values['variation'],
+							'quantity'     => $values['quantity'],
+							'data'         => $_product
 						), $values, $key );
 
 					}
@@ -810,11 +810,11 @@ class WC_Cart {
 
 				// Add item after merging with $cart_item_data - hook to allow plugins to modify cart item
 				$this->cart_contents[$cart_item_key] = apply_filters( 'woocommerce_add_cart_item', array_merge( $cart_item_data, array(
-					'product_id'	=> $product_id,
-					'variation_id'	=> $variation_id,
-					'variation' 	=> $variation,
-					'quantity' 		=> $quantity,
-					'data'			=> $product_data
+					'product_id'   => $product_id,
+					'variation_id' => $variation_id,
+					'variation'    => $variation,
+					'quantity'     => $quantity,
+					'data'         => $product_data
 				) ), $cart_item_key );
 
 			}

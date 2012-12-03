@@ -82,9 +82,9 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 		ob_start();
 		woocommerce_get_template( $this->template_html, array(
 			'email_heading' => $this->get_heading(),
-			'user_login' 	=> $this->user_login,
-			'reset_key'		=> $this->reset_key,
-			'blogname'		=> $this->get_blogname()
+			'user_login'    => $this->user_login,
+			'reset_key'     => $this->reset_key,
+			'blogname'      => $this->get_blogname()
 		) );
 		return ob_get_clean();
 	}
@@ -99,9 +99,9 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 		ob_start();
 		woocommerce_get_template( $this->template_plain, array(
 			'email_heading' => $this->get_heading(),
-			'user_login' 	=> $this->user_login,
-			'reset_key'		=> $this->reset_key,
-			'blogname'		=> $this->get_blogname()
+			'user_login'    => $this->user_login,
+			'reset_key'     => $this->reset_key,
+			'blogname'      => $this->get_blogname()
 		) );
 		return ob_get_clean();
 	}

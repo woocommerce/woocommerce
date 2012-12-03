@@ -75,9 +75,9 @@ class WC_Email_Customer_New_Account extends WC_Email {
 		ob_start();
 		woocommerce_get_template( $this->template_html, array(
 			'email_heading' => $this->get_heading(),
-			'user_login' 	=> $this->user_login,
-			'user_pass'		=> $this->user_pass,
-			'blogname'		=> $this->get_blogname()
+			'user_login'    => $this->user_login,
+			'user_pass'     => $this->user_pass,
+			'blogname'      => $this->get_blogname()
 		) );
 		return ob_get_clean();
 	}
@@ -92,9 +92,9 @@ class WC_Email_Customer_New_Account extends WC_Email {
 		ob_start();
 		woocommerce_get_template( $this->template_plain, array(
 			'email_heading' => $this->get_heading(),
-			'user_login' 	=> $this->user_login,
-			'user_pass'		=> $this->user_pass,
-			'blogname'		=> $this->get_blogname()
+			'user_login'    => $this->user_login,
+			'user_pass'     => $this->user_pass,
+			'blogname'      => $this->get_blogname()
 		) );
 		return ob_get_clean();
 	}

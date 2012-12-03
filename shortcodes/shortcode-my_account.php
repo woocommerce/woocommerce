@@ -88,8 +88,8 @@ function woocommerce_my_account( $atts ) {
 		get_currentuserinfo();
 
 		woocommerce_get_template( 'myaccount/my-account.php', array(
-			'current_user' 	=> $current_user,
-			'recent_orders' 	=> $recent_orders
+			'current_user'  => $current_user,
+			'recent_orders' => $recent_orders
 		) );
 
 	endif;
@@ -118,8 +118,8 @@ function woocommerce_edit_address() {
 	$address = $woocommerce->countries->get_address_fields( get_user_meta( get_current_user_id(), $load_address . '_country', true ), $load_address . '_' );
 
 	woocommerce_get_template( 'myaccount/form-edit-address.php', array(
-		'load_address' 	=> $load_address,
-		'address'		=> $address
+		'load_address' => $load_address,
+		'address'      => $address
 	) );
 }
 

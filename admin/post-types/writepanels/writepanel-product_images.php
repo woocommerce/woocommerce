@@ -82,9 +82,9 @@ function woocommerce_product_images_box() {
 		'multipart'           => true,
 		'urlstream_upload'    => true,
 		'multipart_params'    => array(
-			'_ajax_nonce' 		=> wp_create_nonce( 'product-images-box-upload' ),
-			'action'      		=> 'woocommerce_product_images_box_upload',
-			'post_id'	  		=> $post->ID
+			'_ajax_nonce' => wp_create_nonce( 'product-images-box-upload' ),
+			'action'      => 'woocommerce_product_images_box_upload',
+			'post_id'     => $post->ID
 		)
 	);
 

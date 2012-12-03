@@ -449,16 +449,16 @@ function woocommerce_layered_nav_query( $filtered_posts ) {
 
 					$posts = get_posts(
 						array(
-							'post_type' 	=> 'product',
-							'numberposts' 	=> -1,
-							'post_status' 	=> 'publish',
-							'fields' 		=> 'ids',
+							'post_type'     => 'product',
+							'numberposts'   => -1,
+							'post_status'   => 'publish',
+							'fields'        => 'ids',
 							'no_found_rows' => true,
-							'tax_query' => array(
+							'tax_query'     => array(
 								array(
-									'taxonomy' 	=> $attribute,
-									'terms' 	=> $value,
-									'field' 	=> 'id'
+									'taxonomy' => $attribute,
+									'terms'    => $value,
+									'field'    => 'id'
 								)
 							)
 						)

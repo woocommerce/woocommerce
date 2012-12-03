@@ -44,9 +44,9 @@ function woocommerce_attributes() {
 			$wpdb->insert(
 				$wpdb->prefix . "woocommerce_attribute_taxonomies",
 				array(
-					'attribute_name' 	=> $attribute_name,
-					'attribute_label' 	=> $attribute_label,
-					'attribute_type' 	=> $attribute_type,
+					'attribute_name'    => $attribute_name,
+					'attribute_label'   => $attribute_label,
+					'attribute_type'    => $attribute_type,
 					'attribute_orderby' => $attribute_orderby
 				)
 			);
@@ -82,13 +82,13 @@ function woocommerce_attributes() {
 			$wpdb->update(
 				$wpdb->prefix . "woocommerce_attribute_taxonomies",
 				array(
-					'attribute_name' 	=> $attribute_name,
-					'attribute_label' 	=> $attribute_label,
-					'attribute_type' 	=> $attribute_type,
+					'attribute_name'    => $attribute_name,
+					'attribute_label'   => $attribute_label,
+					'attribute_type'    => $attribute_type,
 					'attribute_orderby' => $attribute_orderby
 				),
 				array(
-					'attribute_id' 		=> $edit
+					'attribute_id' => $edit
 				)
 			);
 
@@ -98,10 +98,10 @@ function woocommerce_attributes() {
 				$wpdb->update(
 					$wpdb->term_taxonomy,
 					array(
-						'taxonomy' 	=> $woocommerce->attribute_taxonomy_name( $attribute_name )
+						'taxonomy' => $woocommerce->attribute_taxonomy_name( $attribute_name )
 					),
 					array(
-						'taxonomy' 	=> $woocommerce->attribute_taxonomy_name( $old_attribute_name )
+						'taxonomy' => $woocommerce->attribute_taxonomy_name( $old_attribute_name )
 					)
 				);
 
@@ -109,10 +109,10 @@ function woocommerce_attributes() {
 				$wpdb->update(
 					$wpdb->prefix . "woocommerce_termmeta",
 					array(
-						'meta_key' 	=> 'order_pa_' . sanitize_title( $attribute_name )
+						'meta_key' => 'order_pa_' . sanitize_title( $attribute_name )
 					),
 					array(
-						'meta_key' 	=> 'order_pa_' . sanitize_title( $old_attribute_name )
+						'meta_key' => 'order_pa_' . sanitize_title( $old_attribute_name )
 					)
 				);
 
@@ -130,10 +130,10 @@ function woocommerce_attributes() {
 				$wpdb->update(
 					$wpdb->postmeta,
 					array(
-						'meta_key' 	=> 'attribute_pa_' . sanitize_title( $attribute_name )
+						'meta_key' => 'attribute_pa_' . sanitize_title( $attribute_name )
 					),
 					array(
-						'meta_key' 	=> 'attribute_pa_' . sanitize_title( $old_attribute_name )
+						'meta_key' => 'attribute_pa_' . sanitize_title( $old_attribute_name )
 					)
 				);
 			}

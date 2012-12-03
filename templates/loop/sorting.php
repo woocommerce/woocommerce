@@ -18,11 +18,11 @@ if ( ! woocommerce_products_will_display() )
 	<select name="sort" class="orderby">
 		<?php
 			$catalog_orderby = apply_filters( 'woocommerce_catalog_orderby', array(
-				'menu_order' 	=> __( 'Default sorting', 'woocommerce' ),
-				'title' 		=> __( 'Sort alphabetically', 'woocommerce' ),
-				'date' 			=> __( 'Sort by most recent', 'woocommerce' ),
-				'price' 		=> __( 'Sort by price - low to high', 'woocommerce' ),
-				'high_price' 	=> __( 'Sort by price - high to low', 'woocommerce' )
+				'menu_order' => __( 'Default sorting', 'woocommerce' ),
+				'title'      => __( 'Sort alphabetically', 'woocommerce' ),
+				'date'       => __( 'Sort by most recent', 'woocommerce' ),
+				'price'      => __( 'Sort by price - low to high', 'woocommerce' ),
+				'high_price' => __( 'Sort by price - high to low', 'woocommerce' )
 			) );
 
 			foreach ( $catalog_orderby as $id => $name )

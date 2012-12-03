@@ -79,9 +79,9 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 		}
 
 		$rate = array(
-			'id' 		=> $this->id,
-			'label' 	=> $this->title,
-			'cost' 		=> $shipping_total
+			'id'    => $this->id,
+			'label' => $this->title,
+			'cost'  => $shipping_total
 		);
 
 		$this->add_rate($rate);
@@ -97,61 +97,61 @@ class WC_Local_Delivery extends WC_Shipping_Method {
     	global $woocommerce;
     	$this->form_fields = array(
 			'enabled' => array(
-				'title' 		=> __( 'Enable', 'woocommerce' ),
-				'type' 			=> 'checkbox',
-				'label' 		=> __( 'Enable local delivery', 'woocommerce' ),
-				'default' 		=> 'no'
+				'title'   => __( 'Enable', 'woocommerce' ),
+				'type'    => 'checkbox',
+				'label'   => __( 'Enable local delivery', 'woocommerce' ),
+				'default' => 'no'
 			),
 			'title' => array(
-				'title' 		=> __( 'Title', 'woocommerce' ),
-				'type' 			=> 'text',
-				'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-				'default'		=> __( 'Local Delivery', 'woocommerce' )
+				'title'       => __( 'Title', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
+				'default'     => __( 'Local Delivery', 'woocommerce' )
 			),
 			'type' => array(
-				'title' 		=> __( 'Fee Type', 'woocommerce' ),
-				'type' 			=> 'select',
-				'description' 	=> __( 'How to calculate delivery charges', 'woocommerce' ),
-				'default' 		=> 'fixed',
-				'options' 		=> array(
-					'fixed' 	=> __( 'Fixed amount', 'woocommerce' ),
-					'percent'	=> __( 'Percentage of cart total', 'woocommerce' ),
-					'product'	=> __( 'Fixed amount per product', 'woocommerce' ),
+				'title'       => __( 'Fee Type', 'woocommerce' ),
+				'type'        => 'select',
+				'description' => __( 'How to calculate delivery charges', 'woocommerce' ),
+				'default'     => 'fixed',
+				'options'     => array(
+					'fixed'   => __( 'Fixed amount', 'woocommerce' ),
+					'percent' => __( 'Percentage of cart total', 'woocommerce' ),
+					'product' => __( 'Fixed amount per product', 'woocommerce' ),
 				),
 			),
 			'fee' => array(
-				'title' 		=> __( 'Delivery Fee', 'woocommerce' ),
-				'type' 			=> 'number',
+				'title' => __( 'Delivery Fee', 'woocommerce' ),
+				'type'  => 'number',
 				'custom_attributes' => array(
-					'step'	=> 'any',
-					'min'	=> '0'
+					'step' => 'any',
+					'min'  => '0'
 				),
-				'description' 	=> __( 'What fee do you want to charge for local delivery, disregarded if you choose free. Leave blank to disable.', 'woocommerce' ),
-				'default'		=> ''
+				'description' => __( 'What fee do you want to charge for local delivery, disregarded if you choose free. Leave blank to disable.', 'woocommerce' ),
+				'default'     => ''
 			),
 			'codes' => array(
-				'title' 		=> __( 'Zip/Post Codes', 'woocommerce' ),
-				'type' 			=> 'textarea',
-				'description' 	=> __( 'What zip/post codes would you like to offer delivery to? Separate codes with a comma. Accepts wildcards, e.g. P* will match a postcode of PE30.', 'woocommerce' ),
-				'default'		=> ''
+				'title'       => __( 'Zip/Post Codes', 'woocommerce' ),
+				'type'        => 'textarea',
+				'description' => __( 'What zip/post codes would you like to offer delivery to? Separate codes with a comma. Accepts wildcards, e.g. P* will match a postcode of PE30.', 'woocommerce' ),
+				'default'     => ''
 			),
 			'availability' => array(
-							'title' 		=> __( 'Method availability', 'woocommerce' ),
-							'type' 			=> 'select',
-							'default' 		=> 'all',
-							'class'			=> 'availability',
-							'options'		=> array(
-								'all' 		=> __( 'All allowed countries', 'woocommerce' ),
-								'specific' 	=> __( 'Specific Countries', 'woocommerce' )
+							'title'   => __( 'Method availability', 'woocommerce' ),
+							'type'    => 'select',
+							'default' => 'all',
+							'class'   => 'availability',
+							'options' => array(
+								'all'      => __( 'All allowed countries', 'woocommerce' ),
+								'specific' => __( 'Specific Countries', 'woocommerce' )
 							)
 						),
 			'countries' => array(
-							'title' 		=> __( 'Specific Countries', 'woocommerce' ),
-							'type' 			=> 'multiselect',
-							'class'			=> 'chosen_select',
-							'css'			=> 'width: 450px;',
-							'default' 		=> '',
-							'options'		=> $woocommerce->countries->countries
+							'title'   => __( 'Specific Countries', 'woocommerce' ),
+							'type'    => 'multiselect',
+							'class'   => 'chosen_select',
+							'css'     => 'width: 450px;',
+							'default' => '',
+							'options' => $woocommerce->countries->countries
 						)
 		);
 	}

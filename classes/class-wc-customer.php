@@ -35,20 +35,20 @@ class WC_Customer {
         	}
 
 			$this->_data = array(
-				'country' 				=> esc_html( $country ),
-				'state' 				=> '',
-				'postcode' 				=> '',
-				'city'					=> '',
-				'address' 				=> '',
-				'address_2' 			=> '',
-				'shipping_country' 		=> esc_html( $country ),
-				'shipping_state' 		=> '',
-				'shipping_postcode' 	=> '',
-				'shipping_city'			=> '',
-				'shipping_address'		=> '',
-				'shipping_address_2'	=> '',
-				'is_vat_exempt' 		=> false,
-				'calculated_shipping'	=> false
+				'country'             => esc_html( $country ),
+				'state'               => '',
+				'postcode'            => '',
+				'city'                => '',
+				'address'             => '',
+				'address_2'           => '',
+				'shipping_country'    => esc_html( $country ),
+				'shipping_state'      => '',
+				'shipping_postcode'   => '',
+				'shipping_city'       => '',
+				'shipping_address'    => '',
+				'shipping_address_2'  => '',
+				'is_vat_exempt'       => false,
+				'calculated_shipping' => false
 			);
 
 		} else {

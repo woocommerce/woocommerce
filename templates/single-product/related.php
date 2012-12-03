@@ -16,12 +16,12 @@ $related = $product->get_related();
 if ( sizeof( $related ) == 0 ) return;
 
 $args = apply_filters('woocommerce_related_products_args', array(
-	'post_type'				=> 'product',
-	'ignore_sticky_posts'	=> 1,
-	'no_found_rows' 		=> 1,
-	'posts_per_page' 		=> $posts_per_page,
-	'orderby' 				=> $orderby,
-	'post__in' 				=> $related
+	'post_type'           => 'product',
+	'ignore_sticky_posts' => 1,
+	'no_found_rows'       => 1,
+	'posts_per_page'      => $posts_per_page,
+	'orderby'             => $orderby,
+	'post__in'            => $related
 ) );
 
 $products = new WP_Query( $args );

@@ -59,14 +59,14 @@ function woocommerce_order_downloads_meta_box() {
 						echo '<option value=""></option>';
 
 						$args = array(
-							'post_type' 		=> array( 'product', 'product_variation' ),
-							'posts_per_page' 	=> -1,
-							'post_status'		=> 'publish',
-							'order'				=> 'ASC',
-							'orderby'			=> 'parent title',
-							'meta_query'		=> array(
+							'post_type'      => array( 'product', 'product_variation' ),
+							'posts_per_page' => -1,
+							'post_status'    => 'publish',
+							'order'          => 'ASC',
+							'orderby'        => 'parent title',
+							'meta_query'     => array(
 								array(
-									'key' 	=> '_downloadable',
+									'key'   => '_downloadable',
 									'value' => 'yes'
 								)
 							)
@@ -219,9 +219,9 @@ function woocommerce_order_downloads_save( $post_id, $post ) {
 		for ( $i = 0; $i < $product_ids_count; $i ++ ) {
 
             $data = array(
-				'user_id'				=> absint( $customer_user ),
-				'user_email' 			=> woocommerce_clean( $customer_email ),
-				'downloads_remaining'	=> woocommerce_clean( $downloads_remaining[$i] )
+				'user_id'             => absint( $customer_user ),
+				'user_email'          => woocommerce_clean( $customer_email ),
+				'downloads_remaining' => woocommerce_clean( $downloads_remaining[$i] )
             );
 
             $format = array( '%d', '%s', '%s' );
@@ -236,9 +236,9 @@ function woocommerce_order_downloads_save( $post_id, $post ) {
             $wpdb->update( $wpdb->prefix . "woocommerce_downloadable_product_permissions",
 			    $data,
                 array(
-					'order_id' 		=> $post_id,
-					'product_id' 	=> absint( $product_ids[$i] ),
-					'download_id'	=> woocommerce_clean( $download_ids[$i] )
+					'order_id'    => $post_id,
+					'product_id'  => absint( $product_ids[$i] ),
+					'download_id' => woocommerce_clean( $download_ids[$i] )
 					),
 				$format, array( '%d', '%d', '%s' )
 			);

@@ -129,41 +129,41 @@ function woocommerce_order_data_meta_box($post) {
 						$billing_data = apply_filters('woocommerce_admin_billing_fields', array(
 							'first_name' => array(
 								'label' => __( 'First Name', 'woocommerce' ),
-								'show'	=> false
+								'show'  => false
 								),
 							'last_name' => array(
 								'label' => __( 'Last Name', 'woocommerce' ),
-								'show'	=> false
+								'show'  => false
 								),
 							'company' => array(
 								'label' => __( 'Company', 'woocommerce' ),
-								'show'	=> false
+								'show'  => false
 								),
 							'address_1' => array(
 								'label' => __( 'Address 1', 'woocommerce' ),
-								'show'	=> false
+								'show'  => false
 								),
 							'address_2' => array(
 								'label' => __( 'Address 2', 'woocommerce' ),
-								'show'	=> false
+								'show'  => false
 								),
 							'city' => array(
 								'label' => __( 'City', 'woocommerce' ),
-								'show'	=> false
+								'show'  => false
 								),
 							'postcode' => array(
 								'label' => __( 'Postcode', 'woocommerce' ),
-								'show'	=> false
+								'show'  => false
 								),
 							'country' => array(
 								'label' => __( 'Country', 'woocommerce' ),
-								'show'	=> false,
-								'type'	=> 'select',
+								'show'  => false,
+								'type'  => 'select',
 								'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + $woocommerce->countries->get_allowed_countries()
 								),
 							'state' => array(
 								'label' => __( 'State/County', 'woocommerce' ),
-								'show'	=> false
+								'show'  => false
 								),
 							'email' => array(
 								'label' => __( 'Email', 'woocommerce' ),
@@ -219,41 +219,41 @@ function woocommerce_order_data_meta_box($post) {
 						$shipping_data = apply_filters('woocommerce_admin_shipping_fields', array(
 							'first_name' => array(
 								'label' => __( 'First Name', 'woocommerce' ),
-								'show'	=> false
+								'show'  => false
 								),
 							'last_name' => array(
 								'label' => __( 'Last Name', 'woocommerce' ),
-								'show'	=> false
+								'show'  => false
 								),
 							'company' => array(
 								'label' => __( 'Company', 'woocommerce' ),
-								'show'	=> false
+								'show'  => false
 								),
 							'address_1' => array(
 								'label' => __( 'Address 1', 'woocommerce' ),
-								'show'	=> false
+								'show'  => false
 								),
 							'address_2' => array(
 								'label' => __( 'Address 2', 'woocommerce' ),
-								'show'	=> false
+								'show'  => false
 								),
 							'city' => array(
 								'label' => __( 'City', 'woocommerce' ),
-								'show'	=> false
+								'show'  => false
 								),
 							'postcode' => array(
 								'label' => __( 'Postcode', 'woocommerce' ),
-								'show'	=> false
+								'show'  => false
 								),
 							'country' => array(
-								'label' => __( 'Country', 'woocommerce' ),
-								'show'	=> false,
-								'type'	=> 'select',
+								'label'   => __( 'Country', 'woocommerce' ),
+								'show'    => false,
+								'type'    => 'select',
 								'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + $woocommerce->countries->get_allowed_countries()
 								),
 							'state' => array(
 								'label' => __( 'State/County', 'woocommerce' ),
-								'show'	=> false
+								'show'  => false
 								),
 							) );
 

@@ -47,11 +47,11 @@ function woocommerce_product_category( $atts ){
   	if ( empty( $atts ) ) return;
 
 	extract( shortcode_atts( array(
-		'per_page' 		=> '12',
-		'columns' 		=> '4',
-	  	'orderby'   	=> 'title',
-	  	'order'     	=> 'asc',
-	  	'category'		=> ''
+		'per_page' => '12',
+		'columns'  => '4',
+	  	'orderby'  => 'title',
+	  	'order'    => 'asc',
+	  	'category' => ''
 		), $atts ) );
 
 	if ( ! $category ) return;
@@ -59,25 +59,25 @@ function woocommerce_product_category( $atts ){
 	$ordering_args = $woocommerce->query->get_catalog_ordering_args( $orderby, $order );
 
   	$args = array(
-		'post_type'				=> 'product',
-		'post_status' 			=> 'publish',
-		'ignore_sticky_posts'	=> 1,
-		'orderby' 				=> $ordering_args['orderby'],
-		'order' 				=> $ordering_args['order'],
-		'posts_per_page' 		=> $per_page,
-		'meta_query' 			=> array(
+		'post_type'           => 'product',
+		'post_status'         => 'publish',
+		'ignore_sticky_posts' => 1,
+		'orderby'             => $ordering_args['orderby'],
+		'order'               => $ordering_args['order'],
+		'posts_per_page'      => $per_page,
+		'meta_query'          => array(
 			array(
-				'key' 			=> '_visibility',
-				'value' 		=> array('catalog', 'visible'),
-				'compare' 		=> 'IN'
+				'key'     => '_visibility',
+				'value'   => array('catalog', 'visible'),
+				'compare' => 'IN'
 			)
 		),
-		'tax_query' 			=> array(
+		'tax_query' => array(
 	    	array(
-		    	'taxonomy' 		=> 'product_cat',
-				'terms' 		=> array( esc_attr($category) ),
-				'field' 		=> 'slug',
-				'operator' 		=> 'IN'
+		    	'taxonomy' => 'product_cat',
+				'terms'    => array( esc_attr($category) ),
+				'field'    => 'slug',
+				'operator' => 'IN'
 			)
 	    )
 	);
@@ -190,23 +190,23 @@ function woocommerce_recent_products( $atts ) {
 	global $woocommerce_loop;
 
 	extract(shortcode_atts(array(
-		'per_page' 	=> '12',
-		'columns' 	=> '4',
-		'orderby' => 'date',
-		'order' => 'desc'
+		'per_page' => '12',
+		'columns'  => '4',
+		'orderby'  => 'date',
+		'order'    => 'desc'
 	), $atts));
 
 	$args = array(
-		'post_type'	=> 'product',
-		'post_status' => 'publish',
-		'ignore_sticky_posts'	=> 1,
-		'posts_per_page' => $per_page,
-		'orderby' => $orderby,
-		'order' => $order,
-		'meta_query' => array(
+		'post_type'           => 'product',
+		'post_status'         => 'publish',
+		'ignore_sticky_posts' => 1,
+		'posts_per_page'      => $per_page,
+		'orderby'             => $orderby,
+		'order'               => $order,
+		'meta_query'          => array(
 			array(
-				'key' => '_visibility',
-				'value' => array('catalog', 'visible'),
+				'key'     => '_visibility',
+				'value'   => array('catalog', 'visible'),
 				'compare' => 'IN'
 			)
 		)
@@ -251,23 +251,23 @@ function woocommerce_products( $atts ) {
   	if (empty($atts)) return;
 
 	extract(shortcode_atts(array(
-		'columns' 	=> '4',
-	  	'orderby'   => 'title',
-	  	'order'     => 'asc'
+		'columns' => '4',
+	  	'orderby' => 'title',
+	  	'order'   => 'asc'
 		), $atts));
 
   	$args = array(
-		'post_type'	=> 'product',
-		'post_status' => 'publish',
-		'ignore_sticky_posts'	=> 1,
-		'orderby' => $orderby,
-		'order' => $order,
-		'posts_per_page' => -1,
-		'meta_query' => array(
+		'post_type'           => 'product',
+		'post_status'         => 'publish',
+		'ignore_sticky_posts' => 1,
+		'orderby'             => $orderby,
+		'order'               => $order,
+		'posts_per_page'      => -1,
+		'meta_query'          => array(
 			array(
-				'key' 		=> '_visibility',
-				'value' 	=> array('catalog', 'visible'),
-				'compare' 	=> 'IN'
+				'key'     => '_visibility',
+				'value'   => array('catalog', 'visible'),
+				'compare' => 'IN'
 			)
 		)
 	);
@@ -276,9 +276,9 @@ function woocommerce_products( $atts ) {
 		$skus = explode(',', $atts['skus']);
 	  	$skus = array_map('trim', $skus);
     	$args['meta_query'][] = array(
-      		'key' 		=> '_sku',
-      		'value' 	=> $skus,
-      		'compare' 	=> 'IN'
+      		'key'     => '_sku',
+      		'value'   => $skus,
+      		'compare' => 'IN'
     	);
   	}
 
@@ -502,18 +502,18 @@ function woocommerce_sale_products( $atts ){
 		$meta_query = array();
 
 	    $meta_query[] = array(
-	    	'key' => '_sale_price',
-	        'value' 	=> 0,
-			'compare' 	=> '>',
-			'type'		=> 'NUMERIC'
+	    	'key'     => '_sale_price',
+	        'value'   => 0,
+			'compare' => '>',
+			'type'    => 'NUMERIC'
 	    );
 
 		$on_sale = get_posts(array(
-			'post_type' 		=> array('product', 'product_variation'),
-			'posts_per_page' 	=> -1,
-			'post_status' 		=> 'publish',
-			'meta_query' 		=> $meta_query,
-			'fields' 			=> 'id=>parent'
+			'post_type'      => array('product', 'product_variation'),
+			'posts_per_page' => -1,
+			'post_status'    => 'publish',
+			'meta_query'     => $meta_query,
+			'fields'         => 'id=>parent'
 		));
 
 		$product_ids 	= array_keys( $on_sale );
@@ -536,16 +536,16 @@ function woocommerce_sale_products( $atts ){
     $meta_query[] = $woocommerce->query->stock_status_meta_query();
 
 	$args = array(
-		'posts_per_page'=> $per_page,
-		'orderby' 		=> $orderby,
-        'order' 		=> $order,
-		'no_found_rows' => 1,
-		'post_status' 	=> 'publish',
-		'post_type' 	=> 'product',
-		'orderby' 		=> 'date',
-		'order' 		=> 'ASC',
-		'meta_query' 	=> $meta_query,
-		'post__in'		=> $product_ids_on_sale
+		'posts_per_page' => $per_page,
+		'orderby'        => $orderby,
+        'order'          => $order,
+		'no_found_rows'  => 1,
+		'post_status'    => 'publish',
+		'post_type'      => 'product',
+		'orderby'        => 'date',
+		'order'          => 'ASC',
+		'meta_query'     => $meta_query,
+		'post__in'       => $product_ids_on_sale
 	);
 
   	ob_start();
@@ -703,27 +703,27 @@ function woocommerce_featured_products( $atts ) {
 	global $woocommerce_loop;
 
 	extract(shortcode_atts(array(
-		'per_page' 	=> '12',
-		'columns' 	=> '4',
-		'orderby' => 'date',
-		'order' => 'desc'
+		'per_page' => '12',
+		'columns'  => '4',
+		'orderby'  => 'date',
+		'order'    => 'desc'
 	), $atts));
 
 	$args = array(
-		'post_type'	=> 'product',
-		'post_status' => 'publish',
-		'ignore_sticky_posts'	=> 1,
-		'posts_per_page' => $per_page,
-		'orderby' => $orderby,
-		'order' => $order,
-		'meta_query' => array(
+		'post_type'           => 'product',
+		'post_status'         => 'publish',
+		'ignore_sticky_posts' => 1,
+		'posts_per_page'      => $per_page,
+		'orderby'             => $orderby,
+		'order'               => $order,
+		'meta_query'          => array(
 			array(
-				'key' => '_visibility',
-				'value' => array('catalog', 'visible'),
+				'key'     => '_visibility',
+				'value'   => array('catalog', 'visible'),
 				'compare' => 'IN'
 			),
 			array(
-				'key' => '_featured',
+				'key'   => '_featured',
 				'value' => 'yes'
 			)
 		)
@@ -768,17 +768,17 @@ function woocommerce_product_page_shortcode( $atts ) {
 	if (!$atts['id'] && !$atts['sku']) return;
 
   	$args = array(
-    	'posts_per_page' 	=> 1,
-    	'post_type'	=> 'product',
-    	'post_status' => 'publish',
-    	'ignore_sticky_posts'	=> 1,
-    	'no_found_rows' => 1
+    	'posts_per_page'      => 1,
+    	'post_type'           => 'product',
+    	'post_status'         => 'publish',
+    	'ignore_sticky_posts' => 1,
+    	'no_found_rows'       => 1
   	);
 
   	if(isset($atts['sku'])){
     	$args['meta_query'][] = array(
-      		'key' => '_sku',
-      		'value' => $atts['sku'],
+      		'key'     => '_sku',
+      		'value'   => $atts['sku'],
       		'compare' => '='
     	);
   	}

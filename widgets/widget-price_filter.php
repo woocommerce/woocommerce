@@ -63,10 +63,10 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		wp_enqueue_script( 'wc-price-slider' );
 
 		wp_localize_script( 'wc-price-slider', 'woocommerce_price_slider_params', array(
-			'currency_symbol' 	=> get_woocommerce_currency_symbol(),
-			'currency_pos'      => get_option( 'woocommerce_currency_pos' ),
-			'min_price'			=> isset( $woocommerce->session->min_price ) ? $woocommerce->session->min_price : '',
-			'max_price'			=> isset( $woocommerce->session->max_price ) ? $woocommerce->session->max_price : ''
+			'currency_symbol' => get_woocommerce_currency_symbol(),
+			'currency_pos'    => get_option( 'woocommerce_currency_pos' ),
+			'min_price'       => isset( $woocommerce->session->min_price ) ? $woocommerce->session->min_price : '',
+			'max_price'       => isset( $woocommerce->session->max_price ) ? $woocommerce->session->max_price : ''
 		) );
 
 		$title = $instance['title'];

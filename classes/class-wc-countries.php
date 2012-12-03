@@ -804,7 +804,7 @@ class WC_Countries {
 				),
 				'AT' => array(
 					'postcode_before_city' => true,
-					'state'		=> array(
+					'state' => array(
 						'required' => false
 					)
 				),
@@ -820,208 +820,208 @@ class WC_Countries {
 					),
 				),
 				'CA' => array(
-					'state'	=> array(
-						'label'			=> __( 'Province', 'woocommerce' ),
-						'placeholder'	=> __( 'Province', 'woocommerce' )
+					'state' => array(
+						'label'       => __( 'Province', 'woocommerce' ),
+						'placeholder' => __( 'Province', 'woocommerce' )
 					)
 				),
 				'CH' => array(
                     'postcode_before_city' => true,
                     'state' => array(
-                        'label'         => __( 'Canton', 'woocommerce' ),
-                        'placeholder'   => __( 'Canton', 'woocommerce' ),
-                        'required'      => false
+                        'label'       => __( 'Canton', 'woocommerce' ),
+                        'placeholder' => __( 'Canton', 'woocommerce' ),
+                        'required'    => false
                     )
                 ),
 				'CL' => array(
-					'city'		=> array(
-						'required' 	=> false,
+					'city' => array(
+						'required' => false,
 					),
-					'state'		=> array(
-						'label'			=> __( 'Municipality', 'woocommerce' ),
-						'placeholder'	=> __( 'Municipality', 'woocommerce' )
+					'state' => array(
+						'label'       => __( 'Municipality', 'woocommerce' ),
+						'placeholder' => __( 'Municipality', 'woocommerce' )
 					)
 				),
 				'CN' => array(
-					'state'	=> array(
-						'label'			=> __( 'Province', 'woocommerce' ),
-						'placeholder'	=> __( 'Province', 'woocommerce' )
+					'state' => array(
+						'label'       => __( 'Province', 'woocommerce' ),
+						'placeholder' => __( 'Province', 'woocommerce' )
 					)
 				),
 				'CO' => array(
 					'postcode' => array(
-						'required' 	=> false
+						'required' => false
 					)
 				),
 				'CZ' => array(
-					'state'		=> array(
+					'state' => array(
 						'required' => false
 					)
 				),
 				'DE' => array(
 					'postcode_before_city' => true,
-					'state'		=> array(
+					'state' => array(
 						'required' => false
 					)
 				),
 				'DK' => array(
 					'postcode_before_city' => true,
-					'state'		=> array(
+					'state' => array(
 						'required' => false
 					)
 				),
 				'FI' => array(
 					'postcode_before_city' => true,
-					'state'		=> array(
+					'state' => array(
 						'required' => false
 					)
 				),
 				'FR' => array(
 					'postcode_before_city' => true,
-					'state'		=> array(
+					'state' => array(
 						'required' => false
 					)
 				),
 				'HK' => array(
-					'postcode'	=> array(
+					'postcode' => array(
 						'required' => false
 					),
-					'city'	=> array(
-						'label'				=> __( 'Town/District', 'woocommerce' ),
-						'placeholder'		=> __( 'Town/District', 'woocommerce' )
+					'city' => array(
+						'label'       => __( 'Town/District', 'woocommerce' ),
+						'placeholder' => __( 'Town/District', 'woocommerce' )
 					),
-					'state'		=> array(
-						'label' 		=> __( 'Region', 'woocommerce' ),
-						'placeholder' 	=> __( 'Region', 'woocommerce' )
+					'state' => array(
+						'label'       => __( 'Region', 'woocommerce' ),
+						'placeholder' => __( 'Region', 'woocommerce' )
 					)
 				),
 				'HU' => array(
-					'state'		=> array(
+					'state' => array(
 						'required' => false
 					)
 				),
 				'IS' => array(
 					'postcode_before_city' => true,
-					'state'		=> array(
+					'state' => array(
 						'required' => false
 					)
 				),
 				'IL' => array(
 					'postcode_before_city' => true,
-					'state'		=> array(
+					'state' => array(
 						'required' => false
 					)
 				),
 				'NL' => array(
 					'postcode_before_city' => true,
-					'state'		=> array(
+					'state' => array(
 						'required' => false
 					)
 				),
 				'NZ' => array(
-					'state'		=> array(
+					'state' => array(
 						'required' => false
 					)
 				),
 				'NO' => array(
 					'postcode_before_city' => true,
-					'state'		=> array(
+					'state' => array(
 						'required' => false
 					)
 				),
 				'PL' => array(
 					'postcode_before_city' => true,
-					'state'		=> array(
+					'state' => array(
 						'required' => false
 					)
 				),
 				'RO' => array(
-					'state'		=> array(
+					'state' => array(
 						'required' => false
 					)
 				),
 				'SG' => array(
-					'state'		=> array(
+					'state' => array(
 						'required' => false
 					)
 				),
 				'SK' => array(
 					'postcode_before_city' => true,
-					'state'		=> array(
+					'state' => array(
 						'required' => false
 					)
 				),
 				'SI' => array(
 					'postcode_before_city' => true,
-					'state'		=> array(
+					'state' => array(
 						'required' => false
 					)
 				),
 				'ES' => array(
 					'postcode_before_city' => true,
-					'state'	=> array(
-						'label'			=> __( 'Province', 'woocommerce' ),
-						'placeholder'	=> __( 'Province', 'woocommerce' )
+					'state' => array(
+						'label'       => __( 'Province', 'woocommerce' ),
+						'placeholder' => __( 'Province', 'woocommerce' )
 					)
 				),
 				'LI' => array(
                     'postcode_before_city' => true,
                     'state' => array(
-                        'label'         => __( 'Municipality', 'woocommerce' ),
-                        'placeholder'   => __( 'Municipality', 'woocommerce' ),
-                        'required'      => false
+                        'label'       => __( 'Municipality', 'woocommerce' ),
+                        'placeholder' => __( 'Municipality', 'woocommerce' ),
+                        'required'    => false
                     )
                 ),
 				'LK' => array(
-					'state'	=> array(
+					'state' => array(
 						'required' => false
 					)
 				),
 				'SE' => array(
 					'postcode_before_city' => true,
-					'state'	=> array(
+					'state' => array(
 						'required' => false
 					)
 				),
 				'TR' => array(
 					'postcode_before_city' => true,
-					'state'	=> array(
-						'label'			=> __( 'Province', 'woocommerce' ),
-						'placeholder'	=> __( 'Province', 'woocommerce' )
+					'state' => array(
+						'label'       => __( 'Province', 'woocommerce' ),
+						'placeholder' => __( 'Province', 'woocommerce' )
 					)
 				),
 				'US' => array(
-					'postcode'	=> array(
-						'label' 		=> __( 'Zip', 'woocommerce' ),
-						'placeholder' 	=> __( 'Zip', 'woocommerce' )
+					'postcode' => array(
+						'label'       => __( 'Zip', 'woocommerce' ),
+						'placeholder' => __( 'Zip', 'woocommerce' )
 					),
-					'state'		=> array(
-						'label' 		=> __( 'State', 'woocommerce' ),
-						'placeholder' 	=> __( 'State', 'woocommerce' )
+					'state' => array(
+						'label'       => __( 'State', 'woocommerce' ),
+						'placeholder' => __( 'State', 'woocommerce' )
 					)
 				),
 				'GB' => array(
-					'postcode'	=> array(
-						'label' 		=> __( 'Postcode', 'woocommerce' ),
-						'placeholder' 	=> __( 'Postcode', 'woocommerce' )
+					'postcode' => array(
+						'label'       => __( 'Postcode', 'woocommerce' ),
+						'placeholder' => __( 'Postcode', 'woocommerce' )
 					),
-					'state'		=> array(
-						'label' 		=> __( 'County', 'woocommerce' ),
-						'placeholder' 	=> __( 'County', 'woocommerce' ),
-						'required' 		=> false
+					'state' => array(
+						'label'       => __( 'County', 'woocommerce' ),
+						'placeholder' => __( 'County', 'woocommerce' ),
+						'required'    => false
 					)
 				),
 				'VN' => array(
-					'state'		=> array(
+					'state' => array(
 						'required' => false
 					),
 					'postcode' => array(
-						'required' 	=> false,
-						'hidden'	=> true
+						'required' => false,
+						'hidden'   => true
 					),
 					'address_2' => array(
-						'required' 	=> false,
-						'hidden'	=> true
+						'required' => false,
+						'hidden'   => true
 					)
 				),
 			));
@@ -1029,23 +1029,23 @@ class WC_Countries {
 			$this->locale = array_intersect_key( $this->locale, $this->get_allowed_countries() );
 
 			$this->locale['default'] = apply_filters('woocommerce_get_country_locale_default', array(
-				'address_2'	=> array(
-					'required' 	=> false
+				'address_2' => array(
+					'required' => false
 				),
-				'postcode'	=> array(
-					'label' 		=> __( 'Postcode/Zip', 'woocommerce' ),
-					'placeholder' 	=> __( 'Postcode/Zip', 'woocommerce' ),
-					'required' 		=> true
+				'postcode' => array(
+					'label'       => __( 'Postcode/Zip', 'woocommerce' ),
+					'placeholder' => __( 'Postcode/Zip', 'woocommerce' ),
+					'required'    => true
 				),
-				'city'	=> array(
-					'label'			=> __( 'Town/City', 'woocommerce' ),
-					'placeholder'	=> __( 'Town/City', 'woocommerce' ),
-					'required' 		=> true
+				'city' => array(
+					'label'       => __( 'Town/City', 'woocommerce' ),
+					'placeholder' => __( 'Town/City', 'woocommerce' ),
+					'required'    => true
 				),
-				'state'		=> array(
-					'label' 		=> __( 'State/County', 'woocommerce' ),
-					'placeholder' 	=> __( 'State/County', 'woocommerce' ),
-					'required' 		=> true
+				'state' => array(
+					'label'       => __( 'State/County', 'woocommerce' ),
+					'placeholder' => __( 'State/County', 'woocommerce' ),
+					'required'    => true
 				)
 			));
 
@@ -1067,63 +1067,63 @@ class WC_Countries {
 
 		$fields = array(
 			'first_name' => array(
-				'label' 		=> __( 'First Name', 'woocommerce' ),
-				'placeholder' 	=> _x('First Name', 'placeholder', 'woocommerce'),
-				'required' 		=> true,
-				'class'			=> array('form-row-first'),
+				'label'       => __( 'First Name', 'woocommerce' ),
+				'placeholder' => _x('First Name', 'placeholder', 'woocommerce'),
+				'required'    => true,
+				'class'       => array('form-row-first'),
 				),
 			'last_name' => array(
-				'label' 		=> __( 'Last Name', 'woocommerce' ),
-				'placeholder' 	=> _x('Last Name', 'placeholder', 'woocommerce'),
-				'required' 		=> true,
-				'class' 		=> array('form-row-last'),
-				'clear'			=> true
+				'label'       => __( 'Last Name', 'woocommerce' ),
+				'placeholder' => _x('Last Name', 'placeholder', 'woocommerce'),
+				'required'    => true,
+				'class'       => array('form-row-last'),
+				'clear'       => true
 				),
-			'company' 	=> array(
-				'label' 		=> __( 'Company Name', 'woocommerce' ),
-				'placeholder' 	=> _x('Company (optional)', 'placeholder', 'woocommerce'),
-				'clear'			=> true
+			'company' => array(
+				'label'       => __( 'Company Name', 'woocommerce' ),
+				'placeholder' => _x('Company (optional)', 'placeholder', 'woocommerce'),
+				'clear'       => true
 				),
-			'address_1' 	=> array(
-				'label' 		=> __( 'Address', 'woocommerce' ),
-				'placeholder' 	=> _x('Address', 'placeholder', 'woocommerce'),
-				'required' 		=> true,
-				'class' 		=> array('form-row-first'),
+			'address_1' => array(
+				'label'       => __( 'Address', 'woocommerce' ),
+				'placeholder' => _x('Address', 'placeholder', 'woocommerce'),
+				'required'    => true,
+				'class'       => array('form-row-first'),
 				),
 			'address_2' => array(
-				'label' 		=> __( 'Address 2', 'woocommerce' ),
-				'placeholder' 	=> _x('Address 2 (optional)', 'placeholder', 'woocommerce'),
-				'class' 		=> array('form-row-last'),
-				'label_class' 	=> array('hidden'),
-				'clear'			=> true
+				'label'       => __( 'Address 2', 'woocommerce' ),
+				'placeholder' => _x('Address 2 (optional)', 'placeholder', 'woocommerce'),
+				'class'       => array('form-row-last'),
+				'label_class' => array('hidden'),
+				'clear'       => true
 				),
-			'city' 		=> array(
-				'label' 		=> __( 'Town/City', 'woocommerce' ),
-				'placeholder' 	=> _x('Town/City', 'placeholder', 'woocommerce'),
-				'required' 		=> true,
-				'class' 		=> array('form-row-first', 'update_totals_on_change'),
+			'city' => array(
+				'label'       => __( 'Town/City', 'woocommerce' ),
+				'placeholder' => _x('Town/City', 'placeholder', 'woocommerce'),
+				'required'    => true,
+				'class'       => array('form-row-first', 'update_totals_on_change'),
 				),
-			'postcode' 	=> array(
-				'label' 		=> __( 'Postcode/Zip', 'woocommerce' ),
-				'placeholder' 	=> _x('Postcode/Zip', 'placeholder', 'woocommerce'),
-				'required' 		=> true,
-				'class'			=> array('form-row-last', 'update_totals_on_change'),
-				'clear'			=> true
+			'postcode' => array(
+				'label'       => __( 'Postcode/Zip', 'woocommerce' ),
+				'placeholder' => _x('Postcode/Zip', 'placeholder', 'woocommerce'),
+				'required'    => true,
+				'class'       => array('form-row-last', 'update_totals_on_change'),
+				'clear'       => true
 				),
-			'country' 	=> array(
-				'type'			=> 'country',
-				'label' 		=> __( 'Country', 'woocommerce' ),
-				'placeholder' 	=> _x('Country', 'placeholder', 'woocommerce'),
-				'required' 		=> true,
-				'class' 		=> array('form-row-first', 'update_totals_on_change'),
+			'country' => array(
+				'type'        => 'country',
+				'label'       => __( 'Country', 'woocommerce' ),
+				'placeholder' => _x('Country', 'placeholder', 'woocommerce'),
+				'required'    => true,
+				'class'       => array('form-row-first', 'update_totals_on_change'),
 				),
-			'state' 	=> array(
-				'type'			=> 'state',
-				'label' 		=> __( 'State/County', 'woocommerce' ),
-				'placeholder' 	=> _x('State/County', 'placeholder', 'woocommerce'),
-				'required' 		=> true,
-				'class' 		=> array('form-row-last', 'update_totals_on_change'),
-				'clear'			=> true
+			'state' => array(
+				'type'        => 'state',
+				'label'       => __( 'State/County', 'woocommerce' ),
+				'placeholder' => _x('State/County', 'placeholder', 'woocommerce'),
+				'required'    => true,
+				'class'       => array('form-row-last', 'update_totals_on_change'),
+				'clear'       => true
 				)
 		);
 
@@ -1164,17 +1164,17 @@ class WC_Countries {
 		if ( $type == 'billing_' ) {
 
 			$address_fields['billing_email'] = array(
-				'label' 		=> __( 'Email Address', 'woocommerce' ),
-				'placeholder' 	=> _x('Email Address', 'placeholder', 'woocommerce'),
-				'required' 		=> true,
-				'class' 		=> array('form-row-first')
+				'label'       => __( 'Email Address', 'woocommerce' ),
+				'placeholder' => _x('Email Address', 'placeholder', 'woocommerce'),
+				'required'    => true,
+				'class'       => array('form-row-first')
 			);
 			$address_fields['billing_phone'] = array(
-				'label' 		=> __( 'Phone', 'woocommerce' ),
-				'placeholder' 	=> _x('Phone', 'placeholder', 'woocommerce'),
-				'required' 		=> true,
-				'class' 		=> array('form-row-last'),
-				'clear'			=> true
+				'label'       => __( 'Phone', 'woocommerce' ),
+				'placeholder' => _x('Phone', 'placeholder', 'woocommerce'),
+				'required'    => true,
+				'class'       => array('form-row-last'),
+				'clear'       => true
 			);
 
 			$address_fields = apply_filters('woocommerce_billing_fields', $address_fields);

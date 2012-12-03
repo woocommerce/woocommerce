@@ -627,9 +627,9 @@ if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
 
 		// Load the template
 		woocommerce_get_template( 'single-product/add-to-cart/variable.php', array(
-				'available_variations'  => $product->get_available_variations(),
-				'attributes'   			=> $product->get_variation_attributes(),
-				'selected_attributes' 	=> $product->get_variation_default_attributes()
+				'available_variations' => $product->get_available_variations(),
+				'attributes'           => $product->get_variation_attributes(),
+				'selected_attributes'  => $product->get_variation_default_attributes()
 			) );
 	}
 }
@@ -667,11 +667,11 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 		global $product;
 
 		$defaults = array(
-			'input_name'  	=> 'quantity',
-			'input_value'  	=> '1',
-			'max_value'  	=> apply_filters( 'woocommerce_quantity_input_max', '', $product ),
-			'min_value'  	=> apply_filters( 'woocommerce_quantity_input_min', '', $product ),
-			'step' 			=> apply_filters( 'woocommerce_quantity_input_step', '1', $product )
+			'input_name'  => 'quantity',
+			'input_value' => '1',
+			'max_value'   => apply_filters( 'woocommerce_quantity_input_max', '', $product ),
+			'min_value'   => apply_filters( 'woocommerce_quantity_input_min', '', $product ),
+			'step'        => apply_filters( 'woocommerce_quantity_input_step', '1', $product )
 		);
 
 		$args = apply_filters( 'woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ), $product );
@@ -1096,12 +1096,12 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 
 		// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( http://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work
 		$args = array(
-			'child_of'		=> $parent_id,
-			'menu_order'	=> 'ASC',
-			'hide_empty'	=> 1,
-			'hierarchical'	=> 1,
-			'taxonomy'		=> 'product_cat',
-			'pad_counts'	=> 1
+			'child_of'     => $parent_id,
+			'menu_order'   => 'ASC',
+			'hide_empty'   => 1,
+			'hierarchical' => 1,
+			'taxonomy'     => 'product_cat',
+			'pad_counts'   => 1
 		);
 		$product_categories = get_categories( $args  );
 

@@ -120,85 +120,85 @@ class WC_Paypal extends WC_Payment_Gateway {
 
     	$this->form_fields = array(
 			'enabled' => array(
-							'title' => __( 'Enable/Disable', 'woocommerce' ),
-							'type' => 'checkbox',
-							'label' => __( 'Enable PayPal standard', 'woocommerce' ),
+							'title'   => __( 'Enable/Disable', 'woocommerce' ),
+							'type'    => 'checkbox',
+							'label'   => __( 'Enable PayPal standard', 'woocommerce' ),
 							'default' => 'yes'
 						),
 			'title' => array(
-							'title' => __( 'Title', 'woocommerce' ),
-							'type' => 'text',
+							'title'       => __( 'Title', 'woocommerce' ),
+							'type'        => 'text',
 							'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-							'default' => __( 'PayPal', 'woocommerce' )
+							'default'     => __( 'PayPal', 'woocommerce' )
 						),
 			'description' => array(
-							'title' => __( 'Description', 'woocommerce' ),
-							'type' => 'textarea',
+							'title'       => __( 'Description', 'woocommerce' ),
+							'type'        => 'textarea',
 							'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce' ),
-							'default' => __( 'Pay via PayPal; you can pay with your credit card if you don\'t have a PayPal account', 'woocommerce' )
+							'default'     => __( 'Pay via PayPal; you can pay with your credit card if you don\'t have a PayPal account', 'woocommerce' )
 						),
 			'email' => array(
-							'title' => __( 'PayPal Email', 'woocommerce' ),
-							'type' 			=> 'email',
+							'title'       => __( 'PayPal Email', 'woocommerce' ),
+							'type'        => 'email',
 							'description' => __( 'Please enter your PayPal email address; this is needed in order to take payment.', 'woocommerce' ),
-							'default' => ''
+							'default'     => ''
 						),
 			'invoice_prefix' => array(
-							'title' => __( 'Invoice Prefix', 'woocommerce' ),
-							'type' => 'text',
+							'title'       => __( 'Invoice Prefix', 'woocommerce' ),
+							'type'        => 'text',
 							'description' => __( 'Please enter a prefix for your invoice numbers. If you use your PayPal account for multiple stores ensure this prefix is unqiue as PayPal will not allow orders with the same invoice number.', 'woocommerce' ),
-							'default' => 'WC-'
+							'default'     => 'WC-'
 						),
 			'form_submission_method' => array(
-							'title' => __( 'Submission method', 'woocommerce' ),
-							'type' => 'checkbox',
-							'label' => __( 'Use form submission method.', 'woocommerce' ),
+							'title'       => __( 'Submission method', 'woocommerce' ),
+							'type'        => 'checkbox',
+							'label'       => __( 'Use form submission method.', 'woocommerce' ),
 							'description' => __( 'Enable this to post order data to PayPal via a form instead of using a redirect/querystring.', 'woocommerce' ),
-							'default' => 'no'
+							'default'     => 'no'
 						),
 			'page_style' => array(
-							'title' => __( 'Page Style', 'woocommerce' ),
-							'type' => 'text',
+							'title'       => __( 'Page Style', 'woocommerce' ),
+							'type'        => 'text',
 							'description' => __( 'Optionally enter the name of the page style you wish to use. These are defined within your PayPal account.', 'woocommerce' ),
-							'default' => ''
+							'default'     => ''
 						),
 			'shipping' => array(
-							'title' => __( 'Shipping options', 'woocommerce' ),
-							'type' => 'title',
+							'title'       => __( 'Shipping options', 'woocommerce' ),
+							'type'        => 'title',
 							'description' => '',
 						),
 			'send_shipping' => array(
-							'title' => __( 'Shipping details', 'woocommerce' ),
-							'type' => 'checkbox',
-							'label' => __( 'Send shipping details to PayPal instead of billing.', 'woocommerce' ),
+							'title'       => __( 'Shipping details', 'woocommerce' ),
+							'type'        => 'checkbox',
+							'label'       => __( 'Send shipping details to PayPal instead of billing.', 'woocommerce' ),
 							'description' => '',
 							'description' => __( 'PayPal allows us to send 1 address. If you are using PayPal for shipping labels you may prefer to send the shipping address rather than billing.', 'woocommerce' ),
-							'default' => 'no'
+							'default'     => 'no'
 						),
 			'address_override' => array(
-							'title' => __( 'Address override', 'woocommerce' ),
-							'type' => 'checkbox',
-							'label' => __( 'Enable "address_override" to prevent address information from being changed.', 'woocommerce' ),
+							'title'       => __( 'Address override', 'woocommerce' ),
+							'type'        => 'checkbox',
+							'label'       => __( 'Enable "address_override" to prevent address information from being changed.', 'woocommerce' ),
 							'description' => __( 'PayPal verifies addresses therefore this setting can cause errors (we recommend keeping it disabled).', 'woocommerce' ),
-							'default' => 'no'
+							'default'     => 'no'
 						),
 			'testing' => array(
-							'title' => __( 'Gateway Testing', 'woocommerce' ),
-							'type' => 'title',
+							'title'       => __( 'Gateway Testing', 'woocommerce' ),
+							'type'        => 'title',
 							'description' => '',
 						),
 			'testmode' => array(
-							'title' => __( 'PayPal sandbox', 'woocommerce' ),
-							'type' => 'checkbox',
-							'label' => __( 'Enable PayPal sandbox', 'woocommerce' ),
-							'default' => 'yes',
+							'title'       => __( 'PayPal sandbox', 'woocommerce' ),
+							'type'        => 'checkbox',
+							'label'       => __( 'Enable PayPal sandbox', 'woocommerce' ),
+							'default'     => 'yes',
 							'description' => sprintf( __( 'PayPal sandbox can be used to test payments. Sign up for a developer account <a href="%s">here</a>.', 'woocommerce' ), 'https://developer.paypal.com/' ),
 						),
 			'debug' => array(
-							'title' => __( 'Debug Log', 'woocommerce' ),
-							'type' => 'checkbox',
-							'label' => __( 'Enable logging', 'woocommerce' ),
-							'default' => 'no',
+							'title'       => __( 'Debug Log', 'woocommerce' ),
+							'type'        => 'checkbox',
+							'label'       => __( 'Enable logging', 'woocommerce' ),
+							'default'     => 'no',
 							'description' => __( 'Log PayPal events, such as IPN requests, inside <code>woocommerce/logs/paypal.txt</code>' ),
 						)
 			);
@@ -227,49 +227,49 @@ class WC_Paypal extends WC_Payment_Gateway {
 				'night_phone_a' => substr( $order->billing_phone, 0, 3 ),
 				'night_phone_b' => substr( $order->billing_phone, 3, 3 ),
 				'night_phone_c' => substr( $order->billing_phone, 6, 4 ),
-				'day_phone_a' 	=> substr( $order->billing_phone, 0, 3 ),
-				'day_phone_b' 	=> substr( $order->billing_phone, 3, 3 ),
-				'day_phone_c' 	=> substr( $order->billing_phone, 6, 4 )
+				'day_phone_a'   => substr( $order->billing_phone, 0, 3 ),
+				'day_phone_b'   => substr( $order->billing_phone, 3, 3 ),
+				'day_phone_c'   => substr( $order->billing_phone, 6, 4 )
 			);
 		} else {
 			$phone_args = array(
 				'night_phone_b' => $order->billing_phone,
-				'day_phone_b' 	=> $order->billing_phone
+				'day_phone_b'   => $order->billing_phone
 			);
 		}
 
 		// PayPal Args
 		$paypal_args = array_merge(
 			array(
-				'cmd' 					=> '_cart',
-				'business' 				=> $this->email,
-				'no_note' 				=> 1,
-				'currency_code' 		=> get_woocommerce_currency(),
-				'charset' 				=> 'UTF-8',
-				'rm' 					=> is_ssl() ? 2 : 1,
-				'upload' 				=> 1,
-				'return' 				=> add_query_arg( 'utm_nooverride', '1', $this->get_return_url( $order ) ),
-				'cancel_return'			=> $order->get_cancel_order_url(),
-				'page_style'			=> $this->page_style,
+				'cmd'           => '_cart',
+				'business'      => $this->email,
+				'no_note'       => 1,
+				'currency_code' => get_woocommerce_currency(),
+				'charset'       => 'UTF-8',
+				'rm'            => is_ssl() ? 2 : 1,
+				'upload'        => 1,
+				'return'        => add_query_arg( 'utm_nooverride', '1', $this->get_return_url( $order ) ),
+				'cancel_return' => $order->get_cancel_order_url(),
+				'page_style'    => $this->page_style,
 
 				// Order key + ID
-				'invoice'				=> $this->invoice_prefix . ltrim( $order->get_order_number(), '#' ),
-				'custom' 				=> serialize( array( $order_id, $order->order_key ) ),
+				'invoice'       => $this->invoice_prefix . ltrim( $order->get_order_number(), '#' ),
+				'custom'        => serialize( array( $order_id, $order->order_key ) ),
 
 				// IPN
-				'notify_url'			=> $this->notify_url,
+				'notify_url'    => $this->notify_url,
 
 				// Billing Address info
-				'first_name'			=> $order->billing_first_name,
-				'last_name'				=> $order->billing_last_name,
-				'company'				=> $order->billing_company,
-				'address1'				=> $order->billing_address_1,
-				'address2'				=> $order->billing_address_2,
-				'city'					=> $order->billing_city,
-				'state'					=> $order->billing_state,
-				'zip'					=> $order->billing_postcode,
-				'country'				=> $order->billing_country,
-				'email'					=> $order->billing_email
+				'first_name'    => $order->billing_first_name,
+				'last_name'     => $order->billing_last_name,
+				'company'       => $order->billing_company,
+				'address1'      => $order->billing_address_1,
+				'address2'      => $order->billing_address_2,
+				'city'          => $order->billing_city,
+				'state'         => $order->billing_state,
+				'zip'           => $order->billing_postcode,
+				'country'       => $order->billing_country,
+				'email'         => $order->billing_email
 			),
 			$phone_args
 		);
@@ -460,15 +460,15 @@ class WC_Paypal extends WC_Payment_Gateway {
 			endif;
 
 			return array(
-				'result' 	=> 'success',
-				'redirect'	=> $paypal_adr . $paypal_args
+				'result'   => 'success',
+				'redirect' => $paypal_adr . $paypal_args
 			);
 
 		} else {
 
 			return array(
-				'result' 	=> 'success',
-				'redirect'	=> add_query_arg('order', $order->id, add_query_arg('key', $order->order_key, get_permalink(woocommerce_get_page_id('pay' ))))
+				'result'   => 'success',
+				'redirect' => add_query_arg('order', $order->id, add_query_arg('key', $order->order_key, get_permalink(woocommerce_get_page_id('pay' ))))
 			);
 
 		}
@@ -507,10 +507,10 @@ class WC_Paypal extends WC_Payment_Gateway {
 
         // Send back post vars to paypal
         $params = array(
-        	'body' 			=> $received_values,
-        	'sslverify' 	=> false,
-        	'timeout' 		=> 30,
-        	'user-agent'	=> 'WooCommerce/' . $woocommerce->version
+        	'body'       => $received_values,
+        	'sslverify'  => false,
+        	'timeout'    => 30,
+        	'user-agent' => 'WooCommerce/' . $woocommerce->version
         );
 
         // Get url
