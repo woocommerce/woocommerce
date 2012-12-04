@@ -610,18 +610,17 @@ function woocommerce_process_login() {
 				$woocommerce->add_error( $user->get_error_message() );
 			else :
 
-				if (isset($_POST['redirect']) && $_POST['redirect']) :
-					wp_safe_redirect( esc_attr($_POST['redirect']) );
-					exit;
-				endif;
+				if (isset($_POST['redirect']) && $_POST['redirect']) {
+					$redirect = esc_attr($_POST['redirect']);
+				} else if ( wp_get_referer() ) {
+					$redirect = wp_safe_redirect( wp_get_referer() );
+				} else {
+					$redirect = get_permalink(woocommerce_get_page_id('myaccount'));
+				}
 
-				if ( wp_get_referer() ) :
-					wp_safe_redirect( wp_get_referer() );
-					exit;
-				endif;
-
-				wp_redirect(get_permalink(woocommerce_get_page_id('myaccount')));
+				wp_redirect(apply_filters('woocommerce_login_redirect', $redirect, $user));
 				exit;
+
 			endif;
 
 		endif;
