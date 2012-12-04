@@ -1,0 +1,1 @@
+jQuery(document).ready(function(e){e("select.country_select, select.state_select").chosen();e("body").bind("country_to_state_changed",function(){e("select.state_select").chosen().trigger("liszt:updated")})});

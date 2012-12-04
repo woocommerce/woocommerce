@@ -1,12 +1,20 @@
 <?php
 /**
- * Reviews Tab
+ * Reviews tab
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
- 
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 global $woocommerce, $post;
-?>
-<div class="panel" id="tab-reviews">
 
-	<?php comments_template(); ?>
+if ( comments_open() ) : ?>
+	<div class="panel entry-content" id="tab-reviews">
 
-</div>
+		<?php comments_template(); ?>
+
+	</div>
+<?php endif; ?>

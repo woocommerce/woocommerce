@@ -1,53 +1,83 @@
 <?php
 /**
  * Order Tracking Shortcode
- * 
+ *
  * Lets a user see the status of an order by entering their order details.
  *
- * @package		WooCommerce
- * @category	Shortcode
- * @author		WooThemes
+ * @author 		WooThemes
+ * @category 	Shortcodes
+ * @package 	WooCommerce/Shortcodes/Order Tracking
+ * @version     1.6.4
  */
-function get_woocommerce_order_tracking($atts) {
+
+/**
+ * Get the order tracking shortcode content.
+ *
+ * @access public
+ * @param array $atts
+ * @return string
+ */
+function get_woocommerce_order_tracking( $atts ) {
 	global $woocommerce;
-	return $woocommerce->shortcode_wrapper('woocommerce_order_tracking', $atts); 
+	return $woocommerce->shortcode_wrapper('woocommerce_order_tracking', $atts);
 }
 
+/**
+ * Output the order tracking shortcode.
+ *
+ * @access public
+ * @param array $atts
+ * @return void
+ */
 function woocommerce_order_tracking( $atts ) {
-	global $woocommerce, $order;
-	
+	global $woocommerce;
+
+	$woocommerce->nocache();
+
 	extract(shortcode_atts(array(
 	), $atts));
-	
-	global $post;
-	
-	if ($_POST) :
-		
-		$order = &new woocommerce_order();
-		
-		if (isset($_POST['orderid']) && $_POST['orderid'] > 0) $order->id = (int) $_POST['orderid']; else $order->id = 0;
-		if (isset($_POST['order_email']) && $_POST['order_email']) $order_email = trim($_POST['order_email']); else $order_email = '';
-		
-		$woocommerce->verify_nonce( 'order_tracking' );
-		
-		if ($order->id && $order_email && $order->get_order( $order->id )) :
 
-			if ($order->billing_email == $order_email) :
-			
-				woocommerce_get_template( 'order/tracking.php' );
-				
-				return;
-				
-			endif;
-					
-		endif;
-		
-		echo '<p>'.sprintf(__('Sorry, we could not find that order id in our database. <a href="%s">Want to retry?</a>', 'woothemes'), get_permalink($post->ID)).'</p>';
-	
-	else :
-	
-		woocommerce_get_template( 'order/tracking-form.php' );
-		
-	endif;	
-	
+	global $post;
+
+	if ( ! empty( $_REQUEST['orderid'] ) ) {
+
+		$woocommerce->verify_nonce( 'order_tracking' );
+
+		$order_id 		= empty( $_REQUEST['orderid'] ) ? 0 : esc_attr( $_REQUEST['orderid'] );
+		$order_email	= empty( $_REQUEST['order_email'] ) ? '' : esc_attr( $_REQUEST['order_email']) ;
+
+		if ( ! $order_id ) {
+
+			echo '<p class="woocommerce_error">' . __( 'Please enter a valid order ID', 'woocommerce' ) . '</p>';
+
+		} elseif ( ! $order_email ) {
+
+			echo '<p class="woocommerce_error">' . __( 'Please enter a valid order email', 'woocommerce' ) . '</p>';
+
+		} else {
+
+			$order = new WC_Order( apply_filters( 'woocommerce_shortcode_order_tracking_order_id', $order_id ) );
+
+			if ( $order->id && $order_email ) {
+
+				if ( strtolower( $order->billing_email ) == strtolower( $order_email ) ) {
+					do_action( 'woocommerce_track_order', $order->id );
+					woocommerce_get_template( 'order/tracking.php', array(
+						'order' => $order
+					) );
+
+					return;
+				}
+
+			} else {
+
+				echo '<p class="woocommerce_error">' . sprintf( __( 'Sorry, we could not find that order id in our database.', 'woocommerce' ), get_permalink($post->ID ) ) . '</p>';
+
+			}
+
+		}
+
+	}
+
+	woocommerce_get_template( 'order/form-tracking.php' );
 }

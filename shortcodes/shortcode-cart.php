@@ -1,76 +1,101 @@
 <?php
 /**
  * Cart Shortcode
- * 
+ *
  * Used on the cart page, the cart shortcode displays the cart contents and interface for coupon codes and other cart bits and pieces.
  *
- * @package		WooCommerce
- * @category	Shortcode
- * @author		WooThemes
+ * @author 		WooThemes
+ * @category 	Shortcodes
+ * @package 	WooCommerce/Shortcodes/Cart
+ * @version     1.6.4
  */
- 
+
+/**
+ * Get the cart shortcode content.
+ *
+ * @access public
+ * @param array $atts
+ * @return string
+ */
 function get_woocommerce_cart( $atts ) {
 	global $woocommerce;
-	return $woocommerce->shortcode_wrapper('woocommerce_cart', $atts);
+	return $woocommerce->shortcode_wrapper( 'woocommerce_cart', $atts );
 }
 
+
+/**
+ * Output the cart shortcode.
+ *
+ * @access public
+ * @param array $atts
+ * @return void
+ */
 function woocommerce_cart( $atts ) {
 	global $woocommerce;
-	
-	// Process Discount Codes
-	if (isset($_POST['apply_coupon']) && $_POST['apply_coupon'] && $woocommerce->verify_nonce('cart')) :
-	
-		$coupon_code = stripslashes(trim($_POST['coupon_code']));
-		$woocommerce->cart->add_discount($coupon_code);
-	
+
+	$woocommerce->nocache();
+
+	if ( ! defined( 'WOOCOMMERCE_CART' ) ) define( 'WOOCOMMERCE_CART', true );
+
+	// Add Discount
+	if ( ! empty( $_POST['apply_coupon'] ) ) {
+
+		if ( ! empty( $_POST['coupon_code'] ) ) {
+			$woocommerce->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
+		} else {
+			$woocommerce->add_error( __( 'Please enter a coupon code.', 'woocommerce' ) );
+		}
+
 	// Remove Discount Codes
-	elseif (isset($_GET['remove_discounts'])) :
-		
+	} elseif ( isset( $_GET['remove_discounts'] ) ) {
+
 		$woocommerce->cart->remove_coupons( $_GET['remove_discounts'] );
-		$woocommerce->cart->calculate_totals();
-	
+
 	// Update Shipping
-	elseif (isset($_POST['calc_shipping']) && $_POST['calc_shipping'] && $woocommerce->verify_nonce('cart')) :
-		
-		$_SESSION['calculated_shipping'] = true;
-		unset($_SESSION['_chosen_shipping_method']);
+	} elseif ( ! empty( $_POST['calc_shipping'] ) && $woocommerce->verify_nonce('cart') ) {
+
+		$validation = $woocommerce->validation();
+
+		$woocommerce->shipping->reset_shipping();
+		$woocommerce->customer->calculated_shipping( true );
 		$country 	= $_POST['calc_shipping_country'];
 		$state 		= $_POST['calc_shipping_state'];
 		$postcode 	= $_POST['calc_shipping_postcode'];
-		
-		if ($postcode && !$woocommerce->validation->is_postcode( $postcode, $country )) : 
-			$woocommerce->add_error( __('Please enter a valid postcode/ZIP.', 'woothemes') ); 
+
+		if ( $postcode && ! $validation->is_postcode( $postcode, $country ) ) {
+			$woocommerce->add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
 			$postcode = '';
-		elseif ($postcode) :
-			$postcode = $woocommerce->validation->format_postcode( $postcode, $country );
-		endif;
-		
-		if ($country) :
-		
+		} elseif ( $postcode ) {
+			$postcode = $validation->format_postcode( $postcode, $country );
+		}
+
+		if ( $country ) {
+
 			// Update customer location
 			$woocommerce->customer->set_location( $country, $state, $postcode );
 			$woocommerce->customer->set_shipping_location( $country, $state, $postcode );
-			$woocommerce->cart->calculate_totals();
-			$woocommerce->add_message(  __('Shipping costs updated.', 'woothemes') );
-		
-		else :
-		
-			$woocommerce->customer->set_shipping_to_base();
-			$woocommerce->add_message(  __('Shipping costs updated.', 'woothemes') );
-			
-		endif;
+			$woocommerce->add_message(  __( 'Shipping costs updated.', 'woocommerce' ) );
 
-	endif;
-	
+		} else {
+
+			$woocommerce->customer->set_to_base();
+			$woocommerce->customer->set_shipping_to_base();
+			$woocommerce->add_message(  __( 'Shipping costs updated.', 'woocommerce' ) );
+
+		}
+
+		do_action( 'woocommerce_calculated_shipping' );
+	}
+
+	// Check cart items are valid
 	do_action('woocommerce_check_cart_items');
-	
-	if (sizeof($woocommerce->cart->get_cart())==0) :
-		
+
+	// Calc totals
+	$woocommerce->cart->calculate_totals();
+
+	if ( sizeof( $woocommerce->cart->get_cart() ) == 0 )
 		woocommerce_get_template( 'cart/empty.php' );
-	
-	else :
-	
+	else
 		woocommerce_get_template( 'cart/cart.php' );
-		
-	endif;		
+
 }

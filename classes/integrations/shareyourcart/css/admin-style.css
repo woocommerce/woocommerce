@@ -1,0 +1,57 @@
+/*use our own save buttons, in order to determine what actions the user made*/
+p.submit .button-primary{
+	display:none
+}
+
+/* disable extra padding */
+.wrap {
+	padding: 0px;
+}
+
+.form-table th {
+	padding: 10px;
+    text-align: left;
+    vertical-align: top;
+    width: 200px;
+}
+
+.form-table td{
+	font-size: 12px;
+    line-height: 20px;
+    margin-bottom: 9px;
+    padding: 8px 10px;
+}
+
+.api-status {
+	float: left;
+}
+
+.syc-configuration {
+	width: 60%;
+}
+.configure-button-container {
+	width: auto;
+	margin: 0;
+}
+
+.buttonTextarea {
+	width: auto;
+	height: 120px;
+}
+
+.buttonOption {
+	height: 170px;
+	background-position: right -54px;
+}
+
+body .buttonCheckbox {
+	margin: 0 9px 0 0;
+}
+
+.buttonOptions {
+	border-bottom: 1px solid #ccc;
+}
+
+#visual-options>fieldset {
+	margin: 0 0 20px;
+}

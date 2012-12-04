@@ -1,68 +1,95 @@
 <?php
 /**
- * Admin functions for the shop_coupon post type
+ * Admin functions for the shop_coupon post type.
  *
  * @author 		WooThemes
  * @category 	Admin
- * @package 	WooCommerce
+ * @package 	WooCommerce/Admin/Coupons
+ * @version     1.6.4
  */
- 
-/**
- * Columns for Coupons page
- **/
-add_filter('manage_edit-shop_coupon_columns', 'woocommerce_edit_coupon_columns');
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
+/**
+ * Define Columns for the Coupons admin page.
+ *
+ * @access public
+ * @param mixed $columns
+ * @return array
+ */
 function woocommerce_edit_coupon_columns($columns){
-	
+
 	$columns = array();
-	
+
 	$columns["cb"] 			= "<input type=\"checkbox\" />";
-	$columns["title"] 		= __("Code", 'woothemes');
-	$columns["type"] 		= __("Coupon type", 'woothemes');
-	$columns["amount"] 		= __("Coupon amount", 'woothemes');
-	$columns["products"]	= __("Product IDs", 'woothemes');
-	$columns["usage_limit"] = __("Usage limit", 'woothemes');
-	$columns["usage_count"] = __("Usage count", 'woothemes');
-	$columns["expiry_date"] = __("Expiry date", 'woothemes');
+	$columns["title"] 		= __( 'Code', 'woocommerce' );
+	$columns["type"] 		= __( 'Coupon type', 'woocommerce' );
+	$columns["amount"] 		= __( 'Coupon amount', 'woocommerce' );
+	$columns["description"] = __( 'Description', 'woocommerce' );
+	$columns["products"]	= __( 'Product IDs', 'woocommerce' );
+	$columns["usage"] 		= __( 'Usage / Limit', 'woocommerce' );
+	$columns["expiry_date"] = __( 'Expiry date', 'woocommerce' );
 
 	return $columns;
 }
 
+add_filter( 'manage_edit-shop_coupon_columns', 'woocommerce_edit_coupon_columns' );
+
 
 /**
- * Custom Columns for Coupons page
- **/
-add_action('manage_shop_coupon_posts_custom_column', 'woocommerce_custom_coupon_columns', 2);
-
-function woocommerce_custom_coupon_columns($column) {
+ * Values for Columns on the Coupons admin page.
+ *
+ * @access public
+ * @param mixed $column
+ * @return void
+ */
+function woocommerce_custom_coupon_columns( $column ) {
 	global $post, $woocommerce;
-	
-	$type 			= get_post_meta($post->ID, 'discount_type', true);
-	$amount 		= get_post_meta($post->ID, 'coupon_amount', true);
-	$individual_use = get_post_meta($post->ID, 'individual_use', true);
-	$product_ids 	= (get_post_meta($post->ID, 'product_ids', true)) ? explode(',', get_post_meta($post->ID, 'product_ids', true)) : array();
-	$usage_limit 	= get_post_meta($post->ID, 'usage_limit', true);
-	$usage_count 	= (int) get_post_meta($post->ID, 'usage_count', true);
-	$expiry_date 	= get_post_meta($post->ID, 'expiry_date', true);
 
-	switch ($column) {
+	switch ( $column ) {
 		case "type" :
-			echo $woocommerce->get_coupon_discount_type($type);			
+			echo esc_html( $woocommerce->get_coupon_discount_type( get_post_meta( $post->ID, 'discount_type', true ) ) );
 		break;
 		case "amount" :
-			echo $amount;
+			echo esc_html( get_post_meta( $post->ID, 'coupon_amount', true ) );
 		break;
 		case "products" :
-			if (sizeof($product_ids)>0) echo implode(', ', $product_ids); else echo '&ndash;';
+			$product_ids = get_post_meta( $post->ID, 'product_ids', true );
+			$product_ids = $product_ids ? array_map( 'absint', explode( ',', $product_ids ) ) : array();
+			if ( sizeof( $product_ids ) > 0 )
+				echo esc_html( implode( ', ', $product_ids ) );
+			else
+				echo '&ndash;';
 		break;
 		case "usage_limit" :
-			if ($usage_limit) echo $usage_limit; else echo '&ndash;';
+			$usage_limit = get_post_meta( $post->ID, 'usage_limit', true );
+
+			if ( $usage_limit )
+				echo esc_html( $usage_limit );
+			else
+				echo '&ndash;';
 		break;
-		case "usage_count" :
-			echo $usage_count;
+		case "usage" :
+			$usage_count = absint( get_post_meta( $post->ID, 'usage_count', true ) );
+			$usage_limit = esc_html( get_post_meta($post->ID, 'usage_limit', true) );
+
+			if ( $usage_limit )
+				printf( __( '%s / %s', 'woocommerce' ), $usage_count, $usage_limit );
+			else
+				printf( __( '%s / &infin;', 'woocommerce' ), $usage_count );
 		break;
 		case "expiry_date" :
-			if ($expiry_date) echo date('F j, Y', strtotime($expiry_date)); else echo '&ndash;';
+			$expiry_date = get_post_meta($post->ID, 'expiry_date', true);
+
+			if ( $expiry_date )
+				echo esc_html( date_i18n( 'F j, Y', strtotime( $expiry_date ) ) );
+			else
+				echo '&ndash;';
+		break;
+		case "description" :
+			echo wp_kses_post( $post->post_excerpt );
 		break;
 	}
 }
+
+add_action( 'manage_shop_coupon_posts_custom_column', 'woocommerce_custom_coupon_columns', 2 );

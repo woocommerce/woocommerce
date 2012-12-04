@@ -1,1 +1,0 @@
-<li><a href="#tab-description"><?php _e('Description', 'woothemes'); ?></a></li>

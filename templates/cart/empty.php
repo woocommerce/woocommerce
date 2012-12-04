@@ -1,11 +1,18 @@
 <?php
 /**
- * Empty Cart Page
+ * Empty cart page
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 ?>
 
-<p><?php _e('Your cart is currently empty.', 'woothemes') ?></p>
+<p><?php _e( 'Your cart is currently empty.', 'woocommerce' ) ?></p>
 
 <?php do_action('woocommerce_cart_is_empty'); ?>
 
-<p><a class="button" href="<?php echo get_permalink(get_option('woocommerce_shop_page_id')); ?>"><?php _e('&larr; Return To Shop', 'woothemes') ?></a></p>
+<p><a class="button" href="<?php echo get_permalink(woocommerce_get_page_id('shop')); ?>"><?php _e( '&larr; Return To Shop', 'woocommerce' ) ?></a></p>

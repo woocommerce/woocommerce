@@ -1,19 +1,22 @@
 <?php
 /**
  * Strings
- * 
+ *
  * This file holds localisation strings that are scanned by localisation plugins. It is not included anywhere.
  *
  * @author 		WooThemes
  * @category 	Languages
- * @package 	WooCommerce
+ * @package 	WooCommerce/Languages
+ * @version     1.6.4
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 // Order Status Terms
-__('pending', 'woothemes');
-__('failed', 'woothemes');
-__('on-hold', 'woothemes');
-__('processing', 'woothemes');
-__('completed', 'woothemes');
-__('refunded', 'woothemes');
-__('cancelled', 'woothemes');
+__( 'pending', 'woocommerce' );
+__( 'failed', 'woocommerce' );
+__( 'on-hold', 'woocommerce' );
+__( 'processing', 'woocommerce' );
+__( 'completed', 'woocommerce' );
+__( 'refunded', 'woocommerce' );
+__( 'cancelled', 'woocommerce' );

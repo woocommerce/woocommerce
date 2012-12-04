@@ -1,9 +1,12 @@
 <?php
 /**
- * Shop Sidebar
- * 
- * Simply loads your sidebar, or sidebar-shop.php if it exists
+ * Sidebar
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
 
-get_sidebar('shop');
-?>
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
+get_sidebar('shop'); ?>

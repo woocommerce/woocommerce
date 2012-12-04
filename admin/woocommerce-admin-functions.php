@@ -1,166 +1,259 @@
 <?php
 /**
  * WooCommerce Admin Functions
- * 
+ *
  * Hooked-in functions for WooCommerce related events in admin.
  *
- * @package		WooCommerce
- * @category	Actions
- * @author		WooThemes
+ * @author 		WooThemes
+ * @category 	Admin
+ * @package 	WooCommerce/Admin
+ * @version     1.6.4
  */
- 
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Checks which method we're using to serve downloads
- * 
+ *
  * If using force or x-sendfile, this ensures the .htaccess is in place
+ *
+ * @access public
+ * @return void
  */
 function woocomerce_check_download_folder_protection() {
 	$upload_dir 		= wp_upload_dir();
 	$downloads_url 		= $upload_dir['basedir'] . '/woocommerce_uploads';
 	$download_method	= get_option('woocommerce_file_download_method');
-	
+
 	if ($download_method=='redirect') :
-		
+
 		// Redirect method - don't protect
 		if (file_exists($downloads_url.'/.htaccess')) :
 			unlink( $downloads_url . '/.htaccess' );
 		endif;
-		
+
+		flush_rewrite_rules( true );
+
 	else :
-		
+
 		// Force method - protect, add rules to the htaccess file
 		if (!file_exists($downloads_url.'/.htaccess')) :
-			if ($file_handle = fopen( $downloads_url . '/.htaccess', 'w' )) :
+			if ($file_handle = @fopen( $downloads_url . '/.htaccess', 'w' )) :
 				fwrite($file_handle, 'deny from all');
 				fclose($file_handle);
 			endif;
 		endif;
-		
+
+		flush_rewrite_rules( true );
+
 	endif;
-} 
- 
+}
+
+
 /**
- * Deleting products sync
- * 
- * Removes variations etc belonging to a deleted post
+ * Protect downlodas from ms-files.php in multisite
+ *
+ * @access public
+ * @param mixed $rewrite
+ * @return string
  */
-function woocommerce_delete_product_sync( $id ) {
-	
-	if (!current_user_can('delete_posts')) return;
-	
-	if ( $id > 0 ) :
-	
-		if ( $children_products =& get_children( 'post_parent='.$id.'&post_type=product_variation' ) ) :
-	
-			if ($children_products) :
-			
-				foreach ($children_products as $child) :
-					
-					wp_delete_post( $child->ID, true );
-					
-				endforeach;
-			
-			endif;
-	
-		endif;
-	
-	endif;
+function woocommerce_ms_protect_download_rewite_rules( $rewrite ) {
+    global $wp_rewrite;
+
+    $download_method	= get_option('woocommerce_file_download_method');
+
+    if (!is_multisite() || $download_method=='redirect') return $rewrite;
+
+	$rule  = "\n# WooCommerce Rules - Protect Files from ms-files.php\n\n";
+	$rule .= "<IfModule mod_rewrite.c>\n";
+	$rule .= "RewriteEngine On\n";
+	$rule .= "RewriteCond %{QUERY_STRING} file=woocommerce_uploads/ [NC]\n";
+	$rule .= "RewriteRule /ms-files.php$ - [F]\n";
+	$rule .= "</IfModule>\n\n";
+
+	return $rule . $rewrite;
 }
+
 
 /**
- * Preview Emails
- **/
-function woocommerce_preview_emails() {
-	if (isset($_GET['preview_woocommerce_mail'])) :
-		$nonce = $_REQUEST['_wpnonce'];
-		if (!wp_verify_nonce($nonce, 'preview-mail') ) die('Security check'); 
-		
-		global $woocommerce, $email_heading;
-		
-		$mailer = $woocommerce->mailer();
-	
-		$email_heading = __('Email preview', 'woothemes');
-		
-		$message = '<h2>WooCommerce sit amet</h2>';
-		
-		$message.= wpautop('Ut ut est qui euismod parum. Dolor veniam tation nihil assum mazim. Possim fiant habent decima et claritatem. Erat me usus gothica laoreet consequat. Clari facer litterarum aliquam insitam dolor. 
+ * Removes variations etc belonging to a deleted post, and clears transients
+ *
+ * @access public
+ * @param mixed $id ID of post being deleted
+ * @return void
+ */
+function woocommerce_delete_post( $id ) {
+	global $woocommerce;
 
-Gothica minim lectores demonstraverunt ut soluta. Sequitur quam exerci veniam aliquip litterarum. Lius videntur nisl facilisis claritatem nunc. Praesent in iusto me tincidunt iusto. Dolore lectores sed putamus exerci est. ');
-		
-		echo $mailer->wrap_message( $email_heading, $message );
-		
-		exit;
-		
+	if ( ! current_user_can( 'delete_posts' ) ) return;
+
+	if ( $id > 0 ) :
+
+		if ( $children_products =& get_children( 'post_parent='.$id.'&post_type=product_variation' ) ) :
+
+			if ($children_products) :
+
+				foreach ($children_products as $child) :
+
+					wp_delete_post( $child->ID, true );
+
+				endforeach;
+
+			endif;
+
+		endif;
+
 	endif;
+
+	$woocommerce->clear_product_transients();
+	delete_transient( 'woocommerce_processing_order_count' );
 }
+
+
+/**
+ * Preview Emails in WP admin
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_preview_emails() {
+	if ( isset( $_GET['preview_woocommerce_mail'] ) ) {
+		$nonce = $_REQUEST['_wpnonce'];
+		if ( ! wp_verify_nonce( $nonce, 'preview-mail') )
+			die( 'Security check' );
+
+		global $woocommerce, $email_heading;
+
+		$mailer = $woocommerce->mailer();
+
+		$email_heading = __( 'Order Received', 'woocommerce' );
+
+		$message  = wpautop( __( 'Thank you, we are now processing your order. Your order\'s details are below.', 'woocommerce' ) );
+
+		$message .= '<h2>' . __( 'Order:', 'woocommerce' ) . ' ' . '#1000</h2>';
+
+		$message .= '
+		<table cellspacing="0" cellpadding="6" style="width: 100%; border: 1px solid #eee; margin: 0 0 20px" border="1" bordercolor="#eee">
+			<thead>
+				<tr>
+					<th scope="col" style="text-align:left; border: 1px solid #eee;">' . __( 'Product', 'woocommerce' ) . '</th>
+					<th scope="col" style="text-align:left; border: 1px solid #eee;">' . __( 'Quantity', 'woocommerce' ) . '</th>
+					<th scope="col" style="text-align:left; border: 1px solid #eee;">' . __( 'Price', 'woocommerce' ) . '</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>An awesome product</td>
+					<td>1</td>
+					<td>$9.99</td>
+				</tr>
+			</tbody>
+			<tfoot>
+				<tr>
+					<th colspan="2">' . __( 'Order total:', 'woocommerce' ) . '</td>
+					<td>$9.99</td>
+				</tr>
+			</tfoot>
+		</table>';
+
+		$message .= '<h2>' . __( 'Customer details', 'woocommerce' ) . '</h2>';
+
+		$message .= '
+		<table cellspacing="0" cellpadding="0" style="width: 100%; vertical-align: top;" border="0">
+			<tr>
+				<td valign="top" width="50%">
+					<h3>' . __( 'Billing address', 'woocommerce' ) . '</h3>
+					<p>Some Guy
+					1 infinite loop
+					Cupertino
+					CA 95014</p>
+				</td>
+				<td valign="top" width="50%">
+					<h3>' . __( 'Shipping address', 'woocommerce' ) . '</h3>
+					<p>Some Guy
+					1 infinite loop
+					Cupertino
+					CA 95014</p>
+				</td>
+			</tr>
+		</table>';
+
+		echo $mailer->wrap_message( $email_heading, $message );
+
+		exit;
+
+	}
+}
+
 
 /**
  * Prevent non-admin access to backend
+ *
+ * @access public
+ * @return void
  */
 function woocommerce_prevent_admin_access() {
-	if ( get_option('woocommerce_lock_down_admin')=='yes' && !is_ajax() && !current_user_can('edit_posts') ) :
-		wp_safe_redirect(get_permalink(get_option('woocommerce_myaccount_page_id')));
+	if ( get_option('woocommerce_lock_down_admin') == 'yes' && ! is_ajax() && ! ( current_user_can('edit_posts') || current_user_can('manage_woocommerce') ) ) {
+		wp_safe_redirect(get_permalink(woocommerce_get_page_id('myaccount')));
 		exit;
-	endif;
+	}
 }
 
-/**
- * Redirect to settings after installation
- */
-function install_woocommerce_redirect() {
-	global $pagenow, $woocommerce;
-
-	if ( is_admin() && isset( $_GET['activate'] ) && ($_GET['activate'] == true) && $pagenow == 'plugins.php' && get_option( "woocommerce_installed" ) == 1 ) :
-		
-		// Clear transient cache
-		$woocommerce->clear_product_transients();
-		
-		// Unset installed flag
-		update_option( "woocommerce_installed", 0 );
-		
-		// Flush rewrites
-		flush_rewrite_rules( false );
-		
-		// Redirect to settings
-		wp_redirect(admin_url('admin.php?page=woocommerce&installed=true'));
-		exit;
-		
-	endif;
-}
 
 /**
  * Fix 'insert into post' buttons for images
- **/
-function woocommerce_allow_img_insertion($vars) {
+ *
+ * @access public
+ * @param mixed $vars
+ * @return array
+ */
+function woocommerce_allow_img_insertion( $vars ) {
     $vars['send'] = true; // 'send' as in "Send to Editor"
     return($vars);
 }
 
+
 /**
- * Directory for uploads
+ * Filter the directory for uploads.
+ *
+ * @access public
+ * @param mixed $pathdata
+ * @return void
  */
 function woocommerce_downloads_upload_dir( $pathdata ) {
 
 	if (isset($_POST['type']) && $_POST['type'] == 'downloadable_product') :
-		
+
 		// Uploading a downloadable file
 		$subdir = '/woocommerce_uploads'.$pathdata['subdir'];
 	 	$pathdata['path'] = str_replace($pathdata['subdir'], $subdir, $pathdata['path']);
 	 	$pathdata['url'] = str_replace($pathdata['subdir'], $subdir, $pathdata['url']);
 		$pathdata['subdir'] = str_replace($pathdata['subdir'], $subdir, $pathdata['subdir']);
 		return $pathdata;
-		
+
 	endif;
-	
+
 	return $pathdata;
 }
+
+
+/**
+ * Run a filter when uploading a downloadable product.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_media_upload_downloadable_product() {
 	do_action('media_upload_file');
 }
 
+
 /**
- * Shortcode button in post editor
- **/
+ * Add a button for shortcodes to the WP editor.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_add_shortcode_button() {
 	if ( ! current_user_can('edit_posts') && ! current_user_can('edit_pages') ) return;
 	if ( get_user_option('rich_editing') == 'true') :
@@ -169,56 +262,247 @@ function woocommerce_add_shortcode_button() {
 	endif;
 }
 
+
+/**
+ * woocommerce_add_tinymce_lang function.
+ *
+ * @access public
+ * @param mixed $arr
+ * @return void
+ */
+function woocommerce_add_tinymce_lang( $arr ) {
+	global $woocommerce;
+    $arr[] = $woocommerce->plugin_path() . '/assets/js/admin/editor_plugin_lang.php';
+    return $arr;
+}
+
+add_filter( 'mce_external_languages', 'woocommerce_add_tinymce_lang', 10, 1 );
+
+
+/**
+ * Register the shortcode button.
+ *
+ * @access public
+ * @param mixed $buttons
+ * @return array
+ */
 function woocommerce_register_shortcode_button($buttons) {
 	array_push($buttons, "|", "woocommerce_shortcodes_button");
 	return $buttons;
 }
 
+
+/**
+ * Add the shortcode button to TinyMCE
+ *
+ * @access public
+ * @param mixed $plugin_array
+ * @return array
+ */
 function woocommerce_add_shortcode_tinymce_plugin($plugin_array) {
 	global $woocommerce;
 	$plugin_array['WooCommerceShortcodes'] = $woocommerce->plugin_url() . '/assets/js/admin/editor_plugin.js';
 	return $plugin_array;
 }
 
-function woocommerce_refresh_mce($ver) {
+
+/**
+ * Force TinyMCE to refresh.
+ *
+ * @access public
+ * @param mixed $ver
+ * @return int
+ */
+function woocommerce_refresh_mce( $ver ) {
 	$ver += 3;
 	return $ver;
 }
 
-/**
- * Reorder categories on term insertion
- */
-function woocommerce_create_term( $term_id, $tt_id, $taxonomy ) {
-	
-	if (!$taxonomy=='product_cat' && !strstr($taxonomy, 'pa_')) return;
-	
-	$next_id = null;
-	
-	$term = get_term($term_id, $taxonomy);
-	
-	// gets the sibling terms
-	$siblings = get_terms($taxonomy, "parent={$term->parent}&menu_order=ASC&hide_empty=0");
-	
-	foreach ($siblings as $sibling) {
-		if( $sibling->term_id == $term_id ) continue;
-		$next_id =  $sibling->term_id; // first sibling term of the hierarchy level
-		break;
-	}
 
-	// reorder
-	woocommerce_order_terms( $term, $next_id, $taxonomy );
+/**
+ * Order term when created (put in position 0).
+ *
+ * @access public
+ * @param mixed $term_id
+ * @param mixed $tt_id
+ * @param mixed $taxonomy
+ * @return void
+ */
+function woocommerce_create_term( $term_id, $tt_id = '', $taxonomy = '' ) {
+
+	if ( ! $taxonomy == 'product_cat' && ! strstr( $taxonomy, 'pa_' ) )
+		return;
+
+	$meta_name = strstr( $taxonomy, 'pa_' ) ? 'order_' . esc_attr( $taxonomy ) : 'order';
+
+	update_woocommerce_term_meta( $term_id, $meta_name, 0 );
 }
 
+
 /**
- * Delete terms metas on deletion
+ * When a term is deleted, delete its meta.
+ *
+ * @access public
+ * @param mixed $term_id
+ * @return void
  */
-function woocommerce_delete_term( $term_id, $tt_id, $taxonomy ) {
-	
+function woocommerce_delete_term( $term_id ) {
+
 	$term_id = (int) $term_id;
-	
-	if(!$term_id) return;
-	
+
+	if ( ! $term_id )
+		return;
+
 	global $wpdb;
-	$wpdb->query("DELETE FROM {$wpdb->woocommerce_termmeta} WHERE `woocommerce_term_id` = " . $term_id);
-	
+	$wpdb->query( "DELETE FROM {$wpdb->woocommerce_termmeta} WHERE `woocommerce_term_id` = " . $term_id );
+}
+
+
+/**
+ * Generate CSS from the less file when changing colours.
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_compile_less_styles() {
+	global $woocommerce;
+
+	$colors 		= array_map( 'esc_attr', (array) get_option( 'woocommerce_frontend_css_colors' ) );
+	$base_file		= $woocommerce->plugin_path() . '/assets/css/woocommerce-base.less';
+	$less_file		= $woocommerce->plugin_path() . '/assets/css/woocommerce.less';
+	$css_file		= $woocommerce->plugin_path() . '/assets/css/woocommerce.css';
+
+	// Write less file
+	if ( is_writable( $base_file ) && is_writable( $css_file ) ) {
+
+		// Colours changed - recompile less
+		if ( ! class_exists( 'lessc' ) )
+			include_once('includes/class-lessc.php');
+		if ( ! class_exists( 'cssmin' ) )
+			include_once('includes/class-cssmin.php');
+
+		try {
+			// Set default if colours not set
+			if ( ! $colors['primary'] ) $colors['primary'] = '#ad74a2';
+			if ( ! $colors['secondary'] ) $colors['secondary'] = '#f7f6f7';
+			if ( ! $colors['highlight'] ) $colors['highlight'] = '#85ad74';
+			if ( ! $colors['content_bg'] ) $colors['content_bg'] = '#ffffff';
+			if ( ! $colors['subtext'] ) $colors['subtext'] = '#777777';
+
+			// Write new color to base file
+			$color_rules = "
+@primary: 		" . $colors['primary'] . ";
+@primarytext: 	" . woocommerce_light_or_dark( $colors['primary'], 'desaturate(darken(@primary,50%),18%)', 'desaturate(lighten(@primary,50%),18%)' ) . ";
+
+@secondary: 	" . $colors['secondary'] . ";
+@secondarytext: " . woocommerce_light_or_dark( $colors['secondary'], 'desaturate(darken(@secondary,60%),18%)', 'desaturate(lighten(@secondary,60%),18%)' ) . ";
+
+@highlight: 	" . $colors['highlight'] . ";
+@highlightext:	" . woocommerce_light_or_dark( $colors['highlight'], 'desaturate(darken(@highlight,60%),18%)', 'desaturate(lighten(@highlight,60%),18%)' ) . ";
+
+@contentbg:		" . $colors['content_bg'] . ";
+
+@subtext:		" . $colors['subtext'] . ";
+			";
+
+			file_put_contents( $base_file, $color_rules );
+
+		    $less 			= new lessc( $less_file );
+			$compiled_css 	= $less->parse();
+
+		    $compiled_css = CssMin::minify( $compiled_css );
+
+		    if ( $compiled_css )
+		    	file_put_contents( $css_file, $compiled_css );
+
+		} catch ( exception $ex ) {
+			wp_die( __( 'Could not compile woocommerce.less:', 'woocommerce' ) . ' ' . $ex->getMessage() );
+		}
+	}
+}
+
+
+/**
+ * Add extra bulk action options to mark orders as complete or processing
+ *
+ * Using Javascript until WordPress core fixes: http://core.trac.wordpress.org/ticket/16031
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_bulk_admin_footer() {
+	global $post_type;
+
+	if ( 'shop_order' == $post_type ) {
+		?>
+		<script type="text/javascript">
+		jQuery(document).ready(function() {
+			jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo("select[name='action']");
+			jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo("select[name='action2']");
+
+			jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark completed', 'woocommerce' )?>').appendTo("select[name='action']");
+			jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark completed', 'woocommerce' )?>').appendTo("select[name='action2']");
+		});
+		</script>
+		<?php
+	}
+}
+
+
+/**
+ * Process the new bulk actions for changing order status
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_order_bulk_action() {
+	$wp_list_table = _get_list_table( 'WP_Posts_List_Table' );
+	$action = $wp_list_table->current_action();
+
+	switch ( $action ) {
+		case 'mark_completed':
+			$new_status = 'completed';
+			$report_action = 'marked_completed';
+			break;
+		case 'mark_processing':
+			$new_status = 'processing';
+			$report_action = 'marked_processing';
+			break;
+		default:
+			return;
+	}
+
+	$changed = 0;
+
+	$post_ids = array_map( 'absint', (array) $_REQUEST['post'] );
+
+	foreach( $post_ids as $post_id ) {
+		$order = new WC_Order( $post_id );
+		$order->update_status( $new_status, __( 'Order status changed by bulk edit:', 'woocommerce' ) );
+		$changed++;
+	}
+
+	$sendback = add_query_arg( array( 'post_type' => 'shop_order', $report_action => $changed, 'ids' => join( ',', $post_ids ) ), '' );
+	wp_redirect( $sendback );
+	exit();
+}
+
+
+/**
+ * Show confirmation message that order status changed for number of orders
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_order_bulk_admin_notices() {
+	global $post_type, $pagenow;
+
+	if ( isset( $_REQUEST['marked_completed'] ) || isset( $_REQUEST['marked_processing'] ) ) {
+		$number = isset( $_REQUEST['marked_processing'] ) ? absint( $_REQUEST['marked_processing'] ) : absint( $_REQUEST['marked_completed'] );
+
+		if ( 'edit.php' == $pagenow && 'shop_order' == $post_type ) {
+			$message = sprintf( _n( 'Order status changed.', '%s order statuses changed.', $number ), number_format_i18n( $number ) );
+			echo '<div class="updated"><p>' . $message . '</p></div>';
+		}
+	}
 }
