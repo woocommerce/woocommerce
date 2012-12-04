@@ -225,7 +225,7 @@ class WC_Coupon {
 
 			// Expired
 			if ( $this->expiry_date ) {
-				if ( strtotime( 'NOW' ) > $this->expiry_date ) {
+				if ( strtotime( current_time( 'timestamp' ) ) > $this->expiry_date ) {
 					$valid = false;
 					$error = __( 'This coupon has expired.', 'woocommerce' );
 				}
