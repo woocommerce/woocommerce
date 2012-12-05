@@ -640,7 +640,7 @@ function woocommerce_link_all_variations() {
 
 	$variations = array();
 
-	$_product = get_product( $post_id );
+	$_product = get_product( $post_id, array( 'product_type' => 'variable' ) );
 
 	// Put variation attributes into an array
 	foreach ( $_product->get_attributes() as $attribute ) {
@@ -662,13 +662,12 @@ function woocommerce_link_all_variations() {
 		$options = array_map('trim', $options);
 
 		$variations[ $attribute_field_name ] = $options;
-
 	}
 
 	// Quit out if none were found
 	if ( sizeof( $variations ) == 0 ) die();
 
-	// Get existing variations so we don't create duplicated
+	// Get existing variations so we don't create duplicates
     $available_variations = array();
 
     foreach( $_product->get_children() as $child_id ) {
