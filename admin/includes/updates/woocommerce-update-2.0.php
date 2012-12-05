@@ -94,78 +94,80 @@ if ( get_option( 'woocommerce_show_subcategories' ) == 'yes' ) {
 $loop = 0;
 $tax_rates = get_option( 'woocommerce_tax_rates' );
 
-foreach ( $tax_rates as $tax_rate ) {
+if ( $tax_rates )
+	foreach ( $tax_rates as $tax_rate ) {
 
-	foreach ( $tax_rate['countries'] as $country => $states ) {
+		foreach ( $tax_rate['countries'] as $country => $states ) {
 
-		$states = array_reverse( $states );
+			$states = array_reverse( $states );
 
-		foreach ( $states as $state ) {
+			foreach ( $states as $state ) {
 
-			if ( $state == '*' )
-				$state = '';
+				if ( $state == '*' )
+					$state = '';
 
-			$wpdb->insert(
-				$wpdb->prefix . "woocommerce_tax_rates",
-				array(
-					'tax_rate_country'  => $country,
-					'tax_rate_state'    => $state,
-					'tax_rate'          => $tax_rate['rate'],
-					'tax_rate_name'     => $tax_rate['label'],
-					'tax_rate_priority' => 1,
-					'tax_rate_compound' => $tax_rate['compound'] == 'yes' ? 1 : 0,
-					'tax_rate_shipping' => $tax_rate['shipping'] == 'yes' ? 1 : 0,
-					'tax_rate_order'    => $loop,
-					'tax_rate_class'    => $tax_rate['class']
-				)
-			);
+				$wpdb->insert(
+					$wpdb->prefix . "woocommerce_tax_rates",
+					array(
+						'tax_rate_country'  => $country,
+						'tax_rate_state'    => $state,
+						'tax_rate'          => $tax_rate['rate'],
+						'tax_rate_name'     => $tax_rate['label'],
+						'tax_rate_priority' => 1,
+						'tax_rate_compound' => $tax_rate['compound'] == 'yes' ? 1 : 0,
+						'tax_rate_shipping' => $tax_rate['shipping'] == 'yes' ? 1 : 0,
+						'tax_rate_order'    => $loop,
+						'tax_rate_class'    => $tax_rate['class']
+					)
+				);
 
-			$loop++;
+				$loop++;
+			}
 		}
 	}
-}
 
 $local_tax_rates = get_option( 'woocommerce_local_tax_rates' );
 
-foreach ( $local_tax_rates as $tax_rate ) {
+if ( $local_tax_rates )
+	foreach ( $local_tax_rates as $tax_rate ) {
 
-	$location_type = $tax_rate['location_type'] == 'postcode' ? 'postcode' : 'city';
+		$location_type = $tax_rate['location_type'] == 'postcode' ? 'postcode' : 'city';
 
-	if ( $tax_rate['state'] == '*' )
-		$tax_rate['state'] = '';
-
-	$wpdb->insert(
-		$wpdb->prefix . "woocommerce_tax_rates",
-		array(
-			'tax_rate_country'  => $tax_rate['country'],
-			'tax_rate_state'    => $tax_rate['state'],
-			'tax_rate'          => $tax_rate['rate'],
-			'tax_rate_name'     => $tax_rate['label'],
-			'tax_rate_priority' => 2,
-			'tax_rate_compound' => $tax_rate['compound'] == 'yes' ? 1 : 0,
-			'tax_rate_shipping' => $tax_rate['shipping'] == 'yes' ? 1 : 0,
-			'tax_rate_order'    => $loop,
-			'tax_rate_class'    => $tax_rate['class']
-		)
-	);
-
-	$tax_rate_id = $wpdb->insert_id;
-
-	foreach ( $tax_rate['locations'] as $location ) {
+		if ( $tax_rate['state'] == '*' )
+			$tax_rate['state'] = '';
 
 		$wpdb->insert(
-			$wpdb->prefix . "woocommerce_tax_rate_locations",
+			$wpdb->prefix . "woocommerce_tax_rates",
 			array(
-				'location_code' => $location,
-				'tax_rate_id'   => $tax_rate_id,
-				'location_type' => $location_type,
+				'tax_rate_country'  => $tax_rate['country'],
+				'tax_rate_state'    => $tax_rate['state'],
+				'tax_rate'          => $tax_rate['rate'],
+				'tax_rate_name'     => $tax_rate['label'],
+				'tax_rate_priority' => 2,
+				'tax_rate_compound' => $tax_rate['compound'] == 'yes' ? 1 : 0,
+				'tax_rate_shipping' => $tax_rate['shipping'] == 'yes' ? 1 : 0,
+				'tax_rate_order'    => $loop,
+				'tax_rate_class'    => $tax_rate['class']
 			)
 		);
 
-	}
+		$tax_rate_id = $wpdb->insert_id;
 
-	$loop++;
-}
+		foreach ( $tax_rate['locations'] as $location ) {
+
+			$wpdb->insert(
+				$wpdb->prefix . "woocommerce_tax_rate_locations",
+				array(
+					'location_code' => $location,
+					'tax_rate_id'   => $tax_rate_id,
+					'location_type' => $location_type,
+				)
+			);
+
+		}
+
+		$loop++;
+	}
 
 update_option( 'woocommerce_tax_rates_backup', $tax_rates );
 update_option( 'woocommerce_local_tax_rates_backup', $local_tax_rates );
