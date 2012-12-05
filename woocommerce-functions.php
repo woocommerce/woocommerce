@@ -903,7 +903,7 @@ function woocommerce_download_product() {
 		if ( $order_id ) {
 			$order = new WC_Order( $order_id );
 
-			if ( ! $order->is_download_permitted() && $order->status != 'publish' )
+			if ( ! $order->is_download_permitted() || $order->status != 'publish' )
 				wp_die( __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . home_url() . '">' . __( 'Go to homepage &rarr;', 'woocommerce' ) . '</a>' );
 		}
 

@@ -53,10 +53,10 @@ $order = new WC_Order( $order_id );
 
 				if ( $_product->exists() && $_product->is_downloadable() && $order->is_download_permitted() ) :
 
-				$download_file_urls = $order->get_downloadable_file_urls( $item['product_id'], $item['variation_id'], $item );
-				foreach ( $download_file_urls as $i => $download_file_url ) :
-					echo '<br/><small><a href="' . $download_file_url . '">' . sprintf( __( 'Download file %s &rarr;', 'woocommerce' ), ( count( $download_file_urls ) > 1 ? $i + 1 : '' ) ) . '</a></small>';
-				endforeach;
+					$download_file_urls = $order->get_downloadable_file_urls( $item['product_id'], $item['variation_id'], $item );
+					foreach ( $download_file_urls as $i => $download_file_url ) :
+						echo '<br/><small><a href="' . $download_file_url . '">' . sprintf( __( 'Download file %s &rarr;', 'woocommerce' ), ( count( $download_file_urls ) > 1 ? $i + 1 : '' ) ) . '</a></small>';
+					endforeach;
 
 				endif;
 
