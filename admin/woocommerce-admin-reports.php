@@ -1918,7 +1918,7 @@ function woocommerce_category_sales() {
 	$current_year 	= isset( $_POST['show_year'] ) 	? $_POST['show_year'] 	: date( 'Y', current_time( 'timestamp' ) );
 	$start_date 	= strtotime( $current_year . '0101' );
 
-	$categories = get_terms( 'product_cat', array( 'parent' => 0 ) );
+	$categories = get_terms( 'product_cat', array( 'orderby' => 'name' ) );
 	?>
 	<form method="post" action="" class="report_filters">
 		<p>
@@ -1932,14 +1932,16 @@ function woocommerce_category_sales() {
 
 			<select multiple="multiple" class="chosen_select" id="show_categories" name="show_categories[]" style="width: 300px;">
 				<?php
-					foreach ( $categories as $category ) {
-						if ( $category->parent > 0 )
-							$prepend = '&mdash; ';
-						else
-							$prepend = '';
+					$r = array();
+					$r['pad_counts'] 	= 1;
+					$r['hierarchal'] 	= 1;
+					$r['hide_empty'] 	= 1;
+					$r['value']			= 'id';
+					$r['selected'] 		= isset( $_POST['show_categories'] ) ? $_POST['show_categories'] : '';
 
-						echo '<option value="' . $category->term_id . '" ' . selected( ! empty( $_POST['show_categories'] ) && in_array( $category->term_id, $_POST['show_categories'] ), true ) . '>' . $prepend . $category->name . '</option>';
-					}
+					include_once( $woocommerce->plugin_path() . '/classes/walkers/class-product-cat-dropdown-walker.php' );
+
+					echo woocommerce_walk_category_dropdown_tree( $categories, 0, $r );
 				?>
 			</select>
 
