@@ -29,8 +29,11 @@ if ( $existing_file_paths ) {
 		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_key = '_file_paths', meta_value = %s WHERE meta_id = %d", $file_paths, $existing_file_path->meta_id ) );
 
 		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}woocommerce_downloadable_product_permissions SET download_id = %s WHERE product_id = %d", md5( $existing_file_path->meta_value ), $existing_file_path->post_id ) );
+
 	}
 
+	// Rename old key
+	$wpdb->query( "UPDATE {$wpdb->postmeta} SET meta_key = '_file_path_backup' WHERE meta_key = '_file_path'" );
 }
 
 // Update table primary keys
