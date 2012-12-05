@@ -32,6 +32,10 @@ function get_product( $the_product = false, $args = array() ) {
 	return $woocommerce->product_factory->get_product( $the_product, $args );
 }
 
+function woocommerce_sanitize_taxonomy_name( $taxonomy ) {
+	return str_replace( array( ' ', '_' ), '-', strtolower( $taxonomy ) );
+}
+
 /**
  * woocommerce_get_dimension function.
  *

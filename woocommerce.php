@@ -797,7 +797,7 @@ class Woocommerce {
 		if ( $attribute_taxonomies ) {
 			foreach ($attribute_taxonomies as $tax) {
 
-		    	$name = $this->attribute_taxonomy_name($tax->attribute_name);
+		    	$name = $this->attribute_taxonomy_name( $tax->attribute_name );
 		    	$hierarchical = true;
 		    	if ($name) {
 
@@ -831,7 +831,7 @@ class Woocommerce {
 								'assign_terms' 		=> 'assign_product_terms',
 				            ),
 				            'show_in_nav_menus' 		=> $show_in_nav_menus,
-				            'rewrite' 					=> array( 'slug' => $product_attribute_base . strtolower( sanitize_title( $tax->attribute_name ) ), 'with_front' => false, 'hierarchical' => $hierarchical ),
+				            'rewrite' 					=> array( 'slug' => $product_attribute_base . sanitize_title( $tax->attribute_name ), 'with_front' => false, 'hierarchical' => $hierarchical ),
 				        )
 				    );
 
@@ -1449,7 +1449,7 @@ class Woocommerce {
 	 * @return string
 	 */
 	function attribute_taxonomy_name( $name ) {
-		return 'pa_' . sanitize_title( $name );
+		return 'pa_' . woocommerce_sanitize_taxonomy_name( $name );
 	}
 
 
@@ -1464,11 +1464,12 @@ class Woocommerce {
 		global $wpdb;
 
 		if ( strstr( $name, 'pa_' ) ) {
-			$name = str_replace( 'pa_', '', sanitize_title( $name ) );
+			$name = woocommerce_sanitize_taxonomy_name( str_replace( 'pa_', '', $name ) );
 
 			$label = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_label FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
 
-			if ( ! $label ) $label = ucfirst( $name );
+			if ( ! $label )
+				$label = ucfirst( $name );
 		} else {
 			$label = $name;
 		}
@@ -1507,7 +1508,7 @@ class Woocommerce {
 		$attribute_taxonomies = $this->get_attribute_taxonomies();
 		if ( $attribute_taxonomies ) {
 			foreach ( $attribute_taxonomies as $tax ) {
-				$taxonomy_names[] = $this->attribute_taxonomy_name( strtolower( sanitize_title( $tax->attribute_name ) ) );
+				$taxonomy_names[] = $this->attribute_taxonomy_name( $tax->attribute_name );
 			}
 		}
 		return $taxonomy_names;
