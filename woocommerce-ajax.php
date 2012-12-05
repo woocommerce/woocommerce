@@ -1922,6 +1922,12 @@ function woocommerce_product_images_box_upload() {
 		$attachment_data = wp_generate_attachment_metadata( $attachment_id, $upload['file'] );
 		wp_update_attachment_metadata( $attachment_id, $attachment_data );
 
+		// Set featured image
+		$post_thumb_id = get_post_meta( $post_id, '_thumbnail_id', true );
+
+		if ( empty( $mpost_thumb_id ) )
+			update_post_meta( $post_id, '_thumbnail_id', $attachment_id );
+
 		// Return the result
 		$image = wp_get_attachment_image_src( $attachment_id, 'full' );
 
