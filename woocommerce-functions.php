@@ -414,13 +414,13 @@ function woocommerce_add_to_cart_message( $product_id ) {
 	// Output success messages
 	if ( get_option( 'woocommerce_cart_redirect_after_add' ) == 'yes' ) :
 
-		$return_to 	= wp_get_referer() ? wp_get_referer() : home_url();
+		$return_to 	= apply_filters( 'woocommerce_continue_shopping_redirect', wp_get_referer() ? wp_get_referer() : home_url() );
 
 		$message 	= sprintf('<a href="%s" class="button">%s</a> %s', $return_to, __( 'Continue Shopping &rarr;', 'woocommerce' ), $added_text );
 
 	else :
 
-		$message 	= sprintf('<a href="%s" class="button">%s</a> %s', get_permalink(woocommerce_get_page_id('cart')), __( 'View Cart &rarr;', 'woocommerce' ), $added_text );
+		$message 	= sprintf('<a href="%s" class="button">%s</a> %s', get_permalink( woocommerce_get_page_id( 'cart' ) ), __( 'View Cart &rarr;', 'woocommerce' ), $added_text );
 
 	endif;
 
