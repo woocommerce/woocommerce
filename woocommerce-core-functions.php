@@ -980,8 +980,10 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 				$product_id = ($item['variation_id']>0) ? $item['variation_id'] : $item['product_id'];
 
 				$file_download_paths = apply_filters( 'woocommerce_file_download_paths', get_post_meta( $product_id, '_file_paths', true ), $product_id, $order_id, $item );
-				foreach ( $file_download_paths as $download_id => $file_path ) {
-					woocommerce_downloadable_file_permission( $download_id, $product_id, $order );
+				if ( !empty($file_download_paths) ) {
+					foreach ( $file_download_paths as $download_id => $file_path ) {
+						woocommerce_downloadable_file_permission( $download_id, $product_id, $order );
+					}
 				}
 
 			endif;
