@@ -1925,7 +1925,7 @@ function woocommerce_product_images_box_upload() {
 		// Set featured image
 		$post_thumb_id = get_post_meta( $post_id, '_thumbnail_id', true );
 
-		if ( empty( $mpost_thumb_id ) )
+		if ( empty( $post_thumb_id ) )
 			update_post_meta( $post_id, '_thumbnail_id', $attachment_id );
 
 		// Return the result
