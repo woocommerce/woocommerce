@@ -19,21 +19,18 @@ if ( $existing_file_paths ) {
 
 	foreach( $existing_file_paths as $existing_file_path ) {
 
-		$existing_file_path->meta_value = trim( $existing_file_path->meta_value );
+		$old_file_path = trim( $existing_file_path->meta_value );
 
-		if ( $existing_file_path->meta_value )
-			$file_paths = maybe_serialize( array( md5( $existing_file_path->meta_value ) => $existing_file_path->meta_value ) );
-		else
-			$file_paths = '';
+		if ( ! empty( $old_file_path ) ) {
+			$file_paths = maybe_serialize( array( md5( $old_file_path ) => $old_file_path ) );
 
-		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_key = '_file_paths', meta_value = %s WHERE meta_id = %d", $file_paths, $existing_file_path->meta_id ) );
 
-		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}woocommerce_downloadable_product_permissions SET download_id = %s WHERE product_id = %d", md5( $existing_file_path->meta_value ), $existing_file_path->post_id ) );
+			$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_key = '_file_paths', meta_value = %s WHERE meta_id = %d", $file_paths, $existing_file_path->meta_id ) );
 
+			$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}woocommerce_downloadable_product_permissions SET download_id = %s WHERE product_id = %d", md5( $old_file_path ), $existing_file_path->post_id ) );
+
+		}
 	}
-
-	// Rename old key
-	$wpdb->query( "UPDATE {$wpdb->postmeta} SET meta_key = '_file_path_backup' WHERE meta_key = '_file_path'" );
 }
 
 // Update table primary keys
