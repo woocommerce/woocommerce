@@ -1736,7 +1736,8 @@ function woocommerce_monthly_taxes() {
 
 		if ( $tax_rows ) {
 			foreach ( $tax_rows as $tax_row ) {
-				$tax_row_labels[] = $tax_row->name;
+				if ( $tax_row->total_tax_amount > 0 )
+					$tax_row_labels[] = $tax_row->name;
 			}
 		}
 

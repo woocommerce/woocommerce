@@ -926,7 +926,7 @@ class WC_Order {
 					}
 
 					$total_rows[ sanitize_title( $tax[ 'name' ] ) ] = array(
-						'label' => $tax[ 'name' ] . ':',
+						'label' => isset( $tax[ 'label' ] ) ? $tax[ 'label' ] : $tax[ 'name' ] . ':',
 						'value'	=> woocommerce_price( ( $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ] ) )
 					);
 				}
@@ -945,7 +945,7 @@ class WC_Order {
 						continue;
 
 					$total_rows[ sanitize_title( $tax[ 'name' ] ) ] = array(
-						'label' => $tax[ 'name' ] . ':',
+						'label' => isset( $tax[ 'label' ] ) ? $tax[ 'label' ] : $tax[ 'name' ] . ':',
 						'value'	=> woocommerce_price( ( $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ] ) )
 					);
 				}

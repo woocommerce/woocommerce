@@ -82,7 +82,7 @@ class WC_Cart {
 		$this->tax = new WC_Tax();
 		$this->prices_include_tax = ( get_option( 'woocommerce_prices_include_tax' ) == 'yes' ) ? true : false;
 		$this->tax_display_cart = get_option( 'woocommerce_tax_display_cart' );
-		$this->dp = ( '' != get_option( 'woocommerce_price_num_decimals' ) ) ? get_option( 'woocommerce_price_num_decimals' ) : 0;
+		$this->dp = (int) get_option( 'woocommerce_price_num_decimals' );
 
 		$this->display_totals_ex_tax = $this->tax_display_cart == 'excl' ? true : false;
 		$this->display_cart_ex_tax   = $this->tax_display_cart == 'excl' ? true : false;

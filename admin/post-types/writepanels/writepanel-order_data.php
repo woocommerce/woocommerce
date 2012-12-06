@@ -567,6 +567,23 @@ function woocommerce_order_totals_meta_box( $post ) {
 		<h4><?php _e( 'Tax Rows', 'woocommerce' ); ?></h4>
 		<div id="tax_rows" class="total_rows">
 			<?php
+				global $wpdb;
+
+				$rates = $wpdb->get_results( "SELECT tax_rate_id, tax_rate_country, tax_rate_state, tax_rate_name, tax_rate_priority FROM {$wpdb->prefix}woocommerce_tax_rates ORDER BY tax_rate_name" );
+
+				$tax_codes = array();
+
+				foreach( $rates as $rate ) {
+					$code = array();
+
+					$code[] = $rate->tax_rate_country;
+					$code[] = $rate->tax_rate_state;
+					$code[] = $rate->tax_rate_name ? sanitize_title( $rate->tax_rate_name ) : 'TAX';
+					$code[] = absint( $rate->tax_rate_priority );
+
+					$tax_codes[ $rate->tax_rate_id ] = strtoupper( implode( '-', array_filter( $code ) ) );
+				}
+
 				foreach ( $order->get_taxes() as $item_id => $item ) {
 					include( 'order-tax-html.php' );
 				}
@@ -742,29 +759,44 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 	// Tax rows
 	if ( isset( $_POST['order_taxes_id'] ) ) {
 
-		$get_values = array( 'order_taxes_id', 'order_taxes_label', 'order_taxes_compound', 'order_taxes_amount', 'order_taxes_shipping_amount' );
+		$get_values = array( 'order_taxes_id', 'order_taxes_rate_id', 'order_taxes_amount', 'order_taxes_shipping_amount' );
 
 		foreach( $get_values as $value )
 			$$value = isset( $_POST[ $value ] ) ? $_POST[ $value ] : array();
 
 		foreach( $order_taxes_id as $item_id ) {
 
-			$item_id = absint( $item_id );
+			$item_id  = absint( $item_id );
+			$rate_id  = absint( $order_taxes_rate_id[ $item_id ] );
 
-			if ( ! $order_taxes_label[ $item_id ] )
-				$order_taxes_label[ $item_id ] = $woocommerce->countries->tax_or_vat();
+			if ( $rate_id ) {
+				$rate     = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $rate_id ) );
+				$label    = $rate->tax_rate_name ? $rate->tax_rate_name : $woocommerce->countries->tax_or_vat();
+				$compound = $rate->tax_rate_compound ? 1 : 0;
 
-			if ( isset( $order_taxes_label[ $item_id ] ) )
-				$wpdb->update(
-					$wpdb->prefix . "woocommerce_order_items",
-					array( 'order_item_name' => woocommerce_clean( $order_taxes_label[ $item_id ] ) ),
-					array( 'order_item_id' => $item_id ),
-					array( '%s' ),
-					array( '%d' )
-				);
+				$code = array();
 
-			if ( isset( $order_taxes_compound[ $item_id ] ) )
-		 		woocommerce_update_order_item_meta( $item_id, 'compound', isset( $order_taxes_compound[ $item_id ] ) ? 1 : 0 );
+				$code[] = $rate->tax_rate_country;
+				$code[] = $rate->tax_rate_state;
+				$code[] = $rate->tax_rate_name ? $rate->tax_rate_name : 'TAX';
+				$code[] = absint( $rate->tax_rate_priority );
+				$code   = strtoupper( implode( '-', array_filter( $code ) ) );
+			} else {
+				$code  = '';
+				$label = $woocommerce->countries->tax_or_vat();
+			}
+
+			$wpdb->update(
+				$wpdb->prefix . "woocommerce_order_items",
+				array( 'order_item_name' => woocommerce_clean( $code ) ),
+				array( 'order_item_id' => $item_id ),
+				array( '%s' ),
+				array( '%d' )
+			);
+
+			woocommerce_update_order_item_meta( $item_id, 'rate_id', $rate_id );
+			woocommerce_update_order_item_meta( $item_id, 'label', $label );
+			woocommerce_update_order_item_meta( $item_id, 'compound', $compound );
 
 			if ( isset( $order_taxes_amount[ $item_id ] ) )
 		 		woocommerce_update_order_item_meta( $item_id, 'tax_amount', woocommerce_clean( $order_taxes_amount[ $item_id ] ) );

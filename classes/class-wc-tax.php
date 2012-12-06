@@ -349,7 +349,7 @@ class WC_Tax {
 
 				// Rounding
 				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding ) {
-					$decimals = ( '' != get_option( 'woocommerce_price_num_decimals' ) ) ? get_option( 'woocommerce_price_num_decimals' ) : 0;
+					$decimals = (int) get_option( 'woocommerce_price_num_decimals' );
 					$tax_amount = round( $tax_amount, $decimals );
 				}
 
@@ -380,7 +380,7 @@ class WC_Tax {
 
 				// Rounding
 				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding ) {
-					$decimals = ( '' != get_option( 'woocommerce_price_num_decimals' ) ) ? get_option( 'woocommerce_price_num_decimals' ) : 0;
+					$decimals = (int) get_option( 'woocommerce_price_num_decimals' );
 					$tax_amount = round( $tax_amount, $decimals );
 				}
 
@@ -412,7 +412,7 @@ class WC_Tax {
 
 				// Rounding
 				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding ) {
-					$decimals = ( '' != get_option( 'woocommerce_price_num_decimals' ) ) ? get_option( 'woocommerce_price_num_decimals' ) : 0;
+					$decimals = (int) get_option( 'woocommerce_price_num_decimals' );
 					$tax_amount = round( $tax_amount, $decimals );
 				}
 
@@ -493,6 +493,28 @@ class WC_Tax {
 	}
 
 	/**
+	 * Get a rates code. Code is made up of COUNTRY-STATE-NAME-Priority. E.g GB-VAT-1, US-AL-TAX-1
+	 *
+	 * @access public
+	 * @param mixed $key
+	 * @return void
+	 */
+	function get_rate_code( $key ) {
+		global $wpdb;
+
+		$rate = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
+
+		$code = array();
+
+		$code[] = $rate->tax_rate_country;
+		$code[] = $rate->tax_rate_state;
+		$code[] = $rate->tax_rate_name ? $rate->tax_rate_name : 'TAX';
+		$code[] = absint( $rate->tax_rate_priority );
+
+		return apply_filters( 'woocommerce_rate_code', strtoupper( implode( '-', array_filter( $code ) ) ), $key, $this );
+	}
+
+	/**
 	 * Round tax lines and return the sum.
 	 *
 	 * @param   array
@@ -506,7 +528,7 @@ class WC_Tax {
 	 * Round to currency DP.
 	 */
 	function round( $in ) {
-		$decimals = ( '' != get_option( 'woocommerce_price_num_decimals' ) ) ? get_option( 'woocommerce_price_num_decimals' ) : 0;
+		$decimals = (int) get_option( 'woocommerce_price_num_decimals' );
 		return round( $in, $decimals );
 	}
 

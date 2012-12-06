@@ -79,6 +79,15 @@ function woocommerce_update_options( $options ) {
 		               $option_value = '';
 		            }
 
+	    		} elseif ( $value['id'] == 'woocommerce_price_num_decimals' ) {
+
+					// price separators get a special treatment as they should allow a spaces (don't trim)
+					if ( isset( $_POST[ $value['id'] ] )  ) {
+						$option_value = absint( esc_attr( $_POST[ $value['id'] ] ) );
+					} else {
+		               $option_value = 2;
+		            }
+
 		        } else {
 
 			       if ( isset( $_POST[$value['id']] ) ) {

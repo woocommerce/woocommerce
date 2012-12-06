@@ -2,14 +2,15 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 ?>
 <div class="tax_row" data-order_item_id="<?php echo $item_id; ?>">
-	<p class="first">
-		<label><?php _e( 'Tax Label:', 'woocommerce' ) ?></label>
-		<input type="text" name="order_taxes_label[<?php echo $item_id; ?>]" placeholder="<?php echo $woocommerce->countries->tax_or_vat(); ?>" value="<?php if ( isset( $item['name'] ) ) echo esc_attr( $item['name'] ); ?>" />
+	<p class="wide">
+		<label><?php _e( 'Tax Rate:', 'woocommerce' ) ?></label>
+		<select name="order_taxes_rate_id[<?php echo $item_id; ?>]">
+			<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
+			<?php foreach( $tax_codes as $tax_id => $tax_code ) : ?>
+				<option value="<?php echo $tax_id; ?>" <?php selected( $tax_id, woocommerce_get_order_item_meta( $item_id, 'rate_id', true ) ); ?>><?php echo esc_html( $tax_code ); ?></option>
+			<?php endforeach; ?>
+		</select>
 		<input type="hidden" name="order_taxes_id[<?php echo $item_id; ?>]" value="<?php echo esc_attr( $item_id ); ?>" />
-	</p>
-	<p class="last">
-		<label><?php _e( 'Compound:', 'woocommerce' ) ?>
-		<input type="checkbox" name="order_taxes_compound[<?php echo $item_id; ?>]" <?php if ( isset( $item['compound'] ) ) checked( $item['compound'], 1 ); ?> /></label>
 	</p>
 	<p class="first">
 		<label><?php _e( 'Sales Tax:', 'woocommerce' ) ?></label>
