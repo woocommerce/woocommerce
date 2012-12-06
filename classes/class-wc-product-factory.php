@@ -18,7 +18,7 @@ class WC_Product_Factory {
 	 * @access public
 	 * @param bool $the_product (default: false)
 	 * @param array $args (default: array())
-	 * @return void
+	 * @return WC_Product_Simple
 	 */
 	public function get_product( $the_product = false, $args = array() ) {
 		global $post;
