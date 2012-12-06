@@ -469,3 +469,38 @@ function woocommerce_wp_select( $field ) {
 	}
 	echo '</p>';
 }
+
+/**
+ * Output a radio input box.
+ *
+ * @access public
+ * @param array $field
+ * @return void
+ */
+function woocommerce_wp_radio( $field ) {
+	global $thepostid, $post, $woocommerce;
+
+	$thepostid 				= empty( $thepostid ) ? $post->ID : $thepostid;
+	$field['class'] 		= isset( $field['class'] ) ? $field['class'] : 'select short';
+	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
+	$field['value'] 		= isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
+
+	echo '<fieldset class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><legend>' . wp_kses_post( $field['label'] ) . '</legend><ul>';
+
+	if ( ! empty( $field['description'] ) ) {
+		echo '<li class="description">' . wp_kses_post( $field['description'] ) . '</li>';
+	}
+
+    foreach ( $field['options'] as $key => $value ) {
+
+		echo '<li><label><input
+        		name="' . esc_attr( $field['id'] ) . '"
+        		value="' . esc_attr( $key ) . '"
+        		type="radio"
+        		class="' . esc_attr( $field['class'] ) . '"
+        		' . checked( esc_attr( $field['value'] ), esc_attr( $key ), false ) . '
+        		/> ' . esc_html( $value ) . '</label>
+    	</li>';
+	}
+    echo '</ul></fieldset>';
+}
