@@ -14,7 +14,7 @@ class WC_Order {
 	/** @var int Order (post) ID */
 	var $id;
 
-	/** @var string Coupon code. */
+	/** @var string Order status. */
 	var $status;
 
 	/** @var string Order date (placed). */
@@ -146,6 +146,9 @@ class WC_Order {
 	/** @var string */
 	var $formatted_shipping_address;
 
+	/** @var string */
+	var $post_status;
+
 	/**
 	 * Get the order if ID is passed, otherwise the order is new and empty.
 	 *
@@ -196,6 +199,7 @@ class WC_Order {
 		$this->order_date = $result->post_date;
 		$this->modified_date = $result->post_modified;
 		$this->customer_note = $result->post_excerpt;
+		$this->post_status = $result->post_status;
 		$this->order_custom_fields = get_post_custom( $this->id );
 
 		// Define the data we're going to load: Key => Default value
@@ -1198,6 +1202,7 @@ class WC_Order {
 				if ( $new_status->slug == 'cancelled' )
 					$this->decrease_coupon_usage_counts();
 
+				$this->status = $new_status->slug;
 			}
 
 		}

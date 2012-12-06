@@ -113,9 +113,9 @@
 	}
 }
 
-@media 
-(-webkit-min-device-pixel-ratio: 2), 
-(min-resolution: 192dpi) { 
+@media
+(-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
 	#woocommerce_extensions {
 		background-image: url(../images/icons/wc_icon@2x.png);
 		background-size: 16px 17px;
@@ -142,9 +142,9 @@
 	background-size: auto !important;
 }
 
-@media 
-(-webkit-min-device-pixel-ratio: 2), 
-(min-resolution: 192dpi) { 
+@media
+(-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
 	#icon-woocommerce, .woocommerce_icon, .icon32-posts-product, .icon32-posts-shop_order, .icon32-posts-shop_coupon, .icon32-posts-product_variation {
 		background-image: url(../images/icons/woocommerce-icons-x2.png) !important;
 		background-size: 986px 91px !important;
@@ -1017,9 +1017,9 @@ table.wp-list-table {
 	.column-is_in_stock {
 		text-align: left !important;
 	}
-	@media 
-	(-webkit-min-device-pixel-ratio: 2), 
-	(min-resolution: 192dpi) { 
+	@media
+	(-webkit-min-device-pixel-ratio: 2),
+	(min-resolution: 192dpi) {
 		span.product-type {
 			background-image: url(../images/product_types-x2.png) !important;
 			background-size:96px 16px !important;
@@ -1672,9 +1672,9 @@ img.help_tip {
 	}
 }
 
-@media 
-(-webkit-min-device-pixel-ratio: 2), 
-(min-resolution: 192dpi) { 
+@media
+(-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
 	#woocommerce-product-data ul.product_data_tabs li {
 		&.general_options, &.tax_options, &.inventory_options, &.shipping_options, &.linked_product_options, &.attribute_options, &.variation_options, &.advanced_options {
 			a {
@@ -1854,7 +1854,7 @@ img.help_tip {
 	p {
 		margin: 9px 0 9px;
 	}
-	label {
+	label, legend {
 		float: left;
 		width: 150px;
 		padding: 0;
@@ -1908,6 +1908,31 @@ img.help_tip {
 	}
 	.options_group:last-child {
 		border-bottom: 0;
+	}
+	.options_group fieldset {
+		margin: 9px 0;
+		font-size: 12px;
+		padding: 5px 9px;
+		line-height: 24px;
+		label {
+			width: auto;
+			float: none;
+		}
+		ul {
+			float: left;
+			width: 50%;
+			margin: 0;
+			padding: 0;
+			li {
+				margin: 0;
+				width: auto;
+				input {
+					width: auto;
+					float: none;
+					margin-right: 4px;
+				}
+			}
+		}
 	}
 	.dimensions_field {
 		.wrap {
