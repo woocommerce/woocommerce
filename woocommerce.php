@@ -1045,7 +1045,6 @@ class Woocommerce {
 
 		// Register any scipts for later use, or used as dependencies
 		wp_register_script( 'chosen', $this->plugin_url() . '/assets/js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), $this->version, true );
-		wp_register_script( 'jquery-ui', $this->plugin_url() . '/assets/js/jquery-ui' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 		wp_register_script( 'jquery-blockui', $this->plugin_url() . '/assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 		wp_register_script( 'jquery-placeholder', $this->plugin_url() . '/assets/js/jquery-placeholder/jquery.placeholder' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 

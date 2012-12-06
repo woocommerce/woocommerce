@@ -229,6 +229,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Flat rate shipping - if no rules match, and no default is set, don't return a rate.
 * Tweak - custom_attributes option added to woocommerce_form_field args. Pass name/value pairs.
 * Tweak - Added html5 type inputs to admin with inline validation.
+* Tweak - Use WP Core jquery-ui-slider
 
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.
