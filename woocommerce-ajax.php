@@ -1462,12 +1462,28 @@ add_action('wp_ajax_woocommerce_calc_line_taxes', 'woocommerce_calc_line_taxes')
  * @return void
  */
 function woocommerce_add_line_tax() {
-	global $woocommerce;
+	global $woocommerce, $wpdb;
 
 	check_ajax_referer( 'calc-totals', 'security' );
 
 	$order_id 	= absint( $_POST['order_id'] );
 	$order 		= new WC_Order( $order_id );
+
+ 	// Get tax rates
+	$rates = $wpdb->get_results( "SELECT tax_rate_id, tax_rate_country, tax_rate_state, tax_rate_name, tax_rate_priority FROM {$wpdb->prefix}woocommerce_tax_rates ORDER BY tax_rate_name" );
+
+	$tax_codes = array();
+
+	foreach( $rates as $rate ) {
+		$code = array();
+
+		$code[] = $rate->tax_rate_country;
+		$code[] = $rate->tax_rate_state;
+		$code[] = $rate->tax_rate_name ? sanitize_title( $rate->tax_rate_name ) : 'TAX';
+		$code[] = absint( $rate->tax_rate_priority );
+
+		$tax_codes[ $rate->tax_rate_id ] = strtoupper( implode( '-', array_filter( $code ) ) );
+	}
 
 	// Add line item
    	$item_id = woocommerce_add_order_item( $order_id, array(
@@ -1477,6 +1493,8 @@ function woocommerce_add_line_tax() {
 
  	// Add line item meta
  	if ( $item_id ) {
+ 		woocommerce_add_order_item_meta( $item_id, 'rate_id', '' );
+ 		woocommerce_add_order_item_meta( $item_id, 'label', '' );
 	 	woocommerce_add_order_item_meta( $item_id, 'compound', '' );
 	 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', '' );
 	 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', '' );

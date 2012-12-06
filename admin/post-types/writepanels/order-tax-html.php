@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 		<select name="order_taxes_rate_id[<?php echo $item_id; ?>]">
 			<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
 			<?php foreach( $tax_codes as $tax_id => $tax_code ) : ?>
-				<option value="<?php echo $tax_id; ?>" <?php selected( $tax_id, woocommerce_get_order_item_meta( $item_id, 'rate_id', true ) ); ?>><?php echo esc_html( $tax_code ); ?></option>
+				<option value="<?php echo $tax_id; ?>" <?php selected( $tax_id, isset( $item['rate_id'] ) ? $item['rate_id'] : '' ); ?>><?php echo esc_html( $tax_code ); ?></option>
 			<?php endforeach; ?>
 		</select>
 		<input type="hidden" name="order_taxes_id[<?php echo $item_id; ?>]" value="<?php echo esc_attr( $item_id ); ?>" />
