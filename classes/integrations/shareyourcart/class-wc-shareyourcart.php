@@ -22,8 +22,11 @@ class WC_ShareYourCart extends WC_Integration {
 		// Load the settings.
 		$this->settings = ( array ) get_option( $this->plugin_id . $this->id . '_settings' ); //do not rely on the base implementation of init_settings
 
-		//the classes need to be initialized
-		$this->init_share_your_cart();
+		if ( isset( $this->settings['enabled'] ) && $this->settings['enabled'] == 'yes' ) {
+
+			//the classes need to be initialized
+			$this->init_share_your_cart();
+		}
 
 		//hook to the admin settings page
 		add_action( 'woocommerce_update_options_integration_shareyourcart', array( &$this, 'process_forms') );
@@ -69,6 +72,7 @@ class WC_ShareYourCart extends WC_Integration {
 	function process_forms() {
 
 		//after this function completes, WooCommerce will refresh the page, so we need to save the data here
+		$this->init_share_your_cart();
 
 		//stripslashes from button_html
 		if(isset($_POST['button_html']))
@@ -89,6 +93,8 @@ class WC_ShareYourCart extends WC_Integration {
 	 * @since 1.0.0
 	 */
 	function admin_options() {
+
+		$this->init_share_your_cart();
 
 		if ( $this->shareYourCartWooCommerce->isActive() ) {
 
