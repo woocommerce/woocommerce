@@ -74,7 +74,7 @@ function variable_product_type_options() {
 				<a href="#" class="close_all"><?php _e( 'Close all', 'woocommerce' ); ?></a><a href="#" class="expand_all"><?php _e( 'Expand all', 'woocommerce' ); ?></a>
 				<strong><?php _e( 'Bulk edit:', 'woocommerce' ); ?></strong>
 				<select id="field_to_edit">
-					<option value="variable_price"><?php _e( 'Prices', 'woocommerce' ); ?></option>
+					<option value="variable_regular_price"><?php _e( 'Prices', 'woocommerce' ); ?></option>
 					<option value="variable_sale_price"><?php _e( 'Sale prices', 'woocommerce' ); ?></option>
 					<option value="variable_stock"><?php _e( 'Stock', 'woocommerce' ); ?></option>
 					<option value="variable_weight"><?php _e( 'Weight', 'woocommerce' ); ?></option>
