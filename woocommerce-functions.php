@@ -822,7 +822,7 @@ function woocommerce_cancel_order() {
 
 		$order = new WC_Order( $order_id );
 
-		if ($order->id == $order_id && $order->order_key == $order_key && in_array($order->status, array('pending', 'failed')) && $woocommerce->verify_nonce('cancel_order', '_GET')) :
+		if ( $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, array( 'pending', 'failed' ) ) && $woocommerce->verify_nonce( 'cancel_order', '_GET' ) ) :
 
 			// Cancel the order + restore stock
 			$order->cancel_order( __('Order cancelled by customer.', 'woocommerce' ) );
@@ -832,7 +832,7 @@ function woocommerce_cancel_order() {
 
 			do_action( 'woocommerce_cancelled_order', $order->id );
 
-		elseif ($order->status!='pending') :
+		elseif ( $order->status != 'pending' ) :
 
 			$woocommerce->add_error( __( 'Your order is no longer pending and could not be cancelled. Please contact us if you need assistance.', 'woocommerce' ) );
 
@@ -915,7 +915,7 @@ function woocommerce_download_product() {
 		if ( $order_id ) {
 			$order = new WC_Order( $order_id );
 
-			if ( ! $order->is_download_permitted() || $order->status != 'publish' )
+			if ( ! $order->is_download_permitted() || $order->post_status != 'publish' )
 				wp_die( __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . home_url() . '">' . __( 'Go to homepage &rarr;', 'woocommerce' ) . '</a>' );
 		}
 

@@ -293,6 +293,7 @@ abstract class WC_Product {
 	function get_file_download_path( $download_id ) {
 
 		$file_paths = isset( $this->product_custom_fields['_file_paths'][0] ) ? $this->product_custom_fields['_file_paths'][0] : '';
+		$file_paths = maybe_unserialize( $file_paths );
 		$file_paths = apply_filters( 'woocommerce_file_download_paths', $file_paths, $this->id, null, null );
 
 		if ( ! $download_id && count( $file_paths ) == 1 ) {
