@@ -251,10 +251,10 @@ function woocommerce_add_to_cart_action( $url = false ) {
     // Variable product handling
     if ( $adding_to_cart->is_type( 'variable' ) ) {
 
-    	$variation_id 		= empty( $_REQUEST['variation_id'] ) ? '' : absint( $_REQUEST['variation_id'] );
-    	$quantity 			= empty( $_REQUEST['quantity'] ) ? 1 : apply_filters( 'woocommerce_stock_amount', $_REQUEST['quantity'] );
+    	$variation_id       = empty( $_REQUEST['variation_id'] ) ? '' : absint( $_REQUEST['variation_id'] );
+    	$quantity           = empty( $_REQUEST['quantity'] ) ? 1 : apply_filters( 'woocommerce_stock_amount', $_REQUEST['quantity'] );
     	$all_variations_set = true;
-    	$variations 		= array();
+    	$variations         = array();
 
 		// Only allow integer variation ID - if its not set, redirect to the product page
 		if ( empty( $variation_id ) ) {
@@ -263,23 +263,35 @@ function woocommerce_add_to_cart_action( $url = false ) {
 			exit;
 		}
 
-		$attributes = (array) maybe_unserialize( get_post_meta( $product_id, '_product_attributes', true ) );
+		$attributes = $adding_to_cart->get_attributes();
+		$variation  = get_product( $variation_id );
 
-		// Verify all attributes for the variable product were set
+		// Verify all attributes
 		foreach ( $attributes as $attribute ) {
             if ( ! $attribute['is_variation'] )
             	continue;
 
             $taxonomy = 'attribute_' . sanitize_title( $attribute['name'] );
-            if ( ! empty( $_REQUEST[$taxonomy] ) ) {
-                // Get value from post data
-                $value = esc_attr( stripslashes( $_REQUEST[ $taxonomy ] ) );
 
-                // Use name so it looks nicer in the cart widget/order page etc - instead of a sanitized string
-                $variations[ esc_attr( $attribute['name'] ) ] = $value;
-			} else {
-                $all_variations_set = false;
-            }
+            if ( ! empty( $_REQUEST[ $taxonomy ] ) ) {
+
+                // Get value from post data
+                $value = woocommerce_clean( $_REQUEST[ $taxonomy ] );
+
+                // Get valid value from variation
+                $valid_value = $variation->variation_data[ $taxonomy ];
+
+                // Allow if valid
+                if ( $valid_value == '' || $valid_value == $value ) {
+
+	                // Use name so it looks nicer in the cart widget/order page etc - instead of a sanitized string
+	                $variations[ esc_html( $attribute['name'] ) ] = $value;
+	                continue;
+	            }
+
+			}
+
+            $all_variations_set = false;
         }
 
         if ( $all_variations_set ) {
