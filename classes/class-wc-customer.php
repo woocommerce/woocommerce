@@ -589,7 +589,7 @@ class WC_Customer {
 					}
 
 					// order exists and downloads permitted?
-					if ( ! $order->id || ! $order->is_download_permitted() ) continue;
+					if ( ! $order->id || ! $order->is_download_permitted() || $order->status != 'publish' ) continue;
 
 					if ( ! $_product || $_product->id != $result->product_id ) :
 						// new product

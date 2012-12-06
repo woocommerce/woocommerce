@@ -28,7 +28,7 @@ function woocommerce_attributes() {
 
 		check_admin_referer( 'woocommerce-add-new_attribute' );
 
-		$attribute_name 	= sanitize_title( esc_attr( $_POST['attribute_name'] ) );
+		$attribute_name 	= woocommerce_sanitize_taxonomy_name( stripslashes( $_POST['attribute_name'] ) );
 		$attribute_type 	= esc_attr( $_POST['attribute_type'] );
 		$attribute_label 	= esc_attr( $_POST['attribute_label'] );
 		$attribute_orderby 	= esc_attr( $_POST['attribute_orderby'] );
@@ -38,6 +38,9 @@ function woocommerce_attributes() {
 
 		if ( ! $attribute_name )
 			$attribute_name = sanitize_title( $attribute_label );
+
+		if ( strlen( $attribute_name ) >= 30 )
+			echo '<div id="woocommerce_errors" class="error fade"><p>' . sprintf( __( 'Slug %s is too long', 'woocommerce' ), sanitize_title( $attribute_name ) ) . '</p></div>';
 
 		if ( $attribute_name && strlen( $attribute_name ) < 30 && $attribute_type && ! taxonomy_exists( $woocommerce->attribute_taxonomy_name( $attribute_name ) ) ) {
 
@@ -60,7 +63,7 @@ function woocommerce_attributes() {
 		$edit = absint( $_GET['edit'] );
 		check_admin_referer( 'woocommerce-save-attribute_' . $edit );
 
-		$attribute_name 	= sanitize_title( esc_attr( $_POST['attribute_name'] ) );
+		$attribute_name 	= woocommerce_sanitize_taxonomy_name( stripslashes( $_POST['attribute_name'] ) );
 		$attribute_type	 	= esc_attr( $_POST['attribute_type'] );
 		$attribute_label 	= esc_attr( $_POST['attribute_label'] );
 		$attribute_orderby	= esc_attr( $_POST['attribute_orderby'] );
@@ -71,7 +74,7 @@ function woocommerce_attributes() {
 		if ( ! $attribute_name )
 			$attribute_name = sanitize_title( $attribute_label );
 
-		$old_attribute_name = sanitize_title( $wpdb->get_var( "SELECT attribute_name FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = $edit" ) );
+		$old_attribute_name = woocommerce_sanitize_taxonomy_name( $wpdb->get_var( "SELECT attribute_name FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = $edit" ) );
 
 		if ( $old_attribute_name != $attribute_name && taxonomy_exists( $woocommerce->attribute_taxonomy_name( $attribute_name ) ) ) {
 

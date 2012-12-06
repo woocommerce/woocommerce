@@ -283,10 +283,6 @@ function variable_product_type_options() {
 
 					var count = parseInt( response );
 
-					if (count>0) {
-						jQuery('.woocommerce_variations').load( window.location + ' .woocommerce_variations > *' );
-					}
-
 					if (count==1) {
 						alert( count + ' <?php _e( "variation added", 'woocommerce' ); ?>');
 					} else if (count==0 || count>1) {
@@ -295,7 +291,17 @@ function variable_product_type_options() {
 						alert('<?php _e( "No variations added", 'woocommerce' ); ?>');
 					}
 
-					jQuery('#variable_product_options').unblock();
+					if (count>0) {
+						var this_page = window.location.toString();
+
+						this_page = this_page.replace( 'post-new.php?', 'post.php?post=<?php echo $post->ID; ?>&action=edit&' );
+
+						$('#variable_product_options').load( this_page + ' #variable_product_options_inner', function() {
+							$('#variable_product_options').unblock();
+						} );
+					} else {
+						$('#variable_product_options').unblock();
+					}
 
 				});
 			}

@@ -35,7 +35,9 @@ class WC_Product_Factory {
 		$product_id = absint( $the_product->ID );
 		$post_type  = $the_product->post_type;
 
-		if ( 'product_variation' == $post_type ) {
+		if ( isset( $args['product_type'] ) ) {
+			$product_type = $args['product_type'];
+		} elseif ( 'product_variation' == $post_type ) {
 			$product_type = 'variation';
 		} else {
 			$terms        = get_the_terms( $product_id, 'product_type' );

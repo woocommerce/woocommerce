@@ -174,21 +174,21 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	function get_children() {
 
-		if (!is_array($this->children)) :
+		if ( ! is_array( $this->children ) ) {
 
 			$this->children = array();
 
 			$transient_name = 'wc_product_children_ids_' . $this->id;
 
-        	if ( false === ( $this->children = get_transient( $transient_name ) ) ) :
+        	if ( false === ( $this->children = get_transient( $transient_name ) ) ) {
 
 		        $this->children = get_posts( 'post_parent=' . $this->id . '&post_type=product_variation&orderby=menu_order&order=ASC&fields=ids&post_status=any&numberposts=-1' );
 
 				set_transient( $transient_name, $this->children );
 
-			endif;
+			}
 
-		endif;
+		}
 
 		return (array) $this->children;
 	}

@@ -414,13 +414,13 @@ function woocommerce_add_to_cart_message( $product_id ) {
 	// Output success messages
 	if ( get_option( 'woocommerce_cart_redirect_after_add' ) == 'yes' ) :
 
-		$return_to 	= wp_get_referer() ? wp_get_referer() : home_url();
+		$return_to 	= apply_filters( 'woocommerce_continue_shopping_redirect', wp_get_referer() ? wp_get_referer() : home_url() );
 
 		$message 	= sprintf('<a href="%s" class="button">%s</a> %s', $return_to, __( 'Continue Shopping &rarr;', 'woocommerce' ), $added_text );
 
 	else :
 
-		$message 	= sprintf('<a href="%s" class="button">%s</a> %s', get_permalink(woocommerce_get_page_id('cart')), __( 'View Cart &rarr;', 'woocommerce' ), $added_text );
+		$message 	= sprintf('<a href="%s" class="button">%s</a> %s', get_permalink( woocommerce_get_page_id( 'cart' ) ), __( 'View Cart &rarr;', 'woocommerce' ), $added_text );
 
 	endif;
 
@@ -610,18 +610,17 @@ function woocommerce_process_login() {
 				$woocommerce->add_error( $user->get_error_message() );
 			else :
 
-				if (isset($_POST['redirect']) && $_POST['redirect']) :
-					wp_safe_redirect( esc_attr($_POST['redirect']) );
-					exit;
-				endif;
+				if (isset($_POST['redirect']) && $_POST['redirect']) {
+					$redirect = esc_attr($_POST['redirect']);
+				} else if ( wp_get_referer() ) {
+					$redirect = wp_safe_redirect( wp_get_referer() );
+				} else {
+					$redirect = get_permalink(woocommerce_get_page_id('myaccount'));
+				}
 
-				if ( wp_get_referer() ) :
-					wp_safe_redirect( wp_get_referer() );
-					exit;
-				endif;
-
-				wp_redirect(get_permalink(woocommerce_get_page_id('myaccount')));
+				wp_redirect(apply_filters('woocommerce_login_redirect', $redirect, $user));
 				exit;
+
 			endif;
 
 		endif;
@@ -904,7 +903,7 @@ function woocommerce_download_product() {
 		if ( $order_id ) {
 			$order = new WC_Order( $order_id );
 
-			if ( ! $order->is_download_permitted() && $order->status != 'publish' )
+			if ( ! $order->is_download_permitted() || $order->status != 'publish' )
 				wp_die( __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . home_url() . '">' . __( 'Go to homepage &rarr;', 'woocommerce' ) . '</a>' );
 		}
 

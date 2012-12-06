@@ -93,3 +93,62 @@ function woocommerce_custom_coupon_columns( $column ) {
 }
 
 add_action( 'manage_shop_coupon_posts_custom_column', 'woocommerce_custom_coupon_columns', 2 );
+
+/**
+ * Show custom filters to filter coupons by type.
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_restrict_manage_coupons() {
+	global $woocommerce, $typenow, $wp_query;
+
+	if ( $typenow != 'shop_coupon' )
+		return;
+
+	// Type
+	?>
+	<select name='coupon_type' id='dropdown_shop_coupon_type'>
+		<option value=""><?php _e( 'Show all statuses', 'woocommerce' ); ?></option>
+		<?php
+			$types = $woocommerce->get_coupon_discount_types();
+
+			foreach ( $types as $name => $type ) {
+				echo '<option value="' . esc_attr( $name ) . '"';
+
+				if ( isset( $_GET['coupon_type'] ) )
+					selected( $name, $_GET['coupon_type'] );
+
+				echo '>' . esc_html__( $type, 'woocommerce' ) . '</option>';
+			}
+		?>
+		</select>
+	<?php
+
+	$woocommerce->add_inline_js( "
+		jQuery('select#dropdown_shop_coupon_type, select[name=m]').css('width', '150px').chosen();
+	" );
+}
+
+add_action( 'restrict_manage_posts', 'woocommerce_restrict_manage_coupons' );
+
+/**
+ * Filter the coupons by the type.
+ *
+ * @access public
+ * @param mixed $vars
+ * @return array
+ */
+function woocommerce_coupons_by_type_query( $vars ) {
+	global $typenow, $wp_query;
+    if ( $typenow == 'shop_coupon' && ! empty( $_GET['coupon_type'] ) ) {
+
+		$vars['meta_key'] = 'discount_type';
+		$vars['meta_value'] = woocommerce_clean( $_GET['coupon_type'] );
+
+	}
+
+	return $vars;
+}
+
+add_filter( 'request', 'woocommerce_coupons_by_type_query' );

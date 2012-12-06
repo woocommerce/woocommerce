@@ -83,6 +83,7 @@ class WC_Tax {
 		) );
 
 		// Put results into array
+		$matched_tax_rates = array();
 		foreach ( $found_rates as $found_rate )
 			$matched_tax_rates[ $found_rate->tax_rate_id ] = array(
 				'rate'     => $found_rate->tax_rate,
