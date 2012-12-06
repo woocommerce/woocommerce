@@ -14,7 +14,7 @@ class WC_Order {
 	/** @var int Order (post) ID */
 	var $id;
 
-	/** @var string Coupon code. */
+	/** @var string Order status. */
 	var $status;
 
 	/** @var string Order date (placed). */
@@ -1198,6 +1198,7 @@ class WC_Order {
 				if ( $new_status->slug == 'cancelled' )
 					$this->decrease_coupon_usage_counts();
 
+				$this->status = $new_status->slug;
 			}
 
 		}
