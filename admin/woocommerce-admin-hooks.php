@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @see woocomerce_check_download_folder_protection()
  * @see woocommerce_ms_protect_download_rewite_rules()
  */
-add_action('delete_post', 'woocommerce_delete_post');
+add_action('before_delete_post', 'woocommerce_delete_post');
 add_action('admin_init', 'woocommerce_preview_emails');
 add_action('admin_init', 'woocommerce_prevent_admin_access');
 add_action('woocommerce_settings_saved', 'woocomerce_check_download_folder_protection');
