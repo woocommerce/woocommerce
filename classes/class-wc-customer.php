@@ -602,8 +602,24 @@ class WC_Customer {
 					if ( ! $_product->has_file( $result->download_id ) ) continue;
 
 					// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files
-					$download_name = $_product->get_title() . ( $file_number > 0 ? ' &mdash; ' . sprintf( __( 'File %d', 'woocommerce' ), $file_number + 1 ) : '' );
-					if ( $file_number == 1 ) $downloads[ count( $downloads ) - 1 ]['download_name'] .= ' &mdash; ' . sprintf( __( 'File %d', 'woocommerce' ), $file_number );
+					$download_name = apply_filters(
+						'woocommerce_downloadable_product_name',
+						$_product->get_title() . ( $file_number > 0 ? ' &mdash; ' . sprintf( __( 'File %d', 'woocommerce' ), $file_number + 1 ) : '' ),
+						$_product,
+						$result->download_id,
+						$file_number
+					);
+
+					// Rename previous download with file number if there are multiple files only
+					if ( $file_number == 1 ) {
+						$downloads[ count( $downloads ) - 1 ]['download_name'] = apply_filters(
+							'woocommerce_downloadable_product_name',
+							$downloads[ count( $downloads ) - 1 ]['download_name'] . ' &mdash; ' . sprintf( __( 'File %d', 'woocommerce' ), $file_number ),
+							$_product,
+							$result->download_id,
+							0
+						);
+					}
 
 					$downloads[] = array(
 						'download_url' => add_query_arg( array( 'download_file' => $result->product_id, 'order' => $result->order_key, 'email' => $result->user_email, 'key' => $result->download_id ), trailingslashit( home_url() ) ),
