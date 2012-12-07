@@ -912,64 +912,79 @@ jQuery( function($){
 		// Get value
 		var select_val = $(this).val();
 
-		$('.hide_if_grouped, .hide_if_external').show();
-		$('.show_if_simple, .show_if_variable, .show_if_grouped, .show_if_external').hide();
-
-		if (select_val=='simple') {
-			$('.show_if_simple').show();
+		if (select_val=='variable') {
 			$('input#_manage_stock').change();
-		}
-
-		else if (select_val=='variable') {
-			$('.show_if_variable').show();
-			$('input#_manage_stock').change();
-			$('input#_downloadable').prop('checked', false).change();
-			$('input#_virtual').removeAttr('checked').change();
+			$('input#_downloadable').prop('checked', false);
+			$('input#_virtual').removeAttr('checked');
 		}
 
 		else if (select_val=='grouped') {
-			$('.show_if_grouped').show();
-			$('input#_downloadable').prop('checked', false).change();
-			$('input#_virtual').removeAttr('checked').change();
-			$('.hide_if_grouped').hide();
+			$('input#_downloadable').prop('checked', false);
+			$('input#_virtual').removeAttr('checked');
 		}
 
 		else if (select_val=='external') {
-			$('.show_if_external').show();
-			$('input#_downloadable').prop('checked', false).change();
-			$('input#_virtual').removeAttr('checked').change();
-			$('.hide_if_external').hide();
+			$('input#_downloadable').prop('checked', false);
+			$('input#_virtual').removeAttr('checked');
 		}
+
+
+		show_and_hide_panels();
 
 		$('ul.wc-tabs li:visible').eq(0).find('a').click();
 
 		$('body').trigger('woocommerce-product-type-change', select_val, $(this) );
-
 	}).change();
 
-	$('input#_downloadable').change(function(){
+	$('input#_downloadable, input#_virtual').change(function(){
+		show_and_hide_panels();
+	});
 
-		$('.show_if_downloadable').hide();
+	function show_and_hide_panels() {
+		var product_type    = $('select#product-type').val();
+		var is_virtual      = $('input#_virtual:checked').size();
+		var is_downloadable = $('input#_downloadable:checked').size();
 
-		if ($('input#_downloadable').is(':checked')) {
+		// Hide/Show all with rules
+		$('.hide_if_simple, .hide_if_grouped, .hide_if_variable, .hide_if_external, .hide_if_downloadable, .hide_if_virtual').show();
+		$('.show_if_simple, .show_if_grouped, .show_if_variable, .show_if_external, .show_if_downloadable, .show_if_virtual').hide();
+
+		// Shows rules
+		if ( is_downloadable ) {
 			$('.show_if_downloadable').show();
 		}
-
-		if ($('.downloads_tab').is('.active')) $('ul.wc-tabs li:visible').eq(0).find('a').click();
-
-	}).change();
-
-	$('input#_virtual').change(function(){
-
-		$('.show_if_virtual').hide();
-		$('.hide_if_virtual').show();
-
-		if ($('input#_virtual').is(':checked')) {
+		if ( is_virtual ) {
 			$('.show_if_virtual').show();
+		}
+
+		if ( product_type == 'simple' ) {
+			$('.show_if_simple').show();
+		} else if ( product_type == 'variable' ) {
+			$('.show_if_variable').show();
+		} else if ( product_type == 'grouped' ) {
+			$('.show_if_grouped').show();
+		} else if ( product_type == 'external' ) {
+			$('.show_if_external').show();
+		}
+
+		// Hide rules
+		if ( is_downloadable ) {
+			$('.hide_if_downloadable').hide();
+		}
+		if ( is_virtual ) {
 			$('.hide_if_virtual').hide();
 		}
 
-	}).change();
+		if ( product_type == 'simple' ) {
+			$('.hide_if_simple').hide();
+		} else if ( product_type == 'variable' ) {
+			$('.hide_if_variable').hide();
+		} else if ( product_type == 'grouped' ) {
+			$('.hide_if_grouped').hide();
+		} else if ( product_type == 'external' ) {
+			$('.hide_if_external').hide();
+		}
+	}
 
 
 	// Sale price schedule

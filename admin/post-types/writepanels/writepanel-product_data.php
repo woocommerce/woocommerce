@@ -91,7 +91,7 @@ function woocommerce_product_data_box() {
 		</ul>
 		<div id="general_product_data" class="panel woocommerce_options_panel"><?php
 
-			echo '<div class="options_group show_if_simple show_if_variable show_if_external">';
+			echo '<div class="options_group hide_if_grouped">';
 
 				// SKU
 				if( get_option('woocommerce_enable_sku', true) !== 'no' )
