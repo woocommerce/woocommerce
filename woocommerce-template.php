@@ -1230,23 +1230,30 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		global $woocommerce;
 
 		$defaults = array(
-			'type'        => 'text',
-			'label'       => '',
-			'placeholder' => '',
-			'maxlength'   => false,
-			'required'    => false,
-			'class'       => array(),
-			'label_class' => array(),
-			'return'      => false,
-			'options'     => array(),
-			'custom_attributes'  => array()
+			'type'              => 'text',
+			'label'             => '',
+			'placeholder'       => '',
+			'maxlength'         => false,
+			'required'          => false,
+			'class'             => array(),
+			'label_class'       => array(),
+			'return'            => false,
+			'options'           => array(),
+			'custom_attributes' => array(),
+			'validate'          => array()
 		);
 
 		$args = wp_parse_args( $args, $defaults  );
 
 		if ( ( ! empty( $args['clear'] ) ) ) $after = '<div class="clear"></div>'; else $after = '';
 
-		$required = ( $args['required']  ) ? ' <abbr class="required" title="' . esc_attr__( 'required', 'woocommerce'  ) . '">*</abbr>' : '';
+		if ( $args['required'] ) {
+			$args['class'][] = 'validate-required';
+			$required = ' <abbr class="required" title="' . esc_attr__( 'required', 'woocommerce'  ) . '">*</abbr>';
+		} else {
+			$required = '';
+		}
+
 		$args['maxlength'] = ( $args['maxlength'] ) ? 'maxlength="' . absint( $args['maxlength'] ) . '"' : '';
 
 		// Custom attribute handling
@@ -1255,6 +1262,10 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		if ( ! empty( $args['custom_attributes'] ) && is_array( $args['custom_attributes'] ) )
 			foreach ( $args['custom_attributes'] as $attribute => $value )
 				$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
+
+		if ( ! empty( $args['validate'] ) )
+			foreach( $args['validate'] as $validate )
+				$args['class'][] = 'validate-' . $validate;
 
 		switch ( $args['type'] ) {
 		case "country" :

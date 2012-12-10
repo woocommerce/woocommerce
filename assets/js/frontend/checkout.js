@@ -189,6 +189,37 @@ jQuery(document).ready(function($) {
 		return false;
 	});
 
+	/* Inline validation */
+	$('form.checkout').on( 'blur change', '.input-text, select', function() {
+		var $this = $(this);
+		var $parent = $this.closest('.form-row');
+		var validated = true;
+
+		if ( $parent.is( '.validate-required' ) ) {
+			if ( $this.val() == '' ) {
+				$parent.removeClass( 'wc-validated' ).addClass( 'wc-error wc-error-required-field' );
+				validated = false;
+			}
+		}
+
+		if ( $parent.is( '.validate-email' ) ) {
+			if ( $this.val() ) {
+
+				/* http://stackoverflow.com/questions/2855865/jquery-validate-e-mail-address-regex */
+				var pattern = new RegExp(/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i);
+
+				if ( ! pattern.test( $this.val()  ) ) {
+					$parent.removeClass( 'wc-validated' ).addClass( 'wc-error wc-error-email' );
+					validated = false;
+				}
+			}
+		}
+
+		if ( validated ) {
+			$parent.removeClass( 'wc-error wc-error-required-field' ).addClass( 'wc-validated' );
+		}
+	} );
+
 	/* AJAX Form Submission */
 	$('form.checkout').submit( function() {
 		clearTimeout( updateTimer );
@@ -225,6 +256,7 @@ jQuery(document).ready(function($) {
 								$('.woocommerce_error, .woocommerce_message').remove();
 								$form.prepend( result.messages );
 								$form.removeClass('processing').unblock();
+								$form.find( '.input-text, select' ).blur();
 
 								if (result.refresh=='true') $('body').trigger('update_checkout');
 
@@ -240,6 +272,7 @@ jQuery(document).ready(function($) {
 							$('.woocommerce_error, .woocommerce_message').remove();
 						  	$form.prepend( code );
 							$form.removeClass('processing').unblock();
+							$form.find( '.input-text, select' ).blur();
 
 							$('html, body').animate({
 							    scrollTop: ($('form.checkout').offset().top - 100)

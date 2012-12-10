@@ -1167,7 +1167,8 @@ class WC_Countries {
 				'label' 		=> __( 'Email Address', 'woocommerce' ),
 				'placeholder' 	=> _x('Email Address', 'placeholder', 'woocommerce'),
 				'required' 		=> true,
-				'class' 		=> array('form-row-first')
+				'class' 		=> array('form-row-first'),
+				'validate'		=> array('email'),
 			);
 			$address_fields['billing_phone'] = array(
 				'label' 		=> __( 'Phone', 'woocommerce' ),
