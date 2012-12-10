@@ -54,6 +54,8 @@ global $woocommerce;
 
 		<?php endforeach; ?>
 
+		<div class="clear"></div>
+
 	</div>
 
 	<?php do_action( 'woocommerce_after_checkout_registration_form', $checkout ); ?>
