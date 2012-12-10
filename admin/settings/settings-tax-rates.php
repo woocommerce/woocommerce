@@ -252,12 +252,48 @@ function woocommerce_tax_rates_setting() {
 				} else {
 					$tbody.append( code );
 				}
+
+				jQuery( "td.country input" ).autocomplete({
+		            source: availableCountries,
+		            minLength: 3
+		        });
+
+		        jQuery( "td.state input" ).autocomplete({
+		            source: availableStates,
+		            minLength: 3
+		        });
+
 				return false;
 			});
 
 			jQuery('.wc_tax_rates td.postcode, .wc_tax_rates td.city').find('input').change(function() {
 				jQuery(this).attr( 'name', jQuery(this).attr( 'data-name' ) );
 			});
+
+			var availableCountries = [<?php
+				$countries = array();
+				foreach ( $woocommerce->countries->get_allowed_countries() as $value => $label )
+					$countries[] = '{ label: "' . $label . '", value: "' . $value . '" }';
+				echo implode( ', ', $countries );
+			?>];
+
+			var availableStates = [<?php
+				$countries = array();
+				foreach ( $woocommerce->countries->get_allowed_country_states() as $value => $label )
+					foreach ( $label as $code => $state )
+						$countries[] = '{ label: "' . $state . '", value: "' . $code . '" }';
+				echo implode( ', ', $countries );
+			?>];
+
+	        jQuery( "td.country input" ).autocomplete({
+	            source: availableCountries,
+	            minLength: 3
+	        });
+
+	        jQuery( "td.state input" ).autocomplete({
+	            source: availableStates,
+	            minLength: 3
+	        });
 		});
 	</script>
 	<?php
