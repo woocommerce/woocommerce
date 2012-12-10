@@ -730,7 +730,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	array(
 		'title' => __( 'Catalog Images', 'woocommerce' ),
 		'desc' 		=> __( 'This size is usually used in product listings', 'woocommerce' ),
-		'id' 		=> 'woocommerce_catalog_image',
+		'id' 		=> 'shop_catalog_image_size',
 		'css' 		=> '',
 		'type' 		=> 'image_width',
 		'default'	=> array(
@@ -744,7 +744,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	array(
 		'title' => __( 'Single Product Image', 'woocommerce' ),
 		'desc' 		=> __( 'This is the size used by the main image on the product page.', 'woocommerce' ),
-		'id' 		=> 'woocommerce_single_image',
+		'id' 		=> 'shop_single_image_size',
 		'css' 		=> '',
 		'type' 		=> 'image_width',
 		'default'	=> array(
@@ -758,7 +758,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	array(
 		'title' => __( 'Product Thumbnails', 'woocommerce' ),
 		'desc' 		=> __( 'This size is usually used for the gallery of images on the product page.', 'woocommerce' ),
-		'id' 		=> 'woocommerce_thumbnail_image',
+		'id' 		=> 'shop_thumbnail_image_size',
 		'css' 		=> '',
 		'type' 		=> 'image_width',
 		'default'	=> array(

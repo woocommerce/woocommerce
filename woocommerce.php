@@ -1279,7 +1279,7 @@ class Woocommerce {
 		if ( ! in_array( $image_size, array( 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ) )
 			return apply_filters( 'woocommerce_get_image_size_' . $image_size, '' );
 
-		$size = get_option( $image_size . '_image', array() );
+		$size = get_option( $image_size . '_image_size', array() );
 
 		$size['width'] 	= isset( $size['width'] ) ? $size['width'] : '300';
 		$size['height'] = isset( $size['height'] ) ? $size['height'] : '300';
