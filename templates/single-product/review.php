@@ -36,7 +36,7 @@ global $post;
 
 						if ( get_option('woocommerce_review_rating_verification_label') == 'yes' )
 							if ( woocommerce_customer_bought_product( $GLOBALS['comment']->comment_author_email, $GLOBALS['comment']->user_id, $post->ID ) )
-								echo '(' . __( 'verified owner', 'woocommerce' ) . ') ';
+								echo '<em class="verified">(' . __( 'verified owner', 'woocommerce' ) . ')</em> ';
 
 					?>&ndash; <time itemprop="datePublished" time datetime="<?php echo get_comment_date('c'); ?>"><?php echo get_comment_date(__( get_option('date_format'), 'woocommerce' )); ?></time>:
 				</p>
