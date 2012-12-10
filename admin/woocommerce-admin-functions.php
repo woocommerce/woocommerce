@@ -107,22 +107,63 @@ function woocommerce_delete_post( $id ) {
 				$woocommerce->clear_product_transients();
 
 			break;
-			case 'shop_order' :
-
-				// Delete count - meta doesn't work on trashed posts
-				$user_id = get_post_meta( $id, '_customer_user', true );
-
-				if ( $user_id > 0 ) {
-					delete_user_meta( $user_id, '_order_count' );
-				}
-
-				delete_transient( 'woocommerce_processing_order_count' );
-
-			break;
 		}
 	}
 }
 
+/**
+ * woocommerce_trash_post function.
+ *
+ * @access public
+ * @param mixed $id
+ * @return void
+ */
+function woocommerce_trash_post( $id ) {
+	if ( $id > 0 ) {
+
+		$post_type = get_post_type( $id );
+
+		if ( 'shop_order' == $post_type ) {
+
+			// Delete count - meta doesn't work on trashed posts
+			$user_id = get_post_meta( $id, '_customer_user', true );
+
+			if ( $user_id > 0 ) {
+				delete_user_meta( $user_id, '_order_count' );
+			}
+
+			delete_transient( 'woocommerce_processing_order_count' );
+		}
+
+	}
+}
+
+/**
+ * woocommerce_untrash_post function.
+ *
+ * @access public
+ * @param mixed $id
+ * @return void
+ */
+function woocommerce_untrash_post( $id ) {
+	if ( $id > 0 ) {
+
+		$post_type = get_post_type( $id );
+
+		if ( 'shop_order' == $post_type ) {
+
+			// Delete count - meta doesn't work on trashed posts
+			$user_id = get_post_meta( $id, '_customer_user', true );
+
+			if ( $user_id > 0 ) {
+				delete_user_meta( $user_id, '_order_count' );
+			}
+
+			delete_transient( 'woocommerce_processing_order_count' );
+		}
+
+	}
+}
 
 /**
  * Preview Emails in WP admin
