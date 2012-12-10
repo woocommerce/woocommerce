@@ -33,6 +33,7 @@ function get_woocommerce_checkout( $atts ) {
 function woocommerce_checkout( $atts ) {
 	global $woocommerce;
 
+	// Prevent cache
 	$woocommerce->nocache();
 
 	// Show non-cart errors
@@ -47,9 +48,12 @@ function woocommerce_checkout( $atts ) {
 	// Check cart contents for errors
 	do_action('woocommerce_check_cart_items');
 
+	// Get checkout object
+	$checkout = $woocommerce->checkout();
+
 	if ( empty( $_POST ) && $woocommerce->error_count() > 0 ) {
 
-		woocommerce_get_template('checkout/cart-errors.php');
+		woocommerce_get_template( 'checkout/cart-errors.php', array( 'checkout' => $checkout ) );
 
 	} else {
 
@@ -58,7 +62,7 @@ function woocommerce_checkout( $atts ) {
 		if ( $woocommerce->error_count() == 0 && $non_js_checkout )
 			$woocommerce->add_message( __( 'The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page.', 'woocommerce' ) );
 
-		woocommerce_get_template('checkout/form-checkout.php');
+		woocommerce_get_template( 'checkout/form-checkout.php', array( 'checkout' => $checkout ) );
 
 	}
 

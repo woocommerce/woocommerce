@@ -30,7 +30,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				<td><?php echo $woocommerce->cart->get_cart_subtotal(); ?></td>
 			</tr>
 
-			<?php if ($woocommerce->cart->get_discounts_before_tax()) : ?>
+			<?php if ( $woocommerce->cart->get_discounts_before_tax() ) : ?>
 
 			<tr class="discount">
 				<th colspan="2"><?php _e( 'Cart Discount', 'woocommerce' ); ?></th>
@@ -241,7 +241,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 			<?php if (woocommerce_get_page_id('terms')>0) : ?>
 			<p class="form-row terms">
 				<label for="terms" class="checkbox"><?php _e( 'I have read and accept the', 'woocommerce' ); ?> <a href="<?php echo esc_url( get_permalink(woocommerce_get_page_id('terms')) ); ?>" target="_blank"><?php _e( 'terms &amp; conditions', 'woocommerce' ); ?></a></label>
-				<input type="checkbox" class="input-checkbox" name="terms" <?php if (isset($_POST['terms'])) echo 'checked="checked"'; ?> id="terms" />
+				<input type="checkbox" class="input-checkbox" name="terms" <?php checked( isset( $_POST['terms'] ), true ); ?> id="terms" />
 			</p>
 			<?php endif; ?>
 

@@ -1132,11 +1132,10 @@ class Woocommerce {
 	 * @return WC_Checkout
 	 */
 	function checkout() {
-		if ( ! class_exists('WC_Checkout') ) {
-			include( 'classes/class-wc-checkout.php' );
+		if ( ! class_exists( 'WC_Checkout' ) ) {
+			include_once( 'classes/class-wc-checkout.php' );
 			$this->checkout = new WC_Checkout();
 		}
-
 		return $this->checkout;
 	}
 

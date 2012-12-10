@@ -929,7 +929,9 @@ if ( ! function_exists( 'woocommerce_checkout_login_form' ) ) {
 	 * @return void
 	 */
 	function woocommerce_checkout_login_form() {
-		woocommerce_get_template( 'checkout/form-login.php' );
+		global $woocommerce;
+
+		woocommerce_get_template( 'checkout/form-login.php', array( 'checkout' => $woocommerce->checkout() ) );
 	}
 }
 
@@ -968,7 +970,9 @@ if ( ! function_exists( 'woocommerce_order_review' ) ) {
 	 * @return void
 	 */
 	function woocommerce_order_review() {
-		woocommerce_get_template( 'checkout/review-order.php' );
+		global $woocommerce;
+
+		woocommerce_get_template( 'checkout/review-order.php', array( 'checkout' => $woocommerce->checkout() ) );
 	}
 }
 
@@ -982,7 +986,9 @@ if ( ! function_exists( 'woocommerce_checkout_coupon_form' ) ) {
 	 * @return void
 	 */
 	function woocommerce_checkout_coupon_form() {
-		woocommerce_get_template( 'checkout/form-coupon.php' );
+		global $woocommerce;
+
+		woocommerce_get_template( 'checkout/form-coupon.php', array( 'checkout' => $woocommerce->checkout() ) );
 	}
 }
 

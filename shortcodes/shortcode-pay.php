@@ -53,7 +53,7 @@ function woocommerce_pay() {
 			if ($order->billing_postcode) $woocommerce->customer->set_postcode( $order->billing_postcode );
 
 			// Show form
-			woocommerce_get_template('checkout/form-pay.php', array('order' => $order));
+			woocommerce_get_template( 'checkout/form-pay.php', array( 'order' => $order ) );
 
 		elseif (!in_array($order->status, array('pending', 'failed'))) :
 

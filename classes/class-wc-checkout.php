@@ -20,6 +20,9 @@ class WC_Checkout {
 	/** @var bool Whether or not the user must create an account to checkout. */
 	var $must_create_account;
 
+	/** @var bool Whether or not signups are allowed. */
+	var $enable_signup;
+
 	/** @var bool True when the user is creating an account. */
 	var $creating_account;
 
@@ -32,11 +35,13 @@ class WC_Checkout {
 	function __construct () {
 		global $woocommerce;
 
-		add_action('woocommerce_checkout_process',array(&$this,'checkout_process'));
-		add_action('woocommerce_checkout_billing',array(&$this,'checkout_form_billing'));
-		add_action('woocommerce_checkout_shipping',array(&$this,'checkout_form_shipping'));
+		add_action( 'woocommerce_checkout_process', array( &$this,'checkout_process' ) );
+		add_action( 'woocommerce_checkout_billing', array( &$this,'checkout_form_billing' ) );
+		add_action( 'woocommerce_checkout_shipping', array( &$this,'checkout_form_shipping' ) );
 
-		$this->must_create_account = get_option('woocommerce_enable_guest_checkout') == 'yes' || is_user_logged_in() ? false : true;
+		$this->enable_signup         = get_option( 'woocommerce_enable_signup_and_login_from_checkout' ) == 'yes' ? true : false;
+		$this->enable_guest_checkout = get_option( 'woocommerce_enable_guest_checkout' ) == 'yes' ? true : false;
+		$this->must_create_account   = $this->enable_guest_checkout || is_user_logged_in() ? false : true;
 
 		// Define all Checkout fields
 		$this->checkout_fields['billing'] 	= $woocommerce->countries->get_address_fields( $this->get_value('billing_country'), 'billing_' );
@@ -75,7 +80,10 @@ class WC_Checkout {
 				'placeholder' => _x('Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce')
 				)
 			);
-		$this->checkout_fields = apply_filters('woocommerce_checkout_fields', $this->checkout_fields);
+
+		$this->checkout_fields = apply_filters( 'woocommerce_checkout_fields', $this->checkout_fields );
+
+		do_action( 'woocommerce_checkout_init', $this );
 	}
 
 

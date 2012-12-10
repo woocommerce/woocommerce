@@ -155,10 +155,10 @@ function woocommerce_ajax_update_order_review() {
 		die();
 	}
 
-	do_action('woocommerce_checkout_update_order_review', $_POST['post_data']);
+	do_action( 'woocommerce_checkout_update_order_review', $_POST['post_data'] );
 
 	$woocommerce->session->chosen_shipping_method = empty( $_POST['shipping_method'] ) ? '' : $_POST['shipping_method'];
-	$woocommerce->session->chosen_payment_method = empty( $_POST['payment_method'] ) ? '' : $_POST['payment_method'];
+	$woocommerce->session->chosen_payment_method  = empty( $_POST['payment_method'] ) ? '' : $_POST['payment_method'];
 
 	if ( isset( $_POST['country'] ) )
 		$woocommerce->customer->set_country( $_POST['country'] );
@@ -198,7 +198,7 @@ function woocommerce_ajax_update_order_review() {
 
 	$woocommerce->cart->calculate_totals();
 
-	do_action('woocommerce_checkout_order_review'); // Display review order table
+	do_action( 'woocommerce_checkout_order_review' ); // Display review order table
 
 	die();
 }
