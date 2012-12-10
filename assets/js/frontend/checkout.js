@@ -66,7 +66,6 @@ jQuery(document).ready(function($) {
 			success: 	function( response ) {
 				if ( response ) {
 					$('#order_review').after(response).remove();
-					$('#order_review input[name=payment_method]:checked');
 					$('body').trigger('updated_checkout');
 				}
 			}
