@@ -395,35 +395,36 @@ class WC_Tax {
 			$pre_compound_total = array_sum( $taxes );
 
 			// Compound taxes
-			foreach ( $rates as $key => $rate ) {
+			if ( $rates ) {
+				foreach ( $rates as $key => $rate ) {
 
-				if ( $rate['compound'] == 'no' )
-					continue;
+					if ( $rate['compound'] == 'no' )
+						continue;
 
-				$the_price_inc_tax = $price + ( $pre_compound_total * 100 );
+					$the_price_inc_tax = $price + ( $pre_compound_total * 100 );
 
-				$tax_amount = $the_price_inc_tax * ( $rate['rate'] / 100 );
+					$tax_amount = $the_price_inc_tax * ( $rate['rate'] / 100 );
 
-				// ADVANCED: Allow third parties to modifiy this rate
-				$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price, $the_price_inc_tax, $pre_compound_total );
+					// ADVANCED: Allow third parties to modifiy this rate
+					$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price, $the_price_inc_tax, $pre_compound_total );
 
-				// Back to pounds
-				$tax_amount = ( $tax_amount / 100 );
+					// Back to pounds
+					$tax_amount = ( $tax_amount / 100 );
 
-				// Rounding
-				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding ) {
-					$decimals = (int) get_option( 'woocommerce_price_num_decimals' );
-					$tax_amount = round( $tax_amount, $decimals );
+					// Rounding
+					if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding ) {
+						$decimals = (int) get_option( 'woocommerce_price_num_decimals' );
+						$tax_amount = round( $tax_amount, $decimals );
+					}
+
+					// Add rate
+					if ( ! isset( $taxes[ $key ] ) )
+						$taxes[ $key ] = $tax_amount;
+					else
+						$taxes[ $key ] += $tax_amount;
+
 				}
-
-				// Add rate
-				if ( ! isset( $taxes[ $key ] ) )
-					$taxes[ $key ] = $tax_amount;
-				else
-					$taxes[ $key ] += $tax_amount;
-
 			}
-
 		}
 
 		return apply_filters( 'woocommerce_calc_tax', $taxes, $price, $rates, $price_includes_tax, $supress_rounding );

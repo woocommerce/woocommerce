@@ -153,17 +153,19 @@ if ( $local_tax_rates )
 
 		$tax_rate_id = $wpdb->insert_id;
 
-		foreach ( $tax_rate['locations'] as $location ) {
+		if ( $tax_rate['locations'] ) {
+			foreach ( $tax_rate['locations'] as $location ) {
 
-			$wpdb->insert(
-				$wpdb->prefix . "woocommerce_tax_rate_locations",
-				array(
-					'location_code' => $location,
-					'tax_rate_id'   => $tax_rate_id,
-					'location_type' => $location_type,
-				)
-			);
+				$wpdb->insert(
+					$wpdb->prefix . "woocommerce_tax_rate_locations",
+					array(
+						'location_code' => $location,
+						'tax_rate_id'   => $tax_rate_id,
+						'location_type' => $location_type,
+					)
+				);
 
+			}
 		}
 
 		$loop++;
