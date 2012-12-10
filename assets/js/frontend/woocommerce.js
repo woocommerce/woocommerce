@@ -96,7 +96,7 @@ jQuery(document).ready(function($) {
 						$statebox.replaceWith('<select name="' + input_name + '" id="' + input_id + '" class="state_select"></select>');
 						$statebox = $(this).closest('div').find('#billing_state, #shipping_state, #calc_shipping_state');
 					}
-					$statebox.html( '<option value="">' + woocommerce_params.select_state_text + '</option>' + options);
+					$statebox.html( '<option value="">' + woocommerce_params.i18n_select_state_text + '</option>' + options);
 
 					$statebox.val(value);
 

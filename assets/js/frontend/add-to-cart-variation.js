@@ -9,17 +9,17 @@ jQuery(document).ready(function($) {
 		.on( 'click', '.reset_variations', function( event ) {
 
 			$(this).closest('form.variations_form').find('.variations select').val('').change();
-			
+
 			var $sku 		= $(this).closest('.product').find('.sku');
 			var $weight 	= $(this).closest('.product').find('.product_weight');
 			var $dimensions = $(this).closest('.product').find('.product_dimensions');
 
 			if ( $sku.attr( 'data-o_sku' ) )
 				$sku.text( $sku.attr( 'data-o_sku' ) );
-				
+
 			if ( $weight.attr( 'data-o_weight' ) )
 				$weight.text( $weight.attr( 'data-o_weight' ) );
-				
+
 			if ( $dimensions.attr( 'data-o_dimensions' ) )
 				$dimensions.text( $dimensions.attr( 'data-o_dimensions' ) );
 
@@ -28,7 +28,7 @@ jQuery(document).ready(function($) {
 
 		// Upon changing an option
 		.on( 'change', '.variations select', function( event ) {
-		
+
 			$variation_form = $(this).closest('form.variations_form');
 			$variation_form.find('input[name=variation_id]').val('').change();
 
@@ -95,11 +95,11 @@ jQuery(document).ready(function($) {
 
 			var product_id			= parseInt( $variation_form.attr( 'data-product_id' ) );
 			var all_variations		= window[ "product_variations" ][ product_id ];
-			
+
 			// Fallback
-			if ( ! all_variations ) 
+			if ( ! all_variations )
 				all_variations = window[ "product_variations" ];
-			
+
 	        var matching_variations = find_matching_variations( all_variations, current_settings );
 
 	        if ( all_set ) {
@@ -123,8 +123,8 @@ jQuery(document).ready(function($) {
 
 	            	if ( ! focus )
 	            		$variation_form.trigger( 'reset_image' );
-	            		
-	            	alert( woocommerce_params.no_matching_variations_text );
+
+	            	alert( woocommerce_params.i18n_no_matching_variations_text );
 
 	            }
 
@@ -235,11 +235,11 @@ jQuery(document).ready(function($) {
 		// Show single variation details (price, stock, image)
 		.on( 'found_variation', function( event, variation ) {
 	      	var $variation_form = $(this);
-	       
+
 	        var $product 		= $(this).closest( '.product' );
 			var $product_img 	= $product.find( 'div.images img:eq(0)' );
 			var $product_link 	= $product.find( 'div.images a.zoom:eq(0)' );
-			
+
 			var o_src 			= $product_img.attr('data-o_src');
 			var o_title 		= $product_img.attr('data-o_title');
 	        var o_href 			= $product_link.attr('data-o_href');
@@ -285,32 +285,32 @@ jQuery(document).ready(function($) {
 	        }
 
 	        var $single_variation_wrap = $variation_form.find('.single_variation_wrap');
-	        
+
 	        var $sku 		= $product.find('.product_meta').find('.sku');
 	        var $weight 	= $product.find('.product_weight');
 			var $dimensions = $product.find('.product_dimensions');
-	        
+
 	        if ( ! $sku.attr( 'data-o_sku' ) )
 	        	$sku.attr( 'data-o_sku', $sku.text() );
-	        	
+
 	        if ( ! $weight.attr( 'data-o_weight' ) )
 	        	$weight.attr( 'data-o_weight', $weight.text() );
-	        	
+
 	        if ( ! $dimensions.attr( 'data-o_dimensions' ) )
 	        	$dimensions.attr( 'data-o_dimensions', $dimensions.text() );
-	        		
+
 	        if ( variation.sku ) {
 		    	$sku.text( variation.sku );
 	        } else {
 	        	$sku.text( $sku.attr( 'data-o_sku' ) );
 	        }
-	        
+
 	        if ( variation.weight ) {
 		    	$weight.text( variation.weight );
 	        } else {
 	        	$weight.text( $weight.attr( 'data-o_weight' ) );
 	        }
-	        
+
 	        if ( variation.dimensions ) {
 		    	$dimensions.text( variation.dimensions );
 	        } else {
@@ -318,11 +318,11 @@ jQuery(document).ready(function($) {
 	        }
 
 	        $single_variation_wrap.find('.quantity').show();
-	        
+
 	        if ( ! variation.is_in_stock && ! variation.backorders_allowed ) {
 		        $variation_form.find('.variations_button').hide();
 	        }
-	        
+
 	        if ( variation.min_qty )
 	        	$single_variation_wrap.find('input[name=quantity]').attr( 'min', variation.min_qty ).val( variation.min_qty );
 	        else

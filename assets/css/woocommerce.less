@@ -544,6 +544,7 @@ p.demo_store {
 	    border: 1px solid darken( @secondary, 20 );
 		.vertical_gradient( @secondary, darken( @secondary, 10 ) );
 		white-space: nowrap;
+		display: inline-block;
 
 	    -webkit-box-shadow:
 	        inset 0 -1px 0 rgba(0,0,0,0.075),
@@ -573,7 +574,7 @@ p.demo_store {
 			}
 		}
 
-		&.added {
+		/*&.added {
 			&:before {
 				content: "";
 				position:absolute;
@@ -585,7 +586,7 @@ p.demo_store {
 				background: url(../images/success.png) no-repeat;
 				background-size:16px 14px;
 			}
-		}
+		}*/
 
 		&:hover {
 			.vertical_gradient( @secondary, darken( @secondary, 15 ) );
@@ -612,6 +613,14 @@ p.demo_store {
 
 	.cart .button, .cart input.button {
 		float:none;
+	}
+
+	a.added_to_cart {
+		background: url(../images/success.png) no-repeat left;
+		background-size:16px 14px;
+		padding: 0 0 0 22px;
+		white-space: nowrap;
+		display: inline-block;
 	}
 
 	/* =Quantity inputs
