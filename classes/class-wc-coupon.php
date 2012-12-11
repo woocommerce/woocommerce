@@ -106,6 +106,8 @@ class WC_Coupon {
 
 			if ( $coupon_id )
 				$coupon = get_post( $coupon_id );
+			else
+				return false;
 
 			$coupon->post_title = apply_filters( 'woocommerce_coupon_code', $coupon->post_title );
 

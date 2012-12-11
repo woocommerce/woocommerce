@@ -1317,16 +1317,21 @@ class WC_Order {
 
 
 	/**
-	 * Increase applied coupon counts
+	 * Get coupon codes only.
 	 *
 	 * @access public
 	 * @return array
 	 */
 	function get_used_coupons() {
 
-		$coupons = get_post_meta( $this->id, 'coupons', true );
+		$codes   = array();
+		$coupons = $this->get_items( 'coupon' );
 
-		return array_map( 'trim', explode( ',', $coupons ) );
+		foreach ( $coupons as $item_id => $item ) {
+			$codes[] = trim( $item['name'] );
+		}
+
+		return $codes;
 	}
 
 

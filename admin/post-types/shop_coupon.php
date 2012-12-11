@@ -22,7 +22,7 @@ function woocommerce_edit_coupon_columns($columns){
 	$columns = array();
 
 	$columns["cb"] 			= "<input type=\"checkbox\" />";
-	$columns["title"] 		= __( 'Code', 'woocommerce' );
+	$columns["coupon_code"] = __( 'Code', 'woocommerce' );
 	$columns["type"] 		= __( 'Coupon type', 'woocommerce' );
 	$columns["amount"] 		= __( 'Coupon amount', 'woocommerce' );
 	$columns["description"] = __( 'Description', 'woocommerce' );
@@ -47,6 +47,43 @@ function woocommerce_custom_coupon_columns( $column ) {
 	global $post, $woocommerce;
 
 	switch ( $column ) {
+		case "coupon_code" :
+			$edit_link = get_edit_post_link( $post->ID );
+			$title = _draft_or_post_title();
+			$post_type_object = get_post_type_object( $post->post_type );
+			$can_edit_post = current_user_can( $post_type_object->cap->edit_post, $post->ID );
+
+			echo '<div class="code tips" data-tip="' . __( 'Edit coupon', 'woocommerce' ) . '"><a href="' . esc_attr( $edit_link ) . '"><span>' . esc_html( $title ). '</span></a></div>';
+
+			_post_states( $post );
+
+			// Get actions
+			$actions = array();
+
+			if ( current_user_can( $post_type_object->cap->delete_post, $post->ID ) ) {
+				if ( 'trash' == $post->post_status )
+					$actions['untrash'] = "<a title='" . esc_attr( __( 'Restore this item from the Trash', 'woocommerce' ) ) . "' href='" . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $post->ID ) ), 'untrash-' . $post->post_type . '_' . $post->ID ) . "'>" . __( 'Restore', 'woocommerce' ) . "</a>";
+				elseif ( EMPTY_TRASH_DAYS )
+					$actions['trash'] = "<a class='submitdelete' title='" . esc_attr( __( 'Move this item to the Trash', 'woocommerce' ) ) . "' href='" . get_delete_post_link( $post->ID ) . "'>" . __( 'Trash', 'woocommerce' ) . "</a>";
+				if ( 'trash' == $post->post_status || !EMPTY_TRASH_DAYS )
+					$actions['delete'] = "<a class='submitdelete' title='" . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . "' href='" . get_delete_post_link( $post->ID, '', true ) . "'>" . __( 'Delete Permanently', 'woocommerce' ) . "</a>";
+			}
+
+			$actions = apply_filters( 'post_row_actions', $actions, $post );
+
+			echo '<div class="row-actions">';
+
+			$i = 0;
+			$action_count = sizeof($actions);
+
+			foreach ( $actions as $action => $link ) {
+				++$i;
+				( $i == $action_count ) ? $sep = '' : $sep = ' | ';
+				echo "<span class='$action'>$link$sep</span>";
+			}
+			echo '</div>';
+
+		break;
 		case "type" :
 			echo esc_html( $woocommerce->get_coupon_discount_type( get_post_meta( $post->ID, 'discount_type', true ) ) );
 		break;

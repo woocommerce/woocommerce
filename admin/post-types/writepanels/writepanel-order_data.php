@@ -478,7 +478,7 @@ function woocommerce_order_actions_meta_box($post) {
  * @return void
  */
 function woocommerce_order_totals_meta_box( $post ) {
-	global $woocommerce, $theorder;
+	global $woocommerce, $theorder, $wpdb;
 
 	if ( ! is_object( $theorder ) )
 		$theorder = new WC_Order( $post->ID );
@@ -508,7 +508,25 @@ function woocommerce_order_totals_meta_box( $post ) {
 			</li>
 
 		</ul>
-		<div class="clear"></div>
+
+		<ul class="wc_coupon_list">
+
+		<?php
+			$coupons = $order->get_items( array( 'coupon' ) );
+
+			foreach ( $coupons as $item_id => $item ) {
+
+				$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' LIMIT 1;", $item['name'] ) );
+
+				$link = $post_id ? admin_url( 'post.php?post=' . $post_id . '&action=edit' ) : admin_url( 'edit.php?s=' . esc_url( $item['name'] ) . '&post_status=all&post_type=shop_coupon' );
+
+				echo '<li class="tips code" data-tip="' . esc_attr( woocommerce_price( $item['discount_amount'] ) ) . '"><a href="' . $link . '"><span>' . esc_html( $item['name'] ). '</span></a></li>';
+
+			}
+		?>
+
+		</ul>
+
 	</div>
 	<div class="totals_group">
 		<h4><?php _e( 'Shipping', 'woocommerce' ); ?></h4>

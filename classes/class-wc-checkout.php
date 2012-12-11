@@ -580,7 +580,22 @@ class WC_Checkout {
 					 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', woocommerce_clean( isset( $woocommerce->cart->taxes[ $key ] ) ? $woocommerce->cart->taxes[ $key ] : 0 ) );
 					 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', woocommerce_clean( isset( $woocommerce->cart->shipping_taxes[ $key ] ) ? $woocommerce->cart->shipping_taxes[ $key ] : 0 ) );
 					}
+				}
 
+				// Store coupons
+				if ( $applied_coupons = $woocommerce->cart->get_applied_coupons() ) {
+					foreach ( $applied_coupons as $code ) {
+
+						$item_id = woocommerce_add_order_item( $order_id, array(
+					 		'order_item_name' 		=> $code,
+					 		'order_item_type' 		=> 'coupon'
+					 	) );
+
+					 	// Add line item meta
+					 	if ( $item_id ) {
+					 		woocommerce_add_order_item_meta( $item_id, 'discount_amount', isset( $woocommerce->cart->coupon_discount_amounts[ $code ] ) ? $woocommerce->cart->coupon_discount_amounts[ $code ] : 0 );
+						}
+					}
 				}
 
 				// Save other order meta fields
@@ -611,17 +626,6 @@ class WC_Checkout {
 
 				// Order status
 				wp_set_object_terms( $order_id, 'pending', 'shop_order_status' );
-
-				// Discount code meta
-				if ( $applied_coupons = $woocommerce->cart->get_applied_coupons() ) {
-
-					update_post_meta( $order_id, 'coupons', implode(', ', $applied_coupons) );
-
-					if ( empty( $order ) )
-						$order = new WC_Order( $order_id );
-
-					$order->add_order_note( sprintf( __( 'Coupon Code Used: %s', 'woocommerce' ), implode(', ', $applied_coupons ) ) );
-				}
 
 				// Order is saved
 				do_action( 'woocommerce_checkout_order_processed', $order_id, $this->posted );

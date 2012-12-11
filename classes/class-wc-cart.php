@@ -6,7 +6,7 @@
  * The cart class also has a price calculation function which calls upon other classes to calculate totals.
  *
  * @class 		WC_Cart
- * @version		1.6.4
+ * @version		2.0.0
  * @package		WooCommerce/Classes
  * @author 		WooThemes
  */
@@ -15,8 +15,11 @@ class WC_Cart {
 	/** @var array Contains an array of cart items. */
 	var $cart_contents;
 
-	/** @var array Contains an array of coupons applied to the cart. */
+	/** @var array Contains an array of coupon codes applied to the cart. */
 	var $applied_coupons;
+
+	/** @var array Contains an array of coupon code discounts after they have been applied. */
+	var $coupon_discount_amounts;
 
 	/** @var float The total cost of the cart items. */
 	var $cart_contents_total;
@@ -119,8 +122,10 @@ class WC_Cart {
 			global $woocommerce;
 
 			// Load the coupons
-			if ( get_option( 'woocommerce_enable_coupons' ) == 'yes' )
-				$this->applied_coupons = ( empty( $woocommerce->session->coupons ) ) ? array() : array_unique( array_filter( (array) $woocommerce->session->coupons ) );
+			if ( get_option( 'woocommerce_enable_coupons' ) == 'yes' ) {
+				$this->applied_coupons         = ( empty( $woocommerce->session->coupon_codes ) ) ? array() : array_filter( (array) $woocommerce->session->coupon_codes );
+				$this->coupon_discount_amounts = ( empty( $woocommerce->session->coupon_amounts ) ) ? array() : array_filter( (array) $woocommerce->session->coupon_amounts );
+			}
 
 			// Load the cart
 			if ( isset( $woocommerce->session->cart ) && is_array( $woocommerce->session->cart ) ) {
@@ -205,25 +210,26 @@ class WC_Cart {
 				}
 			}
 
-			$woocommerce->session->cart = $cart_session;
-			$woocommerce->session->coupons = $this->applied_coupons;
+			$woocommerce->session->cart           = $cart_session;
+			$woocommerce->session->coupon_codes   = $this->applied_coupons;
+			$woocommerce->session->coupon_amounts = $this->coupon_discount_amounts;
 
 			// Store totals to avoid re-calc on page load
-			$woocommerce->session->cart_contents_total = $this->cart_contents_total;
+			$woocommerce->session->cart_contents_total  = $this->cart_contents_total;
 			$woocommerce->session->cart_contents_weight = $this->cart_contents_weight;
-			$woocommerce->session->cart_contents_count = $this->cart_contents_count;
-			$woocommerce->session->cart_contents_tax = $this->cart_contents_tax;
-			$woocommerce->session->total = $this->total;
-			$woocommerce->session->subtotal = $this->subtotal;
-			$woocommerce->session->subtotal_ex_tax = $this->subtotal_ex_tax;
-			$woocommerce->session->tax_total = $this->tax_total;
-			$woocommerce->session->shipping_taxes = $this->shipping_taxes;
-			$woocommerce->session->taxes = $this->taxes;
-			$woocommerce->session->discount_cart = $this->discount_cart;
-			$woocommerce->session->discount_total = $this->discount_total;
-			$woocommerce->session->shipping_total = $this->shipping_total;
-			$woocommerce->session->shipping_tax_total = $this->shipping_tax_total;
-			$woocommerce->session->shipping_label = $this->shipping_label;
+			$woocommerce->session->cart_contents_count  = $this->cart_contents_count;
+			$woocommerce->session->cart_contents_tax    = $this->cart_contents_tax;
+			$woocommerce->session->total                = $this->total;
+			$woocommerce->session->subtotal             = $this->subtotal;
+			$woocommerce->session->subtotal_ex_tax      = $this->subtotal_ex_tax;
+			$woocommerce->session->tax_total            = $this->tax_total;
+			$woocommerce->session->shipping_taxes       = $this->shipping_taxes;
+			$woocommerce->session->taxes                = $this->taxes;
+			$woocommerce->session->discount_cart        = $this->discount_cart;
+			$woocommerce->session->discount_total       = $this->discount_total;
+			$woocommerce->session->shipping_total       = $this->shipping_total;
+			$woocommerce->session->shipping_tax_total   = $this->shipping_tax_total;
+			$woocommerce->session->shipping_label       = $this->shipping_label;
 
 			if ( get_current_user_id() )
 				$this->persistent_cart_update();
@@ -244,7 +250,7 @@ class WC_Cart {
 			$this->cart_contents = array();
 			$this->reset();
 
-			unset( $woocommerce->session->order_awaiting_payment, $woocommerce->session->coupons, $woocommerce->session->cart );
+			unset( $woocommerce->session->order_awaiting_payment, $woocommerce->session->coupon_codes, $woocommerce->session->coupon_amounts, $woocommerce->session->cart );
 
 			if ( $clear_persistent_cart && get_current_user_id() )
 				$this->persistent_cart_destroy();
@@ -332,8 +338,9 @@ class WC_Cart {
 
 						// Remove the coupon
 						unset( $this->applied_coupons[ $key ] );
-						$woocommerce->session->coupons = $this->applied_coupons;
-						$woocommerce->session->refresh_totals = true;
+
+						$woocommerce->session->coupon_codes   = $this->applied_coupons;
+						$woocommerce->session->refresh_totals     = true;
 					}
 				}
 			}
@@ -407,8 +414,9 @@ class WC_Cart {
 							$woocommerce->add_error( sprintf( __( 'Sorry, it seems the coupon "%s" is not yours - it has now been removed from your order.', 'woocommerce' ), $code ) );
 							// Remove the coupon
 							unset( $this->applied_coupons[ $key ] );
-							$woocommerce->session->coupons = $this->applied_coupons;
-							$woocommerce->session->refresh_totals = true;
+
+							$woocommerce->session->coupon_codes   = $this->applied_coupons;
+							$woocommerce->session->refresh_totals     = true;
 						}
 					}
 				}
@@ -945,13 +953,17 @@ class WC_Cart {
 
 										if ( $add_totals ) {
 											$this->discount_cart = $this->discount_cart + ( $discount_amount * $values['quantity'] );
+											$this->coupon_discount_amounts[ $code ] = ( $discount_amount * $values['quantity'] );
 										}
 
 									} elseif ( $coupon->type == 'percent_product' ) {
 
 										$percent_discount = ( $values['data']->get_price_excluding_tax() / 100 ) * $coupon->amount;
 
-										if ( $add_totals ) $this->discount_cart = $this->discount_cart + ( $percent_discount * $values['quantity'] );
+										if ( $add_totals ) {
+											$this->discount_cart = $this->discount_cart + ( $percent_discount * $values['quantity'] );
+											$this->coupon_discount_amounts[ $code ] = ( $percent_discount * $values['quantity'] );
+										}
 
 										$price = $price - $percent_discount;
 
@@ -1002,7 +1014,10 @@ class WC_Cart {
 								if ( $price < 0 ) $price = 0;
 
 								// Add coupon to discount total (once, since this is a fixed cart discount and we don't want rounding issues)
-								if ( $add_totals ) $this->discount_cart = $this->discount_cart + ( ( $discount_amount * $values['quantity'] ) / 100 );
+								if ( $add_totals ) {
+									$this->discount_cart = $this->discount_cart + ( ( $discount_amount * $values['quantity'] ) / 100 );
+									$this->coupon_discount_amounts[ $code ] = ( ( $discount_amount * $values['quantity'] ) / 100 );
+								}
 
 							break;
 
@@ -1010,8 +1025,10 @@ class WC_Cart {
 
 								$percent_discount = round( ( $values['data']->get_price() / 100 ) * $coupon->amount, $this->dp );
 
-								if ( $add_totals )
+								if ( $add_totals ) {
 									$this->discount_cart = $this->discount_cart + ( $percent_discount * $values['quantity'] );
+									$this->coupon_discount_amounts[ $code ] = ( $percent_discount * $values['quantity'] );
+								}
 
 								$price = $price - $percent_discount;
 
@@ -1091,8 +1108,11 @@ class WC_Cart {
 
 								$this->discount_total = $this->discount_total + ( $discount_amount * $values['quantity'] );
 
+								$this->coupon_discount_amounts[ $code ] = ( $discount_amount * $values['quantity'] );
+
 							} elseif ( $coupon->type == 'percent_product' ) {
 								$this->discount_total = $this->discount_total + round( ( $price / 100 ) * $coupon->amount, $this->dp );
+								$this->coupon_discount_amounts[ $code ] = round( ( $price / 100 ) * $coupon->amount, $this->dp );
 							}
 						}
 					}
@@ -1122,6 +1142,8 @@ class WC_Cart {
 
 								$this->discount_total = $this->discount_total + $coupon->amount;
 
+								$this->coupon_discount_amounts[ $code ] = $coupon->amount;
+
 							break;
 
 							case "percent" :
@@ -1129,6 +1151,8 @@ class WC_Cart {
 								$percent_discount = ( round( $this->cart_contents_total + $this->tax_total, $this->dp ) / 100 ) * $coupon->amount;
 
 								$this->discount_total = $this->discount_total + round( $percent_discount, $this->dp );
+
+								$this->coupon_discount_amounts[ $code ] = round( $percent_discount, $this->dp );
 
 							break;
 
@@ -1726,7 +1750,7 @@ class WC_Cart {
 					}
 				}
 
-				$woocommerce->session->coupons = $this->applied_coupons;
+				$woocommerce->session->coupon_codes   = $this->applied_coupons;
 			} elseif ( $type == 2 ) {
 				if ( $this->applied_coupons ) {
 					foreach ( $this->applied_coupons as $index => $code ) {
@@ -1735,9 +1759,9 @@ class WC_Cart {
 					}
 				}
 
-				$woocommerce->session->coupons = $this->applied_coupons;
+				$woocommerce->session->coupon_codes   = $this->applied_coupons;
 			} else {
-				unset( $woocommerce->session->coupons );
+				unset( $woocommerce->session->coupon_codes, $woocommerce->session->coupon_amounts );
 				$this->applied_coupons = array();
 			}
 		}

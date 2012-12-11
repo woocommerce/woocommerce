@@ -239,7 +239,7 @@ class WC_Emails {
 	function order_meta( $order, $sent_to_admin = false, $plain_text = false ) {
 
 		$meta = array();
-		$show_fields = apply_filters( 'woocommerce_email_order_meta_keys', array( 'coupons' ), $sent_to_admin );
+		$show_fields = apply_filters( 'woocommerce_email_order_meta_keys', array(), $sent_to_admin );
 
 		if ( $order->customer_note )
 			$meta[ __( 'Note', 'woocommerce' ) ] = wptexturize( $order->customer_note );
