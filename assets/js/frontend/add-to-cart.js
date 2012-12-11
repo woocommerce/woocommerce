@@ -53,7 +53,6 @@ jQuery(document).ready(function($) {
 
 				// Changes button classes
 				if ( $thisbutton.parent().find('.added_to_cart').size() == 0 )
-					$thisbutton.addClass('added');
 					$( '<a href="' + woocommerce_params.cart_url + '" class="added_to_cart" title="' + woocommerce_params.i18n_view_cart + '">' + woocommerce_params.i18n_view_cart + '</a>' ).insertAfter( $thisbutton ).hide().fadeIn( 100 );
 
 				// Cart widget load
