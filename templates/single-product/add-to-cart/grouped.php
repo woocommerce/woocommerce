@@ -54,9 +54,9 @@ foreach ( $product->get_children() as $child_id ) {
 					<td class="label"><label for="product-<?php echo $child_product['product']->id; ?>"><?php
 
 						if ($child_product['product']->is_visible())
-							echo '<a href="'.get_permalink($child_product['product']->id).'">' . $child_product['product']->get_title() . '</a>';
+							echo '<a href="' . get_permalink( $child_product['product']->id ) . '">' . $child_product['product']->post->post_title . '</a>';
 						else
-							echo $child_product['product']->get_title();
+							echo $child_product['product']->post->post_title;
 
 					?></label></td>
 

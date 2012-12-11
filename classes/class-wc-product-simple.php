@@ -56,6 +56,22 @@ class WC_Product_Simple extends WC_Product {
 		$this->check_sale_price();
 	}
 
+	/**
+	 * Get the title of the post.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	function get_title() {
+
+		$title = $this->post->post_title;
+
+		if ( $this->get_parent() > 0 ) {
+			$title = get_the_title( $this->get_parent() ) . ' &rarr; ' . $title;
+		}
+
+		return apply_filters( 'woocommerce_product_title', apply_filters( 'the_title', $title, $this->id ), $this );
+	}
 
     /**
      * Checks sale data to see if the product is due to go on sale/sale has expired, and updates the main price.
