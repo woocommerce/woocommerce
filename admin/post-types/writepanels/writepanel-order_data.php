@@ -344,6 +344,8 @@ function woocommerce_order_items_meta_box( $post ) {
 
 					foreach ( $order_items as $item_id => $item ) {
 
+						$class = ( isset( $item['refunded'] ) ) ? 'refunded' : '';
+
 						switch ( $item['type'] ) {
 							case 'line_item' :
 								$_product 	= $order->get_product_from_item( $item );
@@ -654,6 +656,20 @@ function woocommerce_order_totals_meta_box( $post ) {
 				</select>
 			</li>
 
+		</ul>
+		<div class="clear"></div>
+	</div>
+	<div class="totals_group">
+		<h4><?php _e( 'Refunds', 'woocommerce' ); ?></h4>
+		<ul class="totals">
+
+			<li class="left">
+				<label><?php _e( 'Refund Total:', 'woocommerce' ); ?></label>
+				<input type="number" disabled="disabled" id="_order_refund_total" name="_order_refund_total" placeholder="0.00" value="<?php
+					if ( isset( $data['_refund_total'][0] ) )
+						echo esc_attr( $data['_refund_total'][0] );
+				?>" />
+			</li>
 		</ul>
 		<div class="clear"></div>
 	</div>

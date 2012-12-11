@@ -47,7 +47,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 							'_line_subtotal',
 							'_line_subtotal_tax',
 							'_line_total',
-							'_line_tax'
+							'_line_tax',
+							'_refunded'
 						) ) ) ) continue;
 
 						// Handle serialised fields

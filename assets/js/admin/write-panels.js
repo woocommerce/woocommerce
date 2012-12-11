@@ -667,6 +667,13 @@ jQuery( function($){
 					data: data,
 					type: 'POST',
 					success: function( response ) {
+						$.each( item_ids, function( i, val ) {
+							$('tbody#order_items_list tr[data-order_item_id="' + val + '"]').addClass( 'refunded' );
+						});
+
+						var response_obj = $.parseJSON(response);
+						$('#_order_refund_total').val( response_obj.refund_total );
+
 						$('table.woocommerce_order_items').unblock();
 					}
 				} );

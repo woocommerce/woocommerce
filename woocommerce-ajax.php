@@ -1131,7 +1131,10 @@ function woocommerce_ajax_refund_order_item() {
 				$order_refund_total = $order_refund_total + $refund_amount;
 			}
 
-			update_post_meta( $order_id, '_refund_total', woocommerce_format_total( $order_refund_total ) );
+			$order_refund_total = woocommerce_format_total( $order_refund_total );
+			update_post_meta( $order_id, '_refund_total', $order_refund_total );
+
+			echo json_encode( array( 'refund_total' => $order_refund_total ) );
 		}
 	}
 
