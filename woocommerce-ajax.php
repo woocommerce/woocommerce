@@ -1545,7 +1545,7 @@ function woocommerce_add_order_note() {
 	check_ajax_referer( 'add-order-note', 'security' );
 
 	$post_id 	= (int) $_POST['post_id'];
-	$note		= wp_kses( trim( stripslashes( $_POST['note'] ) ), array( 'a' => array( 'href' => array(), 'title' => array() ), 'br' => array(), 'em' => array(), 'strong' => array() ) );
+	$note		= wp_kses_post( trim( stripslashes( $_POST['note'] ) ) );
 	$note_type	= $_POST['note_type'];
 
 	$is_customer_note = $note_type == 'customer' ? 1 : 0;
