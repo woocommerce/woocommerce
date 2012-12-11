@@ -1135,9 +1135,13 @@ class WC_Order {
 
 		$is_customer_note = intval( $is_customer_note );
 
+		if ( isset( $_SERVER['HTTP_HOST'] ) )
+			$comment_author_email 	= sanitize_email( strtolower( __( 'WooCommerce', 'woocommerce' ) ) . '@' . str_replace( 'www.', '', $_SERVER['HTTP_HOST'] ) );
+		else
+			$comment_author_email 	= sanitize_email( strtolower( __( 'WooCommerce', 'woocommerce' ) ) . '@noreply.com';
+
 		$comment_post_ID 		= $this->id;
 		$comment_author 		= __( 'WooCommerce', 'woocommerce' );
-		$comment_author_email 	= sanitize_email( strtolower( __( 'WooCommerce', 'woocommerce' ) ) . '@' . str_replace( 'www.', '', $_SERVER['HTTP_HOST'] ) );
 		$comment_author_url 	= '';
 		$comment_content 		= $note;
 		$comment_agent			= 'WooCommerce';
