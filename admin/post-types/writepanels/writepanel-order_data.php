@@ -344,8 +344,6 @@ function woocommerce_order_items_meta_box( $post ) {
 
 					foreach ( $order_items as $item_id => $item ) {
 
-						$class = ( isset( $item['refunded'] ) ) ? 'refunded' : '';
-
 						switch ( $item['type'] ) {
 							case 'line_item' :
 								$_product 	= $order->get_product_from_item( $item );
@@ -371,23 +369,6 @@ function woocommerce_order_items_meta_box( $post ) {
 			<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
 			<optgroup label="<?php _e( 'Edit', 'woocommerce' ); ?>">
 				<option value="delete"><?php _e( 'Delete Lines', 'woocommerce' ); ?></option>
-
-				<?php
-				$gateways = $woocommerce->payment_gateways->payment_gateways();
-
-				if ( isset( $gateways[ $order->payment_method ] ) ) {
-					$gateway = $gateways[ $order->payment_method ];
-
-					if ( ! in_array( 'refunds', $gateway->supports ) || ! method_exists( $gateway, 'refund' ) ) {
-						$supports_refunds = false;
-					} else {
-						$supports_refunds = true;
-					}
-
-					echo '<option value="refund" ' . disabled( $supports_refunds, false ) . '>' . sprintf( __( 'Refund Lines via %s', 'woocommerce' ), $order->payment_method  ) . '</option>';
-				}
-				echo '<option value="manual_refund">' . __( 'Mark Lines Refunded', 'woocommerce' ) . '</option>';
-				?>
 			</optgroup>
 			<optgroup label="<?php _e( 'Stock Actions', 'woocommerce' ); ?>">
 				<option value="reduce_stock"><?php _e( 'Reduce Line Stock', 'woocommerce' ); ?></option>
@@ -450,27 +431,6 @@ function woocommerce_order_actions_meta_box( $post ) {
 					}
 					?>
 				</optgroup>
-				<?php if ( in_array( $order->status, array( 'processing', 'on-hold', 'complete' ) ) ) : ?>
-				<optgroup label="<?php _e( 'Refund Order', 'woocommerce' ); ?>">
-					<?php
-						$gateways = $woocommerce->payment_gateways->payment_gateways();
-
-						if ( isset( $gateways[ $order->payment_method ] ) ) {
-							$gateway = $gateways[ $order->payment_method ];
-
-							if ( ! in_array( 'refunds', $gateway->supports ) || ! method_exists( $gateway, 'refund' ) ) {
-								$supports_refunds = false;
-							} else {
-								$supports_refunds = true;
-							}
-
-							echo '<option value="refund_order" ' . disabled( $supports_refunds, false ) . '>' . sprintf( __( 'Refund Order via %s', 'woocommerce' ), $order->payment_method  ) . '</option>';
-						}
-
-						echo '<option value="manual_refund_order">' . __( 'Mark Order Refunded', 'woocommerce' ) . '</option>';
-					?>
-				</optgroup>
-				<?php endif; ?>
 			</select>
 
 			<button class="button"><?php _e( 'Apply', 'woocommerce' ); ?></button>
@@ -672,14 +632,6 @@ function woocommerce_order_totals_meta_box( $post ) {
 			</li>
 
 			<li class="right">
-				<label><?php _e( 'Refund Total:', 'woocommerce' ); ?></label>
-				<input type="number" step="any" min="0" id="_order_refund_total" name="_order_refund_total" placeholder="0.00" value="<?php
-					if ( isset( $data['_refund_total'][0] ) )
-						echo esc_attr( $data['_refund_total'][0] );
-				?>" />
-			</li>
-
-			<li class="wide">
 				<label><?php _e( 'Payment Method:', 'woocommerce' ); ?></label>
 				<select name="_payment_method" id="_payment_method" class="first">
 					<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
@@ -756,7 +708,6 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 	update_post_meta( $post_id, '_cart_discount', woocommerce_clean( $_POST['_cart_discount'] ) );
 	update_post_meta( $post_id, '_order_discount', woocommerce_clean( $_POST['_order_discount'] ) );
 	update_post_meta( $post_id, '_order_total', woocommerce_clean( $_POST['_order_total'] ) );
-	update_post_meta( $post_id, '_refund_total', woocommerce_clean( $_POST['_order_refund_total'] ) );
 	update_post_meta( $post_id, '_customer_user', absint( $_POST['customer_user'] ) );
 	update_post_meta( $post_id, '_order_tax', woocommerce_clean( $_POST['_order_tax'] ) );
 	update_post_meta( $post_id, '_order_shipping_tax', woocommerce_clean( $_POST['_order_shipping_tax'] ) );
@@ -948,14 +899,6 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			}
 
 			do_action( 'woocommerce_after_resend_order_emails', $order, $resend_emails );
-
-		} elseif ( $action == 'refund_order' ) {
-
-			$order->refund_order( true );
-
-		} elseif ( $action == 'manual_refund_order' ) {
-
-			$order->refund_order( false );
 
 		} else {
 

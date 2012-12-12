@@ -107,9 +107,6 @@ class WC_Order {
 	/** @var string After tax discount total */
 	var $order_discount;
 
-	/** @var string Refund total */
-	var $refund_total;
-
 	/** @var string Before tax discount total */
 	var $cart_discount;
 
@@ -233,7 +230,6 @@ class WC_Order {
 			'payment_method'		=> '',
 			'payment_method_title' 	=> '',
 			'order_discount'		=> '',
-			'refund_total'          => '',
 			'cart_discount'			=> '',
 			'order_tax'				=> '',
 			'order_shipping'		=> '',
@@ -520,17 +516,6 @@ class WC_Order {
 	 */
 	function get_order_discount() {
 		return apply_filters( 'woocommerce_order_amount_order_discount', number_format( (double) $this->order_discount, 2, '.', '' ) );
-	}
-
-
-	/**
-	 * Gets the total refund amount
-	 *
-	 * @access public
-	 * @return float
-	 */
-	function get_refund_total() {
-		return apply_filters( 'woocommerce_order_refund_total', number_format( (double) $this->refund_total, 2, '.', '' ) );
 	}
 
 
@@ -984,13 +969,6 @@ class WC_Order {
 			'value'	=> $this->get_formatted_order_total()
 		);
 
-		if ( $refund_total = $this->get_refund_total() ) {
-			$total_rows['order_refund_total'] = array(
-				'label' => __( 'Refund total:', 'woocommerce' ),
-				'value'	=> '-' . $refund_total,
-			);
-		}
-
 		// Tax for inclusive prices
 		if ( $this->tax_display_cart == 'incl' ) {
 
@@ -1250,43 +1228,6 @@ class WC_Order {
 		unset( $woocommerce->session->order_awaiting_payment );
 
 		$this->update_status('cancelled', $note);
-
-	}
-
-	/**
-	 * refund_order function.
-	 *
-	 * @access public
-	 * @param bool $use_gateway (default: false)
-	 * @return void
-	 */
-	function refund_order( $use_gateway = false ) {
-		$total_to_refund = woocommerce_format_total( $this->get_total() - $this->get_refund_total() );
-
-		if ( $use_gateway ) {
-
-			// Trigger an action which the gateway can pick up to do the refund - the gateway needs to handle status updates and setting the refunded total.
-			do_action( 'woocommerce_' . sanitize_title( $this->payment_method ) . '_refund_order', $this->id, $total_to_refund );
-
-		} else {
-
-			update_post_meta( $this->id, '_refund_total', $this->get_total() );
-
-			$this->update_status( 'refunded', sprintf( __( 'Order refunded manually.', 'woocommerce' ) ) );
-
-		}
-
-	}
-
-	/**
-	 * refund_line_item function.
-	 *
-	 * @access public
-	 * @param mixed $item_id
-	 * @param bool $use_gateway (default: false)
-	 * @return void
-	 */
-	function refund_line_item( $item_id, $use_gateway = false ) {
 
 	}
 

@@ -383,7 +383,6 @@ function woocommerce_admin_scripts() {
 			'remove_item_notice' 			=> __( 'Are you sure you want to remove the selected items? If you have previously reduced this item\'s stock, or this order was submitted by a customer, you will need to manually restore the item\'s stock.', 'woocommerce' ),
 			'remove_item_meta'				=> __( 'Remove this item meta?', 'woocommerce' ),
 			'remove_attribute'				=> __( 'Remove this attribute?', 'woocommerce' ),
-			'refund_item_notice' 			=> __( 'Are you sure you want to refund the selected items? The item\'s stock will not be affected.', 'woocommerce' ),
 			'name_label'					=> __( 'Name', 'woocommerce' ),
 			'remove_label'					=> __( 'Remove', 'woocommerce' ),
 			'click_to_toggle'				=> __( 'Click to toggle', 'woocommerce' ),

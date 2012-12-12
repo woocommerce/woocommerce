@@ -645,41 +645,6 @@ jQuery( function($){
 
 			}
 
-		} else if ( action == 'refund' ) {
-
-			var order_id = $('#post_ID').val();
-
-			var answer = confirm( woocommerce_writepanel_params.refund_item_notice );
-
-			if ( answer ) {
-
-				$('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
-
-				var data = {
-					order_id:           order_id,
-					order_item_ids: 	item_ids,
-					action: 			'woocommerce_refund_order_item',
-					security: 			woocommerce_writepanel_params.order_item_nonce
-				};
-
-				$.ajax( {
-					url: woocommerce_writepanel_params.ajax_url,
-					data: data,
-					type: 'POST',
-					success: function( response ) {
-						$.each( item_ids, function( i, val ) {
-							$('tbody#order_items_list tr[data-order_item_id="' + val + '"]').addClass( 'refunded' );
-						});
-
-						var response_obj = $.parseJSON(response);
-						$('#_order_refund_total').val( response_obj.refund_total );
-
-						$('table.woocommerce_order_items').unblock();
-					}
-				} );
-
-			}
-
 		} else if ( action == 'reduce_stock' ) {
 
 			$('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
