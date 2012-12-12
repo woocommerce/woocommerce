@@ -787,6 +787,19 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 	),
 
 	array(
+		'title' => __( 'Hold Stock (minutes)', 'woocommerce' ),
+		'desc' 		=> __( 'Hold stock (for unpaid orders) for x minutes. When this limit is reached, the pending order will be cancelled. Leave blank to disable.', 'woocommerce' ),
+		'id' 		=> 'woocommerce_hold_stock_minutes',
+		'type' 		=> 'number',
+		'custom_attributes' => array(
+			'min' 	=> 0,
+			'step' 	=> 1
+		),
+		'css' 		=> 'width:50px;',
+		'default'	=> '60'
+	),
+
+	array(
 		'title' => __( 'Notifications', 'woocommerce' ),
 		'desc' 		=> __( 'Enable low stock notifications', 'woocommerce' ),
 		'id' 		=> 'woocommerce_notify_low_stock',

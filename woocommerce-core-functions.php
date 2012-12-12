@@ -2139,3 +2139,47 @@ function woocommerce_scheduled_sales() {
 }
 
 add_action( 'woocommerce_scheduled_sales', 'woocommerce_scheduled_sales' );
+
+
+/**
+ * woocommerce_cancel_unpaid_orders function.
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_cancel_unpaid_orders() {
+	global $wpdb;
+
+	$held_duration = get_option( 'woocommerce_hold_stock_minutes' );
+
+	if ( $held_duration == '' )
+		return;
+
+	$date = date( "Y-m-d H:i:s", strtotime( '+' . absint( $held_duration ) . ' MINUTES', current_time( 'timestamp' ) ) );
+
+	$unpaid_orders = $wpdb->get_col( $wpdb->prepare( "
+		SELECT posts.ID
+		FROM {$wpdb->posts} AS posts
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+
+		WHERE 	posts.post_type   = 'shop_order'
+		AND 	posts.post_status = 'publish'
+		AND 	tax.taxonomy      = 'shop_order_status'
+		AND		term.slug	      IN ('pending')
+		AND 	posts.post_date   < %s
+	", $date ) );
+
+	if ( $unpaid_orders ) {
+		foreach ( $unpaid_orders as $unpaid_order ) {
+			$order = new WC_Order( $unpaid_order );
+			$order->update_status( 'cancelled', __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
+		}
+	}
+
+	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+	wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+}
+
+add_action( 'woocommerce_cancel_unpaid_orders', 'woocommerce_cancel_unpaid_orders' );

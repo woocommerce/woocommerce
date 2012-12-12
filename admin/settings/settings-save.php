@@ -88,6 +88,19 @@ function woocommerce_update_options( $options ) {
 		               $option_value = 2;
 		            }
 
+	    		} elseif ( $value['id'] == 'woocommerce_hold_stock_minutes' ) {
+
+		            if ( isset( $_POST[ $value['id'] ] )  ) {
+						$option_value = esc_attr( $_POST[ $value['id'] ] );
+					} else {
+		            	$option_value = '';
+		            }
+
+		            wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+
+		            if ( $option_value != '' )
+		            	wp_schedule_single_event( time() + ( absint( $option_value ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+
 		        } else {
 
 			       if ( isset( $_POST[$value['id']] ) ) {
