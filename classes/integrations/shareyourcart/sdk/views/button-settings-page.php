@@ -5,15 +5,15 @@
 </script>
 <div class="wrap">
 	<?php if($show_header):?>
-
+	
 	<?php echo $this->getUpdateNotification(); ?>
-
+	
     <h2>
         <a href="http://www.shareyourcart.com" target="_blank" title="Shareyourcart" class="shareyourcart-logo" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin/button-settings-view/logo-click']);">
             <img src="<?php echo $this->getUrl(dirname(__FILE__).'/../img/shareyourcart-logo.png'); ?>"/>
         </a>
 		<div class="syc-slogan"><?php echo SyC::t('sdk','Increase your social media exposure by 10%!'); ?></div>
-		<br clear="all" />
+		<br clear="all" /> 
     </h2>
 	<?php endif; ?>
 
@@ -23,14 +23,14 @@
                 </strong></p></div>
     <?php endif; ?>
 
-    <div id="visual-options">
-        <form method="POST" enctype="multipart/form-data" id="syc-form">
+    <div id="visual-options">       	
+        <form method="POST" enctype="multipart/form-data" id="syc-form"> 	        	
             <fieldset>
-
+                
                 <div class="buttonOption">
-
+                    
                     <input class="buttonOptionRadio" type="radio" value="1" id="button_type_1" <?php if ($current_button_type == '1'||$current_button_type == '') echo 'checked' ?> name="button_type" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin/button-settings-view/default-click']);" />
-                    <label class="buttonOptionLabel" for="button_type_1"><?php echo SyC::t('sdk','Use Standard Button'); ?></label>
+                    <label class="buttonOptionLabel" for="button_type_1"><?php echo SyC::t('sdk','Use Standard Button'); ?></label>	
                     <br /><br />
                     <table class="form-table shareyourcart_button_standard" name="shareyourcart_button_standard">
                         <tr align="center">
@@ -43,7 +43,7 @@
                                     <option name="blue" <?php echo $current_skin == 'blue' ? 'selected="selected"' : ''; ?> value="blue"><?php echo SyC::t('sdk','Blue'); ?></option>
 									<option name="light" <?php echo $current_skin == 'light' ? 'selected="selected"' : ''; ?> value="light"><?php echo SyC::t('sdk','Light'); ?></option>
 									<option name="dark" <?php echo $current_skin == 'dark' ? 'selected="selected"' : ''; ?> value="dark"><?php echo SyC::t('sdk','Dark'); ?></option>
-                                </select>
+                                </select>                        
                             </td>
                         </tr>
                         <tr align="center">
@@ -54,14 +54,14 @@
                                 <select name="button_position" id="button_position" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin/button-settings-view/button-position-click']);">
                                     <option name="normal" <?php echo $current_position == 'normal' ? 'selected="selected"' : ''; ?> value="normal"><?php echo SyC::t('sdk','Normal'); ?></option>
                                     <option name="floating" <?php echo $current_position == 'floating' ? 'selected="selected"' : ''; ?> value="floating"><?php echo SyC::t('sdk','Floating'); ?></option>
-                                </select>
+                                </select>                        
                             </td>
-                        </tr>
+                        </tr>		
                       <!--  <tr align="center"> since we switched to <a> on the button, this does not seem to be needed anymore
                             <td>
 								<input class="buttonCheckbox" name="show_on_single_row" <?php echo $show_on_single_row ? 'checked="checked"' : ''; ?>  type='checkbox' onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin/button-settings-view/toggle-show-on-single-row-click']);"><?php echo SyC::t('sdk','Check this if you want the button to be shown on it\'s own row'); ?></input>
                             </td>
-                        </tr> -->
+                        </tr> -->								
                     </table>
                 </div>
 
@@ -82,7 +82,7 @@
                                 <input type="hidden" name="MAX_FILE_SIZE" value="100000000000" />
                                 <input type="file" accept="image/gif, image/jpeg, image/jpg, image/png" name="button-img" id="button-img" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin/button-settings-view/upload-normal-img-click']);" />
                             </td>
-                        </tr>
+                        </tr> 
 
                         <tr align="center">
                             <th><label><?php echo SyC::t('sdk','Hover image:'); ?></label></th>
@@ -96,27 +96,27 @@
                                 <input type="hidden" name="MAX_FILE_SIZE" value="100000000000" />
                                 <input type="file" accept="image/gif, image/jpeg, image/jpg, image/png" name="button-img-hover" id="button-img-hover" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin/button-settings-view/upload-hover-img-click']);" />
                             </td>
-                        </tr>
+                        </tr>               				
                     </table>
                 </div>
 
                 <div class="buttonOption last">
                     <input class="buttonOptionRadio" type="radio" value="3" id="button_type_3" name="button_type" <?php if ($current_button_type == '3') echo 'checked' ?> onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin/button-settings-view/custom-button-click']);"/>
-                    <label class="buttonOptionLabel" for="button_type_3"><?php echo SyC::t('sdk','Build your own HTML button'); ?></label>
+                    <label class="buttonOptionLabel" for="button_type_3"><?php echo SyC::t('sdk','Build your own HTML button'); ?></label>	
                     <table class="form-table shareyourcart_button_html" name="shareyourcart_button_html">
-                        <tr>
+                        <tr>                    
                             <td>
-                                <textarea id="syc_button_textarea" class="buttonTextarea" rows="7" cols="56" name="button_html"><?php echo ($button_html!=''?$button_html:'<button>'.SyC::t('sdk','Get a {value} discount',array('{value}' => '<div class="shareyourcart-discount"></div>')).'</button>'); ?></textarea>
+                                <textarea id="syc_button_textarea" class="buttonTextarea" rows="7" cols="56" name="button_html"><?php echo ($button_html!=''?$button_html:'<button>'.SyC::t('sdk','Get a {value} discount',array('{value}' => '<div class="shareyourcart-discount"></div>')).'</button>'); ?></textarea>                    
                             </td>
-                        </tr>
+                        </tr>               			
                     </table>
 
                     <?php echo $html; ?>
-
+                    
                 </div>
-
+                
                 <br clear="all" />
-
+                
                 <hr />
                 <br />
                 <table class="form-table table-small" name="shareyourcart_settings">
@@ -125,7 +125,7 @@
                             <td>
                                 <input class="buttonCheckbox" name="show_on_product" <?php echo $show_on_product ? 'checked="checked"' : ''; ?>  type='checkbox' onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin/button-settings-view/toggle-show-on-product-click']);"><?php echo SyC::t('sdk','Product page'); ?></input>
                                 <br />
-                                <input class="buttonCheckbox" name="show_on_checkout" <?php echo $show_on_checkout ? 'checked="checked"' : ''; ?> type='checkbox' onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin/button-settings-view/toggle-show-on-checkout-click']);"><?php echo SyC::t('sdk','Checkout page'); ?></input>
+                                <input class="buttonCheckbox" name="show_on_checkout" <?php echo $show_on_checkout ? 'checked="checked"' : ''; ?> type='checkbox' onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin/button-settings-view/toggle-show-on-checkout-click']);"><?php echo SyC::t('sdk','Checkout page'); ?></input>                        
                             </td>
                         </tr>
 						<tr>
@@ -141,13 +141,13 @@
                             </td>
                         </tr>
                     </table>
-
-
-                <div class="submit"><input type="submit" class="button" name="syc-visual-form" id="syc-visual-form" value="<?php echo SyC::t('sdk','Save'); ?>" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin/button-settings-view/save-click']);"></div>
-
-            </fieldset>
+              
+                
+                <div class="submit"><input type="submit" class="button" name="syc-visual-form" id="syc-visual-form" value="<?php echo SyC::t('sdk','Save'); ?>" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin/button-settings-view/save-click']);"></div>            
+                
+            </fieldset>	
             <br />
-        </form>
+        </form>        
     </div>
 
 	<?php if($show_footer):?>
