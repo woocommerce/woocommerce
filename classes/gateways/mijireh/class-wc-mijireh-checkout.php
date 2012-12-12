@@ -235,7 +235,17 @@ class WC_Mijireh_Checkout extends WC_Payment_Gateway {
 		foreach( $items as $item ) {
 			$product = $wc_order->get_product_from_item( $item );
 
-			$mj_order->add_item( $item['name'], $wc_order->get_item_subtotal( $item, false, false ), $item['qty'], $product->get_sku() );
+			if ( get_option( 'woocommerce_prices_include_tax' ) == 'yes' ) {
+
+				$mj_order->add_item( $item['name'], $wc_order->get_item_subtotal( $item, true, false ), $item['qty'], $product->get_sku() );
+
+			} else {
+
+				$mj_order->add_item( $item['name'], $wc_order->get_item_subtotal( $item, false, false ), $item['qty'], $product->get_sku() );
+
+			}
+
+
 		}
 
 		// Handle fees
@@ -281,9 +291,15 @@ class WC_Mijireh_Checkout extends WC_Payment_Gateway {
 
 		// set order totals
 		$mj_order->total 			= $wc_order->get_order_total();
-		$mj_order->tax 				= $wc_order->get_total_tax();
 		$mj_order->discount 		= $wc_order->get_total_discount();
-		$mj_order->shipping 		= $wc_order->get_shipping();
+
+		if ( get_option( 'woocommerce_prices_include_tax' ) == 'yes' ) {
+			$mj_order->shipping 		= $wc_order->get_shipping() + $wc_order->get_shipping_tax();
+			$mj_order->show_tax			= false;
+		} else {
+			$mj_order->shipping 		= $wc_order->get_shipping();
+			$mj_order->tax 				= $wc_order->get_total_tax();
+		}
 
 		// add meta data to identify woocommerce order
 		$mj_order->add_meta_data( 'wc_order_id', $order_id );

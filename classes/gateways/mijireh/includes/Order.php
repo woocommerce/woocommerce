@@ -6,25 +6,26 @@ class Mijireh_Order extends Mijireh_Model {
 
   private function _init() {
     $this->_data = array(
-      'partner_id' => null,
-      'order_number' => null,
-      'mode' => null,
-      'status' => null,
-      'order_date' => null,
-      'ip_address' => null,
-      'checkout_url' => null,
-      'total' => '',
-      'return_url' => '',
-      'items' => array(),
-      'email' => '',
-      'first_name' => '',
-      'last_name' => '',
-      'meta_data' => array(),
-      'tax' => '',
-      'shipping' => '',
-      'discount' => '',
+      'partner_id'       => null,
+      'order_number'     => null,
+      'mode'             => null,
+      'status'           => null,
+      'order_date'       => null,
+      'ip_address'       => null,
+      'checkout_url'     => null,
+      'total'            => '',
+      'return_url'       => '',
+      'items'            => array(),
+      'email'            => '',
+      'first_name'       => '',
+      'last_name'        => '',
+      'meta_data'        => array(),
+      'tax'              => '',
+      'shipping'         => '',
+      'discount'         => '',
       'shipping_address' => array(),
-      'billing_address' => array()
+      'billing_address'  => array(),
+      'show_tax'         => true
     );
   }
 
