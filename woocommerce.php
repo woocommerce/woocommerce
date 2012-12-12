@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 1.7.0 beta
+ * Version: 2.0.0 beta
  * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 3.3
@@ -37,7 +37,7 @@ class Woocommerce {
 	/**
 	 * @var string
 	 */
-	var $version = '1.7.0';
+	var $version = '2.0.0';
 
 	/**
 	 * @var string
@@ -78,6 +78,11 @@ class Woocommerce {
 	 * @var WC_Shipping
 	 */
 	var $shipping;
+
+	/**
+	 * @var WC_Product_Factory
+	 */
+	var $product_factory;
 
 	/**
 	 * @var WC_Cart
@@ -140,11 +145,17 @@ class Woocommerce {
 		// Define version constant
 		define( 'WOOCOMMERCE_VERSION', $this->version );
 
+		// Installation
+		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+			register_activation_hook( __FILE__, array( $this, 'activate' ) );
+			register_activation_hook( __FILE__, 'flush_rewrite_rules' );
+
+			if ( get_option( 'woocommerce_version' ) != $this->version )
+				add_action( 'init', array( &$this, 'install' ), 1 );
+		}
+
 		// Include required files
 		$this->includes();
-
-		// Installation
-		if ( is_admin() && ! defined('DOING_AJAX') ) $this->install();
 
 		// Actions
 		add_action( 'init', array( &$this, 'init' ), 0 );
@@ -153,6 +164,31 @@ class Woocommerce {
 
 		// Loaded action
 		do_action( 'woocommerce_loaded' );
+	}
+
+
+	/**
+	 * activate function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function activate() {
+		update_option( 'skip_install_woocommerce_pages', 0 );
+		update_option( 'woocommerce_installed', 1 );
+		$this->install();
+	}
+
+
+	/**
+	 * upgrade function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function install() {
+		include_once( 'admin/woocommerce-admin-install.php' );
+		do_install_woocommerce();
 	}
 
 
@@ -171,8 +207,15 @@ class Woocommerce {
 		include( 'widgets/widget-init.php' );					// Widget classes
 		include( 'classes/class-wc-countries.php' );			// Defines countries and states
 		include( 'classes/class-wc-order.php' );				// Single order class
-		include( 'classes/class-wc-product.php' );				// Product class
+
+		include( 'classes/class-wc-product-factory.php' );		// Product factory
+		include( 'classes/abstracts/abstract-wc-product.php' );	// Product class abstract
+		include( 'classes/class-wc-product-simple.php' );		// Simple product type class
+		include( 'classes/class-wc-product-external.php' );		// External product type class
+		include( 'classes/class-wc-product-variable.php' );		// Variable product type class
+		include( 'classes/class-wc-product-grouped.php' );		// Grouped product type class
 		include( 'classes/class-wc-product-variation.php' );	// Product variation class
+
 		include( 'classes/class-wc-tax.php' );					// Tax class
 		include( 'classes/class-wc-settings-api.php' );			// Settings API
 
@@ -257,20 +300,6 @@ class Woocommerce {
 
 
 	/**
-	 * Install upon activation.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	function install() {
-		register_activation_hook( __FILE__, 'activate_woocommerce' );
-		register_activation_hook( __FILE__, 'flush_rewrite_rules' );
-		if ( get_option( 'woocommerce_version' ) != $this->version )
-			add_action( 'init', 'install_woocommerce', 1 );
-	}
-
-
-	/**
 	 * Init WooCommerce when WordPress Initialises.
 	 *
 	 * @access public
@@ -289,6 +318,7 @@ class Woocommerce {
 		// Load class instances
 		$this->payment_gateways 	= new WC_Payment_gateways();	// Payment gateways. Loads and stores payment methods
 		$this->shipping 			= new WC_Shipping();			// Shipping class. loads and stores shipping methods
+		$this->product_factory 		= new WC_Product_Factory();     // Product Factory to create new product instances
 		$this->countries 			= new WC_Countries();			// Countries class
 		$this->integrations			= new WC_Integrations();		// Integrations class
 
@@ -499,7 +529,7 @@ class Woocommerce {
 		if ( is_int( $post ) ) $post = get_post( $post );
 		if ( $post->post_type !== 'product' ) return;
 		unset( $GLOBALS['product'] );
-		$GLOBALS['product'] = new WC_Product( $post->ID );
+		$GLOBALS['product'] = get_product( $post );
 		return $GLOBALS['product'];
 	}
 
@@ -666,7 +696,7 @@ class Woocommerce {
 	        array('product'),
 	        array(
 	            'hierarchical' 			=> true,
-	            'update_count_callback' => 'woocommerce_manual_category_count',
+	            'update_count_callback' => '_woocommerce_term_recount',
 	            'label' 				=> __( 'Product Categories', 'woocommerce'),
 	            'labels' => array(
 	                    'name' 				=> __( 'Product Categories', 'woocommerce'),
@@ -697,7 +727,7 @@ class Woocommerce {
 	        array('product'),
 	        array(
 	            'hierarchical' 			=> false,
-	            'update_count_callback' => '_update_post_term_count',
+	            'update_count_callback' => '_woocommerce_term_recount',
 	            'label' 				=> __( 'Product Tags', 'woocommerce'),
 	            'labels' => array(
 	                    'name' 				=> __( 'Product Tags', 'woocommerce'),
@@ -784,7 +814,7 @@ class Woocommerce {
 		if ( $attribute_taxonomies ) {
 			foreach ($attribute_taxonomies as $tax) {
 
-		    	$name = $this->attribute_taxonomy_name($tax->attribute_name);
+		    	$name = $this->attribute_taxonomy_name( $tax->attribute_name );
 		    	$hierarchical = true;
 		    	if ($name) {
 
@@ -818,7 +848,7 @@ class Woocommerce {
 								'assign_terms' 		=> 'assign_product_terms',
 				            ),
 				            'show_in_nav_menus' 		=> $show_in_nav_menus,
-				            'rewrite' 					=> array( 'slug' => $product_attribute_base . strtolower( sanitize_title( $tax->attribute_name ) ), 'with_front' => false, 'hierarchical' => $hierarchical ),
+				            'rewrite' 					=> array( 'slug' => $product_attribute_base . sanitize_title( $tax->attribute_name ), 'with_front' => false, 'hierarchical' => $hierarchical ),
 				        )
 				    );
 
@@ -989,14 +1019,13 @@ class Woocommerce {
 	 * @return void
 	 */
 	function init_image_sizes() {
-		// Image sizes
-		$shop_thumbnail_crop 	= get_option('woocommerce_thumbnail_image_crop') == 1 ? true : false;
-		$shop_catalog_crop 		= get_option('woocommerce_catalog_image_crop') == 1 ? true : false;
-		$shop_single_crop 		= get_option('woocommerce_single_image_crop') == 1 ? true : false;
+		$shop_thumbnail = $this->get_image_size( 'shop_thumbnail' );
+		$shop_catalog	= $this->get_image_size( 'shop_catalog' );
+		$shop_single	= $this->get_image_size( 'shop_single' );
 
-		add_image_size( 'shop_thumbnail', $this->get_image_size('shop_thumbnail_image_width'), $this->get_image_size('shop_thumbnail_image_height'), $shop_thumbnail_crop );
-		add_image_size( 'shop_catalog', $this->get_image_size('shop_catalog_image_width'), $this->get_image_size('shop_catalog_image_height'), $shop_catalog_crop );
-		add_image_size( 'shop_single', $this->get_image_size('shop_single_image_width'), $this->get_image_size('shop_single_image_height'), $shop_single_crop );
+		add_image_size( 'shop_thumbnail', $shop_thumbnail['width'], $shop_thumbnail['height'], $shop_thumbnail['crop'] );
+		add_image_size( 'shop_catalog', $shop_catalog['width'], $shop_catalog['height'], $shop_catalog['crop'] );
+		add_image_size( 'shop_single', $shop_single['width'], $shop_single['height'], $shop_single['crop'] );
 	}
 
 
@@ -1033,7 +1062,6 @@ class Woocommerce {
 
 		// Register any scipts for later use, or used as dependencies
 		wp_register_script( 'chosen', $this->plugin_url() . '/assets/js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), $this->version, true );
-		wp_register_script( 'jquery-ui', $this->plugin_url() . '/assets/js/jquery-ui' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 		wp_register_script( 'jquery-blockui', $this->plugin_url() . '/assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 		wp_register_script( 'jquery-placeholder', $this->plugin_url() . '/assets/js/jquery-placeholder/jquery.placeholder' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 
@@ -1064,26 +1092,29 @@ class Woocommerce {
 		}
 
 		// Global frontend scripts
-		wp_enqueue_script( 'woocommerce', $frontend_script_path . 'woocommerce' . $suffix . '.js', array( 'jquery', 'jquery-blockui', 'jquery-placeholder' ), $this->version, true );
+		wp_enqueue_script( 'woocommerce', $frontend_script_path . 'woocommerce' . $suffix . '.js', array( 'jquery', 'jquery-blockui' ), $this->version, true );
+		wp_enqueue_script( 'jquery-placeholder' );
 
 		// Variables for JS scripts
 		$woocommerce_params = array(
-			'countries' 					=> json_encode( $this->countries->get_allowed_country_states() ),
-			'select_state_text' 			=> __( 'Select an option&hellip;', 'woocommerce' ),
-			'plugin_url' 					=> $this->plugin_url(),
-			'ajax_url' 						=> $this->ajax_url(),
-			'ajax_loader_url'				=> apply_filters( 'woocommerce_ajax_loader_url', $this->plugin_url() . '/assets/images/ajax-loader.gif' ),
-			'required_rating_text'			=> esc_attr__( 'Please select a rating', 'woocommerce' ),
-			'no_matching_variations_text'	=> esc_attr__( 'Sorry, no products matched your selection. Please choose a different combination.', 'woocommerce' ),
-			'review_rating_required'		=> get_option( 'woocommerce_review_rating_required' ),
-			'required_text'					=> esc_attr__( 'required', 'woocommerce' ),
-			'update_order_review_nonce' 	=> wp_create_nonce( "update-order-review" ),
-			'apply_coupon_nonce' 			=> wp_create_nonce( "apply-coupon" ),
-			'option_guest_checkout'			=> get_option( 'woocommerce_enable_guest_checkout' ),
-			'checkout_url'					=> add_query_arg( 'action', 'woocommerce-checkout', $this->ajax_url() ),
-			'is_checkout'					=> is_page( woocommerce_get_page_id( 'checkout' ) ) ? 1 : 0,
-			'update_shipping_method_nonce' 	=> wp_create_nonce( "update-shipping-method" ),
-			'add_to_cart_nonce' 			=> wp_create_nonce( "add-to-cart" )
+			'countries'                        => json_encode( $this->countries->get_allowed_country_states() ),
+			'plugin_url'                       => $this->plugin_url(),
+			'ajax_url'                         => $this->ajax_url(),
+			'ajax_loader_url'                  => apply_filters( 'woocommerce_ajax_loader_url', $this->plugin_url() . '/assets/images/ajax-loader.gif' ),
+			'i18n_select_state_text'           => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
+			'i18n_required_rating_text'        => esc_attr__( 'Please select a rating', 'woocommerce' ),
+			'i18n_no_matching_variations_text' => esc_attr__( 'Sorry, no products matched your selection. Please choose a different combination.', 'woocommerce' ),
+			'i18n_required_text'               => esc_attr__( 'required', 'woocommerce' ),
+			'i18n_view_cart'                   => esc_attr__( 'View Cart &rarr;', 'woocommerce' ),
+			'review_rating_required'           => get_option( 'woocommerce_review_rating_required' ),
+			'update_order_review_nonce'        => wp_create_nonce( "update-order-review" ),
+			'apply_coupon_nonce'               => wp_create_nonce( "apply-coupon" ),
+			'option_guest_checkout'            => get_option( 'woocommerce_enable_guest_checkout' ),
+			'checkout_url'                     => add_query_arg( 'action', 'woocommerce-checkout', $this->ajax_url() ),
+			'is_checkout'                      => is_page( woocommerce_get_page_id( 'checkout' ) ) ? 1 : 0,
+			'update_shipping_method_nonce'     => wp_create_nonce( "update-shipping-method" ),
+			'add_to_cart_nonce'                => wp_create_nonce( "add-to-cart" ),
+			'cart_url'                         => get_permalink( woocommerce_get_page_id( 'cart' ) ),
 		);
 
 		if ( is_checkout() || is_cart() )
@@ -1121,11 +1152,10 @@ class Woocommerce {
 	 * @return WC_Checkout
 	 */
 	function checkout() {
-		if ( ! class_exists('WC_Checkout') ) {
-			include( 'classes/class-wc-checkout.php' );
+		if ( ! class_exists( 'WC_Checkout' ) ) {
+			include_once( 'classes/class-wc-checkout.php' );
 			$this->checkout = new WC_Checkout();
 		}
-
 		return $this->checkout;
 	}
 
@@ -1263,16 +1293,18 @@ class Woocommerce {
 	 * @return string
 	 */
 	function get_image_size( $image_size ) {
-		$return = '';
-		switch ( $image_size ) {
-			case "shop_thumbnail_image_width" : $return = get_option('woocommerce_thumbnail_image_width'); break;
-			case "shop_thumbnail_image_height" : $return = get_option('woocommerce_thumbnail_image_height'); break;
-			case "shop_catalog_image_width" : $return = get_option('woocommerce_catalog_image_width'); break;
-			case "shop_catalog_image_height" : $return = get_option('woocommerce_catalog_image_height'); break;
-			case "shop_single_image_width" : $return = get_option('woocommerce_single_image_width'); break;
-			case "shop_single_image_height" : $return = get_option('woocommerce_single_image_height'); break;
-		}
-		return apply_filters( 'woocommerce_get_image_size_' . $image_size, $return );
+
+		// Only return sizes we define in settings
+		if ( ! in_array( $image_size, array( 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ) )
+			return apply_filters( 'woocommerce_get_image_size_' . $image_size, '' );
+
+		$size = get_option( $image_size . '_image_size', array() );
+
+		$size['width'] 	= isset( $size['width'] ) ? $size['width'] : '300';
+		$size['height'] = isset( $size['height'] ) ? $size['height'] : '300';
+		$size['crop'] 	= isset( $size['crop'] ) ? $size['crop'] : 1;
+
+		return apply_filters( 'woocommerce_get_image_size_' . $image_size, $size );
 	}
 
 	/** Messages ****************************************************************/
@@ -1422,7 +1454,7 @@ class Woocommerce {
 	function get_attribute_taxonomies() {
 		global $wpdb;
 		if ( ! $this->attribute_taxonomies )
-			$this->attribute_taxonomies = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies" ) );
+			$this->attribute_taxonomies = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies" );
 		return apply_filters( 'woocommerce_attribute_taxonomies', $this->attribute_taxonomies );
 	}
 
@@ -1435,7 +1467,7 @@ class Woocommerce {
 	 * @return string
 	 */
 	function attribute_taxonomy_name( $name ) {
-		return 'pa_' . sanitize_title( $name );
+		return 'pa_' . woocommerce_sanitize_taxonomy_name( $name );
 	}
 
 
@@ -1450,11 +1482,12 @@ class Woocommerce {
 		global $wpdb;
 
 		if ( strstr( $name, 'pa_' ) ) {
-			$name = str_replace( 'pa_', '', sanitize_title( $name ) );
+			$name = woocommerce_sanitize_taxonomy_name( str_replace( 'pa_', '', $name ) );
 
 			$label = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_label FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
 
-			if ( ! $label ) $label = ucfirst( $name );
+			if ( ! $label )
+				$label = ucfirst( $name );
 		} else {
 			$label = $name;
 		}
@@ -1493,7 +1526,7 @@ class Woocommerce {
 		$attribute_taxonomies = $this->get_attribute_taxonomies();
 		if ( $attribute_taxonomies ) {
 			foreach ( $attribute_taxonomies as $tax ) {
-				$taxonomy_names[] = $this->attribute_taxonomy_name( strtolower( sanitize_title( $tax->attribute_name ) ) );
+				$taxonomy_names[] = $this->attribute_taxonomy_name( $tax->attribute_name );
 			}
 		}
 		return $taxonomy_names;
@@ -1612,7 +1645,7 @@ class Woocommerce {
 
 		$before 	= empty( $wrapper['before'] ) ? '<div class="' . $wrapper['class'] . '">' : $wrapper['before'];
 		$after 		= empty( $wrapper['after'] ) ? '</div>' : $wrapper['after'];
-		
+
 		echo $before;
 		call_user_func( $function, $atts );
 		echo $after;

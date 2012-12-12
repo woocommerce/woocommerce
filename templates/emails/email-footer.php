@@ -4,7 +4,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates/Emails
- * @version     1.7.0
+ * @version     2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -21,11 +21,11 @@ $template_footer = "
 ";
 
 $credit = "
-	border:0; 
-	color: $base_lighter_40; 
-	font-family: Arial; 
-	font-size:12px; 
-	line-height:125%; 
+	border:0;
+	color: $base_lighter_40;
+	font-family: Arial;
+	font-size:12px;
+	line-height:125%;
 	text-align:center;
 ";
 ?>

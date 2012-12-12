@@ -5,14 +5,14 @@
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce/Admin/Importers
- * @version     1.7.0
+ * @version     2.0.0
  */
- 
+
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 if ( class_exists( 'WP_Importer' ) ) {
 	class WC_CSV_Tax_Rates_Import extends WP_Importer {
-		
+
 		var $id;
 		var $file_url;
 		var $import_page;
@@ -20,17 +20,17 @@ if ( class_exists( 'WP_Importer' ) ) {
 		var $posts = array();
 		var $imported;
 		var $skipped;
-	
+
 		/**
 		 * __construct function.
-		 * 
+		 *
 		 * @access public
 		 * @return void
 		 */
 		public function __construct() {
 			$this->import_page = 'woocommerce_tax_rate_csv';
 		}
-	
+
 		/**
 		 * Registered callback function for the WordPress Importer
 		 *
@@ -38,13 +38,13 @@ if ( class_exists( 'WP_Importer' ) ) {
 		 */
 		function dispatch() {
 			$this->header();
-	
+
 			if ( ! empty( $_POST['delimiter'] ) )
 				$this->delimiter = stripslashes( trim( $_POST['delimiter'] ) );
-	
-			if ( ! $this->delimiter ) 
+
+			if ( ! $this->delimiter )
 				$this->delimiter = ',';
-	
+
 			$step = empty( $_GET['step'] ) ? 0 : (int) $_GET['step'];
 			switch ( $step ) {
 				case 0:
@@ -58,26 +58,26 @@ if ( class_exists( 'WP_Importer' ) ) {
 							$file = get_attached_file( $this->id );
 						else
 							$file = ABSPATH . $this->file_url;
-		
+
 						add_filter( 'http_request_timeout', array( &$this, 'bump_request_timeout' ) );
-		
+
 						if ( function_exists( 'gc_enable' ) )
 							gc_enable();
-		
+
 						@set_time_limit(0);
 						@ob_flush();
 						@flush();
-		
+
 						$this->import( $file );
 					}
 					break;
 			}
 			$this->footer();
 		}
-	
+
 		/**
 		 * format_data_from_csv function.
-		 * 
+		 *
 		 * @access public
 		 * @param mixed $data
 		 * @param mixed $enc
@@ -89,134 +89,123 @@ if ( class_exists( 'WP_Importer' ) ) {
 
 		/**
 		 * import function.
-		 * 
+		 *
 		 * @access public
 		 * @param mixed $file
 		 * @return void
 		 */
 		function import( $file ) {
 			global $woocommerce, $wpdb;
-	
+
 			$this->imported = $this->skipped = 0;
-			
+
 			if ( ! is_file($file) ) {
 				echo '<p><strong>' . __( 'Sorry, there has been an error.', 'woocommerce' ) . '</strong><br />';
 				echo __( 'The file does not exist, please try again.', 'woocommerce' ) . '</p>';
 				$this->footer();
 				die();
 			}
-	
+
 			$new_rates = array();
-	
+
 			if ( ( $handle = fopen( $file, "r" ) ) !== FALSE ) {
-			
+
 				$header = fgetcsv( $handle, 0, $this->delimiter );
-				
-				if ( sizeof( $header ) == 6 ) {
-					
-					$rates = get_option( 'woocommerce_tax_rates' );
-					
+
+				if ( sizeof( $header ) == 10 ) {
+
+					$loop = 0;
+
 					while ( ( $row = fgetcsv( $handle, 0, $this->delimiter ) ) !== FALSE ) {
-		            
-						$rate = array();
-						
-						list( $rate['countries'], $rate['class'], $rate['label'], $rate['rate'], $rate['compound'], $rate['shipping'] ) = $row;
-						
-						$parsed_countries 	= array();
-						$rate['countries'] 	= array_map( 'trim', explode( '|', $rate['countries'] ) );
-						
-						foreach( $rate['countries'] as $country ) {
-							if ( strstr( $country, ':' ) ) {
-								list( $country, $state ) = array_map( 'trim', explode( ':', $country ) );
-								
-								if ( ! isset( $parsed_countries[ $country ] ) )
-									$parsed_countries[ $country ] = array();
-								
-								$parsed_countries[ $country ][] = $state;
-							} else {
-								
-								if ( ! isset( $parsed_countries[ $country ] ) )
-									$parsed_countries[ $country ] = array();
-									
-								$parsed_countries[ $country ][] = '*';
-							}
+
+						list( $country, $state, $postcode, $city, $rate, $name, $priority, $compound, $shipping, $class ) = $row;
+
+						$country = trim( strtoupper( $country ) );
+						$state   = trim( strtoupper( $state ) );
+
+						if ( $country == '*' )
+							$country = '';
+						if ( $state == '*' )
+							$state = '';
+
+						$wpdb->insert(
+							$wpdb->prefix . "woocommerce_tax_rates",
+							array(
+								'tax_rate_country'  => $country,
+								'tax_rate_state'    => $state,
+								'tax_rate'          => number_format( $rate, 4, '.', '' ),
+								'tax_rate_name'     => trim( $name ),
+								'tax_rate_priority' => absint( $priority ),
+								'tax_rate_compound' => $compound ? 1 : 0,
+								'tax_rate_shipping' => $shipping ? 1 : 0,
+								'tax_rate_order'    => $loop,
+								'tax_rate_class'    => sanitize_title( $class )
+							)
+						);
+
+						$tax_rate_id = $wpdb->insert_id;
+
+						$postcode  = woocommerce_clean( $postcode );
+						$postcodes = explode( ';', $postcode );
+						$postcodes = array_map( 'strtoupper', array_map( 'woocommerce_clean', $postcodes ) );
+						foreach( $postcodes as $postcode ) {
+							$wpdb->insert(
+							$wpdb->prefix . "woocommerce_tax_rate_locations",
+								array(
+									'location_code' => $postcode,
+									'tax_rate_id'   => $tax_rate_id,
+									'location_type' => 'postcode',
+								)
+							);
 						}
-						
-						$rate['countries']	= $parsed_countries;
-						$rate['shipping'] 	= $rate['shipping'] ? 'yes' : 'no';
-						$rate['compound'] 	= $rate['compound'] ? 'yes' : 'no';
-						
-						$new_rates[] = $rate;
-						
-						unset( $rate, $row );
-						
+
+						$city   = woocommerce_clean( $city );
+						$cities = explode( ';', $city );
+						$cities = array_map( 'strtoupper', array_map( 'woocommerce_clean', $cities ) );
+						foreach( $cities as $city ) {
+							$wpdb->insert(
+							$wpdb->prefix . "woocommerce_tax_rate_locations",
+								array(
+									'location_code' => $city,
+									'tax_rate_id'   => $tax_rate_id,
+									'location_type' => 'city',
+								)
+							);
+						}
+
+						$loop ++;
 						$this->imported++;
 				    }
-				    
-				    $rates = array_merge( $rates, $new_rates );
-			
-					update_option( 'woocommerce_tax_rates', $rates );
-					
-				} elseif ( sizeof( $header ) == 8 ) {
-					
-					$rates = get_option( 'woocommerce_local_tax_rates' );
-					
-					while ( ( $row = fgetcsv( $handle, 0, $this->delimiter ) ) !== FALSE ) {
-		            
-						$rate = array();
-						
-						list( $rate['country'], $rate['state'], $rate['postcode'], $rate['class'], $rate['label'], $rate['rate'], $rate['compound'], $rate['shipping'] ) = $row;
-						
-						if ( ! $rate['country'] || ! $rate['postcode'] || ! $rate['rate'] ) {
-							$this->skipped++;
-							continue;
-						}
-						
-						$rate['state']		= $rate['state'] ? $rate['state'] : '*';
-						$rate['shipping'] 	= $rate['shipping'] ? 'yes' : 'no';
-						$rate['compound'] 	= $rate['compound'] ? 'yes' : 'no';
-						$rate['postcode'] 	= array_map( 'trim', explode( '|', $rate['postcode'] ) );
-						
-						$new_rates[] = $rate;
-						
-						unset( $rate, $row );
-						
-						$this->imported++;
-				    }
-				    
-				    $rates = array_merge( $rates, $new_rates );
-			
-					update_option( 'woocommerce_local_tax_rates', $rates );
-					
+
 				} else {
-					
+
 					echo '<p><strong>' . __( 'Sorry, there has been an error.', 'woocommerce' ) . '</strong><br />';
 					echo __( 'The CSV is invalid.', 'woocommerce' ) . '</p>';
 					$this->footer();
 					die();
-				
+
 				}
-			    
+
 			    fclose( $handle );
 			}
-			
+
 			// Show Result
 			echo '<div class="updated settings-error below-h2"><p>
 				'.sprintf( __( 'Import complete - imported <strong>%s</strong> tax rates and skipped <strong>%s</strong>.', 'woocommerce' ), $this->imported, $this->skipped ).'
 			</p></div>';
-	
+
 			$this->import_end();
 		}
-	
+
 		/**
 		 * Performs post-import cleanup of files and the cache
 		 */
 		function import_end() {
 			echo '<p>' . __( 'All done!', 'woocommerce' ) . ' <a href="' . admin_url('admin.php?page=woocommerce_settings&tab=tax') . '">' . __( 'View Tax Rates', 'woocommerce' ) . '</a>' . '</p>';
-	
+
 			do_action( 'import_end' );
 		}
-	
+
 		/**
 		 * Handles the CSV upload and initial parsing of the file to prepare for
 		 * displaying author import options
@@ -224,76 +213,74 @@ if ( class_exists( 'WP_Importer' ) ) {
 		 * @return bool False if error uploading or invalid file, true otherwise
 		 */
 		function handle_upload() {
-	
+
 			if ( empty( $_POST['file_url'] ) ) {
-	
+
 				$file = wp_import_handle_upload();
-	
+
 				if ( isset( $file['error'] ) ) {
 					echo '<p><strong>' . __( 'Sorry, there has been an error.', 'woocommerce' ) . '</strong><br />';
 					echo esc_html( $file['error'] ) . '</p>';
 					return false;
 				}
-	
+
 				$this->id = (int) $file['id'];
-	
+
 			} else {
-	
+
 				if ( file_exists( ABSPATH . $_POST['file_url'] ) ) {
-	
+
 					$this->file_url = esc_attr( $_POST['file_url'] );
-	
+
 				} else {
-	
+
 					echo '<p><strong>' . __( 'Sorry, there has been an error.', 'woocommerce' ) . '</strong></p>';
 					return false;
-	
+
 				}
-	
+
 			}
-	
+
 			return true;
 		}
-			
+
 		/**
 		 * header function.
-		 * 
+		 *
 		 * @access public
 		 * @return void
 		 */
 		function header() {
-			echo '<div class="wrap"><div class="icon32" id="icon-woocommerce-importer"><br></div>';
+			echo '<div class="wrap"><div class="icon32 icon32-woocommerce-importer" id="icon-woocommerce"><br></div>';
 			echo '<h2>' . __( 'Import Tax Rates', 'woocommerce' ) . '</h2>';
 		}
 
 		/**
 		 * footer function.
-		 * 
+		 *
 		 * @access public
 		 * @return void
 		 */
 		function footer() {
 			echo '</div>';
 		}
-	
+
 		/**
 		 * greet function.
-		 * 
+		 *
 		 * @access public
 		 * @return void
 		 */
 		function greet() {
 			global $woocommerce;
-			
+
 			echo '<div class="narrow">';
 			echo '<p>' . __( 'Hi there! Upload a CSV file containing tax rates to import the contents into your shop. Choose a .csv file to upload, then click "Upload file and import".', 'woocommerce' ).'</p>';
-			
-			echo '<p>' . sprintf( __( 'Tax rates need to be defined with columns in a specific order (6 columns). <a href="%s">Click here to download a sample</a>.', 'woocommerce' ), $woocommerce->plugin_url() . '/admin/importers/samples/sample_tax_rates.csv' ) . '</p>';
-			
-			echo '<p>' . sprintf( __( 'Local tax rates also need to be defined with columns in a specific order (8 columns). <a href="%s">Click here to download a sample</a>.', 'woocommerce' ), $woocommerce->plugin_url() . '/admin/importers/samples/sample_local_tax_rates.csv' ) . '</p>';
-	
+
+			echo '<p>' . sprintf( __( 'Tax rates need to be defined with columns in a specific order (10 columns). <a href="%s">Click here to download a sample</a>.', 'woocommerce' ), $woocommerce->plugin_url() . '/admin/importers/samples/sample_tax_rates.csv' ) . '</p>';
+
 			$action = 'admin.php?import=woocommerce_tax_rate_csv&step=1';
-	
+
 			$bytes = apply_filters( 'import_upload_size_limit', wp_max_upload_size() );
 			$size = wp_convert_bytes_to_hr( $bytes );
 			$upload_dir = wp_upload_dir();
@@ -336,10 +323,10 @@ if ( class_exists( 'WP_Importer' ) ) {
 				</form>
 				<?php
 			endif;
-	
+
 			echo '</div>';
 		}
-	
+
 		/**
 		 * Added to http_request_timeout filter to force timeout at 60 seconds during import
 		 * @return int 60

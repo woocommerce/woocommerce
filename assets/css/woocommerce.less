@@ -68,7 +68,7 @@ p.demo_store {
 	z-index: 999999;
 	.inset_box_shadow( 0, 0, 0, 3px, rgba(255,255,255,0.2) );
 }
-	
+
 .woocommerce, .woocommerce-page { // namespace to avoid conflict with common global class names
 
 	small.note {
@@ -543,6 +543,8 @@ p.demo_store {
 	    .darkorlighttextshadow( @secondarytext );
 	    border: 1px solid darken( @secondary, 20 );
 		.vertical_gradient( @secondary, darken( @secondary, 10 ) );
+		white-space: nowrap;
+		display: inline-block;
 
 	    -webkit-box-shadow:
 	        inset 0 -1px 0 rgba(0,0,0,0.075),
@@ -572,7 +574,7 @@ p.demo_store {
 			}
 		}
 
-		&.added {
+		/*&.added {
 			&:before {
 				content: "";
 				position:absolute;
@@ -582,8 +584,9 @@ p.demo_store {
 				right: -26px;
 				text-indent: 0;
 				background: url(../images/success.png) no-repeat;
+				background-size:16px 14px;
 			}
-		}
+		}*/
 
 		&:hover {
 			.vertical_gradient( @secondary, darken( @secondary, 15 ) );
@@ -612,6 +615,14 @@ p.demo_store {
 		float:none;
 	}
 
+	a.added_to_cart {
+		background: url(../images/success.png) no-repeat left;
+		background-size:16px 14px;
+		padding: 0 0 0 22px;
+		white-space: nowrap;
+		display: inline-block;
+	}
+
 	/* =Quantity inputs
 	-------------------------------------------------------------- */
 
@@ -621,6 +632,11 @@ p.demo_store {
 		margin: 0 auto;
 		overflow:hidden;
 		zoom: 1;
+
+		/* Disable input[type=number] buttons until the world is ready */
+		input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+			display:none;
+		}
 
 		input.qty {
 			width: 40px;
@@ -634,6 +650,11 @@ p.demo_store {
 			.inset_box_shadow( 0, 0, 2px, 0, @secondary );
 			font-weight:bold;
 			.border_radius_left(2px);
+		}
+
+		/* Hide buttons for opera */
+		noindex:-o-prefocus, input[type=number] {
+		    padding-right: 1.2em;
 		}
 
 		.plus, .minus {
@@ -1206,6 +1227,35 @@ p.demo_store {
 				-webkit-box-shadow:none;
 				box-shadow:none;
 			}
+			&.wc-validated {
+				input.input-text {
+					background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAVElEQVQYV2NkIAIw4lNz5syZ/yB5nIpgCkxMTBixKkJWgNUkdAVgRciC2BSAFe3evfu/oKAg3P3v379ncHV1RXEGmIOsEORQdB/DBUAKQZLopoDEAE3dJm1YbTYqAAAAAElFTkSuQmCC);
+					background-position: 95% center;
+					background-repeat: no-repeat;
+				}
+			}
+			&.wc-error {
+				input.input-text {
+					background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAZUlEQVQYV2NkQAO/6zv+szZWMCILo3BAChjfvgPLs0zpgsthKAKZ8ien7D9WRSBTQCbAFCGbBjeJoCKYAoRJpUBTIfpB1oJZyIpgDmdgANnOCFGEUAARRHYTLBjAPkGECUQhOgAAec48xMU9V4oAAAAASUVORK5CYII=);
+					background-position: 95% center;
+					background-repeat: no-repeat;
+				}
+				.chzn-single, .chzn-drop, input.input-text, select {
+					border-color: #fb7f88;
+				}
+			}
+			::-webkit-input-placeholder {
+				line-height: 1em;
+				padding-top: 2px;
+			}
+			:-moz-placeholder {
+				line-height: 1em;
+				padding-top: 2px;
+			}
+			:-ms-input-placeholder {
+				line-height: 1em;
+				padding-top: 2px;
+			}
 		}
 		.form-row-first, .form-row-last {
 			float:left;
@@ -1396,10 +1446,10 @@ p.demo_store {
 				text-transform:none;
 				line-height: 1.5em;
 			}
-		}
 
-		li.method {
-			border:none;
+			&:last-of-type {
+				border: none;
+			}
 		}
 	}
 

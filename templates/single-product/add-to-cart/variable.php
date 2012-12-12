@@ -14,7 +14,7 @@ global $woocommerce, $product, $post;
 <script type="text/javascript">
 	if ( ! product_variations )
 		var product_variations = new Array();
-		
+
     product_variations[ <?php echo $post->ID; ?> ] = <?php echo json_encode( $available_variations ) ?>;
 </script>
 
@@ -38,9 +38,9 @@ global $woocommerce, $product, $post;
 
 								// Get terms if this is a taxonomy - ordered
 								if ( taxonomy_exists( sanitize_title( $name ) ) ) {
-								
+
 									$orderby = $woocommerce->attribute_orderby( $name );
-								
+
 									switch ( $orderby ) {
 										case 'name' :
 											$terms = get_terms( sanitize_title($name), array('menu_order' => 'ASC', 'hide_empty' => false) );

@@ -4,7 +4,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.7.0
+ * @version     2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 global $wp_query;
 
 if ( $wp_query->max_num_pages <= 1 )
-	return; 
+	return;
 ?>
 <nav class="woocommerce_pagination">
 	<?php

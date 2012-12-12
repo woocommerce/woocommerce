@@ -1,12 +1,12 @@
-<?php 
+<?php
 /**
  * Shipping Methods Display
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.7.0
+ * @version     2.0.0
  */
- 
+
 global $woocommerce;
 
 // If at least one shipping method is available
@@ -17,7 +17,7 @@ if ( $available_methods ) {
 		$method->full_label = $method->label;
 
 		if ( $method->cost > 0 ) {
-			if ( $woocommerce->cart->display_totals_ex_tax || ! $woocommerce->cart->prices_include_tax || $woocommerce->customer->is_vat_exempt() ) {
+			if ( $woocommerce->cart->tax_display_cart == 'excl' ) {
 				$method->full_label .= ': ' . woocommerce_price( $method->cost );
 				if ( $method->get_shipping_tax() > 0 && $woocommerce->cart->prices_include_tax ) {
 					$method->full_label .= ' '.$woocommerce->countries->ex_tax_or_vat();
@@ -28,6 +28,8 @@ if ( $available_methods ) {
 					$method->full_label .= ' '.$woocommerce->countries->inc_tax_or_vat();
 				}
 			}
+		} elseif ( $method->id !== 'free_shipping' ) {
+			$method->full_label .= ' (' . __( 'Free', 'woocommerce' ) . ')';
 		}
 	}
 
@@ -45,7 +47,7 @@ if ( $available_methods ) {
 			echo '<option value="' . esc_attr( $method->id ) . '" ' . selected( $method->id, $woocommerce->session->chosen_shipping_method, false ) . '>' . wp_kses_post( $method->full_label ) . '</option>';
 
 		echo '</select>';
-		
+
 	// Show radio buttons for methods
 	} else {
 

@@ -28,7 +28,7 @@ function woocommerce_attributes() {
 
 		check_admin_referer( 'woocommerce-add-new_attribute' );
 
-		$attribute_name 	= sanitize_title( esc_attr( $_POST['attribute_name'] ) );
+		$attribute_name 	= woocommerce_sanitize_taxonomy_name( stripslashes( $_POST['attribute_name'] ) );
 		$attribute_type 	= esc_attr( $_POST['attribute_type'] );
 		$attribute_label 	= esc_attr( $_POST['attribute_label'] );
 		$attribute_orderby 	= esc_attr( $_POST['attribute_orderby'] );
@@ -38,6 +38,9 @@ function woocommerce_attributes() {
 
 		if ( ! $attribute_name )
 			$attribute_name = sanitize_title( $attribute_label );
+
+		if ( strlen( $attribute_name ) >= 30 )
+			echo '<div id="woocommerce_errors" class="error fade"><p>' . sprintf( __( 'Slug %s is too long', 'woocommerce' ), sanitize_title( $attribute_name ) ) . '</p></div>';
 
 		if ( $attribute_name && strlen( $attribute_name ) < 30 && $attribute_type && ! taxonomy_exists( $woocommerce->attribute_taxonomy_name( $attribute_name ) ) ) {
 
@@ -60,7 +63,7 @@ function woocommerce_attributes() {
 		$edit = absint( $_GET['edit'] );
 		check_admin_referer( 'woocommerce-save-attribute_' . $edit );
 
-		$attribute_name 	= sanitize_title( esc_attr( $_POST['attribute_name'] ) );
+		$attribute_name 	= woocommerce_sanitize_taxonomy_name( stripslashes( $_POST['attribute_name'] ) );
 		$attribute_type	 	= esc_attr( $_POST['attribute_type'] );
 		$attribute_label 	= esc_attr( $_POST['attribute_label'] );
 		$attribute_orderby	= esc_attr( $_POST['attribute_orderby'] );
@@ -71,7 +74,7 @@ function woocommerce_attributes() {
 		if ( ! $attribute_name )
 			$attribute_name = sanitize_title( $attribute_label );
 
-		$old_attribute_name = sanitize_title( $wpdb->get_var( "SELECT attribute_name FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = $edit" ) );
+		$old_attribute_name = woocommerce_sanitize_taxonomy_name( $wpdb->get_var( "SELECT attribute_name FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = $edit" ) );
 
 		if ( $old_attribute_name != $attribute_name && taxonomy_exists( $woocommerce->attribute_taxonomy_name( $attribute_name ) ) ) {
 
@@ -130,10 +133,10 @@ function woocommerce_attributes() {
 				$wpdb->update(
 					$wpdb->postmeta,
 					array(
-						'meta_key' 	=> 'attribute_' . sanitize_title( $attribute_name )
+						'meta_key' 	=> 'attribute_pa_' . sanitize_title( $attribute_name )
 					),
 					array(
-						'meta_key' 	=> 'attribute_' . sanitize_title( $old_attribute_name )
+						'meta_key' 	=> 'attribute_pa_' . sanitize_title( $old_attribute_name )
 					)
 				);
 			}
@@ -298,7 +301,7 @@ function woocommerce_add_attribute() {
 				        					</td>
 				        					<td><?php echo esc_html( $tax->attribute_name ); ?></td>
 				        					<td><?php echo esc_html( ucwords( $tax->attribute_type ) ); ?></td>
-				        					<td><?php 
+				        					<td><?php
 					        					switch ( $tax->attribute_orderby ) {
 						        					case 'name' :
 						        						_e( 'Name', 'woocommerce' );
@@ -306,7 +309,7 @@ function woocommerce_add_attribute() {
 						        					case 'id' :
 						        						_e( 'Term ID', 'woocommerce' );
 						        					break;
-						        					default: 
+						        					default:
 						        						_e( 'Custom ordering', 'woocommerce' );
 						        					break;
 					        					}
@@ -364,7 +367,7 @@ function woocommerce_add_attribute() {
 								</select>
 								<p class="description"><?php _e( 'Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>.', 'woocommerce' ); ?></p>
 							</div>
-							
+
 							<div class="form-field">
 								<label for="attribute_orderby"><?php _e( 'Default sort order', 'woocommerce' ); ?></label>
 								<select name="attribute_orderby" id="attribute_orderby">

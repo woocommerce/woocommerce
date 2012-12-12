@@ -4,24 +4,24 @@
  * Implements the WC_Session abstract class
  *
  * @class 		WC_Session_Transients
- * @version		1.7
+ * @version		2.0.0
  * @package		WooCommerce/Classes
  * @author 		WooThemes
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class WC_Session_Transients extends WC_Session {	
-	
+class WC_Session_Transients extends WC_Session {
+
 	/** customer_id */
 	private $_customer_id;
-	
+
 	/** cookie name */
 	private $_cookie;
-	
+
 	/** cookie expiration time */
 	private $_cookie_expires;
-	
+
 	/**
 	 * Constructor for the session class.
 	 *
@@ -30,19 +30,19 @@ class WC_Session_Transients extends WC_Session {
 	 */
 	public function __construct() {
 		parent::__construct();
-		
+
 		$this->_cookie				= 'wc_session_cookie_' . COOKIEHASH;
 		$this->_cookie_expiration	= apply_filters( 'wc_session_transients_expiration', 172800 ); // 48 hours default
 		$this->_customer_id 		= $this->get_customer_id();
 		$this->_data 				= maybe_unserialize( get_transient( 'wc_session_' . $this->_customer_id ) );
-    	
+
     	if ( false === $this->_data )
     		$this->_data = array();
     }
-	
+
 	/**
 	 * get_customer_id function.
-	 * 
+	 *
 	 * @access private
 	 * @return mixed
 	 */
@@ -55,32 +55,32 @@ class WC_Session_Transients extends WC_Session {
 			return $this->create_customer_id();
 		}
 	}
-	
+
 	/**
 	 * get_session_cookie function.
-	 * 
+	 *
 	 * @access private
 	 * @return mixed
 	 */
 	private function get_session_cookie() {
-		if ( ! isset( $_COOKIE[ $this->_cookie ] ) ) 
+		if ( ! isset( $_COOKIE[ $this->_cookie ] ) )
 			return false;
-		
+
 		list( $customer_id, $expires, $hash ) = explode( '|', $_COOKIE[ $this->_cookie ] );
-		
+
 		// Validate hash
 		$data 	= $customer_id . $expires;
 		$rehash = hash_hmac( 'md5', $data, wp_hash( $data ) );
 
 		if ( $hash != $rehash )
 			return false;
-			
+
 		return $customer_id;
 	}
-	
+
 	/**
 	 * Create a unqiue customer ID and store it in a cookie, along with its hashed value and expirey date. Stored for 48hours.
-	 * 
+	 *
 	 * @access private
 	 * @return void
 	 */
@@ -90,15 +90,15 @@ class WC_Session_Transients extends WC_Session {
 		$data 			= $customer_id . $expires;
 		$hash 			= hash_hmac( 'md5', $data, wp_hash( $data ) );
 		$value 			= $customer_id . '|' . $expires . '|' . $hash;
-		
+
 		setcookie( $this->_cookie, $value, $expires, COOKIEPATH, COOKIE_DOMAIN, false, true );
 
 		return $customer_id;
 	}
-    
+
     /**
      * save_data function.
-     * 
+     *
      * @access public
      * @return void
      */

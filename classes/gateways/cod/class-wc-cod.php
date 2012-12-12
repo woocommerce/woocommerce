@@ -23,8 +23,9 @@ class WC_COD extends WC_Payment_Gateway {
      */
 	function __construct() {
 		$this->id = 'cod';
+		$this->icon 		= apply_filters('woocommerce_cod_icon', '');
 		$this->method_title = __( 'Cash on Delivery', 'woocommerce' );
-		$this->has_fields 		= false;
+		$this->has_fields 	= false;
 
 		// Load the form fields.
 		$this->init_form_fields();
@@ -68,13 +69,13 @@ class WC_COD extends WC_Payment_Gateway {
      */
     function init_form_fields() {
     	global $woocommerce;
-    	
+
     	$shipping_methods = array();
-    	
+
     	foreach ( $woocommerce->shipping->load_shipping_methods() as $method ) {
 	    	$shipping_methods[ $method->id ] = $method->get_title();
     	}
-    
+
     	$this->form_fields = array(
 			'enabled' => array(
 				'title' => __( 'Enable COD', 'woocommerce' ),
@@ -122,41 +123,41 @@ class WC_COD extends WC_Payment_Gateway {
 	 */
 	function is_available() {
 		global $woocommerce;
-		
+
 		if ( ! empty( $this->enable_for_methods ) ) {
-			
+
 			if ( is_page( woocommerce_get_page_id( 'pay' ) ) ) {
-				
+
 				$order_id = (int) $_GET['order_id'];
 				$order = new WC_Order( $order_id );
-		
-				if ( ! $order->shipping_method ) 
+
+				if ( ! $order->shipping_method )
 					return false;
-					
+
 				$chosen_method = $order->shipping_method;
-				
+
 			} elseif ( empty( $woocommerce->session->chosen_shipping_method ) ) {
 				return false;
 			} else {
 				$chosen_method = $woocommerce->session->chosen_shipping_method;
 			}
-				
+
 			$found = false;
-			
+
 			foreach ( $this->enable_for_methods as $method_id ) {
 				if ( strpos( $chosen_method, $method_id ) === 0 ) {
 					$found = true;
 					break;
 				}
 			}
-			
+
 			if ( ! $found )
 				return false;
 		}
-		
+
 		return parent::is_available();
 	}
-	
+
 
     /**
      * Process the payment and return the result

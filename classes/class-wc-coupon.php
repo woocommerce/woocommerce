@@ -76,12 +76,12 @@ class WC_Coupon {
 		global $wpdb;
 
 		$this->code 	= apply_filters( 'woocommerce_coupon_code', $code );
-		
+
 		// Coupon data lets developers create coupons through code
 		$coupon_data 	= apply_filters( 'woocommerce_get_shop_coupon_data', false, $code );
 
         if ( $coupon_data ) {
-        
+
             $this->id 							= absint( $coupon_data['id'] );
             $this->type 						= esc_html( $coupon_data['type'] );
             $this->amount 						= esc_html( $coupon_data['amount'] );
@@ -97,19 +97,21 @@ class WC_Coupon {
             $this->exclude_product_categories 	= is_array( $coupon_data['exclude_product_categories'] ) ? $coupon_data['exclude_product_categories'] : array();
             $this->minimum_amount 				= esc_html( $coupon_data['minimum_amount'] );
             $this->customer_email 				= esc_html( $coupon_data['customer_email'] );
-            
+
             return true;
-            
+
         } else {
-        
+
             $coupon_id 	= $wpdb->get_var( $wpdb->prepare( apply_filters( 'woocommerce_coupon_code_query', "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon'" ), $this->code ) );
-            
-			if ( $coupon_id ) 
-				$coupon = get_post( $coupon_id ); 
-				
+
+			if ( $coupon_id )
+				$coupon = get_post( $coupon_id );
+			else
+				return false;
+
 			$coupon->post_title = apply_filters( 'woocommerce_coupon_code', $coupon->post_title );
 
-            if ( empty( $coupon ) || $coupon->post_status !== 'publish' || $this->code !== $coupon->post_title ) 
+            if ( empty( $coupon ) || $coupon->post_status !== 'publish' || $this->code !== $coupon->post_title )
             	return false;
 
             $this->id 					= $coupon->ID;
@@ -132,7 +134,7 @@ class WC_Coupon {
             	'customer_email'				=> array()
             );
 
-            foreach ( $load_data as $key => $default ) 
+            foreach ( $load_data as $key => $default )
             	$this->$key = isset( $this->coupon_custom_fields[ $key ][0] ) && $this->coupon_custom_fields[ $key ][0] !== '' ? $this->coupon_custom_fields[ $key ][0] : $default;
 
             // Alias
@@ -149,7 +151,7 @@ class WC_Coupon {
 
             return true;
         }
-        
+
         return false;
 	}
 
@@ -225,7 +227,7 @@ class WC_Coupon {
 
 			// Expired
 			if ( $this->expiry_date ) {
-				if ( strtotime( 'NOW' ) > $this->expiry_date ) {
+				if ( current_time( 'timestamp' ) > $this->expiry_date ) {
 					$valid = false;
 					$error = __( 'This coupon has expired.', 'woocommerce' );
 				}
@@ -244,7 +246,7 @@ class WC_Coupon {
 				$valid_for_cart = false;
 				if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 					foreach( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
-						
+
 						if ( in_array( $cart_item['product_id'], $this->product_ids ) || in_array( $cart_item['variation_id'], $this->product_ids ) || in_array( $cart_item['data']->get_parent(), $this->product_ids ) )
 							$valid_for_cart = true;
 					}
@@ -260,10 +262,10 @@ class WC_Coupon {
 				$valid_for_cart = false;
 				if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 					foreach( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
-	
+
 						$product_cats = wp_get_post_terms($cart_item['product_id'], 'product_cat', array("fields" => "ids"));
-	
-						if ( sizeof( array_intersect( $product_cats, $this->product_categories ) ) > 0 ) 
+
+						if ( sizeof( array_intersect( $product_cats, $this->product_categories ) ) > 0 )
 							$valid_for_cart = true;
 					}
 				}
@@ -297,10 +299,10 @@ class WC_Coupon {
 					$valid_for_cart = true;
 					if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 						foreach( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
-	
+
 							$product_cats = wp_get_post_terms( $cart_item['product_id'], 'product_cat', array( "fields" => "ids" ) );
-	
-							if ( sizeof( array_intersect( $product_cats, $this->exclude_product_categories ) ) > 0 ) 
+
+							if ( sizeof( array_intersect( $product_cats, $this->exclude_product_categories ) ) > 0 )
 								$valid_for_cart = false;
 						}
 					}

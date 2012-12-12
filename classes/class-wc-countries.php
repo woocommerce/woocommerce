@@ -480,7 +480,7 @@ class WC_Countries {
 
 		asort( $this->countries );
 
-		if ( get_option('woocommerce_allowed_countries') !== 'specific' ) 
+		if ( get_option('woocommerce_allowed_countries') !== 'specific' )
 			return $this->countries;
 
 		$allowed_countries = array();
@@ -492,17 +492,17 @@ class WC_Countries {
 
 		return $allowed_countries;
 	}
-	
-	
+
+
 	/**
 	 * get_allowed_country_states function.
-	 * 
+	 *
 	 * @access public
 	 * @return array
 	 */
 	function get_allowed_country_states() {
 
-		if ( get_option('woocommerce_allowed_countries') !== 'specific' ) 
+		if ( get_option('woocommerce_allowed_countries') !== 'specific' )
 			return $this->states;
 
 		$allowed_states = array();
@@ -510,7 +510,7 @@ class WC_Countries {
 		$allowed_countries_raw = get_option( 'woocommerce_specific_allowed_countries' );
 
 		foreach ( $allowed_countries_raw as $country )
-			if ( ! empty( $this->states[ $country ] ) ) 
+			if ( ! empty( $this->states[ $country ] ) )
 				$allowed_states[ $country ] = $this->states[ $country ];
 
 		return $allowed_states;
@@ -740,7 +740,7 @@ class WC_Countries {
 		$full_country 	= ( isset( $this->countries[ $country ] ) ) ? $this->countries[ $country ] : $country;
 
 		// Country is not needed if the same as base
-		if ( $country == $this->get_base_country() ) 
+		if ( $country == $this->get_base_country() )
 			$format = str_replace( '{country}', '', $format );
 
 		// Handle full state name
@@ -769,7 +769,7 @@ class WC_Countries {
 			'{postcode_upper}'   => strtoupper( $postcode ),
 			'{country_upper}'    => strtoupper( $full_country ),
 		) ) ;
-		
+
 		$replace = array_map( 'esc_html', $replace );
 
 		$formatted_address = str_replace( array_keys( $replace ), $replace, $format );
@@ -1167,7 +1167,8 @@ class WC_Countries {
 				'label' 		=> __( 'Email Address', 'woocommerce' ),
 				'placeholder' 	=> _x('Email Address', 'placeholder', 'woocommerce'),
 				'required' 		=> true,
-				'class' 		=> array('form-row-first')
+				'class' 		=> array('form-row-first'),
+				'validate'		=> array('email'),
 			);
 			$address_fields['billing_phone'] = array(
 				'label' 		=> __( 'Phone', 'woocommerce' ),

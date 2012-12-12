@@ -40,11 +40,7 @@ $order = new WC_Order( $order_id );
 
 			foreach($order->get_items() as $item) :
 
-				if (isset($item['variation_id']) && $item['variation_id'] > 0) :
-					$_product = new WC_Product_Variation( $item['variation_id'] );
-				else :
-					$_product = new WC_Product( $item['product_id'] );
-				endif;
+				$_product = get_product( $item['variation_id'] ? $item['variation_id'] : $item['product_id'] );
 
 				echo '
 					<tr class = "' . esc_attr( apply_filters('woocommerce_order_table_item_class', 'order_table_item', $item, $order ) ) . '">
@@ -57,10 +53,10 @@ $order = new WC_Order( $order_id );
 
 				if ( $_product->exists() && $_product->is_downloadable() && $order->is_download_permitted() ) :
 
-				$download_file_urls = $order->get_downloadable_file_urls( $item['product_id'], $item['variation_id'], $item );
-				foreach ( $download_file_urls as $i => $download_file_url ) :
-					echo '<br/><small><a href="' . $download_file_url . '">' . sprintf( __( 'Download file %s &rarr;', 'woocommerce' ), ( count( $download_file_urls ) > 1 ? $i + 1 : '' ) ) . '</a></small>';
-				endforeach;
+					$download_file_urls = $order->get_downloadable_file_urls( $item['product_id'], $item['variation_id'], $item );
+					foreach ( $download_file_urls as $i => $download_file_url ) :
+						echo '<br/><small><a href="' . $download_file_url . '">' . sprintf( __( 'Download file %s &rarr;', 'woocommerce' ), ( count( $download_file_urls ) > 1 ? $i + 1 : '' ) ) . '</a></small>';
+					endforeach;
 
 				endif;
 

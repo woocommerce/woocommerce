@@ -181,8 +181,8 @@ class WC_Shipping {
 	 */
 	function calculate_shipping( $packages = array() ) {
 		global $woocommerce;
-		
-		if ( ! $this->enabled || empty( $packages ) ) 
+
+		if ( ! $this->enabled || empty( $packages ) )
 			return;
 
 		$this->shipping_total 	= 0;
@@ -235,10 +235,10 @@ class WC_Shipping {
 					}
 					$chosen_method = $_cheapest_method;
 				}
-				
+
 				// Store chosen method
 				$woocommerce->session->chosen_shipping_method = $chosen_method;
-				
+
 				// Do action for this chosen method
 				do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
 			}
@@ -272,7 +272,7 @@ class WC_Shipping {
 			$package['rates'] = array();
 
 			foreach ( $this->load_shipping_methods( $package ) as $shipping_method ) {
-			
+
 				if ( $shipping_method->is_available( $package ) ) {
 
 					// Reset Rates
@@ -280,7 +280,7 @@ class WC_Shipping {
 
 					// Calculate Shipping for package
 					$shipping_method->calculate_shipping( $package );
-					
+
 					// Place rates in package array
 					if ( ! empty( $shipping_method->rates ) && is_array( $shipping_method->rates ) )
 						foreach ( $shipping_method->rates as $rate )
@@ -288,7 +288,7 @@ class WC_Shipping {
 				}
 
 			}
-			
+
 			// Filter the calculated rates
 			$package['rates'] = apply_filters( 'woocommerce_package_rates', $package['rates'], $package );
 

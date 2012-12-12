@@ -150,7 +150,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.7.0 = 
+= 2.0.0 =
 * Feature - Securi audited and secured.
 * Feature - Added sales by category report.
 * Feature - Added sales by coupon report (kudos Max Rice).
@@ -179,7 +179,17 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Added the option to sell products individually (only allow 1 in the cart).
 * Feature - New shop page/category archive display settings, and the ability to change display per-category.
 * Feature - Allow shipping tax classes to be defined independent of items. https://github.com/woothemes/woocommerce/issues/1625
-* Feature - Redone order item storage making them easier (and faster) to access for reporting, and querying purchases. Huge performance gains for reports. Order items are no longer serialised - they are stored in there own table with meta. Existing data can be be updated on upgrade. 
+* Feature - Redone order item storage making them easier (and faster) to access for reporting, and querying purchases. Huge performance gains for reports. Order items are no longer serialised - they are stored in there own table with meta. Existing data can be be updated on upgrade.
+* Feature - Update weights/dimensions for variations if they differ.
+* Feature - is_order_received_page() courtesy of Lee Willis.
+* Feature - Inline saving of attributes to make creating variable products easier.
+* Feature - Zip code restriction for local pickup.
+* Feature - New free shipping logic - coupon, min-amount, Both or Either.
+* Feature - Taxes can be based on shipping, billing, or shop base.
+* Feature - Filter coupons in admin by type.
+* Feature - Append view cart link on ajax buttons.
+* Feature - Revised the way coupons are stored per order and added new coupon reports on usage.
+* Feature - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](http://www.woothemes.com/products/product-csv-import-suite/)).
 
 * Templating - Revised pagination, sorting areas (sorting is now above products, numbered pagination below) and added a result count.
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
@@ -187,12 +197,15 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Templating - woocommerce_page_title function for archive titles.
 * Templating - CSS namespacing changes (courtesy of Brian Feister).
 
+* Tweak - Cron jobs for scheduled sales.
+* Tweak - Improved product data panels.
 * Tweak - Improved installation + upgrade process upon activation.
 * Tweak - Protect logs and uploads with a blank index.html
 * Tweak - Append unique hash to log file names
 * Tweak - get_order_number support for PayPal (thanks Justin)
 * Tweak - Taxes - removed woocommerce_display_cart_taxes option in favour of never showing tax until we know where the user is (for tax exclusive prices). Tax inclusive continues to use base so prices remain correct.
 * Tweak - Taxes - tweaked display of tax when using inclusive pricing to avoid confusion.
+* Tweak - Taxes - improved admin interface and simplified options.
 * Tweak - More granular capabilities for admin/shop manager covering products, orders and coupons.
 * Tweak - Added some calculations to the order page when manually entering rows. Also added accounting.js for more accurate rounding of floats.
 * Tweak - Order page can now calculate tax rows for you.
@@ -217,14 +230,18 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Made armed forces 'states' under the US rather than in their own 'country'.
 * Tweak - Extended woocommerce_update_options for flexibility.
 * Tweak - Added disabled to settings API.
+* Tweak - Flat rate shipping - if no rules match, and no default is set, don't return a rate.
+* Tweak - custom_attributes option added to woocommerce_form_field args. Pass name/value pairs.
+* Tweak - Added html5 type inputs to admin with inline validation.
+* Tweak - Use WP Core jquery-ui-slider
+* Tweak - Further optimisation of icons in admin for HiDPI devices
 
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.
 * Fix - Active plugins display on status page.
-* Fix - Manual product category counting to make sure hidden products are not counted.
 
 * Localization - French update by Arnaud Cheminand and absoluteweb.
-* Localization - Romanian update by silviu-bucsa.
+* Localization - Romanian update by silviu-bucsa and a1ur3l.
 * Localization - Dutch updates by Ramoonus.
 * Localization - Localized shortcode button.
 * Localization - Norwegian translation by frilyd.
@@ -1133,10 +1150,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Upgrade Notice ==
 
-= 1.7.0 =
-There are many improvements in this major release - see the changelog for full details. 
+= 2.0.0 =
+There are many improvements in this major release - see the changelog for full details.
 
-The biggest change is that we're redone order item storage making them easier (and faster) to access for reporting and querying purchases; there are huge performance gains for reports. 
+The biggest change is that we're redone order item storage making them easier (and faster) to access for reporting and querying purchases; there are huge performance gains for reports.
 
 Order items are no longer serialised data and store in meta - they are stored in there own table with their own meta. Existing data can be be updated upon upgrade (you will be prompted). You should backup before upgrading.
 

@@ -35,15 +35,18 @@ function woocommerce_coupon_data_meta_box( $post ) {
 
 			// Description
 			woocommerce_wp_text_input( array( 'id' => 'coupon_description', 'label' => __( 'Coupon description', 'woocommerce' ), 'description' => __( 'Optionally enter a description for this coupon for your reference.', 'woocommerce' ), 'value' => $post->post_excerpt, 'name' => 'excerpt' ) );
-			
+
 			echo '</div><div class="options_group">';
-			
+
 			// Type
     		woocommerce_wp_select( array( 'id' => 'discount_type', 'label' => __( 'Discount type', 'woocommerce' ), 'options' => $woocommerce->get_coupon_discount_types() ) );
 
 			// Amount
-			woocommerce_wp_text_input( array( 'id' => 'coupon_amount', 'label' => __( 'Coupon amount', 'woocommerce' ), 'placeholder' => '0.00', 'description' => __( 'Enter an amount e.g. 2.99', 'woocommerce' ) ) );
-			
+			woocommerce_wp_text_input( array( 'id' => 'coupon_amount', 'label' => __( 'Coupon amount', 'woocommerce' ), 'placeholder' => '0.00', 'description' => __( 'Enter an amount e.g. 2.99', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> 'any',
+					'min'	=> '0'
+				)  ) );
+
 			// Free Shipping
 			woocommerce_wp_checkbox( array( 'id' => 'free_shipping', 'label' => __( 'Enable free shipping', 'woocommerce' ), 'description' => sprintf(__( 'Check this box if the coupon grants free shipping. The <a href="%s">free shipping method</a> must be enabled with the "must use coupon" setting checked.', 'woocommerce' ), admin_url('admin.php?page=woocommerce_settings&tab=shipping&section=WC_Free_Shipping')) ) );
 
@@ -52,11 +55,14 @@ function woocommerce_coupon_data_meta_box( $post ) {
 
 			// Apply before tax
 			woocommerce_wp_checkbox( array( 'id' => 'apply_before_tax', 'label' => __( 'Apply before tax', 'woocommerce' ), 'description' => __( 'Check this box if the coupon should be applied before calculating cart tax.', 'woocommerce' ) ) );
-			
+
 			echo '</div><div class="options_group">';
 
 			// minimum spend
-			woocommerce_wp_text_input( array( 'id' => 'minimum_amount', 'label' => __( 'Minimum amount', 'woocommerce' ), 'placeholder' => __( 'No minimum', 'woocommerce' ), 'description' => __( 'This field allows you to set the minimum subtotal needed to use the coupon.', 'woocommerce' ) ) );
+			woocommerce_wp_text_input( array( 'id' => 'minimum_amount', 'label' => __( 'Minimum amount', 'woocommerce' ), 'placeholder' => __( 'No minimum', 'woocommerce' ), 'description' => __( 'This field allows you to set the minimum subtotal needed to use the coupon.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> 'any',
+					'min'	=> '0'
+				) ) );
 
 			echo '</div><div class="options_group">';
 
@@ -72,17 +78,17 @@ function woocommerce_coupon_data_meta_box( $post ) {
 							$title 	= get_the_title( $product_id );
 							$sku 	= get_post_meta( $product_id, '_sku', true );
 
-							if ( ! $title ) 
+							if ( ! $title )
 								continue;
 
-							if ( ! empty( $sku ) ) 
+							if ( ! empty( $sku ) )
 								$sku = ' (SKU: ' . $sku . ')';
 
 							echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $title . $sku ) . '</option>';
 						}
 					}
 				?>
-			</select> <img class="help_tip" data-tip='<?php _e( 'Products which need to be in the cart to use this coupon or, for "Product Discounts", which products are discounted.', 'woocommerce' ) ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" /></p>
+			</select> <img class="help_tip" data-tip='<?php _e( 'Products which need to be in the cart to use this coupon or, for "Product Discounts", which products are discounted.', 'woocommerce' ) ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></p>
 			<?php
 
 			// Exclude Product ids
@@ -97,17 +103,17 @@ function woocommerce_coupon_data_meta_box( $post ) {
 							$title 	= get_the_title( $product_id );
 							$sku 	= get_post_meta( $product_id, '_sku', true );
 
-							if ( ! $title ) 
+							if ( ! $title )
 								continue;
 
-							if ( ! empty( $sku ) ) 
+							if ( ! empty( $sku ) )
 								$sku = ' (SKU: ' . $sku . ')';
 
 							echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $title . $sku ) . '</option>';
 						}
 					}
 				?>
-			</select> <img class="help_tip" data-tip='<?php _e( 'Products which must not be in the cart to use this coupon or, for "Product Discounts", which products are not discounted.', 'woocommerce' ) ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" /></p>
+			</select> <img class="help_tip" data-tip='<?php _e( 'Products which must not be in the cart to use this coupon or, for "Product Discounts", which products are not discounted.', 'woocommerce' ) ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></p>
 			<?php
 
 			echo '</div><div class="options_group">';
@@ -123,7 +129,7 @@ function woocommerce_coupon_data_meta_box( $post ) {
 					if ( $categories ) foreach ( $categories as $cat )
 						echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
 				?>
-			</select> <img class="help_tip" data-tip='<?php _e( 'A product must be in this category for the coupon to remain valid or, for "Product Discounts", products in these categories will be discounted.', 'woocommerce' ) ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" /></p>
+			</select> <img class="help_tip" data-tip='<?php _e( 'A product must be in this category for the coupon to remain valid or, for "Product Discounts", products in these categories will be discounted.', 'woocommerce' ) ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></p>
 			<?php
 
 			// Exclude Categories
@@ -137,21 +143,26 @@ function woocommerce_coupon_data_meta_box( $post ) {
 					if ( $categories ) foreach ( $categories as $cat )
 						echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
 				?>
-			</select> <img class="help_tip" data-tip='<?php _e( 'Product must not be in this category for the coupon to remain valid or, for "Product Discounts", products in these categories will not be discounted.', 'woocommerce' ) ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" /></p>
+			</select> <img class="help_tip" data-tip='<?php _e( 'Product must not be in this category for the coupon to remain valid or, for "Product Discounts", products in these categories will not be discounted.', 'woocommerce' ) ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></p>
 			<?php
 
 			echo '</div><div class="options_group">';
 
 			// Customers
-			woocommerce_wp_text_input( array( 'id' => 'customer_email', 'label' => __( 'Customer emails', 'woocommerce' ), 'placeholder' => __( 'Any customer', 'woocommerce' ), 'description' => __( 'Comma separate email addresses to restrict this coupon to specific billing and user emails.', 'woocommerce' ), 'value' => implode(', ', (array) get_post_meta( $post->ID, 'customer_email', true )) ) );
+			woocommerce_wp_text_input( array( 'id' => 'customer_email', 'label' => __( 'Customer emails', 'woocommerce' ), 'placeholder' => __( 'Any customer', 'woocommerce' ), 'description' => __( 'Comma separate email addresses to restrict this coupon to specific billing and user emails.', 'woocommerce' ), 'value' => implode(', ', (array) get_post_meta( $post->ID, 'customer_email', true ) ), 'type' => 'email', 'custom_attributes' => array(
+					'multiple' 	=> 'multiple'
+				) ) );
 
 			echo '</div><div class="options_group">';
 
 			// Usage limit
-			woocommerce_wp_text_input( array( 'id' => 'usage_limit', 'label' => __( 'Usage limit', 'woocommerce' ), 'placeholder' => _x('Unlimited usage', 'placeholder', 'woocommerce'), 'description' => __( 'How many times this coupon can be used before it is void.', 'woocommerce' ) ) );
+			woocommerce_wp_text_input( array( 'id' => 'usage_limit', 'label' => __( 'Usage limit', 'woocommerce' ), 'placeholder' => _x('Unlimited usage', 'placeholder', 'woocommerce'), 'description' => __( 'How many times this coupon can be used before it is void.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> '1',
+					'min'	=> '0'
+				) ) );
 
 			// Expiry date
-			woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'label' => __( 'Expiry date', 'woocommerce' ), 'placeholder' => _x('Never expire', 'placeholder', 'woocommerce'), 'description' => __( 'The date this coupon will expire, <code>YYYY-MM-DD</code>.', 'woocommerce' ), 'class' => 'short date-picker' ) );
+			woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'label' => __( 'Expiry date', 'woocommerce' ), 'placeholder' => _x('Never expire', 'placeholder', 'woocommerce'), 'description' => __( 'The date this coupon will expire, <code>YYYY-MM-DD</code>.', 'woocommerce' ), 'class' => 'short date-picker', 'custom_attributes' => array( 'pattern' => "[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" ) ) );
 
 			echo '</div>';
 
@@ -172,11 +183,11 @@ function woocommerce_coupon_data_meta_box( $post ) {
  */
 function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 	global $wpdb, $woocommerce_errors;
-	
+
 	// Ensure coupon code is correctly formatted
 	$post->post_title = apply_filters( 'woocommerce_coupon_code', $post->post_title );
 	$wpdb->update( $wpdb->posts, array( 'post_title' => $post->post_title ), array( 'ID' => $post_id ) );
-	
+
 	// Check for dupe coupons
 	$coupon_found = $wpdb->get_var( $wpdb->prepare( "
 		SELECT $wpdb->posts.ID
@@ -186,7 +197,7 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 	    AND $wpdb->posts.post_title = '%s'
 	    AND $wpdb->posts.ID != %s
 	 ", $post->post_title, $post_id ) );
-	 
+
 	if ( $coupon_found )
 		$woocommerce_errors[] = __( 'Coupon code already exists - customers will use the latest coupon with this code.', 'woocommerce' );
 

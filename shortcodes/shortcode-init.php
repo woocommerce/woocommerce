@@ -7,7 +7,7 @@
  * @author 		WooThemes
  * @category 	Shortcodes
  * @package 	WooCommerce/Shortcodes
- * @version     1.7.0
+ * @version     2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -55,7 +55,7 @@ function woocommerce_product_category( $atts ){
 		), $atts ) );
 
 	if ( ! $category ) return;
-	
+
 	$ordering_args = $woocommerce->query->get_catalog_ordering_args( $orderby, $order );
 
   	$args = array(
@@ -81,7 +81,7 @@ function woocommerce_product_category( $atts ){
 			)
 	    )
 	);
-	
+
 	if ( isset( $ordering_args['meta_key'] ) ) {
  		$args['meta_key'] = $ordering_args['meta_key'];
  	}
@@ -415,11 +415,11 @@ function woocommerce_product_add_to_cart( $atts ) {
 
 	} elseif ($product_data->post_type=='product_variation') {
 
-		$product = new WC_Product( $product_data->post_parent );
+		$product = get_product( $product_data->post_parent );
 
 		$GLOBALS['product'] = $product;
 
-		$variation = new WC_Product_Variation( $product_data->ID );
+		$variation = get_product( $product_data );
 
 		ob_start();
 		?>
@@ -474,7 +474,7 @@ function woocommerce_product_add_to_cart_url( $atts ){
 
 	if ($product_data->post_type!=='product') return;
 
-	$_product = new WC_Product( $product_data->ID );
+	$_product = get_product( $product_data );
 
 	return esc_url( $_product->add_to_cart_url() );
 }
@@ -528,7 +528,7 @@ function woocommerce_sale_products( $atts ){
 
 		set_transient( 'wc_products_onsale', $product_ids_on_sale );
 	}
-		
+
 	$product_ids_on_sale[] = 0;
 
 	$meta_query = array();
@@ -551,7 +551,7 @@ function woocommerce_sale_products( $atts ){
   	ob_start();
 
 	$products = new WP_Query( $args );
-	
+
 	$woocommerce_loop['columns'] = $columns;
 
 	if ( $products->have_posts() ) : ?>
@@ -605,9 +605,9 @@ function woocommerce_best_selling_products( $atts ){
     );
 
   	ob_start();
-  	
+
 	$products = new WP_Query( $args );
-	
+
 	$woocommerce_loop['columns'] = $columns;
 
 	if ( $products->have_posts() ) : ?>
@@ -663,13 +663,13 @@ function woocommerce_top_rated_products( $atts ){
     );
 
   	ob_start();
-  	
+
   	add_filter( 'posts_clauses', 'woocommerce_order_by_rating_post_clauses' );
 
 	$products = new WP_Query( $args );
-	
+
 	remove_filter( 'posts_clauses', 'woocommerce_order_by_rating_post_clauses' );
-	
+
 	$woocommerce_loop['columns'] = $columns;
 
 	if ( $products->have_posts() ) : ?>
@@ -824,7 +824,7 @@ function woocommerce_messages_shortcode() {
 
 /**
  * woocommerce_order_by_rating_post_clauses function.
- * 
+ *
  * @access public
  * @param mixed $args
  * @return void

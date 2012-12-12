@@ -5,7 +5,7 @@
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce/Admin/Updates
- * @version     1.7.0
+ * @version     2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 global $wpdb, $woocommerce;
 
 // Update woocommerce_downloadable_product_permissions table to include order ID's as well as keys
-$results = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . $wpdb->prefix . "woocommerce_downloadable_product_permissions WHERE order_id = 0;" ) );
+$results = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = 0;" );
 
 if ( $results ) foreach ( $results as $result ) {
 
@@ -38,10 +38,10 @@ if ( $results ) foreach ( $results as $result ) {
 // Upgrade old meta keys for product data
 $meta = array( 'sku', 'downloadable', 'virtual', 'price', 'visibility', 'stock', 'stock_status', 'backorders', 'manage_stock', 'sale_price', 'regular_price', 'weight', 'length', 'width', 'height', 'tax_status', 'tax_class', 'upsell_ids', 'crosssell_ids', 'sale_price_dates_from', 'sale_price_dates_to', 'min_variation_price', 'max_variation_price', 'featured', 'product_attributes', 'file_path', 'download_limit', 'product_url', 'min_variation_price', 'max_variation_price' );
 
-$wpdb->query( $wpdb->prepare( "
+$wpdb->query( "
 	UPDATE {$wpdb->postmeta}
 	LEFT JOIN {$wpdb->posts} ON ( {$wpdb->postmeta}.post_id = {$wpdb->posts}.ID )
 	SET meta_key = CONCAT( '_', meta_key )
 	WHERE meta_key IN ( '" . implode( "', '", $meta ) . "' )
 	AND {$wpdb->posts}.post_type IN ('product', 'product_variation')
-" ) );
+" );

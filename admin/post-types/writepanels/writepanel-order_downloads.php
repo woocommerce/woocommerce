@@ -29,25 +29,25 @@ function woocommerce_order_downloads_meta_box() {
 			<?php
 				$download_permissions = $wpdb->get_results( $wpdb->prepare( "
 					SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-					WHERE order_id = $post->ID ORDER BY product_id
-				" ) );
+					WHERE order_id = %d ORDER BY product_id
+				", $post->ID ) );
 
 				$product = null;
 				if ( $download_permissions && sizeof( $download_permissions ) > 0 ) foreach ( $download_permissions as $download ) {
 
 					if ( ! $product || $product->id != $download->product_id ) {
-						$product = new WC_Product( absint( $download->product_id ) );
+						$product = get_product( absint( $download->product_id ) );
 						$file_count = $loop = 0;
 					}
 
 					// don't show permissions to files that have since been removed
-					if ( ! $product->exists() || ! $product->has_file( $download->download_id ) ) 
+					if ( ! $product->exists() || ! $product->has_file( $download->download_id ) )
 						continue;
-						
+
+					include( 'order-download-permission-html.php' );
+
 					$loop++;
 					$file_count++;
-					
-					include( 'order-download-permission-html.php' );
 				}
 			?>
 		</div>
@@ -77,7 +77,7 @@ function woocommerce_order_downloads_meta_box() {
 
 							$sku = get_post_meta( $product->ID, '_sku', true );
 
-							if ( $sku ) 
+							if ( $sku )
 								$sku = ' SKU: ' . $sku;
 
 							echo '<option value="' . esc_attr( $product->ID ) . '">' . esc_html( $product->post_title . ' (#' . $product->ID . '' . $sku . ')' ) . '</option>';
@@ -123,9 +123,9 @@ function woocommerce_order_downloads_meta_box() {
 				    jQuery('.order_download_permissions .wc-metaboxes').append( response );
 
 				} else {
-				
+
 					alert('<?php _e( 'Could not grant access - the user may already have permission for this file.', 'woocommerce' ); ?>');
-				
+
 				}
 
 				jQuery( ".date-picker" ).datepicker({
@@ -215,7 +215,7 @@ function woocommerce_order_downloads_save( $post_id, $post ) {
 		$customer_email 		= get_post_meta( $post->ID, '_billing_email', true );
 		$customer_user 			= get_post_meta( $post->ID, '_customer_user', true );
 		$product_ids_count 		= sizeof( $product_ids );
-		
+
 		for ( $i = 0; $i < $product_ids_count; $i ++ ) {
 
             $data = array(
@@ -239,8 +239,8 @@ function woocommerce_order_downloads_save( $post_id, $post ) {
 					'order_id' 		=> $post_id,
 					'product_id' 	=> absint( $product_ids[$i] ),
 					'download_id'	=> woocommerce_clean( $download_ids[$i] )
-					), 
-				$format, array( '%d', '%d', '%s' ) 
+					),
+				$format, array( '%d', '%d', '%s' )
 			);
 
 		}

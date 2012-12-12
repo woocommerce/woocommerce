@@ -6,7 +6,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.7
+ * @version     2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -23,10 +23,10 @@ if ( ! woocommerce_products_will_display() )
 	$max		= $wp_query->found_posts;
 	$first 		= ( $per_page * $paged ) - $per_page + 1;
 	$last 		= $wp_query->get( 'posts_per_page' ) * $paged;
-	
-	if ( $last > $max ) 
+
+	if ( $last > $max )
 		$last = $max;
-		
+
 	printf( __( 'Showing %s - %s of %s results', 'woocommerce' ), $first, $last, $max );
 	?>
 </p>

@@ -16,9 +16,9 @@ global $woocommerce;
 	<table class="shop_table">
 		<thead>
 			<tr>
-				<th><?php _e( 'Product', 'woocommerce' ); ?></th>
-				<th><?php _e( 'Qty', 'woocommerce' ); ?></th>
-				<th><?php _e( 'Totals', 'woocommerce' ); ?></th>
+				<th class="product-name"><?php _e( 'Product', 'woocommerce' ); ?></th>
+				<th class="product-quantity"><?php _e( 'Qty', 'woocommerce' ); ?></th>
+				<th class="product-total"><?php _e( 'Totals', 'woocommerce' ); ?></th>
 			</tr>
 		</thead>
 		<tfoot>
@@ -27,7 +27,7 @@ global $woocommerce;
 				?>
 				<tr>
 					<th scope="row" colspan="2"><?php echo $total['label']; ?></th>
-					<td><?php echo $total['value']; ?></td>
+					<td class="product-total"><?php echo $total['value']; ?></td>
 				</tr>
 				<?php
 			endforeach;
@@ -39,9 +39,9 @@ global $woocommerce;
 				foreach ($order->get_items() as $item) :
 					echo '
 						<tr>
-							<td>'.$item['name'].'</td>
-							<td>'.$item['qty'].'</td>
-							<td>' . $order->get_formatted_line_subtotal($item) . '</td>
+							<td class="product-name">'.$item['name'].'</td>
+							<td class="product-quantity">'.$item['qty'].'</td>
+							<td class="product-subtotal">' . $order->get_formatted_line_subtotal($item) . '</td>
 						</tr>';
 				endforeach;
 			endif;

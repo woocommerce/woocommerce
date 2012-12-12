@@ -78,11 +78,11 @@ class WooCommerce_Widget_Random_Products extends WP_Widget {
 					<li>
 						<a href="<?php the_permalink() ?>">
 							<?php
-							if ( has_post_thumbnail() ) {
-								the_post_thumbnail('shop_thumbnail');
-							} else {
-								echo '<img src="'. woocommerce_placeholder_img_src() .'" alt="Placeholder" width="'.$woocommerce->get_image_size( 'shop_thumbnail_image_width' ).'" height="'.$woocommerce->get_image_size( 'shop_thumbnail_image_height' ).'" />';
-							} ?>
+								if ( has_post_thumbnail() )
+									the_post_thumbnail( 'shop_thumbnail' );
+								else
+									echo woocommerce_placeholder_img( 'shop_thumbnail' );
+							?>
 							<?php the_title() ?>
 						</a>
 						<?php echo $product->get_price_html() ?>

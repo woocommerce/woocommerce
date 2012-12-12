@@ -7,9 +7,9 @@
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce/Admin/WritePanels
- * @version     1.7.0
+ * @version     2.0.0
  */
- 
+
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /** Variable products */
@@ -70,17 +70,17 @@ function woocommerce_product_data_box() {
 
 		<span class="type_box"> &mdash; <?php echo $type_box; ?></span>
 
+		<div class="wc-tabs-back"></div>
+
 		<ul class="product_data_tabs wc-tabs" style="display:none;">
 
 			<li class="active general_options hide_if_grouped"><a href="#general_product_data"><?php _e( 'General', 'woocommerce' ); ?></a></li>
-
-			<li class="tax_tab show_if_simple show_if_variable tax_options"><a href="#tax_product_data"><?php _e( 'Taxes', 'woocommerce' ); ?></a></li>
 
 			<li class="inventory_tab show_if_simple show_if_variable show_if_grouped inventory_options"><a href="#inventory_product_data"><?php _e( 'Inventory', 'woocommerce' ); ?></a></li>
 
 			<li class="shipping_tab hide_if_virtual shipping_options hide_if_grouped hide_if_external"><a href="#shipping_product_data"><?php _e( 'Shipping', 'woocommerce' ); ?></a></li>
 
-			<li class="related_product_tab related_product_options"><a href="#related_product_data"><?php _e( 'Related Products', 'woocommerce' ); ?></a></li>
+			<li class="linked_product_tab linked_product_options"><a href="#linked_product_data"><?php _e( 'Linked Products', 'woocommerce' ); ?></a></li>
 
 			<li class="attributes_tab attribute_options"><a href="#woocommerce_attributes"><?php _e( 'Attributes', 'woocommerce' ); ?></a></li>
 
@@ -91,7 +91,7 @@ function woocommerce_product_data_box() {
 		</ul>
 		<div id="general_product_data" class="panel woocommerce_options_panel"><?php
 
-			echo '<div class="options_group show_if_simple show_if_variable show_if_external">';
+			echo '<div class="options_group hide_if_grouped">';
 
 				// SKU
 				if( get_option('woocommerce_enable_sku', true) !== 'no' )
@@ -116,10 +116,16 @@ function woocommerce_product_data_box() {
 			echo '<div class="options_group pricing show_if_simple show_if_external">';
 
 				// Price
-				woocommerce_wp_text_input( array( 'id' => '_regular_price', 'class' => 'wc_input_price short', 'label' => __( 'Regular Price', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')' ) );
+				woocommerce_wp_text_input( array( 'id' => '_regular_price', 'class' => 'wc_input_price short', 'label' => __( 'Regular Price', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')', 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> 'any',
+					'min'	=> '0'
+				) ) );
 
 				// Special Price
-				woocommerce_wp_text_input( array( 'id' => '_sale_price', 'class' => 'wc_input_price short', 'label' => __( 'Sale Price', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')', 'description' => '<a href="#" class="sale_schedule">' . __( 'Schedule', 'woocommerce' ) . '</a>' ) );
+				woocommerce_wp_text_input( array( 'id' => '_sale_price', 'class' => 'wc_input_price short', 'label' => __( 'Sale Price', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')', 'description' => '<a href="#" class="sale_schedule">' . __( 'Schedule', 'woocommerce' ) . '</a>', 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> 'any',
+					'min'	=> '0'
+				) ) );
 
 				// Special Price date range
 				$sale_price_dates_from 	= ( $date = get_post_meta( $thepostid, '_sale_price_dates_from', true ) ) ? date_i18n( 'Y-m-d', $date ) : '';
@@ -127,8 +133,8 @@ function woocommerce_product_data_box() {
 
 				echo '	<p class="form-field sale_price_dates_fields">
 							<label for="_sale_price_dates_from">' . __( 'Sale Price Dates', 'woocommerce' ) . '</label>
-							<input type="text" class="short" name="_sale_price_dates_from" id="_sale_price_dates_from" value="' . $sale_price_dates_from . '" placeholder="' . _x( 'From&hellip;', 'placeholder', 'woocommerce' ) . '" maxlength="10" />
-							<input type="text" class="short" name="_sale_price_dates_to" id="_sale_price_dates_to" value="' . $sale_price_dates_to . '" placeholder="' . _x( 'To&hellip;', 'placeholder', 'woocommerce' ) . '" maxlength="10" />
+							<input type="text" class="short" name="_sale_price_dates_from" id="_sale_price_dates_from" value="' . $sale_price_dates_from . '" placeholder="' . _x( 'From&hellip;', 'placeholder', 'woocommerce' ) . ' YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+							<input type="text" class="short" name="_sale_price_dates_to" id="_sale_price_dates_to" value="' . $sale_price_dates_to . '" placeholder="' . _x( 'To&hellip;', 'placeholder', 'woocommerce' ) . '  YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
 							<a href="#" class="cancel_sale_schedule">'. __( 'Cancel', 'woocommerce' ) .'</a>
 						</p>';
 
@@ -140,53 +146,61 @@ function woocommerce_product_data_box() {
 
 				// File URL
 				$file_paths = get_post_meta( $post->ID, '_file_paths', true );
-				if ( is_array( $file_paths ) ) 
+				if ( is_array( $file_paths ) )
 					$file_paths = implode( "\n", $file_paths );
-				
+
 				echo '<p class="form-field"><label for="_file_paths">' . __( 'File paths (one per line)', 'woocommerce' ) . ':</label>
 					<textarea style="float:left;height:5em;" id="_file_paths" class="short file_paths" cols="20" rows="3" placeholder="' . __( 'File paths/URLs, one per line', 'woocommerce' ) . '" name="_file_paths" wrap="off">' . esc_textarea( $file_paths ) . '</textarea>
 					<input type="button" class="upload_file_button button" value="' . __( 'Upload a file', 'woocommerce' ) . '" />
 				</p>';
 
 				// Download Limit
-				woocommerce_wp_text_input( array( 'id' => '_download_limit', 'label' => __( 'Download Limit', 'woocommerce' ), 'placeholder' => __( 'Unlimited', 'woocommerce' ), 'description' => __( 'Leave blank for unlimited re-downloads.', 'woocommerce' ) ) );
+				woocommerce_wp_text_input( array( 'id' => '_download_limit', 'label' => __( 'Download Limit', 'woocommerce' ), 'placeholder' => __( 'Unlimited', 'woocommerce' ), 'description' => __( 'Leave blank for unlimited re-downloads.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> '1',
+					'min'	=> '0'
+				) ) );
 
 				// Expirey
-				woocommerce_wp_text_input( array( 'id' => '_download_expiry', 'label' => __( 'Download Expiry', 'woocommerce' ), 'placeholder' => __( 'Never', 'woocommerce' ), 'description' => __( 'Enter the number of days before a download link expires, or leave blank.', 'woocommerce' ) ) );
+				woocommerce_wp_text_input( array( 'id' => '_download_expiry', 'label' => __( 'Download Expiry', 'woocommerce' ), 'placeholder' => __( 'Never', 'woocommerce' ), 'description' => __( 'Enter the number of days before a download link expires, or leave blank.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> '1',
+					'min'	=> '0'
+				) ) );
 
 				do_action( 'woocommerce_product_options_downloads' );
+
+			echo '</div>';
+
+			echo '<div class="options_group show_if_simple show_if_external show_if_variable">';
+
+				// Tax
+				woocommerce_wp_select( array( 'id' => '_tax_status', 'label' => __( 'Tax Status', 'woocommerce' ), 'options' => array(
+					'taxable' 	=> __( 'Taxable', 'woocommerce' ),
+					'shipping' 	=> __( 'Shipping only', 'woocommerce' ),
+					'none' 		=> __( 'None', 'woocommerce' )
+				) ) );
+
+				$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
+				$classes_options = array();
+				$classes_options[''] = __( 'Standard', 'woocommerce' );
+	    		if ( $tax_classes )
+	    			foreach ( $tax_classes as $class )
+	    				$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
+
+				woocommerce_wp_select( array( 'id' => '_tax_class', 'label' => __( 'Tax Class', 'woocommerce' ), 'options' => $classes_options ) );
+
+				do_action( 'woocommerce_product_options_tax' );
 
 			echo '</div>';
 
 			do_action( 'woocommerce_product_options_general_product_data' );
 			?>
 		</div>
-		<div id="tax_product_data" class="panel woocommerce_options_panel">
-			<?php
-			
-			// Tax
-			woocommerce_wp_select( array( 'id' => '_tax_status', 'label' => __( 'Tax Status', 'woocommerce' ), 'options' => array(
-				'taxable' 	=> __( 'Taxable', 'woocommerce' ),
-				'shipping' 	=> __( 'Shipping only', 'woocommerce' ),
-				'none' 		=> __( 'None', 'woocommerce' )
-			) ) );
-
-			$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
-			$classes_options = array();
-			$classes_options[''] = __( 'Standard', 'woocommerce' );
-    		if ( $tax_classes ) 
-    			foreach ( $tax_classes as $class )
-    				$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
-
-			woocommerce_wp_select( array( 'id' => '_tax_class', 'label' => __( 'Tax Class', 'woocommerce' ), 'options' => $classes_options ) );
-
-			do_action( 'woocommerce_product_options_tax' );
-			?>
-		</div>
 
 		<div id="inventory_product_data" class="panel woocommerce_options_panel">
 
 			<?php
+
+			echo '<div class="options_group">';
 
 			if (get_option('woocommerce_manage_stock')=='yes') {
 
@@ -198,7 +212,9 @@ function woocommerce_product_data_box() {
 				echo '<div class="stock_fields show_if_simple show_if_variable">';
 
 				// Stock
-				woocommerce_wp_text_input( array( 'id' => '_stock', 'label' => __( 'Stock Qty', 'woocommerce' ), 'desc_tip' => true, 'description' => __( 'Stock quantity. If this is a variable product this value will be used to control stock for all variations, unless you define stock at variation level.', 'woocommerce' ) ) );
+				woocommerce_wp_text_input( array( 'id' => '_stock', 'label' => __( 'Stock Qty', 'woocommerce' ), 'desc_tip' => true, 'description' => __( 'Stock quantity. If this is a variable product this value will be used to control stock for all variations, unless you define stock at variation level.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> 'any'
+				)  ) );
 
 				do_action('woocommerce_product_options_stock_fields');
 
@@ -227,19 +243,33 @@ function woocommerce_product_data_box() {
 
 			}
 
+			echo '</div>';
+
+			echo '<div class="options_group show_if_simple show_if_variable">';
+
+			// Individual product
+			woocommerce_wp_checkbox( array( 'id' => '_sold_individually', 'wrapper_class' => 'show_if_simple show_if_variable', 'label' => __('Sold Individually', 'woocommerce'), 'description' => __('Enable this to only allow one of this item to be bought in a single order', 'woocommerce') ) );
+
+			do_action('woocommerce_product_options_sold_individually');
+
+			echo '</div>';
+
 			?>
 
 		</div>
 
 		<div id="shipping_product_data" class="panel woocommerce_options_panel">
-			
+
 			<?php
-			
+
 			echo '<div class="options_group">';
-				
+
 				// Weight
 				if( get_option('woocommerce_enable_weight', true) !== 'no' ) :
-					woocommerce_wp_text_input( array( 'id' => '_weight', 'label' => __( 'Weight', 'woocommerce' ) . ' ('.get_option('woocommerce_weight_unit').')', 'placeholder' => '0.00', 'description' => __( 'Weight in decimal form', 'woocommerce' ) ) );
+					woocommerce_wp_text_input( array( 'id' => '_weight', 'label' => __( 'Weight', 'woocommerce' ) . ' ('.get_option('woocommerce_weight_unit').')', 'placeholder' => '0.00', 'description' => __( 'Weight in decimal form', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> 'any',
+					'min'	=> '0'
+				) ) );
 				else:
 					echo '<input type="hidden" name="_weight" value="' . esc_attr( get_post_meta( $thepostid, '_weight', true ) ) . '" />';
 				endif;
@@ -249,9 +279,9 @@ function woocommerce_product_data_box() {
 					?><p class="form-field dimensions_field">
 						<label for"product_length"><?php echo __( 'Dimensions', 'woocommerce' ) . ' (' . get_option( 'woocommerce_dimension_unit' ) . ')'; ?></label>
 						<span class="wrap">
-							<input id="product_length" placeholder="<?php _e( 'Length', 'woocommerce' ); ?>" class="input-text" size="6" type="text" name="_length" value="<?php echo esc_attr( get_post_meta( $thepostid, '_length', true ) ); ?>" />
-							<input placeholder="<?php _e( 'Width', 'woocommerce' ); ?>" class="input-text" size="6" type="text" name="_width" value="<?php echo esc_attr( get_post_meta( $thepostid, '_width', true ) ); ?>" />
-							<input placeholder="<?php _e( 'Height', 'woocommerce' ); ?>" class="input-text last" size="6" type="text" name="_height" value="<?php echo esc_attr( get_post_meta( $thepostid, '_height', true ) ); ?>" />
+							<input id="product_length" placeholder="<?php _e( 'Length', 'woocommerce' ); ?>" class="input-text" size="6" type="number" name="_length" value="<?php echo esc_attr( get_post_meta( $thepostid, '_length', true ) ); ?>" step="any" min="0" />
+							<input placeholder="<?php _e( 'Width', 'woocommerce' ); ?>" class="input-text" size="6" type="number" name="_width" value="<?php echo esc_attr( get_post_meta( $thepostid, '_width', true ) ); ?>"  step="any" min="0" />
+							<input placeholder="<?php _e( 'Height', 'woocommerce' ); ?>" class="input-text last" size="6" type="number" name="_height" value="<?php echo esc_attr( get_post_meta( $thepostid, '_height', true ) ); ?>"  step="any" min="0" />
 						</span>
 						<span class="description"><?php _e( 'LxWxH in decimal form', 'woocommerce' ); ?></span>
 					</p><?php
@@ -264,7 +294,7 @@ function woocommerce_product_data_box() {
 				do_action( 'woocommerce_product_options_dimensions' );
 
 			echo '</div>';
-			
+
 			echo '<div class="options_group">';
 
 				// Shipping Class
@@ -283,7 +313,7 @@ function woocommerce_product_data_box() {
 				?><p class="form-field dimensions_field"><label for="product_shipping_class"><?php _e( 'Shipping class', 'woocommerce' ); ?></label> <?php wp_dropdown_categories( $args ); ?> <span class="description"><?php _e( 'Shipping classes are used by certain shipping methods to group similar products.', 'woocommerce' ); ?></span></p><?php
 
 				do_action( 'woocommerce_product_options_shipping' );
-				
+
 			echo '</div>';
 			?>
 
@@ -314,7 +344,7 @@ function woocommerce_product_data_box() {
 				    		if ( ! taxonomy_exists( $attribute_taxonomy_name ) ) continue;
 
 				    		// Get product data values for current taxonomy - this contains ordering and visibility data
-				    		if ( isset( $attributes[ $attribute_taxonomy_name ] ) ) 
+				    		if ( isset( $attributes[ $attribute_taxonomy_name ] ) )
 				    			$attribute = $attributes[ $attribute_taxonomy_name ];
 
 				    		$position = empty( $attribute['position'] ) ? 0 : absint( $attribute['position'] );
@@ -457,10 +487,13 @@ function woocommerce_product_data_box() {
 					    }
 					?>
 				</select>
+
+				<button type="button" class="button save_attributes"><?php _e( 'Save attributes', 'woocommerce' ); ?></button>
 			</p>
-			<div class="clear"></div>
 		</div>
-		<div id="related_product_data" class="panel woocommerce_options_panel">
+		<div id="linked_product_data" class="panel woocommerce_options_panel">
+
+			<div class="options_group">
 
 			<p class="form-field"><label for="upsell_ids"><?php _e( 'Up-Sells', 'woocommerce' ); ?></label>
 			<select id="upsell_ids" name="upsell_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>">
@@ -470,18 +503,18 @@ function woocommerce_product_data_box() {
 						foreach ( $product_ids as $product_id ) {
 							$title 	= get_the_title( $product_id );
 							$sku 	= get_post_meta( $product_id, '_sku', true );
-							
-							if ( ! $title ) 
+
+							if ( ! $title )
 								continue;
-								
-							if ( ! empty( $sku ) ) 
+
+							if ( ! empty( $sku ) )
 								$sku = ' (SKU: ' . $sku . ')';
 
 							echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $title . $sku ) . '</option>';
 						}
 					}
 				?>
-			</select> <img class="help_tip" data-tip='<?php _e( 'Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woocommerce' ) ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" /></p>
+			</select> <img class="help_tip" data-tip='<?php _e( 'Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woocommerce' ) ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></p>
 
 			<p class="form-field"><label for="crosssell_ids"><?php _e( 'Cross-Sells', 'woocommerce' ); ?></label>
 			<select id="crosssell_ids" name="crosssell_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>">
@@ -491,40 +524,22 @@ function woocommerce_product_data_box() {
 						foreach ( $product_ids as $product_id ) {
 							$title 	= get_the_title( $product_id );
 							$sku 	= get_post_meta( $product_id, '_sku', true );
-							
-							if ( ! $title ) 
+
+							if ( ! $title )
 								continue;
-								
-							if ( ! empty( $sku ) ) 
+
+							if ( ! empty( $sku ) )
 								$sku = ' (SKU: ' . $sku . ')';
 
 							echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $title . $sku ) . '</option>';
 						}
 					}
 				?>
-			</select> <img class="help_tip" data-tip='<?php _e( 'Cross-sells are products which you promote in the cart, based on the current product.', 'woocommerce' ) ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" /></p>
+			</select> <img class="help_tip" data-tip='<?php _e( 'Cross-sells are products which you promote in the cart, based on the current product.', 'woocommerce' ) ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></p>
 
-			<?php do_action( 'woocommerce_product_options_related' ); ?>
-
-		</div>
-
-		<div id="advanced_product_data" class="panel woocommerce_options_panel">
+			</div>
 
 			<?php
-
-			echo '<div class="options_group hide_if_external">';
-
-				// Purchase note
-				woocommerce_wp_textarea_input(  array( 'id' => '_purchase_note', 'label' => __( 'Purchase Note', 'woocommerce' ), 'description' => __( 'Enter an optional note to send the customer after purchase.', 'woocommerce' ) ) );
-
-			echo '</div>';
-
-			echo '<div class="options_group">';
-
-				// menu_order
-				woocommerce_wp_text_input(  array( 'id' => 'menu_order', 'label' => __( 'Menu order', 'woocommerce' ), 'description' => __( 'Custom ordering position.', 'woocommerce' ), 'value' => intval( $post->menu_order ) ) );
-
-			echo '</div>';
 
 			echo '<div class="options_group grouping show_if_simple show_if_external">';
 
@@ -548,7 +563,7 @@ function woocommerce_product_data_box() {
 					if ( $grouped_products ) {
 						foreach ( $grouped_products as $product ) {
 
-							if ( $product->ID == $post->ID ) 
+							if ( $product->ID == $post->ID )
 								continue;
 
 							$post_parents[ $product->ID ] = $product->post_title;
@@ -556,20 +571,36 @@ function woocommerce_product_data_box() {
 					}
 				}
 
-				woocommerce_wp_select( array( 'id' => 'parent_id', 'label' => __( 'Grouping', 'woocommerce' ), 'value' => absint( $post->post_parent ), 'options' => $post_parents ) );
-				
+				woocommerce_wp_select( array( 'id' => 'parent_id', 'label' => __( 'Grouping', 'woocommerce' ), 'value' => absint( $post->post_parent ), 'options' => $post_parents, 'desc_tip' => true, 'description' => __( 'Set this option to make this product part of a grouped product.', 'woocommerce' ) ) );
+
 				woocommerce_wp_hidden_input( array( 'id' => 'previous_parent_id', 'value' => absint( $post->post_parent ) ) );
 
 				do_action( 'woocommerce_product_options_grouping' );
 
 			echo '</div>';
-			
-			echo '<div class="options_group show_if_simple show_if_variable">';
+			?>
 
-				// Individual product
-				woocommerce_wp_checkbox( array( 'id' => '_sold_individually', 'wrapper_class' => 'show_if_simple show_if_variable', 'label' => __('Sold Individually', 'woocommerce'), 'description' => __('Enable this to only allow one of this item to be bought in a single order', 'woocommerce') ) );
+			<?php do_action( 'woocommerce_product_options_related' ); ?>
 
-				do_action('woocommerce_product_options_sold_individually');
+		</div>
+
+		<div id="advanced_product_data" class="panel woocommerce_options_panel">
+
+			<?php
+
+			echo '<div class="options_group hide_if_external">';
+
+				// Purchase note
+				woocommerce_wp_textarea_input(  array( 'id' => '_purchase_note', 'label' => __( 'Purchase Note', 'woocommerce' ), 'description' => __( 'Enter an optional note to send the customer after purchase.', 'woocommerce' ) ) );
+
+			echo '</div>';
+
+			echo '<div class="options_group">';
+
+				// menu_order
+				woocommerce_wp_text_input(  array( 'id' => 'menu_order', 'label' => __( 'Menu order', 'woocommerce' ), 'description' => __( 'Custom ordering position.', 'woocommerce' ), 'value' => intval( $post->menu_order ), 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> '1'
+				)  ) );
 
 			echo '</div>';
 
@@ -585,6 +616,8 @@ function woocommerce_product_data_box() {
 		</div>
 
 		<?php do_action( 'woocommerce_product_write_panels' ); ?>
+
+		<div class="clear"></div>
 
 	</div>
 	<?php
@@ -617,7 +650,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 
 	// Set transient for product type
 	set_transient( 'wc_product_type_' . $post_id, $product_type );
-	
+
 	// Update post meta
 	update_post_meta( $post_id, '_regular_price', stripslashes( $_POST['_regular_price'] ) );
 	update_post_meta( $post_id, '_sale_price', stripslashes( $_POST['_sale_price'] ) );
@@ -625,7 +658,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	update_post_meta( $post_id, '_tax_class', stripslashes( $_POST['_tax_class'] ) );
 	update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
 	update_post_meta( $post_id, '_purchase_note', stripslashes( $_POST['_purchase_note'] ) );
-	update_post_meta( $post_id, '_featured', isset( $_POST['_featured'] ) ? 'yes' : 'no' ); 
+	update_post_meta( $post_id, '_featured', isset( $_POST['_featured'] ) ? 'yes' : 'no' );
 
 	// Dimensions
 	if ( $is_virtual == 'no' ) {
@@ -676,20 +709,20 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	if ( isset( $_POST['attribute_names'] ) ) {
 		$attribute_names = $_POST['attribute_names'];
 		$attribute_values = $_POST['attribute_values'];
-		
-		if ( isset( $_POST['attribute_visibility'] ) ) 
+
+		if ( isset( $_POST['attribute_visibility'] ) )
 			$attribute_visibility = $_POST['attribute_visibility'];
-			
-		if ( isset( $_POST['attribute_variation'] ) ) 
+
+		if ( isset( $_POST['attribute_variation'] ) )
 			$attribute_variation = $_POST['attribute_variation'];
-		
+
 		$attribute_is_taxonomy = $_POST['attribute_is_taxonomy'];
 		$attribute_position = $_POST['attribute_position'];
 
 		$attribute_names_count = sizeof( $attribute_names );
 
 		for ( $i=0; $i < $attribute_names_count; $i++ ) {
-			if ( ! $attribute_names[ $i ] ) 
+			if ( ! $attribute_names[ $i ] )
 				continue;
 
 			$is_visible 	= isset( $attribute_visibility[ $i ] ) ? 1 : 0;
@@ -767,17 +800,17 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	update_post_meta( $post_id, '_product_attributes', $attributes );
 
 	// Sales and prices
-	if ( in_array( $product_type, array( 'variable', 'grouped' ) ) ) { 
-		
+	if ( in_array( $product_type, array( 'variable', 'grouped' ) ) ) {
+
 		// Variable and grouped products have no prices
 		update_post_meta( $post_id, '_regular_price', '' );
 		update_post_meta( $post_id, '_sale_price', '' );
 		update_post_meta( $post_id, '_sale_price_dates_from', '' );
 		update_post_meta( $post_id, '_sale_price_dates_to', '' );
 		update_post_meta( $post_id, '_price', '' );
-		
+
 	} else {
-	
+
 		$date_from = isset( $_POST['_sale_price_dates_from'] ) ? $_POST['_sale_price_dates_from'] : '';
 		$date_to = isset( $_POST['_sale_price_dates_to'] ) ? $_POST['_sale_price_dates_to'] : '';
 
@@ -801,7 +834,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		else
 			update_post_meta( $post_id, '_price', stripslashes( $_POST['_regular_price'] ) );
 
-		if ( $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) )
+		if ( $_POST['_sale_price'] != '' && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) )
 			update_post_meta( $post_id, '_price', stripslashes($_POST['_sale_price']) );
 
 		if ( $date_to && strtotime( $date_to ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
@@ -813,21 +846,21 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 
 	// Update parent if grouped so price sorting works and stays in sync with the cheapest child
 	if ( $post->post_parent > 0 || $product_type == 'grouped' || $_POST['previous_parent_id'] > 0 ) {
-		
+
 		$clear_parent_ids = array();
-		
+
 		if ( $post->post_parent > 0 )
 			$clear_parent_ids[] = $post->post_parent;
-			
+
 		if ( $product_type == 'grouped' )
 			$clear_parent_ids[] = $post_id;
-			
+
 		if ( $_POST['previous_parent_id'] > 0 )
 			$clear_parent_ids[] = absint( $_POST['previous_parent_id'] );
 
 		if ( $clear_parent_ids ) {
 			foreach( $clear_parent_ids as $clear_id ) {
-				
+
 				$children_by_price = get_posts( array(
 					'post_parent' 	=> $clear_id,
 					'orderby' 		=> 'meta_value_num',
@@ -843,7 +876,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 						update_post_meta( $clear_id, '_price', $child_price );
 					}
 				}
-		
+
 				// Clear cache/transients
 				$woocommerce->clear_product_transients( $clear_id );
 			}
@@ -856,7 +889,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	} else {
 		update_post_meta( $post_id, '_sold_individually', '' );
 	}
-	
+
 	// Stock Data
 	if ( get_option('woocommerce_manage_stock') == 'yes' ) {
 
@@ -907,7 +940,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		$upsells = array();
 		$ids = $_POST['upsell_ids'];
 		foreach ( $ids as $id )
-			if ( $id && $id > 0 ) 
+			if ( $id && $id > 0 )
 				$upsells[] = $id;
 
 		update_post_meta( $post_id, '_upsell_ids', $upsells );
@@ -920,9 +953,9 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		$crosssells = array();
 		$ids = $_POST['crosssell_ids'];
 		foreach ( $ids as $id )
-			if ( $id && $id > 0 ) 
+			if ( $id && $id > 0 )
 				$crosssells[] = $id;
-	
+
 		update_post_meta( $post_id, '_crosssell_ids', $crosssells );
 	} else {
 		delete_post_meta( $post_id, '_crosssell_ids' );
@@ -932,11 +965,11 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	if ( $is_downloadable == 'yes' ) {
 
 		$_download_limit = absint( $_POST['_download_limit'] );
-		if ( ! $_download_limit ) 
+		if ( ! $_download_limit )
 			$_download_limit = ''; // 0 or blank = unlimited
 
 		$_download_expiry = absint( $_POST['_download_expiry'] );
-		if ( ! $_download_expiry ) 
+		if ( ! $_download_expiry )
 			$_download_expiry = ''; // 0 or blank = unlimited
 
 		// file paths will be stored in an array keyed off md5(file path)
@@ -958,17 +991,17 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 
 			update_post_meta( $post_id, '_file_paths', $_file_paths );
 		}
-		if ( isset( $_POST['_download_limit'] ) ) 
+		if ( isset( $_POST['_download_limit'] ) )
 			update_post_meta( $post_id, '_download_limit', esc_attr( $_download_limit ) );
-		if ( isset( $_POST['_download_expiry'] ) ) 
+		if ( isset( $_POST['_download_expiry'] ) )
 			update_post_meta( $post_id, '_download_expiry', esc_attr( $_download_expiry ) );
 	}
 
 	// Product url
 	if ( $product_type == 'external' ) {
-		if ( isset( $_POST['_product_url'] ) && $_POST['_product_url'] ) 
+		if ( isset( $_POST['_product_url'] ) && $_POST['_product_url'] )
 			update_post_meta( $post_id, '_product_url', esc_attr( $_POST['_product_url'] ) );
-		if ( isset( $_POST['_button_text'] ) && $_POST['_button_text'] ) 
+		if ( isset( $_POST['_button_text'] ) && $_POST['_button_text'] )
 			update_post_meta( $post_id, '_button_text', esc_attr( $_POST['_button_text'] ) );
 	}
 
@@ -991,12 +1024,12 @@ add_action('woocommerce_process_product_meta', 'woocommerce_process_product_meta
  * @return void
  */
 function woocommerce_change_insert_into_post( $translation, $original ) {
-    if ( ! isset( $_REQUEST['from'] ) ) 
+    if ( ! isset( $_REQUEST['from'] ) )
     	return $translation;
 
 	$original = strtolower( $original );
 
-    if ( $_REQUEST['from'] == 'wc01' && ( $original == 'insert into post' || $original == 'use this image' ) ) 
+    if ( $_REQUEST['from'] == 'wc01' && ( $original == 'insert into post' || $original == 'use this image' ) )
     	return __( 'Use this file', 'woocommerce' );
 
     return $translation;

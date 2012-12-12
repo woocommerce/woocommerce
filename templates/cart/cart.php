@@ -48,8 +48,8 @@ global $woocommerce;
 						<td class="product-thumbnail">
 							<?php
 								$thumbnail = apply_filters( 'woocommerce_in_cart_product_thumbnail', $_product->get_image(), $values, $cart_item_key );
-								
-								if ( ! $_product->is_visible() || ( $_product instanceof WC_Product_Variation && ! $_product->parent_is_visible() ) )
+
+								if ( ! $_product->is_visible() || ( ! empty( $_product->variation_id ) && ! $_product->parent_is_visible() ) )
 									echo $thumbnail;
 								else
 									printf('<a href="%s">%s</a>', esc_url( get_permalink( apply_filters('woocommerce_in_cart_product_id', $values['product_id'] ) ) ), $thumbnail );
@@ -59,7 +59,7 @@ global $woocommerce;
 						<!-- Product Name -->
 						<td class="product-name">
 							<?php
-								if ( ! $_product->is_visible() || ( $_product instanceof WC_Product_Variation && ! $_product->parent_is_visible() ) )
+								if ( ! $_product->is_visible() || ( ! empty( $_product->variation_id ) && ! $_product->parent_is_visible() ) )
 									echo apply_filters( 'woocommerce_in_cart_product_title', $_product->get_title(), $values, $cart_item_key );
 								else
 									printf('<a href="%s">%s</a>', esc_url( get_permalink( apply_filters('woocommerce_in_cart_product_id', $values['product_id'] ) ) ), apply_filters('woocommerce_in_cart_product_title', $_product->get_title(), $values, $cart_item_key ) );
@@ -76,7 +76,7 @@ global $woocommerce;
 						<!-- Product price -->
 						<td class="product-price">
 							<?php
-								$product_price = get_option('woocommerce_display_cart_prices_excluding_tax') == 'yes' || $woocommerce->customer->is_vat_exempt() ? $_product->get_price_excluding_tax() : $_product->get_price();
+								$product_price = get_option('woocommerce_tax_display_cart') == 'excl' ? $_product->get_price_excluding_tax() : $_product->get_price_including_tax();
 
 								echo apply_filters('woocommerce_cart_item_price_html', woocommerce_price( $product_price ), $values, $cart_item_key );
 							?>
@@ -88,11 +88,12 @@ global $woocommerce;
 								if ( $_product->is_sold_individually() ) {
 									$product_quantity = sprintf( '1 <input type="hidden" name="cart[%s][qty]" value="1" />', $cart_item_key );
 								} else {
-									$data_min = apply_filters( 'woocommerce_cart_item_data_min', '', $_product );
-									$data_max = ( $_product->backorders_allowed() ) ? '' : $_product->get_stock_quantity();
-									$data_max = apply_filters( 'woocommerce_cart_item_data_max', $data_max, $_product );
 
-									$product_quantity = sprintf( '<div class="quantity"><input type="text" name="cart[%s][qty]" data-min="%s" data-max="%s" value="%s" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>', $cart_item_key, $data_min, $data_max, esc_attr( $values['quantity'] ) );
+									$step	= apply_filters( 'woocommerce_quantity_input_step', '1', $_product );
+									$min 	= apply_filters( 'woocommerce_quantity_input_min', '', $_product );
+									$max 	= apply_filters( 'woocommerce_quantity_input_max', $_product->backorders_allowed() ? '' : $_product->get_stock_quantity(), $_product );
+
+									$product_quantity = sprintf( '<div class="quantity"><input type="number" name="cart[%s][qty]" step="%s" min="%s" max="%s" value="%s" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>', $cart_item_key, $step, $min, $max, esc_attr( $values['quantity'] ) );
 								}
 
 								echo apply_filters( 'woocommerce_cart_item_quantity', $product_quantity, $cart_item_key );

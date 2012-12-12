@@ -26,7 +26,7 @@ function woocommerce_user_columns( $columns ) {
 	$columns['woocommerce_billing_address'] = __( 'Billing Address', 'woocommerce' );
 	$columns['woocommerce_shipping_address'] = __( 'Shipping Address', 'woocommerce' );
 	$columns['woocommerce_paying_customer'] = __( 'Paying Customer?', 'woocommerce' );
-	$columns['woocommerce_order_count'] = __( 'Orders', 'woocommerce' );
+	$columns['woocommerce_order_count'] = __( 'Completed Orders', 'woocommerce' );
 	return $columns;
 }
 
@@ -47,15 +47,28 @@ function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 	switch ( $column_name ) :
 		case "woocommerce_order_count" :
 
-			$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*)
-			FROM $wpdb->posts
-			LEFT JOIN $wpdb->postmeta ON $wpdb->posts.ID = $wpdb->postmeta.post_id
-			WHERE meta_value = $user_id
-			AND meta_key = '_customer_user'
-			AND post_type IN ('shop_order')
-			AND post_status = 'publish'" ) );
+			if ( ! $count = get_user_meta( $user_id, '_order_count', true ) ) {
 
-			$value = '<a href="' . admin_url( 'edit.php?post_status=all&post_type=shop_order&_customer_user=' . absint( $user_id ) . '' ) . '">' . absint( $count ) . '</a>';
+				$count = $wpdb->get_var( "SELECT COUNT(*)
+					FROM $wpdb->posts as posts
+
+					LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+					LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+					LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+					LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+
+					WHERE 	meta.meta_key 		= '_customer_user'
+					AND 	posts.post_type 	= 'shop_order'
+					AND 	posts.post_status 	= 'publish'
+					AND 	tax.taxonomy		= 'shop_order_status'
+					AND		term.slug			IN ( 'completed' )
+					AND 	meta_value 			= $user_id
+				" );
+
+				update_user_meta( $user_id, '_order_count', $count );
+			}
+
+			$value = '<a href="' . admin_url( 'edit.php?post_status=all&post_type=shop_order&shop_order_status=completed&_customer_user=' . absint( $user_id ) . '' ) . '">' . absint( $count ) . '</a>';
 
 		break;
 		case "woocommerce_billing_address" :
@@ -73,9 +86,9 @@ function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 
 			$formatted_address = $woocommerce->countries->get_formatted_address( $address );
 
-			if ( ! $formatted_address ) 
-				$value = __( 'N/A', 'woocommerce' ); 
-			else 
+			if ( ! $formatted_address )
+				$value = __( 'N/A', 'woocommerce' );
+			else
 				$value = $formatted_address;
 
 			$value = wpautop( $value );
@@ -95,9 +108,9 @@ function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 
 			$formatted_address = $woocommerce->countries->get_formatted_address( $address );
 
-			if ( ! $formatted_address ) 
-				$value = __( 'N/A', 'woocommerce' ); 
-			else 
+			if ( ! $formatted_address )
+				$value = __( 'N/A', 'woocommerce' );
+			else
 				$value = $formatted_address;
 
 			$value = wpautop( $value );
@@ -106,10 +119,10 @@ function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 
 			$paying_customer = get_user_meta( $user_id, 'paying_customer', true );
 
-			if ( $paying_customer ) 
-				$value = '<img src="' . $woocommerce->plugin_url() . '/assets/images/success.png" alt="yes" />';
-			else 
-				$value = '<img src="' . $woocommerce->plugin_url() . '/assets/images/success-off.png" alt="no" />';
+			if ( $paying_customer )
+				$value = '<img src="' . $woocommerce->plugin_url() . '/assets/images/success.png" alt="yes" width="16px" />';
+			else
+				$value = '<img src="' . $woocommerce->plugin_url() . '/assets/images/success-off.png" alt="no" width="16px" />';
 
 		break;
 	endswitch;

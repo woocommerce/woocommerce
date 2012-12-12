@@ -7,7 +7,7 @@
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce/Admin/WritePanels
- * @version     1.7.0
+ * @version     2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -34,7 +34,7 @@ function woocommerce_order_notes_meta_box() {
 	if ( $notes ) {
 		foreach( $notes as $note ) {
 			$note_classes = get_comment_meta( $note->comment_ID, 'is_customer_note', true ) ? array( 'customer-note', 'note' ) : array( 'note' );
-			
+
 			?>
 			<li rel="<?php echo absint( $note->comment_ID ) ; ?>" class="<?php echo implode( ' ', $note_classes ); ?>">
 				<div class="note_content">
@@ -53,7 +53,7 @@ function woocommerce_order_notes_meta_box() {
 	echo '</ul>';
 	?>
 	<div class="add_note">
-		<h4><?php _e( 'Add note', 'woocommerce' ); ?> <img class="help_tip" data-tip='<?php esc_attr_e( 'Add a note for your reference, or add a customer note (the user will be notified).', 'woocommerce' ); ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" /></h4>
+		<h4><?php _e( 'Add note', 'woocommerce' ); ?> <img class="help_tip" data-tip='<?php esc_attr_e( 'Add a note for your reference, or add a customer note (the user will be notified).', 'woocommerce' ); ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></h4>
 		<p>
 			<textarea type="text" name="order_note" id="add_order_note" class="input-text" cols="20" rows="5"></textarea>
 		</p>

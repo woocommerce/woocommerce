@@ -30,7 +30,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				<td><?php echo $woocommerce->cart->get_cart_subtotal(); ?></td>
 			</tr>
 
-			<?php if ($woocommerce->cart->get_discounts_before_tax()) : ?>
+			<?php if ( $woocommerce->cart->get_discounts_before_tax() ) : ?>
 
 			<tr class="discount">
 				<th colspan="2"><?php _e( 'Cart Discount', 'woocommerce' ); ?></th>
@@ -42,88 +42,78 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 			<?php if ( $woocommerce->cart->needs_shipping() && $woocommerce->cart->show_shipping() ) : ?>
 
 				<?php do_action('woocommerce_review_order_before_shipping'); ?>
-	
+
 				<tr class="shipping">
 					<th colspan="2"><?php _e( 'Shipping', 'woocommerce' ); ?></th>
 					<td><?php woocommerce_get_template( 'cart/shipping-methods.php', array( 'available_methods' => $available_methods ) ); ?></td>
 				</tr>
-	
+
 				<?php do_action('woocommerce_review_order_after_shipping'); ?>
 
 			<?php endif; ?>
-			
+
 			<?php foreach ( $woocommerce->cart->get_fees() as $fee ) : ?>
-					
+
 				<tr class="fee fee-<?php echo $fee->id ?>">
 					<th colspan="2"><?php echo $fee->name ?></th>
-					<td><?php 
-						if ( $woocommerce->cart->display_totals_ex_tax || ! $woocommerce->cart->prices_include_tax )
+					<td><?php
+						if ( $woocommerce->cart->tax_display_cart == 'excl' )
 							echo woocommerce_price( $fee->amount );
 						else
 							echo woocommerce_price( $fee->amount + $fee->tax );
 					?></td>
 				</tr>
-				
+
 			<?php endforeach; ?>
 
 			<?php
 				// Show the tax row if showing prices exlcusive of tax only
-				if ( $woocommerce->cart->display_totals_ex_tax || ! $woocommerce->cart->prices_include_tax ) {
-					if ( $woocommerce->cart->get_cart_tax() ) {
+				if ( $woocommerce->cart->tax_display_cart == 'excl' ) {
 
-						$taxes = $woocommerce->cart->get_formatted_taxes();
+					$taxes = $woocommerce->cart->get_formatted_taxes();
 
-						if ( sizeof( $taxes ) > 0 ) {
+					if ( sizeof( $taxes ) > 0 ) {
 
-							$has_compound_tax = false;
+						$has_compound_tax = false;
 
-							foreach ( $taxes as $key => $tax ) {
-								if ( $woocommerce->cart->tax->is_compound( $key ) ) {
-									$has_compound_tax = true; 
-									continue;
-								}
-								?>
-								<tr class="tax-rate tax-rate-<?php echo $key; ?>">
-									<th colspan="2"><?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
-									<td><?php echo $tax; ?></td>
-								</tr>
-								<?php
+						foreach ( $taxes as $key => $tax ) {
+							if ( $woocommerce->cart->tax->is_compound( $key ) ) {
+								$has_compound_tax = true;
+								continue;
 							}
-
-							if ( $has_compound_tax ) {
-								?>
-								<tr class="order-subtotal">
-									<th colspan="2"><strong><?php _e( 'Subtotal', 'woocommerce' ); ?></strong></th>
-									<td><strong><?php echo $woocommerce->cart->get_cart_subtotal( true ); ?></strong></td>
-								</tr>
-								<?php
-							}
-
-							foreach ( $taxes as $key => $tax ) {
-								if ( ! $woocommerce->cart->tax->is_compound( $key ) ) 
-									continue;
-								?>
-								<tr class="tax-rate tax-rate-<?php echo $key; ?>">
-									<th colspan="2"><?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
-									<td><?php echo $tax; ?></td>
-								</tr>
-								<?php
-							}
-
-						} else { 
 							?>
-							<tr class="tax">
-								<th colspan="2" colspan="2"><?php _e( 'Tax', 'woocommerce' ); ?></th>
-								<td><?php echo $woocommerce->cart->get_cart_tax(); ?></td>
+							<tr class="tax-rate tax-rate-<?php echo $key; ?>">
+								<th colspan="2"><?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
+								<td><?php echo $tax; ?></td>
 							</tr>
 							<?php
 						}
-						
-					} elseif ( get_option( 'woocommerce_display_cart_taxes_if_zero' ) == 'yes' ) {
+
+						if ( $has_compound_tax ) {
+							?>
+							<tr class="order-subtotal">
+								<th colspan="2"><strong><?php _e( 'Subtotal', 'woocommerce' ); ?></strong></th>
+								<td><strong><?php echo $woocommerce->cart->get_cart_subtotal( true ); ?></strong></td>
+							</tr>
+							<?php
+						}
+
+						foreach ( $taxes as $key => $tax ) {
+							if ( ! $woocommerce->cart->tax->is_compound( $key ) )
+								continue;
+							?>
+							<tr class="tax-rate tax-rate-<?php echo $key; ?>">
+								<th colspan="2"><?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
+								<td><?php echo $tax; ?></td>
+							</tr>
+							<?php
+						}
+
+					} elseif ( $woocommerce->cart->get_cart_tax() ) {
 						?>
 						<tr class="tax">
-							<th colspan="2"><?php _e( 'Tax', 'woocommerce' ); ?></th>
-							<td><?php _ex( 'N/A', 'Relating to tax', 'woocommerce' ); ?></td>
+							<th colspan="2" colspan="2"><?php _e( 'Tax', 'woocommerce' ); ?></th>
+							<td><?php echo $woocommerce->cart->get_cart_tax(); ?></td>
 						</tr>
 						<?php
 					}
@@ -147,27 +137,21 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					<strong><?php echo $woocommerce->cart->get_total(); ?></strong>
 					<?php
 						// If prices are tax inclusive, show taxes here
-						if ( ! $woocommerce->cart->display_totals_ex_tax && $woocommerce->cart->prices_include_tax ) {
-							
-							if ( $woocommerce->cart->get_cart_tax() ) {
-								$tax_string_array = array();
-								$taxes = $woocommerce->cart->get_formatted_taxes();
-								
-								if ( sizeof( $taxes ) > 0 ) {
-									foreach ( $taxes as $key => $tax ) {
-										$tax_string_array[] = sprintf( '%s %s', $tax, $woocommerce->cart->tax->get_rate_label( $key ) );
-									}
-								} else {
-									$tax_string_array[] = sprintf( '%s tax', $tax );
+						if ( $woocommerce->cart->tax_display_cart == 'incl' ) {
+							$tax_string_array = array();
+							$taxes = $woocommerce->cart->get_formatted_taxes();
+
+							if ( sizeof( $taxes ) > 0 ) {
+								foreach ( $taxes as $key => $tax ) {
+									$tax_string_array[] = sprintf( '%s %s', $tax, $woocommerce->cart->tax->get_rate_label( $key ) );
 								}
-								
-								if ( ! empty( $tax_string_array ) ) {
-									?><small class="includes_tax"><?php printf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) ); ?></small><?php	
-								}
-							} elseif ( get_option( 'woocommerce_display_cart_taxes_if_zero' ) == 'yes' ) {
-								?><small class="includes_tax"><?php printf( __( '(Includes %s tax)', 'woocommerce' ), woocommerce_price( 0 ) ); ?></small><?php
+							} elseif ( $woocommerce->cart->get_cart_tax() ) {
+								$tax_string_array[] = sprintf( '%s tax', $tax );
 							}
-							
+
+							if ( ! empty( $tax_string_array ) ) {
+								?><small class="includes_tax"><?php printf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) ); ?></small><?php
+							}
 						}
 					?>
 				</td>
@@ -206,7 +190,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					// Chosen Method
 					if (sizeof($available_gateways)) :
 						$default_gateway = get_option('woocommerce_default_gateway');
-						
+
 						if ( isset( $woocommerce->session->chosen_payment_method ) && isset( $available_gateways[ $woocommerce->session->chosen_payment_method ] ) ) {
 							$available_gateways[ $woocommerce->session->chosen_payment_method ]->set_current();
 						} elseif ( isset( $available_gateways[ $default_gateway ] ) ) {
@@ -214,16 +198,16 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 						} else {
 							current( $available_gateways )->set_current();
 						}
-						
+
 					endif;
 					foreach ($available_gateways as $gateway ) :
 						?>
 						<li>
-						<input type="radio" id="payment_method_<?php echo $gateway->id; ?>" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php if ($gateway->chosen) echo 'checked="checked"'; ?> />
+						<input type="radio" id="payment_method_<?php echo $gateway->id; ?>" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php checked( $gateway->chosen, true ); ?> />
 						<label for="payment_method_<?php echo $gateway->id; ?>"><?php echo $gateway->get_title(); ?> <?php echo $gateway->get_icon(); ?></label>
 							<?php
 								if ( $gateway->has_fields() || $gateway->get_description() ) :
-									echo '<div class="payment_box payment_method_' . $gateway->id . '" style="display:none;">';
+									echo '<div class="payment_box payment_method_' . $gateway->id . '" ' . ( $gateway->chosen ? '' : 'style="display:none;"' ) . '>';
 									$gateway->payment_fields();
 									echo '</div>';
 								endif;
@@ -256,8 +240,8 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 			<?php if (woocommerce_get_page_id('terms')>0) : ?>
 			<p class="form-row terms">
-				<label for="terms" class="checkbox"><?php _e( 'I accept the', 'woocommerce' ); ?> <a href="<?php echo esc_url( get_permalink(woocommerce_get_page_id('terms')) ); ?>" target="_blank"><?php _e( 'terms &amp; conditions', 'woocommerce' ); ?></a></label>
-				<input type="checkbox" class="input-checkbox" name="terms" <?php if (isset($_POST['terms'])) echo 'checked="checked"'; ?> id="terms" />
+				<label for="terms" class="checkbox"><?php _e( 'I have read and accept the', 'woocommerce' ); ?> <a href="<?php echo esc_url( get_permalink(woocommerce_get_page_id('terms')) ); ?>" target="_blank"><?php _e( 'terms &amp; conditions', 'woocommerce' ); ?></a></label>
+				<input type="checkbox" class="input-checkbox" name="terms" <?php checked( isset( $_POST['terms'] ), true ); ?> id="terms" />
 			</p>
 			<?php endif; ?>
 

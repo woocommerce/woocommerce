@@ -141,7 +141,7 @@ add_action( 'admin_head', 'woocommerce_admin_menu_highlight' );
 
 /**
  * woocommerce_admin_notices_styles function.
- * 
+ *
  * @access public
  * @return void
  */
@@ -151,7 +151,7 @@ function woocommerce_admin_notices_styles() {
 		wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', dirname( __FILE__ ) ) );
 		add_action( 'admin_notices', 'woocommerce_admin_install_notices' );
 	}
-		
+
 }
 
 add_action( 'admin_print_styles', 'woocommerce_admin_notices_styles' );
@@ -159,38 +159,38 @@ add_action( 'admin_print_styles', 'woocommerce_admin_notices_styles' );
 
 /**
  * woocommerce_admin_install_notices function.
- * 
+ *
  * @access public
  * @return void
  */
 function woocommerce_admin_install_notices() {
 	global $woocommerce;
-	
+
 	if ( get_option( 'woocommerce_needs_update' ) == 1 ) {
-		
+
 		include( 'includes/notice-update.php' );
-		
+
 	} elseif ( get_option( 'woocommerce_updated' ) == 1 ) {
-	
+
 		include( 'includes/notice-updated.php' );
-		
+
 		update_option( 'woocommerce_updated', 0 );
 		update_option( 'woocommerce_installed', 0 );
-		
+
 	} elseif ( get_option( 'woocommerce_installed' ) == 1 ) {
-		
+
 		if ( get_option( 'skip_install_woocommerce_pages' ) != 1 && woocommerce_get_page_id( 'shop' ) < 1 && ! isset( $_GET['install_woocommerce_pages'] ) && !isset( $_GET['skip_install_woocommerce_pages'] ) ) {
-		
+
 			include( 'includes/notice-install.php' );
-			
-		} elseif ( ! isset( $_GET['page'] ) || $_GET['page'] != 'woocommerce' ) {
-		
+
+		} elseif ( ! isset( $_GET['page'] ) || $_GET['page'] != 'woocommerce_settings' ) {
+
 			include( 'includes/notice-installed.php' );
-			
+
 			update_option( 'woocommerce_installed', 0 );
-			
+
 		}
-		
+
 	}
 }
 
@@ -232,7 +232,7 @@ function woocommerce_admin_init() {
 		include_once( 'woocommerce-admin-users.php' );
 
 	}
-	
+
 	// Register importers
 	if ( defined( 'WP_LOAD_IMPORTERS' ) ) {
 		include_once( 'importers/importers-init.php' );
@@ -288,32 +288,8 @@ function woocommerce_status_page() {
 
 
 /**
- * On activation, include the installer and run it.
- *
- * @access public
- * @return void
- */
-function activate_woocommerce() {
-	include_once( 'woocommerce-admin-install.php' );
-	update_option( 'skip_install_woocommerce_pages', 0 );
-	update_option( 'woocommerce_installed', 1 );
-	do_install_woocommerce();
-}
-
-/**
- * Include the installer and run it.
- *
- * @access public
- * @return void
- */
-function install_woocommerce() {
-	include_once( 'woocommerce-admin-install.php' );
-	do_install_woocommerce();
-}
-
-/**
  * update_woocommerce function.
- * 
+ *
  * @access public
  * @return void
  */
@@ -354,19 +330,19 @@ function woocommerce_admin_scripts() {
 
 	// Register scripts
 	wp_register_script( 'woocommerce_admin', $woocommerce->plugin_url() . '/assets/js/admin/woocommerce_admin' . $suffix . '.js', array( 'jquery', 'jquery-blockui', 'jquery-placeholder', 'jquery-ui-widget', 'jquery-ui-core', 'jquery-tiptip' ), $woocommerce->version );
-	
+
 	wp_register_script( 'jquery-blockui', $woocommerce->plugin_url() . '/assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), $woocommerce->version, true );
-	
+
 	wp_register_script( 'jquery-placeholder', $woocommerce->plugin_url() . '/assets/js/jquery-placeholder/jquery.placeholder' . $suffix . '.js', array( 'jquery' ), $woocommerce->version, true );
-	
+
 	wp_register_script( 'jquery-tiptip', $woocommerce->plugin_url() . '/assets/js/jquery-tiptip/jquery.tipTip' . $suffix . '.js', array( 'jquery' ), $woocommerce->version, true );
-	
+
 	wp_register_script( 'jquery-ui-datepicker',  $woocommerce->plugin_url() . '/assets/js/admin/ui-datepicker.js', array('jquery','jquery-ui-core'), $woocommerce->version );
-	
+
 	wp_register_script( 'woocommerce_writepanel', $woocommerce->plugin_url() . '/assets/js/admin/write-panels'.$suffix.'.js', array('jquery', 'jquery-ui-datepicker'), $woocommerce->version );
-	
+
 	wp_register_script( 'ajax-chosen', $woocommerce->plugin_url() . '/assets/js/chosen/ajax-chosen.jquery'.$suffix.'.js', array('jquery', 'chosen'), $woocommerce->version );
-	
+
 	wp_register_script( 'chosen', $woocommerce->plugin_url() . '/assets/js/chosen/chosen.jquery'.$suffix.'.js', array('jquery'), $woocommerce->version );
 
 	// Get admin screen id
@@ -380,6 +356,7 @@ function woocommerce_admin_scripts() {
     	wp_enqueue_script( 'ajax-chosen' );
     	wp_enqueue_script( 'chosen' );
     	wp_enqueue_script( 'jquery-ui-sortable' );
+    	wp_enqueue_script( 'jquery-ui-autocomplete' );
 
     endif;
 
@@ -428,11 +405,12 @@ function woocommerce_admin_scripts() {
 			'ajax_url' 						=> admin_url('admin-ajax.php'),
 			'order_item_nonce' 				=> wp_create_nonce("order-item"),
 			'add_attribute_nonce' 			=> wp_create_nonce("add-attribute"),
+			'save_attributes_nonce' 		=> wp_create_nonce("save-attributes"),
 			'calc_totals_nonce' 			=> wp_create_nonce("calc-totals"),
 			'get_customer_details_nonce' 	=> wp_create_nonce("get-customer-details"),
 			'search_products_nonce' 		=> wp_create_nonce("search-products"),
 			'calendar_image'				=> $woocommerce->plugin_url().'/assets/images/calendar.png',
-			'post_id'						=> $post->ID, 
+			'post_id'						=> $post->ID,
 			'currency_format_num_decimals'	=> absint( get_option( 'woocommerce_price_num_decimals' ) ),
 			'currency_format_symbol'		=> get_woocommerce_currency_symbol(),
 			'currency_format_decimal_sep'	=> esc_attr( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ) ),
@@ -617,7 +595,7 @@ function woocommerce_exclude_image_from_product_page_field( $fields, $object ) {
 
 	$parent = get_post( $object->post_parent );
 
-	if ( $parent->post_type !== 'product' ) 
+	if ( $parent->post_type !== 'product' )
 		return $fields;
 
 	$exclude_image = get_post_meta( absint( $object->ID ), '_woocommerce_exclude_image', true );
@@ -768,7 +746,7 @@ add_filter( 'admin_comment_types_dropdown', 'woocommerce_admin_comment_types_dro
 
 /**
  * woocommerce_permalink_settings function.
- * 
+ *
  * @access public
  * @return void
  */
@@ -778,12 +756,12 @@ function woocommerce_permalink_settings() {
 
 	$permalinks = get_option( 'woocommerce_permalinks' );
 	$product_permalink = $permalinks['product_base'];
-	
+
 	// Get shop page
 	$shop_page_id 	= woocommerce_get_page_id( 'shop' );
 	$base_slug 		= ( $shop_page_id > 0 && get_page( $shop_page_id ) ) ? get_page_uri( $shop_page_id ) : _x( 'shop', 'default-slug', 'woocommerce' );
 	$product_base 	= _x( 'product', 'default-slug', 'woocommerce' );
-	
+
 	$structures = array(
 		0 => '',
 		1 => '/' . trailingslashit( $product_base ),
@@ -825,7 +803,7 @@ function woocommerce_permalink_settings() {
 			jQuery('input.wctog').change(function() {
 				jQuery('#woocommerce_permalink_structure').val( jQuery(this).val() );
 			});
-			
+
 			jQuery('#woocommerce_permalink_structure').focus(function(){
 				jQuery('#woocommerce_custom_selection').click();
 			});
@@ -836,7 +814,7 @@ function woocommerce_permalink_settings() {
 
 /**
  * woocommerce_permalink_settings_init function.
- * 
+ *
  * @access public
  * @return void
  */
@@ -844,7 +822,7 @@ function woocommerce_permalink_settings_init() {
 
 	// Add a section to the permalinks page
 	add_settings_section( 'woocommerce-permalink', __( 'Product permalink base', 'woocommerce' ), 'woocommerce_permalink_settings', 'permalink' );
-	
+
 	// Add our settings
 	add_settings_field(
 		'woocommerce_product_category_slug',      	// id
@@ -873,40 +851,40 @@ add_action( 'admin_init', 'woocommerce_permalink_settings_init' );
 
 /**
  * woocommerce_permalink_settings_save function.
- * 
+ *
  * @access public
  * @return void
  */
 function woocommerce_permalink_settings_save() {
 	if ( ! is_admin() )
 		return;
-	
+
 	// We need to save the options ourselves; settings api does not trigger save for the permalinks page
 	if ( isset( $_POST['permalink_structure'] ) || isset( $_POST['category_base'] ) ) {
 		// Cat and tag bases
 		$woocommerce_product_category_slug = woocommerce_clean( $_POST['woocommerce_product_category_slug'] );
 		$woocommerce_product_tag_slug = woocommerce_clean( $_POST['woocommerce_product_tag_slug'] );
 		$woocommerce_product_attribute_slug = woocommerce_clean( $_POST['woocommerce_product_attribute_slug'] );
-		
+
 		$permalinks = get_option( 'woocommerce_permalinks' );
-		if ( ! $permalinks ) 
+		if ( ! $permalinks )
 			$permalinks = array();
-		
+
 		$permalinks['category_base'] 	= untrailingslashit( $woocommerce_product_category_slug );
 		$permalinks['tag_base'] 		= untrailingslashit( $woocommerce_product_tag_slug );
 		$permalinks['attribute_base'] 	= untrailingslashit( $woocommerce_product_attribute_slug );
-		
+
 		// Product base
 		$product_permalink = woocommerce_clean( $_POST['product_permalink'] );
-		
+
 		if ( $product_permalink == 'custom' ) {
 			$product_permalink = woocommerce_clean( $_POST['product_permalink_structure'] );
 		} elseif ( empty( $product_permalink ) ) {
 			$product_permalink = false;
 		}
-		
+
 		$permalinks['product_base'] = untrailingslashit( $product_permalink );
-		
+
 		update_option( 'woocommerce_permalinks', $permalinks );
 	}
 }
@@ -915,7 +893,7 @@ add_action( 'before_woocommerce_init', 'woocommerce_permalink_settings_save' );
 
 /**
  * woocommerce_product_category_slug_input function.
- * 
+ *
  * @access public
  * @return void
  */
@@ -928,7 +906,7 @@ function woocommerce_product_category_slug_input() {
 
 /**
  * woocommerce_product_tag_slug_input function.
- * 
+ *
  * @access public
  * @return void
  */
@@ -941,7 +919,7 @@ function woocommerce_product_tag_slug_input() {
 
 /**
  * woocommerce_product_attribute_slug_input function.
- * 
+ *
  * @access public
  * @return void
  */

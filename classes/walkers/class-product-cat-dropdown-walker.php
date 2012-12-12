@@ -29,16 +29,19 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 		$pad = str_repeat('&nbsp;', $depth * 3);
 
 		$cat_name = apply_filters( 'list_product_cats', $cat->name, $cat );
-		$output .= "\t<option class=\"level-$depth\" value=\"" . $cat->slug . "\"";
 
-		if ( $cat->slug == $args['selected'] )
+		$value = isset( $args['value'] ) && $args['value'] == 'id' ? $cat->term_id : $cat->slug;
+
+		$output .= "\t<option class=\"level-$depth\" value=\"" . $value . "\"";
+
+		if ( $value == $args['selected'] || ( is_array( $args['selected'] ) && in_array( $value, $args['selected'] ) ) )
 			$output .= ' selected="selected"';
 
 		$output .= '>';
 
 		$output .= $pad . __( $cat_name, 'woocommerce' );
 
-		if ( $args['show_count'] )
+		if ( ! empty( $args['show_count'] ) )
 			$output .= '&nbsp;(' . $cat->count . ')';
 
 		$output .= "</option>\n";

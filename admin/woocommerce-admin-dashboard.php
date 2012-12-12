@@ -44,7 +44,7 @@ function woocommerce_init_dashboard_widgets() {
 		wp_add_dashboard_widget( 'woocommerce_dashboard_recent_orders', __( 'WooCommerce Recent Orders', 'woocommerce' ), 'woocommerce_dashboard_recent_orders');
 		wp_add_dashboard_widget( 'woocommerce_dashboard_recent_reviews', __( 'WooCommerce Recent Reviews', 'woocommerce' ), 'woocommerce_dashboard_recent_reviews' );
 	}
-	
+
 	if ( current_user_can( 'view_woocommerce_reports' ) || current_user_can( 'publish_shop_orders' ) ) {
 		wp_add_dashboard_widget( 'woocommerce_dashboard_sales', $sales_heading, 'woocommerce_dashboard_sales' );
 	}
@@ -255,7 +255,7 @@ function woocommerce_dashboard_recent_orders() {
  */
 function woocommerce_dashboard_recent_reviews() {
 	global $wpdb;
-	$comments = $wpdb->get_results( $wpdb->prepare( "SELECT *, SUBSTRING(comment_content,1,100) AS comment_excerpt
+	$comments = $wpdb->get_results( "SELECT *, SUBSTRING(comment_content,1,100) AS comment_excerpt
 	FROM $wpdb->comments
 	LEFT JOIN $wpdb->posts ON ($wpdb->comments.comment_post_ID = $wpdb->posts.ID)
 	WHERE comment_approved = '1'
@@ -263,7 +263,7 @@ function woocommerce_dashboard_recent_reviews() {
 	AND post_password = ''
 	AND post_type = 'product'
 	ORDER BY comment_date_gmt DESC
-	LIMIT 5" ) );
+	LIMIT 5" );
 
 	if ( $comments ) {
 		echo '<ul>';

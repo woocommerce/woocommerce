@@ -1860,7 +1860,7 @@ msgstr "Subtotal:"
 #: admin/post-types/writepanels/writepanel-order_data.php:482
 #: classes/class-wc-countries.php:487
 msgid "(ex. tax)"
-msgstr "(ej. tasa)"
+msgstr "(exc. tasa)"
 
 #@ woocommerce
 #: admin/woocommerce-admin-dashboard.php:224

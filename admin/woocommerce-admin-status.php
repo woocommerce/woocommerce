@@ -23,6 +23,11 @@ function woocommerce_status() {
 			'button'	=> __('Clear Transients','woocommerce'),
 			'desc'		=> __( 'This tool will clear the product/shop transients cache.', 'woocommerce' ),
 		),
+		'recount_terms' => array(
+			'name'		=> __('Term counts','woocommerce'),
+			'button'	=> __('Recount Terms','woocommerce'),
+			'desc'		=> __( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', 'woocommerce' ),
+		),
 		'reset_roles' => array(
 			'name'		=> __('Capabilities','woocommerce'),
 			'button'	=> __('Reset Capabilities','woocommerce'),
@@ -46,10 +51,22 @@ function woocommerce_status() {
 					break;
 					case "reset_roles" :
 						// Remove then re-add caps and roles
-						woocommerce_remove_roles();						
+						woocommerce_remove_roles();
 						woocommerce_init_roles();
 
 						echo '<div class="updated"><p>' . __( 'Roles successfully reset', 'woocommerce' ) . '</p></div>';
+					break;
+					case "recount_terms" :
+
+						$product_cats = get_terms( 'product_cat', array( 'hide_empty' => false, 'fields' => 'id=>parent' ) );
+
+						_woocommerce_term_recount( $product_cats, get_taxonomy( 'product_cat' ), false, false );
+
+						$product_tags = get_terms( 'product_tag', array( 'hide_empty' => false, 'fields' => 'id=>parent' ) );
+
+						_woocommerce_term_recount( $product_cats, get_taxonomy( 'product_tag' ), false, false );
+
+						echo '<div class="updated"><p>' . __( 'Terms successfully recounted', 'woocommerce' ) . '</p></div>';
 					break;
 					default:
 						$action = esc_attr( $_GET['action'] );
@@ -253,7 +270,7 @@ function woocommerce_status() {
                 <tr>
                     <td><?php _e('PHP Version','woocommerce')?></td>
                     <td><?php
-                    	if ( function_exists( 'phpversion' ) ) 
+                    	if ( function_exists( 'phpversion' ) )
                     		echo esc_html( phpversion() );
                     ?></td>
                 </tr>
@@ -334,7 +351,7 @@ function woocommerce_status() {
             		$posting['fsockopen_curl']['note'] = __( 'Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce' ). '</mark>';
             		$posting['fsockopen_curl']['success'] = false;
             	}
-            	
+
             	// SOAP
             	$posting['soap_client']['name'] = __( 'SOAP Client','woocommerce' );
 				if ( class_exists( 'SoapClient' ) ) {

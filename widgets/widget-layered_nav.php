@@ -50,10 +50,10 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 	 */
 	function widget( $args, $instance ) {
 		global $_chosen_attributes, $woocommerce, $_attributes_array;
-		
+
 		extract( $args );
 
-		if ( ! is_post_type_archive( 'product' ) && ! is_tax( array_merge( $_attributes_array, array( 'product_cat', 'product_tag' ) ) ) ) 
+		if ( ! is_post_type_archive( 'product' ) && ! is_tax( array_merge( $_attributes_array, array( 'product_cat', 'product_tag' ) ) ) )
 			return;
 
 		$current_term 	= $_attributes_array && is_tax( $_attributes_array ) ? get_queried_object()->term_id : '';
@@ -64,22 +64,22 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 		$query_type 	= isset( $instance['query_type'] ) ? $instance['query_type'] : 'and';
 		$display_type 	= isset( $instance['display_type'] ) ? $instance['display_type'] : 'list';
 
-		if ( ! taxonomy_exists( $taxonomy ) ) 
+		if ( ! taxonomy_exists( $taxonomy ) )
 			return;
 
 		$terms = get_terms( $taxonomy, array( 'hide_empty' => '1' ) );
 
 		if ( count( $terms ) > 0 ) {
-			
+
 			ob_start();
-			
+
 			$found = false;
-			
+
 			echo $before_widget . $before_title . $title . $after_title;
 
 			// Force found when option is selected - do not force found on taxonomy attributes
 			if ( ! $_attributes_array || ! is_tax( $_attributes_array ) )
-				if ( is_array( $_chosen_attributes ) && array_key_exists( $taxonomy, $_chosen_attributes ) ) 
+				if ( is_array( $_chosen_attributes ) && array_key_exists( $taxonomy, $_chosen_attributes ) )
 					$found = true;
 
 			if ( $display_type == 'dropdown' ) {
@@ -102,7 +102,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 					foreach ( $terms as $term ) {
 
 						// If on a term page, skip that term in widget list
-						if ( $term->term_id == $current_term ) 
+						if ( $term->term_id == $current_term )
 							continue;
 
 						// Get count based on current view - uses transients
@@ -122,10 +122,10 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 
 							$count = sizeof( array_intersect( $_products_in_term, $woocommerce->query->filtered_product_ids ) );
 
-							if ( $count > 0 ) 
+							if ( $count > 0 )
 								$found = true;
 
-							if ( $count == 0 && ! $option_is_set ) 
+							if ( $count == 0 && ! $option_is_set )
 								continue;
 
 						// If this is an OR query, show all options so search can be expanded
@@ -133,7 +133,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 
 							$count = sizeof( array_intersect( $_products_in_term, $woocommerce->query->unfiltered_product_ids ) );
 
-							if ( $count > 0 ) 
+							if ( $count > 0 )
 								$found = true;
 
 						}
@@ -180,25 +180,25 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 						$count = sizeof( array_intersect( $_products_in_term, $woocommerce->query->filtered_product_ids ) );
 
 						// skip the term for the current archive
-						if ( $current_term == $term->term_id ) 
+						if ( $current_term == $term->term_id )
 							continue;
 
-						if ( $count > 0 && $current_term !== $term->term_id ) 
+						if ( $count > 0 && $current_term !== $term->term_id )
 							$found = true;
 
-						if ( $count == 0 && ! $option_is_set ) 
+						if ( $count == 0 && ! $option_is_set )
 							continue;
 
 					// If this is an OR query, show all options so search can be expanded
 					} else {
 
 						// skip the term for the current archive
-						if ( $current_term == $term->term_id ) 
+						if ( $current_term == $term->term_id )
 							continue;
 
 						$count = sizeof( array_intersect( $_products_in_term, $woocommerce->query->unfiltered_product_ids ) );
 
-						if ( $count > 0 ) 
+						if ( $count > 0 )
 							$found = true;
 
 					}
@@ -207,12 +207,12 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 
 					$current_filter = ( isset( $_GET[ $arg ] ) ) ? explode( ',', $_GET[ $arg ] ) : array();
 
-					if ( ! is_array( $current_filter ) ) 
+					if ( ! is_array( $current_filter ) )
 						$current_filter = array();
 
 					$current_filter = array_map( 'esc_attr', $current_filter );
 
-					if ( ! in_array( $term->term_id, $current_filter ) ) 
+					if ( ! in_array( $term->term_id, $current_filter ) )
 						$current_filter[] = $term->term_id;
 
 					// Base Link decided by current page
@@ -238,7 +238,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 								if ( ! empty( $data['terms'] ) )
 									$link = add_query_arg( sanitize_title( str_replace( 'pa_', 'filter_', $name ) ), implode(',', $data['terms']), $link );
 
-								if ( $data['query_type'] == 'or' ) 
+								if ( $data['query_type'] == 'or' )
 									$link = add_query_arg( sanitize_title( str_replace( 'pa_', 'query_type_', $name ) ), 'or', $link );
 							}
 						}
@@ -253,7 +253,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 
 					// Current Filter = this widget
 					if ( isset( $_chosen_attributes[ $taxonomy ] ) && is_array( $_chosen_attributes[ $taxonomy ]['terms'] ) && in_array( $term->term_id, $_chosen_attributes[ $taxonomy ]['terms'] ) ) {
-						
+
 						$class = 'class="chosen"';
 
 						// Remove this term is $current_filter has more than 1 term filtered
@@ -263,10 +263,10 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 						}
 
 					} else {
-						
+
 						$class = '';
 						$link = add_query_arg( $arg, implode( ',', $current_filter ), $link );
-						
+
 					}
 
 					// Search Arg
@@ -317,15 +317,15 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 	 */
 	function update( $new_instance, $old_instance ) {
 		global $woocommerce;
-		
-		if ( empty( $new_instance['title'] ) ) 
+
+		if ( empty( $new_instance['title'] ) )
 			$new_instance['title'] = $woocommerce->attribute_label( $new_instance['attribute'] );
-		
+
 		$instance['title'] 			= strip_tags( stripslashes($new_instance['title'] ) );
 		$instance['attribute'] 		= stripslashes( $new_instance['attribute'] );
 		$instance['query_type'] 	= stripslashes( $new_instance['query_type'] );
 		$instance['display_type'] 	= stripslashes( $new_instance['display_type'] );
-		
+
 		return $instance;
 	}
 
@@ -340,10 +340,10 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 	function form( $instance ) {
 		global $woocommerce;
 
-		if ( ! isset( $instance['query_type'] ) ) 
+		if ( ! isset( $instance['query_type'] ) )
 			$instance['query_type'] = 'and';
-			
-		if ( ! isset( $instance['display_type'] ) ) 
+
+		if ( ! isset( $instance['display_type'] ) )
 			$instance['display_type'] = 'list';
 		?>
 		<p><label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:', 'woocommerce' ) ?></label>

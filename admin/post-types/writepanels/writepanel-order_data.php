@@ -7,7 +7,7 @@
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce/Admin/WritePanels
- * @version     1.7.0
+ * @version     2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -23,7 +23,7 @@ function woocommerce_order_data_meta_box($post) {
 	global $post, $wpdb, $thepostid, $theorder, $order_status, $woocommerce;
 
 	$thepostid = absint( $post->ID );
-	
+
 	if ( ! is_object( $theorder ) )
 		$theorder = new WC_Order( $thepostid );
 
@@ -71,7 +71,7 @@ function woocommerce_order_data_meta_box($post) {
 				</select></p>
 
 				<p class="form-field last"><label for="order_date"><?php _e( 'Order Date:', 'woocommerce' ) ?></label>
-					<input type="text" class="date-picker-field" name="order_date" id="order_date" maxlength="10" value="<?php echo date_i18n( 'Y-m-d', strtotime( $post->post_date ) ); ?>" /> @ <input type="text" class="hour" placeholder="<?php _e( 'h', 'woocommerce' ) ?>" name="order_date_hour" id="order_date_hour" maxlength="2" size="2" value="<?php echo date_i18n( 'H', strtotime( $post->post_date ) ); ?>" />:<input type="text" class="minute" placeholder="<?php _e( 'm', 'woocommerce' ) ?>" name="order_date_minute" id="order_date_minute" maxlength="2" size="2" value="<?php echo date_i18n( 'i', strtotime( $post->post_date ) ); ?>" />
+					<input type="text" class="date-picker-field" name="order_date" id="order_date" maxlength="10" value="<?php echo date_i18n( 'Y-m-d', strtotime( $post->post_date ) ); ?>" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" /> @ <input type="text" class="hour" placeholder="<?php _e( 'h', 'woocommerce' ) ?>" name="order_date_hour" id="order_date_hour" maxlength="2" size="2" value="<?php echo date_i18n( 'H', strtotime( $post->post_date ) ); ?>" pattern="\-?\d+(\.\d{0,})?" />:<input type="text" class="minute" placeholder="<?php _e( 'm', 'woocommerce' ) ?>" name="order_date_minute" id="order_date_minute" maxlength="2" size="2" value="<?php echo date_i18n( 'i', strtotime( $post->post_date ) ); ?>" pattern="\-?\d+(\.\d{0,})?" />
 				</p>
 
 				<p class="form-field form-field-wide">
@@ -176,16 +176,16 @@ function woocommerce_order_data_meta_box($post) {
 						// Display values
 						echo '<div class="address">';
 
-							if ( $order->get_formatted_billing_address() ) 
-								echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong><br/> ' . $order->get_formatted_billing_address() . '</p>'; 
-							else 
+							if ( $order->get_formatted_billing_address() )
+								echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong><br/> ' . $order->get_formatted_billing_address() . '</p>';
+							else
 								echo '<p class="none_set"><strong>' . __( 'Address', 'woocommerce' ) . ':</strong> ' . __( 'No billing address set.', 'woocommerce' ) . '</p>';
 
-							foreach ( $billing_data as $key => $field ) { 
-								if ( empty( $field['show'] ) ) 
+							foreach ( $billing_data as $key => $field ) {
+								if ( empty( $field['show'] ) )
 									continue;
 								$field_name = 'billing_' . $key;
-								if ( $order->$field_name ) 
+								if ( $order->$field_name )
 									echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . esc_html( $order->$field_name ) . '</p>';
 							}
 
@@ -195,7 +195,7 @@ function woocommerce_order_data_meta_box($post) {
 						echo '<div class="edit_address"><p><button class="button load_customer_billing">'.__( 'Load billing address', 'woocommerce' ).'</button></p>';
 
 						foreach ( $billing_data as $key => $field ) {
-							if ( ! isset( $field['type'] ) ) 
+							if ( ! isset( $field['type'] ) )
 								$field['type'] = 'text';
 							switch ( $field['type'] ) {
 								case "select" :
@@ -260,16 +260,16 @@ function woocommerce_order_data_meta_box($post) {
 						// Display values
 						echo '<div class="address">';
 
-							if ( $order->get_formatted_shipping_address() ) 
-								echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong><br/> ' . $order->get_formatted_shipping_address() . '</p>'; 
-							else 
+							if ( $order->get_formatted_shipping_address() )
+								echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong><br/> ' . $order->get_formatted_shipping_address() . '</p>';
+							else
 								echo '<p class="none_set"><strong>' . __( 'Address', 'woocommerce' ) . ':</strong> ' . __( 'No shipping address set.', 'woocommerce' ) . '</p>';
 
-							if ( $shipping_data ) foreach ( $shipping_data as $key => $field ) { 
-								if ( empty( $field['show'] ) ) 
+							if ( $shipping_data ) foreach ( $shipping_data as $key => $field ) {
+								if ( empty( $field['show'] ) )
 									continue;
 								$field_name = 'shipping_' . $key;
-								if ( $order->$field_name ) 
+								if ( $order->$field_name )
 									echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . esc_html( $order->$field_name ) . '</p>';
 							}
 
@@ -279,7 +279,7 @@ function woocommerce_order_data_meta_box($post) {
 						echo '<div class="edit_address"><p><button class="button load_customer_shipping">' . __( 'Load shipping address', 'woocommerce' ) . '</button> <button class="button billing-same-as-shipping">'. __( 'Copy from billing', 'woocommerce' ) . '</button></p>';
 
 						if ( $shipping_data ) foreach ( $shipping_data as $key => $field ) {
-							if ( ! isset( $field['type'] ) ) 
+							if ( ! isset( $field['type'] ) )
 								$field['type'] = 'text';
 							switch ( $field['type'] ) {
 								case "select" :
@@ -315,7 +315,7 @@ function woocommerce_order_items_meta_box( $post ) {
 		$theorder = new WC_Order( $thepostid );
 
 	$order = $theorder;
-	
+
 	$data = get_post_custom( $post->ID );
 	?>
 	<div class="woocommerce_order_items_wrapper">
@@ -324,7 +324,7 @@ function woocommerce_order_items_meta_box( $post ) {
 				<tr>
 					<th><input type="checkbox" class="check-column" /></th>
 					<th class="item" colspan="2"><?php _e( 'Item', 'woocommerce' ); ?></th>
-					
+
 					<?php do_action( 'woocommerce_admin_order_item_headers' ); ?>
 
 					<th class="tax_class"><?php _e( 'Tax Class', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Tax class for the line item', 'woocommerce' ); ?>." href="#">[?]</a></th>
@@ -339,29 +339,33 @@ function woocommerce_order_items_meta_box( $post ) {
 			<tbody id="order_items_list">
 
 				<?php
-					// List order items 
-					$order_items = $order->get_items( array( 'line_item', 'fee' ) );
-					
+					// List order items
+					$order_items = $order->get_items( apply_filters( 'woocommerce_admin_order_item_types', array( 'line_item', 'fee' ) ) );
+
 					foreach ( $order_items as $item_id => $item ) {
-						
+
+						$class = ( isset( $item['refunded'] ) ) ? 'refunded' : '';
+
 						switch ( $item['type'] ) {
 							case 'line_item' :
 								$_product 	= $order->get_product_from_item( $item );
 								$item_meta 	= $order->get_item_meta( $item_id );
-						
+
 								include( 'order-item-html.php' );
 							break;
-							case 'fee' : 
+							case 'fee' :
 								include( 'order-fee-html.php' );
 							break;
 						}
-						
+
+						do_action( 'woocommerce_order_item_' . $item['type'] . '_html' );
+
 					}
 				?>
 			</tbody>
 		</table>
 	</div>
-	
+
 	<p class="bulk_actions">
 		<select>
 			<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
@@ -369,18 +373,20 @@ function woocommerce_order_items_meta_box( $post ) {
 				<option value="delete"><?php _e( 'Delete Lines', 'woocommerce' ); ?></option>
 
 				<?php
-				$gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
+				$gateways = $woocommerce->payment_gateways->payment_gateways();
 
 				if ( isset( $gateways[ $order->payment_method ] ) ) {
 					$gateway = $gateways[ $order->payment_method ];
 
 					if ( ! in_array( 'refunds', $gateway->supports ) || ! method_exists( $gateway, 'refund' ) ) {
-						$disabled = ' disabled="disabled"';
+						$supports_refunds = false;
+					} else {
+						$supports_refunds = true;
 					}
-				}
 
-				echo '<option value="refund"' . $disabled . '>' . __( 'Refund Lines', 'woocommerce' ) . '</option>';
-				echo '<option value="refund">' . __( 'Manual Refund Lines', 'woocommerce' ) . '</option>';
+					echo '<option value="refund" ' . disabled( $supports_refunds, false ) . '>' . sprintf( __( 'Refund Lines via %s', 'woocommerce' ), $order->payment_method  ) . '</option>';
+				}
+				echo '<option value="manual_refund">' . __( 'Mark Lines Refunded', 'woocommerce' ) . '</option>';
 				?>
 			</optgroup>
 			<optgroup label="<?php _e( 'Stock Actions', 'woocommerce' ); ?>">
@@ -388,7 +394,7 @@ function woocommerce_order_items_meta_box( $post ) {
 				<option value="increase_stock"><?php _e( 'Increase Line Stock', 'woocommerce' ); ?></option>
 			</optgroup>
 		</select>
-		
+
 		<button type="button" class="button do_bulk_action"><?php _e( 'Apply', 'woocommerce' ); ?></button>
 	</p>
 
@@ -412,40 +418,59 @@ function woocommerce_order_items_meta_box( $post ) {
  * @param mixed $post
  * @return void
  */
-function woocommerce_order_actions_meta_box($post) {
+function woocommerce_order_actions_meta_box( $post ) {
+	global $woocommerce, $theorder, $wpdb;
+
+	if ( ! is_object( $theorder ) )
+		$theorder = new WC_Order( $post->ID );
+
+	$order = $theorder;
 	?>
 	<ul class="order_actions submitbox">
 
 		<?php do_action( 'woocommerce_order_actions', $post->ID ); ?>
 
-		<li class="wide" id="order-emails">
-			<a href="#order-emails" class="show-order-emails hide-if-no-js tips" data-tip="<?php _e( 'Lets you send or resend order emails to the admin or customer.', 'woocommerce' ); ?>"><?php _e( 'Show order emails', 'woocommerce' ); ?></a>
+		<li class="wide" id="actions">
+			<select name="wc_order_action">
+				<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
+				<optgroup label="<?php _e( 'Resend order emails', 'woocommerce' ); ?>">
+					<?php
+					global $woocommerce;
+					$mailer = $woocommerce->mailer();
 
-			<div id="order-emails-select" class="hide-if-js">
-				<?php
-				global $woocommerce;
-				$mailer = $woocommerce->mailer();
+					$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice' ) );
+					$mails = $mailer->get_emails();
 
-				$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice' ) );
-				$mails = $mailer->get_emails();
-
-				if ( ! empty( $mails ) ) {
-					foreach ( $mails as $mail ) {
-						if ( in_array( $mail->id, $available_emails ) ) {
-							echo '<label><input name="order_email[]" type="checkbox" value="'. esc_attr( $mail->id ) .'" id="'. esc_attr( $mail->id ) .'_email"> ' . $mail->title. '</label>';
-							echo '<img class="help_tip" data-tip="' . esc_attr( $mail->description ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" /></br >';
+					if ( ! empty( $mails ) ) {
+						foreach ( $mails as $mail ) {
+							if ( in_array( $mail->id, $available_emails ) ) {
+								echo '<option value="send_email_'. esc_attr( $mail->id ) .'">' . esc_html( $mail->title ) . '</option>';
+							}
 						}
 					}
-
 					?>
-					<p>
-						<input type="submit" class="save-post-visibility hide-if-no-js button" value="<?php _e( 'Send selected emails', 'woocommerce' ); ?>">
-						<a href="#order-emails" class="hide-order-emails hide-if-no-js"><?php _e( 'Cancel', 'woocommerce' ); ?></a>
-					</p>
+				</optgroup>
+				<optgroup label="<?php _e( 'Refund Order', 'woocommerce' ); ?>">
 					<?php
-				}
-				?>
-			</div>
+						$gateways = $woocommerce->payment_gateways->payment_gateways();
+
+						if ( isset( $gateways[ $order->payment_method ] ) ) {
+							$gateway = $gateways[ $order->payment_method ];
+
+							if ( ! in_array( 'refunds', $gateway->supports ) || ! method_exists( $gateway, 'refund' ) ) {
+								$supports_refunds = false;
+							} else {
+								$supports_refunds = true;
+							}
+
+							echo '<option value="refund_order" ' . disabled( $supports_refunds, false ) . '>' . sprintf( __( 'Refund Order via %s', 'woocommerce' ), $order->payment_method  ) . '</option>';
+						}
+						echo '<option value="manual_refund_order">' . __( 'Mark Order Refunded', 'woocommerce' ) . '</option>';
+					?>
+				</optgroup>
+			</select>
+
+			<button class="button"><?php _e( 'Apply', 'woocommerce' ); ?></button>
 		</li>
 
 		<li class="wide">
@@ -456,9 +481,9 @@ function woocommerce_order_actions_meta_box($post) {
 					else
 						$delete_text = __( 'Move to Trash', 'woocommerce' );
 					?><a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link( $post->ID ) ); ?>"><?php echo $delete_text; ?></a><?php
-				} 
+				}
 			?></div>
-			
+
 			<input type="submit" class="button save_order button-primary tips" name="save" value="<?php _e( 'Save Order', 'woocommerce' ); ?>" data-tip="<?php _e( 'Save/update the order', 'woocommerce' ); ?>" />
 		</li>
 	</ul>
@@ -474,11 +499,11 @@ function woocommerce_order_actions_meta_box($post) {
  * @return void
  */
 function woocommerce_order_totals_meta_box( $post ) {
-	global $woocommerce, $theorder;
-	
+	global $woocommerce, $theorder, $wpdb;
+
 	if ( ! is_object( $theorder ) )
 		$theorder = new WC_Order( $post->ID );
-		
+
 	$order = $theorder;
 
 	$data = get_post_custom( $post->ID );
@@ -489,39 +514,57 @@ function woocommerce_order_totals_meta_box( $post ) {
 
 			<li class="left">
 				<label><?php _e( 'Cart Discount:', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Discounts before tax - calculated by comparing subtotals to totals.', 'woocommerce' ); ?>" href="#">[?]</a></label>
-				<input type="text" id="_cart_discount" name="_cart_discount" placeholder="0.00" value="<?php
-					if ( isset( $data['_cart_discount'][0] ) ) 
+				<input type="number" step="any" min="0" id="_cart_discount" name="_cart_discount" placeholder="0.00" value="<?php
+					if ( isset( $data['_cart_discount'][0] ) )
 						echo esc_attr( $data['_cart_discount'][0] );
 				?>" class="calculated" />
 			</li>
 
 			<li class="right">
 				<label><?php _e( 'Order Discount:', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Discounts after tax - user defined.', 'woocommerce' ); ?>" href="#">[?]</a></label>
-				<input type="text" id="_order_discount" name="_order_discount" placeholder="0.00" value="<?php
-					if ( isset( $data['_order_discount'][0] ) ) 
+				<input type="number" step="any" min="0" id="_order_discount" name="_order_discount" placeholder="0.00" value="<?php
+					if ( isset( $data['_order_discount'][0] ) )
 						echo esc_attr( $data['_order_discount'][0] );
 				?>" />
 			</li>
 
 		</ul>
-		<div class="clear"></div>
+
+		<ul class="wc_coupon_list">
+
+		<?php
+			$coupons = $order->get_items( array( 'coupon' ) );
+
+			foreach ( $coupons as $item_id => $item ) {
+
+				$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' LIMIT 1;", $item['name'] ) );
+
+				$link = $post_id ? admin_url( 'post.php?post=' . $post_id . '&action=edit' ) : admin_url( 'edit.php?s=' . esc_url( $item['name'] ) . '&post_status=all&post_type=shop_coupon' );
+
+				echo '<li class="tips code" data-tip="' . esc_attr( woocommerce_price( $item['discount_amount'] ) ) . '"><a href="' . $link . '"><span>' . esc_html( $item['name'] ). '</span></a></li>';
+
+			}
+		?>
+
+		</ul>
+
 	</div>
 	<div class="totals_group">
 		<h4><?php _e( 'Shipping', 'woocommerce' ); ?></h4>
 		<ul class="totals">
-			
+
 			<li class="wide">
 				<label><?php _e( 'Label:', 'woocommerce' ); ?></label>
-				<input type="text" id="_shipping_method_title" name="_shipping_method_title" placeholder="<?php _e( 'The shipping title the customer sees', 'woocommerce' ); ?>" value="<?php 
-					if ( isset( $data['_shipping_method_title'][0] ) ) 
+				<input type="text" id="_shipping_method_title" name="_shipping_method_title" placeholder="<?php _e( 'The shipping title the customer sees', 'woocommerce' ); ?>" value="<?php
+					if ( isset( $data['_shipping_method_title'][0] ) )
 						echo esc_attr( $data['_shipping_method_title'][0] );
 				?>" class="first" />
 			</li>
-			
+
 			<li class="left">
 				<label><?php _e( 'Cost:', 'woocommerce' ); ?></label>
-				<input type="text" id="_order_shipping" name="_order_shipping" placeholder="0.00 <?php _e( '(ex. tax)', 'woocommerce' ); ?>" value="<?php 
-					if ( isset( $data['_order_shipping'][0] ) ) 
+				<input type="number" step="any" min="0" id="_order_shipping" name="_order_shipping" placeholder="0.00 <?php _e( '(ex. tax)', 'woocommerce' ); ?>" value="<?php
+					if ( isset( $data['_order_shipping'][0] ) )
 						echo esc_attr( $data['_order_shipping'][0] );
 				?>" class="first" />
 			</li>
@@ -536,8 +579,14 @@ function woocommerce_order_totals_meta_box( $post ) {
 
 						if ( $woocommerce->shipping ) {
 							foreach ( $woocommerce->shipping->load_shipping_methods() as $method ) {
-								echo '<option value="' . esc_attr( $method->id ) . '" ' . selected( ( strpos( $chosen_method, $method->id ) === 0 ), true, false ) . '>' . esc_html( $method->get_title() ) . '</option>';
+
 								if ( strpos( $chosen_method, $method->id ) === 0 )
+									$value = $chosen_method;
+								else
+									$value = $method->id;
+
+								echo '<option value="' . esc_attr( $value ) . '" ' . selected( $chosen_method == $value, true, false ) . '>' . esc_html( $method->get_title() ) . '</option>';
+								if ( $chosen_method == $value )
 									$found_method = true;
 							}
 						}
@@ -559,6 +608,23 @@ function woocommerce_order_totals_meta_box( $post ) {
 		<h4><?php _e( 'Tax Rows', 'woocommerce' ); ?></h4>
 		<div id="tax_rows" class="total_rows">
 			<?php
+				global $wpdb;
+
+				$rates = $wpdb->get_results( "SELECT tax_rate_id, tax_rate_country, tax_rate_state, tax_rate_name, tax_rate_priority FROM {$wpdb->prefix}woocommerce_tax_rates ORDER BY tax_rate_name" );
+
+				$tax_codes = array();
+
+				foreach( $rates as $rate ) {
+					$code = array();
+
+					$code[] = $rate->tax_rate_country;
+					$code[] = $rate->tax_rate_state;
+					$code[] = $rate->tax_rate_name ? sanitize_title( $rate->tax_rate_name ) : 'TAX';
+					$code[] = absint( $rate->tax_rate_priority );
+
+					$tax_codes[ $rate->tax_rate_id ] = strtoupper( implode( '-', array_filter( $code ) ) );
+				}
+
 				foreach ( $order->get_taxes() as $item_id => $item ) {
 					include( 'order-tax-html.php' );
 				}
@@ -573,16 +639,16 @@ function woocommerce_order_totals_meta_box( $post ) {
 
 			<li class="left">
 				<label><?php _e( 'Sales Tax:', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Total tax for line items + fees.', 'woocommerce' ); ?>" href="#">[?]</a></label>
-				<input type="text" id="_order_tax" name="_order_tax" placeholder="0.00" value="<?php
-					if ( isset( $data['_order_tax'][0] ) ) 
+				<input type="number" step="any" min="0" id="_order_tax" name="_order_tax" placeholder="0.00" value="<?php
+					if ( isset( $data['_order_tax'][0] ) )
 						echo esc_attr( $data['_order_tax'][0] );
 				?>" class="calculated" />
 			</li>
 
 			<li class="right">
 				<label><?php _e( 'Shipping Tax:', 'woocommerce' ); ?></label>
-				<input type="text" id="_order_shipping_tax" name="_order_shipping_tax" placeholder="0.00" value="<?php
-					if ( isset( $data['_order_shipping_tax'][0] ) ) 
+				<input type="number" step="any" min="0" id="_order_shipping_tax" name="_order_shipping_tax" placeholder="0.00" value="<?php
+					if ( isset( $data['_order_shipping_tax'][0] ) )
 						echo esc_attr( $data['_order_shipping_tax'][0] );
 				?>" />
 			</li>
@@ -591,18 +657,26 @@ function woocommerce_order_totals_meta_box( $post ) {
 		<div class="clear"></div>
 	</div>
 	<div class="totals_group">
-		<h4><?php _e( 'Total', 'woocommerce' ); ?></h4>
+		<h4><?php _e( 'Order Totals', 'woocommerce' ); ?></h4>
 		<ul class="totals">
 
 			<li class="left">
 				<label><?php _e( 'Order Total:', 'woocommerce' ); ?></label>
-				<input type="text" id="_order_total" name="_order_total" placeholder="0.00" value="<?php
-					if ( isset( $data['_order_total'][0] ) ) 
+				<input type="number" step="any" min="0" id="_order_total" name="_order_total" placeholder="0.00" value="<?php
+					if ( isset( $data['_order_total'][0] ) )
 						echo esc_attr( $data['_order_total'][0] );
 				?>" class="calculated" />
 			</li>
 
 			<li class="right">
+				<label><?php _e( 'Refund Total:', 'woocommerce' ); ?></label>
+				<input type="number" step="any" min="0" id="_order_refund_total" name="_order_refund_total" placeholder="0.00" value="<?php
+					if ( isset( $data['_refund_total'][0] ) )
+						echo esc_attr( $data['_refund_total'][0] );
+				?>" />
+			</li>
+
+			<li class="wide">
 				<label><?php _e( 'Payment Method:', 'woocommerce' ); ?></label>
 				<select name="_payment_method" id="_payment_method" class="first">
 					<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
@@ -679,6 +753,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 	update_post_meta( $post_id, '_cart_discount', woocommerce_clean( $_POST['_cart_discount'] ) );
 	update_post_meta( $post_id, '_order_discount', woocommerce_clean( $_POST['_order_discount'] ) );
 	update_post_meta( $post_id, '_order_total', woocommerce_clean( $_POST['_order_total'] ) );
+	update_post_meta( $post_id, '_refund_total', woocommerce_clean( $_POST['_order_refund_total'] ) );
 	update_post_meta( $post_id, '_customer_user', absint( $_POST['customer_user'] ) );
 	update_post_meta( $post_id, '_order_tax', woocommerce_clean( $_POST['_order_tax'] ) );
 	update_post_meta( $post_id, '_order_shipping_tax', woocommerce_clean( $_POST['_order_shipping_tax'] ) );
@@ -733,95 +808,110 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 
 	// Tax rows
 	if ( isset( $_POST['order_taxes_id'] ) ) {
-		
-		$get_values = array( 'order_taxes_id', 'order_taxes_label', 'order_taxes_compound', 'order_taxes_amount', 'order_taxes_shipping_amount' );
+
+		$get_values = array( 'order_taxes_id', 'order_taxes_rate_id', 'order_taxes_amount', 'order_taxes_shipping_amount' );
 
 		foreach( $get_values as $value )
 			$$value = isset( $_POST[ $value ] ) ? $_POST[ $value ] : array();
 
 		foreach( $order_taxes_id as $item_id ) {
-			
-			$item_id = absint( $item_id );
 
-			if ( ! $order_taxes_label[ $item_id ] ) 
-				$order_taxes_label[ $item_id ] = $woocommerce->countries->tax_or_vat();
+			$item_id  = absint( $item_id );
+			$rate_id  = absint( $order_taxes_rate_id[ $item_id ] );
 
-			if ( isset( $order_taxes_label[ $item_id ] ) )
-				$wpdb->update( 
-					$wpdb->prefix . "woocommerce_order_items", 
-					array( 'order_item_name' => woocommerce_clean( $order_taxes_label[ $item_id ] ) ), 
-					array( 'order_item_id' => $item_id ), 
-					array( '%s' ), 
-					array( '%d' ) 
-				);
-			
-			if ( isset( $order_taxes_compound[ $item_id ] ) )
-		 		woocommerce_update_order_item_meta( $item_id, 'compound', isset( $order_taxes_compound[ $item_id ] ) ? 1 : 0 );
-			
+			if ( $rate_id ) {
+				$rate     = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $rate_id ) );
+				$label    = $rate->tax_rate_name ? $rate->tax_rate_name : $woocommerce->countries->tax_or_vat();
+				$compound = $rate->tax_rate_compound ? 1 : 0;
+
+				$code = array();
+
+				$code[] = $rate->tax_rate_country;
+				$code[] = $rate->tax_rate_state;
+				$code[] = $rate->tax_rate_name ? $rate->tax_rate_name : 'TAX';
+				$code[] = absint( $rate->tax_rate_priority );
+				$code   = strtoupper( implode( '-', array_filter( $code ) ) );
+			} else {
+				$code  = '';
+				$label = $woocommerce->countries->tax_or_vat();
+			}
+
+			$wpdb->update(
+				$wpdb->prefix . "woocommerce_order_items",
+				array( 'order_item_name' => woocommerce_clean( $code ) ),
+				array( 'order_item_id' => $item_id ),
+				array( '%s' ),
+				array( '%d' )
+			);
+
+			woocommerce_update_order_item_meta( $item_id, 'rate_id', $rate_id );
+			woocommerce_update_order_item_meta( $item_id, 'label', $label );
+			woocommerce_update_order_item_meta( $item_id, 'compound', $compound );
+
 			if ( isset( $order_taxes_amount[ $item_id ] ) )
 		 		woocommerce_update_order_item_meta( $item_id, 'tax_amount', woocommerce_clean( $order_taxes_amount[ $item_id ] ) );
-		 		
+
 		 	if ( isset( $order_taxes_shipping_amount[ $item_id ] ) )
 		 		woocommerce_update_order_item_meta( $item_id, 'shipping_tax_amount', woocommerce_clean( $order_taxes_shipping_amount[ $item_id ] ) );
 		}
 	}
-	
+
 
 	// Order items + fees
 	if ( isset( $_POST['order_item_id'] ) ) {
-	
+
 		$get_values = array( 'order_item_id', 'order_item_name', 'order_item_qty', 'line_subtotal', 'line_subtotal_tax', 'line_total', 'line_tax', 'order_item_tax_class' );
-		
+
 		foreach( $get_values as $value )
 			$$value = isset( $_POST[ $value ] ) ? $_POST[ $value ] : array();
 
 		foreach ( $order_item_id as $item_id ) {
-			
+
 			$item_id = absint( $item_id );
-			
+
 			if ( isset( $order_item_name[ $item_id ] ) )
-				$wpdb->update( 
-					$wpdb->prefix . "woocommerce_order_items", 
-					array( 'order_item_name' => woocommerce_clean( $order_item_name[ $item_id ] ) ), 
-					array( 'order_item_id' => $item_id ), 
-					array( '%s' ), 
-					array( '%d' ) 
+				$wpdb->update(
+					$wpdb->prefix . "woocommerce_order_items",
+					array( 'order_item_name' => woocommerce_clean( $order_item_name[ $item_id ] ) ),
+					array( 'order_item_id' => $item_id ),
+					array( '%s' ),
+					array( '%d' )
 				);
-		 		
+
 			if ( isset( $order_item_qty[ $item_id ] ) )
-		 		woocommerce_update_order_item_meta( $item_id, '_qty', absint( $order_item_qty[ $item_id ] ) );
-		 	
+		 		woocommerce_update_order_item_meta( $item_id, '_qty', apply_filters( 'woocommerce_stock_amount', $order_item_qty[ $item_id ] ) );
+
 		 	if ( isset( $item_tax_class[ $item_id ] ) )
 		 		woocommerce_update_order_item_meta( $item_id, '_tax_class', woocommerce_clean( $item_tax_class[ $item_id ] ) );
-		 	
+
 		 	if ( isset( $line_subtotal[ $item_id ] ) )
 		 		woocommerce_update_order_item_meta( $item_id, '_line_subtotal', woocommerce_clean( $line_subtotal[ $item_id ] ) );
-		 	
+
 		 	if ( isset(  $line_subtotal_tax[ $item_id ] ) )
 		 		woocommerce_update_order_item_meta( $item_id, '_line_subtotal_tax', woocommerce_clean( $line_subtotal_tax[ $item_id ] ) );
-		 	
+
 		 	if ( isset( $line_total[ $item_id ] ) )
 		 		woocommerce_update_order_item_meta( $item_id, '_line_total', woocommerce_clean( $line_total[ $item_id ] ) );
-		 	
+
 		 	if ( isset( $line_tax[ $item_id ] ) )
 		 		woocommerce_update_order_item_meta( $item_id, '_line_tax', woocommerce_clean( $line_tax[ $item_id ] ) );
 		}
 	}
-	
+
 	// Save meta
-	$meta_keys 		= isset( $_POST['meta_key'] ) ? $_POST['meta_key'] : '';
-	$meta_values 	= isset( $_POST['meta_value'] ) ? $_POST['meta_value'] : '';
-	
+	$meta_keys 		= isset( $_POST['meta_key'] ) ? $_POST['meta_key'] : array();
+	$meta_values 	= isset( $_POST['meta_value'] ) ? $_POST['meta_value'] : array();
+
 	foreach ( $meta_keys as $id => $value ) {
-		$wpdb->update( 
-			$wpdb->prefix . "woocommerce_order_itemmeta", 
-			array( 
+		$wpdb->update(
+			$wpdb->prefix . "woocommerce_order_itemmeta",
+			array(
 				'meta_key' => $value,
 				'meta_value' => empty( $meta_values[ $id ] ) ? '' : $meta_values[ $id ]
-			), 
-			array( 'meta_id' => $id ), 
-			array( '%s', '%s' ), 
-			array( '%d' ) 
+			),
+			array( 'meta_id' => $id ),
+			array( '%s', '%s' ),
+			array( '%d' )
 		);
 	}
 
@@ -830,28 +920,45 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 
 	// Order status
 	$order->update_status( $_POST['order_status'] );
-	
+
 	// Handle button actions
-	if ( ! empty( $_POST['order_email'] ) ) {
+	if ( ! empty( $_POST['wc_order_action'] ) ) {
 
-		do_action( 'woocommerce_before_resend_order_emails', $order );
+		$action = woocommerce_clean( $_POST['wc_order_action'] );
 
-		$mailer = $woocommerce->mailer();
+		if ( strstr( $action, 'send_email_' ) ) {
 
-		$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice' ) );
-		$resend_emails = array_intersect( $available_emails, $_POST['order_email'] );
-		$mails = $mailer->get_emails();
+			do_action( 'woocommerce_before_resend_order_emails', $order );
 
-		if ( ! empty( $mails ) ) {
-			foreach ( $mails as $mail ) {
-				if ( in_array( $mail->id, $resend_emails ) ) {
-					$mail->trigger( $order->id );
+			$mailer = $woocommerce->mailer();
+
+			$email_to_send = str_replace( 'send_email_', '', $action );
+
+			$mails = $mailer->get_emails();
+
+			if ( ! empty( $mails ) ) {
+				foreach ( $mails as $mail ) {
+					if ( $mail->id == $email_to_send ) {
+						$mail->trigger( $order->id );
+					}
 				}
 			}
+
+			do_action( 'woocommerce_after_resend_order_emails', $order, $resend_emails );
+
+		} elseif ( $action == 'refund_order' ) {
+
+			$order->refund_order( true );
+
+		} elseif ( $action == 'manual_refund_order' ) {
+
+			$order->refund_order( false );
+
+		} else {
+
+			do_action( 'woocommerce_order_action_' . sanitize_title( $action ), $order );
+
 		}
-
-		do_action( 'woocommerce_after_resend_order_emails', $order, $resend_emails );
-
 	}
 
 	delete_transient( 'woocommerce_processing_order_count' );

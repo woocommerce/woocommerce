@@ -7,9 +7,9 @@
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce/Admin/WritePanels
- * @version     1.7.0
+ * @version     2.0.0
  */
- 
+
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /** Product data writepanel */
@@ -49,7 +49,7 @@ function woocommerce_meta_boxes() {
 	remove_meta_box( 'product_shipping_classdiv', 'product', 'side' );
 	remove_meta_box( 'pageparentdiv', 'product', 'side' );
 	remove_meta_box( 'postimagediv', 'product', 'side' );
-	
+
 	// Excerpt
 	if ( function_exists('wp_editor') ) {
 		remove_meta_box( 'postexcerpt', 'product', 'normal' );
@@ -131,6 +131,22 @@ function woocommerce_meta_boxes_save( $post_id, $post ) {
 }
 
 add_action( 'save_post', 'woocommerce_meta_boxes_save', 1, 2 );
+
+
+/**
+ * Some functions, like the term recount, require the visibility to be set prior. Lets save that here.
+ *
+ * @access public
+ * @param mixed $post_id
+ * @return void
+ */
+function woocommerce_pre_post_update( $post_id ) {
+	if ( isset( $_POST['_visibility'] ) )
+		update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
+	if ( isset( $_POST['_stock_status'] ) )
+		update_post_meta( $post_id, '_stock_status', stripslashes( $_POST['_stock_status'] ) );
+}
+add_action( 'pre_post_update', 'woocommerce_pre_post_update' );
 
 
 /**
@@ -223,9 +239,9 @@ add_filter('wp_insert_post_data', 'woocommerce_order_data');
 
 
 /**
- * Grant downloadable file access to any newly added files on any existing 
+ * Grant downloadable file access to any newly added files on any existing
  * orders for this product that have previously been granted downloadable file access
- * 
+ *
  * @access public
  * @param int $product_id product identifier
  * @param int $variation_id optional product variation identifier
@@ -234,7 +250,7 @@ add_filter('wp_insert_post_data', 'woocommerce_order_data');
 function woocommerce_process_product_file_download_paths( $product_id, $variation_id, $file_paths ) {
 	global $wpdb;
 
-	if ( $variation_id ) 
+	if ( $variation_id )
 		$product_id = $variation_id;
 
 	// determine whether any new files have been added
@@ -248,10 +264,10 @@ function woocommerce_process_product_file_download_paths( $product_id, $variatio
 		foreach ( $existing_permissions as $existing_permission ) {
 			$order = new WC_Order( $existing_permission->order_id );
 
-			if ( $order->id ) { 
+			if ( $order->id ) {
 				foreach ( $new_download_ids as $new_download_id ) {
 					// grant permission if it doesn't already exist
-					if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT true FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->id, $product_id, $new_download_id ) ) ) { 
+					if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT true FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->id, $product_id, $new_download_id ) ) ) {
 						woocommerce_downloadable_file_permission( $new_download_id, $product_id, $order );
 					}
 				}
@@ -313,19 +329,28 @@ add_action( 'admin_notices', 'woocommerce_meta_boxes_show_errors' );
  */
 function woocommerce_wp_text_input( $field ) {
 	global $thepostid, $post, $woocommerce;
-	
+
 	$thepostid 				= empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['placeholder'] 	= isset( $field['placeholder'] ) ? $field['placeholder'] : '';
 	$field['class'] 		= isset( $field['class'] ) ? $field['class'] : 'short';
+	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
 	$field['value'] 		= isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['name'] 			= isset( $field['name'] ) ? $field['name'] : $field['id'];
+	$field['type'] 			= isset( $field['type'] ) ? $field['type'] : 'text';
 
-	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><input type="text" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" /> ';
+	// Custom attribute handling
+	$custom_attributes = array();
+
+	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) )
+		foreach ( $field['custom_attributes'] as $attribute => $value )
+			$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
+
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><input type="' . esc_attr( $field['type'] ) . '" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" ' . implode( ' ', $custom_attributes ) . ' /> ';
 
 	if ( ! empty( $field['description'] ) ) {
 
 		if ( isset( $field['desc_tip'] ) ) {
-			echo '<img class="help_tip" data-tip="' . esc_attr( $field['description'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" />';
+			echo '<img class="help_tip" data-tip="' . esc_attr( $field['description'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
 		} else {
 			echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
 		}
@@ -344,11 +369,11 @@ function woocommerce_wp_text_input( $field ) {
  */
 function woocommerce_wp_hidden_input( $field ) {
 	global $thepostid, $post;
-	
+
 	$thepostid = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['value'] = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['class'] = isset( $field['class'] ) ? $field['class'] : '';
-	
+
 	echo '<input type="hidden" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) .  '" /> ';
 }
 
@@ -366,14 +391,15 @@ function woocommerce_wp_textarea_input( $field ) {
 	$thepostid 				= empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['placeholder'] 	= isset( $field['placeholder'] ) ? $field['placeholder'] : '';
 	$field['class'] 		= isset( $field['class'] ) ? $field['class'] : 'short';
+	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
 	$field['value'] 		= isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 
-	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><textarea class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" rows="2" cols="20">' . esc_textarea( $field['value'] ) . '</textarea> ';
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><textarea class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" rows="2" cols="20">' . esc_textarea( $field['value'] ) . '</textarea> ';
 
 	if ( ! empty( $field['description'] ) ) {
 
 		if ( isset( $field['desc_tip'] ) ) {
-			echo '<img class="help_tip" data-tip="' . esc_attr( $field['description'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" />';
+			echo '<img class="help_tip" data-tip="' . esc_attr( $field['description'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
 		} else {
 			echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
 		}
@@ -419,9 +445,10 @@ function woocommerce_wp_select( $field ) {
 
 	$thepostid 				= empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['class'] 		= isset( $field['class'] ) ? $field['class'] : 'select short';
+	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
 	$field['value'] 		= isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 
-	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><select id="' . esc_attr( $field['id'] ) . '" name="' . esc_attr( $field['id'] ) . '" class="' . esc_attr( $field['class'] ) . '">';
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><select id="' . esc_attr( $field['id'] ) . '" name="' . esc_attr( $field['id'] ) . '" class="' . esc_attr( $field['class'] ) . '">';
 
 	foreach ( $field['options'] as $key => $value ) {
 
@@ -434,11 +461,46 @@ function woocommerce_wp_select( $field ) {
 	if ( ! empty( $field['description'] ) ) {
 
 		if ( isset( $field['desc_tip'] ) ) {
-			echo '<img class="help_tip" data-tip="' . esc_attr( $field['description'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" />';
+			echo '<img class="help_tip" data-tip="' . esc_attr( $field['description'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
 		} else {
 			echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
 		}
 
 	}
 	echo '</p>';
+}
+
+/**
+ * Output a radio input box.
+ *
+ * @access public
+ * @param array $field
+ * @return void
+ */
+function woocommerce_wp_radio( $field ) {
+	global $thepostid, $post, $woocommerce;
+
+	$thepostid 				= empty( $thepostid ) ? $post->ID : $thepostid;
+	$field['class'] 		= isset( $field['class'] ) ? $field['class'] : 'select short';
+	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
+	$field['value'] 		= isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
+
+	echo '<fieldset class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><legend>' . wp_kses_post( $field['label'] ) . '</legend><ul>';
+
+	if ( ! empty( $field['description'] ) ) {
+		echo '<li class="description">' . wp_kses_post( $field['description'] ) . '</li>';
+	}
+
+    foreach ( $field['options'] as $key => $value ) {
+
+		echo '<li><label><input
+        		name="' . esc_attr( $field['id'] ) . '"
+        		value="' . esc_attr( $key ) . '"
+        		type="radio"
+        		class="' . esc_attr( $field['class'] ) . '"
+        		' . checked( esc_attr( $field['value'] ), esc_attr( $key ), false ) . '
+        		/> ' . esc_html( $value ) . '</label>
+    	</li>';
+	}
+    echo '</ul></fieldset>';
 }
