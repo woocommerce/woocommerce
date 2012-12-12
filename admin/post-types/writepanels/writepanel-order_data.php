@@ -450,6 +450,7 @@ function woocommerce_order_actions_meta_box( $post ) {
 					}
 					?>
 				</optgroup>
+				<?php if ( in_array( $order->status, array( 'processing', 'on-hold', 'complete' ) ) ) : ?>
 				<optgroup label="<?php _e( 'Refund Order', 'woocommerce' ); ?>">
 					<?php
 						$gateways = $woocommerce->payment_gateways->payment_gateways();
@@ -465,9 +466,11 @@ function woocommerce_order_actions_meta_box( $post ) {
 
 							echo '<option value="refund_order" ' . disabled( $supports_refunds, false ) . '>' . sprintf( __( 'Refund Order via %s', 'woocommerce' ), $order->payment_method  ) . '</option>';
 						}
+
 						echo '<option value="manual_refund_order">' . __( 'Mark Order Refunded', 'woocommerce' ) . '</option>';
 					?>
 				</optgroup>
+				<?php endif; ?>
 			</select>
 
 			<button class="button"><?php _e( 'Apply', 'woocommerce' ); ?></button>
