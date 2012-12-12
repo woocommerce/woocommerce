@@ -1,6 +1,6 @@
-<?php
+<?php 
 	if(!class_exists('ShareYourCartBase',false)) die('Access Denied');
-
+	
 	// If only the hover is uploaded
     if((!$button_img or !$button_img_width or !$button_img_height) and ($button_img_hover and $button_img_hover_width and $button_img_hover_height)) {
         $button_img = $button_img_hover;
@@ -10,15 +10,15 @@
         $button_img_hover_width = null;
         $button_img_hover_height = null;
     }
-
+	
 	$callbackDataAttr = '';
-
+	
 	if(isset($callback_url) && !empty($callback_url)) {
 		$callbackDataAttr = 'data-syc-callback_url="' . $callback_url .'"';
 	}
 ?>
 
-<a href="<?php echo $this->SHAREYOURCART_BUTTON_URL ?>" class="shareyourcart-button <?php if (isset($is_product_page) && $is_product_page) echo "product_button"; ?>" <?php echo $callbackDataAttr; ?> data-syc-layout="custom" <?php if(!empty($position_after)): echo "data-syc-position-after=\"$position_after\""; elseif(!empty($position_before)): echo "data-syc-position-before=\"$position_before\""; endif; ?>>
+<a href="<?php echo $this->SHAREYOURCART_BUTTON_URL ?>" class="shareyourcart-button <?php if (isset($is_product_page) && $is_product_page) echo "product_button"; ?>" <?php echo $callbackDataAttr; ?> data-syc-layout="custom" <?php if(!empty($position_after)): echo "data-syc-position-after=\"$position_after\""; elseif(!empty($position_before)): echo "data-syc-position-before=\"$position_before\""; endif; ?> <?php if(!empty($language)): echo "data-syc-language=\"$language\""; endif; ?>>
 &nbsp;
 </a>
 
@@ -30,7 +30,7 @@
 		height: <?php echo $button_img_height; ?>px;
 		text-indent: -9999px;
 	}
-
+	
 	<?php
 		if($button_img_hover and $button_img_hover_width and $button_img_hover_height) {
 	?>

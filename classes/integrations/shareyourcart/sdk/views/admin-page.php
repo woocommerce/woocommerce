@@ -1,4 +1,4 @@
-<?php if(!class_exists('ShareYourCartBase',false)) die('Access Denied');
+<?php if(!class_exists('ShareYourCartBase',false)) die('Access Denied'); 
 
 $admin_base_url = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 
@@ -8,7 +8,7 @@ if($refresh)
 	//recreate the url ( but before that make sure there is no syc-account parameter in it )
 	unset($_GET['syc-account']);
 	$url =  $admin_base_url.'?'.http_build_query($_GET,'','&');
-
+		
 	@header("HTTP/1.1 302 Found");
 	@header("Location: $url");
 	echo "<meta http-equiv=\"refresh\" content=\"0; url=$url\">"; //it can happen that the headers have allready been sent, so use the html version as well
@@ -20,15 +20,15 @@ if($refresh)
 </script>
 <div class="wrap">
 <?php if($show_header):?>
-
+	
 	<?php echo $this->getUpdateNotification(); ?>
-
+	
     <h2>
         <a href="http://www.shareyourcart.com" target="_blank" title="Shareyourcart" class="shareyourcart-logo" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin-view/logo-click']);">
             <img src="<?php echo $this->getUrl(dirname(__FILE__).'/../img/shareyourcart-logo.png'); ?>"/>
         </a>
 		<div class="syc-slogan"><?php echo SyC::t('sdk','Increase your social media exposure by 10%!'); ?></div>
-
+		
 		<?php
 			if(isset($this->adminFix)) echo "<br /><br /><br /><br /><br />";
 			else echo "<br class=\"clr\" /> ";
@@ -38,29 +38,29 @@ if($refresh)
 
 	<?php if(!empty($status_message) || !empty($error_message)): ?>
 	<div class="updated settings-error"><p><strong>
-		<?php
-			$message = @$error_message;
-
+		<?php 
+			$message = @$error_message; 
+		
 			//is there a status message?
 			if(!empty($status_message))
 			{
 				//put the status message on a new line
 				if(!empty($message)) $message .= "<br /><br />";
-
+				
 				$message .= $status_message;
 			}
-
-			echo $message;
+		
+			echo $message; 
 		?>
 	</strong></p></div>
 	<?php endif; ?>
-
+	
     <p><?php echo SyC::t('sdk','{brand} helps you get more customers by motivating satisfied customers to talk with their friends about your products. Each customer that promotes your products, via social media, will receive a coupon that they can apply to their shopping cart in order to get a small discount.',array('{brand}' => '<a href="http://www.shareyourcart.com" target="_blank" title="Shareyourcart&trade;" onclick=" if(_gaq) _gaq.push([\'_trackPageview\', \'/admin-view/logo-click\']);">ShareYourCart&trade;</a>')); ?></p>
-
+    
     <br />
-    <div id="acount-options">
-        <form method="POST" name="account-form">
-		<fieldset>
+    <div id="acount-options">      	
+        <form method="POST" name="account-form">       
+		<fieldset>	   		
 		<div class="api-status" align="right">
                     <?php echo SyC::t('sdk','API Status:'); ?>
                     <?php if($this->isActive()) : ?>
@@ -74,7 +74,7 @@ if($refresh)
                     <?php else :?>
                         <input type="submit" value="<?php echo SyC::t('sdk','Enable'); ?>" name="enable-API" class="api-button" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin-view/enable-click']);" />
                     <?php endif;?>
-                </div>
+                </div>                
         <table class="form-table-api" name="shareyourcart_settings">
             <tr>
                 <th scope="row"><?php echo SyC::t('sdk','Client ID'); ?></th>
@@ -90,34 +90,34 @@ if($refresh)
             </tr>
         </table>
        <?php echo $html;?>
-        <div class="submit"><input type="submit" name="syc-account-form" class="button" value="<?php echo SyC::t('sdk','Save'); ?>" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin-view/save-click']);"></div>
-		</fieldset>
-    </form>
+        <div class="submit"><input type="submit" name="syc-account-form" class="button" value="<?php echo SyC::t('sdk','Save'); ?>" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin-view/save-click']);"></div>        
+		</fieldset>			 
+    </form>  
     </div>
-
+    
 	<?php if($this->isActive()): //show the configure part only if it is active ?>
     <br/>
     <fieldset>
     <p><?php echo SyC::t('sdk','You can choose how much of a discount to give (in fixed amount, percentage, or free shipping) and to which social media channels it should it be applied. You can also define what the advertisement should say, so that it fully benefits your sales.'); ?></p>
     <br />
  	 <form action="<?php echo $this->SHAREYOURCART_CONFIGURE; ?>" method="POST" id="configure-form" target="_blank">
-
+       
         <div class="configure-button-container" align="center">
             <input type="submit" value="<?php echo SyC::t('sdk','Configure'); ?>" id="configure-button" class="shareyourcart-button-orange" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin-view/configure-click']);" />
             <input type="hidden" name="app_key" value="<?php echo $this->getAppKey(); ?>" />
             <input type="hidden" name="client_id" value="<?php echo $this->getClientId(); ?>" />
 			<input type="hidden" name="email" value="<?php echo $this->getAdminEmail(); ?>" />
-        </div>
-
+        </div>   
+       
     </form>
     </fieldset>
-
-	<?php if($show_footer):?>
+	
+	<?php if($show_footer):?>	
 	<br />
 	<h2><?php echo SyC::t('sdk','Contact'); ?></h2>
 	<p><?php echo SyC::t('sdk',"If you've got 30 seconds, we'd {link-1} love to know what ideal outcome you'd like ShareYourCart to help bring to your business</a>, or if you have a private question, you can {link-2} contact us directly</a>", array('{link-1}' => '<a href="http://shareyourcart.uservoice.com" target="_blank" title="forum" class="api-link" onclick=" if(_gaq) _gaq.push([\'_trackPageview\', \'/admin/documentation/forum-click\']);">', '{link-2}' => '<a href="http://www.shareyourcart.com/contact" target="_blank" class="api-link" onclick=" if(_gaq) _gaq.push([\'_trackPageview\', \'/admin/documentation/contact-click\']);">')); ?></p>
 	<br />
 	<?php endif; ?>
-
+	
 	<?php endif; //show only if the cart is active ?>
 </div>
