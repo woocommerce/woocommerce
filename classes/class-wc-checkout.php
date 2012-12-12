@@ -618,8 +618,8 @@ class WC_Checkout {
 				$customer_ip = isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'];
 				$customer_user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '';
 
-				update_post_meta( $order_id, __( 'Customer IP Address', 'woocommerce' ), $customer_ip );
-				update_post_meta( $order_id, __( 'Customer UA', 'woocommerce' ), $customer_user_agent );
+				update_post_meta( $order_id, 'customer_ip_address', $customer_ip );
+				update_post_meta( $order_id, 'customer_user_agent', $customer_user_agent );
 
 				// Let plugins add meta
 				do_action( 'woocommerce_checkout_update_order_meta', $order_id, $this->posted );
