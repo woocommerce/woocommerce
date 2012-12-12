@@ -1082,7 +1082,7 @@ function woocommerce_ajax_refund_order_item() {
 	check_ajax_referer( 'order-item', 'security' );
 
 	$order_id = absint( $_POST['order_id'] );
-	$order = &new WC_Order( $order_id );
+	$order = new WC_Order( $order_id );
 
 	if ( $order ) {
 		global $woocommerce;
@@ -1118,6 +1118,10 @@ function woocommerce_ajax_refund_order_item() {
 						$refund_amount = $refund_amount + $amount;
 
 						woocommerce_update_order_item_meta( $item_id, '_refunded', 1 );
+
+						// Add order note
+						$order->add_order_note( sprintf( __( 'Item #%d has been refunded (%s)' ), $item_id, woocommerce_price( $amount ) ), true );
+
 						do_action( 'woocommerce_refund_order_item', $item_id );
 					}
 				}
