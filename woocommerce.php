@@ -1075,7 +1075,8 @@ class Woocommerce {
 		}
 
 		// Global frontend scripts
-		wp_enqueue_script( 'woocommerce', $frontend_script_path . 'woocommerce' . $suffix . '.js', array( 'jquery', 'jquery-blockui', 'jquery-placeholder' ), $this->version, true );
+		wp_enqueue_script( 'woocommerce', $frontend_script_path . 'woocommerce' . $suffix . '.js', array( 'jquery', 'jquery-blockui' ), $this->version, true );
+		wp_enqueue_script( 'jquery-placeholder' );
 
 		// Variables for JS scripts
 		$woocommerce_params = array(
