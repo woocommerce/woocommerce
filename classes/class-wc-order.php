@@ -1261,6 +1261,20 @@ class WC_Order {
 	 * @return void
 	 */
 	function refund_order( $use_gateway = false ) {
+		$total_to_refund = woocommerce_format_total( $this->get_total() - $this->get_refund_total() );
+
+		if ( $use_gateway ) {
+
+			// Trigger an action which the gateway can pick up to do the refund - the gateway needs to handle status updates and setting the refunded total.
+			do_action( 'woocommerce_' . sanitize_title( $this->payment_method ) . '_refund_order', $this->id, $total_to_refund );
+
+		} else {
+
+			update_post_meta( $this->id, '_refund_total', $this->get_total() );
+
+			$this->update_status( 'refunded', sprintf( __( 'Order refunded manually.', 'woocommerce' ) ) );
+
+		}
 
 	}
 
