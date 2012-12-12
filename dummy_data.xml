@@ -91,10 +91,6 @@
 	<wp:term><wp:term_id>47</wp:term_id><wp:term_taxonomy>product_cat</wp:term_taxonomy><wp:term_slug>teamakers</wp:term_slug><wp:term_parent>coffee-tea</wp:term_parent><wp:term_name><![CDATA[Teamakers]]></wp:term_name></wp:term>
 	<wp:term><wp:term_id>48</wp:term_id><wp:term_taxonomy>product_cat</wp:term_taxonomy><wp:term_slug>toasters</wp:term_slug><wp:term_parent>appliances</wp:term_parent><wp:term_name><![CDATA[Toasters]]></wp:term_name></wp:term>
 	<wp:term><wp:term_id>51</wp:term_id><wp:term_taxonomy>product_cat</wp:term_taxonomy><wp:term_slug>wine-tools-aerators</wp:term_slug><wp:term_parent>bar-wine</wp:term_parent><wp:term_name><![CDATA[Wine Tools &amp; Aerators]]></wp:term_name></wp:term>
-	<wp:term><wp:term_id>56</wp:term_id><wp:term_taxonomy>nav_menu</wp:term_taxonomy><wp:term_slug>main-menu</wp:term_slug><wp:term_name><![CDATA[Main Menu]]></wp:term_name></wp:term>
-	<wp:term><wp:term_id>57</wp:term_id><wp:term_taxonomy>nav_menu</wp:term_taxonomy><wp:term_slug>customer-menu</wp:term_slug><wp:term_name><![CDATA[Customer Menu]]></wp:term_name></wp:term>
-	<wp:term><wp:term_id>58</wp:term_id><wp:term_taxonomy>nav_menu</wp:term_taxonomy><wp:term_slug>main-navigation</wp:term_slug><wp:term_name><![CDATA[Main Navigation]]></wp:term_name></wp:term>
-	<wp:term><wp:term_id>59</wp:term_id><wp:term_taxonomy>nav_menu</wp:term_taxonomy><wp:term_slug>customer-navigation</wp:term_slug><wp:term_name><![CDATA[Customer Navigation]]></wp:term_name></wp:term>
 
 	<generator>http://wordpress.org/?v=3.4.2</generator>
 
