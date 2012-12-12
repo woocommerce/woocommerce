@@ -636,7 +636,7 @@ function woocommerce_order_totals_meta_box( $post ) {
 		<div class="clear"></div>
 	</div>
 	<div class="totals_group">
-		<h4><?php _e( 'Total', 'woocommerce' ); ?></h4>
+		<h4><?php _e( 'Order Totals', 'woocommerce' ); ?></h4>
 		<ul class="totals">
 
 			<li class="left">
@@ -648,6 +648,14 @@ function woocommerce_order_totals_meta_box( $post ) {
 			</li>
 
 			<li class="right">
+				<label><?php _e( 'Refund Total:', 'woocommerce' ); ?></label>
+				<input type="number" step="any" min="0" id="_order_refund_total" name="_order_refund_total" placeholder="0.00" value="<?php
+					if ( isset( $data['_refund_total'][0] ) )
+						echo esc_attr( $data['_refund_total'][0] );
+				?>" />
+			</li>
+
+			<li class="wide">
 				<label><?php _e( 'Payment Method:', 'woocommerce' ); ?></label>
 				<select name="_payment_method" id="_payment_method" class="first">
 					<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
@@ -674,20 +682,6 @@ function woocommerce_order_totals_meta_box( $post ) {
 				</select>
 			</li>
 
-		</ul>
-		<div class="clear"></div>
-	</div>
-	<div class="totals_group">
-		<h4><?php _e( 'Refunds', 'woocommerce' ); ?></h4>
-		<ul class="totals">
-
-			<li class="left">
-				<label><?php _e( 'Refund Total:', 'woocommerce' ); ?></label>
-				<input type="number" disabled="disabled" id="_order_refund_total" name="_order_refund_total" placeholder="0.00" value="<?php
-					if ( isset( $data['_refund_total'][0] ) )
-						echo esc_attr( $data['_refund_total'][0] );
-				?>" />
-			</li>
 		</ul>
 		<div class="clear"></div>
 	</div>
@@ -738,6 +732,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 	update_post_meta( $post_id, '_cart_discount', woocommerce_clean( $_POST['_cart_discount'] ) );
 	update_post_meta( $post_id, '_order_discount', woocommerce_clean( $_POST['_order_discount'] ) );
 	update_post_meta( $post_id, '_order_total', woocommerce_clean( $_POST['_order_total'] ) );
+	update_post_meta( $post_id, '_refund_total', woocommerce_clean( $_POST['_refund_total'] ) );
 	update_post_meta( $post_id, '_customer_user', absint( $_POST['customer_user'] ) );
 	update_post_meta( $post_id, '_order_tax', woocommerce_clean( $_POST['_order_tax'] ) );
 	update_post_meta( $post_id, '_order_shipping_tax', woocommerce_clean( $_POST['_order_shipping_tax'] ) );
