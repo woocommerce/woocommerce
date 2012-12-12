@@ -1084,7 +1084,12 @@ function woocommerce_ajax_refund_order_item() {
 	$order_id = absint( $_POST['order_id'] );
 	$order = new WC_Order( $order_id );
 
-	if ( $order ) {
+	// TODO
+	// REFUND LINE
+	// REFRESH TOTALS
+	// REFRESH ORDER NOTES
+
+	/*if ( $order ) {
 		global $woocommerce;
 		$gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
 
@@ -1140,7 +1145,7 @@ function woocommerce_ajax_refund_order_item() {
 
 			echo json_encode( array( 'refund_total' => $order_refund_total ) );
 		}
-	}
+	} */
 
 	die();
 }

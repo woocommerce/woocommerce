@@ -44,10 +44,10 @@ function woocommerce_order_downloads_meta_box() {
 					if ( ! $product->exists() || ! $product->has_file( $download->download_id ) )
 						continue;
 
+					include( 'order-download-permission-html.php' );
+
 					$loop++;
 					$file_count++;
-
-					include( 'order-download-permission-html.php' );
 				}
 			?>
 		</div>

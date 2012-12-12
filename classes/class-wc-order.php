@@ -1253,6 +1253,28 @@ class WC_Order {
 
 	}
 
+	/**
+	 * refund_order function.
+	 *
+	 * @access public
+	 * @param bool $use_gateway (default: false)
+	 * @return void
+	 */
+	function refund_order( $use_gateway = false ) {
+
+	}
+
+	/**
+	 * refund_line_item function.
+	 *
+	 * @access public
+	 * @param mixed $item_id
+	 * @param bool $use_gateway (default: false)
+	 * @return void
+	 */
+	function refund_line_item( $item_id, $use_gateway = false ) {
+
+	}
 
 	/**
 	 * When a payment is complete this function is called

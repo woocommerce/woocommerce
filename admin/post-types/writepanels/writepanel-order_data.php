@@ -379,12 +379,14 @@ function woocommerce_order_items_meta_box( $post ) {
 					$gateway = $gateways[ $order->payment_method ];
 
 					if ( ! in_array( 'refunds', $gateway->supports ) || ! method_exists( $gateway, 'refund' ) ) {
-						$disabled = ' disabled="disabled"';
+						$supports_refunds = false;
+					} else {
+						$supports_refunds = true;
 					}
-				}
 
-				echo '<option value="refund"' . $disabled . '>' . __( 'Refund Lines', 'woocommerce' ) . '</option>';
-				echo '<option value="refund">' . __( 'Manual Refund Lines', 'woocommerce' ) . '</option>';
+					echo '<option value="refund" ' . disabled( $supports_refunds, false ) . '>' . sprintf( __( 'Refund Lines via %s', 'woocommerce' ), $order->payment_method  ) . '</option>';
+				}
+				echo '<option value="manual_refund">' . __( 'Mark Lines Refunded', 'woocommerce' ) . '</option>';
 				?>
 			</optgroup>
 			<optgroup label="<?php _e( 'Stock Actions', 'woocommerce' ); ?>">
@@ -416,40 +418,59 @@ function woocommerce_order_items_meta_box( $post ) {
  * @param mixed $post
  * @return void
  */
-function woocommerce_order_actions_meta_box($post) {
+function woocommerce_order_actions_meta_box( $post ) {
+	global $woocommerce, $theorder, $wpdb;
+
+	if ( ! is_object( $theorder ) )
+		$theorder = new WC_Order( $post->ID );
+
+	$order = $theorder;
 	?>
 	<ul class="order_actions submitbox">
 
 		<?php do_action( 'woocommerce_order_actions', $post->ID ); ?>
 
-		<li class="wide" id="order-emails">
-			<a href="#order-emails" class="show-order-emails hide-if-no-js tips" data-tip="<?php _e( 'Lets you send or resend order emails to the admin or customer.', 'woocommerce' ); ?>"><?php _e( 'Show order emails', 'woocommerce' ); ?></a>
+		<li class="wide" id="actions">
+			<select name="wc_order_action">
+				<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
+				<optgroup label="<?php _e( 'Resend order emails', 'woocommerce' ); ?>">
+					<?php
+					global $woocommerce;
+					$mailer = $woocommerce->mailer();
 
-			<div id="order-emails-select" class="hide-if-js">
-				<?php
-				global $woocommerce;
-				$mailer = $woocommerce->mailer();
+					$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice' ) );
+					$mails = $mailer->get_emails();
 
-				$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice' ) );
-				$mails = $mailer->get_emails();
-
-				if ( ! empty( $mails ) ) {
-					foreach ( $mails as $mail ) {
-						if ( in_array( $mail->id, $available_emails ) ) {
-							echo '<label><input name="order_email[]" type="checkbox" value="'. esc_attr( $mail->id ) .'" id="'. esc_attr( $mail->id ) .'_email"> ' . $mail->title. '</label>';
-							echo '<img class="help_tip" data-tip="' . esc_attr( $mail->description ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" /></br >';
+					if ( ! empty( $mails ) ) {
+						foreach ( $mails as $mail ) {
+							if ( in_array( $mail->id, $available_emails ) ) {
+								echo '<option value="send_email_'. esc_attr( $mail->id ) .'">' . esc_html( $mail->title ) . '</option>';
+							}
 						}
 					}
-
 					?>
-					<p>
-						<input type="submit" class="save-post-visibility hide-if-no-js button" value="<?php _e( 'Send selected emails', 'woocommerce' ); ?>">
-						<a href="#order-emails" class="hide-order-emails hide-if-no-js"><?php _e( 'Cancel', 'woocommerce' ); ?></a>
-					</p>
+				</optgroup>
+				<optgroup label="<?php _e( 'Refund Order', 'woocommerce' ); ?>">
 					<?php
-				}
-				?>
-			</div>
+						$gateways = $woocommerce->payment_gateways->payment_gateways();
+
+						if ( isset( $gateways[ $order->payment_method ] ) ) {
+							$gateway = $gateways[ $order->payment_method ];
+
+							if ( ! in_array( 'refunds', $gateway->supports ) || ! method_exists( $gateway, 'refund' ) ) {
+								$supports_refunds = false;
+							} else {
+								$supports_refunds = true;
+							}
+
+							echo '<option value="refund_order" ' . disabled( $supports_refunds, false ) . '>' . sprintf( __( 'Refund Order via %s', 'woocommerce' ), $order->payment_method  ) . '</option>';
+						}
+						echo '<option value="manual_refund_order">' . __( 'Mark Order Refunded', 'woocommerce' ) . '</option>';
+					?>
+				</optgroup>
+			</select>
+
+			<button class="button"><?php _e( 'Apply', 'woocommerce' ); ?></button>
 		</li>
 
 		<li class="wide">
@@ -732,7 +753,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 	update_post_meta( $post_id, '_cart_discount', woocommerce_clean( $_POST['_cart_discount'] ) );
 	update_post_meta( $post_id, '_order_discount', woocommerce_clean( $_POST['_order_discount'] ) );
 	update_post_meta( $post_id, '_order_total', woocommerce_clean( $_POST['_order_total'] ) );
-	update_post_meta( $post_id, '_refund_total', woocommerce_clean( $_POST['_refund_total'] ) );
+	update_post_meta( $post_id, '_refund_total', woocommerce_clean( $_POST['_order_refund_total'] ) );
 	update_post_meta( $post_id, '_customer_user', absint( $_POST['customer_user'] ) );
 	update_post_meta( $post_id, '_order_tax', woocommerce_clean( $_POST['_order_tax'] ) );
 	update_post_meta( $post_id, '_order_shipping_tax', woocommerce_clean( $_POST['_order_shipping_tax'] ) );
@@ -901,26 +922,43 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 	$order->update_status( $_POST['order_status'] );
 
 	// Handle button actions
-	if ( ! empty( $_POST['order_email'] ) ) {
+	if ( ! empty( $_POST['wc_order_action'] ) ) {
 
-		do_action( 'woocommerce_before_resend_order_emails', $order );
+		$action = woocommerce_clean( $_POST['wc_order_action'] );
 
-		$mailer = $woocommerce->mailer();
+		if ( strstr( $action, 'send_email_' ) ) {
 
-		$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice' ) );
-		$resend_emails = array_intersect( $available_emails, $_POST['order_email'] );
-		$mails = $mailer->get_emails();
+			do_action( 'woocommerce_before_resend_order_emails', $order );
 
-		if ( ! empty( $mails ) ) {
-			foreach ( $mails as $mail ) {
-				if ( in_array( $mail->id, $resend_emails ) ) {
-					$mail->trigger( $order->id );
+			$mailer = $woocommerce->mailer();
+
+			$email_to_send = str_replace( 'send_email_', '', $action );
+
+			$mails = $mailer->get_emails();
+
+			if ( ! empty( $mails ) ) {
+				foreach ( $mails as $mail ) {
+					if ( $mail->id == $email_to_send ) {
+						$mail->trigger( $order->id );
+					}
 				}
 			}
+
+			do_action( 'woocommerce_after_resend_order_emails', $order, $resend_emails );
+
+		} elseif ( $action == 'refund_order' ) {
+
+			$order->refund_order( true );
+
+		} elseif ( $action == 'manual_refund_order' ) {
+
+			$order->refund_order( false );
+
+		} else {
+
+			do_action( 'woocommerce_order_action_' . sanitize_title( $action ), $order );
+
 		}
-
-		do_action( 'woocommerce_after_resend_order_emails', $order, $resend_emails );
-
 	}
 
 	delete_transient( 'woocommerce_processing_order_count' );
