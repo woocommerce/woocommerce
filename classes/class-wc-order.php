@@ -107,6 +107,9 @@ class WC_Order {
 	/** @var string After tax discount total */
 	var $order_discount;
 
+	/** @var string Refund total */
+	var $refund_total;
+
 	/** @var string Before tax discount total */
 	var $cart_discount;
 
@@ -230,6 +233,7 @@ class WC_Order {
 			'payment_method'		=> '',
 			'payment_method_title' 	=> '',
 			'order_discount'		=> '',
+			'refund_total'          => '',
 			'cart_discount'			=> '',
 			'order_tax'				=> '',
 			'order_shipping'		=> '',
@@ -516,6 +520,17 @@ class WC_Order {
 	 */
 	function get_order_discount() {
 		return apply_filters( 'woocommerce_order_amount_order_discount', number_format( (double) $this->order_discount, 2, '.', '' ) );
+	}
+
+
+	/**
+	 * Gets the total refund amount
+	 *
+	 * @access public
+	 * @return float
+	 */
+	function get_refund_total() {
+		return apply_filters( 'woocommerce_order_refund_total', number_format( (double) $this->refund_total, 2, '.', '' ) );
 	}
 
 
@@ -968,6 +983,13 @@ class WC_Order {
 			'label' => __( 'Order Total:', 'woocommerce' ),
 			'value'	=> $this->get_formatted_order_total()
 		);
+
+		if ( $refund_total = $this->get_refund_total() ) {
+			$total_rows['order_refund_total'] = array(
+				'label' => __( 'Refund total:', 'woocommerce' ),
+				'value'	=> '-' . $refund_total,
+			);
+		}
 
 		// Tax for inclusive prices
 		if ( $this->tax_display_cart == 'incl' ) {
