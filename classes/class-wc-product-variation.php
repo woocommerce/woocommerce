@@ -210,9 +210,6 @@ class WC_Product_Variation extends WC_Product {
 			$this->sale_price_dates_from = $this->product_custom_fields['_sale_price_dates_to'][0];
 
 		$this->total_stock = $this->stock;
-
-		// Check sale dates
-		$this->check_sale_price();
 	}
 
 
@@ -445,45 +442,4 @@ class WC_Product_Variation extends WC_Product {
 		// allow overriding based on the particular file being requested
 		return apply_filters( 'woocommerce_file_download_path', $file_path, $this->variation_id, $download_id );
 	}
-
-    /**
-     * Checks sale data to see if the product is due to go on sale/sale has expired, and updates the main price.
-     *
-     * @access public
-     * @return void
-     */
-    function check_sale_price() {
-
-    	if ( $this->sale_price_dates_from && $this->sale_price_dates_from < current_time('timestamp') ) {
-
-    		if ( $this->sale_price && $this->price !== $this->sale_price ) {
-
-    			// Update price
-    			$this->price = $this->sale_price;
-    			update_post_meta( $this->variation_id, '_price', $this->price );
-
-    			// Variable product prices and sale status are affected by children
-    			$this->parent->variable_product_sync();
-    		}
-
-    	}
-
-    	if ( $this->sale_price_dates_to && $this->sale_price_dates_to < current_time('timestamp') ) {
-
-    		if ( $this->regular_price && $this->price !== $this->regular_price ) {
-
-    			$this->price = $this->regular_price;
-    			update_post_meta( $this->variation_id, '_price', $this->price );
-
-				// Sale has expired - clear the schedule boxes
-				update_post_meta( $this->variation_id, '_sale_price', '' );
-				update_post_meta( $this->variation_id, '_sale_price_dates_from', '' );
-				update_post_meta( $this->variation_id, '_sale_price_dates_to', '' );
-
-				// Variable product prices and sale status are affected by children
-    			$this->parent->variable_product_sync();
-			}
-
-    	}
-    }
 }

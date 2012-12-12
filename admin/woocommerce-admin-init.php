@@ -288,30 +288,6 @@ function woocommerce_status_page() {
 
 
 /**
- * On activation, include the installer and run it.
- *
- * @access public
- * @return void
- */
-function activate_woocommerce() {
-	include_once( 'woocommerce-admin-install.php' );
-	update_option( 'skip_install_woocommerce_pages', 0 );
-	update_option( 'woocommerce_installed', 1 );
-	do_install_woocommerce();
-}
-
-/**
- * Include the installer and run it.
- *
- * @access public
- * @return void
- */
-function install_woocommerce() {
-	include_once( 'woocommerce-admin-install.php' );
-	do_install_woocommerce();
-}
-
-/**
  * update_woocommerce function.
  *
  * @access public

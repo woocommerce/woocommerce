@@ -2050,3 +2050,92 @@ function woocommerce_change_term_counts( $terms, $taxonomies, $args ) {
 
 if ( ! is_admin() && ! is_ajax() )
 	add_filter( 'get_terms', 'woocommerce_change_term_counts', 10, 3 );
+
+/**
+ * Function which handles the start and end of scheduled sales via cron.
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_scheduled_sales() {
+	global $wpdb;
+
+	// Sales which are due to start
+	$product_ids = $wpdb->get_col( $wpdb->prepare( "
+		SELECT postmeta.post_id FROM {$wpdb->postmeta} as postmeta
+		LEFT JOIN {$wpdb->postmeta} as postmeta_2 ON postmeta.post_id = postmeta_2.post_id
+		LEFT JOIN {$wpdb->postmeta} as postmeta_3 ON postmeta.post_id = postmeta_3.post_id
+		WHERE postmeta.meta_key = '_sale_price_dates_from'
+		AND postmeta_2.meta_key = '_price'
+		AND postmeta_3.meta_key = '_sale_price'
+		AND postmeta.meta_value > 0
+		AND postmeta.meta_value < %s
+		AND postmeta_2.meta_value != postmeta_3.meta_value
+	", current_time( 'timestamp' ) ) );
+
+	if ( $product_ids ) {
+		foreach ( $product_ids as $product_id ) {
+			$sale_price = get_post_meta( $product_id, '_sale_price', true );
+
+			if ( $sale_price ) {
+				update_post_meta( $product_id, '_price', $sale_price );
+			} else {
+				// No sale price!
+				update_post_meta( $product_id, '_sale_price_dates_from', '' );
+				update_post_meta( $product_id, '_sale_price_dates_to', '' );
+			}
+
+			$parent = wp_get_post_parent_id( $product_id );
+
+			// Sync parent
+			if ( $parent ) {
+				// We can force varaible product price to sync up by removing their min price meta
+				delete_post_meta( $parent, 'min_variation_price' );
+
+				// Grouped products need syncing via a function
+				$this_product = get_product( $product_id );
+				if ( $this_product->is_type( 'simple' ) )
+					$this_product->grouped_product_sync();
+			}
+		}
+	}
+
+	// Sales which are due to end
+	$product_ids = $wpdb->get_col( $wpdb->prepare( "
+		SELECT postmeta.post_id FROM {$wpdb->postmeta} as postmeta
+		LEFT JOIN {$wpdb->postmeta} as postmeta_2 ON postmeta.post_id = postmeta_2.post_id
+		LEFT JOIN {$wpdb->postmeta} as postmeta_3 ON postmeta.post_id = postmeta_3.post_id
+		WHERE postmeta.meta_key = '_sale_price_dates_to'
+		AND postmeta_2.meta_key = '_price'
+		AND postmeta_3.meta_key = '_regular_price'
+		AND postmeta.meta_value > 0
+		AND postmeta.meta_value < %s
+		AND postmeta_2.meta_value != postmeta_3.meta_value
+	", current_time( 'timestamp' ) ) );
+
+	if ( $product_ids ) {
+		foreach ( $product_ids as $product_id ) {
+			$regular_price = get_post_meta( $product_id, '_regular_price', true );
+
+			update_post_meta( $product_id, '_price', $regular_price );
+			update_post_meta( $product_id, '_sale_price', '' );
+			update_post_meta( $product_id, '_sale_price_dates_from', '' );
+			update_post_meta( $product_id, '_sale_price_dates_to', '' );
+
+			$parent = wp_get_post_parent_id( $product_id );
+
+			// Sync parent
+			if ( $parent ) {
+				// We can force varaible product price to sync up by removing their min price meta
+				delete_post_meta( $parent, 'min_variation_price' );
+
+				// Grouped products need syncing via a function
+				$this_product = get_product( $product_id );
+				if ( $this_product->is_type( 'simple' ) )
+					$this_product->grouped_product_sync();
+			}
+		}
+	}
+}
+
+add_action( 'woocommerce_scheduled_sales', 'woocommerce_scheduled_sales' );

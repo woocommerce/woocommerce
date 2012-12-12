@@ -32,6 +32,10 @@ function do_install_woocommerce() {
 	// Add default taxonomies
 	woocommerce_default_taxonomies();
 
+	// Cron jobs
+	wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
+	wp_schedule_event( strtotime( 'tomorrow' ), 'daily', 'woocommerce_scheduled_sales');
+
 	// Install files and folders for uploading files and prevent hotlinking
 	$upload_dir =  wp_upload_dir();
 

@@ -145,11 +145,17 @@ class Woocommerce {
 		// Define version constant
 		define( 'WOOCOMMERCE_VERSION', $this->version );
 
+		// Installation
+		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+			register_activation_hook( __FILE__, array( $this, 'activate' ) );
+			register_activation_hook( __FILE__, 'flush_rewrite_rules' );
+
+			if ( get_option( 'woocommerce_version' ) != $this->version )
+				add_action( 'init', array( &$this, 'install' ), 1 );
+		}
+
 		// Include required files
 		$this->includes();
-
-		// Installation
-		if ( is_admin() && ! defined('DOING_AJAX') ) $this->install();
 
 		// Actions
 		add_action( 'init', array( &$this, 'init' ), 0 );
@@ -158,6 +164,31 @@ class Woocommerce {
 
 		// Loaded action
 		do_action( 'woocommerce_loaded' );
+	}
+
+
+	/**
+	 * activate function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function activate() {
+		update_option( 'skip_install_woocommerce_pages', 0 );
+		update_option( 'woocommerce_installed', 1 );
+		$this->install();
+	}
+
+
+	/**
+	 * upgrade function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function install() {
+		include_once( 'admin/woocommerce-admin-install.php' );
+		do_install_woocommerce();
 	}
 
 
@@ -265,20 +296,6 @@ class Woocommerce {
 	 */
 	function include_template_functions() {
 		include( 'woocommerce-template.php' );
-	}
-
-
-	/**
-	 * Install upon activation.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	function install() {
-		register_activation_hook( __FILE__, 'activate_woocommerce' );
-		register_activation_hook( __FILE__, 'flush_rewrite_rules' );
-		if ( get_option( 'woocommerce_version' ) != $this->version )
-			add_action( 'init', 'install_woocommerce', 1 );
 	}
 
 
