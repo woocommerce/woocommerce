@@ -914,7 +914,7 @@ abstract class WC_Product {
 				AND comment_post_ID = %d
 				AND comment_approved = '1'
 				AND meta_value > 0
-			"), $this->id );
+			", $this->id ) );
 
 			$ratings = $wpdb->get_var( $wpdb->prepare("
 				SELECT SUM(meta_value) FROM $wpdb->commentmeta
@@ -922,7 +922,7 @@ abstract class WC_Product {
 				WHERE meta_key = 'rating'
 				AND comment_post_ID = %d
 				AND comment_approved = '1'
-			"), $this->id );
+			", $this->id ) );
 
 			if ( $count > 0 )
 				$average_rating = number_format($ratings / $count, 2);

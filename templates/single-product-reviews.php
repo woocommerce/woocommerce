@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			AND comment_post_ID = %d
 			AND comment_approved = '1'
 			AND meta_value > 0
-		"), $post->ID );
+		", $post->ID ) );
 
 		$rating = $wpdb->get_var( $wpdb->prepare("
 			SELECT SUM(meta_value) FROM $wpdb->commentmeta
@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			WHERE meta_key = 'rating'
 			AND comment_post_ID = %d
 			AND comment_approved = '1'
-		"), $post->ID );
+		", $post->ID ) );
 
 		if ( $count > 0 ) {
 
