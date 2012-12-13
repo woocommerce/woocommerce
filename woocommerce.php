@@ -542,7 +542,7 @@ class Woocommerce {
 	 */
 	function compatibility() {
 		// Post thumbnail support
-		if ( ! current_theme_supports( 'post-thumbnails' ) ) {
+		if ( ! current_theme_supports( 'post-thumbnails', 'product' ) ) {
 			add_theme_support( 'post-thumbnails' );
 			remove_post_type_support( 'post', 'thumbnail' );
 			remove_post_type_support( 'page', 'thumbnail' );
