@@ -37,7 +37,7 @@ jQuery(document).ready(function($) {
 			var s_address_2	= $('input#shipping_address_2').val();
 		}
 
-		$('#order_methods, #order_review').block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.ajax_loader_url + ') no-repeat center', opacity: 0.6}});
+		$('#order_methods, #order_review').block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6}});
 
 		var data = {
 			action: 			'woocommerce_update_order_review',
@@ -161,7 +161,7 @@ jQuery(document).ready(function($) {
 
 		if ( $form.is('.processing') ) return false;
 
-		$form.addClass('processing').block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.ajax_loader_url + ') no-repeat center', opacity: 0.6}});
+		$form.addClass('processing').block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6}});
 
 		var data = {
 			action: 			'woocommerce_apply_coupon',
@@ -237,7 +237,7 @@ jQuery(document).ready(function($) {
 			var form_data = $form.data();
 
 			if ( form_data["blockUI.isBlocked"] != 1 )
-				$form.block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.ajax_loader_url + ') no-repeat center', opacity: 0.6}});
+				$form.block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6}});
 
 			$.ajax({
 				type: 		'POST',
@@ -245,11 +245,7 @@ jQuery(document).ready(function($) {
 				data: 		$form.serialize(),
 				success: 	function( code ) {
 						try {
-							// Get the valid JSON only
-							var code = code.split("<!--WC_END-->")[0];
-
-							// Parse
-							var result = $.parseJSON( code );
+							result = $.parseJSON( code );
 
 							if (result.result=='success') {
 

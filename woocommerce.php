@@ -1100,7 +1100,7 @@ class Woocommerce {
 			'countries'                        => json_encode( $this->countries->get_allowed_country_states() ),
 			'plugin_url'                       => $this->plugin_url(),
 			'ajax_url'                         => $this->ajax_url(),
-			'ajax_loader_url'                  => apply_filters( 'woocommerce_ajax_loader_url', $this->plugin_url() . '/assets/images/ajax-loader.gif' ),
+			'ajax_loader_url'                  => apply_filters( 'woocommerce_ajax_loader_url', $this->plugin_url() . '/assets/images/ajax-loader@2x.gif' ),
 			'i18n_select_state_text'           => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
 			'i18n_required_rating_text'        => esc_attr__( 'Please select a rating', 'woocommerce' ),
 			'i18n_no_matching_variations_text' => esc_attr__( 'Sorry, no products matched your selection. Please choose a different combination.', 'woocommerce' ),
