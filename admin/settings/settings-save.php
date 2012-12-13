@@ -76,7 +76,7 @@ function woocommerce_update_options( $options ) {
 					if ( isset( $_POST[ $value['id'] ] )  ) {
 						$option_value = esc_attr( $_POST[ $value['id'] ] );
 					} else {
-		               $option_value = '';
+		            	$option_value = '';
 		            }
 
 	    		} elseif ( $value['id'] == 'woocommerce_price_num_decimals' ) {
@@ -188,7 +188,7 @@ function woocommerce_update_options( $options ) {
 
     // Now save the options
     foreach( $update_options as $name => $value )
-    	update_option( $name, $value, true );
+    	update_option( $name, $value );
 
     return true;
 }

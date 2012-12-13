@@ -553,10 +553,10 @@ function woocommerce_settings_get_option( $option_name, $default = '' ) {
 
 	if ( is_array( $option_value ) )
 		$option_value = array_map( 'stripslashes', $option_value );
-	elseif ( $option_value )
+	elseif ( ! is_null( $option_value ) )
 		$option_value = stripslashes( $option_value );
 
-	return $option_value == null ? $default : $option_value;
+	return $option_value === null ? $default : $option_value;
 }
 
 /**

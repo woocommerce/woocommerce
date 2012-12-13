@@ -1978,7 +1978,7 @@ class WC_Cart {
 					$row_price        = $_product->get_price_excluding_tax( $quantity );
 					$product_subtotal = woocommerce_price( $row_price );
 
-					if ( $this->prices_include_tax )
+					if ( $this->prices_include_tax && $this->tax_total > 0 )
 						$product_subtotal .= ' <small class="tax_label">' . $woocommerce->countries->ex_tax_or_vat() . '</small>';
 
 				} else {
@@ -1986,7 +1986,7 @@ class WC_Cart {
 					$row_price        = $_product->get_price_including_tax( $quantity );
 					$product_subtotal = woocommerce_price( $row_price );
 
-					if ( ! $this->prices_include_tax )
+					if ( ! $this->prices_include_tax && $this->tax_total > 0 )
 						$product_subtotal .= ' <small class="tax_label">' . $woocommerce->countries->inc_tax_or_vat() . '</small>';
 
 				}

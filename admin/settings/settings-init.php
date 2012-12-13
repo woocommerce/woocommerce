@@ -996,9 +996,21 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		'default'   => 'shipping',
 		'type'      => 'select',
 		'options'   => array(
-			'shipping' => __( 'Shipping address', 'woocommerce' ),
-			'billing'  => __( 'Billing address', 'woocommerce' ),
+			'shipping' => __( 'Customer shipping address', 'woocommerce' ),
+			'billing'  => __( 'Customer billing address', 'woocommerce' ),
 			'base'     => __( 'Shop base address', 'woocommerce' )
+		),
+	),
+
+	array(
+		'title'     => __( 'Default Customer Address:', 'woocommerce' ),
+		'id'        => 'woocommerce_default_customer_address',
+		'desc_tip'	=>  __( 'This option determines the customers default address (before they input their own).', 'woocommerce' ),
+		'default'   => 'base',
+		'type'      => 'select',
+		'options'   => array(
+			''     => __( 'No address', 'woocommerce' ),
+			'base' => __( 'Shop base address', 'woocommerce' ),
 		),
 	),
 

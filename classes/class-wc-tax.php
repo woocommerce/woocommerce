@@ -138,8 +138,9 @@ class WC_Tax {
 		} else {
 
 			// Prices which include tax should always use the base rate if we don't know where the user is located
-			// Prices exlcuding tax however should just not add any taxes, as they will be added during checkout
-			$matched_tax_rates = $woocommerce->cart->prices_include_tax
+			// Prices excluding tax however should just not add any taxes, as they will be added during checkout.
+			// The woocommerce_default_customer_address option (when set to base) is also used here.
+			$matched_tax_rates = $woocommerce->cart->prices_include_tax || get_option( 'woocommerce_default_customer_address' ) == 'base'
 				? $this->get_shop_base_rate( $tax_class )
 				: array();
 
@@ -190,7 +191,7 @@ class WC_Tax {
 
 			// Prices which include tax should always use the base rate if we don't know where the user is located
 			// Prices exlcuding tax however should just not add any taxes, as they will be added during checkout
-			if ( $woocommerce->cart->prices_include_tax ) {
+			if ( $woocommerce->cart->prices_include_tax || get_option( 'woocommerce_default_customer_address' ) == 'base' ) {
 				$country 	= $woocommerce->countries->get_base_country();
 				$state 		= $woocommerce->countries->get_base_state();
 				$postcode   = '';
