@@ -110,7 +110,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 								$args = array(
 									'taxonomy' 			=> 'product_shipping_class',
 									'hide_empty'		=> 0,
-									'show_option_all' 	=> __( 'Same as parent', 'woocommerce' ),
+									'show_option_none' 	=> __( 'Same as parent', 'woocommerce' ),
 									'name' 				=> 'variable_shipping_class[' . $loop . ']',
 									'id'				=> '',
 									'selected'			=> isset( $shipping_class ) ? esc_attr( $shipping_class ) : '',

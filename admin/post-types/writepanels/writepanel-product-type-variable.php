@@ -702,12 +702,14 @@ function process_product_meta_variable( $post_id ) {
 			}
 
 			// Save shipping class
-			$variable_shipping_class[ $i ] = ( $variable_shipping_class[ $i ] ) ? (int) $variable_shipping_class[ $i ] : '';
+			$variable_shipping_class[ $i ] = $variable_shipping_class[ $i ] > 0 ? (int) $variable_shipping_class[ $i ] : '';
 			wp_set_object_terms( $variation_id, $variable_shipping_class[ $i ], 'product_shipping_class');
 
 			// Remove old taxonomies attributes so data is kept up to date
-			if ( $variation_id )
-				$wpdb->query( $wpdb->prepare( "DELETE FROM $wpdb->postmeta WHERE meta_key LIKE %s AND post_id = %d;", 'attribute_%', $variation_id ) );
+			if ( $variation_id ) {
+				$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE 'attribute_%%' AND post_id = %d;", $variation_id ) );
+				wp_cache_delete( $variation_id, 'post_meta');
+			}
 
 			// Update taxonomies
 			foreach ( $attributes as $attribute ) {
