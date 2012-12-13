@@ -1771,6 +1771,24 @@ img.help_tip {
 		}
 	}
 }
+@media
+(-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+	#woocommerce-product-images {
+		.inside {
+			#product_images_container {
+				ul {
+					li.image, li.add, li.wc-metabox-sortable-placeholder {
+						.loading {
+							background-image: url(../images/ajax-loader@2x.gif);
+							background-size: 16px 16px;
+						}
+					}
+				}
+			}
+		}
+	}
+}
 #woocommerce-product-data {
 	h3.hndle {
 		padding: 4px 10px;
