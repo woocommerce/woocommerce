@@ -623,7 +623,7 @@ class WC_Checkout {
 						$result = apply_filters('woocommerce_payment_successful_result', $result );
 
 						if (is_ajax()) :
-							echo json_encode( $result );
+							echo json_encode( $result ) . '<!--WC_END-->';
 							exit;
 						else :
 							wp_redirect( $result['redirect'] );
@@ -654,7 +654,7 @@ class WC_Checkout {
 								'result' 	=> 'success',
 								'redirect' => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order)
 							)
-						);
+						) . '<!--WC_END-->';
 						exit;
 					else :
 						wp_safe_redirect(
@@ -685,7 +685,7 @@ class WC_Checkout {
 					'messages' 	=> $messages,
 					'refresh' 	=> (isset($_SESSION['refresh_totals'])) ? 'true' : 'false'
 				)
-			);
+			) . '<!--WC_END-->';
 
 			unset($_SESSION['refresh_totals']);
 			exit;

@@ -3,11 +3,11 @@
  * Plugin Name: WooCommerce
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 1.6.5.2
+ * Version: 1.6.6
  * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 3.3
- * Tested up to: 3.4.2
+ * Tested up to: 3.5
  *
  * Text Domain: woocommerce
  * Domain Path: /languages/
@@ -37,7 +37,7 @@ class Woocommerce {
 	/**
 	 * @var string
 	 */
-	var $version = '1.6.5.2';
+	var $version = '1.6.6';
 
 	/**
 	 * @var string
@@ -505,7 +505,7 @@ class Woocommerce {
 	 */
 	function compatibility() {
 		// Post thumbnail support
-		if ( ! current_theme_supports( 'post-thumbnails' ) ) {
+		if ( ! current_theme_supports( 'post-thumbnails', 'product' ) ) {
 			add_theme_support( 'post-thumbnails' );
 			remove_post_type_support( 'post', 'thumbnail' );
 			remove_post_type_support( 'page', 'thumbnail' );
@@ -1118,7 +1118,6 @@ class Woocommerce {
 
 		// Register any scipts for later use, or used as dependencies
 		wp_register_script( 'chosen', $this->plugin_url() . '/assets/js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), $this->version, true );
-		wp_register_script( 'jquery-ui', $this->plugin_url() . '/assets/js/jquery-ui' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 		wp_register_script( 'jquery-plugins', $this->plugin_url() . '/assets/js/jquery-plugins' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 		wp_register_script( 'wc-add-to-cart-variation', $frontend_script_path . 'add-to-cart-variation' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 		wp_register_script( 'wc-single-product', $frontend_script_path . 'single-product' . $suffix . '.js', array( 'jquery' ), $this->version, true );

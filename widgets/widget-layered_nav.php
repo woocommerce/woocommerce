@@ -50,7 +50,8 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 
 		global $_chosen_attributes, $woocommerce, $_attributes_array;
 
-		if ( !is_post_type_archive('product') && !is_tax( array_merge( $_attributes_array, array('product_cat', 'product_tag') ) ) ) return;
+		if ( ! is_post_type_archive( 'product' ) && is_array( $_attributes_array ) && ! is_tax( array_merge( $_attributes_array, array( 'product_cat', 'product_tag' ) ) ) )
+			return;
 
 		$current_term 	= ($_attributes_array && is_tax($_attributes_array)) ? get_queried_object()->term_id : '';
 		$current_tax 	= ($_attributes_array && is_tax($_attributes_array)) ? get_queried_object()->taxonomy : '';

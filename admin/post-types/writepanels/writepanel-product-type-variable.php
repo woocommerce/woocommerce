@@ -203,7 +203,7 @@ function variable_product_type_options() {
 													$args = array(
 														'taxonomy' 			=> 'product_shipping_class',
 														'hide_empty'		=> 0,
-														'show_option_all' 	=> __('Same as parent', 'woocommerce'),
+														'show_option_none' 	=> __('Same as parent', 'woocommerce'),
 														'name' 				=> 'variable_shipping_class['.$loop.']',
 														'id'				=> '',
 														'selected'			=> $current_shipping_class
@@ -412,7 +412,7 @@ function variable_product_type_options() {
 												$args = array(
 													'taxonomy' 			=> 'product_shipping_class',
 													'hide_empty'		=> 0,
-													'show_option_all' 	=> __('Same as parent', 'woocommerce'),
+													'show_option_none' 	=> __('Same as parent', 'woocommerce'),
 													'name' 				=> 'variable_shipping_class[]',
 													'id'				=> '',
 													'echo'				=> 0
@@ -742,7 +742,7 @@ add_filter('product_type_selector', 'variable_product_type_selector', 1, 2);
 function process_product_meta_variable( $post_id ) {
 	global $woocommerce, $wpdb;
 
-	if (isset($_POST['variable_sku'])) :
+	if (isset($_POST['variable_sku'])) {
 
 		$variable_post_id 			= $_POST['variable_post_id'];
 		$variable_sku 				= $_POST['variable_sku'];
@@ -773,7 +773,7 @@ function process_product_meta_variable( $post_id ) {
 
 		$max_loop = max( array_keys( $_POST['variable_post_id'] ) );
 
-		for ( $i=0; $i <= $max_loop; $i++ ) :
+		for ( $i=0; $i <= $max_loop; $i++ ) {
 
 			if ( ! isset( $variable_post_id[$i] ) ) continue;
 
@@ -839,11 +839,14 @@ function process_product_meta_variable( $post_id ) {
 			endif;
 
 			// Save shipping class
-			$variable_shipping_class[$i] = ( $variable_shipping_class[$i] ) ? (int) $variable_shipping_class[$i] : '';
+			$variable_shipping_class[$i] = $variable_shipping_class[$i] > 0 ? (int) $variable_shipping_class[$i] : '';
 			wp_set_object_terms( $variation_id, $variable_shipping_class[$i], 'product_shipping_class');
 
-			// Remove old taxnomies attributes so data is kept up to date
-			if ($variation_id) $wpdb->query("DELETE FROM $wpdb->postmeta WHERE meta_key LIKE 'attribute_%' AND post_id = $variation_id;");
+			// Remove old taxonomies attributes so data is kept up to date
+			if ( $variation_id ) {
+				$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE 'attribute_%%' AND post_id = %d;", $variation_id ) );
+				wp_cache_delete( $variation_id, 'post_meta');
+			}
 
 			// Update taxonomies
 			foreach ($attributes as $attribute) :
@@ -858,9 +861,9 @@ function process_product_meta_variable( $post_id ) {
 
 			endforeach;
 
-		 endfor;
+		}
 
-	endif;
+	}
 
 	// Update parent if variable so price sorting works and stays in sync with the cheapest child
 	$post_parent = $post_id;
