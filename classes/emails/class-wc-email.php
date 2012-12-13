@@ -64,6 +64,63 @@ class WC_Email extends WC_Settings_API {
 	var $sending;
 
 	/**
+     *  List of preg* regular expression patterns to search for,
+     *  used in conjunction with $replace.
+     *  https://raw.github.com/ushahidi/wp-silcc/master/class.html2text.inc
+     *
+     *  @var array $search
+     *  @access public
+     *  @see $replace
+     */
+    var $plain_search = array(
+        "/\r/",                                  // Non-legal carriage return
+        '/&(nbsp|#160);/i',                      // Non-breaking space
+        '/&(quot|rdquo|ldquo|#8220|#8221|#147|#148);/i',
+		                                         // Double quotes
+        '/&(apos|rsquo|lsquo|#8216|#8217);/i',   // Single quotes
+        '/&gt;/i',                               // Greater-than
+        '/&lt;/i',                               // Less-than
+        '/&(amp|#38);/i',                        // Ampersand
+        '/&(copy|#169);/i',                      // Copyright
+        '/&(trade|#8482|#153);/i',               // Trademark
+        '/&(reg|#174);/i',                       // Registered
+        '/&(mdash|#151|#8212);/i',               // mdash
+        '/&(ndash|minus|#8211|#8722);/i',        // ndash
+        '/&(bull|#149|#8226);/i',                // Bullet
+        '/&(pound|#163);/i',                     // Pound sign
+        '/&(euro|#8364);/i',                     // Euro sign
+        '/&[^&;]+;/i',                           // Unknown/unhandled entities
+        '/[ ]{2,}/'                              // Runs of spaces, post-handling
+    );
+
+    /**
+     *  List of pattern replacements corresponding to patterns searched.
+     *
+     *  @var array $replace
+     *  @access public
+     *  @see $search
+     */
+    var $plain_replace = array(
+        '',                                     // Non-legal carriage return
+        ' ',                                    // Non-breaking space
+        '"',                                    // Double quotes
+        "'",                                    // Single quotes
+        '>',
+        '<',
+        '&',
+        '(c)',
+        '(tm)',
+        '(R)',
+        '--',
+        '-',
+        '*',
+        '£',
+        'EUR',                                  // Euro sign. € ?
+        '',                                     // Unknown/unhandled entities
+        ' '                                     // Runs of spaces, post-handling
+    );
+
+	/**
 	 * Constructor
 	 *
 	 * @access public
@@ -104,7 +161,9 @@ class WC_Email extends WC_Settings_API {
 	function handle_multipart( $mailer )  {
 
 		if ( $this->sending && $this->get_email_type() == 'multipart' ) {
-			$mailer->AltBody = wordwrap( html_entity_decode( strip_tags( $this->get_content_plain() ) ), 70 );
+
+			$mailer->AltBody = wordwrap( preg_replace( $this->plain_search, $this->plain_replace, strip_tags( $this->get_content_plain() ) ) );
+			//$mailer->AltBody = wordwrap( html_entity_decode( strip_tags( $this->get_content_plain() ) ), 70 );
 			$this->sending = false;
 		}
 
@@ -230,7 +289,7 @@ class WC_Email extends WC_Settings_API {
 		$this->sending = true;
 
 		if ( $this->get_email_type() == 'plain' ) {
-			$email_content = html_entity_decode( strip_tags( $this->get_content_plain() ) );
+			$email_content = preg_replace( $this->plain_search, $this->plain_replace, strip_tags( $this->get_content_plain() ) );
 		} else {
 			$email_content = $this->style_inline( $this->get_content_html() );
 		}
