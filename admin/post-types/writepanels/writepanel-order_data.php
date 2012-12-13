@@ -49,82 +49,95 @@ function woocommerce_order_data_meta_box($post) {
 		$order_title = $post->post_title;
 	?>
 	<style type="text/css">
-		#titlediv, #major-publishing-actions, #minor-publishing-actions, #visibility, #submitdiv { display:none }
+		#post-body-content, #titlediv, #major-publishing-actions, #minor-publishing-actions, #visibility, #submitdiv { display:none }
 	</style>
 	<div class="panel-wrap woocommerce">
 		<input name="post_title" type="hidden" value="<?php echo esc_attr( $order_title ); ?>" />
 		<input name="post_status" type="hidden" value="publish" />
 		<div id="order_data" class="panel">
 
-			<div class="order_data_left">
+			<h2><?php _e( 'Order Details', 'woocommerce' ); ?></h2>
+			<p class="order_number"><?php
 
-				<h2><?php _e( 'Order Details', 'woocommerce' ); ?> &mdash; <?php echo esc_html( $order->get_order_number() ); ?></h2>
+				echo __( 'Order number', 'woocommerce' ) . ' ' . esc_html( $order->get_order_number() ) . '. ';
 
-				<p class="form-field"><label for="order_status"><?php _e( 'Order status:', 'woocommerce' ) ?></label>
-				<select id="order_status" name="order_status" class="chosen_select">
-					<?php
-						$statuses = (array) get_terms( 'shop_order_status', array( 'hide_empty' => 0, 'orderby' => 'id' ) );
-						foreach ( $statuses as $status ) {
-							echo '<option value="' . esc_attr( $status->slug ) . '" ' . selected( $status->slug, $order_status, false ) . '>' . esc_html__( $status->name, 'woocommerce' ) . '</option>';
-						}
-					?>
-				</select></p>
+				$ip_address = get_post_meta( $post->ID, '_customer_ip_address', true );
 
-				<p class="form-field last"><label for="order_date"><?php _e( 'Order Date:', 'woocommerce' ) ?></label>
-					<input type="text" class="date-picker-field" name="order_date" id="order_date" maxlength="10" value="<?php echo date_i18n( 'Y-m-d', strtotime( $post->post_date ) ); ?>" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" /> @ <input type="text" class="hour" placeholder="<?php _e( 'h', 'woocommerce' ) ?>" name="order_date_hour" id="order_date_hour" maxlength="2" size="2" value="<?php echo date_i18n( 'H', strtotime( $post->post_date ) ); ?>" pattern="\-?\d+(\.\d{0,})?" />:<input type="text" class="minute" placeholder="<?php _e( 'm', 'woocommerce' ) ?>" name="order_date_minute" id="order_date_minute" maxlength="2" size="2" value="<?php echo date_i18n( 'i', strtotime( $post->post_date ) ); ?>" pattern="\-?\d+(\.\d{0,})?" />
-				</p>
+				if ( $ip_address )
+					echo __( 'Customer IP:', 'woocommerce' ) . ' ' . esc_html( $ip_address );
 
-				<p class="form-field form-field-wide">
-					<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?></label>
-					<select id="customer_user" name="customer_user" class="ajax_chosen_select_customer">
-						<option value=""><?php _e( 'Guest', 'woocommerce' ) ?></option>
+			?></p>
+
+			<div class="order_data_column_container">
+				<div class="order_data_column">
+
+					<h4><?php _e( 'General Details', 'woocommerce' ); ?></h4>
+
+					<p class="form-field"><label for="order_status"><?php _e( 'Order status:', 'woocommerce' ) ?></label>
+					<select id="order_status" name="order_status" class="chosen_select">
 						<?php
-							if ( $customer_user ) {
-								$user = get_user_by( 'id', $customer_user );
-								echo '<option value="' . esc_attr( $user->ID ) . '" ' . selected( 1, 1, false ) . '>' . esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email ) . ')</option>';
+							$statuses = (array) get_terms( 'shop_order_status', array( 'hide_empty' => 0, 'orderby' => 'id' ) );
+							foreach ( $statuses as $status ) {
+								echo '<option value="' . esc_attr( $status->slug ) . '" ' . selected( $status->slug, $order_status, false ) . '>' . esc_html__( $status->name, 'woocommerce' ) . '</option>';
 							}
 						?>
-					</select>
-					<?php
+					</select></p>
 
-					// Ajax Chosen Customer Selectors JS
-					$woocommerce->add_inline_js( "
-						jQuery('select.ajax_chosen_select_customer').ajaxChosen({
-						    method: 		'GET',
-						    url: 			'" . admin_url('admin-ajax.php') . "',
-						    dataType: 		'json',
-						    afterTypeDelay: 100,
-						    minTermLength: 	1,
-						    data:		{
-						    	action: 	'woocommerce_json_search_customers',
-								security: 	'" . wp_create_nonce("search-customers") . "'
-						    }
-						}, function (data) {
+					<p class="form-field last"><label for="order_date"><?php _e( 'Order Date:', 'woocommerce' ) ?></label>
+						<input type="text" class="date-picker-field" name="order_date" id="order_date" maxlength="10" value="<?php echo date_i18n( 'Y-m-d', strtotime( $post->post_date ) ); ?>" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" /> @ <input type="text" class="hour" placeholder="<?php _e( 'h', 'woocommerce' ) ?>" name="order_date_hour" id="order_date_hour" maxlength="2" size="2" value="<?php echo date_i18n( 'H', strtotime( $post->post_date ) ); ?>" pattern="\-?\d+(\.\d{0,})?" />:<input type="text" class="minute" placeholder="<?php _e( 'm', 'woocommerce' ) ?>" name="order_date_minute" id="order_date_minute" maxlength="2" size="2" value="<?php echo date_i18n( 'i', strtotime( $post->post_date ) ); ?>" pattern="\-?\d+(\.\d{0,})?" />
+					</p>
 
-							var terms = {};
+					<p class="form-field form-field-wide">
+						<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?></label>
+						<select id="customer_user" name="customer_user" class="ajax_chosen_select_customer">
+							<option value=""><?php _e( 'Guest', 'woocommerce' ) ?></option>
+							<?php
+								if ( $customer_user ) {
+									$user = get_user_by( 'id', $customer_user );
+									echo '<option value="' . esc_attr( $user->ID ) . '" ' . selected( 1, 1, false ) . '>' . esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email ) . ')</option>';
+								}
+							?>
+						</select>
+						<?php
 
-						    $.each(data, function (i, val) {
-						        terms[i] = val;
-						    });
+						// Ajax Chosen Customer Selectors JS
+						$woocommerce->add_inline_js( "
+							jQuery('select.ajax_chosen_select_customer').ajaxChosen({
+							    method: 		'GET',
+							    url: 			'" . admin_url('admin-ajax.php') . "',
+							    dataType: 		'json',
+							    afterTypeDelay: 100,
+							    minTermLength: 	1,
+							    data:		{
+							    	action: 	'woocommerce_json_search_customers',
+									security: 	'" . wp_create_nonce("search-customers") . "'
+							    }
+							}, function (data) {
 
-						    return terms;
-						});
-					" );
+								var terms = {};
 
-					?>
-				</p>
+							    $.each(data, function (i, val) {
+							        terms[i] = val;
+							    });
 
-				<?php if( get_option( 'woocommerce_enable_order_comments' ) != 'no' ) : ?>
-					<p class="form-field form-field-wide"><label for="excerpt"><?php _e( 'Customer Note:', 'woocommerce' ) ?></label>
-					<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php _e( 'Customer\'s notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses_post( $post->post_excerpt ); ?></textarea></p>
-				<?php endif; ?>
+							    return terms;
+							});
+						" );
+						?>
+					</p>
 
-				<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); ?>
+					<?php if ( get_option( 'woocommerce_enable_order_comments' ) != 'no' ) : ?>
 
-			</div>
-			<div class="order_data_right">
-				<div class="order_data">
-					<h2><?php _e( 'Billing Details', 'woocommerce' ); ?> <a class="edit_address" href="#">(<?php _e( 'Edit', 'woocommerce' ) ;?>)</a></h2>
+						<p class="form-field form-field-wide"><label for="excerpt"><?php _e( 'Customer Note:', 'woocommerce' ) ?></label>
+						<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php _e( 'Customer\'s notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses_post( $post->post_excerpt ); ?></textarea></p>
+
+					<?php endif; ?>
+
+					<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); ?>
+
+				</div>
+				<div class="order_data_column">
+					<h4><?php _e( 'Billing Details', 'woocommerce' ); ?> <a class="edit_address" href="#">(<?php _e( 'Edit', 'woocommerce' ) ;?>)</a></h4>
 					<?php
 						$billing_data = apply_filters('woocommerce_admin_billing_fields', array(
 							'first_name' => array(
@@ -182,7 +195,7 @@ function woocommerce_order_data_meta_box($post) {
 								echo '<p class="none_set"><strong>' . __( 'Address', 'woocommerce' ) . ':</strong> ' . __( 'No billing address set.', 'woocommerce' ) . '</p>';
 
 							foreach ( $billing_data as $key => $field ) {
-								if ( empty( $field['show'] ) )
+								if ( isset( $field['show'] ) && $field['show'] === false )
 									continue;
 								$field_name = 'billing_' . $key;
 								if ( $order->$field_name )
@@ -212,9 +225,9 @@ function woocommerce_order_data_meta_box($post) {
 						do_action( 'woocommerce_admin_order_data_after_billing_address', $order );
 					?>
 				</div>
-				<div class="order_data order_data_alt">
+				<div class="order_data_column">
 
-					<h2><?php _e( 'Shipping Details', 'woocommerce' ); ?> <a class="edit_address" href="#">(<?php _e( 'Edit', 'woocommerce' ) ;?>)</a></h2>
+					<h4><?php _e( 'Shipping Details', 'woocommerce' ); ?> <a class="edit_address" href="#">(<?php _e( 'Edit', 'woocommerce' ) ;?>)</a></h4>
 					<?php
 						$shipping_data = apply_filters('woocommerce_admin_shipping_fields', array(
 							'first_name' => array(
@@ -266,7 +279,7 @@ function woocommerce_order_data_meta_box($post) {
 								echo '<p class="none_set"><strong>' . __( 'Address', 'woocommerce' ) . ':</strong> ' . __( 'No shipping address set.', 'woocommerce' ) . '</p>';
 
 							if ( $shipping_data ) foreach ( $shipping_data as $key => $field ) {
-								if ( empty( $field['show'] ) )
+								if ( isset( $field['show'] ) && $field['show'] === false )
 									continue;
 								$field_name = 'shipping_' . $key;
 								if ( $order->$field_name )

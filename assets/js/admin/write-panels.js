@@ -171,10 +171,9 @@ jQuery( function($){
 	});
 
 	$('a.edit_address').click(function(event){
-
 		$(this).hide();
-		$(this).closest('.order_data').find('div.address').hide();
-		$(this).closest('.order_data').find('div.edit_address').show();
+		$(this).closest('.order_data_column').find('div.address').hide();
+		$(this).closest('.order_data_column').find('div.edit_address').show();
 		event.preventDefault();
 	});
 

@@ -446,14 +446,48 @@ ul.wc_coupon_list_block {
 	display: inline-block;
 	vertical-align: middle;
 }
+#woocommerce-order-data {
+	h3.hndle, .handlediv {
+		display: none;
+	}
+	.inside {
+		display: block !important;
+	}
+}
 #order_data {
-	padding: 0 10px 9px;
-	.order_data_left  {
-		width: 48%;
+	padding: 23px 24px 12px 24px;
+	h2 {
+		margin: 0;
+		font-family: "HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",sans-serif;
+		font-size: 21px;
+		font-weight: normal;
+		line-height: 1.2;
+		text-shadow: 1px 1px 1px white;
+		padding: 0;
+	}
+	h4 {
+		color: #333;
+		margin: 1.33em 0 0;
+	}
+	p {
+		color: #777;
+	}
+	p.order_number {
+		margin: 0;
+		font-family: "HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",sans-serif;
+		font-weight: normal;
+		line-height: 1.6em;
+		font-size: 16px;
+	}
+	.order_data_column_container {
+		clear: both;
+	}
+	.order_data_column {
+		width: 32%;
+		padding: 0 2% 0 0;
 		float: left;
-		h2 {
-			margin-top: 11px;
-			margin-bottom: 0;
+		&:last-child {
+			padding-right: 0;
 		}
 		p {
 			padding: 0 !important;
@@ -487,6 +521,11 @@ ul.wc_coupon_list_block {
 			.hour, .minute {
 				width: 2.5em;
 			}
+			small {
+				display: block;
+				margin: 5px 0 0 0;
+				color: #999;
+			}
 		}
 		.form-field.last {
 			float: right;
@@ -501,48 +540,20 @@ ul.wc_coupon_list_block {
 				width: 100%;
 			}
 		}
-	}
-	.order_data_right {
-		width: 48%;
-		float: right;
-		.order_data {
-			overflow: hidden;
-			zoom: 1;
-			width: 49%;
-			float:left;
-		}
-		.order_data_alt {
-			float:right;
-		}
-		h2 {
-			margin-top: 11px;
-			margin-bottom: 0;
-		}
-		p {
-			padding: 0 !important;
-		}
 		p.none_set {
 			color: #999;
 		}
-		.form-field {
+		._billing_first_name_field, ._billing_address_1_field, ._billing_city_field, ._billing_country_field, ._billing_email_field,
+		._shipping_first_name_field, ._shipping_address_1_field, ._shipping_city_field, ._shipping_country_field {
 			float: left;
-			width: 50%;
-			padding: 0;
-			margin: 9px 0 0 0;
-			label {
-				display: block;
-				padding: 0 0 3px;
-			}
-			input, select {
-				width: 95%;
-			}
+		}
+		._billing_last_name_field, ._billing_address_2_field, ._billing_postcode_field, ._billing_state_field, ._billing_phone_field,
+		._shipping_last_name_field, ._shipping_address_2_field, ._shipping_postcode_field, ._shipping_state_field {
+			float: right;
 		}
 		._billing_company_field, ._shipping_company_field {
 			clear: both;
 			width: 100%;
-			input {
-				width: 97.5%;
-			}
 		}
 		._billing_email_field {
 			clear: left
@@ -551,6 +562,7 @@ ul.wc_coupon_list_block {
 			display: none;
 			overflow: hidden;
 			zoom: 1;
+			padding-right: 1px;
 		}
 	}
 }
