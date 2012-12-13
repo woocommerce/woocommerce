@@ -3,8 +3,8 @@ Contributors: woothemes, mikejolley, jameskoster, CoenJacobs
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.3
-Tested up to: 3.4.2
-Stable tag: 1.6.5.2
+Tested up to: 3.5
+Stable tag: 1.6.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -253,6 +253,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 * Removed all deprecated classes and functions except for 1.6.x template files and functions
 * Many other refactors, minor fixes and tweaks!
+
+= 1.6.6 - 13/12/2012 =
+* Fix - Styling issues for the post date selectors in admin.
+* Fix  - Variation attribute saving issue (cache related).
+* Fixed jQuery issues, now using WordPress core jQuery UI library
+* Tweak - Checkout JSON responses to avoid garbage code breaking requests.
 
 = 1.6.5.2 - 12/09/2012 =
 * Tweak - Extra validation for PayPal IPN.
