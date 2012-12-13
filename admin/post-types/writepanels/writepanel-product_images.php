@@ -31,8 +31,8 @@ function woocommerce_product_images_box() {
 						' . wp_get_attachment_image( $thumbnail_id, 'full' ) . '
 						<span class="loading"></span>
 						<ul class="actions">
-							<li><a href="#" class="delete">' . __( 'Delete', 'woocommerce' ) . '</a></li>
-							<li><a href="' . admin_url( 'media-upload.php?post_id=' . $post->ID . '&attachment_id=' . $thumbnail_id . '&tab=library&width=640&height=553&TB_iframe=1' ) . '" class="view thickbox" onclick="return false;">' . __( 'View', 'woocommerce' ) . '</a></li>
+							<li><a href="#" class="delete" title="' . __( 'Delete image', 'woocommerce' ) . '">' . __( 'Delete', 'woocommerce' ) . '</a></li>
+							<li><a href="' . admin_url( 'media-upload.php?post_id=' . $post->ID . '&attachment_id=' . $thumbnail_id . '&tab=library&width=640&height=553&TB_iframe=1' ) . '" class="view thickbox" onclick="return false;" title="' . __( 'Edit image', 'woocommerce' ) . '">' . __( 'View', 'woocommerce' ) . '</a></li>
 						</ul>
 					</li>';
 
@@ -48,8 +48,8 @@ function woocommerce_product_images_box() {
 						' . wp_get_attachment_image( $attachment_id, 'full' ) . '
 						<span class="loading"></span>
 						<ul class="actions">
-							<li><a href="#" class="delete">' . __( 'Delete', 'woocommerce' ) . '</a></li>
-							<li><a href="' . admin_url( 'media-upload.php?post_id=' . $post->ID . '&attachment_id=' . $attachment_id . '&tab=library&width=640&height=553&TB_iframe=1' ) . '" class="view thickbox" onclick="return false;">' . __( 'View', 'woocommerce' ) . '</a></li>
+							<li><a href="#" class="delete" title="' . __( 'Delete image', 'woocommerce' ) . '">' . __( 'Delete', 'woocommerce' ) . '</a></li>
+							<li><a href="' . admin_url( 'media-upload.php?post_id=' . $post->ID . '&attachment_id=' . $attachment_id . '&tab=library&width=640&height=553&TB_iframe=1' ) . '" class="view thickbox" onclick="return false;" title="' . __( 'Edit image', 'woocommerce' ) . '">' . __( 'View', 'woocommerce' ) . '</a></li>
 						</ul>
 					</li>';
 				}
@@ -235,8 +235,8 @@ function woocommerce_product_images_box() {
 						<img src="' + response.src + '" />\
 						<span class="loading"></span>\
 						<ul class="actions">\
-							<li><a href="#" class="delete"><?php _e( 'Delete', 'woocommerce' ) ?></a></li>\
-							<li><a href="' + response.edit_url + '" class="view thickbox" onclick="return false;"><?php _e( 'View', 'woocommerce' )  ?></a></li>\
+							<li><a href="#" class="delete" title="' . __( 'Delete image', 'woocommerce' ) . '"><?php _e( 'Delete', 'woocommerce' ) ?></a></li>\
+							<li><a href="' + response.edit_url + '" class="view thickbox" onclick="return false;" title="' . __( 'Edit image', 'woocommerce' ) . '"><?php _e( 'View', 'woocommerce' )  ?></a></li>\
 						</ul>\
 					</li>');
 
