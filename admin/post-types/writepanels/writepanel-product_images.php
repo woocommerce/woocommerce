@@ -235,8 +235,8 @@ function woocommerce_product_images_box() {
 						<img src="' + response.src + '" />\
 						<span class="loading"></span>\
 						<ul class="actions">\
-							<li><a href="#" class="delete" title="' . __( 'Delete image', 'woocommerce' ) . '"><?php _e( 'Delete', 'woocommerce' ) ?></a></li>\
-							<li><a href="' + response.edit_url + '" class="view thickbox" onclick="return false;" title="' . __( 'Edit image', 'woocommerce' ) . '"><?php _e( 'View', 'woocommerce' )  ?></a></li>\
+							<li><a href="#" class="delete" title="<?php _e( 'Delete image', 'woocommerce' ); ?>"><?php _e( 'Delete', 'woocommerce' ) ?></a></li>\
+							<li><a href="' + response.edit_url + '" class="view thickbox" onclick="return false;" title="<?php _e( 'Edit image', 'woocommerce' ); ?>"><?php _e( 'View', 'woocommerce' )  ?></a></li>\
 						</ul>\
 					</li>');
 
