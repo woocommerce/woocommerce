@@ -13,6 +13,16 @@ class WC_Tax {
 	var $matched_rates;
 
 	/**
+	 * __construct function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function __construct() {
+		$this->dp = (int) get_option( 'woocommerce_price_num_decimals' );
+	}
+
+	/**
 	 * Searches for all matching country/state/postcode tax rates.
 	 *
 	 * @access public
@@ -349,8 +359,7 @@ class WC_Tax {
 
 				// Rounding
 				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding ) {
-					$decimals = (int) get_option( 'woocommerce_price_num_decimals' );
-					$tax_amount = round( $tax_amount, $decimals );
+					$tax_amount = $this->round( $tax_amount );
 				}
 
 				// Add rate
@@ -380,8 +389,7 @@ class WC_Tax {
 
 				// Rounding
 				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding ) {
-					$decimals = (int) get_option( 'woocommerce_price_num_decimals' );
-					$tax_amount = round( $tax_amount, $decimals );
+					$tax_amount = $this->round( $tax_amount );
 				}
 
 				// Add rate
@@ -413,8 +421,7 @@ class WC_Tax {
 
 					// Rounding
 					if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding ) {
-						$decimals = (int) get_option( 'woocommerce_price_num_decimals' );
-						$tax_amount = round( $tax_amount, $decimals );
+						$tax_amount = $this->round( $tax_amount );
 					}
 
 					// Add rate
@@ -526,11 +533,18 @@ class WC_Tax {
 	}
 
 	/**
-	 * Round to currency DP.
+	 * Round to currency DP. Wrapper for PHP round.
+	 *
+	 * Filter example: to return rounding to .5 cents you'd use:
+	 *
+	 * function euro_5cent_rounding( $in ) {
+	 *      return round( $in / 5, 2 ) * 5;
+	 * }
+	 * add_filter( 'woocommerce_tax_round', 'euro_5cent_rounding' );
+	 *
 	 */
 	function round( $in ) {
-		$decimals = (int) get_option( 'woocommerce_price_num_decimals' );
-		return round( $in, $decimals );
+		return apply_filters( 'woocommerce_tax_round', round( $in, $this->dp ), $in );
 	}
 
 }

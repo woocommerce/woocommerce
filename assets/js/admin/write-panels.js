@@ -349,7 +349,7 @@ jQuery( function($){
 			};
 
 			$.post( woocommerce_writepanel_params.ajax_url, data, function( response ) {
-
+alert( response );
 				result = jQuery.parseJSON( response );
 
 				$items.each( function() {

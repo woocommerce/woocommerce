@@ -1273,8 +1273,11 @@ function woocommerce_calc_line_taxes() {
 				$line_subtotal_taxes = $tax->calc_tax( $line_subtotal, $tax_rates, false );
 				$line_taxes = $tax->calc_tax( $line_total, $tax_rates, false );
 
-				$line_subtotal_tax = rtrim( rtrim( number_format( array_sum( $line_subtotal_taxes ), 4, '.', '' ), '0' ), '.' );
-				$line_tax = rtrim( rtrim( number_format( array_sum( $line_taxes ), 4, '.', '' ), '0' ), '.' );
+				$line_subtotal_tax = $tax->round( array_sum( $line_subtotal_taxes ) );
+				$line_tax = $tax->round( array_sum( $line_taxes ) );
+
+				//$line_subtotal_tax = rtrim( rtrim( number_format( array_sum( $line_subtotal_taxes ), 4, '.', '' ), '0' ), '.' );
+				//$line_tax = rtrim( rtrim( number_format( array_sum( $line_taxes ), 4, '.', '' ), '0' ), '.' );
 
 				if ( $line_subtotal_tax < 0 )
 					$line_subtotal_tax = 0;
@@ -1314,7 +1317,8 @@ function woocommerce_calc_line_taxes() {
 				$matched_tax_rates[ $key ] = $rate;
 
 	$shipping_taxes = $tax->calc_shipping_tax( $shipping, $matched_tax_rates );
-	$shipping_tax = rtrim( rtrim( number_format( array_sum( $shipping_taxes ), 2, '.', '' ), '0' ), '.' );
+	//$shipping_tax = rtrim( rtrim( number_format( array_sum( $shipping_taxes ), 2, '.', '' ), '0' ), '.' );
+	$shipping_tax = $tax->round( array_sum( $shipping_taxes ) );
 
 	// Remove old tax rows
 	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = 'tax' )", $order_id ) );
@@ -1343,11 +1347,12 @@ function woocommerce_calc_line_taxes() {
 	foreach ( array_keys( $taxes + $shipping_taxes ) as $key ) {
 
 	 	$item 							= array();
+	 	$item['rate_id']			 	= $key;
 		$item['name'] 					= $tax_codes[ $key ];
 		$item['label'] 					= $tax->get_rate_label( $key );
 		$item['compound'] 				= $tax->is_compound( $key ) ? 1 : 0;
-		$item['tax_amount'] 			= woocommerce_format_total( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
-		$item['shipping_tax_amount'] 	= woocommerce_format_total( isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0 );
+		$item['tax_amount'] 			= $tax->round( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
+		$item['shipping_tax_amount'] 	= $tax->round( isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0 );
 
 		if ( ! $item['label'] )
 			$item['label'] = $woocommerce->countries->tax_or_vat();
@@ -1360,7 +1365,7 @@ function woocommerce_calc_line_taxes() {
 
 	 	// Add line item meta
 	 	if ( $item_id ) {
-	 		woocommerce_add_order_item_meta( $item_id, 'rate_id', $key );
+	 		woocommerce_add_order_item_meta( $item_id, 'rate_id', $item['rate_id'] );
 	 		woocommerce_add_order_item_meta( $item_id, 'label', $item['label'] );
 		 	woocommerce_add_order_item_meta( $item_id, 'compound', $item['compound'] );
 		 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', $item['tax_amount'] );

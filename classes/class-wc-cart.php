@@ -1327,7 +1327,7 @@ class WC_Cart {
 								$tax_amount				= array_sum( $taxes );
 
 								// Line subtotal + tax
-								$line_subtotal_tax 		= get_option('woocommerce_tax_round_at_subtotal') == 'no' ? round( $tax_amount, $this->dp ) : $tax_amount;
+								$line_subtotal_tax 		= get_option('woocommerce_tax_round_at_subtotal') == 'no' ? $this->tax->round( $tax_amount ) : $tax_amount;
 								$line_subtotal			= $row_base_price - $this->tax->get_tax_total( $base_taxes );
 
 								// Adjusted price
@@ -1348,8 +1348,8 @@ class WC_Cart {
 								$tax_amount				= array_sum( $this->tax->calc_tax( $base_price * $values['quantity'], $tax_rates, true ) );
 
 								// Line subtotal + tax
-								$line_subtotal_tax 		= get_option('woocommerce_tax_round_at_subtotal') == 'no' ? round( $tax_amount, $this->dp ) : $tax_amount;
-								$line_subtotal			= ( $base_price * $values['quantity'] ) - round( $line_subtotal_tax, $this->dp );
+								$line_subtotal_tax 		= get_option('woocommerce_tax_round_at_subtotal') == 'no' ? $this->tax->round( $tax_amount ) : $tax_amount;
+								$line_subtotal			= ( $base_price * $values['quantity'] ) - $this->tax->round( $line_subtotal_tax );
 
 								// Calc prices and tax (discounted)
 								$discounted_price 		= $this->get_discounted_price( $values, $base_price, true );
@@ -1375,8 +1375,8 @@ class WC_Cart {
 						}
 
 						// Line prices
-						$line_tax 		= get_option('woocommerce_tax_round_at_subtotal') == 'no' ? round( $discounted_tax_amount, $this->dp ) : $discounted_tax_amount;
-						$line_total 	= round( ( $discounted_price * $values['quantity'] ) - round( $line_tax, $this->dp ), $this->dp );
+						$line_tax 		= get_option('woocommerce_tax_round_at_subtotal') == 'no' ? $this->tax->round( $discounted_tax_amount ) : $discounted_tax_amount;
+						$line_total 	= $this->tax->round( ( $discounted_price * $values['quantity'] ) - $this->tax->round( $line_tax ) );
 
 						// Add any product discounts (after tax)
 						$this->apply_product_discounts_after_tax( $values, $line_total + $discounted_tax_amount );
