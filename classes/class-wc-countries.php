@@ -12,16 +12,16 @@
 class WC_Countries {
 
 	/** @var array Array of countries */
-	var $countries;
+	public $countries;
 
 	/** @var array Array of states */
-	var $states;
+	public $states;
 
 	/** @var array Array of locales */
-	var $locale;
+	public $locale;
 
 	/** @var array Array of address formats for locales */
-	var $address_formats;
+	public $address_formats;
 
 	/**
 	 * Constructor for the counties class - defines all countries and states.
@@ -29,7 +29,7 @@ class WC_Countries {
 	 * @access public
 	 * @return void
 	 */
-	function __construct() {
+	public function __construct() {
 
 		$this->countries = apply_filters('woocommerce_countries', array(
 			'AF' => __( 'Afghanistan', 'woocommerce' ),
@@ -448,7 +448,7 @@ class WC_Countries {
 	 * @access public
 	 * @return string
 	 */
-	function get_base_country() {
+	public function get_base_country() {
 		$default = esc_attr( get_option('woocommerce_default_country') );
 		if ( ( $pos = strpos( $default, ':' ) ) === false )
 			return $default;
@@ -462,7 +462,7 @@ class WC_Countries {
 	 * @access public
 	 * @return string
 	 */
-	function get_base_state() {
+	public function get_base_state() {
 		$default = esc_attr( get_option( 'woocommerce_default_country' ) );
 		if ( ( $pos = strrpos( $default, ':' ) ) === false )
 			return '';
@@ -476,7 +476,7 @@ class WC_Countries {
 	 * @access public
 	 * @return array
 	 */
-	function get_allowed_countries() {
+	public function get_allowed_countries() {
 
 		asort( $this->countries );
 
@@ -500,7 +500,7 @@ class WC_Countries {
 	 * @access public
 	 * @return array
 	 */
-	function get_allowed_country_states() {
+	public function get_allowed_country_states() {
 
 		if ( get_option('woocommerce_allowed_countries') !== 'specific' )
 			return $this->states;
@@ -523,7 +523,7 @@ class WC_Countries {
 	 * @access public
 	 * @return array
 	 */
-	function get_european_union_countries() {
+	public function get_european_union_countries() {
 		return array('AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GB', 'GR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK');
 	}
 
@@ -534,7 +534,7 @@ class WC_Countries {
 	 * @access public
 	 * @return string
 	 */
-	function shipping_to_prefix() {
+	public function shipping_to_prefix() {
 		global $woocommerce;
 		$return = '';
 		if (in_array($woocommerce->customer->get_shipping_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __( 'to the', 'woocommerce' );
@@ -549,7 +549,7 @@ class WC_Countries {
 	 * @access public
 	 * @return string
 	 */
-	function estimated_for_prefix() {
+	public function estimated_for_prefix() {
 		$return = '';
 		if (in_array($this->get_base_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __( 'the', 'woocommerce' ) . ' ';
 		return apply_filters('woocommerce_countries_estimated_for_prefix', $return, $this->get_base_country());
@@ -562,7 +562,7 @@ class WC_Countries {
 	 * @access public
 	 * @return string
 	 */
-	function tax_or_vat() {
+	public function tax_or_vat() {
 		$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? __( 'VAT', 'woocommerce' ) : __( 'Tax', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_tax_or_vat', $return );
@@ -575,7 +575,7 @@ class WC_Countries {
 	 * @access public
 	 * @return string
 	 */
-	function inc_tax_or_vat() {
+	public function inc_tax_or_vat() {
 		$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? __( '(incl. VAT)', 'woocommerce' ) : __( '(incl. tax)', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_inc_tax_or_vat', $return );
@@ -588,7 +588,7 @@ class WC_Countries {
 	 * @access public
 	 * @return string
 	 */
-	function ex_tax_or_vat() {
+	public function ex_tax_or_vat() {
 		$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? __( '(ex. VAT)', 'woocommerce' ) : __( '(ex. tax)', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_ex_tax_or_vat', $return );
@@ -602,7 +602,7 @@ class WC_Countries {
 	 * @param mixed $cc country code
 	 * @return array of states
 	 */
-	function get_states( $cc ) {
+	public function get_states( $cc ) {
 		if (isset( $this->states[$cc] )) return $this->states[$cc];
 	}
 
@@ -616,7 +616,7 @@ class WC_Countries {
 	 * @param bool $escape (default: false)
 	 * @return void
 	 */
-	function country_dropdown_options( $selected_country = '', $selected_state = '', $escape = false ) {
+	public function country_dropdown_options( $selected_country = '', $selected_state = '', $escape = false ) {
 
 		asort($this->countries);
 
@@ -648,7 +648,7 @@ class WC_Countries {
 	 * @param bool $escape (default: false)
 	 * @return void
 	 */
-	function country_multiselect_options( $selected_countries = '', $escape = false ) {
+	public function country_multiselect_options( $selected_countries = '', $escape = false ) {
 
 		$countries = $this->get_allowed_countries();
 
@@ -674,7 +674,7 @@ class WC_Countries {
 	 * @access public
 	 * @return array
 	 */
-	function get_address_formats() {
+	public function get_address_formats() {
 
 		if (!$this->address_formats) :
 
@@ -724,7 +724,7 @@ class WC_Countries {
 	 * @param array $args (default: array())
 	 * @return string address
 	 */
-	function get_formatted_address( $args = array() ) {
+	public function get_formatted_address( $args = array() ) {
 
 		$args = array_map( 'trim', $args );
 
@@ -792,7 +792,7 @@ class WC_Countries {
 	 * @access public
 	 * @return array
 	 */
-	function get_country_locale() {
+	public function get_country_locale() {
 		if ( ! $this->locale ) {
 
 			// Locale information used by the checkout
@@ -1062,7 +1062,7 @@ class WC_Countries {
 	}
 
 	/** Apply locale and get address fields */
-	function get_address_fields( $country, $type = 'billing_' ) {
+	public function get_address_fields( $country, $type = 'billing_' ) {
 		$locale		= $this->get_country_locale();
 
 		$fields = array(

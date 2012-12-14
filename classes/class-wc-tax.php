@@ -10,7 +10,7 @@
 class WC_Tax {
 
 	/** @var array */
-	var $matched_rates;
+	public $matched_rates;
 
 	/**
 	 * __construct function.
@@ -18,7 +18,7 @@ class WC_Tax {
 	 * @access public
 	 * @return void
 	 */
-	function __construct() {
+	public function __construct() {
 		$this->dp = (int) get_option( 'woocommerce_price_num_decimals' );
 	}
 
@@ -29,7 +29,7 @@ class WC_Tax {
 	 * @param string $args (default: '')
 	 * @return array
 	 */
-	function find_rates( $args = '' ) {
+	public function find_rates( $args = '' ) {
 		global $wpdb;
 
 		$defaults = array(
@@ -117,7 +117,7 @@ class WC_Tax {
 	 * @param   object	Tax Class
 	 * @return  array
 	 */
-	function get_rates( $tax_class = '' ) {
+	public function get_rates( $tax_class = '' ) {
 		global $woocommerce;
 
 		$tax_class = sanitize_title( $tax_class );
@@ -156,7 +156,7 @@ class WC_Tax {
 	 * @param   string	Tax Class
 	 * @return  array
 	 */
-	function get_shop_base_rate( $tax_class = '' ) {
+	public function get_shop_base_rate( $tax_class = '' ) {
 		global $woocommerce;
 
 		$country 	= $woocommerce->countries->get_base_country();
@@ -175,7 +175,7 @@ class WC_Tax {
 	 * @param   string	Tax Class
 	 * @return  mixed
 	 */
-	function get_shipping_tax_rates( $tax_class = null ) {
+	public function get_shipping_tax_rates( $tax_class = null ) {
 		global $woocommerce;
 
 		// See if we have an explicitly set shipping tax class
@@ -320,7 +320,7 @@ class WC_Tax {
 	 * @param	bool	passed price includes tax
 	 * @return  array	array of rates/amounts
 	 */
-	function calc_tax( $price, $rates, $price_includes_tax = true, $supress_rounding = false ) {
+	public function calc_tax( $price, $rates, $price_includes_tax = true, $supress_rounding = false ) {
 
 		$price = $price * 100;	// To avoid float rounding errors, work with integers (pence)
 
@@ -445,7 +445,7 @@ class WC_Tax {
 	 * @param	int		Taxation Rate
 	 * @return  int
 	 */
-	function calc_shipping_tax( $price, $rates ) {
+	public function calc_shipping_tax( $price, $rates ) {
 
 		// Taxes array
 		$taxes = array();
@@ -485,7 +485,7 @@ class WC_Tax {
 	 * @param   int		key
 	 * @return  bool
 	 */
-	function is_compound( $key ) {
+	public function is_compound( $key ) {
 		global $wpdb;
 		return $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_compound FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) ) ? true : false;
 	}
@@ -496,7 +496,7 @@ class WC_Tax {
 	 * @param   int		key
 	 * @return  string
 	 */
-	function get_rate_label( $key ) {
+	public function get_rate_label( $key ) {
 		global $wpdb;
 		return apply_filters( 'woocommerce_rate_label', $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_name FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) ), $key, $this );
 	}
@@ -508,7 +508,7 @@ class WC_Tax {
 	 * @param mixed $key
 	 * @return void
 	 */
-	function get_rate_code( $key ) {
+	public function get_rate_code( $key ) {
 		global $wpdb;
 
 		$rate = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
@@ -529,7 +529,7 @@ class WC_Tax {
 	 * @param   array
 	 * @return  float
 	 */
-	function get_tax_total( $taxes ) {
+	public function get_tax_total( $taxes ) {
 		return array_sum( array_map( array(&$this, 'round'), $taxes ) );
 	}
 
@@ -538,13 +538,13 @@ class WC_Tax {
 	 *
 	 * Filter example: to return rounding to .5 cents you'd use:
 	 *
-	 * function euro_5cent_rounding( $in ) {
+	 * public function euro_5cent_rounding( $in ) {
 	 *      return round( $in / 5, 2 ) * 5;
 	 * }
 	 * add_filter( 'woocommerce_tax_round', 'euro_5cent_rounding' );
 	 *
 	 */
-	function round( $in ) {
+	public function round( $in ) {
 		return apply_filters( 'woocommerce_tax_round', round( $in, $this->dp ), $in );
 	}
 
