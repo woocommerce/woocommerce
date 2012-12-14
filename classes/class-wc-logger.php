@@ -21,7 +21,7 @@ class WC_Logger {
 	 * @access public
 	 * @return void
 	 */
-	function __construct() {
+	public function __construct() {
 		$this->handles = array();
 	}
 
@@ -32,7 +32,7 @@ class WC_Logger {
 	 * @access public
 	 * @return void
 	 */
-	function __destruct() {
+	public function __destruct() {
 		foreach ( $this->handles as $handle )
 	       @fclose( escapeshellarg( $handle ) );
 	}
