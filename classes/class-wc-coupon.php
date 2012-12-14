@@ -11,59 +11,59 @@
  */
 class WC_Coupon {
 
-	/** @var string Coupon code. */
-	var $code;
+	/** @public string Coupon code. */
+	public $code;
 
-	/** @var int Coupon ID. */
-	var $id;
+	/** @public int Coupon ID. */
+	public $id;
 
-	/** @var string Type of discount. */
-	var $type;
+	/** @public string Type of discount. */
+	public $type;
 
-	/** @var string Type of discount (alias). */
-	var $discount_type;
+	/** @public string Type of discount (alias). */
+	public $discount_type;
 
-	/** @var string Coupon amount. */
-	var $amount;
+	/** @public string Coupon amount. */
+	public $amount;
 
-	/** @var string "Yes" if for individual use. */
-	var $individual_use;
+	/** @public string "Yes" if for individual use. */
+	public $individual_use;
 
-	/** @var array Array of product IDs. */
-	var $product_ids;
+	/** @public array Array of product IDs. */
+	public $product_ids;
 
-	/** @var int Coupon usage limit. */
-	var $usage_limit;
+	/** @public int Coupon usage limit. */
+	public $usage_limit;
 
-	/** @var int Coupon usage count. */
-	var $usage_count;
+	/** @public int Coupon usage count. */
+	public $usage_count;
 
-	/** @var string Expirey date. */
-	var $expiry_date;
+	/** @public string Expirey date. */
+	public $expiry_date;
 
-	/** @var string "yes" if applied before tax. */
-	var $apply_before_tax;
+	/** @public string "yes" if applied before tax. */
+	public $apply_before_tax;
 
-	/** @var string "yes" if coupon grants free shipping. */
-	var $free_shipping;
+	/** @public string "yes" if coupon grants free shipping. */
+	public $free_shipping;
 
-	/** @var array Array of category ids. */
-	var $product_categories;
+	/** @public array Array of category ids. */
+	public $product_categories;
 
-	/** @var array Array of category ids. */
-	var $exclude_product_categories;
+	/** @public array Array of category ids. */
+	public $exclude_product_categories;
 
-	/** @var string Minimum cart amount. */
-	var $minimum_amount;
+	/** @public string Minimum cart amount. */
+	public $minimum_amount;
 
-	/** @var string Coupon owner's email. */
-	var $customer_email;
+	/** @public string Coupon owner's email. */
+	public $customer_email;
 
-	/** @var array Post meta. */
-	var $coupon_custom_fields;
+	/** @public array Post meta. */
+	public $coupon_custom_fields;
 
-	/** @var string How much the coupon is worth. */
-	var $coupon_amount;
+	/** @public string How much the coupon is worth. */
+	public $coupon_amount;
 
 	/**
 	 * Coupon constructor. Loads coupon data.
@@ -72,7 +72,7 @@ class WC_Coupon {
 	 * @param mixed $code code of the coupon to load
 	 * @return bool whether or not the coupon was found
 	 */
-	function __construct( $code ) {
+	public function __construct( $code ) {
 		global $wpdb;
 
 		$this->code 	= apply_filters( 'woocommerce_coupon_code', $code );
@@ -162,7 +162,7 @@ class WC_Coupon {
 	 * @access public
 	 * @return bool
 	 */
-	function apply_before_tax() {
+	public function apply_before_tax() {
 		return $this->apply_before_tax == 'yes' ? true : false;
 	}
 
@@ -173,7 +173,7 @@ class WC_Coupon {
 	 * @access public
 	 * @return void
 	 */
-	function enable_free_shipping() {
+	public function enable_free_shipping() {
 		return $this->free_shipping == 'yes' ? true : false;
 	}
 
@@ -184,7 +184,7 @@ class WC_Coupon {
 	 * @access public
 	 * @return void
 	 */
-	function inc_usage_count() {
+	public function inc_usage_count() {
 		$this->usage_count++;
 		update_post_meta( $this->id, 'usage_count', $this->usage_count );
 	}
@@ -196,7 +196,7 @@ class WC_Coupon {
 	 * @access public
 	 * @return void
 	 */
-	function dcr_usage_count() {
+	public function dcr_usage_count() {
 		$this->usage_count--;
 		update_post_meta( $this->id, 'usage_count', $this->usage_count );
 	}
@@ -209,7 +209,7 @@ class WC_Coupon {
 	 * @access public
 	 * @return bool|WP_Error validity or a WP_Error if not valid
 	 */
-	function is_valid() {
+	public function is_valid() {
 		global $woocommerce;
 
 		if ( $this->id ) {
