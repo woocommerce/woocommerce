@@ -20,7 +20,7 @@ class WC_Product_Simple extends WC_Product {
 	 * @param mixed $product
 	 * @param array $args Contains arguments to set up this product
 	 */
-	function __construct( $product, $args ) {
+	public function __construct( $product, $args ) {
 
 		parent::__construct( $product );
 
@@ -60,7 +60,7 @@ class WC_Product_Simple extends WC_Product {
 	 * @access public
 	 * @return string
 	 */
-	function get_title() {
+	public function get_title() {
 
 		$title = $this->post->post_title;
 
@@ -78,7 +78,7 @@ class WC_Product_Simple extends WC_Product {
 	 * @access public
 	 * @return void
 	 */
-	function grouped_product_sync() {
+	public function grouped_product_sync() {
 		global $wpdb, $woocommerce;
 
 		if ( ! $this->get_parent() ) return;
