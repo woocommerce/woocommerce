@@ -13,7 +13,7 @@ class WC_Logger {
 	 * @var array Stores open file handles.
 	 * @access private
 	 */
-	private $handles;
+	private $_handles;
 
 	/**
 	 * Constructor for the logger.
