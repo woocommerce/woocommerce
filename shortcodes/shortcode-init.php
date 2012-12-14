@@ -127,7 +127,8 @@ function woocommerce_product_categories( $atts ) {
 		'orderby'    => 'name',
 		'order'      => 'ASC',
 		'columns' 	 => '4',
-		'hide_empty' => 1
+		'hide_empty' => 1,
+		'parent'     => ''
 		), $atts ) );
 
 	if ( isset( $atts[ 'ids' ] ) ) {
@@ -144,7 +145,8 @@ function woocommerce_product_categories( $atts ) {
   		'orderby'    => $orderby,
   		'order'      => $order,
   		'hide_empty' => $hide_empty,
-		'include'    => $ids
+		'include'    => $ids,
+		'parent'     => $parent
 	);
 
   	$product_categories = get_terms( 'product_cat', $args );
