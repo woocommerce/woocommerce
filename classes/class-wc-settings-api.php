@@ -122,7 +122,7 @@ class WC_Settings_API {
 	    	}
 
 	    	// Set and decode escaped values
-	    	$this->settings = array_map( array( &$this, 'format_settings' ), $form_field_settings );
+	    	$this->settings = array_map( array( $this, 'format_settings' ), $form_field_settings );
     	}
 
     	if ( isset( $this->settings['enabled'] ) && ( $this->settings['enabled'] == 'yes' ) )

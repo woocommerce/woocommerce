@@ -45,7 +45,7 @@ class WC_Shipping {
 
 		$this->enabled = ( get_option('woocommerce_calc_shipping') == 'no' ) ? false : true;
 
-		add_action( 'woocommerce_update_options_shipping', array( &$this, 'process_admin_options' ) );
+		add_action( 'woocommerce_update_options_shipping', array( $this, 'process_admin_options' ) );
 	}
 
 	/**

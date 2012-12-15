@@ -38,11 +38,11 @@ class WC_Cheque extends WC_Payment_Gateway {
 		$this->description = $this->settings['description'];
 
 		// Actions
-		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
-    	add_action('woocommerce_thankyou_cheque', array(&$this, 'thankyou_page'));
+		add_action( 'woocommerce_update_options_payment_gateways', array( $this, 'process_admin_options' ) );
+    	add_action( 'woocommerce_thankyou_cheque', array( $this, 'thankyou_page' ) );
 
     	// Customer Emails
-    	add_action('woocommerce_email_before_order_table', array(&$this, 'email_instructions'), 10, 2);
+    	add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 2 );
     }
 
 

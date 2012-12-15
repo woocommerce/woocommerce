@@ -530,7 +530,7 @@ class WC_Tax {
 	 * @return  float
 	 */
 	function get_tax_total( $taxes ) {
-		return array_sum( array_map( array(&$this, 'round'), $taxes ) );
+		return array_sum( array_map( array( $this, 'round' ), $taxes ) );
 	}
 
 	/**

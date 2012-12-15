@@ -35,9 +35,9 @@ class WC_Checkout {
 	function __construct () {
 		global $woocommerce;
 
-		add_action( 'woocommerce_checkout_process', array( &$this,'checkout_process' ) );
-		add_action( 'woocommerce_checkout_billing', array( &$this,'checkout_form_billing' ) );
-		add_action( 'woocommerce_checkout_shipping', array( &$this,'checkout_form_shipping' ) );
+		add_action( 'woocommerce_checkout_process', array( $this,'checkout_process' ) );
+		add_action( 'woocommerce_checkout_billing', array( $this,'checkout_form_billing' ) );
+		add_action( 'woocommerce_checkout_shipping', array( $this,'checkout_form_shipping' ) );
 
 		$this->enable_signup         = get_option( 'woocommerce_enable_signup_and_login_from_checkout' ) == 'yes' ? true : false;
 		$this->enable_guest_checkout = get_option( 'woocommerce_enable_guest_checkout' ) == 'yes' ? true : false;

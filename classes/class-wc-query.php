@@ -34,9 +34,9 @@ class WC_Query {
 	 * @return void
 	 */
 	function __construct() {
-		add_filter( 'pre_get_posts', array( &$this, 'pre_get_posts') );
-		add_filter( 'the_posts', array( &$this, 'the_posts'), 11, 2 );
-		add_filter( 'wp', array( &$this, 'remove_product_query') );
+		add_filter( 'pre_get_posts', array( $this, 'pre_get_posts') );
+		add_filter( 'the_posts', array( $this, 'the_posts'), 11, 2 );
+		add_filter( 'wp', array( $this, 'remove_product_query') );
 	}
 
 
@@ -84,8 +84,8 @@ class WC_Query {
 
 	        // Fix WP SEO
 	        if ( function_exists( 'wpseo_get_value' ) ) {
-	       		add_filter( 'wpseo_metadesc', array( &$this, 'wpseo_metadesc' ) );
-	       		add_filter( 'wpseo_metakey', array( &$this, 'wpseo_metakey' ) );
+	       		add_filter( 'wpseo_metadesc', array( $this, 'wpseo_metadesc' ) );
+	       		add_filter( 'wpseo_metakey', array( $this, 'wpseo_metakey' ) );
 	       	}
 
 		} else {
@@ -99,7 +99,7 @@ class WC_Query {
 	    $this->product_query( $q );
 
 	    // We're on a shop page so queue the woocommerce_get_products_in_view function
-	    add_action( 'wp', array( &$this, 'get_products_in_view' ), 2);
+	    add_action( 'wp', array( $this, 'get_products_in_view' ), 2);
 
 	    // And remove the pre_get_posts hook
 	    $this->remove_product_query();
@@ -238,7 +238,7 @@ class WC_Query {
 	 * @return void
 	 */
 	function remove_product_query() {
-		remove_filter( 'pre_get_posts', array( &$this, 'pre_get_posts') );
+		remove_filter( 'pre_get_posts', array( $this, 'pre_get_posts') );
 	}
 
 

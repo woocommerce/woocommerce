@@ -58,7 +58,7 @@ class WC_Free_Shipping extends WC_Shipping_Method {
 		}
 
 		// Actions
-		add_action('woocommerce_update_options_shipping_'.$this->id, array(&$this, 'process_admin_options'));
+		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
     }
 
 

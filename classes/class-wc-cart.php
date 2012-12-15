@@ -90,7 +90,7 @@ class WC_Cart {
 		$this->display_totals_ex_tax = $this->tax_display_cart == 'excl' ? true : false;
 		$this->display_cart_ex_tax   = $this->tax_display_cart == 'excl' ? true : false;
 
-		add_action( 'init', array( &$this, 'init' ), 5 ); // Get cart on init
+		add_action( 'init', array( $this, 'init' ), 5 ); // Get cart on init
 	}
 
 
@@ -103,9 +103,9 @@ class WC_Cart {
     function init() {
 		$this->get_cart_from_session();
 
-		add_action('woocommerce_check_cart_items', array( &$this, 'check_cart_items' ), 1 );
-		add_action('woocommerce_check_cart_items', array( &$this, 'check_cart_coupons' ), 1 );
-		add_action('woocommerce_after_checkout_validation', array( &$this, 'check_customer_coupons' ), 1 );
+		add_action('woocommerce_check_cart_items', array( $this, 'check_cart_items' ), 1 );
+		add_action('woocommerce_check_cart_items', array( $this, 'check_cart_coupons' ), 1 );
+		add_action('woocommerce_after_checkout_validation', array( $this, 'check_customer_coupons' ), 1 );
     }
 
  	/*-----------------------------------------------------------------------------------*/
@@ -1502,8 +1502,8 @@ class WC_Cart {
 			}
 
 			// Round cart/shipping tax rows
-			$this->taxes = array_map( array( &$this->tax, 'round' ), $this->taxes );
-			$this->shipping_taxes = array_map( array( &$this->tax, 'round' ), $this->shipping_taxes );
+			$this->taxes = array_map( array( $this->tax, 'round' ), $this->taxes );
+			$this->shipping_taxes = array_map( array( $this->tax, 'round' ), $this->shipping_taxes );
 
 			// Allow plugins to hook and alter totals before final total is calculated
 			do_action( 'woocommerce_calculate_totals', $this );

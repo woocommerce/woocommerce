@@ -40,9 +40,9 @@ class WooCommerce_Widget_Top_Rated_Products extends WP_Widget {
 		/* Create the widget. */
 		$this->WP_Widget('top-rated-products', $this->woo_widget_name, $widget_ops);
 
-		add_action( 'save_post', array(&$this, 'flush_widget_cache') );
-		add_action( 'deleted_post', array(&$this, 'flush_widget_cache') );
-		add_action( 'switch_theme', array(&$this, 'flush_widget_cache') );
+		add_action( 'save_post', array( $this, 'flush_widget_cache' ) );
+		add_action( 'deleted_post', array( $this, 'flush_widget_cache' ) );
+		add_action( 'switch_theme', array( $this, 'flush_widget_cache' ) );
 	}
 
 	/**
@@ -75,7 +75,7 @@ class WooCommerce_Widget_Top_Rated_Products extends WP_Widget {
 		else if ( $number < 1 ) $number = 1;
 		else if ( $number > 15 ) $number = 15;
 
-		add_filter( 'posts_clauses',  array(&$this, 'order_by_rating_post_clauses') );
+		add_filter( 'posts_clauses',  array( $this, 'order_by_rating_post_clauses' ) );
 
 		$query_args = array('posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product' );
 
@@ -107,7 +107,7 @@ class WooCommerce_Widget_Top_Rated_Products extends WP_Widget {
 		endif;
 
 		wp_reset_query();
-		remove_filter( 'posts_clauses', array(&$this, 'order_by_rating_post_clauses') );
+		remove_filter( 'posts_clauses', array( $this, 'order_by_rating_post_clauses' ) );
 
 		$content = ob_get_clean();
 

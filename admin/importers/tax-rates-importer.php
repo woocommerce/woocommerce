@@ -59,7 +59,7 @@ if ( class_exists( 'WP_Importer' ) ) {
 						else
 							$file = ABSPATH . $this->file_url;
 
-						add_filter( 'http_request_timeout', array( &$this, 'bump_request_timeout' ) );
+						add_filter( 'http_request_timeout', array( $this, 'bump_request_timeout' ) );
 
 						if ( function_exists( 'gc_enable' ) )
 							gc_enable();

@@ -34,7 +34,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 		$this->template_plain 	= 'emails/plain/customer-completed-order.php';
 
 		// Triggers for this email
-		add_action( 'woocommerce_order_status_completed_notification', array( &$this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_completed_notification', array( $this, 'trigger' ) );
 
 		// Call parent constuctor
 		parent::__construct();

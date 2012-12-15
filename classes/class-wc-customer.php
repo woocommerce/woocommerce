@@ -56,7 +56,7 @@ class WC_Customer {
 		}
 
 		// When leaving or ending page load, store data
-    	add_action( 'shutdown', array( &$this, 'save_data' ), 10 );
+    	add_action( 'shutdown', array( $this, 'save_data' ), 10 );
 	}
 
     /**

@@ -46,7 +46,7 @@ class WC_Payment_Gateways {
 
 		ksort($this->payment_gateways);
 
-		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
+		add_action( 'woocommerce_update_options_payment_gateways', array( $this, 'process_admin_options' ) );
     }
 
 
