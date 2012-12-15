@@ -14,10 +14,10 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 class WC_Product_Grouped extends WC_Product {
 
 	/** @var array Array of child products/posts/variations. */
-	var $children;
+	public $children;
 
 	/** @var string The product's total stock, including that of its children. */
-	var $total_stock;
+	public $total_stock;
 
 	/**
 	 * __construct function.
@@ -26,7 +26,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @param mixed $product
 	 * @param array $args Contains arguments to set up this product
 	 */
-	function __construct( $product, $args ) {
+	public function __construct( $product, $args ) {
 
 		parent::__construct( $product );
 
@@ -63,7 +63,7 @@ class WC_Product_Grouped extends WC_Product {
      * @access public
      * @return int
      */
-    function get_total_stock() {
+    public function get_total_stock() {
 
         if ( is_null( $this->total_stock ) ) {
 
@@ -95,7 +95,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @access public
 	 * @return array
 	 */
-	function get_children() {
+	public function get_children() {
 
 		if ( ! is_array( $this->children ) ) {
 
@@ -123,7 +123,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @param mixed $child_id
 	 * @return object WC_Product or WC_Product_variation
 	 */
-	function get_child( $child_id ) {
+	public function get_child( $child_id ) {
 		return get_product( $child_id );
 	}
 
@@ -134,7 +134,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function has_child() {
+	public function has_child() {
 		return sizeof( $this->get_children() ) ? true : false;
 	}
 
@@ -145,7 +145,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function is_on_sale() {
+	public function is_on_sale() {
 		if ( $this->has_child() ) {
 
 			foreach ( $this->get_children() as $child_id ) {
@@ -170,7 +170,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @access public
 	 * @return cool
 	 */
-	function is_purchasable() {
+	public function is_purchasable() {
 		return apply_filters( 'woocommerce_is_purchasable', false, $this );
 	}
 
@@ -182,7 +182,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @param string $price (default: '')
 	 * @return string
 	 */
-	function get_price_html( $price = '' ) {
+	public function get_price_html( $price = '' ) {
 
 		$child_prices = array();
 

@@ -37,87 +37,87 @@ class Woocommerce {
 	/**
 	 * @var string
 	 */
-	var $version = '2.0.0';
+	public $version = '2.0.0';
 
 	/**
 	 * @var string
 	 */
-	var $plugin_url;
+	public $plugin_url;
 
 	/**
 	 * @var string
 	 */
-	var $plugin_path;
+	public $plugin_path;
 
 	/**
 	 * @var string
 	 */
-	var $template_url;
+	public $template_url;
 
 	/**
 	 * @var array
 	 */
-	var $errors = array();
+	public $errors = array();
 
 	/**
 	 * @var array
 	 */
-	var $messages = array();
+	public $messages = array();
 
 	/**
 	 * @var WC_Query
 	 */
-	var $query;
+	public $query;
 
 	/**
 	 * @var WC_Customer
 	 */
-	var $customer;
+	public $customer;
 
 	/**
 	 * @var WC_Shipping
 	 */
-	var $shipping;
+	public $shipping;
 
 	/**
 	 * @var WC_Product_Factory
 	 */
-	var $product_factory;
+	public $product_factory;
 
 	/**
 	 * @var WC_Cart
 	 */
-	var $cart;
+	public $cart;
 
 	/**
 	 * @var WC_Payment_Gateways
 	 */
-	var $payment_gateways;
+	public $payment_gateways;
 
 	/**
 	 * @var WC_Countries
 	 */
-	var $countries;
+	public $countries;
 
 	/**
 	 * @var WC_Email
 	 */
-	var $woocommerce_email;
+	public $woocommerce_email;
 
 	/**
 	 * @var WC_Checkout
 	 */
-	var $checkout;
+	public $checkout;
 
 	/**
 	 * @var WC_Integrations
 	 */
-	var $integrations;
+	public $integrations;
 
 	/**
 	 * @var array
 	 */
-	var $attribute_taxonomies;
+	public $attribute_taxonomies;
 
 	/**
 	 * @var array
@@ -136,7 +136,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function __construct() {
+	public function __construct() {
 
 		// Start a PHP session, if not yet started
 		if ( ! session_id() )
@@ -173,7 +173,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function activate() {
+	public function activate() {
 		update_option( 'skip_install_woocommerce_pages', 0 );
 		update_option( 'woocommerce_installed', 1 );
 		$this->install();
@@ -253,7 +253,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function admin_includes() {
+	public function admin_includes() {
 		include( 'admin/woocommerce-admin-init.php' );			// Admin section
 	}
 
@@ -264,7 +264,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function ajax_includes() {
+	public function ajax_includes() {
 		include( 'woocommerce-ajax.php' );						// Ajax functions for admin and the front-end
 	}
 
@@ -275,7 +275,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function frontend_includes() {
+	public function frontend_includes() {
 		include( 'woocommerce-hooks.php' );						// Template hooks used on the front-end
 		include( 'woocommerce-functions.php' );					// Contains functions for various front-end events
 		include( 'shortcodes/shortcode-init.php' );				// Init the shortcodes
@@ -294,7 +294,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function include_template_functions() {
+	public function include_template_functions() {
 		include( 'woocommerce-template.php' );
 	}
 
@@ -305,7 +305,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function init() {
+	public function init() {
 		//Before init action
 		do_action( 'before_woocommerce_init' );
 
@@ -401,7 +401,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function api_requests() {
+	public function api_requests() {
 		if ( isset( $_GET['wc-api'] ) ) {
 			$api = strtolower( esc_attr( $_GET['wc-api'] ) );
 			do_action( 'woocommerce_api_' . $api );
@@ -415,7 +415,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function load_plugin_textdomain() {
+	public function load_plugin_textdomain() {
 		// Note: the first-loaded translation file overrides any following ones if the same translation is present
 		$locale = apply_filters( 'plugin_locale', get_locale(), 'woocommerce' );
 		$variable_lang = ( get_option( 'woocommerce_informal_localisation_type' ) == 'yes' ) ? 'informal' : 'formal';
@@ -441,7 +441,7 @@ class Woocommerce {
 	 * @param mixed $template
 	 * @return string
 	 */
-	function template_loader( $template ) {
+	public function template_loader( $template ) {
 
 		$find = array( 'woocommerce.php' );
 		$file = '';
@@ -486,7 +486,7 @@ class Woocommerce {
 	 * @param mixed $template
 	 * @return string
 	 */
-	function comments_template_loader( $template ) {
+	public function comments_template_loader( $template ) {
 		if( get_post_type() !== 'product' ) return $template;
 
 		if (file_exists( STYLESHEETPATH . '/' . $this->template_url . 'single-product-reviews.php' ))
@@ -502,7 +502,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function buffer_checkout() {
+	public function buffer_checkout() {
 		if ( is_checkout() ) ob_start();
 	}
 
@@ -513,7 +513,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function register_globals() {
+	public function register_globals() {
 		$GLOBALS['product'] = null;
 	}
 
@@ -525,7 +525,7 @@ class Woocommerce {
 	 * @param mixed $post
 	 * @return WC_Product
 	 */
-	function setup_product_data( $post ) {
+	public function setup_product_data( $post ) {
 		if ( is_int( $post ) ) $post = get_post( $post );
 		if ( $post->post_type !== 'product' ) return;
 		unset( $GLOBALS['product'] );
@@ -540,7 +540,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function compatibility() {
+	public function compatibility() {
 		// Post thumbnail support
 		if ( ! current_theme_supports( 'post-thumbnails', 'product' ) ) {
 			add_theme_support( 'post-thumbnails' );
@@ -576,7 +576,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function ssl_redirect() {
+	public function ssl_redirect() {
 		if ( get_option('woocommerce_force_ssl_checkout') == 'no' ) return;
 
 		if ( ! is_ssl() ) {
@@ -614,7 +614,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function generator() {
+	public function generator() {
 		echo "\n\n" . '<!-- WooCommerce Version -->' . "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( $this->version ) . '" />' . "\n\n";
 	}
 
@@ -625,7 +625,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function wp_head() {
+	public function wp_head() {
 		$theme_name = ( function_exists( 'wp_get_theme' ) ) ? wp_get_theme() : get_current_theme();
 		$this->add_body_class( "theme-{$theme_name}" );
 
@@ -647,7 +647,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function init_taxonomy() {
+	public function init_taxonomy() {
 
 		if ( post_type_exists('product') )
 			return;
@@ -1018,7 +1018,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function init_image_sizes() {
+	public function init_image_sizes() {
 		$shop_thumbnail = $this->get_image_size( 'shop_thumbnail' );
 		$shop_catalog	= $this->get_image_size( 'shop_catalog' );
 		$shop_single	= $this->get_image_size( 'shop_single' );
@@ -1035,7 +1035,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function init_styles() {
+	public function init_styles() {
 
     	// Optional front end css
 		if ( ( defined('WOOCOMMERCE_USE_CSS') && WOOCOMMERCE_USE_CSS ) || ( ! defined('WOOCOMMERCE_USE_CSS') && get_option('woocommerce_frontend_css') == 'yes') ) {
@@ -1052,7 +1052,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function frontend_scripts() {
+	public function frontend_scripts() {
 		global $post;
 
 		$suffix 				= defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
@@ -1132,7 +1132,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function check_jquery() {
+	public function check_jquery() {
 		global $wp_scripts;
 
 		// Enforce minimum version of jQuery
@@ -1151,7 +1151,7 @@ class Woocommerce {
 	 * @access public
 	 * @return WC_Checkout
 	 */
-	function checkout() {
+	public function checkout() {
 		if ( ! class_exists( 'WC_Checkout' ) ) {
 			include_once( 'classes/class-wc-checkout.php' );
 			$this->checkout = new WC_Checkout();
@@ -1166,7 +1166,7 @@ class Woocommerce {
 	 * @access public
 	 * @return WC_Logger
 	 */
-	function logger() {
+	public function logger() {
 		if ( ! class_exists('WC_Logger') ) include( 'classes/class-wc-logger.php' );
 		return new WC_Logger();
 	}
@@ -1178,7 +1178,7 @@ class Woocommerce {
 	 * @access public
 	 * @return WC_Validation
 	 */
-	function validation() {
+	public function validation() {
 		if ( ! class_exists('WC_Validation') ) include( 'classes/class-wc-validation.php' );
 		return new WC_Validation();
 	}
@@ -1191,7 +1191,7 @@ class Woocommerce {
 	 * @param mixed $code
 	 * @return WC_Coupon
 	 */
-	function coupon( $code ) {
+	public function coupon( $code ) {
 		if ( ! class_exists('WC_Coupon') ) include( 'classes/class-wc-coupon.php' );
 		return new WC_Coupon( $code );
 	}
@@ -1204,7 +1204,7 @@ class Woocommerce {
 	 * @param array $args (default: array())
 	 * @return void
 	 */
-	function send_transactional_email( $args = array() ) {
+	public function send_transactional_email( $args = array() ) {
 		$this->mailer();
 		do_action( current_filter() . '_notification', $args );
 	}
@@ -1216,7 +1216,7 @@ class Woocommerce {
 	 * @access public
 	 * @return WC_Email
 	 */
-	function mailer() {
+	public function mailer() {
 		if ( empty( $this->woocommerce_email ) ) {
 			// Init mail class
 			if ( ! class_exists('WC_Emails') ) {
@@ -1235,7 +1235,7 @@ class Woocommerce {
 	 * @access public
 	 * @return string
 	 */
-	function plugin_url() {
+	public function plugin_url() {
 		if ( $this->plugin_url ) return $this->plugin_url;
 		return $this->plugin_url = plugins_url( basename( plugin_dir_path(__FILE__) ), basename( __FILE__ ) );
 	}
@@ -1247,7 +1247,7 @@ class Woocommerce {
 	 * @access public
 	 * @return string
 	 */
-	function plugin_path() {
+	public function plugin_path() {
 		if ( $this->plugin_path ) return $this->plugin_path;
 
 		return $this->plugin_path = untrailingslashit( plugin_dir_path( __FILE__ ) );
@@ -1260,7 +1260,7 @@ class Woocommerce {
 	 * @access public
 	 * @return string
 	 */
-	function ajax_url() {
+	public function ajax_url() {
 		return admin_url( 'admin-ajax.php', 'relative' );
 	}
 
@@ -1272,7 +1272,7 @@ class Woocommerce {
 	 * @param string/array $content
 	 * @return string/array
 	 */
-	function force_ssl( $content ) {
+	public function force_ssl( $content ) {
 		if ( is_ssl() ) {
 			if ( is_array($content) )
 				$content = array_map( array( &$this, 'force_ssl' ) , $content );
@@ -1292,7 +1292,7 @@ class Woocommerce {
 	 * @param mixed $image_size
 	 * @return string
 	 */
-	function get_image_size( $image_size ) {
+	public function get_image_size( $image_size ) {
 
 		// Only return sizes we define in settings
 		if ( ! in_array( $image_size, array( 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ) )
@@ -1315,7 +1315,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function load_messages() {
+	public function load_messages() {
 		$this->errors = $this->session->errors;
 		$this->messages = $this->session->messages;
 		unset( $this->session->errors, $this->session->messages );
@@ -1333,7 +1333,7 @@ class Woocommerce {
 	 * @param string $error
 	 * @return void
 	 */
-	function add_error( $error ) {
+	public function add_error( $error ) {
 		$this->errors[] = apply_filters( 'woocommerce_add_error', $error );
 	}
 
@@ -1345,7 +1345,7 @@ class Woocommerce {
 	 * @param string $message
 	 * @return void
 	 */
-	function add_message( $message ) {
+	public function add_message( $message ) {
 		$this->messages[] = apply_filters( 'woocommerce_add_message', $message );
 	}
 
@@ -1356,7 +1356,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function clear_messages() {
+	public function clear_messages() {
 		$this->errors = $this->messages = array();
 		unset( $this->session->errors, $this->session->messages );
 	}
@@ -1368,7 +1368,7 @@ class Woocommerce {
 	 * @access public
 	 * @return int
 	 */
-	function error_count() {
+	public function error_count() {
 		return sizeof( $this->errors );
 	}
 
@@ -1379,7 +1379,7 @@ class Woocommerce {
 	 * @access public
 	 * @return int
 	 */
-	function message_count() {
+	public function message_count() {
 		return sizeof( $this->messages );
 	}
 
@@ -1390,7 +1390,7 @@ class Woocommerce {
 	 * @access public
 	 * @return array
 	 */
-	function get_errors() {
+	public function get_errors() {
 		return (array) $this->errors;
 	}
 
@@ -1401,7 +1401,7 @@ class Woocommerce {
 	 * @access public
 	 * @return array
 	 */
-	function get_messages() {
+	public function get_messages() {
 		return (array) $this->messages;
 	}
 
@@ -1412,7 +1412,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function show_messages() {
+	public function show_messages() {
 		woocommerce_show_messages();
 	}
 
@@ -1423,7 +1423,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function set_messages() {
+	public function set_messages() {
 		$this->session->errors = $this->errors;
 		$this->session->messages = $this->messages;
 	}
@@ -1437,7 +1437,7 @@ class Woocommerce {
 	 * @param mixed $status
 	 * @return string
 	 */
-	function redirect( $location, $status ) {
+	public function redirect( $location, $status ) {
 		$this->set_messages();
 
 		return apply_filters( 'woocommerce_redirect', $location );
@@ -1451,7 +1451,7 @@ class Woocommerce {
 	 * @access public
 	 * @return object
 	 */
-	function get_attribute_taxonomies() {
+	public function get_attribute_taxonomies() {
 		global $wpdb;
 		if ( ! $this->attribute_taxonomies )
 			$this->attribute_taxonomies = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies" );
@@ -1466,7 +1466,7 @@ class Woocommerce {
 	 * @param mixed $name
 	 * @return string
 	 */
-	function attribute_taxonomy_name( $name ) {
+	public function attribute_taxonomy_name( $name ) {
 		return 'pa_' . woocommerce_sanitize_taxonomy_name( $name );
 	}
 
@@ -1478,7 +1478,7 @@ class Woocommerce {
 	 * @param mixed $name
 	 * @return string
 	 */
-	function attribute_label( $name ) {
+	public function attribute_label( $name ) {
 		global $wpdb;
 
 		if ( strstr( $name, 'pa_' ) ) {
@@ -1503,7 +1503,7 @@ class Woocommerce {
 	 * @param mixed $name
 	 * @return string
 	 */
-	function attribute_orderby( $name ) {
+	public function attribute_orderby( $name ) {
 		global $wpdb;
 
 		$name = str_replace( 'pa_', '', sanitize_title( $name ) );
@@ -1521,7 +1521,7 @@ class Woocommerce {
 	 * @access public
 	 * @return array
 	 */
-	function get_attribute_taxonomy_names() {
+	public function get_attribute_taxonomy_names() {
 		$taxonomy_names = array();
 		$attribute_taxonomies = $this->get_attribute_taxonomies();
 		if ( $attribute_taxonomies ) {
@@ -1540,7 +1540,7 @@ class Woocommerce {
 	 * @access public
 	 * @return array
 	 */
-	function get_coupon_discount_types() {
+	public function get_coupon_discount_types() {
 		if ( ! isset($this->coupon_discount_types ) ) {
 			$this->coupon_discount_types = apply_filters( 'woocommerce_coupon_discount_types', array(
     			'fixed_cart' 	=> __( 'Cart Discount', 'woocommerce' ),
@@ -1560,7 +1560,7 @@ class Woocommerce {
 	 * @param string $type (default: '')
 	 * @return string
 	 */
-	function get_coupon_discount_type( $type = '' ) {
+	public function get_coupon_discount_type( $type = '' ) {
 		$types = (array) $this->get_coupon_discount_types();
 		if ( isset( $types[$type] ) ) return $types[$type];
 	}
@@ -1576,7 +1576,7 @@ class Woocommerce {
 	 * @param bool $echo (default: true)
 	 * @return void
 	 */
-	function nonce_field( $action, $referer = true , $echo = true ) {
+	public function nonce_field( $action, $referer = true , $echo = true ) {
 		return wp_nonce_field('woocommerce-' . $action, '_n', $referer, $echo );
 	}
 
@@ -1589,7 +1589,7 @@ class Woocommerce {
 	 * @param string $url (default: '')
 	 * @return string
 	 */
-	function nonce_url( $action, $url = '' ) {
+	public function nonce_url( $action, $url = '' ) {
 		return add_query_arg( '_n', wp_create_nonce( 'woocommerce-' . $action ), $url );
 	}
 
@@ -1606,7 +1606,7 @@ class Woocommerce {
 	 * @param string $error_message custom error message, or false for default message, or an empty string to fail silently
 	 * @return bool
 	 */
-	function verify_nonce( $action, $method='_POST', $error_message = false ) {
+	public function verify_nonce( $action, $method='_POST', $error_message = false ) {
 
 		$name = '_n';
 		$action = 'woocommerce-' . $action;
@@ -1632,7 +1632,7 @@ class Woocommerce {
 	 * @param array $atts (default: array())
 	 * @return string
 	 */
-	function shortcode_wrapper(
+	public function shortcode_wrapper(
 		$function,
 		$atts = array(),
 		$wrapper = array(
@@ -1661,7 +1661,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function nocache() {
+	public function nocache() {
 		if ( ! defined('DONOTCACHEPAGE') ) define("DONOTCACHEPAGE", "true"); // WP Super Cache constant
 	}
 
@@ -1673,7 +1673,7 @@ class Woocommerce {
 	 * @param mixed $set
 	 * @return void
 	 */
-	function cart_has_contents_cookie( $set ) {
+	public function cart_has_contents_cookie( $set ) {
 		if ( ! headers_sent() ) {
 			if ($set)
 				setcookie( "woocommerce_items_in_cart", "1", 0, COOKIEPATH, COOKIE_DOMAIN, false );
@@ -1693,7 +1693,7 @@ class Woocommerce {
 	 * @param mixed $function
 	 * @return void
 	 */
-	function mfunc_wrapper( $mfunction, $function, $args ) {
+	public function mfunc_wrapper( $mfunction, $function, $args ) {
 		global $wp_super_cache_late_init;
 
 		if ( is_null( $wp_super_cache_late_init ) || $wp_super_cache_late_init == 1 ) {
@@ -1714,7 +1714,7 @@ class Woocommerce {
 	 * @param int $post_id (default: 0)
 	 * @return void
 	 */
-	function clear_product_transients( $post_id = 0 ) {
+	public function clear_product_transients( $post_id = 0 ) {
 		global $wpdb;
 
 		$post_id = absint( $post_id );
@@ -1773,7 +1773,7 @@ class Woocommerce {
 	 * @param string $class
 	 * @return void
 	 */
-	function add_body_class( $class ) {
+	public function add_body_class( $class ) {
 		$this->_body_classes[] = sanitize_html_class( strtolower($class) );
 	}
 
@@ -1784,7 +1784,7 @@ class Woocommerce {
 	 * @param mixed $classes
 	 * @return array
 	 */
-	function output_body_class( $classes ) {
+	public function output_body_class( $classes ) {
 		if ( sizeof( $this->_body_classes ) > 0 ) $classes = array_merge( $classes, $this->_body_classes );
 
 		if ( is_singular('product') ) {
@@ -1804,7 +1804,7 @@ class Woocommerce {
 	 * @param string $code
 	 * @return void
 	 */
-	function add_inline_js( $code ) {
+	public function add_inline_js( $code ) {
 		$this->_inline_js .= "\n" . $code . "\n";
 	}
 
@@ -1814,7 +1814,7 @@ class Woocommerce {
 	 * @access public
 	 * @return void
 	 */
-	function output_inline_js() {
+	public function output_inline_js() {
 		if ( $this->_inline_js ) {
 
 			echo "<!-- WooCommerce JavaScript-->\n<script type=\"text/javascript\">\njQuery(document).ready(function($) {";

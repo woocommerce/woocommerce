@@ -20,7 +20,7 @@ class WC_Customer {
 	 * @access public
 	 * @return void
 	 */
-	function __construct() {
+	public function __construct() {
 		global $woocommerce;
 
 		if ( empty( $woocommerce->session->customer ) ) {
@@ -88,7 +88,7 @@ class WC_Customer {
 	 * @access public
 	 * @return void
 	 */
-	function save_data() {
+	public function save_data() {
 		global $woocommerce;
 		$woocommerce->session->customer = $this->_data;
 	}
@@ -99,7 +99,7 @@ class WC_Customer {
 	 * @access public
 	 * @return bool
 	 */
-	function has_calculated_shipping() {
+	public function has_calculated_shipping() {
 		return ( ! empty( $this->_data['calculated_shipping'] ) && $this->_data['calculated_shipping'] ) ? true : false;
 	}
 
@@ -110,7 +110,7 @@ class WC_Customer {
 	 * @access public
 	 * @return void
 	 */
-	function set_to_base() {
+	public function set_to_base() {
 		global $woocommerce;
 		$default = apply_filters( 'woocommerce_customer_default_location', get_option('woocommerce_default_country') );
     	if ( strstr( $default, ':' ) ) {
@@ -132,7 +132,7 @@ class WC_Customer {
 	 * @access public
 	 * @return void
 	 */
-	function set_shipping_to_base() {
+	public function set_shipping_to_base() {
 		global $woocommerce;
 		$default = get_option('woocommerce_default_country');
     	if ( strstr( $default, ':' ) ) {
@@ -154,7 +154,7 @@ class WC_Customer {
 	 * @access public
 	 * @return bool
 	 */
-	function is_customer_outside_base() {
+	public function is_customer_outside_base() {
 		list( $country, $state, $postcode, $city ) = $this->get_taxable_address();
 
 		if ( $country ) {
@@ -182,7 +182,7 @@ class WC_Customer {
 	 * @access public
 	 * @return bool
 	 */
-	function is_vat_exempt() {
+	public function is_vat_exempt() {
 		return ( isset( $this->_data['is_vat_exempt'] ) && $this->_data['is_vat_exempt'] ) ? true : false;
 	}
 
@@ -193,7 +193,7 @@ class WC_Customer {
 	 * @access public
 	 * @return string
 	 */
-	function get_state() {
+	public function get_state() {
 		if ( isset( $this->_data['state'] ) ) return $this->_data['state'];
 	}
 
@@ -204,7 +204,7 @@ class WC_Customer {
 	 * @access public
 	 * @return string
 	 */
-	function get_country() {
+	public function get_country() {
 		if ( isset( $this->_data['country'] ) ) return $this->_data['country'];
 	}
 
@@ -215,7 +215,7 @@ class WC_Customer {
 	 * @access public
 	 * @return string
 	 */
-	function get_postcode() {
+	public function get_postcode() {
 		global $woocommerce;
 		$validation = $woocommerce->validation();
 		if (isset($this->_data['postcode']) && $this->_data['postcode'] !== false) return $validation->format_postcode( $this->_data['postcode'], $this->get_country());
@@ -228,7 +228,7 @@ class WC_Customer {
 	 * @access public
 	 * @return void
 	 */
-	function get_city() {
+	public function get_city() {
 		if ( isset( $this->_data['city'] ) ) return $this->_data['city'];
 	}
 
@@ -238,7 +238,7 @@ class WC_Customer {
 	 * @access public
 	 * @return void
 	 */
-	function get_address() {
+	public function get_address() {
 		if ( isset( $this->_data['address'] ) ) return $this->_data['address'];
 	}
 
@@ -248,7 +248,7 @@ class WC_Customer {
 	 * @access public
 	 * @return void
 	 */
-	function get_address_2() {
+	public function get_address_2() {
 		if ( isset( $this->_data['address_2'] ) ) return $this->_data['address_2'];
 	}
 
@@ -258,7 +258,7 @@ class WC_Customer {
 	 * @access public
 	 * @return string
 	 */
-	function get_shipping_state() {
+	public function get_shipping_state() {
 		if ( isset( $this->_data['shipping_state'] ) ) return $this->_data['shipping_state'];
 	}
 
@@ -269,7 +269,7 @@ class WC_Customer {
 	 * @access public
 	 * @return string
 	 */
-	function get_shipping_country() {
+	public function get_shipping_country() {
 		if ( isset( $this->_data['shipping_country'] ) ) return $this->_data['shipping_country'];
 	}
 
@@ -280,7 +280,7 @@ class WC_Customer {
 	 * @access public
 	 * @return string
 	 */
-	function get_shipping_postcode() {
+	public function get_shipping_postcode() {
 		global $woocommerce;
 		$validation = $woocommerce->validation();
 		if (isset($this->_data['shipping_postcode'])) return $validation->format_postcode( $this->_data['shipping_postcode'], $this->get_shipping_country());
@@ -293,7 +293,7 @@ class WC_Customer {
 	 * @access public
 	 * @return void
 	 */
-	function get_shipping_city() {
+	public function get_shipping_city() {
 		if ( isset( $this->_data['shipping_city'] ) ) return $this->_data['shipping_city'];
 	}
 
@@ -303,7 +303,7 @@ class WC_Customer {
 	 * @access public
 	 * @return void
 	 */
-	function get_shipping_address() {
+	public function get_shipping_address() {
 		if ( isset( $this->_data['shipping_address'] ) ) return $this->_data['shipping_address'];
 	}
 
@@ -313,7 +313,7 @@ class WC_Customer {
 	 * @access public
 	 * @return void
 	 */
-	function get_shipping_address_2() {
+	public function get_shipping_address_2() {
 		if ( isset( $this->_data['shipping_address_2'] ) ) return $this->_data['shipping_address_2'];
 	}
 
@@ -323,7 +323,7 @@ class WC_Customer {
 	 * @access public
 	 * @return void
 	 */
-	function get_taxable_address() {
+	public function get_taxable_address() {
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
 
 		if ( $tax_based_on == 'base' ) {
@@ -369,7 +369,7 @@ class WC_Customer {
 	 * @param string $city (default: '')
 	 * @return void
 	 */
-	function set_location( $country, $state, $postcode = '', $city = '' ) {
+	public function set_location( $country, $state, $postcode = '', $city = '' ) {
 		$this->_data['country'] = $country;
 		$this->_data['state'] = $state;
 		$this->_data['postcode'] = $postcode;
@@ -384,7 +384,7 @@ class WC_Customer {
 	 * @param mixed $country
 	 * @return void
 	 */
-	function set_country( $country ) {
+	public function set_country( $country ) {
 		$this->_data['country'] = $country;
 	}
 
@@ -396,7 +396,7 @@ class WC_Customer {
 	 * @param mixed $state
 	 * @return void
 	 */
-	function set_state( $state ) {
+	public function set_state( $state ) {
 		$this->_data['state'] = $state;
 	}
 
@@ -408,7 +408,7 @@ class WC_Customer {
 	 * @param mixed $postcode
 	 * @return void
 	 */
-	function set_postcode( $postcode ) {
+	public function set_postcode( $postcode ) {
 		$this->_data['postcode'] = $postcode;
 	}
 
@@ -420,7 +420,7 @@ class WC_Customer {
 	 * @param mixed $postcode
 	 * @return void
 	 */
-	function set_city( $city ) {
+	public function set_city( $city ) {
 		$this->_data['city'] = $city;
 	}
 
@@ -431,7 +431,7 @@ class WC_Customer {
 	 * @param mixed $address
 	 * @return void
 	 */
-	function set_address( $address ) {
+	public function set_address( $address ) {
 		$this->_data['address'] = $address;
 	}
 
@@ -442,7 +442,7 @@ class WC_Customer {
 	 * @param mixed $address_2
 	 * @return void
 	 */
-	function set_address_2( $address_2 ) {
+	public function set_address_2( $address_2 ) {
 		$this->_data['address_2'] = $address_2;
 	}
 
@@ -456,7 +456,7 @@ class WC_Customer {
 	 * @param string $city (default: '')
 	 * @return void
 	 */
-	function set_shipping_location( $country, $state = '', $postcode = '', $city = '' ) {
+	public function set_shipping_location( $country, $state = '', $postcode = '', $city = '' ) {
 		$this->_data['shipping_country'] = $country;
 		$this->_data['shipping_state'] = $state;
 		$this->_data['shipping_postcode'] = $postcode;
@@ -471,7 +471,7 @@ class WC_Customer {
 	 * @param mixed $country
 	 * @return void
 	 */
-	function set_shipping_country( $country ) {
+	public function set_shipping_country( $country ) {
 		$this->_data['shipping_country'] = $country;
 	}
 
@@ -483,7 +483,7 @@ class WC_Customer {
 	 * @param mixed $state
 	 * @return void
 	 */
-	function set_shipping_state( $state ) {
+	public function set_shipping_state( $state ) {
 		$this->_data['shipping_state'] = $state;
 	}
 
@@ -495,7 +495,7 @@ class WC_Customer {
 	 * @param mixed $postcode
 	 * @return void
 	 */
-	function set_shipping_postcode( $postcode ) {
+	public function set_shipping_postcode( $postcode ) {
 		$this->_data['shipping_postcode'] = $postcode;
 	}
 
@@ -507,7 +507,7 @@ class WC_Customer {
 	 * @param mixed $postcode
 	 * @return void
 	 */
-	function set_shipping_city( $city ) {
+	public function set_shipping_city( $city ) {
 		$this->_data['shipping_city'] = $city;
 	}
 
@@ -518,7 +518,7 @@ class WC_Customer {
 	 * @param mixed $address
 	 * @return void
 	 */
-	function set_shipping_address( $address ) {
+	public function set_shipping_address( $address ) {
 		$this->_data['shipping_address'] = $address;
 	}
 
@@ -529,7 +529,7 @@ class WC_Customer {
 	 * @param mixed $address_2
 	 * @return void
 	 */
-	function set_shipping_address_2( $address_2 ) {
+	public function set_shipping_address_2( $address_2 ) {
 		$this->_data['shipping_address_2'] = $address_2;
 	}
 
@@ -541,7 +541,7 @@ class WC_Customer {
 	 * @param mixed $is_vat_exempt
 	 * @return void
 	 */
-	function set_is_vat_exempt( $is_vat_exempt ) {
+	public function set_is_vat_exempt( $is_vat_exempt ) {
 		$this->_data['is_vat_exempt'] = $is_vat_exempt;
 	}
 
@@ -553,7 +553,7 @@ class WC_Customer {
 	 * @param mixed $calculated
 	 * @return void
 	 */
-	function calculated_shipping( $calculated = true ) {
+	public function calculated_shipping( $calculated = true ) {
 		$this->_data['calculated_shipping'] = $calculated;
 	}
 
@@ -564,7 +564,7 @@ class WC_Customer {
 	 * @access public
 	 * @return array Array of downloadable products
 	 */
-	function get_downloadable_products() {
+	public function get_downloadable_products() {
 		global $wpdb, $woocommerce;
 
 		$downloads = array();

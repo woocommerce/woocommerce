@@ -11,143 +11,143 @@
  */
 class WC_Order {
 
-	/** @var int Order (post) ID */
-	var $id;
+	/** @public int Order (post) ID */
+	public $id;
 
-	/** @var string Order status. */
-	var $status;
+	/** @public string Order status. */
+	public $status;
 
-	/** @var string Order date (placed). */
-	var $order_date;
+	/** @public string Order date (placed). */
+	public $order_date;
 
-	/** @var string Order date (paid). */
-	var $modified_date;
+	/** @public string Order date (paid). */
+	public $modified_date;
 
-	/** @var string Note added by the customer. */
-	var $customer_note;
+	/** @public string Note added by the customer. */
+	public $customer_note;
 
-	/** @var array Order (post) meta/custom fields. */
-	var $order_custom_fields;
+	/** @public array Order (post) meta/custom fields. */
+	public $order_custom_fields;
 
-	/** @var string Order unique key. */
-	var $order_key;
+	/** @public string Order unique key. */
+	public $order_key;
 
-	/** @var string */
-	var $billing_first_name;
+	/** @public string */
+	public $billing_first_name;
 
-	/** @var string */
-	var $billing_last_name;
+	/** @public string */
+	public $billing_last_name;
 
-	/** @var string */
-	var $billing_company;
+	/** @public string */
+	public $billing_company;
 
-	/** @var string */
-	var $billing_address_1;
+	/** @public string */
+	public $billing_address_1;
 
-	/** @var string */
-	var $billing_address_2;
+	/** @public string */
+	public $billing_address_2;
 
-	/** @var string */
-	var $billing_city;
+	/** @public string */
+	public $billing_city;
 
-	/** @var string */
-	var $billing_postcode;
+	/** @public string */
+	public $billing_postcode;
 
-	/** @var string */
-	var $billing_country;
+	/** @public string */
+	public $billing_country;
 
-	/** @var string */
-	var $billing_state;
+	/** @public string */
+	public $billing_state;
 
-	/** @var string */
-	var $billing_email;
+	/** @public string */
+	public $billing_email;
 
-	/** @var string */
-	var $billing_phone;
+	/** @public string */
+	public $billing_phone;
 
-	/** @var string */
-	var $shipping_first_name;
+	/** @public string */
+	public $shipping_first_name;
 
-	/** @var string */
-	var $shipping_last_name;
+	/** @public string */
+	public $shipping_last_name;
 
-	/** @var string */
-	var $shipping_company;
+	/** @public string */
+	public $shipping_company;
 
-	/** @var string */
-	var $shipping_address_1;
+	/** @public string */
+	public $shipping_address_1;
 
-	/** @var string */
-	var $shipping_address_2;
+	/** @public string */
+	public $shipping_address_2;
 
-	/** @var string */
-	var $shipping_city;
+	/** @public string */
+	public $shipping_city;
 
-	/** @var string */
-	var $shipping_postcode;
+	/** @public string */
+	public $shipping_postcode;
 
-	/** @var string */
-	var $shipping_country;
+	/** @public string */
+	public $shipping_country;
 
-	/** @var string */
-	var $shipping_state;
+	/** @public string */
+	public $shipping_state;
 
-	/** @var string Method id of the shipping used */
-	var $shipping_method;
+	/** @public string Method id of the shipping used */
+	public $shipping_method;
 
-	/** @var string Shipping method title */
-	var $shipping_method_title;
+	/** @public string Shipping method title */
+	public $shipping_method_title;
 
-	/** @var string Method id of the payment used */
-	var $payment_method;
+	/** @public string Method id of the payment used */
+	public $payment_method;
 
-	/** @var string Payment method title */
-	var $payment_method_title;
+	/** @public string Payment method title */
+	public $payment_method_title;
 
-	/** @var string After tax discount total */
-	var $order_discount;
+	/** @public string After tax discount total */
+	public $order_discount;
 
-	/** @var string Before tax discount total */
-	var $cart_discount;
+	/** @public string Before tax discount total */
+	public $cart_discount;
 
-	/** @var string Tax for the items total */
-	var $order_tax;
+	/** @public string Tax for the items total */
+	public $order_tax;
 
-	/** @var string Shipping cost */
-	var $order_shipping;
+	/** @public string Shipping cost */
+	public $order_shipping;
 
-	/** @var string Shipping tax */
-	var $order_shipping_tax;
+	/** @public string Shipping tax */
+	public $order_shipping_tax;
 
-	/** @var string Grand total */
-	var $order_total;
+	/** @public string Grand total */
+	public $order_total;
 
-	/** @var array Taxes array (tax rows) */
-	var $taxes;
+	/** @public array Taxes array (tax rows) */
+	public $taxes;
 
-	/** @var int User ID */
-	var $customer_user;
+	/** @public int User ID */
+	public $customer_user;
 
-	/** @var int User ID */
-	var $user_id;
+	/** @public int User ID */
+	public $user_id;
 
-	/** @var string */
-	var $completed_date;
+	/** @public string */
+	public $completed_date;
 
-	/** @var string */
-	var $billing_address;
+	/** @public string */
+	public $billing_address;
 
-	/** @var string */
-	var $formatted_billing_address;
+	/** @public string */
+	public $formatted_billing_address;
 
-	/** @var string */
-	var $shipping_address;
+	/** @public string */
+	public $shipping_address;
 
-	/** @var string */
-	var $formatted_shipping_address;
+	/** @public string */
+	public $formatted_shipping_address;
 
-	/** @var string */
-	var $post_status;
+	/** @public string */
+	public $post_status;
 
 	/**
 	 * Get the order if ID is passed, otherwise the order is new and empty.
@@ -156,7 +156,7 @@ class WC_Order {
 	 * @param string $id (default: '')
 	 * @return void
 	 */
-	function __construct( $id = '' ) {
+	public function __construct( $id = '' ) {
 		$this->prices_include_tax = get_option('woocommerce_prices_include_tax') == 'yes' ? true : false;
 		$this->tax_display_cart   = get_option( 'woocommerce_tax_display_cart' );
 
@@ -175,7 +175,7 @@ class WC_Order {
 	 * @param int $id (default: 0)
 	 * @return bool
 	 */
-	function get_order( $id = 0 ) {
+	public function get_order( $id = 0 ) {
 		if ( ! $id )
 			return false;
 		if ( $result = get_post( $id ) ) {
@@ -193,7 +193,7 @@ class WC_Order {
 	 * @param mixed $result
 	 * @return void
 	 */
-	function populate( $result ) {
+	public function populate( $result ) {
 		// Standard post data
 		$this->id = $result->ID;
 		$this->order_date = $result->post_date;
@@ -264,7 +264,7 @@ class WC_Order {
 	 * @param mixed $key
 	 * @return bool
 	 */
-	function key_is_valid( $key ) {
+	public function key_is_valid( $key ) {
 		if ( $key == $this->order_key ) return true;
 		return false;
 	}
@@ -278,7 +278,7 @@ class WC_Order {
 	 * @access public
 	 * @return string
 	 */
-	function get_order_number() {
+	public function get_order_number() {
 		return apply_filters( 'woocommerce_order_number', _x( '#', 'hash before order number', 'woocommerce' ) . $this->id, $this );
 	}
 
@@ -288,7 +288,7 @@ class WC_Order {
 	 * @access public
 	 * @return string
 	 */
-	function get_formatted_billing_address() {
+	public function get_formatted_billing_address() {
 		if ( ! $this->formatted_billing_address ) {
 			global $woocommerce;
 
@@ -316,7 +316,7 @@ class WC_Order {
 	 * @access public
 	 * @return array
 	 */
-	function get_billing_address() {
+	public function get_billing_address() {
 		if ( ! $this->billing_address ) {
 			// Formatted Addresses
 			$address = array(
@@ -340,7 +340,7 @@ class WC_Order {
 	 * @access public
 	 * @return void
 	 */
-	function get_formatted_shipping_address() {
+	public function get_formatted_shipping_address() {
 		if ( ! $this->formatted_shipping_address ) {
 			if ( $this->shipping_address_1 ) {
 				global $woocommerce;
@@ -371,7 +371,7 @@ class WC_Order {
 	 * @access public
 	 * @return array
 	 */
-	function get_shipping_address() {
+	public function get_shipping_address() {
 		if ( ! $this->shipping_address ) {
 			if ( $this->shipping_address_1 ) {
 				// Formatted Addresses
@@ -398,7 +398,7 @@ class WC_Order {
 	 * @param string $type Types of line items to get (array or string)
 	 * @return void
 	 */
-	function get_items( $type = '' ) {
+	public function get_items( $type = '' ) {
 		global $wpdb, $woocommerce;
 
 		if ( empty( $type ) )
@@ -442,7 +442,7 @@ class WC_Order {
 	 * @access public
 	 * @return array
 	 */
-	function get_fees() {
+	public function get_fees() {
 		return $this->get_items( 'fee' );
 	}
 
@@ -452,7 +452,7 @@ class WC_Order {
 	 * @access public
 	 * @return void
 	 */
-	function get_taxes() {
+	public function get_taxes() {
 		return $this->get_items( 'tax' );
 	}
 
@@ -462,7 +462,7 @@ class WC_Order {
 	 * @access public
 	 * @return array of meta data
 	 */
-	function has_meta( $order_item_id ) {
+	public function has_meta( $order_item_id ) {
 		global $wpdb;
 
 		return $wpdb->get_results( $wpdb->prepare("SELECT meta_key, meta_value, meta_id, order_item_id
@@ -479,7 +479,7 @@ class WC_Order {
 	 * @param bool $single (default: false)
 	 * @return void
 	 */
-	function get_item_meta( $order_item_id, $key = '', $single = false ) {
+	public function get_item_meta( $order_item_id, $key = '', $single = false ) {
 		return get_metadata( 'order_item', $order_item_id, $key, $single );
 	}
 
@@ -492,7 +492,7 @@ class WC_Order {
 	 * @access public
 	 * @return float
 	 */
-	function get_total_tax() {
+	public function get_total_tax() {
 		return apply_filters( 'woocommerce_order_amount_total_tax', number_format( (double) $this->order_tax + (double) $this->order_shipping_tax, 2, '.', '' ) );
 	}
 
@@ -503,7 +503,7 @@ class WC_Order {
 	 * @access public
 	 * @return float
 	 */
-	function get_cart_discount() {
+	public function get_cart_discount() {
 		return apply_filters( 'woocommerce_order_amount_cart_discount', number_format( (double) $this->cart_discount, 2, '.', '' ) );
 	}
 
@@ -514,7 +514,7 @@ class WC_Order {
 	 * @access public
 	 * @return float
 	 */
-	function get_order_discount() {
+	public function get_order_discount() {
 		return apply_filters( 'woocommerce_order_amount_order_discount', number_format( (double) $this->order_discount, 2, '.', '' ) );
 	}
 
@@ -525,7 +525,7 @@ class WC_Order {
 	 * @access public
 	 * @return float
 	 */
-	function get_total_discount() {
+	public function get_total_discount() {
 		if ( $this->order_discount || $this->cart_discount )
 			return apply_filters( 'woocommerce_order_amount_total_discount', number_format( (double) $this->order_discount + (double) $this->cart_discount, 2, '.', '' ) );
 	}
@@ -537,7 +537,7 @@ class WC_Order {
 	 * @access public
 	 * @return float
 	 */
-	function get_shipping() {
+	public function get_shipping() {
 		return apply_filters( 'woocommerce_order_amount_shipping', number_format( (double) $this->order_shipping, 2, '.', '' ) );
 	}
 
@@ -548,7 +548,7 @@ class WC_Order {
 	 * @access public
 	 * @return float
 	 */
-	function get_shipping_tax() {
+	public function get_shipping_tax() {
 		return apply_filters( 'woocommerce_order_amount_shipping_tax', number_format( (double) $this->order_shipping_tax, 2, '.', '' ) );
 	}
 
@@ -559,7 +559,7 @@ class WC_Order {
 	 * @access public
 	 * @return float
 	 */
-	function get_total() {
+	public function get_total() {
 		return apply_filters( 'woocommerce_order_amount_total', number_format( (double) $this->order_total, 2, '.', '' ) );
 	}
 
@@ -570,7 +570,7 @@ class WC_Order {
 	 * @access public
 	 * @return void
 	 */
-	function get_order_total() {
+	public function get_order_total() {
 		return $this->get_total();
 	}
 
@@ -580,7 +580,7 @@ class WC_Order {
 	 * @access public
 	 * @return string
 	 */
-	function get_shipping_method() {
+	public function get_shipping_method() {
 		return apply_filters( 'woocommerce_order_shipping_method', ucwords( $this->shipping_method_title ) );
 	}
 
@@ -594,7 +594,7 @@ class WC_Order {
 	 * @param bool $round (default: true)
 	 * @return float
 	 */
-	function get_item_subtotal( $item, $inc_tax = false, $round = true ) {
+	public function get_item_subtotal( $item, $inc_tax = false, $round = true ) {
 		if ( $inc_tax )
 			$price = ( $item['line_subtotal'] + $item['line_subtotal_tax'] / $item['qty'] );
 		else
@@ -612,7 +612,7 @@ class WC_Order {
 	 * @param bool $round (default: true)
 	 * @return float
 	 */
-	function get_line_subtotal( $item, $inc_tax = false, $round = true ) {
+	public function get_line_subtotal( $item, $inc_tax = false, $round = true ) {
 		if ( $inc_tax )
 			$price = $item['line_subtotal'] + $item['line_subtotal_tax'];
 		else
@@ -630,7 +630,7 @@ class WC_Order {
 	 * @param bool $round (default: true)
 	 * @return float
 	 */
-	function get_item_total( $item, $inc_tax = false, $round = true ) {
+	public function get_item_total( $item, $inc_tax = false, $round = true ) {
 		if ( $inc_tax )
 			$price = ( ( $item['line_total'] + $item['line_tax'] ) / $item['qty'] );
 		else
@@ -647,7 +647,7 @@ class WC_Order {
 	 * @param bool $round (default: true)
 	 * @return float
 	 */
-	function get_item_tax( $item, $round = true ) {
+	public function get_item_tax( $item, $round = true ) {
 		$price = $item['line_tax'] / $item['qty'];
 		return apply_filters( 'woocommerce_order_amount_item_tax', ($round) ? number_format( $price, 2, '.', '') : $price );
 	}
@@ -661,7 +661,7 @@ class WC_Order {
 	 * @param bool $inc_tax (default: false)
 	 * @return float
 	 */
-	function get_line_total( $item, $inc_tax = false ) {
+	public function get_line_total( $item, $inc_tax = false ) {
 		if ( $inc_tax )
 			return apply_filters( 'woocommerce_order_amount_line_total', number_format( $item['line_total'] + $item['line_tax'] , 2, '.', '') );
 		else
@@ -676,7 +676,7 @@ class WC_Order {
 	 * @param mixed $item
 	 * @return float
 	 */
-	function get_line_tax( $item ) {
+	public function get_line_tax( $item ) {
 		return apply_filters( 'woocommerce_order_amount_line_tax', number_format( $item['line_tax'], 2, '.', '') );
 	}
 
@@ -689,7 +689,7 @@ class WC_Order {
 	 * @param mixed $item
 	 * @return string
 	 */
-	function get_formatted_line_subtotal( $item ) {
+	public function get_formatted_line_subtotal( $item ) {
 		$subtotal = 0;
 
 		if (!isset($item['line_subtotal']) || !isset($item['line_subtotal_tax'])) return;
@@ -711,7 +711,7 @@ class WC_Order {
 	 * @access public
 	 * @return string
 	 */
-	function get_formatted_order_total() {
+	public function get_formatted_order_total() {
 
 		$formatted_total = woocommerce_price( $this->order_total );
 
@@ -726,7 +726,7 @@ class WC_Order {
 	 * @param bool $compound (default: false)
 	 * @return string
 	 */
-	function get_subtotal_to_display( $compound = false ) {
+	public function get_subtotal_to_display( $compound = false ) {
 		global $woocommerce;
 
 		$subtotal = 0;
@@ -790,7 +790,7 @@ class WC_Order {
 	 * @access public
 	 * @return string
 	 */
-	function get_shipping_to_display() {
+	public function get_shipping_to_display() {
 		global $woocommerce;
 
 		if ( $this->order_shipping > 0 ) {
@@ -833,7 +833,7 @@ class WC_Order {
 	 * @access public
 	 * @return string.
 	 */
-	function get_cart_discount_to_display() {
+	public function get_cart_discount_to_display() {
 		return apply_filters( 'woocommerce_order_cart_discount_to_display', woocommerce_price( $this->get_cart_discount() ), $this );
 	}
 
@@ -844,7 +844,7 @@ class WC_Order {
 	 * @access public
 	 * @return string
 	 */
-	function get_order_discount_to_display() {
+	public function get_order_discount_to_display() {
 		return apply_filters( 'woocommerce_order_discount_to_display', woocommerce_price( $this->get_order_discount() ), $this );
 	}
 
@@ -856,7 +856,7 @@ class WC_Order {
 	 * @param mixed $item
 	 * @return WC_Product
 	 */
-	function get_product_from_item( $item ) {
+	public function get_product_from_item( $item ) {
 		$_product = get_product( $item['variation_id'] ? $item['variation_id'] : $item['product_id'] );
 
 		return $_product;
@@ -870,7 +870,7 @@ class WC_Order {
 	 * @access public
 	 * @return array
 	 */
-	function get_order_item_totals() {
+	public function get_order_item_totals() {
 		global $woocommerce;
 
 		$total_rows = array();
@@ -1006,7 +1006,7 @@ class WC_Order {
 	 * @param bool plain text
 	 * @return string
 	 */
-	function email_order_items_table( $show_download_links = false, $show_sku = false, $show_purchase_note = false, $show_image = false, $image_size = array( 32, 32 ), $plain_text = false ) {
+	public function email_order_items_table( $show_download_links = false, $show_sku = false, $show_purchase_note = false, $show_image = false, $image_size = array( 32, 32 ), $plain_text = false ) {
 
 		ob_start();
 
@@ -1033,7 +1033,7 @@ class WC_Order {
 	 * @access public
 	 * @return bool
 	 */
-	function is_download_permitted() {
+	public function is_download_permitted() {
 		return apply_filters( 'woocommerce_order_is_download_permitted', $this->status == 'completed' || ( get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'yes' && $this->status == 'processing' ), $this );
 	}
 
@@ -1043,7 +1043,7 @@ class WC_Order {
 	 * @access public
 	 * @return bool
 	 */
-	function has_downloadable_item() {
+	public function has_downloadable_item() {
 		$has_downloadable_item = false;
 
 		foreach($this->get_items() as $item) :
@@ -1066,7 +1066,7 @@ class WC_Order {
 	 * @access public
 	 * @return string
 	 */
-	function get_checkout_payment_url() {
+	public function get_checkout_payment_url() {
 
 		$payment_page = get_permalink(woocommerce_get_page_id('pay'));
 
@@ -1082,7 +1082,7 @@ class WC_Order {
 	 * @access public
 	 * @return string
 	 */
-	function get_cancel_order_url() {
+	public function get_cancel_order_url() {
 		global $woocommerce;
 		return apply_filters('woocommerce_get_cancel_order_url', $woocommerce->nonce_url( 'cancel_order', add_query_arg('cancel_order', 'true', add_query_arg('order', $this->order_key, add_query_arg('order_id', $this->id, trailingslashit( home_url() ))))));
 	}
@@ -1097,7 +1097,7 @@ class WC_Order {
 	 * @param array $item the item
 	 * @return array available downloadable file urls
 	 */
-	function get_downloadable_file_urls( $product_id, $variation_id, $item ) {
+	public function get_downloadable_file_urls( $product_id, $variation_id, $item ) {
 		global $wpdb;
 
 	 	$download_file = $variation_id > 0 ? $variation_id : $product_id;
@@ -1131,7 +1131,7 @@ class WC_Order {
 	 * @param int $is_customer_note (default: 0) Is this a note for the customer?
 	 * @return id Comment ID
 	 */
-	function add_order_note( $note, $is_customer_note = 0 ) {
+	public function add_order_note( $note, $is_customer_note = 0 ) {
 
 		$is_customer_note = intval( $is_customer_note );
 
@@ -1168,7 +1168,7 @@ class WC_Order {
 	 * @param string $note (default: '') Optional note to add
 	 * @return void
 	 */
-	function update_status( $new_status_slug, $note = '' ) {
+	public function update_status( $new_status_slug, $note = '' ) {
 
 		if ( $note )
 			$note .= ' ';
@@ -1222,7 +1222,7 @@ class WC_Order {
 	 * @param string $note (default: '') Optional note to add
 	 * @return void
 	 */
-	function cancel_order( $note = '' ) {
+	public function cancel_order( $note = '' ) {
 		global $woocommerce;
 
 		unset( $woocommerce->session->order_awaiting_payment );
@@ -1243,7 +1243,7 @@ class WC_Order {
 	 * @access public
 	 * @return void
 	 */
-	function payment_complete() {
+	public function payment_complete() {
 		global $woocommerce;
 
 		unset( $woocommerce->session->order_awaiting_payment );
@@ -1299,7 +1299,7 @@ class WC_Order {
 	 * @access public
 	 * @return void
 	 */
-	function record_product_sales() {
+	public function record_product_sales() {
 
 		if ( get_post_meta( $this->id, '_recorded_sales', true ) == 'yes' )
 			return;
@@ -1325,7 +1325,7 @@ class WC_Order {
 	 * @access public
 	 * @return array
 	 */
-	function get_used_coupons() {
+	public function get_used_coupons() {
 
 		$codes   = array();
 		$coupons = $this->get_items( 'coupon' );
@@ -1344,7 +1344,7 @@ class WC_Order {
 	 * @access public
 	 * @return void
 	 */
-	function increase_coupon_usage_counts() {
+	public function increase_coupon_usage_counts() {
 		global $woocommerce;
 
 		if ( get_post_meta( $this->id, '_recorded_coupon_usage_counts', true ) == 'yes' )
@@ -1370,7 +1370,7 @@ class WC_Order {
 	 * @access public
 	 * @return void
 	 */
-	function decrease_coupon_usage_counts() {
+	public function decrease_coupon_usage_counts() {
 		global $woocommerce;
 
 		if ( get_post_meta( $this->id, '_recorded_coupon_usage_counts', true ) != 'yes' )
@@ -1396,7 +1396,7 @@ class WC_Order {
 	 * @access public
 	 * @return void
 	 */
-	function reduce_order_stock() {
+	public function reduce_order_stock() {
 
 		if ( get_option('woocommerce_manage_stock') == 'yes' && sizeof( $this->get_items() ) > 0 ) {
 
@@ -1439,7 +1439,7 @@ class WC_Order {
 	 * @param int $qty_ordered
 	 * @return void
 	 */
-	function send_stock_notifications( $product, $new_stock, $qty_ordered ) {
+	public function send_stock_notifications( $product, $new_stock, $qty_ordered ) {
 
 		// Backorders
 		if ( $new_stock < 0 )
@@ -1466,7 +1466,7 @@ class WC_Order {
 	 * @access public
 	 * @return array
 	 */
-	function get_customer_order_notes() {
+	public function get_customer_order_notes() {
 
 		$notes = array();
 
@@ -1508,7 +1508,7 @@ class WC_Order {
  */
 class WC_Order_Item_Meta {
 
-	var $meta;
+	public $meta;
 
 	/**
 	 * Constructor
@@ -1517,7 +1517,7 @@ class WC_Order_Item_Meta {
 	 * @param string $item_meta (default: '')
 	 * @return void
 	 */
-	function __construct( $item_meta = array() ) {
+	public function __construct( $item_meta = array() ) {
 		$this->meta = $item_meta;
 	}
 
@@ -1530,7 +1530,7 @@ class WC_Order_Item_Meta {
 	 * @param string $hideprefix (default: _)
 	 * @return void
 	 */
-	function display( $flat = false, $return = false, $hideprefix = '_' ) {
+	public function display( $flat = false, $return = false, $hideprefix = '_' ) {
 		global $woocommerce;
 
 		if ( ! empty( $this->meta ) ) {
