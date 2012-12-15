@@ -81,7 +81,7 @@ class WC_Cart {
 	 * @access public
 	 * @return void
 	 */
-	public function  __construct() {
+	public function __construct() {
 		$this->tax = new WC_Tax();
 		$this->prices_include_tax = ( get_option( 'woocommerce_prices_include_tax' ) == 'yes' ) ? true : false;
 		$this->tax_display_cart = get_option( 'woocommerce_tax_display_cart' );
@@ -100,7 +100,7 @@ class WC_Cart {
      * @access public
      * @return void
      */
-    public function  init() {
+    public function init() {
 		$this->get_cart_from_session();
 
 		add_action('woocommerce_check_cart_items', array( $this, 'check_cart_items' ), 1 );
@@ -118,7 +118,7 @@ class WC_Cart {
 		 * @access public
 		 * @return void
 		 */
-		public function  get_cart_from_session() {
+		public function get_cart_from_session() {
 			global $woocommerce;
 
 			// Load the coupons
@@ -191,7 +191,7 @@ class WC_Cart {
 		 * @access public
 		 * @return void
 		 */
-		public function  set_session() {
+		public function set_session() {
 			global $woocommerce;
 
 			// Re-calc totals
@@ -244,7 +244,7 @@ class WC_Cart {
 		 * @param bool $clear_persistent_cart (default: true)
 		 * @return void
 		 */
-		public function  empty_cart( $clear_persistent_cart = true ) {
+		public function empty_cart( $clear_persistent_cart = true ) {
 			global $woocommerce;
 
 			$this->cart_contents = array();
@@ -268,7 +268,7 @@ class WC_Cart {
 		 * @access public
 		 * @return void
 		 */
-		public function  persistent_cart_update() {
+		public function persistent_cart_update() {
 			global $woocommerce;
 
 			update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart', array(
@@ -283,7 +283,7 @@ class WC_Cart {
 		 * @access public
 		 * @return void
 		 */
-		public function  persistent_cart_destroy() {
+		public function persistent_cart_destroy() {
 			delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart' );
 		}
 
@@ -297,7 +297,7 @@ class WC_Cart {
 		 * @access public
 		 * @return int
 		 */
-		public function  get_cart_contents_count() {
+		public function get_cart_contents_count() {
 			return apply_filters( 'woocommerce_cart_contents_count', $this->cart_contents_count );
 		}
 
@@ -308,7 +308,7 @@ class WC_Cart {
 		 * @access public
 		 * @return void
 		 */
-		public function  check_cart_items() {
+		public function check_cart_items() {
 			global $woocommerce;
 
 			// Check item stock
@@ -325,7 +325,7 @@ class WC_Cart {
 		 * @access public
 		 * @return void
 		 */
-		public function  check_cart_coupons() {
+		public function check_cart_coupons() {
 			global $woocommerce;
 
 			if ( ! empty( $this->applied_coupons ) ) {
@@ -352,7 +352,7 @@ class WC_Cart {
 		 * @access public
 		 * @return array
 		 */
-		public function  get_cart_item_quantities() {
+		public function get_cart_item_quantities() {
 			$quantities = array();
 
 			foreach ( $this->get_cart() as $cart_item_key => $values ) {
@@ -391,7 +391,7 @@ class WC_Cart {
 		 * @access public
 		 * @param array $posted
 		 */
-		public function  check_customer_coupons( $posted ) {
+		public function check_customer_coupons( $posted ) {
 			global $woocommerce;
 
 			if ( ! empty( $this->applied_coupons ) ) {
@@ -429,7 +429,7 @@ class WC_Cart {
 		 * @access public
 		 * @return bool
 		 */
-		public function  check_cart_item_stock() {
+		public function check_cart_item_stock() {
 			global $woocommerce, $wpdb;
 
 			$error = new WP_Error();
@@ -540,7 +540,7 @@ class WC_Cart {
 		 * @param bool $flat (default: false)
 		 * @return string
 		 */
-		public function  get_item_data( $cart_item, $flat = false ) {
+		public function get_item_data( $cart_item, $flat = false ) {
 			global $woocommerce;
 
 			$return = '';
@@ -622,7 +622,7 @@ class WC_Cart {
 		 *
 		 * @return array cross_sells (item ids)
 		 */
-		public function  get_cross_sells() {
+		public function get_cross_sells() {
 			$cross_sells = array();
 			$in_cart = array();
 			if ( sizeof( $this->cart_contents) > 0 ) {
@@ -642,7 +642,7 @@ class WC_Cart {
 		 *
 		 * @return string url to page
 		 */
-		public function  get_cart_url() {
+		public function get_cart_url() {
 			$cart_page_id = woocommerce_get_page_id('cart');
 			if ( $cart_page_id ) return apply_filters( 'woocommerce_get_cart_url', get_permalink( $cart_page_id ) );
 		}
@@ -652,7 +652,7 @@ class WC_Cart {
 		 *
 		 * @return string url to page
 		 */
-		public function  get_checkout_url() {
+		public function get_checkout_url() {
 			$checkout_page_id = woocommerce_get_page_id('checkout');
 			if ( $checkout_page_id ) {
 				if ( is_ssl() )
@@ -667,7 +667,7 @@ class WC_Cart {
 		 *
 		 * @return string url to page
 		 */
-		public function  get_remove_url( $cart_item_key ) {
+		public function get_remove_url( $cart_item_key ) {
 			global $woocommerce;
 			$cart_page_id = woocommerce_get_page_id('cart');
 			if ($cart_page_id)
@@ -679,7 +679,7 @@ class WC_Cart {
 		 *
 		 * @return array contents of the cart
 		 */
-		public function  get_cart() {
+		public function get_cart() {
 			return array_filter( (array) $this->cart_contents );
 		}
 
@@ -688,7 +688,7 @@ class WC_Cart {
 		 *
 		 * @return array merged taxes
 		 */
-		public function  get_taxes() {
+		public function get_taxes() {
 			$merged_taxes = array();
 
 			// Merge
@@ -704,7 +704,7 @@ class WC_Cart {
 		 *
 		 * @return array merged taxes
 		 */
-		public function  get_formatted_taxes() {
+		public function get_formatted_taxes() {
 
 			$taxes = $this->get_taxes();
 
@@ -727,7 +727,7 @@ class WC_Cart {
 	     * @param mixed id of product to find in the cart
 	     * @return string cart item key
 	     */
-	    public function  find_product_in_cart( $cart_id = false ) {
+	    public function find_product_in_cart( $cart_id = false ) {
 	        if ( $cart_id !== false )
 	        	foreach ( $this->cart_contents as $cart_item_key => $cart_item )
 	        		if ( $cart_item_key == $cart_id )
@@ -743,7 +743,7 @@ class WC_Cart {
 	     * @param array $cart_item_data other cart item data passed which affects this items uniqueness in the cart
 	     * @return string cart item key
 	     */
-	    public function  generate_cart_id( $product_id, $variation_id = '', $variation = '', $cart_item_data = array() ) {
+	    public function generate_cart_id( $product_id, $variation_id = '', $variation = '', $cart_item_data = array() ) {
 
 	        $id_parts = array( $product_id );
 
@@ -779,7 +779,7 @@ class WC_Cart {
 		 * @param array $cart_item_data extra cart item data we want to pass into the item
 		 * @return bool
 		 */
-		public function  add_to_cart( $product_id, $quantity = 1, $variation_id = '', $variation = '', $cart_item_data = array() ) {
+		public function add_to_cart( $product_id, $quantity = 1, $variation_id = '', $variation = '', $cart_item_data = array() ) {
 			global $woocommerce;
 
 			if ( $quantity <= 0 ) return false;
@@ -892,7 +892,7 @@ class WC_Cart {
 		 * @param   string	cart_item_key	contains the id of the cart item
 		 * @param   string	quantity	contains the quantity of the item
 		 */
-		public function  set_quantity( $cart_item_key, $quantity = 1 ) {
+		public function set_quantity( $cart_item_key, $quantity = 1 ) {
 
 			if ( $quantity == 0 || $quantity < 0 ) {
 				do_action( 'woocommerce_before_cart_item_quantity_zero', $cart_item_key );
