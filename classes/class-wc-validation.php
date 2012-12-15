@@ -15,7 +15,7 @@ class WC_Validation {
 	 * @param   string	email address
 	 * @return  bool
 	 */
-	function is_email( $email ) {
+	public function is_email( $email ) {
 		return is_email( $email );
 	}
 
@@ -26,7 +26,7 @@ class WC_Validation {
 	 * @param   string	phone number
 	 * @return  bool
 	 */
-	function is_phone( $phone ) {
+	public function is_phone( $phone ) {
 		if ( strlen( trim( preg_replace( '/[\s\#0-9_\-\+\(\)]/', '', $phone ) ) ) > 0 )
 			return false;
 
@@ -41,7 +41,7 @@ class WC_Validation {
 	 * @param	string	country
 	 * @return  bool
 	 */
-	function is_postcode( $postcode, $country ) {
+	public function is_postcode( $postcode, $country ) {
 		if ( strlen( trim( preg_replace( '/[\s\-A-Za-z0-9]/', '', $postcode ) ) ) > 0 )
 			return false;
 
@@ -67,7 +67,7 @@ class WC_Validation {
 	 * @param mixed $toCheck A postcode
 	 * @return bool
 	 */
-	function is_GB_postcode( $toCheck ) {
+	public function is_GB_postcode( $toCheck ) {
 
 		// Permitted letters depend upon their position in the postcode.
 		$alpha1 = "[abcdefghijklmnoprstuwyz]";                          // Character 1
@@ -128,7 +128,7 @@ class WC_Validation {
 	 * @param	string	country
 	 * @return  string	formatted postcode
 	 */
-	function format_postcode( $postcode, $country ) {
+	public function format_postcode( $postcode, $country ) {
 		$postcode = strtoupper(trim($postcode));
 		$postcode = trim(preg_replace('/[\s]/', '', $postcode));
 
@@ -146,7 +146,7 @@ class WC_Validation {
 	 * @param mixed $tel
 	 * @return string
 	 */
-	function format_phone( $tel ) {
+	public function format_phone( $tel ) {
 		$tel = str_replace( '.', '-', $tel );
 		return $tel;
 	}

@@ -14,10 +14,10 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 class WC_Product_External extends WC_Product_Simple {
 
 	/** @var string URL to external product. */
-	var $product_url;
+	public $product_url;
 
 	/** @var string Text for the buy/link button. */
-	var $button_text;
+	public $button_text;
 
 	/**
 	 * __construct function.
@@ -26,7 +26,7 @@ class WC_Product_External extends WC_Product_Simple {
 	 * @param mixed $product
 	 * @param array $args Contains arguments to set up this product
 	 */
-	function __construct( $product, $args ) {
+	public function __construct( $product, $args ) {
 
 		parent::__construct( $product, $args );
 
@@ -53,7 +53,7 @@ class WC_Product_External extends WC_Product_Simple {
 	 * @access public
 	 * @return cool
 	 */
-	function is_purchasable() {
+	public function is_purchasable() {
 		return apply_filters( 'woocommerce_is_purchasable', false, $this );
 	}
 
@@ -63,7 +63,7 @@ class WC_Product_External extends WC_Product_Simple {
 	 * @access public
 	 * @return void
 	 */
-	function get_product_url() {
+	public function get_product_url() {
 		return $this->product_url;
 	}
 
@@ -73,7 +73,7 @@ class WC_Product_External extends WC_Product_Simple {
 	 * @access public
 	 * @return void
 	 */
-	function get_button_text() {
+	public function get_button_text() {
 		return $this->button_text ? $this->button_text : __( 'Buy product', 'woocommerce' );
 	}
 }

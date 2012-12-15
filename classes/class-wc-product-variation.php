@@ -14,53 +14,53 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 class WC_Product_Variation extends WC_Product {
 
-	/** @var array Stores variation data (attributes) for the current variation. */
-	var $variation_data;
+	/** @public array Stores variation data (attributes) for the current variation. */
+	public $variation_data;
 
-	/** @var int ID of the variable product. */
-	var $variation_id;
+	/** @public int ID of the variable product. */
+	public $variation_id;
 
-	/** @var bool True if the variation has a length. */
-	var $variation_has_length;
+	/** @public bool True if the variation has a length. */
+	public $variation_has_length;
 
-	/** @var bool True if the variation has a width. */
-	var $variation_has_width;
+	/** @public bool True if the variation has a width. */
+	public $variation_has_width;
 
-	/** @var bool True if the variation has a height. */
-	var $variation_has_height;
+	/** @public bool True if the variation has a height. */
+	public $variation_has_height;
 
-	/** @var bool True if the variation has a weight. */
-	var $variation_has_weight;
+	/** @public bool True if the variation has a weight. */
+	public $variation_has_weight;
 
-	/** @var bool True if the variation has a price. */
-	var $variation_has_price;
+	/** @public bool True if the variation has a price. */
+	public $variation_has_price;
 
-	/** @var bool True if the variation has a regular price. */
-	var $variation_has_regular_price;
+	/** @public bool True if the variation has a regular price. */
+	public $variation_has_regular_price;
 
-	/** @var bool True if the variation has a sale price. */
-	var $variation_has_sale_price;
+	/** @public bool True if the variation has a sale price. */
+	public $variation_has_sale_price;
 
-	/** @var bool True if the variation has stock and is managing stock. */
-	var $variation_has_stock;
+	/** @public bool True if the variation has stock and is managing stock. */
+	public $variation_has_stock;
 
-	/** @var bool True if the variation has a sku. */
-	var $variation_has_sku;
+	/** @public bool True if the variation has a sku. */
+	public $variation_has_sku;
 
-	/** @var string Stores the shipping class of the variation. */
-	var $variation_shipping_class;
+	/** @public string Stores the shipping class of the variation. */
+	public $variation_shipping_class;
 
-	/** @var int Stores the shipping class ID of the variation. */
-	var $variation_shipping_class_id;
+	/** @public int Stores the shipping class ID of the variation. */
+	public $variation_shipping_class_id;
 
-	/** @var bool True if the variation has a tax class. */
-	var $variation_has_tax_class;
+	/** @public bool True if the variation has a tax class. */
+	public $variation_has_tax_class;
 
-	/** @var array Array of custom fields (meta) containing product data. */
-	var $parent_custom_fields;
+	/** @public array Array of custom fields (meta) containing product data. */
+	public $parent_custom_fields;
 
-	/** @var object Parent Variable product object. */
-	var $parent;
+	/** @public object Parent Variable product object. */
+	public $parent;
 
 	/**
 	 * Loads all product data from custom fields
@@ -70,7 +70,7 @@ class WC_Product_Variation extends WC_Product {
 	 * @param array $args Array of the arguments containing parent product data
 	 * @return void
 	 */
-	function __construct( $variation, $args = array() ) {
+	public function __construct( $variation, $args = array() ) {
 
 		$this->product_type = 'variable';
 
@@ -219,7 +219,7 @@ class WC_Product_Variation extends WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function is_visible() {
+	public function is_visible() {
 
 		$visible = true;
 
@@ -237,7 +237,7 @@ class WC_Product_Variation extends WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function parent_is_visible() {
+	public function parent_is_visible() {
 		return parent::is_visible();
 	}
 
@@ -246,7 +246,7 @@ class WC_Product_Variation extends WC_Product {
      *
      * @return int
      */
-    function get_variation_id() {
+    public function get_variation_id() {
         return absint( $this->variation_id );
     }
 
@@ -255,7 +255,7 @@ class WC_Product_Variation extends WC_Product {
      *
      * @return array of attributes and their values for this variation
      */
-    function get_variation_attributes() {
+    public function get_variation_attributes() {
         return $this->variation_data;
     }
 
@@ -264,7 +264,7 @@ class WC_Product_Variation extends WC_Product {
      *
      * @return string containing the formatted price
      */
-	function get_price_html() {
+	public function get_price_html() {
 		if ( $this->variation_has_price ) {
 			$price = '';
 
@@ -292,7 +292,7 @@ class WC_Product_Variation extends WC_Product {
      * @param string $size (default: 'shop_thumbnail')
      * @return string
      */
-    function get_image( $size = 'shop_thumbnail', $attr = array() ) {
+    public function get_image( $size = 'shop_thumbnail', $attr = array() ) {
     	global $woocommerce;
 
     	$image = '';
@@ -318,7 +318,7 @@ class WC_Product_Variation extends WC_Product {
 	 * @param int $by (default: 1) Amount to reduce by
 	 * @return int stock level
 	 */
-	function reduce_stock( $by = 1 ) {
+	public function reduce_stock( $by = 1 ) {
 		global $woocommerce;
 
 		if ( $this->variation_has_stock ) {
@@ -356,7 +356,7 @@ class WC_Product_Variation extends WC_Product {
 	 * @param int $by (default: 1) Amount to increase by
 	 * @return int stock level
 	 */
-	function increase_stock( $by = 1 ) {
+	public function increase_stock( $by = 1 ) {
 		global $woocommerce;
 
 		if ($this->variation_has_stock) :
@@ -385,7 +385,7 @@ class WC_Product_Variation extends WC_Product {
 	 * @access public
 	 * @return string
 	 */
-	function get_shipping_class() {
+	public function get_shipping_class() {
 		if ( ! $this->variation_shipping_class ) {
 			$classes = get_the_terms( $this->variation_id, 'product_shipping_class' );
 
@@ -406,7 +406,7 @@ class WC_Product_Variation extends WC_Product {
 	 * @access public
 	 * @return int
 	 */
-	function get_shipping_class_id() {
+	public function get_shipping_class_id() {
 		if ( ! $this->variation_shipping_class_id ) {
 
 			$classes = get_the_terms( $this->variation_id, 'product_shipping_class' );
@@ -427,7 +427,7 @@ class WC_Product_Variation extends WC_Product {
 	 * @param string $download_id file identifier
 	 * @return array
 	 */
-	function get_file_download_path( $download_id ) {
+	public function get_file_download_path( $download_id ) {
 
 		$file_path = '';
 		$file_paths = apply_filters( 'woocommerce_file_download_paths', get_post_meta( $this->variation_id, '_file_paths', true ), $this->variation_id, null, null );

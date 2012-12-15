@@ -12,19 +12,19 @@
 class WC_Checkout {
 
 	/** @var array Array of posted form data. */
-	var $posted;
+	public $posted;
 
 	/** @var array Array of fields to display on the checkout. */
-	var $checkout_fields;
+	public $checkout_fields;
 
 	/** @var bool Whether or not the user must create an account to checkout. */
-	var $must_create_account;
+	public $must_create_account;
 
 	/** @var bool Whether or not signups are allowed. */
-	var $enable_signup;
+	public $enable_signup;
 
 	/** @var bool True when the user is creating an account. */
-	var $creating_account;
+	public $creating_account;
 
 	/**
 	 * Constructor for the checkout class. Hooks in methods and defines eheckout fields.
@@ -32,7 +32,7 @@ class WC_Checkout {
 	 * @access public
 	 * @return void
 	 */
-	function __construct () {
+	public function __construct () {
 		global $woocommerce;
 
 		add_action( 'woocommerce_checkout_process', array( $this,'checkout_process' ) );
@@ -93,7 +93,7 @@ class WC_Checkout {
 	 * @access public
 	 * @return void
 	 */
-	function checkout_process() {
+	public function checkout_process() {
 		// When we process the checkout, lets ensure cart items are rechecked to prevent checkout
 		do_action('woocommerce_check_cart_items');
 	}
@@ -105,7 +105,7 @@ class WC_Checkout {
 	 * @access public
 	 * @return void
 	 */
-	function checkout_form_billing() {
+	public function checkout_form_billing() {
 		woocommerce_get_template( 'checkout/form-billing.php', array( 'checkout' => $this ) );
 	}
 
@@ -116,7 +116,7 @@ class WC_Checkout {
 	 * @access public
 	 * @return void
 	 */
-	function checkout_form_shipping() {
+	public function checkout_form_shipping() {
 		woocommerce_get_template( 'checkout/form-shipping.php', array( 'checkout' => $this ) );
 	}
 
@@ -127,7 +127,7 @@ class WC_Checkout {
 	 * @access public
 	 * @return void
 	 */
-	function create_order() {
+	public function create_order() {
 		global $woocommerce, $wpdb;
 
 		// Create Order (send cart variable so we can record items and reduce inventory). Only create if this is a new order, not if the payment was rejected last time.
@@ -352,7 +352,7 @@ class WC_Checkout {
 	 * @access public
 	 * @return void
 	 */
-	function process_checkout() {
+	public function process_checkout() {
 		global $wpdb, $woocommerce;
 
 		$woocommerce->verify_nonce( 'process_checkout' );
@@ -733,7 +733,7 @@ class WC_Checkout {
 	 * @param string $input
 	 * @return string
 	 */
-	function get_value( $input ) {
+	public function get_value( $input ) {
 		global $woocommerce;
 
 		if ( ! empty( $_POST[ $input ] ) ) {
