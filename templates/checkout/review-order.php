@@ -15,39 +15,16 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 ?>
 <div id="order_review">
 
-	<table class="shop_table review">
+	<table class="shop_table">
 		<thead>
 			<tr>
 				<th class="product-name"><?php _e( 'Product', 'woocommerce' ); ?></th>
-				<th class="product-quantity"><?php _e( 'Qty', 'woocommerce' ); ?></th>
-				<th class="product-total"><?php _e( 'Totals', 'woocommerce' ); ?></th>
+				<th class="product-total"><?php _e( 'Total', 'woocommerce' ); ?></th>
 			</tr>
 		</thead>
-		<tbody>
-			<?php
-				if (sizeof($woocommerce->cart->get_cart())>0) :
-					foreach ($woocommerce->cart->get_cart() as $item_id => $values) :
-						$_product = $values['data'];
-						if ($_product->exists() && $values['quantity']>0) :
-							echo '
-								<tr class = "' . esc_attr( apply_filters('woocommerce_checkout_table_item_class', 'checkout_table_item', $values, $item_id ) ) . '">
-									<td class="product-name">'.$_product->get_title().$woocommerce->cart->get_item_data( $values ).'</td>
-									<td class="product-quantity">'.$values['quantity'].'</td>
-									<td class="product-total">' . apply_filters( 'woocommerce_checkout_item_subtotal', $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] ), $values, $item_id ) . '</td>
-								</tr>';
-						endif;
-					endforeach;
-				endif;
-
-				do_action( 'woocommerce_cart_contents_review_order' );
-			?>
-		</tbody>
-	</table>
-	<table class="shop_table total">
 		<tfoot>
-
 			<tr class="cart-subtotal">
-				<th><strong><?php _e( 'Cart Subtotal', 'woocommerce' ); ?></strong></th>
+				<th><?php _e( 'Cart Subtotal', 'woocommerce' ); ?></th>
 				<td><?php echo $woocommerce->cart->get_cart_subtotal(); ?></td>
 			</tr>
 
@@ -113,8 +90,8 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 						if ( $has_compound_tax ) {
 							?>
 							<tr class="order-subtotal">
-								<th><strong><?php _e( 'Subtotal', 'woocommerce' ); ?></strong></th>
-								<td><strong><?php echo $woocommerce->cart->get_cart_subtotal( true ); ?></strong></td>
+								<th><?php _e( 'Subtotal', 'woocommerce' ); ?></th>
+								<td><?php echo $woocommerce->cart->get_cart_subtotal( true ); ?></td>
 							</tr>
 							<?php
 						}
@@ -150,7 +127,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 			<?php endif; ?>
 
-			<?php do_action('woocommerce_before_order_total'); ?>
+			<?php do_action( 'woocommerce_before_order_total' ); ?>
 
 			<tr class="total">
 				<th><strong><?php _e( 'Order Total', 'woocommerce' ); ?></strong></th>
@@ -178,9 +155,26 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				</td>
 			</tr>
 
-			<?php do_action('woocommerce_after_order_total'); ?>
-
+			<?php do_action( 'woocommerce_after_order_total' ); ?>
 		</tfoot>
+		<tbody>
+			<?php
+				if (sizeof($woocommerce->cart->get_cart())>0) :
+					foreach ($woocommerce->cart->get_cart() as $item_id => $values) :
+						$_product = $values['data'];
+						if ($_product->exists() && $values['quantity']>0) :
+							echo '
+								<tr class="' . esc_attr( apply_filters('woocommerce_checkout_table_item_class', 'checkout_table_item', $values, $item_id ) ) . '">
+									<td class="product-name">' . $_product->get_title().$woocommerce->cart->get_item_data( $values ) . ' <strong class="product-quantity">&times; ' . $values['quantity'] . '</strong></td>
+									<td class="product-total">' . apply_filters( 'woocommerce_checkout_item_subtotal', $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] ), $values, $item_id ) . '</td>
+								</tr>';
+						endif;
+					endforeach;
+				endif;
+
+				do_action( 'woocommerce_cart_contents_review_order' );
+			?>
+		</tbody>
 	</table>
 
 	<div id="payment">
