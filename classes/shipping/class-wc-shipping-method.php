@@ -208,7 +208,7 @@ class WC_Shipping_Method extends WC_Settings_API {
      * @access public
      * @param mixed $fee
      * @param mixed $total
-     * @return void
+     * @return float
      */
     function get_fee( $fee, $total ) {
 		if ( strstr( $fee, '%' ) ) :
