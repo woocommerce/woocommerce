@@ -2011,15 +2011,25 @@ function woocommerce_recount_after_stock_change( $product_id ) {
 	$product_cats = $product_tags = array();
 
 	$product_terms = get_the_terms( $product_id, 'product_cat' );
-	foreach ( $product_terms as $term )
-		$product_cats[ $term->term_id ] = $term->parent;
+
+	if( count( $product_terms) ){
+
+		foreach ( $product_terms as $term )
+			$product_cats[ $term->term_id ] = $term->parent;
+
+	}
 
 	$product_terms = get_the_terms( $product_id, 'product_tag' );
-	foreach ( $product_terms as $term )
-		$product_tags[ $term->term_id ] = $term->parent;
 
-	_woocommerce_term_recount( $product_cats, get_taxonomy( 'product_cat' ), false, false );
-	_woocommerce_term_recount( $product_tags, get_taxonomy( 'product_tag' ), false, false );
+	if( count( $product_terms ) ){
+
+		foreach ( $product_terms as $term )
+			$product_tags[ $term->term_id ] = $term->parent;
+
+	}
+
+	if( count( $product_cats ) ) _woocommerce_term_recount( $product_cats, get_taxonomy( 'product_cat' ), false, false );
+	if( count( $product_cats ) ) _woocommerce_term_recount( $product_tags, get_taxonomy( 'product_tag' ), false, false );
 }
 
 add_action( 'woocommerce_product_set_stock_status', 'woocommerce_recount_after_stock_change' );
