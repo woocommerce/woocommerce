@@ -82,7 +82,7 @@ function woocommerce_edit_product_columns( $columns ) {
 	unset( $columns['title'], $columns['comments'], $columns['date'] );
 
 	$columns["cb"] = "<input type=\"checkbox\" />";
-	$columns["thumb"] = __( 'Image', 'woocommerce' );
+	$columns["thumb"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/image.png" alt="' . __( 'Image', 'woocommerce' ) . '" class="tips" data-tip="' . __( 'Image', 'woocommerce' ) . '" width="14" height="14" />';
 
 	$columns["name"] = __( 'Name', 'woocommerce' );
 
@@ -115,11 +115,11 @@ add_filter('manage_edit-product_columns', 'woocommerce_edit_product_columns');
  */
 function woocommerce_custom_product_columns( $column ) {
 	global $post, $woocommerce;
-	$product = get_product($post);
+	$product = get_product( $post );
 
 	switch ($column) {
 		case "thumb" :
-			echo $product->get_image();
+			echo '<a href="' . get_edit_post_link( $post->ID ) . '">' . $product->get_image() . '</a>';
 		break;
 		case "name" :
 			$edit_link = get_edit_post_link( $post->ID );
