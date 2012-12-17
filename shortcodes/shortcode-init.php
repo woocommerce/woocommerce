@@ -384,22 +384,22 @@ function woocommerce_product( $atts ) {
  * @return string
  */
 function woocommerce_product_add_to_cart( $atts ) {
-  	if (empty($atts)) return;
-
   	global $wpdb, $woocommerce;
 
-  	if (!isset($atts['style'])) $atts['style'] = 'border:4px solid #ccc; padding: 12px;';
+  	if ( empty( $atts ) ) return;
 
-  	if ($atts['id']) :
+  	if ( ! isset( $atts['style'] ) ) $atts['style'] = 'border:4px solid #ccc; padding: 12px;';
+
+  	if ( isset( $atts['id'] ) ) {
   		$product_data = get_post( $atts['id'] );
-	elseif ($atts['sku']) :
-		$product_id = $wpdb->get_var($wpdb->prepare("SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $atts['sku']));
+	} elseif ( isset( $atts['sku'] ) ) {
+		$product_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $atts['sku'] ) );
 		$product_data = get_post( $product_id );
-	else :
+	} else {
 		return;
-	endif;
+	}
 
-	if ($product_data->post_type=='product') {
+	if ( 'product' == $product_data->post_type ) {
 
 		$product = $woocommerce->setup_product_data( $product_data );
 
@@ -415,7 +415,7 @@ function woocommerce_product_add_to_cart( $atts ) {
 
 		return ob_get_clean();
 
-	} elseif ($product_data->post_type=='product_variation') {
+	} elseif ( 'product_variation' == $product_data->post_type ) {
 
 		$product = get_product( $product_data->post_parent );
 
@@ -460,21 +460,21 @@ function woocommerce_product_add_to_cart( $atts ) {
  * @param array $atts
  * @return string
  */
-function woocommerce_product_add_to_cart_url( $atts ){
-  	if (empty($atts)) return;
-
+function woocommerce_product_add_to_cart_url( $atts ) {
   	global $wpdb;
 
-  	if ($atts['id']) :
-  		$product_data = get_post( $atts['id'] );
-	elseif ($atts['sku']) :
-		$product_id = $wpdb->get_var($wpdb->prepare("SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $atts['sku']));
-		$product_data = get_post( $product_id );
-	else :
-		return;
-	endif;
+  	if ( empty( $atts ) ) return;
 
-	if ($product_data->post_type!=='product') return;
+  	if ( isset( $atts['id'] ) ) {
+  		$product_data = get_post( $atts['id'] );
+	} elseif ( isset( $atts['sku'] ) ) {
+		$product_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $atts['sku'] ) );
+		$product_data = get_post( $product_id );
+	} else {
+		return;
+	}
+
+	if ( 'product' !== $product_data->post_type ) return;
 
 	$_product = get_product( $product_data );
 
@@ -765,9 +765,9 @@ function woocommerce_featured_products( $atts ) {
  * @return string
  */
 function woocommerce_product_page_shortcode( $atts ) {
-  	if (empty($atts)) return;
+  	if ( empty( $atts ) ) return;
 
-	if (!$atts['id'] && !$atts['sku']) return;
+	if ( ! isset( $atts['id'] ) && ! isset( $atts['sku'] ) ) return;
 
   	$args = array(
     	'posts_per_page' 	=> 1,
@@ -777,15 +777,15 @@ function woocommerce_product_page_shortcode( $atts ) {
     	'no_found_rows' => 1
   	);
 
-  	if(isset($atts['sku'])){
+  	if ( isset( $atts['sku'] ) ) {
     	$args['meta_query'][] = array(
-      		'key' => '_sku',
-      		'value' => $atts['sku'],
+      		'key'     => '_sku',
+      		'value'   => $atts['sku'],
       		'compare' => '='
     	);
   	}
 
-  	if(isset($atts['id'])){
+  	if ( isset( $atts['id'] ) ) {
     	$args['p'] = $atts['id'];
   	}
 
