@@ -16,7 +16,7 @@
 <!-- 7. WordPress will then import each of the posts, pages, comments, categories, etc. -->
 <!--    contained in this file into your site. -->
 
-<!-- generator="WordPress/3.4.2" created="2012-12-17 21:27" -->
+<!-- generator="WordPress/3.4.2" created="2012-12-17 21:39" -->
 <rss version="2.0"
 	xmlns:excerpt="http://wordpress.org/export/1.2/excerpt/"
 	xmlns:content="http://purl.org/rss/1.0/modules/content/"
@@ -29,7 +29,7 @@
 	<title>Superstore</title>
 	<link>http://demo2.woothemes.com/superstore</link>
 	<description>Just another WooThemes Demo site</description>
-	<pubDate>Mon, 17 Dec 2012 21:27:38 +0000</pubDate>
+	<pubDate>Mon, 17 Dec 2012 21:39:45 +0000</pubDate>
 	<language>en-US</language>
 	<wp:wxr_version>1.2</wp:wxr_version>
 	<wp:base_site_url>http://demo2.woothemes.com/</wp:base_site_url>
@@ -7919,7 +7919,7 @@ Image courtesy of Yuppiechef: <a href="http://www.yuppiechef.co.za/zoku.htm">Zok
 		<wp:is_sticky>0</wp:is_sticky>
 		<wp:postmeta>
 			<wp:meta_key>_sku</wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
+			<wp:meta_value><![CDATA[W028]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_price</wp:meta_key>
@@ -7997,7 +7997,7 @@ Image courtesy of Yuppiechef: <a href="http://www.yuppiechef.co.za/zoku.htm">Zok
 		<wp:is_sticky>0</wp:is_sticky>
 		<wp:postmeta>
 			<wp:meta_key>_sku</wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
+			<wp:meta_value><![CDATA[W029]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_price</wp:meta_key>
@@ -8079,7 +8079,7 @@ Image courtesy of Yuppiechef: <a href="http://www.yuppiechef.co.za/zoku.htm">Zok
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_sku</wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
+			<wp:meta_value><![CDATA[W030]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_price</wp:meta_key>
@@ -8201,7 +8201,7 @@ Image courtesy of Yuppiechef: <a href="http://www.yuppiechef.co.za/zoku.htm">Zok
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_sku</wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
+			<wp:meta_value><![CDATA[W035]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>attribute_pa_color</wp:meta_key>
@@ -8271,7 +8271,7 @@ Image courtesy of Yuppiechef: <a href="http://www.yuppiechef.co.za/zoku.htm">Zok
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_sku</wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
+			<wp:meta_value><![CDATA[W031]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_file_path</wp:meta_key>
@@ -8357,7 +8357,7 @@ Image courtesy of Yuppiechef: <a href="http://www.yuppiechef.co.za/zoku.htm">Zok
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_sku</wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
+			<wp:meta_value><![CDATA[W032]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>attribute_pa_color</wp:meta_key>
@@ -8435,7 +8435,7 @@ Image courtesy of Yuppiechef: <a href="http://www.yuppiechef.co.za/zoku.htm">Zok
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_sku</wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
+			<wp:meta_value><![CDATA[W033]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>attribute_pa_color</wp:meta_key>
@@ -8513,7 +8513,7 @@ Image courtesy of Yuppiechef: <a href="http://www.yuppiechef.co.za/zoku.htm">Zok
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_sku</wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
+			<wp:meta_value><![CDATA[W034]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>attribute_pa_color</wp:meta_key>
@@ -8591,7 +8591,7 @@ Image courtesy of Yuppiechef: <a href="http://www.yuppiechef.co.za/zoku.htm">Zok
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_sku</wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
+			<wp:meta_value><![CDATA[W036]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>attribute_pa_color</wp:meta_key>
@@ -8669,7 +8669,7 @@ Image courtesy of Yuppiechef: <a href="http://www.yuppiechef.co.za/zoku.htm">Zok
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_sku</wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
+			<wp:meta_value><![CDATA[W037]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>attribute_pa_color</wp:meta_key>
@@ -8747,7 +8747,7 @@ Image courtesy of Yuppiechef: <a href="http://www.yuppiechef.co.za/zoku.htm">Zok
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_sku</wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
+			<wp:meta_value><![CDATA[W038]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>attribute_pa_color</wp:meta_key>
@@ -8825,7 +8825,7 @@ Image courtesy of Yuppiechef: <a href="http://www.yuppiechef.co.za/zoku.htm">Zok
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_sku</wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
+			<wp:meta_value><![CDATA[W039]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>attribute_pa_color</wp:meta_key>
