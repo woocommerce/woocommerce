@@ -308,47 +308,44 @@ class WC_Query {
 	 * @access public
 	 * @return array
 	 */
-	public function get_catalog_ordering_args() {
+	public function get_catalog_ordering_args( $orderby = '', $order = '' ) {
 		global $woocommerce;
 
-		$current_order = ( isset( $woocommerce->session->orderby ) ) ? $woocommerce->session->orderby : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
-
-		switch ( $current_order ) {
-			case 'date' :
-				$orderby = 'date';
-				$order = 'desc';
-				$meta_key = '';
-			break;
-			case 'price' :
-				$orderby = 'meta_value_num';
-				$order = 'asc';
-				$meta_key = '_price';
-			break;
-			case 'high_price' :
-				$orderby = 'meta_value_num';
-				$order = 'desc';
-				$meta_key = '_price';
-			break;
-			case 'title' :
-				$orderby = 'title';
-				$order = 'asc';
-				$meta_key = '';
-			break;
-			default :
-				$orderby = 'menu_order title';
-				$order = 'asc';
-				$meta_key = '';
-			break;
-		}
+		// Get ordering from session unless defined
+		if ( ! $orderby )
+			$orderby = isset( $woocommerce->session->orderby ) ? $woocommerce->session->orderby : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
 
 		$args = array();
 
-		$args['orderby'] = $orderby;
-		$args['order'] = $order;
-		if ($meta_key)
-			$args['meta_key'] = $meta_key;
+		switch ( $orderby ) {
+			case 'date' :
+				$args['orderby']  = 'date';
+				$args['order']    = $order ? $order : 'desc';
+				$args['meta_key'] = '';
+			break;
+			case 'price' :
+				$args['orderby']  = 'meta_value_num';
+				$args['order']    = $order ? $order : 'asc';
+				$args['meta_key'] = '_price';
+			break;
+			case 'high_price' :
+				$args['orderby']  = 'meta_value_num';
+				$args['order']    = $order ? $order : 'desc';
+				$args['meta_key'] = '_price';
+			break;
+			case 'title' :
+				$args['orderby']  = 'title';
+				$args['order']    = $order ? $order : 'asc';
+				$args['meta_key'] = '';
+			break;
+			default :
+				$args['orderby']  = 'menu_order title';
+				$args['order']    = $order ? $order : 'asc';
+				$args['meta_key'] = '';
+			break;
+		}
 
-		return apply_filters('woocommerce_get_catalog_ordering_args', $args );
+		return apply_filters( 'woocommerce_get_catalog_ordering_args', $args );
 	}
 
 

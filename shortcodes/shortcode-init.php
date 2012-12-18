@@ -50,12 +50,13 @@ function woocommerce_product_category( $atts ){
 		'per_page' 		=> '12',
 		'columns' 		=> '4',
 	  	'orderby'   	=> 'title',
-	  	'order'     	=> 'asc',
+	  	'order'     	=> 'desc',
 	  	'category'		=> ''
 		), $atts ) );
 
 	if ( ! $category ) return;
 
+	// Default ordering args
 	$ordering_args = $woocommerce->query->get_catalog_ordering_args( $orderby, $order );
 
   	$args = array(
