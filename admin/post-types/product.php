@@ -1197,3 +1197,24 @@ function woocommerce_disable_checked_ontop( $args ) {
 }
 
 add_filter( 'wp_terms_checklist_args', 'woocommerce_disable_checked_ontop' );
+
+/**
+ * Change label for insert buttons.
+ *
+ * @access public
+ * @param mixed $translation
+ * @param mixed $original
+ * @return void
+ */
+function woocommerce_change_insert_into_post( $strings ) {
+	global $post_type;
+
+	if ( $post_type == 'product' ) {
+		$strings['insertIntoPost']     = __( 'Insert into product', 'woocommerce' );
+		$strings['uploadedToThisPost'] = __( 'Uploaded to this product', 'woocommerce' );
+	}
+
+	return $strings;
+}
+
+add_filter( 'media_view_strings', 'woocommerce_change_insert_into_post' );

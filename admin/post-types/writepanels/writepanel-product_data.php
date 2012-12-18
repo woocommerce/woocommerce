@@ -1012,29 +1012,6 @@ add_action('woocommerce_process_product_meta', 'woocommerce_process_product_meta
 
 
 /**
- * Change label for insert buttons.
- *
- * @access public
- * @param mixed $translation
- * @param mixed $original
- * @return void
- */
-function woocommerce_change_insert_into_post( $translation, $original ) {
-    if ( ! isset( $_REQUEST['from'] ) )
-    	return $translation;
-
-	$original = strtolower( $original );
-
-    if ( $_REQUEST['from'] == 'wc01' && ( $original == 'insert into post' || $original == 'use this image' ) )
-    	return __( 'Use this file', 'woocommerce' );
-
-    return $translation;
-}
-
-add_filter( 'gettext', 'woocommerce_change_insert_into_post', null, 2 );
-
-
-/**
  * Output product visibility options.
  *
  * @access public
