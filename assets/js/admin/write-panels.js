@@ -1258,7 +1258,7 @@ jQuery( function($){
 
 			var data = {
 				post_id: 		woocommerce_writepanel_params.post_id,
-				data:			$('.woocommerce_attributes').find('input, select').serialize(),
+				data:			$('.woocommerce_attributes').find('input, select, textarea').serialize(),
 				action: 		'woocommerce_save_attributes',
 				security: 		woocommerce_writepanel_params.save_attributes_nonce
 			};

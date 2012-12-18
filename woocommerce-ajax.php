@@ -498,14 +498,10 @@ function woocommerce_save_attributes() {
 				 	);
 			 	}
 
-		 	} else {
-		 		if ( ! $attribute_values[ $i ] ) continue;
-		 		// Format values
-		 		$values = esc_html( stripslashes( $attribute_values[ $i ] ) );
+		 	} elseif ( isset( $attribute_values[ $i ] ) ) {
+
 		 		// Text based, separate by pipe
-		 		$values = explode( '|', $values );
-		 		$values = array_map( 'trim', $values );
-		 		$values = implode( '|', $values );
+		 		$values = implode( '|', array_map( 'esc_html', array_map( 'trim', explode( '|', stripslashes( $attribute_values[ $i ] ) ) ) ) );
 
 		 		// Custom attribute - Add attribute to array and set the values
 			 	$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
@@ -520,6 +516,8 @@ function woocommerce_save_attributes() {
 
 		 }
 	}
+
+	var_dump($attributes);
 
 	if ( ! function_exists( 'attributes_cmp' ) ) {
 		function attributes_cmp( $a, $b ) {
