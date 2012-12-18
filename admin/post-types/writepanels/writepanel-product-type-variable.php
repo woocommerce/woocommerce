@@ -490,8 +490,11 @@ function variable_product_type_options() {
 
 				// If the media frame already exists, reopen it.
 				if ( variable_image_frame ) {
+					variable_image_frame.uploader.uploader.param( 'post_id', setting_variation_image_id );
 					variable_image_frame.open();
 					return;
+				} else {
+					wp.media.model.settings.post.id = setting_variation_image_id;
 				}
 
 				// Create the media frame.
@@ -514,14 +517,6 @@ function variable_product_type_options() {
 
 					wp.media.model.settings.post.id = wp_media_post_id;
 				});
-
-				variable_image_frame.on( 'ready open', function() {
-
-					wp.media.model.settings.post.id = setting_variation_image_id;
-
-				});
-
-				console.log( variable_image_frame.uploader );
 
 				// Finally, open the modal.
 				variable_image_frame.open();
