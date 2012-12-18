@@ -151,7 +151,7 @@ function woocommerce_product_data_box() {
 
 				echo '<p class="form-field"><label for="_file_paths">' . __( 'File paths (one per line)', 'woocommerce' ) . ':</label>
 					<textarea style="float:left;height:5em;" id="_file_paths" class="short file_paths" cols="20" rows="3" placeholder="' . __( 'File paths/URLs, one per line', 'woocommerce' ) . '" name="_file_paths" wrap="off">' . esc_textarea( $file_paths ) . '</textarea>
-					<input type="button" class="upload_file_button button" value="' . __( 'Upload a file', 'woocommerce' ) . '" />
+					<input type="button" class="upload_file_button button" data-choose="' . __( 'Choose a file', 'woocommerce' ) . '" data-update="' . __( 'Insert file URL', 'woocommerce' ) . '" value="' . __( 'Choose a file', 'woocommerce' ) . '" />
 				</p>';
 
 				// Download Limit

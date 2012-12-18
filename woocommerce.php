@@ -6,7 +6,7 @@
  * Version: 2.0.0 beta
  * Author: WooThemes
  * Author URI: http://woothemes.com
- * Requires at least: 3.3
+ * Requires at least: 3.5
  * Tested up to: 3.5
  *
  * Text Domain: woocommerce

@@ -1280,7 +1280,7 @@ jQuery( function($){
 		});
 
 	// Uploading files
-	var file_path_field;
+	/*var file_path_field;
 
 	window.send_to_editor_default = window.send_to_editor;
 
@@ -1305,7 +1305,57 @@ jQuery( function($){
 		tb_remove();
 		window.send_to_editor = window.send_to_editor_default;
 
-	}
+	}*/
+
+	var downloadable_file_frame;
+
+	jQuery('.upload_file_button').live('click', function( event ){
+
+		var $el = $(this);
+		var $file_path_field = $el.parent().find('.file_paths');
+		var file_paths = $file_path_field.val();
+
+		event.preventDefault();
+
+		// If the media frame already exists, reopen it.
+		if ( downloadable_file_frame ) {
+			downloadable_file_frame.open();
+			return;
+		}
+
+		// Create the media frame.
+		downloadable_file_frame = wp.media.frames.downloadable_file = wp.media({
+			// Set the title of the modal.
+			title: $el.data('choose'),
+			library: {
+				type: ''
+			},
+			button: {
+				text: $el.data('update'),
+			},
+			multiple: true,
+		});
+
+		// When an image is selected, run a callback.
+		downloadable_file_frame.on( 'select', function() {
+
+			var selection = downloadable_file_frame.state().get('selection');
+
+			selection.map( function( attachment ) {
+
+				attachment = attachment.toJSON();
+
+				if ( attachment.url )
+					file_paths = file_paths ? file_paths + "\n" + attachment.url : attachment.url
+
+			} );
+
+			$file_path_field.val( file_paths );
+		});
+
+		// Finally, open the modal.
+		downloadable_file_frame.open();
+	});
 
 });
 
