@@ -1050,22 +1050,20 @@ jQuery( function($){
 
 	// META BOXES
 
-		jQuery('.expand_all').click(function(){
-			jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > table').show();
-			return false;
-		});
-
-		jQuery('.close_all').click(function(){
-			jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > table').hide();
-			return false;
-		});
-
 		// Open/close
 		jQuery('.wc-metaboxes-wrapper').on('click', '.wc-metabox h3', function(event){
 			// If the user clicks on some form input inside the h3, like a select list (for variations), the box should not be toggled
 			if ($(event.target).filter(':input, option').length) return;
 
 			jQuery(this).next('.wc-metabox-content').toggle();
+		})
+		.on('click', '.expand_all', function(event){
+			jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > table').show();
+			return false;
+		})
+		.on('click', '.close_all', function(event){
+			jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > table').hide();
+			return false;
 		});
 
 		jQuery('.wc-metabox.closed').each(function(){

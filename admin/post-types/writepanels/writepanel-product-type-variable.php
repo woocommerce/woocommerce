@@ -74,6 +74,10 @@ function variable_product_type_options() {
 				<a href="#" class="close_all"><?php _e( 'Close all', 'woocommerce' ); ?></a><a href="#" class="expand_all"><?php _e( 'Expand all', 'woocommerce' ); ?></a>
 				<strong><?php _e( 'Bulk edit:', 'woocommerce' ); ?></strong>
 				<select id="field_to_edit">
+					<option value="toggle_enabled"><?php _e( 'Toggle &quot;Enabled&quot;', 'woocommerce' ); ?></option>
+					<option value="toggle_downloadable"><?php _e( 'Toggle &quot;Downloadable&quot;', 'woocommerce' ); ?></option>
+					<option value="toggle_virtual"><?php _e( 'Toggle &quot;Virtual&quot;', 'woocommerce' ); ?></option>
+					<option value="delete_all"><?php _e( 'Delete all variations', 'woocommerce' ); ?></option>
 					<option value="variable_regular_price"><?php _e( 'Prices', 'woocommerce' ); ?></option>
 					<option value="variable_sale_price"><?php _e( 'Sale prices', 'woocommerce' ); ?></option>
 					<option value="variable_stock"><?php _e( 'Stock', 'woocommerce' ); ?></option>
@@ -85,8 +89,7 @@ function variable_product_type_options() {
 					<option value="variable_download_limit"><?php _e( 'Download limit', 'woocommerce' ); ?></option>
 					<option value="variable_download_expiry"><?php _e( 'Download Expiry', 'woocommerce' ); ?></option>
 				</select>
-				<a class="button bulk_edit plus"><?php _e( 'Edit', 'woocommerce' ); ?></a>
-				<a class="button toggle toggle_downloadable" href="#"><?php _e( 'Downloadable', 'woocommerce' ); ?></a> <a class="button toggle toggle_virtual" href="#"><?php _e( 'Virtual', 'woocommerce' ); ?></a> <a class="button toggle toggle_enabled" href="#"><?php _e( 'Enabled', 'woocommerce' ); ?></a> <a href="#" class="button delete_variations"><?php _e( 'Delete all', 'woocommerce' ); ?></a>
+				<a class="button bulk_edit"><?php _e( 'Go', 'woocommerce' ); ?></a>
 			</p>
 
 			<div class="woocommerce_variations wc-metaboxes">
@@ -344,71 +347,73 @@ function variable_product_type_options() {
 			return false;
 		});
 
-		jQuery('#variable_product_options').on('click', 'a.delete_variations', function(){
-			var answer = confirm('<?php _e( 'Are you sure you want to delete all variations? This cannot be undone.', 'woocommerce' ); ?>');
-			if (answer){
+		jQuery('.wc-metaboxes-wrapper').on('click', 'a.bulk_edit', function(event){
+			var field_to_edit = jQuery('select#field_to_edit').val();
 
-				var answer = confirm('<?php _e( 'Last warning, are you sure?', 'woocommerce' ); ?>');
+			if ( field_to_edit == 'toggle_enabled' ) {
+				var checkbox = jQuery('input[name^="variable_enabled"]');
+	       		checkbox.attr('checked', !checkbox.attr('checked'));
+				return false;
+			}
+			else if ( field_to_edit == 'toggle_downloadable' ) {
+				var checkbox = jQuery('input[name^="variable_is_downloadable"]');
+	       		checkbox.attr('checked', !checkbox.attr('checked'));
+	       		jQuery('input.variable_is_downloadable').change();
+				return false;
+			}
+			else if ( field_to_edit == 'toggle_virtual' ) {
+				var checkbox = jQuery('input[name^="variable_is_virtual"]');
+	       		checkbox.attr('checked', !checkbox.attr('checked'));
+	       		jQuery('input.variable_is_virtual').change();
+				return false;
+			}
+			else if ( field_to_edit == 'delete_all' ) {
 
-				if (answer) {
+				var answer = confirm('<?php _e( 'Are you sure you want to delete all variations? This cannot be undone.', 'woocommerce' ); ?>');
+				if (answer){
 
-					var variation_ids = [];
+					var answer = confirm('<?php _e( 'Last warning, are you sure?', 'woocommerce' ); ?>');
 
-					jQuery('.woocommerce_variations .woocommerce_variation').block({ message: null, overlayCSS: { background: '#fff url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+					if (answer) {
 
-					jQuery('.woocommerce_variations .woocommerce_variation .remove_variation').each(function(){
+						var variation_ids = [];
 
-						var variation = jQuery(this).attr('rel');
-						if (variation>0) {
-							variation_ids.push(variation);
-						}
-					});
+						jQuery('.woocommerce_variations .woocommerce_variation').block({ message: null, overlayCSS: { background: '#fff url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 
-					var data = {
-						action: 'woocommerce_remove_variations',
-						variation_ids: variation_ids,
-						security: '<?php echo wp_create_nonce("delete-variations"); ?>'
-					};
+						jQuery('.woocommerce_variations .woocommerce_variation .remove_variation').each(function(){
 
-					jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', data, function(response) {
-						jQuery('.woocommerce_variations .woocommerce_variation').fadeOut('300', function(){
-							jQuery('.woocommerce_variations .woocommerce_variation').remove();
+							var variation = jQuery(this).attr('rel');
+							if (variation>0) {
+								variation_ids.push(variation);
+							}
 						});
-					});
+
+						var data = {
+							action: 'woocommerce_remove_variations',
+							variation_ids: variation_ids,
+							security: '<?php echo wp_create_nonce("delete-variations"); ?>'
+						};
+
+						jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', data, function(response) {
+							jQuery('.woocommerce_variations .woocommerce_variation').fadeOut('300', function(){
+								jQuery('.woocommerce_variations .woocommerce_variation').remove();
+							});
+						});
+
+					}
 
 				}
+				return false;
+			}
+			else {
+
+				var input_tag = jQuery('select#field_to_edit :selected').attr('rel') ? jQuery('select#field_to_edit :selected').attr('rel') : 'input';
+
+				var value = prompt("<?php _e( 'Enter a value', 'woocommerce' ); ?>");
+				jQuery(input_tag + '[name^="' + field_to_edit + '"]').val( value );
+				return false;
 
 			}
-			return false;
-		});
-
-		jQuery('a.bulk_edit').click(function() {
-			var field_to_edit = jQuery('select#field_to_edit').val();
-			var input_tag = jQuery('select#field_to_edit :selected').attr('rel') ? jQuery('select#field_to_edit :selected').attr('rel') : 'input';
-
-			var value = prompt("<?php _e( 'Enter a value', 'woocommerce' ); ?>");
-			jQuery(input_tag + '[name^="' + field_to_edit + '"]').val( value );
-			return false;
-		});
-
-		jQuery('a.toggle_virtual').click(function(){
-			var checkbox = jQuery('input[name^="variable_is_virtual"]');
-       		checkbox.attr('checked', !checkbox.attr('checked'));
-       		jQuery('input.variable_is_virtual').change();
-			return false;
-		});
-
-		jQuery('a.toggle_downloadable').click(function(){
-			var checkbox = jQuery('input[name^="variable_is_downloadable"]');
-       		checkbox.attr('checked', !checkbox.attr('checked'));
-       		jQuery('input.variable_is_downloadable').change();
-			return false;
-		});
-
-		jQuery('a.toggle_enabled').click(function(){
-			var checkbox = jQuery('input[name^="variable_enabled"]');
-       		checkbox.attr('checked', !checkbox.attr('checked'));
-			return false;
 		});
 
 		jQuery('#variable_product_options').on('change', 'input.variable_is_downloadable', function(){
