@@ -464,53 +464,74 @@ function variable_product_type_options() {
 			});
 		};
 
-		var current_field_wrapper;
+		// Uploader
+		var variable_image_frame;
+		var setting_variation_image_id;
+		var setting_variation_image;
+		var wp_media_post_id = wp.media.model.settings.post.id;
 
-		window.send_to_editor_default = window.send_to_editor;
+		jQuery('#variable_product_options').on('click', '.upload_image_button', function( event ) {
 
-		jQuery('#variable_product_options').on('click', '.upload_image_button', function(){
+			var $button                = jQuery( this );
+			var post_id                = $button.attr('rel');
+			var $parent                = $button.closest('.upload_image');
+			setting_variation_image    = $parent;
+			setting_variation_image_id = post_id;
 
-			var post_id = jQuery(this).attr('rel');
-			var parent = jQuery(this).parent();
-			current_field_wrapper = parent;
+			event.preventDefault();
 
-			if (jQuery(this).is('.remove')) {
+			if ( $button.is('.remove') ) {
 
-				jQuery('.upload_image_id', current_field_wrapper).val('');
-				jQuery('img', current_field_wrapper).attr('src', '<?php echo woocommerce_placeholder_img_src(); ?>');
-				jQuery(this).removeClass('remove');
+				setting_variation_image.find( '.upload_image_id' ).val( '' );
+				setting_variation_image.find( 'img' ).attr( 'src', '<?php echo woocommerce_placeholder_img_src(); ?>' );
+				setting_variation_image.find( '.upload_image_button' ).removeClass( 'remove' );
 
 			} else {
 
-				window.send_to_editor = window.send_to_cproduct;
-				formfield = jQuery('.upload_image_id', parent).attr('name');
-				tb_show('', 'media-upload.php?post_id=' + post_id + '&amp;type=image&amp;TB_iframe=true');
+				// If the media frame already exists, reopen it.
+				if ( variable_image_frame ) {
+					variable_image_frame.open();
+					return;
+				}
 
+				// Create the media frame.
+				variable_image_frame = wp.media.frames.variable_image = wp.media({
+					// Set the title of the modal.
+					title: '<?php _e( 'Choose an image', 'woocommerce' ); ?>',
+					button: {
+						text: '<?php _e( 'Set variation image', 'woocommerce' ); ?>'
+					}
+				});
+
+				// When an image is selected, run a callback.
+				variable_image_frame.on( 'select', function() {
+
+					attachment = variable_image_frame.state().get('selection').first().toJSON();
+
+					setting_variation_image.find( '.upload_image_id' ).val( attachment.id );
+					setting_variation_image.find( '.upload_image_button' ).addClass( 'remove' );
+					setting_variation_image.find( 'img' ).attr( 'src', attachment.url );
+
+					wp.media.model.settings.post.id = wp_media_post_id;
+				});
+
+				variable_image_frame.on( 'ready open', function() {
+
+					wp.media.model.settings.post.id = setting_variation_image_id;
+
+				});
+
+				console.log( variable_image_frame.uploader );
+
+				// Finally, open the modal.
+				variable_image_frame.open();
 			}
-
-			return false;
 		});
 
-		window.send_to_cproduct = function(html) {
-
-			jQuery('body').append('<div id="temp_image">' + html + '</div>');
-
-			var img = jQuery('#temp_image').find('img');
-
-			imgurl 		= img.attr('src');
-			imgclass 	= img.attr('class');
-			imgid		= parseInt(imgclass.replace(/\D/g, ''), 10);
-
-			jQuery('.upload_image_id', current_field_wrapper).val(imgid);
-			jQuery('.upload_image_button', current_field_wrapper).addClass('remove');
-
-			jQuery('img', current_field_wrapper).attr('src', imgurl);
-			tb_remove();
-			jQuery('#temp_image').remove();
-
-			window.send_to_editor = window.send_to_editor_default;
-
-		}
+		// Restore ID
+		jQuery('a.add_media').on('click', function() {
+			wp.media.model.settings.post.id = wp_media_post_id;
+		} );
 
 	});
 	<?php

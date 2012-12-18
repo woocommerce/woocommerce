@@ -1280,33 +1280,6 @@ jQuery( function($){
 		});
 
 	// Uploading files
-	/*var file_path_field;
-
-	window.send_to_editor_default = window.send_to_editor;
-
-	jQuery('.upload_file_button').live('click', function(){
-
-		file_path_field = jQuery(this).parent().find('.file_paths');
-
-		formfield = jQuery(file_path_field).attr('name');
-
-		window.send_to_editor = window.send_to_download_url;
-
-		tb_show('', 'media-upload.php?type=downloadable_product&amp;from=wc01&amp;TB_iframe=true');
-		return false;
-	});
-
-	window.send_to_download_url = function(html) {
-
-		file_url = jQuery(html).attr('href');
-		if (file_url) {
-			jQuery(file_path_field).val(jQuery(file_path_field).val() ? jQuery(file_path_field).val() + "\n" + file_url : file_url);
-		}
-		tb_remove();
-		window.send_to_editor = window.send_to_editor_default;
-
-	}*/
-
 	var downloadable_file_frame;
 
 	jQuery('.upload_file_button').live('click', function( event ){
@@ -1323,6 +1296,17 @@ jQuery( function($){
 			return;
 		}
 
+		var downloadable_file_states = [
+			// Main states.
+			new wp.media.controller.Library({
+				library:   wp.media.query(),
+				multiple:  true,
+				title:     $el.data('choose'),
+				priority:  20,
+				filterable: 'uploaded',
+			})
+		];
+
 		// Create the media frame.
 		downloadable_file_frame = wp.media.frames.downloadable_file = wp.media({
 			// Set the title of the modal.
@@ -1334,6 +1318,7 @@ jQuery( function($){
 				text: $el.data('update'),
 			},
 			multiple: true,
+			states: downloadable_file_states,
 		});
 
 		// When an image is selected, run a callback.
@@ -1351,6 +1336,14 @@ jQuery( function($){
 			} );
 
 			$file_path_field.val( file_paths );
+		});
+
+		// Set post to 0 and set our custom type
+		downloadable_file_frame.on( 'ready', function() {
+			downloadable_file_frame.uploader.options.uploader.params = {
+				attach_to: 0,
+				type: 'downloadable_product'
+			};
 		});
 
 		// Finally, open the modal.

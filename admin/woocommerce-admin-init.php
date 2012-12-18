@@ -363,8 +363,7 @@ function woocommerce_admin_scripts() {
     // Edit product category pages
     if (in_array( $screen->id, array('edit-product_cat') )) :
 
-		wp_enqueue_script( 'media-upload' );
-		wp_enqueue_script( 'thickbox' );
+		wp_enqueue_media();
 
 	endif;
 
@@ -373,8 +372,7 @@ function woocommerce_admin_scripts() {
 
 		wp_enqueue_script( 'woocommerce_writepanel' );
 		wp_enqueue_script( 'jquery-ui-datepicker' );
-		wp_enqueue_script( 'media-upload' );
-		wp_enqueue_script( 'thickbox' );
+		wp_enqueue_media();
 		wp_enqueue_script( 'ajax-chosen' );
 		wp_enqueue_script( 'chosen' );
 		wp_enqueue_script( 'plupload-all' );
@@ -474,7 +472,6 @@ function woocommerce_admin_css() {
     endif;
 
 	if ( $typenow == '' || $typenow=="product" || $typenow=="shop_order" || $typenow=="shop_coupon" ) :
-		wp_enqueue_style( 'thickbox' );
 		wp_enqueue_style( 'woocommerce_admin_styles', $woocommerce->plugin_url() . '/assets/css/admin.css' );
 		wp_enqueue_style( 'jquery-ui-style', (is_ssl()) ? 'https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css' : 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css' );
 	endif;

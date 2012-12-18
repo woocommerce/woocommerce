@@ -254,20 +254,6 @@ function woocommerce_prevent_admin_access() {
 	}
 }
 
-
-/**
- * Fix 'insert into post' buttons for images
- *
- * @access public
- * @param mixed $vars
- * @return array
- */
-function woocommerce_allow_img_insertion( $vars ) {
-    $vars['send'] = true; // 'send' as in "Send to Editor"
-    return($vars);
-}
-
-
 /**
  * Filter the directory for uploads.
  *
@@ -277,16 +263,15 @@ function woocommerce_allow_img_insertion( $vars ) {
  */
 function woocommerce_downloads_upload_dir( $pathdata ) {
 
-	if (isset($_POST['type']) && $_POST['type'] == 'downloadable_product') :
-
+	// Change upload dir
+	if ( isset( $_POST['type'] ) && $_POST['type'] == 'downloadable_product' ) {
 		// Uploading a downloadable file
 		$subdir = '/woocommerce_uploads'.$pathdata['subdir'];
 	 	$pathdata['path'] = str_replace($pathdata['subdir'], $subdir, $pathdata['path']);
 	 	$pathdata['url'] = str_replace($pathdata['subdir'], $subdir, $pathdata['url']);
 		$pathdata['subdir'] = str_replace($pathdata['subdir'], $subdir, $pathdata['subdir']);
 		return $pathdata;
-
-	endif;
+	}
 
 	return $pathdata;
 }
