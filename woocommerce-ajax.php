@@ -564,7 +564,7 @@ function woocommerce_add_variation() {
 	if ( $variation_id ) {
 
 		$variation_post_status = 'publish';
-		$variation_data = get_post_custom( $variation_id );
+		$variation_data = get_post_meta( $variation_id );
 		$variation_data['variation_post_id'] = $variation_id;
 
 		// Get attributes

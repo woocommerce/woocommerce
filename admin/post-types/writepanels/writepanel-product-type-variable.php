@@ -134,7 +134,7 @@ function variable_product_type_options() {
 
 					$variation_id 			= absint( $variation->ID );
 					$variation_post_status 	= esc_attr( $variation->post_status );
-					$variation_data 		= get_post_custom( $variation_id );
+					$variation_data 		= get_post_meta( $variation_id );
 					$variation_data['variation_post_id'] = $variation_id;
 
 					// Grab shipping classes

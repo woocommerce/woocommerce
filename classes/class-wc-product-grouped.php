@@ -31,7 +31,7 @@ class WC_Product_Grouped extends WC_Product {
 		parent::__construct( $product );
 
 		$this->product_type = 'grouped';
-		$this->product_custom_fields = get_post_custom( $this->id );
+		$this->product_custom_fields = get_post_meta( $this->id );
 		$this->downloadable = 'no';
 		$this->virtual = 'no';
 		$this->stock        = '';

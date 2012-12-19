@@ -91,8 +91,8 @@ class WC_Product_Variation extends WC_Product {
 		$this->post   = $this->parent->post;
 
 		// Get custom fields
-		$this->product_custom_fields = get_post_custom( $this->variation_id );
-		$this->parent_custom_fields  = ! empty( $args['meta'] ) ? $args['meta'] : get_post_custom( $this->id );
+		$this->product_custom_fields = get_post_meta( $this->variation_id );
+		$this->parent_custom_fields  = ! empty( $args['meta'] ) ? $args['meta'] : get_post_meta( $this->id );
 
 		$this->load_product_data( array(
 			'sku'           => '',

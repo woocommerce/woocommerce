@@ -200,7 +200,7 @@ class WC_Order {
 		$this->modified_date = $result->post_modified;
 		$this->customer_note = $result->post_excerpt;
 		$this->post_status = $result->post_status;
-		$this->order_custom_fields = get_post_custom( $this->id );
+		$this->order_custom_fields = get_post_meta( $this->id );
 
 		// Define the data we're going to load: Key => Default value
 		$load_data = apply_filters( 'woocommerce_load_order_data', array(

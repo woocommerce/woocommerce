@@ -49,7 +49,7 @@ class WC_Product_Variable extends WC_Product {
 		parent::__construct( $product );
 
 		$this->product_type = 'variable';
-		$this->product_custom_fields = get_post_custom( $this->id );
+		$this->product_custom_fields = get_post_meta( $this->id );
 
 		// Load data from custom fields
 		$this->load_product_data( array(
