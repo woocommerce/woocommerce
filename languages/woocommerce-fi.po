@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v1.7.0 beta\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2012-12-19 12:49+0200\n"
+"PO-Revision-Date: 2012-12-19 18:09+0200\n"
 "Last-Translator: Arhi Paivarinta <info@swratkaisut.com>\n"
 "Language-Team: Arhi Paivarinta <info@swratkaisut.com>\n"
 "MIME-Version: 1.0\n"
@@ -851,7 +851,7 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-order_notes.php:62
 #: classes/emails/class-wc-email-customer-note.php:29
 msgid "Customer note"
-msgstr "Asiakkaan kommentti"
+msgstr "Kommentti asiakkaalle"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_notes.php:63
@@ -1082,7 +1082,7 @@ msgstr "Joukot"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:109
 msgid "Product URL"
-msgstr "Tuotteen verkko-osoite (URL)"
+msgstr "Tuotteen verkko-osoite"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:109
@@ -1206,7 +1206,7 @@ msgstr "Verotettava"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:178
 msgid "Shipping only"
-msgstr "Vain toimitus"
+msgstr "Toimitus vain"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:179
@@ -1290,12 +1290,12 @@ msgstr "Arvo(t)"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:378
 msgid "Select terms"
-msgstr "Valitse ehdot"
+msgstr "Valitse arvot"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:405
 msgid "Pipe separate terms"
-msgstr "Erota ominaisuudet pystyviivalla"
+msgstr "Erota arvot pystyviivalla"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:479
@@ -1315,7 +1315,7 @@ msgstr "Tuotteet"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:498
 msgid "Up-Sells"
-msgstr "Tarjotaan parempi"
+msgstr "Parempi tuote (Up-Sell)"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:517
@@ -1331,7 +1331,7 @@ msgstr ""
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:519
 msgid "Cross-Sells"
-msgstr "Tarjotaan lisää"
+msgstr "Lisätuote (Cross-Sell)"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:538
@@ -1422,7 +1422,7 @@ msgstr "Muokkaa ominaisuutta"
 #: admin/woocommerce-admin-attributes.php:230
 #: admin/woocommerce-admin-attributes.php:362
 msgid "Select"
-msgstr "Valitse"
+msgstr "Valinta"
 
 # @ woocommerce
 #: admin/woocommerce-admin-attributes.php:231
@@ -1466,7 +1466,7 @@ msgstr "Laji"
 # @ woocommerce
 #: admin/woocommerce-admin-attributes.php:285
 msgid "Terms"
-msgstr "Ehdot"
+msgstr "Arvot"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_images.php:34
@@ -1480,7 +1480,7 @@ msgstr "Poista"
 # @ woocommerce
 #: admin/woocommerce-admin-attributes.php:330
 msgid "Configure&nbsp;terms"
-msgstr "Muokkaa&nbsp;ehtoja"
+msgstr "Muokkaa&nbsp;arvoja"
 
 # @ woocommerce
 #: admin/woocommerce-admin-attributes.php:334
@@ -6487,7 +6487,7 @@ msgstr "Lue Lisää"
 # @ woocommerce
 #: templates/loop/add-to-cart.php:28
 msgid "Select options"
-msgstr "Valitse"
+msgstr "Valitse vaihtoehdoista"
 
 # @ woocommerce
 #: templates/loop/add-to-cart.php:32
@@ -8939,8 +8939,8 @@ msgid ""
 "Shipping classes are used by certain shipping methods to group similar "
 "products."
 msgstr ""
-"Toimitusluokkaa käytetään ryhmittämään tuotteita, jotka tarvitsevat "
-"samankaltaisen kuljetuksen."
+"Toimitusluokka ryhmittää tuotteita, jotka tarvitsevat samankaltaisen "
+"kuljetuksen."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:392
@@ -9473,7 +9473,7 @@ msgstr "Tilaukset"
 # @ woocommerce
 #: admin/woocommerce-admin-init.php:417
 msgid "Enter a name for the new attribute term:"
-msgstr "Kirjoita nimi uudelle ominaisuus termille:"
+msgstr "Kirjoita nimi uudelle ominaisuuden arvolle:"
 
 # @ woocommerce
 #: admin/woocommerce-admin-init.php:711
@@ -10898,9 +10898,7 @@ msgstr "Asiakkaan sähköposti"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-coupon_data.php:159
 msgid "How many times this coupon can be used before it is void."
-msgstr ""
-"Aseta kuinka monta kertaa kuponkia voi käyttää. Sen jälkeen kuponkia ei "
-"hyväksytä."
+msgstr "Aseta kuinka monta kertaa kuponkia voi käyttää."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-coupon_data.php:165
@@ -11236,7 +11234,7 @@ msgstr "Näytä molemmat"
 # @ woocommerce
 #: admin/settings/settings-init.php:535
 msgid "Default Category Display"
-msgstr "(Tuote)Osastojen esitys, oletus"
+msgstr "Osastojen esitys, oletus"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:536
@@ -11516,7 +11514,7 @@ msgstr "Mukautettu järjestys"
 #: admin/woocommerce-admin-attributes.php:307
 #: admin/woocommerce-admin-attributes.php:373
 msgid "Term ID"
-msgstr "Termin ID"
+msgstr "Arvon ID"
 
 # @ woocommerce
 #: admin/woocommerce-admin-attributes.php:246
@@ -11526,7 +11524,7 @@ msgid ""
 "custom ordering, you can drag and drop the terms in this attribute"
 msgstr ""
 "Asettaa ominaisuuksille esitysjärjestyksen julkisella puolella. Kun "
-"'mukautettu järjestys', ominaisuuden termejä voi järjestää Vedä ja pudota -"
+"'mukautettu järjestys', ominaisuuden arvoja voi järjestää Vedä ja pudota -"
 "menetelmällä."
 
 # @ woocommerce
@@ -11777,13 +11775,13 @@ msgstr ""
 #: admin/woocommerce-admin-taxonomies.php:25
 #: admin/woocommerce-admin-taxonomies.php:114
 msgid "Display type"
-msgstr "Esitystapa:"
+msgstr "Esitystapa"
 
 # @ woocommerce
 #: admin/woocommerce-admin-taxonomies.php:29
 #: admin/woocommerce-admin-taxonomies.php:119
 msgid "Subcategories"
-msgstr "Alaosastot:"
+msgstr "Osaston alemmat tasot"
 
 # @ woocommerce
 #: admin/woocommerce-admin-taxonomies.php:30
@@ -12177,7 +12175,7 @@ msgstr "Sähköpostin muoto"
 #: classes/emails/class-wc-email-new-order.php:143
 #: classes/emails/class-wc-email.php:379
 msgid "Choose which format of email to send."
-msgstr "Valitse millainen sähköposti lähetetään"
+msgstr "Valitse missä muodossa sähköposti lähetetään."
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:178
@@ -12201,7 +12199,7 @@ msgstr "HTML muotoiltu"
 #: classes/emails/class-wc-email-new-order.php:149
 #: classes/emails/class-wc-email.php:385
 msgid "Multipart"
-msgstr "Kumpikin samassa(Multipart)"
+msgstr "Kumpikin samassa (Multipart)"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-invoice.php:27
