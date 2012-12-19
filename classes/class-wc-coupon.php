@@ -65,9 +65,6 @@ class WC_Coupon {
 	/** @public string How much the coupon is worth. */
 	public $coupon_amount;
 
-	/** @public string Constructor set value to see if coupon is valid */
-	public $coupon_valid;
-
 	/**
 	 * Coupon constructor. Loads coupon data.
 	 *
@@ -101,7 +98,6 @@ class WC_Coupon {
             $this->minimum_amount 				= esc_html( $coupon_data['minimum_amount'] );
             $this->customer_email 				= esc_html( $coupon_data['customer_email'] );
 
-            $this->coupon_valid = true;
 
         } else {
 
@@ -110,12 +106,10 @@ class WC_Coupon {
 			if ( $coupon_id )
 				$coupon = get_post( $coupon_id );
 			else
-				$this->coupon_valid = false;
 
 			$coupon->post_title = apply_filters( 'woocommerce_coupon_code', $coupon->post_title );
 
             if ( empty( $coupon ) || $coupon->post_status !== 'publish' || $this->code !== $coupon->post_title )
-            	$this->coupon_valid = false;
 
             $this->id 					= $coupon->ID;
             $this->coupon_custom_fields = get_post_custom( $this->id );
@@ -151,11 +145,8 @@ class WC_Coupon {
             $this->product_categories 			= array_filter( array_map( 'trim', (array) maybe_unserialize( $this->product_categories ) ) );
        		$this->exclude_product_categories 	= array_filter( array_map( 'trim', (array) maybe_unserialize( $this->exclude_product_categories ) ) );
 			$this->customer_email 				= array_filter( array_map( 'trim', array_map( 'strtolower', (array) maybe_unserialize( $this->customer_email ) ) ) );
-
-            $this->coupon_valid = true;
         }
 
-        $this->coupon_valid = false;
 	}
 
 
