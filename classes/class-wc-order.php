@@ -748,7 +748,7 @@ class WC_Order {
 			$subtotal = woocommerce_price( $subtotal );
 
 			if ( $this->tax_display_cart == 'excl' && $this->prices_include_tax )
-				$subtotal .= ' <small>'.$woocommerce->countries->ex_tax_or_vat().'</small>';
+				$subtotal .= ' <small>' . $woocommerce->countries->ex_tax_or_vat() . '</small>';
 
 		} else {
 
