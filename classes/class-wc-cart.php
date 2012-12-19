@@ -398,7 +398,7 @@ class WC_Cart {
 				foreach ( $this->applied_coupons as $key => $code ) {
 					$coupon = new WC_Coupon( $code );
 
-					if ( is_array( $coupon->customer_email ) && sizeof( $coupon->customer_email ) > 0 ) {
+					if ( ! is_wp_error( $coupon->is_valid() ) && is_array( $coupon->customer_email ) && sizeof( $coupon->customer_email ) > 0 ) {
 
 						$coupon->customer_email = array_map( 'sanitize_email', $coupon->customer_email );
 
@@ -1104,9 +1104,11 @@ class WC_Cart {
 
 					do_action( 'woocommerce_product_discount_after_tax_' . $coupon->type, $coupon, $values, $price );
 
+					if ( ! $coupon->is_valid() ) continue;
+
 					if ( $coupon->type != 'fixed_product' && $coupon->type != 'percent_product' ) continue;
 
-					if ( !$coupon->apply_before_tax() && $coupon->is_valid() ) {
+					if ( ! $coupon->apply_before_tax() ) {
 
 						$product_cats = wp_get_post_terms( $values['product_id'], 'product_cat', array("fields" => "ids") );
 
@@ -1181,7 +1183,7 @@ class WC_Cart {
 
 					do_action( 'woocommerce_cart_discount_after_tax_' . $coupon->type, $coupon );
 
-					if ( !$coupon->apply_before_tax() && $coupon->is_valid() ) {
+					if ( ! $coupon->apply_before_tax() && $coupon->is_valid() ) {
 
 						switch ( $coupon->type ) {
 
@@ -1745,7 +1747,7 @@ class WC_Cart {
 
 				foreach ( $this->applied_coupons as $code ) {
 					$coupon = new WC_Coupon($code);
-					if ( $coupon->individual_use == 'yes' ) {
+					if ( $coupon->is_valid() && $coupon->individual_use == 'yes' ) {
 						$this->applied_coupons = array();
 					}
 				}
@@ -1793,7 +1795,7 @@ class WC_Cart {
 				if ( $this->applied_coupons ) {
 					foreach ( $this->applied_coupons as $index => $code ) {
 						$coupon = new WC_Coupon( $code );
-						if ( $coupon->apply_before_tax() ) unset( $this->applied_coupons[ $index ] );
+						if ( $coupon->is_valid() && $coupon->apply_before_tax() ) unset( $this->applied_coupons[ $index ] );
 					}
 				}
 
@@ -1802,7 +1804,7 @@ class WC_Cart {
 				if ( $this->applied_coupons ) {
 					foreach ( $this->applied_coupons as $index => $code ) {
 						$coupon = new WC_Coupon( $code );
-						if ( ! $coupon->apply_before_tax() ) unset( $this->applied_coupons[ $index ] );
+						if ( $coupon->is_valid() && ! $coupon->apply_before_tax() ) unset( $this->applied_coupons[ $index ] );
 					}
 				}
 
