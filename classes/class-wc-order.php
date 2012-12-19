@@ -689,12 +689,16 @@ class WC_Order {
 	 * @param mixed $item
 	 * @return string
 	 */
-	public function get_formatted_line_subtotal( $item ) {
+	public function get_formatted_line_subtotal( $item, $tax_display = '' ) {
+
+		if ( ! $tax_display )
+			$tax_display = $this->tax_display_cart;
+
 		$subtotal = 0;
 
 		if (!isset($item['line_subtotal']) || !isset($item['line_subtotal_tax'])) return;
 
-		if ( $this->tax_display_cart == 'excl' ) {
+		if ( $tax_display == 'excl' ) {
 			if ( $this->prices_include_tax ) $ex_tax_label = 1; else $ex_tax_label = 0;
 			$subtotal = woocommerce_price( $this->get_line_subtotal( $item ), array( 'ex_tax_label' => $ex_tax_label ) );
 		} else {
@@ -726,8 +730,11 @@ class WC_Order {
 	 * @param bool $compound (default: false)
 	 * @return string
 	 */
-	public function get_subtotal_to_display( $compound = false ) {
+	public function get_subtotal_to_display( $compound = false, $tax_display = '' ) {
 		global $woocommerce;
+
+		if ( ! $tax_display )
+			$tax_display = $this->tax_display_cart;
 
 		$subtotal = 0;
 
@@ -739,7 +746,7 @@ class WC_Order {
 
 				$subtotal += $this->get_line_subtotal( $item );
 
-				if ( $this->tax_display_cart == 'incl' ) {
+				if ( $tax_display == 'incl' ) {
 					$subtotal += $item['line_subtotal_tax'];
 				}
 
@@ -747,12 +754,12 @@ class WC_Order {
 
 			$subtotal = woocommerce_price( $subtotal );
 
-			if ( $this->tax_display_cart == 'excl' && $this->prices_include_tax )
+			if ( $tax_display == 'excl' && $this->prices_include_tax )
 				$subtotal .= ' <small>' . $woocommerce->countries->ex_tax_or_vat() . '</small>';
 
 		} else {
 
-			if ( $this->tax_display_cart == 'incl' )
+			if ( $tax_display == 'incl' )
 				return;
 
 			foreach ( $this->get_items() as $item ) {
@@ -790,14 +797,17 @@ class WC_Order {
 	 * @access public
 	 * @return string
 	 */
-	public function get_shipping_to_display() {
+	public function get_shipping_to_display( $tax_display = '' ) {
 		global $woocommerce;
+
+		if ( ! $tax_display )
+			$tax_display = $this->tax_display_cart;
 
 		if ( $this->order_shipping > 0 ) {
 
 			$tax_text = '';
 
-			if ( $this->tax_display_cart == 'excl' ) {
+			if ( $tax_display == 'excl' ) {
 
 				// Show shipping excluding tax
 				$shipping = woocommerce_price( $this->order_shipping );
@@ -870,8 +880,11 @@ class WC_Order {
 	 * @access public
 	 * @return array
 	 */
-	public function get_order_item_totals() {
+	public function get_order_item_totals( $tax_display = '' ) {
 		global $woocommerce;
+
+		if ( ! $tax_display )
+			$tax_display = $this->tax_display_cart;
 
 		$total_rows = array();
 
@@ -896,7 +909,7 @@ class WC_Order {
 		if ( $fees = $this->get_fees() )
 			foreach( $fees as $id => $fee ) {
 
-				if ( $this->tax_display_cart == 'excl' ) {
+				if ( $tax_display == 'excl' ) {
 
 					$total_rows[ 'fee_' . $id ] = array(
 						'label' => $fee['name'],
@@ -914,7 +927,7 @@ class WC_Order {
 			}
 
 		// Tax for tax exclusive prices
-		if ( $this->tax_display_cart == 'excl' ) {
+		if ( $tax_display == 'excl' ) {
 			if ( sizeof( $this->get_taxes() ) > 0 ) {
 
 				$has_compound_tax = false;
@@ -970,7 +983,7 @@ class WC_Order {
 		);
 
 		// Tax for inclusive prices
-		if ( $this->tax_display_cart == 'incl' ) {
+		if ( $tax_display == 'incl' ) {
 
 			$tax_string_array = array();
 
