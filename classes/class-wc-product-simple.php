@@ -13,45 +13,17 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 class WC_Product_Simple extends WC_Product {
 
+	/** @var string The product's type. */
+	public $product_type = 'simple';
+
 	/**
 	 * __construct function.
 	 *
 	 * @access public
 	 * @param mixed $product
-	 * @param array $args Contains arguments to set up this product
 	 */
-	public function __construct( $product, $args ) {
-
+	public function __construct( $product ) {
 		parent::__construct( $product );
-
-		$this->product_type = 'simple';
-
-		// Load data from custom fields
-		$this->load_product_data( array(
-			'sku'                   => '',
-			'downloadable'          => 'no',
-			'virtual'               => 'no',
-			'price'                 => '',
-			'visibility'            => 'hidden',
-			'stock'                 => 0,
-			'stock_status'          => 'instock',
-			'backorders'            => 'no',
-			'manage_stock'          => 'no',
-			'sale_price'            => '',
-			'regular_price'         => '',
-			'weight'                => '',
-			'length'                => '',
-			'width'                 => '',
-			'height'                => '',
-			'tax_status'            => 'taxable',
-			'tax_class'             => '',
-			'upsell_ids'            => array(),
-			'crosssell_ids'         => array(),
-			'sale_price_dates_from' => '',
-			'sale_price_dates_to'   => '',
-			'featured'              => 'no',
-			'sold_individually'     => 'no'
-		) );
 	}
 
 	/**
@@ -70,7 +42,6 @@ class WC_Product_Simple extends WC_Product {
 
 		return apply_filters( 'woocommerce_product_title', apply_filters( 'the_title', $title, $this->id ), $this );
 	}
-
 
 	/**
 	 * Sync grouped products with the childs lowest price (so they can be sorted by price accurately).

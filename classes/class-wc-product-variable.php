@@ -13,72 +13,23 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 class WC_Product_Variable extends WC_Product {
 
+	/** @var string The product's type. */
+	public $product_type = 'variable';
+
 	/** @public array Array of child products/posts/variations. */
-	public $children;
+	public $children = '';
 
 	/** @public string The product's total stock, including that of its children. */
-	public $total_stock;
-
-	/** @public string Used for variation prices. */
-	public $min_variation_price;
-
-	/** @public string Used for variation prices. */
-	public $max_variation_price;
-
-	/** @public string Used for variation prices. */
-	public $min_variation_regular_price;
-
-	/** @public string Used for variation prices. */
-	public $max_variation_regular_price;
-
-	/** @public string Used for variation prices. */
-	public $min_variation_sale_price;
-
-	/** @public string Used for variation prices. */
-	public $max_variation_sale_price;
+	public $total_stock = '';
 
 	/**
 	 * __construct function.
 	 *
 	 * @access public
 	 * @param mixed $product
-	 * @param array $args Contains arguments to set up this product
 	 */
-	public function __construct( $product, $args ) {
-
+	public function __construct( $product ) {
 		parent::__construct( $product );
-
-		$this->product_type = 'variable';
-		$this->product_custom_fields = get_post_meta( $this->id );
-
-		// Load data from custom fields
-		$this->load_product_data( array(
-			'sku'                         => '',
-			'price'                       => '',
-			'sale_price'                  => '',
-			'regular_price'               => '',
-			'visibility'                  => 'hidden',
-			'stock'                       => 0,
-			'stock_status'                => 'instock',
-			'backorders'                  => 'no',
-			'manage_stock'                => 'no',
-			'weight'                      => '',
-			'length'                      => '',
-			'width'                       => '',
-			'height'                      => '',
-			'tax_status'                  => 'taxable',
-			'tax_class'                   => '',
-			'upsell_ids'                  => array(),
-			'crosssell_ids'               => array(),
-			'featured'                    => 'no',
-			'min_variation_price'         => '',
-			'max_variation_price'         => '',
-			'min_variation_regular_price' => '',
-			'max_variation_regular_price' => '',
-			'min_variation_sale_price'    => '',
-			'max_variation_sale_price'    => '',
-			'sold_individually'           => 'no'
-		) );
 	}
 
     /**
@@ -91,7 +42,7 @@ class WC_Product_Variable extends WC_Product {
      */
     public function get_total_stock() {
 
-        if ( is_null( $this->total_stock ) ) {
+        if ( empty( $this->total_stock ) ) {
 
         	$transient_name = 'wc_product_total_stock_' . $this->id;
 
@@ -204,8 +155,7 @@ class WC_Product_Variable extends WC_Product {
 	public function get_child( $child_id ) {
 		return get_product( $child_id, array(
 			'parent_id' => $this->id,
-			'parent' 	=> $this,
-			'meta'      => $this->product_custom_fields
+			'parent' 	=> $this
 			) );
 	}
 
@@ -228,6 +178,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return bool
 	 */
 	public function is_on_sale() {
+
 		if ( $this->has_child() ) {
 
 			foreach ( $this->get_children() as $child_id ) {
@@ -389,7 +340,7 @@ class WC_Product_Variable extends WC_Product {
      */
     public function get_variation_default_attributes() {
 
-    	$default = isset( $this->product_custom_fields['_default_attributes'][0] ) ? $this->product_custom_fields['_default_attributes'][0] : '';
+    	$default = isset( $this->default_attributes ) ? $this->default_attributes : '';
 
 	    return apply_filters( 'woocommerce_product_default_attributes', (array) maybe_unserialize( $default ), $this );
     }

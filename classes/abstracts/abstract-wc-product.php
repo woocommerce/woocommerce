@@ -14,97 +14,16 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 abstract class WC_Product {
 
 	/** @var int The product (post) ID. */
-	var $id;
-
-	/** @var array Array of custom fields (meta) containing product data. */
-	var $product_custom_fields;
+	public $id = 0;
 
 	/** @var array Array of product attributes. */
-	var $attributes;
+	public $attributes = '';
 
 	/** @var object The actual post object. */
-	var $post;
-
-	/** @var string "Yes" for downloadable products. */
-	var $downloadable;
-
-	/** @var string "Yes" for virtual products. */
-	var $virtual;
-
-	/** @var string The product SKU (stock keeping unit). */
-	var $sku;
-
-	/** @var string The product price. */
-	var $price;
-
-	/** @var string The product's visibility. */
-	var $visibility;
-
-	/** @var string The product's stock level (if applicable). */
-	var $stock;
-
-	/** @var string The product's stock status (instock or outofstock). */
-	var $stock_status;
-
-	/** @var string The product's backorder status. */
-	var $backorders;
-
-	/** @var bool True if the product is stock managed. */
-	var $manage_stock;
-
-	/** @var string The product's sale price. */
-	var $sale_price;
-
-	/** @var string The product's regular non-sale price. */
-	var $regular_price;
-
-	/** @var string The product's weight. */
-	var $weight;
-
-	/** @var string The product's length. */
-	var $length;
-
-	/** @var string The product's width. */
-	var $width;
-
-	/** @var string The product's height. */
-	var $height;
-
-	/** @var string The product's tax status. */
-	var $tax_status;
-
-	/** @var string The product's tax class. */
-	var $tax_class;
-
-	/** @var array Array of product ID's being up-sold. */
-	var $upsell_ids;
-
-	/** @var array Array of product ID's being cross-sold. */
-	var $crosssell_ids;
+	public $post = '';
 
 	/** @var string The product's type (simple, variable etc). */
-	var $product_type;
-
-	/** @var string Date a sale starts. */
-	var $sale_price_dates_from;
-
-	/** @var string Data a sale ends. */
-	var $sale_price_dates_to;
-
-	/** @var string "Yes" for featured products. */
-	var $featured;
-
-	/** @var string Shipping class slug for the product. */
-	var $shipping_class;
-
-	/** @var int Shipping class ID for the product. */
-	var $shipping_class_id;
-
-	/** @var string Formatted LxWxH. */
-	var $dimensions;
-
-	/** @var string "Yes" if sold individually. */
-	var $sold_individually;
+	public $product_type = '';
 
 	/**
 	 * __construct function.
@@ -112,38 +31,59 @@ abstract class WC_Product {
 	 * @access public
 	 * @param mixed $product
 	 */
-	function __construct( $product ) {
-
+	public function __construct( $product ) {
 		if ( is_object( $product ) ) {
-			$this->id = absint( $product->ID );
+			$this->id   = absint( $product->ID );
 			$this->post = $product;
 		} else {
-			$this->id = absint( $product );
+			$this->id   = absint( $product );
 			$this->post = get_post( $this->id );
 		}
-
-		$this->product_custom_fields = get_post_custom( $this->id );
 	}
-
 
 	/**
-	 * Load the data from the custom fields
+	 * __isset function.
 	 *
 	 * @access public
-	 * @param mixed $fields
-	 * @param string $data (default: '')
-	 * @return void
+	 * @param mixed $key
+	 * @return bool
 	 */
-	function load_product_data( $fields, $data = '' ) {
-
-		if ( ! $data )
-			$data = $this->product_custom_fields;
-
-		if ( $fields )
-			foreach ( $fields as $key => $default )
-				$this->$key = isset( $data[ '_' . $key ][0] ) && $data[ '_' . $key ][0] !== '' ? $data[ '_' . $key ][0] : $default;
+	public function __isset( $key ) {
+		return metadata_exists( 'post', $this->id, '_' . $key );
 	}
 
+	/**
+	 * __get function.
+	 *
+	 * @access public
+	 * @param mixed $key
+	 * @return mixed
+	 */
+	public function __get( $key ) {
+
+		if ( in_array( $key, array( 'downloadable', 'virtual', 'backorders', 'manage_stock', 'featured', 'sold_individually' ) ) )
+			$value = ( $value = get_post_meta( $this->id, '_' . $key, true ) ) ? $value : 'no';
+		elseif ( 'visibility' == $key )
+			$value = ( $value = get_post_meta( $this->id, '_visibility', true ) ) ? $value : 'hidden';
+		elseif ( 'stock' == $key )
+			$value = ( $value = get_post_meta( $this->id, '_stock', true ) ) ? $value : 0;
+		elseif ( 'stock_status' == $key )
+			$value = ( $value = get_post_meta( $this->id, '_stock_status', true ) ) ? $value : 'instock';
+		elseif ( 'tax_status' == $key )
+			$value = ( $value = get_post_meta( $this->id, '_visibility', true ) ) ? $value : 'taxable';
+		elseif ( 'upsell_ids' == $key )
+			$value = ( $value = get_post_meta( $this->id, '_upsell_ids', true ) ) ? $value : array();
+		elseif ( 'crosssell_ids' == $key )
+			$value = ( $value = get_post_meta( $this->id, '_crosssell_ids', true ) ) ? $value : array();
+		else {
+			$value = get_post_meta( $this->id, '_' . $key, true );
+		}
+
+		if ( $value )
+			$this->$key = $value;
+
+		return $value;
+	}
 
 	/**
      * Get SKU (Stock-keeping unit) - product unique ID.
@@ -292,7 +232,7 @@ abstract class WC_Product {
 	 */
 	function get_file_download_path( $download_id ) {
 
-		$file_paths = isset( $this->product_custom_fields['_file_paths'][0] ) ? $this->product_custom_fields['_file_paths'][0] : '';
+		$file_paths = isset( $this->file_paths ) ? $this->file_paths : '';
 		$file_paths = maybe_unserialize( $file_paths );
 		$file_paths = apply_filters( 'woocommerce_file_download_paths', $file_paths, $this->id, null, null );
 
@@ -1125,11 +1065,7 @@ abstract class WC_Product {
 	function get_attributes() {
 
 		if ( ! is_array( $this->attributes ) ) {
-
-			if ( isset( $this->product_custom_fields['_product_attributes'][0] ) )
-				$this->attributes = maybe_unserialize( maybe_unserialize( $this->product_custom_fields['_product_attributes'][0] ));
-			else
-				$this->attributes = array();
+			$this->attributes = isset( $this->product_attributes ) ? maybe_unserialize( maybe_unserialize( $this->product_attributes ) ) : array();
 		}
 
 		return (array) $this->attributes;

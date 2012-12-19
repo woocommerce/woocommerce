@@ -13,46 +13,23 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 class WC_Product_Grouped extends WC_Product {
 
-	/** @var array Array of child products/posts/variations. */
-	public $children;
+	/** @var string The product's type. */
+	public $product_type = 'grouped';
 
-	/** @var string The product's total stock, including that of its children. */
-	public $total_stock;
+	/** @public array Array of child products/posts/variations. */
+	public $children = '';
+
+	/** @public string The product's total stock, including that of its children. */
+	public $total_stock = '';
 
 	/**
 	 * __construct function.
 	 *
 	 * @access public
 	 * @param mixed $product
-	 * @param array $args Contains arguments to set up this product
 	 */
-	public function __construct( $product, $args ) {
-
+	public function __construct( $product ) {
 		parent::__construct( $product );
-
-		$this->product_type = 'grouped';
-		$this->product_custom_fields = get_post_meta( $this->id );
-		$this->downloadable = 'no';
-		$this->virtual = 'no';
-		$this->stock        = '';
-		$this->stock_status = 'instock';
-		$this->manage_stock = 'no';
-		$this->weight       = '';
-		$this->length       = '';
-		$this->width        = '';
-		$this->height       = '';
-
-		// Load data from custom fields
-		$this->load_product_data( array(
-			'sku'                   => '',
-			'price'                 => '',
-			'visibility'            => 'hidden',
-			'sale_price'            => '',
-			'regular_price'         => '',
-			'upsell_ids'            => array(),
-			'crosssell_ids'         => array(),
-			'featured'              => 'no'
-		) );
 	}
 
     /**
@@ -65,7 +42,7 @@ class WC_Product_Grouped extends WC_Product {
      */
     public function get_total_stock() {
 
-        if ( is_null( $this->total_stock ) ) {
+        if ( empty( $this->total_stock ) ) {
 
         	$transient_name = 'wc_product_total_stock_' . $this->id;
 

@@ -13,38 +13,17 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 class WC_Product_External extends WC_Product_Simple {
 
-	/** @var string URL to external product. */
-	public $product_url;
-
-	/** @var string Text for the buy/link button. */
-	public $button_text;
+	/** @var string The product's type. */
+	public $product_type = 'external';
 
 	/**
 	 * __construct function.
 	 *
 	 * @access public
 	 * @param mixed $product
-	 * @param array $args Contains arguments to set up this product
 	 */
-	public function __construct( $product, $args ) {
-
-		parent::__construct( $product, $args );
-
-		$this->product_type = 'external';
-		$this->downloadable = 'no';
-		$this->virtual      = 'no';
-		$this->stock        = '';
-		$this->stock_status = 'instock';
-		$this->manage_stock = 'no';
-		$this->weight       = '';
-		$this->length       = '';
-		$this->width        = '';
-		$this->height       = '';
-
-		$this->load_product_data( array(
-			'product_url' => '',
-			'button_text' => 'no'
-		) );
+	public function __construct( $product ) {
+		parent::__construct( $product );
 	}
 
 	/**
