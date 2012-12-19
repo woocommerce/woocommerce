@@ -64,20 +64,21 @@ add_filter('manage_edit-shop_order_columns', 'woocommerce_edit_order_columns');
  * @return void
  */
 function woocommerce_custom_order_columns( $column ) {
+	global $post, $woocommerce, $the_order;
 
-	global $post, $woocommerce;
-	$order = new WC_Order( $post->ID );
+	if ( empty( $the_order ) || $the_order->id != $post->ID )
+		$the_order = new WC_Order( $post->ID );
 
 	switch ( $column ) {
 		case "order_status" :
 
-			printf( '<mark class="%s">%s</mark>', sanitize_title( $order->status ), esc_html__( $order->status, 'woocommerce' ) );
+			printf( '<mark class="%s">%s</mark>', sanitize_title( $the_order->status ), esc_html__( $the_order->status, 'woocommerce' ) );
 
 		break;
 		case "order_title" :
 
-			if ( $order->user_id )
-				$user_info = get_userdata( $order->user_id );
+			if ( $the_order->user_id )
+				$user_info = get_userdata( $the_order->user_id );
 
 			if ( ! empty( $user_info ) ) {
 
@@ -94,35 +95,35 @@ function woocommerce_custom_order_columns( $column ) {
            		$user = __( 'Guest', 'woocommerce' );
            	}
 
-           	echo '<a href="' . admin_url( 'post.php?post=' . absint( $post->ID ) . '&action=edit' ) . '"><strong>' . sprintf( __( 'Order %s', 'woocommerce' ), esc_attr( $order->get_order_number() ) ) . '</strong></a> ' . __( 'made by', 'woocommerce' ) . ' ' . $user;
+           	echo '<a href="' . admin_url( 'post.php?post=' . absint( $post->ID ) . '&action=edit' ) . '"><strong>' . sprintf( __( 'Order %s', 'woocommerce' ), esc_attr( $the_order->get_order_number() ) ) . '</strong></a> ' . __( 'made by', 'woocommerce' ) . ' ' . $user;
 
-           	if ( $order->billing_email )
-        		echo '<small class="meta">' . __( 'Email:', 'woocommerce' ) . ' ' . '<a href="' . esc_url( 'mailto:' . $order->billing_email ) . '">' . esc_html( $order->billing_email ) . '</a></small>';
+           	if ( $the_order->billing_email )
+        		echo '<small class="meta">' . __( 'Email:', 'woocommerce' ) . ' ' . '<a href="' . esc_url( 'mailto:' . $the_order->billing_email ) . '">' . esc_html( $the_order->billing_email ) . '</a></small>';
 
-        	if ( $order->billing_phone )
-        		echo '<small class="meta">' . __( 'Tel:', 'woocommerce' ) . ' ' . esc_html( $order->billing_phone ) . '</small>';
+        	if ( $the_order->billing_phone )
+        		echo '<small class="meta">' . __( 'Tel:', 'woocommerce' ) . ' ' . esc_html( $the_order->billing_phone ) . '</small>';
 
 		break;
 		case "billing_address" :
-			if ( $order->get_formatted_billing_address() )
-        		echo '<a target="_blank" href="' . esc_url( 'http://maps.google.com/maps?&q=' . urlencode( $order->get_billing_address() ) . '&z=16' ) . '">' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $order->get_formatted_billing_address() ) ) .'</a>';
+			if ( $the_order->get_formatted_billing_address() )
+        		echo '<a target="_blank" href="' . esc_url( 'http://maps.google.com/maps?&q=' . urlencode( $the_order->get_billing_address() ) . '&z=16' ) . '">' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $the_order->get_formatted_billing_address() ) ) .'</a>';
         	else
         		echo '&ndash;';
 
-        	if ( $order->payment_method_title )
-        		echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $order->payment_method_title ) . '</small>';
+        	if ( $the_order->payment_method_title )
+        		echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->payment_method_title ) . '</small>';
 		break;
 		case "shipping_address" :
-			if ( $order->get_formatted_shipping_address() )
-            	echo '<a target="_blank" href="' . esc_url( 'http://maps.google.com/maps?&q=' . urlencode( $order->get_shipping_address() ) . '&z=16' ) . '">'. esc_html( preg_replace('#<br\s*/?>#i', ', ', $order->get_formatted_shipping_address() ) ) .'</a>';
+			if ( $the_order->get_formatted_shipping_address() )
+            	echo '<a target="_blank" href="' . esc_url( 'http://maps.google.com/maps?&q=' . urlencode( $the_order->get_shipping_address() ) . '&z=16' ) . '">'. esc_html( preg_replace('#<br\s*/?>#i', ', ', $the_order->get_formatted_shipping_address() ) ) .'</a>';
         	else
         		echo '&ndash;';
 
-        	if ( $order->shipping_method_title )
-        		echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $order->shipping_method_title ) . '</small>';
+        	if ( $the_order->shipping_method_title )
+        		echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->shipping_method_title ) . '</small>';
 		break;
 		case "total_cost" :
-			echo esc_html( strip_tags( $order->get_formatted_order_total() ) );
+			echo esc_html( strip_tags( $the_order->get_formatted_order_total() ) );
 		break;
 		case "order_date" :
 
@@ -147,18 +148,18 @@ function woocommerce_custom_order_columns( $column ) {
 
 			?><p>
 				<?php
-					do_action( 'woocommerce_admin_order_actions_start', $order );
+					do_action( 'woocommerce_admin_order_actions_start', $the_order );
 
 					$actions = array();
 
-					if ( in_array( $order->status, array( 'pending', 'on-hold' ) ) )
+					if ( in_array( $the_order->status, array( 'pending', 'on-hold' ) ) )
 						$actions[] = array(
 							'url' 		=> wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce-mark-order-processing&order_id=' . $post->ID ), 'woocommerce-mark-order-processing' ),
 							'name' 		=> __( 'Processing', 'woocommerce' ),
 							'action' 	=> "processing"
 						);
 
-					if ( in_array( $order->status, array( 'pending', 'on-hold', 'processing' ) ) )
+					if ( in_array( $the_order->status, array( 'pending', 'on-hold', 'processing' ) ) )
 						$actions[] = array(
 							'url' 		=> wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce-mark-order-complete&order_id=' . $post->ID ), 'woocommerce-mark-order-complete' ),
 							'name' 		=> __( 'Complete', 'woocommerce' ),
@@ -171,21 +172,21 @@ function woocommerce_custom_order_columns( $column ) {
 							'action' 	=> "view"
 						);
 
-					$actions = apply_filters( 'woocommerce_admin_order_actions', $actions, $order );
+					$actions = apply_filters( 'woocommerce_admin_order_actions', $actions, $the_order );
 
 					foreach ( $actions as $action ) {
 						$image = ( isset( $action['image_url'] ) ) ? $action['image_url'] : $woocommerce->plugin_url() . '/assets/images/icons/' . $action['action'] . '.png';
 						printf( '<a class="button tips" href="%s" data-tip="%s"><img src="%s" alt="%s" width="14" /></a>', esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $image ), esc_attr( $action['name'] ) );
 					}
 
-					do_action( 'woocommerce_admin_order_actions_end', $order );
+					do_action( 'woocommerce_admin_order_actions_end', $the_order );
 				?>
 			</p><?php
 
 		break;
 		case "note" :
 
-			if ( $order->customer_note )
+			if ( $the_order->customer_note )
 				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/note.png" alt="yes" class="tips" data-tip="' . __( 'Yes', 'woocommerce' ) . '" width="14" height="14" />';
 			else
 				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/note-off.png" alt="no" class="tips" data-tip="' . __( 'No', 'woocommerce' ) . '" width="14" height="14" />';
