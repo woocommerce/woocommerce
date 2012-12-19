@@ -93,7 +93,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 
 					$taxonomy_filter = str_replace( 'pa_', '', $taxonomy );
 
-					$found = true;
+					$found = false;
 
 					echo '<select id="dropdown_layered_nav_' . $taxonomy_filter . '">';
 
