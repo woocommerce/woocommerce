@@ -1728,9 +1728,8 @@ class WC_Cart {
 			if ( $the_coupon->id ) {
 
 				// Check it can be used with cart
-				$return = $the_coupon->is_valid();
-				if ( ! $return || is_wp_error( $return ) ) {
-					$woocommerce->add_error( is_wp_error( $return ) ? $return->get_error_message() : __( 'Invalid coupon.', 'woocommerce' ) );
+				if ( ! $the_coupon->is_valid() ) {
+					$woocommerce->add_error( $the_coupon->get_error_message() );
 					return false;
 				}
 
