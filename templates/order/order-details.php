@@ -18,8 +18,7 @@ $order = new WC_Order( $order_id );
 	<thead>
 		<tr>
 			<th class="product-name"><?php _e( 'Product', 'woocommerce' ); ?></th>
-			<th class="product-quantity"><?php _e( 'Qty', 'woocommerce' ); ?></th>
-			<th class="product-total"><?php _e( 'Totals', 'woocommerce' ); ?></th>
+			<th class="product-total"><?php _e( 'Total', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
 	<tfoot>
@@ -27,7 +26,7 @@ $order = new WC_Order( $order_id );
 		if ( $totals = $order->get_order_item_totals() ) foreach ( $totals as $total ) :
 			?>
 			<tr>
-				<th scope="row" colspan="2"><?php echo $total['label']; ?></th>
+				<th scope="row"><?php echo $total['label']; ?></th>
 				<td><?php echo $total['value']; ?></td>
 			</tr>
 			<?php
@@ -46,7 +45,7 @@ $order = new WC_Order( $order_id );
 					<tr class = "' . esc_attr( apply_filters('woocommerce_order_table_item_class', 'order_table_item', $item, $order ) ) . '">
 						<td class="product-name">';
 
-				echo '<a href="'.get_permalink( $item['product_id'] ).'">' . $item['name'] . '</a>';
+				echo '<a href="'.get_permalink( $item['product_id'] ).'">' . $item['name'] . '</a> <strong class="product-quantity">&times; ' . $item['qty'] . '</strong>';
 
 				$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
 				$item_meta->display();
@@ -60,7 +59,7 @@ $order = new WC_Order( $order_id );
 
 				endif;
 
-				echo '</td><td class="product-quantity">'.$item['qty'].'</td><td class="product-total">' . $order->get_formatted_line_subtotal($item) . '</td></tr>';
+				echo '</td><td class="product-total">' . $order->get_formatted_line_subtotal( $item ) . '</td></tr>';
 
 				// Show any purchase notes
 				if ($order->status=='completed' || $order->status=='processing') :
