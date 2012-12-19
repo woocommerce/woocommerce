@@ -982,7 +982,7 @@ class WC_Cart {
 										$this_item_is_discounted = false;
 
 								// Apply filter
-								$this_item_is_discounted = apply_filters( 'woocommerce_item_is_discounted', $this_item_is_discounted, $values, $before_tax = true );
+								$this_item_is_discounted = apply_filters( 'woocommerce_item_is_discounted', $this_item_is_discounted, $values, $before_tax = true, $coupon );
 
 								// Apply the discount
 								if ( $this_item_is_discounted ) {
@@ -1142,7 +1142,7 @@ class WC_Cart {
 								$this_item_is_discounted = false;
 
 						// Apply filter
-						$this_item_is_discounted = apply_filters( 'woocommerce_item_is_discounted', $this_item_is_discounted, $values, $before_tax = false );
+						$this_item_is_discounted = apply_filters( 'woocommerce_item_is_discounted', $this_item_is_discounted, $values, $before_tax = false, $coupon );
 
 						// Apply the discount
 						if ( $this_item_is_discounted ) {
