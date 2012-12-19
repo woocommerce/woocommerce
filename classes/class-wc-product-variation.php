@@ -14,53 +14,53 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 class WC_Product_Variation extends WC_Product {
 
+	/** @var string The product's type. */
+	public $product_type = 'variable';
+
 	/** @public array Stores variation data (attributes) for the current variation. */
-	public $variation_data;
+	public $variation_data = array();
 
 	/** @public int ID of the variable product. */
-	public $variation_id;
-
-	/** @public bool True if the variation has a length. */
-	public $variation_has_length;
-
-	/** @public bool True if the variation has a width. */
-	public $variation_has_width;
-
-	/** @public bool True if the variation has a height. */
-	public $variation_has_height;
-
-	/** @public bool True if the variation has a weight. */
-	public $variation_has_weight;
-
-	/** @public bool True if the variation has a price. */
-	public $variation_has_price;
-
-	/** @public bool True if the variation has a regular price. */
-	public $variation_has_regular_price;
-
-	/** @public bool True if the variation has a sale price. */
-	public $variation_has_sale_price;
-
-	/** @public bool True if the variation has stock and is managing stock. */
-	public $variation_has_stock;
-
-	/** @public bool True if the variation has a sku. */
-	public $variation_has_sku;
-
-	/** @public string Stores the shipping class of the variation. */
-	public $variation_shipping_class;
-
-	/** @public int Stores the shipping class ID of the variation. */
-	public $variation_shipping_class_id;
-
-	/** @public bool True if the variation has a tax class. */
-	public $variation_has_tax_class;
-
-	/** @public array Array of custom fields (meta) containing product data. */
-	public $parent_custom_fields;
+	public $variation_id = 0;
 
 	/** @public object Parent Variable product object. */
-	public $parent;
+	public $parent = '';
+
+	/** @public bool True if the variation has a length. */
+	public $variation_has_length = false;
+
+	/** @public bool True if the variation has a width. */
+	public $variation_has_width = false;
+
+	/** @public bool True if the variation has a height. */
+	public $variation_has_height = false;
+
+	/** @public bool True if the variation has a weight. */
+	public $variation_has_weight = false;
+
+	/** @public bool True if the variation has a price. */
+	public $variation_has_price = false;
+
+	/** @public bool True if the variation has a regular price. */
+	public $variation_has_regular_price = false;
+
+	/** @public bool True if the variation has a sale price. */
+	public $variation_has_sale_price = false;
+
+	/** @public bool True if the variation has stock and is managing stock. */
+	public $variation_has_stock = false;
+
+	/** @public bool True if the variation has a sku. */
+	public $variation_has_sku = false;
+
+	/** @public string Stores the shipping class of the variation. */
+	public $variation_shipping_class = false;
+
+	/** @public int Stores the shipping class ID of the variation. */
+	public $variation_shipping_class_id = false;
+
+	/** @public bool True if the variation has a tax class. */
+	public $variation_has_tax_class = false;
 
 	/**
 	 * Loads all product data from custom fields
@@ -72,8 +72,6 @@ class WC_Product_Variation extends WC_Product {
 	 */
 	public function __construct( $variation, $args = array() ) {
 
-		$this->product_type = 'variable';
-
 		if ( is_object( $variation ) ) {
 			$this->variation_id = absint( $variation->ID );
 		} else {
@@ -84,50 +82,23 @@ class WC_Product_Variation extends WC_Product {
 		$this->id   = ! empty( $args['parent_id'] ) ? intval( $args['parent_id'] ) : wp_get_post_parent_id( $this->variation_id );
 
 		// The post doesn't have a parent id, therefore its invalid.
-		if ( empty( $this->id ) ) return false;
+		if ( empty( $this->id ) )
+			return false;
 
 		// Get post data
 		$this->parent = ! empty( $args['parent'] ) ? $args['parent'] : get_product( $this->id );
 		$this->post   = $this->parent->post;
-
-		// Get custom fields
 		$this->product_custom_fields = get_post_meta( $this->variation_id );
-		$this->parent_custom_fields  = ! empty( $args['meta'] ) ? $args['meta'] : get_post_meta( $this->id );
-
-		$this->load_product_data( array(
-			'sku'           => '',
-			'price'         => 0,
-			'visibility'    => 'hidden',
-			'stock'         => 0,
-			'stock_status'  => 'instock',
-			'backorders'    => 'no',
-			'manage_stock'  => 'no',
-			'sale_price'    => '',
-			'regular_price' => '',
-			'weight'        => '',
-			'length'        => '',
-			'width'         => '',
-			'height'        => '',
-			'tax_status'    => 'taxable',
-			'tax_class'     => '',
-			'upsell_ids'    => array(),
-			'crosssell_ids' => array()
-		), $this->parent_custom_fields );
 
 		// Get the variation attributes from meta
-		$this->variation_data = array();
-
 		foreach ( $this->product_custom_fields as $name => $value ) {
-
-			if ( ! strstr( $name, 'attribute_' ) ) continue;
+			if ( ! strstr( $name, 'attribute_' ) )
+				continue;
 
 			$this->variation_data[ $name ] = $value[0];
 		}
 
-		// Now get variation meta and override the parent variable product
-		$this->variation_has_sku = $this->variation_has_stock = $this->variation_has_weight = $this->variation_has_length = $this->variation_has_width = $this->variation_has_height = $this->variation_has_price = $this->variation_has_regular_price = $this->variation_has_sale_price = false;
-
-		/* Override parent data with variation */
+		// Now get variation meta to override the parent variable product
 		if ( ! empty( $this->product_custom_fields['_sku'][0] ) ) {
 			$this->variation_has_sku = true;
 			$this->sku               = $this->product_custom_fields['_sku'][0];
