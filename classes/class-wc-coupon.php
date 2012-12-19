@@ -115,7 +115,7 @@ class WC_Coupon {
             if ( empty( $coupon ) || $coupon->post_status !== 'publish' || $this->code !== $coupon->post_title )
 
             $this->id 					= $coupon->ID;
-            $this->coupon_custom_fields = get_post_custom( $this->id );
+            $this->coupon_custom_fields = get_post_meta( $this->id );
 
             $load_data = array(
             	'discount_type'					=> 'fixed_cart',
