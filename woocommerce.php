@@ -138,10 +138,6 @@ class Woocommerce {
 	 */
 	public function __construct() {
 
-		// Start a PHP session, if not yet started
-		if ( ! session_id() )
-			session_start();
-
 		// Define version constant
 		define( 'WOOCOMMERCE_VERSION', $this->version );
 
