@@ -65,6 +65,9 @@ class WC_Coupon {
 	/** @public string How much the coupon is worth. */
 	public $coupon_amount;
 
+	/** @public string Error message. */
+	public $error_message;
+
 	/**
 	 * Coupon constructor. Loads coupon data.
 	 *
@@ -196,6 +199,16 @@ class WC_Coupon {
 	}
 
 	/**
+	 * Returns the error_message string
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function get_error_message() {
+		return $this->error_message;
+	}
+
+	/**
 	 * is_valid function.
 	 *
 	 * Check if a coupon is valid. Return a reason code if invaid. Reason codes:
@@ -316,6 +329,7 @@ class WC_Coupon {
 			$error = __( 'Invalid coupon', 'woocommerce' );
 		}
 
-		return new WP_Error( 'coupon_error', apply_filters( 'woocommerce_coupon_error', $error, $this ) );
+		$this->error_message = apply_filters( 'woocommerce_coupon_error', $error, $this );
+		return false;
 	}
 }
