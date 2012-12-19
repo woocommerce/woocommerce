@@ -117,11 +117,6 @@ class Woocommerce {
 	/**
 	 * @var array
 	 */
-	public $attribute_taxonomies;
-
-	/**
-	 * @var array
-	 */
 	private $_body_classes = array();
 
 	/**
@@ -1448,10 +1443,19 @@ class Woocommerce {
 	 * @return object
 	 */
 	public function get_attribute_taxonomies() {
-		global $wpdb;
-		if ( ! $this->attribute_taxonomies )
-			$this->attribute_taxonomies = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies" );
-		return apply_filters( 'woocommerce_attribute_taxonomies', $this->attribute_taxonomies );
+
+		$transient_name = 'wc_attribute_taxonomies';
+
+		if ( false === ( $attribute_taxonomies = get_transient( $transient_name ) ) ) {
+
+			global $wpdb;
+
+			$attribute_taxonomies = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies" );
+
+			set_transient( $transient_name, $attribute_taxonomies );
+		}
+
+		return apply_filters( 'woocommerce_attribute_taxonomies', $attribute_taxonomies );
 	}
 
 
@@ -1721,7 +1725,8 @@ class Woocommerce {
 		$transients_to_clear = array(
 			'wc_products_onsale',
 			'wc_hidden_product_ids',
-			'wc_hidden_product_ids_search'
+			'wc_hidden_product_ids_search',
+			'wc_attribute_taxonomies'
 		);
 
 		foreach( $transients_to_clear as $transient ) {

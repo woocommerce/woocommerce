@@ -54,6 +54,8 @@ function woocommerce_attributes() {
 				)
 			);
 
+			delete_transient( 'wc_attribute_taxonomies' );
+
 			wp_safe_redirect( get_admin_url() . 'edit.php?post_type=product&page=woocommerce_attributes' );
 			exit;
 		}
@@ -141,6 +143,8 @@ function woocommerce_attributes() {
 				);
 			}
 
+			delete_transient( 'wc_attribute_taxonomies' );
+
 			wp_safe_redirect( get_admin_url() . 'edit.php?post_type=product&page=woocommerce_attributes' );
 			exit;
 
@@ -164,6 +168,8 @@ function woocommerce_attributes() {
 					wp_delete_term( $term->term_id, $taxonomy );
 
 			}
+
+			delete_transient( 'wc_attribute_taxonomies' );
 
 			wp_safe_redirect( get_admin_url() . 'edit.php?post_type=product&page=woocommerce_attributes' );
 			exit;
