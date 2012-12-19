@@ -503,16 +503,16 @@ class WC_Product_Variable extends WC_Product {
 	    	$this->min_variation_price = $this->min_variation_sale_price === '' || $this->min_variation_regular_price < $this->min_variation_sale_price ? $this->min_variation_regular_price : $this->min_variation_sale_price;
 
 			$this->max_variation_price = $this->max_variation_sale_price === '' || $this->max_variation_regular_price > $this->max_variation_sale_price ? $this->max_variation_regular_price : $this->max_variation_sale_price;
+
+			update_post_meta( $this->id, '_price', $this->min_variation_price );
+			update_post_meta( $this->id, '_min_variation_price', $this->min_variation_price );
+			update_post_meta( $this->id, '_max_variation_price', $this->max_variation_price );
+			update_post_meta( $this->id, '_min_variation_regular_price', $this->min_variation_regular_price );
+			update_post_meta( $this->id, '_max_variation_regular_price', $this->max_variation_regular_price );
+			update_post_meta( $this->id, '_min_variation_sale_price', $this->min_variation_sale_price );
+			update_post_meta( $this->id, '_max_variation_sale_price', $this->max_variation_sale_price );
+
+			$woocommerce->clear_product_transients( $this->id );
 		}
-
-		update_post_meta( $this->id, '_price', $this->min_variation_price );
-		update_post_meta( $this->id, '_min_variation_price', $this->min_variation_price );
-		update_post_meta( $this->id, '_max_variation_price', $this->max_variation_price );
-		update_post_meta( $this->id, '_min_variation_regular_price', $this->min_variation_regular_price );
-		update_post_meta( $this->id, '_max_variation_regular_price', $this->max_variation_regular_price );
-		update_post_meta( $this->id, '_min_variation_sale_price', $this->min_variation_sale_price );
-		update_post_meta( $this->id, '_max_variation_sale_price', $this->max_variation_sale_price );
-
-		$woocommerce->clear_product_transients( $this->id );
 	}
 }
