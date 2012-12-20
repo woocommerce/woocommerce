@@ -17,38 +17,13 @@ $woocommerce->show_messages(); ?>
 
 <?php do_action( 'woocommerce_before_my_account' ); ?>
 
-<?php if ( $downloads = $woocommerce->customer->get_downloadable_products() ) : ?>
+<?php woocommerce_get_template( 'myaccount/my-downloads.php' ); ?>
 
-<h2><?php _e( 'Available downloads', 'woocommerce' ); ?></h2>
-
-<ul class="digital-downloads">
-	<?php foreach ( $downloads as $download ) : ?>
-
-		<li>
-			<?php
-				do_action( 'woocommerce_available_download_start', $download );
-
-				if ( is_numeric( $download['downloads_remaining'] ) )
-					echo apply_filters( 'woocommerce_available_download_count', '<span class="count">' . sprintf( _n( '%s download remaining', '%s downloads remaining', $download['downloads_remaining'], 'woocommerce' ), $download['downloads_remaining'] ) . '</span> ', $download );
-
-				echo apply_filters( 'woocommerce_available_download_link', '<a href="' . esc_url( $download['download_url'] ) . '">' . $download['download_name'] . '</a>', $download );
-
-				do_action( 'woocommerce_available_download_end', $download );
-			?>
-		</li>
-
-	<?php endforeach; ?>
-</ul>
-
-<?php endif; ?>
-
-<h2><?php _e( 'Recent Orders', 'woocommerce' ); ?></h2>
+<?php do_action( 'woocommerce_between_my_account_downloads_and_orders' ); ?>
 
 <?php woocommerce_get_template( 'myaccount/my-orders.php', array( 'recent_orders' => $recent_orders ) ); ?>
 
-<h2><?php _e( 'My Address', 'woocommerce' ); ?></h2>
-
-<p class="myaccount_address"><?php _e( 'The following addresses will be used on the checkout page by default.', 'woocommerce' ); ?></p>
+<?php do_action( 'woocommerce_between_my_account_orders_and_address' ); ?>
 
 <?php woocommerce_get_template( 'myaccount/my-address.php' ); ?>
 
