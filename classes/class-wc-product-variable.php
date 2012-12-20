@@ -204,7 +204,7 @@ class WC_Product_Variable extends WC_Product {
 	public function get_price_html( $price = '' ) {
 
 		// Ensure variation prices are synced with variations
-		if ( $this->min_variation_price === '' || $this->min_variation_regular_price === '' ) {
+		if ( $this->min_variation_price === '' || $this->min_variation_regular_price === '' || $this->price === '' ) {
 			$this->variable_product_sync();
 			$this->price = $this->min_variation_price;
 		}
@@ -425,7 +425,7 @@ class WC_Product_Variable extends WC_Product {
 
 		$this->min_variation_price = $this->min_variation_regular_price = $this->min_variation_sale_price = $this->max_variation_price = $this->max_variation_regular_price = $this->max_variation_sale_price = '';
 
-		if ($children) {
+		if ( $children ) {
 			foreach ( $children as $child ) {
 
 				$child_price 			= get_post_meta( $child, '_price', true );
