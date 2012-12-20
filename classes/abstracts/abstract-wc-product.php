@@ -70,7 +70,7 @@ abstract class WC_Product {
 		elseif ( 'stock_status' == $key )
 			$value = ( $value = get_post_meta( $this->id, '_stock_status', true ) ) ? $value : 'instock';
 		elseif ( 'tax_status' == $key )
-			$value = ( $value = get_post_meta( $this->id, '_visibility', true ) ) ? $value : 'taxable';
+			$value = ( $value = get_post_meta( $this->id, '_tax_status', true ) ) ? $value : 'taxable';
 		elseif ( 'upsell_ids' == $key )
 			$value = ( $value = get_post_meta( $this->id, '_upsell_ids', true ) ) ? $value : array();
 		elseif ( 'crosssell_ids' == $key )
