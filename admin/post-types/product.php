@@ -114,12 +114,14 @@ add_filter('manage_edit-product_columns', 'woocommerce_edit_product_columns');
  * @return void
  */
 function woocommerce_custom_product_columns( $column ) {
-	global $post, $woocommerce;
-	$product = get_product( $post );
+	global $post, $woocommerce, $theproduct;
+
+	if ( empty( $theproduct ) || $theproduct->id != $post->ID )
+		$theproduct = get_product( $post );
 
 	switch ($column) {
 		case "thumb" :
-			echo '<a href="' . get_edit_post_link( $post->ID ) . '">' . $product->get_image() . '</a>';
+			echo '<a href="' . get_edit_post_link( $post->ID ) . '">' . $theproduct->get_image() . '</a>';
 		break;
 		case "name" :
 			$edit_link = get_edit_post_link( $post->ID );
@@ -183,51 +185,51 @@ function woocommerce_custom_product_columns( $column ) {
 			echo '
 				<div class="hidden" id="woocommerce_inline_' . $post->ID . '">
 					<div class="menu_order">' . $post->menu_order . '</div>
-					<div class="sku">' . $product->sku . '</div>
-					<div class="regular_price">' . $product->regular_price . '</div>
-					<div class="sale_price">' . $product->sale_price . '</div>
-					<div class="weight">' . $product->weight . '</div>
-					<div class="length">' . $product->length . '</div>
-					<div class="width">' . $product->width . '</div>
-					<div class="height">' . $product->height . '</div>
-					<div class="visibility">' . $product->visibility . '</div>
-					<div class="stock_status">' . $product->stock_status . '</div>
-					<div class="stock">' . $product->stock . '</div>
-					<div class="manage_stock">' . $product->manage_stock . '</div>
-					<div class="featured">' . $product->featured . '</div>
-					<div class="product_type">' . $product->product_type . '</div>
-					<div class="product_is_virtual">' . $product->virtual . '</div>
+					<div class="sku">' . $theproduct->sku . '</div>
+					<div class="regular_price">' . $theproduct->regular_price . '</div>
+					<div class="sale_price">' . $theproduct->sale_price . '</div>
+					<div class="weight">' . $theproduct->weight . '</div>
+					<div class="length">' . $theproduct->length . '</div>
+					<div class="width">' . $theproduct->width . '</div>
+					<div class="height">' . $theproduct->height . '</div>
+					<div class="visibility">' . $theproduct->visibility . '</div>
+					<div class="stock_status">' . $theproduct->stock_status . '</div>
+					<div class="stock">' . $theproduct->stock . '</div>
+					<div class="manage_stock">' . $theproduct->manage_stock . '</div>
+					<div class="featured">' . $theproduct->featured . '</div>
+					<div class="product_type">' . $theproduct->product_type . '</div>
+					<div class="product_is_virtual">' . $theproduct->virtual . '</div>
 				</div>
 			';
 
 		break;
 		case "sku" :
-			if ($product->get_sku()) echo $product->get_sku(); else echo '<span class="na">&ndash;</span>';
+			if ($theproduct->get_sku()) echo $theproduct->get_sku(); else echo '<span class="na">&ndash;</span>';
 		break;
 		case "product_type" :
-			if( $product->product_type == 'grouped' ):
-				echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . __( 'Grouped', 'woocommerce' ) . '"></span>';
-			elseif ( $product->product_type == 'external' ):
-				echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . __( 'External/Affiliate', 'woocommerce' ) . '"></span>';
-			elseif ( $product->product_type == 'simple' ):
+			if( $theproduct->product_type == 'grouped' ):
+				echo '<span class="product-type tips '.$theproduct->product_type.'" data-tip="' . __( 'Grouped', 'woocommerce' ) . '"></span>';
+			elseif ( $theproduct->product_type == 'external' ):
+				echo '<span class="product-type tips '.$theproduct->product_type.'" data-tip="' . __( 'External/Affiliate', 'woocommerce' ) . '"></span>';
+			elseif ( $theproduct->product_type == 'simple' ):
 
-				if ($product->is_virtual()) {
+				if ($theproduct->is_virtual()) {
 					echo '<span class="product-type tips virtual" data-tip="' . __( 'Virtual', 'woocommerce' ) . '"></span>';
-				} elseif ($product->is_downloadable()) {
+				} elseif ($theproduct->is_downloadable()) {
 					echo '<span class="product-type tips downloadable" data-tip="' . __( 'Downloadable', 'woocommerce' ) . '"></span>';
 				} else {
-					echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . __( 'Simple', 'woocommerce' ) . '"></span>';
+					echo '<span class="product-type tips '.$theproduct->product_type.'" data-tip="' . __( 'Simple', 'woocommerce' ) . '"></span>';
 				}
 
-			elseif ( $product->product_type == 'variable' ):
-				echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . __( 'Variable', 'woocommerce' ) . '"></span>';
+			elseif ( $theproduct->product_type == 'variable' ):
+				echo '<span class="product-type tips '.$theproduct->product_type.'" data-tip="' . __( 'Variable', 'woocommerce' ) . '"></span>';
 			else:
 				// Assuming that we have other types in future
-				echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . ucwords($product->product_type) . '"></span>';
+				echo '<span class="product-type tips '.$theproduct->product_type.'" data-tip="' . ucwords($theproduct->product_type) . '"></span>';
 			endif;
 		break;
 		case "price":
-			if ($product->get_price_html()) echo $product->get_price_html(); else echo '<span class="na">&ndash;</span>';
+			if ($theproduct->get_price_html()) echo $theproduct->get_price_html(); else echo '<span class="na">&ndash;</span>';
 		break;
 		case "product_cat" :
 		case "product_tag" :
@@ -244,20 +246,20 @@ function woocommerce_custom_product_columns( $column ) {
 		case "featured" :
 			$url = wp_nonce_url( admin_url('admin-ajax.php?action=woocommerce-feature-product&product_id=' . $post->ID), 'woocommerce-feature-product' );
 			echo '<a href="'.$url.'" title="'.__( 'Change', 'woocommerce' ) .'">';
-			if ($product->is_featured()) echo '<a href="'.$url.'"><img src="'.$woocommerce->plugin_url().'/assets/images/featured.png" alt="yes" height="14" width="14" />';
+			if ($theproduct->is_featured()) echo '<a href="'.$url.'"><img src="'.$woocommerce->plugin_url().'/assets/images/featured.png" alt="yes" height="14" width="14" />';
 			else echo '<img src="'.$woocommerce->plugin_url().'/assets/images/featured-off.png" alt="no" height="14" width="14" />';
 			echo '</a>';
 		break;
 		case "is_in_stock" :
 
-			if ($product->is_in_stock()) {
+			if ($theproduct->is_in_stock()) {
 				echo '<mark class="instock">' . __( 'In stock', 'woocommerce' ) . '</mark>';
 			} else {
 				echo '<mark class="outofstock">' . __( 'Out of stock', 'woocommerce' ) . '</mark>';
 			}
 
-			if ( $product->managing_stock() ) :
-				echo ' &times; ' . $product->get_total_stock();
+			if ( $theproduct->managing_stock() ) :
+				echo ' &times; ' . $theproduct->get_total_stock();
 			endif;
 
 		break;
