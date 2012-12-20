@@ -86,12 +86,12 @@ abstract class WC_Product {
 	}
 
 	/**
-	 * get_images function.
+	 * get_gallery_attachment_ids function.
 	 *
 	 * @access public
 	 * @return array
 	 */
-	function get_images() {
+	function get_gallery_attachment_ids() {
 		if ( ! isset( $this->product_image_gallery ) ) {
 			// Backwards compat
 			$attachment_ids = array_diff( get_posts( 'post_parent=' . $this->id . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image&fields=ids' ), array( get_post_thumbnail_id() ) );
