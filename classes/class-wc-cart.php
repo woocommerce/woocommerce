@@ -1246,30 +1246,31 @@ class WC_Cart {
 
 							// ADJUST BASE if tax rate is different (different region or modified tax class)
 							if ( $tax_rates !== $base_tax_rates ) {
-								$base_taxes			= $this->tax->calc_tax( $row_base_price, $base_tax_rates, true, true );
-								$modded_taxes		= $this->tax->calc_tax( $row_base_price - array_sum( $base_taxes ), $tax_rates, false );
-								$row_base_price 	= ( $row_base_price - array_sum( $base_taxes ) ) + array_sum( $modded_taxes );
+								$base_taxes     = $this->tax->calc_tax( $row_base_price, $base_tax_rates, true, true );
+								$modded_taxes   = $this->tax->calc_tax( $row_base_price - array_sum( $base_taxes ), $tax_rates, false );
+								$row_base_price = ( $row_base_price - array_sum( $base_taxes ) ) + array_sum( $modded_taxes );
 							}
 
-							$taxes 					= $this->tax->calc_tax( $row_base_price, $tax_rates, true );
-							$tax_amount				= $this->tax->get_tax_total( $taxes );
+							$taxes      = $this->tax->calc_tax( $row_base_price, $tax_rates, true );
+							$tax_amount = get_option('woocommerce_tax_round_at_subtotal') == 'no' ? $this->tax->get_tax_total( $taxes ) : array_sum( $taxes );
+
 						}
 
 						// Sub total is based on base prices (without discounts)
-						$this->subtotal 			= $this->subtotal + $row_base_price;
-						$this->subtotal_ex_tax 		= $this->subtotal_ex_tax + ( $row_base_price - $tax_amount);
+						$this->subtotal        = $this->subtotal + $row_base_price;
+						$this->subtotal_ex_tax = $this->subtotal_ex_tax + ( $row_base_price - $tax_amount);
 
 					} else {
 
 						if ( $_product->is_taxable() ) {
-							$tax_rates			 	= $this->tax->get_rates( $_product->get_tax_class() );
-							$taxes 					= $this->tax->calc_tax( $row_base_price, $tax_rates, false );
-							$tax_amount				= $this->tax->get_tax_total( $taxes );
+							$tax_rates  = $this->tax->get_rates( $_product->get_tax_class() );
+							$taxes      = $this->tax->calc_tax( $row_base_price, $tax_rates, false );
+							$tax_amount = get_option('woocommerce_tax_round_at_subtotal') == 'no' ? $this->tax->get_tax_total( $taxes ) : array_sum( $taxes );
 						}
 
 						// Sub total is based on base prices (without discounts)
-						$this->subtotal 			= $this->subtotal + $row_base_price + $tax_amount;
-						$this->subtotal_ex_tax 		= $this->subtotal_ex_tax + $row_base_price;
+						$this->subtotal        = $this->subtotal + $row_base_price + $tax_amount;
+						$this->subtotal_ex_tax = $this->subtotal_ex_tax + $row_base_price;
 
 					}
 				}

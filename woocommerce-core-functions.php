@@ -653,8 +653,11 @@ function woocommerce_trim_zeros( $price ) {
  * @param mixed $number
  * @return string
  */
-function woocommerce_format_decimal( $number ) {
-	$number = number_format( (float) $number, (int) get_option( 'woocommerce_price_num_decimals' ), '.', '' );
+function woocommerce_format_decimal( $number, $dp = '' ) {
+	if ( $dp == '' )
+		$dp = intval( get_option( 'woocommerce_price_num_decimals' ) );
+
+	$number = number_format( (float) $number, (int) $dp, '.', '' );
 
 	if ( strstr( $number, '.' ) )
 		$number = rtrim( rtrim( $number, '0' ), '.' );
