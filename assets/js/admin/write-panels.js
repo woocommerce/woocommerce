@@ -1341,7 +1341,6 @@ jQuery( function($){
 		// Set post to 0 and set our custom type
 		downloadable_file_frame.on( 'ready', function() {
 			downloadable_file_frame.uploader.options.uploader.params = {
-				attach_to: 0,
 				type: 'downloadable_product'
 			};
 		});
