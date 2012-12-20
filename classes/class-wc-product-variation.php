@@ -14,17 +14,14 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 class WC_Product_Variation extends WC_Product {
 
-	/** @var string The product's type. */
-	public $product_type = 'variable';
+	/** @public int ID of the variable product. */
+	public $variation_id;
+
+	/** @public object Parent Variable product object. */
+	public $parent;
 
 	/** @public array Stores variation data (attributes) for the current variation. */
 	public $variation_data = array();
-
-	/** @public int ID of the variable product. */
-	public $variation_id = 0;
-
-	/** @public object Parent Variable product object. */
-	public $parent = '';
 
 	/** @public bool True if the variation has a length. */
 	public $variation_has_length = false;
@@ -71,6 +68,8 @@ class WC_Product_Variation extends WC_Product {
 	 * @return void
 	 */
 	public function __construct( $variation, $args = array() ) {
+
+		$this->product_type = 'variable';
 
 		if ( is_object( $variation ) ) {
 			$this->variation_id = absint( $variation->ID );

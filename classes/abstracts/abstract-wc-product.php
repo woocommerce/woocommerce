@@ -14,16 +14,13 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 abstract class WC_Product {
 
 	/** @var int The product (post) ID. */
-	public $id = 0;
-
-	/** @var array Array of product attributes. */
-	public $attributes = '';
+	public $id;
 
 	/** @var object The actual post object. */
-	public $post = '';
+	public $post;
 
 	/** @var string The product's type (simple, variable etc). */
-	public $product_type = '';
+	public $product_type;
 
 	/**
 	 * __construct function.
@@ -61,26 +58,27 @@ abstract class WC_Product {
 	 */
 	public function __get( $key ) {
 
+		// Get values or default if not set
 		if ( in_array( $key, array( 'downloadable', 'virtual', 'backorders', 'manage_stock', 'featured', 'sold_individually' ) ) )
 			$value = ( $value = get_post_meta( $this->id, '_' . $key, true ) ) ? $value : 'no';
+
+		elseif( in_array( $key, array( 'product_attributes', 'crosssell_ids', 'upsell_ids' ) ) )
+			$value = ( $value = get_post_meta( $this->id, '_' . $key, true ) ) ? $value : array();
+
 		elseif ( 'visibility' == $key )
 			$value = ( $value = get_post_meta( $this->id, '_visibility', true ) ) ? $value : 'hidden';
+
 		elseif ( 'stock' == $key )
 			$value = ( $value = get_post_meta( $this->id, '_stock', true ) ) ? $value : 0;
+
 		elseif ( 'stock_status' == $key )
 			$value = ( $value = get_post_meta( $this->id, '_stock_status', true ) ) ? $value : 'instock';
+
 		elseif ( 'tax_status' == $key )
 			$value = ( $value = get_post_meta( $this->id, '_tax_status', true ) ) ? $value : 'taxable';
-		elseif ( 'upsell_ids' == $key )
-			$value = ( $value = get_post_meta( $this->id, '_upsell_ids', true ) ) ? $value : array();
-		elseif ( 'crosssell_ids' == $key )
-			$value = ( $value = get_post_meta( $this->id, '_crosssell_ids', true ) ) ? $value : array();
-		else {
-			$value = get_post_meta( $this->id, '_' . $key, true );
-		}
 
-		if ( $value )
-			$this->$key = $value;
+		else
+			$value = get_post_meta( $this->id, '_' . $key, true );
 
 		return $value;
 	}
@@ -1079,12 +1077,7 @@ abstract class WC_Product {
 	 * @return array
 	 */
 	function get_attributes() {
-
-		if ( ! is_array( $this->attributes ) ) {
-			$this->attributes = isset( $this->product_attributes ) ? maybe_unserialize( maybe_unserialize( $this->product_attributes ) ) : array();
-		}
-
-		return (array) $this->attributes;
+		return (array) maybe_unserialize( $this->product_attributes );
 	}
 
 

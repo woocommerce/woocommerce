@@ -13,14 +13,11 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 class WC_Product_Variable extends WC_Product {
 
-	/** @var string The product's type. */
-	public $product_type = 'variable';
-
 	/** @public array Array of child products/posts/variations. */
-	public $children = '';
+	public $children;
 
 	/** @public string The product's total stock, including that of its children. */
-	public $total_stock = '';
+	public $total_stock;
 
 	/**
 	 * __construct function.
@@ -29,6 +26,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @param mixed $product
 	 */
 	public function __construct( $product ) {
+		$this->product_type = 'variable';
 		parent::__construct( $product );
 	}
 
