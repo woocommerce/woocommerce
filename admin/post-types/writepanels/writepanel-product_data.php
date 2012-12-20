@@ -651,6 +651,10 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	// Set transient for product type
 	set_transient( 'wc_product_type_' . $post_id, $product_type );
 
+	// Gallery Images
+	$attachment_ids = array_filter( explode( ',', woocommerce_clean( $_POST['product_image_gallery'] ) ) );
+	update_post_meta( $post_id, '_product_image_gallery', implode( ',', $attachment_ids ) );
+
 	// Update post meta
 	update_post_meta( $post_id, '_regular_price', stripslashes( $_POST['_regular_price'] ) );
 	update_post_meta( $post_id, '_sale_price', stripslashes( $_POST['_sale_price'] ) );

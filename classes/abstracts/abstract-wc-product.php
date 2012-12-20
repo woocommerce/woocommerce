@@ -86,6 +86,22 @@ abstract class WC_Product {
 	}
 
 	/**
+	 * get_images function.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	function get_images() {
+		if ( ! isset( $this->product_image_gallery ) ) {
+			// Backwards compat
+			$attachment_ids = array_diff( get_posts( 'post_parent=' . $this->id . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image&fields=ids' ), array( get_post_thumbnail_id() ) );
+			$this->product_image_gallery = implode( ',', $attachment_ids );
+		}
+
+		return (array) explode( ',', $this->product_image_gallery );
+	}
+
+	/**
      * Get SKU (Stock-keeping unit) - product unique ID.
      *
      * @return string
