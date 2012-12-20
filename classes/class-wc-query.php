@@ -91,7 +91,7 @@ class WC_Query {
 		} else {
 
 			// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies
-		    if 	( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( array_merge( array('product_cat', 'product_tag'), $woocommerce->get_attribute_taxonomy_names() ) ) )
+		    if 	( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( get_object_taxonomies( 'product' ) ) )
 		   		return;
 
 		}
@@ -157,7 +157,7 @@ class WC_Query {
 			return $posts;
 
 		// Abort if we're not on a post type archive/product taxonomy
-		if 	( ! $query->is_post_type_archive( 'product' ) && ! $query->is_tax( array_merge( array('product_cat', 'product_tag'), $woocommerce->get_attribute_taxonomy_names() ) ) )
+		if 	( ! $query->is_post_type_archive( 'product' ) && ! $query->is_tax( get_object_taxonomies( 'product' ) ) )
 	   		return $posts;
 
 	    $filtered_posts = array();
