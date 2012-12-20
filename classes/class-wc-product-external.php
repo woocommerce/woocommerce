@@ -13,9 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 class WC_Product_External extends WC_Product_Simple {
 
-	/** @var string The product's type. */
-	public $product_type = 'external';
-
 	/**
 	 * __construct function.
 	 *
@@ -23,6 +20,7 @@ class WC_Product_External extends WC_Product_Simple {
 	 * @param mixed $product
 	 */
 	public function __construct( $product ) {
+		$this->product_type = 'external';
 		parent::__construct( $product );
 	}
 
