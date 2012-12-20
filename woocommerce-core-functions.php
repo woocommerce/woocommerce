@@ -37,6 +37,39 @@ function woocommerce_sanitize_taxonomy_name( $taxonomy ) {
 }
 
 /**
+ * woocommerce_get_attachment_image_attributes function.
+ *
+ * @access public
+ * @param mixed $attr
+ * @return void
+ */
+function woocommerce_get_attachment_image_attributes( $attr ) {
+	if ( strstr( $attr['src'], 'woocommerce_uploads/' ) )
+		$attr['src'] = woocommerce_placeholder_img_src();
+
+	return $attr;
+}
+
+add_filter( 'wp_get_attachment_image_attributes', 'woocommerce_get_attachment_image_attributes' );
+
+
+function woocommerce_prepare_attachment_for_js( $response ) {
+
+	if ( isset( $response['url'] ) && strstr( $response['url'], 'woocommerce_uploads/' ) ) {
+		$response['full']['url'] = woocommerce_placeholder_img_src();
+		if ( $response['sizes'] ) {
+			foreach( $response['sizes'] as $size => $value ) {
+				$response['sizes'][ $size ]['url'] = woocommerce_placeholder_img_src();
+			}
+		}
+	}
+
+	return $response;
+}
+
+add_filter( 'wp_prepare_attachment_for_js', 'woocommerce_prepare_attachment_for_js' );
+
+/**
  * woocommerce_get_dimension function.
  *
  * Normalise dimensions, unify to cm then convert to wanted unit value
