@@ -151,7 +151,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.0.0 =
-* Feature - Securi audited and secured.
+* Feature - Sucuri audited and secured.
 * Feature - Added sales by category report.
 * Feature - Added sales by coupon report (kudos Max Rice).
 * Feature - Multiple downloadable files per product/variation (kudos Justin Stern).
