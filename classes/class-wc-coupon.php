@@ -109,10 +109,10 @@ class WC_Coupon {
 			if ( $coupon_id )
 				$coupon = get_post( $coupon_id );
 			else
-
-			$coupon->post_title = apply_filters( 'woocommerce_coupon_code', $coupon->post_title );
+				$coupon->post_title = apply_filters( 'woocommerce_coupon_code', $coupon->post_title );
 
             if ( empty( $coupon ) || $coupon->post_status !== 'publish' || $this->code !== $coupon->post_title )
+            	return;
 
             $this->id 					= $coupon->ID;
             $this->coupon_custom_fields = get_post_meta( $this->id );
@@ -149,7 +149,6 @@ class WC_Coupon {
        		$this->exclude_product_categories 	= array_filter( array_map( 'trim', (array) maybe_unserialize( $this->exclude_product_categories ) ) );
 			$this->customer_email 				= array_filter( array_map( 'trim', array_map( 'strtolower', (array) maybe_unserialize( $this->customer_email ) ) ) );
         }
-
 	}
 
 
