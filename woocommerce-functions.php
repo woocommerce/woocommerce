@@ -296,7 +296,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 
         if ( $all_variations_set ) {
         	// Add to cart validation
-        	$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
+        	$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
 
         	if ( $passed_validation ) {
 				if ( $woocommerce->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) ) {
@@ -791,7 +791,7 @@ function woocommerce_order_again() {
 		}
 
 		// Add to cart validation
-		if ( ! apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity ) ) continue;
+		if ( ! apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations ) ) continue;
 
 		$woocommerce->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations );
 	}

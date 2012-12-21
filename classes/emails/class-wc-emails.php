@@ -64,14 +64,14 @@ class WC_Emails {
 		$this->emails = apply_filters( 'woocommerce_email_classes', $this->emails );
 
 		// Email Header, Footer and content hooks
-		add_action( 'woocommerce_email_header', array( &$this, 'email_header' ) );
-		add_action( 'woocommerce_email_footer', array( &$this, 'email_footer' ) );
-		add_action( 'woocommerce_email_order_meta', array( &$this, 'order_meta' ), 10, 3 );
+		add_action( 'woocommerce_email_header', array( $this, 'email_header' ) );
+		add_action( 'woocommerce_email_footer', array( $this, 'email_footer' ) );
+		add_action( 'woocommerce_email_order_meta', array( $this, 'order_meta' ), 10, 3 );
 
 		// Hooks for sending emails during store events
-		add_action( 'woocommerce_low_stock_notification', array( &$this, 'low_stock' ) );
-		add_action( 'woocommerce_no_stock_notification', array( &$this, 'no_stock' ) );
-		add_action( 'woocommerce_product_on_backorder_notification', array( &$this, 'backorder' ));
+		add_action( 'woocommerce_low_stock_notification', array( $this, 'low_stock' ) );
+		add_action( 'woocommerce_no_stock_notification', array( $this, 'no_stock' ) );
+		add_action( 'woocommerce_product_on_backorder_notification', array( $this, 'backorder' ));
 
 		// Let 3rd parties unhook the above via this hook
 		do_action( 'woocommerce_email', $this );
@@ -186,17 +186,17 @@ class WC_Emails {
 		$this->_content_type = $content_type;
 
 		// Filters for the email
-		add_filter( 'wp_mail_from', array( &$this, 'get_from_address' ) );
-		add_filter( 'wp_mail_from_name', array( &$this, 'get_from_name' ) );
-		add_filter( 'wp_mail_content_type', array( &$this, 'get_content_type' ) );
+		add_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
+		add_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
+		add_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
 
 		// Send
 		wp_mail( $to, $subject, $message, $headers, $attachments );
 
 		// Unhook filters
-		remove_filter( 'wp_mail_from', array( &$this, 'get_from_address' ) );
-		remove_filter( 'wp_mail_from_name', array( &$this, 'get_from_name' ) );
-		remove_filter( 'wp_mail_content_type', array( &$this, 'get_content_type' ) );
+		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
+		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
+		remove_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
 	}
 
 	/**

@@ -27,7 +27,7 @@ abstract class WC_Session {
 	 */
 	public function __construct() {
     	// When leaving or ending page load, store data
-    	add_action( 'shutdown', array( &$this, 'save_data' ), 20 );
+    	add_action( 'shutdown', array( $this, 'save_data' ), 20 );
     }
 
     /**

@@ -363,8 +363,7 @@ function woocommerce_admin_scripts() {
     // Edit product category pages
     if (in_array( $screen->id, array('edit-product_cat') )) :
 
-		wp_enqueue_script( 'media-upload' );
-		wp_enqueue_script( 'thickbox' );
+		wp_enqueue_media();
 
 	endif;
 
@@ -373,8 +372,7 @@ function woocommerce_admin_scripts() {
 
 		wp_enqueue_script( 'woocommerce_writepanel' );
 		wp_enqueue_script( 'jquery-ui-datepicker' );
-		wp_enqueue_script( 'media-upload' );
-		wp_enqueue_script( 'thickbox' );
+		wp_enqueue_media();
 		wp_enqueue_script( 'ajax-chosen' );
 		wp_enqueue_script( 'chosen' );
 		wp_enqueue_script( 'plupload-all' );
@@ -474,7 +472,6 @@ function woocommerce_admin_css() {
     endif;
 
 	if ( $typenow == '' || $typenow=="product" || $typenow=="shop_order" || $typenow=="shop_coupon" ) :
-		wp_enqueue_style( 'thickbox' );
 		wp_enqueue_style( 'woocommerce_admin_styles', $woocommerce->plugin_url() . '/assets/css/admin.css' );
 		wp_enqueue_style( 'jquery-ui-style', (is_ssl()) ? 'https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css' : 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css' );
 	endif;
@@ -578,79 +575,6 @@ function woocommerce_admin_head() {
 }
 
 add_action('admin_head', 'woocommerce_admin_head');
-
-
-/**
- * Add functionality to the image uploader on product pages to exclude an image
- *
- * @access public
- * @param mixed $fields
- * @param mixed $object
- * @return void
- */
-function woocommerce_exclude_image_from_product_page_field( $fields, $object ) {
-
-	if (!$object->post_parent) return $fields;
-
-	$parent = get_post( $object->post_parent );
-
-	if ( $parent->post_type !== 'product' )
-		return $fields;
-
-	$exclude_image = get_post_meta( absint( $object->ID ), '_woocommerce_exclude_image', true );
-
-	$label = __( 'Exclude image', 'woocommerce' );
-
-	$html = '<input type="checkbox" '.checked($exclude_image, 1, false).' name="attachments['.$object->ID.'][woocommerce_exclude_image]" id="attachments['.$object->ID.'][woocommerce_exclude_image" />';
-
-	$fields['woocommerce_exclude_image'] = array(
-			'label' => $label,
-			'input' => 'html',
-			'html' =>  $html,
-			'value' => '',
-			'helps' => __( 'Enabling this option will hide it from the product page image gallery.', 'woocommerce' )
-	);
-
-	return $fields;
-}
-
-add_filter('attachment_fields_to_edit', 'woocommerce_exclude_image_from_product_page_field', 1, 2);
-add_filter('attachment_fields_to_save', 'woocommerce_exclude_image_from_product_page_field_save', 1, 2);
-add_action('add_attachment', 'woocommerce_exclude_image_from_product_page_field_add');
-
-
-/**
- * Save the meta for exlcuding images from galleries.
- *
- * @access public
- * @param mixed $post
- * @param mixed $attachment
- * @return void
- */
-function woocommerce_exclude_image_from_product_page_field_save( $post, $attachment ) {
-
-	if (isset($_REQUEST['attachments'][$post['ID']]['woocommerce_exclude_image'])) :
-		delete_post_meta( (int) $post['ID'], '_woocommerce_exclude_image' );
-		update_post_meta( (int) $post['ID'], '_woocommerce_exclude_image', 1);
-	else :
-		delete_post_meta( (int) $post['ID'], '_woocommerce_exclude_image' );
-		update_post_meta( (int) $post['ID'], '_woocommerce_exclude_image', 0);
-	endif;
-
-	return $post;
-
-}
-
-/**
- * Add the meta for exlcuding images from galleries.
- *
- * @access public
- * @param mixed $post_id
- * @return void
- */
-function woocommerce_exclude_image_from_product_page_field_add( $post_id ) {
-	add_post_meta( $post_id, '_woocommerce_exclude_image', 0, true );
-}
 
 
 /**

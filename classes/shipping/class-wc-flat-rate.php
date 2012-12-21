@@ -28,8 +28,8 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 		$this->admin_page_heading 		= __( 'Flat Rates', 'woocommerce' );
 		$this->admin_page_description 	= __( 'Flat rates let you define a standard rate per item, or per order.', 'woocommerce' );
 
-		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( &$this, 'process_admin_options' ) );
-		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( &$this, 'process_flat_rates' ) );
+		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
+		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_flat_rates' ) );
 
     	$this->init();
     }

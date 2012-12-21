@@ -151,7 +151,7 @@ function woocommerce_product_data_box() {
 
 				echo '<p class="form-field"><label for="_file_paths">' . __( 'File paths (one per line)', 'woocommerce' ) . ':</label>
 					<textarea style="float:left;height:5em;" id="_file_paths" class="short file_paths" cols="20" rows="3" placeholder="' . __( 'File paths/URLs, one per line', 'woocommerce' ) . '" name="_file_paths" wrap="off">' . esc_textarea( $file_paths ) . '</textarea>
-					<input type="button" class="upload_file_button button" value="' . __( 'Upload a file', 'woocommerce' ) . '" />
+					<input type="button" class="upload_file_button button" data-choose="' . __( 'Choose a file', 'woocommerce' ) . '" data-update="' . __( 'Insert file URL', 'woocommerce' ) . '" value="' . __( 'Choose a file', 'woocommerce' ) . '" />
 				</p>';
 
 				// Download Limit
@@ -648,8 +648,9 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	update_post_meta( $post_id, '_downloadable', $is_downloadable );
 	update_post_meta( $post_id, '_virtual', $is_virtual );
 
-	// Set transient for product type
-	set_transient( 'wc_product_type_' . $post_id, $product_type );
+	// Gallery Images
+	$attachment_ids = array_filter( explode( ',', woocommerce_clean( $_POST['product_image_gallery'] ) ) );
+	update_post_meta( $post_id, '_product_image_gallery', implode( ',', $attachment_ids ) );
 
 	// Update post meta
 	update_post_meta( $post_id, '_regular_price', stripslashes( $_POST['_regular_price'] ) );
@@ -766,14 +767,10 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 				 	);
 			 	}
 
-		 	} else {
-		 		if ( ! $attribute_values[ $i ] ) continue;
-		 		// Format values
-		 		$values = esc_html( stripslashes( $attribute_values[ $i ] ) );
+		 	} elseif ( isset( $attribute_values[ $i ] ) ) {
+
 		 		// Text based, separate by pipe
-		 		$values = explode( '|', $values );
-		 		$values = array_map( 'trim', $values );
-		 		$values = implode( '|', $values );
+		 		$values = implode( '|', array_map( 'esc_html', array_map( 'trim', explode( '|', stripslashes( $attribute_values[ $i ] ) ) ) ) );
 
 		 		// Custom attribute - Add attribute to array and set the values
 			 	$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
@@ -1013,29 +1010,6 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 }
 
 add_action('woocommerce_process_product_meta', 'woocommerce_process_product_meta', 1, 2);
-
-
-/**
- * Change label for insert buttons.
- *
- * @access public
- * @param mixed $translation
- * @param mixed $original
- * @return void
- */
-function woocommerce_change_insert_into_post( $translation, $original ) {
-    if ( ! isset( $_REQUEST['from'] ) )
-    	return $translation;
-
-	$original = strtolower( $original );
-
-    if ( $_REQUEST['from'] == 'wc01' && ( $original == 'insert into post' || $original == 'use this image' ) )
-    	return __( 'Use this file', 'woocommerce' );
-
-    return $translation;
-}
-
-add_filter( 'gettext', 'woocommerce_change_insert_into_post', null, 2 );
 
 
 /**

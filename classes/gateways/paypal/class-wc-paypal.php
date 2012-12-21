@@ -56,12 +56,12 @@ class WC_Paypal extends WC_Payment_Gateway {
 		if ($this->debug=='yes') $this->log = $woocommerce->logger();
 
 		// Actions
-		add_action( 'valid-paypal-standard-ipn-request', array( &$this, 'successful_request' ) );
-		add_action( 'woocommerce_receipt_paypal', array( &$this, 'receipt_page' ) );
-		add_action( 'woocommerce_update_options_payment_gateways', array( &$this, 'process_admin_options' ) );
+		add_action( 'valid-paypal-standard-ipn-request', array( $this, 'successful_request' ) );
+		add_action( 'woocommerce_receipt_paypal', array( $this, 'receipt_page' ) );
+		add_action( 'woocommerce_update_options_payment_gateways', array( $this, 'process_admin_options' ) );
 
 		// Payment listener/API hook
-		add_action( 'woocommerce_api_wc_paypal', array( &$this, 'check_ipn_response' ) );
+		add_action( 'woocommerce_api_wc_paypal', array( $this, 'check_ipn_response' ) );
 
 		if ( !$this->is_valid_for_use() ) $this->enabled = false;
     }

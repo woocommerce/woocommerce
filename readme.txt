@@ -2,9 +2,9 @@
 Contributors: woothemes, mikejolley, jameskoster, CoenJacobs
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
-Requires at least: 3.3
-Tested up to: 3.4.2
-Stable tag: 1.6.5.2
+Requires at least: 3.5
+Tested up to: 3.5
+Stable tag: 1.6.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -151,7 +151,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.0.0 =
-* Feature - Securi audited and secured.
+* Feature - Sucuri audited and secured.
 * Feature - Added sales by category report.
 * Feature - Added sales by coupon report (kudos Max Rice).
 * Feature - Multiple downloadable files per product/variation (kudos Justin Stern).
@@ -179,7 +179,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Added the option to sell products individually (only allow 1 in the cart).
 * Feature - New shop page/category archive display settings, and the ability to change display per-category.
 * Feature - Allow shipping tax classes to be defined independent of items. https://github.com/woothemes/woocommerce/issues/1625
-* Feature - Redone order item storage making them easier (and faster) to access for reporting, and querying purchases. Huge performance gains for reports. Order items are no longer serialised - they are stored in there own table with meta. Existing data can be be updated on upgrade.
+* Feature - Redone order item storage making them easier (and faster) to access for reporting, and querying purchases. Huge performance gains for reports. Order items are no longer serialised - they are stored in their own table with meta. Existing data can be be updated on upgrade.
 * Feature - Update weights/dimensions for variations if they differ.
 * Feature - is_order_received_page() courtesy of Lee Willis.
 * Feature - Inline saving of attributes to make creating variable products easier.
@@ -250,9 +250,16 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - Korean translate by Woo Jin Koh.
 * Localization - Bulgarian update by Hristo Pandjarov.
 * Localization - Spanish update by bolorino.
+* Localization - Finnish translation by Arhi Paivarinta.
 
 * Removed all deprecated classes and functions except for 1.6.x template files and functions
 * Many other refactors, minor fixes and tweaks!
+
+= 1.6.6 - 13/12/2012 =
+* Fix - Styling issues for the post date selectors in admin.
+* Fix  - Variation attribute saving issue (cache related).
+* Fixed jQuery issues, now using WordPress core jQuery UI library
+* Tweak - Checkout JSON responses to avoid garbage code breaking requests.
 
 = 1.6.5.2 - 12/09/2012 =
 * Tweak - Extra validation for PayPal IPN.
@@ -1156,7 +1163,7 @@ There are many improvements in this major release - see the changelog for full d
 
 The biggest change is that we're redone order item storage making them easier (and faster) to access for reporting and querying purchases; there are huge performance gains for reports.
 
-Order items are no longer serialised data and store in meta - they are stored in there own table with their own meta. Existing data can be be updated upon upgrade (you will be prompted). You should backup before upgrading.
+Order items are no longer serialised data and store in meta - they are stored in there own table with their own meta. Existing data can be updated upon upgrade (you will be prompted). You should backup before upgrading.
 
 = 1.6.2 =
 1.6 introduced some template changes, for loops in particular. See the changelog for details and ensure theme compatibility before upgrading.

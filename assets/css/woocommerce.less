@@ -922,12 +922,13 @@ p.demo_store {
 			border-top: 1px solid rgba(0,0,0,0.1);
 			padding: 6px 12px;
 			vertical-align: middle;
+			small {
+				font-weight: normal;
+			}
 		}
-		td.product-quantity {
-			text-align: center;
-		}
-		tfoot td {
+		tfoot td, tfoot th {
 			font-weight:bold;
+			border-top: 1px solid rgba(0,0,0,0.1);
 		}
 	}
 
@@ -1647,6 +1648,14 @@ p.demo_store {
 					background-image: url(../images/ajax-loader@2x.gif);
 					background-size: 16px 16px;
 				}
+			}
+		}
+		.star-rating {
+			background-image: url(../images/star@2x.png);
+			background-size: 16px 48px;
+			span {
+				background-image: url(../images/star@2x.png);
+				background-size: 16px 48px;
 			}
 		}
 	}

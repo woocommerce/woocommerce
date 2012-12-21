@@ -38,9 +38,9 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 		/* Create the widget. */
 		$this->WP_Widget('recently_viewed_products', $this->woo_widget_name, $widget_ops);
 
-		add_action( 'save_post', array(&$this, 'flush_widget_cache') );
-		add_action( 'deleted_post', array(&$this, 'flush_widget_cache') );
-		add_action( 'switch_theme', array(&$this, 'flush_widget_cache') );
+		add_action( 'save_post', array( $this, 'flush_widget_cache' ) );
+		add_action( 'deleted_post', array( $this, 'flush_widget_cache' ) );
+		add_action( 'switch_theme', array( $this, 'flush_widget_cache' ) );
 	}
 
 	/**

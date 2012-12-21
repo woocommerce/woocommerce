@@ -9,23 +9,23 @@
  */
 class WC_Query {
 
-	/** @var array Unfiltered product ids (before layered nav etc) */
-	var $unfiltered_product_ids 	= array();
+	/** @public array Unfiltered product ids (before layered nav etc) */
+	public $unfiltered_product_ids 	= array();
 
-	/** @var array Filtered product ids (after layered nav) */
-	var $filtered_product_ids 		= array();
+	/** @public array Filtered product ids (after layered nav) */
+	public $filtered_product_ids 		= array();
 
-	/** @var array Product IDs that match the layered nav + price filter */
-	var $post__in 					= array();
+	/** @public array Product IDs that match the layered nav + price filter */
+	public $post__in 					= array();
 
-	/** @var array The meta query for the page */
-	var $meta_query 				= '';
+	/** @public array The meta query for the page */
+	public $meta_query 				= '';
 
-	/** @var array Post IDs matching layered nav only */
-	var $layered_nav_post__in 		= array();
+	/** @public array Post IDs matching layered nav only */
+	public $layered_nav_post__in 		= array();
 
-	/** @var array Stores post IDs matching layered nav, so price filter can find max price in view */
-	var $layered_nav_product_ids 	= array();
+	/** @public array Stores post IDs matching layered nav, so price filter can find max price in view */
+	public $layered_nav_product_ids 	= array();
 
 	/**
 	 * Constructor for the query class. Hooks in methods.
@@ -33,10 +33,10 @@ class WC_Query {
 	 * @access public
 	 * @return void
 	 */
-	function __construct() {
-		add_filter( 'pre_get_posts', array( &$this, 'pre_get_posts') );
-		add_filter( 'the_posts', array( &$this, 'the_posts'), 11, 2 );
-		add_filter( 'wp', array( &$this, 'remove_product_query') );
+	public function __construct() {
+		add_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
+		add_filter( 'the_posts', array( $this, 'the_posts' ), 11, 2 );
+		add_filter( 'wp', array( $this, 'remove_product_query' ) );
 	}
 
 
@@ -47,7 +47,7 @@ class WC_Query {
 	 * @param mixed $q query object
 	 * @return void
 	 */
-	function pre_get_posts( $q ) {
+	public function pre_get_posts( $q ) {
 		global $woocommerce;
 
 		// We only want to affect the main query
@@ -84,14 +84,14 @@ class WC_Query {
 
 	        // Fix WP SEO
 	        if ( function_exists( 'wpseo_get_value' ) ) {
-	       		add_filter( 'wpseo_metadesc', array( &$this, 'wpseo_metadesc' ) );
-	       		add_filter( 'wpseo_metakey', array( &$this, 'wpseo_metakey' ) );
+	       		add_filter( 'wpseo_metadesc', array( $this, 'wpseo_metadesc' ) );
+	       		add_filter( 'wpseo_metakey', array( $this, 'wpseo_metakey' ) );
 	       	}
 
 		} else {
 
 			// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies
-		    if 	( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( array_merge( array('product_cat', 'product_tag'), $woocommerce->get_attribute_taxonomy_names() ) ) )
+		    if 	( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( get_object_taxonomies( 'product' ) ) )
 		   		return;
 
 		}
@@ -99,7 +99,7 @@ class WC_Query {
 	    $this->product_query( $q );
 
 	    // We're on a shop page so queue the woocommerce_get_products_in_view function
-	    add_action( 'wp', array( &$this, 'get_products_in_view' ), 2);
+	    add_action( 'wp', array( $this, 'get_products_in_view' ), 2);
 
 	    // And remove the pre_get_posts hook
 	    $this->remove_product_query();
@@ -113,7 +113,7 @@ class WC_Query {
 	 * @param mixed $meta
 	 * @return void
 	 */
-	function wpseo_metadesc() {
+	public function wpseo_metadesc() {
 		return wpseo_get_value( 'metadesc', woocommerce_get_page_id('shop') );
 	}
 
@@ -124,7 +124,7 @@ class WC_Query {
 	 * @access public
 	 * @return void
 	 */
-	function wpseo_metakey() {
+	public function wpseo_metakey() {
 		return wpseo_get_value( 'metakey', woocommerce_get_page_id('shop') );
 	}
 
@@ -137,7 +137,7 @@ class WC_Query {
 	 * @param bool $query (default: false)
 	 * @return void
 	 */
-	function the_posts( $posts, $query = false ) {
+	public function the_posts( $posts, $query = false ) {
 		global $woocommerce;
 
 		// Abort if theres no query
@@ -157,7 +157,7 @@ class WC_Query {
 			return $posts;
 
 		// Abort if we're not on a post type archive/product taxonomy
-		if 	( ! $query->is_post_type_archive( 'product' ) && ! $query->is_tax( array_merge( array('product_cat', 'product_tag'), $woocommerce->get_attribute_taxonomy_names() ) ) )
+		if 	( ! $query->is_post_type_archive( 'product' ) && ! $query->is_tax( get_object_taxonomies( 'product' ) ) )
 	   		return $posts;
 
 	    $filtered_posts = array();
@@ -194,7 +194,7 @@ class WC_Query {
 	 * @param mixed $q
 	 * @return void
 	 */
-	function product_query( $q ) {
+	public function product_query( $q ) {
 
 		// Meta query
 		$meta_query = (array) $q->get( 'meta_query' );
@@ -237,8 +237,8 @@ class WC_Query {
 	 * @access public
 	 * @return void
 	 */
-	function remove_product_query() {
-		remove_filter( 'pre_get_posts', array( &$this, 'pre_get_posts') );
+	public function remove_product_query() {
+		remove_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 	}
 
 
@@ -248,7 +248,7 @@ class WC_Query {
 	 * @access public
 	 * @return void
 	 */
-	function get_products_in_view() {
+	public function get_products_in_view() {
 		global $wp_the_query;
 
 		$unfiltered_product_ids = array();
@@ -308,47 +308,44 @@ class WC_Query {
 	 * @access public
 	 * @return array
 	 */
-	function get_catalog_ordering_args() {
+	public function get_catalog_ordering_args( $orderby = '', $order = '' ) {
 		global $woocommerce;
 
-		$current_order = ( isset( $woocommerce->session->orderby ) ) ? $woocommerce->session->orderby : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
-
-		switch ( $current_order ) {
-			case 'date' :
-				$orderby = 'date';
-				$order = 'desc';
-				$meta_key = '';
-			break;
-			case 'price' :
-				$orderby = 'meta_value_num';
-				$order = 'asc';
-				$meta_key = '_price';
-			break;
-			case 'high_price' :
-				$orderby = 'meta_value_num';
-				$order = 'desc';
-				$meta_key = '_price';
-			break;
-			case 'title' :
-				$orderby = 'title';
-				$order = 'asc';
-				$meta_key = '';
-			break;
-			default :
-				$orderby = 'menu_order title';
-				$order = 'asc';
-				$meta_key = '';
-			break;
-		}
+		// Get ordering from session unless defined
+		if ( ! $orderby )
+			$orderby = isset( $woocommerce->session->orderby ) ? $woocommerce->session->orderby : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
 
 		$args = array();
 
-		$args['orderby'] = $orderby;
-		$args['order'] = $order;
-		if ($meta_key)
-			$args['meta_key'] = $meta_key;
+		switch ( $orderby ) {
+			case 'date' :
+				$args['orderby']  = 'date';
+				$args['order']    = $order ? $order : 'desc';
+				$args['meta_key'] = '';
+			break;
+			case 'price' :
+				$args['orderby']  = 'meta_value_num';
+				$args['order']    = $order ? $order : 'asc';
+				$args['meta_key'] = '_price';
+			break;
+			case 'high_price' :
+				$args['orderby']  = 'meta_value_num';
+				$args['order']    = $order ? $order : 'desc';
+				$args['meta_key'] = '_price';
+			break;
+			case 'title' :
+				$args['orderby']  = 'title';
+				$args['order']    = $order ? $order : 'asc';
+				$args['meta_key'] = '';
+			break;
+			default :
+				$args['orderby']  = 'menu_order title';
+				$args['order']    = $order ? $order : 'asc';
+				$args['meta_key'] = '';
+			break;
+		}
 
-		return apply_filters('woocommerce_get_catalog_ordering_args', $args );
+		return apply_filters( 'woocommerce_get_catalog_ordering_args', $args );
 	}
 
 
@@ -359,7 +356,7 @@ class WC_Query {
 	 * @param string $compare (default: 'IN')
 	 * @return array
 	 */
-	function visibility_meta_query( $compare = 'IN' ) {
+	public function visibility_meta_query( $compare = 'IN' ) {
 		if ( is_search() ) $in = array( 'visible', 'search' ); else $in = array( 'visible', 'catalog' );
 
 	    $meta_query = array(
@@ -379,7 +376,7 @@ class WC_Query {
 	 * @param string $status (default: 'instock')
 	 * @return array
 	 */
-	function stock_status_meta_query( $status = 'instock' ) {
+	public function stock_status_meta_query( $status = 'instock' ) {
 		$meta_query = array();
 		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' ) {
 			 $meta_query = array(

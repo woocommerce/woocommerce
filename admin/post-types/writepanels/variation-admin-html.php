@@ -132,7 +132,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 								<div class="file_path_field">
 									<label><?php _e( 'File paths:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enter one or more File Paths, one per line, to make this variation a downloadable product, or leave blank.', 'woocommerce' ); ?>" href="#">[?]</a></label>
 									<textarea style="float:left;" class="short file_paths" cols="20" rows="2" placeholder="<?php _e( 'File paths/URLs, one per line', 'woocommerce' ); ?>" name="variable_file_paths[<?php echo $loop; ?>]" wrap="off"><?php if ( isset( $_file_paths ) ) echo esc_textarea( $_file_paths ); ?></textarea>
-									<input type="button"  class="upload_file_button button" value="<?php _e( 'Upload a file', 'woocommerce' ); ?>" title="<?php _e( 'Upload', 'woocommerce' ); ?>" />
+									<input type="button" class="upload_file_button button" value="<?php _e( 'Choose a file', 'woocommerce' ); ?>" title="<?php _e( 'Upload', 'woocommerce' ); ?>" data-choose="<?php _e( 'Choose a file', 'woocommerce' ); ?>" data-update="<?php _e( 'Insert file URL', 'woocommerce' ); ?>" value="<?php _e( 'Choose a file', 'woocommerce' ); ?>" />
 								</div>
 							</td>
 							<td>

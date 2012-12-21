@@ -329,7 +329,7 @@ function woocommerce_order_items_meta_box( $post ) {
 
 	$order = $theorder;
 
-	$data = get_post_custom( $post->ID );
+	$data = get_post_meta( $post->ID );
 	?>
 	<div class="woocommerce_order_items_wrapper">
 		<table cellpadding="0" cellspacing="0" class="woocommerce_order_items">
@@ -482,7 +482,7 @@ function woocommerce_order_totals_meta_box( $post ) {
 
 	$order = $theorder;
 
-	$data = get_post_custom( $post->ID );
+	$data = get_post_meta( $post->ID );
 	?>
 	<div class="totals_group">
 		<h4><span class="discount_total_display inline_total"></span><?php _e( 'Discounts', 'woocommerce' ); ?></h4>

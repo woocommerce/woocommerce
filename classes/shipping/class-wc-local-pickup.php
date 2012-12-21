@@ -47,9 +47,9 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 		$this->countries	= $this->settings['countries'];
 
 		// Actions
-		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( &$this, 'process_admin_options' ) );
-		add_filter( 'woocommerce_customer_taxable_address', array( &$this, 'taxable_address' ) );
-		add_action( 'woocommerce_shipping_method_chosen', array( &$this, 'method_chosen' ) );
+		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
+		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'taxable_address' ) );
+		add_action( 'woocommerce_shipping_method_chosen', array( $this, 'method_chosen' ) );
 	}
 
 	/**

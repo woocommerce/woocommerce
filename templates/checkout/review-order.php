@@ -19,21 +19,19 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 		<thead>
 			<tr>
 				<th class="product-name"><?php _e( 'Product', 'woocommerce' ); ?></th>
-				<th class="product-quantity"><?php _e( 'Qty', 'woocommerce' ); ?></th>
-				<th class="product-total"><?php _e( 'Totals', 'woocommerce' ); ?></th>
+				<th class="product-total"><?php _e( 'Total', 'woocommerce' ); ?></th>
 			</tr>
 		</thead>
 		<tfoot>
-
 			<tr class="cart-subtotal">
-				<th colspan="2"><strong><?php _e( 'Cart Subtotal', 'woocommerce' ); ?></strong></th>
+				<th><?php _e( 'Cart Subtotal', 'woocommerce' ); ?></th>
 				<td><?php echo $woocommerce->cart->get_cart_subtotal(); ?></td>
 			</tr>
 
 			<?php if ( $woocommerce->cart->get_discounts_before_tax() ) : ?>
 
 			<tr class="discount">
-				<th colspan="2"><?php _e( 'Cart Discount', 'woocommerce' ); ?></th>
+				<th><?php _e( 'Cart Discount', 'woocommerce' ); ?></th>
 				<td>-<?php echo $woocommerce->cart->get_discounts_before_tax(); ?></td>
 			</tr>
 
@@ -44,7 +42,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				<?php do_action('woocommerce_review_order_before_shipping'); ?>
 
 				<tr class="shipping">
-					<th colspan="2"><?php _e( 'Shipping', 'woocommerce' ); ?></th>
+					<th><?php _e( 'Shipping', 'woocommerce' ); ?></th>
 					<td><?php woocommerce_get_template( 'cart/shipping-methods.php', array( 'available_methods' => $available_methods ) ); ?></td>
 				</tr>
 
@@ -55,7 +53,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 			<?php foreach ( $woocommerce->cart->get_fees() as $fee ) : ?>
 
 				<tr class="fee fee-<?php echo $fee->id ?>">
-					<th colspan="2"><?php echo $fee->name ?></th>
+					<th><?php echo $fee->name ?></th>
 					<td><?php
 						if ( $woocommerce->cart->tax_display_cart == 'excl' )
 							echo woocommerce_price( $fee->amount );
@@ -83,7 +81,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							}
 							?>
 							<tr class="tax-rate tax-rate-<?php echo $key; ?>">
-								<th colspan="2"><?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
+								<th><?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
 								<td><?php echo $tax; ?></td>
 							</tr>
 							<?php
@@ -92,8 +90,8 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 						if ( $has_compound_tax ) {
 							?>
 							<tr class="order-subtotal">
-								<th colspan="2"><strong><?php _e( 'Subtotal', 'woocommerce' ); ?></strong></th>
-								<td><strong><?php echo $woocommerce->cart->get_cart_subtotal( true ); ?></strong></td>
+								<th><?php _e( 'Subtotal', 'woocommerce' ); ?></th>
+								<td><?php echo $woocommerce->cart->get_cart_subtotal( true ); ?></td>
 							</tr>
 							<?php
 						}
@@ -103,7 +101,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 								continue;
 							?>
 							<tr class="tax-rate tax-rate-<?php echo $key; ?>">
-								<th colspan="2"><?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
+								<th><?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
 								<td><?php echo $tax; ?></td>
 							</tr>
 							<?php
@@ -112,7 +110,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					} elseif ( $woocommerce->cart->get_cart_tax() ) {
 						?>
 						<tr class="tax">
-							<th colspan="2" colspan="2"><?php _e( 'Tax', 'woocommerce' ); ?></th>
+							<th><?php _e( 'Tax', 'woocommerce' ); ?></th>
 							<td><?php echo $woocommerce->cart->get_cart_tax(); ?></td>
 						</tr>
 						<?php
@@ -123,16 +121,16 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 			<?php if ($woocommerce->cart->get_discounts_after_tax()) : ?>
 
 			<tr class="discount">
-				<th colspan="2"><?php _e( 'Order Discount', 'woocommerce' ); ?></th>
+				<th><?php _e( 'Order Discount', 'woocommerce' ); ?></th>
 				<td>-<?php echo $woocommerce->cart->get_discounts_after_tax(); ?></td>
 			</tr>
 
 			<?php endif; ?>
 
-			<?php do_action('woocommerce_before_order_total'); ?>
+			<?php do_action( 'woocommerce_before_order_total' ); ?>
 
 			<tr class="total">
-				<th colspan="2"><strong><?php _e( 'Order Total', 'woocommerce' ); ?></strong></th>
+				<th><strong><?php _e( 'Order Total', 'woocommerce' ); ?></strong></th>
 				<td>
 					<strong><?php echo $woocommerce->cart->get_total(); ?></strong>
 					<?php
@@ -157,8 +155,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				</td>
 			</tr>
 
-			<?php do_action('woocommerce_after_order_total'); ?>
-
+			<?php do_action( 'woocommerce_after_order_total' ); ?>
 		</tfoot>
 		<tbody>
 			<?php
@@ -167,9 +164,8 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 						$_product = $values['data'];
 						if ($_product->exists() && $values['quantity']>0) :
 							echo '
-								<tr class = "' . esc_attr( apply_filters('woocommerce_checkout_table_item_class', 'checkout_table_item', $values, $item_id ) ) . '">
-									<td class="product-name">'.$_product->get_title().$woocommerce->cart->get_item_data( $values ).'</td>
-									<td class="product-quantity">'.$values['quantity'].'</td>
+								<tr class="' . esc_attr( apply_filters('woocommerce_checkout_table_item_class', 'checkout_table_item', $values, $item_id ) ) . '">
+									<td class="product-name">' . $_product->get_title().$woocommerce->cart->get_item_data( $values ) . ' <strong class="product-quantity">&times; ' . $values['quantity'] . '</strong></td>
 									<td class="product-total">' . apply_filters( 'woocommerce_checkout_item_subtotal', $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] ), $values, $item_id ) . '</td>
 								</tr>';
 						endif;

@@ -9,28 +9,18 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-global $post, $woocommerce;
+global $post, $product, $woocommerce;
 ?>
 <div class="thumbnails"><?php
-	$attachments = get_posts( array(
-		'post_type' 	=> 'attachment',
-		'numberposts' 	=> -1,
-		'post_status' 	=> null,
-		'post_parent' 	=> $post->ID,
-		'post__not_in'	=> array( get_post_thumbnail_id() ),
-		'post_mime_type'=> 'image',
-		'orderby'		=> 'menu_order',
-		'order'			=> 'ASC'
-	) );
-	if ($attachments) {
+
+	$attachment_ids = $product->get_gallery_attachment_ids();
+
+	if ( $attachment_ids ) {
 
 		$loop = 0;
 		$columns = apply_filters( 'woocommerce_product_thumbnails_columns', 3 );
 
-		foreach ( $attachments as $key => $attachment ) {
-
-			if ( get_post_meta( $attachment->ID, '_woocommerce_exclude_image', true ) == 1 )
-				continue;
+		foreach ( $attachment_ids as $id ) {
 
 			$classes = array( 'zoom' );
 
@@ -40,10 +30,14 @@ global $post, $woocommerce;
 			if ( ( $loop + 1 ) % $columns == 0 )
 				$classes[] = 'last';
 
-			printf( '<a href="%s" title="%s" rel="thumbnails" class="%s">%s</a>', wp_get_attachment_url( $attachment->ID ), esc_attr( $attachment->post_title ), implode(' ', $classes), wp_get_attachment_image( $attachment->ID, apply_filters( 'single_product_small_thumbnail_size', 'shop_thumbnail' ) ) );
+			$attachment_url = wp_get_attachment_url( $id );
+
+			if ( ! $attachment_url )
+				continue;
+
+			printf( '<a href="%s" title="%s" rel="thumbnails" class="%s">%s</a>', esc_attr( $attachment_url ), esc_attr( get_the_title( $id ) ), implode( ' ', $classes ), wp_get_attachment_image( $id, apply_filters( 'single_product_small_thumbnail_size', 'shop_thumbnail' ) ) );
 
 			$loop++;
-
 		}
 
 	}

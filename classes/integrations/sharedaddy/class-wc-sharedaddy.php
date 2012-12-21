@@ -36,10 +36,10 @@ class WC_ShareDaddy extends WC_Integration {
 		$this->enabled 	= $this->settings['enabled'];
 
 		// Actions
-		add_action( 'woocommerce_update_options_integration_sharedaddy', array( &$this, 'process_admin_options') );
+		add_action( 'woocommerce_update_options_integration_sharedaddy', array( $this, 'process_admin_options' ) );
 
 		// Share widget
-		add_action( 'woocommerce_share', array( &$this, 'sharedaddy_code') );
+		add_action( 'woocommerce_share', array( $this, 'sharedaddy_code' ) );
     }
 
 

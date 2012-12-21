@@ -134,7 +134,7 @@ class WC_Email extends WC_Settings_API {
 		$this->init_settings();
 
 		// Save settings hook
-		add_action( 'woocommerce_update_options_email_' . $this->id, array( &$this, 'process_admin_options' ) );
+		add_action( 'woocommerce_update_options_email_' . $this->id, array( $this, 'process_admin_options' ) );
 
 		// Settings
 		$this->template_base 	= $woocommerce->plugin_path() . '/templates/';
@@ -148,7 +148,7 @@ class WC_Email extends WC_Settings_API {
 		$this->replace = array( $this->get_blogname() );
 
 		// For multipart messages
-		add_filter( 'phpmailer_init', array( &$this, 'handle_multipart' ) );
+		add_filter( 'phpmailer_init', array( $this, 'handle_multipart' ) );
 	}
 
 	/**
@@ -393,15 +393,15 @@ class WC_Email extends WC_Settings_API {
 	 * @return void
 	 */
 	function send( $to, $subject, $message, $headers, $attachments ) {
-		add_filter( 'wp_mail_from', array( &$this, 'get_from_address' ) );
-		add_filter( 'wp_mail_from_name', array( &$this, 'get_from_name' ) );
-		add_filter( 'wp_mail_content_type', array( &$this, 'get_content_type' ) );
+		add_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
+		add_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
+		add_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
 
 		wp_mail( $to, $subject, $message, $headers, $attachments );
 
-		remove_filter( 'wp_mail_from', array( &$this, 'get_from_address' ) );
-		remove_filter( 'wp_mail_from_name', array( &$this, 'get_from_name' ) );
-		remove_filter( 'wp_mail_content_type', array( &$this, 'get_content_type' ) );
+		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
+		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
+		remove_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
 	}
 
     /**

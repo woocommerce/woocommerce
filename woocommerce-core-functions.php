@@ -37,6 +37,39 @@ function woocommerce_sanitize_taxonomy_name( $taxonomy ) {
 }
 
 /**
+ * woocommerce_get_attachment_image_attributes function.
+ *
+ * @access public
+ * @param mixed $attr
+ * @return void
+ */
+function woocommerce_get_attachment_image_attributes( $attr ) {
+	if ( strstr( $attr['src'], 'woocommerce_uploads/' ) )
+		$attr['src'] = woocommerce_placeholder_img_src();
+
+	return $attr;
+}
+
+add_filter( 'wp_get_attachment_image_attributes', 'woocommerce_get_attachment_image_attributes' );
+
+
+function woocommerce_prepare_attachment_for_js( $response ) {
+
+	if ( isset( $response['url'] ) && strstr( $response['url'], 'woocommerce_uploads/' ) ) {
+		$response['full']['url'] = woocommerce_placeholder_img_src();
+		if ( $response['sizes'] ) {
+			foreach( $response['sizes'] as $size => $value ) {
+				$response['sizes'][ $size ]['url'] = woocommerce_placeholder_img_src();
+			}
+		}
+	}
+
+	return $response;
+}
+
+add_filter( 'wp_prepare_attachment_for_js', 'woocommerce_prepare_attachment_for_js' );
+
+/**
  * woocommerce_get_dimension function.
  *
  * Normalise dimensions, unify to cm then convert to wanted unit value
@@ -620,8 +653,11 @@ function woocommerce_trim_zeros( $price ) {
  * @param mixed $number
  * @return string
  */
-function woocommerce_format_decimal( $number ) {
-	$number = number_format( (float) $number, (int) get_option( 'woocommerce_price_num_decimals' ), '.', '' );
+function woocommerce_format_decimal( $number, $dp = '' ) {
+	if ( $dp == '' )
+		$dp = intval( get_option( 'woocommerce_price_num_decimals' ) );
+
+	$number = number_format( (float) $number, (int) $dp, '.', '' );
 
 	if ( strstr( $number, '.' ) )
 		$number = rtrim( rtrim( $number, '0' ), '.' );
@@ -2008,18 +2044,26 @@ function _woocommerce_term_recount( $terms, $taxonomy, $callback = true, $terms_
  */
 function woocommerce_recount_after_stock_change( $product_id ) {
 
-	$product_cats = $product_tags = array();
-
 	$product_terms = get_the_terms( $product_id, 'product_cat' );
-	foreach ( $product_terms as $term )
-		$product_cats[ $term->term_id ] = $term->parent;
+
+	if ( $product_terms ) {
+		foreach ( $product_terms as $term )
+			$product_cats[ $term->term_id ] = $term->parent;
+
+		_woocommerce_term_recount( $product_cats, get_taxonomy( 'product_cat' ), false, false );
+
+	}
 
 	$product_terms = get_the_terms( $product_id, 'product_tag' );
-	foreach ( $product_terms as $term )
-		$product_tags[ $term->term_id ] = $term->parent;
 
-	_woocommerce_term_recount( $product_cats, get_taxonomy( 'product_cat' ), false, false );
-	_woocommerce_term_recount( $product_tags, get_taxonomy( 'product_tag' ), false, false );
+	if ( $product_terms ) {
+		foreach ( $product_terms as $term )
+			$product_tags[ $term->term_id ] = $term->parent;
+
+		_woocommerce_term_recount( $product_tags, get_taxonomy( 'product_tag' ), false, false );
+
+	}
+
 }
 
 add_action( 'woocommerce_product_set_stock_status', 'woocommerce_recount_after_stock_change' );

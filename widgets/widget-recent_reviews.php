@@ -38,9 +38,9 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 		/* Create the widget. */
 		$this->WP_Widget('recent_reviews', $this->woo_widget_name, $widget_ops);
 
-		add_action( 'save_post', array(&$this, 'flush_widget_cache') );
-		add_action( 'deleted_post', array(&$this, 'flush_widget_cache') );
-		add_action( 'switch_theme', array(&$this, 'flush_widget_cache') );
+		add_action( 'save_post', array( $this, 'flush_widget_cache' ) );
+		add_action( 'deleted_post', array( $this, 'flush_widget_cache' ) );
+		add_action( 'switch_theme', array( $this, 'flush_widget_cache' ) );
 	}
 
 	/**

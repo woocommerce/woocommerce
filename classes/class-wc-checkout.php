@@ -12,19 +12,19 @@
 class WC_Checkout {
 
 	/** @var array Array of posted form data. */
-	var $posted;
+	public $posted;
 
 	/** @var array Array of fields to display on the checkout. */
-	var $checkout_fields;
+	public $checkout_fields;
 
 	/** @var bool Whether or not the user must create an account to checkout. */
-	var $must_create_account;
+	public $must_create_account;
 
 	/** @var bool Whether or not signups are allowed. */
-	var $enable_signup;
+	public $enable_signup;
 
 	/** @var bool True when the user is creating an account. */
-	var $creating_account;
+	public $creating_account;
 
 	/**
 	 * Constructor for the checkout class. Hooks in methods and defines eheckout fields.
@@ -32,12 +32,12 @@ class WC_Checkout {
 	 * @access public
 	 * @return void
 	 */
-	function __construct () {
+	public function __construct () {
 		global $woocommerce;
 
-		add_action( 'woocommerce_checkout_process', array( &$this,'checkout_process' ) );
-		add_action( 'woocommerce_checkout_billing', array( &$this,'checkout_form_billing' ) );
-		add_action( 'woocommerce_checkout_shipping', array( &$this,'checkout_form_shipping' ) );
+		add_action( 'woocommerce_checkout_process', array( $this,'checkout_process' ) );
+		add_action( 'woocommerce_checkout_billing', array( $this,'checkout_form_billing' ) );
+		add_action( 'woocommerce_checkout_shipping', array( $this,'checkout_form_shipping' ) );
 
 		$this->enable_signup         = get_option( 'woocommerce_enable_signup_and_login_from_checkout' ) == 'yes' ? true : false;
 		$this->enable_guest_checkout = get_option( 'woocommerce_enable_guest_checkout' ) == 'yes' ? true : false;
@@ -93,7 +93,7 @@ class WC_Checkout {
 	 * @access public
 	 * @return void
 	 */
-	function checkout_process() {
+	public function checkout_process() {
 		// When we process the checkout, lets ensure cart items are rechecked to prevent checkout
 		do_action('woocommerce_check_cart_items');
 	}
@@ -105,7 +105,7 @@ class WC_Checkout {
 	 * @access public
 	 * @return void
 	 */
-	function checkout_form_billing() {
+	public function checkout_form_billing() {
 		woocommerce_get_template( 'checkout/form-billing.php', array( 'checkout' => $this ) );
 	}
 
@@ -116,7 +116,7 @@ class WC_Checkout {
 	 * @access public
 	 * @return void
 	 */
-	function checkout_form_shipping() {
+	public function checkout_form_shipping() {
 		woocommerce_get_template( 'checkout/form-shipping.php', array( 'checkout' => $this ) );
 	}
 
@@ -127,7 +127,7 @@ class WC_Checkout {
 	 * @access public
 	 * @return void
 	 */
-	function create_order() {
+	public function create_order() {
 		global $woocommerce, $wpdb;
 
 		// Create Order (send cart variable so we can record items and reduce inventory). Only create if this is a new order, not if the payment was rejected last time.
@@ -245,9 +245,9 @@ class WC_Checkout {
 			 	woocommerce_add_order_item_meta( $item_id, '_product_id', $values['product_id'] );
 			 	woocommerce_add_order_item_meta( $item_id, '_variation_id', $values['variation_id'] );
 			 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal', woocommerce_format_decimal( $values['line_subtotal'] ) );
-			 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal_tax', woocommerce_format_decimal( $values['line_subtotal_tax'] ) );
 			 	woocommerce_add_order_item_meta( $item_id, '_line_total', woocommerce_format_decimal( $values['line_total'] ) );
-			 	woocommerce_add_order_item_meta( $item_id, '_line_tax', woocommerce_format_decimal( $values['line_tax'] ) );
+			 	woocommerce_add_order_item_meta( $item_id, '_line_tax', woocommerce_format_decimal( $values['line_tax'], 4 ) );
+			 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal_tax', woocommerce_format_decimal( $values['line_subtotal_tax'], 4 ) );
 
 			 	// Store variation data in meta so admin can view it
 				if ( $values['variation'] && is_array( $values['variation'] ) )
@@ -352,7 +352,7 @@ class WC_Checkout {
 	 * @access public
 	 * @return void
 	 */
-	function process_checkout() {
+	public function process_checkout() {
 		global $wpdb, $woocommerce;
 
 		$woocommerce->verify_nonce( 'process_checkout' );
@@ -654,7 +654,7 @@ class WC_Checkout {
 						$result = apply_filters('woocommerce_payment_successful_result', $result );
 
 						if ( is_ajax() ) {
-							echo json_encode( $result );
+							echo json_encode( $result ) . '<!--WC_END-->';
 							exit;
 						} else {
 							wp_redirect( $result['redirect'] );
@@ -685,7 +685,7 @@ class WC_Checkout {
 								'result' 	=> 'success',
 								'redirect' => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order)
 							)
-						);
+						) . '<!--WC_END-->';
 						exit;
 					} else {
 						wp_safe_redirect(
@@ -718,7 +718,7 @@ class WC_Checkout {
 					'messages' 	=> $messages,
 					'refresh' 	=> isset( $woocommerce->session->refresh_totals ) ? 'true' : 'false'
 				)
-			);
+			) . '<!--WC_END-->';
 
 			unset( $woocommerce->session->refresh_totals );
 			exit;
@@ -733,7 +733,7 @@ class WC_Checkout {
 	 * @param string $input
 	 * @return string
 	 */
-	function get_value( $input ) {
+	public function get_value( $input ) {
 		global $woocommerce;
 
 		if ( ! empty( $_POST[ $input ] ) ) {

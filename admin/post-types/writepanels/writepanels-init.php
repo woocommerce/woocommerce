@@ -44,11 +44,10 @@ function woocommerce_meta_boxes() {
 
 	// Products
 	add_meta_box( 'woocommerce-product-data', __( 'Product Data', 'woocommerce' ), 'woocommerce_product_data_box', 'product', 'normal', 'high' );
-	add_meta_box( 'woocommerce-product-images', __( 'Product Images', 'woocommerce' ), 'woocommerce_product_images_box', 'product', 'side' );
+	add_meta_box( 'woocommerce-product-images', __( 'Product Gallery', 'woocommerce' ), 'woocommerce_product_images_box', 'product', 'side' );
 
 	remove_meta_box( 'product_shipping_classdiv', 'product', 'side' );
 	remove_meta_box( 'pageparentdiv', 'product', 'side' );
-	remove_meta_box( 'postimagediv', 'product', 'side' );
 
 	// Excerpt
 	if ( function_exists('wp_editor') ) {

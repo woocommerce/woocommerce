@@ -32,13 +32,6 @@ add_action('woocommerce_settings_saved', 'woocomerce_check_download_folder_prote
 add_filter('mod_rewrite_rules', 'woocommerce_ms_protect_download_rewite_rules');
 
 /**
- * Filters
- *
- * @see woocommerce_allow_img_insertion()
- */
-add_filter('get_media_item_args', 'woocommerce_allow_img_insertion');
-
-/**
  * File uploads
  *
  * @see woocommerce_downloads_upload_dir()

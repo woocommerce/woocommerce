@@ -47,10 +47,10 @@ class WC_ShareThis extends WC_Integration {
 		if ( ! $this->sharethis_code ) $this->settings['sharethis_code'] = $this->sharethis_code = $this->default_code;
 
 		// Actions
-		add_action( 'woocommerce_update_options_integration_sharethis', array( &$this, 'process_admin_options') );
+		add_action( 'woocommerce_update_options_integration_sharethis', array( $this, 'process_admin_options' ) );
 
 		// Share widget
-		add_action( 'woocommerce_share', array( &$this, 'sharethis_code') );
+		add_action( 'woocommerce_share', array( $this, 'sharethis_code' ) );
     }
 
 

@@ -74,6 +74,10 @@ function variable_product_type_options() {
 				<a href="#" class="close_all"><?php _e( 'Close all', 'woocommerce' ); ?></a><a href="#" class="expand_all"><?php _e( 'Expand all', 'woocommerce' ); ?></a>
 				<strong><?php _e( 'Bulk edit:', 'woocommerce' ); ?></strong>
 				<select id="field_to_edit">
+					<option value="toggle_enabled"><?php _e( 'Toggle &quot;Enabled&quot;', 'woocommerce' ); ?></option>
+					<option value="toggle_downloadable"><?php _e( 'Toggle &quot;Downloadable&quot;', 'woocommerce' ); ?></option>
+					<option value="toggle_virtual"><?php _e( 'Toggle &quot;Virtual&quot;', 'woocommerce' ); ?></option>
+					<option value="delete_all"><?php _e( 'Delete all variations', 'woocommerce' ); ?></option>
 					<option value="variable_regular_price"><?php _e( 'Prices', 'woocommerce' ); ?></option>
 					<option value="variable_sale_price"><?php _e( 'Sale prices', 'woocommerce' ); ?></option>
 					<option value="variable_stock"><?php _e( 'Stock', 'woocommerce' ); ?></option>
@@ -85,8 +89,7 @@ function variable_product_type_options() {
 					<option value="variable_download_limit"><?php _e( 'Download limit', 'woocommerce' ); ?></option>
 					<option value="variable_download_expiry"><?php _e( 'Download Expiry', 'woocommerce' ); ?></option>
 				</select>
-				<a class="button bulk_edit plus"><?php _e( 'Edit', 'woocommerce' ); ?></a>
-				<a class="button toggle toggle_downloadable" href="#"><?php _e( 'Downloadable', 'woocommerce' ); ?></a> <a class="button toggle toggle_virtual" href="#"><?php _e( 'Virtual', 'woocommerce' ); ?></a> <a class="button toggle toggle_enabled" href="#"><?php _e( 'Enabled', 'woocommerce' ); ?></a> <a href="#" class="button delete_variations"><?php _e( 'Delete all', 'woocommerce' ); ?></a>
+				<a class="button bulk_edit"><?php _e( 'Go', 'woocommerce' ); ?></a>
 			</p>
 
 			<div class="woocommerce_variations wc-metaboxes">
@@ -131,7 +134,7 @@ function variable_product_type_options() {
 
 					$variation_id 			= absint( $variation->ID );
 					$variation_post_status 	= esc_attr( $variation->post_status );
-					$variation_data 		= get_post_custom( $variation_id );
+					$variation_data 		= get_post_meta( $variation_id );
 					$variation_data['variation_post_id'] = $variation_id;
 
 					// Grab shipping classes
@@ -344,71 +347,73 @@ function variable_product_type_options() {
 			return false;
 		});
 
-		jQuery('#variable_product_options').on('click', 'a.delete_variations', function(){
-			var answer = confirm('<?php _e( 'Are you sure you want to delete all variations? This cannot be undone.', 'woocommerce' ); ?>');
-			if (answer){
+		jQuery('.wc-metaboxes-wrapper').on('click', 'a.bulk_edit', function(event){
+			var field_to_edit = jQuery('select#field_to_edit').val();
 
-				var answer = confirm('<?php _e( 'Last warning, are you sure?', 'woocommerce' ); ?>');
+			if ( field_to_edit == 'toggle_enabled' ) {
+				var checkbox = jQuery('input[name^="variable_enabled"]');
+	       		checkbox.attr('checked', !checkbox.attr('checked'));
+				return false;
+			}
+			else if ( field_to_edit == 'toggle_downloadable' ) {
+				var checkbox = jQuery('input[name^="variable_is_downloadable"]');
+	       		checkbox.attr('checked', !checkbox.attr('checked'));
+	       		jQuery('input.variable_is_downloadable').change();
+				return false;
+			}
+			else if ( field_to_edit == 'toggle_virtual' ) {
+				var checkbox = jQuery('input[name^="variable_is_virtual"]');
+	       		checkbox.attr('checked', !checkbox.attr('checked'));
+	       		jQuery('input.variable_is_virtual').change();
+				return false;
+			}
+			else if ( field_to_edit == 'delete_all' ) {
 
-				if (answer) {
+				var answer = confirm('<?php _e( 'Are you sure you want to delete all variations? This cannot be undone.', 'woocommerce' ); ?>');
+				if (answer){
 
-					var variation_ids = [];
+					var answer = confirm('<?php _e( 'Last warning, are you sure?', 'woocommerce' ); ?>');
 
-					jQuery('.woocommerce_variations .woocommerce_variation').block({ message: null, overlayCSS: { background: '#fff url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+					if (answer) {
 
-					jQuery('.woocommerce_variations .woocommerce_variation .remove_variation').each(function(){
+						var variation_ids = [];
 
-						var variation = jQuery(this).attr('rel');
-						if (variation>0) {
-							variation_ids.push(variation);
-						}
-					});
+						jQuery('.woocommerce_variations .woocommerce_variation').block({ message: null, overlayCSS: { background: '#fff url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 
-					var data = {
-						action: 'woocommerce_remove_variations',
-						variation_ids: variation_ids,
-						security: '<?php echo wp_create_nonce("delete-variations"); ?>'
-					};
+						jQuery('.woocommerce_variations .woocommerce_variation .remove_variation').each(function(){
 
-					jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', data, function(response) {
-						jQuery('.woocommerce_variations .woocommerce_variation').fadeOut('300', function(){
-							jQuery('.woocommerce_variations .woocommerce_variation').remove();
+							var variation = jQuery(this).attr('rel');
+							if (variation>0) {
+								variation_ids.push(variation);
+							}
 						});
-					});
+
+						var data = {
+							action: 'woocommerce_remove_variations',
+							variation_ids: variation_ids,
+							security: '<?php echo wp_create_nonce("delete-variations"); ?>'
+						};
+
+						jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', data, function(response) {
+							jQuery('.woocommerce_variations .woocommerce_variation').fadeOut('300', function(){
+								jQuery('.woocommerce_variations .woocommerce_variation').remove();
+							});
+						});
+
+					}
 
 				}
+				return false;
+			}
+			else {
+
+				var input_tag = jQuery('select#field_to_edit :selected').attr('rel') ? jQuery('select#field_to_edit :selected').attr('rel') : 'input';
+
+				var value = prompt("<?php _e( 'Enter a value', 'woocommerce' ); ?>");
+				jQuery(input_tag + '[name^="' + field_to_edit + '"]').val( value );
+				return false;
 
 			}
-			return false;
-		});
-
-		jQuery('a.bulk_edit').click(function() {
-			var field_to_edit = jQuery('select#field_to_edit').val();
-			var input_tag = jQuery('select#field_to_edit :selected').attr('rel') ? jQuery('select#field_to_edit :selected').attr('rel') : 'input';
-
-			var value = prompt("<?php _e( 'Enter a value', 'woocommerce' ); ?>");
-			jQuery(input_tag + '[name^="' + field_to_edit + '"]').val( value );
-			return false;
-		});
-
-		jQuery('a.toggle_virtual').click(function(){
-			var checkbox = jQuery('input[name^="variable_is_virtual"]');
-       		checkbox.attr('checked', !checkbox.attr('checked'));
-       		jQuery('input.variable_is_virtual').change();
-			return false;
-		});
-
-		jQuery('a.toggle_downloadable').click(function(){
-			var checkbox = jQuery('input[name^="variable_is_downloadable"]');
-       		checkbox.attr('checked', !checkbox.attr('checked'));
-       		jQuery('input.variable_is_downloadable').change();
-			return false;
-		});
-
-		jQuery('a.toggle_enabled').click(function(){
-			var checkbox = jQuery('input[name^="variable_enabled"]');
-       		checkbox.attr('checked', !checkbox.attr('checked'));
-			return false;
 		});
 
 		jQuery('#variable_product_options').on('change', 'input.variable_is_downloadable', function(){
@@ -459,53 +464,69 @@ function variable_product_type_options() {
 			});
 		};
 
-		var current_field_wrapper;
+		// Uploader
+		var variable_image_frame;
+		var setting_variation_image_id;
+		var setting_variation_image;
+		var wp_media_post_id = wp.media.model.settings.post.id;
 
-		window.send_to_editor_default = window.send_to_editor;
+		jQuery('#variable_product_options').on('click', '.upload_image_button', function( event ) {
 
-		jQuery('#variable_product_options').on('click', '.upload_image_button', function(){
+			var $button                = jQuery( this );
+			var post_id                = $button.attr('rel');
+			var $parent                = $button.closest('.upload_image');
+			setting_variation_image    = $parent;
+			setting_variation_image_id = post_id;
 
-			var post_id = jQuery(this).attr('rel');
-			var parent = jQuery(this).parent();
-			current_field_wrapper = parent;
+			event.preventDefault();
 
-			if (jQuery(this).is('.remove')) {
+			if ( $button.is('.remove') ) {
 
-				jQuery('.upload_image_id', current_field_wrapper).val('');
-				jQuery('img', current_field_wrapper).attr('src', '<?php echo woocommerce_placeholder_img_src(); ?>');
-				jQuery(this).removeClass('remove');
+				setting_variation_image.find( '.upload_image_id' ).val( '' );
+				setting_variation_image.find( 'img' ).attr( 'src', '<?php echo woocommerce_placeholder_img_src(); ?>' );
+				setting_variation_image.find( '.upload_image_button' ).removeClass( 'remove' );
 
 			} else {
 
-				window.send_to_editor = window.send_to_cproduct;
-				formfield = jQuery('.upload_image_id', parent).attr('name');
-				tb_show('', 'media-upload.php?post_id=' + post_id + '&amp;type=image&amp;TB_iframe=true');
+				// If the media frame already exists, reopen it.
+				if ( variable_image_frame ) {
+					variable_image_frame.uploader.uploader.param( 'post_id', setting_variation_image_id );
+					variable_image_frame.open();
+					return;
+				} else {
+					wp.media.model.settings.post.id = setting_variation_image_id;
+				}
 
+				// Create the media frame.
+				variable_image_frame = wp.media.frames.variable_image = wp.media({
+					// Set the title of the modal.
+					title: '<?php _e( 'Choose an image', 'woocommerce' ); ?>',
+					button: {
+						text: '<?php _e( 'Set variation image', 'woocommerce' ); ?>'
+					}
+				});
+
+				// When an image is selected, run a callback.
+				variable_image_frame.on( 'select', function() {
+
+					attachment = variable_image_frame.state().get('selection').first().toJSON();
+
+					setting_variation_image.find( '.upload_image_id' ).val( attachment.id );
+					setting_variation_image.find( '.upload_image_button' ).addClass( 'remove' );
+					setting_variation_image.find( 'img' ).attr( 'src', attachment.url );
+
+					wp.media.model.settings.post.id = wp_media_post_id;
+				});
+
+				// Finally, open the modal.
+				variable_image_frame.open();
 			}
-
-			return false;
 		});
 
-		window.send_to_cproduct = function(html) {
-
-			jQuery('body').append('<div id="temp_image">' + html + '</div>');
-
-			var img = jQuery('#temp_image').find('img');
-
-			imgurl 		= img.attr('src');
-			imgclass 	= img.attr('class');
-			imgid		= parseInt(imgclass.replace(/\D/g, ''), 10);
-
-			jQuery('.upload_image_id', current_field_wrapper).val(imgid);
-			jQuery('.upload_image_button', current_field_wrapper).addClass('remove');
-
-			jQuery('img', current_field_wrapper).attr('src', imgurl);
-			tb_remove();
-			jQuery('#temp_image').remove();
-
-			window.send_to_editor = window.send_to_editor_default;
-
-		}
+		// Restore ID
+		jQuery('a.add_media').on('click', function() {
+			wp.media.model.settings.post.id = wp_media_post_id;
+		} );
 
 	});
 	<?php

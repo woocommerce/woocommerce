@@ -49,7 +49,7 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 		$this->availability	= empty( $this->settings['availability'] ) ? '' : $this->settings['availability'];
 		$this->countries	= empty( $this->settings['countries'] ) ? '' : $this->settings['countries'];
 
-		add_action('woocommerce_update_options_shipping_'.$this->id, array(&$this, 'process_admin_options'));
+		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
 	}
 
 	/**

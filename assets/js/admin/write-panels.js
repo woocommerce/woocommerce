@@ -1050,22 +1050,20 @@ jQuery( function($){
 
 	// META BOXES
 
-		jQuery('.expand_all').click(function(){
-			jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > table').show();
-			return false;
-		});
-
-		jQuery('.close_all').click(function(){
-			jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > table').hide();
-			return false;
-		});
-
 		// Open/close
 		jQuery('.wc-metaboxes-wrapper').on('click', '.wc-metabox h3', function(event){
 			// If the user clicks on some form input inside the h3, like a select list (for variations), the box should not be toggled
 			if ($(event.target).filter(':input, option').length) return;
 
 			jQuery(this).next('.wc-metabox-content').toggle();
+		})
+		.on('click', '.expand_all', function(event){
+			jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > table').show();
+			return false;
+		})
+		.on('click', '.close_all', function(event){
+			jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > table').hide();
+			return false;
 		});
 
 		jQuery('.wc-metabox.closed').each(function(){
@@ -1258,7 +1256,7 @@ jQuery( function($){
 
 			var data = {
 				post_id: 		woocommerce_writepanel_params.post_id,
-				data:			$('.woocommerce_attributes').find('input, select').serialize(),
+				data:			$('.woocommerce_attributes').find('input, select, textarea').serialize(),
 				action: 		'woocommerce_save_attributes',
 				security: 		woocommerce_writepanel_params.save_attributes_nonce
 			};
@@ -1282,32 +1280,74 @@ jQuery( function($){
 		});
 
 	// Uploading files
-	var file_path_field;
+	var downloadable_file_frame;
 
-	window.send_to_editor_default = window.send_to_editor;
+	jQuery('.upload_file_button').live('click', function( event ){
 
-	jQuery('.upload_file_button').live('click', function(){
+		var $el = $(this);
+		var $file_path_field = $el.parent().find('.file_paths');
+		var file_paths = $file_path_field.val();
 
-		file_path_field = jQuery(this).parent().find('.file_paths');
+		event.preventDefault();
 
-		formfield = jQuery(file_path_field).attr('name');
-
-		window.send_to_editor = window.send_to_download_url;
-
-		tb_show('', 'media-upload.php?type=downloadable_product&amp;from=wc01&amp;TB_iframe=true');
-		return false;
-	});
-
-	window.send_to_download_url = function(html) {
-
-		file_url = jQuery(html).attr('href');
-		if (file_url) {
-			jQuery(file_path_field).val(jQuery(file_path_field).val() ? jQuery(file_path_field).val() + "\n" + file_url : file_url);
+		// If the media frame already exists, reopen it.
+		if ( downloadable_file_frame ) {
+			downloadable_file_frame.open();
+			return;
 		}
-		tb_remove();
-		window.send_to_editor = window.send_to_editor_default;
 
-	}
+		var downloadable_file_states = [
+			// Main states.
+			new wp.media.controller.Library({
+				library:   wp.media.query(),
+				multiple:  true,
+				title:     $el.data('choose'),
+				priority:  20,
+				filterable: 'uploaded',
+			})
+		];
+
+		// Create the media frame.
+		downloadable_file_frame = wp.media.frames.downloadable_file = wp.media({
+			// Set the title of the modal.
+			title: $el.data('choose'),
+			library: {
+				type: ''
+			},
+			button: {
+				text: $el.data('update'),
+			},
+			multiple: true,
+			states: downloadable_file_states,
+		});
+
+		// When an image is selected, run a callback.
+		downloadable_file_frame.on( 'select', function() {
+
+			var selection = downloadable_file_frame.state().get('selection');
+
+			selection.map( function( attachment ) {
+
+				attachment = attachment.toJSON();
+
+				if ( attachment.url )
+					file_paths = file_paths ? file_paths + "\n" + attachment.url : attachment.url
+
+			} );
+
+			$file_path_field.val( file_paths );
+		});
+
+		// Set post to 0 and set our custom type
+		downloadable_file_frame.on( 'ready', function() {
+			downloadable_file_frame.uploader.options.uploader.params = {
+				type: 'downloadable_product'
+			};
+		});
+
+		// Finally, open the modal.
+		downloadable_file_frame.open();
+	});
 
 });
 

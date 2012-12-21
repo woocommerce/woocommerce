@@ -47,15 +47,15 @@ class WC_Mijireh_Checkout extends WC_Payment_Gateway {
 			$this->install_slurp_page();
 
 			// Hooks
-			add_action( 'add_meta_boxes', array( &$this, 'add_page_slurp_meta' ) );
-			add_action( 'wp_ajax_page_slurp', array( &$this, 'page_slurp' ) );
+			add_action( 'add_meta_boxes', array( $this, 'add_page_slurp_meta' ) );
+			add_action( 'wp_ajax_page_slurp', array( $this, 'page_slurp' ) );
 		}
 
 		// Save options
-		add_action( 'woocommerce_update_options_payment_gateways', array( &$this, 'process_admin_options' ) );
+		add_action( 'woocommerce_update_options_payment_gateways', array( $this, 'process_admin_options' ) );
 
 		// Payment listener/API hook
-		add_action( 'woocommerce_api_wc_mijireh_checkout', array( &$this, 'mijireh_notification' ) );
+		add_action( 'woocommerce_api_wc_mijireh_checkout', array( $this, 'mijireh_notification' ) );
 	}
 
 	/**
@@ -340,7 +340,7 @@ class WC_Mijireh_Checkout extends WC_Payment_Gateway {
 			add_meta_box(
 				'slurp_meta_box', 		// $id
 				'Mijireh Page Slurp', 	// $title
-				array( &$this, 'draw_page_slurp_meta_box' ), // $callback
+				array( $this, 'draw_page_slurp_meta_box' ), // $callback
 				'page', 	// $page
 				'normal', 	// $context
 				'high'		// $priority

@@ -65,7 +65,10 @@ class WooCommerce_Widget_Login extends WP_Widget {
 
 			$user = get_user_by('id', get_current_user_id());
 
-			if ( $logged_in_title ) echo $before_title . sprintf( $logged_in_title, ucwords($user->display_name) ) . $after_title;
+			$logged_in_title = apply_filters( 'woocomerce_login_widget_logged_in_title', sprintf( $logged_in_title, ucwords( $user->display_name ) ) );
+
+			if ( $logged_in_title )
+				echo $before_title . $logged_in_title . $after_title;
 
 			do_action('woocommerce_login_widget_logged_in_before_links');
 
@@ -91,7 +94,10 @@ class WooCommerce_Widget_Login extends WP_Widget {
 
 		} else {
 
-			if ( $logged_out_title ) echo $before_title . $logged_out_title . $after_title;
+			$logged_out_title = apply_filters( 'woocomerce_login_widget_logged_out_title', $logged_out_title );
+
+			if ( $logged_out_title )
+				echo $before_title . $logged_out_title . $after_title;
 
 			do_action('woocommerce_login_widget_logged_out_before_form');
 

@@ -36,7 +36,7 @@ class WC_Email_Customer_Note extends WC_Email {
 		$this->heading      	= __( 'A note has been added to your order', 'woocommerce');
 
 		// Triggers
-		add_action( 'woocommerce_new_customer_note_notification', array( &$this, 'trigger' ) );
+		add_action( 'woocommerce_new_customer_note_notification', array( $this, 'trigger' ) );
 
 		// Call parent constuctor
 		parent::__construct();

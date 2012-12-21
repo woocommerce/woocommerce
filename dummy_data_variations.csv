@@ -1,13 +1,13 @@
-"Parent","post_parent","ID","post_status","sku","downloadable","virtual","stock","price","sale_price","weight","length","width","height","file_path","file_paths","download_limit","images","tax:product_shipping_class","meta:attribute_pa_capacity","meta:attribute_pa_color"
-"Kitchen Craft Home Made Glass Terrine Jars","1284","1319","publish","","no","no","","6","","","","","","","","","","","125ml",""
-"Kenwood kMix Two Slice Toaster","1283","1323","publish","","no","no","","100","","","","","","","","","http://demo2.woothemes.com/superstore/files/2012/12/Kenwood-Toaster-1.jpg","","","blue"
-"Kenwood kMix Manual Espresso Machine","1282","1334","publish","","no","no","","250","","","","","","","","","http://demo2.woothemes.com/superstore/files/2012/12/Kenwood-Espresso-Machine-2.jpg","","","black"
-"Eva Solo My Teapot","1281","1336","publish","","no","no","","75","","","","","","","","","http://demo2.woothemes.com/superstore/files/2012/12/Eva-Solo-Teapot-2.jpg","","","black"
-"Kitchen Craft Home Made Glass Terrine Jars","1284","1320","publish","","no","no","","10","","","","","","","","","","","200ml",""
-"Kenwood kMix Two Slice Toaster","1283","1331","publish","","no","no","","100","","","","","","","","","http://demo2.woothemes.com/superstore/files/2012/12/Kenwood-Toaster-4.jpg","","","orange"
-"Kenwood kMix Manual Espresso Machine","1282","1335","publish","","no","no","","250","","","","","","","","","http://demo2.woothemes.com/superstore/files/2012/12/Kenwood-Espresso-Machine-3.jpg","","","red"
-"Eva Solo My Teapot","1281","1337","publish","","no","no","","75","","","","","","","","","","","","white"
-"Kitchen Craft Home Made Glass Terrine Jars","1284","1321","publish","","no","no","","15","","","","","","","","","","","350ml",""
-"Kenwood kMix Two Slice Toaster","1283","1332","publish","","no","no","","100","","","","","","","","","http://demo2.woothemes.com/superstore/files/2012/12/Kenwood-Toaster-2.jpg","","","red"
-"Kenwood kMix Two Slice Toaster","1283","1333","publish","","no","no","","100","","","","","","","","","http://demo2.woothemes.com/superstore/files/2012/12/Kenwood-Toaster-3.jpg","","","yellow"
-"Kenwood kMix Two Slice Toaster","1283","1322","publish","","no","no","","100","","","","","","","","","http://demo2.woothemes.com/superstore/files/2012/12/Kenwood-Toaster-5.jpg","","","black"
+Parent,parent_sku,post_status,sku,downloadable,virtual,stock,price,sale_price,weight,length,width,height,file_path,file_paths,download_limit,images,tax:product_shipping_class,meta:attribute_pa_capacity,meta:attribute_pa_color
+Kitchen Craft Home Made Glass Terrine Jars,W022,publish,W028,no,no,,6,,,,,,,,,,,125ml,
+Kenwood kMix Two Slice Toaster,W023,publish,W031,no,no,,100,,,,,,,,,http://demo2.woothemes.com/superstore/files/2012/12/Kenwood-Toaster-1.jpg,,,blue
+Kenwood kMix Manual Espresso Machine,W024,publish,W036,no,no,,250,,,,,,,,,http://demo2.woothemes.com/superstore/files/2012/12/Kenwood-Espresso-Machine-2.jpg,,,black
+Eva Solo My Teapot,W025,publish,W038,no,no,,75,,,,,,,,,http://demo2.woothemes.com/superstore/files/2012/12/Eva-Solo-Teapot-2.jpg,,,black
+Kitchen Craft Home Made Glass Terrine Jars,W022,publish,W029,no,no,,10,,,,,,,,,,,200ml,
+Kenwood kMix Two Slice Toaster,W023,publish,W032,no,no,,100,,,,,,,,,http://demo2.woothemes.com/superstore/files/2012/12/Kenwood-Toaster-4.jpg,,,orange
+Kenwood kMix Manual Espresso Machine,W024,publish,W037,no,no,,250,,,,,,,,,http://demo2.woothemes.com/superstore/files/2012/12/Kenwood-Espresso-Machine-3.jpg,,,red
+Eva Solo My Teapot,W025,publish,W039,no,no,,75,,,,,,,,,,,,white
+Kitchen Craft Home Made Glass Terrine Jars,W022,publish,W030,no,no,,15,,,,,,,,,,,350ml,
+Kenwood kMix Two Slice Toaster,W023,publish,W033,no,no,,100,,,,,,,,,http://demo2.woothemes.com/superstore/files/2012/12/Kenwood-Toaster-2.jpg,,,red
+Kenwood kMix Two Slice Toaster,W023,publish,W034,no,no,,100,,,,,,,,,http://demo2.woothemes.com/superstore/files/2012/12/Kenwood-Toaster-3.jpg,,,yellow
+Kenwood kMix Two Slice Toaster,W023,publish,W035,no,no,,100,,,,,,,,,http://demo2.woothemes.com/superstore/files/2012/12/Kenwood-Toaster-5.jpg,,,black

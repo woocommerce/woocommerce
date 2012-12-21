@@ -471,11 +471,13 @@ function woocommerce_tax_rates_setting_save() {
 
 						if ( is_numeric( $postcode_parts[0] ) && is_numeric( $postcode_parts[1] ) && $postcode_parts[1] > $postcode_parts[0] ) {
 							for ( $i = $postcode_parts[0]; $i <= $postcode_parts[1]; $i ++ ) {
-								$postcode_query[] = "( '$i', $tax_rate_id, 'postcode' )";
+								if ( $i )
+									$postcode_query[] = "( '$i', $tax_rate_id, 'postcode' )";
 							}
 						}
 					} else {
-						$postcode_query[] = "( '$postcode', $tax_rate_id, 'postcode' )";
+						if ( $postcode )
+							$postcode_query[] = "( '$postcode', $tax_rate_id, 'postcode' )";
 					}
 
 				$wpdb->query( "INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES " . implode( ',', $postcode_query ) );
@@ -491,14 +493,16 @@ function woocommerce_tax_rates_setting_save() {
 				$cities = explode( ';', $city );
 				$cities = array_map( 'strtoupper', array_map( 'woocommerce_clean', $cities ) );
 				foreach( $cities as $city ) {
-					$wpdb->insert(
-					$wpdb->prefix . "woocommerce_tax_rate_locations",
-						array(
-							'location_code' => $city,
-							'tax_rate_id'   => $tax_rate_id,
-							'location_type' => 'city',
-						)
-					);
+					if ( $city ) {
+						$wpdb->insert(
+						$wpdb->prefix . "woocommerce_tax_rate_locations",
+							array(
+								'location_code' => $city,
+								'tax_rate_id'   => $tax_rate_id,
+								'location_type' => 'city',
+							)
+						);
+					}
 				}
 			}
 

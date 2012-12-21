@@ -13,72 +13,21 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 class WC_Product_Variable extends WC_Product {
 
-	/** @var array Array of child products/posts/variations. */
-	var $children;
+	/** @public array Array of child products/posts/variations. */
+	public $children;
 
-	/** @var string The product's total stock, including that of its children. */
-	var $total_stock;
-
-	/** @var string Used for variation prices. */
-	var $min_variation_price;
-
-	/** @var string Used for variation prices. */
-	var $max_variation_price;
-
-	/** @var string Used for variation prices. */
-	var $min_variation_regular_price;
-
-	/** @var string Used for variation prices. */
-	var $max_variation_regular_price;
-
-	/** @var string Used for variation prices. */
-	var $min_variation_sale_price;
-
-	/** @var string Used for variation prices. */
-	var $max_variation_sale_price;
+	/** @public string The product's total stock, including that of its children. */
+	public $total_stock;
 
 	/**
 	 * __construct function.
 	 *
 	 * @access public
 	 * @param mixed $product
-	 * @param array $args Contains arguments to set up this product
 	 */
-	function __construct( $product, $args ) {
-
-		parent::__construct( $product );
-
+	public function __construct( $product ) {
 		$this->product_type = 'variable';
-		$this->product_custom_fields = get_post_custom( $this->id );
-
-		// Load data from custom fields
-		$this->load_product_data( array(
-			'sku'                         => '',
-			'price'                       => '',
-			'sale_price'                  => '',
-			'regular_price'               => '',
-			'visibility'                  => 'hidden',
-			'stock'                       => 0,
-			'stock_status'                => 'instock',
-			'backorders'                  => 'no',
-			'manage_stock'                => 'no',
-			'weight'                      => '',
-			'length'                      => '',
-			'width'                       => '',
-			'height'                      => '',
-			'tax_status'                  => 'taxable',
-			'tax_class'                   => '',
-			'upsell_ids'                  => array(),
-			'crosssell_ids'               => array(),
-			'featured'                    => 'no',
-			'min_variation_price'         => '',
-			'max_variation_price'         => '',
-			'min_variation_regular_price' => '',
-			'max_variation_regular_price' => '',
-			'min_variation_sale_price'    => '',
-			'max_variation_sale_price'    => '',
-			'sold_individually'           => 'no'
-		) );
+		parent::__construct( $product );
 	}
 
     /**
@@ -89,9 +38,9 @@ class WC_Product_Variable extends WC_Product {
      * @access public
      * @return int
      */
-    function get_total_stock() {
+    public function get_total_stock() {
 
-        if ( is_null( $this->total_stock ) ) {
+        if ( empty( $this->total_stock ) ) {
 
         	$transient_name = 'wc_product_total_stock_' . $this->id;
 
@@ -121,7 +70,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @param int $by (default: 1) Amount to reduce by.
 	 * @return int Stock
 	 */
-	function reduce_stock( $by = 1 ) {
+	public function reduce_stock( $by = 1 ) {
 		global $woocommerce;
 
 		if ( $this->managing_stock() ) {
@@ -147,7 +96,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @param int $by (default: 1) Amount to increase by
 	 * @return int Stock
 	 */
-	function increase_stock( $by = 1 ) {
+	public function increase_stock( $by = 1 ) {
 		global $woocommerce;
 
 		if ($this->managing_stock()) :
@@ -172,7 +121,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @access public
 	 * @return array
 	 */
-	function get_children() {
+	public function get_children() {
 
 		if ( ! is_array( $this->children ) ) {
 
@@ -201,11 +150,10 @@ class WC_Product_Variable extends WC_Product {
 	 * @param mixed $child_id
 	 * @return object WC_Product or WC_Product_variation
 	 */
-	function get_child( $child_id ) {
+	public function get_child( $child_id ) {
 		return get_product( $child_id, array(
 			'parent_id' => $this->id,
-			'parent' 	=> $this,
-			'meta'      => $this->product_custom_fields
+			'parent' 	=> $this
 			) );
 	}
 
@@ -216,7 +164,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function has_child() {
+	public function has_child() {
 		return sizeof( $this->get_children() ) ? true : false;
 	}
 
@@ -227,7 +175,8 @@ class WC_Product_Variable extends WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function is_on_sale() {
+	public function is_on_sale() {
+
 		if ( $this->has_child() ) {
 
 			foreach ( $this->get_children() as $child_id ) {
@@ -252,10 +201,10 @@ class WC_Product_Variable extends WC_Product {
 	 * @param string $price (default: '')
 	 * @return string
 	 */
-	function get_price_html( $price = '' ) {
+	public function get_price_html( $price = '' ) {
 
 		// Ensure variation prices are synced with variations
-		if ( $this->min_variation_price === '' || $this->min_variation_regular_price === '' ) {
+		if ( $this->min_variation_price === '' || $this->min_variation_regular_price === '' || $this->price === '' ) {
 			$this->variable_product_sync();
 			$this->price = $this->min_variation_price;
 		}
@@ -319,7 +268,7 @@ class WC_Product_Variable extends WC_Product {
      * @access public
      * @return array of attributes and their available values
      */
-    function get_variation_attributes() {
+    public function get_variation_attributes() {
 
 	    $variation_attributes = array();
 
@@ -387,9 +336,9 @@ class WC_Product_Variable extends WC_Product {
      * @access public
      * @return array
      */
-    function get_variation_default_attributes() {
+    public function get_variation_default_attributes() {
 
-    	$default = isset( $this->product_custom_fields['_default_attributes'][0] ) ? $this->product_custom_fields['_default_attributes'][0] : '';
+    	$default = isset( $this->default_attributes ) ? $this->default_attributes : '';
 
 	    return apply_filters( 'woocommerce_product_default_attributes', (array) maybe_unserialize( $default ), $this );
     }
@@ -400,7 +349,7 @@ class WC_Product_Variable extends WC_Product {
      * @access public
      * @return array
      */
-    function get_available_variations() {
+    public function get_available_variations() {
 
 	    $available_variations = array();
 
@@ -463,7 +412,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @access public
 	 * @return void
 	 */
-	function variable_product_sync() {
+	public function variable_product_sync() {
 		global $woocommerce;
 
 		$children = get_posts( array(
@@ -476,7 +425,7 @@ class WC_Product_Variable extends WC_Product {
 
 		$this->min_variation_price = $this->min_variation_regular_price = $this->min_variation_sale_price = $this->max_variation_price = $this->max_variation_regular_price = $this->max_variation_sale_price = '';
 
-		if ($children) {
+		if ( $children ) {
 			foreach ( $children as $child ) {
 
 				$child_price 			= get_post_meta( $child, '_price', true );
@@ -503,16 +452,16 @@ class WC_Product_Variable extends WC_Product {
 	    	$this->min_variation_price = $this->min_variation_sale_price === '' || $this->min_variation_regular_price < $this->min_variation_sale_price ? $this->min_variation_regular_price : $this->min_variation_sale_price;
 
 			$this->max_variation_price = $this->max_variation_sale_price === '' || $this->max_variation_regular_price > $this->max_variation_sale_price ? $this->max_variation_regular_price : $this->max_variation_sale_price;
+
+			update_post_meta( $this->id, '_price', $this->min_variation_price );
+			update_post_meta( $this->id, '_min_variation_price', $this->min_variation_price );
+			update_post_meta( $this->id, '_max_variation_price', $this->max_variation_price );
+			update_post_meta( $this->id, '_min_variation_regular_price', $this->min_variation_regular_price );
+			update_post_meta( $this->id, '_max_variation_regular_price', $this->max_variation_regular_price );
+			update_post_meta( $this->id, '_min_variation_sale_price', $this->min_variation_sale_price );
+			update_post_meta( $this->id, '_max_variation_sale_price', $this->max_variation_sale_price );
+
+			$woocommerce->clear_product_transients( $this->id );
 		}
-
-		update_post_meta( $this->id, '_price', $this->min_variation_price );
-		update_post_meta( $this->id, '_min_variation_price', $this->min_variation_price );
-		update_post_meta( $this->id, '_max_variation_price', $this->max_variation_price );
-		update_post_meta( $this->id, '_min_variation_regular_price', $this->min_variation_regular_price );
-		update_post_meta( $this->id, '_max_variation_regular_price', $this->max_variation_regular_price );
-		update_post_meta( $this->id, '_min_variation_sale_price', $this->min_variation_sale_price );
-		update_post_meta( $this->id, '_max_variation_sale_price', $this->max_variation_sale_price );
-
-		$woocommerce->clear_product_transients( $this->id );
 	}
 }
