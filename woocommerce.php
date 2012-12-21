@@ -1743,8 +1743,7 @@ class Woocommerce {
 		$post_transients_to_clear = array(
 			'wc_product_children_ids_',
 			'wc_product_total_stock_',
-			'wc_average_rating_',
-			'wc_product_type_'
+			'wc_average_rating_'
 		);
 
 		if ( $post_id > 0 ) {
