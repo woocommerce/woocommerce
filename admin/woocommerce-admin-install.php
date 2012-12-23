@@ -36,7 +36,9 @@ function do_install_woocommerce() {
 	wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
 	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
 
-	wp_schedule_event( strtotime( 'tomorrow' ), 'daily', 'woocommerce_scheduled_sales');
+	$ve = get_option('gmt_offset') > 0 ? '+' : '-';
+
+	wp_schedule_event( strtotime( 'tomorrow ' . $ve . get_option('gmt_offset') . ' HOURS' ), 'daily', 'woocommerce_scheduled_sales');
 
 	$held_duration = get_option( 'woocommerce_hold_stock_minutes', null );
 
