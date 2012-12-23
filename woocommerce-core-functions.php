@@ -513,7 +513,7 @@ function woocommerce_locate_template( $template_name, $template_path = '', $defa
 	// Look within passed path within the theme - this is priority
 	$template = locate_template(
 		array(
-			$template_path . $template_name,
+			trailingslashit( $template_path ) . $template_name,
 			$template_name
 		)
 	);

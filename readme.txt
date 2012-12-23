@@ -244,6 +244,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - French update by Arnaud Cheminand and absoluteweb.
 * Localization - Romanian update by silviu-bucsa and a1ur3l.
 * Localization - Dutch updates by Ramoonus.
+* Localization - Swedish updates by Mikael Jorhult.
 * Localization - Localized shortcode button.
 * Localization - Norwegian translation by frilyd.
 * Localization - Italian update by Giuseppe-Mazzapica.
