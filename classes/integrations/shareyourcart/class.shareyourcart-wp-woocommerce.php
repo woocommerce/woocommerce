@@ -156,6 +156,7 @@ class ShareYourCartWooCommerce extends ShareYourCartWordpressPlugin{
       if(!$this->isCartActive()) return;
 
       $this->_loadWooCommerce();
+	  global $woocommerce;
 
       //specify the parameters
       $params = array(
@@ -167,11 +168,11 @@ class ShareYourCartWooCommerce extends ShareYourCartWordpressPlugin{
       //there is no product set, thus send the products from the shopping cart
       if(!isset($_REQUEST['p']))
       {
-          if(empty($_SESSION['cart']))
+          if(sizeof( $woocommerce->cart->get_cart() )  == 0)
             exit("Cart is empty");
-
-          foreach($_SESSION['cart'] as $cart_details){
-            $params['cart'][] = $this->_getProductDetails($cart_details['product_id']);
+		  
+		  foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $values ) {
+            $params['cart'][] = $this->_getProductDetails($values['data']);
           }
       }
       else
@@ -192,7 +193,12 @@ class ShareYourCartWooCommerce extends ShareYourCartWordpressPlugin{
     }
 
     private function _getProductDetails($product_id){
-        $product = get_product($product_id);
+    	if(is_object($product_id))	{  //if we've already received the product, use this one
+			$product = $product_id;
+		}
+		else { //it's only a number, so get the product
+			$product = get_product($product_id);	
+		}
 
 		//WooCommerce actually echoes the image
         ob_start();
@@ -214,10 +220,10 @@ class ShareYourCartWooCommerce extends ShareYourCartWordpressPlugin{
         return array(
             "item_name"        => $product->get_title(),
             "item_description" => $product->post->post_excerpt,
-            "item_url"         => get_permalink($product_id),
+            "item_url"         => get_permalink($product->id),
             "item_price"       => $product->price,
             "item_picture_url" => $image,
-			"item_unique_id"   => $product_id,
+			"item_unique_id"   => $product->id,
         );
     }
 
