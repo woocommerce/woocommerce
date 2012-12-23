@@ -69,31 +69,26 @@ function get_woocommerce_view_order() {
  * @return void
  */
 function woocommerce_my_account( $atts ) {
-	global $woocommerce, $current_user;
+	global $woocommerce;
 
 	$woocommerce->nocache();
 
-	if ( ! is_user_logged_in() ) :
+	if ( ! is_user_logged_in() ) {
 
 		woocommerce_get_template( 'myaccount/form-login.php' );
 
-	else :
+	} else {
 
-		extract(shortcode_atts(array(
-	    	'recent_orders' => 5
-		), $atts));
-
-	  	$recent_orders = ('all' == $recent_orders) ? -1 : $recent_orders;
-
-		get_currentuserinfo();
+		extract( shortcode_atts( array(
+	    	'order_count' => 5
+		), $atts ) );
 
 		woocommerce_get_template( 'myaccount/my-account.php', array(
-			'current_user' 	=> $current_user,
-			'recent_orders' 	=> $recent_orders
+			'current_user' 	=> get_user_by( 'id', get_current_user_id() ),
+			'order_count' 	=> 'all' == $order_count ? -1 : $order_count
 		) );
 
-	endif;
-
+	}
 }
 
 /**
@@ -282,7 +277,7 @@ function woocommerce_view_order() {
 	$order 			= new WC_Order( $order_id );
 
 	if ( $order_id == 0 ) {
-		woocommerce_get_template('myaccount/my-orders.php', array( 'recent_orders' => 10 ));
+		woocommerce_get_template('myaccount/my-orders.php', array( 'order_count' => 10 ));
 		return;
 	}
 
