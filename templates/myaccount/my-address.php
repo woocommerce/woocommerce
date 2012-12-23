@@ -14,6 +14,10 @@ global $woocommerce;
 $customer_id = get_current_user_id();
 ?>
 
+<h2><?php echo apply_filters( 'woocommerce_my_address_title', __( 'My Address', 'woocommerce' ) ); ?></h2>
+
+<p class="myaccount_address"><?php echo apply_filters( 'woocommerce_my_address_description', __( 'The following addresses will be used on the checkout page by default.', 'woocommerce' ) ); ?></p>
+
 <?php if (get_option('woocommerce_ship_to_billing_address_only')=='no') : ?>
 
 	<div class="col2-set addresses">

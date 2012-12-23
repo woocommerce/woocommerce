@@ -24,6 +24,8 @@ $args = array(
 );
 $customer_orders = get_posts($args);
 
+echo '<h2>' . apply_filters( 'woocommerce_recent_orders_title', __( 'Recent Orders', 'woocommerce' ) ) . '</h2>';
+
 if ($customer_orders) :
 ?>
 	<table class="shop_table my_account_orders">
