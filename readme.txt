@@ -197,6 +197,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Templating - loop-end and start for product loops, allow changing the UL's used by default to something else.
 * Templating - woocommerce_page_title function for archive titles.
 * Templating - CSS namespacing changes (courtesy of Brian Feister).
+* Templating - My account page broken up into template files (by Brian Richards)
 
 * Tweak - Cron jobs for scheduled sales.
 * Tweak - Improved product data panels.
