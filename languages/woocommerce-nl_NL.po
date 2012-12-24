@@ -3,8 +3,8 @@ msgstr ""
 "Project-Id-Version: WooCommerce v1.6.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-12-22 12:05+0100\n"
-"PO-Revision-Date: 2012-12-22 12:05+0100\n"
-"Last-Translator: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
+"PO-Revision-Date: 2012-12-26 16:26+0100\n"
+"Last-Translator: Geert De Deckere <geertdd@gmail.com>\n"
 "Language-Team: Ramon van Belzen <woocommerce@ramoonus.nl>, Geert De "
 "Deckere<geertdd@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -98,7 +98,7 @@ msgstr "Naam"
 # @ woocommerce
 #: woocommerce-ajax.php:1180
 msgid "Value"
-msgstr ""
+msgstr "Waarde"
 
 # @ woocommerce
 #: woocommerce-ajax.php:1492
@@ -506,7 +506,7 @@ msgstr[1] "Productcategorieën"
 #: woocommerce.php:695
 msgctxt "Admin menu name"
 msgid "Categories"
-msgstr "Categoriën"
+msgstr "Categorieën"
 
 # @ woocommerce
 #: woocommerce.php:696
@@ -719,7 +719,7 @@ msgstr "Nieuwe bestelstatus naam"
 #: admin/post-types/product.php:894
 #: admin/post-types/writepanels/writepanel-product_data.php:1033
 msgid "Search"
-msgstr "Zoek"
+msgstr "Zoeken"
 
 # @ woocommerce
 #: woocommerce.php:825
@@ -1073,7 +1073,7 @@ msgstr "Actie niet gelukt. Ververs de pagina en probeer opnieuw."
 #: admin/woocommerce-admin-attributes.php:43
 #, php-format
 msgid "Slug %s is too long"
-msgstr ""
+msgstr "Slug %s is te lang"
 
 # @ woocommerce
 #: admin/woocommerce-admin-attributes.php:83
@@ -1143,9 +1143,8 @@ msgstr ""
 # @ woocommerce
 #: admin/woocommerce-admin-attributes.php:247
 #: admin/woocommerce-admin-attributes.php:378
-#, fuzzy
 msgid "Default sort order"
-msgstr "Standaard productsortering"
+msgstr "Standaard sorteervolgorde"
 
 # @ woocommerce
 #: admin/woocommerce-admin-attributes.php:251
@@ -1179,9 +1178,8 @@ msgstr "Eigenschappen"
 
 # @ woocommerce
 #: admin/woocommerce-admin-attributes.php:293
-#, fuzzy
 msgid "Order by"
-msgstr "Sorteer op:"
+msgstr "Sorteer op"
 
 # @ woocommerce
 #: admin/woocommerce-admin-attributes.php:294
@@ -1321,7 +1319,7 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:215
 #: assets/js/admin/editor_plugin_lang.php:14
 msgid "Pages"
-msgstr "Pagina's"
+msgstr "Pagina’s"
 
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:45
@@ -1589,7 +1587,7 @@ msgstr "WooCommerce recente bestellingen"
 #: admin/woocommerce-admin-dashboard.php:45
 #: widgets/widget-recent_reviews.php:33
 msgid "WooCommerce Recent Reviews"
-msgstr "WooCommerce recente reviews"
+msgstr "WooCommerce Recente Reviews"
 
 # @ woocommerce
 #: admin/woocommerce-admin-dashboard.php:78
@@ -1668,11 +1666,11 @@ msgstr "Er zijn nog geen reviews van dit product."
 
 #: admin/woocommerce-admin-dashboard.php:428
 msgid "Sold"
-msgstr ""
+msgstr "Verkocht"
 
 #: admin/woocommerce-admin-dashboard.php:429
 msgid "Earned"
-msgstr ""
+msgstr "Verdiend"
 
 # @ woocommerce
 #: admin/woocommerce-admin-functions.php:184
@@ -2207,7 +2205,6 @@ msgstr "Wachtwoord opvragen"
 
 # @ woocommerce
 #: admin/woocommerce-admin-install.php:202
-#, fuzzy
 msgid "Lost Password"
 msgstr "Wachtwoord vergeten?"
 
@@ -2270,7 +2267,7 @@ msgstr "Verkoop per maand"
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:46
 msgid "Taxes by month"
-msgstr ""
+msgstr "BTW per maand"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:51
@@ -2290,7 +2287,7 @@ msgstr "Topverdieners"
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:66
 msgid "Sales by category"
-msgstr ""
+msgstr "Verkoop per categorie"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:81
@@ -2383,7 +2380,6 @@ msgstr "Totale verzendkosten"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:407
-#, fuzzy
 msgid "This month's sales"
 msgstr "Verkopen van deze maand"
 
@@ -2419,7 +2415,7 @@ msgstr "Tonen"
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:637
 msgid "Total sales in range"
-msgstr "Totale omzet binnen het bereik"
+msgstr "Totale verkoop binnen bereik"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:643
@@ -2429,12 +2425,12 @@ msgstr "Totaal aantal bestellingen binnen bereik"
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:649
 msgid "Average order total in range"
-msgstr "Gemiddelde bestelling totaal in assortiment"
+msgstr "Gemiddelde bestellingstotaal binnen bereik"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:655
 msgid "Average order items in range"
-msgstr "Gemiddeld aantal artikelen per bestelling in het bereik"
+msgstr "Gemiddeld aantal artikelen per bestelling binnen bereik"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:663
@@ -2510,21 +2506,20 @@ msgstr "Zoek naar een product &hellip;"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1347
-#, fuzzy
 msgid "Total orders containing coupons"
-msgstr "Totaal aantal bestellingen binnen bereik"
+msgstr "Totaal aantal bestellingen met kortingsbon"
 
 #: admin/woocommerce-admin-reports.php:1353
 msgid "Percent of orders containing coupons"
-msgstr ""
+msgstr "Percentage bestellingen met kortingsbon"
 
 #: admin/woocommerce-admin-reports.php:1359
 msgid "Total coupon discount"
-msgstr ""
+msgstr "Totale korting via bonnen"
 
 #: admin/woocommerce-admin-reports.php:1368
 msgid "Most popular coupons"
-msgstr ""
+msgstr "Populairste kortingsbonnen"
 
 #: admin/woocommerce-admin-reports.php:1378
 #, php-format
@@ -2536,7 +2531,6 @@ msgstr[1] ""
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1381
 #: admin/woocommerce-admin-reports.php:1403
-#, fuzzy
 msgid "No coupons found"
 msgstr "Geen kortingsbonnen gevonden"
 
@@ -2573,9 +2567,8 @@ msgstr "Totaal"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1599
-#, fuzzy
 msgid "Top coupon"
-msgstr "Kortingsbon"
+msgstr "Topkortingsbon"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1607
@@ -2611,7 +2604,7 @@ msgstr "N.B."
 
 #: admin/woocommerce-admin-reports.php:1643
 msgid "Monthly discounts by coupon"
-msgstr ""
+msgstr "Maandelijkse korting per bon"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1788
@@ -2694,17 +2687,17 @@ msgstr "Er zijn geen producten uitverkocht."
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2249
 msgid "Total taxes for year"
-msgstr ""
+msgstr "Totaal BTW voor dit jaar"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2260
 msgid "Total product taxes for year"
-msgstr ""
+msgstr "Totaal BTW op producten voor dit jaar"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2271
 msgid "Total shipping tax for year"
-msgstr ""
+msgstr "Totaal BTW op verzendkosten voor dit jaar"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2287
@@ -2719,7 +2712,7 @@ msgstr ""
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2288
 msgid "Total Shipping"
-msgstr "Totaal Verzendkosten"
+msgstr "Totaal verzendkosten"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2288
@@ -2729,7 +2722,7 @@ msgstr ""
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2289
 msgid "Total Product Taxes"
-msgstr ""
+msgstr "Totaal BTW op producten"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2289
@@ -2739,7 +2732,7 @@ msgstr ""
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2290
 msgid "Total Shipping Taxes"
-msgstr ""
+msgstr "Totaal BTW op verzendkosten"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2290
@@ -2749,7 +2742,7 @@ msgstr ""
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2291
 msgid "Total Taxes"
-msgstr "Totaal Belasting"
+msgstr "Totaal BTW"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2291
@@ -2761,7 +2754,7 @@ msgstr ""
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2292
 msgid "Net profit"
-msgstr "Netto winst"
+msgstr "Nettowinst"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2292
@@ -2781,7 +2774,7 @@ msgstr "Categorie"
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2585
 msgid "Top category"
-msgstr ""
+msgstr "Topcategorie"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2594
@@ -3004,9 +2997,8 @@ msgstr "WooCommerce versie"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:104
-#, fuzzy
 msgid "WooCommerce DB version"
-msgstr "WooCommerce versie"
+msgstr "WooCommerce DB versie"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:108
@@ -3125,7 +3117,7 @@ msgstr ""
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:255
 msgid "Order Statuses"
-msgstr ""
+msgstr "Bestelstatussen"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:265
@@ -3281,27 +3273,25 @@ msgstr "Tools"
 # @ woocommerce
 #: admin/woocommerce-admin-taxonomies.php:25
 #: admin/woocommerce-admin-taxonomies.php:118
-#, fuzzy
 msgid "Display type"
 msgstr "Weergavetype:"
 
 # @ woocommerce
 #: admin/woocommerce-admin-taxonomies.php:29
 #: admin/woocommerce-admin-taxonomies.php:123
-#, fuzzy
 msgid "Subcategories"
-msgstr "Toon subcategorieën"
+msgstr "Subcategorieën"
 
 #: admin/woocommerce-admin-taxonomies.php:30
 #: admin/woocommerce-admin-taxonomies.php:124
 msgid "Both"
-msgstr ""
+msgstr "Beide"
 
 # @ woocommerce
 #: admin/woocommerce-admin-taxonomies.php:34
 #: admin/woocommerce-admin-taxonomies.php:129
 msgid "Thumbnail"
-msgstr "Preview afbeelding"
+msgstr "Previewafbeelding"
 
 # @ woocommerce
 #: admin/woocommerce-admin-taxonomies.php:38
@@ -3319,9 +3309,8 @@ msgstr "Afbeelding verwijderen"
 #: admin/woocommerce-admin-taxonomies.php:62
 #: admin/woocommerce-admin-taxonomies.php:154
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:503
-#, fuzzy
 msgid "Choose an image"
-msgstr "Kies een optie"
+msgstr "Kies een afbeelding"
 
 # @ woocommerce
 #: admin/woocommerce-admin-taxonomies.php:64
@@ -3510,7 +3499,7 @@ msgstr ""
 #: admin/importers/tax-rates-importer.php:222
 #: admin/importers/tax-rates-importer.php:237
 msgid "Sorry, there has been an error."
-msgstr ""
+msgstr "Sorry, er ging iets mis."
 
 #: admin/importers/tax-rates-importer.php:104
 msgid "The file does not exist, please try again."
@@ -3518,7 +3507,7 @@ msgstr ""
 
 #: admin/importers/tax-rates-importer.php:183
 msgid "The CSV is invalid."
-msgstr ""
+msgstr "CSV is ongeldig."
 
 #: admin/importers/tax-rates-importer.php:194
 #, php-format
@@ -3578,7 +3567,7 @@ msgstr ""
 # @ woocommerce
 #: admin/importers/tax-rates-importer.php:315
 msgid "Delimiter"
-msgstr ""
+msgstr "Scheidingsteken"
 
 # @ woocommerce
 #: admin/includes/duplicate_product.php:23
@@ -3668,7 +3657,7 @@ msgstr "Dupliceren"
 # @ woocommerce
 #: admin/post-types/product.php:61
 msgid "Copy to a new draft"
-msgstr "Dit product dupiceren"
+msgstr "Dit product dupliceren"
 
 # @ woocommerce
 #: admin/post-types/product.php:97
@@ -3998,7 +3987,6 @@ msgstr "Product ID's"
 
 # @ woocommerce
 #: admin/post-types/shop_coupon.php:30
-#, fuzzy
 msgid "Usage / Limit"
 msgstr "Gebruikslimiet"
 
@@ -4010,7 +3998,6 @@ msgstr "Vervaldatum"
 
 # @ woocommerce
 #: admin/post-types/shop_coupon.php:56
-#, fuzzy
 msgid "Edit coupon"
 msgstr "Kortingsbon bewerken"
 
@@ -4148,7 +4135,7 @@ msgstr "Toegang Terugtrekken"
 #: admin/post-types/writepanels/order-download-permission-html.php:9
 #, php-format
 msgid "File %d: %s"
-msgstr ""
+msgstr "Bestand %d: %s"
 
 # @ woocommerce
 #: admin/post-types/writepanels/order-download-permission-html.php:9
@@ -4320,7 +4307,7 @@ msgstr "Promotieperiode"
 #: admin/post-types/writepanels/writepanel-product_data.php:137
 msgctxt "placeholder"
 msgid "To&hellip;"
-msgstr "Naar &hellip;"
+msgstr "Tot &hellip;"
 
 # @ woocommerce
 #: admin/post-types/writepanels/variation-admin-html.php:90
@@ -4625,9 +4612,8 @@ msgstr "Niet vervallen"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-coupon_data.php:165
-#, fuzzy
 msgid "The date this coupon will expire, <code>YYYY-MM-DD</code>."
-msgstr "De datum waarop deze kortingsbon vervalt"
+msgstr "De datum waarop deze kortingsbon vervalt, <code>JJJJ-MM-DD</code>."
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:202
 msgid ""
@@ -4961,9 +4947,8 @@ msgstr "Betalingsmethode:"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:678
-#, fuzzy
 msgid "Calc taxes"
-msgstr "Totaal Belasting"
+msgstr "Totaal BTW"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:679
@@ -5212,9 +5197,8 @@ msgstr ""
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:83
-#, fuzzy
 msgid "Linked Products"
-msgstr "Nieuwe producten"
+msgstr "Gerelateerde producten"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:87
@@ -5321,7 +5305,7 @@ msgstr ""
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:226
 msgid "Stock status"
-msgstr "Voorraad status"
+msgstr "Voorraadstatus"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:229
@@ -5359,14 +5343,14 @@ msgstr ""
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:251
-#, fuzzy
 msgid "Sold Individually"
-msgstr "Individueel gebruik"
+msgstr "Individueel verkocht"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:251
 msgid ""
 "Enable this to only allow one of this item to be bought in a single order"
 msgstr ""
+"Schakel in als dit product maar één keer per bestelling gekocht kan worden"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:269
@@ -5400,8 +5384,8 @@ msgid ""
 "Shipping classes are used by certain shipping methods to group similar "
 "products."
 msgstr ""
-"Verzendklassen worden gebruikt door bepaalde verzendmethoden om "
-"gelijkaardige producten te groeperen."
+"Verzendklassen kunnen gebruikt worden om gelijkaardige producten te "
+"groeperen."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:378
@@ -5435,14 +5419,13 @@ msgstr "Speciale producteigenschap"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:491
-#, fuzzy
 msgid "Save attributes"
-msgstr "Eigenschappen"
+msgstr "Eigenschappen opslaan"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:498
 msgid "Up-Sells"
-msgstr "Up-Sells"
+msgstr "Up-sells"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:517
@@ -5457,7 +5440,7 @@ msgstr ""
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:519
 msgid "Cross-Sells"
-msgstr "Cross-Sells"
+msgstr "Cross-sells"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:538
@@ -5485,7 +5468,7 @@ msgstr ""
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:594
 msgid "Purchase Note"
-msgstr "Bestelling Opmerking"
+msgstr "Aankoopnotitie"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:594
@@ -5497,7 +5480,7 @@ msgstr ""
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:601
 msgid "Menu order"
-msgstr "Menu volgorde"
+msgstr "Menuvolgorde"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:601
@@ -5507,7 +5490,7 @@ msgstr ""
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:609
 msgid "Enable reviews"
-msgstr "Activeer Reviews"
+msgstr "Sta reviews toe"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:698
@@ -5517,12 +5500,12 @@ msgstr "Product SKU dient uniek te zijn."
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:1031
 msgid "Catalog/search"
-msgstr ""
+msgstr "Catalogus &amp; zoeken"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:1038
 msgid "Catalog visibility:"
-msgstr ""
+msgstr "Productzichtbaarheid:"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:1054
@@ -5530,16 +5513,18 @@ msgid ""
 "Define the loops this product should be visible in. The product will still "
 "be accessible directly."
 msgstr ""
+"Bepaalt waar het product zichtbaar is. Het product kan nog steeds via een "
+"rechtstreekse URL bekeken worden."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:1060
 msgid "Enable this option to feature this product."
-msgstr ""
+msgstr "Vink aan om het product uit te lichten."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:1062
 msgid "Featured Product"
-msgstr ""
+msgstr "Uitgelicht product"
 
 # @ default
 #: admin/post-types/writepanels/writepanel-product_data.php:1066
@@ -5555,27 +5540,23 @@ msgstr "Verwijder item"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_images.php:53
-#, fuzzy
 msgid "Add product gallery images"
-msgstr "Alle Productcategorieën"
+msgstr "Productafbeeldingen toevoegen"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_images.php:79
-#, fuzzy
 msgid "Add Images to Product Gallery"
-msgstr "Nieuwe productcategorie toevoegen"
+msgstr "Afbeeldingen toevoegen aan de productgalerij"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_images.php:81
-#, fuzzy
 msgid "Add to gallery"
-msgstr "Kopen"
+msgstr "Toevoegen aan galerij"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanels-init.php:47
-#, fuzzy
 msgid "Product Gallery"
-msgstr "Verkoop per product"
+msgstr "Productgalerij"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanels-init.php:55
@@ -5993,7 +5974,7 @@ msgstr "Kortingsbonnen inschakelen"
 # @ woocommerce
 #: admin/settings/settings-init.php:156
 msgid "Enable coupon form on cart"
-msgstr ""
+msgstr "Toon kortingsbonformulier in de winkelwagen"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:165
@@ -6008,16 +5989,16 @@ msgstr "Registratie"
 # @ woocommerce
 #: admin/settings/settings-init.php:175
 msgid "Allow registration on the checkout page"
-msgstr ""
+msgstr "Sta registratie toe bij het afrekenen"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:183
 msgid "Allow registration on the \"My Account\" page"
-msgstr ""
+msgstr "Sta registratie toe op de pagina “Mijn Account”"
 
 #: admin/settings/settings-init.php:191
 msgid "Register using the email address for the username"
-msgstr ""
+msgstr "Registreren met het e-mailadres als gebruikersnaam"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:199
@@ -6303,9 +6284,8 @@ msgstr "Pagina inhoud: [woocommerce_change_password] Ouder: \"Mijn Account\""
 
 # @ woocommerce
 #: admin/settings/settings-init.php:484
-#, fuzzy
 msgid "Lost Password Page"
-msgstr "Wachtwoord vergeten?"
+msgstr "Wachtwoord vergeten pagina"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:485
@@ -6320,9 +6300,8 @@ msgstr "Catalogusopties"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:504
-#, fuzzy
 msgid "Default Product Sorting"
-msgstr "Standaard product sortering"
+msgstr "Standaard productsortering"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:505
@@ -6353,9 +6332,8 @@ msgstr "Sorteer op prijs"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:520
-#, fuzzy
 msgid "Shop Page Display"
-msgstr "Winkelpagina's"
+msgstr "Weergave winkelpagina"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:521
@@ -6365,9 +6343,8 @@ msgstr "Hiermee bepaalt u hoe voorraad wordt weergegeven op de front-end."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:527 admin/settings/settings-init.php:542
-#, fuzzy
 msgid "Show products"
-msgstr "Nieuwe producten"
+msgstr "Toon producten"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:528 admin/settings/settings-init.php:543
@@ -6376,15 +6353,13 @@ msgstr "Toon subcategorieën"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:529 admin/settings/settings-init.php:544
-#, fuzzy
 msgid "Show both"
-msgstr "Tonen"
+msgstr "Toon beide"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:535
-#, fuzzy
 msgid "Default Category Display"
-msgstr "Standaard kosten"
+msgstr "Standaard categorieweergave"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:536
@@ -6395,7 +6370,7 @@ msgstr "Dit bepaalt in welke eenheid u het gewicht van een product opgeeft."
 # @ woocommerce
 #: admin/settings/settings-init.php:550
 msgid "Redirects"
-msgstr "Verwijzing"
+msgstr "Doorsturen"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:551
@@ -6420,7 +6395,6 @@ msgstr ""
 
 # @ woocommerce
 #: admin/settings/settings-init.php:571
-#, fuzzy
 msgid "Product Fields"
 msgstr "Productvelden"
 
@@ -6511,7 +6485,6 @@ msgstr "Productratings"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:638
-#, fuzzy
 msgid "Enable the rating field on the review form"
 msgstr "Schakel sterratings in op het reviewformulier"
 
@@ -6569,7 +6542,6 @@ msgstr "Rechts (met spatie)"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:685
-#, fuzzy
 msgid "Thousand Separator"
 msgstr "Duizendtalscheiding"
 
@@ -6581,7 +6553,6 @@ msgstr ""
 
 # @ woocommerce
 #: admin/settings/settings-init.php:695
-#, fuzzy
 msgid "Decimal Separator"
 msgstr "Decimaalscheiding"
 
@@ -6592,7 +6563,6 @@ msgstr "Dit stelt het decimaal-scheidingsteken van de weergegeven prijzen in."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:705
-#, fuzzy
 msgid "Number of Decimals"
 msgstr "Aantal decimalen"
 
@@ -6603,7 +6573,6 @@ msgstr "Dit bepaalt het aantal decimalen getoond in de getoonde prijzen."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:719
-#, fuzzy
 msgid "Trailing Zeros"
 msgstr "Eindnullen"
 
@@ -6631,9 +6600,9 @@ msgid ""
 "thumbnails</a>."
 msgstr ""
 "Deze instellingen zijn van toepassing op de grootte van de afbeeldingen in "
-"de catalogus. De grootte van de afbeeldingen zullen worden beïnvloed door "
-"CSS-stijlen. Na het aanpassen van de instellingen kan het zijn dat u de<a "
-"href=\"%s\">miniatuurafbeeldingen opnieuw moet genereren</a>."
+"de catalogus. De grootte van de afbeeldingen zal worden beïnvloed door CSS. "
+"Na het aanpassen van de instellingen kan het zijn dat u de <a href=\"%s"
+"\">miniatuurafbeeldingen opnieuw moet genereren</a>."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:731
@@ -6670,13 +6639,12 @@ msgstr ""
 # @ woocommerce
 #: admin/settings/settings-init.php:779
 msgid "Inventory Options"
-msgstr "Voorraad opties"
+msgstr "Voorraadopties"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:782
-#, fuzzy
 msgid "Manage Stock"
-msgstr "Voorraadbeheer"
+msgstr "Beheer voorraad"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:783
@@ -6835,9 +6803,8 @@ msgstr ""
 
 # @ woocommerce
 #: admin/settings/settings-init.php:973
-#, fuzzy
 msgid "Enable Taxes"
-msgstr "Totaal Belasting"
+msgstr "Schakel BTW in"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:974
@@ -6902,9 +6869,8 @@ msgstr ""
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1012
-#, fuzzy
 msgid "No address"
-msgstr "Adres"
+msgstr "Geen adres"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1018
@@ -6931,7 +6897,6 @@ msgstr "Rond BTW af bij subtotalen ipv per regel"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1037
-#, fuzzy
 msgid "Additional Tax Classes"
 msgstr "Additionele BTW-schalen"
 
@@ -6955,15 +6920,13 @@ msgstr "E-mail gebruikt bij afrekenen."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1051
-#, fuzzy
 msgid "Including tax"
-msgstr "Kosten excl. BTW."
+msgstr "Inclusief BTW"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1052
-#, fuzzy
 msgid "Excluding tax"
-msgstr "Kosten excl. BTW."
+msgstr "Exclusief BTW"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1064
@@ -6981,19 +6944,16 @@ msgstr ""
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1067
-#, fuzzy
 msgid "\"From\" Name"
-msgstr "\"Van\" naam"
+msgstr "“Van” naam"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1076
-#, fuzzy
 msgid "\"From\" Email Address"
-msgstr "\"Van\" e-mailadres"
+msgstr "“Van” e-mailadres"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1089
-#, fuzzy
 msgid "Email Template"
 msgstr "E-mailtemplate"
 
@@ -7013,7 +6973,6 @@ msgstr ""
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1092
-#, fuzzy
 msgid "Header Image"
 msgstr "Headerafbeelding"
 
@@ -7029,9 +6988,8 @@ msgstr ""
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1101
-#, fuzzy
 msgid "Email Footer Text"
-msgstr "E-mail footer tekst"
+msgstr "E-mail footertekst"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1102
@@ -7045,7 +7003,6 @@ msgstr "Powered by WooCommerce"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1110
-#, fuzzy
 msgid "Base Colour"
 msgstr "Basiskleur"
 
@@ -7060,7 +7017,6 @@ msgstr ""
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1119
-#, fuzzy
 msgid "Background Colour"
 msgstr "Achtergrondkleur"
 
@@ -7073,7 +7029,6 @@ msgstr ""
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1128
-#, fuzzy
 msgid "Email Body Background Colour"
 msgstr "E-mailbericht achtergrondkleur"
 
@@ -7084,7 +7039,6 @@ msgstr "De bericht achtergrond kleur. Standaard <code>#fdfdfd</code>."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1137
-#, fuzzy
 msgid "Email Body Text Colour"
 msgstr "E-mailbericht tekstkleur"
 
@@ -7162,7 +7116,6 @@ msgstr ""
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:40
 #: admin/settings/settings-tax-rates.php:182
-#, fuzzy
 msgid "ZIP/Postcode"
 msgstr "Postcode"
 
@@ -7181,7 +7134,6 @@ msgstr ""
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:44
-#, fuzzy
 msgid "Rate&nbsp;%"
 msgstr "Beoordeel&hellip;"
 
@@ -7246,27 +7198,23 @@ msgstr "Verwijder geselecteerde rijen"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:62
-#, fuzzy
 msgid "Export CSV"
-msgstr "Exporteer tarieven"
+msgstr "Exporteer CSV"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:63
-#, fuzzy
 msgid "Import CSV"
-msgstr "Importeer tarieven"
+msgstr "Importeer CSV"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:163
-#, fuzzy
 msgid "No row(s) selected"
-msgstr "Geen laden geselecteerd"
+msgstr "Geen rij(en) geselecteerd"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:182
-#, fuzzy
 msgid "Country Code"
-msgstr "Land"
+msgstr "Landcode"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:182
@@ -7276,9 +7224,8 @@ msgstr "Sorteercode"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:182
-#, fuzzy
 msgid "Rate %"
-msgstr "Waardering"
+msgstr "Waardering %"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:182
@@ -8649,9 +8596,8 @@ msgstr "Zuid-Korea"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:243
-#, fuzzy
 msgid "South Sudan"
-msgstr "South Carolina"
+msgstr "Zuid-Sudan"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:244
@@ -9797,7 +9743,7 @@ msgstr ""
 #: classes/emails/class-wc-email-customer-completed-order.php:144
 #: classes/emails/class-wc-email-new-order.php:128
 msgid "Subject"
-msgstr ""
+msgstr "Onderwerp"
 
 #: classes/emails/class-wc-email-customer-completed-order.php:146
 #: classes/emails/class-wc-email-customer-completed-order.php:153
@@ -9847,14 +9793,14 @@ msgstr ""
 #: classes/emails/class-wc-email-new-order.php:148
 #: classes/emails/class-wc-email.php:442
 msgid "Plain text"
-msgstr ""
+msgstr "Platte tekst"
 
 #: classes/emails/class-wc-email-customer-completed-order.php:179
 #: classes/emails/class-wc-email-customer-invoice.php:179
 #: classes/emails/class-wc-email-new-order.php:149
 #: classes/emails/class-wc-email.php:443
 msgid "HTML"
-msgstr ""
+msgstr "HTML"
 
 #: classes/emails/class-wc-email-customer-completed-order.php:180
 #: classes/emails/class-wc-email-customer-invoice.php:180
@@ -11613,9 +11559,8 @@ msgstr "Werk totalen bij"
 
 # @ woocommerce
 #: templates/cart/shipping-methods.php:32
-#, fuzzy
 msgid "Free"
-msgstr "Gratis!"
+msgstr "Gratis"
 
 # @ woocommerce
 #: templates/cart/shipping-methods.php:66
@@ -11962,9 +11907,9 @@ msgstr ""
 # @ woocommerce
 #: templates/emails/customer-reset-password.php:15
 #: templates/emails/plain/customer-reset-password.php:15
-#, fuzzy, php-format
+#, php-format
 msgid "Username: %s"
-msgstr "Gebruikersnaam"
+msgstr "Gebruikersnaam: %s"
 
 #: templates/emails/customer-reset-password.php:16
 #: templates/emails/plain/customer-reset-password.php:16
@@ -12055,7 +12000,7 @@ msgstr "Bekijk opties"
 #: templates/loop/result-count.php:30
 #, php-format
 msgid "Showing %s - %s of %s results"
-msgstr ""
+msgstr "Toont %s–%s van %s resultaten"
 
 # @ woocommerce
 #: templates/loop/sale-flash.php:16 templates/single-product/sale-flash.php:16
@@ -12064,15 +12009,13 @@ msgstr "Promo!"
 
 # @ woocommerce
 #: templates/loop/sorting.php:24
-#, fuzzy
 msgid "Sort by price - low to high"
-msgstr "Sorteer op prijs"
+msgstr "Sorteer op prijs - laag naar hoog"
 
 # @ woocommerce
 #: templates/loop/sorting.php:25
-#, fuzzy
 msgid "Sort by price - high to low"
-msgstr "Sorteer op prijs"
+msgstr "Sorteer op prijs - hoog naar laag"
 
 # @ woocommerce
 #: templates/myaccount/form-change-password.php:20
@@ -12174,11 +12117,11 @@ msgstr "Beschikbare downloads"
 
 # @ woocommerce
 #: templates/myaccount/my-account.php:32
-#, fuzzy, php-format
+#, php-format
 msgid "%s download remaining"
 msgid_plural "%s downloads remaining"
-msgstr[0] "&nbsp;download te gaan"
-msgstr[1] "&nbsp;downloads te gaan"
+msgstr[0] "Nog %s download te gaan"
+msgstr[1] "Nog %s downloads te gaan"
 
 # @ woocommerce
 #: templates/myaccount/my-account.php:45
@@ -12331,11 +12274,10 @@ msgstr "Pagina"
 
 # @ woocommerce
 #: templates/single-product/meta.php:22
-#, fuzzy
 msgid "Category:"
 msgid_plural "Categories:"
-msgstr[0] "Categorie"
-msgstr[1] "Categorie"
+msgstr[0] "Categorie:"
+msgstr[1] "Categorieën:"
 
 #: templates/single-product/meta.php:24
 msgid "Tag:"
@@ -12427,7 +12369,7 @@ msgstr "Verberg gratis producten"
 # @ woocommerce
 #: widgets/widget-cart.php:33
 msgid "Display the user's Cart in the sidebar."
-msgstr ""
+msgstr "Toon de winkelwagen van de klant in de zijbalk."
 
 # @ woocommerce
 #: widgets/widget-cart.php:35
@@ -12512,24 +12454,24 @@ msgstr "OF"
 #: widgets/widget-layered_nav_filters.php:31
 msgid "Shows active layered nav filters so users can see and deactivate them."
 msgstr ""
+"Toont actieve filters van de gelaagde navigatie met de mogelijkheid om ze te "
+"deactiveren."
 
 # @ woocommerce
 #: widgets/widget-layered_nav_filters.php:33
-#, fuzzy
 msgid "WooCommerce Layered Nav Filters"
-msgstr "WooCommerce Gelaagde Navigatie"
+msgstr "WooCommerce Gelaagde Navigatie Filters"
 
 #: widgets/widget-layered_nav_filters.php:62
 msgid "Active filters"
-msgstr ""
+msgstr "Actieve filters"
 
 # @ woocommerce
 #: widgets/widget-layered_nav_filters.php:90
 #: widgets/widget-layered_nav_filters.php:96
 #: widgets/widget-layered_nav_filters.php:101
-#, fuzzy
 msgid "Remove filter"
-msgstr "Afbeelding verwijderen"
+msgstr "Verwijder filter"
 
 # @ woocommerce
 #: widgets/widget-layered_nav_filters.php:96
@@ -12659,7 +12601,7 @@ msgstr "Sorteer op:"
 # @ woocommerce
 #: widgets/widget-product_categories.php:188
 msgid "Category Order"
-msgstr "Categorie volgorde"
+msgstr "Categorievolgorde"
 
 # @ woocommerce
 #: widgets/widget-product_categories.php:193
@@ -12669,17 +12611,17 @@ msgstr "Toon als uitklapmenu"
 # @ woocommerce
 #: widgets/widget-product_categories.php:196
 msgid "Show post counts"
-msgstr "Toon bericht aantallen"
+msgstr "Toon aantal producten"
 
 # @ woocommerce
 #: widgets/widget-product_categories.php:199
 msgid "Show hierarchy"
-msgstr "Hiërarchie bekijken"
+msgstr "Toon hiërarchie"
 
 # @ woocommerce
 #: widgets/widget-product_categories.php:202
 msgid "Only show children for the current category"
-msgstr "Toon alleen subcategoriën van de huidige categorie"
+msgstr "Toon alleen subcategorieën van de huidige categorie"
 
 # @ woocommerce
 #: widgets/widget-product_search.php:31
@@ -12781,6 +12723,5 @@ msgstr "WooCommerce Hoogst Gewaardeerde Producten"
 
 # @ woocommerce
 #: widgets/widget-top_rated_products.php:72
-#, fuzzy
 msgid "Top Rated Products"
-msgstr "Gerelateerde producten"
+msgstr "Hoogst gewaardeerde producten"
