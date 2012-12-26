@@ -59,8 +59,8 @@ class WooCommerce_Widget_Layered_Nav_Filters extends WP_Widget {
 		$current_term 	= $_attributes_array && is_tax( $_attributes_array ) ? get_queried_object()->term_id : '';
 		$current_tax 	= $_attributes_array && is_tax( $_attributes_array ) ? get_queried_object()->taxonomy : '';
 
-		$title = __( 'Active filters', 'woocommerce' );
-		//$title = apply_filters('widget_title', $instance['title'], $instance, $this->id_base );
+		$title = empty( $instance['title'] ) ? __( 'Active filters', 'woocommerce' ) : $instance['title'];
+		$title = apply_filters( 'widget_title', $title, $instance, $this->id_base);
 
 		// Price
 		$post_min = isset( $woocommerce->session->min_price ) ? $woocommerce->session->min_price : 0;
@@ -68,7 +68,10 @@ class WooCommerce_Widget_Layered_Nav_Filters extends WP_Widget {
 
 		if ( count( $_chosen_attributes ) > 0 || $post_min > 0 || $post_max > 0 ) {
 
-			echo $before_widget . $before_title . $title . $after_title;
+			echo $before_widget;
+			if ( $title ) {
+				echo $before_title . $title . $after_title;
+			}
 
 			echo "<ul>";
 
