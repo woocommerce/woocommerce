@@ -59,7 +59,7 @@ class WooCommerce_Widget_Layered_Nav_Filters extends WP_Widget {
 		$current_term 	= $_attributes_array && is_tax( $_attributes_array ) ? get_queried_object()->term_id : '';
 		$current_tax 	= $_attributes_array && is_tax( $_attributes_array ) ? get_queried_object()->taxonomy : '';
 
-		$title = empty( $instance['title'] ) ? __( 'Active filters', 'woocommerce' ) : $instance['title'];
+		$title = ( ! isset( $instance['title'] ) ) ? __( 'Active filters', 'woocommerce' ) : $instance['title'];
 		$title = apply_filters( 'widget_title', $title, $instance, $this->id_base);
 
 		// Price
