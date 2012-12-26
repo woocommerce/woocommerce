@@ -501,6 +501,12 @@ class WC_Paypal extends WC_Payment_Gateway {
 
     	// Get recieved values from post data
 		$received_values = (array) stripslashes_deep( $_POST );
+		
+		// Check email address to make sure that IPN response is not a spoof 
+		if ( strcasecmp(trim($received_values['receiver_email']), trim($this->email)) != 0 ) {
+			if ($this->debug=='yes') $this->log->add( 'paypal', 'IPN Response is for another one: ' . $received_values['receiver_email'] . ' our email is ' . $this->email);
+			return false;
+		}
 
 		 // Add cmd to the post array
 		$received_values['cmd'] = '_notify-validate';
