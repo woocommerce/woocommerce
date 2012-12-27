@@ -197,7 +197,7 @@ msgstr "Fullførte"
 #: admin/woocommerce-admin-dashboard.php:189
 #@ woocommerce
 msgid "Monthly Sales"
-msgstr "Månedlige slag"
+msgstr "Månedlige salg"
 
 #: admin/woocommerce-admin-dashboard.php:224
 #@ woocommerce
@@ -1687,7 +1687,7 @@ msgstr "Slett permanent"
 #: admin/post-types/writepanels/writepanel-order_data.php:468
 #@ woocommerce
 msgid "Move to Trash"
-msgstr "Flytt til pepirkurven"
+msgstr "Flytt til papirkurven"
 
 #: classes/class-wc-order.php:568
 #@ woocommerce
@@ -2107,7 +2107,7 @@ msgstr "Ordredata"
 #: admin/post-types/writepanels/writepanels-init.php:50
 #@ woocommerce
 msgid "Order Items <small>&ndash; Note: if you edit quantities or remove items from the order you will need to manually change the item's stock levels.</small>"
-msgstr "Produkter i ordre <small>&ndash; OBS: Om du bruker entall eller tar bort produkter fra ordren må du manuellt endre lagersaldo for produktet."
+msgstr "Produkter i ordre <small>&ndash; OBS: Hvis du bruker antall eller tar bort produkter fra ordren må du manuellt endre lagersaldo for produktet."
 
 #: admin/post-types/writepanels/writepanels-init.php:51
 #@ woocommerce
@@ -2173,7 +2173,7 @@ msgstr "Du kan ikke legge produktet i handlekurven fordi det er tomt på lager."
 #, php-format
 #@ woocommerce
 msgid "Sorry, we do not have enough \"%s\" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused."
-msgstr "Beklager, vi har dessverre ikke mange nok \"%s\" på lager i forhold til ditt ønske. (%s i lager) Redigere din handlekurv og prøv igjen. Vi beklager dette."
+msgstr "Beklager, vi har dessverre ikke mange nok \"%s\" på lager i forhold til ditt ønske. (%s på lager) Redigere din handlekurv og prøv igjen. Vi beklager dette."
 
 #: classes/class-wc-cart.php:392
 #, php-format
@@ -2408,7 +2408,7 @@ msgstr "Gi kunden instruksjoner om hvordan man betaler via BACS og la kunden vit
 #: classes/gateways/bacs/class-wc-bacs.php:65
 #@ woocommerce
 msgid "Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order wont be shipped until the funds have cleared in our account."
-msgstr "Gør bestillingen din direkte til vår bankkonto. Bruk order-ID som betalingsreferanse. Din ordre leveres når vi har mottatt din betaling."
+msgstr "Betal bestillingen din direkte til vår bankkonto. Bruk ordre-ID som betalingsreferanse. Din ordre leveres når vi har mottatt din betaling."
 
 #: classes/gateways/bacs/class-wc-bacs.php:74
 #: classes/gateways/bacs/class-wc-bacs.php:140
@@ -4426,7 +4426,7 @@ msgstr "Ordredetaljer"
 #: templates/order/order-details.php:15
 #@ woocommerce
 msgid "Qty"
-msgstr "Antal"
+msgstr "Antall"
 
 #: templates/checkout/form-pay.php:14
 #: templates/checkout/review-order.php:17
@@ -4639,7 +4639,7 @@ msgstr "Frakt:"
 #: templates/emails/customer-processing-order.php:46
 #@ woocommerce
 msgid "Tel:"
-msgstr "Telefonnr."
+msgstr "Tlf:"
 
 #: admin/woocommerce-admin-functions.php:145
 #: templates/emails/email-addresses.php:7
@@ -4710,7 +4710,7 @@ msgstr "Skriv en anmeldelse"
 #: templates/single-product-reviews.php:66
 #@ woocommerce
 msgid "There are no reviews yet, would you like to <a href=\"#review_form\" class=\"inline show_review_form\">submit yours</a>?"
-msgstr "Det finnes ingen anmeldelser ennå, vil du <a href=\"#review_form\" class=\"inline show_review_form\"> skriv en </a>?"
+msgstr "Det finnes ingen anmeldelser ennå, vil du <a href=\"#review_form\" class=\"inline show_review_form\"> skrive en </a>?"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:167
 #: admin/woocommerce-admin-users.php:145
@@ -4807,7 +4807,7 @@ msgstr "WooCommerce Utvalgte produkter"
 #: widgets/widget-featured_products.php:55
 #@ woocommerce
 msgid "Featured Products"
-msgstr "Anbelate produkter"
+msgstr "Anbefalte produkter"
 
 #: widgets/widget-best_sellers.php:144
 #: widgets/widget-featured_products.php:131
@@ -6225,7 +6225,7 @@ msgstr "Takk for din bestilling! Dine opplysninger ser du nedenfor."
 #: templates/emails/admin-new-order.php:5
 #@ woocommerce
 msgid "You have received an order from"
-msgstr "Du har mottatt ordre fra"
+msgstr "Du har mottatt en ordre fra"
 
 #: templates/single-product-reviews.php:64
 #@ woocommerce
@@ -6470,7 +6470,7 @@ msgstr "Artikkel"
 #: woocommerce-ajax.php:722
 #@ woocommerce
 msgid "Delete item"
-msgstr "Rediger artikkel"
+msgstr "Fjern artikkel"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:356
 #: woocommerce-ajax.php:723
@@ -8213,7 +8213,7 @@ msgstr "Fortsett å handle &rarr;"
 #: woocommerce-functions.php:359
 #@ woocommerce
 msgid "Product successfully added to your cart."
-msgstr "Pruduktet er lagt til i din handlekurv."
+msgstr "Produktet er lagt til i din handlekurv."
 
 #: woocommerce-functions.php:552
 #@ woocommerce
@@ -8998,7 +8998,7 @@ msgstr "Sorter produkter"
 #, php-format
 #@ woocommerce
 msgid "Order %s"
-msgstr "Rekkefølge %s"
+msgstr "Ordre %s"
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:49
 #@ woocommerce
@@ -9577,7 +9577,7 @@ msgstr "Antall salg"
 #: admin/woocommerce-admin-reports.php:850
 #@ woocommerce
 msgid "Sales amount"
-msgstr "Salgsantall"
+msgstr "Salgsbeløp"
 
 #: admin/woocommerce-admin-functions.php:328
 #@ woocommerce
@@ -10042,7 +10042,7 @@ msgstr "%s varer av %s har blitt satt i restordre #%s."
 #: classes/class-wc-email.php:418
 #@ woocommerce
 msgid "Note"
-msgstr "Noter"
+msgstr "Notat"
 
 #: classes/class-wc-email.php:452
 #, php-format
