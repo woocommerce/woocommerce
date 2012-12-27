@@ -53,7 +53,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 		$this->invoice_prefix	= ! empty( $this->settings['invoice_prefix'] ) ? $this->settings['invoice_prefix'] : 'WC-';
 
 		// Logs
-		if ( $this->debug == 'yes' )
+		if ( 'yes' == $this->debug )
 			$this->log = $woocommerce->logger();
 
 		// Actions
@@ -88,24 +88,24 @@ class WC_Paypal extends WC_Payment_Gateway {
 	 */
 	public function admin_options() {
 
-    	?>
-    	<h3><?php _e( 'PayPal standard', 'woocommerce' ); ?></h3>
-    	<p><?php _e( 'PayPal standard works by sending the user to PayPal to enter their payment information.', 'woocommerce' ); ?></p>
-    	
+		?>
+		<h3><?php _e( 'PayPal standard', 'woocommerce' ); ?></h3>
+		<p><?php _e( 'PayPal standard works by sending the user to PayPal to enter their payment information.', 'woocommerce' ); ?></p>
+
     	<?php if ( $this->is_valid_for_use() ) : ?>
-    	
-    		<table class="form-table">    		
-    		<?php
+
+			<table class="form-table">    		
+			<?php
     			// Generate the HTML For the settings form.
     			$this->generate_settings_html();    			
-    		?>    		
-    		</table><!--/.form-table-->
-    		
+			?>    		
+			</table><!--/.form-table-->
+
 		<?php else : ?>
             <div class="inline error"><p><strong><?php _e( 'Gateway Disabled', 'woocommerce' ); ?></strong>: <?php _e( 'PayPal does not support your store currency.', 'woocommerce' ); ?></p></div>
-        <?php
-        	endif;
-    }
+		<?php
+			endif;
+	}
 
 
     /**
@@ -216,7 +216,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 
 		$order_id = $order->id;
 
-		if ( $this->debug == 'yes' )
+		if ( 'yes' == $this->debug )
 			$this->log->add( 'paypal', 'Generating payment form for order ' . $order->get_order_number() . '. Notify URL: ' . $this->notify_url );
 
 		if ( in_array( $order->billing_country, array( 'US','CA' ) ) ) {
@@ -494,7 +494,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 	function check_ipn_request_is_valid() {
 		global $woocommerce;
 
-		if ( $this->debug == 'yes' )
+		if ( 'yes' == $this->debug )
 			$this->log->add( 'paypal', 'Checking IPN response is valid...' );
 
     	// Get recieved values from post data
@@ -502,7 +502,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 		
 		// Check email address to make sure that IPN response is not a spoof 
 		if ( strcasecmp( trim( $received_values['receiver_email'] ), trim( $this->email ) ) != 0 ) {
-			if ( $this->debug == 'yes' )
+			if ( 'yes' == $this->debug )
 				$this->log->add( 'paypal', "IPN Response is for another one: {$received_values['receiver_email']} our email is {$this->email}" );
 			return false;
 		}
@@ -527,18 +527,18 @@ class WC_Paypal extends WC_Payment_Gateway {
 		// Post back to get a response
         $response = wp_remote_post( $paypal_adr, $params );
 
-        if ( $this->debug == 'yes' )
+        if ( 'yes' == $this->debug )
         	$this->log->add( 'paypal', 'IPN Response: ' . print_r( $response, true ) );
 
         // check to see if the request was valid
         if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 && ( strcmp( $response['body'], "VERIFIED" ) == 0 ) ) {
-            if ( $this->debug == 'yes' )
+            if ( 'yes' == $this->debug )
             	$this->log->add( 'paypal', 'Received valid response from PayPal' );
 
             return true;
         }
 
-        if ( $this->debug == 'yes' ) {
+        if ( 'yes' == $this->debug ) {
         	$this->log->add( 'paypal', 'Received invalid response from PayPal' );
         	if ( is_wp_error( $response ) )
         		$this->log->add( 'paypal', 'Error response: ' . $result->get_error_message() );
@@ -598,7 +598,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 	        if ( $posted['test_ipn'] == 1 && $posted['payment_status'] == 'pending' )
 	        	$posted['payment_status'] = 'completed';
 
-	        if ( $this->debug == 'yes' )
+	        if ( 'yes' == $this->debug )
 	        	$this->log->add( 'paypal', 'Payment status: ' . $posted['payment_status'] );
 
 	        // We are here so lets check status and do actions
@@ -607,7 +607,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 
 	            	// Check order not already completed
 	            	if ( $order->status == 'completed' ) {
-	            		 if ( $this->debug == 'yes' )
+	            		 if ( 'yes' == $this->debug )
 	            		 	$this->log->add( 'paypal', 'Aborting, Order #' . $order_id . ' is already complete.' );
 	            		 exit;
 	            	}
@@ -615,7 +615,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 	            	// Check valid txn_type
 	            	$accepted_types = array( 'cart', 'instant', 'express_checkout', 'web_accept', 'masspay', 'send_money' );
 					if ( ! in_array( $posted['txn_type'], $accepted_types ) ) {
-						if ( $this->debug == 'yes' )
+						if ( 'yes' == $this->debug )
 							$this->log->add( 'paypal', 'Aborting, Invalid type:' . $posted['txn_type'] );
 						exit;
 					}
@@ -623,7 +623,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 					// Validate Amount
 				    if ( $order->get_total() != $posted['mc_gross'] ) {
 
-				    	if ( $this->debug == 'yes' )
+				    	if ( 'yes' == $this->debug )
 				    		$this->log->add( 'paypal', 'Payment error: Amounts do not match (gross ' . $posted['mc_gross'] . ')' );
 
 				    	// Put this order on-hold for manual checking
@@ -648,7 +648,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 	                $order->add_order_note( __( 'IPN payment completed', 'woocommerce' ) );
 	                $order->payment_complete();
 
-	                if ( $this->debug == 'yes' )
+	                if ( 'yes' == $this->debug )
 	                	$this->log->add( 'paypal', 'Payment complete.' );
 
 	            break;
