@@ -2086,7 +2086,7 @@ function woocommerce_change_term_counts( $terms, $taxonomies, $args ) {
 
 	foreach ( $terms as &$term ) {
 		// If the original term count is zero, there's no way the product count could be higher.
-		if ( empty( $term->count )) continue;
+		if ( empty( $term->count ) ) continue;
 
 		$count = get_woocommerce_term_meta( $term->term_id, 'product_count_' . $taxonomies[0] , true );
 
