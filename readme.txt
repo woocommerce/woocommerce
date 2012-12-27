@@ -1167,6 +1167,8 @@ The biggest change is that we're redone order item storage making them easier (a
 
 Order items are no longer serialised data and store in meta - they are stored in there own table with their own meta. Existing data can be updated upon upgrade (you will be prompted). You should backup before upgrading.
 
+On the frontend; if your store is overwriting the core WooCommerce CSS you will need to prefix those overrides with the .woocommerce class as we do in woocommerce.css as of 2.0.
+
 = 1.6.2 =
 1.6 introduced some template changes, for loops in particular. See the changelog for details and ensure theme compatibility before upgrading.
 
