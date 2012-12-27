@@ -53,7 +53,8 @@ class WC_Paypal extends WC_Payment_Gateway {
 		$this->invoice_prefix	= ! empty( $this->settings['invoice_prefix'] ) ? $this->settings['invoice_prefix'] : 'WC-';
 
 		// Logs
-		if ($this->debug=='yes') $this->log = $woocommerce->logger();
+		if ( $this->debug == 'yes' )
+			$this->log = $woocommerce->logger();
 
 		// Actions
 		add_action( 'valid-paypal-standard-ipn-request', array( $this, 'successful_request' ) );
@@ -90,23 +91,20 @@ class WC_Paypal extends WC_Payment_Gateway {
     	?>
     	<h3><?php _e( 'PayPal standard', 'woocommerce' ); ?></h3>
     	<p><?php _e( 'PayPal standard works by sending the user to PayPal to enter their payment information.', 'woocommerce' ); ?></p>
-    	<table class="form-table">
-    	<?php
-    		if ( $this->is_valid_for_use() ) :
-
+    	
+    	<?php if ( $this->is_valid_for_use() ) : ?>
+    	
+    		<table class="form-table">    		
+    		<?php
     			// Generate the HTML For the settings form.
-    			$this->generate_settings_html();
-
-    		else :
-
-    			?>
-            		<div class="inline error"><p><strong><?php _e( 'Gateway Disabled', 'woocommerce' ); ?></strong>: <?php _e( 'PayPal does not support your store currency.', 'woocommerce' ); ?></p></div>
-        		<?php
-
-    		endif;
-    	?>
-		</table><!--/.form-table-->
-    	<?php
+    			$this->generate_settings_html();    			
+    		?>    		
+    		</table><!--/.form-table-->
+    		
+		<?php else : ?>
+            <div class="inline error"><p><strong><?php _e( 'Gateway Disabled', 'woocommerce' ); ?></strong>: <?php _e( 'PayPal does not support your store currency.', 'woocommerce' ); ?></p></div>
+        <?php
+        	endif;
     }
 
 
@@ -503,8 +501,9 @@ class WC_Paypal extends WC_Payment_Gateway {
 		$received_values = (array) stripslashes_deep( $_POST );
 		
 		// Check email address to make sure that IPN response is not a spoof 
-		if ( strcasecmp(trim($received_values['receiver_email']), trim($this->email)) != 0 ) {
-			if ($this->debug=='yes') $this->log->add( 'paypal', 'IPN Response is for another one: ' . $received_values['receiver_email'] . ' our email is ' . $this->email);
+		if ( strcasecmp( trim( $received_values['receiver_email'] ), trim( $this->email ) ) != 0 ) {
+			if ( $this->debug == 'yes' )
+				$this->log->add( 'paypal', "IPN Response is for another one: {$received_values['receiver_email']} our email is {$this->email}" );
 			return false;
 		}
 
