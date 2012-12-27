@@ -26,6 +26,12 @@ class WC_Checkout {
 	/** @var bool True when the user is creating an account. */
 	public $creating_account;
 
+	/** @var object The shipping method being used. */
+	private $shipping_method;
+
+	/** @var array The payment gateway being used. */
+	private $payment_method;
+
 	/**
 	 * Constructor for the checkout class. Hooks in methods and defines eheckout fields.
 	 *
@@ -314,14 +320,14 @@ class WC_Checkout {
 		}
 
 		// Store meta
-		if ( $this->chosen_shipping_method ) {
-			update_post_meta( $order_id, '_shipping_method', 		$this->chosen_shipping_method->id );
-			update_post_meta( $order_id, '_shipping_method_title', 	$this->chosen_shipping_method->label );
+		if ( $this->shipping_method ) {
+			update_post_meta( $order_id, '_shipping_method', 		$this->shipping_method->id );
+			update_post_meta( $order_id, '_shipping_method_title', 	$this->shipping_method->label );
 		}
 
-		if ( $this->chosen_payment_method ) {
-			update_post_meta( $order_id, '_payment_method', 		$this->chosen_payment_method->id );
-			update_post_meta( $order_id, '_payment_method_title', 	$this->chosen_payment_method->get_title() );
+		if ( $this->payment_method ) {
+			update_post_meta( $order_id, '_payment_method', 		$this->payment_method->id );
+			update_post_meta( $order_id, '_payment_method_title', 	$this->payment_method->get_title() );
 		}
 
 		update_post_meta( $order_id, '_order_shipping', 		woocommerce_format_total( $woocommerce->cart->shipping_total ) );
@@ -561,10 +567,10 @@ class WC_Checkout {
 			$available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 			if ( ! isset( $available_methods[ $this->posted['shipping_method'] ] ) ) {
-				$this->chosen_shipping_method = '';
+				$this->shipping_method = '';
 				$woocommerce->add_error( __( 'Invalid shipping method.', 'woocommerce' ) );
 			} else {
-				$this->chosen_shipping_method = $available_methods[ $this->posted['shipping_method'] ];
+				$this->shipping_method = $available_methods[ $this->posted['shipping_method'] ];
 			}
 		}
 
@@ -574,11 +580,11 @@ class WC_Checkout {
 			$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
 
 			if ( ! isset( $available_gateways[ $this->posted['payment_method'] ] ) ) {
-				$this->chosen_payment_method = '';
+				$this->payment_method = '';
 				$woocommerce->add_error( __( 'Invalid payment method.', 'woocommerce' ) );
 			} else {
-				$this->chosen_payment_method = $available_gateways[ $this->posted['payment_method'] ];
-				$this->chosen_payment_method->validate_fields();
+				$this->payment_method = $available_gateways[ $this->posted['payment_method'] ];
+				$this->payment_method->validate_fields();
 			}
 		}
 
