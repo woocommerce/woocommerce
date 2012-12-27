@@ -106,15 +106,16 @@ class WC_Coupon {
 
             $coupon_id 	= $wpdb->get_var( $wpdb->prepare( apply_filters( 'woocommerce_coupon_code_query', "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon'" ), $this->code ) );
 
-			if ( $coupon_id )
-				$coupon = get_post( $coupon_id );
-			else
-				$coupon->post_title = apply_filters( 'woocommerce_coupon_code', $coupon->post_title );
+            if ( ! $coupon_id )
+            	return;
+
+			$coupon             = get_post( $coupon_id );
+			$coupon->post_title = apply_filters( 'woocommerce_coupon_code', $coupon->post_title );
 
             if ( empty( $coupon ) || $coupon->post_status !== 'publish' || $this->code !== $coupon->post_title )
             	return;
 
-            $this->id 					= $coupon->ID;
+            $this->id                   = $coupon->ID;
             $this->coupon_custom_fields = get_post_meta( $this->id );
 
             $load_data = array(
