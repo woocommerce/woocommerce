@@ -326,3 +326,13 @@ add_filter( 'woocommerce_short_description', 'wpautop'            );
 add_filter( 'woocommerce_short_description', 'shortcode_unautop'  );
 add_filter( 'woocommerce_short_description', 'prepend_attachment' );
 add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpautop()
+
+function woocommerce_lostpassword_url( $url ) {
+
+    $id = woocommerce_get_page_id( 'lost_password' );
+    if ($id != -1) $url = get_permalink( $id );
+    
+    return $url;
+}
+
+add_filter('lostpassword_url',  'woocommerce_lostpassword_url');
