@@ -67,7 +67,9 @@ function woocommerce_order_notes_meta_box() {
 	</div>
 	<script type="text/javascript">
 
-		jQuery('a.add_note').click(function(){
+		jQuery('#woocommerce-order-notes')
+
+		.on( 'click', 'a.add_note', function() {
 
 			if (!jQuery('textarea#add_order_note').val()) return;
 
@@ -91,9 +93,9 @@ function woocommerce_order_notes_meta_box() {
 
 			return false;
 
-		});
+		})
 
-		jQuery('a.delete_note').live('click', function(){
+		.on( 'click', 'a.delete_note', function() {
 
 			var note = jQuery(this).closest('li.note');
 

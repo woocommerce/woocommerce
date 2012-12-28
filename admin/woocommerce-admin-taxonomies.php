@@ -47,7 +47,7 @@ function woocommerce_add_category_fields() {
 			// Uploading files
 			var file_frame;
 
-			jQuery('.upload_image_button').live('click', function( event ){
+			jQuery(document).on( 'click', '.upload_image_button', function( event ){
 
 				event.preventDefault();
 
@@ -79,7 +79,7 @@ function woocommerce_add_category_fields() {
 				file_frame.open();
 			});
 
-			jQuery('.remove_image_button').live('click', function(){
+			jQuery(document).on( 'click', '.remove_image_button', function( event ){
 				jQuery('#product_cat_thumbnail img').attr('src', '<?php echo woocommerce_placeholder_img_src(); ?>');
 				jQuery('#product_cat_thumbnail_id').val('');
 				jQuery('.remove_image_button').hide();
@@ -139,7 +139,7 @@ function woocommerce_edit_category_fields( $term, $taxonomy ) {
 				// Uploading files
 				var file_frame;
 
-				jQuery('.upload_image_button').live('click', function( event ){
+				jQuery(document).on( 'click', '.upload_image_button', function( event ){
 
 					event.preventDefault();
 
@@ -171,7 +171,7 @@ function woocommerce_edit_category_fields( $term, $taxonomy ) {
 					file_frame.open();
 				});
 
-				jQuery('.remove_image_button').live('click', function(){
+				jQuery(document).on( 'click', '.remove_image_button', function( event ){
 					jQuery('#product_cat_thumbnail img').attr('src', '<?php echo woocommerce_placeholder_img_src(); ?>');
 					jQuery('#product_cat_thumbnail_id').val('');
 					jQuery('.remove_image_button').hide();

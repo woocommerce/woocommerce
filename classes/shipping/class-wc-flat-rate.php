@@ -508,7 +508,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
        	<script type="text/javascript">
 			jQuery(function() {
 
-				jQuery('#<?php echo $this->id; ?>_flat_rates a.add').live('click', function(){
+				jQuery('#<?php echo $this->id; ?>_flat_rates').on( 'click', 'a.add', function(){
 
 					var size = jQuery('#<?php echo $this->id; ?>_flat_rates tbody .flat_rate').size();
 
@@ -535,7 +535,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 				});
 
 				// Remove row
-				jQuery('#<?php echo $this->id; ?>_flat_rates a.remove').live('click', function(){
+				jQuery('#<?php echo $this->id; ?>_flat_rates').on( 'click', 'a.remove', function(){
 					var answer = confirm("<?php _e( 'Delete the selected rates?', 'woocommerce' ); ?>")
 					if (answer) {
 						jQuery('#<?php echo $this->id; ?>_flat_rates table tbody tr td.check-column input:checked').each(function(i, el){
