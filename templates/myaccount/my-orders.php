@@ -66,15 +66,26 @@ if ( $customer_orders ) : ?>
 						<?php endif; ?>
 					</td>
 					<td class="order-actions" style="text-align:right; white-space:nowrap;">
+						<?php
+							$actions = array();
 
-						<?php if ( in_array( $order->status, array( 'pending', 'failed' ) ) ) : ?>
+							if ( in_array( $order->status, array( 'pending', 'failed' ) ) )
+								$actions[] = array(
+									'url'  => $order->get_checkout_payment_url(),
+									'name' => __( 'Pay', 'woocommerce' )
+								);
 
-							<a href="<?php echo esc_url( $order->get_checkout_payment_url() ); ?>" class="button pay"><?php _e( 'Pay', 'woocommerce' ); ?></a>
+							$actions[] = array(
+								'url'  => add_query_arg( 'order', $order->id, get_permalink( woocommerce_get_page_id( 'view_order' ) ) ),
+								'name' => __( 'View', 'woocommerce' )
+							);
 
-						<?php endif; ?>
+							$actions = apply_filters( 'woocommerce_my_account_my_orders_actions', $actions, $order );
 
-						<a href="<?php echo esc_url( add_query_arg('order', $order->id, get_permalink( woocommerce_get_page_id( 'view_order' ) ) ) ); ?>" class="button"><?php _e( 'View', 'woocommerce' ); ?></a>
-
+							foreach( $actions as $action ) {
+								echo '<a href="' . esc_url( $action['url'] ) . '" class="button ' . sanitize_title( $action['name'] ) . '">' . esc_html( $action['name'] ) . '</a>';
+							}
+						?>
 					</td>
 				</tr><?php
 			}
