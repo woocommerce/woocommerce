@@ -291,8 +291,9 @@ if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 	 * @return void
 	 */
 	function woocommerce_taxonomy_archive_description() {
-		if ( is_tax( array( 'product_cat', 'product_tag' ) ) && get_query_var( 'paged' ) == 0 )
-			echo '<div class="term-description">' . wpautop( wptexturize( term_description() ) ) . '</div>';
+		$term_description = term_description();
+		if ( $term_description && is_tax( array( 'product_cat', 'product_tag' ) ) && get_query_var( 'paged' ) == 0 )
+			echo '<div class="term-description">' . wpautop( wptexturize( $term_description ) ) . '</div>';
 	}
 }
 if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
