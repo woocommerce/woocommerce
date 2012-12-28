@@ -169,7 +169,7 @@ function woocommerce_tax_rates_setting() {
 
 			jQuery(document).bind('keyup keydown', function(e){shifted = e.shiftKey} );
 
-			jQuery('.wc_tax_rates input').live( 'click focus', function( e ) {
+			jQuery('.wc_tax_rates').on( 'click focus', 'input', function( e ) {
 				if ( ! shifted ) {
 					jQuery('.wc_tax_rates tr').removeClass('current');
 				}

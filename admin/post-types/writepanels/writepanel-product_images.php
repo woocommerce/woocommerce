@@ -60,7 +60,7 @@ function woocommerce_product_images_box() {
 			var $image_gallery_ids = $('#product_image_gallery');
 			var $product_images = $('#product_images_container ul.product_images');
 
-			jQuery('.add_product_images a').live('click', function( event ){
+			jQuery('.add_product_images').on( 'click', 'a', function( event ) {
 
 				var $el = $(this);
 				var attachment_ids = $image_gallery_ids.val();

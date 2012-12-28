@@ -36,7 +36,7 @@ jQuery(document).ready(function($) {
 		return false;
 	});
 
-	$('#review_form #submit').live('click', function(){
+	$('#review_form').on( 'click', '#submit', function(){
 		var rating = $('#rating').val();
 
 		if ( $('#rating').size() > 0 && !rating && woocommerce_params.review_rating_required == 'yes' ) {
