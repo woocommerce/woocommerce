@@ -243,11 +243,14 @@ function woocommerce_custom_product_columns( $column ) {
 				echo implode( ', ', $termlist );
 			}
 		break;
-		case "featured" :
-			$url = wp_nonce_url( admin_url('admin-ajax.php?action=woocommerce-feature-product&product_id=' . $post->ID), 'woocommerce-feature-product' );
-			echo '<a href="'.$url.'" title="'.__( 'Change', 'woocommerce' ) .'">';
-			if ($the_product->is_featured()) echo '<a href="'.$url.'"><img src="'.$woocommerce->plugin_url().'/assets/images/featured.png" alt="yes" height="14" width="14" />';
-			else echo '<img src="'.$woocommerce->plugin_url().'/assets/images/featured-off.png" alt="no" height="14" width="14" />';
+		case 'featured':
+			$url = wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce-feature-product&product_id=' . $post->ID ), 'woocommerce-feature-product' );
+			echo '<a href="' . $url . '" title="'. __( 'Toggle featured', 'woocommerce' ) . '">';
+			if ( $the_product->is_featured() ) {
+				echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/featured.png" alt="'. __( 'yes', 'woocommerce' ) . '" height="14" width="14" />';
+			} else {
+				echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/featured-off.png" alt="'. __( 'no', 'woocommerce' ) . '" height="14" width="14" />';
+			}
 			echo '</a>';
 		break;
 		case "is_in_stock" :
