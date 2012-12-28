@@ -637,6 +637,7 @@ function woocommerce_admin_fields( $options ) {
             case 'email':
             case 'number':
             case 'color' :
+            case 'password' :
 
             	$type 			= $value['type'];
             	$class 			= '';
