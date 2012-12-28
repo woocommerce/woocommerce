@@ -462,19 +462,22 @@ add_action( 'admin_enqueue_scripts', 'woocommerce_admin_scripts' );
  * @return void
  */
 function woocommerce_admin_css() {
-	global $woocommerce, $typenow, $post;
+	global $woocommerce, $typenow, $post, $wp_scripts;
 
-	if ($typenow=='post' && isset($_GET['post']) && !empty($_GET['post'])) :
+	if ( $typenow == 'post' && ! empty( $_GET['post'] ) ) {
 		$typenow = $post->post_type;
-	elseif (empty($typenow) && !empty($_GET['post'])) :
-        $post = get_post($_GET['post']);
+	} elseif ( empty( $typenow ) && ! empty( $_GET['post'] ) ) {
+        $post = get_post( $_GET['post'] );
         $typenow = $post->post_type;
-    endif;
+    }
 
-	if ( $typenow == '' || $typenow=="product" || $typenow=="shop_order" || $typenow=="shop_coupon" ) :
+	if ( $typenow == '' || $typenow == "product" || $typenow == "shop_order" || $typenow == "shop_coupon" ) {
 		wp_enqueue_style( 'woocommerce_admin_styles', $woocommerce->plugin_url() . '/assets/css/admin.css' );
-		wp_enqueue_style( 'jquery-ui-style', (is_ssl()) ? 'https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css' : 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css' );
-	endif;
+
+		$jquery_version = isset( $wp_scripts->registered['jquery-ui-core']->ver ) ? $wp_scripts->registered['jquery-ui-core']->ver : '1.9.2';
+
+		wp_enqueue_style( 'jquery-ui-style', '//ajax.googleapis.com/ajax/libs/jqueryui/' . $jquery_version . '/themes/smoothness/jquery-ui.css' );
+	}
 
 	wp_enqueue_style('farbtastic');
 
