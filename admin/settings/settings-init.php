@@ -12,9 +12,11 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-$localisation_setting = ( defined('WPLANG') ) ? array(
+global $woocommerce;
+
+$localisation_setting = defined( 'WPLANG' ) && file_exists( $woocommerce->plugin_path() . '/i18n/languages/informal/woocommerce-' . WPLANG . '.mo' ) ? array(
 	'title' => __( 'Localisation', 'woocommerce' ),
-	'desc' 		=> __( 'Use informal localisation file if it exists', 'woocommerce' ),
+	'desc' 		=> sprintf( __( 'Use informal localisation for %s', 'woocommerce' ), WPLANG ),
 	'id' 		=> 'woocommerce_informal_localisation_type',
 	'type' 		=> 'checkbox',
 	'default'	=> 'no',
