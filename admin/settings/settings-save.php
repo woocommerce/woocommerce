@@ -66,6 +66,7 @@ function woocommerce_update_options( $options ) {
             case 'number':
 	    	case "select" :
 	    	case "color" :
+            case 'password' :
 	    	case "single_select_page" :
 	    	case "single_select_country" :
 	    	case 'radio' :
