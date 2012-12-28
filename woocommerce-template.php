@@ -951,7 +951,7 @@ if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 			'wrap_after'  => '</div>',
 			'before'      => '',
 			'after'       => '',
-			'home'        => null,
+			'home'        => _x( 'Home', 'breadcrumb', 'woocommerce' ),
 		) );
 
 		$args = wp_parse_args( $args, $defaults );
