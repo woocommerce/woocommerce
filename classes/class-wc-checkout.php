@@ -602,21 +602,26 @@ class WC_Checkout {
 
 					$reg_errors = new WP_Error();
 
-					do_action('woocommerce_register_post', $this->posted['account_username'], $this->posted['billing_email'], $reg_errors);
+					do_action( 'woocommerce_register_post', $this->posted['account_username'], $this->posted['billing_email'], $reg_errors );
 
 					$errors = apply_filters( 'woocommerce_registration_errors', $reg_errors, $this->posted['account_username'], $this->posted['billing_email'] );
 
 	                // if there are no errors, let's create the user account
 					if ( ! $reg_errors->get_error_code() ) {
 
-		                $user_pass         = esc_attr( $this->posted['account_password'] );
-		                $this->customer_id = wp_create_user( $this->posted['account_username'], $user_pass, $this->posted['billing_email'] );
+		                $user_pass = esc_attr( $this->posted['account_password'] );
+
+		                $new_customer_data = array(
+		                	'user_login' => $this->posted['account_username'],
+		                	'user_pass'  => $user_pass,
+		                	'user_email' => $this->posted['billing_email'],
+		                	'role'       => 'customer'
+		                );
+
+		                $this->customer_id = wp_insert_user( apply_filters( 'woocommerce_new_customer_data', $new_customer_data ) );
 
 		                if ( ! $this->customer_id )
 		                	throw new MyException( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
-
-	                    // Change role
-	                    wp_update_user( array('ID' => $this->customer_id, 'role' => 'customer') ) ;
 
 	                    // Action
 	                    do_action( 'woocommerce_created_customer', $this->customer_id );
