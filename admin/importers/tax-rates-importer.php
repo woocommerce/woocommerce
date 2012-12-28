@@ -149,28 +149,32 @@ if ( class_exists( 'WP_Importer' ) ) {
 						$postcodes = explode( ';', $postcode );
 						$postcodes = array_map( 'strtoupper', array_map( 'woocommerce_clean', $postcodes ) );
 						foreach( $postcodes as $postcode ) {
-							$wpdb->insert(
-							$wpdb->prefix . "woocommerce_tax_rate_locations",
-								array(
-									'location_code' => $postcode,
-									'tax_rate_id'   => $tax_rate_id,
-									'location_type' => 'postcode',
-								)
-							);
+							if ( ! empty( $postcode ) && $postcode != '*' ) {
+								$wpdb->insert(
+									$wpdb->prefix . "woocommerce_tax_rate_locations",
+									array(
+										'location_code' => $postcode,
+										'tax_rate_id'   => $tax_rate_id,
+										'location_type' => 'postcode',
+									)
+								);
+							}
 						}
 
 						$city   = woocommerce_clean( $city );
 						$cities = explode( ';', $city );
 						$cities = array_map( 'strtoupper', array_map( 'woocommerce_clean', $cities ) );
 						foreach( $cities as $city ) {
-							$wpdb->insert(
-							$wpdb->prefix . "woocommerce_tax_rate_locations",
-								array(
-									'location_code' => $city,
-									'tax_rate_id'   => $tax_rate_id,
-									'location_type' => 'city',
-								)
-							);
+							if ( ! empty( $city ) && $city != '*' ) {
+								$wpdb->insert(
+								$wpdb->prefix . "woocommerce_tax_rate_locations",
+									array(
+										'location_code' => $city,
+										'tax_rate_id'   => $tax_rate_id,
+										'location_type' => 'city',
+									)
+								);
+							}
 						}
 
 						$loop ++;
