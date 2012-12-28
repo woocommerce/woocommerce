@@ -282,6 +282,46 @@ class WC_Product_Variation extends WC_Product {
 
 
 	/**
+	 * Set stock level of the product.
+	 *
+	 * @access public
+	 * @param mixed $amount (default: null)
+	 * @return int Stock
+	 */
+	function set_stock( $amount = null ) {
+		global $woocommerce;
+
+		if ( $this->variation_has_stock ) {
+			if ( $this->managing_stock() && ! is_null( $amount ) ) {
+
+				$this->stock = intval( $amount );
+				$this->total_stock = intval( $amount );
+				update_post_meta( $this->variation_id, '_stock', $this->stock );
+				$woocommerce->clear_product_transients( $this->id ); // Clear transient
+
+				// Check parents out of stock attribute
+				if ( ! $this->is_in_stock() ) {
+
+					// Check parent
+					$parent_product = get_product( $this->id );
+
+					// Only continue if the parent has backorders off
+					if ( ! $parent_product->backorders_allowed() && $parent_product->get_total_stock() <= 0 )
+						$this->set_stock_status( 'outofstock' );
+
+				} elseif ( $this->is_in_stock() ) {
+					$this->set_stock_status( 'instock' );
+				}
+
+				return apply_filters( 'woocommerce_stock_amount', $this->stock );
+			}
+		} else {
+			return parent::set_stock( $amount );
+		}
+	}
+
+
+	/**
 	 * Reduce stock level of the product.
 	 *
 	 * @access public

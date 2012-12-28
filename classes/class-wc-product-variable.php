@@ -64,6 +64,34 @@ class WC_Product_Variable extends WC_Product {
     }
 
 	/**
+	 * Set stock level of the product.
+	 *
+	 * @access public
+	 * @param mixed $amount (default: null)
+	 * @return int Stock
+	 */
+	function set_stock( $amount = null ) {
+		global $woocommerce;
+
+		if ( $this->managing_stock() && ! is_null( $amount ) ) {
+
+			$this->stock = intval( $amount );
+			$this->total_stock = intval( $amount );
+			update_post_meta( $this->id, '_stock', $this->stock );
+
+			// Check parents out of stock attribute
+			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= 0 )
+				$this->set_stock_status( 'outofstock' );
+			elseif ( $this->backorders_allowed() || $this->get_total_stock() > 0 )
+				$this->set_stock_status( 'instock' );
+
+			$woocommerce->clear_product_transients( $this->id ); // Clear transient
+
+			return apply_filters( 'woocommerce_stock_amount', $this->stock );
+		}
+	}
+
+	/**
 	 * Reduce stock level of the product.
 	 *
 	 * @access public
@@ -79,7 +107,7 @@ class WC_Product_Variable extends WC_Product {
 			update_post_meta($this->id, '_stock', $this->stock);
 
 			// Out of stock attribute
-			if ($this->managing_stock() && !$this->backorders_allowed() && $this->get_total_stock()<=0)
+			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= 0 )
 				$this->set_stock_status( 'outofstock' );
 
 			$woocommerce->clear_product_transients( $this->id ); // Clear transient
@@ -105,7 +133,7 @@ class WC_Product_Variable extends WC_Product {
 			update_post_meta($this->id, '_stock', $this->stock);
 
 			// Out of stock attribute
-			if ($this->managing_stock() && ($this->backorders_allowed() || $this->get_total_stock()>0))
+			if ( $this->backorders_allowed() || $this->get_total_stock() > 0 )
 				$this->set_stock_status( 'instock' );
 
 			$woocommerce->clear_product_transients( $this->id ); // Clear transient
