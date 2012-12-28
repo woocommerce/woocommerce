@@ -2107,7 +2107,7 @@ if ( ! is_admin() && ! is_ajax() )
  * @return void
  */
 function woocommerce_scheduled_sales() {
-	global $wpdb;
+	global $woocommerce, $wpdb;
 
 	// Sales which are due to start
 	$product_ids = $wpdb->get_col( $wpdb->prepare( "
@@ -2134,6 +2134,8 @@ function woocommerce_scheduled_sales() {
 				update_post_meta( $product_id, '_sale_price_dates_to', '' );
 			}
 
+			$woocommerce->clear_product_transients( $product_id );
+
 			$parent = wp_get_post_parent_id( $product_id );
 
 			// Sync parent
@@ -2145,6 +2147,8 @@ function woocommerce_scheduled_sales() {
 				$this_product = get_product( $product_id );
 				if ( $this_product->is_type( 'simple' ) )
 					$this_product->grouped_product_sync();
+
+				$woocommerce->clear_product_transients( $parent );
 			}
 		}
 	}
@@ -2171,6 +2175,8 @@ function woocommerce_scheduled_sales() {
 			update_post_meta( $product_id, '_sale_price_dates_from', '' );
 			update_post_meta( $product_id, '_sale_price_dates_to', '' );
 
+			$woocommerce->clear_product_transients( $product_id );
+
 			$parent = wp_get_post_parent_id( $product_id );
 
 			// Sync parent
@@ -2182,6 +2188,8 @@ function woocommerce_scheduled_sales() {
 				$this_product = get_product( $product_id );
 				if ( $this_product->is_type( 'simple' ) )
 					$this_product->grouped_product_sync();
+
+				$woocommerce->clear_product_transients( $parent );
 			}
 		}
 	}
