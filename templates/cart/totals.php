@@ -118,7 +118,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					</tr>
 
 				<?php endif; ?>
-
+                                <?php do_action('woocommerce_cart_before_order_total'); ?>
 				<tr class="total">
 					<th><strong><?php _e( 'Order Total', 'woocommerce' ); ?></strong></th>
 					<td>
