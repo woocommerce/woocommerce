@@ -30,6 +30,7 @@ class WC_Countries {
 	 * @return void
 	 */
 	public function __construct() {
+		global $woocommerce, $states;
 
 		$this->countries = apply_filters('woocommerce_countries', array(
 			'AF' => __( 'Afghanistan', 'woocommerce' ),
@@ -284,96 +285,21 @@ class WC_Countries {
 			'ZW' => __( 'Zimbabwe', 'woocommerce' )
 		));
 
-		$this->states = apply_filters('woocommerce_states', array(
-			'AU' => array(
-				'ACT' => __( 'Australian Capital Territory', 'woocommerce' ) ,
-				'NSW' => __( 'New South Wales', 'woocommerce' ) ,
-				'NT'  => __( 'Northern Territory', 'woocommerce' ) ,
-				'QLD' => __( 'Queensland', 'woocommerce' ) ,
-				'SA'  => __( 'South Australia', 'woocommerce' ) ,
-				'TAS' => __( 'Tasmania', 'woocommerce' ) ,
-				'VIC' => __( 'Victoria', 'woocommerce' ) ,
-				'WA'  => __( 'Western Australia', 'woocommerce' )
-			),
+		// States set to array() are blank i.e. the country has no use for the state field.
+		$states = array(
 			'AF' => array(),
 			'AT' => array(),
 			'BE' => array(),
 			'BI' => array(),
-			'BR' => array(
-				'AC' => __( 'Acre', 'woocommerce' ),
-				'AL' => __( 'Alagoas', 'woocommerce' ),
-				'AP' => __( 'Amap&aacute;', 'woocommerce' ),
-				'AM' => __( 'Amazonas', 'woocommerce' ),
-				'BH' => __( 'Bahia', 'woocommerce' ),
-				'CE' => __( 'Cear&aacute;', 'woocommerce' ),
-				'DF' => __( 'Distrito Federal', 'woocommerce' ),
-				'ES' => __( 'Esp&iacute;rito Santo', 'woocommerce' ),
-				'GO' => __( 'Goi&aacute;s', 'woocommerce' ),
-				'MA' => __( 'Maranh&atilde;o', 'woocommerce' ),
-				'MT' => __( 'Mato Grosso', 'woocommerce' ),
-				'MS' => __( 'Mato Grosso do Sul', 'woocommerce' ),
-				'MG' => __( 'Minas Gerais', 'woocommerce' ),
-				'PA' => __( 'Par&aacute;', 'woocommerce' ),
-				'PB' => __( 'Para&iacute;ba', 'woocommerce' ),
-				'PR' => __( 'Paran&aacute;', 'woocommerce' ),
-				'PE' => __( 'Pernambuco', 'woocommerce' ),
-				'PI' => __( 'Piau&iacute;', 'woocommerce' ),
-				'RJ' => __( 'Rio de Janeiro', 'woocommerce' ),
-				'RN' => __( 'Rio Grande do Norte', 'woocommerce' ),
-				'RS' => __( 'Rio Grande do Sul', 'woocommerce' ),
-				'RO' => __( 'Rond&ocirc;nia', 'woocommerce' ),
-				'RR' => __( 'Roraima', 'woocommerce' ),
-				'SC' => __( 'Santa Catarina', 'woocommerce' ),
-				'SP' => __( 'S&atilde;o Paulo', 'woocommerce' ),
-				'SE' => __( 'Sergipe', 'woocommerce' ),
-				'TO' => __( 'Tocantins', 'woocommerce' )
-			),
-			'CA' => array(
-				'AB' => __( 'Alberta', 'woocommerce' ) ,
-				'BC' => __( 'British Columbia', 'woocommerce' ) ,
-				'MB' => __( 'Manitoba', 'woocommerce' ) ,
-				'NB' => __( 'New Brunswick', 'woocommerce' ) ,
-				'NF' => __( 'Newfoundland', 'woocommerce' ) ,
-				'NT' => __( 'Northwest Territories', 'woocommerce' ) ,
-				'NS' => __( 'Nova Scotia', 'woocommerce' ) ,
-				'NU' => __( 'Nunavut', 'woocommerce' ) ,
-				'ON' => __( 'Ontario', 'woocommerce' ) ,
-				'PE' => __( 'Prince Edward Island', 'woocommerce' ) ,
-				'QC' => __( 'Quebec', 'woocommerce' ) ,
-				'SK' => __( 'Saskatchewan', 'woocommerce' ) ,
-				'YT' => __( 'Yukon Territory', 'woocommerce' )
-			),
 			'CZ' => array(),
 			'DE' => array(),
 			'DK' => array(),
 			'FI' => array(),
 			'FR' => array(),
-			'HK' => array(
-				'HONG KONG' => __( 'Hong Kong Island', 'woocommerce' ),
-				'KOWLOON' => __( 'Kowloon', 'woocommerce' ),
-				'NEW TERRITORIES' => __( 'New Territories', 'woocommerce' )
-			),
 			'HU' => array(),
 			'IS' => array(),
 			'IL' => array(),
 			'NL' => array(),
-			'NZ' => array(
-				'AK' => __( 'Auckland', 'woocommerce' ),
-				'BP' => __( 'Bay of Plenty', 'woocommerce' ),
-				'CT' => __( 'Canterbury', 'woocommerce' ),
-				'HB' => __( 'Hawke&rsquo;s Bay', 'woocommerce' ),
-				'MW' => __( 'Manawatu-Wanganui', 'woocommerce' ),
-				'MB' => __( 'Marlborough', 'woocommerce' ),
-				'NS' => __( 'Nelson', 'woocommerce' ),
-				'NL' => __( 'Northland', 'woocommerce' ),
-				'OT' => __( 'Otago', 'woocommerce' ),
-				'SL' => __( 'Southland', 'woocommerce' ),
-				'TK' => __( 'Taranaki', 'woocommerce' ),
-				'TM' => __( 'Tasman', 'woocommerce' ),
-				'WA' => __( 'Waikato', 'woocommerce' ),
-				'WE' => __( 'Wellington', 'woocommerce' ),
-				'WC' => __( 'West Coast', 'woocommerce' )
-			),
 			'NO' => array(),
 			'PL' => array(),
 			'SG' => array(),
@@ -381,64 +307,18 @@ class WC_Countries {
 			'SI' => array(),
 			'LK' => array(),
 			'SE' => array(),
-			'US' => array(
-				'AL' => __( 'Alabama', 'woocommerce' ) ,
-				'AK' => __( 'Alaska', 'woocommerce' ) ,
-				'AZ' => __( 'Arizona', 'woocommerce' ) ,
-				'AR' => __( 'Arkansas', 'woocommerce' ) ,
-				'CA' => __( 'California', 'woocommerce' ) ,
-				'CO' => __( 'Colorado', 'woocommerce' ) ,
-				'CT' => __( 'Connecticut', 'woocommerce' ) ,
-				'DE' => __( 'Delaware', 'woocommerce' ) ,
-				'DC' => __( 'District Of Columbia', 'woocommerce' ) ,
-				'FL' => __( 'Florida', 'woocommerce' ) ,
-				'GA' => __( 'Georgia', 'woocommerce' ) ,
-				'HI' => __( 'Hawaii', 'woocommerce' ) ,
-				'ID' => __( 'Idaho', 'woocommerce' ) ,
-				'IL' => __( 'Illinois', 'woocommerce' ) ,
-				'IN' => __( 'Indiana', 'woocommerce' ) ,
-				'IA' => __( 'Iowa', 'woocommerce' ) ,
-				'KS' => __( 'Kansas', 'woocommerce' ) ,
-				'KY' => __( 'Kentucky', 'woocommerce' ) ,
-				'LA' => __( 'Louisiana', 'woocommerce' ) ,
-				'ME' => __( 'Maine', 'woocommerce' ) ,
-				'MD' => __( 'Maryland', 'woocommerce' ) ,
-				'MA' => __( 'Massachusetts', 'woocommerce' ) ,
-				'MI' => __( 'Michigan', 'woocommerce' ) ,
-				'MN' => __( 'Minnesota', 'woocommerce' ) ,
-				'MS' => __( 'Mississippi', 'woocommerce' ) ,
-				'MO' => __( 'Missouri', 'woocommerce' ) ,
-				'MT' => __( 'Montana', 'woocommerce' ) ,
-				'NE' => __( 'Nebraska', 'woocommerce' ) ,
-				'NV' => __( 'Nevada', 'woocommerce' ) ,
-				'NH' => __( 'New Hampshire', 'woocommerce' ) ,
-				'NJ' => __( 'New Jersey', 'woocommerce' ) ,
-				'NM' => __( 'New Mexico', 'woocommerce' ) ,
-				'NY' => __( 'New York', 'woocommerce' ) ,
-				'NC' => __( 'North Carolina', 'woocommerce' ) ,
-				'ND' => __( 'North Dakota', 'woocommerce' ) ,
-				'OH' => __( 'Ohio', 'woocommerce' ) ,
-				'OK' => __( 'Oklahoma', 'woocommerce' ) ,
-				'OR' => __( 'Oregon', 'woocommerce' ) ,
-				'PA' => __( 'Pennsylvania', 'woocommerce' ) ,
-				'RI' => __( 'Rhode Island', 'woocommerce' ) ,
-				'SC' => __( 'South Carolina', 'woocommerce' ) ,
-				'SD' => __( 'South Dakota', 'woocommerce' ) ,
-				'TN' => __( 'Tennessee', 'woocommerce' ) ,
-				'TX' => __( 'Texas', 'woocommerce' ) ,
-				'UT' => __( 'Utah', 'woocommerce' ) ,
-				'VT' => __( 'Vermont', 'woocommerce' ) ,
-				'VA' => __( 'Virginia', 'woocommerce' ) ,
-				'WA' => __( 'Washington', 'woocommerce' ) ,
-				'WV' => __( 'West Virginia', 'woocommerce' ) ,
-				'WI' => __( 'Wisconsin', 'woocommerce' ) ,
-				'WY' => __( 'Wyoming', 'woocommerce' ) ,
-				'AA' => __( 'Armed Forces (AA)', 'woocommerce' ) ,
-				'AE' => __( 'Armed Forces (AE)', 'woocommerce' ) ,
-				'AP' => __( 'Armed Forces (AP)', 'woocommerce' )
-			),
 			'VN' => array()
-		));
+		);
+
+		// Load only the state files the shop owner wants/needs
+		$allowed = $this->get_allowed_countries();
+
+		if ( $allowed )
+			foreach ( $allowed as $CC => $country )
+				if ( ! isset( $states[ $CC ] ) && file_exists( $woocommerce->plugin_path() . '/i18n/states/' . $CC . '.php' ) )
+					include( $woocommerce->plugin_path() . '/i18n/states/' . $CC . '.php' );
+
+		$this->states = apply_filters('woocommerce_states', $states );
 	}
 
 
@@ -487,8 +367,8 @@ class WC_Countries {
 
 		$allowed_countries_raw = get_option( 'woocommerce_specific_allowed_countries' );
 
-		foreach ($allowed_countries_raw as $country)
-			$allowed_countries[$country] = $this->countries[$country];
+		foreach ( $allowed_countries_raw as $country )
+			$allowed_countries[ $country ] = $this->countries[ $country ];
 
 		return $allowed_countries;
 	}

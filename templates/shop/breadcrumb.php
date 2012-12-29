@@ -11,11 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $post, $wp_query;
 
-if( ! $home )
-	$home = _x( 'Home', 'breadcrumb', 'woocommerce' );
-
-$home_link = home_url();
-
 if ( get_option('woocommerce_prepend_shop_page_to_urls') == "yes" && woocommerce_get_page_id( 'shop' ) && get_option( 'page_on_front' ) !== woocommerce_get_page_id( 'shop' ) )
 	$prepend =  $before . '<a href="' . get_permalink( woocommerce_get_page_id('shop') ) . '">' . get_the_title( woocommerce_get_page_id('shop') ) . '</a> ' . $after . $delimiter;
 else
@@ -23,7 +18,11 @@ else
 
 if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_front' ) == woocommerce_get_page_id( 'shop' ) ) ) || is_paged() ) {
 
-	echo $wrap_before . $before  . '<a class="home" href="' . $home_link . '">' . $home . '</a> '  . $after . $delimiter ;
+	echo $wrap_before;
+
+	if ( ! empty( $home ) ) {
+		echo $before . '<a class="home" href="' . home_url() . '">' . $home . '</a>' . $after . $delimiter;
+	}
 
 	if ( is_category() ) {
 

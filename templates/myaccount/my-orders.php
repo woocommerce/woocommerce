@@ -6,26 +6,25 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @version     2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $woocommerce;
 
-$customer_id = get_current_user_id();
+$customer_orders = get_posts( array(
+    'numberposts' => $order_count,
+    'meta_key'    => '_customer_user',
+    'meta_value'  => get_current_user_id(),
+    'post_type'   => 'shop_order',
+    'post_status' => 'publish'
+) );
 
-$args = array(
-    'numberposts'     => $recent_orders,
-    'meta_key'        => '_customer_user',
-    'meta_value'	  => $customer_id,
-    'post_type'       => 'shop_order',
-    'post_status'     => 'publish'
-);
-$customer_orders = get_posts($args);
+if ( $customer_orders ) : ?>
 
-if ($customer_orders) :
-?>
+	<h2><?php echo apply_filters( 'woocommerce_my_account_my_orders_title', __( 'Recent Orders', 'woocommerce' ) ); ?></h2>
+
 	<table class="shop_table my_account_orders">
 
 		<thead>
@@ -38,44 +37,60 @@ if ($customer_orders) :
 		</thead>
 
 		<tbody><?php
-			foreach ($customer_orders as $customer_order) :
+			foreach ( $customer_orders as $customer_order ) {
 				$order = new WC_Order();
 
 				$order->populate( $customer_order );
 
-				$status = get_term_by('slug', $order->status, 'shop_order_status');
+				$status = get_term_by( 'slug', $order->status, 'shop_order_status' );
 
 				?><tr class="order">
 					<td class="order-number" width="1%">
-						<a href="<?php echo esc_url( add_query_arg('order', $order->id, get_permalink(woocommerce_get_page_id('view_order'))) ); ?>"><?php echo $order->get_order_number(); ?></a> &ndash; <time title="<?php echo esc_attr( strtotime($order->order_date) ); ?>"><?php echo date_i18n(get_option('date_format'), strtotime($order->order_date)); ?></time>
+						<a href="<?php echo esc_url( add_query_arg('order', $order->id, get_permalink( woocommerce_get_page_id( 'view_order' ) ) ) ); ?>">
+							<?php echo $order->get_order_number(); ?>
+						</a> &ndash; <time title="<?php echo esc_attr( strtotime( $order->order_date ) ); ?>"><?php echo date_i18n( get_option( 'date_format' ), strtotime( $order->order_date ) ); ?></time>
 					</td>
-					<td class="order-shipto"><address><?php if ($order->get_formatted_shipping_address()) echo $order->get_formatted_shipping_address(); else echo '&ndash;'; ?></address></td>
-					<td class="order-total" width="1%"><?php echo $order->get_formatted_order_total(); ?></td>
+					<td class="order-shipto">
+						<address><?php if ( $address = $order->get_formatted_shipping_address() ) echo $address; else echo '&ndash;'; ?></address>
+					</td>
+					<td class="order-total" width="1%">
+						<?php echo $order->get_formatted_order_total(); ?>
+					</td>
 					<td class="order-status" style="text-align:left; white-space:nowrap;">
 						<?php echo ucfirst( __( $status->name, 'woocommerce' ) ); ?>
-						<?php if (in_array($order->status, array('pending', 'failed'))) : ?>
+
+						<?php if ( in_array( $order->status, array( 'pending', 'failed' ) ) ) : ?>
+
 							<a href="<?php echo esc_url( $order->get_cancel_order_url() ); ?>" class="cancel" title="<?php _e( 'Click to cancel this order', 'woocommerce' ); ?>">(<?php _e( 'Cancel', 'woocommerce' ); ?>)</a>
+
 						<?php endif; ?>
 					</td>
 					<td class="order-actions" style="text-align:right; white-space:nowrap;">
+						<?php
+							$actions = array();
 
-						<?php if (in_array($order->status, array('pending', 'failed'))) : ?>
-							<a href="<?php echo esc_url( $order->get_checkout_payment_url() ); ?>" class="button pay"><?php _e( 'Pay', 'woocommerce' ); ?></a>
-						<?php endif; ?>
+							if ( in_array( $order->status, array( 'pending', 'failed' ) ) )
+								$actions[] = array(
+									'url'  => $order->get_checkout_payment_url(),
+									'name' => __( 'Pay', 'woocommerce' )
+								);
 
-						<a href="<?php echo esc_url( add_query_arg('order', $order->id, get_permalink(woocommerce_get_page_id('view_order'))) ); ?>" class="button"><?php _e( 'View', 'woocommerce' ); ?></a>
+							$actions[] = array(
+								'url'  => add_query_arg( 'order', $order->id, get_permalink( woocommerce_get_page_id( 'view_order' ) ) ),
+								'name' => __( 'View', 'woocommerce' )
+							);
 
+							$actions = apply_filters( 'woocommerce_my_account_my_orders_actions', $actions, $order );
 
+							foreach( $actions as $action ) {
+								echo '<a href="' . esc_url( $action['url'] ) . '" class="button ' . sanitize_title( $action['name'] ) . '">' . esc_html( $action['name'] ) . '</a>';
+							}
+						?>
 					</td>
 				</tr><?php
-			endforeach;
+			}
 		?></tbody>
 
 	</table>
-<?php
-else :
-?>
-	<p><?php _e( 'You have no recent orders.', 'woocommerce' ); ?></p>
-<?php
-endif;
-?>
+
+<?php endif; ?>

@@ -291,8 +291,9 @@ if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 	 * @return void
 	 */
 	function woocommerce_taxonomy_archive_description() {
-		if ( is_tax( array( 'product_cat', 'product_tag' ) ) && get_query_var( 'paged' ) == 0 )
-			echo '<div class="term-description">' . wpautop( wptexturize( term_description() ) ) . '</div>';
+		$term_description = term_description();
+		if ( $term_description && is_tax( array( 'product_cat', 'product_tag' ) ) && get_query_var( 'paged' ) == 0 )
+			echo '<div class="term-description">' . wpautop( wptexturize( $term_description ) ) . '</div>';
 	}
 }
 if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
@@ -945,16 +946,16 @@ if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 	 */
 	function woocommerce_breadcrumb( $args = array() ) {
 
-		$defaults = array(
-			'delimiter'  => ' &rsaquo; ',
-			'wrap_before'  => '<div id="breadcrumb" itemprop="breadcrumb">',
-			'wrap_after' => '</div>',
-			'before'   => '',
-			'after'   => '',
-			'home'    => null
-		);
+		$defaults = apply_filters( 'woocommerce_breadcrumb_defaults', array(
+			'delimiter'   => ' &rsaquo; ',
+			'wrap_before' => '<div class="wc-breadcrumb" itemprop="breadcrumb">',
+			'wrap_after'  => '</div>',
+			'before'      => '',
+			'after'       => '',
+			'home'        => _x( 'Home', 'breadcrumb', 'woocommerce' ),
+		) );
 
-		$args = wp_parse_args( $args, $defaults  );
+		$args = wp_parse_args( $args, $defaults );
 
 		woocommerce_get_template( 'shop/breadcrumb.php', $args );
 	}

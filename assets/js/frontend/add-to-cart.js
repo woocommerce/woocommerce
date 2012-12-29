@@ -1,7 +1,7 @@
 jQuery(document).ready(function($) {
 
 	// Ajax add to cart
-	$('.add_to_cart_button').live('click', function() {
+	$(document).on( 'click', '.add_to_cart_button', function() {
 
 		// AJAX add to cart request
 		var $thisbutton = $(this);

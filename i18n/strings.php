@@ -5,9 +5,9 @@
  * This file holds localisation strings that are scanned by localisation plugins. It is not included anywhere.
  *
  * @author 		WooThemes
- * @category 	Languages
- * @package 	WooCommerce/Languages
- * @version     1.6.4
+ * @category 	i18n
+ * @package 	WooCommerce/i18n
+ * @version     2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly

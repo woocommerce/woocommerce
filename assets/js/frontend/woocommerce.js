@@ -19,7 +19,8 @@ jQuery(document).ready(function($) {
 
 	});
 
-	$(".plus, .minus").live('click', function() {
+
+	$(document).on( 'click', '.plus, .minus', function() {
 
 		// Get values
 		var $qty 		= $(this).closest('.quantity').find(".qty");

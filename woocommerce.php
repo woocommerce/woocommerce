@@ -10,7 +10,7 @@
  * Tested up to: 3.5
  *
  * Text Domain: woocommerce
- * Domain Path: /languages/
+ * Domain Path: /i18n/languages/
  *
  * @package WooCommerce
  * @category Core
@@ -408,11 +408,10 @@ class Woocommerce {
 	 */
 	public function load_plugin_textdomain() {
 		// Note: the first-loaded translation file overrides any following ones if the same translation is present
-		$locale = apply_filters( 'plugin_locale', get_locale(), 'woocommerce' );
-		$variable_lang = ( get_option( 'woocommerce_informal_localisation_type' ) == 'yes' ) ? 'informal' : 'formal';
-		load_textdomain( 'woocommerce', WP_LANG_DIR.'/woocommerce/woocommerce-'.$locale.'.mo' );
-		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ).'/languages/'.$variable_lang );
-		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ).'/languages' );
+		$variable_lang = 'yes' == get_option( 'woocommerce_informal_localisation_type' ) ? 'informal' : 'formal';
+		load_textdomain( 'woocommerce', WP_LANG_DIR . '/woocommerce/woocommerce-' . apply_filters( 'plugin_locale', get_locale(), 'woocommerce' ) . '.mo' );
+		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . '/i18n/languages/' . $variable_lang );
+		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . '/i18n/languages' );
 	}
 
 
@@ -572,10 +571,10 @@ class Woocommerce {
 
 		if ( ! is_ssl() ) {
 			if ( is_checkout() ) {
-				wp_safe_redirect( str_replace('http:', 'https:', get_permalink(woocommerce_get_page_id('checkout'))), 301 );
+				wp_safe_redirect( str_replace('http:', 'https:', get_permalink( woocommerce_get_page_id( 'checkout' ) ) ), 301 );
 				exit;
-			} elseif ( is_account_page() ) {
-				if ( 0 === strpos($_SERVER['REQUEST_URI'], 'http') ) {
+			} elseif ( is_account_page() || apply_filters( 'woocommerce_force_ssl_checkout', false ) ) {
+				if ( 0 === strpos( $_SERVER['REQUEST_URI'], 'http' ) ) {
 					wp_safe_redirect( preg_replace( '|^http://|', 'https://', $_SERVER['REQUEST_URI'] ) );
 					exit;
 				} else {
@@ -586,8 +585,8 @@ class Woocommerce {
 			}
 		} else {
 			// Break out of SSL if we leave the checkout/my accounts (anywhere but thanks)
-			if ( get_option('woocommerce_unforce_ssl_checkout') == 'yes' && $_SERVER['REQUEST_URI'] && ! is_checkout() && ! is_page( woocommerce_get_page_id('thanks') ) && ! is_ajax() && ! is_account_page() ) {
-				if ( 0 === strpos($_SERVER['REQUEST_URI'], 'http') ) {
+			if ( get_option('woocommerce_unforce_ssl_checkout') == 'yes' && $_SERVER['REQUEST_URI'] && ! is_checkout() && ! is_page( woocommerce_get_page_id('thanks') ) && ! is_ajax() && ! is_account_page() && apply_filters( 'woocommerce_unforce_ssl_checkout', true ) ) {
+				if ( 0 === strpos( $_SERVER['REQUEST_URI'], 'http' ) ) {
 					wp_safe_redirect( preg_replace( '|^https://|', 'http://', $_SERVER['REQUEST_URI'] ) );
 					exit;
 				} else {

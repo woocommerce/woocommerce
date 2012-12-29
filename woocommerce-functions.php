@@ -651,15 +651,15 @@ function woocommerce_process_registration() {
 
 	global $woocommerce;
 
-	if (isset($_POST['register']) && $_POST['register']) :
+	if ( ! empty( $_POST['register'] ) ) {
 
 		$woocommerce->verify_nonce('register');
 
 		// Get fields
-		$user_email 			= isset( $_POST['email'] ) ? trim( $_POST['email'] ) : '';
-		$password				= isset( $_POST['password'] ) ? trim( $_POST['password'] ) : '';
-		$password2 				= isset( $_POST['password2'] ) ? trim( $_POST['password2'] ) : '';
-		$user_email 			= apply_filters( 'user_registration_email', $user_email );
+		$user_email = isset( $_POST['email'] ) ? trim( $_POST['email'] ) : '';
+		$password   = isset( $_POST['password'] ) ? trim( $_POST['password'] ) : '';
+		$password2  = isset( $_POST['password2'] ) ? trim( $_POST['password2'] ) : '';
+		$user_email = apply_filters( 'user_registration_email', $user_email );
 
 		if ( get_option( 'woocommerce_registration_email_for_username' ) == 'no' ) {
 
@@ -694,31 +694,36 @@ function woocommerce_process_registration() {
 		}
 
 		// Password
-		if ( !$password ) $woocommerce->add_error( __( 'Password is required.', 'woocommerce' ) );
-		if ( !$password2 ) $woocommerce->add_error( __( 'Re-enter your password.', 'woocommerce' ) );
+		if ( ! $password ) $woocommerce->add_error( __( 'Password is required.', 'woocommerce' ) );
+		if ( ! $password2 ) $woocommerce->add_error( __( 'Re-enter your password.', 'woocommerce' ) );
 		if ( $password != $password2 ) $woocommerce->add_error( __( 'Passwords do not match.', 'woocommerce' ) );
 
 		// Spam trap
-		if (isset($_POST['email_2']) && $_POST['email_2']) $woocommerce->add_error( __( 'Anti-spam field was filled in.', 'woocommerce' ) );
+		if ( ! empty( $_POST['email_2'] ) )
+			$woocommerce->add_error( __( 'Anti-spam field was filled in.', 'woocommerce' ) );
 
-		if ($woocommerce->error_count()==0) :
+		if ( $woocommerce->error_count() == 0 ) {
 
 			$reg_errors = new WP_Error();
-			do_action('register_post', $sanitized_user_login, $user_email, $reg_errors);
+			do_action( 'register_post', $sanitized_user_login, $user_email, $reg_errors );
 			$reg_errors = apply_filters( 'registration_errors', $reg_errors, $sanitized_user_login, $user_email );
 
             // if there are no errors, let's create the user account
-			if ( !$reg_errors->get_error_code() ) :
+			if ( ! $reg_errors->get_error_code() ) {
 
-                $user_id 	= wp_create_user( $sanitized_user_login, $password, $user_email );
+                $new_customer_data = array(
+                	'user_login' => $sanitized_user_login,
+                	'user_pass'  => $password,
+                	'user_email' => $user_email,
+                	'role'       => 'customer'
+                );
 
-                if ( !$user_id ) {
+                $user_id = wp_insert_user( apply_filters( 'woocommerce_new_customer_data', $new_customer_data ) );
+
+                if ( ! $user_id ) {
                 	$woocommerce->add_error( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
                     return;
                 }
-
-                // Change role
-                wp_update_user( array ('ID' => $user_id, 'role' => 'customer') ) ;
 
                 // Action
 	            do_action( 'woocommerce_created_customer', $user_id );
@@ -732,21 +737,22 @@ function woocommerce_process_registration() {
                 wp_set_auth_cookie($user_id, true, $secure_cookie);
 
                 // Redirect
-                if ( wp_get_referer() ) :
+                if ( wp_get_referer() ) {
 					wp_safe_redirect( wp_get_referer() );
 					exit;
-				endif;
-				wp_redirect(get_permalink(woocommerce_get_page_id('myaccount')));
-				exit;
+				} else {
+					wp_redirect(get_permalink(woocommerce_get_page_id('myaccount')));
+					exit;
+				}
 
-			else :
+			} else {
 				$woocommerce->add_error( $reg_errors->get_error_message() );
             	return;
-			endif;
+			}
 
-		endif;
+		}
 
-	endif;
+	}
 }
 
 

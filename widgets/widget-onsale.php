@@ -128,26 +128,30 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 
 		$r = new WP_Query($query_args);
 
-		if ( $r->have_posts() ) :
-?>
-		<?php echo $before_widget; ?>
-		<?php if ( $title ) echo $before_title . $title . $after_title; ?>
-		<ul class="product_list_widget">
-		<?php  while ($r->have_posts()) : $r->the_post(); global $product; ?>
-		<li><a href="<?php the_permalink() ?>" title="<?php echo esc_attr(get_the_title() ? get_the_title() : get_the_ID()); ?>">
-			<?php
-				if ( has_post_thumbnail() )
-					the_post_thumbnail( 'shop_thumbnail' );
-				else
-					echo woocommerce_placeholder_img( 'shop_thumbnail' );
-			?>
-			<?php if ( get_the_title() ) the_title(); else the_ID(); ?>
-		</a> <?php echo $product->get_price_html(); ?></li>
-		<?php endwhile; ?>
-		</ul>
-		<?php echo $after_widget; ?>
-<?php
-		endif;
+		if ( $r->have_posts() ) {
+
+			echo $before_widget;
+
+			if ( $title )
+				echo $before_title . $title . $after_title;
+
+			echo '<ul class="product_list_widget">';
+
+			while ( $r->have_posts() ) {
+				$r->the_post();
+				global $product;
+
+				echo '<li>
+					<a href="' . get_permalink() . '">
+						' . ( has_post_thumbnail() ? get_the_post_thumbnail( $r->post->ID, 'shop_thumbnail' ) : woocommerce_placeholder_img( 'shop_thumbnail' ) ) . ' ' . get_the_title() . '
+					</a> ' . $product->get_price_html() . '
+				</li>';
+			}
+
+			echo '</ul>';
+
+			echo $after_widget;
+		}
 
 		$content = ob_get_clean();
 

@@ -388,7 +388,7 @@ if ( ! function_exists( 'is_account_page' ) ) {
 	 * @return bool
 	 */
 	function is_account_page() {
-		return ( is_page( woocommerce_get_page_id( 'myaccount' ) ) || is_page( woocommerce_get_page_id( 'edit_address' ) ) || is_page( woocommerce_get_page_id( 'view_order' ) ) || is_page( woocommerce_get_page_id( 'change_password' ) ) ) ? true : false;
+		return is_page( woocommerce_get_page_id( 'myaccount' ) ) || is_page( woocommerce_get_page_id( 'edit_address' ) ) || is_page( woocommerce_get_page_id( 'view_order' ) ) || is_page( woocommerce_get_page_id( 'change_password' ) ) || is_page( woocommerce_get_page_id( 'lost_password' ) ) || apply_filters( 'woocommerce_is_account_page', false ) ? true : false;
 	}
 }
 if ( ! function_exists( 'is_order_received_page' ) ) {
@@ -513,7 +513,7 @@ function woocommerce_locate_template( $template_name, $template_path = '', $defa
 	// Look within passed path within the theme - this is priority
 	$template = locate_template(
 		array(
-			$template_path . $template_name,
+			trailingslashit( $template_path ) . $template_name,
 			$template_name
 		)
 	);
@@ -1315,7 +1315,7 @@ function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchal 
 	$r['pad_counts'] 	= 1;
 	$r['hierarchal'] 	= $hierarchal;
 	$r['hide_empty'] 	= 1;
-	$r['show_count'] 	= 1;
+	$r['show_count'] 	= $show_counts;
 	$r['selected'] 		= ( isset( $wp_query->query['product_cat'] ) ) ? $wp_query->query['product_cat'] : '';
 
 	$terms = get_terms( 'product_cat', $r );
@@ -2070,6 +2070,8 @@ add_action( 'woocommerce_product_set_stock_status', 'woocommerce_recount_after_s
 
 /**
  * woocommerce_change_term_counts function.
+ * Overrides the original term count for product categories and tags with the product count
+ * that takes catalog visibility into account.
  *
  * @access public
  * @param mixed $terms
@@ -2083,6 +2085,9 @@ function woocommerce_change_term_counts( $terms, $taxonomies, $args ) {
 		return $terms;
 
 	foreach ( $terms as &$term ) {
+		// If the original term count is zero, there's no way the product count could be higher.
+		if ( empty( $term->count ) ) continue;
+
 		$count = get_woocommerce_term_meta( $term->term_id, 'product_count_' . $taxonomies[0] , true );
 
 		if ( $count != '' )
@@ -2102,7 +2107,7 @@ if ( ! is_admin() && ! is_ajax() )
  * @return void
  */
 function woocommerce_scheduled_sales() {
-	global $wpdb;
+	global $woocommerce, $wpdb;
 
 	// Sales which are due to start
 	$product_ids = $wpdb->get_col( $wpdb->prepare( "
@@ -2129,6 +2134,8 @@ function woocommerce_scheduled_sales() {
 				update_post_meta( $product_id, '_sale_price_dates_to', '' );
 			}
 
+			$woocommerce->clear_product_transients( $product_id );
+
 			$parent = wp_get_post_parent_id( $product_id );
 
 			// Sync parent
@@ -2140,6 +2147,8 @@ function woocommerce_scheduled_sales() {
 				$this_product = get_product( $product_id );
 				if ( $this_product->is_type( 'simple' ) )
 					$this_product->grouped_product_sync();
+
+				$woocommerce->clear_product_transients( $parent );
 			}
 		}
 	}
@@ -2166,6 +2175,8 @@ function woocommerce_scheduled_sales() {
 			update_post_meta( $product_id, '_sale_price_dates_from', '' );
 			update_post_meta( $product_id, '_sale_price_dates_to', '' );
 
+			$woocommerce->clear_product_transients( $product_id );
+
 			$parent = wp_get_post_parent_id( $product_id );
 
 			// Sync parent
@@ -2177,6 +2188,8 @@ function woocommerce_scheduled_sales() {
 				$this_product = get_product( $product_id );
 				if ( $this_product->is_type( 'simple' ) )
 					$this_product->grouped_product_sync();
+
+				$woocommerce->clear_product_transients( $parent );
 			}
 		}
 	}
