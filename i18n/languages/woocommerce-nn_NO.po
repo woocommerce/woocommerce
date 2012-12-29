@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v1.6.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2012-10-08 10:46+0100\n"
+"PO-Revision-Date: 2012-12-29 10:23+0100\n"
 "Last-Translator: Eivind Ødegård <meinmycell-forums@yahoo.no>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,6 +16,7 @@ msgstr ""
 "X-Poedit-Basepath: ../\n"
 "X-Textdomain-Support: yes\n"
 "Language: nn_NO\n"
+"X-Generator: Poedit 1.5.4\n"
 "X-Poedit-SearchPath-0: .\n"
 
 # @ woocommerce
@@ -782,8 +783,8 @@ msgid ""
 "Reduces stock for each item in the order; useful after manually creating an "
 "order or manually marking an order as paid."
 msgstr ""
-"Minkar lagermengda for kvar vare i bestillinga. Nyttig om du lagar bestillingar "
-"manuelt eller manuelt merkar dei som betalte."
+"Minkar lagermengda for kvar vare i bestillinga. Nyttig om du lagar "
+"bestillingar manuelt eller manuelt merkar dei som betalte."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:424
@@ -796,8 +797,8 @@ msgid ""
 "Restores stock for each item in the order; useful after refunding or "
 "canceling the entire order."
 msgstr ""
-"Gjenopprettar lagermengda for kvar vare i bestillinga. Nyttig om du refunderer "
-"eller hevar heile bestillinga."
+"Gjenopprettar lagermengda for kvar vare i bestillinga. Nyttig om du "
+"refunderer eller hevar heile bestillinga."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:426
@@ -809,8 +810,8 @@ msgstr "Epostfaktura"
 msgid ""
 "Email the order to the customer. Unpaid orders will include a payment link."
 msgstr ""
-"Sender bestillinga på epost til kunden. Ubetalte bestillingar vil innehalda ei "
-"lenkje til betaling."
+"Sender bestillinga på epost til kunden. Ubetalte bestillingar vil innehalda "
+"ei lenkje til betaling."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:436
@@ -861,8 +862,8 @@ msgid ""
 "These rows contain taxes for this order. This allows you to display multiple "
 "or compound taxes rather than a single total."
 msgstr ""
-"Desse radene inneheld avgiftene for denne bestillinga. Det gjer at du kan visa "
-"fleire ulike avgifter eller toppsatsar i staden for ein samla sum."
+"Desse radene inneheld avgiftene for denne bestillinga. Det gjer at du kan "
+"visa fleire ulike avgifter eller toppsatsar i staden for ein samla sum."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:508
@@ -1565,8 +1566,8 @@ msgid ""
 "Order Items <small>&ndash; Note: if you edit quantities or remove items from "
 "the order you will need to manually change the item's stock levels.</small>"
 msgstr ""
-"Varer i bestillinga <small>&ndash; Hugs: Viss du endrar varemengd eller fjernar "
-"varer frå bestillinga, må du endra varelagermengda manuelt.</small>"
+"Varer i bestillinga <small>&ndash; Hugs: Viss du endrar varemengd eller "
+"fjernar varer frå bestillinga, må du endra varelagermengda manuelt.</small>"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanels-init.php:51
@@ -1871,8 +1872,8 @@ msgid ""
 "The orders section can be accessed from the left-hand navigation menu. Here "
 "you can view and manage customer orders."
 msgstr ""
-"Du kjem til bestillingane med menyen til venstre. Her kan du sjå på og handtera "
-"bestillingar."
+"Du kjem til bestillingane med menyen til venstre. Her kan du sjå på og "
+"handtera bestillingar."
 
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:64
@@ -1880,8 +1881,8 @@ msgid ""
 "Orders can also be added from this section if you want to set them up for a "
 "customer manually."
 msgstr ""
-"Du kan òg leggja til bestillingane i denne avdelinga viss du vil setja dei opp "
-"for ein kunde manuelt."
+"Du kan òg leggja til bestillingane i denne avdelinga viss du vil setja dei "
+"opp for ein kunde manuelt."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:142 admin/woocommerce-admin-content.php:69
@@ -2055,8 +2056,8 @@ msgid ""
 "stock."
 msgstr ""
 "Vil du fjerna denne oppføringa? Viss du har redusert lagermengda for denne "
-"vara, eller bestillinga vart sendt inn av ein kunde, må du justera lagermengda "
-"manuelt."
+"vara, eller bestillinga vart sendt inn av ein kunde, må du justera "
+"lagermengda manuelt."
 
 # @ woocommerce
 #: admin/woocommerce-admin-init.php:288
@@ -3952,8 +3953,9 @@ msgid ""
 "Sorry, we do not have enough \"%s\" in stock to fulfill your order. Please "
 "edit your cart and try again. We apologise for any inconvenience caused."
 msgstr ""
-"Me har diverre ikkje att nok av \"%s\" på lager til å ta imot bestillinga di. "
-"Viss du endrar talet i handlekorga di, kan du prøva att. Me orsakar bryet."
+"Me har diverre ikkje att nok av \"%s\" på lager til å ta imot bestillinga "
+"di. Viss du endrar talet i handlekorga di, kan du prøva att. Me orsakar "
+"bryet."
 
 # @ woocommerce
 #: classes/class-wc-cart.php:665
@@ -6655,7 +6657,8 @@ msgstr "Korleis du reknar ut leveringstakstar"
 #: classes/shipping/class-wc-local-delivery.php:131
 msgid ""
 "Local delivery is a simple shipping method for delivering orders locally."
-msgstr "Lokal levering er ein enkel fraktmåte for å levera bestillingar lokalt."
+msgstr ""
+"Lokal levering er ein enkel fraktmåte for å levera bestillingar lokalt."
 
 # @ woocommerce
 #: classes/shipping/class-wc-local-pickup.php:17
@@ -6728,8 +6731,8 @@ msgid ""
 "The order totals have been updated. Please confirm your order by pressing "
 "the Place Order button at the bottom of the page."
 msgstr ""
-"Ordresummen er oppdatert. Stadfest bestillinga di ved å klikka på knappen med "
-"«Send bestillinga» nedst på denne sida."
+"Ordresummen er oppdatert. Stadfest bestillinga di ved å klikka på knappen "
+"med «Send bestillinga» nedst på denne sida."
 
 # @ woocommerce
 #: shortcodes/shortcode-my_account.php:221 widgets/widget-login.php:235
@@ -6938,7 +6941,8 @@ msgid ""
 "If you require assistance or wish to make alternate arrangements please "
 "contact us."
 msgstr ""
-"Kontakt oss viss du treng hjelp, eller vil ordna bestillinga på ein annan måte."
+"Kontakt oss viss du treng hjelp, eller vil ordna bestillinga på ein annan "
+"måte."
 
 # @ woocommerce
 #: templates/checkout/form-coupon.php:7
@@ -7020,7 +7024,8 @@ msgid ""
 "arrangements."
 msgstr ""
 "Orsak, det ser ikkje ut som det finst gyldige betalingsmåtar for delstaten "
-"din. Kontakt oss om du treng hjelp, eller vil ordna bestillinga på annan måte."
+"din. Kontakt oss om du treng hjelp, eller vil ordna bestillinga på annan "
+"måte."
 
 # @ woocommerce
 #: templates/checkout/review-order.php:276
@@ -7061,8 +7066,8 @@ msgid ""
 "Unfortunately your order cannot be processed as the originating bank/"
 "merchant has declined your transaction."
 msgstr ""
-"Me kan diverre ikkje gjennomføra bestillinga di, fordi banken/kjøpmannen ikkje "
-"godkjende overføringa."
+"Me kan diverre ikkje gjennomføra bestillinga di, fordi banken/kjøpmannen "
+"ikkje godkjende overføringa."
 
 # @ woocommerce
 #: templates/checkout/thankyou.php:17
@@ -7133,7 +7138,8 @@ msgstr ""
 msgid ""
 "Thank you, we are now processing your order. Your order's details are below."
 msgstr ""
-"Mange takk, me handterer bestillinga di. Opplysingane om bestillinga står under."
+"Mange takk, me handterer bestillinga di. Opplysingane om bestillinga står "
+"under."
 
 # @ woocommerce
 #: templates/emails/admin-new-order.php:5
@@ -7295,8 +7301,8 @@ msgid ""
 "return. This was given to you on your receipt and in the confirmation email "
 "you should have received."
 msgstr ""
-"For å spora bestillinga di, kan du skriva inn ordrenummeret i boksen under, og "
-"trykkja linjeskift (enter). Du fekk ordrenummeret i kvitteringa, og i "
+"For å spora bestillinga di, kan du skriva inn ordrenummeret i boksen under, "
+"og trykkja linjeskift (enter). Du fekk ordrenummeret i kvitteringa, og i "
 "eposten du fekk."
 
 # @ woocommerce
@@ -7972,8 +7978,8 @@ msgid ""
 "Your order is no longer pending and could not be cancelled. Please contact "
 "us if you need assistance."
 msgstr ""
-"Bestillinga di er ikkje på vent lenger, så du kan ikkje avlysa henne. Kontakt "
-"oss om du treng hjelp."
+"Bestillinga di er ikkje på vent lenger, så du kan ikkje avlysa henne. "
+"Kontakt oss om du treng hjelp."
 
 # @ woocommerce
 #: woocommerce-functions.php:720
@@ -9920,8 +9926,8 @@ msgid ""
 "Turn this option off to only grant access when an order is \"complete\", "
 "rather than \"processing\""
 msgstr ""
-"Skru av dette valet for å gje tilgjenge berre når bestillinga er «fullført», i "
-"staden for «handterer»"
+"Skru av dette valet for å gje tilgjenge berre når bestillinga er «fullført», "
+"i staden for «handterer»"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:318
@@ -10355,7 +10361,8 @@ msgid ""
 "This is the sum of the 'Cart Tax' and 'Shipping Tax' fields within your "
 "orders."
 msgstr ""
-"Her er summen for «Avgifter handlekorg» og «fraktavgifter» i bestillingane dine."
+"Her er summen for «Avgifter handlekorg» og «fraktavgifter» i bestillingane "
+"dine."
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1776
@@ -10681,7 +10688,8 @@ msgid ""
 "Sorry, it seems the coupon \"%s\" is invalid - it has now been removed from "
 "your order."
 msgstr ""
-"Det ser ut som kupongen «%s» er ugyldig - me har fjerna han frå bestillinga di."
+"Det ser ut som kupongen «%s» er ugyldig - me har fjerna han frå bestillinga "
+"di."
 
 # @ woocommerce
 #: classes/class-wc-cart.php:321
@@ -10719,7 +10727,8 @@ msgstr "Passord"
 #: classes/class-wc-checkout.php:58
 msgctxt "placeholder"
 msgid "Notes about your order, e.g. special notes for delivery."
-msgstr "Kommentarar om bestillinga di, til dømes detaljar om frakt eller henting."
+msgstr ""
+"Kommentarar om bestillinga di, til dømes detaljar om frakt eller henting."
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:157
@@ -11102,7 +11111,8 @@ msgstr "Frakt via"
 #: classes/gateways/paypal/class-wc-paypal.php:608
 #, php-format
 msgid "Order %s has been marked as refunded - PayPal reason code: %s"
-msgstr "Bestillinga %s er merka som refundert - grunngjevingskoden frå PayPal: %s"
+msgstr ""
+"Bestillinga %s er merka som refundert - grunngjevingskoden frå PayPal: %s"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-paypal.php:593
