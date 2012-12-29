@@ -127,7 +127,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 			<?php endif; ?>
 
-			<?php do_action( 'woocommerce_before_order_total' ); ?>
+			<?php do_action( 'woocommerce_review_order_before_order_total' ); ?>
 
 			<tr class="total">
 				<th><strong><?php _e( 'Order Total', 'woocommerce' ); ?></strong></th>
@@ -155,10 +155,13 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				</td>
 			</tr>
 
-			<?php do_action( 'woocommerce_after_order_total' ); ?>
+			<?php do_action( 'woocommerce_review_order_after_order_total' ); ?>
+
 		</tfoot>
 		<tbody>
 			<?php
+				do_action( 'woocommerce_review_order_before_cart_contents' );
+
 				if (sizeof($woocommerce->cart->get_cart())>0) :
 					foreach ($woocommerce->cart->get_cart() as $item_id => $values) :
 						$_product = $values['data'];
@@ -172,7 +175,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					endforeach;
 				endif;
 
-				do_action( 'woocommerce_cart_contents_review_order' );
+				do_action( 'woocommerce_review_order_after_cart_contents' );
 			?>
 		</tbody>
 	</table>

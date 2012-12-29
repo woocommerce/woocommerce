@@ -40,10 +40,14 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 				<?php if ( $woocommerce->cart->needs_shipping() && $woocommerce->cart->show_shipping() && ( $available_methods || get_option( 'woocommerce_enable_shipping_calc' ) == 'yes' ) ) : ?>
 
+					<?php do_action( 'woocommerce_cart_totals_before_shipping' ); ?>
+
 					<tr class="shipping">
 						<th><?php _e( 'Shipping', 'woocommerce' ); ?></th>
 						<td><?php woocommerce_get_template( 'cart/shipping-methods.php', array( 'available_methods' => $available_methods ) ); ?></td>
 					</tr>
+
+					<?php do_action( 'woocommerce_cart_totals_after_shipping' ); ?>
 
 				<?php endif ?>
 
@@ -119,6 +123,8 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 				<?php endif; ?>
 
+				<?php do_action( 'woocommerce_cart_totals_before_order_total' ); ?>
+
 				<tr class="total">
 					<th><strong><?php _e( 'Order Total', 'woocommerce' ); ?></strong></th>
 					<td>
@@ -142,6 +148,8 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 						?>
 					</td>
 				</tr>
+
+				<?php do_action( 'woocommerce_cart_totals_after_order_total' ); ?>
 
 			</tbody>
 		</table>
