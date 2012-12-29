@@ -300,7 +300,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 			echo $after_widget;
 
 			if ( ! $found )
-				ob_clean();
+				ob_end_clean();
 			else
 				echo ob_get_clean();
 		}
