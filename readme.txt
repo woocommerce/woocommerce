@@ -243,6 +243,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Variation sku updating after selection.
 * Fix - Active plugins display on status page.
 
+* Localization - Makepot added by Geert De Deckere for generating POT files.
+* Localization - Admin/Frontend POT files to reduce memory consumption on the frontend.
 * Localization - French update by Arnaud Cheminand and absoluteweb.
 * Localization - Romanian update by silviu-bucsa and a1ur3l.
 * Localization - Dutch updates by Ramoonus.

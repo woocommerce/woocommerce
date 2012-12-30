@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.0.0-beta1 Front-end\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2012-12-30 11:35:30+00:00\n"
+"POT-Creation-Date: 2012-12-30 13:34:17+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -74,8 +74,8 @@ msgstr ""
 msgid "Change Password"
 msgstr ""
 
-#: assets/js/admin/editor_plugin_lang.php:21 woocommerce.php:941
-#: woocommerce.php:942
+#: assets/js/admin/editor_plugin_lang.php:21 woocommerce.php:948
+#: woocommerce.php:949
 msgid "View Order"
 msgstr ""
 
@@ -179,7 +179,7 @@ msgstr ""
 
 #: classes/class-wc-cart.php:828 classes/class-wc-cart.php:842
 #: classes/class-wc-cart.php:850 templates/cart/mini-cart.php:65
-#: woocommerce-functions.php:435 woocommerce.php:1098
+#: woocommerce-functions.php:435 woocommerce.php:1105
 msgid "View Cart &rarr;"
 msgstr ""
 
@@ -1336,7 +1336,7 @@ msgstr ""
 msgid "VAT"
 msgstr ""
 
-#: classes/class-wc-countries.php:446 templates/cart/totals.php:106
+#: classes/class-wc-countries.php:446 templates/cart/totals.php:110
 #: templates/checkout/review-order.php:113
 msgid "Tax"
 msgstr ""
@@ -1559,7 +1559,7 @@ msgstr ""
 msgid "Order Total:"
 msgstr ""
 
-#: classes/class-wc-order.php:1003 templates/cart/totals.php:139
+#: classes/class-wc-order.php:1003 templates/cart/totals.php:145
 #: templates/checkout/review-order.php:151
 msgid "(Includes %s)"
 msgstr ""
@@ -2408,11 +2408,19 @@ msgstr ""
 
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:256
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:276
-#: woocommerce.php:858
+#: woocommerce.php:865
 msgid "Products"
 msgstr ""
 
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:257
+#: shortcodes/shortcode-init.php:437 templates/loop/add-to-cart.php:40
+#: templates/single-product/add-to-cart/grouped.php:45
+#: templates/single-product/add-to-cart/grouped.php:75
+#: templates/single-product/add-to-cart/simple.php:42
+#: templates/single-product/add-to-cart/variable.php:84
+msgid "Add to cart"
+msgstr ""
+
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:277
 msgid "Add to Cart"
 msgstr ""
@@ -2641,7 +2649,7 @@ msgstr ""
 msgid "Optional extra shipping options with additional costs (one per line). Example: <code>Option Name|Cost|Per-order (yes or no)</code>. Example: <code>Priority Mail|6.95|yes</code>. If per-order is set to no, it will use the \"Calculation Type\" setting."
 msgstr ""
 
-#: classes/shipping/class-wc-flat-rate.php:464 woocommerce.php:755
+#: classes/shipping/class-wc-flat-rate.php:464 woocommerce.php:762
 msgid "Shipping Class"
 msgstr ""
 
@@ -4029,14 +4037,6 @@ msgstr ""
 msgid "The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page."
 msgstr ""
 
-#: shortcodes/shortcode-init.php:437 templates/loop/add-to-cart.php:40
-#: templates/single-product/add-to-cart/grouped.php:45
-#: templates/single-product/add-to-cart/grouped.php:75
-#: templates/single-product/add-to-cart/simple.php:42
-#: templates/single-product/add-to-cart/variable.php:84
-msgid "Add to cart"
-msgstr ""
-
 #: shortcodes/shortcode-lost_password.php:76
 #: shortcodes/shortcode-my_account.php:245 widgets/widget-login.php:279
 msgid "Please enter your password."
@@ -4150,7 +4150,7 @@ msgstr ""
 #: templates/emails/customer-invoice.php:27
 #: templates/emails/customer-note.php:27
 #: templates/emails/customer-processing-order.php:23
-#: templates/order/order-details.php:20 woocommerce.php:859
+#: templates/order/order-details.php:20 woocommerce.php:866
 msgid "Product"
 msgstr ""
 
@@ -4179,7 +4179,7 @@ msgstr ""
 msgid "Remove this item"
 msgstr ""
 
-#: templates/cart/cart.php:123 woocommerce.php:972
+#: templates/cart/cart.php:123 woocommerce.php:979
 msgid "Coupon"
 msgstr ""
 
@@ -4211,7 +4211,7 @@ msgstr ""
 msgid "No products in the cart."
 msgstr ""
 
-#: templates/cart/mini-cart.php:60 templates/cart/totals.php:88
+#: templates/cart/mini-cart.php:60 templates/cart/totals.php:92
 #: templates/checkout/review-order.php:93
 msgid "Subtotal"
 msgstr ""
@@ -4257,43 +4257,43 @@ msgid "Cart Subtotal"
 msgstr ""
 
 #: templates/cart/totals.php:35 templates/checkout/review-order.php:34
-#: woocommerce.php:1545
+#: woocommerce.php:1552
 msgid "Cart Discount"
 msgstr ""
 
-#: templates/cart/totals.php:35 templates/cart/totals.php:116
+#: templates/cart/totals.php:35 templates/cart/totals.php:120
 msgid "[Remove]"
 msgstr ""
 
-#: templates/cart/totals.php:44 templates/checkout/review-order.php:45
+#: templates/cart/totals.php:46 templates/checkout/review-order.php:45
 msgid "Shipping"
 msgstr ""
 
-#: templates/cart/totals.php:116 templates/checkout/review-order.php:124
+#: templates/cart/totals.php:120 templates/checkout/review-order.php:124
 msgid "Order Discount"
 msgstr ""
 
-#: templates/cart/totals.php:123 templates/checkout/review-order.php:133
+#: templates/cart/totals.php:129 templates/checkout/review-order.php:133
 msgid "Order Total"
 msgstr ""
 
-#: templates/cart/totals.php:153
+#: templates/cart/totals.php:161
 msgid " (taxes estimated for %s)"
 msgstr ""
 
-#: templates/cart/totals.php:155
+#: templates/cart/totals.php:163
 msgid "Note: Shipping and taxes are estimated%s and will be updated during checkout based on your billing and shipping information."
 msgstr ""
 
-#: templates/cart/totals.php:167
+#: templates/cart/totals.php:175
 msgid "No shipping methods were found; please recalculate your shipping and enter your state/county and zip/postcode to ensure there are no other available methods for your location."
 msgstr ""
 
-#: templates/cart/totals.php:175
+#: templates/cart/totals.php:183
 msgid "Sorry, it seems that there are no available shipping methods for your location (%s)."
 msgstr ""
 
-#: templates/cart/totals.php:177
+#: templates/cart/totals.php:185
 msgid "If you require assistance or wish to make alternate arrangements please contact us."
 msgstr ""
 
@@ -4388,31 +4388,31 @@ msgstr ""
 msgid "Additional Information"
 msgstr ""
 
-#: templates/checkout/review-order.php:217
+#: templates/checkout/review-order.php:220
 msgid "Please fill in your details above to see available payment methods."
 msgstr ""
 
-#: templates/checkout/review-order.php:219
+#: templates/checkout/review-order.php:222
 msgid "Sorry, it seems that there are no available payment methods for your state. Please contact us if you require assistance or wish to make alternate arrangements."
 msgstr ""
 
-#: templates/checkout/review-order.php:229
+#: templates/checkout/review-order.php:232
 msgid "Since your browser does not support JavaScript, or it is disabled, please ensure you click the <em>Update Totals</em> button before placing your order. You may be charged more than the amount stated above if you fail to do so."
 msgstr ""
 
-#: templates/checkout/review-order.php:229
+#: templates/checkout/review-order.php:232
 msgid "Update totals"
 msgstr ""
 
-#: templates/checkout/review-order.php:235
+#: templates/checkout/review-order.php:238
 msgid "Place order"
 msgstr ""
 
-#: templates/checkout/review-order.php:239
+#: templates/checkout/review-order.php:242
 msgid "I have read and accept the"
 msgstr ""
 
-#: templates/checkout/review-order.php:239
+#: templates/checkout/review-order.php:242
 msgid "terms &amp; conditions"
 msgstr ""
 
@@ -4721,9 +4721,9 @@ msgstr ""
 msgid "The following addresses will be used on the checkout page by default."
 msgstr ""
 
-#: templates/myaccount/my-address.php:45 woocommerce.php:827
-#: woocommerce.php:863 woocommerce.php:900 woocommerce.php:938
-#: woocommerce.php:976
+#: templates/myaccount/my-address.php:45 woocommerce.php:834
+#: woocommerce.php:870 woocommerce.php:907 woocommerce.php:945
+#: woocommerce.php:983
 msgid "Edit"
 msgstr ""
 
@@ -4745,7 +4745,7 @@ msgstr[1] ""
 msgid "Recent Orders"
 msgstr ""
 
-#: templates/myaccount/my-orders.php:32 woocommerce.php:935
+#: templates/myaccount/my-orders.php:32 woocommerce.php:942
 msgid "Order"
 msgstr ""
 
@@ -5197,8 +5197,8 @@ msgstr ""
 msgid "WooCommerce Product Categories"
 msgstr ""
 
-#: widgets/widget-product_categories.php:57 woocommerce.php:690
-#: woocommerce.php:692
+#: widgets/widget-product_categories.php:57 woocommerce.php:697
+#: woocommerce.php:699
 msgid "Product Categories"
 msgstr ""
 
@@ -5246,8 +5246,8 @@ msgstr ""
 msgid "WooCommerce Product Tags"
 msgstr ""
 
-#: widgets/widget-product_tag_cloud.php:58 woocommerce.php:721
-#: woocommerce.php:723
+#: widgets/widget-product_tag_cloud.php:58 woocommerce.php:728
+#: woocommerce.php:730
 msgid "Product Tags"
 msgstr ""
 
@@ -5566,7 +5566,7 @@ msgctxt "breadcrumb"
 msgid "Home"
 msgstr ""
 
-#: woocommerce-template.php:1253 woocommerce.php:1097
+#: woocommerce-template.php:1253 woocommerce.php:1104
 msgid "required"
 msgstr ""
 
@@ -5582,419 +5582,419 @@ msgstr ""
 msgid "Search for products"
 msgstr ""
 
-#: woocommerce-template.php:1433 woocommerce.php:823
+#: woocommerce-template.php:1433 woocommerce.php:830
 msgid "Search"
 msgstr ""
 
-#: woocommerce.php:655
+#: woocommerce.php:662
 msgctxt "slug"
 msgid "product-category"
 msgstr ""
 
-#: woocommerce.php:656
+#: woocommerce.php:663
 msgctxt "slug"
 msgid "product-tag"
 msgstr ""
 
-#: woocommerce.php:658
+#: woocommerce.php:665
 msgctxt "slug"
 msgid "product"
 msgstr ""
 
-#: woocommerce.php:693
+#: woocommerce.php:700
 msgid "Product Category"
 msgstr ""
 
-#: woocommerce.php:694
+#: woocommerce.php:701
 msgctxt "Admin menu name"
 msgid "Categories"
 msgstr ""
 
-#: woocommerce.php:695
+#: woocommerce.php:702
 msgid "Search Product Categories"
 msgstr ""
 
-#: woocommerce.php:696
+#: woocommerce.php:703
 msgid "All Product Categories"
 msgstr ""
 
-#: woocommerce.php:697
+#: woocommerce.php:704
 msgid "Parent Product Category"
 msgstr ""
 
-#: woocommerce.php:698
+#: woocommerce.php:705
 msgid "Parent Product Category:"
 msgstr ""
 
-#: woocommerce.php:699
+#: woocommerce.php:706
 msgid "Edit Product Category"
 msgstr ""
 
-#: woocommerce.php:700
+#: woocommerce.php:707
 msgid "Update Product Category"
 msgstr ""
 
-#: woocommerce.php:701
+#: woocommerce.php:708
 msgid "Add New Product Category"
 msgstr ""
 
-#: woocommerce.php:702
+#: woocommerce.php:709
 msgid "New Product Category Name"
 msgstr ""
 
-#: woocommerce.php:724
+#: woocommerce.php:731
 msgid "Product Tag"
 msgstr ""
 
-#: woocommerce.php:725
+#: woocommerce.php:732
 msgctxt "Admin menu name"
 msgid "Tags"
 msgstr ""
 
-#: woocommerce.php:726
+#: woocommerce.php:733
 msgid "Search Product Tags"
 msgstr ""
 
-#: woocommerce.php:727
+#: woocommerce.php:734
 msgid "All Product Tags"
 msgstr ""
 
-#: woocommerce.php:728
+#: woocommerce.php:735
 msgid "Parent Product Tag"
 msgstr ""
 
-#: woocommerce.php:729
+#: woocommerce.php:736
 msgid "Parent Product Tag:"
 msgstr ""
 
-#: woocommerce.php:730
+#: woocommerce.php:737
 msgid "Edit Product Tag"
 msgstr ""
 
-#: woocommerce.php:731
+#: woocommerce.php:738
 msgid "Update Product Tag"
 msgstr ""
 
-#: woocommerce.php:732
+#: woocommerce.php:739
 msgid "Add New Product Tag"
 msgstr ""
 
-#: woocommerce.php:733
+#: woocommerce.php:740
 msgid "New Product Tag Name"
 msgstr ""
 
-#: woocommerce.php:752 woocommerce.php:754
+#: woocommerce.php:759 woocommerce.php:761
 msgid "Shipping Classes"
 msgstr ""
 
-#: woocommerce.php:756
+#: woocommerce.php:763
 msgctxt "Admin menu name"
 msgid "Shipping Classes"
 msgstr ""
 
-#: woocommerce.php:757
+#: woocommerce.php:764
 msgid "Search Shipping Classes"
 msgstr ""
 
-#: woocommerce.php:758
+#: woocommerce.php:765
 msgid "All Shipping Classes"
 msgstr ""
 
-#: woocommerce.php:759
+#: woocommerce.php:766
 msgid "Parent Shipping Class"
 msgstr ""
 
-#: woocommerce.php:760
+#: woocommerce.php:767
 msgid "Parent Shipping Class:"
 msgstr ""
 
-#: woocommerce.php:761
+#: woocommerce.php:768
 msgid "Edit Shipping Class"
 msgstr ""
 
-#: woocommerce.php:762
+#: woocommerce.php:769
 msgid "Update Shipping Class"
 msgstr ""
 
-#: woocommerce.php:763
+#: woocommerce.php:770
 msgid "Add New Shipping Class"
 msgstr ""
 
-#: woocommerce.php:764
+#: woocommerce.php:771
 msgid "New Shipping Class Name"
 msgstr ""
 
-#: woocommerce.php:785
+#: woocommerce.php:792
 msgid "Order statuses"
 msgstr ""
 
-#: woocommerce.php:786
+#: woocommerce.php:793
 msgid "Order status"
 msgstr ""
 
-#: woocommerce.php:787
+#: woocommerce.php:794
 msgid "Search Order statuses"
 msgstr ""
 
-#: woocommerce.php:788
+#: woocommerce.php:795
 msgid "All Order statuses"
 msgstr ""
 
-#: woocommerce.php:789
+#: woocommerce.php:796
 msgid "Parent Order status"
 msgstr ""
 
-#: woocommerce.php:790
+#: woocommerce.php:797
 msgid "Parent Order status:"
 msgstr ""
 
-#: woocommerce.php:791
+#: woocommerce.php:798
 msgid "Edit Order status"
 msgstr ""
 
-#: woocommerce.php:792
+#: woocommerce.php:799
 msgid "Update Order status"
 msgstr ""
 
-#: woocommerce.php:793
+#: woocommerce.php:800
 msgid "Add New Order status"
 msgstr ""
 
-#: woocommerce.php:794
+#: woocommerce.php:801
 msgid "New Order status Name"
 msgstr ""
 
-#: woocommerce.php:824
+#: woocommerce.php:831
 msgid "All"
 msgstr ""
 
-#: woocommerce.php:825 woocommerce.php:826
+#: woocommerce.php:832 woocommerce.php:833
 msgid "Parent"
 msgstr ""
 
-#: woocommerce.php:828
+#: woocommerce.php:835
 msgid "Update"
 msgstr ""
 
-#: woocommerce.php:829
+#: woocommerce.php:836
 msgid "Add New"
 msgstr ""
 
-#: woocommerce.php:830
+#: woocommerce.php:837
 msgid "New"
 msgstr ""
 
-#: woocommerce.php:860
+#: woocommerce.php:867
 msgctxt "Admin menu name"
 msgid "Products"
 msgstr ""
 
-#: woocommerce.php:861
+#: woocommerce.php:868
 msgid "Add Product"
 msgstr ""
 
-#: woocommerce.php:862
+#: woocommerce.php:869
 msgid "Add New Product"
 msgstr ""
 
-#: woocommerce.php:864
+#: woocommerce.php:871
 msgid "Edit Product"
 msgstr ""
 
-#: woocommerce.php:865
+#: woocommerce.php:872
 msgid "New Product"
 msgstr ""
 
-#: woocommerce.php:866 woocommerce.php:867
+#: woocommerce.php:873 woocommerce.php:874
 msgid "View Product"
 msgstr ""
 
-#: woocommerce.php:868
+#: woocommerce.php:875
 msgid "Search Products"
 msgstr ""
 
-#: woocommerce.php:869
+#: woocommerce.php:876
 msgid "No Products found"
 msgstr ""
 
-#: woocommerce.php:870
+#: woocommerce.php:877
 msgid "No Products found in trash"
 msgstr ""
 
-#: woocommerce.php:871
+#: woocommerce.php:878
 msgid "Parent Product"
 msgstr ""
 
-#: woocommerce.php:873
+#: woocommerce.php:880
 msgid "This is where you can add new products to your store."
 msgstr ""
 
-#: woocommerce.php:896
+#: woocommerce.php:903
 msgid "Variations"
 msgstr ""
 
-#: woocommerce.php:897
+#: woocommerce.php:904
 msgid "Variation"
 msgstr ""
 
-#: woocommerce.php:898
+#: woocommerce.php:905
 msgid "Add Variation"
 msgstr ""
 
-#: woocommerce.php:899
+#: woocommerce.php:906
 msgid "Add New Variation"
 msgstr ""
 
-#: woocommerce.php:901
+#: woocommerce.php:908
 msgid "Edit Variation"
 msgstr ""
 
-#: woocommerce.php:902
+#: woocommerce.php:909
 msgid "New Variation"
 msgstr ""
 
-#: woocommerce.php:903 woocommerce.php:904
+#: woocommerce.php:910 woocommerce.php:911
 msgid "View Variation"
 msgstr ""
 
-#: woocommerce.php:905
+#: woocommerce.php:912
 msgid "Search Variations"
 msgstr ""
 
-#: woocommerce.php:906
+#: woocommerce.php:913
 msgid "No Variations found"
 msgstr ""
 
-#: woocommerce.php:907
+#: woocommerce.php:914
 msgid "No Variations found in trash"
 msgstr ""
 
-#: woocommerce.php:908
+#: woocommerce.php:915
 msgid "Parent Variation"
 msgstr ""
 
-#: woocommerce.php:925
+#: woocommerce.php:932
 msgctxt "Admin menu name"
 msgid "Orders"
 msgstr ""
 
-#: woocommerce.php:934
+#: woocommerce.php:941
 msgid "Orders"
-msgstr ""
-
-#: woocommerce.php:936
-msgid "Add Order"
-msgstr ""
-
-#: woocommerce.php:937
-msgid "Add New Order"
-msgstr ""
-
-#: woocommerce.php:939
-msgid "Edit Order"
-msgstr ""
-
-#: woocommerce.php:940
-msgid "New Order"
 msgstr ""
 
 #: woocommerce.php:943
-msgid "Search Orders"
+msgid "Add Order"
 msgstr ""
 
 #: woocommerce.php:944
-msgid "No Orders found"
-msgstr ""
-
-#: woocommerce.php:945
-msgid "No Orders found in trash"
+msgid "Add New Order"
 msgstr ""
 
 #: woocommerce.php:946
+msgid "Edit Order"
+msgstr ""
+
+#: woocommerce.php:947
+msgid "New Order"
+msgstr ""
+
+#: woocommerce.php:950
+msgid "Search Orders"
+msgstr ""
+
+#: woocommerce.php:951
+msgid "No Orders found"
+msgstr ""
+
+#: woocommerce.php:952
+msgid "No Orders found in trash"
+msgstr ""
+
+#: woocommerce.php:953
 msgid "Parent Orders"
 msgstr ""
 
-#: woocommerce.php:949
+#: woocommerce.php:956
 msgid "This is where store orders are stored."
 msgstr ""
 
-#: woocommerce.php:971
+#: woocommerce.php:978
 msgid "Coupons"
 msgstr ""
 
-#: woocommerce.php:973
+#: woocommerce.php:980
 msgctxt "Admin menu name"
 msgid "Coupons"
 msgstr ""
 
-#: woocommerce.php:974
+#: woocommerce.php:981
 msgid "Add Coupon"
 msgstr ""
 
-#: woocommerce.php:975
+#: woocommerce.php:982
 msgid "Add New Coupon"
 msgstr ""
 
-#: woocommerce.php:977
+#: woocommerce.php:984
 msgid "Edit Coupon"
 msgstr ""
 
-#: woocommerce.php:978
+#: woocommerce.php:985
 msgid "New Coupon"
 msgstr ""
 
-#: woocommerce.php:979
+#: woocommerce.php:986
 msgid "View Coupons"
 msgstr ""
 
-#: woocommerce.php:980
+#: woocommerce.php:987
 msgid "View Coupon"
 msgstr ""
 
-#: woocommerce.php:981
+#: woocommerce.php:988
 msgid "Search Coupons"
 msgstr ""
 
-#: woocommerce.php:982
+#: woocommerce.php:989
 msgid "No Coupons found"
 msgstr ""
 
-#: woocommerce.php:983
+#: woocommerce.php:990
 msgid "No Coupons found in trash"
 msgstr ""
 
-#: woocommerce.php:984
+#: woocommerce.php:991
 msgid "Parent Coupon"
 msgstr ""
 
-#: woocommerce.php:986
+#: woocommerce.php:993
 msgid "This is where you can add new coupons that customers can use in your store."
 msgstr ""
 
-#: woocommerce.php:1094
+#: woocommerce.php:1101
 msgid "Select an option&hellip;"
 msgstr ""
 
-#: woocommerce.php:1095
+#: woocommerce.php:1102
 msgid "Please select a rating"
 msgstr ""
 
-#: woocommerce.php:1096
+#: woocommerce.php:1103
 msgid "Sorry, no products matched your selection. Please choose a different combination."
 msgstr ""
 
-#: woocommerce.php:1546
+#: woocommerce.php:1553
 msgid "Cart % Discount"
 msgstr ""
 
-#: woocommerce.php:1547
+#: woocommerce.php:1554
 msgid "Product Discount"
 msgstr ""
 
-#: woocommerce.php:1548
+#: woocommerce.php:1555
 msgid "Product % Discount"
 msgstr ""
 
-#: woocommerce.php:1613
+#: woocommerce.php:1620
 msgid "Action failed. Please refresh the page and retry."
 msgstr ""

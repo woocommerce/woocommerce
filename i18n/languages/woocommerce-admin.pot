@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.0.0-beta1 Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2012-12-30 11:35:31+00:00\n"
+"POT-Creation-Date: 2012-12-30 13:34:18+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -566,7 +566,7 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-order_data.php:529
 #: admin/post-types/writepanels/writepanel-product_data.php:81
 #: admin/settings/settings-tax-rates.php:52
-#: admin/settings/settings-tax-rates.php:182
+#: admin/settings/settings-tax-rates.php:217
 #: admin/woocommerce-admin-content.php:49
 #: admin/woocommerce-admin-settings.php:218
 msgid "Shipping"
@@ -1136,7 +1136,7 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-order_data.php:164
 #: admin/post-types/writepanels/writepanel-order_data.php:254
 #: admin/settings/settings-tax-rates.php:42
-#: admin/settings/settings-tax-rates.php:182
+#: admin/settings/settings-tax-rates.php:217
 #: admin/woocommerce-admin-users.php:167 admin/woocommerce-admin-users.php:216
 msgid "City"
 msgstr ""
@@ -1210,7 +1210,7 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:343
 #: admin/post-types/writepanels/writepanel-product_data.php:189
-#: admin/settings/settings-tax-rates.php:182
+#: admin/settings/settings-tax-rates.php:217
 msgid "Tax Class"
 msgstr ""
 
@@ -1231,8 +1231,8 @@ msgid "Line subtotals are before pre-tax discounts, totals are after."
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:349
-#: admin/settings/settings-tax-rates.php:352
-#: admin/settings/settings-tax-rates.php:431
+#: admin/settings/settings-tax-rates.php:387
+#: admin/settings/settings-tax-rates.php:466
 #: admin/woocommerce-admin-content.php:48
 #: admin/woocommerce-admin-settings.php:217
 msgid "Tax"
@@ -3065,7 +3065,7 @@ msgid "A 2 digit state code, e.g. AL. Leave blank to apply to all."
 msgstr ""
 
 #: admin/settings/settings-tax-rates.php:40
-#: admin/settings/settings-tax-rates.php:182
+#: admin/settings/settings-tax-rates.php:217
 msgid "ZIP/Postcode"
 msgstr ""
 
@@ -3094,7 +3094,7 @@ msgid "Enter a name for this tax rate."
 msgstr ""
 
 #: admin/settings/settings-tax-rates.php:48
-#: admin/settings/settings-tax-rates.php:182
+#: admin/settings/settings-tax-rates.php:217
 msgid "Priority"
 msgstr ""
 
@@ -3103,7 +3103,7 @@ msgid "Choose a priority for this tax rate. Only 1 matching rate per priority wi
 msgstr ""
 
 #: admin/settings/settings-tax-rates.php:50
-#: admin/settings/settings-tax-rates.php:182
+#: admin/settings/settings-tax-rates.php:217
 msgid "Compound"
 msgstr ""
 
@@ -3135,19 +3135,19 @@ msgstr ""
 msgid "No row(s) selected"
 msgstr ""
 
-#: admin/settings/settings-tax-rates.php:182
+#: admin/settings/settings-tax-rates.php:217
 msgid "Country Code"
 msgstr ""
 
-#: admin/settings/settings-tax-rates.php:182
+#: admin/settings/settings-tax-rates.php:217
 msgid "State Code"
 msgstr ""
 
-#: admin/settings/settings-tax-rates.php:182
+#: admin/settings/settings-tax-rates.php:217
 msgid "Rate %"
 msgstr ""
 
-#: admin/settings/settings-tax-rates.php:182
+#: admin/settings/settings-tax-rates.php:217
 msgid "Tax Name"
 msgstr ""
 
