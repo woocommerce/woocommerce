@@ -3,8 +3,8 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0-beta1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-12-29 10:22+0100\n"
-"PO-Revision-Date: 2012-12-29 10:22+0100\n"
-"Last-Translator: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
+"PO-Revision-Date: 2012-12-29 23:40+0200\n"
+"Last-Translator: Arhi Paivarinta <info@swratkaisut.com>\n"
 "Language-Team: Arhi Paivarinta <info@swratkaisut.com>\n"
 "Language: fi\n"
 "MIME-Version: 1.0\n"
@@ -22,7 +22,7 @@ msgstr ""
 # @ woocommerce
 #: woocommerce-ajax.php:72
 msgid "Please enter your username and password to login."
-msgstr "Kirjaudu - Kirjoita käyttäjätunnus ja salasana."
+msgstr "Kirjaudu - kirjoita käyttäjätunnus ja salasana."
 
 # @ woocommerce
 #: woocommerce-ajax.php:100 shortcodes/shortcode-cart.php:46
@@ -1428,7 +1428,7 @@ msgstr ""
 #: admin/woocommerce-admin-content.php:51
 #: admin/woocommerce-admin-settings.php:220
 msgid "Emails"
-msgstr "Sähköpostit"
+msgstr "S-posti"
 
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:51
@@ -1439,7 +1439,7 @@ msgstr "Tässä voi muokata sähköpostien ilmettä ja sisältöä."
 #: admin/woocommerce-admin-content.php:52
 #: admin/woocommerce-admin-settings.php:221
 msgid "Integration"
-msgstr "Palvelusidokset"
+msgstr "Palvelusidos"
 
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:52
@@ -2837,7 +2837,7 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:355
 #: admin/settings/settings-init.php:954
 msgid "Payment Gateways"
-msgstr "Maksutavat"
+msgstr "Maksu"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:238
@@ -3818,19 +3818,17 @@ msgstr "Muunnelma"
 
 # @ woocommerce
 #: admin/post-types/product.php:248
-#, fuzzy
 msgid "Toggle featured"
 msgstr "Esittelyssä"
 
 # @ woocommerce
 #: admin/post-types/product.php:250
-#, fuzzy
 msgid "yes"
-msgstr "Kyllä"
+msgstr "kyllä"
 
 #: admin/post-types/product.php:252
 msgid "no"
-msgstr ""
+msgstr "ei"
 
 # @ woocommerce
 #: admin/post-types/product.php:259 admin/post-types/product.php:645
@@ -4564,7 +4562,7 @@ msgstr "Poissulje tuotteet"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-coupon_data.php:97
 msgid "Search for a product…"
-msgstr "Etsi tuotetta&hellip"
+msgstr "Etsi tuotetta..."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-coupon_data.php:116
@@ -4726,7 +4724,7 @@ msgstr "Asiakkaan kommentti:"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:132
 msgid "Customer's notes about the order"
-msgstr "Asiakkan kommentti tilauksessa"
+msgstr "Asiakkaan kommentti tilauksessa"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:140
@@ -5782,10 +5780,9 @@ msgstr "Lokalisointi"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:19
-#, fuzzy, php-format
+#, php-format
 msgid "Use informal localisation for %s"
-msgstr ""
-"Käytä sinuttelu muotoista lokalisointi-tiedostoa, jos sellainen on olemassa"
+msgstr "Käytä sinuttelu muotoista käännöstä kielelle %s"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:27
@@ -6250,7 +6247,7 @@ msgid ""
 "can also be used in your %sproduct permalinks%s."
 msgstr ""
 "Tässä asetetaan WooCommerce:n edellyttämät sivut, esim. kaupan (perus)sivu. "
-"Kaupan (perus)sivua voidaan käyttää kestolinkeissä (%sproduct permalinks%s)."
+"Kaupan (perus)sivua voidaan käyttää kestolinkeissä (%sAseta osoiterakenne%s)."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:354
@@ -11132,131 +11129,131 @@ msgstr "Yukon"
 
 #: i18n/states/CN.php:13
 msgid "Yunnan / &#20113;&#21335;"
-msgstr ""
+msgstr "Yunnan / &#20113;&#21335;"
 
 #: i18n/states/CN.php:14
 msgid "Beijing / &#21271;&#20140;"
-msgstr ""
+msgstr "Peking / &#21271;&#20140;"
 
 #: i18n/states/CN.php:15
 msgid "Tianjin / &#22825;&#27941;"
-msgstr ""
+msgstr "Tianjin / &#22825;&#27941;"
 
 #: i18n/states/CN.php:16
 msgid "Hebei / &#27827;&#21271;"
-msgstr ""
+msgstr "Hubei / &#27827;&#21271;"
 
 #: i18n/states/CN.php:17
 msgid "Shanxi / &#23665;&#35199;"
-msgstr ""
+msgstr "Shanxi / &#23665;&#35199;"
 
 #: i18n/states/CN.php:18
 msgid "Inner Mongolia / &#20839;&#33945;&#21476;"
-msgstr ""
+msgstr "Sisä-Mongolia / &#20839;&#33945;&#21476;"
 
 #: i18n/states/CN.php:19
 msgid "Liaoning / &#36797;&#23425;"
-msgstr ""
+msgstr "Liaoning / &#36797;&#23425;"
 
 #: i18n/states/CN.php:20
 msgid "Jilin / &#21513;&#26519;"
-msgstr ""
+msgstr "Jilin / &#21513;&#26519;"
 
 #: i18n/states/CN.php:21
 msgid "Heilongjiang / &#40657;&#40857;&#27743;"
-msgstr ""
+msgstr "Heilongjiang / &#40657;&#40857;&#27743;"
 
 #: i18n/states/CN.php:22
 msgid "Shanghai / &#19978;&#28023;"
-msgstr ""
+msgstr "Shanghai / &#19978;&#28023;"
 
 #: i18n/states/CN.php:23
 msgid "Jiangsu / &#27743;&#33487;"
-msgstr ""
+msgstr "Jiangsu / &#27743;&#33487;"
 
 #: i18n/states/CN.php:24
 msgid "Zhejiang / &#27993;&#27743;"
-msgstr ""
+msgstr "Zhejiang / &#27993;&#27743;"
 
 #: i18n/states/CN.php:25
 msgid "Anhui / &#23433;&#24509;"
-msgstr ""
+msgstr "Anhui / &#23433;&#24509;"
 
 #: i18n/states/CN.php:26
 msgid "Fujian / &#31119;&#24314;"
-msgstr ""
+msgstr "Fujian / &#31119;&#24314;"
 
 #: i18n/states/CN.php:27
 msgid "Jiangxi / &#27743;&#35199;"
-msgstr ""
+msgstr "Jiangxi / &#27743;&#35199;"
 
 #: i18n/states/CN.php:28
 msgid "Shandong / &#23665;&#19996;"
-msgstr ""
+msgstr "Shandong / &#23665;&#19996;"
 
 #: i18n/states/CN.php:29
 msgid "Henan / &#27827;&#21335;"
-msgstr ""
+msgstr "Henan / &#27827;&#21335;"
 
 #: i18n/states/CN.php:30
 msgid "Hubei / &#28246;&#21271;"
-msgstr ""
+msgstr "Hubei / &#28246;&#21271;"
 
 #: i18n/states/CN.php:31
 msgid "Hunan / &#28246;&#21335;"
-msgstr ""
+msgstr "Hunan / &#28246;&#21335;"
 
 #: i18n/states/CN.php:32
 msgid "Guangdong / &#24191;&#19996;"
-msgstr ""
+msgstr "Guangdong (Kanton)/ &#24191;&#19996;"
 
 #: i18n/states/CN.php:33
 msgid "Guangxi Zhuang / &#24191;&#35199;&#22766;&#26063;"
-msgstr ""
+msgstr "Guangxi / &#24191;&#35199;&#22766;&#26063;"
 
 #: i18n/states/CN.php:34
 msgid "Hainan / &#28023;&#21335;"
-msgstr ""
+msgstr "Hainan / &#28023;&#21335;"
 
 #: i18n/states/CN.php:35
 msgid "Chongqing / &#37325;&#24198;"
-msgstr ""
+msgstr "Chongqing / &#37325;&#24198;"
 
 #: i18n/states/CN.php:36
 msgid "Sichuan / &#22235;&#24029;"
-msgstr ""
+msgstr "Sichuan / &#22235;&#24029;"
 
 #: i18n/states/CN.php:37
 msgid "Guizhou / &#36149;&#24030;"
-msgstr ""
+msgstr "Guizhou / &#36149;&#24030;"
 
 #: i18n/states/CN.php:38
 msgid "Shaanxi / &#38485;&#35199;"
-msgstr ""
+msgstr "Shaanxi / &#38485;&#35199;"
 
 #: i18n/states/CN.php:39
 msgid "Gansu / &#29976;&#32899;"
-msgstr ""
+msgstr "Gansu / &#29976;&#32899;"
 
 #: i18n/states/CN.php:40
 msgid "Qinghai / &#38738;&#28023;"
-msgstr ""
+msgstr "Qinghai / &#38738;&#28023;"
 
 #: i18n/states/CN.php:41
 msgid "Ningxia Hui / &#23425;&#22799;"
-msgstr ""
+msgstr "Ningxia / &#23425;&#22799;"
 
 #: i18n/states/CN.php:42
 msgid "Macau / &#28595;&#38376;"
-msgstr ""
+msgstr "Macao / &#28595;&#38376;"
 
 #: i18n/states/CN.php:43
 msgid "Tibet / &#35199;&#34255;"
-msgstr ""
+msgstr "Tiibet / &#35199;&#34255;"
 
 #: i18n/states/CN.php:44
 msgid "Xinjiang / &#26032;&#30086;"
-msgstr ""
+msgstr "Xinjiang / &#26032;&#30086;"
 
 # @ woocommerce
 #: i18n/states/HK.php:13
@@ -11350,578 +11347,618 @@ msgstr "West Coast"
 
 #: i18n/states/IN.php:13
 msgid "Andra Pradesh"
-msgstr ""
+msgstr "Andra Pradesh"
 
 #: i18n/states/IN.php:14
 msgid "Arunachal Pradesh"
-msgstr ""
+msgstr "Arunachal Pradesh"
 
 #: i18n/states/IN.php:15
 msgid "Assam"
-msgstr ""
+msgstr "Assam"
 
 #: i18n/states/IN.php:16
 msgid "Bihar"
-msgstr ""
+msgstr "Bihar"
 
 #: i18n/states/IN.php:17
 msgid "Chhattisgarh"
-msgstr ""
+msgstr "Chhattisgarh"
 
 # @ woocommerce
 #: i18n/states/IN.php:18
-#, fuzzy
 msgid "Goa"
-msgstr "Toteuta"
+msgstr "Goa"
 
 #: i18n/states/IN.php:19
 msgid "Gujarat"
-msgstr ""
+msgstr "Gujarat"
 
 # @ woocommerce
 #: i18n/states/IN.php:20
-#, fuzzy
 msgid "Haryana"
-msgstr "Guyana"
+msgstr "Haryana"
 
 #: i18n/states/IN.php:21
 msgid "Himachal Pradesh"
-msgstr ""
+msgstr "Himachal Pradesh"
 
 #: i18n/states/IN.php:22
 msgid "Jammu and Kashmir"
-msgstr ""
+msgstr "Jammu ja Kashmir"
 
 #: i18n/states/IN.php:23
 msgid "Jharkhand"
-msgstr ""
+msgstr "Jharkhand"
 
 #: i18n/states/IN.php:24
 msgid "Karnataka"
-msgstr ""
+msgstr "Karnataka"
 
 # @ woocommerce
 #: i18n/states/IN.php:25
-#, fuzzy
 msgid "Kerala"
-msgstr "Yleiset"
+msgstr "Kerala"
 
 #: i18n/states/IN.php:26
 msgid "Madhya Pradesh"
-msgstr ""
+msgstr "Madhya Pradesh"
 
 #: i18n/states/IN.php:27
 msgid "Maharashtra"
-msgstr ""
+msgstr "Maharashtra"
 
 #: i18n/states/IN.php:28
 msgid "Manipur"
-msgstr ""
+msgstr "Manipur"
 
 # @ woocommerce
 #: i18n/states/IN.php:29
-#, fuzzy
 msgid "Meghalaya"
-msgstr "Malesia"
+msgstr "Meghalaya"
 
 #: i18n/states/IN.php:30
 msgid "Mizoram"
-msgstr ""
+msgstr "Mizoram"
 
 # @ woocommerce
 #: i18n/states/IN.php:31
-#, fuzzy
 msgid "Nagaland"
-msgstr "Uusi-Seelanti"
+msgstr "Nagaland"
 
 #: i18n/states/IN.php:32
 msgid "Orissa"
-msgstr ""
+msgstr "Orissa"
 
 #: i18n/states/IN.php:33
 msgid "Punjab"
-msgstr ""
+msgstr "Punjab"
 
 #: i18n/states/IN.php:34
 msgid "Rajasthan"
-msgstr ""
+msgstr "Rajasthan"
 
 #: i18n/states/IN.php:35
 msgid "Sikkim"
-msgstr ""
+msgstr "Sikkim"
 
 #: i18n/states/IN.php:36
 msgid "Tamil Nadu"
-msgstr ""
+msgstr "Tamil Nadu"
 
 #: i18n/states/IN.php:37
 msgid "Tripura"
-msgstr ""
+msgstr "Tripura"
 
 #: i18n/states/IN.php:38
 msgid "Uttaranchal"
-msgstr ""
+msgstr "Uttarakhand"
 
 #: i18n/states/IN.php:39
 msgid "Uttar Pradesh"
-msgstr ""
+msgstr "Uttar Pradesh"
 
 #: i18n/states/IN.php:40
 msgid "West Bengal"
-msgstr ""
+msgstr "Länsi-Bengali"
 
 # @ woocommerce
 #: i18n/states/IN.php:41
-#, fuzzy
 msgid "Andaman and Nicobar Islands"
-msgstr "Heard Island ja McDonald Islands"
+msgstr "Andaman ja Nicobar Islands"
 
 # @ woocommerce
 #: i18n/states/IN.php:42
-#, fuzzy
 msgid "Chandigarh"
-msgstr "Vaihda"
+msgstr "Chandigarh"
 
 #: i18n/states/IN.php:43
 msgid "Dadar and Nagar Haveli"
-msgstr ""
+msgstr "Dadra ja Nagar Haveli"
 
 #: i18n/states/IN.php:44
 msgid "Daman and Diu"
-msgstr ""
+msgstr "Daman ja Diu"
 
 #: i18n/states/IN.php:45
 msgid "Delhi"
-msgstr ""
+msgstr "Delhi"
 
 #: i18n/states/IN.php:46
 msgid "Lakshadeep"
-msgstr ""
+msgstr "Lakshadweep"
 
 #: i18n/states/IN.php:47
 msgid "Pondicherry (Puducherry)"
-msgstr ""
+msgstr "Pondicherry"
 
 #: i18n/states/MY.php:13
 msgid "Johor"
-msgstr ""
+msgstr "Johor"
 
 #: i18n/states/MY.php:14
 msgid "Kedah"
-msgstr ""
+msgstr "Kedah"
 
 #: i18n/states/MY.php:15
 msgid "Kelantan"
-msgstr ""
+msgstr "Kelantan"
 
 #: i18n/states/MY.php:16
 msgid "Melaka"
-msgstr ""
+msgstr "Melaka"
 
 #: i18n/states/MY.php:17
 msgid "Negeri Sembilan"
-msgstr ""
+msgstr "Negeri Sembilan"
 
 # @ woocommerce
 #: i18n/states/MY.php:18
-#, fuzzy
 msgid "Pahang"
-msgstr "Vaihda"
+msgstr "Pahang"
 
 #: i18n/states/MY.php:19
 msgid "Perak"
-msgstr ""
+msgstr "Perak"
 
 #: i18n/states/MY.php:20
 msgid "Perlis"
-msgstr ""
+msgstr "Perlis"
 
 #: i18n/states/MY.php:21
 msgid "Pulau Pinang"
-msgstr ""
+msgstr "Pulau Pinang"
 
 #: i18n/states/MY.php:22
 msgid "Sabah"
-msgstr ""
+msgstr "Sabah"
 
 #: i18n/states/MY.php:23
 msgid "Sarawak"
-msgstr ""
+msgstr "Sarawak"
 
 #: i18n/states/MY.php:24
 msgid "Selangor"
-msgstr ""
+msgstr "Selangor"
 
 #: i18n/states/MY.php:25
 msgid "Terengganu"
-msgstr ""
+msgstr "Terengganu"
 
 #: i18n/states/MY.php:26
 msgid "W.P. Kuala Lumpur"
-msgstr ""
+msgstr "W.P. Kuala Lumpur"
 
 #: i18n/states/MY.php:27
 msgid "W.P. Labuan"
-msgstr ""
+msgstr "W.P. Labuan"
 
 #: i18n/states/MY.php:28
 msgid "W.P. Putrajaya"
-msgstr ""
+msgstr "W.P. Putrajaya"
 
 #: i18n/states/TH.php:13
 msgid ""
 "Amnat Charoen (&#3629;&#3635;&#3609;&#3634;&#3592;&#3648;&#3592;&#3619;"
 "&#3636;&#3597;)"
 msgstr ""
+"Amnat Charoen (&#3629;&#3635;&#3609;&#3634;&#3592;&#3648;&#3592;&#3619;"
+"&#3636;&#3597;)"
 
 #: i18n/states/TH.php:14
 msgid "Ang Thong (&#3629;&#3656;&#3634;&#3591;&#3607;&#3629;&#3591;)"
-msgstr ""
+msgstr "Ang Thong (&#3629;&#3656;&#3634;&#3591;&#3607;&#3629;&#3591;)"
 
 #: i18n/states/TH.php:15
 msgid ""
 "Ayutthaya (&#3614;&#3619;&#3632;&#3609;&#3588;&#3619;&#3624;&#3619;&#3637;"
 "&#3629;&#3618;&#3640;&#3608;&#3618;&#3634;)"
 msgstr ""
+"Ayutthaya (&#3614;&#3619;&#3632;&#3609;&#3588;&#3619;&#3624;&#3619;&#3637;"
+"&#3629;&#3618;&#3640;&#3608;&#3618;&#3634;)"
 
 #: i18n/states/TH.php:16
 msgid ""
 "Bangkok (&#3585;&#3619;&#3640;&#3591;&#3648;&#3607;&#3614;&#3617;&#3627;"
 "&#3634;&#3609;&#3588;&#3619;)"
 msgstr ""
+"Bangkok (&#3585;&#3619;&#3640;&#3591;&#3648;&#3607;&#3614;&#3617;&#3627;"
+"&#3634;&#3609;&#3588;&#3619;)"
 
 #: i18n/states/TH.php:17
 msgid "Bueng Kan (&#3610;&#3638;&#3591;&#3585;&#3634;&#3628;)"
-msgstr ""
+msgstr "Bueng Kan (&#3610;&#3638;&#3591;&#3585;&#3634;&#3628;)"
 
 #: i18n/states/TH.php:18
 msgid ""
 "Buri Ram (&#3610;&#3640;&#3619;&#3637;&#3619;&#3633;&#3617;&#3618;&#3660;)"
 msgstr ""
+"Buri Ram (&#3610;&#3640;&#3619;&#3637;&#3619;&#3633;&#3617;&#3618;&#3660;)"
 
 #: i18n/states/TH.php:19
 msgid ""
 "Chachoengsao (&#3593;&#3632;&#3648;&#3594;&#3636;&#3591;&#3648;&#3607;&#3619;"
 "&#3634;)"
 msgstr ""
+"Chachoengsao (&#3593;&#3632;&#3648;&#3594;&#3636;&#3591;&#3648;&#3607;&#3619;"
+"&#3634;)"
 
 #: i18n/states/TH.php:20
 msgid "Chai Nat (&#3594;&#3633;&#3618;&#3609;&#3634;&#3607;)"
-msgstr ""
+msgstr "Chai Nat (&#3594;&#3633;&#3618;&#3609;&#3634;&#3607;)"
 
 #: i18n/states/TH.php:21
 msgid "Chaiyaphum (&#3594;&#3633;&#3618;&#3616;&#3641;&#3617;&#3636;)"
-msgstr ""
+msgstr "Chaiyaphum (&#3594;&#3633;&#3618;&#3616;&#3641;&#3617;&#3636;)"
 
 #: i18n/states/TH.php:22
 msgid "Chanthaburi (&#3592;&#3633;&#3609;&#3607;&#3610;&#3640;&#3619;&#3637;)"
-msgstr ""
+msgstr "Chanthaburi (&#3592;&#3633;&#3609;&#3607;&#3610;&#3640;&#3619;&#3637;)"
 
 #: i18n/states/TH.php:23
 msgid ""
 "Chiang Mai (&#3648;&#3594;&#3637;&#3618;&#3591;&#3651;&#3627;&#3617;&#3656;)"
 msgstr ""
+"Chiang Mai (&#3648;&#3594;&#3637;&#3618;&#3591;&#3651;&#3627;&#3617;&#3656;)"
 
 #: i18n/states/TH.php:24
 msgid "Chiang Rai (&#3648;&#3594;&#3637;&#3618;&#3591;&#3619;&#3634;&#3618;)"
-msgstr ""
+msgstr "Chiang Rai (&#3648;&#3594;&#3637;&#3618;&#3591;&#3619;&#3634;&#3618;)"
 
 #: i18n/states/TH.php:25
 msgid "Chonburi (&#3594;&#3621;&#3610;&#3640;&#3619;&#3637;)"
-msgstr ""
+msgstr "Chonburi (&#3594;&#3621;&#3610;&#3640;&#3619;&#3637;)"
 
 #: i18n/states/TH.php:26
 msgid "Chumphon (&#3594;&#3640;&#3617;&#3614;&#3619;)"
-msgstr ""
+msgstr "Chumphon (&#3594;&#3640;&#3617;&#3614;&#3619;)"
 
 #: i18n/states/TH.php:27
 msgid ""
 "Kalasin (&#3585;&#3634;&#3628;&#3626;&#3636;&#3609;&#3608;&#3640;&#3660;)"
 msgstr ""
+"Kalasin (&#3585;&#3634;&#3628;&#3626;&#3636;&#3609;&#3608;&#3640;&#3660;)"
 
 #: i18n/states/TH.php:28
 msgid ""
 "Kamphaeng Phet (&#3585;&#3635;&#3649;&#3614;&#3591;&#3648;&#3614;&#3594;"
 "&#3619;)"
 msgstr ""
+"Kamphaeng Phet (&#3585;&#3635;&#3649;&#3614;&#3591;&#3648;&#3614;&#3594;"
+"&#3619;)"
 
 #: i18n/states/TH.php:29
 msgid ""
 "Kanchanaburi (&#3585;&#3634;&#3597;&#3592;&#3609;&#3610;&#3640;&#3619;"
 "&#3637;)"
 msgstr ""
+"Kanchanaburi (&#3585;&#3634;&#3597;&#3592;&#3609;&#3610;&#3640;&#3619;"
+"&#3637;)"
 
 #: i18n/states/TH.php:30
 msgid "Khon Kaen (&#3586;&#3629;&#3609;&#3649;&#3585;&#3656;&#3609;)"
-msgstr ""
+msgstr "Khon Kaen (&#3586;&#3629;&#3609;&#3649;&#3585;&#3656;&#3609;)"
 
 #: i18n/states/TH.php:31
 msgid "Krabi (&#3585;&#3619;&#3632;&#3610;&#3637;&#3656;)"
-msgstr ""
+msgstr "Krabi (&#3585;&#3619;&#3632;&#3610;&#3637;&#3656;)"
 
 #: i18n/states/TH.php:32
 msgid "Lampang (&#3621;&#3635;&#3611;&#3634;&#3591;)"
-msgstr ""
+msgstr "Lampang (&#3621;&#3635;&#3611;&#3634;&#3591;)"
 
 #: i18n/states/TH.php:33
 msgid "Lamphun (&#3621;&#3635;&#3614;&#3641;&#3609;)"
-msgstr ""
+msgstr "Lamphun (&#3621;&#3635;&#3614;&#3641;&#3609;)"
 
 #: i18n/states/TH.php:34
 msgid "Loei (&#3648;&#3621;&#3618;)"
-msgstr ""
+msgstr "Loei (&#3648;&#3621;&#3618;)"
 
 #: i18n/states/TH.php:35
 msgid "Lopburi (&#3621;&#3614;&#3610;&#3640;&#3619;&#3637;)"
-msgstr ""
+msgstr "Lopburi (&#3621;&#3614;&#3610;&#3640;&#3619;&#3637;)"
 
 #: i18n/states/TH.php:36
 msgid ""
 "Mae Hong Son (&#3649;&#3617;&#3656;&#3630;&#3656;&#3629;&#3591;&#3626;&#3629;"
 "&#3609;)"
 msgstr ""
+"Mae Hong Son (&#3649;&#3617;&#3656;&#3630;&#3656;&#3629;&#3591;&#3626;&#3629;"
+"&#3609;)"
 
 #: i18n/states/TH.php:37
 msgid ""
 "Maha Sarakham (&#3617;&#3627;&#3634;&#3626;&#3634;&#3619;&#3588;&#3634;"
 "&#3617;)"
 msgstr ""
+"Maha Sarakham (&#3617;&#3627;&#3634;&#3626;&#3634;&#3619;&#3588;&#3634;"
+"&#3617;)"
 
 #: i18n/states/TH.php:38
 msgid "Mukdahan (&#3617;&#3640;&#3585;&#3604;&#3634;&#3627;&#3634;&#3619;)"
-msgstr ""
+msgstr "Mukdahan (&#3617;&#3640;&#3585;&#3604;&#3634;&#3627;&#3634;&#3619;)"
 
 #: i18n/states/TH.php:39
 msgid "Nakhon Nayok (&#3609;&#3588;&#3619;&#3609;&#3634;&#3618;&#3585;)"
-msgstr ""
+msgstr "Nakhon Nayok (&#3609;&#3588;&#3619;&#3609;&#3634;&#3618;&#3585;)"
 
 #: i18n/states/TH.php:40
 msgid "Nakhon Pathom (&#3609;&#3588;&#3619;&#3611;&#3600;&#3617;)"
-msgstr ""
+msgstr "Nakhon Pathom (&#3609;&#3588;&#3619;&#3611;&#3600;&#3617;)"
 
 #: i18n/states/TH.php:41
 msgid "Nakhon Phanom (&#3609;&#3588;&#3619;&#3614;&#3609;&#3617;)"
-msgstr ""
+msgstr "Nakhon Phanom (&#3609;&#3588;&#3619;&#3614;&#3609;&#3617;)"
 
 #: i18n/states/TH.php:42
 msgid ""
 "Nakhon Ratchasima (&#3609;&#3588;&#3619;&#3619;&#3634;&#3594;&#3626;&#3637;"
 "&#3617;&#3634;)"
 msgstr ""
+"Nakhon Ratchasima (&#3609;&#3588;&#3619;&#3619;&#3634;&#3594;&#3626;&#3637;"
+"&#3617;&#3634;)"
 
 #: i18n/states/TH.php:43
 msgid ""
 "Nakhon Sawan (&#3609;&#3588;&#3619;&#3626;&#3623;&#3619;&#3619;&#3588;"
 "&#3660;)"
 msgstr ""
+"Nakhon Sawan (&#3609;&#3588;&#3619;&#3626;&#3623;&#3619;&#3619;&#3588;"
+"&#3660;)"
 
 #: i18n/states/TH.php:44
 msgid ""
 "Nakhon Si Thammarat (&#3609;&#3588;&#3619;&#3624;&#3619;&#3637;&#3608;&#3619;"
 "&#3619;&#3617;&#3619;&#3634;&#3594;)"
 msgstr ""
+"Nakhon Si Thammarat (&#3609;&#3588;&#3619;&#3624;&#3619;&#3637;&#3608;&#3619;"
+"&#3619;&#3617;&#3619;&#3634;&#3594;)"
 
 #: i18n/states/TH.php:45
 msgid "Nan (&#3609;&#3656;&#3634;&#3609;)"
-msgstr ""
+msgstr "Nan (&#3609;&#3656;&#3634;&#3609;)"
 
 #: i18n/states/TH.php:46
 msgid "Narathiwat (&#3609;&#3619;&#3634;&#3608;&#3636;&#3623;&#3634;&#3626;)"
-msgstr ""
+msgstr "Narathiwat (&#3609;&#3619;&#3634;&#3608;&#3636;&#3623;&#3634;&#3626;)"
 
 #: i18n/states/TH.php:47
 msgid ""
 "Nong Bua Lam Phu (&#3627;&#3609;&#3629;&#3591;&#3610;&#3633;&#3623;&#3621;"
 "&#3635;&#3616;&#3641;)"
 msgstr ""
+"Nong Bua Lam Phu (&#3627;&#3609;&#3629;&#3591;&#3610;&#3633;&#3623;&#3621;"
+"&#3635;&#3616;&#3641;)"
 
 #: i18n/states/TH.php:48
 msgid "Nong Khai (&#3627;&#3609;&#3629;&#3591;&#3588;&#3634;&#3618;)"
-msgstr ""
+msgstr "Nong Khai (&#3627;&#3609;&#3629;&#3591;&#3588;&#3634;&#3618;)"
 
 #: i18n/states/TH.php:49
 msgid "Nonthaburi (&#3609;&#3609;&#3607;&#3610;&#3640;&#3619;&#3637;)"
-msgstr ""
+msgstr "Nonthaburi (&#3609;&#3609;&#3607;&#3610;&#3640;&#3619;&#3637;)"
 
 #: i18n/states/TH.php:50
 msgid "Pathum Thani (&#3611;&#3607;&#3640;&#3617;&#3608;&#3634;&#3609;&#3637;)"
 msgstr ""
+"Pathum Thani (&#3611;&#3607;&#3640;&#3617;&#3608;&#3634;&#3609;&#3637;)"
 
 #: i18n/states/TH.php:51
 msgid "Pattani (&#3611;&#3633;&#3605;&#3605;&#3634;&#3609;&#3637;)"
-msgstr ""
+msgstr "Pattani (&#3611;&#3633;&#3605;&#3605;&#3634;&#3609;&#3637;)"
 
 #: i18n/states/TH.php:52
 msgid "Phang Nga (&#3614;&#3633;&#3591;&#3591;&#3634;)"
-msgstr ""
+msgstr "Phang Nga (&#3614;&#3633;&#3591;&#3591;&#3634;)"
 
 #: i18n/states/TH.php:53
 msgid "Phatthalung (&#3614;&#3633;&#3607;&#3621;&#3640;&#3591;)"
-msgstr ""
+msgstr "Phatthalung (&#3614;&#3633;&#3607;&#3621;&#3640;&#3591;)"
 
 #: i18n/states/TH.php:54
 msgid "Phayao (&#3614;&#3632;&#3648;&#3618;&#3634;)"
-msgstr ""
+msgstr "Phayao (&#3614;&#3632;&#3648;&#3618;&#3634;)"
 
 #: i18n/states/TH.php:55
 msgid ""
 "Phetchabun (&#3648;&#3614;&#3594;&#3619;&#3610;&#3641;&#3619;&#3603;&#3660;)"
 msgstr ""
+"Phetchabun (&#3648;&#3614;&#3594;&#3619;&#3610;&#3641;&#3619;&#3603;&#3660;)"
 
 #: i18n/states/TH.php:56
 msgid "Phetchaburi (&#3648;&#3614;&#3594;&#3619;&#3610;&#3640;&#3619;&#3637;)"
-msgstr ""
+msgstr "Phetchaburi (&#3648;&#3614;&#3594;&#3619;&#3610;&#3640;&#3619;&#3637;)"
 
 #: i18n/states/TH.php:57
 msgid "Phichit (&#3614;&#3636;&#3592;&#3636;&#3605;&#3619;)"
-msgstr ""
+msgstr "Phichit (&#3614;&#3636;&#3592;&#3636;&#3605;&#3619;)"
 
 #: i18n/states/TH.php:58
 msgid "Phitsanulok (&#3614;&#3636;&#3625;&#3603;&#3640;&#3650;&#3621;&#3585;)"
-msgstr ""
+msgstr "Phitsanulok (&#3614;&#3636;&#3625;&#3603;&#3640;&#3650;&#3621;&#3585;)"
 
 #: i18n/states/TH.php:59
 msgid "Phrae (&#3649;&#3614;&#3619;&#3656;)"
-msgstr ""
+msgstr "Phrae (&#3649;&#3614;&#3619;&#3656;)"
 
 #: i18n/states/TH.php:60
 msgid "Phuket (&#3616;&#3641;&#3648;&#3585;&#3655;&#3605;)"
-msgstr ""
+msgstr "Phuket (&#3616;&#3641;&#3648;&#3585;&#3655;&#3605;)"
 
 #: i18n/states/TH.php:61
 msgid ""
 "Prachin Buri (&#3611;&#3619;&#3634;&#3592;&#3637;&#3609;&#3610;&#3640;&#3619;"
 "&#3637;)"
 msgstr ""
+"Prachin Buri (&#3611;&#3619;&#3634;&#3592;&#3637;&#3609;&#3610;&#3640;&#3619;"
+"&#3637;)"
 
 #: i18n/states/TH.php:62
 msgid ""
 "Prachuap Khiri Khan (&#3611;&#3619;&#3632;&#3592;&#3623;&#3610;&#3588;&#3637;"
 "&#3619;&#3637;&#3586;&#3633;&#3609;&#3608;&#3660;)"
 msgstr ""
+"Prachuap Khiri Khan (&#3611;&#3619;&#3632;&#3592;&#3623;&#3610;&#3588;&#3637;"
+"&#3619;&#3637;&#3586;&#3633;&#3609;&#3608;&#3660;)"
 
 #: i18n/states/TH.php:63
 msgid "Ranong (&#3619;&#3632;&#3609;&#3629;&#3591;)"
-msgstr ""
+msgstr "Ranong (&#3619;&#3632;&#3609;&#3629;&#3591;)"
 
 #: i18n/states/TH.php:64
 msgid "Ratchaburi (&#3619;&#3634;&#3594;&#3610;&#3640;&#3619;&#3637;)"
-msgstr ""
+msgstr "Ratchaburi (&#3619;&#3634;&#3594;&#3610;&#3640;&#3619;&#3637;)"
 
 #: i18n/states/TH.php:65
 msgid "Rayong (&#3619;&#3632;&#3618;&#3629;&#3591;)"
-msgstr ""
+msgstr "Rayong (&#3619;&#3632;&#3618;&#3629;&#3591;)"
 
 #: i18n/states/TH.php:66
 msgid "Roi Et (&#3619;&#3657;&#3629;&#3618;&#3648;&#3629;&#3655;&#3604;)"
-msgstr ""
+msgstr "Roi Et (&#3619;&#3657;&#3629;&#3618;&#3648;&#3629;&#3655;&#3604;)"
 
 #: i18n/states/TH.php:67
 msgid "Sa Kaeo (&#3626;&#3619;&#3632;&#3649;&#3585;&#3657;&#3623;)"
-msgstr ""
+msgstr "Sa Kaeo (&#3626;&#3619;&#3632;&#3649;&#3585;&#3657;&#3623;)"
 
 #: i18n/states/TH.php:68
 msgid "Sakon Nakhon (&#3626;&#3585;&#3621;&#3609;&#3588;&#3619;)"
-msgstr ""
+msgstr "Sakon Nakhon (&#3626;&#3585;&#3621;&#3609;&#3588;&#3619;)"
 
 #: i18n/states/TH.php:69
 msgid ""
 "Samut Prakan (&#3626;&#3617;&#3640;&#3607;&#3619;&#3611;&#3619;&#3634;&#3585;"
 "&#3634;&#3619;)"
 msgstr ""
+"Samut Prakan (&#3626;&#3617;&#3640;&#3607;&#3619;&#3611;&#3619;&#3634;&#3585;"
+"&#3634;&#3619;)"
 
 #: i18n/states/TH.php:70
 msgid ""
 "Samut Sakhon (&#3626;&#3617;&#3640;&#3607;&#3619;&#3626;&#3634;&#3588;"
 "&#3619;)"
 msgstr ""
+"Samut Sakhon (&#3626;&#3617;&#3640;&#3607;&#3619;&#3626;&#3634;&#3588;"
+"&#3619;)"
 
 #: i18n/states/TH.php:71
 msgid ""
 "Samut Songkhram (&#3626;&#3617;&#3640;&#3607;&#3619;&#3626;&#3591;&#3588;"
 "&#3619;&#3634;&#3617;)"
 msgstr ""
+"Samut Songkhram (&#3626;&#3617;&#3640;&#3607;&#3619;&#3626;&#3591;&#3588;"
+"&#3619;&#3634;&#3617;)"
 
 #: i18n/states/TH.php:72
 msgid "Saraburi (&#3626;&#3619;&#3632;&#3610;&#3640;&#3619;&#3637;)"
-msgstr ""
+msgstr "Saraburi (&#3626;&#3619;&#3632;&#3610;&#3640;&#3619;&#3637;)"
 
 #: i18n/states/TH.php:73
 msgid "Satun (&#3626;&#3605;&#3641;&#3621;)"
-msgstr ""
+msgstr "Satun (&#3626;&#3605;&#3641;&#3621;)"
 
 #: i18n/states/TH.php:74
 msgid ""
 "Sing Buri (&#3626;&#3636;&#3591;&#3627;&#3660;&#3610;&#3640;&#3619;&#3637;)"
 msgstr ""
+"Sing Buri (&#3626;&#3636;&#3591;&#3627;&#3660;&#3610;&#3640;&#3619;&#3637;)"
 
 #: i18n/states/TH.php:75
 msgid "Sisaket (&#3624;&#3619;&#3637;&#3626;&#3632;&#3648;&#3585;&#3625;)"
-msgstr ""
+msgstr "Sisaket (&#3624;&#3619;&#3637;&#3626;&#3632;&#3648;&#3585;&#3625;)"
 
 #: i18n/states/TH.php:76
 msgid "Songkhla (&#3626;&#3591;&#3586;&#3621;&#3634;)"
-msgstr ""
+msgstr "Songkhla (&#3626;&#3591;&#3586;&#3621;&#3634;)"
 
 #: i18n/states/TH.php:77
 msgid "Sukhothai (&#3626;&#3640;&#3650;&#3586;&#3607;&#3633;&#3618;)"
-msgstr ""
+msgstr "Sukhothai (&#3626;&#3640;&#3650;&#3586;&#3607;&#3633;&#3618;)"
 
 #: i18n/states/TH.php:78
 msgid ""
 "Suphan Buri (&#3626;&#3640;&#3614;&#3619;&#3619;&#3603;&#3610;&#3640;&#3619;"
 "&#3637;)"
 msgstr ""
+"Suphan Buri (&#3626;&#3640;&#3614;&#3619;&#3619;&#3603;&#3610;&#3640;&#3619;"
+"&#3637;)"
 
 #: i18n/states/TH.php:79
 msgid ""
 "Surat Thani (&#3626;&#3640;&#3619;&#3634;&#3625;&#3598;&#3619;&#3660;&#3608;"
 "&#3634;&#3609;&#3637;)"
 msgstr ""
+"Surat Thani (&#3626;&#3640;&#3619;&#3634;&#3625;&#3598;&#3619;&#3660;&#3608;"
+"&#3634;&#3609;&#3637;)"
 
 #: i18n/states/TH.php:80
 msgid "Surin (&#3626;&#3640;&#3619;&#3636;&#3609;&#3607;&#3619;&#3660;)"
-msgstr ""
+msgstr "Surin (&#3626;&#3640;&#3619;&#3636;&#3609;&#3607;&#3619;&#3660;)"
 
 #: i18n/states/TH.php:81
 msgid "Tak (&#3605;&#3634;&#3585;)"
-msgstr ""
+msgstr "Tak (&#3605;&#3634;&#3585;)"
 
 #: i18n/states/TH.php:82
 msgid "Trang (&#3605;&#3619;&#3633;&#3591;)"
-msgstr ""
+msgstr "Trang (&#3605;&#3619;&#3633;&#3591;)"
 
 #: i18n/states/TH.php:83
 msgid "Trat (&#3605;&#3619;&#3634;&#3604;)"
-msgstr ""
+msgstr "Trat (&#3605;&#3619;&#3634;&#3604;)"
 
 #: i18n/states/TH.php:84
 msgid ""
 "Ubon Ratchathani (&#3629;&#3640;&#3610;&#3621;&#3619;&#3634;&#3594;&#3608;"
 "&#3634;&#3609;&#3637;)"
 msgstr ""
+"Ubon Ratchathani (&#3629;&#3640;&#3610;&#3621;&#3619;&#3634;&#3594;&#3608;"
+"&#3634;&#3609;&#3637;)"
 
 #: i18n/states/TH.php:85
 msgid "Udon Thani (&#3629;&#3640;&#3604;&#3619;&#3608;&#3634;&#3609;&#3637;)"
-msgstr ""
+msgstr "Udon Thani (&#3629;&#3640;&#3604;&#3619;&#3608;&#3634;&#3609;&#3637;)"
 
 #: i18n/states/TH.php:86
 msgid ""
 "Uthai Thani (&#3629;&#3640;&#3607;&#3633;&#3618;&#3608;&#3634;&#3609;&#3637;)"
 msgstr ""
+"Uthai Thani (&#3629;&#3640;&#3607;&#3633;&#3618;&#3608;&#3634;&#3609;&#3637;)"
 
 #: i18n/states/TH.php:87
 msgid ""
 "Uttaradit (&#3629;&#3640;&#3605;&#3619;&#3604;&#3636;&#3605;&#3606;&#3660;)"
 msgstr ""
+"Uttaradit (&#3629;&#3640;&#3605;&#3619;&#3604;&#3636;&#3605;&#3606;&#3660;)"
 
 #: i18n/states/TH.php:88
 msgid "Yala (&#3618;&#3632;&#3621;&#3634;)"
-msgstr ""
+msgstr "Yala (&#3618;&#3632;&#3621;&#3634;)"
 
 #: i18n/states/TH.php:89
 msgid "Yasothon (&#3618;&#3650;&#3626;&#3608;&#3619;)"
-msgstr ""
+msgstr "Yasothon (&#3618;&#3650;&#3626;&#3608;&#3619;)"
 
 # @ woocommerce
 #: i18n/states/US.php:13
@@ -12190,47 +12227,43 @@ msgstr "Armed Forces (AP)"
 
 #: i18n/states/ZA.php:13
 msgid "Eastern Cape"
-msgstr ""
+msgstr "Eastern Cape"
 
 # @ woocommerce
 #: i18n/states/ZA.php:14
-#, fuzzy
 msgid "Free State"
-msgstr "Osavaltio"
+msgstr "Free State"
 
 #: i18n/states/ZA.php:15
 msgid "Gauteng"
-msgstr ""
+msgstr "Gauteng"
 
 #: i18n/states/ZA.php:16
 msgid "KwaZulu-Natal"
-msgstr ""
+msgstr "KwaZulu-Natal"
 
 #: i18n/states/ZA.php:17
 msgid "Limpopo"
-msgstr ""
+msgstr "Limpopo"
 
 #: i18n/states/ZA.php:18
 msgid "Mpumalanga"
-msgstr ""
+msgstr "Mpumalanga"
 
 # @ woocommerce
 #: i18n/states/ZA.php:19
-#, fuzzy
 msgid "Northern Cape"
-msgstr "Northern Territory"
+msgstr "Northern Cape"
 
 # @ woocommerce
 #: i18n/states/ZA.php:20
-#, fuzzy
 msgid "North West"
-msgstr "Pohjois-Korea"
+msgstr "North West"
 
 # @ woocommerce
 #: i18n/states/ZA.php:21
-#, fuzzy
 msgid "Western Cape"
-msgstr "Länsi-Sahara"
+msgstr "Western Cape"
 
 # @ woocommerce
 #: shortcodes/shortcode-cart.php:66 shortcodes/shortcode-my_account.php:171
@@ -12959,22 +12992,21 @@ msgstr "Katso vaihtoehdot"
 
 # @ woocommerce
 #: templates/loop/result-count.php:28
-#, fuzzy
 msgid "Showing the single result"
-msgstr "Näytetään %s - %s väli %s tuloksista"
+msgstr "Näytetään ainut tulos"
 
 # @ woocommerce
 #: templates/loop/result-count.php:30
-#, fuzzy, php-format
+#, php-format
 msgid "Showing all %d results"
-msgstr "Näytetään %s - %s väli %s tuloksista"
+msgstr "Näytetään kaikki %d tulosta"
 
 # @ woocommerce
 #: templates/loop/result-count.php:32
-#, fuzzy, php-format
+#, php-format
 msgctxt "%1$d = first, %2$d = last, %3$d = total"
 msgid "Showing %1$d–%2$d of %3$d results"
-msgstr "Näytetään %s - %s väli %s tuloksista"
+msgstr "Näytetään %1$d–%2$d väli %3$d tuloksista"
 
 # @ woocommerce
 #: templates/loop/sale-flash.php:16 templates/single-product/sale-flash.php:16
@@ -13088,9 +13120,8 @@ msgstr ""
 
 # @ woocommerce
 #: templates/myaccount/my-address.php:17
-#, fuzzy
 msgid "My Addresses"
-msgstr "Osoite"
+msgstr "Osoitteet"
 
 # @ woocommerce
 #: templates/myaccount/my-address.php:23
@@ -13104,9 +13135,8 @@ msgstr "Kassalla käytetään näitä osoitteita oletuksena."
 
 # @ woocommerce
 #: templates/myaccount/my-address.php:64
-#, fuzzy
 msgid "You have not set up this type of address yet."
-msgstr "Toimitusosoitetta ei ole asetettu."
+msgstr "Tällaista osoitetta ei ole asetettu."
 
 # @ woocommerce
 #: templates/myaccount/my-downloads.php:18
