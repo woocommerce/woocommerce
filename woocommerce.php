@@ -418,7 +418,7 @@ class Woocommerce {
 		if ( is_admin() ) {
 			if ( file_exists( WP_LANG_DIR . "/woocommerce/woocommerce-admin-$locale.mo" ) )
 				load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-admin-$locale.mo" );
-			elseif ( file_exists( $this->plugin_path() . "/i18n/languages/woocommerce-admin-$locale.mo" ) )
+			else
 				load_textdomain( 'woocommerce', $this->plugin_path() . "/i18n/languages/woocommerce-admin-$locale.mo" );
 		}
 
