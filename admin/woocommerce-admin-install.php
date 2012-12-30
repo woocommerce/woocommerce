@@ -194,9 +194,6 @@ function woocommerce_create_pages() {
 	// Checkout page
     woocommerce_create_page( esc_sql( _x( 'checkout', 'page_slug', 'woocommerce' ) ), 'woocommerce_checkout_page_id', __( 'Checkout', 'woocommerce' ), '[woocommerce_checkout]' );
 
-    // Order tracking page
-    woocommerce_create_page( esc_sql( _x( 'order-tracking', 'page_slug', 'woocommerce' ) ), 'woocommerce_order_tracking_page_id', __( 'Track your order', 'woocommerce' ), '[woocommerce_order_tracking]' );
-
 	// My Account page
     woocommerce_create_page( esc_sql( _x( 'my-account', 'page_slug', 'woocommerce' ) ), 'woocommerce_myaccount_page_id', __( 'My Account', 'woocommerce' ), '[woocommerce_my_account]' );
 

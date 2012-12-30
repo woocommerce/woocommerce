@@ -27,7 +27,7 @@ if ( ! class_exists( 'Woocommerce' ) ) {
  * Contains the main functions for WooCommerce, stores variables, and handles error messages
  *
  * @class Woocommerce
- * @version	1.6.4
+ * @version	2.0.0
  * @since 1.4
  * @package	WooCommerce
  * @author WooThemes
@@ -532,7 +532,6 @@ class Woocommerce {
 		if ( $post->post_type !== 'product' ) return;
 		unset( $GLOBALS['product'] );
 		$GLOBALS['product'] = get_product( $post );
-		return $GLOBALS['product'];
 	}
 
 
@@ -628,18 +627,29 @@ class Woocommerce {
 	 * @return void
 	 */
 	public function wp_head() {
-		$theme_name = ( function_exists( 'wp_get_theme' ) ) ? wp_get_theme() : get_current_theme();
-		$this->add_body_class( "theme-{$theme_name}" );
+		if ( is_woocommerce() ) {
+			$this->add_body_class( 'woocommerce' );
+			$this->add_body_class( 'woocommerce-page' );
+			return;
+		}
 
-		if ( is_woocommerce() ) $this->add_body_class('woocommerce');
+		if ( is_checkout() || is_order_received_page() ) {
+			$this->add_body_class( 'woocommerce-checkout' );
+			$this->add_body_class( 'woocommerce-page' );
+			return;
+		}
 
-		if ( is_checkout() ) $this->add_body_class('woocommerce-checkout');
+		if ( is_cart() ) {
+			$this->add_body_class( 'woocommerce-cart' );
+			$this->add_body_class( 'woocommerce-page' );
+			return;
+		}
 
-		if ( is_cart() ) $this->add_body_class('woocommerce-cart');
-
-		if ( is_account_page() ) $this->add_body_class('woocommerce-account');
-
-		if ( is_woocommerce() || is_checkout() || is_cart() || is_account_page() || is_page( woocommerce_get_page_id('order_tracking') ) || is_page( woocommerce_get_page_id('thanks') ) ) $this->add_body_class('woocommerce-page');
+		if ( is_account_page() ) {
+			$this->add_body_class( 'woocommerce-account' );
+			$this->add_body_class( 'woocommerce-page' );
+			return;
+		}
 	}
 
 
@@ -793,18 +803,6 @@ class Woocommerce {
 	        array(
 	            'hierarchical' 			=> false,
 	            'update_count_callback' => '_update_post_term_count',
-	            'labels' => array(
-	                    'name' 				=> __( 'Order statuses', 'woocommerce'),
-	                    'singular_name' 	=> __( 'Order status', 'woocommerce'),
-	                    'search_items' 		=> __( 'Search Order statuses', 'woocommerce'),
-	                    'all_items' 		=> __( 'All Order statuses', 'woocommerce'),
-	                    'parent_item' 		=> __( 'Parent Order status', 'woocommerce'),
-	                    'parent_item_colon' => __( 'Parent Order status:', 'woocommerce'),
-	                    'edit_item' 		=> __( 'Edit Order status', 'woocommerce'),
-	                    'update_item' 		=> __( 'Update Order status', 'woocommerce'),
-	                    'add_new_item' 		=> __( 'Add New Order status', 'woocommerce'),
-	                    'new_item_name' 	=> __( 'New Order status Name', 'woocommerce')
-	           	 ),
 	            'show_ui' 				=> false,
 	            'show_in_nav_menus' 	=> false,
 	            'query_var' 			=> $admin_only_query_var,
@@ -1552,7 +1550,7 @@ class Woocommerce {
 	 * @return array
 	 */
 	public function get_coupon_discount_types() {
-		if ( ! isset($this->coupon_discount_types ) ) {
+		if ( ! isset( $this->coupon_discount_types ) ) {
 			$this->coupon_discount_types = apply_filters( 'woocommerce_coupon_discount_types', array(
     			'fixed_cart' 	=> __( 'Cart Discount', 'woocommerce' ),
     			'percent' 		=> __( 'Cart % Discount', 'woocommerce' ),

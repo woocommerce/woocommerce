@@ -202,6 +202,24 @@ function woocommerce_placeholder_img( $size = 'shop_thumbnail' ) {
 
 
 /**
+ * woocommerce_lostpassword_url function.
+ *
+ * @access public
+ * @param mixed $url
+ * @return void
+ */
+function woocommerce_lostpassword_url( $url ) {
+    $id = woocommerce_get_page_id( 'lost_password' );
+    if ( $id != -1 )
+    	 $url = get_permalink( $id );
+
+    return $url;
+}
+
+add_filter( 'lostpassword_url',  'woocommerce_lostpassword_url' );
+
+
+/**
  * Send HTML emails from WooCommerce
  *
  * @access public
@@ -225,7 +243,7 @@ if ( ! function_exists( 'woocommerce_get_page_id' ) ) {
 	/**
 	 * WooCommerce page IDs
 	 *
-	 * retrieve page ids - used for myaccount, edit_address, change_password, shop, cart, checkout, pay, view_order, thanks, terms, order_tracking
+	 * retrieve page ids - used for myaccount, edit_address, change_password, shop, cart, checkout, pay, view_order, thanks, terms
 	 *
 	 * returns -1 if no page is found
 	 *
