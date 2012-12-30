@@ -414,8 +414,13 @@ class Woocommerce {
 
 		load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-$locale.mo" );
 
-		if ( is_admin() )
-			load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-admin-$locale.mo" );
+		// Load admin specific MO files
+		if ( is_admin() ) {
+			if ( file_exists( WP_LANG_DIR . "/woocommerce/woocommerce-admin-$locale.mo" ) )
+				load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-admin-$locale.mo" );
+			elseif ( file_exists( $this->plugin_path() . "/i18n/languages/woocommerce-admin-$locale.mo" ) )
+				load_textdomain( 'woocommerce', $this->plugin_path() . "/i18n/languages/woocommerce-admin-$locale.mo" );
+		}
 
 		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . "/i18n/languages/$formal" );
 		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . "/i18n/languages" );
