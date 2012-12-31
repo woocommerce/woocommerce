@@ -337,13 +337,18 @@ class Woocommerce {
 			add_filter( 'template_include', array( $this, 'template_loader' ) );
 			add_filter( 'comments_template', array( $this, 'comments_template_loader' ) );
 			add_filter( 'wp_redirect', array( $this, 'redirect' ), 1, 2 );
-			add_action( 'template_redirect', array( $this, 'buffer_checkout' ) );
 			add_action( 'wp_enqueue_scripts', array( $this, 'frontend_scripts' ) );
 			add_action( 'wp_print_scripts', array( $this, 'check_jquery' ), 25 );
 			add_action( 'wp_head', array( $this, 'generator' ) );
 			add_action( 'wp_head', array( $this, 'wp_head' ) );
 			add_filter( 'body_class', array( $this, 'output_body_class' ) );
 			add_action( 'wp_footer', array( $this, 'output_inline_js' ), 25 );
+
+			// HTTPS urls with SSL on
+			$filters = array( 'post_thumbnail_html', 'widget_text', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_siteurl', 'option_homeurl', 'option_home', 'option_url', 'option_wpurl', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
+
+			foreach ( $filters as $filter )
+				add_filter( $filter, array( $this, 'force_ssl' ) );
 		}
 
 		// Actions
@@ -356,16 +361,6 @@ class Woocommerce {
 		foreach ( $email_actions as $action )
 			add_action( $action, array( $this, 'send_transactional_email') );
 
-		// Actions for SSL
-		if ( ! is_admin() || defined('DOING_AJAX') ) {
-			add_action( 'template_redirect', array( $this, 'ssl_redirect' ) );
-
-			$filters = array( 'post_thumbnail_html', 'widget_text', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_siteurl', 'option_homeurl', 'option_home', 'option_url', 'option_wpurl', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
-
-			foreach ( $filters as $filter )
-				add_filter( $filter, array( $this, 'force_ssl') );
-		}
-
 		// Register globals for WC environment
 		$this->register_globals();
 
@@ -374,9 +369,6 @@ class Woocommerce {
 
 		// Init Images sizes
 		$this->init_image_sizes();
-
-		// Init styles
-		if ( ! is_admin() ) $this->init_styles();
 
 		// Trigger API requests
 		$this->api_requests();
@@ -416,10 +408,8 @@ class Woocommerce {
 
 		// Load admin specific MO files
 		if ( is_admin() ) {
-			if ( file_exists( WP_LANG_DIR . "/woocommerce/woocommerce-admin-$locale.mo" ) )
-				load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-admin-$locale.mo" );
-			else
-				load_textdomain( 'woocommerce', $this->plugin_path() . "/i18n/languages/woocommerce-admin-$locale.mo" );
+			load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-admin-$locale.mo" );
+			load_textdomain( 'woocommerce', $this->plugin_path() . "/i18n/languages/woocommerce-admin-$locale.mo" );
 		}
 
 		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . "/i18n/languages/$formal" );
@@ -489,23 +479,13 @@ class Woocommerce {
 	 * @return string
 	 */
 	public function comments_template_loader( $template ) {
-		if( get_post_type() !== 'product' ) return $template;
+		if ( get_post_type() !== 'product' )
+			return $template;
 
-		if (file_exists( STYLESHEETPATH . '/' . $this->template_url . 'single-product-reviews.php' ))
+		if ( file_exists( STYLESHEETPATH . '/' . $this->template_url . 'single-product-reviews.php' ))
 			return STYLESHEETPATH . '/' . $this->template_url . 'single-product-reviews.php';
 		else
 			return $this->plugin_path() . '/templates/single-product-reviews.php';
-	}
-
-
-	/**
-	 * Output buffering on the checkout allows gateways to do header redirects.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function buffer_checkout() {
-		if ( is_checkout() ) ob_start();
 	}
 
 
@@ -568,44 +548,6 @@ class Woocommerce {
 		// Support for hosts which don't use HTTPS, and use HTTP_X_FORWARDED_PROTO
 		if ( ! isset( $_SERVER['HTTPS'] ) && ! empty( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' )
 			$_SERVER['HTTPS'] = '1';
-	}
-
-
-	/**
-	 * Redirect to https if Force SSL is enabled.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function ssl_redirect() {
-		if ( get_option('woocommerce_force_ssl_checkout') == 'no' ) return;
-
-		if ( ! is_ssl() ) {
-			if ( is_checkout() ) {
-				wp_safe_redirect( str_replace('http:', 'https:', get_permalink( woocommerce_get_page_id( 'checkout' ) ) ), 301 );
-				exit;
-			} elseif ( is_account_page() || apply_filters( 'woocommerce_force_ssl_checkout', false ) ) {
-				if ( 0 === strpos( $_SERVER['REQUEST_URI'], 'http' ) ) {
-					wp_safe_redirect( preg_replace( '|^http://|', 'https://', $_SERVER['REQUEST_URI'] ) );
-					exit;
-				} else {
-					wp_safe_redirect( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
-					exit;
-				}
-				exit;
-			}
-		} else {
-			// Break out of SSL if we leave the checkout/my accounts (anywhere but thanks)
-			if ( get_option('woocommerce_unforce_ssl_checkout') == 'yes' && $_SERVER['REQUEST_URI'] && ! is_checkout() && ! is_page( woocommerce_get_page_id('thanks') ) && ! is_ajax() && ! is_account_page() && apply_filters( 'woocommerce_unforce_ssl_checkout', true ) ) {
-				if ( 0 === strpos( $_SERVER['REQUEST_URI'], 'http' ) ) {
-					wp_safe_redirect( preg_replace( '|^https://|', 'http://', $_SERVER['REQUEST_URI'] ) );
-					exit;
-				} else {
-					wp_safe_redirect( 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
-					exit;
-				}
-			}
-		}
 	}
 
 
@@ -1030,23 +972,6 @@ class Woocommerce {
 
 
 	/**
-	 * Init frontend CSS.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function init_styles() {
-
-    	// Optional front end css
-		if ( ( defined('WOOCOMMERCE_USE_CSS') && WOOCOMMERCE_USE_CSS ) || ( ! defined('WOOCOMMERCE_USE_CSS') && get_option('woocommerce_frontend_css') == 'yes') ) {
-			$css = file_exists( get_stylesheet_directory() . '/woocommerce/style.css' ) ? get_stylesheet_directory_uri() . '/woocommerce/style.css' : $this->plugin_url() . '/assets/css/woocommerce.css';
-
-			wp_enqueue_style( 'woocommerce_frontend_styles', $css );
-		}
-	}
-
-
-	/**
 	 * Register/queue frontend scripts.
 	 *
 	 * @access public
@@ -1121,6 +1046,16 @@ class Woocommerce {
 			$woocommerce_params['locale'] = json_encode( $this->countries->get_country_locale() );
 
 		wp_localize_script( 'woocommerce', 'woocommerce_params', apply_filters( 'woocommerce_params', $woocommerce_params ) );
+
+		// CSS Styles
+		if ( ! defined( 'WOOCOMMERCE_USE_CSS' ) )
+			define( 'WOOCOMMERCE_USE_CSS', get_option( 'woocommerce_frontend_css' ) == 'yes' ? true : false );
+
+		if ( WOOCOMMERCE_USE_CSS ) {
+			$css = file_exists( get_stylesheet_directory() . '/woocommerce/style.css' ) ? get_stylesheet_directory_uri() . '/woocommerce/style.css' : $this->plugin_url() . '/assets/css/woocommerce.css';
+
+			wp_enqueue_style( 'woocommerce_frontend_styles', $css );
+		}
 	}
 
 	/**
@@ -1671,7 +1606,8 @@ class Woocommerce {
 	 * @return void
 	 */
 	public function nocache() {
-		if ( ! defined('DONOTCACHEPAGE') ) define("DONOTCACHEPAGE", "true"); // WP Super Cache constant
+		if ( ! defined('DONOTCACHEPAGE') )
+			define("DONOTCACHEPAGE", "true"); // WP Super Cache constant
 	}
 
 
@@ -1684,7 +1620,7 @@ class Woocommerce {
 	 */
 	public function cart_has_contents_cookie( $set ) {
 		if ( ! headers_sent() ) {
-			if ($set)
+			if ( $set )
 				setcookie( "woocommerce_items_in_cart", "1", 0, COOKIEPATH, COOKIE_DOMAIN, false );
 			else
 				setcookie( "woocommerce_items_in_cart", "0", time() - 3600, COOKIEPATH, COOKIE_DOMAIN, false );

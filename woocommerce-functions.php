@@ -16,40 +16,77 @@
  * @access public
  * @return void
  */
-function woocommerce_redirects() {
+function woocommerce_template_redirect() {
 	global $woocommerce, $wp_query;
 
 	// When default permalinks are enabled, redirect shop page to post type archive url
-	if ( isset($_GET['page_id']) && $_GET['page_id'] > 0 && get_option( 'permalink_structure' )=="" && $_GET['page_id'] == woocommerce_get_page_id('shop') ) :
+	if ( ! empty( $_GET['page_id'] ) && get_option( 'permalink_structure' ) == "" && $_GET['page_id'] == woocommerce_get_page_id( 'shop' ) ) {
 		wp_safe_redirect( get_post_type_archive_link('product') );
 		exit;
-	endif;
+	}
 
 	// When on the checkout with an empty cart, redirect to cart page
-	if (is_page(woocommerce_get_page_id('checkout')) && sizeof($woocommerce->cart->get_cart())==0) :
-		wp_redirect(get_permalink(woocommerce_get_page_id('cart')));
+	elseif ( is_page( woocommerce_get_page_id( 'checkout' ) ) && sizeof( $woocommerce->cart->get_cart() ) == 0 ) {
+		wp_redirect( get_permalink( woocommerce_get_page_id( 'cart' ) ) );
 		exit;
-	endif;
+	}
 
 	// When on pay page with no query string, redirect to checkout
-	if (is_page(woocommerce_get_page_id('pay')) && !isset($_GET['order'])) :
-		wp_redirect(get_permalink(woocommerce_get_page_id('checkout')));
+	elseif ( is_page( woocommerce_get_page_id( 'pay' ) ) && ! isset( $_GET['order'] ) ) {
+		wp_redirect( get_permalink( woocommerce_get_page_id( 'checkout' ) ) );
 		exit;
-	endif;
+	}
 
 	// My account page redirects (logged out)
-	if (!is_user_logged_in() && ( is_page(woocommerce_get_page_id('edit_address')) || is_page(woocommerce_get_page_id('view_order')) || is_page(woocommerce_get_page_id('change_password')) )) :
-		wp_redirect(get_permalink(woocommerce_get_page_id('myaccount')));
+	elseif ( ! is_user_logged_in() && ( is_page( woocommerce_get_page_id( 'edit_address' ) ) || is_page( woocommerce_get_page_id( 'view_order' ) ) || is_page( woocommerce_get_page_id( 'change_password' ) ) ) ) {
+		wp_redirect( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
 		exit;
-	endif;
+	}
 
 	// Redirect to the product page if we have a single product
-	if (is_search() && is_post_type_archive('product') && get_option('woocommerce_redirect_on_single_search_result')=='yes') {
-		if ($wp_query->post_count==1) {
+	elseif ( is_search() && is_post_type_archive( 'product' ) && get_option( 'woocommerce_redirect_on_single_search_result' ) == 'yes' ) {
+		if ( $wp_query->post_count == 1 ) {
 			$product = get_product( $wp_query->post );
-			if ($product->is_visible()) wp_safe_redirect( get_permalink($product->id), 302 );
+			if ( $product->is_visible() )
+				wp_safe_redirect( get_permalink( $product->id ), 302 );
 			exit;
 		}
+	}
+
+	// Force SSL
+	elseif ( get_option('woocommerce_force_ssl_checkout') == 'yes' && ! is_ssl() ) {
+
+		if ( is_checkout() ) {
+			wp_safe_redirect( str_replace('http:', 'https:', get_permalink( woocommerce_get_page_id( 'checkout' ) ) ), 301 );
+			exit;
+		} elseif ( is_account_page() || apply_filters( 'woocommerce_force_ssl_checkout', false ) ) {
+			if ( 0 === strpos( $_SERVER['REQUEST_URI'], 'http' ) ) {
+				wp_safe_redirect( preg_replace( '|^http://|', 'https://', $_SERVER['REQUEST_URI'] ) );
+				exit;
+			} else {
+				wp_safe_redirect( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+				exit;
+			}
+		}
+
+	}
+
+	// Break out of SSL if we leave the checkout/my accounts (anywhere but thanks)
+	elseif ( get_option('woocommerce_force_ssl_checkout') == 'yes' && get_option('woocommerce_unforce_ssl_checkout') == 'yes' && is_ssl() && $_SERVER['REQUEST_URI'] && ! is_checkout() && ! is_page( woocommerce_get_page_id('thanks') ) && ! is_ajax() && ! is_account_page() && apply_filters( 'woocommerce_unforce_ssl_checkout', true ) ) {
+
+		if ( 0 === strpos( $_SERVER['REQUEST_URI'], 'http' ) ) {
+			wp_safe_redirect( preg_replace( '|^https://|', 'http://', $_SERVER['REQUEST_URI'] ) );
+			exit;
+		} else {
+			wp_safe_redirect( 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+			exit;
+		}
+
+	}
+
+	// Buffer the checkout page
+	elseif ( is_checkout() ) {
+		ob_start();
 	}
 }
 
