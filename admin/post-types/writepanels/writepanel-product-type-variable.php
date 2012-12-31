@@ -261,7 +261,7 @@ function variable_product_type_options() {
 			    jQuery('input.variable_is_downloadable, input.variable_is_virtual').change();
 
 				jQuery('.woocommerce_variations').unblock();
-
+				jQuery('.woocommerce_variations').trigger('woocommerce_variations_added');
 			});
 
 			return false;
@@ -301,6 +301,7 @@ function variable_product_type_options() {
 
 						$('#variable_product_options').load( this_page + ' #variable_product_options_inner', function() {
 							$('#variable_product_options').unblock();
+							jQuery('.woocommerce_variations').trigger('woocommerce_variations_added');
 						} );
 					} else {
 						$('#variable_product_options').unblock();
