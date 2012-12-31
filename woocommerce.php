@@ -517,7 +517,10 @@ class Woocommerce {
 	 * @return void
 	 */
 	public function api_requests() {
-		if ( isset( $_GET['wc-api'] ) ) {
+		if ( ! empty( $_GET['wc-api'] ) ) {
+			// Buffer, we won't want any output here
+			ob_start();
+
 			// Get API trigger
 			$api = strtolower( esc_attr( $_GET['wc-api'] ) );
 
@@ -527,6 +530,10 @@ class Woocommerce {
 
 			// Trigger actions
 			do_action( 'woocommerce_api_' . $api );
+
+			// Done, clear buffer and exit
+			ob_end_clean();
+			die('1');
 		}
 	}
 
