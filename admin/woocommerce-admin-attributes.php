@@ -238,6 +238,7 @@ function woocommerce_edit_attribute() {
 							<select name="attribute_type" id="attribute_type">
 								<option value="select" <?php selected( $att_type, 'select' ); ?>><?php _e( 'Select', 'woocommerce' ) ?></option>
 								<option value="text" <?php selected( $att_type, 'text' ); ?>><?php _e( 'Text', 'woocommerce' ) ?></option>
+								<?php do_action('woocommerce_admin_attribute_types'); ?>
 							</select>
 							<p class="description"><?php _e( 'Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>.', 'woocommerce' ); ?></p>
 						</td>
@@ -370,6 +371,7 @@ function woocommerce_add_attribute() {
 								<select name="attribute_type" id="attribute_type">
 									<option value="select"><?php _e( 'Select', 'woocommerce' ) ?></option>
 									<option value="text"><?php _e( 'Text', 'woocommerce' ) ?></option>
+									<?php do_action('woocommerce_admin_attribute_types'); ?>
 								</select>
 								<p class="description"><?php _e( 'Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>.', 'woocommerce' ); ?></p>
 							</div>
