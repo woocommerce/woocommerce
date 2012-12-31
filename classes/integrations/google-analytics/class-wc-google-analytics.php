@@ -26,17 +26,14 @@ class WC_Google_Analytics extends WC_Integration {
         $this->method_title     	= __( 'Google Analytics', 'woocommerce' );
         $this->method_description	= __( 'Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website.', 'woocommerce' );
 
-		// Load the form fields.
-		$this->init_form_fields();
-
 		// Load the settings.
 		$this->init_settings();
 
 		// Define user set variables
-		$this->ga_id 							= $this->settings['ga_id'];
-		$this->ga_standard_tracking_enabled 	= $this->settings['ga_standard_tracking_enabled'];
-		$this->ga_ecommerce_tracking_enabled 	= $this->settings['ga_ecommerce_tracking_enabled'];
-		$this->ga_event_tracking_enabled		= $this->settings['ga_event_tracking_enabled'];
+		$this->ga_id 							= $this->get_option( 'ga_id' );
+		$this->ga_standard_tracking_enabled 	= $this->get_option( 'ga_standard_tracking_enabled' );
+		$this->ga_ecommerce_tracking_enabled 	= $this->get_option( 'ga_ecommerce_tracking_enabled' );
+		$this->ga_event_tracking_enabled		= $this->get_option( 'ga_event_tracking_enabled' );
 
 		// Actions
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options') );

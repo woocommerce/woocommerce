@@ -22,22 +22,19 @@ class WC_COD extends WC_Payment_Gateway {
      * @return void
      */
 	function __construct() {
-		$this->id = 'cod';
-		$this->icon 		= apply_filters('woocommerce_cod_icon', '');
+		$this->id           = 'cod';
+		$this->icon         = apply_filters( 'woocommerce_cod_icon', '' );
 		$this->method_title = __( 'Cash on Delivery', 'woocommerce' );
-		$this->has_fields 	= false;
+		$this->has_fields   = false;
 
-		// Load the form fields.
-		$this->init_form_fields();
-
-		// Load the settings.
+		// Load the settings
 		$this->init_settings();
 
-		// Define user set variables
-		$this->title = $this->settings['title'];
-		$this->description = $this->settings['description'];
-		$this->instructions = $this->settings['instructions'];
-		$this->enable_for_methods = empty( $this->settings['enable_for_methods'] ) ? array() : $this->settings['enable_for_methods'];
+		// Get settings
+		$this->title              = $this->get_option( 'title' );
+		$this->description        = $this->get_option( 'description' );
+		$this->instructions       = $this->get_option( 'instructions' );
+		$this->enable_for_methods = $this->get_option( 'enable_for_methods', array() );
 
 		add_action( 'woocommerce_update_options_payment_gateways', array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_thankyou_cod', array( $this, 'thankyou' ) );
@@ -72,9 +69,10 @@ class WC_COD extends WC_Payment_Gateway {
 
     	$shipping_methods = array();
 
-    	foreach ( $woocommerce->shipping->load_shipping_methods() as $method ) {
-	    	$shipping_methods[ $method->id ] = $method->get_title();
-    	}
+    	if ( is_admin() )
+	    	foreach ( $woocommerce->shipping->load_shipping_methods() as $method ) {
+		    	$shipping_methods[ $method->id ] = $method->get_title();
+	    	}
 
     	$this->form_fields = array(
 			'enabled' => array(
@@ -195,7 +193,7 @@ class WC_COD extends WC_Payment_Gateway {
      * @return void
      */
 	function thankyou() {
-		if ($this->instructions!='') { echo wpautop($this->instructions); }
+		echo $this->instructions != '' ? wpautop( $this->instructions ) : '';
 	}
 
 }

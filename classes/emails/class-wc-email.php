@@ -130,7 +130,6 @@ class WC_Email extends WC_Settings_API {
 		global $woocommerce;
 
 		// Init settings
-		$this->init_form_fields();
 		$this->init_settings();
 
 		// Save settings hook
@@ -138,10 +137,10 @@ class WC_Email extends WC_Settings_API {
 
 		// Settings
 		$this->template_base 	= $woocommerce->plugin_path() . '/templates/';
-		$this->heading 			= empty( $this->settings['heading'] ) ? $this->heading : $this->settings['heading'];
-		$this->subject      	= empty( $this->settings['subject'] ) ? $this->subject : $this->settings['subject'];
-		$this->email_type     	= $this->settings['email_type'];
-		$this->enabled   		= $this->settings['enabled'];
+		$this->heading 			= $this->get_option( 'heading', $this->heading );
+		$this->subject      	= $this->get_option( 'subject', $this->subject );
+		$this->email_type     	= $this->get_option( 'email_type' );
+		$this->enabled   		= $this->get_option( 'enabled' );
 
 		// Find/replace
 		$this->find = array( '{blogname}' );

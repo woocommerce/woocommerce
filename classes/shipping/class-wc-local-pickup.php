@@ -33,18 +33,16 @@ class WC_Local_Pickup extends WC_Shipping_Method {
      * @return void
      */
     function init() {
-		// Load the form fields.
-		$this->init_form_fields();
 
 		// Load the settings.
 		$this->init_settings();
 
 		// Define user set variables
-		$this->enabled		= $this->settings['enabled'];
-		$this->title		= $this->settings['title'];
-		$this->codes		= empty( $this->settings['codes'] ) ? '' : $this->settings['codes'];
-		$this->availability	= $this->settings['availability'];
-		$this->countries	= $this->settings['countries'];
+		$this->enabled		= $this->get_option( 'enabled' );
+		$this->title		= $this->get_option( 'title' );
+		$this->codes		= $this->get_option( 'codes' );
+		$this->availability	= $this->get_option( 'availability' );
+		$this->countries	= $this->get_option( 'countries' );
 
 		// Actions
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -221,7 +219,7 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 		global $woocommerce;
 
 		if ( ! empty( $woocommerce->session->chosen_shipping_method ) && $woocommerce->session->chosen_shipping_method == 'local_pickup' ) {
-			if ( ! empty( $this->settings['apply_base_tax'] ) && $this->settings['apply_base_tax'] == 'yes' ) {
+			if ( $this->get_option( 'apply_base_tax' ) == 'yes' ) {
 
 				$country 	= $woocommerce->countries->get_base_country();
 				$state 		= $woocommerce->countries->get_base_state();
@@ -241,7 +239,7 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 	function method_chosen( $method ) {
 		global $woocommerce;
 
-		if ( $method == 'local_pickup' && ! empty( $this->settings['apply_base_tax'] ) && $this->settings['apply_base_tax'] == 'yes' ) {
+		if ( $method == 'local_pickup' && $this->get_option( 'apply_base_tax' ) == 'yes' ) {
 			$woocommerce->cart->calculate_totals();
 		}
 	}

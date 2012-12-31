@@ -27,15 +27,12 @@ class WC_Cheque extends WC_Payment_Gateway {
         $this->has_fields 		= false;
         $this->method_title     = __( 'Cheque', 'woocommerce' );
 
-		// Load the form fields.
-		$this->init_form_fields();
-
 		// Load the settings.
 		$this->init_settings();
 
 		// Define user set variables
-		$this->title = $this->settings['title'];
-		$this->description = $this->settings['description'];
+		$this->title       = $this->get_option( 'title' );
+		$this->description = $this->get_option( 'description' );
 
 		// Actions
 		add_action( 'woocommerce_update_options_payment_gateways', array( $this, 'process_admin_options' ) );

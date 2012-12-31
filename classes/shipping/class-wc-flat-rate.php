@@ -42,27 +42,21 @@ class WC_Flat_Rate extends WC_Shipping_Method {
      * @return void
      */
     function init() {
-    	// Load the form fields.
-		$this->init_form_fields();
 
 		// Load the settings.
 		$this->init_settings();
 
 		// Define user set variables
-        $this->enabled		  = $this->settings['enabled'];
-		$this->title 		  = $this->settings['title'];
-		$this->availability   = $this->settings['availability'];
-		$this->countries 	  = $this->settings['countries'];
-		$this->type 		  = $this->settings['type'];
-		$this->tax_status	  = $this->settings['tax_status'];
-		$this->cost 		  = $this->settings['cost'];
-		$this->cost_per_order = isset( $this->settings['cost_per_order'] ) ? $this->settings['cost_per_order'] : '';
-		$this->fee 			  = $this->settings['fee'];
-		$this->minimum_fee 	  = isset( $this->settings['minimum_fee'] ) ? $this->settings['minimum_fee'] : '';
-		$this->options 		  = isset( $this->settings['options'] ) ? $this->settings['options'] : '';
-
-		// Get options
-		$this->options		  = (array) explode( "\n", $this->options );
+		$this->title 		  = $this->get_option( 'title' );
+		$this->availability   = $this->get_option( 'availability' );
+		$this->countries 	  = $this->get_option( 'countries' );
+		$this->type 		  = $this->get_option( 'type' );
+		$this->tax_status	  = $this->get_option( 'tax_status' );
+		$this->cost 		  = $this->get_option( 'cost' );
+		$this->cost_per_order = $this->get_option( 'cost_per_order' );
+		$this->fee 			  = $this->get_option( 'fee' );
+		$this->minimum_fee 	  = $this->get_option( 'minimum_fee' );
+		$this->options 		  = (array) explode( "\n", $this->get_option( 'options' ) );
 
 		// Load Flat rates
 		$this->get_flat_rates();

@@ -32,16 +32,13 @@ class WC_Mijireh_Checkout extends WC_Payment_Gateway {
 		$this->icon 		= apply_filters( 'woocommerce_mijireh_checkout_icon', $woocommerce->plugin_url() . '/classes/gateways/mijireh/assets/images/credit_cards.png' );
 		$this->has_fields = false;
 
-		// Load the form fields.
-		$this->init_form_fields();
-
 		// Load the settings.
 		$this->init_settings();
 
 		// Define user set variables
-		$this->access_key 	= $this->settings['access_key'];
-		$this->title 		= $this->settings['title'];
-		$this->description 	= $this->settings['description'];
+		$this->access_key 	= $this->get_option( 'access_key' );
+		$this->title 		= $this->get_option( 'title' );
+		$this->description 	= $this->get_option( 'description' );
 
 		if ( $this->enabled && is_admin() ) {
 			$this->install_slurp_page();

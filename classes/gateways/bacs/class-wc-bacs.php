@@ -26,21 +26,19 @@ class WC_BACS extends WC_Payment_Gateway {
 		$this->icon 			= apply_filters('woocommerce_bacs_icon', '');
 		$this->has_fields 		= false;
 		$this->method_title     = __( 'Bacs', 'woocommerce' );
-		// Load the form fields.
-		$this->init_form_fields();
 
 		// Load the settings.
 		$this->init_settings();
 
 		// Define user set variables
-		$this->title 			= $this->settings['title'];
-		$this->description      = $this->settings['description'];
-		$this->account_name     = $this->settings['account_name'];
-		$this->account_number   = $this->settings['account_number'];
-		$this->sort_code        = $this->settings['sort_code'];
-		$this->bank_name        = $this->settings['bank_name'];
-		$this->iban             = $this->settings['iban'];
-		$this->bic              = $this->settings['bic'];
+		$this->title 			= $this->get_option( 'title' );
+		$this->description      = $this->get_option( 'description' );
+		$this->account_name     = $this->get_option( 'account_name' );
+		$this->account_number   = $this->get_option( 'account_number' );
+		$this->sort_code        = $this->get_option( 'sort_code' );
+		$this->bank_name        = $this->get_option( 'bank_name' );
+		$this->iban             = $this->get_option( 'iban' );
+		$this->bic              = $this->get_option( 'bic' );
 
 		// Actions
 		add_action( 'woocommerce_update_options_payment_gateways', array( $this, 'process_admin_options' ) );

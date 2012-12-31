@@ -26,31 +26,28 @@ class WC_Paypal extends WC_Payment_Gateway {
 	public function __construct() {
 		global $woocommerce;
 
-        $this->id			= 'paypal';
-        $this->icon 		= apply_filters( 'woocommerce_paypal_icon', $woocommerce->plugin_url() . '/assets/images/icons/paypal.png' );
-        $this->has_fields 	= false;
-        $this->liveurl 		= 'https://www.paypal.com/webscr';
-		$this->testurl 		= 'https://www.sandbox.paypal.com/webscr';
-        $this->method_title     = __( 'PayPal', 'woocommerce' );
-        $this->notify_url	= str_replace( 'https:', 'http:', add_query_arg( 'wc-api', 'WC_Paypal', home_url( '/' ) ) );
-
-		// Load the form fields.
-		$this->init_form_fields();
+        $this->id           = 'paypal';
+        $this->icon         = apply_filters( 'woocommerce_paypal_icon', $woocommerce->plugin_url() . '/assets/images/icons/paypal.png' );
+        $this->has_fields   = false;
+        $this->liveurl      = 'https://www.paypal.com/webscr';
+		$this->testurl      = 'https://www.sandbox.paypal.com/webscr';
+        $this->method_title = __( 'PayPal', 'woocommerce' );
+        $this->notify_url   = str_replace( 'https:', 'http:', add_query_arg( 'wc-api', 'WC_Paypal', home_url( '/' ) ) );
 
 		// Load the settings.
 		$this->init_settings();
 
 		// Define user set variables
-		$this->title 			= $this->settings['title'];
-		$this->description 		= $this->settings['description'];
-		$this->email 			= $this->settings['email'];
-		$this->testmode			= $this->settings['testmode'];
-		$this->send_shipping	= $this->settings['send_shipping'];
-		$this->address_override	= isset( $this->settings['address_override'] ) ? $this->settings['address_override'] : 'no';
-		$this->debug			= $this->settings['debug'];
-		$this->form_submission_method = ( isset( $this->settings['form_submission_method'] ) && $this->settings['form_submission_method'] == 'yes' ) ? true : false;
-		$this->page_style 		= ( isset( $this->settings['page_style'] ) ) ? $this->settings['page_style'] : '';
-		$this->invoice_prefix	= ! empty( $this->settings['invoice_prefix'] ) ? $this->settings['invoice_prefix'] : 'WC-';
+		$this->title 			= $this->get_option( 'title' );
+		$this->description 		= $this->get_option( 'description' );
+		$this->email 			= $this->get_option( 'email' );
+		$this->testmode			= $this->get_option( 'testmode' );
+		$this->send_shipping	= $this->get_option( 'send_shipping' );
+		$this->address_override	= $this->get_option( 'address_override' );
+		$this->debug			= $this->get_option( 'debug' );
+		$this->form_submission_method = $this->get_option( 'form_submission_method' ) == 'yes' ? true : false;
+		$this->page_style 		= $this->get_option( 'page_style' );
+		$this->invoice_prefix	= $this->get_option( 'invoice_prefix', 'WC-' );
 
 		// Logs
 		if ( 'yes' == $this->debug )
@@ -94,11 +91,11 @@ class WC_Paypal extends WC_Payment_Gateway {
 
     	<?php if ( $this->is_valid_for_use() ) : ?>
 
-			<table class="form-table">    		
+			<table class="form-table">
 			<?php
     			// Generate the HTML For the settings form.
-    			$this->generate_settings_html();    			
-			?>    		
+    			$this->generate_settings_html();
+			?>
 			</table><!--/.form-table-->
 
 		<?php else : ?>
@@ -499,8 +496,8 @@ class WC_Paypal extends WC_Payment_Gateway {
 
     	// Get recieved values from post data
 		$received_values = (array) stripslashes_deep( $_POST );
-		
-		// Check email address to make sure that IPN response is not a spoof 
+
+		// Check email address to make sure that IPN response is not a spoof
 		if ( strcasecmp( trim( $received_values['receiver_email'] ), trim( $this->email ) ) != 0 ) {
 			if ( 'yes' == $this->debug )
 				$this->log->add( 'paypal', "IPN Response is for another one: {$received_values['receiver_email']} our email is {$this->email}" );

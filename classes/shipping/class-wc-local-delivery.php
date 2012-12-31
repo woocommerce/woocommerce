@@ -33,21 +33,18 @@ class WC_Local_Delivery extends WC_Shipping_Method {
      * @return void
      */
     function init() {
-		// Load the form fields.
-		$this->init_form_fields();
 
 		// Load the settings.
 		$this->init_settings();
 
 		// Define user set variables
-		$this->enabled		= empty( $this->settings['enabled'] ) ? 'no' : $this->settings['enabled'];
-		$this->title		= empty( $this->settings['title'] ) ? '' : $this->settings['title'];
-		$this->type 		= $this->settings['type'];
-		$this->fee			= empty( $this->settings['fee'] ) ? '' : $this->settings['fee'];
-		$this->type			= empty( $this->settings['type'] ) ? '' : $this->settings['type'];
-		$this->codes		= empty( $this->settings['codes'] ) ? '' : $this->settings['codes'];
-		$this->availability	= empty( $this->settings['availability'] ) ? '' : $this->settings['availability'];
-		$this->countries	= empty( $this->settings['countries'] ) ? '' : $this->settings['countries'];
+		$this->title		= $this->get_option( 'title' );
+		$this->type 		= $this->get_option( 'type' );
+		$this->fee			= $this->get_option( 'fee' );
+		$this->type			= $this->get_option( 'type' );
+		$this->codes		= $this->get_option( 'codes' );
+		$this->availability	= $this->get_option( 'availability' );
+		$this->countries	= $this->get_option( 'countries' );
 
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
 	}

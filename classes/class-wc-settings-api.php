@@ -3,7 +3,7 @@
  * Admin Settings API used by Shipping Methods and Payment Gateways
  *
  * @class 		WC_Settings_API
- * @version		1.6.4
+ * @version		2.0.0
  * @package		WooCommerce/Classes
  * @author 		WooThemes
  */
@@ -24,7 +24,6 @@ class WC_Settings_API {
 	/** @var array Sanitized fields after validation. */
 	public $sanitized_fields = array();
 
-
 	/**
 	 * Admin Options
 	 *
@@ -36,7 +35,7 @@ class WC_Settings_API {
 	 * @return void
 	 */
 	public function admin_options() { ?>
-		<h3><?php echo ( ! empty( $this->method_title ) ) ? $this->method_title : __( 'Settings','woocommerce' ) ; ?></h3>
+		<h3><?php echo ( ! empty( $this->method_title ) ) ? $this->method_title : __( 'Settings', 'woocommerce' ) ; ?></h3>
 
 		<?php echo ( ! empty( $this->method_description ) ) ? wpautop( $this->method_description ) : ''; ?>
 
@@ -44,6 +43,7 @@ class WC_Settings_API {
 			<?php $this->generate_settings_html(); ?>
 		</table><?php
 	}
+
 
 	/**
 	 * Initialise Settings Form Fields
@@ -55,9 +55,8 @@ class WC_Settings_API {
 	 * @access public
 	 * @return string
 	 */
-	public function init_form_fields() {
-		return __( 'This public function needs to be overridden by your payment gateway class.', 'woocommerce' );
-	}
+	public function init_form_fields() {}
+
 
 	/**
 	 * Admin Panel Options Processing
@@ -79,6 +78,7 @@ class WC_Settings_API {
     	}
     }
 
+
     /**
      * Display admin error messages.
      *
@@ -87,6 +87,7 @@ class WC_Settings_API {
 	 * @return void
 	 */
     public function display_errors() {}
+
 
 	/**
      * Initialise Gateway Settings
@@ -102,32 +103,54 @@ class WC_Settings_API {
 	 */
     public function init_settings() {
 
+	    if ( ! empty( $this->settings ) )
+	    	return;
+
     	// Load form_field settings
-    	if ( $this->form_fields ) {
+    	$this->settings = get_option( $this->plugin_id . $this->id . '_settings', null );
 
-    		$form_field_settings = ( array ) get_option( $this->plugin_id . $this->id . '_settings' );
+    	if ( ! is_array( $this->settings ) ) {
 
-	    	if ( ! $form_field_settings ) {
+    		// If there are no settings defined, load defaults
+    		$this->init_form_fields();
 
-	    		// If there are no settings defined, load defaults
-	    		foreach ( $this->form_fields as $k => $v )
-	    			$form_field_settings[ $k ] = isset( $v['default'] ) ? $v['default'] : '';
-
-	    	} else {
-
-		    	// Prevent "undefined index" errors.
-		    	foreach ( $this->form_fields as $k => $v )
-    				$form_field_settings[ $k ] = isset( $form_field_settings[ $k ] ) ? $form_field_settings[ $k ] : ( isset( $v['default'] ) ? $v['default'] : '' );
-
-	    	}
-
-	    	// Set and decode escaped values
-	    	$this->settings = array_map( array( $this, 'format_settings' ), $form_field_settings );
+    		foreach ( $this->form_fields as $k => $v )
+    			$this->settings[ $k ] = isset( $v['default'] ) ? $v['default'] : '';
     	}
 
-    	if ( isset( $this->settings['enabled'] ) && ( $this->settings['enabled'] == 'yes' ) )
-    		$this->enabled = 'yes';
+    	$this->settings = array_map( array( $this, 'format_settings' ), $this->settings );
+    	$this->enabled  = isset( $this->settings['enabled'] ) && $this->settings['enabled'] == 'yes' ? 'yes' : 'no';
+    }
 
+
+    /**
+     * get_option function.
+     *
+     * Gets and option from the settings API, using defaults if neccessary to prevent undefined notices.
+     *
+     * @access public
+     * @param mixed $key
+     * @param mixed $empty_value
+     * @return void
+     */
+    public function get_option( $key, $empty_value = '' ) {
+
+	    if ( empty( $this->settings ) )
+	    	$this->init_settings();
+
+    	// Get option default if unset
+	    if ( ! isset( $this->settings[ $key ] ) ) {
+
+		    if ( ! isset( $this->form_fields ) )
+		    	$this->init_form_fields();
+
+		    $this->settings[ $key ] = isset( $this->form_fields[ $key ]['default'] ) ? $this->form_fields[ $key ]['default'] : '';
+	    }
+
+	    if ( empty( $this->settings[ $key ] ) )
+	    	$this->settings[ $key ] = $empty_value;
+
+	    return $this->settings[ $key ];
     }
 
 
@@ -157,8 +180,11 @@ class WC_Settings_API {
      */
     public function generate_settings_html ( $form_fields = false ) {
 
-    	if ( ! $form_fields )
+	    $this->init_form_fields();
+
+    	if ( ! $form_fields ) {
     		$form_fields = $this->form_fields;
+    	}
 
     	$html = '';
     	foreach ( $form_fields as $k => $v ) {
@@ -207,8 +233,7 @@ class WC_Settings_API {
 			$html .= '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post( $data['title'] ) . '</span></legend>' . "\n";
-                $value = ( isset( $this->settings[ $key ] ) ) ? esc_attr( $this->settings[ $key ] ) : '';
-				$html .= '<input class="input-text regular-input ' . esc_attr( $data['class'] ) . '" type="' . esc_attr( $data['type'] ) . '" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" style="' . esc_attr( $data['css'] ) . '" value="' . $value . '" placeholder="' . esc_attr( $data['placeholder'] ) . '" ' . disabled( $data['disabled'], true, false ) . ' ' . implode( ' ', $custom_attributes ) . ' />';
+				$html .= '<input class="input-text regular-input ' . esc_attr( $data['class'] ) . '" type="' . esc_attr( $data['type'] ) . '" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" style="' . esc_attr( $data['css'] ) . '" value="' . esc_attr( $this->get_option( $key ) ) . '" placeholder="' . esc_attr( $data['placeholder'] ) . '" ' . disabled( $data['disabled'], true, false ) . ' ' . implode( ' ', $custom_attributes ) . ' />';
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= ' <p class="description">' . wp_kses_post( $data['description'] ) . '</p>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
@@ -247,8 +272,7 @@ class WC_Settings_API {
 			$html .= '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post( $data['title'] ) . '</span></legend>' . "\n";
-                $value = ( isset( $this->settings[ $key ] ) ) ? esc_attr( $this->settings[ $key ] ) : '';
-				$html .= '<input class="input-text regular-input ' . esc_attr( $data['class'] ) . '" type="password" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" style="' . esc_attr( $data['css'] ) . '" value="' . $value . '" ' . disabled( $data['disabled'], true, false ) . ' ' . implode( ' ', $custom_attributes ) . ' />';
+				$html .= '<input class="input-text regular-input ' . esc_attr( $data['class'] ) . '" type="password" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" style="' . esc_attr( $data['css'] ) . '" value="' . esc_attr( $this->get_option( $key ) ) . '" ' . disabled( $data['disabled'], true, false ) . ' ' . implode( ' ', $custom_attributes ) . ' />';
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= ' <p class="description">' . esc_attr( $data['description'] ) . '</p>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
@@ -271,7 +295,6 @@ class WC_Settings_API {
 
     	$data['title']			= isset( $data['title'] ) ? $data['title'] : '';
     	$data['disabled']		= empty( $data['disabled'] ) ? false : true;
-    	if ( ! isset( $this->settings[$key] ) ) $this->settings[$key] = '';
     	$data['class']			= isset( $data['class'] ) ? $data['class'] : '';
     	$data['css'] 			= isset( $data['css'] ) ? $data['css'] : '';
 
@@ -288,8 +311,7 @@ class WC_Settings_API {
 			$html .= '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post( $data['title'] ) . '</span></legend>' . "\n";
-                $value = ( isset( $this->settings[ $key ] ) ) ? esc_textarea( $this->settings[ $key ] ) : '';
-				$html .= '<textarea rows="3" cols="20" class="input-text wide-input ' . esc_attr( $data['class'] ) . '" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" style="' . esc_attr( $data['css'] ) . '" ' . disabled( $data['disabled'], true, false ) . ' ' . implode( ' ', $custom_attributes ) . '>' . $value . '</textarea>';
+				$html .= '<textarea rows="3" cols="20" class="input-text wide-input ' . esc_attr( $data['class'] ) . '" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" style="' . esc_attr( $data['css'] ) . '" ' . disabled( $data['disabled'], true, false ) . ' ' . implode( ' ', $custom_attributes ) . '>' . esc_textarea( $this->get_option( $key ) ) . '</textarea>';
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= ' <p class="description">' . wp_kses_post( $data['description'] ) . '</p>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
@@ -328,7 +350,7 @@ class WC_Settings_API {
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post( $data['title'] ) . '</span></legend>' . "\n";
 				$html .= '<label for="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '">';
-				$html .= '<input style="' . esc_attr( $data['css'] ) . '" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" type="checkbox" value="1" ' . checked( $this->settings[$key], 'yes', false ) . ' class="' . esc_attr( $data['class'] ).'" ' . disabled( $data['disabled'], true, false ) . ' ' . implode( ' ', $custom_attributes ) . ' /> ' . wp_kses_post( $data['label'] ) . '</label><br />' . "\n";
+				$html .= '<input style="' . esc_attr( $data['css'] ) . '" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" type="checkbox" value="1" ' . checked( $this->get_option( $key ), 'yes', false ) . ' class="' . esc_attr( $data['class'] ).'" ' . disabled( $data['disabled'], true, false ) . ' ' . implode( ' ', $custom_attributes ) . ' /> ' . wp_kses_post( $data['label'] ) . '</label><br />' . "\n";
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= ' <p class="description">' . wp_kses_post( $data['description'] ) . '</p>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
@@ -371,7 +393,7 @@ class WC_Settings_API {
 				$html .= '<select name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" style="' . esc_attr( $data['css'] ) . '" class="select ' .esc_attr( $data['class'] ) . '" ' . disabled( $data['disabled'], true, false ) . ' ' . implode( ' ', $custom_attributes ) . '>';
 
 				foreach ($data['options'] as $option_key => $option_value) :
-					$html .= '<option value="' . esc_attr( $option_key ) . '" '.selected($option_key, esc_attr($this->settings[$key]), false).'>' . esc_attr( $option_value ) . '</option>';
+					$html .= '<option value="' . esc_attr( $option_key ) . '" '.selected( $option_key, esc_attr( $this->get_option( $key ) ), false ).'>' . esc_attr( $option_value ) . '</option>';
 				endforeach;
 
 				$html .= '</select>';
@@ -417,9 +439,7 @@ class WC_Settings_API {
 				$html .= '<select multiple="multiple" style="' . esc_attr( $data['css'] ) . '" class="multiselect ' . esc_attr( $data['class'] ) . '" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '[]" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" ' . disabled( $data['disabled'], true, false ) . ' ' . implode( ' ', $custom_attributes ) . '>';
 
 				foreach ( $data['options'] as $option_key => $option_value) {
-					$html .= '<option value="' . esc_attr( $option_key ) . '" ';
-					if ( isset( $this->settings[ $key ] ) && in_array( $option_key, (array) $this->settings[ $key ] ) ) $html .= 'selected="selected"';
-					$html .= '>' . esc_attr( $option_value ) . '</option>';
+					$html .= '<option value="' . esc_attr( $option_key ) . '" ' . selected( in_array( $option_key, $this->get_option( $key, array() ) ), true, false ) . '>' . esc_attr( $option_value ) . '</option>';
 				}
 
 				$html .= '</select>';
@@ -467,6 +487,8 @@ class WC_Settings_API {
      * @return void
      */
     public function validate_settings_fields( $form_fields = false ) {
+
+	    $this->init_form_fields();
 
     	if ( ! $form_fields )
     		$form_fields = $this->form_fields;
@@ -518,7 +540,7 @@ class WC_Settings_API {
      * @return string
      */
     public function validate_text_field( $key ) {
-    	$text = ( isset( $this->settings[ $key ] ) ) ? $this->settings[ $key ] : '';
+    	$text = $this->get_option( $key );
 
     	if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
     		$text = esc_attr( trim( stripslashes( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) );
@@ -539,7 +561,7 @@ class WC_Settings_API {
      * @return string
      */
     public function validate_password_field( $key ) {
-    	$text = (isset($this->settings[$key])) ? $this->settings[$key] : '';
+    	$text = $this->get_option( $key );
 
     	if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
     		$text = esc_attr( woocommerce_clean( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) );
@@ -560,7 +582,7 @@ class WC_Settings_API {
      * @return string
      */
     public function validate_textarea_field( $key ) {
-    	$text = ( isset( $this->settings[ $key ] ) ) ? $this->settings[ $key ] : '';
+    	$text = $this->get_option( $key );
 
     	if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
     		$text = esc_attr( trim( stripslashes( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) );
@@ -581,7 +603,7 @@ class WC_Settings_API {
      * @return string
      */
     public function validate_select_field( $key ) {
-    	$value = ( isset( $this->settings[ $key ] ) ) ? $this->settings[ $key ] : '';
+    	$value = $this->get_option( $key );
 
     	if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
     		$value = esc_attr( woocommerce_clean( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) );
@@ -601,7 +623,7 @@ class WC_Settings_API {
      * @return string
      */
     public function validate_multiselect_field( $key ) {
-    	$value = ( isset( $this->settings[ $key ] ) ) ? $this->settings[ $key ] : '';
+    	$value = $this->get_option( $key );
 
     	if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
     		$value = array_map('esc_attr', array_map('woocommerce_clean', (array) $_POST[ $this->plugin_id . $this->id . '_' . $key ] ));

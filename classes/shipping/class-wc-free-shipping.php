@@ -33,29 +33,17 @@ class WC_Free_Shipping extends WC_Shipping_Method {
      * @return void
      */
     function init() {
-		// Load the form fields.
-		$this->init_form_fields();
 
 		// Load the settings.
 		$this->init_settings();
 
 		// Define user set variables
-        $this->enabled		= $this->settings['enabled'];
-		$this->title 		= $this->settings['title'];
-		$this->min_amount 	= $this->settings['min_amount'] ? $this->settings['min_amount'] : 0;
-		$this->availability = $this->settings['availability'];
-		$this->countries 	= $this->settings['countries'];
-		$this->requires		= isset( $this->settings['requires'] ) ? $this->settings['requires'] : '';
-
-		// Backwards compat
-		if ( ! isset( $this->settings['requires'] ) ) {
-			if ( $this->settings['requires_coupon'] && $this->min_amount )
-				$this->requires = 'either';
-			elseif ( $this->settings['requires_coupon'] )
-				$this->requires = 'coupon';
-			elseif ( $this->min_amount )
-				$this->requires = 'min_amount';
-		}
+        $this->enabled		= $this->get_option( 'enabled' );
+		$this->title 		= $this->get_option( 'title' );
+		$this->min_amount 	= $this->get_option( 'min_amount', 0 );
+		$this->availability = $this->get_option( 'availability' );
+		$this->countries 	= $this->get_option( 'countries' );
+		$this->requires		= $this->get_option( 'requires' );
 
 		// Actions
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -70,6 +58,16 @@ class WC_Free_Shipping extends WC_Shipping_Method {
      */
     function init_form_fields() {
     	global $woocommerce;
+
+    	// Backwards compat
+    	if ( $this->get_option( 'requires_coupon' ) && $this->min_amount )
+			$default_requires = 'either';
+		elseif ( $this->get_option( 'requires_coupon' ) )
+			$default_requires = 'coupon';
+		elseif ( $this->min_amount )
+			$default_requires = 'min_amount';
+		else
+			$default_requires = '';
 
     	$this->form_fields = array(
 			'enabled' => array(
@@ -105,7 +103,7 @@ class WC_Free_Shipping extends WC_Shipping_Method {
 			'requires' => array(
 							'title' 		=> __( 'Free Shipping Requires...', 'woocommerce' ),
 							'type' 			=> 'select',
-							'default' 		=> '',
+							'default' 		=> $default_requires,
 							'options'		=> array(
 								'' 				=> __( 'N/A', 'woocommerce' ),
 								'coupon'		=> __( 'A valid free shipping coupon', 'woocommerce' ),

@@ -20,9 +20,9 @@ class WC_ShareYourCart extends WC_Integration {
         $this->method_description	= __( 'Increase your social media exposure by 10 percent! ShareYourCart helps you get more customers by motivating satisfied customers to talk with their friends about your products. For help with ShareYourCart view the <a href="http://www.woothemes.com/woocommerce-docs/user-guide/shareyourcart/" target="__blank">documentation</a>.', 'woocommerce' );
 
 		// Load the settings.
-		$this->settings = ( array ) get_option( $this->plugin_id . $this->id . '_settings' ); //do not rely on the base implementation of init_settings
+		$this->init_settings();
 
-		if ( isset( $this->settings['enabled'] ) && $this->settings['enabled'] == 'yes' ) {
+		if ( $this->enabled == 'yes' ) {
 
 			//the classes need to be initialized
 			$this->init_share_your_cart();
