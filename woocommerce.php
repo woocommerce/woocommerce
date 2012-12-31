@@ -75,11 +75,6 @@ class Woocommerce {
 	public $customer;
 
 	/**
-	 * @var WC_Shipping
-	 */
-	public $shipping;
-
-	/**
 	 * @var WC_Product_Factory
 	 */
 	public $product_factory;
@@ -88,11 +83,6 @@ class Woocommerce {
 	 * @var WC_Cart
 	 */
 	public $cart;
-
-	/**
-	 * @var WC_Payment_Gateways
-	 */
-	public $payment_gateways;
 
 	/**
 	 * @var WC_Countries
@@ -133,6 +123,9 @@ class Woocommerce {
 	 */
 	public function __construct() {
 
+		// Auto-load classes on demand
+		spl_autoload_register( array( $this, 'autoload' ) );
+
 		// Define version constant
 		define( 'WOOCOMMERCE_VERSION', $this->version );
 
@@ -148,13 +141,94 @@ class Woocommerce {
 		// Include required files
 		$this->includes();
 
-		// Actions
+		// Hooks
+		add_filter( 'woocommerce_shipping_methods', array( $this, 'core_shipping' ) );
+		add_filter( 'woocommerce_payment_gateways', array( $this, 'core_gateways' ) );
+		add_action( 'widgets_init', array( $this, 'register_widgets' ) );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( $this, 'include_template_functions' ), 25 );
 		add_action( 'after_setup_theme', array( $this, 'compatibility' ) );
 
 		// Loaded action
 		do_action( 'woocommerce_loaded' );
+	}
+
+	/**
+	 * __get function.
+	 *
+	 * @access public
+	 * @param mixed $key
+	 * @return mixed
+	 */
+	public function __get( $key ) {
+
+		if ( 'payment_gateways' == $key ) {
+			$this->payment_gateways = new WC_Payment_Gateways();	// Payment gateways. Loads and stores payment methods
+			$this->payment_gateways->init();
+			return $this->payment_gateways;
+		}
+
+		elseif ( 'shipping' == $key ) {
+			$this->shipping = new WC_Shipping();					// Shipping class. loads and stores shipping methods
+			$this->shipping->init();
+			return $this->shipping;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Auto-load WC classes on demand to reduce memory consumption.
+	 *
+	 * @access public
+	 * @param mixed $class
+	 * @return void
+	 */
+	public function autoload( $class ) {
+
+		$class = strtolower( $class );
+
+		if ( strpos( $class, 'wc_gateway_' ) === 0 ) {
+
+			$path = $this->plugin_path() . '/classes/gateways/' . trailingslashit( substr( str_replace( '_', '-', $class ), 11 ) );
+			$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
+
+			if ( file_exists( $path . $file ) ) {
+				include( $path . $file );
+				return;
+			}
+
+		} elseif ( strpos( $class, 'wc_shipping_' ) === 0 ) {
+
+			$path = $this->plugin_path() . '/classes/shipping/' . trailingslashit( substr( str_replace( '_', '-', $class ), 12 ) );
+			$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
+
+			if ( file_exists( $path . $file ) ) {
+				include( $path . $file );
+				return;
+			}
+
+		} elseif ( strpos( $class, 'wc_shortcode_' ) === 0 ) {
+
+			$path = $this->plugin_path() . '/classes/shortcodes/';
+			$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
+
+			if ( file_exists( $path . $file ) ) {
+				include( $path . $file );
+				return;
+			}
+		}
+
+		if ( strpos( $class, 'wc_' ) === 0 ) {
+
+			$path = $this->plugin_path() . '/classes/';
+			$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
+
+			if ( file_exists( $path . $file ) ) {
+				include( $path . $file );
+				return;
+			}
+		}
 	}
 
 
@@ -184,57 +258,39 @@ class Woocommerce {
 
 
 	/**
-	 * Include required core files.
+	 * Include required core files used in admin and on the frontend.
 	 *
 	 * @access public
 	 * @return void
 	 */
 	function includes() {
-		if ( is_admin() ) $this->admin_includes();
-		if ( defined('DOING_AJAX') ) $this->ajax_includes();
-		if ( ! is_admin() || defined('DOING_AJAX') ) $this->frontend_includes();
+		if ( is_admin() )
+			$this->admin_includes();
+		if ( defined('DOING_AJAX') )
+			$this->ajax_includes();
+		if ( ! is_admin() || defined('DOING_AJAX') )
+			$this->frontend_includes();
 
-		include( 'woocommerce-core-functions.php' );			// Contains core functions for the front/back end
-		include( 'widgets/widget-init.php' );					// Widget classes
-		include( 'classes/class-wc-countries.php' );			// Defines countries and states
-		include( 'classes/class-wc-order.php' );				// Single order class
+		// Functions
+		include( 'woocommerce-core-functions.php' );					// Contains core functions for the front/back end
 
-		include( 'classes/class-wc-product-factory.php' );		// Product factory
-		include( 'classes/abstracts/abstract-wc-product.php' );	// Product class abstract
-		include( 'classes/class-wc-product-simple.php' );		// Simple product type class
-		include( 'classes/class-wc-product-external.php' );		// External product type class
-		include( 'classes/class-wc-product-variable.php' );		// Variable product type class
-		include( 'classes/class-wc-product-grouped.php' );		// Grouped product type class
-		include( 'classes/class-wc-product-variation.php' );	// Product variation class
+		// Include abstract classes
+		include( 'classes/abstracts/abstract-wc-product.php' );			// Products
+		include( 'classes/abstracts/abstract-wc-settings-api.php' );	// Settings API (for gateways, shipping, and integrations)
+		include( 'classes/abstracts/abstract-wc-shipping-method.php' );	// A Shipping method
+		include( 'classes/abstracts/abstract-wc-payment-gateway.php' ); // A Payment gateway
+		include( 'classes/abstracts/abstract-wc-integration.php' );		// An integration with a service
 
-		include( 'classes/class-wc-tax.php' );					// Tax class
-		include( 'classes/class-wc-settings-api.php' );			// Settings API
+		// Classes (used on all pages)
+		include( 'classes/class-wc-product-factory.php' );				// Product factory
+		include( 'classes/class-wc-countries.php' );					// Defines countries and states
+		include( 'classes/class-wc-integrations.php' );					// Loads integrations
 
-		// Include Core Payment Gateways
-		include( 'classes/gateways/class-wc-payment-gateways.php' );
-		include( 'classes/gateways/class-wc-payment-gateway.php' );
-		include( 'classes/gateways/bacs/class-wc-bacs.php' );
-		include( 'classes/gateways/cheque/class-wc-cheque.php' );
-		include( 'classes/gateways/paypal/class-wc-paypal.php' );
-		include( 'classes/gateways/cod/class-wc-cod.php' );
-		include( 'classes/gateways/mijireh/class-wc-mijireh-checkout.php' );
-
-		// Include Core Shipping Methods
-		include( 'classes/shipping/class-wc-shipping.php' );
-		include( 'classes/shipping/class-wc-shipping-method.php' );
-		include( 'classes/shipping/class-wc-flat-rate.php' );
-		include( 'classes/shipping/class-wc-international-delivery.php' );
-		include( 'classes/shipping/class-wc-free-shipping.php' );
-		include( 'classes/shipping/class-wc-local-delivery.php' );
-		include( 'classes/shipping/class-wc-local-pickup.php' );
-
-		// Include Core Integrations
-		include( 'classes/integrations/class-wc-integration.php' );
-		include( 'classes/integrations/class-wc-integrations.php' );
+		// Include Core Integrations - these are included sitewide
 		include( 'classes/integrations/google-analytics/class-wc-google-analytics.php' );
 		include( 'classes/integrations/sharethis/class-wc-sharethis.php' );
-		include( 'classes/integrations/sharedaddy/class-wc-sharedaddy.php' );
 		include( 'classes/integrations/shareyourcart/class-wc-shareyourcart.php' );
+		include( 'classes/integrations/sharedaddy/class-wc-sharedaddy.php' );
 	}
 
 
@@ -267,15 +323,18 @@ class Woocommerce {
 	 * @return void
 	 */
 	public function frontend_includes() {
+		// Functions
 		include( 'woocommerce-hooks.php' );						// Template hooks used on the front-end
 		include( 'woocommerce-functions.php' );					// Contains functions for various front-end events
-		include( 'shortcodes/shortcode-init.php' );				// Init the shortcodes
+
+		// Classes
 		include( 'classes/class-wc-query.php' );				// The main store queries
 		include( 'classes/class-wc-cart.php' );					// The main cart class
-		include( 'classes/class-wc-coupon.php' );				// Coupon class
+		include( 'classes/class-wc-tax.php' );					// Tax class
 		include( 'classes/class-wc-customer.php' ); 			// Customer class
-		include( 'classes/abstracts/abstract-wc-session.php' );    // Abstract for session implementations
+		include( 'classes/abstracts/abstract-wc-session.php' ); // Abstract for session implementations
 		include( 'classes/class-wc-session-transients.php' );   // Transients implementation of the session class
+		include( 'classes/class-wc-shortcodes.php' );			// Shortcodes class
 	}
 
 
@@ -287,6 +346,85 @@ class Woocommerce {
 	 */
 	public function include_template_functions() {
 		include( 'woocommerce-template.php' );
+	}
+
+
+	/**
+	 * core_gateways function.
+	 *
+	 * @access public
+	 * @param mixed $methods
+	 * @return void
+	 */
+	function core_gateways( $methods ) {
+		$methods[] = 'WC_Gateway_BACS';
+		$methods[] = 'WC_Gateway_Cheque';
+		$methods[] = 'WC_Gateway_COD';
+		$methods[] = 'WC_Gateway_Mijireh';
+		$methods[] = 'WC_Gateway_Paypal';
+		return $methods;
+	}
+
+
+	/**
+	 * core_shipping function.
+	 *
+	 * @access public
+	 * @param mixed $methods
+	 * @return void
+	 */
+	function core_shipping( $methods ) {
+		$methods[] = 'WC_Shipping_Flat_Rate';
+		$methods[] = 'WC_Shipping_Free_Shipping';
+		$methods[] = 'WC_Shipping_International_Delivery';
+		$methods[] = 'WC_Shipping_Local_Delivery';
+		$methods[] = 'WC_Shipping_Local_Pickup';
+		return $methods;
+	}
+
+
+	/**
+	 * register_widgets function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function register_widgets() {
+		// Include - no need to use autoload as WP loads them anyway
+		include( 'classes/widgets/class-wc-widget-cart.php' );
+		include( 'classes/widgets/class-wc-widget-featured-products.php' );
+		include( 'classes/widgets/class-wc-widget-layered-nav.php' );
+		include( 'classes/widgets/class-wc-widget-layered-nav-filters.php' );
+		include( 'classes/widgets/class-wc-widget-price-filter.php' );
+		include( 'classes/widgets/class-wc-widget-product-categories.php' );
+		include( 'classes/widgets/class-wc-widget-product-search.php' );
+		include( 'classes/widgets/class-wc-widget-product-tag-cloud.php' );
+		include( 'classes/widgets/class-wc-widget-recent-products.php' );
+		include( 'classes/widgets/class-wc-widget-top-rated-products.php' );
+		include( 'classes/widgets/class-wc-widget-recent-reviews.php' );
+		include( 'classes/widgets/class-wc-widget-recently-viewed.php' );
+		include( 'classes/widgets/class-wc-widget-best-sellers.php' );
+		include( 'classes/widgets/class-wc-widget-onsale.php' );
+		include( 'classes/widgets/class-wc-widget-login.php' );
+		include( 'classes/widgets/class-wc-widget-random-products.php' );
+
+		// Register widgets
+		register_widget( 'WC_Widget_Recent_Products' );
+		register_widget( 'WC_Widget_Featured_Products' );
+		register_widget( 'WC_Widget_Product_Categories' );
+		register_widget( 'WC_Widget_Product_Tag_Cloud' );
+		register_widget( 'WC_Widget_Cart' );
+		register_widget( 'WC_Widget_Layered_Nav' );
+		register_widget( 'WC_Widget_Layered_Nav_Filters' );
+		register_widget( 'WC_Widget_Price_Filter' );
+		register_widget( 'WC_Widget_Product_Search' );
+		register_widget( 'WC_Widget_Top_Rated_Products' );
+		register_widget( 'WC_Widget_Recent_Reviews' );
+		register_widget( 'WC_Widget_Recently_Viewed' );
+		register_widget( 'WC_Widget_Best_Sellers' );
+		register_widget( 'WC_Widget_Onsale' );
+		register_widget( 'WC_Widget_Login' );
+		register_widget( 'WC_Widget_Random_Products' );
 	}
 
 
@@ -307,16 +445,9 @@ class Woocommerce {
 		$this->template_url			= apply_filters( 'woocommerce_template_url', 'woocommerce/' );
 
 		// Load class instances
-		$this->payment_gateways 	= new WC_Payment_gateways();	// Payment gateways. Loads and stores payment methods
-		$this->shipping 			= new WC_Shipping();			// Shipping class. loads and stores shipping methods
 		$this->product_factory 		= new WC_Product_Factory();     // Product Factory to create new product instances
 		$this->countries 			= new WC_Countries();			// Countries class
 		$this->integrations			= new WC_Integrations();		// Integrations class
-
-		// Init shipping, payment gateways, and integrations
-		$this->shipping->init();
-		$this->payment_gateways->init();
-		$this->integrations->init();
 
 		// Classes/actions loaded for the frontend and for ajax requests
 		if ( ! is_admin() || defined('DOING_AJAX') ) {
@@ -329,6 +460,7 @@ class Woocommerce {
 			$this->cart 			= new WC_Cart();				// Cart class, stores the cart contents
 			$this->customer 		= new WC_Customer();			// Customer class, handles data such as customer location
 			$this->query			= new WC_Query();				// Query class, handles front-end queries and loops
+			$this->shortcodes		= new WC_Shortcodes();			// Shortcodes class, controls all frontend shortcodes
 
 			// Load messages
 			$this->load_messages();
@@ -386,7 +518,14 @@ class Woocommerce {
 	 */
 	public function api_requests() {
 		if ( isset( $_GET['wc-api'] ) ) {
+			// Get API trigger
 			$api = strtolower( esc_attr( $_GET['wc-api'] ) );
+
+			// Load class if exists
+			if ( class_exists( $api ) )
+				$api_class = new $api();
+
+			// Trigger actions
 			do_action( 'woocommerce_api_' . $api );
 		}
 	}
@@ -512,6 +651,7 @@ class Woocommerce {
 		if ( $post->post_type !== 'product' ) return;
 		unset( $GLOBALS['product'] );
 		$GLOBALS['product'] = get_product( $post );
+		return $GLOBALS['product'];
 	}
 
 
@@ -1087,8 +1227,7 @@ class Woocommerce {
 	 * @return WC_Checkout
 	 */
 	public function checkout() {
-		if ( ! class_exists( 'WC_Checkout' ) ) {
-			include_once( 'classes/class-wc-checkout.php' );
+		if ( empty( $this->checkout ) ) {
 			$this->checkout = new WC_Checkout();
 		}
 		return $this->checkout;
@@ -1102,7 +1241,6 @@ class Woocommerce {
 	 * @return WC_Logger
 	 */
 	public function logger() {
-		if ( ! class_exists('WC_Logger') ) include( 'classes/class-wc-logger.php' );
 		return new WC_Logger();
 	}
 
@@ -1114,23 +1252,8 @@ class Woocommerce {
 	 * @return WC_Validation
 	 */
 	public function validation() {
-		if ( ! class_exists('WC_Validation') ) include( 'classes/class-wc-validation.php' );
 		return new WC_Validation();
 	}
-
-
-	/**
-	 * Init a coupon.
-	 *
-	 * @access public
-	 * @param mixed $code
-	 * @return WC_Coupon
-	 */
-	public function coupon( $code ) {
-		if ( ! class_exists('WC_Coupon') ) include( 'classes/class-wc-coupon.php' );
-		return new WC_Coupon( $code );
-	}
-
 
 	/**
 	 * Init the mailer and call the notifications for the current filter.
@@ -1153,10 +1276,6 @@ class Woocommerce {
 	 */
 	public function mailer() {
 		if ( empty( $this->woocommerce_email ) ) {
-			// Init mail class
-			if ( ! class_exists('WC_Emails') ) {
-				include_once( 'classes/emails/class-wc-emails.php' );
-			}
 			$this->woocommerce_email = new WC_Emails();
 		}
 		return $this->woocommerce_email;

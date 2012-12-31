@@ -56,11 +56,17 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 					case "pages" :
 					case "catalog" :
 					case "inventory" :
-					case "payment" :
-					case "shipping" :
 					case "tax" :
 					case "email" :
 						woocommerce_update_options( $woocommerce_settings[ $current_tab ] );
+					break;
+					case "payment_gateways" :
+						woocommerce_update_options( $woocommerce_settings[ $current_tab ] );
+						$woocommerce->payment_gateways->process_admin_options();
+					break;
+					case "shipping" :
+						woocommerce_update_options( $woocommerce_settings[ $current_tab ] );
+						$woocommerce->shipping->process_admin_options();
 					break;
 				}
 
@@ -95,7 +101,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 			} else {
 
 				// If saving a shipping methods options, load 'er up
-				if ( $current_tab == 'shipping' && class_exists( $current_section ) ) {
+				if ( ( $current_tab == 'shipping' || $current_tab == 'payment_gateways' ) && class_exists( $current_section ) ) {
 
 					$current_section_class = new $current_section();
 					do_action( 'woocommerce_update_options_' . $current_tab . '_' . $current_section_class->id );
@@ -345,34 +351,42 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 									}
 								}
 			            	} else {
-			            		woocommerce_admin_fields( $woocommerce_settings[$current_tab] );
+			            		woocommerce_admin_fields( $woocommerce_settings[ $current_tab ] );
 			            	}
 
 						break;
 						case "payment_gateways" :
 							include('settings/settings-payment-gateways.php');
 
-							$links = array( '<a href="#payment-gateways">'.__( 'Payment Gateways', 'woocommerce' ).'</a>' );
+							$current = $current_section ? '' : 'class="current"';
 
-			            	foreach ( $woocommerce->payment_gateways->payment_gateways() as $gateway ) :
-			            		$title = empty( $gateway->method_title ) ? ucwords( $gateway->id ) : ucwords( $gateway->method_title );
+							$links = array( '<a href="' . admin_url('admin.php?page=woocommerce_settings&tab=payment_gateways') . '" ' . $current . '>' . __( 'Payment Gateways', 'woocommerce' ) . '</a>' );
 
-			            		$links[] = '<a href="#gateway-'.$gateway->id.'">' . esc_html( $title ) . '</a>';
-							endforeach;
+							// Load shipping methods so we can show any global options they may have
+							$payment_gateways = $woocommerce->payment_gateways->payment_gateways();
 
-							echo '<div class="subsubsub_section"><ul class="subsubsub"><li>' . implode( ' | </li><li>', $links ) . '</li></ul><br class="clear" />';
+							foreach ( $payment_gateways as $gateway ) {
 
-							echo '<div class="section" id="payment-gateways">';
+								$title = empty( $gateway->method_title ) ? ucwords( $gateway->id ) : ucwords( $gateway->method_title );
 
-							woocommerce_admin_fields( $woocommerce_settings[$current_tab] );
+								$current = ( get_class( $gateway ) == $current_section ) ? 'class="current"' : '';
 
-							echo '</div>';
+								$links[] = '<a href="' . add_query_arg( 'section', get_class( $gateway ), admin_url('admin.php?page=woocommerce_settings&tab=payment_gateways') ) . '"' . $current . '>' . esc_html( $title ) . '</a>';
+
+							}
+
+							echo '<ul class="subsubsub"><li>' . implode( ' | </li><li>', $links ) . '</li></ul><br class="clear" />';
 
 							// Specific method options
-			            	foreach ( $woocommerce->payment_gateways->payment_gateways() as $gateway ) {
-			            		echo '<div class="section" id="gateway-'.$gateway->id.'">';
-		            			$gateway->admin_options();
-		            			echo '</div>';
+							if ( $current_section ) {
+								foreach ( $payment_gateways as $gateway ) {
+									if ( get_class( $gateway ) == $current_section ) {
+										$gateway->admin_options();
+										break;
+									}
+								}
+			            	} else {
+			            		woocommerce_admin_fields( $woocommerce_settings[ $current_tab ] );
 			            	}
 
 							echo '</div>';
@@ -413,32 +427,6 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 
 			<script type="text/javascript">
 				jQuery(window).load(function(){
-					// Subsubsub tabs
-					jQuery('div.subsubsub_section ul.subsubsub li a:eq(0)').addClass('current');
-					jQuery('div.subsubsub_section .section:gt(0)').hide();
-
-					jQuery('div.subsubsub_section ul.subsubsub li a').click(function(){
-						var $clicked = jQuery(this);
-						var $section = $clicked.closest('.subsubsub_section');
-						var $target  = $clicked.attr('href');
-
-						$section.find('a').removeClass('current');
-
-						if ( $section.find('.section:visible').size() > 0 ) {
-							$section.find('.section:visible').fadeOut( 100, function() {
-								$section.find( $target ).fadeIn('fast');
-							});
-						} else {
-							$section.find( $target ).fadeIn('fast');
-						}
-
-						$clicked.addClass('current');
-						jQuery('#last_tab').val( $target );
-
-						return false;
-					});
-
-					<?php if ( ! empty( $_GET['subtab'] ) ) echo 'jQuery("div.subsubsub_section ul.subsubsub li a[href=#' . esc_js( $_GET['subtab'] ) . ']").click();'; ?>
 
 					// Countries
 					jQuery('select#woocommerce_allowed_countries').change(function(){

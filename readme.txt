@@ -200,6 +200,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Templating - CSS namespacing changes (courtesy of Brian Feister).
 * Templating - My account page broken up into template files (by Brian Richards)
 
+* Tweak - Optimised class loading (autoload). Reduced memory consumption.
+* Tweak - Moved shortcodes and widgets to classes.
+* Tweak - Tweaks to gateways API. Must use WC-WPI for IPN requests (classes will only be init when needed).
+* Tweak - Save hooks for gateways have changed to match shipping methods. Plugins must be updated with the new hook to save options.
 * Tweak - Cron jobs for scheduled sales.
 * Tweak - Improved product data panels.
 * Tweak - Improved installation + upgrade process upon activation.

@@ -10,6 +10,8 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $woocommerce;
+
+$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
 ?>
 
 <?php if ($order) : ?>
