@@ -118,7 +118,9 @@ abstract class WC_Settings_API {
     			$this->settings[ $k ] = isset( $v['default'] ) ? $v['default'] : '';
     	}
 
-    	$this->settings = array_map( array( $this, 'format_settings' ), $this->settings );
+    	if ( $this->settings ) {
+    		$this->settings = array_map( array( $this, 'format_settings' ), $this->settings );
+    	}
     	$this->enabled  = isset( $this->settings['enabled'] ) && $this->settings['enabled'] == 'yes' ? 'yes' : 'no';
     }
 
