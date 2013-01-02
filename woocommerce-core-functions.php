@@ -2102,15 +2102,21 @@ function woocommerce_change_term_counts( $terms, $taxonomies, $args ) {
 	if ( ! in_array( $taxonomies[0], apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag' ) ) ) )
 		return $terms;
 
+	$term_counts = $o_term_counts = get_transient( 'wc_term_counts' );
+
 	foreach ( $terms as &$term ) {
 		// If the original term count is zero, there's no way the product count could be higher.
 		if ( empty( $term->count ) ) continue;
 
-		$count = get_woocommerce_term_meta( $term->term_id, 'product_count_' . $taxonomies[0] , true );
+		$term_counts[ $term->term_id ] = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : get_woocommerce_term_meta( $term->term_id, 'product_count_' . $taxonomies[0] , true );
 
-		if ( $count != '' )
-			$term->count = $count;
+		if ( $term_counts[ $term->term_id ] != '' )
+			$term->count = $term_counts[ $term->term_id ];
 	}
+
+	// Update transient
+	if ( $term_counts != $o_term_counts )
+		set_transient( 'wc_term_counts', $term_counts );
 
 	return $terms;
 }

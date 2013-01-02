@@ -1798,6 +1798,7 @@ class Woocommerce {
 			'wc_hidden_product_ids',
 			'wc_hidden_product_ids_search',
 			'wc_attribute_taxonomies',
+			'wc_term_counts'
 		);
 
 		foreach( $transients_to_clear as $transient ) {
