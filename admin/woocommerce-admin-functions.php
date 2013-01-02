@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @access public
  * @return void
  */
-function woocomerce_check_download_folder_protection() {
+function woocommerce_check_download_folder_protection() {
 	$upload_dir 		= wp_upload_dir();
 	$downloads_url 		= $upload_dir['basedir'] . '/woocommerce_uploads';
 	$download_method	= get_option('woocommerce_file_download_method');
