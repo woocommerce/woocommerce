@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v1.6.1\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-01-02 13:44:50+00:00\n"
-"PO-Revision-Date: 2013-01-02 19:07+0200\n"
+"PO-Revision-Date: 2013-01-02 19:36+0200\n"
 "Last-Translator: Aurel Roman <aur3l.roman@gmail.com>\n"
 "Language-Team: \n"
 "Language: ro_RO\n"
@@ -46,7 +46,7 @@ msgstr "Categorii de Produse"
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:10
 msgid "Products by category slug"
-msgstr "Produse după numele scurt al Categoriei"
+msgstr "Produse după Numele Scurt al Categoriei"
 
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:11
@@ -368,38 +368,37 @@ msgstr ""
 
 # @ woocommerce
 #: classes/class-wc-cart.php:472 classes/class-wc-cart.php:481
-#, fuzzy
 msgid ""
 "Sorry, we do not have enough \"%s\" in stock to fulfil your order (%s in "
 "stock). Please edit your cart and try again. We apologise for any "
 "inconvenience caused."
 msgstr ""
-"Ne pare rău însă nu avem suficiente produse \"%s\" în stoc pentru a vă onora "
-"comanda. Doar %s produse sunt în stoc. Vă rugăm editați Coșul de Cumpărături "
-"și încercați din nou. Ne pare rău pentru orice neplăcere creată."
+"Ne pare rău, însă nu avem suficiente produse \"%s\" în stoc pentru a vă "
+"onora comanda ( doar %s produse sunt în stoc). Vă rugăm să modificați Coșul "
+"de Cumpărături și încercați din nou. Ne pare rău pentru orice neplăcere "
+"creată."
 
 # @ woocommerce
 #: classes/class-wc-cart.php:516
-#, fuzzy
 msgid ""
 "Sorry, we do not have enough \"%s\" in stock to fulfil your order right now. "
 "Please try again in %d minutes or edit your cart and try again. We apologise "
 "for any inconvenience caused."
 msgstr ""
-"Ne pare rău însă nu avem suficiente produse \"%s\" în stoc pentru a vă onora "
-"comanda. Vă rugăm editați Coșul de Cumpărături și încercați din nou. Ne pare "
-"rău pentru orice neplăcere creată."
+"Ne pare rău, însă în acest moment nu avem suficiente produse \"%s\" în stoc "
+"pentru a vă onora comanda. Vă rugăm încercați din nou în %d minute sau "
+"modificați Coșul de Cumpărături și încercați din nou. Ne pare rău pentru "
+"orice neplăcere creată."
 
 # @ woocommerce
 #: classes/class-wc-cart.php:526
-#, fuzzy
 msgid ""
 "Sorry, \"%s\" is not in stock. Please edit your cart and try again. We "
 "apologise for any inconvenience caused."
 msgstr ""
-"Ne pare rău însă nu avem suficiente produse \"%s\" în stoc pentru a vă onora "
-"comanda. Vă rugăm editați Coșul de Cumpărături și încercați din nou. Ne pare "
-"rău pentru orice neplăcere creată."
+"Ne pare rău, însă produsul \"%s\" nu este în stoc. Vă rugăm să modificați "
+"Coșul de Cumpărături și să încercați din nou. Ne pare rău pentru orice "
+"neplăcere creată. "
 
 # @ woocommerce
 #: classes/class-wc-cart.php:804
@@ -3585,9 +3584,8 @@ msgstr "Activează Livrare Gratuită"
 
 # @ woocommerce
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:105
-#, fuzzy
 msgid "Free Shipping Requires..."
-msgstr "Livrare Gratuită"
+msgstr "Livrare Gratuită Necesită ..."
 
 # @ woocommerce
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:109
@@ -3597,25 +3595,22 @@ msgstr "N / A"
 
 # @ woocommerce
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:110
-#, fuzzy
 msgid "A valid free shipping coupon"
-msgstr "Activează Livrare Gratuită"
+msgstr "Cupon Valid pentru Livrare Gratuită"
 
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:111
 msgid "A minimum order amount (defined below)"
-msgstr ""
+msgstr "O Valoare minimă a Comenzii (definită mai jos)"
 
 # @ woocommerce
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:112
-#, fuzzy
 msgid "A minimum order amount OR a coupon"
-msgstr "Comandă minimă"
+msgstr "O Valoare minimă a Comenzii  (definită mai jos) SAU cupon"
 
 # @ woocommerce
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:113
-#, fuzzy
 msgid "A minimum order amount AND a coupon"
-msgstr "Comandă minimă"
+msgstr "O Valoare minimă a Comenzii (definită mai jos) ȘI cupon"
 
 # @ woocommerce
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:117
@@ -3624,12 +3619,11 @@ msgstr "Comandă minimă"
 
 # @ woocommerce
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:123
-#, fuzzy
 msgid ""
 "Users will need to spend this amount to get free shipping (if enabled above)."
 msgstr ""
 "Pentru a beneficia de Livrare Gratuită, vizitatorii trebuie să aibă o "
-"comandă în valoare de minim. Lasă gol pentru a dezactiva opțiunea."
+"comandă cu această valoare minimă (dacă este activată mai sus)."
 
 # @ woocommerce
 #: classes/shipping/international-delivery/class-wc-shipping-international-delivery.php:28
@@ -4371,9 +4365,8 @@ msgstr "Recenzii Recente"
 # @ woocommerce
 #: classes/widgets/class-wc-widget-recent-reviews.php:89
 #: templates/single-product/review.php:26
-#, fuzzy
 msgid "Rated %d out of 5"
-msgstr "Evaluat la %s stele din 5"
+msgstr "Evaluat la %d stele din 5"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-recent-reviews.php:101
@@ -4882,9 +4875,8 @@ msgstr ""
 
 # @ woocommerce
 #: i18n/states/IN.php:18
-#, fuzzy
 msgid "Goa"
-msgstr "Georgia"
+msgstr "Goa"
 
 #: i18n/states/IN.php:19
 msgid "Gujarat"
@@ -4892,9 +4884,8 @@ msgstr ""
 
 # @ woocommerce
 #: i18n/states/IN.php:20
-#, fuzzy
 msgid "Haryana"
-msgstr "Guyana"
+msgstr "Haryana"
 
 #: i18n/states/IN.php:21
 msgid "Himachal Pradesh"
@@ -4914,9 +4905,8 @@ msgstr ""
 
 # @ woocommerce
 #: i18n/states/IN.php:25
-#, fuzzy
 msgid "Kerala"
-msgstr "General"
+msgstr "Kerala"
 
 #: i18n/states/IN.php:26
 msgid "Madhya Pradesh"
@@ -4932,9 +4922,8 @@ msgstr ""
 
 # @ woocommerce
 #: i18n/states/IN.php:29
-#, fuzzy
 msgid "Meghalaya"
-msgstr "Malaysia"
+msgstr "Meghalaya"
 
 #: i18n/states/IN.php:30
 msgid "Mizoram"
@@ -4942,9 +4931,8 @@ msgstr ""
 
 # @ woocommerce
 #: i18n/states/IN.php:31
-#, fuzzy
 msgid "Nagaland"
-msgstr "Noua Zeelanda"
+msgstr "Nagaland"
 
 #: i18n/states/IN.php:32
 msgid "Orissa"
@@ -4983,15 +4971,13 @@ msgid "West Bengal"
 msgstr ""
 
 #: i18n/states/IN.php:41
-#, fuzzy
 msgid "Andaman and Nicobar Islands"
-msgstr "Insula Heard și Insula McDonald"
+msgstr "Insulele Andaman și Nicobar"
 
 # @ woocommerce
 #: i18n/states/IN.php:42
-#, fuzzy
 msgid "Chandigarh"
-msgstr "Modifică"
+msgstr "Chandigarh"
 
 #: i18n/states/IN.php:43
 msgid "Dadar and Nagar Haveli"
@@ -5035,9 +5021,8 @@ msgstr ""
 
 # @ woocommerce
 #: i18n/states/MY.php:18
-#, fuzzy
 msgid "Pahang"
-msgstr "Modifică"
+msgstr "Pahang"
 
 #: i18n/states/MY.php:19
 msgid "Perak"
@@ -5710,19 +5695,19 @@ msgstr "Free State"
 
 #: i18n/states/ZA.php:15
 msgid "Gauteng"
-msgstr ""
+msgstr "Gauteng"
 
 #: i18n/states/ZA.php:16
 msgid "KwaZulu-Natal"
-msgstr ""
+msgstr "KwaZulu-Natal"
 
 #: i18n/states/ZA.php:17
 msgid "Limpopo"
-msgstr ""
+msgstr "Limpopo"
 
 #: i18n/states/ZA.php:18
 msgid "Mpumalanga"
-msgstr ""
+msgstr "Mpumalanga"
 
 # @ woocommerce
 #: i18n/states/ZA.php:19
@@ -6979,6 +6964,8 @@ msgstr "Manager Magazin"
 #: woocommerce-core-functions.php:2258
 msgid "Unpaid order cancelled - time limit reached."
 msgstr ""
+"Comenzile neachitate au fost anulate - Limita de timp în care se putea "
+"efectua plata a fost atinsă."
 
 # @ woocommerce
 #: woocommerce-core-functions.php:2310 woocommerce-functions.php:708
@@ -7206,7 +7193,7 @@ msgstr "Acasă"
 
 #: woocommerce-template.php:1253 woocommerce.php:1179
 msgid "required"
-msgstr ""
+msgstr "obligatoriu"
 
 # @ woocommerce
 #: woocommerce-template.php:1297
@@ -7675,6 +7662,8 @@ msgid ""
 "Sorry, no products matched your selection. Please choose a different "
 "combination."
 msgstr ""
+"Ne pare rău, dar nu avem produse care sa corespundă criteriilor dvs. Vă "
+"rugăm încercați o altă combinație."
 
 # @ woocommerce
 #: woocommerce.php:1617
