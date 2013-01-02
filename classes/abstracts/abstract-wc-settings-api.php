@@ -109,7 +109,7 @@ abstract class WC_Settings_API {
     	// Load form_field settings
     	$this->settings = get_option( $this->plugin_id . $this->id . '_settings', null );
 
-    	if ( ! is_array( $this->settings ) ) {
+    	if ( ! $this->settings || ! is_array( $this->settings ) ) {
 
     		// If there are no settings defined, load defaults
     		$this->init_form_fields();
@@ -118,8 +118,10 @@ abstract class WC_Settings_API {
     			$this->settings[ $k ] = isset( $v['default'] ) ? $v['default'] : '';
     	}
 
-    	$this->settings = array_map( array( $this, 'format_settings' ), $this->settings );
-    	$this->enabled  = isset( $this->settings['enabled'] ) && $this->settings['enabled'] == 'yes' ? 'yes' : 'no';
+        if ( $this->settings && is_array( $this->settings ) ) {
+    	   $this->settings = array_map( array( $this, 'format_settings' ), $this->settings );
+    	   $this->enabled  = isset( $this->settings['enabled'] ) && $this->settings['enabled'] == 'yes' ? 'yes' : 'no';
+        }
     }
 
 
