@@ -99,7 +99,8 @@ class WC_Query {
 		$this->product_query( $q );
 		
 		if ( is_search() ) {
-		    add_filter('posts_where', array( $this, 'search_post_excerpt') );
+		    add_filter( 'posts_where', array( $this, 'search_post_excerpt' ) );
+		    add_filter( 'wp', array( $this, 'remove_posts_where' ) );
 		}
 
 		// We're on a shop page so queue the woocommerce_get_products_in_view function
@@ -265,6 +266,16 @@ class WC_Query {
 		remove_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 	}
 
+	/**
+	 * Remove the posts_where filter
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function remove_posts_where() {		
+		remove_filter( 'posts_where', array( $this, 'search_post_excerpt' ) );
+	}
+	
 
 	/**
 	 * Get an unpaginated list all product ID's (both filtered and unfiltered). Makes use of transients.
