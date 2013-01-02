@@ -1611,7 +1611,7 @@ class WC_Cart {
 				}
 			}
 
-			return apply_filters( 'woocomerce_cart_needs_shipping', $needs_shipping );
+			return apply_filters( 'woocommerce_cart_needs_shipping', $needs_shipping );
 		}
 
 		/**
@@ -1633,7 +1633,7 @@ class WC_Cart {
 
 			$show_shipping = true;
 
-			return apply_filters( 'woocomerce_cart_ready_to_calc_shipping', $show_shipping );
+			return apply_filters( 'woocommerce_cart_ready_to_calc_shipping', $show_shipping );
 
 		}
 
