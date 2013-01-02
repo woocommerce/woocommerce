@@ -53,7 +53,7 @@ global $woocommerce;
 		<?php if ($order->order_total > 0) : ?>
 		<ul class="payment_methods methods">
 			<?php
-				if ($available_gateways) :
+				if ( $available_gateways ) :
 					// Chosen Method
 					if (sizeof($available_gateways)) current($available_gateways)->set_current();
 					foreach ($available_gateways as $gateway ) :

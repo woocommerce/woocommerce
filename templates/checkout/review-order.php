@@ -185,25 +185,22 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 		<ul class="payment_methods methods">
 			<?php
 				$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
-				if ($available_gateways) :
+				if ( ! empty( $available_gateways ) ) {
+
 					// Chosen Method
-					if (sizeof($available_gateways)) :
-						$default_gateway = get_option('woocommerce_default_gateway');
+					if ( isset( $woocommerce->session->chosen_payment_method ) && isset( $available_gateways[ $woocommerce->session->chosen_payment_method ] ) ) {
+						$available_gateways[ $woocommerce->session->chosen_payment_method ]->set_current();
+					} elseif ( isset( $available_gateways[ get_option( 'woocommerce_default_gateway' ) ] ) ) {
+						$available_gateways[ get_option( 'woocommerce_default_gateway' ) ]->set_current();
+					} else {
+						current( $available_gateways )->set_current();
+					}
 
-						if ( isset( $woocommerce->session->chosen_payment_method ) && isset( $available_gateways[ $woocommerce->session->chosen_payment_method ] ) ) {
-							$available_gateways[ $woocommerce->session->chosen_payment_method ]->set_current();
-						} elseif ( isset( $available_gateways[ $default_gateway ] ) ) {
-							$available_gateways[ $default_gateway ]->set_current();
-						} else {
-							current( $available_gateways )->set_current();
-						}
-
-					endif;
-					foreach ($available_gateways as $gateway ) :
+					foreach ( $available_gateways as $gateway ) {
 						?>
 						<li>
-						<input type="radio" id="payment_method_<?php echo $gateway->id; ?>" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php checked( $gateway->chosen, true ); ?> />
-						<label for="payment_method_<?php echo $gateway->id; ?>"><?php echo $gateway->get_title(); ?> <?php echo $gateway->get_icon(); ?></label>
+							<input type="radio" id="payment_method_<?php echo $gateway->id; ?>" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php checked( $gateway->chosen, true ); ?> />
+							<label for="payment_method_<?php echo $gateway->id; ?>"><?php echo $gateway->get_title(); ?> <?php echo $gateway->get_icon(); ?></label>
 							<?php
 								if ( $gateway->has_fields() || $gateway->get_description() ) :
 									echo '<div class="payment_box payment_method_' . $gateway->id . '" ' . ( $gateway->chosen ? '' : 'style="display:none;"' ) . '>';
@@ -213,16 +210,15 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							?>
 						</li>
 						<?php
-					endforeach;
-				else :
+					}
+				} else {
 
-					if ( !$woocommerce->customer->get_country() ) :
-						echo '<p>'.__( 'Please fill in your details above to see available payment methods.', 'woocommerce' ).'</p>';
-					else :
-						echo '<p>'.__( 'Sorry, it seems that there are no available payment methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce' ).'</p>';
-					endif;
+					if ( ! $woocommerce->customer->get_country() )
+						echo '<p>' . __( 'Please fill in your details above to see available payment methods.', 'woocommerce' ) . '</p>';
+					else
+						echo '<p>' . __( 'Sorry, it seems that there are no available payment methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce' ) . '</p>';
 
-				endif;
+				}
 			?>
 		</ul>
 		<?php endif; ?>

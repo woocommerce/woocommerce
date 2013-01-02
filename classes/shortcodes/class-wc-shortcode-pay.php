@@ -34,53 +34,58 @@ class WC_Shortcode_Pay {
 	public static function output( $atts ) {
 		global $woocommerce;
 
-		$woocommerce->nocache();
-
-		do_action('before_woocommerce_pay');
-
-		$woocommerce->show_messages();
+		// Get available gateways here - touching this also ensures gateways are loaded in time for the woocommerce_receipt_ hook
 		$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
 
-		if ( isset($_GET['pay_for_order']) && isset($_GET['order']) && isset($_GET['order_id']) ) :
+		$woocommerce->nocache();
+
+		do_action( 'before_woocommerce_pay' );
+
+		$woocommerce->show_messages();
+
+		if ( isset( $_GET['pay_for_order'] ) && isset( $_GET['order'] ) && isset( $_GET['order_id'] ) ) {
 
 			// Pay for existing order
 			$order_key = urldecode( $_GET['order'] );
-			$order_id = (int) $_GET['order_id'];
-			$order = new WC_Order( $order_id );
+			$order_id  = absint( $_GET['order_id'] );
+			$order     = new WC_Order( $order_id );
 
-			if ($order->id == $order_id && $order->order_key == $order_key && in_array($order->status, array('pending', 'failed'))) :
+			if ( $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, array( 'pending', 'failed' ) ) ) {
 
 				// Set customer location to order location
-				if ($order->billing_country) $woocommerce->customer->set_country( $order->billing_country );
-				if ($order->billing_state) $woocommerce->customer->set_state( $order->billing_state );
-				if ($order->billing_postcode) $woocommerce->customer->set_postcode( $order->billing_postcode );
+				if ( $order->billing_country )
+					$woocommerce->customer->set_country( $order->billing_country );
+				if ( $order->billing_state )
+					$woocommerce->customer->set_state( $order->billing_state );
+				if ( $order->billing_postcode )
+					$woocommerce->customer->set_postcode( $order->billing_postcode );
 
 				// Show form
 				woocommerce_get_template( 'checkout/form-pay.php', array( 'order' => $order, 'available_gateways' => $available_gateways ) );
 
-			elseif (!in_array($order->status, array('pending', 'failed'))) :
+			} elseif ( ! in_array( $order->status, array( 'pending', 'failed' ) ) ) {
 
 				$woocommerce->add_error( __( 'Your order has already been paid for. Please contact us if you need assistance.', 'woocommerce' ) );
 				$woocommerce->show_messages();
 
-			else :
+			} else {
 
 				$woocommerce->add_error( __( 'Invalid order.', 'woocommerce' ) );
 				$woocommerce->show_messages();
 
-			endif;
+			}
 
-		else :
+		} else {
 
 			// Pay for order after checkout step
-			if (isset($_GET['order'])) $order_id = $_GET['order']; else $order_id = 0;
-			if (isset($_GET['key'])) $order_key = $_GET['key']; else $order_key = '';
+			$order_id  = isset( $_GET['order'] ) ? absint( $_GET['order'] ) : 0;
+			$order_key = isset( $_GET['key'] ) ? woocommerce_clean( $_GET['key'] ) : '';
 
-			if ($order_id > 0) :
+			if ( $order_id > 0 ) {
 
 				$order = new WC_Order( $order_id );
 
-				if ($order->order_key == $order_key && in_array($order->status, array('pending', 'failed'))) :
+				if ( $order->order_key == $order_key && in_array( $order->status, array( 'pending', 'failed' ) ) ) {
 
 					?>
 					<ul class="order_details">
@@ -111,22 +116,22 @@ class WC_Shortcode_Pay {
 					<div class="clear"></div>
 					<?php
 
-				elseif (!in_array($order->status, array('pending', 'failed'))) :
+				} elseif ( ! in_array( $order->status, array( 'pending', 'failed' ) ) ) {
 
 					$woocommerce->add_error( __( 'Your order has already been paid for. Please contact us if you need assistance.', 'woocommerce' ) );
 					$woocommerce->show_messages();
 
-				endif;
+				}
 
-			else :
+			} else {
 
 				$woocommerce->add_error( __( 'Invalid order.', 'woocommerce' ) );
 				$woocommerce->show_messages();
 
-			endif;
+			}
 
-		endif;
+		}
 
-		do_action('after_woocommerce_pay');
+		do_action( 'after_woocommerce_pay' );
 	}
 }
