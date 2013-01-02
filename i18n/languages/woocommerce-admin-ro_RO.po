@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v1.6.1\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-01-02 13:44:51+00:00\n"
-"PO-Revision-Date: 2013-01-02 18:52+0200\n"
+"PO-Revision-Date: 2013-01-02 22:38+0200\n"
 "Last-Translator: Aurel Roman <aur3l.roman@gmail.com>\n"
 "Language-Team: \n"
 "Language: ro_RO\n"
@@ -79,14 +79,13 @@ msgstr ""
 "încărcat, apoi apăsaţi (faceţi click) pe  \"Încarcă fişiere şi importă\"."
 
 #: admin/importers/tax-rates-importer.php:284
-#, fuzzy
 msgid ""
 "Tax rates need to be defined with columns in a specific order (10 columns). "
 "<a href=\"%s\">Click here to download a sample</a>."
 msgstr ""
 "Cotele de impozitare trebuie să fie definite pe coloane, într-o ordine "
-"specifică (6 coloane). <a href=\"%s\">Click aici pentru a descărca un fişier "
-"exemplu </a>."
+"specifică (10 coloane). <a href=\"%s\">Click aici pentru a descărca un "
+"fişier exemplu </a>."
 
 #: admin/importers/tax-rates-importer.php:292
 msgid ""
@@ -115,7 +114,7 @@ msgstr "Delimitator"
 
 #: admin/importers/tax-rates-importer.php:325
 msgid "Upload file and import"
-msgstr ""
+msgstr "Încărcă fișier și importă"
 
 # @ woocommerce
 #: admin/includes/duplicate_product.php:23
@@ -234,7 +233,7 @@ msgstr "Copiază"
 # @ woocommerce
 #: admin/post-types/product.php:61
 msgid "Copy to a new draft"
-msgstr "Copiază într-o nouă ciornă"
+msgstr "Copiază într-o ciornă nouă"
 
 # @ woocommerce
 #: admin/post-types/product.php:85 admin/woocommerce-admin-taxonomies.php:297
@@ -294,7 +293,7 @@ msgstr "Etichete"
 #: admin/post-types/writepanels/writepanel-product_data.php:1044
 #: admin/woocommerce-admin-init.php:397
 msgid "Featured"
-msgstr "În prim plan"
+msgstr "Recomandat"
 
 # @ woocommerce
 #: admin/post-types/product.php:100 admin/woocommerce-admin-attributes.php:235
@@ -405,19 +404,17 @@ msgstr "Variabil"
 
 # @ woocommerce
 #: admin/post-types/product.php:248
-#, fuzzy
 msgid "Toggle featured"
-msgstr "În prim plan"
+msgstr "Comutare &quot;Recomandat&quot;"
 
 # @ woocommerce
 #: admin/post-types/product.php:250
-#, fuzzy
 msgid "yes"
 msgstr "Da"
 
 #: admin/post-types/product.php:252
 msgid "no"
-msgstr ""
+msgstr "Nu"
 
 # @ woocommerce
 #: admin/post-types/product.php:259 admin/post-types/product.php:645
@@ -593,7 +590,7 @@ msgstr "— Nici o modificare —"
 #: admin/post-types/product.php:847 admin/post-types/product.php:871
 #: admin/post-types/product.php:969
 msgid "Change to:"
-msgstr "Schimbă la:"
+msgstr "Schimbă în:"
 
 #: admin/post-types/product.php:798 admin/post-types/product.php:822
 msgid "Increase by (fixed amount or %):"
@@ -633,15 +630,13 @@ msgstr "Sortează Produse"
 
 # @ woocommerce
 #: admin/post-types/product.php:1218
-#, fuzzy
 msgid "Insert into product"
-msgstr "Vă rugăm evaluați produsul."
+msgstr "Inserați în produs"
 
 # @ woocommerce
 #: admin/post-types/product.php:1219
-#, fuzzy
 msgid "Uploaded to this product"
-msgstr "Vă rugăm evaluați produsul."
+msgstr "Încărcată la acest produs"
 
 # @ woocommerce
 #: admin/post-types/shop_coupon.php:25
@@ -682,7 +677,6 @@ msgstr "Data expirării"
 
 # @ woocommerce
 #: admin/post-types/shop_coupon.php:56
-#, fuzzy
 msgid "Edit coupon"
 msgstr "Modifică Cupon"
 
@@ -944,9 +938,8 @@ msgstr "Subtotal"
 
 # @ woocommerce
 #: admin/post-types/writepanels/order-tax-html.php:6
-#, fuzzy
 msgid "Tax Rate:"
-msgstr "Cote de impozitare"
+msgstr "Cotă de impozitare:"
 
 # @ woocommerce
 #: admin/post-types/writepanels/order-tax-html.php:16
@@ -1093,9 +1086,8 @@ msgstr "Cale către fișier (câte una pe linie):"
 # @ woocommerce
 #: admin/post-types/writepanels/variation-admin-html.php:135
 #: admin/post-types/writepanels/writepanel-product_data.php:154
-#, fuzzy
 msgid "Choose a file"
-msgstr "Alege o opțiune"
+msgstr "Alege un fișier"
 
 # @ woocommerce
 #: admin/post-types/writepanels/variation-admin-html.php:135
@@ -1105,7 +1097,7 @@ msgstr "Încarcă"
 #: admin/post-types/writepanels/variation-admin-html.php:135
 #: admin/post-types/writepanels/writepanel-product_data.php:154
 msgid "Insert file URL"
-msgstr ""
+msgstr "Inserează Adresa URL a fișierului"
 
 # @ woocommerce
 #: admin/post-types/writepanels/variation-admin-html.php:140
@@ -1256,8 +1248,8 @@ msgid ""
 "Products which need to be in the cart to use this coupon or, for \"Product "
 "Discounts\", which products are discounted."
 msgstr ""
-"Produse care trebuie să fie în Coș pentru a utiliza acest cupon, \"Produse "
-"cu Reducere\", ce produse sunt reduse."
+"Produse care trebuie să fie în Coș pentru a utiliza acest cupon sau, pentru "
+"\"Produse cu Reducere\", ce produse sunt reduse."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-coupon_data.php:96
@@ -1383,21 +1375,18 @@ msgstr "Detalii Comandă"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:62
-#, fuzzy
 msgid "Order number"
-msgstr "Număr Comandă: %s"
+msgstr "Număr Comandă"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:67
-#, fuzzy
 msgid "Customer IP:"
-msgstr "Client:"
+msgstr " IP Client:"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:74
-#, fuzzy
 msgid "General Details"
-msgstr "Opțiuni Generale"
+msgstr "Detalii Generale"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:76
@@ -1647,9 +1636,8 @@ msgstr "Adăugați taxă"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:430
-#, fuzzy
 msgid "Resend order emails"
-msgstr "Afișează Emailurile de Comandă"
+msgstr "Retrimite emailurile de comandă"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:458
@@ -1826,6 +1814,8 @@ msgid ""
 "Add a note for your reference, or add a customer note (the user will be "
 "notified)."
 msgstr ""
+"Adaugă o notiță pentru referința ta, sau adaugă o notă pentru client "
+"(utilizatorul va fi notificat)."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_notes.php:62
@@ -1885,24 +1875,21 @@ msgid "Bulk edit:"
 msgstr "Editare la grămada:"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:77
-#, fuzzy
 msgid "Toggle &quot;Enabled&quot;"
-msgstr "&quot; şi &quot;"
+msgstr "Comutare  &quot;Activat&quot;"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:78
 msgid "Toggle &quot;Downloadable&quot;"
-msgstr ""
+msgstr "Comutare &quot;Descărcabil&quot;"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:79
-#, fuzzy
 msgid "Toggle &quot;Virtual&quot;"
-msgstr "&quot; şi &quot;"
+msgstr "Comutare &quot;Virtual&quot;"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:80
-#, fuzzy
 msgid "Delete all variations"
-msgstr "Link către toate variantele"
+msgstr "Șterge toate variațiile"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:81
@@ -1932,9 +1919,8 @@ msgstr "Linkul pentru descărcarea produsului expiră"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:92
-#, fuzzy
 msgid "Go"
-msgstr "Bun"
+msgstr "Execută"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:192
@@ -2002,21 +1988,19 @@ msgstr "Ultimul avertisment... Ești 100% sigur?"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:413
 msgid "Enter a value"
-msgstr "Introdu o valoare"
+msgstr "Adaugă o valoare"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:504
 #: admin/woocommerce-admin-taxonomies.php:62
 #: admin/woocommerce-admin-taxonomies.php:154
-#, fuzzy
 msgid "Choose an image"
-msgstr "Alege o opțiune"
+msgstr "Alege o imagine"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:506
-#, fuzzy
 msgid "Set variation image"
-msgstr "variație adăugată"
+msgstr "Setează imaginea variației"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:550
@@ -2433,7 +2417,7 @@ msgstr "Activează pentru a evidenția produsul."
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:1063
 msgid "Featured Product"
-msgstr "Produs evidențiat"
+msgstr "Produs Recomandat"
 
 # @ default
 #: admin/post-types/writepanels/writepanel-product_data.php:1067
@@ -2443,9 +2427,8 @@ msgstr "OK"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_images.php:42
 #: admin/post-types/writepanels/writepanel-product_images.php:102
-#, fuzzy
 msgid "Delete image"
-msgstr "Șterge Liniile"
+msgstr "Șterge Imaginea"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_images.php:42
@@ -2456,27 +2439,23 @@ msgstr "Șterge"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_images.php:53
-#, fuzzy
 msgid "Add product gallery images"
-msgstr "Toate Categoriile de Produs"
+msgstr "Adugă Galerie de Imagini pentru Produs"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_images.php:79
-#, fuzzy
 msgid "Add Images to Product Gallery"
-msgstr "Adaugă Categorie Nouă de Produs"
+msgstr "Adaugă Imagini la Galeria Produsului"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_images.php:81
-#, fuzzy
 msgid "Add to gallery"
-msgstr "Adaugă în Coș"
+msgstr "Adaugă în Galerie"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanels-init.php:47
-#, fuzzy
 msgid "Product Gallery"
-msgstr "Vânzări Produs"
+msgstr "Galeria Produsului"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanels-init.php:55
@@ -2639,9 +2618,8 @@ msgstr "Localizare"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:19
-#, fuzzy
 msgid "Use informal localisation for %s"
-msgstr "Dacă există utilizaţi fişierul de localizare informală."
+msgstr "Dacă există utilizaţi fişierul de localizare informală pentru  %s."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:27
@@ -3681,13 +3659,16 @@ msgstr "Activează administrarea stocurilor de produse"
 
 #: admin/settings/settings-init.php:792
 msgid "Hold Stock (minutes)"
-msgstr ""
+msgstr "Păstrează Stocul (minute)"
 
 #: admin/settings/settings-init.php:793
 msgid ""
 "Hold stock (for unpaid orders) for x minutes. When this limit is reached, "
 "the pending order will be cancelled. Leave blank to disable."
 msgstr ""
+"Păstrează Stocul (pentru comenzile neachitate) pentru X minute. Când această "
+"limită este atinsă, Comanda Care este în așteptare și neachitată va fi "
+"anulată. Lăsa-ți Gol pentru a Dezactiva."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:805
@@ -3846,9 +3827,8 @@ msgstr "Opțiuni Administrare Taxe"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:975
-#, fuzzy
 msgid "Enable Taxes"
-msgstr "Total Taxe"
+msgstr "Activează Taxele"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:976
@@ -3856,71 +3836,69 @@ msgid "Enable taxes and tax calculations"
 msgstr "Activează câmpurile necesare taxelor și calculării taxelor"
 
 #: admin/settings/settings-init.php:983
-#, fuzzy
 msgid "Prices Entered With Tax"
-msgstr "Prețurile includ taxele"
+msgstr "Prețurile Produselor includ taxele"
 
 #: admin/settings/settings-init.php:987
 msgid ""
 "This option is important as it will affect how you input prices. Changing it "
 "will not update existing products."
 msgstr ""
+"Această opțiune este importanta pentru ca va afecta modul în care introduci "
+"prețurile. Modificând-o nu vei Modifica si produsele deja Existente."
 
 #: admin/settings/settings-init.php:989
 msgid "Yes, I will enter prices inclusive of tax"
-msgstr ""
+msgstr "DA, voi introduce prețurile cu toate Taxele INCLUSE"
 
 #: admin/settings/settings-init.php:990
 msgid "No, I will enter prices exclusive of tax"
-msgstr ""
+msgstr "NU, voi introduce prețurile FĂRĂ TAXE (BRUT)"
 
 #: admin/settings/settings-init.php:995
 msgid "Calculate Tax Based On:"
-msgstr ""
+msgstr "Calculează taxele (Brut) bazat pe:"
 
 #: admin/settings/settings-init.php:997
 msgid "This option determines which address is used to calculate tax."
 msgstr ""
+"Această Opțiune specifică ce adresă va fi utilizată pentru a calcula taxele."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1001
-#, fuzzy
 msgid "Customer shipping address"
 msgstr "Adresa de Livrare a clientului"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1002
-#, fuzzy
 msgid "Customer billing address"
 msgstr "Adresa de Facturare a clientului"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1003 admin/settings/settings-init.php:1015
-#, fuzzy
 msgid "Shop base address"
-msgstr "Pagina de bază pentru Magazin"
+msgstr "Adresa Magazinului"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1008
-#, fuzzy
 msgid "Default Customer Address:"
-msgstr "Adresa IP a clientului"
+msgstr "Adresa implicită a Clientului:"
 
 #: admin/settings/settings-init.php:1010
 msgid ""
 "This option determines the customers default address (before they input "
 "their own)."
 msgstr ""
+"Această Opțiune va specifica adresa implicită a clienților (înainte să "
+"introducă adresa lor)."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1014
-#, fuzzy
 msgid "No address"
-msgstr "Adresă"
+msgstr "Nici o Adresă"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1020
-#, fuzzy
 msgid "Shipping Tax Class:"
 msgstr "Clasă de Taxare pentru Expediere"
 
@@ -3934,9 +3912,8 @@ msgstr ""
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1031
-#, fuzzy
 msgid "Rounding"
-msgstr "În așteptare"
+msgstr "Rotunjire"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1032
@@ -3947,19 +3924,18 @@ msgstr ""
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1039
-#, fuzzy
 msgid "Additional Tax Classes"
-msgstr "Clase adiționale de Taxe"
+msgstr "Clase adiționale de Taxere"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1040
-#, fuzzy
 msgid ""
 "List additonal tax classes below (1 per line). This is in addition to the "
 "default <code>Standard Rate</code>. Tax classes can be assigned to products."
 msgstr ""
 "Listează mai jos (1 pe linie) clasele de taxare. Această opțiune este "
-"adăugată în plus la opțiune implicită <code>Rată Standard</code>."
+"adăugată în plus la opțiune implicită <code>Rată Standard</code>. Clasele de "
+"Taxare pot fi alocate produselor."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1044
@@ -3968,21 +3944,18 @@ msgstr "Rată Redusă%sRată Zero"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1048
-#, fuzzy
 msgid "Display prices during cart/checkout:"
-msgstr "Adresa de email utilizată la Plasarea Comenzii."
+msgstr "Modul de afișare a prețurilor pe pagina de coș / checkout:"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1053
-#, fuzzy
 msgid "Including tax"
-msgstr "Cost, fără taxe. "
+msgstr "Incluzând taxe. "
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1054
-#, fuzzy
 msgid "Excluding tax"
-msgstr "Cost, fără taxe. "
+msgstr "Fără taxe. "
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1066
@@ -4148,46 +4121,42 @@ msgstr "Cod Identificare Metodă"
 
 #: admin/settings/settings-tax-rates.php:29
 msgid "Tax Rates for the \"%s\" Class"
-msgstr ""
+msgstr "Rata de impozitare pentru Clasa \"%s\""
 
 #: admin/settings/settings-tax-rates.php:30
-#, fuzzy
 msgid ""
 "Define tax rates for countries and states below. <a href=\"%s\">See here</a> "
 "for available country/state codes."
 msgstr ""
 "Definiţi cote de impozitare / taxare în funcţie de ţări sau state. "
-"Introduceţi detaliile mai jos. Puteţi de asemenea să exportaţi sau să "
-"importaţi aceste valori dintr-un fişier CSV."
+"Introduceţi detaliile mai jos.  <a href=\"%s\">Vezi Aici </a> lista "
+"codurilor țară / stat disponibile."
 
 #: admin/settings/settings-tax-rates.php:36
 msgid "Country&nbsp;Code"
-msgstr ""
+msgstr "Cod&nbsp;Țară"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:36
-#, fuzzy
 msgid "A 2 digit country code, e.g. US. Leave blank to apply to all."
 msgstr ""
-"Introdu un cost per comandă, de ex. 5,00. Lasă câmpul gol pentru a dezactiva "
-"această opțiune."
+"Un cod de țară din 2 litere, de exemplu RO. Lăsați necompletat pentru a se "
+"aplica tuturor"
 
 #: admin/settings/settings-tax-rates.php:38
 msgid "State&nbsp;Code"
-msgstr ""
+msgstr "Cod&nbsp;Statal"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:38
-#, fuzzy
 msgid "A 2 digit state code, e.g. AL. Leave blank to apply to all."
 msgstr ""
-"Introdu un cost per comandă, de ex. 5,00. Lasă câmpul gol pentru a dezactiva "
-"această opțiune."
+"Un cod de stat din 2 caractere, de exemplu AL. Lăsați necompletat pentru a "
+"se aplica tuturor."
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:40
 #: admin/settings/settings-tax-rates.php:217
-#, fuzzy
 msgid "ZIP/Postcode"
 msgstr "Cod poștal"
 
@@ -4197,18 +4166,23 @@ msgid ""
 "to apply to all areas. Wildcards (*) can be used. Ranges for numeric "
 "postcodes (e.g. 12345-12350) will be expanded into individual postcodes."
 msgstr ""
+"Codurile poștale pentru această regulă. Valorile multiple trebuie sa fie "
+"separate prin punct și virgulă (;). Pot fi utilizate Metacaractere (*). "
+"Intervalele pentru codurile poștale numerice (de exemplu, 12345 - 12350) vor "
+"fi extinse în codurile poștale individuale."
 
 #: admin/settings/settings-tax-rates.php:42
 msgid ""
 "Cities for this rule. Semi-colon (;) separate multiple values. Leave blank "
 "to apply to all cities."
 msgstr ""
+"Orașele pentru această regulă. Valorile multiple trebuie sa fie separate "
+"prin punct și virgulă (;). Lasă gol pentru a fi aplicabilă la toate orașele."
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:44
-#, fuzzy
 msgid "Rate&nbsp;%"
-msgstr "Rată&hellip;"
+msgstr "Rată&hellip;%"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:44
@@ -4217,20 +4191,18 @@ msgstr "Introdu o valoare pentru taxă (procentuală) cu 4 (patru) decimale."
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:46
-#, fuzzy
 msgid "Tax&nbsp;Name"
-msgstr "Adaugă&nbsp;meta"
+msgstr "Nume&nbsp;Taxă"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:46
-#, fuzzy
 msgid "Enter a name for this tax rate."
-msgstr "Introdu un nume pentru noul atribut:"
+msgstr "Introdu un nume pentru această valoare de taxare."
 
 #: admin/settings/settings-tax-rates.php:48
 #: admin/settings/settings-tax-rates.php:217
 msgid "Priority"
-msgstr ""
+msgstr "Prioritate"
 
 #: admin/settings/settings-tax-rates.php:48
 msgid ""
@@ -4238,6 +4210,10 @@ msgid ""
 "be used. To define multiple tax rates for a single area you need to specify "
 "a different priority per rate."
 msgstr ""
+"Alege o prioritate pentru aceasta Cotă de Taxare. Doar 1 cotă de taxare per "
+"prioritate va fi utilizată. Pentru a defini și utiliza mai multe Cote de "
+"Impozitare pentru o singură zonă, este necesar să specifici altă prioritate "
+"pentru fiecare Cota."
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:50
@@ -4260,61 +4236,52 @@ msgid "Choose whether or not this tax rate also gets applied to shipping."
 msgstr "Alege dacă această taxă va fi aplicată si costului de expediere."
 
 #: admin/settings/settings-tax-rates.php:59
-#, fuzzy
 msgid "Insert row"
-msgstr "Inserează Scurtătură de Cod"
+msgstr "Adaugă rând"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:60
-#, fuzzy
 msgid "Remove selected row(s)"
 msgstr "Șterge rândurile selectate"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:62
-#, fuzzy
 msgid "Export CSV"
-msgstr "Exportă Cotele de Taxare"
+msgstr "Exportă în format CSV"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:63
-#, fuzzy
 msgid "Import CSV"
-msgstr "Importă Cote de Taxare"
+msgstr "Importă din CSV"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:163
-#, fuzzy
 msgid "No row(s) selected"
-msgstr "Nici o țară selectată"
+msgstr "Niciun rând(uri) selectat(e)"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:217
-#, fuzzy
 msgid "Country Code"
-msgstr "Țară"
+msgstr "Cod de Țară"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:217
-#, fuzzy
 msgid "State Code"
-msgstr "Cod Sortare"
+msgstr "Cod Statal"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:217
-#, fuzzy
 msgid "Rate %"
-msgstr "Rată (Cotă)"
+msgstr "Rată (Cotă) %"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:217
-#, fuzzy
 msgid "Tax Name"
-msgstr "Nume"
+msgstr "Nume Taxă"
 
 #: admin/woocommerce-admin-attributes.php:43
 msgid "Slug %s is too long"
-msgstr ""
+msgstr "Numele Scurt %s este prea lung"
 
 # @ woocommerce
 #: admin/woocommerce-admin-attributes.php:83
@@ -5372,9 +5339,8 @@ msgstr "Vânzări per categorii"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:81
-#, fuzzy
 msgid "Discounts by coupon"
-msgstr "Tip Reducere"
+msgstr "Reduceri per Cupon"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:232
@@ -5577,48 +5543,43 @@ msgstr "Nici o vânzare :("
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1347
-#, fuzzy
 msgid "Total orders containing coupons"
-msgstr "Comenzi totale pentru perioada selectată"
+msgstr "Comenzi totale incluzând cupoanele"
 
 #: admin/woocommerce-admin-reports.php:1353
 msgid "Percent of orders containing coupons"
-msgstr ""
+msgstr "Procentul din Comenzi la care s-au folosit cupoane"
 
 #: admin/woocommerce-admin-reports.php:1359
 msgid "Total coupon discount"
-msgstr ""
+msgstr "Reducere Totală Cupon"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1368
-#, fuzzy
 msgid "Most popular coupons"
-msgstr "Cel mai prost Cupon"
+msgstr "Cel mai popular Cupon"
 
 #: admin/woocommerce-admin-reports.php:1378
 msgid "Used 1 time"
 msgid_plural "Used %d times"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Folosit 1 dată"
+msgstr[1] "Folosit de %d ori"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1381
 #: admin/woocommerce-admin-reports.php:1403
-#, fuzzy
 msgid "No coupons found"
 msgstr "Nici un Cupon nu a fost găsit"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1390
-#, fuzzy
 msgid "Greatest discount amount"
-msgstr "Crează Cont"
+msgstr "Cea mai mare sumă redusă"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1400
-#, fuzzy
 msgid "Discounted %s"
-msgstr "Reduceri"
+msgstr "Reduceri %s"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1459
@@ -5643,19 +5604,16 @@ msgstr "Cel mai prost Cupon"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1615
-#, fuzzy
 msgid "Discount average"
-msgstr "Tip Reducere"
+msgstr "Medie Reducere"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1623
-#, fuzzy
 msgid "Discount median"
-msgstr "Reduceri utilizate"
+msgstr "Reduceri mediane"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1643
-#, fuzzy
 msgid "Monthly discounts by coupon"
 msgstr "Reduceri lunare per cupon"
 
@@ -5900,13 +5858,11 @@ msgstr "Selectează țările&hellip;"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:22
-#, fuzzy
 msgid "WC Transients"
-msgstr "Elemente Tranzitorii"
+msgstr "Elemente Tranzitorii WC"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:23
-#, fuzzy
 msgid "Clear transients"
 msgstr "Curăță Elementele Tranzitorii"
 
@@ -5918,40 +5874,39 @@ msgstr ""
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:27
-#, fuzzy
 msgid "Expired Transients"
-msgstr "Elemente Tranzitorii"
+msgstr "Elemente Tranzitorii Expirate"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:28
-#, fuzzy
 msgid "Clear expired transients"
-msgstr "Curăță Elementele Tranzitorii"
+msgstr "Curăță Elementele Tranzitorii expirate"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:29
-#, fuzzy
 msgid "This tool will clear ALL expired transients from Wordpress."
 msgstr ""
-"Această unealtă va elimina elementele tranzitorii salvate pentru reutilizare."
+"Această unealtă va elimina TOATE elementele tranzitorii expirate din baza de "
+"date a Wordpress."
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:32
-#, fuzzy
 msgid "Term counts"
-msgstr "Conturi Clienți"
+msgstr "Numără Termeni"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:33
-#, fuzzy
 msgid "Recount terms"
-msgstr "Selectează termeni"
+msgstr "Renumără Termenii"
 
 #: admin/woocommerce-admin-status.php:34
 msgid ""
 "This tool will recount product terms - useful when changing your settings in "
 "a way which hides products from the catalog."
 msgstr ""
+"Această unealta va renumăra Produsele pentru fiecare Termen - folositoare "
+"atunci când schimbi setările într-un mod care ascunde produsele de afișarea "
+"în catalog. "
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:37
@@ -5960,9 +5915,8 @@ msgstr "Capabilități"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:38
-#, fuzzy
 msgid "Reset capabilities"
-msgstr "Resetează Capabilități"
+msgstr "Resetează Capabilități (Roluri)"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:39
@@ -5985,9 +5939,8 @@ msgstr "Elementele Tranzitorii ale produsului au fost reinițializate."
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:96
-#, fuzzy
 msgid "%d Transients Rows Cleared"
-msgstr "Elementele Tranzitorii ale produsului au fost reinițializate."
+msgstr "Au fost %d rânduri tranzitorii șterse"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:104
@@ -5996,9 +5949,8 @@ msgstr "Roluri resetate cu succes."
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:116
-#, fuzzy
 msgid "Terms successfully recounted"
-msgstr "Roluri resetate cu succes."
+msgstr "Termenii au fost numărați cu succes."
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:125
@@ -6277,9 +6229,8 @@ msgstr "Șterge Imagine"
 # @ woocommerce
 #: admin/woocommerce-admin-taxonomies.php:64
 #: admin/woocommerce-admin-taxonomies.php:156
-#, fuzzy
 msgid "Use image"
-msgstr "Șterge Imagine"
+msgstr "Folosește Imaginea"
 
 # @ woocommerce
 #: admin/woocommerce-admin-taxonomies.php:222
@@ -6328,9 +6279,8 @@ msgstr "Client plătitor?"
 
 # @ woocommerce
 #: admin/woocommerce-admin-users.php:29
-#, fuzzy
 msgid "Completed Orders"
-msgstr "Comandă finalizată"
+msgstr "Comenzi finalizate"
 
 # @ woocommerce
 #: admin/woocommerce-admin-users.php:144
