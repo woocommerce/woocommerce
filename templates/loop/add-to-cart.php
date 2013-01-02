@@ -41,7 +41,7 @@ if ( ! $product->is_purchasable() ) return;
 			break;
 		}
 
-		printf('<a href="%s" rel="nofollow" data-product_id="%s" class="add_to_cart_button button product_type_%s">%s</a>', $link, $product->id, $product->product_type, $label);
+		echo apply_filters( 'woocommerce_loop_add_to_cart_link', sprintf('<a href="%s" rel="nofollow" data-product_id="%s" class="add_to_cart_button button product_type_%s">%s</a>', $link, $product->id, $product->product_type, $label ), $link, $product, $label );
 
 	?>
 

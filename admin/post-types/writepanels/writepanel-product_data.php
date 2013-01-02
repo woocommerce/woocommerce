@@ -404,6 +404,7 @@ function woocommerce_product_data_box() {
 
 													?>" placeholder="<?php _e( 'Pipe separate terms', 'woocommerce' ); ?>" />
 												<?php endif; ?>
+												<?php do_action( 'woocommerce_product_option_terms', $tax, $i ); ?>
 											</td>
 										</tr>
 										<tr>
