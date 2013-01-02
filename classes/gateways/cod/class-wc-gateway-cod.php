@@ -65,14 +65,6 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
      * @return void
      */
     function init_form_fields() {
-    	global $woocommerce;
-
-    	$shipping_methods = array();
-
-    	if ( is_admin() )
-	    	foreach ( $woocommerce->shipping->load_shipping_methods() as $method ) {
-		    	$shipping_methods[ $method->id ] = $method->get_title();
-	    	}
 
     	$this->form_fields = array(
 			'enabled' => array(
