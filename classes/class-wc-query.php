@@ -97,14 +97,38 @@ class WC_Query {
 		}
 
 		$this->product_query( $q );
+		
+		if ( is_search() ) {
+		    add_filter('posts_where', array( $this, 'search_post_excerpt') );
+		}
 
 		// We're on a shop page so queue the woocommerce_get_products_in_view function
 		add_action( 'wp', array( $this, 'get_products_in_view' ), 2);
-
+	
 		// And remove the pre_get_posts hook
 		$this->remove_product_query();
 	}
 
+	/**
+	 * search_post_excerpt function. 
+	 *
+	 * @access public
+	 * @param string $where (default: '')
+	 * @return string (modified where clause)
+	 */
+	public function search_post_excerpt( $where = '' ) {
+		global $wp_the_query;
+	    
+		// If this is not a WC Query, do not modify the query
+		if ( empty( $wp_the_query->query_vars['wc_query'] ) )
+		    return $where;
+
+		$where = preg_replace(
+		    "/post_title\s+LIKE\s*(\'[^\']+\')/",
+		    "post_title LIKE $1) OR (post_excerpt LIKE $1", $where );		
+	    
+		return $where;
+	}
 
 	/**
 	 * wpseo_metadesc function.
