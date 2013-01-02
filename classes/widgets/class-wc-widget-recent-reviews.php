@@ -86,7 +86,7 @@ class WC_Widget_Recent_Reviews extends WP_Widget {
 
 				$rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 
-				$rating_html = '<div class="star-rating" title="' . $rating . '">
+				$rating_html = '<div class="star-rating" title="' . sprintf(__( 'Rated %d out of 5', 'woocommerce' ), $rating) . '">
 					<span style="width:' . ( $rating * $star_size ) . 'px">' . $rating . ' ' . __( 'out of 5', 'woocommerce' ) . '</span>
 				</div>';
 
