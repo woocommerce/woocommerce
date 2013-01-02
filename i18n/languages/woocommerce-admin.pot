@@ -2,11 +2,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.0.0-beta1 Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2012-12-30 13:34:18+00:00\n"
+"POT-Creation-Date: 2013-01-02 13:44:51+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2012-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2013-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
 
@@ -111,7 +111,7 @@ msgstr ""
 
 #: admin/includes/notice-installed.php:8 admin/includes/notice-updated.php:8
 #: admin/woocommerce-admin-content.php:41 admin/woocommerce-admin-init.php:81
-#: admin/woocommerce-admin-status.php:140
+#: admin/woocommerce-admin-status.php:187
 msgid "Settings"
 msgstr ""
 
@@ -164,19 +164,19 @@ msgstr ""
 msgid "Copy to a new draft"
 msgstr ""
 
-#: admin/post-types/product.php:85 admin/woocommerce-admin-taxonomies.php:295
+#: admin/post-types/product.php:85 admin/woocommerce-admin-taxonomies.php:297
 msgid "Image"
 msgstr ""
 
 #: admin/post-types/product.php:87
 #: admin/post-types/writepanels/writepanel-product_data.php:368
-#: admin/post-types/writepanels/writepanel-product_data.php:446
+#: admin/post-types/writepanels/writepanel-product_data.php:447
 #: admin/woocommerce-admin-attributes.php:217
-#: admin/woocommerce-admin-attributes.php:252
-#: admin/woocommerce-admin-attributes.php:290
-#: admin/woocommerce-admin-attributes.php:313
-#: admin/woocommerce-admin-attributes.php:357
-#: admin/woocommerce-admin-attributes.php:381
+#: admin/woocommerce-admin-attributes.php:253
+#: admin/woocommerce-admin-attributes.php:291
+#: admin/woocommerce-admin-attributes.php:314
+#: admin/woocommerce-admin-attributes.php:358
+#: admin/woocommerce-admin-attributes.php:383
 #: admin/woocommerce-admin-init.php:384
 msgid "Name"
 msgstr ""
@@ -211,14 +211,14 @@ msgstr ""
 
 #: admin/post-types/product.php:99 admin/post-types/product.php:636
 #: admin/post-types/product.php:908
-#: admin/post-types/writepanels/writepanel-product_data.php:1043
+#: admin/post-types/writepanels/writepanel-product_data.php:1044
 #: admin/woocommerce-admin-init.php:397
 msgid "Featured"
 msgstr ""
 
 #: admin/post-types/product.php:100 admin/woocommerce-admin-attributes.php:235
-#: admin/woocommerce-admin-attributes.php:292
-#: admin/woocommerce-admin-attributes.php:369
+#: admin/woocommerce-admin-attributes.php:293
+#: admin/woocommerce-admin-attributes.php:370
 msgid "Type"
 msgstr ""
 
@@ -397,14 +397,14 @@ msgstr ""
 #: admin/post-types/product.php:606 admin/post-types/product.php:882
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:86
 #: admin/post-types/writepanels/writepanel-product_data.php:283
-#: admin/woocommerce-admin-settings.php:839
+#: admin/woocommerce-admin-settings.php:827
 msgid "Width"
 msgstr ""
 
 #: admin/post-types/product.php:607 admin/post-types/product.php:883
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:87
 #: admin/post-types/writepanels/writepanel-product_data.php:284
-#: admin/woocommerce-admin-settings.php:841
+#: admin/woocommerce-admin-settings.php:829
 msgid "Height"
 msgstr ""
 
@@ -417,19 +417,19 @@ msgid "Catalog &amp; search"
 msgstr ""
 
 #: admin/post-types/product.php:623 admin/post-types/product.php:896
-#: admin/post-types/writepanels/writepanel-product_data.php:1032
+#: admin/post-types/writepanels/writepanel-product_data.php:1033
 #: admin/woocommerce-admin-content.php:46
-#: admin/woocommerce-admin-settings.php:214
+#: admin/woocommerce-admin-settings.php:220
 msgid "Catalog"
 msgstr ""
 
 #: admin/post-types/product.php:624 admin/post-types/product.php:897
-#: admin/post-types/writepanels/writepanel-product_data.php:1033
+#: admin/post-types/writepanels/writepanel-product_data.php:1034
 msgid "Search"
 msgstr ""
 
 #: admin/post-types/product.php:625 admin/post-types/product.php:898
-#: admin/post-types/writepanels/writepanel-product_data.php:1034
+#: admin/post-types/writepanels/writepanel-product_data.php:1035
 msgid "Hidden"
 msgstr ""
 
@@ -479,14 +479,14 @@ msgid "Decrease regular price by (fixed amount or %):"
 msgstr ""
 
 #: admin/post-types/product.php:914 admin/post-types/product.php:950
-#: admin/post-types/shop_order.php:190 admin/woocommerce-admin-status.php:155
-#: admin/woocommerce-admin-status.php:317
+#: admin/post-types/shop_order.php:190 admin/woocommerce-admin-status.php:202
+#: admin/woocommerce-admin-status.php:364
 msgid "Yes"
 msgstr ""
 
 #: admin/post-types/product.php:915 admin/post-types/product.php:951
-#: admin/post-types/shop_order.php:192 admin/woocommerce-admin-status.php:155
-#: admin/woocommerce-admin-status.php:317
+#: admin/post-types/shop_order.php:192 admin/woocommerce-admin-status.php:202
+#: admin/woocommerce-admin-status.php:364
 msgid "No"
 msgstr ""
 
@@ -568,7 +568,7 @@ msgstr ""
 #: admin/settings/settings-tax-rates.php:52
 #: admin/settings/settings-tax-rates.php:217
 #: admin/woocommerce-admin-content.php:49
-#: admin/woocommerce-admin-settings.php:218
+#: admin/woocommerce-admin-settings.php:224
 msgid "Shipping"
 msgstr ""
 
@@ -652,7 +652,7 @@ msgstr ""
 #: admin/post-types/writepanels/order-download-permission-html.php:7
 #: admin/post-types/writepanels/variation-admin-html.php:7
 #: admin/post-types/writepanels/writepanel-product_data.php:361
-#: admin/post-types/writepanels/writepanel-product_data.php:439
+#: admin/post-types/writepanels/writepanel-product_data.php:440
 #: admin/woocommerce-admin-init.php:386
 msgid "Click to toggle"
 msgstr ""
@@ -718,7 +718,7 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-product_data.php:184
 #: admin/settings/settings-init.php:1026
 #: admin/settings/settings-tax-rates.php:29
-#: admin/woocommerce-admin-settings.php:256
+#: admin/woocommerce-admin-settings.php:262
 msgid "Standard"
 msgstr ""
 
@@ -768,7 +768,7 @@ msgstr ""
 
 #: admin/post-types/writepanels/variation-admin-html.php:6
 #: admin/post-types/writepanels/writepanel-product_data.php:360
-#: admin/post-types/writepanels/writepanel-product_data.php:438
+#: admin/post-types/writepanels/writepanel-product_data.php:439
 #: admin/woocommerce-admin-init.php:385
 msgid "Remove"
 msgstr ""
@@ -964,8 +964,8 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:72
 #: admin/post-types/writepanels/writepanel-order_data.php:396
-#: admin/post-types/writepanels/writepanel-product_data.php:499
-#: admin/post-types/writepanels/writepanel-product_data.php:520
+#: admin/post-types/writepanels/writepanel-product_data.php:500
+#: admin/post-types/writepanels/writepanel-product_data.php:521
 #: admin/woocommerce-admin-reports.php:1214
 msgid "Search for a product&hellip;"
 msgstr ""
@@ -1100,8 +1100,8 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-order_data.php:140
 #: admin/post-types/writepanels/writepanel-order_data.php:230
 #: admin/post-types/writepanels/writepanel-order_data.php:383
-#: admin/post-types/writepanels/writepanel-product_data.php:1046
-#: admin/woocommerce-admin-attributes.php:306
+#: admin/post-types/writepanels/writepanel-product_data.php:1047
+#: admin/woocommerce-admin-attributes.php:307
 msgid "Edit"
 msgstr ""
 
@@ -1234,7 +1234,7 @@ msgstr ""
 #: admin/settings/settings-tax-rates.php:387
 #: admin/settings/settings-tax-rates.php:466
 #: admin/woocommerce-admin-content.php:48
-#: admin/woocommerce-admin-settings.php:217
+#: admin/woocommerce-admin-settings.php:223
 msgid "Tax"
 msgstr ""
 
@@ -1416,7 +1416,7 @@ msgid "Private note"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_notes.php:65
-#: admin/post-types/writepanels/writepanel-product_data.php:477
+#: admin/post-types/writepanels/writepanel-product_data.php:478
 msgid "Add"
 msgstr ""
 
@@ -1523,37 +1523,37 @@ msgstr ""
 msgid "No variations added"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:316
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:317
 msgid "Are you sure you want to remove this variation?"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:372
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:373
 msgid "Are you sure you want to delete all variations? This cannot be undone."
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:375
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:376
 msgid "Last warning, are you sure?"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:412
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:413
 msgid "Enter a value"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:503
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:504
 #: admin/woocommerce-admin-taxonomies.php:62
 #: admin/woocommerce-admin-taxonomies.php:154
 msgid "Choose an image"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:505
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:506
 msgid "Set variation image"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:549
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:550
 msgid "Variable product"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:615
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:616
 msgid "Variation #%s of %s"
 msgstr ""
 
@@ -1571,13 +1571,13 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-product_data.php:77
 #: admin/woocommerce-admin-content.php:44
-#: admin/woocommerce-admin-settings.php:213
+#: admin/woocommerce-admin-settings.php:219
 msgid "General"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-product_data.php:79
 #: admin/woocommerce-admin-content.php:47
-#: admin/woocommerce-admin-settings.php:216
+#: admin/woocommerce-admin-settings.php:222
 msgid "Inventory"
 msgstr ""
 
@@ -1586,7 +1586,7 @@ msgid "Linked Products"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-product_data.php:85
-#: admin/woocommerce-admin-attributes.php:282
+#: admin/woocommerce-admin-attributes.php:283
 #: admin/woocommerce-admin-init.php:61
 msgid "Attributes"
 msgstr ""
@@ -1637,7 +1637,7 @@ msgid "Sale Price Dates"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-product_data.php:138
-#: admin/post-types/writepanels/writepanel-product_data.php:1067
+#: admin/post-types/writepanels/writepanel-product_data.php:1068
 msgid "Cancel"
 msgstr ""
 
@@ -1726,7 +1726,7 @@ msgid "Shipping classes are used by certain shipping methods to group similar pr
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-product_data.php:376
-#: admin/post-types/writepanels/writepanel-product_data.php:452
+#: admin/post-types/writepanels/writepanel-product_data.php:453
 #: admin/woocommerce-admin-init.php:387
 msgid "Value(s)"
 msgstr ""
@@ -1751,104 +1751,104 @@ msgstr ""
 msgid "Pipe separate terms"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:411
-#: admin/post-types/writepanels/writepanel-product_data.php:458
+#: admin/post-types/writepanels/writepanel-product_data.php:412
+#: admin/post-types/writepanels/writepanel-product_data.php:459
 #: admin/woocommerce-admin-init.php:389
 msgid "Visible on the product page"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:417
-#: admin/post-types/writepanels/writepanel-product_data.php:464
+#: admin/post-types/writepanels/writepanel-product_data.php:418
+#: admin/post-types/writepanels/writepanel-product_data.php:465
 #: admin/woocommerce-admin-init.php:390
 msgid "Used for variations"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:453
+#: admin/post-types/writepanels/writepanel-product_data.php:454
 #: admin/woocommerce-admin-init.php:388
 msgid "Enter some text, or some attributes by pipe (|) separating values."
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:479
+#: admin/post-types/writepanels/writepanel-product_data.php:480
 msgid "Custom product attribute"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:491
+#: admin/post-types/writepanels/writepanel-product_data.php:492
 msgid "Save attributes"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:498
+#: admin/post-types/writepanels/writepanel-product_data.php:499
 msgid "Up-Sells"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:517
+#: admin/post-types/writepanels/writepanel-product_data.php:518
 msgid "Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive."
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:519
+#: admin/post-types/writepanels/writepanel-product_data.php:520
 msgid "Cross-Sells"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:538
+#: admin/post-types/writepanels/writepanel-product_data.php:539
 msgid "Cross-sells are products which you promote in the cart, based on the current product."
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:548
+#: admin/post-types/writepanels/writepanel-product_data.php:549
 msgid "Choose a grouped product&hellip;"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:574
+#: admin/post-types/writepanels/writepanel-product_data.php:575
 msgid "Grouping"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:574
+#: admin/post-types/writepanels/writepanel-product_data.php:575
 msgid "Set this option to make this product part of a grouped product."
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:594
+#: admin/post-types/writepanels/writepanel-product_data.php:595
 msgid "Purchase Note"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:594
+#: admin/post-types/writepanels/writepanel-product_data.php:595
 msgid "Enter an optional note to send the customer after purchase."
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:601
+#: admin/post-types/writepanels/writepanel-product_data.php:602
 msgid "Menu order"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:601
+#: admin/post-types/writepanels/writepanel-product_data.php:602
 msgid "Custom ordering position."
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:609
+#: admin/post-types/writepanels/writepanel-product_data.php:610
 msgid "Enable reviews"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:698
+#: admin/post-types/writepanels/writepanel-product_data.php:699
 msgid "Product SKU must be unique."
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:1031
+#: admin/post-types/writepanels/writepanel-product_data.php:1032
 msgid "Catalog/search"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:1038
+#: admin/post-types/writepanels/writepanel-product_data.php:1039
 msgid "Catalog visibility:"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:1054
+#: admin/post-types/writepanels/writepanel-product_data.php:1055
 msgid "Define the loops this product should be visible in. The product will still be accessible directly."
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:1060
+#: admin/post-types/writepanels/writepanel-product_data.php:1061
 msgid "Enable this option to feature this product."
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:1062
+#: admin/post-types/writepanels/writepanel-product_data.php:1063
 msgid "Featured Product"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_data.php:1066
+#: admin/post-types/writepanels/writepanel-product_data.php:1067
 msgid "OK"
 msgstr ""
 
@@ -1859,7 +1859,7 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-product_images.php:42
 #: admin/post-types/writepanels/writepanel-product_images.php:102
-#: admin/woocommerce-admin-attributes.php:306
+#: admin/woocommerce-admin-attributes.php:307
 msgid "Delete"
 msgstr ""
 
@@ -2368,7 +2368,7 @@ msgstr ""
 msgid "Append a logout link to menus containing \"My Account\""
 msgstr ""
 
-#: admin/settings/settings-init.php:395 admin/woocommerce-admin-status.php:161
+#: admin/settings/settings-init.php:395 admin/woocommerce-admin-status.php:208
 msgid "Shop Pages"
 msgstr ""
 
@@ -2376,7 +2376,7 @@ msgstr ""
 msgid "The following pages need selecting so that WooCommerce knows where they are. These pages should have been created upon installation of the plugin, if not you will need to create them."
 msgstr ""
 
-#: admin/settings/settings-init.php:398 admin/woocommerce-admin-status.php:172
+#: admin/settings/settings-init.php:398 admin/woocommerce-admin-status.php:219
 msgid "Cart Page"
 msgstr ""
 
@@ -2384,7 +2384,7 @@ msgstr ""
 msgid "Page contents: [woocommerce_cart]"
 msgstr ""
 
-#: admin/settings/settings-init.php:409 admin/woocommerce-admin-status.php:176
+#: admin/settings/settings-init.php:409 admin/woocommerce-admin-status.php:223
 msgid "Checkout Page"
 msgstr ""
 
@@ -2392,7 +2392,7 @@ msgstr ""
 msgid "Page contents: [woocommerce_checkout]"
 msgstr ""
 
-#: admin/settings/settings-init.php:420 admin/woocommerce-admin-status.php:180
+#: admin/settings/settings-init.php:420 admin/woocommerce-admin-status.php:227
 msgid "Pay Page"
 msgstr ""
 
@@ -2400,7 +2400,7 @@ msgstr ""
 msgid "Page contents: [woocommerce_pay] Parent: \"Checkout\""
 msgstr ""
 
-#: admin/settings/settings-init.php:431 admin/woocommerce-admin-status.php:184
+#: admin/settings/settings-init.php:431 admin/woocommerce-admin-status.php:231
 msgid "Thanks Page"
 msgstr ""
 
@@ -2408,7 +2408,7 @@ msgstr ""
 msgid "Page contents: [woocommerce_thankyou] Parent: \"Checkout\""
 msgstr ""
 
-#: admin/settings/settings-init.php:442 admin/woocommerce-admin-status.php:188
+#: admin/settings/settings-init.php:442 admin/woocommerce-admin-status.php:235
 msgid "My Account Page"
 msgstr ""
 
@@ -2416,7 +2416,7 @@ msgstr ""
 msgid "Page contents: [woocommerce_my_account]"
 msgstr ""
 
-#: admin/settings/settings-init.php:453 admin/woocommerce-admin-status.php:192
+#: admin/settings/settings-init.php:453 admin/woocommerce-admin-status.php:239
 msgid "Edit Address Page"
 msgstr ""
 
@@ -2424,7 +2424,7 @@ msgstr ""
 msgid "Page contents: [woocommerce_edit_address] Parent: \"My Account\""
 msgstr ""
 
-#: admin/settings/settings-init.php:464 admin/woocommerce-admin-status.php:196
+#: admin/settings/settings-init.php:464 admin/woocommerce-admin-status.php:243
 msgid "View Order Page"
 msgstr ""
 
@@ -2432,7 +2432,7 @@ msgstr ""
 msgid "Page contents: [woocommerce_view_order] Parent: \"My Account\""
 msgstr ""
 
-#: admin/settings/settings-init.php:475 admin/woocommerce-admin-status.php:200
+#: admin/settings/settings-init.php:475 admin/woocommerce-admin-status.php:247
 msgid "Change Password Page"
 msgstr ""
 
@@ -2769,7 +2769,7 @@ msgid "Never show stock amount"
 msgstr ""
 
 #: admin/settings/settings-init.php:877
-#: admin/woocommerce-admin-settings.php:320
+#: admin/woocommerce-admin-settings.php:326
 msgid "Shipping Options"
 msgstr ""
 
@@ -2822,8 +2822,8 @@ msgid "Collect shipping address even when not required"
 msgstr ""
 
 #: admin/settings/settings-init.php:954
-#: admin/woocommerce-admin-settings.php:219
-#: admin/woocommerce-admin-settings.php:355
+#: admin/woocommerce-admin-settings.php:225
+#: admin/woocommerce-admin-settings.php:363
 msgid "Payment Gateways"
 msgstr ""
 
@@ -2832,7 +2832,7 @@ msgid "Installed payment gateways are displayed below. Drag and drop payment gat
 msgstr ""
 
 #: admin/settings/settings-init.php:972
-#: admin/woocommerce-admin-settings.php:250
+#: admin/woocommerce-admin-settings.php:256
 msgid "Tax Options"
 msgstr ""
 
@@ -3164,91 +3164,91 @@ msgid "Edit Attribute"
 msgstr ""
 
 #: admin/woocommerce-admin-attributes.php:221
-#: admin/woocommerce-admin-attributes.php:359
+#: admin/woocommerce-admin-attributes.php:360
 msgid "Name for the attribute (shown on the front-end)."
 msgstr ""
 
 #: admin/woocommerce-admin-attributes.php:226
-#: admin/woocommerce-admin-attributes.php:291
-#: admin/woocommerce-admin-attributes.php:363
+#: admin/woocommerce-admin-attributes.php:292
+#: admin/woocommerce-admin-attributes.php:364
 msgid "Slug"
 msgstr ""
 
 #: admin/woocommerce-admin-attributes.php:230
-#: admin/woocommerce-admin-attributes.php:365
+#: admin/woocommerce-admin-attributes.php:366
 msgid "Unique slug/reference for the attribute; must be shorter than 28 characters."
 msgstr ""
 
 #: admin/woocommerce-admin-attributes.php:239
-#: admin/woocommerce-admin-attributes.php:371
+#: admin/woocommerce-admin-attributes.php:372
 msgid "Select"
 msgstr ""
 
 #: admin/woocommerce-admin-attributes.php:240
-#: admin/woocommerce-admin-attributes.php:372
+#: admin/woocommerce-admin-attributes.php:373
 msgid "Text"
 msgstr ""
 
-#: admin/woocommerce-admin-attributes.php:242
-#: admin/woocommerce-admin-attributes.php:374
+#: admin/woocommerce-admin-attributes.php:243
+#: admin/woocommerce-admin-attributes.php:376
 msgid "Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>."
 msgstr ""
 
-#: admin/woocommerce-admin-attributes.php:247
-#: admin/woocommerce-admin-attributes.php:378
+#: admin/woocommerce-admin-attributes.php:248
+#: admin/woocommerce-admin-attributes.php:380
 msgid "Default sort order"
 msgstr ""
 
-#: admin/woocommerce-admin-attributes.php:251
-#: admin/woocommerce-admin-attributes.php:319
-#: admin/woocommerce-admin-attributes.php:380
+#: admin/woocommerce-admin-attributes.php:252
+#: admin/woocommerce-admin-attributes.php:320
+#: admin/woocommerce-admin-attributes.php:382
 msgid "Custom ordering"
 msgstr ""
 
-#: admin/woocommerce-admin-attributes.php:253
-#: admin/woocommerce-admin-attributes.php:316
-#: admin/woocommerce-admin-attributes.php:382
+#: admin/woocommerce-admin-attributes.php:254
+#: admin/woocommerce-admin-attributes.php:317
+#: admin/woocommerce-admin-attributes.php:384
 msgid "Term ID"
 msgstr ""
 
-#: admin/woocommerce-admin-attributes.php:255
-#: admin/woocommerce-admin-attributes.php:384
+#: admin/woocommerce-admin-attributes.php:256
+#: admin/woocommerce-admin-attributes.php:386
 msgid "Determines the sort order on the frontend for this attribute. If using custom ordering, you can drag and drop the terms in this attribute"
 msgstr ""
 
-#: admin/woocommerce-admin-attributes.php:260
+#: admin/woocommerce-admin-attributes.php:261
 msgid "Update"
 msgstr ""
 
-#: admin/woocommerce-admin-attributes.php:293
+#: admin/woocommerce-admin-attributes.php:294
 msgid "Order by"
 msgstr ""
 
-#: admin/woocommerce-admin-attributes.php:294
+#: admin/woocommerce-admin-attributes.php:295
 msgid "Terms"
 msgstr ""
 
-#: admin/woocommerce-admin-attributes.php:339
+#: admin/woocommerce-admin-attributes.php:340
 msgid "Configure&nbsp;terms"
 msgstr ""
 
-#: admin/woocommerce-admin-attributes.php:343
+#: admin/woocommerce-admin-attributes.php:344
 msgid "No attributes currently exist."
 msgstr ""
 
-#: admin/woocommerce-admin-attributes.php:353
+#: admin/woocommerce-admin-attributes.php:354
 msgid "Add New Attribute"
 msgstr ""
 
-#: admin/woocommerce-admin-attributes.php:354
+#: admin/woocommerce-admin-attributes.php:355
 msgid "Attributes let you define extra product data, such as size or colour. You can use these attributes in the shop sidebar using the \"layered nav\" widgets. Please note: you cannot rename an attribute later on."
 msgstr ""
 
-#: admin/woocommerce-admin-attributes.php:387
+#: admin/woocommerce-admin-attributes.php:389
 msgid "Add Attribute"
 msgstr ""
 
-#: admin/woocommerce-admin-attributes.php:398
+#: admin/woocommerce-admin-attributes.php:400
 msgid "Are you sure you want to delete this attribute?"
 msgstr ""
 
@@ -3269,7 +3269,7 @@ msgid "If you are having problems, or to assist us with support, please check th
 msgstr ""
 
 #: admin/woocommerce-admin-content.php:33 admin/woocommerce-admin-init.php:82
-#: admin/woocommerce-admin-status.php:41
+#: admin/woocommerce-admin-status.php:46
 msgid "System Status"
 msgstr ""
 
@@ -3286,7 +3286,7 @@ msgid "General settings such as your shop base, currency, and script/styling opt
 msgstr ""
 
 #: admin/woocommerce-admin-content.php:45
-#: admin/woocommerce-admin-settings.php:215
+#: admin/woocommerce-admin-settings.php:221
 msgid "Pages"
 msgstr ""
 
@@ -3319,7 +3319,7 @@ msgid "This is where payment gateway options are defined, and individual payment
 msgstr ""
 
 #: admin/woocommerce-admin-content.php:51
-#: admin/woocommerce-admin-settings.php:220
+#: admin/woocommerce-admin-settings.php:226
 msgid "Emails"
 msgstr ""
 
@@ -3328,7 +3328,7 @@ msgid "Here you can customise the way WooCommerce emails appear."
 msgstr ""
 
 #: admin/woocommerce-admin-content.php:52
-#: admin/woocommerce-admin-settings.php:221
+#: admin/woocommerce-admin-settings.php:227
 msgid "Integration"
 msgstr ""
 
@@ -3512,7 +3512,7 @@ msgid "Earned"
 msgstr ""
 
 #: admin/woocommerce-admin-functions.php:184
-#: admin/woocommerce-admin-install.php:219
+#: admin/woocommerce-admin-install.php:216
 msgid "Order Received"
 msgstr ""
 
@@ -3797,68 +3797,59 @@ msgstr ""
 
 #: admin/woocommerce-admin-install.php:198
 msgctxt "page_slug"
-msgid "order-tracking"
-msgstr ""
-
-#: admin/woocommerce-admin-install.php:198
-msgid "Track your order"
-msgstr ""
-
-#: admin/woocommerce-admin-install.php:201
-msgctxt "page_slug"
 msgid "my-account"
 msgstr ""
 
-#: admin/woocommerce-admin-install.php:201
+#: admin/woocommerce-admin-install.php:198
 msgid "My Account"
 msgstr ""
 
-#: admin/woocommerce-admin-install.php:204
+#: admin/woocommerce-admin-install.php:201
 msgctxt "page_slug"
 msgid "lost-password"
 msgstr ""
 
-#: admin/woocommerce-admin-install.php:204
+#: admin/woocommerce-admin-install.php:201
 msgid "Lost Password"
 msgstr ""
 
-#: admin/woocommerce-admin-install.php:207
+#: admin/woocommerce-admin-install.php:204
 msgctxt "page_slug"
 msgid "edit-address"
 msgstr ""
 
-#: admin/woocommerce-admin-install.php:207
+#: admin/woocommerce-admin-install.php:204
 msgid "Edit My Address"
 msgstr ""
 
-#: admin/woocommerce-admin-install.php:210
+#: admin/woocommerce-admin-install.php:207
 msgctxt "page_slug"
 msgid "view-order"
 msgstr ""
 
-#: admin/woocommerce-admin-install.php:210
+#: admin/woocommerce-admin-install.php:207
 msgid "View Order"
 msgstr ""
 
-#: admin/woocommerce-admin-install.php:213
+#: admin/woocommerce-admin-install.php:210
 msgctxt "page_slug"
 msgid "change-password"
 msgstr ""
 
-#: admin/woocommerce-admin-install.php:213
+#: admin/woocommerce-admin-install.php:210
 msgid "Change Password"
 msgstr ""
 
-#: admin/woocommerce-admin-install.php:216
+#: admin/woocommerce-admin-install.php:213
 msgctxt "page_slug"
 msgid "pay"
 msgstr ""
 
-#: admin/woocommerce-admin-install.php:216
+#: admin/woocommerce-admin-install.php:213
 msgid "Checkout &rarr; Pay"
 msgstr ""
 
-#: admin/woocommerce-admin-install.php:219
+#: admin/woocommerce-admin-install.php:216
 msgctxt "page_slug"
 msgid "order-received"
 msgstr ""
@@ -4267,56 +4258,56 @@ msgstr ""
 msgid "Action failed. Please refresh the page and retry."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:158
+#: admin/woocommerce-admin-settings.php:164
 msgid "Your settings have been saved."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:194
+#: admin/woocommerce-admin-settings.php:200
 msgid "<strong>Congratulations!</strong> &#8211; WooCommerce has been installed and setup. Enjoy :)"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:238
+#: admin/woocommerce-admin-settings.php:244
 msgid "More functionality and gateway options available via <a href=\"%s\" target=\"_blank\">WC official extensions</a>."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:256
+#: admin/woocommerce-admin-settings.php:262
 msgid "Tax Rates"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:283
+#: admin/woocommerce-admin-settings.php:289
 msgid "Email Options"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:408
+#: admin/woocommerce-admin-settings.php:422
 msgid "Save changes"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:475
+#: admin/woocommerce-admin-settings.php:463
 msgid "The changes you made will be lost if you navigate away from this page."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:843
+#: admin/woocommerce-admin-settings.php:831
 msgid "Hard Crop"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:868
+#: admin/woocommerce-admin-settings.php:856
 msgid "Select a page&hellip;"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:891
+#: admin/woocommerce-admin-settings.php:879
 msgid "Choose a country&hellip;"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:911
+#: admin/woocommerce-admin-settings.php:899
 msgid "Choose countries&hellip;"
 msgstr ""
 
 #: admin/woocommerce-admin-status.php:22
-msgid "Transients"
+msgid "WC Transients"
 msgstr ""
 
 #: admin/woocommerce-admin-status.php:23
-msgid "Clear Transients"
+msgid "Clear transients"
 msgstr ""
 
 #: admin/woocommerce-admin-status.php:24
@@ -4324,214 +4315,230 @@ msgid "This tool will clear the product/shop transients cache."
 msgstr ""
 
 #: admin/woocommerce-admin-status.php:27
-msgid "Term counts"
+msgid "Expired Transients"
 msgstr ""
 
 #: admin/woocommerce-admin-status.php:28
-msgid "Recount Terms"
+msgid "Clear expired transients"
 msgstr ""
 
 #: admin/woocommerce-admin-status.php:29
-msgid "This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog."
+msgid "This tool will clear ALL expired transients from Wordpress."
 msgstr ""
 
 #: admin/woocommerce-admin-status.php:32
-msgid "Capabilities"
+msgid "Term counts"
 msgstr ""
 
 #: admin/woocommerce-admin-status.php:33
-msgid "Reset Capabilities"
+msgid "Recount terms"
 msgstr ""
 
 #: admin/woocommerce-admin-status.php:34
+msgid "This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog."
+msgstr ""
+
+#: admin/woocommerce-admin-status.php:37
+msgid "Capabilities"
+msgstr ""
+
+#: admin/woocommerce-admin-status.php:38
+msgid "Reset capabilities"
+msgstr ""
+
+#: admin/woocommerce-admin-status.php:39
 msgid "This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages."
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:41
+#: admin/woocommerce-admin-status.php:46
 msgid "Generate report"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:50
+#: admin/woocommerce-admin-status.php:55
 msgid "Product Transients Cleared"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:57
-msgid "Roles successfully reset"
-msgstr ""
-
-#: admin/woocommerce-admin-status.php:69
-msgid "Terms successfully recounted"
-msgstr ""
-
-#: admin/woocommerce-admin-status.php:78
-msgid "There was an error calling %s::%s"
-msgstr ""
-
-#: admin/woocommerce-admin-status.php:81
-msgid "There was an error calling %s"
-msgstr ""
-
-#: admin/woocommerce-admin-status.php:94
-msgid "Versions"
-msgstr ""
-
-#: admin/woocommerce-admin-status.php:100
-msgid "WooCommerce version"
+#: admin/woocommerce-admin-status.php:96
+msgid "%d Transients Rows Cleared"
 msgstr ""
 
 #: admin/woocommerce-admin-status.php:104
+msgid "Roles successfully reset"
+msgstr ""
+
+#: admin/woocommerce-admin-status.php:116
+msgid "Terms successfully recounted"
+msgstr ""
+
+#: admin/woocommerce-admin-status.php:125
+msgid "There was an error calling %s::%s"
+msgstr ""
+
+#: admin/woocommerce-admin-status.php:128
+msgid "There was an error calling %s"
+msgstr ""
+
+#: admin/woocommerce-admin-status.php:141
+msgid "Versions"
+msgstr ""
+
+#: admin/woocommerce-admin-status.php:147
+msgid "WooCommerce version"
+msgstr ""
+
+#: admin/woocommerce-admin-status.php:151
 msgid "WooCommerce DB version"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:108
+#: admin/woocommerce-admin-status.php:155
 msgid "WordPress version"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:112
+#: admin/woocommerce-admin-status.php:159
 msgid "Installed plugins"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:127
+#: admin/woocommerce-admin-status.php:174
 msgid "by"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:127
+#: admin/woocommerce-admin-status.php:174
 msgid "version"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:146
+#: admin/woocommerce-admin-status.php:193
 msgid "Home URL"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:150
+#: admin/woocommerce-admin-status.php:197
 msgid "Site URL"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:154
+#: admin/woocommerce-admin-status.php:201
 msgid "Force SSL"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:168
+#: admin/woocommerce-admin-status.php:215
 msgid "Shop base page"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:220
+#: admin/woocommerce-admin-status.php:267
 msgid "Page not set"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:230
+#: admin/woocommerce-admin-status.php:277
 msgid "Page does not contain the shortcode: %s"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:249
+#: admin/woocommerce-admin-status.php:296
 msgid "Core Taxonomies"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:255
+#: admin/woocommerce-admin-status.php:302
 msgid "Order Statuses"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:265
+#: admin/woocommerce-admin-status.php:312
 msgid "Server Environment"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:271
+#: admin/woocommerce-admin-status.php:318
 msgid "PHP Version"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:278
+#: admin/woocommerce-admin-status.php:325
 msgid "Server Software"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:284
+#: admin/woocommerce-admin-status.php:331
 msgid "WP Max Upload Size"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:290
+#: admin/woocommerce-admin-status.php:337
 msgid "Server upload_max_filesize"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:297
+#: admin/woocommerce-admin-status.php:344
 msgid "Server post_max_size"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:304
+#: admin/woocommerce-admin-status.php:351
 msgid "WP Memory Limit"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:309
+#: admin/woocommerce-admin-status.php:356
 msgid "%s - We recommend setting memory to at least 64MB. See: <a href=\"%s\">Increasing memory allocated to PHP</a>"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:316
+#: admin/woocommerce-admin-status.php:363
 msgid "WP Debug Mode"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:320
+#: admin/woocommerce-admin-status.php:367
 msgid "WC Logging"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:323
+#: admin/woocommerce-admin-status.php:370
 msgid "Log directory is writable."
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:325
+#: admin/woocommerce-admin-status.php:372
 msgid "Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will not be possible."
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:332
+#: admin/woocommerce-admin-status.php:379
 msgid "Remote Posting/IPN"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:340
+#: admin/woocommerce-admin-status.php:387
 msgid "fsockopen/cURL"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:343
+#: admin/woocommerce-admin-status.php:390
 msgid "Your server has fsockopen and cURL enabled."
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:345
+#: admin/woocommerce-admin-status.php:392
 msgid "Your server has fsockopen enabled, cURL is disabled."
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:347
+#: admin/woocommerce-admin-status.php:394
 msgid "Your server has cURL enabled, fsockopen is disabled."
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:351
+#: admin/woocommerce-admin-status.php:398
 msgid "Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider."
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:356
+#: admin/woocommerce-admin-status.php:403
 msgid "SOAP Client"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:358
+#: admin/woocommerce-admin-status.php:405
 msgid "Your server has the SOAP Client class enabled."
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:361
+#: admin/woocommerce-admin-status.php:408
 msgid "Your server does not have the <a href=\"%s\">SOAP Client</a> class enabled - some gateway plugins which use SOAP may not work as expected."
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:366
+#: admin/woocommerce-admin-status.php:413
 msgid "WP Remote Post Check"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:377
+#: admin/woocommerce-admin-status.php:424
 msgid "wp_remote_post() was successful - PayPal IPN is working."
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:380
+#: admin/woocommerce-admin-status.php:427
 msgid "wp_remote_post() failed. PayPal IPN won't work with your server. Contact your hosting provider. Error:"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:383
+#: admin/woocommerce-admin-status.php:430
 msgid "wp_remote_post() failed. PayPal IPN may not work with your server."
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:405
+#: admin/woocommerce-admin-status.php:452
 msgid "Tools"
 msgstr ""
 
@@ -4570,15 +4577,15 @@ msgstr ""
 msgid "Use image"
 msgstr ""
 
-#: admin/woocommerce-admin-taxonomies.php:220
+#: admin/woocommerce-admin-taxonomies.php:222
 msgid "Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. To see more categories listed click the \"screen options\" link at the top of the page."
 msgstr ""
 
-#: admin/woocommerce-admin-taxonomies.php:235
+#: admin/woocommerce-admin-taxonomies.php:237
 msgid "Shipping classes can be used to group products of similar type. These groups can then be used by certain shipping methods to provide different rates to different products."
 msgstr ""
 
-#: admin/woocommerce-admin-taxonomies.php:363
+#: admin/woocommerce-admin-taxonomies.php:365
 msgid "Configure shipping class"
 msgstr ""
 
