@@ -112,10 +112,9 @@ abstract class WC_Settings_API {
     	if ( ! $this->settings || ! is_array( $this->settings ) ) {
 
     		// If there are no settings defined, load defaults
-    		$this->init_form_fields();
-
-    		foreach ( $this->form_fields as $k => $v )
-    			$this->settings[ $k ] = isset( $v['default'] ) ? $v['default'] : '';
+    		if ( $this->form_fields )
+	    		foreach ( $this->form_fields as $k => $v )
+	    			$this->settings[ $k ] = isset( $v['default'] ) ? $v['default'] : '';
     	}
 
         if ( $this->settings && is_array( $this->settings ) ) {
@@ -142,10 +141,6 @@ abstract class WC_Settings_API {
 
     	// Get option default if unset
 	    if ( ! isset( $this->settings[ $key ] ) ) {
-
-		    if ( ! isset( $this->form_fields ) )
-		    	$this->init_form_fields();
-
 		    $this->settings[ $key ] = isset( $this->form_fields[ $key ]['default'] ) ? $this->form_fields[ $key ]['default'] : '';
 	    }
 
@@ -181,8 +176,6 @@ abstract class WC_Settings_API {
 	 * @return string the html for the settings
      */
     public function generate_settings_html ( $form_fields = false ) {
-
-	    $this->init_form_fields();
 
     	if ( ! $form_fields ) {
     		$form_fields = $this->form_fields;
@@ -489,8 +482,6 @@ abstract class WC_Settings_API {
      * @return void
      */
     public function validate_settings_fields( $form_fields = false ) {
-
-	    $this->init_form_fields();
 
     	if ( ! $form_fields )
     		$form_fields = $this->form_fields;

@@ -33,6 +33,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 		$this->has_fields = false;
 
 		// Load the settings.
+		$this->init_form_fields();
 		$this->init_settings();
 
 		// Define user set variables

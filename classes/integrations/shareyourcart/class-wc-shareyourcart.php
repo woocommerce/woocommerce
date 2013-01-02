@@ -12,7 +12,8 @@
 
 class WC_ShareYourCart extends WC_Integration {
 
-	var $ShareYourCartWooCommerce;
+	public $ShareYourCartWooCommerce;
+	public $enabled;
 
 	public function __construct() {
         $this->id					= 'shareyourcart';

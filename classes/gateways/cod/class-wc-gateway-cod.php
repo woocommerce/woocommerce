@@ -28,6 +28,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		$this->has_fields   = false;
 
 		// Load the settings
+		$this->init_form_fields();
 		$this->init_settings();
 
 		// Get settings

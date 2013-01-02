@@ -28,6 +28,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		$this->method_title     = __( 'Bacs', 'woocommerce' );
 
 		// Load the settings.
+		$this->init_form_fields();
 		$this->init_settings();
 
 		// Define user set variables

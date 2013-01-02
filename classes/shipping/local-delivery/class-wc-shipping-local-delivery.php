@@ -35,6 +35,7 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
     function init() {
 
 		// Load the settings.
+		$this->init_form_fields();
 		$this->init_settings();
 
 		// Define user set variables
