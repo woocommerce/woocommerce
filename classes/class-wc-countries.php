@@ -357,8 +357,9 @@ class WC_Countries {
 	 * @return array
 	 */
 	public function get_allowed_countries() {
-
-		asort( $this->countries );
+		
+		if ( apply_filters('woocommerce_sort_countries', true ) )
+			asort( $this->countries );
 
 		if ( get_option('woocommerce_allowed_countries') !== 'specific' )
 			return $this->countries;
@@ -498,7 +499,8 @@ class WC_Countries {
 	 */
 	public function country_dropdown_options( $selected_country = '', $selected_state = '', $escape = false ) {
 
-		asort($this->countries);
+		if ( apply_filters('woocommerce_sort_countries', true ) )
+			asort( $this->countries );
 
 		if ( $this->countries ) foreach ( $this->countries as $key=>$value) :
 			if ( $states =  $this->get_states($key) ) :
