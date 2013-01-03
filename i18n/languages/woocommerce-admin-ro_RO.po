@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v1.6.1\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-01-02 13:44:51+00:00\n"
-"PO-Revision-Date: 2013-01-04 00:02+0200\n"
+"PO-Revision-Date: 2013-01-04 00:20+0200\n"
 "Last-Translator: Aurel Roman <aur3l.roman@gmail.com>\n"
 "Language-Team: \n"
 "Language: ro_RO\n"
@@ -5325,7 +5325,7 @@ msgstr "Vânzări Produs"
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:56
 msgid "Top sellers"
-msgstr "Cele mai multe vândute"
+msgstr "Cele mai multe vândute (cantitativ)"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:61
@@ -5557,7 +5557,7 @@ msgstr "Reducere Totală Cupon"
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1368
 msgid "Most popular coupons"
-msgstr "Cel mai popular Cupon"
+msgstr "Cele mai populare Cupoane"
 
 #: admin/woocommerce-admin-reports.php:1378
 msgid "Used 1 time"
