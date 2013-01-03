@@ -170,7 +170,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 		<?php if ( ! $woocommerce->customer->get_shipping_state() || ! $woocommerce->customer->get_shipping_postcode() ) : ?>
 
-			<div class="woocommerce_info">
+			<div class="woocommerce-info">
 
 				<p><?php _e( 'No shipping methods were found; please recalculate your shipping and enter your state/county and zip/postcode to ensure there are no other available methods for your location.', 'woocommerce' ); ?></p>
 
@@ -178,7 +178,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 		<?php else : ?>
 
-			<div class="woocommerce_error">
+			<div class="woocommerce-error">
 
 				<p><?php printf( __( 'Sorry, it seems that there are no available shipping methods for your location (%s).', 'woocommerce' ), $woocommerce->countries->countries[ $woocommerce->customer->get_shipping_country() ] ); ?></p>
 
