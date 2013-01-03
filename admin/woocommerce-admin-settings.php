@@ -389,8 +389,6 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 			            		woocommerce_admin_fields( $woocommerce_settings[ $current_tab ] );
 			            	}
 
-							echo '</div>';
-
 						break;
 						case "integration" :
 
