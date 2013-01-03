@@ -42,12 +42,6 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 
 			<?php do_action( 'woocommerce_archive_description' ); ?>
 
-			<?php if ( is_tax() ) : ?>
-				<?php do_action( 'woocommerce_taxonomy_archive_description' ); ?>
-			<?php elseif ( ! empty( $shop_page ) && is_object( $shop_page ) ) : ?>
-				<?php do_action( 'woocommerce_product_archive_description', $shop_page ); ?>
-			<?php endif; ?>
-
 			<?php if ( have_posts() ) : ?>
 
 				<?php do_action('woocommerce_before_shop_loop'); ?>
@@ -237,9 +231,9 @@ if ( ! function_exists( 'woocommerce_page_title' ) ) {
 
 		} else {
 
-			$shop_page = get_post( woocommerce_get_page_id( 'shop' ) );
+			$shop_page_id = woocommerce_get_page_id( 'shop' );
 
-			$page_title = apply_filters( 'the_title', ( $shop_page_title = get_option( 'woocommerce_shop_page_title' ) ) ? $shop_page_title : $shop_page->post_title, $shop_page->ID );
+			$page_title = apply_filters( 'the_title', ( $shop_page_title = get_option( 'woocommerce_shop_page_title' ) ) ? $shop_page_title : get_the_title( $shop_page_id ), $shop_page_id );
 
 		}
 
@@ -291,9 +285,11 @@ if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 	 * @return void
 	 */
 	function woocommerce_taxonomy_archive_description() {
-		$term_description = term_description();
-		if ( $term_description && is_tax( array( 'product_cat', 'product_tag' ) ) && get_query_var( 'paged' ) == 0 )
-			echo '<div class="term-description">' . wpautop( wptexturize( $term_description ) ) . '</div>';
+		if ( is_tax( array( 'product_cat', 'product_tag' ) ) ) {
+			$term_description = term_description();
+			if ( $term_description && get_query_var( 'paged' ) == 0 )
+				echo '<div class="term-description">' . wpautop( wptexturize( $term_description ) ) . '</div>';
+		}
 	}
 }
 if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
@@ -305,9 +301,14 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 	 * @subpackage	Archives
 	 * @return void
 	 */
-	function woocommerce_product_archive_description( $shop_page ) {
-		if ( get_query_var( 'paged' ) == 0 )
+	function woocommerce_product_archive_description() {
+		if ( is_post_type_archive( 'product' ) && get_query_var( 'paged' ) == 0 ) {
+
+			$shop_page_id = woocommerce_get_page_id( 'shop' );
+			$shop_page    = get_post( $shop_page_id );
+
 			echo '<div class="page-description">' . apply_filters( 'the_content', $shop_page->post_content ) . '</div>';
+		}
 	}
 }
 

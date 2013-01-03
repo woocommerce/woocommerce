@@ -54,8 +54,8 @@ if ( ! is_admin() || defined('DOING_AJAX') ) {
 	 * @see woocommerce_taxonomy_archive_description()
 	 * @see woocommerce_product_archive_description()
 	 */
-	add_action( 'woocommerce_taxonomy_archive_description', 'woocommerce_taxonomy_archive_description', 10 );
-	add_action( 'woocommerce_product_archive_description', 'woocommerce_product_archive_description', 10 );
+	add_action( 'woocommerce_archive_description', 'woocommerce_taxonomy_archive_description', 10 );
+	add_action( 'woocommerce_archive_description', 'woocommerce_product_archive_description', 10 );
 
 	/**
 	 * Products Loop
