@@ -1,12 +1,12 @@
 jQuery(document).ready(function($) {
 
 	// Tabs
-	$('.woocommerce_tabs .panel').hide();
+	$('.woocommerce-tabs .panel').hide();
 
-	$('.woocommerce_tabs ul.tabs li a').click(function(){
+	$('.woocommerce-tabs ul.tabs li a').click(function(){
 
 		var $tab = $(this);
-		var $tabs_wrapper = $tab.closest('.woocommerce_tabs');
+		var $tabs_wrapper = $tab.closest('.woocommerce-tabs');
 
 		$('ul.tabs li', $tabs_wrapper).removeClass('active');
 		$('div.panel', $tabs_wrapper).hide();
@@ -16,7 +16,7 @@ jQuery(document).ready(function($) {
 		return false;
 	});
 
-	$('.woocommerce_tabs').each(function() {
+	$('.woocommerce-tabs').each(function() {
 		var hash = window.location.hash;
 		if (hash.toLowerCase().indexOf("comment-") >= 0) {
 			$('ul.tabs li.reviews_tab a', $(this)).click();

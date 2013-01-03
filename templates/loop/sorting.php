@@ -14,7 +14,7 @@ global $woocommerce;
 if ( ! woocommerce_products_will_display() )
 	return;
 ?>
-<form class="woocommerce_ordering" method="post">
+<form class="woocommerce-ordering" method="post">
 	<select name="sort" class="orderby">
 		<?php
 			$catalog_orderby = apply_filters( 'woocommerce_catalog_orderby', array(
