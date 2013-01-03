@@ -50,11 +50,11 @@ class WC_Shortcode_Order_Tracking {
 
 			if ( ! $order_id ) {
 
-				echo '<p class="woocommerce_error">' . __( 'Please enter a valid order ID', 'woocommerce' ) . '</p>';
+				echo '<p class="woocommerce-error">' . __( 'Please enter a valid order ID', 'woocommerce' ) . '</p>';
 
 			} elseif ( ! $order_email ) {
 
-				echo '<p class="woocommerce_error">' . __( 'Please enter a valid order email', 'woocommerce' ) . '</p>';
+				echo '<p class="woocommerce-error">' . __( 'Please enter a valid order email', 'woocommerce' ) . '</p>';
 
 			} else {
 
@@ -73,7 +73,7 @@ class WC_Shortcode_Order_Tracking {
 
 				} else {
 
-					echo '<p class="woocommerce_error">' . sprintf( __( 'Sorry, we could not find that order id in our database.', 'woocommerce' ), get_permalink($post->ID ) ) . '</p>';
+					echo '<p class="woocommerce-error">' . sprintf( __( 'Sorry, we could not find that order id in our database.', 'woocommerce' ), get_permalink($post->ID ) ) . '</p>';
 
 				}
 
