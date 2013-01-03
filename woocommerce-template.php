@@ -948,7 +948,7 @@ if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 	function woocommerce_breadcrumb( $args = array() ) {
 
 		$defaults = apply_filters( 'woocommerce_breadcrumb_defaults', array(
-			'delimiter'   => ' / ',
+			'delimiter'   => ' &#47; ',
 			'wrap_before' => '<nav class="woocommerce-breadcrumb" itemprop="breadcrumb">',
 			'wrap_after'  => '</nav>',
 			'before'      => '',
