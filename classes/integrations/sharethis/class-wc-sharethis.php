@@ -35,6 +35,7 @@ class WC_ShareThis extends WC_Integration {
 </div>';
 
 		// Load the settings.
+		$this->init_form_fields();
 		$this->init_settings();
 
 		// Define user set variables

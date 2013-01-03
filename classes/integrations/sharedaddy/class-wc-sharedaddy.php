@@ -27,6 +27,7 @@ class WC_ShareDaddy extends WC_Integration {
         $this->method_description	= __( 'ShareDaddy is a sharing plugin bundled with JetPack.', 'woocommerce' );
 
 		// Load the settings.
+		$this->init_form_fields();
 		$this->init_settings();
 
 		// Actions
