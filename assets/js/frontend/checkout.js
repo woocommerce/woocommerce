@@ -351,9 +351,9 @@ jQuery(document).ready(function($) {
 
 				if ( key !== 'state' ) {
 					if ( thislocale[key]['hidden'] == true ) {
-						field.fadeOut(200).find('input').val('');
+						field.hide().find('input').val('');
 					} else {
-						field.fadeIn(500);
+						field.show();
 					}
 				}
 
@@ -362,34 +362,24 @@ jQuery(document).ready(function($) {
 					if (field.find('label abbr').size()==0) field.find('label').append( required );
 				}
 				if ( key !== 'state' && (typeof locale['default'][key]['hidden'] == 'undefined' || locale['default'][key]['hidden'] == false) ) {
-					field.fadeIn(500);
+					field.show();
 				}
 			}
 
 		});
 
-		var postcodefield = thisform.find('#billing_postcode_field, #shipping_postcode_field');
-		var cityfield = thisform.find('#billing_city_field, #shipping_city_field');
+		var $postcodefield = thisform.find('#billing_postcode_field, #shipping_postcode_field');
+		var $cityfield     = thisform.find('#billing_city_field, #shipping_city_field');
 
 		// Re-order postcode/city
 		if ( thislocale['postcode_before_city'] ) {
-			if (cityfield.is('.form-row-first')) {
-				cityfield.fadeOut(200, function() {
-					cityfield.removeClass('form-row-first').addClass('form-row-last').insertAfter( postcodefield ).fadeIn(500);
-				});
-				postcodefield.fadeOut(200, function (){
-					postcodefield.removeClass('form-row-last').addClass('form-row-first').fadeIn(500);
-				});
-			}
+			$postcodefield.removeClass('form-row-last').addClass('form-row-wide');
+			$cityfield.removeClass('form-row-wide').addClass('form-row-first');
+			$postcodefield.insertBefore( $cityfield );
 		} else {
-			if (cityfield.is('.form-row-last')) {
-				cityfield.fadeOut(200, function() {
-					cityfield.removeClass('form-row-last').addClass('form-row-first').insertBefore( postcodefield ).fadeIn(500);
-				});
-				postcodefield.fadeOut(200, function (){
-					postcodefield.removeClass('form-row-first').addClass('form-row-last').fadeIn(500);
-				});
-			}
+			$postcodefield.removeClass('form-row-wide').addClass('form-row-last');
+			$cityfield.removeClass('form-row-first').addClass('form-row-wide');
+			$postcodefield.insertAfter( $cityfield );
 		}
 
 	})
