@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v1.6.1\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-01-02 13:44:50+00:00\n"
-"PO-Revision-Date: 2013-01-02 19:36+0200\n"
+"PO-Revision-Date: 2013-01-03 23:59+0200\n"
 "Last-Translator: Aurel Roman <aur3l.roman@gmail.com>\n"
 "Language-Team: \n"
 "Language: ro_RO\n"
@@ -1887,7 +1887,7 @@ msgstr "TVA"
 #: classes/class-wc-countries.php:446 templates/cart/totals.php:110
 #: templates/checkout/review-order.php:113
 msgid "Tax"
-msgstr "Taxe"
+msgstr "Taxă"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:459
@@ -2558,8 +2558,8 @@ msgstr "Detalii Cont"
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:83
 msgid "Optionally enter your bank details below for customers to pay into."
 msgstr ""
-"Opțional, introduceți detaliile bancare mai jos pentru a activa opțiune de "
-"Transfer Bancar (?)"
+"Opțional, introduceți detaliile bancare mai jos pentru a activa opțiunea "
+"Transfer Bancar"
 
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:87
@@ -3473,8 +3473,8 @@ msgid ""
 "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. "
 "Leave blank to disable."
 msgstr ""
-"Comision fără taxe. Introdu suma, ex.: 2,25 sau un procent ex.: 5%. Lasă "
-"câmpul gol pentru a dezactiva opțiunea."
+"Comision fără taxe. Introdu o sumă ( ex.: 2,25) sau un procent (ex.: 5%). "
+"Lasă câmpul gol pentru a dezactiva opțiunea."
 
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:155
@@ -3532,7 +3532,8 @@ msgstr "Comision de prelucrare a comenzii"
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:461
 msgid ""
 "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%."
-msgstr "Comision fără taxe. Introdu o sumă sau procent"
+msgstr ""
+"Comision fără taxe. Introdu o sumă ( ex.: 2,25) sau un procent (ex.: 5%)."
 
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:466
@@ -4221,7 +4222,7 @@ msgstr "Filtrează"
 # @ woocommerce
 #: classes/widgets/class-wc-widget-price-filter.php:140
 msgid "Price:"
-msgstr "Preț"
+msgstr "Preț:"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-price-filter.php:162
@@ -4627,7 +4628,7 @@ msgstr "Ontario"
 # @ woocommerce
 #: i18n/states/CA.php:22
 msgid "Prince Edward Island"
-msgstr "Prince Edward Island"
+msgstr "Insula Prince Edward"
 
 # @ woocommerce
 #: i18n/states/CA.php:23
@@ -5737,7 +5738,7 @@ msgstr "eșuată"
 # @ woocommerce
 #: i18n/strings.php:18
 msgid "on-hold"
-msgstr "în așteptarea"
+msgstr "păstrează (On-Hold)"
 
 # @ woocommerce
 #: i18n/strings.php:19
@@ -5947,8 +5948,9 @@ msgid ""
 "Note: Shipping and taxes are estimated%s and will be updated during checkout "
 "based on your billing and shipping information."
 msgstr ""
-"Notă: Costurile de livrare sunt estimate, %s și vor fi actualizate în timpul "
-"Finalizării Comenzii în funcție de informațiile de Facturare și Livrare."
+"Notă: Costurile de livrare sunt estimative, %s și vor fi actualizate în "
+"timpul Finalizării Comenzii în funcție de informațiile de Facturare și "
+"Livrare."
 
 # @ woocommerce
 #: templates/cart/totals.php:175
@@ -6239,7 +6241,8 @@ msgid ""
 "Hi there. Your recent order on %s has been completed. Your order details are "
 "shown below for your reference:"
 msgstr ""
-"Comanda dvs. pe %s este completă. Detalii comenzii sunt afișate mai jos:"
+"Comanda dvs. pe site-ul %s este completă. Detalii comenzii sunt afișate mai "
+"jos:"
 
 # @ woocommerce
 #: templates/emails/customer-invoice.php:16
@@ -6248,9 +6251,8 @@ msgid ""
 "An order has been created for you on %s. To pay for this order please use "
 "the following link: %s"
 msgstr ""
-"O comandă a fost creeată pentru dvs. pe data de &ldquo; %s &rdquo;. Pentru a "
-"achita această comandă vă rugăm să urmați link-ul acesta: <a href=\"%s"
-"\">Achitare Comandă</a>"
+"O comandă a fost creeată pentru dvs. pe site-ul &ldquo; %s &rdquo;. Pentru a "
+"achita această comandă vă rugăm să urmați link-ul următor: %s"
 
 # @ woocommerce
 #: templates/emails/customer-invoice.php:16
@@ -6264,7 +6266,7 @@ msgid ""
 "Thanks for creating an account on %s. Your username is <strong>%s</strong>."
 msgstr ""
 "Vă mulțumim pentru creeare unui cont la magazinul %s. Numele de utilizator "
-"este: <strong>%s</strong>"
+"este: <strong> %s </strong>."
 
 # @ woocommerce
 #: templates/emails/customer-new-account.php:16
@@ -6445,7 +6447,7 @@ msgstr "Sortează după preț - Descendent"
 #: templates/myaccount/form-change-password.php:20
 #: templates/myaccount/form-lost-password.php:31
 msgid "New password"
-msgstr "Parolă nouă"
+msgstr "Parolă Nouă"
 
 # @ woocommerce
 #: templates/myaccount/form-change-password.php:24
@@ -6814,8 +6816,9 @@ msgid ""
 "There are no reviews yet, would you like to <a href=\"#review_form\" class="
 "\"inline show_review_form\">submit yours</a>?"
 msgstr ""
-"Nu există nici un comentariu, vrei să fii primul care comentează? <a href="
-"\"#review_form\" class=\"inline show_review_form\">Click Aici</a>?"
+"Nu există nici un comentariu, vrei să fii primul care comentează? Dacă da, "
+"atunci <a href=\"#review_form\" class=\"inline show_review_form\">Click "
+"Aici</a>!"
 
 # @ woocommerce
 #: templates/single-product-reviews.php:104
@@ -7154,7 +7157,7 @@ msgstr "Produse noi adăugate la %s"
 # @ woocommerce
 #: woocommerce-functions.php:1235
 msgid "New products tagged %s"
-msgstr "Produse noi etichetate %s"
+msgstr "Produse noi etichetate cu %s"
 
 # @ woocommerce
 #: woocommerce-functions.php:1270
