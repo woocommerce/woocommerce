@@ -242,6 +242,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Added html5 type inputs to admin with inline validation.
 * Tweak - Use WP Core jquery-ui-slider
 * Tweak - Further optimisation of icons in admin for HiDPI devices
+* Tweak - On product search include post_excerpt, by krbvroc1
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.
 * Fix - Active plugins display on status page.
