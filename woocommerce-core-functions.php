@@ -1960,7 +1960,7 @@ function _woocommerce_term_recount( $terms, $taxonomy, $callback = true, $terms_
 	$count_query = $wpdb->prepare( "
 		SELECT COUNT( DISTINCT posts.ID ) FROM {$wpdb->posts} as posts
 
-		LEFT JOIN {$wpdb->postmeta} AS meta_visibilty ON posts.ID = meta_visibilty.post_id
+		LEFT JOIN {$wpdb->postmeta} AS meta_visibility ON posts.ID = meta_visibility.post_id
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
@@ -1969,9 +1969,9 @@ function _woocommerce_term_recount( $terms, $taxonomy, $callback = true, $terms_
 		WHERE 	posts.post_status 	= 'publish'
 		AND 	posts.post_type 	= 'product'
 		AND 	(
-			meta_visibilty.meta_key = '_visibility'
+			meta_visibility.meta_key = '_visibility'
 			AND
-			meta_visibilty.meta_value IN ( 'visible', 'catalog' )
+			meta_visibility.meta_value IN ( 'visible', 'catalog' )
 		)
 		AND 	tax.taxonomy	= %s
 		$stock_query
