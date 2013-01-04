@@ -244,6 +244,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Use WP Core jquery-ui-slider
 * Tweak - Further optimisation of icons in admin for HiDPI devices
 * Tweak - On product search include post_excerpt, by krbvroc1
+* Tweak - Attribute page restricts reserved terms by GeertDD
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.
 * Fix - Active plugins display on status page.
