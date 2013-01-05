@@ -11,6 +11,14 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
+global $product;
+
+// Extra post classes
+$classes = array();
+if ( $product->is_featured() )
+	$classes[] = 'featured';
+if ( $product->is_on_sale() )
+	$classes[] = 'onsale';
 ?>
 
 <?php
@@ -22,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 	 do_action( 'woocommerce_before_single_product' );
 ?>
 
-<div itemscope itemtype="http://schema.org/Product" id="product-<?php the_ID(); ?>" <?php post_class(); ?>>
+<div itemscope itemtype="http://schema.org/Product" id="product-<?php the_ID(); ?>" <?php post_class( $classes ); ?>>
 
 	<?php
 		/**
