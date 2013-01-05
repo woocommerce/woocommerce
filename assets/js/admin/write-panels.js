@@ -84,7 +84,7 @@ jQuery( function($){
 		$('#catalog-visibility-select').slideUp('fast');
 		$('#catalog-visibility .edit-catalog-visibility').show();
 
-		var current_visibility = $('#current_visibilty').val();
+		var current_visibility = $('#current_visibility').val();
 		var current_featured = $('#current_featured').val();
 
 		$('input[name=_visibility]').removeAttr('checked');
