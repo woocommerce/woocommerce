@@ -268,7 +268,7 @@ abstract class WC_Settings_API {
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post( $data['title'] ) . '</span></legend>' . "\n";
 				$html .= '<input class="input-text regular-input ' . esc_attr( $data['class'] ) . '" type="password" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" style="' . esc_attr( $data['css'] ) . '" value="' . esc_attr( $this->get_option( $key ) ) . '" ' . disabled( $data['disabled'], true, false ) . ' ' . implode( ' ', $custom_attributes ) . ' />';
-				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= ' <p class="description">' . esc_attr( $data['description'] ) . '</p>' . "\n"; }
+				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= ' <p class="description">' . wp_kses_post( $data['description'] ) . '</p>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
 		$html .= '</tr>' . "\n";
