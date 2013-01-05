@@ -21,7 +21,7 @@ if ( empty( $woocommerce_loop['loop'] ) )
 if ( empty( $woocommerce_loop['columns'] ) )
 	$woocommerce_loop['columns'] = apply_filters( 'loop_shop_columns', 4 );
 
-// Ensure visibilty
+// Ensure visibility
 if ( ! $product->is_visible() )
 	return;
 
