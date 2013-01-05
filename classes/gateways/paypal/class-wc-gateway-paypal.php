@@ -539,7 +539,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
         if ( 'yes' == $this->debug ) {
         	$this->log->add( 'paypal', 'Received invalid response from PayPal' );
         	if ( is_wp_error( $response ) )
-        		$this->log->add( 'paypal', 'Error response: ' . $result->get_error_message() );
+        		$this->log->add( 'paypal', 'Error response: ' . $response->get_error_message() );
         }
 
         return false;
