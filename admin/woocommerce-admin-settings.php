@@ -101,10 +101,18 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 			} else {
 
 				// If saving a shipping methods options, load 'er up
-				if ( ( $current_tab == 'shipping' || $current_tab == 'payment_gateways' ) && class_exists( $current_section ) ) {
+				if ( $current_tab == 'shipping' || $current_tab == 'payment_gateways' ) {
 
-					$current_section_class = new $current_section();
-					do_action( 'woocommerce_update_options_' . $current_tab . '_' . $current_section_class->id );
+					// Ensure shipping methods or gateways are initiated by touching their vars
+					if ( ! class_exists( $current_section ) ) {
+						$woocommerce->shipping;
+						$woocommerce->payment_gateways;
+					}
+
+					if ( class_exists( $current_section ) ) {
+						$current_section_class = new $current_section();
+						do_action( 'woocommerce_update_options_' . $current_tab . '_' . $current_section_class->id );
+					}
 
 				// If saving an email's options, load theme
 				} elseif ( $current_tab == 'email' ) {
