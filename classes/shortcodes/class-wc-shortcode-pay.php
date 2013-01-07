@@ -34,9 +34,6 @@ class WC_Shortcode_Pay {
 	public static function output( $atts ) {
 		global $woocommerce;
 
-		// Get available gateways here - touching this also ensures gateways are loaded in time for the woocommerce_receipt_ hook
-		$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
-
 		$woocommerce->nocache();
 
 		do_action( 'before_woocommerce_pay' );
@@ -61,7 +58,7 @@ class WC_Shortcode_Pay {
 					$woocommerce->customer->set_postcode( $order->billing_postcode );
 
 				// Show form
-				woocommerce_get_template( 'checkout/form-pay.php', array( 'order' => $order, 'available_gateways' => $available_gateways ) );
+				woocommerce_get_template( 'checkout/form-pay.php', array( 'order' => $order ) );
 
 			} elseif ( ! in_array( $order->status, array( 'pending', 'failed' ) ) ) {
 

@@ -54,14 +54,14 @@ function woocommerce_admin_menu() {
     if ( current_user_can( 'manage_woocommerce' ) )
     $menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );
 
-    $main_page = add_menu_page(__( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings_page', null, '55.5' );
+    $main_page = add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings_page', null, '55.5' );
 
-    $reports_page = add_submenu_page('woocommerce', __( 'Reports', 'woocommerce' ),  __( 'Reports', 'woocommerce' ) , 'view_woocommerce_reports', 'woocommerce_reports', 'woocommerce_reports_page');
+    $reports_page = add_submenu_page( 'woocommerce', __( 'Reports', 'woocommerce' ),  __( 'Reports', 'woocommerce' ) , 'view_woocommerce_reports', 'woocommerce_reports', 'woocommerce_reports_page' );
 
-    add_submenu_page('edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'woocommerce_attributes', 'woocommerce_attributes_page');
+    add_submenu_page( 'edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'woocommerce_attributes', 'woocommerce_attributes_page');
 
-    add_action('load-' . $main_page, 'woocommerce_admin_help_tab');
-    add_action('load-' . $reports_page, 'woocommerce_admin_help_tab');
+    add_action( 'load-' . $main_page, 'woocommerce_admin_help_tab' );
+    add_action( 'load-' . $reports_page, 'woocommerce_admin_help_tab' );
 
     $print_css_on = apply_filters( 'woocommerce_screen_ids', array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_woocommerce_reports', 'woocommerce_page_woocommerce_status', 'product_page_woocommerce_attributes', 'edit-tags.php', 'edit.php', 'index.php', 'post-new.php', 'post.php' ) );
 
@@ -78,12 +78,24 @@ add_action('admin_menu', 'woocommerce_admin_menu', 9);
  * @return void
  */
 function woocommerce_admin_menu_after() {
-	add_submenu_page( 'woocommerce', __( 'WooCommerce Settings', 'woocommerce' ),  __( 'Settings', 'woocommerce' ) , 'manage_woocommerce', 'woocommerce_settings', 'woocommerce_settings_page');
-	add_submenu_page( 'woocommerce', __( 'WooCommerce Status', 'woocommerce' ),  __( 'System Status', 'woocommerce' ) , 'manage_woocommerce', 'woocommerce_status', 'woocommerce_status_page');
+	$settings_page = add_submenu_page( 'woocommerce', __( 'WooCommerce Settings', 'woocommerce' ),  __( 'Settings', 'woocommerce' ) , 'manage_woocommerce', 'woocommerce_settings', 'woocommerce_settings_page');
+	$status_page = add_submenu_page( 'woocommerce', __( 'WooCommerce Status', 'woocommerce' ),  __( 'System Status', 'woocommerce' ) , 'manage_woocommerce', 'woocommerce_status', 'woocommerce_status_page');
+
+	add_action( 'load-' . $settings_page, 'woocommerce_settings_page_init' );
 }
 
 add_action('admin_menu', 'woocommerce_admin_menu_after', 50);
 
+/**
+ * Loads gateways and shipping methods into memory for use within settings.
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_settings_page_init() {
+	$GLOBALS['woocommerce']->payment_gateways();
+	$GLOBALS['woocommerce']->shipping();
+}
 
 /**
  * Highlights the correct top level admin menu item for post type add screens.
@@ -349,7 +361,7 @@ function woocommerce_admin_scripts() {
     $screen = get_current_screen();
 
     // WooCommerce admin pages
-    if (in_array( $screen->id, apply_filters( 'woocommerce_screen_ids', array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_woocommerce_reports', 'edit-shop_order', 'edit-shop_coupon', 'shop_coupon', 'shop_order', 'edit-product', 'product' ) ) ) ) :
+    if ( in_array( $screen->id, apply_filters( 'woocommerce_screen_ids', array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_woocommerce_reports', 'edit-shop_order', 'edit-shop_coupon', 'shop_coupon', 'shop_order', 'edit-product', 'product' ) ) ) ) {
 
     	wp_enqueue_script( 'woocommerce_admin' );
     	wp_enqueue_script( 'farbtastic' );
@@ -358,17 +370,14 @@ function woocommerce_admin_scripts() {
     	wp_enqueue_script( 'jquery-ui-sortable' );
     	wp_enqueue_script( 'jquery-ui-autocomplete' );
 
-    endif;
+    }
 
     // Edit product category pages
-    if (in_array( $screen->id, array('edit-product_cat') )) :
-
+    if ( in_array( $screen->id, array('edit-product_cat') ) )
 		wp_enqueue_media();
 
-	endif;
-
 	// Product/Coupon/Orders
-	if (in_array( $screen->id, array( 'shop_coupon', 'shop_order', 'product' ))) :
+	if ( in_array( $screen->id, array( 'shop_coupon', 'shop_order', 'product' ) ) ) {
 
 		wp_enqueue_script( 'woocommerce_writepanel' );
 		wp_enqueue_script( 'jquery-ui-datepicker' );
@@ -416,11 +425,10 @@ function woocommerce_admin_scripts() {
 		 );
 
 		wp_localize_script( 'woocommerce_writepanel', 'woocommerce_writepanel_params', $woocommerce_witepanel_params );
-
-	endif;
+	}
 
 	// Term ordering - only when sorting by term_order
-	if ( ( strstr( $screen->id, 'edit-pa_' ) || ( ! empty( $_GET['taxonomy'] ) && in_array( $_GET['taxonomy'], apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ) ) ) ) && ! isset( $_GET['orderby'] ) ) :
+	if ( ( strstr( $screen->id, 'edit-pa_' ) || ( ! empty( $_GET['taxonomy'] ) && in_array( $_GET['taxonomy'], apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ) ) ) ) && ! isset( $_GET['orderby'] ) ) {
 
 		wp_register_script( 'woocommerce_term_ordering', $woocommerce->plugin_url() . '/assets/js/admin/term-ordering.js', array('jquery-ui-sortable'), $woocommerce->version );
 		wp_enqueue_script( 'woocommerce_term_ordering' );
@@ -433,7 +441,7 @@ function woocommerce_admin_scripts() {
 
 		wp_localize_script( 'woocommerce_term_ordering', 'woocommerce_term_ordering_params', $woocommerce_term_order_params );
 
-	endif;
+	}
 
 	// Product sorting - only when sorting by menu order on the products page
 	if ( current_user_can('edit_others_pages') && $screen->id == 'edit-product' && isset( $wp_query->query['orderby'] ) && $wp_query->query['orderby'] == 'menu_order title' ) {

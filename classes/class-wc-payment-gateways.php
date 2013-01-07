@@ -14,6 +14,16 @@ class WC_Payment_Gateways {
 	/** @var array Array of payment gateway classes. */
 	var $payment_gateways;
 
+	/**
+	 * __construct function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function __construct() {
+		$this->init();
+	}
+
     /**
      * Load gateways and hook in functions.
      *

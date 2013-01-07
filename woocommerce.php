@@ -154,7 +154,7 @@ class Woocommerce {
 	}
 
 	/**
-	 * __get function.
+	 * Auto-load in-accessible properties on demand.
 	 *
 	 * @access public
 	 * @param mixed $key
@@ -163,15 +163,11 @@ class Woocommerce {
 	public function __get( $key ) {
 
 		if ( 'payment_gateways' == $key ) {
-			$this->payment_gateways = new WC_Payment_Gateways();	// Payment gateways. Loads and stores payment methods
-			$this->payment_gateways->init();
-			return $this->payment_gateways;
+			return $this->payment_gateways();
 		}
 
 		elseif ( 'shipping' == $key ) {
-			$this->shipping = new WC_Shipping();					// Shipping class. loads and stores shipping methods
-			$this->shipping->init();
-			return $this->shipping;
+			return $this->shipping();
 		}
 
 		return false;
@@ -466,6 +462,7 @@ class Woocommerce {
 			$this->load_messages();
 
 			// Hooks
+			add_action( 'wp', array( $this, 'init_checkout' ) );
 			add_filter( 'template_include', array( $this, 'template_loader' ) );
 			add_filter( 'comments_template', array( $this, 'comments_template_loader' ) );
 			add_filter( 'wp_redirect', array( $this, 'redirect' ), 1, 2 );
@@ -534,6 +531,20 @@ class Woocommerce {
 			// Done, clear buffer and exit
 			ob_end_clean();
 			die('1');
+		}
+	}
+
+
+	/**
+	 * During checkout, ensure gateways and shipping classes are loaded so they can hook into the respective pages.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function init_checkout() {
+		if ( is_checkout() || is_order_received_page() ) {
+			$this->payment_gateways();
+			$this->shipping();
 		}
 	}
 
@@ -1234,12 +1245,37 @@ class Woocommerce {
 	 * @return WC_Checkout
 	 */
 	public function checkout() {
-		if ( empty( $this->checkout ) ) {
+		if ( empty( $this->checkout ) )
 			$this->checkout = new WC_Checkout();
-		}
+
 		return $this->checkout;
 	}
 
+	/**
+	 * Get gateways class
+	 *
+	 * @access public
+	 * @return WC_Payment_Gateways
+	 */
+	public function payment_gateways() {
+		if ( empty( $this->payment_gateways ) )
+			$this->payment_gateways = new WC_Payment_Gateways();
+
+		return $this->payment_gateways;
+	}
+
+	/**
+	 * Get shipping class
+	 *
+	 * @access public
+	 * @return WC_Shipping
+	 */
+	public function shipping() {
+		if ( empty( $this->shipping ) )
+			$this->shipping = new WC_Shipping();
+
+		return $this->shipping;
+	}
 
 	/**
 	 * Get Logging Class.
@@ -1250,7 +1286,6 @@ class Woocommerce {
 	public function logger() {
 		return new WC_Logger();
 	}
-
 
 	/**
 	 * Get Validation Class.
@@ -1273,7 +1308,6 @@ class Woocommerce {
 		$this->mailer();
 		do_action( current_filter() . '_notification', $args );
 	}
-
 
 	/**
 	 * Email Class.

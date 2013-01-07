@@ -11,9 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $woocommerce;
 
-// Get available gateways here - touching this also ensures gateways are loaded in time for the woocommerce_thankyou_ hook
-$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
-
 if ( $order ) : ?>
 
 	<?php if ( in_array( $order->status, array( 'failed' ) ) ) : ?>

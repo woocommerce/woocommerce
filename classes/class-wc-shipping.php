@@ -35,6 +35,16 @@ class WC_Shipping {
 	/** @var array Stores packages to ship and to get quotes for. */
 	var $packages					= array();
 
+	/**
+	 * __construct function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function __construct() {
+		$this->init();
+	}
+
     /**
      * init function.
      *
