@@ -370,6 +370,7 @@ jQuery(document).ready(function($) {
 
 		var $postcodefield = thisform.find('#billing_postcode_field, #shipping_postcode_field');
 		var $cityfield     = thisform.find('#billing_city_field, #shipping_city_field');
+		var $statefield    = thisform.find('#billing_state_field, #shipping_state_field');
 
 		// Re-order postcode/city
 		if ( thislocale['postcode_before_city'] ) {
@@ -379,7 +380,7 @@ jQuery(document).ready(function($) {
 		} else {
 			$postcodefield.removeClass('form-row-wide').addClass('form-row-last');
 			$cityfield.removeClass('form-row-first').addClass('form-row-wide');
-			$postcodefield.insertAfter( $cityfield );
+			$postcodefield.insertAfter( $statefield );
 		}
 
 	})
