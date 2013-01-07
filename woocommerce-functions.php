@@ -1600,7 +1600,8 @@ function woocommerce_save_address() {
 
 	if ( $user_id <= 0 ) return;
 
-	$load_address = woocommerce_get_address_to_edit();
+	$load_address = ( isset( $_GET[ 'address' ] ) ) ? esc_attr( $_GET[ 'address' ] ) : '';
+	$load_address = ( $load_address == 'billing' || $load_address == 'shipping' ) ? $load_address : '';
 
 	$address = $woocommerce->countries->get_address_fields( esc_attr($_POST[ $load_address . '_country' ]), $load_address . '_' );
 
