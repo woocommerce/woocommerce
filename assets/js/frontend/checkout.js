@@ -231,7 +231,7 @@ jQuery(document).ready(function($) {
 
 							} else if (result.result=='failure') {
 
-								$('.woocommerce_error, .woocommerce_message').remove();
+								$('.woocommerce-error, .woocommerce-message').remove();
 								$form.prepend( result.messages );
 								$form.removeClass('processing').unblock();
 								$form.find( '.input-text, select' ).blur();
@@ -247,7 +247,7 @@ jQuery(document).ready(function($) {
 							}
 						}
 						catch(err) {
-							$('.woocommerce_error, .woocommerce_message').remove();
+							$('.woocommerce-error, .woocommerce-message').remove();
 						  	$form.prepend( code );
 							$form.removeClass('processing').unblock();
 							$form.find( '.input-text, select' ).blur();
@@ -287,7 +287,7 @@ jQuery(document).ready(function($) {
 			url: 		woocommerce_params.ajax_url,
 			data: 		data,
 			success: 	function( code ) {
-				$('.woocommerce_error, .woocommerce_message').remove();
+				$('.woocommerce-error, .woocommerce-message').remove();
 				$form.removeClass('processing').unblock();
 
 				if ( code ) {
