@@ -70,7 +70,7 @@ function woocommerce_tax_rates_setting() {
 					"SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates
 					WHERE tax_rate_class = %s
 					ORDER BY tax_rate_order
-					" , $current_class ) );
+					" , sanitize_title( $current_class ) ) );
 
 				foreach ( $rates as $rate ) {
 					?>
@@ -403,7 +403,7 @@ function woocommerce_tax_rates_setting_save() {
 						'tax_rate_compound' => $compound,
 						'tax_rate_shipping' => $shipping,
 						'tax_rate_order'    => $i,
-						'tax_rate_class'    => $current_class
+						'tax_rate_class'    => sanitize_title( $current_class )
 					)
 				);
 
@@ -482,7 +482,7 @@ function woocommerce_tax_rates_setting_save() {
 					'tax_rate_compound' => $compound,
 					'tax_rate_shipping' => $shipping,
 					'tax_rate_order'    => $i,
-					'tax_rate_class'    => $current_class
+					'tax_rate_class'    => sanitize_title( $current_class )
 				),
 				array(
 					'tax_rate_id' 		=> $tax_rate_id
