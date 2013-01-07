@@ -757,7 +757,7 @@ class WC_Checkout {
 
 				$current_user = wp_get_current_user();
 
-				if ( $meta = get_user_meta( get_current_user_id(), $input, true ) )
+				if ( $meta = get_user_meta( $current_user->ID, $input, true ) )
 					return $meta;
 
 				if ( $input == "billing_email" )
