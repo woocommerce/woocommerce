@@ -1159,6 +1159,11 @@
 			'speedOut'		:	200,
 			'overlayShow'	:	true
 		});
+		
+		// Open review form lightbox if accessed via anchor
+		if( window.location.hash == '#review_form' ) {
+			$('a.show_review_form').trigger('click');
+		}
 
 	});
 

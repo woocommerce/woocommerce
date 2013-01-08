@@ -194,6 +194,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](http://www.woothemes.com/products/product-csv-import-suite/)).
 * Feature - Option to hold stock for unpaid orders (defaults to 60mins). When this time limit is reached, and the order is not paid for, stock is released and the order is cancelled.
 * Feature - Added set_stock() method to product class.
+* Feature - Linking to mydomain.com/product#review_form will now open the review form on load (if WooCommerce lightbox is turned on)
 * Templating - Revised pagination, sorting areas (sorting is now above products, numbered pagination below) and added a result count.
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
 * Templating - loop-end and start for product loops, allow changing the UL's used by default to something else.
