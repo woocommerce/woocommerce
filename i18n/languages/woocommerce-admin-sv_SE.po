@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0-beta2\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-01-09 09:36:51+00:00\n"
-"PO-Revision-Date: 2013-01-09 10:41+0100\n"
+"PO-Revision-Date: 2013-01-09 11:24+0100\n"
 "Last-Translator: Mikael Jorhult <mikael@jorhult.se>\n"
 "Language-Team: Humblebrag <mikael@humblebrag.nu>\n"
 "Language: sv_SE\n"
@@ -3836,7 +3836,7 @@ msgstr ""
 # @ woocommerce
 #: admin/settings/settings-init.php:1045
 msgid "Reduced Rate%sZero Rate"
-msgstr "Reducerad sast%sIngen skatt"
+msgstr "Reducerad sats%sIngen skatt"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1049
