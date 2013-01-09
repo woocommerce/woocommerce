@@ -471,6 +471,7 @@ class Woocommerce {
 			add_action( 'wp_head', array( $this, 'generator' ) );
 			add_action( 'wp_head', array( $this, 'wp_head' ) );
 			add_filter( 'body_class', array( $this, 'output_body_class' ) );
+			add_filter( 'post_class', array( $this, 'post_class' ), 20, 3 );
 			add_action( 'wp_footer', array( $this, 'output_inline_js' ), 25 );
 
 			// HTTPS urls with SSL on
@@ -1898,6 +1899,32 @@ class Woocommerce {
 		if ( is_singular('product') ) {
 			$key = array_search( 'singular', $classes );
 			if ( $key !== false ) unset( $classes[$key] );
+		}
+
+		return $classes;
+	}
+
+	/** Post Classes **********************************************************/
+
+	/**
+	 * Adds extra post classes for products
+	 *
+	 * @access public
+	 * @param array $classes
+	 * @param string|array $class
+	 * @param int $post_id
+	 * @return array
+	 */
+	public function post_class( $classes, $class, $post_id ) {
+		$product = get_product( $post_id );
+
+		if ( $product ) {
+			if ( $product->is_on_sale() ) {
+				$classes[] = 'sale';
+			}
+			if ( $product->is_featured() ) {
+				$classes[] = 'featured';
+			}
 		}
 
 		return $classes;
