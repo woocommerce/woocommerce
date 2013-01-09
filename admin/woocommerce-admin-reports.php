@@ -407,6 +407,7 @@ function woocommerce_sales_overview() {
 				<h3><span><?php _e( 'This month\'s sales', 'woocommerce' ); ?></span></h3>
 				<div class="inside chart">
 					<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
+					<div id="cart_legend"></div>
 				</div>
 			</div>
 		</div>
@@ -494,6 +495,10 @@ function woocommerce_sales_overview() {
 			var placeholder = jQuery("#placeholder");
 
 			var plot = jQuery.plot(placeholder, [ { label: "<?php echo esc_js( __( 'Number of sales', 'woocommerce' ) ) ?>", data: d }, { label: "<?php echo esc_js( __( 'Sales amount', 'woocommerce' ) ) ?>", data: d2, yaxis: 2 } ], {
+				legend: {
+					container: jQuery('#cart_legend'),
+					noColumns: 2
+				},
 				series: {
 					lines: { show: true, fill: true },
 					points: { show: true }
@@ -663,6 +668,7 @@ function woocommerce_daily_sales() {
 				<h3><span><?php _e( 'Sales in range', 'woocommerce' ); ?></span></h3>
 				<div class="inside chart">
 					<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
+					<div id="cart_legend"></div>
 				</div>
 			</div>
 		</div>
@@ -694,6 +700,10 @@ function woocommerce_daily_sales() {
 			var placeholder = jQuery("#placeholder");
 
 			var plot = jQuery.plot(placeholder, [ { label: "<?php echo esc_js( __( 'Number of sales', 'woocommerce' ) ) ?>", data: d }, { label: "<?php echo esc_js( __( 'Sales amount', 'woocommerce' ) ) ?>", data: d2, yaxis: 2 } ], {
+				legend: {
+					container: jQuery('#cart_legend'),
+					noColumns: 2
+				},
 				series: {
 					lines: { show: true, fill: true },
 					points: { show: true }
@@ -842,6 +852,7 @@ function woocommerce_monthly_sales() {
 				<h3><span><?php _e( 'Monthly sales for year', 'woocommerce' ); ?></span></h3>
 				<div class="inside chart">
 					<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
+					<div id="cart_legend"></div>
 				</div>
 			</div>
 		</div>
@@ -870,6 +881,10 @@ function woocommerce_monthly_sales() {
 			var placeholder = jQuery("#placeholder");
 
 			var plot = jQuery.plot(placeholder, [ { label: "<?php echo esc_js( __( 'Number of sales', 'woocommerce' ) ) ?>", data: d }, { label: "<?php echo esc_js( __( 'Sales amount', 'woocommerce' ) ) ?>", data: d2, yaxis: 2 } ], {
+				legend: {
+					container: jQuery('#cart_legend'),
+					noColumns: 2
+				},
 				series: {
 					lines: { show: true, fill: true },
 					points: { show: true, align: "left" }
@@ -1643,6 +1658,7 @@ function woocommerce_coupon_discounts() {
 					<h3><span><?php _e( 'Monthly discounts by coupon', 'woocommerce' ); ?></span></h3>
 					<div class="inside chart">
 						<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
+						<div id="cart_legend"></div>
 					</div>
 				</div>
 			</div>
@@ -1671,6 +1687,10 @@ function woocommerce_coupon_discounts() {
 					echo implode( ',', $labels );
 					?>
 				], {
+					legend: {
+						container: jQuery('#cart_legend'),
+						noColumns: 2
+					},
 					series: {
 						lines: { show: true, fill: true },
 						points: { show: true, align: "left" }
@@ -1826,6 +1846,7 @@ function woocommerce_customer_overview() {
 				<h3><span><?php _e( 'Signups per day', 'woocommerce' ); ?></span></h3>
 				<div class="inside chart">
 					<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
+					<div id="cart_legend"></div>
 				</div>
 			</div>
 		</div>
@@ -1877,6 +1898,10 @@ function woocommerce_customer_overview() {
 			var placeholder = jQuery("#placeholder");
 
 			var plot = jQuery.plot(placeholder, [ { data: d } ], {
+				legend: {
+					container: jQuery('#cart_legend'),
+					noColumns: 2
+				},
 				series: {
 					bars: {
 						barWidth: 60 * 60 * 24 * 1000,
@@ -2633,6 +2658,7 @@ function woocommerce_category_sales() {
 					<h3><span><?php _e( 'Monthly sales by category', 'woocommerce' ); ?></span></h3>
 					<div class="inside chart">
 						<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
+						<div id="cart_legend"></div>
 					</div>
 				</div>
 			</div>
@@ -2661,6 +2687,10 @@ function woocommerce_category_sales() {
 					echo implode( ',', $labels );
 					?>
 				], {
+					legend: {
+						container: jQuery('#cart_legend'),
+						noColumns: 2
+					},
 					series: {
 						lines: { show: true, fill: true },
 						points: { show: true, align: "left" }

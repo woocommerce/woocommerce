@@ -16,40 +16,77 @@
  * @access public
  * @return void
  */
-function woocommerce_redirects() {
+function woocommerce_template_redirect() {
 	global $woocommerce, $wp_query;
 
 	// When default permalinks are enabled, redirect shop page to post type archive url
-	if ( isset($_GET['page_id']) && $_GET['page_id'] > 0 && get_option( 'permalink_structure' )=="" && $_GET['page_id'] == woocommerce_get_page_id('shop') ) :
+	if ( ! empty( $_GET['page_id'] ) && get_option( 'permalink_structure' ) == "" && $_GET['page_id'] == woocommerce_get_page_id( 'shop' ) ) {
 		wp_safe_redirect( get_post_type_archive_link('product') );
 		exit;
-	endif;
+	}
 
 	// When on the checkout with an empty cart, redirect to cart page
-	if (is_page(woocommerce_get_page_id('checkout')) && sizeof($woocommerce->cart->get_cart())==0) :
-		wp_redirect(get_permalink(woocommerce_get_page_id('cart')));
+	elseif ( is_page( woocommerce_get_page_id( 'checkout' ) ) && sizeof( $woocommerce->cart->get_cart() ) == 0 ) {
+		wp_redirect( get_permalink( woocommerce_get_page_id( 'cart' ) ) );
 		exit;
-	endif;
+	}
 
 	// When on pay page with no query string, redirect to checkout
-	if (is_page(woocommerce_get_page_id('pay')) && !isset($_GET['order'])) :
-		wp_redirect(get_permalink(woocommerce_get_page_id('checkout')));
+	elseif ( is_page( woocommerce_get_page_id( 'pay' ) ) && ! isset( $_GET['order'] ) ) {
+		wp_redirect( get_permalink( woocommerce_get_page_id( 'checkout' ) ) );
 		exit;
-	endif;
+	}
 
 	// My account page redirects (logged out)
-	if (!is_user_logged_in() && ( is_page(woocommerce_get_page_id('edit_address')) || is_page(woocommerce_get_page_id('view_order')) || is_page(woocommerce_get_page_id('change_password')) )) :
-		wp_redirect(get_permalink(woocommerce_get_page_id('myaccount')));
+	elseif ( ! is_user_logged_in() && ( is_page( woocommerce_get_page_id( 'edit_address' ) ) || is_page( woocommerce_get_page_id( 'view_order' ) ) || is_page( woocommerce_get_page_id( 'change_password' ) ) ) ) {
+		wp_redirect( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
 		exit;
-	endif;
+	}
 
 	// Redirect to the product page if we have a single product
-	if (is_search() && is_post_type_archive('product') && get_option('woocommerce_redirect_on_single_search_result')=='yes') {
-		if ($wp_query->post_count==1) {
+	elseif ( is_search() && is_post_type_archive( 'product' ) && get_option( 'woocommerce_redirect_on_single_search_result' ) == 'yes' ) {
+		if ( $wp_query->post_count == 1 ) {
 			$product = get_product( $wp_query->post );
-			if ($product->is_visible()) wp_safe_redirect( get_permalink($product->id), 302 );
+			if ( $product->is_visible() )
+				wp_safe_redirect( get_permalink( $product->id ), 302 );
 			exit;
 		}
+	}
+
+	// Force SSL
+	elseif ( get_option('woocommerce_force_ssl_checkout') == 'yes' && ! is_ssl() ) {
+
+		if ( is_checkout() ) {
+			wp_safe_redirect( str_replace('http:', 'https:', get_permalink( woocommerce_get_page_id( 'checkout' ) ) ), 301 );
+			exit;
+		} elseif ( is_account_page() || apply_filters( 'woocommerce_force_ssl_checkout', false ) ) {
+			if ( 0 === strpos( $_SERVER['REQUEST_URI'], 'http' ) ) {
+				wp_safe_redirect( preg_replace( '|^http://|', 'https://', $_SERVER['REQUEST_URI'] ) );
+				exit;
+			} else {
+				wp_safe_redirect( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+				exit;
+			}
+		}
+
+	}
+
+	// Break out of SSL if we leave the checkout/my accounts (anywhere but thanks)
+	elseif ( get_option('woocommerce_force_ssl_checkout') == 'yes' && get_option('woocommerce_unforce_ssl_checkout') == 'yes' && is_ssl() && $_SERVER['REQUEST_URI'] && ! is_checkout() && ! is_page( woocommerce_get_page_id('thanks') ) && ! is_ajax() && ! is_account_page() && apply_filters( 'woocommerce_unforce_ssl_checkout', true ) ) {
+
+		if ( 0 === strpos( $_SERVER['REQUEST_URI'], 'http' ) ) {
+			wp_safe_redirect( preg_replace( '|^https://|', 'http://', $_SERVER['REQUEST_URI'] ) );
+			exit;
+		} else {
+			wp_safe_redirect( 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+			exit;
+		}
+
+	}
+
+	// Buffer the checkout page
+	elseif ( is_checkout() ) {
+		ob_start();
 	}
 }
 
@@ -1255,3 +1292,361 @@ function woocommerce_get_order_id_by_order_key( $order_key ) {
 
 	return $order_id;
 }
+
+/**
+ * Track product views
+ *
+ * @access public
+ * @package 	WooCommerce/Widgets
+ * @return void
+ */
+function woocommerce_track_product_view() {
+	global $post, $product, $woocommerce;
+
+	$viewed_products = $woocommerce->session->viewed_products;
+
+	if ( empty( $woocommerce->session->viewed_products ) )
+		$viewed_products = array();
+
+	if ( ! in_array( $post->ID, $viewed_products ) )
+		$viewed_products[] = $post->ID;
+
+	if ( sizeof( $viewed_products ) > 15 )
+		array_shift( $viewed_products );
+
+	$woocommerce->session->viewed_products = $viewed_products;
+}
+
+add_action( 'woocommerce_before_single_product', 'woocommerce_track_product_view', 10);
+
+/**
+ * Layered Nav Init
+ *
+ * @package 	WooCommerce/Widgets
+ * @access public
+ * @return void
+ */
+function woocommerce_layered_nav_init( ) {
+
+	if ( is_active_widget( false, false, 'woocommerce_layered_nav', true ) && ! is_admin() ) {
+
+		global $_chosen_attributes, $woocommerce, $_attributes_array;
+
+		$_chosen_attributes = $_attributes_array = array();
+
+		$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();
+		if ( $attribute_taxonomies ) {
+			foreach ( $attribute_taxonomies as $tax ) {
+
+		    	$attribute = sanitize_title( $tax->attribute_name );
+		    	$taxonomy = $woocommerce->attribute_taxonomy_name( $attribute );
+
+				// create an array of product attribute taxonomies
+				$_attributes_array[] = $taxonomy;
+
+		    	$name = 'filter_' . $attribute;
+		    	$query_type_name = 'query_type_' . $attribute;
+
+		    	if ( ! empty( $_GET[ $name ] ) && taxonomy_exists( $taxonomy ) ) {
+
+		    		$_chosen_attributes[ $taxonomy ]['terms'] = explode( ',', $_GET[ $name ] );
+
+		    		if ( ! empty( $_GET[ $query_type_name ] ) && $_GET[ $query_type_name ] == 'or' )
+		    			$_chosen_attributes[ $taxonomy ]['query_type'] = 'or';
+		    		else
+		    			$_chosen_attributes[ $taxonomy ]['query_type'] = 'and';
+
+				}
+			}
+	    }
+
+	    add_filter('loop_shop_post_in', 'woocommerce_layered_nav_query');
+    }
+}
+
+add_action( 'init', 'woocommerce_layered_nav_init', 1 );
+
+
+/**
+ * Layered Nav post filter
+ *
+ * @package 	WooCommerce/Widgets
+ * @access public
+ * @param array $filtered_posts
+ * @return array
+ */
+function woocommerce_layered_nav_query( $filtered_posts ) {
+	global $_chosen_attributes, $woocommerce, $wp_query;
+
+	if ( sizeof( $_chosen_attributes ) > 0 ) {
+
+		$matched_products = array();
+		$filtered_attribute = false;
+
+		foreach ( $_chosen_attributes as $attribute => $data ) {
+
+			$matched_products_from_attribute = array();
+			$filtered = false;
+
+			if ( sizeof( $data['terms'] ) > 0 ) {
+				foreach ( $data['terms'] as $value ) {
+
+					$posts = get_posts(
+						array(
+							'post_type' 	=> 'product',
+							'numberposts' 	=> -1,
+							'post_status' 	=> 'publish',
+							'fields' 		=> 'ids',
+							'no_found_rows' => true,
+							'tax_query' => array(
+								array(
+									'taxonomy' 	=> $attribute,
+									'terms' 	=> $value,
+									'field' 	=> 'id'
+								)
+							)
+						)
+					);
+
+					// AND or OR
+					if ( $data['query_type'] == 'or' ) {
+
+						if ( ! is_wp_error( $posts ) && ( sizeof( $matched_products_from_attribute ) > 0 || $filtered ) )
+							$matched_products_from_attribute = array_merge($posts, $matched_products_from_attribute);
+						elseif ( ! is_wp_error( $posts ) )
+							$matched_products_from_attribute = $posts;
+
+					} else {
+
+						if ( ! is_wp_error( $posts ) && ( sizeof( $matched_products_from_attribute ) > 0 || $filtered ) )
+							$matched_products_from_attribute = array_intersect($posts, $matched_products_from_attribute);
+						elseif ( ! is_wp_error( $posts ) )
+							$matched_products_from_attribute = $posts;
+					}
+
+					$filtered = true;
+
+				}
+			}
+
+			if ( sizeof( $matched_products ) > 0 || $filtered_attribute )
+				$matched_products = array_intersect( $matched_products_from_attribute, $matched_products );
+			else
+				$matched_products = $matched_products_from_attribute;
+
+			$filtered_attribute = true;
+
+		}
+
+		if ( $filtered ) {
+
+			$woocommerce->query->layered_nav_post__in = $matched_products;
+			$woocommerce->query->layered_nav_post__in[] = 0;
+
+			if ( sizeof( $filtered_posts ) == 0 ) {
+				$filtered_posts = $matched_products;
+				$filtered_posts[] = 0;
+			} else {
+				$filtered_posts = array_intersect( $filtered_posts, $matched_products );
+				$filtered_posts[] = 0;
+			}
+
+		}
+	}
+
+	return (array) $filtered_posts;
+}
+
+/**
+ * Price filter Init
+ *
+ * @package 	WooCommerce/Widgets
+ * @access public
+ * @return void
+ */
+function woocommerce_price_filter_init() {
+	global $woocommerce;
+
+	if ( is_active_widget( false, false, 'price_filter', true ) && ! is_admin() ) {
+
+		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+
+		wp_register_script( 'wc-price-slider', $woocommerce->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider' ), '1.6', true );
+
+		unset( $woocommerce->session->min_price );
+		unset( $woocommerce->session->max_price );
+
+		if ( isset( $_GET['min_price'] ) )
+			$woocommerce->session->min_price = esc_attr( $_GET['min_price'] );
+
+		if ( isset( $_GET['max_price'] ) )
+			$woocommerce->session->max_price = esc_attr( $_GET['max_price'] );
+
+		add_filter( 'loop_shop_post_in', 'woocommerce_price_filter' );
+	}
+}
+
+add_action( 'init', 'woocommerce_price_filter_init' );
+
+
+/**
+ * Price Filter post filter
+ *
+ * @package 	WooCommerce/Widgets
+ * @access public
+ * @param array $filtered_posts
+ * @return array
+ */
+function woocommerce_price_filter($filtered_posts) {
+    global $wpdb;
+
+    if ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) {
+
+        $matched_products = array();
+        $min 	= floatval( $_GET['min_price'] );
+        $max 	= floatval( $_GET['max_price'] );
+
+        $matched_products_query = $wpdb->get_results( $wpdb->prepare("
+        	SELECT DISTINCT ID, post_parent, post_type FROM $wpdb->posts
+			INNER JOIN $wpdb->postmeta ON ID = post_id
+			WHERE post_type IN ( 'product', 'product_variation' ) AND post_status = 'publish' AND meta_key = %s AND meta_value BETWEEN %d AND %d
+		", '_price', $min, $max ), OBJECT_K );
+
+        if ( $matched_products_query ) {
+            foreach ( $matched_products_query as $product ) {
+                if ( $product->post_type == 'product' )
+                    $matched_products[] = $product->ID;
+                if ( $product->post_parent > 0 && ! in_array( $product->post_parent, $matched_products ) )
+                    $matched_products[] = $product->post_parent;
+            }
+        }
+
+        // Filter the id's
+        if ( sizeof( $filtered_posts ) == 0) {
+            $filtered_posts = $matched_products;
+            $filtered_posts[] = 0;
+        } else {
+            $filtered_posts = array_intersect( $filtered_posts, $matched_products );
+            $filtered_posts[] = 0;
+        }
+
+    }
+
+    return (array) $filtered_posts;
+}
+
+/**
+ * Save the password and redirect back to the my account page.
+ *
+ * @access public
+ */
+function woocommerce_save_password() {
+	global $woocommerce;
+
+	if ( 'POST' !== strtoupper( $_SERVER[ 'REQUEST_METHOD' ] ) )
+		return;
+
+	if ( empty( $_POST[ 'action' ] ) || ( 'change_password' !== $_POST[ 'action' ] ) )
+		return;
+
+	$woocommerce->verify_nonce( 'change_password' );
+
+	$user_id = get_current_user_id();
+
+	if ( $user_id <= 0 )
+		return;
+
+	$_POST = array_map( 'woocommerce_clean', $_POST );
+
+	if ( empty( $_POST[ 'password_1' ] ) || empty( $_POST[ 'password_2' ] ) )
+		$woocommerce->add_error( __( 'Please enter your password.', 'woocommerce' ) );
+
+	if ( $_POST[ 'password_1' ] !== $_POST[ 'password_2' ] )
+		$woocommerce->add_error( __( 'Passwords do not match.', 'woocommerce' ) );
+
+	if ( $woocommerce->error_count() == 0 ) {
+
+		wp_update_user( array ('ID' => $user_id, 'user_pass' => esc_attr( $_POST['password_1'] ) ) ) ;
+
+		do_action( 'woocommerce_customer_change_password', $user_id );
+
+		wp_safe_redirect( get_permalink( woocommerce_get_page_id('myaccount') ) );
+		exit;
+	}
+}
+
+add_action( 'template_redirect', 'woocommerce_save_password' );
+
+/**
+ * Save and and update a billing or shipping address if the
+ * form was submitted through the user account page.
+ *
+ * @access public
+ */
+function woocommerce_save_address() {
+	global $woocommerce;
+
+	if ( 'POST' !== strtoupper( $_SERVER[ 'REQUEST_METHOD' ] ) )
+		return;
+
+	if ( empty( $_POST[ 'action' ] ) || ( 'edit_address' !== $_POST[ 'action' ] ) )
+		return;
+
+	$woocommerce->verify_nonce( 'edit_address' );
+
+	$validation = $woocommerce->validation();
+
+	$user_id = get_current_user_id();
+
+	if ( $user_id <= 0 ) return;
+
+	$load_address = ( isset( $_GET[ 'address' ] ) ) ? esc_attr( $_GET[ 'address' ] ) : '';
+	$load_address = ( $load_address == 'billing' || $load_address == 'shipping' ) ? $load_address : '';
+
+	$address = $woocommerce->countries->get_address_fields( esc_attr($_POST[ $load_address . '_country' ]), $load_address . '_' );
+
+	foreach ($address as $key => $field) :
+
+		if (!isset($field['type'])) $field['type'] = 'text';
+
+		// Get Value
+		switch ($field['type']) :
+			case "checkbox" :
+				$_POST[$key] = isset($_POST[$key]) ? 1 : 0;
+			break;
+			default :
+				$_POST[$key] = isset($_POST[$key]) ? woocommerce_clean($_POST[$key]) : '';
+			break;
+		endswitch;
+
+		// Hook to allow modification of value
+		$_POST[$key] = apply_filters('woocommerce_process_myaccount_field_' . $key, $_POST[$key]);
+
+		// Validation: Required fields
+		if ( isset($field['required']) && $field['required'] && empty($_POST[$key]) ) $woocommerce->add_error( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce' ) );
+
+		// Postcode
+		if ($key=='billing_postcode' || $key=='shipping_postcode') :
+			if ( ! $validation->is_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] ) ) :
+				$woocommerce->add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
+			else :
+				$_POST[$key] = $validation->format_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] );
+			endif;
+		endif;
+
+	endforeach;
+
+	if ( $woocommerce->error_count() == 0 ) {
+
+		foreach ($address as $key => $field) :
+			update_user_meta( $user_id, $key, $_POST[$key] );
+		endforeach;
+
+		do_action( 'woocommerce_customer_save_address', $user_id );
+
+		wp_safe_redirect( get_permalink( woocommerce_get_page_id('myaccount') ) );
+		exit;
+	}
+}
+
+add_action( 'template_redirect', 'woocommerce_save_address' );

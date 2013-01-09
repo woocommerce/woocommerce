@@ -170,7 +170,7 @@ jQuery(document).ready(function($) {
 
 		if ( $parent.is( '.validate-required' ) ) {
 			if ( $this.val() == '' ) {
-				$parent.removeClass( 'wc-validated' ).addClass( 'wc-error wc-error-required-field' );
+				$parent.removeClass( 'woocommerce-validated' ).addClass( 'woocommerce-invalid woocommerce-invalid-required-field' );
 				validated = false;
 			}
 		}
@@ -182,14 +182,14 @@ jQuery(document).ready(function($) {
 				var pattern = new RegExp(/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i);
 
 				if ( ! pattern.test( $this.val()  ) ) {
-					$parent.removeClass( 'wc-validated' ).addClass( 'wc-error wc-error-email' );
+					$parent.removeClass( 'woocommerce-validated' ).addClass( 'woocommerce-invalid woocommerce-invalid-email' );
 					validated = false;
 				}
 			}
 		}
 
 		if ( validated ) {
-			$parent.removeClass( 'wc-error wc-error-required-field' ).addClass( 'wc-validated' );
+			$parent.removeClass( 'woocommerce-invalid woocommerce-invalid-required-field' ).addClass( 'woocommerce-validated' );
 		}
 	} )
 
@@ -231,7 +231,7 @@ jQuery(document).ready(function($) {
 
 							} else if (result.result=='failure') {
 
-								$('.woocommerce_error, .woocommerce_message').remove();
+								$('.woocommerce-error, .woocommerce-message').remove();
 								$form.prepend( result.messages );
 								$form.removeClass('processing').unblock();
 								$form.find( '.input-text, select' ).blur();
@@ -247,7 +247,7 @@ jQuery(document).ready(function($) {
 							}
 						}
 						catch(err) {
-							$('.woocommerce_error, .woocommerce_message').remove();
+							$('.woocommerce-error, .woocommerce-message').remove();
 						  	$form.prepend( code );
 							$form.removeClass('processing').unblock();
 							$form.find( '.input-text, select' ).blur();
@@ -287,7 +287,7 @@ jQuery(document).ready(function($) {
 			url: 		woocommerce_params.ajax_url,
 			data: 		data,
 			success: 	function( code ) {
-				$('.woocommerce_error, .woocommerce_message').remove();
+				$('.woocommerce-error, .woocommerce-message').remove();
 				$form.removeClass('processing').unblock();
 
 				if ( code ) {
@@ -351,9 +351,9 @@ jQuery(document).ready(function($) {
 
 				if ( key !== 'state' ) {
 					if ( thislocale[key]['hidden'] == true ) {
-						field.fadeOut(200).find('input').val('');
+						field.hide().find('input').val('');
 					} else {
-						field.fadeIn(500);
+						field.show();
 					}
 				}
 
@@ -362,34 +362,25 @@ jQuery(document).ready(function($) {
 					if (field.find('label abbr').size()==0) field.find('label').append( required );
 				}
 				if ( key !== 'state' && (typeof locale['default'][key]['hidden'] == 'undefined' || locale['default'][key]['hidden'] == false) ) {
-					field.fadeIn(500);
+					field.show();
 				}
 			}
 
 		});
 
-		var postcodefield = thisform.find('#billing_postcode_field, #shipping_postcode_field');
-		var cityfield = thisform.find('#billing_city_field, #shipping_city_field');
+		var $postcodefield = thisform.find('#billing_postcode_field, #shipping_postcode_field');
+		var $cityfield     = thisform.find('#billing_city_field, #shipping_city_field');
+		var $statefield    = thisform.find('#billing_state_field, #shipping_state_field');
 
 		// Re-order postcode/city
 		if ( thislocale['postcode_before_city'] ) {
-			if (cityfield.is('.form-row-first')) {
-				cityfield.fadeOut(200, function() {
-					cityfield.removeClass('form-row-first').addClass('form-row-last').insertAfter( postcodefield ).fadeIn(500);
-				});
-				postcodefield.fadeOut(200, function (){
-					postcodefield.removeClass('form-row-last').addClass('form-row-first').fadeIn(500);
-				});
-			}
+			$postcodefield.removeClass('form-row-last').addClass('form-row-wide');
+			$cityfield.removeClass('form-row-wide').addClass('form-row-first');
+			$postcodefield.insertBefore( $cityfield );
 		} else {
-			if (cityfield.is('.form-row-last')) {
-				cityfield.fadeOut(200, function() {
-					cityfield.removeClass('form-row-last').addClass('form-row-first').insertBefore( postcodefield ).fadeIn(500);
-				});
-				postcodefield.fadeOut(200, function (){
-					postcodefield.removeClass('form-row-first').addClass('form-row-last').fadeIn(500);
-				});
-			}
+			$postcodefield.removeClass('form-row-wide').addClass('form-row-last');
+			$cityfield.removeClass('form-row-first').addClass('form-row-wide');
+			$postcodefield.insertAfter( $statefield );
 		}
 
 	})

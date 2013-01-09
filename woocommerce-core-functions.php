@@ -202,6 +202,24 @@ function woocommerce_placeholder_img( $size = 'shop_thumbnail' ) {
 
 
 /**
+ * woocommerce_lostpassword_url function.
+ *
+ * @access public
+ * @param mixed $url
+ * @return void
+ */
+function woocommerce_lostpassword_url( $url ) {
+    $id = woocommerce_get_page_id( 'lost_password' );
+    if ( $id != -1 )
+    	 $url = get_permalink( $id );
+
+    return $url;
+}
+
+add_filter( 'lostpassword_url',  'woocommerce_lostpassword_url' );
+
+
+/**
  * Send HTML emails from WooCommerce
  *
  * @access public
@@ -225,7 +243,7 @@ if ( ! function_exists( 'woocommerce_get_page_id' ) ) {
 	/**
 	 * WooCommerce page IDs
 	 *
-	 * retrieve page ids - used for myaccount, edit_address, change_password, shop, cart, checkout, pay, view_order, thanks, terms, order_tracking
+	 * retrieve page ids - used for myaccount, edit_address, change_password, shop, cart, checkout, pay, view_order, thanks, terms
 	 *
 	 * returns -1 if no page is found
 	 *
@@ -1942,7 +1960,7 @@ function _woocommerce_term_recount( $terms, $taxonomy, $callback = true, $terms_
 	$count_query = $wpdb->prepare( "
 		SELECT COUNT( DISTINCT posts.ID ) FROM {$wpdb->posts} as posts
 
-		LEFT JOIN {$wpdb->postmeta} AS meta_visibilty ON posts.ID = meta_visibilty.post_id
+		LEFT JOIN {$wpdb->postmeta} AS meta_visibility ON posts.ID = meta_visibility.post_id
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
@@ -1951,9 +1969,9 @@ function _woocommerce_term_recount( $terms, $taxonomy, $callback = true, $terms_
 		WHERE 	posts.post_status 	= 'publish'
 		AND 	posts.post_type 	= 'product'
 		AND 	(
-			meta_visibilty.meta_key = '_visibility'
+			meta_visibility.meta_key = '_visibility'
 			AND
-			meta_visibilty.meta_value IN ( 'visible', 'catalog' )
+			meta_visibility.meta_value IN ( 'visible', 'catalog' )
 		)
 		AND 	tax.taxonomy	= %s
 		$stock_query
@@ -2084,15 +2102,21 @@ function woocommerce_change_term_counts( $terms, $taxonomies, $args ) {
 	if ( ! in_array( $taxonomies[0], apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag' ) ) ) )
 		return $terms;
 
+	$term_counts = $o_term_counts = get_transient( 'wc_term_counts' );
+
 	foreach ( $terms as &$term ) {
 		// If the original term count is zero, there's no way the product count could be higher.
 		if ( empty( $term->count ) ) continue;
 
-		$count = get_woocommerce_term_meta( $term->term_id, 'product_count_' . $taxonomies[0] , true );
+		$term_counts[ $term->term_id ] = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : get_woocommerce_term_meta( $term->term_id, 'product_count_' . $taxonomies[0] , true );
 
-		if ( $count != '' )
-			$term->count = $count;
+		if ( $term_counts[ $term->term_id ] != '' )
+			$term->count = $term_counts[ $term->term_id ];
 	}
+
+	// Update transient
+	if ( $term_counts != $o_term_counts )
+		set_transient( 'wc_term_counts', $term_counts );
 
 	return $terms;
 }
@@ -2240,3 +2264,64 @@ function woocommerce_cancel_unpaid_orders() {
 }
 
 add_action( 'woocommerce_cancel_unpaid_orders', 'woocommerce_cancel_unpaid_orders' );
+
+/**
+ * Process the login.
+ *
+ * @access public
+ * @package 	WooCommerce/Widgets
+ * @return void
+ */
+function woocommerce_sidebar_login_process() {
+
+	if (isset($_POST['woocommerce_login'])) {
+
+		global $login_errors;
+
+		// Get redirect URL
+		$redirect_to = esc_url( apply_filters( 'woocommerce_login_widget_redirect', get_permalink( woocommerce_get_page_id( 'myaccount' ) ) ) );
+
+		// Check for Secure Cookie
+		$secure_cookie = '';
+
+		// If the user wants ssl but the session is not ssl, force a secure cookie.
+		if ( !empty($_POST['log']) && !force_ssl_admin() ) {
+			$user_name = sanitize_user($_POST['log']);
+			if ( $user = get_user_by('login', $user_name) ) {
+				if ( get_user_option('use_ssl', $user->ID) ) {
+					$secure_cookie = true;
+					force_ssl_admin(true);
+				}
+			}
+		}
+
+		if ( force_ssl_admin() ) $secure_cookie = true;
+		if ( $secure_cookie == '' && force_ssl_login() ) $secure_cookie = false;
+
+		// Login
+		$user = wp_signon( '', $secure_cookie );
+
+		// Redirect filter
+		if ( $secure_cookie && strstr($redirect_to, 'wp-admin') ) $redirect_to = str_replace('http:', 'https:', $redirect_to);
+
+		// Check the username
+		if ( !$_POST['log'] ) :
+			$user = new WP_Error();
+			$user->add('empty_username', '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Please enter a username.', 'woocommerce' ));
+		elseif ( !$_POST['pwd'] ) :
+			$user = new WP_Error();
+			$user->add('empty_username', '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Please enter your password.', 'woocommerce' ));
+		endif;
+
+		// Redirect if successful
+		if ( !is_wp_error($user) ) :
+			wp_safe_redirect( $redirect_to );
+			exit;
+		endif;
+
+		$login_errors = $user;
+
+	}
+}
+
+add_action( 'init', 'woocommerce_sidebar_login_process', 0 );

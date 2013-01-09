@@ -17,7 +17,7 @@ do_action('woocommerce_product_tabs');
 $tabs = trim( ob_get_clean() );
 
 if ( ! empty( $tabs ) ) : ?>
-	<div class="woocommerce_tabs">
+	<div class="woocommerce-tabs">
 		<ul class="tabs">
 			<?php echo $tabs; ?>
 		</ul>

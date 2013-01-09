@@ -203,6 +203,8 @@ function woocommerce_category_fields_save( $term_id, $tt_id, $taxonomy ) {
 
 	if ( isset( $_POST['product_cat_thumbnail_id'] ) )
 		update_woocommerce_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) );
+
+	delete_transient( 'wc_term_counts' );
 }
 
 add_action( 'created_term', 'woocommerce_category_fields_save', 10,3 );

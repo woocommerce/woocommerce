@@ -404,6 +404,7 @@ function woocommerce_product_data_box() {
 
 													?>" placeholder="<?php _e( 'Pipe separate terms', 'woocommerce' ); ?>" />
 												<?php endif; ?>
+												<?php do_action( 'woocommerce_product_option_terms', $tax, $i ); ?>
 											</td>
 										</tr>
 										<tr>
@@ -1047,7 +1048,7 @@ function woocommerce_product_data_visibility() {
 
 		<div id="catalog-visibility-select" class="hide-if-js">
 
-			<input type="hidden" name="current_visibilty" id="current_visibilty" value="<?php echo esc_attr( $current_visibility ); ?>" />
+			<input type="hidden" name="current_visibility" id="current_visibility" value="<?php echo esc_attr( $current_visibility ); ?>" />
 			<input type="hidden" name="current_featured" id="current_featured" value="<?php echo esc_attr( $current_featured ); ?>" />
 
 			<?php

@@ -40,10 +40,14 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 				<?php if ( $woocommerce->cart->needs_shipping() && $woocommerce->cart->show_shipping() && ( $available_methods || get_option( 'woocommerce_enable_shipping_calc' ) == 'yes' ) ) : ?>
 
+					<?php do_action( 'woocommerce_cart_totals_before_shipping' ); ?>
+
 					<tr class="shipping">
 						<th><?php _e( 'Shipping', 'woocommerce' ); ?></th>
 						<td><?php woocommerce_get_template( 'cart/shipping-methods.php', array( 'available_methods' => $available_methods ) ); ?></td>
 					</tr>
+
+					<?php do_action( 'woocommerce_cart_totals_after_shipping' ); ?>
 
 				<?php endif ?>
 
@@ -119,6 +123,8 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 				<?php endif; ?>
 
+				<?php do_action( 'woocommerce_cart_totals_before_order_total' ); ?>
+
 				<tr class="total">
 					<th><strong><?php _e( 'Order Total', 'woocommerce' ); ?></strong></th>
 					<td>
@@ -143,6 +149,8 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					</td>
 				</tr>
 
+				<?php do_action( 'woocommerce_cart_totals_after_order_total' ); ?>
+
 			</tbody>
 		</table>
 
@@ -162,7 +170,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 		<?php if ( ! $woocommerce->customer->get_shipping_state() || ! $woocommerce->customer->get_shipping_postcode() ) : ?>
 
-			<div class="woocommerce_info">
+			<div class="woocommerce-info">
 
 				<p><?php _e( 'No shipping methods were found; please recalculate your shipping and enter your state/county and zip/postcode to ensure there are no other available methods for your location.', 'woocommerce' ); ?></p>
 
@@ -170,7 +178,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 		<?php else : ?>
 
-			<div class="woocommerce_error">
+			<div class="woocommerce-error">
 
 				<p><?php printf( __( 'Sorry, it seems that there are no available shipping methods for your location (%s).', 'woocommerce' ), $woocommerce->countries->countries[ $woocommerce->customer->get_shipping_country() ] ); ?></p>
 

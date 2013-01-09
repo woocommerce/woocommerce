@@ -56,7 +56,7 @@ Developers can checkout and contribute to the source code on the [WooCommerce Gi
 
 = Minimum Requirements =
 
-* WordPress 3.3 or greater
+* WordPress 3.5 or greater
 * PHP version 5.2.4 or greater
 * MySQL version 5.0 or greater
 * Some payment gateways require fsockopen support (for IPN access)
@@ -81,6 +81,10 @@ Automatic updates should work a charm; as always though, ensure you backup your 
 
 If on the off chance you do encounter issues with the shop/category pages after an update you simply need to flush the permalinks by going to WordPress > Settings > Permalinks and hitting 'save'. That should return things to normal.
 
+= Dummy data =
+
+WooCommerce comes with some dummy data you can use to see how products look; either import dummy_data.xml via the [WordPress importer](http://wordpress.org/extend/plugins/wordpress-importer/) or use our [CSV Import Suite plugin](http://www.woothemes.com/products/product-csv-import-suite/) to import dummy_data.csv and dummy_data_variations.csv.
+
 == Premium Extensions ==
 
 [Click here to view our extensions](http://www.woothemes.com/extensions/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes"). Some of our more popular plugins are listed below.
@@ -96,9 +100,7 @@ If on the off chance you do encounter issues with the shop/category pages after 
 	* [Newsletter Subscription](http://www.woothemes.com/extension/newsletter-subscription/) - Allow customers to subscribe to your MailChimp or CampaignMonitor mailing list.
 * __Shipping__
 	* [Shipment Tracking](http://www.woothemes.com/extension/shipment-tracking/) - Add tracking info to orders
-	* [FedEx](http://www.woothemes.com/extension/fedex/) - Get rates from the FedEx API
 	* [Table rate shipping](http://www.woothemes.com/extension/table-rate-shipping/) - Create rules based on country/postcode, weight, cart items, and price.
-	* [UPS Shipping Method](http://www.woothemes.com/extension/ups/) - Get rates from the UPS API
 * __Payment__
 	* [PayPal Pro](http://www.woothemes.com/extension/paypal-pro/) - Direct gateway
 	* [PayPal Express](http://www.woothemes.com/extension/paypal-express/) - Skip the WooCommerce checkout in favour of PayPal
@@ -109,7 +111,7 @@ If on the off chance you do encounter issues with the shop/category pages after 
 
 == Free Extensions ==
 
-WordPress.org is home to some cool free extensions too:
+WordPress.org is home to some cool free extensions too ([search WordPress.org for more](http://wordpress.org/extend/plugins/search.php?q=woocommerce&sort=popular)).
 
 * [WooCommerce Admin Bar Addition](http://wordpress.org/extend/plugins/woocommerce-admin-bar-addition/) - Adds useful admin links and resources for the WooCommerce eCommerce Plugin to the WordPress Toolbar / Admin Bar.
 * [WooCommerce Delivery Notes](http://wordpress.org/extend/plugins/woocommerce-delivery-notes/) - Print delivery Notes for orders.
@@ -192,14 +194,18 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](http://www.woothemes.com/products/product-csv-import-suite/)).
 * Feature - Option to hold stock for unpaid orders (defaults to 60mins). When this time limit is reached, and the order is not paid for, stock is released and the order is cancelled.
 * Feature - Added set_stock() method to product class.
-
+* Feature - Linking to mydomain.com/product#review_form will now open the review form on load (if WooCommerce lightbox is turned on)
 * Templating - Revised pagination, sorting areas (sorting is now above products, numbered pagination below) and added a result count.
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
 * Templating - loop-end and start for product loops, allow changing the UL's used by default to something else.
 * Templating - woocommerce_page_title function for archive titles.
 * Templating - CSS namespacing changes (courtesy of Brian Feister).
 * Templating - My account page broken up into template files (by Brian Richards)
-
+* Templating - CSS classes standardised. Instances of '.woocommerce_' & '.wc-' replaced with '.woocommerce-'
+* Tweak - Optimised class loading (autoload). Reduced memory consumption.
+* Tweak - Moved shortcodes and widgets to classes.
+* Tweak - Tweaks to gateways API. Must use WC-WPI for IPN requests (classes will only be init when needed).
+* Tweak - Save hooks for gateways have changed to match shipping methods. Plugins must be updated with the new hook to save options.
 * Tweak - Cron jobs for scheduled sales.
 * Tweak - Improved product data panels.
 * Tweak - Improved installation + upgrade process upon activation.
@@ -238,11 +244,13 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Added html5 type inputs to admin with inline validation.
 * Tweak - Use WP Core jquery-ui-slider
 * Tweak - Further optimisation of icons in admin for HiDPI devices
-
+* Tweak - On product search include post_excerpt, by krbvroc1
+* Tweak - Attribute page restricts reserved terms by GeertDD
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.
 * Fix - Active plugins display on status page.
-
+* Localization - Makepot added by Geert De Deckere for generating POT files.
+* Localization - Admin/Frontend POT files to reduce memory consumption on the frontend.
 * Localization - French update by Arnaud Cheminand and absoluteweb.
 * Localization - Romanian update by silviu-bucsa and a1ur3l.
 * Localization - Dutch updates by Ramoonus.
@@ -254,7 +262,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - Bulgarian update by Hristo Pandjarov.
 * Localization - Spanish update by bolorino.
 * Localization - Finnish translation by Arhi Paivarinta.
-
 * Removed all deprecated classes and functions except for 1.6.x template files and functions
 * Many other refactors, minor fixes and tweaks!
 
@@ -1168,7 +1175,7 @@ The biggest change is that we're redone order item storage making them easier (a
 
 Order items are no longer serialised data and store in meta - they are stored in there own table with their own meta. Existing data can be updated upon upgrade (you will be prompted). You should backup before upgrading.
 
-On the frontend; if your store is overwriting the core WooCommerce CSS you will need to prefix those overrides with the .woocommerce class as we do in woocommerce.css as of 2.0.
+On the frontend; if your store is overwriting the core WooCommerce CSS you will need to prefix those overrides with the .woocommerce class as we do in woocommerce.css as of 2.0. Also replaced all instances of .woocommerce_ and .wc- with standardised .woocommerce-
 
 = 1.6.2 =
 1.6 introduced some template changes, for loops in particular. See the changelog for details and ensure theme compatibility before upgrading.

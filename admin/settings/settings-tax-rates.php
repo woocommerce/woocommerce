@@ -70,7 +70,7 @@ function woocommerce_tax_rates_setting() {
 					"SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates
 					WHERE tax_rate_class = %s
 					ORDER BY tax_rate_order
-					" , $current_class ) );
+					" , sanitize_title( $current_class ) ) );
 
 				foreach ( $rates as $rate ) {
 					?>
@@ -165,16 +165,51 @@ function woocommerce_tax_rates_setting() {
 				return false;
 			});
 
+			var controlled = false;
 			var shifted = false;
+			var hasFocus = false;
 
-			jQuery(document).bind('keyup keydown', function(e){shifted = e.shiftKey} );
+			jQuery(document).bind('keyup keydown', function(e){ shifted = e.shiftKey; controlled = e.ctrlKey || e.metaKey } );
 
-			jQuery('.wc_tax_rates').on( 'click focus', 'input', function( e ) {
-				if ( ! shifted ) {
-					jQuery('.wc_tax_rates tr').removeClass('current');
+			jQuery('#rates').on( 'focus click', 'input', function( e ) {
+
+				$this_row = jQuery(this).closest('tr');
+
+				if ( ( e.type == 'focus' && hasFocus != $this_row.index() ) || ( e.type == 'click' && jQuery(this).is(':focus') ) ) {
+
+					hasFocus = $this_row.index();
+
+					if ( ! shifted && ! controlled ) {
+						jQuery('#rates tr').removeClass('current').removeClass('last_selected');
+						$this_row.addClass('current').addClass('last_selected');
+					} else if ( shifted ) {
+						jQuery('#rates tr').removeClass('current');
+						$this_row.addClass('selected_now').addClass('current');
+
+						if ( jQuery('#rates tr.last_selected').size() > 0 ) {
+							if ( $this_row.index() > jQuery('#rates tr.last_selected').index() ) {
+								jQuery('#rates tr').slice( jQuery('#rates tr.last_selected').index(), $this_row.index() ).addClass('current');
+							} else {
+								jQuery('#rates tr').slice( $this_row.index(), jQuery('#rates tr.last_selected').index() + 1 ).addClass('current');
+							}
+						}
+
+						jQuery('#rates tr').removeClass('last_selected');
+						$this_row.addClass('last_selected');
+					} else {
+						jQuery('#rates tr').removeClass('last_selected');
+						if ( controlled && jQuery(this).closest('tr').is('.current') ) {
+							$this_row.removeClass('current');
+						} else {
+							$this_row.addClass('current').addClass('last_selected');
+						}
+					}
+
+					jQuery('#rates tr').removeClass('selected_now');
+
 				}
-
-				jQuery(this).closest('tr').addClass('current');
+			}).on( 'blur', 'input', function( e ) {
+				hasFocus = false;
 			});
 
 			jQuery('.wc_tax_rates .export').click(function() {
@@ -368,7 +403,7 @@ function woocommerce_tax_rates_setting_save() {
 						'tax_rate_compound' => $compound,
 						'tax_rate_shipping' => $shipping,
 						'tax_rate_order'    => $i,
-						'tax_rate_class'    => $current_class
+						'tax_rate_class'    => sanitize_title( $current_class )
 					)
 				);
 
@@ -447,7 +482,7 @@ function woocommerce_tax_rates_setting_save() {
 					'tax_rate_compound' => $compound,
 					'tax_rate_shipping' => $shipping,
 					'tax_rate_order'    => $i,
-					'tax_rate_class'    => $current_class
+					'tax_rate_class'    => sanitize_title( $current_class )
 				),
 				array(
 					'tax_rate_id' 		=> $tax_rate_id

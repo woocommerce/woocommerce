@@ -265,9 +265,10 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 
 	array(
-		'desc' 		=> __( 'Enable WooCommerce lightbox on the product page', 'woocommerce' ),
+		'desc' 	=> __( 'Enable WooCommerce lightbox', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_lightbox',
 		'default'	=> 'yes',
+		'desc_tip'	=> __( 'On the product details page, product gallery images will open in a lightbox. The Add Review form will open in a modal window', 'woocommerce' ),
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> ''
 	),

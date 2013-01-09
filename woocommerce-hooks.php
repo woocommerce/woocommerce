@@ -54,8 +54,8 @@ if ( ! is_admin() || defined('DOING_AJAX') ) {
 	 * @see woocommerce_taxonomy_archive_description()
 	 * @see woocommerce_product_archive_description()
 	 */
-	add_action( 'woocommerce_taxonomy_archive_description', 'woocommerce_taxonomy_archive_description', 10 );
-	add_action( 'woocommerce_product_archive_description', 'woocommerce_product_archive_description', 10 );
+	add_action( 'woocommerce_archive_description', 'woocommerce_taxonomy_archive_description', 10 );
+	add_action( 'woocommerce_archive_description', 'woocommerce_product_archive_description', 10 );
 
 	/**
 	 * Products Loop
@@ -209,11 +209,11 @@ if ( ! is_admin() || defined('DOING_AJAX') ) {
 /**
  * Shop Page Handling and Support
  *
- * @see woocommerce_redirects()
+ * @see woocommerce_template_redirect()
  * @see woocommerce_nav_menu_item_classes()
  * @see woocommerce_list_pages()
  */
-add_action( 'template_redirect', 'woocommerce_redirects' );
+add_action( 'template_redirect', 'woocommerce_template_redirect' );
 add_filter( 'wp_nav_menu_objects',  'woocommerce_nav_menu_item_classes', 2, 20 );
 add_filter( 'wp_list_pages', 'woocommerce_list_pages' );
 
@@ -326,13 +326,3 @@ add_filter( 'woocommerce_short_description', 'wpautop'            );
 add_filter( 'woocommerce_short_description', 'shortcode_unautop'  );
 add_filter( 'woocommerce_short_description', 'prepend_attachment' );
 add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpautop()
-
-function woocommerce_lostpassword_url( $url ) {
-
-    $id = woocommerce_get_page_id( 'lost_password' );
-    if ($id != -1) $url = get_permalink( $id );
-    
-    return $url;
-}
-
-add_filter('lostpassword_url',  'woocommerce_lostpassword_url');

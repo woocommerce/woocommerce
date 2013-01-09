@@ -424,9 +424,8 @@ add_filter( 'request', 'woocommerce_custom_shop_order_orderby' );
 function woocommerce_shop_order_search_custom_fields( $wp ) {
 	global $pagenow, $wpdb;
 
-	if ( 'edit.php' != $pagenow ) return $wp;
-	if ( ! isset( $wp->query_vars['s'] ) || ! $wp->query_vars['s'] ) return $wp;
-	if ( $wp->query_vars['post_type'] != 'shop_order' ) return $wp;
+	if ( 'edit.php' != $pagenow || empty( $wp->query_vars['s'] ) || $wp->query_vars['post_type'] != 'shop_order' )
+		return $wp;
 
 	$search_fields = array_map( 'esc_attr', apply_filters( 'woocommerce_shop_order_search_fields', array(
 		'_order_key',
@@ -443,42 +442,54 @@ function woocommerce_shop_order_search_custom_fields( $wp ) {
 		'_billing_phone'
 	) ) );
 
-	// Query matching custom fields - this seems faster than meta_query
-	$post_ids = $wpdb->get_col(
-		$wpdb->prepare(
-			"SELECT post_id FROM " . $wpdb->postmeta . " WHERE meta_key IN ('" . implode( "','", $search_fields ) . "') AND meta_value LIKE '%%%s%%'", esc_attr( $_GET['s'] )
-		)
-	);
-
-	// Query matching excerpts and titles
-	$post_ids = array_merge( $post_ids, $wpdb->get_col( $wpdb->prepare('
-		SELECT ' . $wpdb->posts . '.ID
-		FROM ' . $wpdb->posts . '
-		LEFT JOIN ' . $wpdb->postmeta . ' ON ' . $wpdb->posts . '.ID = ' . $wpdb->postmeta . '.post_id
-		LEFT JOIN ' . $wpdb->users . ' ON ' . $wpdb->postmeta . '.meta_value = ' . $wpdb->users . '.ID
-		WHERE
-			post_excerpt 	LIKE "%%%1$s%%" OR
-			post_title 		LIKE "%%%1$s%%" OR
-			(
-				meta_key		= "_customer_user" AND
-				(
-					user_login		LIKE "%%%1$s%%" OR
-					user_nicename	LIKE "%%%1$s%%" OR
-					user_email		LIKE "%%%1$s%%" OR
-					display_name	LIKE "%%%1$s%%"
-				)
-			)
-		',
-		esc_attr($_GET['s'])
-	) ) );
-
-	// Add ID
 	$search_order_id = str_replace( 'Order #', '', $_GET['s'] );
-	if ( is_numeric( $search_order_id ) )
-		$post_ids[] = $search_order_id;
+	if ( ! is_numeric( $search_order_id ) )
+		$search_order_id = 0;
 
-	// Add blank ID so not all results are returned if the search finds nothing
-	$post_ids[] = 0;
+	// Search orders
+	$post_ids = array_merge(
+		$wpdb->get_col(
+			$wpdb->prepare( "
+				SELECT post_id
+				FROM {$wpdb->postmeta}
+				WHERE meta_key IN ('" . implode( "','", $search_fields ) . "')
+				AND meta_value LIKE '%%%s%%'",
+				esc_attr( $_GET['s'] )
+			)
+		),
+		$wpdb->get_col(
+			$wpdb->prepare( "
+				SELECT order_id
+				FROM {$wpdb->prefix}woocommerce_order_items as order_items
+				WHERE order_item_name LIKE '%%%s%%'
+				",
+				esc_attr( $_GET['s'] )
+			)
+		),
+		$wpdb->get_col(
+			$wpdb->prepare( "
+				SELECT posts.ID
+				FROM {$wpdb->posts} as posts
+				LEFT JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
+				LEFT JOIN {$wpdb->users} as users ON postmeta.meta_value = users.ID
+				WHERE
+					post_excerpt 	LIKE '%%%1\$s%%' OR
+					post_title 		LIKE '%%%1\$s%%' OR
+					(
+						meta_key		= '_customer_user' AND
+						(
+							user_login		LIKE '%%%1\$s%%' OR
+							user_nicename	LIKE '%%%1\$s%%' OR
+							user_email		LIKE '%%%1\$s%%' OR
+							display_name	LIKE '%%%1\$s%%'
+						)
+					)
+				",
+				esc_attr( $_GET['s'] )
+			)
+		),
+		array( $search_order_id )
+	);
 
 	// Remove s - we don't want to search order name
 	unset( $wp->query_vars['s'] );

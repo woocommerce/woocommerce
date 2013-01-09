@@ -1368,7 +1368,7 @@ class WC_Order {
 				if ( ! $code )
 					continue;
 
-				$coupon = $woocommerce->coupon( $code );
+				$coupon = new WC_Coupon( $code );
 				$coupon->inc_usage_count();
 			}
 		}
@@ -1394,7 +1394,7 @@ class WC_Order {
 				if ( ! $code )
 					continue;
 
-				$coupon = $woocommerce->coupon( $code );
+				$coupon = new WC_Coupon( $code );
 				$coupon->dcr_usage_count();
 			}
 		}

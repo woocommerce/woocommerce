@@ -212,11 +212,11 @@ function variable_product_type_options() {
 						if ( $attribute['is_taxonomy'] ) {
 							$post_terms = wp_get_post_terms( $post->ID, $attribute['name'] );
 							foreach ( $post_terms as $term )
-								echo '<option ' . selected( $variation_selected_value, $term->slug, false ) . ' value="' . esc_attr( $term->slug ) . '">' . esc_html( $term->name ) . '</option>';
+								echo '<option ' . selected( $variation_selected_value, $term->slug, false ) . ' value="' . esc_attr( $term->slug ) . '">' . apply_filters( 'woocommerce_variation_option_name', esc_html( $term->name ) ) . '</option>';
 						} else {
 							$options = explode( '|', $attribute['value'] );
 							foreach ( $options as $option )
-								echo '<option ' . selected( $variation_selected_value, $option, false ) . ' value="' . esc_attr( $option ) . '">' . ucfirst( esc_html( $option ) ) . '</option>';
+								echo '<option ' . selected( $variation_selected_value, $option, false ) . ' value="' . esc_attr( $option ) . '">' . ucfirst( apply_filters( 'woocommerce_variation_option_name', esc_html( $option ) ) ) . '</option>';
 						}
 
 						echo '</select>';
@@ -261,7 +261,7 @@ function variable_product_type_options() {
 			    jQuery('input.variable_is_downloadable, input.variable_is_virtual').change();
 
 				jQuery('.woocommerce_variations').unblock();
-
+				jQuery('.woocommerce_variations').trigger('woocommerce_variations_added');
 			});
 
 			return false;
@@ -301,6 +301,7 @@ function variable_product_type_options() {
 
 						$('#variable_product_options').load( this_page + ' #variable_product_options_inner', function() {
 							$('#variable_product_options').unblock();
+							jQuery('.woocommerce_variations').trigger('woocommerce_variations_added');
 						} );
 					} else {
 						$('#variable_product_options').unblock();

@@ -42,7 +42,7 @@ class WC_Email_New_Order extends WC_Email {
 		parent::__construct();
 
 		// Other settings
-		$this->recipient		= $this->settings['recipient'];
+		$this->recipient = $this->get_option( 'recipient' );
 
 		if ( ! $this->recipient )
 			$this->recipient = get_option( 'admin_email' );

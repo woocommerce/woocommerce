@@ -553,7 +553,7 @@ function woocommerce_order_totals_meta_box( $post ) {
 						$chosen_method 	= $data['_shipping_method'][0];
 						$found_method 	= false;
 
-						if ( $woocommerce->shipping ) {
+						if ( $woocommerce->shipping() ) {
 							foreach ( $woocommerce->shipping->load_shipping_methods() as $method ) {
 
 								if ( strpos( $chosen_method, $method->id ) === 0 )
@@ -652,7 +652,7 @@ function woocommerce_order_totals_meta_box( $post ) {
 						$chosen_method 	= $data['_payment_method'][0];
 						$found_method 	= false;
 
-						if ( $woocommerce->payment_gateways ) {
+						if ( $woocommerce->payment_gateways() ) {
 							foreach ( $woocommerce->payment_gateways->payment_gateways() as $gateway ) {
 								if ( $gateway->enabled == "yes" ) {
 									echo '<option value="' . esc_attr( $gateway->id ) . '" ' . selected( $chosen_method, $gateway->id, false ) . '>' . esc_html( $gateway->get_title() ) . '</option>';

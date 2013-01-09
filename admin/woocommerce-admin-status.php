@@ -15,22 +15,27 @@
  * @return void
  */
 function woocommerce_status() {
-	global $woocommerce;
+	global $woocommerce, $wpdb;
 
 	$tools = apply_filters( 'wc_debug_tools', array(
 		'clear_transients' => array(
-			'name'		=> __( 'Transients','woocommerce'),
-			'button'	=> __('Clear Transients','woocommerce'),
+			'name'		=> __( 'WC Transients','woocommerce'),
+			'button'	=> __('Clear transients','woocommerce'),
 			'desc'		=> __( 'This tool will clear the product/shop transients cache.', 'woocommerce' ),
+		),
+		'clear_expired_transients' => array(
+			'name'		=> __( 'Expired Transients','woocommerce'),
+			'button'	=> __('Clear expired transients','woocommerce'),
+			'desc'		=> __( 'This tool will clear ALL expired transients from Wordpress.', 'woocommerce' ),
 		),
 		'recount_terms' => array(
 			'name'		=> __('Term counts','woocommerce'),
-			'button'	=> __('Recount Terms','woocommerce'),
+			'button'	=> __('Recount terms','woocommerce'),
 			'desc'		=> __( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', 'woocommerce' ),
 		),
 		'reset_roles' => array(
 			'name'		=> __('Capabilities','woocommerce'),
-			'button'	=> __('Reset Capabilities','woocommerce'),
+			'button'	=> __('Reset capabilities','woocommerce'),
 			'desc'		=> __( 'This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages.', 'woocommerce' ),
 		),
 	) );
@@ -48,6 +53,48 @@ function woocommerce_status() {
 						$woocommerce->clear_product_transients();
 
 						echo '<div class="updated"><p>' . __( 'Product Transients Cleared', 'woocommerce' ) . '</p></div>';
+					break;
+					case "clear_expired_transients" :
+
+						// http://w-shadow.com/blog/2012/04/17/delete-stale-transients/
+						$rows = $wpdb->query( "
+							DELETE
+								a, b
+							FROM
+								{$wpdb->options} a, {$wpdb->options} b
+							WHERE
+								a.option_name LIKE '_transient_%' AND
+								a.option_name NOT LIKE '_transient_timeout_%' AND
+								b.option_name = CONCAT(
+									'_transient_timeout_',
+									SUBSTRING(
+										a.option_name,
+										CHAR_LENGTH('_transient_') + 1
+									)
+								)
+								AND b.option_value < UNIX_TIMESTAMP()
+						" );
+
+						$rows2 = $wpdb->query( "
+							DELETE
+								a, b
+							FROM
+								{$wpdb->options} a, {$wpdb->options} b
+							WHERE
+								a.option_name LIKE '_site_transient_%' AND
+								a.option_name NOT LIKE '_site_transient_timeout_%' AND
+								b.option_name = CONCAT(
+									'_site_transient_timeout_',
+									SUBSTRING(
+										a.option_name,
+										CHAR_LENGTH('_site_transient_') + 1
+									)
+								)
+								AND b.option_value < UNIX_TIMESTAMP()
+						" );
+
+						echo '<div class="updated"><p>' . sprintf( __( '%d Transients Rows Cleared', 'woocommerce' ), $rows + $rows2 ) . '</p></div>';
+
 					break;
 					case "reset_roles" :
 						// Remove then re-add caps and roles
