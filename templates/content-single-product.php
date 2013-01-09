@@ -18,7 +18,7 @@ $classes = array();
 if ( $product->is_featured() )
 	$classes[] = 'featured';
 if ( $product->is_on_sale() )
-	$classes[] = 'onsale';
+	$classes[] = 'sale';
 ?>
 
 <?php
