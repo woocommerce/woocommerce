@@ -709,54 +709,54 @@ add_action( 'admin_enqueue_scripts', 'woocommerce_admin_product_quick_edit_scrip
  */
 function woocommerce_admin_product_quick_edit_save( $post_id, $post ) {
 
-	if ( !$_POST ) return $post_id;
-	if ( is_int( wp_is_post_revision( $post_id ) ) ) return;
-	if( is_int( wp_is_post_autosave( $post_id ) ) ) return;
-	if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return $post_id;
-	if ( !isset($_POST['woocommerce_quick_edit_nonce']) || (isset($_POST['woocommerce_quick_edit_nonce']) && !wp_verify_nonce( $_POST['woocommerce_quick_edit_nonce'], 'woocommerce_quick_edit_nonce' ))) return $post_id;
-	if ( !current_user_can( 'edit_post', $post_id )) return $post_id;
+	if ( ! $_POST || is_int( wp_is_post_revision( $post_id ) ) || is_int( wp_is_post_autosave( $post_id ) ) ) return $post_id;
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return $post_id;
+	if ( ! isset( $_POST['woocommerce_quick_edit_nonce'] ) || ! wp_verify_nonce( $_POST['woocommerce_quick_edit_nonce'], 'woocommerce_quick_edit_nonce' ) ) return $post_id;
+	if ( ! current_user_can( 'edit_post', $post_id ) ) return $post_id;
 	if ( $post->post_type != 'product' ) return $post_id;
 
 	global $woocommerce, $wpdb;
 
-	$product = get_product( $post );
+	$product           = get_product( $post );
+	$old_regular_price = $product->regular_price;
+	$old_sale_price    = $product->sale_price;
 
 	// Save fields
-	if(isset($_POST['_sku'])) update_post_meta($post_id, '_sku', esc_html(stripslashes($_POST['_sku'])));
-	if(isset($_POST['_weight'])) update_post_meta($post_id, '_weight', esc_html(stripslashes($_POST['_weight'])));
-	if(isset($_POST['_length'])) update_post_meta($post_id, '_length', esc_html(stripslashes($_POST['_length'])));
-	if(isset($_POST['_width'])) update_post_meta($post_id, '_width', esc_html(stripslashes($_POST['_width'])));
-	if(isset($_POST['_height'])) update_post_meta($post_id, '_height', esc_html(stripslashes($_POST['_height'])));
-	if(isset($_POST['_stock_status'])) update_post_meta( $post_id, '_stock_status', stripslashes( $_POST['_stock_status'] ) );
-	if(isset($_POST['_visibility'])) update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
-	if(isset($_POST['_featured'])) update_post_meta( $post_id, '_featured', 'yes' ); else update_post_meta( $post_id, '_featured', 'no' );
+	if ( isset( $_POST['_sku'] ) ) update_post_meta( $post_id, '_sku', woocommerce_clean( $_POST['_sku'] ) );
+	if ( isset( $_POST['_weight'] ) ) update_post_meta( $post_id, '_weight', woocommerce_clean( $_POST['_weight'] ) );
+	if ( isset( $_POST['_length'] ) ) update_post_meta( $post_id, '_length', woocommerce_clean( $_POST['_length'] ) );
+	if ( isset( $_POST['_width'] ) ) update_post_meta( $post_id, '_width', woocommerce_clean( $_POST['_width'] ) );
+	if ( isset( $_POST['_height'] ) ) update_post_meta( $post_id, '_height', woocommerce_clean( $_POST['_height'] ) );
+	if ( isset( $_POST['_stock_status'] ) ) update_post_meta( $post_id, '_stock_status', woocommerce_clean( $_POST['_stock_status'] ) );
+	if ( isset( $_POST['_visibility'] ) ) update_post_meta( $post_id, '_visibility', woocommerce_clean( $_POST['_visibility'] ) );
+	if ( isset( $_POST['_featured'] ) ) update_post_meta( $post_id, '_featured', 'yes' ); else update_post_meta( $post_id, '_featured', 'no' );
 
-	if ($product->is_type('simple') || $product->is_type('external')) {
+	if ( $product->is_type('simple') || $product->is_type('external') ) {
 
-		if(isset($_POST['_regular_price'])) update_post_meta( $post_id, '_regular_price', stripslashes( $_POST['_regular_price'] ) );
-		if(isset($_POST['_sale_price'])) update_post_meta( $post_id, '_sale_price', stripslashes( $_POST['_sale_price'] ) );
+		if ( isset( $_POST['_regular_price'] ) ) update_post_meta( $post_id, '_regular_price', woocommerce_clean( $_POST['_regular_price'] ) );
+		if ( isset( $_POST['_sale_price'] ) ) update_post_meta( $post_id, '_sale_price', woocommerce_clean( $_POST['_sale_price'] ) );
 
 		// Handle price - remove dates and set to lowest
 		$price_changed = false;
 
-		if(isset($_POST['_regular_price']) && stripslashes( $_POST['_regular_price'] )!=$product->regular_price) $price_changed = true;
-		if(isset($_POST['_sale_price']) && stripslashes( $_POST['_sale_price'] )!=$product->sale_price) $price_changed = true;
+		if ( isset( $_POST['_regular_price'] ) && woocommerce_clean( $_POST['_regular_price'] ) != $old_regular_price ) $price_changed = true;
+		if ( isset( $_POST['_sale_price'] ) && woocommerce_clean( $_POST['_sale_price'] ) != $old_sale_price ) $price_changed = true;
 
-		if ($price_changed) {
-			update_post_meta( $post_id, '_sale_price_dates_from', '');
-			update_post_meta( $post_id, '_sale_price_dates_to', '');
+		if ( $price_changed ) {
+			update_post_meta( $post_id, '_sale_price_dates_from', '' );
+			update_post_meta( $post_id, '_sale_price_dates_to', '' );
 
-			if ($_POST['_sale_price'] != '') {
-				update_post_meta( $post_id, '_price', stripslashes($_POST['_sale_price']) );
+			if ( isset( $_POST['_sale_price'] ) && $_POST['_sale_price'] != '' ) {
+				update_post_meta( $post_id, '_price', woocommerce_clean( $_POST['_sale_price'] ) );
 			} else {
-				update_post_meta( $post_id, '_price', stripslashes($_POST['_regular_price']) );
+				update_post_meta( $post_id, '_price', woocommerce_clean( $_POST['_regular_price'] ) );
 			}
 		}
 	}
 
 	// Handle stock
-	if (!$product->is_type('grouped')) {
-		if (isset($_POST['_manage_stock'])) {
+	if ( ! $product->is_type('grouped') ) {
+		if ( isset( $_POST['_manage_stock'] ) ) {
 			update_post_meta( $post_id, '_manage_stock', 'yes' );
 			update_post_meta( $post_id, '_stock', (int) $_POST['_stock'] );
 		} else {
@@ -1010,7 +1010,9 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 
 	global $woocommerce, $wpdb;
 
-	$product = get_product( $post );
+	$product           = get_product( $post );
+	$old_regular_price = $product->regular_price;
+	$old_sale_price    = $product->sale_price;
 
 	// Save fields
 	if ( ! empty( $_REQUEST['change_weight'] ) && isset( $_REQUEST['_weight'] ) )
@@ -1041,7 +1043,6 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 
 		if ( ! empty( $_REQUEST['change_regular_price'] ) ) {
 
-			$old_price = $product->regular_price;
 			$change_regular_price = absint( $_REQUEST['change_regular_price'] );
 			$regular_price = esc_attr( stripslashes( $_REQUEST['_regular_price'] ) );
 
@@ -1052,22 +1053,22 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 				case 2 :
 					if ( strstr( $regular_price, '%' ) ) {
 						$percent = str_replace( '%', '', $regular_price ) / 100;
-						$new_price = $old_price + ( $old_price * $percent );
+						$new_price = $old_regular_price + ( $old_regular_price * $percent );
 					} else {
-						$new_price = $old_price + $regular_price;
+						$new_price = $old_regular_price + $regular_price;
 					}
 				break;
 				case 3 :
 					if ( strstr( $regular_price, '%' ) ) {
 						$percent = str_replace( '%', '', $regular_price ) / 100;
-						$new_price = $old_price - ( $old_price * $percent );
+						$new_price = $old_regular_price - ( $old_regular_price * $percent );
 					} else {
-						$new_price = $old_price - $regular_price;
+						$new_price = $old_regular_price - $regular_price;
 					}
 				break;
 			}
 
-			if ( isset( $new_price ) && $new_price != $product->regular_price ) {
+			if ( isset( $new_price ) && $new_price != $old_regular_price ) {
 				$price_changed = true;
 				update_post_meta( $post_id, '_regular_price', $new_price );
 				$product->regular_price = $new_price;
@@ -1076,7 +1077,6 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 
 		if ( ! empty( $_REQUEST['change_sale_price'] ) ) {
 
-			$old_price = $product->sale_price;
 			$change_sale_price = absint( $_REQUEST['change_sale_price'] );
 			$sale_price = esc_attr( stripslashes( $_REQUEST['_sale_price'] ) );
 
@@ -1087,17 +1087,17 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 				case 2 :
 					if ( strstr( $sale_price, '%' ) ) {
 						$percent = str_replace( '%', '', $sale_price ) / 100;
-						$new_price = $old_price + ( $old_price * $percent );
+						$new_price = $old_sale_price + ( $old_sale_price * $percent );
 					} else {
-						$new_price = $old_price + $sale_price;
+						$new_price = $old_sale_price + $sale_price;
 					}
 				break;
 				case 3 :
 					if ( strstr( $sale_price, '%' ) ) {
 						$percent = str_replace( '%', '', $sale_price ) / 100;
-						$new_price = $old_price - ( $old_price * $percent );
+						$new_price = $old_sale_price - ( $old_sale_price * $percent );
 					} else {
-						$new_price = $old_price - $sale_price;
+						$new_price = $old_sale_price - $sale_price;
 					}
 				break;
 				case 4 :
@@ -1110,7 +1110,7 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 				break;
 			}
 
-			if ( isset( $new_price ) && $new_price != $product->sale_price ) {
+			if ( isset( $new_price ) && $new_price != $old_sale_price ) {
 				$price_changed = true;
 				update_post_meta( $post_id, '_sale_price', $new_price );
 				$product->sale_price = $new_price;
