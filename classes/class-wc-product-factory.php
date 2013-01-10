@@ -18,7 +18,7 @@ class WC_Product_Factory {
 	 * @access public
 	 * @param bool $the_product (default: false)
 	 * @param array $args (default: array())
-	 * @return WC_Product_Simple
+	 * @return false|WC_Product_Simple
 	 */
 	public function get_product( $the_product = false, $args = array() ) {
 		global $post;
@@ -34,6 +34,9 @@ class WC_Product_Factory {
 
 		$product_id = absint( $the_product->ID );
 		$post_type  = $the_product->post_type;
+
+		if ( ! in_array( $post_type, array( 'product', 'product_variation' ) ) )
+			return false;
 
 		if ( isset( $args['product_type'] ) ) {
 			$product_type = $args['product_type'];
