@@ -16,6 +16,9 @@ class WC_Product_Variation extends WC_Product {
 
 	/** @public int ID of the variable product. */
 	public $variation_id;
+	
+	/** @var array Array of custom fields (meta) containing product data. */
+	var $product_custom_fields;
 
 	/** @public object Parent Variable product object. */
 	public $parent;
