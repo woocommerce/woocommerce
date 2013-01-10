@@ -1986,6 +1986,7 @@ function woocommerce_stock_overview() {
 			)
 		)
 	);
+
 	$low_stock_products = (array) get_posts($args);
 
 	// Get low stock product variations
@@ -2007,6 +2008,7 @@ function woocommerce_stock_overview() {
 			)
 		)
 	);
+
 	$low_stock_variations = (array) get_posts($args);
 
 	// Finally, get low stock variable products (where stock is set for the parent)
@@ -2036,10 +2038,11 @@ function woocommerce_stock_overview() {
 			)
 		)
 	);
+
 	$low_stock_variable_products = (array) get_posts($args);
 
 	// Merge results
-	$low_in_stock = array_merge($low_stock_products, $low_stock_variations, $low_stock_variable_products);
+	$low_in_stock = apply_filters( 'woocommerce_reports_stock_overview_products', array_merge( $low_stock_products, $low_stock_variations, $low_stock_variable_products ) );
 
 	?>
 	<div id="poststuff" class="woocommerce-reports-wrap halved">
