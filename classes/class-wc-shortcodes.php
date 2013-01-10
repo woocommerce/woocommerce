@@ -316,7 +316,7 @@ class WC_Shortcodes {
 	 */
 	public function recent_products( $atts ) {
 
-		global $woocommerce_loop;
+		global $woocommerce_loop, $woocommerce;
 
 		extract(shortcode_atts(array(
 			'per_page' 	=> '12',
