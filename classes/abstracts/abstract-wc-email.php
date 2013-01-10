@@ -130,6 +130,7 @@ abstract class WC_Email extends WC_Settings_API {
 		global $woocommerce;
 
 		// Init settings
+		$this->init_form_fields();
 		$this->init_settings();
 
 		// Save settings hook

@@ -820,6 +820,14 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 	),
 
 	array(
+		'title' => __( 'Notification Recipient', 'woocommerce' ),
+		'desc' 		=> '',
+		'id' 		=> 'woocommerce_stock_email_recipient',
+		'type' 		=> 'email',
+		'default'	=> get_option( 'admin_email' )
+	),
+
+	array(
 		'title' => __( 'Low Stock Threshold', 'woocommerce' ),
 		'desc' 		=> '',
 		'id' 		=> 'woocommerce_notify_low_stock_amount',

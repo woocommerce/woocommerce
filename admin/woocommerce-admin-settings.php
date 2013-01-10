@@ -110,7 +110,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 				} elseif ( $current_tab == 'email' ) {
 
 					// Load mailer
-					$mailer 	= $woocommerce->mailer();
+					$mailer = $woocommerce->mailer();
 
 					if ( class_exists( $current_section ) ) {
 						$current_section_class = new $current_section();
