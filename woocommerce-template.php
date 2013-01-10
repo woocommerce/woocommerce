@@ -1112,7 +1112,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 			'taxonomy'		=> 'product_cat',
 			'pad_counts'	=> 1
 		);
-		$product_categories = get_categories( $args  );
+		$product_categories = get_categories( apply_filters( 'woocommerce_product_subcategories_args', $args ) );
 
 		$product_category_found = false;
 
