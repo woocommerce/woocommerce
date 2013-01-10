@@ -499,7 +499,8 @@ function woocommerce_product_data_box() {
 			<p class="form-field"><label for="upsell_ids"><?php _e( 'Up-Sells', 'woocommerce' ); ?></label>
 			<select id="upsell_ids" name="upsell_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>">
 				<?php
-					$product_ids = array_map( 'absint', get_post_meta( $post->ID, '_upsell_ids', true ) );
+					$upsell_ids = get_post_meta( $post->ID, '_upsell_ids', true );
+					$product_ids = ! empty( $upsell_ids ) ? array_map( 'absint',  $upsell_ids ) : null;
 					if ( $product_ids ) {
 						foreach ( $product_ids as $product_id ) {
 							$title 	= get_the_title( $product_id );
@@ -520,7 +521,8 @@ function woocommerce_product_data_box() {
 			<p class="form-field"><label for="crosssell_ids"><?php _e( 'Cross-Sells', 'woocommerce' ); ?></label>
 			<select id="crosssell_ids" name="crosssell_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>">
 				<?php
-					$product_ids = array_map( 'absint', get_post_meta( $post->ID, '_crosssell_ids', true ) );
+					$crosssell_ids = get_post_meta( $post->ID, '_crosssell_ids', true );
+					$product_ids = ! empty( $crosssell_ids ) ? array_map( 'absint',  $crosssell_ids ) : null;
 					if ( $product_ids ) {
 						foreach ( $product_ids as $product_id ) {
 							$title 	= get_the_title( $product_id );
