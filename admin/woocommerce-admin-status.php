@@ -276,7 +276,7 @@ function woocommerce_status() {
 							if ( $values['shortcode'] ) {
 								$page = get_post( $page_id );
 
-								if ( is_null( $page ) ) {
+								if ( empty( $page ) ) {
 									
 									echo '<mark class="error">' . sprintf( __( 'Page does not exist', 'woocommerce' ) ) . '</mark>';
 									$error = true;									
