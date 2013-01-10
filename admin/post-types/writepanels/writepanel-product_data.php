@@ -170,27 +170,31 @@ function woocommerce_product_data_box() {
 
 			echo '</div>';
 
-			echo '<div class="options_group show_if_simple show_if_external show_if_variable">';
+			if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) {
 
-				// Tax
-				woocommerce_wp_select( array( 'id' => '_tax_status', 'label' => __( 'Tax Status', 'woocommerce' ), 'options' => array(
-					'taxable' 	=> __( 'Taxable', 'woocommerce' ),
-					'shipping' 	=> __( 'Shipping only', 'woocommerce' ),
-					'none' 		=> __( 'None', 'woocommerce' )
-				) ) );
+				echo '<div class="options_group show_if_simple show_if_external show_if_variable">';
 
-				$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
-				$classes_options = array();
-				$classes_options[''] = __( 'Standard', 'woocommerce' );
-	    		if ( $tax_classes )
-	    			foreach ( $tax_classes as $class )
-	    				$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
+					// Tax
+					woocommerce_wp_select( array( 'id' => '_tax_status', 'label' => __( 'Tax Status', 'woocommerce' ), 'options' => array(
+						'taxable' 	=> __( 'Taxable', 'woocommerce' ),
+						'shipping' 	=> __( 'Shipping only', 'woocommerce' ),
+						'none' 		=> __( 'None', 'woocommerce' )
+					) ) );
 
-				woocommerce_wp_select( array( 'id' => '_tax_class', 'label' => __( 'Tax Class', 'woocommerce' ), 'options' => $classes_options ) );
+					$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
+					$classes_options = array();
+					$classes_options[''] = __( 'Standard', 'woocommerce' );
+		    		if ( $tax_classes )
+		    			foreach ( $tax_classes as $class )
+		    				$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
 
-				do_action( 'woocommerce_product_options_tax' );
+					woocommerce_wp_select( array( 'id' => '_tax_class', 'label' => __( 'Tax Class', 'woocommerce' ), 'options' => $classes_options ) );
 
-			echo '</div>';
+					do_action( 'woocommerce_product_options_tax' );
+
+				echo '</div>';
+
+			}
 
 			do_action( 'woocommerce_product_options_general_product_data' );
 			?>

@@ -120,11 +120,13 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 								echo wp_dropdown_categories( $args );
 							?></td>
 							<td>
+								<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
 								<label><?php _e( 'Tax class:', 'woocommerce' ); ?></label>
 								<select name="variable_tax_class[<?php echo $loop; ?>]"><?php
 									foreach ( $parent_data['tax_class_options'] as $key => $value )
 										echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key, $_tax_class, false ) . '>' . esc_html( $value ) . '</option>';
 								?></select>
+								<?php endif; ?>
 							</td>
 						</tr>
 						<tr class="show_if_variation_downloadable">
