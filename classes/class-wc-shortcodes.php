@@ -325,6 +325,10 @@ class WC_Shortcodes {
 			'order' => 'desc'
 		), $atts));
 
+		$meta_query = array();
+		$meta_query[] = $woocommerce->query->visibility_meta_query();
+		$meta_query[] = $woocommerce->query->stock_status_meta_query();
+
 		$args = array(
 			'post_type'	=> 'product',
 			'post_status' => 'publish',
@@ -332,13 +336,7 @@ class WC_Shortcodes {
 			'posts_per_page' => $per_page,
 			'orderby' => $orderby,
 			'order' => $order,
-			'meta_query' => array(
-				array(
-					'key' => '_visibility',
-					'value' => array('catalog', 'visible'),
-					'compare' => 'IN'
-				)
-			)
+			'meta_query' => $meta_query
 		);
 
 		ob_start();
