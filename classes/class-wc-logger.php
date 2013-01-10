@@ -69,7 +69,7 @@ class WC_Logger {
 	public function add( $handle, $message ) {
 		if ( $this->open( $handle ) && is_resource( $this->_handles[ $handle ] ) ) {
 			$time = date_i18n( 'm-d-Y @ H:i:s -' ); //Grab Time
-			fwrite( $this->_handles[ $handle ], $time . " " . $message . "\n" );
+			@fwrite( $this->_handles[ $handle ], $time . " " . $message . "\n" );
 		}
 	}
 
@@ -84,7 +84,7 @@ class WC_Logger {
 	public function clear( $handle ) {
 
 		if ( $this->open( $handle ) && is_resource( $this->_handles[ $handle ] ) )
-			ftruncate( $this->_handles[ $handle ], 0 );
+			@ftruncate( $this->_handles[ $handle ], 0 );
 	}
 
 
