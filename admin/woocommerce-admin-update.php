@@ -21,6 +21,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 function do_update_woocommerce() {
 	global $woocommerce;
 
+	// Include installer so we have page creation functions
+	include_once( 'woocommerce-admin-install.php' );
+
 	// Do updates
 	$current_db_version = get_option( 'woocommerce_db_version' );
 
