@@ -171,9 +171,15 @@ function woocommerce_list_pages( $pages ){
  * @return string
  */
 function woocommerce_nav_menu_items( $items, $args ) {
-	if ( get_option('woocommerce_menu_logout_link')=='yes' && strstr($items, get_permalink(woocommerce_get_page_id('myaccount'))) && is_user_logged_in() )
-		$items .= '<li class="logout"><a href="'. wp_logout_url(home_url()) .'">'.__( 'Logout', 'woocommerce' ).'</a></li>';
+	if ( is_user_logged_in() && get_option('woocommerce_menu_logout_link') == 'yes' ) {
 
+		$my_account_page_id = woocommerce_get_page_id( 'myaccount' );
+		$permalink          = get_permalink( $my_account_page_id );
+
+		if ( $my_account_page_id && $permalink && $items && strstr( $items, $permalink ) ) {
+			$items .= '<li class="logout"><a href="'. wp_logout_url( home_url() ) .'">' . __( 'Logout', 'woocommerce' ) . '</a></li>';
+		}
+	}
     return $items;
 }
 
