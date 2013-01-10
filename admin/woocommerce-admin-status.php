@@ -247,6 +247,10 @@ function woocommerce_status() {
 						__( 'Change Password Page', 'woocommerce' ) => array(
 								'option' => 'woocommerce_change_password_page_id',
 								'shortcode' => '[woocommerce_change_password]'
+							),
+						__( 'Lost Password Page', 'woocommerce' ) => array(
+								'option' => 'woocommerce_lost_password_page_id',
+								'shortcode' => '[woocommerce_lost_password]'
 							)
 					);
 
@@ -272,7 +276,12 @@ function woocommerce_status() {
 							if ( $values['shortcode'] ) {
 								$page = get_post( $page_id );
 
-								if ( ! strstr( $page->post_content, $values['shortcode'] ) ) {
+								if ( is_null( $page ) ) {
+									
+									echo '<mark class="error">' . sprintf( __( 'Page does not exist', 'woocommerce' ) ) . '</mark>';
+									$error = true;									
+
+								} else if ( ! strstr( $page->post_content, $values['shortcode'] ) ) {
 
 									echo '<mark class="error">' . sprintf(__( 'Page does not contain the shortcode: %s', 'woocommerce' ), $values['shortcode'] ) . '</mark>';
 									$error = true;
