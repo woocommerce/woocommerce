@@ -1568,6 +1568,8 @@ function woocommerce_save_password() {
 
 		wp_update_user( array ('ID' => $user_id, 'user_pass' => esc_attr( $_POST['password_1'] ) ) ) ;
 
+		$woocommerce->add_message( __( 'Password changed successfully.', 'woocommerce' ) );
+
 		do_action( 'woocommerce_customer_change_password', $user_id );
 
 		wp_safe_redirect( get_permalink( woocommerce_get_page_id('myaccount') ) );
@@ -1641,6 +1643,8 @@ function woocommerce_save_address() {
 		foreach ($address as $key => $field) :
 			update_user_meta( $user_id, $key, $_POST[$key] );
 		endforeach;
+
+		$woocommerce->add_message( __( 'Address changed successfully.', 'woocommerce' ) );
 
 		do_action( 'woocommerce_customer_save_address', $user_id );
 
