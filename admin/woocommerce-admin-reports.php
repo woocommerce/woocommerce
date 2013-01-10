@@ -2423,8 +2423,7 @@ function woocommerce_category_sales() {
 	$first_year = $wpdb->get_var( "SELECT post_date FROM $wpdb->posts WHERE post_date != 0 ORDER BY post_date ASC LIMIT 1;" );
 	$first_year = ( $first_year ) ? date( 'Y', strtotime( $first_year ) ) : date( 'Y' );
 
-	$current_year 	= isset( $_POST['show_year'] ) 	? $_POST['show_year'] 	: date( 'Y', current_time( 'timestamp' ) );
-	$start_date 	= strtotime( $current_year . '0101' );
+	$current_year 	= isset( $_POST['show_year'] ) ? $_POST['show_year'] : date( 'Y', current_time( 'timestamp' ) );
 
 	$categories = get_terms( 'product_cat', array( 'orderby' => 'name' ) );
 	?>
@@ -2461,8 +2460,6 @@ function woocommerce_category_sales() {
 	$item_sales = array();
 
 	// Get order items
-	$start_date = date( 'Ym', strtotime( date( 'Ym', strtotime( '-1 year', $start_date ) ) . '01' ) );
-
 	$order_items = apply_filters( 'woocommerce_reports_category_sales_order_items', $wpdb->get_results( $wpdb->prepare( "
 		SELECT order_item_meta_2.meta_value as product_id, posts.post_date, SUM( order_item_meta.meta_value ) as line_total
 		FROM {$wpdb->prefix}woocommerce_order_items as order_items
@@ -2478,13 +2475,13 @@ function woocommerce_category_sales() {
 		AND 	posts.post_status 	= 'publish'
 		AND 	tax.taxonomy		= 'shop_order_status'
 		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-		AND		date_format(posts.post_date,'%%Y%%m') >= %s
+		AND		date_format(posts.post_date,'%%Y') = %s
 		AND 	order_items.order_item_type = 'line_item'
 		AND 	order_item_meta.meta_key = '_line_total'
 		AND 	order_item_meta_2.meta_key = '_product_id'
 		GROUP BY order_items.order_id
 		ORDER BY posts.post_date ASC
-	", $start_date ) ) );
+	", $current_year ) ) );
 
 	if ( $order_items ) {
 		foreach ( $order_items as $order_item ) {
