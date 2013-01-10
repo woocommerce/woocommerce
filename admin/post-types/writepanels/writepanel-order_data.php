@@ -550,7 +550,7 @@ function woocommerce_order_totals_meta_box( $post ) {
 				<select name="_shipping_method" id="_shipping_method" class="first">
 					<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
 					<?php
-						$chosen_method 	= $data['_shipping_method'][0];
+						$chosen_method 	= ! empty( $data['_shipping_method'][0] ) ? $data['_shipping_method'][0] : '';
 						$found_method 	= false;
 
 						if ( $woocommerce->shipping() ) {
@@ -649,7 +649,7 @@ function woocommerce_order_totals_meta_box( $post ) {
 				<select name="_payment_method" id="_payment_method" class="first">
 					<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
 					<?php
-						$chosen_method 	= $data['_payment_method'][0];
+						$chosen_method 	= ! empty( $data['_payment_method'][0] ) ? $data['_payment_method'][0] : '';
 						$found_method 	= false;
 
 						if ( $woocommerce->payment_gateways() ) {
