@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce v2.0.0-beta1\n"
+"Project-Id-Version: WooCommerce v2.0.0-beta2\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2012-12-30 13:34:18+00:00\n"
-"PO-Revision-Date: 2012-12-30 23:50+0200\n"
+"POT-Creation-Date: 2013-01-09 09:36:51+00:00\n"
+"PO-Revision-Date: 2013-01-11 16:58+0200\n"
 "Last-Translator: Arhi Paivarinta <info@swratkaisut.com>\n"
 "Language-Team: Arhi Paivarinta <info@swratkaisut.com>\n"
 "Language: fi\n"
@@ -167,7 +167,7 @@ msgstr ""
 # @ woocommerce
 #: admin/includes/notice-installed.php:8 admin/includes/notice-updated.php:8
 #: admin/woocommerce-admin-content.php:41 admin/woocommerce-admin-init.php:81
-#: admin/woocommerce-admin-status.php:140
+#: admin/woocommerce-admin-status.php:187
 msgid "Settings"
 msgstr "Asetukset"
 
@@ -209,14 +209,14 @@ msgstr ""
 
 # @ woocommerce
 #: admin/includes/updates/woocommerce-update-2.0.php:50
-#: admin/woocommerce-admin-init.php:829
+#: admin/woocommerce-admin-init.php:837
 msgctxt "slug"
 msgid "product-category"
 msgstr "tuote-osasto"
 
 # @ woocommerce
 #: admin/includes/updates/woocommerce-update-2.0.php:51
-#: admin/woocommerce-admin-init.php:842
+#: admin/woocommerce-admin-init.php:850
 msgctxt "slug"
 msgid "product-tag"
 msgstr "tuote-avainsana"
@@ -243,30 +243,30 @@ msgid "Copy to a new draft"
 msgstr "Kopioi ja tee uusi luonnos"
 
 # @ woocommerce
-#: admin/post-types/product.php:85 admin/woocommerce-admin-taxonomies.php:295
+#: admin/post-types/product.php:85 admin/woocommerce-admin-taxonomies.php:297
 msgid "Image"
 msgstr "Kuva"
 
 # @ woocommerce
 #: admin/post-types/product.php:87
 #: admin/post-types/writepanels/writepanel-product_data.php:368
-#: admin/post-types/writepanels/writepanel-product_data.php:446
-#: admin/woocommerce-admin-attributes.php:217
-#: admin/woocommerce-admin-attributes.php:252
-#: admin/woocommerce-admin-attributes.php:290
-#: admin/woocommerce-admin-attributes.php:313
-#: admin/woocommerce-admin-attributes.php:357
-#: admin/woocommerce-admin-attributes.php:381
-#: admin/woocommerce-admin-init.php:384
+#: admin/post-types/writepanels/writepanel-product_data.php:447
+#: admin/woocommerce-admin-attributes.php:232
+#: admin/woocommerce-admin-attributes.php:268
+#: admin/woocommerce-admin-attributes.php:306
+#: admin/woocommerce-admin-attributes.php:329
+#: admin/woocommerce-admin-attributes.php:373
+#: admin/woocommerce-admin-attributes.php:398
+#: admin/woocommerce-admin-init.php:393
 msgid "Name"
 msgstr "Nimi"
 
 # @ woocommerce
-#: admin/post-types/product.php:90 admin/post-types/product.php:561
+#: admin/post-types/product.php:90 admin/post-types/product.php:563
 #: admin/post-types/writepanels/variation-admin-html.php:46
 #: admin/post-types/writepanels/writepanel-product_data.php:98
-#: admin/woocommerce-admin-reports.php:2038
-#: admin/woocommerce-admin-reports.php:2073
+#: admin/woocommerce-admin-reports.php:2063
+#: admin/woocommerce-admin-reports.php:2098
 msgid "SKU"
 msgstr "Tuotetunnus (SKU)"
 
@@ -279,8 +279,8 @@ msgid "Stock"
 msgstr "Varasto"
 
 # @ woocommerce
-#: admin/post-types/product.php:95 admin/post-types/product.php:572
-#: admin/post-types/product.php:791 admin/woocommerce-admin-functions.php:196
+#: admin/post-types/product.php:95 admin/post-types/product.php:574
+#: admin/post-types/product.php:793 admin/woocommerce-admin-functions.php:196
 msgid "Price"
 msgstr "Hinta"
 
@@ -295,17 +295,17 @@ msgid "Tags"
 msgstr "Avainsanat (tägit)"
 
 # @ woocommerce
-#: admin/post-types/product.php:99 admin/post-types/product.php:636
-#: admin/post-types/product.php:908
-#: admin/post-types/writepanels/writepanel-product_data.php:1043
-#: admin/woocommerce-admin-init.php:397
+#: admin/post-types/product.php:99 admin/post-types/product.php:638
+#: admin/post-types/product.php:910
+#: admin/post-types/writepanels/writepanel-product_data.php:1044
+#: admin/woocommerce-admin-init.php:406
 msgid "Featured"
 msgstr "Esittelyssä"
 
 # @ woocommerce
-#: admin/post-types/product.php:100 admin/woocommerce-admin-attributes.php:235
-#: admin/woocommerce-admin-attributes.php:292
-#: admin/woocommerce-admin-attributes.php:369
+#: admin/post-types/product.php:100 admin/woocommerce-admin-attributes.php:250
+#: admin/woocommerce-admin-attributes.php:308
+#: admin/woocommerce-admin-attributes.php:385
 msgid "Type"
 msgstr "Laji"
 
@@ -316,190 +316,205 @@ msgstr "Päivämäärä"
 
 # @ woocommerce
 #: admin/post-types/product.php:150
+msgid "Edit this item"
+msgstr "Muokkaa tätä kohdetta"
+
+# @ woocommerce
+#: admin/post-types/product.php:150
+#: admin/post-types/writepanels/writepanel-order_data.php:140
+#: admin/post-types/writepanels/writepanel-order_data.php:230
+#: admin/post-types/writepanels/writepanel-order_data.php:383
+#: admin/post-types/writepanels/writepanel-product_data.php:1047
+#: admin/woocommerce-admin-attributes.php:322
+msgid "Edit"
+msgstr "Muokkaa"
+
+# @ woocommerce
+#: admin/post-types/product.php:151
 msgid "Edit this item inline"
 msgstr "Muokkaa tätä kohdetta yhdellä rivillä"
 
 # @ woocommerce
-#: admin/post-types/product.php:150
+#: admin/post-types/product.php:151
 msgid "Quick&nbsp;Edit"
 msgstr "Pikamuokkaus"
 
 # @ woocommerce
-#: admin/post-types/product.php:154 admin/post-types/shop_coupon.php:65
+#: admin/post-types/product.php:155 admin/post-types/shop_coupon.php:65
 msgid "Restore this item from the Trash"
 msgstr "Palauta kohde roskakorista"
 
 # @ woocommerce
-#: admin/post-types/product.php:154 admin/post-types/shop_coupon.php:65
+#: admin/post-types/product.php:155 admin/post-types/shop_coupon.php:65
 msgid "Restore"
 msgstr "Palauta"
 
 # @ woocommerce
-#: admin/post-types/product.php:156 admin/post-types/shop_coupon.php:67
+#: admin/post-types/product.php:157 admin/post-types/shop_coupon.php:67
 msgid "Move this item to the Trash"
 msgstr "Siirrä tämä tuote roskakoriin"
 
 # @ woocommerce
-#: admin/post-types/product.php:156 admin/post-types/shop_coupon.php:67
+#: admin/post-types/product.php:157 admin/post-types/shop_coupon.php:67
 msgid "Trash"
 msgstr "Roskakori"
 
 # @ woocommerce
-#: admin/post-types/product.php:158 admin/post-types/shop_coupon.php:69
+#: admin/post-types/product.php:159 admin/post-types/shop_coupon.php:69
 msgid "Delete this item permanently"
 msgstr "Poista kohde pysyvästi"
 
 # @ woocommerce
-#: admin/post-types/product.php:158 admin/post-types/shop_coupon.php:69
+#: admin/post-types/product.php:159 admin/post-types/shop_coupon.php:69
 #: admin/post-types/writepanels/writepanel-order_data.php:456
 msgid "Delete Permanently"
 msgstr "Poista lopullisesti"
 
 # @ woocommerce
-#: admin/post-types/product.php:163
+#: admin/post-types/product.php:164
 msgid "Preview &#8220;%s&#8221;"
 msgstr "Esikatselu &#8220;%s&#8221;"
 
 # @ woocommerce
-#: admin/post-types/product.php:163
+#: admin/post-types/product.php:164
 msgid "Preview"
 msgstr "Esikatselu"
 
 # @ woocommerce
-#: admin/post-types/product.php:165
+#: admin/post-types/product.php:166
 msgid "View &#8220;%s&#8221;"
 msgstr "Näytä &#8220;%s&#8221;"
 
 # @ woocommerce
-#: admin/post-types/product.php:165 admin/post-types/shop_order.php:171
+#: admin/post-types/product.php:166 admin/post-types/shop_order.php:171
 msgid "View"
 msgstr "Katso"
 
 # @ woocommerce
-#: admin/post-types/product.php:211
+#: admin/post-types/product.php:213
 msgid "Grouped"
 msgstr "Joukko"
 
 # @ woocommerce
-#: admin/post-types/product.php:213
+#: admin/post-types/product.php:215
 msgid "External/Affiliate"
 msgstr "Ulkoinen/yhteistyökumppani"
 
 # @ woocommerce
-#: admin/post-types/product.php:217 admin/post-types/product.php:411
+#: admin/post-types/product.php:219 admin/post-types/product.php:413
 #: admin/post-types/writepanels/variation-admin-html.php:166
 #: admin/post-types/writepanels/writepanel-product_data.php:52
 msgid "Virtual"
 msgstr "Palvelu(tuote)"
 
 # @ woocommerce
-#: admin/post-types/product.php:219 admin/post-types/product.php:407
+#: admin/post-types/product.php:221 admin/post-types/product.php:409
 #: admin/post-types/writepanels/variation-admin-html.php:164
 #: admin/post-types/writepanels/writepanel-product_data.php:58
 msgid "Downloadable"
 msgstr "Ladattava"
 
 # @ woocommerce
-#: admin/post-types/product.php:221
+#: admin/post-types/product.php:223
 msgid "Simple"
 msgstr "Perustuote"
 
 # @ woocommerce
-#: admin/post-types/product.php:225 admin/post-types/product.php:391
+#: admin/post-types/product.php:227 admin/post-types/product.php:393
 msgid "Variable"
 msgstr "Muunnelma"
 
 # @ woocommerce
-#: admin/post-types/product.php:248
+#: admin/post-types/product.php:250
 msgid "Toggle featured"
 msgstr "Esittelyssä"
 
 # @ woocommerce
-#: admin/post-types/product.php:250
+#: admin/post-types/product.php:252
 msgid "yes"
 msgstr "kyllä"
 
-#: admin/post-types/product.php:252
+#: admin/post-types/product.php:254
 msgid "no"
 msgstr "ei"
 
 # @ woocommerce
-#: admin/post-types/product.php:259 admin/post-types/product.php:645
-#: admin/post-types/product.php:932
+#: admin/post-types/product.php:261 admin/post-types/product.php:647
+#: admin/post-types/product.php:934
 #: admin/post-types/writepanels/writepanel-product_data.php:227
 msgid "In stock"
 msgstr "Varastossa"
 
 # @ woocommerce
-#: admin/post-types/product.php:261 admin/post-types/product.php:646
-#: admin/post-types/product.php:933
+#: admin/post-types/product.php:263 admin/post-types/product.php:648
+#: admin/post-types/product.php:935
 #: admin/post-types/writepanels/writepanel-product_data.php:228
-#: admin/woocommerce-admin-reports.php:2058
+#: admin/woocommerce-admin-reports.php:2083
 msgid "Out of stock"
 msgstr "Varasto loppu"
 
 # @ woocommerce
-#: admin/post-types/product.php:377
+#: admin/post-types/product.php:379
 msgid "Show all product types"
 msgstr "Näytä kaikki tuotelajit"
 
 # @ woocommerce
-#: admin/post-types/product.php:385
+#: admin/post-types/product.php:387
 #: admin/post-types/writepanels/writepanel-product_data.php:39
 msgid "Grouped product"
 msgstr "Joukkotuote"
 
 # @ woocommerce
-#: admin/post-types/product.php:387
+#: admin/post-types/product.php:389
 #: admin/post-types/writepanels/writepanel-product_data.php:40
 msgid "External/Affiliate product"
 msgstr "Yhteistyökumppanin tuote"
 
 # @ woocommerce
-#: admin/post-types/product.php:389
+#: admin/post-types/product.php:391
 #: admin/post-types/writepanels/writepanel-product_data.php:38
 msgid "Simple product"
 msgstr "Perustuote"
 
 # @ woocommerce
-#: admin/post-types/product.php:403
+#: admin/post-types/product.php:405
 msgid "Show all sub-types"
 msgstr "Näytä kaikki alalajit"
 
 # @ woocommerce
-#: admin/post-types/product.php:524
+#: admin/post-types/product.php:526
 msgid "[%s with SKU of %s]"
 msgstr "[%s tuotetunnuksella %s]"
 
 # @ woocommerce
-#: admin/post-types/product.php:530
+#: admin/post-types/product.php:532
 msgid "[%s with ID of %d]"
 msgstr "[%s ID:llä %d]"
 
 # @ woocommerce
-#: admin/post-types/product.php:556 admin/post-types/product.php:787
+#: admin/post-types/product.php:558 admin/post-types/product.php:789
 #: admin/post-types/writepanels/writepanels-init.php:46
-#: admin/settings/settings-init.php:570
+#: admin/settings/settings-init.php:571
 msgid "Product Data"
 msgstr "Tuotetiedot"
 
 # @ woocommerce
-#: admin/post-types/product.php:574
+#: admin/post-types/product.php:576
 msgid "Regular price"
 msgstr "Normaali hinta"
 
 # @ woocommerce
-#: admin/post-types/product.php:579 admin/post-types/product.php:815
+#: admin/post-types/product.php:581 admin/post-types/product.php:817
 msgid "Sale"
 msgstr "Alennus"
 
 # @ woocommerce
-#: admin/post-types/product.php:581
+#: admin/post-types/product.php:583
 msgid "Sale price"
 msgstr "Alennettu hinta"
 
 # @ woocommerce
-#: admin/post-types/product.php:592 admin/post-types/product.php:841
+#: admin/post-types/product.php:594 admin/post-types/product.php:843
 #: admin/post-types/writepanels/variation-admin-html.php:90
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:84
 #: admin/post-types/writepanels/writepanel-product_data.php:269
@@ -507,143 +522,143 @@ msgid "Weight"
 msgstr "Paino"
 
 # @ woocommerce
-#: admin/post-types/product.php:603 admin/post-types/product.php:865
+#: admin/post-types/product.php:605 admin/post-types/product.php:867
 msgid "L/W/H"
 msgstr "p/l/k"
 
 # @ woocommerce
-#: admin/post-types/product.php:605 admin/post-types/product.php:881
+#: admin/post-types/product.php:607 admin/post-types/product.php:883
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:85
 #: admin/post-types/writepanels/writepanel-product_data.php:282
 msgid "Length"
 msgstr "Pituus"
 
 # @ woocommerce
-#: admin/post-types/product.php:606 admin/post-types/product.php:882
+#: admin/post-types/product.php:608 admin/post-types/product.php:884
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:86
 #: admin/post-types/writepanels/writepanel-product_data.php:283
-#: admin/woocommerce-admin-settings.php:839
+#: admin/woocommerce-admin-settings.php:825
 msgid "Width"
 msgstr "Leveys"
 
 # @ woocommerce
-#: admin/post-types/product.php:607 admin/post-types/product.php:883
+#: admin/post-types/product.php:609 admin/post-types/product.php:885
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:87
 #: admin/post-types/writepanels/writepanel-product_data.php:284
-#: admin/woocommerce-admin-settings.php:841
+#: admin/woocommerce-admin-settings.php:827
 msgid "Height"
 msgstr "Korkeus"
 
 # @ woocommerce
-#: admin/post-types/product.php:617 admin/post-types/product.php:889
+#: admin/post-types/product.php:619 admin/post-types/product.php:891
 msgid "Visibility"
 msgstr "Näkyvyys"
 
 # @ woocommerce
-#: admin/post-types/product.php:622 admin/post-types/product.php:895
+#: admin/post-types/product.php:624 admin/post-types/product.php:897
 msgid "Catalog &amp; search"
 msgstr "Luettelo &amp; haku"
 
 # @ woocommerce
-#: admin/post-types/product.php:623 admin/post-types/product.php:896
-#: admin/post-types/writepanels/writepanel-product_data.php:1032
+#: admin/post-types/product.php:625 admin/post-types/product.php:898
+#: admin/post-types/writepanels/writepanel-product_data.php:1033
 #: admin/woocommerce-admin-content.php:46
-#: admin/woocommerce-admin-settings.php:214
+#: admin/woocommerce-admin-settings.php:220
 msgid "Catalog"
 msgstr "Luettelo"
 
 # @ woocommerce
-#: admin/post-types/product.php:624 admin/post-types/product.php:897
-#: admin/post-types/writepanels/writepanel-product_data.php:1033
+#: admin/post-types/product.php:626 admin/post-types/product.php:899
+#: admin/post-types/writepanels/writepanel-product_data.php:1034
 msgid "Search"
 msgstr "Haku"
 
 # @ woocommerce
-#: admin/post-types/product.php:625 admin/post-types/product.php:898
-#: admin/post-types/writepanels/writepanel-product_data.php:1034
+#: admin/post-types/product.php:627 admin/post-types/product.php:900
+#: admin/post-types/writepanels/writepanel-product_data.php:1035
 msgid "Hidden"
 msgstr "Piilotettu"
 
 # @ woocommerce
-#: admin/post-types/product.php:640 admin/post-types/product.php:926
+#: admin/post-types/product.php:642 admin/post-types/product.php:928
 msgid "In stock?"
 msgstr "Varasto?"
 
 # @ woocommerce
-#: admin/post-types/product.php:661 admin/post-types/product.php:944
+#: admin/post-types/product.php:663 admin/post-types/product.php:946
 #: admin/post-types/writepanels/writepanel-product_data.php:208
 msgid "Manage stock?"
 msgstr "Aseta määrä varastossa?"
 
 # @ woocommerce
-#: admin/post-types/product.php:665 admin/post-types/product.php:963
-#: admin/post-types/product.php:979
+#: admin/post-types/product.php:667 admin/post-types/product.php:965
+#: admin/post-types/product.php:981
 #: admin/post-types/writepanels/writepanel-product_data.php:215
 msgid "Stock Qty"
 msgstr "Varastossa"
 
 # @ woocommerce
-#: admin/post-types/product.php:796 admin/post-types/product.php:820
-#: admin/post-types/product.php:846 admin/post-types/product.php:870
-#: admin/post-types/product.php:894 admin/post-types/product.php:913
-#: admin/post-types/product.php:931 admin/post-types/product.php:949
-#: admin/post-types/product.php:968
+#: admin/post-types/product.php:798 admin/post-types/product.php:822
+#: admin/post-types/product.php:848 admin/post-types/product.php:872
+#: admin/post-types/product.php:896 admin/post-types/product.php:915
+#: admin/post-types/product.php:933 admin/post-types/product.php:951
+#: admin/post-types/product.php:970
 msgid "— No Change —"
 msgstr "— Ei muutosta —"
 
 # @ woocommerce
-#: admin/post-types/product.php:797 admin/post-types/product.php:821
-#: admin/post-types/product.php:847 admin/post-types/product.php:871
-#: admin/post-types/product.php:969
+#: admin/post-types/product.php:799 admin/post-types/product.php:823
+#: admin/post-types/product.php:849 admin/post-types/product.php:873
+#: admin/post-types/product.php:971
 msgid "Change to:"
 msgstr "Vaihda:"
 
 # @ woocommerce
-#: admin/post-types/product.php:798 admin/post-types/product.php:822
+#: admin/post-types/product.php:800 admin/post-types/product.php:824
 msgid "Increase by (fixed amount or %):"
 msgstr "Suurenna (kiinteä määrä tai %):"
 
 # @ woocommerce
-#: admin/post-types/product.php:799 admin/post-types/product.php:823
+#: admin/post-types/product.php:801 admin/post-types/product.php:825
 msgid "Decrease by (fixed amount or %):"
 msgstr "Pienennä (kiinteä määrä tai %):"
 
 # @ woocommerce
-#: admin/post-types/product.php:809 admin/post-types/product.php:834
+#: admin/post-types/product.php:811 admin/post-types/product.php:836
 msgid "Enter price"
 msgstr "Kirjoita hinta"
 
 # @ woocommerce
-#: admin/post-types/product.php:824
+#: admin/post-types/product.php:826
 msgid "Decrease regular price by (fixed amount or %):"
 msgstr "Pienennä normaalihintaa (kiinteä määrä tai %):"
 
 # @ woocommerce
-#: admin/post-types/product.php:914 admin/post-types/product.php:950
-#: admin/post-types/shop_order.php:190 admin/woocommerce-admin-status.php:155
-#: admin/woocommerce-admin-status.php:317
+#: admin/post-types/product.php:916 admin/post-types/product.php:952
+#: admin/post-types/shop_order.php:190 admin/woocommerce-admin-status.php:202
+#: admin/woocommerce-admin-status.php:364
 msgid "Yes"
 msgstr "Kyllä"
 
 # @ woocommerce
-#: admin/post-types/product.php:915 admin/post-types/product.php:951
-#: admin/post-types/shop_order.php:192 admin/woocommerce-admin-status.php:155
-#: admin/woocommerce-admin-status.php:317
+#: admin/post-types/product.php:917 admin/post-types/product.php:953
+#: admin/post-types/shop_order.php:192 admin/woocommerce-admin-status.php:202
+#: admin/woocommerce-admin-status.php:364
 msgid "No"
 msgstr "Ei"
 
 # @ woocommerce
-#: admin/post-types/product.php:1179
+#: admin/post-types/product.php:1181
 msgid "Sort Products"
 msgstr "Lajittele tuotteet"
 
 # @ woocommerce
-#: admin/post-types/product.php:1218
+#: admin/post-types/product.php:1220
 msgid "Insert into product"
 msgstr "Liitä tuotteeseen"
 
 # @ woocommerce
-#: admin/post-types/product.php:1219
+#: admin/post-types/product.php:1221
 msgid "Uploaded to this product"
 msgstr "Tähän tuotteeseen liitetty [palvelimelle] siirto"
 
@@ -728,7 +743,7 @@ msgstr "Laskutus"
 #: admin/settings/settings-tax-rates.php:52
 #: admin/settings/settings-tax-rates.php:217
 #: admin/woocommerce-admin-content.php:49
-#: admin/woocommerce-admin-settings.php:218
+#: admin/woocommerce-admin-settings.php:224
 msgid "Shipping"
 msgstr "Toimitus"
 
@@ -831,8 +846,8 @@ msgstr "Estä pääsy"
 #: admin/post-types/writepanels/order-download-permission-html.php:7
 #: admin/post-types/writepanels/variation-admin-html.php:7
 #: admin/post-types/writepanels/writepanel-product_data.php:361
-#: admin/post-types/writepanels/writepanel-product_data.php:439
-#: admin/woocommerce-admin-init.php:386
+#: admin/post-types/writepanels/writepanel-product_data.php:440
+#: admin/woocommerce-admin-init.php:395
 msgid "Click to toggle"
 msgstr "Vaihda tila painamalla"
 
@@ -888,9 +903,9 @@ msgstr "Veroluokka"
 #: admin/post-types/writepanels/order-tax-html.php:8
 #: admin/post-types/writepanels/writepanel-order_data.php:551
 #: admin/post-types/writepanels/writepanel-order_data.php:650
-#: admin/woocommerce-admin-reports.php:1627
-#: admin/woocommerce-admin-reports.php:2608
-#: admin/woocommerce-admin-reports.php:2617
+#: admin/woocommerce-admin-reports.php:1642
+#: admin/woocommerce-admin-reports.php:2633
+#: admin/woocommerce-admin-reports.php:2642
 #: admin/woocommerce-admin-users.php:90 admin/woocommerce-admin-users.php:112
 msgid "N/A"
 msgstr "Ei saatavilla/-tietoa"
@@ -906,20 +921,20 @@ msgstr "Verotettava"
 #: admin/post-types/writepanels/order-item-html.php:89
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:54
 #: admin/post-types/writepanels/writepanel-product_data.php:184
-#: admin/settings/settings-init.php:1026
+#: admin/settings/settings-init.php:1027
 #: admin/settings/settings-tax-rates.php:29
-#: admin/woocommerce-admin-settings.php:256
+#: admin/woocommerce-admin-settings.php:262
 msgid "Standard"
 msgstr "Standardi"
 
 # @ woocommerce
 #: admin/post-types/writepanels/order-fee-html.php:39
 #: admin/post-types/writepanels/order-item-html.php:106
-#: admin/woocommerce-admin-reports.php:1531
-#: admin/woocommerce-admin-reports.php:1584
-#: admin/woocommerce-admin-reports.php:2321
-#: admin/woocommerce-admin-reports.php:2493
-#: admin/woocommerce-admin-reports.php:2570
+#: admin/woocommerce-admin-reports.php:1546
+#: admin/woocommerce-admin-reports.php:1599
+#: admin/woocommerce-admin-reports.php:2346
+#: admin/woocommerce-admin-reports.php:2518
+#: admin/woocommerce-admin-reports.php:2595
 msgid "Total"
 msgstr "Yhteensä"
 
@@ -968,8 +983,8 @@ msgstr "Toimituskulujen vero:"
 # @ woocommerce
 #: admin/post-types/writepanels/variation-admin-html.php:6
 #: admin/post-types/writepanels/writepanel-product_data.php:360
-#: admin/post-types/writepanels/writepanel-product_data.php:438
-#: admin/woocommerce-admin-init.php:385
+#: admin/post-types/writepanels/writepanel-product_data.php:439
+#: admin/woocommerce-admin-init.php:394
 msgid "Remove"
 msgstr "Poista"
 
@@ -1244,9 +1259,9 @@ msgstr "Tuotteet"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-coupon_data.php:72
 #: admin/post-types/writepanels/writepanel-order_data.php:396
-#: admin/post-types/writepanels/writepanel-product_data.php:499
-#: admin/post-types/writepanels/writepanel-product_data.php:520
-#: admin/woocommerce-admin-reports.php:1214
+#: admin/post-types/writepanels/writepanel-product_data.php:500
+#: admin/post-types/writepanels/writepanel-product_data.php:521
+#: admin/woocommerce-admin-reports.php:1229
 msgid "Search for a product&hellip;"
 msgstr "Etsi tuotetta..."
 
@@ -1410,7 +1425,7 @@ msgstr "h"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:87
-#: admin/settings/settings-init.php:629
+#: admin/settings/settings-init.php:630
 msgid "m"
 msgstr "m (metri)"
 
@@ -1433,15 +1448,6 @@ msgstr "Asiakkaan kommentti tilauksessa"
 #: admin/post-types/writepanels/writepanel-order_data.php:140
 msgid "Billing Details"
 msgstr "Laskutustiedot"
-
-# @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:140
-#: admin/post-types/writepanels/writepanel-order_data.php:230
-#: admin/post-types/writepanels/writepanel-order_data.php:383
-#: admin/post-types/writepanels/writepanel-product_data.php:1046
-#: admin/woocommerce-admin-attributes.php:306
-msgid "Edit"
-msgstr "Muokkaa"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:144
@@ -1600,7 +1606,7 @@ msgstr ""
 #: admin/settings/settings-tax-rates.php:387
 #: admin/settings/settings-tax-rates.php:466
 #: admin/woocommerce-admin-content.php:48
-#: admin/woocommerce-admin-settings.php:217
+#: admin/woocommerce-admin-settings.php:223
 msgid "Tax"
 msgstr "Verot"
 
@@ -1834,7 +1840,7 @@ msgstr "Yksityinen viesti"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_notes.php:65
-#: admin/post-types/writepanels/writepanel-product_data.php:477
+#: admin/post-types/writepanels/writepanel-product_data.php:478
 msgid "Add"
 msgstr "Lisää"
 
@@ -1978,45 +1984,45 @@ msgid "No variations added"
 msgstr "Muunnelmia ei lisätty"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:316
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:317
 msgid "Are you sure you want to remove this variation?"
 msgstr "Oletko varma, että haluat poistaa tämän muunnelman?"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:372
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:373
 msgid "Are you sure you want to delete all variations? This cannot be undone."
 msgstr ""
 "Haluatko varmasti poistaa kaikki muunnelmat? Toimintoa ei voi peruuttaa."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:375
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:376
 msgid "Last warning, are you sure?"
 msgstr "Viimeinen varoitus, oletko varma?"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:412
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:413
 msgid "Enter a value"
 msgstr "Kirjoita arvo"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:503
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:504
 #: admin/woocommerce-admin-taxonomies.php:62
 #: admin/woocommerce-admin-taxonomies.php:154
 msgid "Choose an image"
 msgstr "Valitse kuva"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:505
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:506
 msgid "Set variation image"
 msgstr "Aseta muunnoksen kuva"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:549
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:550
 msgid "Variable product"
 msgstr "Muunnelmatuote"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:615
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:616
 msgid "Variation #%s of %s"
 msgstr "Muunnelma nro.%s / %s"
 
@@ -2040,14 +2046,14 @@ msgstr "Kun ladattava tuote on ostettu, asiakas voi ladata tiedoston."
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:77
 #: admin/woocommerce-admin-content.php:44
-#: admin/woocommerce-admin-settings.php:213
+#: admin/woocommerce-admin-settings.php:219
 msgid "General"
 msgstr "Yleiset"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:79
 #: admin/woocommerce-admin-content.php:47
-#: admin/woocommerce-admin-settings.php:216
+#: admin/woocommerce-admin-settings.php:222
 msgid "Inventory"
 msgstr "Varasto"
 
@@ -2058,7 +2064,7 @@ msgstr "Liitetyt tuotteet"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:85
-#: admin/woocommerce-admin-attributes.php:282
+#: admin/woocommerce-admin-attributes.php:298
 #: admin/woocommerce-admin-init.php:61
 msgid "Attributes"
 msgstr "Ominaisuudet"
@@ -2127,7 +2133,7 @@ msgstr "Tarjous voimassa, pvm."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:138
-#: admin/post-types/writepanels/writepanel-product_data.php:1067
+#: admin/post-types/writepanels/writepanel-product_data.php:1068
 msgid "Cancel"
 msgstr "Peruuta"
 
@@ -2258,8 +2264,8 @@ msgstr ""
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:376
-#: admin/post-types/writepanels/writepanel-product_data.php:452
-#: admin/woocommerce-admin-init.php:387
+#: admin/post-types/writepanels/writepanel-product_data.php:453
+#: admin/woocommerce-admin-init.php:396
 msgid "Value(s)"
 msgstr "Arvo(t)"
 
@@ -2289,42 +2295,42 @@ msgid "Pipe separate terms"
 msgstr "Erota arvot pystyviivalla"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:411
-#: admin/post-types/writepanels/writepanel-product_data.php:458
-#: admin/woocommerce-admin-init.php:389
+#: admin/post-types/writepanels/writepanel-product_data.php:412
+#: admin/post-types/writepanels/writepanel-product_data.php:459
+#: admin/woocommerce-admin-init.php:398
 msgid "Visible on the product page"
 msgstr "Näkyy tuotesivulla"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:417
-#: admin/post-types/writepanels/writepanel-product_data.php:464
-#: admin/woocommerce-admin-init.php:390
+#: admin/post-types/writepanels/writepanel-product_data.php:418
+#: admin/post-types/writepanels/writepanel-product_data.php:465
+#: admin/woocommerce-admin-init.php:399
 msgid "Used for variations"
 msgstr "Käytetään muunnelmissa"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:453
-#: admin/woocommerce-admin-init.php:388
+#: admin/post-types/writepanels/writepanel-product_data.php:454
+#: admin/woocommerce-admin-init.php:397
 msgid "Enter some text, or some attributes by pipe (|) separating values."
 msgstr "Kirjoita tekstiä tai lisää ominaisuuksia. Erota pystyviivalla (|)."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:479
+#: admin/post-types/writepanels/writepanel-product_data.php:480
 msgid "Custom product attribute"
 msgstr "Mukautettu ominaisuus"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:491
+#: admin/post-types/writepanels/writepanel-product_data.php:492
 msgid "Save attributes"
 msgstr "Tallenna ominaisuudet"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:498
+#: admin/post-types/writepanels/writepanel-product_data.php:499
 msgid "Up-Sells"
 msgstr "Parempi tuote (Up-Sell)"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:517
+#: admin/post-types/writepanels/writepanel-product_data.php:518
 msgid ""
 "Up-sells are products which you recommend instead of the currently viewed "
 "product, for example, products that are more profitable or better quality or "
@@ -2335,12 +2341,12 @@ msgstr ""
 "ominaisuuksiltaan parempi tuote."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:519
+#: admin/post-types/writepanels/writepanel-product_data.php:520
 msgid "Cross-Sells"
 msgstr "Lisätuote (Cross-Sell)"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:538
+#: admin/post-types/writepanels/writepanel-product_data.php:539
 msgid ""
 "Cross-sells are products which you promote in the cart, based on the current "
 "product."
@@ -2349,62 +2355,62 @@ msgstr ""
 "valittujen tuotteiden alla (ja niihin liittyen)."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:548
+#: admin/post-types/writepanels/writepanel-product_data.php:549
 msgid "Choose a grouped product&hellip;"
 msgstr "Valitse joukko tuotteelle ..."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:574
+#: admin/post-types/writepanels/writepanel-product_data.php:575
 msgid "Grouping"
 msgstr "Joukot"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:574
+#: admin/post-types/writepanels/writepanel-product_data.php:575
 msgid "Set this option to make this product part of a grouped product."
 msgstr "Tässä liitetään tuote osaksi (tuote)joukkoa."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:594
+#: admin/post-types/writepanels/writepanel-product_data.php:595
 msgid "Purchase Note"
 msgstr "Viesti ostajalle"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:594
+#: admin/post-types/writepanels/writepanel-product_data.php:595
 msgid "Enter an optional note to send the customer after purchase."
 msgstr "Valinnainen: tieto joka lähetetään tuotteen ostaneelle."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:601
+#: admin/post-types/writepanels/writepanel-product_data.php:602
 msgid "Menu order"
 msgstr "Järjestys valikossa"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:601
+#: admin/post-types/writepanels/writepanel-product_data.php:602
 msgid "Custom ordering position."
 msgstr "Mukautettu järjestys (paikka)"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:609
+#: admin/post-types/writepanels/writepanel-product_data.php:610
 msgid "Enable reviews"
 msgstr "Ota käyttöön tuotearviot"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:698
+#: admin/post-types/writepanels/writepanel-product_data.php:699
 msgid "Product SKU must be unique."
 msgstr "Tuotetunnuksen (SKU) täytyy olla muista poikkeava."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:1031
+#: admin/post-types/writepanels/writepanel-product_data.php:1032
 msgid "Catalog/search"
 msgstr "Luettelo/etsi"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:1038
+#: admin/post-types/writepanels/writepanel-product_data.php:1039
 msgid "Catalog visibility:"
 msgstr "Luettelo näkyvyys:"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:1054
+#: admin/post-types/writepanels/writepanel-product_data.php:1055
 msgid ""
 "Define the loops this product should be visible in. The product will still "
 "be accessible directly."
@@ -2413,17 +2419,17 @@ msgstr ""
 "suoraan."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:1060
+#: admin/post-types/writepanels/writepanel-product_data.php:1061
 msgid "Enable this option to feature this product."
 msgstr "Aseta tämä tuote 'Esittelyssä' tilaan."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:1062
+#: admin/post-types/writepanels/writepanel-product_data.php:1063
 msgid "Featured Product"
 msgstr "Tuote on esittelyssä"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:1066
+#: admin/post-types/writepanels/writepanel-product_data.php:1067
 msgid "OK"
 msgstr "OK"
 
@@ -2436,7 +2442,7 @@ msgstr "Poista kuva"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_images.php:42
 #: admin/post-types/writepanels/writepanel-product_images.php:102
-#: admin/woocommerce-admin-attributes.php:306
+#: admin/woocommerce-admin-attributes.php:322
 msgid "Delete"
 msgstr "Poista"
 
@@ -2983,34 +2989,40 @@ msgstr "Ota käyttöön AJAX -menetelmän 'lisää ostoskoriin' painikkeet"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:268
-msgid "Enable WooCommerce lightbox on the product page"
+msgid "Enable WooCommerce lightbox"
+msgstr "Ota käyttöön WooCommerce 'Lightbox'"
+
+#: admin/settings/settings-init.php:271
+msgid ""
+"On the product details page, product gallery images will open in a lightbox. "
+"The Add Review form will open in a modal window"
 msgstr ""
-"Ota käyttöön tuotesivulla WooCommerce lightbox (kuva avautuu harmaan taustan "
-"päälle)"
+"Tuotteen kuvat avautuvat harmaan taustan päälle. 'Lisää arvostelu' lomake "
+"avautuu omaan ikkunaan."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:276
+#: admin/settings/settings-init.php:277
 msgid "Enable enhanced country select boxes"
 msgstr "Ota käyttöön lisäpiirteitä maiden valinnassa"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:285
+#: admin/settings/settings-init.php:286
 msgid "Digital Downloads"
 msgstr "Tiedostojen lataukset"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:285
+#: admin/settings/settings-init.php:286
 msgid "The following options are specific to downloadable products."
 msgstr ""
 "Tässä asetetaan ladattaviin tuotteisiin (tiedostoihin) liittyviä asioita."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:288
+#: admin/settings/settings-init.php:289
 msgid "File Download Method"
 msgstr "Tiedostojen lataustapa"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:289
+#: admin/settings/settings-init.php:290
 msgid ""
 "Forcing downloads will keep URLs hidden, but some servers may serve large "
 "files unreliably. If supported, <code>X-Accel-Redirect</code>/ <code>X-"
@@ -3023,42 +3035,42 @@ msgstr ""
 "latauksia varten (palvelimessa oltava <code>mod_xsendfile</code>)."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:297
+#: admin/settings/settings-init.php:298
 msgid "Force Downloads"
 msgstr "Pakota lataukset"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:298
+#: admin/settings/settings-init.php:299
 msgid "X-Accel-Redirect/X-Sendfile"
 msgstr "X-Accel-Redirect/X-Sendfile"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:299
+#: admin/settings/settings-init.php:300
 msgid "Redirect only"
 msgstr "Vain edelleenohjaus"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:304
+#: admin/settings/settings-init.php:305
 msgid "Access Restrictions"
 msgstr "Rajoitettu pääsy"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:305
+#: admin/settings/settings-init.php:306
 msgid "Must be logged in to download files"
 msgstr "Vain sisäänkirjautuneena voi ladata tiedostoja."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:309
+#: admin/settings/settings-init.php:310
 msgid "This setting does not apply to guest downloads."
 msgstr "Tämä asetus ei koske kaikille julkisia tiedostoja"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:314
+#: admin/settings/settings-init.php:315
 msgid "Grant access to downloadable products after payment"
 msgstr "Kun maksettu, sallitaan pääsy tiedoston lataamiseen"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:318
+#: admin/settings/settings-init.php:319
 msgid ""
 "Turn this option off to only grant access when an order is \"complete\", "
 "rather than \"processing\""
@@ -3067,18 +3079,18 @@ msgstr ""
 "tilauksen tila on 'Valmis' - 'Käsittelyssä' tila ei riitä."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:323
+#: admin/settings/settings-init.php:324
 msgid "Limit Quantity"
 msgstr "Rajoita määrä"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:324
+#: admin/settings/settings-init.php:325
 msgid "Limit the purchasable quantity of downloadable-virtual items to 1"
 msgstr ""
 "Rajoita kerralla ostettavien, ladattavien tuotteiden määrä yhteen (1 kpl)."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:342
+#: admin/settings/settings-init.php:343
 msgid ""
 "Note: The shop page has children - child pages will not work if you enable "
 "this option."
@@ -3087,12 +3099,12 @@ msgstr ""
 "sivut eivät toimi jos otat tämän käyttöön."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:347
+#: admin/settings/settings-init.php:348
 msgid "Page Setup"
 msgstr "Sivujen asetukset"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:349
+#: admin/settings/settings-init.php:350
 msgid ""
 "Set up core WooCommerce pages here, for example the base page. The base page "
 "can also be used in your %sproduct permalinks%s."
@@ -3101,12 +3113,12 @@ msgstr ""
 "Kaupan (perus)sivua voidaan käyttää kestolinkeissä (%sAseta osoiterakenne%s)."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:354
+#: admin/settings/settings-init.php:355
 msgid "Shop Base Page"
 msgstr "Kaupan (perus)sivu"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:355
+#: admin/settings/settings-init.php:356
 msgid ""
 "This sets the base page of your shop - this is where your product archive "
 "will be."
@@ -3115,12 +3127,12 @@ msgstr ""
 "- pilkottuna yleensä usealle sivulle."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:365
+#: admin/settings/settings-init.php:366
 msgid "Base Page Title"
 msgstr "Kaupan (perus)sivun otsikko"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:366
+#: admin/settings/settings-init.php:367
 msgid ""
 "This title to show on the shop base page. Leave blank to use the page title."
 msgstr ""
@@ -3128,12 +3140,12 @@ msgstr ""
 "sivun nimeä (Shop, Kauppa..)."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:375
+#: admin/settings/settings-init.php:376
 msgid "Terms Page ID"
 msgstr "Tilaus-/sopimusehdot -sivun ID"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:376
+#: admin/settings/settings-init.php:377
 msgid ""
 "If you define a \"Terms\" page the customer will be asked if they accept "
 "them when checking out."
@@ -3142,22 +3154,22 @@ msgstr ""
 "kaupan ehdot kassalla."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:386
+#: admin/settings/settings-init.php:387
 msgid "Logout link"
 msgstr "Kirjaudu ulos -linkki"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:387
+#: admin/settings/settings-init.php:388
 msgid "Append a logout link to menus containing \"My Account\""
 msgstr "Liitä kirjaudu ulos -linkki valikoihin, joissa on 'Oma tili' -linkki"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:395 admin/woocommerce-admin-status.php:161
+#: admin/settings/settings-init.php:396 admin/woocommerce-admin-status.php:208
 msgid "Shop Pages"
 msgstr "Kaupan sivut"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:395
+#: admin/settings/settings-init.php:396
 msgid ""
 "The following pages need selecting so that WooCommerce knows where they are. "
 "These pages should have been created upon installation of the plugin, if not "
@@ -3168,175 +3180,175 @@ msgstr ""
 "luotava."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:398 admin/woocommerce-admin-status.php:172
+#: admin/settings/settings-init.php:399 admin/woocommerce-admin-status.php:219
 msgid "Cart Page"
 msgstr "Ostoskorin sivu"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:399
+#: admin/settings/settings-init.php:400
 msgid "Page contents: [woocommerce_cart]"
 msgstr "Sivun sisältö: [woocommerce_cart]"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:409 admin/woocommerce-admin-status.php:176
+#: admin/settings/settings-init.php:410 admin/woocommerce-admin-status.php:223
 msgid "Checkout Page"
 msgstr "Kassa sivu"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:410
+#: admin/settings/settings-init.php:411
 msgid "Page contents: [woocommerce_checkout]"
 msgstr "Sivun sisältö: [woocommerce_checkout]"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:420 admin/woocommerce-admin-status.php:180
+#: admin/settings/settings-init.php:421 admin/woocommerce-admin-status.php:227
 msgid "Pay Page"
 msgstr "Maksaminen sivu"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:421
+#: admin/settings/settings-init.php:422
 msgid "Page contents: [woocommerce_pay] Parent: \"Checkout\""
 msgstr "Sivun sisältö: [woocommerce_pay] Ylemmän tason sivu: 'Kassa'"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:431 admin/woocommerce-admin-status.php:184
+#: admin/settings/settings-init.php:432 admin/woocommerce-admin-status.php:231
 msgid "Thanks Page"
 msgstr "Kiitos sivu"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:432
+#: admin/settings/settings-init.php:433
 msgid "Page contents: [woocommerce_thankyou] Parent: \"Checkout\""
 msgstr "Sivun sisältö: [woocommerce_thankyou] Ylemmän tason sivu: 'Kassa'"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:442 admin/woocommerce-admin-status.php:188
+#: admin/settings/settings-init.php:443 admin/woocommerce-admin-status.php:235
 msgid "My Account Page"
 msgstr "Oma tili -sivu"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:443
+#: admin/settings/settings-init.php:444
 msgid "Page contents: [woocommerce_my_account]"
 msgstr "Sivun sisältö: [woocommerce_my_account]"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:453 admin/woocommerce-admin-status.php:192
+#: admin/settings/settings-init.php:454 admin/woocommerce-admin-status.php:239
 msgid "Edit Address Page"
 msgstr "Muokkaa osoitetta -sivu"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:454
+#: admin/settings/settings-init.php:455
 msgid "Page contents: [woocommerce_edit_address] Parent: \"My Account\""
 msgstr ""
 "Sivun sisältö: [woocommerce_edit_address] Ylemmän tason sivu: 'Oma tili'"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:464 admin/woocommerce-admin-status.php:196
+#: admin/settings/settings-init.php:465 admin/woocommerce-admin-status.php:243
 msgid "View Order Page"
 msgstr "Näytä tilaussivu"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:465
+#: admin/settings/settings-init.php:466
 msgid "Page contents: [woocommerce_view_order] Parent: \"My Account\""
 msgstr "Sivun sisältö: [woocommerce_view_order] Ylemmän tason sivu: 'Oma tili'"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:475 admin/woocommerce-admin-status.php:200
+#: admin/settings/settings-init.php:476 admin/woocommerce-admin-status.php:247
 msgid "Change Password Page"
 msgstr "Vaihda salasana -sivu"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:476
+#: admin/settings/settings-init.php:477
 msgid "Page contents: [woocommerce_change_password] Parent: \"My Account\""
 msgstr ""
 "Sivun sisältö: [woocommerce_change_password] Ylemmän tason sivu: 'Oma tili'"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:486
+#: admin/settings/settings-init.php:487
 msgid "Lost Password Page"
 msgstr "Salasana unohtunut -sivu"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:487
+#: admin/settings/settings-init.php:488
 msgid "Page contents: [woocommerce_lost_password] Parent: \"My Account\""
 msgstr ""
 "Sivun sisältö: [woocommerce_lost_password] Ylemmän tason sivu: 'Oma tili'"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:503
+#: admin/settings/settings-init.php:504
 msgid "Catalog Options"
 msgstr "Luettelon asetukset"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:506
+#: admin/settings/settings-init.php:507
 msgid "Default Product Sorting"
 msgstr "Tuotteiden lajittelu, oletus"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:507
+#: admin/settings/settings-init.php:508
 msgid "This controls the default sort order of the catalog."
 msgstr "Tässä asetetaan tuoteluettelossa oletuksena käytettävä lajittelutapa."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:513
+#: admin/settings/settings-init.php:514
 msgid "Default sorting"
 msgstr "Lajittelu, oletustapa"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:514
+#: admin/settings/settings-init.php:515
 msgid "Sort alphabetically"
 msgstr "Aakkosten mukaan"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:515
+#: admin/settings/settings-init.php:516
 msgid "Sort by most recent"
 msgstr "Uusimmat ensin"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:516
+#: admin/settings/settings-init.php:517
 msgid "Sort by price"
 msgstr "Hinnan mukaan"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:522
+#: admin/settings/settings-init.php:523
 msgid "Shop Page Display"
 msgstr "Kaupan (perus)sivulla esitys"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:523
+#: admin/settings/settings-init.php:524
 msgid "This controls what is shown on the product archive."
 msgstr "Tässä asetetaan kaupan (perus)sivulla esittäminen ('product archive')."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:529 admin/settings/settings-init.php:544
+#: admin/settings/settings-init.php:530 admin/settings/settings-init.php:545
 msgid "Show products"
 msgstr "Näytä tuotteet"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:530 admin/settings/settings-init.php:545
+#: admin/settings/settings-init.php:531 admin/settings/settings-init.php:546
 msgid "Show subcategories"
 msgstr "Näytä osastojen alemmat tasot"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:531 admin/settings/settings-init.php:546
+#: admin/settings/settings-init.php:532 admin/settings/settings-init.php:547
 msgid "Show both"
 msgstr "Näytä molemmat"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:537
+#: admin/settings/settings-init.php:538
 msgid "Default Category Display"
 msgstr "Osastojen esitys, oletus"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:538
+#: admin/settings/settings-init.php:539
 msgid "This controls what is shown on category archives."
 msgstr "Tässä asetetaan kaupan (tuote)osastojen esittäminen."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:552
+#: admin/settings/settings-init.php:553
 msgid "Redirects"
 msgstr "Edelleenohjaus"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:553
+#: admin/settings/settings-init.php:554
 msgid ""
 "Redirect to cart after adding a product to the cart (on single product pages)"
 msgstr ""
@@ -3344,207 +3356,207 @@ msgstr ""
 "sivulla)"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:561
+#: admin/settings/settings-init.php:562
 msgid "Redirect to the product page on a single matching search result"
 msgstr "Kun vain yksi tuote vastaa hakua, ohjaa tuotteen sivulle"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:570
+#: admin/settings/settings-init.php:571
 msgid ""
 "The following options affect the fields available on the edit product page."
 msgstr ""
 "Tässä asetetaan kentät, jotka esitetään sivulla jossa tuotetietoja muokataan."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:573
+#: admin/settings/settings-init.php:574
 msgid "Product Fields"
 msgstr "Tuotekentät"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:574
+#: admin/settings/settings-init.php:575
 msgid "Enable the SKU field for products"
 msgstr "Ota käyttöön tuotteille tuotetunnus (SKU)"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:582
+#: admin/settings/settings-init.php:583
 msgid "Enable the weight field for products"
 msgstr "Ota käyttöön tuotteille paino"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:590
+#: admin/settings/settings-init.php:591
 msgid "Enable the dimension fields for products"
 msgstr "Ota käyttöön tuotteille mitat"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:598
+#: admin/settings/settings-init.php:599
 msgid "Show weight and dimension fields in product attributes tab"
 msgstr "Näytä paino- ja mitat kenttä Ominaisuudet välilehdellä"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:606
+#: admin/settings/settings-init.php:607
 msgid "Weight Unit"
 msgstr "Painon yksikkö"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:607
+#: admin/settings/settings-init.php:608
 msgid "This controls what unit you will define weights in."
 msgstr "Paino syötetään ja esitetään käyttäen tätä (paino)yksikköä."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:613
+#: admin/settings/settings-init.php:614
 msgid "kg"
 msgstr "kg (kilogramma)"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:614
+#: admin/settings/settings-init.php:615
 msgid "g"
 msgstr "g (gramma)"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:615
+#: admin/settings/settings-init.php:616
 msgid "lbs"
 msgstr "lbs (naula)"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:616
+#: admin/settings/settings-init.php:617
 msgid "oz"
 msgstr "oz (unssi)"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:622
+#: admin/settings/settings-init.php:623
 msgid "Dimensions Unit"
 msgstr "Mittojen yksikkö"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:623
+#: admin/settings/settings-init.php:624
 msgid "This controls what unit you will define lengths in."
 msgstr ""
 "Pituus, leveys ja korkeus syötetään ja esitetään käyttäen tätä yksikköä."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:630
+#: admin/settings/settings-init.php:631
 msgid "cm"
 msgstr "cm (senttimetri)"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:631
+#: admin/settings/settings-init.php:632
 msgid "mm"
 msgstr "mm (millimetri)"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:632
+#: admin/settings/settings-init.php:633
 msgid "in"
 msgstr "in (tuuma)"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:633
+#: admin/settings/settings-init.php:634
 msgid "yd"
 msgstr "yd (jaardi)"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:639
+#: admin/settings/settings-init.php:640
 msgid "Product Ratings"
 msgstr "Tuotearvostelut"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:640
+#: admin/settings/settings-init.php:641
 msgid "Enable the rating field on the review form"
 msgstr ""
 "Ota käyttöön kenttä jossa tuotteelle voi antaa tähtiä 1-5, tuotearvio "
 "lomakkeella."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:649
+#: admin/settings/settings-init.php:650
 msgid "Ratings are required to leave a review"
 msgstr "(Tähti) Arvostelu vaaditaan, kun poistutaan tuotearvioinnista."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:658
+#: admin/settings/settings-init.php:659
 msgid "Show \"verified owner\" label for customer reviews"
 msgstr ""
 "Näytä 'Varmistettu kirjoittaja' -nimike kun arvion on kirjoittanut asiakas"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:668
+#: admin/settings/settings-init.php:669
 msgid "Pricing Options"
 msgstr "Hinnoittelun asetukset"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:668
+#: admin/settings/settings-init.php:669
 msgid "The following options affect how prices are displayed on the frontend."
 msgstr "Tässä asetetaan, kuinka hinnat esitetään julkisella puolella."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:671
+#: admin/settings/settings-init.php:672
 msgid "Currency Position"
 msgstr "Valuuttamerkin paikka"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:672
+#: admin/settings/settings-init.php:673
 msgid "This controls the position of the currency symbol."
 msgstr "Tässä asetetaan valuuttamerkin paikka."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:678
+#: admin/settings/settings-init.php:679
 msgid "Left"
 msgstr "Vasemmalla"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:679
+#: admin/settings/settings-init.php:680
 msgid "Right"
 msgstr "Oikealla"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:680
+#: admin/settings/settings-init.php:681
 msgid "Left (with space)"
 msgstr "Vasemmalla +välilyönti"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:681
+#: admin/settings/settings-init.php:682
 msgid "Right (with space)"
 msgstr "välilyönti+ Oikealla"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:687
+#: admin/settings/settings-init.php:688
 msgid "Thousand Separator"
 msgstr "Tuhaterotin"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:688
+#: admin/settings/settings-init.php:689
 msgid "This sets the thousand separator of displayed prices."
 msgstr ""
 "Tässä asetetaan tuhaterotin hintojen luvuille - yleensä Suomessa ei mitään, "
 "välilyönti tai &nbsp;."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:697
+#: admin/settings/settings-init.php:698
 msgid "Decimal Separator"
 msgstr "Desimaalierotin"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:698
+#: admin/settings/settings-init.php:699
 msgid "This sets the decimal separator of displayed prices."
 msgstr ""
 "Tässä asetetaan desimaalierottimena käytettävä merkki - yleensä Suomessa "
 "pilkku."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:707
+#: admin/settings/settings-init.php:708
 msgid "Number of Decimals"
 msgstr "Desimaalien lukumäärä"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:708
+#: admin/settings/settings-init.php:709
 msgid "This sets the number of decimal points shown in displayed prices."
 msgstr "Tässä asetetaan desimaalien määrä hintojen luvuille."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:721
+#: admin/settings/settings-init.php:722
 msgid "Trailing Zeros"
 msgstr "Nollat perässä"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:722
+#: admin/settings/settings-init.php:723
 msgid ""
 "Remove zeros after the decimal point. e.g. <code>$10.00</code> becomes <code>"
 "$10</code>"
@@ -3553,12 +3565,12 @@ msgstr ""
 "esitetään muodossa <code>10 €</code>"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:730
+#: admin/settings/settings-init.php:731
 msgid "Image Options"
 msgstr "Kuvien asetukset"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:730
+#: admin/settings/settings-init.php:731
 msgid ""
 "These settings affect the actual dimensions of images in your catalog - the "
 "display on the front-end will still be affected by CSS styles. After "
@@ -3570,60 +3582,60 @@ msgstr ""
 "uudet pikkukuvat <a href=\"%s\">lisäosan avulla</a>."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:733
+#: admin/settings/settings-init.php:734
 msgid "Catalog Images"
 msgstr "Luettelon kuvat"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:734
+#: admin/settings/settings-init.php:735
 msgid "This size is usually used in product listings"
 msgstr "Tätä kokoa käytetään yleensä tuotelistauksissa"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:747
+#: admin/settings/settings-init.php:748
 msgid "Single Product Image"
 msgstr "Yksittäinen tuotekuva"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:748
+#: admin/settings/settings-init.php:749
 msgid "This is the size used by the main image on the product page."
 msgstr "Tätä kokoa käytetään tuotesivulla esillä olevassa kuvassa"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:761
+#: admin/settings/settings-init.php:762
 msgid "Product Thumbnails"
 msgstr "Tuotteen pikkukuva"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:762
+#: admin/settings/settings-init.php:763
 msgid ""
 "This size is usually used for the gallery of images on the product page."
 msgstr "Tätä kokoa käytetään yleensä tuotesivulla, kuvagallerian kuvissa."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:781
+#: admin/settings/settings-init.php:782
 msgid "Inventory Options"
 msgstr "Varaston asetukset"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:784
+#: admin/settings/settings-init.php:785
 msgid "Manage Stock"
 msgstr "Varaston hallinta"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:785
+#: admin/settings/settings-init.php:786
 msgid "Enable stock management"
 msgstr ""
 "Ota käyttöön varastokirjanpito (myynnin seurauksena tuotteiden määrä "
 "varastokirjanpidossa muuttuu)"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:792
+#: admin/settings/settings-init.php:793
 msgid "Hold Stock (minutes)"
 msgstr "Varaa tuotteet (minuuttia)"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:793
+#: admin/settings/settings-init.php:794
 msgid ""
 "Hold stock (for unpaid orders) for x minutes. When this limit is reached, "
 "the pending order will be cancelled. Leave blank to disable."
@@ -3632,99 +3644,99 @@ msgstr ""
 "Tilaus perutaan, kun aikaraja on saavutettu. Kun tyhjä, ei käytetä."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:805
+#: admin/settings/settings-init.php:806
 msgid "Notifications"
 msgstr "Ilmoitukset"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:806
+#: admin/settings/settings-init.php:807
 msgid "Enable low stock notifications"
 msgstr "Ota käyttöön 'Varasto vähissä' ilmoitukset"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:814
+#: admin/settings/settings-init.php:815
 msgid "Enable out of stock notifications"
 msgstr "Ota käyttöön 'Varasto loppu' ilmoitukset"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:822
+#: admin/settings/settings-init.php:823
 msgid "Low Stock Threshold"
 msgstr "Varasto vähissä raja-arvo"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:835
+#: admin/settings/settings-init.php:836
 msgid "Out Of Stock Threshold"
 msgstr "Varasto loppu raja-arvo"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:848
+#: admin/settings/settings-init.php:849
 msgid "Out Of Stock Visibility"
 msgstr "Varasto loppu -tilanne"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:849
+#: admin/settings/settings-init.php:850
 msgid "Hide out of stock items from the catalog"
 msgstr "Piilota varastosta loppuneet tuotteet tuoteluettelosta"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:856
+#: admin/settings/settings-init.php:857
 msgid "Stock Display Format"
 msgstr "Varaston esitystapa"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:857
+#: admin/settings/settings-init.php:858
 msgid "This controls how stock is displayed on the frontend."
 msgstr "Tässä asetetaan kuinka esitetään tuotteiden määrä varastossa."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:863
+#: admin/settings/settings-init.php:864
 msgid "Always show stock e.g. \"12 in stock\""
 msgstr "Näytä aina tuotteiden määrä, esim. '12 varastossa'"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:864
+#: admin/settings/settings-init.php:865
 msgid "Only show stock when low e.g. \"Only 2 left in stock\" vs. \"In Stock\""
 msgstr ""
 "Näytä kun määrä on vähäinen, esim. 'Vain 2 varastossa' eikä 'Varastossa'"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:865
+#: admin/settings/settings-init.php:866
 msgid "Never show stock amount"
 msgstr "Ei näytetä tuotteiden määrää varastossa"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:877
-#: admin/woocommerce-admin-settings.php:320
+#: admin/settings/settings-init.php:878
+#: admin/woocommerce-admin-settings.php:326
 msgid "Shipping Options"
 msgstr "Toimituksen asetukset"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:880
+#: admin/settings/settings-init.php:881
 msgid "Shipping Calculations"
 msgstr "Toimituskulujen laskeminen"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:881
+#: admin/settings/settings-init.php:882
 msgid "Enable shipping"
 msgstr "Ota käyttöön tuotteiden toimitus asiakkaalle"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:889
+#: admin/settings/settings-init.php:890
 msgid "Enable the shipping calculator on the cart page"
 msgstr "Ota käyttöön ostoskorissa toimituskulujen laskuri"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:897
+#: admin/settings/settings-init.php:898
 msgid "Hide shipping costs until an address is entered"
 msgstr "Toimituskuluja ei näytetä ennen kuin osoite on syötetty."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:905
+#: admin/settings/settings-init.php:906
 msgid "Shipping Method Display"
 msgstr "Toimitustavan esitys"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:906
+#: admin/settings/settings-init.php:907
 msgid ""
 "This controls how multiple shipping methods are displayed on the frontend."
 msgstr ""
@@ -3732,44 +3744,44 @@ msgstr ""
 "puolella."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:912
+#: admin/settings/settings-init.php:913
 msgid "Radio buttons"
 msgstr "Valintanappi"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:913
+#: admin/settings/settings-init.php:914
 msgid "Select box"
 msgstr "Valintaruutu"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:919
+#: admin/settings/settings-init.php:920
 msgid "Shipping Destination"
 msgstr "Toimitusosoite"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:920
+#: admin/settings/settings-init.php:921
 msgid "Only ship to the users billing address"
 msgstr "Toimita ainoastaan asiakkaan laskutusosoitteeseen"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:928
+#: admin/settings/settings-init.php:929
 msgid "Ship to billing address by default"
 msgstr "Toimita laskutusosoitteeseen, oletus"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:936
+#: admin/settings/settings-init.php:937
 msgid "Collect shipping address even when not required"
 msgstr "Kerää toimitusosoite aina, vaikka sitä ei tarvita"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:954
-#: admin/woocommerce-admin-settings.php:219
-#: admin/woocommerce-admin-settings.php:355
+#: admin/settings/settings-init.php:955
+#: admin/woocommerce-admin-settings.php:225
+#: admin/woocommerce-admin-settings.php:363
 msgid "Payment Gateways"
 msgstr "Maksu"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:954
+#: admin/settings/settings-init.php:955
 msgid ""
 "Installed payment gateways are displayed below. Drag and drop payment "
 "gateways to control their display order on the checkout."
@@ -3778,28 +3790,28 @@ msgstr ""
 "tässä, Vedä ja pudota -menetelmällä."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:972
-#: admin/woocommerce-admin-settings.php:250
+#: admin/settings/settings-init.php:973
+#: admin/woocommerce-admin-settings.php:256
 msgid "Tax Options"
 msgstr "Vero asetukset"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:975
+#: admin/settings/settings-init.php:976
 msgid "Enable Taxes"
 msgstr "Verotus"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:976
+#: admin/settings/settings-init.php:977
 msgid "Enable taxes and tax calculations"
 msgstr "Ota käyttöön verot ja verojen laskeminen"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:983
+#: admin/settings/settings-init.php:984
 msgid "Prices Entered With Tax"
 msgstr "Hinnat kirjoitettu"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:987
+#: admin/settings/settings-init.php:988
 msgid ""
 "This option is important as it will affect how you input prices. Changing it "
 "will not update existing products."
@@ -3808,47 +3820,47 @@ msgstr ""
 "syötetyt] hinnat eivät muutu."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:989
+#: admin/settings/settings-init.php:990
 msgid "Yes, I will enter prices inclusive of tax"
 msgstr "Hinnat ilmoitettu/ syötetään verollisina (sisältää veron)."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:990
+#: admin/settings/settings-init.php:991
 msgid "No, I will enter prices exclusive of tax"
 msgstr "Hinnat ilmoitettu/ syötetään verottomina (ei sisällä vero)."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:995
+#: admin/settings/settings-init.php:996
 msgid "Calculate Tax Based On:"
 msgstr "Veron laskentaperuste:"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:997
+#: admin/settings/settings-init.php:998
 msgid "This option determines which address is used to calculate tax."
 msgstr "Tässä asetetaan osoite, jonka perusteella lasketaan verot."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1001
+#: admin/settings/settings-init.php:1002
 msgid "Customer shipping address"
 msgstr "Toimitusosoite"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1002
+#: admin/settings/settings-init.php:1003
 msgid "Customer billing address"
 msgstr "Laskutusosoite"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1003 admin/settings/settings-init.php:1015
+#: admin/settings/settings-init.php:1004 admin/settings/settings-init.php:1016
 msgid "Shop base address"
 msgstr "Kaupan osoite"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1008
+#: admin/settings/settings-init.php:1009
 msgid "Default Customer Address:"
 msgstr "Asiakkaan osoite, oletus"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1010
+#: admin/settings/settings-init.php:1011
 msgid ""
 "This option determines the customers default address (before they input "
 "their own)."
@@ -3857,17 +3869,17 @@ msgstr ""
 "kirjoittaa oman osoitteensa."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1014
+#: admin/settings/settings-init.php:1015
 msgid "No address"
 msgstr "Ei käytetä osoitetta"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1020
+#: admin/settings/settings-init.php:1021
 msgid "Shipping Tax Class:"
 msgstr "Toimituskulujen veroluokka:"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1021
+#: admin/settings/settings-init.php:1022
 msgid ""
 "Optionally control which tax class shipping gets, or leave it so shipping "
 "tax is based on the cart items themselves."
@@ -3876,24 +3888,24 @@ msgstr ""
 "samaa veroluokkaa kuin ostoskorissa olevilla tuotteilla."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1031
+#: admin/settings/settings-init.php:1032
 msgid "Rounding"
 msgstr "Pyöristys"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1032
+#: admin/settings/settings-init.php:1033
 msgid "Round tax at subtotal level, instead of rounding per line"
 msgstr ""
 "Pyöristä kaikkien tuotteiden vero yhdellä kertaa (USA), eikä kuten "
 "oletuksena jokaisella rivillä/ -tuotteelle erikseen (EU)."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1039
+#: admin/settings/settings-init.php:1040
 msgid "Additional Tax Classes"
 msgstr "Lisää veroluokkia"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1040
+#: admin/settings/settings-init.php:1041
 msgid ""
 "List additonal tax classes below (1 per line). This is in addition to the "
 "default <code>Standard Rate</code>. Tax classes can be assigned to products."
@@ -3903,32 +3915,32 @@ msgstr ""
 "voidaan kohdistaa tuotteille."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1044
+#: admin/settings/settings-init.php:1045
 msgid "Reduced Rate%sZero Rate"
 msgstr "Alennettu veroprosentti%s0 veroprosentti"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1048
+#: admin/settings/settings-init.php:1049
 msgid "Display prices during cart/checkout:"
 msgstr "Ostoskori/kassa hinnat näytetään"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1053
+#: admin/settings/settings-init.php:1054
 msgid "Including tax"
 msgstr "Sisältää veron"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1054
+#: admin/settings/settings-init.php:1055
 msgid "Excluding tax"
 msgstr "Ei sisällä veroa"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1066
+#: admin/settings/settings-init.php:1067
 msgid "Email Sender Options"
 msgstr "Sähköpostin lähettäjä asetukset"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1066
+#: admin/settings/settings-init.php:1067
 msgid ""
 "The following options affect the sender (email address and name) used in "
 "WooCommerce emails."
@@ -3937,22 +3949,22 @@ msgstr ""
 "ja sähköpostiosoite."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1069
+#: admin/settings/settings-init.php:1070
 msgid "\"From\" Name"
 msgstr "'Lähettäjän' nimi"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1078
+#: admin/settings/settings-init.php:1079
 msgid "\"From\" Email Address"
 msgstr "'Lähettäjän' sähköpostiosoite"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1091
+#: admin/settings/settings-init.php:1092
 msgid "Email Template"
 msgstr "Sähköpostin pohja (malline)"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1091
+#: admin/settings/settings-init.php:1092
 msgid ""
 "This section lets you customise the WooCommerce emails. <a href=\"%s\" "
 "target=\"_blank\">Click here to preview your email template</a>. For more "
@@ -3966,12 +3978,12 @@ msgstr ""
 "<code>teeman-hakemisto/woocommmerce/emails/</code>."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1094
+#: admin/settings/settings-init.php:1095
 msgid "Header Image"
 msgstr "Kuva yläpalkissa"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1095
+#: admin/settings/settings-init.php:1096
 msgid ""
 "Enter a URL to an image you want to show in the email's header. Upload your "
 "image using the <a href=\"%s\">media uploader</a>."
@@ -3981,61 +3993,61 @@ msgstr ""
 "toimintoa."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1103
+#: admin/settings/settings-init.php:1104
 msgid "Email Footer Text"
 msgstr "Teksti alatunnisteessa"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1104
+#: admin/settings/settings-init.php:1105
 msgid "The text to appear in the footer of WooCommerce emails."
 msgstr "Teksti näkyy WooCommercen lähettämien viestien alareunassa."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1108
+#: admin/settings/settings-init.php:1109
 msgid "Powered by WooCommerce"
 msgstr "Moottorina toimii WooCommerce"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1112
+#: admin/settings/settings-init.php:1113
 msgid "Base Colour"
 msgstr "Yläpalkin väri"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1113
+#: admin/settings/settings-init.php:1114
 msgid ""
 "The base colour for WooCommerce email templates. Default <code>#557da1</"
 "code>."
 msgstr "Sähköpostien yläpalkin väri. Oletuksena <code>#557da1</code>."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1121
+#: admin/settings/settings-init.php:1122
 msgid "Background Colour"
 msgstr "Sähköpostisivun taustaväri"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1122
+#: admin/settings/settings-init.php:1123
 msgid ""
 "The background colour for WooCommerce email templates. Default "
 "<code>#f5f5f5</code>."
 msgstr "Sähköpostisivun taustaväri. Oletuksena <code>#f5f5f5</code>."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1130
+#: admin/settings/settings-init.php:1131
 msgid "Email Body Background Colour"
 msgstr "Tekstialueen taustaväri"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1131
+#: admin/settings/settings-init.php:1132
 msgid "The main body background colour. Default <code>#fdfdfd</code>."
 msgstr "Tekstin alla olevan alueen väri. Oletuksena <code>#fdfdfd</code>."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1139
+#: admin/settings/settings-init.php:1140
 msgid "Email Body Text Colour"
 msgstr "Tekstin väri"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1140
+#: admin/settings/settings-init.php:1141
 msgid "The main body text colour. Default <code>#505050</code>."
 msgstr "Kirjoituksen väri. Oletuksena <code>#505050</code>."
 
@@ -4043,7 +4055,7 @@ msgstr "Kirjoituksen väri. Oletuksena <code>#505050</code>."
 # @ default
 #: admin/settings/settings-payment-gateways.php:27
 #: admin/settings/settings-shipping-methods.php:29
-#: admin/woocommerce-admin-init.php:701
+#: admin/woocommerce-admin-init.php:709
 #: admin/woocommerce-admin-taxonomies.php:27
 #: admin/woocommerce-admin-taxonomies.php:121
 msgid "Default"
@@ -4182,7 +4194,7 @@ msgstr ""
 #: admin/settings/settings-tax-rates.php:50
 #: admin/settings/settings-tax-rates.php:217
 msgid "Compound"
-msgstr "Kasautuva"
+msgstr "Yhdistelmä"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:50
@@ -4190,8 +4202,8 @@ msgid ""
 "Choose whether or not this is a compound rate. Compound tax rates are "
 "applied on top of other tax rates."
 msgstr ""
-"Valitse onko vero kasautauva (kumuloituva). Kasautuva vero lasketaan "
-"summasta joka sisältää jo aiemmin lasketun toisen veron (ja tuotteen hinnan)."
+"Valitse onko vero yhdistetty (eli 'veroa veron päälle'). Yhdistetty vero "
+"lasketaan summasta: tuotteen hinta + hinnalle aiemmin laskettu vero."
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:52
@@ -4243,37 +4255,45 @@ msgstr "Veroprosentti"
 msgid "Tax Name"
 msgstr "Veron nimi"
 
-# @ woocommerce
-#: admin/woocommerce-admin-attributes.php:43
-msgid "Slug %s is too long"
-msgstr "Polkutunnus %s on liian pitkä"
+#: admin/woocommerce-admin-attributes.php:77
+msgid "Please, provide an attribute name, slug and type."
+msgstr "Kirjoita ominaisuuden nimi, polkutunnus ja laji."
+
+#: admin/woocommerce-admin-attributes.php:79
+msgid "Slug “%s” is too long (28 characters max). Shorten it, please."
+msgstr "Polkutunnus '%s' ylittää max. pituuden 28 merkkiä. Lyhennä, ole hyvä."
+
+#: admin/woocommerce-admin-attributes.php:81
+msgid ""
+"Slug “%s” is not allowed because it is a reserved term. Change it, please."
+msgstr "Polkutunnus '%s' on varattu [järjestelmälle]. Vaihda, ole hyvä."
+
+#: admin/woocommerce-admin-attributes.php:85
+#: admin/woocommerce-admin-attributes.php:90
+msgid "Slug “%s” is already in use. Change it, please."
+msgstr "Polkutunnus '%s' on käytössä. Vaihda, ole hyvä."
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:83
-msgid "Taxonomy exists - please change the slug"
-msgstr "Sama luokittelu on jo - ole hyvä ja vaihda polkutunnus"
-
-# @ woocommerce
-#: admin/woocommerce-admin-attributes.php:211
+#: admin/woocommerce-admin-attributes.php:226
 msgid "Edit Attribute"
 msgstr "Muokkaa ominaisuutta"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:221
-#: admin/woocommerce-admin-attributes.php:359
+#: admin/woocommerce-admin-attributes.php:236
+#: admin/woocommerce-admin-attributes.php:375
 msgid "Name for the attribute (shown on the front-end)."
 msgstr "Ominaisuuden nimi (näkyy julkisella puolella)."
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:226
-#: admin/woocommerce-admin-attributes.php:291
-#: admin/woocommerce-admin-attributes.php:363
+#: admin/woocommerce-admin-attributes.php:241
+#: admin/woocommerce-admin-attributes.php:307
+#: admin/woocommerce-admin-attributes.php:379
 msgid "Slug"
 msgstr "Polkutunnus"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:230
-#: admin/woocommerce-admin-attributes.php:365
+#: admin/woocommerce-admin-attributes.php:245
+#: admin/woocommerce-admin-attributes.php:381
 msgid ""
 "Unique slug/reference for the attribute; must be shorter than 28 characters."
 msgstr ""
@@ -4281,20 +4301,20 @@ msgstr ""
 "poikkeava."
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:239
-#: admin/woocommerce-admin-attributes.php:371
+#: admin/woocommerce-admin-attributes.php:254
+#: admin/woocommerce-admin-attributes.php:387
 msgid "Select"
 msgstr "Valinta"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:240
-#: admin/woocommerce-admin-attributes.php:372
+#: admin/woocommerce-admin-attributes.php:255
+#: admin/woocommerce-admin-attributes.php:388
 msgid "Text"
 msgstr "Teksti"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:242
-#: admin/woocommerce-admin-attributes.php:374
+#: admin/woocommerce-admin-attributes.php:258
+#: admin/woocommerce-admin-attributes.php:391
 msgid ""
 "Determines how you select attributes for products. <strong>Text</strong> "
 "allows manual entry via the product page, whereas <strong>select</strong> "
@@ -4308,28 +4328,28 @@ msgstr ""
 "ominaisuutta."
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:247
-#: admin/woocommerce-admin-attributes.php:378
+#: admin/woocommerce-admin-attributes.php:263
+#: admin/woocommerce-admin-attributes.php:395
 msgid "Default sort order"
 msgstr "Lajittelujärjestys, oletus"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:251
-#: admin/woocommerce-admin-attributes.php:319
-#: admin/woocommerce-admin-attributes.php:380
+#: admin/woocommerce-admin-attributes.php:267
+#: admin/woocommerce-admin-attributes.php:335
+#: admin/woocommerce-admin-attributes.php:397
 msgid "Custom ordering"
 msgstr "Mukautettu järjestys"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:253
-#: admin/woocommerce-admin-attributes.php:316
-#: admin/woocommerce-admin-attributes.php:382
+#: admin/woocommerce-admin-attributes.php:269
+#: admin/woocommerce-admin-attributes.php:332
+#: admin/woocommerce-admin-attributes.php:399
 msgid "Term ID"
 msgstr "Arvon ID"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:255
-#: admin/woocommerce-admin-attributes.php:384
+#: admin/woocommerce-admin-attributes.php:271
+#: admin/woocommerce-admin-attributes.php:401
 msgid ""
 "Determines the sort order on the frontend for this attribute. If using "
 "custom ordering, you can drag and drop the terms in this attribute"
@@ -4339,37 +4359,37 @@ msgstr ""
 "menetelmällä."
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:260
+#: admin/woocommerce-admin-attributes.php:276
 msgid "Update"
 msgstr "Päivitys"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:293
+#: admin/woocommerce-admin-attributes.php:309
 msgid "Order by"
 msgstr "Järjestys"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:294
+#: admin/woocommerce-admin-attributes.php:310
 msgid "Terms"
 msgstr "Arvot"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:339
+#: admin/woocommerce-admin-attributes.php:355
 msgid "Configure&nbsp;terms"
 msgstr "Muokkaa&nbsp;arvoja"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:343
+#: admin/woocommerce-admin-attributes.php:359
 msgid "No attributes currently exist."
 msgstr "Yhtään ominaisuutta ei ole asetettu."
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:353
+#: admin/woocommerce-admin-attributes.php:369
 msgid "Add New Attribute"
 msgstr "Lisää uusi ominaisuus"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:354
+#: admin/woocommerce-admin-attributes.php:370
 msgid ""
 "Attributes let you define extra product data, such as size or colour. You "
 "can use these attributes in the shop sidebar using the \"layered nav\" "
@@ -4381,12 +4401,12 @@ msgstr ""
 "nimetä myöhemmin uudelleen."
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:387
+#: admin/woocommerce-admin-attributes.php:404
 msgid "Add Attribute"
 msgstr "Lisää ominaisuus"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:398
+#: admin/woocommerce-admin-attributes.php:415
 msgid "Are you sure you want to delete this attribute?"
 msgstr "Haluatko poistaa tämän ominaisuuden?"
 
@@ -4425,7 +4445,7 @@ msgstr ""
 
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:33 admin/woocommerce-admin-init.php:82
-#: admin/woocommerce-admin-status.php:41
+#: admin/woocommerce-admin-status.php:46
 msgid "System Status"
 msgstr "Järjestelmän tila"
 
@@ -4458,7 +4478,7 @@ msgstr ""
 
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:45
-#: admin/woocommerce-admin-settings.php:215
+#: admin/woocommerce-admin-settings.php:221
 msgid "Pages"
 msgstr "Sivut"
 
@@ -4512,7 +4532,7 @@ msgstr ""
 
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:51
-#: admin/woocommerce-admin-settings.php:220
+#: admin/woocommerce-admin-settings.php:226
 msgid "Emails"
 msgstr "S-posti"
 
@@ -4523,7 +4543,7 @@ msgstr "Tässä voi muokata sähköpostien ilmettä ja sisältöä."
 
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:52
-#: admin/woocommerce-admin-settings.php:221
+#: admin/woocommerce-admin-settings.php:227
 msgid "Integration"
 msgstr "Palvelusidos"
 
@@ -4553,9 +4573,9 @@ msgstr ""
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:60
 #: admin/woocommerce-admin-reports.php:27
-#: admin/woocommerce-admin-reports.php:971
-#: admin/woocommerce-admin-reports.php:1067
-#: admin/woocommerce-admin-reports.php:1184
+#: admin/woocommerce-admin-reports.php:986
+#: admin/woocommerce-admin-reports.php:1082
+#: admin/woocommerce-admin-reports.php:1199
 msgid "Sales"
 msgstr "Myynti"
 
@@ -4703,9 +4723,9 @@ msgstr "Kaupan sisältö"
 # @ woocommerce
 #: admin/woocommerce-admin-dashboard.php:84
 #: admin/woocommerce-admin-functions.php:194
-#: admin/woocommerce-admin-init.php:705
-#: admin/woocommerce-admin-reports.php:970
-#: admin/woocommerce-admin-reports.php:1066
+#: admin/woocommerce-admin-init.php:713
+#: admin/woocommerce-admin-reports.php:985
+#: admin/woocommerce-admin-reports.php:1081
 msgid "Product"
 msgid_plural "Products"
 msgstr[0] "Tuote"
@@ -4796,7 +4816,7 @@ msgstr "Tuloja"
 
 # @ woocommerce
 #: admin/woocommerce-admin-functions.php:184
-#: admin/woocommerce-admin-install.php:219
+#: admin/woocommerce-admin-install.php:216
 msgid "Order Received"
 msgstr "Tilaus vastaanotettu"
 
@@ -4881,13 +4901,13 @@ msgid "WooCommerce Status"
 msgstr "WooCommerce tila"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:123 admin/woocommerce-admin-init.php:125
+#: admin/woocommerce-admin-init.php:135 admin/woocommerce-admin-init.php:137
 msgctxt "Admin menu name"
 msgid "Orders"
 msgstr "Tilaukset"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:381
+#: admin/woocommerce-admin-init.php:390
 msgid ""
 "Are you sure you want to remove the selected items? If you have previously "
 "reduced this item's stock, or this order was submitted by a customer, you "
@@ -4899,29 +4919,29 @@ msgstr ""
 "korotettava."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:382
+#: admin/woocommerce-admin-init.php:391
 msgid "Remove this item meta?"
 msgstr "Poista kohteen metatieto?"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:383
+#: admin/woocommerce-admin-init.php:392
 msgid "Remove this attribute?"
 msgstr "Poistetaanko tämä ominaisuus?"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:391
+#: admin/woocommerce-admin-init.php:400
 msgid "Enter a name for the new attribute term:"
 msgstr "Kirjoita nimi uudelle ominaisuuden arvolle:"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:392
+#: admin/woocommerce-admin-init.php:401
 msgid "Calculate totals based on order items, discounts, and shipping?"
 msgstr ""
 "Laske loppusummat tilattujen tuotteiden, -alennusten ja -toimituskulujen "
 "pohjalta?"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:393
+#: admin/woocommerce-admin-init.php:402
 msgid ""
 "Calculate line taxes? This will calculate taxes based on the customers "
 "country. If no billing/shipping is set it will use the store base country."
@@ -4931,7 +4951,7 @@ msgstr ""
 "kaupan sijaintia."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:394
+#: admin/woocommerce-admin-init.php:403
 msgid ""
 "Copy billing information to shipping information? This will remove any "
 "currently entered shipping information."
@@ -4940,7 +4960,7 @@ msgstr ""
 "toimitusosoitteen."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:395
+#: admin/woocommerce-admin-init.php:404
 msgid ""
 "Load the customer's billing information? This will remove any currently "
 "entered billing information."
@@ -4948,7 +4968,7 @@ msgstr ""
 "Ladataanko asiakkaan laskutustiedot? Tämä poistaa jo syötetyt laskutustiedot."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:396
+#: admin/woocommerce-admin-init.php:405
 msgid ""
 "Load the customer's shipping information? This will remove any currently "
 "entered shipping information."
@@ -4957,54 +4977,54 @@ msgstr ""
 "toimitustiedot."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:400
+#: admin/woocommerce-admin-init.php:409
 msgid "No customer selected"
 msgstr "Asiakasta ei valittu"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:609
+#: admin/woocommerce-admin-init.php:617
 msgid "Product updated. <a href=\"%s\">View Product</a>"
 msgstr "Tuote päivitetty. <a href=\"%s\">Katso tuote</a>"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:610 admin/woocommerce-admin-init.php:625
-#: admin/woocommerce-admin-init.php:640
+#: admin/woocommerce-admin-init.php:618 admin/woocommerce-admin-init.php:633
+#: admin/woocommerce-admin-init.php:648
 msgid "Custom field updated."
 msgstr "Mukautettu kenttä päivitetty."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:611 admin/woocommerce-admin-init.php:626
-#: admin/woocommerce-admin-init.php:641
+#: admin/woocommerce-admin-init.php:619 admin/woocommerce-admin-init.php:634
+#: admin/woocommerce-admin-init.php:649
 msgid "Custom field deleted."
 msgstr "Mukautettu kenttä poistettu."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:612
+#: admin/woocommerce-admin-init.php:620
 msgid "Product updated."
 msgstr "Tuote päivitetty."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:613
+#: admin/woocommerce-admin-init.php:621
 msgid "Product restored to revision from %s"
 msgstr "Tuote palautettu versioon, %s"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:614
+#: admin/woocommerce-admin-init.php:622
 msgid "Product published. <a href=\"%s\">View Product</a>"
 msgstr "Tuote julkaistu. <a href=\"%s\">Katso tuote</a>"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:615
+#: admin/woocommerce-admin-init.php:623
 msgid "Product saved."
 msgstr "Tuote tallennettu."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:616
+#: admin/woocommerce-admin-init.php:624
 msgid "Product submitted. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
 msgstr "Tuote syötetty. <a target=\"_blank\" href=\"%s\">Esikatsele tuote</a>"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:617
+#: admin/woocommerce-admin-init.php:625
 msgid ""
 "Product scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" href="
 "\"%2$s\">Preview Product</a>"
@@ -5013,13 +5033,13 @@ msgstr ""
 "\">Esikatsele tuote</a>"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:618 admin/woocommerce-admin-init.php:633
-#: admin/woocommerce-admin-init.php:648
+#: admin/woocommerce-admin-init.php:626 admin/woocommerce-admin-init.php:641
+#: admin/woocommerce-admin-init.php:656
 msgid "M j, Y @ G:i"
 msgstr "j.n.Y @ H:i"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:619
+#: admin/woocommerce-admin-init.php:627
 msgid ""
 "Product draft updated. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
 msgstr ""
@@ -5027,74 +5047,74 @@ msgstr ""
 "tuote</a>"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:624 admin/woocommerce-admin-init.php:627
-#: admin/woocommerce-admin-init.php:629
+#: admin/woocommerce-admin-init.php:632 admin/woocommerce-admin-init.php:635
+#: admin/woocommerce-admin-init.php:637
 msgid "Order updated."
 msgstr "Tilaus päivitetty."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:628
+#: admin/woocommerce-admin-init.php:636
 msgid "Order restored to revision from %s"
 msgstr "Tilaus palautettu versioon, %s"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:630
+#: admin/woocommerce-admin-init.php:638
 msgid "Order saved."
 msgstr "Tilaus tallennettu."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:631
+#: admin/woocommerce-admin-init.php:639
 msgid "Order submitted."
 msgstr "Tilaus lähetetty."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:632
+#: admin/woocommerce-admin-init.php:640
 msgid "Order scheduled for: <strong>%1$s</strong>."
 msgstr "Tilaus ajastettu: <strong>%1$s</strong>"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:634
+#: admin/woocommerce-admin-init.php:642
 msgid "Order draft updated."
 msgstr "Tilauksen luonnos päivitetty."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:639 admin/woocommerce-admin-init.php:642
-#: admin/woocommerce-admin-init.php:644
+#: admin/woocommerce-admin-init.php:647 admin/woocommerce-admin-init.php:650
+#: admin/woocommerce-admin-init.php:652
 msgid "Coupon updated."
 msgstr "Kuponki päivitetty."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:643
+#: admin/woocommerce-admin-init.php:651
 msgid "Coupon restored to revision from %s"
 msgstr "Kuponki palautettu versioon, %s"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:645
+#: admin/woocommerce-admin-init.php:653
 msgid "Coupon saved."
 msgstr "Kuponki tallennettu."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:646
+#: admin/woocommerce-admin-init.php:654
 msgid "Coupon submitted."
 msgstr "Kuponki lähetetty."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:647
+#: admin/woocommerce-admin-init.php:655
 msgid "Coupon scheduled for: <strong>%1$s</strong>."
 msgstr "Kuponki ajastettu: <strong>%1$s</strong>."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:649
+#: admin/woocommerce-admin-init.php:657
 msgid "Coupon draft updated."
 msgstr "Kupongin luonnos päivitetty."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:666
+#: admin/woocommerce-admin-init.php:674
 msgid "Order notes"
 msgstr "Tilauksen kommentit"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:681
+#: admin/woocommerce-admin-init.php:689
 msgid ""
 "These settings control the permalinks used for products. These settings only "
 "apply when <strong>not using \"default\" permalinks above</strong>."
@@ -5103,34 +5123,34 @@ msgstr ""
 "silloin, kun <strong> ei käytetä 'oletus' kestolinkkejä</strong> (yllä)."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:688
+#: admin/woocommerce-admin-init.php:696
 msgctxt "default-slug"
 msgid "shop"
 msgstr "kauppa"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:689
+#: admin/woocommerce-admin-init.php:697
 msgctxt "default-slug"
 msgid "product"
 msgstr "tuote"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:710
+#: admin/woocommerce-admin-init.php:718
 msgid "Shop base"
 msgstr "Kaupan polkutunnus"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:714
+#: admin/woocommerce-admin-init.php:722
 msgid "Shop base with category"
 msgstr "Kaupan polkutunnus ja osasto"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:720
+#: admin/woocommerce-admin-init.php:728
 msgid "Custom Base"
 msgstr "Mukautettu polkutunnus"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:722
+#: admin/woocommerce-admin-init.php:730
 msgid ""
 "Enter a custom base to use. A base <strong>must</strong> be set or WordPress "
 "will use default instead."
@@ -5139,22 +5159,22 @@ msgstr ""
 "tai käytetään WordPress oletusta."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:750
+#: admin/woocommerce-admin-init.php:758
 msgid "Product permalink base"
 msgstr "Tuotteiden polkutunnus"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:755
+#: admin/woocommerce-admin-init.php:763
 msgid "Product category base"
 msgstr "(Tuote)Osastojen polkutunnus"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:762
+#: admin/woocommerce-admin-init.php:770
 msgid "Product tag base"
 msgstr "Avainsanojen polkutunnus"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:769
+#: admin/woocommerce-admin-init.php:777
 msgid "Product attribute base"
 msgstr "Ominaisuuksien polkutunnus"
 
@@ -5189,82 +5209,71 @@ msgstr "kassa"
 # @ woocommerce
 #: admin/woocommerce-admin-install.php:198
 msgctxt "page_slug"
-msgid "order-tracking"
-msgstr "tilauksen-seuraaminen"
-
-# @ woocommerce
-#: admin/woocommerce-admin-install.php:198
-msgid "Track your order"
-msgstr "Seuraa tilaustasi"
-
-# @ woocommerce
-#: admin/woocommerce-admin-install.php:201
-msgctxt "page_slug"
 msgid "my-account"
 msgstr "oma-tili"
 
 # @ woocommerce
-#: admin/woocommerce-admin-install.php:201
+#: admin/woocommerce-admin-install.php:198
 msgid "My Account"
 msgstr "Oma tili"
 
 # @ woocommerce
-#: admin/woocommerce-admin-install.php:204
+#: admin/woocommerce-admin-install.php:201
 msgctxt "page_slug"
 msgid "lost-password"
 msgstr "salasanan-palautus"
 
 # @ woocommerce
-#: admin/woocommerce-admin-install.php:204
+#: admin/woocommerce-admin-install.php:201
 msgid "Lost Password"
 msgstr "Salasana unohtunut"
 
 # @ woocommerce
-#: admin/woocommerce-admin-install.php:207
+#: admin/woocommerce-admin-install.php:204
 msgctxt "page_slug"
 msgid "edit-address"
 msgstr "muokkaa-osoitetta"
 
 # @ woocommerce
-#: admin/woocommerce-admin-install.php:207
+#: admin/woocommerce-admin-install.php:204
 msgid "Edit My Address"
 msgstr "Muokkaa osoitetta"
 
 # @ woocommerce
-#: admin/woocommerce-admin-install.php:210
+#: admin/woocommerce-admin-install.php:207
 msgctxt "page_slug"
 msgid "view-order"
 msgstr "tarkastele-tilausta"
 
 # @ woocommerce
-#: admin/woocommerce-admin-install.php:210
+#: admin/woocommerce-admin-install.php:207
 msgid "View Order"
 msgstr "Tarkastele tilausta"
 
 # @ woocommerce
-#: admin/woocommerce-admin-install.php:213
+#: admin/woocommerce-admin-install.php:210
 msgctxt "page_slug"
 msgid "change-password"
 msgstr "vaihda-salasana"
 
 # @ woocommerce
-#: admin/woocommerce-admin-install.php:213
+#: admin/woocommerce-admin-install.php:210
 msgid "Change Password"
 msgstr "Vaihda salasana"
 
 # @ woocommerce
-#: admin/woocommerce-admin-install.php:216
+#: admin/woocommerce-admin-install.php:213
 msgctxt "page_slug"
 msgid "pay"
 msgstr "maksa"
 
 # @ woocommerce
-#: admin/woocommerce-admin-install.php:216
+#: admin/woocommerce-admin-install.php:213
 msgid "Checkout &rarr; Pay"
 msgstr "Siirry kassalle &rarr; Maksa"
 
 # @ woocommerce
-#: admin/woocommerce-admin-install.php:219
+#: admin/woocommerce-admin-install.php:216
 msgctxt "page_slug"
 msgid "order-received"
 msgstr "tilaus-vastaanotettu"
@@ -5311,17 +5320,17 @@ msgstr "Alennus kupongin mukaan "
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:232
-#: admin/woocommerce-admin-reports.php:496
-#: admin/woocommerce-admin-reports.php:696
-#: admin/woocommerce-admin-reports.php:872
+#: admin/woocommerce-admin-reports.php:497
+#: admin/woocommerce-admin-reports.php:702
+#: admin/woocommerce-admin-reports.php:883
 msgid "Sales amount"
 msgstr "Myynnin määrä €"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:237
-#: admin/woocommerce-admin-reports.php:496
-#: admin/woocommerce-admin-reports.php:696
-#: admin/woocommerce-admin-reports.php:872
+#: admin/woocommerce-admin-reports.php:497
+#: admin/woocommerce-admin-reports.php:702
+#: admin/woocommerce-admin-reports.php:883
 msgid "Number of sales"
 msgstr "Myyntitapahtumia kpl"
 
@@ -5337,26 +5346,26 @@ msgstr "Myynti yhteensä"
 #: admin/woocommerce-admin-reports.php:389
 #: admin/woocommerce-admin-reports.php:395
 #: admin/woocommerce-admin-reports.php:401
-#: admin/woocommerce-admin-reports.php:639
-#: admin/woocommerce-admin-reports.php:645
-#: admin/woocommerce-admin-reports.php:651
-#: admin/woocommerce-admin-reports.php:657
-#: admin/woocommerce-admin-reports.php:818
-#: admin/woocommerce-admin-reports.php:824
-#: admin/woocommerce-admin-reports.php:830
-#: admin/woocommerce-admin-reports.php:836
-#: admin/woocommerce-admin-reports.php:1349
-#: admin/woocommerce-admin-reports.php:1355
-#: admin/woocommerce-admin-reports.php:1361
-#: admin/woocommerce-admin-reports.php:1790
-#: admin/woocommerce-admin-reports.php:1796
-#: admin/woocommerce-admin-reports.php:1802
-#: admin/woocommerce-admin-reports.php:1808
-#: admin/woocommerce-admin-reports.php:1814
-#: admin/woocommerce-admin-reports.php:1820
-#: admin/woocommerce-admin-reports.php:2255
-#: admin/woocommerce-admin-reports.php:2266
-#: admin/woocommerce-admin-reports.php:2277
+#: admin/woocommerce-admin-reports.php:644
+#: admin/woocommerce-admin-reports.php:650
+#: admin/woocommerce-admin-reports.php:656
+#: admin/woocommerce-admin-reports.php:662
+#: admin/woocommerce-admin-reports.php:828
+#: admin/woocommerce-admin-reports.php:834
+#: admin/woocommerce-admin-reports.php:840
+#: admin/woocommerce-admin-reports.php:846
+#: admin/woocommerce-admin-reports.php:1364
+#: admin/woocommerce-admin-reports.php:1370
+#: admin/woocommerce-admin-reports.php:1376
+#: admin/woocommerce-admin-reports.php:1810
+#: admin/woocommerce-admin-reports.php:1816
+#: admin/woocommerce-admin-reports.php:1822
+#: admin/woocommerce-admin-reports.php:1828
+#: admin/woocommerce-admin-reports.php:1834
+#: admin/woocommerce-admin-reports.php:1840
+#: admin/woocommerce-admin-reports.php:2280
+#: admin/woocommerce-admin-reports.php:2291
+#: admin/woocommerce-admin-reports.php:2302
 msgid "n/a"
 msgstr "Ei saatavilla/-tietoa"
 
@@ -5367,8 +5376,8 @@ msgstr "Tilaukset yhteensä"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:377
-#: admin/woocommerce-admin-reports.php:645
-#: admin/woocommerce-admin-reports.php:824
+#: admin/woocommerce-admin-reports.php:650
+#: admin/woocommerce-admin-reports.php:834
 msgid "items"
 msgstr "kohteet"
 
@@ -5398,315 +5407,315 @@ msgid "This month's sales"
 msgstr "Tämän kuukauden myynti"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:631
-#: admin/woocommerce-admin-reports.php:965
-#: admin/woocommerce-admin-reports.php:1061
-#: admin/woocommerce-admin-reports.php:1341
+#: admin/woocommerce-admin-reports.php:636
+#: admin/woocommerce-admin-reports.php:980
+#: admin/woocommerce-admin-reports.php:1076
+#: admin/woocommerce-admin-reports.php:1356
 msgid "From:"
-msgstr "Lähettäjä:"
+msgstr "Alku pvm.:"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:631
-#: admin/woocommerce-admin-reports.php:965
-#: admin/woocommerce-admin-reports.php:1061
-#: admin/woocommerce-admin-reports.php:1341
+#: admin/woocommerce-admin-reports.php:636
+#: admin/woocommerce-admin-reports.php:980
+#: admin/woocommerce-admin-reports.php:1076
+#: admin/woocommerce-admin-reports.php:1356
 msgid "To:"
-msgstr "Vastaanottaja:"
+msgstr "Loppu pvm.:"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:631
-#: admin/woocommerce-admin-reports.php:811
-#: admin/woocommerce-admin-reports.php:965
-#: admin/woocommerce-admin-reports.php:1061
-#: admin/woocommerce-admin-reports.php:1214
-#: admin/woocommerce-admin-reports.php:1341
-#: admin/woocommerce-admin-reports.php:1474
-#: admin/woocommerce-admin-reports.php:2244
-#: admin/woocommerce-admin-reports.php:2428
+#: admin/woocommerce-admin-reports.php:636
+#: admin/woocommerce-admin-reports.php:821
+#: admin/woocommerce-admin-reports.php:980
+#: admin/woocommerce-admin-reports.php:1076
+#: admin/woocommerce-admin-reports.php:1229
+#: admin/woocommerce-admin-reports.php:1356
+#: admin/woocommerce-admin-reports.php:1489
+#: admin/woocommerce-admin-reports.php:2269
+#: admin/woocommerce-admin-reports.php:2453
 msgid "Show"
 msgstr "Näytä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:637
+#: admin/woocommerce-admin-reports.php:642
 msgid "Total sales in range"
 msgstr "Ajanjakson myynti yhteensä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:643
+#: admin/woocommerce-admin-reports.php:648
 msgid "Total orders in range"
 msgstr "Ajanjakson tilaukset"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:649
+#: admin/woocommerce-admin-reports.php:654
 msgid "Average order total in range"
 msgstr "Tilaus keskimäärin € aikavälillä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:655
+#: admin/woocommerce-admin-reports.php:660
 msgid "Average order items in range"
 msgstr "Tilattu keskimäärin tuotteita kpl aikavälillä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:663
+#: admin/woocommerce-admin-reports.php:668
 msgid "Sales in range"
 msgstr "Myyntitulot aikavälillä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:805
-#: admin/woocommerce-admin-reports.php:2238
+#: admin/woocommerce-admin-reports.php:815
+#: admin/woocommerce-admin-reports.php:2263
 msgid "Year:"
 msgstr "Vuosi:"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:816
+#: admin/woocommerce-admin-reports.php:826
 msgid "Total sales for year"
 msgstr "Koko vuoden myynti"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:822
+#: admin/woocommerce-admin-reports.php:832
 msgid "Total orders for year"
 msgstr "Koko vuoden tilaukset"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:828
+#: admin/woocommerce-admin-reports.php:838
 msgid "Average order total for year"
 msgstr "Tilaus keskimäärin € vuodessa"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:834
+#: admin/woocommerce-admin-reports.php:844
 msgid "Average order items for year"
 msgstr "Tilaus keskimäärin kpl vuodessa"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:842
+#: admin/woocommerce-admin-reports.php:852
 msgid "Monthly sales for year"
 msgstr "Vuoden kuukausittainen myynti"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:985
+#: admin/woocommerce-admin-reports.php:1000
 msgid "Product does not exist"
 msgstr "Tuotetta ei ole"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1082
+#: admin/woocommerce-admin-reports.php:1097
 msgid "Product no longer exists"
 msgstr "Tuotetta ei enää ole"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1179
+#: admin/woocommerce-admin-reports.php:1194
 msgid "Sales for %s:"
 msgstr "Myynti - tuote %s:"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1183
-#: admin/woocommerce-admin-reports.php:2286
+#: admin/woocommerce-admin-reports.php:1198
+#: admin/woocommerce-admin-reports.php:2311
 msgid "Month"
 msgstr "Kuukausi"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1204
+#: admin/woocommerce-admin-reports.php:1219
 msgid "No sales :("
 msgstr "Ei myyntiä :("
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1347
+#: admin/woocommerce-admin-reports.php:1362
 msgid "Total orders containing coupons"
 msgstr "Kuponkien käyttö, kpl tilauksessa"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1353
+#: admin/woocommerce-admin-reports.php:1368
 msgid "Percent of orders containing coupons"
 msgstr "Kuponkien käyttö, % tilauksista"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1359
+#: admin/woocommerce-admin-reports.php:1374
 msgid "Total coupon discount"
 msgstr "Kuponkialennus yhteensä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1368
+#: admin/woocommerce-admin-reports.php:1383
 msgid "Most popular coupons"
 msgstr "Suosituimmat kupongit"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1378
+#: admin/woocommerce-admin-reports.php:1393
 msgid "Used 1 time"
 msgid_plural "Used %d times"
 msgstr[0] "Käytetty 1 kerran"
 msgstr[1] "Käytetty %d kertaa"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1381
-#: admin/woocommerce-admin-reports.php:1403
+#: admin/woocommerce-admin-reports.php:1396
+#: admin/woocommerce-admin-reports.php:1418
 msgid "No coupons found"
 msgstr "Kuponkeja ei löytynyt"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1390
+#: admin/woocommerce-admin-reports.php:1405
 msgid "Greatest discount amount"
 msgstr "Suurin alennus (€)"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1400
+#: admin/woocommerce-admin-reports.php:1415
 msgid "Discounted %s"
 msgstr "Alennettu %s"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1459
-#: admin/woocommerce-admin-reports.php:2405
+#: admin/woocommerce-admin-reports.php:1474
+#: admin/woocommerce-admin-reports.php:2430
 msgid "Show:"
 msgstr "Näytä:"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1516
+#: admin/woocommerce-admin-reports.php:1531
 msgid "Coupon"
 msgstr "Kuponki"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1599
+#: admin/woocommerce-admin-reports.php:1614
 msgid "Top coupon"
 msgstr "Paras kuponki"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1607
+#: admin/woocommerce-admin-reports.php:1622
 msgid "Worst coupon"
 msgstr "Huonoin kuponki"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1615
+#: admin/woocommerce-admin-reports.php:1630
 msgid "Discount average"
 msgstr "Alennus keskimäärin (€)"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1623
+#: admin/woocommerce-admin-reports.php:1638
 msgid "Discount median"
 msgstr "Alennus, mediaani"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1643
+#: admin/woocommerce-admin-reports.php:1658
 msgid "Monthly discounts by coupon"
 msgstr "Kuponkialennukset kuukaudessa"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1788
+#: admin/woocommerce-admin-reports.php:1808
 msgid "Total customers"
 msgstr "Asiakkaita yhteensä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1794
+#: admin/woocommerce-admin-reports.php:1814
 msgid "Total customer sales"
 msgstr "Myyntitulot rekisteröityneiltä yhteensä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1800
+#: admin/woocommerce-admin-reports.php:1820
 msgid "Total guest sales"
 msgstr "Myyntitulot vierailta yhteensä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1806
+#: admin/woocommerce-admin-reports.php:1826
 msgid "Total customer orders"
 msgstr "Tilauksia rekisteröityneiltä yhteensä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1812
+#: admin/woocommerce-admin-reports.php:1832
 msgid "Total guest orders"
 msgstr "Tilauksia vierailta yhteensä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1818
+#: admin/woocommerce-admin-reports.php:1838
 msgid "Average orders per customer"
 msgstr "Tilaukset keskimäärin / asiakas"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1826
+#: admin/woocommerce-admin-reports.php:1846
 msgid "Signups per day"
 msgstr "Rekisteröitymisiä päivässä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2023
+#: admin/woocommerce-admin-reports.php:2048
 msgid "Low stock"
 msgstr "Varasto vähissä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2045
-#: admin/woocommerce-admin-reports.php:2080
+#: admin/woocommerce-admin-reports.php:2070
+#: admin/woocommerce-admin-reports.php:2105
 msgid "%d in stock"
 msgid_plural "%d in stock"
 msgstr[0] "%d varastossa"
 msgstr[1] "%d varastossa"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2050
+#: admin/woocommerce-admin-reports.php:2075
 msgid "No products are low in stock."
 msgstr "Kaikkia tuotteita enemmän kuin 'Varasto vähissä' raja."
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2085
+#: admin/woocommerce-admin-reports.php:2110
 msgid "No products are out in stock."
 msgstr "Kaikkia tuotteita vähintään 1 kpl varastossa."
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2249
+#: admin/woocommerce-admin-reports.php:2274
 msgid "Total taxes for year"
 msgstr "Verot vuodessa yhteensä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2260
+#: admin/woocommerce-admin-reports.php:2285
 msgid "Total product taxes for year"
 msgstr "Tuotteiden vero, vuosi"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2271
+#: admin/woocommerce-admin-reports.php:2296
 msgid "Total shipping tax for year"
 msgstr "Toimituskulujen vero, vuosi"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2287
+#: admin/woocommerce-admin-reports.php:2312
 msgid "Total Sales"
 msgstr "Myynti yhteensä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2287
+#: admin/woocommerce-admin-reports.php:2312
 msgid "This is the sum of the 'Order Total' field within your orders."
 msgstr "Tilausten kenttä 'Tilaus yhteensä' arvot laskettu yhteen."
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2288
+#: admin/woocommerce-admin-reports.php:2313
 msgid "Total Shipping"
 msgstr "Toimituskulut yhteensä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2288
+#: admin/woocommerce-admin-reports.php:2313
 msgid "This is the sum of the 'Shipping Total' field within your orders."
 msgstr "Tilausten kenttä 'Toimituskulut yhteensä' arvot laskettu yhteen."
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2289
+#: admin/woocommerce-admin-reports.php:2314
 msgid "Total Product Taxes"
 msgstr "Tuotteiden verot yhteensä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2289
+#: admin/woocommerce-admin-reports.php:2314
 msgid "This is the sum of the 'Cart Tax' field within your orders."
 msgstr "Tilausten kenttä 'Ostoskorin vero' arvot laskettu yhteen."
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2290
+#: admin/woocommerce-admin-reports.php:2315
 msgid "Total Shipping Taxes"
 msgstr "Toimituskulujen verot yhteensä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2290
+#: admin/woocommerce-admin-reports.php:2315
 msgid "This is the sum of the 'Shipping Tax' field within your orders."
 msgstr "Tilausten kenttä 'Toimituskulujen vero' arvot laskettu yhteen."
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2291
+#: admin/woocommerce-admin-reports.php:2316
 msgid "Total Taxes"
 msgstr "Verot yhteensä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2291
+#: admin/woocommerce-admin-reports.php:2316
 msgid ""
 "This is the sum of the 'Cart Tax' and 'Shipping Tax' fields within your "
 "orders."
@@ -5715,47 +5724,47 @@ msgstr ""
 "'Toimituskulujen vero' arvot."
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2292
+#: admin/woocommerce-admin-reports.php:2317
 msgid "Net profit"
 msgstr "Nettovoitto"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2292
+#: admin/woocommerce-admin-reports.php:2317
 msgid "Total sales minus shipping and tax."
 msgstr "Kokonaismyynti josta vähennetty toimituskulut ja verot."
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2337
+#: admin/woocommerce-admin-reports.php:2362
 msgid "Toggle tax rows"
 msgstr "Vaihda verorivien tilaa"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2483
+#: admin/woocommerce-admin-reports.php:2508
 msgid "Category"
 msgstr "Osasto"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2585
+#: admin/woocommerce-admin-reports.php:2610
 msgid "Top category"
 msgstr "Paras osasto"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2594
+#: admin/woocommerce-admin-reports.php:2619
 msgid "Worst category"
 msgstr "Huonoin osasto"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2602
+#: admin/woocommerce-admin-reports.php:2627
 msgid "Category sales average"
 msgstr "Osaston myynnin keskimäärä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2613
+#: admin/woocommerce-admin-reports.php:2638
 msgid "Category sales median"
 msgstr "Osaston myynnin mediaani"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2633
+#: admin/woocommerce-admin-reports.php:2658
 msgid "Monthly sales by category"
 msgstr "Kuukausittainen myynti/osasto"
 
@@ -5765,12 +5774,12 @@ msgid "Action failed. Please refresh the page and retry."
 msgstr "Toiminto ei onnistunut. Päivitä sivu ja yritä uudelleen."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:158
+#: admin/woocommerce-admin-settings.php:164
 msgid "Your settings have been saved."
 msgstr "Asetukset on tallennettu."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:194
+#: admin/woocommerce-admin-settings.php:200
 msgid ""
 "<strong>Congratulations!</strong> &#8211; WooCommerce has been installed and "
 "setup. Enjoy :)"
@@ -5778,7 +5787,7 @@ msgstr ""
 "<strong>Onnittelut!</strong> &#8211; WooCommerce on asennettu. Nauti :)"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:238
+#: admin/woocommerce-admin-settings.php:244
 msgid ""
 "More functionality and gateway options available via <a href=\"%s\" target="
 "\"_blank\">WC official extensions</a>."
@@ -5787,53 +5796,53 @@ msgstr ""
 "\">Viralliset (=valmistajan) laajennukset</a>."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:256
+#: admin/woocommerce-admin-settings.php:262
 msgid "Tax Rates"
 msgstr "Veroprosentit"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:283
+#: admin/woocommerce-admin-settings.php:289
 msgid "Email Options"
 msgstr "Sähköposti asetukset"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:408
+#: admin/woocommerce-admin-settings.php:420
 msgid "Save changes"
 msgstr "Tallenna muutokset"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:475
+#: admin/woocommerce-admin-settings.php:461
 msgid "The changes you made will be lost if you navigate away from this page."
 msgstr "Tallentamattomat tiedot häviävät jos poistut tältä sivulta."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:843
+#: admin/woocommerce-admin-settings.php:829
 msgid "Hard Crop"
 msgstr "Rajoita väkisin"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:868
+#: admin/woocommerce-admin-settings.php:854
 msgid "Select a page&hellip;"
 msgstr "Valitse sivu..."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:891
+#: admin/woocommerce-admin-settings.php:877
 msgid "Choose a country&hellip;"
 msgstr "Valitse maa..."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:911
+#: admin/woocommerce-admin-settings.php:897
 msgid "Choose countries&hellip;"
 msgstr "Valitse maat..."
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:22
-msgid "Transients"
-msgstr "Väliaikaiset tiedot"
+msgid "WC Transients"
+msgstr "WC väliaikaiset tiedot"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:23
-msgid "Clear Transients"
+msgid "Clear transients"
 msgstr "Tyhjennä välimuisti"
 
 # @ woocommerce
@@ -5843,16 +5852,32 @@ msgstr "Työkalu tyhjentää välimuistin: 'väliaikaisesti tarvitut tiedot'"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:27
+msgid "Expired Transients"
+msgstr "Vanhentuneet välimuistissa"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:28
+msgid "Clear expired transients"
+msgstr "Poista vanhentuneet"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:29
+msgid "This tool will clear ALL expired transients from Wordpress."
+msgstr ""
+"Työkalu tyhjentää KAIKKI 'väliaikaisesti tarvitut tiedot' WordPress'istä."
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:32
 msgid "Term counts"
 msgstr "Luokittelut, avaisanat määrä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:28
-msgid "Recount Terms"
+#: admin/woocommerce-admin-status.php:33
+msgid "Recount terms"
 msgstr "Laske uudelleen"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:29
+#: admin/woocommerce-admin-status.php:34
 msgid ""
 "This tool will recount product terms - useful when changing your settings in "
 "a way which hides products from the catalog."
@@ -5861,17 +5886,17 @@ msgstr ""
 "[asetusten] muutosten jälkeen, jotka piilottavat luettelon tuotteita."
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:32
+#: admin/woocommerce-admin-status.php:37
 msgid "Capabilities"
 msgstr "Roolien pääsyoikeudet"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:33
-msgid "Reset Capabilities"
+#: admin/woocommerce-admin-status.php:38
+msgid "Reset capabilities"
 msgstr "Roolit perustilaan"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:34
+#: admin/woocommerce-admin-status.php:39
 msgid ""
 "This tool will reset the admin, customer and shop_manager roles to default. "
 "Use this if your users cannot access all of the WooCommerce admin pages."
@@ -5880,147 +5905,152 @@ msgstr ""
 "Käytetään jos käyttäjät eivät pääse kaikille WooCommerce hallintasivuille."
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:41
+#: admin/woocommerce-admin-status.php:46
 msgid "Generate report"
 msgstr "Luo raportti"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:50
+#: admin/woocommerce-admin-status.php:55
 msgid "Product Transients Cleared"
 msgstr "Välimuisti: 'väliaikaisesti tarvitut tiedot' tyhjennetty"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:57
+#: admin/woocommerce-admin-status.php:96
+msgid "%d Transients Rows Cleared"
+msgstr "Välimuisti: %d 'väliaikaisesti tarvittua riviä' poistettu"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:104
 msgid "Roles successfully reset"
 msgstr "Roolien pääsyoikeudet asetettu perustilaan"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:69
+#: admin/woocommerce-admin-status.php:116
 msgid "Terms successfully recounted"
 msgstr "Termit laskettiin uudelleen."
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:78
+#: admin/woocommerce-admin-status.php:125
 msgid "There was an error calling %s::%s"
 msgstr "Tapahtui virhe kutsuttaessa %s::%s"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:81
+#: admin/woocommerce-admin-status.php:128
 msgid "There was an error calling %s"
 msgstr "Tapahtui virhe kutsuttaessa %s"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:94
+#: admin/woocommerce-admin-status.php:141
 msgid "Versions"
 msgstr "Versiot"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:100
+#: admin/woocommerce-admin-status.php:147
 msgid "WooCommerce version"
 msgstr "WooCommerce versio"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:104
+#: admin/woocommerce-admin-status.php:151
 msgid "WooCommerce DB version"
 msgstr "WooCommerce tietokannan versio"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:108
+#: admin/woocommerce-admin-status.php:155
 msgid "WordPress version"
 msgstr "WordPress versio"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:112
+#: admin/woocommerce-admin-status.php:159
 msgid "Installed plugins"
 msgstr "Asennetut lisäosat"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:127
+#: admin/woocommerce-admin-status.php:174
 msgid "by"
 msgstr "tekijä"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:127
+#: admin/woocommerce-admin-status.php:174
 msgid "version"
 msgstr "versio"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:146
+#: admin/woocommerce-admin-status.php:193
 msgid "Home URL"
 msgstr "Etusivun verkko-osoite (URL)"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:150
+#: admin/woocommerce-admin-status.php:197
 msgid "Site URL"
 msgstr "Sivuston verkko-osoite (URL)"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:154
+#: admin/woocommerce-admin-status.php:201
 msgid "Force SSL"
 msgstr "Pakota SSL"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:168
+#: admin/woocommerce-admin-status.php:215
 msgid "Shop base page"
 msgstr "Kaupan (perus)sivu"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:220
+#: admin/woocommerce-admin-status.php:267
 msgid "Page not set"
 msgstr "Sivua ei ole asetettu"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:230
+#: admin/woocommerce-admin-status.php:277
 msgid "Page does not contain the shortcode: %s"
 msgstr "Sivulta puuttuu lyhytkoodi ('shortcode'): %s"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:249
+#: admin/woocommerce-admin-status.php:296
 msgid "Core Taxonomies"
 msgstr "Luokittelut"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:255
+#: admin/woocommerce-admin-status.php:302
 msgid "Order Statuses"
 msgstr "Tilausten tilat"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:265
+#: admin/woocommerce-admin-status.php:312
 msgid "Server Environment"
 msgstr "Palvelinympäristö"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:271
+#: admin/woocommerce-admin-status.php:318
 msgid "PHP Version"
 msgstr "PHP versio"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:278
+#: admin/woocommerce-admin-status.php:325
 msgid "Server Software"
 msgstr "Palvelimen ohjelmisto"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:284
+#: admin/woocommerce-admin-status.php:331
 msgid "WP Max Upload Size"
 msgstr "WP suurin siirrettävän tiedoston koko"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:290
+#: admin/woocommerce-admin-status.php:337
 msgid "Server upload_max_filesize"
 msgstr "Palvelin suurin siirrettävän tiedoston koko"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:297
+#: admin/woocommerce-admin-status.php:344
 msgid "Server post_max_size"
 msgstr "Palvelin suurin artikkelin/tuotteen koko"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:304
+#: admin/woocommerce-admin-status.php:351
 msgid "WP Memory Limit"
 msgstr "WP muistin varaus"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:309
+#: admin/woocommerce-admin-status.php:356
 msgid ""
 "%s - We recommend setting memory to at least 64MB. See: <a href=\"%s"
 "\">Increasing memory allocated to PHP</a>"
@@ -6030,22 +6060,22 @@ msgstr ""
 "allocated to PHP</a>"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:316
+#: admin/woocommerce-admin-status.php:363
 msgid "WP Debug Mode"
 msgstr "WP testaus tila"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:320
+#: admin/woocommerce-admin-status.php:367
 msgid "WC Logging"
 msgstr "WooCommerce loki"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:323
+#: admin/woocommerce-admin-status.php:370
 msgid "Log directory is writable."
 msgstr "Voidaan kirjoittaa lokitiedoston hakemistoon."
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:325
+#: admin/woocommerce-admin-status.php:372
 msgid ""
 "Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will "
 "not be possible."
@@ -6054,32 +6084,32 @@ msgstr ""
 "kirjoittaa. Lokia ei voi tehdä."
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:332
+#: admin/woocommerce-admin-status.php:379
 msgid "Remote Posting/IPN"
 msgstr "Etälähetys/IPN (PayPal)"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:340
+#: admin/woocommerce-admin-status.php:387
 msgid "fsockopen/cURL"
 msgstr "fsockopen/cURL"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:343
+#: admin/woocommerce-admin-status.php:390
 msgid "Your server has fsockopen and cURL enabled."
 msgstr "Palvelimella on käytössä fsockopen ja cURL."
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:345
+#: admin/woocommerce-admin-status.php:392
 msgid "Your server has fsockopen enabled, cURL is disabled."
 msgstr "Palvelimella on käytössä fsockopen mutta cURL ei ole käytössä."
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:347
+#: admin/woocommerce-admin-status.php:394
 msgid "Your server has cURL enabled, fsockopen is disabled."
 msgstr "Palvelimella on käytössä cURL mutta fsockopen ei ole käytössä."
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:351
+#: admin/woocommerce-admin-status.php:398
 msgid ""
 "Your server does not have fsockopen or cURL enabled - PayPal IPN and other "
 "scripts which communicate with other servers will not work. Contact your "
@@ -6089,17 +6119,17 @@ msgstr ""
 "eivät toimi. - Ota yhteyttä palvelimen ylläpitäjään ja selvitä tilanne."
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:356
+#: admin/woocommerce-admin-status.php:403
 msgid "SOAP Client"
 msgstr "SOAP Client (-asiakas)"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:358
+#: admin/woocommerce-admin-status.php:405
 msgid "Your server has the SOAP Client class enabled."
 msgstr "Palvelimella on käytössä SOAP Client class."
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:361
+#: admin/woocommerce-admin-status.php:408
 msgid ""
 "Your server does not have the <a href=\"%s\">SOAP Client</a> class enabled - "
 "some gateway plugins which use SOAP may not work as expected."
@@ -6108,17 +6138,17 @@ msgstr ""
 "lisäosat jotka käyttävät SOAP eivät toimi odotetulla tavalla."
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:366
+#: admin/woocommerce-admin-status.php:413
 msgid "WP Remote Post Check"
 msgstr "WP etälähetys testi"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:377
+#: admin/woocommerce-admin-status.php:424
 msgid "wp_remote_post() was successful - PayPal IPN is working."
 msgstr "wp_remote_post() onnistui - PayPal IPN toimii."
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:380
+#: admin/woocommerce-admin-status.php:427
 msgid ""
 "wp_remote_post() failed. PayPal IPN won't work with your server. Contact "
 "your hosting provider. Error:"
@@ -6127,12 +6157,12 @@ msgstr ""
 "yhteyttä palvelimen ylläpitäjään ja selvitä tilanne. Virhe:"
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:383
+#: admin/woocommerce-admin-status.php:430
 msgid "wp_remote_post() failed. PayPal IPN may not work with your server."
 msgstr "wp_remote_post() epäonnistui. PayPal IPN ei ehkä toimi palvelimella."
 
 # @ woocommerce
-#: admin/woocommerce-admin-status.php:405
+#: admin/woocommerce-admin-status.php:452
 msgid "Tools"
 msgstr "Työkalut"
 
@@ -6179,7 +6209,7 @@ msgid "Use image"
 msgstr "Käytä kuvaa"
 
 # @ woocommerce
-#: admin/woocommerce-admin-taxonomies.php:220
+#: admin/woocommerce-admin-taxonomies.php:222
 msgid ""
 "Product categories for your store can be managed here. To change the order "
 "of categories on the front-end you can drag and drop to sort them. To see "
@@ -6192,7 +6222,7 @@ msgstr ""
 "yläkulmassa olevaa 'Näyttöasetukset' painiketta."
 
 # @ woocommerce
-#: admin/woocommerce-admin-taxonomies.php:235
+#: admin/woocommerce-admin-taxonomies.php:237
 msgid ""
 "Shipping classes can be used to group products of similar type. These groups "
 "can then be used by certain shipping methods to provide different rates to "
@@ -6203,7 +6233,7 @@ msgstr ""
 "kuljetustapa ja kuljetuksesta aiheutuvat kustannukset."
 
 # @ woocommerce
-#: admin/woocommerce-admin-taxonomies.php:363
+#: admin/woocommerce-admin-taxonomies.php:365
 msgid "Configure shipping class"
 msgstr "Muokkaa toimitusluokka"
 
