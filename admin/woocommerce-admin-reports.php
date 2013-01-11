@@ -1957,9 +1957,6 @@ function woocommerce_stock_overview() {
 	$nostockamount = get_option('woocommerce_notify_no_stock_amount');
 	if (!is_numeric($nostockamount)) $nostockamount = 0;
 
-	$outofstock = array();
-	$lowinstock = array();
-
 	// Get low in stock simple/downloadable/virtual products. Grouped don't have stock. Variations need a separate query.
 	$args = array(
 		'post_type'			=> 'product',
