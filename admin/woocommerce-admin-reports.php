@@ -2707,7 +2707,7 @@ function woocommerce_category_sales() {
 					},
 					xaxis: {
 						mode: "time",
-						timeformat: "%b %y",
+						timeformat: "%b",
 						monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
 						tickLength: 1,
 						minTickSize: [1, "month"]
