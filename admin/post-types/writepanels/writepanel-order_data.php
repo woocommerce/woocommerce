@@ -340,13 +340,17 @@ function woocommerce_order_items_meta_box( $post ) {
 
 					<?php do_action( 'woocommerce_admin_order_item_headers' ); ?>
 
-					<th class="tax_class"><?php _e( 'Tax Class', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Tax class for the line item', 'woocommerce' ); ?>." href="#">[?]</a></th>
+					<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
+						<th class="tax_class"><?php _e( 'Tax Class', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Tax class for the line item', 'woocommerce' ); ?>." href="#">[?]</a></th>
+					<?php endif; ?>
 
 					<th class="quantity"><?php _e( 'Qty', 'woocommerce' ); ?></th>
 
 					<th class="line_cost"><?php _e( 'Cost', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Line subtotals are before pre-tax discounts, totals are after.', 'woocommerce' ); ?>" href="#">[?]</a></th>
 
-					<th class="line_tax"><?php _e( 'Tax', 'woocommerce' ); ?></th>
+					<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
+						<th class="line_tax"><?php _e( 'Tax', 'woocommerce' ); ?></th>
+					<?php endif; ?>
 				</tr>
 			</thead>
 			<tbody id="order_items_list">
@@ -580,6 +584,9 @@ function woocommerce_order_totals_meta_box( $post ) {
 		<?php do_action( 'woocommerce_admin_order_totals_after_shipping', $post->ID ) ?>
 		<div class="clear"></div>
 	</div>
+
+	<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
+
 	<div class="totals_group tax_rows_group">
 		<h4><?php _e( 'Tax Rows', 'woocommerce' ); ?></h4>
 		<div id="tax_rows" class="total_rows">
@@ -632,6 +639,9 @@ function woocommerce_order_totals_meta_box( $post ) {
 		</ul>
 		<div class="clear"></div>
 	</div>
+
+	<?php endif; ?>
+
 	<div class="totals_group">
 		<h4><?php _e( 'Order Totals', 'woocommerce' ); ?></h4>
 		<ul class="totals">
@@ -675,7 +685,9 @@ function woocommerce_order_totals_meta_box( $post ) {
 		<div class="clear"></div>
 	</div>
 	<p class="buttons">
-		<button type="button" class="button calc_line_taxes"><?php _e( 'Calc taxes', 'woocommerce' ); ?></button>
+		<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
+			<button type="button" class="button calc_line_taxes"><?php _e( 'Calc taxes', 'woocommerce' ); ?></button>
+		<?php endif; ?>
 		<button type="button" class="button calc_totals button-primary"><?php _e( 'Calc totals', 'woocommerce' ); ?></button>
 	</p>
 	<?php

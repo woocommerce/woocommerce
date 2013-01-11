@@ -11,6 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 		<input type="hidden" class="order_item_id" name="order_item_id[]" value="<?php echo esc_attr( $item_id ); ?>" />
 	</td>
 
+	<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
+
 	<td class="tax_class" width="1%">
 		<select class="tax_class" name="order_item_tax_class[<?php echo absint( $item_id ); ?>]" title="<?php _e( 'Tax class', 'woocommerce' ); ?>">
 			<?php $tax_class = isset( $item['tax_class'] ) ? sanitize_title( $item['tax_class'] ) : ''; ?>
@@ -33,14 +35,20 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 		</select>
 	</td>
 
+	<?php endif; ?>
+
 	<td class="quantity" width="1%">1</td>
 
 	<td class="line_cost" width="1%">
 		<label><?php _e( 'Total', 'woocommerce' ); ?>: <input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_total'] ) ) echo esc_attr( $item['line_total'] ); ?>" class="line_total" /></label>
 	</td>
 
+	<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
+
 	<td class="line_tax" width="1%">
 		<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_tax'] ) ) echo esc_attr( $item['line_tax'] ); ?>" class="line_tax" />
 	</td>
+
+	<?php endif; ?>
 
 </tr>
