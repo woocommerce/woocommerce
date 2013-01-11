@@ -57,7 +57,7 @@ function woocommerce_prepare_attachment_for_js( $response ) {
 
 	if ( isset( $response['url'] ) && strstr( $response['url'], 'woocommerce_uploads/' ) ) {
 		$response['full']['url'] = woocommerce_placeholder_img_src();
-		if ( $response['sizes'] ) {
+		if ( isset( $response['sizes'] ) ) {
 			foreach( $response['sizes'] as $size => $value ) {
 				$response['sizes'][ $size ]['url'] = woocommerce_placeholder_img_src();
 			}
