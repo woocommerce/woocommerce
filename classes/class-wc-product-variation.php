@@ -86,7 +86,7 @@ class WC_Product_Variation extends WC_Product {
 
 		// Get post data
 		$this->parent = ! empty( $args['parent'] ) ? $args['parent'] : get_product( $this->id );
-		$this->post   = $this->parent->post;
+		$this->post   = ! empty( $this->parent->post ) ? $this->parent->post : array();
 		$this->product_custom_fields = get_post_meta( $this->variation_id );
 
 		// Get the variation attributes from meta

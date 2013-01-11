@@ -84,6 +84,16 @@ abstract class WC_Product {
 	}
 
 	/**
+	 * Get the product's post data.
+	 *
+	 * @access public
+	 * @return object
+	 */
+	public function get_post_data() {
+		return $this->post;
+	}
+
+	/**
 	 * get_gallery_attachment_ids function.
 	 *
 	 * @access public
