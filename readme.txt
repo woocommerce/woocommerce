@@ -195,6 +195,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Option to hold stock for unpaid orders (defaults to 60mins). When this time limit is reached, and the order is not paid for, stock is released and the order is cancelled.
 * Feature - Added set_stock() method to product class.
 * Feature - Linking to mydomain.com/product#review_form will now open the review form on load (if WooCommerce lightbox is turned on)
+* Feature - Customers can sort by popularity + rating.
 * Templating - Revised pagination, sorting areas (sorting is now above products, numbered pagination below) and added a result count.
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
 * Templating - loop-end and start for product loops, allow changing the UL's used by default to something else.
@@ -202,6 +203,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Templating - CSS namespacing changes (courtesy of Brian Feister).
 * Templating - My account page broken up into template files (by Brian Richards)
 * Templating - CSS classes standardised. Instances of '.woocommerce_' & '.wc-' replaced with '.woocommerce-'
+* Templating - Ratings added to loop.
+* Tweak - Sorting uses GET to make it cache friendly
 * Tweak - Optimised class loading (autoload). Reduced memory consumption.
 * Tweak - Moved shortcodes and widgets to classes.
 * Tweak - Tweaks to gateways API. Must use WC-WPI for IPN requests (classes will only be init when needed).
