@@ -1296,12 +1296,12 @@ function woocommerce_get_order_id_by_order_key( $order_key ) {
  * @return void
  */
 function woocommerce_track_product_view() {
-	global $post, $product, $woocommerce;
+	global $post, $product;
 
-	$viewed_products = $woocommerce->session->viewed_products;
-
-	if ( empty( $woocommerce->session->viewed_products ) )
+	if ( empty( $_COOKIE['woocommerce_recently_viewed'] ) )
 		$viewed_products = array();
+	else
+		$viewed_products = (array) explode( '|', $_COOKIE['woocommerce_recently_viewed'] );
 
 	if ( ! in_array( $post->ID, $viewed_products ) )
 		$viewed_products[] = $post->ID;
@@ -1309,10 +1309,11 @@ function woocommerce_track_product_view() {
 	if ( sizeof( $viewed_products ) > 15 )
 		array_shift( $viewed_products );
 
-	$woocommerce->session->viewed_products = $viewed_products;
+	// Store for session only
+	setcookie( "woocommerce_recently_viewed", implode( '|', $viewed_products ), 0, COOKIEPATH, COOKIE_DOMAIN, false, true );
 }
 
-add_action( 'woocommerce_before_single_product', 'woocommerce_track_product_view', 10);
+add_action( 'wp', 'woocommerce_track_product_view', 10 );
 
 /**
  * Layered Nav Init
@@ -1467,15 +1468,6 @@ function woocommerce_price_filter_init() {
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
 		wp_register_script( 'wc-price-slider', $woocommerce->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider' ), '1.6', true );
-
-		unset( $woocommerce->session->min_price );
-		unset( $woocommerce->session->max_price );
-
-		if ( isset( $_GET['min_price'] ) )
-			$woocommerce->session->min_price = esc_attr( $_GET['min_price'] );
-
-		if ( isset( $_GET['max_price'] ) )
-			$woocommerce->session->max_price = esc_attr( $_GET['max_price'] );
 
 		add_filter( 'loop_shop_post_in', 'woocommerce_price_filter' );
 	}

@@ -64,12 +64,16 @@ class WC_Widget_Recently_Viewed extends WP_Widget {
 			return;
 		}
 
-		if ( empty( $woocommerce->session->viewed_products ) ) return;
+		$viewed_products = ! empty( $_COOKIE['woocommerce_recently_viewed'] ) ? (array) explode( '|', $_COOKIE['woocommerce_recently_viewed'] ) : array();
+		$viewed_products = array_filter( array_map( 'absint', $viewed_products ) );
+
+		if ( empty( $viewed_products ) )
+			return;
 
 		ob_start();
-		extract($args);
+		extract( $args );
 
-		$title = apply_filters('widget_title', empty($instance['title']) ? __('Recently viewed', 'woocommerce' ) : $instance['title'], $instance, $this->id_base);
+		$title = apply_filters('widget_title', empty( $instance['title'] ) ? __( 'Recently viewed', 'woocommerce' ) : $instance['title'], $instance, $this->id_base);
 		if ( !$number = (int) $instance['number'] )
 			$number = 10;
 		else if ( $number < 1 )
@@ -77,7 +81,7 @@ class WC_Widget_Recently_Viewed extends WP_Widget {
 		else if ( $number > 15 )
 			$number = 15;
 
-	    $query_args = array('posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product', 'post__in' => $woocommerce->session->viewed_products, 'orderby' => 'rand');
+	    $query_args = array('posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product', 'post__in' => $viewed_products, 'orderby' => 'rand');
 
 		$query_args['meta_query'] = array();
 
