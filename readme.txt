@@ -203,7 +203,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Templating - CSS namespacing changes (courtesy of Brian Feister).
 * Templating - My account page broken up into template files (by Brian Richards)
 * Templating - CSS classes standardised. Instances of '.woocommerce_' & '.wc-' replaced with '.woocommerce-'
-* Templating - Ratings added to loop.
+* Templating - Ratings added to loop. Remove with [this snippet](https://gist.github.com/4518617).
 * Tweak - Sorting uses GET to make it cache friendly
 * Tweak - Optimised class loading (autoload). Reduced memory consumption.
 * Tweak - Moved shortcodes and widgets to classes.
