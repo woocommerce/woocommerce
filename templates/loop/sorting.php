@@ -33,4 +33,21 @@ if ( ! woocommerce_products_will_display() ||  1 == $wp_query->found_posts )
 				echo '<option value="' . esc_attr( $id ) . '" ' . selected( $orderby, $id, false ) . '>' . esc_attr( $name ) . '</option>';
 		?>
 	</select>
+	<?php
+		// Keep query string vars intact
+		$parts = explode( '?', $_SERVER['REQUEST_URI'] );
+
+		$query = isset( $parts[1] ) ? $parts[1] : '';
+
+		if ( $frag = strstr( $query, '#' ) )
+			$query = substr( $query, 0, -strlen( $frag ) );
+
+		wp_parse_str( $query, $qs );
+
+		foreach ( $qs as $key => $val ) {
+			if ( $key == 'orderby' )
+				continue;
+			echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $val ) . '" />';
+		}
+	?>
 </form>
