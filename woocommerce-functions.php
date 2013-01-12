@@ -183,21 +183,6 @@ function woocommerce_nav_menu_items( $items, $args ) {
     return $items;
 }
 
-
-/**
- * Update catalog ordering if posted.
- *
- * @access public
- * @return void
- */
-function woocommerce_update_catalog_ordering() {
-	global $woocommerce;
-
-	if ( isset( $_REQUEST['sort'] ) && $_REQUEST['sort'] != '' )
-		$woocommerce->session->orderby = esc_attr( $_REQUEST['sort'] );
-}
-
-
 /**
  * Remove from cart/update.
  *
@@ -1252,12 +1237,16 @@ function woocommerce_products_rss_feed() {
  * @return void
  */
 function woocommerce_add_comment_rating($comment_id) {
-	if ( isset($_POST['rating']) ) :
+	if ( isset( $_POST['rating'] ) ) {
 		global $post;
-		if ( ! $_POST['rating'] || $_POST['rating'] > 5 || $_POST['rating'] < 0 ) return;
-		add_comment_meta( $comment_id, 'rating', (int) esc_attr($_POST['rating']), true );
+
+		if ( ! $_POST['rating'] || $_POST['rating'] > 5 || $_POST['rating'] < 0 )
+			return;
+
+		add_comment_meta( $comment_id, 'rating', (int) esc_attr( $_POST['rating'] ), true );
+
 		delete_transient( 'wc_average_rating_' . esc_attr($post->ID) );
-	endif;
+	}
 }
 
 

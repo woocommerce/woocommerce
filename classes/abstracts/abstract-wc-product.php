@@ -879,22 +879,48 @@ abstract class WC_Product {
 		return '<del>' . ( ( is_numeric( $from ) ) ? woocommerce_price( $from ) : $from ) . '</del> <ins>' . ( ( is_numeric( $to ) ) ? woocommerce_price( $to ) : $to ) . '</ins>';
 	}
 
-
 	/**
-	 * Returns the product rating in html format - ratings are stored in transient cache.
+	 * get_average_rating function.
 	 *
 	 * @access public
-	 * @param string $location (default: '')
 	 * @return void
 	 */
-	function get_rating_html( $location = '' ) {
-
-		if ( $location )
-			$location = '_' . $location;
-
-		$star_size = apply_filters( 'woocommerce_star_rating_size' . $location, 16 );
-
+	function get_average_rating() {
 		if ( false === ( $average_rating = get_transient( 'wc_average_rating_' . $this->id ) ) ) {
+
+			global $wpdb;
+
+			$average_rating = '';
+			$count          = $this->get_rating_count();
+
+			if ( $count > 0 ) {
+
+				$ratings = $wpdb->get_var( $wpdb->prepare("
+					SELECT SUM(meta_value) FROM $wpdb->commentmeta
+					LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
+					WHERE meta_key = 'rating'
+					AND comment_post_ID = %d
+					AND comment_approved = '1'
+				", $this->id ) );
+
+				$average_rating = number_format( $ratings / $count, 2 );
+
+			}
+
+			set_transient( 'wc_average_rating_' . $this->id, $average_rating );
+		}
+
+		return $average_rating;
+	}
+
+	/**
+	 * get_rating_count function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function get_rating_count() {
+		if ( false === ( $count = get_transient( 'wc_rating_count_' . $this->id ) ) ) {
 
 			global $wpdb;
 
@@ -907,26 +933,40 @@ abstract class WC_Product {
 				AND meta_value > 0
 			", $this->id ) );
 
-			$ratings = $wpdb->get_var( $wpdb->prepare("
-				SELECT SUM(meta_value) FROM $wpdb->commentmeta
-				LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
-				WHERE meta_key = 'rating'
-				AND comment_post_ID = %d
-				AND comment_approved = '1'
-			", $this->id ) );
-
-			if ( $count > 0 )
-				$average_rating = number_format($ratings / $count, 2);
-			else
-				$average_rating = '';
-
-			set_transient( 'wc_average_rating_' . $this->id, $average_rating );
+			set_transient( 'wc_rating_count_' . $this->id, $count );
 		}
 
-		if ( $average_rating > 0 )
-			return '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $average_rating ) . '"><span style="width:' . ( $average_rating * $star_size ) . 'px"><span class="rating">' . $average_rating . '</span> ' . __( 'out of 5', 'woocommerce' ) . '</span></div>';
-		else
-			return '';
+		return $count;
+	}
+
+	/**
+	 * Returns the product rating in html format - ratings are stored in transient cache.
+	 *
+	 * @access public
+	 * @param string $location (default: '')
+	 * @return void
+	 */
+	function get_rating_html( $location = '' ) {
+
+		$average_rating = $this->get_average_rating();
+
+		if ( $average_rating > 0 ) {
+
+			if ( $location )
+				$location = '_' . $location;
+
+			$star_size = apply_filters( 'woocommerce_star_rating_size' . $location, 16 );
+
+			$average_rating = $this->get_average_rating();
+
+			$rating_html  = '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $average_rating ) . '">';
+
+			$rating_html .= '<span style="width:' . ( $average_rating * $star_size ) . 'px"><span class="rating">' . $average_rating . '</span> ' . __( 'out of 5', 'woocommerce' ) . '</span>';
+
+			$rating_html .= '</div>';
+
+			return $rating_html;
+		}
 	}
 
 

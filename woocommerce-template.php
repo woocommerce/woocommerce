@@ -352,6 +352,19 @@ if ( ! function_exists( 'woocommerce_template_loop_price' ) ) {
 		woocommerce_get_template( 'loop/price.php' );
 	}
 }
+if ( ! function_exists( 'woocommerce_template_loop_rating' ) ) {
+
+	/**
+	 * Display the average rating in the loop
+	 *
+	 * @access public
+	 * @subpackage	Loop
+	 * @return void
+	 */
+	function woocommerce_template_loop_rating() {
+		woocommerce_get_template( 'loop/rating.php' );
+	}
+}
 if ( ! function_exists( 'woocommerce_show_product_loop_sale_flash' ) ) {
 
 	/**
@@ -432,10 +445,9 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 	function woocommerce_catalog_ordering() {
 		global $woocommerce;
 
-		if ( ! isset( $woocommerce->session->orderby ) )
-			$woocommerce->session->orderby = apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+		$orderby = isset( $_GET['orderby'] ) ? woocommerce_clean( $_GET['orderby'] ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
 
-		woocommerce_get_template( 'loop/sorting.php' );
+		woocommerce_get_template( 'loop/sorting.php', array( 'orderby' => $orderby ) );
 	}
 }
 

@@ -832,7 +832,12 @@ class Woocommerce {
 					'delete_terms' 		=> 'delete_product_terms',
 					'assign_terms' 		=> 'assign_product_terms',
 	            ),
-	            'rewrite' 				=> array( 'slug' => $product_category_slug, 'with_front' => false, 'hierarchical' => true ),
+	            'rewrite' 				=> array(
+	            	'slug' => $product_category_slug,
+	            	'with_front' => false,
+	            	'hierarchical' => true,
+	            	//'ep_mask' => EP_CATEGORIES
+	            ),
 	        )
 	    );
 
@@ -1851,6 +1856,7 @@ class Woocommerce {
 			'wc_product_children_ids_',
 			'wc_product_total_stock_',
 			'wc_average_rating_',
+			'wc_rating_count_',
 			'woocommerce_product_type_', // No longer used
 			'wc_product_type_', // No longer used
 		);
