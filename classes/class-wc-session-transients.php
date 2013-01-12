@@ -103,7 +103,7 @@ class WC_Session_Transients extends WC_Session {
      * @return void
      */
     public function save_data() {
-	    // Set cart data
-	    set_transient( 'wc_session_' . $this->_customer_id, $this->_data, $this->_cookie_expiration );
+	    if ( ! empty( $this->_data ) )
+	    	set_transient( 'wc_session_' . $this->_customer_id, $this->_data, $this->_cookie_expiration );
     }
 }
