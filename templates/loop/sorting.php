@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $woocommerce, $wp_query;
 
-if ( ! woocommerce_products_will_display() ||  1 == $wp_query->found_posts )
+if ( 1 == $wp_query->found_posts || ! woocommerce_products_will_display() )
 	return;
 ?>
 <form class="woocommerce-ordering" method="get">
