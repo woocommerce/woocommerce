@@ -63,10 +63,10 @@ class WC_Widget_Layered_Nav_Filters extends WP_Widget {
 		$title = apply_filters( 'widget_title', $title, $instance, $this->id_base);
 
 		// Price
-		$post_min = isset( $woocommerce->session->min_price ) ? $woocommerce->session->min_price : 0;
-		$post_max = isset( $woocommerce->session->max_price ) ? $woocommerce->session->max_price : 0;
+		$min_price = isset( $_GET['min_price'] ) ? esc_attr( $_GET['min_price'] ) : 0;
+		$max_price = isset( $_GET['max_price'] ) ? esc_attr( $_GET['max_price'] ) : 0;
 
-		if ( count( $_chosen_attributes ) > 0 || $post_min > 0 || $post_max > 0 ) {
+		if ( count( $_chosen_attributes ) > 0 || $min_price > 0 || $max_price > 0 ) {
 
 			echo $before_widget;
 			if ( $title ) {
@@ -94,14 +94,14 @@ class WC_Widget_Layered_Nav_Filters extends WP_Widget {
 				}
 			}
 
-			if ( $post_min ) {
+			if ( $min_price ) {
 				$link = remove_query_arg( 'min_price' );
-				echo '<li class="chosen"><a title="' . __( 'Remove filter', 'woocommerce' ) . '" href="' . $link . '">' . __( 'Min', 'woocommerce' ) . ' ' . woocommerce_price( $post_min ) . '</a></li>';
+				echo '<li class="chosen"><a title="' . __( 'Remove filter', 'woocommerce' ) . '" href="' . $link . '">' . __( 'Min', 'woocommerce' ) . ' ' . woocommerce_price( $min_price ) . '</a></li>';
 			}
 
-			if ( $post_max ) {
+			if ( $max_price ) {
 				$link = remove_query_arg( 'max_price' );
-				echo '<li class="chosen"><a title="' . __( 'Remove filter', 'woocommerce' ) . '" href="' . $link . '">' . __( 'Max', 'woocommerce' ) . ' ' . woocommerce_price( $post_max ) . '</a></li>';
+				echo '<li class="chosen"><a title="' . __( 'Remove filter', 'woocommerce' ) . '" href="' . $link . '">' . __( 'Max', 'woocommerce' ) . ' ' . woocommerce_price( $max_price ) . '</a></li>';
 			}
 
 			echo "</ul>";

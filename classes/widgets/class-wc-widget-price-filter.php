@@ -60,13 +60,16 @@ class WC_Widget_Price_Filter extends WP_Widget {
 
 		if ( sizeof( $woocommerce->query->unfiltered_product_ids ) == 0 ) return; // None shown - return
 
+		$min_price = isset( $_GET['min_price'] ) ? esc_attr( $_GET['min_price'] ) : '';
+		$max_price = isset( $_GET['max_price'] ) ? esc_attr( $_GET['max_price'] ) : '';
+
 		wp_enqueue_script( 'wc-price-slider' );
 
 		wp_localize_script( 'wc-price-slider', 'woocommerce_price_slider_params', array(
 			'currency_symbol' 	=> get_woocommerce_currency_symbol(),
 			'currency_pos'      => get_option( 'woocommerce_currency_pos' ),
-			'min_price'			=> isset( $woocommerce->session->min_price ) ? $woocommerce->session->min_price : '',
-			'max_price'			=> isset( $woocommerce->session->max_price ) ? $woocommerce->session->max_price : ''
+			'min_price'			=> $min_price,
+			'max_price'			=> $max_price
 		) );
 
 		$title = $instance['title'];
@@ -119,9 +122,6 @@ class WC_Widget_Price_Filter extends WP_Widget {
 
 		if ( $min == $max ) return;
 
-		if ( isset( $woocommerce->session->min_price ) ) $post_min = $woocommerce->session->min_price;
-		if ( isset( $woocommerce->session->max_price ) ) $post_max = $woocommerce->session->max_price;
-
 		echo $before_widget . $before_title . $title . $after_title;
 
 		if ( get_option( 'permalink_structure' ) == '' )
@@ -133,8 +133,8 @@ class WC_Widget_Price_Filter extends WP_Widget {
 			<div class="price_slider_wrapper">
 				<div class="price_slider" style="display:none;"></div>
 				<div class="price_slider_amount">
-					<input type="text" id="min_price" name="min_price" value="'.esc_attr( $post_min ).'" data-min="'.esc_attr( $min ).'" placeholder="'.__('Min price', 'woocommerce' ).'" />
-					<input type="text" id="max_price" name="max_price" value="'.esc_attr( $post_max ).'" data-max="'.esc_attr( $max ).'" placeholder="'.__( 'Max price', 'woocommerce' ).'" />
+					<input type="text" id="min_price" name="min_price" value="'.esc_attr( $min_price ).'" data-min="'.esc_attr( $min ).'" placeholder="'.__('Min price', 'woocommerce' ).'" />
+					<input type="text" id="max_price" name="max_price" value="'.esc_attr( $max_price ).'" data-max="'.esc_attr( $max ).'" placeholder="'.__( 'Max price', 'woocommerce' ).'" />
 					<button type="submit" class="button">'.__( 'Filter', 'woocommerce' ).'</button>
 					<div class="price_label" style="display:none;">
 						'.__( 'Price:', 'woocommerce' ).' <span class="from"></span> &mdash; <span class="to"></span>
