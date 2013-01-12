@@ -97,7 +97,7 @@ class WC_Query {
 		}
 
 		$this->product_query( $q );
-		
+
 		if ( is_search() ) {
 		    add_filter( 'posts_where', array( $this, 'search_post_excerpt' ) );
 		    add_filter( 'wp', array( $this, 'remove_posts_where' ) );
@@ -105,13 +105,13 @@ class WC_Query {
 
 		// We're on a shop page so queue the woocommerce_get_products_in_view function
 		add_action( 'wp', array( $this, 'get_products_in_view' ), 2);
-	
+
 		// And remove the pre_get_posts hook
 		$this->remove_product_query();
 	}
 
 	/**
-	 * search_post_excerpt function. 
+	 * search_post_excerpt function.
 	 *
 	 * @access public
 	 * @param string $where (default: '')
@@ -119,15 +119,15 @@ class WC_Query {
 	 */
 	public function search_post_excerpt( $where = '' ) {
 		global $wp_the_query;
-	    
+
 		// If this is not a WC Query, do not modify the query
 		if ( empty( $wp_the_query->query_vars['wc_query'] ) )
 		    return $where;
 
 		$where = preg_replace(
 		    "/post_title\s+LIKE\s*(\'[^\']+\')/",
-		    "post_title LIKE $1) OR (post_excerpt LIKE $1", $where );		
-	    
+		    "post_title LIKE $1) OR (post_excerpt LIKE $1", $where );
+
 		return $where;
 	}
 
@@ -272,10 +272,10 @@ class WC_Query {
 	 * @access public
 	 * @return void
 	 */
-	public function remove_posts_where() {		
+	public function remove_posts_where() {
 		remove_filter( 'posts_where', array( $this, 'search_post_excerpt' ) );
 	}
-	
+
 
 	/**
 	 * Get an unpaginated list all product ID's (both filtered and unfiltered). Makes use of transients.
@@ -346,36 +346,44 @@ class WC_Query {
 	public function get_catalog_ordering_args( $orderby = '', $order = '' ) {
 		global $woocommerce;
 
-		// Get ordering from session unless defined
-		if ( ! $orderby )
-			$orderby = isset( $woocommerce->session->orderby ) ? $woocommerce->session->orderby : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+		// Get ordering from query string unless defined
+		if ( ! $orderby ) {
+			$orderby_value = isset( $_GET['orderby'] ) ? woocommerce_clean( $_GET['orderby'] ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+
+			// Get order + orderby args from string
+			$orderby_value = explode( '-', $orderby_value );
+			$orderby       = esc_attr( $orderby_value[0] );
+			$order         = ! empty( $orderby_value[1] ) ? $orderby_value[1] : $order;
+		}
 
 		$args = array();
 
 		switch ( $orderby ) {
 			case 'date' :
 				$args['orderby']  = 'date';
-				$args['order']    = $order ? $order : 'desc';
+				$args['order']    = $order == 'asc' ? 'asc' : 'desc';
 				$args['meta_key'] = '';
 			break;
 			case 'price' :
 				$args['orderby']  = 'meta_value_num';
-				$args['order']    = $order ? $order : 'asc';
+				$args['order']    = $order == 'desc' ? 'desc' : 'asc';
 				$args['meta_key'] = '_price';
 			break;
-			case 'high_price' :
+			case 'popularity' :
 				$args['orderby']  = 'meta_value_num';
-				$args['order']    = $order ? $order : 'desc';
-				$args['meta_key'] = '_price';
+				$args['order']    = $order == 'asc' ? 'asc' : 'desc';
+				$args['meta_key'] = 'total_sales';
 			break;
-			case 'title' :
-				$args['orderby']  = 'title';
-				$args['order']    = $order ? $order : 'asc';
+			case 'rating' :
+				$args['orderby']  = 'menu_order title';
+				$args['order']    = $order == 'desc' ? 'desc' : 'asc';
 				$args['meta_key'] = '';
+
+				add_filter( 'posts_clauses', array( $this, 'order_by_rating_post_clauses' ) );
 			break;
 			default :
 				$args['orderby']  = 'menu_order title';
-				$args['order']    = $order ? $order : 'asc';
+				$args['order']    = $order == 'desc' ? 'desc' : 'asc';
 				$args['meta_key'] = '';
 			break;
 		}
@@ -383,6 +391,32 @@ class WC_Query {
 		return apply_filters( 'woocommerce_get_catalog_ordering_args', $args );
 	}
 
+	/**
+	 * order_by_rating_post_clauses function.
+	 *
+	 * @access public
+	 * @param array $args
+	 * @return array
+	 */
+	public function order_by_rating_post_clauses( $args ) {
+
+		global $wpdb;
+
+		$args['fields'] .= ", AVG( $wpdb->commentmeta.meta_value ) as average_rating ";
+
+		$args['where'] .= " AND ( $wpdb->commentmeta.meta_key = 'rating' OR $wpdb->commentmeta.meta_key IS null ) ";
+
+		$args['join'] .= "
+			LEFT OUTER JOIN $wpdb->comments ON($wpdb->posts.ID = $wpdb->comments.comment_post_ID)
+			LEFT JOIN $wpdb->commentmeta ON($wpdb->comments.comment_ID = $wpdb->commentmeta.comment_id)
+		";
+
+		$args['orderby'] = "average_rating DESC";
+
+		$args['groupby'] = "$wpdb->posts.ID";
+
+		return $args;
+	}
 
 	/**
 	 * Returns a meta query to handle product visibility

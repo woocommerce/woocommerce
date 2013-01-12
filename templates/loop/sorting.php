@@ -14,19 +14,23 @@ global $woocommerce, $wp_query;
 if ( ! woocommerce_products_will_display() ||  1 == $wp_query->found_posts )
 	return;
 ?>
-<form class="woocommerce-ordering" method="post">
-	<select name="sort" class="orderby">
+<form class="woocommerce-ordering" method="get">
+	<select name="orderby" class="orderby">
 		<?php
 			$catalog_orderby = apply_filters( 'woocommerce_catalog_orderby', array(
-				'menu_order' 	=> __( 'Default sorting', 'woocommerce' ),
-				'title' 		=> __( 'Sort alphabetically', 'woocommerce' ),
-				'date' 			=> __( 'Sort by most recent', 'woocommerce' ),
-				'price' 		=> __( 'Sort by price - low to high', 'woocommerce' ),
-				'high_price' 	=> __( 'Sort by price - high to low', 'woocommerce' )
+				'menu_order' => __( 'Default sorting', 'woocommerce' ),
+				'popularity' => __( 'Sort by popularity', 'woocommerce' ),
+				'rating'     => __( 'Sort by average rating', 'woocommerce' ),
+				'date'       => __( 'Sort by newness', 'woocommerce' ),
+				'price'      => __( 'Sort by price: low to high', 'woocommerce' ),
+				'price-desc' => __( 'Sort by price: high to low', 'woocommerce' )
 			) );
 
+			if ( get_option( 'woocommerce_enable_review_rating' ) == 'no' )
+				unset( $catalog_orderby['rating'] );
+
 			foreach ( $catalog_orderby as $id => $name )
-				echo '<option value="' . esc_attr( $id ) . '" ' . selected( $woocommerce->session->orderby, $id, false ) . '>' . esc_attr( $name ) . '</option>';
+				echo '<option value="' . esc_attr( $id ) . '" ' . selected( $orderby, $id, false ) . '>' . esc_attr( $name ) . '</option>';
 		?>
 	</select>
 </form>
