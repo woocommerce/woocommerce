@@ -4,3 +4,9 @@ project.xml
 project.properties
 .DS_Store
 Thumbs.db
+
+# Zend Studio files #
+#####################
+.buildpath
+.project
+.settings*
