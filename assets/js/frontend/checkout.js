@@ -121,7 +121,7 @@ jQuery(document).ready(function($) {
 		$('body').trigger('update_checkout');
 	}
 
-	$('form.checkout')
+	$('form.checkout, #order_review')
 
 	/* Payment option selection */
 
@@ -134,8 +134,9 @@ jQuery(document).ready(function($) {
 		} else {
 			$('div.payment_box').show();
 		}
-	})
+	});
 
+	$('form.checkout')
 
 	/* Update totals */
 
