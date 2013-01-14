@@ -1296,6 +1296,9 @@ function woocommerce_get_order_id_by_order_key( $order_key ) {
  * @return void
  */
 function woocommerce_track_product_view() {
+	if ( ! is_singular( 'product' ) )
+		return;
+
 	global $post, $product;
 
 	if ( empty( $_COOKIE['woocommerce_recently_viewed'] ) )
