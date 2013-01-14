@@ -955,13 +955,11 @@ abstract class WC_Product {
 			if ( $location )
 				$location = '_' . $location;
 
-			$star_size = apply_filters( 'woocommerce_star_rating_size' . $location, 16 );
-
 			$average_rating = $this->get_average_rating();
 
 			$rating_html  = '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $average_rating ) . '">';
 
-			$rating_html .= '<span style="width:' . ( $average_rating * $star_size ) . 'px"><span class="rating">' . $average_rating . '</span> ' . __( 'out of 5', 'woocommerce' ) . '</span>';
+			$rating_html .= '<span style="width:' . ( ( $average_rating / 5 ) * 100 ) . '%"><strong class="rating">' . $average_rating . '</strong> ' . __( 'out of 5', 'woocommerce' ) . '</span>';
 
 			$rating_html .= '</div>';
 

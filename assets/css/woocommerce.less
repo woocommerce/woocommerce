@@ -803,15 +803,35 @@ p.demo_store {
 	/* Star rating */
 	.star-rating {
 		float: right;
-		width: 80px;
-		height: 16px;
-		background: url(../images/star.png) repeat-x left 0;
+		overflow: hidden;
+		position: relative;
+		height: 1em;
+		line-height: 1em;
+		font-size: 1em;
+		width: 5.4em;
+		&:before {
+			content: "\2606\2606\2606\2606\2606";
+			color: darken( @secondary, 10 );
+			float: left;
+			top: 0;
+			left: 0;
+			position: absolute;
+			letter-spacing: 1px;
+		}
 		span {
-			background: url(../images/star.png) repeat-x left -32px;
-			height: 0;
-			padding-top: 16px;
-			overflow:hidden;
-			float:left;
+			overflow: hidden;
+			float: left;
+			top: 0;
+			left: 0;
+			position: absolute;
+			padding-top: 1.5em;
+		}
+		span:before {
+			content: "\2605\2605\2605\2605\2605";
+			top: 0;
+			position: absolute;
+			left: 0;
+			letter-spacing: 1px;
 		}
 	}
 
@@ -1665,13 +1685,13 @@ p.demo_store {
 				}
 			}
 		}
-		.star-rating {
+		/*.star-rating {
 			background-image: url(../images/star@2x.png);
 			background-size: 16px 48px;
 			span {
 				background-image: url(../images/star@2x.png);
 				background-size: 16px 48px;
 			}
-		}
+		}*/
 	}
 }

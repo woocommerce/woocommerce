@@ -82,13 +82,9 @@ class WC_Widget_Recent_Reviews extends WP_Widget {
 
 				$_product = get_product( $comment->comment_post_ID );
 
-				$star_size = intval( apply_filters( 'woocommerce_star_rating_size_recent_reviews', 16 ) );
-
 				$rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 
-				$rating_html = '<div class="star-rating" title="' . sprintf(__( 'Rated %d out of 5', 'woocommerce' ), $rating) . '">
-					<span style="width:' . ( $rating * $star_size ) . 'px">' . $rating . ' ' . __( 'out of 5', 'woocommerce' ) . '</span>
-				</div>';
+				$rating_html = $_product->get_rating_html();
 
 				echo '<li><a href="' . esc_url( get_comment_link( $comment->comment_ID ) ) . '">';
 
