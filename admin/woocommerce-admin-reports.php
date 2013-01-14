@@ -2476,7 +2476,7 @@ function woocommerce_category_sales() {
 		AND 	order_items.order_item_type = 'line_item'
 		AND 	order_item_meta.meta_key = '_line_total'
 		AND 	order_item_meta_2.meta_key = '_product_id'
-		GROUP BY order_items.order_id
+		GROUP BY order_items.order_item_id
 		ORDER BY posts.post_date ASC
 	", $current_year ) ) );
 
