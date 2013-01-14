@@ -1324,17 +1324,24 @@ function woocommerce_get_product_terms( $object_id, $taxonomy, $fields = 'all' )
  * @param int $show_uncategorized (default: 1)
  * @return string
  */
-function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchal = 1, $show_uncategorized = 1 ) {
+function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchical = 1, $show_uncategorized = 1, $orderby = '' ) {
 	global $wp_query, $woocommerce;
 
 	include_once( $woocommerce->plugin_path() . '/classes/walkers/class-product-cat-dropdown-walker.php' );
 
 	$r = array();
 	$r['pad_counts'] 	= 1;
-	$r['hierarchal'] 	= $hierarchal;
+	$r['hierarchical'] 	= $hierarchical;
 	$r['hide_empty'] 	= 1;
 	$r['show_count'] 	= $show_counts;
 	$r['selected'] 		= ( isset( $wp_query->query['product_cat'] ) ) ? $wp_query->query['product_cat'] : '';
+
+	$r['menu_order'] = false;
+
+	if ( $orderby == 'order' )
+		$r['menu_order'] = 'asc';
+	elseif ( $orderby )
+		$r['orderby'] = $orderby;
 
 	$terms = get_terms( 'product_cat', $r );
 

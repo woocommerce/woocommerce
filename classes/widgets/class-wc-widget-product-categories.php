@@ -64,7 +64,9 @@ class WC_Widget_Product_Categories extends WP_Widget {
 		echo $before_widget;
 		if ( $title ) echo $before_title . $title . $after_title;
 
-		$cat_args = array('show_count' => $c, 'hierarchical' => $h, 'taxonomy' => 'product_cat');
+		$cat_args = array( 'show_count' => $c, 'hierarchical' => $h, 'taxonomy' => 'product_cat' );
+
+		$cat_args['menu_order'] = false;
 
 		if ( $o == 'order' ) {
 
@@ -79,7 +81,7 @@ class WC_Widget_Product_Categories extends WP_Widget {
 		if ( $d ) {
 
 			// Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258
-			woocommerce_product_dropdown_categories( $c, $h, 0 );
+			woocommerce_product_dropdown_categories( $c, $h, 0, $o );
 
 			?>
 			<script type='text/javascript'>
