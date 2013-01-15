@@ -2335,12 +2335,12 @@ add_action( 'init', 'woocommerce_sidebar_login_process', 0 );
 
 
 /**
- * woocommerce_cleanup_session_transients function.
+ * woocommerce_cleanup_sessions function.
  *
  * @access public
  * @return void
  */
-function woocommerce_cleanup_session_transients() {
+function woocommerce_cleanup_sessions() {
 	global $wpdb;
 
 	$now = time();
@@ -2351,13 +2351,13 @@ function woocommerce_cleanup_session_transients() {
 		FROM
 			{$wpdb->options} a
 		WHERE
-			a.option_name LIKE '_transient_timeout_wc_session_%%'
+			a.option_name LIKE '_wc_session_expires_%%'
 			AND a.option_value < %s
 	", $now ) );
 
 	// Clear cache
 	foreach ( $session_names as $session_name )
-		wp_cache_delete( substr( $session_name, 20 ), 'transient' );
+		wp_cache_delete( substr( $session_name, 10 ), 'options' );
 
 	// Delete rows
 	$wpdb->query( $wpdb->prepare( "
@@ -2366,17 +2366,16 @@ function woocommerce_cleanup_session_transients() {
 		FROM
 			{$wpdb->options} a, {$wpdb->options} b
 		WHERE
-			a.option_name LIKE '_transient_wc_session_%%' AND
+			a.option_name LIKE '_wc_session_%%' AND
 			b.option_name = CONCAT(
-				'_transient_timeout_wc_session_',
+				'_wc_session_expires_',
 				SUBSTRING(
 					a.option_name,
-					CHAR_LENGTH('_transient_wc_session_') + 1
+					CHAR_LENGTH('_wc_session_') + 1
 				)
 			)
 			AND b.option_value < %s
 	", $now ) );
-
 }
 
-add_action( 'woocommerce_cleanup_session_transients', 'woocommerce_cleanup_session_transients' );
+add_action( 'woocommerce_cleanup_sessions', 'woocommerce_cleanup_sessions' );

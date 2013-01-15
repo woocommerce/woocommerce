@@ -329,7 +329,7 @@ class Woocommerce {
 		include( 'classes/class-wc-tax.php' );					// Tax class
 		include( 'classes/class-wc-customer.php' ); 			// Customer class
 		include( 'classes/abstracts/abstract-wc-session.php' ); // Abstract for session implementations
-		include( 'classes/class-wc-session-transients.php' );   // Transients implementation of the session class
+		include( 'classes/class-wc-session-handler.php' );   	// WC Session class
 		include( 'classes/class-wc-shortcodes.php' );			// Shortcodes class
 	}
 
@@ -449,7 +449,7 @@ class Woocommerce {
 		if ( ! is_admin() || defined('DOING_AJAX') ) {
 
 			// Session class, handles session data for customers - can be overwritten if custom handler is needed
-			$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Transients' );
+			$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
 			$this->session = new $session_class();
 
 			// Class instances

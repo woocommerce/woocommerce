@@ -35,7 +35,7 @@ function do_install_woocommerce() {
 	// Cron jobs
 	wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
 	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
-	wp_clear_scheduled_hook( 'woocommerce_cleanup_session_transients' );
+	wp_clear_scheduled_hook( 'woocommerce_cleanup_sessions' );
 
 	$ve = get_option('gmt_offset') > 0 ? '+' : '-';
 
@@ -49,7 +49,7 @@ function do_install_woocommerce() {
 	if ( $held_duration != '' )
 		wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 
-	wp_schedule_event( time(), 'twicedaily', 'woocommerce_cleanup_session_transients' );
+	wp_schedule_event( time(), 'twicedaily', 'woocommerce_cleanup_sessions' );
 
 	// Install files and folders for uploading files and prevent hotlinking
 	$upload_dir =  wp_upload_dir();

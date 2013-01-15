@@ -8,27 +8,12 @@
  * @author 		WooThemes
  */
 abstract class WC_Session {
+
     /** _data  */
-    protected $_data;
+    protected $_data = array();
 
-    /**
-     * save_data function to be implemented
-     *
-     * @access public
-     * @return void
-     */
-    abstract public function save_data();
-
-	/**
-	 * Constructor for the session classes. Hooks in methods.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function __construct() {
-    	// When leaving or ending page load, store data
-    	add_action( 'shutdown', array( $this, 'save_data' ), 20 );
-    }
+    /** When something changes */
+    protected $_dirty = false;
 
     /**
      * __get function.
@@ -51,6 +36,7 @@ abstract class WC_Session {
      */
     public function __set( $property, $value ) {
         $this->_data[ $property ] = $value;
+        $this->_dirty = true;
     }
 
      /**
@@ -73,5 +59,6 @@ abstract class WC_Session {
      */
     public function __unset( $property ) {
         unset( $this->_data[ $property ] );
+        $this->_dirty = true;
     }
 }
