@@ -2332,3 +2332,52 @@ function woocommerce_sidebar_login_process() {
 }
 
 add_action( 'init', 'woocommerce_sidebar_login_process', 0 );
+
+
+/**
+ * woocommerce_cleanup_session_transients function.
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_cleanup_session_transients() {
+	global $wpdb;
+echo '<br/><br/><br/><br/><br/>';
+
+	$now = time();
+
+	$session_names = $wpdb->get_col( $wpdb->prepare( "
+		SELECT
+			a.option_name
+		FROM
+			{$wpdb->options} a
+		WHERE
+			a.option_name LIKE '_transient_timeout_wc_session_%%'
+			AND a.option_value < %s
+	", $now ) );
+
+	// Clear cache
+	foreach ( $session_names as $session_name )
+		wp_cache_delete( substr( $session_name, 20 ), 'transient' );
+
+	// Delete rows
+	$wpdb->query( $wpdb->prepare( "
+		DELETE
+			a, b
+		FROM
+			{$wpdb->options} a, {$wpdb->options} b
+		WHERE
+			a.option_name LIKE '_transient_wc_session_%%' AND
+			b.option_name = CONCAT(
+				'_transient_timeout_wc_session_',
+				SUBSTRING(
+					a.option_name,
+					CHAR_LENGTH('_transient_wc_session_') + 1
+				)
+			)
+			AND b.option_value < %s
+	", $now ) );
+
+}
+
+add_action( 'woocommerce_cleanup_session_transients', 'woocommerce_cleanup_session_transients' );

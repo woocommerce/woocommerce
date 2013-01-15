@@ -20,7 +20,7 @@ class WC_Session_Transients extends WC_Session {
 	private $_cookie;
 
 	/** cookie expiration time */
-	private $_cookie_expires;
+	private $_cookie_expiration;
 
 	/**
 	 * Constructor for the session class.
