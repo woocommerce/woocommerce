@@ -43,7 +43,7 @@ global $woocommerce, $product, $post;
 
 									switch ( $orderby ) {
 										case 'name' :
-											$terms = get_terms( sanitize_title($name), array('menu_order' => 'ASC', 'hide_empty' => false) );
+											$args = array( 'orderby' => 'name', 'hide_empty' => false, 'menu_order' => false );
 										break;
 										case 'id' :
 											$args = array( 'orderby' => 'id', 'order' => 'ASC', 'menu_order' => false );
