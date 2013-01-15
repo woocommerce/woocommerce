@@ -2342,7 +2342,6 @@ add_action( 'init', 'woocommerce_sidebar_login_process', 0 );
  */
 function woocommerce_cleanup_session_transients() {
 	global $wpdb;
-echo '<br/><br/><br/><br/><br/>';
 
 	$now = time();
 
