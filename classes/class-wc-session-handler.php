@@ -65,6 +65,7 @@ class WC_Session_Handler extends WC_Session {
     	setcookie( $this->_cookie, $cookie_value, $this->_expiration, COOKIEPATH, COOKIE_DOMAIN, false, true );
 
     	// Actions
+    	add_action( 'woocommerce_cleanup_sessions', array( $this, 'cleanup_sessions' ), 10 );
     	add_action( 'shutdown', array( $this, 'save_data' ), 20 );
     }
 
@@ -141,4 +142,48 @@ class WC_Session_Handler extends WC_Session {
 	    	}
 	    }
     }
+
+    /**
+	 * cleanup_sessions function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function cleanup_sessions() {
+		global $wpdb;
+
+		$now = time();
+
+		$session_names = $wpdb->get_col( $wpdb->prepare( "
+			SELECT
+				a.option_name
+			FROM
+				{$wpdb->options} a
+			WHERE
+				a.option_name LIKE '_wc_session_expires_%%'
+				AND a.option_value < %s
+		", $now ) );
+
+		// Clear cache
+		foreach ( $session_names as $session_name )
+			wp_cache_delete( substr( $session_name, 10 ), 'options' );
+
+		// Delete rows
+		$wpdb->query( $wpdb->prepare( "
+			DELETE
+				a, b
+			FROM
+				{$wpdb->options} a, {$wpdb->options} b
+			WHERE
+				a.option_name LIKE '_wc_session_%%' AND
+				b.option_name = CONCAT(
+					'_wc_session_expires_',
+					SUBSTRING(
+						a.option_name,
+						CHAR_LENGTH('_wc_session_') + 1
+					)
+				)
+				AND b.option_value < %s
+		", $now ) );
+	}
 }
