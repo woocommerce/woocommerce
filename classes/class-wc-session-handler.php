@@ -24,11 +24,11 @@ class WC_Session_Handler extends WC_Session {
 	/** cookie name */
 	private $_cookie;
 
+	/** session due to expire timestamp */
+	private $_session_expiring;
+
 	/** session expiration timestamp */
 	private $_session_expiration;
-
-	/** cookie expiration timestamp */
-	private $_expiration;
 
 	/**
 	 * Constructor for the session class.
@@ -41,28 +41,28 @@ class WC_Session_Handler extends WC_Session {
 
 		if ( $cookie = $this->get_session_cookie() ) {
 			$this->_customer_id        = $cookie[0];
-			$this->_expiration         = $cookie[1];
-			$this->_session_expiration = $cookie[2];
+			$this->_session_expiration = $cookie[1];
+			$this->_session_expiring   = $cookie[2];
 
 			// Update session if its close to expiring
-			if ( time() > $this->_session_expiration ) {
-				$this->set_expiration();
-				update_option( '_wc_session_expires_' . $this->_customer_id, $this->_expiration );
+			if ( time() > $this->_session_expiring ) {
+				$this->set_session_expiration();
+				update_option( '_wc_session_expires_' . $this->_customer_id, $this->_session_expiration );
 			}
 
 		} else {
-			$this->set_expiration();
+			$this->set_session_expiration();
 			$this->_customer_id = $this->generate_customer_id();
 		}
 
 		$this->_data = $this->get_session_data();
 
     	// Set/renew our cookie
-    	$to_hash      = $this->_customer_id . $this->_expiration;
+    	$to_hash      = $this->_customer_id . $this->_session_expiration;
     	$cookie_hash  = hash_hmac( 'md5', $to_hash, wp_hash( $to_hash ) );
-    	$cookie_value = $this->_customer_id . '||' . $this->_expiration . '||' . $this->_session_expiration . '||' . $cookie_hash;
+    	$cookie_value = $this->_customer_id . '||' . $this->_session_expiration . '||' . $this->_session_expiring . '||' . $cookie_hash;
 
-    	setcookie( $this->_cookie, $cookie_value, $this->_expiration, COOKIEPATH, COOKIE_DOMAIN, false, true );
+    	setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, COOKIEPATH, COOKIE_DOMAIN, false, true );
 
     	// Actions
     	add_action( 'woocommerce_cleanup_sessions', array( $this, 'cleanup_sessions' ), 10 );
@@ -70,14 +70,14 @@ class WC_Session_Handler extends WC_Session {
     }
 
     /**
-     * set_expiration function.
+     * set_session_expiration function.
      *
      * @access private
      * @return void
      */
-    private function set_expiration() {
-	    $this->_session_expiration = time() + intval( apply_filters( 'wc_session_expiration', 60 * 60 * 47 ) ); // 47 Hours
-		$this->_expiration  = time() + intval( apply_filters( 'wc_session_expiration', 60 * 60 * 48 ) ); // 48 Hours
+    private function set_session_expiration() {
+	    $this->_session_expiring    = time() + intval( apply_filters( 'wc_session_expiring', 60 * 60 * 47 ) ); // 47 Hours
+		$this->_session_expiration  = time() + intval( apply_filters( 'wc_session_expiration', 60 * 60 * 48 ) ); // 48 Hours
     }
 
 	/**
@@ -103,16 +103,16 @@ class WC_Session_Handler extends WC_Session {
 		if ( ! isset( $_COOKIE[ $this->_cookie ] ) )
 			return false;
 
-		list( $customer_id, $cookie_expiration, $session_expiration, $cookie_hash ) = explode( '||', $_COOKIE[ $this->_cookie ] );
+		list( $customer_id, $session_expiration, $session_expiring, $cookie_hash ) = explode( '||', $_COOKIE[ $this->_cookie ] );
 
 		// Validate hash
-		$to_hash = $customer_id . $cookie_expiration;
+		$to_hash = $customer_id . $session_expiration;
 		$hash    = hash_hmac( 'md5', $to_hash, wp_hash( $to_hash ) );
 
 		if ( $hash != $cookie_hash )
 			return false;
 
-		return array( $customer_id, $cookie_expiration, $session_expiration, $cookie_hash );
+		return array( $customer_id, $session_expiration, $session_expiring, $cookie_hash );
 	}
 
 	/**
@@ -134,11 +134,15 @@ class WC_Session_Handler extends WC_Session {
     public function save_data() {
     	// Dirty if something changed - prevents saving nothing new
     	if ( $this->_dirty ) {
-	    	if ( false === get_option( '_wc_session_' . $this->_customer_id ) ) {
-		    	add_option( '_wc_session_' . $this->_customer_id, $this->_data, '', 'no' );
-		    	add_option( '_wc_session_expires_' . $this->_customer_id, $this->_expiration, '', 'no' );
+
+    		$session_option = '_wc_session_' . $this->_customer_id;
+    		$session_expiry_option = '_wc_session_expires_' . $this->_customer_id;
+
+	    	if ( false === get_option( $session_option ) ) {
+		    	add_option( $session_option, $this->_data, '', 'no' );
+		    	add_option( $session_expiry_option, $this->_session_expiration, '', 'no' );
 	    	} else {
-		    	update_option( '_wc_session_' . $this->_customer_id, $this->_data );
+		    	update_option( $session_option, $this->_data );
 	    	}
 	    }
     }
