@@ -34,7 +34,7 @@ class WC_Shortcode_Cart {
 				$woocommerce->add_error( __( 'Please enter a coupon code.', 'woocommerce' ) );
 			}
 
-		// Remove Discount Codes
+		// Remove Coupon Codes
 		} elseif ( isset( $_GET['remove_discounts'] ) ) {
 
 			$woocommerce->cart->remove_coupons( $_GET['remove_discounts'] );

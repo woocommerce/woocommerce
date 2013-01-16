@@ -1736,19 +1736,27 @@ class WC_Cart {
 
 				// Check if applied
 				if ( $woocommerce->cart->has_discount( $coupon_code ) ) {
-					$woocommerce->add_error( __( 'Discount code already applied!', 'woocommerce' ) );
+					$woocommerce->add_error( __( 'Coupon code already applied!', 'woocommerce' ) );
 					return false;
 				}
 
 				// If its individual use then remove other coupons
 				if ( $the_coupon->individual_use == 'yes' ) {
-					$this->applied_coupons = array();
+					$this->applied_coupons = apply_filters( 'woocommerce_apply_individual_use_coupon', array(), $the_coupon, $this->applied_coupons );
 				}
 
-				foreach ( $this->applied_coupons as $code ) {
-					$coupon = new WC_Coupon($code);
-					if ( $coupon->is_valid() && $coupon->individual_use == 'yes' ) {
-						$this->applied_coupons = array();
+				if ( $this->applied_coupons ) {
+					foreach ( $this->applied_coupons as $code ) {
+
+						$existing_coupon = new WC_Coupon( $code );
+
+						if ( $existing_coupon->individual_use == 'yes' && false === apply_filters( 'woocommerce_apply_with_individual_use_coupon', false, $the_coupon, $existing_coupon, $this->applied_coupons ) ) {
+
+							// Reject new coupon
+							$woocommerce->add_message( sprintf( __( 'Sorry, coupon <code>%s</code> has already been applied and cannot be used in conjunction with other coupons.', 'woocommerce' ), $code ) );
+
+							return false;
+						}
 					}
 				}
 
@@ -1761,7 +1769,7 @@ class WC_Cart {
 
 				$this->set_session();
 
-				$woocommerce->add_message( __( 'Discount code applied successfully.', 'woocommerce' ) );
+				$woocommerce->add_message( __( 'Coupon code applied successfully.', 'woocommerce' ) );
 
 				do_action( 'woocommerce_applied_coupon', $coupon_code );
 
