@@ -24,6 +24,8 @@ function woocommerce_sidebar_login_ajax_process() {
 
 	check_ajax_referer( 'woocommerce-sidebar-login-action', 'security' );
 
+	header( 'Content-Type: application/json; charset=utf-8' );
+
 	// Get post data
 	$creds = array();
 	$creds['user_login'] 	= $_REQUEST['user_login'];
@@ -72,8 +74,6 @@ function woocommerce_sidebar_login_ajax_process() {
 			$result['error'] = __( 'Please enter your username and password to login.', 'woocommerce' );
 		}
 	}
-
-	header( 'content-type: application/json; charset=utf-8' );
 
 	echo esc_js( $_GET['callback'] ) . '(' . json_encode( $result ) . ')';
 
@@ -219,6 +219,8 @@ function woocommerce_ajax_add_to_cart() {
 
 	check_ajax_referer( 'add-to-cart', 'security' );
 
+	header( 'Content-Type: application/json; charset=utf-8' );
+
 	$product_id = (int) apply_filters('woocommerce_add_to_cart_product_id', $_POST['product_id']);
 
 	$passed_validation = apply_filters('woocommerce_add_to_cart_validation', true, $product_id, 1);
@@ -359,6 +361,8 @@ add_action('wp_ajax_woocommerce-mark-order-processing', 'woocommerce_mark_order_
 function woocommerce_add_new_attribute() {
 
 	check_ajax_referer( 'add-attribute', 'security' );
+
+	header( 'Content-Type: application/json; charset=utf-8' );
 
 	$taxonomy = esc_attr( $_POST['taxonomy'] );
 	$term = stripslashes( $_POST['term'] );
@@ -914,6 +918,8 @@ function woocommerce_get_customer_details() {
 
 	check_ajax_referer( 'get-customer-details', 'security' );
 
+	header( 'Content-Type: application/json; charset=utf-8' );
+
 	$user_id = (int) trim(stripslashes($_POST['user_id']));
 	$type_to_load = esc_attr(trim(stripslashes($_POST['type_to_load'])));
 
@@ -931,7 +937,7 @@ function woocommerce_get_customer_details() {
 		$type_to_load . '_phone' => get_user_meta( $user_id, $type_to_load . '_phone', true ),
 	);
 
-	echo json_encode($customer_data);
+	echo json_encode( $customer_data );
 
 	// Quit out
 	die();
@@ -1222,6 +1228,8 @@ function woocommerce_calc_line_taxes() {
 	global $woocommerce, $wpdb;
 
 	check_ajax_referer( 'calc-totals', 'security' );
+
+	header( 'Content-Type: application/json; charset=utf-8' );
 
 	$tax = new WC_Tax();
 
@@ -1538,6 +1546,8 @@ function woocommerce_json_search_products( $x = '', $post_types = array('product
 
 	check_ajax_referer( 'search-products', 'security' );
 
+	header( 'Content-Type: application/json; charset=utf-8' );
+
 	$term = (string) urldecode(stripslashes(strip_tags($_GET['term'])));
 
 	if (empty($term)) die();
@@ -1648,6 +1658,8 @@ add_action('wp_ajax_woocommerce_json_search_products_and_variations', 'woocommer
 function woocommerce_json_search_customers() {
 
 	check_ajax_referer( 'search-customers', 'security' );
+
+	header( 'Content-Type: application/json; charset=utf-8' );
 
 	$term = urldecode( stripslashes( strip_tags( $_GET['term'] ) ) );
 
@@ -1784,6 +1796,8 @@ function woocommerce_product_ordering() {
 	// real post?
 	if ( ! $post = get_post( $_POST['id'] ) )
 		die(-1);
+
+	header( 'Content-Type: application/json; charset=utf-8' );
 
 	$previd = isset( $_POST['previd'] ) ? $_POST['previd'] : false;
 	$nextid = isset( $_POST['nextid'] ) ? $_POST['nextid'] : false;
