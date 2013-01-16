@@ -683,7 +683,7 @@ function process_product_meta_variable( $post_id ) {
 			else
 				update_post_meta( $variation_id, '_price', $regular_price );
 
-			if ( $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) )
+			if ( $sale_price != '' && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) )
 				update_post_meta( $variation_id, '_price', $sale_price );
 
 			if ( $date_to && strtotime( $date_to ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {

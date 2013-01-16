@@ -35,15 +35,6 @@ class WC_Product_Variation extends WC_Product {
 	/** @public bool True if the variation has a weight. */
 	public $variation_has_weight = false;
 
-	/** @public bool True if the variation has a price. */
-	public $variation_has_price = false;
-
-	/** @public bool True if the variation has a regular price. */
-	public $variation_has_regular_price = false;
-
-	/** @public bool True if the variation has a sale price. */
-	public $variation_has_sale_price = false;
-
 	/** @public bool True if the variation has stock and is managing stock. */
 	public $variation_has_stock = false;
 
@@ -146,42 +137,40 @@ class WC_Product_Variation extends WC_Product {
 			$this->tax_class               = $this->product_custom_fields['_tax_class'][0];
 		}
 
-		if ( isset( $this->product_custom_fields['_price'][0] ) && $this->product_custom_fields['_price'][0] !== '' ) {
-			$this->variation_has_price = true;
-			$this->price               = $this->product_custom_fields['_price'][0];
-		}
-
-		if ( isset( $this->product_custom_fields['_regular_price'][0] ) && $this->product_custom_fields['_regular_price'][0] !== '' ) {
-			$this->variation_has_regular_price = true;
-			$this->regular_price               = $this->product_custom_fields['_regular_price'][0];
-		}
-
-		if ( isset( $this->product_custom_fields['_sale_price'][0] ) && $this->product_custom_fields['_sale_price'][0] !== '' ) {
-			$this->variation_has_sale_price = true;
-			$this->sale_price               = $this->product_custom_fields['_sale_price'][0];
-		}
-
-		// Backwards compat for prices
-		if ( $this->variation_has_price && ! $this->variation_has_regular_price ) {
-			update_post_meta( $this->variation_id, '_regular_price', $this->price );
-			$this->variation_has_regular_price = true;
-			$this->regular_price               = $this->price;
-
-			if ( $this->variation_has_sale_price && $this->sale_price < $this->regular_price ) {
-				update_post_meta( $this->variation_id, '_price', $this->sale_price );
-				$this->price = $this->sale_price;
-			}
-		}
-
 		if ( isset( $this->product_custom_fields['_sale_price_dates_from'][0] ) )
 			$this->sale_price_dates_from = $this->product_custom_fields['_sale_price_dates_from'][0];
 
 		if ( isset( $this->product_custom_fields['_sale_price_dates_to'][0] ) )
 			$this->sale_price_dates_from = $this->product_custom_fields['_sale_price_dates_to'][0];
 
+		// Prices
+		$this->price         = isset( $this->product_custom_fields['_price'][0] ) ? $this->product_custom_fields['_price'][0] : '';
+		$this->regular_price = isset( $this->product_custom_fields['_regular_price'][0] ) ? $this->product_custom_fields['_regular_price'][0] : '';
+		$this->sale_price    = isset( $this->product_custom_fields['_sale_price'][0] ) ? $this->product_custom_fields['_sale_price'][0] : '';
+
+		// Backwards compat for prices
+		if ( $this->price !== '' && $this->regular_price == '' ) {
+			update_post_meta( $this->variation_id, '_regular_price', $this->price );
+			$this->regular_price = $this->price;
+
+			if ( $this->sale_price !== '' && $this->sale_price < $this->regular_price ) {
+				update_post_meta( $this->variation_id, '_price', $this->sale_price );
+				$this->price = $this->sale_price;
+			}
+		}
+
 		$this->total_stock = $this->stock;
 	}
 
+	/**
+	 * Returns whether or not the product post exists.
+	 *
+	 * @access public
+	 * @return bool
+	 */
+	function exists() {
+		return empty( $this->id ) ? false : true;
+	}
 
 	/**
 	 * Returns whether or not the variation is visible.
@@ -195,6 +184,10 @@ class WC_Product_Variation extends WC_Product {
 
 		// Out of stock visibility
 		if ( get_option('woocommerce_hide_out_of_stock_items') == 'yes' && ! $this->is_in_stock() )
+			$visible = false;
+
+		// Price not set
+		elseif ( $this->price == "" )
 			$visible = false;
 
 		return apply_filters( 'woocommerce_product_is_visible', $visible, $this->id );
@@ -230,28 +223,34 @@ class WC_Product_Variation extends WC_Product {
     }
 
 	/**
-     * Get variation attribute values
+     * Get variation price HTML. Prices are not inherited from parents.
      *
      * @return string containing the formatted price
      */
 	public function get_price_html() {
-		if ( $this->variation_has_price ) {
-			$price = '';
 
-			if ( $this->price !== '' ) {
-				if ( $this->price == $this->sale_price && $this->sale_price < $this->regular_price ) {
-					$price .= '<del>' . woocommerce_price( $this->regular_price ) . '</del> <ins>' . woocommerce_price( $this->sale_price ) . '</ins>';
-					$price = apply_filters( 'woocommerce_variation_sale_price_html', $price, $this );
-				} else {
-					$price .= woocommerce_price( $this->price );
-					$price = apply_filters( 'woocommerce_variation_price_html', $price, $this );
-				}
+		if ( $this->price !== '' ) {
+			if ( $this->price == $this->sale_price && $this->sale_price < $this->regular_price ) {
+
+				$price = '<del>' . woocommerce_price( $this->regular_price ) . '</del> <ins>' . woocommerce_price( $this->sale_price ) . '</ins>';
+				$price = apply_filters( 'woocommerce_variation_sale_price_html', $price, $this );
+
+			} elseif ( $this->price > 0 ) {
+
+				$price = woocommerce_price( $this->price );
+				$price = apply_filters( 'woocommerce_variation_price_html', $price, $this );
+
+			} else {
+
+				$price = __( 'Free!', 'woocommerce' );
+				$price = apply_filters( 'woocommerce_variation_free_price_html', $price, $this );
+
 			}
-
-			return $price;
 		} else {
-			return woocommerce_price( parent::get_price() );
+			$price = apply_filters( 'woocommerce_variation_empty_price_html', '', $this );
 		}
+
+		return $price;
 	}
 
 
