@@ -39,7 +39,7 @@ if ( get_option('woocommerce_enable_shipping_calc')=='no' || ! $woocommerce->car
 
 					// Hidden
 					?>
-					<input type="hidden" name="calc_shipping_state" id="calc_shipping_state" />
+					<input type="hidden" name="calc_shipping_state" id="calc_shipping_state" placeholder="<?php _e( 'State / county', 'woocommerce' ); ?>" />
 					<?php
 
 				} elseif ( is_array( $states ) ) {
@@ -47,7 +47,7 @@ if ( get_option('woocommerce_enable_shipping_calc')=='no' || ! $woocommerce->car
 					// Dropdown
 					?>
 					<span>
-						<select name="calc_shipping_state" id="calc_shipping_state"><option value=""><?php _e( 'Select a state&hellip;', 'woocommerce' ); ?></option><?php
+						<select name="calc_shipping_state" id="calc_shipping_state" placeholder="<?php _e( 'State / county', 'woocommerce' ); ?>"><option value=""><?php _e( 'Select a state&hellip;', 'woocommerce' ); ?></option><?php
 							foreach ( $states as $ckey => $cvalue )
 								echo '<option value="' . esc_attr( $ckey ) . '" '.selected( $current_r, $ckey, false ) .'>' . __( esc_html( $cvalue ), 'woocommerce' ) .'</option>';
 						?></select>
