@@ -227,7 +227,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 							'integration' => __( 'Integration', 'woocommerce' )
 						);
 						
-						if ( ! count( $woocommerce->integrations->get_integrations() ) )
+						if ( empty( $woocommerce->integrations->get_integrations() ) )
 							unset( $tabs['integration'] );
 
 						$tabs = apply_filters('woocommerce_settings_tabs_array', $tabs);
