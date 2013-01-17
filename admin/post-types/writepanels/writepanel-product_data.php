@@ -507,16 +507,11 @@ function woocommerce_product_data_box() {
 					$product_ids = ! empty( $upsell_ids ) ? array_map( 'absint',  $upsell_ids ) : null;
 					if ( $product_ids ) {
 						foreach ( $product_ids as $product_id ) {
-							$title 	= get_the_title( $product_id );
-							$sku 	= get_post_meta( $product_id, '_sku', true );
 
-							if ( ! $title )
-								continue;
+							$product      = get_product( $product_id );
+							$product_name = woocommerce_get_formatted_product_name( $product );
 
-							if ( ! empty( $sku ) )
-								$sku = ' (SKU: ' . $sku . ')';
-
-							echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $title . $sku ) . '</option>';
+							echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $product_name ) . '</option>';
 						}
 					}
 				?>
@@ -529,16 +524,11 @@ function woocommerce_product_data_box() {
 					$product_ids = ! empty( $crosssell_ids ) ? array_map( 'absint',  $crosssell_ids ) : null;
 					if ( $product_ids ) {
 						foreach ( $product_ids as $product_id ) {
-							$title 	= get_the_title( $product_id );
-							$sku 	= get_post_meta( $product_id, '_sku', true );
 
-							if ( ! $title )
-								continue;
+							$product      = get_product( $product_id );
+							$product_name = woocommerce_get_formatted_product_name( $product );
 
-							if ( ! empty( $sku ) )
-								$sku = ' (SKU: ' . $sku . ')';
-
-							echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $title . $sku ) . '</option>';
+							echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $product_name ) . '</option>';
 						}
 					}
 				?>

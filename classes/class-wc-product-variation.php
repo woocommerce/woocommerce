@@ -60,7 +60,7 @@ class WC_Product_Variation extends WC_Product {
 	 */
 	public function __construct( $variation, $args = array() ) {
 
-		$this->product_type = 'variable';
+		$this->product_type = 'variation';
 
 		if ( is_object( $variation ) ) {
 			$this->variation_id = absint( $variation->ID );

@@ -1616,17 +1616,15 @@ function woocommerce_json_search_products( $x = '', $post_types = array('product
 
 	$found_products = array();
 
-	if ($posts) foreach ($posts as $post) {
+	if ( $posts ) foreach ( $posts as $post ) {
 
-		$SKU = get_post_meta($post, '_sku', true);
+		$product = get_product( $post );
 
-		if (isset($SKU) && $SKU) $SKU = ' (SKU: ' . $SKU . ')';
-
-		$found_products[$post] = get_the_title( $post ) . ' &ndash; #' . $post . $SKU;
+		$found_products[ $post ] = woocommerce_get_formatted_product_name( $product );
 
 	}
 
-	$found_products = apply_filters( 'woocommerce_json_search_found_products', $found_products);
+	$found_products = apply_filters( 'woocommerce_json_search_found_products', $found_products );
 
 	echo json_encode( $found_products );
 
@@ -1690,63 +1688,6 @@ function woocommerce_json_search_customers() {
 }
 
 add_action('wp_ajax_woocommerce_json_search_customers', 'woocommerce_json_search_customers');
-
-
-/**
- * Search for products for upsells/crosssells
- *
- * @access public
- * @return void
- */
-function woocommerce_upsell_crosssell_search_products() {
-
-	check_ajax_referer( 'search-products', 'security' );
-
-	$search = (string) urldecode(stripslashes(strip_tags($_POST['search'])));
-	$name = (string) urldecode(stripslashes(strip_tags($_POST['name'])));
-
-	if (empty($search)) die();
-
-	if (is_numeric($search)) :
-
-		$args = array(
-			'post_type'	=> 'product',
-			'post_status' => 'publish',
-			'posts_per_page' => 15,
-			'post__in' => array(0, $search)
-		);
-
-	else :
-
-		$args = array(
-			'post_type'	=> 'product',
-			'post_status' => 'publish',
-			'posts_per_page' => 15,
-			's' => $search
-		);
-
-	endif;
-
-	$posts = apply_filters('woocommerce_upsell_crosssell_search_products', get_posts( $args ));
-
-	if ($posts) : foreach ($posts as $post) :
-
-		$SKU = get_post_meta($post->ID, '_sku', true);
-
-		?>
-		<li rel="<?php echo $post->ID; ?>"><button type="button" name="Add" class="button add_crosssell" title="Add"><?php _e( 'Cross-sell', 'woocommerce' ); ?> &rarr;</button><button type="button" name="Add" class="button add_upsell" title="Add"><?php _e( 'Up-sell', 'woocommerce' ); ?> &rarr;</button><strong><?php echo $post->post_title; ?></strong> &ndash; #<?php echo $post->ID; ?> <?php if (isset($SKU) && $SKU) echo 'SKU: '.esc_attr( $SKU ); ?><input type="hidden" class="product_id" value="0" /></li>
-		<?php
-
-	endforeach; else :
-
-		?><li><?php _e( 'No products found', 'woocommerce' ); ?></li><?php
-
-	endif;
-
-	die();
-}
-
-add_action('wp_ajax_woocommerce_upsell_crosssell_search_products', 'woocommerce_upsell_crosssell_search_products');
 
 
 /**
