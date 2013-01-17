@@ -32,6 +32,50 @@ function get_product( $the_product = false, $args = array() ) {
 	return $woocommerce->product_factory->get_product( $the_product, $args );
 }
 
+/**
+ * Function that returns an array containing the IDs of the products that are on sale.
+ *
+ * @access public
+ * @return array
+ */
+function woocommerce_get_product_ids_on_sale() {
+	// Load from cache
+	$product_ids_on_sale = get_transient( 'wc_products_onsale' );
+
+	// Valid cache found
+	if ( false !== $product_ids_on_sale )
+		return $product_ids_on_sale;
+
+	$on_sale = get_posts( array(
+		'post_type'      => array( 'product', 'product_variation' ),
+		'posts_per_page' => -1,
+		'post_status'    => 'publish',
+		'meta_query'     => array( array(
+			'key'        => '_sale_price',
+			'value'      => 0,
+			'compare'    => '>',
+			'type'       => 'NUMERIC',
+		) ),
+		'fields'         => 'id=>parent',
+	) );
+
+	$product_ids = array_keys( $on_sale );
+	$parent_ids  = array_values( $on_sale );
+
+	// Check for scheduled sales which have not started
+	foreach ( $product_ids as $key => $id ) {
+		if ( get_post_meta( $id, '_sale_price_dates_from', true ) > current_time( 'timestamp' ) ) {
+			unset( $product_ids[ $key ] );
+		}
+	}
+
+	$product_ids_on_sale = array_unique( array_merge( $product_ids, $parent_ids ) );
+
+	set_transient( 'wc_products_onsale', $product_ids_on_sale );
+
+	return $product_ids_on_sale;
+}
+
 function woocommerce_sanitize_taxonomy_name( $taxonomy ) {
 	return str_replace( array( ' ', '_' ), '-', strtolower( $taxonomy ) );
 }
