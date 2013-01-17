@@ -144,7 +144,7 @@ class WC_Google_Analytics extends WC_Integration {
 	function ecommerce_tracking_code( $order_id ) {
 		global $woocommerce;
 
-		if ( $this->ga_ecommerce_tracking_enabled == "no" || current_user_can('manage_options') )
+		if ( $this->ga_ecommerce_tracking_enabled == "no" || current_user_can('manage_options') || get_post_meta( $order_id, '_ga_tracked', true ) == 1 )
 			return;
 
 		$tracking_id = $this->ga_id;
@@ -233,6 +233,8 @@ class WC_Google_Analytics extends WC_Integration {
 		";
 
 		echo '<script type="text/javascript">' . $code . '</script>';
+
+		update_post_meta( $order_id, '_ga_tracked', 1 );
 	}
 
 
