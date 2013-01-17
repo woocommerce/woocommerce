@@ -398,7 +398,9 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 							$integrations = $woocommerce->integrations->get_integrations();
 
 							$current_section = empty( $current_section ) ? key( $integrations ) : $current_section;
-
+							
+							$links = array();
+							
 							foreach ( $integrations as $integration ) {
 								$title = empty( $integration->method_title ) ? ucwords( $integration->id ) : ucwords( $integration->method_title );
 
