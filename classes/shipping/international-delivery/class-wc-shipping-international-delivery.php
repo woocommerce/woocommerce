@@ -58,7 +58,8 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 							'title' 		=> __( 'Method Title', 'woocommerce' ),
 							'type' 			=> 'text',
 							'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-							'default'		=> __( 'International Delivery', 'woocommerce' )
+							'default'		=> __( 'International Delivery', 'woocommerce' ),
+							'desc_tip'      => true,
 						),
 			'availability' => array(
 							'title' 		=> __( 'Availability', 'woocommerce' ),
@@ -81,7 +82,6 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 			'type' => array(
 							'title' 		=> __( 'Calculation Type', 'woocommerce' ),
 							'type' 			=> 'select',
-							'description' 	=> '',
 							'default' 		=> 'order',
 							'options' 		=> array(
 								'order' 	=> __( 'Per Order - charge shipping for the entire order as a whole', 'woocommerce' ),
@@ -92,7 +92,6 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 			'tax_status' => array(
 							'title' 		=> __( 'Tax Status', 'woocommerce' ),
 							'type' 			=> 'select',
-							'description' 	=> '',
 							'default' 		=> 'taxable',
 							'options'		=> array(
 								'taxable' 	=> __( 'Taxable', 'woocommerce' ),
@@ -107,13 +106,17 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 								'min'	=> '0'
 							),
 							'description'	=> __( 'Cost excluding tax. Enter an amount, e.g. 2.50.', 'woocommerce' ),
-							'default' 		=> ''
+							'default' 		=> '',
+							'desc_tip'      => true,
+							'placeholder'	=> '0.00'
 						),
 			'fee' => array(
 							'title' 		=> __( 'Default Handling Fee', 'woocommerce' ),
 							'type' 			=> 'text',
 							'description'	=> __( 'Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable.', 'woocommerce' ),
-							'default'		=> ''
+							'default'		=> '',
+							'desc_tip'      => true,
+							'placeholder'	=> '0.00'
 						),
 			);
 

@@ -63,7 +63,8 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 							'title' => __( 'Title', 'woocommerce' ),
 							'type' => 'text',
 							'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-							'default' => __( 'Cheque Payment', 'woocommerce' )
+							'default' => __( 'Cheque Payment', 'woocommerce' ),
+							'desc_tip'      => true,
 						),
 			'description' => array(
 							'title' => __( 'Customer Message', 'woocommerce' ),

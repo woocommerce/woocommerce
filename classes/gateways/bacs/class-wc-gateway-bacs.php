@@ -69,7 +69,8 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 							'title' => __( 'Title', 'woocommerce' ),
 							'type' => 'text',
 							'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-							'default' => __( 'Direct Bank Transfer', 'woocommerce' )
+							'default' => __( 'Direct Bank Transfer', 'woocommerce' ),
+							'desc_tip'      => true,
 						),
 			'description' => array(
 							'title' => __( 'Customer Message', 'woocommerce' ),
@@ -110,13 +111,11 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 			'iban' => array(
 							'title' => __( 'IBAN', 'woocommerce' ),
 							'type' => 'text',
-							'description' => __( 'Your bank may require this for international payments','woocommerce'),
 							'default' => ''
 						),
 			'bic' => array(
 							'title' => __( 'BIC (formerly Swift)', 'woocommerce' ),
 							'type' => 'text',
-							'description' => __('Your bank may require this for international payments','woocommerce'),
 							'default' => ''
 						),
 

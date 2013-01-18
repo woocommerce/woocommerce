@@ -1578,13 +1578,15 @@ class WC_Cart {
 			// Packages array for storing 'carts'
 			$packages = array();
 
-			$packages[0]['contents'] 				= $this->get_cart();		// Items in the package
-			$packages[0]['contents_cost'] 			= 0;						// Cost of items in the package, set below
-			$packages[0]['applied_coupons']			= $this->applied_coupons; 	// Applied coupons - some, like free shipping, affect costs
-			$packages[0]['destination']['country'] 	= $woocommerce->customer->get_shipping_country();
-			$packages[0]['destination']['state'] 	= $woocommerce->customer->get_shipping_state();
-			$packages[0]['destination']['postcode'] = $woocommerce->customer->get_shipping_postcode();
-			$packages[0]['destination']['city'] 	= $woocommerce->customer->get_shipping_city();
+			$packages[0]['contents']                 = $this->get_cart();		// Items in the package
+			$packages[0]['contents_cost']            = 0;						// Cost of items in the package, set below
+			$packages[0]['applied_coupons']          = $this->applied_coupons; 	// Applied coupons - some, like free shipping, affect costs
+			$packages[0]['destination']['country']   = $woocommerce->customer->get_shipping_country();
+			$packages[0]['destination']['state']     = $woocommerce->customer->get_shipping_state();
+			$packages[0]['destination']['postcode']  = $woocommerce->customer->get_shipping_postcode();
+			$packages[0]['destination']['city']      = $woocommerce->customer->get_shipping_city();
+			$packages[0]['destination']['address']   = $woocommerce->customer->get_shipping_address();
+			$packages[0]['destination']['address_2'] = $woocommerce->customer->get_shipping_address_2();
 
 			foreach ( $this->get_cart() as $item )
 				if ( $item['data']->needs_shipping() )

@@ -84,13 +84,16 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 				'title' 		=> __( 'Title', 'woocommerce' ),
 				'type' 			=> 'text',
 				'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-				'default'		=> __( 'Local Pickup', 'woocommerce' )
+				'default'		=> __( 'Local Pickup', 'woocommerce' ),
+				'desc_tip'      => true,
 			),
 			'codes' => array(
 				'title' 		=> __( 'Zip/Post Codes', 'woocommerce' ),
 				'type' 			=> 'textarea',
 				'description' 	=> __( 'What zip/post codes would you like to offer delivery to? Separate codes with a comma. Accepts wildcards, e.g. P* will match a postcode of PE30.', 'woocommerce' ),
-				'default'		=> ''
+				'default'		=> '',
+				'desc_tip'      => true,
+				'placeholder'	=> '12345, 56789 etc'
 			),
 			'availability' => array(
 				'title' 		=> __( 'Method availability', 'woocommerce' ),

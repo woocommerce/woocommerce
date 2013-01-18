@@ -104,7 +104,8 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 				'title' 		=> __( 'Title', 'woocommerce' ),
 				'type' 			=> 'text',
 				'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-				'default'		=> __( 'Local Delivery', 'woocommerce' )
+				'default'		=> __( 'Local Delivery', 'woocommerce' ),
+				'desc_tip'      => true,
 			),
 			'type' => array(
 				'title' 		=> __( 'Fee Type', 'woocommerce' ),
@@ -116,6 +117,7 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 					'percent'	=> __( 'Percentage of cart total', 'woocommerce' ),
 					'product'	=> __( 'Fixed amount per product', 'woocommerce' ),
 				),
+				'desc_tip'      => true,
 			),
 			'fee' => array(
 				'title' 		=> __( 'Delivery Fee', 'woocommerce' ),
@@ -125,13 +127,17 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 					'min'	=> '0'
 				),
 				'description' 	=> __( 'What fee do you want to charge for local delivery, disregarded if you choose free. Leave blank to disable.', 'woocommerce' ),
-				'default'		=> ''
+				'default'		=> '',
+				'desc_tip'      => true,
+				'placeholder'	=> '0.00'
 			),
 			'codes' => array(
 				'title' 		=> __( 'Zip/Post Codes', 'woocommerce' ),
 				'type' 			=> 'textarea',
 				'description' 	=> __( 'What zip/post codes would you like to offer delivery to? Separate codes with a comma. Accepts wildcards, e.g. P* will match a postcode of PE30.', 'woocommerce' ),
-				'default'		=> ''
+				'default'		=> '',
+				'desc_tip'      => true,
+				'placeholder'	=> '12345, 56789 etc'
 			),
 			'availability' => array(
 							'title' 		=> __( 'Method availability', 'woocommerce' ),
