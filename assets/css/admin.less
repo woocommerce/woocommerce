@@ -1002,46 +1002,48 @@ ul.wc_coupon_list_block {
 		width:9%;
 	}
 	.column-order_status {
-		width:75px;
+		width:45px;
 		text-align: center;
 		mark {
 			display:block;
-			text-align: center;
-			white-space: nowrap;
-			padding: 0 2px;
-
-			background: #999;
-			font-size:11px;
-			line-height: 1.75;
-			-webkit-border-radius:3px;
-			-moz-border-radius:3px;
-			-o-border-radius:3px;
-			border-radius:3px;
-			margin: 0;
-			color:#fff;
-			font-weight: bold;
+			height:12px;
+			width:16px;
+			text-indent: -999em;
+			margin:0 auto;
+			background: none;
+			background-repeat: no-repeat;
+			background-position: center;
+			opacity:0.5;
+			&:hover {
+				opacity:1;
+			}
 		}
 		mark.pending {
-			background-color: #999;
+			background-image:url(../images/icons/pending.png);
 		}
 		mark.completed {
-			background-color: #a0658b;
+			background-image:url(../images/icons/completed.png);
 		}
 		mark.on-hold {
-			background-color: #E66F00;
+			background-image:url(../images/icons/on-hold.png);
+			width:15px;
+			height:14px;
 		}
 		mark.failed {
-			background-color: red;
+			background-image:url(../images/icons/failed.png);
 		}
 		mark.cancelled {
-			background-color: #ccc;
+			background-image:url(../images/icons/cancelled.png);
 		}
 		mark.processing {
-			background-color: #2184c2;
+			background-image:url(../images/icons/st-processing.png);
 		}
 		mark.refunded {
-			background-color: #ccc;
+			background-image:url(../images/icons/refunded.png);
 		}
+	}
+	td.column-order_status {
+		padding-top:10px;
 	}
 }
 
@@ -2698,6 +2700,38 @@ table.bar_chart {
 			span {
 				background-image: url(../images/admin-star@2x.png);
 				background-size: 10px 20px;
+			}
+		}
+	}
+	.widefat {
+		.column-order_status {
+			mark.pending {
+				background-image:url(../images/icons/pending@2x.png);
+				background-size: 15px 12px;
+			}
+			mark.completed {
+				background-image:url(../images/icons/completed@2x.png);
+				background-size: 15px 12px;
+			}
+			mark.on-hold {
+				background-image:url(../images/icons/on-hold@2x.png);
+				background-size: 13px 13px;
+			}
+			mark.failed {
+				background-image:url(../images/icons/failed@2x.png);
+				background-size: 15px 12px;
+			}
+			mark.cancelled {
+				background-image:url(../images/icons/cancelled@2x.png);
+				background-size: 15px 12px;
+			}
+			mark.processing {
+				background-image:url(../images/icons/st-processing@2x.png);
+				background-size: 14px 11px;
+			}
+			mark.refunded {
+				background-image:url(../images/icons/refunded@2x.png);
+				background-size: 15px 12px;
 			}
 		}
 	}

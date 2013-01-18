@@ -72,7 +72,7 @@ function woocommerce_custom_order_columns( $column ) {
 	switch ( $column ) {
 		case "order_status" :
 
-			printf( '<mark class="%s">%s</mark>', sanitize_title( $the_order->status ), esc_html__( $the_order->status, 'woocommerce' ) );
+			printf( '<mark class="%s tips" data-tip="%s">%s</mark>', sanitize_title( $the_order->status ), esc_html__( $the_order->status, 'woocommerce' ), esc_html__( $the_order->status, 'woocommerce' ) );
 
 		break;
 		case "order_title" :
