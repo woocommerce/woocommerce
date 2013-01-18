@@ -1441,10 +1441,20 @@ table.wc_tax_rates {
 		padding: 0;
 	}
 	td.sort {
-		width: 16px;
-		padding: 0;
+		padding-left: 2em;
 		cursor: move;
-		background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAHUlEQVQYV2O8f//+fwY8gJGgAny6QXKETRgEVgAAXxAVsa5Xr3QAAAAASUVORK5CYII=) no-repeat center;
+		position: relative;
+		background: #f9f9f9;
+		&:before {
+			content: "";
+			position: absolute;
+			top: 0.75em;
+			left: 0.5em;
+			width: 1em;
+			height: 0.125em;
+			border-top: 0.375em double #777;
+			border-bottom: 0.125em solid #777;
+		}
 	}
 	.button {
 		float: left;
