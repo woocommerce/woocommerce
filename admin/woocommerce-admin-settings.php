@@ -59,6 +59,9 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 					case "tax" :
 					case "email" :
 						woocommerce_update_options( $woocommerce_settings[ $current_tab ] );
+
+						// Trigger action for tab
+						do_action( 'woocommerce_update_options_' . $current_tab );
 					break;
 					case "payment_gateways" :
 						woocommerce_update_options( $woocommerce_settings[ $current_tab ] );
@@ -68,10 +71,13 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 						woocommerce_update_options( $woocommerce_settings[ $current_tab ] );
 						$woocommerce->shipping->process_admin_options();
 					break;
+					default :
+						// Trigger action for tab
+						do_action( 'woocommerce_update_options_' . $current_tab );
+					break;
 				}
 
 				do_action( 'woocommerce_update_options' );
-				do_action( 'woocommerce_update_options_' . $current_tab );
 
 				// Handle Colour Settings
 				if ( $current_tab == 'general' && get_option('woocommerce_frontend_css') == 'yes' ) {
@@ -398,9 +404,9 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 							$integrations = $woocommerce->integrations->get_integrations();
 
 							$current_section = empty( $current_section ) ? key( $integrations ) : $current_section;
-							
+
 							$links = array();
-							
+
 							foreach ( $integrations as $integration ) {
 								$title = empty( $integration->method_title ) ? ucwords( $integration->id ) : ucwords( $integration->method_title );
 
