@@ -70,6 +70,7 @@ function woocommerce_update_options( $options ) {
 	    	case "single_select_page" :
 	    	case "single_select_country" :
 	    	case 'radio' :
+	    	case "multiselect" :
 
 	    		if ( $value['id'] == 'woocommerce_price_thousand_sep' || $value['id'] == 'woocommerce_price_decimal_sep' ) {
 
