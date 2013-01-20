@@ -79,8 +79,8 @@ jQuery(document).ready(function($) {
 
 				// Empty array means state field is not used
 				//$parent.fadeOut(200, function() {
-					$statebox.parent().find('.chzn-container').remove();
-					$statebox.replaceWith('<input type="hidden" class="hidden" name="' + input_name + '" id="' + input_id + '" value="" />');
+					$statebox.parent().hide().find('.chzn-container').remove();
+					$statebox.replaceWith('<input type="hidden" class="hidden" name="' + input_name + '" id="' + input_id + '" value="" placeholder="' + placeholder + '" />');
 
 					$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
 				//});
@@ -93,6 +93,7 @@ jQuery(document).ready(function($) {
 					for(var index in state) {
 						options = options + '<option value="' + index + '">' + state[index] + '</option>';
 					}
+					$statebox.parent().show();
 					if ($statebox.is('input')) {
 						// Change for select
 						$statebox.replaceWith('<select name="' + input_name + '" id="' + input_id + '" class="state_select" placeholder="' + placeholder + '"></select>');
@@ -103,8 +104,6 @@ jQuery(document).ready(function($) {
 					$statebox.val(value);
 
 					$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
-
-					//$parent.fadeIn(500);
 				//});
 
 			}
@@ -112,16 +111,15 @@ jQuery(document).ready(function($) {
 			if ($statebox.is('select')) {
 
 				//$parent.fadeOut(200, function() {
-					$parent.find('.chzn-container').remove();
+					$parent.show().find('.chzn-container').remove();
 					$statebox.replaceWith('<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />');
 
 					$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
-					//$parent.fadeIn(500);
 				//});
 
 			} else if ($statebox.is('.hidden')) {
 
-				$parent.find('.chzn-container').remove();
+				$parent.show().find('.chzn-container').remove();
 				$statebox.replaceWith('<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />');
 
 				$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);

@@ -789,6 +789,11 @@ class WC_Countries {
 						'required' => false
 					)
 				),
+				'KR' => array(
+					'state'		=> array(
+						'required' => false
+					)
+				),
 				'NL' => array(
 					'postcode_before_city' => true,
 					'state'		=> array(
