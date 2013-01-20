@@ -299,6 +299,7 @@ class WC_Countries {
 			'HU' => array(),
 			'IS' => array(),
 			'IL' => array(),
+			'KR' => array(),
 			'NL' => array(),
 			'NO' => array(),
 			'PL' => array(),
