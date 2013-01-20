@@ -945,7 +945,7 @@ class WC_Countries {
 				'type'			=> 'country',
 				'label' 		=> __( 'Country', 'woocommerce' ),
 				'required' 		=> true,
-				'class' 		=> array( 'form-row-wide', 'update_totals_on_change' ),
+				'class' 		=> array( 'form-row-wide', 'address-field', 'update_totals_on_change' ),
 				),
 			'first_name' => array(
 				'label' 		=> __( 'First Name', 'woocommerce' ),
@@ -966,27 +966,27 @@ class WC_Countries {
 				'label' 		=> __( 'Address', 'woocommerce' ),
 				'placeholder' 	=> _x( 'Street address', 'placeholder', 'woocommerce' ),
 				'required' 		=> true,
-				'class' 		=> array( 'form-row-wide' ),
+				'class' 		=> array( 'form-row-wide', 'address-field' ),
 				),
 			'address_2' => array(
 				'placeholder' 	=> _x( 'Apartment, suite, unit etc. (optional)', 'placeholder', 'woocommerce' ),
-				'class' 		=> array( 'form-row-wide' ),
+				'class' 		=> array( 'form-row-wide', 'address-field' ),
 				),
 			'city' 		=> array(
 				'label' 		=> __( 'Town / City', 'woocommerce' ),
 				'required' 		=> true,
-				'class' 		=> array( 'form-row-wide', 'update_totals_on_change' ),
+				'class' 		=> array( 'form-row-wide', 'address-field' ),
 				),
 			'state' 	=> array(
 				'type'			=> 'state',
 				'label' 		=> __( 'State / County', 'woocommerce' ),
 				'required' 		=> true,
-				'class' 		=> array( 'form-row-first', 'update_totals_on_change' )
+				'class' 		=> array( 'form-row-first', 'address-field' )
 				),
 			'postcode' 	=> array(
 				'label' 		=> __( 'Postcode / Zip', 'woocommerce' ),
 				'required' 		=> true,
-				'class'			=> array( 'form-row-last', 'update_totals_on_change' ),
+				'class'			=> array( 'form-row-last', 'address-field' ),
 				'clear'			=> true
 				),
 		);
@@ -998,7 +998,7 @@ class WC_Countries {
 			// If default country has postcode_before_city switch the fields round.
 			// This is only done at this point, not if country changes on checkout.
 			if ( isset( $locale[ $country ]['postcode_before_city'] ) ) {
-				$fields['postcode']['class'] = array( 'form-row-wide', 'update_totals_on_change' );
+				$fields['postcode']['class'] = array( 'form-row-wide', 'address-field' );
 
 				$switch_fields = array();
 

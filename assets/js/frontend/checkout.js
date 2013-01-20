@@ -117,8 +117,26 @@ jQuery(document).ready(function($) {
 
 	// Used for input change events below
 	function input_changed() {
-		dirtyInput = false;
-		$('body').trigger('update_checkout');
+		var update_totals = true;
+
+		if ( $(dirtyInput).size() ) {
+
+			$required_siblings = $(dirtyInput).closest('.form-row').siblings('.address-field.validate-required');
+
+			if ( $required_siblings.size() ) {
+				 $required_siblings.each(function(){
+					if ( $(this).find('input.input-text').val() == '' || $(this).find('input.input-text').val() == 'undefined' ) {
+						update_totals = false;
+					}
+				 });
+			}
+
+		}
+
+		if ( update_totals ) {
+			dirtyInput = false;
+			$('body').trigger('update_checkout');
+		}
 	}
 
 	$('form.checkout, #order_review')
@@ -138,26 +156,32 @@ jQuery(document).ready(function($) {
 
 	$('form.checkout')
 
-	/* Update totals */
+	/* Update totals/taxes/shipping */
 
 	// Inputs/selects which update totals instantly
 	.on( 'change', 'select#shipping_method, input[name=shipping_method], #shiptobilling input, .update_totals_on_change select', function(){
 		clearTimeout( updateTimer );
+		dirtyInput = false;
 		$('body').trigger('update_checkout');
 	})
 
-	// Inputs which update totals on change
-	.on( 'change', '.update_totals_on_change input', function(){
+	// Address-fields which refresh totals when all required fields are filled
+	.on( 'change', '.address-field input.input-text', function() {
 		if ( dirtyInput ) {
-			clearTimeout( updateTimer );
-			$('body').trigger('update_checkout');
+			input_changed();
 		}
 	})
-	.on( 'keydown', '.update_totals_on_change input.input-text', function( e ){
+
+	.on( 'change', '.address-field select', function() {
+		dirtyInput = this;
+		input_changed();
+	})
+
+	.on( 'keydown', '.address-field input.input-text', function( e ){
 		var code = e.keyCode || e.which;
 		if ( code == '9' )
 			return;
-		dirtyInput = true;
+		dirtyInput = this;
 		clearTimeout( updateTimer );
 		updateTimer = setTimeout( input_changed, '1000' );
 	})
