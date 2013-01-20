@@ -52,17 +52,6 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 	    	 	include_once( 'settings/settings-save.php' );
 
 		    	switch ( $current_tab ) {
-					case "general" :
-					case "pages" :
-					case "catalog" :
-					case "inventory" :
-					case "tax" :
-					case "email" :
-						woocommerce_update_options( $woocommerce_settings[ $current_tab ] );
-
-						// Trigger action for tab
-						do_action( 'woocommerce_update_options_' . $current_tab );
-					break;
 					case "payment_gateways" :
 						woocommerce_update_options( $woocommerce_settings[ $current_tab ] );
 						$woocommerce->payment_gateways->process_admin_options();
@@ -72,6 +61,9 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 						$woocommerce->shipping->process_admin_options();
 					break;
 					default :
+						if ( isset( $woocommerce_settings[ $current_tab ] ) )
+							woocommerce_update_options( $woocommerce_settings[ $current_tab ] );
+
 						// Trigger action for tab
 						do_action( 'woocommerce_update_options_' . $current_tab );
 					break;
