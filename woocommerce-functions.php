@@ -730,52 +730,50 @@ function woocommerce_process_registration() {
 		if ( ! empty( $_POST['email_2'] ) )
 			$woocommerce->add_error( __( 'Anti-spam field was filled in.', 'woocommerce' ) );
 
+		// More error checking
+		$reg_errors = new WP_Error();
+		do_action( 'register_post', $sanitized_user_login, $user_email, $reg_errors );
+		$reg_errors = apply_filters( 'registration_errors', $reg_errors, $sanitized_user_login, $user_email );
+
+		if ( $reg_errors->get_error_code() ) {
+			$woocommerce->add_error( $reg_errors->get_error_message() );
+			return;
+		}
+
 		if ( $woocommerce->error_count() == 0 ) {
 
-			$reg_errors = new WP_Error();
-			do_action( 'register_post', $sanitized_user_login, $user_email, $reg_errors );
-			$reg_errors = apply_filters( 'registration_errors', $reg_errors, $sanitized_user_login, $user_email );
+            $new_customer_data = array(
+            	'user_login' => $sanitized_user_login,
+            	'user_pass'  => $password,
+            	'user_email' => $user_email,
+            	'role'       => 'customer'
+            );
 
-            // if there are no errors, let's create the user account
-			if ( ! $reg_errors->get_error_code() ) {
+            $user_id = wp_insert_user( apply_filters( 'woocommerce_new_customer_data', $new_customer_data ) );
 
-                $new_customer_data = array(
-                	'user_login' => $sanitized_user_login,
-                	'user_pass'  => $password,
-                	'user_email' => $user_email,
-                	'role'       => 'customer'
-                );
+            if ( ! $user_id ) {
+            	$woocommerce->add_error( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
+                return;
+            }
 
-                $user_id = wp_insert_user( apply_filters( 'woocommerce_new_customer_data', $new_customer_data ) );
+            // Action
+            do_action( 'woocommerce_created_customer', $user_id );
 
-                if ( ! $user_id ) {
-                	$woocommerce->add_error( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
-                    return;
-                }
+			// send the user a confirmation and their login details
+			$mailer = $woocommerce->mailer();
+			$mailer->customer_new_account( $user_id, $password );
 
-                // Action
-	            do_action( 'woocommerce_created_customer', $user_id );
+            // set the WP login cookie
+            $secure_cookie = is_ssl() ? true : false;
+            wp_set_auth_cookie($user_id, true, $secure_cookie);
 
-				// send the user a confirmation and their login details
-				$mailer = $woocommerce->mailer();
-				$mailer->customer_new_account( $user_id, $password );
-
-                // set the WP login cookie
-                $secure_cookie = is_ssl() ? true : false;
-                wp_set_auth_cookie($user_id, true, $secure_cookie);
-
-                // Redirect
-                if ( wp_get_referer() ) {
-					wp_safe_redirect( wp_get_referer() );
-					exit;
-				} else {
-					wp_redirect(get_permalink(woocommerce_get_page_id('myaccount')));
-					exit;
-				}
-
+            // Redirect
+            if ( wp_get_referer() ) {
+				wp_safe_redirect( wp_get_referer() );
+				exit;
 			} else {
-				$woocommerce->add_error( $reg_errors->get_error_message() );
-            	return;
+				wp_redirect(get_permalink(woocommerce_get_page_id('myaccount')));
+				exit;
 			}
 
 		}
