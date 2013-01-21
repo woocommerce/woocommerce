@@ -881,12 +881,13 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 	$meta_keys 		= isset( $_POST['meta_key'] ) ? $_POST['meta_key'] : array();
 	$meta_values 	= isset( $_POST['meta_value'] ) ? $_POST['meta_value'] : array();
 
-	foreach ( $meta_keys as $id => $value ) {
+	foreach ( $meta_keys as $id => $meta_key ) {
+		$meta_value = ( empty( $meta_values[ $id ] ) && ! is_numeric( $meta_values[ $id ] ) ) ? '' : $meta_values[ $id ];
 		$wpdb->update(
 			$wpdb->prefix . "woocommerce_order_itemmeta",
 			array(
-				'meta_key' => $value,
-				'meta_value' => empty( $meta_values[ $id ] ) ? '' : $meta_values[ $id ]
+				'meta_key' => $meta_key,
+				'meta_value' => $meta_value
 			),
 			array( 'meta_id' => $id ),
 			array( '%s', '%s' ),
