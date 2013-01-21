@@ -694,7 +694,7 @@ function woocommerce_admin_fields( $options ) {
 					</th>
                     <td class="forminp forminp-<?php echo sanitize_title( $value['type'] ) ?>">
                     	<select
-                    		name="<?php echo esc_attr( $value['id'] ); ?>"
+                    		name="<?php echo esc_attr( $value['id'] ); ?><?php if ( $value['type'] == 'multiselect' ) echo '[]'; ?>"
                     		id="<?php echo esc_attr( $value['id'] ); ?>"
                     		style="<?php echo esc_attr( $value['css'] ); ?>"
                     		class="<?php echo esc_attr( $value['class'] ); ?>"
