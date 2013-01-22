@@ -1226,14 +1226,12 @@ jQuery( function($){
 
 				$.post( woocommerce_writepanel_params.ajax_url, data, function( response ) {
 
-					result = jQuery.parseJSON( response );
-
-					if ( result.error ) {
+					if ( response.error ) {
 						// Error
-						alert( result.error );
-					} else if ( result.slug ) {
+						alert( response.error );
+					} else if ( response.slug ) {
 						// Success
-						$wrapper.find('select.attribute_values').append('<option value="' + result.slug + '" selected="selected">' + result.name + '</option>');
+						$wrapper.find('select.attribute_values').append('<option value="' + response.slug + '" selected="selected">' + response.name + '</option>');
 						$wrapper.find('select.attribute_values').trigger("liszt:updated");
 					}
 

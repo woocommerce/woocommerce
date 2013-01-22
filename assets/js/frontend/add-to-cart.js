@@ -23,7 +23,10 @@ jQuery(document).ready(function($) {
 			$('body').trigger('adding_to_cart');
 
 			// Ajax action
-			$.post( woocommerce_params.ajax_url, data, function(response) {
+			$.post( woocommerce_params.ajax_url, data, function( response ) {
+
+				if ( ! response )
+					return;
 
 				var this_page = window.location.toString();
 
@@ -31,17 +34,12 @@ jQuery(document).ready(function($) {
 
 				$thisbutton.removeClass('loading');
 
-				// Get response
-				if ( response ) {
-					data = $.parseJSON( response );
-
-					if (data && data.error && data.product_url) {
-						window.location = data.product_url;
-						return;
-					}
+				if ( response.error && response.product_url ) {
+					window.location = data.product_url;
+					return;
 				}
 
-				fragments = response;
+				fragments = response.fragments;
 
 				// Block fragments class
 				if (fragments) {
