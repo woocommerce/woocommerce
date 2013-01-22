@@ -539,3 +539,26 @@ function woocommerce_add_custom_query_var($public_query_vars) {
 }
 
 add_filter('query_vars', 'woocommerce_add_custom_query_var');
+
+/**
+ * Remove item meta on permanent deletion
+ *
+ * @access public
+ * @return void
+ **/
+function woocommerce_delete_order_items( $postid )
+{
+	global $wpdb;
+	
+	if ( get_post_type( $postid ) == 'shop_order' )
+	{
+		$wpdb->query( "
+			DELETE {$wpdb->prefix}woocommerce_order_items, {$wpdb->prefix}woocommerce_order_itemmeta
+			FROM {$wpdb->prefix}woocommerce_order_items
+			JOIN {$wpdb->prefix}woocommerce_order_itemmeta ON {$wpdb->prefix}woocommerce_order_items.order_item_id = {$wpdb->prefix}woocommerce_order_itemmeta.order_item_id
+			WHERE {$wpdb->prefix}woocommerce_order_items.order_id = '{$postid}';
+			"	);
+	}
+}
+
+add_action( 'before_delete_post', 'woocommerce_delete_order_items' );
