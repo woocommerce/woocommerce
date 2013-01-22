@@ -350,19 +350,21 @@ jQuery( function($){
 
 			$.post( woocommerce_writepanel_params.ajax_url, data, function( response ) {
 
-				result = jQuery.parseJSON( response );
+				if ( response ) {
 
-				$items.each( function() {
-					var $row = $(this);
-					var item_id = $row.find('input.order_item_id').val();
+					$items.each( function() {
+						var $row = $(this);
+						var item_id = $row.find('input.order_item_id').val();
 
-					$row.find('input.line_tax').val( result['item_taxes'][ item_id ]['line_tax'] ).change();
-					$row.find('input.line_subtotal_tax').val( result['item_taxes'][ item_id ]['line_subtotal_tax'] ).change();
-					$('#tax_rows').empty().append( result['tax_row_html'] );
-				} );
+						$row.find('input.line_tax').val( response['item_taxes'][ item_id ]['line_tax'] ).change();
+						$row.find('input.line_subtotal_tax').val( response['item_taxes'][ item_id ]['line_subtotal_tax'] ).change();
+						$('#tax_rows').empty().append( response['tax_row_html'] );
+					} );
 
-				$('#_order_tax').val( result['item_tax'] ).change();
-				$('#_order_shipping_tax').val( result['shipping_tax'] ).change();
+					$('#_order_tax').val( response['item_tax'] ).change();
+					$('#_order_shipping_tax').val( response['shipping_tax'] ).change();
+
+				}
 
 				$('.woocommerce_order_items_wrapper').unblock();
 			});
@@ -791,7 +793,7 @@ jQuery( function($){
 				type: 'POST',
 				success: function( response ) {
 					var info = response;
-					
+
 					if (info) {
 						$('input#_shipping_first_name').val( info.shipping_first_name );
 						$('input#_shipping_last_name').val( info.shipping_last_name );

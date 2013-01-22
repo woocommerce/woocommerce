@@ -76,7 +76,7 @@ function woocommerce_order_downloads_meta_box() {
 						if ( $products ) foreach ( $products as $product ) {
 
 							$product_object = get_product( $product->ID );
-							$product_name   = woocommerce_get_formatted_product_name( $product );
+							$product_name   = woocommerce_get_formatted_product_name( $product_object );
 
 							echo '<option value="' . esc_attr( $product->ID ) . '">' . esc_html( $product_name ) . '</option>';
 
