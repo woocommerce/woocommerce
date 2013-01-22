@@ -740,7 +740,7 @@ jQuery( function($){
 				data: data,
 				type: 'POST',
 				success: function( response ) {
-					var info = jQuery.parseJSON(response);
+					var info = response;
 
 					if (info) {
 						$('input#_billing_first_name').val( info.billing_first_name );
@@ -790,8 +790,8 @@ jQuery( function($){
 				data: data,
 				type: 'POST',
 				success: function( response ) {
-					var info = jQuery.parseJSON(response);
-
+					var info = response;
+					
 					if (info) {
 						$('input#_shipping_first_name').val( info.shipping_first_name );
 						$('input#_shipping_last_name').val( info.shipping_last_name );
