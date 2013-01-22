@@ -521,8 +521,6 @@ function woocommerce_save_attributes() {
 		 }
 	}
 
-	var_dump($attributes);
-
 	if ( ! function_exists( 'attributes_cmp' ) ) {
 		function attributes_cmp( $a, $b ) {
 		    if ( $a['position'] == $b['position'] ) return 0;
@@ -936,6 +934,8 @@ function woocommerce_get_customer_details() {
 		$type_to_load . '_email' => get_user_meta( $user_id, $type_to_load . '_email', true ),
 		$type_to_load . '_phone' => get_user_meta( $user_id, $type_to_load . '_phone', true ),
 	);
+
+	$customer_data = apply_filters( 'woocommerce_found_customer_details', $customer_data );
 
 	echo json_encode( $customer_data );
 
