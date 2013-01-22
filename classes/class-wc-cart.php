@@ -795,6 +795,9 @@ class WC_Cart {
 
 			$product_data = get_product( $variation_id ? $variation_id : $product_id );
 
+			if ( ! $product_data )
+				return false;
+
 			// Force quantity to 1 if sold individually
 			if ( $product_data->is_sold_individually() )
 				$quantity = 1;

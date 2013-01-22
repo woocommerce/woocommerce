@@ -32,14 +32,16 @@ jQuery(document).ready(function($) {
 				$thisbutton.removeClass('loading');
 
 				// Get response
-				data = $.parseJSON( response );
+				if ( response ) {
+					data = $.parseJSON( response );
 
-				if (data.error && data.product_url) {
-					window.location = data.product_url;
-					return;
+					if (data && data.error && data.product_url) {
+						window.location = data.product_url;
+						return;
+					}
 				}
 
-				fragments = data;
+				fragments = response;
 
 				// Block fragments class
 				if (fragments) {
