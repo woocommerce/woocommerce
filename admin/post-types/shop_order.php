@@ -549,7 +549,7 @@ add_filter('query_vars', 'woocommerce_add_custom_query_var');
 function woocommerce_delete_order_items( $postid )
 {
 	global $wpdb;
-	
+
 	if ( get_post_type( $postid ) == 'shop_order' )
 	{
 		$wpdb->query( "
@@ -557,7 +557,7 @@ function woocommerce_delete_order_items( $postid )
 			FROM {$wpdb->prefix}woocommerce_order_items
 			JOIN {$wpdb->prefix}woocommerce_order_itemmeta ON {$wpdb->prefix}woocommerce_order_items.order_item_id = {$wpdb->prefix}woocommerce_order_itemmeta.order_item_id
 			WHERE {$wpdb->prefix}woocommerce_order_items.order_id = '{$postid}';
-			"	);
+			" );
 	}
 }
 
