@@ -359,7 +359,7 @@ class WC_Checkout {
 	 * @return void
 	 */
 	public function process_checkout() {
-		global $wpdb, $woocommerce;
+		global $wpdb, $woocommerce, $current_user;
 
 		$woocommerce->verify_nonce( 'process_checkout' );
 
@@ -622,6 +622,9 @@ class WC_Checkout {
 
 		                if ( ! $this->customer_id )
 		                	throw new MyException( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
+
+                        // Set the global user object
+                        $current_user = get_user_by ( 'id', $this->customer_id );
 
 	                    // Action
 	                    do_action( 'woocommerce_created_customer', $this->customer_id );
