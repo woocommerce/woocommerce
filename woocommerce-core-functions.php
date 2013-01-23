@@ -1928,7 +1928,7 @@ function woocommerce_add_order_item( $order_id, $item ) {
 
 	$item_id = absint( $wpdb->insert_id );
 
-	do_action( 'woocommerce_new_order_item', $item_id );
+	do_action( 'woocommerce_new_order_item', $item_id, $item, $order_id );
 
 	return $item_id;
 }
