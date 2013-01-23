@@ -15,7 +15,7 @@ class WC_Customer {
 	protected $_data;
 
 	/** Stores bool when data is changed */
-	private $_changed = true;
+	private $_changed = false;
 
 	/**
 	 * Constructor for the customer class loads the customer data.

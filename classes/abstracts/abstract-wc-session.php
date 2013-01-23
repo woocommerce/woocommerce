@@ -58,7 +58,9 @@ abstract class WC_Session {
      * @return void
      */
     public function __unset( $property ) {
-        unset( $this->_data[ $property ] );
-        $this->_dirty = true;
+    	if ( isset( $this->_data[ $property ] ) ) {
+       		unset( $this->_data[ $property ] );
+       		$this->_dirty = true;
+        }
     }
 }
