@@ -248,7 +248,9 @@ function woocommerce_preview_emails() {
  * @return void
  */
 function woocommerce_prevent_admin_access() {
-	if ( get_option('woocommerce_lock_down_admin') == 'yes' && ! is_ajax() && ! ( current_user_can('edit_posts') || current_user_can('manage_woocommerce') ) ) {
+	$permitted_user = apply_filters( 'woocommerce_admin_access', ( current_user_can('edit_posts') || current_user_can('manage_woocommerce') ) );
+
+	if ( get_option('woocommerce_lock_down_admin') == 'yes' && ! is_ajax() && ! $permitted_user ) {
 		wp_safe_redirect(get_permalink(woocommerce_get_page_id('myaccount')));
 		exit;
 	}
