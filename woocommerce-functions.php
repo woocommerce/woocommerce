@@ -676,8 +676,7 @@ function woocommerce_process_login() {
  * @return void
  */
 function woocommerce_process_registration() {
-
-	global $woocommerce;
+	global $woocommerce, $current_user;
 
 	if ( ! empty( $_POST['register'] ) ) {
 
@@ -755,6 +754,9 @@ function woocommerce_process_registration() {
             	$woocommerce->add_error( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
                 return;
             }
+
+            // Get user
+            $current_user = get_user_by( 'id', $user_id );
 
             // Action
             do_action( 'woocommerce_created_customer', $user_id );
