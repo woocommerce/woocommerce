@@ -189,7 +189,7 @@ class Woocommerce {
 			$path = $this->plugin_path() . '/classes/gateways/' . trailingslashit( substr( str_replace( '_', '-', $class ), 11 ) );
 			$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
 
-			if ( file_exists( $path . $file ) ) {
+			if ( is_readable( $path . $file ) ) {
 				include( $path . $file );
 				return;
 			}
@@ -199,7 +199,7 @@ class Woocommerce {
 			$path = $this->plugin_path() . '/classes/shipping/' . trailingslashit( substr( str_replace( '_', '-', $class ), 12 ) );
 			$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
 
-			if ( file_exists( $path . $file ) ) {
+			if ( is_readable( $path . $file ) ) {
 				include( $path . $file );
 				return;
 			}
@@ -209,7 +209,7 @@ class Woocommerce {
 			$path = $this->plugin_path() . '/classes/shortcodes/';
 			$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
 
-			if ( file_exists( $path . $file ) ) {
+			if ( is_readable( $path . $file ) ) {
 				include( $path . $file );
 				return;
 			}
@@ -220,7 +220,7 @@ class Woocommerce {
 			$path = $this->plugin_path() . '/classes/';
 			$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
 
-			if ( file_exists( $path . $file ) ) {
+			if ( is_readable( $path . $file ) ) {
 				include( $path . $file );
 				return;
 			}
