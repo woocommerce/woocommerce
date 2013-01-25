@@ -853,7 +853,7 @@ jQuery( function($){
 	});
 
 	// Delete a tax row
-	$('a.delete_tax_row').click(function(){
+	$('#tax_rows').on('click','a.delete_tax_row',function(){
 		$tax_row = $(this).closest('.tax_row');
 
 		var tax_row_id = $tax_row.attr( 'data-order_item_id' )
