@@ -221,11 +221,12 @@ function woocommerce_ajax_add_to_cart() {
 
 	header( 'Content-Type: application/json; charset=utf-8' );
 
-	$product_id = (int) apply_filters('woocommerce_add_to_cart_product_id', $_POST['product_id']);
+	$product_id = apply_filters('woocommerce_add_to_cart_product_id', absint( $_POST['product_id'] ) );
+	$quantity = empty( $_POST['quantity'] ) ? 1 : apply_filters( 'woocommerce_stock_amount', $_POST['quantity'] );
 
-	$passed_validation = apply_filters('woocommerce_add_to_cart_validation', true, $product_id, 1);
+	$passed_validation = apply_filters('woocommerce_add_to_cart_validation', true, $product_id, $quantity);
 
-	if ( $passed_validation && $woocommerce->cart->add_to_cart( $product_id, 1 ) ) {
+	if ( $passed_validation && $woocommerce->cart->add_to_cart( $product_id, $quantity ) ) {
 		// Return html fragments
 		$data = array(
 			'fragments' => apply_filters( 'add_to_cart_fragments', array() )
