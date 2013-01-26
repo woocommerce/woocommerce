@@ -131,6 +131,8 @@ class WC_Google_Analytics extends WC_Integration {
 			})();
 
 		</script>";
+		
+		do_action( 'wc-ga-push-other-tracking' );
 	}
 
 
@@ -235,6 +237,8 @@ class WC_Google_Analytics extends WC_Integration {
 		echo '<script type="text/javascript">' . $code . '</script>';
 
 		update_post_meta( $order_id, '_ga_tracked', 1 );
+		
+		do_action( 'wc-ga-push-other-tracking' );
 	}
 
 
