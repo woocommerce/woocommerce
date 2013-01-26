@@ -784,7 +784,7 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 	array(	'title' => __( 'Inventory Options', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'inventory_options' ),
 
 	array(
-		'title' => __( 'Manage Stock', 'woocommerce' ),
+		'title' => __( 'Manage stock?', 'woocommerce' ),
 		'desc' 		=> __( 'Enable stock management', 'woocommerce' ),
 		'id' 		=> 'woocommerce_manage_stock',
 		'default'	=> 'yes',
@@ -1009,8 +1009,8 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		'default'   => 'shipping',
 		'type'      => 'select',
 		'options'   => array(
-			'shipping' => __( 'Customer shipping address', 'woocommerce' ),
-			'billing'  => __( 'Customer billing address', 'woocommerce' ),
+			'shipping' => __( 'Customer Shipping Address', 'woocommerce' ),
+			'billing'  => __( 'Customer Billing Address', 'woocommerce' ),
 			'base'     => __( 'Shop base address', 'woocommerce' )
 		),
 	),

@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 	<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
 
 	<td class="tax_class" width="1%">
-		<select class="tax_class" name="order_item_tax_class[<?php echo absint( $item_id ); ?>]" title="<?php _e( 'Tax class', 'woocommerce' ); ?>">
+		<select class="tax_class" name="order_item_tax_class[<?php echo absint( $item_id ); ?>]" title="<?php _e( 'Tax Class', 'woocommerce' ); ?>">
 			<?php $tax_class = isset( $item['tax_class'] ) ? sanitize_title( $item['tax_class'] ) : ''; ?>
 			<option value="0" <?php selected( 0, $tax_class ) ?>><?php _e( 'N/A', 'woocommerce' ); ?></option>
 			<optgroup label="<?php _e( 'Taxable', 'woocommerce' ); ?>">

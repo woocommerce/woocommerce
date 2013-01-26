@@ -144,11 +144,11 @@ function woocommerce_get_customer_meta_fields() {
 			'title' => __( 'Customer Billing Address', 'woocommerce' ),
 			'fields' => array(
 				'billing_first_name' => array(
-						'label' => __( 'First name', 'woocommerce' ),
+						'label' => __( 'First Name', 'woocommerce' ),
 						'description' => ''
 					),
 				'billing_last_name' => array(
-						'label' => __( 'Last name', 'woocommerce' ),
+						'label' => __( 'Last Name', 'woocommerce' ),
 						'description' => ''
 					),
 				'billing_company' => array(
@@ -193,11 +193,11 @@ function woocommerce_get_customer_meta_fields() {
 			'title' => __( 'Customer Shipping Address', 'woocommerce' ),
 			'fields' => array(
 				'shipping_first_name' => array(
-						'label' => __( 'First name', 'woocommerce' ),
+						'label' => __( 'First Name', 'woocommerce' ),
 						'description' => ''
 					),
 				'shipping_last_name' => array(
-						'label' => __( 'Last name', 'woocommerce' ),
+						'label' => __( 'Last Name', 'woocommerce' ),
 						'description' => ''
 					),
 				'shipping_company' => array(

@@ -249,9 +249,9 @@ function woocommerce_custom_product_columns( $column ) {
 			$url = wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce-feature-product&product_id=' . $post->ID ), 'woocommerce-feature-product' );
 			echo '<a href="' . $url . '" title="'. __( 'Toggle featured', 'woocommerce' ) . '">';
 			if ( $the_product->is_featured() ) {
-				echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/featured.png" alt="'. __( 'yes', 'woocommerce' ) . '" height="14" width="14" />';
+				echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/featured.png" alt="'. __( 'Yes', 'woocommerce' ) . '" height="14" width="14" />';
 			} else {
-				echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/featured-off.png" alt="'. __( 'no', 'woocommerce' ) . '" height="14" width="14" />';
+				echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/featured-off.png" alt="'. __( 'No', 'woocommerce' ) . '" height="14" width="14" />';
 			}
 			echo '</a>';
 		break;
@@ -573,14 +573,14 @@ function woocommerce_admin_product_quick_edit( $column_name, $post_type ) {
 				<label>
 				    <span class="title"><?php _e( 'Price', 'woocommerce' ); ?></span>
 				    <span class="input-text-wrap">
-						<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php _e( 'Regular price', 'woocommerce' ); ?>" value="">
+						<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php _e( 'Regular Price', 'woocommerce' ); ?>" value="">
 					</span>
 				</label>
 				<br class="clear" />
 				<label>
 				    <span class="title"><?php _e( 'Sale', 'woocommerce' ); ?></span>
 				    <span class="input-text-wrap">
-						<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php _e( 'Sale price', 'woocommerce' ); ?>" value="">
+						<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php _e( 'Sale Price', 'woocommerce' ); ?>" value="">
 					</span>
 				</label>
 				<br class="clear" />

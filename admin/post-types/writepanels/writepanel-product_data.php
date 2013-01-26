@@ -314,7 +314,7 @@ function woocommerce_product_data_box() {
 					'selected'			=> $current_shipping_class,
 					'class'				=> 'select short'
 				);
-				?><p class="form-field dimensions_field"><label for="product_shipping_class"><?php _e( 'Shipping class', 'woocommerce' ); ?></label> <?php wp_dropdown_categories( $args ); ?> <span class="description"><?php _e( 'Shipping classes are used by certain shipping methods to group similar products.', 'woocommerce' ); ?></span></p><?php
+				?><p class="form-field dimensions_field"><label for="product_shipping_class"><?php _e( 'Shipping class:', 'woocommerce' ); ?></label> <?php wp_dropdown_categories( $args ); ?> <span class="description"><?php _e( 'Shipping classes are used by certain shipping methods to group similar products.', 'woocommerce' ); ?></span></p><?php
 
 				do_action( 'woocommerce_product_options_shipping' );
 

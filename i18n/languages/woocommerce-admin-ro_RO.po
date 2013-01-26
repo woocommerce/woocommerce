@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v1.6.1\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-01-09 09:36:51+00:00\n"
-"PO-Revision-Date: 2013-01-26 22:43+0200\n"
+"PO-Revision-Date: 2013-01-26 23:50+0200\n"
 "Last-Translator: Aurel Roman <aur3l.roman@gmail.com>\n"
 "Language-Team: \n"
 "Language: ro_RO\n"
@@ -885,7 +885,7 @@ msgstr "Nume Taxă"
 #: admin/post-types/writepanels/order-fee-html.php:15
 #: admin/post-types/writepanels/order-item-html.php:82
 msgid "Tax class"
-msgstr "Clasă Taxă"
+msgstr "Clasă Taxare"
 
 # @ woocommerce
 #: admin/post-types/writepanels/order-fee-html.php:17
@@ -1412,7 +1412,7 @@ msgstr "Status Comandă:"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:86
 msgid "Order Date:"
-msgstr "Data Comenzii:"
+msgstr "Dată Comandă:"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:87
@@ -1572,7 +1572,7 @@ msgstr "Articol"
 #: admin/post-types/writepanels/writepanel-product_data.php:189
 #: admin/settings/settings-tax-rates.php:217
 msgid "Tax Class"
-msgstr "Clasă Taxă"
+msgstr "Clasă Taxare"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:343
@@ -1638,7 +1638,7 @@ msgstr "Adaugă produs(e)"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:399
 msgid "Add fee"
-msgstr "Adăugați taxă"
+msgstr "Adaugă taxă"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:430
@@ -2242,7 +2242,7 @@ msgstr "Nu există nici o Clasă de Expediere"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:313
 msgid "Shipping class"
-msgstr "Clase de Expediere"
+msgstr "Clasă de Expediere"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:313
@@ -2476,7 +2476,7 @@ msgstr "Opinii"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanels-init.php:68
 msgid "Order Data"
-msgstr "Date Comandă"
+msgstr "Data Comandă"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanels-init.php:69
@@ -4555,7 +4555,9 @@ msgstr "Opțiuni de administrare a stocurilor."
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:48
 msgid "Options concerning tax, including international and local tax rates."
-msgstr "Opțiuni de configurare a taxelor achitate de client."
+msgstr ""
+"Opțiuni de configurare a taxelor achitate de client, incluzând taxele "
+"internaționale și cele locale."
 
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:49
@@ -5384,12 +5386,12 @@ msgstr "Suma Vânzărilor"
 #: admin/woocommerce-admin-reports.php:702
 #: admin/woocommerce-admin-reports.php:883
 msgid "Number of sales"
-msgstr "număr de vânzări"
+msgstr "Număr de Vânzări"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:369
 msgid "Total sales"
-msgstr "Total vânzări"
+msgstr "Vânzări Totale"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:371
@@ -5431,7 +5433,7 @@ msgstr "Total comenzi"
 #: admin/woocommerce-admin-reports.php:650
 #: admin/woocommerce-admin-reports.php:834
 msgid "items"
-msgstr "Articole"
+msgstr "articole"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:381

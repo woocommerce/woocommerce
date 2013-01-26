@@ -669,7 +669,7 @@ add_filter('post_updated_messages', 'woocommerce_product_updated_messages');
  * @return void
  */
 function woocommerce_admin_comment_types_dropdown( $types ) {
-	$types['order_note'] = __( 'Order notes', 'woocommerce' );
+	$types['order_note'] = __( 'Order Notes', 'woocommerce' );
 	return $types;
 }
 
