@@ -1,5 +1,25 @@
 jQuery(document).ready(function($) {
 
+	// Update cart widgets + fragments on page load - get around cache
+	$.ajax({
+		//url: woocommerce_params.ajax_url,
+		url: woocommerce_params.plugin_url + '/woocommerce-ajax-handler.php',
+		data: {
+			action: 'woocommerce_get_widget_shopping_cart',
+		},
+		type: 'POST',
+		success: function( data ) {
+
+			if ( data.fragments ) {
+				$.each(data.fragments, function(key, value) {
+					$(key).replaceWith(value);
+				});
+			}
+
+			$('.widget_shopping_cart_content').html( data.mini_cart );
+		}
+	});
+
 	// Orderby
 	$('select.orderby').change(function(){
 		$(this).closest('form').submit();
@@ -18,7 +38,6 @@ jQuery(document).ready(function($) {
 		}
 
 	});
-
 
 	$(document).on( 'click', '.plus, .minus', function() {
 

@@ -57,20 +57,29 @@ jQuery(document).ready(function($) {
 
 				// Cart widget load
 				if ($('.widget_shopping_cart').size()>0) {
-					$('.widget_shopping_cart:eq(0)').load( this_page + ' .widget_shopping_cart:eq(0) > *', function() {
 
-						// Replace fragments
-						if (fragments) {
-							$.each(fragments, function(key, value) {
-								$(key).replaceWith(value);
-							});
+					jQuery.ajax({
+						url: woocommerce_params.ajax_url,
+						data: {
+							action: 'woocommerce_get_widget_shopping_cart',
+						},
+						type: 'POST',
+						success: function( data ) {
+							jQuery('.widget_shopping_cart_content').html( data );
+
+							// Replace fragments
+							if (fragments) {
+								$.each(fragments, function(key, value) {
+									$(key).replaceWith(value);
+								});
+							}
+
+							// Unblock
+							$('.widget_shopping_cart, .updating').stop(true).css('opacity', '1').unblock();
+							$('body').trigger('cart_widget_refreshed');
 						}
+					});
 
-						// Unblock
-						$('.widget_shopping_cart, .updating').stop(true).css('opacity', '1').unblock();
-
-						$('body').trigger('cart_widget_refreshed');
-					} );
 				} else {
 					// Replace fragments
 					if (fragments) {

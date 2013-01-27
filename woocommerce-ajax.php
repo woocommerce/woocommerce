@@ -15,6 +15,35 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 /** Frontend AJAX events **************************************************/
 
 /**
+ * woocommerce_get_widget_shopping_cart function.
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_get_widget_shopping_cart() {
+	header( 'Content-Type: application/json; charset=utf-8' );
+
+	// Get mini cart
+	ob_start();
+	woocommerce_mini_cart();
+	$mini_cart = ob_get_clean();
+
+	// Fragments and mini cart are returned
+	$data = array(
+		'fragments' => apply_filters( 'add_to_cart_fragments', array() ),
+		'mini_cart' => $mini_cart
+	);
+
+	echo json_encode( $data );
+
+	die();
+}
+
+add_action( 'wp_ajax_nopriv_woocommerce_get_widget_shopping_cart', 'woocommerce_get_widget_shopping_cart' );
+add_action( 'wp_ajax_woocommerce_get_widget_shopping_cart', 'woocommerce_get_widget_shopping_cart' );
+
+
+/**
  * Process ajax login
  *
  * @access public
