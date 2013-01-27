@@ -50,7 +50,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 					<?php endif; ?>
 				</td>
 				<td class="data" rowspan="2">
-					<table cellspacing="0" cellpadding="0">
+					<table cellspacing="0" cellpadding="0" class="data_table">
 						<?php if ( get_option( 'woocommerce_manage_stock' ) == 'yes' ) : ?>
 							<tr>
 								<td>
@@ -152,7 +152,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 								</div>
 							</td>
 						</tr>
-						<?php do_action( 'woocommerce_product_after_variable_attributes', $loop, $variation_data ); ?>
+						<?php do_action( 'woocommerce_product_after_variable_attributes', $loop, $variation_data, $variation ); ?>
 					</table>
 				</td>
 			</tr>
@@ -167,7 +167,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 					<label><input type="checkbox" class="checkbox variable_is_virtual" name="variable_is_virtual[<?php echo $loop; ?>]" <?php checked( isset( $_virtual ) ? $_virtual : '', 'yes' ); ?> /> <?php _e( 'Virtual', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enable this option if a product is not shipped or there is no shipping cost', 'woocommerce' ); ?>" href="#">[?]</a></label>
 
-					<?php do_action( 'woocommerce_variation_options', $loop, $variation_data ); ?>
+					<?php do_action( 'woocommerce_variation_options', $loop, $variation_data, $variation ); ?>
 				</td>
 			</tr>
 		</tbody>

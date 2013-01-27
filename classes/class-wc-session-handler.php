@@ -18,9 +18,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 class WC_Session_Handler extends WC_Session {
 
-	/** customer_id */
-	private $_customer_id;
-
 	/** cookie name */
 	private $_cookie;
 

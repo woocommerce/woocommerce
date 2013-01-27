@@ -9,6 +9,9 @@
  */
 abstract class WC_Session {
 
+	/** customer_id */
+	protected $_customer_id;
+
     /** _data  */
     protected $_data = array();
 
@@ -63,4 +66,14 @@ abstract class WC_Session {
        		$this->_dirty = true;
         }
     }
+
+   	/**
+	 * get_customer_id function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function get_customer_id() {
+		return $this->_customer_id;
+	}
 }
