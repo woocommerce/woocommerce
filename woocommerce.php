@@ -1931,6 +1931,7 @@ class Woocommerce {
 			if ( $product->is_featured() ) {
 				$classes[] = 'featured';
 			}
+			$classes[] = $product->stock_status;
 		}
 
 		return $classes;
