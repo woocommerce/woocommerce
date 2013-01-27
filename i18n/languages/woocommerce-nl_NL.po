@@ -1,10 +1,10 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce v1.6.1\n"
+"Project-Id-Version: WooCommerce v2.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2012-12-30 13:34:17+00:00\n"
-"PO-Revision-Date: 2012-12-30 21:19+0100\n"
-"Last-Translator: Geert De Deckere <geertdd@gmail.com>\n"
+"PO-Revision-Date: 2013-01-26 10:44+0100\n"
+"Last-Translator: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
 "Language-Team: Ramon van Belzen <woocommerce@ramoonus.nl>, Geert De "
 "Deckere<geertdd@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -5047,7 +5047,7 @@ msgstr ""
 
 #: shortcodes/shortcode-lost_password.php:91
 msgid "Log in"
-msgstr ""
+msgstr "Login"
 
 # @ woocommerce
 #: shortcodes/shortcode-lost_password.php:112
