@@ -695,6 +695,7 @@ class WC_Countries {
 					'postcode_before_city' => true,
 					'state' => array(
 						'required' => false,
+						'label'    => __( 'Province', 'woocommerce' ),
 					),
 				),
 				'BI' => array(
@@ -797,7 +798,8 @@ class WC_Countries {
 				'NL' => array(
 					'postcode_before_city' => true,
 					'state'		=> array(
-						'required' => false
+						'required' => false,
+						'label'    => __( 'Province', 'woocommerce' ),
 					)
 				),
 				'NZ' => array(
