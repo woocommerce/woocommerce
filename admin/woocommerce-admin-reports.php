@@ -366,7 +366,7 @@ function woocommerce_sales_overview() {
 	<div id="poststuff" class="woocommerce-reports-wrap">
 		<div class="woocommerce-reports-sidebar">
 			<div class="postbox">
-				<h3><span><?php _e( 'Total sales', 'woocommerce' ); ?></span></h3>
+				<h3><span><?php _e( 'Total Sales', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
 					<p class="stat"><?php if ($total_sales>0) echo woocommerce_price($total_sales); else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>

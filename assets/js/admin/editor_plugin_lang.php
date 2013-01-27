@@ -6,7 +6,7 @@ $strings = 'tinyMCE.addI18n({' . _WP_Editors::$mce_locale . ':{
         price_button: "' . esc_js( __( 'Product price/cart button', 'woocommerce' ) ) . '",
         product_by_sku: "' . esc_js( __( 'Product by SKU/ID', 'woocommerce' ) ) . '",
         products_by_sku: "' . esc_js( __( 'Products by SKU/ID', 'woocommerce' ) ) . '",
-        product_categories: "' . esc_js( __( 'Product categories', 'woocommerce' ) ) . '",
+        product_categories: "' . esc_js( __( 'Product Categories', 'woocommerce' ) ) . '",
         products_by_cat_slug: "' . esc_js( __( 'Products by category slug', 'woocommerce' ) ) . '",
         recent_products: "' . esc_js( __( 'Recent products', 'woocommerce' ) ) . '",
         featured_products: "' . esc_js( __( 'Featured products', 'woocommerce' ) ) . '",

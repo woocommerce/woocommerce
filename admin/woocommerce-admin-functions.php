@@ -205,7 +205,7 @@ function woocommerce_preview_emails() {
 			</tbody>
 			<tfoot>
 				<tr>
-					<th colspan="2">' . __( 'Order total:', 'woocommerce' ) . '</td>
+					<th colspan="2">' . __( 'Order Total:', 'woocommerce' ) . '</td>
 					<td>$9.99</td>
 				</tr>
 			</tfoot>
@@ -217,14 +217,14 @@ function woocommerce_preview_emails() {
 		<table cellspacing="0" cellpadding="0" style="width: 100%; vertical-align: top;" border="0">
 			<tr>
 				<td valign="top" width="50%">
-					<h3>' . __( 'Billing address', 'woocommerce' ) . '</h3>
+					<h3>' . __( 'Billing Address', 'woocommerce' ) . '</h3>
 					<p>Some Guy
 					1 infinite loop
 					Cupertino
 					CA 95014</p>
 				</td>
 				<td valign="top" width="50%">
-					<h3>' . __( 'Shipping address', 'woocommerce' ) . '</h3>
+					<h3>' . __( 'Shipping Address', 'woocommerce' ) . '</h3>
 					<p>Some Guy
 					1 infinite loop
 					Cupertino

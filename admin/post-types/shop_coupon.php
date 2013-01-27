@@ -27,7 +27,7 @@ function woocommerce_edit_coupon_columns($columns){
 	$columns["amount"] 		= __( 'Coupon amount', 'woocommerce' );
 	$columns["description"] = __( 'Description', 'woocommerce' );
 	$columns["products"]	= __( 'Product IDs', 'woocommerce' );
-	$columns["usage"] 		= __( 'Usage / Limit', 'woocommerce' );
+	$columns["usage"] 		= __( 'Usage Limit', 'woocommerce' );
 	$columns["expiry_date"] = __( 'Expiry date', 'woocommerce' );
 
 	return $columns;

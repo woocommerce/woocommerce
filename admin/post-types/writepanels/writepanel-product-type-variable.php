@@ -86,7 +86,7 @@ function variable_product_type_options() {
 					<option value="variable_width"><?php _e( 'Width', 'woocommerce' ); ?></option>
 					<option value="variable_height"><?php _e( 'Height', 'woocommerce' ); ?></option>
 					<option value="variable_file_paths" rel="textarea"><?php _e( 'File Path', 'woocommerce' ); ?></option>
-					<option value="variable_download_limit"><?php _e( 'Download limit', 'woocommerce' ); ?></option>
+					<option value="variable_download_limit"><?php _e( 'Download Limit', 'woocommerce' ); ?></option>
 					<option value="variable_download_expiry"><?php _e( 'Download Expiry', 'woocommerce' ); ?></option>
 				</select>
 				<a class="button bulk_edit"><?php _e( 'Go', 'woocommerce' ); ?></a>
