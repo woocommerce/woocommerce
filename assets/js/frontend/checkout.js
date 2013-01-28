@@ -397,14 +397,25 @@ jQuery(document).ready(function($) {
 		var $cityfield     = thisform.find('#billing_city_field, #shipping_city_field');
 		var $statefield    = thisform.find('#billing_state_field, #shipping_state_field');
 
+		if ( ! $postcodefield.attr('data-o_class') ) {
+			$postcodefield.attr('data-o_class', $postcodefield.attr('class'));
+			$cityfield.attr('data-o_class', $cityfield.attr('class'));
+			$statefield.attr('data-o_class', $statefield.attr('class'));
+		}
+
 		// Re-order postcode/city
 		if ( thislocale['postcode_before_city'] ) {
-			$postcodefield.removeClass('form-row-last').addClass('form-row-wide');
-			$cityfield.removeClass('form-row-wide').addClass('form-row-first');
+
+			$postcodefield.removeClass('form-row-first').removeClass('form-row-last').addClass('form-row-wide');
+			$cityfield.removeClass('form-row-first').removeClass('form-row-last').addClass('form-row-wide');
+			$statefield.removeClass('form-row-first').removeClass('form-row-last').addClass('form-row-wide');
 			$postcodefield.insertBefore( $cityfield );
+
 		} else {
-			$postcodefield.removeClass('form-row-wide').addClass('form-row-last');
-			$cityfield.removeClass('form-row-first').addClass('form-row-wide');
+			// Default
+			$postcodefield.attr('class', $postcodefield.attr('data-o_class'));
+			$cityfield.attr('class', $cityfield.attr('data-o_class'));
+			$statefield.attr('class', $statefield.attr('data-o_class'));
 			$postcodefield.insertAfter( $statefield );
 		}
 
