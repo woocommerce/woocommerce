@@ -29,7 +29,7 @@ Your business is unique, as should your online store. Choose one of our [eCommer
 
 WooCommerce works with any theme, including the default WordPress themes Twenty Ten and Eleven. If you need help getting your theme working nicely with WooCommerce read our [theming docs](http://wcdocs.woothemes.com/category/codex/theming/).
 
-Looking for a tailored WordPress eCommmerce theme designed specifically to be used with WooCommerce? Be sure to browse the official [WooCommerce Themes](http://www.woothemes.com/product-category/themes/woocommerce/) and check out our free themes, such as [Mystile](http://www.woothemes.com/products/mystile/).
+Looking for a tailored WordPress eCommmerce theme designed specifically to be used with WooCommerce? Be sure to browse the official [WooCommerce Themes](http://www.woothemes.com/product-category/themes/woocommerce/) and check out our free themes, such as [Mystile](http://www.woothemes.com/products/mystile/), [Artificer](http://www.woothemes.com/products/artificer/) and [Wootique](http://www.woothemes.com/products/wootique/).
 
 = FEATURES =
 Seriously, WooCommerce has got more features than you can shake a stick at. But don't just take our word for it, try it for yourself! You can read more about features on the [WooCommerce website](http://www.woothemes.com/woocommerce/ "WooCommerce: An open-source eCommerce plugin for WordPress").
