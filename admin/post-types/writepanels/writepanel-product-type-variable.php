@@ -411,7 +411,7 @@ function variable_product_type_options() {
 				var input_tag = jQuery('select#field_to_edit :selected').attr('rel') ? jQuery('select#field_to_edit :selected').attr('rel') : 'input';
 
 				var value = prompt("<?php _e( 'Enter a value', 'woocommerce' ); ?>");
-				jQuery(input_tag + '[name^="' + field_to_edit + '"]').val( value );
+				jQuery(input_tag + '[name^="' + field_to_edit + '["]').val( value );
 				return false;
 
 			}
