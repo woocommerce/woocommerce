@@ -33,7 +33,7 @@ jQuery(document).ready(function($) {
 		var wc_fragments = $.parseJSON( localStorage.getItem( "wc_fragments" ) );
 		var cart_hash    = localStorage.getItem( "wc_cart_hash" );
 
-		if ( wc_fragments && cart_hash == $.cookie( "woocommerce_cart_hash" ) ) {
+		if ( wc_fragments && typeof wc_fragments == 'object' && wc_fragments['div.widget_shopping_cart_content'] && cart_hash == $.cookie( "woocommerce_cart_hash" ) ) {
 
 			$.each( wc_fragments, function( key, value ) {
 				$(key).replaceWith(value);
