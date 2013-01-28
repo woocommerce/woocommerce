@@ -54,7 +54,7 @@ function woocommerce_get_product_ids_on_sale() {
 			'key'        => '_sale_price',
 			'value'      => 0,
 			'compare'    => '>',
-			'type'       => 'NUMERIC',
+			'type'       => 'DECIMAL',
 		) ),
 		'fields'         => 'id=>parent',
 	) );
