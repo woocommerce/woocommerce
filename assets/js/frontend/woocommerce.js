@@ -8,7 +8,7 @@ jQuery(document).ready(function($) {
 		type: 'POST',
 		data: { action: 'woocommerce_get_refreshed_fragments' },
 		success: function( data ) {
-			if ( data.fragments ) {
+			if ( data && data.fragments ) {
 
 				$.each( data.fragments, function( key, value ) {
 					$(key).replaceWith(value);
@@ -30,16 +30,21 @@ jQuery(document).ready(function($) {
 			localStorage.setItem( "wc_cart_hash", cart_hash );
 		});
 
-		var wc_fragments = $.parseJSON( localStorage.getItem( "wc_fragments" ) );
-		var cart_hash    = localStorage.getItem( "wc_cart_hash" );
+		try {
+			var wc_fragments = $.parseJSON( localStorage.getItem( "wc_fragments" ) );
+			var cart_hash    = localStorage.getItem( "wc_cart_hash" );
 
-		if ( wc_fragments && typeof wc_fragments == 'object' && wc_fragments['div.widget_shopping_cart_content'] && cart_hash == $.cookie( "woocommerce_cart_hash" ) ) {
+			if ( wc_fragments && wc_fragments['div.widget_shopping_cart_content'] && cart_hash == $.cookie( "woocommerce_cart_hash" ) ) {
 
-			$.each( wc_fragments, function( key, value ) {
-				$(key).replaceWith(value);
-			});
+				$.each( wc_fragments, function( key, value ) {
+					$(key).replaceWith(value);
+				});
 
-		} else {
+			} else {
+				throw "No fragment";
+			}
+
+		} catch(err) {
 			$.ajax( $fragment_refresh );
 		}
 
