@@ -931,15 +931,7 @@ jQuery( function($){
 			$('.show_if_virtual').show();
 		}
 
-		if ( product_type == 'simple' ) {
-			$('.show_if_simple').show();
-		} else if ( product_type == 'variable' ) {
-			$('.show_if_variable').show();
-		} else if ( product_type == 'grouped' ) {
-			$('.show_if_grouped').show();
-		} else if ( product_type == 'external' ) {
-			$('.show_if_external').show();
-		}
+                 $('.show_if_'+product_type).show();    
 
 		// Hide rules
 		if ( is_downloadable ) {
@@ -949,15 +941,7 @@ jQuery( function($){
 			$('.hide_if_virtual').hide();
 		}
 
-		if ( product_type == 'simple' ) {
-			$('.hide_if_simple').hide();
-		} else if ( product_type == 'variable' ) {
-			$('.hide_if_variable').hide();
-		} else if ( product_type == 'grouped' ) {
-			$('.hide_if_grouped').hide();
-		} else if ( product_type == 'external' ) {
-			$('.hide_if_external').hide();
-		}
+		$('.hide_if_'+product_type).hide();
 	}
 
 
