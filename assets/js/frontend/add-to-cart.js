@@ -35,62 +35,36 @@ jQuery(document).ready(function($) {
 				$thisbutton.removeClass('loading');
 
 				if ( response.error && response.product_url ) {
-					window.location = data.product_url;
+					window.location = response.product_url;
 					return;
 				}
 
 				fragments = response.fragments;
+				cart_hash = response.cart_hash;
 
 				// Block fragments class
-				if (fragments) {
+				if ( fragments ) {
 					$.each(fragments, function(key, value) {
 						$(key).addClass('updating');
 					});
 				}
 
 				// Block widgets and fragments
-				$('.widget_shopping_cart, .shop_table.cart, .updating, .cart_totals').fadeTo('400', '0.6').block({message: null, overlayCSS: {background: 'transparent url(' + woocommerce_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6 } } );
+				$('.shop_table.cart, .updating, .cart_totals').fadeTo('400', '0.6').block({message: null, overlayCSS: {background: 'transparent url(' + woocommerce_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6 } } );
 
 				// Changes button classes
 				if ( $thisbutton.parent().find('.added_to_cart').size() == 0 )
 					$thisbutton.addClass('added').after( ' <a href="' + woocommerce_params.cart_url + '" class="added_to_cart" title="' + woocommerce_params.i18n_view_cart + '">' + woocommerce_params.i18n_view_cart + '</a>' );
 
-				// Cart widget load
-				if ($('.widget_shopping_cart').size()>0) {
-
-					jQuery.ajax({
-						url: woocommerce_params.ajax_url,
-						data: {
-							action: 'woocommerce_get_widget_shopping_cart',
-						},
-						type: 'POST',
-						success: function( data ) {
-							jQuery('.widget_shopping_cart_content').html( data );
-
-							// Replace fragments
-							if (fragments) {
-								$.each(fragments, function(key, value) {
-									$(key).replaceWith(value);
-								});
-							}
-
-							// Unblock
-							$('.widget_shopping_cart, .updating').stop(true).css('opacity', '1').unblock();
-							$('body').trigger('cart_widget_refreshed');
-						}
+				// Replace fragments
+				if ( fragments ) {
+					$.each(fragments, function(key, value) {
+						$(key).replaceWith(value);
 					});
-
-				} else {
-					// Replace fragments
-					if (fragments) {
-						$.each(fragments, function(key, value) {
-							$(key).replaceWith(value);
-						});
-					}
-
-					// Unblock
-					$('.widget_shopping_cart, .updating').stop(true).css('opacity', '1').unblock();
 				}
+
+				// Unblock
+				$('.widget_shopping_cart, .updating').stop(true).css('opacity', '1').unblock();
 
 				// Cart page elements
 				$('.shop_table.cart').load( this_page + ' .shop_table.cart:eq(0) > *', function() {
@@ -107,8 +81,7 @@ jQuery(document).ready(function($) {
 				});
 
 				// Trigger event so themes can refresh other areas
-				$('body').trigger('added_to_cart');
-
+				$('body').trigger( 'added_to_cart', [ fragments, cart_hash ] );
 			});
 
 			return false;

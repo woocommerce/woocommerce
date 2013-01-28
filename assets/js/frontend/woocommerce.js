@@ -1,24 +1,52 @@
 jQuery(document).ready(function($) {
 
-	// Update cart widgets + fragments on page load - get around cache
-	$.ajax({
-		//url: woocommerce_params.ajax_url,
-		url: woocommerce_params.plugin_url + '/woocommerce-ajax-handler.php',
-		data: {
-			action: 'woocommerce_get_widget_shopping_cart',
-		},
-		type: 'POST',
-		success: function( data ) {
+	/** Cart Handling */
+	$supports_html5_storage = ( 'localStorage' in window && window['localStorage'] !== null );
 
+	$fragment_refresh = {
+		url: woocommerce_params.ajax_url,
+		type: 'POST',
+		data: { action: 'woocommerce_get_refreshed_fragments' },
+		success: function( data ) {
 			if ( data.fragments ) {
-				$.each(data.fragments, function(key, value) {
+
+				$.each( data.fragments, function( key, value ) {
 					$(key).replaceWith(value);
 				});
-			}
 
-			$('.widget_shopping_cart_content').html( data.mini_cart );
+				if ( $supports_html5_storage ) {
+					localStorage.setItem( "wc_fragments", JSON.stringify( data.fragments ) );
+					localStorage.setItem( "wc_cart_hash", data.cart_hash );
+				}
+
+			}
 		}
-	});
+	};
+
+	if ( $supports_html5_storage ) {
+
+		$('body').bind( 'added_to_cart', function( event, fragments, cart_hash ) {
+			localStorage.setItem( "wc_fragments", JSON.stringify( fragments ) );
+			localStorage.setItem( "wc_cart_hash", cart_hash );
+		});
+
+		var wc_fragments = $.parseJSON( localStorage.getItem( "wc_fragments" ) );
+		var cart_hash    = localStorage.getItem( "wc_cart_hash" );
+
+		if ( wc_fragments && cart_hash == $.cookie( "woocommerce_cart_hash" ) ) {
+
+			$.each( wc_fragments, function( key, value ) {
+				$(key).replaceWith(value);
+			});
+
+		} else {
+			$.ajax( $fragment_refresh );
+		}
+
+	} else {
+		$.ajax( $fragment_refresh );
+	}
+
 
 	// Orderby
 	$('select.orderby').change(function(){

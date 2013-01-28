@@ -7,7 +7,7 @@
  * @author 		WooThemes
  * @category 	Core
  * @package 	WooCommerce/Functions/AJAX
- * @version     1.6.4
+ * @version     2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -15,12 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 /** Frontend AJAX events **************************************************/
 
 /**
- * woocommerce_get_widget_shopping_cart function.
+ * woocommerce_get_refreshed_fragments function.
  *
  * @access public
  * @return void
  */
-function woocommerce_get_widget_shopping_cart() {
+function woocommerce_get_refreshed_fragments() {
+	global $woocommerce;
+
 	header( 'Content-Type: application/json; charset=utf-8' );
 
 	// Get mini cart
@@ -30,8 +32,11 @@ function woocommerce_get_widget_shopping_cart() {
 
 	// Fragments and mini cart are returned
 	$data = array(
-		'fragments' => apply_filters( 'add_to_cart_fragments', array() ),
-		'mini_cart' => $mini_cart
+		'fragments' => apply_filters( 'add_to_cart_fragments', array(
+				'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>'
+			)
+		),
+		'cart_hash' => md5( json_encode( $woocommerce->cart->get_cart() ) )
 	);
 
 	echo json_encode( $data );
@@ -39,8 +44,8 @@ function woocommerce_get_widget_shopping_cart() {
 	die();
 }
 
-add_action( 'wp_ajax_nopriv_woocommerce_get_widget_shopping_cart', 'woocommerce_get_widget_shopping_cart' );
-add_action( 'wp_ajax_woocommerce_get_widget_shopping_cart', 'woocommerce_get_widget_shopping_cart' );
+add_action( 'wp_ajax_nopriv_woocommerce_get_refreshed_fragments', 'woocommerce_get_refreshed_fragments' );
+add_action( 'wp_ajax_woocommerce_get_refreshed_fragments', 'woocommerce_get_refreshed_fragments' );
 
 
 /**
@@ -248,29 +253,31 @@ function woocommerce_ajax_add_to_cart() {
 
 	check_ajax_referer( 'add-to-cart', 'security' );
 
-	header( 'Content-Type: application/json; charset=utf-8' );
-
 	$product_id = (int) apply_filters('woocommerce_add_to_cart_product_id', $_POST['product_id']);
 
-	$passed_validation = apply_filters('woocommerce_add_to_cart_validation', true, $product_id, 1);
+	$passed_validation = apply_filters('woocommerce_add_to_cart_validation', true, $product_id, 1 );
 
 	if ( $passed_validation && $woocommerce->cart->add_to_cart( $product_id, 1 ) ) {
-		// Return html fragments
-		$data = array(
-			'fragments' => apply_filters( 'add_to_cart_fragments', array() )
-		);
 
 		do_action( 'woocommerce_ajax_added_to_cart', $product_id );
+
+		// Return fragments
+		woocommerce_get_refreshed_fragments();
+
 	} else {
+
+		header( 'Content-Type: application/json; charset=utf-8' );
+
 		// If there was an error adding to the cart, redirect to the product page to show any errors
 		$data = array(
 			'error' => true,
 			'product_url' => get_permalink( $product_id )
 		);
-		$woocommerce->set_messages();
-	}
 
-	echo json_encode( $data );
+		$woocommerce->set_messages();
+
+		echo json_encode( $data );
+	}
 
 	die();
 }

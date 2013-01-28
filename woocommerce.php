@@ -1156,6 +1156,7 @@ class Woocommerce {
 
 		wp_register_script( 'wc-add-to-cart-variation', $frontend_script_path . 'add-to-cart-variation' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 		wp_register_script( 'wc-single-product', $frontend_script_path . 'single-product' . $suffix . '.js', array( 'jquery' ), $this->version, true );
+		wp_register_script( 'jquery-cookie', $this->plugin_url() . '/assets/js/jquery-cookie/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '1.3.1', true );
 
 		// Queue frontend scripts conditionally
 		if ( get_option( 'woocommerce_enable_ajax_add_to_cart' ) == 'yes' )
@@ -1181,7 +1182,7 @@ class Woocommerce {
 		}
 
 		// Global frontend scripts
-		wp_enqueue_script( 'woocommerce', $frontend_script_path . 'woocommerce' . $suffix . '.js', array( 'jquery', 'jquery-blockui' ), $this->version, true );
+		wp_enqueue_script( 'woocommerce', $frontend_script_path . 'woocommerce' . $suffix . '.js', array( 'jquery', 'jquery-cookie', 'jquery-blockui' ), $this->version, true );
 		wp_enqueue_script( 'jquery-placeholder' );
 
 		// Variables for JS scripts
@@ -1786,10 +1787,13 @@ class Woocommerce {
 	 */
 	public function cart_has_contents_cookie( $set ) {
 		if ( ! headers_sent() ) {
-			if ( $set )
+			if ( $set ) {
 				setcookie( "woocommerce_items_in_cart", "1", 0, COOKIEPATH, COOKIE_DOMAIN, false );
-			else
+				setcookie( "woocommerce_cart_hash", md5( json_encode( $this->cart->get_cart() ) ), 0, COOKIEPATH, COOKIE_DOMAIN, false );
+			} else {
 				setcookie( "woocommerce_items_in_cart", "0", time() - 3600, COOKIEPATH, COOKIE_DOMAIN, false );
+				setcookie( "woocommerce_cart_hash", "0", time() - 3600, COOKIEPATH, COOKIE_DOMAIN, false );
+			}
 		}
 	}
 
