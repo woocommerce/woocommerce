@@ -406,9 +406,7 @@ jQuery(document).ready(function($) {
 		// Re-order postcode/city
 		if ( thislocale['postcode_before_city'] ) {
 
-			$postcodefield.removeClass('form-row-first').removeClass('form-row-last').addClass('form-row-wide');
-			$cityfield.removeClass('form-row-first').removeClass('form-row-last').addClass('form-row-wide');
-			$statefield.removeClass('form-row-first').removeClass('form-row-last').addClass('form-row-wide');
+			$postcodefield.add( $cityfield ).add( $statefield ).removeClass('form-row-first form-row-last').addClass('form-row-wide');
 			$postcodefield.insertBefore( $cityfield );
 
 		} else {
