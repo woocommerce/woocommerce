@@ -1289,14 +1289,14 @@ p.demo_store {
 			}
 			&.woocommerce-validated {
 				input.input-text {
-					background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAVElEQVQYV2NkIAIw4lNz5syZ/yB5nIpgCkxMTBixKkJWgNUkdAVgRciC2BSAFe3evfu/oKAg3P3v379ncHV1RXEGmIOsEORQdB/DBUAKQZLopoDEAE3dJm1YbTYqAAAAAElFTkSuQmCC);
+					background-image: url(../images/icons/valid.png);
 					background-position: 95% center;
 					background-repeat: no-repeat;
 				}
 			}
 			&.woocommerce-invalid {
 				input.input-text {
-					background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAZUlEQVQYV2NkQAO/6zv+szZWMCILo3BAChjfvgPLs0zpgsthKAKZ8ien7D9WRSBTQCbAFCGbBjeJoCKYAoRJpUBTIfpB1oJZyIpgDmdgANnOCFGEUAARRHYTLBjAPkGECUQhOgAAec48xMU9V4oAAAAASUVORK5CYII=);
+					background-image: url(../images/icons/invalid.png);
 					background-position: 95% center;
 					background-repeat: no-repeat;
 				}
@@ -1712,13 +1712,13 @@ p.demo_store {
 				}
 			}
 		}
-		/*.star-rating {
-			background-image: url(../images/star@2x.png);
-			background-size: 16px 48px;
-			span {
-				background-image: url(../images/star@2x.png);
-				background-size: 16px 48px;
-			}
-		}*/
+		.woocommerce form .form-row.woocommerce-validated input.input-text, .woocommerce-page form .form-row.woocommerce-validated input.input-text {
+			background-image: url(../images/icons/valid@2x.png);
+			background-size: 12px 9px;
+		}
+		.woocommerce form .form-row.woocommerce-invalid input.input-text, .woocommerce-page form .form-row.woocommerce-invalid input.input-text {
+			background-image: url(../images/icons/invalid@2x.png);
+			background-size: 12px 9px;
+		}
 	}
 }
