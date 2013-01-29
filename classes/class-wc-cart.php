@@ -1154,7 +1154,7 @@ class WC_Cart {
 
 						// Sale Items excluded from discount
 								if ( $coupon->exclude_sale_items() && sizeof( woocommerce_get_product_ids_on_sale() ) > 0 )
-									$product_ids_on_sale = woocommerce_get_product_ids_on_sale()
+									$product_ids_on_sale = woocommerce_get_product_ids_on_sale();
 									if ( in_array( $values['product_id'], $product_ids_on_sale ) || in_array( $values['variation_id'], $product_ids_on_sale ) || in_array( $values['data']->get_parent(), $product_ids_on_sale ) )
 										$this_item_is_discounted = false;
 
