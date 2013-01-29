@@ -192,11 +192,4 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 	<?php do_action( 'woocommerce_after_cart_totals' ); ?>
 
-	<div class="debug"> 
-		<?php 
-		print_r(woocommerce_get_product_ids_on_sale() );
-		print_r( $woocommerce )
-		?>
-	</div>
-
 </div>
