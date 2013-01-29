@@ -178,7 +178,9 @@ class WC_Coupon {
 	public function enable_free_shipping() {
 		return $this->free_shipping == 'yes' ? true : false;
 	}
-/**
+
+
+	/**
 	 * Check if a coupon excludes sale items.
 	 *
 	 * @access public
@@ -329,7 +331,7 @@ class WC_Coupon {
 					}
 					if ( ! $valid_for_cart ) {
 						$valid = false;
-						$error = __( 'Sorry, this coupon is not applicable if your cart contains sale items.', 'woocommerce' );
+						$error = __( 'Sorry, this coupon is not valid for sale items.', 'woocommerce' );
 					}
 				}
 

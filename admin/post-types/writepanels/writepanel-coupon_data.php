@@ -57,7 +57,7 @@ function woocommerce_coupon_data_meta_box( $post ) {
 			woocommerce_wp_checkbox( array( 'id' => 'apply_before_tax', 'label' => __( 'Apply before tax', 'woocommerce' ), 'description' => __( 'Check this box if the coupon should be applied before calculating cart tax.', 'woocommerce' ) ) );
 
 			// Exclude Sale Products
-			woocommerce_wp_checkbox( array( 'id' => 'exclude_sale_items', 'label' => __( 'Exclude sale item', 'woocommerce' ), 'description' => __( 'Check this box if the coupon should not apply to sale items. Be sure when ticking this box for cart coupons as the presence of any sale item in the cart will stop the coupon from applying', 'woocommerce' ) ) );
+			woocommerce_wp_checkbox( array( 'id' => 'exclude_sale_items', 'label' => __( 'Exclude sale items', 'woocommerce' ), 'description' => __( 'Check this box if the coupon should not apply to items on sale. Per-item coupons will only work if the item is not on sale. Per-cart coupons will only work if there are no sale items in the cart.', 'woocommerce' ) ) );
 
 			echo '</div><div class="options_group">';
 

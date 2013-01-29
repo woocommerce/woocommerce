@@ -1106,7 +1106,7 @@ class WC_Cart {
 		 * @param mixed $price
 		 */
 		public function apply_product_discounts_after_tax( $values, $price ) {
-			
+
 			if ( ! empty( $this->applied_coupons) ) {
 				foreach ( $this->applied_coupons as $code ) {
 					$coupon = new WC_Coupon( $code );
@@ -1154,9 +1154,9 @@ class WC_Cart {
 								$this_item_is_discounted = false;
 
 						// Sale Items excluded from discount
-								if ( $coupon->exclude_sale_items == 'yes' )
-									if ( in_array( $values['product_id'], $product_ids_on_sale, true ) || in_array( $values['variation_id'], $product_ids_on_sale, true ) || in_array( $values['data']->get_parent(), $product_ids_on_sale, true ) )
-										$this_item_is_discounted = false;
+						if ( $coupon->exclude_sale_items == 'yes' )
+							if ( in_array( $values['product_id'], $product_ids_on_sale, true ) || in_array( $values['variation_id'], $product_ids_on_sale, true ) || in_array( $values['data']->get_parent(), $product_ids_on_sale, true ) )
+								$this_item_is_discounted = false;
 
 						// Apply filter
 						$this_item_is_discounted = apply_filters( 'woocommerce_item_is_discounted', $this_item_is_discounted, $values, $before_tax = false, $coupon );
