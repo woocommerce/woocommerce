@@ -50,12 +50,20 @@ function woocommerce_get_product_ids_on_sale() {
 		'post_type'      => array( 'product', 'product_variation' ),
 		'posts_per_page' => -1,
 		'post_status'    => 'publish',
-		'meta_query'     => array( array(
-			'key'        => '_sale_price',
-			'value'      => 0,
-			'compare'    => '>',
-			'type'       => 'DECIMAL',
-		) ),
+		'meta_query'     => array(
+			array(
+				'key'        => '_sale_price',
+				'value'      => 0,
+				'compare'    => '>=',
+				'type'       => 'DECIMAL',
+			),
+			array(
+				'key'        => '_sale_price',
+				'value'      => '',
+				'compare'    => '!=',
+				'type'       => '',
+			)
+		),
 		'fields'         => 'id=>parent',
 	) );
 
