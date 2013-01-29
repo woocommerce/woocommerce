@@ -235,7 +235,7 @@ class WC_Shortcodes {
 
 		wp_reset_postdata();
 
-		return ob_get_clean();
+		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
 
 
@@ -303,7 +303,7 @@ class WC_Shortcodes {
 
 		woocommerce_reset_loop();
 
-		return ob_get_clean();
+		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
 
 
@@ -361,7 +361,7 @@ class WC_Shortcodes {
 
 		wp_reset_postdata();
 
-		return ob_get_clean();
+		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
 
 
@@ -437,7 +437,7 @@ class WC_Shortcodes {
 
 		wp_reset_postdata();
 
-		return ob_get_clean();
+		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
 
 
@@ -497,7 +497,7 @@ class WC_Shortcodes {
 
 		wp_reset_postdata();
 
-		return ob_get_clean();
+		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
 
 
@@ -665,7 +665,7 @@ class WC_Shortcodes {
 
 		wp_reset_postdata();
 
-		return ob_get_clean();
+		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
 
 	/**
@@ -721,7 +721,7 @@ class WC_Shortcodes {
 
 		wp_reset_postdata();
 
-		return ob_get_clean();
+		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
 
 	/**
@@ -783,7 +783,7 @@ class WC_Shortcodes {
 
 		wp_reset_postdata();
 
-		return ob_get_clean();
+		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
 
 	/**
@@ -846,7 +846,7 @@ class WC_Shortcodes {
 
 		wp_reset_postdata();
 
-		return ob_get_clean();
+		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
 
 
@@ -898,7 +898,7 @@ class WC_Shortcodes {
 
 		wp_reset_postdata();
 
-		return ob_get_clean();
+		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
 
 
