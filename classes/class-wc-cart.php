@@ -954,6 +954,7 @@ class WC_Cart {
 								$this_item_is_discounted = false;
 
 								$product_cats = wp_get_post_terms( $values['product_id'], 'product_cat', array("fields" => "ids") );
+								$product_ids_on_sale = woocommerce_get_product_ids_on_sale();
 
 								// Specific products get the discount
 								if ( sizeof( $coupon->product_ids ) > 0 ) {
@@ -982,6 +983,11 @@ class WC_Cart {
 								// Specific categories excluded from the discount
 								if ( sizeof( $coupon->exclude_product_categories ) > 0 )
 									if ( sizeof( array_intersect( $product_cats, $coupon->exclude_product_categories ) ) > 0 )
+										$this_item_is_discounted = false;
+
+								// Sale Items excluded from discount
+								if ( $coupon->exclude_sale_items == 'yes' )
+									if ( in_array( $values['product_id'], $product_ids_on_sale, true ) || in_array( $values['variation_id'], $product_ids_on_sale, true ) || in_array( $values['data']->get_parent(), $product_ids_on_sale, true ) )
 										$this_item_is_discounted = false;
 
 								// Apply filter
@@ -1146,6 +1152,11 @@ class WC_Cart {
 						if ( sizeof( $coupon->exclude_product_categories ) > 0 )
 							if ( sizeof( array_intersect( $product_cats, $coupon->exclude_product_categories ) ) > 0 )
 								$this_item_is_discounted = false;
+
+						// Sale Items excluded from discount
+								if ( $coupon->exclude_sale_items == 'yes' )
+									if ( in_array( $values['product_id'], $product_ids_on_sale, true ) || in_array( $values['variation_id'], $product_ids_on_sale, true ) || in_array( $values['data']->get_parent(), $product_ids_on_sale, true ) )
+										$this_item_is_discounted = false;
 
 						// Apply filter
 						$this_item_is_discounted = apply_filters( 'woocommerce_item_is_discounted', $this_item_is_discounted, $values, $before_tax = false, $coupon );

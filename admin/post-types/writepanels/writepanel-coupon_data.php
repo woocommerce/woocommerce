@@ -56,6 +56,9 @@ function woocommerce_coupon_data_meta_box( $post ) {
 			// Apply before tax
 			woocommerce_wp_checkbox( array( 'id' => 'apply_before_tax', 'label' => __( 'Apply before tax', 'woocommerce' ), 'description' => __( 'Check this box if the coupon should be applied before calculating cart tax.', 'woocommerce' ) ) );
 
+			// Exclude Sale Products
+			woocommerce_wp_checkbox( array( 'id' => 'exclude_sale_items', 'label' => __( 'Exclude sale item', 'woocommerce' ), 'description' => __( 'Check this box if the coupon should not apply to sale items. Be sure when ticking this box for cart coupons as the presence of any sale item in the cart will stop the coupon from applying', 'woocommerce' ) ) );
+
 			echo '</div><div class="options_group">';
 
 			// minimum spend
@@ -199,6 +202,7 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 	$expiry_date 		= woocommerce_clean( $_POST['expiry_date'] );
 	$apply_before_tax 	= isset( $_POST['apply_before_tax'] ) ? 'yes' : 'no';
 	$free_shipping 		= isset( $_POST['free_shipping'] ) ? 'yes' : 'no';
+	$exclude_sale_items	= isset( $_POST['exclude_sale_items'] ) ? 'yes' : 'no';
 	$minimum_amount 	= woocommerce_clean( $_POST['minimum_amount'] );
 	$customer_email 	= array_filter( array_map( 'trim', explode( ',', woocommerce_clean( $_POST['customer_email'] ) ) ) );
 
@@ -227,6 +231,7 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 	update_post_meta( $post_id, 'expiry_date', $expiry_date );
 	update_post_meta( $post_id, 'apply_before_tax', $apply_before_tax );
 	update_post_meta( $post_id, 'free_shipping', $free_shipping );
+	update_post_meta( $post_id, 'exclude_sale_items', $exclude_sale_items );
 	update_post_meta( $post_id, 'product_categories', $product_categories );
 	update_post_meta( $post_id, 'exclude_product_categories', $exclude_product_categories );
 	update_post_meta( $post_id, 'minimum_amount', $minimum_amount );
