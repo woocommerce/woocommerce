@@ -1757,8 +1757,6 @@ class Woocommerce {
 		$before 	= empty( $wrapper['before'] ) ? '<div class="' . $wrapper['class'] . '">' : $wrapper['before'];
 		$after 		= empty( $wrapper['after'] ) ? '</div>' : $wrapper['after'];
 
-		var_dump($before);
-
 		echo $before;
 		call_user_func( $function, $atts );
 		echo $after;
