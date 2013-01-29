@@ -350,7 +350,6 @@ class WC_Coupon {
 						$error = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );
 					}
 				}
-
 			}
 
 			$valid = apply_filters( 'woocommerce_coupon_is_valid', $valid, $this );
