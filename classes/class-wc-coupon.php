@@ -53,6 +53,9 @@ class WC_Coupon {
 	/** @public array Array of category ids. */
 	public $exclude_product_categories;
 
+	/** @public string "yes" if coupon does NOT apply to items on sale. */
+	public $exclude_sale_items;
+
 	/** @public string Minimum cart amount. */
 	public $minimum_amount;
 
@@ -98,6 +101,7 @@ class WC_Coupon {
             $this->free_shipping 				= esc_html( $coupon_data['free_shipping'] );
             $this->product_categories 			= is_array( $coupon_data['product_categories'] ) ? $coupon_data['product_categories'] : array();
             $this->exclude_product_categories 	= is_array( $coupon_data['exclude_product_categories'] ) ? $coupon_data['exclude_product_categories'] : array();
+            $this->exclude_sale_items			= esc_html( $coupon_data['exclude_sale_items'] );
             $this->minimum_amount 				= esc_html( $coupon_data['minimum_amount'] );
             $this->customer_email 				= esc_html( $coupon_data['customer_email'] );
 
@@ -131,6 +135,7 @@ class WC_Coupon {
             	'free_shipping'					=> 'no',
             	'product_categories'			=> array(),
             	'exclude_product_categories'	=> array(),
+            	'exclude_sale_items'			=> 'no',
             	'minimum_amount'				=> '',
             	'customer_email'				=> array()
             );
@@ -173,6 +178,16 @@ class WC_Coupon {
 	public function enable_free_shipping() {
 		return $this->free_shipping == 'yes' ? true : false;
 	}
+/**
+	 * Check if a coupon excludes sale items.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function exclude_sale_items() {
+		return $this->exclude_sale_items == 'yes' ? true : false;
+	}
+
 
 
 	/**
@@ -298,6 +313,23 @@ class WC_Coupon {
 					if ( ! $valid_for_cart ) {
 						$valid = false;
 						$error = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );
+					}
+				}
+
+				// Exclude Sale Items
+				if ( $this->exclude_sale_items == 'yes' ) {
+					$valid_for_cart = true;
+					$product_ids_on_sale = woocommerce_get_product_ids_on_sale();
+					if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
+						foreach( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
+							if ( in_array( $cart_item['product_id'], $product_ids_on_sale, true ) || in_array( $cart_item['variation_id'], $product_ids_on_sale, true ) || in_array( $cart_item['data']->get_parent(), $product_ids_on_sale, true ) ) {
+								$valid_for_cart = false;
+							}
+						}
+					}
+					if ( ! $valid_for_cart ) {
+						$valid = false;
+						$error = __( 'Sorry, this coupon is not applicable if your cart contains sale items.', 'woocommerce' );
 					}
 				}
 
