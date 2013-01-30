@@ -205,6 +205,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Templating - My account page broken up into template files (by Brian Richards)
 * Templating - CSS classes standardised. Instances of '.woocommerce_' & '.wc-' replaced with '.woocommerce-'
 * Templating - Ratings added to loop. Remove with [this snippet](https://gist.github.com/4518617).
+* Templating - Replaced Fancybox with prettyPhoto
 * Tweak - Sorting uses GET to make it cache friendly
 * Tweak - Optimised class loading (autoload). Reduced memory consumption.
 * Tweak - Moved shortcodes and widgets to classes.
@@ -1180,7 +1181,9 @@ The biggest change is that we're redone order item storage making them easier (a
 
 Order items are no longer serialised data and store in meta - they are stored in there own table with their own meta. Existing data can be updated upon upgrade (you will be prompted). You should backup before upgrading.
 
-On the frontend; if your store is overwriting the core WooCommerce CSS you will need to prefix those overrides with the .woocommerce class as we do in woocommerce.css as of 2.0. Also replaced all instances of .woocommerce_ and .wc- with standardised .woocommerce-
+On the frontend; if your store is overwriting the core WooCommerce CSS you will need to prefix those overrides with the .woocommerce class as we do in woocommerce.css as of 2.0. Also replaced all instances of .woocommerce_ and .wc- with standardised .woocommerce-.
+
+Fancybox (lightbox popup script) has been replaced with prettyPhoto.
 
 = 1.6.2 =
 1.6 introduced some template changes, for loops in particular. See the changelog for details and ensure theme compatibility before upgrading.
