@@ -146,9 +146,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Screenshots ==
 
-1. The slick WooCommerce settings panel
-2. WooCommerce products admin
-3. WooCommerce sales reports
+1. The slick WooCommerce settings panel.
+2. WooCommerce products admin.
+3. Product data panel.
+4. WooCommerce sales reports.
+5. A single product page.
+6. A product archive (grid).
 
 == Changelog ==
 
