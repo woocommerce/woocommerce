@@ -1177,7 +1177,7 @@ function woocommerce_ecommerce_tracking_piwik( $order_id ) {
 				"<?php echo esc_js( $_product->sku ); ?>",	// (required) SKU: Product unique identifier
 				"<?php echo esc_js( $item['name'] ); ?>",		// (optional) Product name
 				"<?php if (isset($_product->variation_data)) echo esc_js( woocommerce_get_formatted_variation( $_product->variation_data, true ) ); ?>",	// (optional) Product category. You can also specify an array of up to 5 categories eg. ["Books", "New releases", "Biography"]
-				<?php echo esc_js( ( $item['line_cost'] / $item['qty'] ) ); ?>,		// (recommended) Product price
+				<?php echo esc_js( $order->get_item_total( $item ) ); ?>,		// (recommended) Product price
 				<?php echo esc_js( $item['qty'] ); ?> 		// (optional, default to 1) Product quantity
 			);
 		<?php endforeach; ?>
