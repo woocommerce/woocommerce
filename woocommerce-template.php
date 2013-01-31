@@ -1138,7 +1138,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 				if ( ! $product_category_found ) {
 					// We found a category
 					$product_category_found = true;
-					echo esc_html( $before );
+					echo $before;
 				}
 
 				woocommerce_get_template( 'content-product_cat.php', array(
@@ -1172,7 +1172,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 				$wp_query->max_num_pages = 0;
 			}
 
-			echo esc_html( $after );
+			echo $after;
 			return true;
 		}
 
