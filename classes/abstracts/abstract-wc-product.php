@@ -1009,8 +1009,7 @@ abstract class WC_Product {
 	 * Returns the product tags.
 	 *
 	 * @access public
-	 * @param string $sep (default: ')
-	 * @param mixed '
+	 * @param string $sep (default: ', ')
 	 * @param string $before (default: '')
 	 * @param string $after (default: '')
 	 * @return array
