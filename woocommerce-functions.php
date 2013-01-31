@@ -617,17 +617,16 @@ function woocommerce_pay_action() {
  * @return void
  */
 function woocommerce_process_login() {
-
 	global $woocommerce;
 
-	if (isset($_POST['login']) && $_POST['login']) :
+	if ( ! empty( $_POST['login'] ) ) {
 
-		$woocommerce->verify_nonce('login');
+		$woocommerce->verify_nonce( 'login' );
 
-		if ( !isset($_POST['username']) || empty($_POST['username']) ) $woocommerce->add_error( __( 'Username is required.', 'woocommerce' ) );
-		if ( !isset($_POST['password']) || empty($_POST['password']) ) $woocommerce->add_error( __( 'Password is required.', 'woocommerce' ) );
+		if ( empty( $_POST['username'] ) ) $woocommerce->add_error( __( 'Username is required.', 'woocommerce' ) );
+		if ( empty( $_POST['password'] ) ) $woocommerce->add_error( __( 'Password is required.', 'woocommerce' ) );
 
-		if ($woocommerce->error_count()==0) :
+		if ( $woocommerce->error_count() == 0 ) {
 
 			$creds = array();
 
@@ -643,29 +642,28 @@ function woocommerce_process_login() {
 			}
 
 			$creds['user_password'] = $_POST['password'];
-			$creds['remember'] = true;
-			$secure_cookie = is_ssl() ? true : false;
-			$user = wp_signon( $creds, $secure_cookie );
-			if ( is_wp_error($user) ) :
-				$woocommerce->add_error( $user->get_error_message() );
-			else :
+			$creds['remember']      = true;
+			$secure_cookie          = is_ssl() ? true : false;
+			$user                   = wp_signon( $creds, $secure_cookie );
 
-				if (isset($_POST['redirect']) && $_POST['redirect']) {
-					$redirect = esc_attr($_POST['redirect']);
-				} else if ( wp_get_referer() ) {
-					$redirect = wp_safe_redirect( wp_get_referer() );
+			if ( is_wp_error( $user ) ) {
+				$woocommerce->add_error( $user->get_error_message() );
+			} else {
+
+				if ( ! empty( $_POST['redirect'] ) ) {
+					$redirect = esc_url( $_POST['redirect'] );
+				} elseif ( wp_get_referer() ) {
+					$redirect = esc_url( wp_get_referer() );
 				} else {
-					$redirect = get_permalink(woocommerce_get_page_id('myaccount'));
+					$redirect = esc_url( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
 				}
 
-				wp_redirect(apply_filters('woocommerce_login_redirect', $redirect, $user));
+				wp_redirect( apply_filters( 'woocommerce_login_redirect', $redirect, $user ) );
 				exit;
 
-			endif;
-
-		endif;
-
-	endif;
+			}
+		}
+	}
 }
 
 
@@ -680,7 +678,7 @@ function woocommerce_process_registration() {
 
 	if ( ! empty( $_POST['register'] ) ) {
 
-		$woocommerce->verify_nonce('register');
+		$woocommerce->verify_nonce( 'register' );
 
 		// Get fields
 		$user_email = isset( $_POST['email'] ) ? trim( $_POST['email'] ) : '';
