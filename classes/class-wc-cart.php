@@ -149,6 +149,8 @@ class WC_Cart {
 					}
 				}
 
+				do_action( 'woocommerce_cart_loaded_from_session', $this );
+
 				if ( ! is_array( $this->cart_contents ) )
 					$this->cart_contents = array();
 
@@ -181,21 +183,18 @@ class WC_Cart {
 
 			// Queue re-calc if subtotal is not set
 			if ( ! $this->subtotal && sizeof( $this->cart_contents ) > 0 )
-				$this->set_session();
+				$this->calculate_totals();
 		}
 
 
 		/**
-		 * Sets the php session data for the cart and coupons and re-calculates totals.
+		 * Sets the php session data for the cart and coupons.
 		 *
 		 * @access public
 		 * @return void
 		 */
 		public function set_session() {
 			global $woocommerce;
-
-			// Re-calc totals
-			$this->calculate_totals();
 
 			// Set cart and coupon session data
 			$cart_session = array();
@@ -884,7 +883,7 @@ class WC_Cart {
 
 			$woocommerce->cart_has_contents_cookie( true );
 
-			$this->set_session();
+			$this->calculate_totals();
 
 			return true;
 		}
@@ -905,7 +904,7 @@ class WC_Cart {
 				do_action( 'woocommerce_after_cart_item_quantity_update', $cart_item_key, $quantity );
 			}
 
-			$this->set_session();
+			$this->calculate_totals();
 		}
 
     /*-----------------------------------------------------------------------------------*/
@@ -1507,34 +1506,38 @@ class WC_Cart {
 			// Cart Discounts (after tax)
 			$this->apply_cart_discounts_after_tax();
 
-			// Only go beyond this point if on the cart/checkout
-			if ( ! is_checkout() && ! is_cart() && ! defined('WOOCOMMERCE_CHECKOUT') && ! defined('WOOCOMMERCE_CART') ) return;
+			// Only calculate the grand total + shipping if on the cart/checkout
+			if ( is_checkout() || is_cart() || defined('WOOCOMMERCE_CHECKOUT') || defined('WOOCOMMERCE_CART') ) {
 
-			// Cart Shipping
-			$this->calculate_shipping();
+				// Cart Shipping
+				$this->calculate_shipping();
 
-			// VAT exemption for shipping
-			if ( $woocommerce->customer->is_vat_exempt() ) {
-				$this->shipping_tax_total = 0;
-				$this->shipping_taxes = array();
+				// VAT exemption for shipping
+				if ( $woocommerce->customer->is_vat_exempt() ) {
+					$this->shipping_tax_total = 0;
+					$this->shipping_taxes = array();
+				}
+
+				// Round cart/shipping tax rows
+				$this->taxes = array_map( array( $this->tax, 'round' ), $this->taxes );
+				$this->shipping_taxes = array_map( array( $this->tax, 'round' ), $this->shipping_taxes );
+
+				// Allow plugins to hook and alter totals before final total is calculated
+				do_action( 'woocommerce_calculate_totals', $this );
+
+				/**
+				 * Grand Total
+				 *
+				 * Based on discounted product prices, discounted tax, shipping cost + tax, and any discounts to be added after tax (e.g. store credit)
+				 */
+				$this->total = apply_filters( 'woocommerce_calculated_total', number_format( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total - $this->discount_total + $this->fee_total, $this->dp, '.', '' ), $this );
+
+				if ( $this->total < 0 )
+					$this->total = 0;
+
 			}
 
-			// Round cart/shipping tax rows
-			$this->taxes = array_map( array( $this->tax, 'round' ), $this->taxes );
-			$this->shipping_taxes = array_map( array( $this->tax, 'round' ), $this->shipping_taxes );
-
-			// Allow plugins to hook and alter totals before final total is calculated
-			do_action( 'woocommerce_calculate_totals', $this );
-
-			/**
-			 * Grand Total
-			 *
-			 * Based on discounted product prices, discounted tax, shipping cost + tax, and any discounts to be added after tax (e.g. store credit)
-			 */
-			$this->total = apply_filters( 'woocommerce_calculated_total', number_format( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total - $this->discount_total + $this->fee_total, $this->dp, '.', '' ), $this );
-
-			if ( $this->total < 0 )
-				$this->total = 0;
+			$this->set_session();
 		}
 
 		/**
@@ -1784,7 +1787,7 @@ class WC_Cart {
 					$woocommerce->session->chosen_shipping_method = 'free_shipping';
 				}
 
-				$this->set_session();
+				$this->calculate_totals();
 
 				$woocommerce->add_message( __( 'Coupon code applied successfully.', 'woocommerce' ) );
 
