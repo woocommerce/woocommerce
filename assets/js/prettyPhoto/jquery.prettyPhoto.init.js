@@ -11,11 +11,13 @@ $(document).ready(function() {
 	});
 	$("a.show_review_form").prettyPhoto({
 		social_tools: false,
-		theme: 'pp_woocommerce'
+		theme: 'pp_woocommerce',
+		opacity: 1
 	});
 	$("a[rel^='prettyPhoto']").prettyPhoto({
 		social_tools: false,
-		theme: 'pp_woocommerce'
+		theme: 'pp_woocommerce',
+		opacity: 1
 	});
 
 	// Open review form lightbox if accessed via anchor

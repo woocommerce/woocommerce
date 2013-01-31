@@ -75,7 +75,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			</div>
 		<?php endif;
 
-		echo '<p class="add_review"><a href="#review_form" class="inline show_review_form button">'.__( 'Add Review', 'woocommerce' ).'</a></p>';
+		echo '<p class="add_review"><a href="#review_form" class="inline show_review_form button" rel="prettyPhoto">'.__( 'Add Review', 'woocommerce' ).'</a></p>';
 
 		$title_reply = __( 'Add a review', 'woocommerce' );
 

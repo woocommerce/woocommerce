@@ -28,7 +28,7 @@ jQuery(document).ready(function($) {
 	// Star ratings for comments
 	$('#rating').hide().before('<p class="stars"><span><a class="star-1" href="#">1</a><a class="star-2" href="#">2</a><a class="star-3" href="#">3</a><a class="star-4" href="#">4</a><a class="star-5" href="#">5</a></span></p>');
 
-	$('p.stars a').click(function(){
+	$('p.stars a').live( 'click', function(){
 		var $star = $(this);
 		$('#rating').val( $star.text() );
 		$('p.stars a').removeClass('active');
