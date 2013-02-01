@@ -738,12 +738,16 @@ function get_woocommerce_price_format() {
 	switch ( $currency_pos ) {
 		case 'left' :
 			$format = '%1$s%2$s';
+		break;
 		case 'right' :
 			$format = '%2$s%1$s';
+		break;
 		case 'left_space' :
 			$format = '%1$s&nbsp;%2$s';
+		break;
 		case 'right_space' :
 			$format = '%2$s&nbsp;%1$s';
+		break;
 	}
 
 	return apply_filters( 'woocommerce_price_format', $format, $currency_pos );
