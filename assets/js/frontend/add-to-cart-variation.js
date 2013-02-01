@@ -182,12 +182,17 @@ jQuery(document).ready(function($) {
 	    	$variation_form = $(this).closest('form.variations_form');
 
 	        // Loop through selects and disable/enable options based on selections
-	        $variation_form.find('.variations select').each(function( index, el ){
+	        $variation_form.find('.variations select').each(function( index, el ) {
 
 	        	current_attr_select = $(el);
 
-	        	// Disable all
-	        	current_attr_select.find('option:gt(0)').attr('disabled', 'disabled');
+	        	// Reset options
+	        	if ( ! current_attr_select.data( 'attribute_options' ) )
+	        		current_attr_select.data( 'attribute_options', current_attr_select.find('option:gt(0)').get() )
+
+	        	current_attr_select.find('option:gt(0)').remove();
+	        	current_attr_select.append( current_attr_select.data( 'attribute_options' ) );
+	        	current_attr_select.find('option:gt(0)').removeClass('active');
 
 	        	// Get name
 		        var current_attr_name 	= current_attr_select.attr('name');
@@ -213,10 +218,12 @@ jQuery(document).ready(function($) {
 		                    	attr_val = attr_val.replace(/"/g, "\\\"");
 
 		                    	// Compare the meercat
-		                    	current_attr_select.find('option[value="' + attr_val + '"]').removeAttr('disabled');
+		                    	current_attr_select.find('option[value="' + attr_val + '"]').addClass('active');
 
 		                    } else {
-		                    	current_attr_select.find('option').removeAttr('disabled');
+
+		                    	current_attr_select.find('option:gt(0)').addClass('active');
+
 		                    }
 
 		                }
@@ -224,6 +231,9 @@ jQuery(document).ready(function($) {
 		            }
 
 		        }
+
+		        // Detach inactive
+		        current_attr_select.find('option:gt(0):not(.active)').remove();
 
 	        });
 
