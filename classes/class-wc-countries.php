@@ -902,6 +902,12 @@ class WC_Countries {
 						'hidden'	=> true
 					)
 				),
+				'ZW' => array(
+					'postcode' => array(
+						'required' 	=> false,
+						'hidden'	=> true
+					),
+				),
 			));
 
 			$this->locale = array_intersect_key( $this->locale, $this->get_allowed_countries() );
