@@ -692,6 +692,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'RON' : $currency_symbol = 'lei'; break;
 		default    : $currency_symbol = ''; break;
 	endswitch;
+
 	return apply_filters( 'woocommerce_currency_symbol', $currency_symbol, $currency );
 }
 
@@ -736,14 +737,16 @@ function get_woocommerce_price_format() {
 
 	switch ( $currency_pos ) {
 		case 'left' :
-			return '%1$s%2$s';
+			$format = '%1$s%2$s';
 		case 'right' :
-			return '%2$s%1$s';
+			$format = '%2$s%1$s';
 		case 'left_space' :
-			return '%1$s&nbsp;%2$s';
+			$format = '%1$s&nbsp;%2$s';
 		case 'right_space' :
-			return '%2$s&nbsp;%1$s';
+			$format = '%2$s&nbsp;%1$s';
 	}
+
+	return apply_filters( 'woocommerce_price_format', $format, $currency_pos );
 }
 
 
