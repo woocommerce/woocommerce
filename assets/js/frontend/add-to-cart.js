@@ -21,7 +21,7 @@ jQuery(document).ready(function($) {
 			};
 
 			// Trigger event
-			$('body').trigger('adding_to_cart');
+			$('body').trigger( 'adding_to_cart', [ $thisbutton, data ] );
 
 			// Ajax action
 			$.post( woocommerce_params.ajax_url, data, function( response ) {
