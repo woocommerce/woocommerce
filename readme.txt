@@ -361,7 +361,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - PayPal standard: No longer using shipping_1 because a) paypal ignore it if *any* shipping rules are within paypal, b) paypal ignore anyhing over 5 digits, so 999.99 is the max
 * Tweak - Optimised dashboard icons for retina displays
 * Tweak - added is_purchasable class method for products
-* Fix - Removed session_name from 1.6 to prevent issues when other plugins start a session first. Instead, added a KB article on how to do it manually (if needed, this is an edge case) - http://wcdocs.woothemes.com/codex/extending/multiple-installs-on-one-domain-sessions-conflictsession-sharing-workaround/
+* Fix - Removed session_name from 1.6 to prevent issues when other plugins start a session first. Instead, added a KB article on how to do it manually (if needed, this is an edge case)
 * Fix - Product categories shortcode loop
 * Fix - selected state for variation options
 * Localization - Rescan all language strings and updated .po and .mo files for next release
