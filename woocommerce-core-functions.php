@@ -641,7 +641,7 @@ function woocommerce_locate_template( $template_name, $template_path = '', $defa
 
 
 /**
- * Get Currency.
+ * Get Base Currency Code.
  *
  * @access public
  * @return string
@@ -652,6 +652,49 @@ function get_woocommerce_currency() {
 
 
 /**
+ * Get full list of currency codes.
+ *
+ * @access public
+ * @return void
+ */
+function get_woocommerce_currencies() {
+	return array_unique(
+		apply_filters( 'woocommerce_currencies',
+			array(
+				'AUD' => __( 'Australian Dollars', 'woocommerce' ),
+				'BRL' => __( 'Brazilian Real', 'woocommerce' ),
+				'CAD' => __( 'Canadian Dollars', 'woocommerce' ),
+				'RMB' => __( 'Chinese Yuan', 'woocommerce' ),
+				'CZK' => __( 'Czech Koruna', 'woocommerce' ),
+				'DKK' => __( 'Danish Krone', 'woocommerce' ),
+				'EUR' => __( 'Euros', 'woocommerce' ),
+				'HKD' => __( 'Hong Kong Dollar', 'woocommerce' ),
+				'HUF' => __( 'Hungarian Forint', 'woocommerce' ),
+				'IDR' => __( 'Indonesia Rupiah', 'woocommerce' ),
+				'ILS' => __( 'Israeli Shekel', 'woocommerce' ),
+				'JPY' => __( 'Japanese Yen', 'woocommerce' ),
+				'MYR' => __( 'Malaysian Ringgits', 'woocommerce' ),
+				'MXN' => __( 'Mexican Peso', 'woocommerce' ),
+				'NOK' => __( 'Norwegian Krone', 'woocommerce' ),
+				'NZD' => __( 'New Zealand Dollar', 'woocommerce' ),
+				'PHP' => __( 'Philippine Pesos', 'woocommerce' ),
+				'PLN' => __( 'Polish Zloty', 'woocommerce' ),
+				'GBP' => __( 'Pounds Sterling', 'woocommerce' ),
+				'RON' => __( 'Romanian Leu', 'woocommerce' ),
+				'SGD' => __( 'Singapore Dollar', 'woocommerce' ),
+				'ZAR' => __( 'South African rand', 'woocommerce' ),
+				'SEK' => __( 'Swedish Krona', 'woocommerce' ),
+				'CHF' => __( 'Swiss Franc', 'woocommerce' ),
+				'TWD' => __( 'Taiwan New Dollars', 'woocommerce' ),
+				'THB' => __( 'Thai Baht', 'woocommerce' ),
+				'TRY' => __( 'Turkish Lira', 'woocommerce' ),
+				'USD' => __( 'US Dollars', 'woocommerce' ),
+			)
+		)
+	);
+}
+
+/**
  * Get Currency symbol.
  *
  * @access public
@@ -659,21 +702,30 @@ function get_woocommerce_currency() {
  * @return string
  */
 function get_woocommerce_currency_symbol( $currency = '' ) {
-	if ( ! $currency ) $currency = get_woocommerce_currency();
-	$currency_symbol = '';
-	switch ( $currency ) :
-		case 'BRL' : $currency_symbol = '&#82;&#36;'; break;
-		case 'AUD' : $currency_symbol = '&#36;'; break;
-		case 'CAD' : $currency_symbol = '&#36;'; break;
-		case 'MXN' : $currency_symbol = '&#36;'; break;
-		case 'NZD' : $currency_symbol = '&#36;'; break;
-		case 'HKD' : $currency_symbol = '&#36;'; break;
-		case 'SGD' : $currency_symbol = '&#36;'; break;
-		case 'USD' : $currency_symbol = '&#36;'; break;
-		case 'EUR' : $currency_symbol = '&euro;'; break;
-		case 'CNY' : $currency_symbol = '&yen;'; break;
-		case 'RMB' : $currency_symbol = '&yen;'; break;
-		case 'JPY' : $currency_symbol = '&yen;'; break;
+	if ( ! $currency )
+		$currency = get_woocommerce_currency();
+
+	switch ( $currency ) {
+		case 'BRL' :
+			$currency_symbol = '&#82;&#36;';
+			break;
+		case 'AUD' :
+		case 'CAD' :
+		case 'MXN' :
+		case 'NZD' :
+		case 'HKD' :
+		case 'SGD' :
+		case 'USD' :
+			$currency_symbol = '&#36;';
+			break;
+		case 'EUR' :
+			$currency_symbol = '&euro;';
+			break;
+		case 'CNY' :
+		case 'RMB' :
+		case 'JPY' :
+			$currency_symbol = '&yen;';
+			break;
 		case 'TRY' : $currency_symbol = '&#84;&#76;'; break;
 		case 'NOK' : $currency_symbol = '&#107;&#114;'; break;
 		case 'ZAR' : $currency_symbol = '&#82;'; break;
@@ -692,7 +744,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'GBP' : $currency_symbol = '&pound;'; break;
 		case 'RON' : $currency_symbol = 'lei'; break;
 		default    : $currency_symbol = ''; break;
-	endswitch;
+	}
 
 	return apply_filters( 'woocommerce_currency_symbol', $currency_symbol, $currency );
 }

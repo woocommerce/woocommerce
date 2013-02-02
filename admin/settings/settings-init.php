@@ -22,6 +22,12 @@ $localisation_setting = defined( 'WPLANG' ) && file_exists( $woocommerce->plugin
 	'default'	=> 'no',
 ) : array();
 
+$currency_code_options = get_woocommerce_currencies();
+
+foreach ( $currency_code_options as $code => $name ) {
+	$currency_code_options[ $code ] = $name . ' (' . get_woocommerce_currency_symbol( $code ) . ')';
+}
+
 $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings', array(
 
 	array( 'title' => __( 'General Options', 'woocommerce' ), 'type' => 'title', 'desc' => '', 'id' => 'general_options' ),
@@ -45,37 +51,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'type' 		=> 'select',
 		'class'		=> 'chosen_select',
 		'desc_tip'	=>  true,
-		'options' => array_unique( apply_filters( 'woocommerce_currencies', array(
-			'AUD' => __( 'Australian Dollars (&#36;)', 'woocommerce' ),
-			'BRL' => __( 'Brazilian Real (&#36;)', 'woocommerce' ),
-			'CAD' => __( 'Canadian Dollars (&#36;)', 'woocommerce' ),
-			'RMB' => __( 'Chinese Yuan (&yen;)', 'woocommerce' ),
-			'CZK' => __( 'Czech Koruna (&#75;&#269;)', 'woocommerce' ),
-			'DKK' => __( 'Danish Krone', 'woocommerce' ),
-			'EUR' => __( 'Euros (&euro;)', 'woocommerce' ),
-			'HKD' => __( 'Hong Kong Dollar (&#36;)', 'woocommerce' ),
-			'HUF' => __( 'Hungarian Forint', 'woocommerce' ),
-			'IDR' => __( 'Indonesia Rupiah (Rp)', 'woocommerce' ),
-			'ILS' => __( 'Israeli Shekel', 'woocommerce' ),
-			'JPY' => __( 'Japanese Yen (&yen;)', 'woocommerce' ),
-			'MYR' => __( 'Malaysian Ringgits (RM)', 'woocommerce' ),
-			'MXN' => __( 'Mexican Peso (&#36;)', 'woocommerce' ),
-			'NOK' => __( 'Norwegian Krone', 'woocommerce' ),
-			'NZD' => __( 'New Zealand Dollar (&#36;)', 'woocommerce' ),
-			'PHP' => __( 'Philippine Pesos', 'woocommerce' ),
-			'PLN' => __( 'Polish Zloty', 'woocommerce' ),
-			'GBP' => __( 'Pounds Sterling (&pound;)', 'woocommerce' ),
-			'RON' => __( 'Romanian Leu (RON)', 'woocommerce' ),
-			'SGD' => __( 'Singapore Dollar (&#36;)', 'woocommerce' ),
-			'ZAR' => __( 'South African rand (R)', 'woocommerce' ),
-			'SEK' => __( 'Swedish Krona', 'woocommerce' ),
-			'CHF' => __( 'Swiss Franc', 'woocommerce' ),
-			'TWD' => __( 'Taiwan New Dollars', 'woocommerce' ),
-			'THB' => __( 'Thai Baht', 'woocommerce' ),
-			'TRY' => __( 'Turkish Lira (TL)', 'woocommerce' ),
-			'USD' => __( 'US Dollars (&#36;)', 'woocommerce' ),
-			) )
-		)
+		'options'   => $currency_code_options
 	),
 
 	array(
