@@ -893,11 +893,12 @@ function woocommerce_download_product() {
 
 		global $wpdb;
 
-		$product_id 	= (int) urldecode($_GET['download_file']);
-		$order_key 		= urldecode( $_GET['order'] );
-		$email 			= sanitize_email( str_replace( ' ', '+', urldecode( $_GET['email'] ) ) );
-		$download_id 	= isset( $_GET['key'] ) ? urldecode( $_GET['key'] ) : '';  // backwards compatibility for existing download URLs
-		$_product	 	= get_product( $product_id );
+		$product_id           = (int) urldecode($_GET['download_file']);
+		$order_key            = urldecode( $_GET['order'] );
+		$email                = sanitize_email( str_replace( ' ', '+', urldecode( $_GET['email'] ) ) );
+		$download_id          = isset( $_GET['key'] ) ? urldecode( $_GET['key'] ) : '';  // backwards compatibility for existing download URLs
+		$_product             = get_product( $product_id );
+		$file_download_method = apply_filters( 'woocommerce_file_download_method', get_option( 'woocommerce_file_download_method' ), $product_id );
 
 		if ( ! is_email( $email) )
 			wp_die( __( 'Invalid email address.', 'woocommerce' ) . ' <a href="' . home_url() . '">' . __( 'Go to homepage &rarr;', 'woocommerce' ) . '</a>' );
@@ -985,34 +986,31 @@ function woocommerce_download_product() {
 		$file_path = $_product->get_file_download_path( $download_id );
 
 		if ( ! $file_path )
-			exit;
+			wp_die( __( 'No file defined', 'woocommerce' ) . ' <a href="'.home_url().'">' . __( 'Go to homepage &rarr;', 'woocommerce' ) . '</a>' );
 
-		$file_download_method = apply_filters( 'woocommerce_file_download_method', get_option( 'woocommerce_file_download_method' ), $product_id );
-
-		// Redirect to download location
-		if ( $file_download_method == 'redirect' ) {
+		// Redirect to the file...
+		if ( $file_download_method == "redirect" ) {
 			header( 'Location: ' . $file_path );
 			exit;
 		}
 
-		// Get URLS with https
-		$site_url = site_url();
-		$network_url = network_admin_url();
-		if ( is_ssl() ) {
-			$site_url = str_replace( 'https:', 'http:', $site_url );
-			$network_url = str_replace( 'https:', 'http:', $network_url );
-		}
-
+		// ...or serve it
 		if ( ! is_multisite() ) {
-			$file_path = str_replace( trailingslashit( $site_url ), ABSPATH, $file_path );
+
+			$site_url    = is_ssl() ? str_replace( 'https:', 'http:', site_url() ) : site_url();
+
+			$file_path   = str_replace( trailingslashit( $site_url ), ABSPATH, $file_path );
+
 		} else {
-			$upload_dir = wp_upload_dir();
+
+			$network_url = is_ssl() ? str_replace( 'https:', 'http:', network_admin_url() ) : network_admin_url();
+			$upload_dir  = wp_upload_dir();
 
 			// Try to replace network url
-			$file_path = str_replace( trailingslashit( $network_url ), ABSPATH, $file_path );
+			$file_path   = str_replace( trailingslashit( $network_url ), ABSPATH, $file_path );
 
 			// Now try to replace upload URL
-			$file_path = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $file_path );
+			$file_path   = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $file_path );
 		}
 
 		// See if its local or remote
@@ -1020,13 +1018,11 @@ function woocommerce_download_product() {
 			$remote_file = true;
 		} else {
 			$remote_file = false;
-			$file_path = realpath( $file_path );
+			$file_path   = realpath( $file_path );
 		}
 
-		// Download the file
-		$file_extension = strtolower( substr( strrchr( $file_path, "." ), 1 ) );
-
-		$ctype = "application/force-download";
+		$file_extension  = strtolower( substr( strrchr( $file_path, "." ), 1 ) );
+		$ctype           = "application/force-download";
 
 		foreach ( get_allowed_mime_types() as $mime => $type ) {
 			$mimes = explode( '|', $mime );
@@ -1035,6 +1031,34 @@ function woocommerce_download_product() {
 				break;
 			}
 		}
+
+		// Start setting headers
+		if ( ! ini_get('safe_mode') )
+			@set_time_limit(0);
+
+		if ( function_exists( 'get_magic_quotes_runtime' ) && get_magic_quotes_runtime() )
+			@set_magic_quotes_runtime(0);
+
+		if( function_exists( 'apache_setenv' ) )
+			@apache_setenv( 'no-gzip', 1 );
+
+		@session_write_close();
+		@ini_set( 'zlib.output_compression', 'Off' );
+		@ob_end_clean();
+
+		if ( ob_get_level() )
+			@ob_end_clean(); // Zip corruption fix
+
+		nocache_headers();
+
+		header( "Robots: none" );
+		header( "Content-Type: " . $ctype );
+		header( "Content-Description: File Transfer" );
+		header( "Content-Disposition: attachment; filename=\"" . basename( $file_path ) . "\";" );
+		header( "Content-Transfer-Encoding: binary" );
+
+        if ( $size = @filesize( $file_path ) )
+        	header( "Content-Length: " . $size );
 
 		if ( $file_download_method == 'xsendfile' ) {
 
@@ -1062,85 +1086,52 @@ function woocommerce_download_product() {
             }
         }
 
-        if ( ! function_exists('readfile_chunked')) {
-
-			/**
-			 * readfile_chunked
-			 *
-			 * Reads file in chunks so big downloads are possible without changing PHP.INI - http://codeigniter.com/wiki/Download_helper_for_large_files/
-			 *
-			 * @access   public
-			 * @param    string    file
-			 * @param    boolean    return bytes of file
-			 * @return   void
-			 */
-		    function readfile_chunked( $file, $retbytes = true ) {
-
-				$chunksize = 1 * ( 1024 * 1024 );
-				$buffer = '';
-				$cnt = 0;
-
-				$handle = fopen( $file, 'r' );
-				if ( $handle === FALSE )
-					return FALSE;
-
-				while ( ! feof( $handle ) ) {
-					$buffer = fread( $handle, $chunksize );
-					echo $buffer;
-					ob_flush();
-					flush();
-
-					if ( $retbytes )
-						$cnt += strlen( $buffer );
-				}
-
-				$status = fclose( $handle );
-
-				if ( $retbytes && $status )
-					return $cnt;
-
-				return $status;
-		    }
-		}
-
-        @session_write_close();
-        if ( function_exists( 'apache_setenv' ) )
-        	@apache_setenv( 'no-gzip', 1 );
-        @ini_set( 'zlib.output_compression', 'Off' );
-		@set_time_limit(0);
-		@set_magic_quotes_runtime(0);
-		@ob_end_clean();
-		if ( ob_get_level() )
-			@ob_end_clean(); // Zip corruption fix
-
-		header( "Pragma: no-cache" );
-		header( "Expires: 0" );
-		header( "Cache-Control: must-revalidate, post-check=0, pre-check=0" );
-		header( "Robots: none" );
-		header( "Content-Type: " . $ctype );
-		header( "Content-Description: File Transfer" );
-		header( "Content-Disposition: attachment; filename=\"" . basename( $file_path ) . "\";" );
-		header( "Content-Transfer-Encoding: binary" );
-
-        if ( $size = @filesize( $file_path ) )
-        	header( "Content-Length: " . $size );
-
-        // Serve it
-        if ( $remote_file ) {
-
-        	@readfile_chunked( "$file_path" ) or header( 'Location: ' . $file_path );
-
-        } else {
-
-        	@readfile_chunked( "$file_path" ) or wp_die( __( 'File not found', 'woocommerce' ) . ' <a href="' . home_url() . '">' . __( 'Go to homepage &rarr;', 'woocommerce' ) . '</a>' );
-
-        }
+        if ( $remote_file )
+        	@woocommerce_readfile_chunked( $file_path ) or header( 'Location: ' . $file_path );
+        else
+        	@woocommerce_readfile_chunked( $file_path ) or wp_die( __( 'File not found', 'woocommerce' ) . ' <a href="' . home_url() . '">' . __( 'Go to homepage &rarr;', 'woocommerce' ) . '</a>' );
 
         exit;
-
 	}
 }
 
+/**
+ * readfile_chunked
+ *
+ * Reads file in chunks so big downloads are possible without changing PHP.INI - http://codeigniter.com/wiki/Download_helper_for_large_files/
+ *
+ * @access   public
+ * @param    string    file
+ * @param    boolean    return bytes of file
+ * @return   void
+ */
+function woocommerce_readfile_chunked( $file, $retbytes = true ) {
+
+	$chunksize = 1 * ( 1024 * 1024 );
+	$buffer = '';
+	$cnt = 0;
+
+	$handle = fopen( $file, 'r' );
+	if ( $handle === FALSE )
+		return FALSE;
+
+	while ( ! feof( $handle ) ) {
+		$buffer = fread( $handle, $chunksize );
+		echo $buffer;
+		ob_flush();
+		flush();
+
+		if ( $retbytes )
+			$cnt += strlen( $buffer );
+	}
+
+	$status = fclose( $handle );
+
+	if ( $retbytes && $status )
+		return $cnt;
+
+	return $status;
+}
 
 /**
  * ecommerce tracking with piwik.
