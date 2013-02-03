@@ -530,7 +530,7 @@ class WC_Shortcodes {
 
 			ob_start();
 			?>
-			<p class="product" style="<?php echo $atts['style']; ?>">
+			<p class="product woocommerce" style="<?php echo $atts['style']; ?>">
 
 				<?php echo $product->get_price_html(); ?>
 
