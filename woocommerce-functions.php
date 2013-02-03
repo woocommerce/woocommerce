@@ -748,7 +748,7 @@ function woocommerce_process_registration() {
 
             $user_id = wp_insert_user( apply_filters( 'woocommerce_new_customer_data', $new_customer_data ) );
 
-            if ( ! $user_id ) {
+            if ( is_wp_error($user_id) ) {
             	$woocommerce->add_error( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
                 return;
             }
