@@ -7,17 +7,18 @@ $(document).ready(function() {
 	// Lightbox
 	$("a.zoom").prettyPhoto({
 		social_tools: false,
-		theme: 'pp_woocommerce'
+		theme: 'pp_woocommerce',
+		opacity: 0.9
 	});
 	$("a.show_review_form").prettyPhoto({
 		social_tools: false,
 		theme: 'pp_woocommerce',
-		opacity: 1
+		opacity: 0.9
 	});
 	$("a[rel^='prettyPhoto']").prettyPhoto({
 		social_tools: false,
 		theme: 'pp_woocommerce',
-		opacity: 1
+		opacity: 0.9
 	});
 
 	// Open review form lightbox if accessed via anchor
