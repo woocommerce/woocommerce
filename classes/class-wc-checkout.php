@@ -620,8 +620,9 @@ class WC_Checkout {
 
 		                $this->customer_id = wp_insert_user( apply_filters( 'woocommerce_new_customer_data', $new_customer_data ) );
 
-		                if ( ! $this->customer_id )
+		                if ( is_wp_error( $this->customer_id ) ) {
 		                	throw new MyException( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
+						}
 
                         // Set the global user object
                         $current_user = get_user_by ( 'id', $this->customer_id );
