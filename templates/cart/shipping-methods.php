@@ -31,6 +31,7 @@ if ( $available_methods ) {
 		} elseif ( $method->id !== 'free_shipping' ) {
 			$method->full_label .= ' (' . __( 'Free', 'woocommerce' ) . ')';
 		}
+		$method->full_label = apply_filters( 'woocommerce_cart_shipping_method_full_label', $method->full_label, $method );
 	}
 
 	// Print a single available shipping method as plain text
