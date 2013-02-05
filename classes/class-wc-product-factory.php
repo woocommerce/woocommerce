@@ -54,10 +54,9 @@ class WC_Product_Factory {
 		// Filter classname so that the class can be overridden if extended.
 		$classname = apply_filters( 'woocommerce_product_class', $classname, $product_type, $post_type, $product_id );
 
-		if ( $classname && class_exists( $classname ) ) {
-			return new $classname( $the_product, $args );
-		}
+		if ( ! class_exists( $classname ) )
+			$classname = 'WC_Product_Simple';
 
-		return false;
+		return new $classname( $the_product, $args );
 	}
 }
