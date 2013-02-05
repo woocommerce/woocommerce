@@ -152,7 +152,10 @@ jQuery(document).ready(function($) {
 		} else {
 			$('div.payment_box').show();
 		}
-	});
+	})
+
+	// Trigger initial click
+	.find('input[name=payment_method]:checked').click();
 
 	$('form.checkout')
 
@@ -288,10 +291,7 @@ jQuery(document).ready(function($) {
 		}
 
 		return false;
-	})
-
-	// Trigger initial click
-	.find('#order_review input[name=payment_method]:checked').click();
+	});
 
 	/* AJAX Coupon Form Submission */
 	$('form.checkout_coupon').submit( function() {
