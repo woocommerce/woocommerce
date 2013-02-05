@@ -779,6 +779,11 @@ class WC_Countries {
 						'required' => false
 					)
 				),
+				'ID' => array(
+	                'state' => array(
+	                    'label'         => __( 'Province', 'woocommerce' ),
+	                )
+            	),
 				'IS' => array(
 					'postcode_before_city' => true,
 					'state'		=> array(
