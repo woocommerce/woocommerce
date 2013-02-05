@@ -1478,7 +1478,7 @@ class WC_Cart {
 
 				if ( $fee->taxable ) {
 					// Get tax rates
-					$tax_rates 				= $this->tax->get_rates();
+					$tax_rates 				= $this->tax->get_rates( $fee->tax_class );
 					$fee_taxes				= $this->tax->calc_tax( $fee->amount, $tax_rates, false );
 
 					// Store
