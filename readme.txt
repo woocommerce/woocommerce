@@ -254,6 +254,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Further optimisation of icons in admin for HiDPI devices
 * Tweak - On product search include post_excerpt, by krbvroc1
 * Tweak - Attribute page restricts reserved terms by GeertDD
+* Tweak - Arguments for taxonomies are now filterable
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.
 * Fix - Active plugins display on status page.

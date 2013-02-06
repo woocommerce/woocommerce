@@ -795,19 +795,19 @@ class Woocommerce {
 		$admin_only_query_var = ( is_admin() ) ? true : false;
 
 		register_taxonomy( 'product_type',
-	        array('product'),
-	        array(
+	        apply_filters( 'woocommerce_taxonomy_objects_product_type', array('product') ),
+	        apply_filters( 'woocommerce_taxonomy_args_product_type', array(
 	            'hierarchical' 			=> false,
 	            'update_count_callback' => '_update_post_term_count',
 	            'show_ui' 				=> false,
 	            'show_in_nav_menus' 	=> false,
 	            'query_var' 			=> $admin_only_query_var,
 	            'rewrite'				=> false
-	        )
+	        ) )
 	    );
 		register_taxonomy( 'product_cat',
-	        array('product'),
-	        array(
+	        apply_filters( 'woocommerce_taxonomy_objects_product_cat', array('product') ),
+	        apply_filters( 'woocommerce_taxonomy_args_product_cat', array(
 	            'hierarchical' 			=> true,
 	            'update_count_callback' => '_woocommerce_term_recount',
 	            'label' 				=> __( 'Product Categories', 'woocommerce'),
@@ -838,12 +838,12 @@ class Woocommerce {
 	            	'hierarchical' => true,
 	            	//'ep_mask' => EP_CATEGORIES
 	            ),
-	        )
+	        ) )
 	    );
 
 	    register_taxonomy( 'product_tag',
-	        array('product'),
-	        array(
+	        apply_filters( 'woocommerce_taxonomy_objects_product_tag', array('product') ),
+	        apply_filters( 'woocommerce_taxonomy_args_product_tag', array(
 	            'hierarchical' 			=> false,
 	            'update_count_callback' => '_woocommerce_term_recount',
 	            'label' 				=> __( 'Product Tags', 'woocommerce'),
@@ -869,12 +869,12 @@ class Woocommerce {
 					'assign_terms' 		=> 'assign_product_terms',
 				),
 	            'rewrite' 				=> array( 'slug' => $product_tag_slug, 'with_front' => false ),
-	        )
+	        ) )
 	    );
 
 		register_taxonomy( 'product_shipping_class',
-	        array('product', 'product_variation'),
-	        array(
+	        apply_filters( 'woocommerce_taxonomy_objects_product_shipping_class', array('product', 'product_variation'),
+	        apply_filters( 'woocommerce_taxonomy_args_product_shipping_class', array(
 	            'hierarchical' 			=> true,
 	            'update_count_callback' => '_update_post_term_count',
 	            'label' 				=> __( 'Shipping Classes', 'woocommerce'),
@@ -901,19 +901,19 @@ class Woocommerce {
 					'assign_terms' 		=> 'assign_product_terms',
 				),
 	            'rewrite' 				=> false,
-	        )
+	        ) )
 	    );
 
 	    register_taxonomy( 'shop_order_status',
-	        array('shop_order'),
-	        array(
+	        apply_filters( 'woocommerce_taxonomy_objects_shop_order_status', array('shop_order'),
+	        apply_filters( 'woocommerce_taxonomy_args_shop_order_status', array(
 	            'hierarchical' 			=> false,
 	            'update_count_callback' => '_update_post_term_count',
 	            'show_ui' 				=> false,
 	            'show_in_nav_menus' 	=> false,
 	            'query_var' 			=> $admin_only_query_var,
 	            'rewrite' 				=> false,
-	        )
+	        ) )
 	    );
 
 	    $attribute_taxonomies = $this->get_attribute_taxonomies();
@@ -929,8 +929,8 @@ class Woocommerce {
 					$show_in_nav_menus = apply_filters( 'woocommerce_attribute_show_in_nav_menus', false, $name );
 
 		    		register_taxonomy( $name,
-				        array('product'),
-				        array(
+				        apply_filters( 'woocommerce_taxonomy_objects_' . $name, array('product'),
+				        apply_filters( 'woocommerce_taxonomy_args_' . $name, array(
 				            'hierarchical' 				=> $hierarchical,
 	            			'update_count_callback' 	=> '_update_post_term_count',
 				            'labels' => array(
@@ -955,7 +955,7 @@ class Woocommerce {
 				            ),
 				            'show_in_nav_menus' 		=> $show_in_nav_menus,
 				            'rewrite' 					=> array( 'slug' => $product_attribute_base . sanitize_title( $tax->attribute_name ), 'with_front' => false, 'hierarchical' => $hierarchical ),
-				        )
+				        ) )
 				    );
 
 		    	}
