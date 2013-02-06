@@ -147,6 +147,7 @@ class Woocommerce {
 		add_action( 'widgets_init', array( $this, 'register_widgets' ) );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( $this, 'include_template_functions' ), 25 );
+		add_action( 'init', array( $this, 'api_requests' ), 50 );
 		add_action( 'after_setup_theme', array( $this, 'compatibility' ) );
 
 		// Loaded action
@@ -499,9 +500,6 @@ class Woocommerce {
 
 		// Init Images sizes
 		$this->init_image_sizes();
-
-		// Trigger API requests
-		$this->api_requests();
 
 		// Init action
 		do_action( 'woocommerce_init' );
