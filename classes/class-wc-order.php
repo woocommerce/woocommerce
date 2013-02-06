@@ -1000,7 +1000,8 @@ class WC_Order {
 
 			}
 
-			$total_rows['order_total']['value'] .= ' ' . sprintf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) );
+			if ( ! empty( $tax_string_array ) )
+				$total_rows['order_total']['value'] .= ' ' . sprintf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) );
 		}
 
 		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this );
