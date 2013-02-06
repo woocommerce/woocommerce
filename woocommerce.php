@@ -873,7 +873,7 @@ class Woocommerce {
 	    );
 
 		register_taxonomy( 'product_shipping_class',
-	        apply_filters( 'woocommerce_taxonomy_objects_product_shipping_class', array('product', 'product_variation'),
+	        apply_filters( 'woocommerce_taxonomy_objects_product_shipping_class', array('product', 'product_variation') ),
 	        apply_filters( 'woocommerce_taxonomy_args_product_shipping_class', array(
 	            'hierarchical' 			=> true,
 	            'update_count_callback' => '_update_post_term_count',
@@ -905,7 +905,7 @@ class Woocommerce {
 	    );
 
 	    register_taxonomy( 'shop_order_status',
-	        apply_filters( 'woocommerce_taxonomy_objects_shop_order_status', array('shop_order'),
+	        apply_filters( 'woocommerce_taxonomy_objects_shop_order_status', array('shop_order') ),
 	        apply_filters( 'woocommerce_taxonomy_args_shop_order_status', array(
 	            'hierarchical' 			=> false,
 	            'update_count_callback' => '_update_post_term_count',
@@ -929,7 +929,7 @@ class Woocommerce {
 					$show_in_nav_menus = apply_filters( 'woocommerce_attribute_show_in_nav_menus', false, $name );
 
 		    		register_taxonomy( $name,
-				        apply_filters( 'woocommerce_taxonomy_objects_' . $name, array('product'),
+				        apply_filters( 'woocommerce_taxonomy_objects_' . $name, array('product') ),
 				        apply_filters( 'woocommerce_taxonomy_args_' . $name, array(
 				            'hierarchical' 				=> $hierarchical,
 	            			'update_count_callback' 	=> '_update_post_term_count',
