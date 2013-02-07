@@ -297,3 +297,24 @@ foreach ( $order_tax_rows as $order_tax_row ) {
 		}
 	}
 }
+
+// Grab the pre 2.0 Image options and use to populate the new image options settings,
+// cleaning up afterwards like nice people do
+
+foreach ( array( 'catalog', 'single', 'thumbnail' ) as $value ) {
+
+	$old_settings = array_filter( array(
+		'width' => get_option( 'woocommerce_' . $value . '_image_width' ),
+		'height' => get_option( 'woocommerce_' . $value . '_image_height' ),
+		'crop' => get_option( 'woocommerce_' . $value . '_image_crop' )
+	) );
+
+	if ( ! empty(  $old_settings  ) ){
+	
+		update_option( 'shop_' . $value . '_image_size', $old_settings ) ;
+		delete_option( 'woocommerce_' . $value . '_image_width' );
+		delete_option( 'woocommerce_' . $value . '_image_height' );
+		delete_option( 'woocommerce_' . $value . '_image_crop' );
+	
+	}
+}
