@@ -309,9 +309,8 @@ foreach ( array( 'catalog', 'single', 'thumbnail' ) as $value ) {
 		'crop' => get_option( 'woocommerce_' . $value . '_image_crop' )
 	) );
 
-	if ( ! empty(  $old_settings  ) ){
+	if ( ! empty(  $old_settings  ) && update_option( 'shop_' . $value . '_image_size', $old_settings ) ){
 	
-		update_option( 'shop_' . $value . '_image_size', $old_settings ) ;
 		delete_option( 'woocommerce_' . $value . '_image_width' );
 		delete_option( 'woocommerce_' . $value . '_image_height' );
 		delete_option( 'woocommerce_' . $value . '_image_crop' );
