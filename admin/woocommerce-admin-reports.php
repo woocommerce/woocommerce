@@ -1981,7 +1981,8 @@ function woocommerce_stock_overview() {
 				'terms' 	=> array('simple'),
 				'operator' 	=> 'IN'
 			)
-		)
+		),
+		'fields' => 'id=>parent'
 	);
 
 	$low_stock_products = (array) get_posts($args);
@@ -2000,15 +2001,16 @@ function woocommerce_stock_overview() {
 			),
 			array(
 				'key' 		=> '_stock',
-				'value' 	=> array('', false, null),
+				'value' 	=> array( '', false, null ),
 				'compare' 	=> 'NOT IN'
 			)
-		)
+		),
+		'fields' => 'id=>parent'
 	);
 
 	$low_stock_variations = (array) get_posts($args);
 
-	// Finally, get low stock variable products (where stock is set for the parent)
+	// Get low stock variable products (where stock is set for the parent)
 	$args = array(
 		'post_type'			=> array('product'),
 		'post_status' 		=> 'publish',
@@ -2033,14 +2035,31 @@ function woocommerce_stock_overview() {
 				'terms' 	=> array('variable'),
 				'operator' 	=> 'IN'
 			)
-		)
+		),
+		'fields' => 'id=>parent'
 	);
 
 	$low_stock_variable_products = (array) get_posts($args);
 
-	// Merge results
-	$low_in_stock = apply_filters( 'woocommerce_reports_stock_overview_products', array_merge( $low_stock_products, $low_stock_variations, $low_stock_variable_products ) );
+	// Get products marked out of stock
+	$args = array(
+		'post_type'			=> array( 'product' ),
+		'post_status' 		=> 'publish',
+		'posts_per_page' 	=> -1,
+		'meta_query' => array(
+			'relation' => 'AND',
+			array(
+				'key' 		=> '_stock_status',
+				'value' 	=> 'outofstock'
+			)
+		),
+		'fields' => 'id=>parent'
+	);
 
+	$out_of_stock_status_products = (array) get_posts($args);
+
+	// Merge results
+	$low_in_stock = apply_filters( 'woocommerce_reports_stock_overview_products', $low_stock_products + $low_stock_variations + $low_stock_variable_products + $out_of_stock_status_products );
 	?>
 	<div id="poststuff" class="woocommerce-reports-wrap halved">
 		<div class="woocommerce-reports-left">
@@ -2050,22 +2069,23 @@ function woocommerce_stock_overview() {
 					<?php
 					if ( $low_in_stock ) {
 						echo '<ul class="stock_list">';
-						foreach ( $low_in_stock as $product ) {
+						foreach ( $low_in_stock as $product_id => $parent ) {
 
-							$stock 	= (int) get_post_meta( $product->ID, '_stock', true );
-							$sku	= get_post_meta( $product->ID, '_sku', true );
+							$stock 	= (int) get_post_meta( $product_id, '_stock', true );
+							$sku	= get_post_meta( $product_id, '_sku', true );
 
-							if ( $stock <= $nostockamount ) continue;
+							if ( $stock <= $nostockamount || in_array( $product_id, array_keys( $out_of_stock_status_products ) ) )
+								continue;
 
-							$title = esc_html__( $product->post_title );
+							$title = esc_html__( get_the_title( $product_id ) );
 
 							if ( $sku )
 								$title .= ' (' . __( 'SKU', 'woocommerce' ) . ': ' . esc_html( $sku ) . ')';
 
-							if ( $product->post_type=='product' )
-								$product_url = admin_url( 'post.php?post=' . $product->ID . '&action=edit' );
+							if ( get_post_type( $product_id ) == 'product' )
+								$product_url = admin_url( 'post.php?post=' . $product_id . '&action=edit' );
 							else
-								$product_url = admin_url( 'post.php?post=' . $product->post_parent . '&action=edit' );
+								$product_url = admin_url( 'post.php?post=' . $parent . '&action=edit' );
 
 							printf( '<li><a href="%s"><small>' .  _n('%d in stock', '%d in stock', $stock, 'woocommerce') . '</small> %s</a></li>', $product_url, $stock, $title );
 
@@ -2085,24 +2105,28 @@ function woocommerce_stock_overview() {
 					<?php
 					if ( $low_in_stock ) {
 						echo '<ul class="stock_list">';
-						foreach ( $low_in_stock as $product ) {
+						foreach ( $low_in_stock as $product_id => $parent ) {
 
-							$stock 	= (int) get_post_meta( $product->ID, '_stock', true );
-							$sku	= get_post_meta( $product->ID, '_sku', true );
+							$stock 	= get_post_meta( $product_id, '_stock', true );
+							$sku	= get_post_meta( $product_id, '_sku', true );
 
-							if ( $stock > $nostockamount ) continue;
+							if ( $stock > $nostockamount && ! in_array( $product_id, array_keys( $out_of_stock_status_products ) ) )
+								continue;
 
-							$title = esc_html__( $product->post_title );
+							$title = esc_html__( get_the_title( $product_id ) );
 
 							if ( $sku )
 								$title .= ' (' . __( 'SKU', 'woocommerce' ) . ': ' . esc_html( $sku ) . ')';
 
-							if ( $product->post_type=='product' )
-								$product_url = admin_url( 'post.php?post=' . $product->ID . '&action=edit' );
+							if ( get_post_type( $product_id ) == 'product' )
+								$product_url = admin_url( 'post.php?post=' . $product_id . '&action=edit' );
 							else
-								$product_url = admin_url( 'post.php?post=' . $product->post_parent . '&action=edit' );
+								$product_url = admin_url( 'post.php?post=' . $parent . '&action=edit' );
 
-							printf( '<li><a href="%s"><small>' .  _n('%d in stock', '%d in stock', $stock, 'woocommerce') . '</small> %s</a></li>', $product_url, $stock, $title );
+							if ( $stock == '' )
+								printf( '<li><a href="%s"><small>' .  __('Marked out of stock', 'woocommerce') . '</small> %s</a></li>', $product_url, $title );
+							else
+								printf( '<li><a href="%s"><small>' .  _n('%d in stock', '%d in stock', $stock, 'woocommerce') . '</small> %s</a></li>', $product_url, $stock, $title );
 
 						}
 						echo '</ul>';

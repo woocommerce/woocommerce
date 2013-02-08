@@ -290,7 +290,6 @@ add_action('manage_product_posts_custom_column', 'woocommerce_custom_product_col
  */
 function woocommerce_custom_product_sort($columns) {
 	$custom = array(
-		'is_in_stock' 	=> 'inventory',
 		'price'			=> 'price',
 		'featured'		=> 'featured',
 		'sku'			=> 'sku',
@@ -313,12 +312,6 @@ add_filter( 'manage_edit-product_sortable_columns', 'woocommerce_custom_product_
  */
 function woocommerce_custom_product_orderby( $vars ) {
 	if (isset( $vars['orderby'] )) :
-		if ( 'inventory' == $vars['orderby'] ) :
-			$vars = array_merge( $vars, array(
-				'meta_key' 	=> '_stock',
-				'orderby' 	=> 'meta_value_num'
-			) );
-		endif;
 		if ( 'price' == $vars['orderby'] ) :
 			$vars = array_merge( $vars, array(
 				'meta_key' 	=> '_price',
