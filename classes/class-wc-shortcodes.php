@@ -267,16 +267,23 @@ class WC_Shortcodes {
 
 		$hide_empty = ( $hide_empty == true || $hide_empty == 1 ) ? 1 : 0;
 
+		// get terms and workaround WP bug with parents/pad counts
 	  	$args = array(
-	  		'number'     => $number,
 	  		'orderby'    => $orderby,
 	  		'order'      => $order,
 	  		'hide_empty' => $hide_empty,
 			'include'    => $ids,
-			'parent'     => $parent
+			'pad_counts' => true,
+			'child_of'   => $parent
 		);
 
 	  	$product_categories = get_terms( 'product_cat', $args );
+
+	  	if ( $parent !== "" )
+	  		$product_categories = wp_list_filter( $product_categories, array( 'parent' => $parent ) );
+
+	  	if ( $number )
+	  		$product_categories = array_slice( $product_categories, 0, $number );
 
 	  	$woocommerce_loop['columns'] = $columns;
 
