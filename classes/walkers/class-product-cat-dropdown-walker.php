@@ -27,7 +27,7 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 	 */
 	function start_el(&$output, $cat, $depth, $args) {
 
-		if ( $args['hierarchical'] )
+		if ( ! empty( $args['hierarchical'] ) )
 			$pad = str_repeat('&nbsp;', $depth * 3);
 		else
 			$pad = '';

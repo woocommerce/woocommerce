@@ -368,7 +368,7 @@ function woocommerce_sales_overview() {
 			<div class="postbox">
 				<h3><span><?php _e( 'Total sales', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_sales>0) echo woocommerce_price($total_sales); else _e( 'n/a', 'woocommerce' ); ?></p>
+					<p class="stat"><?php if ( $total_sales > 0 ) echo woocommerce_price($total_sales); else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
@@ -2579,7 +2579,8 @@ function woocommerce_category_sales() {
 								$total = 0;
 							}
 
-							$month_totals[ $count ] += $total;
+							if ( sizeof( array_intersect( $include_categories, get_ancestors( $category->term_id, 'product_cat' ) ) ) == 0 )
+								$month_totals[ $count ] += $total;
 
 							$category_sales_html .= '<td>' . woocommerce_price( $total ) . '</td>';
 
