@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce v1.6.1\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2013-01-02 13:44:50+00:00\n"
-"PO-Revision-Date: 2013-01-07 13:57-0000\n"
+"POT-Creation-Date: 2013-01-09 09:36:51+00:00\n"
+"PO-Revision-Date: 2013-02-08 12:04+0100\n"
 "Last-Translator: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
 "Language-Team: \n"
 "Language: pl_PL\n"
@@ -16,7 +16,7 @@ msgstr ""
 "_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
 "X-Poedit-Basepath: ../../\n"
 "X-Textdomain-Support: yes\n"
-"X-Generator: Poedit 1.5.4\n"
+"X-Generator: Poedit 1.5.5\n"
 "X-Poedit-SearchPath-0: .\n"
 
 #: assets/js/admin/editor_plugin_lang.php:5
@@ -95,7 +95,7 @@ msgstr "sledzenie-zamowienia"
 
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:18
-#: templates/checkout/thankyou.php:33
+#: templates/checkout/thankyou.php:30
 msgid "My Account"
 msgstr "Moje konto"
 
@@ -111,14 +111,14 @@ msgid "Change Password"
 msgstr "Zmień hasło"
 
 # @ woocommerce
-#: assets/js/admin/editor_plugin_lang.php:21 woocommerce.php:1040
-#: woocommerce.php:1041
+#: assets/js/admin/editor_plugin_lang.php:21 woocommerce.php:1051
+#: woocommerce.php:1052
 msgid "View Order"
 msgstr "Podgląd zamówienia"
 
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:22
-#: templates/checkout/thankyou.php:31 templates/myaccount/my-orders.php:75
+#: templates/checkout/thankyou.php:28 templates/myaccount/my-orders.php:75
 msgid "Pay"
 msgstr "Płać"
 
@@ -441,7 +441,7 @@ msgstr ""
 # @ woocommerce
 #: classes/class-wc-cart.php:828 classes/class-wc-cart.php:842
 #: classes/class-wc-cart.php:850 templates/cart/mini-cart.php:65
-#: woocommerce-functions.php:472 woocommerce.php:1180
+#: woocommerce-functions.php:472 woocommerce.php:1191
 msgid "View Cart &rarr;"
 msgstr "Zobacz koszyk &rarr;"
 
@@ -535,7 +535,7 @@ msgstr ""
 "&rarr;</a>"
 
 # @ woocommerce
-#: classes/class-wc-checkout.php:427 woocommerce-functions.php:1625
+#: classes/class-wc-checkout.php:427 woocommerce-functions.php:1626
 msgid "is a required field."
 msgstr "jest wymaganym polem."
 
@@ -1873,226 +1873,167 @@ msgid "Zimbabwe"
 msgstr "Zimbabwe"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:420
+#: classes/class-wc-countries.php:421
 msgid "to the"
 msgstr "do"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:421
+#: classes/class-wc-countries.php:422
 msgid "to"
 msgstr "do"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:434
+#: classes/class-wc-countries.php:435
 msgid "the"
 msgstr " "
 
 # @ woocommerce
-#: classes/class-wc-countries.php:446
+#: classes/class-wc-countries.php:447
 msgid "VAT"
 msgstr "VAT"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:446 templates/cart/totals.php:110
+#: classes/class-wc-countries.php:447 templates/cart/totals.php:110
 #: templates/checkout/review-order.php:113
 msgid "Tax"
 msgstr "Podatek"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:459
+#: classes/class-wc-countries.php:460
 msgid "(incl. VAT)"
 msgstr "(z VAT)"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:459
+#: classes/class-wc-countries.php:460
 msgid "(incl. tax)"
 msgstr "(z podatkiem)"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:472
+#: classes/class-wc-countries.php:473
 msgid "(ex. VAT)"
 msgstr "(bez VAT)"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:472
+#: classes/class-wc-countries.php:473
 msgid "(ex. tax)"
 msgstr "(bez podatku)"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:704 classes/class-wc-countries.php:705
-#: classes/class-wc-countries.php:727 classes/class-wc-countries.php:728
-#: classes/class-wc-countries.php:843 classes/class-wc-countries.php:844
-#: classes/class-wc-countries.php:869 classes/class-wc-countries.php:870
+#: classes/class-wc-countries.php:706 classes/class-wc-countries.php:726
+#: classes/class-wc-countries.php:839 classes/class-wc-countries.php:863
 msgid "Province"
 msgstr "Prowincja"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:711 classes/class-wc-countries.php:712
+#: classes/class-wc-countries.php:712
 msgid "Canton"
 msgstr ""
 
 # @ woocommerce
-#: classes/class-wc-countries.php:721 classes/class-wc-countries.php:722
-#: classes/class-wc-countries.php:850 classes/class-wc-countries.php:851
+#: classes/class-wc-countries.php:721 classes/class-wc-countries.php:845
 msgid "Municipality"
 msgstr "Magistrat"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:770 classes/class-wc-countries.php:771
-msgid "Town/District"
+#: classes/class-wc-countries.php:768
+#, fuzzy
+msgid "Town / District"
 msgstr "Miasto/Okręg"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:774 classes/class-wc-countries.php:775
+#: classes/class-wc-countries.php:771
 msgid "Region"
 msgstr "Region"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:875 classes/class-wc-countries.php:876
+#: classes/class-wc-countries.php:868
 msgid "Zip"
 msgstr "Kod"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:879 classes/class-wc-countries.php:880
-#: templates/cart/shipping-calculator.php:61
+#: classes/class-wc-countries.php:871
 msgid "State"
 msgstr "Region"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:885 classes/class-wc-countries.php:886
-#: templates/cart/shipping-calculator.php:69
+#: classes/class-wc-countries.php:876
+#: templates/cart/shipping-calculator.php:68
 msgid "Postcode"
 msgstr "Kod pocztowy"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:889 classes/class-wc-countries.php:890
+#: classes/class-wc-countries.php:879
 msgid "County"
 msgstr "Okręg"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:916 classes/class-wc-countries.php:917
-#: classes/class-wc-countries.php:987
-#: templates/cart/shipping-calculator.php:69
-msgid "Postcode/Zip"
+#: classes/class-wc-countries.php:905 classes/class-wc-countries.php:906
+#: classes/class-wc-countries.php:981
+#: templates/cart/shipping-calculator.php:68
+#, fuzzy
+msgid "Postcode / Zip"
 msgstr "Kod pocztowy"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:921 classes/class-wc-countries.php:922
-#: classes/class-wc-countries.php:981
-msgid "Town/City"
+#: classes/class-wc-countries.php:910 classes/class-wc-countries.php:911
+#: classes/class-wc-countries.php:970
+#, fuzzy
+msgid "Town / City"
 msgstr "Miasto"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:926 classes/class-wc-countries.php:927
-#: classes/class-wc-countries.php:1002
-msgid "State/County"
+#: classes/class-wc-countries.php:915 classes/class-wc-countries.php:916
+#: classes/class-wc-countries.php:976
+#, fuzzy
+msgid "State / County"
 msgstr "Województwo"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:950
-msgid "First Name"
-msgstr "Imię"
-
-# @ woocommerce
-#: classes/class-wc-countries.php:951
-msgctxt "placeholder"
-msgid "First Name"
-msgstr ""
-
-# @ woocommerce
-#: classes/class-wc-countries.php:956
-msgid "Last Name"
-msgstr "Nazwisko"
-
-# @ woocommerce
-#: classes/class-wc-countries.php:957
-msgctxt "placeholder"
-msgid "Last Name"
-msgstr ""
-
-# @ woocommerce
-#: classes/class-wc-countries.php:963
-msgid "Company Name"
-msgstr "Nazwa firmy"
-
-# @ woocommerce
-#: classes/class-wc-countries.php:964
-msgctxt "placeholder"
-msgid "Company (optional)"
-msgstr ""
-
-# @ woocommerce
-#: classes/class-wc-countries.php:968
-msgid "Address"
-msgstr "Adres"
-
-# @ woocommerce
-#: classes/class-wc-countries.php:969
-msgctxt "placeholder"
-msgid "Address"
-msgstr ""
-
-# @ woocommerce
-#: classes/class-wc-countries.php:974
-msgid "Address 2"
-msgstr "Linia adresu 2"
-
-# @ woocommerce
-#: classes/class-wc-countries.php:975
-msgctxt "placeholder"
-msgid "Address 2 (optional)"
-msgstr ""
-
-# @ woocommerce
-#: classes/class-wc-countries.php:982
-msgctxt "placeholder"
-msgid "Town/City"
-msgstr ""
-
-# @ woocommerce
-#: classes/class-wc-countries.php:988
-msgctxt "placeholder"
-msgid "Postcode/Zip"
-msgstr ""
-
-# @ woocommerce
-#: classes/class-wc-countries.php:995
+#: classes/class-wc-countries.php:940
 msgid "Country"
 msgstr "Kraj"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:996
+#: classes/class-wc-countries.php:945
+msgid "First Name"
+msgstr "Imię"
+
+# @ woocommerce
+#: classes/class-wc-countries.php:950
+msgid "Last Name"
+msgstr "Nazwisko"
+
+# @ woocommerce
+#: classes/class-wc-countries.php:956
+msgid "Company Name"
+msgstr "Nazwa firmy"
+
+# @ woocommerce
+#: classes/class-wc-countries.php:960
+msgid "Address"
+msgstr "Adres"
+
+# @ woocommerce
+#: classes/class-wc-countries.php:961
+#, fuzzy
 msgctxt "placeholder"
-msgid "Country"
+msgid "Street address"
+msgstr "Zapisz adres"
+
+#: classes/class-wc-countries.php:966
+msgctxt "placeholder"
+msgid "Apartment, suite, unit etc. (optional)"
 msgstr ""
 
 # @ woocommerce
-#: classes/class-wc-countries.php:1003
-msgctxt "placeholder"
-msgid "State/County"
-msgstr ""
-
-# @ woocommerce
-#: classes/class-wc-countries.php:1047
+#: classes/class-wc-countries.php:1023
 msgid "Email Address"
 msgstr "Adres e-mail"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:1048
-msgctxt "placeholder"
-msgid "Email Address"
-msgstr ""
-
-# @ woocommerce
-#: classes/class-wc-countries.php:1054
+#: classes/class-wc-countries.php:1029
 msgid "Phone"
 msgstr "Telefon"
-
-# @ woocommerce
-#: classes/class-wc-countries.php:1055
-msgctxt "placeholder"
-msgid "Phone"
-msgstr ""
 
 # @ woocommerce
 #: classes/class-wc-coupon.php:231
@@ -2248,7 +2189,7 @@ msgstr "Kup produkt"
 
 # @ woocommerce
 #: classes/class-wc-shortcodes.php:563
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:254
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:255
 #: templates/loop/add-to-cart.php:40
 #: templates/single-product/add-to-cart/grouped.php:45
 #: templates/single-product/add-to-cart/grouped.php:75
@@ -3084,12 +3025,12 @@ msgstr ""
 "statystyki odwiedzin strony."
 
 # @ woocommerce
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:61
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:62
 msgid "Google Analytics ID"
 msgstr "ID Google Analytics"
 
 # @ woocommerce
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:62
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:63
 msgid ""
 "Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-"
 "X</code>"
@@ -3098,12 +3039,12 @@ msgstr ""
 "<code>UA-XXXXX-X</code>"
 
 # @ woocommerce
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:67
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:68
 msgid "Tracking code"
 msgstr "Kod śledzenia"
 
 # @ woocommerce
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:68
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:69
 msgid ""
 "Add tracking code to your site's footer. You don't need to enable this if "
 "using a 3rd party analytics plugin."
@@ -3112,36 +3053,36 @@ msgstr ""
 "jeśli używasz innej wtyczki do statystyk."
 
 # @ woocommerce
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:74
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:75
 msgid "Add eCommerce tracking code to the thankyou page"
 msgstr "Dodaj kod śledzenia eCommerce do strony z podziękowaniem"
 
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:80
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:81
 msgid "Add event tracking code for add to cart actions"
 msgstr ""
 
 # @ woocommerce
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:112
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:167
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:113
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:168
 #: woocommerce-ajax.php:1657
 msgid "Guest"
 msgstr "Gość"
 
 # @ woocommerce
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:200
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:201
 #: templates/single-product/meta.php:19
 msgid "SKU:"
 msgstr "SKU:"
 
 # @ woocommerce
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:253
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:273
-#: woocommerce.php:957
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:254
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:274
+#: woocommerce.php:968
 msgid "Products"
 msgstr "Produkty"
 
 # @ woocommerce
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:274
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:275
 #, fuzzy
 msgid "Add to Cart"
 msgstr "Dodaj do koszyka"
@@ -3157,12 +3098,12 @@ msgid "ShareDaddy is a sharing plugin bundled with JetPack."
 msgstr "ShareDaddy jest wtyczką do dzielenia się włączoną do JetPacka."
 
 # @ woocommerce
-#: classes/integrations/sharedaddy/class-wc-sharedaddy.php:50
+#: classes/integrations/sharedaddy/class-wc-sharedaddy.php:51
 msgid "Output ShareDaddy button?"
 msgstr "Wyświetlać przycisk ShareDaddy?"
 
 # @ woocommerce
-#: classes/integrations/sharedaddy/class-wc-sharedaddy.php:51
+#: classes/integrations/sharedaddy/class-wc-sharedaddy.php:52
 msgid "Enable this option to show the ShareDaddy button on the product page."
 msgstr ""
 
@@ -3181,12 +3122,12 @@ msgstr ""
 "do produktów ze znajomymi."
 
 # @ woocommerce
-#: classes/integrations/sharethis/class-wc-sharethis.php:62
+#: classes/integrations/sharethis/class-wc-sharethis.php:63
 msgid "ShareThis Publisher ID"
 msgstr "ID Wydawcy w ShareThis"
 
 # @ woocommerce
-#: classes/integrations/sharethis/class-wc-sharethis.php:63
+#: classes/integrations/sharethis/class-wc-sharethis.php:64
 msgid ""
 "Enter your %1$sShareThis publisher ID%2$s to show social sharing buttons on "
 "product pages."
@@ -3195,12 +3136,12 @@ msgstr ""
 "na stronach produktów."
 
 # @ woocommerce
-#: classes/integrations/sharethis/class-wc-sharethis.php:68
+#: classes/integrations/sharethis/class-wc-sharethis.php:69
 msgid "ShareThis Code"
 msgstr ""
 
 # @ woocommerce
-#: classes/integrations/sharethis/class-wc-sharethis.php:69
+#: classes/integrations/sharethis/class-wc-sharethis.php:70
 msgid "You can tweak the ShareThis code by editing this option."
 msgstr ""
 
@@ -3314,8 +3255,12 @@ msgstr ""
 
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:96
-msgid "Enter a cost per order, e.g. 5.00. Leave blank to disable."
+#, fuzzy
+msgid ""
+"Enter a cost (excluding tax) per order, e.g. 5.00. Leave blank to disable."
 msgstr ""
+"Opłata bez podatku. Wpisz liczbę, np. 2,50, lub procent, np. 5%. Pozostaw "
+"puste pole, aby nie pobierać opłaty."
 
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:100
@@ -3443,7 +3388,7 @@ msgstr ""
 
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:459
-#: woocommerce.php:866
+#: woocommerce.php:877
 msgid "Shipping Class"
 msgstr "Klasa wysyłkowa"
 
@@ -3709,7 +3654,7 @@ msgstr ""
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-cart.php:54
-#: woocommerce-functions.php:1630
+#: woocommerce-functions.php:1631
 msgid "Please enter a valid postcode/ZIP."
 msgstr "Proszę podać poprawny kod pocztowy."
 
@@ -3796,8 +3741,8 @@ msgid "Sorry, we could not find that order id in our database."
 msgstr ""
 
 # @ woocommerce
-#: classes/shortcodes/class-wc-shortcode-pay.php:68
-#: classes/shortcodes/class-wc-shortcode-pay.php:121
+#: classes/shortcodes/class-wc-shortcode-pay.php:65
+#: classes/shortcodes/class-wc-shortcode-pay.php:118
 msgid ""
 "Your order has already been paid for. Please contact us if you need "
 "assistance."
@@ -3806,16 +3751,16 @@ msgstr ""
 "potrzebujesz pomocy."
 
 # @ woocommerce
-#: classes/shortcodes/class-wc-shortcode-pay.php:73
-#: classes/shortcodes/class-wc-shortcode-pay.php:128
+#: classes/shortcodes/class-wc-shortcode-pay.php:70
+#: classes/shortcodes/class-wc-shortcode-pay.php:125
 #: classes/shortcodes/class-wc-shortcode-view-order.php:49
 #: woocommerce-functions.php:884 woocommerce-functions.php:962
 msgid "Invalid order."
 msgstr "Nieprawidłowe zamówienie."
 
 # @ woocommerce
-#: classes/shortcodes/class-wc-shortcode-pay.php:93
-#: templates/checkout/thankyou.php:43
+#: classes/shortcodes/class-wc-shortcode-pay.php:90
+#: templates/checkout/thankyou.php:40
 #: templates/emails/customer-completed-order.php:18
 #: templates/emails/customer-invoice.php:22
 #: templates/emails/customer-note.php:22
@@ -3824,20 +3769,20 @@ msgid "Order:"
 msgstr "Zamówienie:"
 
 # @ woocommerce
-#: classes/shortcodes/class-wc-shortcode-pay.php:97
-#: templates/checkout/thankyou.php:47
+#: classes/shortcodes/class-wc-shortcode-pay.php:94
+#: templates/checkout/thankyou.php:44
 msgid "Date:"
 msgstr "Data:"
 
 # @ woocommerce
-#: classes/shortcodes/class-wc-shortcode-pay.php:101
-#: templates/checkout/thankyou.php:51
+#: classes/shortcodes/class-wc-shortcode-pay.php:98
+#: templates/checkout/thankyou.php:48
 msgid "Total:"
 msgstr "Suma:"
 
 # @ woocommerce
-#: classes/shortcodes/class-wc-shortcode-pay.php:106
-#: templates/checkout/thankyou.php:56
+#: classes/shortcodes/class-wc-shortcode-pay.php:103
+#: templates/checkout/thankyou.php:53
 msgid "Payment method:"
 msgstr "Metoda płatności:"
 
@@ -4177,7 +4122,7 @@ msgstr "Kategorie Produktów WooCommerce"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-product-categories.php:57
-#: woocommerce.php:801 woocommerce.php:803
+#: woocommerce.php:812 woocommerce.php:814
 msgid "Product Categories"
 msgstr "Kategorie produktów"
 
@@ -4243,7 +4188,7 @@ msgstr "Tagi produktów WooCommerce"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-product-tag-cloud.php:58
-#: woocommerce.php:832 woocommerce.php:834
+#: woocommerce.php:843 woocommerce.php:845
 msgid "Product Tags"
 msgstr "Tagi produktów"
 
@@ -5728,8 +5673,8 @@ msgid "cancelled"
 msgstr "odwołane"
 
 # @ woocommerce
-#: templates/archive-product.php:67 templates/loop-shop.php:40
-#: woocommerce-template.php:73
+#: templates/archive-product.php:61 templates/loop-shop.php:40
+#: woocommerce-template.php:67
 msgid "No products found which match your selection."
 msgstr "Nie znaleziono produktów które pasują do Twoich wyborów."
 
@@ -5741,7 +5686,7 @@ msgstr "Nie znaleziono produktów które pasują do Twoich wyborów."
 #: templates/emails/customer-invoice.php:27
 #: templates/emails/customer-note.php:27
 #: templates/emails/customer-processing-order.php:23
-#: templates/order/order-details.php:20 woocommerce.php:958
+#: templates/order/order-details.php:20 woocommerce.php:969
 msgid "Product"
 msgstr ""
 
@@ -5775,7 +5720,15 @@ msgid "Remove this item"
 msgstr "Usuń rzecz"
 
 # @ woocommerce
-#: templates/cart/cart.php:123 woocommerce.php:1071
+#: templates/cart/cart.php:96
+#: templates/single-product/add-to-cart/quantity.php:13
+#, fuzzy
+msgctxt "Product quantity input tooltip"
+msgid "Qty"
+msgstr "Ilość"
+
+# @ woocommerce
+#: templates/cart/cart.php:123 woocommerce.php:1082
 msgid "Coupon"
 msgstr "Kupon"
 
@@ -5831,17 +5784,23 @@ msgid "Calculate Shipping"
 msgstr "Oblicz koszty wysyłki"
 
 # @ woocommerce
-#: templates/cart/shipping-calculator.php:24 woocommerce-template.php:1290
+#: templates/cart/shipping-calculator.php:24 woocommerce-template.php:1294
 msgid "Select a country&hellip;"
 msgstr "Wybierz kraj&hellip;"
 
 # @ woocommerce
-#: templates/cart/shipping-calculator.php:50 woocommerce-template.php:1333
+#: templates/cart/shipping-calculator.php:50 woocommerce-template.php:1341
 msgid "Select a state&hellip;"
 msgstr "Wybierz stan&hellip;"
 
 # @ woocommerce
-#: templates/cart/shipping-calculator.php:72
+#: templates/cart/shipping-calculator.php:61
+#, fuzzy
+msgid "State / county"
+msgstr "Województwo"
+
+# @ woocommerce
+#: templates/cart/shipping-calculator.php:71
 msgid "Update Totals"
 msgstr "Uaktualnij sumy"
 
@@ -5879,7 +5838,7 @@ msgstr "Wartość produktów"
 
 # @ woocommerce
 #: templates/cart/totals.php:35 templates/checkout/review-order.php:34
-#: woocommerce.php:1616
+#: woocommerce.php:1650
 msgid "Cart Discount"
 msgstr "Rabat na cały koszyk"
 
@@ -6047,7 +6006,7 @@ msgid "Totals"
 msgstr "Łącznie"
 
 # @ woocommerce
-#: templates/checkout/form-pay.php:76
+#: templates/checkout/form-pay.php:78
 msgid ""
 "Sorry, it seems that there are no available payment methods for your "
 "location. Please contact us if you require assistance or wish to make "
@@ -6058,7 +6017,7 @@ msgstr ""
 "chcesz omówić alternatywne sposoby płatności."
 
 # @ woocommerce
-#: templates/checkout/form-pay.php:85
+#: templates/checkout/form-pay.php:87
 msgid "Pay for order"
 msgstr "Płać za zamówienie"
 
@@ -6132,7 +6091,7 @@ msgid "terms &amp; conditions"
 msgstr "warunki i zasady"
 
 # @ woocommerce
-#: templates/checkout/thankyou.php:21
+#: templates/checkout/thankyou.php:18
 msgid ""
 "Unfortunately your order cannot be processed as the originating bank/"
 "merchant has declined your transaction."
@@ -6141,18 +6100,18 @@ msgstr ""
 "odrzucił transakcje."
 
 # @ woocommerce
-#: templates/checkout/thankyou.php:25
+#: templates/checkout/thankyou.php:22
 msgid "Please attempt your purchase again or go to your account page."
 msgstr ""
 "Proszę spróbuj ponownie dokonać zakupu lub udaj się na stronę swojego konta. "
 
 # @ woocommerce
-#: templates/checkout/thankyou.php:27
+#: templates/checkout/thankyou.php:24
 msgid "Please attempt your purchase again."
 msgstr "Proszę spróbuj ponownie dokonać zakupu."
 
 # @ woocommerce
-#: templates/checkout/thankyou.php:39 templates/checkout/thankyou.php:70
+#: templates/checkout/thankyou.php:36 templates/checkout/thankyou.php:67
 msgid "Thank you. Your order has been received."
 msgstr "Dziękujemy. Otrzymaliśmy Twoje zamówienie."
 
@@ -6520,9 +6479,9 @@ msgstr "Następujące adresy zostaną domyślnie użyte na stronie zamówienia."
 
 # @ woocommerce
 # @ default
-#: templates/myaccount/my-address.php:45 woocommerce.php:926
-#: woocommerce.php:962 woocommerce.php:999 woocommerce.php:1037
-#: woocommerce.php:1075
+#: templates/myaccount/my-address.php:45 woocommerce.php:937
+#: woocommerce.php:973 woocommerce.php:1010 woocommerce.php:1048
+#: woocommerce.php:1086
 msgid "Edit"
 msgstr "Edytuj"
 
@@ -6549,7 +6508,7 @@ msgid "Recent Orders"
 msgstr "Ostatnie zamówienia"
 
 # @ woocommerce
-#: templates/myaccount/my-orders.php:32 woocommerce.php:1034
+#: templates/myaccount/my-orders.php:32 woocommerce.php:1045
 msgid "Order"
 msgstr "Zamówienie"
 
@@ -6612,7 +6571,8 @@ msgstr "E-mail który został użyty podczas składania zamówienia."
 
 # @ woocommerce
 #: templates/order/form-tracking.php:23
-msgid "Track\""
+#, fuzzy
+msgid "Track"
 msgstr "Śledź\""
 
 # @ woocommerce
@@ -7138,7 +7098,7 @@ msgid "Please rate the product."
 msgstr "Proszę oceń ten produkt."
 
 # @ woocommerce
-#: woocommerce-template.php:210
+#: woocommerce-template.php:204
 msgid ""
 "This is a demo store for testing purposes &mdash; no orders shall be "
 "fulfilled."
@@ -7147,514 +7107,518 @@ msgstr ""
 "nie będą realizowane."
 
 # @ woocommerce
-#: woocommerce-template.php:229
+#: woocommerce-template.php:223
 msgid "Search Results: &ldquo;%s&rdquo;"
 msgstr ""
 
 # @ woocommerce
-#: woocommerce-template.php:232
+#: woocommerce-template.php:226
 msgid "&nbsp;&ndash; Page %s"
 msgstr ""
 
 # @ woocommerce
-#: woocommerce-template.php:955
+#: woocommerce-template.php:957
 msgctxt "breadcrumb"
 msgid "Home"
 msgstr "Glowna"
 
-#: woocommerce-template.php:1253 woocommerce.php:1179
+#: woocommerce-template.php:1255 woocommerce.php:1190
 msgid "required"
 msgstr ""
 
 # @ woocommerce
-#: woocommerce-template.php:1297
+#: woocommerce-template.php:1301
 msgid "Update country"
 msgstr ""
 
 # @ woocommerce
-#: woocommerce-template.php:1431
+#: woocommerce-template.php:1453
 msgid "Search for:"
 msgstr "Szukaj:"
 
 # @ woocommerce
-#: woocommerce-template.php:1432
+#: woocommerce-template.php:1454
 msgid "Search for products"
 msgstr "Szukaj produktów"
 
 # @ woocommerce
 # @ default
-#: woocommerce-template.php:1433 woocommerce.php:922
+#: woocommerce-template.php:1455 woocommerce.php:933
 msgid "Search"
 msgstr "Szukaj"
 
 # @ woocommerce
-#: woocommerce.php:766
+#: woocommerce.php:777
 msgctxt "slug"
 msgid "product-category"
 msgstr "kategoria-produktu"
 
 # @ woocommerce
-#: woocommerce.php:767
+#: woocommerce.php:778
 msgctxt "slug"
 msgid "product-tag"
 msgstr "tag-produktu"
 
 # @ woocommerce
-#: woocommerce.php:769
+#: woocommerce.php:780
 msgctxt "slug"
 msgid "product"
 msgstr ""
 
 # @ woocommerce
-#: woocommerce.php:804
+#: woocommerce.php:815
 msgid "Product Category"
 msgstr ""
 
 # @ woocommerce
-#: woocommerce.php:805
+#: woocommerce.php:816
 msgctxt "Admin menu name"
 msgid "Categories"
 msgstr ""
 
 # @ woocommerce
-#: woocommerce.php:806
+#: woocommerce.php:817
 msgid "Search Product Categories"
 msgstr "Kategorie wyszukiwanych produktów"
 
 # @ woocommerce
-#: woocommerce.php:807
+#: woocommerce.php:818
 msgid "All Product Categories"
 msgstr "Wszystkie kategorie produktów"
 
 # @ woocommerce
-#: woocommerce.php:808
+#: woocommerce.php:819
 msgid "Parent Product Category"
 msgstr "Kategoria produktu nadrzędnego"
 
 # @ woocommerce
-#: woocommerce.php:809
+#: woocommerce.php:820
 msgid "Parent Product Category:"
 msgstr "Kategoria produktu nadrzędnego:"
 
 # @ woocommerce
-#: woocommerce.php:810
+#: woocommerce.php:821
 msgid "Edit Product Category"
 msgstr "Edytuj kategorię produktu"
 
 # @ woocommerce
-#: woocommerce.php:811
+#: woocommerce.php:822
 msgid "Update Product Category"
 msgstr "Uaktualnij kategorię produktu"
 
 # @ woocommerce
-#: woocommerce.php:812
+#: woocommerce.php:823
 msgid "Add New Product Category"
 msgstr "Dodaj nową kategorię produktu"
 
 # @ woocommerce
-#: woocommerce.php:813
+#: woocommerce.php:824
 msgid "New Product Category Name"
 msgstr "Nowa nazwa kategorii produktu"
 
 # @ woocommerce
-#: woocommerce.php:835
+#: woocommerce.php:846
 msgid "Product Tag"
 msgstr ""
 
 # @ woocommerce
-#: woocommerce.php:836
+#: woocommerce.php:847
 msgctxt "Admin menu name"
 msgid "Tags"
 msgstr ""
 
 # @ woocommerce
-#: woocommerce.php:837
+#: woocommerce.php:848
 msgid "Search Product Tags"
 msgstr "Poszukiwane tagi produktu"
 
 # @ woocommerce
-#: woocommerce.php:838
+#: woocommerce.php:849
 msgid "All Product Tags"
 msgstr "Wszystkie tagi produktów"
 
 # @ woocommerce
-#: woocommerce.php:839
+#: woocommerce.php:850
 msgid "Parent Product Tag"
 msgstr "Tag produktu nadrzędnego"
 
 # @ woocommerce
-#: woocommerce.php:840
+#: woocommerce.php:851
 msgid "Parent Product Tag:"
 msgstr "Tag produktu nadrzędnego:"
 
 # @ woocommerce
-#: woocommerce.php:841
+#: woocommerce.php:852
 msgid "Edit Product Tag"
 msgstr "Edytuj tag produktu"
 
 # @ woocommerce
-#: woocommerce.php:842
+#: woocommerce.php:853
 msgid "Update Product Tag"
 msgstr "Uaktualnij tag produktu"
 
 # @ woocommerce
-#: woocommerce.php:843
+#: woocommerce.php:854
 msgid "Add New Product Tag"
 msgstr "Dodaj nowy tag produktu"
 
 # @ woocommerce
-#: woocommerce.php:844
+#: woocommerce.php:855
 msgid "New Product Tag Name"
 msgstr "Nowa nazwa tagu produktu"
 
 # @ woocommerce
-#: woocommerce.php:863 woocommerce.php:865
+#: woocommerce.php:874 woocommerce.php:876
 msgid "Shipping Classes"
 msgstr "Klasy wysyłkowe"
 
 # @ woocommerce
-#: woocommerce.php:867
+#: woocommerce.php:878
 msgctxt "Admin menu name"
 msgid "Shipping Classes"
 msgstr ""
 
 # @ woocommerce
-#: woocommerce.php:868
+#: woocommerce.php:879
 msgid "Search Shipping Classes"
 msgstr "Szukaj klas wysyłkowych"
 
 # @ woocommerce
-#: woocommerce.php:869
+#: woocommerce.php:880
 msgid "All Shipping Classes"
 msgstr "Wszystkie klasy wysyłkowe"
 
 # @ woocommerce
-#: woocommerce.php:870
+#: woocommerce.php:881
 msgid "Parent Shipping Class"
 msgstr "Nadrzędna klasa wysyłkowa"
 
 # @ woocommerce
-#: woocommerce.php:871
+#: woocommerce.php:882
 msgid "Parent Shipping Class:"
 msgstr "Nadrzędna klasa wysyłkowa:"
 
 # @ woocommerce
-#: woocommerce.php:872
+#: woocommerce.php:883
 msgid "Edit Shipping Class"
 msgstr "Edytuj klasę wysyłkową"
 
 # @ woocommerce
-#: woocommerce.php:873
+#: woocommerce.php:884
 msgid "Update Shipping Class"
 msgstr "Uaktualnij klasę wysyłkową"
 
 # @ woocommerce
-#: woocommerce.php:874
+#: woocommerce.php:885
 msgid "Add New Shipping Class"
 msgstr "Dodaj nową klasę wysyłkową"
 
 # @ woocommerce
-#: woocommerce.php:875
+#: woocommerce.php:886
 msgid "New Shipping Class Name"
 msgstr "Nazwa nowej klasy wysyłkowej"
 
 # @ woocommerce
-#: woocommerce.php:923
+#: woocommerce.php:934
 msgid "All"
 msgstr "Wszystkie"
 
 # @ woocommerce
-#: woocommerce.php:924 woocommerce.php:925
+#: woocommerce.php:935 woocommerce.php:936
 msgid "Parent"
 msgstr "Rodzic"
 
 # @ woocommerce
-#: woocommerce.php:927
+#: woocommerce.php:938
 msgid "Update"
 msgstr "Uaktualnij"
 
 # @ woocommerce
-#: woocommerce.php:928
+#: woocommerce.php:939
 msgid "Add New"
 msgstr "Dodaj nowy"
 
 # @ woocommerce
-#: woocommerce.php:929
+#: woocommerce.php:940
 msgid "New"
 msgstr "Nowy"
 
 # @ woocommerce
-#: woocommerce.php:959
+#: woocommerce.php:970
 msgctxt "Admin menu name"
 msgid "Products"
 msgstr ""
 
 # @ woocommerce
-#: woocommerce.php:960
+#: woocommerce.php:971
 msgid "Add Product"
 msgstr "Dodaj produkt"
 
 # @ woocommerce
-#: woocommerce.php:961
+#: woocommerce.php:972
 msgid "Add New Product"
 msgstr "Dodaj nowy produkt"
 
 # @ woocommerce
-#: woocommerce.php:963
+#: woocommerce.php:974
 msgid "Edit Product"
 msgstr "Edytuj produkt"
 
 # @ woocommerce
-#: woocommerce.php:964
+#: woocommerce.php:975
 msgid "New Product"
 msgstr "Nowy produkt"
 
 # @ woocommerce
-#: woocommerce.php:965 woocommerce.php:966
+#: woocommerce.php:976 woocommerce.php:977
 msgid "View Product"
 msgstr "Zobacz produkt"
 
 # @ woocommerce
-#: woocommerce.php:967
+#: woocommerce.php:978
 msgid "Search Products"
 msgstr "Szukaj produktów"
 
 # @ woocommerce
-#: woocommerce.php:968
+#: woocommerce.php:979
 msgid "No Products found"
 msgstr "Nie znaleziono produktów"
 
 # @ woocommerce
-#: woocommerce.php:969
+#: woocommerce.php:980
 msgid "No Products found in trash"
 msgstr "Nie znaleziono produktów w koszu"
 
 # @ woocommerce
-#: woocommerce.php:970
+#: woocommerce.php:981
 msgid "Parent Product"
 msgstr "Nadrzędny produkt"
 
 # @ woocommerce
-#: woocommerce.php:972
+#: woocommerce.php:983
 msgid "This is where you can add new products to your store."
 msgstr "Tutaj możesz dodać nowe produkty do sklepu."
 
 # @ woocommerce
-#: woocommerce.php:995
+#: woocommerce.php:1006
 msgid "Variations"
 msgstr "Warianty"
 
 # @ woocommerce
-#: woocommerce.php:996
+#: woocommerce.php:1007
 msgid "Variation"
 msgstr "Wariant"
 
 # @ woocommerce
-#: woocommerce.php:997
+#: woocommerce.php:1008
 msgid "Add Variation"
 msgstr "Dodaj wariant"
 
 # @ woocommerce
-#: woocommerce.php:998
+#: woocommerce.php:1009
 msgid "Add New Variation"
 msgstr "Dodaj nowy wariant"
 
 # @ woocommerce
-#: woocommerce.php:1000
+#: woocommerce.php:1011
 msgid "Edit Variation"
 msgstr "Edytuj wariant"
 
 # @ woocommerce
-#: woocommerce.php:1001
+#: woocommerce.php:1012
 msgid "New Variation"
 msgstr "Nowy wariant"
 
 # @ woocommerce
-#: woocommerce.php:1002 woocommerce.php:1003
+#: woocommerce.php:1013 woocommerce.php:1014
 msgid "View Variation"
 msgstr "Zobacz wariant"
 
 # @ woocommerce
-#: woocommerce.php:1004
+#: woocommerce.php:1015
 msgid "Search Variations"
 msgstr "Szukaj wariantów"
 
 # @ woocommerce
-#: woocommerce.php:1005
+#: woocommerce.php:1016
 msgid "No Variations found"
 msgstr "Nie znaleziono wariantów"
 
 # @ woocommerce
-#: woocommerce.php:1006
+#: woocommerce.php:1017
 msgid "No Variations found in trash"
 msgstr "Nie znaleziono wariantów w koszu"
 
 # @ woocommerce
-#: woocommerce.php:1007
+#: woocommerce.php:1018
 msgid "Parent Variation"
 msgstr "Nadrzędny wariant"
 
 # @ woocommerce
-#: woocommerce.php:1024
+#: woocommerce.php:1035
 msgctxt "Admin menu name"
 msgid "Orders"
 msgstr ""
 
 # @ woocommerce
-#: woocommerce.php:1033
+#: woocommerce.php:1044
 msgid "Orders"
 msgstr "Zamówienia"
 
 # @ woocommerce
-#: woocommerce.php:1035
+#: woocommerce.php:1046
 msgid "Add Order"
 msgstr "Dodaj zamówienie"
 
 # @ woocommerce
-#: woocommerce.php:1036
+#: woocommerce.php:1047
 msgid "Add New Order"
 msgstr "Dodaj nowe zamówienie"
 
 # @ woocommerce
-#: woocommerce.php:1038
+#: woocommerce.php:1049
 msgid "Edit Order"
 msgstr "Edytuj zamówienie"
 
 # @ woocommerce
-#: woocommerce.php:1039
+#: woocommerce.php:1050
 msgid "New Order"
 msgstr "Nowe zamówienie"
 
 # @ woocommerce
-#: woocommerce.php:1042
+#: woocommerce.php:1053
 msgid "Search Orders"
 msgstr "Szukaj zamówień"
 
 # @ woocommerce
-#: woocommerce.php:1043
+#: woocommerce.php:1054
 msgid "No Orders found"
 msgstr "Nie znaleziono zamówień"
 
 # @ woocommerce
-#: woocommerce.php:1044
+#: woocommerce.php:1055
 msgid "No Orders found in trash"
 msgstr "Nie znaleziono zamówień w koszu"
 
 # @ woocommerce
-#: woocommerce.php:1045
+#: woocommerce.php:1056
 msgid "Parent Orders"
 msgstr "Nadrzędne zamówienia"
 
 # @ woocommerce
-#: woocommerce.php:1048
+#: woocommerce.php:1059
 msgid "This is where store orders are stored."
 msgstr "Tutaj przechowywane są zamówienia."
 
 # @ woocommerce
-#: woocommerce.php:1070
+#: woocommerce.php:1081
 msgid "Coupons"
 msgstr "Kupony"
 
 # @ woocommerce
-#: woocommerce.php:1072
+#: woocommerce.php:1083
 msgctxt "Admin menu name"
 msgid "Coupons"
 msgstr ""
 
 # @ woocommerce
-#: woocommerce.php:1073
+#: woocommerce.php:1084
 msgid "Add Coupon"
 msgstr "Dodaj kupon"
 
 # @ woocommerce
-#: woocommerce.php:1074
+#: woocommerce.php:1085
 msgid "Add New Coupon"
 msgstr "Dodaj nowy kupon"
 
 # @ woocommerce
-#: woocommerce.php:1076
+#: woocommerce.php:1087
 msgid "Edit Coupon"
 msgstr "Edytuj kupon"
 
 # @ woocommerce
-#: woocommerce.php:1077
+#: woocommerce.php:1088
 msgid "New Coupon"
 msgstr "Nowy kupon"
 
 # @ woocommerce
-#: woocommerce.php:1078
+#: woocommerce.php:1089
 msgid "View Coupons"
 msgstr "Zobacz kupony"
 
 # @ woocommerce
-#: woocommerce.php:1079
+#: woocommerce.php:1090
 msgid "View Coupon"
 msgstr "Zobacz kupon"
 
 # @ woocommerce
-#: woocommerce.php:1080
+#: woocommerce.php:1091
 msgid "Search Coupons"
 msgstr "Szukaj kuponów"
 
 # @ woocommerce
-#: woocommerce.php:1081
+#: woocommerce.php:1092
 msgid "No Coupons found"
 msgstr "Nie znaleziono kuponów"
 
 # @ woocommerce
-#: woocommerce.php:1082
+#: woocommerce.php:1093
 msgid "No Coupons found in trash"
 msgstr "Nie znaleziono kuponów w koszu"
 
 # @ woocommerce
-#: woocommerce.php:1083
+#: woocommerce.php:1094
 msgid "Parent Coupon"
 msgstr "Nadrzędny kupon"
 
 # @ woocommerce
-#: woocommerce.php:1085
+#: woocommerce.php:1096
 msgid ""
 "This is where you can add new coupons that customers can use in your store."
 msgstr ""
 "Tutaj możesz dodać nowe kupony, których klienci mogą używać w Twoim sklepie."
 
 # @ woocommerce
-#: woocommerce.php:1176
+#: woocommerce.php:1187
 #, fuzzy
 msgid "Select an option&hellip;"
 msgstr "Wybierz kraj&hellip;"
 
 # @ woocommerce
-#: woocommerce.php:1177
+#: woocommerce.php:1188
 #, fuzzy
 msgid "Please select a rating"
 msgstr "Usuń zaznaczone stawki"
 
-#: woocommerce.php:1178
+#: woocommerce.php:1189
 msgid ""
 "Sorry, no products matched your selection. Please choose a different "
 "combination."
 msgstr ""
 
 # @ woocommerce
-#: woocommerce.php:1617
+#: woocommerce.php:1651
 msgid "Cart % Discount"
 msgstr "Procentowy rabat na cały koszyk"
 
 # @ woocommerce
-#: woocommerce.php:1618
+#: woocommerce.php:1652
 msgid "Product Discount"
 msgstr "Rabat na produkt"
 
 # @ woocommerce
-#: woocommerce.php:1619
+#: woocommerce.php:1653
 msgid "Product % Discount"
 msgstr "Procentowy rabat na produkt"
 
 # @ woocommerce
-#: woocommerce.php:1684
+#: woocommerce.php:1718
 msgid "Action failed. Please refresh the page and retry."
 msgstr "Akcja nieudana. Odśwież stronę i spróbuj ponownie."
+
+# @ woocommerce
+#~ msgid "Address 2"
+#~ msgstr "Linia adresu 2"
 
 # @ woocommerce
 #~ msgid "Order statuses"
