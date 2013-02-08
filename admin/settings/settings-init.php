@@ -1011,7 +1011,7 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		'css' 		=> 'min-width:150px;',
 		'default'	=> 'title',
 		'type' 		=> 'select',
-		'options' 	=> array( '' => 'Shipping tax class based on cart items', 'standard' => __( 'Standard', 'woocommerce' ) ) + $classes_options,
+		'options' 	=> array( '' => __( 'Shipping tax class based on cart items', 'woocommerce' ), 'standard' => __( 'Standard', 'woocommerce' ) ) + $classes_options,
 		'desc_tip'	=>  true,
 	),
 

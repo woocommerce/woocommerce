@@ -94,13 +94,13 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 				'title' => __( 'Description', 'woocommerce' ),
 				'type' => 'textarea',
 				'description' => __( 'Payment method description that the customer will see on your website.', 'woocommerce' ),
-				'default' => 'Pay with cash upon delivery.',
+				'default' => __( 'Pay with cash upon delivery.', 'woocommerce' ),
 			),
 			'instructions' => array(
 				'title' => __( 'Instructions', 'woocommerce' ),
 				'type' => 'textarea',
 				'description' => __( 'Instructions that will be added to the thank you page.', 'woocommerce' ),
-				'default' => 'Pay with cash upon delivery.'
+				'default' => __( 'Pay with cash upon delivery.', 'woocommerce' )
 			),
 			'enable_for_methods' => array(
 				'title' 		=> __( 'Enable for shipping methods', 'woocommerce' ),
