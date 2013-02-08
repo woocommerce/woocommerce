@@ -459,6 +459,20 @@ ul.wc_coupon_list_block {
 
 
 /* Orders */
+.button.wc-reload {
+	padding:0;
+	-webkit-border-radius:100%;
+	border-radius:100%;
+	span {
+		display: block;
+		text-indent: -999em;
+		background-image:url(../images/icons/reload.png);
+		background-repeat: no-repeat;
+		background-position: center center;
+		width:22px;
+		height:22px;
+	}
+}
 .tablenav .actions {
 	overflow: visible;
 }
@@ -624,14 +638,14 @@ ul.wc_coupon_list_block {
 		&#actions {
 			overflow: hidden;
 			.button {
-				width: 25%;
+				width: 24px;
 				-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
 				-moz-box-sizing: border-box;    /* Firefox, other Gecko */
 				box-sizing: border-box;         /* Opera/IE 8+ */
 				float: right;
 			}
 			select {
-				width: 70%;
+				width: 225px;
 				-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
 				-moz-box-sizing: border-box;    /* Firefox, other Gecko */
 				box-sizing: border-box;         /* Opera/IE 8+ */
@@ -2778,6 +2792,10 @@ table.bar_chart {
 				background-size: 10px 8px;
 			}
 		}
+	}
+	.button.wc-reload span {
+		background-image: url(../images/icons/reload@2x.png);
+		background-size: 12px 12px;
 	}
 }
 

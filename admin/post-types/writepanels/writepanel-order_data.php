@@ -393,7 +393,7 @@ function woocommerce_order_items_meta_box( $post ) {
 			</optgroup>
 		</select>
 
-		<button type="button" class="button do_bulk_action"><?php _e( 'Apply', 'woocommerce' ); ?></button>
+		<button type="button" class="button do_bulk_action wc-reload" title="<?php _e( 'Apply', 'woocommerce' ); ?>"><span><?php _e( 'Apply', 'woocommerce' ); ?></span></button>
 	</p>
 
 	<p class="add_items">
@@ -450,7 +450,7 @@ function woocommerce_order_actions_meta_box( $post ) {
 				</optgroup>
 			</select>
 
-			<button class="button"><?php _e( 'Apply', 'woocommerce' ); ?></button>
+			<button class="button wc-reload" title="<?php _e( 'Apply', 'woocommerce' ); ?>"><span><?php _e( 'Apply', 'woocommerce' ); ?></span></button>
 		</li>
 
 		<li class="wide">
