@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.0 beta 2\n"
+"Project-Id-Version: WooCommerce 2.0 RC1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-02-07 15:01+0100\n"
 "PO-Revision-Date: \n"
