@@ -35,6 +35,7 @@ function get_product( $the_product = false, $args = array() ) {
 /**
  * Function that returns an array containing the IDs of the products that are on sale.
  *
+ * @since 2.0
  * @access public
  * @return array
  */

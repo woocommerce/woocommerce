@@ -1918,6 +1918,7 @@ class Woocommerce {
 	/**
 	 * Adds extra post classes for products
 	 *
+	 * @since 2.0
 	 * @access public
 	 * @param array $classes
 	 * @param string|array $class
