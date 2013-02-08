@@ -3,8 +3,8 @@ msgstr ""
 "Project-Id-Version: WooCommerce v1.6.1\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-01-02 13:44:51+00:00\n"
-"PO-Revision-Date: 2013-01-04 00:20+0200\n"
-"Last-Translator: Aurel Roman <aur3l.roman@gmail.com>\n"
+"PO-Revision-Date: 2013-02-08 15:32+0200\n"
+"Last-Translator: Silviu Bucsa <tom@madc.at>\n"
 "Language-Team: \n"
 "Language: ro_RO\n"
 "MIME-Version: 1.0\n"
@@ -16,19 +16,19 @@ msgstr ""
 "_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
 "X-Poedit-Basepath: ../../\n"
 "X-Textdomain-Support: yes\n"
-"X-Generator: Poedit 1.5.4\n"
+"X-Generator: Poedit 1.5.5\n"
 "X-Poedit-SearchPath-0: .\n"
 
 # @ woocommerce
 #: admin/importers/importers-init.php:13
 msgid "WooCommerce Tax Rates (CSV)"
-msgstr "WooCommerce Cote Taxare (CSV)"
+msgstr "WooCommerce Cote Impozitare (CSV)"
 
 #: admin/importers/importers-init.php:13
 msgid "Import <strong>tax rates</strong> to your store via a csv file."
 msgstr ""
-"Importaţi <strong>cote de taxare</strong> în magazinul dvs. dintr-un fişier "
-"CSV."
+"Importă <strong>cote de impozitare<strong> pentru magazinul tău cu ajutorul "
+"unui fișier csv."
 
 #: admin/importers/tax-rates-importer.php:103
 #: admin/importers/tax-rates-importer.php:186
@@ -39,29 +39,29 @@ msgstr "Ne pare rău, dar a apărut o eroare."
 
 #: admin/importers/tax-rates-importer.php:104
 msgid "The file does not exist, please try again."
-msgstr "Fișierul nu există, vă rugăm încercați din nou."
+msgstr "Fișierul nu există, încearcă din nou."
 
 #: admin/importers/tax-rates-importer.php:187
 msgid "The CSV is invalid."
-msgstr "Fișierul CSV este invalid."
+msgstr "Fișierul CSV nu este valid."
 
 #: admin/importers/tax-rates-importer.php:198
 msgid ""
 "Import complete - imported <strong>%s</strong> tax rates and skipped <strong>"
 "%s</strong>."
 msgstr ""
-"Importare Finalizată - importate <strong>%s</strong> cote de impozitare şi "
-"ne importate <strong>%s</strong>."
+"Importare finalizată - au fost importate următoarele rate de impozitare: "
+"<strong>%s</strong> și au fost sărite următoarele: <strong>%s</strong>"
 
 # @ woocommerce
 #: admin/importers/tax-rates-importer.php:208
 msgid "All done!"
-msgstr "Terminat!"
+msgstr "Totul pare în regulă!"
 
 # @ woocommerce
 #: admin/importers/tax-rates-importer.php:208
 msgid "View Tax Rates"
-msgstr "Vezi Cotele de impozitare"
+msgstr "Vizualizează Rate de impozitare"
 
 # @ woocommerce
 #: admin/importers/tax-rates-importer.php:259
@@ -105,7 +105,7 @@ msgstr "Dimensiune Maximă: %s"
 
 #: admin/importers/tax-rates-importer.php:312
 msgid "OR enter path to file:"
-msgstr "SAU introduceți calea către fișier:"
+msgstr "SAU introdu calea către fișier:"
 
 # @ woocommerce
 #: admin/importers/tax-rates-importer.php:319
@@ -114,17 +114,17 @@ msgstr "Delimitator"
 
 #: admin/importers/tax-rates-importer.php:325
 msgid "Upload file and import"
-msgstr "Încărcă fișier și importă"
+msgstr "Încarcă fișier și importă conținutul"
 
 # @ woocommerce
 #: admin/includes/duplicate_product.php:23
 msgid "No product to duplicate has been supplied!"
-msgstr "Produsul propus pentru a fi copiat nu a fost furnizat!"
+msgstr "Nu a fost furnizat nici un produs pentru duplicare!"
 
 # @ woocommerce
 #: admin/includes/duplicate_product.php:43
 msgid "Product creation failed, could not find original product:"
-msgstr "Creearea produsului a eșuat, nu găsim produsul original:"
+msgstr "Creearea de produs a eșuat, nu găsim produsul original:"
 
 # @ woocommerce
 #: admin/includes/duplicate_product.php:89
@@ -137,18 +137,18 @@ msgid ""
 "<strong>Welcome to WooCommerce</strong> &#8211; You're almost ready to start "
 "selling :)"
 msgstr ""
-"<strong>Bine ai venit la WooCommerce</strong> &#8211; Ești aproape gata să "
-"începi comercializarea produselor tale!"
+"<strong>Bine ai venit! Cu WooCommerce</strong> &#8211; Ești aproape gata să "
+"începit comercializarea produselor tale!"
 
 # @ woocommerce
 #: admin/includes/notice-install.php:7
 msgid "Install WooCommerce Pages"
-msgstr "Instalează Pagini pentru WooCommerce"
+msgstr "Creează Pagini necesare WooCommerce"
 
 # @ woocommerce
 #: admin/includes/notice-install.php:7
 msgid "Skip setup"
-msgstr "Sări peste configurare"
+msgstr "Continuă fără a configura WooCommerce"
 
 # @ woocommerce
 #: admin/includes/notice-installed.php:6
@@ -156,8 +156,7 @@ msgid ""
 "<strong>WooCommerce has been installed</strong> &#8211; You're ready to "
 "start selling :)"
 msgstr ""
-"<strong>WooCommerce a fost instalat</strong> &#8211; Ești gata să începi "
-"comercializarea produselor tale!"
+"<strong>WooCommerce a fost instalat</strong> &#8211; Acum ești gata să vinzi!"
 
 # @ woocommerce
 #: admin/includes/notice-installed.php:8 admin/includes/notice-updated.php:8
@@ -175,21 +174,21 @@ msgid ""
 "<strong>Data Update Required</strong> &#8211; We just need to update your "
 "install to the latest version"
 msgstr ""
-"<strong> Actualizare necesară </ strong>&#8211; Trebuie doar să actualizăm "
-"instalarea dumneavoastră la ultima versiune."
+"<strong>Este necesară Actualizarea Datelor</strong> &#8211; Trebuie să "
+"actualizăm WooCommerce la ultima versiune disponibilă."
 
 # @ woocommerce
 #: admin/includes/notice-update.php:7
 msgid "Run the updater"
-msgstr "Porneşte Actualizarea"
+msgstr "Rulează actualizare WooCommerce"
 
 #: admin/includes/notice-update.php:12
 msgid ""
 "It is strongly recommended that you backup your database before proceeding. "
 "Are you sure you wish to run the updater now?"
 msgstr ""
-"Se recomandă să faceţi o copie de siguranţă a bazei de date înainte de a "
-"continua. Sunteți sigur că doriți să rulați updaterul acum?"
+"Este recomandat să faci o copie de siguranță a Bazei de Date înainte de a "
+"continua! Ești sigur că dorești să rulezi actualizatorul acum?"
 
 # @ woocommerce
 #: admin/includes/notice-updated.php:6
@@ -197,8 +196,8 @@ msgid ""
 "<strong>WooCommerce has been updated</strong> &#8211; You're ready to "
 "continue selling :)"
 msgstr ""
-"<strong>WooCommerce a fost actualizat</strong> &#8211; Poţi continua "
-"comercializarea produselor tale!"
+"<strong>WooCommerce a fost actualizat</strong> &#8211; Ești gata să continui "
+"vânzările!"
 
 # @ woocommerce
 #: admin/includes/updates/woocommerce-update-2.0.php:50
@@ -223,12 +222,12 @@ msgstr "produs"
 # @ woocommerce
 #: admin/post-types/product.php:31
 msgid "Make a duplicate from this product"
-msgstr "Creează o copie identică pentru acest produs"
+msgstr "Dublează acest produs"
 
 # @ woocommerce
 #: admin/post-types/product.php:32
 msgid "Duplicate"
-msgstr "Copiază"
+msgstr "Dublează"
 
 # @ woocommerce
 #: admin/post-types/product.php:61
@@ -293,7 +292,7 @@ msgstr "Etichete"
 #: admin/post-types/writepanels/writepanel-product_data.php:1044
 #: admin/woocommerce-admin-init.php:397
 msgid "Featured"
-msgstr "Recomandat"
+msgstr "Produs Evidențiat"
 
 # @ woocommerce
 #: admin/post-types/product.php:100 admin/woocommerce-admin-attributes.php:235
@@ -310,7 +309,7 @@ msgstr "Dată"
 # @ woocommerce
 #: admin/post-types/product.php:150
 msgid "Edit this item inline"
-msgstr "Editează acest element in linie"
+msgstr "Modifică acest produs în linie"
 
 # @ woocommerce
 #: admin/post-types/product.php:150
@@ -320,17 +319,17 @@ msgstr "Editare&nbsp;rapidă"
 # @ woocommerce
 #: admin/post-types/product.php:154 admin/post-types/shop_coupon.php:65
 msgid "Restore this item from the Trash"
-msgstr "Restaurează acest element din Gunoi"
+msgstr "Mută acest produs din Gunoi înapoi la locul său"
 
 # @ woocommerce
 #: admin/post-types/product.php:154 admin/post-types/shop_coupon.php:65
 msgid "Restore"
-msgstr "Restaurează"
+msgstr "Mută înapoi"
 
 # @ woocommerce
 #: admin/post-types/product.php:156 admin/post-types/shop_coupon.php:67
 msgid "Move this item to the Trash"
-msgstr "Mută acest element la Gunoi"
+msgstr "Mută acest produs la Gunoi"
 
 # @ woocommerce
 #: admin/post-types/product.php:156 admin/post-types/shop_coupon.php:67
@@ -340,7 +339,7 @@ msgstr "Gunoi"
 # @ woocommerce
 #: admin/post-types/product.php:158 admin/post-types/shop_coupon.php:69
 msgid "Delete this item permanently"
-msgstr "Șterge acest element definitiv"
+msgstr "Șterge acest produs definitiv"
 
 # @ woocommerce
 #: admin/post-types/product.php:158 admin/post-types/shop_coupon.php:69
@@ -351,22 +350,22 @@ msgstr "Șterge Definitiv"
 # @ woocommerce
 #: admin/post-types/product.php:163
 msgid "Preview &#8220;%s&#8221;"
-msgstr "Previzualizare &#8220;%s&#8221;"
+msgstr "Previzualizează &#8220;%s&#8221;"
 
 # @ woocommerce
 #: admin/post-types/product.php:163
 msgid "Preview"
-msgstr "Previzualizare"
+msgstr "Previzualizează"
 
 # @ woocommerce
 #: admin/post-types/product.php:165
 msgid "View &#8220;%s&#8221;"
-msgstr "Vizualizare &#8220;%s&#8221;"
+msgstr "Vizualizează &#8220;%s&#8221;"
 
 # @ woocommerce
 #: admin/post-types/product.php:165 admin/post-types/shop_order.php:171
 msgid "View"
-msgstr "Vizualizare"
+msgstr "Vizualizează"
 
 # @ woocommerce
 #: admin/post-types/product.php:211
@@ -405,7 +404,7 @@ msgstr "Variabil"
 # @ woocommerce
 #: admin/post-types/product.php:248
 msgid "Toggle featured"
-msgstr "Comutare &quot;Recomandat&quot;"
+msgstr "Comutare &quot;Produs Evidențiat&quot;"
 
 # @ woocommerce
 #: admin/post-types/product.php:250
@@ -567,7 +566,7 @@ msgstr "În stoc?"
 #: admin/post-types/product.php:661 admin/post-types/product.php:944
 #: admin/post-types/writepanels/writepanel-product_data.php:208
 msgid "Manage stock?"
-msgstr "Vrei să administrezi Stocurile?"
+msgstr "Administrare stocuri"
 
 # @ woocommerce
 #: admin/post-types/product.php:665 admin/post-types/product.php:963
@@ -2549,12 +2548,12 @@ msgstr "Stiluri"
 # @ woocommerce
 #: admin/settings/settings-frontend-styles.php:43
 msgid "Primary"
-msgstr "Prinicipal"
+msgstr "Primar"
 
 # @ woocommerce
 #: admin/settings/settings-frontend-styles.php:43
 msgid "Call to action buttons/price slider/layered nav UI"
-msgstr "Butoane de acțiune / Slider Preț / Interfață stratificată a navigației"
+msgstr "Butoane principale / cursor preț / butoane meniu principal"
 
 # @ woocommerce
 #: admin/settings/settings-frontend-styles.php:44
@@ -2569,12 +2568,12 @@ msgstr "Butoane și file"
 # @ woocommerce
 #: admin/settings/settings-frontend-styles.php:45
 msgid "Highlight"
-msgstr "Evidențiază"
+msgstr "Evidențiere"
 
 # @ woocommerce
 #: admin/settings/settings-frontend-styles.php:45
 msgid "Price labels and Sale Flashes"
-msgstr "Etichete preț și vânzări fulger"
+msgstr "Etichete de Preț și Etichete de Preț Redus"
 
 # @ woocommerce
 #: admin/settings/settings-frontend-styles.php:46
@@ -2585,8 +2584,7 @@ msgstr "Conținut"
 #: admin/settings/settings-frontend-styles.php:46
 msgid "Your themes page background - used for tab active states"
 msgstr ""
-"Culoarea de fundal a paginii dvs. - este utilizată pentru a afișa filele "
-"active."
+"Culoare de fundal a paginii - utilizat și pentru starea activă a filelor"
 
 # @ woocommerce
 #: admin/settings/settings-frontend-styles.php:47
@@ -2596,7 +2594,9 @@ msgstr "Subtext"
 # @ woocommerce
 #: admin/settings/settings-frontend-styles.php:47
 msgid "Used for certain text and asides - breadcrumbs, small text etc."
-msgstr "Utilizat pentru anumite texte - navigație liniară, text mic, etc."
+msgstr ""
+"Culoare utilizată pentru unele texte și părți laterale - firimituri, text "
+"mic, etc."
 
 # @ woocommerce
 #: admin/settings/settings-frontend-styles.php:51
@@ -2606,10 +2606,10 @@ msgid ""
 "codex.wordpress.org/Changing_File_Permissions\">the Codex</a> for more "
 "information."
 msgstr ""
-"Pentru a putea edita culori următoarele fișiere trebuie să fie editabile:"
-"<code>woocommerce/assets/css/woocommerce-base.less</code> și "
-"<code>woocommerce.css</code>. Pentru mai multe informații vezi: <a href="
-"\"http://codex.wordpress.org/Changing_File_Permissions\">Codex-ul</a>"
+"Pentru a putea modifica culori, următoarele fișiere: <code>woocommerce/"
+"assets/css/woocommerce-base.less</code> și <code>woocommerce.css</code> "
+"trebuie să poată fi scrise. Pentru mai multe informații, vezi <a href="
+"\"http://codex.wordpress.org/Changing_File_Permissions\">Codex-ul (EN)</a>"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:18
@@ -2619,7 +2619,7 @@ msgstr "Localizare"
 # @ woocommerce
 #: admin/settings/settings-init.php:19
 msgid "Use informal localisation for %s"
-msgstr "Dacă există utilizaţi fişierul de localizare informală pentru  %s."
+msgstr "Utilizați localizare informală pentru %s"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:27
@@ -2629,7 +2629,7 @@ msgstr "Opțiuni Generale"
 # @ woocommerce
 #: admin/settings/settings-init.php:30
 msgid "Base Country/Region"
-msgstr "Locație magazin"
+msgstr "Localizare magazin (țară / regiune)"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:31
@@ -2637,8 +2637,8 @@ msgid ""
 "This is the base country for your business. Tax rates will be based on this "
 "country."
 msgstr ""
-"Această este țara de bază pentru magazinul dvs. Taxele și ratele de "
-"impozitare se vor baza pe această țară."
+"Aceasta este țara de rezidență a magazinului. Taxele și impozitele vor fi "
+"bazate pe această țară."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:40
@@ -2652,7 +2652,7 @@ msgid ""
 "currency gateways will take payments in."
 msgstr ""
 "Această opțiune controlează moneda în care sunt afișate prețurile dar și ce "
-"monedă este folosită pentru plata produselor."
+"monedă este folosită pentru a procesa plățile."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:49
@@ -2791,12 +2791,12 @@ msgstr "Leu (RON)"
 # @ woocommerce
 #: admin/settings/settings-init.php:81
 msgid "Allowed Countries"
-msgstr "Țări permise"
+msgstr "Țări în care livrezi"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:82
 msgid "These are countries that you are willing to ship to."
-msgstr "Acestea sunt țările în care ești dispus să livrezi comenzi."
+msgstr "Acestea sunt țările în care vrei să livrezi produsele."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:90
@@ -2811,7 +2811,7 @@ msgstr "Anumite țări"
 # @ woocommerce
 #: admin/settings/settings-init.php:108
 msgid "Checkout and Accounts"
-msgstr "Setări pentru Pagina de Finalizare Comandă și Contul Meu"
+msgstr "Setări pentru Pagina de Finalizare Comandă și Conturi Clienți"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:108
@@ -2819,8 +2819,8 @@ msgid ""
 "The following options control the behaviour of the checkout process and "
 "customer accounts."
 msgstr ""
-"Următoarele opțiuni controlează setările paginilor de Finalizare Comandă și "
-"paginile de administrare a contului (de către clienți)"
+"Următoarele opțiuni controlează câteva setări ale Paginii de Finalizare "
+"Comandă și modul de administrare a contului de client."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:111
@@ -2831,7 +2831,7 @@ msgstr "Plasează Comanda"
 # @ woocommerce
 #: admin/settings/settings-init.php:112
 msgid "Enable guest checkout (no account required)"
-msgstr "Activează Comandă Rapidă (fără a creea cont)"
+msgstr "Activează Comandă Rapidă - <strong>Fără a creea cont</strong>"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:120
@@ -2855,15 +2855,15 @@ msgstr "Forțează procesarea comenzilor prin protocolul de securitate HTTPS"
 msgid ""
 "Force SSL (HTTPS) on the checkout pages (an SSL Certificate is required)"
 msgstr ""
-"Forțează protocol SSL (HTTPS) pentru procesarea comenzilor (pe pagina "
-"Finalizare Comenzi - este necesar achiziționarea unui certificat SSL și "
-"instalarea sa pe server-ul ce găzduiește magazinul)"
+"Forțează protocolul de securitate SSL (HTTPS) pentru procesarea comenzilor. "
+"(Este necesară achiziționarea unui certificat SSL)"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:139
 msgid "Un-force HTTPS when leaving the checkout"
 msgstr ""
-"Dezactivează protcolul HTTPS după părăsirea paginii de Finalizare Comandă"
+"Dezactivează protcolul HTTPS după părăsirea paginii de <strong>Finalizare "
+"Comandă</strong>"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:148 admin/woocommerce-admin-content.php:75
@@ -2890,21 +2890,25 @@ msgstr ""
 # @ woocommerce
 #: admin/settings/settings-init.php:176
 msgid "Registration"
-msgstr "Înregistrare"
+msgstr "Înregistrare Clienți"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:177
 msgid "Allow registration on the checkout page"
-msgstr "Permite înregistrarea unui cont nou pe pagina 'Finalizare Comandă'"
+msgstr ""
+"Permite înregistrarea unui client nou pe pagina <strong>Finalizare Comandă</"
+"strong>"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:185
 msgid "Allow registration on the \"My Account\" page"
-msgstr "Permite înregistrarea unui cont nou pe pagina \"Contul Meu\""
+msgstr ""
+"Permite înregistrarea unui client nou pe pagina <strong>Contul Meu</strong>"
 
 #: admin/settings/settings-init.php:193
 msgid "Register using the email address for the username"
-msgstr "Înregistrează-te cu adresa de email ca și nume de utilizator"
+msgstr ""
+"Permite înregistrarea unui client cu adresa de email ca și nume de utilizator"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:201
@@ -2915,18 +2919,21 @@ msgstr "Conturi Clienți"
 #: admin/settings/settings-init.php:202
 msgid "Prevent customers from accessing WordPress admin"
 msgstr ""
-"Împiedică accesul clienților în zona de administrare Wordpress (Paginile "
-"vizualizate în momentul de față)"
+"<strong>Bifează pentru a împiedica accesul clienților în zona de "
+"administrare Wordpress </strong> - Paginile vizualizate în momentul de față"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:210
 msgid "Clear cart when logging out"
-msgstr "Goliți Coșul de cumpărături la deconectarea utilizatorului."
+msgstr ""
+"Coșul de cumpărături este golit atunci când utilizatorul se deconectează."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:218
 msgid "Allow customers to repurchase past orders"
-msgstr "Permite clienţilor să cumpere din nou comenzile făcute anterior"
+msgstr ""
+"Bifează pentru a permite clienţilor să cumpere din nou comenzile făcute "
+"anterior"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:227
@@ -2939,8 +2946,8 @@ msgid ""
 "The following options affect the styling of your store, as well as how "
 "certain features behave."
 msgstr ""
-"Opțiunile de mai jos controlează o parte din culorile de prezentare a "
-"magazinului și încărcarea script-urilor WooCommerce."
+"Opțiunile de mai jos controlează o parte din setările de prezentare a "
+"magazinului precum și comportamentul anumitor elemente."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:230
@@ -2950,21 +2957,21 @@ msgstr "Opțiuni afișare"
 # @ woocommerce
 #: admin/settings/settings-init.php:231
 msgid "Enable WooCommerce CSS styles"
-msgstr "Activează stiluri WooCommerce"
+msgstr "Activează stiluri afișare WooCommerce"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:242
 msgid "Store Notice"
-msgstr "Anunț Magazin"
+msgstr "Opțiune Testare Magazin"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:243
 msgid "Enable the \"Demo Store\" notice on your site"
-msgstr "Activează opțiunea de \"Magazin Demo\" pe site."
+msgstr "Activează opțiunea \"Magazin Demo\" pe site."
 
 #: admin/settings/settings-init.php:250
 msgid "Store Notice Text"
-msgstr "Text pentru Anunț Magazin"
+msgstr "Text afișat pe paginile magazinului:"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:253
@@ -2972,7 +2979,8 @@ msgid ""
 "This is a demo store for testing purposes &mdash; no orders shall be "
 "fulfilled."
 msgstr ""
-"Acesta magazin demo pentru testare &mdash; nici o comandă nu va fi onorată."
+"Acesta este un magazin <strong>demonstrativ pentru testare</strong> &mdash; "
+"Nici o comandă nu va fi onorată."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:259
@@ -2982,19 +2990,19 @@ msgstr "Script-uri"
 # @ woocommerce
 #: admin/settings/settings-init.php:260
 msgid "Enable AJAX add to cart buttons on product archives"
-msgstr "Activează butoane \"Adaugă în Coș\" prin AJAX pe arhivele de produs."
+msgstr "Activează butoane \"Adaugă în Coș\" prin AJAX pe arhivele de produs"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:268
 msgid "Enable WooCommerce lightbox on the product page"
 msgstr ""
-"Activează \"WooCommerce Lightbox\" - prezentare de imagini - pe paginile de "
-"produs."
+"Activează \"WooCommerce Lightbox\" - prezentare de imagini - pentru paginile "
+"de produs"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:276
 msgid "Enable enhanced country select boxes"
-msgstr "Activează meniu avansat pentru selecția de țară."
+msgstr "Activează meniu avansat pentru selecția de țară"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:285
@@ -3020,8 +3028,8 @@ msgid ""
 "<code>mod_xsendfile</code>)."
 msgstr ""
 "Forțarea descărcărilor va ascunde calea către fișiere (ajută la împiedicarea "
-"descărcărilor neautorizate), dar o parte din servere ar putea creea probleme "
-"la descărcarea fișierelor mari. Dacă este suportat protocolul <code>X-Accel-"
+"descărcărilor neautorizate), dar unele servere ar putea creea probleme la "
+"descărcarea fișierelor mari. Dacă este suportat, protocolul <code>X-Accel-"
 "Redirect</code>/ <code>X-Sendfile</code> poate fi utilizat pentru servirea "
 "fișierelor descărcabile (Serverul trebuie configurat să folosească "
 "<code>mod_xsendfile</code>)."
@@ -3050,15 +3058,14 @@ msgstr "Restricții Acces"
 #: admin/settings/settings-init.php:305
 msgid "Must be logged in to download files"
 msgstr ""
-"Utilizator trebuie să fie autentificat pentru a putea descărca fișierele "
-"cumpărate."
+"Utilizatorul trebuie să fie autentificat pentru a putea descărca fișierele."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:309
 msgid "This setting does not apply to guest downloads."
 msgstr ""
 "Această opțiune nu se aplică pentru descărcările oaspeților (descărcări "
-"făcute cadou)"
+"făcute cadou)."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:314
@@ -3083,8 +3090,8 @@ msgstr "Limitează Cantitatea"
 #: admin/settings/settings-init.php:324
 msgid "Limit the purchasable quantity of downloadable-virtual items to 1"
 msgstr ""
-"Clientul poate achiziționa o singură bucată dintr-un produs descărcabil - "
-"virtual."
+"Limitează achiziționarea unui produs descărcabil - virtual la o singură "
+"bucată (1)"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:342
@@ -3105,9 +3112,8 @@ msgid ""
 "Set up core WooCommerce pages here, for example the base page. The base page "
 "can also be used in your %sproduct permalinks%s."
 msgstr ""
-"Configurați paginile de bază WooCommerce aici, de exemplu, pagina de bază."
-"Pagina de bază poate fi utilizat și în %s Legături permanente pentru Produs "
-"%s."
+"Configurați paginile de bază WooCommerce aici, de ex. pagina de bază. Pagina "
+"de bază poate fi utilizată și în %sLegături permanente pentru Produs%s."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:354
@@ -3126,7 +3132,7 @@ msgstr ""
 # @ woocommerce
 #: admin/settings/settings-init.php:365
 msgid "Base Page Title"
-msgstr "Titlul Paginii de bază a Magazinului"
+msgstr "Titlul paginii de bază a Magazinului"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:366
@@ -3148,7 +3154,8 @@ msgid ""
 "them when checking out."
 msgstr ""
 "Dacă definești o pagină de \"Termeni și condiții\", clientul va fi rugat să "
-"accepte Termenii și Condițiile prezentate la finalizarea comenzii."
+"accepte Termenii și Condițiile site-ului. Pagina este prezentată în cursul "
+"finalizării comenzii."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:386
@@ -3288,12 +3295,12 @@ msgstr "Opțiuni Catalog"
 # @ woocommerce
 #: admin/settings/settings-init.php:506
 msgid "Default Product Sorting"
-msgstr "Sortarea implicită a Produselor"
+msgstr "Sortarea Produselor"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:507
 msgid "This controls the default sort order of the catalog."
-msgstr "Această opțiune controlează modul de sortare a produselor."
+msgstr "Această opțiune controlează modul de afișare a produselor în catalog."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:513
@@ -3303,17 +3310,17 @@ msgstr "Sortare implicită"
 # @ woocommerce
 #: admin/settings/settings-init.php:514
 msgid "Sort alphabetically"
-msgstr "Afișează de la A la Z"
+msgstr "Afișează alfabetic"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:515
 msgid "Sort by most recent"
-msgstr "Sorteză după cele mai Recente Produse"
+msgstr "Cele mai noi produse"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:516
 msgid "Sort by price"
-msgstr "Preț Ascendent"
+msgstr "Preț Crescător"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:522
@@ -3324,8 +3331,7 @@ msgstr "Afișare pe Pagina Magazinului"
 #: admin/settings/settings-init.php:523
 msgid "This controls what is shown on the product archive."
 msgstr ""
-"Această opțiune controlează modul de afișare pe pagina de Arhive Produse "
-"(Pagina Magazinului)."
+"Această opțiune controlează modul de afișare pe pagina de Arhive Produse."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:529 admin/settings/settings-init.php:544
@@ -3362,8 +3368,8 @@ msgstr "Redirecționări"
 msgid ""
 "Redirect to cart after adding a product to the cart (on single product pages)"
 msgstr ""
-"După adăugarea unui produs în Coș - de pe pagina unui produs - "
-"redirecționează clientul pe pagina Coșul Meu"
+"După adăugarea unui produs în Coș - de pe pagina unui produs - trimite "
+"clientul către pagina Coșul Meu"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:561
@@ -3377,36 +3383,33 @@ msgstr ""
 msgid ""
 "The following options affect the fields available on the edit product page."
 msgstr ""
-"Următoarele opțiuni controlează câmpurile disponibile pe pagina de editare "
-"produs."
+"Următoarele opțiuni controlează câmpurile disponibile pe pagina de "
+"modificare produs."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:573
 msgid "Product Fields"
-msgstr "Câmpuri Produs"
+msgstr "Detalii Produs"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:574
 msgid "Enable the SKU field for products"
-msgstr ""
-"Activează câmpul \"Cod Produs\" pentru identificarea mai ușoară a produselor"
+msgstr "Afișează \"Cod Produs\" pentru identificarea mai ușoară a produselor"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:582
 msgid "Enable the weight field for products"
-msgstr "Activează câmpurl pentru afișarea greutății produsului"
+msgstr "Afișează greutatea produsului"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:590
 msgid "Enable the dimension fields for products"
-msgstr "Activează câmpurile pentru afișarea dimensiunilor produsului"
+msgstr "Afișează dimensiunile produsului"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:598
 msgid "Show weight and dimension fields in product attributes tab"
-msgstr ""
-"Afișează câmpurile de greutate și dimensiune în tab-ul de atribute a "
-"produsului"
+msgstr "Afișează greutatea și dimensiunea produsului în fila de atribute"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:606
@@ -3416,8 +3419,7 @@ msgstr "Unitate de măsură a greutății"
 # @ woocommerce
 #: admin/settings/settings-init.php:607
 msgid "This controls what unit you will define weights in."
-msgstr ""
-"Această opțiune afișează unitatea de măsură ce definește greutatea produsului"
+msgstr "Această opțiune afișează unitatea de măsură a greutății"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:613
@@ -3437,7 +3439,7 @@ msgstr "livre"
 # @ woocommerce
 #: admin/settings/settings-init.php:616
 msgid "oz"
-msgstr "uncie"
+msgstr "uncii"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:622
@@ -3487,56 +3489,56 @@ msgstr ""
 #: admin/settings/settings-init.php:649
 msgid "Ratings are required to leave a review"
 msgstr ""
-"Acordarea de calificative este necesară pentru a lăsa un comentariu / opinie "
-"asupra produsului"
+"Acordarea de calificative este necesară pentru a lăsa un comentariu despre "
+"produs"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:658
 msgid "Show \"verified owner\" label for customer reviews"
 msgstr ""
-"Afișează simbol de \"Proprietar Verificat\" pentru recenziile de produs"
+"Afișează simbolul de \"Proprietar Verificat\" pentru comentariile de produs"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:668
 msgid "Pricing Options"
-msgstr "Afișarea Prețurilor"
+msgstr "Modalități de afișare prețuri"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:668
 msgid "The following options affect how prices are displayed on the frontend."
-msgstr "Următoarele opțiuni stabilesc modalitatea de afișar a prețurilor."
+msgstr "Următoarele opțiuni stabilesc modalitatea de afișare a prețurilor."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:671
 msgid "Currency Position"
-msgstr "Poziția Monedei"
+msgstr "Poziție simbol valutar"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:672
 msgid "This controls the position of the currency symbol."
 msgstr ""
-"Această opțiune controlează poziția de afișare a monedei - în stânga sau în "
-"dreapta prețului"
+"Această opțiune controlează poziția de afișare a simbolului valutar - în "
+"stânga sau în dreapta prețului"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:678
 msgid "Left"
-msgstr "În Stânga monedei"
+msgstr "În stânga prețului - $123"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:679
 msgid "Right"
-msgstr "În Dreapta monedei"
+msgstr "În dreapta prețului - 123$"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:680
 msgid "Left (with space)"
-msgstr "În Stânga monedei plus un spațiu între preț și simbol"
+msgstr "În stânga prețului cu spațiu între - $ 123"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:681
 msgid "Right (with space)"
-msgstr "În Dreapta monedei plus un spațiu între preț și simbol"
+msgstr "În dreapta prețului  cu spațiu între - 123 $"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:687
@@ -3547,9 +3549,9 @@ msgstr "Separator Mii"
 #: admin/settings/settings-init.php:688
 msgid "This sets the thousand separator of displayed prices."
 msgstr ""
-"Această opțiuni controlează caracterul care delimitează miile (Pentru "
+"Această opțiuni controlează caracterul care delimitează miile - Ex.: Pentru "
 "România: 200.000 - două sute de mii; Pentru Statele Unite: 200,000 - două "
-"sute de mii)"
+"sute de mii."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:697
@@ -3560,9 +3562,9 @@ msgstr "Separator Zecimale"
 #: admin/settings/settings-init.php:698
 msgid "This sets the decimal separator of displayed prices."
 msgstr ""
-"Această opțiuni controlează caracterul care delimitează decimalele (Pentru "
-"România: 1,25 - unu virgulă douăzeci și cinci; Pentru Statele Unite: 1.25 - "
-"unu punct douăzeci și cinci)"
+"Această opțiuni controlează caracterul care delimitează decimalele - Ex.: "
+"Pentru România: 1,25 - unu virgulă douăzeci și cinci; Pentru Statele Unite: "
+"1.25 - unu punct douăzeci și cinci."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:707
@@ -3579,7 +3581,7 @@ msgstr ""
 # @ woocommerce
 #: admin/settings/settings-init.php:721
 msgid "Trailing Zeros"
-msgstr "Zero-uri afișate la Sfârșit"
+msgstr "Zero-uri afișate la sfârșit"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:722
@@ -3587,8 +3589,8 @@ msgid ""
 "Remove zeros after the decimal point. e.g. <code>$10.00</code> becomes <code>"
 "$10</code>"
 msgstr ""
-"Elimină zero-urile aflate după decimale în următoarele cazuri:  <code>"
-"$10.00</code> devine <code>$10</code>"
+"Elimină zero-urile aflate după virgulă, ex.: <code>$10,00</code> devine "
+"<code>$10</code>"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:730
@@ -3603,11 +3605,11 @@ msgid ""
 "changing these settings you may need to <a href=\"%s\">regenerate your "
 "thumbnails</a>."
 msgstr ""
-"Aceste opțiuni controlează dimensiunile imaginilor din catalog - "
-"dimensiunile de afișare a imaginilor în magazin va fi controlat în "
-"continuare de stilurile definite în CSS. După modificarea acestor dimensiuni "
-"ar putea fi necesară regenerarea imaginilor. Pentru regenerarea imaginilor "
-"folosește <a href=\"%s\">acest plugin</a>."
+"Aceste opțiuni controlează dimensiunile fizice ale imaginilor de produse din "
+"magazin - afișarea imaginilor în magazin va fi influențată de stilurile "
+"definite în CSS. După modificarea opțiunilor prezentate mai jos, va trebui "
+"să regenerezi imaginile cu ajutorul acestui plugin, numit: <a href=\"%s"
+"\">Regenerate Thumbnails</a>."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:733
@@ -3650,12 +3652,12 @@ msgstr "Opțiuni Administrare Inventar"
 # @ woocommerce
 #: admin/settings/settings-init.php:784
 msgid "Manage Stock"
-msgstr "Gestionați stoc"
+msgstr "Gestionare stoc produse"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:785
 msgid "Enable stock management"
-msgstr "Activează administrarea stocurilor de produse"
+msgstr "Activează administrarea stocului de produse"
 
 #: admin/settings/settings-init.php:792
 msgid "Hold Stock (minutes)"
@@ -3666,9 +3668,9 @@ msgid ""
 "Hold stock (for unpaid orders) for x minutes. When this limit is reached, "
 "the pending order will be cancelled. Leave blank to disable."
 msgstr ""
-"Păstrează Stocul (pentru comenzile neachitate) pentru X minute. Când această "
-"limită este atinsă, Comanda Care este în așteptare și neachitată va fi "
-"anulată. Lăsa-ți Gol pentru a Dezactiva."
+"Păstrează Stocul (pentru comenzile neachitate) pentru X minute. <br />După X "
+"minute, comanda care este încă în așteptare și neachitată va fi anulată. "
+"Lăsați câmpul gol pentru a dezactiva."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:805
@@ -3678,56 +3680,56 @@ msgstr "Notificări"
 # @ woocommerce
 #: admin/settings/settings-init.php:806
 msgid "Enable low stock notifications"
-msgstr "Activează notificarea de stoc redus"
+msgstr "Activează notificare <b>Stoc Redus</b>"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:814
 msgid "Enable out of stock notifications"
-msgstr "Activează notificarea de stoc epuizat"
+msgstr "Activează notificare <b>Stoc Epuizat</b>"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:822
 msgid "Low Stock Threshold"
-msgstr "Pragul de Stoc Redus"
+msgstr "Prag notificare Stoc Redus"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:835
 msgid "Out Of Stock Threshold"
-msgstr "Pragul de Stoc Epuizat"
+msgstr "Prag notificare Stoc Epuizat"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:848
 msgid "Out Of Stock Visibility"
-msgstr "Vizibilitate Produse cu Stoc Epuizat"
+msgstr "Produse cu Stoc Epuizat"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:849
 msgid "Hide out of stock items from the catalog"
-msgstr "Ascunde produse care au stocul epuizat (Împiedică comandarea lor)"
+msgstr "Ascunde produsele care au stocul epuizat"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:856
 msgid "Stock Display Format"
-msgstr "Format afișare stocuri"
+msgstr "Format afișare stoc"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:857
 msgid "This controls how stock is displayed on the frontend."
 msgstr ""
-"Această opțiune controlează modul de afișare pe pagina de produs a "
-"informațiilor legate de stocul produsului."
+"Această opțiune controlează modul de afișare a informațiilor legate de "
+"stocul produsului pe pagina de produs."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:863
 msgid "Always show stock e.g. \"12 in stock\""
-msgstr "Afișează stocul mereu, ex: \"12 în stoc\""
+msgstr "Afișează mereu, ex: \"12 în stoc\""
 
 # @ woocommerce
 #: admin/settings/settings-init.php:864
 msgid "Only show stock when low e.g. \"Only 2 left in stock\" vs. \"In Stock\""
 msgstr ""
-"Afișează stocul doar când se apropie de epuizare, ex: \"Doar 2 produse "
-"rămase pe stoc\" vs. \"În Stoc\""
+"Afișeaz[ doar când se apropie de 0, ex: \"Doar 2 produse rămase pe stoc\" "
+"vs. \"În Stoc\""
 
 # @ woocommerce
 #: admin/settings/settings-init.php:865
@@ -3795,7 +3797,7 @@ msgstr "Expediază doar către Adresa de Facturare a clientului"
 # @ woocommerce
 #: admin/settings/settings-init.php:928
 msgid "Ship to billing address by default"
-msgstr "Expediază către Adresa de Facturare a clientului în mod implicit"
+msgstr "Expediază către Adresa de Facturare a clientului în mod automat"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:936
@@ -3837,42 +3839,42 @@ msgstr "Activează câmpurile necesare taxelor și calculării taxelor"
 
 #: admin/settings/settings-init.php:983
 msgid "Prices Entered With Tax"
-msgstr "Prețurile Produselor includ taxele"
+msgstr "Prețurile produselor includ taxele"
 
 #: admin/settings/settings-init.php:987
 msgid ""
 "This option is important as it will affect how you input prices. Changing it "
 "will not update existing products."
 msgstr ""
-"Această opțiune este importanta pentru ca va afecta modul în care introduci "
-"prețurile. Modificând-o nu vei Modifica si produsele deja Existente."
+"Această opțiune este importantă - Va afecta modul în care introduci "
+"prețurile. NU vei modifica si produsele deja existente."
 
 #: admin/settings/settings-init.php:989
 msgid "Yes, I will enter prices inclusive of tax"
-msgstr "DA, voi introduce prețurile cu toate Taxele INCLUSE"
+msgstr "DA - voi introduce prețurile cu toate Taxele INCLUSE"
 
 #: admin/settings/settings-init.php:990
 msgid "No, I will enter prices exclusive of tax"
-msgstr "NU, voi introduce prețurile FĂRĂ TAXE (BRUT)"
+msgstr "NU - voi introduce prețurile FĂRĂ TAXE (BRUT)"
 
 #: admin/settings/settings-init.php:995
 msgid "Calculate Tax Based On:"
-msgstr "Calculează taxele (Brut) bazat pe:"
+msgstr "Calculează taxele pe baza:"
 
 #: admin/settings/settings-init.php:997
 msgid "This option determines which address is used to calculate tax."
 msgstr ""
-"Această Opțiune specifică ce adresă va fi utilizată pentru a calcula taxele."
+"Această opțiune specifică ce adresă va fi utilizată pentru a calcula taxele."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1001
 msgid "Customer shipping address"
-msgstr "Adresa de Livrare a clientului"
+msgstr "Adresei de Livrare a clientului"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1002
 msgid "Customer billing address"
-msgstr "Adresa de Facturare a clientului"
+msgstr "Adresei de Facturare a clientului"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1003 admin/settings/settings-init.php:1015
@@ -3889,7 +3891,7 @@ msgid ""
 "This option determines the customers default address (before they input "
 "their own)."
 msgstr ""
-"Această Opțiune va specifica adresa implicită a clienților (înainte să "
+"Această opțiune va specifica adresa implicită a clienților (înainte să "
 "introducă adresa lor)."
 
 # @ woocommerce
@@ -3907,8 +3909,8 @@ msgid ""
 "Optionally control which tax class shipping gets, or leave it so shipping "
 "tax is based on the cart items themselves."
 msgstr ""
-"Opţional controlaţi ce clasă de taxare se aplică pentru livrare, sau lăsaţi "
-"implicit, pentru aplicarea taxei de livrare în funcţie de articolele din coş."
+"Opţional, controlaţi ce clasă de taxare se aplică pentru livrare, sau lăsaţi "
+"automat, pentru aplicarea taxei de livrare în funcţie de articolele din coş."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1031
@@ -3950,12 +3952,12 @@ msgstr "Modul de afișare a prețurilor pe pagina de coș / checkout:"
 # @ woocommerce
 #: admin/settings/settings-init.php:1053
 msgid "Including tax"
-msgstr "Incluzând taxe. "
+msgstr "Incluzând taxe."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1054
 msgid "Excluding tax"
-msgstr "Fără taxe. "
+msgstr "Fără taxe."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1066
@@ -4030,7 +4032,7 @@ msgstr ""
 # @ woocommerce
 #: admin/settings/settings-init.php:1108
 msgid "Powered by WooCommerce"
-msgstr "Realizat de WooCommerce"
+msgstr "Powered by WooCommerce"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1112
@@ -4257,7 +4259,7 @@ msgstr "Importă din CSV"
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:163
 msgid "No row(s) selected"
-msgstr "Niciun rând(uri) selectat(e)"
+msgstr "Nici un rând selectat"
 
 # @ woocommerce
 #: admin/settings/settings-tax-rates.php:217
@@ -4356,7 +4358,7 @@ msgstr "Sortare implicită"
 #: admin/woocommerce-admin-attributes.php:320
 #: admin/woocommerce-admin-attributes.php:382
 msgid "Custom ordering"
-msgstr "Sortare personalizată."
+msgstr "Sortare personalizată"
 
 # @ woocommerce
 #: admin/woocommerce-admin-attributes.php:254
@@ -4393,7 +4395,7 @@ msgstr "Termeni"
 # @ woocommerce
 #: admin/woocommerce-admin-attributes.php:340
 msgid "Configure&nbsp;terms"
-msgstr "Configurează"
+msgstr "Configurează&nbsp;termeni"
 
 # @ woocommerce
 #: admin/woocommerce-admin-attributes.php:344
@@ -4508,7 +4510,7 @@ msgid ""
 "pages (such as a Terms page) here."
 msgstr ""
 "Aici sunt definite paginile importatante ale magazinului, tot aici pot fi "
-"setate și alte pagini (precum Termeni și Condiții)"
+"setate și alte pagini (precum Termeni și Condiții)."
 
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:46
@@ -4661,7 +4663,7 @@ msgstr ""
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:81
 msgid "For more information:"
-msgstr "Mai multe informații:"
+msgstr "Pentru mai multe informații:"
 
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:82
@@ -4782,7 +4784,7 @@ msgstr "În așteptare"
 # @ woocommerce
 #: admin/woocommerce-admin-dashboard.php:162
 msgid "On-Hold"
-msgstr "Păstrată (On-Hold)"
+msgstr "În așteptare"
 
 # @ woocommerce
 #: admin/woocommerce-admin-dashboard.php:190
@@ -5272,7 +5274,7 @@ msgstr "vezi-comanda"
 # @ woocommerce
 #: admin/woocommerce-admin-install.php:207
 msgid "View Order"
-msgstr "Vezi Comanenzi"
+msgstr "Vezi Comandă"
 
 # @ woocommerce
 #: admin/woocommerce-admin-install.php:210
@@ -5325,7 +5327,7 @@ msgstr "Vânzări Produs"
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:56
 msgid "Top sellers"
-msgstr "Cele mai multe vândute (cantitativ)"
+msgstr "Cele mai vândute (cantitativ)"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:61
@@ -5356,7 +5358,7 @@ msgstr "Suma Vânzărilor"
 #: admin/woocommerce-admin-reports.php:696
 #: admin/woocommerce-admin-reports.php:872
 msgid "Number of sales"
-msgstr "număr de vânzări"
+msgstr "Număr de vânzări"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:369
@@ -5403,7 +5405,7 @@ msgstr "Total comenzi"
 #: admin/woocommerce-admin-reports.php:645
 #: admin/woocommerce-admin-reports.php:824
 msgid "items"
-msgstr "Articole"
+msgstr "articole"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:381
@@ -5539,7 +5541,7 @@ msgstr "Lună"
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1204
 msgid "No sales :("
-msgstr "Nici o vânzare :("
+msgstr "N-am vândut nimic… :("
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1347
@@ -5548,7 +5550,7 @@ msgstr "Comenzi totale incluzând cupoanele"
 
 #: admin/woocommerce-admin-reports.php:1353
 msgid "Percent of orders containing coupons"
-msgstr "Procentul din Comenzi la care s-au folosit cupoane"
+msgstr "Procent din Comenzi pentru care s-au folosit cupoane"
 
 #: admin/woocommerce-admin-reports.php:1359
 msgid "Total coupon discount"
@@ -5569,7 +5571,7 @@ msgstr[1] "Folosit de %d ori"
 #: admin/woocommerce-admin-reports.php:1381
 #: admin/woocommerce-admin-reports.php:1403
 msgid "No coupons found"
-msgstr "Nici un Cupon nu a fost găsit"
+msgstr "N-am găsit nici un cupon"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1390
@@ -5625,12 +5627,12 @@ msgstr "Total Clienți"
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1794
 msgid "Total customer sales"
-msgstr "Total comenzi clienți"
+msgstr "Total vânzări clienți"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1800
 msgid "Total guest sales"
-msgstr "Total comenzi utilizatori neînregistrați"
+msgstr "Total comenzi clienți neînregistrați"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1806
@@ -5640,7 +5642,7 @@ msgstr "Total comenzi clienți"
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1812
 msgid "Total guest orders"
-msgstr "Total comenzi utilizatori neînregistrați"
+msgstr "Total comenzi clienți neînregistrați"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1818
@@ -5750,12 +5752,12 @@ msgstr "Profit Net"
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2292
 msgid "Total sales minus shipping and tax."
-msgstr "Total vânzări, minus costuri livrări și taxe."
+msgstr "Total vânzări, fără costuri livrări și taxe incluse."
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2337
 msgid "Toggle tax rows"
-msgstr "Comută rînduri taxe"
+msgstr "Comută rânduri taxe"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2483
@@ -5811,7 +5813,7 @@ msgid ""
 "More functionality and gateway options available via <a href=\"%s\" target="
 "\"_blank\">WC official extensions</a>."
 msgstr ""
-"Mai multe plugin-uri de funcționalitate și procesatori de plăți disponibili "
+"Mai multe plugin-uri de funcționalitate și procesatori de plăți, disponibili "
 "prin <a href=\"%s\" target=\"_blank\">extensiile oficiale WooCommerce</a>."
 
 # @ woocommerce
@@ -5839,7 +5841,7 @@ msgstr ""
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:831
 msgid "Hard Crop"
-msgstr "Tăiere imagine fără redimensionare"
+msgstr "Tăiere Automată"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:856
@@ -5940,17 +5942,17 @@ msgstr "Elementele Tranzitorii ale produsului au fost reinițializate."
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:96
 msgid "%d Transients Rows Cleared"
-msgstr "Au fost %d rânduri tranzitorii șterse"
+msgstr "Au fost șterse %d rânduri tranzitorii"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:104
 msgid "Roles successfully reset"
-msgstr "Roluri resetate cu succes."
+msgstr "Roluri resetate cu succes"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:116
 msgid "Terms successfully recounted"
-msgstr "Termenii au fost numărați cu succes."
+msgstr "Termenii au fost numărați cu succes"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:125
@@ -6212,7 +6214,7 @@ msgstr "Ambele"
 #: admin/woocommerce-admin-taxonomies.php:34
 #: admin/woocommerce-admin-taxonomies.php:129
 msgid "Thumbnail"
-msgstr "Imagine Medalion"
+msgstr "Imagine mică"
 
 # @ woocommerce
 #: admin/woocommerce-admin-taxonomies.php:38
@@ -6224,13 +6226,13 @@ msgstr "Încarcă / Adaugă imagine"
 #: admin/woocommerce-admin-taxonomies.php:39
 #: admin/woocommerce-admin-taxonomies.php:135
 msgid "Remove image"
-msgstr "Șterge Imagine"
+msgstr "Șterge imagine"
 
 # @ woocommerce
 #: admin/woocommerce-admin-taxonomies.php:64
 #: admin/woocommerce-admin-taxonomies.php:156
 msgid "Use image"
-msgstr "Folosește Imaginea"
+msgstr "Folosește imaginea"
 
 # @ woocommerce
 #: admin/woocommerce-admin-taxonomies.php:222
@@ -6260,7 +6262,7 @@ msgstr ""
 # @ woocommerce
 #: admin/woocommerce-admin-taxonomies.php:365
 msgid "Configure shipping class"
-msgstr "Configurează"
+msgstr "Configurează clasă de expediere"
 
 # @ woocommerce
 #: admin/woocommerce-admin-users.php:26
