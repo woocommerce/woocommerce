@@ -209,7 +209,7 @@ function woocommerce_product_data_box() {
 			if (get_option('woocommerce_manage_stock')=='yes') {
 
 				// manage stock
-				woocommerce_wp_checkbox( array( 'id' => '_manage_stock', 'wrapper_class' => 'show_if_simple show_if_variable', 'label' => __('Manage stock?', 'woocommerce' ) ) );
+				woocommerce_wp_checkbox( array( 'id' => '_manage_stock', 'wrapper_class' => 'show_if_simple show_if_variable', 'label' => __('Manage stock?', 'woocommerce' ), 'description' => __( 'Enable stock management at product level', 'woocommerce' ) ) );
 
 				do_action('woocommerce_product_options_stock');
 

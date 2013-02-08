@@ -54,7 +54,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 						<?php if ( get_option( 'woocommerce_manage_stock' ) == 'yes' ) : ?>
 							<tr>
 								<td>
-									<label><?php _e( 'Stock Qty:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enter a quantity to enable stock management for this variation, or leave blank to use the variable product stock options.', 'woocommerce' ); ?>" href="#">[?]</a></label>
+									<label><?php _e( 'Stock Qty:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enter a quantity to enable stock management at variation level, or leave blank to use the parent product\'s options.', 'woocommerce' ); ?>" href="#">[?]</a></label>
 									<input type="number" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if ( isset( $_stock ) ) echo esc_attr( $_stock ); ?>" step="any" />
 								</td>
 								<td>&nbsp;</td>
@@ -64,7 +64,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 						<tr>
 							<td>
 								<label><?php echo __( 'Regular Price:', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')'; ?></label>
-								<input type="number" size="5" name="variable_regular_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_regular_price ) ) echo esc_attr( $_regular_price ); ?>" step="any" min="0" placeholder="<?php _e( 'Enter a price for this variation (required)', 'woocommerce' ); ?>" />
+								<input type="number" size="5" name="variable_regular_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_regular_price ) ) echo esc_attr( $_regular_price ); ?>" step="any" min="0" placeholder="<?php _e( 'Variation price (required)', 'woocommerce' ); ?>" />
 							</td>
 							<td>
 								<label><?php echo __( 'Sale Price:', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')'; ?> <a href="#" class="sale_schedule"><?php _e( 'Schedule', 'woocommerce' ); ?></a><a href="#" class="cancel_sale_schedule" style="display:none"><?php _e( 'Cancel schedule', 'woocommerce' ); ?></a></label>
