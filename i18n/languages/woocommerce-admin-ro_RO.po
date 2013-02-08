@@ -2,9 +2,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce v1.6.1\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2013-01-02 13:44:51+00:00\n"
-"PO-Revision-Date: 2013-01-04 00:20+0200\n"
-"Last-Translator: Aurel Roman <aur3l.roman@gmail.com>\n"
+"POT-Creation-Date: 2013-01-09 09:36:51+00:00\n"
+"PO-Revision-Date: 2013-02-08 12:00+0100\n"
+"Last-Translator: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
 "Language-Team: \n"
 "Language: ro_RO\n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
 "X-Poedit-Basepath: ../../\n"
 "X-Textdomain-Support: yes\n"
-"X-Generator: Poedit 1.5.4\n"
+"X-Generator: Poedit 1.5.5\n"
 "X-Poedit-SearchPath-0: .\n"
 
 # @ woocommerce
@@ -202,14 +202,14 @@ msgstr ""
 
 # @ woocommerce
 #: admin/includes/updates/woocommerce-update-2.0.php:50
-#: admin/woocommerce-admin-init.php:829
+#: admin/woocommerce-admin-init.php:837
 msgctxt "slug"
 msgid "product-category"
 msgstr "categorie-produs"
 
 # @ woocommerce
 #: admin/includes/updates/woocommerce-update-2.0.php:51
-#: admin/woocommerce-admin-init.php:842
+#: admin/woocommerce-admin-init.php:850
 msgctxt "slug"
 msgid "product-tag"
 msgstr "eticheta-produs"
@@ -244,22 +244,22 @@ msgstr "Imagine"
 #: admin/post-types/product.php:87
 #: admin/post-types/writepanels/writepanel-product_data.php:368
 #: admin/post-types/writepanels/writepanel-product_data.php:447
-#: admin/woocommerce-admin-attributes.php:217
-#: admin/woocommerce-admin-attributes.php:253
-#: admin/woocommerce-admin-attributes.php:291
-#: admin/woocommerce-admin-attributes.php:314
-#: admin/woocommerce-admin-attributes.php:358
-#: admin/woocommerce-admin-attributes.php:383
-#: admin/woocommerce-admin-init.php:384
+#: admin/woocommerce-admin-attributes.php:232
+#: admin/woocommerce-admin-attributes.php:268
+#: admin/woocommerce-admin-attributes.php:306
+#: admin/woocommerce-admin-attributes.php:329
+#: admin/woocommerce-admin-attributes.php:373
+#: admin/woocommerce-admin-attributes.php:398
+#: admin/woocommerce-admin-init.php:393
 msgid "Name"
 msgstr "Nume"
 
 # @ woocommerce
-#: admin/post-types/product.php:90 admin/post-types/product.php:561
+#: admin/post-types/product.php:90 admin/post-types/product.php:563
 #: admin/post-types/writepanels/variation-admin-html.php:46
 #: admin/post-types/writepanels/writepanel-product_data.php:98
-#: admin/woocommerce-admin-reports.php:2038
-#: admin/woocommerce-admin-reports.php:2073
+#: admin/woocommerce-admin-reports.php:2063
+#: admin/woocommerce-admin-reports.php:2098
 msgid "SKU"
 msgstr "Cod Produs"
 
@@ -272,8 +272,8 @@ msgid "Stock"
 msgstr "Stoc"
 
 # @ woocommerce
-#: admin/post-types/product.php:95 admin/post-types/product.php:572
-#: admin/post-types/product.php:791 admin/woocommerce-admin-functions.php:196
+#: admin/post-types/product.php:95 admin/post-types/product.php:574
+#: admin/post-types/product.php:793 admin/woocommerce-admin-functions.php:196
 msgid "Price"
 msgstr "Preț"
 
@@ -288,17 +288,17 @@ msgid "Tags"
 msgstr "Etichete"
 
 # @ woocommerce
-#: admin/post-types/product.php:99 admin/post-types/product.php:636
-#: admin/post-types/product.php:908
+#: admin/post-types/product.php:99 admin/post-types/product.php:638
+#: admin/post-types/product.php:910
 #: admin/post-types/writepanels/writepanel-product_data.php:1044
-#: admin/woocommerce-admin-init.php:397
+#: admin/woocommerce-admin-init.php:406
 msgid "Featured"
 msgstr "Recomandat"
 
 # @ woocommerce
-#: admin/post-types/product.php:100 admin/woocommerce-admin-attributes.php:235
-#: admin/woocommerce-admin-attributes.php:293
-#: admin/woocommerce-admin-attributes.php:370
+#: admin/post-types/product.php:100 admin/woocommerce-admin-attributes.php:250
+#: admin/woocommerce-admin-attributes.php:308
+#: admin/woocommerce-admin-attributes.php:385
 msgid "Type"
 msgstr "Tip"
 
@@ -309,190 +309,207 @@ msgstr "Dată"
 
 # @ woocommerce
 #: admin/post-types/product.php:150
+#, fuzzy
+msgid "Edit this item"
+msgstr "Editează acest element in linie"
+
+# @ woocommerce
+# @ default
+#: admin/post-types/product.php:150
+#: admin/post-types/writepanels/writepanel-order_data.php:140
+#: admin/post-types/writepanels/writepanel-order_data.php:230
+#: admin/post-types/writepanels/writepanel-order_data.php:383
+#: admin/post-types/writepanels/writepanel-product_data.php:1047
+#: admin/woocommerce-admin-attributes.php:322
+msgid "Edit"
+msgstr "Editare"
+
+# @ woocommerce
+#: admin/post-types/product.php:151
 msgid "Edit this item inline"
 msgstr "Editează acest element in linie"
 
 # @ woocommerce
-#: admin/post-types/product.php:150
+#: admin/post-types/product.php:151
 msgid "Quick&nbsp;Edit"
 msgstr "Editare&nbsp;rapidă"
 
 # @ woocommerce
-#: admin/post-types/product.php:154 admin/post-types/shop_coupon.php:65
+#: admin/post-types/product.php:155 admin/post-types/shop_coupon.php:65
 msgid "Restore this item from the Trash"
 msgstr "Restaurează acest element din Gunoi"
 
 # @ woocommerce
-#: admin/post-types/product.php:154 admin/post-types/shop_coupon.php:65
+#: admin/post-types/product.php:155 admin/post-types/shop_coupon.php:65
 msgid "Restore"
 msgstr "Restaurează"
 
 # @ woocommerce
-#: admin/post-types/product.php:156 admin/post-types/shop_coupon.php:67
+#: admin/post-types/product.php:157 admin/post-types/shop_coupon.php:67
 msgid "Move this item to the Trash"
 msgstr "Mută acest element la Gunoi"
 
 # @ woocommerce
-#: admin/post-types/product.php:156 admin/post-types/shop_coupon.php:67
+#: admin/post-types/product.php:157 admin/post-types/shop_coupon.php:67
 msgid "Trash"
 msgstr "Gunoi"
 
 # @ woocommerce
-#: admin/post-types/product.php:158 admin/post-types/shop_coupon.php:69
+#: admin/post-types/product.php:159 admin/post-types/shop_coupon.php:69
 msgid "Delete this item permanently"
 msgstr "Șterge acest element definitiv"
 
 # @ woocommerce
-#: admin/post-types/product.php:158 admin/post-types/shop_coupon.php:69
+#: admin/post-types/product.php:159 admin/post-types/shop_coupon.php:69
 #: admin/post-types/writepanels/writepanel-order_data.php:456
 msgid "Delete Permanently"
 msgstr "Șterge Definitiv"
 
 # @ woocommerce
-#: admin/post-types/product.php:163
+#: admin/post-types/product.php:164
 msgid "Preview &#8220;%s&#8221;"
 msgstr "Previzualizare &#8220;%s&#8221;"
 
 # @ woocommerce
-#: admin/post-types/product.php:163
+#: admin/post-types/product.php:164
 msgid "Preview"
 msgstr "Previzualizare"
 
 # @ woocommerce
-#: admin/post-types/product.php:165
+#: admin/post-types/product.php:166
 msgid "View &#8220;%s&#8221;"
 msgstr "Vizualizare &#8220;%s&#8221;"
 
 # @ woocommerce
-#: admin/post-types/product.php:165 admin/post-types/shop_order.php:171
+#: admin/post-types/product.php:166 admin/post-types/shop_order.php:171
 msgid "View"
 msgstr "Vizualizare"
 
 # @ woocommerce
-#: admin/post-types/product.php:211
+#: admin/post-types/product.php:213
 msgid "Grouped"
 msgstr "Grupat"
 
 # @ woocommerce
-#: admin/post-types/product.php:213
+#: admin/post-types/product.php:215
 msgid "External/Affiliate"
 msgstr "Extern / Afiliat"
 
 # @ woocommerce
-#: admin/post-types/product.php:217 admin/post-types/product.php:411
+#: admin/post-types/product.php:219 admin/post-types/product.php:413
 #: admin/post-types/writepanels/variation-admin-html.php:166
 #: admin/post-types/writepanels/writepanel-product_data.php:52
 msgid "Virtual"
 msgstr "Virtual"
 
 # @ woocommerce
-#: admin/post-types/product.php:219 admin/post-types/product.php:407
+#: admin/post-types/product.php:221 admin/post-types/product.php:409
 #: admin/post-types/writepanels/variation-admin-html.php:164
 #: admin/post-types/writepanels/writepanel-product_data.php:58
 msgid "Downloadable"
 msgstr "Descărcabil"
 
 # @ woocommerce
-#: admin/post-types/product.php:221
+#: admin/post-types/product.php:223
 msgid "Simple"
 msgstr "Simplu"
 
 # @ woocommerce
-#: admin/post-types/product.php:225 admin/post-types/product.php:391
+#: admin/post-types/product.php:227 admin/post-types/product.php:393
 msgid "Variable"
 msgstr "Variabil"
 
 # @ woocommerce
-#: admin/post-types/product.php:248
+#: admin/post-types/product.php:250
 msgid "Toggle featured"
 msgstr "Comutare &quot;Recomandat&quot;"
 
 # @ woocommerce
-#: admin/post-types/product.php:250
+#: admin/post-types/product.php:252
 msgid "yes"
 msgstr "Da"
 
-#: admin/post-types/product.php:252
+#: admin/post-types/product.php:254
 msgid "no"
 msgstr "Nu"
 
 # @ woocommerce
-#: admin/post-types/product.php:259 admin/post-types/product.php:645
-#: admin/post-types/product.php:932
+#: admin/post-types/product.php:261 admin/post-types/product.php:647
+#: admin/post-types/product.php:934
 #: admin/post-types/writepanels/writepanel-product_data.php:227
 msgid "In stock"
 msgstr "În stoc"
 
 # @ woocommerce
-#: admin/post-types/product.php:261 admin/post-types/product.php:646
-#: admin/post-types/product.php:933
+#: admin/post-types/product.php:263 admin/post-types/product.php:648
+#: admin/post-types/product.php:935
 #: admin/post-types/writepanels/writepanel-product_data.php:228
-#: admin/woocommerce-admin-reports.php:2058
+#: admin/woocommerce-admin-reports.php:2083
 msgid "Out of stock"
 msgstr "Stoc epuizat"
 
 # @ woocommerce
-#: admin/post-types/product.php:377
+#: admin/post-types/product.php:379
 msgid "Show all product types"
 msgstr "Afișează toate tipurile de produs"
 
 # @ woocommerce
-#: admin/post-types/product.php:385
+#: admin/post-types/product.php:387
 #: admin/post-types/writepanels/writepanel-product_data.php:39
 msgid "Grouped product"
 msgstr "Produs Grupat"
 
 # @ woocommerce
-#: admin/post-types/product.php:387
+#: admin/post-types/product.php:389
 #: admin/post-types/writepanels/writepanel-product_data.php:40
 msgid "External/Affiliate product"
 msgstr "Produs Extern / Afiliat"
 
 # @ woocommerce
-#: admin/post-types/product.php:389
+#: admin/post-types/product.php:391
 #: admin/post-types/writepanels/writepanel-product_data.php:38
 msgid "Simple product"
 msgstr "Produs Simplu"
 
 # @ woocommerce
-#: admin/post-types/product.php:403
+#: admin/post-types/product.php:405
 msgid "Show all sub-types"
 msgstr "Afișează toate subtipurile"
 
 # @ woocommerce
-#: admin/post-types/product.php:524
+#: admin/post-types/product.php:526
 msgid "[%s with SKU of %s]"
 msgstr "[%s cu Cod Produs de %s]"
 
 # @ woocommerce
-#: admin/post-types/product.php:530
+#: admin/post-types/product.php:532
 msgid "[%s with ID of %d]"
 msgstr "[%s cu ID de %d]"
 
 # @ woocommerce
-#: admin/post-types/product.php:556 admin/post-types/product.php:787
+#: admin/post-types/product.php:558 admin/post-types/product.php:789
 #: admin/post-types/writepanels/writepanels-init.php:46
-#: admin/settings/settings-init.php:570
+#: admin/settings/settings-init.php:571
 msgid "Product Data"
 msgstr "Informații Produs"
 
 # @ woocommerce
-#: admin/post-types/product.php:574
+#: admin/post-types/product.php:576
 msgid "Regular price"
 msgstr "Preț Normal"
 
 # @ woocommerce
-#: admin/post-types/product.php:579 admin/post-types/product.php:815
+#: admin/post-types/product.php:581 admin/post-types/product.php:817
 msgid "Sale"
 msgstr "Reducere"
 
 # @ woocommerce
-#: admin/post-types/product.php:581
+#: admin/post-types/product.php:583
 msgid "Sale price"
 msgstr "Preț Reducere"
 
 # @ woocommerce
-#: admin/post-types/product.php:592 admin/post-types/product.php:841
+#: admin/post-types/product.php:594 admin/post-types/product.php:843
 #: admin/post-types/writepanels/variation-admin-html.php:90
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:84
 #: admin/post-types/writepanels/writepanel-product_data.php:269
@@ -500,45 +517,45 @@ msgid "Weight"
 msgstr "Greutate"
 
 # @ woocommerce
-#: admin/post-types/product.php:603 admin/post-types/product.php:865
+#: admin/post-types/product.php:605 admin/post-types/product.php:867
 msgid "L/W/H"
 msgstr "L/W/h"
 
 # @ woocommerce
-#: admin/post-types/product.php:605 admin/post-types/product.php:881
+#: admin/post-types/product.php:607 admin/post-types/product.php:883
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:85
 #: admin/post-types/writepanels/writepanel-product_data.php:282
 msgid "Length"
 msgstr "Lungime"
 
 # @ woocommerce
-#: admin/post-types/product.php:606 admin/post-types/product.php:882
+#: admin/post-types/product.php:608 admin/post-types/product.php:884
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:86
 #: admin/post-types/writepanels/writepanel-product_data.php:283
-#: admin/woocommerce-admin-settings.php:827
+#: admin/woocommerce-admin-settings.php:825
 msgid "Width"
 msgstr "Lățime"
 
 # @ woocommerce
-#: admin/post-types/product.php:607 admin/post-types/product.php:883
+#: admin/post-types/product.php:609 admin/post-types/product.php:885
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:87
 #: admin/post-types/writepanels/writepanel-product_data.php:284
-#: admin/woocommerce-admin-settings.php:829
+#: admin/woocommerce-admin-settings.php:827
 msgid "Height"
 msgstr "Înălțime"
 
 # @ woocommerce
-#: admin/post-types/product.php:617 admin/post-types/product.php:889
+#: admin/post-types/product.php:619 admin/post-types/product.php:891
 msgid "Visibility"
 msgstr "Vizibilittate"
 
 # @ woocommerce
-#: admin/post-types/product.php:622 admin/post-types/product.php:895
+#: admin/post-types/product.php:624 admin/post-types/product.php:897
 msgid "Catalog &amp; search"
 msgstr "Catalog &amp; Căutare"
 
 # @ woocommerce
-#: admin/post-types/product.php:623 admin/post-types/product.php:896
+#: admin/post-types/product.php:625 admin/post-types/product.php:898
 #: admin/post-types/writepanels/writepanel-product_data.php:1033
 #: admin/woocommerce-admin-content.php:46
 #: admin/woocommerce-admin-settings.php:220
@@ -547,94 +564,94 @@ msgstr "Catalog"
 
 # @ woocommerce
 # @ default
-#: admin/post-types/product.php:624 admin/post-types/product.php:897
+#: admin/post-types/product.php:626 admin/post-types/product.php:899
 #: admin/post-types/writepanels/writepanel-product_data.php:1034
 msgid "Search"
 msgstr "Caută"
 
 # @ woocommerce
-#: admin/post-types/product.php:625 admin/post-types/product.php:898
+#: admin/post-types/product.php:627 admin/post-types/product.php:900
 #: admin/post-types/writepanels/writepanel-product_data.php:1035
 msgid "Hidden"
 msgstr "Ascuns"
 
 # @ woocommerce
-#: admin/post-types/product.php:640 admin/post-types/product.php:926
+#: admin/post-types/product.php:642 admin/post-types/product.php:928
 msgid "In stock?"
 msgstr "În stoc?"
 
 # @ woocommerce
-#: admin/post-types/product.php:661 admin/post-types/product.php:944
+#: admin/post-types/product.php:663 admin/post-types/product.php:946
 #: admin/post-types/writepanels/writepanel-product_data.php:208
 msgid "Manage stock?"
 msgstr "Vrei să administrezi Stocurile?"
 
 # @ woocommerce
-#: admin/post-types/product.php:665 admin/post-types/product.php:963
-#: admin/post-types/product.php:979
+#: admin/post-types/product.php:667 admin/post-types/product.php:965
+#: admin/post-types/product.php:981
 #: admin/post-types/writepanels/writepanel-product_data.php:215
 msgid "Stock Qty"
 msgstr "Cantitate Stoc"
 
 # @ woocommerce
-#: admin/post-types/product.php:796 admin/post-types/product.php:820
-#: admin/post-types/product.php:846 admin/post-types/product.php:870
-#: admin/post-types/product.php:894 admin/post-types/product.php:913
-#: admin/post-types/product.php:931 admin/post-types/product.php:949
-#: admin/post-types/product.php:968
+#: admin/post-types/product.php:798 admin/post-types/product.php:822
+#: admin/post-types/product.php:848 admin/post-types/product.php:872
+#: admin/post-types/product.php:896 admin/post-types/product.php:915
+#: admin/post-types/product.php:933 admin/post-types/product.php:951
+#: admin/post-types/product.php:970
 msgid "— No Change —"
 msgstr "— Nici o modificare —"
 
 # @ woocommerce
-#: admin/post-types/product.php:797 admin/post-types/product.php:821
-#: admin/post-types/product.php:847 admin/post-types/product.php:871
-#: admin/post-types/product.php:969
+#: admin/post-types/product.php:799 admin/post-types/product.php:823
+#: admin/post-types/product.php:849 admin/post-types/product.php:873
+#: admin/post-types/product.php:971
 msgid "Change to:"
 msgstr "Schimbă în:"
 
-#: admin/post-types/product.php:798 admin/post-types/product.php:822
+#: admin/post-types/product.php:800 admin/post-types/product.php:824
 msgid "Increase by (fixed amount or %):"
 msgstr "Crește cu (sumă fixă sau valoare procentuală %):"
 
-#: admin/post-types/product.php:799 admin/post-types/product.php:823
+#: admin/post-types/product.php:801 admin/post-types/product.php:825
 msgid "Decrease by (fixed amount or %):"
 msgstr "Scade cu (sumă fixă sau valoare procentuală %):"
 
 # @ woocommerce
-#: admin/post-types/product.php:809 admin/post-types/product.php:834
+#: admin/post-types/product.php:811 admin/post-types/product.php:836
 msgid "Enter price"
 msgstr "Introdu Preț"
 
-#: admin/post-types/product.php:824
+#: admin/post-types/product.php:826
 msgid "Decrease regular price by (fixed amount or %):"
 msgstr "Scade prețul normal cu (sumă fixă sau valoare procentuală %):"
 
 # @ woocommerce
-#: admin/post-types/product.php:914 admin/post-types/product.php:950
+#: admin/post-types/product.php:916 admin/post-types/product.php:952
 #: admin/post-types/shop_order.php:190 admin/woocommerce-admin-status.php:202
 #: admin/woocommerce-admin-status.php:364
 msgid "Yes"
 msgstr "Da"
 
 # @ woocommerce
-#: admin/post-types/product.php:915 admin/post-types/product.php:951
+#: admin/post-types/product.php:917 admin/post-types/product.php:953
 #: admin/post-types/shop_order.php:192 admin/woocommerce-admin-status.php:202
 #: admin/woocommerce-admin-status.php:364
 msgid "No"
 msgstr "Nu"
 
 # @ woocommerce
-#: admin/post-types/product.php:1179
+#: admin/post-types/product.php:1181
 msgid "Sort Products"
 msgstr "Sortează Produse"
 
 # @ woocommerce
-#: admin/post-types/product.php:1218
+#: admin/post-types/product.php:1220
 msgid "Insert into product"
 msgstr "Inserați în produs"
 
 # @ woocommerce
-#: admin/post-types/product.php:1219
+#: admin/post-types/product.php:1221
 msgid "Uploaded to this product"
 msgstr "Încărcată la acest produs"
 
@@ -821,7 +838,7 @@ msgstr "Revocă Accesul"
 #: admin/post-types/writepanels/variation-admin-html.php:7
 #: admin/post-types/writepanels/writepanel-product_data.php:361
 #: admin/post-types/writepanels/writepanel-product_data.php:440
-#: admin/woocommerce-admin-init.php:386
+#: admin/woocommerce-admin-init.php:395
 msgid "Click to toggle"
 msgstr "Click pentru a comuta"
 
@@ -876,9 +893,9 @@ msgstr "Clasă Taxă"
 #: admin/post-types/writepanels/order-tax-html.php:8
 #: admin/post-types/writepanels/writepanel-order_data.php:551
 #: admin/post-types/writepanels/writepanel-order_data.php:650
-#: admin/woocommerce-admin-reports.php:1627
-#: admin/woocommerce-admin-reports.php:2608
-#: admin/woocommerce-admin-reports.php:2617
+#: admin/woocommerce-admin-reports.php:1642
+#: admin/woocommerce-admin-reports.php:2633
+#: admin/woocommerce-admin-reports.php:2642
 #: admin/woocommerce-admin-users.php:90 admin/woocommerce-admin-users.php:112
 msgid "N/A"
 msgstr "N / A"
@@ -894,7 +911,7 @@ msgstr "Taxabil"
 #: admin/post-types/writepanels/order-item-html.php:89
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:54
 #: admin/post-types/writepanels/writepanel-product_data.php:184
-#: admin/settings/settings-init.php:1026
+#: admin/settings/settings-init.php:1027
 #: admin/settings/settings-tax-rates.php:29
 #: admin/woocommerce-admin-settings.php:262
 msgid "Standard"
@@ -903,11 +920,11 @@ msgstr "Standard"
 # @ woocommerce
 #: admin/post-types/writepanels/order-fee-html.php:39
 #: admin/post-types/writepanels/order-item-html.php:106
-#: admin/woocommerce-admin-reports.php:1531
-#: admin/woocommerce-admin-reports.php:1584
-#: admin/woocommerce-admin-reports.php:2321
-#: admin/woocommerce-admin-reports.php:2493
-#: admin/woocommerce-admin-reports.php:2570
+#: admin/woocommerce-admin-reports.php:1546
+#: admin/woocommerce-admin-reports.php:1599
+#: admin/woocommerce-admin-reports.php:2346
+#: admin/woocommerce-admin-reports.php:2518
+#: admin/woocommerce-admin-reports.php:2595
 msgid "Total"
 msgstr "Total"
 
@@ -957,7 +974,7 @@ msgstr "Taxă Expediere:"
 #: admin/post-types/writepanels/variation-admin-html.php:6
 #: admin/post-types/writepanels/writepanel-product_data.php:360
 #: admin/post-types/writepanels/writepanel-product_data.php:439
-#: admin/woocommerce-admin-init.php:385
+#: admin/woocommerce-admin-init.php:394
 msgid "Remove"
 msgstr "Eliminină"
 
@@ -1238,7 +1255,7 @@ msgstr "Produse"
 #: admin/post-types/writepanels/writepanel-order_data.php:396
 #: admin/post-types/writepanels/writepanel-product_data.php:500
 #: admin/post-types/writepanels/writepanel-product_data.php:521
-#: admin/woocommerce-admin-reports.php:1214
+#: admin/woocommerce-admin-reports.php:1229
 msgid "Search for a product&hellip;"
 msgstr "Caută un produs&hellip;"
 
@@ -1405,7 +1422,7 @@ msgstr "h"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:87
-#: admin/settings/settings-init.php:629
+#: admin/settings/settings-init.php:630
 msgid "m"
 msgstr "m"
 
@@ -1428,16 +1445,6 @@ msgstr "Mențiunea clientului despre comandă:"
 #: admin/post-types/writepanels/writepanel-order_data.php:140
 msgid "Billing Details"
 msgstr "Detalii Facturare"
-
-# @ woocommerce
-# @ default
-#: admin/post-types/writepanels/writepanel-order_data.php:140
-#: admin/post-types/writepanels/writepanel-order_data.php:230
-#: admin/post-types/writepanels/writepanel-order_data.php:383
-#: admin/post-types/writepanels/writepanel-product_data.php:1047
-#: admin/woocommerce-admin-attributes.php:307
-msgid "Edit"
-msgstr "Editare"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:144
@@ -2050,7 +2057,7 @@ msgstr "Produse Legate"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:85
-#: admin/woocommerce-admin-attributes.php:283
+#: admin/woocommerce-admin-attributes.php:298
 #: admin/woocommerce-admin-init.php:61
 msgid "Attributes"
 msgstr "Atribute"
@@ -2250,7 +2257,7 @@ msgstr ""
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:376
 #: admin/post-types/writepanels/writepanel-product_data.php:453
-#: admin/woocommerce-admin-init.php:387
+#: admin/woocommerce-admin-init.php:396
 msgid "Value(s)"
 msgstr "Valoare(i)"
 
@@ -2282,20 +2289,20 @@ msgstr "Separă termenii prin \"|\""
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:412
 #: admin/post-types/writepanels/writepanel-product_data.php:459
-#: admin/woocommerce-admin-init.php:389
+#: admin/woocommerce-admin-init.php:398
 msgid "Visible on the product page"
 msgstr "Vizibil pe Pagina Produsului"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:418
 #: admin/post-types/writepanels/writepanel-product_data.php:465
-#: admin/woocommerce-admin-init.php:390
+#: admin/woocommerce-admin-init.php:399
 msgid "Used for variations"
 msgstr "Utilizat pentru Variații de Produs"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:454
-#: admin/woocommerce-admin-init.php:388
+#: admin/woocommerce-admin-init.php:397
 msgid "Enter some text, or some attributes by pipe (|) separating values."
 msgstr ""
 "Introduceți un text sau niște atribute separate prin caracterul (|). Ex.: "
@@ -2433,7 +2440,7 @@ msgstr "Șterge Imaginea"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_images.php:42
 #: admin/post-types/writepanels/writepanel-product_images.php:102
-#: admin/woocommerce-admin-attributes.php:307
+#: admin/woocommerce-admin-attributes.php:322
 msgid "Delete"
 msgstr "Șterge"
 
@@ -2986,33 +2993,40 @@ msgstr "Activează butoane \"Adaugă în Coș\" prin AJAX pe arhivele de produs.
 
 # @ woocommerce
 #: admin/settings/settings-init.php:268
-msgid "Enable WooCommerce lightbox on the product page"
+#, fuzzy
+msgid "Enable WooCommerce lightbox"
 msgstr ""
 "Activează \"WooCommerce Lightbox\" - prezentare de imagini - pe paginile de "
 "produs."
 
+#: admin/settings/settings-init.php:271
+msgid ""
+"On the product details page, product gallery images will open in a lightbox. "
+"The Add Review form will open in a modal window"
+msgstr ""
+
 # @ woocommerce
-#: admin/settings/settings-init.php:276
+#: admin/settings/settings-init.php:277
 msgid "Enable enhanced country select boxes"
 msgstr "Activează meniu avansat pentru selecția de țară."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:285
+#: admin/settings/settings-init.php:286
 msgid "Digital Downloads"
 msgstr "Descărcări Digitale"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:285
+#: admin/settings/settings-init.php:286
 msgid "The following options are specific to downloadable products."
 msgstr "Următoare opțiuni controlează produsele descărcabile (virtuale)."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:288
+#: admin/settings/settings-init.php:289
 msgid "File Download Method"
 msgstr "Metodă de descărcare a fișierelor"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:289
+#: admin/settings/settings-init.php:290
 msgid ""
 "Forcing downloads will keep URLs hidden, but some servers may serve large "
 "files unreliably. If supported, <code>X-Accel-Redirect</code>/ <code>X-"
@@ -3027,46 +3041,46 @@ msgstr ""
 "<code>mod_xsendfile</code>)."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:297
+#: admin/settings/settings-init.php:298
 msgid "Force Downloads"
 msgstr "Forțează descărcarea fișierelor"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:298
+#: admin/settings/settings-init.php:299
 msgid "X-Accel-Redirect/X-Sendfile"
 msgstr "X-Accel-Redirect/X-Sendfile"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:299
+#: admin/settings/settings-init.php:300
 msgid "Redirect only"
 msgstr "Doar redirecțisonare"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:304
+#: admin/settings/settings-init.php:305
 msgid "Access Restrictions"
 msgstr "Restricții Acces"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:305
+#: admin/settings/settings-init.php:306
 msgid "Must be logged in to download files"
 msgstr ""
 "Utilizator trebuie să fie autentificat pentru a putea descărca fișierele "
 "cumpărate."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:309
+#: admin/settings/settings-init.php:310
 msgid "This setting does not apply to guest downloads."
 msgstr ""
 "Această opțiune nu se aplică pentru descărcările oaspeților (descărcări "
 "făcute cadou)"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:314
+#: admin/settings/settings-init.php:315
 msgid "Grant access to downloadable products after payment"
 msgstr "Oferă acces la produsul descărcabil după plată"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:318
+#: admin/settings/settings-init.php:319
 msgid ""
 "Turn this option off to only grant access when an order is \"complete\", "
 "rather than \"processing\""
@@ -3075,19 +3089,19 @@ msgstr ""
 "comandă este marcată \"Completată\", în loc de \"În procesare\""
 
 # @ woocommerce
-#: admin/settings/settings-init.php:323
+#: admin/settings/settings-init.php:324
 msgid "Limit Quantity"
 msgstr "Limitează Cantitatea"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:324
+#: admin/settings/settings-init.php:325
 msgid "Limit the purchasable quantity of downloadable-virtual items to 1"
 msgstr ""
 "Clientul poate achiziționa o singură bucată dintr-un produs descărcabil - "
 "virtual."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:342
+#: admin/settings/settings-init.php:343
 msgid ""
 "Note: The shop page has children - child pages will not work if you enable "
 "this option."
@@ -3096,11 +3110,11 @@ msgstr ""
 "această opțiune este activă."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:347
+#: admin/settings/settings-init.php:348
 msgid "Page Setup"
 msgstr "Setări Pagină"
 
-#: admin/settings/settings-init.php:349
+#: admin/settings/settings-init.php:350
 msgid ""
 "Set up core WooCommerce pages here, for example the base page. The base page "
 "can also be used in your %sproduct permalinks%s."
@@ -3110,12 +3124,12 @@ msgstr ""
 "%s."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:354
+#: admin/settings/settings-init.php:355
 msgid "Shop Base Page"
 msgstr "Pagina de bază a Magazinului"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:355
+#: admin/settings/settings-init.php:356
 msgid ""
 "This sets the base page of your shop - this is where your product archive "
 "will be."
@@ -3124,12 +3138,12 @@ msgstr ""
 "arhiva cu toate produsele."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:365
+#: admin/settings/settings-init.php:366
 msgid "Base Page Title"
 msgstr "Titlul Paginii de bază a Magazinului"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:366
+#: admin/settings/settings-init.php:367
 msgid ""
 "This title to show on the shop base page. Leave blank to use the page title."
 msgstr ""
@@ -3137,12 +3151,12 @@ msgstr ""
 "gol pentru a utiliza titlu inițial al paginii (Setat din Meniul \"Pagini\")."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:375
+#: admin/settings/settings-init.php:376
 msgid "Terms Page ID"
 msgstr "Pagina de Termeni și Condiții"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:376
+#: admin/settings/settings-init.php:377
 msgid ""
 "If you define a \"Terms\" page the customer will be asked if they accept "
 "them when checking out."
@@ -3151,24 +3165,24 @@ msgstr ""
 "accepte Termenii și Condițiile prezentate la finalizarea comenzii."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:386
+#: admin/settings/settings-init.php:387
 msgid "Logout link"
 msgstr "Link Deconectare"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:387
+#: admin/settings/settings-init.php:388
 msgid "Append a logout link to menus containing \"My Account\""
 msgstr ""
 "Adaugă un link de Deconectare la toate meniurile ce conțin fraza \"Contul Meu"
 "\""
 
 # @ woocommerce
-#: admin/settings/settings-init.php:395 admin/woocommerce-admin-status.php:208
+#: admin/settings/settings-init.php:396 admin/woocommerce-admin-status.php:208
 msgid "Shop Pages"
 msgstr "Paginile Magazinului"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:395
+#: admin/settings/settings-init.php:396
 msgid ""
 "The following pages need selecting so that WooCommerce knows where they are. "
 "These pages should have been created upon installation of the plugin, if not "
@@ -3182,183 +3196,183 @@ msgstr ""
 "fiecărui câmp de selecție."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:398 admin/woocommerce-admin-status.php:219
+#: admin/settings/settings-init.php:399 admin/woocommerce-admin-status.php:219
 msgid "Cart Page"
 msgstr "Pagina \"Coș de Cumpărături\""
 
 # @ woocommerce
-#: admin/settings/settings-init.php:399
+#: admin/settings/settings-init.php:400
 msgid "Page contents: [woocommerce_cart]"
 msgstr "Conținut pagină: [woocommerce_cart]"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:409 admin/woocommerce-admin-status.php:223
+#: admin/settings/settings-init.php:410 admin/woocommerce-admin-status.php:223
 msgid "Checkout Page"
 msgstr "Pagina \"Finalizare Comandă\""
 
 # @ woocommerce
-#: admin/settings/settings-init.php:410
+#: admin/settings/settings-init.php:411
 msgid "Page contents: [woocommerce_checkout]"
 msgstr "Conținut pagină: [woocommerce_checkout]"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:420 admin/woocommerce-admin-status.php:227
+#: admin/settings/settings-init.php:421 admin/woocommerce-admin-status.php:227
 msgid "Pay Page"
 msgstr "Pagina \"Plată Comandă\""
 
 # @ woocommerce
-#: admin/settings/settings-init.php:421
+#: admin/settings/settings-init.php:422
 msgid "Page contents: [woocommerce_pay] Parent: \"Checkout\""
 msgstr ""
 "Conținut pagină: [woocommerce_pay] | Părinte Pagină: \"Finalizare Comandă\""
 
 # @ woocommerce
-#: admin/settings/settings-init.php:431 admin/woocommerce-admin-status.php:231
+#: admin/settings/settings-init.php:432 admin/woocommerce-admin-status.php:231
 msgid "Thanks Page"
 msgstr "Pagina \"Comandă Primită\""
 
 # @ woocommerce
-#: admin/settings/settings-init.php:432
+#: admin/settings/settings-init.php:433
 msgid "Page contents: [woocommerce_thankyou] Parent: \"Checkout\""
 msgstr ""
 "Conținut pagină: [woocommerce_thankyou] | Părinte Pagină: \"Finalizare "
 "Comandă\""
 
 # @ woocommerce
-#: admin/settings/settings-init.php:442 admin/woocommerce-admin-status.php:235
+#: admin/settings/settings-init.php:443 admin/woocommerce-admin-status.php:235
 msgid "My Account Page"
 msgstr "Pagina \"Contul Meu\""
 
 # @ woocommerce
-#: admin/settings/settings-init.php:443
+#: admin/settings/settings-init.php:444
 msgid "Page contents: [woocommerce_my_account]"
 msgstr "Conținut pagină: [woocommerce_my_account]"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:453 admin/woocommerce-admin-status.php:239
+#: admin/settings/settings-init.php:454 admin/woocommerce-admin-status.php:239
 msgid "Edit Address Page"
 msgstr "Pagina \"Modificare Adresă\""
 
 # @ woocommerce
-#: admin/settings/settings-init.php:454
+#: admin/settings/settings-init.php:455
 msgid "Page contents: [woocommerce_edit_address] Parent: \"My Account\""
 msgstr ""
 "Conținut pagină: [woocommerce_edit_address] | Părinte Pagină: \"Contul Meu\""
 
 # @ woocommerce
-#: admin/settings/settings-init.php:464 admin/woocommerce-admin-status.php:243
+#: admin/settings/settings-init.php:465 admin/woocommerce-admin-status.php:243
 msgid "View Order Page"
 msgstr "Pagina \"Vizualizare Comandă\""
 
 # @ woocommerce
-#: admin/settings/settings-init.php:465
+#: admin/settings/settings-init.php:466
 msgid "Page contents: [woocommerce_view_order] Parent: \"My Account\""
 msgstr ""
 "Conținut pagină: [woocommerce_view_order] | Părinte Pagină: \"Contul Meu\""
 
 # @ woocommerce
-#: admin/settings/settings-init.php:475 admin/woocommerce-admin-status.php:247
+#: admin/settings/settings-init.php:476 admin/woocommerce-admin-status.php:247
 msgid "Change Password Page"
 msgstr "Pagina \"Modificare Parolă\""
 
 # @ woocommerce
-#: admin/settings/settings-init.php:476
+#: admin/settings/settings-init.php:477
 msgid "Page contents: [woocommerce_change_password] Parent: \"My Account\""
 msgstr ""
 "Conținut pagină: [woocommerce_change_password] | Părinte Pagină: \"Contul Meu"
 "\""
 
 # @ woocommerce
-#: admin/settings/settings-init.php:486
+#: admin/settings/settings-init.php:487
 msgid "Lost Password Page"
 msgstr "Pagina \"Ai uitat parola?\""
 
 # @ woocommerce
-#: admin/settings/settings-init.php:487
+#: admin/settings/settings-init.php:488
 msgid "Page contents: [woocommerce_lost_password] Parent: \"My Account\""
 msgstr ""
 "Conținut pagină: [woocommerce_change_password] | Părinte Pagină: \"Contul Meu"
 "\""
 
 # @ woocommerce
-#: admin/settings/settings-init.php:503
+#: admin/settings/settings-init.php:504
 msgid "Catalog Options"
 msgstr "Opțiuni Catalog"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:506
+#: admin/settings/settings-init.php:507
 msgid "Default Product Sorting"
 msgstr "Sortarea implicită a Produselor"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:507
+#: admin/settings/settings-init.php:508
 msgid "This controls the default sort order of the catalog."
 msgstr "Această opțiune controlează modul de sortare a produselor."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:513
+#: admin/settings/settings-init.php:514
 msgid "Default sorting"
 msgstr "Sortare implicită"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:514
+#: admin/settings/settings-init.php:515
 msgid "Sort alphabetically"
 msgstr "Afișează de la A la Z"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:515
+#: admin/settings/settings-init.php:516
 msgid "Sort by most recent"
 msgstr "Sorteză după cele mai Recente Produse"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:516
+#: admin/settings/settings-init.php:517
 msgid "Sort by price"
 msgstr "Preț Ascendent"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:522
+#: admin/settings/settings-init.php:523
 msgid "Shop Page Display"
 msgstr "Afișare pe Pagina Magazinului"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:523
+#: admin/settings/settings-init.php:524
 msgid "This controls what is shown on the product archive."
 msgstr ""
 "Această opțiune controlează modul de afișare pe pagina de Arhive Produse "
 "(Pagina Magazinului)."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:529 admin/settings/settings-init.php:544
+#: admin/settings/settings-init.php:530 admin/settings/settings-init.php:545
 msgid "Show products"
 msgstr "Afișează produse"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:530 admin/settings/settings-init.php:545
+#: admin/settings/settings-init.php:531 admin/settings/settings-init.php:546
 msgid "Show subcategories"
 msgstr "Afișează subcategorii"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:531 admin/settings/settings-init.php:546
+#: admin/settings/settings-init.php:532 admin/settings/settings-init.php:547
 msgid "Show both"
 msgstr "Afișează ambele"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:537
+#: admin/settings/settings-init.php:538
 msgid "Default Category Display"
 msgstr "Afișare Implicită pe o Pagină Categorie"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:538
+#: admin/settings/settings-init.php:539
 msgid "This controls what is shown on category archives."
 msgstr "Această opțiune controlează ce este afișat pe Arhivele Categorie"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:552
+#: admin/settings/settings-init.php:553
 msgid "Redirects"
 msgstr "Redirecționări"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:553
+#: admin/settings/settings-init.php:554
 msgid ""
 "Redirect to cart after adding a product to the cart (on single product pages)"
 msgstr ""
@@ -3366,14 +3380,14 @@ msgstr ""
 "redirecționează clientul pe pagina Coșul Meu"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:561
+#: admin/settings/settings-init.php:562
 msgid "Redirect to the product page on a single matching search result"
 msgstr ""
 "Dacă în urma unei căutări este găsit un singur produs, redirecționează "
 "vizitatorul automat către pagina produsului"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:570
+#: admin/settings/settings-init.php:571
 msgid ""
 "The following options affect the fields available on the edit product page."
 msgstr ""
@@ -3381,170 +3395,170 @@ msgstr ""
 "produs."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:573
+#: admin/settings/settings-init.php:574
 msgid "Product Fields"
 msgstr "Câmpuri Produs"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:574
+#: admin/settings/settings-init.php:575
 msgid "Enable the SKU field for products"
 msgstr ""
 "Activează câmpul \"Cod Produs\" pentru identificarea mai ușoară a produselor"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:582
+#: admin/settings/settings-init.php:583
 msgid "Enable the weight field for products"
 msgstr "Activează câmpurl pentru afișarea greutății produsului"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:590
+#: admin/settings/settings-init.php:591
 msgid "Enable the dimension fields for products"
 msgstr "Activează câmpurile pentru afișarea dimensiunilor produsului"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:598
+#: admin/settings/settings-init.php:599
 msgid "Show weight and dimension fields in product attributes tab"
 msgstr ""
 "Afișează câmpurile de greutate și dimensiune în tab-ul de atribute a "
 "produsului"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:606
+#: admin/settings/settings-init.php:607
 msgid "Weight Unit"
 msgstr "Unitate de măsură a greutății"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:607
+#: admin/settings/settings-init.php:608
 msgid "This controls what unit you will define weights in."
 msgstr ""
 "Această opțiune afișează unitatea de măsură ce definește greutatea produsului"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:613
+#: admin/settings/settings-init.php:614
 msgid "kg"
 msgstr "kg"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:614
+#: admin/settings/settings-init.php:615
 msgid "g"
 msgstr "g"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:615
+#: admin/settings/settings-init.php:616
 msgid "lbs"
 msgstr "livre"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:616
+#: admin/settings/settings-init.php:617
 msgid "oz"
 msgstr "uncie"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:622
+#: admin/settings/settings-init.php:623
 msgid "Dimensions Unit"
 msgstr "Unitate de măsură a dimensiunii"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:623
+#: admin/settings/settings-init.php:624
 msgid "This controls what unit you will define lengths in."
 msgstr ""
 "Această opțiune afișează unitatea de măsură ce definește lungimea, lățimea, "
 "adâncimea unui produs."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:630
+#: admin/settings/settings-init.php:631
 msgid "cm"
 msgstr "cm"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:631
+#: admin/settings/settings-init.php:632
 msgid "mm"
 msgstr "mm"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:632
+#: admin/settings/settings-init.php:633
 msgid "in"
 msgstr "inci"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:633
+#: admin/settings/settings-init.php:634
 msgid "yd"
 msgstr "yarzi"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:639
+#: admin/settings/settings-init.php:640
 msgid "Product Ratings"
 msgstr "Calificative Produse"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:640
+#: admin/settings/settings-init.php:641
 msgid "Enable the rating field on the review form"
 msgstr ""
 "Activează calificativele definite prin steluțe pe formularul de comentarii / "
 "review"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:649
+#: admin/settings/settings-init.php:650
 msgid "Ratings are required to leave a review"
 msgstr ""
 "Acordarea de calificative este necesară pentru a lăsa un comentariu / opinie "
 "asupra produsului"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:658
+#: admin/settings/settings-init.php:659
 msgid "Show \"verified owner\" label for customer reviews"
 msgstr ""
 "Afișează simbol de \"Proprietar Verificat\" pentru recenziile de produs"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:668
+#: admin/settings/settings-init.php:669
 msgid "Pricing Options"
 msgstr "Afișarea Prețurilor"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:668
+#: admin/settings/settings-init.php:669
 msgid "The following options affect how prices are displayed on the frontend."
 msgstr "Următoarele opțiuni stabilesc modalitatea de afișar a prețurilor."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:671
+#: admin/settings/settings-init.php:672
 msgid "Currency Position"
 msgstr "Poziția Monedei"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:672
+#: admin/settings/settings-init.php:673
 msgid "This controls the position of the currency symbol."
 msgstr ""
 "Această opțiune controlează poziția de afișare a monedei - în stânga sau în "
 "dreapta prețului"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:678
+#: admin/settings/settings-init.php:679
 msgid "Left"
 msgstr "În Stânga monedei"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:679
+#: admin/settings/settings-init.php:680
 msgid "Right"
 msgstr "În Dreapta monedei"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:680
+#: admin/settings/settings-init.php:681
 msgid "Left (with space)"
 msgstr "În Stânga monedei plus un spațiu între preț și simbol"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:681
+#: admin/settings/settings-init.php:682
 msgid "Right (with space)"
 msgstr "În Dreapta monedei plus un spațiu între preț și simbol"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:687
+#: admin/settings/settings-init.php:688
 msgid "Thousand Separator"
 msgstr "Separator Mii"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:688
+#: admin/settings/settings-init.php:689
 msgid "This sets the thousand separator of displayed prices."
 msgstr ""
 "Această opțiuni controlează caracterul care delimitează miile (Pentru "
@@ -3552,12 +3566,12 @@ msgstr ""
 "sute de mii)"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:697
+#: admin/settings/settings-init.php:698
 msgid "Decimal Separator"
 msgstr "Separator Zecimale"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:698
+#: admin/settings/settings-init.php:699
 msgid "This sets the decimal separator of displayed prices."
 msgstr ""
 "Această opțiuni controlează caracterul care delimitează decimalele (Pentru "
@@ -3565,24 +3579,24 @@ msgstr ""
 "unu punct douăzeci și cinci)"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:707
+#: admin/settings/settings-init.php:708
 msgid "Number of Decimals"
 msgstr "Număr Zecimale"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:708
+#: admin/settings/settings-init.php:709
 msgid "This sets the number of decimal points shown in displayed prices."
 msgstr ""
 "Câte cifre vor fi afișate in cazul prețurilor cu decimală după \"virgulă\" "
 "respectiv \"punct\"."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:721
+#: admin/settings/settings-init.php:722
 msgid "Trailing Zeros"
 msgstr "Zero-uri afișate la Sfârșit"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:722
+#: admin/settings/settings-init.php:723
 msgid ""
 "Remove zeros after the decimal point. e.g. <code>$10.00</code> becomes <code>"
 "$10</code>"
@@ -3591,12 +3605,12 @@ msgstr ""
 "$10.00</code> devine <code>$10</code>"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:730
+#: admin/settings/settings-init.php:731
 msgid "Image Options"
 msgstr "Opțiuni Imagini"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:730
+#: admin/settings/settings-init.php:731
 msgid ""
 "These settings affect the actual dimensions of images in your catalog - the "
 "display on the front-end will still be affected by CSS styles. After "
@@ -3610,32 +3624,32 @@ msgstr ""
 "folosește <a href=\"%s\">acest plugin</a>."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:733
+#: admin/settings/settings-init.php:734
 msgid "Catalog Images"
 msgstr "Imagini Catalog"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:734
+#: admin/settings/settings-init.php:735
 msgid "This size is usually used in product listings"
 msgstr "Această dimensiune este utilizată de obicei în lista de produse."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:747
+#: admin/settings/settings-init.php:748
 msgid "Single Product Image"
 msgstr "Imagini afișate pe pagina de produs"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:748
+#: admin/settings/settings-init.php:749
 msgid "This is the size used by the main image on the product page."
 msgstr "Această dimensiune este utilizată de obicei pe pagina produsului."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:761
+#: admin/settings/settings-init.php:762
 msgid "Product Thumbnails"
 msgstr "Miniaturi Imagini"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:762
+#: admin/settings/settings-init.php:763
 msgid ""
 "This size is usually used for the gallery of images on the product page."
 msgstr ""
@@ -3643,25 +3657,25 @@ msgstr ""
 "galerie de imagini pe pagina produsului."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:781
+#: admin/settings/settings-init.php:782
 msgid "Inventory Options"
 msgstr "Opțiuni Administrare Inventar"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:784
+#: admin/settings/settings-init.php:785
 msgid "Manage Stock"
 msgstr "Gestionați stoc"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:785
+#: admin/settings/settings-init.php:786
 msgid "Enable stock management"
 msgstr "Activează administrarea stocurilor de produse"
 
-#: admin/settings/settings-init.php:792
+#: admin/settings/settings-init.php:793
 msgid "Hold Stock (minutes)"
 msgstr "Păstrează Stocul (minute)"
 
-#: admin/settings/settings-init.php:793
+#: admin/settings/settings-init.php:794
 msgid ""
 "Hold stock (for unpaid orders) for x minutes. When this limit is reached, "
 "the pending order will be cancelled. Leave blank to disable."
@@ -3671,146 +3685,146 @@ msgstr ""
 "anulată. Lăsa-ți Gol pentru a Dezactiva."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:805
+#: admin/settings/settings-init.php:806
 msgid "Notifications"
 msgstr "Notificări"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:806
+#: admin/settings/settings-init.php:807
 msgid "Enable low stock notifications"
 msgstr "Activează notificarea de stoc redus"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:814
+#: admin/settings/settings-init.php:815
 msgid "Enable out of stock notifications"
 msgstr "Activează notificarea de stoc epuizat"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:822
+#: admin/settings/settings-init.php:823
 msgid "Low Stock Threshold"
 msgstr "Pragul de Stoc Redus"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:835
+#: admin/settings/settings-init.php:836
 msgid "Out Of Stock Threshold"
 msgstr "Pragul de Stoc Epuizat"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:848
+#: admin/settings/settings-init.php:849
 msgid "Out Of Stock Visibility"
 msgstr "Vizibilitate Produse cu Stoc Epuizat"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:849
+#: admin/settings/settings-init.php:850
 msgid "Hide out of stock items from the catalog"
 msgstr "Ascunde produse care au stocul epuizat (Împiedică comandarea lor)"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:856
+#: admin/settings/settings-init.php:857
 msgid "Stock Display Format"
 msgstr "Format afișare stocuri"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:857
+#: admin/settings/settings-init.php:858
 msgid "This controls how stock is displayed on the frontend."
 msgstr ""
 "Această opțiune controlează modul de afișare pe pagina de produs a "
 "informațiilor legate de stocul produsului."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:863
+#: admin/settings/settings-init.php:864
 msgid "Always show stock e.g. \"12 in stock\""
 msgstr "Afișează stocul mereu, ex: \"12 în stoc\""
 
 # @ woocommerce
-#: admin/settings/settings-init.php:864
+#: admin/settings/settings-init.php:865
 msgid "Only show stock when low e.g. \"Only 2 left in stock\" vs. \"In Stock\""
 msgstr ""
 "Afișează stocul doar când se apropie de epuizare, ex: \"Doar 2 produse "
 "rămase pe stoc\" vs. \"În Stoc\""
 
 # @ woocommerce
-#: admin/settings/settings-init.php:865
+#: admin/settings/settings-init.php:866
 msgid "Never show stock amount"
 msgstr "Nu afișa cantitatea de produse în stoc"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:877
+#: admin/settings/settings-init.php:878
 #: admin/woocommerce-admin-settings.php:326
 msgid "Shipping Options"
 msgstr "Opțiuni Expediere"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:880
+#: admin/settings/settings-init.php:881
 msgid "Shipping Calculations"
 msgstr "Calcule Costuri Livrare"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:881
+#: admin/settings/settings-init.php:882
 msgid "Enable shipping"
 msgstr "Activează Expedierea Produselor"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:889
+#: admin/settings/settings-init.php:890
 msgid "Enable the shipping calculator on the cart page"
 msgstr "Activează Calculator Livrare pe pagina de Coș"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:897
+#: admin/settings/settings-init.php:898
 msgid "Hide shipping costs until an address is entered"
 msgstr "Ascunde costurile de livrare până în momentul introducerii unei adrese"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:905
+#: admin/settings/settings-init.php:906
 msgid "Shipping Method Display"
 msgstr "Afișare Metoda de Livrare"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:906
+#: admin/settings/settings-init.php:907
 msgid ""
 "This controls how multiple shipping methods are displayed on the frontend."
 msgstr ""
 "Această opțiune controlează afișarea Metodelor de Livrare pentru clienți."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:912
+#: admin/settings/settings-init.php:913
 msgid "Radio buttons"
 msgstr "Buton radio"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:913
+#: admin/settings/settings-init.php:914
 msgid "Select box"
 msgstr "Căsuță selecție"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:919
+#: admin/settings/settings-init.php:920
 msgid "Shipping Destination"
 msgstr "Destinație de Livrare"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:920
+#: admin/settings/settings-init.php:921
 msgid "Only ship to the users billing address"
 msgstr "Expediază doar către Adresa de Facturare a clientului"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:928
+#: admin/settings/settings-init.php:929
 msgid "Ship to billing address by default"
 msgstr "Expediază către Adresa de Facturare a clientului în mod implicit"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:936
+#: admin/settings/settings-init.php:937
 msgid "Collect shipping address even when not required"
 msgstr "Cere Adresa de Livrare a clientului chiar dacă nu este necesară"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:954
+#: admin/settings/settings-init.php:955
 #: admin/woocommerce-admin-settings.php:225
 #: admin/woocommerce-admin-settings.php:363
 msgid "Payment Gateways"
 msgstr "Metode de Plată"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:954
+#: admin/settings/settings-init.php:955
 msgid ""
 "Installed payment gateways are displayed below. Drag and drop payment "
 "gateways to control their display order on the checkout."
@@ -3820,26 +3834,26 @@ msgstr ""
 "Comandă."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:972
+#: admin/settings/settings-init.php:973
 #: admin/woocommerce-admin-settings.php:256
 msgid "Tax Options"
 msgstr "Opțiuni Administrare Taxe"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:975
+#: admin/settings/settings-init.php:976
 msgid "Enable Taxes"
 msgstr "Activează Taxele"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:976
+#: admin/settings/settings-init.php:977
 msgid "Enable taxes and tax calculations"
 msgstr "Activează câmpurile necesare taxelor și calculării taxelor"
 
-#: admin/settings/settings-init.php:983
+#: admin/settings/settings-init.php:984
 msgid "Prices Entered With Tax"
 msgstr "Prețurile Produselor includ taxele"
 
-#: admin/settings/settings-init.php:987
+#: admin/settings/settings-init.php:988
 msgid ""
 "This option is important as it will affect how you input prices. Changing it "
 "will not update existing products."
@@ -3847,44 +3861,44 @@ msgstr ""
 "Această opțiune este importanta pentru ca va afecta modul în care introduci "
 "prețurile. Modificând-o nu vei Modifica si produsele deja Existente."
 
-#: admin/settings/settings-init.php:989
+#: admin/settings/settings-init.php:990
 msgid "Yes, I will enter prices inclusive of tax"
 msgstr "DA, voi introduce prețurile cu toate Taxele INCLUSE"
 
-#: admin/settings/settings-init.php:990
+#: admin/settings/settings-init.php:991
 msgid "No, I will enter prices exclusive of tax"
 msgstr "NU, voi introduce prețurile FĂRĂ TAXE (BRUT)"
 
-#: admin/settings/settings-init.php:995
+#: admin/settings/settings-init.php:996
 msgid "Calculate Tax Based On:"
 msgstr "Calculează taxele (Brut) bazat pe:"
 
-#: admin/settings/settings-init.php:997
+#: admin/settings/settings-init.php:998
 msgid "This option determines which address is used to calculate tax."
 msgstr ""
 "Această Opțiune specifică ce adresă va fi utilizată pentru a calcula taxele."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1001
+#: admin/settings/settings-init.php:1002
 msgid "Customer shipping address"
 msgstr "Adresa de Livrare a clientului"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1002
+#: admin/settings/settings-init.php:1003
 msgid "Customer billing address"
 msgstr "Adresa de Facturare a clientului"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1003 admin/settings/settings-init.php:1015
+#: admin/settings/settings-init.php:1004 admin/settings/settings-init.php:1016
 msgid "Shop base address"
 msgstr "Adresa Magazinului"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1008
+#: admin/settings/settings-init.php:1009
 msgid "Default Customer Address:"
 msgstr "Adresa implicită a Clientului:"
 
-#: admin/settings/settings-init.php:1010
+#: admin/settings/settings-init.php:1011
 msgid ""
 "This option determines the customers default address (before they input "
 "their own)."
@@ -3893,16 +3907,16 @@ msgstr ""
 "introducă adresa lor)."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1014
+#: admin/settings/settings-init.php:1015
 msgid "No address"
 msgstr "Nici o Adresă"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1020
+#: admin/settings/settings-init.php:1021
 msgid "Shipping Tax Class:"
 msgstr "Clasă de Taxare pentru Expediere"
 
-#: admin/settings/settings-init.php:1021
+#: admin/settings/settings-init.php:1022
 msgid ""
 "Optionally control which tax class shipping gets, or leave it so shipping "
 "tax is based on the cart items themselves."
@@ -3911,24 +3925,24 @@ msgstr ""
 "implicit, pentru aplicarea taxei de livrare în funcţie de articolele din coş."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1031
+#: admin/settings/settings-init.php:1032
 msgid "Rounding"
 msgstr "Rotunjire"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1032
+#: admin/settings/settings-init.php:1033
 msgid "Round tax at subtotal level, instead of rounding per line"
 msgstr ""
 "Rotunjește taxele la nivel de subtotal, în schimbul rotunjirii la nivel de "
 "linie"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1039
+#: admin/settings/settings-init.php:1040
 msgid "Additional Tax Classes"
 msgstr "Clase adiționale de Taxere"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1040
+#: admin/settings/settings-init.php:1041
 msgid ""
 "List additonal tax classes below (1 per line). This is in addition to the "
 "default <code>Standard Rate</code>. Tax classes can be assigned to products."
@@ -3938,32 +3952,32 @@ msgstr ""
 "Taxare pot fi alocate produselor."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1044
+#: admin/settings/settings-init.php:1045
 msgid "Reduced Rate%sZero Rate"
 msgstr "Rată Redusă%sRată Zero"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1048
+#: admin/settings/settings-init.php:1049
 msgid "Display prices during cart/checkout:"
 msgstr "Modul de afișare a prețurilor pe pagina de coș / checkout:"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1053
+#: admin/settings/settings-init.php:1054
 msgid "Including tax"
 msgstr "Incluzând taxe. "
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1054
+#: admin/settings/settings-init.php:1055
 msgid "Excluding tax"
 msgstr "Fără taxe. "
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1066
+#: admin/settings/settings-init.php:1067
 msgid "Email Sender Options"
 msgstr "Cum sunt afișate datele de expediere a emailurilor"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1066
+#: admin/settings/settings-init.php:1067
 msgid ""
 "The following options affect the sender (email address and name) used in "
 "WooCommerce emails."
@@ -3973,22 +3987,22 @@ msgstr ""
 "Adresă de Email)."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1069
+#: admin/settings/settings-init.php:1070
 msgid "\"From\" Name"
 msgstr "\"De la\" - Se afișează Numele:"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1078
+#: admin/settings/settings-init.php:1079
 msgid "\"From\" Email Address"
 msgstr "\"De la\" - Se afișează adresa de email:"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1091
+#: admin/settings/settings-init.php:1092
 msgid "Email Template"
 msgstr "Șablon email"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1091
+#: admin/settings/settings-init.php:1092
 msgid ""
 "This section lets you customise the WooCommerce emails. <a href=\"%s\" "
 "target=\"_blank\">Click here to preview your email template</a>. For more "
@@ -4002,12 +4016,12 @@ msgstr ""
 "directorul<code>tema-Ta/woocommerce/emails/</code>."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1094
+#: admin/settings/settings-init.php:1095
 msgid "Header Image"
 msgstr "Imagine Antet"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1095
+#: admin/settings/settings-init.php:1096
 msgid ""
 "Enter a URL to an image you want to show in the email's header. Upload your "
 "image using the <a href=\"%s\">media uploader</a>."
@@ -4016,29 +4030,29 @@ msgstr ""
 "sau încarcă adaugă prin <a href=\"%s\">modulul de încărcare</a>."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1103
+#: admin/settings/settings-init.php:1104
 msgid "Email Footer Text"
 msgstr "Text afișat în subsolul emailului."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1104
+#: admin/settings/settings-init.php:1105
 msgid "The text to appear in the footer of WooCommerce emails."
 msgstr ""
 "Acest text va apărea în partea de subsol a emailurilor trimise de "
 "WooCommerce."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1108
+#: admin/settings/settings-init.php:1109
 msgid "Powered by WooCommerce"
 msgstr "Realizat de WooCommerce"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1112
+#: admin/settings/settings-init.php:1113
 msgid "Base Colour"
 msgstr "Culoară de bază"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1113
+#: admin/settings/settings-init.php:1114
 msgid ""
 "The base colour for WooCommerce email templates. Default <code>#557da1</"
 "code>."
@@ -4047,12 +4061,12 @@ msgstr ""
 "Culoare originală <code>#557da1</code>."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1121
+#: admin/settings/settings-init.php:1122
 msgid "Background Colour"
 msgstr "Culoare fundal"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1122
+#: admin/settings/settings-init.php:1123
 msgid ""
 "The background colour for WooCommerce email templates. Default "
 "<code>#f5f5f5</code>."
@@ -4061,29 +4075,29 @@ msgstr ""
 "originală <code>#f5f5f5</code>."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1130
+#: admin/settings/settings-init.php:1131
 msgid "Email Body Background Colour"
 msgstr "Culoare fundal email"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1131
+#: admin/settings/settings-init.php:1132
 msgid "The main body background colour. Default <code>#fdfdfd</code>."
 msgstr "Culoare principală de fundal. Original <code>#fdfdfd</code>."
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1139
+#: admin/settings/settings-init.php:1140
 msgid "Email Body Text Colour"
 msgstr "Culoare text email"
 
 # @ woocommerce
-#: admin/settings/settings-init.php:1140
+#: admin/settings/settings-init.php:1141
 msgid "The main body text colour. Default <code>#505050</code>."
 msgstr "Culoarea principală a textului. Original <code>#505050</code>."
 
 # @ woocommerce
 #: admin/settings/settings-payment-gateways.php:27
 #: admin/settings/settings-shipping-methods.php:29
-#: admin/woocommerce-admin-init.php:701
+#: admin/woocommerce-admin-init.php:709
 #: admin/woocommerce-admin-taxonomies.php:27
 #: admin/woocommerce-admin-taxonomies.php:121
 msgid "Default"
@@ -4279,38 +4293,47 @@ msgstr "Rată (Cotă) %"
 msgid "Tax Name"
 msgstr "Nume Taxă"
 
-#: admin/woocommerce-admin-attributes.php:43
-msgid "Slug %s is too long"
-msgstr "Numele Scurt %s este prea lung"
+#: admin/woocommerce-admin-attributes.php:77
+msgid "Please, provide an attribute name, slug and type."
+msgstr ""
+
+#: admin/woocommerce-admin-attributes.php:79
+msgid "Slug “%s” is too long (28 characters max). Shorten it, please."
+msgstr ""
+
+#: admin/woocommerce-admin-attributes.php:81
+msgid ""
+"Slug “%s” is not allowed because it is a reserved term. Change it, please."
+msgstr ""
+
+#: admin/woocommerce-admin-attributes.php:85
+#: admin/woocommerce-admin-attributes.php:90
+msgid "Slug “%s” is already in use. Change it, please."
+msgstr ""
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:83
-msgid "Taxonomy exists - please change the slug"
-msgstr "Numele există deja - modifică numele scurt (?)"
-
-# @ woocommerce
-#: admin/woocommerce-admin-attributes.php:211
+#: admin/woocommerce-admin-attributes.php:226
 msgid "Edit Attribute"
 msgstr "Editează Atribut"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:221
-#: admin/woocommerce-admin-attributes.php:360
+#: admin/woocommerce-admin-attributes.php:236
+#: admin/woocommerce-admin-attributes.php:375
 msgid "Name for the attribute (shown on the front-end)."
 msgstr ""
 "Nume atribut (este afișat pe pagina de prezentare produs - alături de "
 "Dimensiuni, Greutate, etc.)"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:226
-#: admin/woocommerce-admin-attributes.php:292
-#: admin/woocommerce-admin-attributes.php:364
+#: admin/woocommerce-admin-attributes.php:241
+#: admin/woocommerce-admin-attributes.php:307
+#: admin/woocommerce-admin-attributes.php:379
 msgid "Slug"
 msgstr "Nume scurt"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:230
-#: admin/woocommerce-admin-attributes.php:366
+#: admin/woocommerce-admin-attributes.php:245
+#: admin/woocommerce-admin-attributes.php:381
 msgid ""
 "Unique slug/reference for the attribute; must be shorter than 28 characters."
 msgstr ""
@@ -4319,20 +4342,20 @@ msgstr ""
 "<br />ex.: Nume Atribut: Sistem de Prindere » Nume Scurt: sistem-de-prindere."
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:239
-#: admin/woocommerce-admin-attributes.php:372
+#: admin/woocommerce-admin-attributes.php:254
+#: admin/woocommerce-admin-attributes.php:387
 msgid "Select"
 msgstr "Selectează"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:240
-#: admin/woocommerce-admin-attributes.php:373
+#: admin/woocommerce-admin-attributes.php:255
+#: admin/woocommerce-admin-attributes.php:388
 msgid "Text"
 msgstr "Text"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:243
-#: admin/woocommerce-admin-attributes.php:376
+#: admin/woocommerce-admin-attributes.php:258
+#: admin/woocommerce-admin-attributes.php:391
 msgid ""
 "Determines how you select attributes for products. <strong>Text</strong> "
 "allows manual entry via the product page, whereas <strong>select</strong> "
@@ -4346,27 +4369,27 @@ msgstr ""
 "folosește tipul de atribut <strong>Selectează</strong>."
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:248
-#: admin/woocommerce-admin-attributes.php:380
+#: admin/woocommerce-admin-attributes.php:263
+#: admin/woocommerce-admin-attributes.php:395
 msgid "Default sort order"
 msgstr "Sortare implicită"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:252
-#: admin/woocommerce-admin-attributes.php:320
-#: admin/woocommerce-admin-attributes.php:382
+#: admin/woocommerce-admin-attributes.php:267
+#: admin/woocommerce-admin-attributes.php:335
+#: admin/woocommerce-admin-attributes.php:397
 msgid "Custom ordering"
 msgstr "Sortare personalizată."
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:254
-#: admin/woocommerce-admin-attributes.php:317
-#: admin/woocommerce-admin-attributes.php:384
+#: admin/woocommerce-admin-attributes.php:269
+#: admin/woocommerce-admin-attributes.php:332
+#: admin/woocommerce-admin-attributes.php:399
 msgid "Term ID"
 msgstr "ID - Termen"
 
-#: admin/woocommerce-admin-attributes.php:256
-#: admin/woocommerce-admin-attributes.php:386
+#: admin/woocommerce-admin-attributes.php:271
+#: admin/woocommerce-admin-attributes.php:401
 msgid ""
 "Determines the sort order on the frontend for this attribute. If using "
 "custom ordering, you can drag and drop the terms in this attribute"
@@ -4376,37 +4399,37 @@ msgstr ""
 "fixați termenii în acest atribut"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:261
+#: admin/woocommerce-admin-attributes.php:276
 msgid "Update"
 msgstr "Actualizează"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:294
+#: admin/woocommerce-admin-attributes.php:309
 msgid "Order by"
 msgstr "Sortează după"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:295
+#: admin/woocommerce-admin-attributes.php:310
 msgid "Terms"
 msgstr "Termeni"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:340
+#: admin/woocommerce-admin-attributes.php:355
 msgid "Configure&nbsp;terms"
 msgstr "Configurează"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:344
+#: admin/woocommerce-admin-attributes.php:359
 msgid "No attributes currently exist."
 msgstr "Momentan nu există atribute produs."
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:354
+#: admin/woocommerce-admin-attributes.php:369
 msgid "Add New Attribute"
 msgstr "Adaugă Atribut Nou"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:355
+#: admin/woocommerce-admin-attributes.php:370
 msgid ""
 "Attributes let you define extra product data, such as size or colour. You "
 "can use these attributes in the shop sidebar using the \"layered nav\" "
@@ -4420,12 +4443,12 @@ msgstr ""
 "poate fi modificat."
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:389
+#: admin/woocommerce-admin-attributes.php:404
 msgid "Add Attribute"
 msgstr "Adaugă Atribut"
 
 # @ woocommerce
-#: admin/woocommerce-admin-attributes.php:400
+#: admin/woocommerce-admin-attributes.php:415
 msgid "Are you sure you want to delete this attribute?"
 msgstr "Ești sigur că vrei să ștergi acest atribut?"
 
@@ -4594,9 +4617,9 @@ msgstr ""
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:60
 #: admin/woocommerce-admin-reports.php:27
-#: admin/woocommerce-admin-reports.php:971
-#: admin/woocommerce-admin-reports.php:1067
-#: admin/woocommerce-admin-reports.php:1184
+#: admin/woocommerce-admin-reports.php:986
+#: admin/woocommerce-admin-reports.php:1082
+#: admin/woocommerce-admin-reports.php:1199
 msgid "Sales"
 msgstr "Vânzări"
 
@@ -4745,9 +4768,9 @@ msgstr "Conținut Magazin"
 # @ woocommerce
 #: admin/woocommerce-admin-dashboard.php:84
 #: admin/woocommerce-admin-functions.php:194
-#: admin/woocommerce-admin-init.php:705
-#: admin/woocommerce-admin-reports.php:970
-#: admin/woocommerce-admin-reports.php:1066
+#: admin/woocommerce-admin-init.php:713
+#: admin/woocommerce-admin-reports.php:985
+#: admin/woocommerce-admin-reports.php:1081
 msgid "Product"
 msgid_plural "Products"
 msgstr[0] "Produs"
@@ -4924,13 +4947,13 @@ msgid "WooCommerce Status"
 msgstr "Status WooCommerce"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:123 admin/woocommerce-admin-init.php:125
+#: admin/woocommerce-admin-init.php:135 admin/woocommerce-admin-init.php:137
 msgctxt "Admin menu name"
 msgid "Orders"
 msgstr "Comenzi"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:381
+#: admin/woocommerce-admin-init.php:390
 msgid ""
 "Are you sure you want to remove the selected items? If you have previously "
 "reduced this item's stock, or this order was submitted by a customer, you "
@@ -4941,27 +4964,27 @@ msgstr ""
 "un client, va trebui să restaurezi manual stocurile produselor."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:382
+#: admin/woocommerce-admin-init.php:391
 msgid "Remove this item meta?"
 msgstr "Șterge meta pentru acest articol?"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:383
+#: admin/woocommerce-admin-init.php:392
 msgid "Remove this attribute?"
 msgstr "Șterge acest atribut?"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:391
+#: admin/woocommerce-admin-init.php:400
 msgid "Enter a name for the new attribute term:"
 msgstr "Introdu un nume pentru noul atribut:"
 
-#: admin/woocommerce-admin-init.php:392
+#: admin/woocommerce-admin-init.php:401
 msgid "Calculate totals based on order items, discounts, and shipping?"
 msgstr ""
 "Calculați totalurile bazate pe produsele comandate, reduceri și transport?"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:393
+#: admin/woocommerce-admin-init.php:402
 msgid ""
 "Calculate line taxes? This will calculate taxes based on the customers "
 "country. If no billing/shipping is set it will use the store base country."
@@ -4972,7 +4995,7 @@ msgstr ""
 "provine magazinul."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:394
+#: admin/woocommerce-admin-init.php:403
 msgid ""
 "Copy billing information to shipping information? This will remove any "
 "currently entered shipping information."
@@ -4981,7 +5004,7 @@ msgstr ""
 "șterge informațiile de livrare existente."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:395
+#: admin/woocommerce-admin-init.php:404
 msgid ""
 "Load the customer's billing information? This will remove any currently "
 "entered billing information."
@@ -4990,7 +5013,7 @@ msgstr ""
 "informația existentă în câmpurile Adresei de Facturare."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:396
+#: admin/woocommerce-admin-init.php:405
 msgid ""
 "Load the customer's shipping information? This will remove any currently "
 "entered shipping information."
@@ -4999,55 +5022,55 @@ msgstr ""
 "informația existentă în câmpurile Adresei de Livrare."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:400
+#: admin/woocommerce-admin-init.php:409
 msgid "No customer selected"
 msgstr "Nu a fost selectat nici un client"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:609
+#: admin/woocommerce-admin-init.php:617
 msgid "Product updated. <a href=\"%s\">View Product</a>"
 msgstr "Produs Actualizat. <a href=\"%s\">Vezi Produs</a>"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:610 admin/woocommerce-admin-init.php:625
-#: admin/woocommerce-admin-init.php:640
+#: admin/woocommerce-admin-init.php:618 admin/woocommerce-admin-init.php:633
+#: admin/woocommerce-admin-init.php:648
 msgid "Custom field updated."
 msgstr "Câmp personalizat actualizat."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:611 admin/woocommerce-admin-init.php:626
-#: admin/woocommerce-admin-init.php:641
+#: admin/woocommerce-admin-init.php:619 admin/woocommerce-admin-init.php:634
+#: admin/woocommerce-admin-init.php:649
 msgid "Custom field deleted."
 msgstr "Câmp personalizat șters."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:612
+#: admin/woocommerce-admin-init.php:620
 msgid "Product updated."
 msgstr "Produs Actualizat."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:613
+#: admin/woocommerce-admin-init.php:621
 msgid "Product restored to revision from %s"
 msgstr "Produsul a fost restaurat la versiunea din %s"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:614
+#: admin/woocommerce-admin-init.php:622
 msgid "Product published. <a href=\"%s\">View Product</a>"
 msgstr "Produs publicat. <a href=\"%s\">Vezi Produs</a>"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:615
+#: admin/woocommerce-admin-init.php:623
 msgid "Product saved."
 msgstr "Produs Salvat."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:616
+#: admin/woocommerce-admin-init.php:624
 msgid "Product submitted. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
 msgstr ""
 "Produs prezentat. <a target=\"_blank\" href=\"%s\">Previzualizează Produs</a>"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:617
+#: admin/woocommerce-admin-init.php:625
 msgid ""
 "Product scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" href="
 "\"%2$s\">Preview Product</a>"
@@ -5056,13 +5079,13 @@ msgstr ""
 "target=\"_blank\" href=\"%2$s\">Previzualizează Produs</a>"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:618 admin/woocommerce-admin-init.php:633
-#: admin/woocommerce-admin-init.php:648
+#: admin/woocommerce-admin-init.php:626 admin/woocommerce-admin-init.php:641
+#: admin/woocommerce-admin-init.php:656
 msgid "M j, Y @ G:i"
 msgstr "M j, Y @ G:i"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:619
+#: admin/woocommerce-admin-init.php:627
 msgid ""
 "Product draft updated. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
 msgstr ""
@@ -5070,74 +5093,74 @@ msgstr ""
 "Produs</a>"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:624 admin/woocommerce-admin-init.php:627
-#: admin/woocommerce-admin-init.php:629
+#: admin/woocommerce-admin-init.php:632 admin/woocommerce-admin-init.php:635
+#: admin/woocommerce-admin-init.php:637
 msgid "Order updated."
 msgstr "Comandă Actualizată."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:628
+#: admin/woocommerce-admin-init.php:636
 msgid "Order restored to revision from %s"
 msgstr "Comandă restaurată la revizia %s"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:630
+#: admin/woocommerce-admin-init.php:638
 msgid "Order saved."
 msgstr "Comandă Salvată."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:631
+#: admin/woocommerce-admin-init.php:639
 msgid "Order submitted."
 msgstr "Comandă Trimisă."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:632
+#: admin/woocommerce-admin-init.php:640
 msgid "Order scheduled for: <strong>%1$s</strong>."
 msgstr "Comandă programată pentru: <strong>%1$s</strong>."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:634
+#: admin/woocommerce-admin-init.php:642
 msgid "Order draft updated."
 msgstr "Ciornă Comandă Actualizată."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:639 admin/woocommerce-admin-init.php:642
-#: admin/woocommerce-admin-init.php:644
+#: admin/woocommerce-admin-init.php:647 admin/woocommerce-admin-init.php:650
+#: admin/woocommerce-admin-init.php:652
 msgid "Coupon updated."
 msgstr "Cupon Actualizat."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:643
+#: admin/woocommerce-admin-init.php:651
 msgid "Coupon restored to revision from %s"
 msgstr "Cupon restaurat la revizia %s"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:645
+#: admin/woocommerce-admin-init.php:653
 msgid "Coupon saved."
 msgstr "Cupon Salvat."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:646
+#: admin/woocommerce-admin-init.php:654
 msgid "Coupon submitted."
 msgstr "Cupon Trimis."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:647
+#: admin/woocommerce-admin-init.php:655
 msgid "Coupon scheduled for: <strong>%1$s</strong>."
 msgstr ""
 "Cupon programat pentru pentru a fi activat pe data: <strong>%1$s</strong>."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:649
+#: admin/woocommerce-admin-init.php:657
 msgid "Coupon draft updated."
 msgstr "Ciornă Cupon Actualizat."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:666
+#: admin/woocommerce-admin-init.php:674
 msgid "Order notes"
 msgstr "Mențiuni Comandă"
 
-#: admin/woocommerce-admin-init.php:681
+#: admin/woocommerce-admin-init.php:689
 msgid ""
 "These settings control the permalinks used for products. These settings only "
 "apply when <strong>not using \"default\" permalinks above</strong>."
@@ -5147,33 +5170,33 @@ msgstr ""
 "legăturile permanente mai sus</strong>."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:688
+#: admin/woocommerce-admin-init.php:696
 msgctxt "default-slug"
 msgid "shop"
 msgstr "magazin"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:689
+#: admin/woocommerce-admin-init.php:697
 msgctxt "default-slug"
 msgid "product"
 msgstr "produs"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:710
+#: admin/woocommerce-admin-init.php:718
 msgid "Shop base"
 msgstr "Pagina de bază - Magazin"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:714
+#: admin/woocommerce-admin-init.php:722
 msgid "Shop base with category"
 msgstr "Pagina de bază - Magazin și Categorie"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:720
+#: admin/woocommerce-admin-init.php:728
 msgid "Custom Base"
 msgstr "Structură personalizată"
 
-#: admin/woocommerce-admin-init.php:722
+#: admin/woocommerce-admin-init.php:730
 msgid ""
 "Enter a custom base to use. A base <strong>must</strong> be set or WordPress "
 "will use default instead."
@@ -5183,22 +5206,22 @@ msgstr ""
 "WordPress-ul va utiliza valorile implicite."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:750
+#: admin/woocommerce-admin-init.php:758
 msgid "Product permalink base"
 msgstr "Structură - Legătura permanentă Produs"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:755
+#: admin/woocommerce-admin-init.php:763
 msgid "Product category base"
 msgstr "Bază - Categorie produs"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:762
+#: admin/woocommerce-admin-init.php:770
 msgid "Product tag base"
 msgstr "Bază - Etichetă produs"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:769
+#: admin/woocommerce-admin-init.php:777
 msgid "Product attribute base"
 msgstr "Bază - Atribute Produs"
 
@@ -5344,17 +5367,17 @@ msgstr "Reduceri per Cupon"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:232
-#: admin/woocommerce-admin-reports.php:496
-#: admin/woocommerce-admin-reports.php:696
-#: admin/woocommerce-admin-reports.php:872
+#: admin/woocommerce-admin-reports.php:497
+#: admin/woocommerce-admin-reports.php:702
+#: admin/woocommerce-admin-reports.php:883
 msgid "Sales amount"
 msgstr "Suma Vânzărilor"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:237
-#: admin/woocommerce-admin-reports.php:496
-#: admin/woocommerce-admin-reports.php:696
-#: admin/woocommerce-admin-reports.php:872
+#: admin/woocommerce-admin-reports.php:497
+#: admin/woocommerce-admin-reports.php:702
+#: admin/woocommerce-admin-reports.php:883
 msgid "Number of sales"
 msgstr "număr de vânzări"
 
@@ -5370,26 +5393,26 @@ msgstr "Total vânzări"
 #: admin/woocommerce-admin-reports.php:389
 #: admin/woocommerce-admin-reports.php:395
 #: admin/woocommerce-admin-reports.php:401
-#: admin/woocommerce-admin-reports.php:639
-#: admin/woocommerce-admin-reports.php:645
-#: admin/woocommerce-admin-reports.php:651
-#: admin/woocommerce-admin-reports.php:657
-#: admin/woocommerce-admin-reports.php:818
-#: admin/woocommerce-admin-reports.php:824
-#: admin/woocommerce-admin-reports.php:830
-#: admin/woocommerce-admin-reports.php:836
-#: admin/woocommerce-admin-reports.php:1349
-#: admin/woocommerce-admin-reports.php:1355
-#: admin/woocommerce-admin-reports.php:1361
-#: admin/woocommerce-admin-reports.php:1790
-#: admin/woocommerce-admin-reports.php:1796
-#: admin/woocommerce-admin-reports.php:1802
-#: admin/woocommerce-admin-reports.php:1808
-#: admin/woocommerce-admin-reports.php:1814
-#: admin/woocommerce-admin-reports.php:1820
-#: admin/woocommerce-admin-reports.php:2255
-#: admin/woocommerce-admin-reports.php:2266
-#: admin/woocommerce-admin-reports.php:2277
+#: admin/woocommerce-admin-reports.php:644
+#: admin/woocommerce-admin-reports.php:650
+#: admin/woocommerce-admin-reports.php:656
+#: admin/woocommerce-admin-reports.php:662
+#: admin/woocommerce-admin-reports.php:828
+#: admin/woocommerce-admin-reports.php:834
+#: admin/woocommerce-admin-reports.php:840
+#: admin/woocommerce-admin-reports.php:846
+#: admin/woocommerce-admin-reports.php:1364
+#: admin/woocommerce-admin-reports.php:1370
+#: admin/woocommerce-admin-reports.php:1376
+#: admin/woocommerce-admin-reports.php:1810
+#: admin/woocommerce-admin-reports.php:1816
+#: admin/woocommerce-admin-reports.php:1822
+#: admin/woocommerce-admin-reports.php:1828
+#: admin/woocommerce-admin-reports.php:1834
+#: admin/woocommerce-admin-reports.php:1840
+#: admin/woocommerce-admin-reports.php:2280
+#: admin/woocommerce-admin-reports.php:2291
+#: admin/woocommerce-admin-reports.php:2302
 msgid "n/a"
 msgstr "N / A"
 
@@ -5400,8 +5423,8 @@ msgstr "Total comenzi"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:377
-#: admin/woocommerce-admin-reports.php:645
-#: admin/woocommerce-admin-reports.php:824
+#: admin/woocommerce-admin-reports.php:650
+#: admin/woocommerce-admin-reports.php:834
 msgid "items"
 msgstr "Articole"
 
@@ -5431,358 +5454,358 @@ msgid "This month's sales"
 msgstr "Vânzări pentru luna în curs"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:631
-#: admin/woocommerce-admin-reports.php:965
-#: admin/woocommerce-admin-reports.php:1061
-#: admin/woocommerce-admin-reports.php:1341
+#: admin/woocommerce-admin-reports.php:636
+#: admin/woocommerce-admin-reports.php:980
+#: admin/woocommerce-admin-reports.php:1076
+#: admin/woocommerce-admin-reports.php:1356
 msgid "From:"
 msgstr "De la:"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:631
-#: admin/woocommerce-admin-reports.php:965
-#: admin/woocommerce-admin-reports.php:1061
-#: admin/woocommerce-admin-reports.php:1341
+#: admin/woocommerce-admin-reports.php:636
+#: admin/woocommerce-admin-reports.php:980
+#: admin/woocommerce-admin-reports.php:1076
+#: admin/woocommerce-admin-reports.php:1356
 msgid "To:"
 msgstr "La:"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:631
-#: admin/woocommerce-admin-reports.php:811
-#: admin/woocommerce-admin-reports.php:965
-#: admin/woocommerce-admin-reports.php:1061
-#: admin/woocommerce-admin-reports.php:1214
-#: admin/woocommerce-admin-reports.php:1341
-#: admin/woocommerce-admin-reports.php:1474
-#: admin/woocommerce-admin-reports.php:2244
-#: admin/woocommerce-admin-reports.php:2428
+#: admin/woocommerce-admin-reports.php:636
+#: admin/woocommerce-admin-reports.php:821
+#: admin/woocommerce-admin-reports.php:980
+#: admin/woocommerce-admin-reports.php:1076
+#: admin/woocommerce-admin-reports.php:1229
+#: admin/woocommerce-admin-reports.php:1356
+#: admin/woocommerce-admin-reports.php:1489
+#: admin/woocommerce-admin-reports.php:2269
+#: admin/woocommerce-admin-reports.php:2453
 msgid "Show"
 msgstr "Arată"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:637
+#: admin/woocommerce-admin-reports.php:642
 msgid "Total sales in range"
 msgstr "Vânzări totale pentru perioada selectată"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:643
+#: admin/woocommerce-admin-reports.php:648
 msgid "Total orders in range"
 msgstr "Comenzi totale pentru perioada selectată"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:649
+#: admin/woocommerce-admin-reports.php:654
 msgid "Average order total in range"
 msgstr "Media valorii unei comenzi pentru perioada selectată"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:655
+#: admin/woocommerce-admin-reports.php:660
 msgid "Average order items in range"
 msgstr "Număr mediu de produse per comandă pentru perioada selectată"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:663
+#: admin/woocommerce-admin-reports.php:668
 msgid "Sales in range"
 msgstr "Vânzări pentru perioada selectată"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:805
-#: admin/woocommerce-admin-reports.php:2238
+#: admin/woocommerce-admin-reports.php:815
+#: admin/woocommerce-admin-reports.php:2263
 msgid "Year:"
 msgstr "An:"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:816
+#: admin/woocommerce-admin-reports.php:826
 msgid "Total sales for year"
 msgstr "Total vânzări pentru anul"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:822
+#: admin/woocommerce-admin-reports.php:832
 msgid "Total orders for year"
 msgstr "Total comenzi pentru anul"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:828
+#: admin/woocommerce-admin-reports.php:838
 msgid "Average order total for year"
 msgstr "Total mediu comadă per an"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:834
+#: admin/woocommerce-admin-reports.php:844
 msgid "Average order items for year"
 msgstr "Medie produse pe comandă per an (?)"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:842
+#: admin/woocommerce-admin-reports.php:852
 msgid "Monthly sales for year"
 msgstr "Vânzări lunare pentru anul"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:985
+#: admin/woocommerce-admin-reports.php:1000
 msgid "Product does not exist"
 msgstr "Produsul nu există"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1082
+#: admin/woocommerce-admin-reports.php:1097
 msgid "Product no longer exists"
 msgstr "Produsul nu mai există"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1179
+#: admin/woocommerce-admin-reports.php:1194
 msgid "Sales for %s:"
 msgstr "Vânzări pentru %s:"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1183
-#: admin/woocommerce-admin-reports.php:2286
+#: admin/woocommerce-admin-reports.php:1198
+#: admin/woocommerce-admin-reports.php:2311
 msgid "Month"
 msgstr "Lună"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1204
+#: admin/woocommerce-admin-reports.php:1219
 msgid "No sales :("
 msgstr "Nici o vânzare :("
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1347
+#: admin/woocommerce-admin-reports.php:1362
 msgid "Total orders containing coupons"
 msgstr "Comenzi totale incluzând cupoanele"
 
-#: admin/woocommerce-admin-reports.php:1353
+#: admin/woocommerce-admin-reports.php:1368
 msgid "Percent of orders containing coupons"
 msgstr "Procentul din Comenzi la care s-au folosit cupoane"
 
-#: admin/woocommerce-admin-reports.php:1359
+#: admin/woocommerce-admin-reports.php:1374
 msgid "Total coupon discount"
 msgstr "Reducere Totală Cupon"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1368
+#: admin/woocommerce-admin-reports.php:1383
 msgid "Most popular coupons"
 msgstr "Cele mai populare Cupoane"
 
-#: admin/woocommerce-admin-reports.php:1378
+#: admin/woocommerce-admin-reports.php:1393
 msgid "Used 1 time"
 msgid_plural "Used %d times"
 msgstr[0] "Folosit 1 dată"
 msgstr[1] "Folosit de %d ori"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1381
-#: admin/woocommerce-admin-reports.php:1403
+#: admin/woocommerce-admin-reports.php:1396
+#: admin/woocommerce-admin-reports.php:1418
 msgid "No coupons found"
 msgstr "Nici un Cupon nu a fost găsit"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1390
+#: admin/woocommerce-admin-reports.php:1405
 msgid "Greatest discount amount"
 msgstr "Cea mai mare sumă redusă"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1400
+#: admin/woocommerce-admin-reports.php:1415
 msgid "Discounted %s"
 msgstr "Redus %s"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1459
-#: admin/woocommerce-admin-reports.php:2405
+#: admin/woocommerce-admin-reports.php:1474
+#: admin/woocommerce-admin-reports.php:2430
 msgid "Show:"
 msgstr "Afișează:"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1516
+#: admin/woocommerce-admin-reports.php:1531
 msgid "Coupon"
 msgstr "Cupon"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1599
+#: admin/woocommerce-admin-reports.php:1614
 msgid "Top coupon"
 msgstr "Cel mai bun Cupon"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1607
+#: admin/woocommerce-admin-reports.php:1622
 msgid "Worst coupon"
 msgstr "Cel mai prost Cupon"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1615
+#: admin/woocommerce-admin-reports.php:1630
 msgid "Discount average"
 msgstr "Medie Reducere"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1623
+#: admin/woocommerce-admin-reports.php:1638
 msgid "Discount median"
 msgstr "Reduceri mediane"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1643
+#: admin/woocommerce-admin-reports.php:1658
 msgid "Monthly discounts by coupon"
 msgstr "Reduceri lunare per cupon"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1788
+#: admin/woocommerce-admin-reports.php:1808
 msgid "Total customers"
 msgstr "Total Clienți"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1794
+#: admin/woocommerce-admin-reports.php:1814
 msgid "Total customer sales"
 msgstr "Total comenzi clienți"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1800
+#: admin/woocommerce-admin-reports.php:1820
 msgid "Total guest sales"
 msgstr "Total comenzi utilizatori neînregistrați"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1806
+#: admin/woocommerce-admin-reports.php:1826
 msgid "Total customer orders"
 msgstr "Total comenzi clienți"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1812
+#: admin/woocommerce-admin-reports.php:1832
 msgid "Total guest orders"
 msgstr "Total comenzi utilizatori neînregistrați"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1818
+#: admin/woocommerce-admin-reports.php:1838
 msgid "Average orders per customer"
 msgstr "Număr mediu de comenzi per client"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:1826
+#: admin/woocommerce-admin-reports.php:1846
 msgid "Signups per day"
 msgstr "Înscrieri pe zi"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2023
+#: admin/woocommerce-admin-reports.php:2048
 msgid "Low stock"
 msgstr "Stoc redus"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2045
-#: admin/woocommerce-admin-reports.php:2080
+#: admin/woocommerce-admin-reports.php:2070
+#: admin/woocommerce-admin-reports.php:2105
 msgid "%d in stock"
 msgid_plural "%d in stock"
 msgstr[0] "%d în stoc"
 msgstr[1] "%d în stoc"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2050
+#: admin/woocommerce-admin-reports.php:2075
 msgid "No products are low in stock."
 msgstr "Nu sunt produse cu stoc redus."
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2085
+#: admin/woocommerce-admin-reports.php:2110
 msgid "No products are out in stock."
 msgstr "Toate produsele sunt în stoc."
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2249
+#: admin/woocommerce-admin-reports.php:2274
 msgid "Total taxes for year"
 msgstr "Total taxe per an"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2260
+#: admin/woocommerce-admin-reports.php:2285
 msgid "Total product taxes for year"
 msgstr "Total taxe produs per an"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2271
+#: admin/woocommerce-admin-reports.php:2296
 msgid "Total shipping tax for year"
 msgstr "Total taxe de livrare per an"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2287
+#: admin/woocommerce-admin-reports.php:2312
 msgid "Total Sales"
 msgstr "Vânzări Totale"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2287
+#: admin/woocommerce-admin-reports.php:2312
 msgid "This is the sum of the 'Order Total' field within your orders."
 msgstr "Suma câmpurilor 'Total Comandă' per comenzi."
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2288
+#: admin/woocommerce-admin-reports.php:2313
 msgid "Total Shipping"
 msgstr "Total Livrări"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2288
+#: admin/woocommerce-admin-reports.php:2313
 msgid "This is the sum of the 'Shipping Total' field within your orders."
 msgstr "Suma câmpurilor 'Total Livrări' per comenzi."
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2289
+#: admin/woocommerce-admin-reports.php:2314
 msgid "Total Product Taxes"
 msgstr "Total Taxe Produs"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2289
+#: admin/woocommerce-admin-reports.php:2314
 msgid "This is the sum of the 'Cart Tax' field within your orders."
 msgstr "Suma câmpurilor 'Taxe Coș' per comenzi."
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2290
+#: admin/woocommerce-admin-reports.php:2315
 msgid "Total Shipping Taxes"
 msgstr "Total Taxe Livrări"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2290
+#: admin/woocommerce-admin-reports.php:2315
 msgid "This is the sum of the 'Shipping Tax' field within your orders."
 msgstr "Suma câmpurilor 'Taxe Livrări' per comenzi."
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2291
+#: admin/woocommerce-admin-reports.php:2316
 msgid "Total Taxes"
 msgstr "Total Taxe"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2291
+#: admin/woocommerce-admin-reports.php:2316
 msgid ""
 "This is the sum of the 'Cart Tax' and 'Shipping Tax' fields within your "
 "orders."
 msgstr "Suma câmpurilor 'Taxe Coș' și 'Taxă Livrări' per comenzi."
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2292
+#: admin/woocommerce-admin-reports.php:2317
 msgid "Net profit"
 msgstr "Profit Net"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2292
+#: admin/woocommerce-admin-reports.php:2317
 msgid "Total sales minus shipping and tax."
 msgstr "Total vânzări, minus costuri livrări și taxe."
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2337
+#: admin/woocommerce-admin-reports.php:2362
 msgid "Toggle tax rows"
 msgstr "Comută rînduri taxe"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2483
+#: admin/woocommerce-admin-reports.php:2508
 msgid "Category"
 msgstr "Categorie"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2585
+#: admin/woocommerce-admin-reports.php:2610
 msgid "Top category"
 msgstr "Top Categorie"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2594
+#: admin/woocommerce-admin-reports.php:2619
 msgid "Worst category"
 msgstr "Cea mai proastă categorie"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2602
+#: admin/woocommerce-admin-reports.php:2627
 msgid "Category sales average"
 msgstr "Medie de vânzare per categorie"
 
-#: admin/woocommerce-admin-reports.php:2613
+#: admin/woocommerce-admin-reports.php:2638
 msgid "Category sales median"
 msgstr "Vânzări mediane per categorie"
 
 # @ woocommerce
-#: admin/woocommerce-admin-reports.php:2633
+#: admin/woocommerce-admin-reports.php:2658
 msgid "Monthly sales by category"
 msgstr "Vânzări lunare per categorie"
 
@@ -5825,34 +5848,34 @@ msgid "Email Options"
 msgstr "Setări Emailuri"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:422
+#: admin/woocommerce-admin-settings.php:420
 msgid "Save changes"
 msgstr "Salvează modificări"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:463
+#: admin/woocommerce-admin-settings.php:461
 msgid "The changes you made will be lost if you navigate away from this page."
 msgstr ""
 "Modificările efectuate până acum vor fi pierdute dcă părăsiți pagina fără să "
 "salvați."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:831
+#: admin/woocommerce-admin-settings.php:829
 msgid "Hard Crop"
 msgstr "Tăiere imagine fără redimensionare"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:856
+#: admin/woocommerce-admin-settings.php:854
 msgid "Select a page&hellip;"
 msgstr "Selectează o pagină&hellip;"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:879
+#: admin/woocommerce-admin-settings.php:877
 msgid "Choose a country&hellip;"
 msgstr "Selectează o țară&hellip;"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:899
+#: admin/woocommerce-admin-settings.php:897
 msgid "Choose countries&hellip;"
 msgstr "Selectează țările&hellip;"
 
@@ -6321,6 +6344,13 @@ msgstr "Adresa de Livrare a clientului"
 #: admin/woocommerce-admin-users.php:225
 msgid "State/County or state code"
 msgstr "Cod Poștal"
+
+#~ msgid "Slug %s is too long"
+#~ msgstr "Numele Scurt %s este prea lung"
+
+# @ woocommerce
+#~ msgid "Taxonomy exists - please change the slug"
+#~ msgstr "Numele există deja - modifică numele scurt (?)"
 
 # @ woocommerce
 #~ msgid "Please enter your username and password to login."
