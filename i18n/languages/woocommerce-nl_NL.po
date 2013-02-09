@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-01-09 09:36:51+00:00\n"
-"PO-Revision-Date: 2013-02-08 12:04+0100\n"
+"PO-Revision-Date: 2013-02-09 12:00+0100\n"
 "Last-Translator: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
 "Language-Team: Ramon van Belzen <woocommerce@ramoonus.nl>, Geert De "
 "Deckere<geertdd@gmail.com>\n"
@@ -114,7 +114,7 @@ msgstr "Betalen"
 
 #: assets/js/admin/editor_plugin_lang.php:23
 msgid "Thankyou"
-msgstr ""
+msgstr "Bedankt"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:415
@@ -156,13 +156,13 @@ msgstr ""
 #: classes/emails/class-wc-email-customer-invoice.php:160
 #: classes/emails/class-wc-email-customer-invoice.php:167
 msgid "Defaults to <code>%s</code>"
-msgstr ""
+msgstr "Standaard  <code>%s</code>"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:428
 #: classes/emails/class-wc-email-customer-invoice.php:151
 msgid "Email heading"
-msgstr ""
+msgstr "Email kop"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:435
@@ -170,7 +170,7 @@ msgstr ""
 #: classes/emails/class-wc-email-customer-invoice.php:172
 #: classes/emails/class-wc-email-new-order.php:142
 msgid "Email type"
-msgstr ""
+msgstr "Email type"
 
 #: classes/abstracts/abstract-wc-email.php:437
 #: classes/emails/class-wc-email-customer-completed-order.php:171
@@ -198,7 +198,7 @@ msgstr "HTML"
 #: classes/emails/class-wc-email-customer-invoice.php:180
 #: classes/emails/class-wc-email-new-order.php:150
 msgid "Multipart"
-msgstr ""
+msgstr "Multipart"
 
 #: classes/abstracts/abstract-wc-email.php:479
 #: classes/abstracts/abstract-wc-email.php:500
@@ -223,12 +223,12 @@ msgstr "Instellingen"
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:556
 msgid "HTML template"
-msgstr ""
+msgstr "HTML template"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:557
 msgid "Plain text template"
-msgstr ""
+msgstr "Tekst template"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:576
@@ -888,7 +888,7 @@ msgstr "Cuba"
 
 #: classes/class-wc-countries.php:93
 msgid "Cura&Ccedil;ao"
-msgstr ""
+msgstr "Curacao"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:94
@@ -1903,7 +1903,7 @@ msgstr "Provincie"
 # @ woocommerce
 #: classes/class-wc-countries.php:712
 msgid "Canton"
-msgstr ""
+msgstr "Canton"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:721 classes/class-wc-countries.php:845
@@ -2034,7 +2034,7 @@ msgstr "Ongeldige kortingsbon"
 # @ woocommerce
 #: classes/class-wc-customer.php:607 classes/class-wc-customer.php:617
 msgid "File %d"
-msgstr ""
+msgstr "Bestand %d"
 
 # @ woocommerce
 #: classes/class-wc-emails.php:245
@@ -2206,7 +2206,7 @@ msgstr "Onderwerp"
 #: classes/emails/class-wc-email-customer-completed-order.php:148
 #: classes/emails/class-wc-email-new-order.php:135
 msgid "Email Heading"
-msgstr ""
+msgstr "Email Kop"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:155
@@ -2215,7 +2215,7 @@ msgstr ""
 
 #: classes/emails/class-wc-email-customer-completed-order.php:162
 msgid "Email Heading (downloadable)"
-msgstr ""
+msgstr "Email kop (downloadbaar)"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-invoice.php:27
@@ -2257,7 +2257,7 @@ msgstr ""
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-new-account.php:31
 msgid "New account"
-msgstr ""
+msgstr "Nieuwe account"
 
 #: classes/emails/class-wc-email-customer-new-account.php:32
 msgid ""
@@ -2354,7 +2354,7 @@ msgstr ""
 
 #: classes/emails/class-wc-email-new-order.php:121
 msgid "Recipient(s)"
-msgstr ""
+msgstr "Ontvanger(s)"
 
 #: classes/emails/class-wc-email-new-order.php:123
 msgid ""
@@ -3624,7 +3624,7 @@ msgstr "Vul a.u.b. uw wachtwoord in."
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:95
 msgid "Your password has been reset."
-msgstr ""
+msgstr "Uw wachtwoord is gereset."
 
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:95
 msgid "Log in"
@@ -3748,7 +3748,7 @@ msgstr "Bestellingsupdates"
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-view-order.php:69
 msgid "l jS \\of F Y, h:ia"
-msgstr ""
+msgstr "l jS \\of F Y, h:ia"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-best-sellers.php:31
@@ -3855,12 +3855,12 @@ msgstr "Verwijder filter"
 # @ woocommerce
 #: classes/widgets/class-wc-widget-layered-nav-filters.php:99
 msgid "Min"
-msgstr ""
+msgstr "Min"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-layered-nav-filters.php:104
 msgid "Max"
-msgstr ""
+msgstr "Max"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-layered-nav.php:31
@@ -5525,17 +5525,17 @@ msgstr ""
 # @ woocommerce
 #: i18n/states/ZA.php:19
 msgid "Northern Cape"
-msgstr ""
+msgstr "Noord Kaap"
 
 # @ woocommerce
 #: i18n/states/ZA.php:20
 msgid "North West"
-msgstr ""
+msgstr "Noord West"
 
 # @ woocommerce
 #: i18n/states/ZA.php:21
 msgid "Western Cape"
-msgstr ""
+msgstr "West Kaap"
 
 # @ woocommerce
 #: i18n/strings.php:16
@@ -6183,7 +6183,7 @@ msgstr "jS F Y"
 #: templates/emails/plain/customer-note.php:46
 #: templates/emails/plain/customer-processing-order.php:38
 msgid "Your details"
-msgstr ""
+msgstr "Uw details"
 
 # @ woocommerce
 #: templates/emails/plain/email-order-items.php:28
@@ -6318,12 +6318,12 @@ msgstr ""
 # @ woocommerce
 #: templates/myaccount/form-lost-password.php:28
 msgid "Enter a new password below."
-msgstr ""
+msgstr "Voer hieronder een nieuw wachtwoord in."
 
 # @ woocommerce
 #: templates/myaccount/form-lost-password.php:45
 msgid "Reset Password"
-msgstr ""
+msgstr "Wachtwoord Reset"
 
 # @ woocommerce
 #: templates/myaccount/my-account.php:19
@@ -6538,8 +6538,8 @@ msgstr[1] "Categorieën:"
 #: templates/single-product/meta.php:24
 msgid "Tag:"
 msgid_plural "Tags:"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Tag:"
+msgstr[1] "Tags:"
 
 # @ woocommerce
 #: templates/single-product/product-attributes.php:28
