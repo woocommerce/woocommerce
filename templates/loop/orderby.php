@@ -1,6 +1,6 @@
 <?php
 /**
- * Sorting
+ * Show options for ordering
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
