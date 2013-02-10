@@ -445,7 +445,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 
 		$orderby = isset( $_GET['orderby'] ) ? woocommerce_clean( $_GET['orderby'] ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
 
-		woocommerce_get_template( 'loop/sorting.php', array( 'orderby' => $orderby ) );
+		woocommerce_get_template( 'loop/orderby.php', array( 'orderby' => $orderby ) );
 	}
 }
 
@@ -696,57 +696,17 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 if ( ! function_exists( 'woocommerce_product_description_tab' ) ) {
 
 	/**
-	 * Output the description tab.
-	 *
-	 * @access public
-	 * @subpackage	Product/Tabs
-	 * @return void
-	 */
-	function woocommerce_product_description_tab() {
-		woocommerce_get_template( 'single-product/tabs/tab-description.php' );
-	}
-}
-if ( ! function_exists( 'woocommerce_product_attributes_tab' ) ) {
-
-	/**
-	 * Output the attributes tab.
-	 *
-	 * @access public
-	 * @subpackage	Product/Tabs
-	 * @return void
-	 */
-	function woocommerce_product_attributes_tab() {
-		woocommerce_get_template( 'single-product/tabs/tab-attributes.php' );
-	}
-}
-if ( ! function_exists( 'woocommerce_product_reviews_tab' ) ) {
-
-	/**
-	 * Output the reviews tab.
-	 *
-	 * @access public
-	 * @subpackage	Product/Tabs
-	 * @return void
-	 */
-	function woocommerce_product_reviews_tab() {
-		woocommerce_get_template( 'single-product/tabs/tab-reviews.php' );
-	}
-}
-
-if ( ! function_exists( 'woocommerce_product_description_panel' ) ) {
-
-	/**
 	 * Output the description tab content.
 	 *
 	 * @access public
 	 * @subpackage	Product/Tabs
 	 * @return void
 	 */
-	function woocommerce_product_description_panel() {
+	function woocommerce_product_description_tab() {
 		woocommerce_get_template( 'single-product/tabs/description.php' );
 	}
 }
-if ( ! function_exists( 'woocommerce_product_attributes_panel' ) ) {
+if ( ! function_exists( 'woocommerce_product_additional_information_tab' ) ) {
 
 	/**
 	 * Output the attributes tab content.
@@ -755,11 +715,11 @@ if ( ! function_exists( 'woocommerce_product_attributes_panel' ) ) {
 	 * @subpackage	Product/Tabs
 	 * @return void
 	 */
-	function woocommerce_product_attributes_panel() {
-		woocommerce_get_template( 'single-product/tabs/attributes.php' );
+	function woocommerce_product_additional_information_tab() {
+		woocommerce_get_template( 'single-product/tabs/additional-information.php' );
 	}
 }
-if ( ! function_exists( 'woocommerce_product_reviews_panel' ) ) {
+if ( ! function_exists( 'woocommerce_product_reviews_tab' ) ) {
 
 	/**
 	 * Output the reviews tab content.
@@ -768,8 +728,73 @@ if ( ! function_exists( 'woocommerce_product_reviews_panel' ) ) {
 	 * @subpackage	Product/Tabs
 	 * @return void
 	 */
-	function woocommerce_product_reviews_panel() {
+	function woocommerce_product_reviews_tab() {
 		woocommerce_get_template( 'single-product/tabs/reviews.php' );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_default_product_tabs' ) ) {
+
+	/**
+	 * Add default product tabs to product pages.
+	 *
+	 * @access public
+	 * @param mixed $tabs
+	 * @return void
+	 */
+	function woocommerce_default_product_tabs( $tabs = array() ) {
+		global $product, $post;
+
+		// Description tab - shows product content
+		if ( $post->post_content )
+			$tabs['description'] = array(
+				'title'    => __( 'Description', 'woocommerce' ),
+				'priority' => 10,
+				'callback' => 'woocommerce_product_description_tab'
+			);
+
+		// Additonal information tab - shows attributes
+		if ( $product->has_attributes() || ( get_option( 'woocommerce_enable_dimension_product_attributes' ) == 'yes' && ( $product->has_dimensions() || $product->has_weight() ) ) )
+			$tabs['additional_information'] = array(
+				'title'    => __( 'Additional Information', 'woocommerce' ),
+				'priority' => 20,
+				'callback' => 'woocommerce_product_additional_information_tab'
+			);
+
+		// Reviews tab - shows comments
+		if ( comments_open() )
+			$tabs['reviews'] = array(
+				'title'    => sprintf( __( 'Reviews (%d)', 'woocommerce' ), get_comments_number( $post->ID ) ),
+				'priority' => 30,
+				'callback' => 'comments_template'
+			);
+
+		return $tabs;
+	}
+}
+
+if ( ! function_exists( 'woocommerce_sort_product_tabs' ) ) {
+
+	/**
+	 * Sort tabs by priority
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function woocommerce_sort_product_tabs( $tabs = array() ) {
+
+		// Re-order tabs by priority
+		if ( ! function_exists( '_sort_priority_callback' ) ) {
+			function _sort_priority_callback( $a, $b ) {
+				if ( $a['priority'] == $b['priority'] )
+			        return 0;
+			    return ( $a['priority'] < $b['priority'] ) ? -1 : 1;
+			}
+		}
+
+		uasort( $tabs, '_sort_priority_callback' );
+
+		return $tabs;
 	}
 }
 

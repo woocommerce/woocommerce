@@ -155,20 +155,9 @@ if ( ! is_admin() || defined('DOING_AJAX') ) {
 
 	/**
 	 * Product page tabs
-	 *
-	 * @see woocommerce_product_description_tab()
-	 * @see woocommerce_product_attributes_tab()
-	 * @see woocommerce_product_reviews_tab()
-	 * @see woocommerce_product_description_panel()
-	 * @see woocommerce_product_attributes_panel()
-	 * @see woocommerce_product_reviews_panel()
 	 */
-	add_action( 'woocommerce_product_tabs', 'woocommerce_product_description_tab', 10 );
-	add_action( 'woocommerce_product_tabs', 'woocommerce_product_attributes_tab', 20 );
-	add_action( 'woocommerce_product_tabs', 'woocommerce_product_reviews_tab', 30 );
-	add_action( 'woocommerce_product_tab_panels', 'woocommerce_product_description_panel', 10 );
-	add_action( 'woocommerce_product_tab_panels', 'woocommerce_product_attributes_panel', 20 );
-	add_action( 'woocommerce_product_tab_panels', 'woocommerce_product_reviews_panel', 30 );
+	add_filter( 'woocommerce_product_tabs', 'woocommerce_default_product_tabs' );
+	add_filter( 'woocommerce_product_tabs', 'woocommerce_sort_product_tabs', 99 );
 
 	/**
 	 * Checkout

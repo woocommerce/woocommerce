@@ -4,23 +4,37 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @version     2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-// Get tabs
-ob_start();
-
-do_action('woocommerce_product_tabs');
-
-$tabs = trim( ob_get_clean() );
+/**
+ * Filter tabs and allow third parties to add their own
+ *
+ * Each tab is an array containing title, callback and priority. See @woocommerce_default_product_tabs()
+ */
+$tabs = apply_filters( 'woocommerce_product_tabs', array() );
 
 if ( ! empty( $tabs ) ) : ?>
+
 	<div class="woocommerce-tabs">
 		<ul class="tabs">
-			<?php echo $tabs; ?>
+			<?php foreach ( $tabs as $key => $tab ) : ?>
+
+				<li class="<?php echo $key ?>_tab">
+					<a href="#tab-<?php echo $key ?>"><?php echo apply_filters( 'woocommerce_product_' . $key . '_tab_title', $tab['title'], $key ) ?></a>
+				</li>
+
+			<?php endforeach; ?>
 		</ul>
-		<?php do_action('woocommerce_product_tab_panels'); ?>
+		<?php foreach ( $tabs as $key => $tab ) : ?>
+
+			<div class="panel entry-content" id="tab-<?php echo $key ?>">
+				<?php call_user_func( $tab['callback'], $key, $tab ) ?>
+			</div>
+
+		<?php endforeach; ?>
 	</div>
+
 <?php endif; ?>
