@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0-RC1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-02-10 16:28:28+0000\n"
+"PO-Revision-Date: 2013-02-10 21:21:39+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -4068,7 +4068,7 @@ msgstr "Digite um CEP válido."
 #: classes/shortcodes/class-wc-shortcode-cart.php:71
 #@ woocommerce
 msgid "Shipping costs updated."
-msgstr "O custo de envio atualizado."
+msgstr "O custo de envio foi atualizado."
 
 #: templates/cart/empty.php:14
 #@ woocommerce
@@ -5245,7 +5245,7 @@ msgstr "Clique aqui para entrar"
 #@ woocommerce
 msgctxt "breadcrumb"
 msgid "Home"
-msgstr "Principal"
+msgstr "Home"
 
 #: templates/shop/breadcrumb.php:66
 #@ woocommerce
@@ -9967,7 +9967,7 @@ msgstr "Configurar as páginas principais do WooCommerce aqui. Essas páginas de
 #: admin/settings/settings-init.php:353
 #@ woocommerce
 msgid "Terms Page ID"
-msgstr "ID da Página de Termos"
+msgstr "Página de Termos de Uso"
 
 #: admin/settings/settings-init.php:464
 #@ woocommerce
@@ -13273,7 +13273,7 @@ msgstr ""
 #: woocommerce-core-functions.php:666
 #@ woocommerce
 msgid "Brazilian Real"
-msgstr ""
+msgstr "Real Brasileiro"
 
 #: woocommerce-core-functions.php:667
 #@ woocommerce
@@ -13358,7 +13358,7 @@ msgstr ""
 #: woocommerce-functions.php:989
 #@ woocommerce
 msgid "No file defined"
-msgstr ""
+msgstr "Nenhum arquivo definido"
 
 #. translators: plugin header field 'Version'
 #: woocommerce.php:0
