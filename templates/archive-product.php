@@ -31,9 +31,8 @@ get_header('shop'); ?>
 
 			<?php
 				/**
-				 * woocommerce_pagination hook
+				 * woocommerce_before_shop_loop hook
 				 *
-				 * @hooked woocommerce_pagination - 10
 				 * @hooked woocommerce_result_count - 20
 				 * @hooked woocommerce_catalog_ordering - 30
 				 */
@@ -52,7 +51,14 @@ get_header('shop'); ?>
 
 			<?php woocommerce_product_loop_end(); ?>
 
-			<?php do_action( 'woocommerce_after_shop_loop' ); ?>
+			<?php
+				/**
+				 * woocommerce_after_shop_loop hook
+				 *
+				 * @hooked woocommerce_pagination - 10
+				 */
+				do_action( 'woocommerce_after_shop_loop' );
+			?>
 
 		<?php else : ?>
 
@@ -63,16 +69,6 @@ get_header('shop'); ?>
 			<?php endif; ?>
 
 		<?php endif; ?>
-
-		<?php
-			/**
-			 * woocommerce_pagination hook
-			 *
-			 * @hooked woocommerce_pagination - 10
-			 * @hooked woocommerce_catalog_ordering - 20
-			 */
-			do_action( 'woocommerce_pagination' );
-		?>
 
 	<?php
 		/**

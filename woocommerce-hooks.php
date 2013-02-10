@@ -147,11 +147,11 @@ if ( ! is_admin() || defined('DOING_AJAX') ) {
 	add_action( 'woocommerce_external_add_to_cart', 'woocommerce_external_add_to_cart', 30 );
 
 	/**
-	 * Pagination in loop-shop
+	 * Pagination after shop loops
 	 *
 	 * @see woocommerce_pagination()
 	 */
-	add_action( 'woocommerce_pagination', 'woocommerce_pagination', 10 );
+	add_action( 'woocommerce_after_shop_loop', 'woocommerce_pagination', 10 );
 
 	/**
 	 * Product page tabs

@@ -21,7 +21,7 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 	 *
 	 * This function is only used in the optional 'woocommerce.php' template
 	 * which people can add to their themes to add basic woocommerce support
-	 * without using hooks or modifying core templates.
+	 * without hooks or modifying core templates.
 	 *
 	 * @access public
 	 * @return void
@@ -68,11 +68,7 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 
 				<?php endif; ?>
 
-			<?php endif; ?>
-
-			<div class="clear"></div>
-
-			<?php do_action( 'woocommerce_pagination' );
+			<?php endif;
 
 		}
 	}
@@ -268,7 +264,9 @@ if ( ! function_exists( 'woocommerce_product_loop_end' ) ) {
 	 */
 	function woocommerce_product_loop_end( $echo = true ) {
 		ob_start();
+
 		woocommerce_get_template( 'loop/loop-end.php' );
+
 		if ( $echo )
 			echo ob_get_clean();
 		else
