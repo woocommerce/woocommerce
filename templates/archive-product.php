@@ -60,13 +60,9 @@ get_header('shop'); ?>
 				do_action( 'woocommerce_after_shop_loop' );
 			?>
 
-		<?php else : ?>
+		<?php elseif ( ! woocommerce_product_subcategories( array( 'before' => woocommerce_product_loop_start( false ), 'after' => woocommerce_product_loop_end( false ) ) ) ) : ?>
 
-			<?php if ( ! woocommerce_product_subcategories( array( 'before' => woocommerce_product_loop_start( false ), 'after' => woocommerce_product_loop_end( false ) ) ) ) : ?>
-
-				<p><?php _e( 'No products found which match your selection.', 'woocommerce' ); ?></p>
-
-			<?php endif; ?>
+			<?php woocommerce_get_template( 'loop/no-products-found.php' ); ?>
 
 		<?php endif; ?>
 
