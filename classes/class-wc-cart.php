@@ -122,10 +122,8 @@ class WC_Cart {
 			global $woocommerce;
 
 			// Load the coupons
-			if ( get_option( 'woocommerce_enable_coupons' ) == 'yes' ) {
-				$this->applied_coupons         = ( empty( $woocommerce->session->coupon_codes ) ) ? array() : array_filter( (array) $woocommerce->session->coupon_codes );
-				$this->coupon_discount_amounts = ( empty( $woocommerce->session->coupon_amounts ) ) ? array() : array_filter( (array) $woocommerce->session->coupon_amounts );
-			}
+			$this->applied_coupons         = ( empty( $woocommerce->session->coupon_codes ) ) ? array() : array_filter( (array) $woocommerce->session->coupon_codes );
+			$this->coupon_discount_amounts = ( empty( $woocommerce->session->coupon_amounts ) ) ? array() : array_filter( (array) $woocommerce->session->coupon_amounts );
 
 			// Load the cart
 			if ( isset( $woocommerce->session->cart ) && is_array( $woocommerce->session->cart ) ) {
@@ -289,6 +287,20 @@ class WC_Cart {
  	/*-----------------------------------------------------------------------------------*/
 	/* Cart Data Functions */
 	/*-----------------------------------------------------------------------------------*/
+
+		/**
+		 * If there are no coupons, return false to disable coupon forms. Filterable.
+		 *
+		 * @access public
+		 * @return void
+		 */
+		public function coupons_enabled() {
+
+			$coupon_count    = wp_count_posts( 'shop_coupon' );
+			$coupons_enabled = $coupon_count->publish > 0 ? true : false;
+
+			return apply_filters( 'woocommerce_coupons_enabled', $coupons_enabled );
+		}
 
 		/**
 		 * Get number of items in the cart.
@@ -1742,7 +1754,8 @@ class WC_Cart {
 			global $woocommerce;
 
 			// Coupons are globally disabled
-			if ( get_option('woocommerce_enable_coupons') == 'no' ) return false;
+			if ( ! $woocommerce->cart->coupons_enabled() )
+				return false;
 
 			$the_coupon = new WC_Coupon( $coupon_code );
 

@@ -214,6 +214,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Templating - Renamed empty.php to cart-empty.php to make clearer.
 * Templating - Renamed sorting.php to orderby.php to better reflect contained hooks and code.
 * Templating - Product tabs rewritten - new filter to define tab titles, priorities, and display callbacks.
+* Templating - loop/no-products-found.php template added.
 
 * Tweak - Sorting uses GET to make it cache friendly
 * Tweak - Optimised class loading (autoload). Reduced memory consumption.

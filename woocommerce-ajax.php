@@ -262,6 +262,11 @@ function woocommerce_ajax_add_to_cart() {
 
 		do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
+		if ( get_option( 'woocommerce_cart_redirect_after_add' ) == 'yes' ) {
+			woocommerce_add_to_cart_message( $product_id );
+			$woocommerce->set_messages();
+		}
+
 		// Return fragments
 		woocommerce_get_refreshed_fragments();
 

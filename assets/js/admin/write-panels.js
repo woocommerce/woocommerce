@@ -931,7 +931,7 @@ jQuery( function($){
 			$('.show_if_virtual').show();
 		}
 
-                 $('.show_if_'+product_type).show();    
+        $('.show_if_' + product_type).show();
 
 		// Hide rules
 		if ( is_downloadable ) {
@@ -941,7 +941,9 @@ jQuery( function($){
 			$('.hide_if_virtual').hide();
 		}
 
-		$('.hide_if_'+product_type).hide();
+		$('.hide_if_' + product_type).hide();
+
+		$('input#_manage_stock').change();
 	}
 
 

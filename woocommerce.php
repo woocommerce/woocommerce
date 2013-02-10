@@ -726,6 +726,7 @@ class Woocommerce {
 	 * @return void
 	 */
 	public function wp_head() {
+
 		if ( is_woocommerce() ) {
 			$this->add_body_class( 'woocommerce' );
 			$this->add_body_class( 'woocommerce-page' );
@@ -749,6 +750,7 @@ class Woocommerce {
 			$this->add_body_class( 'woocommerce-page' );
 			return;
 		}
+
 	}
 
 
@@ -1204,6 +1206,7 @@ class Woocommerce {
 			'update_shipping_method_nonce'     => wp_create_nonce( "update-shipping-method" ),
 			'add_to_cart_nonce'                => wp_create_nonce( "add-to-cart" ),
 			'cart_url'                         => get_permalink( woocommerce_get_page_id( 'cart' ) ),
+			'cart_redirect_after_add'          => get_option( 'woocommerce_cart_redirect_after_add' )
 		);
 
 		if ( is_checkout() || is_cart() )

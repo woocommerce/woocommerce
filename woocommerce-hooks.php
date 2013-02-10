@@ -208,13 +208,6 @@ add_filter( 'wp_nav_menu_objects',  'woocommerce_nav_menu_item_classes', 2, 20 )
 add_filter( 'wp_list_pages', 'woocommerce_list_pages' );
 
 /**
- * Logout link
- *
- * @see woocommerce_nav_menu_items()
- */
-add_filter( 'wp_nav_menu_items', 'woocommerce_nav_menu_items', 10, 2 );
-
-/**
  * Clear the cart
  *
  * @see woocommerce_empty_cart()

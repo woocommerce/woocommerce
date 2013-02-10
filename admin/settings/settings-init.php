@@ -33,10 +33,10 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	array( 'title' => __( 'General Options', 'woocommerce' ), 'type' => 'title', 'desc' => '', 'id' => 'general_options' ),
 
 	array(
-		'title' 	=> __( 'Base Country/Region', 'woocommerce' ),
-		'desc' 		=> __( 'This is the base country for your business. Tax rates will be based on this country.', 'woocommerce' ),
+		'title' 	=> __( 'Base Location', 'woocommerce' ),
+		'desc' 		=> __( 'This is the base location for your business. Tax rates will be based on this country.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_default_country',
-		'css' 		=> 'min-width:300px;',
+		'css' 		=> 'min-width:350px;',
 		'default'	=> 'GB',
 		'type' 		=> 'single_select_country',
 		'desc_tip'	=>  true,
@@ -44,9 +44,9 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 	array(
 		'title' 	=> __( 'Currency', 'woocommerce' ),
-		'desc' 		=> __("This controls what currency prices are listed at in the catalog and which currency gateways will take payments in.", 'woocommerce' ),
+		'desc' 		=> __( "This controls what currency prices are listed at in the catalog and which currency gateways will take payments in.", 'woocommerce' ),
 		'id' 		=> 'woocommerce_currency',
-		'css' 		=> 'min-width:300px;',
+		'css' 		=> 'min-width:350px;',
 		'default'	=> 'GBP',
 		'type' 		=> 'select',
 		'class'		=> 'chosen_select',
@@ -61,7 +61,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'default'	=> 'all',
 		'type' 		=> 'select',
 		'class'		=> 'chosen_select',
-		'css' 		=> 'min-width:300px;',
+		'css' 		=> 'min-width:350px;',
 		'desc_tip'	=>  true,
 		'options' => array(
 			'all'  => __( 'All Countries', 'woocommerce' ),
@@ -80,9 +80,26 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 	$localisation_setting,
 
+	array(
+		'title' => __( 'Store Notice', 'woocommerce' ),
+		'desc' 		=> __( 'Enable site-wide store notice text', 'woocommerce' ),
+		'id' 		=> 'woocommerce_demo_store',
+		'default'	=> 'no',
+		'type' 		=> 'checkbox'
+	),
+
+	array(
+		'title' => __( 'Store Notice Text', 'woocommerce' ),
+		'desc' 		=> '',
+		'id' 		=> 'woocommerce_demo_store_notice',
+		'default'	=> __( 'This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woocommerce' ),
+		'type' 		=> 'text',
+		'css' 		=> 'min-width:300px;',
+	),
+
 	array( 'type' => 'sectionend', 'id' => 'general_options'),
 
-	array(	'title' => __( 'Checkout and Accounts', 'woocommerce' ), 'type' => 'title','desc' => __( 'The following options control the behaviour of the checkout process and customer accounts.', 'woocommerce' ), 'id' => 'checkout_account_options' ),
+	array(	'title' => __( 'Checkout and Accounts', 'woocommerce' ), 'type' => 'title', 'id' => 'checkout_account_options' ),
 
 	array(
 		'title' => __( 'Checkout', 'woocommerce' ),
@@ -94,20 +111,19 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 
 	array(
-		'desc' 		=> __( 'Show order comments section', 'woocommerce' ),
+		'desc' 		=> __( 'Enable customer note field on checkout', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_order_comments',
 		'default'	=> 'yes',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end'
+		'checkboxgroup'		=> ''
 	),
 
 	array(
-		'title' => __( 'Security', 'woocommerce' ),
 		'desc' 		=> __( 'Force secure checkout', 'woocommerce' ),
 		'id' 		=> 'woocommerce_force_ssl_checkout',
 		'default'	=> 'no',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start',
+		'checkboxgroup'		=> '',
 		'show_if_checked' => 'option',
 		'desc_tip'	=>  __( 'Force SSL (HTTPS) on the checkout pages (an SSL Certificate is required)', 'woocommerce' ),
 	),
@@ -119,34 +135,6 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end',
 		'show_if_checked' => 'yes',
-	),
-
-	array(
-		'title' => __( 'Coupons', 'woocommerce' ),
-		'desc'          => __( 'Enable coupons', 'woocommerce' ),
-		'id'            => 'woocommerce_enable_coupons',
-		'default'       => 'yes',
-		'type'          => 'checkbox',
-		'checkboxgroup' => 'start',
-		'show_if_checked' => 'option'
-	),
-
-	array(
-		'desc' 		=> __( 'Enable coupon form on cart', 'woocommerce' ),
-		'id' 		=> 'woocommerce_enable_coupon_form_on_cart',
-		'default'	=> 'yes',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'	=> '',
-		'show_if_checked' => 'yes'
-	),
-
-	array(
-		'desc' 		=> __( 'Enable coupon form on checkout', 'woocommerce' ),
-		'id' 		=> 'woocommerce_enable_coupon_form_on_checkout',
-		'default'	=> 'no',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'	=> 'end',
-		'show_if_checked' => 'yes'
 	),
 
 	array(
@@ -192,7 +180,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 
 	array(
-		'desc' 		=> __( 'Allow customers to repurchase past orders', 'woocommerce' ),
+		'desc' 		=> __( 'Allow customers to repurchase orders from their account page', 'woocommerce' ),
 		'id' 		=> 'woocommerce_allow_customers_to_reorder',
 		'default'	=> 'no',
 		'type' 		=> 'checkbox',
@@ -201,7 +189,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 	array( 'type' => 'sectionend', 'id' => 'checkout_account_options'),
 
-	array(	'title' => __( 'Styles and Scripts', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following options affect the styling of your store, as well as how certain features behave.', 'woocommerce' ), 'id' => 'script_styling_options' ),
+	array(	'title' => __( 'Styles and Scripts', 'woocommerce' ), 'type' => 'title', 'id' => 'script_styling_options' ),
 
 	array(
 		'title' => __( 'Styling', 'woocommerce' ),
@@ -216,38 +204,12 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 
 	array(
-		'title' => __( 'Store Notice', 'woocommerce' ),
-		'desc' 		=> __( 'Enable the "Demo Store" notice on your site', 'woocommerce' ),
-		'id' 		=> 'woocommerce_demo_store',
-		'default'	=> 'no',
-		'type' 		=> 'checkbox'
-	),
-
-	array(
-		'title' => __( 'Store Notice Text', 'woocommerce' ),
-		'desc' 		=> '',
-		'id' 		=> 'woocommerce_demo_store_notice',
-		'default'	=> __( 'This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woocommerce' ),
-		'type' 		=> 'text',
-		'css' 		=> 'min-width:300px;',
-	),
-
-	array(
-		'title' => __( 'Scripts', 'woocommerce' ),
-		'desc' 		=> __( 'Enable AJAX add to cart buttons on product archives', 'woocommerce' ),
-		'id' 		=> 'woocommerce_enable_ajax_add_to_cart',
-		'default'	=> 'yes',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start'
-	),
-
-	array(
 		'desc' 	=> __( 'Enable WooCommerce lightbox', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_lightbox',
 		'default'	=> 'yes',
-		'desc_tip'	=> __( 'On the product details page, product gallery images will open in a lightbox. The Add Review form will open in a modal window', 'woocommerce' ),
+		'desc_tip'	=> __( 'On the product details page, product gallery images will open in a lightbox. The Add Review form will also open in a modal window.', 'woocommerce' ),
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
+		'checkboxgroup'		=> 'start'
 	),
 
 	array(
@@ -260,7 +222,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 	array( 'type' => 'sectionend', 'id' => 'script_styling_options'),
 
-	array(	'title' => __( 'Digital Downloads', 'woocommerce' ), 'type' => 'title','desc' => __( 'The following options are specific to downloadable products.', 'woocommerce' ), 'id' => 'digital_download_options' ),
+	array(	'title' => __( 'Downloadable Products', 'woocommerce' ), 'type' => 'title', 'id' => 'digital_download_options' ),
 
 	array(
 		'title' => __( 'File Download Method', 'woocommerce' ),
@@ -279,12 +241,12 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 
 	array(
-		'title' => __( 'Access Restrictions', 'woocommerce' ),
-		'desc' 		=> __( 'Must be logged in to download files', 'woocommerce' ),
+		'title' => __( 'Access Restriction', 'woocommerce' ),
+		'desc' 		=> __( 'Downloads require login', 'woocommerce' ),
 		'id' 		=> 'woocommerce_downloads_require_login',
 		'type' 		=> 'checkbox',
 		'default'	=> 'no',
-		'desc_tip'	=> __( 'This setting does not apply to guest downloads.', 'woocommerce' ),
+		'desc_tip'	=> __( 'This setting does not apply to guest purchases.', 'woocommerce' ),
 		'checkboxgroup'		=> 'start'
 	),
 
@@ -295,14 +257,6 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'default'	=> 'yes',
 		'desc_tip'	=> __( 'Turn this option off to only grant access when an order is "complete", rather than "processing"', 'woocommerce' ),
 		'checkboxgroup'		=> 'end'
-	),
-
-	array(
-		'title' => __( 'Limit Quantity', 'woocommerce' ),
-		'desc' 		=> __( 'Limit the purchasable quantity of downloadable-virtual items to 1', 'woocommerce' ),
-		'id' 		=> 'woocommerce_limit_downloadable_product_qty',
-		'default'	=> 'yes',
-		'type' 		=> 'checkbox'
 	),
 
 	array( 'type' => 'sectionend', 'id' => 'digital_download_options' ),
@@ -358,14 +312,6 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'css' 		=> 'min-width:300px;',
 		'type' 		=> 'single_select_page',
 		'desc_tip'	=>  true,
-	),
-
-	array(
-		'title' => __( 'Logout link', 'woocommerce' ),
-		'desc' 		=> sprintf(__( 'Append a logout link to menus containing "My Account"', 'woocommerce' ), $base_slug),
-		'id' 		=> 'woocommerce_menu_logout_link',
-		'default'	=> 'yes',
-		'type' 		=> 'checkbox',
 	),
 
 	array( 'type' => 'sectionend', 'id' => 'page_options' ),
@@ -461,6 +407,17 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 	),
 
 	array(
+		'title' => __( 'Logout Page', 'woocommerce' ),
+		'desc' 		=> __( 'Parent: "My Account"', 'woocommerce' ),
+		'id' 		=> 'woocommerce_logout_page_id',
+		'type' 		=> 'single_select_page',
+		'default'	=> '',
+		'class'		=> 'chosen_select_nostd',
+		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
+	),
+
+	array(
 		'title' => __( 'Lost Password Page', 'woocommerce' ),
 		'desc' 		=> __( 'Page contents: [woocommerce_lost_password] Parent: "My Account"', 'woocommerce' ),
 		'id' 		=> 'woocommerce_lost_password_page_id',
@@ -529,8 +486,8 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	),
 
 	array(
-		'title' => __( 'Redirects', 'woocommerce' ),
-		'desc' 		=> __( 'Redirect to cart after adding a product to the cart (on single product pages)', 'woocommerce' ),
+		'title' => __( 'Add to cart', 'woocommerce' ),
+		'desc' 		=> __( 'Redirect to the cart page after successful addition', 'woocommerce' ),
 		'id' 		=> 'woocommerce_cart_redirect_after_add',
 		'default'	=> 'no',
 		'type' 		=> 'checkbox',
@@ -538,9 +495,9 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	),
 
 	array(
-		'desc' 		=> __( 'Redirect to the product page on a single matching search result', 'woocommerce' ),
-		'id' 		=> 'woocommerce_redirect_on_single_search_result',
-		'default'	=> 'no',
+		'desc' 		=> __( 'Enable AJAX add to cart buttons on archives', 'woocommerce' ),
+		'id' 		=> 'woocommerce_enable_ajax_add_to_cart',
+		'default'	=> 'yes',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end'
 	),
@@ -551,7 +508,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 
 	array(
 		'title' => __( 'Product Fields', 'woocommerce' ),
-		'desc' 		=> __( 'Enable the SKU field for products', 'woocommerce' ),
+		'desc' 		=> __( 'Enable the <strong>SKU</strong> field for products', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_sku',
 		'default'	=> 'yes',
 		'type' 		=> 'checkbox',
@@ -559,7 +516,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	),
 
 	array(
-		'desc' 		=> __( 'Enable the weight field for products', 'woocommerce' ),
+		'desc' 		=> __( 'Enable the <strong>weight</strong> field for products (some shipping methods may require this)', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_weight',
 		'default'	=> 'yes',
 		'type' 		=> 'checkbox',
@@ -567,7 +524,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	),
 
 	array(
-		'desc' 		=> __( 'Enable the dimension fields for products', 'woocommerce' ),
+		'desc' 		=> __( 'Enable the <strong>dimension</strong> fields for products (some shipping methods may require this)', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_dimensions',
 		'default'	=> 'yes',
 		'type' 		=> 'checkbox',
@@ -575,7 +532,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	),
 
 	array(
-		'desc' 		=> __( 'Show weight and dimension fields in product attributes tab', 'woocommerce' ),
+		'desc' 		=> __( 'Show <strong>weight and dimension</strong> values on the <strong>Additional Information</strong> tab', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_dimension_product_attributes',
 		'default'	=> 'yes',
 		'type' 		=> 'checkbox',
