@@ -43,8 +43,14 @@ function woocommerce_template_redirect() {
 		exit;
 	}
 
+	// Logout
+	elseif ( is_page( woocommerce_get_page_id( 'logout' ) ) ) {
+		wp_redirect( str_replace( '&amp;', '&', wp_logout_url( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) ) ) );
+		exit;
+	}
+
 	// Redirect to the product page if we have a single product
-	elseif ( is_search() && is_post_type_archive( 'product' ) && get_option( 'woocommerce_redirect_on_single_search_result' ) == 'yes' ) {
+	elseif ( is_search() && is_post_type_archive( 'product' ) ) {
 		if ( $wp_query->post_count == 1 ) {
 			$product = get_product( $wp_query->post );
 			if ( $product->is_visible() )
@@ -88,6 +94,7 @@ function woocommerce_template_redirect() {
 	elseif ( is_checkout() ) {
 		ob_start();
 	}
+
 }
 
 
@@ -161,28 +168,6 @@ function woocommerce_list_pages( $pages ){
     return $pages;
 }
 
-
-/**
- * Add logout link to my account menu.
- *
- * @access public
- * @param string $items
- * @param array $args
- * @return string
- */
-function woocommerce_nav_menu_items( $items, $args ) {
-	if ( is_user_logged_in() && get_option('woocommerce_menu_logout_link') == 'yes' ) {
-
-		$my_account_page_id = woocommerce_get_page_id( 'myaccount' );
-		$permalink          = get_permalink( $my_account_page_id );
-
-		if ( $my_account_page_id && $permalink && $items && strstr( $items, $permalink ) ) {
-			$items .= '<li class="logout"><a href="'. wp_logout_url( home_url() ) .'">' . __( 'Logout', 'woocommerce' ) . '</a></li>';
-		}
-	}
-    return $items;
-}
-
 /**
  * Remove from cart/update.
  *
@@ -226,12 +211,10 @@ function woocommerce_update_cart_action() {
 				// Update cart validation
 	    		$passed_validation 	= apply_filters( 'woocommerce_update_cart_validation', true, $cart_item_key, $values, $quantity );
 
-	    		// Check downloadable items
-				if ( get_option('woocommerce_limit_downloadable_product_qty') == 'yes' ) {
-					if ( $_product->is_downloadable() && $_product->is_virtual() && $quantity > 1 ) {
-						$woocommerce->add_error( sprintf(__( 'You can only have 1 %s in your cart.', 'woocommerce' ), $_product->get_title()) );
-						$passed_validation = false;
-					}
+	    		// is_sold_individually
+				if ( $_product->is_sold_individually() && $quantity > 1 ) {
+					$woocommerce->add_error( sprintf( __( 'You can only have 1 %s in your cart.', 'woocommerce' ), $_product->get_title() ) );
+					$passed_validation = false;
 				}
 
 	    		if ( $passed_validation )

@@ -212,6 +212,9 @@ function woocommerce_create_pages() {
     // Change password page
     woocommerce_create_page( esc_sql( _x( 'change-password', 'page_slug', 'woocommerce' ) ), 'woocommerce_change_password_page_id', __( 'Change Password', 'woocommerce' ), '[woocommerce_change_password]', woocommerce_get_page_id( 'myaccount' ) );
 
+    // Logout page
+    woocommerce_create_page( esc_sql( _x( 'logout', 'page_slug', 'woocommerce' ) ), 'woocommerce_logout_page_id', __( 'Logout', 'woocommerce' ), '', woocommerce_get_page_id( 'myaccount' ) );
+
 	// Pay page
     woocommerce_create_page( esc_sql( _x( 'pay', 'page_slug', 'woocommerce' ) ), 'woocommerce_pay_page_id', __( 'Checkout &rarr; Pay', 'woocommerce' ), '[woocommerce_pay]', woocommerce_get_page_id( 'checkout' ) );
 
