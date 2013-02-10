@@ -12,7 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 /**
  * Filter tabs and allow third parties to add their own
  *
- * Each tab is an array containing title, callback and priority. See @woocommerce_default_product_tabs()
+ * Each tab is an array containing title, callback and priority.
+ * @see woocommerce_default_product_tabs()
  */
 $tabs = apply_filters( 'woocommerce_product_tabs', array() );
 
