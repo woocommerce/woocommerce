@@ -82,7 +82,7 @@ class WC_Shortcode_Cart {
 		$woocommerce->cart->calculate_totals();
 
 		if ( sizeof( $woocommerce->cart->get_cart() ) == 0 )
-			woocommerce_get_template( 'cart/empty.php' );
+			woocommerce_get_template( 'cart/cart-empty.php' );
 		else
 			woocommerce_get_template( 'cart/cart.php' );
 
