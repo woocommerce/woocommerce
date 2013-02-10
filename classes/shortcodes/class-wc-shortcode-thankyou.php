@@ -35,24 +35,22 @@ class WC_Shortcode_Thankyou {
 		global $woocommerce;
 
 		$woocommerce->nocache();
-
 		$woocommerce->show_messages();
 
 		$order = false;
 
-		// Pay for order after checkout step
-		if (isset($_GET['order'])) $order_id = $_GET['order']; else $order_id = 0;
-		if (isset($_GET['key'])) $order_key = $_GET['key']; else $order_key = '';
+		// Get the order
+		$order_id  = apply_filters( 'woocommerce_thankyou_order_id', empty( $_GET['order'] ) ? 0 : absint( $_GET['order'] ) );
+		$order_key = apply_filters( 'woocommerce_thankyou_order_key', empty( $_GET['key'] ) ? '' : woocommerce_clean( $_GET['key'] ) );
+
+		if ( $order_id > 0 ) {
+			$order = new WC_Order( $order_id );
+			if ( $order->order_key != $order_key )
+				unset( $order );
+		}
 
 		// Empty awaiting payment session
 		unset( $woocommerce->session->order_awaiting_payment );
-
-		if ($order_id > 0) :
-			$order = new WC_Order( $order_id );
-			if ($order->order_key != $order_key) :
-				unset($order);
-			endif;
-		endif;
 
 		woocommerce_get_template( 'checkout/thankyou.php', array( 'order' => $order ) );
 	}
