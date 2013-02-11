@@ -97,6 +97,32 @@ function woocommerce_template_redirect() {
 
 }
 
+/**
+ * woocommerce_nav_menu_items function.
+ *
+ * @access public
+ * @param mixed $items
+ * @param mixed $args
+ * @return void
+ */
+function woocommerce_nav_menu_items( $items, $args ) {
+	if ( ! is_user_logged_in() ) {
+
+		$hide_pages   = array();
+		$hide_pages[] = (int) woocommerce_get_page_id( 'change_password' );
+		$hide_pages[] = (int) woocommerce_get_page_id( 'logout' );
+		$hide_pages[] = (int) woocommerce_get_page_id( 'edit_address' );
+		$hide_pages[] = (int) woocommerce_get_page_id( 'view_order' );
+		$hide_pages   = apply_filters( 'woocommerce_logged_out_hidden_page_ids', $hide_pages );
+
+		foreach ( $items as $key => $item ) {
+			if ( ! empty( $item->object_id ) && in_array( $item->object_id, $hide_pages ) ) {
+				unset( $items[ $key ] );
+			}
+		}
+	}
+    return $items;
+}
 
 /**
  * Fix active class in nav for shop page.
