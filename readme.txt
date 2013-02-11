@@ -200,6 +200,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Linking to mydomain.com/product#review_form will now open the review form on load (if WooCommerce lightbox is turned on)
 * Feature - Customers can sort by popularity + rating.
 * Feature - Option to exclude coupons from sale items (thanks aj-adl)
+* Feature - Logout "page" which can be added to menus.
 
 * Templating - Revised pagination, sorting areas (sorting is now above products, numbered pagination below) and added a result count.
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.

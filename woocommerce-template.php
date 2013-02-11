@@ -454,7 +454,7 @@ if ( ! function_exists( 'woocommerce_output_product_data_tabs' ) ) {
 	 * @return void
 	 */
 	function woocommerce_output_product_data_tabs() {
-		woocommerce_get_template( 'single-product/tabs.php' );
+		woocommerce_get_template( 'single-product/tabs/tabs.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_template_single_title' ) ) {

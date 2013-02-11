@@ -106,7 +106,7 @@ abstract class WC_Product {
 			$this->product_image_gallery = implode( ',', $attachment_ids );
 		}
 
-		return (array) explode( ',', $this->product_image_gallery );
+		return array_filter( (array) explode( ',', $this->product_image_gallery ) );
 	}
 
 	/**

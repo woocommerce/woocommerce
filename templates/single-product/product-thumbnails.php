@@ -10,12 +10,12 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $post, $product, $woocommerce;
-?>
-<div class="thumbnails"><?php
 
-	$attachment_ids = $product->get_gallery_attachment_ids();
+$attachment_ids = $product->get_gallery_attachment_ids();
 
-	if ( $attachment_ids ) {
+if ( $attachment_ids ) {
+	?>
+	<div class="thumbnails"><?php
 
 		$loop = 0;
 		$columns = apply_filters( 'woocommerce_product_thumbnails_columns', 3 );
@@ -40,5 +40,6 @@ global $post, $product, $woocommerce;
 			$loop++;
 		}
 
-	}
-?></div>
+	?></div>
+	<?php
+}
