@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0-RC1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-02-11 09:08:31+0000\n"
+"PO-Revision-Date: 2013-02-11 15:17:50+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -116,7 +116,7 @@ msgstr "Adicionar Novo Atributo"
 #: admin/woocommerce-admin-attributes.php:370
 #@ woocommerce
 msgid "Attributes let you define extra product data, such as size or colour. You can use these attributes in the shop sidebar using the \"layered nav\" widgets. Please note: you cannot rename an attribute later on."
-msgstr "Atributos permitem que você defina os dados extra do produto, como tamanho ou cor. Você pode usar estes atributos na barra lateral da loja usando o \"camadas de navegação\" widgets. Por favor note: não é possível renomear um atributo mais tarde."
+msgstr "Atributos permitem que você defina os dados extra do produto, como tamanho ou cor. Você pode usar estes atributos na barra lateral da loja usando o \"camadas de navegação\" widgets. Atenção: não é possível renomear um atributo mais tarde."
 
 #: admin/woocommerce-admin-attributes.php:258
 #: admin/woocommerce-admin-attributes.php:391
