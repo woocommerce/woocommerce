@@ -111,6 +111,8 @@ abstract class WC_Settings_API {
 
     	if ( ! $this->settings || ! is_array( $this->settings ) ) {
 
+	    	$this->settings = array();
+
     		// If there are no settings defined, load defaults
     		if ( $this->form_fields )
 	    		foreach ( $this->form_fields as $k => $v )
