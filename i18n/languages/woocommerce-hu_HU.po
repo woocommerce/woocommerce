@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0-RC1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-02-11 15:07:58+0000\n"
+"PO-Revision-Date: 2013-02-11 20:59:45+0000\n"
 "Last-Translator: kukac7 <kukac7@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -1797,12 +1797,12 @@ msgstr "Feltételek választás"
 #: admin/post-types/writepanels/writepanel-product_data.php:394
 #@ woocommerce
 msgid "Select all"
-msgstr ""
+msgstr "Mindet választ"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:394
 #@ woocommerce
 msgid "Select none"
-msgstr ""
+msgstr "Egyiket sem választ"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:396
 #@ woocommerce
@@ -2083,52 +2083,52 @@ msgstr ""
 #: woocommerce-core-functions.php:669
 #@ woocommerce
 msgid "Danish Krone"
-msgstr ""
+msgstr "dán korona"
 
 #: woocommerce-core-functions.php:672
 #@ woocommerce
 msgid "Hungarian Forint"
-msgstr "Magyar forint"
+msgstr "magyar forint"
 
 #: woocommerce-core-functions.php:674
 #@ woocommerce
 msgid "Israeli Shekel"
-msgstr ""
+msgstr "izraeli sékel"
 
 #: woocommerce-core-functions.php:678
 #@ woocommerce
 msgid "Norwegian Krone"
-msgstr ""
+msgstr "norvég korona"
 
 #: woocommerce-core-functions.php:680
 #@ woocommerce
 msgid "Philippine Pesos"
-msgstr ""
+msgstr "fülöp-szigeteki peso"
 
 #: woocommerce-core-functions.php:681
 #@ woocommerce
 msgid "Polish Zloty"
-msgstr ""
+msgstr "lengyel zloty"
 
 #: woocommerce-core-functions.php:686
 #@ woocommerce
 msgid "Swedish Krona"
-msgstr ""
+msgstr "svéd korona"
 
 #: woocommerce-core-functions.php:687
 #@ woocommerce
 msgid "Swiss Franc"
-msgstr ""
+msgstr "svájci frank"
 
 #: woocommerce-core-functions.php:688
 #@ woocommerce
 msgid "Taiwan New Dollars"
-msgstr ""
+msgstr "Tajvan új dollár"
 
 #: woocommerce-core-functions.php:689
 #@ woocommerce
 msgid "Thai Baht"
-msgstr ""
+msgstr "thai baht"
 
 #: admin/settings/settings-init.php:58
 #@ woocommerce
@@ -2293,23 +2293,23 @@ msgstr "WooCommerce CSS stílus engedélyezése"
 #: admin/settings/settings-init.php:219
 #@ woocommerce
 msgid "Store Notice"
-msgstr "Bolt jegyzet"
+msgstr "Bolt közlemény"
 
 #: admin/settings/settings-init.php:220
 #@ woocommerce
 msgid "Enable the \"Demo Store\" notice on your site"
-msgstr ""
+msgstr "Engedélyezd a \"Demó bolt\" közleményt az oldaladon"
 
 #: admin/settings/settings-init.php:227
 #@ woocommerce
 msgid "Store Notice Text"
-msgstr ""
+msgstr "Bolt közlemény szövege"
 
 #: admin/settings/settings-init.php:230
 #: woocommerce-template.php:204
 #@ woocommerce
 msgid "This is a demo store for testing purposes &mdash; no orders shall be fulfilled."
-msgstr ""
+msgstr "Ez egy demó bolt tesztelés céljából &mdash; nem lehet ténylegesen vásárolni."
 
 #: admin/settings/settings-init.php:236
 #@ woocommerce
@@ -2469,7 +2469,7 @@ msgstr "Fizetés oldal"
 #: admin/settings/settings-init.php:399
 #@ woocommerce
 msgid "Page contents: [woocommerce_pay] Parent: \"Checkout\""
-msgstr "Az oldal tartalma: [woocommerce_pay] Szülő: \"Kassza\""
+msgstr "Az oldal tartalma: [woocommerce_pay] Szülő: \"Pénztár\""
 
 #: admin/settings/settings-init.php:409
 #@ woocommerce
@@ -2479,7 +2479,7 @@ msgstr "Köszönöm oldal"
 #: admin/settings/settings-init.php:410
 #@ woocommerce
 msgid "Page contents: [woocommerce_thankyou] Parent: \"Checkout\""
-msgstr "Az oldal tartalma: [woocommerce_thankyou] Szülő: \"Kassza\""
+msgstr "Az oldal tartalma: [woocommerce_thankyou] Szülő: \"Pénztár\""
 
 #: admin/settings/settings-init.php:420
 #@ woocommerce
@@ -2924,7 +2924,7 @@ msgstr "Add meg a kép URL-jét, amit az email fejrészében akarsz megjeleníte
 #: admin/settings/settings-init.php:1092
 #@ woocommerce
 msgid "The text to appear in the footer of WooCommerce emails."
-msgstr "A szöveg jelenik meg a lábrészben a WooCommerce email-eken."
+msgstr "Ez a szöveg jelenik meg a WooCommerce email lábrészében."
 
 #: admin/settings/settings-init.php:1096
 #@ woocommerce
@@ -3050,7 +3050,7 @@ msgstr ""
 #: admin/woocommerce-admin-attributes.php:387
 #@ woocommerce
 msgid "Select"
-msgstr ""
+msgstr "Választ"
 
 #: admin/woocommerce-admin-attributes.php:255
 #: admin/woocommerce-admin-attributes.php:388
@@ -3815,7 +3815,7 @@ msgstr "kosar"
 #: classes/widgets/class-wc-widget-cart.php:61
 #@ woocommerce
 msgid "Cart"
-msgstr ""
+msgstr "Kosár"
 
 #: admin/woocommerce-admin-install.php:198
 #@ woocommerce
@@ -4249,7 +4249,7 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:162
 #@ woocommerce
 msgid "Your settings have been saved."
-msgstr ""
+msgstr "A beállításaid elmentve."
 
 #: admin/woocommerce-admin-settings.php:198
 #@ woocommerce
@@ -4282,7 +4282,7 @@ msgstr "Kemény kivágás"
 #: admin/woocommerce-admin-settings.php:857
 #@ woocommerce
 msgid "Select a page&hellip;"
-msgstr ""
+msgstr "Válassz egy oldalt&hellip;"
 
 #: admin/woocommerce-admin-settings.php:880
 #@ woocommerce
@@ -4396,12 +4396,12 @@ msgstr ""
 #: admin/woocommerce-admin-status.php:121
 #@ woocommerce
 msgid "WP Debug Mode"
-msgstr ""
+msgstr "WP hibakereső mód"
 
 #: admin/woocommerce-admin-status.php:137
 #@ woocommerce
 msgid "WC Logging"
-msgstr ""
+msgstr "WC Logging"
 
 #: admin/woocommerce-admin-status.php:140
 #@ woocommerce
@@ -4623,7 +4623,7 @@ msgstr "A kupon nem létezik!"
 #: classes/class-wc-checkout.php:60
 #@ woocommerce
 msgid "Account username"
-msgstr ""
+msgstr "Profil felhasználónév"
 
 #: classes/class-wc-checkout.php:61
 #@ woocommerce
@@ -4635,7 +4635,7 @@ msgstr "Felhasználónév"
 #: classes/class-wc-checkout.php:75
 #@ woocommerce
 msgid "Account password"
-msgstr ""
+msgstr "Profil jelszó"
 
 #: classes/class-wc-checkout.php:69
 #: classes/class-wc-checkout.php:76
@@ -4772,37 +4772,37 @@ msgstr "Előrendelt"
 #: classes/class-wc-countries.php:36
 #@ woocommerce
 msgid "Afghanistan"
-msgstr ""
+msgstr "Afganisztán"
 
 #: classes/class-wc-countries.php:37
 #@ woocommerce
 msgid "&#197;land Islands"
-msgstr ""
+msgstr "&#197;land-szigetek"
 
 #: classes/class-wc-countries.php:38
 #@ woocommerce
 msgid "Albania"
-msgstr ""
+msgstr "Albánia"
 
 #: classes/class-wc-countries.php:39
 #@ woocommerce
 msgid "Algeria"
-msgstr ""
+msgstr "Algéria"
 
 #: classes/class-wc-countries.php:40
 #@ woocommerce
 msgid "American Samoa"
-msgstr ""
+msgstr "Amerikai Szamoa"
 
 #: classes/class-wc-countries.php:41
 #@ woocommerce
 msgid "Andorra"
-msgstr ""
+msgstr "Andorra"
 
 #: classes/class-wc-countries.php:42
 #@ woocommerce
 msgid "Angola"
-msgstr ""
+msgstr "Angola"
 
 #: classes/class-wc-countries.php:43
 #@ woocommerce
@@ -4812,438 +4812,438 @@ msgstr ""
 #: classes/class-wc-countries.php:44
 #@ woocommerce
 msgid "Antarctica"
-msgstr ""
+msgstr "Anguilla"
 
 #: classes/class-wc-countries.php:45
 #@ woocommerce
 msgid "Antigua and Barbuda"
-msgstr ""
+msgstr "Antigua és Barbuda"
 
 #: classes/class-wc-countries.php:46
 #@ woocommerce
 msgid "Argentina"
-msgstr ""
+msgstr "Argentína"
 
 #: classes/class-wc-countries.php:47
 #@ woocommerce
 msgid "Armenia"
-msgstr ""
+msgstr "Örményország"
 
 #: classes/class-wc-countries.php:48
 #@ woocommerce
 msgid "Aruba"
-msgstr ""
+msgstr "Aruba"
 
 #: classes/class-wc-countries.php:49
 #@ woocommerce
 msgid "Australia"
-msgstr ""
+msgstr "Ausztrália"
 
 #: classes/class-wc-countries.php:50
 #@ woocommerce
 msgid "Austria"
-msgstr ""
+msgstr "Ausztria"
 
 #: classes/class-wc-countries.php:51
 #@ woocommerce
 msgid "Azerbaijan"
-msgstr ""
+msgstr "Azerbajdzsán"
 
 #: classes/class-wc-countries.php:52
 #@ woocommerce
 msgid "Bahamas"
-msgstr ""
+msgstr "Bahama-szigetek"
 
 #: classes/class-wc-countries.php:53
 #@ woocommerce
 msgid "Bahrain"
-msgstr ""
+msgstr "Bahrein"
 
 #: classes/class-wc-countries.php:54
 #@ woocommerce
 msgid "Bangladesh"
-msgstr ""
+msgstr "Banglades"
 
 #: classes/class-wc-countries.php:55
 #@ woocommerce
 msgid "Barbados"
-msgstr ""
+msgstr "Barbados"
 
 #: classes/class-wc-countries.php:56
 #@ woocommerce
 msgid "Belarus"
-msgstr ""
+msgstr "Belarusz/Fehéroroszország"
 
 #: classes/class-wc-countries.php:57
 #@ woocommerce
 msgid "Belgium"
-msgstr ""
+msgstr "Belgium"
 
 #: classes/class-wc-countries.php:59
 #@ woocommerce
 msgid "Belize"
-msgstr ""
+msgstr "Belize"
 
 #: classes/class-wc-countries.php:60
 #@ woocommerce
 msgid "Benin"
-msgstr ""
+msgstr "Benin"
 
 #: classes/class-wc-countries.php:61
 #@ woocommerce
 msgid "Bermuda"
-msgstr ""
+msgstr "Bermuda"
 
 #: classes/class-wc-countries.php:62
 #@ woocommerce
 msgid "Bhutan"
-msgstr ""
+msgstr "Bhután"
 
 #: classes/class-wc-countries.php:63
 #@ woocommerce
 msgid "Bolivia"
-msgstr ""
+msgstr "Bolívia"
 
 #: classes/class-wc-countries.php:65
 #@ woocommerce
 msgid "Bosnia and Herzegovina"
-msgstr ""
+msgstr "Bosznia-Hercegovina"
 
 #: classes/class-wc-countries.php:66
 #@ woocommerce
 msgid "Botswana"
-msgstr ""
+msgstr "Botswana"
 
 #: classes/class-wc-countries.php:68
 #@ woocommerce
 msgid "Brazil"
-msgstr ""
+msgstr "Brazília"
 
 #: classes/class-wc-countries.php:69
 #@ woocommerce
 msgid "British Indian Ocean Territory"
-msgstr ""
+msgstr "Brit Indiai-óceáni Terület"
 
 #: classes/class-wc-countries.php:70
 #@ woocommerce
 msgid "British Virgin Islands"
-msgstr ""
+msgstr "Brit Virgin-szigetek"
 
 #: classes/class-wc-countries.php:71
 #@ woocommerce
 msgid "Brunei"
-msgstr ""
+msgstr "Brunei"
 
 #: classes/class-wc-countries.php:72
 #@ woocommerce
 msgid "Bulgaria"
-msgstr ""
+msgstr "Bulgária"
 
 #: classes/class-wc-countries.php:73
 #@ woocommerce
 msgid "Burkina Faso"
-msgstr ""
+msgstr "Burkina Faso"
 
 #: classes/class-wc-countries.php:74
 #@ woocommerce
 msgid "Burundi"
-msgstr ""
+msgstr "Burundi"
 
 #: classes/class-wc-countries.php:75
 #@ woocommerce
 msgid "Cambodia"
-msgstr ""
+msgstr "Kambodzsa"
 
 #: classes/class-wc-countries.php:76
 #@ woocommerce
 msgid "Cameroon"
-msgstr ""
+msgstr "Kamerun"
 
 #: classes/class-wc-countries.php:77
 #@ woocommerce
 msgid "Canada"
-msgstr ""
+msgstr "Kanada"
 
 #: classes/class-wc-countries.php:78
 #@ woocommerce
 msgid "Cape Verde"
-msgstr ""
+msgstr "Zöld-foki-szigetek"
 
 #: classes/class-wc-countries.php:79
 #@ woocommerce
 msgid "Cayman Islands"
-msgstr ""
+msgstr "Kajmán-szigetek"
 
 #: classes/class-wc-countries.php:80
 #@ woocommerce
 msgid "Central African Republic"
-msgstr ""
+msgstr "Közép-afrikai Köztársaság"
 
 #: classes/class-wc-countries.php:81
 #@ woocommerce
 msgid "Chad"
-msgstr ""
+msgstr "Csád"
 
 #: classes/class-wc-countries.php:82
 #@ woocommerce
 msgid "Chile"
-msgstr ""
+msgstr "Chile"
 
 #: classes/class-wc-countries.php:83
 #@ woocommerce
 msgid "China"
-msgstr ""
+msgstr "Kína"
 
 #: classes/class-wc-countries.php:84
 #@ woocommerce
 msgid "Christmas Island"
-msgstr ""
+msgstr "Karácsony-sziget"
 
 #: classes/class-wc-countries.php:85
 #@ woocommerce
 msgid "Cocos (Keeling) Islands"
-msgstr ""
+msgstr "Kókusz-szigetek/Keeling-szigetek"
 
 #: classes/class-wc-countries.php:86
 #@ woocommerce
 msgid "Colombia"
-msgstr ""
+msgstr "Kolumbia"
 
 #: classes/class-wc-countries.php:87
 #@ woocommerce
 msgid "Comoros"
-msgstr ""
+msgstr "Comore-szigetek"
 
 #: classes/class-wc-countries.php:88
 #@ woocommerce
 msgid "Congo (Brazzaville)"
-msgstr ""
+msgstr "Kongó"
 
 #: classes/class-wc-countries.php:89
 #@ woocommerce
 msgid "Congo (Kinshasa)"
-msgstr ""
+msgstr "Kongói Demokratikus Köztársaság"
 
 #: classes/class-wc-countries.php:90
 #@ woocommerce
 msgid "Cook Islands"
-msgstr ""
+msgstr "Cook-szigetek"
 
 #: classes/class-wc-countries.php:91
 #@ woocommerce
 msgid "Costa Rica"
-msgstr ""
+msgstr "Costa Rica"
 
 #: classes/class-wc-countries.php:92
 #@ woocommerce
 msgid "Croatia"
-msgstr ""
+msgstr "Horvátország"
 
 #: classes/class-wc-countries.php:93
 #@ woocommerce
 msgid "Cuba"
-msgstr ""
+msgstr "Kuba"
 
 #: classes/class-wc-countries.php:95
 #@ woocommerce
 msgid "Cyprus"
-msgstr ""
+msgstr "Ciprus"
 
 #: classes/class-wc-countries.php:96
 #@ woocommerce
 msgid "Czech Republic"
-msgstr ""
+msgstr "Csehország"
 
 #: classes/class-wc-countries.php:97
 #@ woocommerce
 msgid "Denmark"
-msgstr ""
+msgstr "Dánia"
 
 #: classes/class-wc-countries.php:98
 #@ woocommerce
 msgid "Djibouti"
-msgstr ""
+msgstr "Dzsibuti"
 
 #: classes/class-wc-countries.php:99
 #@ woocommerce
 msgid "Dominica"
-msgstr ""
+msgstr "Dominika"
 
 #: classes/class-wc-countries.php:100
 #@ woocommerce
 msgid "Dominican Republic"
-msgstr ""
+msgstr "Dominikai Köztársaság"
 
 #: classes/class-wc-countries.php:101
 #@ woocommerce
 msgid "Ecuador"
-msgstr ""
+msgstr "Ecuador"
 
 #: classes/class-wc-countries.php:102
 #@ woocommerce
 msgid "Egypt"
-msgstr ""
+msgstr "Egyiptom"
 
 #: classes/class-wc-countries.php:103
 #@ woocommerce
 msgid "El Salvador"
-msgstr ""
+msgstr "Salvador"
 
 #: classes/class-wc-countries.php:104
 #@ woocommerce
 msgid "Equatorial Guinea"
-msgstr ""
+msgstr "Egyenlítői-Guinea"
 
 #: classes/class-wc-countries.php:105
 #@ woocommerce
 msgid "Eritrea"
-msgstr ""
+msgstr "Eritrea"
 
 #: classes/class-wc-countries.php:106
 #@ woocommerce
 msgid "Estonia"
-msgstr ""
+msgstr "Észtország"
 
 #: classes/class-wc-countries.php:107
 #@ woocommerce
 msgid "Ethiopia"
-msgstr ""
+msgstr "Etiópia"
 
 #: classes/class-wc-countries.php:108
 #@ woocommerce
 msgid "Falkland Islands"
-msgstr ""
+msgstr "Falkland-szigetek"
 
 #: classes/class-wc-countries.php:109
 #@ woocommerce
 msgid "Faroe Islands"
-msgstr ""
+msgstr "Feröer szigetek"
 
 #: classes/class-wc-countries.php:110
 #@ woocommerce
 msgid "Fiji"
-msgstr ""
+msgstr "Fidzsi-szigetek"
 
 #: classes/class-wc-countries.php:111
 #@ woocommerce
 msgid "Finland"
-msgstr ""
+msgstr "Finnország"
 
 #: classes/class-wc-countries.php:112
 #@ woocommerce
 msgid "France"
-msgstr ""
+msgstr "Franciaország"
 
 #: classes/class-wc-countries.php:113
 #@ woocommerce
 msgid "French Guiana"
-msgstr ""
+msgstr "Francia Guyana"
 
 #: classes/class-wc-countries.php:114
 #@ woocommerce
 msgid "French Polynesia"
-msgstr ""
+msgstr "Francia Polinézia"
 
 #: classes/class-wc-countries.php:115
 #@ woocommerce
 msgid "French Southern Territories"
-msgstr ""
+msgstr "Francia Déli Területek"
 
 #: classes/class-wc-countries.php:116
 #@ woocommerce
 msgid "Gabon"
-msgstr ""
+msgstr "Gabon"
 
 #: classes/class-wc-countries.php:117
 #@ woocommerce
 msgid "Gambia"
-msgstr ""
+msgstr "Gambia"
 
 #: classes/class-wc-countries.php:118
 #: i18n/states/US.php:23
 #@ woocommerce
 msgid "Georgia"
-msgstr ""
+msgstr "Grúzia"
 
 #: classes/class-wc-countries.php:119
 #@ woocommerce
 msgid "Germany"
-msgstr ""
+msgstr "Németország"
 
 #: classes/class-wc-countries.php:120
 #@ woocommerce
 msgid "Ghana"
-msgstr ""
+msgstr "Ghána"
 
 #: classes/class-wc-countries.php:121
 #@ woocommerce
 msgid "Gibraltar"
-msgstr ""
+msgstr "Gibraltár"
 
 #: classes/class-wc-countries.php:122
 #@ woocommerce
 msgid "Greece"
-msgstr ""
+msgstr "Görögország"
 
 #: classes/class-wc-countries.php:123
 #@ woocommerce
 msgid "Greenland"
-msgstr ""
+msgstr "Grönland"
 
 #: classes/class-wc-countries.php:124
 #@ woocommerce
 msgid "Grenada"
-msgstr ""
+msgstr "Grenada"
 
 #: classes/class-wc-countries.php:125
 #@ woocommerce
 msgid "Guadeloupe"
-msgstr ""
+msgstr "Guadeloupe"
 
 #: classes/class-wc-countries.php:126
 #@ woocommerce
 msgid "Guam"
-msgstr ""
+msgstr "Guam"
 
 #: classes/class-wc-countries.php:127
 #@ woocommerce
 msgid "Guatemala"
-msgstr ""
+msgstr "Guatemala"
 
 #: classes/class-wc-countries.php:128
 #@ woocommerce
 msgid "Guernsey"
-msgstr ""
+msgstr "Guernsey-sziget"
 
 #: classes/class-wc-countries.php:129
 #@ woocommerce
 msgid "Guinea"
-msgstr ""
+msgstr "Guinea"
 
 #: classes/class-wc-countries.php:130
 #@ woocommerce
 msgid "Guinea-Bissau"
-msgstr ""
+msgstr "Bissau-Guinea"
 
 #: classes/class-wc-countries.php:131
 #@ woocommerce
 msgid "Guyana"
-msgstr ""
+msgstr "Guyana"
 
 #: classes/class-wc-countries.php:132
 #@ woocommerce
 msgid "Haiti"
-msgstr ""
+msgstr "Haiti"
 
 #: classes/class-wc-countries.php:134
 #@ woocommerce
 msgid "Honduras"
-msgstr ""
+msgstr "Honduras"
 
 #: classes/class-wc-countries.php:135
 #@ woocommerce
 msgid "Hong Kong"
-msgstr ""
+msgstr "Hong Kong"
 
 #: classes/class-wc-countries.php:136
 #@ woocommerce
@@ -5253,782 +5253,782 @@ msgstr "Magyarország"
 #: classes/class-wc-countries.php:137
 #@ woocommerce
 msgid "Iceland"
-msgstr ""
+msgstr "Izland"
 
 #: classes/class-wc-countries.php:138
 #@ woocommerce
 msgid "India"
-msgstr ""
+msgstr "India"
 
 #: classes/class-wc-countries.php:139
 #@ woocommerce
 msgid "Indonesia"
-msgstr ""
+msgstr "Indonézia"
 
 #: classes/class-wc-countries.php:140
 #@ woocommerce
 msgid "Iran"
-msgstr ""
+msgstr "Irán"
 
 #: classes/class-wc-countries.php:141
 #@ woocommerce
 msgid "Iraq"
-msgstr ""
+msgstr "Irak"
 
 #: classes/class-wc-countries.php:142
 #@ woocommerce
 msgid "Republic of Ireland"
-msgstr ""
+msgstr "Írország"
 
 #: classes/class-wc-countries.php:143
 #@ woocommerce
 msgid "Isle of Man"
-msgstr ""
+msgstr "Isle of Man"
 
 #: classes/class-wc-countries.php:144
 #@ woocommerce
 msgid "Israel"
-msgstr ""
+msgstr "Izrael"
 
 #: classes/class-wc-countries.php:145
 #@ woocommerce
 msgid "Italy"
-msgstr ""
+msgstr "Olaszország"
 
 #: classes/class-wc-countries.php:146
 #@ woocommerce
 msgid "Ivory Coast"
-msgstr ""
+msgstr "Elefántcsontpart"
 
 #: classes/class-wc-countries.php:147
 #@ woocommerce
 msgid "Jamaica"
-msgstr ""
+msgstr "Jamaica"
 
 #: classes/class-wc-countries.php:148
 #@ woocommerce
 msgid "Japan"
-msgstr ""
+msgstr "Japán"
 
 #: classes/class-wc-countries.php:149
 #@ woocommerce
 msgid "Jersey"
-msgstr ""
+msgstr "Jersey-sziget"
 
 #: classes/class-wc-countries.php:150
 #@ woocommerce
 msgid "Jordan"
-msgstr ""
+msgstr "Jordánia"
 
 #: classes/class-wc-countries.php:151
 #@ woocommerce
 msgid "Kazakhstan"
-msgstr ""
+msgstr "Kazahsztán"
 
 #: classes/class-wc-countries.php:152
 #@ woocommerce
 msgid "Kenya"
-msgstr ""
+msgstr "Kenya"
 
 #: classes/class-wc-countries.php:153
 #@ woocommerce
 msgid "Kiribati"
-msgstr ""
+msgstr "Kiribati"
 
 #: classes/class-wc-countries.php:154
 #@ woocommerce
 msgid "Kuwait"
-msgstr ""
+msgstr "Kuvait"
 
 #: classes/class-wc-countries.php:155
 #@ woocommerce
 msgid "Kyrgyzstan"
-msgstr ""
+msgstr "Kirgizisztán"
 
 #: classes/class-wc-countries.php:156
 #@ woocommerce
 msgid "Laos"
-msgstr ""
+msgstr "Laosz"
 
 #: classes/class-wc-countries.php:157
 #@ woocommerce
 msgid "Latvia"
-msgstr ""
+msgstr "Lettország"
 
 #: classes/class-wc-countries.php:158
 #@ woocommerce
 msgid "Lebanon"
-msgstr ""
+msgstr "Libanon"
 
 #: classes/class-wc-countries.php:159
 #@ woocommerce
 msgid "Lesotho"
-msgstr ""
+msgstr "Lesotho"
 
 #: classes/class-wc-countries.php:160
 #@ woocommerce
 msgid "Liberia"
-msgstr ""
+msgstr "Libéria"
 
 #: classes/class-wc-countries.php:161
 #@ woocommerce
 msgid "Libya"
-msgstr ""
+msgstr "Líbia"
 
 #: classes/class-wc-countries.php:162
 #@ woocommerce
 msgid "Liechtenstein"
-msgstr ""
+msgstr "Liechtenstein"
 
 #: classes/class-wc-countries.php:163
 #@ woocommerce
 msgid "Lithuania"
-msgstr ""
+msgstr "Litvánia"
 
 #: classes/class-wc-countries.php:164
 #@ woocommerce
 msgid "Luxembourg"
-msgstr ""
+msgstr "Luxembourg"
 
 #: classes/class-wc-countries.php:165
 #@ woocommerce
 msgid "Macao S.A.R., China"
-msgstr ""
+msgstr "Makaó"
 
 #: classes/class-wc-countries.php:166
 #@ woocommerce
 msgid "Macedonia"
-msgstr ""
+msgstr "Macedónia"
 
 #: classes/class-wc-countries.php:167
 #@ woocommerce
 msgid "Madagascar"
-msgstr ""
+msgstr "Madagaszkár"
 
 #: classes/class-wc-countries.php:168
 #@ woocommerce
 msgid "Malawi"
-msgstr ""
+msgstr "Malawi"
 
 #: classes/class-wc-countries.php:169
 #@ woocommerce
 msgid "Malaysia"
-msgstr ""
+msgstr "Malajzia"
 
 #: classes/class-wc-countries.php:170
 #@ woocommerce
 msgid "Maldives"
-msgstr ""
+msgstr "Maldív-szigetek"
 
 #: classes/class-wc-countries.php:171
 #@ woocommerce
 msgid "Mali"
-msgstr ""
+msgstr "Mali"
 
 #: classes/class-wc-countries.php:172
 #@ woocommerce
 msgid "Malta"
-msgstr ""
+msgstr "Málta"
 
 #: classes/class-wc-countries.php:173
 #@ woocommerce
 msgid "Marshall Islands"
-msgstr ""
+msgstr "Marshall-szigetek"
 
 #: classes/class-wc-countries.php:174
 #@ woocommerce
 msgid "Martinique"
-msgstr ""
+msgstr "Martinique"
 
 #: classes/class-wc-countries.php:175
 #@ woocommerce
 msgid "Mauritania"
-msgstr ""
+msgstr "Mauritánia"
 
 #: classes/class-wc-countries.php:176
 #@ woocommerce
 msgid "Mauritius"
-msgstr ""
+msgstr "Mauritius"
 
 #: classes/class-wc-countries.php:177
 #@ woocommerce
 msgid "Mayotte"
-msgstr ""
+msgstr "Mayotte"
 
 #: classes/class-wc-countries.php:178
 #@ woocommerce
 msgid "Mexico"
-msgstr ""
+msgstr "Mexikó"
 
 #: classes/class-wc-countries.php:179
 #@ woocommerce
 msgid "Micronesia"
-msgstr ""
+msgstr "Mikronézia"
 
 #: classes/class-wc-countries.php:180
 #@ woocommerce
 msgid "Moldova"
-msgstr ""
+msgstr "Moldova"
 
 #: classes/class-wc-countries.php:181
 #@ woocommerce
 msgid "Monaco"
-msgstr ""
+msgstr "Monaco"
 
 #: classes/class-wc-countries.php:182
 #@ woocommerce
 msgid "Mongolia"
-msgstr ""
+msgstr "Mongólia"
 
 #: classes/class-wc-countries.php:183
 #@ woocommerce
 msgid "Montenegro"
-msgstr ""
+msgstr "Montenegró"
 
 #: classes/class-wc-countries.php:184
 #@ woocommerce
 msgid "Montserrat"
-msgstr ""
+msgstr "Montserrat"
 
 #: classes/class-wc-countries.php:185
 #@ woocommerce
 msgid "Morocco"
-msgstr ""
+msgstr "Marokkó"
 
 #: classes/class-wc-countries.php:186
 #@ woocommerce
 msgid "Mozambique"
-msgstr ""
+msgstr "Mozambik"
 
 #: classes/class-wc-countries.php:187
 #@ woocommerce
 msgid "Myanmar"
-msgstr ""
+msgstr "Mianmar"
 
 #: classes/class-wc-countries.php:188
 #@ woocommerce
 msgid "Namibia"
-msgstr ""
+msgstr "Namíbia"
 
 #: classes/class-wc-countries.php:189
 #@ woocommerce
 msgid "Nauru"
-msgstr ""
+msgstr "Nauru"
 
 #: classes/class-wc-countries.php:190
 #@ woocommerce
 msgid "Nepal"
-msgstr ""
+msgstr "Nepál"
 
 #: classes/class-wc-countries.php:191
 #@ woocommerce
 msgid "Netherlands"
-msgstr ""
+msgstr "Hollandia"
 
 #: classes/class-wc-countries.php:192
 #@ woocommerce
 msgid "Netherlands Antilles"
-msgstr ""
+msgstr "Holland Antillák"
 
 #: classes/class-wc-countries.php:193
 #@ woocommerce
 msgid "New Caledonia"
-msgstr ""
+msgstr "Új-Kaledónia"
 
 #: classes/class-wc-countries.php:194
 #@ woocommerce
 msgid "New Zealand"
-msgstr ""
+msgstr "Új-Zéland"
 
 #: classes/class-wc-countries.php:195
 #@ woocommerce
 msgid "Nicaragua"
-msgstr ""
+msgstr "Nicaragua"
 
 #: classes/class-wc-countries.php:196
 #@ woocommerce
 msgid "Niger"
-msgstr ""
+msgstr "Niger"
 
 #: classes/class-wc-countries.php:197
 #@ woocommerce
 msgid "Nigeria"
-msgstr ""
+msgstr "Nigéria"
 
 #: classes/class-wc-countries.php:198
 #@ woocommerce
 msgid "Niue"
-msgstr ""
+msgstr "Niue"
 
 #: classes/class-wc-countries.php:199
 #@ woocommerce
 msgid "Norfolk Island"
-msgstr ""
+msgstr "Norfolk-sziget"
 
 #: classes/class-wc-countries.php:200
 #@ woocommerce
 msgid "North Korea"
-msgstr ""
+msgstr "Észak-Korea"
 
 #: classes/class-wc-countries.php:201
 #@ woocommerce
 msgid "Northern Mariana Islands"
-msgstr ""
+msgstr "Északi-Mariana-szigetek"
 
 #: classes/class-wc-countries.php:202
 #@ woocommerce
 msgid "Norway"
-msgstr ""
+msgstr "Norvégia"
 
 #: classes/class-wc-countries.php:203
 #@ woocommerce
 msgid "Oman"
-msgstr ""
+msgstr "Omán"
 
 #: classes/class-wc-countries.php:204
 #@ woocommerce
 msgid "Pakistan"
-msgstr ""
+msgstr "Pakisztán"
 
 #: classes/class-wc-countries.php:205
 #@ woocommerce
 msgid "Palestinian Territory"
-msgstr ""
+msgstr "Palesztina"
 
 #: classes/class-wc-countries.php:206
 #@ woocommerce
 msgid "Panama"
-msgstr ""
+msgstr "Panama"
 
 #: classes/class-wc-countries.php:207
 #@ woocommerce
 msgid "Papua New Guinea"
-msgstr ""
+msgstr "Pápua Új-Guinea"
 
 #: classes/class-wc-countries.php:208
 #@ woocommerce
 msgid "Paraguay"
-msgstr ""
+msgstr "Paraguay"
 
 #: classes/class-wc-countries.php:209
 #@ woocommerce
 msgid "Peru"
-msgstr ""
+msgstr "Peru"
 
 #: classes/class-wc-countries.php:210
 #@ woocommerce
 msgid "Philippines"
-msgstr ""
+msgstr "Fülöp-szigetek"
 
 #: classes/class-wc-countries.php:211
 #@ woocommerce
 msgid "Pitcairn"
-msgstr ""
+msgstr "Pitcairn-szigetek"
 
 #: classes/class-wc-countries.php:212
 #@ woocommerce
 msgid "Poland"
-msgstr ""
+msgstr "Lengyelország"
 
 #: classes/class-wc-countries.php:213
 #@ woocommerce
 msgid "Portugal"
-msgstr ""
+msgstr "Portugália"
 
 #: classes/class-wc-countries.php:214
 #@ woocommerce
 msgid "Puerto Rico"
-msgstr ""
+msgstr "Puerto Rico"
 
 #: classes/class-wc-countries.php:215
 #@ woocommerce
 msgid "Qatar"
-msgstr ""
+msgstr "Katar"
 
 #: classes/class-wc-countries.php:216
 #@ woocommerce
 msgid "Reunion"
-msgstr ""
+msgstr "Réunion"
 
 #: classes/class-wc-countries.php:217
 #@ woocommerce
 msgid "Romania"
-msgstr ""
+msgstr "Románia"
 
 #: classes/class-wc-countries.php:218
 #@ woocommerce
 msgid "Russia"
-msgstr ""
+msgstr "Oroszország"
 
 #: classes/class-wc-countries.php:219
 #@ woocommerce
 msgid "Rwanda"
-msgstr ""
+msgstr "Ruanda"
 
 #: classes/class-wc-countries.php:220
 #@ woocommerce
 msgid "Saint Barth&eacute;lemy"
-msgstr ""
+msgstr "Saint Barth&eacute;lemy"
 
 #: classes/class-wc-countries.php:221
 #@ woocommerce
 msgid "Saint Helena"
-msgstr ""
+msgstr "Szent Ilona"
 
 #: classes/class-wc-countries.php:222
 #@ woocommerce
 msgid "Saint Kitts and Nevis"
-msgstr ""
+msgstr "Saint Kitts és Nevis"
 
 #: classes/class-wc-countries.php:223
 #@ woocommerce
 msgid "Saint Lucia"
-msgstr ""
+msgstr "Saint Lucia"
 
 #: classes/class-wc-countries.php:224
 #@ woocommerce
 msgid "Saint Martin (French part)"
-msgstr ""
+msgstr "Saint Martin"
 
 #: classes/class-wc-countries.php:226
 #@ woocommerce
 msgid "Saint Pierre and Miquelon"
-msgstr ""
+msgstr "Saint-Pierre és Miquelon"
 
 #: classes/class-wc-countries.php:227
 #@ woocommerce
 msgid "Saint Vincent and the Grenadines"
-msgstr ""
+msgstr "Saint Vincent és Grenadine-szigetek"
 
 #: classes/class-wc-countries.php:228
 #@ woocommerce
 msgid "Samoa"
-msgstr ""
+msgstr "Szamoa"
 
 #: classes/class-wc-countries.php:229
 #@ woocommerce
 msgid "San Marino"
-msgstr ""
+msgstr "San Marino"
 
 #: classes/class-wc-countries.php:230
 #@ woocommerce
 msgid "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
-msgstr ""
+msgstr "S&atilde;o Tom&eacute; és Pr&iacute;ncipe"
 
 #: classes/class-wc-countries.php:231
 #@ woocommerce
 msgid "Saudi Arabia"
-msgstr ""
+msgstr "Szaúd-Arábia"
 
 #: classes/class-wc-countries.php:232
 #@ woocommerce
 msgid "Senegal"
-msgstr ""
+msgstr "Szenegál"
 
 #: classes/class-wc-countries.php:233
 #@ woocommerce
 msgid "Serbia"
-msgstr ""
+msgstr "Szerbia"
 
 #: classes/class-wc-countries.php:234
 #@ woocommerce
 msgid "Seychelles"
-msgstr ""
+msgstr "Seychelle-szigetek"
 
 #: classes/class-wc-countries.php:235
 #@ woocommerce
 msgid "Sierra Leone"
-msgstr ""
+msgstr "Sierra Leone"
 
 #: classes/class-wc-countries.php:236
 #@ woocommerce
 msgid "Singapore"
-msgstr ""
+msgstr "Szingapúr"
 
 #: classes/class-wc-countries.php:237
 #@ woocommerce
 msgid "Slovakia"
-msgstr ""
+msgstr "Szlovákia"
 
 #: classes/class-wc-countries.php:238
 #@ woocommerce
 msgid "Slovenia"
-msgstr ""
+msgstr "Szlovénia"
 
 #: classes/class-wc-countries.php:239
 #@ woocommerce
 msgid "Solomon Islands"
-msgstr ""
+msgstr "Salamon-szigetek"
 
 #: classes/class-wc-countries.php:240
 #@ woocommerce
 msgid "Somalia"
-msgstr ""
+msgstr "Szomália"
 
 #: classes/class-wc-countries.php:241
 #@ woocommerce
 msgid "South Africa"
-msgstr ""
+msgstr "Dél-Afrika"
 
 #: classes/class-wc-countries.php:242
 #@ woocommerce
 msgid "South Georgia/Sandwich Islands"
-msgstr ""
+msgstr "Dél-Georgia és Déli-Sandwich-szigetek"
 
 #: classes/class-wc-countries.php:243
 #@ woocommerce
 msgid "South Korea"
-msgstr ""
+msgstr "Dél-Korea"
 
 #: classes/class-wc-countries.php:245
 #@ woocommerce
 msgid "Spain"
-msgstr ""
+msgstr "Spanyolország"
 
 #: classes/class-wc-countries.php:246
 #@ woocommerce
 msgid "Sri Lanka"
-msgstr ""
+msgstr "Srí Lanka"
 
 #: classes/class-wc-countries.php:247
 #@ woocommerce
 msgid "Sudan"
-msgstr ""
+msgstr "Szudán"
 
 #: classes/class-wc-countries.php:248
 #@ woocommerce
 msgid "Suriname"
-msgstr ""
+msgstr "Suriname"
 
 #: classes/class-wc-countries.php:249
 #@ woocommerce
 msgid "Svalbard and Jan Mayen"
-msgstr ""
+msgstr "Svalbard- és Jan Mayen-szigetek"
 
 #: classes/class-wc-countries.php:250
 #@ woocommerce
 msgid "Swaziland"
-msgstr ""
+msgstr "Szváziföld"
 
 #: classes/class-wc-countries.php:251
 #@ woocommerce
 msgid "Sweden"
-msgstr ""
+msgstr "Svédország"
 
 #: classes/class-wc-countries.php:252
 #@ woocommerce
 msgid "Switzerland"
-msgstr ""
+msgstr "Svájc"
 
 #: classes/class-wc-countries.php:253
 #@ woocommerce
 msgid "Syria"
-msgstr ""
+msgstr "Szíria"
 
 #: classes/class-wc-countries.php:254
 #@ woocommerce
 msgid "Taiwan"
-msgstr ""
+msgstr "Tajvan"
 
 #: classes/class-wc-countries.php:255
 #@ woocommerce
 msgid "Tajikistan"
-msgstr ""
+msgstr "Tádzsikisztán"
 
 #: classes/class-wc-countries.php:256
 #@ woocommerce
 msgid "Tanzania"
-msgstr ""
+msgstr "Tanzánia"
 
 #: classes/class-wc-countries.php:257
 #@ woocommerce
 msgid "Thailand"
-msgstr ""
+msgstr "Thaiföld"
 
 #: classes/class-wc-countries.php:258
 #@ woocommerce
 msgid "Timor-Leste"
-msgstr ""
+msgstr "Kelet-Timor"
 
 #: classes/class-wc-countries.php:259
 #@ woocommerce
 msgid "Togo"
-msgstr ""
+msgstr "Togo"
 
 #: classes/class-wc-countries.php:260
 #@ woocommerce
 msgid "Tokelau"
-msgstr ""
+msgstr "Tokelau-szigetek"
 
 #: classes/class-wc-countries.php:261
 #@ woocommerce
 msgid "Tonga"
-msgstr ""
+msgstr "Tonga"
 
 #: classes/class-wc-countries.php:262
 #@ woocommerce
 msgid "Trinidad and Tobago"
-msgstr ""
+msgstr "Trinidad és Tobago"
 
 #: classes/class-wc-countries.php:263
 #@ woocommerce
 msgid "Tunisia"
-msgstr ""
+msgstr "Tunézia"
 
 #: classes/class-wc-countries.php:264
 #@ woocommerce
 msgid "Turkey"
-msgstr ""
+msgstr "Törökország"
 
 #: classes/class-wc-countries.php:265
 #@ woocommerce
 msgid "Turkmenistan"
-msgstr ""
+msgstr "Türkmenisztán"
 
 #: classes/class-wc-countries.php:266
 #@ woocommerce
 msgid "Turks and Caicos Islands"
-msgstr ""
+msgstr "Turks- és Caicos-szigetek"
 
 #: classes/class-wc-countries.php:267
 #@ woocommerce
 msgid "Tuvalu"
-msgstr ""
+msgstr "Tuvalu"
 
 #: classes/class-wc-countries.php:268
 #@ woocommerce
 msgid "U.S. Virgin Islands"
-msgstr ""
+msgstr "Amerikai Virgin-szigetek"
 
 #: classes/class-wc-countries.php:269
 #@ woocommerce
 msgid "US Minor Outlying Islands"
-msgstr ""
+msgstr "Az Amerikai Egyesült Államok Külső Szigetei"
 
 #: classes/class-wc-countries.php:270
 #@ woocommerce
 msgid "Uganda"
-msgstr ""
+msgstr "Uganda"
 
 #: classes/class-wc-countries.php:271
 #@ woocommerce
 msgid "Ukraine"
-msgstr ""
+msgstr "Ukrajna"
 
 #: classes/class-wc-countries.php:272
 #@ woocommerce
 msgid "United Arab Emirates"
-msgstr ""
+msgstr "Egyesült Arab Emírségek"
 
 #: classes/class-wc-countries.php:273
 #@ woocommerce
 msgid "United Kingdom"
-msgstr ""
+msgstr "Egyesült Királyság"
 
 #: classes/class-wc-countries.php:274
 #@ woocommerce
 msgid "United States"
-msgstr ""
+msgstr "Egyesült Államok"
 
 #: classes/class-wc-countries.php:275
 #@ woocommerce
 msgid "Uruguay"
-msgstr ""
+msgstr "Uruguay"
 
 #: classes/class-wc-countries.php:276
 #@ woocommerce
 msgid "Uzbekistan"
-msgstr ""
+msgstr "Üzbegisztán"
 
 #: classes/class-wc-countries.php:277
 #@ woocommerce
 msgid "Vanuatu"
-msgstr ""
+msgstr "Vanuatu"
 
 #: classes/class-wc-countries.php:278
 #@ woocommerce
 msgid "Vatican"
-msgstr ""
+msgstr "Vatikán"
 
 #: classes/class-wc-countries.php:279
 #@ woocommerce
 msgid "Venezuela"
-msgstr ""
+msgstr "Venezuela"
 
 #: classes/class-wc-countries.php:280
 #@ woocommerce
 msgid "Vietnam"
-msgstr ""
+msgstr "Vietnam"
 
 #: classes/class-wc-countries.php:281
 #@ woocommerce
 msgid "Wallis and Futuna"
-msgstr ""
+msgstr "Wallis és Futuna"
 
 #: classes/class-wc-countries.php:282
 #@ woocommerce
 msgid "Western Sahara"
-msgstr ""
+msgstr "Nyugat-Szahara"
 
 #: classes/class-wc-countries.php:283
 #@ woocommerce
 msgid "Yemen"
-msgstr ""
+msgstr "Jemen"
 
 #: classes/class-wc-countries.php:284
 #@ woocommerce
 msgid "Zambia"
-msgstr ""
+msgstr "Zambia"
 
 #: classes/class-wc-countries.php:285
 #@ woocommerce
 msgid "Zimbabwe"
-msgstr ""
+msgstr "Zimbabwe"
 
 #: i18n/states/AU.php:13
 #@ woocommerce
 msgid "Australian Capital Territory"
-msgstr ""
+msgstr "Ausztráliai fővárosi terület"
 
 #: i18n/states/AU.php:14
 #@ woocommerce
 msgid "New South Wales"
-msgstr ""
+msgstr "Új-Dél-Wales"
 
 #: i18n/states/AU.php:15
 #@ woocommerce
 msgid "Northern Territory"
-msgstr ""
+msgstr "Northern Territory"
 
 #: i18n/states/AU.php:16
 #@ woocommerce
 msgid "Queensland"
-msgstr ""
+msgstr "Queensland"
 
 #: i18n/states/AU.php:17
 #@ woocommerce
 msgid "South Australia"
-msgstr ""
+msgstr "Dél-Ausztrália"
 
 #: i18n/states/AU.php:18
 #@ woocommerce
 msgid "Tasmania"
-msgstr ""
+msgstr "Tasmania"
 
 #: i18n/states/AU.php:19
 #@ woocommerce
 msgid "Victoria"
-msgstr ""
+msgstr "Victoria"
 
 #: i18n/states/AU.php:20
 #@ woocommerce
 msgid "Western Australia"
-msgstr ""
+msgstr "Nyugat-Ausztrália"
 
 #: i18n/states/BR.php:16
 #@ woocommerce
 msgid "Amazonas"
-msgstr ""
+msgstr "Amazonas"
 
 #: i18n/states/BR.php:13
 #@ woocommerce
@@ -6876,7 +6876,7 @@ msgstr ""
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:82
 #@ woocommerce
 msgid "Account Details"
-msgstr ""
+msgstr "Profil adatok"
 
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:84
 #@ woocommerce
@@ -6888,45 +6888,45 @@ msgstr ""
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:203
 #@ woocommerce
 msgid "Account Name"
-msgstr ""
+msgstr "Profil név"
 
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:94
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:164
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:204
 #@ woocommerce
 msgid "Account Number"
-msgstr ""
+msgstr "Profil szám"
 
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:100
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:165
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:205
 #@ woocommerce
 msgid "Sort Code"
-msgstr ""
+msgstr "Rövid kód"
 
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:106
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:166
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:206
 #@ woocommerce
 msgid "Bank Name"
-msgstr ""
+msgstr "Bank név"
 
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:112
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:167
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:207
 #@ woocommerce
 msgid "IBAN"
-msgstr ""
+msgstr "IBAN"
 
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:117
 #@ woocommerce
 msgid "BIC (formerly Swift)"
-msgstr ""
+msgstr "BIC (korábban Swift)"
 
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:136
 #@ woocommerce
 msgid "BACS Payment"
-msgstr ""
+msgstr "Közvetlen banki átutalásos fizetés"
 
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:137
 #@ woocommerce
@@ -6943,7 +6943,7 @@ msgstr ""
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:208
 #@ woocommerce
 msgid "BIC"
-msgstr ""
+msgstr "BIC"
 
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:234
 #@ woocommerce
@@ -7001,7 +7001,7 @@ msgstr ""
 #: classes/gateways/cod/class-wc-gateway-cod.php:80
 #@ woocommerce
 msgid "Enable COD"
-msgstr ""
+msgstr "Engedélyez"
 
 #: classes/gateways/cod/class-wc-gateway-cod.php:81
 #@ woocommerce
@@ -7035,7 +7035,7 @@ msgstr "Instrukció"
 #: classes/gateways/cod/class-wc-gateway-cod.php:102
 #@ woocommerce
 msgid "Instructions that will be added to the thank you page."
-msgstr ""
+msgstr "Az instrukció megjelenik a köszönő oldalon."
 
 #: classes/gateways/cod/class-wc-gateway-cod.php:176
 #@ woocommerce
@@ -7046,28 +7046,28 @@ msgstr ""
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:196
 #@ woocommerce
 msgid "Mijireh Checkout"
-msgstr "Mijireh pénztár"
+msgstr "Mijireh vásárlás"
 
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:143
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:321
 #@ woocommerce
 msgid "Mijireh error:"
-msgstr ""
+msgstr "Mijireh hiba:"
 
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:160
 #@ woocommerce
 msgid "Enable Mijireh Checkout"
-msgstr "Mijireh pénztár engedélyezése"
+msgstr "Mijireh vásárlás engedélyezése"
 
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:164
 #@ woocommerce
 msgid "Access Key"
-msgstr ""
+msgstr "Hozzáférési kulcs"
 
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:166
 #@ woocommerce
 msgid "The Mijireh access key for your store."
-msgstr ""
+msgstr "A Mijireh hozzáférési kulcs a boltodhoz."
 
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:174
 #@ woocommerce
@@ -7088,7 +7088,7 @@ msgstr ""
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:200
 #@ woocommerce
 msgid "Get started with Mijireh Checkout"
-msgstr ""
+msgstr "Első lépések a Mijireh vásárlással"
 
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:201
 #@ woocommerce
@@ -7098,7 +7098,7 @@ msgstr ""
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:203
 #@ woocommerce
 msgid "Join for free"
-msgstr ""
+msgstr "Csatlakozz ingyen"
 
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:203
 #@ woocommerce
@@ -7119,7 +7119,7 @@ msgstr ""
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:90
 #@ woocommerce
 msgid "PayPal standard"
-msgstr ""
+msgstr "PayPal szabvány"
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:91
 #@ woocommerce
@@ -7139,7 +7139,7 @@ msgstr ""
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:121
 #@ woocommerce
 msgid "Enable PayPal standard"
-msgstr ""
+msgstr "PayPal szabvány engedélyezése"
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:135
 #@ woocommerce
@@ -7159,7 +7159,7 @@ msgstr ""
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:146
 #@ woocommerce
 msgid "Invoice Prefix"
-msgstr ""
+msgstr "Számla előtag"
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:148
 #@ woocommerce
@@ -7169,12 +7169,12 @@ msgstr ""
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:153
 #@ woocommerce
 msgid "Submission method"
-msgstr ""
+msgstr "Beküldés módja"
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:155
 #@ woocommerce
 msgid "Use form submission method."
-msgstr ""
+msgstr "Beküldő ürlap mód használata."
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:156
 #@ woocommerce
@@ -7184,7 +7184,7 @@ msgstr ""
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:160
 #@ woocommerce
 msgid "Page Style"
-msgstr "Oldal stílusa"
+msgstr "Oldal kinézete"
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:162
 #@ woocommerce
@@ -7229,17 +7229,17 @@ msgstr ""
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:188
 #@ woocommerce
 msgid "Gateway Testing"
-msgstr ""
+msgstr "Átjáró tesztelése"
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:193
 #@ woocommerce
 msgid "PayPal sandbox"
-msgstr ""
+msgstr "PayPal sandbox"
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:195
 #@ woocommerce
 msgid "Enable PayPal sandbox"
-msgstr ""
+msgstr "PayPal sandbox engedélyezése"
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:197
 #, php-format
@@ -7250,12 +7250,12 @@ msgstr ""
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:200
 #@ woocommerce
 msgid "Debug Log"
-msgstr ""
+msgstr "Hibakeresés log"
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:202
 #@ woocommerce
 msgid "Enable logging"
-msgstr ""
+msgstr "Loggolás engedélyezése"
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:204
 #@ default
@@ -7330,27 +7330,27 @@ msgstr ""
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:26
 #@ woocommerce
 msgid "Google Analytics"
-msgstr ""
+msgstr "Google Analytics"
 
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:27
 #@ woocommerce
 msgid "Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website."
-msgstr ""
+msgstr "A Google Analytics egy ingyenes szolgáltatás, ami Google által generál részletes statisztikát a honlapod látogatóiról."
 
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:62
 #@ woocommerce
 msgid "Google Analytics ID"
-msgstr ""
+msgstr "Google Analytics ID"
 
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:63
 #@ woocommerce
 msgid "Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>"
-msgstr ""
+msgstr "Jelentkezz be a Google Analytics fiókoddal és keresd meg az ID-det. Pl. <code>UA-XXXXX-X</code>"
 
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:68
 #@ woocommerce
 msgid "Tracking code"
-msgstr ""
+msgstr "Követő kód"
 
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:69
 #@ woocommerce
@@ -7395,7 +7395,7 @@ msgstr ""
 #: classes/integrations/sharethis/class-wc-sharethis.php:29
 #@ woocommerce
 msgid "ShareThis"
-msgstr ""
+msgstr "ShareThis"
 
 #: classes/integrations/sharethis/class-wc-sharethis.php:30
 #@ woocommerce
@@ -7405,7 +7405,7 @@ msgstr ""
 #: classes/integrations/sharethis/class-wc-sharethis.php:63
 #@ woocommerce
 msgid "ShareThis Publisher ID"
-msgstr ""
+msgstr "ShareThis publikációs ID"
 
 #: classes/integrations/sharethis/class-wc-sharethis.php:64
 #, php-format
@@ -7416,7 +7416,7 @@ msgstr ""
 #: classes/integrations/sharethis/class-wc-sharethis.php:69
 #@ woocommerce
 msgid "ShareThis Code"
-msgstr ""
+msgstr "Publisher kód"
 
 #: classes/integrations/sharethis/class-wc-sharethis.php:70
 #@ woocommerce
@@ -7428,22 +7428,22 @@ msgstr ""
 #@ woocommerce
 #@ default
 msgid "ShareYourCart"
-msgstr ""
+msgstr "ShareYourCart"
 
 #: classes/integrations/shareyourcart/views/admin-page.php:33
 #@ woocommerce
 msgid "Setup your ShareYourCart account"
-msgstr ""
+msgstr "ShareYourCart profilod beállítása"
 
 #: classes/integrations/shareyourcart/views/admin-page.php:35
 #@ woocommerce
 msgid "Create an account"
-msgstr ""
+msgstr "Hozz létre egy fiókot"
 
 #: classes/integrations/shareyourcart/views/admin-page.php:35
 #@ woocommerce
 msgid "Can't access your account?"
-msgstr ""
+msgstr "Nem férsz hozzá a fiókodhoz?"
 
 #: classes/integrations/shareyourcart/views/admin-page.php:100
 #@ woocommerce
@@ -7608,13 +7608,13 @@ msgstr ""
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:476
 #@ woocommerce
 msgid "Delete selected rates"
-msgstr ""
+msgstr "Kijelölt díjszabás törlése"
 
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:496
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:529
 #@ woocommerce
 msgid "Select a class&hellip;"
-msgstr ""
+msgstr "Válassz egy osztályt&hellip;"
 
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:501
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:502
@@ -7637,7 +7637,7 @@ msgstr "Ingyenes szállítás engedélyezése"
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:118
 #@ woocommerce
 msgid "Minimum Order Amount"
-msgstr ""
+msgstr "Minimális rendelési összeg"
 
 #: admin/woocommerce-admin-reports.php:1531
 #: templates/cart/cart.php:123
@@ -7688,7 +7688,7 @@ msgstr "Helyi kézbesítés"
 #: classes/shipping/local-pickup/class-wc-shipping-local-pickup.php:78
 #@ woocommerce
 msgid "Enable"
-msgstr ""
+msgstr "Engedélyez"
 
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:100
 #@ woocommerce
@@ -7698,7 +7698,7 @@ msgstr "Helyi kézbesítés engedélyezése"
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:111
 #@ woocommerce
 msgid "Fee Type"
-msgstr ""
+msgstr "Díj típusa"
 
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:113
 #@ woocommerce
@@ -7708,22 +7708,22 @@ msgstr ""
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:116
 #@ woocommerce
 msgid "Fixed amount"
-msgstr ""
+msgstr "Fix összeg"
 
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:117
 #@ woocommerce
 msgid "Percentage of cart total"
-msgstr ""
+msgstr "Százalék a teljes kosárról"
 
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:118
 #@ woocommerce
 msgid "Fixed amount per product"
-msgstr ""
+msgstr "Fix összeg per termék"
 
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:123
 #@ woocommerce
 msgid "Delivery Fee"
-msgstr ""
+msgstr "Szállítási díj"
 
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:129
 #@ woocommerce
@@ -7750,7 +7750,7 @@ msgstr "Személyes átvétel"
 #: classes/shipping/local-pickup/class-wc-shipping-local-pickup.php:80
 #@ woocommerce
 msgid "Enable local pickup"
-msgstr ""
+msgstr "Személyes átvétel engedélyezése"
 
 #: classes/shipping/local-pickup/class-wc-shipping-local-pickup.php:134
 #@ woocommerce
@@ -8052,7 +8052,7 @@ msgstr ""
 #: templates/checkout/cart-errors.php:20
 #@ woocommerce
 msgid "&larr; Return To Cart"
-msgstr ""
+msgstr "&larr; Vissza a kosárhoz"
 
 #: templates/checkout/form-billing.php:17
 #@ woocommerce
@@ -8062,7 +8062,7 @@ msgstr "Fizetés &amp; Szállítás"
 #: templates/checkout/form-billing.php:42
 #@ woocommerce
 msgid "Create an account?"
-msgstr ""
+msgstr "Léterehozol egy fiókot?"
 
 #: templates/checkout/form-billing.php:51
 #@ woocommerce
@@ -8458,7 +8458,7 @@ msgstr "Válassz egy opciót"
 #: templates/single-product/add-to-cart/variable.php:64
 #@ woocommerce
 msgid "Clear selection"
-msgstr ""
+msgstr "Választás törlése"
 
 #: templates/single-product/review.php:33
 #@ woocommerce
@@ -8994,7 +8994,7 @@ msgstr "termek"
 #: woocommerce-core-functions.php:1506
 #@ woocommerce
 msgid "Select a category"
-msgstr "Válassz kategóriát"
+msgstr "Válassz egy kategóriát"
 
 #: woocommerce-core-functions.php:1510
 #@ woocommerce
@@ -9612,7 +9612,7 @@ msgstr "Ez az, ahol új kupont hozhatsz létre, hogy a vásárlók felhasználha
 #: woocommerce.php:1193
 #@ woocommerce
 msgid "Select an option&hellip;"
-msgstr ""
+msgstr "Válassz egy opciót&hellip;"
 
 #: woocommerce.php:1194
 #@ woocommerce
@@ -10539,7 +10539,7 @@ msgstr "Alapszín"
 #: admin/settings/settings-init.php:1109
 #@ woocommerce
 msgid "Background Colour"
-msgstr ""
+msgstr "Háttérszín"
 
 #: admin/settings/settings-init.php:1110
 #@ woocommerce
@@ -11216,7 +11216,7 @@ msgstr "Email tárgy"
 #, php-format
 #@ woocommerce
 msgid "Defaults to <code>%s</code>"
-msgstr ""
+msgstr "Alapértelmezett: <code>%s</code>"
 
 #: classes/abstracts/abstract-wc-email.php:429
 #: classes/emails/class-wc-email-customer-invoice.php:151
@@ -11246,7 +11246,7 @@ msgstr "Válassz, milyen formátumú legyen a küldendő email."
 #: classes/emails/class-wc-email-new-order.php:148
 #@ woocommerce
 msgid "Plain text"
-msgstr ""
+msgstr "Egyszerű szöveg"
 
 #: classes/abstracts/abstract-wc-email.php:443
 #: classes/emails/class-wc-email-customer-completed-order.php:176
@@ -11254,7 +11254,7 @@ msgstr ""
 #: classes/emails/class-wc-email-new-order.php:149
 #@ woocommerce
 msgid "HTML"
-msgstr ""
+msgstr "HTML"
 
 #: classes/abstracts/abstract-wc-email.php:444
 #: classes/emails/class-wc-email-customer-completed-order.php:177
@@ -11262,7 +11262,7 @@ msgstr ""
 #: classes/emails/class-wc-email-new-order.php:150
 #@ woocommerce
 msgid "Multipart"
-msgstr ""
+msgstr "Multipart"
 
 #: classes/abstracts/abstract-wc-email.php:480
 #: classes/abstracts/abstract-wc-email.php:501
@@ -11283,12 +11283,12 @@ msgstr ""
 #: classes/abstracts/abstract-wc-email.php:557
 #@ woocommerce
 msgid "HTML template"
-msgstr ""
+msgstr "HTML sablon"
 
 #: classes/abstracts/abstract-wc-email.php:558
 #@ woocommerce
 msgid "Plain text template"
-msgstr ""
+msgstr "Egyszerű szöveg sablon"
 
 #: classes/abstracts/abstract-wc-email.php:577
 #@ woocommerce
@@ -11304,7 +11304,7 @@ msgstr ""
 #: classes/abstracts/abstract-wc-email.php:595
 #@ woocommerce
 msgid "Copy file to theme"
-msgstr ""
+msgstr "Fájl másolása a témához"
 
 #: classes/abstracts/abstract-wc-email.php:598
 #, php-format
@@ -11320,7 +11320,7 @@ msgstr ""
 #: classes/abstracts/abstract-wc-email.php:634
 #@ woocommerce
 msgid "View template"
-msgstr ""
+msgstr "Sablon megtekintése"
 
 #: classes/abstracts/abstract-wc-email.php:635
 #@ woocommerce
@@ -11521,7 +11521,7 @@ msgstr ""
 #: classes/emails/class-wc-email-new-order.php:128
 #@ woocommerce
 msgid "Subject"
-msgstr ""
+msgstr "Tárgy"
 
 #: classes/emails/class-wc-email-customer-completed-order.php:148
 #: classes/emails/class-wc-email-new-order.php:135
@@ -11532,7 +11532,7 @@ msgstr "Email fejrész"
 #: classes/emails/class-wc-email-customer-completed-order.php:155
 #@ woocommerce
 msgid "Subject (downloadable)"
-msgstr ""
+msgstr "Tárgy (letölthető)"
 
 #: classes/emails/class-wc-email-customer-completed-order.php:162
 #@ woocommerce
@@ -11582,7 +11582,7 @@ msgstr "Email fejrész (fizetett)"
 #: classes/emails/class-wc-email-customer-new-account.php:31
 #@ woocommerce
 msgid "New account"
-msgstr ""
+msgstr "Új profil"
 
 #: classes/emails/class-wc-email-customer-new-account.php:32
 #@ woocommerce
@@ -11632,7 +11632,7 @@ msgstr ""
 #: classes/emails/class-wc-email-customer-reset-password.php:35
 #@ woocommerce
 msgid "Reset password"
-msgstr ""
+msgstr "Jelszó visszaállítása"
 
 #: classes/emails/class-wc-email-customer-reset-password.php:36
 #@ woocommerce
@@ -11672,7 +11672,7 @@ msgstr ""
 #: classes/emails/class-wc-email-new-order.php:121
 #@ woocommerce
 msgid "Recipient(s)"
-msgstr ""
+msgstr "Címzett(ek)"
 
 #: classes/emails/class-wc-email-new-order.php:123
 #, php-format
@@ -11695,7 +11695,7 @@ msgstr ""
 #: classes/gateways/cod/class-wc-gateway-cod.php:106
 #@ woocommerce
 msgid "Enable for shipping methods"
-msgstr ""
+msgstr "Szállítási módszernél engedélyez"
 
 #: classes/gateways/cod/class-wc-gateway-cod.php:111
 #@ woocommerce
@@ -11705,7 +11705,7 @@ msgstr ""
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:165
 #@ woocommerce
 msgid "Optional"
-msgstr ""
+msgstr "Opcionális"
 
 #: classes/integrations/shareyourcart/class-wc-shareyourcart.php:21
 #@ woocommerce
@@ -11720,12 +11720,12 @@ msgstr ""
 #: classes/integrations/shareyourcart/class.shareyourcart-wp.php:342
 #@ default
 msgid "Button"
-msgstr ""
+msgstr "Gomb"
 
 #: classes/integrations/shareyourcart/class.shareyourcart-wp.php:343
 #@ default
 msgid "Customize Button"
-msgstr ""
+msgstr "Gombot testreszab"
 
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:97
 #@ woocommerce
@@ -11776,7 +11776,7 @@ msgstr ""
 #: classes/shipping/local-pickup/class-wc-shipping-local-pickup.php:117
 #@ woocommerce
 msgid "Apply base tax rate"
-msgstr ""
+msgstr "Alap adókulcs alkalmazása"
 
 #: classes/shipping/local-pickup/class-wc-shipping-local-pickup.php:119
 #@ woocommerce
@@ -13101,7 +13101,7 @@ msgstr ""
 #: templates/myaccount/form-lost-password.php:45
 #@ woocommerce
 msgid "Reset Password"
-msgstr ""
+msgstr "Jelszó visszaállítása"
 
 #: templates/myaccount/my-address.php:17
 #@ woocommerce
@@ -13135,13 +13135,13 @@ msgstr ""
 #@ product_cat
 msgid "Category:"
 msgid_plural "Categories:"
-msgstr[0] ""
+msgstr[0] "Kategóriák:"
 
 #: templates/single-product/meta.php:24
 #@ product_tag
 msgid "Tag:"
 msgid_plural "Tags:"
-msgstr[0] ""
+msgstr[0] "Tag-ok:"
 
 #: templates/single-product/review.php:26
 #, php-format
@@ -13168,92 +13168,92 @@ msgstr ""
 #: woocommerce-core-functions.php:664
 #@ woocommerce
 msgid "Australian Dollars"
-msgstr ""
+msgstr "ausztrál dollár"
 
 #: woocommerce-core-functions.php:665
 #@ woocommerce
 msgid "Brazilian Real"
-msgstr ""
+msgstr "brazil real"
 
 #: woocommerce-core-functions.php:666
 #@ woocommerce
 msgid "Canadian Dollars"
-msgstr ""
+msgstr "kanadai dollár"
 
 #: woocommerce-core-functions.php:667
 #@ woocommerce
 msgid "Chinese Yuan"
-msgstr ""
+msgstr "kínai jüan"
 
 #: woocommerce-core-functions.php:668
 #@ woocommerce
 msgid "Czech Koruna"
-msgstr ""
+msgstr "cseh korona"
 
 #: woocommerce-core-functions.php:670
 #@ woocommerce
 msgid "Euros"
-msgstr ""
+msgstr "euró"
 
 #: woocommerce-core-functions.php:671
 #@ woocommerce
 msgid "Hong Kong Dollar"
-msgstr ""
+msgstr "hongkongi dollár"
 
 #: woocommerce-core-functions.php:673
 #@ woocommerce
 msgid "Indonesia Rupiah"
-msgstr ""
+msgstr "indonéz rúpia"
 
 #: woocommerce-core-functions.php:675
 #@ woocommerce
 msgid "Japanese Yen"
-msgstr ""
+msgstr "japán jen"
 
 #: woocommerce-core-functions.php:676
 #@ woocommerce
 msgid "Malaysian Ringgits"
-msgstr ""
+msgstr "maláj ringgit"
 
 #: woocommerce-core-functions.php:677
 #@ woocommerce
 msgid "Mexican Peso"
-msgstr ""
+msgstr "mexikói peso"
 
 #: woocommerce-core-functions.php:679
 #@ woocommerce
 msgid "New Zealand Dollar"
-msgstr ""
+msgstr "új-zélandi dollár"
 
 #: woocommerce-core-functions.php:682
 #@ woocommerce
 msgid "Pounds Sterling"
-msgstr ""
+msgstr "Font sterling"
 
 #: woocommerce-core-functions.php:683
 #@ woocommerce
 msgid "Romanian Leu"
-msgstr ""
+msgstr "román lej"
 
 #: woocommerce-core-functions.php:684
 #@ woocommerce
 msgid "Singapore Dollar"
-msgstr ""
+msgstr "szingapúri dollár"
 
 #: woocommerce-core-functions.php:685
 #@ woocommerce
 msgid "South African rand"
-msgstr ""
+msgstr "dél-afrikai rand"
 
 #: woocommerce-core-functions.php:690
 #@ woocommerce
 msgid "Turkish Lira"
-msgstr ""
+msgstr "török ​​líra"
 
 #: woocommerce-core-functions.php:691
 #@ woocommerce
 msgid "US Dollars"
-msgstr ""
+msgstr "USA dollár"
 
 #: woocommerce-core-functions.php:1317
 #@ woocommerce
