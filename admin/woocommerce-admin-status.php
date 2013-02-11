@@ -387,6 +387,39 @@ function woocommerce_status_report() {
             </tr>
 		</tbody>
 
+		<thead>
+			<tr>
+				<th colspan="2"><?php _e( 'Templates', 'woocommerce' ); ?></th>
+			</tr>
+		</thead>
+
+		<tbody>
+            <tr>
+                <td><?php _e( 'Template Overrides', 'woocommerce' ); ?>:</td>
+                <td><?php
+
+					$template_path = $woocommerce->plugin_path() . '/templates/';
+					$found_files   = array();
+					$files         = woocommerce_scan_template_files( $template_path );
+
+					foreach ( $files as $file ) {
+						if ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
+							$found_files[] = '/' . $file;
+						} elseif( file_exists( get_stylesheet_directory() . '/woocommerce/' . $file ) ) {
+							$found_files[] = '/woocommerce/' . $file;
+						}
+					}
+
+					if ( $found_files ) {
+						echo implode( ', <br/>', $found_files );
+					} else {
+						_e( 'No core overrides present in theme.', 'woocommerce' );
+					}
+
+                ?></td>
+            </tr>
+		</tbody>
+
 	</table>
 	<script type="text/javascript">
 
@@ -434,6 +467,33 @@ function woocommerce_status_report() {
 
 	</script>
 	<?php
+}
+
+/**
+ * woocommerce_scan_template_files function.
+ *
+ * @access public
+ * @param mixed $template_path
+ * @return void
+ */
+function woocommerce_scan_template_files( $template_path ) {
+	$files         = scandir( $template_path );
+	$result        = array();
+	if ( $files ) {
+		foreach ( $files as $key => $value ) {
+			if ( ! in_array( $value, array( ".",".." ) ) ) {
+				if ( is_dir( $template_path . DIRECTORY_SEPARATOR . $value ) ) {
+					$sub_files = woocommerce_scan_template_files( $template_path . DIRECTORY_SEPARATOR . $value );
+					foreach ( $sub_files as $sub_file ) {
+						$result[] = $value . DIRECTORY_SEPARATOR . $sub_file;
+					}
+				} else {
+					$result[] = $value;
+				}
+			}
+		}
+	}
+	return $result;
 }
 
 /**
