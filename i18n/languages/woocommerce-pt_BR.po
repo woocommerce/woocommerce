@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0-RC1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-02-10 21:21:39+0000\n"
+"PO-Revision-Date: 2013-02-11 09:08:31+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -457,7 +457,7 @@ msgstr "Categorias"
 #: admin/post-types/product.php:98
 #@ woocommerce
 msgid "Tags"
-msgstr "Etiquetas"
+msgstr "Tags"
 
 #: admin/post-types/product.php:99
 #: admin/post-types/product.php:631
@@ -4858,7 +4858,7 @@ msgstr "Pesquisa de categoria de produtos"
 #: woocommerce.php:817
 #@ woocommerce
 msgid "All Product Categories"
-msgstr "Todas as categorias de produtos"
+msgstr "Todas"
 
 #: woocommerce.php:818
 #@ woocommerce
@@ -7141,8 +7141,8 @@ msgstr[1] "Categorias de produto"
 #@ woocommerce
 msgid "Product Tag"
 msgid_plural "Product Tags"
-msgstr[0] "Tag do produto"
-msgstr[1] ""
+msgstr[0] "Tag de produto"
+msgstr[1] "Tags de produto"
 
 #: admin/woocommerce-admin-dashboard.php:126
 #@ woocommerce
