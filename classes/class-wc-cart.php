@@ -289,15 +289,13 @@ class WC_Cart {
 	/*-----------------------------------------------------------------------------------*/
 
 		/**
-		 * If there are no coupons, return false to disable coupon forms. Filterable.
+		 * Coupons enabled function. Filterable.
 		 *
 		 * @access public
 		 * @return void
 		 */
 		public function coupons_enabled() {
-
-			$coupon_count    = wp_count_posts( 'shop_coupon' );
-			$coupons_enabled = $coupon_count->publish > 0 ? true : false;
+			$coupons_enabled = get_option( 'woocommerce_enable_coupons' ) == 'no' ? false : true;
 
 			return apply_filters( 'woocommerce_coupons_enabled', $coupons_enabled );
 		}

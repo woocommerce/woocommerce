@@ -99,7 +99,16 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 	array( 'type' => 'sectionend', 'id' => 'general_options'),
 
-	array(	'title' => __( 'Checkout and Accounts', 'woocommerce' ), 'type' => 'title', 'id' => 'checkout_account_options' ),
+	array(	'title' => __( 'Cart, Checkout and Accounts', 'woocommerce' ), 'type' => 'title', 'id' => 'checkout_account_options' ),
+
+	array(
+		'title' => __( 'Coupons', 'woocommerce' ),
+		'desc'          => __( 'Enable the use of coupons', 'woocommerce' ),
+		'id'            => 'woocommerce_enable_coupons',
+		'default'       => 'yes',
+		'type'          => 'checkbox',
+		'desc_tip'		=>  __( 'Coupons can be applied from the cart and checkout pages.', 'woocommerce' ),
+	),
 
 	array(
 		'title' => __( 'Checkout', 'woocommerce' ),
@@ -125,7 +134,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> '',
 		'show_if_checked' => 'option',
-		'desc_tip'	=>  __( 'Force SSL (HTTPS) on the checkout pages (an SSL Certificate is required)', 'woocommerce' ),
+		'desc_tip'	=>  __( 'Force SSL (HTTPS) on the checkout pages (an SSL Certificate is required).', 'woocommerce' ),
 	),
 
 	array(
@@ -204,10 +213,10 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 
 	array(
-		'desc' 	=> __( 'Enable WooCommerce lightbox', 'woocommerce' ),
+		'desc' 	=> __( 'Enable Lightbox', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_lightbox',
 		'default'	=> 'yes',
-		'desc_tip'	=> __( 'On the product details page, product gallery images will open in a lightbox. The Add Review form will also open in a modal window.', 'woocommerce' ),
+		'desc_tip'	=> __( 'Include WooCommerce\'s lightbox. Product gallery images and the add review form will open in a lightbox.', 'woocommerce' ),
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'start'
 	),
@@ -217,7 +226,8 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'id' 		=> 'woocommerce_enable_chosen',
 		'default'	=> 'yes',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end'
+		'checkboxgroup'		=> 'end',
+		'desc_tip'	=> __( 'This will enable a script allowing the country fields to be searchable.', 'woocommerce' ),
 	),
 
 	array( 'type' => 'sectionend', 'id' => 'script_styling_options'),
@@ -255,7 +265,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'id' 		=> 'woocommerce_downloads_grant_access_after_payment',
 		'type' 		=> 'checkbox',
 		'default'	=> 'yes',
-		'desc_tip'	=> __( 'Turn this option off to only grant access when an order is "complete", rather than "processing"', 'woocommerce' ),
+		'desc_tip'	=> __( 'Enable this option to grant access to downloads when orders are "processing", rather than "completed".', 'woocommerce' ),
 		'checkboxgroup'		=> 'end'
 	),
 

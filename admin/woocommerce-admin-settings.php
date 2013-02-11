@@ -598,9 +598,13 @@ function woocommerce_admin_fields( $options ) {
 		}
 
 		if ( $tip && in_array( $value['type'], array( 'checkbox' ) ) ) {
-			$tip = '<span class="help_tip" data-tip="' . esc_attr( $tip ) . '">[?]</span>';
+
+			$tip = '<p class="description">' . $tip . '</p>';
+
 		} elseif ( $tip ) {
+
 			$tip = '<img class="help_tip" data-tip="' . esc_attr( $tip ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
+
 		}
 
 		// Switch based on type
@@ -797,7 +801,7 @@ function woocommerce_admin_fields( $options ) {
 						value="1"
 						<?php checked( $option_value, 'yes'); ?>
 						<?php echo implode( ' ', $custom_attributes ); ?>
-					/> <?php echo wp_kses_post( $value['desc'] ) ?></label> <?php echo $tip; ?><br />
+					/> <?php echo wp_kses_post( $value['desc'] ) ?></label> <?php echo $tip; ?>
 				<?php
 
 				if ( ! isset( $value['checkboxgroup'] ) || ( isset( $value['checkboxgroup'] ) && $value['checkboxgroup'] == 'end' ) ) {
