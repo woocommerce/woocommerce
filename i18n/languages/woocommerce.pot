@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.0.0-RC1 Front-end\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2013-02-08 10:55:50+00:00\n"
+"POT-Creation-Date: 2013-02-11 14:03:39+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -227,126 +227,126 @@ msgstr ""
 msgid "Are you sure you want to delete this template file?"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-product.php:540
-#: classes/abstracts/abstract-wc-product.php:545
-#: classes/abstracts/abstract-wc-product.php:564
+#: classes/abstracts/abstract-wc-product.php:539
+#: classes/abstracts/abstract-wc-product.php:544
+#: classes/abstracts/abstract-wc-product.php:563
 msgid "In stock"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-product.php:545
+#: classes/abstracts/abstract-wc-product.php:544
 msgid "Only %s left in stock"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-product.php:548
+#: classes/abstracts/abstract-wc-product.php:547
 msgid "%s in stock"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-product.php:555
+#: classes/abstracts/abstract-wc-product.php:554
 msgid "(backorders allowed)"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-product.php:561
-#: classes/abstracts/abstract-wc-product.php:574 templates/cart/cart.php:72
+#: classes/abstracts/abstract-wc-product.php:560
+#: classes/abstracts/abstract-wc-product.php:573 templates/cart/cart.php:72
 msgid "Available on backorder"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-product.php:567
-#: classes/abstracts/abstract-wc-product.php:577
-#: classes/abstracts/abstract-wc-product.php:581
+#: classes/abstracts/abstract-wc-product.php:566
+#: classes/abstracts/abstract-wc-product.php:576
+#: classes/abstracts/abstract-wc-product.php:580
 msgid "Out of stock"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-product.php:844
-#: classes/abstracts/abstract-wc-product.php:850 classes/class-wc-cart.php:1704
+#: classes/abstracts/abstract-wc-product.php:843
+#: classes/abstracts/abstract-wc-product.php:849 classes/class-wc-cart.php:1714
 #: classes/class-wc-order.php:833 classes/class-wc-product-variable.php:272
 #: classes/class-wc-product-variable.php:281
 #: classes/class-wc-product-variation.php:245
 msgid "Free!"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-product.php:868
+#: classes/abstracts/abstract-wc-product.php:867
 msgctxt "min_price"
 msgid "From:"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-product.php:960
+#: classes/abstracts/abstract-wc-product.php:959
 #: templates/single-product-reviews.php:43
 msgid "Rated %s out of 5"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-product.php:962
+#: classes/abstracts/abstract-wc-product.php:961
 #: templates/single-product/review.php:27
 #: templates/single-product-reviews.php:43
 msgid "out of 5"
 msgstr ""
 
-#: classes/class-wc-cart.php:336
+#: classes/class-wc-cart.php:346
 msgid "Sorry, it seems the coupon \"%s\" is invalid - it has now been removed from your order."
 msgstr ""
 
-#: classes/class-wc-cart.php:413
+#: classes/class-wc-cart.php:423
 msgid "Sorry, it seems the coupon \"%s\" is not yours - it has now been removed from your order."
 msgstr ""
 
-#: classes/class-wc-cart.php:452
+#: classes/class-wc-cart.php:462
 msgid "Sorry, we do not have enough \"%s\" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused."
 msgstr ""
 
-#: classes/class-wc-cart.php:471 classes/class-wc-cart.php:480
+#: classes/class-wc-cart.php:481 classes/class-wc-cart.php:490
 msgid "Sorry, we do not have enough \"%s\" in stock to fulfil your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused."
 msgstr ""
 
-#: classes/class-wc-cart.php:515
+#: classes/class-wc-cart.php:525
 msgid "Sorry, we do not have enough \"%s\" in stock to fulfil your order right now. Please try again in %d minutes or edit your cart and try again. We apologise for any inconvenience caused."
 msgstr ""
 
-#: classes/class-wc-cart.php:525
+#: classes/class-wc-cart.php:535
 msgid "Sorry, \"%s\" is not in stock. Please edit your cart and try again. We apologise for any inconvenience caused."
 msgstr ""
 
-#: classes/class-wc-cart.php:806
+#: classes/class-wc-cart.php:816
 msgid "Sorry, &quot;%s&quot; cannot be purchased."
 msgstr ""
 
-#: classes/class-wc-cart.php:813
+#: classes/class-wc-cart.php:823
 msgid "You cannot add &quot;%s&quot; to the cart because the product is out of stock."
 msgstr ""
 
-#: classes/class-wc-cart.php:818
+#: classes/class-wc-cart.php:828
 msgid "You cannot add that amount of &quot;%s&quot; to the cart because there is not enough stock (%s remaining)."
 msgstr ""
 
-#: classes/class-wc-cart.php:830 classes/class-wc-cart.php:844
-#: classes/class-wc-cart.php:852 templates/cart/mini-cart.php:65
-#: woocommerce-functions.php:463 woocommerce.php:1199
+#: classes/class-wc-cart.php:840 classes/class-wc-cart.php:854
+#: classes/class-wc-cart.php:862 templates/cart/mini-cart.php:65
+#: woocommerce-functions.php:472 woocommerce.php:1199
 msgid "View Cart &rarr;"
 msgstr ""
 
-#: classes/class-wc-cart.php:830
+#: classes/class-wc-cart.php:840
 msgid "You already have this item in your cart."
 msgstr ""
 
-#: classes/class-wc-cart.php:844 classes/class-wc-cart.php:852
+#: classes/class-wc-cart.php:854 classes/class-wc-cart.php:862
 msgid "<a href=\"%s\" class=\"button\">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart."
 msgstr ""
 
-#: classes/class-wc-cart.php:1716
+#: classes/class-wc-cart.php:1726
 msgid "via"
 msgstr ""
 
-#: classes/class-wc-cart.php:1759
+#: classes/class-wc-cart.php:1770
 msgid "Coupon code already applied!"
 msgstr ""
 
-#: classes/class-wc-cart.php:1776
+#: classes/class-wc-cart.php:1787
 msgid "Sorry, coupon <code>%s</code> has already been applied and cannot be used in conjunction with other coupons."
 msgstr ""
 
-#: classes/class-wc-cart.php:1792
+#: classes/class-wc-cart.php:1803
 msgid "Coupon code applied successfully."
 msgstr ""
 
-#: classes/class-wc-cart.php:1799
+#: classes/class-wc-cart.php:1810
 msgid "Coupon does not exist!"
 msgstr ""
 
@@ -394,7 +394,7 @@ msgstr ""
 msgid "Sorry, your session has expired. <a href=\"%s\">Return to homepage &rarr;</a>"
 msgstr ""
 
-#: classes/class-wc-checkout.php:427 woocommerce-functions.php:1610
+#: classes/class-wc-checkout.php:427 woocommerce-functions.php:1619
 msgid "is a required field."
 msgstr ""
 
@@ -432,7 +432,7 @@ msgstr ""
 
 #: classes/class-wc-checkout.php:552
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:85
-#: woocommerce-functions.php:724 woocommerce-functions.php:1547
+#: woocommerce-functions.php:733 woocommerce-functions.php:1556
 msgid "Passwords do not match."
 msgstr ""
 
@@ -452,15 +452,15 @@ msgstr ""
 msgid "Invalid payment method."
 msgstr ""
 
-#: classes/class-wc-checkout.php:624 woocommerce-core-functions.php:2474
-#: woocommerce-core-functions.php:2477 woocommerce-functions.php:696
-#: woocommerce-functions.php:698 woocommerce-functions.php:701
-#: woocommerce-functions.php:713 woocommerce-functions.php:715
-#: woocommerce-functions.php:718 woocommerce-functions.php:752
+#: classes/class-wc-checkout.php:624 woocommerce-core-functions.php:2475
+#: woocommerce-core-functions.php:2478 woocommerce-functions.php:705
+#: woocommerce-functions.php:707 woocommerce-functions.php:710
+#: woocommerce-functions.php:722 woocommerce-functions.php:724
+#: woocommerce-functions.php:727 woocommerce-functions.php:761
 msgid "ERROR"
 msgstr ""
 
-#: classes/class-wc-checkout.php:624 woocommerce-functions.php:752
+#: classes/class-wc-checkout.php:624 woocommerce-functions.php:761
 msgid "Couldn&#8217;t register you&hellip; please contact us if you continue to have problems."
 msgstr ""
 
@@ -1502,8 +1502,9 @@ msgid "(ex. tax)"
 msgstr ""
 
 #: classes/class-wc-countries.php:699 classes/class-wc-countries.php:709
-#: classes/class-wc-countries.php:729 classes/class-wc-countries.php:803
-#: classes/class-wc-countries.php:848 classes/class-wc-countries.php:872
+#: classes/class-wc-countries.php:729 classes/class-wc-countries.php:784
+#: classes/class-wc-countries.php:808 classes/class-wc-countries.php:853
+#: classes/class-wc-countries.php:877
 msgid "Province"
 msgstr ""
 
@@ -1511,7 +1512,7 @@ msgstr ""
 msgid "Canton"
 msgstr ""
 
-#: classes/class-wc-countries.php:724 classes/class-wc-countries.php:854
+#: classes/class-wc-countries.php:724 classes/class-wc-countries.php:859
 msgid "Municipality"
 msgstr ""
 
@@ -1523,72 +1524,73 @@ msgstr ""
 msgid "Region"
 msgstr ""
 
-#: classes/class-wc-countries.php:877
+#: classes/class-wc-countries.php:882
 msgid "Zip"
 msgstr ""
 
-#: classes/class-wc-countries.php:880
+#: classes/class-wc-countries.php:885
 msgid "State"
 msgstr ""
 
-#: classes/class-wc-countries.php:885 templates/cart/shipping-calculator.php:68
+#: classes/class-wc-countries.php:890 templates/cart/shipping-calculator.php:68
 msgid "Postcode"
 msgstr ""
 
-#: classes/class-wc-countries.php:888
+#: classes/class-wc-countries.php:893
 msgid "County"
 msgstr ""
 
-#: classes/class-wc-countries.php:920 classes/class-wc-countries.php:921
-#: classes/class-wc-countries.php:996 templates/cart/shipping-calculator.php:68
+#: classes/class-wc-countries.php:925 classes/class-wc-countries.php:926
+#: classes/class-wc-countries.php:1001
+#: templates/cart/shipping-calculator.php:68
 msgid "Postcode / Zip"
 msgstr ""
 
-#: classes/class-wc-countries.php:925 classes/class-wc-countries.php:926
-#: classes/class-wc-countries.php:985
+#: classes/class-wc-countries.php:930 classes/class-wc-countries.php:931
+#: classes/class-wc-countries.php:990
 msgid "Town / City"
 msgstr ""
 
-#: classes/class-wc-countries.php:930 classes/class-wc-countries.php:931
-#: classes/class-wc-countries.php:991
+#: classes/class-wc-countries.php:935 classes/class-wc-countries.php:936
+#: classes/class-wc-countries.php:996
 msgid "State / County"
 msgstr ""
 
-#: classes/class-wc-countries.php:955
+#: classes/class-wc-countries.php:960
 msgid "Country"
 msgstr ""
 
-#: classes/class-wc-countries.php:960
+#: classes/class-wc-countries.php:965
 msgid "First Name"
 msgstr ""
 
-#: classes/class-wc-countries.php:965
+#: classes/class-wc-countries.php:970
 msgid "Last Name"
 msgstr ""
 
-#: classes/class-wc-countries.php:971
+#: classes/class-wc-countries.php:976
 msgid "Company Name"
 msgstr ""
 
-#: classes/class-wc-countries.php:975
+#: classes/class-wc-countries.php:980
 msgid "Address"
-msgstr ""
-
-#: classes/class-wc-countries.php:976
-msgctxt "placeholder"
-msgid "Street address"
 msgstr ""
 
 #: classes/class-wc-countries.php:981
 msgctxt "placeholder"
+msgid "Street address"
+msgstr ""
+
+#: classes/class-wc-countries.php:986
+msgctxt "placeholder"
 msgid "Apartment, suite, unit etc. (optional)"
 msgstr ""
 
-#: classes/class-wc-countries.php:1038
+#: classes/class-wc-countries.php:1043
 msgid "Email Address"
 msgstr ""
 
-#: classes/class-wc-countries.php:1044
+#: classes/class-wc-countries.php:1049
 msgid "Phone"
 msgstr ""
 
@@ -1692,26 +1694,26 @@ msgstr ""
 msgid "Order Total:"
 msgstr ""
 
-#: classes/class-wc-order.php:1003 templates/cart/totals.php:145
+#: classes/class-wc-order.php:1004 templates/cart/totals.php:145
 #: templates/checkout/review-order.php:151
 msgid "(Includes %s)"
 msgstr ""
 
-#: classes/class-wc-order.php:1152 classes/class-wc-order.php:1154
-#: classes/class-wc-order.php:1157
+#: classes/class-wc-order.php:1153 classes/class-wc-order.php:1155
+#: classes/class-wc-order.php:1158
 msgid "WooCommerce"
 msgstr ""
 
-#: classes/class-wc-order.php:1203
+#: classes/class-wc-order.php:1204
 msgid "Order status changed from %s to %s."
 msgstr ""
 
-#: classes/class-wc-order.php:1428 woocommerce-ajax.php:1151
-#: woocommerce-ajax.php:1152
+#: classes/class-wc-order.php:1429 woocommerce-ajax.php:1156
+#: woocommerce-ajax.php:1157
 msgid "Item #%s stock reduced from %s to %s."
 msgstr ""
 
-#: classes/class-wc-order.php:1440
+#: classes/class-wc-order.php:1441
 msgid "Order item stock reduced successfully."
 msgstr ""
 
@@ -1719,13 +1721,13 @@ msgstr ""
 msgid "Buy product"
 msgstr ""
 
-#: classes/class-wc-shortcodes.php:561
+#: classes/class-wc-shortcodes.php:568
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:257
 #: templates/loop/add-to-cart.php:40
 #: templates/single-product/add-to-cart/grouped.php:45
 #: templates/single-product/add-to-cart/grouped.php:75
 #: templates/single-product/add-to-cart/simple.php:42
-#: templates/single-product/add-to-cart/variable.php:84
+#: templates/single-product/add-to-cart/variable.php:78
 msgid "Add to cart"
 msgstr ""
 
@@ -2064,12 +2066,17 @@ msgstr ""
 #: classes/gateways/cod/class-wc-gateway-cod.php:94
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:178
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:132
-#: templates/single-product/tabs/tab-description.php:15
+#: woocommerce-template.php:704
 msgid "Description"
 msgstr ""
 
 #: classes/gateways/cod/class-wc-gateway-cod.php:96
 msgid "Payment method description that the customer will see on your website."
+msgstr ""
+
+#: classes/gateways/cod/class-wc-gateway-cod.php:97
+#: classes/gateways/cod/class-wc-gateway-cod.php:103
+msgid "Pay with cash upon delivery."
 msgstr ""
 
 #: classes/gateways/cod/class-wc-gateway-cod.php:100
@@ -2360,7 +2367,7 @@ msgstr ""
 
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:113
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:168
-#: woocommerce-ajax.php:1707
+#: woocommerce-ajax.php:1712
 msgid "Guest"
 msgstr ""
 
@@ -2805,7 +2812,7 @@ msgid "Please enter a coupon code."
 msgstr ""
 
 #: classes/shortcodes/class-wc-shortcode-cart.php:54
-#: woocommerce-functions.php:1615
+#: woocommerce-functions.php:1624
 msgid "Please enter a valid postcode/ZIP."
 msgstr ""
 
@@ -2819,7 +2826,7 @@ msgid "The order totals have been updated. Please confirm your order by pressing
 msgstr ""
 
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:80
-#: woocommerce-core-functions.php:2477 woocommerce-functions.php:1544
+#: woocommerce-core-functions.php:2478 woocommerce-functions.php:1553
 msgid "Please enter your password."
 msgstr ""
 
@@ -2877,7 +2884,7 @@ msgstr ""
 #: classes/shortcodes/class-wc-shortcode-pay.php:70
 #: classes/shortcodes/class-wc-shortcode-pay.php:125
 #: classes/shortcodes/class-wc-shortcode-view-order.php:49
-#: woocommerce-functions.php:873 woocommerce-functions.php:952
+#: woocommerce-functions.php:882 woocommerce-functions.php:961
 msgid "Invalid order."
 msgstr ""
 
@@ -3086,7 +3093,7 @@ msgstr ""
 msgid "Change my password"
 msgstr ""
 
-#: classes/widgets/class-wc-widget-login.php:78 woocommerce-functions.php:180
+#: classes/widgets/class-wc-widget-login.php:78
 msgid "Logout"
 msgstr ""
 
@@ -3103,7 +3110,7 @@ msgstr ""
 msgid "Password"
 msgstr ""
 
-#: classes/widgets/class-wc-widget-login.php:120 woocommerce-functions.php:938
+#: classes/widgets/class-wc-widget-login.php:120 woocommerce-functions.php:947
 msgid "Login &rarr;"
 msgstr ""
 
@@ -3185,7 +3192,7 @@ msgid "Category Order"
 msgstr ""
 
 #: classes/widgets/class-wc-widget-product-categories.php:191
-#: templates/single-product-reviews.php:99 woocommerce-ajax.php:1226
+#: templates/single-product-reviews.php:99 woocommerce-ajax.php:1231
 msgid "Name"
 msgstr ""
 
@@ -4612,9 +4619,12 @@ msgstr ""
 msgid "cancelled"
 msgstr ""
 
-#: templates/archive-product.php:61 templates/loop-shop.php:40
-#: woocommerce-template.php:67
-msgid "No products found which match your selection."
+#: templates/cart/cart-empty.php:14
+msgid "Your cart is currently empty."
+msgstr ""
+
+#: templates/cart/cart-empty.php:18
+msgid "&larr; Return To Shop"
 msgstr ""
 
 #: templates/cart/cart.php:24 templates/checkout/form-pay.php:19
@@ -4663,7 +4673,7 @@ msgstr ""
 msgid "Coupon"
 msgstr ""
 
-#: templates/cart/cart.php:123 templates/checkout/form-coupon.php:26
+#: templates/cart/cart.php:123 templates/checkout/form-coupon.php:29
 msgid "Apply Coupon"
 msgstr ""
 
@@ -4677,14 +4687,6 @@ msgstr ""
 
 #: templates/cart/cross-sells.php:40
 msgid "You may be interested in&hellip;"
-msgstr ""
-
-#: templates/cart/empty.php:14
-msgid "Your cart is currently empty."
-msgstr ""
-
-#: templates/cart/empty.php:18
-msgid "&larr; Return To Shop"
 msgstr ""
 
 #: templates/cart/mini-cart.php:52
@@ -4704,7 +4706,7 @@ msgstr ""
 msgid "Calculate Shipping"
 msgstr ""
 
-#: templates/cart/shipping-calculator.php:24 woocommerce-template.php:1306
+#: templates/cart/shipping-calculator.php:24 woocommerce-template.php:1282
 msgid "Select a country&hellip;"
 msgstr ""
 
@@ -4714,7 +4716,7 @@ msgstr ""
 msgid "State / county"
 msgstr ""
 
-#: templates/cart/shipping-calculator.php:50 woocommerce-template.php:1353
+#: templates/cart/shipping-calculator.php:50 woocommerce-template.php:1332
 msgid "Select a state&hellip;"
 msgstr ""
 
@@ -4743,7 +4745,7 @@ msgid "Cart Subtotal"
 msgstr ""
 
 #: templates/cart/totals.php:35 templates/checkout/review-order.php:34
-#: woocommerce.php:1658
+#: woocommerce.php:1659
 msgid "Cart Discount"
 msgstr ""
 
@@ -4818,15 +4820,15 @@ msgstr ""
 msgid "Your order"
 msgstr ""
 
-#: templates/checkout/form-coupon.php:14
+#: templates/checkout/form-coupon.php:17
 msgid "Have a coupon?"
 msgstr ""
 
-#: templates/checkout/form-coupon.php:17
+#: templates/checkout/form-coupon.php:20
 msgid "Click here to enter your code"
 msgstr ""
 
-#: templates/checkout/form-coupon.php:22
+#: templates/checkout/form-coupon.php:25
 msgid "Coupon code"
 msgstr ""
 
@@ -4869,8 +4871,8 @@ msgid "Shipping Address"
 msgstr ""
 
 #: templates/checkout/form-shipping.php:59
-#: templates/single-product/tabs/attributes.php:20
-#: templates/single-product/tabs/tab-attributes.php:18
+#: templates/single-product/tabs/additional-information.php:14
+#: woocommerce-template.php:712
 msgid "Additional Information"
 msgstr ""
 
@@ -5086,6 +5088,34 @@ msgstr ""
 msgid "View options"
 msgstr ""
 
+#: templates/loop/no-products-found.php:14
+msgid "No products found which match your selection."
+msgstr ""
+
+#: templates/loop/orderby.php:21
+msgid "Default sorting"
+msgstr ""
+
+#: templates/loop/orderby.php:22
+msgid "Sort by popularity"
+msgstr ""
+
+#: templates/loop/orderby.php:23
+msgid "Sort by average rating"
+msgstr ""
+
+#: templates/loop/orderby.php:24
+msgid "Sort by newness"
+msgstr ""
+
+#: templates/loop/orderby.php:25
+msgid "Sort by price: low to high"
+msgstr ""
+
+#: templates/loop/orderby.php:26
+msgid "Sort by price: high to low"
+msgstr ""
+
 #: templates/loop/result-count.php:28
 msgid "Showing the single result"
 msgstr ""
@@ -5101,30 +5131,6 @@ msgstr ""
 
 #: templates/loop/sale-flash.php:16 templates/single-product/sale-flash.php:16
 msgid "Sale!"
-msgstr ""
-
-#: templates/loop/sorting.php:21
-msgid "Default sorting"
-msgstr ""
-
-#: templates/loop/sorting.php:22
-msgid "Sort by popularity"
-msgstr ""
-
-#: templates/loop/sorting.php:23
-msgid "Sort by average rating"
-msgstr ""
-
-#: templates/loop/sorting.php:24
-msgid "Sort by newness"
-msgstr ""
-
-#: templates/loop/sorting.php:25
-msgid "Sort by price: low to high"
-msgstr ""
-
-#: templates/loop/sorting.php:26
-msgid "Sort by price: high to low"
 msgstr ""
 
 #: templates/myaccount/form-change-password.php:20
@@ -5328,11 +5334,11 @@ msgstr ""
 msgid "Page"
 msgstr ""
 
-#: templates/single-product/add-to-cart/variable.php:30
+#: templates/single-product/add-to-cart/variable.php:24
 msgid "Choose an option"
 msgstr ""
 
-#: templates/single-product/add-to-cart/variable.php:70
+#: templates/single-product/add-to-cart/variable.php:64
 msgid "Clear selection"
 msgstr ""
 
@@ -5372,14 +5378,8 @@ msgstr ""
 msgid "verified owner"
 msgstr ""
 
-#: templates/single-product/tabs/description.php:17
+#: templates/single-product/tabs/description.php:14
 msgid "Product Description"
-msgstr ""
-
-#: templates/single-product/tabs/tab-reviews.php:13
-#: templates/single-product-reviews.php:51
-#: templates/single-product-reviews.php:57
-msgid "Reviews"
 msgstr ""
 
 #: templates/single-product/up-sells.php:41
@@ -5391,6 +5391,11 @@ msgid "%s review for %s"
 msgid_plural "%s reviews for %s"
 msgstr[0] ""
 msgstr[1] ""
+
+#: templates/single-product-reviews.php:51
+#: templates/single-product-reviews.php:57
+msgid "Reviews"
+msgstr ""
 
 #: templates/single-product-reviews.php:73
 msgid "<span class=\"meta-nav\">&larr;</span> Previous"
@@ -5468,376 +5473,380 @@ msgstr ""
 msgid "Return to homepage &rarr;"
 msgstr ""
 
-#: woocommerce-ajax.php:324 woocommerce-ajax.php:358 woocommerce-ajax.php:381
+#: woocommerce-ajax.php:329 woocommerce-ajax.php:363 woocommerce-ajax.php:386
 msgid "You do not have sufficient permissions to access this page."
 msgstr ""
 
-#: woocommerce-ajax.php:326 woocommerce-ajax.php:359 woocommerce-ajax.php:382
+#: woocommerce-ajax.php:331 woocommerce-ajax.php:364 woocommerce-ajax.php:387
 msgid "You have taken too long. Please go back and retry."
 msgstr ""
 
-#: woocommerce-ajax.php:618
+#: woocommerce-ajax.php:623
 msgid "Same as parent"
 msgstr ""
 
-#: woocommerce-ajax.php:619
+#: woocommerce-ajax.php:624
 msgid "Standard"
 msgstr ""
 
-#: woocommerce-ajax.php:1200 woocommerce-ajax.php:1201
+#: woocommerce-ajax.php:1205 woocommerce-ajax.php:1206
 msgid "Item #%s stock increased from %s to %s."
 msgstr ""
 
-#: woocommerce-ajax.php:1226
+#: woocommerce-ajax.php:1231
 msgid "Value"
 msgstr ""
 
-#: woocommerce-ajax.php:1540
+#: woocommerce-ajax.php:1545
 msgid "Delete note"
 msgstr ""
 
-#: woocommerce-core-functions.php:267
+#: woocommerce-core-functions.php:268
 msgid "%s &ndash; %s%s"
 msgstr ""
 
-#: woocommerce-core-functions.php:664
+#: woocommerce-core-functions.php:665
 msgid "Australian Dollars"
 msgstr ""
 
-#: woocommerce-core-functions.php:665
+#: woocommerce-core-functions.php:666
 msgid "Brazilian Real"
 msgstr ""
 
-#: woocommerce-core-functions.php:666
+#: woocommerce-core-functions.php:667
 msgid "Canadian Dollars"
 msgstr ""
 
-#: woocommerce-core-functions.php:667
+#: woocommerce-core-functions.php:668
 msgid "Chinese Yuan"
 msgstr ""
 
-#: woocommerce-core-functions.php:668
+#: woocommerce-core-functions.php:669
 msgid "Czech Koruna"
 msgstr ""
 
-#: woocommerce-core-functions.php:669
+#: woocommerce-core-functions.php:670
 msgid "Danish Krone"
 msgstr ""
 
-#: woocommerce-core-functions.php:670
+#: woocommerce-core-functions.php:671
 msgid "Euros"
 msgstr ""
 
-#: woocommerce-core-functions.php:671
+#: woocommerce-core-functions.php:672
 msgid "Hong Kong Dollar"
 msgstr ""
 
-#: woocommerce-core-functions.php:672
+#: woocommerce-core-functions.php:673
 msgid "Hungarian Forint"
 msgstr ""
 
-#: woocommerce-core-functions.php:673
+#: woocommerce-core-functions.php:674
 msgid "Indonesia Rupiah"
 msgstr ""
 
-#: woocommerce-core-functions.php:674
+#: woocommerce-core-functions.php:675
 msgid "Israeli Shekel"
 msgstr ""
 
-#: woocommerce-core-functions.php:675
+#: woocommerce-core-functions.php:676
 msgid "Japanese Yen"
 msgstr ""
 
-#: woocommerce-core-functions.php:676
+#: woocommerce-core-functions.php:677
 msgid "Malaysian Ringgits"
 msgstr ""
 
-#: woocommerce-core-functions.php:677
+#: woocommerce-core-functions.php:678
 msgid "Mexican Peso"
 msgstr ""
 
-#: woocommerce-core-functions.php:678
+#: woocommerce-core-functions.php:679
 msgid "Norwegian Krone"
 msgstr ""
 
-#: woocommerce-core-functions.php:679
+#: woocommerce-core-functions.php:680
 msgid "New Zealand Dollar"
 msgstr ""
 
-#: woocommerce-core-functions.php:680
+#: woocommerce-core-functions.php:681
 msgid "Philippine Pesos"
 msgstr ""
 
-#: woocommerce-core-functions.php:681
+#: woocommerce-core-functions.php:682
 msgid "Polish Zloty"
 msgstr ""
 
-#: woocommerce-core-functions.php:682
+#: woocommerce-core-functions.php:683
 msgid "Pounds Sterling"
 msgstr ""
 
-#: woocommerce-core-functions.php:683
+#: woocommerce-core-functions.php:684
 msgid "Romanian Leu"
 msgstr ""
 
-#: woocommerce-core-functions.php:684
+#: woocommerce-core-functions.php:685
 msgid "Singapore Dollar"
 msgstr ""
 
-#: woocommerce-core-functions.php:685
+#: woocommerce-core-functions.php:686
 msgid "South African rand"
 msgstr ""
 
-#: woocommerce-core-functions.php:686
+#: woocommerce-core-functions.php:687
 msgid "Swedish Krona"
 msgstr ""
 
-#: woocommerce-core-functions.php:687
+#: woocommerce-core-functions.php:688
 msgid "Swiss Franc"
 msgstr ""
 
-#: woocommerce-core-functions.php:688
+#: woocommerce-core-functions.php:689
 msgid "Taiwan New Dollars"
 msgstr ""
 
-#: woocommerce-core-functions.php:689
+#: woocommerce-core-functions.php:690
 msgid "Thai Baht"
 msgstr ""
 
-#: woocommerce-core-functions.php:690
+#: woocommerce-core-functions.php:691
 msgid "Turkish Lira"
 msgstr ""
 
-#: woocommerce-core-functions.php:691
+#: woocommerce-core-functions.php:692
 msgid "US Dollars"
 msgstr ""
 
-#: woocommerce-core-functions.php:1178 woocommerce-core-functions.php:1204
+#: woocommerce-core-functions.php:1179 woocommerce-core-functions.php:1205
 msgid "Download Permissions Granted"
 msgstr ""
 
-#: woocommerce-core-functions.php:1317
+#: woocommerce-core-functions.php:1318
 msgctxt "slug"
 msgid "uncategorized"
 msgstr ""
 
-#: woocommerce-core-functions.php:1506
+#: woocommerce-core-functions.php:1507
 msgid "Select a category"
 msgstr ""
 
-#: woocommerce-core-functions.php:1510
+#: woocommerce-core-functions.php:1511
 msgid "Uncategorized"
 msgstr ""
 
-#: woocommerce-core-functions.php:1882
+#: woocommerce-core-functions.php:1883
 msgid "Customer"
 msgstr ""
 
-#: woocommerce-core-functions.php:1889
+#: woocommerce-core-functions.php:1890
 msgid "Shop Manager"
 msgstr ""
 
-#: woocommerce-core-functions.php:2422
+#: woocommerce-core-functions.php:2423
 msgid "Unpaid order cancelled - time limit reached."
 msgstr ""
 
-#: woocommerce-core-functions.php:2474 woocommerce-functions.php:696
+#: woocommerce-core-functions.php:2475 woocommerce-functions.php:705
 msgid "Please enter a username."
 msgstr ""
 
-#: woocommerce-functions.php:200 woocommerce-functions.php:247
+#: woocommerce-functions.php:211 woocommerce-functions.php:256
 msgid "Cart updated."
 msgstr ""
 
-#: woocommerce-functions.php:232
+#: woocommerce-functions.php:242
 msgid "You can only have 1 %s in your cart."
 msgstr ""
 
-#: woocommerce-functions.php:289 woocommerce-functions.php:336
+#: woocommerce-functions.php:298 woocommerce-functions.php:345
 msgid "Please choose product options&hellip;"
 msgstr ""
 
-#: woocommerce-functions.php:371
+#: woocommerce-functions.php:380
 msgid "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr ""
 
-#: woocommerce-functions.php:379
+#: woocommerce-functions.php:388
 msgid "Please choose a product to add to your cart&hellip;"
 msgstr ""
 
-#: woocommerce-functions.php:448
+#: woocommerce-functions.php:457
 msgid "Added &quot;%s&quot; to your cart."
 msgstr ""
 
-#: woocommerce-functions.php:448
+#: woocommerce-functions.php:457
 msgid "&quot; and &quot;"
 msgstr ""
 
-#: woocommerce-functions.php:451
+#: woocommerce-functions.php:460
 msgid "&quot;%s&quot; was successfully added to your cart."
 msgstr ""
 
-#: woocommerce-functions.php:459
+#: woocommerce-functions.php:468
 msgid "Continue Shopping &rarr;"
 msgstr ""
 
-#: woocommerce-functions.php:626
+#: woocommerce-functions.php:635
 msgid "Username is required."
 msgstr ""
 
-#: woocommerce-functions.php:627 woocommerce-functions.php:722
+#: woocommerce-functions.php:636 woocommerce-functions.php:731
 msgid "Password is required."
 msgstr ""
 
-#: woocommerce-functions.php:698
+#: woocommerce-functions.php:707
 msgid "This username is invalid because it uses illegal characters. Please enter a valid username."
 msgstr ""
 
-#: woocommerce-functions.php:701
+#: woocommerce-functions.php:710
 msgid "This username is already registered, please choose another one."
 msgstr ""
 
-#: woocommerce-functions.php:713
+#: woocommerce-functions.php:722
 msgid "Please type your e-mail address."
 msgstr ""
 
-#: woocommerce-functions.php:715
+#: woocommerce-functions.php:724
 msgid "The email address isn&#8217;t correct."
 msgstr ""
 
-#: woocommerce-functions.php:718
+#: woocommerce-functions.php:727
 msgid "This email is already registered, please choose another one."
 msgstr ""
 
-#: woocommerce-functions.php:723
+#: woocommerce-functions.php:732
 msgid "Re-enter your password."
 msgstr ""
 
-#: woocommerce-functions.php:728
+#: woocommerce-functions.php:737
 msgid "Anti-spam field was filled in."
 msgstr ""
 
-#: woocommerce-functions.php:834
+#: woocommerce-functions.php:843
 msgid "The cart has been filled with the items from your previous order."
 msgstr ""
 
-#: woocommerce-functions.php:860
+#: woocommerce-functions.php:869
 msgid "Order cancelled by customer."
 msgstr ""
 
-#: woocommerce-functions.php:863
+#: woocommerce-functions.php:872
 msgid "Your order was cancelled."
 msgstr ""
 
-#: woocommerce-functions.php:869
+#: woocommerce-functions.php:878
 msgid "Your order is no longer pending and could not be cancelled. Please contact us if you need assistance."
 msgstr ""
 
-#: woocommerce-functions.php:904
+#: woocommerce-functions.php:913
 msgid "Invalid email address."
 msgstr ""
 
-#: woocommerce-functions.php:904 woocommerce-functions.php:926
-#: woocommerce-functions.php:946 woocommerce-functions.php:952
-#: woocommerce-functions.php:956 woocommerce-functions.php:959
-#: woocommerce-functions.php:989 woocommerce-functions.php:1092
+#: woocommerce-functions.php:913 woocommerce-functions.php:935
+#: woocommerce-functions.php:955 woocommerce-functions.php:961
+#: woocommerce-functions.php:965 woocommerce-functions.php:968
+#: woocommerce-functions.php:998 woocommerce-functions.php:1101
 msgid "Go to homepage &rarr;"
 msgstr ""
 
-#: woocommerce-functions.php:926
+#: woocommerce-functions.php:935
 msgid "Invalid download."
 msgstr ""
 
-#: woocommerce-functions.php:938
+#: woocommerce-functions.php:947
 msgid "You must be logged in to download files."
 msgstr ""
 
-#: woocommerce-functions.php:941
+#: woocommerce-functions.php:950
 msgid "This is not your download link."
 msgstr ""
 
-#: woocommerce-functions.php:946
+#: woocommerce-functions.php:955
 msgid "Product no longer exists."
 msgstr ""
 
-#: woocommerce-functions.php:956
+#: woocommerce-functions.php:965
 msgid "Sorry, you have reached your download limit for this file"
 msgstr ""
 
-#: woocommerce-functions.php:959
+#: woocommerce-functions.php:968
 msgid "Sorry, this download has expired"
 msgstr ""
 
-#: woocommerce-functions.php:989
+#: woocommerce-functions.php:998
 msgid "No file defined"
 msgstr ""
 
-#: woocommerce-functions.php:1092
+#: woocommerce-functions.php:1101
 msgid "File not found"
 msgstr ""
 
-#: woocommerce-functions.php:1202
+#: woocommerce-functions.php:1211
 msgid "New products"
 msgstr ""
 
-#: woocommerce-functions.php:1210
+#: woocommerce-functions.php:1219
 msgid "New products added to %s"
 msgstr ""
 
-#: woocommerce-functions.php:1218
+#: woocommerce-functions.php:1227
 msgid "New products tagged %s"
 msgstr ""
 
-#: woocommerce-functions.php:1257
+#: woocommerce-functions.php:1266
 msgid "You have taken too long. Please go back and refresh the page."
 msgstr ""
 
-#: woocommerce-functions.php:1260
+#: woocommerce-functions.php:1269
 msgid "Please rate the product."
 msgstr ""
 
-#: woocommerce-functions.php:1553
+#: woocommerce-functions.php:1562
 msgid "Password changed successfully."
 msgstr ""
 
-#: woocommerce-functions.php:1629
+#: woocommerce-functions.php:1638
 msgid "Address changed successfully."
 msgstr ""
 
-#: woocommerce-template.php:204
+#: woocommerce-template.php:153
 msgid "This is a demo store for testing purposes &mdash; no orders shall be fulfilled."
 msgstr ""
 
-#: woocommerce-template.php:223
+#: woocommerce-template.php:172
 msgid "Search Results: &ldquo;%s&rdquo;"
 msgstr ""
 
-#: woocommerce-template.php:226
+#: woocommerce-template.php:175
 msgid "&nbsp;&ndash; Page %s"
 msgstr ""
 
-#: woocommerce-template.php:969
+#: woocommerce-template.php:720
+msgid "Reviews (%d)"
+msgstr ""
+
+#: woocommerce-template.php:945
 msgctxt "breadcrumb"
 msgid "Home"
 msgstr ""
 
-#: woocommerce-template.php:1267 woocommerce.php:1198
+#: woocommerce-template.php:1243 woocommerce.php:1198
 msgid "required"
 msgstr ""
 
-#: woocommerce-template.php:1313
+#: woocommerce-template.php:1289
 msgid "Update country"
 msgstr ""
 
-#: woocommerce-template.php:1465
+#: woocommerce-template.php:1444
 msgid "Search for:"
 msgstr ""
 
-#: woocommerce-template.php:1466
+#: woocommerce-template.php:1445
 msgid "Search for products"
 msgstr ""
 
-#: woocommerce-template.php:1467 woocommerce.php:939
+#: woocommerce-template.php:1446 woocommerce.php:939
 msgid "Search"
 msgstr ""
 
@@ -6198,18 +6207,18 @@ msgstr ""
 msgid "Sorry, no products matched your selection. Please choose a different combination."
 msgstr ""
 
-#: woocommerce.php:1659
+#: woocommerce.php:1660
 msgid "Cart % Discount"
 msgstr ""
 
-#: woocommerce.php:1660
+#: woocommerce.php:1661
 msgid "Product Discount"
 msgstr ""
 
-#: woocommerce.php:1661
+#: woocommerce.php:1662
 msgid "Product % Discount"
 msgstr ""
 
-#: woocommerce.php:1726
+#: woocommerce.php:1727
 msgid "Action failed. Please refresh the page and retry."
 msgstr ""
