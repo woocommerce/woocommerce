@@ -28,22 +28,26 @@ jQuery(document).ready(function($) {
 	// Star ratings for comments
 	$('#rating').hide().before('<p class="stars"><span><a class="star-1" href="#">1</a><a class="star-2" href="#">2</a><a class="star-3" href="#">3</a><a class="star-4" href="#">4</a><a class="star-5" href="#">5</a></span></p>');
 
-	$('p.stars a').live( 'click', function(){
-		var $star = $(this);
-		$('#rating').val( $star.text() );
-		$('p.stars a').removeClass('active');
-		$star.addClass('active');
-		return false;
-	});
+	$('body')
+		.on( 'click', '#respond p.stars a', function(){
+			var $star   = $(this);
+			var $rating = $(this).closest('#respond').find('#rating');
 
-	$('#review_form').on( 'click', '#submit', function(){
-		var rating = $('#rating').val();
+			$rating.val( $star.text() );
+			$star.siblings('a').removeClass('active');
+			$star.addClass('active');
 
-		if ( $('#rating').size() > 0 && !rating && woocommerce_params.review_rating_required == 'yes' ) {
-			alert(woocommerce_params.i18n_required_rating_text);
 			return false;
-		}
-	});
+		})
+		.on( 'click', '#respond #submit', function(){
+			var $rating = $(this).closest('#respond').find('#rating');
+			var rating  = $rating.val();
+
+			if ( $rating.size() > 0 && ! rating && woocommerce_params.review_rating_required == 'yes' ) {
+				alert(woocommerce_params.i18n_required_rating_text);
+				return false;
+			}
+		});
 
 	// prevent double form submission
 	$('form.cart').submit(function(){
