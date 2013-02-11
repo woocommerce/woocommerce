@@ -73,14 +73,15 @@ add_action( 'post_submitbox_start', 'woocommerce_duplicate_product_post_button' 
  * @param mixed $columns
  * @return array
  */
-function woocommerce_edit_product_columns( $columns ) {
+function woocommerce_edit_product_columns( $existing_columns ) {
 	global $woocommerce;
 
-	if ( empty( $columns ) && ! is_array( $columns ) )
-		$columns = array();
+	if ( empty( $existing_columns ) && ! is_array( $existing_columns ) )
+		$existing_columns = array();
 
-	unset( $columns['title'], $columns['comments'], $columns['date'] );
+	unset( $existing_columns['title'], $existing_columns['comments'], $existing_columns['date'] );
 
+	$columns = array();
 	$columns["cb"] = "<input type=\"checkbox\" />";
 	$columns["thumb"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/image.png" alt="' . __( 'Image', 'woocommerce' ) . '" class="tips" data-tip="' . __( 'Image', 'woocommerce' ) . '" width="14" height="14" />';
 
@@ -100,10 +101,10 @@ function woocommerce_edit_product_columns( $columns ) {
 	$columns["product_type"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/product_type_head.png" alt="' . __( 'Type', 'woocommerce' ) . '" class="tips" data-tip="' . __( 'Type', 'woocommerce' ) . '" width="14" height="12" />';
 	$columns["date"] = __( 'Date', 'woocommerce' );
 
-	return $columns;
+	return array_merge( $columns, $existing_columns );
 }
 
-add_filter('manage_edit-product_columns', 'woocommerce_edit_product_columns');
+add_filter( 'manage_edit-product_columns', 'woocommerce_edit_product_columns' );
 
 
 /**
