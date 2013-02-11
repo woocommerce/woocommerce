@@ -311,6 +311,9 @@ function update_woocommerce() {
 		do_update_woocommerce();
 		update_option( 'woocommerce_updated', 1 );
 		update_option( 'woocommerce_needs_update', 0 );
+
+		// Flush rules after update
+		flush_rewrite_rules( false );
 	}
 }
 
