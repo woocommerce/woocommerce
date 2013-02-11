@@ -164,9 +164,39 @@ function woocommerce_admin_notices_styles() {
 		add_action( 'admin_notices', 'woocommerce_admin_install_notices' );
 	}
 
+	$template = get_option( 'template' );
+
+	if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $template, array( 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
+
+		if ( ! empty( $_GET['hide_woocommerce_theme_support_check'] ) ) {
+
+			update_option( 'woocommerce_theme_support_check', $template );
+
+			return;
+
+		}
+
+		if ( get_option( 'woocommerce_theme_support_check' ) !== $template ) {
+			wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', dirname( __FILE__ ) ) );
+			add_action( 'admin_notices', 'woocommerce_theme_check_notice' );
+		}
+
+	}
+
 }
 
 add_action( 'admin_print_styles', 'woocommerce_admin_notices_styles' );
+
+
+/**
+ * woocommerce_theme_check_notice function.
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_theme_check_notice() {
+	include( 'includes/notice-theme-support.php' );
+}
 
 
 /**
