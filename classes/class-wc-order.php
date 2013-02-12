@@ -1201,7 +1201,8 @@ class WC_Order {
 				do_action( 'woocommerce_order_status_' . $this->status . '_to_' . $new_status->slug, $this->id );
 				do_action( 'woocommerce_order_status_changed', $this->id, $this->status, $new_status->slug );
 
-				$this->add_order_note( $note . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), __( $old_status->name, 'woocommerce' ), __( $new_status->name, 'woocommerce' ) ) );
+				if ( $old_status )
+					$this->add_order_note( $note . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), __( $old_status->name, 'woocommerce' ), __( $new_status->name, 'woocommerce' ) ) );
 
 				// Record the completed date of the order
 				if ( $new_status->slug == 'completed' )
@@ -1260,9 +1261,10 @@ class WC_Order {
 	public function payment_complete() {
 		global $woocommerce;
 
-		unset( $woocommerce->session->order_awaiting_payment );
+		if ( ! empty( $woocommerce->session->order_awaiting_payment ) )
+			unset( $woocommerce->session->order_awaiting_payment );
 
-		if ( $this->status == 'on-hold' || $this->status == 'pending' || $this->status == 'failed' ) {
+		if ( $this->id && ( $this->status == 'on-hold' || $this->status == 'pending' || $this->status == 'failed' ) ) {
 
 			$order_needs_processing = true;
 
