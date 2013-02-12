@@ -202,7 +202,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 	array(
 		'title' => __( 'Styling', 'woocommerce' ),
-		'desc' 		=> __( 'Enable WooCommerce CSS styles', 'woocommerce' ),
+		'desc' 		=> __( 'Enable WooCommerce CSS', 'woocommerce' ),
 		'id' 		=> 'woocommerce_frontend_css',
 		'default'	=> 'yes',
 		'type' 		=> 'checkbox'
