@@ -1,6 +1,6 @@
 <?php
 /**
- * Product Search Widget
+ * Product Categories Widget
  *
  * @author 		WooThemes
  * @category 	Widgets
