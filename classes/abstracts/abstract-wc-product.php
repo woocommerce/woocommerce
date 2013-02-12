@@ -11,7 +11,7 @@
  */
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-abstract class WC_Product {
+class WC_Product {
 
 	/** @var int The product (post) ID. */
 	public $id;
@@ -29,6 +29,12 @@ abstract class WC_Product {
 	 * @param mixed $product
 	 */
 	public function __construct( $product ) {
+
+		if ( $this->is_doing_it_wrong() ) {
+			_doing_it_wrong( 'WC_Product', __( 'The <code>WC_Product</code> class is now abstract. Use <code>get_product()</code> to instantiate an instance of a product instead of calling this class directly.', 'woocommerce' ), '2.0 of WooCommerce' );
+			$product = get_product( $product );
+		}
+
 		if ( is_object( $product ) ) {
 			$this->id   = absint( $product->ID );
 			$this->post = $product;
@@ -1268,4 +1274,32 @@ abstract class WC_Product {
 
 		return $image;
     }
+
+
+	/**
+	 * Checks if the call to the constructor came through the get_product() API function
+	 * or the equivalent in the @see WC_Product_Factory class.
+	 *
+	 * Standard stack is be: 
+	 *	0. WC_Product->is_called_directly()
+	 *	1. WC_Product->__construct() => WC_Product->is_called_directly()
+	 *	2. WC_Product_*->__construct()
+	 *	3. WC_Product_Factory->get_product()
+	 *	4. get_product()
+	 *
+	 * But the stack checked in this function allows for a few parent classes to be inserted
+	 * in between.
+	 *
+	 * @access public
+	 * @return bool True if the class is being instantiated directly, false if it's being instantiated by a get_product() call.
+	 */
+	protected function is_doing_it_wrong() {
+
+		$backtrace = debug_backtrace();
+
+		if ( ! in_array( 'get_product', array( $backtrace[3]['function'], $backtrace[4]['function'], $backtrace[5]['function'], $backtrace[6]['function'] ) ) )
+			return true;
+
+		return false;
+	}
 }
