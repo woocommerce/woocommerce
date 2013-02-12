@@ -419,6 +419,7 @@ function woocommerce_load_persistent_cart( $user_login, $user ) {
 function is_woocommerce() {
 	return ( is_shop() || is_product_category() || is_product_tag() || is_product() ) ? true : false;
 }
+
 if ( ! function_exists( 'is_shop' ) ) {
 
 	/**
@@ -431,6 +432,7 @@ if ( ! function_exists( 'is_shop' ) ) {
 		return ( is_post_type_archive( 'product' ) || is_page( woocommerce_get_page_id( 'shop' ) ) ) ? true : false;
 	}
 }
+
 if ( ! function_exists( 'is_product_category' ) ) {
 
 	/**
@@ -444,6 +446,7 @@ if ( ! function_exists( 'is_product_category' ) ) {
 		return is_tax( 'product_cat', $term );
 	}
 }
+
 if ( ! function_exists( 'is_product_tag' ) ) {
 
 	/**
@@ -457,6 +460,7 @@ if ( ! function_exists( 'is_product_tag' ) ) {
 		return is_tax( 'product_tag', $term );
 	}
 }
+
 if ( ! function_exists( 'is_product' ) ) {
 
 	/**
@@ -469,6 +473,7 @@ if ( ! function_exists( 'is_product' ) ) {
 		return is_singular( array( 'product' ) );
 	}
 }
+
 if ( ! function_exists( 'is_cart' ) ) {
 
 	/**
@@ -481,6 +486,7 @@ if ( ! function_exists( 'is_cart' ) ) {
 		return is_page( woocommerce_get_page_id( 'cart' ) );
 	}
 }
+
 if ( ! function_exists( 'is_checkout' ) ) {
 
 	/**
@@ -493,6 +499,7 @@ if ( ! function_exists( 'is_checkout' ) ) {
 		return ( is_page( woocommerce_get_page_id( 'checkout' ) ) || is_page( woocommerce_get_page_id( 'pay' ) ) ) ? true : false;
 	}
 }
+
 if ( ! function_exists( 'is_account_page' ) ) {
 
 	/**
@@ -505,6 +512,7 @@ if ( ! function_exists( 'is_account_page' ) ) {
 		return is_page( woocommerce_get_page_id( 'myaccount' ) ) || is_page( woocommerce_get_page_id( 'edit_address' ) ) || is_page( woocommerce_get_page_id( 'view_order' ) ) || is_page( woocommerce_get_page_id( 'change_password' ) ) || is_page( woocommerce_get_page_id( 'lost_password' ) ) || apply_filters( 'woocommerce_is_account_page', false ) ? true : false;
 	}
 }
+
 if ( ! function_exists( 'is_order_received_page' ) ) {
 
     /**
@@ -517,6 +525,7 @@ if ( ! function_exists( 'is_order_received_page' ) ) {
         return ( is_page( woocommerce_get_page_id( 'thanks' ) ) ) ? true : false;
     }
 }
+
 if ( ! function_exists( 'is_ajax' ) ) {
 
 	/**
@@ -532,6 +541,7 @@ if ( ! function_exists( 'is_ajax' ) ) {
 		return ( isset( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ) == 'xmlhttprequest' ) ? true : false;
 	}
 }
+
 if ( ! function_exists( 'is_filtered' ) ) {
 
 	/**

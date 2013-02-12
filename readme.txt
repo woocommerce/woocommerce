@@ -284,7 +284,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - Chinese (Taiwan) translation by Fliper.
 * Localization - Brazilian update by Fernando Daciuk.
 
-* Removed all deprecated classes and functions
 * Many other refactors, minor fixes and tweaks!
 
 = 1.6.6 - 13/12/2012 =
