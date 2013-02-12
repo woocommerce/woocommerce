@@ -11,7 +11,7 @@
  */
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-abstract class WC_Product {
+class WC_Product {
 
 	/** @var int The product (post) ID. */
 	public $id;
@@ -20,7 +20,7 @@ abstract class WC_Product {
 	public $post;
 
 	/** @var string The product's type (simple, variable etc). */
-	public $product_type;
+	public $product_type = null;
 
 	/**
 	 * __construct function.
@@ -29,6 +29,13 @@ abstract class WC_Product {
 	 * @param mixed $product
 	 */
 	public function __construct( $product ) {
+
+		if ( ( function_exists( 'get_called_class' ) && get_called_class() == 'WC_Product' ) || ( ! function_exists( 'get_called_class' ) && is_null( $this->product_type ) ) ) {
+			_doing_it_wrong( 'WC_Product', __( 'The <code>WC_Product</code> class is now abstract. Use <code>get_product()</code> to instantiate an instance of a product instead of calling this class directly.', 'woocommerce' ), '2.0 of WooCommerce' );
+
+			$product = get_product( $product );
+		}
+
 		if ( is_object( $product ) ) {
 			$this->id   = absint( $product->ID );
 			$this->post = $product;
