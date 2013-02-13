@@ -648,8 +648,12 @@ class WC_Checkout {
 				if ( $woocommerce->error_count() > 0 )
 					throw new MyException();
 
-				// Create the order
-				$order_id = $this->create_order();
+				// Allow plugins opportunity to create order
+				$order_id = apply_filters( 'woocommerce_create_order', 0, $this->posted );
+				if ( empty( $order_id ) ) {
+					// Create the order
+					$order_id = $this->create_order();
+				}
 
 				// Order is saved
 				do_action( 'woocommerce_checkout_order_processed', $order_id, $this->posted );
