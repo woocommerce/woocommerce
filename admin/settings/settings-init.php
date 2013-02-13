@@ -213,6 +213,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 
 	array(
+		'title' => __( 'Scripts', 'woocommerce' ),
 		'desc' 	=> __( 'Enable Lightbox', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_lightbox',
 		'default'	=> 'yes',
