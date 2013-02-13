@@ -1043,13 +1043,19 @@ p.demo_store {
 		}
 		a.remove {
 			display:block;
-			height: 16px;
-			width: 16px;
-			text-indent: -9999px;
-			background: url(../images/remove.png) darken( @secondary, 10 );
+			font-size:1.5em;
+			height:1em;
+			width:1em;
+			text-align: center;
+			line-height: 1;
+			.border_radius(100%);
+			color: red;
+			text-decoration: none;
+			font-weight: bold;
 		}
 		a.remove:hover {
 			background-color: red;
+			color: #fff;
 		}
 		td.actions {
 			text-align: right;
