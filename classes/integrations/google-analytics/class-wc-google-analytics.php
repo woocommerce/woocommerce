@@ -255,7 +255,7 @@ class WC_Google_Analytics extends WC_Integration {
 		// Add single quotes to allow jQuery to be substituted into _trackEvent parameters
 		$parameters['category'] = "'" . __( 'Products', 'woocommerce' ) . "'";
 		$parameters['action'] = "'" . __( 'Add to cart', 'woocommerce' ) . "'";
-		$parameters['label'] = "'#" . esc_js( $product->id ) . "'";
+		$parameters['label'] = "'" . ( $product->get_sku() ? __('SKU:', 'woocommerce') . ' ' . $product->get_sku() : "#" . $product->id ) . "'";
 
 		$this->event_tracking_code( $parameters, '.single_add_to_cart_button' );
 	}
