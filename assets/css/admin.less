@@ -1436,16 +1436,40 @@ ul.recent-orders, ul.stock_list {
 	}
 	.star-rating {
 		float: right;
-		width: 50px;
-		height: 10px;
-		margin: 3px 0 0 0;
-		background: url(../images/admin-star.png) repeat-x left -10px;
+		overflow: hidden;
+		position: relative;
+		height: 1.5em;
+		font-size: .9em;
+		line-height: 1.5;
+		margin-left:.5em;
+		width: 5.4em;
+		font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+		&:before {
+			content: "\2605\2605\2605\2605\2605";
+			color: darken( #ccc, 10 );
+			float: left;
+			top: 0;
+			left: 0;
+			position: absolute;
+			letter-spacing: 0.1em;
+			letter-spacing:0\9; // IE8 & below hack ;-(
+		}
 		span {
-			background: url(../images/admin-star.png) repeat-x left 0;
-			height: 0;
-			padding-top: 10px;
 			overflow: hidden;
 			float: left;
+			top: 0;
+			left: 0;
+			position: absolute;
+			padding-top: 1.5em;
+		}
+		span:before {
+			content: "\2605\2605\2605\2605\2605";
+			top: 0;
+			position: absolute;
+			left: 0;
+			letter-spacing: 0.1em;
+			letter-spacing:0\9; // IE8 & below hack ;-(
+			color: #9c5d90;
 		}
 	}
 }
@@ -2755,16 +2779,6 @@ table.bar_chart {
 				&:hover {
 					background-size: 21px 165px;
 				}
-			}
-		}
-	}
-	#woocommerce_dashboard_recent_reviews {
-		.star-rating {
-			background-image: url(../images/admin-star@2x.png);
-			background-size: 10px 20px;
-			span {
-				background-image: url(../images/admin-star@2x.png);
-				background-size: 10px 20px;
 			}
 		}
 	}
