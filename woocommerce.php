@@ -141,13 +141,15 @@ class Woocommerce {
 		// Include required files
 		$this->includes();
 
+		// Init API
+		$this->api = new WC_API();
+
 		// Hooks
 		add_filter( 'woocommerce_shipping_methods', array( $this, 'core_shipping' ) );
 		add_filter( 'woocommerce_payment_gateways', array( $this, 'core_gateways' ) );
 		add_action( 'widgets_init', array( $this, 'register_widgets' ) );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( $this, 'include_template_functions' ), 25 );
-		add_action( 'init', array( $this, 'api_requests' ), 50 );
 		add_action( 'after_setup_theme', array( $this, 'compatibility' ) );
 
 		// Loaded action
@@ -503,34 +505,6 @@ class Woocommerce {
 
 		// Init action
 		do_action( 'woocommerce_init' );
-	}
-
-
-	/**
-	 * API request - Trigger any API requests (handy for third party plugins/gateways).
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function api_requests() {
-		if ( ! empty( $_GET['wc-api'] ) ) {
-			// Buffer, we won't want any output here
-			ob_start();
-
-			// Get API trigger
-			$api = strtolower( esc_attr( $_GET['wc-api'] ) );
-
-			// Load class if exists
-			if ( class_exists( $api ) )
-				$api_class = new $api();
-
-			// Trigger actions
-			do_action( 'woocommerce_api_' . $api );
-
-			// Done, clear buffer and exit
-			ob_end_clean();
-			die('1');
-		}
 	}
 
 
@@ -1370,11 +1344,23 @@ class Woocommerce {
 
 
 	/**
-	 * Return the URL with https if SSL is on.
+	 * Return the WC API URL for a given request
 	 *
 	 * @access public
-	 * @param string/array $content
-	 * @return string/array
+	 * @param mixed $request
+	 * @return void
+	 */
+	public function api_request_url( $request ) {
+		return sanitize_url( home_url( '/wc-api/' . $request ) );
+	}
+
+
+	/**
+	 * force_ssl function.
+	 *
+	 * @access public
+	 * @param mixed $content
+	 * @return void
 	 */
 	public function force_ssl( $content ) {
 		if ( is_ssl() ) {
