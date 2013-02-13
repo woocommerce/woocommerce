@@ -11,7 +11,7 @@
  */
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class WC_Product_External extends WC_Product_Simple {
+class WC_Product_External extends WC_Product {
 
 	/**
 	 * __construct function.

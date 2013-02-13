@@ -10,8 +10,6 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $product;
-
-if ( ! $product->is_purchasable() ) return;
 ?>
 
 <?php if ( ! $product->is_in_stock() ) : ?>
@@ -21,27 +19,38 @@ if ( ! $product->is_purchasable() ) return;
 <?php else : ?>
 
 	<?php
+		$link = array(
+			'url'   => '',
+			'label' => '',
+			'class' => ''
+		);
 
 		switch ( $product->product_type ) {
 			case "variable" :
-				$link 	= apply_filters( 'variable_add_to_cart_url', get_permalink( $product->id ) );
-				$label 	= apply_filters( 'variable_add_to_cart_text', __( 'Select options', 'woocommerce' ) );
+				$link['url'] 	= apply_filters( 'variable_add_to_cart_url', get_permalink( $product->id ) );
+				$link['label'] 	= apply_filters( 'variable_add_to_cart_text', __( 'Select options', 'woocommerce' ) );
 			break;
 			case "grouped" :
-				$link 	= apply_filters( 'grouped_add_to_cart_url', get_permalink( $product->id ) );
-				$label 	= apply_filters( 'grouped_add_to_cart_text', __( 'View options', 'woocommerce' ) );
+				$link['url'] 	= apply_filters( 'grouped_add_to_cart_url', get_permalink( $product->id ) );
+				$link['label'] 	= apply_filters( 'grouped_add_to_cart_text', __( 'View options', 'woocommerce' ) );
 			break;
 			case "external" :
-				$link 	= apply_filters( 'external_add_to_cart_url', get_permalink( $product->id ) );
-				$label 	= apply_filters( 'external_add_to_cart_text', __( 'Read More', 'woocommerce' ) );
+				$link['url'] 	= apply_filters( 'external_add_to_cart_url', get_permalink( $product->id ) );
+				$link['label'] 	= apply_filters( 'external_add_to_cart_text', __( 'Read More', 'woocommerce' ) );
 			break;
 			default :
-				$link 	= apply_filters( 'add_to_cart_url', esc_url( $product->add_to_cart_url() ) );
-				$label 	= apply_filters( 'add_to_cart_text', __( 'Add to cart', 'woocommerce' ) );
+				if ( $product->is_purchasable() ) {
+					$link['url'] 	= apply_filters( 'add_to_cart_url', esc_url( $product->add_to_cart_url() ) );
+					$link['label'] 	= apply_filters( 'add_to_cart_text', __( 'Add to cart', 'woocommerce' ) );
+					$link['class']  = apply_filters( 'add_to_cart_class', 'add_to_cart_button' );
+				} else {
+					$link['url'] 	= apply_filters( 'not_purchasable_url', get_permalink( $product->id ) );
+					$link['label'] 	= apply_filters( 'not_purchasable_text', __( 'Read More', 'woocommerce' ) );
+				}
 			break;
 		}
 
-		echo apply_filters( 'woocommerce_loop_add_to_cart_link', sprintf('<a href="%s" rel="nofollow" data-product_id="%s" class="add_to_cart_button button product_type_%s">%s</a>', $link, $product->id, $product->product_type, $label ), $link, $product, $label );
+		echo apply_filters( 'woocommerce_loop_add_to_cart_link', sprintf('<a href="%s" rel="nofollow" data-product_id="%s" class="%s button product_type_%s">%s</a>', $link['url'], $product->id, $link['class'], $product->product_type, $link['label'] ), $product, $link );
 
 	?>
 

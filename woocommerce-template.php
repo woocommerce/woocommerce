@@ -654,7 +654,8 @@ if ( ! function_exists( 'woocommerce_external_add_to_cart' ) ) {
 	function woocommerce_external_add_to_cart() {
 		global $product;
 
-		if ( ! $product->get_product_url() ) return;
+		if ( ! $product->get_product_url() )
+			return;
 
 		woocommerce_get_template( 'single-product/add-to-cart/external.php', array(
 				'product_url' => $product->get_product_url(),
