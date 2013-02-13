@@ -48,9 +48,9 @@ function woocommerce_shipping_methods_setting() {
 				    			<td>';
 
 			    		if ($method->enabled == 'yes')
-			    			echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/success.png" width="16 height="14" alt="yes" />';
+			    			echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/success@2x.png" width="16 height="14" alt="yes" />';
 						else
-							echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/success-off.png" width="16" height="14" alt="no" />';
+							echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/success-off@2x.png" width="16" height="14" alt="no" />';
 
 			    		echo '</td>
 			    		</tr>';
