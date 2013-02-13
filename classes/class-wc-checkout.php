@@ -136,7 +136,13 @@ class WC_Checkout {
 	public function create_order() {
 		global $woocommerce, $wpdb;
 
-		// Create Order (send cart variable so we can record items and reduce inventory). Only create if this is a new order, not if the payment was rejected last time.
+		// Give plugins the opportunity to create an order themselves
+		$order_id = apply_filters( 'woocommerce_create_order', null, $this );
+
+		if ( is_numeric( $order_id ) )
+			return $order_id;
+
+		// Create Order (send cart variable so we can record items and reduce inventory). Only create if this is a new order, not if the payment was rejected.
 		$order_data = apply_filters( 'woocommerce_new_order_data', array(
 			'post_type' 	=> 'shop_order',
 			'post_title' 	=> sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) ),
