@@ -1542,18 +1542,33 @@ function woocommerce_save_password() {
 
 	$woocommerce->verify_nonce( 'change_password' );
 
-	$user_id = get_current_user_id();
+	$update = true;
+	$errors = new WP_Error();
+	$user   = new stdClass();
 
-	if ( $user_id <= 0 )
+	$user->ID = (int) get_current_user_id();
+
+	if ( $user->ID <= 0 )
 		return;
 
 	$_POST = array_map( 'woocommerce_clean', $_POST );
 
-	if ( empty( $_POST[ 'password_1' ] ) || empty( $_POST[ 'password_2' ] ) )
+	$pass1           = ! empty( $_POST[ 'password_1' ] ) ? $_POST[ 'password_1' ] : '';
+	$pass2           = ! empty( $_POST[ 'password_1' ] ) ? $_POST[ 'password_1' ] : '';
+	$user->user_pass = $pass1;
+
+	if ( empty( $pass1 ) || empty( $pass2 ) )
 		$woocommerce->add_error( __( 'Please enter your password.', 'woocommerce' ) );
 
-	if ( $_POST[ 'password_1' ] !== $_POST[ 'password_2' ] )
+	if ( $pass1 !== $pass2 )
 		$woocommerce->add_error( __( 'Passwords do not match.', 'woocommerce' ) );
+
+	// Allow plugins to return their own errors.
+	do_action_ref_array( 'user_profile_update_errors', array ( &$errors, $update, &$user ) );
+
+	if ( $errors->get_error_messages() )
+		foreach( $errors->get_error_messages() as $error )
+			$woocommerce->add_error( $error );
 
 	if ( $woocommerce->error_count() == 0 ) {
 
