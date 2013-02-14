@@ -165,7 +165,7 @@ class WC_Checkout {
 			$order_status = isset( $terms[0] ) ? $terms[0] : 'pending';
 
 			// Resume the unpaid order if its pending
-			if ( $order_status == 'pending' ) {
+			if ( $order_status == 'pending' || $order_status == 'failed' ) {
 
 				// Update the existing order as we are resuming it
 				$create_new_order = false;
