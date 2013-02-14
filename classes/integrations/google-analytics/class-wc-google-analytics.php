@@ -255,7 +255,7 @@ class WC_Google_Analytics extends WC_Integration {
 		// Add single quotes to allow jQuery to be substituted into _trackEvent parameters
 		$parameters['category'] = "'" . __( 'Products', 'woocommerce' ) . "'";
 		$parameters['action'] = "'" . __( 'Add to cart', 'woocommerce' ) . "'";
-		$parameters['label'] = "'#" . esc_js( $product->id ) . "'";
+		$parameters['label'] = "'" . ( $product->get_sku() ? __('SKU:', 'woocommerce') . ' ' . $product->get_sku() : "#" . $product->id ) . "'";
 
 		$this->event_tracking_code( $parameters, '.single_add_to_cart_button' );
 	}
@@ -275,7 +275,7 @@ class WC_Google_Analytics extends WC_Integration {
 		// Add single quotes to allow jQuery to be substituted into _trackEvent parameters
 		$parameters['category'] = "'" . __( 'Products', 'woocommerce' ) . "'";
 		$parameters['action'] 	= "'" . __( 'Add to Cart', 'woocommerce' ) . "'";
-		$parameters['label'] 	= "'#' + $(this).attr('data-product_id')"; // Product ID
+		$parameters['label'] 	= "($(this).hasAttr('data-product_sku')) ? ('SKU: ' + $(this).attr('data-product_sku')) : ('#' + $(this).attr('data-product_id))"; // Product SKU or ID
 
 		$this->event_tracking_code( $parameters, '.add_to_cart_button:not(.product_type_variable, .product_type_grouped)' );
 	}

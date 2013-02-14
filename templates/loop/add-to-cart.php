@@ -50,7 +50,7 @@ global $product;
 			break;
 		}
 
-		echo apply_filters( 'woocommerce_loop_add_to_cart_link', sprintf('<a href="%s" rel="nofollow" data-product_id="%s" class="%s button product_type_%s">%s</a>', $link['url'], $product->id, $link['class'], $product->product_type, $link['label'] ), $product, $link );
+		echo apply_filters( 'woocommerce_loop_add_to_cart_link', sprintf('<a href="%s" rel="nofollow" data-product_id="%s" class="%s button product_type_%s"%s>%s</a>', $link['url'], $product->id, $link['class'], $product->product_type, $product->get_sku() ? ' data-product_sku="' . $product->get_sku() . '"' : '', $link['label'] ), $product, $link );
 
 	?>
 
