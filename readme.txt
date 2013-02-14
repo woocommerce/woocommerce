@@ -283,6 +283,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - Finnish translation by Arhi Paivarinta.
 * Localization - Chinese (Taiwan) translation by Fliper.
 * Localization - Brazilian update by Fernando Daciuk.
+* Localization - Hungarian translation by béla.
 
 * Many other refactors, minor fixes and tweaks!
 
