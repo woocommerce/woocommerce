@@ -2411,7 +2411,7 @@ function woocommerce_cancel_unpaid_orders() {
 	if ( $held_duration == '' )
 		return;
 
-	$date = date( "Y-m-d H:i:s", strtotime( '+' . absint( $held_duration ) . ' MINUTES', current_time( 'timestamp' ) ) );
+	$date = date( "Y-m-d H:i:s", strtotime( '-' . absint( $held_duration ) . ' MINUTES', current_time( 'timestamp' ) ) );
 
 	$unpaid_orders = $wpdb->get_col( $wpdb->prepare( "
 		SELECT posts.ID
