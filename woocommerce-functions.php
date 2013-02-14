@@ -1572,11 +1572,11 @@ function woocommerce_save_password() {
 
 	if ( $woocommerce->error_count() == 0 ) {
 
-		wp_update_user( array ('ID' => $user_id, 'user_pass' => esc_attr( $_POST['password_1'] ) ) ) ;
+		wp_update_user( $user ) ;
 
 		$woocommerce->add_message( __( 'Password changed successfully.', 'woocommerce' ) );
 
-		do_action( 'woocommerce_customer_change_password', $user_id );
+		do_action( 'woocommerce_customer_change_password', $user->ID );
 
 		wp_safe_redirect( get_permalink( woocommerce_get_page_id('myaccount') ) );
 		exit;
