@@ -453,7 +453,8 @@ jQuery( function($){
 
 			// Tax
 			if (woocommerce_writepanel_params.round_at_subtotal=='yes') {
-				cart_tax = accounting.toFixed( cart_tax, 2 );
+				cart_tax = parseFloat( accounting.toFixed( cart_tax, 2 ) );
+				
 			}
 
 			// Total
