@@ -404,9 +404,8 @@ class WC_Order {
 		if ( empty( $type ) )
 			$type = array( 'line_item' );
 
-		if ( ! is_array( $type ) ) {
+		if ( ! is_array( $type ) )
 			$type = array( $type );
-		}
 
 		$type = array_map( 'esc_attr', $type );
 
@@ -434,6 +433,35 @@ class WC_Order {
 			}
 		}
 		return $items;
+	}
+
+	/**
+	 * Gets order total - formatted for display.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function get_item_count( $type = '' ) {
+		global $wpdb, $woocommerce;
+
+		if ( empty( $type ) )
+			$type = array( 'line_item' );
+
+		if ( ! is_array( $type ) )
+			$type = array( $type );
+
+		$items = $this->get_items( $type );
+
+		$count = 0;
+
+		foreach ( $items as $item ) {
+			if ( ! empty( $item['qty'] ) )
+				$count += $item['qty'];
+			else
+				$count ++;
+		}
+
+		return apply_filters( 'woocommerce_get_item_count', $count, $type, $this );
 	}
 
 	/**

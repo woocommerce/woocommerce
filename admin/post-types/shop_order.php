@@ -153,24 +153,24 @@ function woocommerce_custom_order_columns( $column ) {
 					$actions = array();
 
 					if ( in_array( $the_order->status, array( 'pending', 'on-hold' ) ) )
-						$actions[] = array(
+						$actions['processing'] = array(
 							'url' 		=> wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce-mark-order-processing&order_id=' . $post->ID ), 'woocommerce-mark-order-processing' ),
 							'name' 		=> __( 'Processing', 'woocommerce' ),
 							'action' 	=> "processing"
 						);
 
 					if ( in_array( $the_order->status, array( 'pending', 'on-hold', 'processing' ) ) )
-						$actions[] = array(
+						$actions['complete'] = array(
 							'url' 		=> wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce-mark-order-complete&order_id=' . $post->ID ), 'woocommerce-mark-order-complete' ),
 							'name' 		=> __( 'Complete', 'woocommerce' ),
 							'action' 	=> "complete"
 						);
 
-					$actions[] = array(
-							'url' 		=> admin_url( 'post.php?post=' . $post->ID . '&action=edit' ),
-							'name' 		=> __( 'View', 'woocommerce' ),
-							'action' 	=> "view"
-						);
+					$actions['view'] = array(
+						'url' 		=> admin_url( 'post.php?post=' . $post->ID . '&action=edit' ),
+						'name' 		=> __( 'View', 'woocommerce' ),
+						'action' 	=> "view"
+					);
 
 					$actions = apply_filters( 'woocommerce_admin_order_actions', $actions, $the_order );
 
