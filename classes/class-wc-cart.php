@@ -342,8 +342,8 @@ class WC_Cart {
 					$coupon = new WC_Coupon( $code );
 
 					if ( is_wp_error( $coupon->is_valid() ) ) {
-
-						$woocommerce->add_error( sprintf( __( 'Sorry, it seems the %s "%s" is invalid - it has now been removed from your order.', 'woocommerce' ), $coupon->coupon_text, $code ) );
+						
+						$coupon->add_coupon_message( WC_Coupon::E_COUPON_INVALID_REMOVED );
 
 						// Remove the coupon
 						unset( $this->applied_coupons[ $key ] );
@@ -420,7 +420,7 @@ class WC_Cart {
 						$check_emails = array_map( 'sanitize_email', array_map( 'strtolower', $check_emails ) );
 
 						if ( 0 == sizeof( array_intersect( $check_emails, $coupon->customer_email ) ) ) {
-							$woocommerce->add_error( sprintf( __( 'Sorry, it seems the %s "%s" is not yours - it has now been removed from your order.', 'woocommerce' ), $coupon->coupon_text, $code ) );
+							$coupon->add_coupon_message( WC_Coupon::E_COUPON_NOT_YOURS_REMOVED );						
 							// Remove the coupon
 							unset( $this->applied_coupons[ $key ] );
 
@@ -1767,7 +1767,7 @@ class WC_Cart {
 
 				// Check if applied
 				if ( $woocommerce->cart->has_discount( $coupon_code ) ) {
-					$woocommerce->add_error( sprintf( __( '%s already applied!', 'woocommerce' ), ucfirst( $the_coupon->coupon_text ) ) );
+					$the_coupon->add_coupon_message( WC_Coupon::E_COUPON_ALREADY_APPLIED );
 					return false;
 				}
 
@@ -1784,7 +1784,7 @@ class WC_Cart {
 						if ( $existing_coupon->individual_use == 'yes' && false === apply_filters( 'woocommerce_apply_with_individual_use_coupon', false, $the_coupon, $existing_coupon, $this->applied_coupons ) ) {
 
 							// Reject new coupon
-							$woocommerce->add_error( sprintf( __( 'Sorry, %s <code>%s</code> has already been applied and cannot be used in conjunction with other coupons.', 'woocommerce' ), $existing_coupon->coupon_text, $code ) );
+							$existing_coupon->add_coupon_message( WC_Coupon::E_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY );
 
 							return false;
 						}
@@ -1799,15 +1799,15 @@ class WC_Cart {
 				}
 
 				$this->calculate_totals();
-
-				$woocommerce->add_message( sprintf( __( '%s applied successfully.', 'woocommerce' ), ucfirst( $the_coupon->coupon_text ) ) );
 				
+				$the_coupon->add_coupon_message( WC_Coupon::I_COUPON_SUCCESS );
+
 				do_action( 'woocommerce_applied_coupon', $coupon_code );
 
 				return true;
 
-			} else {								
-				$woocommerce->add_error( sprintf( __( '%s does not exist!', 'woocommerce' ), ucfirst( $the_coupon->coupon_text ) ) );
+			} else {
+				$the_coupon->add_coupon_message( WC_Coupon::E_COUPON_NOT_EXIST );				
 				return false;
 			}
 			return false;
