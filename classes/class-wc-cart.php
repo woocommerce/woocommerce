@@ -931,7 +931,7 @@ class WC_Cart {
 			global $woocommerce;
 
 			$this->total = $this->cart_contents_total = $this->cart_contents_weight = $this->cart_contents_count = $this->cart_contents_tax = $this->tax_total = $this->shipping_tax_total = $this->subtotal = $this->subtotal_ex_tax = $this->discount_total = $this->discount_cart = $this->shipping_total = $this->fee_total = 0;
-			$this->shipping_taxes = $this->taxes = array();
+			$this->shipping_taxes = $this->taxes = $this->coupon_discount_amounts = array();
 
 			unset( $woocommerce->session->cart_contents_total, $woocommerce->session->cart_contents_weight, $woocommerce->session->cart_contents_count, $woocommerce->session->cart_contents_tax, $woocommerce->session->total, $woocommerce->session->subtotal, $woocommerce->session->subtotal_ex_tax, $woocommerce->session->tax_total, $woocommerce->session->taxes, $woocommerce->session->shipping_taxes, $woocommerce->session->discount_cart, $woocommerce->session->discount_total, $woocommerce->session->shipping_total, $woocommerce->session->shipping_tax_total, $woocommerce->session->shipping_label );
 		}
@@ -1018,7 +1018,7 @@ class WC_Cart {
 
 										if ( $add_totals ) {
 											$this->discount_cart = $this->discount_cart + ( $discount_amount * $values['quantity'] );
-											$this->coupon_discount_amounts[ $code ] = ( $discount_amount * $values['quantity'] );
+											$this->increase_coupon_discount_amount( $code, $discount_amount * $values['quantity'] );
 										}
 
 									} elseif ( $coupon->type == 'percent_product' ) {
@@ -1027,7 +1027,7 @@ class WC_Cart {
 
 										if ( $add_totals ) {
 											$this->discount_cart = $this->discount_cart + ( $percent_discount * $values['quantity'] );
-											$this->coupon_discount_amounts[ $code ] = ( $percent_discount * $values['quantity'] );
+											$this->increase_coupon_discount_amount( $code, $percent_discount * $values['quantity'] );
 										}
 
 										$price = $price - $percent_discount;
@@ -1081,7 +1081,7 @@ class WC_Cart {
 								// Add coupon to discount total (once, since this is a fixed cart discount and we don't want rounding issues)
 								if ( $add_totals ) {
 									$this->discount_cart = $this->discount_cart + ( ( $discount_amount * $values['quantity'] ) / 100 );
-									$this->coupon_discount_amounts[ $code ] = ( ( $discount_amount * $values['quantity'] ) / 100 );
+									$this->increase_coupon_discount_amount( $code, ( $discount_amount * $values['quantity'] ) / 100 );
 								}
 
 							break;
@@ -1092,7 +1092,7 @@ class WC_Cart {
 
 								if ( $add_totals ) {
 									$this->discount_cart = $this->discount_cart + ( $percent_discount * $values['quantity'] );
-									$this->coupon_discount_amounts[ $code ] = ( $percent_discount * $values['quantity'] );
+									$this->increase_coupon_discount_amount( $code, $percent_discount * $values['quantity'] );
 								}
 
 								$price = $price - $percent_discount;
@@ -1180,12 +1180,11 @@ class WC_Cart {
 									$discount_amount = $coupon->amount;
 
 								$this->discount_total = $this->discount_total + ( $discount_amount * $values['quantity'] );
-
-								$this->coupon_discount_amounts[ $code ] = ( $discount_amount * $values['quantity'] );
+								$this->increase_coupon_discount_amount( $code, $discount_amount * $values['quantity'] );
 
 							} elseif ( $coupon->type == 'percent_product' ) {
 								$this->discount_total = $this->discount_total + round( ( $price / 100 ) * $coupon->amount, $this->dp );
-								$this->coupon_discount_amounts[ $code ] = round( ( $price / 100 ) * $coupon->amount, $this->dp );
+								$this->increase_coupon_discount_amount( $code, round( ( $price / 100 ) * $coupon->amount, $this->dp ) );
 							}
 						}
 					}
@@ -1215,7 +1214,7 @@ class WC_Cart {
 
 								$this->discount_total = $this->discount_total + $coupon->amount;
 
-								$this->coupon_discount_amounts[ $code ] = $coupon->amount;
+								$this->increase_coupon_discount_amount( $code, $coupon->amount );
 
 							break;
 
@@ -1225,7 +1224,7 @@ class WC_Cart {
 
 								$this->discount_total = $this->discount_total + round( $percent_discount, $this->dp );
 
-								$this->coupon_discount_amounts[ $code ] = round( $percent_discount, $this->dp );
+								$this->increase_coupon_discount_amount( $code, round( $percent_discount, $this->dp ) );
 
 							break;
 
@@ -1234,6 +1233,21 @@ class WC_Cart {
 					}
 				}
 			}
+		}
+
+		/**
+		 * Store how much discount each coupon grants.
+		 *
+		 * @access private
+		 * @param mixed $code
+		 * @param mixed $amount
+		 * @return void
+		 */
+		private function increase_coupon_discount_amount( $code, $amount ) {
+			if ( empty( $this->coupon_discount_amounts[ $code ] ) )
+				$this->coupon_discount_amounts[ $code ] = 0;
+
+			$this->coupon_discount_amounts[ $code ] += $amount;
 		}
 
 		/**
