@@ -32,6 +32,9 @@ class WC_Checkout {
 	/** @var array The payment gateway being used. */
 	private $payment_method;
 
+	/** @var int ID of customer. */
+	private $customer_id;
+
 	/**
 	 * Constructor for the checkout class. Hooks in methods and defines eheckout fields.
 	 *
