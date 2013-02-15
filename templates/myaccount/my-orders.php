@@ -59,7 +59,7 @@ if ( $customer_orders ) : ?>
 						<?php echo ucfirst( __( $status->name, 'woocommerce' ) ); ?>
 					</td>
 					<td class="order-total">
-						<?php echo sprintf( _n( '%s, %s item', '%s, %s items', $item_count, 'woocommerce' ), $order->get_formatted_order_total(), $item_count ); ?>
+						<?php echo sprintf( _n( '%s for %s item', '%s for %s items', $item_count, 'woocommerce' ), $order->get_formatted_order_total(), $item_count ); ?>
 					</td>
 					<td class="order-actions">
 						<?php
