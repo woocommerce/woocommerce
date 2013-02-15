@@ -70,6 +70,9 @@ class WC_Coupon {
 
 	/** @public string Error message. */
 	public $error_message;
+	
+	/** @public string Filterable text used on frontend - defaults to 'coupon code'. */
+	public $coupon_text;
 
 	/**
 	 * Coupon constructor. Loads coupon data.
@@ -110,8 +113,11 @@ class WC_Coupon {
 
             $coupon_id 	= $wpdb->get_var( $wpdb->prepare( apply_filters( 'woocommerce_coupon_code_query', "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon'" ), $this->code ) );
 
-            if ( ! $coupon_id )
+            if ( ! $coupon_id ) {
+				// Handle the case where coupon does not exist. Filter can decode whether to call it something generic or more specific
+				$this->coupon_text = apply_filters( 'woocommerce_coupon_text', __( 'coupon code', 'woocommerce' ), $this );
             	return;
+			}
 
 			$coupon             = get_post( $coupon_id );
 			$coupon->post_title = apply_filters( 'woocommerce_coupon_code', $coupon->post_title );
@@ -155,6 +161,9 @@ class WC_Coupon {
        		$this->exclude_product_categories 	= array_filter( array_map( 'trim', (array) maybe_unserialize( $this->exclude_product_categories ) ) );
 			$this->customer_email 				= array_filter( array_map( 'trim', array_map( 'strtolower', (array) maybe_unserialize( $this->customer_email ) ) ) );
         }
+		
+		$this->coupon_text = apply_filters( 'woocommerce_coupon_text', __( 'coupon code', 'woocommerce' ), $this );
+		
 	}
 
 
@@ -245,7 +254,7 @@ class WC_Coupon {
 			if ( $this->usage_limit > 0 ) {
 				if ( $this->usage_count >= $this->usage_limit ) {
 					$valid = false;
-					$error = __( 'Coupon usage limit has been reached.', 'woocommerce' );
+					$error = sprintf( __( '%s usage limit has been reached.', 'woocommerce' ), ucfirst( $this->coupon_text ) );
 				}
 			}
 
@@ -253,15 +262,15 @@ class WC_Coupon {
 			if ( $this->expiry_date ) {
 				if ( current_time( 'timestamp' ) > $this->expiry_date ) {
 					$valid = false;
-					$error = __( 'This coupon has expired.', 'woocommerce' );
+					$error = sprintf( __( 'This %s has expired.', 'woocommerce' ), $this->coupon_text );
 				}
 			}
 
 			// Minimum spend
 			if ( $this->minimum_amount > 0 ) {
 				if ( $this->minimum_amount > $woocommerce->cart->subtotal ) {
-					$valid = false;
-					$error = sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), woocommerce_price( $this->minimum_amount ) );
+					$valid = false;					
+					$error = sprintf( __( 'The minimum spend for this %s is %s.', 'woocommerce' ), $this->coupon_text, woocommerce_price( $this->minimum_amount ) );
 				}
 			}
 
@@ -277,7 +286,7 @@ class WC_Coupon {
 				}
 				if ( ! $valid_for_cart ) {
 					$valid = false;
-					$error = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );
+					$error = sprintf( __( 'Sorry, this %s is not applicable to your cart contents.', 'woocommerce' ), $this->coupon_text );					
 				}
 			}
 
@@ -295,7 +304,7 @@ class WC_Coupon {
 				}
 				if ( ! $valid_for_cart ) {
 					$valid = false;
-					$error = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );
+					$error = sprintf( __( 'Sorry, this %s is not applicable to your cart contents.', 'woocommerce' ), $this->coupon_text );
 				}
 			}
 
@@ -314,7 +323,7 @@ class WC_Coupon {
 					}
 					if ( ! $valid_for_cart ) {
 						$valid = false;
-						$error = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );
+						$error = sprintf( __( 'Sorry, this %s is not applicable to your cart contents.', 'woocommerce' ), $this->coupon_text );
 					}
 				}
 
@@ -331,7 +340,7 @@ class WC_Coupon {
 					}
 					if ( ! $valid_for_cart ) {
 						$valid = false;
-						$error = __( 'Sorry, this coupon is not valid for sale items.', 'woocommerce' );
+						$error = sprintf( __( 'Sorry, this %s is not valid for sale items.', 'woocommerce' ), $this->coupon_text );						
 					}
 				}
 
@@ -349,7 +358,7 @@ class WC_Coupon {
 					}
 					if ( ! $valid_for_cart ) {
 						$valid = false;
-						$error = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );
+						$error = sprintf( __( 'Sorry, this %s is not applicable to your cart contents.', 'woocommerce' ), $this->coupon_text );
 					}
 				}
 			}
@@ -359,11 +368,26 @@ class WC_Coupon {
 			if ( $valid )
 				return true;
 
-		} else {
-			$error = __( 'Invalid coupon', 'woocommerce' );
+		} else {			
+			$error = sprintf( __( 'Invalid %s', 'woocommerce' ), self::get_generic_coupon_text() );
 		}
 
 		$this->error_message = apply_filters( 'woocommerce_coupon_error', $error, $this );
 		return false;
+	}
+	
+	/**
+	 * get_generic_coupon_text static function.
+	 *
+	 * Return generic coupon text string for when there is no coupon instance to be used in 
+	 * text strings such as error messages.
+	 *
+	 * @access public
+	 * @return string|Defaults to 'coupon code'
+	 */
+
+	public static function get_generic_coupon_text() {
+		// Handle the case where coupon does not exist. Filter can decode whether to call it something generic
+		return apply_filters( 'woocommerce_coupon_text', __( 'coupon code', 'woocommerce' ), null );		
 	}
 }
