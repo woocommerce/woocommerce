@@ -59,23 +59,35 @@ if ( $customer_orders ) : ?>
 					<td class="order-status" style="text-align:left; white-space:nowrap;">
 						<?php echo ucfirst( __( $status->name, 'woocommerce' ) ); ?>
 
-						<?php if ( in_array( $order->status, array( 'pending', 'failed' ) ) ) : ?>
+						<?php
+						$status_actions = array( );
 
-							<a href="<?php echo esc_url( $order->get_cancel_order_url() ); ?>" class="cancel" title="<?php _e( 'Click to cancel this order', 'woocommerce' ); ?>">(<?php _e( 'Cancel', 'woocommerce' ); ?>)</a>
+						if ( in_array( $order->status, array( 'pending', 'failed' ) ) )
+							$status_actions['cancel'] = array(
+								'url' => $order->get_cancel_order_url(),
+								'text' => __( 'Cancel', 'woocommerce' ),
+								'title' => __( 'Click to cancel this order', 'woocommerce' ),
+								'class' => 'cancel'
+							);
 
-						<?php endif; ?>
+						$status_actions = apply_filters( 'woocommerce_my_account_my_orders_status_actions', $status_actions, $order );
+
+						foreach ( $status_actions as $status_action ) {
+							echo '<a href="' . esc_url( $status_action['url'] ) . '" class="' . sanitize_html_class( $status_action['class'] ) . '" title="' . esc_html( $status_action['title'] ) . '">' . esc_html( $status_action['text'] ) . '</a>';
+						}
+						?>
 					</td>
 					<td class="order-actions" style="text-align:right; white-space:nowrap;">
 						<?php
 							$actions = array();
 
 							if ( in_array( $order->status, array( 'pending', 'failed' ) ) )
-								$actions[] = array(
+								$actions['pay'] = array(
 									'url'  => $order->get_checkout_payment_url(),
 									'name' => __( 'Pay', 'woocommerce' )
 								);
 
-							$actions[] = array(
+							$actions['view'] = array(
 								'url'  => add_query_arg( 'order', $order->id, get_permalink( woocommerce_get_page_id( 'view_order' ) ) ),
 								'name' => __( 'View', 'woocommerce' )
 							);
@@ -83,7 +95,7 @@ if ( $customer_orders ) : ?>
 							$actions = apply_filters( 'woocommerce_my_account_my_orders_actions', $actions, $order );
 
 							foreach( $actions as $action ) {
-								echo '<a href="' . esc_url( $action['url'] ) . '" class="button ' . sanitize_title( $action['name'] ) . '">' . esc_html( $action['name'] ) . '</a>';
+								echo '<a href="' . esc_url( $action['url'] ) . '" class="button ' . sanitize_html_class( $action['name'] ) . '">' . esc_html( $action['name'] ) . '</a>';
 							}
 						?>
 					</td>
