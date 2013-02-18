@@ -12,17 +12,18 @@
 class WC_Coupon {
 
 	// Coupon message codes
-	const E_WC_COUPON_INVALID_REMOVED                = 100;
-	const E_WC_COUPON_NOT_YOURS_REMOVED              = 101;
-	const E_WC_COUPON_ALREADY_APPLIED                = 102;
-	const E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY = 103;
-	const E_WC_COUPON_NOT_EXIST                      = 104;
-	const E_WC_COUPON_USAGE_LIMIT_REACHED            = 105;
-	const E_WC_COUPON_EXPIRED                        = 106;
-	const E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET        = 107;
-	const E_WC_COUPON_NOT_APPLICABLE                 = 108;
-	const E_WC_COUPON_NOT_VALID_SALE_ITEMS           = 109;
-	const E_WC_COUPON_PLEASE_ENTER                   = 110;
+	const E_WC_COUPON_INVALID_FILTERED               = 100;
+	const E_WC_COUPON_INVALID_REMOVED                = 101;
+	const E_WC_COUPON_NOT_YOURS_REMOVED              = 102;
+	const E_WC_COUPON_ALREADY_APPLIED                = 103;
+	const E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY = 104;
+	const E_WC_COUPON_NOT_EXIST                      = 105;
+	const E_WC_COUPON_USAGE_LIMIT_REACHED            = 106;
+	const E_WC_COUPON_EXPIRED                        = 107;
+	const E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET        = 108;
+	const E_WC_COUPON_NOT_APPLICABLE                 = 109;
+	const E_WC_COUPON_NOT_VALID_SALE_ITEMS           = 110;
+	const E_WC_COUPON_PLEASE_ENTER                   = 111;
 	const WC_COUPON_SUCCESS                          = 200;
 
 	/** @public string Coupon code. */
@@ -371,8 +372,11 @@ class WC_Coupon {
 
 			$valid = apply_filters( 'woocommerce_coupon_is_valid', $valid, $this );
 
-			if ( $valid )
+			if ( $valid ) {
 				return true;
+			} else {
+				$error_code = self::E_WC_COUPON_INVALID_FILTERED;
+			}
 
 		} else {
 			$error_code = self::E_WC_COUPON_NOT_EXIST;
@@ -432,6 +436,9 @@ class WC_Coupon {
 	public function get_coupon_error( $err_code ) {
 
 		switch ( $err_code ) {
+			case self::E_WC_COUPON_INVALID_FILTERED:
+				$err = __( 'Coupon is not valid.', 'woocommerce' );
+			break;
 			case self::E_WC_COUPON_NOT_EXIST:
 				$err = __( 'Coupon does not exist!', 'woocommerce' );
 			break;
