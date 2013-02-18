@@ -31,7 +31,8 @@ class WC_Shortcode_Cart {
 			if ( ! empty( $_POST['coupon_code'] ) ) {
 				$woocommerce->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
 			} else {
-				$woocommerce->add_error( __( 'Please enter a coupon code.', 'woocommerce' ) );
+				$error = WC_Coupon::map_generic_coupon_error( WC_Coupon::E_COUPON_PLEASE_ENTER );
+				$woocommerce->add_error( $error );
 			}
 
 		// Remove Coupon Codes
