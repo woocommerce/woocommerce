@@ -1814,7 +1814,7 @@ class WC_Cart {
 
 				$this->calculate_totals();
 
-				$woocommerce->add_message( __( 'Coupon code applied successfully.', 'woocommerce' ) );
+				$woocommerce->add_message( apply_filters( 'woocommerce_coupon_applied', __( 'Coupon code applied successfully.', 'woocommerce' ), $coupon_code ) );
 
 				do_action( 'woocommerce_applied_coupon', $coupon_code );
 
