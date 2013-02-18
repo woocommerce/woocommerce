@@ -118,6 +118,18 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 							'desc_tip'      => true,
 							'placeholder'	=> '0.00'
 						),
+			'minimum_fee' => array(
+							'title' 		=> __( 'Minimum Fee', 'woocommerce' ),
+							'type' 			=> 'number',
+							'custom_attributes' => array(
+								'step'	=> 'any',
+								'min'	=> '0'
+							),
+							'description'	=> __( 'Enter a minimum fee amount. Fee\'s less than this will be increased. Leave blank to disable.', 'woocommerce' ),
+							'default'		=> '',
+							'desc_tip'      => true,
+							'placeholder'	=> '0.00'
+						),
 			);
 
     }
