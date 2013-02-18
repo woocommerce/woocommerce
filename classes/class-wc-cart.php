@@ -342,8 +342,8 @@ class WC_Cart {
 					$coupon = new WC_Coupon( $code );
 
 					if ( is_wp_error( $coupon->is_valid() ) ) {
-						
-						$coupon->add_coupon_message( WC_Coupon::E_COUPON_INVALID_REMOVED );
+
+						$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_INVALID_REMOVED );
 
 						// Remove the coupon
 						unset( $this->applied_coupons[ $key ] );
@@ -420,7 +420,8 @@ class WC_Cart {
 						$check_emails = array_map( 'sanitize_email', array_map( 'strtolower', $check_emails ) );
 
 						if ( 0 == sizeof( array_intersect( $check_emails, $coupon->customer_email ) ) ) {
-							$coupon->add_coupon_message( WC_Coupon::E_COUPON_NOT_YOURS_REMOVED );						
+							$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED );
+
 							// Remove the coupon
 							unset( $this->applied_coupons[ $key ] );
 
@@ -1781,7 +1782,7 @@ class WC_Cart {
 
 				// Check if applied
 				if ( $woocommerce->cart->has_discount( $coupon_code ) ) {
-					$the_coupon->add_coupon_message( WC_Coupon::E_COUPON_ALREADY_APPLIED );
+					$the_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED );
 					return false;
 				}
 
@@ -1798,7 +1799,7 @@ class WC_Cart {
 						if ( $existing_coupon->individual_use == 'yes' && false === apply_filters( 'woocommerce_apply_with_individual_use_coupon', false, $the_coupon, $existing_coupon, $this->applied_coupons ) ) {
 
 							// Reject new coupon
-							$existing_coupon->add_coupon_message( WC_Coupon::E_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY );
+							$existing_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY );
 
 							return false;
 						}
@@ -1813,15 +1814,15 @@ class WC_Cart {
 				}
 
 				$this->calculate_totals();
-				
-				$the_coupon->add_coupon_message( WC_Coupon::I_COUPON_SUCCESS );
+
+				$the_coupon->add_coupon_message( WC_Coupon::WC_COUPON_SUCCESS );
 
 				do_action( 'woocommerce_applied_coupon', $coupon_code );
 
 				return true;
 
 			} else {
-				$the_coupon->add_coupon_message( WC_Coupon::E_COUPON_NOT_EXIST );				
+				$the_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_EXIST );
 				return false;
 			}
 			return false;

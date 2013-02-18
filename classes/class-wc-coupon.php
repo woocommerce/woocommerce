@@ -11,24 +11,20 @@
  */
 class WC_Coupon {
 
-	// Coupon error message codes
-	const E_COUPON_MIN_ERROR_CODE = 100;
-	const E_COUPON_INVALID_REMOVED = 100;
-	const E_COUPON_NOT_YOURS_REMOVED = 101;
-	const E_COUPON_ALREADY_APPLIED = 102;
-	const E_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY = 103;
-	const E_COUPON_NOT_EXIST = 104;
-	const E_COUPON_USAGE_LIMIT_REACHED = 105;
-	const E_COUPON_EXPIRED = 106;
-	const E_COUPON_MIN_SPEND_LIMIT_NOT_MET = 107;
-	const E_COUPON_NOT_APPLICABLE = 108;
-	const E_COUPON_NOT_VALID_SALE_ITEMS = 109;
-	const E_COUPON_PLEASE_ENTER = 110;
-	
-	// Coupon info message codes
-	const I_COUPON_MIN_SUCCESS_CODE = 200;
-	const I_COUPON_SUCCESS = 200;
-	
+	// Coupon message codes
+	const E_WC_COUPON_INVALID_REMOVED                = 100;
+	const E_WC_COUPON_NOT_YOURS_REMOVED              = 101;
+	const E_WC_COUPON_ALREADY_APPLIED                = 102;
+	const E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY = 103;
+	const E_WC_COUPON_NOT_EXIST                      = 104;
+	const E_WC_COUPON_USAGE_LIMIT_REACHED            = 105;
+	const E_WC_COUPON_EXPIRED                        = 106;
+	const E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET        = 107;
+	const E_WC_COUPON_NOT_APPLICABLE                 = 108;
+	const E_WC_COUPON_NOT_VALID_SALE_ITEMS           = 109;
+	const E_WC_COUPON_PLEASE_ENTER                   = 110;
+	const WC_COUPON_SUCCESS                          = 200;
+
 	/** @public string Coupon code. */
 	public $code;
 
@@ -255,17 +251,16 @@ class WC_Coupon {
 		global $woocommerce;
 
 		$error_code = null;
-		
-		if ( $this->id ) {
+		$valid      = true;
+		$error      = false;
 
-			$valid = true;
-			$error = false;
+		if ( $this->id ) {
 
 			// Usage Limit
 			if ( $this->usage_limit > 0 ) {
 				if ( $this->usage_count >= $this->usage_limit ) {
 					$valid = false;
-					$error_code = self::E_COUPON_USAGE_LIMIT_REACHED;	
+					$error_code = self::E_WC_COUPON_USAGE_LIMIT_REACHED;
 				}
 			}
 
@@ -273,7 +268,7 @@ class WC_Coupon {
 			if ( $this->expiry_date ) {
 				if ( current_time( 'timestamp' ) > $this->expiry_date ) {
 					$valid = false;
-					$error_code = self::E_COUPON_EXPIRED;
+					$error_code = self::E_WC_COUPON_EXPIRED;
 				}
 			}
 
@@ -281,7 +276,7 @@ class WC_Coupon {
 			if ( $this->minimum_amount > 0 ) {
 				if ( $this->minimum_amount > $woocommerce->cart->subtotal ) {
 					$valid = false;
-					$error_code = self::E_COUPON_MIN_SPEND_LIMIT_NOT_MET;
+					$error_code = self::E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET;
 				}
 			}
 
@@ -297,7 +292,7 @@ class WC_Coupon {
 				}
 				if ( ! $valid_for_cart ) {
 					$valid = false;
-					$error_code = self::E_COUPON_NOT_APPLICABLE;
+					$error_code = self::E_WC_COUPON_NOT_APPLICABLE;
 				}
 			}
 
@@ -315,7 +310,7 @@ class WC_Coupon {
 				}
 				if ( ! $valid_for_cart ) {
 					$valid = false;
-					$error_code = self::E_COUPON_NOT_APPLICABLE;
+					$error_code = self::E_WC_COUPON_NOT_APPLICABLE;
 				}
 			}
 
@@ -334,7 +329,7 @@ class WC_Coupon {
 					}
 					if ( ! $valid_for_cart ) {
 						$valid = false;
-						$error_code = self::E_COUPON_NOT_APPLICABLE;
+						$error_code = self::E_WC_COUPON_NOT_APPLICABLE;
 					}
 				}
 
@@ -351,7 +346,7 @@ class WC_Coupon {
 					}
 					if ( ! $valid_for_cart ) {
 						$valid = false;
-						$error_code = self::E_COUPON_NOT_VALID_SALE_ITEMS;
+						$error_code = self::E_WC_COUPON_NOT_VALID_SALE_ITEMS;
 					}
 				}
 
@@ -369,7 +364,7 @@ class WC_Coupon {
 					}
 					if ( ! $valid_for_cart ) {
 						$valid = false;
-						$error_code = self::E_COUPON_NOT_APPLICABLE;
+						$error_code = self::E_WC_COUPON_NOT_APPLICABLE;
 					}
 				}
 			}
@@ -380,15 +375,12 @@ class WC_Coupon {
 				return true;
 
 		} else {
-			$error_code = self::E_COUPON_NOT_EXIST;
+			$error_code = self::E_WC_COUPON_NOT_EXIST;
 		}
 
-		if ($error_code) {
-			$error = $this->map_coupon_message( $error_code );
-		}
-		
-		$this->error_message = apply_filters( 'woocommerce_coupon_error', $error, $this );
-		
+		if ( $error_code )
+			$this->error_message = $this->get_coupon_error( $error_code );
+
 		return false;
 	}
 
@@ -402,73 +394,84 @@ class WC_Coupon {
 	 */
 	public function add_coupon_message( $msg_code ) {
 		global $woocommerce;
-		
-		$msg = $this->map_coupon_message($msg_code);
-				
-		if ($msg_code >= self::I_COUPON_MIN_SUCCESS_CODE) {
-			$woocommerce->add_message($msg);
-		} elseif ($msg_code >= self::E_COUPON_MIN_ERROR_CODE) {
-			$woocommerce->add_error($msg);
-		}
+
+		if ( $msg_code < 200 )
+			$woocommerce->add_error( $this->get_coupon_error( $msg_code ) );
+		else
+			$woocommerce->add_message( $this->get_coupon_message( $msg_code ) );
 	}
 
 	/**
-	 * Map one of the WC_Coupon message/error codes to a message string 
+	 * Map one of the WC_Coupon message codes to a message string
 	 *
 	 * @access public
-	 * @param int $msg_code Message/error code.
+	 * @param mixed $msg_code
 	 * @return string| Message/error string
 	 */
-	public function map_coupon_message( $msg_code ) {
-		
-		$code = $this->code;
-		
-		switch ($msg_code) {
-			case self::E_COUPON_NOT_EXIST:
-				$msg = __( 'Coupon does not exist!', 'woocommerce' );
-				break;
-			case self::E_COUPON_INVALID_REMOVED:
-				$msg = sprintf( __( 'Sorry, it seems the coupon "%s" is invalid - it has now been removed from your order.', 'woocommerce' ), $code );
-				break;
-			case self::E_COUPON_NOT_YOURS_REMOVED:
-				$msg = sprintf( __( 'Sorry, it seems the coupon "%s" is not yours - it has now been removed from your order.', 'woocommerce' ), $code );
-				break;
-			case self::E_COUPON_ALREADY_APPLIED:
-				$msg = __( 'Coupon code already applied!', 'woocommerce' );
-				break;
-			case self::E_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY:
-				$msg = sprintf( __( 'Sorry, coupon <code>%s</code> has already been applied and cannot be used in conjunction with other coupons.', 'woocommerce' ), $code );
-				break;
-			case self::E_COUPON_USAGE_LIMIT_REACHED:
-				$msg = __( 'Coupon usage limit has been reached.', 'woocommerce' );
-				break;
-			case self::E_COUPON_EXPIRED:
-				$msg = __( 'This coupon has expired.', 'woocommerce' );
-				break;
-			case self::E_COUPON_MIN_SPEND_LIMIT_NOT_MET:
-				$msg = sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), woocommerce_price( $this->minimum_amount ) );
-				break;
-			case self::E_COUPON_NOT_APPLICABLE:
-				$msg = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );
-				break;
-			case self::E_COUPON_NOT_VALID_SALE_ITEMS:		
-				$msg = __( 'Sorry, this coupon is not valid for sale items.', 'woocommerce' );
-				break;			
-			case self::I_COUPON_SUCCESS:
+	public function get_coupon_message( $msg_code ) {
+
+		switch ( $msg_code ) {
+			case self::WC_COUPON_SUCCESS:
 				$msg = __( 'Coupon code applied successfully.', 'woocommerce' );
-				break;
+			break;
 			default:
 				$msg = '';
-				break;
+			break;
 		}
-		
-		$msg = apply_filters( 'woocommerce_coupon_message', $msg, $msg_code, $this );
-		
-		return $msg;
+
+		return apply_filters( 'woocommerce_coupon_message', $msg, $msg_code, $this );
 	}
-	
+
 	/**
-	 * Map one of the WC_Coupon error codes to an error string 
+	 * Map one of the WC_Coupon error codes to a message string
+	 *
+	 * @access public
+	 * @param int $err_code Message/error code.
+	 * @return string| Message/error string
+	 */
+	public function get_coupon_error( $err_code ) {
+
+		switch ( $err_code ) {
+			case self::E_WC_COUPON_NOT_EXIST:
+				$err = __( 'Coupon does not exist!', 'woocommerce' );
+			break;
+			case self::E_WC_COUPON_INVALID_REMOVED:
+				$err = sprintf( __( 'Sorry, it seems the coupon "%s" is invalid - it has now been removed from your order.', 'woocommerce' ), $this->code );
+			break;
+			case self::E_WC_COUPON_NOT_YOURS_REMOVED:
+				$err = sprintf( __( 'Sorry, it seems the coupon "%s" is not yours - it has now been removed from your order.', 'woocommerce' ), $this->code );
+			break;
+			case self::E_WC_COUPON_ALREADY_APPLIED:
+				$err = __( 'Coupon code already applied!', 'woocommerce' );
+			break;
+			case self::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY:
+				$err = sprintf( __( 'Sorry, coupon "%s" has already been applied and cannot be used in conjunction with other coupons.', 'woocommerce' ), $this->code );
+			break;
+			case self::E_WC_COUPON_USAGE_LIMIT_REACHED:
+				$err = __( 'Coupon usage limit has been reached.', 'woocommerce' );
+			break;
+			case self::E_WC_COUPON_EXPIRED:
+				$err = __( 'This coupon has expired.', 'woocommerce' );
+			break;
+			case self::E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET:
+				$err = sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), woocommerce_price( $this->minimum_amount ) );
+			break;
+			case self::E_WC_COUPON_NOT_APPLICABLE:
+				$err = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );
+			break;
+			case self::E_WC_COUPON_NOT_VALID_SALE_ITEMS:
+				$err = __( 'Sorry, this coupon is not valid for sale items.', 'woocommerce' );
+			break;
+			default:
+				$err = '';
+			break;
+		}
+
+		return apply_filters( 'woocommerce_coupon_error', $err, $err_code, $this );
+	}
+
+	/**
+	 * Map one of the WC_Coupon error codes to an error string
 	 * No coupon instance will be available where a coupon does not exist,
 	 * so this static method exists.
 	 *
@@ -476,25 +479,22 @@ class WC_Coupon {
 	 * @param int $err_code Error code
 	 * @return string| Error string
 	 */
-	
-	public static function map_generic_coupon_error( $err_code ) {
+	public static function get_generic_coupon_error( $err_code ) {
 
-		switch ($err_code) {
-			case self::E_COUPON_NOT_EXIST:
-				$error = __( 'Coupon does not exist!', 'woocommerce' );
-				break;						
-			case self::E_COUPON_PLEASE_ENTER:
-				$error = __( 'Please enter a coupon code.', 'woocommerce' );
-				break;						
+		switch ( $err_code ) {
+			case self::E_WC_COUPON_NOT_EXIST:
+				$err = __( 'Coupon does not exist!', 'woocommerce' );
+			break;
+			case self::E_WC_COUPON_PLEASE_ENTER:
+				$err = __( 'Please enter a coupon code.', 'woocommerce' );
+			break;
 			default:
-				$error = '';
-				break;
+				$err = '';
+			break;
 		}
-	
+
 		// When using this static method, there is no $this to pass to filter
-		$error = apply_filters( 'woocommerce_coupon_message', $error, $err_code, null ); 
-		
-		return $error;
+		return apply_filters( 'woocommerce_coupon_error', $err, $err_code, null );
 	}
-	
+
 }

@@ -131,8 +131,7 @@ function woocommerce_ajax_apply_coupon() {
 	if ( ! empty( $_POST['coupon_code'] ) ) {
 		$woocommerce->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
 	} else {
-		$error = WC_Coupon::map_generic_coupon_error( WC_Coupon::E_COUPON_PLEASE_ENTER );
-		$woocommerce->add_error( $error );
+		$woocommerce->add_error( WC_Coupon::get_generic_coupon_error( WC_Coupon::E_COUPON_PLEASE_ENTER ) );
 	}
 
 	$woocommerce->show_messages();
