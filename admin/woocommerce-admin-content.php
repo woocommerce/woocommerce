@@ -80,11 +80,11 @@ function woocommerce_admin_help_tab_content() {
 
 	$screen->set_help_sidebar(
 		'<p><strong>' . __( 'For more information:', 'woocommerce' ) . '</strong></p>' .
-		'<p>' . __( '<a href="http://www.woothemes.com/woocommerce/" target="_blank">WooCommerce</a>', 'woocommerce' ) . '</p>' .
-		'<p>' . __( '<a href="http://wordpress.org/extend/plugins/woocommerce/" target="_blank">Project on WordPress.org</a>', 'woocommerce' ) . '</p>' .
-		'<p>' . __( '<a href="https://github.com/woothemes/woocommerce" target="_blank">Project on Github</a>', 'woocommerce' ) . '</p>' .
-		'<p>' . __( '<a href="http://www.woothemes.com/woocommerce-docs/" target="_blank">WooCommerce Docs</a>', 'woocommerce' ) . '</p>' .
-		'<p>' . __( '<a href="http://www.woothemes.com/extensions/woocommerce-extensions/" target="_blank">Official Extensions</a>', 'woocommerce' ) . '</p>' .
-		'<p>' . __( '<a href="http://www.woothemes.com/themes/woocommerce-themes/" target="_blank">Official Themes</a>', 'woocommerce' ) . '</p>'
+		'<p><a href="http://www.woothemes.com/woocommerce/" target="_blank">' . __( 'WooCommerce', 'woocommerce' ) . '</a></p>' .
+		'<p><a href="http://wordpress.org/extend/plugins/woocommerce/" target="_blank">' . __( 'Project on WordPress.org', 'woocommerce' ) . '</a></p>' .
+		'<p><a href="https://github.com/woothemes/woocommerce" target="_blank">' . __( 'Project on Github', 'woocommerce' ) . '</a></p>' .
+		'<p><a href="http://www.woothemes.com/woocommerce-docs/" target="_blank">' . __( 'WooCommerce Docs', 'woocommerce' ) . '</a></p>' .
+		'<p><a href="http://wcdocs.woothemes.com/" target="_blank">' . __( 'Official Extensions', 'woocommerce' ) . '</a></p>' .
+		'<p><a href="http://www.woothemes.com/product-category/themes/woocommerce/" target="_blank">' . __( 'Official Themes', 'woocommerce' ) . '</a></p>'
 	);
 }
