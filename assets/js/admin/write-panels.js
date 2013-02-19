@@ -398,13 +398,13 @@ jQuery( function($){
 			var order_shipping_tax 	= $('#_order_shipping_tax').val();
 			var order_discount		= $('#_order_discount').val();
 
-			if ( ! order_shipping ) order_shipping = 0;
-			if ( ! order_shipping_tax ) order_shipping_tax = 0;
-			if ( ! order_discount ) order_discount = 0;
-
 			order_shipping = accounting.unformat( order_shipping.replace(',', '.') );
 			order_shipping_tax = accounting.unformat( order_shipping_tax.replace(',', '.') );
 			order_discount = accounting.unformat( order_discount.replace(',', '.') );
+
+			if ( ! order_shipping ) order_shipping = 0;
+			if ( ! order_shipping_tax ) order_shipping_tax = 0;
+			if ( ! order_discount ) order_discount = 0;
 
 			$('#order_items_list tr.item').each(function(){
 
@@ -413,15 +413,15 @@ jQuery( function($){
 				var line_total 			= $(this).find('input.line_total').val();
 				var line_tax 			= $(this).find('input.line_tax').val();
 
-				if ( ! line_subtotal ) line_subtotal = 0;
-				if ( ! line_subtotal_tax ) line_subtotal_tax = 0;
-				if ( ! line_total ) line_total = 0;
-				if ( ! line_tax ) line_tax = 0;
-
 				line_subtotal = accounting.unformat( line_subtotal.replace(',', '.') );
 				line_subtotal_tax = accounting.unformat( line_subtotal_tax.replace(',', '.') );
 				line_total = accounting.unformat( line_total.replace(',', '.') );
 				line_tax = accounting.unformat( line_tax.replace(',', '.') );
+
+				if ( ! line_subtotal ) line_subtotal = 0;
+				if ( ! line_subtotal_tax ) line_subtotal_tax = 0;
+				if ( ! line_total ) line_total = 0;
+				if ( ! line_tax ) line_tax = 0;
 
 				line_subtotals = line_subtotals + line_subtotal;
 				line_subtotal_taxes = line_subtotal_taxes + line_subtotal_tax;
@@ -448,11 +448,11 @@ jQuery( function($){
 				var line_total 			= $(this).find('input.line_total').val();
 				var line_tax 			= $(this).find('input.line_tax').val();
 
-				if ( ! line_total ) line_total = 0;
-				if ( ! line_tax ) line_tax = 0;
-
 				line_total = accounting.unformat( line_total.replace(',', '.') );
 				line_tax = accounting.unformat( line_tax.replace(',', '.') );
+
+				if ( ! line_total ) line_total = 0;
+				if ( ! line_tax ) line_tax = 0;
 
 				line_totals = line_totals + line_total;
 
