@@ -200,13 +200,19 @@
 					var o_title 		= $product_img.attr('data-o_title');
 			        var o_href 			= $product_link.attr('data-o_href');
 
-			        if ( o_src && o_href && o_title ) {
+			        if ( o_src ) {
 				        $product_img
-				        	.attr( 'src', o_src )
+				        	.attr( 'src', o_src );
+			        }
+			        if ( o_href ) {
+			            $product_link
+			            	.attr( 'href', o_href );
+			        }
+			        if ( o_title ) {
+				        $product_img
 				        	.attr( 'alt', o_title )
 				        	.attr( 'title', o_title );
 			            $product_link
-			            	.attr( 'href', o_href )
 							.attr( 'title', o_title );
 			        }
 
