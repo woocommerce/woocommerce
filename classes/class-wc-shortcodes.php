@@ -546,6 +546,8 @@ class WC_Shortcodes {
 
 			</p><?php
 
+			wp_reset_postdata();
+
 			return ob_get_clean();
 
 		} elseif ( 'product_variation' == $product_data->post_type ) {
@@ -579,6 +581,8 @@ class WC_Shortcodes {
 				?>
 
 			</p><?php
+
+			wp_reset_postdata();
 
 			return ob_get_clean();
 
