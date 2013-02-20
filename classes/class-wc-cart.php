@@ -1049,7 +1049,7 @@ class WC_Cart {
 
 								// Get item discount by dividing item cost by subtotal to get a %
 								if ( $this->subtotal_ex_tax )
-									$discount_percent = ( $values['data']->get_price_excluding_tax()*$values['quantity'] ) / $this->subtotal_ex_tax;
+									$discount_percent = ( $values['data']->get_price_excluding_tax() * $values['quantity'] ) / $this->subtotal_ex_tax;
 								else
 									$discount_percent = 0;
 
@@ -1063,7 +1063,7 @@ class WC_Cart {
 								$item_discount = $item_discount / $values['quantity'];
 
 								// Pence
-								$price = ( $price * 100 );
+								$price = $price * 100;
 
 								// Check if discount is more than price
 								if ( $price < $item_discount )
@@ -1078,7 +1078,8 @@ class WC_Cart {
 								$price = $price / 100;
 
 								// Cannot be below 0
-								if ( $price < 0 ) $price = 0;
+								if ( $price < 0 )
+									$price = 0;
 
 								// Add coupon to discount total (once, since this is a fixed cart discount and we don't want rounding issues)
 								if ( $add_totals ) {
@@ -1419,7 +1420,7 @@ class WC_Cart {
 
 						// Line prices
 						$line_tax 		= get_option('woocommerce_tax_round_at_subtotal') == 'no' ? $this->tax->round( $discounted_tax_amount ) : $discounted_tax_amount;
-						$line_total 	= $this->tax->round( ( $discounted_price * $values['quantity'] ) - $this->tax->round( $line_tax ) );
+						$line_total 	= ( $discounted_price * $values['quantity'] ) - $this->tax->round( $line_tax );
 
 						// Add any product discounts (after tax)
 						$this->apply_product_discounts_after_tax( $values, $line_total + $discounted_tax_amount );
