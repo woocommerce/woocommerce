@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * ShareYourCart Integration
  *
@@ -9,7 +12,6 @@
  * @category	Integrations
  * @author		WooThemes
  */
-
 class WC_ShareYourCart extends WC_Integration {
 
 	public $ShareYourCartWooCommerce;

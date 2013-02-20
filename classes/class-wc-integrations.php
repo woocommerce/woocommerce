@@ -7,6 +7,7 @@
  * @class 		WC_Integrations
  * @version		2.0.0
  * @package		WooCommerce/Classes/Integrations
+ * @category	Class
  * @author 		WooThemes
  */
 class WC_Integrations {

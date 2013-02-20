@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Mijireh Checkout Gateway
  *
@@ -10,9 +13,6 @@
  * @package		WooCommerce/Classes/Payment
  * @author 		Mijireh
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 
 	/** @var string Access key for mijireh */

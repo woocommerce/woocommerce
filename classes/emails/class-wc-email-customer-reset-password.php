@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Customer Reset Password
  *
@@ -10,8 +13,6 @@
  * @author 		WooThemes
  * @extends 	WC_Email
  */
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_Email_Customer_Reset_Password extends WC_Email {
 
 	/** @var string */

@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Flat Rate Shipping Method
  *
@@ -9,9 +12,6 @@
  * @package		WooCommerce/Classes/Shipping
  * @author 		WooThemes
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 	/**
@@ -33,7 +33,6 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
     	$this->init();
     }
-
 
     /**
      * init function.

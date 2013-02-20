@@ -4,7 +4,8 @@
  *
  * @class 		WC_Session
  * @version		2.0.0
- * @package		WooCommerce/Classes/Abstracts
+ * @package		WooCommerce/Abstracts
+ * @category	Abstract Class
  * @author 		WooThemes
  */
 abstract class WC_Session {

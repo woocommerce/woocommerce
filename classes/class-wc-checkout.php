@@ -7,6 +7,7 @@
  * @class 		WC_Cart
  * @version		1.6.4
  * @package		WooCommerce/Classes
+ * @category	Class
  * @author 		WooThemes
  */
 class WC_Checkout {

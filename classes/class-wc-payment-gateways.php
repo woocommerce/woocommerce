@@ -7,6 +7,7 @@
  * @class 		WC_Payment_Gateways
  * @version		1.6.4
  * @package		WooCommerce/Classes/Payment
+ * @category	Class
  * @author 		WooThemes
  */
 class WC_Payment_Gateways {

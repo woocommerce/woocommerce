@@ -7,6 +7,7 @@
  * @class 		WC_Emails
  * @version		2.0.0
  * @package		WooCommerce/Classes/Emails
+ * @category	Class
  * @author 		WooThemes
  */
 class WC_Emails {

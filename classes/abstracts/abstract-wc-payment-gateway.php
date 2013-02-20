@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * WooCommerce Payment Gateway class
  *
@@ -7,12 +10,10 @@
  * @class 		WC_Payment_Gateway
  * @extends		WC_Settings_API
  * @version		1.6.4
- * @package		WooCommerce/Classes/Payment
+ * @package		WooCommerce/Abstracts
+ * @category	Abstract Class
  * @author 		WooThemes
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 abstract class WC_Payment_Gateway extends WC_Settings_API {
 
 	/** @var string Payment method ID. */

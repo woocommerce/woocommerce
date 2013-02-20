@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Cheque Payment Gateway
  *
@@ -10,9 +13,6 @@
  * @package		WooCommerce/Classes/Payment
  * @author 		WooThemes
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_Gateway_Cheque extends WC_Payment_Gateway {
 
     /**

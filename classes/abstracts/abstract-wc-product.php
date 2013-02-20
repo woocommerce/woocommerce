@@ -6,11 +6,10 @@
  *
  * @class 		WC_Product
  * @version		2.0.0
- * @package		WooCommerce/Classes
+ * @package		WooCommerce/Abstracts
+ * @category	Abstract Class
  * @author 		WooThemes
  */
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_Product {
 
 	/** @var int The product (post) ID. */

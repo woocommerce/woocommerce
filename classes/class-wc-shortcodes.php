@@ -5,6 +5,7 @@
  * @class 		WC_Shortcodes
  * @version		2.0.0
  * @package		WooCommerce/Classes
+ * @category	Class
  * @author 		WooThemes
  */
 

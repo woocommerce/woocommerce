@@ -1,7 +1,14 @@
 <?php
-
 /**
- * WC_API class.
+ * WooCommerce API
+ *
+ * This API class handles the WC-API endpoint requests.
+ *
+ * @class 		WC_API
+ * @version		2.0.0
+ * @package		WooCommerce/Classes
+ * @category	Class
+ * @author 		WooThemes
  */
 class WC_API {
 

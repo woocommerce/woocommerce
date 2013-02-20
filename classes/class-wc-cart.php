@@ -8,6 +8,7 @@
  * @class 		WC_Cart
  * @version		2.0.0
  * @package		WooCommerce/Classes
+ * @category	Class
  * @author 		WooThemes
  */
 class WC_Cart {

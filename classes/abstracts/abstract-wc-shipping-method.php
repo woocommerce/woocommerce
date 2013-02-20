@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * WooCommerce Shipping Method Class
  *
@@ -6,12 +9,10 @@
  *
  * @class 		WC_Shipping_Method
  * @version		1.6.4
- * @package		WooCommerce/Classes/Shipping
+ * @package		WooCommerce/Abstracts
+ * @category	Abstract Class
  * @author 		WooThemes
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 abstract class WC_Shipping_Method extends WC_Settings_API {
 
 	/** @var string Unique ID for the shipping method - must be set. */

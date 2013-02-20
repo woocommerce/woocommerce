@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * WooCommerce Integration class
  *
@@ -7,12 +10,10 @@
  * @class 		WC_Integration
  * @extends		WC_Settings_API
  * @version		2.0.0
- * @package		WooCommerce/Classes/Integrations
+ * @package		WooCommerce/Abstracts
+ * @category	Abstract Class
  * @author 		WooThemes
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 abstract class WC_Integration extends WC_Settings_API {
 
 	/**

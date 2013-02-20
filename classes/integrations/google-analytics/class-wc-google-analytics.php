@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Google Analytics Integration
  *
@@ -10,9 +13,6 @@
  * @package		WooCommerce/Classes/Integrations
  * @author 		WooThemes
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_Google_Analytics extends WC_Integration {
 
 	/**

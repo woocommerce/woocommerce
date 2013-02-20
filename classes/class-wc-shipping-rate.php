@@ -7,6 +7,7 @@
  * @class 		WC_Shipping_Rate
  * @version		2.0.0
  * @package		WooCommerce/Classes/Shipping
+ * @category	Class
  * @author 		WooThemes
  */
 

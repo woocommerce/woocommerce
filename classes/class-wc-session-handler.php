@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Handle data for the current customers session.
  * Implements the WC_Session abstract class
@@ -11,11 +14,9 @@
  * @class 		WC_Session_Handler
  * @version		2.0.0
  * @package		WooCommerce/Classes
+ * @category	Class
  * @author 		WooThemes
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_Session_Handler extends WC_Session {
 
 	/** cookie name */

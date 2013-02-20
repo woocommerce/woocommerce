@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Local Pickup Shipping Method
  *
@@ -9,9 +12,6 @@
  * @package		WooCommerce/Classes/Shipping
  * @author 		WooThemes
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 
 	/**

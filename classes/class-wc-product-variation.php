@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Product Variation Class
  *
@@ -7,11 +10,9 @@
  * @class 		WC_Product_Variation
  * @version		2.0.0
  * @package		WooCommerce/Classes
+ * @category	Class
  * @author 		WooThemes
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_Product_Variation extends WC_Product {
 
 	/** @public int ID of the variable product. */

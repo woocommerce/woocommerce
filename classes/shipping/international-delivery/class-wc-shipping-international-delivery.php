@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * International Shipping Method based on Flat Rate shipping
  *
@@ -9,9 +12,6 @@
  * @package		WooCommerce/Classes/Shipping
  * @author 		WooThemes
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 
 	var $id = 'international_delivery';

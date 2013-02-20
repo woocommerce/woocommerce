@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Cash on Delivery Gateway
  *
@@ -10,9 +13,6 @@
  * @package		WooCommerce/Classes/Payment
  * @author 		Patrick Garman
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_Gateway_COD extends WC_Payment_Gateway {
 
     /**

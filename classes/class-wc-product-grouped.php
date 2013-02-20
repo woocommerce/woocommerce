@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Grouped Product Class
  *
@@ -7,10 +10,9 @@
  * @class 		WC_Product_Grouped
  * @version		2.0.0
  * @package		WooCommerce/Classes/Products
+ * @category	Class
  * @author 		WooThemes
  */
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_Product_Grouped extends WC_Product {
 
 	/** @public array Array of child products/posts/variations. */

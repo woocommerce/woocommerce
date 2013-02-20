@@ -5,6 +5,7 @@
  * @class 		WC_Validation
  * @version		1.6.4
  * @package		WooCommerce/Classes
+ * @category	Class
  * @author 		WooThemes
  */
 class WC_Validation {

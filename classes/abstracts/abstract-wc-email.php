@@ -1,18 +1,19 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
- * Email Class
+ * Abstract Email Class
  *
  * WooCommerce Email Class which is extended by specific email template classes to add emails to WooCommerce
  *
  * @class 		WC_Email
  * @version		2.0.0
- * @package		WooCommerce/Classes/Emails
+ * @package		WooCommerce/Abstracts
  * @author 		WooThemes
+ * @category	Abstract Class
  * @extends 	WC_Settings_API
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 abstract class WC_Email extends WC_Settings_API {
 
 	/** @var string Payment method ID. */

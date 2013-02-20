@@ -5,6 +5,7 @@
  * @class 		WC_Logger
  * @version		1.6.4
  * @package		WooCommerce/Classes
+ * @category	Class
  * @author 		WooThemes
  */
 class WC_Logger {
