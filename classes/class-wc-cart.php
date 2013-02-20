@@ -1203,6 +1203,8 @@ class WC_Cart {
 		 */
 		public function apply_cart_discounts_after_tax() {
 
+			$pre_discount_total = number_format( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total + $this->fee_total, $this->dp, '.', '' );
+
 			if ( $this->applied_coupons ) {
 				foreach ( $this->applied_coupons as $code ) {
 					$coupon = new WC_Coupon( $code );
@@ -1215,6 +1217,11 @@ class WC_Cart {
 
 							case "fixed_cart" :
 
+								if ( $coupon->amount > $pre_discount_total )
+									$coupon->amount = $pre_discount_total;
+
+								$pre_discount_total = $pre_discount_total - $coupon->amount;
+
 								$this->discount_total = $this->discount_total + $coupon->amount;
 
 								$this->increase_coupon_discount_amount( $code, $coupon->amount );
@@ -1223,11 +1230,16 @@ class WC_Cart {
 
 							case "percent" :
 
-								$percent_discount = ( round( $this->cart_contents_total + $this->tax_total, $this->dp ) / 100 ) * $coupon->amount;
+								$percent_discount = round( ( round( $this->cart_contents_total + $this->tax_total, $this->dp ) / 100 ) * $coupon->amount, $this->dp );
 
-								$this->discount_total = $this->discount_total + round( $percent_discount, $this->dp );
+								if ( $coupon->amount > $percent_discount )
+									$coupon->amount = $percent_discount;
 
-								$this->increase_coupon_discount_amount( $code, round( $percent_discount, $this->dp ) );
+								$pre_discount_total = $pre_discount_total - $percent_discount;
+
+								$this->discount_total = $this->discount_total + $percent_discount;
+
+								$this->increase_coupon_discount_amount( $code, $percent_discount );
 
 							break;
 
