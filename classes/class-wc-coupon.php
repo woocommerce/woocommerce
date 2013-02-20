@@ -120,10 +120,9 @@ class WC_Coupon {
             $this->minimum_amount 				= esc_html( $coupon_data['minimum_amount'] );
             $this->customer_email 				= esc_html( $coupon_data['customer_email'] );
 
-
         } else {
 
-            $coupon_id 	= $wpdb->get_var( $wpdb->prepare( apply_filters( 'woocommerce_coupon_code_query', "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon'" ), $this->code ) );
+            $coupon_id 	= $wpdb->get_var( $wpdb->prepare( apply_filters( 'woocommerce_coupon_code_query', "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish'" ), $this->code ) );
 
             if ( ! $coupon_id )
             	return;
@@ -131,7 +130,7 @@ class WC_Coupon {
 			$coupon             = get_post( $coupon_id );
 			$coupon->post_title = apply_filters( 'woocommerce_coupon_code', $coupon->post_title );
 
-            if ( empty( $coupon ) || $coupon->post_status !== 'publish' || $this->code !== $coupon->post_title )
+            if ( empty( $coupon ) || $this->code !== $coupon->post_title )
             	return;
 
             $this->id                   = $coupon->ID;
