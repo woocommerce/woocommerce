@@ -104,7 +104,7 @@ class WC_Widget_Login extends WP_Widget {
 			global $login_errors;
 
 			if ( is_wp_error($login_errors) && $login_errors->get_error_code() ) foreach ($login_errors->get_error_messages() as $error) :
-				echo '<div class="woocommerce_error">' . wp_kses_post( $error ) . "</div>\n";
+				echo '<div class="woocommerce-error">' . wp_kses_post( $error ) . "</div>\n";
 				break;
 			endforeach;
 
