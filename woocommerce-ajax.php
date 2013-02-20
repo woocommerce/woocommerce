@@ -101,7 +101,7 @@ function woocommerce_sidebar_login_ajax_process() {
 
 		if ( $user->errors ) {
 			foreach ( $user->errors as $error ) {
-				$result['error'] = esc_html( $error[0] );
+				$result['error'] = wp_kses_post( $error[0] );
 				break;
 			}
 		} else {
