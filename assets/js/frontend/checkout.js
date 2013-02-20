@@ -92,6 +92,7 @@ jQuery(document).ready(function($) {
 
 	$('a.showcoupon').click(function(){
 		$('.checkout_coupon').slideToggle();
+		$('#coupon_code').focus();
 		return false;
 	});
 
