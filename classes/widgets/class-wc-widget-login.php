@@ -158,12 +158,12 @@ class WC_Widget_Login extends WP_Widget {
 						type: 'GET',
 						dataType: 'jsonp',
 						success: function( result ) {
-							jQuery('.woocommerce_error').remove();
+							jQuery('.woocommerce-error').remove();
 
 							if (result.success==1) {
 								window.location = result.redirect;
 							} else {
-								jQuery(thisform).prepend('<div class=\"woocommerce_error\">' + result.error + '</div>');
+								jQuery(thisform).prepend('<div class=\"woocommerce-error\">' + result.error + '</div>');
 								jQuery(thisform).unblock();
 							}
 						}
