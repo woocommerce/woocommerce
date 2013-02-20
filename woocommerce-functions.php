@@ -1086,7 +1086,7 @@ function woocommerce_download_product() {
 
             } elseif ( stristr( getenv( 'SERVER_SOFTWARE' ), 'nginx' ) || stristr( getenv( 'SERVER_SOFTWARE' ), 'cherokee' ) ) {
 
-            	header( "X-Accel-Redirect: $file_path" );
+            	header( "X-Accel-Redirect: /$file_path" );
             	exit;
 
             }
