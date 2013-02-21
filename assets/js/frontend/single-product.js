@@ -33,7 +33,9 @@ jQuery(document).ready(function($) {
 			var $star   = $(this);
 			var $rating = $(this).closest('#respond').find('#rating');
 
-			$rating.val( $star.text() );
+			$("#rating option").filter(function() {
+			    return $(this).attr('value') == $star.text(); 
+			}).attr('selected', true);
 			$star.siblings('a').removeClass('active');
 			$star.addClass('active');
 
