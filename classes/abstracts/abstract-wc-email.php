@@ -137,8 +137,11 @@ abstract class WC_Email extends WC_Settings_API {
 		// Save settings hook
 		add_action( 'woocommerce_update_options_email_' . $this->id, array( $this, 'process_admin_options' ) );
 
+		// Default template base if not declared in child constructor 
+		if ( is_null( $this->template_base) )
+			$this->template_base = $woocommerce->plugin_path() . '/templates/';
+
 		// Settings
-		$this->template_base 	= $woocommerce->plugin_path() . '/templates/';
 		$this->heading 			= $this->get_option( 'heading', $this->heading );
 		$this->subject      	= $this->get_option( 'subject', $this->subject );
 		$this->email_type     	= $this->get_option( 'email_type' );
