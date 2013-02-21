@@ -46,7 +46,7 @@ class WC_Product_Factory {
 				$product_type = ! empty( $terms ) && isset( current( $terms )->slug ) ? current( $terms )->slug : 'simple';
 			}
 
-			$classname = 'WC_Product_' . ucfirst( $product_type );
+			$classname = 'WC_Product_' . preg_replace( '/(?<=_)(.)/e', "strtoupper( '$1' )", ucfirst( $product_type ) );
 		} else {
 			$classname = false;
 			$product_type = false;
