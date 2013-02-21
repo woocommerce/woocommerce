@@ -43,7 +43,7 @@ class WC_Product_Factory {
 				$product_type = 'variation';
 			} else {
 				$terms        = get_the_terms( $product_id, 'product_type' );
-				$product_type = ! empty( $terms ) && isset( current( $terms )->name ) ? sanitize_title( current( $terms )->name ) : 'simple';
+				$product_type = ! empty( $terms ) && isset( current( $terms )->slug ) ? current( $terms )->slug : 'simple';
 			}
 
 			$classname = 'WC_Product_' . ucfirst( $product_type );
