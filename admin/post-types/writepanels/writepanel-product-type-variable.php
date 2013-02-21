@@ -88,6 +88,7 @@ function variable_product_type_options() {
 					<option value="variable_file_paths" rel="textarea"><?php _e( 'File Path', 'woocommerce' ); ?></option>
 					<option value="variable_download_limit"><?php _e( 'Download limit', 'woocommerce' ); ?></option>
 					<option value="variable_download_expiry"><?php _e( 'Download Expiry', 'woocommerce' ); ?></option>
+					<?php do_action( 'woocommerce_variable_product_bulk_edit_actions' ); ?>
 				</select>
 				<a class="button bulk_edit"><?php _e( 'Go', 'woocommerce' ); ?></a>
 			</p>
