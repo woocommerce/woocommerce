@@ -137,8 +137,11 @@ abstract class WC_Email extends WC_Settings_API {
 		// Save settings hook
 		add_action( 'woocommerce_update_options_email_' . $this->id, array( $this, 'process_admin_options' ) );
 
+		// Default template base if not declared in child constructor 
+		if ( is_null( $this->template_base ) )
+			$this->template_base = $woocommerce->plugin_path() . '/templates/';
+
 		// Settings
-		$this->template_base 	= $woocommerce->plugin_path() . '/templates/';
 		$this->heading 			= $this->get_option( 'heading', $this->heading );
 		$this->subject      	= $this->get_option( 'subject', $this->subject );
 		$this->email_type     	= $this->get_option( 'email_type' );
@@ -596,7 +599,7 @@ abstract class WC_Email extends WC_Settings_API {
 									<a href="<?php echo remove_query_arg( array( 'delete_template', 'saved' ), add_query_arg( 'move_template', $template ) ); ?>" class="button"><?php _e( 'Copy file to theme', 'woocommerce' ); ?></a>
 								<?php endif; ?>
 
-								<?php printf( __( 'To override and edit this email template copy <code>%s</code> to your theme folder: <code>%s</code>.', 'woocommerce' ), 'woocommerce/templates/' . $this->$template, 'yourtheme/woocommerce/' . $this->$template ); ?>
+								<?php printf( __( 'To override and edit this email template copy <code>%s</code> to your theme folder: <code>%s</code>.', 'woocommerce' ), plugin_basename( $core_file ) , 'yourtheme/woocommerce/' . $this->$template ); ?>
 							</p>
 
 							<div class="editor" style="display:none">
