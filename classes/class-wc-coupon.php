@@ -134,7 +134,7 @@ class WC_Coupon {
             	return;
 
             $this->id                   = $coupon->ID;
-            $this->coupon_custom_fields = get_post_meta( $this->id );
+            $this->coupon_custom_fields = apply_filters( 'woocommerce_coupon_custom_fields', get_post_meta( $this->id ), $this->code);
 
             $load_data = array(
             	'discount_type'					=> 'fixed_cart',
