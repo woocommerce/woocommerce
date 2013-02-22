@@ -96,29 +96,29 @@ class WC_Coupon {
 	public function __construct( $code ) {
 		global $wpdb;
 
-		$this->code 	= apply_filters( 'woocommerce_coupon_code', $code );
+		$this->code  = apply_filters( 'woocommerce_coupon_code', $code );
 
 		// Coupon data lets developers create coupons through code
-		$coupon_data 	= apply_filters( 'woocommerce_get_shop_coupon_data', false, $code );
+		$coupon_data = apply_filters( 'woocommerce_get_shop_coupon_data', false, $code );
 
         if ( $coupon_data ) {
 
-            $this->id 							= absint( $coupon_data['id'] );
-            $this->type 						= esc_html( $coupon_data['type'] );
-            $this->amount 						= esc_html( $coupon_data['amount'] );
-            $this->individual_use 				= esc_html( $coupon_data['individual_use'] );
-            $this->product_ids 					= is_array( $coupon_data['product_ids'] ) ? $coupon_data['product_ids'] : array();
-            $this->exclude_product_ids 			= is_array( $coupon_data['exclude_product_ids'] ) ? $coupon_data['exclude_product_ids'] : array();
-            $this->usage_limit 					= absint( $coupon_data['usage_limit'] );
-            $this->usage_count 					= absint( $coupon_data['usage_count'] );
-            $this->expiry_date 					= esc_html( $coupon_data['expiry_date'] );
-            $this->apply_before_tax 			= esc_html( $coupon_data['apply_before_tax'] );
-            $this->free_shipping 				= esc_html( $coupon_data['free_shipping'] );
-            $this->product_categories 			= is_array( $coupon_data['product_categories'] ) ? $coupon_data['product_categories'] : array();
-            $this->exclude_product_categories 	= is_array( $coupon_data['exclude_product_categories'] ) ? $coupon_data['exclude_product_categories'] : array();
-            $this->exclude_sale_items			= esc_html( $coupon_data['exclude_sale_items'] );
-            $this->minimum_amount 				= esc_html( $coupon_data['minimum_amount'] );
-            $this->customer_email 				= esc_html( $coupon_data['customer_email'] );
+            $this->id                         = absint( $coupon_data['id'] );
+            $this->type                       = esc_html( $coupon_data['type'] );
+            $this->amount                     = esc_html( $coupon_data['amount'] );
+            $this->individual_use             = esc_html( $coupon_data['individual_use'] );
+            $this->product_ids                = is_array( $coupon_data['product_ids'] ) ? $coupon_data['product_ids'] : array();
+            $this->exclude_product_ids        = is_array( $coupon_data['exclude_product_ids'] ) ? $coupon_data['exclude_product_ids'] : array();
+            $this->usage_limit                = absint( $coupon_data['usage_limit'] );
+            $this->usage_count                = absint( $coupon_data['usage_count'] );
+            $this->expiry_date                = esc_html( $coupon_data['expiry_date'] );
+            $this->apply_before_tax           = esc_html( $coupon_data['apply_before_tax'] );
+            $this->free_shipping              = esc_html( $coupon_data['free_shipping'] );
+            $this->product_categories         = is_array( $coupon_data['product_categories'] ) ? $coupon_data['product_categories'] : array();
+            $this->exclude_product_categories = is_array( $coupon_data['exclude_product_categories'] ) ? $coupon_data['exclude_product_categories'] : array();
+            $this->exclude_sale_items         = esc_html( $coupon_data['exclude_sale_items'] );
+            $this->minimum_amount             = esc_html( $coupon_data['minimum_amount'] );
+            $this->customer_email             = esc_html( $coupon_data['customer_email'] );
 
         } else {
 
@@ -137,38 +137,40 @@ class WC_Coupon {
             $this->coupon_custom_fields = get_post_meta( $this->id );
 
             $load_data = array(
-            	'discount_type'					=> 'fixed_cart',
-            	'coupon_amount'					=> 0,
-            	'individual_use'				=> 'no',
-            	'product_ids'					=> '',
-            	'exclude_product_ids'			=> '',
-            	'usage_limit'					=> '',
-            	'usage_count'					=> '',
-            	'expiry_date'					=> '',
-            	'apply_before_tax'				=> 'yes',
-            	'free_shipping'					=> 'no',
-            	'product_categories'			=> array(),
-            	'exclude_product_categories'	=> array(),
-            	'exclude_sale_items'			=> 'no',
-            	'minimum_amount'				=> '',
-            	'customer_email'				=> array()
+            	'discount_type'              => 'fixed_cart',
+            	'coupon_amount'              => 0,
+            	'individual_use'             => 'no',
+            	'product_ids'                => '',
+            	'exclude_product_ids'        => '',
+            	'usage_limit'                => '',
+            	'usage_count'                => '',
+            	'expiry_date'                => '',
+            	'apply_before_tax'           => 'yes',
+            	'free_shipping'              => 'no',
+            	'product_categories'         => array(),
+            	'exclude_product_categories' => array(),
+            	'exclude_sale_items'         => 'no',
+            	'minimum_amount'             => '',
+            	'customer_email'             => array()
             );
 
             foreach ( $load_data as $key => $default )
             	$this->$key = isset( $this->coupon_custom_fields[ $key ][0] ) && $this->coupon_custom_fields[ $key ][0] !== '' ? $this->coupon_custom_fields[ $key ][0] : $default;
 
             // Alias
-            $this->type 						= $this->discount_type;
-            $this->amount 						= $this->coupon_amount;
+            $this->type                    = $this->discount_type;
+            $this->amount                  = $this->coupon_amount;
 
             // Formatting
-            $this->product_ids 					= array_filter( array_map( 'trim', explode( ',', $this->product_ids ) ) );
-            $this->exclude_product_ids 			= array_filter( array_map( 'trim', explode( ',', $this->exclude_product_ids ) ) );
- 			$this->expiry_date 					= $this->expiry_date ? strtotime( $this->expiry_date ) : '';
-            $this->product_categories 			= array_filter( array_map( 'trim', (array) maybe_unserialize( $this->product_categories ) ) );
-       		$this->exclude_product_categories 	= array_filter( array_map( 'trim', (array) maybe_unserialize( $this->exclude_product_categories ) ) );
-			$this->customer_email 				= array_filter( array_map( 'trim', array_map( 'strtolower', (array) maybe_unserialize( $this->customer_email ) ) ) );
+            $this->product_ids                = array_filter( array_map( 'trim', explode( ',', $this->product_ids ) ) );
+            $this->exclude_product_ids        = array_filter( array_map( 'trim', explode( ',', $this->exclude_product_ids ) ) );
+ 			$this->expiry_date                = $this->expiry_date ? strtotime( $this->expiry_date ) : '';
+            $this->product_categories         = array_filter( array_map( 'trim', (array) maybe_unserialize( $this->product_categories ) ) );
+       		$this->exclude_product_categories = array_filter( array_map( 'trim', (array) maybe_unserialize( $this->exclude_product_categories ) ) );
+			$this->customer_email             = array_filter( array_map( 'trim', array_map( 'strtolower', (array) maybe_unserialize( $this->customer_email ) ) ) );
         }
+
+        do_action( 'woocommerce_coupon_loaded', $this );
 	}
 
 
