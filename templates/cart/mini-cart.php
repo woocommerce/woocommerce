@@ -13,6 +13,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $woocommerce;
 ?>
+
+<?php do_action( 'woocommerce_before_mini_cart' ); ?>
+
 <ul class="cart_list product_list_widget <?php echo $args['list_class']; ?>">
 
 	<?php if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) : ?>
@@ -67,3 +70,5 @@ global $woocommerce;
 	</p>
 
 <?php endif; ?>
+
+<?php do_action( 'woocommerce_after_mini_cart' ); ?>
