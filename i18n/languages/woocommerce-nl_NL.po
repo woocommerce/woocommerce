@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-01-09 09:36:51+00:00\n"
-"PO-Revision-Date: 2013-02-09 12:00+0100\n"
+"PO-Revision-Date: 2013-02-24 10:30+0100\n"
 "Last-Translator: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
 "Language-Team: Ramon van Belzen <woocommerce@ramoonus.nl>, Geert De "
 "Deckere<geertdd@gmail.com>\n"
@@ -21,22 +21,22 @@ msgstr ""
 
 #: assets/js/admin/editor_plugin_lang.php:5
 msgid "Insert Shortcode"
-msgstr ""
+msgstr "Shortcode Invoegen"
 
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:6
 msgid "Product price/cart button"
-msgstr ""
+msgstr "Product prijs/winkelwagen knop"
 
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:7
 msgid "Product by SKU/ID"
-msgstr ""
+msgstr "Product op SKU/ID"
 
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:8
 msgid "Products by SKU/ID"
-msgstr ""
+msgstr "Producten op SKU/ID"
 
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:9
@@ -61,7 +61,7 @@ msgstr "Uitgelichte producten"
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:13
 msgid "Shop Messages"
-msgstr ""
+msgstr "Winkel Berichten"
 
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:14
@@ -82,7 +82,7 @@ msgstr "Afrekenen"
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:17
 msgid "Order tracking"
-msgstr ""
+msgstr "Bestelling Traceren"
 
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:18
@@ -137,13 +137,13 @@ msgstr "Activeer/Deactiveer"
 #: classes/emails/class-wc-email-customer-invoice.php:140
 #: classes/emails/class-wc-email-new-order.php:117
 msgid "Enable this email notification"
-msgstr ""
+msgstr "Activeer deze email notificatie"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:421
 #: classes/emails/class-wc-email-customer-invoice.php:144
 msgid "Email subject"
-msgstr ""
+msgstr "Email onderwerp"
 
 #: classes/abstracts/abstract-wc-email.php:423
 #: classes/abstracts/abstract-wc-email.php:430
@@ -177,7 +177,7 @@ msgstr "Email type"
 #: classes/emails/class-wc-email-customer-invoice.php:174
 #: classes/emails/class-wc-email-new-order.php:144
 msgid "Choose which format of email to send."
-msgstr ""
+msgstr "Kies welk email formaat te versturen."
 
 #: classes/abstracts/abstract-wc-email.php:441
 #: classes/emails/class-wc-email-customer-completed-order.php:175
@@ -203,15 +203,15 @@ msgstr "Multipart"
 #: classes/abstracts/abstract-wc-email.php:479
 #: classes/abstracts/abstract-wc-email.php:500
 msgid "Could not write to template file."
-msgstr ""
+msgstr "Kan het template bestand niet schrijven."
 
 #: classes/abstracts/abstract-wc-email.php:527
 msgid "Template file copied to theme."
-msgstr ""
+msgstr "Template bestand gekopieerd naar thema."
 
 #: classes/abstracts/abstract-wc-email.php:536
 msgid "Template file deleted from theme."
-msgstr ""
+msgstr "Template bestand verwijderd in thema."
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:544
@@ -233,17 +233,19 @@ msgstr "Tekst template"
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:576
 msgid "Delete template file"
-msgstr ""
+msgstr "Verwijder template bestand"
 
 #: classes/abstracts/abstract-wc-email.php:579
 msgid ""
 "This template has been overridden by your theme and can be found in: <code>"
 "%s</code>."
 msgstr ""
+"Template overschreven door het thema, dit kan gevonden worden in <code>%s</"
+"code>."
 
 #: classes/abstracts/abstract-wc-email.php:594
 msgid "Copy file to theme"
-msgstr ""
+msgstr "Kopieer bestand naar  thema"
 
 #: classes/abstracts/abstract-wc-email.php:597
 msgid ""
@@ -259,12 +261,12 @@ msgstr "Bestand niet gevonden."
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:633
 msgid "View template"
-msgstr ""
+msgstr "Bekijk template"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:634
 msgid "Hide template"
-msgstr ""
+msgstr "Verberg template"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:645
@@ -754,7 +756,7 @@ msgstr "Botswana"
 # @ woocommerce
 #: classes/class-wc-countries.php:66
 msgid "Bouvet Island"
-msgstr ""
+msgstr "Bouvet Eiland"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:67
@@ -1082,7 +1084,7 @@ msgstr "Haiti"
 
 #: classes/class-wc-countries.php:132
 msgid "Heard Island and McDonald Islands"
-msgstr ""
+msgstr "Heard Eiland en McDonald Eilanden"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:133
@@ -1126,7 +1128,7 @@ msgstr "Irak"
 
 #: classes/class-wc-countries.php:141
 msgid "Republic of Ireland"
-msgstr ""
+msgstr "Republiek Ierland"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:142
@@ -2127,7 +2129,7 @@ msgstr "Bestellingstotaal:"
 #: classes/class-wc-order.php:1003 templates/cart/totals.php:145
 #: templates/checkout/review-order.php:151
 msgid "(Includes %s)"
-msgstr ""
+msgstr "(Bevat %s)"
 
 # @ woocommerce
 #: classes/class-wc-order.php:1152 classes/class-wc-order.php:1154
@@ -2170,7 +2172,7 @@ msgstr "Kopen"
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:24
 msgid "Completed order"
-msgstr ""
+msgstr "Afgeronde bestelling"
 
 #: classes/emails/class-wc-email-customer-completed-order.php:25
 msgid ""
@@ -2181,7 +2183,7 @@ msgstr ""
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:27
 msgid "Your order is complete"
-msgstr ""
+msgstr "Uw bestelling is afgerond"
 
 #: classes/emails/class-wc-email-customer-completed-order.php:28
 msgid "Your {blogname} order from {order_date} is complete"
@@ -2220,7 +2222,7 @@ msgstr "Email kop (downloadbaar)"
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-invoice.php:27
 msgid "Customer invoice"
-msgstr ""
+msgstr "Klant factuur"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-invoice.php:28
@@ -2248,11 +2250,11 @@ msgstr ""
 
 #: classes/emails/class-wc-email-customer-invoice.php:158
 msgid "Email subject (paid)"
-msgstr ""
+msgstr "Email onderwerp (betaald)"
 
 #: classes/emails/class-wc-email-customer-invoice.php:165
 msgid "Email heading (paid)"
-msgstr ""
+msgstr "Email kop (betaald)"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-new-account.php:31
@@ -2307,7 +2309,7 @@ msgstr ""
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-processing-order.php:27
 msgid "Thank you for your order"
-msgstr ""
+msgstr "Bedankt voor uw bestelling"
 
 #: classes/emails/class-wc-email-customer-processing-order.php:28
 msgid "Your {blogname} order receipt from {order_date}"
@@ -2316,7 +2318,7 @@ msgstr ""
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-reset-password.php:35
 msgid "Reset password"
-msgstr ""
+msgstr "Reset wachtwoord"
 
 #: classes/emails/class-wc-email-customer-reset-password.php:36
 msgid ""
@@ -2327,12 +2329,12 @@ msgstr ""
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-reset-password.php:41
 msgid "Password Reset for {blogname}"
-msgstr ""
+msgstr "Wachtwoord Reset voor {blogname}"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-reset-password.php:42
 msgid "Password Reset Instructions"
-msgstr ""
+msgstr "Wachtwoord Reset Instructies"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-new-order.php:24
@@ -2697,7 +2699,7 @@ msgstr ""
 # @ woocommerce
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:201
 msgid "Join for free"
-msgstr ""
+msgstr "Schrijf je gratis in"
 
 # @ woocommerce
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:201
@@ -2771,7 +2773,7 @@ msgstr ""
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:143
 msgid "Invoice Prefix"
-msgstr ""
+msgstr "Factuur Prefix"
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:145
 msgid ""
@@ -2834,7 +2836,7 @@ msgstr ""
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:175
 msgid "Address override"
-msgstr ""
+msgstr "Adres overschrijven"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:177
@@ -3113,7 +3115,7 @@ msgstr ""
 
 #: classes/integrations/shareyourcart/class.shareyourcart-wp.php:328
 msgid "Share your cart settings"
-msgstr ""
+msgstr "ShareYourCart instellingen"
 
 # @ woocommerce
 #: classes/integrations/shareyourcart/class.shareyourcart-wp.php:342
@@ -3123,7 +3125,7 @@ msgstr "Knop"
 # @ woocommerce
 #: classes/integrations/shareyourcart/class.shareyourcart-wp.php:343
 msgid "Customize Button"
-msgstr ""
+msgstr "Knoppen aanpassen"
 
 # @ woocommerce
 #: classes/integrations/shareyourcart/class.shareyourcart-wp.php:351
@@ -3134,7 +3136,7 @@ msgstr "Documentatie"
 # @ woocommerce
 #: classes/integrations/shareyourcart/views/admin-page.php:33
 msgid "Setup your ShareYourCart account"
-msgstr ""
+msgstr "Stel de ShareYourCart account in"
 
 # @ woocommerce
 #: classes/integrations/shareyourcart/views/admin-page.php:35
@@ -3414,7 +3416,7 @@ msgstr "Activeer gratis verzending"
 # @ woocommerce
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:105
 msgid "Free Shipping Requires..."
-msgstr ""
+msgstr "Gratis verzending eisen"
 
 # @ woocommerce
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:109
@@ -4835,7 +4837,7 @@ msgstr ""
 # @ woocommerce
 #: i18n/states/MY.php:18
 msgid "Pahang"
-msgstr ""
+msgstr "Pahang"
 
 #: i18n/states/MY.php:19
 msgid "Perak"
@@ -5504,7 +5506,7 @@ msgstr ""
 # @ woocommerce
 #: i18n/states/ZA.php:14
 msgid "Free State"
-msgstr ""
+msgstr "Vrije Staat"
 
 #: i18n/states/ZA.php:15
 msgid "Gauteng"
@@ -6131,7 +6133,7 @@ msgstr ""
 # @ woocommerce
 #: templates/emails/customer-reset-password.php:20
 msgid "Click here to reset your password"
-msgstr ""
+msgstr "Klik hier om uw wachtwoord te resetten"
 
 # @ woocommerce
 #: templates/emails/email-addresses.php:18
@@ -6564,7 +6566,7 @@ msgstr "Jouw reactie is in afwachting van goedkeuring"
 # @ woocommerce
 #: templates/single-product/review.php:40
 msgid "verified owner"
-msgstr ""
+msgstr "geverifieerde eigenaar"
 
 # @ woocommerce
 #: templates/single-product/tabs/description.php:17
@@ -6743,7 +6745,7 @@ msgstr "Download Toestemming Verleend"
 #: woocommerce-core-functions.php:1162
 msgctxt "slug"
 msgid "uncategorized"
-msgstr ""
+msgstr "ongecategoriseerd"
 
 # @ woocommerce
 #: woocommerce-core-functions.php:1344
@@ -6997,7 +6999,7 @@ msgstr "verplicht"
 # @ woocommerce
 #: woocommerce-template.php:1301
 msgid "Update country"
-msgstr ""
+msgstr "Update land"
 
 # @ woocommerce
 #: woocommerce-template.php:1453
@@ -7453,7 +7455,7 @@ msgstr "Select an option&hellip;"
 # @ woocommerce
 #: woocommerce.php:1188
 msgid "Please select a rating"
-msgstr ""
+msgstr "Selecteer een classificatie"
 
 #: woocommerce.php:1189
 msgid ""
