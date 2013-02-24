@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-01-09 09:36:51+00:00\n"
-"PO-Revision-Date: 2013-02-24 10:52+0100\n"
+"PO-Revision-Date: 2013-02-24 14:02+0100\n"
 "Last-Translator: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
 "Language-Team: Ramon van Belzen <woocommerce@ramoonus.nl>, Geert De "
 "Deckere<geertdd@gmail.com>\n"
@@ -252,6 +252,8 @@ msgid ""
 "To override and edit this email template copy <code>%s</code> to your theme "
 "folder: <code>%s</code>."
 msgstr ""
+"Om het email template bestand te overrulen, kopieer  <code>%s</code> naar de "
+"thema map: <code>%s</code>."
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:608
@@ -374,6 +376,9 @@ msgid ""
 "stock). Please edit your cart and try again. We apologise for any "
 "inconvenience caused."
 msgstr ""
+"Sorry, we niet genoeg  \"%s \" op voorraad om uw bestelling (%s op voorraad) "
+"te vervullen. Corrigeer uw winkelwagen en probeer het opnieuw. Onze excuses "
+"voor het ongemak."
 
 # @ woocommerce
 #: classes/class-wc-cart.php:516
@@ -382,6 +387,9 @@ msgid ""
 "Please try again in %d minutes or edit your cart and try again. We apologise "
 "for any inconvenience caused."
 msgstr ""
+"Sorry, we hebben niet genoeg \"%s \" op voorraad om uw bestelling uit te "
+"voeren op dit moment. Probeer het over %d minuten opnieuw of corrigeer uw  "
+"winkelwagentje probeer het opnieuw. Onze excuses voor het ongemak."
 
 # @ woocommerce
 #: classes/class-wc-cart.php:526
@@ -389,11 +397,13 @@ msgid ""
 "Sorry, \"%s\" is not in stock. Please edit your cart and try again. We "
 "apologise for any inconvenience caused."
 msgstr ""
+"Sorry, \"%s\" is niet op voorraad. Corrigeer uw winkelwagen en probeer "
+"nogmaals. Onze excuses voor het ongemak."
 
 # @ woocommerce
 #: classes/class-wc-cart.php:804
 msgid "Sorry, &quot;%s&quot; cannot be purchased."
-msgstr ""
+msgstr "Sorry, &quot;%s&quot kan niet aangeschaft worden."
 
 # @ woocommerce
 #: classes/class-wc-cart.php:811
@@ -523,7 +533,7 @@ msgstr "(%s) is geen geldige postcode."
 # @ woocommerce
 #: classes/class-wc-checkout.php:461
 msgid "is not valid. Please enter one of the following:"
-msgstr ""
+msgstr "is not correct. Voeg een van de volgende in:"
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:469
@@ -2027,6 +2037,8 @@ msgstr "Het minimumaankoopbedrag voor deze kortingsbon is %s."
 #: classes/class-wc-coupon.php:300 classes/class-wc-coupon.php:318
 msgid "Sorry, this coupon is not applicable to your cart contents."
 msgstr ""
+"Sorry, deze coupon is niet toepasbaar op de huidige inhoud van de "
+"winkelwagen."
 
 # @ woocommerce
 #: classes/class-wc-coupon.php:329
@@ -2187,7 +2199,7 @@ msgstr "Uw bestelling is afgerond"
 
 #: classes/emails/class-wc-email-customer-completed-order.php:28
 msgid "Your {blogname} order from {order_date} is complete"
-msgstr ""
+msgstr "Uw  {blogname} bestelling op {order_date} is afgerond"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:40
@@ -2198,6 +2210,7 @@ msgstr "Uw order is afgerond, download de bestanden"
 msgid ""
 "Your {blogname} order from {order_date} is complete - download your files"
 msgstr ""
+"Uw  {blogname} bestelling op {order_date} is afgerond - download uw bestanden"
 
 #: classes/emails/class-wc-email-customer-completed-order.php:141
 #: classes/emails/class-wc-email-new-order.php:128
@@ -2233,7 +2246,7 @@ msgstr ""
 
 #: classes/emails/class-wc-email-customer-invoice.php:33
 msgid "Invoice for order {order_number} from {order_date}"
-msgstr ""
+msgstr "Factuur voor bestelling {order_number} op {order_date}"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-invoice.php:34
@@ -2313,7 +2326,7 @@ msgstr "Bedankt voor uw bestelling"
 
 #: classes/emails/class-wc-email-customer-processing-order.php:28
 msgid "Your {blogname} order receipt from {order_date}"
-msgstr ""
+msgstr "Uw {blogname} bestelling ontvangst van {order_date}"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-reset-password.php:35
@@ -2955,13 +2968,13 @@ msgstr "Bestelling terugbetaald"
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:672
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:690
 msgid "Order %s has been marked as refunded - PayPal reason code: %s"
-msgstr ""
+msgstr "Bestelling %s is gemarkeerd als terugbetaald. PayPal reden code: %s"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:675
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:693
 msgid "Payment for order %s refunded/reversed"
-msgstr ""
+msgstr "Betaling voor bestelling %s is teruggedraait"
 
 # @ woocommerce
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:26
