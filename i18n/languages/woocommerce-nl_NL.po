@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-01-09 09:36:51+00:00\n"
-"PO-Revision-Date: 2013-02-24 10:44+0100\n"
+"PO-Revision-Date: 2013-02-24 10:52+0100\n"
 "Last-Translator: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
 "Language-Team: Ramon van Belzen <woocommerce@ramoonus.nl>, Geert De "
 "Deckere<geertdd@gmail.com>\n"
@@ -271,7 +271,7 @@ msgstr "Verberg template"
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:645
 msgid "Are you sure you want to delete this template file?"
-msgstr ""
+msgstr "Weet u zeker dat u dit template bestand wilt verwijderen?"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-product.php:530
@@ -741,7 +741,7 @@ msgstr "Bolivia"
 
 #: classes/class-wc-countries.php:63
 msgid "Bonaire, Saint Eustatius and Saba"
-msgstr ""
+msgstr "Bonaire, Sint Eustatius en Saba"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:64
@@ -1991,12 +1991,12 @@ msgstr "Adres"
 #: classes/class-wc-countries.php:961
 msgctxt "placeholder"
 msgid "Street address"
-msgstr ""
+msgstr "Straat adres"
 
 #: classes/class-wc-countries.php:966
 msgctxt "placeholder"
 msgid "Apartment, suite, unit etc. (optional)"
-msgstr ""
+msgstr "Apartement, suite etc. (optioneel)"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:1023
@@ -2192,7 +2192,7 @@ msgstr ""
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:40
 msgid "Your order is complete - download your files"
-msgstr ""
+msgstr "Uw order is afgerond, download de bestanden"
 
 #: classes/emails/class-wc-email-customer-completed-order.php:41
 msgid ""
@@ -2213,7 +2213,7 @@ msgstr "Email Kop"
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:155
 msgid "Subject (downloadable)"
-msgstr ""
+msgstr "Onderwerp (download)"
 
 #: classes/emails/class-wc-email-customer-completed-order.php:162
 msgid "Email Heading (downloadable)"
@@ -2242,11 +2242,11 @@ msgstr "Factuur voor bestelling {order_number}"
 
 #: classes/emails/class-wc-email-customer-invoice.php:36
 msgid "Your {blogname} order from {order_date}"
-msgstr ""
+msgstr "Uw {blogname} bestelling op {order_date}"
 
 #: classes/emails/class-wc-email-customer-invoice.php:37
 msgid "Order {order_number} details"
-msgstr ""
+msgstr "Bestelling {order_number} details"
 
 #: classes/emails/class-wc-email-customer-invoice.php:158
 msgid "Email subject (paid)"
@@ -2626,7 +2626,7 @@ msgstr "Instructies die getoond worden op de \"Dank u\"-pagina."
 # @ woocommerce
 #: classes/gateways/cod/class-wc-gateway-cod.php:105
 msgid "Enable for shipping methods"
-msgstr ""
+msgstr "Activeer voor verzend methoden"
 
 #: classes/gateways/cod/class-wc-gateway-cod.php:110
 msgid ""
@@ -3576,7 +3576,7 @@ msgstr "Activeer afhalen"
 # @ woocommerce
 #: classes/shipping/local-pickup/class-wc-shipping-local-pickup.php:114
 msgid "Apply base tax rate"
-msgstr ""
+msgstr "Basis belasting tarief"
 
 #: classes/shipping/local-pickup/class-wc-shipping-local-pickup.php:116
 msgid ""
@@ -3635,12 +3635,12 @@ msgstr "Login"
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:116
 msgid "Enter a username or e-mail address."
-msgstr ""
+msgstr "Voer een username of email adres in."
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:123
 msgid "There is no user registered with that email address."
-msgstr ""
+msgstr "Er bestaat geen geregistreerde gebruiker met dit email adres."
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:138
@@ -3654,14 +3654,14 @@ msgstr ""
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:180
 msgid "Check your e-mail for the confirmation link."
-msgstr ""
+msgstr "Controleer uw e-mail voor de bevestigingslink."
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:200
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:205
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:212
 msgid "Invalid key"
-msgstr ""
+msgstr "Ongeldige sleutel"
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-order-tracking.php:53
@@ -3739,7 +3739,7 @@ msgstr ""
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-view-order.php:57
 msgid "Order status: <mark class=\"order-status\">%s</mark>"
-msgstr ""
+msgstr "Bestelling status: <mark class=\"order-status\">%s</mark>"
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-view-order.php:63
@@ -6817,7 +6817,7 @@ msgstr "Winkelmanager"
 
 #: woocommerce-core-functions.php:2258
 msgid "Unpaid order cancelled - time limit reached."
-msgstr ""
+msgstr "Onbetaalde bestelling gecancelled op tijd."
 
 # @ woocommerce
 #: woocommerce-core-functions.php:2310 woocommerce-functions.php:708
