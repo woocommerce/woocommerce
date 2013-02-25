@@ -12,6 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 global $woocommerce;
 ?>
 
+<?php do_action( 'woocommerce_before_cart' ); ?>
+
 <?php $woocommerce->show_messages(); ?>
 
 <form action="<?php echo esc_url( $woocommerce->cart->get_cart_url() ); ?>" method="post">
@@ -149,3 +151,5 @@ global $woocommerce;
 	<?php woocommerce_shipping_calculator(); ?>
 
 </div>
+
+<?php do_action( 'woocommerce_after_cart' ); ?>
