@@ -1119,8 +1119,9 @@ class Woocommerce {
 		global $post;
 
 		$suffix 				= defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-		$lightbox_en 			= get_option('woocommerce_enable_lightbox') == 'yes' ? true : false;
+		$lightbox_en 			= get_option( 'woocommerce_enable_lightbox' ) == 'yes' ? true : false;
 		$chosen_en 				= get_option( 'woocommerce_enable_chosen' ) == 'yes' ? true : false;
+		$ajax_cart_en			= get_option( 'woocommerce_enable_ajax_add_to_cart' ) == 'yes' ? true : false;
 		$frontend_script_path 	= $this->plugin_url() . '/assets/js/frontend/';
 
 		// Register any scipts for later use, or used as dependencies
@@ -1133,17 +1134,20 @@ class Woocommerce {
 		wp_register_script( 'jquery-cookie', $this->plugin_url() . '/assets/js/jquery-cookie/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '1.3.1', true );
 
 		// Queue frontend scripts conditionally
-		if ( get_option( 'woocommerce_enable_ajax_add_to_cart' ) == 'yes' )
+		if ( $ajax_cart_en )
 			wp_enqueue_script( 'wc-add-to-cart', $frontend_script_path . 'add-to-cart' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 
 		if ( is_cart() )
 			wp_enqueue_script( 'wc-cart', $frontend_script_path . 'cart' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 
-		if ( is_checkout() )
-			wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce' ), $this->version, true );
+		if ( is_checkout() ) {
+			if ( $chosen_en ) {
+				wp_enqueue_script( 'wc-chosen', $frontend_script_path . 'chosen-frontend' . $suffix . '.js', array( 'chosen' ), $this->version, true );
+				wp_enqueue_style( 'woocommerce_chosen_styles', $this->plugin_url() . '/assets/css/chosen.css' );
+			}
 
-		if ( is_product() )
-			wp_enqueue_script( 'wc-single-product' );
+			wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce' ), $this->version, true );
+		}
 
 		if ( $lightbox_en && ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) ) {
 			wp_enqueue_script( 'prettyPhoto', $this->plugin_url() . '/assets/js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js', array( 'jquery' ), $this->version, true );
@@ -1151,10 +1155,8 @@ class Woocommerce {
 			wp_enqueue_style( 'woocommerce_prettyPhoto_css', $this->plugin_url() . '/assets/css/prettyPhoto.css' );
 		}
 
-		if ( $chosen_en && is_checkout() ) {
-			wp_enqueue_script( 'wc-chosen', $frontend_script_path . 'chosen-frontend' . $suffix . '.js', array( 'chosen' ), $this->version, true );
-			wp_enqueue_style( 'woocommerce_chosen_styles', $this->plugin_url() . '/assets/css/chosen.css' );
-		}
+		if ( is_product() )
+			wp_enqueue_script( 'wc-single-product' );
 
 		// Global frontend scripts
 		wp_enqueue_script( 'woocommerce', $frontend_script_path . 'woocommerce' . $suffix . '.js', array( 'jquery', 'jquery-cookie', 'jquery-blockui' ), $this->version, true );
