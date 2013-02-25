@@ -86,6 +86,9 @@ function woocommerce_sidebar_login_ajax_process() {
 
 	// Login
 	$user = wp_signon( $creds, $secure_cookie );
+	
+	// Filter the redirect URL.
+	$redirect_to = apply_filters('woocommerce_login_widget_redirect', $redirect_to, isset( $_REQUEST['redirect_to'] ) ? $_REQUEST['redirect_to'] : '', $user);
 
 	// Redirect filter
 	if ( $secure_cookie && strstr( $redirect_to, 'wp-admin' ) ) $redirect_to = str_replace( 'http:', 'https:', $redirect_to );
