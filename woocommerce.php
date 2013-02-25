@@ -1182,7 +1182,8 @@ class Woocommerce {
 			'update_shipping_method_nonce'     => wp_create_nonce( "update-shipping-method" ),
 			'add_to_cart_nonce'                => wp_create_nonce( "add-to-cart" ),
 			'cart_url'                         => get_permalink( woocommerce_get_page_id( 'cart' ) ),
-			'cart_redirect_after_add'          => get_option( 'woocommerce_cart_redirect_after_add' )
+			'cart_redirect_after_add'          => get_option( 'woocommerce_cart_redirect_after_add' ),
+			'use_theme_fragments'			   => apply_filters( 'woocommerce_use_theme_fragments', true )
 		);
 
 		if ( is_checkout() || is_cart() )
