@@ -10,14 +10,16 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $woocommerce;
+
+$woocommerce->show_messages();
 ?>
 
 <?php do_action( 'woocommerce_before_cart' ); ?>
 
-<?php $woocommerce->show_messages(); ?>
-
 <form action="<?php echo esc_url( $woocommerce->cart->get_cart_url() ); ?>" method="post">
+
 <?php do_action( 'woocommerce_before_cart_table' ); ?>
+
 <table class="shop_table cart" cellspacing="0">
 	<thead>
 		<tr>
@@ -140,8 +142,11 @@ global $woocommerce;
 		<?php do_action( 'woocommerce_after_cart_contents' ); ?>
 	</tbody>
 </table>
+
 <?php do_action( 'woocommerce_after_cart_table' ); ?>
+
 </form>
+
 <div class="cart-collaterals">
 
 	<?php do_action('woocommerce_cart_collaterals'); ?>
