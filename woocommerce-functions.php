@@ -1551,7 +1551,7 @@ function woocommerce_save_password() {
 	$_POST = array_map( 'woocommerce_clean', $_POST );
 
 	$pass1           = ! empty( $_POST[ 'password_1' ] ) ? $_POST[ 'password_1' ] : '';
-	$pass2           = ! empty( $_POST[ 'password_1' ] ) ? $_POST[ 'password_1' ] : '';
+	$pass2           = ! empty( $_POST[ 'password_2' ] ) ? $_POST[ 'password_2' ] : '';
 	$user->user_pass = $pass1;
 
 	if ( empty( $pass1 ) || empty( $pass2 ) )
