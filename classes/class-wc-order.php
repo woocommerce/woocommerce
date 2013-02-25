@@ -433,7 +433,8 @@ class WC_Order {
 				$items[ $item->order_item_id ][ $key ] = $value[0];
 			}
 		}
-		return $items;
+
+		return apply_filters( 'woocommerce_order_get_items', $items, $this );
 	}
 
 	/**
