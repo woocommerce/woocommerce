@@ -924,7 +924,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 				}
 			}
 
-			do_action( 'woocommerce_after_resend_order_emails', $order, $resend_emails );
+			do_action( 'woocommerce_after_resend_order_email', $order, $email_to_send );
 
 		} else {
 
