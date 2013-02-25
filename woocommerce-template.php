@@ -944,8 +944,9 @@ if ( ! function_exists( 'woocommerce_login_form' ) ) {
 	function woocommerce_login_form( $args = array() ) {
 
 		$defaults = array(
-			'message' => '',
-			'redirect' => ''
+			'message'  => '',
+			'redirect' => '',
+			'hidden'   => false
 		);
 
 		$args = wp_parse_args( $args, $defaults  );
