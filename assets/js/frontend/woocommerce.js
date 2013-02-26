@@ -1,5 +1,7 @@
 jQuery(document).ready(function($) {
 
+	if ( woocommerce_params.use_theme_fragments ) {
+	
 	/** Cart Handling */
 	$supports_html5_storage = ( 'sessionStorage' in window && window['sessionStorage'] !== null );
 
@@ -50,6 +52,8 @@ jQuery(document).ready(function($) {
 
 	} else {
 		$.ajax( $fragment_refresh );
+	}
+	
 	}
 
 
