@@ -920,8 +920,16 @@ jQuery( function($){
 		var is_downloadable = $('input#_downloadable:checked').size();
 
 		// Hide/Show all with rules
-		$('.hide_if_simple, .hide_if_grouped, .hide_if_variable, .hide_if_external, .hide_if_downloadable, .hide_if_virtual').show();
-		$('.show_if_simple, .show_if_grouped, .show_if_variable, .show_if_external, .show_if_downloadable, .show_if_virtual').hide();
+		var hide_classes = '.hide_if_downloadable, .hide_if_virtual';
+		var show_classes = '.show_if_downloadable, .show_if_virtual';
+
+		$.each( woocommerce_writepanel_params.product_types, function( index, value ) {
+			hide_classes = hide_classes + ', .hide_if_' + value;
+			show_classes = show_classes + ', .show_if_' + value;
+		} );
+
+		$( hide_classes ).show();
+		$( show_classes ).hide();
 
 		// Shows rules
 		if ( is_downloadable ) {

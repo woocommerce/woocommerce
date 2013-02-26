@@ -1977,7 +1977,7 @@ function woocommerce_stock_overview() {
 		'tax_query' => array(
 			array(
 				'taxonomy' 	=> 'product_type',
-				'field' 	=> 'slug',
+				'field' 	=> 'name',
 				'terms' 	=> array('simple'),
 				'operator' 	=> 'IN'
 			)
@@ -2031,7 +2031,7 @@ function woocommerce_stock_overview() {
 		'tax_query' => array(
 			array(
 				'taxonomy' 	=> 'product_type',
-				'field' 	=> 'slug',
+				'field' 	=> 'name',
 				'terms' 	=> array('variable'),
 				'operator' 	=> 'IN'
 			)
