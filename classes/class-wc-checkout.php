@@ -628,7 +628,7 @@ class WC_Checkout {
 		                	'role'       => 'customer'
 		                );
 
-		                $this->customer_id = wp_insert_user( apply_filters( 'woocommerce_new_customer_data', $new_customer_data ) );
+		                $this->customer_id = wp_insert_user( apply_filters( 'woocommerce_new_customer_data', $new_customer_data, $this->posted ) );
 
 		                if ( is_wp_error( $this->customer_id ) ) {
 		                	throw new MyException( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
