@@ -1,58 +1,5 @@
 jQuery(document).ready(function($) {
 
-	/** Cart Handling */
-	$supports_html5_storage = ( 'sessionStorage' in window && window['sessionStorage'] !== null );
-
-	$fragment_refresh = {
-		url: woocommerce_params.ajax_url,
-		type: 'POST',
-		data: { action: 'woocommerce_get_refreshed_fragments' },
-		success: function( data ) {
-			if ( data && data.fragments ) {
-
-				$.each( data.fragments, function( key, value ) {
-					$(key).replaceWith(value);
-				});
-
-				if ( $supports_html5_storage ) {
-					sessionStorage.setItem( "wc_fragments", JSON.stringify( data.fragments ) );
-					sessionStorage.setItem( "wc_cart_hash", data.cart_hash );
-				}
-
-			}
-		}
-	};
-
-	if ( $supports_html5_storage ) {
-
-		$('body').bind( 'added_to_cart', function( event, fragments, cart_hash ) {
-			sessionStorage.setItem( "wc_fragments", JSON.stringify( fragments ) );
-			sessionStorage.setItem( "wc_cart_hash", cart_hash );
-		});
-
-		try {
-			var wc_fragments = $.parseJSON( sessionStorage.getItem( "wc_fragments" ) );
-			var cart_hash    = sessionStorage.getItem( "wc_cart_hash" );
-
-			if ( wc_fragments && wc_fragments['div.widget_shopping_cart_content'] && cart_hash == $.cookie( "woocommerce_cart_hash" ) ) {
-
-				$.each( wc_fragments, function( key, value ) {
-					$(key).replaceWith(value);
-				});
-
-			} else {
-				throw "No fragment";
-			}
-
-		} catch(err) {
-			$.ajax( $fragment_refresh );
-		}
-
-	} else {
-		$.ajax( $fragment_refresh );
-	}
-
-
 	// Orderby
 	$('select.orderby').change(function(){
 		$(this).closest('form').submit();
@@ -129,45 +76,38 @@ jQuery(document).ready(function($) {
 		if (states[country]) {
 			if (states[country].length == 0) {
 
-				// Empty array means state field is not used
-				//$parent.fadeOut(200, function() {
-					$statebox.parent().hide().find('.chzn-container').remove();
-					$statebox.replaceWith('<input type="hidden" class="hidden" name="' + input_name + '" id="' + input_id + '" value="" placeholder="' + placeholder + '" />');
+				$statebox.parent().hide().find('.chzn-container').remove();
+				$statebox.replaceWith('<input type="hidden" class="hidden" name="' + input_name + '" id="' + input_id + '" value="" placeholder="' + placeholder + '" />');
 
-					$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
-				//});
+				$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
 
 			} else {
 
-				//$parent.fadeOut(200, function() {
-					var options = '';
-					var state = states[country];
-					for(var index in state) {
-						options = options + '<option value="' + index + '">' + state[index] + '</option>';
-					}
-					$statebox.parent().show();
-					if ($statebox.is('input')) {
-						// Change for select
-						$statebox.replaceWith('<select name="' + input_name + '" id="' + input_id + '" class="state_select" placeholder="' + placeholder + '"></select>');
-						$statebox = $(this).closest('div').find('#billing_state, #shipping_state, #calc_shipping_state');
-					}
-					$statebox.html( '<option value="">' + woocommerce_params.i18n_select_state_text + '</option>' + options);
+				var options = '';
+				var state = states[country];
+				for(var index in state) {
+					options = options + '<option value="' + index + '">' + state[index] + '</option>';
+				}
+				$statebox.parent().show();
+				if ($statebox.is('input')) {
+					// Change for select
+					$statebox.replaceWith('<select name="' + input_name + '" id="' + input_id + '" class="state_select" placeholder="' + placeholder + '"></select>');
+					$statebox = $(this).closest('div').find('#billing_state, #shipping_state, #calc_shipping_state');
+				}
+				$statebox.html( '<option value="">' + woocommerce_params.i18n_select_state_text + '</option>' + options);
 
-					$statebox.val(value);
+				$statebox.val(value);
 
-					$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
-				//});
+				$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
 
 			}
 		} else {
 			if ($statebox.is('select')) {
 
-				//$parent.fadeOut(200, function() {
-					$parent.show().find('.chzn-container').remove();
-					$statebox.replaceWith('<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />');
+				$parent.show().find('.chzn-container').remove();
+				$statebox.replaceWith('<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />');
 
-					$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
-				//});
+				$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
 
 			} else if ($statebox.is('.hidden')) {
 
@@ -175,14 +115,11 @@ jQuery(document).ready(function($) {
 				$statebox.replaceWith('<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />');
 
 				$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
-				//$parent.delay(200).fadeIn(500);
 
 			}
 		}
 
-		$('body')
-		//.delay(200)
-		.trigger('country_to_state_changing', [country, $(this).closest('div')]);
+		$('body').trigger('country_to_state_changing', [country, $(this).closest('div')]);
 
 	});
 
