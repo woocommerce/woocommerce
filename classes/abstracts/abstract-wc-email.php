@@ -268,7 +268,10 @@ abstract class WC_Email extends WC_Settings_API {
 	 * @return bool
 	 */
 	function is_enabled() {
-		if ( $this->enabled == "yes" )
+		
+		$enabled = apply_filters( 'woocommerce_email_enabled_' . $this->id, $this->enabled, $this->object );
+
+		if ( $enabled == "yes" )
 			return true;
 	}
 
