@@ -1296,8 +1296,8 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		$custom_attributes = array();
 
 		if ( ! empty( $args['custom_attributes'] ) && is_array( $args['custom_attributes'] ) )
-			foreach ( $args['custom_attributes'] as $attribute => $value )
-				$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
+			foreach ( $args['custom_attributes'] as $attribute => $attribute_value )
+				$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $attribute_value ) . '"';
 
 		if ( ! empty( $args['validate'] ) )
 			foreach( $args['validate'] as $validate )
