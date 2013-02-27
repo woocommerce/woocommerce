@@ -278,12 +278,13 @@ function woocommerce_add_to_cart_action( $url = false ) {
 
 	global $woocommerce;
 
-	$product_id			= apply_filters('woocommerce_add_to_cart_product_id', absint( $_REQUEST['add-to-cart'] ) );
-	$was_added_to_cart 	= false;
-	$adding_to_cart 	= get_product( $product_id );
+	$product_id          = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_REQUEST['add-to-cart'] ) );
+	$was_added_to_cart   = false;
+	$adding_to_cart      = get_product( $product_id );
+	$add_to_cart_handler = apply_filters( 'woocommerce_add_to_cart_handler', $adding_to_cart->product_type, $adding_to_cart );
 
     // Variable product handling
-    if ( $adding_to_cart->is_type( 'variable' ) ) {
+    if ( 'variable' === $add_to_cart_handler ) {
 
     	$variation_id       = empty( $_REQUEST['variation_id'] ) ? '' : absint( $_REQUEST['variation_id'] );
     	$quantity           = empty( $_REQUEST['quantity'] ) ? 1 : apply_filters( 'woocommerce_stock_amount', $_REQUEST['quantity'] );
@@ -345,7 +346,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
        }
 
     // Grouped Products
-    } elseif ( $adding_to_cart->is_type( 'grouped' ) ) {
+    } elseif ( 'grouped' === $add_to_cart_handler ) {
 
 		if ( ! empty( $_REQUEST['quantity'] ) && is_array( $_REQUEST['quantity'] ) ) {
 
