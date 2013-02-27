@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0-RC2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-02-23 16:32:45+0000\n"
+"PO-Revision-Date: 2013-02-26 19:04:05+0000\n"
 "Last-Translator: kukac7 <kukac7@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -68,7 +68,7 @@ msgstr "Kép"
 #: admin/woocommerce-admin-init.php:424
 #: classes/widgets/class-wc-widget-product-categories.php:191
 #: templates/single-product-reviews.php:99
-#: woocommerce-ajax.php:1231
+#: woocommerce-ajax.php:1234
 #@ woocommerce
 msgid "Name"
 msgstr "Név"
@@ -95,7 +95,7 @@ msgstr "Készlet"
 #: admin/post-types/product.php:568
 #: admin/post-types/product.php:787
 #: admin/woocommerce-admin-functions.php:196
-#: templates/cart/cart.php:25
+#: templates/cart/cart.php:29
 #: templates/emails/admin-new-order.php:24
 #: templates/emails/customer-completed-order.php:25
 #: templates/emails/customer-invoice.php:29
@@ -258,7 +258,7 @@ msgstr "Változó"
 #: classes/abstracts/abstract-wc-product.php:569
 #@ woocommerce
 msgid "In stock"
-msgstr "Raktáron"
+msgstr "Készleten"
 
 #: admin/post-types/product.php:264
 #: admin/post-types/product.php:642
@@ -270,7 +270,7 @@ msgstr "Raktáron"
 #: classes/abstracts/abstract-wc-product.php:586
 #@ woocommerce
 msgid "Out of stock"
-msgstr "Nincs készleten"
+msgstr "Elfogyott"
 
 #: admin/post-types/product.php:373
 #@ woocommerce
@@ -304,13 +304,13 @@ msgstr "Összes altípus"
 #, php-format
 #@ woocommerce
 msgid "[%s with SKU of %s]"
-msgstr "[%s with SKU of %s]"
+msgstr "[%s CSZ-mal %s]"
 
 #: admin/post-types/product.php:526
 #, php-format
 #@ woocommerce
 msgid "[%s with ID of %d]"
-msgstr "[%s with ID of %d]"
+msgstr "[%s azonosítóval %d]"
 
 #: admin/post-types/product.php:552
 #: admin/post-types/product.php:783
@@ -402,7 +402,7 @@ msgstr "Katalógus"
 #: admin/post-types/product.php:620
 #: admin/post-types/product.php:893
 #: admin/post-types/writepanels/writepanel-product_data.php:1030
-#: woocommerce-template.php:1490
+#: woocommerce-template.php:1491
 #: woocommerce.php:913
 #@ woocommerce
 msgid "Search"
@@ -500,7 +500,7 @@ msgstr "Kupon összeg"
 #: admin/post-types/shop_coupon.php:29
 #@ woocommerce
 msgid "Product IDs"
-msgstr "Termék ID"
+msgstr "Termék azon."
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:152
 #@ woocommerce
@@ -576,7 +576,7 @@ msgstr "Műveletek"
 #: admin/post-types/writepanels/writepanel-order_data.php:93
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:113
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:168
-#: woocommerce-ajax.php:1712
+#: woocommerce-ajax.php:1715
 #@ woocommerce
 msgid "Guest"
 msgstr "Vendég"
@@ -656,7 +656,7 @@ msgstr "Feldolgozás"
 #: admin/post-types/shop_order.php:165
 #@ woocommerce
 msgid "Complete"
-msgstr "Befejez"
+msgstr "Teljesít"
 
 #: admin/post-types/shop_coupon.php:149
 #: admin/post-types/shop_order.php:282
@@ -922,7 +922,7 @@ msgstr "Ország"
 #: admin/post-types/writepanels/writepanel-order_data.php:175
 #: admin/post-types/writepanels/writepanel-order_data.php:265
 #: templates/cart/shipping-calculator.php:24
-#: woocommerce-template.php:1326
+#: woocommerce-template.php:1327
 #@ woocommerce
 msgid "Select a country&hellip;"
 msgstr "Válassz országot&hellip;"
@@ -1014,12 +1014,12 @@ msgstr "Db"
 #: admin/post-types/writepanels/order-item-html.php:9
 #@ woocommerce
 msgid "Product ID:"
-msgstr "Termék ID:"
+msgstr "Termék azon.:"
 
 #: admin/post-types/writepanels/order-item-html.php:12
 #@ woocommerce
 msgid "Variation ID:"
-msgstr "Variáció ID:"
+msgstr "Variáció azon.:"
 
 #: admin/post-types/writepanels/order-item-html.php:15
 #@ woocommerce
@@ -1044,7 +1044,7 @@ msgstr "Adó osztály"
 #: admin/settings/settings-init.php:982
 #: admin/settings/settings-tax-rates.php:29
 #: admin/woocommerce-admin-settings.php:263
-#: woocommerce-ajax.php:624
+#: woocommerce-ajax.php:627
 #@ woocommerce
 msgid "Standard"
 msgstr "Szabvány"
@@ -1093,13 +1093,13 @@ msgid "Discounts"
 msgstr "Kedvezmények"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:496
-#: classes/class-wc-order.php:928
+#: classes/class-wc-order.php:929
 #@ woocommerce
 msgid "Cart Discount:"
 msgstr "Kosár kedvezmény:"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:504
-#: classes/class-wc-order.php:1005
+#: classes/class-wc-order.php:1006
 #@ woocommerce
 msgid "Order Discount:"
 msgstr "Rendelési engedm.:"
@@ -1172,7 +1172,7 @@ msgstr "Adó összesen"
 #: admin/woocommerce-admin-reports.php:2370
 #: admin/woocommerce-admin-reports.php:2539
 #: admin/woocommerce-admin-reports.php:2617
-#: templates/cart/cart.php:27
+#: templates/cart/cart.php:31
 #: templates/checkout/review-order.php:22
 #: templates/myaccount/my-orders.php:35
 #: templates/order/order-details.php:21
@@ -1181,7 +1181,7 @@ msgid "Total"
 msgstr "Összesen"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:650
-#: classes/class-wc-order.php:1010
+#: classes/class-wc-order.php:1011
 #@ woocommerce
 msgid "Order Total:"
 msgstr "Rendelés összesen:"
@@ -1191,20 +1191,20 @@ msgstr "Rendelés összesen:"
 msgid "Payment Method:"
 msgstr "Fizetési mód:"
 
-#: classes/class-wc-order.php:1460
-#: woocommerce-ajax.php:1156
-#: woocommerce-ajax.php:1157
+#: classes/class-wc-order.php:1461
+#: woocommerce-ajax.php:1159
+#: woocommerce-ajax.php:1160
 #, php-format
 #@ woocommerce
 msgid "Item #%s stock reduced from %s to %s."
-msgstr "A #%s tétel készlet volt %s, lett %s."
+msgstr "A #%s tétel csökkent; %s volt, %s lett."
 
-#: woocommerce-ajax.php:1205
-#: woocommerce-ajax.php:1206
+#: woocommerce-ajax.php:1208
+#: woocommerce-ajax.php:1209
 #, php-format
 #@ woocommerce
 msgid "Item #%s stock increased from %s to %s."
-msgstr ""
+msgstr "A #%s tétel növekedett; %s volt, %s lett."
 
 #: admin/post-types/writepanels/order-download-permission-html.php:6
 #@ woocommerce
@@ -1218,7 +1218,7 @@ msgstr "Hozzáférés visszavonása"
 #: admin/woocommerce-admin-init.php:426
 #@ woocommerce
 msgid "Click to toggle"
-msgstr "Kattints a váltásra"
+msgstr "Klikk a váltáshoz"
 
 #: admin/post-types/writepanels/order-download-permission-html.php:9
 #, php-format
@@ -1264,12 +1264,12 @@ msgstr "Hozzáférés biztosítása"
 #: admin/post-types/writepanels/writepanel-order_downloads.php:125
 #@ woocommerce
 msgid "Could not grant access - the user may already have permission for this file."
-msgstr ""
+msgstr "Nem sikerült hozzáférést biztosítani - a felhasználónak már van engedélye a fájlhoz."
 
 #: admin/post-types/writepanels/writepanel-order_downloads.php:148
 #@ woocommerce
 msgid "Are you sure you want to revoke access to this download?"
-msgstr ""
+msgstr "Biztos vagy benne, hogy visszavonod a hozzáférést a letöltéstől?"
 
 #: admin/post-types/writepanels/writepanel-order_notes.php:44
 #, php-format
@@ -1278,7 +1278,7 @@ msgid "added %s ago"
 msgstr "%s telt el"
 
 #: admin/post-types/writepanels/writepanel-order_notes.php:44
-#: woocommerce-ajax.php:1545
+#: woocommerce-ajax.php:1548
 #@ woocommerce
 msgid "Delete note"
 msgstr "Jegyzet törlése"
@@ -1296,7 +1296,7 @@ msgstr "Jegyzet hozzáadása"
 #: admin/post-types/writepanels/writepanel-order_notes.php:56
 #@ woocommerce
 msgid "Add a note for your reference, or add a customer note (the user will be notified)."
-msgstr ""
+msgstr "Megjegyzés hozzáadása a hivatkozáshoz vagy vásárlói megjegyzés hozzáadása (értesítést kap a felhasználó)."
 
 #: admin/post-types/writepanels/writepanel-order_notes.php:62
 #: classes/emails/class-wc-email-customer-note.php:29
@@ -1318,7 +1318,7 @@ msgstr "Hozzáad"
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:23
 #@ woocommerce
 msgid "Variations for variable products are defined here."
-msgstr "Változó termékek tulajdonságainak a meghatározása itt."
+msgstr "Változó termékek variációinak a meghatározása itt."
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:23
 #: woocommerce.php:986
@@ -1328,7 +1328,7 @@ msgstr "Variációk"
 
 #: admin/post-types/writepanels/variation-admin-html.php:113
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:53
-#: woocommerce-ajax.php:623
+#: woocommerce-ajax.php:626
 #@ woocommerce
 msgid "Same as parent"
 msgstr "Ugyanaz, mint a szülő"
@@ -1401,7 +1401,7 @@ msgstr "Bármilyen"
 #: admin/post-types/writepanels/variation-admin-html.php:46
 #@ woocommerce
 msgid "Enter a SKU for this variation or leave blank to use the parent product SKU."
-msgstr ""
+msgstr "Add meg a CSZ-t ehhez a variációhoz vagy hagyd üresen és a szülő termék CSZ lesz használva."
 
 #: admin/post-types/writepanels/variation-admin-html.php:57
 #@ woocommerce
@@ -1421,7 +1421,7 @@ msgstr "Akciós ár:"
 #: admin/post-types/writepanels/variation-admin-html.php:90
 #@ woocommerce
 msgid "Enter a weight for this variation or leave blank to use the parent product weight."
-msgstr ""
+msgstr "Add meg a tömeget ehhez a variációhoz vagy hagyd üresen és a szülő termék tömege lesz használva."
 
 #: admin/post-types/writepanels/variation-admin-html.php:98
 #@ woocommerce
@@ -1452,17 +1452,17 @@ msgstr "Letöltési limit:"
 #: admin/post-types/writepanels/writepanel-product_data.php:158
 #@ woocommerce
 msgid "Leave blank for unlimited re-downloads."
-msgstr ""
+msgstr "Hagyd üresen a korlátlan letöltéshez."
 
 #: admin/post-types/writepanels/variation-admin-html.php:166
 #@ woocommerce
 msgid "Enable this option if access is given to a downloadable file upon purchase of a product"
-msgstr ""
+msgstr "Engedélyezd ezt az opciót, ha hozzáférést adsz a letölthető fájlhoz a termék kifizetése után."
 
 #: admin/post-types/writepanels/variation-admin-html.php:168
 #@ woocommerce
 msgid "Enable this option if a product is not shipped or there is no shipping cost"
-msgstr ""
+msgstr "Engedélyezd ezt az opciót, ha a termék nem szállítható vagy nincs szállítási költség"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:193
 #: woocommerce.php:988
@@ -1473,7 +1473,7 @@ msgstr "Új variáció"
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:195
 #@ woocommerce
 msgid "Link all variations"
-msgstr ""
+msgstr "Minden variáció összekapcsolása"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:197
 #@ woocommerce
@@ -1488,37 +1488,37 @@ msgstr "Nem alapértelmezett"
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:293
 #@ woocommerce
 msgid "Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes (max 50 per run)."
-msgstr ""
+msgstr "Biztos vagy benne, hogy össze akarod kapcsolni az összes variációt? Ez létre fog hozni egy új variációt mindegyiknek és minden lehetséges variáció tulajdonság kombinációjának (max 50 futtatásonként)."
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:310
 #@ woocommerce
 msgid "variation added"
-msgstr ""
+msgstr "variáció hozzáadva"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:312
 #@ woocommerce
 msgid "variations added"
-msgstr ""
+msgstr "variációk hozzáadva"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:314
 #@ woocommerce
 msgid "No variations added"
-msgstr ""
+msgstr "Nincsenek variációk hozzáadva"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:337
 #@ woocommerce
 msgid "Are you sure you want to remove this variation?"
-msgstr ""
+msgstr "Biztos, hogy el akarod távolítani ezt a variációt?"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:393
 #@ woocommerce
 msgid "Are you sure you want to delete all variations? This cannot be undone."
-msgstr ""
+msgstr "Biztos, hogy törölni akarod az összes variációt? Ezt nem lehet visszavonni."
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:396
 #@ woocommerce
 msgid "Last warning, are you sure?"
-msgstr ""
+msgstr "Utolsó figyelmeztetés, biztos vagy benne?"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:433
 #@ woocommerce
@@ -1547,12 +1547,12 @@ msgstr "Termék típus"
 #: admin/post-types/writepanels/writepanel-product_data.php:53
 #@ woocommerce
 msgid "Virtual products are intangible and aren't shipped."
-msgstr ""
+msgstr "A virtuális termék nem kézzelfogható és nem szállítható."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:59
 #@ woocommerce
 msgid "Downloadable products give access to a file upon purchase."
-msgstr ""
+msgstr "A letölthető termék hozzáfárést biztosít a fájlhoz fizetés után."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:77
 #: admin/woocommerce-admin-content.php:44
@@ -1588,7 +1588,7 @@ msgstr "Haladó"
 #: admin/post-types/writepanels/writepanel-product_data.php:98
 #@ woocommerce
 msgid "Stock Keeping Unit"
-msgstr ""
+msgstr "Készlet tartás egység"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:98
 #@ woocommerce
@@ -1603,7 +1603,7 @@ msgstr "Termék URL"
 #: admin/post-types/writepanels/writepanel-product_data.php:109
 #@ woocommerce
 msgid "Enter the external URL to the product."
-msgstr ""
+msgstr "Add meg a külső URL-t a termékhez."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:112
 #@ woocommerce
@@ -1619,7 +1619,7 @@ msgstr "Termék vásárlás"
 #: admin/post-types/writepanels/writepanel-product_data.php:112
 #@ woocommerce
 msgid "This text will be shown on the button linking to the external product."
-msgstr ""
+msgstr "Ez a szöveg megjelenik a gombon, ami összekapcsolja a külső terméket."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:119
 #@ woocommerce
@@ -1694,7 +1694,7 @@ msgstr "Letöltés érvényessége"
 #: admin/post-types/writepanels/writepanel-product_data.php:164
 #@ woocommerce
 msgid "Enter the number of days before a download link expires, or leave blank."
-msgstr ""
+msgstr "Add meg a napok számát, mielőtt a letöltési link lejár vagy hagyd üresen."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:178
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:130
@@ -1736,7 +1736,7 @@ msgstr "Készlet státusz"
 #: admin/post-types/writepanels/writepanel-product_data.php:233
 #@ woocommerce
 msgid "Controls whether or not the product is listed as \"in stock\" or \"out of stock\" on the frontend."
-msgstr ""
+msgstr "Minden körülmények között listázza a \"készleten\" vagy \"elfogyott\" termékeket."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:240
 #@ woocommerce
@@ -1776,7 +1776,7 @@ msgstr "Szállítási osztály"
 #: admin/post-types/writepanels/writepanel-product_data.php:317
 #@ woocommerce
 msgid "Shipping classes are used by certain shipping methods to group similar products."
-msgstr ""
+msgstr "Szállítási osztályok által használt egyes szállítási módok a csoportosított hasonló térmékekhez."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:380
 #: admin/post-types/writepanels/writepanel-product_data.php:457
@@ -1808,27 +1808,27 @@ msgstr "Új hozzáadása"
 #: admin/post-types/writepanels/writepanel-product_data.php:409
 #@ woocommerce
 msgid "Pipe separate terms"
-msgstr ""
+msgstr "Függőleges vonallal feltételek"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:416
 #: admin/post-types/writepanels/writepanel-product_data.php:463
 #: admin/woocommerce-admin-init.php:429
 #@ woocommerce
 msgid "Visible on the product page"
-msgstr ""
+msgstr "Látható a termék oldalon"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:422
 #: admin/post-types/writepanels/writepanel-product_data.php:469
 #: admin/woocommerce-admin-init.php:430
 #@ woocommerce
 msgid "Used for variations"
-msgstr ""
+msgstr "Használt variációk"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:458
 #: admin/woocommerce-admin-init.php:428
 #@ woocommerce
 msgid "Enter some text, or some attributes by pipe (|) separating values."
-msgstr ""
+msgstr "Add meg a szöveget vagy valamilyen tulajdonságot függőleges vonallal (|) elválasztva."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:484
 #@ woocommerce
@@ -1838,22 +1838,22 @@ msgstr "Egyedi termék tulajdonság"
 #: admin/post-types/writepanels/writepanel-product_data.php:503
 #@ woocommerce
 msgid "Up-Sells"
-msgstr "Felfelé értékesítés"
+msgstr "Jobb ajánlatok"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:518
 #@ woocommerce
 msgid "Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive."
-msgstr ""
+msgstr "A jobb ajánlatok olyan termékek, amelyek ajánlva vannak az aktuálisan megtekintett terméknél, például olyan termék, ami nyereségesebb vagy jobb minőségű vagy drágább."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:520
 #@ woocommerce
 msgid "Cross-Sells"
-msgstr "Kereszt értékesítés"
+msgstr "További ajánlatok"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:535
 #@ woocommerce
 msgid "Cross-sells are products which you promote in the cart, based on the current product."
-msgstr ""
+msgstr "A további ajánlatok olyan termékek, amelyek megjelennek a kosárnál és az aktuális terméknél."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:591
 #@ woocommerce
@@ -1893,7 +1893,7 @@ msgstr "Értékelés engedélyezése"
 #: admin/post-types/writepanels/writepanel-product_data.php:695
 #@ woocommerce
 msgid "Product SKU must be unique."
-msgstr ""
+msgstr "A termék CSZ-nek egyedinek kell lennie."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:1028
 #@ woocommerce
@@ -1908,7 +1908,7 @@ msgstr "Katalógus láthatóság:"
 #: admin/post-types/writepanels/writepanel-product_data.php:1051
 #@ woocommerce
 msgid "Define the loops this product should be visible in. The product will still be accessible directly."
-msgstr ""
+msgstr "Hurok megadása, hogy a termék látható legyen. A termék továbbra is közvetlenül elérhető."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:1057
 #@ woocommerce
@@ -1998,7 +1998,7 @@ msgstr "Elsődleges"
 #: admin/settings/settings-frontend-styles.php:43
 #@ woocommerce
 msgid "Call to action buttons/price slider/layered nav UI"
-msgstr ""
+msgstr "Meghívja a gomb/ár csúszkás/rétegelt navigációs UI-t"
 
 #: admin/settings/settings-frontend-styles.php:44
 #@ woocommerce
@@ -2018,7 +2018,7 @@ msgstr "Kiemelés"
 #: admin/settings/settings-frontend-styles.php:45
 #@ woocommerce
 msgid "Price labels and Sale Flashes"
-msgstr ""
+msgstr "Ár címkék és gyorsvásárlások"
 
 #: admin/settings/settings-frontend-styles.php:46
 #@ woocommerce
@@ -2028,7 +2028,7 @@ msgstr "Tartalom"
 #: admin/settings/settings-frontend-styles.php:46
 #@ woocommerce
 msgid "Your themes page background - used for tab active states"
-msgstr ""
+msgstr "A sablonod oldal háttere - használd a fület az aktív állapotért"
 
 #: admin/settings/settings-frontend-styles.php:47
 #@ woocommerce
@@ -2038,12 +2038,12 @@ msgstr "Alszöveg"
 #: admin/settings/settings-frontend-styles.php:47
 #@ woocommerce
 msgid "Used for certain text and asides - breadcrumbs, small text etc."
-msgstr ""
+msgstr "Használd az egyes szöveges és elkülönített részekért - breadcrumb, kis szöveg, stb."
 
 #: admin/settings/settings-frontend-styles.php:51
 #@ woocommerce
 msgid "To edit colours <code>woocommerce/assets/css/woocommerce-base.less</code> and <code>woocommerce.css</code> need to be writable. See <a href=\"http://codex.wordpress.org/Changing_File_Permissions\">the Codex</a> for more information."
-msgstr ""
+msgstr "A színek szerkesztéséhez a <code>woocommerce/assets/css/woocommerce-base.less</code> és <code>woocommerce.css</code> fájloknak írhatónak kell lenniük. Lásd további információért a <a href=\"http://codex.wordpress.org/Changing_File_Permissions\">Codex</a>-ben."
 
 #: admin/settings/settings-init.php:18
 #@ woocommerce
@@ -2123,7 +2123,7 @@ msgstr "Elérhető országok"
 #: admin/settings/settings-init.php:59
 #@ woocommerce
 msgid "These are countries that you are willing to ship to."
-msgstr ""
+msgstr "Ezek az országok, ahova lehetséges a szállítás."
 
 #: admin/settings/settings-init.php:67
 #@ woocommerce
@@ -2160,12 +2160,12 @@ msgstr "Vendég fizetés (fiók nem szükséges) engedélyezése"
 #: admin/settings/settings-init.php:131
 #@ woocommerce
 msgid "Force secure checkout"
-msgstr "Erős biztonságú vásárlás"
+msgstr "Titkosított pénztár"
 
 #: admin/settings/settings-init.php:141
 #@ woocommerce
 msgid "Un-force HTTPS when leaving the checkout"
-msgstr ""
+msgstr "HTTPS titkosítás kikapcsolása pénztár elhagyásakor"
 
 #: admin/settings/settings-init.php:105
 #: admin/woocommerce-admin-content.php:61
@@ -2189,12 +2189,12 @@ msgstr "Regisztráció engedélyezése a pénztár oldalon"
 #: admin/settings/settings-init.php:159
 #@ woocommerce
 msgid "Allow registration on the \"My Account\" page"
-msgstr "Regisztráció engedélyezése a \"Profilom\" oldalon"
+msgstr "Regisztráció engedélyezése a \"Fiókom\" oldalon"
 
 #: admin/settings/settings-init.php:167
 #@ woocommerce
 msgid "Register using the email address for the username"
-msgstr ""
+msgstr "Regisztrálj az email cím használatával a felhasználónévért"
 
 #: admin/settings/settings-init.php:175
 #@ woocommerce
@@ -2204,7 +2204,7 @@ msgstr "Vásárlói fiókok"
 #: admin/settings/settings-init.php:176
 #@ woocommerce
 msgid "Prevent customers from accessing WordPress admin"
-msgstr ""
+msgstr "WordPress admin hozzáférés tiltása a vásárlóknál"
 
 #: admin/settings/settings-init.php:184
 #@ woocommerce
@@ -2265,12 +2265,12 @@ msgstr "Csak átirányítás"
 #: admin/settings/settings-init.php:265
 #@ woocommerce
 msgid "Grant access to downloadable products after payment"
-msgstr ""
+msgstr "Hozzáférés engedélyezése letölthető termékek kifizetése után"
 
 #: admin/settings/settings-init.php:285
 #@ woocommerce
 msgid "Note: The shop page has children - child pages will not work if you enable this option."
-msgstr ""
+msgstr "Megjegyzés: A bolt oldal gyermek - gyermek oldal nem fog működni, ha engedélyezed ezt az opciót."
 
 #: admin/settings/settings-init.php:290
 #@ woocommerce
@@ -2280,12 +2280,12 @@ msgstr "Oldal beállítások"
 #: admin/settings/settings-init.php:297
 #@ woocommerce
 msgid "Shop Base Page"
-msgstr "Alap shop oldal"
+msgstr "Bolt alap oldal"
 
 #: admin/settings/settings-init.php:298
 #@ woocommerce
 msgid "This sets the base page of your shop - this is where your product archive will be."
-msgstr ""
+msgstr "Ez beállítja az alap oldalt a boltodnál - ez az, ahol a termék archív lesz."
 
 #: admin/settings/settings-init.php:308
 #@ woocommerce
@@ -2295,17 +2295,17 @@ msgstr "Alap oldal cím"
 #: admin/settings/settings-init.php:309
 #@ woocommerce
 msgid "This title to show on the shop base page. Leave blank to use the page title."
-msgstr ""
+msgstr "Ez a cím jelenik meg a bolt alap oldalon. Hagyd üresen, ha az oldal címét akarod használni."
 
 #: admin/settings/settings-init.php:319
 #@ woocommerce
 msgid "If you define a \"Terms\" page the customer will be asked if they accept them when checking out."
-msgstr ""
+msgstr "Ha beállítasz \"Feltételek\" oldalt, akkor a vásárlóidnak el kell fogadniuk azt fizetés előtt."
 
 #: admin/settings/settings-init.php:330
 #@ woocommerce
 msgid "Shop Pages"
-msgstr "Shop oldalak"
+msgstr "Bolt oldalak"
 
 #: admin/settings/settings-init.php:330
 #@ woocommerce
@@ -2355,7 +2355,7 @@ msgstr "Az oldal tartalma: [woocommerce_thankyou] Szülő: \"Pénztár\""
 #: admin/settings/settings-init.php:377
 #@ woocommerce
 msgid "My Account Page"
-msgstr "Profilom oldal"
+msgstr "Fiókom oldal"
 
 #: admin/settings/settings-init.php:378
 #@ woocommerce
@@ -2370,17 +2370,17 @@ msgstr "Cím szerkesztés oldal"
 #: admin/settings/settings-init.php:389
 #@ woocommerce
 msgid "Page contents: [woocommerce_edit_address] Parent: \"My Account\""
-msgstr "Az oldal tartalma: [woocommerce_edit_address] Szülő: \"Profilom\""
+msgstr "Az oldal tartalma: [woocommerce_edit_address] Szülő: \"Fiókom\""
 
 #: admin/settings/settings-init.php:399
 #@ woocommerce
 msgid "View Order Page"
-msgstr "Rendelési oldal megtekintése"
+msgstr "Rendeléseim megtekintése"
 
 #: admin/settings/settings-init.php:400
 #@ woocommerce
 msgid "Page contents: [woocommerce_view_order] Parent: \"My Account\""
-msgstr "Az oldal tartalma: [woocommerce_view_order] Szülő: \"Profilom\""
+msgstr "Az oldal tartalma: [woocommerce_view_order] Szülő: \"Fiókom\""
 
 #: admin/settings/settings-init.php:410
 #@ woocommerce
@@ -2390,7 +2390,7 @@ msgstr "Jelszó módosítás oldal"
 #: admin/settings/settings-init.php:411
 #@ woocommerce
 msgid "Page contents: [woocommerce_change_password] Parent: \"My Account\""
-msgstr "Az oldal tartalma: [woocommerce_change_password] Szülő: \"Profilom\""
+msgstr "Az oldal tartalma: [woocommerce_change_password] Szülő: \"Fiókom\""
 
 #: admin/settings/settings-init.php:449
 #@ woocommerce
@@ -2400,7 +2400,7 @@ msgstr "Katalógus beállítások"
 #: admin/settings/settings-init.php:453
 #@ woocommerce
 msgid "This controls the default sort order of the catalog."
-msgstr ""
+msgstr "Ez vezérli az alapértelmezett rendezési sorrendet a katalógusban."
 
 #: templates/loop/orderby.php:21
 #@ woocommerce
@@ -2421,7 +2421,7 @@ msgstr "Alkategóriák mutatása"
 #: admin/settings/settings-init.php:518
 #@ woocommerce
 msgid "The following options affect the fields available on the edit product page."
-msgstr ""
+msgstr "A következő opciók befolyásolják a mezőket, amik elérhetőek a termék szerkesztő oldalon."
 
 #: admin/settings/settings-init.php:554
 #@ woocommerce
@@ -2431,7 +2431,7 @@ msgstr "Súly egység"
 #: admin/settings/settings-init.php:555
 #@ woocommerce
 msgid "This controls what unit you will define weights in."
-msgstr ""
+msgstr "Ez szabályozza milyen egységet fog meghatározni súlyban."
 
 #: admin/settings/settings-init.php:561
 #@ woocommerce
@@ -2461,7 +2461,7 @@ msgstr "Méret egység"
 #: admin/settings/settings-init.php:571
 #@ woocommerce
 msgid "This controls what unit you will define lengths in."
-msgstr ""
+msgstr "Ez szabályozza milyen egységet fog meghatározni hosszúságban."
 
 #: admin/settings/settings-init.php:578
 #@ woocommerce
@@ -2496,7 +2496,7 @@ msgstr "Értékelés kötelező, ha véleményt akarsz hagyni"
 #: admin/settings/settings-init.php:606
 #@ woocommerce
 msgid "Show \"verified owner\" label for customer reviews"
-msgstr ""
+msgstr "Mutasd a \"ellenőrzött tulajdonos\" címkéjű vásárlói véleményeket"
 
 #: admin/settings/settings-init.php:616
 #@ woocommerce
@@ -2506,7 +2506,7 @@ msgstr "Árazás beállitása"
 #: admin/settings/settings-init.php:616
 #@ woocommerce
 msgid "The following options affect how prices are displayed on the frontend."
-msgstr ""
+msgstr "A következő opciók befolyásolják az árak megjelenítését az oldalon."
 
 #: admin/settings/settings-init.php:619
 #@ woocommerce
@@ -2516,7 +2516,7 @@ msgstr "Pénznem pozíció"
 #: admin/settings/settings-init.php:620
 #@ woocommerce
 msgid "This controls the position of the currency symbol."
-msgstr ""
+msgstr "Ez szabályozza a pénznem szimbólum helyét."
 
 #: admin/settings/settings-init.php:626
 #@ woocommerce
@@ -2551,7 +2551,7 @@ msgstr "Ez beállítja a mértékegység elválasztót az ár megjelenítésnél
 #: admin/settings/settings-init.php:656
 #@ woocommerce
 msgid "This sets the number of decimal points shown in displayed prices."
-msgstr ""
+msgstr "Ez beállítja a tizedes pont helyét az áraknál."
 
 #: admin/settings/settings-init.php:670
 #@ woocommerce
@@ -2577,7 +2577,7 @@ msgstr "Katalógus képek"
 #: admin/settings/settings-init.php:682
 #@ woocommerce
 msgid "This size is usually used in product listings"
-msgstr ""
+msgstr "Ez a méret általában a termék listázásnál."
 
 #: admin/settings/settings-init.php:695
 #@ woocommerce
@@ -2587,7 +2587,7 @@ msgstr "Egyedülálló termék kép"
 #: admin/settings/settings-init.php:696
 #@ woocommerce
 msgid "This is the size used by the main image on the product page."
-msgstr ""
+msgstr "Ez az a méret, ami általában használva van a fő képnél a termék oldalon."
 
 #: admin/settings/settings-init.php:709
 #@ woocommerce
@@ -2597,7 +2597,7 @@ msgstr "Termék bélyegképek"
 #: admin/settings/settings-init.php:710
 #@ woocommerce
 msgid "This size is usually used for the gallery of images on the product page."
-msgstr ""
+msgstr "Ez a méret van használva általában a képgalériánál a termék oldalon."
 
 #: admin/settings/settings-init.php:729
 #@ woocommerce
@@ -2632,7 +2632,7 @@ msgstr "Nincs készleten tétel elrejtése a katalógusból"
 #: admin/settings/settings-init.php:813
 #@ woocommerce
 msgid "This controls how stock is displayed on the frontend."
-msgstr "Ez szabályozza, hogy jelenjen meg a készlet kijelzése az oldalon."
+msgstr "Ez szabályozza, hogy jelenjen meg a készlet az oldalon."
 
 #: admin/settings/settings-init.php:819
 #@ woocommerce
@@ -2674,7 +2674,7 @@ msgstr "Szállítási összeg elrejtése, míg a cím nincs megadva."
 #: admin/settings/settings-init.php:862
 #@ woocommerce
 msgid "This controls how multiple shipping methods are displayed on the frontend."
-msgstr ""
+msgstr "Ez szabályozza, hogy jelenjenek meg a szállítási módszerek az oldalon."
 
 #: admin/settings/settings-init.php:868
 #@ woocommerce
@@ -2711,7 +2711,7 @@ msgstr "Szállítási cím kérese akkor is, ha az nem szükséges"
 #: admin/woocommerce-admin-settings.php:364
 #@ woocommerce
 msgid "Payment Gateways"
-msgstr "Fizetési megoldások"
+msgstr "Fizetési módok"
 
 #: admin/settings/settings-init.php:910
 #@ woocommerce
@@ -2743,7 +2743,7 @@ msgstr "Email küldő beállítások"
 #: admin/settings/settings-init.php:1022
 #@ woocommerce
 msgid "The following options affect the sender (email address and name) used in WooCommerce emails."
-msgstr ""
+msgstr "A következő opciók befolyásolják a feladó (e-mail cím és név) által használt WooCommerce emaileket."
 
 #: admin/settings/settings-init.php:1047
 #, php-format
@@ -2795,12 +2795,12 @@ msgstr "Alapértelmezett"
 #: admin/settings/settings-payment-gateways.php:28
 #@ woocommerce
 msgid "Gateway"
-msgstr "Megoldás"
+msgstr "Mód"
 
 #: admin/settings/settings-payment-gateways.php:45
 #@ woocommerce
 msgid "Gateway ID"
-msgstr "Megoldás ID"
+msgstr "Mód azon."
 
 #: admin/settings/settings-shipping-methods.php:23
 #@ woocommerce
@@ -2820,7 +2820,7 @@ msgstr "Szállítási mód"
 #: admin/settings/settings-shipping-methods.php:46
 #@ woocommerce
 msgid "Method ID"
-msgstr "Mód ID"
+msgstr "Mód azon."
 
 #: admin/woocommerce-admin-settings.php:263
 #@ woocommerce
@@ -2830,7 +2830,7 @@ msgstr "Adókulcsok"
 #: admin/settings/settings-tax-rates.php:44
 #@ woocommerce
 msgid "Enter a tax rate (percentage) to 4 decimal places."
-msgstr ""
+msgstr "Add meg az adókulcsot (százalékban) 4 tizedesjegy pontossággal."
 
 #: admin/settings/settings-tax-rates.php:50
 #: admin/settings/settings-tax-rates.php:217
@@ -2841,12 +2841,12 @@ msgstr "Összetett"
 #: admin/settings/settings-tax-rates.php:50
 #@ woocommerce
 msgid "Choose whether or not this is a compound rate. Compound tax rates are applied on top of other tax rates."
-msgstr ""
+msgstr "Válaszd ki, hogy ez egy összetett arány vagy sem. Az összetett adókulcs felülírja a többi adó mértéket."
 
 #: admin/settings/settings-tax-rates.php:52
 #@ woocommerce
 msgid "Choose whether or not this tax rate also gets applied to shipping."
-msgstr ""
+msgstr "Válaszd ki, hogy kap vagy sem adó mértéket a szállítás."
 
 #: woocommerce.php:914
 #@ woocommerce
@@ -2856,7 +2856,7 @@ msgstr "Összes"
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:542
 #@ woocommerce
 msgid "Delete the selected rates?"
-msgstr ""
+msgstr "Törlöd a kiválasztott arányt?"
 
 #: admin/woocommerce-admin-attributes.php:226
 #@ woocommerce
@@ -2867,7 +2867,7 @@ msgstr "Tulajdonság szerkesztése"
 #: admin/woocommerce-admin-attributes.php:375
 #@ woocommerce
 msgid "Name for the attribute (shown on the front-end)."
-msgstr ""
+msgstr "A tulajdonság neve (megjelenik az oldalon)"
 
 #: admin/woocommerce-admin-attributes.php:241
 #: admin/woocommerce-admin-attributes.php:307
@@ -2880,7 +2880,7 @@ msgstr "Keresőbarát név"
 #: admin/woocommerce-admin-attributes.php:381
 #@ woocommerce
 msgid "Unique slug/reference for the attribute; must be shorter than 28 characters."
-msgstr ""
+msgstr "Egyedi keresőbarát név/referencia a tulajdonságnak; rövidebbnek kell lennie 28 karakternél."
 
 #: admin/woocommerce-admin-attributes.php:254
 #: admin/woocommerce-admin-attributes.php:387
@@ -2921,7 +2921,7 @@ msgstr "Töröl"
 #: admin/woocommerce-admin-attributes.php:355
 #@ woocommerce
 msgid "Configure&nbsp;terms"
-msgstr "Feltételek&nbsp;beállítás"
+msgstr "Feltételek&nbsp;beállítása"
 
 #: admin/woocommerce-admin-attributes.php:359
 #@ woocommerce
@@ -2946,7 +2946,7 @@ msgstr "Új tulajdonság"
 #: admin/woocommerce-admin-attributes.php:415
 #@ woocommerce
 msgid "Are you sure you want to delete this attribute?"
-msgstr ""
+msgstr "Biztos hogy törlöd ezt a tulajdonságot?"
 
 #: admin/woocommerce-admin-content.php:26
 #: admin/woocommerce-admin-reports.php:30
@@ -2966,7 +2966,7 @@ msgstr "Köszönjük, hogy a WooCommerce-et használod. :) Ha segítségre van s
 #: admin/woocommerce-admin-content.php:31
 #@ woocommerce
 msgid "If you are having problems, or to assist us with support, please check the status page to identify any problems with your configuration:"
-msgstr ""
+msgstr "Ha problémád van vagy hogy segíts nekünk a támogatással, kérlek ellenőrizd a státusz oldat, hogy azonosítani lehessen a problémát a beállításaiddal:"
 
 #: admin/woocommerce-admin-content.php:33
 #: admin/woocommerce-admin-init.php:82
@@ -2996,12 +2996,12 @@ msgstr "Beállítások"
 #: admin/woocommerce-admin-content.php:43
 #@ woocommerce
 msgid "Here you can set up your store and customise it to fit your needs. The sections available from the settings page include:"
-msgstr ""
+msgstr "Itt tudod beállítani és személyreszabni a boltodat, ahogy szeretnéd. Az elérhető szakaszok a beállítások oldalon a következők:"
 
 #: admin/woocommerce-admin-content.php:44
 #@ woocommerce
 msgid "General settings such as your shop base, currency, and script/styling options which affect features used in your store."
-msgstr ""
+msgstr "Általános beállítások, mint például a bolt alapja, pénznem és szkript/stílus lehetőség, amelyek hatással vannak a boltban használt funkciókra."
 
 #: admin/woocommerce-admin-content.php:45
 #: admin/woocommerce-admin-settings.php:219
@@ -3013,27 +3013,27 @@ msgstr "Oldalak"
 #: admin/woocommerce-admin-content.php:45
 #@ woocommerce
 msgid "This is where important store page are defined. You can also set up other pages (such as a Terms page) here."
-msgstr ""
+msgstr "Ez az, ahol a bolt oldal határozható meg. Képes vagy más oldalt is beállítani (például a Feltételek oldalt) itt."
 
 #: admin/woocommerce-admin-content.php:46
 #@ woocommerce
 msgid "Options for how things like price, images and weights appear in your product catalog."
-msgstr ""
+msgstr "Olyan mint ár, képek és méretek megjelenése a termék katalógusban opciók."
 
 #: admin/woocommerce-admin-content.php:47
 #@ woocommerce
 msgid "Options concerning stock and stock notices."
-msgstr ""
+msgstr "Vonatkozó készlet és készlet figyelmeztetések opciók."
 
 #: admin/woocommerce-admin-content.php:48
 #@ woocommerce
 msgid "Options concerning tax, including international and local tax rates."
-msgstr ""
+msgstr "Vonatkozó adó opciók, beleértve a nemzetközi és helyi adókulcsokat."
 
 #: admin/woocommerce-admin-content.php:49
 #@ woocommerce
 msgid "This is where shipping options are defined, and shipping methods are set up."
-msgstr ""
+msgstr "Ez az, ahol a szállítási lehetőségek megadhatók és a szállítási módok beállíthatók."
 
 #: admin/woocommerce-admin-content.php:50
 #@ woocommerce
@@ -3043,7 +3043,7 @@ msgstr "Fizetési módok"
 #: admin/woocommerce-admin-content.php:50
 #@ woocommerce
 msgid "This is where payment gateway options are defined, and individual payment gateways are set up."
-msgstr ""
+msgstr "Ez az, ahol a fizetési módok megadhatók és az egyéni fizetési módok beállítatók."
 
 #: admin/woocommerce-admin-content.php:51
 #: admin/woocommerce-admin-settings.php:224
@@ -3054,7 +3054,7 @@ msgstr "Email-ek"
 #: admin/woocommerce-admin-content.php:51
 #@ woocommerce
 msgid "Here you can customise the way WooCommerce emails appear."
-msgstr ""
+msgstr "Itt tudod személyre szabni a WooCommerce email-ek útját."
 
 #: admin/woocommerce-admin-content.php:52
 #: admin/woocommerce-admin-settings.php:225
@@ -3065,7 +3065,7 @@ msgstr "Integráció"
 #: admin/woocommerce-admin-content.php:52
 #@ woocommerce
 msgid "The integration section contains options for third party services which integrate with WooCommerce."
-msgstr ""
+msgstr "Az integráció részben tudsz third party szolgáltatást hozzákapcsolni a WooCommerce-hez."
 
 #: admin/woocommerce-admin-content.php:57
 #: admin/woocommerce-admin-init.php:59
@@ -3076,7 +3076,7 @@ msgstr "Jelentések"
 #: admin/woocommerce-admin-content.php:59
 #@ woocommerce
 msgid "The reports section can be accessed from the left-hand navigation menu. Here you can generate reports for sales and customers."
-msgstr ""
+msgstr "A jelentések elérhetőek a bal oldali navigációs menüben. Itt tudsz generálni jelentéseket az értékesítésről és a vásárlókról."
 
 #: admin/woocommerce-admin-content.php:60
 #: admin/woocommerce-admin-reports.php:27
@@ -3090,7 +3090,7 @@ msgstr "Eladás"
 #: admin/woocommerce-admin-content.php:60
 #@ woocommerce
 msgid "Reports for sales based on date, top sellers and top earners."
-msgstr ""
+msgstr "Jelentések eladási dátum, top eladók és a top kereset alapján."
 
 #: admin/woocommerce-admin-content.php:62
 #: admin/woocommerce-admin-reports.php:88
@@ -3101,7 +3101,7 @@ msgstr "Vásárlók"
 #: admin/woocommerce-admin-content.php:62
 #@ woocommerce
 msgid "Customer reports, such as signups per day."
-msgstr ""
+msgstr "Vásárlói jelentések, mint például regisztrációk naponta."
 
 #: admin/woocommerce-admin-content.php:63
 #@ woocommerce
@@ -3118,17 +3118,17 @@ msgstr "Rendelések"
 #: admin/woocommerce-admin-content.php:70
 #@ woocommerce
 msgid "The orders section can be accessed from the left-hand navigation menu. Here you can view and manage customer orders."
-msgstr ""
+msgstr "A megrendelések rész elérhető a bal oldali navigációs menüben. Itt megtekintheted és kezelheted a vevői megrendeléseket."
 
 #: admin/woocommerce-admin-content.php:71
 #@ woocommerce
 msgid "Orders can also be added from this section if you want to set them up for a customer manually."
-msgstr ""
+msgstr "A rendelések hozzáadhatók ehhez a részhez, ha azt szeretned, hogy a vásárló manuálisan állítsa be."
 
 #: admin/woocommerce-admin-content.php:78
 #@ woocommerce
 msgid "Coupons can be managed from this section. Once added, customers will be able to enter coupon codes on the cart/checkout page. If a customer uses a coupon code they will be viewable when viewing orders."
-msgstr ""
+msgstr "A kuponok kezelhetőek ezen a részen. Miután hozzáadtad, a vásárlóknak lehetőségük lesz a kupon kódot megadni a kosár/pénztár oldalon. Ha egy vásárló felhasznál egy kódot, az látható lesz a rendelésnél."
 
 #: admin/woocommerce-admin-content.php:82
 #@ woocommerce
@@ -3159,7 +3159,7 @@ msgstr "WooCommerce friss értékelések"
 #: admin/woocommerce-admin-dashboard.php:78
 #@ woocommerce
 msgid "Shop Content"
-msgstr "Shop tartalom"
+msgstr "Bolt tartalom"
 
 #. gettext fix: identical singular and plural forms found, that may be ambiguous! Please check the code!
 #: admin/woocommerce-admin-dashboard.php:84
@@ -3167,7 +3167,7 @@ msgstr "Shop tartalom"
 #: admin/woocommerce-admin-init.php:744
 #: admin/woocommerce-admin-reports.php:985
 #: admin/woocommerce-admin-reports.php:1081
-#: templates/cart/cart.php:24
+#: templates/cart/cart.php:28
 #: templates/checkout/form-pay.php:19
 #: templates/checkout/review-order.php:21
 #: templates/emails/admin-new-order.php:22
@@ -3207,17 +3207,17 @@ msgstr[0] "Tulajdonságok"
 #: admin/woocommerce-admin-dashboard.php:148
 #@ woocommerce
 msgid "Pending"
-msgstr "Függő"
+msgstr "Függőben"
 
 #: admin/woocommerce-admin-dashboard.php:162
 #@ woocommerce
 msgid "On-Hold"
-msgstr "Beérkezett"
+msgstr "Várakozik"
 
 #: admin/woocommerce-admin-dashboard.php:190
 #@ woocommerce
 msgid "Completed"
-msgstr "Befejezett"
+msgstr "Teljesítve"
 
 #: admin/woocommerce-admin-dashboard.php:207
 #, php-format
@@ -3286,7 +3286,7 @@ msgstr "Rendelés elfogadva"
 #: admin/woocommerce-admin-functions.php:186
 #@ woocommerce
 msgid "Thank you, we are now processing your order. Your order's details are below."
-msgstr ""
+msgstr "Köszönöm, mi most feldolgozzuk a rendelésedet. Rendelésed részleteit lentebb találod."
 
 #: admin/woocommerce-admin-functions.php:188
 #: classes/shortcodes/class-wc-shortcode-pay.php:90
@@ -3300,7 +3300,7 @@ msgid "Order:"
 msgstr "Rendelés:"
 
 #: admin/woocommerce-admin-functions.php:195
-#: templates/cart/cart.php:26
+#: templates/cart/cart.php:30
 #: templates/emails/admin-new-order.php:23
 #: templates/emails/customer-completed-order.php:24
 #: templates/emails/customer-invoice.php:28
@@ -3360,7 +3360,7 @@ msgstr "Teljesítettnek jelöl"
 #: admin/woocommerce-admin-functions.php:521
 #@ woocommerce
 msgid "Order status changed by bulk edit:"
-msgstr ""
+msgstr "Rendelési állapotok csoportos szerkesztése:"
 
 #: admin/woocommerce-admin-functions.php:544
 #, php-format
@@ -3372,9 +3372,9 @@ msgstr[0] "%s rendelés állapota megváltozott."
 #. translators: plugin header field 'Name'
 #: admin/woocommerce-admin-content.php:83
 #: admin/woocommerce-admin-init.php:57
-#: classes/class-wc-order.php:1182
-#: classes/class-wc-order.php:1184
-#: classes/class-wc-order.php:1187
+#: classes/class-wc-order.php:1183
+#: classes/class-wc-order.php:1185
+#: classes/class-wc-order.php:1188
 #: woocommerce.php:0
 #@ woocommerce
 msgid "WooCommerce"
@@ -3427,12 +3427,12 @@ msgstr "Dokumentáció"
 #: admin/woocommerce-admin-init.php:423
 #@ woocommerce
 msgid "Remove this attribute?"
-msgstr ""
+msgstr "Eltávolítod ezt a tulajdonságot?"
 
 #: admin/woocommerce-admin-init.php:431
 #@ woocommerce
 msgid "Enter a name for the new attribute term:"
-msgstr ""
+msgstr "Add meg az új nevét a tulajdonságnak:"
 
 #: admin/woocommerce-admin-init.php:433
 #@ woocommerce
@@ -3603,12 +3603,12 @@ msgstr "Rendelési jegyzet"
 #@ woocommerce
 msgctxt "page_slug"
 msgid "shop"
-msgstr "shop"
+msgstr "bolt"
 
 #: admin/woocommerce-admin-install.php:192
 #@ woocommerce
 msgid "Shop"
-msgstr "Shop"
+msgstr "Bolt"
 
 #: admin/woocommerce-admin-install.php:195
 #@ woocommerce
@@ -3634,7 +3634,7 @@ msgstr "penztar"
 #@ woocommerce
 msgctxt "page_slug"
 msgid "my-account"
-msgstr "profilom"
+msgstr "fiokom"
 
 #: admin/woocommerce-admin-install.php:201
 #: admin/woocommerce-admin-status.php:293
@@ -3642,13 +3642,13 @@ msgstr "profilom"
 #: templates/checkout/thankyou.php:30
 #@ woocommerce
 msgid "My Account"
-msgstr "Profilom"
+msgstr "Fiókom"
 
 #: admin/woocommerce-admin-install.php:207
 #@ woocommerce
 msgctxt "page_slug"
 msgid "edit-address"
-msgstr "cim-szerkesztes"
+msgstr "cimem-szerkesztese"
 
 #: admin/woocommerce-admin-install.php:207
 #@ woocommerce
@@ -3659,7 +3659,7 @@ msgstr "Címem szerkesztése"
 #@ woocommerce
 msgctxt "page_slug"
 msgid "view-order"
-msgstr "rendelesem"
+msgstr "rendeleseim"
 
 #: admin/woocommerce-admin-install.php:210
 #: admin/woocommerce-admin-status.php:301
@@ -3668,7 +3668,7 @@ msgstr "rendelesem"
 #: woocommerce.php:1032
 #@ woocommerce
 msgid "View Order"
-msgstr "Rendelési oldal"
+msgstr "Rendeléseim"
 
 #: admin/woocommerce-admin-install.php:213
 #@ woocommerce
@@ -4048,7 +4048,7 @@ msgid "Toggle tax rows"
 msgstr "Adó sorok elrejtése"
 
 #: admin/woocommerce-admin-settings.php:45
-#: woocommerce.php:1713
+#: woocommerce.php:1715
 #@ woocommerce
 msgid "Action failed. Please refresh the page and retry."
 msgstr "A művelet sikertelen. Kérlek frissítsd az oldalt és próbáld újra."
@@ -4067,7 +4067,7 @@ msgstr "<strong>Gratulálunk!</strong> &#8211; WooCommerce telepítve és beáll
 #, php-format
 #@ woocommerce
 msgid "More functionality and gateway options available via <a href=\"%s\" target=\"_blank\">WC official extensions</a>."
-msgstr "További funkciók és fizetési megoldások a <a href=\"%s\" target=\"_blank\">WC hivatalos bővítmények</a> oldalon."
+msgstr "További funkciók és fizetési módok a <a href=\"%s\" target=\"_blank\">WC hivatalos bővítmények</a> oldalon."
 
 #: admin/woocommerce-admin-settings.php:423
 #: classes/integrations/shareyourcart/views/admin-page.php:110
@@ -4104,7 +4104,7 @@ msgstr "Válassz országokat&hellip;"
 #: admin/woocommerce-admin-status.php:512
 #@ woocommerce
 msgid "This tool will clear the product/shop transients cache."
-msgstr "Ez az eszköz törli a termékek/shop tranzienseket."
+msgstr "Ez az eszköz törli a termékek/bolt tranzienseket."
 
 #: admin/woocommerce-admin-status.php:525
 #@ woocommerce
@@ -4114,7 +4114,7 @@ msgstr "Képességek"
 #: admin/woocommerce-admin-status.php:527
 #@ woocommerce
 msgid "This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages."
-msgstr "Ez az eszköz visszaállítja az admin, vásárló és shop_nyilvántartás szabályokat alaphelyzetbe. Használd ezt, ha a felhasználók nem férnek hozzá minden WooCommerce admin oldalhoz."
+msgstr "Ez az eszköz visszaállítja az admin, vásárló és bolt_nyilvántartás szabályokat alaphelyzetbe. Használd ezt, ha a felhasználók nem férnek hozzá minden WooCommerce admin oldalhoz."
 
 #: admin/woocommerce-admin-status.php:537
 #@ woocommerce
@@ -4161,7 +4161,7 @@ msgstr "Oldal URL"
 #: admin/woocommerce-admin-status.php:259
 #@ woocommerce
 msgid "Force SSL"
-msgstr "Erős SSL"
+msgstr "Titkosított SSL"
 
 #: admin/woocommerce-admin-status.php:329
 #@ woocommerce
@@ -4370,26 +4370,26 @@ msgstr "Állam/megye vagy megye kód"
 #, php-format
 #@ woocommerce
 msgid "Sorry, it seems the coupon \"%s\" is invalid - it has now been removed from your order."
-msgstr ""
+msgstr "Sajnáljuk, úgy tünik a \"%s\" kupon érvénytelen - ezt már el is távolítottuk a rendelésedből."
 
 #: classes/class-wc-coupon.php:450
 #, php-format
 #@ woocommerce
 msgid "Sorry, it seems the coupon \"%s\" is not yours - it has now been removed from your order."
-msgstr ""
+msgstr "Sajnáljuk, úgy tünik a \"%s\" kupon nem a tiéd - ezt már el is távolítottuk a rendelésedből."
 
 #: classes/class-wc-cart.php:464
 #, php-format
 #@ woocommerce
 msgid "Sorry, we do not have enough \"%s\" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused."
-msgstr ""
+msgstr "Sajnájuk, de nincs elég \"%s\" készleten (%s van belőle). Kérlek módosítsd a kosarat és próbáld újra. Elnézést kérünk az esetleges kellemetlenségért."
 
 #: classes/class-wc-cart.php:842
 #: classes/class-wc-cart.php:856
 #: classes/class-wc-cart.php:864
-#: templates/cart/mini-cart.php:65
+#: templates/cart/mini-cart.php:68
 #: woocommerce-functions.php:469
-#: woocommerce.php:1173
+#: woocommerce.php:1175
 #@ woocommerce
 msgid "View Cart &rarr;"
 msgstr "Kosár megtekintése &rarr;"
@@ -4404,12 +4404,12 @@ msgstr "Ez a tétel már a kosárban."
 #, php-format
 #@ woocommerce
 msgid "<a href=\"%s\" class=\"button\">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart."
-msgstr ""
+msgstr "<a href=\"%s\" class=\"button\">%s</a> Nem tudod ezt az összeget hozzáadni a kosárhoz &mdash; nekünk %s készleten van és %s már a kosaradban van."
 
 #: classes/abstracts/abstract-wc-product.php:849
 #: classes/abstracts/abstract-wc-product.php:855
 #: classes/class-wc-cart.php:1743
-#: classes/class-wc-order.php:862
+#: classes/class-wc-order.php:863
 #: classes/class-wc-product-variable.php:274
 #: classes/class-wc-product-variable.php:283
 #: classes/class-wc-product-variation.php:246
@@ -4431,7 +4431,7 @@ msgstr "A kupon nem létezik!"
 #: classes/class-wc-checkout.php:64
 #@ woocommerce
 msgid "Account username"
-msgstr "Profil felhasználónév"
+msgstr "Fiók felhasználónév"
 
 #: classes/class-wc-checkout.php:65
 #@ woocommerce
@@ -4443,7 +4443,7 @@ msgstr "Felhasználónév"
 #: classes/class-wc-checkout.php:79
 #@ woocommerce
 msgid "Account password"
-msgstr "Profil jelszó"
+msgstr "Fiók jelszó"
 
 #: classes/class-wc-checkout.php:73
 #: classes/class-wc-checkout.php:80
@@ -4456,7 +4456,7 @@ msgstr "Jelszó"
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Notes about your order, e.g. special notes for delivery."
-msgstr "Megjegyzés a rendelésedhez, pl. speciális szállítási megjegyzés."
+msgstr "Megjegyzés a rendelésedhez, pl. speciális szállítási igény."
 
 #: classes/class-wc-checkout.php:385
 #, php-format
@@ -4468,7 +4468,7 @@ msgstr "Sajnálom, a munkamenet lejárt. <a href=\"%s\">Vissza a főoldalra &rar
 #: woocommerce-functions.php:1631
 #@ woocommerce
 msgid "is a required field."
-msgstr "kötelező mező."
+msgstr "mező kitöltése kötelező."
 
 #: classes/class-wc-checkout.php:450
 #, php-format
@@ -4504,7 +4504,7 @@ msgstr "Érvénytelen email/felhasználónév"
 #: classes/class-wc-checkout.php:549
 #@ woocommerce
 msgid "An account is already registered with that username. Please choose another."
-msgstr "Egy profil már regisztrálva az adott felhasználónévre. Kérlek válassz másikat."
+msgstr "Egy fiók már regisztrálva van ezzel a felhasználónévvel. Kérlek válassz másikat."
 
 #: classes/class-wc-checkout.php:559
 #@ woocommerce
@@ -4522,7 +4522,7 @@ msgstr "A jelszavak nem egyeznek."
 #: classes/class-wc-checkout.php:566
 #@ woocommerce
 msgid "An account is already registered with your email address. Please login."
-msgstr "Egy profil már regisztrálva van érre az email címre. Kérlek jeletkezz be."
+msgstr "Egy fiók már regisztrálva van ezzel az email címmel. Kérlek jeletkezz be."
 
 #: classes/class-wc-checkout.php:572
 #@ woocommerce
@@ -6502,12 +6502,12 @@ msgstr "alacsony készleten."
 #: classes/class-wc-emails.php:313
 #@ woocommerce
 msgid "Product out of stock"
-msgstr "Termék nincs készleten"
+msgstr "Termék elfogyott"
 
 #: classes/class-wc-emails.php:322
 #@ woocommerce
 msgid "is out of stock."
-msgstr "nincs készleten."
+msgstr "elfogyott."
 
 #: classes/class-wc-emails.php:357
 #@ woocommerce
@@ -6531,34 +6531,34 @@ msgctxt "hash before order number"
 msgid "#"
 msgstr "#"
 
-#: classes/class-wc-order.php:857
+#: classes/class-wc-order.php:858
 #, php-format
 #@ woocommerce
 msgid "&nbsp;<small>%svia %s</small>"
 msgstr "&nbsp;<small>%sáltal %s</small>"
 
-#: classes/class-wc-order.php:922
+#: classes/class-wc-order.php:923
 #@ woocommerce
 msgid "Cart Subtotal:"
 msgstr "Kosár részösszeg:"
 
-#: classes/class-wc-order.php:934
+#: classes/class-wc-order.php:935
 #@ woocommerce
 msgid "Shipping:"
 msgstr "Szállítás:"
 
-#: classes/class-wc-order.php:979
+#: classes/class-wc-order.php:980
 #@ woocommerce
 msgid "Subtotal:"
 msgstr "Részösszeg:"
 
-#: classes/class-wc-order.php:1234
+#: classes/class-wc-order.php:1235
 #, php-format
 #@ woocommerce
 msgid "Order status changed from %s to %s."
 msgstr "Rendelés állapota %s volt, majd %s lett."
 
-#: classes/class-wc-order.php:1472
+#: classes/class-wc-order.php:1473
 #@ woocommerce
 msgid "Order item stock reduced successfully."
 msgstr "Rendelési tétel készlet sikeresen csökkent."
@@ -6582,7 +6582,7 @@ msgstr "(előrendelés megengedett)"
 
 #: classes/abstracts/abstract-wc-product.php:566
 #: classes/abstracts/abstract-wc-product.php:579
-#: templates/cart/cart.php:72
+#: templates/cart/cart.php:76
 #@ woocommerce
 msgid "Available on backorder"
 msgstr "Elérhető az előrendelés"
@@ -6598,7 +6598,7 @@ msgstr "Mettől:"
 #, php-format
 #@ woocommerce
 msgid "Rated %s out of 5"
-msgstr "Értékelés 5-ből %s"
+msgstr "Értékelve 5-ből %s"
 
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:201
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:258
@@ -6654,7 +6654,7 @@ msgstr "Cím"
 #: classes/shipping/local-pickup/class-wc-shipping-local-pickup.php:86
 #@ woocommerce
 msgid "This controls the title which the user sees during checkout."
-msgstr ""
+msgstr "Ez szabályozza a címet, ami a felhasználó lát a kasszánál."
 
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:72
 #@ woocommerce
@@ -6675,31 +6675,31 @@ msgstr ""
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:79
 #@ woocommerce
 msgid "Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order wont be shipped until the funds have cleared in our account."
-msgstr ""
+msgstr "Összeg átutalása közvetlenül a bankszámlánkra. Kérlek a rendelési azonosítót a megjegyzésbe írd bele. A megrendelést akkor fogadjuk el, ha megérkezett az összeg."
 
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:82
 #@ woocommerce
 msgid "Account Details"
-msgstr "Profil adatok"
+msgstr "Fiók adatok"
 
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:84
 #@ woocommerce
 msgid "Optionally enter your bank details below for customers to pay into."
-msgstr ""
+msgstr "Adott esetben add meg a banki adataidat, azoknak akik így fizetnének."
 
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:88
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:163
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:203
 #@ woocommerce
 msgid "Account Name"
-msgstr "Profil név"
+msgstr "Fiók név"
 
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:94
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:164
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:204
 #@ woocommerce
 msgid "Account Number"
-msgstr "Profil szám"
+msgstr "Fiók szám"
 
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:100
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:165
@@ -6735,7 +6735,7 @@ msgstr "Közvetlen banki átutalásos fizetés"
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:137
 #@ woocommerce
 msgid "Allows payments by BACS (Bank Account Clearing System), more commonly known as direct bank/wire transfer."
-msgstr ""
+msgstr "Lehetővé teszi a BER-t (Bankszámla Elszámolási Rendszer), másnéven a közvetlen banki átutalást."
 
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:158
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:200
@@ -6752,7 +6752,7 @@ msgstr "BIC"
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:234
 #@ woocommerce
 msgid "Awaiting BACS payment"
-msgstr "Várakozás a banki fizetésre."
+msgstr "Várakozás a banki átutalásra."
 
 #: classes/gateways/cheque/class-wc-gateway-cheque.php:28
 #@ woocommerce
@@ -6778,7 +6778,7 @@ msgstr ""
 #: classes/gateways/cheque/class-wc-gateway-cheque.php:73
 #@ woocommerce
 msgid "Please send your cheque to Store Name, Store Street, Store Town, Store State / County, Store Postcode."
-msgstr ""
+msgstr "Kérlek küld el a csekket a bolt nevével, címével, városával, államával / megyéjével, irányítoszámával."
 
 #: classes/gateways/cheque/class-wc-gateway-cheque.php:91
 #@ woocommerce
@@ -6800,7 +6800,7 @@ msgstr "Utánvétel"
 #: classes/gateways/cod/class-wc-gateway-cod.php:55
 #@ woocommerce
 msgid "Have your customers pay with cash (or by other means) upon delivery."
-msgstr ""
+msgstr "A vásárlód készpénzzel (vagy más lehetőséggel) fog fizetni a kiszállításkor."
 
 #: classes/gateways/cod/class-wc-gateway-cod.php:80
 #@ woocommerce
@@ -6815,7 +6815,7 @@ msgstr "Utánvétel engedélyezése"
 #: classes/gateways/cod/class-wc-gateway-cod.php:89
 #@ woocommerce
 msgid "Payment method title that the customer will see on your website."
-msgstr ""
+msgstr "Fizetési mód neve, ahogy a vásárló fogja látni a honlapon."
 
 #: admin/post-types/shop_coupon.php:28
 #: classes/gateways/cod/class-wc-gateway-cod.php:94
@@ -6829,7 +6829,7 @@ msgstr "Leírás"
 #: classes/gateways/cod/class-wc-gateway-cod.php:96
 #@ woocommerce
 msgid "Payment method description that the customer will see on your website."
-msgstr ""
+msgstr "Fizetési mód leírása, ahogy a vásárló fogja látni a honlapon."
 
 #: classes/gateways/cod/class-wc-gateway-cod.php:100
 #@ woocommerce
@@ -6933,7 +6933,7 @@ msgstr ""
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:103
 #@ woocommerce
 msgid "Gateway Disabled"
-msgstr "Megoldás letiltva"
+msgstr "Mód letiltva"
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:103
 #@ woocommerce
@@ -6948,7 +6948,7 @@ msgstr "PayPal szabvány engedélyezése"
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:135
 #@ woocommerce
 msgid "Pay via PayPal; you can pay with your credit card if you don't have a PayPal account"
-msgstr ""
+msgstr "Fizess PayPal-lal; fizethetsz kártyával is, ha nem rendelkezel PayPal fiókkal."
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:138
 #@ woocommerce
@@ -7033,7 +7033,7 @@ msgstr ""
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:188
 #@ woocommerce
 msgid "Gateway Testing"
-msgstr "Megoldás tesztelése"
+msgstr "Mód tesztelése"
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:193
 #@ woocommerce
@@ -7144,12 +7144,12 @@ msgstr "A Google Analytics egy ingyenes szolgáltatás, ami Google által gener�
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:62
 #@ woocommerce
 msgid "Google Analytics ID"
-msgstr "Google Analytics ID"
+msgstr "Google Analytics azon."
 
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:63
 #@ woocommerce
 msgid "Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>"
-msgstr "Jelentkezz be a Google Analytics fiókoddal és keresd meg az ID-det. Pl. <code>UA-XXXXX-X</code>"
+msgstr "Jelentkezz be a Google Analytics fiókoddal és keresd meg az azonosítódat. pl. <code>UA-XXXXX-X</code>"
 
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:68
 #@ woocommerce
@@ -7209,7 +7209,7 @@ msgstr ""
 #: classes/integrations/sharethis/class-wc-sharethis.php:63
 #@ woocommerce
 msgid "ShareThis Publisher ID"
-msgstr "ShareThis publikációs ID"
+msgstr "ShareThis publikációs azon."
 
 #: classes/integrations/sharethis/class-wc-sharethis.php:64
 #, php-format
@@ -7237,7 +7237,7 @@ msgstr "ShareYourCart"
 #: classes/integrations/shareyourcart/views/admin-page.php:33
 #@ woocommerce
 msgid "Setup your ShareYourCart account"
-msgstr "ShareYourCart profilod beállítása"
+msgstr "ShareYourCart fiók beállítása"
 
 #: classes/integrations/shareyourcart/views/admin-page.php:35
 #@ woocommerce
@@ -7446,7 +7446,7 @@ msgid "Minimum Order Amount"
 msgstr "Minimális rendelési összeg"
 
 #: admin/woocommerce-admin-reports.php:1531
-#: templates/cart/cart.php:123
+#: templates/cart/cart.php:127
 #: woocommerce.php:1062
 #@ woocommerce
 msgid "Coupon"
@@ -7566,7 +7566,7 @@ msgstr ""
 #: i18n/strings.php:16
 #@ woocommerce
 msgid "pending"
-msgstr "függő"
+msgstr "függőben"
 
 #: i18n/strings.php:17
 #@ woocommerce
@@ -7576,7 +7576,7 @@ msgstr "sikertelen"
 #: i18n/strings.php:18
 #@ woocommerce
 msgid "on-hold"
-msgstr "beérkezett"
+msgstr "várakozik"
 
 #: i18n/strings.php:19
 #@ woocommerce
@@ -7586,7 +7586,7 @@ msgstr "feldolgozás"
 #: i18n/strings.php:20
 #@ woocommerce
 msgid "completed"
-msgstr "befejezett"
+msgstr "teljesítve"
 
 #: i18n/strings.php:21
 #@ woocommerce
@@ -7651,7 +7651,7 @@ msgstr "Érvénytelen rendelés."
 #: classes/shortcodes/class-wc-shortcode-view-order.php:49
 #@ woocommerce
 msgid "My Account &rarr;"
-msgstr "Profilom &rarr;"
+msgstr "Fiókom &rarr;"
 
 #: classes/shortcodes/class-wc-shortcode-view-order.php:56
 #, php-format
@@ -7722,23 +7722,23 @@ msgstr "&nbsp;&ndash; %s oldal"
 msgid "No products found which match your selection."
 msgstr "Nincs talált termék, amely megfelelne a választásnak."
 
-#: templates/cart/cart.php:43
+#: templates/cart/cart.php:47
 #@ woocommerce
 msgid "Remove this item"
 msgstr "Elem eltávolítása"
 
-#: templates/cart/cart.php:123
+#: templates/cart/cart.php:127
 #: templates/checkout/form-coupon.php:29
 #@ woocommerce
 msgid "Apply Coupon"
 msgstr "Kupon használása"
 
-#: templates/cart/cart.php:130
+#: templates/cart/cart.php:134
 #@ woocommerce
 msgid "Update Cart"
 msgstr "Kosár frissítése"
 
-#: templates/cart/cart.php:130
+#: templates/cart/cart.php:134
 #@ woocommerce
 msgid "Proceed to Checkout &rarr;"
 msgstr "Folytatás a pénztárhoz &rarr;"
@@ -7756,22 +7756,22 @@ msgstr "A kosarad jelenleg üres."
 #: templates/cart/cart-empty.php:18
 #@ woocommerce
 msgid "&larr; Return To Shop"
-msgstr "&larr; Vissza a shopba"
+msgstr "&larr; Vissza a boltba"
 
-#: templates/cart/mini-cart.php:52
+#: templates/cart/mini-cart.php:55
 #@ woocommerce
 msgid "No products in the cart."
 msgstr "Nincs termék a kosárban."
 
 #: admin/post-types/writepanels/order-item-html.php:112
-#: templates/cart/mini-cart.php:60
+#: templates/cart/mini-cart.php:63
 #: templates/cart/totals.php:92
 #: templates/checkout/review-order.php:93
 #@ woocommerce
 msgid "Subtotal"
 msgstr "Részösszeg"
 
-#: templates/cart/mini-cart.php:66
+#: templates/cart/mini-cart.php:69
 #@ woocommerce
 msgid "Checkout &rarr;"
 msgstr "Pénztár &rarr;"
@@ -7782,7 +7782,7 @@ msgid "Calculate Shipping"
 msgstr "Szállítás számítása"
 
 #: templates/cart/shipping-calculator.php:50
-#: woocommerce-template.php:1376
+#: woocommerce-template.php:1377
 #@ woocommerce
 msgid "Select a state&hellip;"
 msgstr "Válassz egy államot&hellip;"
@@ -7790,7 +7790,7 @@ msgstr "Válassz egy államot&hellip;"
 #: templates/cart/shipping-calculator.php:71
 #@ woocommerce
 msgid "Update Totals"
-msgstr "Összes frissítése"
+msgstr "Összeg frissítése"
 
 #: templates/cart/totals.php:22
 #@ woocommerce
@@ -7805,7 +7805,7 @@ msgstr "Kosár részösszeg"
 
 #: templates/cart/totals.php:35
 #: templates/checkout/review-order.php:34
-#: woocommerce.php:1645
+#: woocommerce.php:1647
 #@ woocommerce
 msgid "Cart Discount"
 msgstr "Kosár kedvezmény"
@@ -7872,7 +7872,7 @@ msgstr "Léterehozol egy fiókot?"
 #: templates/checkout/form-billing.php:51
 #@ woocommerce
 msgid "Create an account by entering the information below. If you are a returning customer please login at the top of the page."
-msgstr ""
+msgstr "Fiók létrehozása az alábbi adatok megadásával. Ha visszatérő vásárló vagy, kérlek jelentkezz be az oldal tetején."
 
 #: templates/checkout/form-checkout.php:20
 #@ woocommerce
@@ -7892,7 +7892,7 @@ msgstr "Van kuponod?"
 #: templates/checkout/form-coupon.php:20
 #@ woocommerce
 msgid "Click here to enter your code"
-msgstr "Kattints ide a kód megadásához"
+msgstr "Klikk ide a kód megadásához"
 
 #: templates/checkout/form-login.php:17
 #@ woocommerce
@@ -7902,7 +7902,7 @@ msgstr "Klikk ide a bejelentkezéshez"
 #: templates/checkout/form-login.php:22
 #@ woocommerce
 msgid "If you have shopped with us before, please enter your details in the boxes below. If you are a new customer please proceed to the Billing &amp; Shipping section."
-msgstr ""
+msgstr "Ha már vásáróltál nálunk korábban, kérlek add meg az adataidat a dobozokban. Ha új vásárló vagy, kérlek folytasd a Számlázási &amp; Szállítási szakaszt."
 
 #: templates/checkout/form-pay.php:21
 #@ woocommerce
@@ -8000,14 +8000,14 @@ msgstr "jS F Y"
 #, php-format
 #@ woocommerce
 msgid "Thanks for creating an account on %s. Your username is <strong>%s</strong>."
-msgstr "Köszönjük a profil létrehozását %s. A felhasználóneved <strong>%s</strong>."
+msgstr "Köszönjük, hogy létrehoztad a %s fiókot. A felhasználóneved <strong>%s</strong>."
 
 #: templates/emails/customer-new-account.php:16
 #: templates/emails/plain/customer-new-account.php:15
 #, php-format
 #@ woocommerce
 msgid "You can access your account area here: %s."
-msgstr "Itt hozzáférhetsz a profilod felületéhez: %s."
+msgstr "Itt hozzáférhetsz a fiókod felületéhez: %s."
 
 #: templates/emails/customer-note.php:14
 #: templates/emails/plain/customer-note.php:13
@@ -8161,7 +8161,7 @@ msgstr ""
 #: templates/order/form-tracking.php:19
 #@ woocommerce
 msgid "Order ID"
-msgstr "Rendelés ID"
+msgstr "Rendelés azon."
 
 #: templates/order/form-tracking.php:19
 #@ woocommerce
@@ -8202,14 +8202,14 @@ msgstr "óta"
 #: templates/order/tracking.php:20
 #@ woocommerce
 msgid "and was completed"
-msgstr "és befejeződött"
+msgstr "és teljesítve"
 
 #: templates/order/tracking.php:20
 #@ woocommerce
 msgid " ago"
 msgstr "óta"
 
-#: woocommerce-template.php:989
+#: woocommerce-template.php:990
 #@ woocommerce
 msgctxt "breadcrumb"
 msgid "Home"
@@ -8264,7 +8264,7 @@ msgstr "A megjegyzés jóváhagyásra vár"
 #: templates/single-product/review.php:40
 #@ woocommerce
 msgid "verified owner"
-msgstr "igazolt tulajdonos"
+msgstr "ellenőrzött tulajdonos"
 
 #: templates/single-product/tabs/description.php:14
 #@ woocommerce
@@ -8482,7 +8482,7 @@ msgstr "VAGY"
 #: classes/widgets/class-wc-widget-login.php:31
 #@ woocommerce
 msgid "Display a login area and \"My Account\" links in the sidebar."
-msgstr "Bejelentkezési terület és \"Profilom\" link megjelenítése az oldalsávban."
+msgstr "Bejelentkezési terület és \"Fiókom\" link megjelenítése az oldalsávban."
 
 #: classes/widgets/class-wc-widget-login.php:33
 #@ woocommerce
@@ -8505,7 +8505,7 @@ msgstr "Üdvözlet %s"
 #: classes/widgets/class-wc-widget-login.php:76
 #@ woocommerce
 msgid "My account"
-msgstr "Profilom"
+msgstr "Fiókom"
 
 #: classes/widgets/class-wc-widget-login.php:77
 #@ woocommerce
@@ -8681,7 +8681,7 @@ msgstr "Véletlenszerű termékek"
 #: classes/widgets/class-wc-widget-recent-products.php:176
 #@ woocommerce
 msgid "Show hidden product variations"
-msgstr ""
+msgstr "Rejtett termék variációk mutatása"
 
 #: classes/widgets/class-wc-widget-recent-products.php:31
 #@ woocommerce
@@ -8745,31 +8745,31 @@ msgstr "WooCommerce legjobb termékek"
 msgid "Top Rated Products"
 msgstr ""
 
-#: woocommerce-ajax.php:108
+#: woocommerce-ajax.php:111
 #@ woocommerce
 msgid "Please enter your username and password to login."
 msgstr "Kérlek add meg felhasználónevedet vagy email címedet a belépéshez."
 
-#: woocommerce-ajax.php:188
+#: woocommerce-ajax.php:191
 #@ woocommerce
 msgid "Sorry, your session has expired."
 msgstr ""
 
-#: woocommerce-ajax.php:188
+#: woocommerce-ajax.php:191
 #@ woocommerce
 msgid "Return to homepage &rarr;"
 msgstr "Vissza a kezdőlapra &rarr;"
 
-#: woocommerce-ajax.php:329
-#: woocommerce-ajax.php:363
-#: woocommerce-ajax.php:386
+#: woocommerce-ajax.php:332
+#: woocommerce-ajax.php:366
+#: woocommerce-ajax.php:389
 #@ woocommerce
 msgid "You do not have sufficient permissions to access this page."
 msgstr ""
 
-#: woocommerce-ajax.php:331
-#: woocommerce-ajax.php:364
-#: woocommerce-ajax.php:387
+#: woocommerce-ajax.php:334
+#: woocommerce-ajax.php:367
+#: woocommerce-ajax.php:390
 #@ woocommerce
 msgid "You have taken too long. Please go back and retry."
 msgstr ""
@@ -8965,23 +8965,23 @@ msgstr "Kérlek értékeld a terméket."
 msgid "Buy product"
 msgstr "Termék vásárlása"
 
-#: woocommerce-template.php:1287
-#: woocommerce.php:1172
+#: woocommerce-template.php:1288
+#: woocommerce.php:1174
 #@ woocommerce
 msgid "required"
 msgstr "kötelező"
 
-#: woocommerce-template.php:1333
+#: woocommerce-template.php:1334
 #@ woocommerce
 msgid "Update country"
 msgstr "Ország frissítése"
 
-#: woocommerce-template.php:1488
+#: woocommerce-template.php:1489
 #@ woocommerce
 msgid "Search for:"
 msgstr "Keresés mint:"
 
-#: woocommerce-template.php:1489
+#: woocommerce-template.php:1490
 #@ woocommerce
 msgid "Search for products"
 msgstr "Termékek keresése"
@@ -9018,7 +9018,7 @@ msgstr "Vásárló"
 #: woocommerce-core-functions.php:1900
 #@ woocommerce
 msgid "Shop Manager"
-msgstr "Shop menedzser"
+msgstr "Bolt nyilvántartás"
 
 #: admin/includes/updates/woocommerce-update-2.0.php:50
 #: admin/woocommerce-admin-init.php:868
@@ -9405,27 +9405,27 @@ msgstr "Szülő kupon"
 msgid "This is where you can add new coupons that customers can use in your store."
 msgstr "Ez az, ahol új kupont hozhatsz létre, hogy a vásárlók felhasználhassák az áruházadban."
 
-#: woocommerce.php:1169
+#: woocommerce.php:1171
 #@ woocommerce
 msgid "Select an option&hellip;"
 msgstr "Válassz egy opciót&hellip;"
 
-#: woocommerce.php:1170
+#: woocommerce.php:1172
 #@ woocommerce
 msgid "Please select a rating"
 msgstr "Kérlek válassz egy értékelést"
 
-#: woocommerce.php:1646
+#: woocommerce.php:1648
 #@ woocommerce
 msgid "Cart % Discount"
 msgstr "Kosár % kedvezmény"
 
-#: woocommerce.php:1647
+#: woocommerce.php:1649
 #@ woocommerce
 msgid "Product Discount"
 msgstr "Termék kedvezmény"
 
-#: woocommerce.php:1648
+#: woocommerce.php:1650
 #@ woocommerce
 msgid "Product % Discount"
 msgstr "Termék % kedvezmény"
@@ -10017,7 +10017,7 @@ msgstr ""
 #: admin/settings/settings-init.php:318
 #@ woocommerce
 msgid "Terms Page ID"
-msgstr "Feltételek oldal ID"
+msgstr "Feltételek oldal azon."
 
 #: admin/settings/settings-init.php:432
 #@ woocommerce
@@ -10027,7 +10027,7 @@ msgstr "Elfelejtett jelszó oldal"
 #: admin/settings/settings-init.php:433
 #@ woocommerce
 msgid "Page contents: [woocommerce_lost_password] Parent: \"My Account\""
-msgstr "Az oldal tartalma: [woocommerce_lost_password] Szülő: \"Profilom\""
+msgstr "Az oldal tartalma: [woocommerce_lost_password] Szülő: \"Fiókom\""
 
 #: admin/settings/settings-init.php:452
 #@ woocommerce
@@ -10062,7 +10062,7 @@ msgstr "Ár szerint rendez (csökkenő)"
 #: admin/settings/settings-init.php:470
 #@ woocommerce
 msgid "Shop Page Display"
-msgstr "Shop oldal kinézete"
+msgstr "Bolt oldal kinézete"
 
 #: admin/settings/settings-init.php:471
 #@ woocommerce
@@ -10149,12 +10149,12 @@ msgstr "Alacsony készlet kezdete"
 #: admin/settings/settings-init.php:791
 #@ woocommerce
 msgid "Out Of Stock Threshold"
-msgstr "Nincs készleten határérték"
+msgstr "Elfogyott határérték"
 
 #: admin/settings/settings-init.php:804
 #@ woocommerce
 msgid "Out Of Stock Visibility"
-msgstr "Nincs készleten láthatóság"
+msgstr "Elfogyott láthatóság"
 
 #: admin/settings/settings-init.php:812
 #@ woocommerce
@@ -10220,7 +10220,7 @@ msgstr "Vásárlói számlázási cím"
 #: admin/settings/settings-init.php:971
 #@ woocommerce
 msgid "Shop base address"
-msgstr "Alap shop cím"
+msgstr "Alap bolt cím"
 
 #: admin/settings/settings-init.php:964
 #@ woocommerce
@@ -10493,7 +10493,7 @@ msgstr "Egyedi megrendelés"
 #: admin/woocommerce-admin-attributes.php:399
 #@ woocommerce
 msgid "Term ID"
-msgstr "Feltétel ID"
+msgstr "Feltétel azon."
 
 #: admin/woocommerce-admin-attributes.php:271
 #: admin/woocommerce-admin-attributes.php:401
@@ -10540,7 +10540,7 @@ msgstr ""
 #@ woocommerce
 msgctxt "default-slug"
 msgid "shop"
-msgstr "shop"
+msgstr "bolt"
 
 #: admin/woocommerce-admin-init.php:728
 #@ woocommerce
@@ -10551,12 +10551,12 @@ msgstr "termek"
 #: admin/woocommerce-admin-init.php:749
 #@ woocommerce
 msgid "Shop base"
-msgstr "Alap shop"
+msgstr "Alap bolt"
 
 #: admin/woocommerce-admin-init.php:753
 #@ woocommerce
 msgid "Shop base with category"
-msgstr "Alap shop kategóriával"
+msgstr "Alap bolt kategóriával"
 
 #: admin/woocommerce-admin-init.php:759
 #@ woocommerce
@@ -10777,7 +10777,7 @@ msgstr "A szerveren a SOAP kliens osztály engedélyezett."
 #, php-format
 #@ woocommerce
 msgid "Your server does not have the <a href=\"%s\">SOAP Client</a> class enabled - some gateway plugins which use SOAP may not work as expected."
-msgstr "A szerveren a <a href=\"%s\">SOAP kliens</a> osztály nincs engedélyezve - néhány átjáró kiegészítő, amit a SOAP használ nem megfelelően működik."
+msgstr "A szerveren a <a href=\"%s\">SOAP kliens</a> osztály nincs engedélyezve - néhány mód kiegészítő, amit a SOAP használ nem megfelelően működik."
 
 #: admin/woocommerce-admin-status.php:175
 #@ woocommerce
@@ -10802,7 +10802,7 @@ msgstr "WC oldalak"
 #: admin/woocommerce-admin-status.php:273
 #@ woocommerce
 msgid "Shop Base"
-msgstr "Alap shop"
+msgstr "Alap bolt"
 
 #: admin/woocommerce-admin-status.php:289
 #@ woocommerce
@@ -10913,7 +10913,7 @@ msgstr "Kép használata"
 #: admin/woocommerce-admin-users.php:29
 #@ woocommerce
 msgid "Completed Orders"
-msgstr "Befejezett rendelések"
+msgstr "Teljesített rendelések"
 
 #: assets/js/admin/editor_plugin_lang.php:5
 #@ woocommerce
@@ -10928,12 +10928,12 @@ msgstr "Termék ár/kosár gomb"
 #: assets/js/admin/editor_plugin_lang.php:7
 #@ woocommerce
 msgid "Product by SKU/ID"
-msgstr "Termék CSZ/ID"
+msgstr "Termék CSZ/azon."
 
 #: assets/js/admin/editor_plugin_lang.php:8
 #@ woocommerce
 msgid "Products by SKU/ID"
-msgstr "Termékek CSZ/ID"
+msgstr "Termékek CSZ/azon."
 
 #: assets/js/admin/editor_plugin_lang.php:10
 #@ woocommerce
@@ -10953,7 +10953,7 @@ msgstr "Kiemelt termékek"
 #: assets/js/admin/editor_plugin_lang.php:13
 #@ woocommerce
 msgid "Shop Messages"
-msgstr "Shop üzenetek"
+msgstr "Bolt üzenetek"
 
 #: assets/js/admin/editor_plugin_lang.php:17
 #@ woocommerce
@@ -11101,7 +11101,7 @@ msgstr "Sablon megtekintése"
 #: classes/abstracts/abstract-wc-email.php:639
 #@ woocommerce
 msgid "Hide template"
-msgstr "Sablon lerejtése"
+msgstr "Sablon elrejtése"
 
 #: classes/abstracts/abstract-wc-email.php:650
 #@ woocommerce
@@ -11137,7 +11137,7 @@ msgstr "Sajnáljuk, &quot;%s&quot; nem vásárolható."
 #, php-format
 #@ woocommerce
 msgid "You cannot add &quot;%s&quot; to the cart because the product is out of stock."
-msgstr ""
+msgstr "Nem adhatod hozz a(z) &quot;%s&quot; terméket a kosárba, mert az elfogyott."
 
 #: classes/class-wc-cart.php:830
 #, php-format
@@ -11246,7 +11246,7 @@ msgstr "Sajnálom, ez a kupon nem használható akciós termékeknél."
 msgid "File %d"
 msgstr "Fájl %d"
 
-#: classes/class-wc-order.php:1033
+#: classes/class-wc-order.php:1034
 #: templates/cart/totals.php:145
 #: templates/checkout/review-order.php:151
 #, php-format
@@ -11257,7 +11257,7 @@ msgstr "(%s tartalmaz)"
 #: classes/emails/class-wc-email-customer-completed-order.php:24
 #@ woocommerce
 msgid "Completed order"
-msgstr "Befejezett rendelés"
+msgstr "Teljesített rendelés"
 
 #: classes/emails/class-wc-email-customer-completed-order.php:25
 #@ woocommerce
@@ -11267,22 +11267,22 @@ msgstr ""
 #: classes/emails/class-wc-email-customer-completed-order.php:27
 #@ woocommerce
 msgid "Your order is complete"
-msgstr "Rendelésed befejezve"
+msgstr "Rendelésed teljesítve"
 
 #: classes/emails/class-wc-email-customer-completed-order.php:28
 #@ woocommerce
 msgid "Your {blogname} order from {order_date} is complete"
-msgstr "{blogname} rendelés {order_date}-kor befejeződött"
+msgstr "{blogname} rendelés {order_date}-kor teljesítve"
 
 #: classes/emails/class-wc-email-customer-completed-order.php:37
 #@ woocommerce
 msgid "Your order is complete - download your files"
-msgstr "A rendelésed befejeződött - töltsd le a fájlt"
+msgstr "A rendelésed teljesítve - töltsd le a fájlt"
 
 #: classes/emails/class-wc-email-customer-completed-order.php:38
 #@ woocommerce
 msgid "Your {blogname} order from {order_date} is complete - download your files"
-msgstr "{blogname} rendelés {order_date}-kor befejeződött - töltsd le a fájlt"
+msgstr "{blogname} rendelés {order_date}-kor teljesítve - töltsd le a fájlt"
 
 #: classes/emails/class-wc-email-customer-completed-order.php:141
 #: classes/emails/class-wc-email-new-order.php:128
@@ -11349,7 +11349,7 @@ msgstr "Email fejrész (fizetett)"
 #: classes/emails/class-wc-email-customer-new-account.php:31
 #@ woocommerce
 msgid "New account"
-msgstr "Új profil"
+msgstr "Új fiók"
 
 #: classes/emails/class-wc-email-customer-new-account.php:32
 #@ woocommerce
@@ -11359,7 +11359,7 @@ msgstr ""
 #: classes/emails/class-wc-email-customer-new-account.php:37
 #@ woocommerce
 msgid "Your account on {blogname}"
-msgstr "A profilod {blogname}"
+msgstr "A {blogname} fiókod"
 
 #: classes/emails/class-wc-email-customer-new-account.php:38
 #@ woocommerce
@@ -12659,7 +12659,7 @@ msgstr "North West"
 msgid "Western Cape"
 msgstr "Western Cape"
 
-#: templates/cart/cart.php:96
+#: templates/cart/cart.php:100
 #: templates/single-product/add-to-cart/quantity.php:13
 #@ woocommerce
 msgctxt "Product quantity input tooltip"
@@ -12692,7 +12692,7 @@ msgstr ""
 #: templates/checkout/form-login.php:14
 #@ woocommerce
 msgid "Returning customer?"
-msgstr ""
+msgstr "Visszatérő vásárló?"
 
 #: templates/checkout/review-order.php:238
 #@ woocommerce
@@ -12914,14 +12914,14 @@ msgstr[0] "Címkék:"
 #, php-format
 #@ woocommerce
 msgid "Rated %d out of 5"
-msgstr "Értékelve %d az 5-ből"
+msgstr "Értékelve 5-ből %s"
 
 #: templates/single-product-reviews.php:78
 #@ woocommerce
 msgid "Add Your Review"
 msgstr "Értékelésed hozzáadása"
 
-#: woocommerce-ajax.php:1231
+#: woocommerce-ajax.php:1234
 #@ woocommerce
 msgid "Value"
 msgstr "Érték"
@@ -13073,14 +13073,14 @@ msgstr "Nincs fájl megadva"
 #: woocommerce-functions.php:1574
 #@ woocommerce
 msgid "Password changed successfully."
-msgstr ""
+msgstr "A jelszó sikeresen megváltoztatva."
 
 #: woocommerce-functions.php:1650
 #@ woocommerce
 msgid "Address changed successfully."
 msgstr "Cím sikeresen módosítva."
 
-#: woocommerce.php:1171
+#: woocommerce.php:1173
 #@ woocommerce
 msgid "Sorry, no products matched your selection. Please choose a different combination."
 msgstr "Sajnálom, de egyetlen termék sem felelt meg a kritériumnak. Kérlek, válassz egy másik kombinációt."
@@ -13088,7 +13088,7 @@ msgstr "Sajnálom, de egyetlen termék sem felelt meg a kritériumnak. Kérlek, 
 #: admin/includes/notice-theme-support.php:6
 #@ woocommerce
 msgid "<strong>Your theme does not declare WooCommerce support</strong> &#8211; if you encounter layout issues please read our integration guide or choose a WooCommerce theme :)"
-msgstr ""
+msgstr "<strong>A sablonod nem kaphat WooCommerce támogatást</strong> &#8211; ha találkozol elrendezésbeli problémával, kérlek olvasd el az integrációs leírást vagy válassz WooCommerce sablont. :)"
 
 #: admin/includes/notice-theme-support.php:7
 #@ woocommerce
@@ -13108,7 +13108,7 @@ msgstr ""
 #: admin/post-types/writepanels/variation-admin-html.php:67
 #@ woocommerce
 msgid "Variation price (required)"
-msgstr "Tulajdonság ár (kötelező)"
+msgstr "Variáció ár (kötelező)"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:212
 #@ woocommerce
@@ -13153,7 +13153,7 @@ msgstr ""
 #: admin/settings/settings-init.php:137
 #@ woocommerce
 msgid "Force SSL (HTTPS) on the checkout pages (an SSL Certificate is required)."
-msgstr ""
+msgstr "Titkosított SSL (HTTPS) a pénztár oldalon (SSL-tanúsítvány szükséges)."
 
 #: admin/settings/settings-init.php:192
 #@ woocommerce
@@ -13208,7 +13208,7 @@ msgstr "Kijelentkező oldal"
 #: admin/settings/settings-init.php:422
 #@ woocommerce
 msgid "Parent: \"My Account\""
-msgstr "Szülő: \"Profilom\""
+msgstr "Szülő: \"Fiókom\""
 
 #: admin/settings/settings-init.php:501
 #@ woocommerce
@@ -13259,7 +13259,7 @@ msgstr "kijelentkezes"
 #: admin/woocommerce-admin-reports.php:2127
 #@ woocommerce
 msgid "Marked out of stock"
-msgstr ""
+msgstr "Elfogyott megjelölve"
 
 #: admin/woocommerce-admin-status.php:392
 #@ woocommerce
@@ -13274,13 +13274,13 @@ msgstr "Sablon felülírások"
 #: admin/woocommerce-admin-status.php:416
 #@ woocommerce
 msgid "No core overrides present in theme."
-msgstr ""
+msgstr "Nincs alap, ami felülírja a jelenlegi sablont."
 
 #: classes/gateways/cod/class-wc-gateway-cod.php:97
 #: classes/gateways/cod/class-wc-gateway-cod.php:103
 #@ woocommerce
 msgid "Pay with cash upon delivery."
-msgstr ""
+msgstr "Fizetés készpénzben a kiszállításkor."
 
 #: i18n/states/HU.php:13
 #@ woocommerce
