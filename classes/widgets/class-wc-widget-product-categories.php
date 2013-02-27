@@ -104,21 +104,21 @@ class WC_Widget_Product_Categories extends WP_Widget {
 			$this->current_cat = false;
 			$this->cat_ancestors = array();
 
-			if ( is_tax('product_cat') ) :
+			if ( is_tax('product_cat') ) {
 
 				$this->current_cat = $wp_query->queried_object;
 				$this->cat_ancestors = get_ancestors( $this->current_cat->term_id, 'product_cat' );
 
-			elseif ( is_singular('product') ) :
+			} elseif ( is_singular('product') ) {
 
-				$product_category = wp_get_post_terms( $post->ID, 'product_cat' );
+				$product_category = wp_get_post_terms( $post->ID, 'product_cat', array( 'orderby' => 'parent' ) );
 
-				if ($product_category) :
-					$this->current_cat = end($product_category);
+				if ( $product_category ) {
+					$this->current_cat   = end( $product_category );
 					$this->cat_ancestors = get_ancestors( $this->current_cat->term_id, 'product_cat' );
-				endif;
+				}
 
-			endif;
+			}
 
 			include_once( $woocommerce->plugin_path() . '/classes/walkers/class-product-cat-list-walker.php' );
 
