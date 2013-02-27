@@ -137,7 +137,7 @@ abstract class WC_Email extends WC_Settings_API {
 		// Save settings hook
 		add_action( 'woocommerce_update_options_email_' . $this->id, array( $this, 'process_admin_options' ) );
 
-		// Default template base if not declared in child constructor 
+		// Default template base if not declared in child constructor
 		if ( is_null( $this->template_base ) )
 			$this->template_base = $woocommerce->plugin_path() . '/templates/';
 
@@ -268,8 +268,9 @@ abstract class WC_Email extends WC_Settings_API {
 	 * @return bool
 	 */
 	function is_enabled() {
-		if ( $this->enabled == "yes" )
-			return true;
+		$enabled = $this->enabled == "yes" ? true : false;
+
+		return apply_filters( 'woocommerce_email_enabled_' . $this->id, $enabled, $this->object );
 	}
 
 	/**
