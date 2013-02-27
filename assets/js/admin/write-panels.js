@@ -618,6 +618,11 @@ jQuery( function($){
 
 		} );
 
+		if ( item_ids.length == 0 ) {
+			alert( woocommerce_writepanel_params.i18n_select_items );
+			return;
+		}
+
 		if ( action == 'delete' ) {
 
 			var answer = confirm( woocommerce_writepanel_params.remove_item_notice );

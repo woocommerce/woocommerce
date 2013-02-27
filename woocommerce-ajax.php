@@ -86,7 +86,7 @@ function woocommerce_sidebar_login_ajax_process() {
 
 	// Login
 	$user = wp_signon( $creds, $secure_cookie );
-	
+
 	// Filter the redirect URL.
 	$redirect_to = apply_filters('woocommerce_login_widget_redirect', $redirect_to, isset( $_REQUEST['redirect_to'] ) ? $_REQUEST['redirect_to'] : '', $user);
 
@@ -1135,8 +1135,8 @@ function woocommerce_ajax_reduce_order_item_stock() {
 	check_ajax_referer( 'order-item', 'security' );
 
 	$order_id		= absint( $_POST['order_id'] );
-	$order_item_ids	= $_POST['order_item_ids'];
-	$order_item_qty	= $_POST['order_item_qty'];
+	$order_item_ids	= isset( $_POST['order_item_ids'] ) ? $_POST['order_item_ids'] : array();
+	$order_item_qty	= isset( $_POST['order_item_qty'] ) ? $_POST['order_item_qty'] : array();
 	$order 			= new WC_Order( $order_id );
 	$order_items 	= $order->get_items();
 	$return 		= array();
@@ -1164,6 +1164,9 @@ function woocommerce_ajax_reduce_order_item_stock() {
 
 		do_action( 'woocommerce_reduce_order_stock', $order );
 
+		if ( empty( $return ) )
+			$return[] = __( 'No products had their stock reduced - they may not have stock management enabled.', 'woocommerce' );
+
 		echo implode( ', ', $return );
 	}
 
@@ -1184,8 +1187,8 @@ function woocommerce_ajax_increase_order_item_stock() {
 	check_ajax_referer( 'order-item', 'security' );
 
 	$order_id		= absint( $_POST['order_id'] );
-	$order_item_ids	= $_POST['order_item_ids'];
-	$order_item_qty	= $_POST['order_item_qty'];
+	$order_item_ids	= isset( $_POST['order_item_ids'] ) ? $_POST['order_item_ids'] : array();
+	$order_item_qty	= isset( $_POST['order_item_qty'] ) ? $_POST['order_item_qty'] : array();
 	$order 			= new WC_Order( $order_id );
 	$order_items 	= $order->get_items();
 	$return 		= array();
@@ -1211,6 +1214,9 @@ function woocommerce_ajax_increase_order_item_stock() {
 		}
 
 		do_action( 'woocommerce_restore_order_stock', $order );
+
+		if ( empty( $return ) )
+			$return[] = __( 'No products had their stock increased - they may not have stock management enabled.', 'woocommerce' );
 
 		echo implode( ', ', $return );
 	}

@@ -419,6 +419,7 @@ function woocommerce_admin_scripts() {
 
 		$woocommerce_witepanel_params = array(
 			'remove_item_notice' 			=> __( 'Are you sure you want to remove the selected items? If you have previously reduced this item\'s stock, or this order was submitted by a customer, you will need to manually restore the item\'s stock.', 'woocommerce' ),
+			'i18n_select_items'				=> __( 'Please select some items.', 'woocommerce' ),
 			'remove_item_meta'				=> __( 'Remove this item meta?', 'woocommerce' ),
 			'remove_attribute'				=> __( 'Remove this attribute?', 'woocommerce' ),
 			'name_label'					=> __( 'Name', 'woocommerce' ),
