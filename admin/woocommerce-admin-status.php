@@ -505,7 +505,7 @@ function woocommerce_scan_template_files( $template_path ) {
 function woocommerce_status_tools() {
 	global $woocommerce, $wpdb;
 
-	$tools = apply_filters( 'wc_debug_tools', array(
+	$tools = apply_filters( 'woocommerce_debug_tools', array(
 		'clear_transients' => array(
 			'name'		=> __( 'WC Transients','woocommerce'),
 			'button'	=> __('Clear transients','woocommerce'),
