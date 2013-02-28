@@ -226,7 +226,8 @@ class WC_Checkout {
 			foreach ( $this->checkout_fields['shipping'] as $key => $field ) {
 				if ( $this->posted['shiptobilling'] ) {
 
-					update_post_meta( $order_id, '_' . $key, $this->posted[ str_replace( 'shipping_', 'billing_', $key ) ] );
+					if ( isset( $this->posted[ str_replace( 'shipping_', 'billing_', $key ) ] ) )
+						update_post_meta( $order_id, '_' . $key, $this->posted[ str_replace( 'shipping_', 'billing_', $key ) ] );
 
 				} else {
 
