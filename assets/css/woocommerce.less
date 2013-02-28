@@ -1767,3 +1767,29 @@ p.demo_store {
 		}
 	}
 }
+// Firefox hack :( (for some reason Firefox doesn't like applying font-size to pseudo-elements containing unicode chars in the content property)
+@-moz-document url-prefix() {
+	.woocommerce .star-rating, .woocommerce-page .star-rating {
+		width:3.4em;
+		font-size:1.5em;
+	}
+	.woocommerce p.stars, .woocommerce-page p.stars {
+		width:3.5em;
+		font-size:1.5em;
+		a.star-1 {
+			width:.7em;
+		}
+		a.star-2 {
+			width:1.4em;
+		}
+		a.star-3 {
+			width:2.1em;
+		}
+		a.star-4 {
+			width:2.8em;
+		}
+		a.star-5 {
+			width:3.5em;
+		}
+	}
+}
