@@ -448,6 +448,9 @@ function woocommerce_order_actions_meta_box( $post ) {
 					}
 					?>
 				</optgroup>
+				<?php foreach( apply_filters( 'woocommerce_order_actions', array() ) as $action => $title ) { ?>
+					<option value="<?php echo $action; ?>"><?php echo $title; ?></option>
+				<?php } ?>
 			</select>
 
 			<button class="button wc-reload" title="<?php _e( 'Apply', 'woocommerce' ); ?>"><span><?php _e( 'Apply', 'woocommerce' ); ?></span></button>
@@ -924,7 +927,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 				}
 			}
 
-			do_action( 'woocommerce_after_resend_order_email', $order, $email_to_send );
+			do_action( 'woocommerce_after_resend_order_emails', $order, $resend_emails );
 
 		} else {
 
