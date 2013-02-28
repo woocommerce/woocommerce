@@ -372,7 +372,7 @@ function woocommerce_products_by_type() {
 		$output = "<select name='product_type' id='dropdown_product_type'>";
 		$output .= '<option value="">'.__( 'Show all product types', 'woocommerce' ).'</option>';
 		foreach($terms as $term) :
-			$output .="<option value='$term->name' ";
+			$output .="<option value='" . sanitize_title( $term->name ) . "' ";
 			if ( isset( $wp_query->query['product_type'] ) ) $output .=selected($term->slug, $wp_query->query['product_type'], false);
 			$output .=">";
 

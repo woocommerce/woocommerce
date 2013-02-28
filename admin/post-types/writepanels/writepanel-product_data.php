@@ -30,7 +30,7 @@ function woocommerce_product_data_box() {
 	$thepostid = $post->ID;
 
 	if ( $terms = wp_get_object_terms( $post->ID, 'product_type' ) )
-		$product_type = current( $terms )->name;
+		$product_type = sanitize_title( current( $terms )->name );
 	else
 		$product_type = 'simple';
 

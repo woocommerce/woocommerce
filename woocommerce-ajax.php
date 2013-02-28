@@ -655,6 +655,7 @@ function woocommerce_add_variation() {
 
 		$_tax_class = '';
 		$image_id = 0;
+		$variation = get_post( $variation_id ); // Get the variation object
 
 		include( 'admin/post-types/writepanels/variation-admin-html.php' );
 	}
