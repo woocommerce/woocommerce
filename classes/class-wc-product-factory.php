@@ -46,7 +46,8 @@ class WC_Product_Factory {
 				$product_type = ! empty( $terms ) && isset( current( $terms )->name ) ? sanitize_title( current( $terms )->name ) : 'simple';
 			}
 
-			$classname = 'WC_Product_' . preg_replace( '/(?<=_)(.)/e', "strtoupper( '$1' )", ucfirst( $product_type ) );
+			// Create a WC coding standards compliant class name e.g. WC_Product_Type_Class instead of WC_Product_type-class
+			$classname = 'WC_Product_' . preg_replace( '/-(.)/e', "'_' . strtoupper( '$1' )", ucfirst( $product_type ) );
 		} else {
 			$classname = false;
 			$product_type = false;
