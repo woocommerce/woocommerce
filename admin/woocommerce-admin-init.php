@@ -454,7 +454,7 @@ function woocommerce_admin_scripts() {
 			'currency_format_decimal_sep'	=> esc_attr( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ) ),
 			'currency_format_thousand_sep'	=> esc_attr( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ) ),
 			'currency_format'				=> esc_attr( str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) ), // For accounting JS
-			'product_types'					=> get_terms( 'product_type', array( 'fields' => 'names' ) )
+			'product_types'					=> array_map( 'sanitize_title', get_terms( 'product_type', array( 'fields' => 'names' ) ) )
 		 );
 
 		wp_localize_script( 'woocommerce_writepanel', 'woocommerce_writepanel_params', $woocommerce_witepanel_params );
