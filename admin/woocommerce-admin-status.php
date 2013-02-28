@@ -193,7 +193,7 @@ function woocommerce_status_report() {
 	        		$posting['wp_remote_post']['success'] = false;
 	        	}
 
-	        	$posting = apply_filters( 'wc_debug_posting', $posting );
+	        	$posting = apply_filters( 'woocommerce_debug_posting', $posting );
 
 	        	foreach( $posting as $post ) { $mark = ( isset( $post['success'] ) && $post['success'] == true ) ? 'yes' : 'error';
 	        		?>
