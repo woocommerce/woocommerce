@@ -43,7 +43,7 @@ class WC_Product_Factory {
 				$product_type = 'variation';
 			} else {
 				$terms        = get_the_terms( $product_id, 'product_type' );
-				$product_type = ! empty( $terms ) && isset( current( $terms )->name ) ? current( $terms )->name : 'simple';
+				$product_type = ! empty( $terms ) && isset( current( $terms )->name ) ? sanitize_title( current( $terms )->name ) : 'simple';
 			}
 
 			$classname = 'WC_Product_' . preg_replace( '/(?<=_)(.)/e', "strtoupper( '$1' )", ucfirst( $product_type ) );
