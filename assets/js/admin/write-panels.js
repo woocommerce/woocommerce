@@ -926,7 +926,7 @@ jQuery( function($){
 
 		// Hide/Show all with rules
 		var hide_classes = '.hide_if_downloadable, .hide_if_virtual';
-		var show_classes = '.show_if_downloadable, .show_if_virtual';
+		var show_classes = '.show_if_downloadable, .show_if_virtual, .show_if_external';
 
 		$.each( woocommerce_writepanel_params.product_types, function( index, value ) {
 			hide_classes = hide_classes + ', .hide_if_' + value;
