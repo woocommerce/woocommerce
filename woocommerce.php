@@ -1351,10 +1351,17 @@ class Woocommerce {
 	 *
 	 * @access public
 	 * @param mixed $request
-	 * @return void
+	 * @param mixed $ssl (default: null)
+	 * @return string
 	 */
-	public function api_request_url( $request ) {
-		return esc_url_raw( home_url( '/wc-api/' . $request ) );
+	public function api_request_url( $request, $ssl = null ) {
+		if ( is_null( $ssl ) )
+			$ssl = is_ssl();
+
+		$url = trailingslashit( home_url( '/wc-api/' . $request ) );
+		$url = $ssl ? str_replace( 'http:', 'https:', $url ) : str_replace( 'https:', 'http:', $url );
+
+		return esc_url_raw( $url );
 	}
 
 
