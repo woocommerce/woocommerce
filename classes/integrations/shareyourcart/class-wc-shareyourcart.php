@@ -20,7 +20,7 @@ class WC_ShareYourCart extends WC_Integration {
 	public function __construct() {
         $this->id					= 'shareyourcart';
         $this->method_title     	= __( 'ShareYourCart', 'woocommerce' );
-        $this->method_description	= __( 'Increase your social media exposure by 10 percent! ShareYourCart helps you get more customers by motivating satisfied customers to talk with their friends about your products. For help with ShareYourCart view the <a href="http://www.woothemes.com/woocommerce-docs/user-guide/shareyourcart/" target="__blank">documentation</a>.', 'woocommerce' );
+        $this->method_description	= __( 'Increase your social media exposure by 10 percent! ShareYourCart helps you get more customers by motivating satisfied customers to talk with their friends about your products. For help with ShareYourCart view the <a href="http://docs.woothemes.com/document/shareyourcart/" target="__blank">documentation</a>.', 'woocommerce' );
 
 		// Load the settings.
 		$this->init_form_fields();

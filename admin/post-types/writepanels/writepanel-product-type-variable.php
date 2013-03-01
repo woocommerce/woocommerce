@@ -64,7 +64,7 @@ function variable_product_type_options() {
 				<div class="squeezer">
 					<h4><?php _e( 'Before adding variations, add and save some attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ); ?></h4>
 
-					<p class="submit"><a class="button-primary" href="http://www.woothemes.com/woocommerce-docs/user-guide/product-variations/" target="_blank"><?php _e( 'Learn more', 'woocommerce' ); ?></a></p>
+					<p class="submit"><a class="button-primary" href="http://docs.woothemes.com/document/product-variations/" target="_blank"><?php _e( 'Learn more', 'woocommerce' ); ?></a></p>
 				</div>
 			</div>
 

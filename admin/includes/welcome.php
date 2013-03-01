@@ -144,7 +144,7 @@ class WC_Welcome_Page {
 
 		<p class="woocommerce-actions">
 			<a href="<?php echo admin_url('admin.php?page=woocommerce_settings'); ?>" class="button button-primary"><?php _e( 'Settings', 'woocommerce' ); ?></a>
-			<a class="docs button button-primary" href="http://www.woothemes.com/woocommerce-docs/"><?php _e( 'Docs', 'woocommerce' ); ?></a>
+			<a class="docs button button-primary" href="http://docs.woothemes.com/"><?php _e( 'Docs', 'woocommerce' ); ?></a>
 			<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="A open-source (free) #ecommerce plugin for #WordPress that helps you sell anything. Beautifully." data-via="WooThemes" data-size="large" data-hashtags="WooCommerce">Tweet</a>
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 		</p>
