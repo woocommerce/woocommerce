@@ -191,7 +191,7 @@ class WC_Welcome_Page {
 					<div>
 						<img src="<?php echo $woocommerce->plugin_url() . '/assets/images/welcome/product.png'; ?>" alt="Product panel screenshot" style="width: 99%; margin: 0 0 1em;" />
 						<h4><?php _e( 'New Product Panel', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'We have revised the product data panel making it cleaner, more streamlined, and more logical. Adding products is a doddle!', 'woocommerce' ); ?></p>
+						<p><?php _e( 'We have revised the product data panel making it cleaner, more streamlined, and more logical. Adding products is a breeze!', 'woocommerce' ); ?></p>
 					</div>
 
 					<div>
