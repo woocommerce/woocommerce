@@ -12,29 +12,29 @@ WooCommerce is a powerful, extendable eCommerce plugin that helps you sell anyth
 
 == Description ==
 
-Transform your WordPress website into a thorough-bred online eCommerce store. Delivering enterprise-level quality and features whilst backed by a name you can trust. Say hello to the WooCommerce eCommerce plugin.
+Transform your WordPress website into a thorough-bred eCommerce store. Delivering enterprise-level quality and features whilst backed by a name you can trust. Say "hello" to the WooCommerce eCommerce plugin.
 
 WooCommerce is built by the experienced folk at WooThemes who also offer premium [eCommerce themes](http://www.woothemes.com/product-category/themes/woocommerce/ "eCommerce themes from WooThemes") and [extensions](http://www.woothemes.com/product-category/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes") to further enhance your shopfront.
 
-[vimeo http://vimeo.com/29198966]
+[vimeo http://vimeo.com/60440851]
 
 = STRENGTH & FLEXIBILITY =
-Built upon core WordPress functionality for stability, with enough hooks and filters to satisfy the most avid theme developer, eCommerce is now truly accessible to anyone.
+WooCommerce is built using WordPress best practises both on the front and the back end. This results in an efficient, robust and intuitive plugin.
 
 = SMART DASHBOARD WIDGETS & REPORTS =
 Keep a birds-eye view of incoming sales and reviews, stock levels and general store performance and statistics all from the WordPress dashboard or go to the reports section to view stats in more detail.
 
 = CUSTOMIZABLE =
-Your business is unique, as should your online store. Choose one of our [eCommerce themes](http://www.woothemes.com/product-category/themes/woocommerce/ "eCommerce themes from WooThemes") or build your own and give it a personal touch using the built in shortcodes and widgets.
+Your business is unique, your online store should be too. Choose one of our [eCommerce themes](http://www.woothemes.com/product-category/themes/woocommerce/ "eCommerce themes from WooThemes") or build your own and give it a personal touch using the built in shortcodes and widgets.
 
-WooCommerce works with any theme, including the default WordPress themes Twenty Ten and Eleven. If you need help getting your theme working nicely with WooCommerce read our [theming docs](http://wcdocs.woothemes.com/category/codex/theming/).
+WooCommerce works with any theme, including the default WordPress themes Twenty Ten, Twenty Eleven and Twenty Twelve. If you need help getting your theme working nicely with WooCommerce please read our [theming docs](http://docs.woothemes.com/document/third-party-custom-theme-compatibility/) to discover your options.
 
-Looking for a tailored WordPress eCommmerce theme designed specifically to be used with WooCommerce? Be sure to browse the official [WooCommerce Themes](http://www.woothemes.com/product-category/themes/woocommerce/) and check out our free themes, such as [Mystile](http://www.woothemes.com/products/mystile/), [Artificer](http://www.woothemes.com/products/artificer/) and [Wootique](http://www.woothemes.com/products/wootique/).
+If you're ooking for a tailored WordPress eCommmerce theme designed specifically to be used with WooCommerce be sure to browse the official [WooCommerce Themes](http://www.woothemes.com/product-category/themes/woocommerce/). Also check out our free themes, [Mystile](http://www.woothemes.com/products/mystile/), [Artificer](http://www.woothemes.com/products/artificer/) and [Wootique](http://www.woothemes.com/products/wootique/).
 
 = FEATURES =
-Seriously, WooCommerce has got more features than you can shake a stick at. But don't just take our word for it, try it for yourself! You can read more about features on the [WooCommerce website](http://www.woothemes.com/woocommerce/ "WooCommerce: An open-source eCommerce plugin for WordPress").
+Whether you're operating a superstore selling thousands of products, or a just a sole trader selling hand made arts and crafts WooCommerce has you covered. You can read all about WooCommerce' features on the [WooCommerce website](http://www.woothemes.com/woocommerce/ "WooCommerce: An open-source eCommerce plugin for WordPress").
 
-Payment Gateways, Shipping Methods and Integrations are important to any store - WC comes bundled with the following:
+Payment Gateways, Shipping Methods and Integrations are important to any store - WooCommerce comes bundled with the following:
 
 * __PayPal Standard Gateway__ - Accept credit cards and PayPal payments
 * __Mijireh Checkout__ - Accept credit cards via Stripe, Authorize.net, PayPal, eWay, SagePay, Braintree, PayLeap, and more.
@@ -46,11 +46,15 @@ Payment Gateways, Shipping Methods and Integrations are important to any store -
 * __Sharedaddy__ and __ShareThis__ - Let your customers share your products with their friends
 * __ShareYourCart__ - Encourage your customers to share their purchases in return for a coupon
 
-Need a specific payment gateway? Perhaps additional shipping methods? WooCommerce has a plethora of eCommerce extensions available to provide just that. [View our extensions](http://www.woothemes.com/product-category/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes").
+Need a specific payment gateway? Perhaps additional shipping methods? WooCommerce has a plethora of eCommerce extensions available to provide just that.
+
+* [View Payment Gateways](http://www.woothemes.com/product-category/woocommerce-extensions/?prod_cat%5B%5D=1023&s=&post_type=product&min_price=0&max_price=129&prod_country=0 "Payment gateways for WooCommerce from WooThemes").
+* [View Shipping Methods](http://www.woothemes.com/product-category/woocommerce-extensions/?prod_cat%5B%5D=1026&s=&post_type=product&min_price=0&max_price=129&post_type=product&prod_country=0 "Shipping methods for WooCommerce from WooThemes").
+* [View all extensions](http://www.woothemes.com/product-category/woocommerce-extensions/ "View all WooCommerce extensions").
 
 = GET INVOLVED =
 
-Developers can checkout and contribute to the source code on the [WooCommerce GitHub Repository](http://github.com/woothemes/woocommerce/).
+Developers can checkout and contribute to the source code on the [WooCommerce GitHub Repository](https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md).
 
 == Installation ==
 
@@ -77,9 +81,9 @@ The manual installation method involves downloading our eCommerce plugin and upl
 
 = Upgrading =
 
-Automatic updates should work a charm; as always though, ensure you backup your site just in case.
+Automatic updates should work like a charm; as always though, ensure you backup your site just in case.
 
-If on the off chance you do encounter issues with the shop/category pages after an update you simply need to flush the permalinks by going to WordPress > Settings > Permalinks and hitting 'save'. That should return things to normal.
+If on the off-chance you do encounter issues with the shop/category pages after an update you simply need to flush the permalinks by going to WordPress > Settings > Permalinks and hitting 'save'. That should return things to normal.
 
 = Dummy data =
 
@@ -101,6 +105,9 @@ WooCommerce comes with some dummy data you can use to see how products look; eit
 * __Shipping__
 	* [Shipment Tracking](http://www.woothemes.com/extension/shipment-tracking/) - Add tracking info to orders
 	* [Table rate shipping](http://www.woothemes.com/extension/table-rate-shipping/) - Create rules based on country/postcode, weight, cart items, and price.
+	* [UPS Shipping Method](http://www.woothemes.com/products/ups-shipping-method/) - Get calculated shipping rates from UPS
+	* [USPS Shipping Method](http://www.woothemes.com/products/usps-shipping-method/) - Get calculated shipping rates from USPS.
+	* [FedEx Shipping Method](http://www.woothemes.com/products/fedex-shipping-module/) - Get calculated shipping rates from FedEx.
 * __Payment__
 	* [PayPal Pro](http://www.woothemes.com/extension/paypal-pro/) - Direct gateway
 	* [PayPal Express](http://www.woothemes.com/extension/paypal-express/) - Skip the WooCommerce checkout in favour of PayPal
@@ -117,20 +124,23 @@ WordPress.org is home to some cool free extensions too ([search WordPress.org fo
 * [WooCommerce Delivery Notes](http://wordpress.org/extend/plugins/woocommerce-delivery-notes/) - Print delivery Notes for orders.
 * [Affiliates WooCommerce Integration Light](http://wordpress.org/extend/plugins/affiliates-woocommerce-light/) - Integrates Affiliates with WooCommerce.
 * [WooCommerce Multilingual](http://wordpress.org/extend/plugins/woocommerce-multilingual/) - Allows running multilingual e-commerce sites using WooCommerce and WPML.
+* [WooCommerce Grid / List Toggle](http://wordpress.org/extend/plugins/woocommerce-grid-list-toggle/) - Display products in grid or list format.
+* [WooCommerce Customizer](http://wordpress.org/extend/plugins/woocommerce-customizer/) - Customise button text, labels and more from the dashboard.
+* [WooCommerce Custom Product Tabs Lite](http://wordpress.org/extend/plugins/woocommerce-custom-product-tabs-lite/) - Easily create custom tabs for your WooCommerce products.
 
 == Frequently Asked Questions ==
 
 = Where can I find WooCommerce documentation and user guides =
 
-To view our extensive WooCommerce Codex, documentation and tips go to the [WooCommerce Docs site](http://wcdocs.woothemes.com/).
+For help setting up and configuring WooCommerce please refer to our [user guide](http://docs.woothemes.com/document/woocommerce/)
 
-Clients and beginners will appreciate the usage instructions here: [User Guide](http://wcdocs.woothemes.com/category/user-guide/)
+For extending or theming WooCommerce, see our [developer documentation](http://docs.woothemes.com/product/woocommerce-plugin/developer-reference/).
 
-If you get stuck, and your not a WooThemes member, you can ask for help on the [Community Forums](http://www.woothemes.com/support-forum/?viewforum=150)
+If you get stuck and you're not a WooThemes customer, you can ask for help on the [Community Forums](http://wordpress.org/support/plugin/woocommerce).
 
 = Will WooCommerce work with my theme? =
 
-Yes; WooCommerce will work with any theme, but may require some styling to make it match nicely. See our docs.
+Yes; WooCommerce will work with any theme, but may require some styling to make it match nicely. Please see our [developer documentation](http://docs.woothemes.com/product/woocommerce-plugin/developer-reference/) for help.
 
 = Where can I request new features, eCommerce themes and extensions? =
 
