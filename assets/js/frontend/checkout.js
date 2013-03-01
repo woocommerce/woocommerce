@@ -65,7 +65,8 @@ jQuery(document).ready(function($) {
 			data: 		data,
 			success: 	function( response ) {
 				if ( response ) {
-					$('#order_review').after(response).remove();
+					var order_output = $(response);
+					$('#order_review').html(order_output.html());
 					$('body').trigger('updated_checkout');
 				}
 			}
