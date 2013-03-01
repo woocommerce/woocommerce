@@ -1204,51 +1204,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.0.0 =
 There are many improvements in this major release - see the changelog for full details.
 
-The biggest change is that we're redone order item storage making them easier (and faster) to access for reporting and querying purchases; there are huge performance gains for reports.
+The biggest change is that we've redone order item storage making them easier (and faster) to access for reporting and querying purchases; there are huge performance gains for reports.
 
 Order items are no longer serialised data and store in meta - they are stored in there own table with their own meta. Existing data can be updated upon upgrade (you will be prompted). You should backup before upgrading.
 
 On the frontend; if your store is overwriting the core WooCommerce CSS you will need to prefix those overrides with the .woocommerce class as we do in woocommerce.css as of 2.0. Also replaced all instances of .woocommerce_ and .wc- with standardised .woocommerce-.
 
 Fancybox (lightbox popup script) has been replaced with prettyPhoto.
-
-= 1.6.2 =
-1.6 introduced some template changes, for loops in particular. See the changelog for details and ensure theme compatibility before upgrading.
-
-= 1.5.4 =
-Please update your shipping methods after upgrading - the save hooks have been modified to ensure settings are saved more reliably.
-
-Also note, there was a mistake in the code for Quebec -> PQ to QC. If you have rates for Quebec ensure you re-save them.
-
-= 1.5.2.1 =
-Minor update. Note, titles are now hooked in to single-product.php - if you have overridden this template and have double titles, update your single-product.php template with that from core.
-
-= 1.4.4 =
-Minor update fixing a few bugs. If you encounter any problems with the store/category pages after upgrade simply go to Settings > Permalinks and hit 'save'.
-
-= 1.4 =
-Major update with plenty of optimisations and new features. Changes to note:
-
-* Requires WP 3.3
-* Product data meta has been renamed in this version so that custom-fields can be enabled. Product data is now prepended with an underscore so they are hidden from the custom-field panel. Existing data will be upgraded automatically.
-* The shipping method classes have been updated to make rate definition easier. Third party plugins will need updating.
-* Textdomain has changed - re-scan your po/mo's
-* Tax additions (tax rows, compounds etc) required a change to the way order items are stored. Old orders won't show items when viewed. Order totals should be unaffected.
-* Significant modifications to woocommerce.less/.css to deliver a more polished look when using the default styles. If your theme builds on top of this you will likely need to update some classes. Consider using https://gist.github.com/1601558 to disable WooCommerce default css.
-
-Please backup your database before upgrading and also ensure you are running the latest versions of any WooCommerce plugins after upgrading - this includes shipping and payment gateways.
-
-= 1.3 =
-This is a major update and includes improvements to the tax and coupon system in particular - please backup your database before upgrading and also ensure you are running the latest versions of any WooCommerce plugins after upgrading.
-
-= 1.2.3 =
-Fixes minor issues in 1.2.2 - please backup your database before upgrading and also ensure you are running the latest versions of any WooCommerce plugins.
-
-= 1.2.2 =
-Due to some changes in the plugin, if you are using any of our extensions please ensure you check the changelogs and download any updates from your account - especially if using 2CO, iDeal or authorize.net. This version also updates the download permissions table so please ensure you backup your database before upgrading.
-
-= 1.2.1 =
-This version has improved product types - ensure you de/re-activate the theme to ensure existing products get converted correctly.
-
-= 1.2 =
-New features, bug fixes and improvements to keep WooCommerce running smoothly.
