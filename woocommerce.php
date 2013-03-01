@@ -1354,7 +1354,7 @@ class Woocommerce {
 	 * @return void
 	 */
 	public function api_request_url( $request ) {
-		return sanitize_url( home_url( '/wc-api/' . $request ) );
+		return esc_url_raw( home_url( '/wc-api/' . $request ) );
 	}
 
 
