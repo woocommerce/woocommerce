@@ -238,8 +238,7 @@ class Woocommerce {
 	 * @return void
 	 */
 	public function activate() {
-		update_option( 'skip_install_woocommerce_pages', 0 );
-		update_option( 'woocommerce_installed', 1 );
+		update_option( '_wc_install_pages', 1 );
 		$this->install();
 	}
 
@@ -253,6 +252,7 @@ class Woocommerce {
 	function install() {
 		include_once( 'admin/woocommerce-admin-install.php' );
 		do_install_woocommerce();
+		set_transient( '_wc_activation_redirect', 1, 60 * 60 );
 	}
 
 

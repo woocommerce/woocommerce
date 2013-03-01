@@ -43,6 +43,11 @@ include_once( 'woocommerce-admin-functions.php' );
 include_once( 'woocommerce-admin-taxonomies.php' );
 
 /**
+ * Welcome Page
+ */
+include_once( 'includes/welcome.php' );
+
+/**
  * Setup the Admin menu in WordPress
  *
  * @access public
@@ -159,7 +164,7 @@ add_action( 'admin_head', 'woocommerce_admin_menu_highlight' );
  */
 function woocommerce_admin_notices_styles() {
 
-	if ( get_option( 'woocommerce_updated' ) == 1 || get_option( 'woocommerce_needs_update' ) == 1 || get_option( 'woocommerce_installed' ) == 1 ) {
+	if ( get_option( '_wc_needs_update' ) == 1 || get_option( '_wc_install_pages' ) == 1 ) {
 		wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', dirname( __FILE__ ) ) );
 		add_action( 'admin_notices', 'woocommerce_admin_install_notices' );
 	}
@@ -169,11 +174,8 @@ function woocommerce_admin_notices_styles() {
 	if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $template, array( 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
 
 		if ( ! empty( $_GET['hide_woocommerce_theme_support_check'] ) ) {
-
 			update_option( 'woocommerce_theme_support_check', $template );
-
 			return;
-
 		}
 
 		if ( get_option( 'woocommerce_theme_support_check' ) !== $template ) {
@@ -208,31 +210,25 @@ function woocommerce_theme_check_notice() {
 function woocommerce_admin_install_notices() {
 	global $woocommerce;
 
-	if ( get_option( 'woocommerce_needs_update' ) == 1 ) {
+	if ( get_option( '_wc_needs_update' ) == 1 ) {
 
 		include( 'includes/notice-update.php' );
 
-	} elseif ( get_option( 'woocommerce_updated' ) == 1 ) {
+	} elseif ( get_option( '_wc_install_pages' ) == 1 && woocommerce_get_page_id( 'shop' ) < 1 ) {
 
-		include( 'includes/notice-updated.php' );
+		include( 'includes/notice-install.php' );
 
-		update_option( 'woocommerce_updated', 0 );
-		update_option( 'woocommerce_installed', 0 );
+	} elseif ( get_option( '_wc_install_pages' ) == 1 ) {
 
-	} elseif ( get_option( 'woocommerce_installed' ) == 1 ) {
+		// We no longer need to install pages
+		delete_option( '_wc_install_pages' );
 
-		if ( get_option( 'skip_install_woocommerce_pages' ) != 1 && woocommerce_get_page_id( 'shop' ) < 1 && ! isset( $_GET['install_woocommerce_pages'] ) && !isset( $_GET['skip_install_woocommerce_pages'] ) ) {
+		// Flush rules after install
+		flush_rewrite_rules( false );
 
-			include( 'includes/notice-install.php' );
-
-		} elseif ( ! isset( $_GET['page'] ) || $_GET['page'] != 'woocommerce_settings' ) {
-
-			include( 'includes/notice-installed.php' );
-
-			update_option( 'woocommerce_installed', 0 );
-
-		}
-
+		// What's new redirect
+		wp_safe_redirect( admin_url( 'index.php?page=wc-about' ) );
+		exit;
 	}
 }
 
@@ -247,7 +243,57 @@ function woocommerce_admin_init() {
 
 	ob_start();
 
-	if ( $typenow=='post' && isset( $_GET['post'] ) && ! empty( $_GET['post'] ) ) {
+	// Install - Add pages button
+	if ( ! empty( $_GET['install_woocommerce_pages'] ) ) {
+
+		require_once( 'woocommerce-admin-install.php' );
+		woocommerce_create_pages();
+
+		// We no longer need to install pages
+		delete_option( '_wc_install_pages' );
+		delete_transient( '_wc_activation_redirect' );
+
+		// Flush rules after install
+		flush_rewrite_rules( false );
+
+		// What's new redirect
+		wp_safe_redirect( admin_url( 'index.php?page=wc-about&wc-installed=true' ) );
+		exit;
+
+	// Skip button
+	} elseif ( ! empty( $_GET['skip_install_woocommerce_pages'] ) ) {
+
+		// We no longer need to install pages
+		delete_option( '_wc_install_pages' );
+		delete_transient( '_wc_activation_redirect' );
+
+		// Flush rules after install
+		flush_rewrite_rules( false );
+
+		// What's new redirect
+		wp_safe_redirect( admin_url( 'index.php?page=wc-about' ) );
+		exit;
+
+	// Update button
+	} elseif ( ! empty( $_GET['do_update_woocommerce'] ) ) {
+
+		include_once( 'woocommerce-admin-update.php' );
+		do_update_woocommerce();
+
+		// Update complete
+		delete_option( '_wc_install_pages' );
+		delete_option( '_wc_needs_update' );
+
+		// Flush rules after update
+		flush_rewrite_rules( false );
+
+		// What's new redirect
+		wp_safe_redirect( admin_url( 'index.php?page=wc-about&wc-updated=true' ) );
+		exit;
+	}
+
+	// Includes
+	if ( $typenow == 'post' && isset( $_GET['post'] ) && ! empty( $_GET['post'] ) ) {
 		$typenow = $post->post_type;
 	} elseif ( empty( $typenow ) && ! empty( $_GET['post'] ) ) {
 	    $post = get_post( $_GET['post'] );
@@ -327,27 +373,6 @@ function woocommerce_status_page() {
 	include_once( 'woocommerce-admin-status.php' );
 	woocommerce_status();
 }
-
-
-/**
- * update_woocommerce function.
- *
- * @access public
- * @return void
- */
-function update_woocommerce() {
-	if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
-		include_once( 'woocommerce-admin-update.php' );
-		do_update_woocommerce();
-		update_option( 'woocommerce_updated', 1 );
-		update_option( 'woocommerce_needs_update', 0 );
-
-		// Flush rules after update
-		flush_rewrite_rules( false );
-	}
-}
-
-add_action( 'admin_init', 'update_woocommerce' );
 
 
 /**

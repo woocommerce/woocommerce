@@ -169,45 +169,8 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 	    }
 
 	    // Hide WC Link
-	    if (isset($_GET['hide-wc-extensions-message']))
-	    	update_option('hide-wc-extensions-message', 1);
-
-	    // Install/page installer
-	    $install_complete = false;
-
-	    // Add pages button
-	    if (isset($_GET['install_woocommerce_pages']) && $_GET['install_woocommerce_pages']) {
-
-			require_once( 'woocommerce-admin-install.php' );
-	    	woocommerce_create_pages();
-	    	update_option('skip_install_woocommerce_pages', 1);
-	    	$install_complete = true;
-
-		// Skip button
-	    } elseif (isset($_GET['skip_install_woocommerce_pages']) && $_GET['skip_install_woocommerce_pages']) {
-
-	    	update_option('skip_install_woocommerce_pages', 1);
-	    	$install_complete = true;
-
-	    }
-
-		if ($install_complete) {
-			?>
-	    	<div id="message" class="updated woocommerce-message wc-connect">
-				<div class="squeezer">
-					<h4><?php _e( '<strong>Congratulations!</strong> &#8211; WooCommerce has been installed and setup. Enjoy :)', 'woocommerce' ); ?></h4>
-					<p><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="A open-source (free) #ecommerce plugin for #WordPress that helps you sell anything. Beautifully." data-via="WooThemes" data-size="large" data-hashtags="WooCommerce">Tweet</a>
-		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></p>
-				</div>
-			</div>
-			<?php
-
-			// Flush rules after install
-			flush_rewrite_rules( false );
-
-			// Set installed option
-			update_option('woocommerce_installed', 0);
-		}
+	    if ( ! empty( $_GET['hide-wc-extensions-message'] ) )
+	    	update_option( 'hide-wc-extensions-message', 1 );
 	    ?>
 		<div class="wrap woocommerce">
 			<form method="post" id="mainform" action="" enctype="multipart/form-data">
