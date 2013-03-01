@@ -122,7 +122,7 @@ function woocommerce_order_downloads_meta_box() {
 
 				} else {
 
-					alert('<?php _e( 'Could not grant access - the user may already have permission for this file.', 'woocommerce' ); ?>');
+					alert('<?php _e( 'Could not grant access - the user may already have permission for this file or billing email is not set. Ensure the billing email is set, and the order has been saved.', 'woocommerce' ); ?>');
 
 				}
 

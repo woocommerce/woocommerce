@@ -875,6 +875,9 @@ function woocommerce_grant_access_to_download() {
 
 	$user_email = sanitize_email( $order->billing_email );
 
+	if ( ! $user_email )
+		die();
+
 	$limit		= trim( get_post_meta( $product_id, '_download_limit', true ) );
 	$expiry 	= trim( get_post_meta( $product_id, '_download_expiry', true ) );
 	$file_paths = apply_filters( 'woocommerce_file_download_paths', get_post_meta( $product_id, '_file_paths', true ), $product_id, $order_id, null );
