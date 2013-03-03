@@ -222,7 +222,7 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 				return false;
 		}
 
-		// Either post codes not setup, or post codes are in array... so lefts check countries for backwards compatability.
+		// Either post codes not setup, or post codes are in array... so lefts check countries for backwards compatibility.
 		$ship_to_countries = '';
 		if ($this->availability == 'specific') :
 			$ship_to_countries = $this->countries;

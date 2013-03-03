@@ -29,7 +29,7 @@ Your business is unique, your online store should be too. Choose one of our [eCo
 
 WooCommerce works with any theme, including the default WordPress themes Twenty Ten, Twenty Eleven and Twenty Twelve. If you need help getting your theme working nicely with WooCommerce please read our [theming docs](http://docs.woothemes.com/document/third-party-custom-theme-compatibility/) to discover your options.
 
-If you're ooking for a tailored WordPress eCommmerce theme designed specifically to be used with WooCommerce be sure to browse the official [WooCommerce Themes](http://www.woothemes.com/product-category/themes/woocommerce/). Also check out our free themes, [Mystile](http://www.woothemes.com/products/mystile/), [Artificer](http://www.woothemes.com/products/artificer/) and [Wootique](http://www.woothemes.com/products/wootique/).
+If you're looking for a tailored WordPress eCommerce theme designed specifically to be used with WooCommerce be sure to browse the official [WooCommerce Themes](http://www.woothemes.com/product-category/themes/woocommerce/). Also check out our free themes, [Mystile](http://www.woothemes.com/products/mystile/), [Artificer](http://www.woothemes.com/products/artificer/) and [Wootique](http://www.woothemes.com/products/wootique/).
 
 = FEATURES =
 Whether you're operating a superstore selling thousands of products, or a just a sole trader selling hand made arts and crafts WooCommerce has you covered. You can read all about WooCommerce' features on the [WooCommerce website](http://www.woothemes.com/woocommerce/ "WooCommerce: An open-source eCommerce plugin for WordPress").
@@ -221,7 +221,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Templating - CSS classes standardised. Instances of '.woocommerce_' & '.wc-' replaced with '.woocommerce-'
 * Templating - Ratings added to loop. Remove with [this snippet](https://gist.github.com/4518617).
 * Templating - Replaced Fancybox with prettyPhoto
-* Templating - loop-shop which was depricated is now gone for good.
+* Templating - loop-shop which was deprecated is now gone for good.
 * Templating - Renamed empty.php to cart-empty.php to make clearer.
 * Templating - Renamed sorting.php to orderby.php to better reflect contained hooks and code.
 * Templating - Product tabs rewritten - new filter to define tab titles, priorities, and display callbacks.
@@ -382,7 +382,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Formatted addresses in emails in a table to maintain appearance when printing
 * Tweak - Better support for supercache - detect late_init or don't cache
 * Tweak - Added generate_title_html() to settings API
-* Tweak - PayPal standard: No longer using shipping_1 because a) paypal ignore it if *any* shipping rules are within paypal, b) paypal ignore anyhing over 5 digits, so 999.99 is the max
+* Tweak - PayPal standard: No longer using shipping_1 because a) paypal ignore it if *any* shipping rules are within paypal, b) paypal ignore anything over 5 digits, so 999.99 is the max
 * Tweak - Optimised dashboard icons for retina displays
 * Tweak - added is_purchasable class method for products
 * Fix - Removed session_name from 1.6 to prevent issues when other plugins start a session first. Instead, added a KB article on how to do it manually (if needed, this is an edge case)
@@ -514,7 +514,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - Updated localisations
 * Localization - Updated currency symbols
 * Localization - translations for admin menu names
-* Localization - Updated french translaction by Arnaud Cheminand
+* Localization - Updated french translation by Arnaud Cheminand
 
 = 1.5.6 - 17/05/2012 =
 * Feature - Default display for shipping methods is radio buttons. Before, when methods were enabled/disabled based on coupons or customer, changed methods could go unnoticed. Radio options are always visible.
@@ -815,7 +815,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fixed a bug allowing checkout when items are out of stock
 * Added a cart item error page for checkout, if the items are invalid
 * Hidden shipping text when calculator is hidden
-* If theres 1 shipping method, don't show a select box (thanks GeertDD)
+* If there's 1 shipping method, don't show a select box (thanks GeertDD)
 * Don't repeat weight units after each measurement (GeertDD is on a role)
 * CZ fix
 * SKU system changes - old system was confusing and could conflict with post IDs thus the following changes have been made; 1) SKU no longer defaults to post ID automatically, 2) Unique SKU check looks for SKUs only - not post IDs 3) get_sku() will return _sku not post ID
@@ -1120,14 +1120,14 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Moved discount above shipping calc
 * Fixed enter key on product edit page
 * Typos
-* Made custom attributes display 'nicely' in cart widgets, instead of santized
+* Made custom attributes display 'nicely' in cart widgets, instead of sanitized
 
 = 1.1 - 12/10/2011 =
 * Tested and working with WordPress 3.3 beta-1
 * Added a hook for payment complete order status
 * Added woocommerce term meta api
 * Added ability to upload category thumbnails
-* Added option to show sub-categories when browing categories/the shop page
+* Added option to show sub-categories when browsing categories/the shop page
 * Zero tax rate fix
 * Filters for tax rates
 * Fixes to find rate function

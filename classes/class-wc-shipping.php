@@ -186,7 +186,7 @@ class WC_Shipping {
 	 * Calculate shipping for (multiple) packages of cart items.
 	 *
 	 * @access public
-	 * @param array $packages multi-dimentional array of cart items to calc shipping for
+	 * @param array $packages multi-dimensional array of cart items to calc shipping for
 	 */
 	function calculate_shipping( $packages = array() ) {
 		global $woocommerce;
@@ -319,7 +319,7 @@ class WC_Shipping {
 	 * Gets all available shipping methods which have rates.
 	 *
 	 * @todo Currently we support 1 shipping method per order so this function merges rates - in the future we should offer
-	 * 1 rate per package and list them accordinly for user selection
+	 * 1 rate per package and list them accordingly for user selection
 	 *
 	 * @access public
 	 * @return array

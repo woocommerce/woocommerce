@@ -29,7 +29,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	
 		//set exception handler
 		if(set_exception_handler(array(&$this,'UncaughtExceptionHandler')) !== null)
-			restore_exception_handler(); //if there allready was an exception handler, revert back to it
+			restore_exception_handler(); //if there already was an exception handler, revert back to it
 	
 		parent::__construct();
 		
@@ -109,7 +109,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 	/**
 	*
-	* Return FALSE if the curent single product is out of stock, or not
+	* Return FALSE if the current single product is out of stock, or not
 	*
 	*/
 	public function isOutOfStock(){
@@ -225,7 +225,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	/**
 	*
 	* Check if this instance can load, or not!
-	* This is ment so that at ALL times, only the latest plugin version will work
+	* This is meant so that at ALL times, only the latest plugin version will work
 	*
 	*/
 	protected function canLoad()
@@ -698,7 +698,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 			//since we might have changed the status, REFRESH
 			$refresh = true;
 		}  
-		//check if the user want's to recover his account
+		//check if the user wants to recover his account
 		else if (@$_REQUEST['syc-account'] === 'recover'){
 
 			//by default, show the form if we are here
@@ -1071,7 +1071,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 		$this->executeNonQuery($sql);
 		
-		//we can't relly on the fact that the table has been properly created, so check it!
+		//we can't rely on the fact that the table has been properly created, so check it!
 		if(!$this->existsTable($tableName))
 			throw new Exception(SyC::t('sdk','Cannot create table "{table_name}". Check your database permissions or manually run the following SQL command and try again:<br /><strong>{sql}</strong>', array('{table_name}' => $tableName,'{sql}' => nl2br($sql))));
 	}
@@ -1099,7 +1099,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		$sql = "DROP TABLE $tableName";
 		$this->executeNonQuery($sql);
 		
-		//we can't relly on the fact that the table has been properly droped, so check it!
+		//we can't rely on the fact that the table has been properly dropped, so check it!
 		if($this->existsTable($tableName))
 			throw new Exception(SyC::t('sdk','Cannot drop table "{table_name}". Check your database permissions or manually run the following SQL command and try again:<br /><strong>{sql}</strong>', array('{table_name}' => $tableName, '{sql}' => nl2br($sql))));
 	}
@@ -1118,7 +1118,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		//check if there is a file in the specified location
 		if(!file_exists($_viewFile_)){
 			
-			//the view has not been overrided, so use the SDK one
+			//the view has not been overridden, so use the SDK one
 			$_viewFile_ = dirname(__FILE__) . "/views/$_viewName_.php";
 		}
 
@@ -1266,7 +1266,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	
 	/**
 	*
-	* User to catch any unhandled exceptions and print them nicelly
+	* User to catch any unhandled exceptions and print them nicely
 	*
 	*/
 	public function UncaughtExceptionHandler(Exception $e) {

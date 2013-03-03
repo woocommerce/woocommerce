@@ -750,7 +750,7 @@ if ( ! function_exists( 'woocommerce_default_product_tabs' ) ) {
 				'callback' => 'woocommerce_product_description_tab'
 			);
 
-		// Additonal information tab - shows attributes
+		// Additional information tab - shows attributes
 		if ( $product->has_attributes() || ( get_option( 'woocommerce_enable_dimension_product_attributes' ) == 'yes' && ( $product->has_dimensions() || $product->has_weight() ) ) )
 			$tabs['additional_information'] = array(
 				'title'    => __( 'Additional Information', 'woocommerce' ),

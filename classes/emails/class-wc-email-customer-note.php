@@ -38,7 +38,7 @@ class WC_Email_Customer_Note extends WC_Email {
 		// Triggers
 		add_action( 'woocommerce_new_customer_note_notification', array( $this, 'trigger' ) );
 
-		// Call parent constuctor
+		// Call parent constructor
 		parent::__construct();
 	}
 
