@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-02-25 11:29:36+00:00\n"
-"PO-Revision-Date: 2013-03-03 10:00+0100\n"
+"PO-Revision-Date: 2013-03-03 10:13+0100\n"
 "Last-Translator: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
 "Language-Team: Ramon van Belzen <woocommerce@ramoonus.nl>, Geert De "
 "Deckere<geertdd@gmail.com>\n"
@@ -281,6 +281,8 @@ msgid ""
 "code> to instantiate an instance of a product instead of calling this class "
 "directly."
 msgstr ""
+"De <code>WC_Product</code> classe is nu abstract. Gebruik <code>get_product()"
+"</code> om een instantie te initieren in plaats van de klasse te gebruiken."
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-product.php:545
@@ -409,6 +411,8 @@ msgid ""
 "You cannot add that amount of &quot;%s&quot; to the cart because there is "
 "not enough stock (%s remaining)."
 msgstr ""
+"De gewenste hoeveelheid &quot;%s&quot; kan niet aan de winkelwagen "
+"toegevoegd worden vanwege de voorraad (%s op voorraad)."
 
 # @ woocommerce
 #: classes/class-wc-cart.php:842 classes/class-wc-cart.php:856
@@ -2037,6 +2041,8 @@ msgid ""
 "Sorry, coupon \"%s\" has already been applied and cannot be used in "
 "conjunction with other coupons."
 msgstr ""
+"Sorry, de kortingsbon \"%s\" is reeds gebruikt en kan niet in combinatie met "
+"andere kortingsbonnen gebruikt worden."
 
 # @ woocommerce
 #: classes/class-wc-coupon.php:459
@@ -2061,7 +2067,7 @@ msgstr ""
 
 #: classes/class-wc-coupon.php:471
 msgid "Sorry, this coupon is not valid for sale items."
-msgstr ""
+msgstr "Sorry, deze kortingsbon is niet geldig voor aanbiedingen."
 
 # @ woocommerce
 #: classes/class-wc-coupon.php:497
@@ -2864,7 +2870,7 @@ msgstr "Verzendinformatie"
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:175
 msgid "Send shipping details to PayPal instead of billing."
-msgstr ""
+msgstr "Stuur verzendgegevens naar PayPal in plaats van facturering."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:177
@@ -3385,7 +3391,7 @@ msgstr ""
 
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:176
 msgid "Option Name|Cost|Per-order (yes or no)"
-msgstr ""
+msgstr "Optie Naam|Prijs|Per-bestelling (ja/nee)"
 
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:467
@@ -3474,11 +3480,11 @@ msgstr "N.B."
 # @ woocommerce
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:111
 msgid "A valid free shipping coupon"
-msgstr ""
+msgstr "Een geldig gratis verzending kortingsbon"
 
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:112
 msgid "A minimum order amount (defined below)"
-msgstr ""
+msgstr "minimum bestel bedrag (zoals hieronder gedefinieerd)"
 
 # @ woocommerce
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:113
@@ -3691,7 +3697,7 @@ msgstr "Ongeldige gebruikersnaam of e-mailadres."
 
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:152
 msgid "Password reset is not allowed for this user"
-msgstr ""
+msgstr "Wachtwoord reset is niet toegestaan ​​voor deze gebruiker"
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:180
@@ -6086,7 +6092,7 @@ msgstr "Code kortingsbon"
 
 #: templates/checkout/form-login.php:14
 msgid "Returning customer?"
-msgstr ""
+msgstr "Terugkerende klant?"
 
 # @ woocommerce
 #: templates/checkout/form-login.php:17
@@ -6346,6 +6352,7 @@ msgstr ""
 #: templates/emails/plain/customer-reset-password.php:17
 msgid "To reset your password, visit the following address:"
 msgstr ""
+"Als u uw wachtwoord opnieuw in te stellen, gaat u naar het volgende adres:"
 
 # @ woocommerce
 #: templates/emails/customer-reset-password.php:20
@@ -6442,15 +6449,15 @@ msgstr "Standaard productsortering"
 
 #: templates/loop/orderby.php:22
 msgid "Sort by popularity"
-msgstr ""
+msgstr "Sorteren op populariteit"
 
 #: templates/loop/orderby.php:23
 msgid "Sort by average rating"
-msgstr ""
+msgstr "Sorteren op beoordeling"
 
 #: templates/loop/orderby.php:24
 msgid "Sort by newness"
-msgstr ""
+msgstr "Sorteren op datum"
 
 # @ woocommerce
 #: templates/loop/orderby.php:25
@@ -6541,6 +6548,8 @@ msgid ""
 "Lost your password? Please enter your username or email address. You will "
 "receive a link to create a new password via email."
 msgstr ""
+"Wachtwoord vergeten? Voer je gebruikersnaam of e-mailadres. U ontvangt een "
+"link via email om een ​nieuw wachtwoord te creëren."
 
 # @ woocommerce
 #: templates/myaccount/form-lost-password.php:28
@@ -6589,7 +6598,7 @@ msgstr "Bewerken"
 # @ woocommerce
 #: templates/myaccount/my-address.php:64
 msgid "You have not set up this type of address yet."
-msgstr ""
+msgstr "U heeft dit type adres nog niet ingesteld."
 
 # @ woocommerce
 #: templates/myaccount/my-downloads.php:18
@@ -6627,8 +6636,8 @@ msgstr "Status"
 #: templates/myaccount/my-orders.php:62
 msgid "%s for %s item"
 msgid_plural "%s for %s items"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%s voor %s product"
+msgstr[1] "%s voor %s producten"
 
 # @ woocommerce
 # @ default
@@ -6836,7 +6845,7 @@ msgstr "Volgende <span class=\"meta-nav\">&rarr;</span>"
 # @ woocommerce
 #: templates/single-product-reviews.php:78
 msgid "Add Your Review"
-msgstr ""
+msgstr "Geef uw beoordeling"
 
 # @ woocommerce
 #: templates/single-product-reviews.php:78
@@ -6960,7 +6969,7 @@ msgstr "Notitie verwijderen"
 # @ woocommerce
 #: woocommerce-core-functions.php:268
 msgid "%s &ndash; %s%s"
-msgstr ""
+msgstr "%s &ndash; %s%s"
 
 # @ woocommerce
 #: woocommerce-core-functions.php:675
@@ -7145,11 +7154,13 @@ msgstr "Kies product opties&hellip;"
 msgid ""
 "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr ""
+"Kies het aantal artikelen dat u wenst toe te voegen aan uw "
+"winkelwagen&hellip;"
 
 # @ woocommerce
 #: woocommerce-functions.php:385
 msgid "Please choose a product to add to your cart&hellip;"
-msgstr ""
+msgstr "Kies een product om toe te voegen aan uw winkelwagen&hellip;"
 
 # @ woocommerce
 #: woocommerce-functions.php:454
@@ -7289,7 +7300,7 @@ msgstr "Het spijt ons. Deze download is vervallen."
 
 #: woocommerce-functions.php:995
 msgid "No file defined"
-msgstr ""
+msgstr "Geen bestand opgegeven"
 
 # @ woocommerce
 #: woocommerce-functions.php:1098
@@ -7324,12 +7335,12 @@ msgstr "Becijfer het product."
 # @ woocommerce
 #: woocommerce-functions.php:1574
 msgid "Password changed successfully."
-msgstr ""
+msgstr "Wachtwoord veranderd."
 
 # @ woocommerce
 #: woocommerce-functions.php:1650
 msgid "Address changed successfully."
-msgstr ""
+msgstr "Adres veranderd."
 
 # @ woocommerce
 #: woocommerce-template.php:196
@@ -7831,6 +7842,8 @@ msgid ""
 "Sorry, no products matched your selection. Please choose a different "
 "combination."
 msgstr ""
+"Sorry, er zijn geen producten gevonden welke voldoen aan de zoekcriteria. "
+"Gebruik andere zoektermen."
 
 # @ woocommerce
 #: woocommerce.php:1648
