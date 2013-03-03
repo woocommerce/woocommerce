@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-02-25 11:29:36+00:00\n"
-"PO-Revision-Date: 2013-03-03 12:14+0100\n"
+"PO-Revision-Date: 2013-03-03 16:26+0100\n"
 "Last-Translator: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
 "Language-Team: Ramon van Belzen <woocommerce@ramoonus.nl>, Geert De "
 "Deckere<geertdd@gmail.com>\n"
@@ -2697,6 +2697,8 @@ msgid ""
 "If COD is only available for certain methods, set it up here. Leave blank to "
 "enable for all methods."
 msgstr ""
+"Als Rembours niet voor alle typen verzending mogelijk is, dient u dit "
+"hieronder in te stellen. Laat leegt voor actief op alle methoden."
 
 # @ woocommerce
 #: classes/gateways/cod/class-wc-gateway-cod.php:176
@@ -2759,6 +2761,11 @@ msgid ""
 "of your site. Mijireh supports a wide variety of payment gateways: Stripe, "
 "Authorize.net, PayPal, eWay, SagePay, Braintree, PayLeap, and more."
 msgstr ""
+"verzorgd een PCI Compliant, veilige manier voor het verzamelen en verzenden "
+"van creditcard data aan de betalings  gateway terwijl u in controle van het "
+"ontwerp van uw website. Mijireh ondersteund een wijde variateit aan "
+"betalings gateways: Stripe, Authorize.net, PayPal, eWay, SagePay, Braintree, "
+"PayLeap en meer."
 
 # @ woocommerce
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:203
@@ -2777,6 +2784,9 @@ msgid ""
 "card data to your payment gateway while keeping you in control of the design "
 "of your site."
 msgstr ""
+"verzorgd een PCI Compliant, veilige manier voor het verzamelen en verzenden "
+"van creditcard data aan de betalings  gateway terwijl u in controle van het "
+"ontwerp van uw website. "
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:34
@@ -2845,6 +2855,8 @@ msgid ""
 "account for multiple stores ensure this prefix is unqiue as PayPal will not "
 "allow orders with the same invoice number."
 msgstr ""
+"Geef een prefix op voor factuur nummers. Indien je je PayPal account voor "
+"meerdere winkels gebruikt dient deze uniek te zijn. "
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:153
@@ -2862,6 +2874,8 @@ msgid ""
 "Enable this to post order data to PayPal via a form instead of using a "
 "redirect/querystring."
 msgstr ""
+"Schakel dit in om bestelling gegevens naar PayPal via een formulier in "
+"plaats van het gebruik van een redirect / querystring te plaatsen."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:160
@@ -2874,6 +2888,8 @@ msgid ""
 "Optionally enter the name of the page style you wish to use. These are "
 "defined within your PayPal account."
 msgstr ""
+"Optioneel: geef een naam van de gewenste pagina stijling op. Deze worden "
+"gedefinieerd door uw PayPal-rekening."
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:165
 msgid "Optional"
@@ -2900,6 +2916,9 @@ msgid ""
 "PayPal allows us to send 1 address. If you are using PayPal for shipping "
 "labels you may prefer to send the shipping address rather than billing."
 msgstr ""
+"PayPal stelt ons in staat om naar 1 adres te sturen. Als u gebruik maakt van "
+"PayPal voor verzending labels kunt u ervoor kiezen om naar het afleveradres "
+"in plaats van facturering te sturen."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:181
@@ -2919,6 +2938,8 @@ msgid ""
 "PayPal verifies addresses therefore this setting can cause errors (we "
 "recommend keeping it disabled)."
 msgstr ""
+"PayPal verifieerd adressen daarom kan deze instelling voor problemen zorgen. "
+"(u wordt aanbevolen deze uit te laten staan)"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:188
@@ -2941,6 +2962,8 @@ msgid ""
 "PayPal sandbox can be used to test payments. Sign up for a developer account "
 "<a href=\"%s\">here</a>."
 msgstr ""
+"De PayPal Sandbox kan gebruikt worden om betalingen te testen. Geef je <a "
+"href=\"%s\">hier</a> op voor een developer account."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:200
@@ -3183,6 +3206,12 @@ msgid ""
 "\"http://www.woothemes.com/woocommerce-docs/user-guide/shareyourcart/\" "
 "target=\"__blank\">documentation</a>."
 msgstr ""
+"Verhoog uw sociale media-exposure met 10 procent! Verhoog uw sociale media-"
+"exposure met 10 procent! ShareYourCart helpt u meer klanten te krijgen door "
+"mensen aan te sporen met hun vrienden te praten over bij uw winkel "
+"aangeschafte producten. Voor hulp bij  ShareYourCart bekijk de <a href="
+"\"http://www.woothemes.com/woocommerce-docs/user-guide/shareyourcart/\" "
+"target=\"__blank\">documentatie</a>."
 
 #: classes/integrations/shareyourcart/class.shareyourcart-wp.php:328
 msgid "Share your cart settings"
@@ -3412,6 +3441,9 @@ msgid ""
 "<code>Priority Mail|6.95|yes</code>. If per-order is set to no, it will use "
 "the \"Calculation Type\" setting."
 msgstr ""
+"Optioneel extra verzendingsopties zoals kosten per regel. Bijvoorbeeld: "
+"<code>Optie Naam|Kosten|Per-order (ja/nee)</code>. Als per-order op no "
+"staat, gebruikt het  de \"Calculation Type\" instelling."
 
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:176
 msgid "Option Name|Cost|Per-order (yes or no)"
@@ -3455,6 +3487,8 @@ msgid ""
 "Add rates for shipping classes here &mdash; they will override the default "
 "costs defined above."
 msgstr ""
+"Voeg  tarieven voor verzendingsklassen here toe, deze overschrijven de "
+"standaard - hier boven gedefinieerde - kosten. "
 
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:475
@@ -3619,6 +3653,8 @@ msgid ""
 "What fee do you want to charge for local delivery, disregarded if you choose "
 "free. Leave blank to disable."
 msgstr ""
+"Welke vergoeding wil je in rekening brengen voor lokale levering. Laat leeg "
+"om the deactiveren."
 
 # @ woocommerce
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:135
@@ -3632,6 +3668,8 @@ msgid ""
 "What zip/post codes would you like to offer delivery to? Separate codes with "
 "a comma. Accepts wildcards, e.g. P* will match a postcode of PE30."
 msgstr ""
+"Welke postcodes wil je hiervoor toestaan? Komma gescheiden, wilcards "
+"bijvoorbeeld 468* zijn ook mogelijk."
 
 # @ woocommerce
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:172
@@ -3662,6 +3700,8 @@ msgid ""
 "When this shipping method is chosen, apply the base tax rate rather than for "
 "the customer's given address."
 msgstr ""
+"Als een verzend methoden gekozen is, pas de standaard BTW toe ipv de voor de "
+"klant geldend tarief."
 
 # @ woocommerce
 #: classes/shipping/local-pickup/class-wc-shipping-local-pickup.php:134
@@ -3669,6 +3709,8 @@ msgid ""
 "Local pickup is a simple method which allows the customer to pick up their "
 "order themselves."
 msgstr ""
+"Ophalen is een simpele methode welke de klant toestaat om de bestelling op "
+"te komen halen."
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-cart.php:54
@@ -6035,6 +6077,8 @@ msgid ""
 "your state/county and zip/postcode to ensure there are no other available "
 "methods for your location."
 msgstr ""
+"Geen verzendmethoden gevonden: herbereken de verzending door een provincie "
+"en postcode in te voeren om zeker te weten dat verzending mogelijk is."
 
 # @ woocommerce
 #: templates/cart/totals.php:183
@@ -6060,6 +6104,9 @@ msgid ""
 "There are some issues with the items in your cart (shown above). Please go "
 "back to the cart page and resolve these issues before checking out."
 msgstr ""
+"Er zijn problemen met de producten in de winkelwagen hierboven. Ga terug "
+"naar de winkelwagen pagina om deze problemen op te lossen, alvorens de "
+"bestelling af te ronden."
 
 # @ woocommerce
 #: templates/checkout/cart-errors.php:20
