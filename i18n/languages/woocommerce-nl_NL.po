@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-02-25 11:29:36+00:00\n"
-"PO-Revision-Date: 2013-03-03 10:13+0100\n"
+"PO-Revision-Date: 2013-03-03 10:18+0100\n"
 "Last-Translator: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
 "Language-Team: Ramon van Belzen <woocommerce@ramoonus.nl>, Geert De "
 "Deckere<geertdd@gmail.com>\n"
@@ -6974,126 +6974,126 @@ msgstr "%s &ndash; %s%s"
 # @ woocommerce
 #: woocommerce-core-functions.php:675
 msgid "Australian Dollars"
-msgstr ""
+msgstr "Australische Dollars"
 
 # @ woocommerce
 #: woocommerce-core-functions.php:676
 msgid "Brazilian Real"
-msgstr ""
+msgstr "Braziliaanse Real"
 
 #: woocommerce-core-functions.php:677
 msgid "Canadian Dollars"
-msgstr ""
+msgstr "Canadese Dollars"
 
 #: woocommerce-core-functions.php:678
 msgid "Chinese Yuan"
-msgstr ""
+msgstr "Chinese Yuan"
 
 #: woocommerce-core-functions.php:679
 msgid "Czech Koruna"
-msgstr ""
+msgstr "Tsjechische Kroon"
 
 #: woocommerce-core-functions.php:680
 msgid "Danish Krone"
-msgstr ""
+msgstr "Deense Kroon"
 
 #: woocommerce-core-functions.php:681
 msgid "Euros"
-msgstr ""
+msgstr "Euros"
 
 # @ woocommerce
 #: woocommerce-core-functions.php:682
 msgid "Hong Kong Dollar"
-msgstr ""
+msgstr "Hong Kong Dollar"
 
 #: woocommerce-core-functions.php:683
 msgid "Hungarian Forint"
-msgstr ""
+msgstr "Hongaarse Forint"
 
 # @ woocommerce
 #: woocommerce-core-functions.php:684
 msgid "Indonesia Rupiah"
-msgstr ""
+msgstr "Indonesië Rupiah"
 
 # @ woocommerce
 #: woocommerce-core-functions.php:685
 msgid "Israeli Shekel"
-msgstr ""
+msgstr "Israëlische Shekel"
 
 #: woocommerce-core-functions.php:686
 msgid "Japanese Yen"
-msgstr ""
+msgstr "Japanse Yen"
 
 # @ woocommerce
 #: woocommerce-core-functions.php:687
 msgid "Malaysian Ringgits"
-msgstr ""
+msgstr "Maleisische Ringgit"
 
 # @ woocommerce
 #: woocommerce-core-functions.php:688
 msgid "Mexican Peso"
-msgstr ""
+msgstr "Mexicaanse Peso"
 
 #: woocommerce-core-functions.php:689
 msgid "Norwegian Krone"
-msgstr ""
+msgstr "Noorse Kroon"
 
 # @ woocommerce
 #: woocommerce-core-functions.php:690
 msgid "New Zealand Dollar"
-msgstr ""
+msgstr "Nieuw-Zeelandse Dollar"
 
 # @ woocommerce
 #: woocommerce-core-functions.php:691
 msgid "Philippine Pesos"
-msgstr ""
+msgstr "Filippijnse Peso's"
 
 #: woocommerce-core-functions.php:692
 msgid "Polish Zloty"
-msgstr ""
+msgstr "Poolse Zloty"
 
 #: woocommerce-core-functions.php:693
 msgid "Pounds Sterling"
-msgstr ""
+msgstr "Pound Sterling"
 
 # @ woocommerce
 #: woocommerce-core-functions.php:694
 msgid "Romanian Leu"
-msgstr ""
+msgstr "Roemeense Leu"
 
 # @ woocommerce
 #: woocommerce-core-functions.php:695
 msgid "Singapore Dollar"
-msgstr ""
+msgstr "Singapore Dollar"
 
 # @ woocommerce
 #: woocommerce-core-functions.php:696
 msgid "South African rand"
-msgstr ""
+msgstr "Zuid-Afrikaanse rand"
 
 #: woocommerce-core-functions.php:697
 msgid "Swedish Krona"
-msgstr ""
+msgstr "Zweedse Kroon"
 
 #: woocommerce-core-functions.php:698
 msgid "Swiss Franc"
-msgstr ""
+msgstr "Zwitserse Frank"
 
 #: woocommerce-core-functions.php:699
 msgid "Taiwan New Dollars"
-msgstr ""
+msgstr "Taiwan Nieuwe Dollars"
 
 #: woocommerce-core-functions.php:700
 msgid "Thai Baht"
-msgstr ""
+msgstr "Thaise Baht"
 
 #: woocommerce-core-functions.php:701
 msgid "Turkish Lira"
-msgstr ""
+msgstr "Turkse Lira"
 
 #: woocommerce-core-functions.php:702
 msgid "US Dollars"
-msgstr ""
+msgstr "US Dollars"
 
 # @ woocommerce
 #: woocommerce-core-functions.php:1189 woocommerce-core-functions.php:1215
