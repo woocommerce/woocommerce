@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-02-25 11:29:36+00:00\n"
-"PO-Revision-Date: 2013-03-03 10:18+0100\n"
+"PO-Revision-Date: 2013-03-03 12:14+0100\n"
 "Last-Translator: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
 "Language-Team: Ramon van Belzen <woocommerce@ramoonus.nl>, Geert De "
 "Deckere<geertdd@gmail.com>\n"
@@ -2220,6 +2220,8 @@ msgid ""
 "Order complete emails are sent to the customer when the order is marked "
 "complete and usual indicates that the order has been shipped."
 msgstr ""
+"Afgeronde bestelling email worden naar de klant gestuurd zodra de bestelling "
+"op afgerond staat en geeft normaal aan dat de bestelling verzonden is."
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:27
@@ -2272,6 +2274,8 @@ msgid ""
 "Customer invoice emails can be sent to the user containing order info and "
 "payment links."
 msgstr ""
+"Klant factuur e-mails kunnen worden verzonden naar de gebruiker met "
+"bestelling informatie en betaling links."
 
 #: classes/emails/class-wc-email-customer-invoice.php:33
 msgid "Invoice for order {order_number} from {order_date}"
@@ -2308,6 +2312,8 @@ msgid ""
 "Customer new account emails are sent when a customer signs up via the "
 "checkout or My Account page."
 msgstr ""
+"Nieuwe klant account emails worden verstuurd als een klant zich op geeft via "
+"afrekenen of de Mijn Account pagina."
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-new-account.php:37
@@ -2327,10 +2333,12 @@ msgstr "Klantbericht"
 #: classes/emails/class-wc-email-customer-note.php:30
 msgid "Customer note emails are sent when you add a note to an order."
 msgstr ""
+"Klant notitie emails worden verzonden als u een notitie op de bestelling "
+"maakt."
 
 #: classes/emails/class-wc-email-customer-note.php:35
 msgid "Note added to your {blogname} order from {order_date}"
-msgstr ""
+msgstr "Opmerking toegevoegd aan {blogname} bestelling van {order_date}"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-note.php:36
@@ -2347,6 +2355,8 @@ msgid ""
 "This is an order notification sent to the customer after payment containing "
 "order details."
 msgstr ""
+"Dit is een bestelling kennisgeving met bestel details welke naar een klant "
+"verzonden wordt na betaling."
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-processing-order.php:27
@@ -2367,6 +2377,8 @@ msgid ""
 "Customer reset password emails are sent when a customer resets their "
 "password."
 msgstr ""
+"Klant reset wachtwoord e-mails worden verstuurd wanneer een klant zijn "
+"wachtwoord reset."
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-reset-password.php:42
@@ -2386,6 +2398,8 @@ msgstr "Nieuwe bestelling"
 #: classes/emails/class-wc-email-new-order.php:25
 msgid "New order emails are sent when an order is received/paid by a customer."
 msgstr ""
+"Nieuwe bestelling emails worden verzonden zodra een bestelling ontvangen/"
+"betaald is."
 
 # @ woocommerce
 #: classes/emails/class-wc-email-new-order.php:27
@@ -2394,7 +2408,7 @@ msgstr "Nieuwe bestelling (door klant)"
 
 #: classes/emails/class-wc-email-new-order.php:28
 msgid "[{blogname}] New customer order ({order_number}) - {order_date}"
-msgstr ""
+msgstr "[{blogname}] Nieuwe klant bestelling ({order_number}) - {order_date}"
 
 #: classes/emails/class-wc-email-new-order.php:121
 msgid "Recipient(s)"
@@ -2405,6 +2419,8 @@ msgid ""
 "Enter recipients (comma separated) for this email. Defaults to <code>%s</"
 "code>."
 msgstr ""
+"Geef ontvangers op, door komma gescheidenm, voor deze email. Standaard: "
+"<code>%s</code>."
 
 # @ woocommerce
 #: classes/emails/class-wc-email-new-order.php:130
@@ -2412,12 +2428,16 @@ msgid ""
 "This controls the email subject line. Leave blank to use the default "
 "subject: <code>%s</code>."
 msgstr ""
+"Hier stelt u het email onderwerp in. Laat leeg om het volgende onderwerp te "
+"gebruiken: <code>%s</code>."
 
 #: classes/emails/class-wc-email-new-order.php:137
 msgid ""
 "This controls the main heading contained within the email notification. "
 "Leave blank to use the default heading: <code>%s</code>."
 msgstr ""
+"Hier stelt u de koptekst in. Laat leeg om de volgende koptekst te gebruiken: "
+"<code>%s</code>."
 
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:28
@@ -2492,7 +2512,7 @@ msgstr "Account Details"
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:84
 msgid "Optionally enter your bank details below for customers to pay into."
-msgstr ""
+msgstr "Optioneel: geef uw bankrekening gegevens hieronder in."
 
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:88
@@ -2594,6 +2614,8 @@ msgid ""
 "Please send your cheque to Store Name, Store Street, Store Town, Store "
 "State / County, Store Postcode."
 msgstr ""
+"Gelieve uw cheque te sturen naar: Winkel Naam, Winkel Adres, Winkel Postcode "
+"Winkel Stad."
 
 # @ woocommerce
 #: classes/gateways/cheque/class-wc-gateway-cheque.php:91
@@ -2889,7 +2911,7 @@ msgstr "Adres overschrijven"
 msgid ""
 "Enable \"address_override\" to prevent address information from being "
 "changed."
-msgstr ""
+msgstr "Activeer \"address_override\" om adres wijzigingen te blokkeren."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:184
@@ -2936,6 +2958,8 @@ msgid ""
 "Log PayPal events, such as IPN requests, inside <code>woocommerce/logs/"
 "paypal.txt</code>"
 msgstr ""
+"Logt PayPal gebeurtenissen, zoals IPN requests, in <code>woocommerce/logs/"
+"paypal.txt</code>"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:313
@@ -2977,7 +3001,7 @@ msgstr ""
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:634
 msgid "Validation error: PayPal amounts do not match (gross %s)."
-msgstr ""
+msgstr "Validatie fout: PayPal hoeveelheden komen niet overeen (%s)."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:652
@@ -3058,7 +3082,7 @@ msgstr "eCommerce tracking code toevoegen aan de \"Bedankt\"-pagina"
 
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:81
 msgid "Add event tracking code for add to cart actions"
-msgstr ""
+msgstr "Voeg Event Tracking codes toe aan add to cart acties"
 
 # @ woocommerce
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:113
@@ -3143,7 +3167,7 @@ msgstr "ShareThis Code"
 # @ woocommerce
 #: classes/integrations/sharethis/class-wc-sharethis.php:70
 msgid "You can tweak the ShareThis code by editing this option."
-msgstr ""
+msgstr "U kan de ShareThis code aanpassen met behulp van de opties hieronder."
 
 # @ woocommerce
 #: classes/integrations/shareyourcart/class-wc-shareyourcart.php:22
@@ -3614,6 +3638,8 @@ msgstr ""
 msgid ""
 "Local delivery is a simple shipping method for delivering orders locally."
 msgstr ""
+"Local delivery is een eenvoudige verzendmethode voor het leveren van "
+"bestellingen ter plaatse."
 
 # @ woocommerce
 #: classes/shipping/local-pickup/class-wc-shipping-local-pickup.php:25
@@ -3783,6 +3809,8 @@ msgid ""
 "Order <mark class=\"order-number\">%s</mark> made on <mark class=\"order-date"
 "\">%s</mark>"
 msgstr ""
+"Bestelling <mark class=\"order-number\">%s</mark> geplaatst op <mark class="
+"\"order-date\">%s</mark>"
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-view-order.php:57
@@ -6284,6 +6312,8 @@ msgid ""
 "Hi there. Your recent order on %s has been completed. Your order details are "
 "shown below for your reference:"
 msgstr ""
+"Hallo. Uw recente bestelling van %s  is voltooid. Uw bestelling details "
+"worden hieronder weergegeven ter referentie:"
 
 #: templates/emails/customer-invoice.php:16
 #: templates/emails/plain/customer-invoice.php:14
@@ -6291,6 +6321,8 @@ msgid ""
 "An order has been created for you on %s. To pay for this order please use "
 "the following link: %s"
 msgstr ""
+"Uw bestelling is aangemaakt op %s. Om te betalen voor deze bestelling kunt u "
+"gebruik maken van de volgende link: %s"
 
 # @ woocommerce
 #: templates/emails/customer-invoice.php:16
@@ -6331,11 +6363,14 @@ msgid ""
 "Your order has been received and is now being processed. Your order details "
 "are shown below for your reference:"
 msgstr ""
+"Uw bestelling is ontvangen en wordt nu verwerkt. Uw bestelling details "
+"worden hieronder weergegeven ter referentie:"
 
 #: templates/emails/customer-reset-password.php:14
 #: templates/emails/plain/customer-reset-password.php:13
 msgid "Someone requested that the password be reset for the following account:"
 msgstr ""
+"Iemand heeft  een wachtwoord reset aangevraagd voor de volgende account:"
 
 # @ woocommerce
 #: templates/emails/customer-reset-password.php:15
@@ -6346,7 +6381,7 @@ msgstr "Gebruikersnaam: %s"
 #: templates/emails/customer-reset-password.php:16
 #: templates/emails/plain/customer-reset-password.php:16
 msgid "If this was a mistake, just ignore this email and nothing will happen."
-msgstr ""
+msgstr "Als dit een vergissing was, negeer deze e-mail en niets zal gebeuren."
 
 #: templates/emails/customer-reset-password.php:17
 #: templates/emails/plain/customer-reset-password.php:17
