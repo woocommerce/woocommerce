@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-02-25 11:29:36+00:00\n"
-"PO-Revision-Date: 2013-03-02 09:11+0100\n"
+"PO-Revision-Date: 2013-03-03 10:00+0100\n"
 "Last-Translator: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
 "Language-Team: Ramon van Belzen <woocommerce@ramoonus.nl>, Geert De "
 "Deckere<geertdd@gmail.com>\n"
@@ -701,7 +701,7 @@ msgstr "België"
 # @ woocommerce
 #: classes/class-wc-countries.php:59
 msgid "Belau"
-msgstr ""
+msgstr "Belau"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:60
@@ -2849,7 +2849,7 @@ msgstr ""
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:165
 msgid "Optional"
-msgstr ""
+msgstr "Optioneel"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:168
@@ -4705,141 +4705,141 @@ msgstr "West Coast"
 
 #: i18n/states/ID.php:13
 msgid "Daerah Istimewa Aceh"
-msgstr ""
+msgstr "Daerah Istimewa Aceh"
 
 #: i18n/states/ID.php:14
 msgid "Sumatera Utara"
-msgstr ""
+msgstr "Sumatera Utara"
 
 #: i18n/states/ID.php:15
 msgid "Sumatera Barat"
-msgstr ""
+msgstr "Sumatera Barat"
 
 #: i18n/states/ID.php:16
 msgid "Riau"
-msgstr ""
+msgstr "Riau"
 
 #: i18n/states/ID.php:17
 msgid "Kepulauan Riau"
-msgstr ""
+msgstr "Kepulauan Riau"
 
 # @ woocommerce
 #: i18n/states/ID.php:18
 msgid "Jambi"
-msgstr ""
+msgstr "Jambi"
 
 #: i18n/states/ID.php:19
 msgid "Sumatera Selatan"
-msgstr ""
+msgstr "Sumatera Selatan"
 
 #: i18n/states/ID.php:20
 msgid "Bangka Belitung"
-msgstr ""
+msgstr "Bangka Belitung"
 
 #: i18n/states/ID.php:21
 msgid "Bengkulu"
-msgstr ""
+msgstr "Bengkulu"
 
 #: i18n/states/ID.php:22
 msgid "Lampung"
-msgstr ""
+msgstr "Lampung"
 
 #: i18n/states/ID.php:23
 msgid "DKI Jakarta"
-msgstr ""
+msgstr "DKI Jakarta"
 
 #: i18n/states/ID.php:24
 msgid "Jawa Barat"
-msgstr ""
+msgstr "Jawa Barat"
 
 #: i18n/states/ID.php:25
 msgid "Banten"
-msgstr ""
+msgstr "Banten"
 
 #: i18n/states/ID.php:26
 msgid "Jawa Tengah"
-msgstr ""
+msgstr "Jawa Tengah"
 
 #: i18n/states/ID.php:27
 msgid "Jawa Timur"
-msgstr ""
+msgstr "Java Timur"
 
 #: i18n/states/ID.php:28
 msgid "Daerah Istimewa Yogyakarta"
-msgstr ""
+msgstr "Daerah Istimewa Yogyakarta"
 
 #: i18n/states/ID.php:29
 msgid "Bali"
-msgstr ""
+msgstr "Bali"
 
 #: i18n/states/ID.php:30
 msgid "Nusa Tenggara Barat"
-msgstr ""
+msgstr "Nusa Tenggara Barat"
 
 #: i18n/states/ID.php:31
 msgid "Nusa Tenggara Timur"
-msgstr ""
+msgstr "Nusa Tenggara Timur"
 
 #: i18n/states/ID.php:32
 msgid "Kalimantan Barat"
-msgstr ""
+msgstr "Kalimantan Barat"
 
 #: i18n/states/ID.php:33
 msgid "Kalimantan Tengah"
-msgstr ""
+msgstr "Kalimantan Tengah"
 
 #: i18n/states/ID.php:34
 msgid "Kalimantan Timur"
-msgstr ""
+msgstr "Kalimantan Timur"
 
 #: i18n/states/ID.php:35
 msgid "Kalimantan Selatan"
-msgstr ""
+msgstr "Kalimantan Selatan"
 
 # @ woocommerce
 #: i18n/states/ID.php:36
 msgid "Kalimantan Utara"
-msgstr ""
+msgstr "Kalimantan Utara"
 
 #: i18n/states/ID.php:37
 msgid "Sulawesi Utara"
-msgstr ""
+msgstr "Sulawesi Utara"
 
 #: i18n/states/ID.php:38
 msgid "Sulawesi Tengah"
-msgstr ""
+msgstr "Sulawesi Tengah"
 
 #: i18n/states/ID.php:39
 msgid "Sulawesi Tenggara"
-msgstr ""
+msgstr "Sulawesi Tenggara"
 
 #: i18n/states/ID.php:40
 msgid "Sulawesi Barat"
-msgstr ""
+msgstr "Sulawesi Barat"
 
 #: i18n/states/ID.php:41
 msgid "Sulawesi Selatan"
-msgstr ""
+msgstr "Sulawesi Selatan"
 
 #: i18n/states/ID.php:42
 msgid "Gorontalo"
-msgstr ""
+msgstr "Gorontalo"
 
 #: i18n/states/ID.php:43
 msgid "Maluku"
-msgstr ""
+msgstr "Maluku"
 
 #: i18n/states/ID.php:44
 msgid "Maluku Utara"
-msgstr ""
+msgstr "Maluku Utara"
 
 #: i18n/states/ID.php:45
 msgid "Papua"
-msgstr ""
+msgstr "Papua"
 
 #: i18n/states/ID.php:46
 msgid "Papua Barat"
-msgstr ""
+msgstr "Papua Barat"
 
 #: i18n/states/IN.php:13
 msgid "Andra Pradesh"
