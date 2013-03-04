@@ -122,6 +122,10 @@ class WC_Welcome_Page {
 	private function intro() {
 		global $woocommerce;
 
+		// Flush rules after update
+		if ( ! empty( $_GET['wc-updated'] ) )
+			flush_rewrite_rules( false );
+
 		// Drop minor version if 0
 		$major_version = strstr( $woocommerce->version, '0.0' ) ? substr( $woocommerce->version, 0, 3 ) : $woocommerce->version;
 		?>

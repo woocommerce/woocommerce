@@ -284,9 +284,6 @@ function woocommerce_admin_init() {
 		delete_option( '_wc_install_pages' );
 		delete_option( '_wc_needs_update' );
 
-		// Flush rules after update
-		flush_rewrite_rules( false );
-
 		// What's new redirect
 		wp_safe_redirect( admin_url( 'index.php?page=wc-about&wc-updated=true' ) );
 		exit;
