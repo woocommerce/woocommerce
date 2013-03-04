@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce v2.0.0-RC3\n"
+"Project-Id-Version: WooCommerce v2.0.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-03-02 12:30:06+0000\n"
+"PO-Revision-Date: 2013-03-04 09:32:42+0000\n"
 "Last-Translator: kukac7 <kukac7@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -6938,11 +6938,6 @@ msgstr "Kérlek add meg a PayPal email címedet; ami a fizetéshez szükséges."
 msgid "Invoice Prefix"
 msgstr "Számla előtag"
 
-#: classes/gateways/paypal/class-wc-gateway-paypal.php:148
-#@ woocommerce
-msgid "Please enter a prefix for your invoice numbers. If you use your PayPal account for multiple stores ensure this prefix is unqiue as PayPal will not allow orders with the same invoice number."
-msgstr ""
-
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:153
 #@ woocommerce
 msgid "Submission method"
@@ -13713,9 +13708,14 @@ msgstr ""
 msgid "US Virgin Islands"
 msgstr "US Virgin Islands"
 
+#: classes/gateways/paypal/class-wc-gateway-paypal.php:148
+#@ woocommerce
+msgid "Please enter a prefix for your invoice numbers. If you use your PayPal account for multiple stores ensure this prefix is unique as PayPal will not allow orders with the same invoice number."
+msgstr ""
+
 #. translators: plugin header field 'Version'
 #: woocommerce.php:0
 #@ woocommerce
-msgid "2.0.0-RC3"
-msgstr "2.0.0-RC3"
+msgid "2.0.0"
+msgstr ""
 
