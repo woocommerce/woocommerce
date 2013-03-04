@@ -418,6 +418,9 @@ class WC_Welcome_Page {
 		if ( is_network_admin() || isset( $_GET['activate-multi'] ) )
 			return;
 
+		if ( ( isset( $_GET['action'] ) && 'upgrade-plugin' == $_GET['action'] ) && ( isset( $_GET['plugin'] ) && strstr( $_GET['plugin'], 'woocommerce.php' ) ) )
+			return;
+
 		wp_safe_redirect( admin_url( 'index.php?page=wc-about' ) );
 		exit;
 	}
