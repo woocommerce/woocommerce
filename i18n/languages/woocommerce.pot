@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.0.0-RC2 Front-end\n"
+"Project-Id-Version: WooCommerce 2.0.0 Front-end\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2013-02-25 11:29:36+00:00\n"
+"POT-Creation-Date: 2013-03-04 09:46:16+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -89,7 +89,7 @@ msgstr ""
 msgid "Thankyou"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:417
+#: classes/abstracts/abstract-wc-email.php:421
 #: classes/emails/class-wc-email-customer-completed-order.php:135
 #: classes/emails/class-wc-email-customer-invoice.php:138
 #: classes/emails/class-wc-email-new-order.php:115
@@ -103,20 +103,20 @@ msgstr ""
 msgid "Enable/Disable"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:419
+#: classes/abstracts/abstract-wc-email.php:423
 #: classes/emails/class-wc-email-customer-completed-order.php:137
 #: classes/emails/class-wc-email-customer-invoice.php:140
 #: classes/emails/class-wc-email-new-order.php:117
 msgid "Enable this email notification"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:423
+#: classes/abstracts/abstract-wc-email.php:427
 #: classes/emails/class-wc-email-customer-invoice.php:144
 msgid "Email subject"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:425
-#: classes/abstracts/abstract-wc-email.php:432
+#: classes/abstracts/abstract-wc-email.php:429
+#: classes/abstracts/abstract-wc-email.php:436
 #: classes/emails/class-wc-email-customer-completed-order.php:143
 #: classes/emails/class-wc-email-customer-completed-order.php:150
 #: classes/emails/class-wc-email-customer-completed-order.php:157
@@ -128,102 +128,102 @@ msgstr ""
 msgid "Defaults to <code>%s</code>"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:430
+#: classes/abstracts/abstract-wc-email.php:434
 #: classes/emails/class-wc-email-customer-invoice.php:151
 msgid "Email heading"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:437
+#: classes/abstracts/abstract-wc-email.php:441
 #: classes/emails/class-wc-email-customer-completed-order.php:169
 #: classes/emails/class-wc-email-customer-invoice.php:172
 #: classes/emails/class-wc-email-new-order.php:142
 msgid "Email type"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:439
+#: classes/abstracts/abstract-wc-email.php:443
 #: classes/emails/class-wc-email-customer-completed-order.php:171
 #: classes/emails/class-wc-email-customer-invoice.php:174
 #: classes/emails/class-wc-email-new-order.php:144
 msgid "Choose which format of email to send."
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:443
+#: classes/abstracts/abstract-wc-email.php:447
 #: classes/emails/class-wc-email-customer-completed-order.php:175
 #: classes/emails/class-wc-email-customer-invoice.php:178
 #: classes/emails/class-wc-email-new-order.php:148
 msgid "Plain text"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:444
+#: classes/abstracts/abstract-wc-email.php:448
 #: classes/emails/class-wc-email-customer-completed-order.php:176
 #: classes/emails/class-wc-email-customer-invoice.php:179
 #: classes/emails/class-wc-email-new-order.php:149
 msgid "HTML"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:445
+#: classes/abstracts/abstract-wc-email.php:449
 #: classes/emails/class-wc-email-customer-completed-order.php:177
 #: classes/emails/class-wc-email-customer-invoice.php:180
 #: classes/emails/class-wc-email-new-order.php:150
 msgid "Multipart"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:481
-#: classes/abstracts/abstract-wc-email.php:502
+#: classes/abstracts/abstract-wc-email.php:485
+#: classes/abstracts/abstract-wc-email.php:506
 msgid "Could not write to template file."
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:529
+#: classes/abstracts/abstract-wc-email.php:533
 msgid "Template file copied to theme."
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:538
+#: classes/abstracts/abstract-wc-email.php:542
 msgid "Template file deleted from theme."
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:546
+#: classes/abstracts/abstract-wc-email.php:550
 #: classes/abstracts/abstract-wc-integration.php:30
 #: classes/abstracts/abstract-wc-settings-api.php:39
 msgid "Settings"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:558
+#: classes/abstracts/abstract-wc-email.php:562
 msgid "HTML template"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:559
+#: classes/abstracts/abstract-wc-email.php:563
 msgid "Plain text template"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:578
+#: classes/abstracts/abstract-wc-email.php:582
 msgid "Delete template file"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:581
+#: classes/abstracts/abstract-wc-email.php:585
 msgid "This template has been overridden by your theme and can be found in: <code>%s</code>."
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:596
+#: classes/abstracts/abstract-wc-email.php:600
 msgid "Copy file to theme"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:599
+#: classes/abstracts/abstract-wc-email.php:603
 msgid "To override and edit this email template copy <code>%s</code> to your theme folder: <code>%s</code>."
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:610
+#: classes/abstracts/abstract-wc-email.php:614
 msgid "File was not found."
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:635
+#: classes/abstracts/abstract-wc-email.php:639
 msgid "View template"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:636
+#: classes/abstracts/abstract-wc-email.php:640
 msgid "Hide template"
 msgstr ""
 
-#: classes/abstracts/abstract-wc-email.php:647
+#: classes/abstracts/abstract-wc-email.php:651
 msgid "Are you sure you want to delete this template file?"
 msgstr ""
 
@@ -262,7 +262,7 @@ msgstr ""
 
 #: classes/abstracts/abstract-wc-product.php:849
 #: classes/abstracts/abstract-wc-product.php:855 classes/class-wc-cart.php:1743
-#: classes/class-wc-order.php:862 classes/class-wc-product-variable.php:274
+#: classes/class-wc-order.php:863 classes/class-wc-product-variable.php:274
 #: classes/class-wc-product-variable.php:283
 #: classes/class-wc-product-variation.php:246
 msgid "Free!"
@@ -313,8 +313,8 @@ msgid "You cannot add that amount of &quot;%s&quot; to the cart because there is
 msgstr ""
 
 #: classes/class-wc-cart.php:842 classes/class-wc-cart.php:856
-#: classes/class-wc-cart.php:864 templates/cart/mini-cart.php:65
-#: woocommerce-functions.php:469 woocommerce.php:1175
+#: classes/class-wc-cart.php:864 templates/cart/mini-cart.php:68
+#: woocommerce-functions.php:470 woocommerce.php:1176
 msgid "View Cart &rarr;"
 msgstr ""
 
@@ -366,81 +366,81 @@ msgctxt "Order date parsed by strftime"
 msgid "%b %d, %Y @ %I:%M %p"
 msgstr ""
 
-#: classes/class-wc-checkout.php:275
+#: classes/class-wc-checkout.php:276
 msgid "Backordered"
 msgstr ""
 
-#: classes/class-wc-checkout.php:385
+#: classes/class-wc-checkout.php:386
 msgid "Sorry, your session has expired. <a href=\"%s\">Return to homepage &rarr;</a>"
 msgstr ""
 
-#: classes/class-wc-checkout.php:437 woocommerce-functions.php:1631
+#: classes/class-wc-checkout.php:438 woocommerce-functions.php:1632
 msgid "is a required field."
 msgstr ""
 
-#: classes/class-wc-checkout.php:450
+#: classes/class-wc-checkout.php:451
 msgid "(%s) is not a valid postcode/ZIP."
 msgstr ""
 
-#: classes/class-wc-checkout.php:471
+#: classes/class-wc-checkout.php:472
 msgid "is not valid. Please enter one of the following:"
 msgstr ""
 
-#: classes/class-wc-checkout.php:479
+#: classes/class-wc-checkout.php:480
 msgid "is not a valid number."
 msgstr ""
 
-#: classes/class-wc-checkout.php:486
+#: classes/class-wc-checkout.php:487
 msgid "is not a valid email address."
 msgstr ""
 
-#: classes/class-wc-checkout.php:542
+#: classes/class-wc-checkout.php:543
 msgid "Please enter an account username."
 msgstr ""
 
-#: classes/class-wc-checkout.php:546
+#: classes/class-wc-checkout.php:547
 msgid "Invalid email/username."
 msgstr ""
 
-#: classes/class-wc-checkout.php:549
+#: classes/class-wc-checkout.php:550
 msgid "An account is already registered with that username. Please choose another."
 msgstr ""
 
-#: classes/class-wc-checkout.php:559
+#: classes/class-wc-checkout.php:560
 msgid "Please enter an account password."
 msgstr ""
 
-#: classes/class-wc-checkout.php:562
+#: classes/class-wc-checkout.php:563
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:85
-#: woocommerce-functions.php:730 woocommerce-functions.php:1561
+#: woocommerce-functions.php:731 woocommerce-functions.php:1562
 msgid "Passwords do not match."
 msgstr ""
 
-#: classes/class-wc-checkout.php:566
+#: classes/class-wc-checkout.php:567
 msgid "An account is already registered with your email address. Please login."
 msgstr ""
 
-#: classes/class-wc-checkout.php:572
+#: classes/class-wc-checkout.php:573
 msgid "You must accept our Terms &amp; Conditions."
 msgstr ""
 
-#: classes/class-wc-checkout.php:581
+#: classes/class-wc-checkout.php:582
 msgid "Invalid shipping method."
 msgstr ""
 
-#: classes/class-wc-checkout.php:594
+#: classes/class-wc-checkout.php:595
 msgid "Invalid payment method."
 msgstr ""
 
-#: classes/class-wc-checkout.php:634 woocommerce-core-functions.php:2485
-#: woocommerce-core-functions.php:2488 woocommerce-functions.php:702
-#: woocommerce-functions.php:704 woocommerce-functions.php:707
-#: woocommerce-functions.php:719 woocommerce-functions.php:721
-#: woocommerce-functions.php:724 woocommerce-functions.php:758
+#: classes/class-wc-checkout.php:635 woocommerce-core-functions.php:2485
+#: woocommerce-core-functions.php:2488 woocommerce-functions.php:703
+#: woocommerce-functions.php:705 woocommerce-functions.php:708
+#: woocommerce-functions.php:720 woocommerce-functions.php:722
+#: woocommerce-functions.php:725 woocommerce-functions.php:759
 msgid "ERROR"
 msgstr ""
 
-#: classes/class-wc-checkout.php:634 woocommerce-functions.php:758
+#: classes/class-wc-checkout.php:635 woocommerce-functions.php:759
 msgid "Couldn&#8217;t register you&hellip; please contact us if you continue to have problems."
 msgstr ""
 
@@ -461,1116 +461,1091 @@ msgid "Algeria"
 msgstr ""
 
 #: classes/class-wc-countries.php:41
-msgid "American Samoa"
-msgstr ""
-
-#: classes/class-wc-countries.php:42
 msgid "Andorra"
 msgstr ""
 
-#: classes/class-wc-countries.php:43
+#: classes/class-wc-countries.php:42
 msgid "Angola"
 msgstr ""
 
-#: classes/class-wc-countries.php:44
+#: classes/class-wc-countries.php:43
 msgid "Anguilla"
 msgstr ""
 
-#: classes/class-wc-countries.php:45
+#: classes/class-wc-countries.php:44
 msgid "Antarctica"
 msgstr ""
 
-#: classes/class-wc-countries.php:46
+#: classes/class-wc-countries.php:45
 msgid "Antigua and Barbuda"
 msgstr ""
 
-#: classes/class-wc-countries.php:47
+#: classes/class-wc-countries.php:46
 msgid "Argentina"
 msgstr ""
 
-#: classes/class-wc-countries.php:48
+#: classes/class-wc-countries.php:47
 msgid "Armenia"
 msgstr ""
 
-#: classes/class-wc-countries.php:49
+#: classes/class-wc-countries.php:48
 msgid "Aruba"
 msgstr ""
 
-#: classes/class-wc-countries.php:50
+#: classes/class-wc-countries.php:49
 msgid "Australia"
 msgstr ""
 
-#: classes/class-wc-countries.php:51
+#: classes/class-wc-countries.php:50
 msgid "Austria"
 msgstr ""
 
-#: classes/class-wc-countries.php:52
+#: classes/class-wc-countries.php:51
 msgid "Azerbaijan"
 msgstr ""
 
-#: classes/class-wc-countries.php:53
+#: classes/class-wc-countries.php:52
 msgid "Bahamas"
 msgstr ""
 
-#: classes/class-wc-countries.php:54
+#: classes/class-wc-countries.php:53
 msgid "Bahrain"
 msgstr ""
 
-#: classes/class-wc-countries.php:55
+#: classes/class-wc-countries.php:54
 msgid "Bangladesh"
 msgstr ""
 
-#: classes/class-wc-countries.php:56
+#: classes/class-wc-countries.php:55
 msgid "Barbados"
 msgstr ""
 
-#: classes/class-wc-countries.php:57
+#: classes/class-wc-countries.php:56
 msgid "Belarus"
 msgstr ""
 
-#: classes/class-wc-countries.php:58
+#: classes/class-wc-countries.php:57
 msgid "Belgium"
 msgstr ""
 
-#: classes/class-wc-countries.php:59
+#: classes/class-wc-countries.php:58
 msgid "Belau"
 msgstr ""
 
-#: classes/class-wc-countries.php:60
+#: classes/class-wc-countries.php:59
 msgid "Belize"
 msgstr ""
 
-#: classes/class-wc-countries.php:61
+#: classes/class-wc-countries.php:60
 msgid "Benin"
 msgstr ""
 
-#: classes/class-wc-countries.php:62
+#: classes/class-wc-countries.php:61
 msgid "Bermuda"
 msgstr ""
 
-#: classes/class-wc-countries.php:63
+#: classes/class-wc-countries.php:62
 msgid "Bhutan"
 msgstr ""
 
-#: classes/class-wc-countries.php:64
+#: classes/class-wc-countries.php:63
 msgid "Bolivia"
 msgstr ""
 
-#: classes/class-wc-countries.php:65
+#: classes/class-wc-countries.php:64
 msgid "Bonaire, Saint Eustatius and Saba"
 msgstr ""
 
-#: classes/class-wc-countries.php:66
+#: classes/class-wc-countries.php:65
 msgid "Bosnia and Herzegovina"
 msgstr ""
 
-#: classes/class-wc-countries.php:67
+#: classes/class-wc-countries.php:66
 msgid "Botswana"
 msgstr ""
 
-#: classes/class-wc-countries.php:68
+#: classes/class-wc-countries.php:67
 msgid "Bouvet Island"
 msgstr ""
 
-#: classes/class-wc-countries.php:69
+#: classes/class-wc-countries.php:68
 msgid "Brazil"
 msgstr ""
 
-#: classes/class-wc-countries.php:70
+#: classes/class-wc-countries.php:69
 msgid "British Indian Ocean Territory"
 msgstr ""
 
-#: classes/class-wc-countries.php:71
+#: classes/class-wc-countries.php:70
 msgid "British Virgin Islands"
 msgstr ""
 
-#: classes/class-wc-countries.php:72
+#: classes/class-wc-countries.php:71
 msgid "Brunei"
 msgstr ""
 
-#: classes/class-wc-countries.php:73
+#: classes/class-wc-countries.php:72
 msgid "Bulgaria"
 msgstr ""
 
-#: classes/class-wc-countries.php:74
+#: classes/class-wc-countries.php:73
 msgid "Burkina Faso"
 msgstr ""
 
-#: classes/class-wc-countries.php:75
+#: classes/class-wc-countries.php:74
 msgid "Burundi"
 msgstr ""
 
-#: classes/class-wc-countries.php:76
+#: classes/class-wc-countries.php:75
 msgid "Cambodia"
 msgstr ""
 
-#: classes/class-wc-countries.php:77
+#: classes/class-wc-countries.php:76
 msgid "Cameroon"
 msgstr ""
 
-#: classes/class-wc-countries.php:78
+#: classes/class-wc-countries.php:77
 msgid "Canada"
 msgstr ""
 
-#: classes/class-wc-countries.php:79
+#: classes/class-wc-countries.php:78
 msgid "Cape Verde"
 msgstr ""
 
-#: classes/class-wc-countries.php:80
+#: classes/class-wc-countries.php:79
 msgid "Cayman Islands"
 msgstr ""
 
-#: classes/class-wc-countries.php:81
+#: classes/class-wc-countries.php:80
 msgid "Central African Republic"
 msgstr ""
 
-#: classes/class-wc-countries.php:82
+#: classes/class-wc-countries.php:81
 msgid "Chad"
 msgstr ""
 
-#: classes/class-wc-countries.php:83
+#: classes/class-wc-countries.php:82
 msgid "Chile"
 msgstr ""
 
-#: classes/class-wc-countries.php:84
+#: classes/class-wc-countries.php:83
 msgid "China"
 msgstr ""
 
-#: classes/class-wc-countries.php:85
+#: classes/class-wc-countries.php:84
 msgid "Christmas Island"
 msgstr ""
 
-#: classes/class-wc-countries.php:86
+#: classes/class-wc-countries.php:85
 msgid "Cocos (Keeling) Islands"
 msgstr ""
 
-#: classes/class-wc-countries.php:87
+#: classes/class-wc-countries.php:86
 msgid "Colombia"
 msgstr ""
 
-#: classes/class-wc-countries.php:88
+#: classes/class-wc-countries.php:87
 msgid "Comoros"
 msgstr ""
 
-#: classes/class-wc-countries.php:89
+#: classes/class-wc-countries.php:88
 msgid "Congo (Brazzaville)"
 msgstr ""
 
-#: classes/class-wc-countries.php:90
+#: classes/class-wc-countries.php:89
 msgid "Congo (Kinshasa)"
 msgstr ""
 
-#: classes/class-wc-countries.php:91
+#: classes/class-wc-countries.php:90
 msgid "Cook Islands"
 msgstr ""
 
-#: classes/class-wc-countries.php:92
+#: classes/class-wc-countries.php:91
 msgid "Costa Rica"
 msgstr ""
 
-#: classes/class-wc-countries.php:93
+#: classes/class-wc-countries.php:92
 msgid "Croatia"
 msgstr ""
 
-#: classes/class-wc-countries.php:94
+#: classes/class-wc-countries.php:93
 msgid "Cuba"
 msgstr ""
 
-#: classes/class-wc-countries.php:95
+#: classes/class-wc-countries.php:94
 msgid "Cura&Ccedil;ao"
 msgstr ""
 
-#: classes/class-wc-countries.php:96
+#: classes/class-wc-countries.php:95
 msgid "Cyprus"
 msgstr ""
 
-#: classes/class-wc-countries.php:97
+#: classes/class-wc-countries.php:96
 msgid "Czech Republic"
 msgstr ""
 
-#: classes/class-wc-countries.php:98
+#: classes/class-wc-countries.php:97
 msgid "Denmark"
 msgstr ""
 
-#: classes/class-wc-countries.php:99
+#: classes/class-wc-countries.php:98
 msgid "Djibouti"
 msgstr ""
 
-#: classes/class-wc-countries.php:100
+#: classes/class-wc-countries.php:99
 msgid "Dominica"
 msgstr ""
 
-#: classes/class-wc-countries.php:101
+#: classes/class-wc-countries.php:100
 msgid "Dominican Republic"
 msgstr ""
 
-#: classes/class-wc-countries.php:102
+#: classes/class-wc-countries.php:101
 msgid "Ecuador"
 msgstr ""
 
-#: classes/class-wc-countries.php:103
+#: classes/class-wc-countries.php:102
 msgid "Egypt"
 msgstr ""
 
-#: classes/class-wc-countries.php:104
+#: classes/class-wc-countries.php:103
 msgid "El Salvador"
 msgstr ""
 
-#: classes/class-wc-countries.php:105
+#: classes/class-wc-countries.php:104
 msgid "Equatorial Guinea"
 msgstr ""
 
-#: classes/class-wc-countries.php:106
+#: classes/class-wc-countries.php:105
 msgid "Eritrea"
 msgstr ""
 
-#: classes/class-wc-countries.php:107
+#: classes/class-wc-countries.php:106
 msgid "Estonia"
 msgstr ""
 
-#: classes/class-wc-countries.php:108
+#: classes/class-wc-countries.php:107
 msgid "Ethiopia"
 msgstr ""
 
-#: classes/class-wc-countries.php:109
+#: classes/class-wc-countries.php:108
 msgid "Falkland Islands"
 msgstr ""
 
-#: classes/class-wc-countries.php:110
+#: classes/class-wc-countries.php:109
 msgid "Faroe Islands"
 msgstr ""
 
-#: classes/class-wc-countries.php:111
+#: classes/class-wc-countries.php:110
 msgid "Fiji"
 msgstr ""
 
-#: classes/class-wc-countries.php:112
+#: classes/class-wc-countries.php:111
 msgid "Finland"
 msgstr ""
 
-#: classes/class-wc-countries.php:113
+#: classes/class-wc-countries.php:112
 msgid "France"
 msgstr ""
 
-#: classes/class-wc-countries.php:114
+#: classes/class-wc-countries.php:113
 msgid "French Guiana"
 msgstr ""
 
-#: classes/class-wc-countries.php:115
+#: classes/class-wc-countries.php:114
 msgid "French Polynesia"
 msgstr ""
 
-#: classes/class-wc-countries.php:116
+#: classes/class-wc-countries.php:115
 msgid "French Southern Territories"
 msgstr ""
 
-#: classes/class-wc-countries.php:117
+#: classes/class-wc-countries.php:116
 msgid "Gabon"
 msgstr ""
 
-#: classes/class-wc-countries.php:118
+#: classes/class-wc-countries.php:117
 msgid "Gambia"
 msgstr ""
 
-#: classes/class-wc-countries.php:119 i18n/states/US.php:23
+#: classes/class-wc-countries.php:118 i18n/states/US.php:23
 msgid "Georgia"
 msgstr ""
 
-#: classes/class-wc-countries.php:120
+#: classes/class-wc-countries.php:119
 msgid "Germany"
 msgstr ""
 
-#: classes/class-wc-countries.php:121
+#: classes/class-wc-countries.php:120
 msgid "Ghana"
 msgstr ""
 
-#: classes/class-wc-countries.php:122
+#: classes/class-wc-countries.php:121
 msgid "Gibraltar"
 msgstr ""
 
-#: classes/class-wc-countries.php:123
+#: classes/class-wc-countries.php:122
 msgid "Greece"
 msgstr ""
 
-#: classes/class-wc-countries.php:124
+#: classes/class-wc-countries.php:123
 msgid "Greenland"
 msgstr ""
 
-#: classes/class-wc-countries.php:125
+#: classes/class-wc-countries.php:124
 msgid "Grenada"
 msgstr ""
 
-#: classes/class-wc-countries.php:126
+#: classes/class-wc-countries.php:125
 msgid "Guadeloupe"
 msgstr ""
 
-#: classes/class-wc-countries.php:127
-msgid "Guam"
-msgstr ""
-
-#: classes/class-wc-countries.php:128
+#: classes/class-wc-countries.php:126
 msgid "Guatemala"
 msgstr ""
 
-#: classes/class-wc-countries.php:129
+#: classes/class-wc-countries.php:127
 msgid "Guernsey"
 msgstr ""
 
-#: classes/class-wc-countries.php:130
+#: classes/class-wc-countries.php:128
 msgid "Guinea"
 msgstr ""
 
-#: classes/class-wc-countries.php:131
+#: classes/class-wc-countries.php:129
 msgid "Guinea-Bissau"
 msgstr ""
 
-#: classes/class-wc-countries.php:132
+#: classes/class-wc-countries.php:130
 msgid "Guyana"
 msgstr ""
 
-#: classes/class-wc-countries.php:133
+#: classes/class-wc-countries.php:131
 msgid "Haiti"
 msgstr ""
 
-#: classes/class-wc-countries.php:134
+#: classes/class-wc-countries.php:132
 msgid "Heard Island and McDonald Islands"
 msgstr ""
 
-#: classes/class-wc-countries.php:135
+#: classes/class-wc-countries.php:133
 msgid "Honduras"
 msgstr ""
 
-#: classes/class-wc-countries.php:136
+#: classes/class-wc-countries.php:134
 msgid "Hong Kong"
 msgstr ""
 
-#: classes/class-wc-countries.php:137
+#: classes/class-wc-countries.php:135
 msgid "Hungary"
 msgstr ""
 
-#: classes/class-wc-countries.php:138
+#: classes/class-wc-countries.php:136
 msgid "Iceland"
 msgstr ""
 
-#: classes/class-wc-countries.php:139
+#: classes/class-wc-countries.php:137
 msgid "India"
 msgstr ""
 
-#: classes/class-wc-countries.php:140
+#: classes/class-wc-countries.php:138
 msgid "Indonesia"
 msgstr ""
 
-#: classes/class-wc-countries.php:141
+#: classes/class-wc-countries.php:139
 msgid "Iran"
 msgstr ""
 
-#: classes/class-wc-countries.php:142
+#: classes/class-wc-countries.php:140
 msgid "Iraq"
 msgstr ""
 
-#: classes/class-wc-countries.php:143
+#: classes/class-wc-countries.php:141
 msgid "Republic of Ireland"
 msgstr ""
 
-#: classes/class-wc-countries.php:144
+#: classes/class-wc-countries.php:142
 msgid "Isle of Man"
 msgstr ""
 
-#: classes/class-wc-countries.php:145
+#: classes/class-wc-countries.php:143
 msgid "Israel"
 msgstr ""
 
-#: classes/class-wc-countries.php:146
+#: classes/class-wc-countries.php:144
 msgid "Italy"
 msgstr ""
 
-#: classes/class-wc-countries.php:147
+#: classes/class-wc-countries.php:145
 msgid "Ivory Coast"
 msgstr ""
 
-#: classes/class-wc-countries.php:148
+#: classes/class-wc-countries.php:146
 msgid "Jamaica"
 msgstr ""
 
-#: classes/class-wc-countries.php:149
+#: classes/class-wc-countries.php:147
 msgid "Japan"
 msgstr ""
 
-#: classes/class-wc-countries.php:150
+#: classes/class-wc-countries.php:148
 msgid "Jersey"
 msgstr ""
 
-#: classes/class-wc-countries.php:151
+#: classes/class-wc-countries.php:149
 msgid "Jordan"
 msgstr ""
 
-#: classes/class-wc-countries.php:152
+#: classes/class-wc-countries.php:150
 msgid "Kazakhstan"
 msgstr ""
 
-#: classes/class-wc-countries.php:153
+#: classes/class-wc-countries.php:151
 msgid "Kenya"
 msgstr ""
 
-#: classes/class-wc-countries.php:154
+#: classes/class-wc-countries.php:152
 msgid "Kiribati"
 msgstr ""
 
-#: classes/class-wc-countries.php:155
+#: classes/class-wc-countries.php:153
 msgid "Kuwait"
 msgstr ""
 
-#: classes/class-wc-countries.php:156
+#: classes/class-wc-countries.php:154
 msgid "Kyrgyzstan"
 msgstr ""
 
-#: classes/class-wc-countries.php:157
+#: classes/class-wc-countries.php:155
 msgid "Laos"
 msgstr ""
 
-#: classes/class-wc-countries.php:158
+#: classes/class-wc-countries.php:156
 msgid "Latvia"
 msgstr ""
 
-#: classes/class-wc-countries.php:159
+#: classes/class-wc-countries.php:157
 msgid "Lebanon"
 msgstr ""
 
-#: classes/class-wc-countries.php:160
+#: classes/class-wc-countries.php:158
 msgid "Lesotho"
 msgstr ""
 
-#: classes/class-wc-countries.php:161
+#: classes/class-wc-countries.php:159
 msgid "Liberia"
 msgstr ""
 
-#: classes/class-wc-countries.php:162
+#: classes/class-wc-countries.php:160
 msgid "Libya"
 msgstr ""
 
-#: classes/class-wc-countries.php:163
+#: classes/class-wc-countries.php:161
 msgid "Liechtenstein"
 msgstr ""
 
-#: classes/class-wc-countries.php:164
+#: classes/class-wc-countries.php:162
 msgid "Lithuania"
 msgstr ""
 
-#: classes/class-wc-countries.php:165
+#: classes/class-wc-countries.php:163
 msgid "Luxembourg"
 msgstr ""
 
-#: classes/class-wc-countries.php:166
+#: classes/class-wc-countries.php:164
 msgid "Macao S.A.R., China"
 msgstr ""
 
-#: classes/class-wc-countries.php:167
+#: classes/class-wc-countries.php:165
 msgid "Macedonia"
 msgstr ""
 
-#: classes/class-wc-countries.php:168
+#: classes/class-wc-countries.php:166
 msgid "Madagascar"
 msgstr ""
 
-#: classes/class-wc-countries.php:169
+#: classes/class-wc-countries.php:167
 msgid "Malawi"
 msgstr ""
 
-#: classes/class-wc-countries.php:170
+#: classes/class-wc-countries.php:168
 msgid "Malaysia"
 msgstr ""
 
-#: classes/class-wc-countries.php:171
+#: classes/class-wc-countries.php:169
 msgid "Maldives"
 msgstr ""
 
-#: classes/class-wc-countries.php:172
+#: classes/class-wc-countries.php:170
 msgid "Mali"
 msgstr ""
 
-#: classes/class-wc-countries.php:173
+#: classes/class-wc-countries.php:171
 msgid "Malta"
 msgstr ""
 
-#: classes/class-wc-countries.php:174
+#: classes/class-wc-countries.php:172
 msgid "Marshall Islands"
 msgstr ""
 
-#: classes/class-wc-countries.php:175
+#: classes/class-wc-countries.php:173
 msgid "Martinique"
 msgstr ""
 
-#: classes/class-wc-countries.php:176
+#: classes/class-wc-countries.php:174
 msgid "Mauritania"
 msgstr ""
 
-#: classes/class-wc-countries.php:177
+#: classes/class-wc-countries.php:175
 msgid "Mauritius"
 msgstr ""
 
-#: classes/class-wc-countries.php:178
+#: classes/class-wc-countries.php:176
 msgid "Mayotte"
 msgstr ""
 
-#: classes/class-wc-countries.php:179
+#: classes/class-wc-countries.php:177
 msgid "Mexico"
 msgstr ""
 
-#: classes/class-wc-countries.php:180
+#: classes/class-wc-countries.php:178
 msgid "Micronesia"
 msgstr ""
 
-#: classes/class-wc-countries.php:181
+#: classes/class-wc-countries.php:179
 msgid "Moldova"
 msgstr ""
 
-#: classes/class-wc-countries.php:182
+#: classes/class-wc-countries.php:180
 msgid "Monaco"
 msgstr ""
 
-#: classes/class-wc-countries.php:183
+#: classes/class-wc-countries.php:181
 msgid "Mongolia"
 msgstr ""
 
-#: classes/class-wc-countries.php:184
+#: classes/class-wc-countries.php:182
 msgid "Montenegro"
 msgstr ""
 
-#: classes/class-wc-countries.php:185
+#: classes/class-wc-countries.php:183
 msgid "Montserrat"
 msgstr ""
 
-#: classes/class-wc-countries.php:186
+#: classes/class-wc-countries.php:184
 msgid "Morocco"
 msgstr ""
 
-#: classes/class-wc-countries.php:187
+#: classes/class-wc-countries.php:185
 msgid "Mozambique"
 msgstr ""
 
-#: classes/class-wc-countries.php:188
+#: classes/class-wc-countries.php:186
 msgid "Myanmar"
 msgstr ""
 
-#: classes/class-wc-countries.php:189
+#: classes/class-wc-countries.php:187
 msgid "Namibia"
 msgstr ""
 
-#: classes/class-wc-countries.php:190
+#: classes/class-wc-countries.php:188
 msgid "Nauru"
 msgstr ""
 
-#: classes/class-wc-countries.php:191
+#: classes/class-wc-countries.php:189
 msgid "Nepal"
 msgstr ""
 
-#: classes/class-wc-countries.php:192
+#: classes/class-wc-countries.php:190
 msgid "Netherlands"
 msgstr ""
 
-#: classes/class-wc-countries.php:193
+#: classes/class-wc-countries.php:191
 msgid "Netherlands Antilles"
 msgstr ""
 
-#: classes/class-wc-countries.php:194
+#: classes/class-wc-countries.php:192
 msgid "New Caledonia"
 msgstr ""
 
-#: classes/class-wc-countries.php:195
+#: classes/class-wc-countries.php:193
 msgid "New Zealand"
 msgstr ""
 
-#: classes/class-wc-countries.php:196
+#: classes/class-wc-countries.php:194
 msgid "Nicaragua"
 msgstr ""
 
-#: classes/class-wc-countries.php:197
+#: classes/class-wc-countries.php:195
 msgid "Niger"
 msgstr ""
 
-#: classes/class-wc-countries.php:198
+#: classes/class-wc-countries.php:196
 msgid "Nigeria"
 msgstr ""
 
-#: classes/class-wc-countries.php:199
+#: classes/class-wc-countries.php:197
 msgid "Niue"
 msgstr ""
 
-#: classes/class-wc-countries.php:200
+#: classes/class-wc-countries.php:198
 msgid "Norfolk Island"
 msgstr ""
 
-#: classes/class-wc-countries.php:201
+#: classes/class-wc-countries.php:199
 msgid "North Korea"
 msgstr ""
 
-#: classes/class-wc-countries.php:202
-msgid "Northern Mariana Islands"
-msgstr ""
-
-#: classes/class-wc-countries.php:203
+#: classes/class-wc-countries.php:200
 msgid "Norway"
 msgstr ""
 
-#: classes/class-wc-countries.php:204
+#: classes/class-wc-countries.php:201
 msgid "Oman"
 msgstr ""
 
-#: classes/class-wc-countries.php:205
+#: classes/class-wc-countries.php:202
 msgid "Pakistan"
 msgstr ""
 
-#: classes/class-wc-countries.php:206
+#: classes/class-wc-countries.php:203
 msgid "Palestinian Territory"
 msgstr ""
 
-#: classes/class-wc-countries.php:207
+#: classes/class-wc-countries.php:204
 msgid "Panama"
 msgstr ""
 
-#: classes/class-wc-countries.php:208
+#: classes/class-wc-countries.php:205
 msgid "Papua New Guinea"
 msgstr ""
 
-#: classes/class-wc-countries.php:209
+#: classes/class-wc-countries.php:206
 msgid "Paraguay"
 msgstr ""
 
-#: classes/class-wc-countries.php:210
+#: classes/class-wc-countries.php:207
 msgid "Peru"
 msgstr ""
 
-#: classes/class-wc-countries.php:211
+#: classes/class-wc-countries.php:208
 msgid "Philippines"
 msgstr ""
 
-#: classes/class-wc-countries.php:212
+#: classes/class-wc-countries.php:209
 msgid "Pitcairn"
 msgstr ""
 
-#: classes/class-wc-countries.php:213
+#: classes/class-wc-countries.php:210
 msgid "Poland"
 msgstr ""
 
-#: classes/class-wc-countries.php:214
+#: classes/class-wc-countries.php:211
 msgid "Portugal"
 msgstr ""
 
-#: classes/class-wc-countries.php:215
-msgid "Puerto Rico"
-msgstr ""
-
-#: classes/class-wc-countries.php:216
+#: classes/class-wc-countries.php:212
 msgid "Qatar"
 msgstr ""
 
-#: classes/class-wc-countries.php:217
+#: classes/class-wc-countries.php:213
 msgid "Reunion"
 msgstr ""
 
-#: classes/class-wc-countries.php:218
+#: classes/class-wc-countries.php:214
 msgid "Romania"
 msgstr ""
 
-#: classes/class-wc-countries.php:219
+#: classes/class-wc-countries.php:215
 msgid "Russia"
 msgstr ""
 
-#: classes/class-wc-countries.php:220
+#: classes/class-wc-countries.php:216
 msgid "Rwanda"
 msgstr ""
 
-#: classes/class-wc-countries.php:221
+#: classes/class-wc-countries.php:217
 msgid "Saint Barth&eacute;lemy"
 msgstr ""
 
-#: classes/class-wc-countries.php:222
+#: classes/class-wc-countries.php:218
 msgid "Saint Helena"
 msgstr ""
 
-#: classes/class-wc-countries.php:223
+#: classes/class-wc-countries.php:219
 msgid "Saint Kitts and Nevis"
 msgstr ""
 
-#: classes/class-wc-countries.php:224
+#: classes/class-wc-countries.php:220
 msgid "Saint Lucia"
 msgstr ""
 
-#: classes/class-wc-countries.php:225
+#: classes/class-wc-countries.php:221
 msgid "Saint Martin (French part)"
 msgstr ""
 
-#: classes/class-wc-countries.php:226
+#: classes/class-wc-countries.php:222
 msgid "Saint Martin (Dutch part)"
 msgstr ""
 
-#: classes/class-wc-countries.php:227
+#: classes/class-wc-countries.php:223
 msgid "Saint Pierre and Miquelon"
 msgstr ""
 
-#: classes/class-wc-countries.php:228
+#: classes/class-wc-countries.php:224
 msgid "Saint Vincent and the Grenadines"
 msgstr ""
 
-#: classes/class-wc-countries.php:229
+#: classes/class-wc-countries.php:225
 msgid "Samoa"
 msgstr ""
 
-#: classes/class-wc-countries.php:230
+#: classes/class-wc-countries.php:226
 msgid "San Marino"
 msgstr ""
 
-#: classes/class-wc-countries.php:231
+#: classes/class-wc-countries.php:227
 msgid "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
 msgstr ""
 
-#: classes/class-wc-countries.php:232
+#: classes/class-wc-countries.php:228
 msgid "Saudi Arabia"
 msgstr ""
 
-#: classes/class-wc-countries.php:233
+#: classes/class-wc-countries.php:229
 msgid "Senegal"
 msgstr ""
 
-#: classes/class-wc-countries.php:234
+#: classes/class-wc-countries.php:230
 msgid "Serbia"
 msgstr ""
 
-#: classes/class-wc-countries.php:235
+#: classes/class-wc-countries.php:231
 msgid "Seychelles"
 msgstr ""
 
-#: classes/class-wc-countries.php:236
+#: classes/class-wc-countries.php:232
 msgid "Sierra Leone"
 msgstr ""
 
-#: classes/class-wc-countries.php:237
+#: classes/class-wc-countries.php:233
 msgid "Singapore"
 msgstr ""
 
-#: classes/class-wc-countries.php:238
+#: classes/class-wc-countries.php:234
 msgid "Slovakia"
 msgstr ""
 
-#: classes/class-wc-countries.php:239
+#: classes/class-wc-countries.php:235
 msgid "Slovenia"
 msgstr ""
 
-#: classes/class-wc-countries.php:240
+#: classes/class-wc-countries.php:236
 msgid "Solomon Islands"
 msgstr ""
 
-#: classes/class-wc-countries.php:241
+#: classes/class-wc-countries.php:237
 msgid "Somalia"
 msgstr ""
 
-#: classes/class-wc-countries.php:242
+#: classes/class-wc-countries.php:238
 msgid "South Africa"
 msgstr ""
 
-#: classes/class-wc-countries.php:243
+#: classes/class-wc-countries.php:239
 msgid "South Georgia/Sandwich Islands"
 msgstr ""
 
-#: classes/class-wc-countries.php:244
+#: classes/class-wc-countries.php:240
 msgid "South Korea"
 msgstr ""
 
-#: classes/class-wc-countries.php:245
+#: classes/class-wc-countries.php:241
 msgid "South Sudan"
 msgstr ""
 
-#: classes/class-wc-countries.php:246
+#: classes/class-wc-countries.php:242
 msgid "Spain"
 msgstr ""
 
-#: classes/class-wc-countries.php:247
+#: classes/class-wc-countries.php:243
 msgid "Sri Lanka"
 msgstr ""
 
-#: classes/class-wc-countries.php:248
+#: classes/class-wc-countries.php:244
 msgid "Sudan"
 msgstr ""
 
-#: classes/class-wc-countries.php:249
+#: classes/class-wc-countries.php:245
 msgid "Suriname"
 msgstr ""
 
-#: classes/class-wc-countries.php:250
+#: classes/class-wc-countries.php:246
 msgid "Svalbard and Jan Mayen"
 msgstr ""
 
-#: classes/class-wc-countries.php:251
+#: classes/class-wc-countries.php:247
 msgid "Swaziland"
 msgstr ""
 
-#: classes/class-wc-countries.php:252
+#: classes/class-wc-countries.php:248
 msgid "Sweden"
 msgstr ""
 
-#: classes/class-wc-countries.php:253
+#: classes/class-wc-countries.php:249
 msgid "Switzerland"
 msgstr ""
 
-#: classes/class-wc-countries.php:254
+#: classes/class-wc-countries.php:250
 msgid "Syria"
 msgstr ""
 
-#: classes/class-wc-countries.php:255
+#: classes/class-wc-countries.php:251
 msgid "Taiwan"
 msgstr ""
 
-#: classes/class-wc-countries.php:256
+#: classes/class-wc-countries.php:252
 msgid "Tajikistan"
 msgstr ""
 
-#: classes/class-wc-countries.php:257
+#: classes/class-wc-countries.php:253
 msgid "Tanzania"
 msgstr ""
 
-#: classes/class-wc-countries.php:258
+#: classes/class-wc-countries.php:254
 msgid "Thailand"
 msgstr ""
 
-#: classes/class-wc-countries.php:259
+#: classes/class-wc-countries.php:255
 msgid "Timor-Leste"
 msgstr ""
 
-#: classes/class-wc-countries.php:260
+#: classes/class-wc-countries.php:256
 msgid "Togo"
 msgstr ""
 
-#: classes/class-wc-countries.php:261
+#: classes/class-wc-countries.php:257
 msgid "Tokelau"
 msgstr ""
 
-#: classes/class-wc-countries.php:262
+#: classes/class-wc-countries.php:258
 msgid "Tonga"
 msgstr ""
 
-#: classes/class-wc-countries.php:263
+#: classes/class-wc-countries.php:259
 msgid "Trinidad and Tobago"
 msgstr ""
 
-#: classes/class-wc-countries.php:264
+#: classes/class-wc-countries.php:260
 msgid "Tunisia"
 msgstr ""
 
-#: classes/class-wc-countries.php:265
+#: classes/class-wc-countries.php:261
 msgid "Turkey"
 msgstr ""
 
-#: classes/class-wc-countries.php:266
+#: classes/class-wc-countries.php:262
 msgid "Turkmenistan"
 msgstr ""
 
-#: classes/class-wc-countries.php:267
+#: classes/class-wc-countries.php:263
 msgid "Turks and Caicos Islands"
 msgstr ""
 
-#: classes/class-wc-countries.php:268
+#: classes/class-wc-countries.php:264
 msgid "Tuvalu"
 msgstr ""
 
-#: classes/class-wc-countries.php:269
-msgid "U.S. Virgin Islands"
-msgstr ""
-
-#: classes/class-wc-countries.php:270
-msgid "US Minor Outlying Islands"
-msgstr ""
-
-#: classes/class-wc-countries.php:271
+#: classes/class-wc-countries.php:265
 msgid "Uganda"
 msgstr ""
 
-#: classes/class-wc-countries.php:272
+#: classes/class-wc-countries.php:266
 msgid "Ukraine"
 msgstr ""
 
-#: classes/class-wc-countries.php:273
+#: classes/class-wc-countries.php:267
 msgid "United Arab Emirates"
 msgstr ""
 
-#: classes/class-wc-countries.php:274
+#: classes/class-wc-countries.php:268
 msgid "United Kingdom"
 msgstr ""
 
-#: classes/class-wc-countries.php:275
+#: classes/class-wc-countries.php:269
 msgid "United States"
 msgstr ""
 
-#: classes/class-wc-countries.php:276
+#: classes/class-wc-countries.php:270
 msgid "Uruguay"
 msgstr ""
 
-#: classes/class-wc-countries.php:277
+#: classes/class-wc-countries.php:271
 msgid "Uzbekistan"
 msgstr ""
 
-#: classes/class-wc-countries.php:278
+#: classes/class-wc-countries.php:272
 msgid "Vanuatu"
 msgstr ""
 
-#: classes/class-wc-countries.php:279
+#: classes/class-wc-countries.php:273
 msgid "Vatican"
 msgstr ""
 
-#: classes/class-wc-countries.php:280
+#: classes/class-wc-countries.php:274
 msgid "Venezuela"
 msgstr ""
 
-#: classes/class-wc-countries.php:281
+#: classes/class-wc-countries.php:275
 msgid "Vietnam"
 msgstr ""
 
-#: classes/class-wc-countries.php:282
+#: classes/class-wc-countries.php:276
 msgid "Wallis and Futuna"
 msgstr ""
 
-#: classes/class-wc-countries.php:283
+#: classes/class-wc-countries.php:277
 msgid "Western Sahara"
 msgstr ""
 
-#: classes/class-wc-countries.php:284
+#: classes/class-wc-countries.php:278
 msgid "Yemen"
 msgstr ""
 
-#: classes/class-wc-countries.php:285
+#: classes/class-wc-countries.php:279
 msgid "Zambia"
 msgstr ""
 
-#: classes/class-wc-countries.php:286
+#: classes/class-wc-countries.php:280
 msgid "Zimbabwe"
 msgstr ""
 
-#: classes/class-wc-countries.php:424
+#: classes/class-wc-countries.php:418
 msgid "to the"
 msgstr ""
 
-#: classes/class-wc-countries.php:425
+#: classes/class-wc-countries.php:419
 msgid "to"
 msgstr ""
 
-#: classes/class-wc-countries.php:438
+#: classes/class-wc-countries.php:432
 msgid "the"
 msgstr ""
 
-#: classes/class-wc-countries.php:450
+#: classes/class-wc-countries.php:444
 msgid "VAT"
 msgstr ""
 
-#: classes/class-wc-countries.php:450 templates/cart/totals.php:110
+#: classes/class-wc-countries.php:444 templates/cart/totals.php:110
 #: templates/checkout/review-order.php:113
 msgid "Tax"
 msgstr ""
 
-#: classes/class-wc-countries.php:463
+#: classes/class-wc-countries.php:457
 msgid "(incl. VAT)"
 msgstr ""
 
-#: classes/class-wc-countries.php:463
+#: classes/class-wc-countries.php:457
 msgid "(incl. tax)"
 msgstr ""
 
-#: classes/class-wc-countries.php:476
+#: classes/class-wc-countries.php:470
 msgid "(ex. VAT)"
 msgstr ""
 
-#: classes/class-wc-countries.php:476
+#: classes/class-wc-countries.php:470
 msgid "(ex. tax)"
 msgstr ""
 
-#: classes/class-wc-countries.php:700 classes/class-wc-countries.php:710
-#: classes/class-wc-countries.php:730 classes/class-wc-countries.php:785
-#: classes/class-wc-countries.php:809 classes/class-wc-countries.php:854
-#: classes/class-wc-countries.php:878
+#: classes/class-wc-countries.php:694 classes/class-wc-countries.php:704
+#: classes/class-wc-countries.php:724 classes/class-wc-countries.php:779
+#: classes/class-wc-countries.php:803 classes/class-wc-countries.php:848
+#: classes/class-wc-countries.php:872
 msgid "Province"
 msgstr ""
 
-#: classes/class-wc-countries.php:716
+#: classes/class-wc-countries.php:710
 msgid "Canton"
 msgstr ""
 
-#: classes/class-wc-countries.php:725 classes/class-wc-countries.php:860
+#: classes/class-wc-countries.php:719 classes/class-wc-countries.php:854
 msgid "Municipality"
 msgstr ""
 
-#: classes/class-wc-countries.php:772
+#: classes/class-wc-countries.php:766
 msgid "Town / District"
 msgstr ""
 
-#: classes/class-wc-countries.php:775
+#: classes/class-wc-countries.php:769
 msgid "Region"
 msgstr ""
 
-#: classes/class-wc-countries.php:883
+#: classes/class-wc-countries.php:877
 msgid "Zip"
 msgstr ""
 
-#: classes/class-wc-countries.php:886
+#: classes/class-wc-countries.php:880
 msgid "State"
 msgstr ""
 
-#: classes/class-wc-countries.php:891 templates/cart/shipping-calculator.php:68
+#: classes/class-wc-countries.php:885 templates/cart/shipping-calculator.php:68
 msgid "Postcode"
 msgstr ""
 
-#: classes/class-wc-countries.php:894
+#: classes/class-wc-countries.php:888
 msgid "County"
 msgstr ""
 
-#: classes/class-wc-countries.php:926 classes/class-wc-countries.php:927
-#: classes/class-wc-countries.php:1002
-#: templates/cart/shipping-calculator.php:68
+#: classes/class-wc-countries.php:920 classes/class-wc-countries.php:921
+#: classes/class-wc-countries.php:996 templates/cart/shipping-calculator.php:68
 msgid "Postcode / Zip"
 msgstr ""
 
-#: classes/class-wc-countries.php:931 classes/class-wc-countries.php:932
-#: classes/class-wc-countries.php:991
+#: classes/class-wc-countries.php:925 classes/class-wc-countries.php:926
+#: classes/class-wc-countries.php:985
 msgid "Town / City"
 msgstr ""
 
-#: classes/class-wc-countries.php:936 classes/class-wc-countries.php:937
-#: classes/class-wc-countries.php:997
+#: classes/class-wc-countries.php:930 classes/class-wc-countries.php:931
+#: classes/class-wc-countries.php:991
 msgid "State / County"
 msgstr ""
 
-#: classes/class-wc-countries.php:961
+#: classes/class-wc-countries.php:955
 msgid "Country"
 msgstr ""
 
-#: classes/class-wc-countries.php:966
+#: classes/class-wc-countries.php:960
 msgid "First Name"
 msgstr ""
 
-#: classes/class-wc-countries.php:971
+#: classes/class-wc-countries.php:965
 msgid "Last Name"
 msgstr ""
 
-#: classes/class-wc-countries.php:977
+#: classes/class-wc-countries.php:971
 msgid "Company Name"
 msgstr ""
 
-#: classes/class-wc-countries.php:981
+#: classes/class-wc-countries.php:975
 msgid "Address"
 msgstr ""
 
-#: classes/class-wc-countries.php:982
+#: classes/class-wc-countries.php:976
 msgctxt "placeholder"
 msgid "Street address"
 msgstr ""
 
-#: classes/class-wc-countries.php:987
+#: classes/class-wc-countries.php:981
 msgctxt "placeholder"
 msgid "Apartment, suite, unit etc. (optional)"
 msgstr ""
 
-#: classes/class-wc-countries.php:1044
+#: classes/class-wc-countries.php:1038
 msgid "Email Address"
 msgstr ""
 
-#: classes/class-wc-countries.php:1050
+#: classes/class-wc-countries.php:1044
 msgid "Phone"
 msgstr ""
 
@@ -1673,54 +1648,54 @@ msgctxt "hash before order number"
 msgid "#"
 msgstr ""
 
-#: classes/class-wc-order.php:857
+#: classes/class-wc-order.php:858
 msgid "&nbsp;<small>%svia %s</small>"
 msgstr ""
 
-#: classes/class-wc-order.php:922
+#: classes/class-wc-order.php:923
 msgid "Cart Subtotal:"
 msgstr ""
 
-#: classes/class-wc-order.php:928
+#: classes/class-wc-order.php:929
 msgid "Cart Discount:"
 msgstr ""
 
-#: classes/class-wc-order.php:934
+#: classes/class-wc-order.php:935
 msgid "Shipping:"
 msgstr ""
 
-#: classes/class-wc-order.php:979
+#: classes/class-wc-order.php:980
 msgid "Subtotal:"
 msgstr ""
 
-#: classes/class-wc-order.php:1005
+#: classes/class-wc-order.php:1006
 msgid "Order Discount:"
 msgstr ""
 
-#: classes/class-wc-order.php:1010
+#: classes/class-wc-order.php:1011
 msgid "Order Total:"
 msgstr ""
 
-#: classes/class-wc-order.php:1033 templates/cart/totals.php:145
+#: classes/class-wc-order.php:1034 templates/cart/totals.php:145
 #: templates/checkout/review-order.php:151
 msgid "(Includes %s)"
 msgstr ""
 
-#: classes/class-wc-order.php:1182 classes/class-wc-order.php:1184
-#: classes/class-wc-order.php:1187
+#: classes/class-wc-order.php:1183 classes/class-wc-order.php:1185
+#: classes/class-wc-order.php:1188
 msgid "WooCommerce"
 msgstr ""
 
-#: classes/class-wc-order.php:1234
+#: classes/class-wc-order.php:1235
 msgid "Order status changed from %s to %s."
 msgstr ""
 
-#: classes/class-wc-order.php:1460 woocommerce-ajax.php:1156
-#: woocommerce-ajax.php:1157
+#: classes/class-wc-order.php:1461 woocommerce-ajax.php:1163
+#: woocommerce-ajax.php:1164
 msgid "Item #%s stock reduced from %s to %s."
 msgstr ""
 
-#: classes/class-wc-order.php:1472
+#: classes/class-wc-order.php:1473
 msgid "Order item stock reduced successfully."
 msgstr ""
 
@@ -1730,7 +1705,7 @@ msgstr ""
 
 #: classes/class-wc-shortcodes.php:571
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:257
-#: templates/loop/add-to-cart.php:44
+#: templates/loop/add-to-cart.php:46
 #: templates/single-product/add-to-cart/grouped.php:45
 #: templates/single-product/add-to-cart/grouped.php:75
 #: templates/single-product/add-to-cart/simple.php:42
@@ -2203,7 +2178,7 @@ msgid "Invoice Prefix"
 msgstr ""
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:148
-msgid "Please enter a prefix for your invoice numbers. If you use your PayPal account for multiple stores ensure this prefix is unqiue as PayPal will not allow orders with the same invoice number."
+msgid "Please enter a prefix for your invoice numbers. If you use your PayPal account for multiple stores ensure this prefix is unique as PayPal will not allow orders with the same invoice number."
 msgstr ""
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:153
@@ -2374,7 +2349,7 @@ msgstr ""
 
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:113
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:168
-#: woocommerce-ajax.php:1712
+#: woocommerce-ajax.php:1725
 msgid "Guest"
 msgstr ""
 
@@ -2440,7 +2415,7 @@ msgid "ShareYourCart"
 msgstr ""
 
 #: classes/integrations/shareyourcart/class-wc-shareyourcart.php:23
-msgid "Increase your social media exposure by 10 percent! ShareYourCart helps you get more customers by motivating satisfied customers to talk with their friends about your products. For help with ShareYourCart view the <a href=\"http://www.woothemes.com/woocommerce-docs/user-guide/shareyourcart/\" target=\"__blank\">documentation</a>."
+msgid "Increase your social media exposure by 10 percent! ShareYourCart helps you get more customers by motivating satisfied customers to talk with their friends about your products. For help with ShareYourCart view the <a href=\"http://docs.woothemes.com/document/shareyourcart/\" target=\"__blank\">documentation</a>."
 msgstr ""
 
 #: classes/integrations/shareyourcart/class.shareyourcart-wp.php:328
@@ -2818,7 +2793,7 @@ msgid "Local pickup is a simple method which allows the customer to pick up thei
 msgstr ""
 
 #: classes/shortcodes/class-wc-shortcode-cart.php:54
-#: woocommerce-functions.php:1636
+#: woocommerce-functions.php:1637
 msgid "Please enter a valid postcode/ZIP."
 msgstr ""
 
@@ -2832,7 +2807,7 @@ msgid "The order totals have been updated. Please confirm your order by pressing
 msgstr ""
 
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:80
-#: woocommerce-core-functions.php:2488 woocommerce-functions.php:1558
+#: woocommerce-core-functions.php:2488 woocommerce-functions.php:1559
 msgid "Please enter your password."
 msgstr ""
 
@@ -2890,7 +2865,7 @@ msgstr ""
 #: classes/shortcodes/class-wc-shortcode-pay.php:70
 #: classes/shortcodes/class-wc-shortcode-pay.php:125
 #: classes/shortcodes/class-wc-shortcode-view-order.php:49
-#: woocommerce-functions.php:879 woocommerce-functions.php:958
+#: woocommerce-functions.php:880 woocommerce-functions.php:959
 msgid "Invalid order."
 msgstr ""
 
@@ -3116,7 +3091,7 @@ msgstr ""
 msgid "Password"
 msgstr ""
 
-#: classes/widgets/class-wc-widget-login.php:120 woocommerce-functions.php:944
+#: classes/widgets/class-wc-widget-login.php:120 woocommerce-functions.php:945
 msgid "Login &rarr;"
 msgstr ""
 
@@ -3198,7 +3173,7 @@ msgid "Category Order"
 msgstr ""
 
 #: classes/widgets/class-wc-widget-product-categories.php:191
-#: templates/single-product-reviews.php:99 woocommerce-ajax.php:1231
+#: templates/single-product-reviews.php:99 woocommerce-ajax.php:1244
 msgid "Name"
 msgstr ""
 
@@ -3639,6 +3614,86 @@ msgstr ""
 
 #: i18n/states/HK.php:15
 msgid "New Territories"
+msgstr ""
+
+#: i18n/states/HU.php:13
+msgid "Bács-Kiskun"
+msgstr ""
+
+#: i18n/states/HU.php:14
+msgid "Békés"
+msgstr ""
+
+#: i18n/states/HU.php:15
+msgid "Baranya"
+msgstr ""
+
+#: i18n/states/HU.php:16
+msgid "Borsod-Abaúj-Zemplén"
+msgstr ""
+
+#: i18n/states/HU.php:17
+msgid "Budapest"
+msgstr ""
+
+#: i18n/states/HU.php:18
+msgid "Csongrád"
+msgstr ""
+
+#: i18n/states/HU.php:19
+msgid "Fejér"
+msgstr ""
+
+#: i18n/states/HU.php:20
+msgid "Győr-Moson-Sopron"
+msgstr ""
+
+#: i18n/states/HU.php:21
+msgid "Hajdú-Bihar"
+msgstr ""
+
+#: i18n/states/HU.php:22
+msgid "Heves"
+msgstr ""
+
+#: i18n/states/HU.php:23
+msgid "Jász-Nagykun-Szolnok"
+msgstr ""
+
+#: i18n/states/HU.php:24
+msgid "Komárom-Esztergom"
+msgstr ""
+
+#: i18n/states/HU.php:25
+msgid "Nógrád"
+msgstr ""
+
+#: i18n/states/HU.php:26
+msgid "Pest"
+msgstr ""
+
+#: i18n/states/HU.php:27
+msgid "Somogy"
+msgstr ""
+
+#: i18n/states/HU.php:28
+msgid "Szabolcs-Szatmár-Bereg"
+msgstr ""
+
+#: i18n/states/HU.php:29
+msgid "Tolna"
+msgstr ""
+
+#: i18n/states/HU.php:30
+msgid "Vas"
+msgstr ""
+
+#: i18n/states/HU.php:31
+msgid "Veszprém"
+msgstr ""
+
+#: i18n/states/HU.php:32
+msgid "Zala"
 msgstr ""
 
 #: i18n/states/HZ.php:13
@@ -4561,6 +4616,30 @@ msgstr ""
 msgid "Armed Forces (AP)"
 msgstr ""
 
+#: i18n/states/US.php:67
+msgid "American Samoa"
+msgstr ""
+
+#: i18n/states/US.php:68
+msgid "Guam"
+msgstr ""
+
+#: i18n/states/US.php:69
+msgid "Northern Mariana Islands"
+msgstr ""
+
+#: i18n/states/US.php:70
+msgid "Puerto Rico"
+msgstr ""
+
+#: i18n/states/US.php:71
+msgid "US Minor Outlying Islands"
+msgstr ""
+
+#: i18n/states/US.php:72
+msgid "US Virgin Islands"
+msgstr ""
+
 #: i18n/states/ZA.php:13
 msgid "Eastern Cape"
 msgstr ""
@@ -4695,16 +4774,16 @@ msgstr ""
 msgid "You may be interested in&hellip;"
 msgstr ""
 
-#: templates/cart/mini-cart.php:52
+#: templates/cart/mini-cart.php:55
 msgid "No products in the cart."
 msgstr ""
 
-#: templates/cart/mini-cart.php:60 templates/cart/totals.php:92
+#: templates/cart/mini-cart.php:63 templates/cart/totals.php:92
 #: templates/checkout/review-order.php:93
 msgid "Subtotal"
 msgstr ""
 
-#: templates/cart/mini-cart.php:66
+#: templates/cart/mini-cart.php:69
 msgid "Checkout &rarr;"
 msgstr ""
 
@@ -4751,7 +4830,7 @@ msgid "Cart Subtotal"
 msgstr ""
 
 #: templates/cart/totals.php:35 templates/checkout/review-order.php:34
-#: woocommerce.php:1647
+#: woocommerce.php:1655
 msgid "Cart Discount"
 msgstr ""
 
@@ -5082,16 +5161,16 @@ msgstr ""
 msgid "Cost: %s"
 msgstr ""
 
-#: templates/loop/add-to-cart.php:17 templates/loop/add-to-cart.php:39
-#: templates/loop/add-to-cart.php:48
+#: templates/loop/add-to-cart.php:17 templates/loop/add-to-cart.php:41
+#: templates/loop/add-to-cart.php:50
 msgid "Read More"
 msgstr ""
 
-#: templates/loop/add-to-cart.php:31
+#: templates/loop/add-to-cart.php:33
 msgid "Select options"
 msgstr ""
 
-#: templates/loop/add-to-cart.php:35
+#: templates/loop/add-to-cart.php:37
 msgid "View options"
 msgstr ""
 
@@ -5470,43 +5549,51 @@ msgstr ""
 msgid "Your Review"
 msgstr ""
 
-#: woocommerce-ajax.php:108
+#: woocommerce-ajax.php:111
 msgid "Please enter your username and password to login."
 msgstr ""
 
-#: woocommerce-ajax.php:188
+#: woocommerce-ajax.php:191
 msgid "Sorry, your session has expired."
 msgstr ""
 
-#: woocommerce-ajax.php:188
+#: woocommerce-ajax.php:191
 msgid "Return to homepage &rarr;"
 msgstr ""
 
-#: woocommerce-ajax.php:329 woocommerce-ajax.php:363 woocommerce-ajax.php:386
+#: woocommerce-ajax.php:332 woocommerce-ajax.php:366 woocommerce-ajax.php:389
 msgid "You do not have sufficient permissions to access this page."
 msgstr ""
 
-#: woocommerce-ajax.php:331 woocommerce-ajax.php:364 woocommerce-ajax.php:387
+#: woocommerce-ajax.php:334 woocommerce-ajax.php:367 woocommerce-ajax.php:390
 msgid "You have taken too long. Please go back and retry."
 msgstr ""
 
-#: woocommerce-ajax.php:623
+#: woocommerce-ajax.php:626
 msgid "Same as parent"
 msgstr ""
 
-#: woocommerce-ajax.php:624
+#: woocommerce-ajax.php:627
 msgid "Standard"
 msgstr ""
 
-#: woocommerce-ajax.php:1205 woocommerce-ajax.php:1206
+#: woocommerce-ajax.php:1172
+msgid "No products had their stock reduced - they may not have stock management enabled."
+msgstr ""
+
+#: woocommerce-ajax.php:1215 woocommerce-ajax.php:1216
 msgid "Item #%s stock increased from %s to %s."
 msgstr ""
 
-#: woocommerce-ajax.php:1231
+#: woocommerce-ajax.php:1223
+msgid "No products had their stock increased - they may not have stock management enabled."
+msgstr ""
+
+#: woocommerce-ajax.php:1244
 msgid "Value"
 msgstr ""
 
-#: woocommerce-ajax.php:1545
+#: woocommerce-ajax.php:1558
 msgid "Delete note"
 msgstr ""
 
@@ -5655,7 +5742,7 @@ msgstr ""
 msgid "Unpaid order cancelled - time limit reached."
 msgstr ""
 
-#: woocommerce-core-functions.php:2485 woocommerce-functions.php:702
+#: woocommerce-core-functions.php:2485 woocommerce-functions.php:703
 msgid "Please enter a username."
 msgstr ""
 
@@ -5667,154 +5754,154 @@ msgstr ""
 msgid "You can only have 1 %s in your cart."
 msgstr ""
 
-#: woocommerce-functions.php:295 woocommerce-functions.php:342
+#: woocommerce-functions.php:296 woocommerce-functions.php:343
 msgid "Please choose product options&hellip;"
 msgstr ""
 
-#: woocommerce-functions.php:377
+#: woocommerce-functions.php:378
 msgid "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr ""
 
-#: woocommerce-functions.php:385
+#: woocommerce-functions.php:386
 msgid "Please choose a product to add to your cart&hellip;"
 msgstr ""
 
-#: woocommerce-functions.php:454
+#: woocommerce-functions.php:455
 msgid "Added &quot;%s&quot; to your cart."
 msgstr ""
 
-#: woocommerce-functions.php:454
+#: woocommerce-functions.php:455
 msgid "&quot; and &quot;"
 msgstr ""
 
-#: woocommerce-functions.php:457
+#: woocommerce-functions.php:458
 msgid "&quot;%s&quot; was successfully added to your cart."
 msgstr ""
 
-#: woocommerce-functions.php:465
+#: woocommerce-functions.php:466
 msgid "Continue Shopping &rarr;"
 msgstr ""
 
-#: woocommerce-functions.php:632
+#: woocommerce-functions.php:633
 msgid "Username is required."
 msgstr ""
 
-#: woocommerce-functions.php:633 woocommerce-functions.php:728
+#: woocommerce-functions.php:634 woocommerce-functions.php:729
 msgid "Password is required."
 msgstr ""
 
-#: woocommerce-functions.php:704
+#: woocommerce-functions.php:705
 msgid "This username is invalid because it uses illegal characters. Please enter a valid username."
 msgstr ""
 
-#: woocommerce-functions.php:707
+#: woocommerce-functions.php:708
 msgid "This username is already registered, please choose another one."
 msgstr ""
 
-#: woocommerce-functions.php:719
+#: woocommerce-functions.php:720
 msgid "Please type your e-mail address."
 msgstr ""
 
-#: woocommerce-functions.php:721
+#: woocommerce-functions.php:722
 msgid "The email address isn&#8217;t correct."
 msgstr ""
 
-#: woocommerce-functions.php:724
+#: woocommerce-functions.php:725
 msgid "This email is already registered, please choose another one."
 msgstr ""
 
-#: woocommerce-functions.php:729
+#: woocommerce-functions.php:730
 msgid "Re-enter your password."
 msgstr ""
 
-#: woocommerce-functions.php:734
+#: woocommerce-functions.php:735
 msgid "Anti-spam field was filled in."
 msgstr ""
 
-#: woocommerce-functions.php:840
+#: woocommerce-functions.php:841
 msgid "The cart has been filled with the items from your previous order."
 msgstr ""
 
-#: woocommerce-functions.php:866
+#: woocommerce-functions.php:867
 msgid "Order cancelled by customer."
 msgstr ""
 
-#: woocommerce-functions.php:869
+#: woocommerce-functions.php:870
 msgid "Your order was cancelled."
 msgstr ""
 
-#: woocommerce-functions.php:875
+#: woocommerce-functions.php:876
 msgid "Your order is no longer pending and could not be cancelled. Please contact us if you need assistance."
 msgstr ""
 
-#: woocommerce-functions.php:910
+#: woocommerce-functions.php:911
 msgid "Invalid email address."
 msgstr ""
 
-#: woocommerce-functions.php:910 woocommerce-functions.php:932
-#: woocommerce-functions.php:952 woocommerce-functions.php:958
-#: woocommerce-functions.php:962 woocommerce-functions.php:965
-#: woocommerce-functions.php:995 woocommerce-functions.php:1098
+#: woocommerce-functions.php:911 woocommerce-functions.php:933
+#: woocommerce-functions.php:953 woocommerce-functions.php:959
+#: woocommerce-functions.php:963 woocommerce-functions.php:966
+#: woocommerce-functions.php:996 woocommerce-functions.php:1099
 msgid "Go to homepage &rarr;"
 msgstr ""
 
-#: woocommerce-functions.php:932
+#: woocommerce-functions.php:933
 msgid "Invalid download."
 msgstr ""
 
-#: woocommerce-functions.php:944
+#: woocommerce-functions.php:945
 msgid "You must be logged in to download files."
 msgstr ""
 
-#: woocommerce-functions.php:947
+#: woocommerce-functions.php:948
 msgid "This is not your download link."
 msgstr ""
 
-#: woocommerce-functions.php:952
+#: woocommerce-functions.php:953
 msgid "Product no longer exists."
 msgstr ""
 
-#: woocommerce-functions.php:962
+#: woocommerce-functions.php:963
 msgid "Sorry, you have reached your download limit for this file"
 msgstr ""
 
-#: woocommerce-functions.php:965
+#: woocommerce-functions.php:966
 msgid "Sorry, this download has expired"
 msgstr ""
 
-#: woocommerce-functions.php:995
+#: woocommerce-functions.php:996
 msgid "No file defined"
 msgstr ""
 
-#: woocommerce-functions.php:1098
+#: woocommerce-functions.php:1099
 msgid "File not found"
 msgstr ""
 
-#: woocommerce-functions.php:1208
+#: woocommerce-functions.php:1209
 msgid "New products"
 msgstr ""
 
-#: woocommerce-functions.php:1216
+#: woocommerce-functions.php:1217
 msgid "New products added to %s"
 msgstr ""
 
-#: woocommerce-functions.php:1224
+#: woocommerce-functions.php:1225
 msgid "New products tagged %s"
 msgstr ""
 
-#: woocommerce-functions.php:1263
+#: woocommerce-functions.php:1264
 msgid "You have taken too long. Please go back and refresh the page."
 msgstr ""
 
-#: woocommerce-functions.php:1266
+#: woocommerce-functions.php:1267
 msgid "Please rate the product."
 msgstr ""
 
-#: woocommerce-functions.php:1574
+#: woocommerce-functions.php:1575
 msgid "Password changed successfully."
 msgstr ""
 
-#: woocommerce-functions.php:1650
+#: woocommerce-functions.php:1651
 msgid "Address changed successfully."
 msgstr ""
 
@@ -5839,7 +5926,7 @@ msgctxt "breadcrumb"
 msgid "Home"
 msgstr ""
 
-#: woocommerce-template.php:1288 woocommerce.php:1174
+#: woocommerce-template.php:1288 woocommerce.php:1175
 msgid "required"
 msgstr ""
 
@@ -6204,30 +6291,30 @@ msgstr ""
 msgid "This is where you can add new coupons that customers can use in your store."
 msgstr ""
 
-#: woocommerce.php:1171
+#: woocommerce.php:1172
 msgid "Select an option&hellip;"
 msgstr ""
 
-#: woocommerce.php:1172
+#: woocommerce.php:1173
 msgid "Please select a rating"
 msgstr ""
 
-#: woocommerce.php:1173
+#: woocommerce.php:1174
 msgid "Sorry, no products matched your selection. Please choose a different combination."
 msgstr ""
 
-#: woocommerce.php:1648
+#: woocommerce.php:1656
 msgid "Cart % Discount"
 msgstr ""
 
-#: woocommerce.php:1649
+#: woocommerce.php:1657
 msgid "Product Discount"
 msgstr ""
 
-#: woocommerce.php:1650
+#: woocommerce.php:1658
 msgid "Product % Discount"
 msgstr ""
 
-#: woocommerce.php:1715
+#: woocommerce.php:1723
 msgid "Action failed. Please refresh the page and retry."
 msgstr ""
