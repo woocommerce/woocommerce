@@ -165,7 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.0.1 - 03/03/2013 =
+= 2.0.1 - 04/03/2013 =
 * Fix - Added an extra permalink flush after upgrade to save needing to do it manually.
 
 = 2.0.0 - 04/03/2013 =
