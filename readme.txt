@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.5
 Tested up to: 3.5
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -165,6 +165,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.0.1 - 03/03/2013 =
+* Fix - Added an extra permalink flush after upgrade to save needing to do it manually.
+
 = 2.0.0 - 04/03/2013 =
 * Feature - Sucuri audited and secured.
 * Feature - Added sales by category report.
@@ -211,7 +214,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Customers can sort by popularity + rating.
 * Feature - Option to exclude coupons from sale items (thanks aj-adl)
 * Feature - Logout "page" which can be added to menus.
-
 * Templating - Revised pagination, sorting areas (sorting is now above products, numbered pagination below) and added a result count.
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
 * Templating - loop-end and start for product loops, allow changing the UL's used by default to something else.
@@ -226,7 +228,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Templating - Renamed sorting.php to orderby.php to better reflect contained hooks and code.
 * Templating - Product tabs rewritten - new filter to define tab titles, priorities, and display callbacks.
 * Templating - loop/no-products-found.php template added.
-
 * Tweak - Sorting uses GET to make it cache friendly
 * Tweak - Optimised class loading (autoload). Reduced memory consumption.
 * Tweak - Moved shortcodes and widgets to classes.
@@ -273,11 +274,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - On product search include post_excerpt, by krbvroc1
 * Tweak - Attribute page restricts reserved terms by GeertDD
 * Tweak - Arguments for taxonomies are now filterable
-
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.
 * Fix - Active plugins display on status page.
-
 * Localization - Makepot added by Geert De Deckere for generating POT files.
 * Localization - Admin/Frontend POT files to reduce memory consumption on the frontend.
 * Localization - French update by Arnaud Cheminand and absoluteweb.
@@ -1201,5 +1200,5 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Upgrade Notice ==
 
-= 2.0.0 =
+= 2.0.1 =
 This is a major update - Test extensions and your theme prior to updating and ensure that you keep backups. After updating there is no undo. See our [release post](http://www.woothemes.com/?p=165321) and our [preparation guide](http://www.woothemes.com/?p=158537) before upgrading.
