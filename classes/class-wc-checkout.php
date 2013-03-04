@@ -224,19 +224,21 @@ class WC_Checkout {
 
 		if ( $this->checkout_fields['shipping'] && ( $woocommerce->cart->needs_shipping() || get_option('woocommerce_require_shipping_address') == 'yes' ) ) {
 			foreach ( $this->checkout_fields['shipping'] as $key => $field ) {
+				$postvalue = false;
+
 				if ( $this->posted['shiptobilling'] ) {
-
-					if ( isset( $this->posted[ str_replace( 'shipping_', 'billing_', $key ) ] ) )
-						update_post_meta( $order_id, '_' . $key, $this->posted[ str_replace( 'shipping_', 'billing_', $key ) ] );
-
+					if ( isset( $this->posted[ str_replace( 'shipping_', 'billing_', $key ) ] ) ) {
+						$postvalue = $this->posted[ str_replace( 'shipping_', 'billing_', $key ) ];
+						update_post_meta( $order_id, '_' . $key, $postvalue );
+					}
 				} else {
-
-					update_post_meta( $order_id, '_' . $key, $this->posted[ $key ] );
-
-					// User
-					if ( $this->customer_id )
-						update_user_meta( $this->customer_id, $key, $this->posted[ $key ] );
+					$postvalue = $this->posted[ $key ];
+					update_post_meta( $order_id, '_' . $key, $postvalue );
 				}
+
+				// User
+				if ( $postvalue && $this->customer_id )
+					update_user_meta( $this->customer_id, $key, $postvalue );
 			}
 		}
 
