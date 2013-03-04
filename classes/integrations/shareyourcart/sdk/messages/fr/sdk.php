@@ -71,7 +71,7 @@ return array (
   'Save' => '',
   'Show button by default on: ' => '',
   'Standard Button' => '',
-  'This plugin allows you to easilly set the above meta properties directly in the post or page edit form' => '',
+  'This plugin allows you to easily set the above meta properties directly in the post or page edit form' => '',
   'To position the {brand} button, you need to override the following CSS classes' => '',
   'Use Image Button' => '',
   'Use Standard Button' => '',
@@ -79,6 +79,6 @@ return array (
   'You can choose how much of a discount to give (in fixed amount, percentage, or free shipping) and to which social media channels it should it be applied. You can also define what the advertisement should say, so that it fully benefits your sales.' => '',
   'or' => '',
   '{brand} helps you get more customers by motivating satisfied customers to talk with their friends about your products. Each customer that promotes your products, via social media, will receive a coupon that they can apply to their shopping cart in order to get a small discount.' => '',
-  '{css_class} for the horrizontal button' => '',
+  '{css_class} for the horizontal button' => '',
   '{css_class} for the vertical button' => '',
 );

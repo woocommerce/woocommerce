@@ -45,7 +45,7 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 		// Trigger
 		add_action( 'woocommerce_reset_password_notification', array( $this, 'trigger' ), 10, 2 );
 
-		// Call parent constuctor
+		// Call parent constructor
 		parent::__construct();
 	}
 

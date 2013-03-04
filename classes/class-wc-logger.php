@@ -76,7 +76,7 @@ class WC_Logger {
 
 
 	/**
-	 * Clear entrys from chosen file.
+	 * Clear entries from chosen file.
 	 *
 	 * @access public
 	 * @param mixed $handle

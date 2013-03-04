@@ -88,7 +88,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		$total_cost = ( is_array( $cost ) ) ? array_sum( $cost ) : $cost;
 
 		// Taxes - if not an array and not set to false, calc tax based on cost and passed calc_tax variable
-		// This saves shipping methods having to do compelex tax calculations
+		// This saves shipping methods having to do complex tax calculations
 		if ( ! is_array( $taxes ) && $taxes !== false && $total_cost > 0 && get_option( 'woocommerce_calc_taxes' ) == 'yes' && $this->tax_status == 'taxable' ) {
 
 			$_tax 	= new WC_Tax();

@@ -145,7 +145,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			'invoice_prefix' => array(
 							'title' => __( 'Invoice Prefix', 'woocommerce' ),
 							'type' => 'text',
-							'description' => __( 'Please enter a prefix for your invoice numbers. If you use your PayPal account for multiple stores ensure this prefix is unqiue as PayPal will not allow orders with the same invoice number.', 'woocommerce' ),
+							'description' => __( 'Please enter a prefix for your invoice numbers. If you use your PayPal account for multiple stores ensure this prefix is unique as PayPal will not allow orders with the same invoice number.', 'woocommerce' ),
 							'default' => 'WC-',
 							'desc_tip'      => true,
 						),
@@ -317,7 +317,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			// Shipping Cost
 			// No longer using shipping_1 because
 			//		a) paypal ignore it if *any* shipping rules are within paypal
-			//		b) paypal ignore anyhing over 5 digits, so 999.99 is the max
+			//		b) paypal ignore anything over 5 digits, so 999.99 is the max
 			// $paypal_args['shipping_1']		= number_format( $order->get_shipping() + $order->get_shipping_tax() , 2, '.', '' );
 			if ( ( $order->get_shipping() + $order->get_shipping_tax() ) > 0 ) {
 				$paypal_args['item_name_2'] = __( 'Shipping via', 'woocommerce' ) . ' ' . ucwords( $order->shipping_method_title );

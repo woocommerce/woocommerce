@@ -58,7 +58,7 @@ class WC_Cart {
 	/** @var float Discounts after tax. */
 	public $discount_total;
 
-	/** @var float Total for additonal fees. */
+	/** @var float Total for additional fees. */
 	public $fee_total;
 
 	/** @var float Shipping cost. */
@@ -1355,7 +1355,7 @@ class WC_Cart {
 						 */
 						$_product = $values['data'];
 
-						// Base Price (inlusive of tax for now)
+						// Base Price (inclusive of tax for now)
 						$base_price 			= $_product->get_price();
 
 						// Base Price Adjustment
@@ -1620,7 +1620,7 @@ class WC_Cart {
 		 *
 		 * This lets us calculate costs for carts that are shipped to multiple locations.
 		 *
-		 * Shipping methods are responsble for looping through these packages.
+		 * Shipping methods are responsible for looping through these packages.
 		 *
 		 * By default we pass the cart itself as a package - plugins can change this
 		 * through the filter and break it up.

@@ -90,7 +90,7 @@ class ShareYourCartAPI {
         $httpCode = curl_getinfo($session, CURLINFO_HTTP_CODE);
         curl_close($session);
 
-        // If the operation was not succesfull, print the error
+        // If the operation was not successful, print the error
         if($httpCode != 200)
             throw new Exception($response);
 
@@ -151,7 +151,7 @@ class ShareYourCartAPI {
         $httpCode = curl_getinfo($session, CURLINFO_HTTP_CODE);
         curl_close($session);
 
-        //if the operation was not succesfull, print the error
+        //if the operation was not successful, print the error
 		if($httpCode != 200)
             throw new Exception(SyC::t('sdk',"Coupon Invalid: {coupon}", array('{coupon}' => $response)));
 
@@ -194,7 +194,7 @@ class ShareYourCartAPI {
         $httpCode = curl_getinfo($session, CURLINFO_HTTP_CODE);
         curl_close($session);
 
-        // If the operation was not succesfull, return FALSE
+        // If the operation was not successful, return FALSE
         if($httpCode != 200) {
             if(isset($message)) $message = $response;
 

@@ -450,7 +450,7 @@ class WC_Shortcodes {
 
 
 	/**
-	 * Display a single prodcut
+	 * Display a single product
 	 *
 	 * @access public
 	 * @param array $atts
@@ -510,7 +510,7 @@ class WC_Shortcodes {
 
 
 	/**
-	 * Display a single prodcut price + cart button
+	 * Display a single product price + cart button
 	 *
 	 * @access public
 	 * @param array $atts

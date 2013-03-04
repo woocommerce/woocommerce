@@ -53,7 +53,7 @@ class WC_Coupon {
 	/** @public int Coupon usage count. */
 	public $usage_count;
 
-	/** @public string Expirey date. */
+	/** @public string Expiry date. */
 	public $expiry_date;
 
 	/** @public string "yes" if applied before tax. */
@@ -244,7 +244,7 @@ class WC_Coupon {
 	/**
 	 * is_valid function.
 	 *
-	 * Check if a coupon is valid. Return a reason code if invaid. Reason codes:
+	 * Check if a coupon is valid. Return a reason code if invalid. Reason codes:
 	 *
 	 * @access public
 	 * @return bool|WP_Error validity or a WP_Error if not valid

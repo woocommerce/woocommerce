@@ -27,7 +27,7 @@ class ShareYourCartWooCommerceEx extends ShareYourCartWooCommerce {
 	}
 
 	public function showAdminMenu() {
-		//since we have allready integrated this in our own settings page,
+		//since we have already integrated this in our own settings page,
 		//leave this function empty
 	}
 
@@ -46,8 +46,8 @@ class ShareYourCartWooCommerceEx extends ShareYourCartWooCommerce {
 				$this->settings['enabled'] = ( $value == 'active' ? 'yes' : 'no' );
 				break;
 			case "plugin_current_version":
-				//this setting needs to be set globaly as well, in order to be recognized by other ShareYourCart integrations,
-				//and to not interfear with one-another
+				//this setting needs to be set globally as well, in order to be recognized by other ShareYourCart integrations,
+				//and to not interfere with one-another
 				parent::setConfigValue($field, $value);
 				break;
 		}

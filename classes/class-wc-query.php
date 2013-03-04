@@ -166,7 +166,7 @@ class WC_Query {
 	public function the_posts( $posts, $query = false ) {
 		global $woocommerce;
 
-		// Abort if theres no query
+		// Abort if there's no query
 		if ( ! $query )
 			return $posts;
 

@@ -37,7 +37,7 @@ class WC_Checkout {
 	private $customer_id;
 
 	/**
-	 * Constructor for the checkout class. Hooks in methods and defines eheckout fields.
+	 * Constructor for the checkout class. Hooks in methods and defines checkout fields.
 	 *
 	 * @access public
 	 * @return void

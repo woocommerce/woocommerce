@@ -1,6 +1,6 @@
 <?php
 /**
- * Additonal Information tab
+ * Additional Information tab
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates

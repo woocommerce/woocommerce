@@ -553,7 +553,7 @@ class Woocommerce {
 	 * Handles template usage so that we can use our own templates instead of the themes.
 	 *
 	 * Templates are in the 'templates' folder. woocommerce looks for theme
-	 * overides in /theme/woocommerce/ by default
+	 * overrides in /theme/woocommerce/ by default
 	 *
 	 * For beginners, it also looks for a woocommerce.php template first. If the user adds
 	 * this to the theme (containing a woocommerce() inside) this will be used for all
@@ -967,7 +967,7 @@ class Woocommerce {
 					'map_meta_cap'			=> true,
 					'publicly_queryable' 	=> true,
 					'exclude_from_search' 	=> false,
-					'hierarchical' 			=> false, // Hierarcal causes memory issues - WP loads all records!
+					'hierarchical' 			=> false, // Hierarchical causes memory issues - WP loads all records!
 					'rewrite' 				=> $rewrite,
 					'query_var' 			=> true,
 					'supports' 				=> array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields', 'page-attributes' ),
@@ -1124,7 +1124,7 @@ class Woocommerce {
 		$ajax_cart_en			= get_option( 'woocommerce_enable_ajax_add_to_cart' ) == 'yes' ? true : false;
 		$frontend_script_path 	= $this->plugin_url() . '/assets/js/frontend/';
 
-		// Register any scipts for later use, or used as dependencies
+		// Register any scripts for later use, or used as dependencies
 		wp_register_script( 'chosen', $this->plugin_url() . '/assets/js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 		wp_register_script( 'jquery-blockui', $this->plugin_url() . '/assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 		wp_register_script( 'jquery-placeholder', $this->plugin_url() . '/assets/js/jquery-placeholder/jquery.placeholder' . $suffix . '.js', array( 'jquery' ), $this->version, true );

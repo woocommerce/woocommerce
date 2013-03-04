@@ -985,7 +985,7 @@ class WC_Product {
 
 
 	/**
-	 * Returns the crosssell product ids.
+	 * Returns the cross sell product ids.
 	 *
 	 * @access public
 	 * @return array
