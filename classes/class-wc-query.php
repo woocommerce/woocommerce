@@ -40,7 +40,6 @@ class WC_Query {
 		add_filter( 'wp', array( $this, 'remove_product_query' ) );
 	}
 
-
 	/**
 	 * Hook into pre_get_posts to do the main product query
 	 *
@@ -54,6 +53,17 @@ class WC_Query {
 		// We only want to affect the main query
 		if ( ! $q->is_main_query() )
 			return;
+
+		// When orderby is set, WordPress shows posts. Get around that here.
+		if ( $q->is_home() && 'page' == get_option('show_on_front') && get_option('page_on_front') == woocommerce_get_page_id('shop') ) {
+			$_query = wp_parse_args( $q->query );
+			if ( empty( $_query ) || ! array_diff( array_keys( $_query ), array( 'preview', 'page', 'paged', 'cpage', 'orderby' ) ) ) {
+				$q->is_page = true;
+				$q->is_home = false;
+				$q->set( 'page_id', get_option('page_on_front') );
+				$q->set( 'post_type', 'product' );
+			}
+		}
 
 		// Special check for shops with the product archive on front
 		if ( $q->is_page() && 'page' == get_option( 'show_on_front' ) && $q->get('page_id') == woocommerce_get_page_id('shop') ) {
