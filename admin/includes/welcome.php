@@ -35,6 +35,7 @@ class WC_Welcome_Page {
 		add_action( 'admin_menu', array( $this, 'admin_menus') );
 		add_action( 'admin_head', array( $this, 'admin_head' ) );
 		add_action( 'admin_init', array( $this, 'welcome'    ) );
+		add_action( 'admin_footer', array( $this, 'footer_redirect' ) );
 	}
 
 	/**
@@ -423,6 +424,17 @@ class WC_Welcome_Page {
 
 		wp_safe_redirect( admin_url( 'index.php?page=wc-about' ) );
 		exit;
+	}
+
+	/**
+	 * Redirects the user to welcome screen via Javascript after upgrade
+	 */
+	public function footer_redirect() {
+		global $woocommerce;
+
+		if ( ( isset( $_GET['action'] ) && 'upgrade-plugin' == $_GET['action'] ) && ( isset( $_GET['plugin'] ) && strstr( $_GET['plugin'], 'woocommerce.php' ) ) ) {
+			$woocommerce->add_inline_js( 'window.top.location.href = "' . admin_url( 'index.php?page=wc-about' ) . '"; ');
+		}
 	}
 }
 
