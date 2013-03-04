@@ -34,7 +34,7 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 		add_action( 'woocommerce_order_status_pending_to_processing_notification', array( $this, 'trigger' ) );
 		add_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( $this, 'trigger' ) );
 
-		// Call parent constuctor
+		// Call parent constructor
 		parent::__construct();
 	}
 

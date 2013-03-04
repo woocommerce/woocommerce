@@ -44,7 +44,7 @@ class WC_Product_Simple extends WC_Product {
 	}
 
 	/**
-	 * Sync grouped products with the childs lowest price (so they can be sorted by price accurately).
+	 * Sync grouped products with the children lowest price (so they can be sorted by price accurately).
 	 *
 	 * @access public
 	 * @return void

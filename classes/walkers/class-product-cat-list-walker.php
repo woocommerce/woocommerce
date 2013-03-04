@@ -126,7 +126,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 
 			$id = $element->$id_field;
 
-			// descend only when the depth is right and there are childrens for this element
+			// descend only when the depth is right and there are children for this element
 			if ( ($max_depth == 0 || $max_depth > $depth+1 ) && isset( $children_elements[$id]) ) {
 
 				foreach( $children_elements[ $id ] as $child ){

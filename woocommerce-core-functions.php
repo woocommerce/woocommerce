@@ -1486,7 +1486,7 @@ function woocommerce_get_product_terms( $object_id, $taxonomy, $fields = 'all' )
  *
  * @access public
  * @param int $show_counts (default: 1)
- * @param int $hierarchal (default: 1)
+ * @param int $hierarchical (default: 1)
  * @param int $show_uncategorized (default: 1)
  * @return string
  */
@@ -1631,7 +1631,7 @@ function get_woocommerce_term_meta( $term_id, $key, $single = true ) {
  *
  * @access public
  * @param int $the_term
- * @param int $next_id the id of the next slibling element in save hierachy level
+ * @param int $next_id the id of the next sibling element in save hierarchy level
  * @param string $taxonomy
  * @param int $index (default: 0)
  * @param mixed $terms (default: null)
@@ -2380,7 +2380,7 @@ function woocommerce_scheduled_sales() {
 
 			// Sync parent
 			if ( $parent ) {
-				// We can force varaible product price to sync up by removing their min price meta
+				// We can force variable product price to sync up by removing their min price meta
 				delete_post_meta( $parent, 'min_variation_price' );
 
 				// Grouped products need syncing via a function

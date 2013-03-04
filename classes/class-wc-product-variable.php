@@ -437,7 +437,7 @@ class WC_Product_Variable extends WC_Product {
 
 
 	/**
-	 * Sync variable product prices with the childs lowest/highest prices.
+	 * Sync variable product prices with the children lowest/highest prices.
 	 *
 	 * @access public
 	 * @return void

@@ -216,7 +216,7 @@ class WC_Tax {
 		} else {
 
 			// Prices which include tax should always use the base rate if we don't know where the user is located
-			// Prices exlcuding tax however should just not add any taxes, as they will be added during checkout
+			// Prices excluding tax however should just not add any taxes, as they will be added during checkout
 			if ( $woocommerce->cart->prices_include_tax || get_option( 'woocommerce_default_customer_address' ) == 'base' ) {
 				$country 	= $woocommerce->countries->get_base_country();
 				$state 		= $woocommerce->countries->get_base_state();
@@ -346,7 +346,7 @@ class WC_Tax {
 	 * @param	bool	passed price includes tax
 	 * @return  array	array of rates/amounts
 	 */
-	public function calc_tax( $price, $rates, $price_includes_tax = true, $supress_rounding = false ) {
+	public function calc_tax( $price, $rates, $price_includes_tax = true, $suppress_rounding = false ) {
 
 		$price = $price * 100;	// To avoid float rounding errors, work with integers (pence)
 
@@ -378,14 +378,14 @@ class WC_Tax {
 				else
 					$tax_amount = ( $the_rate / $regular_tax_rate ) * $non_compound_price;
 
-				// ADVANCED: Allow third parties to modifiy this rate
+				// ADVANCED: Allow third parties to modify this rate
 				$tax_amount = apply_filters( 'woocommerce_price_inc_tax_amount', $tax_amount, $key, $rate, $price, $non_compound_price );
 
 				// Back to pounds
 				$tax_amount = ( $tax_amount / 100 );
 
 				// Rounding
-				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding ) {
+				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $suppress_rounding ) {
 					$tax_amount = $this->round( $tax_amount );
 				}
 
@@ -408,14 +408,14 @@ class WC_Tax {
 
 				$tax_amount = $price * ( $rate['rate'] / 100 );
 
-				// ADVANCED: Allow third parties to modifiy this rate
+				// ADVANCED: Allow third parties to modify this rate
 				$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price );
 
 				// Back to pounds
 				$tax_amount = ( $tax_amount / 100 );
 
 				// Rounding
-				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding ) {
+				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $suppress_rounding ) {
 					$tax_amount = $this->round( $tax_amount );
 				}
 
@@ -447,7 +447,7 @@ class WC_Tax {
 					$tax_amount = ( $tax_amount / 100 );
 
 					// Rounding
-					if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding ) {
+					if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $suppress_rounding ) {
 						$tax_amount = $this->round( $tax_amount );
 					}
 
@@ -461,7 +461,7 @@ class WC_Tax {
 			}
 		}
 
-		return apply_filters( 'woocommerce_calc_tax', $taxes, $price, $rates, $price_includes_tax, $supress_rounding );
+		return apply_filters( 'woocommerce_calc_tax', $taxes, $price, $rates, $price_includes_tax, $suppress_rounding );
 	}
 
 	/**
