@@ -89,7 +89,7 @@ If on the off-chance you do encounter issues with the shop/category pages after 
 
 WooCommerce comes with some dummy data you can use to see how products look; either import dummy_data.xml via the [WordPress importer](http://wordpress.org/extend/plugins/wordpress-importer/) or use our [CSV Import Suite plugin](http://www.woothemes.com/products/product-csv-import-suite/) to import dummy_data.csv and dummy_data_variations.csv.
 
-== Premium Extensions ==
+= Premium Extensions =
 
 [Click here to view our extensions](http://www.woothemes.com/extensions/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes"). Some of our more popular plugins are listed below.
 
@@ -116,7 +116,7 @@ WooCommerce comes with some dummy data you can use to see how products look; eit
 	* [Product CSV Import Suite](http://www.woothemes.com/extension/product-csv-import-suite/) - Import and Export variations and products via a CSV
 	* [Order/Customer CSV Export](http://www.woothemes.com/extension/order-customer-csv-export/) - Export your orders and customer records to a CSV
 
-== Free Extensions ==
+= Free Extensions =
 
 WordPress.org is home to some cool free extensions too ([search WordPress.org for more](http://wordpress.org/extend/plugins/search.php?q=woocommerce&sort=popular)).
 
