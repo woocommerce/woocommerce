@@ -42,7 +42,7 @@ foreach ( $product->get_children() as $child_id ) {
 
 						<?php elseif ( ! $quantites_required ) : ?>
 
-							<button type="submit" name="quantity[<?php echo $child_product['product']->id; ?>]" value="1" class="single_add_to_cart_button button alt"><?php _e( 'Add to cart', 'woocommerce' ); ?></button>
+							<a href="<?php echo esc_url( $child_product['product']->add_to_cart_url() ); ?>" rel="nofollow" class="single_add_to_cart_button button alt"><?php echo apply_filters( 'single_add_to_cart_text', __( 'Add to cart', 'woocommerce' ), $child_product['product']->product_type ); ?></a>
 
 						<?php else : ?>
 
