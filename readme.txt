@@ -169,6 +169,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Frontpage shop when 'orderby' is set.
 * Fix - Fix add-to-cart for grouped products which are sold individually.
 * Fix - Payment method animation on the checkout.
+* Fix - Updated chosen library.
 
 = 2.0.1 - 04/03/2013 =
 * Fix - Added an extra permalink flush after upgrade to save needing to do it manually.
