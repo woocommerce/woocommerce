@@ -304,7 +304,8 @@ class WC_Countries {
 			'SI' => array(),
 			'LK' => array(),
 			'SE' => array(),
-			'VN' => array()
+			'VN' => array(),
+			'ZA' => array(),
 		);
 
 		// Load only the state files the shop owner wants/needs
