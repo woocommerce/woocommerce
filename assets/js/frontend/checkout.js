@@ -141,7 +141,7 @@ jQuery(document).ready(function($) {
 		}
 	}
 
-	$('form.checkout, #order_review')
+	$('#order_review')
 
 	/* Payment option selection */
 
