@@ -902,6 +902,11 @@ class WC_Countries {
 						'hidden'	=> true
 					)
 				),
+				'ZA' => array(
+					'state'	=> array(
+						'label'			=> __( 'Province', 'woocommerce' ),
+					)
+				),
 				'ZW' => array(
 					'postcode' => array(
 						'required' 	=> false,
