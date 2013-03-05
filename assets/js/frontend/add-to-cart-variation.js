@@ -114,12 +114,7 @@
 						} else {
 
 			            	// Encode entities
-			            	value = $(this).val()
-					            .replace(/&/g, '&amp;')
-					            .replace(/"/g, '&quot;')
-					            .replace(/'/g, '&#039;')
-					            .replace(/</g, '&lt;')
-					            .replace(/>/g, '&gt;');
+			            	value = $(this).val();
 
 							// Add to settings array
 							current_settings[ $(this).attr('name') ] = value;
