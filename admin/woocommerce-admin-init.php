@@ -164,7 +164,7 @@ add_action( 'admin_head', 'woocommerce_admin_menu_highlight' );
  */
 function woocommerce_admin_notices_styles() {
 
-	if ( get_option( '_wc_needs_update' ) == 1 || get_option( '_wc_install_pages' ) == 1 ) {
+	if ( get_option( '_wc_needs_update' ) == 1 || get_option( '_wc_needs_pages' ) == 1 ) {
 		wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', dirname( __FILE__ ) ) );
 		add_action( 'admin_notices', 'woocommerce_admin_install_notices' );
 	}
@@ -210,25 +210,14 @@ function woocommerce_theme_check_notice() {
 function woocommerce_admin_install_notices() {
 	global $woocommerce;
 
+	// If we need to update, include a message with the update button
 	if ( get_option( '_wc_needs_update' ) == 1 ) {
-
 		include( 'includes/notice-update.php' );
+	}
 
-	} elseif ( get_option( '_wc_install_pages' ) == 1 && woocommerce_get_page_id( 'shop' ) < 1 ) {
-
+	// If we have just installed, show a message with the install pages button
+	elseif ( get_option( '_wc_needs_pages' ) == 1 ) {
 		include( 'includes/notice-install.php' );
-
-	} elseif ( get_option( '_wc_install_pages' ) == 1 ) {
-
-		// We no longer need to install pages
-		delete_option( '_wc_install_pages' );
-
-		// Flush rules after install
-		flush_rewrite_rules( false );
-
-		// What's new redirect
-		wp_safe_redirect( admin_url( 'index.php?page=wc-about' ) );
-		exit;
 	}
 }
 
@@ -250,11 +239,11 @@ function woocommerce_admin_init() {
 		woocommerce_create_pages();
 
 		// We no longer need to install pages
-		delete_option( '_wc_install_pages' );
+		delete_option( '_wc_needs_pages' );
 		delete_transient( '_wc_activation_redirect' );
 
 		// Flush rules after install
-		flush_rewrite_rules( false );
+		flush_rewrite_rules();
 
 		// What's new redirect
 		wp_safe_redirect( admin_url( 'index.php?page=wc-about&wc-installed=true' ) );
@@ -264,11 +253,11 @@ function woocommerce_admin_init() {
 	} elseif ( ! empty( $_GET['skip_install_woocommerce_pages'] ) ) {
 
 		// We no longer need to install pages
-		delete_option( '_wc_install_pages' );
+		delete_option( '_wc_needs_pages' );
 		delete_transient( '_wc_activation_redirect' );
 
 		// Flush rules after install
-		flush_rewrite_rules( false );
+		flush_rewrite_rules();
 
 		// What's new redirect
 		wp_safe_redirect( admin_url( 'index.php?page=wc-about' ) );
@@ -281,8 +270,12 @@ function woocommerce_admin_init() {
 		do_update_woocommerce();
 
 		// Update complete
-		delete_option( '_wc_install_pages' );
+		delete_option( '_wc_needs_pages' );
 		delete_option( '_wc_needs_update' );
+		delete_transient( '_wc_activation_redirect' );
+
+		// Flush rules after install
+		flush_rewrite_rules();
 
 		// What's new redirect
 		wp_safe_redirect( admin_url( 'index.php?page=wc-about&wc-updated=true' ) );

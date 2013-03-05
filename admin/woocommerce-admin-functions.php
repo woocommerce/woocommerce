@@ -25,28 +25,24 @@ function woocommerce_check_download_folder_protection() {
 	$downloads_url 		= $upload_dir['basedir'] . '/woocommerce_uploads';
 	$download_method	= get_option('woocommerce_file_download_method');
 
-	if ($download_method=='redirect') :
+	if ( $download_method == 'redirect' ) {
 
 		// Redirect method - don't protect
-		if (file_exists($downloads_url.'/.htaccess')) :
+		if ( file_exists( $downloads_url . '/.htaccess' ) )
 			unlink( $downloads_url . '/.htaccess' );
-		endif;
 
-		flush_rewrite_rules( true );
-
-	else :
+	} else {
 
 		// Force method - protect, add rules to the htaccess file
-		if (!file_exists($downloads_url.'/.htaccess')) :
-			if ($file_handle = @fopen( $downloads_url . '/.htaccess', 'w' )) :
-				fwrite($file_handle, 'deny from all');
-				fclose($file_handle);
-			endif;
-		endif;
+		if ( ! file_exists( $downloads_url . '/.htaccess' ) ) {
+			if ( $file_handle = @fopen( $downloads_url . '/.htaccess', 'w' ) ) {
+				fwrite( $file_handle, 'deny from all' );
+				fclose( $file_handle );
+			}
+		}
+	}
 
-		flush_rewrite_rules( true );
-
-	endif;
+	flush_rewrite_rules();
 }
 
 

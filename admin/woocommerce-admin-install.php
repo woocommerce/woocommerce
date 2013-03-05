@@ -111,6 +111,9 @@ function do_install_woocommerce() {
 
 	// Update version
 	update_option( 'woocommerce_version', $woocommerce->version );
+
+	// Flush rewrite rules
+	flush_rewrite_rules();
 }
 
 

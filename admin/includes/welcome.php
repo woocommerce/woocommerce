@@ -22,6 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 class WC_Welcome_Page {
 
 	private $welcome_page_title;
+	private $plugin;
 
 	/**
 	 * __construct function.
@@ -30,12 +31,12 @@ class WC_Welcome_Page {
 	 * @return void
 	 */
 	public function __construct() {
+		$this->plugin             = 'woocommerce/woocommerce.php';
 		$this->welcome_page_title = __( 'Welcome to WooCommerce', 'woocommerce' );
 
 		add_action( 'admin_menu', array( $this, 'admin_menus') );
 		add_action( 'admin_head', array( $this, 'admin_head' ) );
 		add_action( 'admin_init', array( $this, 'welcome'    ) );
-		add_action( 'admin_footer', array( $this, 'footer_redirect' ) );
 	}
 
 	/**
@@ -123,12 +124,8 @@ class WC_Welcome_Page {
 	private function intro() {
 		global $woocommerce;
 
-		// Flush rules after update
-		if ( ! empty( $_GET['wc-updated'] ) )
-			flush_rewrite_rules( false );
-
 		// Drop minor version if 0
-		$major_version = strstr( $woocommerce->version, '0.0' ) ? substr( $woocommerce->version, 0, 3 ) : $woocommerce->version;
+		$major_version = substr( $woocommerce->version, 0, 3 );
 		?>
 		<h1><?php printf( __( 'Welcome to WooCommerce %s', 'woocommerce' ), $major_version ); ?></h1>
 
@@ -404,19 +401,19 @@ class WC_Welcome_Page {
 	 */
 	public function welcome() {
 
-		// Bail if no activation redirect
+		// Bail if no activation redirect transient is set
 	    if ( ! get_transient( '_wc_activation_redirect' ) )
 			return;
 
 		// Delete the redirect transient
 		delete_transient( '_wc_activation_redirect' );
 
-		// Bail if we are waiting to install or update via the interface
-		if ( get_option( '_wc_needs_update' ) == 1 || get_option( '_wc_install_pages' ) == 1 )
+		// Bail if we are waiting to install or update via the interface update/install links
+		if ( get_option( '_wc_needs_update' ) == 1 || get_option( '_wc_needs_pages' ) == 1 )
 			return;
 
-		// Bail if activating from network, or bulk
-		if ( is_network_admin() || isset( $_GET['activate-multi'] ) )
+		// Bail if activating from network, or bulk, or within an iFrame
+		if ( is_network_admin() || isset( $_GET['activate-multi'] ) || defined( 'IFRAME_REQUEST' ) )
 			return;
 
 		if ( ( isset( $_GET['action'] ) && 'upgrade-plugin' == $_GET['action'] ) && ( isset( $_GET['plugin'] ) && strstr( $_GET['plugin'], 'woocommerce.php' ) ) )
@@ -424,17 +421,6 @@ class WC_Welcome_Page {
 
 		wp_safe_redirect( admin_url( 'index.php?page=wc-about' ) );
 		exit;
-	}
-
-	/**
-	 * Redirects the user to welcome screen via Javascript after upgrade
-	 */
-	public function footer_redirect() {
-		global $woocommerce;
-
-		if ( ( isset( $_GET['action'] ) && 'upgrade-plugin' == $_GET['action'] ) && ( isset( $_GET['plugin'] ) && strstr( $_GET['plugin'], 'woocommerce.php' ) ) ) {
-			$woocommerce->add_inline_js( 'window.top.location.href = "' . admin_url( 'index.php?page=wc-about' ) . '"; ');
-		}
 	}
 }
 

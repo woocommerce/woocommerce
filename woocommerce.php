@@ -130,13 +130,11 @@ class Woocommerce {
 		define( 'WOOCOMMERCE_VERSION', $this->version );
 
 		// Installation
-		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
-			register_activation_hook( __FILE__, array( $this, 'activate' ) );
-			register_activation_hook( __FILE__, 'flush_rewrite_rules' );
+		register_activation_hook( __FILE__, array( $this, 'activate' ) );
 
-			if ( get_option( 'woocommerce_version' ) != $this->version )
-				add_action( 'init', array( $this, 'install' ), 1 );
-		}
+		// Upgrades
+		if ( is_admin() && ! defined( 'DOING_AJAX' ) && get_option( 'woocommerce_version' ) != $this->version )
+			add_action( 'admin_init', array( $this, 'install' ), 1 );
 
 		// Include required files
 		$this->includes();
@@ -238,7 +236,8 @@ class Woocommerce {
 	 * @return void
 	 */
 	public function activate() {
-		update_option( '_wc_install_pages', 1 );
+		if ( woocommerce_get_page_id( 'shop' ) < 1 )
+			update_option( '_wc_needs_pages', 1 );
 		$this->install();
 	}
 
@@ -251,8 +250,8 @@ class Woocommerce {
 	 */
 	function install() {
 		include_once( 'admin/woocommerce-admin-install.php' );
-		do_install_woocommerce();
 		set_transient( '_wc_activation_redirect', 1, 60 * 60 );
+		do_install_woocommerce();
 	}
 
 
