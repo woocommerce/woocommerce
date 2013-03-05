@@ -167,6 +167,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 2.0.2 - XX/03/2013 =
 * Fix - Frontpage shop when 'orderby' is set.
+* Fix - Fix add-to-cart for grouped products which are sold individually.
 
 = 2.0.1 - 04/03/2013 =
 * Fix - Added an extra permalink flush after upgrade to save needing to do it manually.
