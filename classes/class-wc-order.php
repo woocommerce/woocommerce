@@ -900,7 +900,6 @@ class WC_Order {
 		$_product = get_product( $item['variation_id'] ? $item['variation_id'] : $item['product_id'] );
 
 		return $_product;
-
 	}
 
 

@@ -366,7 +366,8 @@ function woocommerce_order_items_meta_box( $post ) {
 								$_product 	= $order->get_product_from_item( $item );
 								$item_meta 	= $order->get_item_meta( $item_id );
 
-								include( 'order-item-html.php' );
+								if ( $_product )
+									include( 'order-item-html.php' );
 							break;
 							case 'fee' :
 								include( 'order-fee-html.php' );
