@@ -738,8 +738,12 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 	update_post_meta( $post_id, '_order_discount', woocommerce_clean( $_POST['_order_discount'] ) );
 	update_post_meta( $post_id, '_order_total', woocommerce_clean( $_POST['_order_total'] ) );
 	update_post_meta( $post_id, '_customer_user', absint( $_POST['customer_user'] ) );
-	update_post_meta( $post_id, '_order_tax', woocommerce_clean( $_POST['_order_tax'] ) );
-	update_post_meta( $post_id, '_order_shipping_tax', woocommerce_clean( $_POST['_order_shipping_tax'] ) );
+
+	if ( isset( $_POST['_order_tax'] ) )
+		update_post_meta( $post_id, '_order_tax', woocommerce_clean( $_POST['_order_tax'] ) );
+
+	if ( isset( $_POST['_order_shipping_tax'] ) )
+		update_post_meta( $post_id, '_order_shipping_tax', woocommerce_clean( $_POST['_order_shipping_tax'] ) );
 
 	// Shipping method handling
 	if ( get_post_meta( $post_id, '_shipping_method', true ) !== stripslashes( $_POST['_shipping_method'] ) ) {
@@ -878,6 +882,9 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 
 		 	if ( isset( $line_tax[ $item_id ] ) )
 		 		woocommerce_update_order_item_meta( $item_id, '_line_tax', woocommerce_clean( $line_tax[ $item_id ] ) );
+
+		 	// Clear meta cache
+		 	wp_cache_delete( $item_id, 'order_item_meta' );
 		}
 	}
 
