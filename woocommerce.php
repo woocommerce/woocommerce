@@ -132,9 +132,8 @@ class Woocommerce {
 		// Installation
 		register_activation_hook( __FILE__, array( $this, 'activate' ) );
 
-		// Upgrades
-		if ( is_admin() && ( get_option( 'woocommerce_version' ) != $this->version || get_option( 'woocommerce_db_version' ) != $this->version ) )
-			add_action( 'admin_init', array( $this, 'install' ), 1 );
+		// Updates
+		add_action( 'admin_init', array( $this, 'update' ), 5 );
 
 		// Include required files
 		$this->includes();
@@ -241,6 +240,16 @@ class Woocommerce {
 		$this->install();
 	}
 
+	/**
+	 * update function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function update() {
+		if ( ! defined( 'IFRAME_REQUEST' ) && ( get_option( 'woocommerce_version' ) != $this->version || get_option( 'woocommerce_db_version' ) != $this->version ) )
+			$this->install();
+	}
 
 	/**
 	 * upgrade function.

@@ -98,7 +98,7 @@ class WC_Session_Handler extends WC_Session {
 	 * @return mixed
 	 */
 	private function get_session_cookie() {
-		if ( ! isset( $_COOKIE[ $this->_cookie ] ) )
+		if ( empty( $_COOKIE[ $this->_cookie ] ) )
 			return false;
 
 		list( $customer_id, $session_expiration, $session_expiring, $cookie_hash ) = explode( '||', $_COOKIE[ $this->_cookie ] );
