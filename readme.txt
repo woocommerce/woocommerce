@@ -171,6 +171,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Payment method animation on the checkout.
 * Fix - Updated chosen library.
 * Fix - Saving of attributes/variations with custom product-level attributes.
+* Fix - Include once to prevent class exist errors with widgets.
 
 = 2.0.1 - 04/03/2013 =
 * Fix - Added an extra permalink flush after upgrade to save needing to do it manually.
