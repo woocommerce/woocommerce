@@ -65,13 +65,13 @@ if ( $customer_orders ) : ?>
 						<?php
 							$actions = array();
 
-							if ( in_array( $order->status, array( 'pending', 'failed' ) ) )
+							if ( in_array( $order->status, apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order ) ) )
 								$actions['pay'] = array(
 									'url'  => $order->get_checkout_payment_url(),
 									'name' => __( 'Pay', 'woocommerce' )
 								);
 
-							if ( in_array( $order->status, array( 'pending', 'failed' ) ) )
+							if ( in_array( $order->status, apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ), $order ) ) )
 								$actions['cancel'] = array(
 									'url'  => $order->get_cancel_order_url(),
 									'name' => __( 'Cancel', 'woocommerce' )
