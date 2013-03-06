@@ -242,9 +242,6 @@ function woocommerce_admin_init() {
 		delete_option( '_wc_needs_pages' );
 		delete_transient( '_wc_activation_redirect' );
 
-		// Flush rules after install
-		flush_rewrite_rules();
-
 		// What's new redirect
 		wp_safe_redirect( admin_url( 'index.php?page=wc-about&wc-installed=true' ) );
 		exit;
@@ -273,9 +270,6 @@ function woocommerce_admin_init() {
 		delete_option( '_wc_needs_pages' );
 		delete_option( '_wc_needs_update' );
 		delete_transient( '_wc_activation_redirect' );
-
-		// Flush rules after install
-		flush_rewrite_rules();
 
 		// What's new redirect
 		wp_safe_redirect( admin_url( 'index.php?page=wc-about&wc-updated=true' ) );
