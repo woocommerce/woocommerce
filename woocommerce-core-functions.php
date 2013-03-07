@@ -2430,7 +2430,9 @@ function woocommerce_cancel_unpaid_orders() {
 	if ( $unpaid_orders ) {
 		foreach ( $unpaid_orders as $unpaid_order ) {
 			$order = new WC_Order( $unpaid_order );
-			$order->update_status( 'cancelled', __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
+
+			if ( apply_filters( 'woocommerce_cancel_unpaid_order', true, $order ) )
+				$order->update_status( 'cancelled', __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
 		}
 	}
 
