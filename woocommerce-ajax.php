@@ -280,7 +280,7 @@ function woocommerce_ajax_add_to_cart() {
 		// If there was an error adding to the cart, redirect to the product page to show any errors
 		$data = array(
 			'error' => true,
-			'product_url' => get_permalink( $product_id )
+			'product_url' => apply_filters('woocommerce_cart_redirect_after_error', get_permalink( $product_id ), $product_id)
 		);
 
 		$woocommerce->set_messages();
