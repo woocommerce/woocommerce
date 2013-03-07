@@ -43,11 +43,12 @@ class WC_Shortcode_Pay {
 		if ( isset( $_GET['pay_for_order'] ) && isset( $_GET['order'] ) && isset( $_GET['order_id'] ) ) {
 
 			// Pay for existing order
-			$order_key = urldecode( $_GET['order'] );
-			$order_id  = absint( $_GET['order_id'] );
-			$order     = new WC_Order( $order_id );
+			$order_key            = urldecode( $_GET[ 'order' ] );
+			$order_id             = absint( $_GET[ 'order_id' ] );
+			$order                = new WC_Order( $order_id );
+			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
 
-			if ( $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, array( 'pending', 'failed' ) ) ) {
+			if ( $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, $valid_order_statuses ) ) {
 
 				// Set customer location to order location
 				if ( $order->billing_country )
@@ -60,7 +61,7 @@ class WC_Shortcode_Pay {
 				// Show form
 				woocommerce_get_template( 'checkout/form-pay.php', array( 'order' => $order ) );
 
-			} elseif ( ! in_array( $order->status, array( 'pending', 'failed' ) ) ) {
+			} elseif ( ! in_array( $order->status, $valid_order_statuses ) ) {
 
 				$woocommerce->add_error( __( 'Your order has already been paid for. Please contact us if you need assistance.', 'woocommerce' ) );
 				$woocommerce->show_messages();
@@ -80,9 +81,10 @@ class WC_Shortcode_Pay {
 
 			if ( $order_id > 0 ) {
 
-				$order = new WC_Order( $order_id );
+				$order                = new WC_Order( $order_id );
+				$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
 
-				if ( $order->order_key == $order_key && in_array( $order->status, array( 'pending', 'failed' ) ) ) {
+				if ( $order->order_key == $order_key && in_array( $order->status, $valid_order_statuses ) ) {
 
 					?>
 					<ul class="order_details">
@@ -113,7 +115,7 @@ class WC_Shortcode_Pay {
 					<div class="clear"></div>
 					<?php
 
-				} elseif ( ! in_array( $order->status, array( 'pending', 'failed' ) ) ) {
+				} elseif ( ! in_array( $order->status, $valid_order_statuses ) ) {
 
 					$woocommerce->add_error( __( 'Your order has already been paid for. Please contact us if you need assistance.', 'woocommerce' ) );
 					$woocommerce->show_messages();
