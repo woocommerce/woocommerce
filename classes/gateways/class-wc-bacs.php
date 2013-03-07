@@ -13,7 +13,7 @@ class WC_BACS extends WC_Payment_Gateway {
 
     public function __construct() { 
 		$this->id				= 'bacs';
-		$this->icon 			= apply_filters('woocommerce_bacs_icon', '');
+		$this->icon 			= apply_filters('woocommerce_bacs_icon', 'http://cdn1.iconfinder.com/data/icons/credit_card_icons/32/bank.png');
 		$this->has_fields 		= false;
 		$this->method_title     = __( 'Bacs', 'woocommerce' );
 		// Load the form fields.
