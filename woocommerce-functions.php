@@ -318,9 +318,19 @@ function woocommerce_add_to_cart_action( $url = false ) {
 
                 // Allow if valid
                 if ( $valid_value == '' || $valid_value == $value ) {
-
-	                // Use name so it looks nicer in the cart widget/order page etc - instead of a sanitized string
-	                $variations[ esc_html( $attribute['name'] ) ] = $value;
+	                if ( $attribute['is_taxonomy'] )
+	                	$variations[ esc_html( $attribute['name'] ) ] = $value;
+	                else {
+		                // For custom attributes, get the name from the slug
+		                $options = array_map( 'trim', explode( '|', $attribute['value'] ) );
+		                foreach ( $options as $option ) {
+		                	if ( sanitize_title( $option ) == $value ) {
+		                		$value = $option;
+		                		break;
+		                	}
+		                }
+		                 $variations[ esc_html( $attribute['name'] ) ] = $value;
+	                }
 	                continue;
 	            }
 

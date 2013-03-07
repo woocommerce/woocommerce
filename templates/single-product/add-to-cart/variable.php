@@ -4,7 +4,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.6.5
+ * @version     2.0.3
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -50,12 +50,17 @@ global $woocommerce, $product, $post;
 									$terms = get_terms( sanitize_title( $name ), $args );
 
 									foreach ( $terms as $term ) {
-										if ( ! in_array( $term->slug, $options ) ) continue;
+										if ( ! in_array( $term->slug, $options ) )
+											continue;
+
 										echo '<option value="' . esc_attr( $term->slug ) . '" ' . selected( $selected_value, $term->slug, false ) . '>' . apply_filters( 'woocommerce_variation_option_name', $term->name ) . '</option>';
 									}
 								} else {
-									foreach ( $options as $option )
-										echo '<option value="' . esc_attr( $option ) . '" ' . selected( $selected_value, $option, false ) . '>' . apply_filters( 'woocommerce_variation_option_name', $option ) . '</option>';
+
+									foreach ( $options as $option ) {
+										echo '<option value="' . esc_attr( sanitize_title( $option ) ) . '" ' . selected( sanitize_title( $selected_value ), sanitize_title( $option ), false ) . '>' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
+									}
+
 								}
 							}
 						?>

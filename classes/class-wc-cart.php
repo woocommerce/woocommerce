@@ -573,8 +573,10 @@ class WC_Cart {
 		            	$term = get_term_by( 'slug', $value, esc_attr( str_replace( 'attribute_', '', $name ) ) );
 		            	if ( ! is_wp_error( $term ) && $term->name )
 		            		$value = $term->name;
+
+		            // If this is a custom option slug, get the options name
 		            } else {
-		            	$value = ucfirst( apply_filters( 'woocommerce_variation_option_name', $value ) );
+		            	$value = apply_filters( 'woocommerce_variation_option_name', $value );
 					}
 
 					if ( $flat )

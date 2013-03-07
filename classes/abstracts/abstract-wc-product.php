@@ -1123,7 +1123,7 @@ class WC_Product {
 	 *
 	 * @access public
 	 * @param mixed $attr
-	 * @return mixed
+	 * @return string
 	 */
 	function get_attribute( $attr ) {
 		$attributes = $this->get_attributes();
@@ -1145,7 +1145,8 @@ class WC_Product {
 			}
 
 		}
-		return false;
+
+		return '';
 	}
 
 

@@ -325,7 +325,7 @@ class WC_Product_Variable extends WC_Product {
 
                 foreach ( $child_variation_attributes as $name => $value )
                     if ( $name == $attribute_field_name )
-                    	$values[] = $value;
+                    	$values[] = sanitize_title( $value );
             }
 
             // empty value indicates that all options for given attribute are available
@@ -339,19 +339,22 @@ class WC_Product_Variable extends WC_Product {
 					foreach ( $post_terms as $term )
 						$values[] = $term->slug;
 				} else {
-					$values = explode( '|', $attribute['value'] );
+					$values = array_map( 'trim', explode( '|', $attribute['value'] ) );
 				}
 
-				$values = array_unique( array_map( 'trim', $values ) );
+				$values = array_unique( $values );
 
 			// Order custom attributes (non taxonomy) as defined
-            } else {
+            } elseif ( ! $attribute['is_taxonomy'] ) {
 
-	            if ( ! $attribute['is_taxonomy'] ) {
-	            	$options 	= array_map( 'trim', explode( '|', $attribute['value'] ) );
-	            	$values 	= array_intersect( $options, $values );
-	            }
+            	$option_names = array_map( 'trim', explode( '|', $attribute['value'] ) );
+            	$option_slugs = $values;
+            	$values       = array();
 
+            	foreach ( $option_names as $option_name ) {
+	            	if ( in_array( sanitize_title( $option_name ), $option_slugs ) )
+	            		$values[] = $option_name;
+            	}
             }
 
             $variation_attributes[ $attribute['name'] ] = array_unique( $values );

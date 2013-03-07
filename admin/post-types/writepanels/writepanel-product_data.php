@@ -332,8 +332,11 @@ function woocommerce_product_data_box() {
 			<div class="woocommerce_attributes wc-metaboxes">
 
 				<?php
-					$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();	// Array of defined attribute taxonomies
-					$attributes = maybe_unserialize( get_post_meta( $thepostid, '_product_attributes', true ) );	// Product attributes - taxonomies and custom, ordered, with visibility and variation attributes set
+					// Array of defined attribute taxonomies
+					$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();
+
+					// Product attributes - taxonomies and custom, ordered, with visibility and variation attributes set
+					$attributes = maybe_unserialize( get_post_meta( $thepostid, '_product_attributes', true ) );
 
 					$i = -1;
 
@@ -403,10 +406,10 @@ function woocommerce_product_data_box() {
 															$values = array();
 															foreach ( $post_terms as $term )
 																$values[] = $term->name;
-															echo implode( '|', $values );
+															echo implode( ' | ', $values );
 														}
 
-													?>" placeholder="<?php _e( 'Pipe separate terms', 'woocommerce' ); ?>" />
+													?>" placeholder="<?php _e( 'Pipe (|) separate terms', 'woocommerce' ); ?>" />
 												<?php endif; ?>
 												<?php do_action( 'woocommerce_product_option_terms', $tax, $i ); ?>
 											</td>
@@ -432,7 +435,8 @@ function woocommerce_product_data_box() {
 
 					// Custom Attributes
 					if ( ! empty( $attributes ) ) foreach ( $attributes as $attribute ) {
-						if ( $attribute['is_taxonomy'] ) continue;
+						if ( $attribute['is_taxonomy'] )
+							continue;
 
 						$i++;
 
@@ -733,12 +737,10 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 
 			 		// Format values
 			 		if ( is_array( $attribute_values[ $i ] ) ) {
-				 		$values = array_map('htmlspecialchars', array_map('stripslashes', $attribute_values[ $i ]));
+				 		$values = array_map( 'woocommerce_clean', $attribute_values[ $i ] );
 				 	} else {
 				 		// Text based, separate by pipe
-				 		$values = htmlspecialchars( stripslashes( $attribute_values[ $i ] ) );
-				 		$values = explode( '|', $values );
-				 		$values = array_map( 'trim', $values );
+				 		$values = array_map( 'woocommerce_clean', explode( '|', $attribute_values[ $i ] ) );
 				 	}
 
 				 	// Remove empty items in the array
@@ -755,7 +757,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		 		if ( $values ) {
 			 		// Add attribute to array, but don't set values
 			 		$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
-				 		'name' 			=> htmlspecialchars( stripslashes( $attribute_names[ $i ] ) ),
+				 		'name' 			=> woocommerce_clean( $attribute_names[ $i ] ),
 				 		'value' 		=> '',
 				 		'position' 		=> $attribute_position[ $i ],
 				 		'is_visible' 	=> $is_visible,
@@ -767,11 +769,11 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		 	} elseif ( isset( $attribute_values[ $i ] ) ) {
 
 		 		// Text based, separate by pipe
-		 		$values = implode( '|', array_map( 'trim', explode( '|', stripslashes( $attribute_values[ $i ] ) ) ) );
+		 		$values = implode( ' | ', array_map( 'woocommerce_clean', explode( '|', $attribute_values[ $i ] ) ) );
 
 		 		// Custom attribute - Add attribute to array and set the values
 			 	$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
-			 		'name' 			=> htmlspecialchars( stripslashes( $attribute_names[ $i ] ) ),
+			 		'name' 			=> woocommerce_clean( $attribute_names[ $i ] ),
 			 		'value' 		=> $values,
 			 		'position' 		=> $attribute_position[ $i ],
 			 		'is_visible' 	=> $is_visible,
