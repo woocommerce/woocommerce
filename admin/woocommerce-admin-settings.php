@@ -789,7 +789,7 @@ function woocommerce_admin_fields( $options ) {
             	$crop 	= checked( 1, woocommerce_settings_get_option( $value['id'] . '[crop]', $value['default']['crop'] ), false );
 
             	?><tr valign="top">
-					<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?></th>
+					<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?> <?php echo $tip; ?></th>
                     <td class="forminp">
 
                     	<?php _e( 'Width', 'woocommerce' ); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>[width]" id="<?php echo esc_attr( $value['id'] ); ?>-width" type="text" size="3" value="<?php echo $width; ?>" />
@@ -798,7 +798,7 @@ function woocommerce_admin_fields( $options ) {
 
                     	<label><?php _e( 'Hard Crop', 'woocommerce' ); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>[crop]" id="<?php echo esc_attr( $value['id'] ); ?>-crop" type="checkbox" <?php echo $crop; ?> /></label>
 
-                    	<?php echo $description; ?></td>
+                    	</td>
                 </tr><?php
             break;
 
