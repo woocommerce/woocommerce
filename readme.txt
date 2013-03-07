@@ -173,6 +173,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Samoa -> Western Samoa
 * Fix - Re-applied image setting tooltips
 * Fix - Post code ranges (taxes) on insert.
+* Fix - Moved init checkout to a later hook to prevent canonical template redirects kicking in.
 
 = 2.0.2 - 06/03/2013 =
 * Fix - Frontpage shop when 'orderby' is set.

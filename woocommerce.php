@@ -473,7 +473,7 @@ class Woocommerce {
 			$this->load_messages();
 
 			// Hooks
-			add_action( 'wp', array( $this, 'init_checkout' ) );
+			add_action( 'get_header', array( $this, 'init_checkout' ) );
 			add_filter( 'template_include', array( $this, 'template_loader' ) );
 			add_filter( 'comments_template', array( $this, 'comments_template_loader' ) );
 			add_filter( 'wp_redirect', array( $this, 'redirect' ), 1, 2 );

@@ -1315,7 +1315,7 @@ function woocommerce_track_product_view() {
 	setcookie( "woocommerce_recently_viewed", implode( '|', $viewed_products ), 0, COOKIEPATH, COOKIE_DOMAIN, false, true );
 }
 
-add_action( 'wp', 'woocommerce_track_product_view', 10 );
+add_action( 'get_header', 'woocommerce_track_product_view', 10 );
 
 /**
  * Layered Nav Init
