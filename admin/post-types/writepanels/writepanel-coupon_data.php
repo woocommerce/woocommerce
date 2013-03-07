@@ -42,7 +42,7 @@ function woocommerce_coupon_data_meta_box( $post ) {
     		woocommerce_wp_select( array( 'id' => 'discount_type', 'label' => __( 'Discount type', 'woocommerce' ), 'options' => $woocommerce->get_coupon_discount_types() ) );
 
 			// Amount
-			woocommerce_wp_text_input( array( 'id' => 'coupon_amount', 'label' => __( 'Coupon amount', 'woocommerce' ), 'placeholder' => '0.00', 'description' => __( 'Enter an amount or percentage e.g. 2.99 or 15%', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
+			woocommerce_wp_text_input( array( 'id' => 'coupon_amount', 'label' => __( 'Coupon amount', 'woocommerce' ), 'placeholder' => '0.00', 'description' => __( 'Value of the coupon.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
 					'step' 	=> 'any',
 					'min'	=> '0'
 				)  ) );

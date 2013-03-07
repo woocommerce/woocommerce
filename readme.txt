@@ -166,7 +166,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = X =
-* Fix Samoa -> Western Samoa
+* Tweak - Made coupon label more clear.
+* Fix - Samoa -> Western Samoa
 
 = 2.0.2 - 06/03/2013 =
 * Fix - Frontpage shop when 'orderby' is set.
