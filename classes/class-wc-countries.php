@@ -222,7 +222,6 @@ class WC_Countries {
 			'SX' => __( 'Saint Martin (Dutch part)', 'woocommerce' ),
 			'PM' => __( 'Saint Pierre and Miquelon', 'woocommerce' ),
 			'VC' => __( 'Saint Vincent and the Grenadines', 'woocommerce' ),
-			'WS' => __( 'Samoa', 'woocommerce' ),
 			'SM' => __( 'San Marino', 'woocommerce' ),
 			'ST' => __( 'S&atilde;o Tom&eacute; and Pr&iacute;ncipe', 'woocommerce' ),
 			'SA' => __( 'Saudi Arabia', 'woocommerce' ),
@@ -275,6 +274,7 @@ class WC_Countries {
 			'VN' => __( 'Vietnam', 'woocommerce' ),
 			'WF' => __( 'Wallis and Futuna', 'woocommerce' ),
 			'EH' => __( 'Western Sahara', 'woocommerce' ),
+			'WS' => __( 'Western Samoa', 'woocommerce' ),
 			'YE' => __( 'Yemen', 'woocommerce' ),
 			'ZM' => __( 'Zambia', 'woocommerce' ),
 			'ZW' => __( 'Zimbabwe', 'woocommerce' )
@@ -901,6 +901,12 @@ class WC_Countries {
 						'required' 	=> false,
 						'hidden'	=> true
 					)
+				),
+				'WS' => array(
+					'postcode' => array(
+						'required' 	=> false,
+						'hidden'	=> true
+					),
 				),
 				'ZA' => array(
 					'state'	=> array(
