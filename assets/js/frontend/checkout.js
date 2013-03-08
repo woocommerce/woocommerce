@@ -249,8 +249,12 @@ jQuery(document).ready(function($) {
 				data: 		$form.serialize(),
 				success: 	function( code ) {
 						try {
-							// Get the valid JSON only
-							var code = code.split("<!--WC_END-->")[0];
+							// Get the valid JSON only from the returned string
+							if ( code.indexOf("<!--WC_START-->") >= 0 )
+								code = code.split("<!--WC_START-->")[1]; // Strip off before after WC_START
+
+							if ( code.indexOf("<!--WC_END-->") >= 0 )
+								code = code.split("<!--WC_END-->")[0]; // Strip off anything after WC_END
 
 							// Parse
 							var result = $.parseJSON( code );
