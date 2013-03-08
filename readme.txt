@@ -175,6 +175,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Post code ranges (taxes) on insert.
 * Fix - Moved init checkout to a later hook to prevent canonical template redirects kicking in.
 * Fix - Made custom attributes more robust by using santiized values for variations.
+* Fix - woocommerce_cancel_unpaid_orders respects the manage stock setting.
 
 = 2.0.2 - 06/03/2013 =
 * Fix - Frontpage shop when 'orderby' is set.
