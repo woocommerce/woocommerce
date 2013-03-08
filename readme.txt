@@ -174,7 +174,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Re-applied image setting tooltips
 * Fix - Post code ranges (taxes) on insert.
 * Fix - Moved init checkout to a later hook to prevent canonical template redirects kicking in.
-* Fix - Made custom attributes more robust by using santiized values for variations.
+* Fix - Made custom attributes more robust by using sanitized values for variations.
 * Fix - woocommerce_cancel_unpaid_orders respects the manage stock setting.
 
 = 2.0.2 - 06/03/2013 =
@@ -963,7 +963,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fixed sale widget
 * File download method option so force download can be switched off
 * Improved product cat dropdowns
-* Czech translation by Martin Nečas
+* Czech translation by Martin Nečas
 * Turkish translation by Ercan
 
 = 1.3 - 01/12/2011 =
