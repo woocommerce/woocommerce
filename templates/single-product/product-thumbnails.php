@@ -35,7 +35,9 @@ if ( $attachment_ids ) {
 			if ( ! $attachment_url )
 				continue;
 
-			printf( '<a href="%s" title="%s" rel="prettyPhoto[product-gallery]" class="%s">%s</a>', esc_attr( $attachment_url ), esc_attr( get_the_title( $id ) ), implode( ' ', $classes ), wp_get_attachment_image( $id, apply_filters( 'single_product_small_thumbnail_size', 'shop_thumbnail' ) ) );
+			$image = apply_filters( 'single_product_thumbnail_image', sprintf( '<a href="%s" title="%s" rel="prettyPhoto[product-gallery]" class="%s">%s</a>', esc_attr( $attachment_url ), esc_attr( get_the_title( $id ) ), implode( ' ', $classes ), wp_get_attachment_image( $id, apply_filters( 'single_product_small_thumbnail_size', 'shop_thumbnail' ) ) ), $id );
+			
+			echo $image;
 
 			$loop++;
 		}
