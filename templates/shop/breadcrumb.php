@@ -11,10 +11,15 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $post, $wp_query;
 
-if ( get_option('woocommerce_prepend_shop_page_to_urls') == "yes" && woocommerce_get_page_id( 'shop' ) && get_option( 'page_on_front' ) !== woocommerce_get_page_id( 'shop' ) )
-	$prepend =  $before . '<a href="' . get_permalink( woocommerce_get_page_id('shop') ) . '">' . get_the_title( woocommerce_get_page_id('shop') ) . '</a> ' . $after . $delimiter;
-else
-	$prepend = '';
+$prepend      = '';
+$permalinks   = get_option( 'woocommerce_permalinks' );
+$shop_page_id = woocommerce_get_page_id( 'shop' );
+$shop_page    = get_post( $shop_page_id );
+
+// If permalinks contain the shop page in the URI prepend the breadcrumb with shop
+if ( $shop_page_id && strstr( $permalinks['product_base'], '/' . $shop_page->post_name ) && get_option( 'page_on_front' ) !== $shop_page_id ) {
+	$prepend = $before . '<a href="' . get_permalink( $shop_page ) . '">' . $shop_page->post_title . '</a> ' . $after . $delimiter;
+}
 
 if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_front' ) == woocommerce_get_page_id( 'shop' ) ) ) || is_paged() ) {
 
@@ -80,7 +85,7 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 		echo $before . get_the_time('Y') . $after;
 
-	} elseif ( is_post_type_archive('product') && get_option('page_on_front') !== woocommerce_get_page_id('shop') ) {
+	} elseif ( is_post_type_archive('product') && get_option('page_on_front') !== $shop_page_id ) {
 
 		$_name = woocommerce_get_page_id( 'shop' ) ? get_the_title( woocommerce_get_page_id( 'shop' ) ) : '';
 
