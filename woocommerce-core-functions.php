@@ -949,8 +949,6 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
             	$term = get_term_by( 'slug', $value, esc_attr( str_replace( 'attribute_', '', $name ) ) );
             	if ( ! is_wp_error( $term ) && $term->name )
             		$value = $term->name;
-            } else {
-            	$value = ucfirst( $value );
             }
 
 			if ( $flat )

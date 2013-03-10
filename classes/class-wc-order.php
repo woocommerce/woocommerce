@@ -1597,8 +1597,6 @@ class WC_Order_Item_Meta {
 	            	$term = get_term_by('slug', $meta_value, esc_attr( str_replace( 'attribute_', '', $meta_key ) ) );
 	            	if ( ! is_wp_error( $term ) && $term->name )
 	            		$meta_value = $term->name;
-	            } else {
-	            	$meta_value = ucfirst( $meta_value );
 	            }
 
 				if ( $flat )
