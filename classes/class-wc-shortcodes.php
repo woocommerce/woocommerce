@@ -967,34 +967,30 @@ class WC_Shortcodes {
 	function product_attribute( $atts ) {
 		global $woocommerce_loop;
 
-  		if ( empty( $atts ) ) return;
-
 		extract( shortcode_atts( array(
-			'per_page' 		=> '12',
-			'columns' 		=> '4',
-		  	'orderby'   	=> 'title',
-		  	'order'     	=> 'asc',
-		  	'attribute'		=> '',
-		  	'filter'		=> ''
-			), $atts ) );
+			'per_page'  => '12',
+			'columns'   => '4',
+			'orderby'   => 'title',
+			'order'     => 'asc',
+			'attribute' => '',
+		  	'filter'    => ''
+		), $atts ) );
 
-		$attribute 	= 'pa_' . sanitize_title($attribute);
-		$filter 	= sanitize_title($filter);
+		$attribute 	= strstr( $attribute, 'pa_' ) ? sanitize_title( $attribute ) : 'pa_' . sanitize_title( $attribute );
+		$filter 	= sanitize_title( $filter );
 
-		if ( ! $attribute || ! $filter ) return;
-
-  		$args = array(
-			'post_type'				=> 'product',
-			'post_status' 			=> 'publish',
-			'ignore_sticky_posts'	=> 1,
-			'orderby' 				=> $orderby,
-			'order' 				=> $order,
-			'posts_per_page' 		=> $per_page,
-			'meta_query' 			=> array(
+		$args = array(
+			'post_type'           => 'product',
+			'post_status'         => 'publish',
+			'ignore_sticky_posts' => 1,
+			'posts_per_page'      => $per_page,
+			'orderby'             => $orderby,
+			'order'               => $order,
+			'meta_query'          => array(
 				array(
-					'key' 		=> '_visibility',
-					'value' 	=> array('catalog', 'visible'),
-					'compare' 	=> 'IN'
+					'key'               => '_visibility',
+					'value'             => array('catalog', 'visible'),
+					'compare'           => 'IN'
 				)
 			),
 			'tax_query' 			=> array(
@@ -1006,7 +1002,7 @@ class WC_Shortcodes {
 			)
 		);
 
-  		ob_start();
+		ob_start();
 
 		$products = new WP_Query( $args );
 
@@ -1014,7 +1010,7 @@ class WC_Shortcodes {
 
 		if ( $products->have_posts() ) : ?>
 
-			<ul class="products">
+			<?php woocommerce_product_loop_start(); ?>
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
@@ -1022,12 +1018,12 @@ class WC_Shortcodes {
 
 				<?php endwhile; // end of the loop. ?>
 
-			</ul>
+			<?php woocommerce_product_loop_end(); ?>
 
 		<?php endif;
 
-		wp_reset_query();
+		wp_reset_postdata();
 
-		return ob_get_clean();
+		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
 }

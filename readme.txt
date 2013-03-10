@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = X =
+* Feature - Added products by attribute shortcode, e.g. [product_attribute attribute="color" filter="blue"]
 * Tweak - Made coupon label more clear.
 * Tweak - woocommerce_cart_redirect_after_error hook.
 * Tweak - woocommerce_cancel_unpaid_order hook to control if an order should be cancelled (if unpaid)
