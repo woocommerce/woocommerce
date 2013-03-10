@@ -493,7 +493,7 @@ function woocommerce_save_attributes() {
 	if ( isset( $data['attribute_names'] ) ) {
 
 		$attribute_names  = array_map( 'stripslashes', $data['attribute_names'] );
-		$attribute_values = array_map( 'stripslashes', $data['attribute_values'] );
+		$attribute_values = $data['attribute_values'];
 
 		if ( isset( $data['attribute_visibility'] ) )
 			$attribute_visibility = $data['attribute_visibility'];
@@ -520,10 +520,10 @@ function woocommerce_save_attributes() {
 
 			 		// Format values
 			 		if ( is_array( $attribute_values[ $i ] ) ) {
-				 		$values = array_map( 'woocommerce_clean', $attribute_values[ $i ] );
+				 		$values = array_map( 'woocommerce_clean', array_map( 'stripslashes', $attribute_values[ $i ] ) );
 				 	} else {
 				 		// Text based, separate by pipe
-				 		$values = array_map( 'woocommerce_clean', explode( '|', $attribute_values[ $i ] ) );
+				 		$values = array_map( 'woocommerce_clean', array_map( 'stripslashes', explode( '|', $attribute_values[ $i ] ) ) );
 				 	}
 
 				 	// Remove empty items in the array
@@ -552,7 +552,7 @@ function woocommerce_save_attributes() {
 		 	} elseif ( isset( $attribute_values[ $i ] ) ) {
 
 		 		// Text based, separate by pipe
-		 		$values = implode( ' | ', array_map( 'woocommerce_clean', explode( '|', $attribute_values[ $i ] ) ) );
+		 		$values = implode( ' | ', array_map( 'woocommerce_clean', array_map( 'stripslashes', explode( '|', $attribute_values[ $i ] ) ) ) );
 
 		 		// Custom attribute - Add attribute to array and set the values
 			 	$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
