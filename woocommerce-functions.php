@@ -311,7 +311,8 @@ function woocommerce_add_to_cart_action( $url = false ) {
             if ( ! empty( $_REQUEST[ $taxonomy ] ) ) {
 
                 // Get value from post data
-                $value = woocommerce_clean( $_REQUEST[ $taxonomy ] );
+                // Don't use woocommerce_clean as it destroys sanitized characters
+                $value = sanitize_title( trim( stripslashes( $_REQUEST[ $taxonomy ] ) ) );
 
                 // Get valid value from variation
                 $valid_value = $variation->variation_data[ $taxonomy ];

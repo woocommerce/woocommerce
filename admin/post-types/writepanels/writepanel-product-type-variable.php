@@ -751,7 +751,8 @@ function process_product_meta_variable( $post_id ) {
 
 				if ( $attribute['is_variation'] ) {
 
-					$value = woocommerce_clean( $_POST[ 'attribute_' . sanitize_title( $attribute['name'] ) ][ $i ] );
+					// Don't use woocommerce_clean as it destroys sanitized characters
+					$value = sanitize_title( trim( stripslashes( $_POST[ 'attribute_' . sanitize_title( $attribute['name'] ) ][ $i ] ) ) );
 
 					update_post_meta( $variation_id, 'attribute_' . sanitize_title( $attribute['name'] ), $value );
 				}
@@ -818,7 +819,10 @@ function process_product_meta_variable( $post_id ) {
 
 	foreach ( $attributes as $attribute ) {
 		if ( $attribute['is_variation'] ) {
-			$value = woocommerce_clean( $_POST[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] );
+
+			// Don't use woocommerce_clean as it destroys sanitized characters
+			$value = sanitize_title( trim( stripslashes( $_POST[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] ) ) );
+
 			if ( $value )
 				$default_attributes[ sanitize_title( $attribute['name'] ) ] = $value;
 		}

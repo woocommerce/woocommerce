@@ -56,7 +56,7 @@ function woocommerce_attributes() {
 		if ( ! $attribute_label ) {
 			$attribute_label = ucwords( $attribute_name );
 		} elseif ( ! $attribute_name ) {
-			$attribute_name = sanitize_title( $attribute_label );
+			$attribute_name = woocommerce_sanitize_taxonomy_name( stripslashes( $attribute_label ) );
 		}
 
 		// Forbidden attribute names

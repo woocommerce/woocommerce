@@ -483,16 +483,17 @@ function woocommerce_save_attributes() {
 
 	check_ajax_referer( 'save-attributes', 'security' );
 
-	// Get post ID
-	$post_id 	= absint( $_POST['post_id'] );
+	// Get post data
 	parse_str( $_POST['data'], $data );
+	$post_id = absint( $_POST['post_id'] );
 
 	// Save Attributes
 	$attributes = array();
 
 	if ( isset( $data['attribute_names'] ) ) {
-		$attribute_names = $data['attribute_names'];
-		$attribute_values = $data['attribute_values'];
+
+		$attribute_names  = array_map( 'stripslashes', $data['attribute_names'] );
+		$attribute_values = array_map( 'stripslashes', $data['attribute_values'] );
 
 		if ( isset( $data['attribute_visibility'] ) )
 			$attribute_visibility = $data['attribute_visibility'];
