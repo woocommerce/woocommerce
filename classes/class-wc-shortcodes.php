@@ -26,6 +26,7 @@ class WC_Shortcodes {
 		add_shortcode( 'top_rated_products', array( $this, 'top_rated_products' ) );
 		add_shortcode( 'featured_products', array( $this, 'featured_products' ) );
 		add_shortcode( 'woocommerce_messages', array( $this, 'messages_shortcode' ) );
+		add_shortcode( 'product_attribute', array( $this, 'product_attribute' ) );
 
 		// Pages
 		add_shortcode( 'woocommerce_cart', array( $this, 'cart' ) );
@@ -952,5 +953,81 @@ class WC_Shortcodes {
 		$args['groupby'] = "$wpdb->posts.ID";
 
 		return $args;
+	}
+
+
+	/**
+	 * List products with an attribute shortcode
+	 * Example [product_attribute attribute='color' filter='black']
+	 *
+	 * @access public
+	 * @param array $atts
+	 * @return string
+	 */
+	function product_attribute( $atts ) {
+		global $woocommerce_loop;
+
+  		if ( empty( $atts ) ) return;
+
+		extract( shortcode_atts( array(
+			'per_page' 		=> '12',
+			'columns' 		=> '4',
+		  	'orderby'   	=> 'title',
+		  	'order'     	=> 'asc',
+		  	'attribute'		=> '',
+		  	'filter'		=> ''
+			), $atts ) );
+
+		$attribute 	= 'pa_' . sanitize_title($attribute);
+		$filter 	= sanitize_title($filter);
+
+		if ( ! $attribute || ! $filter ) return;
+
+  		$args = array(
+			'post_type'				=> 'product',
+			'post_status' 			=> 'publish',
+			'ignore_sticky_posts'	=> 1,
+			'orderby' 				=> $orderby,
+			'order' 				=> $order,
+			'posts_per_page' 		=> $per_page,
+			'meta_query' 			=> array(
+				array(
+					'key' 		=> '_visibility',
+					'value' 	=> array('catalog', 'visible'),
+					'compare' 	=> 'IN'
+				)
+			),
+			'tax_query' 			=> array(
+				array(
+					'taxonomy' 	=> $attribute,
+					'terms' 	=> $filter,
+					'field' 	=> 'slug'
+				)
+			)
+		);
+
+  		ob_start();
+
+		$products = new WP_Query( $args );
+
+		$woocommerce_loop['columns'] = $columns;
+
+		if ( $products->have_posts() ) : ?>
+
+			<ul class="products">
+
+				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
+
+					<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+
+				<?php endwhile; // end of the loop. ?>
+
+			</ul>
+
+		<?php endif;
+
+		wp_reset_query();
+
+		return ob_get_clean();
 	}
 }
