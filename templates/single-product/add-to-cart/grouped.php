@@ -60,6 +60,8 @@ foreach ( $product->get_children() as $child_id ) {
 
 					?></label></td>
 
+					<?php do_action ( 'woocommerce_grouped_product_list_before_price', $child_product['product'] ); ?>
+
 					<td class="price"><?php echo $child_product['product']->get_price_html(); ?>
 					<?php echo apply_filters( 'woocommerce_stock_html', '<small class="stock '.$child_product['availability']['class'].'">'.$child_product['availability']['availability'].'</small>', $child_product['availability']['availability'] ); ?>
 					</td>
