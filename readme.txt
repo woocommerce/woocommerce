@@ -171,6 +171,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - woocommerce_cancel_unpaid_order hook to control if an order should be cancelled (if unpaid)
 * Tweak - woocommerce_valid_order_statuses_for_payment and woocommerce_valid_order_statuses_for_cancel hooks for pay pages/my account.
 * Tweak - WC_START in checkout json requests to prevent notices breaking checkout.
+* Tweak - Add filters to product images and thumbnails.
 * Fix - Samoa -> Western Samoa
 * Fix - Re-applied image setting tooltips
 * Fix - Post code ranges (taxes) on insert.
