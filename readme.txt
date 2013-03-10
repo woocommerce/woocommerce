@@ -180,6 +180,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Moved init checkout to a later hook to prevent canonical template redirects kicking in.
 * Fix - Made custom attributes more robust by using sanitized values for variations.
 * Fix - woocommerce_cancel_unpaid_orders respects the manage stock setting.
+* Fix - Mijireh Page Slurp
 
 = 2.0.2 - 06/03/2013 =
 * Fix - Frontpage shop when 'orderby' is set.

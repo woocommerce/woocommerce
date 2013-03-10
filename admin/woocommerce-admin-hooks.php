@@ -68,3 +68,9 @@ add_action( "delete_term", 'woocommerce_delete_term', 5 );
 add_action( 'admin_footer', 'woocommerce_bulk_admin_footer', 10 );
 add_action( 'load-edit.php', 'woocommerce_order_bulk_action' );
 add_action( 'admin_notices', 'woocommerce_order_bulk_admin_notices' );
+
+/**
+ * Mijireh Gateway
+ */
+add_action( 'add_meta_boxes', array( 'WC_Gateway_Mijireh', 'add_page_slurp_meta' ) );
+add_action( 'wp_ajax_page_slurp', array( 'WC_Gateway_Mijireh', 'page_slurp' ) );

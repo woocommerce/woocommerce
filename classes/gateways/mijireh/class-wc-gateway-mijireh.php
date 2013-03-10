@@ -43,10 +43,6 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 
 		if ( $this->enabled && is_admin() ) {
 			$this->install_slurp_page();
-
-			// Hooks
-			add_action( 'add_meta_boxes', array( $this, 'add_page_slurp_meta' ) );
-			add_action( 'wp_ajax_page_slurp', array( $this, 'page_slurp' ) );
 		}
 
 		// Save options
@@ -54,19 +50,6 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 
 		// Payment listener/API hook
 		add_action( 'woocommerce_api_wc_gateway_mijireh', array( $this, 'mijireh_notification' ) );
-	}
-
-	/**
-	 * init_mijireh function.
-	 *
-	 * @access public
-	 */
-	public function init_mijireh() {
-		if ( ! class_exists( 'Mijireh' ) ) {
-	    	require_once 'includes/Mijireh.php';
-
-	    	Mijireh::$access_key = $this->access_key;
-	    }
 	}
 
 	/**
@@ -93,25 +76,6 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 			update_option( 'slurp_page_installed', 1 );
 		}
     }
-
-    /**
-     * page_slurp function.
-     *
-     * @access public
-     * @return void
-     */
-    public function page_slurp() {
-
-    	$this->init_mijireh();
-
-		$page 	= get_page( absint( $_POST['page_id'] ) );
-		$url 	= get_permalink( $page->ID );
-		wp_update_post( array( 'ID' => $page->ID, 'post_status' => 'publish' ) );
-		$job_id = Mijireh::slurp( $url );
-		wp_update_post( array( 'ID' => $page->ID, 'post_status' => 'private' ) );
-		echo $job_id;
-		die;
-	}
 
 	/**
 	 * mijireh_notification function.
@@ -323,16 +287,57 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
     }
 
 
+	/**
+	 * init_mijireh function.
+	 *
+	 * @access public
+	 */
+	public function init_mijireh() {
+		if ( ! class_exists( 'Mijireh' ) ) {
+	    	require_once 'includes/Mijireh.php';
+
+	    	if ( ! isset( $this ) ) {
+		    	$settings = get_option( 'woocommerce_' . 'mijireh_checkout' . '_settings', null );
+		    	$key = ! empty( $settings['access_key'] ) ? $settings['access_key'] : '';
+	    	} else {
+		    	$key = $this->access_key;
+	    	}
+
+	    	Mijireh::$access_key = $key;
+	    }
+	}
+
+
+    /**
+     * page_slurp function.
+     *
+     * @access public
+     * @return void
+     */
+    public static function page_slurp() {
+
+    	self::init_mijireh();
+
+		$page 	= get_page( absint( $_POST['page_id'] ) );
+		$url 	= get_permalink( $page->ID );
+		wp_update_post( array( 'ID' => $page->ID, 'post_status' => 'publish' ) );
+		$job_id = Mijireh::slurp( $url );
+		wp_update_post( array( 'ID' => $page->ID, 'post_status' => 'private' ) );
+		echo $job_id;
+		die;
+	}
+
+
     /**
      * add_page_slurp_meta function.
      *
      * @access public
      * @return void
      */
-    public function add_page_slurp_meta() {
+    public static function add_page_slurp_meta() {
     	global $woocommerce;
 
-    	if ( $this->is_slurp_page() ) {
+    	if ( self::is_slurp_page() ) {
         	wp_enqueue_style( 'mijireh_css', $woocommerce->plugin_url() . '/classes/gateways/mijireh/assets/css/mijireh.css' );
         	wp_enqueue_script( 'pusher', 'https://d3dy5gmtp8yhk7.cloudfront.net/1.11/pusher.min.js', null, false, true );
         	wp_enqueue_script( 'page_slurp', $woocommerce->plugin_url() . '/classes/gateways/mijireh/assets/js/page_slurp.js', array('jquery'), false, true );
@@ -340,7 +345,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 			add_meta_box(
 				'slurp_meta_box', 		// $id
 				'Mijireh Page Slurp', 	// $title
-				array( $this, 'draw_page_slurp_meta_box' ), // $callback
+				array( 'WC_Gateway_Mijireh', 'draw_page_slurp_meta_box' ), // $callback
 				'page', 	// $page
 				'normal', 	// $context
 				'high'		// $priority
@@ -355,7 +360,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
      * @access public
      * @return void
      */
-    public function is_slurp_page() {
+    public static function is_slurp_page() {
 		global $post;
 		$is_slurp = false;
 		if ( isset( $post ) && is_object( $post ) ) {
@@ -375,10 +380,10 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
      * @param mixed $post
      * @return void
      */
-    public function draw_page_slurp_meta_box( $post ) {
+    public static function draw_page_slurp_meta_box( $post ) {
     	global $woocommerce;
 
-    	$this->init_mijireh();
+    	self::init_mijireh();
 
 		echo "<div id='mijireh_notice' class='mijireh-info alert-message info' data-alert='alert'>";
 		echo    "<h2>Slurp your custom checkout page!</h2>";
