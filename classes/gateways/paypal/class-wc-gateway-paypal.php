@@ -504,13 +504,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
     	// Get recieved values from post data
 		$received_values = (array) stripslashes_deep( $_POST );
 
-		// Check email address to make sure that IPN response is not a spoof
-		if ( strcasecmp( trim( $received_values['receiver_email'] ), trim( $this->email ) ) != 0 ) {
-			if ( 'yes' == $this->debug )
-				$this->log->add( 'paypal', "IPN Response is for another one: {$received_values['receiver_email']} our email is {$this->email}" );
-			return false;
-		}
-
 		 // Add cmd to the post array
 		$received_values['cmd'] = '_notify-validate';
 
@@ -635,6 +628,17 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 				    	exit;
 				    }
+
+				    // Validate Email Address
+					if ( strcasecmp( trim( $posted['receiver_email'] ), trim( $this->email ) ) != 0 ) {
+						if ( 'yes' == $this->debug )
+							$this->log->add( 'paypal', "IPN Response is for another one: {$posted['receiver_email']} our email is {$this->email}" );
+
+						// Put this order on-hold for manual checking
+				    	$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal IPN response from a different email address (%s).', 'woocommerce' ), $posted['receiver_email'] ) );
+
+				    	exit;
+					}
 
 					 // Store PP Details
 	                if ( ! empty( $posted['payer_email'] ) )

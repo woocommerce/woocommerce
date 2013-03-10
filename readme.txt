@@ -173,6 +173,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - woocommerce_valid_order_statuses_for_payment and woocommerce_valid_order_statuses_for_cancel hooks for pay pages/my account.
 * Tweak - WC_START in checkout json requests to prevent notices breaking checkout.
 * Tweak - Add filters to product images and thumbnails.
+* Tweak - IPN email mismatch puts order on-hold.
 * Fix - Samoa -> Western Samoa
 * Fix - Re-applied image setting tooltips
 * Fix - Post code ranges (taxes) on insert.
