@@ -1276,7 +1276,8 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			'return'            => false,
 			'options'           => array(),
 			'custom_attributes' => array(),
-			'validate'          => array()
+			'validate'          => array(),
+			'defaultval'		=> '',
 		);
 
 		$args = wp_parse_args( $args, $defaults  );
@@ -1291,6 +1292,8 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		}
 
 		$args['maxlength'] = ( $args['maxlength'] ) ? 'maxlength="' . absint( $args['maxlength'] ) . '"' : '';
+
+		if ( $value == '' ) $value = $args['defaultval'];
 
 		// Custom attribute handling
 		$custom_attributes = array();
