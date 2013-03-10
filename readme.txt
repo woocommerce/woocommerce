@@ -182,6 +182,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - woocommerce_cancel_unpaid_orders respects the manage stock setting.
 * Fix - Mijireh Page Slurp.
 * Fix - Removed unused 'woocommerce_prepend_shop_page_to_urls' setting from breadcrumbs.
+* Fix - hide_cart_widget_if_empty option.
 
 = 2.0.2 - 06/03/2013 =
 * Fix - Frontpage shop when 'orderby' is set.

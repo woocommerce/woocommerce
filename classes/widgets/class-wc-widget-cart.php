@@ -66,10 +66,14 @@ class WC_Widget_Cart extends WP_Widget {
 		if ( $title )
 			echo $before_title . $title . $after_title;
 
-		//$woocommerce->mfunc_wrapper( 'woocommerce_mini_cart()', 'woocommerce_mini_cart', array( 'list_class' => $hide_if_empty ? 'hide_cart_widget_if_empty' : '' ) );
+		if ( $hide_if_empty )
+			echo '<div class="hide_cart_widget_if_empty">';
 
 		// Insert cart widget placeholder - code in woocommerce.js will update this on page load
-		echo '<div class="widget_shopping_cart_content ' . ( $hide_if_empty ? 'hide_cart_widget_if_empty' : '' ) . '"></div>';
+		echo '<div class="widget_shopping_cart_content"></div>';
+
+		if ( $hide_if_empty )
+			echo '</div>';
 
 		echo $after_widget;
 
@@ -78,7 +82,7 @@ class WC_Widget_Cart extends WP_Widget {
 				jQuery('.hide_cart_widget_if_empty').closest('.widget').hide();
 
 				jQuery('body').bind('adding_to_cart', function(){
-					jQuery(this).find('.hide_cart_widget_if_empty').closest('.widget').fadeIn();
+					jQuery('.hide_cart_widget_if_empty').closest('.widget').fadeIn();
 				});
 			" );
 		}
