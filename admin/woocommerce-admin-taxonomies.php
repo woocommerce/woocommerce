@@ -344,7 +344,7 @@ add_filter( 'manage_product_cat_custom_column', 'woocommerce_product_cat_column'
  * @return void
  */
 function woocommerce_shipping_class_columns( $columns ) {
-	$columns['configure'] = '&nbsp;';
+	$columns['edit'] = '&nbsp;';
 	return $columns;
 }
 
@@ -361,8 +361,8 @@ add_filter( 'manage_edit-product_shipping_class_columns', 'woocommerce_shipping_
  * @return void
  */
 function woocommerce_shipping_class_column( $columns, $column, $id ) {
-	if ( $column == 'configure' )
-		$columns .= '<a href="'. admin_url( 'edit-tags.php?action=edit&taxonomy=product_shipping_class&tag_ID='. $id .'&post_type=product' ) .'" class="button alignright">'.__( 'Configure shipping class', 'woocommerce' ).'</a>';
+	if ( $column == 'edit' )
+		$columns .= '<a href="'. admin_url( 'edit-tags.php?action=edit&taxonomy=product_shipping_class&tag_ID='. $id .'&post_type=product' ) .'" class="button alignright">'.__( 'Edit Class', 'woocommerce' ).'</a>';
 
 	return $columns;
 }
