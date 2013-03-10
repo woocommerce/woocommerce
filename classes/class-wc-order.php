@@ -1159,7 +1159,9 @@ class WC_Order {
 		$file_urls = array();
 		foreach ( $results as $result ) {
 			if ( $_product->has_file( $result->download_id ) ) {
-				$file_urls[] = add_query_arg( array( 'download_file' => $download_file, 'order' => $this->order_key, 'email' => $user_email, 'key' => $result->download_id ), trailingslashit( home_url() ) );
+
+				$file_urls[ $_product->get_file_download_path( $result->download_id ) ] = add_query_arg( array( 'download_file' => $download_file, 'order' => $this->order_key, 'email' => $user_email, 'key' => $result->download_id ), trailingslashit( home_url() ) );
+
 			}
 		}
 
