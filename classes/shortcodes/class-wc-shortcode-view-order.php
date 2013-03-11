@@ -36,12 +36,16 @@ class WC_Shortcode_View_Order {
 
 		if ( ! is_user_logged_in() ) return;
 
+		extract( shortcode_atts( array(
+	    	'order_count' => 10
+		), $atts ) );
+
 		$user_id      	= get_current_user_id();
 		$order_id		= ( isset( $_GET['order'] ) ) ? $_GET['order'] : 0;
 		$order 			= new WC_Order( $order_id );
 
 		if ( $order_id == 0 ) {
-			woocommerce_get_template('myaccount/my-orders.php', array( 'order_count' => 10 ));
+			woocommerce_get_template( 'myaccount/my-orders.php', array( 'order_count' => 'all' == $order_count ? -1 : $order_count ) );
 			return;
 		}
 
