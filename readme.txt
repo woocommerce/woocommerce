@@ -174,6 +174,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - WC_START in checkout json requests to prevent notices breaking checkout.
 * Tweak - Add filters to product images and thumbnails.
 * Tweak - IPN email mismatch puts order on-hold.
+* Tweak - Option to set main paypal receiver email.
 * Tweak - Download file links show filename as part of link.
 * Fix - Samoa -> Western Samoa
 * Fix - Re-applied image setting tooltips
