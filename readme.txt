@@ -184,6 +184,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Mijireh Page Slurp.
 * Fix - Removed unused 'woocommerce_prepend_shop_page_to_urls' setting from breadcrumbs.
 * Fix - hide_cart_widget_if_empty option.
+* Localization - Finnish translation by Arhi Paivarinta.
 
 = 2.0.2 - 06/03/2013 =
 * Fix - Frontpage shop when 'orderby' is set.
