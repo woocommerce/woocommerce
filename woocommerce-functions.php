@@ -11,6 +11,24 @@
  */
 
 /**
+ * Handle IPN requests for the legacy paypal gateway by calling gateways manually if needed.
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_legacy_paypal_ipn() {
+	if ( ! empty( $_GET['paypalListener'] ) && $_GET['paypalListener'] == 'paypal_standard_IPN' ) {
+		global $woocommerce;
+
+		$woocommerce->payment_gateways();
+
+		do_action( 'woocommerce_api_wc_gateway_paypal' );
+	}
+}
+
+add_action( 'init', 'woocommerce_legacy_paypal_ipn' );
+
+/**
  * Handle redirects before content is output - hooked into template_redirect so is_page works.
  *
  * @access public
