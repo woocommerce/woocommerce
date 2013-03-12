@@ -172,6 +172,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Codestyling bug with meta.php
 * Fix - Icon replacement in .woocommerce-info for Gecko
 * Fix - prettyPhoto next/prev links and thumbnail navigation no longer appear when there's only one attachment
+* Fix - Attribute base
 * Localization - Added indian rupees
 
 = 2.0.3 - 11/03/2013 =
