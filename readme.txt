@@ -167,6 +167,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = X =
 * Tweak - Like my account, added order_count attribute to view order shortcode.
+* Tweak - Moved WC_Order_Item_Meta into own file.
+* Fix - WC_Order_Item_Meta support for keys with multiple values.
 * Fix - Codestyling bug with meta.php
 * Localization - Added indian rupees
 
