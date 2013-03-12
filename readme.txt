@@ -168,6 +168,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = X =
 * Tweak - Like my account, added order_count attribute to view order shortcode.
 * Fix - Codestyling bug with meta.php
+* Localization - Added indian rupees
 
 = 2.0.3 - 11/03/2013 =
 * Feature - Added products by attribute shortcode, e.g. [product_attribute attribute="color" filter="blue"]
