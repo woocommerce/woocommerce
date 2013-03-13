@@ -168,6 +168,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = X =
 * Tweak - Like my account, added order_count attribute to view order shortcode.
 * Tweak - Moved WC_Order_Item_Meta into own file.
+* Tweak - PayPal standard gateway - no longer needs sandbox fix, and notify-validate should be first in the requests.
 * Fix - WC_Order_Item_Meta support for keys with multiple values.
 * Fix - Codestyling bug with meta.php
 * Fix - Icon replacement in .woocommerce-info for Gecko

@@ -29,8 +29,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
         $this->id           = 'paypal';
         $this->icon         = apply_filters( 'woocommerce_paypal_icon', $woocommerce->plugin_url() . '/assets/images/icons/paypal.png' );
         $this->has_fields   = false;
-        $this->liveurl      = 'https://www.paypal.com/webscr';
-		$this->testurl      = 'https://www.sandbox.paypal.com/webscr';
+        $this->liveurl      = 'https://www.paypal.com/cgi-bin/webscr';
+		$this->testurl      = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
         $this->method_title = __( 'PayPal', 'woocommerce' );
         $this->notify_url   = str_replace( 'https:', 'http:', add_query_arg( 'wc-api', 'WC_Gateway_Paypal', home_url( '/' ) ) );
 
@@ -511,18 +511,19 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$this->log->add( 'paypal', 'Checking IPN response is valid...' );
 
     	// Get recieved values from post data
-		$received_values = (array) stripslashes_deep( $_POST );
-
-		 // Add cmd to the post array
-		$received_values['cmd'] = '_notify-validate';
+		$received_values = array( 'cmd' => '_notify-validate' );
+		$received_values += stripslashes_deep( $_POST );
 
         // Send back post vars to paypal
         $params = array(
         	'body' 			=> $received_values,
         	'sslverify' 	=> false,
-        	'timeout' 		=> 30,
+        	'timeout' 		=> 60,
         	'user-agent'	=> 'WooCommerce/' . $woocommerce->version
         );
+
+        if ( 'yes' == $this->debug )
+			$this->log->add( 'paypal', 'IPN Request: ' . print_r( $params, true ) );
 
         // Get url
        	if ( $this->testmode == 'yes' )
@@ -564,9 +565,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		@ob_clean();
 
-    	$_POST = stripslashes_deep( $_POST );
-
-    	if ( $this->check_ipn_request_is_valid() ) {
+    	if ( ! empty( $_POST ) && $this->check_ipn_request_is_valid() ) {
 
     		header( 'HTTP/1.1 200 OK' );
 
@@ -591,18 +590,19 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	function successful_request( $posted ) {
 		global $woocommerce;
 
+		$posted = stripslashes_deep( $posted );
+
 		// Custom holds post ID
 	    if ( ! empty( $posted['invoice'] ) && ! empty( $posted['custom'] ) ) {
 
 		    $order = $this->get_paypal_order( $posted );
 
+		     if ( 'yes' == $this->debug )
+	        	$this->log->add( 'paypal', 'Found order #' . $order->id );
+
 		    // Lowercase returned variables
 	        $posted['payment_status'] 	= strtolower( $posted['payment_status'] );
 	        $posted['txn_type'] 		= strtolower( $posted['txn_type'] );
-
-		    // Sandbox fix
-	        if ( $posted['test_ipn'] == 1 && $posted['payment_status'] == 'pending' )
-	        	$posted['payment_status'] = 'completed';
 
 	        if ( 'yes' == $this->debug )
 	        	$this->log->add( 'paypal', 'Payment status: ' . $posted['payment_status'] );
@@ -614,7 +614,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	            	// Check order not already completed
 	            	if ( $order->status == 'completed' ) {
 	            		 if ( 'yes' == $this->debug )
-	            		 	$this->log->add( 'paypal', 'Aborting, Order #' . $order_id . ' is already complete.' );
+	            		 	$this->log->add( 'paypal', 'Aborting, Order #' . $order->id . ' is already complete.' );
 	            		 exit;
 	            	}
 
