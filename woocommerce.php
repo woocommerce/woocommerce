@@ -281,6 +281,9 @@ class Woocommerce {
 		// Functions
 		include_once( 'woocommerce-core-functions.php' );					// Contains core functions for the front/back end
 
+		// API Class
+		include_once( 'classes/class-wc-api.php' );
+
 		// Include abstract classes
 		include_once( 'classes/abstracts/abstract-wc-product.php' );			// Products
 		include_once( 'classes/abstracts/abstract-wc-settings-api.php' );	// Settings API (for gateways, shipping, and integrations)
