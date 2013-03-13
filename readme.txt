@@ -178,6 +178,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Fixed adjust_price method in product class, allowing negative adjustments
 * Localization - Added indian rupees
 * Localization - Updated French translation by absoluteweb
+* Localization - Updated Brazilian translaction by Claudio Sanches
 
 = 2.0.3 - 11/03/2013 =
 * Feature - Added products by attribute shortcode, e.g. [product_attribute attribute="color" filter="blue"]
