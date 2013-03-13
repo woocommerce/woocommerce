@@ -1016,7 +1016,7 @@ function woocommerce_download_product() {
 		), array( '%d' ), array( '%s', '%s', '%d', '%s' ) );
 
 		// Trigger action
-		do_action( 'woocommerce_download_product', $email, $order_key, $product_id, $user_id, $download_id );
+		do_action( 'woocommerce_download_product', $email, $order_key, $product_id, $user_id, $download_id, $order_id );
 
 		// Get the download URL and try to replace the url with a path
 		$file_path = $_product->get_file_download_path( $download_id );
