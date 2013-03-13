@@ -74,7 +74,7 @@ abstract class WC_Settings_API {
     		$this->display_errors();
     		return false;
     	} else {
-    		update_option( $this->plugin_id . $this->id . '_settings', $this->sanitized_fields );
+    		update_option( $this->plugin_id . $this->id . '_settings', apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->sanitized_fields ) );
     		return true;
     	}
     }
