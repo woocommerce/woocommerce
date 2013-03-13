@@ -671,10 +671,7 @@ class WC_Product {
 	 * @return void
 	 */
 	function adjust_price( $price ) {
-		if ( $price > 0 )
-			$this->price += $price;
-		else
-			$this->price = $this->price - $price;
+		$this->price = $this->price + $price;
 	}
 
 
