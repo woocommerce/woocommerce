@@ -1333,7 +1333,8 @@ class WC_Order {
 			);
 			wp_update_post( $this_order );
 
-			$this->reduce_order_stock(); // Payment is complete so reduce stock levels
+			if ( apply_filters( 'woocommerce_payment_complete_reduce_order_stock', true, $this->id ) )
+				$this->reduce_order_stock(); // Payment is complete so reduce stock levels
 
 			do_action( 'woocommerce_payment_complete', $this->id );
 		}
