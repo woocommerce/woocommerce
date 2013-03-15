@@ -172,6 +172,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Flat rate interface tidy up.
 * Tweak - Add order_id to woocommerce_download_product hook
 * Tweak - Disabled prettyPhoto deeplinking
+* Tweak - Applied a width to the product name column (edit products) to fix layout small screens
 * Fix - WC_Order_Item_Meta support for keys with multiple values.
 * Fix - Codestyling bug with meta.php
 * Fix - Icon replacement in .woocommerce-info for Gecko
