@@ -9,19 +9,22 @@ $(document).ready(function() {
 		social_tools: false,
 		theme: 'pp_woocommerce',
 		horizontal_padding: 40,
-		opacity: 0.9
+		opacity: 0.9,
+		deeplinking: false
 	});
 	$("a.show_review_form").prettyPhoto({
 		social_tools: false,
 		theme: 'pp_woocommerce',
 		horizontal_padding: 40,
-		opacity: 0.9
+		opacity: 0.9,
+		deeplinking: false
 	});
 	$("a[rel^='prettyPhoto']").prettyPhoto({
 		social_tools: false,
 		theme: 'pp_woocommerce',
 		horizontal_padding: 40,
-		opacity: 0.9
+		opacity: 0.9,
+		deeplinking: false
 	});
 
 	// Open review form lightbox if accessed via anchor

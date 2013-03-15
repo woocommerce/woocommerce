@@ -171,6 +171,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - PayPal standard gateway - no longer needs sandbox fix, and notify-validate should be first in the requests.
 * Tweak - Flat rate interface tidy up.
 * Tweak - Add order_id to woocommerce_download_product hook
+* Tweak - Disabled prettyPhoto deeplinking
 * Fix - WC_Order_Item_Meta support for keys with multiple values.
 * Fix - Codestyling bug with meta.php
 * Fix - Icon replacement in .woocommerce-info for Gecko
