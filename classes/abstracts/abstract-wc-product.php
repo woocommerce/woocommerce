@@ -903,6 +903,7 @@ class WC_Product {
 					WHERE meta_key = 'rating'
 					AND comment_post_ID = %d
 					AND comment_approved = '1'
+					AND meta_value > 0
 				", $this->id ) );
 
 				$average_rating = number_format( $ratings / $count, 2 );
@@ -956,8 +957,6 @@ class WC_Product {
 
 			if ( $location )
 				$location = '_' . $location;
-
-			$average_rating = $this->get_average_rating();
 
 			$rating_html  = '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $average_rating ) . '">';
 
