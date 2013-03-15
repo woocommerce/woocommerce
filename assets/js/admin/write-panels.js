@@ -1128,13 +1128,13 @@ jQuery( function($){
 								</tr>\
 								<tr>\
 									<td>\
-										<label><input type="checkbox" class="checkbox" checked="checked" name="attribute_visibility[' + size + ']" value="1" /> ' + woocommerce_writepanel_params.visible_label + '</label>\
+										<label><input type="checkbox" class="checkbox" ' + ( woocommerce_writepanel_params.default_attribute_visibility ? 'checked="checked"' : '' ) + ' name="attribute_visibility[' + size + ']" value="1" /> ' + woocommerce_writepanel_params.visible_label + '</label>\
 									</td>\
 								</tr>\
 								<tr>\
 									<td>\
 										<div class="enable_variation show_if_variable" ' + enable_variation + '>\
-										<label><input type="checkbox" class="checkbox" name="attribute_variation[' + size + ']" value="1" /> ' + woocommerce_writepanel_params.used_for_variations_label + '</label>\
+										<label><input type="checkbox" class="checkbox" ' + ( woocommerce_writepanel_params.default_attribute_variation ? 'checked="checked"' : '' ) + ' name="attribute_variation[' + size + ']" value="1" /> ' + woocommerce_writepanel_params.used_for_variations_label + '</label>\
 										</div>\
 									</td>\
 								</tr>\
