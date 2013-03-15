@@ -177,6 +177,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - prettyPhoto next/prev links and thumbnail navigation no longer appear when there's only one attachment
 * Fix - Attribute base
 * Fix - Fixed adjust_price method in product class, allowing negative adjustments
+* Fix - Ratings and rating count transient syncing.
 * Localization - Added indian rupees
 * Localization - Updated French translation by absoluteweb
 * Localization - Updated Brazilian translaction by Claudio Sanches

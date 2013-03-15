@@ -1274,6 +1274,7 @@ function woocommerce_add_comment_rating($comment_id) {
 		add_comment_meta( $comment_id, 'rating', (int) esc_attr( $_POST['rating'] ), true );
 
 		delete_transient( 'wc_average_rating_' . esc_attr($post->ID) );
+		delete_transient( 'wc_rating_count_' . esc_attr($post->ID) );
 	}
 }
 

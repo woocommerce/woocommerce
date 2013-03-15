@@ -4,9 +4,9 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @version     2.0.3
  */
-global $woocommerce;
+global $woocommerce, $product;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
@@ -17,30 +17,15 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 	if ( get_option('woocommerce_enable_review_rating') == 'yes' ) {
 
-		$count = $wpdb->get_var( $wpdb->prepare("
-			SELECT COUNT(meta_value) FROM $wpdb->commentmeta
-			LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
-			WHERE meta_key = 'rating'
-			AND comment_post_ID = %d
-			AND comment_approved = '1'
-			AND meta_value > 0
-		", $post->ID ) );
-
-		$rating = $wpdb->get_var( $wpdb->prepare("
-			SELECT SUM(meta_value) FROM $wpdb->commentmeta
-			LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
-			WHERE meta_key = 'rating'
-			AND comment_post_ID = %d
-			AND comment_approved = '1'
-		", $post->ID ) );
+		$count = $product->get_rating_count();
 
 		if ( $count > 0 ) {
 
-			$average = number_format($rating / $count, 2);
+			$average = $product->get_average_rating();
 
 			echo '<div itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">';
 
-			echo '<div class="star-rating" title="'.sprintf(__( 'Rated %s out of 5', 'woocommerce' ), $average).'"><span style="width:'.( ( $average / 5 ) * 100 ) . '%"><strong itemprop="ratingValue" class="rating">'.$average.'</strong> '.__( 'out of 5', 'woocommerce' ).'</span></div>';
+			echo '<div class="star-rating" title="'.sprintf(__( 'Rated %s out of 5', 'woocommerce' ), $average ).'"><span style="width:'.( ( $average / 5 ) * 100 ) . '%"><strong itemprop="ratingValue" class="rating">'.$average.'</strong> '.__( 'out of 5', 'woocommerce' ).'</span></div>';
 
 			echo '<h2>'.sprintf( _n('%s review for %s', '%s reviews for %s', $count, 'woocommerce'), '<span itemprop="ratingCount" class="count">'.$count.'</span>', wptexturize($post->post_title) ).'</h2>';
 
