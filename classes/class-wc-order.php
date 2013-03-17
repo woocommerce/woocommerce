@@ -1020,7 +1020,7 @@ class WC_Order {
 
 				foreach ( $this->get_taxes() as $tax ) {
 
-					$tax_string_array[] = sprintf( '%s %s', woocommerce_price( ( $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ] ) ), $tax[ 'name' ] );
+					$tax_string_array[] = sprintf( '%s %s', woocommerce_price( ( $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ] ) ), isset( $tax[ 'label' ] ) ? $tax[ 'label' ] : $tax[ 'name' ] );
 				}
 
 			} elseif ( $this->get_total_tax() > 0 ) {
