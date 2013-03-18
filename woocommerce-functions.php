@@ -853,15 +853,17 @@ function woocommerce_order_again() {
 		$quantity     = (int) $item['qty'];
 		$variation_id = (int) $item['variation_id'];
 		$variations   = array();
-		foreach ( $item['item_meta'] as $meta ) {
-			if ( ! substr( $meta['meta_name'], 0, 3) === 'pa_' ) continue;
-			$variations[$meta['meta_name']] = $meta['meta_value'];
+		$cart_item_data = apply_filters( 'woocommerce_order_again_cart_item_data', array(), $item, $order );
+
+		foreach ( $item['item_meta'] as $meta_name => $meta_value ) {
+			if ( 'pa_' === substr( $meta_name, 0, 3 ) )
+				$variations[ $meta_name ] = $meta_value[0];
 		}
 
 		// Add to cart validation
-		if ( ! apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations ) ) continue;
+		if ( ! apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations, $cart_item_data ) ) continue;
 
-		$woocommerce->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations );
+		$woocommerce->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations, $cart_item_data );
 	}
 
 	do_action( 'woocommerce_ordered_again', $order->id );
