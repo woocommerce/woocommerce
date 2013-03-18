@@ -45,7 +45,7 @@ class WC_Welcome_Page {
 	 */
 	public function admin_menus() {
 
-		$welcome_page_title = __( 'Welcome to WooCommerce', 'woocommerce' )
+		$welcome_page_title = __( 'Welcome to WooCommerce', 'woocommerce' );
 
 		// About
 		$about = add_dashboard_page( $welcome_page_title, $welcome_page_title, 'manage_options', 'wc-about', array( $this, 'about_screen' ) );
