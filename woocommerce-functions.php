@@ -1041,6 +1041,7 @@ function woocommerce_download_product() {
 			 * So blindly doing a str_replace is incorrect because it will fail with schemes are mismatched.
 			 */
 			$scheme = parse_url( $file_path, PHP_URL_SCHEME );
+
 			if ( $scheme ) {
 				$site_url = site_url( '', $scheme );
 			} else {
@@ -1066,6 +1067,11 @@ function woocommerce_download_product() {
 			$remote_file = true;
 		} else {
 			$remote_file = false;
+
+			// Remove Query String
+			if ( strstr( $file_path, '?' ) )
+				$file_path = current( explode( '?', $file_path ) );
+
 			$file_path   = realpath( $file_path );
 		}
 
@@ -1099,10 +1105,15 @@ function woocommerce_download_product() {
 
 		nocache_headers();
 
+		$file_name = basename( $file_path );
+
+		if ( strstr( $file_name, '?' ) )
+			$file_name = current( explode( '?', $file_name ) );
+
 		header( "Robots: none" );
 		header( "Content-Type: " . $ctype );
 		header( "Content-Description: File Transfer" );
-		header( "Content-Disposition: attachment; filename=\"" . basename( $file_path ) . "\";" );
+		header( "Content-Disposition: attachment; filename=\"" . $file_name . "\";" );
 		header( "Content-Transfer-Encoding: binary" );
 
         if ( $size = @filesize( $file_path ) )
@@ -1114,7 +1125,7 @@ function woocommerce_download_product() {
          	if ( getcwd() )
          		$file_path = trim( preg_replace( '`^' . getcwd() . '`' , '', $file_path ), '/' );
 
-            header( "Content-Disposition: attachment; filename=\"" . basename( $file_path ) . "\";" );
+            header( "Content-Disposition: attachment; filename=\"" . $file_name . "\";" );
 
             if ( function_exists( 'apache_get_modules' ) && in_array( 'mod_xsendfile', apache_get_modules() ) ) {
 
