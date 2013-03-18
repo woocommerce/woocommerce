@@ -224,8 +224,7 @@ if ( ! function_exists( 'woocommerce_page_title' ) ) {
 		} else {
 
 			$shop_page_id = woocommerce_get_page_id( 'shop' );
-
-			$page_title = apply_filters( 'the_title', ( $shop_page_title = get_option( 'woocommerce_shop_page_title' ) ) ? $shop_page_title : get_the_title( $shop_page_id ), $shop_page_id );
+			$page_title   = get_the_title( $shop_page_id );
 
 		}
 

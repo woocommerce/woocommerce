@@ -305,16 +305,6 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 	),
 
 	array(
-		'title' => __( 'Base Page Title', 'woocommerce' ),
-		'desc' 		=> __( 'This title to show on the shop base page. Leave blank to use the page title.', 'woocommerce' ),
-		'id' 		=> 'woocommerce_shop_page_title',
-		'type' 		=> 'text',
-		'css' 		=> 'min-width:300px;',
-		'default'	=> 'All Products', // Default value for the page title - changed in settings
-		'desc_tip'	=>  true,
-	),
-
-	array(
 		'title' => __( 'Terms Page ID', 'woocommerce' ),
 		'desc' 		=> __( 'If you define a "Terms" page the customer will be asked if they accept them when checking out.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_terms_page_id',
