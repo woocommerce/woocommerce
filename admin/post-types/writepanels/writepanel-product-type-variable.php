@@ -721,7 +721,7 @@ function process_product_meta_variable( $post_id ) {
 					$file_paths = explode( "\n", $file_paths );
 
 					foreach ( $file_paths as $file_path ) {
-						$file_path = woocommerce_clean( $file_path );
+						$file_path = trim( $file_path );
 						$_file_paths[ md5( $file_path ) ] = $file_path;
 					}
 				}
