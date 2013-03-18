@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.5
 Tested up to: 3.5
-Stable tag: 2.0.3
+Stable tag: 2.0.4
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -165,7 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= X =
+= 2.0.4 - 18/03/2013 =
 * Tweak - Like my account, added order_count attribute to view order shortcode.
 * Tweak - Moved WC_Order_Item_Meta into own file.
 * Tweak - PayPal standard gateway - no longer needs sandbox fix, and notify-validate should be first in the requests.
