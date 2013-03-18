@@ -244,9 +244,9 @@ function woocommerce_update_cart_action() {
 					continue;
 
 				// Sanitize
-				$quantity = preg_replace( "/[^0-9\.]/", "", $cart_totals[ $cart_item_key ]['qty'] );
+				$quantity = apply_filters( 'woocommerce_stock_amount_cart_item', preg_replace( "/[^0-9\.]/", "", $cart_totals[ $cart_item_key ]['qty'] ), $cart_item_key );
 
-				if ( $quantity == "" )
+				if ( "" === $quantity )
 					continue;
 
 				// Update cart validation

@@ -1157,7 +1157,8 @@ function woocommerce_ajax_reduce_order_item_stock() {
 			if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 
 				$old_stock 		= $_product->stock;
-				$new_quantity 	= $_product->reduce_stock( $order_item_qty[ $item_id ] );
+				$stock_change   = apply_filters( 'woocommerce_reduce_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
+				$new_quantity 	= $_product->reduce_stock( $stock_change );
 
 				$return[] = sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity );
 				$order->add_order_note( sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity) );
@@ -1209,7 +1210,8 @@ function woocommerce_ajax_increase_order_item_stock() {
 			if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 
 				$old_stock 		= $_product->stock;
-				$new_quantity 	= $_product->increase_stock( $order_item_qty[ $item_id ] );
+				$stock_change   = apply_filters( 'woocommerce_restore_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
+				$new_quantity 	= $_product->increase_stock( $stock_change );
 
 				$return[] = sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity );
 				$order->add_order_note( sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity ) );

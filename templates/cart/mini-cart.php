@@ -45,7 +45,7 @@ global $woocommerce;
 
 				<?php echo $woocommerce->cart->get_item_data( $cart_item ); ?>
 
-				<span class="quantity"><?php printf( '%s &times; %s', $cart_item['quantity'], $product_price ); ?></span>
+				<?php echo apply_filters( 'woocommerce_widget_cart_item_quantity', '<span class="quantity">' . sprintf( '%s &times; %s', $cart_item['quantity'], $product_price ) . '</span>', $cart_item, $cart_item_key ); ?>
 			</li>
 
 		<?php endforeach; ?>

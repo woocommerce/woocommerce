@@ -168,7 +168,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 						if ($_product->exists() && $values['quantity']>0) :
 							echo '
 								<tr class="' . esc_attr( apply_filters('woocommerce_checkout_table_item_class', 'checkout_table_item', $values, $item_id ) ) . '">
-									<td class="product-name">' . $_product->get_title() . ' <strong class="product-quantity">&times; ' . $values['quantity'] . '</strong>' . $woocommerce->cart->get_item_data( $values ) . '</td>
+									<td class="product-name">' . apply_filters( 'woocommerce_checkout_item_name', $_product->get_title() . ' <strong class="product-quantity">&times; ' . $values['quantity'] . '</strong>' . $woocommerce->cart->get_item_data( $values ), $values, $item_id ) . '</td>
 									<td class="product-total">' . apply_filters( 'woocommerce_checkout_item_subtotal', $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] ), $values, $item_id ) . '</td>
 								</tr>';
 						endif;
