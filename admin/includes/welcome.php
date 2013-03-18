@@ -21,7 +21,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 class WC_Welcome_Page {
 
-	private $welcome_page_title;
 	private $plugin;
 
 	/**
@@ -32,7 +31,6 @@ class WC_Welcome_Page {
 	 */
 	public function __construct() {
 		$this->plugin             = 'woocommerce/woocommerce.php';
-		$this->welcome_page_title = __( 'Welcome to WooCommerce', 'woocommerce' );
 
 		add_action( 'admin_menu', array( $this, 'admin_menus') );
 		add_action( 'admin_head', array( $this, 'admin_head' ) );
@@ -46,11 +44,14 @@ class WC_Welcome_Page {
 	 * @return void
 	 */
 	public function admin_menus() {
+
+		$welcome_page_title = __( 'Welcome to WooCommerce', 'woocommerce' )
+
 		// About
-		$about = add_dashboard_page( $this->welcome_page_title, $this->welcome_page_title, 'manage_options', 'wc-about', array( $this, 'about_screen' ) );
+		$about = add_dashboard_page( $welcome_page_title, $welcome_page_title, 'manage_options', 'wc-about', array( $this, 'about_screen' ) );
 
 		// Credits
-		$credits = add_dashboard_page( $this->welcome_page_title, $this->welcome_page_title, 'manage_options', 'wc-credits', array( $this, 'credits_screen' ) );
+		$credits = add_dashboard_page( $welcome_page_title, $welcome_page_title, 'manage_options', 'wc-credits', array( $this, 'credits_screen' ) );
 
 		add_action( 'admin_print_styles-'. $about, array( $this, 'admin_css' ) );
 		add_action( 'admin_print_styles-'. $credits, array( $this, 'admin_css' ) );
