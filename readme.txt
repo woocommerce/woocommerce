@@ -195,6 +195,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Product tabs when a product type doesn't exist yet.
 * Fix - Saving of variation download paths with special chars.
 * Fix - Unset parent of children when deleting a grouped product.
+* Fix - Removed Sidebar Login Widget. Use http://wordpress.org/extend/plugins/sidebar-login/ instead. A potential security issue was found regarding logging of passwords (since GET was used instead of POST). Sidebar Login 2.5 resolves this and the widget has been removed from WC to prevent needing to maintain two (virtually identical) codebases.
 * Localization - Added indian rupees
 * Localization - Updated French translation by absoluteweb
 * Localization - Updated Brazilian translaction by Claudio Sanches

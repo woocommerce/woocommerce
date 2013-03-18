@@ -415,7 +415,6 @@ class Woocommerce {
 		include_once( 'classes/widgets/class-wc-widget-recently-viewed.php' );
 		include_once( 'classes/widgets/class-wc-widget-best-sellers.php' );
 		include_once( 'classes/widgets/class-wc-widget-onsale.php' );
-		include_once( 'classes/widgets/class-wc-widget-login.php' );
 		include_once( 'classes/widgets/class-wc-widget-random-products.php' );
 
 		// Register widgets
@@ -433,7 +432,6 @@ class Woocommerce {
 		register_widget( 'WC_Widget_Recently_Viewed' );
 		register_widget( 'WC_Widget_Best_Sellers' );
 		register_widget( 'WC_Widget_Onsale' );
-		register_widget( 'WC_Widget_Login' );
 		register_widget( 'WC_Widget_Random_Products' );
 	}
 
