@@ -176,6 +176,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Filters for attribute default values.
 * Tweak - Added filter to control order stock reduction when payment is complete.
 * Tweak - Increase priority of woocommerce_checkout_action and woocommerce_pay_action so things can be hooked-in prior.
+* Tweak - Tweaked default locale to include all fields so that checkout fields can fallback if specific properties are not set e.g. required.
 * Fix - WC_Order_Item_Meta support for keys with multiple values.
 * Fix - Codestyling bug with meta.php
 * Fix - Icon replacement in .woocommerce-info for Gecko

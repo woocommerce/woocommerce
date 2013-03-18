@@ -376,7 +376,9 @@ jQuery(document).ready(function($) {
 
 				field.find('label abbr').remove();
 
-				if ( typeof thislocale[key]['required'] == 'undefined' || thislocale[key]['required'] == true ) {
+				if ( typeof thislocale[key]['required'] == 'undefined' && locale['default'][key]['required'] == true ) {
+					field.find('label').append( required );
+				} else if ( thislocale[key]['required'] == true ) {
 					field.find('label').append( required );
 				}
 
