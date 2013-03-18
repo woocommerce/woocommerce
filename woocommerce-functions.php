@@ -1033,8 +1033,18 @@ function woocommerce_download_product() {
 		// ...or serve it
 		if ( ! is_multisite() ) {
 
-			$site_url    = is_ssl() ? str_replace( 'https:', 'http:', site_url() ) : site_url();
-
+			/* 			
+			 * If WP FORCE_SSL_ADMIN is enabled, file will have been inserted as https from Media Library
+			 * site_url() depends on whether the page containing the download (ie; My Account) is served via SSL.
+			 * So blindly doing a str_replace is incorrect because it will fail with schemes are mismatched.			 
+			 */
+			$scheme = parse_url( $file_path, PHP_URL_SCHEME );
+			if ( $scheme ) {
+				$site_url = site_url( '', $scheme );
+			} else {
+				$site_url = is_ssl() ? str_replace( 'https:', 'http:', site_url() ) : site_url();
+			}
+			
 			$file_path   = str_replace( trailingslashit( $site_url ), ABSPATH, $file_path );
 
 		} else {
