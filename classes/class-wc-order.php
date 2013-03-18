@@ -1457,7 +1457,9 @@ class WC_Order {
 
 						$old_stock = $_product->stock;
 
-						$new_quantity = $_product->reduce_stock( $item['qty'] );
+						$qty = apply_filters( 'woocommerce_order_item_quantity', $item['qty'], $this, $item );
+
+						$new_quantity = $_product->reduce_stock( $qty );
 
 						$this->add_order_note( sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $item['product_id'], $old_stock, $new_quantity) );
 
