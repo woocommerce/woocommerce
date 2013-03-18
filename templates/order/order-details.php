@@ -42,11 +42,10 @@ $order = new WC_Order( $order_id );
 				$_product = get_product( $item['variation_id'] ? $item['variation_id'] : $item['product_id'] );
 
 				echo '
-					<tr class = "' . esc_attr( apply_filters('woocommerce_order_table_item_class', 'order_table_item', $item, $order ) ) . '">
-						<td class="product-name">';
-
-				$product_name = '<a href="'.get_permalink( $item['product_id'] ).'">' . $item['name'] . '</a> <strong class="product-quantity">&times; ' . $item['qty'] . '</strong>';
-				echo apply_filters( 'woocommerce_order_table_item_name', $product_name, $item );
+					<tr class = "' . esc_attr( apply_filters( 'woocommerce_order_table_item_class', 'order_table_item', $item, $order ) ) . '">
+						<td class="product-name">' .
+							apply_filters( 'woocommerce_order_table_product_title', '<a href="' . get_permalink( $item['product_id'] ) . '">' . $item['name'] . '</a>', $item ) . ' ' .
+							apply_filters( 'woocommerce_order_table_item_quantity', '<strong class="product-quantity">&times; ' . $item['qty'] . '</strong>', $item );
 
 				$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
 				$item_meta->display();

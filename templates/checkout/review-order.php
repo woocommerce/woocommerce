@@ -163,13 +163,17 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				do_action( 'woocommerce_review_order_before_cart_contents' );
 
 				if (sizeof($woocommerce->cart->get_cart())>0) :
-					foreach ($woocommerce->cart->get_cart() as $item_id => $values) :
+					foreach ($woocommerce->cart->get_cart() as $cart_item_key => $values) :
 						$_product = $values['data'];
 						if ($_product->exists() && $values['quantity']>0) :
 							echo '
-								<tr class="' . esc_attr( apply_filters('woocommerce_checkout_table_item_class', 'checkout_table_item', $values, $item_id ) ) . '">
-									<td class="product-name">' . apply_filters( 'woocommerce_checkout_item_name', $_product->get_title() . ' <strong class="product-quantity">&times; ' . $values['quantity'] . '</strong>' . $woocommerce->cart->get_item_data( $values ), $values, $item_id ) . '</td>
-									<td class="product-total">' . apply_filters( 'woocommerce_checkout_item_subtotal', $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] ), $values, $item_id ) . '</td>
+								<tr class="' . esc_attr( apply_filters('woocommerce_checkout_table_item_class', 'checkout_table_item', $values, $cart_item_key ) ) . '">
+									<td class="product-name">' .
+										apply_filters( 'woocommerce_checkout_product_title', $_product->get_title(), $_product ) . ' ' .
+										apply_filters( 'woocommerce_checkout_item_quantity', '<strong class="product-quantity">&times; ' . $values['quantity'] . '</strong>', $values, $cart_item_key ) .
+										$woocommerce->cart->get_item_data( $values ) .
+									'</td>
+									<td class="product-total">' . apply_filters( 'woocommerce_checkout_item_subtotal', $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] ), $values, $cart_item_key ) . '</td>
 								</tr>';
 						endif;
 					endforeach;
