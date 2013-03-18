@@ -98,7 +98,7 @@ class WC_Emails {
 		if ( ! $this->_from_name )
 			$this->_from_name = get_option( 'woocommerce_email_from_name' );
 
-		return $this->_from_name;
+		return wp_specialchars_decode( $this->_from_name );
 	}
 
 	/**
