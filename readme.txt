@@ -181,6 +181,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Attribute base
 * Fix - Fixed adjust_price method in product class, allowing negative adjustments
 * Fix - Ratings and rating count transient syncing.
+* Fix - Tax label vs name in order emails.
+* Fix - Sendfile when FORCE_SSL_ADMIN is enabled.
 * Localization - Added indian rupees
 * Localization - Updated French translation by absoluteweb
 * Localization - Updated Brazilian translaction by Claudio Sanches
