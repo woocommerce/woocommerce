@@ -1035,10 +1035,10 @@ function woocommerce_download_product() {
 		// ...or serve it
 		if ( ! is_multisite() ) {
 
-			/* 			
+			/*
 			 * If WP FORCE_SSL_ADMIN is enabled, file will have been inserted as https from Media Library
 			 * site_url() depends on whether the page containing the download (ie; My Account) is served via SSL.
-			 * So blindly doing a str_replace is incorrect because it will fail with schemes are mismatched.			 
+			 * So blindly doing a str_replace is incorrect because it will fail with schemes are mismatched.
 			 */
 			$scheme = parse_url( $file_path, PHP_URL_SCHEME );
 			if ( $scheme ) {
@@ -1046,7 +1046,7 @@ function woocommerce_download_product() {
 			} else {
 				$site_url = is_ssl() ? str_replace( 'https:', 'http:', site_url() ) : site_url();
 			}
-			
+
 			$file_path   = str_replace( trailingslashit( $site_url ), ABSPATH, $file_path );
 
 		} else {
@@ -1357,7 +1357,7 @@ function woocommerce_track_product_view() {
 	setcookie( "woocommerce_recently_viewed", implode( '|', $viewed_products ), 0, COOKIEPATH, COOKIE_DOMAIN, false, true );
 }
 
-add_action( 'get_header', 'woocommerce_track_product_view', 10 );
+add_action( 'template_redirect', 'woocommerce_track_product_view', 20 );
 
 /**
  * Layered Nav Init
