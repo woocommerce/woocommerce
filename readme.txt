@@ -194,6 +194,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Move track pageview back to template_redirect to prevent headers_redirect, but give a later priority than canonical.
 * Fix - Product tabs when a product type doesn't exist yet.
 * Fix - Saving of variation download paths with special chars.
+* Fix - Unset parent of children when deleting a grouped product.
 * Localization - Added indian rupees
 * Localization - Updated French translation by absoluteweb
 * Localization - Updated Brazilian translaction by Claudio Sanches

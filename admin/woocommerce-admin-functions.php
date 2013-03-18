@@ -81,7 +81,8 @@ function woocommerce_ms_protect_download_rewite_rules( $rewrite ) {
 function woocommerce_delete_post( $id ) {
 	global $woocommerce, $wpdb;
 
-	if ( ! current_user_can( 'delete_posts' ) ) return;
+	if ( ! current_user_can( 'delete_posts' ) )
+		return;
 
 	if ( $id > 0 ) {
 
@@ -90,10 +91,19 @@ function woocommerce_delete_post( $id ) {
 		switch( $post_type ) {
 			case 'product' :
 
-				if ( $children_products =& get_children( 'post_parent=' . $id . '&post_type=product_variation' ) )
-					if ( $children_products )
-						foreach ( $children_products as $child )
+				if ( $child_product_variations =& get_children( 'post_parent=' . $id . '&post_type=product_variation' ) )
+					if ( $child_product_variations )
+						foreach ( $child_product_variations as $child )
 							wp_delete_post( $child->ID, true );
+
+				if ( $child_products =& get_children( 'post_parent=' . $id . '&post_type=product' ) )
+					if ( $child_products )
+						foreach ( $child_products as $child ) {
+							$child_post = array();
+							$child_post['ID'] = $child->ID;
+							$child_post['post_parent'] = 0;
+							wp_update_post( $child_post );
+						}
 
 				$woocommerce->clear_product_transients();
 
