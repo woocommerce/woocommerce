@@ -778,14 +778,15 @@ function woocommerce_price( $price, $args = array() ) {
 		'ex_tax_label' 	=> '0'
 	), $args ) );
 
-	$return = '';
-	$num_decimals = (int) get_option( 'woocommerce_price_num_decimals' );
-	$currency_pos = get_option( 'woocommerce_currency_pos' );
+	$return          = '';
+	$num_decimals    = (int) get_option( 'woocommerce_price_num_decimals' );
+	$currency_pos    = get_option( 'woocommerce_currency_pos' );
 	$currency_symbol = get_woocommerce_currency_symbol();
+	$decimal_sep     = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ), ENT_QUOTES );
+	$thousands_sep   = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ), ENT_QUOTES );
 
-	$price = apply_filters( 'raw_woocommerce_price', (double) $price );
-
-	$price = number_format( $price, $num_decimals, stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ), stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ) );
+	$price           = apply_filters( 'raw_woocommerce_price', (double) $price );
+	$price           = number_format( $price, $num_decimals, $decimal_sep, $thousands_sep );
 
 	if ( get_option( 'woocommerce_price_trim_zeros' ) == 'yes' && $num_decimals > 0 )
 		$price = woocommerce_trim_zeros( $price );
