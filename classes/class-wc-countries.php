@@ -885,6 +885,11 @@ class WC_Countries {
 						'required' => false
 					)
 				),
+				'PT' => array(
+					'state'		=> array(
+						'required' => false
+					)
+				),
 				'RO' => array(
 					'state'		=> array(
 						'required' => false
