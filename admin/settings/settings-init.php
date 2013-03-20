@@ -503,6 +503,14 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'checkboxgroup'		=> 'end'
 	),
 
+	array(
+		'title' => __( 'Product Search', 'woocommerce' ),
+		'desc'     => __( 'Redirect to the product page on a single matching search result', 'woocommerce' ),
+		'id'     => 'woocommerce_redirect_on_single_search_result',
+		'default'     => 'yes',
+		'type'     => 'checkbox'
+   ),
+   
 	array( 'type' => 'sectionend', 'id' => 'catalog_options' ),
 
 	array(	'title' => __( 'Product Data', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following options affect the fields available on the edit product page.', 'woocommerce' ), 'id' => 'product_data_options' ),

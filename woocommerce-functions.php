@@ -68,7 +68,7 @@ function woocommerce_template_redirect() {
 	}
 
 	// Redirect to the product page if we have a single product
-	elseif ( is_search() && is_post_type_archive( 'product' ) ) {
+	elseif ( is_search() && is_post_type_archive( 'product' ) && get_option('woocommerce_redirect_on_single_search_result')=='yes' ) {
 		if ( $wp_query->post_count == 1 ) {
 			$product = get_product( $wp_query->post );
 			if ( $product->is_visible() )
