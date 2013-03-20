@@ -66,7 +66,15 @@ if ( $available_methods ) {
 	if ( ! $woocommerce->customer->get_shipping_country() || ! $woocommerce->customer->get_shipping_state() || ! $woocommerce->customer->get_shipping_postcode() ) {
 		echo '<p>' . __( 'Please fill in your details to see available shipping methods.', 'woocommerce' ) . '</p>';
 	} else {
-		echo '<p>' . __( 'Sorry, it seems that there are no available shipping methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce' ) . '</p>';
+
+		$customer_location = $woocommerce->countries->countries[ $woocommerce->customer->get_shipping_country() ];
+
+		echo apply_filters( 'woocommerce_checkout_no_shipping_available_html',
+			'<p>' .
+			sprintf( __( 'Sorry, it seems that there are no available shipping methods for your location (%s).', 'woocommerce' ) . ' ' . __( 'If you require assistance or wish to make alternate arrangements please contact us.', 'woocommerce' ), $customer_location ) .
+			'</p>'
+		);
+
 	}
 
 }

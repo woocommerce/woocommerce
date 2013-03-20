@@ -178,13 +178,17 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 		<?php else : ?>
 
-			<div class="woocommerce-error">
+			<?php
 
-				<p><?php printf( __( 'Sorry, it seems that there are no available shipping methods for your location (%s).', 'woocommerce' ), $woocommerce->countries->countries[ $woocommerce->customer->get_shipping_country() ] ); ?></p>
+				$customer_location = $woocommerce->countries->countries[ $woocommerce->customer->get_shipping_country() ];
 
-				<p><?php _e( 'If you require assistance or wish to make alternate arrangements please contact us.', 'woocommerce' ); ?></p>
+				echo apply_filters( 'woocommerce_cart_no_shipping_available_html',
+					'<div class="woocommerce-error"><p>' .
+					sprintf( __( 'Sorry, it seems that there are no available shipping methods for your location (%s).', 'woocommerce' ) . ' ' . __( 'If you require assistance or wish to make alternate arrangements please contact us.', 'woocommerce' ), $customer_location ) .
+					'</p></div>'
+				);
 
-			</div>
+			?>
 
 		<?php endif; ?>
 
