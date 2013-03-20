@@ -4,7 +4,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates/Emails
- * @version     1.6.4
+ * @version     2.0.3
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -32,17 +32,25 @@ foreach ($items as $item) :
 			echo 	($show_sku && $_product->get_sku()) ? ' (#' . $_product->get_sku() . ')' : '';
 
 			// File URLs
-			if ( $show_download_links && $_product->exists() && $_product->is_downloadable() ) :
+			if ( $show_download_links && $_product->exists() && $_product->is_downloadable() ) {
+
 				$download_file_urls = $order->get_downloadable_file_urls( $item['product_id'], $item['variation_id'], $item );
-				foreach ( $download_file_urls as $i => $download_file_url ) :
+
+				$i = 0;
+
+				foreach ( $download_file_urls as $file_url => $download_file_url ) {
 					echo '<br/><small>';
+
 					if ( count( $download_file_urls ) > 1 ) {
 						echo sprintf( __('Download %d:', 'woocommerce' ), $i + 1 );
 					} elseif ( $i == 0 )
 						echo __( 'Download:', 'woocommerce' );
-					echo ' <a href="' . $download_file_url . '" target="_blank">' . $download_file_url . '</a></small>';
-				endforeach;
-			endif;
+
+					echo ' <a href="' . $download_file_url . '" target="_blank">' . basename( $file_url ) . '</a></small>';
+
+					$i++;
+				}
+			}
 
 			// Variation
 			echo 	($item_meta->meta) ? '<br/><small>' . nl2br( $item_meta->display( true, true ) ) . '</small>' : '';

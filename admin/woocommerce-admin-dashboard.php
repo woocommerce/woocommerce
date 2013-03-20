@@ -276,7 +276,7 @@ function woocommerce_dashboard_recent_reviews() {
 			$rating = get_comment_meta( $comment->comment_ID, 'rating', true );
 
 			echo '<div class="star-rating" title="' . $rating . '">
-				<span style="width:'. ( $rating * 10 ) . 'px">' . $rating . ' ' . __( 'out of 5', 'woocommerce' ) . '</span></div>';
+				<span style="width:'. ( $rating * 20 ) . '%">' . $rating . ' ' . __( 'out of 5', 'woocommerce' ) . '</span></div>';
 
 			echo '<h4 class="meta"><a href="' . get_permalink( $comment->ID ) . '#comment-' . absint( $comment->comment_ID ) .'">' . esc_html__( $comment->post_title ) . '</a> reviewed by ' . esc_html( $comment->comment_author ) .'</h4>';
 			echo '<blockquote>' . wp_kses_data( $comment->comment_excerpt ) . ' [...]</blockquote></li>';
@@ -447,13 +447,11 @@ function woocommerce_dashboard_sales_js() {
 	// Queue scripts
 	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 
-	wp_register_script( 'woocommerce_dashboard_sales', $woocommerce->plugin_url() . '/assets/js/admin/dashboard_sales'.$suffix.'.js', 'jquery', '1.0' );
+	wp_register_script( 'woocommerce_dashboard_sales', $woocommerce->plugin_url() . '/assets/js/admin/dashboard_sales' . $suffix . '.js', array( 'jquery', 'flot', 'flot-resize' ), '1.0' );
 	wp_register_script( 'flot', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot'.$suffix.'.js', 'jquery', '1.0' );
 	wp_register_script( 'flot-resize', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.resize'.$suffix.'.js', 'jquery', '1.0' );
 
 	wp_localize_script( 'woocommerce_dashboard_sales', 'params', $params );
 
-	wp_print_scripts('flot');
-	wp_print_scripts('flot-resize');
 	wp_print_scripts('woocommerce_dashboard_sales');
 }

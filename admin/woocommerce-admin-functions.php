@@ -20,33 +20,29 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @access public
  * @return void
  */
-function woocomerce_check_download_folder_protection() {
+function woocommerce_check_download_folder_protection() {
 	$upload_dir 		= wp_upload_dir();
 	$downloads_url 		= $upload_dir['basedir'] . '/woocommerce_uploads';
 	$download_method	= get_option('woocommerce_file_download_method');
 
-	if ($download_method=='redirect') :
+	if ( $download_method == 'redirect' ) {
 
 		// Redirect method - don't protect
-		if (file_exists($downloads_url.'/.htaccess')) :
+		if ( file_exists( $downloads_url . '/.htaccess' ) )
 			unlink( $downloads_url . '/.htaccess' );
-		endif;
 
-		flush_rewrite_rules( true );
-
-	else :
+	} else {
 
 		// Force method - protect, add rules to the htaccess file
-		if (!file_exists($downloads_url.'/.htaccess')) :
-			if ($file_handle = @fopen( $downloads_url . '/.htaccess', 'w' )) :
-				fwrite($file_handle, 'deny from all');
-				fclose($file_handle);
-			endif;
-		endif;
+		if ( ! file_exists( $downloads_url . '/.htaccess' ) ) {
+			if ( $file_handle = @fopen( $downloads_url . '/.htaccess', 'w' ) ) {
+				fwrite( $file_handle, 'deny from all' );
+				fclose( $file_handle );
+			}
+		}
+	}
 
-		flush_rewrite_rules( true );
-
-	endif;
+	flush_rewrite_rules();
 }
 
 
@@ -85,7 +81,8 @@ function woocommerce_ms_protect_download_rewite_rules( $rewrite ) {
 function woocommerce_delete_post( $id ) {
 	global $woocommerce, $wpdb;
 
-	if ( ! current_user_can( 'delete_posts' ) ) return;
+	if ( ! current_user_can( 'delete_posts' ) )
+		return;
 
 	if ( $id > 0 ) {
 
@@ -94,10 +91,19 @@ function woocommerce_delete_post( $id ) {
 		switch( $post_type ) {
 			case 'product' :
 
-				if ( $children_products =& get_children( 'post_parent=' . $id . '&post_type=product_variation' ) )
-					if ( $children_products )
-						foreach ( $children_products as $child )
+				if ( $child_product_variations =& get_children( 'post_parent=' . $id . '&post_type=product_variation' ) )
+					if ( $child_product_variations )
+						foreach ( $child_product_variations as $child )
 							wp_delete_post( $child->ID, true );
+
+				if ( $child_products =& get_children( 'post_parent=' . $id . '&post_type=product' ) )
+					if ( $child_products )
+						foreach ( $child_products as $child ) {
+							$child_post = array();
+							$child_post['ID'] = $child->ID;
+							$child_post['post_parent'] = 0;
+							wp_update_post( $child_post );
+						}
 
 				$woocommerce->clear_product_transients();
 
@@ -254,20 +260,6 @@ function woocommerce_prevent_admin_access() {
 	}
 }
 
-
-/**
- * Fix 'insert into post' buttons for images
- *
- * @access public
- * @param mixed $vars
- * @return array
- */
-function woocommerce_allow_img_insertion( $vars ) {
-    $vars['send'] = true; // 'send' as in "Send to Editor"
-    return($vars);
-}
-
-
 /**
  * Filter the directory for uploads.
  *
@@ -277,16 +269,15 @@ function woocommerce_allow_img_insertion( $vars ) {
  */
 function woocommerce_downloads_upload_dir( $pathdata ) {
 
-	if (isset($_POST['type']) && $_POST['type'] == 'downloadable_product') :
-
+	// Change upload dir
+	if ( isset( $_POST['type'] ) && $_POST['type'] == 'downloadable_product' ) {
 		// Uploading a downloadable file
 		$subdir = '/woocommerce_uploads'.$pathdata['subdir'];
 	 	$pathdata['path'] = str_replace($pathdata['subdir'], $subdir, $pathdata['path']);
 	 	$pathdata['url'] = str_replace($pathdata['subdir'], $subdir, $pathdata['url']);
 		$pathdata['subdir'] = str_replace($pathdata['subdir'], $subdir, $pathdata['subdir']);
 		return $pathdata;
-
-	endif;
+	}
 
 	return $pathdata;
 }

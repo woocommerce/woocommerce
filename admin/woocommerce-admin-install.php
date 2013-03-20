@@ -34,7 +34,22 @@ function do_install_woocommerce() {
 
 	// Cron jobs
 	wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
-	wp_schedule_event( strtotime( 'tomorrow' ), 'daily', 'woocommerce_scheduled_sales');
+	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+	wp_clear_scheduled_hook( 'woocommerce_cleanup_sessions' );
+
+	$ve = get_option('gmt_offset') > 0 ? '+' : '-';
+
+	wp_schedule_event( strtotime( 'tomorrow ' . $ve . get_option('gmt_offset') . ' HOURS' ), 'daily', 'woocommerce_scheduled_sales');
+
+	$held_duration = get_option( 'woocommerce_hold_stock_minutes', null );
+
+	if ( is_null( $held_duration ) )
+		$held_duration = '60';
+
+	if ( $held_duration != '' )
+		wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+
+	wp_schedule_event( time(), 'twicedaily', 'woocommerce_cleanup_sessions' );
 
 	// Install files and folders for uploading files and prevent hotlinking
 	$upload_dir =  wp_upload_dir();
@@ -88,14 +103,17 @@ function do_install_woocommerce() {
 	$current_version = get_option( 'woocommerce_version', null );
 	$current_db_version = get_option( 'woocommerce_db_version', null );
 
-	if ( version_compare( $current_db_version, '2.0', '<' ) && null !== $current_version ) {
-		update_option( 'woocommerce_needs_update', 1 );
+	if ( version_compare( $current_db_version, '2.0', '<' ) && null !== $current_db_version ) {
+		update_option( '_wc_needs_update', 1 );
 	} else {
 		update_option( 'woocommerce_db_version', $woocommerce->version );
 	}
 
 	// Update version
 	update_option( 'woocommerce_version', $woocommerce->version );
+
+	// Flush rewrite rules
+	flush_rewrite_rules();
 }
 
 
@@ -182,9 +200,6 @@ function woocommerce_create_pages() {
 	// Checkout page
     woocommerce_create_page( esc_sql( _x( 'checkout', 'page_slug', 'woocommerce' ) ), 'woocommerce_checkout_page_id', __( 'Checkout', 'woocommerce' ), '[woocommerce_checkout]' );
 
-    // Order tracking page
-    woocommerce_create_page( esc_sql( _x( 'order-tracking', 'page_slug', 'woocommerce' ) ), 'woocommerce_order_tracking_page_id', __( 'Track your order', 'woocommerce' ), '[woocommerce_order_tracking]' );
-
 	// My Account page
     woocommerce_create_page( esc_sql( _x( 'my-account', 'page_slug', 'woocommerce' ) ), 'woocommerce_myaccount_page_id', __( 'My Account', 'woocommerce' ), '[woocommerce_my_account]' );
 
@@ -200,6 +215,9 @@ function woocommerce_create_pages() {
     // Change password page
     woocommerce_create_page( esc_sql( _x( 'change-password', 'page_slug', 'woocommerce' ) ), 'woocommerce_change_password_page_id', __( 'Change Password', 'woocommerce' ), '[woocommerce_change_password]', woocommerce_get_page_id( 'myaccount' ) );
 
+    // Logout page
+    woocommerce_create_page( esc_sql( _x( 'logout', 'page_slug', 'woocommerce' ) ), 'woocommerce_logout_page_id', __( 'Logout', 'woocommerce' ), '', woocommerce_get_page_id( 'myaccount' ) );
+
 	// Pay page
     woocommerce_create_page( esc_sql( _x( 'pay', 'page_slug', 'woocommerce' ) ), 'woocommerce_pay_page_id', __( 'Checkout &rarr; Pay', 'woocommerce' ), '[woocommerce_pay]', woocommerce_get_page_id( 'checkout' ) );
 
@@ -211,6 +229,16 @@ function woocommerce_create_pages() {
 /**
  * Set up the database tables which the plugin needs to function.
  *
+ * Tables:
+ *		woocommerce_attribute_taxonomies - Table for storing attribute taxonomies - these are user defined
+ *		woocommerce_termmeta - Term meta table - sadly WordPress does not have termmeta so we need our own
+ *		woocommerce_downloadable_product_permissions - Table for storing user and guest download permissions.
+ *			KEY(order_id, product_id, download_id) used for organizing downloads on the My Account page
+ *		woocommerce_order_items - Order line items are stored in a table to make them easily queryable for reports
+ *		woocommerce_order_itemmeta - Order line item meta is stored in a table for storing extra data.
+ *		woocommerce_tax_rates - Tax Rates are stored inside 2 tables making tax queries simple and efficient.
+ *		woocommerce_tax_rate_locations - Each rate can be applied to more than one postcode/city hence the second table.
+ *
  * @access public
  * @return void
  */
@@ -220,6 +248,7 @@ function woocommerce_tables_install() {
 	$wpdb->hide_errors();
 
 	$collate = '';
+
     if ( $wpdb->has_cap( 'collation' ) ) {
 		if( ! empty($wpdb->charset ) )
 			$collate .= "DEFAULT CHARACTER SET $wpdb->charset";
@@ -229,35 +258,27 @@ function woocommerce_tables_install() {
 
     require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
-    // Table for storing attribute taxonomies - these are user defined
-    $sql = "
-CREATE TABLE ". $wpdb->prefix . "woocommerce_attribute_taxonomies (
+    // WooCommerce Tables
+    $woocommerce_tables = "
+CREATE TABLE {$wpdb->prefix}woocommerce_attribute_taxonomies (
   attribute_id bigint(20) NOT NULL auto_increment,
   attribute_name varchar(200) NOT NULL,
   attribute_label longtext NULL,
   attribute_type varchar(200) NOT NULL,
   attribute_orderby varchar(200) NOT NULL,
-  PRIMARY KEY  (attribute_id)
+  PRIMARY KEY  (attribute_id),
+  KEY attribute_name (attribute_name)
 ) $collate;
-";
-    dbDelta( $sql );
-
-    // Term meta table - sadly WordPress does not have termmeta so we need our own
-    $sql = "
-CREATE TABLE ". $wpdb->prefix . "woocommerce_termmeta (
+CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
   meta_id bigint(20) NOT NULL AUTO_INCREMENT,
   woocommerce_term_id bigint(20) NOT NULL,
   meta_key varchar(255) NULL,
   meta_value longtext NULL,
-  PRIMARY KEY  (meta_id)
+  PRIMARY KEY  (meta_id),
+  KEY woocommerce_term_id (woocommerce_term_id),
+  KEY meta_key (meta_key)
 ) $collate;
-";
-    dbDelta( $sql );
-
-    // Table for storing user and guest download permissions
-    // KEY(order_id, product_id, download_id) used for organizing downloads on the My Account page
-    $sql = "
-CREATE TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions (
+CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   download_id varchar(32) NOT NULL,
   product_id bigint(20) NOT NULL,
   order_id bigint(20) NOT NULL DEFAULT 0,
@@ -269,38 +290,26 @@ CREATE TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions (
   access_expires datetime NULL default null,
   download_count bigint(20) NOT NULL DEFAULT 0,
   PRIMARY KEY  (product_id,order_id,order_key,download_id),
-  KEY (order_id,product_id,download_id)
+  KEY download_order_product (download_id,order_id,product_id)
 ) $collate;
-";
-    dbDelta( $sql );
-
-    // Order line items are stored in a table to make them easily queryable for reports
-    $sql = "
-CREATE TABLE ". $wpdb->prefix . "woocommerce_order_items (
+CREATE TABLE {$wpdb->prefix}woocommerce_order_items (
   order_item_id bigint(20) NOT NULL auto_increment,
-  order_item_name longtext NOT NULL DEFAULT '',
+  order_item_name longtext NOT NULL,
   order_item_type varchar(200) NOT NULL DEFAULT '',
   order_id bigint(20) NOT NULL,
-  PRIMARY KEY  (order_item_id)
+  PRIMARY KEY  (order_item_id),
+  KEY order_id (order_id)
 ) $collate;
-";
-    dbDelta( $sql );
-
-    // Order line item meta is stored in a table for storing extra data.
-    $sql = "
-CREATE TABLE ". $wpdb->prefix . "woocommerce_order_itemmeta (
+CREATE TABLE {$wpdb->prefix}woocommerce_order_itemmeta (
   meta_id bigint(20) NOT NULL auto_increment,
   order_item_id bigint(20) NOT NULL,
   meta_key varchar(255) NULL,
   meta_value longtext NULL,
-  PRIMARY KEY  (meta_id)
+  PRIMARY KEY  (meta_id),
+  KEY order_item_id (order_item_id),
+  KEY meta_key (meta_key)
 ) $collate;
-";
-    dbDelta( $sql );
-
-    // Tax Rates are stored inside 2 tables making tax queries simple and efficient.
-    $sql = "
-CREATE TABLE ". $wpdb->prefix . "woocommerce_tax_rates (
+CREATE TABLE {$wpdb->prefix}woocommerce_tax_rates (
   tax_rate_id bigint(20) NOT NULL auto_increment,
   tax_rate_country varchar(200) NOT NULL DEFAULT '',
   tax_rate_state varchar(200) NOT NULL DEFAULT '',
@@ -311,22 +320,23 @@ CREATE TABLE ". $wpdb->prefix . "woocommerce_tax_rates (
   tax_rate_shipping int(1) NOT NULL DEFAULT 1,
   tax_rate_order bigint(20) NOT NULL,
   tax_rate_class varchar(200) NOT NULL DEFAULT '',
-  PRIMARY KEY  (tax_rate_id)
+  PRIMARY KEY  (tax_rate_id),
+  KEY tax_rate_country (tax_rate_country),
+  KEY tax_rate_state (tax_rate_state),
+  KEY tax_rate_class (tax_rate_class),
+  KEY tax_rate_priority (tax_rate_priority)
 ) $collate;
-";
-    dbDelta( $sql );
-
-    // Each rate can be applied to more than one postcode/city hence the second table.
-    $sql = "
-CREATE TABLE ". $wpdb->prefix . "woocommerce_tax_rate_locations (
+CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
   location_id bigint(20) NOT NULL auto_increment,
   location_code varchar(255) NOT NULL,
   tax_rate_id bigint(20) NOT NULL,
   location_type varchar(40) NOT NULL,
-  PRIMARY KEY  (location_id)
+  PRIMARY KEY  (location_id),
+  KEY location_type (location_type),
+  KEY location_type_code (location_type,location_code)
 ) $collate;
 ";
-    dbDelta( $sql );
+    dbDelta( $woocommerce_tables );
 }
 
 

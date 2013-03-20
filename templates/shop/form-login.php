@@ -13,8 +13,8 @@ global $woocommerce;
 
 if (is_user_logged_in()) return;
 ?>
-<form method="post" class="login">
-	<?php if ($message) echo wpautop(wptexturize($message)); ?>
+<form method="post" class="login" <?php if ( $hidden ) echo 'style="display:none;"'; ?>>
+	<?php if ( $message ) echo wpautop( wptexturize( $message ) ); ?>
 
 	<p class="form-row form-row-first">
 		<label for="username"><?php _e( 'Username or email', 'woocommerce' ); ?> <span class="required">*</span></label>

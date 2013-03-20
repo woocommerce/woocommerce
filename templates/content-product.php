@@ -21,19 +21,21 @@ if ( empty( $woocommerce_loop['loop'] ) )
 if ( empty( $woocommerce_loop['columns'] ) )
 	$woocommerce_loop['columns'] = apply_filters( 'loop_shop_columns', 4 );
 
-// Ensure visibilty
+// Ensure visibility
 if ( ! $product->is_visible() )
 	return;
 
 // Increase loop count
 $woocommerce_loop['loop']++;
+
+// Extra post classes
+$classes = array();
+if ( 0 == ( $woocommerce_loop['loop'] - 1 ) % $woocommerce_loop['columns'] || 1 == $woocommerce_loop['columns'] )
+	$classes[] = 'first';
+if ( 0 == $woocommerce_loop['loop'] % $woocommerce_loop['columns'] )
+	$classes[] = 'last';
 ?>
-<li class="product<?php
-    if ( ( $woocommerce_loop['loop'] - 1 ) % $woocommerce_loop['columns'] == 0 || $woocommerce_loop['columns'] == 1)
-        echo ' first';
-	if ( $woocommerce_loop['loop'] % $woocommerce_loop['columns'] == 0 )
-		echo ' last';
-	?>">
+<li <?php post_class( $classes ); ?>>
 
 	<?php do_action( 'woocommerce_before_shop_loop_item' ); ?>
 

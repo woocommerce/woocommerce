@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Customer New Account
  *
@@ -10,9 +13,6 @@
  * @author 		WooThemes
  * @extends 	WC_Email
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_Email_Customer_New_Account extends WC_Email {
 
 	var $user_login;

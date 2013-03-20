@@ -1,0 +1,6185 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WooCommerce v2.0.0-beta2\n"
+"Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
+"POT-Creation-Date: 2013-01-09 09:36:51+00:00\n"
+"PO-Revision-Date: 2013-03-02 17:42+0100\n"
+"Last-Translator: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
+"Language-Team: Humblebrag <mikael@humblebrag.nu>\n"
+"Language: sv_SE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
+"_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
+"X-Poedit-Basepath: ../../\n"
+"X-Textdomain-Support: yes\n"
+"X-Generator: Poedit 1.5.5\n"
+"X-Poedit-SearchPath-0: .\n"
+
+# @ woocommerce
+#: admin/importers/importers-init.php:13
+msgid "WooCommerce Tax Rates (CSV)"
+msgstr "WooCommerce momssatser (CSV)"
+
+#: admin/importers/importers-init.php:13
+msgid "Import <strong>tax rates</strong> to your store via a csv file."
+msgstr "Importera <strong>momssatser</strong> till din butik via en CSV-fil."
+
+#: admin/importers/tax-rates-importer.php:103
+#: admin/importers/tax-rates-importer.php:186
+#: admin/importers/tax-rates-importer.php:226
+#: admin/importers/tax-rates-importer.php:241
+msgid "Sorry, there has been an error."
+msgstr "Ett fel har tyvärr uppstått."
+
+#: admin/importers/tax-rates-importer.php:104
+msgid "The file does not exist, please try again."
+msgstr "Filen existerar inte. Vänligen försök igen."
+
+#: admin/importers/tax-rates-importer.php:187
+msgid "The CSV is invalid."
+msgstr "Ogiltig CSV-fil."
+
+#: admin/importers/tax-rates-importer.php:198
+msgid ""
+"Import complete - imported <strong>%s</strong> tax rates and skipped <strong>"
+"%s</strong>."
+msgstr ""
+"Import genomförd! Importerade <strong>%s</strong> momssatser och hoppade "
+"över <strong>%s</strong>."
+
+# @ woocommerce
+#: admin/importers/tax-rates-importer.php:208
+msgid "All done!"
+msgstr "Genomfört!"
+
+# @ woocommerce
+#: admin/importers/tax-rates-importer.php:208
+msgid "View Tax Rates"
+msgstr "Visa momssatser"
+
+# @ woocommerce
+#: admin/importers/tax-rates-importer.php:259
+msgid "Import Tax Rates"
+msgstr "Importera momssatser"
+
+#: admin/importers/tax-rates-importer.php:282
+msgid ""
+"Hi there! Upload a CSV file containing tax rates to import the contents into "
+"your shop. Choose a .csv file to upload, then click \"Upload file and import"
+"\"."
+msgstr ""
+"Hej! Ladda upp en CSV-fil med momssatser för att lägga till dessa i butiken. "
+"Välj en fil med ändelsen .csv och klicka sedan \"Ladda upp fil och importera"
+"\"."
+
+#: admin/importers/tax-rates-importer.php:284
+msgid ""
+"Tax rates need to be defined with columns in a specific order (10 columns). "
+"<a href=\"%s\">Click here to download a sample</a>."
+msgstr ""
+"Momssatser måste definieras med kolumnerna i en specifik ordning (10 "
+"kolumner). <a href=\"%s\">Klicka här för att ladda ner ett exempel</a>."
+
+#: admin/importers/tax-rates-importer.php:292
+msgid ""
+"Before you can upload your import file, you will need to fix the following "
+"error:"
+msgstr "Du måste åtgärda följande fel innan du kan ladda upp din fil:"
+
+#: admin/importers/tax-rates-importer.php:301
+msgid "Choose a file from your computer:"
+msgstr "Välj en fil från din hårddisk:"
+
+#: admin/importers/tax-rates-importer.php:307
+msgid "Maximum size: %s"
+msgstr "Maximal filstorlek: %s"
+
+#: admin/importers/tax-rates-importer.php:312
+msgid "OR enter path to file:"
+msgstr "ELLER ange sökvägen till filen:"
+
+# @ woocommerce
+#: admin/importers/tax-rates-importer.php:319
+msgid "Delimiter"
+msgstr "Avdelare"
+
+#: admin/importers/tax-rates-importer.php:325
+msgid "Upload file and import"
+msgstr "Ladda upp fil och importera"
+
+# @ woocommerce
+#: admin/includes/duplicate_product.php:23
+msgid "No product to duplicate has been supplied!"
+msgstr "Ingen produkt att duplicera har valts!"
+
+# @ woocommerce
+#: admin/includes/duplicate_product.php:43
+msgid "Product creation failed, could not find original product:"
+msgstr "Skapande av produkt misslyckades, kunde inte hitta originalprodukten:"
+
+# @ woocommerce
+#: admin/includes/duplicate_product.php:89
+msgid "(Copy)"
+msgstr "(Kopia)"
+
+# @ woocommerce
+#: admin/includes/notice-install.php:6
+msgid ""
+"<strong>Welcome to WooCommerce</strong> &#8211; You're almost ready to start "
+"selling :)"
+msgstr ""
+"<strong>Välkommen till WooCommerce</strong> &#8211; Du är bara något steg "
+"ifrån att börja försäljningen :)"
+
+# @ woocommerce
+#: admin/includes/notice-install.php:7
+msgid "Install WooCommerce Pages"
+msgstr "Installera sidor för WooCommerce"
+
+# @ woocommerce
+#: admin/includes/notice-install.php:7
+msgid "Skip setup"
+msgstr "Hoppa över konfiguration"
+
+# @ woocommerce
+#: admin/includes/notice-installed.php:6
+msgid ""
+"<strong>WooCommerce has been installed</strong> &#8211; You're ready to "
+"start selling :)"
+msgstr ""
+"<strong>WooCommerce har installerats</strong> &#8211; Du är nu reda att "
+"börja försäljningen :)"
+
+# @ woocommerce
+#: admin/includes/notice-installed.php:8 admin/includes/notice-updated.php:8
+#: admin/woocommerce-admin-content.php:41 admin/woocommerce-admin-init.php:81
+#: admin/woocommerce-admin-status.php:187
+msgid "Settings"
+msgstr "Inställningar"
+
+#: admin/includes/notice-installed.php:8 admin/includes/notice-updated.php:8
+msgid "Docs"
+msgstr "Dokumentation"
+
+#: admin/includes/notice-update.php:6
+msgid ""
+"<strong>Data Update Required</strong> &#8211; We just need to update your "
+"install to the latest version"
+msgstr ""
+"<strong>Uppdatering av data krävs</strong> &#8211; Innan du kan börja måste "
+"vi bara uppdatera din installation till den senaste versionen"
+
+#: admin/includes/notice-update.php:7
+msgid "Run the updater"
+msgstr "Starta uppdatering"
+
+#: admin/includes/notice-update.php:12
+msgid ""
+"It is strongly recommended that you backup your database before proceeding. "
+"Are you sure you wish to run the updater now?"
+msgstr ""
+"Vi rekommenderar att du säkerhetskopierar din databas innan du fortsätter. "
+"Är du säker att du vill starta uppdateringen nu?"
+
+#: admin/includes/notice-updated.php:6
+msgid ""
+"<strong>WooCommerce has been updated</strong> &#8211; You're ready to "
+"continue selling :)"
+msgstr ""
+"<strong>WooCommerce har uppdaterats</strong> &#8211; Du är nu redo att börja "
+"försäljningen :)"
+
+# @ woocommerce
+#: admin/includes/updates/woocommerce-update-2.0.php:50
+#: admin/woocommerce-admin-init.php:837
+msgctxt "slug"
+msgid "product-category"
+msgstr "produkt-kategori"
+
+# @ woocommerce
+#: admin/includes/updates/woocommerce-update-2.0.php:51
+#: admin/woocommerce-admin-init.php:850
+msgctxt "slug"
+msgid "product-tag"
+msgstr "produkt-etikett"
+
+# @ woocommerce
+#: admin/includes/updates/woocommerce-update-2.0.php:59
+msgctxt "slug"
+msgid "product"
+msgstr "produkt"
+
+# @ woocommerce
+#: admin/post-types/product.php:31
+msgid "Make a duplicate from this product"
+msgstr "Skapa en dublett av den här produkten"
+
+# @ woocommerce
+#: admin/post-types/product.php:32
+msgid "Duplicate"
+msgstr "Duplicera"
+
+# @ woocommerce
+#: admin/post-types/product.php:61
+msgid "Copy to a new draft"
+msgstr "Kopiera till nytt utkast"
+
+# @ woocommerce
+#: admin/post-types/product.php:85 admin/woocommerce-admin-taxonomies.php:297
+msgid "Image"
+msgstr "Bild"
+
+# @ woocommerce
+#: admin/post-types/product.php:87
+#: admin/post-types/writepanels/writepanel-product_data.php:368
+#: admin/post-types/writepanels/writepanel-product_data.php:447
+#: admin/woocommerce-admin-attributes.php:232
+#: admin/woocommerce-admin-attributes.php:268
+#: admin/woocommerce-admin-attributes.php:306
+#: admin/woocommerce-admin-attributes.php:329
+#: admin/woocommerce-admin-attributes.php:373
+#: admin/woocommerce-admin-attributes.php:398
+#: admin/woocommerce-admin-init.php:393
+msgid "Name"
+msgstr "Namn"
+
+# @ woocommerce
+#: admin/post-types/product.php:90 admin/post-types/product.php:563
+#: admin/post-types/writepanels/variation-admin-html.php:46
+#: admin/post-types/writepanels/writepanel-product_data.php:98
+#: admin/woocommerce-admin-reports.php:2063
+#: admin/woocommerce-admin-reports.php:2098
+msgid "SKU"
+msgstr "Art. nr."
+
+# @ woocommerce
+#: admin/post-types/product.php:93
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:83
+#: admin/woocommerce-admin-content.php:62
+#: admin/woocommerce-admin-reports.php:99
+msgid "Stock"
+msgstr "Lager"
+
+# @ woocommerce
+#: admin/post-types/product.php:95 admin/post-types/product.php:574
+#: admin/post-types/product.php:793 admin/woocommerce-admin-functions.php:196
+msgid "Price"
+msgstr "Pris"
+
+# @ woocommerce
+#: admin/post-types/product.php:97
+msgid "Categories"
+msgstr "Kategorier"
+
+# @ woocommerce
+#: admin/post-types/product.php:98
+msgid "Tags"
+msgstr "Etiketter"
+
+# @ woocommerce
+#: admin/post-types/product.php:99 admin/post-types/product.php:638
+#: admin/post-types/product.php:910
+#: admin/post-types/writepanels/writepanel-product_data.php:1044
+#: admin/woocommerce-admin-init.php:406
+msgid "Featured"
+msgstr "Rekommenderad"
+
+# @ woocommerce
+#: admin/post-types/product.php:100 admin/woocommerce-admin-attributes.php:250
+#: admin/woocommerce-admin-attributes.php:308
+#: admin/woocommerce-admin-attributes.php:385
+msgid "Type"
+msgstr "Typ"
+
+# @ woocommerce
+#: admin/post-types/product.php:101 admin/post-types/shop_order.php:50
+msgid "Date"
+msgstr "Datum"
+
+# @ woocommerce
+#: admin/post-types/product.php:150
+msgid "Edit this item"
+msgstr "Redigera denna artikel"
+
+# @ woocommerce
+# @ default
+#: admin/post-types/product.php:150
+#: admin/post-types/writepanels/writepanel-order_data.php:140
+#: admin/post-types/writepanels/writepanel-order_data.php:230
+#: admin/post-types/writepanels/writepanel-order_data.php:383
+#: admin/post-types/writepanels/writepanel-product_data.php:1047
+#: admin/woocommerce-admin-attributes.php:322
+msgid "Edit"
+msgstr "Redigera"
+
+# @ woocommerce
+#: admin/post-types/product.php:151
+msgid "Edit this item inline"
+msgstr "Redigera artikel direkt"
+
+# @ woocommerce
+#: admin/post-types/product.php:151
+msgid "Quick&nbsp;Edit"
+msgstr "Snabbredigering"
+
+# @ woocommerce
+#: admin/post-types/product.php:155 admin/post-types/shop_coupon.php:65
+msgid "Restore this item from the Trash"
+msgstr "Återställ artikel från Papperskorgen"
+
+# @ woocommerce
+#: admin/post-types/product.php:155 admin/post-types/shop_coupon.php:65
+msgid "Restore"
+msgstr "Återställ"
+
+# @ woocommerce
+#: admin/post-types/product.php:157 admin/post-types/shop_coupon.php:67
+msgid "Move this item to the Trash"
+msgstr "Flytta artikel till Papperskorgen"
+
+# @ woocommerce
+#: admin/post-types/product.php:157 admin/post-types/shop_coupon.php:67
+msgid "Trash"
+msgstr "Papperskorg"
+
+# @ woocommerce
+#: admin/post-types/product.php:159 admin/post-types/shop_coupon.php:69
+msgid "Delete this item permanently"
+msgstr "Radera artikel permanent"
+
+# @ woocommerce
+#: admin/post-types/product.php:159 admin/post-types/shop_coupon.php:69
+#: admin/post-types/writepanels/writepanel-order_data.php:456
+msgid "Delete Permanently"
+msgstr "Radera permanent"
+
+# @ woocommerce
+#: admin/post-types/product.php:164
+msgid "Preview &#8220;%s&#8221;"
+msgstr "Förhandsgranska &#8220;%s&#8221;"
+
+# @ woocommerce
+#: admin/post-types/product.php:164
+msgid "Preview"
+msgstr "Förhandsgranska"
+
+# @ woocommerce
+#: admin/post-types/product.php:166
+msgid "View &#8220;%s&#8221;"
+msgstr "Visa &#8220;%s&#8221;"
+
+# @ woocommerce
+#: admin/post-types/product.php:166 admin/post-types/shop_order.php:171
+msgid "View"
+msgstr "Visa"
+
+# @ woocommerce
+#: admin/post-types/product.php:213
+msgid "Grouped"
+msgstr "Grupperad"
+
+# @ woocommerce
+#: admin/post-types/product.php:215
+msgid "External/Affiliate"
+msgstr "Extern/Återförsäljare"
+
+# @ woocommerce
+#: admin/post-types/product.php:219 admin/post-types/product.php:413
+#: admin/post-types/writepanels/variation-admin-html.php:166
+#: admin/post-types/writepanels/writepanel-product_data.php:52
+msgid "Virtual"
+msgstr "Virtuell"
+
+# @ woocommerce
+#: admin/post-types/product.php:221 admin/post-types/product.php:409
+#: admin/post-types/writepanels/variation-admin-html.php:164
+#: admin/post-types/writepanels/writepanel-product_data.php:58
+msgid "Downloadable"
+msgstr "Nedladdningsbar"
+
+# @ woocommerce
+#: admin/post-types/product.php:223
+msgid "Simple"
+msgstr "Enkel"
+
+# @ woocommerce
+#: admin/post-types/product.php:227 admin/post-types/product.php:393
+msgid "Variable"
+msgstr "Variabel"
+
+# @ woocommerce
+#: admin/post-types/product.php:250
+msgid "Toggle featured"
+msgstr "Aktivera rekommenderad"
+
+# @ woocommerce
+#: admin/post-types/product.php:252
+msgid "yes"
+msgstr "ja"
+
+#: admin/post-types/product.php:254
+msgid "no"
+msgstr "nej"
+
+# @ woocommerce
+#: admin/post-types/product.php:261 admin/post-types/product.php:647
+#: admin/post-types/product.php:934
+#: admin/post-types/writepanels/writepanel-product_data.php:227
+msgid "In stock"
+msgstr "I lager"
+
+# @ woocommerce
+#: admin/post-types/product.php:263 admin/post-types/product.php:648
+#: admin/post-types/product.php:935
+#: admin/post-types/writepanels/writepanel-product_data.php:228
+#: admin/woocommerce-admin-reports.php:2083
+msgid "Out of stock"
+msgstr "Slut i lager"
+
+# @ woocommerce
+#: admin/post-types/product.php:379
+msgid "Show all product types"
+msgstr "Visa alla produkttyper"
+
+# @ woocommerce
+#: admin/post-types/product.php:387
+#: admin/post-types/writepanels/writepanel-product_data.php:39
+msgid "Grouped product"
+msgstr "Grupperad produkt"
+
+# @ woocommerce
+#: admin/post-types/product.php:389
+#: admin/post-types/writepanels/writepanel-product_data.php:40
+msgid "External/Affiliate product"
+msgstr "Extern/Affiliateprodukt"
+
+# @ woocommerce
+#: admin/post-types/product.php:391
+#: admin/post-types/writepanels/writepanel-product_data.php:38
+msgid "Simple product"
+msgstr "Enkel produkt"
+
+# @ woocommerce
+#: admin/post-types/product.php:405
+msgid "Show all sub-types"
+msgstr "Visa alla undertyper"
+
+# @ woocommerce
+#: admin/post-types/product.php:526
+msgid "[%s with SKU of %s]"
+msgstr "[%s med Art. nr. av %s]"
+
+# @ woocommerce
+#: admin/post-types/product.php:532
+msgid "[%s with ID of %d]"
+msgstr "[%s med ID av %d]"
+
+# @ woocommerce
+#: admin/post-types/product.php:558 admin/post-types/product.php:789
+#: admin/post-types/writepanels/writepanels-init.php:46
+#: admin/settings/settings-init.php:571
+msgid "Product Data"
+msgstr "Produktdata"
+
+# @ woocommerce
+#: admin/post-types/product.php:576
+msgid "Regular price"
+msgstr "Normalpris"
+
+# @ woocommerce
+#: admin/post-types/product.php:581 admin/post-types/product.php:817
+msgid "Sale"
+msgstr "Rea"
+
+# @ woocommerce
+#: admin/post-types/product.php:583
+msgid "Sale price"
+msgstr "Rea-pris"
+
+# @ woocommerce
+#: admin/post-types/product.php:594 admin/post-types/product.php:843
+#: admin/post-types/writepanels/variation-admin-html.php:90
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:84
+#: admin/post-types/writepanels/writepanel-product_data.php:269
+msgid "Weight"
+msgstr "Vikt"
+
+# @ woocommerce
+#: admin/post-types/product.php:605 admin/post-types/product.php:867
+msgid "L/W/H"
+msgstr "L/B/H"
+
+# @ woocommerce
+#: admin/post-types/product.php:607 admin/post-types/product.php:883
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:85
+#: admin/post-types/writepanels/writepanel-product_data.php:282
+msgid "Length"
+msgstr "Längd"
+
+# @ woocommerce
+#: admin/post-types/product.php:608 admin/post-types/product.php:884
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:86
+#: admin/post-types/writepanels/writepanel-product_data.php:283
+#: admin/woocommerce-admin-settings.php:825
+msgid "Width"
+msgstr "Bredd"
+
+# @ woocommerce
+#: admin/post-types/product.php:609 admin/post-types/product.php:885
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:87
+#: admin/post-types/writepanels/writepanel-product_data.php:284
+#: admin/woocommerce-admin-settings.php:827
+msgid "Height"
+msgstr "Höjd"
+
+# @ woocommerce
+#: admin/post-types/product.php:619 admin/post-types/product.php:891
+msgid "Visibility"
+msgstr "Synlighet"
+
+# @ woocommerce
+#: admin/post-types/product.php:624 admin/post-types/product.php:897
+msgid "Catalog &amp; search"
+msgstr "Sök i katalogen"
+
+# @ woocommerce
+#: admin/post-types/product.php:625 admin/post-types/product.php:898
+#: admin/post-types/writepanels/writepanel-product_data.php:1033
+#: admin/woocommerce-admin-content.php:46
+#: admin/woocommerce-admin-settings.php:220
+msgid "Catalog"
+msgstr "Produktkatalog"
+
+# @ woocommerce
+# @ default
+#: admin/post-types/product.php:626 admin/post-types/product.php:899
+#: admin/post-types/writepanels/writepanel-product_data.php:1034
+msgid "Search"
+msgstr "Sök"
+
+# @ woocommerce
+#: admin/post-types/product.php:627 admin/post-types/product.php:900
+#: admin/post-types/writepanels/writepanel-product_data.php:1035
+msgid "Hidden"
+msgstr "Dold"
+
+# @ woocommerce
+#: admin/post-types/product.php:642 admin/post-types/product.php:928
+msgid "In stock?"
+msgstr "I lager?"
+
+# @ woocommerce
+#: admin/post-types/product.php:663 admin/post-types/product.php:946
+#: admin/post-types/writepanels/writepanel-product_data.php:208
+msgid "Manage stock?"
+msgstr "Hantera lager?"
+
+# @ woocommerce
+#: admin/post-types/product.php:667 admin/post-types/product.php:965
+#: admin/post-types/product.php:981
+#: admin/post-types/writepanels/writepanel-product_data.php:215
+msgid "Stock Qty"
+msgstr "Lagersaldo"
+
+# @ woocommerce
+#: admin/post-types/product.php:798 admin/post-types/product.php:822
+#: admin/post-types/product.php:848 admin/post-types/product.php:872
+#: admin/post-types/product.php:896 admin/post-types/product.php:915
+#: admin/post-types/product.php:933 admin/post-types/product.php:951
+#: admin/post-types/product.php:970
+msgid "— No Change —"
+msgstr "— Ingen förändring —"
+
+# @ woocommerce
+#: admin/post-types/product.php:799 admin/post-types/product.php:823
+#: admin/post-types/product.php:849 admin/post-types/product.php:873
+#: admin/post-types/product.php:971
+msgid "Change to:"
+msgstr "Ändra till:"
+
+#: admin/post-types/product.php:800 admin/post-types/product.php:824
+msgid "Increase by (fixed amount or %):"
+msgstr "Öka med (bestämt antal eller procent):"
+
+#: admin/post-types/product.php:801 admin/post-types/product.php:825
+msgid "Decrease by (fixed amount or %):"
+msgstr "Öka med (bestämt antal eller procent):"
+
+# @ woocommerce
+#: admin/post-types/product.php:811 admin/post-types/product.php:836
+msgid "Enter price"
+msgstr "Ange pris"
+
+#: admin/post-types/product.php:826
+msgid "Decrease regular price by (fixed amount or %):"
+msgstr "Sänk standardpris med (bestämd summa eller procent):"
+
+# @ woocommerce
+#: admin/post-types/product.php:916 admin/post-types/product.php:952
+#: admin/post-types/shop_order.php:190 admin/woocommerce-admin-status.php:202
+#: admin/woocommerce-admin-status.php:364
+msgid "Yes"
+msgstr "Ja"
+
+# @ woocommerce
+#: admin/post-types/product.php:917 admin/post-types/product.php:953
+#: admin/post-types/shop_order.php:192 admin/woocommerce-admin-status.php:202
+#: admin/woocommerce-admin-status.php:364
+msgid "No"
+msgstr "Nej"
+
+# @ woocommerce
+#: admin/post-types/product.php:1181
+msgid "Sort Products"
+msgstr "Sortera produkter"
+
+# @ woocommerce
+#: admin/post-types/product.php:1220
+msgid "Insert into product"
+msgstr "Lägg till i produkt"
+
+# @ woocommerce
+#: admin/post-types/product.php:1221
+msgid "Uploaded to this product"
+msgstr "Ladda upp till produkt"
+
+# @ woocommerce
+#: admin/post-types/shop_coupon.php:25
+msgid "Code"
+msgstr "Kod"
+
+# @ woocommerce
+#: admin/post-types/shop_coupon.php:26
+msgid "Coupon type"
+msgstr "Kupongtyp"
+
+# @ woocommerce
+#: admin/post-types/shop_coupon.php:27
+#: admin/post-types/writepanels/writepanel-coupon_data.php:45
+msgid "Coupon amount"
+msgstr "Kupongbelopp"
+
+# @ woocommerce
+#: admin/post-types/shop_coupon.php:28
+msgid "Description"
+msgstr "Beskrivning"
+
+# @ woocommerce
+#: admin/post-types/shop_coupon.php:29
+msgid "Product IDs"
+msgstr "Produkt IDn"
+
+# @ woocommerce
+#: admin/post-types/shop_coupon.php:30
+msgid "Usage / Limit"
+msgstr "Användningsgräns"
+
+# @ woocommerce
+#: admin/post-types/shop_coupon.php:31
+#: admin/post-types/writepanels/writepanel-coupon_data.php:165
+msgid "Expiry date"
+msgstr "Gäller till"
+
+# @ woocommerce
+#: admin/post-types/shop_coupon.php:56
+msgid "Edit coupon"
+msgstr "Redigera rabattkupong"
+
+#: admin/post-types/shop_coupon.php:114
+msgid "%s / %s"
+msgstr "%s / %s"
+
+#: admin/post-types/shop_coupon.php:116
+msgid "%s / &infin;"
+msgstr "%s / &infin;"
+
+# @ woocommerce
+#: admin/post-types/shop_coupon.php:149 admin/post-types/shop_order.php:282
+msgid "Show all statuses"
+msgstr "Visa alla statusar"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:43
+#: admin/settings/settings-payment-gateways.php:29
+#: admin/settings/settings-shipping-methods.php:31
+msgid "Status"
+msgstr "Status"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:44
+msgid "Order"
+msgstr "Order"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:45
+msgid "Billing"
+msgstr "Faktura"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:46
+#: admin/post-types/writepanels/writepanel-order_data.php:529
+#: admin/post-types/writepanels/writepanel-product_data.php:81
+#: admin/settings/settings-tax-rates.php:52
+#: admin/settings/settings-tax-rates.php:217
+#: admin/woocommerce-admin-content.php:49
+#: admin/woocommerce-admin-settings.php:224
+msgid "Shipping"
+msgstr "Frakt"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:47
+msgid "Order Total"
+msgstr "Order totalt"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:48
+#: admin/post-types/writepanels/writepanels-init.php:71
+msgid "Order Notes"
+msgstr "Ordernoteringar"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:49
+msgid "Customer Notes"
+msgstr "Kundnoteringar"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:51
+#: admin/post-types/writepanels/writepanel-order_data.php:382
+#: admin/post-types/writepanels/writepanel-order_data.php:429
+msgid "Actions"
+msgstr "Händelser"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:95
+#: admin/post-types/writepanels/writepanel-order_data.php:93
+msgid "Guest"
+msgstr "Gäst"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:98
+msgid "Order %s"
+msgstr "Order %s"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:98
+msgid "made by"
+msgstr "skapad av"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:101
+msgid "Email:"
+msgstr "E-postadress:"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:104
+msgid "Tel:"
+msgstr "Tfn:"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:114 admin/post-types/shop_order.php:123
+msgid "Via"
+msgstr "Via"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:131
+msgid "Unpublished"
+msgstr "Ej publicerad"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:133
+msgid "Y/m/d g:i:s A"
+msgstr "Y/m/d H:i:s"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:139
+msgid "%s ago"
+msgstr "%s sedan"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:141
+msgid "Y/m/d"
+msgstr "Y/m/d"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:158
+#: admin/woocommerce-admin-dashboard.php:176
+msgid "Processing"
+msgstr "Pågående"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:165
+msgid "Complete"
+msgstr "Genomförd"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:301 admin/post-types/shop_order.php:326
+msgid "Show all customers"
+msgstr "Visa alla kunder"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-download-permission-html.php:6
+msgid "Revoke Access"
+msgstr "Återkalla åtkomst"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-download-permission-html.php:7
+#: admin/post-types/writepanels/variation-admin-html.php:7
+#: admin/post-types/writepanels/writepanel-product_data.php:361
+#: admin/post-types/writepanels/writepanel-product_data.php:440
+#: admin/woocommerce-admin-init.php:395
+msgid "Click to toggle"
+msgstr "Klicka för att akttivera/avaktivera"
+
+#: admin/post-types/writepanels/order-download-permission-html.php:9
+msgid "File %d: %s"
+msgstr "Fil %d: %s"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-download-permission-html.php:9
+msgid "Downloaded %s time"
+msgid_plural "Downloaded %s times"
+msgstr[0] "Nerladdad %s gång"
+msgstr[1] "Nerladdad %s gånger"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-download-permission-html.php:16
+msgid "Downloads Remaining"
+msgstr "Återstående nerladdningar"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-download-permission-html.php:19
+#: admin/post-types/writepanels/variation-admin-html.php:141
+#: admin/post-types/writepanels/variation-admin-html.php:149
+#: admin/post-types/writepanels/writepanel-product_data.php:158
+msgid "Unlimited"
+msgstr "Obegränsad"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-download-permission-html.php:22
+msgid "Access Expires"
+msgstr "Åtkomst upphör"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-download-permission-html.php:23
+#: admin/post-types/writepanels/writepanel-product_data.php:164
+msgid "Never"
+msgstr "Aldrig"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-fee-html.php:10
+msgid "Fee Name"
+msgstr "Avgiftsnamn"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-fee-html.php:15
+#: admin/post-types/writepanels/order-item-html.php:82
+msgid "Tax class"
+msgstr "Momsgrupp"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-fee-html.php:17
+#: admin/post-types/writepanels/order-tax-html.php:8
+#: admin/post-types/writepanels/writepanel-order_data.php:551
+#: admin/post-types/writepanels/writepanel-order_data.php:650
+#: admin/woocommerce-admin-reports.php:1642
+#: admin/woocommerce-admin-reports.php:2633
+#: admin/woocommerce-admin-reports.php:2642
+#: admin/woocommerce-admin-users.php:90 admin/woocommerce-admin-users.php:112
+msgid "N/A"
+msgstr "Inte tillgänglig"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-fee-html.php:18
+#: admin/post-types/writepanels/writepanel-product_data.php:177
+msgid "Taxable"
+msgstr "Momsbelagd"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-fee-html.php:23
+#: admin/post-types/writepanels/order-item-html.php:89
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:54
+#: admin/post-types/writepanels/writepanel-product_data.php:184
+#: admin/settings/settings-init.php:1027
+#: admin/settings/settings-tax-rates.php:29
+#: admin/woocommerce-admin-settings.php:262
+msgid "Standard"
+msgstr "Standard"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-fee-html.php:39
+#: admin/post-types/writepanels/order-item-html.php:106
+#: admin/woocommerce-admin-reports.php:1546
+#: admin/woocommerce-admin-reports.php:1599
+#: admin/woocommerce-admin-reports.php:2346
+#: admin/woocommerce-admin-reports.php:2518
+#: admin/woocommerce-admin-reports.php:2595
+msgid "Total"
+msgstr "Total"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-item-html.php:9
+msgid "Product ID:"
+msgstr "Produkt-ID:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-item-html.php:12
+msgid "Variation ID:"
+msgstr "Variant-ID:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-item-html.php:15
+msgid "Product SKU:"
+msgstr "Artikelnummer:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-item-html.php:33
+msgid "Add&nbsp;meta"
+msgstr "Lägg till meta"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-item-html.php:108
+msgid "Subtotal"
+msgstr "Delsumma"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-tax-html.php:6
+msgid "Tax Rate:"
+msgstr "Momssats"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-tax-html.php:16
+#: admin/post-types/writepanels/writepanel-order_data.php:617
+msgid "Sales Tax:"
+msgstr "Momssats för rea"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-tax-html.php:20
+#: admin/post-types/writepanels/writepanel-order_data.php:625
+msgid "Shipping Tax:"
+msgstr "Fraktmoms:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:6
+#: admin/post-types/writepanels/writepanel-product_data.php:360
+#: admin/post-types/writepanels/writepanel-product_data.php:439
+#: admin/woocommerce-admin-init.php:394
+msgid "Remove"
+msgstr "Ta bort"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:20
+msgid "Any"
+msgstr "Vilken som helst"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:46
+msgid ""
+"Enter a SKU for this variation or leave blank to use the parent product SKU."
+msgstr ""
+"Uppge ett artikelnummer för den här varianten eller lämna blankt för att "
+"använda förälderns artikelnummer."
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:57
+msgid "Stock Qty:"
+msgstr "Lagersaldo:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:57
+msgid ""
+"Enter a quantity to enable stock management for this variation, or leave "
+"blank to use the variable product stock options."
+msgstr ""
+"Ange ett antal för att aktivera hanteringen av lagersaldo för denna "
+"variation. Lämna tomt för att använda variabelt lagersaldo."
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:66
+msgid "Price:"
+msgstr "Pris:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:70
+msgid "Sale Price:"
+msgstr "Reapris:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:70
+#: admin/post-types/writepanels/writepanel-product_data.php:125
+msgid "Schedule"
+msgstr "Schemalägg"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:70
+msgid "Cancel schedule"
+msgstr "Avaktivera schema"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:77
+msgid "Sale start date:"
+msgstr "Datum för reastart:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:78
+#: admin/post-types/writepanels/writepanel-product_data.php:136
+msgctxt "placeholder"
+msgid "From&hellip;"
+msgstr "Från&hellip;"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:81
+msgid "Sale end date:"
+msgstr "Datum för reaslut:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:82
+#: admin/post-types/writepanels/writepanel-product_data.php:137
+msgctxt "placeholder"
+msgid "To&hellip;"
+msgstr "Till&hellip;"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:90
+msgid ""
+"Enter a weight for this variation or leave blank to use the parent product "
+"weight."
+msgstr ""
+"Uppge en vikt för den här varianten eller lämna blankt för att använda "
+"förälderns vikt."
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:98
+msgid "Dimensions (L&times;W&times;H)"
+msgstr "Dimensioner (L&times;B&times;H)"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:109
+msgid "Shipping class:"
+msgstr "Fraktklass:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:113
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:53
+msgid "Same as parent"
+msgstr "Samma som förälder"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:123
+msgid "Tax class:"
+msgstr "Momssats:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:133
+msgid "File paths:"
+msgstr "Sökväg för fil:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:133
+msgid ""
+"Enter one or more File Paths, one per line, to make this variation a "
+"downloadable product, or leave blank."
+msgstr ""
+"Uppge sökväg till en eller flera filer (dock endast en per rad) för att göra "
+"den här varianten till en nedladdningsbar produkt. Lämna annars tomt."
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:134
+#: admin/post-types/writepanels/writepanel-product_data.php:153
+msgid "File paths/URLs, one per line"
+msgstr "Sökväg för fil/URL, en per rad"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:135
+#: admin/post-types/writepanels/writepanel-product_data.php:154
+msgid "Choose a file"
+msgstr "Välj en fil"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:135
+msgid "Upload"
+msgstr "Ladda upp"
+
+#: admin/post-types/writepanels/variation-admin-html.php:135
+#: admin/post-types/writepanels/writepanel-product_data.php:154
+msgid "Insert file URL"
+msgstr "Ange URL till fil"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:140
+msgid "Download Limit:"
+msgstr "Gräns för nedladdning:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:140
+#: admin/post-types/writepanels/writepanel-product_data.php:158
+msgid "Leave blank for unlimited re-downloads."
+msgstr "Lämna blankt för obegränsad åternedladdning"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:148
+msgid "Download Expiry:"
+msgstr "Nerladdning upphör:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:148
+#: admin/post-types/writepanels/writepanel-product_data.php:164
+msgid ""
+"Enter the number of days before a download link expires, or leave blank."
+msgstr ""
+"Ange giltighetstiden för nedladdningslänken (antal dagar), eller lämna tomt."
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:162
+msgid "Enabled"
+msgstr "Aktiverad"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:164
+msgid ""
+"Enable this option if access is given to a downloadable file upon purchase "
+"of a product"
+msgstr ""
+"Aktivera det här alternativet om tillgång till nedladdningsbar fil ges vid "
+"köp av produkt"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:166
+msgid ""
+"Enable this option if a product is not shipped or there is no shipping cost"
+msgstr ""
+"Aktivera det här alternativet om en produkt inte kan skickas eller om det "
+"inte finns någon fraktkostnad"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:37
+msgid "Coupon description"
+msgstr "Kupongbeskrivning"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:37
+msgid "Optionally enter a description for this coupon for your reference."
+msgstr "Valfri beskrivning för din egen referens."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:42
+msgid "Discount type"
+msgstr "Rabattyp"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:45
+msgid "Enter an amount e.g. 2.99"
+msgstr "Uppge ett belopp t.ex. 2.99"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:51
+msgid "Enable free shipping"
+msgstr "Aktivera fri frakt"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:51
+msgid ""
+"Check this box if the coupon grants free shipping. The <a href=\"%s\">free "
+"shipping method</a> must be enabled with the \"must use coupon\" setting "
+"checked."
+msgstr ""
+"Kryssa i denna ruta om kupongen ska aktivera fri frakt. <a href=\"%s\">Metod "
+"för fri frakt</a> måste ställas in för att kräva kupong för fri frakt."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:54
+msgid "Individual use"
+msgstr "Enskilt användande"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:54
+msgid ""
+"Check this box if the coupon cannot be used in conjunction with other "
+"coupons."
+msgstr ""
+"Kryssa i den här rutan om kupongen inte kan användas tillsammans med andra "
+"kuponger."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:57
+msgid "Apply before tax"
+msgstr "Applicera innan skatt"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:57
+msgid ""
+"Check this box if the coupon should be applied before calculating cart tax."
+msgstr ""
+"Kryssa i rutan om kupongvärdet ska dras av innan momsen/skatten beräknas."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:62
+msgid "Minimum amount"
+msgstr "Minsta mängd"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:62
+msgid "No minimum"
+msgstr "Inget minimum"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:62
+msgid ""
+"This field allows you to set the minimum subtotal needed to use the coupon."
+msgstr ""
+"Detta fält låter dig ange en lägsta summa för att denna kupong ska kunna "
+"användas."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:71
+#: admin/woocommerce-admin-taxonomies.php:28
+#: admin/woocommerce-admin-taxonomies.php:122
+msgid "Products"
+msgstr "Produkter"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:72
+#: admin/post-types/writepanels/writepanel-order_data.php:396
+#: admin/post-types/writepanels/writepanel-product_data.php:500
+#: admin/post-types/writepanels/writepanel-product_data.php:521
+#: admin/woocommerce-admin-reports.php:1229
+msgid "Search for a product&hellip;"
+msgstr "Sök efter en produkt&hellip;"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:91
+msgid ""
+"Products which need to be in the cart to use this coupon or, for \"Product "
+"Discounts\", which products are discounted."
+msgstr ""
+"Produkter som måste finnas i varukorgen för att denna kupong ska kunna "
+"användas eller för att \"Produktrabatter\" ska rabatteras."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:96
+msgid "Exclude products"
+msgstr "Exkludera produkter"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:97
+msgid "Search for a product…"
+msgstr "Sök efter en produkt..."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:116
+msgid ""
+"Products which must not be in the cart to use this coupon or, for \"Product "
+"Discounts\", which products are not discounted."
+msgstr ""
+"Produkter som inte får finnas i varukorgen för att denna kupong ska kunna "
+"användas, eller för att \"Produktrabatter\" ska rabatteras."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:123
+msgid "Product categories"
+msgstr "Produktkategorier"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:124
+msgid "Any category"
+msgstr "Alla kategorier"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:132
+msgid ""
+"A product must be in this category for the coupon to remain valid or, for "
+"\"Product Discounts\", products in these categories will be discounted."
+msgstr ""
+"En produkt från denna kategori måste finnas i varukorgen för att kupongen "
+"ska vara giltig, eller för att \"Produktrabatter\" ska rabatteras."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:137
+msgid "Exclude categories"
+msgstr "Exkludera kategorier"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:138
+msgid "No categories"
+msgstr "Inga kategorier"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:146
+msgid ""
+"Product must not be in this category for the coupon to remain valid or, for "
+"\"Product Discounts\", products in these categories will not be discounted."
+msgstr ""
+"Produkter från denna kategori får inte finnas i varukorgen för att kupongen "
+"ska vara giltig, eller för att \"Produktrabatter\" inte ska rabatteras."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:152
+msgid "Customer emails"
+msgstr "E-post till kunder"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:152
+msgid "Any customer"
+msgstr "Alla kunder"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:152
+msgid ""
+"Comma separate email addresses to restrict this coupon to specific billing "
+"and user emails."
+msgstr ""
+"Kommaseparerad lista över e-postadresser som denna kupong är giltig för."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:159
+msgid "Usage limit"
+msgstr "Användningsgräns"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:159
+msgctxt "placeholder"
+msgid "Unlimited usage"
+msgstr "Obegränsad användning"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:159
+msgid "How many times this coupon can be used before it is void."
+msgstr "Hur många gånger kan denna kupong användas?"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:165
+msgctxt "placeholder"
+msgid "Never expire"
+msgstr "Upphör aldrig"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:165
+msgid "The date this coupon will expire, <code>YYYY-MM-DD</code>."
+msgstr "Kupongen är giltig till och med detta datum, <code>YYYY-MM-DD</code>."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:202
+msgid ""
+"Coupon code already exists - customers will use the latest coupon with this "
+"code."
+msgstr ""
+"Kupongkoden finns redan - kunder kommer att använda den senaste kupongen med "
+"denna kod."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:59
+msgid "Order Details"
+msgstr "Orderdetaljer"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:62
+msgid "Order number"
+msgstr "Ordernummer"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:67
+msgid "Customer IP:"
+msgstr "Kundens IP-nummer:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:74
+msgid "General Details"
+msgstr "Generell information"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:76
+msgid "Order status:"
+msgstr "Orderstatus:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:86
+msgid "Order Date:"
+msgstr "Orderdatum:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:87
+msgid "h"
+msgstr "h"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:87
+#: admin/settings/settings-init.php:630
+msgid "m"
+msgstr "m"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:91
+msgid "Customer:"
+msgstr "Kund:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:131
+msgid "Customer Note:"
+msgstr "Kundnotering:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:132
+msgid "Customer's notes about the order"
+msgstr "Kundens notering gällande ordern"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:140
+msgid "Billing Details"
+msgstr "Debiteringsinformation"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:144
+#: admin/post-types/writepanels/writepanel-order_data.php:234
+msgid "First Name"
+msgstr "Förnamn"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:148
+#: admin/post-types/writepanels/writepanel-order_data.php:238
+msgid "Last Name"
+msgstr "Efternamn"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:152
+#: admin/post-types/writepanels/writepanel-order_data.php:242
+#: admin/woocommerce-admin-users.php:155 admin/woocommerce-admin-users.php:204
+msgid "Company"
+msgstr "Företag"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:156
+#: admin/post-types/writepanels/writepanel-order_data.php:246
+#: admin/woocommerce-admin-users.php:159 admin/woocommerce-admin-users.php:208
+msgid "Address 1"
+msgstr "Adress 1"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:160
+#: admin/post-types/writepanels/writepanel-order_data.php:250
+#: admin/woocommerce-admin-users.php:163 admin/woocommerce-admin-users.php:212
+msgid "Address 2"
+msgstr "Adress 2"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:164
+#: admin/post-types/writepanels/writepanel-order_data.php:254
+#: admin/settings/settings-tax-rates.php:42
+#: admin/settings/settings-tax-rates.php:217
+#: admin/woocommerce-admin-users.php:167 admin/woocommerce-admin-users.php:216
+msgid "City"
+msgstr "Stad"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:168
+#: admin/post-types/writepanels/writepanel-order_data.php:258
+#: admin/woocommerce-admin-users.php:171 admin/woocommerce-admin-users.php:220
+msgid "Postcode"
+msgstr "Postnummer"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:172
+#: admin/post-types/writepanels/writepanel-order_data.php:262
+#: admin/woocommerce-admin-users.php:179 admin/woocommerce-admin-users.php:228
+msgid "Country"
+msgstr "Land"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:175
+#: admin/post-types/writepanels/writepanel-order_data.php:265
+msgid "Select a country&hellip;"
+msgstr "Välj land&hellip;"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:178
+#: admin/post-types/writepanels/writepanel-order_data.php:268
+#: admin/woocommerce-admin-users.php:175 admin/woocommerce-admin-users.php:224
+msgid "State/County"
+msgstr "Län"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:182
+#: admin/woocommerce-admin-users.php:187
+msgid "Email"
+msgstr "E-post"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:185
+msgid "Phone"
+msgstr "Telefon"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:193
+#: admin/post-types/writepanels/writepanel-order_data.php:195
+#: admin/post-types/writepanels/writepanel-order_data.php:277
+#: admin/post-types/writepanels/writepanel-order_data.php:279
+msgid "Address"
+msgstr "Adress"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:195
+msgid "No billing address set."
+msgstr "Ingen debiteringsadress angiven."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:208
+msgid "Load billing address"
+msgstr "Ladda kundens fakturaadress"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:230
+msgid "Shipping Details"
+msgstr "Leveransinformation"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:279
+msgid "No shipping address set."
+msgstr "Ingen leveransadress angiven."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:292
+msgid "Load shipping address"
+msgstr "Ladda kundens leveransadress"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:292
+msgid "Copy from billing"
+msgstr "Kopiera från fakturering"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:339
+msgid "Item"
+msgstr "Artikel"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:343
+#: admin/post-types/writepanels/writepanel-product_data.php:189
+#: admin/settings/settings-tax-rates.php:217
+msgid "Tax Class"
+msgstr "Momsgrupp"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:343
+msgid "Tax class for the line item"
+msgstr "Momsgrupp för radens artikel"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:345
+msgid "Qty"
+msgstr "Antal"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:347
+msgid "Cost"
+msgstr "Kostnad"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:347
+msgid "Line subtotals are before pre-tax discounts, totals are after."
+msgstr "Summa per rad är före före-skattrabatter, summa är efter."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:349
+#: admin/settings/settings-tax-rates.php:387
+#: admin/settings/settings-tax-rates.php:466
+#: admin/woocommerce-admin-content.php:48
+#: admin/woocommerce-admin-settings.php:223
+msgid "Tax"
+msgstr "Moms"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:384
+msgid "Delete Lines"
+msgstr "Radera notering"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:386
+msgid "Stock Actions"
+msgstr "Lagerhändelser"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:387
+msgid "Reduce Line Stock"
+msgstr "Minska lagersaldo"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:388
+msgid "Increase Line Stock"
+msgstr "Öka lagersaldo"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:392
+#: admin/post-types/writepanels/writepanel-order_data.php:449
+msgid "Apply"
+msgstr "Genomför"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:398
+msgid "Add item(s)"
+msgstr "Lägg till artiklar"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:399
+msgid "Add fee"
+msgstr "Lägg till avgift"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:430
+msgid "Resend order emails"
+msgstr "Skicka om e-post om order"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:458
+msgid "Move to Trash"
+msgstr "Flytta till papperskorgen"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:463
+msgid "Save Order"
+msgstr "Spara order"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:463
+msgid "Save/update the order"
+msgstr "Spara/uppdatera ordern"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:488
+msgid "Discounts"
+msgstr "Rabatter"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:492
+msgid "Cart Discount:"
+msgstr "Total Rabatt:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:492
+msgid "Discounts before tax - calculated by comparing subtotals to totals."
+msgstr "Rabatter före skatt - beräknas genom att jämföra delsumma med summa."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:500
+msgid "Order Discount:"
+msgstr "Orderns Rabatt:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:500
+msgid "Discounts after tax - user defined."
+msgstr "Rabatter efter skatt - användardefinierat"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:533
+msgid "Label:"
+msgstr "Etikett:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:534
+msgid "The shipping title the customer sees"
+msgstr "Titel som kunden ser för frakt"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:541
+msgid "Cost:"
+msgstr "Pris:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:542
+msgid "(ex. tax)"
+msgstr " (exkl. moms)"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:549
+msgid "Method:"
+msgstr "Metod:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:571
+#: admin/post-types/writepanels/writepanel-order_data.php:573
+#: admin/post-types/writepanels/writepanel-order_data.php:666
+#: admin/post-types/writepanels/writepanel-order_data.php:668
+msgid "Other"
+msgstr "Övrigt"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:584
+msgid "Tax Rows"
+msgstr "Momsrader"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:609
+msgid "+ Add tax row"
+msgstr "+ Lägg till momsrad"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:609
+msgid ""
+"These rows contain taxes for this order. This allows you to display multiple "
+"or compound taxes rather than a single total."
+msgstr ""
+"Dessa rader innehåller moms/skatt för denna order. Detta låter dig visa "
+"flera eller sammanräknad skatt istället för en totalsumma."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:613
+msgid "Tax Totals"
+msgstr "Summa moms"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:617
+msgid "Total tax for line items + fees."
+msgstr "Moms för raden samt avgifter"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:636
+#: admin/post-types/writepanels/writepanels-init.php:70
+msgid "Order Totals"
+msgstr "Ordertotal"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:640
+msgid "Order Total:"
+msgstr "Totalt för ordern:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:648
+msgid "Payment Method:"
+msgstr "Betalningsmetod:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:678
+msgid "Calc taxes"
+msgstr "Beräkna moms"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:679
+msgid "Calc totals"
+msgstr "Varukorg totalt"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_downloads.php:57
+msgid "Choose a downloadable product&hellip;"
+msgstr "Välj en nerladdingsbar produkt&hellip;"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_downloads.php:89
+msgid "Grant Access"
+msgstr "Ge tillgång"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_downloads.php:127
+msgid ""
+"Could not grant access - the user may already have permission for this file."
+msgstr ""
+"Kunde inte ge tillgång - användaren kan redan ha tillgång till denna fil."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_downloads.php:150
+msgid "Are you sure you want to revoke access to this download?"
+msgstr "Är du säker att du vill ta bort tillgången till denna nedladdning?"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_notes.php:44
+msgid "added %s ago"
+msgstr "tillagd för %s timmar sedan"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_notes.php:44
+msgid "Delete note"
+msgstr "Radera notering"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_notes.php:50
+msgid "There are no notes for this order yet."
+msgstr "Det finns inga noteringar för denna order ännu."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_notes.php:56
+msgid "Add note"
+msgstr "Lägg till notering"
+
+#: admin/post-types/writepanels/writepanel-order_notes.php:56
+msgid ""
+"Add a note for your reference, or add a customer note (the user will be "
+"notified)."
+msgstr ""
+"Lägg till en egen notis eller lägg till ett kundmeddelande (användaren "
+"kommer att notifieras)."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_notes.php:62
+msgid "Customer note"
+msgstr "Kundnotering"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_notes.php:63
+msgid "Private note"
+msgstr "Egen notering"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_notes.php:65
+#: admin/post-types/writepanels/writepanel-product_data.php:478
+msgid "Add"
+msgstr "Lägg till"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:23
+msgid "Variations for variable products are defined here."
+msgstr "Varianter för variabla produkter definieras här."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:23
+msgid "Variations"
+msgstr "Varianter"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:65
+msgid ""
+"Before adding variations, add and save some attributes on the "
+"<strong>Attributes</strong> tab."
+msgstr ""
+"Innan du lägger till variationer måste du lägga till och spara ett eller "
+"flera attribut under <strong>Attribut</strong>-fliken."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:67
+msgid "Learn more"
+msgstr "Läs mer"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:74
+#: admin/post-types/writepanels/writepanel-product_data.php:325
+msgid "Close all"
+msgstr "Stäng alla"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:74
+#: admin/post-types/writepanels/writepanel-product_data.php:325
+msgid "Expand all"
+msgstr "Expandera alla"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:75
+msgid "Bulk edit:"
+msgstr "Redigera fler"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:77
+msgid "Toggle &quot;Enabled&quot;"
+msgstr "Aktiverad"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:78
+msgid "Toggle &quot;Downloadable&quot;"
+msgstr "Aktivera/avaktivera nedladdningsbar"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:79
+msgid "Toggle &quot;Virtual&quot;"
+msgstr "Aktivera/avaktivera virtuell"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:80
+msgid "Delete all variations"
+msgstr "Ta bort alla variationer"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:81
+msgid "Prices"
+msgstr "Priser"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:82
+msgid "Sale prices"
+msgstr "Reapriser"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:88
+msgid "File Path"
+msgstr "Sökväg för fil"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:89
+msgid "Download limit"
+msgstr "Nedladdningsgräns"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:90
+#: admin/post-types/writepanels/writepanel-product_data.php:164
+msgid "Download Expiry"
+msgstr "Nerladdning upphör"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:92
+msgid "Go"
+msgstr "Kör"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:192
+msgid "Add Variation"
+msgstr "Lägg till variant"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:194
+msgid "Link all variations"
+msgstr "Länka alla varianter"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:196
+msgid "Default selections:"
+msgstr "Standardval:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:209
+msgid "No default"
+msgstr "Inte standard"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:273
+msgid ""
+"Are you sure you want to link all variations? This will create a new "
+"variation for each and every possible combination of variation attributes "
+"(max 50 per run)."
+msgstr ""
+"Är du säker på att du vill länka alla variationer? Detta kommer skapa en ny "
+"variation för varje möjlig kombination av alla attribut (max 50 per omgång)."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:290
+msgid "variation added"
+msgstr "variation tillagd"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:292
+msgid "variations added"
+msgstr "variationer tillagda"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:294
+msgid "No variations added"
+msgstr "Inga variationer tillagda"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:317
+msgid "Are you sure you want to remove this variation?"
+msgstr "Är du säker på att du vill ta bort den här varianten?"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:373
+msgid "Are you sure you want to delete all variations? This cannot be undone."
+msgstr ""
+"Är du säker på att du vill radera alla variationer? Detta kan inte ångras."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:376
+msgid "Last warning, are you sure?"
+msgstr "Sista varningen, är du säker?"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:413
+msgid "Enter a value"
+msgstr "Ange värde"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:504
+#: admin/woocommerce-admin-taxonomies.php:62
+#: admin/woocommerce-admin-taxonomies.php:154
+msgid "Choose an image"
+msgstr "Välj ett bild"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:506
+msgid "Set variation image"
+msgstr "Välj bild för variation"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:550
+msgid "Variable product"
+msgstr "Variabel produkt"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:616
+msgid "Variation #%s of %s"
+msgstr "Variation %s of %s"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:43
+msgid "Product Type"
+msgstr "Produkttyp"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:53
+msgid "Virtual products are intangible and aren't shipped."
+msgstr "Virtuella produkter är immateriella och skickas inte."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:59
+msgid "Downloadable products give access to a file upon purchase."
+msgstr "Nedladdningsbara produkter ger tillgång till fil efter köp."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:77
+#: admin/woocommerce-admin-content.php:44
+#: admin/woocommerce-admin-settings.php:219
+msgid "General"
+msgstr "Generellt"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:79
+#: admin/woocommerce-admin-content.php:47
+#: admin/woocommerce-admin-settings.php:222
+msgid "Inventory"
+msgstr "Lagersaldo"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:83
+msgid "Linked Products"
+msgstr "Länkade produkter"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:85
+#: admin/woocommerce-admin-attributes.php:298
+#: admin/woocommerce-admin-init.php:61
+msgid "Attributes"
+msgstr "Attribut"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:87
+msgid "Advanced"
+msgstr "Avancerat"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:98
+msgid "Stock Keeping Unit"
+msgstr "Artikelnummer"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:98
+msgid ""
+"SKU refers to a Stock-keeping unit, a unique identifier for each distinct "
+"product and service that can be purchased."
+msgstr ""
+"SKU är Stock-Keeping Unit, ett unikt artikelnummer för varje produkt och "
+"tjänst som kan köpas."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:109
+msgid "Product URL"
+msgstr "URL till produkt"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:109
+msgid "Enter the external URL to the product."
+msgstr "Uppge en extern URL till produkten."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:112
+msgid "Button text"
+msgstr "Knapptext"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:112
+msgctxt "placeholder"
+msgid "Buy product"
+msgstr "Köp produkt"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:112
+msgid "This text will be shown on the button linking to the external product."
+msgstr "Denna text visas på knappen som länkar till den externa produkten."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:119
+msgid "Regular Price"
+msgstr "Ordinarie pris"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:125
+msgid "Sale Price"
+msgstr "Reapris"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:135
+msgid "Sale Price Dates"
+msgstr "Reaprisdatum"
+
+# @ woocommerce
+# @ default
+#: admin/post-types/writepanels/writepanel-product_data.php:138
+#: admin/post-types/writepanels/writepanel-product_data.php:1068
+msgid "Cancel"
+msgstr "Avbryt"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:152
+msgid "File paths (one per line)"
+msgstr "Sökvägar för fil (en per rad)"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:158
+msgid "Download Limit"
+msgstr "Gräns för nedladdning"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:176
+msgid "Tax Status"
+msgstr "Momsstatus"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:178
+msgid "Shipping only"
+msgstr "Endast frakt"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:179
+msgid "None"
+msgstr "Ingen"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:215
+msgid ""
+"Stock quantity. If this is a variable product this value will be used to "
+"control stock for all variations, unless you define stock at variation level."
+msgstr ""
+"Lagersaldo. Om denna produkt är en variabel produkt kontrollerar detta värde "
+"lagersaldot för samtliga variationer om du inte definierar lagersaldo för "
+"varje variation."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:226
+msgid "Stock status"
+msgstr "Lagerstatus"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:229
+msgid ""
+"Controls whether or not the product is listed as \"in stock\" or \"out of "
+"stock\" on the frontend."
+msgstr ""
+"Styr om produkten visas som \"i lager\" eller \"slut i lager\" i butiken."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:236
+msgid "Allow Backorders?"
+msgstr "Tillåt bokning av produkter?"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:237
+msgid "Do not allow"
+msgstr "Tillåt inte"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:238
+msgid "Allow, but notify customer"
+msgstr "Tillåt men meddela kund"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:239
+msgid "Allow"
+msgstr "Tillåt"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:240
+msgid ""
+"If managing stock, this controls whether or not backorders are allowed for "
+"this product and variations. If enabled, stock quantity can go below 0."
+msgstr ""
+"Om lagersaldo hanteras styr detta om restordrar tillåts för denna produkt "
+"eller variation. Om detta tillåts kan lagersaldo vara lägre än noll."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:251
+msgid "Sold Individually"
+msgstr "Säljs individuellt"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:251
+msgid ""
+"Enable this to only allow one of this item to be bought in a single order"
+msgstr ""
+"Aktivera detta för att endast tillåta att ett exemplar av denna artikel kan "
+"köpas i samma order"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:269
+msgid "Weight in decimal form"
+msgstr "Vikt i decimalform"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:280
+msgid "Dimensions"
+msgstr "Dimensioner"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:286
+msgid "LxWxH in decimal form"
+msgstr "LxBxH i decimalform"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:307
+msgid "No shipping class"
+msgstr "Ingen fraktklass"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:313
+msgid "Shipping class"
+msgstr "Fraktklass"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:313
+msgid ""
+"Shipping classes are used by certain shipping methods to group similar "
+"products."
+msgstr ""
+"Fraktklasser används av vissa fraktmetoder för att gruppera liknande "
+"produkter."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:376
+#: admin/post-types/writepanels/writepanel-product_data.php:453
+#: admin/woocommerce-admin-init.php:396
+msgid "Value(s)"
+msgstr "Värde(n)"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:378
+msgid "Select terms"
+msgstr "Välj villkor"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:390
+msgid "Select all"
+msgstr "Välj alla"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:390
+msgid "Select none"
+msgstr "Välj ingen"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:392
+msgid "Add new"
+msgstr "Lägg till ny"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:405
+msgid "Pipe separate terms"
+msgstr "Pipe separata villkor"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:412
+#: admin/post-types/writepanels/writepanel-product_data.php:459
+#: admin/woocommerce-admin-init.php:398
+msgid "Visible on the product page"
+msgstr "Synlig på produktsidan"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:418
+#: admin/post-types/writepanels/writepanel-product_data.php:465
+#: admin/woocommerce-admin-init.php:399
+msgid "Used for variations"
+msgstr "Använd variationer"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:454
+#: admin/woocommerce-admin-init.php:397
+msgid "Enter some text, or some attributes by pipe (|) separating values."
+msgstr "Mata in text eller attribut avskilda med pipe (|)."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:480
+msgid "Custom product attribute"
+msgstr "Eget produktattribut"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:492
+msgid "Save attributes"
+msgstr "Spara attribut"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:499
+msgid "Up-Sells"
+msgstr "Uppförsäljning"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:518
+msgid ""
+"Up-sells are products which you recommend instead of the currently viewed "
+"product, for example, products that are more profitable or better quality or "
+"more expensive."
+msgstr ""
+"Uppförsäljning är produkter som du rekommenderar istället för visad produkt, "
+"t.ex. produkter som är mer prisvärda eller har en högre kvalitet eller är "
+"dyrare."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:520
+msgid "Cross-Sells"
+msgstr "Korsförsäljning"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:539
+msgid ""
+"Cross-sells are products which you promote in the cart, based on the current "
+"product."
+msgstr ""
+"Korsförsäljning är produkter som du vill marknadsföra i varukorgen, baserad "
+"på existerande produkt."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:549
+msgid "Choose a grouped product&hellip;"
+msgstr "Välj en grupperad produkt&hellip;"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:575
+msgid "Grouping"
+msgstr "Gruppering"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:575
+msgid "Set this option to make this product part of a grouped product."
+msgstr ""
+"Markera detta för att göra denna produkt till del av en grupperad produkt."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:595
+msgid "Purchase Note"
+msgstr "Köpnotering"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:595
+msgid "Enter an optional note to send the customer after purchase."
+msgstr "Skriv in valfri notering att skicka till kund efter köp."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:602
+msgid "Menu order"
+msgstr "Menyordning"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:602
+msgid "Custom ordering position."
+msgstr "Anpassad position."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:610
+msgid "Enable reviews"
+msgstr "Tillåt recensioner"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:699
+msgid "Product SKU must be unique."
+msgstr "Produktens artikelnummer måste vara unikt."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:1032
+msgid "Catalog/search"
+msgstr "Katalog/Sök"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:1039
+msgid "Catalog visibility:"
+msgstr "Synlighet i katalog:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:1055
+msgid ""
+"Define the loops this product should be visible in. The product will still "
+"be accessible directly."
+msgstr ""
+"Definiera vilka loopar denna produkt ska vara synlig i. Produkten kommer "
+"fortfarande vara direkt nåbar."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:1061
+msgid "Enable this option to feature this product."
+msgstr "Välj detta för att markera som utvald produkt"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:1063
+msgid "Featured Product"
+msgstr "Utvald produkt"
+
+# @ default
+#: admin/post-types/writepanels/writepanel-product_data.php:1067
+msgid "OK"
+msgstr "OK"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_images.php:42
+#: admin/post-types/writepanels/writepanel-product_images.php:102
+msgid "Delete image"
+msgstr "Radera bild"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_images.php:42
+#: admin/post-types/writepanels/writepanel-product_images.php:102
+#: admin/woocommerce-admin-attributes.php:322
+msgid "Delete"
+msgstr "Radera"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_images.php:53
+msgid "Add product gallery images"
+msgstr "Lägg till bilder i produktgalleri"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_images.php:79
+msgid "Add Images to Product Gallery"
+msgstr "Lägg till bilder i produktgalleri"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_images.php:81
+msgid "Add to gallery"
+msgstr "Lägg till i galleri"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:47
+msgid "Product Gallery"
+msgstr "Produktgalleri"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:55
+msgid "Product Short Description"
+msgstr "Kort beskrivning av produkt"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:64
+msgid "Reviews"
+msgstr "Recensioner"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:68
+msgid "Order Data"
+msgstr "Orderdata"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:69
+msgid "Order Items"
+msgstr "Orderrader"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:69
+msgid ""
+"Note: if you edit quantities or remove items from the order you will need to "
+"manually update stock levels."
+msgstr ""
+"Notera att du måste ändra lagersaldo manuellt om du ändrar antal eller tar "
+"bort produkter från ordern."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:72
+msgid "Downloadable Product Permissions"
+msgstr "Behörighet för nedladdningsbar produkt"
+
+#: admin/post-types/writepanels/writepanels-init.php:72
+msgid ""
+"Note: Permissions for order items will automatically be granted when the "
+"order status changes to processing/completed."
+msgstr ""
+"Notera att behörigheten för artiklar kommer att tillåtas automatiskt när "
+"orderns status ändras till behandlas/slutförd."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:73
+msgid "Order Actions"
+msgstr "Orderhändelser"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:81
+msgid "Coupon Data"
+msgstr "Kupongdata"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:100
+msgid "Coupon code"
+msgstr "Kupongkod"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:101
+msgid "Product name"
+msgstr "Produktnamn"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:185
+msgid "Allow reviews."
+msgstr "Tillåt recensioner."
+
+# @ default
+#: admin/post-types/writepanels/writepanels-init.php:186
+msgid ""
+"Allow <a href=\"%s\" target=\"_blank\">trackbacks and pingbacks</a> on this "
+"page."
+msgstr ""
+"Tillåt <a href=\"%s\" target=\"_blank\">trackbacks och pingbacks</a> på "
+"denna sida."
+
+# @ default
+#: admin/post-types/writepanels/writepanels-init.php:186
+msgid "http://codex.wordpress.org/Introduction_to_Blogging#Managing_Comments"
+msgstr "http://codex.wordpress.org/Introduction_to_Blogging#Managing_Comments"
+
+# @ woocommerce
+#: admin/settings/settings-frontend-styles.php:23
+msgid "Styles"
+msgstr "Stilar"
+
+# @ woocommerce
+#: admin/settings/settings-frontend-styles.php:43
+msgid "Primary"
+msgstr "Primär"
+
+# @ woocommerce
+#: admin/settings/settings-frontend-styles.php:43
+msgid "Call to action buttons/price slider/layered nav UI"
+msgstr "Handlingsknappar/pris-slider/navigering"
+
+# @ woocommerce
+#: admin/settings/settings-frontend-styles.php:44
+msgid "Secondary"
+msgstr "Sekundär"
+
+# @ woocommerce
+#: admin/settings/settings-frontend-styles.php:44
+msgid "Buttons and tabs"
+msgstr "Knappar och flikar"
+
+# @ woocommerce
+#: admin/settings/settings-frontend-styles.php:45
+msgid "Highlight"
+msgstr "Markering"
+
+# @ woocommerce
+#: admin/settings/settings-frontend-styles.php:45
+msgid "Price labels and Sale Flashes"
+msgstr "Prislappar och rea-lappar"
+
+# @ woocommerce
+#: admin/settings/settings-frontend-styles.php:46
+msgid "Content"
+msgstr "Innehåll"
+
+# @ woocommerce
+#: admin/settings/settings-frontend-styles.php:46
+msgid "Your themes page background - used for tab active states"
+msgstr "Ditt temas bakgrund - används för aktiva flikar"
+
+# @ woocommerce
+#: admin/settings/settings-frontend-styles.php:47
+msgid "Subtext"
+msgstr "Undertext"
+
+# @ woocommerce
+#: admin/settings/settings-frontend-styles.php:47
+msgid "Used for certain text and asides - breadcrumbs, small text etc."
+msgstr "Används för vissa texter och asides - brödsmulor, finstilt osv."
+
+# @ woocommerce
+#: admin/settings/settings-frontend-styles.php:51
+msgid ""
+"To edit colours <code>woocommerce/assets/css/woocommerce-base.less</code> "
+"and <code>woocommerce.css</code> need to be writable. See <a href=\"http://"
+"codex.wordpress.org/Changing_File_Permissions\">the Codex</a> for more "
+"information."
+msgstr ""
+"För att redigera färger måste filerna <code>woocommerce/assets/css/"
+"woocommerce-base.less</code> och <code>woocommerce.css</code> vara "
+"skrivbara. Se <a href=\"http://codex.wordpress.org/Changing_File_Permissions"
+"\">artikel i Codex</a> för mer information."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:18
+msgid "Localisation"
+msgstr "Språk"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:19
+msgid "Use informal localisation for %s"
+msgstr "Använd informell språkfil för %s"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:27
+msgid "General Options"
+msgstr "Generella alternativ"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:30
+msgid "Base Country/Region"
+msgstr "Basland"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:31
+msgid ""
+"This is the base country for your business. Tax rates will be based on this "
+"country."
+msgstr ""
+"Det här är landet som är bas för din verksamhet. Momsregler baseras på detta "
+"land."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:40
+msgid "Currency"
+msgstr "Valuta"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:41
+msgid ""
+"This controls what currency prices are listed at in the catalog and which "
+"currency gateways will take payments in."
+msgstr ""
+"Det här kontrollerar vilken valuta priser är listade med i produktkatalogen "
+"och vilken betalningsmetod som kommer att användas."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:49
+msgid "US Dollars (&#36;)"
+msgstr "US Dollar (&#36;)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:50
+msgid "Euros (&euro;)"
+msgstr "Euro (&euro;)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:51
+msgid "Pounds Sterling (&pound;)"
+msgstr "Brittiska pund (&pound;)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:52
+msgid "Australian Dollars (&#36;)"
+msgstr "Australiska Dollar (&#36;)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:53
+msgid "Brazilian Real (&#36;)"
+msgstr "Brasilianska Real (&#36;)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:54
+msgid "Canadian Dollars (&#36;)"
+msgstr "Kanadensiska Dollar (&#36;)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:55
+msgid "Czech Koruna (&#75;&#269;)"
+msgstr "Tjeckiska Koruna (&#75;&#269;)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:56
+msgid "Danish Krone"
+msgstr "Danska kronor"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:57
+msgid "Hong Kong Dollar (&#36;)"
+msgstr "Hong Kong Dollar (&#36;)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:58
+msgid "Hungarian Forint"
+msgstr "Ungerska Forinter"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:59
+msgid "Israeli Shekel"
+msgstr "Israeliska Shekel"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:60
+msgid "Chinese Yuan (&yen;)"
+msgstr "Kinesiska Yuan (&yen;)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:61
+msgid "Japanese Yen (&yen;)"
+msgstr "Japanska Yen (&yen;)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:62
+msgid "Malaysian Ringgits (RM)"
+msgstr "Malaysiska Ringgits (RM)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:63
+msgid "Mexican Peso (&#36;)"
+msgstr "Mexikanska Peso (&#36;)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:64
+msgid "New Zealand Dollar (&#36;)"
+msgstr "Nya Zeländska Dollar (&#36;)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:65
+msgid "Norwegian Krone"
+msgstr "Norska kronor"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:66
+msgid "Philippine Pesos"
+msgstr "Philippinska Pesos"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:67
+msgid "Polish Zloty"
+msgstr "Polska Zloty"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:68
+msgid "Singapore Dollar (&#36;)"
+msgstr "Singapore Dollar (&#36;)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:69
+msgid "Swedish Krona"
+msgstr "Svensk krona"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:70
+msgid "Swiss Franc"
+msgstr "Schweiziska Franc"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:71
+msgid "Taiwan New Dollars"
+msgstr "Taiwanesiska Nya Dollar"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:72
+msgid "Thai Baht"
+msgstr "Thailändska Baht"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:73
+msgid "Turkish Lira (TL)"
+msgstr "Turkisk Lira (TL)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:74
+msgid "South African rand (R)"
+msgstr "Sydafrikanska rand ®"
+
+#: admin/settings/settings-init.php:75
+msgid "Romanian Leu (RON)"
+msgstr "Rumänska Leu (RON)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:81
+msgid "Allowed Countries"
+msgstr "Tillåtna länder"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:82
+msgid "These are countries that you are willing to ship to."
+msgstr "Det här länderna är du villig att leverera till."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:90
+msgid "All Countries"
+msgstr "Alla länder"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:91 admin/settings/settings-init.php:96
+msgid "Specific Countries"
+msgstr "Specifika länder"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:108
+msgid "Checkout and Accounts"
+msgstr "Utcheckning och konton"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:108
+msgid ""
+"The following options control the behaviour of the checkout process and "
+"customer accounts."
+msgstr ""
+"Följande inställningar styr processen vid utcheckning samt användarkonton."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:111
+#: admin/woocommerce-admin-install.php:195
+msgid "Checkout"
+msgstr "Till kassan"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:112
+msgid "Enable guest checkout (no account required)"
+msgstr "Tillåt gästutcheckning (inget konto krävs)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:120
+msgid "Show order comments section"
+msgstr "Visa sektion för ordernkommetarer"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:128
+msgid "Security"
+msgstr "Säkerhet"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:129
+msgid "Force secure checkout"
+msgstr "Tvinga säker anslutning"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:135
+msgid ""
+"Force SSL (HTTPS) on the checkout pages (an SSL Certificate is required)"
+msgstr "Tvinga SSL (HTTPS) vid utcheckning (ett SSL-certifikat krävs)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:139
+msgid "Un-force HTTPS when leaving the checkout"
+msgstr "Tvinga användaren att lämna HTTPS när utcheckningen lämnas"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:148 admin/woocommerce-admin-content.php:75
+#: admin/woocommerce-admin-reports.php:72
+msgid "Coupons"
+msgstr "Rabattkuponger"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:149
+msgid "Enable coupons"
+msgstr "Aktivera kuponger"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:158
+msgid "Enable coupon form on cart"
+msgstr "Lägg till kupongformulär i varukorg"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:167
+msgid "Enable coupon form on checkout"
+msgstr "Aktivera formulär för kuponger vid kassan"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:176
+msgid "Registration"
+msgstr "Registrering"
+
+#: admin/settings/settings-init.php:177
+msgid "Allow registration on the checkout page"
+msgstr "Tillåt registrering vid utcheckning"
+
+#: admin/settings/settings-init.php:185
+msgid "Allow registration on the \"My Account\" page"
+msgstr "Tillåt registrering på sidan \"Mitt konto\""
+
+#: admin/settings/settings-init.php:193
+msgid "Register using the email address for the username"
+msgstr "Använd e-postadress som användarnamn vid registrering"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:201
+msgid "Customer Accounts"
+msgstr "Kundkonton"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:202
+msgid "Prevent customers from accessing WordPress admin"
+msgstr "Förhindra kunder att nå WordPress administrationspanel"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:210
+msgid "Clear cart when logging out"
+msgstr "Rensa varukorg när användare loggar ut"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:218
+msgid "Allow customers to repurchase past orders"
+msgstr "Tillåt kunder att köpa tidigare ordrar igen"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:227
+msgid "Styles and Scripts"
+msgstr "Stilmallar och skript"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:227
+msgid ""
+"The following options affect the styling of your store, as well as how "
+"certain features behave."
+msgstr ""
+"Följande inställningar påverkar din butiks utseende och hur olika funktioner "
+"fungerar."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:230
+msgid "Styling"
+msgstr "Utseende"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:231
+msgid "Enable WooCommerce CSS styles"
+msgstr "Aktivera WooCommerce CSS stilar"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:242
+msgid "Store Notice"
+msgstr "Butiksmeddelande"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:243
+msgid "Enable the \"Demo Store\" notice on your site"
+msgstr "Aktivera \"Demobutik\" notisen för din butik"
+
+#: admin/settings/settings-init.php:250
+msgid "Store Notice Text"
+msgstr "Text i butiksnotifiering"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:253
+msgid ""
+"This is a demo store for testing purposes &mdash; no orders shall be "
+"fulfilled."
+msgstr ""
+"Det här är en demobutik för testning &mdash; Inga beställningar kan göras."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:259
+msgid "Scripts"
+msgstr "Script"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:260
+msgid "Enable AJAX add to cart buttons on product archives"
+msgstr "Aktivera AJAX lägg i varukorgen-knappar i produktarkiven"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:268
+msgid "Enable WooCommerce lightbox"
+msgstr "Aktivera WooCommerce lightbox"
+
+#: admin/settings/settings-init.php:271
+msgid ""
+"On the product details page, product gallery images will open in a lightbox. "
+"The Add Review form will open in a modal window"
+msgstr ""
+"Bilder i produktgallerier öppnas i en lightbox på informationssidor för "
+"produkter. Recensionsformuläret öppnas i ett modalt fönster."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:277
+msgid "Enable enhanced country select boxes"
+msgstr "Använd förbättrad dropdown för val av land"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:286
+msgid "Digital Downloads"
+msgstr "Digitala nedladdningar"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:286
+msgid "The following options are specific to downloadable products."
+msgstr "Dessa inställningar är specifika för nedladdningsbara produkter."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:289
+msgid "File Download Method"
+msgstr "Metod för filnedladdning"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:290
+msgid ""
+"Forcing downloads will keep URLs hidden, but some servers may serve large "
+"files unreliably. If supported, <code>X-Accel-Redirect</code>/ <code>X-"
+"Sendfile</code> can be used to serve downloads instead (server requires "
+"<code>mod_xsendfile</code>)."
+msgstr ""
+"Tvingad nedladdning kommer dölja dina urler men vissa servrar kan hantera "
+"stora filer otillräckligt. Om det finns stöd för det kan <code>X-Accel-"
+"Redirect</code>/ <code>X-Sendfile</code> användas för att ladda ner filer "
+"istället (servern behöver ha <code>mod_xsendfile</code>)."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:298
+msgid "Force Downloads"
+msgstr "Tvinga nedladdning"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:299
+msgid "X-Accel-Redirect/X-Sendfile"
+msgstr "X-Accel-Redirect/X-Sendfile"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:300
+msgid "Redirect only"
+msgstr "Endast omdirigering"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:305
+msgid "Access Restrictions"
+msgstr "Åtkomstsbegränsningar"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:306
+msgid "Must be logged in to download files"
+msgstr "Måste vara inloggad för att ladda ner filer"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:310
+msgid "This setting does not apply to guest downloads."
+msgstr "Denna inställning gäller inte gästnedladdningar."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:315
+msgid "Grant access to downloadable products after payment"
+msgstr "Tillåt åtkomst till nedladdningsbara produkter efter betalning"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:319
+msgid ""
+"Turn this option off to only grant access when an order is \"complete\", "
+"rather than \"processing\""
+msgstr ""
+"Stäng av detta för att endast ge åtkomst efter att ordern är \"slutförd\" "
+"snarare än \"behandlas\""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:324
+msgid "Limit Quantity"
+msgstr "Begränsa antal"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:325
+msgid "Limit the purchasable quantity of downloadable-virtual items to 1"
+msgstr ""
+"Begränsa antalet som kan köpas av nedladdningsbara/virtuella produkter till "
+"1."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:343
+msgid ""
+"Note: The shop page has children - child pages will not work if you enable "
+"this option."
+msgstr ""
+"Notera att butikssidan har undersidor. Undersidorna kommer inte att fungera "
+"om du aktiverar denna inställning."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:348
+msgid "Page Setup"
+msgstr "Inställningar för sida"
+
+#: admin/settings/settings-init.php:350
+msgid ""
+"Set up core WooCommerce pages here, for example the base page. The base page "
+"can also be used in your %sproduct permalinks%s."
+msgstr ""
+"Ställ in WooCommerce grundsidor, till exempel butikssidan, här. Denna kan "
+"också användas i dina %sproduktpermalänkar%s."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:355
+msgid "Shop Base Page"
+msgstr "Bassida för butik"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:356
+msgid ""
+"This sets the base page of your shop - this is where your product archive "
+"will be."
+msgstr ""
+"Detta anger grundsidan för din butik. Det är här ditt produktarkiv kommer "
+"att visas."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:366
+msgid "Base Page Title"
+msgstr "Titel för bassida"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:367
+msgid ""
+"This title to show on the shop base page. Leave blank to use the page title."
+msgstr ""
+"Den här titeln visas på din butiks bassida. Lämna blankt för att använda "
+"sidtiteln."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:376
+msgid "Terms Page ID"
+msgstr "ID för sida med villkor"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:377
+msgid ""
+"If you define a \"Terms\" page the customer will be asked if they accept "
+"them when checking out."
+msgstr ""
+"Om du definierar en sida för \"Villkor\" så måste kunden acceptera dessa för "
+"att kunna gå vidare med ordern."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:387
+msgid "Logout link"
+msgstr "Utloggningslänk"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:388
+msgid "Append a logout link to menus containing \"My Account\""
+msgstr "Lägg till utloggningslänk i menyer innehållande \"Mitt konto\""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:396 admin/woocommerce-admin-status.php:208
+msgid "Shop Pages"
+msgstr "Butikssidor"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:396
+msgid ""
+"The following pages need selecting so that WooCommerce knows where they are. "
+"These pages should have been created upon installation of the plugin, if not "
+"you will need to create them."
+msgstr ""
+"Följande sidor måste väljas så att WooCommerce vet var de finns. Dessa sidor "
+"borde ha skapats när tillägget installerades men annars måste du skapa dem "
+"själv."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:399 admin/woocommerce-admin-status.php:219
+msgid "Cart Page"
+msgstr "Sida för Varukorg"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:400
+msgid "Page contents: [woocommerce_cart]"
+msgstr "Sida: [woocommerce_cart]"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:410 admin/woocommerce-admin-status.php:223
+msgid "Checkout Page"
+msgstr "Kassasida"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:411
+msgid "Page contents: [woocommerce_checkout]"
+msgstr "Sida: [woocommerce_checkout]"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:421 admin/woocommerce-admin-status.php:227
+msgid "Pay Page"
+msgstr "Betalningssida"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:422
+msgid "Page contents: [woocommerce_pay] Parent: \"Checkout\""
+msgstr "Sida: [woocommerce_pay] Förälder: \"Kassa\""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:432 admin/woocommerce-admin-status.php:231
+msgid "Thanks Page"
+msgstr "Tacksida"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:433
+msgid "Page contents: [woocommerce_thankyou] Parent: \"Checkout\""
+msgstr "Sida: [woocommerce_thankyou] Förälder: \"Kassa\""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:443 admin/woocommerce-admin-status.php:235
+msgid "My Account Page"
+msgstr "Mitt konto"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:444
+msgid "Page contents: [woocommerce_my_account]"
+msgstr "Sida: [woocommerce_my_account]"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:454 admin/woocommerce-admin-status.php:239
+msgid "Edit Address Page"
+msgstr "Redigera adress"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:455
+msgid "Page contents: [woocommerce_edit_address] Parent: \"My Account\""
+msgstr "Sida: [woocommerce_edit_address] Parent: \"Mitt konto\""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:465 admin/woocommerce-admin-status.php:243
+msgid "View Order Page"
+msgstr "Visa order"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:466
+msgid "Page contents: [woocommerce_view_order] Parent: \"My Account\""
+msgstr "Sida: [woocommerce_view_order] Förälder: \"Mitt konto\""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:476 admin/woocommerce-admin-status.php:247
+msgid "Change Password Page"
+msgstr "Ändra lösenord"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:477
+msgid "Page contents: [woocommerce_change_password] Parent: \"My Account\""
+msgstr "Sida: [woocommerce_change_password] Förälder: \"Mitt konto\""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:487
+msgid "Lost Password Page"
+msgstr "Glömt lösenordet?"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:488
+msgid "Page contents: [woocommerce_lost_password] Parent: \"My Account\""
+msgstr "Sida: [woocommerce_lost_password] Förälder: \"Mitt konto\""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:504
+msgid "Catalog Options"
+msgstr "Katalogalternativ"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:507
+msgid "Default Product Sorting"
+msgstr "Standardsortering"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:508
+msgid "This controls the default sort order of the catalog."
+msgstr "Dessa styr standardsorteringen i katalogen."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:514
+msgid "Default sorting"
+msgstr "Standardsortering"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:515
+msgid "Sort alphabetically"
+msgstr "Alfabetisk sortering"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:516
+msgid "Sort by most recent"
+msgstr "Sortera efter senaste"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:517
+msgid "Sort by price"
+msgstr "Sortera efter pris"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:523
+msgid "Shop Page Display"
+msgstr "Butikssidor"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:524
+msgid "This controls what is shown on the product archive."
+msgstr "Detta styr vad som visas i produktarkivet."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:530 admin/settings/settings-init.php:545
+msgid "Show products"
+msgstr "Visa produkter"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:531 admin/settings/settings-init.php:546
+msgid "Show subcategories"
+msgstr "Visa underkategorier"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:532 admin/settings/settings-init.php:547
+msgid "Show both"
+msgstr "Visa båda"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:538
+msgid "Default Category Display"
+msgstr "Visning av standardkategori"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:539
+msgid "This controls what is shown on category archives."
+msgstr "Detta styr vad som visas i kategoriarkiv."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:553
+msgid "Redirects"
+msgstr "Omdirigeringar"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:554
+msgid ""
+"Redirect to cart after adding a product to the cart (on single product pages)"
+msgstr ""
+"Omdirigera till varukorgen efter att en produkt lagts i varukorgen. (Från "
+"produktsida)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:562
+msgid "Redirect to the product page on a single matching search result"
+msgstr "Omdirigera automatiskt till produktsidan vid en ensam sökträff"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:571
+msgid ""
+"The following options affect the fields available on the edit product page."
+msgstr ""
+"Följande inställningar påverkar vilka fält som är tillgängliga för produkter."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:574
+msgid "Product Fields"
+msgstr "Produktfält"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:575
+msgid "Enable the SKU field for products"
+msgstr "Aktivera fält för artikelnummer"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:583
+msgid "Enable the weight field for products"
+msgstr "Aktivera viktfält"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:591
+msgid "Enable the dimension fields for products"
+msgstr "Aktivera produkters fält för dimensioner"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:599
+msgid "Show weight and dimension fields in product attributes tab"
+msgstr "Visa fält för vikt och dimensioner i panelen för produktattribut"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:607
+msgid "Weight Unit"
+msgstr "Viktenhet"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:608
+msgid "This controls what unit you will define weights in."
+msgstr "Det här kontrollerar vilken viktenhet som används för produkter."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:614
+msgid "kg"
+msgstr "kg"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:615
+msgid "g"
+msgstr "g"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:616
+msgid "lbs"
+msgstr "lbs"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:617
+msgid "oz"
+msgstr "oz"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:623
+msgid "Dimensions Unit"
+msgstr "Enhet för dimensioner"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:624
+msgid "This controls what unit you will define lengths in."
+msgstr "Det här kontrollerar vilken längdenhet som används."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:631
+msgid "cm"
+msgstr "cm"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:632
+msgid "mm"
+msgstr "mm"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:633
+msgid "in"
+msgstr "i"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:634
+msgid "yd"
+msgstr "yd"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:640
+msgid "Product Ratings"
+msgstr "Produktbetyg"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:641
+msgid "Enable the rating field on the review form"
+msgstr "Aktivera fält för betyg i recensionsformuläret"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:650
+msgid "Ratings are required to leave a review"
+msgstr "Betyg måste anges för att få lämna recension"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:659
+msgid "Show \"verified owner\" label for customer reviews"
+msgstr "Visa etikett för \"verifierad ägare\" i kundrecensioner"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:669
+msgid "Pricing Options"
+msgstr "Prisalternativ"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:669
+msgid "The following options affect how prices are displayed on the frontend."
+msgstr "Följande inställningar påverkar hur priset visas i butiken."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:672
+msgid "Currency Position"
+msgstr "Valutaposition"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:673
+msgid "This controls the position of the currency symbol."
+msgstr "Det här kontrollerar positionen för valutasymbolen."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:679
+msgid "Left"
+msgstr "Vänster"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:680
+msgid "Right"
+msgstr "Höger"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:681
+msgid "Left (with space)"
+msgstr "Vänster (med mellanrum)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:682
+msgid "Right (with space)"
+msgstr "Höger (med mellanrum)"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:688
+msgid "Thousand Separator"
+msgstr "Tusentalsavgränsare"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:689
+msgid "This sets the thousand separator of displayed prices."
+msgstr "Det här bestämmer tusentalsavgränsare för visade priser."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:698
+msgid "Decimal Separator"
+msgstr "Decimalavgränsare"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:699
+msgid "This sets the decimal separator of displayed prices."
+msgstr ""
+"Det här bestämmer vilken decimalavgränsare som används för visade priser."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:708
+msgid "Number of Decimals"
+msgstr "Antal decimaler"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:709
+msgid "This sets the number of decimal points shown in displayed prices."
+msgstr "Det här bestämmer antalet decimalpunkter för visade priser."
+
+#: admin/settings/settings-init.php:722
+msgid "Trailing Zeros"
+msgstr "Efterföljande nollor"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:723
+msgid ""
+"Remove zeros after the decimal point. e.g. <code>$10.00</code> becomes <code>"
+"$10</code>"
+msgstr ""
+"Ta bort nollor efter decimaltecknet. Till exempel blir <code>10.00 kr</code> "
+"<code>10 kr</code>"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:731
+msgid "Image Options"
+msgstr "Bildalternativ"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:731
+msgid ""
+"These settings affect the actual dimensions of images in your catalog - the "
+"display on the front-end will still be affected by CSS styles. After "
+"changing these settings you may need to <a href=\"%s\">regenerate your "
+"thumbnails</a>."
+msgstr ""
+"Dessa inställningar påverkar dimensionerna på bilderna i katalogen - "
+"visningen av bilderna för kunderna kommer fortfarande påverkas av CSS-"
+"stilmallar. Efter att du ändrar detta kan du behöva <a href=\"%s"
+"\">regenerera dina miniatyrbilder</a>"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:734
+msgid "Catalog Images"
+msgstr "Katalogbilder"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:735
+msgid "This size is usually used in product listings"
+msgstr "Den här storleken används normalt i produktlistningar."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:748
+msgid "Single Product Image"
+msgstr "Ensam produktbild"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:749
+msgid "This is the size used by the main image on the product page."
+msgstr "Den här storleken används av huvudbilden på produktsidan."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:762
+msgid "Product Thumbnails"
+msgstr "Tumnaglar för produkt"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:763
+msgid ""
+"This size is usually used for the gallery of images on the product page."
+msgstr "Den här storleken används normalt till galleribilder på produktsidan."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:782
+msgid "Inventory Options"
+msgstr "Lagersaldo inställningar"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:785
+msgid "Manage Stock"
+msgstr "Hantera lager"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:786
+msgid "Enable stock management"
+msgstr "Aktivera lagerhantering"
+
+#: admin/settings/settings-init.php:793
+msgid "Hold Stock (minutes)"
+msgstr "Reservera artiklar (minuter)"
+
+#: admin/settings/settings-init.php:794
+msgid ""
+"Hold stock (for unpaid orders) for x minutes. When this limit is reached, "
+"the pending order will be cancelled. Leave blank to disable."
+msgstr ""
+"Reservera artiklar (i obetalda ordrar) i x minuter. När denna gräns nås "
+"avbryts obetalda ordrar. Lämna tomt för att avaktivera."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:806
+msgid "Notifications"
+msgstr "Meddelanden"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:807
+msgid "Enable low stock notifications"
+msgstr "Aktivera meddelanden för lågt lagersaldo"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:815
+msgid "Enable out of stock notifications"
+msgstr "Aktivera meddelanden för slut i lager"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:823
+msgid "Low Stock Threshold"
+msgstr "Gränsvärde för lågt lagersaldo"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:836
+msgid "Out Of Stock Threshold"
+msgstr "Gränsvärde för slut i lager"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:849
+msgid "Out Of Stock Visibility"
+msgstr "Synlighet för slut i lager"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:850
+msgid "Hide out of stock items from the catalog"
+msgstr "Dölj produkter i katalogen som är slut i lager"
+
+#: admin/settings/settings-init.php:857
+msgid "Stock Display Format"
+msgstr "Visningsformat för lager"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:858
+msgid "This controls how stock is displayed on the frontend."
+msgstr "Detta kontrollerar hur lagersaldo visas i butiken."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:864
+msgid "Always show stock e.g. \"12 in stock\""
+msgstr "Visa alltid lagersaldo, t.ex. \"12 i lager\""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:865
+msgid "Only show stock when low e.g. \"Only 2 left in stock\" vs. \"In Stock\""
+msgstr ""
+"Visa bara vid lågt lagersaldo, t.ex. \"Bara 2 i lager\" istället för \"I "
+"lager\""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:866
+msgid "Never show stock amount"
+msgstr "Visa aldrig lagersaldo"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:878
+#: admin/woocommerce-admin-settings.php:326
+msgid "Shipping Options"
+msgstr "Fraktalternativ"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:881
+msgid "Shipping Calculations"
+msgstr "Fraktberäkningar"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:882
+msgid "Enable shipping"
+msgstr "Aktivera frakt"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:890
+msgid "Enable the shipping calculator on the cart page"
+msgstr "Aktivera fraktkostnadskalkylator i varukorgen"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:898
+msgid "Hide shipping costs until an address is entered"
+msgstr "Dölj fraktkostnaden tills adress har angetts"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:906
+msgid "Shipping Method Display"
+msgstr "Fraktmetoder"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:907
+msgid ""
+"This controls how multiple shipping methods are displayed on the frontend."
+msgstr "Detta kontrollerar hur flera fraktmetoder visas i butiken."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:913
+msgid "Radio buttons"
+msgstr "Alternativknappar"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:914
+msgid "Select box"
+msgstr "Dropdown"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:920
+msgid "Shipping Destination"
+msgstr "Fraktdestination"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:921
+msgid "Only ship to the users billing address"
+msgstr "Leverera endast till fakturaadress"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:929
+msgid "Ship to billing address by default"
+msgstr "Skicka till debiteringsadress som standard"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:937
+msgid "Collect shipping address even when not required"
+msgstr "Efterfråga destination även när det inte behövs"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:955
+#: admin/woocommerce-admin-settings.php:225
+#: admin/woocommerce-admin-settings.php:363
+msgid "Payment Gateways"
+msgstr "Betalningsalternativ"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:955
+msgid ""
+"Installed payment gateways are displayed below. Drag and drop payment "
+"gateways to control their display order on the checkout."
+msgstr ""
+"Installerade betalningstjänster  visas nedan. Dra och släpp tjänster för att "
+"kontrollera deras ordning i utcheckningen."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:973
+#: admin/woocommerce-admin-settings.php:256
+msgid "Tax Options"
+msgstr "Momsalternativ"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:976
+msgid "Enable Taxes"
+msgstr "Aktivera moms"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:977
+msgid "Enable taxes and tax calculations"
+msgstr "Aktivera moms och momsberäkningar"
+
+#: admin/settings/settings-init.php:984
+msgid "Prices Entered With Tax"
+msgstr "Priser anges med moms/skatt"
+
+#: admin/settings/settings-init.php:988
+msgid ""
+"This option is important as it will affect how you input prices. Changing it "
+"will not update existing products."
+msgstr ""
+"Denna inställning är viktig då den styr hur du matas in priser. Ändringar "
+"påverkar inte existerande produkter."
+
+#: admin/settings/settings-init.php:990
+msgid "Yes, I will enter prices inclusive of tax"
+msgstr "Ja, jag vill ange priser inklusive moms/skatt"
+
+#: admin/settings/settings-init.php:991
+msgid "No, I will enter prices exclusive of tax"
+msgstr "Nej, jag vill ange priser exklusive moms/skatt"
+
+#: admin/settings/settings-init.php:996
+msgid "Calculate Tax Based On:"
+msgstr "Beräkna skatt baserat på:"
+
+#: admin/settings/settings-init.php:998
+msgid "This option determines which address is used to calculate tax."
+msgstr ""
+"Denna inställningar styr vilken adress som används för att beräkna skatt."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1002
+msgid "Customer shipping address"
+msgstr "Leveransadress för kund"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1003
+msgid "Customer billing address"
+msgstr "Fakturaadress för kund"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1004 admin/settings/settings-init.php:1016
+msgid "Shop base address"
+msgstr "Bassida för butik"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1009
+msgid "Default Customer Address:"
+msgstr "Standardadress för kund:"
+
+#: admin/settings/settings-init.php:1011
+msgid ""
+"This option determines the customers default address (before they input "
+"their own)."
+msgstr ""
+"Denna inställning styr standardadress för kunder (innan de matar in sin "
+"egen)."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1015
+msgid "No address"
+msgstr "Ingen adress"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1021
+msgid "Shipping Tax Class:"
+msgstr "Fraktklass:"
+
+#: admin/settings/settings-init.php:1022
+msgid ""
+"Optionally control which tax class shipping gets, or leave it so shipping "
+"tax is based on the cart items themselves."
+msgstr ""
+"Kan kontrollera vilken momsklass som försändelsen får eller lämna tomt för "
+"att basera moms på varukorgens artiklar."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1032
+msgid "Rounding"
+msgstr "Avrundning"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1033
+msgid "Round tax at subtotal level, instead of rounding per line"
+msgstr "Avrunda moms på totalen och inte per enskild rad"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1040
+msgid "Additional Tax Classes"
+msgstr "Ytterligare momsgrupper"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1041
+msgid ""
+"List additonal tax classes below (1 per line). This is in addition to the "
+"default <code>Standard Rate</code>. Tax classes can be assigned to products."
+msgstr ""
+"Lista en klass per rad. Det här är tillägg utöver <code> Standardmoms</"
+"code>. Klasser kan knytas till produkter."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1045
+msgid "Reduced Rate%sZero Rate"
+msgstr "Reducerad sats%sIngen skatt"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1049
+msgid "Display prices during cart/checkout:"
+msgstr "Visa priset i varukorg och utcheckning:"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1054
+msgid "Including tax"
+msgstr "Inklusive moms"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1055
+msgid "Excluding tax"
+msgstr "Exklusive moms"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1067
+msgid "Email Sender Options"
+msgstr "Avsändare för e-post"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1067
+msgid ""
+"The following options affect the sender (email address and name) used in "
+"WooCommerce emails."
+msgstr ""
+"Följande inställningar påverkar vilken avsändare (namn och e-postadress) som "
+"används i e-post från WooCommerce."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1070
+msgid "\"From\" Name"
+msgstr "\"Från\" namn"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1079
+msgid "\"From\" Email Address"
+msgstr "\"Från\" e-postadress"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1092
+msgid "Email Template"
+msgstr "Mall för e-post"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1092
+msgid ""
+"This section lets you customise the WooCommerce emails. <a href=\"%s\" "
+"target=\"_blank\">Click here to preview your email template</a>. For more "
+"advanced control copy <code>woocommerce/templates/emails/</code> to "
+"<code>yourtheme/woocommerce/emails/</code>."
+msgstr ""
+"Denna del låter dig anpassa e-post från WooCommerce. <a href=\"%s\" target="
+"\"_blank\">Klicka här för att förhandsgranska dina e-postmallar</a>. För mer "
+"avancerade förändringar kopiera <code>woocommerce/templates/emails/</code> "
+"till <code>ditt-tema/woocommerce/emails/</code>."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1095
+msgid "Header Image"
+msgstr "Sidhuvuvdsbild"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1096
+msgid ""
+"Enter a URL to an image you want to show in the email's header. Upload your "
+"image using the <a href=\"%s\">media uploader</a>."
+msgstr ""
+"Skriv in sökvägen till bilden du vill använda i sidhuvudet. Ladda upp din "
+"bild genom att använda <a href=\"%s\">mediauppladdaren</a>."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1104
+msgid "Email Footer Text"
+msgstr "Sidfotstext i e-post"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1105
+msgid "The text to appear in the footer of WooCommerce emails."
+msgstr "Texten visas i sidfoten för e-post från WooCommerce."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1109
+msgid "Powered by WooCommerce"
+msgstr "Drivs med WooCommerce"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1113
+msgid "Base Colour"
+msgstr "Basfärg"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1114
+msgid ""
+"The base colour for WooCommerce email templates. Default <code>#557da1</"
+"code>."
+msgstr ""
+"Det här är basfärgen för e-postamallarna i WooCommerce. Standard "
+"<code>#557da1</code>."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1122
+msgid "Background Colour"
+msgstr "Bakgrundsfärg"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1123
+msgid ""
+"The background colour for WooCommerce email templates. Default "
+"<code>#f5f5f5</code>."
+msgstr ""
+"Bakgrundsfärgen för e-postmallarna i WooCommerce. Standard <code>#f5f5f5</"
+"code>."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1131
+msgid "Email Body Background Colour"
+msgstr "Bakgrundsfärg för innehållet i e-post"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1132
+msgid "The main body background colour. Default <code>#fdfdfd</code>."
+msgstr "Bakgrundsfärgen för innehållet. Standard <code>#fdfdfd</code>."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1140
+msgid "Email Body Text Colour"
+msgstr "Textfärg för e-post"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1141
+msgid "The main body text colour. Default <code>#505050</code>."
+msgstr "Textfärgen för innhållstexten. Standard <code>#505050</code>."
+
+# @ woocommerce
+#: admin/settings/settings-payment-gateways.php:27
+#: admin/settings/settings-shipping-methods.php:29
+#: admin/woocommerce-admin-init.php:709
+#: admin/woocommerce-admin-taxonomies.php:27
+#: admin/woocommerce-admin-taxonomies.php:121
+msgid "Default"
+msgstr "Standard"
+
+# @ woocommerce
+#: admin/settings/settings-payment-gateways.php:28
+msgid "Gateway"
+msgstr "Tjänst"
+
+# @ woocommerce
+#: admin/settings/settings-payment-gateways.php:45
+msgid "Gateway ID"
+msgstr "Tjänst ID"
+
+# @ woocommerce
+#: admin/settings/settings-shipping-methods.php:23
+msgid "Shipping Methods"
+msgstr "Fraktmetoder"
+
+# @ woocommerce
+#: admin/settings/settings-shipping-methods.php:25
+msgid "Drag and drop methods to control their display order."
+msgstr "Dra och släpp metoder för att kontrollera deras ordning."
+
+# @ woocommerce
+#: admin/settings/settings-shipping-methods.php:30
+msgid "Shipping Method"
+msgstr "Fraktmetoder"
+
+# @ woocommerce
+#: admin/settings/settings-shipping-methods.php:46
+msgid "Method ID"
+msgstr "Metod ID"
+
+#: admin/settings/settings-tax-rates.php:29
+msgid "Tax Rates for the \"%s\" Class"
+msgstr "Momssats för klassen \"%s\""
+
+#: admin/settings/settings-tax-rates.php:30
+msgid ""
+"Define tax rates for countries and states below. <a href=\"%s\">See here</a> "
+"for available country/state codes."
+msgstr ""
+"Definiera momssatser för land och stater sedan. <a href=\"%s\">Läs här</a> "
+"för tillgängliga landskoder."
+
+#: admin/settings/settings-tax-rates.php:36
+msgid "Country&nbsp;Code"
+msgstr "Landskod"
+
+#: admin/settings/settings-tax-rates.php:36
+msgid "A 2 digit country code, e.g. US. Leave blank to apply to all."
+msgstr ""
+"En två tecken landskod, t.ex. SE. Lämna tomt för att applicera på samtliga."
+
+#: admin/settings/settings-tax-rates.php:38
+msgid "State&nbsp;Code"
+msgstr "Statskod"
+
+#: admin/settings/settings-tax-rates.php:38
+msgid "A 2 digit state code, e.g. AL. Leave blank to apply to all."
+msgstr ""
+"En två tecken lång statskod, t.ex. AL. Lämna tom för att applicera på "
+"samtliga."
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:40
+#: admin/settings/settings-tax-rates.php:217
+msgid "ZIP/Postcode"
+msgstr "Postnummer"
+
+#: admin/settings/settings-tax-rates.php:40
+msgid ""
+"Postcode for this rule. Semi-colon (;) separate multiple values. Leave blank "
+"to apply to all areas. Wildcards (*) can be used. Ranges for numeric "
+"postcodes (e.g. 12345-12350) will be expanded into individual postcodes."
+msgstr ""
+"Postnummer för denna regel. Avgränsa flera värden med semikolon (;). Lämna "
+"tom för att applicera på samtliga områden. Wildcard (*) kan användas. Omfång "
+"av postnummer (t.ex. 79141-79145) expanderas till individuella postnummer."
+
+#: admin/settings/settings-tax-rates.php:42
+msgid ""
+"Cities for this rule. Semi-colon (;) separate multiple values. Leave blank "
+"to apply to all cities."
+msgstr ""
+"Städer för denna regel. Avgränsa flera värden med semikolon (;). Lämna tom "
+"för att applicera på samtliga städer."
+
+#: admin/settings/settings-tax-rates.php:44
+msgid "Rate&nbsp;%"
+msgstr "Sats&nbsp;%"
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:44
+msgid "Enter a tax rate (percentage) to 4 decimal places."
+msgstr "Ange momssats (procent) med upp till 4 decimaler"
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:46
+msgid "Tax&nbsp;Name"
+msgstr "Namn&nbsp;på&nbsp;taxa"
+
+#: admin/settings/settings-tax-rates.php:46
+msgid "Enter a name for this tax rate."
+msgstr "Ange namn för denna skatt/momssats."
+
+#: admin/settings/settings-tax-rates.php:48
+#: admin/settings/settings-tax-rates.php:217
+msgid "Priority"
+msgstr "Prioritet"
+
+#: admin/settings/settings-tax-rates.php:48
+msgid ""
+"Choose a priority for this tax rate. Only 1 matching rate per priority will "
+"be used. To define multiple tax rates for a single area you need to specify "
+"a different priority per rate."
+msgstr ""
+"Välj prioritet för denna skattesats. Endast en matchning per prioritet "
+"kommer att användas. För att definiera flera skattesatser för samma område "
+"måste du specificera olika prioritet för dessa."
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:50
+#: admin/settings/settings-tax-rates.php:217
+msgid "Compound"
+msgstr "Sammansatt skattesats"
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:50
+msgid ""
+"Choose whether or not this is a compound rate. Compound tax rates are "
+"applied on top of other tax rates."
+msgstr ""
+"Ange om detta är en sammansatt skattesats. Sammansatta skattesatser "
+"appliceras ovanpå andra skattesatser."
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:52
+msgid "Choose whether or not this tax rate also gets applied to shipping."
+msgstr "Välj ifall denna skattesats även gäller frakten"
+
+#: admin/settings/settings-tax-rates.php:59
+msgid "Insert row"
+msgstr "Infoga rad"
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:60
+msgid "Remove selected row(s)"
+msgstr "Radera valda rader"
+
+#: admin/settings/settings-tax-rates.php:62
+msgid "Export CSV"
+msgstr "Exportera CSV"
+
+#: admin/settings/settings-tax-rates.php:63
+msgid "Import CSV"
+msgstr "Importera CSV"
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:163
+msgid "No row(s) selected"
+msgstr "Inga rader valda"
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:217
+msgid "Country Code"
+msgstr "Landskod"
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:217
+msgid "State Code"
+msgstr "Kod för delstat"
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:217
+msgid "Rate %"
+msgstr "Taxa"
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:217
+msgid "Tax Name"
+msgstr "Namn på taxa"
+
+#: admin/woocommerce-admin-attributes.php:77
+msgid "Please, provide an attribute name, slug and type."
+msgstr "Vänligen ange attributets namn, länk och typ."
+
+#: admin/woocommerce-admin-attributes.php:79
+msgid "Slug “%s” is too long (28 characters max). Shorten it, please."
+msgstr ""
+"Länken \"%s\" är för lång (maximalt 28 tecken). Vänligen välj en kortare."
+
+#: admin/woocommerce-admin-attributes.php:81
+msgid ""
+"Slug “%s” is not allowed because it is a reserved term. Change it, please."
+msgstr ""
+"Länken \"%s\" är inte tillåten då det är ett reserverat ord. Vänligen ändra "
+"det."
+
+#: admin/woocommerce-admin-attributes.php:85
+#: admin/woocommerce-admin-attributes.php:90
+msgid "Slug “%s” is already in use. Change it, please."
+msgstr "Länken \"%s\" används redan. Vänligen ändra det."
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:226
+msgid "Edit Attribute"
+msgstr "Redigera attribut"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:236
+#: admin/woocommerce-admin-attributes.php:375
+msgid "Name for the attribute (shown on the front-end)."
+msgstr "Namn för attributen (som det visas för kunderna)."
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:241
+#: admin/woocommerce-admin-attributes.php:307
+#: admin/woocommerce-admin-attributes.php:379
+msgid "Slug"
+msgstr "Permalänk"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:245
+#: admin/woocommerce-admin-attributes.php:381
+msgid ""
+"Unique slug/reference for the attribute; must be shorter than 28 characters."
+msgstr ""
+"Unik url-kod för att referera till attributen; måste vara kortare än 28 "
+"tecken."
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:254
+#: admin/woocommerce-admin-attributes.php:387
+msgid "Select"
+msgstr "Rullgardingsmeny"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:255
+#: admin/woocommerce-admin-attributes.php:388
+msgid "Text"
+msgstr "Text"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:258
+#: admin/woocommerce-admin-attributes.php:391
+msgid ""
+"Determines how you select attributes for products. <strong>Text</strong> "
+"allows manual entry via the product page, whereas <strong>select</strong> "
+"attribute terms can be defined from this section. If you plan on using an "
+"attribute for variations use <strong>select</strong>."
+msgstr ""
+"Bestämmer hur du väljer attribut för produkter. <strong>Text</strong> "
+"tillåter manuell inmatning på produktsidan, men <strong>rullgardinsmenyns</"
+"strong> attributvillkor kan definieras från den här sektionen. Planerar du "
+"att använda ett attribut för variationer, använd <strong>rullgardinsmeny</"
+"strong>."
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:263
+#: admin/woocommerce-admin-attributes.php:395
+msgid "Default sort order"
+msgstr "Standardsortering"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:267
+#: admin/woocommerce-admin-attributes.php:335
+#: admin/woocommerce-admin-attributes.php:397
+msgid "Custom ordering"
+msgstr "Skräddarsydd order"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:269
+#: admin/woocommerce-admin-attributes.php:332
+#: admin/woocommerce-admin-attributes.php:399
+msgid "Term ID"
+msgstr "ID för sida med villkor"
+
+#: admin/woocommerce-admin-attributes.php:271
+#: admin/woocommerce-admin-attributes.php:401
+msgid ""
+"Determines the sort order on the frontend for this attribute. If using "
+"custom ordering, you can drag and drop the terms in this attribute"
+msgstr ""
+"Styr vilken sorteringsordningen för detta attribut. Om du använder anpassad "
+"ordning kan du dra och släppa termerna i detta attribut"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:276
+msgid "Update"
+msgstr "Uppdatera"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:309
+msgid "Order by"
+msgstr "Sortera efter"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:310
+msgid "Terms"
+msgstr "Villkor"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:355
+msgid "Configure&nbsp;terms"
+msgstr "Konfigurera&nbsp;villkor"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:359
+msgid "No attributes currently exist."
+msgstr "Det existerar inga attribut"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:369
+msgid "Add New Attribute"
+msgstr "Lägg till nytt attribut"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:370
+msgid ""
+"Attributes let you define extra product data, such as size or colour. You "
+"can use these attributes in the shop sidebar using the \"layered nav\" "
+"widgets. Please note: you cannot rename an attribute later on."
+msgstr ""
+"Attribut låter dig deffiniera extra produktdata, som storlek eller färg. Du "
+"kan använda dessa attribut i butikens sidebar genom att använda \"layered nav"
+"\" widgets. Observera: du kan inte byta namn på ett attribut senare."
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:404
+msgid "Add Attribute"
+msgstr "Lägg till attribut"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:415
+msgid "Are you sure you want to delete this attribute?"
+msgstr "Är du säker på att du vill radera det här attributet?"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:26
+#: admin/woocommerce-admin-reports.php:30
+#: admin/woocommerce-admin-reports.php:75
+#: admin/woocommerce-admin-reports.php:91
+#: admin/woocommerce-admin-reports.php:102
+msgid "Overview"
+msgstr "Översikt"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:29
+msgid ""
+"Thank you for using WooCommerce :) Should you need help using or extending "
+"WooCommerce please <a href=\"%s\">read the documentation</a>. For further "
+"assistance you can use the <a href=\"%s\">community forum</a> or if you have "
+"access, <a href=\"%s\">the members forum</a>."
+msgstr ""
+"Tack för att du använder WooCommerce :) Behöver du hjälp att använda "
+"WooCommerce kan du ta hjälp av <a href=\"%s\">dokumentationen</a>. För "
+"ytterligare vägledning kan du besöka vårt <a href=\"%s\">communityforum</a> "
+"eller, om du har behörighet, vårt <a href=\"%s\">medlemsforum</a>."
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:31
+msgid ""
+"If you are having problems, or to assist us with support, please check the "
+"status page to identify any problems with your configuration:"
+msgstr ""
+"Om du upplever problem eller som hjälp under support kan du kontrollera "
+"tilläggets status för att identifiera eventuella problem med din "
+"konfiguration:"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:33 admin/woocommerce-admin-init.php:82
+#: admin/woocommerce-admin-status.php:46
+msgid "System Status"
+msgstr "Systemstatus"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:35
+msgid ""
+"If you come across a bug, or wish to contribute to the project you can also "
+"<a href=\"%s\">get involved on GitHub</a>."
+msgstr ""
+"Om du stött på en bugg eller vill bidra till projektet kan du också <a href="
+"\"%s\">delta på GitHub</a>."
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:43
+msgid ""
+"Here you can set up your store and customise it to fit your needs. The "
+"sections available from the settings page include:"
+msgstr ""
+"Här kan du konfigurera din butik och anpassa den efter dina behov. Detta "
+"inkluderar:"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:44
+msgid ""
+"General settings such as your shop base, currency, and script/styling "
+"options which affect features used in your store."
+msgstr ""
+"Huvudinställningar såsom vilka sidor som används, valuta och utseende som "
+"påverkar funktioner i webb-shoppen."
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:45
+#: admin/woocommerce-admin-settings.php:221
+msgid "Pages"
+msgstr "Sidor"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:45
+msgid ""
+"This is where important store page are defined. You can also set up other "
+"pages (such as a Terms page) here."
+msgstr ""
+"Detta är där du hanterar webb-shoppens sidor. Du kan också konfigurera andra "
+"sidor (exempelvis policy) här."
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:46
+msgid ""
+"Options for how things like price, images and weights appear in your product "
+"catalog."
+msgstr ""
+"Inställningar för hur till exempel pris, bilder och storlekar visas i din "
+"produktkatalog."
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:47
+msgid "Options concerning stock and stock notices."
+msgstr "Inställningar för lagersaldo och lagernotifieringar."
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:48
+msgid "Options concerning tax, including international and local tax rates."
+msgstr "Inställningar för moms, inklusive internationell skatt."
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:49
+msgid ""
+"This is where shipping options are defined, and shipping methods are set up."
+msgstr "Detta är stället du hanterar fraktinställningar."
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:50
+msgid "Payment Methods"
+msgstr "Betalningslösningar"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:50
+msgid ""
+"This is where payment gateway options are defined, and individual payment "
+"gateways are set up."
+msgstr "Här konfigurerar och hanterar du dina olika betalningslösningar"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:51
+#: admin/woocommerce-admin-settings.php:226
+msgid "Emails"
+msgstr "E-post"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:51
+msgid "Here you can customise the way WooCommerce emails appear."
+msgstr "Här ställer du in hur e-postutskicken från WooCommerce kommer se ut."
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:52
+#: admin/woocommerce-admin-settings.php:227
+msgid "Integration"
+msgstr "Integrering"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:52
+msgid ""
+"The integration section contains options for third party services which "
+"integrate with WooCommerce."
+msgstr ""
+"Intagrationsinställningarna innehåller inställningar för att ansluta "
+"tredjepartstjänster med WooCommerce."
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:57 admin/woocommerce-admin-init.php:59
+msgid "Reports"
+msgstr "Rapporter"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:59
+msgid ""
+"The reports section can be accessed from the left-hand navigation menu. Here "
+"you can generate reports for sales and customers."
+msgstr ""
+"Rapport-sektionen kan nås från den vänstra navigationsmenyn. Här kan du "
+"generera rapporter/statistik för försäljning och kunder."
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:60
+#: admin/woocommerce-admin-reports.php:27
+#: admin/woocommerce-admin-reports.php:986
+#: admin/woocommerce-admin-reports.php:1082
+#: admin/woocommerce-admin-reports.php:1199
+msgid "Sales"
+msgstr "Rea"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:60
+msgid "Reports for sales based on date, top sellers and top earners."
+msgstr ""
+"Rapporter för försäljning baserat på datum, mest sålda varor och mest "
+"betalande produkter."
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:61
+#: admin/woocommerce-admin-reports.php:88
+msgid "Customers"
+msgstr "Kunder"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:61
+msgid "Customer reports, such as signups per day."
+msgstr "Kundrapporter, exempelvis registreringar per dag."
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:62
+msgid "Stock reports for low stock and out of stock items."
+msgstr "Rapporter för lågt lagersaldo och slutsålda artiklar."
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:67
+#: admin/woocommerce-admin-dashboard.php:142
+msgid "Orders"
+msgstr "Ordrar"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:69
+msgid ""
+"The orders section can be accessed from the left-hand navigation menu. Here "
+"you can view and manage customer orders."
+msgstr ""
+"Order-sektionen kan nås från vänsta navigationsmenyn. Här kan du visa och "
+"hantera kundordrar."
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:70
+msgid ""
+"Orders can also be added from this section if you want to set them up for a "
+"customer manually."
+msgstr ""
+"Ordrar kan också läggas till från denna sektion om du vill lägga till dem "
+"manuellt."
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:77
+msgid ""
+"Coupons can be managed from this section. Once added, customers will be able "
+"to enter coupon codes on the cart/checkout page. If a customer uses a coupon "
+"code they will be viewable when viewing orders."
+msgstr ""
+"Kuponger hanteras från denna sektion. När de lagts till kan kunder ange "
+"kupongkoder i kassan. Om en kund använder en kupong kommer det att synas vid "
+"visning av ordrar."
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:81
+msgid "For more information:"
+msgstr "För mer information:"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:82
+msgid ""
+"<a href=\"http://www.woothemes.com/woocommerce/\" target=\"_blank"
+"\">WooCommerce</a>"
+msgstr ""
+"<a href=\"http://www.woothemes.com/woocommerce/\" target=\"_blank"
+"\">WooCommerce</a>"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:83
+msgid ""
+"<a href=\"http://wordpress.org/extend/plugins/woocommerce/\" target=\"_blank"
+"\">Project on WordPress.org</a>"
+msgstr ""
+"<a href=\"http://wordpress.org/extend/plugins/woocommerce/\" target=\"_blank"
+"\">Projektet på WordPress.org</a>"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:84
+msgid ""
+"<a href=\"https://github.com/woothemes/woocommerce\" target=\"_blank"
+"\">Project on Github</a>"
+msgstr ""
+"<a href=\"https://github.com/woothemes/woocommerce\" target=\"_blank"
+"\">Projektet på Github</a>"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:85
+msgid ""
+"<a href=\"http://www.woothemes.com/woocommerce-docs/\" target=\"_blank"
+"\">WooCommerce Docs</a>"
+msgstr ""
+"<a href=\"http://www.woothemes.com/woocommerce-docs/\" target=\"_blank"
+"\">WooCommerce Dokumentation</a>"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:86
+msgid ""
+"<a href=\"http://www.woothemes.com/extensions/woocommerce-extensions/\" "
+"target=\"_blank\">Official Extensions</a>"
+msgstr ""
+"<a href=\"http://www.woothemes.com/extensions/woocommerce-extensions/\" "
+"target=\"_blank\">Officiella Tillägg</a>"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:87
+msgid ""
+"<a href=\"http://www.woothemes.com/themes/woocommerce-themes/\" target="
+"\"_blank\">Official Themes</a>"
+msgstr ""
+"<a href=\"http://www.woothemes.com/themes/woocommerce-themes/\" target="
+"\"_blank\">Officiella teman</a>"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:40
+msgid "Monthly Sales"
+msgstr "Månatlig försäljning"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:43
+msgid "WooCommerce Right Now"
+msgstr "WooCommerce - Just nu"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:44
+msgid "WooCommerce Recent Orders"
+msgstr "WooCommerce - Nya ordrar"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:45
+msgid "WooCommerce Recent Reviews"
+msgstr "WooCommerce senaste recensioner"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:78
+msgid "Shop Content"
+msgstr "Butiksinnehåll"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:84
+#: admin/woocommerce-admin-functions.php:194
+#: admin/woocommerce-admin-init.php:713
+#: admin/woocommerce-admin-reports.php:985
+#: admin/woocommerce-admin-reports.php:1081
+msgid "Product"
+msgid_plural "Products"
+msgstr[0] "Produkt"
+msgstr[1] "Produkter"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:98
+msgid "Product Category"
+msgid_plural "Product Categories"
+msgstr[0] "Produktkategori"
+msgstr[1] "Produktkategorier"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:112
+msgid "Product Tag"
+msgid_plural "Product Tags"
+msgstr[0] "Produktetikett"
+msgstr[1] "Produktetiketter"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:126
+msgid "Attribute"
+msgid_plural "Attributes"
+msgstr[0] "Attribut"
+msgstr[1] "Attribut"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:148
+msgid "Pending"
+msgstr "Väntande"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:162
+msgid "On-Hold"
+msgstr "Parkerad"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:190
+msgid "Completed"
+msgstr "Genomförd"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:207
+msgid "You are using <strong>WooCommerce %s</strong>."
+msgstr "Du använder <strong>WooCommerce %s</strong>."
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:238
+msgid "l jS \\of F Y h:i:s A"
+msgstr "j F Y, H:i:s"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:239
+msgid "item"
+msgid_plural "items"
+msgstr[0] "artikel"
+msgstr[1] "artiklar"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:239
+msgid "Total:"
+msgstr "Totalt:"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:245
+msgid "There are no product orders yet."
+msgstr "Det finns inga produktordrar ännu."
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:279
+msgid "out of 5"
+msgstr "av 5"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:287
+msgid "There are no product reviews yet."
+msgstr "Det finns inga produktrecensioner ännu."
+
+#: admin/woocommerce-admin-dashboard.php:428
+msgid "Sold"
+msgstr "Sålt"
+
+#: admin/woocommerce-admin-dashboard.php:429
+msgid "Earned"
+msgstr "Vinst"
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:184
+#: admin/woocommerce-admin-install.php:216
+msgid "Order Received"
+msgstr "Order mottagen"
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:186
+msgid ""
+"Thank you, we are now processing your order. Your order's details are below."
+msgstr ""
+"Tack! Vi har tagit emot din order. Dina orderuppgifter ser du här nedanför."
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:188
+msgid "Order:"
+msgstr "Order:"
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:195
+msgid "Quantity"
+msgstr "Antal"
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:208
+msgid "Order total:"
+msgstr "Totalt för ordern:"
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:214
+msgid "Customer details"
+msgstr "Kunddetaljer"
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:220
+msgid "Billing address"
+msgstr "Fakturaadress"
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:227
+msgid "Shipping address"
+msgstr "Leveransadress"
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:459
+msgid "Could not compile woocommerce.less:"
+msgstr "Kunde inte kompilera woocommerce.less:"
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:480
+#: admin/woocommerce-admin-functions.php:481
+msgid "Mark processing"
+msgstr "Markera som behandlas"
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:483
+#: admin/woocommerce-admin-functions.php:484
+msgid "Mark completed"
+msgstr "Markera som genomförd"
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:521
+msgid "Order status changed by bulk edit:"
+msgstr "Orderstatus ändrades för flera ordrar:"
+
+# @ default
+#: admin/woocommerce-admin-functions.php:544
+msgid "Order status changed."
+msgid_plural "%s order statuses changed."
+msgstr[0] "Order status changed."
+msgstr[1] "%s orderstatus ändrades."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:57
+msgid "WooCommerce"
+msgstr "WooCommerce"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:81
+msgid "WooCommerce Settings"
+msgstr "WooCommerce Inställningar"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:82
+msgid "WooCommerce Status"
+msgstr "WooCommerce - Status"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:135 admin/woocommerce-admin-init.php:137
+msgctxt "Admin menu name"
+msgid "Orders"
+msgstr "Ordrar"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:390
+msgid ""
+"Are you sure you want to remove the selected items? If you have previously "
+"reduced this item's stock, or this order was submitted by a customer, you "
+"will need to manually restore the item's stock."
+msgstr ""
+"Är du säker att du vill radera denna produkt? Om du nyligen minskat "
+"produktens lagersaldo eller om ordern lades av en kund, behöver du manuellt "
+"återställa antal produkter i lager."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:391
+msgid "Remove this item meta?"
+msgstr "Ta bort detta meta för produkten"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:392
+msgid "Remove this attribute?"
+msgstr "Radera detta attribut?"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:400
+msgid "Enter a name for the new attribute term:"
+msgstr "Ange ett namn för den nya attributtermen:"
+
+#: admin/woocommerce-admin-init.php:401
+msgid "Calculate totals based on order items, discounts, and shipping?"
+msgstr "Beräkna summa baserat på beställda artiklar, rabatt och frakt?"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:402
+msgid ""
+"Calculate line taxes? This will calculate taxes based on the customers "
+"country. If no billing/shipping is set it will use the store base country."
+msgstr ""
+"Beräkna radens moms? Detta kommer att beräkna moms/skatt baserat på "
+"kundernas hemland. Om ingen faktura/leverans-adress angetts används butikens "
+"landsinställning."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:403
+msgid ""
+"Copy billing information to shipping information? This will remove any "
+"currently entered shipping information."
+msgstr ""
+"Kopiera fakturauppgifterna till leveransuppgifter? Detta raderar befintliga "
+"leveransuppgifter."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:404
+msgid ""
+"Load the customer's billing information? This will remove any currently "
+"entered billing information."
+msgstr ""
+"Ladda kundens debiteringsinformation? Detta kommer ersätta nuvarande angiven "
+"information."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:405
+msgid ""
+"Load the customer's shipping information? This will remove any currently "
+"entered shipping information."
+msgstr ""
+"Ladda kundens leveransinformation? Detta kommer ersätta all nuvarande "
+"angiven leveransinformation."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:409
+msgid "No customer selected"
+msgstr "Ingen kund vald"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:617
+msgid "Product updated. <a href=\"%s\">View Product</a>"
+msgstr "Produkten uppdaterades. <a href=\"%s\">Visa produkt</a>"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:618 admin/woocommerce-admin-init.php:633
+#: admin/woocommerce-admin-init.php:648
+msgid "Custom field updated."
+msgstr "Eget fält uppdaterades."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:619 admin/woocommerce-admin-init.php:634
+#: admin/woocommerce-admin-init.php:649
+msgid "Custom field deleted."
+msgstr "Eget fält raderades."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:620
+msgid "Product updated."
+msgstr "Produkt uppdaterad."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:621
+msgid "Product restored to revision from %s"
+msgstr "Produkt återställdes till revision från %s"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:622
+msgid "Product published. <a href=\"%s\">View Product</a>"
+msgstr "Produkten publicerades. <a href=\"%s\">Visa produkt</a>"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:623
+msgid "Product saved."
+msgstr "Produkten sparades."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:624
+msgid "Product submitted. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
+msgstr ""
+"Produkt sparades. <a target=\"_blank\" href=\"%s\">Förhandsvisa produkt</a>"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:625
+msgid ""
+"Product scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" href="
+"\"%2$s\">Preview Product</a>"
+msgstr ""
+"Produkt schemalagd till: <strong>%1$s</strong>. <a target=\"_blank\" href="
+"\"%2$s\">Förhandsgranska produkt</a>"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:626 admin/woocommerce-admin-init.php:641
+#: admin/woocommerce-admin-init.php:656
+msgid "M j, Y @ G:i"
+msgstr "j M Y @ G:i"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:627
+msgid ""
+"Product draft updated. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
+msgstr ""
+"Produktutkast uppdaterades. <a target=\"_blank\" href=\"%s\">Förhandsgranska "
+"produkt</a>"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:632 admin/woocommerce-admin-init.php:635
+#: admin/woocommerce-admin-init.php:637
+msgid "Order updated."
+msgstr "Ordern uppdaterades."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:636
+msgid "Order restored to revision from %s"
+msgstr "Ordern återställdes till revision från %s"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:638
+msgid "Order saved."
+msgstr "Order sparad."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:639
+msgid "Order submitted."
+msgstr "Ordern skickades."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:640
+msgid "Order scheduled for: <strong>%1$s</strong>."
+msgstr "Ordern är schemalagd till: <strong>%1$s</strong>."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:642
+msgid "Order draft updated."
+msgstr "Utkast av ordern uppdaterades."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:647 admin/woocommerce-admin-init.php:650
+#: admin/woocommerce-admin-init.php:652
+msgid "Coupon updated."
+msgstr "Kupongen uppdaterades."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:651
+msgid "Coupon restored to revision from %s"
+msgstr "Kupongen återställdes till revision från %s"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:653
+msgid "Coupon saved."
+msgstr "Kupongen sparades."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:654
+msgid "Coupon submitted."
+msgstr "Kupongen skickades."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:655
+msgid "Coupon scheduled for: <strong>%1$s</strong>."
+msgstr "Kupongen är schemalagd till: <strong>%1$s</strong>."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:657
+msgid "Coupon draft updated."
+msgstr "Utkast av kupong uppdaterades."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:674
+msgid "Order notes"
+msgstr "Ordernoteringar"
+
+#: admin/woocommerce-admin-init.php:689
+msgid ""
+"These settings control the permalinks used for products. These settings only "
+"apply when <strong>not using \"default\" permalinks above</strong>."
+msgstr ""
+"Dessa inställningar styr permalänkarna för produkter. Dock används dessa "
+"<strong>endast när standardformatet inte används ovan</strong>."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:696
+msgctxt "default-slug"
+msgid "shop"
+msgstr "butik"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:697
+msgctxt "default-slug"
+msgid "product"
+msgstr "produkt"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:718
+msgid "Shop base"
+msgstr "Bassökväg för butiken"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:722
+msgid "Shop base with category"
+msgstr "Bassökväg för butik med kategori"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:728
+msgid "Custom Base"
+msgstr "Valbar bassökväg"
+
+#: admin/woocommerce-admin-init.php:730
+msgid ""
+"Enter a custom base to use. A base <strong>must</strong> be set or WordPress "
+"will use default instead."
+msgstr ""
+"Ange en anpassad länk att använda. Detta <strong>måste</strong> anges, "
+"annars använder WordPress standardformatet."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:758
+msgid "Product permalink base"
+msgstr "Bassökväg för produktpermalänkar"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:763
+msgid "Product category base"
+msgstr "Bassökväg för produktkategorier"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:770
+msgid "Product tag base"
+msgstr "Bassökväg för produktetiketter"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:777
+msgid "Product attribute base"
+msgstr "Bassökväg för produktattribut"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:189
+msgctxt "page_slug"
+msgid "shop"
+msgstr "butik"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:189
+msgid "Shop"
+msgstr "Butik"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:192
+msgctxt "page_slug"
+msgid "cart"
+msgstr "varukorg"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:192
+msgid "Cart"
+msgstr "Varukorg"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:195
+msgctxt "page_slug"
+msgid "checkout"
+msgstr "till kassan"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:198
+msgctxt "page_slug"
+msgid "my-account"
+msgstr "mitt-konto"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:198
+msgid "My Account"
+msgstr "Mitt konto"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:201
+msgctxt "page_slug"
+msgid "lost-password"
+msgstr "glomt-losenord"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:201
+msgid "Lost Password"
+msgstr "Glömt lösenordet?"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:204
+msgctxt "page_slug"
+msgid "edit-address"
+msgstr "redigera-adress"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:204
+msgid "Edit My Address"
+msgstr "Redigera min adress"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:207
+msgctxt "page_slug"
+msgid "view-order"
+msgstr "visa-order"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:207
+msgid "View Order"
+msgstr "Visa order"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:210
+msgctxt "page_slug"
+msgid "change-password"
+msgstr "andra-losenord"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:210
+msgid "Change Password"
+msgstr "Ändra lösenord"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:213
+msgctxt "page_slug"
+msgid "pay"
+msgstr "betala"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:213
+msgid "Checkout &rarr; Pay"
+msgstr "Till kassan &rarr; Betala"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:216
+msgctxt "page_slug"
+msgid "order-received"
+msgstr "order-mottagen"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:36
+msgid "Sales by day"
+msgstr "Försäljningar per dag"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:41
+msgid "Sales by month"
+msgstr "Försäljningar per månad"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:46
+msgid "Taxes by month"
+msgstr "Moms per månad"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:51
+msgid "Product Sales"
+msgstr "Produktförsäljning"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:56
+msgid "Top sellers"
+msgstr "Toppsäljare"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:61
+msgid "Top earners"
+msgstr "Produkter med bäst förtjänst"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:66
+msgid "Sales by category"
+msgstr "Försäljning efter kategori"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:81
+msgid "Discounts by coupon"
+msgstr "Rabatt efter kupong"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:232
+#: admin/woocommerce-admin-reports.php:497
+#: admin/woocommerce-admin-reports.php:702
+#: admin/woocommerce-admin-reports.php:883
+msgid "Sales amount"
+msgstr "Total försäljning"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:237
+#: admin/woocommerce-admin-reports.php:497
+#: admin/woocommerce-admin-reports.php:702
+#: admin/woocommerce-admin-reports.php:883
+msgid "Number of sales"
+msgstr "Antal genomförda köp"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:369
+msgid "Total sales"
+msgstr "Antal försäljningar"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:371
+#: admin/woocommerce-admin-reports.php:377
+#: admin/woocommerce-admin-reports.php:383
+#: admin/woocommerce-admin-reports.php:389
+#: admin/woocommerce-admin-reports.php:395
+#: admin/woocommerce-admin-reports.php:401
+#: admin/woocommerce-admin-reports.php:644
+#: admin/woocommerce-admin-reports.php:650
+#: admin/woocommerce-admin-reports.php:656
+#: admin/woocommerce-admin-reports.php:662
+#: admin/woocommerce-admin-reports.php:828
+#: admin/woocommerce-admin-reports.php:834
+#: admin/woocommerce-admin-reports.php:840
+#: admin/woocommerce-admin-reports.php:846
+#: admin/woocommerce-admin-reports.php:1364
+#: admin/woocommerce-admin-reports.php:1370
+#: admin/woocommerce-admin-reports.php:1376
+#: admin/woocommerce-admin-reports.php:1810
+#: admin/woocommerce-admin-reports.php:1816
+#: admin/woocommerce-admin-reports.php:1822
+#: admin/woocommerce-admin-reports.php:1828
+#: admin/woocommerce-admin-reports.php:1834
+#: admin/woocommerce-admin-reports.php:1840
+#: admin/woocommerce-admin-reports.php:2280
+#: admin/woocommerce-admin-reports.php:2291
+#: admin/woocommerce-admin-reports.php:2302
+msgid "n/a"
+msgstr "Inte tillgänglig"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:375
+msgid "Total orders"
+msgstr "Totalt antal ordrar"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:377
+#: admin/woocommerce-admin-reports.php:650
+#: admin/woocommerce-admin-reports.php:834
+msgid "items"
+msgstr "varor"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:381
+msgid "Average order total"
+msgstr "Genomsnittlig ordertotal"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:387
+msgid "Average order items"
+msgstr "Genomsnittligt antal produkter"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:393
+msgid "Discounts used"
+msgstr "Använda rabatter"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:399
+msgid "Total shipping costs"
+msgstr "Total fraktkostnad"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:407
+msgid "This month's sales"
+msgstr "Denna månadens försäljning"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:636
+#: admin/woocommerce-admin-reports.php:980
+#: admin/woocommerce-admin-reports.php:1076
+#: admin/woocommerce-admin-reports.php:1356
+msgid "From:"
+msgstr "Från:"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:636
+#: admin/woocommerce-admin-reports.php:980
+#: admin/woocommerce-admin-reports.php:1076
+#: admin/woocommerce-admin-reports.php:1356
+msgid "To:"
+msgstr "Till:"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:636
+#: admin/woocommerce-admin-reports.php:821
+#: admin/woocommerce-admin-reports.php:980
+#: admin/woocommerce-admin-reports.php:1076
+#: admin/woocommerce-admin-reports.php:1229
+#: admin/woocommerce-admin-reports.php:1356
+#: admin/woocommerce-admin-reports.php:1489
+#: admin/woocommerce-admin-reports.php:2269
+#: admin/woocommerce-admin-reports.php:2453
+msgid "Show"
+msgstr "Visa"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:642
+msgid "Total sales in range"
+msgstr "Total försäljning i urval"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:648
+msgid "Total orders in range"
+msgstr "Totalt antal ordrar i urval"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:654
+msgid "Average order total in range"
+msgstr "Genomsnittligt ordervärde i urval"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:660
+msgid "Average order items in range"
+msgstr "Genomsnittligt antal produkter i urval"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:668
+msgid "Sales in range"
+msgstr "Försäljning i urval"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:815
+#: admin/woocommerce-admin-reports.php:2263
+msgid "Year:"
+msgstr "År:"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:826
+msgid "Total sales for year"
+msgstr "Total försäljning för året"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:832
+msgid "Total orders for year"
+msgstr "Totalt antal ordrar för året"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:838
+msgid "Average order total for year"
+msgstr "Genomsnittligt antal ordrar för år"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:844
+msgid "Average order items for year"
+msgstr "Genomsnittligt antal produkter per order och år"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:852
+msgid "Monthly sales for year"
+msgstr "Månatlig försäljning för år"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1000
+msgid "Product does not exist"
+msgstr "Produkten existerar inte"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1097
+msgid "Product no longer exists"
+msgstr "Produkten existerar inte längre"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1194
+msgid "Sales for %s:"
+msgstr "Försäljning av %s:"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1198
+#: admin/woocommerce-admin-reports.php:2311
+msgid "Month"
+msgstr "Månad"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1219
+msgid "No sales :("
+msgstr "Ingen rea :("
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1362
+msgid "Total orders containing coupons"
+msgstr "Antal ordrar som innehåller kuponger"
+
+#: admin/woocommerce-admin-reports.php:1368
+msgid "Percent of orders containing coupons"
+msgstr "Andel ordrar som innehåller kuponger"
+
+#: admin/woocommerce-admin-reports.php:1374
+msgid "Total coupon discount"
+msgstr "Total kupongrabatt"
+
+#: admin/woocommerce-admin-reports.php:1383
+msgid "Most popular coupons"
+msgstr "Mest populära kuponger"
+
+#: admin/woocommerce-admin-reports.php:1393
+msgid "Used 1 time"
+msgid_plural "Used %d times"
+msgstr[0] "Använd en gång"
+msgstr[1] "Använd %d gånger"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1396
+#: admin/woocommerce-admin-reports.php:1418
+msgid "No coupons found"
+msgstr "Inga rabattkuponger hittades"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1405
+msgid "Greatest discount amount"
+msgstr "Största möjliga rabatt"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1415
+msgid "Discounted %s"
+msgstr "Rabatterad %s"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1474
+#: admin/woocommerce-admin-reports.php:2430
+msgid "Show:"
+msgstr "Visa:"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1531
+msgid "Coupon"
+msgstr "Rabattkupong"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1614
+msgid "Top coupon"
+msgstr "Toppkupong"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1622
+msgid "Worst coupon"
+msgstr "Sämsta kupong"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1630
+msgid "Discount average"
+msgstr "Genomsnittlig rabatt"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1638
+msgid "Discount median"
+msgstr "Median för rabatter"
+
+#: admin/woocommerce-admin-reports.php:1658
+msgid "Monthly discounts by coupon"
+msgstr "Månatlig rabatt per kupong"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1808
+msgid "Total customers"
+msgstr "Totalt antal kunder"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1814
+msgid "Total customer sales"
+msgstr "Total försäljning kunder"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1820
+msgid "Total guest sales"
+msgstr "Total försäljning gäster"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1826
+msgid "Total customer orders"
+msgstr "Totalt antal ordrar per kund"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1832
+msgid "Total guest orders"
+msgstr "Totalt antal ordrar per gäst"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1838
+msgid "Average orders per customer"
+msgstr "Genomsnittligt antal ordrar per kund"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1846
+msgid "Signups per day"
+msgstr "Registreringar per dag"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2048
+msgid "Low stock"
+msgstr "Lågt lagersaldo"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2070
+#: admin/woocommerce-admin-reports.php:2105
+msgid "%d in stock"
+msgid_plural "%d in stock"
+msgstr[0] "%d i lager"
+msgstr[1] "%d i lager"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2075
+msgid "No products are low in stock."
+msgstr "Inga produkter har lågt lagersaldo"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2110
+msgid "No products are out in stock."
+msgstr "Inga produkter är slut"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2274
+msgid "Total taxes for year"
+msgstr "Summa moms för året"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2285
+msgid "Total product taxes for year"
+msgstr "Summa produktmoms för året"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2296
+msgid "Total shipping tax for year"
+msgstr "Summa fraktmoms för året"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2312
+msgid "Total Sales"
+msgstr "Summa försäljning"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2312
+msgid "This is the sum of the 'Order Total' field within your orders."
+msgstr "Detta är summan av fältet \"Totalsumma\" i dina ordrar."
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2313
+msgid "Total Shipping"
+msgstr "Summa frakt"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2313
+msgid "This is the sum of the 'Shipping Total' field within your orders."
+msgstr "Detta är summan från fältet \"Frakt\" i dina ordrar."
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2314
+msgid "Total Product Taxes"
+msgstr "Summa produktmoms"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2314
+msgid "This is the sum of the 'Cart Tax' field within your orders."
+msgstr "Detta är summan av fältet \"Moms\" i dina ordrar."
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2315
+msgid "Total Shipping Taxes"
+msgstr "Summa fraktskatt"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2315
+msgid "This is the sum of the 'Shipping Tax' field within your orders."
+msgstr "Detta är summan av fältet \"Fraktskatt\" i dina ordrar."
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2316
+msgid "Total Taxes"
+msgstr "Summa moms/skatt"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2316
+msgid ""
+"This is the sum of the 'Cart Tax' and 'Shipping Tax' fields within your "
+"orders."
+msgstr ""
+"Detta är summan av båda fälten \"Moms\" och \"Fraktskatt\" i dina ordrar."
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2317
+msgid "Net profit"
+msgstr "Vinst, netto"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2317
+msgid "Total sales minus shipping and tax."
+msgstr "Summa minus frakt och moms."
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2362
+msgid "Toggle tax rows"
+msgstr "Visa/dölj rader för moms/skatt"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2508
+msgid "Category"
+msgstr "Kategori"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2610
+msgid "Top category"
+msgstr "Toppkategori"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2619
+msgid "Worst category"
+msgstr "Sämsta kategori"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2627
+msgid "Category sales average"
+msgstr "Genomsnittlig försäljning per kategori"
+
+#: admin/woocommerce-admin-reports.php:2638
+msgid "Category sales median"
+msgstr "Median på försäljning per kategori"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2658
+msgid "Monthly sales by category"
+msgstr "Månatlig försäljning per kategori"
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:45
+msgid "Action failed. Please refresh the page and retry."
+msgstr "Processen misslyckades. Uppdatera sidan och försök igen."
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:164
+msgid "Your settings have been saved."
+msgstr "Dina inställningar har sparats."
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:200
+msgid ""
+"<strong>Congratulations!</strong> &#8211; WooCommerce has been installed and "
+"setup. Enjoy :)"
+msgstr ""
+"<strong>Grattis!</strong> &#8211; WooCommerce har installerats och "
+"konfigurerats. Mycket nöje! :)"
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:244
+msgid ""
+"More functionality and gateway options available via <a href=\"%s\" target="
+"\"_blank\">WC official extensions</a>."
+msgstr ""
+"Mer funktionalitet och betalningstjänster finns tillgängliga via <a href=\"%s"
+"\" target=\"_blank\">WC officiella tillägg</a>."
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:262
+msgid "Tax Rates"
+msgstr "Momssatser"
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:289
+msgid "Email Options"
+msgstr "Inställningar för e-post"
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:420
+msgid "Save changes"
+msgstr "Spara ändringar"
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:461
+msgid "The changes you made will be lost if you navigate away from this page."
+msgstr "Ändringar som du genomfört förloras om du lämnar denna sida."
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:829
+msgid "Hard Crop"
+msgstr "Hård beskärning"
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:854
+msgid "Select a page&hellip;"
+msgstr "Välj sida&hellip;"
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:877
+msgid "Choose a country&hellip;"
+msgstr "Välj land&hellip;"
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:897
+msgid "Choose countries&hellip;"
+msgstr "Välj länder&hellip;"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:22
+msgid "WC Transients"
+msgstr "WC-transienter"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:23
+msgid "Clear transients"
+msgstr "Töm transienter"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:24
+msgid "This tool will clear the product/shop transients cache."
+msgstr "Detta verktyg tömmer transientcache för produkter/butik."
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:27
+msgid "Expired Transients"
+msgstr "Förfallna transienter"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:28
+msgid "Clear expired transients"
+msgstr "Töm förfallna transienter"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:29
+msgid "This tool will clear ALL expired transients from Wordpress."
+msgstr "Detta verktyg tömmer samtliga förfallna transienter i WordPress."
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:32
+msgid "Term counts"
+msgstr "Antal termer"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:33
+msgid "Recount terms"
+msgstr "Räkna om termer"
+
+#: admin/woocommerce-admin-status.php:34
+msgid ""
+"This tool will recount product terms - useful when changing your settings in "
+"a way which hides products from the catalog."
+msgstr ""
+"Detta verktyg räknar alla produkttermer på nytt, något som är användbart om "
+"du ändrar inställningar som döljer produkter i din katalog."
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:37
+msgid "Capabilities"
+msgstr "Behörigheter"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:38
+msgid "Reset capabilities"
+msgstr "Återställ behörigheter"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:39
+msgid ""
+"This tool will reset the admin, customer and shop_manager roles to default. "
+"Use this if your users cannot access all of the WooCommerce admin pages."
+msgstr ""
+"Detta verktyg återställer rollerna för administratörer, kunder och "
+"butiksansvariga. Använd detta om användare upplever problem att nå samtliga "
+"WooCommerce administrationssidor."
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:46
+msgid "Generate report"
+msgstr "Skapa rapport"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:55
+msgid "Product Transients Cleared"
+msgstr "Produkttransienter tömdes"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:96
+msgid "%d Transients Rows Cleared"
+msgstr "%d produkttransienter tömdes"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:104
+msgid "Roles successfully reset"
+msgstr "Roller återställdes"
+
+#: admin/woocommerce-admin-status.php:116
+msgid "Terms successfully recounted"
+msgstr "Termer beräknades på nytt"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:125
+msgid "There was an error calling %s::%s"
+msgstr "Ett fel uppstod när följande skulle anropas %s::%s"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:128
+msgid "There was an error calling %s"
+msgstr "Ett fel uppstod när följande skulle anropas %s"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:141
+msgid "Versions"
+msgstr "Versioner"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:147
+msgid "WooCommerce version"
+msgstr "WooCommerce-version"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:151
+msgid "WooCommerce DB version"
+msgstr "Version av WooCommerce DB"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:155
+msgid "WordPress version"
+msgstr "WordPress-version"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:159
+msgid "Installed plugins"
+msgstr "Installerades tillägg"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:174
+msgid "by"
+msgstr "av"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:174
+msgid "version"
+msgstr "version"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:193
+msgid "Home URL"
+msgstr "Hemadress"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:197
+msgid "Site URL"
+msgstr "Sajtadress"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:201
+msgid "Force SSL"
+msgstr "Tvinga SSL"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:215
+msgid "Shop base page"
+msgstr "Huvudsida för butik"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:267
+msgid "Page not set"
+msgstr "Sida har inte valts"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:277
+msgid "Page does not contain the shortcode: %s"
+msgstr "Sidan innehåller inte koden: %s"
+
+#: admin/woocommerce-admin-status.php:296
+msgid "Core Taxonomies"
+msgstr "Standardtaxonomier"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:302
+msgid "Order Statuses"
+msgstr "Orderstatusar"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:312
+msgid "Server Environment"
+msgstr "Servermiljö"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:318
+msgid "PHP Version"
+msgstr "PHP-version"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:325
+msgid "Server Software"
+msgstr "Servermjukvara"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:331
+msgid "WP Max Upload Size"
+msgstr "WP Max Upload Size"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:337
+msgid "Server upload_max_filesize"
+msgstr "Server upload_max_filesize"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:344
+msgid "Server post_max_size"
+msgstr "Server post_max_size"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:351
+msgid "WP Memory Limit"
+msgstr "WP Memory Limit"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:356
+msgid ""
+"%s - We recommend setting memory to at least 64MB. See: <a href=\"%s"
+"\">Increasing memory allocated to PHP</a>"
+msgstr ""
+"%s - Vi rekommenderar att minnesgränsen sätts till minst 64MB. Se: <a href="
+"\"%s\">Increasing memory allocated to PHP</a>"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:363
+msgid "WP Debug Mode"
+msgstr "WP Debug Mode"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:367
+msgid "WC Logging"
+msgstr "WC Logging"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:370
+msgid "Log directory is writable."
+msgstr "Katalog för logg är skrivbar."
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:372
+msgid ""
+"Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will "
+"not be possible."
+msgstr ""
+"Katalog för logg (<code>woocommerce/logs/</code>) är inte skrivbar. Loggning "
+"är inte möjlig."
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:379
+msgid "Remote Posting/IPN"
+msgstr "Remote Posting/IPN"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:387
+msgid "fsockopen/cURL"
+msgstr "fsockopen/cURL"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:390
+msgid "Your server has fsockopen and cURL enabled."
+msgstr "fsockopen och cURL är aktiverat på din server."
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:392
+msgid "Your server has fsockopen enabled, cURL is disabled."
+msgstr "fsockopen är aktiverat på servern, men inte cURL."
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:394
+msgid "Your server has cURL enabled, fsockopen is disabled."
+msgstr "Servern har cURL aktiverat, men inte fsockopen."
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:398
+msgid ""
+"Your server does not have fsockopen or cURL enabled - PayPal IPN and other "
+"scripts which communicate with other servers will not work. Contact your "
+"hosting provider."
+msgstr ""
+"Servern verkar ha varken fsockopen eller cURL aktiverat. PayPal IPN och "
+"andra skript som behöver kommunicera med servern kommer inte att fungera. "
+"Vänligen kontakta ditt webbhotell."
+
+#: admin/woocommerce-admin-status.php:403
+msgid "SOAP Client"
+msgstr "SOAP-klient"
+
+#: admin/woocommerce-admin-status.php:405
+msgid "Your server has the SOAP Client class enabled."
+msgstr "Servern har SOAP-klientklassen aktiverad."
+
+#: admin/woocommerce-admin-status.php:408
+msgid ""
+"Your server does not have the <a href=\"%s\">SOAP Client</a> class enabled - "
+"some gateway plugins which use SOAP may not work as expected."
+msgstr ""
+"Din server har inte <a href=\"%s\">SOAP-klientklassen</a> aktiverad. Vissa "
+"betalningstjänster som använder SOAP kanske inte kommer att fungera."
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:413
+msgid "WP Remote Post Check"
+msgstr "WP Remote Post Check"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:424
+msgid "wp_remote_post() was successful - PayPal IPN is working."
+msgstr "wp_remote_post() fingerer korrekt - PayPal IPN fungerar."
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:427
+msgid ""
+"wp_remote_post() failed. PayPal IPN won't work with your server. Contact "
+"your hosting provider. Error:"
+msgstr ""
+"wp_remote_post() misslyckades. PayPal IPN kommer inte att fungera på din "
+"server. Vänligen kontakt ditt webbhotell med följande felmeddelade:"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:430
+msgid "wp_remote_post() failed. PayPal IPN may not work with your server."
+msgstr ""
+"wp_remote_post() misslyckades. PayPal IPN kanske inte fungerar korrekt på "
+"din server."
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:452
+msgid "Tools"
+msgstr "Verktyg"
+
+# @ woocommerce
+#: admin/woocommerce-admin-taxonomies.php:25
+#: admin/woocommerce-admin-taxonomies.php:118
+msgid "Display type"
+msgstr "Visningstyp"
+
+# @ woocommerce
+#: admin/woocommerce-admin-taxonomies.php:29
+#: admin/woocommerce-admin-taxonomies.php:123
+msgid "Subcategories"
+msgstr "Underkategorier"
+
+#: admin/woocommerce-admin-taxonomies.php:30
+#: admin/woocommerce-admin-taxonomies.php:124
+msgid "Both"
+msgstr "Båda"
+
+# @ woocommerce
+#: admin/woocommerce-admin-taxonomies.php:34
+#: admin/woocommerce-admin-taxonomies.php:129
+msgid "Thumbnail"
+msgstr "Tumnagel"
+
+# @ woocommerce
+#: admin/woocommerce-admin-taxonomies.php:38
+#: admin/woocommerce-admin-taxonomies.php:134
+msgid "Upload/Add image"
+msgstr "Ladda upp/lägg till bild"
+
+# @ woocommerce
+#: admin/woocommerce-admin-taxonomies.php:39
+#: admin/woocommerce-admin-taxonomies.php:135
+msgid "Remove image"
+msgstr "Ta bort bild"
+
+# @ woocommerce
+#: admin/woocommerce-admin-taxonomies.php:64
+#: admin/woocommerce-admin-taxonomies.php:156
+msgid "Use image"
+msgstr "Använd bild"
+
+# @ woocommerce
+#: admin/woocommerce-admin-taxonomies.php:222
+msgid ""
+"Product categories for your store can be managed here. To change the order "
+"of categories on the front-end you can drag and drop to sort them. To see "
+"more categories listed click the \"screen options\" link at the top of the "
+"page."
+msgstr ""
+"Produktkategorier för din affär kan hanteras här. För att ändra ordning av "
+"visningen av kategorierna för kunden kan du dra och släppa för att sortera. "
+"För att se fler kategorier klicka på \"skärminställningar\" längst upp på "
+"sidan."
+
+# @ woocommerce
+#: admin/woocommerce-admin-taxonomies.php:237
+msgid ""
+"Shipping classes can be used to group products of similar type. These groups "
+"can then be used by certain shipping methods to provide different rates to "
+"different products."
+msgstr ""
+"Fraktklasser kan användas för att gruppera likartade produkter. Dessa "
+"grupper kan sen användas av olika fraktmetoder för att ge olika lösningar/"
+"prisförlsag för frakt."
+
+# @ woocommerce
+#: admin/woocommerce-admin-taxonomies.php:365
+msgid "Configure shipping class"
+msgstr "Konfigurera fraktklass"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:26
+msgid "Billing Address"
+msgstr "Fakturaadress"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:27
+msgid "Shipping Address"
+msgstr "Leveransadress"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:28
+msgid "Paying Customer?"
+msgstr "Betalande kund?"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:29
+msgid "Completed Orders"
+msgstr "Genomförda ordrar"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:144
+msgid "Customer Billing Address"
+msgstr "Fakturaadress för kund"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:147 admin/woocommerce-admin-users.php:196
+msgid "First name"
+msgstr "Förnamn"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:151 admin/woocommerce-admin-users.php:200
+msgid "Last name"
+msgstr "Efternamn"
+
+#: admin/woocommerce-admin-users.php:176
+msgid "Country or state code"
+msgstr "Landskod (eller stat)"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:180 admin/woocommerce-admin-users.php:229
+msgid "2 letter Country code"
+msgstr "Landskod (2 bokstäver)"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:183
+msgid "Telephone"
+msgstr "Telefon"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:193
+msgid "Customer Shipping Address"
+msgstr "Leveransadress för kund"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:225
+msgid "State/County or state code"
+msgstr "Landskod (eller stat)"

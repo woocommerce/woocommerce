@@ -71,7 +71,7 @@ return array (
   'Save' => '',
   'Show button by default on: ' => '',
   'Standard Button' => '',
-  'This plugin allows you to easilly set the above meta properties directly in the post or page edit form' => '',
+  'This plugin allows you to easily set the above meta properties directly in the post or page edit form' => '',
   'To position the {brand} button, you need to override the following CSS classes' => '',
   'Use Image Button' => '',
   'Use Standard Button' => '',

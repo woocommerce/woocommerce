@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Simple Product Class
  *
@@ -7,10 +10,9 @@
  * @class 		WC_Product_Simple
  * @version		2.0.0
  * @package		WooCommerce/Classes/Products
+ * @category	Class
  * @author 		WooThemes
  */
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_Product_Simple extends WC_Product {
 
 	/**
@@ -18,40 +20,10 @@ class WC_Product_Simple extends WC_Product {
 	 *
 	 * @access public
 	 * @param mixed $product
-	 * @param array $args Contains arguments to set up this product
 	 */
-	function __construct( $product, $args ) {
-
-		parent::__construct( $product );
-
+	public function __construct( $product ) {
 		$this->product_type = 'simple';
-
-		// Load data from custom fields
-		$this->load_product_data( array(
-			'sku'                   => '',
-			'downloadable'          => 'no',
-			'virtual'               => 'no',
-			'price'                 => '',
-			'visibility'            => 'hidden',
-			'stock'                 => 0,
-			'stock_status'          => 'instock',
-			'backorders'            => 'no',
-			'manage_stock'          => 'no',
-			'sale_price'            => '',
-			'regular_price'         => '',
-			'weight'                => '',
-			'length'                => '',
-			'width'                 => '',
-			'height'                => '',
-			'tax_status'            => 'taxable',
-			'tax_class'             => '',
-			'upsell_ids'            => array(),
-			'crosssell_ids'         => array(),
-			'sale_price_dates_from' => '',
-			'sale_price_dates_to'   => '',
-			'featured'              => 'no',
-			'sold_individually'     => 'no'
-		) );
+		parent::__construct( $product );
 	}
 
 	/**
@@ -60,7 +32,7 @@ class WC_Product_Simple extends WC_Product {
 	 * @access public
 	 * @return string
 	 */
-	function get_title() {
+	public function get_title() {
 
 		$title = $this->post->post_title;
 
@@ -71,14 +43,13 @@ class WC_Product_Simple extends WC_Product {
 		return apply_filters( 'woocommerce_product_title', apply_filters( 'the_title', $title, $this->id ), $this );
 	}
 
-
 	/**
-	 * Sync grouped products with the childs lowest price (so they can be sorted by price accurately).
+	 * Sync grouped products with the children lowest price (so they can be sorted by price accurately).
 	 *
 	 * @access public
 	 * @return void
 	 */
-	function grouped_product_sync() {
+	public function grouped_product_sync() {
 		global $wpdb, $woocommerce;
 
 		if ( ! $this->get_parent() ) return;

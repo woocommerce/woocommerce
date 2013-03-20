@@ -66,6 +66,7 @@ function woocommerce_update_options( $options ) {
             case 'number':
 	    	case "select" :
 	    	case "color" :
+            case 'password' :
 	    	case "single_select_page" :
 	    	case "single_select_country" :
 	    	case 'radio' :
@@ -76,7 +77,7 @@ function woocommerce_update_options( $options ) {
 					if ( isset( $_POST[ $value['id'] ] )  ) {
 						$option_value = esc_attr( $_POST[ $value['id'] ] );
 					} else {
-		               $option_value = '';
+		            	$option_value = '';
 		            }
 
 	    		} elseif ( $value['id'] == 'woocommerce_price_num_decimals' ) {
@@ -87,6 +88,19 @@ function woocommerce_update_options( $options ) {
 					} else {
 		               $option_value = 2;
 		            }
+
+	    		} elseif ( $value['id'] == 'woocommerce_hold_stock_minutes' ) {
+
+		            if ( isset( $_POST[ $value['id'] ] )  ) {
+						$option_value = esc_attr( $_POST[ $value['id'] ] );
+					} else {
+		            	$option_value = '';
+		            }
+
+		            wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+
+		            if ( $option_value != '' )
+		            	wp_schedule_single_event( time() + ( absint( $option_value ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 
 		        } else {
 
@@ -101,6 +115,7 @@ function woocommerce_update_options( $options ) {
 	    	break;
 
 	    	// Special types
+	    	case "multiselect" :
 	    	case "multi_select_countries" :
 
 	    		// Get countries array
@@ -175,7 +190,7 @@ function woocommerce_update_options( $options ) {
 
     // Now save the options
     foreach( $update_options as $name => $value )
-    	update_option( $name, $value, true );
+    	update_option( $name, $value );
 
     return true;
 }

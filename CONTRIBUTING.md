@@ -4,7 +4,7 @@ Community made patches, localisations, bug reports and contributions are always 
 
 When contributing please ensure you follow the guidelines below so that we can keep on top of things.
 
-__note__ GitHub is for bug reports and contributions only - if you have a support question or a request for a customisation don't post here. Use [WooThemes Support](http://support.woothemes.com) and [WooJobs](http://jobs.woothemes.com) respectively.
+__note:__ GitHub is for bug reports and contributions only - if you have a support question or a request for a customization don't post here. Use [WooThemes Support](http://support.woothemes.com) and [WooJobs](http://jobs.woothemes.com) respectively.
 
 ## Getting Started
 
@@ -13,20 +13,20 @@ __note__ GitHub is for bug reports and contributions only - if you have a suppor
   * Clearly describe the issue including steps to reproduce when it is a bug.
   * Make sure you fill in the earliest version that you know has the issue.
 
-## Making Changes 
+## Making Changes
 
-* Fork the repository on GitHub
-* Make the changes to your forked repository
-  * Ensure you stick to the [WordPress Coding Standards](http://codex.wordpress.org/WordPress_Coding_Standards)
-  * Ensure you use LF line endings - no crazy windows line endings :)
-* When committing, reference your issue (#1234) and include a note about the fix
-* Push the changes to your fork and submit a pull request on the master WooCommerce repository
+* Fork the repository on GitHub.
+* Make the changes to your forked repository.
+  * **Ensure you stick to the [WordPress Coding Standards](http://codex.wordpress.org/WordPress_Coding_Standards).**
+  * Ensure you use LF line endings - no crazy windows line endings. :)
+* When committing, reference your issue (#1234) and include a note about the fix.
+* Push the changes to your fork and submit a pull request on the master WooCommerce repository.
 
-At this point you're waiting on us to merge your pull request. We'll review all pull requests, and make suggestions and changes if necessary. 
+At this point you're waiting on us to merge your pull request. We'll review all pull requests, and make suggestions and changes if necessary.
 
 # Additional Resources
 
 * [General GitHub documentation](http://help.github.com/)
 * [GitHub pull request documentation](http://help.github.com/send-pull-requests/)
-* [WooCommerce Docs](http://wcdocs.woothemes.com/)
+* [WooCommerce Docs](http://docs.woothemes.com/)
 * [WooThemes Support](http://support.woothemes.com)

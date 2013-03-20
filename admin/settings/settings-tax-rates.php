@@ -27,7 +27,7 @@ function woocommerce_tax_rates_setting() {
 			$current_class = $class;
 	?>
 	<h3><?php printf( __( 'Tax Rates for the "%s" Class', 'woocommerce' ), $current_class ? esc_html( $current_class ) : __( 'Standard', 'woocommerce' ) ); ?></h3>
-	<p><?php printf( __( 'Define tax rates for countries and states below. <a href="%s">See here</a> for available country/state codes.', 'woocommerce' ), 'http://wcdocs.woothemes.com/?p=2163' ); ?></p>
+	<p><?php printf( __( 'Define tax rates for countries and states below. <a href="%s">See here</a> for available alpha-2 country codes.', 'woocommerce' ), 'http://en.wikipedia.org/wiki/ISO_3166-1#Current_codes' ); ?></p>
 	<table class="wc_tax_rates widefat">
 		<thead>
 			<tr>
@@ -70,7 +70,7 @@ function woocommerce_tax_rates_setting() {
 					"SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates
 					WHERE tax_rate_class = %s
 					ORDER BY tax_rate_order
-					" , $current_class ) );
+					" , sanitize_title( $current_class ) ) );
 
 				foreach ( $rates as $rate ) {
 					?>
@@ -165,16 +165,51 @@ function woocommerce_tax_rates_setting() {
 				return false;
 			});
 
+			var controlled = false;
 			var shifted = false;
+			var hasFocus = false;
 
-			jQuery(document).bind('keyup keydown', function(e){shifted = e.shiftKey} );
+			jQuery(document).bind('keyup keydown', function(e){ shifted = e.shiftKey; controlled = e.ctrlKey || e.metaKey } );
 
-			jQuery('.wc_tax_rates input').live( 'click focus', function( e ) {
-				if ( ! shifted ) {
-					jQuery('.wc_tax_rates tr').removeClass('current');
+			jQuery('#rates').on( 'focus click', 'input', function( e ) {
+
+				$this_row = jQuery(this).closest('tr');
+
+				if ( ( e.type == 'focus' && hasFocus != $this_row.index() ) || ( e.type == 'click' && jQuery(this).is(':focus') ) ) {
+
+					hasFocus = $this_row.index();
+
+					if ( ! shifted && ! controlled ) {
+						jQuery('#rates tr').removeClass('current').removeClass('last_selected');
+						$this_row.addClass('current').addClass('last_selected');
+					} else if ( shifted ) {
+						jQuery('#rates tr').removeClass('current');
+						$this_row.addClass('selected_now').addClass('current');
+
+						if ( jQuery('#rates tr.last_selected').size() > 0 ) {
+							if ( $this_row.index() > jQuery('#rates tr.last_selected').index() ) {
+								jQuery('#rates tr').slice( jQuery('#rates tr.last_selected').index(), $this_row.index() ).addClass('current');
+							} else {
+								jQuery('#rates tr').slice( $this_row.index(), jQuery('#rates tr.last_selected').index() + 1 ).addClass('current');
+							}
+						}
+
+						jQuery('#rates tr').removeClass('last_selected');
+						$this_row.addClass('last_selected');
+					} else {
+						jQuery('#rates tr').removeClass('last_selected');
+						if ( controlled && jQuery(this).closest('tr').is('.current') ) {
+							$this_row.removeClass('current');
+						} else {
+							$this_row.addClass('current').addClass('last_selected');
+						}
+					}
+
+					jQuery('#rates tr').removeClass('selected_now');
+
 				}
-
-				jQuery(this).closest('tr').addClass('current');
+			}).on( 'blur', 'input', function( e ) {
+				hasFocus = false;
 			});
 
 			jQuery('.wc_tax_rates .export').click(function() {
@@ -368,7 +403,7 @@ function woocommerce_tax_rates_setting_save() {
 						'tax_rate_compound' => $compound,
 						'tax_rate_shipping' => $shipping,
 						'tax_rate_order'    => $i,
-						'tax_rate_class'    => $current_class
+						'tax_rate_class'    => sanitize_title( $current_class )
 					)
 				);
 
@@ -377,16 +412,25 @@ function woocommerce_tax_rates_setting_save() {
 				if ( ! empty( $postcode ) ) {
 					$postcodes = explode( ';', $postcode );
 					$postcodes = array_map( 'strtoupper', array_map( 'woocommerce_clean', $postcodes ) );
-					foreach( $postcodes as $postcode ) {
-						$wpdb->insert(
-						$wpdb->prefix . "woocommerce_tax_rate_locations",
-							array(
-								'location_code' => $postcode,
-								'tax_rate_id'   => $tax_rate_id,
-								'location_type' => 'postcode',
-							)
-						);
-					}
+
+					$postcode_query = array();
+
+					foreach( $postcodes as $postcode )
+						if ( strstr( $postcode, '-' ) ) {
+							$postcode_parts = explode( '-', $postcode );
+
+							if ( is_numeric( $postcode_parts[0] ) && is_numeric( $postcode_parts[1] ) && $postcode_parts[1] > $postcode_parts[0] ) {
+								for ( $i = $postcode_parts[0]; $i <= $postcode_parts[1]; $i ++ ) {
+									if ( $i )
+										$postcode_query[] = "( '$i', $tax_rate_id, 'postcode' )";
+								}
+							}
+						} else {
+							if ( $postcode )
+								$postcode_query[] = "( '$postcode', $tax_rate_id, 'postcode' )";
+						}
+
+					$wpdb->query( "INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES " . implode( ',', $postcode_query ) );
 				}
 
 				if ( ! empty( $city ) ) {
@@ -447,7 +491,7 @@ function woocommerce_tax_rates_setting_save() {
 					'tax_rate_compound' => $compound,
 					'tax_rate_shipping' => $shipping,
 					'tax_rate_order'    => $i,
-					'tax_rate_class'    => $current_class
+					'tax_rate_class'    => sanitize_title( $current_class )
 				),
 				array(
 					'tax_rate_id' 		=> $tax_rate_id
@@ -471,11 +515,13 @@ function woocommerce_tax_rates_setting_save() {
 
 						if ( is_numeric( $postcode_parts[0] ) && is_numeric( $postcode_parts[1] ) && $postcode_parts[1] > $postcode_parts[0] ) {
 							for ( $i = $postcode_parts[0]; $i <= $postcode_parts[1]; $i ++ ) {
-								$postcode_query[] = "( '$i', $tax_rate_id, 'postcode' )";
+								if ( $i )
+									$postcode_query[] = "( '$i', $tax_rate_id, 'postcode' )";
 							}
 						}
 					} else {
-						$postcode_query[] = "( '$postcode', $tax_rate_id, 'postcode' )";
+						if ( $postcode )
+							$postcode_query[] = "( '$postcode', $tax_rate_id, 'postcode' )";
 					}
 
 				$wpdb->query( "INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES " . implode( ',', $postcode_query ) );
@@ -491,14 +537,16 @@ function woocommerce_tax_rates_setting_save() {
 				$cities = explode( ';', $city );
 				$cities = array_map( 'strtoupper', array_map( 'woocommerce_clean', $cities ) );
 				foreach( $cities as $city ) {
-					$wpdb->insert(
-					$wpdb->prefix . "woocommerce_tax_rate_locations",
-						array(
-							'location_code' => $city,
-							'tax_rate_id'   => $tax_rate_id,
-							'location_type' => 'city',
-						)
-					);
+					if ( $city ) {
+						$wpdb->insert(
+						$wpdb->prefix . "woocommerce_tax_rate_locations",
+							array(
+								'location_code' => $city,
+								'tax_rate_id'   => $tax_rate_id,
+								'location_type' => 'city',
+							)
+						);
+					}
 				}
 			}
 

@@ -4,3 +4,6 @@ project.xml
 project.properties
 .DS_Store
 Thumbs.db
+.buildpath
+.project
+.settings*

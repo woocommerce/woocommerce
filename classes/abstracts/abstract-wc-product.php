@@ -6,105 +6,20 @@
  *
  * @class 		WC_Product
  * @version		2.0.0
- * @package		WooCommerce/Classes
+ * @package		WooCommerce/Abstracts
+ * @category	Abstract Class
  * @author 		WooThemes
  */
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
-abstract class WC_Product {
+class WC_Product {
 
 	/** @var int The product (post) ID. */
-	var $id;
-
-	/** @var array Array of custom fields (meta) containing product data. */
-	var $product_custom_fields;
-
-	/** @var array Array of product attributes. */
-	var $attributes;
+	public $id;
 
 	/** @var object The actual post object. */
-	var $post;
-
-	/** @var string "Yes" for downloadable products. */
-	var $downloadable;
-
-	/** @var string "Yes" for virtual products. */
-	var $virtual;
-
-	/** @var string The product SKU (stock keeping unit). */
-	var $sku;
-
-	/** @var string The product price. */
-	var $price;
-
-	/** @var string The product's visibility. */
-	var $visibility;
-
-	/** @var string The product's stock level (if applicable). */
-	var $stock;
-
-	/** @var string The product's stock status (instock or outofstock). */
-	var $stock_status;
-
-	/** @var string The product's backorder status. */
-	var $backorders;
-
-	/** @var bool True if the product is stock managed. */
-	var $manage_stock;
-
-	/** @var string The product's sale price. */
-	var $sale_price;
-
-	/** @var string The product's regular non-sale price. */
-	var $regular_price;
-
-	/** @var string The product's weight. */
-	var $weight;
-
-	/** @var string The product's length. */
-	var $length;
-
-	/** @var string The product's width. */
-	var $width;
-
-	/** @var string The product's height. */
-	var $height;
-
-	/** @var string The product's tax status. */
-	var $tax_status;
-
-	/** @var string The product's tax class. */
-	var $tax_class;
-
-	/** @var array Array of product ID's being up-sold. */
-	var $upsell_ids;
-
-	/** @var array Array of product ID's being cross-sold. */
-	var $crosssell_ids;
+	public $post;
 
 	/** @var string The product's type (simple, variable etc). */
-	var $product_type;
-
-	/** @var string Date a sale starts. */
-	var $sale_price_dates_from;
-
-	/** @var string Data a sale ends. */
-	var $sale_price_dates_to;
-
-	/** @var string "Yes" for featured products. */
-	var $featured;
-
-	/** @var string Shipping class slug for the product. */
-	var $shipping_class;
-
-	/** @var int Shipping class ID for the product. */
-	var $shipping_class_id;
-
-	/** @var string Formatted LxWxH. */
-	var $dimensions;
-
-	/** @var string "Yes" if sold individually. */
-	var $sold_individually;
+	public $product_type = null;
 
 	/**
 	 * __construct function.
@@ -112,38 +27,93 @@ abstract class WC_Product {
 	 * @access public
 	 * @param mixed $product
 	 */
-	function __construct( $product ) {
+	public function __construct( $product ) {
 
-		if ( is_object( $product ) ) {
-			$this->id = absint( $product->ID );
-			$this->post = $product;
-		} else {
-			$this->id = absint( $product );
-			$this->post = get_post( $this->id );
+		if ( ( function_exists( 'get_called_class' ) && get_called_class() == 'WC_Product' ) || ( ! function_exists( 'get_called_class' ) && is_null( $this->product_type ) ) ) {
+			_doing_it_wrong( 'WC_Product', __( 'The <code>WC_Product</code> class is now abstract. Use <code>get_product()</code> to instantiate an instance of a product instead of calling this class directly.', 'woocommerce' ), '2.0 of WooCommerce' );
+
+			$product = get_product( $product );
 		}
 
-		$this->product_custom_fields = get_post_custom( $this->id );
+		if ( is_object( $product ) ) {
+			$this->id   = absint( $product->ID );
+			$this->post = $product;
+		} else {
+			$this->id   = absint( $product );
+			$this->post = get_post( $this->id );
+		}
 	}
-
 
 	/**
-	 * Load the data from the custom fields
+	 * __isset function.
 	 *
 	 * @access public
-	 * @param mixed $fields
-	 * @param string $data (default: '')
-	 * @return void
+	 * @param mixed $key
+	 * @return bool
 	 */
-	function load_product_data( $fields, $data = '' ) {
-
-		if ( ! $data )
-			$data = $this->product_custom_fields;
-
-		if ( $fields )
-			foreach ( $fields as $key => $default )
-				$this->$key = isset( $data[ '_' . $key ][0] ) && $data[ '_' . $key ][0] !== '' ? $data[ '_' . $key ][0] : $default;
+	public function __isset( $key ) {
+		return metadata_exists( 'post', $this->id, '_' . $key );
 	}
 
+	/**
+	 * __get function.
+	 *
+	 * @access public
+	 * @param mixed $key
+	 * @return mixed
+	 */
+	public function __get( $key ) {
+
+		// Get values or default if not set
+		if ( in_array( $key, array( 'downloadable', 'virtual', 'backorders', 'manage_stock', 'featured', 'sold_individually' ) ) )
+			$value = ( $value = get_post_meta( $this->id, '_' . $key, true ) ) ? $value : 'no';
+
+		elseif( in_array( $key, array( 'product_attributes', 'crosssell_ids', 'upsell_ids' ) ) )
+			$value = ( $value = get_post_meta( $this->id, '_' . $key, true ) ) ? $value : array();
+
+		elseif ( 'visibility' == $key )
+			$value = ( $value = get_post_meta( $this->id, '_visibility', true ) ) ? $value : 'hidden';
+
+		elseif ( 'stock' == $key )
+			$value = ( $value = get_post_meta( $this->id, '_stock', true ) ) ? $value : 0;
+
+		elseif ( 'stock_status' == $key )
+			$value = ( $value = get_post_meta( $this->id, '_stock_status', true ) ) ? $value : 'instock';
+
+		elseif ( 'tax_status' == $key )
+			$value = ( $value = get_post_meta( $this->id, '_tax_status', true ) ) ? $value : 'taxable';
+
+		else
+			$value = get_post_meta( $this->id, '_' . $key, true );
+
+		return $value;
+	}
+
+	/**
+	 * Get the product's post data.
+	 *
+	 * @access public
+	 * @return object
+	 */
+	public function get_post_data() {
+		return $this->post;
+	}
+
+	/**
+	 * get_gallery_attachment_ids function.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	function get_gallery_attachment_ids() {
+		if ( ! isset( $this->product_image_gallery ) ) {
+			// Backwards compat
+			$attachment_ids = array_diff( get_posts( 'post_parent=' . $this->id . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image&fields=ids' ), array( get_post_thumbnail_id() ) );
+			$this->product_image_gallery = implode( ',', $attachment_ids );
+		}
+
+		return array_filter( (array) explode( ',', $this->product_image_gallery ) );
+	}
 
 	/**
      * Get SKU (Stock-keeping unit) - product unique ID.
@@ -178,6 +148,33 @@ abstract class WC_Product {
 
 
 	/**
+	 * Set stock level of the product.
+	 *
+	 * @access public
+	 * @param mixed $amount (default: null)
+	 * @return int Stock
+	 */
+	function set_stock( $amount = null ) {
+		global $woocommerce;
+
+		if ( $this->managing_stock() && ! is_null( $amount ) ) {
+			$this->stock = intval( $amount );
+			update_post_meta( $this->id, '_stock', $this->stock );
+
+			// Out of stock attribute
+			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= 0 )
+				$this->set_stock_status( 'outofstock' );
+			elseif ( $this->backorders_allowed() || $this->get_total_stock() > 0 )
+				$this->set_stock_status( 'instock' );
+
+			$woocommerce->clear_product_transients( $this->id ); // Clear transient
+
+			return $this->get_stock_quantity();
+		}
+	}
+
+
+	/**
 	 * Reduce stock level of the product.
 	 *
 	 * @access public
@@ -192,7 +189,7 @@ abstract class WC_Product {
 			update_post_meta( $this->id, '_stock', $this->stock );
 
 			// Out of stock attribute
-			if ( $this->managing_stock() && ! $this->backorders_allowed() && $this->get_total_stock() <= 0 )
+			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= 0 )
 				$this->set_stock_status( 'outofstock' );
 
 			$woocommerce->clear_product_transients( $this->id ); // Clear transient
@@ -217,7 +214,7 @@ abstract class WC_Product {
 			update_post_meta( $this->id, '_stock', $this->stock );
 
 			// Out of stock attribute
-			if ( $this->managing_stock() && ( $this->backorders_allowed() || $this->get_total_stock() > 0 ) )
+			if ( $this->backorders_allowed() || $this->get_total_stock() > 0 )
 				$this->set_stock_status( 'instock' );
 
 			$woocommerce->clear_product_transients( $this->id ); // Clear transient
@@ -292,7 +289,7 @@ abstract class WC_Product {
 	 */
 	function get_file_download_path( $download_id ) {
 
-		$file_paths = isset( $this->product_custom_fields['_file_paths'][0] ) ? $this->product_custom_fields['_file_paths'][0] : '';
+		$file_paths = isset( $this->file_paths ) ? $this->file_paths : '';
 		$file_paths = maybe_unserialize( $file_paths );
 		$file_paths = apply_filters( 'woocommerce_file_download_paths', $file_paths, $this->id, null, null );
 
@@ -341,8 +338,7 @@ abstract class WC_Product {
 	function is_sold_individually() {
 		$return = false;
 
-		// Sold individually if downloadable, virtual, and the option is enabled OR if intentionally a singular item
-		if ( 'yes' == $this->sold_individually || ( $this->is_downloadable() && $this->is_virtual() && get_option('woocommerce_limit_downloadable_product_qty') == 'yes' ) || ( ! $this->backorders_allowed() && $this->get_stock_quantity() == 1 ) ) {
+		if ( 'yes' == $this->sold_individually || ( ! $this->backorders_allowed() && $this->get_stock_quantity() == 1 ) ) {
 			$return = true;
 		}
 
@@ -675,10 +671,7 @@ abstract class WC_Product {
 	 * @return void
 	 */
 	function adjust_price( $price ) {
-		if ( $price > 0 )
-			$this->price += $price;
-		else
-			$this->price = $this->price - $price;
+		$this->price = $this->price + $price;
 	}
 
 
@@ -888,22 +881,49 @@ abstract class WC_Product {
 		return '<del>' . ( ( is_numeric( $from ) ) ? woocommerce_price( $from ) : $from ) . '</del> <ins>' . ( ( is_numeric( $to ) ) ? woocommerce_price( $to ) : $to ) . '</ins>';
 	}
 
-
 	/**
-	 * Returns the product rating in html format - ratings are stored in transient cache.
+	 * get_average_rating function.
 	 *
 	 * @access public
-	 * @param string $location (default: '')
 	 * @return void
 	 */
-	function get_rating_html( $location = '' ) {
-
-		if ( $location )
-			$location = '_' . $location;
-
-		$star_size = apply_filters( 'woocommerce_star_rating_size' . $location, 16 );
-
+	function get_average_rating() {
 		if ( false === ( $average_rating = get_transient( 'wc_average_rating_' . $this->id ) ) ) {
+
+			global $wpdb;
+
+			$average_rating = '';
+			$count          = $this->get_rating_count();
+
+			if ( $count > 0 ) {
+
+				$ratings = $wpdb->get_var( $wpdb->prepare("
+					SELECT SUM(meta_value) FROM $wpdb->commentmeta
+					LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
+					WHERE meta_key = 'rating'
+					AND comment_post_ID = %d
+					AND comment_approved = '1'
+					AND meta_value > 0
+				", $this->id ) );
+
+				$average_rating = number_format( $ratings / $count, 2 );
+
+			}
+
+			set_transient( 'wc_average_rating_' . $this->id, $average_rating );
+		}
+
+		return $average_rating;
+	}
+
+	/**
+	 * get_rating_count function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function get_rating_count() {
+		if ( false === ( $count = get_transient( 'wc_rating_count_' . $this->id ) ) ) {
 
 			global $wpdb;
 
@@ -916,26 +936,36 @@ abstract class WC_Product {
 				AND meta_value > 0
 			", $this->id ) );
 
-			$ratings = $wpdb->get_var( $wpdb->prepare("
-				SELECT SUM(meta_value) FROM $wpdb->commentmeta
-				LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
-				WHERE meta_key = 'rating'
-				AND comment_post_ID = %d
-				AND comment_approved = '1'
-			", $this->id ) );
-
-			if ( $count > 0 )
-				$average_rating = number_format($ratings / $count, 2);
-			else
-				$average_rating = '';
-
-			set_transient( 'wc_average_rating_' . $this->id, $average_rating );
+			set_transient( 'wc_rating_count_' . $this->id, $count );
 		}
 
-		if ( $average_rating > 0 )
-			return '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $average_rating ) . '"><span style="width:' . ( $average_rating * $star_size ) . 'px"><span class="rating">' . $average_rating . '</span> ' . __( 'out of 5', 'woocommerce' ) . '</span></div>';
-		else
-			return '';
+		return $count;
+	}
+
+	/**
+	 * Returns the product rating in html format - ratings are stored in transient cache.
+	 *
+	 * @access public
+	 * @param string $location (default: '')
+	 * @return void
+	 */
+	function get_rating_html( $location = '' ) {
+
+		$average_rating = $this->get_average_rating();
+
+		if ( $average_rating > 0 ) {
+
+			if ( $location )
+				$location = '_' . $location;
+
+			$rating_html  = '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $average_rating ) . '">';
+
+			$rating_html .= '<span style="width:' . ( ( $average_rating / 5 ) * 100 ) . '%"><strong class="rating">' . $average_rating . '</strong> ' . __( 'out of 5', 'woocommerce' ) . '</span>';
+
+			$rating_html .= '</div>';
+
+			return $rating_html;
+		}
 	}
 
 
@@ -951,7 +981,7 @@ abstract class WC_Product {
 
 
 	/**
-	 * Returns the crosssell product ids.
+	 * Returns the cross sell product ids.
 	 *
 	 * @access public
 	 * @return array
@@ -980,8 +1010,7 @@ abstract class WC_Product {
 	 * Returns the product tags.
 	 *
 	 * @access public
-	 * @param string $sep (default: ')
-	 * @param mixed '
+	 * @param string $sep (default: ', ')
 	 * @param string $before (default: '')
 	 * @param string $after (default: '')
 	 * @return array
@@ -1090,7 +1119,7 @@ abstract class WC_Product {
 	 *
 	 * @access public
 	 * @param mixed $attr
-	 * @return mixed
+	 * @return string
 	 */
 	function get_attribute( $attr ) {
 		$attributes = $this->get_attributes();
@@ -1112,7 +1141,8 @@ abstract class WC_Product {
 			}
 
 		}
-		return false;
+
+		return '';
 	}
 
 
@@ -1123,16 +1153,7 @@ abstract class WC_Product {
 	 * @return array
 	 */
 	function get_attributes() {
-
-		if ( ! is_array( $this->attributes ) ) {
-
-			if ( isset( $this->product_custom_fields['_product_attributes'][0] ) )
-				$this->attributes = maybe_unserialize( maybe_unserialize( $this->product_custom_fields['_product_attributes'][0] ));
-			else
-				$this->attributes = array();
-		}
-
-		return (array) $this->attributes;
+		return (array) maybe_unserialize( $this->product_attributes );
 	}
 
 

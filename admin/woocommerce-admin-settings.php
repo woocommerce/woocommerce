@@ -52,20 +52,24 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 	    	 	include_once( 'settings/settings-save.php' );
 
 		    	switch ( $current_tab ) {
-					case "general" :
-					case "pages" :
-					case "catalog" :
-					case "inventory" :
-					case "payment" :
-					case "shipping" :
-					case "tax" :
-					case "email" :
+					case "payment_gateways" :
 						woocommerce_update_options( $woocommerce_settings[ $current_tab ] );
+						$woocommerce->payment_gateways->process_admin_options();
+					break;
+					case "shipping" :
+						woocommerce_update_options( $woocommerce_settings[ $current_tab ] );
+						$woocommerce->shipping->process_admin_options();
+					break;
+					default :
+						if ( isset( $woocommerce_settings[ $current_tab ] ) )
+							woocommerce_update_options( $woocommerce_settings[ $current_tab ] );
+
+						// Trigger action for tab
+						do_action( 'woocommerce_update_options_' . $current_tab );
 					break;
 				}
 
 				do_action( 'woocommerce_update_options' );
-				do_action( 'woocommerce_update_options_' . $current_tab );
 
 				// Handle Colour Settings
 				if ( $current_tab == 'general' && get_option('woocommerce_frontend_css') == 'yes' ) {
@@ -95,7 +99,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 			} else {
 
 				// If saving a shipping methods options, load 'er up
-				if ( $current_tab == 'shipping' && class_exists( $current_section ) ) {
+				if ( ( $current_tab == 'shipping' || $current_tab == 'payment_gateways' && class_exists( $current_section ) ) ) {
 
 					$current_section_class = new $current_section();
 					do_action( 'woocommerce_update_options_' . $current_tab . '_' . $current_section_class->id );
@@ -104,7 +108,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 				} elseif ( $current_tab == 'email' ) {
 
 					// Load mailer
-					$mailer 	= $woocommerce->mailer();
+					$mailer = $woocommerce->mailer();
 
 					if ( class_exists( $current_section ) ) {
 						$current_section_class = new $current_section();
@@ -165,45 +169,8 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 	    }
 
 	    // Hide WC Link
-	    if (isset($_GET['hide-wc-extensions-message']))
-	    	update_option('hide-wc-extensions-message', 1);
-
-	    // Install/page installer
-	    $install_complete = false;
-
-	    // Add pages button
-	    if (isset($_GET['install_woocommerce_pages']) && $_GET['install_woocommerce_pages']) {
-
-			require_once( 'woocommerce-admin-install.php' );
-	    	woocommerce_create_pages();
-	    	update_option('skip_install_woocommerce_pages', 1);
-	    	$install_complete = true;
-
-		// Skip button
-	    } elseif (isset($_GET['skip_install_woocommerce_pages']) && $_GET['skip_install_woocommerce_pages']) {
-
-	    	update_option('skip_install_woocommerce_pages', 1);
-	    	$install_complete = true;
-
-	    }
-
-		if ($install_complete) {
-			?>
-	    	<div id="message" class="updated woocommerce-message wc-connect">
-				<div class="squeezer">
-					<h4><?php _e( '<strong>Congratulations!</strong> &#8211; WooCommerce has been installed and setup. Enjoy :)', 'woocommerce' ); ?></h4>
-					<p><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="A open-source (free) #ecommerce plugin for #WordPress that helps you sell anything. Beautifully." data-via="WooThemes" data-size="large" data-hashtags="WooCommerce">Tweet</a>
-		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></p>
-				</div>
-			</div>
-			<?php
-
-			// Flush rules after install
-			flush_rewrite_rules( false );
-
-			// Set installed option
-			update_option('woocommerce_installed', 0);
-		}
+	    if ( ! empty( $_GET['hide-wc-extensions-message'] ) )
+	    	update_option( 'hide-wc-extensions-message', 1 );
 	    ?>
 		<div class="wrap woocommerce">
 			<form method="post" id="mainform" action="" enctype="multipart/form-data">
@@ -220,6 +187,9 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 							'email' => __( 'Emails', 'woocommerce' ),
 							'integration' => __( 'Integration', 'woocommerce' )
 						);
+
+						if ( ! $woocommerce->integrations->get_integrations() )
+							unset( $tabs['integration'] );
 
 						$tabs = apply_filters('woocommerce_settings_tabs_array', $tabs);
 
@@ -345,37 +315,43 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 									}
 								}
 			            	} else {
-			            		woocommerce_admin_fields( $woocommerce_settings[$current_tab] );
+			            		woocommerce_admin_fields( $woocommerce_settings[ $current_tab ] );
 			            	}
 
 						break;
 						case "payment_gateways" :
 							include('settings/settings-payment-gateways.php');
 
-							$links = array( '<a href="#payment-gateways">'.__( 'Payment Gateways', 'woocommerce' ).'</a>' );
+							$current = $current_section ? '' : 'class="current"';
 
-			            	foreach ( $woocommerce->payment_gateways->payment_gateways() as $gateway ) :
-			            		$title = empty( $gateway->method_title ) ? ucwords( $gateway->id ) : ucwords( $gateway->method_title );
+							$links = array( '<a href="' . admin_url('admin.php?page=woocommerce_settings&tab=payment_gateways') . '" ' . $current . '>' . __( 'Payment Gateways', 'woocommerce' ) . '</a>' );
 
-			            		$links[] = '<a href="#gateway-'.$gateway->id.'">' . esc_html( $title ) . '</a>';
-							endforeach;
+							// Load shipping methods so we can show any global options they may have
+							$payment_gateways = $woocommerce->payment_gateways->payment_gateways();
 
-							echo '<div class="subsubsub_section"><ul class="subsubsub"><li>' . implode( ' | </li><li>', $links ) . '</li></ul><br class="clear" />';
+							foreach ( $payment_gateways as $gateway ) {
 
-							echo '<div class="section" id="payment-gateways">';
+								$title = empty( $gateway->method_title ) ? ucwords( $gateway->id ) : ucwords( $gateway->method_title );
 
-							woocommerce_admin_fields( $woocommerce_settings[$current_tab] );
+								$current = ( get_class( $gateway ) == $current_section ) ? 'class="current"' : '';
 
-							echo '</div>';
+								$links[] = '<a href="' . add_query_arg( 'section', get_class( $gateway ), admin_url('admin.php?page=woocommerce_settings&tab=payment_gateways') ) . '"' . $current . '>' . esc_html( $title ) . '</a>';
+
+							}
+
+							echo '<ul class="subsubsub"><li>' . implode( ' | </li><li>', $links ) . '</li></ul><br class="clear" />';
 
 							// Specific method options
-			            	foreach ( $woocommerce->payment_gateways->payment_gateways() as $gateway ) {
-			            		echo '<div class="section" id="gateway-'.$gateway->id.'">';
-		            			$gateway->admin_options();
-		            			echo '</div>';
+							if ( $current_section ) {
+								foreach ( $payment_gateways as $gateway ) {
+									if ( get_class( $gateway ) == $current_section ) {
+										$gateway->admin_options();
+										break;
+									}
+								}
+			            	} else {
+			            		woocommerce_admin_fields( $woocommerce_settings[ $current_tab ] );
 			            	}
-
-							echo '</div>';
 
 						break;
 						case "integration" :
@@ -383,6 +359,8 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 							$integrations = $woocommerce->integrations->get_integrations();
 
 							$current_section = empty( $current_section ) ? key( $integrations ) : $current_section;
+
+							$links = array();
 
 							foreach ( $integrations as $integration ) {
 								$title = empty( $integration->method_title ) ? ucwords( $integration->id ) : ucwords( $integration->method_title );
@@ -413,32 +391,6 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 
 			<script type="text/javascript">
 				jQuery(window).load(function(){
-					// Subsubsub tabs
-					jQuery('div.subsubsub_section ul.subsubsub li a:eq(0)').addClass('current');
-					jQuery('div.subsubsub_section .section:gt(0)').hide();
-
-					jQuery('div.subsubsub_section ul.subsubsub li a').click(function(){
-						var $clicked = jQuery(this);
-						var $section = $clicked.closest('.subsubsub_section');
-						var $target  = $clicked.attr('href');
-
-						$section.find('a').removeClass('current');
-
-						if ( $section.find('.section:visible').size() > 0 ) {
-							$section.find('.section:visible').fadeOut( 100, function() {
-								$section.find( $target ).fadeIn('fast');
-							});
-						} else {
-							$section.find( $target ).fadeIn('fast');
-						}
-
-						$clicked.addClass('current');
-						jQuery('#last_tab').val( $target );
-
-						return false;
-					});
-
-					<?php if ( ! empty( $_GET['subtab'] ) ) echo 'jQuery("div.subsubsub_section ul.subsubsub li a[href=#' . esc_js( $_GET['subtab'] ) . ']").click();'; ?>
 
 					// Countries
 					jQuery('select#woocommerce_allowed_countries').change(function(){
@@ -553,10 +505,10 @@ function woocommerce_settings_get_option( $option_name, $default = '' ) {
 
 	if ( is_array( $option_value ) )
 		$option_value = array_map( 'stripslashes', $option_value );
-	elseif ( $option_value )
+	elseif ( ! is_null( $option_value ) )
 		$option_value = stripslashes( $option_value );
 
-	return $option_value == null ? $default : $option_value;
+	return $option_value === null ? $default : $option_value;
 }
 
 /**
@@ -609,9 +561,13 @@ function woocommerce_admin_fields( $options ) {
 		}
 
 		if ( $tip && in_array( $value['type'], array( 'checkbox' ) ) ) {
-			$tip = '<span class="help_tip" data-tip="' . esc_attr( $tip ) . '">[?]</span>';
+
+			$tip = '<p class="description">' . $tip . '</p>';
+
 		} elseif ( $tip ) {
+
 			$tip = '<img class="help_tip" data-tip="' . esc_attr( $tip ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
+
 		}
 
 		// Switch based on type
@@ -637,6 +593,7 @@ function woocommerce_admin_fields( $options ) {
             case 'email':
             case 'number':
             case 'color' :
+            case 'password' :
 
             	$type 			= $value['type'];
             	$class 			= '';
@@ -704,7 +661,7 @@ function woocommerce_admin_fields( $options ) {
 					</th>
                     <td class="forminp forminp-<?php echo sanitize_title( $value['type'] ) ?>">
                     	<select
-                    		name="<?php echo esc_attr( $value['id'] ); ?>"
+                    		name="<?php echo esc_attr( $value['id'] ); ?><?php if ( $value['type'] == 'multiselect' ) echo '[]'; ?>"
                     		id="<?php echo esc_attr( $value['id'] ); ?>"
                     		style="<?php echo esc_attr( $value['css'] ); ?>"
                     		class="<?php echo esc_attr( $value['class'] ); ?>"
@@ -807,7 +764,7 @@ function woocommerce_admin_fields( $options ) {
 						value="1"
 						<?php checked( $option_value, 'yes'); ?>
 						<?php echo implode( ' ', $custom_attributes ); ?>
-					/> <?php echo wp_kses_post( $value['desc'] ) ?></label> <?php echo $tip; ?><br />
+					/> <?php echo wp_kses_post( $value['desc'] ) ?></label> <?php echo $tip; ?>
 				<?php
 
 				if ( ! isset( $value['checkboxgroup'] ) || ( isset( $value['checkboxgroup'] ) && $value['checkboxgroup'] == 'end' ) ) {
@@ -832,7 +789,7 @@ function woocommerce_admin_fields( $options ) {
             	$crop 	= checked( 1, woocommerce_settings_get_option( $value['id'] . '[crop]', $value['default']['crop'] ), false );
 
             	?><tr valign="top">
-					<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?></th>
+					<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?> <?php echo $tip; ?></th>
                     <td class="forminp">
 
                     	<?php _e( 'Width', 'woocommerce' ); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>[width]" id="<?php echo esc_attr( $value['id'] ); ?>-width" type="text" size="3" value="<?php echo $width; ?>" />
@@ -841,7 +798,7 @@ function woocommerce_admin_fields( $options ) {
 
                     	<label><?php _e( 'Hard Crop', 'woocommerce' ); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>[crop]" id="<?php echo esc_attr( $value['id'] ); ?>-crop" type="checkbox" <?php echo $crop; ?> /></label>
 
-                    	<?php echo $description; ?></td>
+                    	</td>
                 </tr><?php
             break;
 

@@ -84,7 +84,7 @@ jQuery( function($){
 		$('#catalog-visibility-select').slideUp('fast');
 		$('#catalog-visibility .edit-catalog-visibility').show();
 
-		var current_visibility = $('#current_visibilty').val();
+		var current_visibility = $('#current_visibility').val();
 		var current_featured = $('#current_featured').val();
 
 		$('input[name=_visibility]').removeAttr('checked');
@@ -171,10 +171,9 @@ jQuery( function($){
 	});
 
 	$('a.edit_address').click(function(event){
-
 		$(this).hide();
-		$(this).closest('.order_data').find('div.address').hide();
-		$(this).closest('.order_data').find('div.edit_address').show();
+		$(this).closest('.order_data_column').find('div.address').hide();
+		$(this).closest('.order_data_column').find('div.edit_address').show();
 		event.preventDefault();
 	});
 
@@ -297,7 +296,7 @@ jQuery( function($){
 	$('span.inline_total').closest('.totals_group').find('input').change();
 
 	// Calculate totals
-	$('button.calc_line_taxes').live('click', function(){
+	$('button.calc_line_taxes').click(function(){
 		// Block write panel
 		$('.woocommerce_order_items_wrapper').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 
@@ -351,19 +350,21 @@ jQuery( function($){
 
 			$.post( woocommerce_writepanel_params.ajax_url, data, function( response ) {
 
-				result = jQuery.parseJSON( response );
+				if ( response ) {
 
-				$items.each( function() {
-					var $row = $(this);
-					var item_id = $row.find('input.order_item_id').val();
+					$items.each( function() {
+						var $row = $(this);
+						var item_id = $row.find('input.order_item_id').val();
 
-					$row.find('input.line_tax').val( result['item_taxes'][ item_id ]['line_tax'] ).change();
-					$row.find('input.line_subtotal_tax').val( result['item_taxes'][ item_id ]['line_subtotal_tax'] ).change();
-					$('#tax_rows').empty().append( result['tax_row_html'] );
-				} );
+						$row.find('input.line_tax').val( response['item_taxes'][ item_id ]['line_tax'] ).change();
+						$row.find('input.line_subtotal_tax').val( response['item_taxes'][ item_id ]['line_subtotal_tax'] ).change();
+						$('#tax_rows').empty().append( response['tax_row_html'] );
+					} );
 
-				$('#_order_tax').val( result['item_tax'] ).change();
-				$('#_order_shipping_tax').val( result['shipping_tax'] ).change();
+					$('#_order_tax').val( response['item_tax'] ).change();
+					$('#_order_shipping_tax').val( response['shipping_tax'] ).change();
+
+				}
 
 				$('.woocommerce_order_items_wrapper').unblock();
 			});
@@ -379,7 +380,7 @@ jQuery( function($){
 	});
 
 
-	$('button.calc_totals').live('click', function(){
+	$('button.calc_totals').click( function(){
 		// Block write panel
 		$('#woocommerce-order-totals').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 
@@ -393,25 +394,25 @@ jQuery( function($){
 			var line_totals 		= 0;
 			var cart_discount 		= 0;
 			var cart_tax 			= 0;
-			var order_shipping 		= accounting.unformat( $('#_order_shipping').val() );
-			var order_shipping_tax 	= accounting.unformat( $('#_order_shipping_tax').val() );
-			var order_discount		= accounting.unformat( $('#_order_discount').val() );
+			var order_shipping 		= $('#_order_shipping').val() || '0';
+			var order_shipping_tax 	= $('#_order_shipping_tax').val() || '0';
+			var order_discount		= $('#_order_discount').val() || '0';
 
-			if ( ! order_shipping ) order_shipping = 0;
-			if ( ! order_shipping_tax ) order_shipping_tax = 0;
-			if ( ! order_discount ) order_discount = 0;
+			order_shipping = accounting.unformat( order_shipping.replace(',', '.') );
+			order_shipping_tax = accounting.unformat( order_shipping_tax.replace(',', '.') );
+			order_discount = accounting.unformat( order_discount.replace(',', '.') );
 
 			$('#order_items_list tr.item').each(function(){
 
-				var line_subtotal 		= accounting.unformat( $(this).find('input.line_subtotal').val() );
-				var line_subtotal_tax 	= accounting.unformat( $(this).find('input.line_subtotal_tax').val() );
-				var line_total 			= accounting.unformat( $(this).find('input.line_total').val() );
-				var line_tax 			= accounting.unformat( $(this).find('input.line_tax').val() );
+				var line_subtotal 		= $(this).find('input.line_subtotal').val() || '0';
+				var line_subtotal_tax 	= $(this).find('input.line_subtotal_tax').val() || '0';
+				var line_total 			= $(this).find('input.line_total').val() || '0';
+				var line_tax 			= $(this).find('input.line_tax').val() || '0';
 
-				if ( ! line_subtotal ) line_subtotal = 0;
-				if ( ! line_subtotal_tax ) line_subtotal_tax = 0;
-				if ( ! line_total ) line_total = 0;
-				if ( ! line_tax ) line_tax = 0;
+				line_subtotal = accounting.unformat( line_subtotal.replace(',', '.') );
+				line_subtotal_tax = accounting.unformat( line_subtotal_tax.replace(',', '.') );
+				line_total = accounting.unformat( line_total.replace(',', '.') );
+				line_tax = accounting.unformat( line_tax.replace(',', '.') );
 
 				line_subtotals = line_subtotals + line_subtotal;
 				line_subtotal_taxes = line_subtotal_taxes + line_subtotal_tax;
@@ -435,11 +436,11 @@ jQuery( function($){
 			cart_discount = accounting.toFixed( cart_discount, 2 );
 
 			$('#order_items_list tr.fee').each(function(){
-				var line_total 			= accounting.unformat( $(this).find('input.line_total').val() );
-				var line_tax 			= accounting.unformat( $(this).find('input.line_tax').val() );
+				var line_total 			= $(this).find('input.line_total').val() || '0';;
+				var line_tax 			= $(this).find('input.line_tax').val() || '0';;
 
-				if ( ! line_total ) line_total = 0;
-				if ( ! line_tax ) line_tax = 0;
+				line_total = accounting.unformat( line_total.replace(',', '.') );
+				line_tax = accounting.unformat( line_tax.replace(',', '.') );
 
 				line_totals = line_totals + line_total;
 
@@ -452,7 +453,7 @@ jQuery( function($){
 
 			// Tax
 			if (woocommerce_writepanel_params.round_at_subtotal=='yes') {
-				cart_tax = accounting.toFixed( cart_tax, 2 );
+				cart_tax = parseFloat( accounting.toFixed( cart_tax, 2 ) );
 			}
 
 			// Total
@@ -543,7 +544,7 @@ jQuery( function($){
 	});
 
 	// Add some meta to a line item
-	$('#order_items_list button.add_order_item_meta').live('click', function(){
+	$('#order_items_list').on('click', 'button.add_order_item_meta', function(){
 
 		var $button = $(this);
 		var $item = $button.closest('tr.item');
@@ -569,7 +570,7 @@ jQuery( function($){
 		return false;
 	});
 
-	$('#order_items_list button.remove_order_item_meta').live('click', function(){
+	$('#order_items_list').on('click', 'button.remove_order_item_meta', function(){
 		var answer = confirm( woocommerce_writepanel_params.remove_item_meta )
 		if ( answer ) {
 			var $row = $(this).closest('tr');
@@ -617,6 +618,11 @@ jQuery( function($){
 
 		} );
 
+		if ( item_ids.length == 0 ) {
+			alert( woocommerce_writepanel_params.i18n_select_items );
+			return;
+		}
+
 		if ( action == 'delete' ) {
 
 			var answer = confirm( woocommerce_writepanel_params.remove_item_notice );
@@ -637,43 +643,8 @@ jQuery( function($){
 					type: 'POST',
 					success: function( response ) {
 						$(selected_rows).each( function() {
-							$(this).closest('tr.item, tr.fee').hide();
+							$(this).closest('tr.item, tr.fee').remove();
 						} );
-						$('table.woocommerce_order_items').unblock();
-					}
-				} );
-
-			}
-
-		} else if ( action == 'refund' ) {
-
-			var order_id = $('#post_ID').val();
-
-			var answer = confirm( woocommerce_writepanel_params.refund_item_notice );
-
-			if ( answer ) {
-
-				$('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
-
-				var data = {
-					order_id:           order_id,
-					order_item_ids: 	item_ids,
-					action: 			'woocommerce_refund_order_item',
-					security: 			woocommerce_writepanel_params.order_item_nonce
-				};
-
-				$.ajax( {
-					url: woocommerce_writepanel_params.ajax_url,
-					data: data,
-					type: 'POST',
-					success: function( response ) {
-						$.each( item_ids, function( i, val ) {
-							$('tbody#order_items_list tr[data-order_item_id="' + val + '"]').addClass( 'refunded' );
-						});
-
-						var response_obj = $.parseJSON(response);
-						$('#_order_refund_total').val( response_obj.refund_total );
-
 						$('table.woocommerce_order_items').unblock();
 					}
 				} );
@@ -749,7 +720,7 @@ jQuery( function($){
 	} );
 
 
-	$('button.load_customer_billing').live('click', function(){
+	$('button.load_customer_billing').click(function(){
 
 		var answer = confirm(woocommerce_writepanel_params.load_billing);
 		if (answer){
@@ -776,7 +747,7 @@ jQuery( function($){
 				data: data,
 				type: 'POST',
 				success: function( response ) {
-					var info = jQuery.parseJSON(response);
+					var info = response;
 
 					if (info) {
 						$('input#_billing_first_name').val( info.billing_first_name );
@@ -799,7 +770,7 @@ jQuery( function($){
 		return false;
 	});
 
-	$('button.load_customer_shipping').live('click', function(){
+	$('button.load_customer_shipping').click(function(){
 
 		var answer = confirm(woocommerce_writepanel_params.load_shipping);
 		if (answer){
@@ -826,7 +797,7 @@ jQuery( function($){
 				data: data,
 				type: 'POST',
 				success: function( response ) {
-					var info = jQuery.parseJSON(response);
+					var info = response;
 
 					if (info) {
 						$('input#_shipping_first_name').val( info.shipping_first_name );
@@ -847,7 +818,7 @@ jQuery( function($){
 		return false;
 	});
 
-	$('button.billing-same-as-shipping').live('click', function(){
+	$('button.billing-same-as-shipping').click(function(){
 		var answer = confirm(woocommerce_writepanel_params.copy_billing);
 		if (answer){
 			$('input#_shipping_first_name').val( $('input#_billing_first_name').val() );
@@ -864,7 +835,7 @@ jQuery( function($){
 	});
 
 	// Add a tax row
-	$('a.add_tax_row').live('click', function(){
+	$('a.add_tax_row').click(function(){
 
 		var data = {
 			order_id: 	woocommerce_writepanel_params.post_id,
@@ -887,10 +858,11 @@ jQuery( function($){
 	});
 
 	// Delete a tax row
-	$('a.delete_tax_row').live('click', function(){
-		$tax_row = $(this).closest('.tax_row');
+	$('#tax_rows').on('click','a.delete_tax_row',function(){
 
-		var tax_row_id = $tax_row.attr( 'data-order_item_id' )
+		var $tax_row = $(this).closest('.tax_row');
+
+		var tax_row_id = $tax_row.attr( 'data-order_item_id' );
 
 		var data = {
 			tax_row_id: tax_row_id,
@@ -953,8 +925,16 @@ jQuery( function($){
 		var is_downloadable = $('input#_downloadable:checked').size();
 
 		// Hide/Show all with rules
-		$('.hide_if_simple, .hide_if_grouped, .hide_if_variable, .hide_if_external, .hide_if_downloadable, .hide_if_virtual').show();
-		$('.show_if_simple, .show_if_grouped, .show_if_variable, .show_if_external, .show_if_downloadable, .show_if_virtual').hide();
+		var hide_classes = '.hide_if_downloadable, .hide_if_virtual';
+		var show_classes = '.show_if_downloadable, .show_if_virtual, .show_if_external';
+
+		$.each( woocommerce_writepanel_params.product_types, function( index, value ) {
+			hide_classes = hide_classes + ', .hide_if_' + value;
+			show_classes = show_classes + ', .show_if_' + value;
+		} );
+
+		$( hide_classes ).show();
+		$( show_classes ).hide();
 
 		// Shows rules
 		if ( is_downloadable ) {
@@ -964,15 +944,7 @@ jQuery( function($){
 			$('.show_if_virtual').show();
 		}
 
-		if ( product_type == 'simple' ) {
-			$('.show_if_simple').show();
-		} else if ( product_type == 'variable' ) {
-			$('.show_if_variable').show();
-		} else if ( product_type == 'grouped' ) {
-			$('.show_if_grouped').show();
-		} else if ( product_type == 'external' ) {
-			$('.show_if_external').show();
-		}
+        $('.show_if_' + product_type).show();
 
 		// Hide rules
 		if ( is_downloadable ) {
@@ -982,15 +954,9 @@ jQuery( function($){
 			$('.hide_if_virtual').hide();
 		}
 
-		if ( product_type == 'simple' ) {
-			$('.hide_if_simple').hide();
-		} else if ( product_type == 'variable' ) {
-			$('.hide_if_variable').hide();
-		} else if ( product_type == 'grouped' ) {
-			$('.hide_if_grouped').hide();
-		} else if ( product_type == 'external' ) {
-			$('.hide_if_external').hide();
-		}
+		$('.hide_if_' + product_type).hide();
+
+		$('input#_manage_stock').change();
 	}
 
 
@@ -1086,22 +1052,20 @@ jQuery( function($){
 
 	// META BOXES
 
-		jQuery('.expand_all').click(function(){
-			jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > table').show();
-			return false;
-		});
-
-		jQuery('.close_all').click(function(){
-			jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > table').hide();
-			return false;
-		});
-
 		// Open/close
 		jQuery('.wc-metaboxes-wrapper').on('click', '.wc-metabox h3', function(event){
 			// If the user clicks on some form input inside the h3, like a select list (for variations), the box should not be toggled
 			if ($(event.target).filter(':input, option').length) return;
 
 			jQuery(this).next('.wc-metabox-content').toggle();
+		})
+		.on('click', '.expand_all', function(event){
+			jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > table').show();
+			return false;
+		})
+		.on('click', '.close_all', function(event){
+			jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > table').hide();
+			return false;
 		});
 
 		jQuery('.wc-metabox.closed').each(function(){
@@ -1164,13 +1128,13 @@ jQuery( function($){
 								</tr>\
 								<tr>\
 									<td>\
-										<label><input type="checkbox" class="checkbox" checked="checked" name="attribute_visibility[' + size + ']" value="1" /> ' + woocommerce_writepanel_params.visible_label + '</label>\
+										<label><input type="checkbox" class="checkbox" ' + ( woocommerce_writepanel_params.default_attribute_visibility ? 'checked="checked"' : '' ) + ' name="attribute_visibility[' + size + ']" value="1" /> ' + woocommerce_writepanel_params.visible_label + '</label>\
 									</td>\
 								</tr>\
 								<tr>\
 									<td>\
 										<div class="enable_variation show_if_variable" ' + enable_variation + '>\
-										<label><input type="checkbox" class="checkbox" name="attribute_variation[' + size + ']" value="1" /> ' + woocommerce_writepanel_params.used_for_variations_label + '</label>\
+										<label><input type="checkbox" class="checkbox" ' + ( woocommerce_writepanel_params.default_attribute_variation ? 'checked="checked"' : '' ) + ' name="attribute_variation[' + size + ']" value="1" /> ' + woocommerce_writepanel_params.used_for_variations_label + '</label>\
 										</div>\
 									</td>\
 								</tr>\
@@ -1264,14 +1228,12 @@ jQuery( function($){
 
 				$.post( woocommerce_writepanel_params.ajax_url, data, function( response ) {
 
-					result = jQuery.parseJSON( response );
-
-					if ( result.error ) {
+					if ( response.error ) {
 						// Error
-						alert( result.error );
-					} else if ( result.slug ) {
+						alert( response.error );
+					} else if ( response.slug ) {
 						// Success
-						$wrapper.find('select.attribute_values').append('<option value="' + result.slug + '" selected="selected">' + result.name + '</option>');
+						$wrapper.find('select.attribute_values').append('<option value="' + response.slug + '" selected="selected">' + response.name + '</option>');
 						$wrapper.find('select.attribute_values').trigger("liszt:updated");
 					}
 
@@ -1294,7 +1256,7 @@ jQuery( function($){
 
 			var data = {
 				post_id: 		woocommerce_writepanel_params.post_id,
-				data:			$('.woocommerce_attributes').find('input, select').serialize(),
+				data:			$('.woocommerce_attributes').find('input, select, textarea').serialize(),
 				action: 		'woocommerce_save_attributes',
 				security: 		woocommerce_writepanel_params.save_attributes_nonce
 			};
@@ -1318,32 +1280,74 @@ jQuery( function($){
 		});
 
 	// Uploading files
-	var file_path_field;
+	var downloadable_file_frame;
 
-	window.send_to_editor_default = window.send_to_editor;
+	jQuery(document).on( 'click', '.upload_file_button', function( event ){
 
-	jQuery('.upload_file_button').live('click', function(){
+		var $el = $(this);
+		var $file_path_field = $el.parent().find('.file_paths');
+		var file_paths = $file_path_field.val();
 
-		file_path_field = jQuery(this).parent().find('.file_paths');
+		event.preventDefault();
 
-		formfield = jQuery(file_path_field).attr('name');
-
-		window.send_to_editor = window.send_to_download_url;
-
-		tb_show('', 'media-upload.php?type=downloadable_product&amp;from=wc01&amp;TB_iframe=true');
-		return false;
-	});
-
-	window.send_to_download_url = function(html) {
-
-		file_url = jQuery(html).attr('href');
-		if (file_url) {
-			jQuery(file_path_field).val(jQuery(file_path_field).val() ? jQuery(file_path_field).val() + "\n" + file_url : file_url);
+		// If the media frame already exists, reopen it.
+		if ( downloadable_file_frame ) {
+			downloadable_file_frame.open();
+			return;
 		}
-		tb_remove();
-		window.send_to_editor = window.send_to_editor_default;
 
-	}
+		var downloadable_file_states = [
+			// Main states.
+			new wp.media.controller.Library({
+				library:   wp.media.query(),
+				multiple:  true,
+				title:     $el.data('choose'),
+				priority:  20,
+				filterable: 'uploaded',
+			})
+		];
+
+		// Create the media frame.
+		downloadable_file_frame = wp.media.frames.downloadable_file = wp.media({
+			// Set the title of the modal.
+			title: $el.data('choose'),
+			library: {
+				type: ''
+			},
+			button: {
+				text: $el.data('update'),
+			},
+			multiple: true,
+			states: downloadable_file_states,
+		});
+
+		// When an image is selected, run a callback.
+		downloadable_file_frame.on( 'select', function() {
+
+			var selection = downloadable_file_frame.state().get('selection');
+
+			selection.map( function( attachment ) {
+
+				attachment = attachment.toJSON();
+
+				if ( attachment.url )
+					file_paths = file_paths ? file_paths + "\n" + attachment.url : attachment.url
+
+			} );
+
+			$file_path_field.val( file_paths );
+		});
+
+		// Set post to 0 and set our custom type
+		downloadable_file_frame.on( 'ready', function() {
+			downloadable_file_frame.uploader.options.uploader.params = {
+				type: 'downloadable_product'
+			};
+		});
+
+		// Finally, open the modal.
+		downloadable_file_frame.open();
+	});
 
 });
 

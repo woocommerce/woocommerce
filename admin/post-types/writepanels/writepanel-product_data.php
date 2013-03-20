@@ -30,7 +30,7 @@ function woocommerce_product_data_box() {
 	$thepostid = $post->ID;
 
 	if ( $terms = wp_get_object_terms( $post->ID, 'product_type' ) )
-		$product_type = current( $terms )->slug;
+		$product_type = sanitize_title( current( $terms )->name );
 	else
 		$product_type = 'simple';
 
@@ -151,7 +151,7 @@ function woocommerce_product_data_box() {
 
 				echo '<p class="form-field"><label for="_file_paths">' . __( 'File paths (one per line)', 'woocommerce' ) . ':</label>
 					<textarea style="float:left;height:5em;" id="_file_paths" class="short file_paths" cols="20" rows="3" placeholder="' . __( 'File paths/URLs, one per line', 'woocommerce' ) . '" name="_file_paths" wrap="off">' . esc_textarea( $file_paths ) . '</textarea>
-					<input type="button" class="upload_file_button button" value="' . __( 'Upload a file', 'woocommerce' ) . '" />
+					<input type="button" class="upload_file_button button" data-choose="' . __( 'Choose a file', 'woocommerce' ) . '" data-update="' . __( 'Insert file URL', 'woocommerce' ) . '" value="' . __( 'Choose a file', 'woocommerce' ) . '" />
 				</p>';
 
 				// Download Limit
@@ -170,27 +170,31 @@ function woocommerce_product_data_box() {
 
 			echo '</div>';
 
-			echo '<div class="options_group show_if_simple show_if_external show_if_variable">';
+			if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) {
 
-				// Tax
-				woocommerce_wp_select( array( 'id' => '_tax_status', 'label' => __( 'Tax Status', 'woocommerce' ), 'options' => array(
-					'taxable' 	=> __( 'Taxable', 'woocommerce' ),
-					'shipping' 	=> __( 'Shipping only', 'woocommerce' ),
-					'none' 		=> __( 'None', 'woocommerce' )
-				) ) );
+				echo '<div class="options_group show_if_simple show_if_external show_if_variable">';
 
-				$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
-				$classes_options = array();
-				$classes_options[''] = __( 'Standard', 'woocommerce' );
-	    		if ( $tax_classes )
-	    			foreach ( $tax_classes as $class )
-	    				$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
+					// Tax
+					woocommerce_wp_select( array( 'id' => '_tax_status', 'label' => __( 'Tax Status', 'woocommerce' ), 'options' => array(
+						'taxable' 	=> __( 'Taxable', 'woocommerce' ),
+						'shipping' 	=> __( 'Shipping only', 'woocommerce' ),
+						'none' 		=> __( 'None', 'woocommerce' )
+					) ) );
 
-				woocommerce_wp_select( array( 'id' => '_tax_class', 'label' => __( 'Tax Class', 'woocommerce' ), 'options' => $classes_options ) );
+					$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
+					$classes_options = array();
+					$classes_options[''] = __( 'Standard', 'woocommerce' );
+		    		if ( $tax_classes )
+		    			foreach ( $tax_classes as $class )
+		    				$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
 
-				do_action( 'woocommerce_product_options_tax' );
+					woocommerce_wp_select( array( 'id' => '_tax_class', 'label' => __( 'Tax Class', 'woocommerce' ), 'options' => $classes_options ) );
 
-			echo '</div>';
+					do_action( 'woocommerce_product_options_tax' );
+
+				echo '</div>';
+
+			}
 
 			do_action( 'woocommerce_product_options_general_product_data' );
 			?>
@@ -205,7 +209,7 @@ function woocommerce_product_data_box() {
 			if (get_option('woocommerce_manage_stock')=='yes') {
 
 				// manage stock
-				woocommerce_wp_checkbox( array( 'id' => '_manage_stock', 'wrapper_class' => 'show_if_simple show_if_variable', 'label' => __('Manage stock?', 'woocommerce' ) ) );
+				woocommerce_wp_checkbox( array( 'id' => '_manage_stock', 'wrapper_class' => 'show_if_simple show_if_variable', 'label' => __('Manage stock?', 'woocommerce' ), 'description' => __( 'Enable stock management at product level', 'woocommerce' ) ) );
 
 				do_action('woocommerce_product_options_stock');
 
@@ -277,7 +281,7 @@ function woocommerce_product_data_box() {
 				// Size fields
 				if( get_option( 'woocommerce_enable_dimensions', true ) !== 'no' ) :
 					?><p class="form-field dimensions_field">
-						<label for"product_length"><?php echo __( 'Dimensions', 'woocommerce' ) . ' (' . get_option( 'woocommerce_dimension_unit' ) . ')'; ?></label>
+						<label for="product_length"><?php echo __( 'Dimensions', 'woocommerce' ) . ' (' . get_option( 'woocommerce_dimension_unit' ) . ')'; ?></label>
 						<span class="wrap">
 							<input id="product_length" placeholder="<?php _e( 'Length', 'woocommerce' ); ?>" class="input-text" size="6" type="number" name="_length" value="<?php echo esc_attr( get_post_meta( $thepostid, '_length', true ) ); ?>" step="any" min="0" />
 							<input placeholder="<?php _e( 'Width', 'woocommerce' ); ?>" class="input-text" size="6" type="number" name="_width" value="<?php echo esc_attr( get_post_meta( $thepostid, '_width', true ) ); ?>"  step="any" min="0" />
@@ -328,8 +332,11 @@ function woocommerce_product_data_box() {
 			<div class="woocommerce_attributes wc-metaboxes">
 
 				<?php
-					$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();	// Array of defined attribute taxonomies
-					$attributes = maybe_unserialize( get_post_meta( $thepostid, '_product_attributes', true ) );	// Product attributes - taxonomies and custom, ordered, with visibility and variation attributes set
+					// Array of defined attribute taxonomies
+					$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();
+
+					// Product attributes - taxonomies and custom, ordered, with visibility and variation attributes set
+					$attributes = maybe_unserialize( get_post_meta( $thepostid, '_product_attributes', true ) );
 
 					$i = -1;
 
@@ -380,7 +387,7 @@ function woocommerce_product_data_box() {
 							        					$all_terms = get_terms( $attribute_taxonomy_name, 'orderby=name&hide_empty=0' );
 						        						if ( $all_terms ) {
 							        						foreach ( $all_terms as $term ) {
-							        							$has_term = has_term( $term->slug, $attribute_taxonomy_name, $thepostid ) ? 1 : 0;
+							        							$has_term = has_term( $term->term_id, $attribute_taxonomy_name, $thepostid ) ? 1 : 0;
 							        							echo '<option value="' . $term->slug . '" ' . selected( $has_term, 1, false ) . '>' . $term->name . '</option>';
 															}
 														}
@@ -399,22 +406,37 @@ function woocommerce_product_data_box() {
 															$values = array();
 															foreach ( $post_terms as $term )
 																$values[] = $term->name;
-															echo implode( '|', $values );
+															echo implode( ' | ', $values );
 														}
 
-													?>" placeholder="<?php _e( 'Pipe separate terms', 'woocommerce' ); ?>" />
+													?>" placeholder="<?php _e( 'Pipe (|) separate terms', 'woocommerce' ); ?>" />
 												<?php endif; ?>
+												<?php do_action( 'woocommerce_product_option_terms', $tax, $i ); ?>
 											</td>
 										</tr>
 										<tr>
 											<td>
-												<label><input type="checkbox" class="checkbox" <?php if ( ! empty( $attribute['is_visible'] ) ) checked( $attribute['is_visible'], 1 ); ?> name="attribute_visibility[<?php echo $i; ?>]" value="1" /> <?php _e( 'Visible on the product page', 'woocommerce' ); ?></label>
+												<label><input type="checkbox" class="checkbox" <?php
+
+													if ( isset( $attribute['is_visible'] ) )
+														checked( $attribute['is_visible'], 1 );
+													else
+														checked( apply_filters( 'default_attribute_visibility', false, $tax ), true );
+
+												?> name="attribute_visibility[<?php echo $i; ?>]" value="1" /> <?php _e( 'Visible on the product page', 'woocommerce' ); ?></label>
 											</td>
 										</tr>
 										<tr>
 											<td>
 												<div class="enable_variation show_if_variable">
-												<label><input type="checkbox" class="checkbox" <?php if ( ! empty( $attribute['is_variation'] ) ) checked( $attribute['is_variation'], 1 ); ?> name="attribute_variation[<?php echo $i; ?>]" value="1" /> <?php _e( 'Used for variations', 'woocommerce' ); ?></label>
+												<label><input type="checkbox" class="checkbox" <?php
+
+													if ( isset( $attribute['is_variation'] ) )
+														checked( $attribute['is_variation'], 1 );
+													else
+														checked( apply_filters( 'default_attribute_variation', false, $tax ), true );
+
+												?> name="attribute_variation[<?php echo $i; ?>]" value="1" /> <?php _e( 'Used for variations', 'woocommerce' ); ?></label>
 												</div>
 											</td>
 										</tr>
@@ -427,7 +449,8 @@ function woocommerce_product_data_box() {
 
 					// Custom Attributes
 					if ( ! empty( $attributes ) ) foreach ( $attributes as $attribute ) {
-						if ( $attribute['is_taxonomy'] ) continue;
+						if ( $attribute['is_taxonomy'] )
+							continue;
 
 						$i++;
 
@@ -498,19 +521,15 @@ function woocommerce_product_data_box() {
 			<p class="form-field"><label for="upsell_ids"><?php _e( 'Up-Sells', 'woocommerce' ); ?></label>
 			<select id="upsell_ids" name="upsell_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>">
 				<?php
-					$product_ids = array_map( 'absint', get_post_meta( $post->ID, '_upsell_ids', true ) );
+					$upsell_ids = get_post_meta( $post->ID, '_upsell_ids', true );
+					$product_ids = ! empty( $upsell_ids ) ? array_map( 'absint',  $upsell_ids ) : null;
 					if ( $product_ids ) {
 						foreach ( $product_ids as $product_id ) {
-							$title 	= get_the_title( $product_id );
-							$sku 	= get_post_meta( $product_id, '_sku', true );
 
-							if ( ! $title )
-								continue;
+							$product      = get_product( $product_id );
+							$product_name = woocommerce_get_formatted_product_name( $product );
 
-							if ( ! empty( $sku ) )
-								$sku = ' (SKU: ' . $sku . ')';
-
-							echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $title . $sku ) . '</option>';
+							echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $product_name ) . '</option>';
 						}
 					}
 				?>
@@ -519,19 +538,15 @@ function woocommerce_product_data_box() {
 			<p class="form-field"><label for="crosssell_ids"><?php _e( 'Cross-Sells', 'woocommerce' ); ?></label>
 			<select id="crosssell_ids" name="crosssell_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>">
 				<?php
-					$product_ids = array_map( 'absint', get_post_meta( $post->ID, '_crosssell_ids', true ) );
+					$crosssell_ids = get_post_meta( $post->ID, '_crosssell_ids', true );
+					$product_ids = ! empty( $crosssell_ids ) ? array_map( 'absint',  $crosssell_ids ) : null;
 					if ( $product_ids ) {
 						foreach ( $product_ids as $product_id ) {
-							$title 	= get_the_title( $product_id );
-							$sku 	= get_post_meta( $product_id, '_sku', true );
 
-							if ( ! $title )
-								continue;
+							$product      = get_product( $product_id );
+							$product_name = woocommerce_get_formatted_product_name( $product );
 
-							if ( ! empty( $sku ) )
-								$sku = ' (SKU: ' . $sku . ')';
-
-							echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $title . $sku ) . '</option>';
+							echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $product_name ) . '</option>';
 						}
 					}
 				?>
@@ -648,8 +663,9 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	update_post_meta( $post_id, '_downloadable', $is_downloadable );
 	update_post_meta( $post_id, '_virtual', $is_virtual );
 
-	// Set transient for product type
-	set_transient( 'wc_product_type_' . $post_id, $product_type );
+	// Gallery Images
+	$attachment_ids = array_filter( explode( ',', woocommerce_clean( $_POST['product_image_gallery'] ) ) );
+	update_post_meta( $post_id, '_product_image_gallery', implode( ',', $attachment_ids ) );
 
 	// Update post meta
 	update_post_meta( $post_id, '_regular_price', stripslashes( $_POST['_regular_price'] ) );
@@ -735,12 +751,10 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 
 			 		// Format values
 			 		if ( is_array( $attribute_values[ $i ] ) ) {
-				 		$values = array_map('htmlspecialchars', array_map('stripslashes', $attribute_values[ $i ]));
+				 		$values = array_map( 'woocommerce_clean', $attribute_values[ $i ] );
 				 	} else {
 				 		// Text based, separate by pipe
-				 		$values = htmlspecialchars( stripslashes( $attribute_values[ $i ] ) );
-				 		$values = explode( '|', $values );
-				 		$values = array_map( 'trim', $values );
+				 		$values = array_map( 'woocommerce_clean', explode( '|', $attribute_values[ $i ] ) );
 				 	}
 
 				 	// Remove empty items in the array
@@ -757,7 +771,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		 		if ( $values ) {
 			 		// Add attribute to array, but don't set values
 			 		$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
-				 		'name' 			=> htmlspecialchars( stripslashes( $attribute_names[ $i ] ) ),
+				 		'name' 			=> woocommerce_clean( $attribute_names[ $i ] ),
 				 		'value' 		=> '',
 				 		'position' 		=> $attribute_position[ $i ],
 				 		'is_visible' 	=> $is_visible,
@@ -766,18 +780,14 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 				 	);
 			 	}
 
-		 	} else {
-		 		if ( ! $attribute_values[ $i ] ) continue;
-		 		// Format values
-		 		$values = esc_html( stripslashes( $attribute_values[ $i ] ) );
+		 	} elseif ( isset( $attribute_values[ $i ] ) ) {
+
 		 		// Text based, separate by pipe
-		 		$values = explode( '|', $values );
-		 		$values = array_map( 'trim', $values );
-		 		$values = implode( '|', $values );
+		 		$values = implode( ' | ', array_map( 'woocommerce_clean', explode( '|', $attribute_values[ $i ] ) ) );
 
 		 		// Custom attribute - Add attribute to array and set the values
 			 	$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
-			 		'name' 			=> htmlspecialchars( stripslashes( $attribute_names[ $i ] ) ),
+			 		'name' 			=> woocommerce_clean( $attribute_names[ $i ] ),
 			 		'value' 		=> $values,
 			 		'position' 		=> $attribute_position[ $i ],
 			 		'is_visible' 	=> $is_visible,
@@ -1016,29 +1026,6 @@ add_action('woocommerce_process_product_meta', 'woocommerce_process_product_meta
 
 
 /**
- * Change label for insert buttons.
- *
- * @access public
- * @param mixed $translation
- * @param mixed $original
- * @return void
- */
-function woocommerce_change_insert_into_post( $translation, $original ) {
-    if ( ! isset( $_REQUEST['from'] ) )
-    	return $translation;
-
-	$original = strtolower( $original );
-
-    if ( $_REQUEST['from'] == 'wc01' && ( $original == 'insert into post' || $original == 'use this image' ) )
-    	return __( 'Use this file', 'woocommerce' );
-
-    return $translation;
-}
-
-add_filter( 'gettext', 'woocommerce_change_insert_into_post', null, 2 );
-
-
-/**
  * Output product visibility options.
  *
  * @access public
@@ -1073,7 +1060,7 @@ function woocommerce_product_data_visibility() {
 
 		<div id="catalog-visibility-select" class="hide-if-js">
 
-			<input type="hidden" name="current_visibilty" id="current_visibilty" value="<?php echo esc_attr( $current_visibility ); ?>" />
+			<input type="hidden" name="current_visibility" id="current_visibility" value="<?php echo esc_attr( $current_visibility ); ?>" />
 			<input type="hidden" name="current_featured" id="current_featured" value="<?php echo esc_attr( $current_featured ); ?>" />
 
 			<?php

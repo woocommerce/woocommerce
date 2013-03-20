@@ -32,9 +32,109 @@ function get_product( $the_product = false, $args = array() ) {
 	return $woocommerce->product_factory->get_product( $the_product, $args );
 }
 
+/**
+ * Function that returns an array containing the IDs of the products that are on sale.
+ *
+ * @since 2.0
+ * @access public
+ * @return array
+ */
+function woocommerce_get_product_ids_on_sale() {
+	// Load from cache
+	$product_ids_on_sale = get_transient( 'wc_products_onsale' );
+
+	// Valid cache found
+	if ( false !== $product_ids_on_sale )
+		return $product_ids_on_sale;
+
+	$on_sale = get_posts( array(
+		'post_type'      => array( 'product', 'product_variation' ),
+		'posts_per_page' => -1,
+		'post_status'    => 'publish',
+		'meta_query'     => array(
+			array(
+				'key'        => '_sale_price',
+				'value'      => 0,
+				'compare'    => '>=',
+				'type'       => 'DECIMAL',
+			),
+			array(
+				'key'        => '_sale_price',
+				'value'      => '',
+				'compare'    => '!=',
+				'type'       => '',
+			)
+		),
+		'fields'         => 'id=>parent',
+	) );
+
+	$product_ids = array_keys( $on_sale );
+	$parent_ids  = array_values( $on_sale );
+
+	// Check for scheduled sales which have not started
+	foreach ( $product_ids as $key => $id ) {
+		if ( get_post_meta( $id, '_sale_price_dates_from', true ) > current_time( 'timestamp' ) ) {
+			unset( $product_ids[ $key ] );
+		}
+	}
+
+	$product_ids_on_sale = array_unique( array_merge( $product_ids, $parent_ids ) );
+
+	set_transient( 'wc_products_onsale', $product_ids_on_sale );
+
+	return $product_ids_on_sale;
+}
+
+/**
+ * woocommerce_sanitize_taxonomy_name function.
+ *
+ * @access public
+ * @param mixed $taxonomy
+ * @return void
+ */
 function woocommerce_sanitize_taxonomy_name( $taxonomy ) {
 	return str_replace( array( ' ', '_' ), '-', strtolower( $taxonomy ) );
 }
+
+/**
+ * woocommerce_get_attachment_image_attributes function.
+ *
+ * @access public
+ * @param mixed $attr
+ * @return void
+ */
+function woocommerce_get_attachment_image_attributes( $attr ) {
+	if ( strstr( $attr['src'], 'woocommerce_uploads/' ) )
+		$attr['src'] = woocommerce_placeholder_img_src();
+
+	return $attr;
+}
+
+add_filter( 'wp_get_attachment_image_attributes', 'woocommerce_get_attachment_image_attributes' );
+
+
+/**
+ * woocommerce_prepare_attachment_for_js function.
+ *
+ * @access public
+ * @param mixed $response
+ * @return void
+ */
+function woocommerce_prepare_attachment_for_js( $response ) {
+
+	if ( isset( $response['url'] ) && strstr( $response['url'], 'woocommerce_uploads/' ) ) {
+		$response['full']['url'] = woocommerce_placeholder_img_src();
+		if ( isset( $response['sizes'] ) ) {
+			foreach( $response['sizes'] as $size => $value ) {
+				$response['sizes'][ $size ]['url'] = woocommerce_placeholder_img_src();
+			}
+		}
+	}
+
+	return $response;
+}
+
+add_filter( 'wp_prepare_attachment_for_js', 'woocommerce_prepare_attachment_for_js' );
 
 /**
  * woocommerce_get_dimension function.
@@ -141,6 +241,35 @@ function woocommerce_get_weight( $weight, $to_unit ) {
 
 
 /**
+ * Get product name with extra details such as SKU price and attributes. Used within admin.
+ *
+ * @access public
+ * @param mixed $product
+ * @return void
+ */
+function woocommerce_get_formatted_product_name( $product ) {
+	if ( ! $product || ! is_object( $product ) )
+		return;
+
+	if ( $product->get_sku() )
+		$identifier = $product->get_sku();
+	elseif ( $product->is_type( 'variation' ) )
+		$identifier = '#' . $product->variation_id;
+	else
+		$identifier = '#' . $product->id;
+
+	if ( $product->is_type( 'variation' ) ) {
+		$attributes = $product->get_variation_attributes();
+		$extra_data = ' &ndash; ' . implode( ', ', $attributes ) . ' &ndash; ' . woocommerce_price( $product->get_price() );
+	} else {
+		$extra_data = '';
+	}
+
+	return sprintf( __( '%s &ndash; %s%s', 'woocommerce' ), $identifier, $product->get_title(), $extra_data );
+}
+
+
+/**
  * Get the placeholder image URL for products etc
  *
  * @access public
@@ -169,6 +298,24 @@ function woocommerce_placeholder_img( $size = 'shop_thumbnail' ) {
 
 
 /**
+ * woocommerce_lostpassword_url function.
+ *
+ * @access public
+ * @param mixed $url
+ * @return void
+ */
+function woocommerce_lostpassword_url( $url ) {
+    $id = woocommerce_get_page_id( 'lost_password' );
+    if ( $id != -1 )
+    	 $url = get_permalink( $id );
+
+    return $url;
+}
+
+add_filter( 'lostpassword_url',  'woocommerce_lostpassword_url' );
+
+
+/**
  * Send HTML emails from WooCommerce
  *
  * @access public
@@ -192,7 +339,7 @@ if ( ! function_exists( 'woocommerce_get_page_id' ) ) {
 	/**
 	 * WooCommerce page IDs
 	 *
-	 * retrieve page ids - used for myaccount, edit_address, change_password, shop, cart, checkout, pay, view_order, thanks, terms, order_tracking
+	 * retrieve page ids - used for myaccount, edit_address, change_password, shop, cart, checkout, pay, view_order, thanks, terms
 	 *
 	 * returns -1 if no page is found
 	 *
@@ -272,6 +419,7 @@ function woocommerce_load_persistent_cart( $user_login, $user ) {
 function is_woocommerce() {
 	return ( is_shop() || is_product_category() || is_product_tag() || is_product() ) ? true : false;
 }
+
 if ( ! function_exists( 'is_shop' ) ) {
 
 	/**
@@ -284,6 +432,7 @@ if ( ! function_exists( 'is_shop' ) ) {
 		return ( is_post_type_archive( 'product' ) || is_page( woocommerce_get_page_id( 'shop' ) ) ) ? true : false;
 	}
 }
+
 if ( ! function_exists( 'is_product_category' ) ) {
 
 	/**
@@ -297,6 +446,7 @@ if ( ! function_exists( 'is_product_category' ) ) {
 		return is_tax( 'product_cat', $term );
 	}
 }
+
 if ( ! function_exists( 'is_product_tag' ) ) {
 
 	/**
@@ -310,6 +460,7 @@ if ( ! function_exists( 'is_product_tag' ) ) {
 		return is_tax( 'product_tag', $term );
 	}
 }
+
 if ( ! function_exists( 'is_product' ) ) {
 
 	/**
@@ -322,6 +473,7 @@ if ( ! function_exists( 'is_product' ) ) {
 		return is_singular( array( 'product' ) );
 	}
 }
+
 if ( ! function_exists( 'is_cart' ) ) {
 
 	/**
@@ -334,6 +486,7 @@ if ( ! function_exists( 'is_cart' ) ) {
 		return is_page( woocommerce_get_page_id( 'cart' ) );
 	}
 }
+
 if ( ! function_exists( 'is_checkout' ) ) {
 
 	/**
@@ -346,6 +499,7 @@ if ( ! function_exists( 'is_checkout' ) ) {
 		return ( is_page( woocommerce_get_page_id( 'checkout' ) ) || is_page( woocommerce_get_page_id( 'pay' ) ) ) ? true : false;
 	}
 }
+
 if ( ! function_exists( 'is_account_page' ) ) {
 
 	/**
@@ -355,9 +509,10 @@ if ( ! function_exists( 'is_account_page' ) ) {
 	 * @return bool
 	 */
 	function is_account_page() {
-		return ( is_page( woocommerce_get_page_id( 'myaccount' ) ) || is_page( woocommerce_get_page_id( 'edit_address' ) ) || is_page( woocommerce_get_page_id( 'view_order' ) ) || is_page( woocommerce_get_page_id( 'change_password' ) ) ) ? true : false;
+		return is_page( woocommerce_get_page_id( 'myaccount' ) ) || is_page( woocommerce_get_page_id( 'edit_address' ) ) || is_page( woocommerce_get_page_id( 'view_order' ) ) || is_page( woocommerce_get_page_id( 'change_password' ) ) || is_page( woocommerce_get_page_id( 'lost_password' ) ) || apply_filters( 'woocommerce_is_account_page', false ) ? true : false;
 	}
 }
+
 if ( ! function_exists( 'is_order_received_page' ) ) {
 
     /**
@@ -370,6 +525,7 @@ if ( ! function_exists( 'is_order_received_page' ) ) {
         return ( is_page( woocommerce_get_page_id( 'thanks' ) ) ) ? true : false;
     }
 }
+
 if ( ! function_exists( 'is_ajax' ) ) {
 
 	/**
@@ -385,6 +541,7 @@ if ( ! function_exists( 'is_ajax' ) ) {
 		return ( isset( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ) == 'xmlhttprequest' ) ? true : false;
 	}
 }
+
 if ( ! function_exists( 'is_filtered' ) ) {
 
 	/**
@@ -480,7 +637,7 @@ function woocommerce_locate_template( $template_name, $template_path = '', $defa
 	// Look within passed path within the theme - this is priority
 	$template = locate_template(
 		array(
-			$template_path . $template_name,
+			trailingslashit( $template_path ) . $template_name,
 			$template_name
 		)
 	);
@@ -495,7 +652,7 @@ function woocommerce_locate_template( $template_name, $template_path = '', $defa
 
 
 /**
- * Get Currency.
+ * Get Base Currency Code.
  *
  * @access public
  * @return string
@@ -506,6 +663,50 @@ function get_woocommerce_currency() {
 
 
 /**
+ * Get full list of currency codes.
+ *
+ * @access public
+ * @return void
+ */
+function get_woocommerce_currencies() {
+	return array_unique(
+		apply_filters( 'woocommerce_currencies',
+			array(
+				'AUD' => __( 'Australian Dollars', 'woocommerce' ),
+				'BRL' => __( 'Brazilian Real', 'woocommerce' ),
+				'CAD' => __( 'Canadian Dollars', 'woocommerce' ),
+				'RMB' => __( 'Chinese Yuan', 'woocommerce' ),
+				'CZK' => __( 'Czech Koruna', 'woocommerce' ),
+				'DKK' => __( 'Danish Krone', 'woocommerce' ),
+				'EUR' => __( 'Euros', 'woocommerce' ),
+				'HKD' => __( 'Hong Kong Dollar', 'woocommerce' ),
+				'HUF' => __( 'Hungarian Forint', 'woocommerce' ),
+				'IDR' => __( 'Indonesia Rupiah', 'woocommerce' ),
+				'INR' => __( 'Indian Rupee', 'woocommerce' ),
+				'ILS' => __( 'Israeli Shekel', 'woocommerce' ),
+				'JPY' => __( 'Japanese Yen', 'woocommerce' ),
+				'MYR' => __( 'Malaysian Ringgits', 'woocommerce' ),
+				'MXN' => __( 'Mexican Peso', 'woocommerce' ),
+				'NOK' => __( 'Norwegian Krone', 'woocommerce' ),
+				'NZD' => __( 'New Zealand Dollar', 'woocommerce' ),
+				'PHP' => __( 'Philippine Pesos', 'woocommerce' ),
+				'PLN' => __( 'Polish Zloty', 'woocommerce' ),
+				'GBP' => __( 'Pounds Sterling', 'woocommerce' ),
+				'RON' => __( 'Romanian Leu', 'woocommerce' ),
+				'SGD' => __( 'Singapore Dollar', 'woocommerce' ),
+				'ZAR' => __( 'South African rand', 'woocommerce' ),
+				'SEK' => __( 'Swedish Krona', 'woocommerce' ),
+				'CHF' => __( 'Swiss Franc', 'woocommerce' ),
+				'TWD' => __( 'Taiwan New Dollars', 'woocommerce' ),
+				'THB' => __( 'Thai Baht', 'woocommerce' ),
+				'TRY' => __( 'Turkish Lira', 'woocommerce' ),
+				'USD' => __( 'US Dollars', 'woocommerce' ),
+			)
+		)
+	);
+}
+
+/**
  * Get Currency symbol.
  *
  * @access public
@@ -513,21 +714,30 @@ function get_woocommerce_currency() {
  * @return string
  */
 function get_woocommerce_currency_symbol( $currency = '' ) {
-	if ( ! $currency ) $currency = get_woocommerce_currency();
-	$currency_symbol = '';
-	switch ($currency) :
-		case 'BRL' : $currency_symbol = '&#82;&#36;'; break;
-		case 'AUD' : $currency_symbol = '&#36;'; break;
-		case 'CAD' : $currency_symbol = '&#36;'; break;
-		case 'MXN' : $currency_symbol = '&#36;'; break;
-		case 'NZD' : $currency_symbol = '&#36;'; break;
-		case 'HKD' : $currency_symbol = '&#36;'; break;
-		case 'SGD' : $currency_symbol = '&#36;'; break;
-		case 'USD' : $currency_symbol = '&#36;'; break;
-		case 'EUR' : $currency_symbol = '&euro;'; break;
-		case 'CNY' : $currency_symbol = '&yen;'; break;
-		case 'RMB' : $currency_symbol = '&yen;'; break;
-		case 'JPY' : $currency_symbol = '&yen;'; break;
+	if ( ! $currency )
+		$currency = get_woocommerce_currency();
+
+	switch ( $currency ) {
+		case 'BRL' :
+			$currency_symbol = '&#82;&#36;';
+			break;
+		case 'AUD' :
+		case 'CAD' :
+		case 'MXN' :
+		case 'NZD' :
+		case 'HKD' :
+		case 'SGD' :
+		case 'USD' :
+			$currency_symbol = '&#36;';
+			break;
+		case 'EUR' :
+			$currency_symbol = '&euro;';
+			break;
+		case 'CNY' :
+		case 'RMB' :
+		case 'JPY' :
+			$currency_symbol = '&yen;';
+			break;
 		case 'TRY' : $currency_symbol = '&#84;&#76;'; break;
 		case 'NOK' : $currency_symbol = '&#107;&#114;'; break;
 		case 'ZAR' : $currency_symbol = '&#82;'; break;
@@ -535,6 +745,8 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'MYR' : $currency_symbol = '&#82;&#77;'; break;
 		case 'DKK' : $currency_symbol = '&#107;&#114;'; break;
 		case 'HUF' : $currency_symbol = '&#70;&#116;'; break;
+		case 'IDR' : $currency_symbol = 'Rp'; break;
+		case 'INR' : $currency_symbol = '&#8377;'; break;
 		case 'ILS' : $currency_symbol = '&#8362;'; break;
 		case 'PHP' : $currency_symbol = '&#8369;'; break;
 		case 'PLN' : $currency_symbol = '&#122;&#322;'; break;
@@ -545,7 +757,8 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'GBP' : $currency_symbol = '&pound;'; break;
 		case 'RON' : $currency_symbol = 'lei'; break;
 		default    : $currency_symbol = ''; break;
-	endswitch;
+	}
+
 	return apply_filters( 'woocommerce_currency_symbol', $currency_symbol, $currency );
 }
 
@@ -565,14 +778,15 @@ function woocommerce_price( $price, $args = array() ) {
 		'ex_tax_label' 	=> '0'
 	), $args ) );
 
-	$return = '';
-	$num_decimals = (int) get_option( 'woocommerce_price_num_decimals' );
-	$currency_pos = get_option( 'woocommerce_currency_pos' );
+	$return          = '';
+	$num_decimals    = (int) get_option( 'woocommerce_price_num_decimals' );
+	$currency_pos    = get_option( 'woocommerce_currency_pos' );
 	$currency_symbol = get_woocommerce_currency_symbol();
+	$decimal_sep     = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ), ENT_QUOTES );
+	$thousands_sep   = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ), ENT_QUOTES );
 
-	$price = apply_filters( 'raw_woocommerce_price', (double) $price );
-
-	$price = number_format( $price, $num_decimals, stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ), stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ) );
+	$price           = apply_filters( 'raw_woocommerce_price', (double) $price );
+	$price           = number_format( $price, $num_decimals, $decimal_sep, $thousands_sep );
 
 	if ( get_option( 'woocommerce_price_trim_zeros' ) == 'yes' && $num_decimals > 0 )
 		$price = woocommerce_trim_zeros( $price );
@@ -590,14 +804,20 @@ function get_woocommerce_price_format() {
 
 	switch ( $currency_pos ) {
 		case 'left' :
-			return '%1$s%2$s';
+			$format = '%1$s%2$s';
+		break;
 		case 'right' :
-			return '%2$s%1$s';
+			$format = '%2$s%1$s';
+		break;
 		case 'left_space' :
-			return '%1$s&nbsp;%2$s';
+			$format = '%1$s&nbsp;%2$s';
+		break;
 		case 'right_space' :
-			return '%2$s&nbsp;%1$s';
+			$format = '%2$s&nbsp;%1$s';
+		break;
 	}
+
+	return apply_filters( 'woocommerce_price_format', $format, $currency_pos );
 }
 
 
@@ -620,8 +840,11 @@ function woocommerce_trim_zeros( $price ) {
  * @param mixed $number
  * @return string
  */
-function woocommerce_format_decimal( $number ) {
-	$number = number_format( (float) $number, (int) get_option( 'woocommerce_price_num_decimals' ), '.', '' );
+function woocommerce_format_decimal( $number, $dp = '' ) {
+	if ( $dp == '' )
+		$dp = intval( get_option( 'woocommerce_price_num_decimals' ) );
+
+	$number = number_format( (float) $number, (int) $dp, '.', '' );
 
 	if ( strstr( $number, '.' ) )
 		$number = rtrim( rtrim( $number, '0' ), '.' );
@@ -729,8 +952,6 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
             	$term = get_term_by( 'slug', $value, esc_attr( str_replace( 'attribute_', '', $name ) ) );
             	if ( ! is_wp_error( $term ) && $term->name )
             		$value = $term->name;
-            } else {
-            	$value = ucfirst($value);
             }
 
 			if ( $flat )
@@ -1266,21 +1487,28 @@ function woocommerce_get_product_terms( $object_id, $taxonomy, $fields = 'all' )
  *
  * @access public
  * @param int $show_counts (default: 1)
- * @param int $hierarchal (default: 1)
+ * @param int $hierarchical (default: 1)
  * @param int $show_uncategorized (default: 1)
  * @return string
  */
-function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchal = 1, $show_uncategorized = 1 ) {
+function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchical = 1, $show_uncategorized = 1, $orderby = '' ) {
 	global $wp_query, $woocommerce;
 
 	include_once( $woocommerce->plugin_path() . '/classes/walkers/class-product-cat-dropdown-walker.php' );
 
 	$r = array();
 	$r['pad_counts'] 	= 1;
-	$r['hierarchal'] 	= $hierarchal;
+	$r['hierarchical'] 	= $hierarchical;
 	$r['hide_empty'] 	= 1;
-	$r['show_count'] 	= 1;
+	$r['show_count'] 	= $show_counts;
 	$r['selected'] 		= ( isset( $wp_query->query['product_cat'] ) ) ? $wp_query->query['product_cat'] : '';
+
+	$r['menu_order'] = false;
+
+	if ( $orderby == 'order' )
+		$r['menu_order'] = 'asc';
+	elseif ( $orderby )
+		$r['orderby'] = $orderby;
 
 	$terms = get_terms( 'product_cat', $r );
 
@@ -1404,7 +1632,7 @@ function get_woocommerce_term_meta( $term_id, $key, $single = true ) {
  *
  * @access public
  * @param int $the_term
- * @param int $next_id the id of the next slibling element in save hierachy level
+ * @param int $next_id the id of the next sibling element in save hierarchy level
  * @param string $taxonomy
  * @param int $index (default: 0)
  * @param mixed $terms (default: null)
@@ -1671,35 +1899,45 @@ function woocommerce_init_roles() {
 
 		// Shop manager role
 		add_role( 'shop_manager', __( 'Shop Manager', 'woocommerce' ), array(
-		    'read' 						=> true,
-		    'read_private_pages'		=> true,
-		    'read_private_posts'		=> true,
-		    'edit_users'				=> true,
-		    'edit_posts' 				=> true,
-		    'edit_pages' 				=> true,
-		    'edit_published_posts'		=> true,
-		    'edit_published_pages'		=> true,
-		    'edit_private_pages'		=> true,
-		    'edit_private_posts'		=> true,
-		    'edit_others_posts' 		=> true,
-		    'edit_others_pages' 		=> true,
-		    'publish_posts' 			=> true,
-		    'publish_pages'				=> true,
-		    'delete_posts' 				=> true,
-		    'delete_pages' 				=> true,
-		    'delete_private_pages'		=> true,
-		    'delete_private_posts'		=> true,
-		    'delete_published_pages'	=> true,
-		    'delete_published_posts'	=> true,
-		    'delete_others_posts' 		=> true,
-		    'delete_others_pages' 		=> true,
-		    'manage_categories' 		=> true,
-		    'manage_links'				=> true,
-		    'moderate_comments'			=> true,
-		    'unfiltered_html'			=> true,
-		    'upload_files'				=> true,
-		   	'export'					=> true,
-			'import'					=> true
+			'level_9'                => true,
+			'level_8'                => true,
+			'level_7'                => true,
+			'level_6'                => true,
+			'level_5'                => true,
+			'level_4'                => true,
+			'level_3'                => true,
+			'level_2'                => true,
+			'level_1'                => true,
+			'level_0'                => true,
+		    'read'                   => true,
+		    'read_private_pages'     => true,
+		    'read_private_posts'     => true,
+		    'edit_users'             => true,
+		    'edit_posts'             => true,
+		    'edit_pages'             => true,
+		    'edit_published_posts'   => true,
+		    'edit_published_pages'   => true,
+		    'edit_private_pages'     => true,
+		    'edit_private_posts'     => true,
+		    'edit_others_posts'      => true,
+		    'edit_others_pages'      => true,
+		    'publish_posts'          => true,
+		    'publish_pages'          => true,
+		    'delete_posts'           => true,
+		    'delete_pages'           => true,
+		    'delete_private_pages'   => true,
+		    'delete_private_posts'   => true,
+		    'delete_published_pages' => true,
+		    'delete_published_posts' => true,
+		    'delete_others_posts'    => true,
+		    'delete_others_pages'    => true,
+		    'manage_categories'      => true,
+		    'manage_links'           => true,
+		    'moderate_comments'      => true,
+		    'unfiltered_html'        => true,
+		    'upload_files'           => true,
+		   	'export'                 => true,
+			'import'                 => true
 		) );
 
 		$capabilities = woocommerce_get_core_capabilities();
@@ -1778,9 +2016,11 @@ function woocommerce_add_order_item( $order_id, $item ) {
 		)
 	);
 
-	do_action( 'woocommerce_new_order_item', absint( $wpdb->insert_id ) );
+	$item_id = absint( $wpdb->insert_id );
 
-	return absint( $wpdb->insert_id );
+	do_action( 'woocommerce_new_order_item', $item_id, $item, $order_id );
+
+	return $item_id;
 }
 
 /**
@@ -1906,7 +2146,7 @@ function _woocommerce_term_recount( $terms, $taxonomy, $callback = true, $terms_
 	$count_query = $wpdb->prepare( "
 		SELECT COUNT( DISTINCT posts.ID ) FROM {$wpdb->posts} as posts
 
-		LEFT JOIN {$wpdb->postmeta} AS meta_visibilty ON posts.ID = meta_visibilty.post_id
+		LEFT JOIN {$wpdb->postmeta} AS meta_visibility ON posts.ID = meta_visibility.post_id
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
@@ -1915,9 +2155,9 @@ function _woocommerce_term_recount( $terms, $taxonomy, $callback = true, $terms_
 		WHERE 	posts.post_status 	= 'publish'
 		AND 	posts.post_type 	= 'product'
 		AND 	(
-			meta_visibilty.meta_key = '_visibility'
+			meta_visibility.meta_key = '_visibility'
 			AND
-			meta_visibilty.meta_value IN ( 'visible', 'catalog' )
+			meta_visibility.meta_value IN ( 'visible', 'catalog' )
 		)
 		AND 	tax.taxonomy	= %s
 		$stock_query
@@ -2008,24 +2248,34 @@ function _woocommerce_term_recount( $terms, $taxonomy, $callback = true, $terms_
  */
 function woocommerce_recount_after_stock_change( $product_id ) {
 
-	$product_cats = $product_tags = array();
-
 	$product_terms = get_the_terms( $product_id, 'product_cat' );
-	foreach ( $product_terms as $term )
-		$product_cats[ $term->term_id ] = $term->parent;
+
+	if ( $product_terms ) {
+		foreach ( $product_terms as $term )
+			$product_cats[ $term->term_id ] = $term->parent;
+
+		_woocommerce_term_recount( $product_cats, get_taxonomy( 'product_cat' ), false, false );
+
+	}
 
 	$product_terms = get_the_terms( $product_id, 'product_tag' );
-	foreach ( $product_terms as $term )
-		$product_tags[ $term->term_id ] = $term->parent;
 
-	_woocommerce_term_recount( $product_cats, get_taxonomy( 'product_cat' ), false, false );
-	_woocommerce_term_recount( $product_tags, get_taxonomy( 'product_tag' ), false, false );
+	if ( $product_terms ) {
+		foreach ( $product_terms as $term )
+			$product_tags[ $term->term_id ] = $term->parent;
+
+		_woocommerce_term_recount( $product_tags, get_taxonomy( 'product_tag' ), false, false );
+
+	}
+
 }
 
 add_action( 'woocommerce_product_set_stock_status', 'woocommerce_recount_after_stock_change' );
 
 /**
  * woocommerce_change_term_counts function.
+ * Overrides the original term count for product categories and tags with the product count
+ * that takes catalog visibility into account.
  *
  * @access public
  * @param mixed $terms
@@ -2038,12 +2288,21 @@ function woocommerce_change_term_counts( $terms, $taxonomies, $args ) {
 	if ( ! in_array( $taxonomies[0], apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag' ) ) ) )
 		return $terms;
 
-	foreach ( $terms as &$term ) {
-		$count = get_woocommerce_term_meta( $term->term_id, 'product_count_' . $taxonomies[0] , true );
+	$term_counts = $o_term_counts = get_transient( 'wc_term_counts' );
 
-		if ( $count != '' )
-			$term->count = $count;
+	foreach ( $terms as &$term ) {
+		// If the original term count is zero, there's no way the product count could be higher.
+		if ( empty( $term->count ) ) continue;
+
+		$term_counts[ $term->term_id ] = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : get_woocommerce_term_meta( $term->term_id, 'product_count_' . $taxonomies[0] , true );
+
+		if ( $term_counts[ $term->term_id ] != '' )
+			$term->count = $term_counts[ $term->term_id ];
 	}
+
+	// Update transient
+	if ( $term_counts != $o_term_counts )
+		set_transient( 'wc_term_counts', $term_counts );
 
 	return $terms;
 }
@@ -2058,7 +2317,7 @@ if ( ! is_admin() && ! is_ajax() )
  * @return void
  */
 function woocommerce_scheduled_sales() {
-	global $wpdb;
+	global $woocommerce, $wpdb;
 
 	// Sales which are due to start
 	$product_ids = $wpdb->get_col( $wpdb->prepare( "
@@ -2085,6 +2344,8 @@ function woocommerce_scheduled_sales() {
 				update_post_meta( $product_id, '_sale_price_dates_to', '' );
 			}
 
+			$woocommerce->clear_product_transients( $product_id );
+
 			$parent = wp_get_post_parent_id( $product_id );
 
 			// Sync parent
@@ -2096,6 +2357,8 @@ function woocommerce_scheduled_sales() {
 				$this_product = get_product( $product_id );
 				if ( $this_product->is_type( 'simple' ) )
 					$this_product->grouped_product_sync();
+
+				$woocommerce->clear_product_transients( $parent );
 			}
 		}
 	}
@@ -2122,20 +2385,70 @@ function woocommerce_scheduled_sales() {
 			update_post_meta( $product_id, '_sale_price_dates_from', '' );
 			update_post_meta( $product_id, '_sale_price_dates_to', '' );
 
+			$woocommerce->clear_product_transients( $product_id );
+
 			$parent = wp_get_post_parent_id( $product_id );
 
 			// Sync parent
 			if ( $parent ) {
-				// We can force varaible product price to sync up by removing their min price meta
+				// We can force variable product price to sync up by removing their min price meta
 				delete_post_meta( $parent, 'min_variation_price' );
 
 				// Grouped products need syncing via a function
 				$this_product = get_product( $product_id );
 				if ( $this_product->is_type( 'simple' ) )
 					$this_product->grouped_product_sync();
+
+				$woocommerce->clear_product_transients( $parent );
 			}
 		}
 	}
 }
 
 add_action( 'woocommerce_scheduled_sales', 'woocommerce_scheduled_sales' );
+
+
+/**
+ * woocommerce_cancel_unpaid_orders function.
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_cancel_unpaid_orders() {
+	global $wpdb;
+
+	$held_duration = get_option( 'woocommerce_hold_stock_minutes' );
+
+	if ( $held_duration == '' || get_option( 'woocommerce_manage_stock' ) != 'yes' )
+		return;
+
+	$date = date( "Y-m-d H:i:s", strtotime( '-' . absint( $held_duration ) . ' MINUTES', current_time( 'timestamp' ) ) );
+
+	$unpaid_orders = $wpdb->get_col( $wpdb->prepare( "
+		SELECT posts.ID
+		FROM {$wpdb->posts} AS posts
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+
+		WHERE 	posts.post_type   = 'shop_order'
+		AND 	posts.post_status = 'publish'
+		AND 	tax.taxonomy      = 'shop_order_status'
+		AND		term.slug	      IN ('pending')
+		AND 	posts.post_date   < %s
+	", $date ) );
+
+	if ( $unpaid_orders ) {
+		foreach ( $unpaid_orders as $unpaid_order ) {
+			$order = new WC_Order( $unpaid_order );
+
+			if ( apply_filters( 'woocommerce_cancel_unpaid_order', true, $order ) )
+				$order->update_status( 'cancelled', __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
+		}
+	}
+
+	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+	wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+}
+
+add_action( 'woocommerce_cancel_unpaid_orders', 'woocommerce_cancel_unpaid_orders' );

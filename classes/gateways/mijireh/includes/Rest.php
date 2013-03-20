@@ -14,7 +14,7 @@ class Mijireh_Rest {
   public $curl_opts = array(
   	CURLOPT_RETURNTRANSFER => true,  // return result instead of echoing
   	CURLOPT_SSL_VERIFYPEER => false, // stop cURL from verifying the peer's certificate
-  	CURLOPT_MAXREDIRS      => 10     // but dont redirect more than 10 times
+  	CURLOPT_MAXREDIRS      => 10     // but don't redirect more than 10 times
   );
 
   public $base_url;

@@ -6,11 +6,11 @@
       action: 'page_slurp',
       page_id: page_id
     };
-    
+
     $('#page_slurp').attr('disabled', 'disabled');
     $('#slurp_progress').show();
     $('#slurp_progress_bar').html('Starting up');
-    
+
     $.post(ajaxurl, data, function(job_id) {
       // The job id is the id for the page slurp job or 0 if the slurp failed
       if(job_id.substring(0, 4) === 'http') {
@@ -22,7 +22,7 @@
         pusher = new Pusher('7dcd33b15307eb9be5fb');
         channel_name = 'slurp-' + job_id;
         channel = pusher.subscribe(channel_name);
-        
+
         channel.bind('status_changed', function (data) {
           // console.log(data);
           if(data.level == 'info') {
@@ -37,14 +37,14 @@
           }
         });
       }
-      
+
     })
     .error(function(response) {
       $('#slurp_progress').hide();
       $('#page_slurp').removeAttr('disabled');
       alert('Please make sure your Mijireh access key is correct');
     });
-    
+
     return false;
   });
 

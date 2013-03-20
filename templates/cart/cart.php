@@ -10,12 +10,16 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $woocommerce;
+
+$woocommerce->show_messages();
 ?>
 
-<?php $woocommerce->show_messages(); ?>
+<?php do_action( 'woocommerce_before_cart' ); ?>
 
 <form action="<?php echo esc_url( $woocommerce->cart->get_cart_url() ); ?>" method="post">
+
 <?php do_action( 'woocommerce_before_cart_table' ); ?>
+
 <table class="shop_table cart" cellspacing="0">
 	<thead>
 		<tr>
@@ -93,7 +97,7 @@ global $woocommerce;
 									$min 	= apply_filters( 'woocommerce_quantity_input_min', '', $_product );
 									$max 	= apply_filters( 'woocommerce_quantity_input_max', $_product->backorders_allowed() ? '' : $_product->get_stock_quantity(), $_product );
 
-									$product_quantity = sprintf( '<div class="quantity"><input type="number" name="cart[%s][qty]" step="%s" min="%s" max="%s" value="%s" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>', $cart_item_key, $step, $min, $max, esc_attr( $values['quantity'] ) );
+									$product_quantity = sprintf( '<div class="quantity"><input type="number" name="cart[%s][qty]" step="%s" min="%s" max="%s" value="%s" size="4" title="' . _x( 'Qty', 'Product quantity input tooltip', 'woocommerce' ) . '" class="input-text qty text" maxlength="12" /></div>', $cart_item_key, $step, $min, $max, esc_attr( $values['quantity'] ) );
 								}
 
 								echo apply_filters( 'woocommerce_cart_item_quantity', $product_quantity, $cart_item_key );
@@ -117,7 +121,7 @@ global $woocommerce;
 		<tr>
 			<td colspan="6" class="actions">
 
-				<?php if ( get_option( 'woocommerce_enable_coupons' ) == 'yes' && get_option( 'woocommerce_enable_coupon_form_on_cart' ) == 'yes') { ?>
+				<?php if ( $woocommerce->cart->coupons_enabled() ) { ?>
 					<div class="coupon">
 
 						<label for="coupon_code"><?php _e( 'Coupon', 'woocommerce' ); ?>:</label> <input name="coupon_code" class="input-text" id="coupon_code" value="" /> <input type="submit" class="button" name="apply_coupon" value="<?php _e( 'Apply Coupon', 'woocommerce' ); ?>" />
@@ -138,8 +142,11 @@ global $woocommerce;
 		<?php do_action( 'woocommerce_after_cart_contents' ); ?>
 	</tbody>
 </table>
+
 <?php do_action( 'woocommerce_after_cart_table' ); ?>
+
 </form>
+
 <div class="cart-collaterals">
 
 	<?php do_action('woocommerce_cart_collaterals'); ?>
@@ -149,3 +156,5 @@ global $woocommerce;
 	<?php woocommerce_shipping_calculator(); ?>
 
 </div>
+
+<?php do_action( 'woocommerce_after_cart' ); ?>

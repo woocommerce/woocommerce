@@ -5,15 +5,16 @@
  * @class 		WC_Logger
  * @version		1.6.4
  * @package		WooCommerce/Classes
+ * @category	Class
  * @author 		WooThemes
  */
 class WC_Logger {
 
 	/**
-	 * @var array Stores open file handles.
+	 * @var array Stores open file _handles.
 	 * @access private
 	 */
-	private $handles;
+	private $_handles;
 
 	/**
 	 * Constructor for the logger.
@@ -21,8 +22,8 @@ class WC_Logger {
 	 * @access public
 	 * @return void
 	 */
-	function __construct() {
-		$this->handles = array();
+	public function __construct() {
+		$this->_handles = array();
 	}
 
 
@@ -32,8 +33,8 @@ class WC_Logger {
 	 * @access public
 	 * @return void
 	 */
-	function __destruct() {
-		foreach ( $this->handles as $handle )
+	public function __destruct() {
+		foreach ( $this->_handles as $handle )
 	       @fclose( escapeshellarg( $handle ) );
 	}
 
@@ -48,10 +49,10 @@ class WC_Logger {
 	private function open( $handle ) {
 		global $woocommerce;
 
-		if ( isset( $this->handles[ $handle ] ) )
+		if ( isset( $this->_handles[ $handle ] ) )
 			return true;
 
-		if ( $this->handles[ $handle ] = @fopen( $woocommerce->plugin_path() . '/logs/' . $this->file_name( $handle ) . '.txt', 'a' ) )
+		if ( $this->_handles[ $handle ] = @fopen( $woocommerce->plugin_path() . '/logs/' . $this->file_name( $handle ) . '.txt', 'a' ) )
 			return true;
 
 		return false;
@@ -67,15 +68,15 @@ class WC_Logger {
 	 * @return void
 	 */
 	public function add( $handle, $message ) {
-		if ( $this->open( $handle ) ) {
+		if ( $this->open( $handle ) && is_resource( $this->_handles[ $handle ] ) ) {
 			$time = date_i18n( 'm-d-Y @ H:i:s -' ); //Grab Time
-			fwrite( $this->handles[ $handle ], $time . " " . $message . "\n" );
+			@fwrite( $this->_handles[ $handle ], $time . " " . $message . "\n" );
 		}
 	}
 
 
 	/**
-	 * Clear entrys from chosen file.
+	 * Clear entries from chosen file.
 	 *
 	 * @access public
 	 * @param mixed $handle
@@ -83,8 +84,8 @@ class WC_Logger {
 	 */
 	public function clear( $handle ) {
 
-		if ( $this->open( $handle ) )
-			ftruncate( $this->handles[ $handle ], 0 );
+		if ( $this->open( $handle ) && is_resource( $this->_handles[ $handle ] ) )
+			@ftruncate( $this->_handles[ $handle ], 0 );
 	}
 
 

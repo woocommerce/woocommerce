@@ -44,38 +44,42 @@ function woocommerce_add_category_fields() {
 			 if ( ! jQuery('#product_cat_thumbnail_id').val() )
 				 jQuery('.remove_image_button').hide();
 
-			window.send_to_editor_default = window.send_to_editor;
+			// Uploading files
+			var file_frame;
 
-			window.send_to_termmeta = function(html) {
+			jQuery(document).on( 'click', '.upload_image_button', function( event ){
 
-				jQuery('body').append('<div id="temp_image">' + html + '</div>');
+				event.preventDefault();
 
-				var img = jQuery('#temp_image').find('img');
+				// If the media frame already exists, reopen it.
+				if ( file_frame ) {
+					file_frame.open();
+					return;
+				}
 
-				imgurl 		= img.attr('src');
-				imgclass 	= img.attr('class');
-				imgid		= parseInt(imgclass.replace(/\D/g, ''), 10);
+				// Create the media frame.
+				file_frame = wp.media.frames.downloadable_file = wp.media({
+					title: '<?php _e( 'Choose an image', 'woocommerce' ); ?>',
+					button: {
+						text: '<?php _e( 'Use image', 'woocommerce' ); ?>',
+					},
+					multiple: false
+				});
 
-				jQuery('#product_cat_thumbnail_id').val(imgid);
-				jQuery('#product_cat_thumbnail img').attr('src', imgurl);
-				jQuery('.remove_image_button').show();
-				jQuery('#temp_image').remove();
+				// When an image is selected, run a callback.
+				file_frame.on( 'select', function() {
+					attachment = file_frame.state().get('selection').first().toJSON();
 
-				tb_remove();
+					jQuery('#product_cat_thumbnail_id').val( attachment.id );
+					jQuery('#product_cat_thumbnail img').attr('src', attachment.url );
+					jQuery('.remove_image_button').show();
+				});
 
-				window.send_to_editor = window.send_to_editor_default;
-			}
-
-			jQuery('.upload_image_button').live('click', function(){
-				var post_id = 0;
-
-				window.send_to_editor = window.send_to_termmeta;
-
-				tb_show('', 'media-upload.php?post_id=' + post_id + '&amp;type=image&amp;TB_iframe=true');
-				return false;
+				// Finally, open the modal.
+				file_frame.open();
 			});
 
-			jQuery('.remove_image_button').live('click', function(){
+			jQuery(document).on( 'click', '.remove_image_button', function( event ){
 				jQuery('#product_cat_thumbnail img').attr('src', '<?php echo woocommerce_placeholder_img_src(); ?>');
 				jQuery('#product_cat_thumbnail_id').val('');
 				jQuery('.remove_image_button').hide();
@@ -132,35 +136,45 @@ function woocommerce_edit_category_fields( $term, $taxonomy ) {
 			</div>
 			<script type="text/javascript">
 
-				window.send_to_termmeta = function(html) {
+				// Uploading files
+				var file_frame;
 
-					jQuery('body').append('<div id="temp_image">' + html + '</div>');
+				jQuery(document).on( 'click', '.upload_image_button', function( event ){
 
-					var img = jQuery('#temp_image').find('img');
+					event.preventDefault();
 
-					imgurl 		= img.attr('src');
-					imgclass 	= img.attr('class');
-					imgid		= parseInt(imgclass.replace(/\D/g, ''), 10);
+					// If the media frame already exists, reopen it.
+					if ( file_frame ) {
+						file_frame.open();
+						return;
+					}
 
-					jQuery('#product_cat_thumbnail_id').val(imgid);
-					jQuery('#product_cat_thumbnail img').attr('src', imgurl);
-					jQuery('#temp_image').remove();
+					// Create the media frame.
+					file_frame = wp.media.frames.downloadable_file = wp.media({
+						title: '<?php _e( 'Choose an image', 'woocommerce' ); ?>',
+						button: {
+							text: '<?php _e( 'Use image', 'woocommerce' ); ?>',
+						},
+						multiple: false
+					});
 
-					tb_remove();
-				}
+					// When an image is selected, run a callback.
+					file_frame.on( 'select', function() {
+						attachment = file_frame.state().get('selection').first().toJSON();
 
-				jQuery('.upload_image_button').live('click', function(){
-					var post_id = 0;
+						jQuery('#product_cat_thumbnail_id').val( attachment.id );
+						jQuery('#product_cat_thumbnail img').attr('src', attachment.url );
+						jQuery('.remove_image_button').show();
+					});
 
-					window.send_to_editor = window.send_to_termmeta;
-
-					tb_show('', 'media-upload.php?post_id=' + post_id + '&amp;type=image&amp;TB_iframe=true');
-					return false;
+					// Finally, open the modal.
+					file_frame.open();
 				});
 
-				jQuery('.remove_image_button').live('click', function(){
+				jQuery(document).on( 'click', '.remove_image_button', function( event ){
 					jQuery('#product_cat_thumbnail img').attr('src', '<?php echo woocommerce_placeholder_img_src(); ?>');
 					jQuery('#product_cat_thumbnail_id').val('');
+					jQuery('.remove_image_button').hide();
 					return false;
 				});
 
@@ -189,6 +203,8 @@ function woocommerce_category_fields_save( $term_id, $tt_id, $taxonomy ) {
 
 	if ( isset( $_POST['product_cat_thumbnail_id'] ) )
 		update_woocommerce_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) );
+
+	delete_transient( 'wc_term_counts' );
 }
 
 add_action( 'created_term', 'woocommerce_category_fields_save', 10,3 );
@@ -328,7 +344,7 @@ add_filter( 'manage_product_cat_custom_column', 'woocommerce_product_cat_column'
  * @return void
  */
 function woocommerce_shipping_class_columns( $columns ) {
-	$columns['configure'] = '&nbsp;';
+	$columns['edit'] = '&nbsp;';
 	return $columns;
 }
 
@@ -345,8 +361,8 @@ add_filter( 'manage_edit-product_shipping_class_columns', 'woocommerce_shipping_
  * @return void
  */
 function woocommerce_shipping_class_column( $columns, $column, $id ) {
-	if ( $column == 'configure' )
-		$columns .= '<a href="'. admin_url( 'edit-tags.php?action=edit&taxonomy=product_shipping_class&tag_ID='. $id .'&post_type=product' ) .'" class="button alignright">'.__( 'Configure shipping class', 'woocommerce' ).'</a>';
+	if ( $column == 'edit' )
+		$columns .= '<a href="'. admin_url( 'edit-tags.php?action=edit&taxonomy=product_shipping_class&tag_ID='. $id .'&post_type=product' ) .'" class="button alignright">'.__( 'Edit Class', 'woocommerce' ).'</a>';
 
 	return $columns;
 }

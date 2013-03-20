@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Customer Invoice
  *
@@ -10,9 +13,6 @@
  * @author 		WooThemes
  * @extends 	WC_Email
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_Email_Customer_Invoice extends WC_Email {
 
 	var $find;
@@ -36,7 +36,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 		$this->subject_paid 	= __( 'Your {blogname} order from {order_date}', 'woocommerce');
 		$this->heading_paid     = __( 'Order {order_number} details', 'woocommerce');
 
-		// Call parent constuctor
+		// Call parent constructor
 		parent::__construct();
 	}
 

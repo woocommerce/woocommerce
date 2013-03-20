@@ -19,21 +19,19 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 		<thead>
 			<tr>
 				<th class="product-name"><?php _e( 'Product', 'woocommerce' ); ?></th>
-				<th class="product-quantity"><?php _e( 'Qty', 'woocommerce' ); ?></th>
-				<th class="product-total"><?php _e( 'Totals', 'woocommerce' ); ?></th>
+				<th class="product-total"><?php _e( 'Total', 'woocommerce' ); ?></th>
 			</tr>
 		</thead>
 		<tfoot>
-
 			<tr class="cart-subtotal">
-				<th colspan="2"><strong><?php _e( 'Cart Subtotal', 'woocommerce' ); ?></strong></th>
+				<th><?php _e( 'Cart Subtotal', 'woocommerce' ); ?></th>
 				<td><?php echo $woocommerce->cart->get_cart_subtotal(); ?></td>
 			</tr>
 
 			<?php if ( $woocommerce->cart->get_discounts_before_tax() ) : ?>
 
 			<tr class="discount">
-				<th colspan="2"><?php _e( 'Cart Discount', 'woocommerce' ); ?></th>
+				<th><?php _e( 'Cart Discount', 'woocommerce' ); ?></th>
 				<td>-<?php echo $woocommerce->cart->get_discounts_before_tax(); ?></td>
 			</tr>
 
@@ -44,7 +42,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				<?php do_action('woocommerce_review_order_before_shipping'); ?>
 
 				<tr class="shipping">
-					<th colspan="2"><?php _e( 'Shipping', 'woocommerce' ); ?></th>
+					<th><?php _e( 'Shipping', 'woocommerce' ); ?></th>
 					<td><?php woocommerce_get_template( 'cart/shipping-methods.php', array( 'available_methods' => $available_methods ) ); ?></td>
 				</tr>
 
@@ -55,7 +53,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 			<?php foreach ( $woocommerce->cart->get_fees() as $fee ) : ?>
 
 				<tr class="fee fee-<?php echo $fee->id ?>">
-					<th colspan="2"><?php echo $fee->name ?></th>
+					<th><?php echo $fee->name ?></th>
 					<td><?php
 						if ( $woocommerce->cart->tax_display_cart == 'excl' )
 							echo woocommerce_price( $fee->amount );
@@ -83,7 +81,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							}
 							?>
 							<tr class="tax-rate tax-rate-<?php echo $key; ?>">
-								<th colspan="2"><?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
+								<th><?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
 								<td><?php echo $tax; ?></td>
 							</tr>
 							<?php
@@ -92,8 +90,8 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 						if ( $has_compound_tax ) {
 							?>
 							<tr class="order-subtotal">
-								<th colspan="2"><strong><?php _e( 'Subtotal', 'woocommerce' ); ?></strong></th>
-								<td><strong><?php echo $woocommerce->cart->get_cart_subtotal( true ); ?></strong></td>
+								<th><?php _e( 'Subtotal', 'woocommerce' ); ?></th>
+								<td><?php echo $woocommerce->cart->get_cart_subtotal( true ); ?></td>
 							</tr>
 							<?php
 						}
@@ -103,7 +101,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 								continue;
 							?>
 							<tr class="tax-rate tax-rate-<?php echo $key; ?>">
-								<th colspan="2"><?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
+								<th><?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
 								<td><?php echo $tax; ?></td>
 							</tr>
 							<?php
@@ -112,7 +110,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					} elseif ( $woocommerce->cart->get_cart_tax() ) {
 						?>
 						<tr class="tax">
-							<th colspan="2" colspan="2"><?php _e( 'Tax', 'woocommerce' ); ?></th>
+							<th><?php _e( 'Tax', 'woocommerce' ); ?></th>
 							<td><?php echo $woocommerce->cart->get_cart_tax(); ?></td>
 						</tr>
 						<?php
@@ -123,16 +121,16 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 			<?php if ($woocommerce->cart->get_discounts_after_tax()) : ?>
 
 			<tr class="discount">
-				<th colspan="2"><?php _e( 'Order Discount', 'woocommerce' ); ?></th>
+				<th><?php _e( 'Order Discount', 'woocommerce' ); ?></th>
 				<td>-<?php echo $woocommerce->cart->get_discounts_after_tax(); ?></td>
 			</tr>
 
 			<?php endif; ?>
 
-			<?php do_action('woocommerce_before_order_total'); ?>
+			<?php do_action( 'woocommerce_review_order_before_order_total' ); ?>
 
 			<tr class="total">
-				<th colspan="2"><strong><?php _e( 'Order Total', 'woocommerce' ); ?></strong></th>
+				<th><strong><?php _e( 'Order Total', 'woocommerce' ); ?></strong></th>
 				<td>
 					<strong><?php echo $woocommerce->cart->get_total(); ?></strong>
 					<?php
@@ -157,26 +155,31 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				</td>
 			</tr>
 
-			<?php do_action('woocommerce_after_order_total'); ?>
+			<?php do_action( 'woocommerce_review_order_after_order_total' ); ?>
 
 		</tfoot>
 		<tbody>
 			<?php
+				do_action( 'woocommerce_review_order_before_cart_contents' );
+
 				if (sizeof($woocommerce->cart->get_cart())>0) :
-					foreach ($woocommerce->cart->get_cart() as $item_id => $values) :
+					foreach ($woocommerce->cart->get_cart() as $cart_item_key => $values) :
 						$_product = $values['data'];
 						if ($_product->exists() && $values['quantity']>0) :
 							echo '
-								<tr class = "' . esc_attr( apply_filters('woocommerce_checkout_table_item_class', 'checkout_table_item', $values, $item_id ) ) . '">
-									<td class="product-name">'.$_product->get_title().$woocommerce->cart->get_item_data( $values ).'</td>
-									<td class="product-quantity">'.$values['quantity'].'</td>
-									<td class="product-total">' . apply_filters( 'woocommerce_checkout_item_subtotal', $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] ), $values, $item_id ) . '</td>
+								<tr class="' . esc_attr( apply_filters('woocommerce_checkout_table_item_class', 'checkout_table_item', $values, $cart_item_key ) ) . '">
+									<td class="product-name">' .
+										apply_filters( 'woocommerce_checkout_product_title', $_product->get_title(), $_product ) . ' ' .
+										apply_filters( 'woocommerce_checkout_item_quantity', '<strong class="product-quantity">&times; ' . $values['quantity'] . '</strong>', $values, $cart_item_key ) .
+										$woocommerce->cart->get_item_data( $values ) .
+									'</td>
+									<td class="product-total">' . apply_filters( 'woocommerce_checkout_item_subtotal', $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] ), $values, $cart_item_key ) . '</td>
 								</tr>';
 						endif;
 					endforeach;
 				endif;
 
-				do_action( 'woocommerce_cart_contents_review_order' );
+				do_action( 'woocommerce_review_order_after_cart_contents' );
 			?>
 		</tbody>
 	</table>
@@ -186,25 +189,22 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 		<ul class="payment_methods methods">
 			<?php
 				$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
-				if ($available_gateways) :
+				if ( ! empty( $available_gateways ) ) {
+
 					// Chosen Method
-					if (sizeof($available_gateways)) :
-						$default_gateway = get_option('woocommerce_default_gateway');
+					if ( isset( $woocommerce->session->chosen_payment_method ) && isset( $available_gateways[ $woocommerce->session->chosen_payment_method ] ) ) {
+						$available_gateways[ $woocommerce->session->chosen_payment_method ]->set_current();
+					} elseif ( isset( $available_gateways[ get_option( 'woocommerce_default_gateway' ) ] ) ) {
+						$available_gateways[ get_option( 'woocommerce_default_gateway' ) ]->set_current();
+					} else {
+						current( $available_gateways )->set_current();
+					}
 
-						if ( isset( $woocommerce->session->chosen_payment_method ) && isset( $available_gateways[ $woocommerce->session->chosen_payment_method ] ) ) {
-							$available_gateways[ $woocommerce->session->chosen_payment_method ]->set_current();
-						} elseif ( isset( $available_gateways[ $default_gateway ] ) ) {
-							$available_gateways[ $default_gateway ]->set_current();
-						} else {
-							current( $available_gateways )->set_current();
-						}
-
-					endif;
-					foreach ($available_gateways as $gateway ) :
+					foreach ( $available_gateways as $gateway ) {
 						?>
 						<li>
-						<input type="radio" id="payment_method_<?php echo $gateway->id; ?>" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php checked( $gateway->chosen, true ); ?> />
-						<label for="payment_method_<?php echo $gateway->id; ?>"><?php echo $gateway->get_title(); ?> <?php echo $gateway->get_icon(); ?></label>
+							<input type="radio" id="payment_method_<?php echo $gateway->id; ?>" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php checked( $gateway->chosen, true ); ?> />
+							<label for="payment_method_<?php echo $gateway->id; ?>"><?php echo $gateway->get_title(); ?> <?php echo $gateway->get_icon(); ?></label>
 							<?php
 								if ( $gateway->has_fields() || $gateway->get_description() ) :
 									echo '<div class="payment_box payment_method_' . $gateway->id . '" ' . ( $gateway->chosen ? '' : 'style="display:none;"' ) . '>';
@@ -214,16 +214,15 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							?>
 						</li>
 						<?php
-					endforeach;
-				else :
+					}
+				} else {
 
-					if ( !$woocommerce->customer->get_country() ) :
-						echo '<p>'.__( 'Please fill in your details above to see available payment methods.', 'woocommerce' ).'</p>';
-					else :
-						echo '<p>'.__( 'Sorry, it seems that there are no available payment methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce' ).'</p>';
-					endif;
+					if ( ! $woocommerce->customer->get_country() )
+						echo '<p>' . __( 'Please fill in your details above to see available payment methods.', 'woocommerce' ) . '</p>';
+					else
+						echo '<p>' . __( 'Sorry, it seems that there are no available payment methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce' ) . '</p>';
 
-				endif;
+				}
 			?>
 		</ul>
 		<?php endif; ?>

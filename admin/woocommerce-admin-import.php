@@ -62,13 +62,13 @@ function woocommerce_import_start() {
 
 								// Register the taxonomy now so that the import works!
 								register_taxonomy( $domain,
-							        array('product'),
-							        array(
+							        apply_filters( 'woocommerce_taxonomy_objects_' . $domain, array('product') ),
+							        apply_filters( 'woocommerce_taxonomy_args_' . $domain, array(
 							            'hierarchical' => true,
 							            'show_ui' => false,
 							            'query_var' => true,
 							            'rewrite' => false,
-							        )
+							        ) )
 							    );
 
 							endif;

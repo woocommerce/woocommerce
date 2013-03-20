@@ -1,3 +1,5 @@
+@woocommerce: #ad74a2;
+
 .clearfix() {
 	&:after {
 		content:"";
@@ -18,7 +20,7 @@
 	border-top-right-radius: @radius;
 	border-bottom-right-radius: @radius;
 }
-.border_radius_left(@radius:4px) { 
+.border_radius_left(@radius:4px) {
 	-webkit-border-top-left-radius: @radius;
 	-webkit-border-bottom-left-radius: @radius;
 	-moz-border-radius-topleft: @radius;
@@ -73,6 +75,20 @@
 	-moz-transition:@selector @animation @duration;
 	-o-transition:@selector @animation @duration;
 	transition:@selector @animation @duration;
+}
+
+.scale(@ratio:1.5){
+  -webkit-transform:scale(@ratio);
+  -moz-transform:scale(@ratio);
+  -ms-transform:scale(@ratio);
+  -o-transform:scale(@ratio);
+  transform:scale(@ratio);
+}
+
+.borderbox () {
+	-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+	-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+	box-sizing: border-box;         /* Opera/IE 8+ */
 }
 
 .clear { clear: both; }

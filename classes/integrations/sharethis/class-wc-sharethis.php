@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * ShareThis Integration
  *
@@ -10,9 +13,6 @@
  * @package		WooCommerce/Classes/Integrations
  * @author 		WooThemes
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_ShareThis extends WC_Integration {
 
 	/** @var string Default code for share this */
@@ -34,23 +34,19 @@ class WC_ShareThis extends WC_Integration {
 	<span class="st_twitter"></span><span class="st_email"></span><span class="st_sharethis" st_image="{image}"></span><span class="st_plusone_button"></span>
 </div>';
 
-		// Load the form fields.
-		$this->init_form_fields();
-
 		// Load the settings.
+		$this->init_form_fields();
 		$this->init_settings();
 
 		// Define user set variables
-		$this->publisher_id 	= $this->settings['publisher_id'];
-		$this->sharethis_code 	= $this->settings['sharethis_code'];
-
-		if ( ! $this->sharethis_code ) $this->settings['sharethis_code'] = $this->sharethis_code = $this->default_code;
+		$this->publisher_id 	= $this->get_option( 'publisher_id' );
+		$this->sharethis_code 	= $this->get_option( 'sharethis_code', $this->default_code );
 
 		// Actions
-		add_action( 'woocommerce_update_options_integration_sharethis', array( &$this, 'process_admin_options') );
+		add_action( 'woocommerce_update_options_integration_sharethis', array( $this, 'process_admin_options' ) );
 
 		// Share widget
-		add_action( 'woocommerce_share', array( &$this, 'sharethis_code') );
+		add_action( 'woocommerce_share', array( $this, 'sharethis_code' ) );
     }
 
 

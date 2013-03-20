@@ -43,6 +43,11 @@ include_once( 'woocommerce-admin-functions.php' );
 include_once( 'woocommerce-admin-taxonomies.php' );
 
 /**
+ * Welcome Page
+ */
+include_once( 'includes/welcome.php' );
+
+/**
  * Setup the Admin menu in WordPress
  *
  * @access public
@@ -54,14 +59,14 @@ function woocommerce_admin_menu() {
     if ( current_user_can( 'manage_woocommerce' ) )
     $menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );
 
-    $main_page = add_menu_page(__( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings_page', null, '55.5' );
+    $main_page = add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings_page', null, '55.5' );
 
-    $reports_page = add_submenu_page('woocommerce', __( 'Reports', 'woocommerce' ),  __( 'Reports', 'woocommerce' ) , 'view_woocommerce_reports', 'woocommerce_reports', 'woocommerce_reports_page');
+    $reports_page = add_submenu_page( 'woocommerce', __( 'Reports', 'woocommerce' ),  __( 'Reports', 'woocommerce' ) , 'view_woocommerce_reports', 'woocommerce_reports', 'woocommerce_reports_page' );
 
-    add_submenu_page('edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'woocommerce_attributes', 'woocommerce_attributes_page');
+    add_submenu_page( 'edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'woocommerce_attributes', 'woocommerce_attributes_page');
 
-    add_action('load-' . $main_page, 'woocommerce_admin_help_tab');
-    add_action('load-' . $reports_page, 'woocommerce_admin_help_tab');
+    add_action( 'load-' . $main_page, 'woocommerce_admin_help_tab' );
+    add_action( 'load-' . $reports_page, 'woocommerce_admin_help_tab' );
 
     $print_css_on = apply_filters( 'woocommerce_screen_ids', array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_woocommerce_reports', 'woocommerce_page_woocommerce_status', 'product_page_woocommerce_attributes', 'edit-tags.php', 'edit.php', 'index.php', 'post-new.php', 'post.php' ) );
 
@@ -78,12 +83,24 @@ add_action('admin_menu', 'woocommerce_admin_menu', 9);
  * @return void
  */
 function woocommerce_admin_menu_after() {
-	add_submenu_page( 'woocommerce', __( 'WooCommerce Settings', 'woocommerce' ),  __( 'Settings', 'woocommerce' ) , 'manage_woocommerce', 'woocommerce_settings', 'woocommerce_settings_page');
-	add_submenu_page( 'woocommerce', __( 'WooCommerce Status', 'woocommerce' ),  __( 'System Status', 'woocommerce' ) , 'manage_woocommerce', 'woocommerce_status', 'woocommerce_status_page');
+	$settings_page = add_submenu_page( 'woocommerce', __( 'WooCommerce Settings', 'woocommerce' ),  __( 'Settings', 'woocommerce' ) , 'manage_woocommerce', 'woocommerce_settings', 'woocommerce_settings_page');
+	$status_page = add_submenu_page( 'woocommerce', __( 'WooCommerce Status', 'woocommerce' ),  __( 'System Status', 'woocommerce' ) , 'manage_woocommerce', 'woocommerce_status', 'woocommerce_status_page');
+
+	add_action( 'load-' . $settings_page, 'woocommerce_settings_page_init' );
 }
 
 add_action('admin_menu', 'woocommerce_admin_menu_after', 50);
 
+/**
+ * Loads gateways and shipping methods into memory for use within settings.
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_settings_page_init() {
+	$GLOBALS['woocommerce']->payment_gateways();
+	$GLOBALS['woocommerce']->shipping();
+}
 
 /**
  * Highlights the correct top level admin menu item for post type add screens.
@@ -147,14 +164,41 @@ add_action( 'admin_head', 'woocommerce_admin_menu_highlight' );
  */
 function woocommerce_admin_notices_styles() {
 
-	if ( get_option( 'woocommerce_updated' ) == 1 || get_option( 'woocommerce_needs_update' ) == 1 || get_option( 'woocommerce_installed' ) == 1 ) {
+	if ( get_option( '_wc_needs_update' ) == 1 || get_option( '_wc_needs_pages' ) == 1 ) {
 		wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', dirname( __FILE__ ) ) );
 		add_action( 'admin_notices', 'woocommerce_admin_install_notices' );
+	}
+
+	$template = get_option( 'template' );
+
+	if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $template, array( 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
+
+		if ( ! empty( $_GET['hide_woocommerce_theme_support_check'] ) ) {
+			update_option( 'woocommerce_theme_support_check', $template );
+			return;
+		}
+
+		if ( get_option( 'woocommerce_theme_support_check' ) !== $template ) {
+			wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', dirname( __FILE__ ) ) );
+			add_action( 'admin_notices', 'woocommerce_theme_check_notice' );
+		}
+
 	}
 
 }
 
 add_action( 'admin_print_styles', 'woocommerce_admin_notices_styles' );
+
+
+/**
+ * woocommerce_theme_check_notice function.
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_theme_check_notice() {
+	include( 'includes/notice-theme-support.php' );
+}
 
 
 /**
@@ -166,31 +210,14 @@ add_action( 'admin_print_styles', 'woocommerce_admin_notices_styles' );
 function woocommerce_admin_install_notices() {
 	global $woocommerce;
 
-	if ( get_option( 'woocommerce_needs_update' ) == 1 ) {
-
+	// If we need to update, include a message with the update button
+	if ( get_option( '_wc_needs_update' ) == 1 ) {
 		include( 'includes/notice-update.php' );
+	}
 
-	} elseif ( get_option( 'woocommerce_updated' ) == 1 ) {
-
-		include( 'includes/notice-updated.php' );
-
-		update_option( 'woocommerce_updated', 0 );
-		update_option( 'woocommerce_installed', 0 );
-
-	} elseif ( get_option( 'woocommerce_installed' ) == 1 ) {
-
-		if ( get_option( 'skip_install_woocommerce_pages' ) != 1 && woocommerce_get_page_id( 'shop' ) < 1 && ! isset( $_GET['install_woocommerce_pages'] ) && !isset( $_GET['skip_install_woocommerce_pages'] ) ) {
-
-			include( 'includes/notice-install.php' );
-
-		} elseif ( ! isset( $_GET['page'] ) || $_GET['page'] != 'woocommerce_settings' ) {
-
-			include( 'includes/notice-installed.php' );
-
-			update_option( 'woocommerce_installed', 0 );
-
-		}
-
+	// If we have just installed, show a message with the install pages button
+	elseif ( get_option( '_wc_needs_pages' ) == 1 ) {
+		include( 'includes/notice-install.php' );
 	}
 }
 
@@ -205,7 +232,52 @@ function woocommerce_admin_init() {
 
 	ob_start();
 
-	if ( $typenow=='post' && isset( $_GET['post'] ) && ! empty( $_GET['post'] ) ) {
+	// Install - Add pages button
+	if ( ! empty( $_GET['install_woocommerce_pages'] ) ) {
+
+		require_once( 'woocommerce-admin-install.php' );
+		woocommerce_create_pages();
+
+		// We no longer need to install pages
+		delete_option( '_wc_needs_pages' );
+		delete_transient( '_wc_activation_redirect' );
+
+		// What's new redirect
+		wp_safe_redirect( admin_url( 'index.php?page=wc-about&wc-installed=true' ) );
+		exit;
+
+	// Skip button
+	} elseif ( ! empty( $_GET['skip_install_woocommerce_pages'] ) ) {
+
+		// We no longer need to install pages
+		delete_option( '_wc_needs_pages' );
+		delete_transient( '_wc_activation_redirect' );
+
+		// Flush rules after install
+		flush_rewrite_rules();
+
+		// What's new redirect
+		wp_safe_redirect( admin_url( 'index.php?page=wc-about' ) );
+		exit;
+
+	// Update button
+	} elseif ( ! empty( $_GET['do_update_woocommerce'] ) ) {
+
+		include_once( 'woocommerce-admin-update.php' );
+		do_update_woocommerce();
+
+		// Update complete
+		delete_option( '_wc_needs_pages' );
+		delete_option( '_wc_needs_update' );
+		delete_transient( '_wc_activation_redirect' );
+
+		// What's new redirect
+		wp_safe_redirect( admin_url( 'index.php?page=wc-about&wc-updated=true' ) );
+		exit;
+	}
+
+	// Includes
+	if ( $typenow == 'post' && isset( $_GET['post'] ) && ! empty( $_GET['post'] ) ) {
 		$typenow = $post->post_type;
 	} elseif ( empty( $typenow ) && ! empty( $_GET['post'] ) ) {
 	    $post = get_post( $_GET['post'] );
@@ -288,24 +360,6 @@ function woocommerce_status_page() {
 
 
 /**
- * update_woocommerce function.
- *
- * @access public
- * @return void
- */
-function update_woocommerce() {
-	if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
-		include_once( 'woocommerce-admin-update.php' );
-		do_update_woocommerce();
-		update_option( 'woocommerce_updated', 1 );
-		update_option( 'woocommerce_needs_update', 0 );
-	}
-}
-
-add_action( 'admin_init', 'update_woocommerce' );
-
-
-/**
  * Include and add help tabs to WordPress admin.
  *
  * @access public
@@ -337,9 +391,7 @@ function woocommerce_admin_scripts() {
 
 	wp_register_script( 'jquery-tiptip', $woocommerce->plugin_url() . '/assets/js/jquery-tiptip/jquery.tipTip' . $suffix . '.js', array( 'jquery' ), $woocommerce->version, true );
 
-	wp_register_script( 'jquery-ui-datepicker',  $woocommerce->plugin_url() . '/assets/js/admin/ui-datepicker.js', array('jquery','jquery-ui-core'), $woocommerce->version );
-
-	wp_register_script( 'woocommerce_writepanel', $woocommerce->plugin_url() . '/assets/js/admin/write-panels'.$suffix.'.js', array('jquery', 'jquery-ui-datepicker'), $woocommerce->version );
+	wp_register_script( 'woocommerce_writepanel', $woocommerce->plugin_url() . '/assets/js/admin/write-panels'.$suffix.'.js', array('jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable'), $woocommerce->version );
 
 	wp_register_script( 'ajax-chosen', $woocommerce->plugin_url() . '/assets/js/chosen/ajax-chosen.jquery'.$suffix.'.js', array('jquery', 'chosen'), $woocommerce->version );
 
@@ -349,7 +401,7 @@ function woocommerce_admin_scripts() {
     $screen = get_current_screen();
 
     // WooCommerce admin pages
-    if (in_array( $screen->id, apply_filters( 'woocommerce_screen_ids', array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_woocommerce_reports', 'edit-shop_order', 'edit-shop_coupon', 'shop_coupon', 'shop_order', 'edit-product', 'product' ) ) ) ) :
+    if ( in_array( $screen->id, apply_filters( 'woocommerce_screen_ids', array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_woocommerce_reports', 'edit-shop_order', 'edit-shop_coupon', 'shop_coupon', 'shop_order', 'edit-product', 'product' ) ) ) ) {
 
     	wp_enqueue_script( 'woocommerce_admin' );
     	wp_enqueue_script( 'farbtastic' );
@@ -358,32 +410,27 @@ function woocommerce_admin_scripts() {
     	wp_enqueue_script( 'jquery-ui-sortable' );
     	wp_enqueue_script( 'jquery-ui-autocomplete' );
 
-    endif;
+    }
 
     // Edit product category pages
-    if (in_array( $screen->id, array('edit-product_cat') )) :
-
-		wp_enqueue_script( 'media-upload' );
-		wp_enqueue_script( 'thickbox' );
-
-	endif;
+    if ( in_array( $screen->id, array('edit-product_cat') ) )
+		wp_enqueue_media();
 
 	// Product/Coupon/Orders
-	if (in_array( $screen->id, array( 'shop_coupon', 'shop_order', 'product' ))) :
+	if ( in_array( $screen->id, array( 'shop_coupon', 'shop_order', 'product' ) ) ) {
 
 		wp_enqueue_script( 'woocommerce_writepanel' );
 		wp_enqueue_script( 'jquery-ui-datepicker' );
-		wp_enqueue_script( 'media-upload' );
-		wp_enqueue_script( 'thickbox' );
+		wp_enqueue_media();
 		wp_enqueue_script( 'ajax-chosen' );
 		wp_enqueue_script( 'chosen' );
 		wp_enqueue_script( 'plupload-all' );
 
 		$woocommerce_witepanel_params = array(
 			'remove_item_notice' 			=> __( 'Are you sure you want to remove the selected items? If you have previously reduced this item\'s stock, or this order was submitted by a customer, you will need to manually restore the item\'s stock.', 'woocommerce' ),
+			'i18n_select_items'				=> __( 'Please select some items.', 'woocommerce' ),
 			'remove_item_meta'				=> __( 'Remove this item meta?', 'woocommerce' ),
 			'remove_attribute'				=> __( 'Remove this attribute?', 'woocommerce' ),
-			'refund_item_notice' 			=> __( 'Are you sure you want to refund the selected items? The item\'s stock will not be affected.', 'woocommerce' ),
 			'name_label'					=> __( 'Name', 'woocommerce' ),
 			'remove_label'					=> __( 'Remove', 'woocommerce' ),
 			'click_to_toggle'				=> __( 'Click to toggle', 'woocommerce' ),
@@ -415,15 +462,17 @@ function woocommerce_admin_scripts() {
 			'currency_format_symbol'		=> get_woocommerce_currency_symbol(),
 			'currency_format_decimal_sep'	=> esc_attr( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ) ),
 			'currency_format_thousand_sep'	=> esc_attr( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ) ),
-			'currency_format'				=> esc_attr( str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) ) // For accounting JS
+			'currency_format'				=> esc_attr( str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) ), // For accounting JS
+			'product_types'					=> array_map( 'sanitize_title', get_terms( 'product_type', array( 'hide_empty' => false, 'fields' => 'names' ) ) ),
+			'default_attribute_visibility'  => apply_filters( 'default_attribute_visibility', false ),
+			'default_attribute_variation'   => apply_filters( 'default_attribute_variation', false )
 		 );
 
 		wp_localize_script( 'woocommerce_writepanel', 'woocommerce_writepanel_params', $woocommerce_witepanel_params );
-
-	endif;
+	}
 
 	// Term ordering - only when sorting by term_order
-	if ( ( strstr( $screen->id, 'edit-pa_' ) || ( ! empty( $_GET['taxonomy'] ) && in_array( $_GET['taxonomy'], apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ) ) ) ) && ! isset( $_GET['orderby'] ) ) :
+	if ( ( strstr( $screen->id, 'edit-pa_' ) || ( ! empty( $_GET['taxonomy'] ) && in_array( $_GET['taxonomy'], apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ) ) ) ) && ! isset( $_GET['orderby'] ) ) {
 
 		wp_register_script( 'woocommerce_term_ordering', $woocommerce->plugin_url() . '/assets/js/admin/term-ordering.js', array('jquery-ui-sortable'), $woocommerce->version );
 		wp_enqueue_script( 'woocommerce_term_ordering' );
@@ -436,7 +485,7 @@ function woocommerce_admin_scripts() {
 
 		wp_localize_script( 'woocommerce_term_ordering', 'woocommerce_term_ordering_params', $woocommerce_term_order_params );
 
-	endif;
+	}
 
 	// Product sorting - only when sorting by menu order on the products page
 	if ( current_user_can('edit_others_pages') && $screen->id == 'edit-product' && isset( $wp_query->query['orderby'] ) && $wp_query->query['orderby'] == 'menu_order title' ) {
@@ -465,20 +514,22 @@ add_action( 'admin_enqueue_scripts', 'woocommerce_admin_scripts' );
  * @return void
  */
 function woocommerce_admin_css() {
-	global $woocommerce, $typenow, $post;
+	global $woocommerce, $typenow, $post, $wp_scripts;
 
-	if ($typenow=='post' && isset($_GET['post']) && !empty($_GET['post'])) :
+	if ( $typenow == 'post' && ! empty( $_GET['post'] ) ) {
 		$typenow = $post->post_type;
-	elseif (empty($typenow) && !empty($_GET['post'])) :
-        $post = get_post($_GET['post']);
+	} elseif ( empty( $typenow ) && ! empty( $_GET['post'] ) ) {
+        $post = get_post( $_GET['post'] );
         $typenow = $post->post_type;
-    endif;
+    }
 
-	if ( $typenow == '' || $typenow=="product" || $typenow=="shop_order" || $typenow=="shop_coupon" ) :
-		wp_enqueue_style( 'thickbox' );
+	if ( $typenow == '' || $typenow == "product" || $typenow == "shop_order" || $typenow == "shop_coupon" ) {
 		wp_enqueue_style( 'woocommerce_admin_styles', $woocommerce->plugin_url() . '/assets/css/admin.css' );
-		wp_enqueue_style( 'jquery-ui-style', (is_ssl()) ? 'https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css' : 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css' );
-	endif;
+
+		$jquery_version = isset( $wp_scripts->registered['jquery-ui-core']->ver ) ? $wp_scripts->registered['jquery-ui-core']->ver : '1.9.2';
+
+		wp_enqueue_style( 'jquery-ui-style', '//ajax.googleapis.com/ajax/libs/jqueryui/' . $jquery_version . '/themes/smoothness/jquery-ui.css' );
+	}
 
 	wp_enqueue_style('farbtastic');
 
@@ -579,79 +630,6 @@ function woocommerce_admin_head() {
 }
 
 add_action('admin_head', 'woocommerce_admin_head');
-
-
-/**
- * Add functionality to the image uploader on product pages to exclude an image
- *
- * @access public
- * @param mixed $fields
- * @param mixed $object
- * @return void
- */
-function woocommerce_exclude_image_from_product_page_field( $fields, $object ) {
-
-	if (!$object->post_parent) return $fields;
-
-	$parent = get_post( $object->post_parent );
-
-	if ( $parent->post_type !== 'product' )
-		return $fields;
-
-	$exclude_image = get_post_meta( absint( $object->ID ), '_woocommerce_exclude_image', true );
-
-	$label = __( 'Exclude image', 'woocommerce' );
-
-	$html = '<input type="checkbox" '.checked($exclude_image, 1, false).' name="attachments['.$object->ID.'][woocommerce_exclude_image]" id="attachments['.$object->ID.'][woocommerce_exclude_image" />';
-
-	$fields['woocommerce_exclude_image'] = array(
-			'label' => $label,
-			'input' => 'html',
-			'html' =>  $html,
-			'value' => '',
-			'helps' => __( 'Enabling this option will hide it from the product page image gallery.', 'woocommerce' )
-	);
-
-	return $fields;
-}
-
-add_filter('attachment_fields_to_edit', 'woocommerce_exclude_image_from_product_page_field', 1, 2);
-add_filter('attachment_fields_to_save', 'woocommerce_exclude_image_from_product_page_field_save', 1, 2);
-add_action('add_attachment', 'woocommerce_exclude_image_from_product_page_field_add');
-
-
-/**
- * Save the meta for exlcuding images from galleries.
- *
- * @access public
- * @param mixed $post
- * @param mixed $attachment
- * @return void
- */
-function woocommerce_exclude_image_from_product_page_field_save( $post, $attachment ) {
-
-	if (isset($_REQUEST['attachments'][$post['ID']]['woocommerce_exclude_image'])) :
-		delete_post_meta( (int) $post['ID'], '_woocommerce_exclude_image' );
-		update_post_meta( (int) $post['ID'], '_woocommerce_exclude_image', 1);
-	else :
-		delete_post_meta( (int) $post['ID'], '_woocommerce_exclude_image' );
-		update_post_meta( (int) $post['ID'], '_woocommerce_exclude_image', 0);
-	endif;
-
-	return $post;
-
-}
-
-/**
- * Add the meta for exlcuding images from galleries.
- *
- * @access public
- * @param mixed $post_id
- * @return void
- */
-function woocommerce_exclude_image_from_product_page_field_add( $post_id ) {
-	add_post_meta( $post_id, '_woocommerce_exclude_image', 0, true );
-}
 
 
 /**

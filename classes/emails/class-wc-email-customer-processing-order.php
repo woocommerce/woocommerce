@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Customer Processing Order Email
  *
@@ -10,9 +13,6 @@
  * @author 		WooThemes
  * @extends 	WC_Email
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_Email_Customer_Processing_Order extends WC_Email {
 
 	/**
@@ -31,10 +31,10 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 		$this->template_plain 	= 'emails/plain/customer-processing-order.php';
 
 		// Triggers for this email
-		add_action( 'woocommerce_order_status_pending_to_processing_notification', array( &$this, 'trigger' ) );
-		add_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( &$this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_pending_to_processing_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( $this, 'trigger' ) );
 
-		// Call parent constuctor
+		// Call parent constructor
 		parent::__construct();
 	}
 

@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Customer Note Order Email
  *
@@ -10,9 +13,6 @@
  * @author 		WooThemes
  * @extends 	WC_Email
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_Email_Customer_Note extends WC_Email {
 
 	var $customer_note;
@@ -36,9 +36,9 @@ class WC_Email_Customer_Note extends WC_Email {
 		$this->heading      	= __( 'A note has been added to your order', 'woocommerce');
 
 		// Triggers
-		add_action( 'woocommerce_new_customer_note_notification', array( &$this, 'trigger' ) );
+		add_action( 'woocommerce_new_customer_note_notification', array( $this, 'trigger' ) );
 
-		// Call parent constuctor
+		// Call parent constructor
 		parent::__construct();
 	}
 

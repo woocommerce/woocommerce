@@ -4,9 +4,9 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @version     2.0.3
  */
-global $woocommerce;
+global $woocommerce, $product;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
@@ -17,30 +17,15 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 	if ( get_option('woocommerce_enable_review_rating') == 'yes' ) {
 
-		$count = $wpdb->get_var( $wpdb->prepare("
-			SELECT COUNT(meta_value) FROM $wpdb->commentmeta
-			LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
-			WHERE meta_key = 'rating'
-			AND comment_post_ID = %d
-			AND comment_approved = '1'
-			AND meta_value > 0
-		", $post->ID ) );
-
-		$rating = $wpdb->get_var( $wpdb->prepare("
-			SELECT SUM(meta_value) FROM $wpdb->commentmeta
-			LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
-			WHERE meta_key = 'rating'
-			AND comment_post_ID = %d
-			AND comment_approved = '1'
-		", $post->ID ) );
+		$count = $product->get_rating_count();
 
 		if ( $count > 0 ) {
 
-			$average = number_format($rating / $count, 2);
+			$average = $product->get_average_rating();
 
 			echo '<div itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">';
 
-			echo '<div class="star-rating" title="'.sprintf(__( 'Rated %s out of 5', 'woocommerce' ), $average).'"><span style="width:'.($average*16).'px"><span itemprop="ratingValue" class="rating">'.$average.'</span> '.__( 'out of 5', 'woocommerce' ).'</span></div>';
+			echo '<div class="star-rating" title="'.sprintf(__( 'Rated %s out of 5', 'woocommerce' ), $average ).'"><span style="width:'.( ( $average / 5 ) * 100 ) . '%"><strong itemprop="ratingValue" class="rating">'.$average.'</strong> '.__( 'out of 5', 'woocommerce' ).'</span></div>';
 
 			echo '<h2>'.sprintf( _n('%s review for %s', '%s reviews for %s', $count, 'woocommerce'), '<span itemprop="ratingCount" class="count">'.$count.'</span>', wptexturize($post->post_title) ).'</h2>';
 
@@ -75,7 +60,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			</div>
 		<?php endif;
 
-		echo '<p class="add_review"><a href="#review_form" class="inline show_review_form button">'.__( 'Add Review', 'woocommerce' ).'</a></p>';
+		echo '<p class="add_review"><a href="#review_form" class="inline show_review_form button" rel="prettyPhoto" title="' . __( 'Add Your Review', 'woocommerce' ) . '">' . __( 'Add Review', 'woocommerce' ) . '</a></p>';
 
 		$title_reply = __( 'Add a review', 'woocommerce' );
 
@@ -83,7 +68,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 		$title_reply = __( 'Be the first to review', 'woocommerce' ).' &ldquo;'.$post->post_title.'&rdquo;';
 
-		echo '<p>'.__( 'There are no reviews yet, would you like to <a href="#review_form" class="inline show_review_form">submit yours</a>?', 'woocommerce' ).'</p>';
+		echo '<p class="noreviews">'.__( 'There are no reviews yet, would you like to <a href="#review_form" class="inline show_review_form">submit yours</a>?', 'woocommerce' ).'</p>';
 
 	endif;
 
@@ -121,7 +106,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 	$comment_form['comment_field'] .= '<p class="comment-form-comment"><label for="comment">' . __( 'Your Review', 'woocommerce' ) . '</label><textarea id="comment" name="comment" cols="45" rows="8" aria-required="true"></textarea></p>' . $woocommerce->nonce_field('comment_rating', true, false);
 
-	comment_form( $comment_form );
+	comment_form( apply_filters( 'woocommerce_product_review_comment_form_args', $comment_form ) );
 
 	echo '</div></div>';
 

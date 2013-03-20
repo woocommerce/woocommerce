@@ -73,16 +73,17 @@ add_action( 'post_submitbox_start', 'woocommerce_duplicate_product_post_button' 
  * @param mixed $columns
  * @return array
  */
-function woocommerce_edit_product_columns( $columns ) {
+function woocommerce_edit_product_columns( $existing_columns ) {
 	global $woocommerce;
 
-	if ( empty( $columns ) && ! is_array( $columns ) )
-		$columns = array();
+	if ( empty( $existing_columns ) && ! is_array( $existing_columns ) )
+		$existing_columns = array();
 
-	unset( $columns['title'], $columns['comments'], $columns['date'] );
+	unset( $existing_columns['title'], $existing_columns['comments'], $existing_columns['date'] );
 
+	$columns = array();
 	$columns["cb"] = "<input type=\"checkbox\" />";
-	$columns["thumb"] = __( 'Image', 'woocommerce' );
+	$columns["thumb"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/image.png" alt="' . __( 'Image', 'woocommerce' ) . '" class="tips" data-tip="' . __( 'Image', 'woocommerce' ) . '" width="14" height="14" />';
 
 	$columns["name"] = __( 'Name', 'woocommerce' );
 
@@ -100,10 +101,10 @@ function woocommerce_edit_product_columns( $columns ) {
 	$columns["product_type"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/product_type_head.png" alt="' . __( 'Type', 'woocommerce' ) . '" class="tips" data-tip="' . __( 'Type', 'woocommerce' ) . '" width="14" height="12" />';
 	$columns["date"] = __( 'Date', 'woocommerce' );
 
-	return $columns;
+	return array_merge( $columns, $existing_columns );
 }
 
-add_filter('manage_edit-product_columns', 'woocommerce_edit_product_columns');
+add_filter( 'manage_edit-product_columns', 'woocommerce_edit_product_columns' );
 
 
 /**
@@ -114,12 +115,14 @@ add_filter('manage_edit-product_columns', 'woocommerce_edit_product_columns');
  * @return void
  */
 function woocommerce_custom_product_columns( $column ) {
-	global $post, $woocommerce;
-	$product = get_product($post);
+	global $post, $woocommerce, $the_product;
+
+	if ( empty( $the_product ) || $the_product->id != $post->ID )
+		$the_product = get_product( $post );
 
 	switch ($column) {
 		case "thumb" :
-			echo $product->get_image();
+			echo '<a href="' . get_edit_post_link( $post->ID ) . '">' . $the_product->get_image() . '</a>';
 		break;
 		case "name" :
 			$edit_link = get_edit_post_link( $post->ID );
@@ -145,24 +148,26 @@ function woocommerce_custom_product_columns( $column ) {
 			$actions['id'] = 'ID: ' . $post->ID;
 
 			if ( $can_edit_post && 'trash' != $post->post_status ) {
-				$actions['inline hide-if-no-js'] = '<a href="#" class="editinline" title="' . esc_attr( __( 'Edit this item inline', 'woocommerce' ) ) . '">' . __( 'Quick&nbsp;Edit', 'woocommerce' ) . '</a>';
+				$actions['edit'] = '<a href="' . get_edit_post_link( $post->ID, true ) . '" title="' . esc_attr( __( 'Edit this item' ) ) . '">' . __( 'Edit' ) . '</a>';
+				$actions['inline hide-if-no-js'] = '<a href="#" class="editinline" title="' . esc_attr( __( 'Edit this item inline' ) ) . '">' . __( 'Quick&nbsp;Edit' ) . '</a>';
 			}
 			if ( current_user_can( $post_type_object->cap->delete_post, $post->ID ) ) {
 				if ( 'trash' == $post->post_status )
-					$actions['untrash'] = "<a title='" . esc_attr( __( 'Restore this item from the Trash', 'woocommerce' ) ) . "' href='" . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $post->ID ) ), 'untrash-' . $post->post_type . '_' . $post->ID ) . "'>" . __( 'Restore', 'woocommerce' ) . "</a>";
+					$actions['untrash'] = "<a title='" . esc_attr( __( 'Restore this item from the Trash' ) ) . "' href='" . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $post->ID ) ), 'untrash-post_' . $post->ID ) . "'>" . __( 'Restore' ) . "</a>";
 				elseif ( EMPTY_TRASH_DAYS )
-					$actions['trash'] = "<a class='submitdelete' title='" . esc_attr( __( 'Move this item to the Trash', 'woocommerce' ) ) . "' href='" . get_delete_post_link( $post->ID ) . "'>" . __( 'Trash', 'woocommerce' ) . "</a>";
+					$actions['trash'] = "<a class='submitdelete' title='" . esc_attr( __( 'Move this item to the Trash' ) ) . "' href='" . get_delete_post_link( $post->ID ) . "'>" . __( 'Trash' ) . "</a>";
 				if ( 'trash' == $post->post_status || !EMPTY_TRASH_DAYS )
-					$actions['delete'] = "<a class='submitdelete' title='" . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . "' href='" . get_delete_post_link( $post->ID, '', true ) . "'>" . __( 'Delete Permanently', 'woocommerce' ) . "</a>";
+					$actions['delete'] = "<a class='submitdelete' title='" . esc_attr( __( 'Delete this item permanently' ) ) . "' href='" . get_delete_post_link( $post->ID, '', true ) . "'>" . __( 'Delete Permanently' ) . "</a>";
 			}
 			if ( $post_type_object->public ) {
-				if ( in_array( $post->post_status, array( 'pending', 'draft' ) ) ) {
+				if ( in_array( $post->post_status, array( 'pending', 'draft', 'future' ) ) ) {
 					if ( $can_edit_post )
-						$actions['view'] = '<a href="' . esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) . '" title="' . esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;', 'woocommerce' ), $title ) ) . '" rel="permalink">' . __( 'Preview', 'woocommerce' ) . '</a>';
+						$actions['view'] = '<a href="' . esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) . '" title="' . esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;' ), $title ) ) . '" rel="permalink">' . __( 'Preview' ) . '</a>';
 				} elseif ( 'trash' != $post->post_status ) {
-					$actions['view'] = '<a href="' . get_permalink( $post->ID ) . '" title="' . esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'woocommerce' ), $title ) ) . '" rel="permalink">' . __( 'View', 'woocommerce' ) . '</a>';
+					$actions['view'] = '<a href="' . get_permalink( $post->ID ) . '" title="' . esc_attr( sprintf( __( 'View &#8220;%s&#8221;' ), $title ) ) . '" rel="permalink">' . __( 'View' ) . '</a>';
 				}
 			}
+
 			$actions = apply_filters( 'post_row_actions', $actions, $post );
 
 			echo '<div class="row-actions">';
@@ -183,51 +188,51 @@ function woocommerce_custom_product_columns( $column ) {
 			echo '
 				<div class="hidden" id="woocommerce_inline_' . $post->ID . '">
 					<div class="menu_order">' . $post->menu_order . '</div>
-					<div class="sku">' . $product->sku . '</div>
-					<div class="regular_price">' . $product->regular_price . '</div>
-					<div class="sale_price">' . $product->sale_price . '</div>
-					<div class="weight">' . $product->weight . '</div>
-					<div class="length">' . $product->length . '</div>
-					<div class="width">' . $product->width . '</div>
-					<div class="height">' . $product->height . '</div>
-					<div class="visibility">' . $product->visibility . '</div>
-					<div class="stock_status">' . $product->stock_status . '</div>
-					<div class="stock">' . $product->stock . '</div>
-					<div class="manage_stock">' . $product->manage_stock . '</div>
-					<div class="featured">' . $product->featured . '</div>
-					<div class="product_type">' . $product->product_type . '</div>
-					<div class="product_is_virtual">' . $product->virtual . '</div>
+					<div class="sku">' . $the_product->sku . '</div>
+					<div class="regular_price">' . $the_product->regular_price . '</div>
+					<div class="sale_price">' . $the_product->sale_price . '</div>
+					<div class="weight">' . $the_product->weight . '</div>
+					<div class="length">' . $the_product->length . '</div>
+					<div class="width">' . $the_product->width . '</div>
+					<div class="height">' . $the_product->height . '</div>
+					<div class="visibility">' . $the_product->visibility . '</div>
+					<div class="stock_status">' . $the_product->stock_status . '</div>
+					<div class="stock">' . $the_product->stock . '</div>
+					<div class="manage_stock">' . $the_product->manage_stock . '</div>
+					<div class="featured">' . $the_product->featured . '</div>
+					<div class="product_type">' . $the_product->product_type . '</div>
+					<div class="product_is_virtual">' . $the_product->virtual . '</div>
 				</div>
 			';
 
 		break;
 		case "sku" :
-			if ($product->get_sku()) echo $product->get_sku(); else echo '<span class="na">&ndash;</span>';
+			if ($the_product->get_sku()) echo $the_product->get_sku(); else echo '<span class="na">&ndash;</span>';
 		break;
 		case "product_type" :
-			if( $product->product_type == 'grouped' ):
-				echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . __( 'Grouped', 'woocommerce' ) . '"></span>';
-			elseif ( $product->product_type == 'external' ):
-				echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . __( 'External/Affiliate', 'woocommerce' ) . '"></span>';
-			elseif ( $product->product_type == 'simple' ):
+			if( $the_product->product_type == 'grouped' ):
+				echo '<span class="product-type tips '.$the_product->product_type.'" data-tip="' . __( 'Grouped', 'woocommerce' ) . '"></span>';
+			elseif ( $the_product->product_type == 'external' ):
+				echo '<span class="product-type tips '.$the_product->product_type.'" data-tip="' . __( 'External/Affiliate', 'woocommerce' ) . '"></span>';
+			elseif ( $the_product->product_type == 'simple' ):
 
-				if ($product->is_virtual()) {
+				if ($the_product->is_virtual()) {
 					echo '<span class="product-type tips virtual" data-tip="' . __( 'Virtual', 'woocommerce' ) . '"></span>';
-				} elseif ($product->is_downloadable()) {
+				} elseif ($the_product->is_downloadable()) {
 					echo '<span class="product-type tips downloadable" data-tip="' . __( 'Downloadable', 'woocommerce' ) . '"></span>';
 				} else {
-					echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . __( 'Simple', 'woocommerce' ) . '"></span>';
+					echo '<span class="product-type tips '.$the_product->product_type.'" data-tip="' . __( 'Simple', 'woocommerce' ) . '"></span>';
 				}
 
-			elseif ( $product->product_type == 'variable' ):
-				echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . __( 'Variable', 'woocommerce' ) . '"></span>';
+			elseif ( $the_product->product_type == 'variable' ):
+				echo '<span class="product-type tips '.$the_product->product_type.'" data-tip="' . __( 'Variable', 'woocommerce' ) . '"></span>';
 			else:
 				// Assuming that we have other types in future
-				echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . ucwords($product->product_type) . '"></span>';
+				echo '<span class="product-type tips '.$the_product->product_type.'" data-tip="' . ucwords($the_product->product_type) . '"></span>';
 			endif;
 		break;
 		case "price":
-			if ($product->get_price_html()) echo $product->get_price_html(); else echo '<span class="na">&ndash;</span>';
+			if ($the_product->get_price_html()) echo $the_product->get_price_html(); else echo '<span class="na">&ndash;</span>';
 		break;
 		case "product_cat" :
 		case "product_tag" :
@@ -241,23 +246,26 @@ function woocommerce_custom_product_columns( $column ) {
 				echo implode( ', ', $termlist );
 			}
 		break;
-		case "featured" :
-			$url = wp_nonce_url( admin_url('admin-ajax.php?action=woocommerce-feature-product&product_id=' . $post->ID), 'woocommerce-feature-product' );
-			echo '<a href="'.$url.'" title="'.__( 'Change', 'woocommerce' ) .'">';
-			if ($product->is_featured()) echo '<a href="'.$url.'"><img src="'.$woocommerce->plugin_url().'/assets/images/featured.png" alt="yes" height="14" width="14" />';
-			else echo '<img src="'.$woocommerce->plugin_url().'/assets/images/featured-off.png" alt="no" height="14" width="14" />';
+		case 'featured':
+			$url = wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce-feature-product&product_id=' . $post->ID ), 'woocommerce-feature-product' );
+			echo '<a href="' . $url . '" title="'. __( 'Toggle featured', 'woocommerce' ) . '">';
+			if ( $the_product->is_featured() ) {
+				echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/featured.png" alt="'. __( 'yes', 'woocommerce' ) . '" height="14" width="14" />';
+			} else {
+				echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/featured-off.png" alt="'. __( 'no', 'woocommerce' ) . '" height="14" width="14" />';
+			}
 			echo '</a>';
 		break;
 		case "is_in_stock" :
 
-			if ($product->is_in_stock()) {
+			if ($the_product->is_in_stock()) {
 				echo '<mark class="instock">' . __( 'In stock', 'woocommerce' ) . '</mark>';
 			} else {
 				echo '<mark class="outofstock">' . __( 'Out of stock', 'woocommerce' ) . '</mark>';
 			}
 
-			if ( $product->managing_stock() ) :
-				echo ' &times; ' . $product->get_total_stock();
+			if ( $the_product->managing_stock() ) :
+				echo ' &times; ' . $the_product->get_total_stock();
 			endif;
 
 		break;
@@ -283,7 +291,6 @@ add_action('manage_product_posts_custom_column', 'woocommerce_custom_product_col
  */
 function woocommerce_custom_product_sort($columns) {
 	$custom = array(
-		'is_in_stock' 	=> 'inventory',
 		'price'			=> 'price',
 		'featured'		=> 'featured',
 		'sku'			=> 'sku',
@@ -306,12 +313,6 @@ add_filter( 'manage_edit-product_sortable_columns', 'woocommerce_custom_product_
  */
 function woocommerce_custom_product_orderby( $vars ) {
 	if (isset( $vars['orderby'] )) :
-		if ( 'inventory' == $vars['orderby'] ) :
-			$vars = array_merge( $vars, array(
-				'meta_key' 	=> '_stock',
-				'orderby' 	=> 'meta_value_num'
-			) );
-		endif;
 		if ( 'price' == $vars['orderby'] ) :
 			$vars = array_merge( $vars, array(
 				'meta_key' 	=> '_price',
@@ -371,7 +372,7 @@ function woocommerce_products_by_type() {
 		$output = "<select name='product_type' id='dropdown_product_type'>";
 		$output .= '<option value="">'.__( 'Show all product types', 'woocommerce' ).'</option>';
 		foreach($terms as $term) :
-			$output .="<option value='$term->slug' ";
+			$output .="<option value='" . sanitize_title( $term->name ) . "' ";
 			if ( isset( $wp_query->query['product_type'] ) ) $output .=selected($term->slug, $wp_query->query['product_type'], false);
 			$output .=">";
 
@@ -702,54 +703,54 @@ add_action( 'admin_enqueue_scripts', 'woocommerce_admin_product_quick_edit_scrip
  */
 function woocommerce_admin_product_quick_edit_save( $post_id, $post ) {
 
-	if ( !$_POST ) return $post_id;
-	if ( is_int( wp_is_post_revision( $post_id ) ) ) return;
-	if( is_int( wp_is_post_autosave( $post_id ) ) ) return;
-	if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return $post_id;
-	if ( !isset($_POST['woocommerce_quick_edit_nonce']) || (isset($_POST['woocommerce_quick_edit_nonce']) && !wp_verify_nonce( $_POST['woocommerce_quick_edit_nonce'], 'woocommerce_quick_edit_nonce' ))) return $post_id;
-	if ( !current_user_can( 'edit_post', $post_id )) return $post_id;
+	if ( ! $_POST || is_int( wp_is_post_revision( $post_id ) ) || is_int( wp_is_post_autosave( $post_id ) ) ) return $post_id;
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return $post_id;
+	if ( ! isset( $_POST['woocommerce_quick_edit_nonce'] ) || ! wp_verify_nonce( $_POST['woocommerce_quick_edit_nonce'], 'woocommerce_quick_edit_nonce' ) ) return $post_id;
+	if ( ! current_user_can( 'edit_post', $post_id ) ) return $post_id;
 	if ( $post->post_type != 'product' ) return $post_id;
 
 	global $woocommerce, $wpdb;
 
-	$product = get_product( $post );
+	$product           = get_product( $post );
+	$old_regular_price = $product->regular_price;
+	$old_sale_price    = $product->sale_price;
 
 	// Save fields
-	if(isset($_POST['_sku'])) update_post_meta($post_id, '_sku', esc_html(stripslashes($_POST['_sku'])));
-	if(isset($_POST['_weight'])) update_post_meta($post_id, '_weight', esc_html(stripslashes($_POST['_weight'])));
-	if(isset($_POST['_length'])) update_post_meta($post_id, '_length', esc_html(stripslashes($_POST['_length'])));
-	if(isset($_POST['_width'])) update_post_meta($post_id, '_width', esc_html(stripslashes($_POST['_width'])));
-	if(isset($_POST['_height'])) update_post_meta($post_id, '_height', esc_html(stripslashes($_POST['_height'])));
-	if(isset($_POST['_stock_status'])) update_post_meta( $post_id, '_stock_status', stripslashes( $_POST['_stock_status'] ) );
-	if(isset($_POST['_visibility'])) update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
-	if(isset($_POST['_featured'])) update_post_meta( $post_id, '_featured', 'yes' ); else update_post_meta( $post_id, '_featured', 'no' );
+	if ( isset( $_POST['_sku'] ) ) update_post_meta( $post_id, '_sku', woocommerce_clean( $_POST['_sku'] ) );
+	if ( isset( $_POST['_weight'] ) ) update_post_meta( $post_id, '_weight', woocommerce_clean( $_POST['_weight'] ) );
+	if ( isset( $_POST['_length'] ) ) update_post_meta( $post_id, '_length', woocommerce_clean( $_POST['_length'] ) );
+	if ( isset( $_POST['_width'] ) ) update_post_meta( $post_id, '_width', woocommerce_clean( $_POST['_width'] ) );
+	if ( isset( $_POST['_height'] ) ) update_post_meta( $post_id, '_height', woocommerce_clean( $_POST['_height'] ) );
+	if ( isset( $_POST['_stock_status'] ) ) update_post_meta( $post_id, '_stock_status', woocommerce_clean( $_POST['_stock_status'] ) );
+	if ( isset( $_POST['_visibility'] ) ) update_post_meta( $post_id, '_visibility', woocommerce_clean( $_POST['_visibility'] ) );
+	if ( isset( $_POST['_featured'] ) ) update_post_meta( $post_id, '_featured', 'yes' ); else update_post_meta( $post_id, '_featured', 'no' );
 
-	if ($product->is_type('simple') || $product->is_type('external')) {
+	if ( $product->is_type('simple') || $product->is_type('external') ) {
 
-		if(isset($_POST['_regular_price'])) update_post_meta( $post_id, '_regular_price', stripslashes( $_POST['_regular_price'] ) );
-		if(isset($_POST['_sale_price'])) update_post_meta( $post_id, '_sale_price', stripslashes( $_POST['_sale_price'] ) );
+		if ( isset( $_POST['_regular_price'] ) ) update_post_meta( $post_id, '_regular_price', woocommerce_clean( $_POST['_regular_price'] ) );
+		if ( isset( $_POST['_sale_price'] ) ) update_post_meta( $post_id, '_sale_price', woocommerce_clean( $_POST['_sale_price'] ) );
 
 		// Handle price - remove dates and set to lowest
 		$price_changed = false;
 
-		if(isset($_POST['_regular_price']) && stripslashes( $_POST['_regular_price'] )!=$product->regular_price) $price_changed = true;
-		if(isset($_POST['_sale_price']) && stripslashes( $_POST['_sale_price'] )!=$product->sale_price) $price_changed = true;
+		if ( isset( $_POST['_regular_price'] ) && woocommerce_clean( $_POST['_regular_price'] ) != $old_regular_price ) $price_changed = true;
+		if ( isset( $_POST['_sale_price'] ) && woocommerce_clean( $_POST['_sale_price'] ) != $old_sale_price ) $price_changed = true;
 
-		if ($price_changed) {
-			update_post_meta( $post_id, '_sale_price_dates_from', '');
-			update_post_meta( $post_id, '_sale_price_dates_to', '');
+		if ( $price_changed ) {
+			update_post_meta( $post_id, '_sale_price_dates_from', '' );
+			update_post_meta( $post_id, '_sale_price_dates_to', '' );
 
-			if ($_POST['_sale_price'] != '') {
-				update_post_meta( $post_id, '_price', stripslashes($_POST['_sale_price']) );
+			if ( isset( $_POST['_sale_price'] ) && $_POST['_sale_price'] != '' ) {
+				update_post_meta( $post_id, '_price', woocommerce_clean( $_POST['_sale_price'] ) );
 			} else {
-				update_post_meta( $post_id, '_price', stripslashes($_POST['_regular_price']) );
+				update_post_meta( $post_id, '_price', woocommerce_clean( $_POST['_regular_price'] ) );
 			}
 		}
 	}
 
 	// Handle stock
-	if (!$product->is_type('grouped')) {
-		if (isset($_POST['_manage_stock'])) {
+	if ( ! $product->is_type('grouped') ) {
+		if ( isset( $_POST['_manage_stock'] ) ) {
 			update_post_meta( $post_id, '_manage_stock', 'yes' );
 			update_post_meta( $post_id, '_stock', (int) $_POST['_stock'] );
 		} else {
@@ -1003,7 +1004,9 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 
 	global $woocommerce, $wpdb;
 
-	$product = get_product( $post );
+	$product           = get_product( $post );
+	$old_regular_price = $product->regular_price;
+	$old_sale_price    = $product->sale_price;
 
 	// Save fields
 	if ( ! empty( $_REQUEST['change_weight'] ) && isset( $_REQUEST['_weight'] ) )
@@ -1034,7 +1037,6 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 
 		if ( ! empty( $_REQUEST['change_regular_price'] ) ) {
 
-			$old_price = $product->regular_price;
 			$change_regular_price = absint( $_REQUEST['change_regular_price'] );
 			$regular_price = esc_attr( stripslashes( $_REQUEST['_regular_price'] ) );
 
@@ -1045,22 +1047,22 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 				case 2 :
 					if ( strstr( $regular_price, '%' ) ) {
 						$percent = str_replace( '%', '', $regular_price ) / 100;
-						$new_price = $old_price + ( $old_price * $percent );
+						$new_price = $old_regular_price + ( $old_regular_price * $percent );
 					} else {
-						$new_price = $old_price + $regular_price;
+						$new_price = $old_regular_price + $regular_price;
 					}
 				break;
 				case 3 :
 					if ( strstr( $regular_price, '%' ) ) {
 						$percent = str_replace( '%', '', $regular_price ) / 100;
-						$new_price = $old_price - ( $old_price * $percent );
+						$new_price = $old_regular_price - ( $old_regular_price * $percent );
 					} else {
-						$new_price = $old_price - $regular_price;
+						$new_price = $old_regular_price - $regular_price;
 					}
 				break;
 			}
 
-			if ( isset( $new_price ) && $new_price != $product->regular_price ) {
+			if ( isset( $new_price ) && $new_price != $old_regular_price ) {
 				$price_changed = true;
 				update_post_meta( $post_id, '_regular_price', $new_price );
 				$product->regular_price = $new_price;
@@ -1069,7 +1071,6 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 
 		if ( ! empty( $_REQUEST['change_sale_price'] ) ) {
 
-			$old_price = $product->sale_price;
 			$change_sale_price = absint( $_REQUEST['change_sale_price'] );
 			$sale_price = esc_attr( stripslashes( $_REQUEST['_sale_price'] ) );
 
@@ -1080,17 +1081,17 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 				case 2 :
 					if ( strstr( $sale_price, '%' ) ) {
 						$percent = str_replace( '%', '', $sale_price ) / 100;
-						$new_price = $old_price + ( $old_price * $percent );
+						$new_price = $old_sale_price + ( $old_sale_price * $percent );
 					} else {
-						$new_price = $old_price + $sale_price;
+						$new_price = $old_sale_price + $sale_price;
 					}
 				break;
 				case 3 :
 					if ( strstr( $sale_price, '%' ) ) {
 						$percent = str_replace( '%', '', $sale_price ) / 100;
-						$new_price = $old_price - ( $old_price * $percent );
+						$new_price = $old_sale_price - ( $old_sale_price * $percent );
 					} else {
-						$new_price = $old_price - $sale_price;
+						$new_price = $old_sale_price - $sale_price;
 					}
 				break;
 				case 4 :
@@ -1103,7 +1104,7 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 				break;
 			}
 
-			if ( isset( $new_price ) && $new_price != $product->sale_price ) {
+			if ( isset( $new_price ) && $new_price != $old_sale_price ) {
 				$price_changed = true;
 				update_post_meta( $post_id, '_sale_price', $new_price );
 				$product->sale_price = $new_price;
@@ -1197,3 +1198,24 @@ function woocommerce_disable_checked_ontop( $args ) {
 }
 
 add_filter( 'wp_terms_checklist_args', 'woocommerce_disable_checked_ontop' );
+
+/**
+ * Change label for insert buttons.
+ *
+ * @access public
+ * @param mixed $translation
+ * @param mixed $original
+ * @return void
+ */
+function woocommerce_change_insert_into_post( $strings ) {
+	global $post_type;
+
+	if ( $post_type == 'product' ) {
+		$strings['insertIntoPost']     = __( 'Insert into product', 'woocommerce' );
+		$strings['uploadedToThisPost'] = __( 'Uploaded to this product', 'woocommerce' );
+	}
+
+	return $strings;
+}
+
+add_filter( 'media_view_strings', 'woocommerce_change_insert_into_post' );

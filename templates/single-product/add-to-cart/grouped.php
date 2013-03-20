@@ -42,7 +42,7 @@ foreach ( $product->get_children() as $child_id ) {
 
 						<?php elseif ( ! $quantites_required ) : ?>
 
-							<button type="submit" name="quantity[<?php echo $child_product['product']->id; ?>]" value="1" class="single_add_to_cart_button button alt"><?php _e( 'Add to cart', 'woocommerce' ); ?></button>
+							<a href="<?php echo esc_url( $child_product['product']->add_to_cart_url() ); ?>" rel="nofollow" class="single_add_to_cart_button button alt"><?php echo apply_filters( 'single_add_to_cart_text', __( 'Add to cart', 'woocommerce' ), $child_product['product']->product_type ); ?></a>
 
 						<?php else : ?>
 
@@ -59,6 +59,8 @@ foreach ( $product->get_children() as $child_id ) {
 							echo $child_product['product']->post->post_title;
 
 					?></label></td>
+
+					<?php do_action ( 'woocommerce_grouped_product_list_before_price', $child_product['product'] ); ?>
 
 					<td class="price"><?php echo $child_product['product']->get_price_html(); ?>
 					<?php echo apply_filters( 'woocommerce_stock_html', '<small class="stock '.$child_product['availability']['class'].'">'.$child_product['availability']['availability'].'</small>', $child_product['availability']['availability'] ); ?>

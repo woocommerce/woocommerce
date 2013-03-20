@@ -4,7 +4,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @version     2.0.3
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -18,8 +18,7 @@ $order = new WC_Order( $order_id );
 	<thead>
 		<tr>
 			<th class="product-name"><?php _e( 'Product', 'woocommerce' ); ?></th>
-			<th class="product-quantity"><?php _e( 'Qty', 'woocommerce' ); ?></th>
-			<th class="product-total"><?php _e( 'Totals', 'woocommerce' ); ?></th>
+			<th class="product-total"><?php _e( 'Total', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
 	<tfoot>
@@ -27,7 +26,7 @@ $order = new WC_Order( $order_id );
 		if ( $totals = $order->get_order_item_totals() ) foreach ( $totals as $total ) :
 			?>
 			<tr>
-				<th scope="row" colspan="2"><?php echo $total['label']; ?></th>
+				<th scope="row"><?php echo $total['label']; ?></th>
 				<td><?php echo $total['value']; ?></td>
 			</tr>
 			<?php
@@ -36,41 +35,48 @@ $order = new WC_Order( $order_id );
 	</tfoot>
 	<tbody>
 		<?php
-		if (sizeof($order->get_items())>0) :
+		if (sizeof($order->get_items())>0) {
 
-			foreach($order->get_items() as $item) :
+			foreach($order->get_items() as $item) {
 
 				$_product = get_product( $item['variation_id'] ? $item['variation_id'] : $item['product_id'] );
 
 				echo '
-					<tr class = "' . esc_attr( apply_filters('woocommerce_order_table_item_class', 'order_table_item', $item, $order ) ) . '">
-						<td class="product-name">';
-
-				echo '<a href="'.get_permalink( $item['product_id'] ).'">' . $item['name'] . '</a>';
+					<tr class = "' . esc_attr( apply_filters( 'woocommerce_order_table_item_class', 'order_table_item', $item, $order ) ) . '">
+						<td class="product-name">' .
+							apply_filters( 'woocommerce_order_table_product_title', '<a href="' . get_permalink( $item['product_id'] ) . '">' . $item['name'] . '</a>', $item ) . ' ' .
+							apply_filters( 'woocommerce_order_table_item_quantity', '<strong class="product-quantity">&times; ' . $item['qty'] . '</strong>', $item );
 
 				$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
 				$item_meta->display();
 
-				if ( $_product->exists() && $_product->is_downloadable() && $order->is_download_permitted() ) :
+				if ( $_product->exists() && $_product->is_downloadable() && $order->is_download_permitted() ) {
 
 					$download_file_urls = $order->get_downloadable_file_urls( $item['product_id'], $item['variation_id'], $item );
-					foreach ( $download_file_urls as $i => $download_file_url ) :
-						echo '<br/><small><a href="' . $download_file_url . '">' . sprintf( __( 'Download file %s &rarr;', 'woocommerce' ), ( count( $download_file_urls ) > 1 ? $i + 1 : '' ) ) . '</a></small>';
-					endforeach;
 
-				endif;
+					$i     = 0;
+					$links = array();
 
-				echo '</td><td class="product-quantity">'.$item['qty'].'</td><td class="product-total">' . $order->get_formatted_line_subtotal($item) . '</td></tr>';
+					foreach ( $download_file_urls as $file_url => $download_file_url ) {
+
+						$links[] = '<small><a href="' . $download_file_url . '">' . sprintf( __( 'Download file%s', 'woocommerce' ), ( count( $download_file_urls ) > 1 ? ' ' . ( $i + 1 ) . ': ' : ': ' ) ) . basename( $file_url ) . '</a></small>';
+
+						$i++;
+					}
+
+					echo implode( '<br/>', $links );
+				}
+
+				echo '</td><td class="product-total">' . $order->get_formatted_line_subtotal( $item ) . '</td></tr>';
 
 				// Show any purchase notes
-				if ($order->status=='completed' || $order->status=='processing') :
-					if ($purchase_note = get_post_meta( $_product->id, '_purchase_note', true)) :
+				if ($order->status=='completed' || $order->status=='processing') {
+					if ($purchase_note = get_post_meta( $_product->id, '_purchase_note', true))
 						echo '<tr class="product-purchase-note"><td colspan="3">' . apply_filters('the_content', $purchase_note) . '</td></tr>';
-					endif;
-				endif;
+				}
 
-			endforeach;
-		endif;
+			}
+		}
 
 		do_action( 'woocommerce_order_items_table', $order );
 		?>

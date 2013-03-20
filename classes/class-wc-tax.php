@@ -5,12 +5,23 @@
  * @class 		WC_Tax
  * @version		2.0.0
  * @package		WooCommerce/Classes
+ * @category	Class
  * @author 		WooThemes
  */
 class WC_Tax {
 
 	/** @var array */
-	var $matched_rates;
+	public $matched_rates;
+
+	/**
+	 * __construct function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function __construct() {
+		$this->dp = (int) get_option( 'woocommerce_price_num_decimals' );
+	}
 
 	/**
 	 * Searches for all matching country/state/postcode tax rates.
@@ -19,8 +30,33 @@ class WC_Tax {
 	 * @param string $args (default: '')
 	 * @return array
 	 */
-	function find_rates( $args = '' ) {
+	public function find_rates( $args = array(), $deprecated_state = null, $deprecated_postcode = null, $deprecated_class = null ) {
 		global $wpdb;
+
+		// Make sure the arguments match the WC 2.0 structure
+		if ( is_string( $args ) ) {
+			_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.0', 'Use $args["country"] instead. Deprecated argument will be removed in WC 2.1.' );
+			$args = array(
+				'country' => $args
+			);
+		}
+
+		if ( func_num_args() > 1 ) {
+			if ( null !== $deprecated_state ) {
+				_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.0', 'Use $args["state"] instead. Deprecated argument will be removed in WC 2.1.' );
+				$args['state'] = $deprecated_state;
+			}
+
+			if ( null !== $deprecated_postcode ) {
+				_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.0', 'Use $args["postcode"] instead. Deprecated argument will be removed in WC 2.1.' );
+				$args['postcode'] = $deprecated_postcode;
+			}
+
+			if ( null !== $deprecated_class ) {
+				_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.0', 'Use $args["tax_class"] instead. Deprecated argument will be removed in WC 2.1.' );
+				$args['tax_class'] = $deprecated_class;
+			}
+		}
 
 		$defaults = array(
 			'country' 	=> '',
@@ -107,7 +143,7 @@ class WC_Tax {
 	 * @param   object	Tax Class
 	 * @return  array
 	 */
-	function get_rates( $tax_class = '' ) {
+	public function get_rates( $tax_class = '' ) {
 		global $woocommerce;
 
 		$tax_class = sanitize_title( $tax_class );
@@ -128,8 +164,9 @@ class WC_Tax {
 		} else {
 
 			// Prices which include tax should always use the base rate if we don't know where the user is located
-			// Prices exlcuding tax however should just not add any taxes, as they will be added during checkout
-			$matched_tax_rates = $woocommerce->cart->prices_include_tax
+			// Prices excluding tax however should just not add any taxes, as they will be added during checkout.
+			// The woocommerce_default_customer_address option (when set to base) is also used here.
+			$matched_tax_rates = $woocommerce->cart->prices_include_tax || get_option( 'woocommerce_default_customer_address' ) == 'base'
 				? $this->get_shop_base_rate( $tax_class )
 				: array();
 
@@ -145,7 +182,7 @@ class WC_Tax {
 	 * @param   string	Tax Class
 	 * @return  array
 	 */
-	function get_shop_base_rate( $tax_class = '' ) {
+	public function get_shop_base_rate( $tax_class = '' ) {
 		global $woocommerce;
 
 		$country 	= $woocommerce->countries->get_base_country();
@@ -164,7 +201,7 @@ class WC_Tax {
 	 * @param   string	Tax Class
 	 * @return  mixed
 	 */
-	function get_shipping_tax_rates( $tax_class = null ) {
+	public function get_shipping_tax_rates( $tax_class = null ) {
 		global $woocommerce;
 
 		// See if we have an explicitly set shipping tax class
@@ -179,8 +216,8 @@ class WC_Tax {
 		} else {
 
 			// Prices which include tax should always use the base rate if we don't know where the user is located
-			// Prices exlcuding tax however should just not add any taxes, as they will be added during checkout
-			if ( $woocommerce->cart->prices_include_tax ) {
+			// Prices excluding tax however should just not add any taxes, as they will be added during checkout
+			if ( $woocommerce->cart->prices_include_tax || get_option( 'woocommerce_default_customer_address' ) == 'base' ) {
 				$country 	= $woocommerce->countries->get_base_country();
 				$state 		= $woocommerce->countries->get_base_state();
 				$postcode   = '';
@@ -309,7 +346,7 @@ class WC_Tax {
 	 * @param	bool	passed price includes tax
 	 * @return  array	array of rates/amounts
 	 */
-	function calc_tax( $price, $rates, $price_includes_tax = true, $supress_rounding = false ) {
+	public function calc_tax( $price, $rates, $price_includes_tax = true, $suppress_rounding = false ) {
 
 		$price = $price * 100;	// To avoid float rounding errors, work with integers (pence)
 
@@ -341,16 +378,15 @@ class WC_Tax {
 				else
 					$tax_amount = ( $the_rate / $regular_tax_rate ) * $non_compound_price;
 
-				// ADVANCED: Allow third parties to modifiy this rate
+				// ADVANCED: Allow third parties to modify this rate
 				$tax_amount = apply_filters( 'woocommerce_price_inc_tax_amount', $tax_amount, $key, $rate, $price, $non_compound_price );
 
 				// Back to pounds
 				$tax_amount = ( $tax_amount / 100 );
 
 				// Rounding
-				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding ) {
-					$decimals = (int) get_option( 'woocommerce_price_num_decimals' );
-					$tax_amount = round( $tax_amount, $decimals );
+				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $suppress_rounding ) {
+					$tax_amount = $this->round( $tax_amount );
 				}
 
 				// Add rate
@@ -372,16 +408,15 @@ class WC_Tax {
 
 				$tax_amount = $price * ( $rate['rate'] / 100 );
 
-				// ADVANCED: Allow third parties to modifiy this rate
+				// ADVANCED: Allow third parties to modify this rate
 				$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price );
 
 				// Back to pounds
 				$tax_amount = ( $tax_amount / 100 );
 
 				// Rounding
-				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding ) {
-					$decimals = (int) get_option( 'woocommerce_price_num_decimals' );
-					$tax_amount = round( $tax_amount, $decimals );
+				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $suppress_rounding ) {
+					$tax_amount = $this->round( $tax_amount );
 				}
 
 				// Add rate
@@ -412,9 +447,8 @@ class WC_Tax {
 					$tax_amount = ( $tax_amount / 100 );
 
 					// Rounding
-					if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding ) {
-						$decimals = (int) get_option( 'woocommerce_price_num_decimals' );
-						$tax_amount = round( $tax_amount, $decimals );
+					if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $suppress_rounding ) {
+						$tax_amount = $this->round( $tax_amount );
 					}
 
 					// Add rate
@@ -427,7 +461,7 @@ class WC_Tax {
 			}
 		}
 
-		return apply_filters( 'woocommerce_calc_tax', $taxes, $price, $rates, $price_includes_tax, $supress_rounding );
+		return apply_filters( 'woocommerce_calc_tax', $taxes, $price, $rates, $price_includes_tax, $suppress_rounding );
 	}
 
 	/**
@@ -437,7 +471,7 @@ class WC_Tax {
 	 * @param	int		Taxation Rate
 	 * @return  int
 	 */
-	function calc_shipping_tax( $price, $rates ) {
+	public function calc_shipping_tax( $price, $rates ) {
 
 		// Taxes array
 		$taxes = array();
@@ -477,7 +511,7 @@ class WC_Tax {
 	 * @param   int		key
 	 * @return  bool
 	 */
-	function is_compound( $key ) {
+	public function is_compound( $key ) {
 		global $wpdb;
 		return $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_compound FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) ) ? true : false;
 	}
@@ -488,7 +522,7 @@ class WC_Tax {
 	 * @param   int		key
 	 * @return  string
 	 */
-	function get_rate_label( $key ) {
+	public function get_rate_label( $key ) {
 		global $wpdb;
 		return apply_filters( 'woocommerce_rate_label', $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_name FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) ), $key, $this );
 	}
@@ -500,7 +534,7 @@ class WC_Tax {
 	 * @param mixed $key
 	 * @return void
 	 */
-	function get_rate_code( $key ) {
+	public function get_rate_code( $key ) {
 		global $wpdb;
 
 		$rate = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
@@ -521,16 +555,23 @@ class WC_Tax {
 	 * @param   array
 	 * @return  float
 	 */
-	function get_tax_total( $taxes ) {
-		return array_sum( array_map( array(&$this, 'round'), $taxes ) );
+	public function get_tax_total( $taxes ) {
+		return array_sum( array_map( array( $this, 'round' ), $taxes ) );
 	}
 
 	/**
-	 * Round to currency DP.
+	 * Round to currency DP. Wrapper for PHP round.
+	 *
+	 * Filter example: to return rounding to .5 cents you'd use:
+	 *
+	 * public function euro_5cent_rounding( $in ) {
+	 *      return round( $in / 5, 2 ) * 5;
+	 * }
+	 * add_filter( 'woocommerce_tax_round', 'euro_5cent_rounding' );
+	 *
 	 */
-	function round( $in ) {
-		$decimals = (int) get_option( 'woocommerce_price_num_decimals' );
-		return round( $in, $decimals );
+	public function round( $in ) {
+		return apply_filters( 'woocommerce_tax_round', round( $in, $this->dp ), $in );
 	}
 
 }

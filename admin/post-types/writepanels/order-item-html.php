@@ -48,7 +48,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 							'_line_subtotal_tax',
 							'_line_total',
 							'_line_tax',
-							'_refunded'
 						) ) ) ) continue;
 
 						// Handle serialised fields
@@ -79,6 +78,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 	<?php do_action( 'woocommerce_admin_order_item_values', $_product, $item, absint( $item_id ) ); ?>
 
+	<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
+
 	<td class="tax_class" width="1%">
 		<select class="tax_class" name="order_item_tax_class[<?php echo absint( $item_id ); ?>]" title="<?php _e( 'Tax class', 'woocommerce' ); ?>">
 			<?php
@@ -99,6 +100,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 		</select>
 	</td>
 
+	<?php endif; ?>
+
 	<td class="quantity" width="1%">
 		<input type="number" step="<?php echo apply_filters( 'woocommerce_quantity_input_step', '1', $_product ); ?>" min="0" autocomplete="off" name="order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" value="<?php echo esc_attr( $item['qty'] ); ?>" size="4" class="quantity" />
 	</td>
@@ -109,10 +112,14 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 		<span class="subtotal"><label><?php _e( 'Subtotal', 'woocommerce' ); ?>: <input type="number" step="any" min="0" name="line_subtotal[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_subtotal'] ) ) echo esc_attr( $item['line_subtotal'] ); ?>" class="line_subtotal" /></label></span>
 	</td>
 
+	<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
+
 	<td class="line_tax" width="1%">
 		<input type="number" step="any" min="0" name="line_tax[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_tax'] ) ) echo esc_attr( $item['line_tax'] ); ?>" class="line_tax" />
 
 		<span class="subtotal"><input type="number" step="any" min="0" name="line_subtotal_tax[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_subtotal_tax'] ) ) echo esc_attr( $item['line_subtotal_tax'] ); ?>" class="line_subtotal_tax" /></span>
 	</td>
+
+	<?php endif; ?>
 
 </tr>

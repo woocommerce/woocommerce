@@ -202,7 +202,7 @@ class ShareYourCartWooCommerce extends ShareYourCartWordpressPlugin{
 
 		//WooCommerce actually echoes the image
         ob_start();
-        echo $product->get_image(); //older WooCommerce versions might allready echo, but newer versions don't, so force it anyway
+        echo $product->get_image(); //older WooCommerce versions might already echo, but newer versions don't, so force it anyway
         $image = ob_get_clean();
 
 		//check is image actually a HTML img entity

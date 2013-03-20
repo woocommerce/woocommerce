@@ -19,7 +19,7 @@ jQuery(document).ready(function($) {
 
 	});
 
-	$(".plus, .minus").live('click', function() {
+	$(document).on( 'click', '.plus, .minus', function() {
 
 		// Get values
 		var $qty 		= $(this).closest('.quantity').find(".qty");
@@ -71,64 +71,55 @@ jQuery(document).ready(function($) {
 		var input_name = $statebox.attr('name');
 		var input_id = $statebox.attr('id');
 		var value = $statebox.val();
+		var placeholder = $statebox.attr('placeholder');
 
 		if (states[country]) {
 			if (states[country].length == 0) {
 
-				// Empty array means state field is not used
-				$parent.fadeOut(200, function() {
-					$statebox.parent().find('.chzn-container').remove();
-					$statebox.replaceWith('<input type="hidden" class="hidden" name="' + input_name + '" id="' + input_id + '" value="" />');
+				$statebox.parent().hide().find('.chzn-container').remove();
+				$statebox.replaceWith('<input type="hidden" class="hidden" name="' + input_name + '" id="' + input_id + '" value="" placeholder="' + placeholder + '" />');
 
-					$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
-				});
+				$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
 
 			} else {
 
-				$parent.fadeOut(200, function() {
-					var options = '';
-					var state = states[country];
-					for(var index in state) {
-						options = options + '<option value="' + index + '">' + state[index] + '</option>';
-					}
-					if ($statebox.is('input')) {
-						// Change for select
-						$statebox.replaceWith('<select name="' + input_name + '" id="' + input_id + '" class="state_select"></select>');
-						$statebox = $(this).closest('div').find('#billing_state, #shipping_state, #calc_shipping_state');
-					}
-					$statebox.html( '<option value="">' + woocommerce_params.i18n_select_state_text + '</option>' + options);
+				var options = '';
+				var state = states[country];
+				for(var index in state) {
+					options = options + '<option value="' + index + '">' + state[index] + '</option>';
+				}
+				$statebox.parent().show();
+				if ($statebox.is('input')) {
+					// Change for select
+					$statebox.replaceWith('<select name="' + input_name + '" id="' + input_id + '" class="state_select" placeholder="' + placeholder + '"></select>');
+					$statebox = $(this).closest('div').find('#billing_state, #shipping_state, #calc_shipping_state');
+				}
+				$statebox.html( '<option value="">' + woocommerce_params.i18n_select_state_text + '</option>' + options);
 
-					$statebox.val(value);
+				$statebox.val(value);
 
-					$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
-
-					$parent.fadeIn(500);
-				});
+				$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
 
 			}
 		} else {
 			if ($statebox.is('select')) {
 
-				$parent.fadeOut(200, function() {
-					$parent.find('.chzn-container').remove();
-					$statebox.replaceWith('<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" />');
+				$parent.show().find('.chzn-container').remove();
+				$statebox.replaceWith('<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />');
 
-					$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
-					$parent.fadeIn(500);
-				});
+				$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
 
 			} else if ($statebox.is('.hidden')) {
 
-				$parent.find('.chzn-container').remove();
-				$statebox.replaceWith('<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" />');
+				$parent.show().find('.chzn-container').remove();
+				$statebox.replaceWith('<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />');
 
 				$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
-				$parent.delay(200).fadeIn(500);
 
 			}
 		}
 
-		$('body').delay(200).trigger('country_to_state_changing', [country, $(this).closest('div')]);
+		$('body').trigger('country_to_state_changing', [country, $(this).closest('div')]);
 
 	});
 

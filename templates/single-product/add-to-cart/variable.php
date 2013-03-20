@@ -4,23 +4,17 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.6.5
+ * @version     2.0.3
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $woocommerce, $product, $post;
 ?>
-<script type="text/javascript">
-	if ( ! product_variations )
-		var product_variations = new Array();
-
-    product_variations[ <?php echo $post->ID; ?> ] = <?php echo json_encode( $available_variations ) ?>;
-</script>
 
 <?php do_action('woocommerce_before_add_to_cart_form'); ?>
 
-<form action="<?php echo esc_url( $product->add_to_cart_url() ); ?>" class="variations_form cart" method="post" enctype='multipart/form-data' data-product_id="<?php echo $post->ID; ?>">
+<form action="<?php echo esc_url( $product->add_to_cart_url() ); ?>" class="variations_form cart" method="post" enctype='multipart/form-data' data-product_id="<?php echo $post->ID; ?>" data-product_variations="<?php echo esc_attr( json_encode( $available_variations ) ) ?>">
 	<table class="variations" cellspacing="0">
 		<tbody>
 			<?php $loop = 0; foreach ( $attributes as $name => $options ) : $loop++; ?>
@@ -43,7 +37,7 @@ global $woocommerce, $product, $post;
 
 									switch ( $orderby ) {
 										case 'name' :
-											$terms = get_terms( sanitize_title($name), array('menu_order' => 'ASC', 'hide_empty' => false) );
+											$args = array( 'orderby' => 'name', 'hide_empty' => false, 'menu_order' => false );
 										break;
 										case 'id' :
 											$args = array( 'orderby' => 'id', 'order' => 'ASC', 'menu_order' => false );
@@ -56,12 +50,17 @@ global $woocommerce, $product, $post;
 									$terms = get_terms( sanitize_title( $name ), $args );
 
 									foreach ( $terms as $term ) {
-										if ( ! in_array( $term->slug, $options ) ) continue;
-										echo '<option value="' . $term->slug . '" ' . selected( $selected_value, $term->slug, false ) . '>' . apply_filters( 'woocommerce_variation_option_name', $term->name ) . '</option>';
+										if ( ! in_array( $term->slug, $options ) )
+											continue;
+
+										echo '<option value="' . esc_attr( $term->slug ) . '" ' . selected( $selected_value, $term->slug, false ) . '>' . apply_filters( 'woocommerce_variation_option_name', $term->name ) . '</option>';
 									}
 								} else {
-									foreach ( $options as $option )
-										echo '<option value="' . $option . '" ' . selected( $selected_value, $option, false ) . '>' . apply_filters( 'woocommerce_variation_option_name', $option ) . '</option>';
+
+									foreach ( $options as $option ) {
+										echo '<option value="' . esc_attr( sanitize_title( $option ) ) . '" ' . selected( sanitize_title( $selected_value ), sanitize_title( $option ), false ) . '>' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
+									}
+
 								}
 							}
 						?>

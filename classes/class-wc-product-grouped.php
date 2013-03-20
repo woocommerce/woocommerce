@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Grouped Product Class
  *
@@ -7,52 +10,26 @@
  * @class 		WC_Product_Grouped
  * @version		2.0.0
  * @package		WooCommerce/Classes/Products
+ * @category	Class
  * @author 		WooThemes
  */
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_Product_Grouped extends WC_Product {
 
-	/** @var array Array of child products/posts/variations. */
-	var $children;
+	/** @public array Array of child products/posts/variations. */
+	public $children;
 
-	/** @var string The product's total stock, including that of its children. */
-	var $total_stock;
+	/** @public string The product's total stock, including that of its children. */
+	public $total_stock;
 
 	/**
 	 * __construct function.
 	 *
 	 * @access public
 	 * @param mixed $product
-	 * @param array $args Contains arguments to set up this product
 	 */
-	function __construct( $product, $args ) {
-
-		parent::__construct( $product );
-
+	public function __construct( $product ) {
 		$this->product_type = 'grouped';
-		$this->product_custom_fields = get_post_custom( $this->id );
-		$this->downloadable = 'no';
-		$this->virtual = 'no';
-		$this->stock        = '';
-		$this->stock_status = 'instock';
-		$this->manage_stock = 'no';
-		$this->weight       = '';
-		$this->length       = '';
-		$this->width        = '';
-		$this->height       = '';
-
-		// Load data from custom fields
-		$this->load_product_data( array(
-			'sku'                   => '',
-			'price'                 => '',
-			'visibility'            => 'hidden',
-			'sale_price'            => '',
-			'regular_price'         => '',
-			'upsell_ids'            => array(),
-			'crosssell_ids'         => array(),
-			'featured'              => 'no'
-		) );
+		parent::__construct( $product );
 	}
 
     /**
@@ -63,9 +40,9 @@ class WC_Product_Grouped extends WC_Product {
      * @access public
      * @return int
      */
-    function get_total_stock() {
+    public function get_total_stock() {
 
-        if ( is_null( $this->total_stock ) ) {
+        if ( empty( $this->total_stock ) ) {
 
         	$transient_name = 'wc_product_total_stock_' . $this->id;
 
@@ -95,7 +72,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @access public
 	 * @return array
 	 */
-	function get_children() {
+	public function get_children() {
 
 		if ( ! is_array( $this->children ) ) {
 
@@ -123,7 +100,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @param mixed $child_id
 	 * @return object WC_Product or WC_Product_variation
 	 */
-	function get_child( $child_id ) {
+	public function get_child( $child_id ) {
 		return get_product( $child_id );
 	}
 
@@ -134,7 +111,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function has_child() {
+	public function has_child() {
 		return sizeof( $this->get_children() ) ? true : false;
 	}
 
@@ -145,7 +122,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function is_on_sale() {
+	public function is_on_sale() {
 		if ( $this->has_child() ) {
 
 			foreach ( $this->get_children() as $child_id ) {
@@ -170,7 +147,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @access public
 	 * @return cool
 	 */
-	function is_purchasable() {
+	public function is_purchasable() {
 		return apply_filters( 'woocommerce_is_purchasable', false, $this );
 	}
 
@@ -182,7 +159,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @param string $price (default: '')
 	 * @return string
 	 */
-	function get_price_html( $price = '' ) {
+	public function get_price_html( $price = '' ) {
 
 		$child_prices = array();
 

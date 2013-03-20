@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * New Order Email
  *
@@ -10,9 +13,6 @@
  * @author 		WooThemes
  * @extends 	WC_Email
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_Email_New_Order extends WC_Email {
 
 	/**
@@ -31,18 +31,18 @@ class WC_Email_New_Order extends WC_Email {
 		$this->template_plain 	= 'emails/plain/admin-new-order.php';
 
 		// Triggers for this email
-		add_action( 'woocommerce_order_status_pending_to_processing_notification', array( &$this, 'trigger' ) );
-		add_action( 'woocommerce_order_status_pending_to_completed_notification', array( &$this, 'trigger' ) );
-		add_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( &$this, 'trigger' ) );
-		add_action( 'woocommerce_order_status_failed_to_processing_notification', array( &$this, 'trigger' ) );
-		add_action( 'woocommerce_order_status_failed_to_completed_notification', array( &$this, 'trigger' ) );
-		add_action( 'woocommerce_order_status_failed_to_on-hold_notification', array( &$this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_pending_to_processing_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_pending_to_completed_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_failed_to_processing_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_failed_to_completed_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_failed_to_on-hold_notification', array( $this, 'trigger' ) );
 
-		// Call parent constuctor
+		// Call parent constructor
 		parent::__construct();
 
 		// Other settings
-		$this->recipient		= $this->settings['recipient'];
+		$this->recipient = $this->get_option( 'recipient' );
 
 		if ( ! $this->recipient )
 			$this->recipient = get_option( 'admin_email' );

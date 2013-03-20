@@ -24,7 +24,6 @@ if ( function_exists( 'woocommerce_remove_roles' ) )
 wp_delete_post( get_option('woocommerce_shop_page_id'), true );
 wp_delete_post( get_option('woocommerce_cart_page_id'), true );
 wp_delete_post( get_option('woocommerce_checkout_page_id'), true );
-wp_delete_post( get_option('woocommerce_order_tracking_page_id'), true );
 wp_delete_post( get_option('woocommerce_myaccount_page_id'), true );
 wp_delete_post( get_option('woocommerce_edit_address_page_id'), true );
 wp_delete_post( get_option('woocommerce_view_order_page_id'), true );
