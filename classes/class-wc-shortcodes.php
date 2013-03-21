@@ -702,7 +702,7 @@ class WC_Shortcodes {
 	        'ignore_sticky_posts'   => 1,
 	        'posts_per_page' => $per_page,
 	        'meta_key' 		 => 'total_sales',
-	    	'orderby' 		 => 'meta_value',
+	    	'orderby' 		 => 'meta_value_num',
 	        'meta_query' => array(
 	            array(
 	                'key' => '_visibility',
