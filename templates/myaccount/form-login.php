@@ -92,7 +92,7 @@ global $woocommerce; ?>
 			<div class="clear"></div>
 
 			<!-- Spam Trap -->
-			<div style="left:-999em; position:absolute;"><label for="trap">Anti-spam</label><input type="text" name="email_2" id="trap" /></div>
+			<div style="left:-999em; position:absolute;"><label for="trap">Anti-spam</label><input type="text" name="email_2" id="trap" tabindex="-1" /></div>
 
 			<?php do_action( 'register_form' ); ?>
 
