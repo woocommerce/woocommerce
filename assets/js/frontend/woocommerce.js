@@ -19,23 +19,6 @@ jQuery(document).ready(function($) {
 
 	});
 
-	// Do not allow decimals in quantity (required for Internet Explorer)
-	$( 'div.quantity .qty' ).blur(function() {
-
-		// The value input
-	    var $qty 		= parseFloat( $(this).val() );
-
-	    // The value input stripped to 0 decimal places
-	    var cleanNum 	= $qty.toFixed(0);
-
-	    // Set the value
-	    if ( isNaN( $qty ) ) {
-			return false;
-		} else {
-		    $(this).val( cleanNum );
-		}
-	});
-
 	$(document).on( 'click', '.plus, .minus', function() {
 
 		// Get values
