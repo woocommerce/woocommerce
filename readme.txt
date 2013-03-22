@@ -169,6 +169,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Made no shipping available messages filterable via woocommerce_cart_no_shipping_available_html and woocommerce_no_shipping_available_html.
 * Tweak - disabled keyboard shortcuts in prettyPhoto.
 * Tweak - woocommerce_date_format() function.
+* Tweak - After adding to cart, add 'added_to_cart' to querystring - lets messages show with cache enabled.
+* Tweak - Similar to above, on failure don't redirect. The POST should exclude from cache.
 * Fix - Fix orderby title - separated from menu_order.
 * Other minor fixes and localisation updates.
 
