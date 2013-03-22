@@ -141,7 +141,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 			'description' => array(
 				'title' => __( 'Description', 'woocommerce' ),
 				'type' => 'textarea',
-				'default' => __( 'Pay securely with you credit card.', 'woocommerce' ),
+				'default' => __( 'Pay securely with your credit card.', 'woocommerce' ),
 				'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce' ),
 				),
 		);
