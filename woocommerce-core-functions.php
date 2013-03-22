@@ -2115,6 +2115,16 @@ function woocommerce_date_format() {
 }
 
 /**
+ * WooCommerce Time Format - Allows to change time format for everything WooCommerce
+ *
+ * @access public
+ * @return string
+ */
+function woocommerce_time_format() {
+	return apply_filters( 'woocommerce_time_format', get_option( 'time_format' ) );
+}
+
+/**
  * Function for recounting product terms, ignoring hidden products.
  *
  * @access public
