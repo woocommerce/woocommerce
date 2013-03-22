@@ -41,7 +41,9 @@ class ShareYourCartWooCommerce extends ShareYourCartWordpressPlugin{
 
 	  add_action('woocommerce_before_single_product', array(&$this,'showProductButton'));
       add_action('woocommerce_cart_contents', array(&$this,'showCartButton'));
-	}
+            add_action('woocommerce_checkout_before_customer_details', array(&$this, 'showCheckoutButton'));
+            //add_action('woocommerce_after_order_notes', array(&$this,'showCartButton'));
+        }
 
 	/**
 	*
@@ -152,58 +154,93 @@ class ShareYourCartWooCommerce extends ShareYourCartWordpressPlugin{
 		return $callback_url;
 	}
 
-    public function buttonCallback(){
-      if(!$this->isCartActive()) return;
+        //This function is to be used by WooCommerce from version 2.0
+        //This is necessary because of some major modifications in WooCommerce starting with the version 2.0
+        public function buttonCallback20(){
+          if(!$this->isCartActive()) return;
 
-      $this->_loadWooCommerce();
-	  global $woocommerce;
+          global $woocommerce;
 
-      //specify the parameters
-      $params = array(
-          'callback_url' => get_bloginfo('wpurl').'/?action='.$this->_plugin_name.'_coupon'.(isset($_REQUEST['p']) ? '&p='.$_REQUEST['p'] : '' ),
-          'success_url'  => get_option('shopping_cart_url'),
-          'cancel_url'   => get_option('shopping_cart_url'),
-      );
+          $this->_loadWooCommerce();
 
-      //there is no product set, thus send the products from the shopping cart
-      if(!isset($_REQUEST['p']))
-      {
-          if(sizeof( $woocommerce->cart->get_cart() )  == 0)
-            exit("Cart is empty");
-		  
-		  foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $values ) {
-            $params['cart'][] = $this->_getProductDetails($values['data']);
+          //specify the parameters
+          $params = array(
+              'callback_url' => get_bloginfo('wpurl').'/?action='.$this->_plugin_name.'_coupon'.(isset($_REQUEST['p']) ? '&product='.$_REQUEST['p'] : '' ),
+              'success_url'  => get_bloginfo('wpurl').'/?page_id='.get_option('woocommerce_cart_page_id'),
+              'cancel_url'   => get_bloginfo('wpurl').'/?page_id='.get_option('woocommerce_cart_page_id'),
+          );
+
+          //there is no product set, thus send the products from the shopping cart
+          if(!isset($_REQUEST['p']))
+          {
+              if (!isset( $woocommerce->session->cart ) /*&& !is_array( $woocommerce->session->cart )*/ )
+                exit("Cart is empty");
+              foreach($woocommerce->session->cart as $cart_details){
+                $params['cart'][] = $this->_getProductDetails20($cart_details['product_id']);
+              }
           }
-      }
-      else
-      {
-          $params['cart'][] = $this->_getProductDetails($_REQUEST['p']);
-      }
+          else
+          {
+              $params['cart'][] = $this->_getProductDetails20($_REQUEST['p']);
+          }
 
-      try
-      {
-          $this->startSession($params);
-      }
-      catch(Exception $e)
-      {
-          //display the error to the user
-          echo $e->getMessage();
-      }
-      exit;
-    }
+          try
+          {
+              $this->startSession($params);
+          }
+          catch(Exception $e)
+          {
+              //display the error to the user
+              echo $e->getMessage();
+          }
+          exit;
+        }
 
-    private function _getProductDetails($product_id){
-    	if(is_object($product_id))	{  //if we've already received the product, use this one
-			$product = $product_id;
-		}
-		else { //it's only a number, so get the product
-			$product = get_product($product_id);	
-		}
+        public function buttonCallback() {
+            //If the WooCommerce version is 2.0 or greater, we will redirect the script to use a new function, compatible with this version.
+            if (version_compare(get_option('woocommerce_version'),'2.0','>=')) {
+                $this->buttonCallback20();
+            }
+            if (!$this->isCartActive())
+                return;
 
-		//WooCommerce actually echoes the image
-        ob_start();
-        echo $product->get_image(); //older WooCommerce versions might already echo, but newer versions don't, so force it anyway
-        $image = ob_get_clean();
+            $this->_loadWooCommerce();
+
+            //specify the parameters
+            $params = array(
+                'callback_url' => get_bloginfo('wpurl') . '/?action=' . $this->_plugin_name . '_coupon' . (isset($_REQUEST['p']) ? '&p=' . $_REQUEST['p'] : '' ),
+                'success_url' => get_option('shopping_cart_url'),
+                'cancel_url' => get_option('shopping_cart_url'),
+            );
+
+            //there is no product set, thus send the products from the shopping cart
+            if (!isset($_REQUEST['p'])) {
+                if (empty($_SESSION['cart']))
+                    exit("Cart is empty");
+
+                foreach ($_SESSION['cart'] as $cart_details) {
+                    $params['cart'][] = $this->_getProductDetails($cart_details['product_id']);
+                }
+            } else {
+                $params['cart'][] = $this->_getProductDetails($_REQUEST['p']);
+            }
+
+            try {
+                $this->startSession($params);
+            } catch (Exception $e) {
+                //display the error to the user
+                echo $e->getMessage();
+            }
+            exit;
+        }
+
+        private function _getProductDetails($product_id) {
+            $product = new WC_Product($product_id);
+
+            //WooCommerce actually echoes the image
+            ob_start();
+            echo $product->get_image(); //older WooCommerce versions might allready echo, but newer versions don't, so force it anyway
+            $image = ob_get_clean();
 
 		//check is image actually a HTML img entity
 		if(($doc = @DomDocument::loadHTML($image)) !== FALSE)
@@ -217,15 +254,47 @@ class ShareYourCartWooCommerce extends ShareYourCartWordpressPlugin{
 				$image = $src;
 		}
 
-        return array(
-            "item_name"        => $product->get_title(),
-            "item_description" => $product->post->post_excerpt,
-            "item_url"         => get_permalink($product->id),
-            "item_price"       => $product->price,
-            "item_picture_url" => $image,
-			"item_unique_id"   => $product->id,
-        );
-    }
+            return array(
+                "item_name" => $product->get_title(),
+                "item_description" => $product->post->post_excerpt,
+                "item_url" => get_permalink($product_id),
+                "item_price" => $product->price,
+                "item_picture_url" => $image,
+                "item_unique_id" => $product_id,
+            );
+        }
+
+        //This function is to be used by WooCommerce from version 2.0
+        //This is necessary because of some major modifications in WooCommerce starting with the version 2.0
+        private function _getProductDetails20($product_id){
+            $product = new WC_Product_Simple($product_id);
+            global $woocommerce;
+
+    		//WooCommerce actually echoes the image
+            ob_start();
+            echo $product->get_image(); //older WooCommerce versions might allready echo, but newer versions don't, so force it anyway
+            $image = ob_get_clean();
+
+    		//check is image actually a HTML img entity
+    		if(($doc = @DomDocument::loadHTML($image)) !== FALSE)
+    		{
+    			$imageTags =  $doc->getElementsByTagName('img');
+    			if($imageTags->length >0 )
+    				$src =  $imageTags->item(0)->getAttribute('src');
+
+    			//replace image only if src has been set
+    			if (!empty($src))
+    				$image = $src;
+    		}
+
+            return array(
+                "item_name"        => $product->get_title(),//$product->post->post_title,
+                "item_url"         => get_permalink($product_id),
+                "item_price"       => $product->get_price(),
+                "item_picture_url" => $image,
+    			"item_unique_id"   => $product_id,
+            );
+        }
 
     public function loadSessionData() {
       return;
