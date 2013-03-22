@@ -168,6 +168,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = X =
 * Tweak - Made no shipping available messages filterable via woocommerce_cart_no_shipping_available_html and woocommerce_no_shipping_available_html
 * Tweak - disabled keyboard shortcuts in prettyPhoto
+* Fix - Fix orderby title - separated from menu_order.
 
 = 2.0.4 - 18/03/2013 =
 * Tweak - Like my account, added order_count attribute to view order shortcode.

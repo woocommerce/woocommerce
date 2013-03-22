@@ -367,34 +367,43 @@ class WC_Query {
 			$order         = ! empty( $orderby_value[1] ) ? $orderby_value[1] : $order;
 		}
 
+		$orderby = strtolower( $orderby );
+		$order   = strtoupper( $order );
+
 		$args = array();
 
 		switch ( $orderby ) {
 			case 'date' :
 				$args['orderby']  = 'date';
-				$args['order']    = $order == 'asc' ? 'asc' : 'desc';
+				$args['order']    = $order == 'ASC' ? 'ASC' : 'DESC';
 				$args['meta_key'] = '';
 			break;
 			case 'price' :
 				$args['orderby']  = 'meta_value_num';
-				$args['order']    = $order == 'desc' ? 'desc' : 'asc';
+				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
 				$args['meta_key'] = '_price';
 			break;
 			case 'popularity' :
 				$args['orderby']  = 'meta_value_num';
-				$args['order']    = $order == 'asc' ? 'asc' : 'desc';
+				$args['order']    = $order == 'ASC' ? 'ASC' : 'DESC';
 				$args['meta_key'] = 'total_sales';
 			break;
 			case 'rating' :
 				$args['orderby']  = 'menu_order title';
-				$args['order']    = $order == 'desc' ? 'desc' : 'asc';
+				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
 				$args['meta_key'] = '';
 
 				add_filter( 'posts_clauses', array( $this, 'order_by_rating_post_clauses' ) );
 			break;
+			case 'title' :
+				$args['orderby']  = 'title';
+				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
+				$args['meta_key'] = '';
+			break;
+			// default - menu_order
 			default :
 				$args['orderby']  = 'menu_order title';
-				$args['order']    = $order == 'desc' ? 'desc' : 'asc';
+				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
 				$args['meta_key'] = '';
 			break;
 		}
