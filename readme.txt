@@ -170,7 +170,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - disabled keyboard shortcuts in prettyPhoto.
 * Tweak - woocommerce_date_format() function.
 * Fix - Fix orderby title - separated from menu_order.
-* Fix - Decimals no longer accepted in quantity input  (fixes IE8 issue)
 * Other minor fixes and localisation updates.
 
 = 2.0.4 - 18/03/2013 =
