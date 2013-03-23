@@ -775,7 +775,7 @@ class Woocommerce {
 		 **/
 		do_action( 'woocommerce_register_taxonomy' );
 
-		$admin_only_query_var = ( is_admin() ) ? true : false;
+		$admin_only_query_var = is_admin();
 
 		register_taxonomy( 'product_type',
 	        apply_filters( 'woocommerce_taxonomy_objects_product_type', array('product') ),
