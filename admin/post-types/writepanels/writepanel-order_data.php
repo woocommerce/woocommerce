@@ -70,10 +70,7 @@ function woocommerce_order_data_meta_box($post) {
 
 			<div class="order_data_column_container">
 				<div class="order_data_column">
-
-					<h4><?php _e( 'General Details', 'woocommerce' ); ?></h4>
-
-					<p class="form-field"><label for="order_status"><?php _e( 'Order status:', 'woocommerce' ) ?></label>
+					<p class="form-field form-field-wide"><label for="order_status"><?php _e( 'Order status:', 'woocommerce' ) ?></label>
 					<select id="order_status" name="order_status" class="chosen_select">
 						<?php
 							$statuses = (array) get_terms( 'shop_order_status', array( 'hide_empty' => 0, 'orderby' => 'id' ) );
@@ -83,10 +80,11 @@ function woocommerce_order_data_meta_box($post) {
 						?>
 					</select></p>
 
-					<p class="form-field last"><label for="order_date"><?php _e( 'Order Date:', 'woocommerce' ) ?></label>
+					<p class="form-field form-field-wide"><label for="order_date"><?php _e( 'Order Date:', 'woocommerce' ) ?></label>
 						<input type="text" class="date-picker-field" name="order_date" id="order_date" maxlength="10" value="<?php echo date_i18n( 'Y-m-d', strtotime( $post->post_date ) ); ?>" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" /> @ <input type="text" class="hour" placeholder="<?php _e( 'h', 'woocommerce' ) ?>" name="order_date_hour" id="order_date_hour" maxlength="2" size="2" value="<?php echo date_i18n( 'H', strtotime( $post->post_date ) ); ?>" pattern="\-?\d+(\.\d{0,})?" />:<input type="text" class="minute" placeholder="<?php _e( 'm', 'woocommerce' ) ?>" name="order_date_minute" id="order_date_minute" maxlength="2" size="2" value="<?php echo date_i18n( 'i', strtotime( $post->post_date ) ); ?>" pattern="\-?\d+(\.\d{0,})?" />
 					</p>
-
+				</div>
+				<div class="order_data_column">
 					<p class="form-field form-field-wide">
 						<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?></label>
 						<select id="customer_user" name="customer_user" class="ajax_chosen_select_customer">
