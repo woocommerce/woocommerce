@@ -130,6 +130,8 @@
 						all_variations = window[ "product_variations" ][ product_id ];
 					if ( ! all_variations )
 						all_variations = window[ "product_variations" ];
+					if ( ! all_variations )
+						all_variations = window[ "product_variations_" + product_id ];
 
 			        var matching_variations = $.fn.wc_variation_form.find_matching_variations( all_variations, current_settings );
 
