@@ -2115,6 +2115,16 @@ function woocommerce_date_format() {
 }
 
 /**
+ * WooCommerce Time Format - Allows to change time format for everything WooCommerce
+ *
+ * @access public
+ * @return string
+ */
+function woocommerce_time_format() {
+	return apply_filters( 'woocommerce_time_format', get_option( 'time_format' ) );
+}
+
+/**
  * Function for recounting product terms, ignoring hidden products.
  *
  * @access public
@@ -2419,7 +2429,7 @@ function woocommerce_cancel_unpaid_orders() {
 
 	$held_duration = get_option( 'woocommerce_hold_stock_minutes' );
 
-	if ( $held_duration == '' || get_option( 'woocommerce_manage_stock' ) != 'yes' )
+	if ( $held_duration < 1 || get_option( 'woocommerce_manage_stock' ) != 'yes' )
 		return;
 
 	$date = date( "Y-m-d H:i:s", strtotime( '-' . absint( $held_duration ) . ' MINUTES', current_time( 'timestamp' ) ) );
