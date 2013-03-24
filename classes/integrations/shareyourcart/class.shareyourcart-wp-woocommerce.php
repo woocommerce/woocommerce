@@ -24,7 +24,7 @@ if ( ! class_exists( 'ShareYourCartWooCommerce', false ) ) {
 			if ( isset( $_REQUEST['action'] ) ) {
 				switch( $_REQUEST['action'] ) {
 					case $this->_plugin_name:
-						$this->buttonCallback();
+						$this->buttonCallback20();
 					break;
 					case $this->_plugin_name.'_coupon':
 						$this->couponCallback();
@@ -248,74 +248,6 @@ if ( ! class_exists( 'ShareYourCartWooCommerce', false ) ) {
 			}
 			exit;
 		}
-
-	        public function buttonCallback() {
-	            //If the WooCommerce version is 2.0 or greater, we will redirect the script to use a new function, compatible with this version.
-	            if (version_compare(get_option('woocommerce_version'),'2.0','>=')) {
-	                $this->buttonCallback20();
-	            }
-	            if (!$this->isCartActive())
-	                return;
-
-	            $this->_loadWooCommerce();
-
-	            //specify the parameters
-	            $params = array(
-	                'callback_url' => get_bloginfo('wpurl') . '/?action=' . $this->_plugin_name . '_coupon' . (isset($_REQUEST['p']) ? '&p=' . $_REQUEST['p'] : '' ),
-	                'success_url' => get_option('shopping_cart_url'),
-	                'cancel_url' => get_option('shopping_cart_url'),
-	            );
-
-	            //there is no product set, thus send the products from the shopping cart
-	            if (!isset($_REQUEST['p'])) {
-	                if (empty($_SESSION['cart']))
-	                    exit("Cart is empty");
-
-	                foreach ($_SESSION['cart'] as $cart_details) {
-	                    $params['cart'][] = $this->_getProductDetails($cart_details['product_id']);
-	                }
-	            } else {
-	                $params['cart'][] = $this->_getProductDetails($_REQUEST['p']);
-	            }
-
-	            try {
-	                $this->startSession($params);
-	            } catch (Exception $e) {
-	                //display the error to the user
-	                echo $e->getMessage();
-	            }
-	            exit;
-	        }
-
-	        private function _getProductDetails($product_id) {
-	            $product = new WC_Product($product_id);
-
-	            //WooCommerce actually echoes the image
-	            ob_start();
-	            echo $product->get_image(); //older WooCommerce versions might allready echo, but newer versions don't, so force it anyway
-	            $image = ob_get_clean();
-
-			//check is image actually a HTML img entity
-			if(($doc = @DomDocument::loadHTML($image)) !== FALSE)
-			{
-				$imageTags =  $doc->getElementsByTagName('img');
-				if($imageTags->length >0 )
-					$src =  $imageTags->item(0)->getAttribute('src');
-
-				//replace image only if src has been set
-				if (!empty($src))
-					$image = $src;
-			}
-
-	            return array(
-	                "item_name" => $product->get_title(),
-	                "item_description" => $product->post->post_excerpt,
-	                "item_url" => get_permalink($product_id),
-	                "item_price" => $product->price,
-	                "item_picture_url" => $image,
-	                "item_unique_id" => $product_id,
-	            );
-	        }
 
 		/**
 		 * This function is to be used by WooCommerce from version 2.0
