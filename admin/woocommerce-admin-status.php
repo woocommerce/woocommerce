@@ -460,7 +460,7 @@ function woocommerce_status_report() {
 
 		jQuery('a.debug-report').click(function(){
 
-			var report = "data:text/plain;charset=utf-8,";
+			var report = "";
 
 			jQuery('.wc_status_table thead, .wc_status_table tbody').each(function(){
 
@@ -483,10 +483,11 @@ function woocommerce_status_report() {
 					});
 
 				}
-
 			} );
 
-			jQuery(this).attr( 'href', encodeURI( report ) );
+			var blob = new Blob( [report] );
+
+			jQuery(this).attr( 'href', window.URL.createObjectURL( blob ) );
 
       		return true;
 		});
