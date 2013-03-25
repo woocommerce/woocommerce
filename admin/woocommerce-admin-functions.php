@@ -547,7 +547,7 @@ function woocommerce_order_bulk_admin_notices() {
 		$number = isset( $_REQUEST['marked_processing'] ) ? absint( $_REQUEST['marked_processing'] ) : absint( $_REQUEST['marked_completed'] );
 
 		if ( 'edit.php' == $pagenow && 'shop_order' == $post_type ) {
-			$message = sprintf( _n( 'Order status changed.', '%s order statuses changed.', $number ), number_format_i18n( $number ) );
+			$message = sprintf( _n( 'Order status changed.', '%s order statuses changed.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 			echo '<div class="updated"><p>' . $message . '</p></div>';
 		}
 	}
