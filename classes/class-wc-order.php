@@ -1252,6 +1252,9 @@ class WC_Order {
 				if ( $new_status->slug == 'cancelled' )
 					$this->decrease_coupon_usage_counts();
 
+				// Update last modified
+  				wp_update_post( array( 'ID' => $this->id ) );
+
 				$this->status = $new_status->slug;
 			}
 
