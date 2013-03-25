@@ -229,11 +229,37 @@ function woocommerce_status_report() {
 
 					foreach ( $active_plugins as $plugin ) {
 
-						$plugin_data = @get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
+						$plugin_data    = @get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
+						$dirname        = dirname( $plugin );
+						$version_string = '';
 
 						if ( ! empty( $plugin_data['Name'] ) ) {
 
-							$wc_plugins[] = $plugin_data['Name'] . ' ' . __( 'by', 'woocommerce' ) . ' ' . $plugin_data['Author'] . ' ' . __( 'version', 'woocommerce' ) . ' ' . $plugin_data['Version'];
+							if ( strstr( $dirname, 'woocommerce' ) ) {
+
+								if ( false === ( $version_data = get_transient( $plugin . '_version_data' ) ) ) {
+									$changelog = wp_remote_get( 'http://www.woothemes.com/changelogs/extensions/' . $dirname . '/changelog.txt' );
+									$cl_lines  = explode( "\n", wp_remote_retrieve_body( $changelog ) );
+									if ( ! empty( $cl_lines ) ) {
+										foreach ( $cl_lines as $line_num => $cl_line ) {
+											if ( preg_match( '/^[0-9]/', $cl_line ) ) {
+
+												$date         = str_replace( '.' , '-' , trim( substr( $cl_line , 0 , strpos( $cl_line , '-' ) ) ) );
+												$version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
+												$update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
+												$version_data = array( 'date' => $date , 'version' => $version , 'update' => $update , 'changelog' => $changelog );
+												set_transient( $plugin . '_version_data', $version_data , 60*60*12 );
+												break;
+											}
+										}
+									}
+								}
+
+								if ( ! empty( $version_data['version'] ) && version_compare( $version_data['version'], $plugin_data['Version'], '!=' ) )
+									$version_string = ' &ndash; <strong style="color:red;">' . $version_data['version'] . ' ' . __( 'is available', 'woocommerce' ) . '</strong>';
+							}
+
+							$wc_plugins[] = $plugin_data['Name'] . ' ' . __( 'by', 'woocommerce' ) . ' ' . $plugin_data['Author'] . ' ' . __( 'version', 'woocommerce' ) . ' ' . $plugin_data['Version'] . $version_string;
 
 						}
 					}

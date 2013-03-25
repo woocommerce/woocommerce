@@ -171,6 +171,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - woocommerce_date_format() function.
 * Tweak - After adding to cart, add 'added_to_cart' to querystring - lets messages show with cache enabled.
 * Tweak - Similar to above, on failure don't redirect. The POST should exclude from cache.
+* Tweak - Version data on system status page.
 * Fix - Fix orderby title - separated from menu_order.
 * Other minor fixes and localisation updates.
 
