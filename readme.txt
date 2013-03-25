@@ -175,6 +175,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Fix orderby title - separated from menu_order.
 * Fix - WC_Product::set_stock_status() to correctly set status.
 * Fix - last_modified_date updated on status change for orders.
+* Fix - Sanitize id in woocommerce_get_product_to_duplicate function
 * Other minor fixes and localisation updates.
 
 = 2.0.4 - 18/03/2013 =
