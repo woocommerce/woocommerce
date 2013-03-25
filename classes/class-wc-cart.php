@@ -722,7 +722,7 @@ class WC_Cart {
 			$taxes = $this->get_taxes();
 
 			foreach ( $taxes as $key => $tax )
-				if ( $tax > 0 )
+				if ( is_numeric( $tax ) )
 					$taxes[ $key ] = woocommerce_price( $tax );
 
 			return apply_filters( 'woocommerce_cart_formatted_taxes', $taxes, $this );

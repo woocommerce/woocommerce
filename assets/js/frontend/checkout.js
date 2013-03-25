@@ -171,7 +171,7 @@ jQuery(document).ready(function($) {
 	})
 
 	// Address-fields which refresh totals when all required fields are filled
-	.on( 'change', '.address-field input.input-text', function() {
+	.on( 'change', '.address-field input.input-text, .update_totals_on_change input.input-text', function() {
 		if ( dirtyInput ) {
 			input_changed();
 		}
@@ -182,7 +182,7 @@ jQuery(document).ready(function($) {
 		input_changed();
 	})
 
-	.on( 'keydown', '.address-field input.input-text', function( e ){
+	.on( 'keydown', '.address-field input.input-text, .update_totals_on_change input.input-text', function( e ){
 		var code = e.keyCode || e.which;
 		if ( code == '9' )
 			return;
