@@ -357,13 +357,17 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 						$paypal_args[ 'item_name_' . $item_loop ] 	= $item_name;
 						$paypal_args[ 'quantity_' . $item_loop ] 	= $item['qty'];
-						$paypal_args[ 'amount_' . $item_loop ] 		= $order->get_item_total( $item, false );
+						$paypal_args[ 'amount_' . $item_loop ] 		= $order->get_item_subtotal( $item, false );
 
 						if ( $product->get_sku() )
 							$paypal_args[ 'item_number_' . $item_loop ] = $product->get_sku();
 					}
 				}
 			}
+
+			// Discount
+			if ( $order->get_cart_discount() > 0 )
+				$paypal_args['discount_amount_cart'] = round( $order->get_cart_discount(), 2 );
 
 			// Fees
 			if ( sizeof( $order->get_fees() ) > 0 ) {
