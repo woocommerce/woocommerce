@@ -173,6 +173,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Similar to above, on failure don't redirect. The POST should exclude from cache.
 * Tweak - Version data on system status page.
 * Fix - Fix orderby title - separated from menu_order.
+* Fix - WC_Product::set_stock_status() to correctly set status.
 * Other minor fixes and localisation updates.
 
 = 2.0.4 - 18/03/2013 =
