@@ -782,6 +782,8 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 
 			<h4><?php _e( 'Product Data', 'woocommerce' ); ?></h4>
 
+			<?php do_action( 'woocommerce_product_bulk_edit_start' ); ?>
+
 			<div class="inline-edit-group">
 				<label class="alignleft">
 					<span class="title"><?php _e( 'Price', 'woocommerce' ); ?></span>
@@ -975,7 +977,11 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 						<input type="text" name="_stock" class="text stock" placeholder="<?php _e( 'Stock Qty', 'woocommerce' ); ?>" value="">
 					</label>
 				</div>
+
 			<?php endif; ?>
+
+			do_action( 'woocommerce_product_bulk_edit_end' );
+
 			<input type="hidden" name="woocommerce_bulk_edit_nonce" value="<?php echo wp_create_nonce( 'woocommerce_bulk_edit_nonce' ); ?>" />
 		</div>
 	</fieldset>
@@ -1147,6 +1153,8 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 		}
 
 	}
+
+	do_action( 'woocommerce_product_bulk_edit_save', $product );
 
 	// Clear transient
 	$woocommerce->clear_product_transients( $post_id );
