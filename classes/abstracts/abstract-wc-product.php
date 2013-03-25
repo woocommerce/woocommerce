@@ -231,7 +231,7 @@ class WC_Product {
 	 * @return void
 	 */
 	function set_stock_status( $status ) {
-		$status = 'outofstock' ? 'outofstock' : 'instock';
+		$status = ( 'outofstock' === $status ) ? 'outofstock' : 'instock';
 
 		if ( $this->stock_status != $status ) {
 			update_post_meta( $this->id, '_stock_status', $status );
