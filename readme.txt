@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.5
 Tested up to: 3.5
-Stable tag: 2.0.4
+Stable tag: 2.0.5
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -165,7 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= X =
+= 2.0.5 - 26/03/2013 =
 * Tweak - Made no shipping available messages filterable via woocommerce_cart_no_shipping_available_html and woocommerce_no_shipping_available_html.
 * Tweak - disabled keyboard shortcuts in prettyPhoto.
 * Tweak - woocommerce_date_format() function.
@@ -176,6 +176,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - WC_Product::set_stock_status() to correctly set status.
 * Fix - last_modified_date updated on status change for orders.
 * Fix - Sanitize id in woocommerce_get_product_to_duplicate function
+* Fix - Cancel order function now looks at post_modified instead of post_date.
 * Other minor fixes and localisation updates.
 
 = 2.0.4 - 18/03/2013 =
