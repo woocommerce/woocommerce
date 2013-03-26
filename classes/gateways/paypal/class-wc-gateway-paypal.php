@@ -655,15 +655,15 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 					 // Store PP Details
 	                if ( ! empty( $posted['payer_email'] ) )
-	                	update_post_meta( $order_id, 'Payer PayPal address', $posted['payer_email'] );
+	                	update_post_meta( $order->id, 'Payer PayPal address', $posted['payer_email'] );
 	                if ( ! empty( $posted['txn_id'] ) )
-	                	update_post_meta( $order_id, 'Transaction ID', $posted['txn_id'] );
+	                	update_post_meta( $order->id, 'Transaction ID', $posted['txn_id'] );
 	                if ( ! empty( $posted['first_name'] ) )
-	                	update_post_meta( $order_id, 'Payer first name', $posted['first_name'] );
+	                	update_post_meta( $order->id, 'Payer first name', $posted['first_name'] );
 	                if ( ! empty( $posted['last_name'] ) )
-	                	update_post_meta( $order_id, 'Payer last name', $posted['last_name'] );
+	                	update_post_meta( $order->id, 'Payer last name', $posted['last_name'] );
 	                if ( ! empty( $posted['payment_type'] ) )
-	                	update_post_meta( $order_id, 'Payment type', $posted['payment_type'] );
+	                	update_post_meta( $order->id, 'Payment type', $posted['payment_type'] );
 
 	            	// Payment completed
 	                $order->add_order_note( __( 'IPN payment completed', 'woocommerce' ) );
