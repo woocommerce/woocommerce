@@ -345,7 +345,7 @@ jQuery(document).ready(function($) {
 
 		var thisform = wrapper;
 
-		if ( locale[country] ) {
+		if ( typeof locale[country] != 'undefined' ) {
 			var thislocale = locale[country];
 		} else {
 			var thislocale = locale['default'];
@@ -434,7 +434,8 @@ jQuery(document).ready(function($) {
 	});
 
 	// Update on page load
-	if ( woocommerce_params.is_checkout == 1 )
+	if ( woocommerce_params.is_checkout == 1 ) {
 		$('body').trigger('init_checkout');
+	}
 
 });
