@@ -170,6 +170,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - woocommerce_nav_menu_items - only hide pages, not other objects.
 * Fix - woocommerce_add_tinymce_lang array key.
 * Fix - Find_rates now works with both postcode and city together.
+* Fix - PrettyPhoto content clearfixed.
 
 = 2.0.5 - 26/03/2013 =
 * Tweak - Made no shipping available messages filterable via woocommerce_cart_no_shipping_available_html and woocommerce_no_shipping_available_html.
