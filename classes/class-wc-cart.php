@@ -702,14 +702,14 @@ class WC_Cart {
 		 * @return array merged taxes
 		 */
 		public function get_taxes() {
-			$merged_taxes = array();
+			$taxes = array();
 
 			// Merge
 			foreach ( array_keys( $this->taxes + $this->shipping_taxes ) as $key ) {
-				$merged_taxes[ $key ] = ( isset( $this->shipping_taxes[ $key ] ) ? $this->shipping_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
+				$taxes[ $key ] = ( isset( $this->shipping_taxes[ $key ] ) ? $this->shipping_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
 			}
 
-			return $merged_taxes;
+			return apply_filters( 'woocommerce_cart_get_taxes', $taxes, $this );
 		}
 
 		/**
@@ -718,7 +718,6 @@ class WC_Cart {
 		 * @return array merged taxes
 		 */
 		public function get_formatted_taxes() {
-
 			$taxes = $this->get_taxes();
 
 			foreach ( $taxes as $key => $tax )
@@ -726,6 +725,34 @@ class WC_Cart {
 					$taxes[ $key ] = woocommerce_price( $tax );
 
 			return apply_filters( 'woocommerce_cart_formatted_taxes', $taxes, $this );
+		}
+
+		/**
+		 * Get taxes, merged by code, formatted ready for output.
+		 *
+		 * @access public
+		 * @return void
+		 */
+		public function get_tax_totals() {
+			$taxes      = $this->get_taxes();
+			$tax_totals = array();
+
+			foreach ( $taxes as $key => $tax ) {
+
+				$code = $this->tax->get_rate_code( $key );
+
+				if ( ! isset( $tax_totals[ $code ] ) ) {
+					$tax_totals[ $code ] = new stdClass();
+					$tax_totals[ $code ]->amount = 0;
+				}
+
+				$tax_totals[ $code ]->is_compound       = $this->tax->is_compound( $key );
+				$tax_totals[ $code ]->label             = $this->tax->get_rate_label( $key );
+				$tax_totals[ $code ]->amount           += $tax;
+				$tax_totals[ $code ]->formatted_amount  = woocommerce_price( $tax_totals[ $code ]->amount );
+			}
+
+			return apply_filters( 'woocommerce_cart_tax_totals', $tax_totals, $this );
 		}
 
 	/*-----------------------------------------------------------------------------------*/

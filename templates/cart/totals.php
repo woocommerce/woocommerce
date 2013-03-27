@@ -68,47 +68,10 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				<?php
 					// Show the tax row if showing prices exclusive of tax only
 					if ( $woocommerce->cart->tax_display_cart == 'excl' ) {
-						$taxes = $woocommerce->cart->get_formatted_taxes();
-
-						if ( sizeof( $taxes ) > 0 ) {
-
-							$has_compound_tax = false;
-
-							foreach ( $taxes as $key => $tax ) {
-								if ( $woocommerce->cart->tax->is_compound( $key ) ) {
-									$has_compound_tax = true;
-									continue;
-								}
-
-								echo '<tr class="tax-rate tax-rate-' . $key . '">
-									<th>' . $woocommerce->cart->tax->get_rate_label( $key ) . '</th>
-									<td>' . $tax . '</td>
-								</tr>';
-							}
-
-							if ( $has_compound_tax ) {
-
-								echo '<tr class="order-subtotal">
-									<th><strong>' . __( 'Subtotal', 'woocommerce' ) . '</strong></th>
-									<td><strong>' . $woocommerce->cart->get_cart_subtotal( true ) . '</strong></td>
-								</tr>';
-							}
-
-							foreach ( $taxes as $key => $tax ) {
-								if ( ! $woocommerce->cart->tax->is_compound( $key ) )
-									continue;
-
-								echo '<tr class="tax-rate tax-rate-' . $key . '">
-									<th>' . $woocommerce->cart->tax->get_rate_label( $key ) . '</th>
-									<td>' . $tax . '</td>
-								</tr>';
-							}
-
-						} elseif ( $woocommerce->cart->get_cart_tax() > 0 ) {
-
-							echo '<tr class="tax">
-								<th>' . __( 'Tax', 'woocommerce' ) . '</th>
-								<td>' . $woocommerce->cart->get_cart_tax() . '</td>
+						foreach ( $woocommerce->cart->get_tax_totals() as $code => $tax ) {
+							echo '<tr class="tax-rate tax-rate-' . $code . '">
+								<th>' . $tax->label . '</th>
+								<td>' . $tax->formatted_amount . '</td>
 							</tr>';
 						}
 					}
@@ -133,13 +96,10 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							// If prices are tax inclusive, show taxes here
 							if (  $woocommerce->cart->tax_display_cart == 'incl' ) {
 								$tax_string_array = array();
-								$taxes = $woocommerce->cart->get_formatted_taxes();
 
-								if ( sizeof( $taxes ) > 0 )
-									foreach ( $taxes as $key => $tax )
-										$tax_string_array[] = sprintf( '%s %s', $tax, $woocommerce->cart->tax->get_rate_label( $key ) );
-								elseif ( $woocommerce->cart->get_cart_tax() )
-									$tax_string_array[] = sprintf( '%s tax', $tax );
+								foreach ( $woocommerce->cart->get_tax_totals() as $code => $tax ) {
+									$tax_string_array[] = sprintf( '%s %s', $tax->formatted_amount, $tax->label );
+								}
 
 								if ( ! empty( $tax_string_array ) ) {
 									echo '<small class="includes_tax">' . sprintf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) ) . '</small>';
