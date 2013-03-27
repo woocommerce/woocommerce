@@ -1607,7 +1607,7 @@ function woocommerce_json_search_products( $x = '', $post_types = array('product
 
 		$product = get_product( $post );
 
-		$found_products[ $post ] = woocommerce_get_formatted_product_name( $product );
+		$found_products[ $post ] = $product->get_formatted_name();
 
 	}
 
