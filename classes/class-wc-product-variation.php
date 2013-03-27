@@ -452,4 +452,25 @@ class WC_Product_Variation extends WC_Product {
 		// allow overriding based on the particular file being requested
 		return apply_filters( 'woocommerce_file_download_path', $file_path, $this->variation_id, $download_id );
 	}
+
+
+	/**
+	 * Get product name with extra details such as SKU price and attributes. Used within admin.
+	 *
+	 * @access public
+	 * @param mixed $product
+	 * @return void
+	 */
+	function get_formatted_name() {
+
+		if ( $this->get_sku() )
+			$identifier = $this->get_sku();
+		else
+			$identifier = '#' . $this->variation_id;
+
+		$attributes = $this->get_variation_attributes();
+		$extra_data = ' &ndash; ' . implode( ', ', $attributes ) . ' &ndash; ' . woocommerce_price( $this->get_price() );
+
+		return sprintf( __( '%s &ndash; %s%s', 'woocommerce' ), $identifier, $this->get_title(), $extra_data );
+	}
 }
