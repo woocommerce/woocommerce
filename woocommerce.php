@@ -124,6 +124,9 @@ class Woocommerce {
 	public function __construct() {
 
 		// Auto-load classes on demand
+		if ( function_exists( "__autoload" ) ) {
+			spl_autoload_register( "__autoload" );
+    	}
 		spl_autoload_register( array( $this, 'autoload' ) );
 
 		// Define version constant
