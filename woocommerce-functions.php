@@ -1040,7 +1040,12 @@ function woocommerce_download_product() {
 			 */
 			$scheme = parse_url( $file_path, PHP_URL_SCHEME );
 
-			if ( $scheme ) {
+			/*
+			 * Because we sometimes 'force_ssl', do a http/https substituation manually here
+			 */
+			if ( $scheme == 'http' ) {
+				$site_url = str_replace( 'https:', 'http:', site_url( '', $scheme ) );
+			} elseif ( $scheme ) {
 				$site_url = site_url( '', $scheme );
 			} else {
 				$site_url = is_ssl() ? str_replace( 'https:', 'http:', site_url() ) : site_url();

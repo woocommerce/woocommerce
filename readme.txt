@@ -172,6 +172,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - woocommerce_add_tinymce_lang array key.
 * Fix - Find_rates now works with both postcode and city together.
 * Fix - PrettyPhoto content clearfixed.
+* Fix - Fix the download method when force SSL is on.
 * Tweak - UX - Placeholder fades out on focus
 * Tweak - UX - Only display validation result on required fields
 * Localisation - NZ States
