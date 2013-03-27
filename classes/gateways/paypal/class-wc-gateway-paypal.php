@@ -608,6 +608,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	        $posted['payment_status'] 	= strtolower( $posted['payment_status'] );
 	        $posted['txn_type'] 		= strtolower( $posted['txn_type'] );
 
+	        // Sandbox fix
+	        if ( $posted['test_ipn'] == 1 && $posted['payment_status'] == 'pending' )
+	        	$posted['payment_status'] = 'completed';
+
 	        if ( 'yes' == $this->debug )
 	        	$this->log->add( 'paypal', 'Payment status: ' . $posted['payment_status'] );
 

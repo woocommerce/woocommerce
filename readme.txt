@@ -173,6 +173,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Find_rates now works with both postcode and city together.
 * Fix - PrettyPhoto content clearfixed.
 * Fix - Fix the download method when force SSL is on.
+* Fix - Put back sandbox pending fix. Aparently still needed for some accounts.
 * Tweak - UX - Placeholder fades out on focus
 * Tweak - UX - Only display validation result on required fields
 * Localisation - NZ States
