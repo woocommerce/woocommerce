@@ -1274,11 +1274,11 @@ class WC_Product {
 
 
 	/**
-	 * Get product name with extra details such as SKU price and attributes. Used within admin.
+	 * Get product name with SKU or ID. Used within admin.
 	 *
 	 * @access public
 	 * @param mixed $product
-	 * @return void
+	 * @return string Formatted product name
 	 */
 	function get_formatted_name() {
 

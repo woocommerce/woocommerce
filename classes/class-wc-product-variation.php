@@ -455,13 +455,13 @@ class WC_Product_Variation extends WC_Product {
 
 
 	/**
-	 * Get product name with extra details such as SKU price and attributes. Used within admin.
+	 * Get product name with extra details such as SKU, price and attributes. Used within admin.
 	 *
 	 * @access public
 	 * @param mixed $product
-	 * @return void
+	 * @return string Formatted product name, including attributes and price
 	 */
-	function get_formatted_name() {
+	public function get_formatted_name() {
 
 		if ( $this->get_sku() )
 			$identifier = $this->get_sku();

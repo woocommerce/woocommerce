@@ -245,6 +245,7 @@ function woocommerce_get_weight( $weight, $to_unit ) {
  *
  * @access public
  * @param mixed $product
+ * @deprecated 2.1
  * @return void
  */
 function woocommerce_get_formatted_product_name( $product ) {
