@@ -248,24 +248,10 @@ function woocommerce_get_weight( $weight, $to_unit ) {
  * @return void
  */
 function woocommerce_get_formatted_product_name( $product ) {
-	if ( ! $product || ! is_object( $product ) )
-		return;
 
-	if ( $product->get_sku() )
-		$identifier = $product->get_sku();
-	elseif ( $product->is_type( 'variation' ) )
-		$identifier = '#' . $product->variation_id;
-	else
-		$identifier = '#' . $product->id;
+	_deprecated_function( __FUNCTION__, '2.1', 'WC_Product::get_formatted_name()' );
 
-	if ( $product->is_type( 'variation' ) ) {
-		$attributes = $product->get_variation_attributes();
-		$extra_data = ' &ndash; ' . implode( ', ', $attributes ) . ' &ndash; ' . woocommerce_price( $product->get_price() );
-	} else {
-		$extra_data = '';
-	}
-
-	return sprintf( __( '%s &ndash; %s%s', 'woocommerce' ), $identifier, $product->get_title(), $extra_data );
+	return $product->get_formatted_name();
 }
 
 
