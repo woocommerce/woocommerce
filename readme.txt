@@ -174,6 +174,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - PrettyPhoto content clearfixed.
 * Fix - Fix the download method when force SSL is on.
 * Fix - Put back sandbox pending fix. Aparently still needed for some accounts.
+* Fix - Do not sanitize old attribute name to not mess up comparing
 * Tweak - UX - Placeholder fades out on focus
 * Tweak - UX - Only display validation result on required fields
 * Localisation - NZ States
