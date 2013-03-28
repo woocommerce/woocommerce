@@ -180,6 +180,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Ensure API Request URL scheme is not relative to the current page.
 * Tweak - UX - Placeholder fades out on focus
 * Tweak - UX - Only display validation result on required fields
+* Tweak - Product column widths in admin
 * Localisation - NZ States
 
 = 2.0.5 - 26/03/2013 =
