@@ -20,7 +20,7 @@ foreach ($items as $item) :
 
 	?>
 	<tr>
-		<td style="text-align:left; vertical-align:middle; border: 1px solid #eee;"><?php
+		<td style="text-align:left; vertical-align:middle; border: 1px solid #eee; word-wrap:break-word;"><?php
 
 			// Show title/image etc
 			echo 	apply_filters( 'woocommerce_order_product_image', $image, $_product, $show_image);
