@@ -181,6 +181,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - UX - Placeholder fades out on focus
 * Tweak - UX - Only display validation result on required fields
 * Tweak - Product column widths in admin
+* Tweak - .shipping_address clears to avoid flash of ugliness in some themes when revealing shipping address
 * Localisation - NZ States
 
 = 2.0.5 - 26/03/2013 =
