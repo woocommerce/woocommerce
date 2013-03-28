@@ -1413,14 +1413,13 @@ class WC_Cart {
 
 								// Line subtotal + tax
 								$line_subtotal_tax 		= get_option('woocommerce_tax_round_at_subtotal') == 'no' ? $this->tax->round( $tax_amount ) : $tax_amount;
-								$line_subtotal			= $row_base_price - $this->tax->get_tax_total( $base_taxes );
+								$line_subtotal			= $row_base_price - array_sum( $base_taxes );
 
 								// Adjusted price
 								$adjusted_price 		= ( $row_base_price - array_sum( $base_taxes ) + array_sum( $taxes ) ) / $values['quantity'];
 
 								// Apply discounts
 								$discounted_price 		= $this->get_discounted_price( $values, $adjusted_price, true );
-
 								$discounted_taxes		= $this->tax->calc_tax( $discounted_price * $values['quantity'], $tax_rates, true );
 								$discounted_tax_amount	= array_sum( $discounted_taxes ); // Sum taxes
 
@@ -1474,7 +1473,6 @@ class WC_Cart {
 						$this->cart_contents[ $cart_item_key ]['line_tax'] 			= $line_tax;
 						$this->cart_contents[ $cart_item_key ]['line_subtotal'] 	= $line_subtotal;
 						$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = $line_subtotal_tax;
-
 					}
 				}
 
