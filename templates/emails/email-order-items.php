@@ -46,7 +46,7 @@ foreach ($items as $item) :
 					} elseif ( $i == 0 )
 						echo __( 'Download:', 'woocommerce' );
 
-					echo ' <a href="' . $download_file_url . '" target="_blank">' . basename( $file_url ) . '</a></small>';
+					echo ' <a href="' . $download_file_url . '" target="_blank">' . current( explode( '?', basename( $file_url ) ) ) . '</a></small>';
 
 					$i++;
 				}
