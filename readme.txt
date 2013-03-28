@@ -177,6 +177,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Put back sandbox pending fix. Aparently still needed for some accounts.
 * Fix - Do not sanitize old attribute name to not mess up comparing
 * Fix - Settings API empty value only used if set. In turn fixes blank values in flat rate shipping.
+* Fix - Ensure API Request URL scheme is not relative to the current page.
 * Tweak - UX - Placeholder fades out on focus
 * Tweak - UX - Only display validation result on required fields
 * Localisation - NZ States
