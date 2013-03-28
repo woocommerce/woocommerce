@@ -176,6 +176,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Fix the download method when force SSL is on.
 * Fix - Put back sandbox pending fix. Aparently still needed for some accounts.
 * Fix - Do not sanitize old attribute name to not mess up comparing
+* Fix - Settings API empty value only used if set. In turn fixes blank values in flat rate shipping.
 * Tweak - UX - Placeholder fades out on focus
 * Tweak - UX - Only display validation result on required fields
 * Localisation - NZ States

@@ -137,7 +137,7 @@ abstract class WC_Settings_API {
      * @param mixed $empty_value
      * @return void
      */
-    public function get_option( $key, $empty_value = '' ) {
+    public function get_option( $key, $empty_value = null ) {
 
 	    if ( empty( $this->settings ) )
 	    	$this->init_settings();
@@ -147,7 +147,7 @@ abstract class WC_Settings_API {
 		    $this->settings[ $key ] = isset( $this->form_fields[ $key ]['default'] ) ? $this->form_fields[ $key ]['default'] : '';
 	    }
 
-	    if ( empty( $this->settings[ $key ] ) )
+	    if ( ! is_null( $empty_value ) && empty( $this->settings[ $key ] ) )
 	    	$this->settings[ $key ] = $empty_value;
 
 	    return $this->settings[ $key ];
