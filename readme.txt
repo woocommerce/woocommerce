@@ -167,13 +167,21 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = X =
 * Tweak/Fix - Merge taxes by CODE so totals are displayed clearer. Also added additonal function for getting merged tax totals, and to keep compatibility with themes.
+* Tweak/Fix - Recent reviews show actual review stars, and allowed get_rating_html() to be passed a rating. Also removed unused $location var.
 * Fix - Saving of meta values from paypal after payment.
 * Fix - woocommerce_nav_menu_items - only hide pages, not other objects.
 * Fix - woocommerce_add_tinymce_lang array key.
 * Fix - Find_rates now works with both postcode and city together.
 * Fix - PrettyPhoto content clearfixed.
+* Fix - Fix the download method when force SSL is on.
+* Fix - Put back sandbox pending fix. Aparently still needed for some accounts.
+* Fix - Do not sanitize old attribute name to not mess up comparing
+* Fix - Settings API empty value only used if set. In turn fixes blank values in flat rate shipping.
+* Fix - Ensure API Request URL scheme is not relative to the current page.
 * Tweak - UX - Placeholder fades out on focus
 * Tweak - UX - Only display validation result on required fields
+* Tweak - Product column widths in admin
+* Tweak - .shipping_address clears to avoid flash of ugliness in some themes when revealing shipping address
 * Localisation - NZ States
 
 = 2.0.5 - 26/03/2013 =

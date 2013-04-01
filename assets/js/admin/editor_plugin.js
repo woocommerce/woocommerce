@@ -37,7 +37,7 @@
 
 								b.addSeparator();
 
-								c=b.addMenu({title:"Pages"});
+								c=b.addMenu({title:ed.getLang('woocommerce.pages')});
 										a.addImmediate(c, ed.getLang('woocommerce.cart'),"[woocommerce_cart]" );
 										a.addImmediate(c, ed.getLang('woocommerce.checkout'),"[woocommerce_checkout]" );
 										a.addImmediate(c, ed.getLang('woocommerce.my_account'),"[woocommerce_my_account]" );

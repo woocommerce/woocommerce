@@ -81,12 +81,13 @@ function woocommerce_attributes() {
 			$error = sprintf( __( 'Slug “%s” is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) );
 		} else {
 			$taxonomy_exists = taxonomy_exists( $woocommerce->attribute_taxonomy_name( $attribute_name ) );
+
 			if ( 'add' === $action && $taxonomy_exists ) {
 				$error = sprintf( __( 'Slug “%s” is already in use. Change it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) );
 			}
 			if ( 'edit' === $action ) {
-				$old_attribute_name = woocommerce_sanitize_taxonomy_name( $wpdb->get_var( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" ) );
-				if ( $old_attribute_name != $attribute_name && $taxonomy_exists ) {
+				$old_attribute_name = $wpdb->get_var( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" );
+				if ( $old_attribute_name != $attribute_name && woocommerce_sanitize_taxonomy_name( $old_attribute_name ) != $attribute_name && $taxonomy_exists ) {
 					$error = sprintf( __( 'Slug “%s” is already in use. Change it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) );
 				}
 			}
@@ -130,7 +131,7 @@ function woocommerce_attributes() {
 					$wpdb->update(
 						$wpdb->term_taxonomy,
 						array( 'taxonomy' => $woocommerce->attribute_taxonomy_name( $attribute_name ) ),
-						array( 'taxonomy' => $woocommerce->attribute_taxonomy_name( $old_attribute_name ) )
+						array( 'taxonomy' => 'pa_' . $old_attribute_name )
 					);
 
 					// Update taxonomy ordering term meta
