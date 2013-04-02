@@ -179,6 +179,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Settings API empty value only used if set. In turn fixes blank values in flat rate shipping.
 * Fix - Ensure API Request URL scheme is not relative to the current page.
 * Fix - Fix saving of download permissions in order admin.
+* Fix - Action woocommerce_product_bulk_edit_end is now properly executed instead of outputted as HTML.
 * Tweak - UX - Placeholder fades out on focus
 * Tweak - UX - Only display validation result on required fields
 * Tweak - Product column widths in admin
