@@ -318,7 +318,7 @@ function woocommerce_add_shortcode_button() {
  */
 function woocommerce_add_tinymce_lang( $arr ) {
 	global $woocommerce;
-    $arr[] = $woocommerce->plugin_path() . '/assets/js/admin/editor_plugin_lang.php';
+    $arr['WooCommerceShortcodes'] = $woocommerce->plugin_path() . '/assets/js/admin/editor_plugin_lang.php';
     return $arr;
 }
 

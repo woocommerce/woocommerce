@@ -270,7 +270,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_attribute_taxonomies (
   KEY attribute_name (attribute_name)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
-  meta_id bigint(20) NOT NULL AUTO_INCREMENT,
+  meta_id bigint(20) NOT NULL auto_increment,
   woocommerce_term_id bigint(20) NOT NULL,
   meta_key varchar(255) NULL,
   meta_value longtext NULL,

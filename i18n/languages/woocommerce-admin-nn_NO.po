@@ -1,0 +1,4915 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WooCommerce 2.0.0 Admin\n"
+"Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
+"POT-Creation-Date: 2013-03-04 09:46:18+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"PO-Revision-Date: 2013-03-22 12:48+0100\n"
+"Last-Translator: Eivind Ødegård <meinmycell-forums@yahoo.no>\n"
+"Language-Team: nn_NO <i18n-nn@lister.ping.uio.no>\n"
+"X-Poedit-Language: Norwegian Nynorsk\n"
+"X-Poedit-Country: NORWAY\n"
+
+#: admin/importers/importers-init.php:13
+msgid "WooCommerce Tax Rates (CSV)"
+msgstr "WooCommerce avgiftssatsar (CSV)"
+
+#: admin/importers/importers-init.php:13
+msgid "Import <strong>tax rates</strong> to your store via a csv file."
+msgstr "Importer <strong>avgiftssatsar</strong> til butikken din med ei csv-fil."
+
+#: admin/importers/tax-rates-importer.php:103
+#: admin/importers/tax-rates-importer.php:186
+#: admin/importers/tax-rates-importer.php:226
+#: admin/importers/tax-rates-importer.php:241
+msgid "Sorry, there has been an error."
+msgstr "Det har oppstått ein feil."
+
+#: admin/importers/tax-rates-importer.php:104
+msgid "The file does not exist, please try again."
+msgstr "Fila finst ikkje, prøv ein gong til."
+
+#: admin/importers/tax-rates-importer.php:187
+msgid "The CSV is invalid."
+msgstr "CSV-fila er ugyldig."
+
+#: admin/importers/tax-rates-importer.php:198
+msgid "Import complete - imported <strong>%s</strong> tax rates and skipped <strong>%s</strong>."
+msgstr "Importen er ferdig - importerte <strong>%s</strong> avgiftssatsar og hoppa over <strong>%s</strong>."
+
+#: admin/importers/tax-rates-importer.php:208
+msgid "All done!"
+msgstr "Ferdig!"
+
+#: admin/importers/tax-rates-importer.php:208
+msgid "View Tax Rates"
+msgstr "Sjå avgiftssatar"
+
+#: admin/importers/tax-rates-importer.php:259
+msgid "Import Tax Rates"
+msgstr "Importer avgiftssatsar"
+
+#: admin/importers/tax-rates-importer.php:282
+msgid "Hi there! Upload a CSV file containing tax rates to import the contents into your shop. Choose a .csv file to upload, then click \"Upload file and import\"."
+msgstr "Hei! last opp ei CSV-fil som inneheld avgiftssatsane du vil bruka i butikken din. Vel ei .csv-fil å lasta opp, og så klikkar du «Last opp fila og importer»."
+
+#: admin/importers/tax-rates-importer.php:284
+msgid "Tax rates need to be defined with columns in a specific order (10 columns). <a href=\"%s\">Click here to download a sample</a>."
+msgstr "Du må setja opp avgiftssatsar i kolonnar, og med ei bestemt rekkjefølgje. <a href=\"%s\">Klikk her for å lasta ned eit døme</a>."
+
+#: admin/importers/tax-rates-importer.php:292
+msgid "Before you can upload your import file, you will need to fix the following error:"
+msgstr "Før du kan lasta opp importfila di, lyt du retta denne feilen:"
+
+#: admin/importers/tax-rates-importer.php:301
+msgid "Choose a file from your computer:"
+msgstr "Vel ei fil frå datamaskina di:"
+
+#: admin/importers/tax-rates-importer.php:307
+msgid "Maximum size: %s"
+msgstr "Maksimumstorleik: %s"
+
+#: admin/importers/tax-rates-importer.php:312
+msgid "OR enter path to file:"
+msgstr "ELLER skriv inn ei filplassering:"
+
+#: admin/importers/tax-rates-importer.php:319
+msgid "Delimiter"
+msgstr "Skiljeteikn"
+
+#: admin/importers/tax-rates-importer.php:325
+msgid "Upload file and import"
+msgstr "Last opp fila og importer"
+
+#: admin/includes/duplicate_product.php:23
+msgid "No product to duplicate has been supplied!"
+msgstr "Fann ingen varer å klona!"
+
+#: admin/includes/duplicate_product.php:43
+msgid "Product creation failed, could not find original product:"
+msgstr "Klarte ikkje laga produktet, fordi me ikkje fann originalproduktet: "
+
+#: admin/includes/duplicate_product.php:89
+msgid "(Copy)"
+msgstr "(Kopi)"
+
+#: admin/includes/notice-install.php:6
+msgid "<strong>Welcome to WooCommerce</strong> &#8211; You're almost ready to start selling :)"
+msgstr "<strong>Velkomen til WooCommerce</strong> &#8211; Du er nesten klar til å opna butikken :)"
+
+#: admin/includes/notice-install.php:7
+msgid "Install WooCommerce Pages"
+msgstr "Installer WooCommerce-sidene"
+
+#: admin/includes/notice-install.php:7
+msgid "Skip setup"
+msgstr "Hopp over oppsettet"
+
+#: admin/includes/notice-theme-support.php:6
+msgid "<strong>Your theme does not declare WooCommerce support</strong> &#8211; if you encounter layout issues please read our integration guide or choose a WooCommerce theme :)"
+msgstr "<strong>Bunaden din stadfestar ikkje at han har WooCommerce-støtte</strong> - viss du får vanskar med utforminga, bør du lesa dokumentasjonen vår eller velja ein WooCommerce-bunad."
+
+#: admin/includes/notice-theme-support.php:7
+msgid "Theme Integration Guide"
+msgstr "Bunadinnbyggingsguide"
+
+#: admin/includes/notice-theme-support.php:7
+msgid "Hide this notice"
+msgstr "Gøym denne meldinga"
+
+#: admin/includes/notice-update.php:6
+msgid "<strong>Data Update Required</strong> &#8211; We just need to update your install to the latest version"
+msgstr "<strong>Dataoppdatering krevst</strong> - me må oppdatera installasjonen din til siste utgåva"
+
+#: admin/includes/notice-update.php:7
+msgid "Run the updater"
+msgstr "Køyr oppdateringa"
+
+#: admin/includes/notice-update.php:12
+msgid "It is strongly recommended that you backup your database before proceeding. Are you sure you wish to run the updater now?"
+msgstr "Du bør absolutt ta ein tryggingskopi av databasen din før du held fram. Er du sikker på at du vil køyra oppdateringa no?"
+
+#: admin/includes/updates/woocommerce-update-2.0.php:50
+#: admin/woocommerce-admin-init.php:895
+msgctxt "slug"
+msgid "product-category"
+msgstr "vare-kategori"
+
+#: admin/includes/updates/woocommerce-update-2.0.php:51
+#: admin/woocommerce-admin-init.php:908
+msgctxt "slug"
+msgid "product-tag"
+msgstr "vare-merkelapp"
+
+#: admin/includes/updates/woocommerce-update-2.0.php:59
+msgctxt "slug"
+msgid "product"
+msgstr "vare"
+
+#: admin/includes/updates/woocommerce-update-2.0.php:180
+#: admin/woocommerce-admin-install.php:204
+msgctxt "page_slug"
+msgid "lost-password"
+msgstr "mista-passord"
+
+#: admin/includes/updates/woocommerce-update-2.0.php:180
+#: admin/woocommerce-admin-install.php:204
+#: admin/woocommerce-admin-status.php:309
+msgid "Lost Password"
+msgstr "Mista passord"
+
+#: admin/includes/welcome.php:33
+msgid "Welcome to WooCommerce"
+msgstr "Velkomen til WooCommerce"
+
+#: admin/includes/welcome.php:128
+msgid "Welcome to WooCommerce %s"
+msgstr "Velkomen til WooCommerce %s"
+
+#: admin/includes/welcome.php:133
+msgid "Thanks, all done!"
+msgstr "Takk skal du ha. Me er ferdige!"
+
+#: admin/includes/welcome.php:135
+msgid "Thank you for updating to the latest version!"
+msgstr "Flott at du oppdaterte til siste utgåva!"
+
+#: admin/includes/welcome.php:137
+msgid "Thanks for installing!"
+msgstr "Takk for at du installerte WooCommerce."
+
+#: admin/includes/welcome.php:139
+msgid "%s WooCommerce %s is more powerful, stable, and secure than ever before. We hope you enjoy it."
+msgstr "%s WooCommerce %s er kraftigare, meir stabil og sikrare enn nokon gong før. Me vonar du likar det."
+
+#: admin/includes/welcome.php:143
+msgid "Version %s"
+msgstr "Versjon %s"
+
+#: admin/includes/welcome.php:146
+#: admin/woocommerce-admin-content.php:41
+#: admin/woocommerce-admin-init.php:86
+#: admin/woocommerce-admin-status.php:252
+msgid "Settings"
+msgstr "Innstillingar"
+
+#: admin/includes/welcome.php:147
+msgid "Docs"
+msgstr "Dokumentasjon"
+
+#: admin/includes/welcome.php:154
+msgid "What's New"
+msgstr "Siste nytt"
+
+#: admin/includes/welcome.php:156
+msgid "Credits"
+msgstr "Takk og ære"
+
+#: admin/includes/welcome.php:179
+msgid "Security in mind"
+msgstr "Med tanke for tryggleik"
+
+#: admin/includes/welcome.php:183
+msgid "Sucuri Safe Plugin"
+msgstr "Sucuri Safe-innstikk"
+
+#: admin/includes/welcome.php:184
+msgid "You will be happy to learn that WooCommerce has been audited and certified by the Sucuri Security team. Whilst there is not much to be seen visually to understand the amount of work that went into this audit, rest assured that your website is powered by one of the most powerful and stable eCommerce plugins available."
+msgstr "WooCommerce er gjennomgått og sikra av Sucuri Security-laget. Det kan du ikkje sjå på overflata, men ver sikker på at mykje arbeid har gått med for å sikra at heimesida di køyrer ein av dei kraftigaste og mest stabile ehandelsløysingane som finst."
+
+#: admin/includes/welcome.php:187
+msgid "A Smoother Admin Experience"
+msgstr "Enklare styring"
+
+#: admin/includes/welcome.php:193
+msgid "New Product Panel"
+msgstr "Nytt produktpanel"
+
+#: admin/includes/welcome.php:194
+msgid "We have revised the product data panel making it cleaner, more streamlined, and more logical. Adding products is a breeze!"
+msgstr "Me har gått gjennom varepanelet for å gjera det enklare og meir logisk. No er det lett å leggja til nye varer!"
+
+#: admin/includes/welcome.php:199
+msgid "Nicer Order Screens"
+msgstr "Betre bestillingssider"
+
+#: admin/includes/welcome.php:200
+msgid "Order pages have had a cleanup, with a more easily scannable interface. We particularly like the new status icons!"
+msgstr "Bestillingssidene har fått ei opprydding, med meir lesbar utforming. Me er spesielt glade i dei nye statusikona!"
+
+#: admin/includes/welcome.php:205
+msgid "Multi-Download Support"
+msgstr "Støtte for fleire nedlastingar"
+
+#: admin/includes/welcome.php:206
+msgid "Products can have multiple downloadable files - purchasers will get access to all the files added."
+msgstr "Varer kan ha fleire nedlastbare filer - kundane får tilgang til alle filene når dei kjøper nedlastinga."
+
+#: admin/includes/welcome.php:211
+msgid "Less Taxing Taxes"
+msgstr "Giftfrie avgifter"
+
+#: admin/includes/welcome.php:217
+msgid "New Tax Input Panel"
+msgstr "Ny avgiftsside"
+
+#: admin/includes/welcome.php:218
+msgid "The tax input pages have been streamlined to make inputting taxes simpler - adding multiple taxes for a single jurisdiction is now much easier using the priority system. There is also CSV import/export support."
+msgstr "Me har rydda opp i avgifssidene, slik at det er enklare å leggja til avgifter - og å leggja til fleire avgifter for same området er mykje enklare, takk vere prioriteringssystemet. Me har òg laga import- og eksportløysing frå CSV."
+
+#: admin/includes/welcome.php:222
+msgid "Improved Tax Options"
+msgstr "Betre avgiftsval"
+
+#: admin/includes/welcome.php:223
+msgid "As requested by some users, we now support taxing the billing address instead of shipping (optional), and we allow you to choose which tax class applies to shipping."
+msgstr "Fleire brukarar har spurt om det, og no gjer me det: Du kan bruka avgiftssatsar ut frå fakturaadressa til kunden heller enn fraktadressa, og du kan velja kva avgiftsklasse som skal gjelda for frakt."
+
+#: admin/includes/welcome.php:228
+msgid "Product Listing Improvements Customers Will Love"
+msgstr "Oppdateringar i vareopplistinga"
+
+#: admin/includes/welcome.php:234
+msgid "New Sorting Options"
+msgstr "Nye sorteringsval"
+
+#: admin/includes/welcome.php:235
+msgid "Customers can now sort products by popularity and ratings."
+msgstr "No kan kundane dine sortera varene etter popularitet og vurdering."
+
+#: admin/includes/welcome.php:240
+msgid "Better Pagination and Result Counts"
+msgstr "Betre side- og resultatteljing"
+
+#: admin/includes/welcome.php:241
+msgid "Numbered pagination has been added to core, and we show the number of results found above the listings."
+msgstr "Me har lagt nummerert sideteljing til i kjernen, og me viser talet på søkjeresultat over lista."
+
+#: admin/includes/welcome.php:246
+msgid "Inline Star Rating Display"
+msgstr "Innebygd stjernevurdering"
+
+#: admin/includes/welcome.php:247
+msgid "We have added star ratings to the catalog which are pulled from reviews."
+msgstr "Me har lagt stjernevurderingar til katalogen. Dei blir henta frå fullstendige vurderingar."
+
+#: admin/includes/welcome.php:255
+msgid "Under the Hood"
+msgstr "Under panseret"
+
+#: admin/includes/welcome.php:259
+msgid "New product classes"
+msgstr "Nye produktklasser"
+
+#: admin/includes/welcome.php:260
+msgid "The product classes have been rewritten and are now factory based. Much more extendable, and easier to query products using the new <code>get_product()</code> function."
+msgstr "Produktklassene er omskrivne, og er fabrikkbaserte. Mykje meir utvidbart, og lettare å gjera produkspørjingar med den nye <code>get_product()</code>-funksjonen."
+
+#: admin/includes/welcome.php:264
+msgid "Capability overhaul"
+msgstr "Oppussing eigenskapane"
+
+#: admin/includes/welcome.php:265
+msgid "More granular capabilities for admin/shop manager roles covering products, orders and coupons."
+msgstr "Meir findelte rollefordelingar for styrar og butikkinnehavar, som dekkjer varer, tingingar og kupongar."
+
+#: admin/includes/welcome.php:269
+msgid "API Improvements"
+msgstr "Betra API"
+
+#: admin/includes/welcome.php:270
+msgid "<code>WC-API</code> now has real endpoints, and we've optimised the gateways API significantly by only loading gateways when needed."
+msgstr "<code>WC-API</code> har fått ordentlege sluttpunkt, og me har finstilt portnar-API-ane ved å berre lasta dei portnarane som trengst."
+
+#: admin/includes/welcome.php:276
+msgid "Cache-friendly cart widgets"
+msgstr "Handlekorgprogram som går fint med mellomlager-program"
+
+#: admin/includes/welcome.php:277
+msgid "Cart widgets and other \"fragments\" are now pulled in via AJAX - this works wonders with static page caching."
+msgstr "Handlekorgprogram og andre «fragment» bruker AJAX - det gjer underverk for statisk sidelagring."
+
+#: admin/includes/welcome.php:281
+msgid "Session handling"
+msgstr "Økthandtering"
+
+#: admin/includes/welcome.php:282
+msgid "PHP SESSIONS have been a problem for many users in the past, so we've developed our own handler using cookies and options to make these more reliable."
+msgstr "PHP-økter har vore eit problem for mange brukarar, så me har utvikla vår eiga handtering med infokapslar og val som gjer desse meir pålitelege."
+
+#: admin/includes/welcome.php:286
+msgid "Retina Ready"
+msgstr "Klar for Retina-skjermar"
+
+#: admin/includes/welcome.php:287
+msgid "All graphics within WC have been optimised for HiDPI displays."
+msgstr "All grafikk i WooCommerce er tilpassa HiDPI-skjermar."
+
+#: admin/includes/welcome.php:294
+msgid "Better stock handling"
+msgstr "Betre lagerstyring"
+
+#: admin/includes/welcome.php:295
+msgid "We have added an option to hold stock for unpaid orders (defaults to 60mins). When this time limit is reached, and the order is not paid for, stock is released and the order is cancelled."
+msgstr "Me har lagt til eit val for å halde av lager for ubetalte ordrar (standardtida er 60 minutt). Når denne tidsgrensa er nådd, og tinginga ikkje er betalt, blir reservasjonen sleppt og tinginga kansellert."
+
+#: admin/includes/welcome.php:299
+msgid "Improved Line-item storage"
+msgstr "Betre linje-elementlagring"
+
+#: admin/includes/welcome.php:300
+msgid "We have changed how order items get stored making them easier (and faster) to access for reporting. Order items are no longer serialised within an order - they are stored within their own table."
+msgstr "Me har endra korleis element blir lagra, og gjort dei lettare (og raskare) å henta for rapportering. Ordreelement blir ikkje serialisert lenger i ein ordre - dei er lagra i ein eigen tabell."
+
+#: admin/includes/welcome.php:304
+msgid "Autoload"
+msgstr "Autolast"
+
+#: admin/includes/welcome.php:305
+msgid "We have setup autoloading for classes - this has dramatically reduced memory usage in 2.0."
+msgstr "Me har sett opp autolasting for klasser - dette har redusert minnebruken kraftig i 2.0."
+
+#: admin/includes/welcome.php:312
+msgid "Go to WooCommerce Settings"
+msgstr "Gå til WooCommerce-innstillingane"
+
+#: admin/includes/welcome.php:330
+msgid "WooCommerce is developed and maintained by a worldwide team of passionate individuals and backed by an awesome developer community. Want to see your name? <a href=\"https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md\">Contribute to WooCommerce</a>."
+msgstr "WooCommerce blir utvikla og vedlikehalde av eit verdsfemnande lag med individ, hjelpt av eit supert utviklingsmiljø. Vil du sjå namnet ditt her? <a href=\"https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md\">Bidra til WooCommerce</a>."
+
+#: admin/includes/welcome.php:356
+msgid "View %s"
+msgstr "Vis %s"
+
+#: admin/post-types/product.php:31
+msgid "Make a duplicate from this product"
+msgstr "Klon denne vara"
+
+#: admin/post-types/product.php:32
+msgid "Duplicate"
+msgstr "Klon"
+
+#: admin/post-types/product.php:61
+msgid "Copy to a new draft"
+msgstr "Kopier til ny kladd"
+
+#: admin/post-types/product.php:86
+#: admin/woocommerce-admin-taxonomies.php:297
+msgid "Image"
+msgstr "Bilete"
+
+#: admin/post-types/product.php:88
+#: admin/post-types/writepanels/writepanel-product_data.php:372
+#: admin/post-types/writepanels/writepanel-product_data.php:451
+#: admin/woocommerce-admin-attributes.php:232
+#: admin/woocommerce-admin-attributes.php:268
+#: admin/woocommerce-admin-attributes.php:306
+#: admin/woocommerce-admin-attributes.php:329
+#: admin/woocommerce-admin-attributes.php:373
+#: admin/woocommerce-admin-attributes.php:398
+#: admin/woocommerce-admin-init.php:450
+msgid "Name"
+msgstr "Namn"
+
+#: admin/post-types/product.php:91
+#: admin/post-types/product.php:557
+#: admin/post-types/writepanels/variation-admin-html.php:46
+#: admin/post-types/writepanels/writepanel-product_data.php:98
+#: admin/woocommerce-admin-reports.php:2083
+#: admin/woocommerce-admin-reports.php:2119
+msgid "SKU"
+msgstr "SKU"
+
+#: admin/post-types/product.php:94
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:83
+#: admin/woocommerce-admin-content.php:63
+#: admin/woocommerce-admin-reports.php:99
+msgid "Stock"
+msgstr "Lager"
+
+#: admin/post-types/product.php:96
+#: admin/post-types/product.php:568
+#: admin/post-types/product.php:787
+#: admin/woocommerce-admin-functions.php:196
+msgid "Price"
+msgstr "Pris"
+
+#: admin/post-types/product.php:98
+msgid "Categories"
+msgstr "Kategoriar"
+
+#: admin/post-types/product.php:99
+msgid "Tags"
+msgstr "Merkelappar"
+
+#: admin/post-types/product.php:100
+#: admin/post-types/product.php:632
+#: admin/post-types/product.php:904
+#: admin/post-types/writepanels/writepanel-product_data.php:1040
+#: admin/woocommerce-admin-init.php:463
+msgid "Featured"
+msgstr "Framheva"
+
+#: admin/post-types/product.php:101
+#: admin/woocommerce-admin-attributes.php:250
+#: admin/woocommerce-admin-attributes.php:308
+#: admin/woocommerce-admin-attributes.php:385
+msgid "Type"
+msgstr "Type"
+
+#: admin/post-types/product.php:102
+#: admin/post-types/shop_order.php:50
+msgid "Date"
+msgstr "Dato"
+
+#: admin/post-types/product.php:151
+msgid "Edit this item"
+msgstr "Endra dette elementet"
+
+#: admin/post-types/product.php:151
+#: admin/post-types/writepanels/writepanel-order_data.php:140
+#: admin/post-types/writepanels/writepanel-order_data.php:230
+#: admin/post-types/writepanels/writepanel-order_data.php:387
+#: admin/post-types/writepanels/writepanel-product_data.php:1043
+#: admin/woocommerce-admin-attributes.php:322
+msgid "Edit"
+msgstr "Endra"
+
+#: admin/post-types/product.php:152
+msgid "Edit this item inline"
+msgstr "Endra dette elementet inni"
+
+#: admin/post-types/product.php:152
+msgid "Quick&nbsp;Edit"
+msgstr "Snøggendring"
+
+#: admin/post-types/product.php:156
+#: admin/post-types/shop_coupon.php:65
+msgid "Restore this item from the Trash"
+msgstr "Plukk dette elementet oppatt or papirkorga"
+
+#: admin/post-types/product.php:156
+#: admin/post-types/shop_coupon.php:65
+msgid "Restore"
+msgstr "Gjenopprett"
+
+#: admin/post-types/product.php:158
+#: admin/post-types/shop_coupon.php:67
+msgid "Move this item to the Trash"
+msgstr "Kast dette elementet i papirkorga"
+
+#: admin/post-types/product.php:158
+#: admin/post-types/shop_coupon.php:67
+msgid "Trash"
+msgstr "Papirkorg"
+
+#: admin/post-types/product.php:160
+#: admin/post-types/shop_coupon.php:69
+msgid "Delete this item permanently"
+msgstr "Slett dette elementet for alltid"
+
+#: admin/post-types/product.php:160
+#: admin/post-types/shop_coupon.php:69
+#: admin/post-types/writepanels/writepanel-order_data.php:463
+msgid "Delete Permanently"
+msgstr "Slett for alltid"
+
+#: admin/post-types/product.php:165
+msgid "Preview &#8220;%s&#8221;"
+msgstr "Førehandsvis &#8220;%s&#8221;"
+
+#: admin/post-types/product.php:165
+msgid "Preview"
+msgstr "Førehandsvis"
+
+#: admin/post-types/product.php:167
+msgid "View &#8220;%s&#8221;"
+msgstr "Vis &#8220;%s&#8221;"
+
+#: admin/post-types/product.php:167
+#: admin/post-types/shop_order.php:171
+msgid "View"
+msgstr "Vis"
+
+#: admin/post-types/product.php:214
+msgid "Grouped"
+msgstr "Gruppert"
+
+#: admin/post-types/product.php:216
+msgid "External/Affiliate"
+msgstr "Ekstern/kommisjon"
+
+#: admin/post-types/product.php:220
+#: admin/post-types/product.php:407
+#: admin/post-types/writepanels/variation-admin-html.php:168
+#: admin/post-types/writepanels/writepanel-product_data.php:52
+msgid "Virtual"
+msgstr "Virtuelt"
+
+#: admin/post-types/product.php:222
+#: admin/post-types/product.php:403
+#: admin/post-types/writepanels/variation-admin-html.php:166
+#: admin/post-types/writepanels/writepanel-product_data.php:58
+msgid "Downloadable"
+msgstr "Nedlasting"
+
+#: admin/post-types/product.php:224
+msgid "Simple"
+msgstr "Enkel"
+
+#: admin/post-types/product.php:228
+#: admin/post-types/product.php:387
+msgid "Variable"
+msgstr "Variabel"
+
+#: admin/post-types/product.php:251
+msgid "Toggle featured"
+msgstr "Framhev"
+
+#: admin/post-types/product.php:253
+msgid "yes"
+msgstr "ja"
+
+#: admin/post-types/product.php:255
+msgid "no"
+msgstr "nei"
+
+#: admin/post-types/product.php:262
+#: admin/post-types/product.php:641
+#: admin/post-types/product.php:928
+#: admin/post-types/writepanels/writepanel-product_data.php:231
+msgid "In stock"
+msgstr "På lager"
+
+#: admin/post-types/product.php:264
+#: admin/post-types/product.php:642
+#: admin/post-types/product.php:929
+#: admin/post-types/writepanels/writepanel-product_data.php:232
+#: admin/woocommerce-admin-reports.php:2103
+msgid "Out of stock"
+msgstr "Tomt"
+
+#: admin/post-types/product.php:373
+msgid "Show all product types"
+msgstr "Vis alle varetypar"
+
+#: admin/post-types/product.php:381
+#: admin/post-types/writepanels/writepanel-product_data.php:39
+msgid "Grouped product"
+msgstr "Gruppert vare"
+
+#: admin/post-types/product.php:383
+#: admin/post-types/writepanels/writepanel-product_data.php:40
+msgid "External/Affiliate product"
+msgstr "Eksternt/kommisjonsprodukt"
+
+#: admin/post-types/product.php:385
+#: admin/post-types/writepanels/writepanel-product_data.php:38
+msgid "Simple product"
+msgstr "Enkel vare"
+
+#: admin/post-types/product.php:399
+msgid "Show all sub-types"
+msgstr "Vis alle undertypar"
+
+#: admin/post-types/product.php:520
+msgid "[%s with SKU of %s]"
+msgstr "[%s med SKU %s]"
+
+#: admin/post-types/product.php:526
+msgid "[%s with ID of %d]"
+msgstr "[%s med ID %d]"
+
+#: admin/post-types/product.php:552
+#: admin/post-types/product.php:783
+#: admin/post-types/writepanels/writepanels-init.php:46
+#: admin/settings/settings-init.php:518
+msgid "Product Data"
+msgstr "Varedata"
+
+#: admin/post-types/product.php:570
+msgid "Regular price"
+msgstr "Vanleg pris"
+
+#: admin/post-types/product.php:575
+#: admin/post-types/product.php:811
+msgid "Sale"
+msgstr "Sal"
+
+#: admin/post-types/product.php:577
+msgid "Sale price"
+msgstr "Tilbodspris"
+
+#: admin/post-types/product.php:588
+#: admin/post-types/product.php:837
+#: admin/post-types/writepanels/variation-admin-html.php:90
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:84
+#: admin/post-types/writepanels/writepanel-product_data.php:273
+msgid "Weight"
+msgstr "Vekt"
+
+#: admin/post-types/product.php:599
+#: admin/post-types/product.php:861
+msgid "L/W/H"
+msgstr "L/B/H"
+
+#: admin/post-types/product.php:601
+#: admin/post-types/product.php:877
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:85
+#: admin/post-types/writepanels/writepanel-product_data.php:286
+msgid "Length"
+msgstr "Lengd"
+
+#: admin/post-types/product.php:602
+#: admin/post-types/product.php:878
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:86
+#: admin/post-types/writepanels/writepanel-product_data.php:287
+#: admin/woocommerce-admin-settings.php:795
+msgid "Width"
+msgstr "Breidd"
+
+#: admin/post-types/product.php:603
+#: admin/post-types/product.php:879
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:87
+#: admin/post-types/writepanels/writepanel-product_data.php:288
+#: admin/woocommerce-admin-settings.php:797
+msgid "Height"
+msgstr "Høgd"
+
+#: admin/post-types/product.php:613
+#: admin/post-types/product.php:885
+msgid "Visibility"
+msgstr "Synleg"
+
+#: admin/post-types/product.php:618
+#: admin/post-types/product.php:891
+msgid "Catalog &amp; search"
+msgstr "Katalog &amp; søk"
+
+#: admin/post-types/product.php:619
+#: admin/post-types/product.php:892
+#: admin/post-types/writepanels/writepanel-product_data.php:1029
+#: admin/woocommerce-admin-content.php:46
+#: admin/woocommerce-admin-settings.php:181
+msgid "Catalog"
+msgstr "Katalog"
+
+#: admin/post-types/product.php:620
+#: admin/post-types/product.php:893
+#: admin/post-types/writepanels/writepanel-product_data.php:1030
+msgid "Search"
+msgstr "Søk"
+
+#: admin/post-types/product.php:621
+#: admin/post-types/product.php:894
+#: admin/post-types/writepanels/writepanel-product_data.php:1031
+msgid "Hidden"
+msgstr "Gøymt"
+
+#: admin/post-types/product.php:636
+#: admin/post-types/product.php:922
+msgid "In stock?"
+msgstr "På lager?"
+
+#: admin/post-types/product.php:657
+#: admin/post-types/product.php:940
+#: admin/post-types/writepanels/writepanel-product_data.php:212
+msgid "Manage stock?"
+msgstr "Bruk lagerstyring?"
+
+#: admin/post-types/product.php:661
+#: admin/post-types/product.php:959
+#: admin/post-types/product.php:975
+#: admin/post-types/writepanels/writepanel-product_data.php:219
+msgid "Stock Qty"
+msgstr "Lagermengd"
+
+#: admin/post-types/product.php:792
+#: admin/post-types/product.php:816
+#: admin/post-types/product.php:842
+#: admin/post-types/product.php:866
+#: admin/post-types/product.php:890
+#: admin/post-types/product.php:909
+#: admin/post-types/product.php:927
+#: admin/post-types/product.php:945
+#: admin/post-types/product.php:964
+msgid "— No Change —"
+msgstr "— Inga endring —"
+
+#: admin/post-types/product.php:793
+#: admin/post-types/product.php:817
+#: admin/post-types/product.php:843
+#: admin/post-types/product.php:867
+#: admin/post-types/product.php:965
+msgid "Change to:"
+msgstr "Endra til:"
+
+#: admin/post-types/product.php:794
+#: admin/post-types/product.php:818
+msgid "Increase by (fixed amount or %):"
+msgstr "Auk med (fast beløp eller %):"
+
+#: admin/post-types/product.php:795
+#: admin/post-types/product.php:819
+msgid "Decrease by (fixed amount or %):"
+msgstr "Mink med (fast beløp eller %):"
+
+#: admin/post-types/product.php:805
+#: admin/post-types/product.php:830
+msgid "Enter price"
+msgstr "Skriv inn pris"
+
+#: admin/post-types/product.php:820
+msgid "Decrease regular price by (fixed amount or %):"
+msgstr "Senk vanleg pris med (fast beløp eller %):"
+
+#: admin/post-types/product.php:910
+#: admin/post-types/product.php:946
+#: admin/post-types/shop_order.php:190
+#: admin/woocommerce-admin-status.php:122
+#: admin/woocommerce-admin-status.php:260
+msgid "Yes"
+msgstr "Ja"
+
+#: admin/post-types/product.php:911
+#: admin/post-types/product.php:947
+#: admin/post-types/shop_order.php:192
+#: admin/woocommerce-admin-status.php:122
+#: admin/woocommerce-admin-status.php:260
+msgid "No"
+msgstr "Nei"
+
+#: admin/post-types/product.php:1175
+msgid "Sort Products"
+msgstr "Sorter varer"
+
+#: admin/post-types/product.php:1214
+msgid "Insert into product"
+msgstr "Sett inn i vara"
+
+#: admin/post-types/product.php:1215
+msgid "Uploaded to this product"
+msgstr "Lasta opp til dette produktet"
+
+#: admin/post-types/shop_coupon.php:25
+msgid "Code"
+msgstr "Kode"
+
+#: admin/post-types/shop_coupon.php:26
+msgid "Coupon type"
+msgstr "Kupongtype"
+
+#: admin/post-types/shop_coupon.php:27
+#: admin/post-types/writepanels/writepanel-coupon_data.php:45
+msgid "Coupon amount"
+msgstr "Kupongsum"
+
+#: admin/post-types/shop_coupon.php:28
+msgid "Description"
+msgstr "Skildring"
+
+#: admin/post-types/shop_coupon.php:29
+msgid "Product IDs"
+msgstr "Vare-IDar"
+
+#: admin/post-types/shop_coupon.php:30
+msgid "Usage / Limit"
+msgstr "Bruk / grense"
+
+#: admin/post-types/shop_coupon.php:31
+#: admin/post-types/writepanels/writepanel-coupon_data.php:158
+msgid "Expiry date"
+msgstr "Utløpsdato"
+
+#: admin/post-types/shop_coupon.php:56
+msgid "Edit coupon"
+msgstr "Endra kupong"
+
+#: admin/post-types/shop_coupon.php:114
+msgid "%s / %s"
+msgstr "%s / %s"
+
+#: admin/post-types/shop_coupon.php:116
+msgid "%s / &infin;"
+msgstr "%s / &infin;"
+
+#: admin/post-types/shop_coupon.php:149
+#: admin/post-types/shop_order.php:282
+msgid "Show all statuses"
+msgstr "Vis alle statusar"
+
+#: admin/post-types/shop_order.php:43
+#: admin/settings/settings-payment-gateways.php:29
+#: admin/settings/settings-shipping-methods.php:31
+msgid "Status"
+msgstr "Status"
+
+#: admin/post-types/shop_order.php:44
+msgid "Order"
+msgstr "Tinging"
+
+#: admin/post-types/shop_order.php:45
+msgid "Billing"
+msgstr "Fakturering"
+
+#: admin/post-types/shop_order.php:46
+#: admin/post-types/writepanels/writepanel-order_data.php:536
+#: admin/post-types/writepanels/writepanel-product_data.php:81
+#: admin/settings/settings-tax-rates.php:52
+#: admin/settings/settings-tax-rates.php:217
+#: admin/woocommerce-admin-content.php:49
+#: admin/woocommerce-admin-settings.php:185
+msgid "Shipping"
+msgstr "Frakt"
+
+#: admin/post-types/shop_order.php:47
+msgid "Order Total"
+msgstr "I alt"
+
+#: admin/post-types/shop_order.php:48
+#: admin/post-types/writepanels/writepanels-init.php:71
+msgid "Order Notes"
+msgstr "Notat til ordren"
+
+#: admin/post-types/shop_order.php:49
+msgid "Customer Notes"
+msgstr "Kundemerknader"
+
+#: admin/post-types/shop_order.php:51
+#: admin/post-types/writepanels/writepanel-order_data.php:386
+#: admin/post-types/writepanels/writepanel-order_data.php:433
+msgid "Actions"
+msgstr "Handlingar"
+
+#: admin/post-types/shop_order.php:95
+#: admin/post-types/writepanels/writepanel-order_data.php:93
+msgid "Guest"
+msgstr "Gjest"
+
+#: admin/post-types/shop_order.php:98
+msgid "Order %s"
+msgstr "Tinging %s"
+
+#: admin/post-types/shop_order.php:98
+msgid "made by"
+msgstr "laga av"
+
+#: admin/post-types/shop_order.php:101
+msgid "Email:"
+msgstr "Epost:"
+
+#: admin/post-types/shop_order.php:104
+msgid "Tel:"
+msgstr "Tlf:"
+
+#: admin/post-types/shop_order.php:114
+#: admin/post-types/shop_order.php:123
+msgid "Via"
+msgstr "Via"
+
+#: admin/post-types/shop_order.php:131
+msgid "Unpublished"
+msgstr "Ikkje publisert"
+
+#: admin/post-types/shop_order.php:133
+msgid "Y/m/d g:i:s A"
+msgstr "d.m.Y G:i:s"
+
+#: admin/post-types/shop_order.php:139
+msgid "%s ago"
+msgstr "%s sidan"
+
+#: admin/post-types/shop_order.php:141
+msgid "Y/m/d"
+msgstr "d.m.Y"
+
+#: admin/post-types/shop_order.php:158
+#: admin/woocommerce-admin-dashboard.php:176
+msgid "Processing"
+msgstr "Handsamar"
+
+#: admin/post-types/shop_order.php:165
+msgid "Complete"
+msgstr "Fullført"
+
+#: admin/post-types/shop_order.php:301
+#: admin/post-types/shop_order.php:326
+msgid "Show all customers"
+msgstr "Vis alle kundar"
+
+#: admin/post-types/writepanels/order-download-permission-html.php:6
+msgid "Revoke Access"
+msgstr "Fjern tilgangsløyve"
+
+#: admin/post-types/writepanels/order-download-permission-html.php:7
+#: admin/post-types/writepanels/variation-admin-html.php:7
+#: admin/post-types/writepanels/writepanel-product_data.php:365
+#: admin/post-types/writepanels/writepanel-product_data.php:444
+#: admin/woocommerce-admin-init.php:452
+msgid "Click to toggle"
+msgstr "Klikk for å skru på/av"
+
+#: admin/post-types/writepanels/order-download-permission-html.php:9
+msgid "File %d: %s"
+msgstr "Fil %d: %s"
+
+#: admin/post-types/writepanels/order-download-permission-html.php:9
+msgid "Downloaded %s time"
+msgid_plural "Downloaded %s times"
+msgstr[0] "Lasta ned %s gong"
+msgstr[1] "Lasta ned %s gonger"
+
+#: admin/post-types/writepanels/order-download-permission-html.php:16
+msgid "Downloads Remaining"
+msgstr "Nedlastingar att"
+
+#: admin/post-types/writepanels/order-download-permission-html.php:19
+#: admin/post-types/writepanels/variation-admin-html.php:143
+#: admin/post-types/writepanels/variation-admin-html.php:151
+#: admin/post-types/writepanels/writepanel-product_data.php:158
+msgid "Unlimited"
+msgstr "Uavgrensa"
+
+#: admin/post-types/writepanels/order-download-permission-html.php:22
+msgid "Access Expires"
+msgstr "Tilgangen går ut"
+
+#: admin/post-types/writepanels/order-download-permission-html.php:23
+#: admin/post-types/writepanels/writepanel-product_data.php:164
+msgid "Never"
+msgstr "Aldri"
+
+#: admin/post-types/writepanels/order-fee-html.php:10
+msgid "Fee Name"
+msgstr "Namn på gebyret"
+
+#: admin/post-types/writepanels/order-fee-html.php:17
+#: admin/post-types/writepanels/order-item-html.php:84
+msgid "Tax class"
+msgstr "Avgiftsklasse"
+
+#: admin/post-types/writepanels/order-fee-html.php:19
+#: admin/post-types/writepanels/order-tax-html.php:8
+#: admin/post-types/writepanels/writepanel-order_data.php:558
+#: admin/post-types/writepanels/writepanel-order_data.php:663
+#: admin/woocommerce-admin-reports.php:1642
+#: admin/woocommerce-admin-reports.php:2655
+#: admin/woocommerce-admin-reports.php:2664
+#: admin/woocommerce-admin-users.php:90
+#: admin/woocommerce-admin-users.php:112
+msgid "N/A"
+msgstr "I/T"
+
+#: admin/post-types/writepanels/order-fee-html.php:20
+#: admin/post-types/writepanels/writepanel-product_data.php:179
+msgid "Taxable"
+msgstr "Skal ha mva"
+
+#: admin/post-types/writepanels/order-fee-html.php:25
+#: admin/post-types/writepanels/order-item-html.php:91
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:54
+#: admin/post-types/writepanels/writepanel-product_data.php:186
+#: admin/settings/settings-init.php:982
+#: admin/settings/settings-tax-rates.php:29
+#: admin/woocommerce-admin-settings.php:226
+msgid "Standard"
+msgstr "Vanleg"
+
+#: admin/post-types/writepanels/order-fee-html.php:43
+#: admin/post-types/writepanels/order-item-html.php:110
+#: admin/woocommerce-admin-reports.php:1546
+#: admin/woocommerce-admin-reports.php:1599
+#: admin/woocommerce-admin-reports.php:2370
+#: admin/woocommerce-admin-reports.php:2539
+#: admin/woocommerce-admin-reports.php:2617
+msgid "Total"
+msgstr "Totalt"
+
+#: admin/post-types/writepanels/order-item-html.php:9
+msgid "Product ID:"
+msgstr "Vare-ID:"
+
+#: admin/post-types/writepanels/order-item-html.php:12
+msgid "Variation ID:"
+msgstr "Variant-ID:"
+
+#: admin/post-types/writepanels/order-item-html.php:15
+msgid "Product SKU:"
+msgstr "Vare-SKU:"
+
+#: admin/post-types/writepanels/order-item-html.php:33
+msgid "Add&nbsp;meta"
+msgstr "Legg til&nbsp;meta"
+
+#: admin/post-types/writepanels/order-item-html.php:112
+msgid "Subtotal"
+msgstr "Subtotal"
+
+#: admin/post-types/writepanels/order-tax-html.php:6
+msgid "Tax Rate:"
+msgstr "MVA/tollsats:"
+
+#: admin/post-types/writepanels/order-tax-html.php:16
+#: admin/post-types/writepanels/writepanel-order_data.php:627
+msgid "Sales Tax:"
+msgstr "Mva varer:"
+
+#: admin/post-types/writepanels/order-tax-html.php:20
+#: admin/post-types/writepanels/writepanel-order_data.php:635
+msgid "Shipping Tax:"
+msgstr "Mva frakt:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:6
+#: admin/post-types/writepanels/writepanel-product_data.php:364
+#: admin/post-types/writepanels/writepanel-product_data.php:443
+#: admin/woocommerce-admin-init.php:451
+msgid "Remove"
+msgstr "Fjern"
+
+#: admin/post-types/writepanels/variation-admin-html.php:20
+msgid "Any"
+msgstr "Einkvar"
+
+#: admin/post-types/writepanels/variation-admin-html.php:46
+msgid "Enter a SKU for this variation or leave blank to use the parent product SKU."
+msgstr "Skriv inn eit SKU-nummer for denne varianten, eller la feltet stå tomt for å bruka nummeret til opphavsproduktet."
+
+#: admin/post-types/writepanels/variation-admin-html.php:57
+msgid "Stock Qty:"
+msgstr "Lagermengd:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:57
+msgid "Enter a quantity to enable stock management at variation level, or leave blank to use the parent product's options."
+msgstr "Skriv inn ei mengd for å skru på lagerstyring på variantnivå, eller la stå tomt for å bruka vala frå opphavsproduktet."
+
+#: admin/post-types/writepanels/variation-admin-html.php:66
+msgid "Regular Price:"
+msgstr "Vanleg pris:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:67
+msgid "Variation price (required)"
+msgstr "Variantpris (kravd)"
+
+#: admin/post-types/writepanels/variation-admin-html.php:70
+msgid "Sale Price:"
+msgstr "Tilbodspris:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:70
+#: admin/post-types/writepanels/writepanel-product_data.php:125
+msgid "Schedule"
+msgstr "Planlegging"
+
+#: admin/post-types/writepanels/variation-admin-html.php:70
+msgid "Cancel schedule"
+msgstr "Avbryt planlegginga"
+
+#: admin/post-types/writepanels/variation-admin-html.php:77
+msgid "Sale start date:"
+msgstr "Salet startar dato:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:78
+#: admin/post-types/writepanels/writepanel-product_data.php:136
+msgctxt "placeholder"
+msgid "From&hellip;"
+msgstr "Frå&hellip;"
+
+#: admin/post-types/writepanels/variation-admin-html.php:81
+msgid "Sale end date:"
+msgstr "Salet sluttar dato:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:82
+#: admin/post-types/writepanels/writepanel-product_data.php:137
+msgctxt "placeholder"
+msgid "To&hellip;"
+msgstr "Til&hellip;"
+
+#: admin/post-types/writepanels/variation-admin-html.php:90
+msgid "Enter a weight for this variation or leave blank to use the parent product weight."
+msgstr "Skriv inn vekt for denne varianten, eller la stå tomt for å bruka vekta til opphavsproduktet."
+
+#: admin/post-types/writepanels/variation-admin-html.php:98
+msgid "Dimensions (L&times;W&times;H)"
+msgstr "Storleik (L&times;B&times;H)"
+
+#: admin/post-types/writepanels/variation-admin-html.php:109
+msgid "Shipping class:"
+msgstr "Fraktklasse:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:113
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:53
+msgid "Same as parent"
+msgstr "Same som forelderen"
+
+#: admin/post-types/writepanels/variation-admin-html.php:124
+msgid "Tax class:"
+msgstr "Avgiftsklasse:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:135
+msgid "File paths:"
+msgstr "Filstigar:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:135
+msgid "Enter one or more File Paths, one per line, to make this variation a downloadable product, or leave blank."
+msgstr "Skriv inn ei eller fleire filplasseringar, ein per linje, for å gjera denne varianten til eit nedlastbart produkt. Eventuelt kan du la feltet stå tomt."
+
+#: admin/post-types/writepanels/variation-admin-html.php:136
+#: admin/post-types/writepanels/writepanel-product_data.php:153
+msgid "File paths/URLs, one per line"
+msgstr "Filplasseringar/URL, ei per linje"
+
+#: admin/post-types/writepanels/variation-admin-html.php:137
+#: admin/post-types/writepanels/writepanel-product_data.php:154
+msgid "Choose a file"
+msgstr "Vel ei fil"
+
+#: admin/post-types/writepanels/variation-admin-html.php:137
+msgid "Upload"
+msgstr "Last opp"
+
+#: admin/post-types/writepanels/variation-admin-html.php:137
+#: admin/post-types/writepanels/writepanel-product_data.php:154
+msgid "Insert file URL"
+msgstr "Set inn fil-URL"
+
+#: admin/post-types/writepanels/variation-admin-html.php:142
+msgid "Download Limit:"
+msgstr "Nedlastingsgrense:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:142
+#: admin/post-types/writepanels/writepanel-product_data.php:158
+msgid "Leave blank for unlimited re-downloads."
+msgstr "La stå tomt for uavgrensa nedlastingar."
+
+#: admin/post-types/writepanels/variation-admin-html.php:150
+msgid "Download Expiry:"
+msgstr "Nedlastinga går ut:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:150
+#: admin/post-types/writepanels/writepanel-product_data.php:164
+msgid "Enter the number of days before a download link expires, or leave blank."
+msgstr "Skriv inn kor mange dagar det skal ta før nedlastinga går ut, eller la feltet stå tomt."
+
+#: admin/post-types/writepanels/variation-admin-html.php:164
+msgid "Enabled"
+msgstr "På"
+
+#: admin/post-types/writepanels/variation-admin-html.php:166
+msgid "Enable this option if access is given to a downloadable file upon purchase of a product"
+msgstr "Skru på dette for å gje tilgang til ei nedlastbar fil når kunden kjøper vara"
+
+#: admin/post-types/writepanels/variation-admin-html.php:168
+msgid "Enable this option if a product is not shipped or there is no shipping cost"
+msgstr "Skru på dette viss ei vare ikkje skal sendast, eller det ikkje er nokon fraktkostnad"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:37
+msgid "Coupon description"
+msgstr "Kupongskildring"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:37
+msgid "Optionally enter a description for this coupon for your reference."
+msgstr "Eventuelt skriv ei skildring for denne kupongen for din eigen del."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:42
+msgid "Discount type"
+msgstr "Rabattype"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:45
+msgid "Enter an amount or percentage e.g. 2.99 or 15%"
+msgstr "Skriv inn eit beløp eller ein prosentdel, td. 150 eller 10%"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:51
+msgid "Enable free shipping"
+msgstr "Skru på fri frakt"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:51
+msgid "Check this box if the coupon grants free shipping. The <a href=\"%s\">free shipping method</a> must be enabled with the \"must use coupon\" setting checked."
+msgstr "Hak av her viss kupongen gjev fri frakt. <a href=\"%s\">Fri frakt</a> må vera på, med «må bruka kupong»-innstillinga haka av."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:54
+msgid "Individual use"
+msgstr "Individuell bruk"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:54
+msgid "Check this box if the coupon cannot be used in conjunction with other coupons."
+msgstr "Hak av her viss rabattkupongen ikkje kan brukast saman med andre kupongar"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:57
+msgid "Apply before tax"
+msgstr "Ta i bruk før avgifter"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:57
+msgid "Check this box if the coupon should be applied before calculating cart tax."
+msgstr "Hak av her viss rabattkupongen skal brukast før me reknar ut moms for handlekorga"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:60
+msgid "Exclude sale items"
+msgstr "Utelat varer som er på sal"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:60
+msgid "Check this box if the coupon should not apply to items on sale. Per-item coupons will only work if the item is not on sale. Per-cart coupons will only work if there are no sale items in the cart."
+msgstr "Hak av her viss kupongen ikkje skal gjelda varer som er på sal. Kupongar som gjeld per vare vil berre gjelda dersom vara ikkje er på sal. Kupongar som gjeld per handlekorg vil berre verka viss det ikkje er nokon varer på sal i handlekorga."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:65
+msgid "Minimum amount"
+msgstr "Minstesum"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:65
+msgid "No minimum"
+msgstr "Ikkje noko minimum"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:65
+msgid "This field allows you to set the minimum subtotal needed to use the coupon."
+msgstr "Her skriv du inn minste totalbeløp for å kunna bruka rabattkupongen."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:74
+#: admin/woocommerce-admin-taxonomies.php:28
+#: admin/woocommerce-admin-taxonomies.php:122
+msgid "Products"
+msgstr "Varer"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:75
+#: admin/post-types/writepanels/writepanel-order_data.php:400
+#: admin/post-types/writepanels/writepanel-product_data.php:504
+#: admin/post-types/writepanels/writepanel-product_data.php:521
+#: admin/woocommerce-admin-reports.php:1229
+msgid "Search for a product&hellip;"
+msgstr "Søk etter ei vare&hellip;"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:89
+msgid "Products which need to be in the cart to use this coupon or, for \"Product Discounts\", which products are discounted."
+msgstr "Varer som må vera i handlekorga for at rabattkupongen skal gjelda, eller når det gjeld enkeltvarerabattar: kva varer som er rabatterte."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:94
+msgid "Exclude products"
+msgstr "Utelat produkt"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:95
+msgid "Search for a product…"
+msgstr "Søk etter ei vare..."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:109
+msgid "Products which must not be in the cart to use this coupon or, for \"Product Discounts\", which products are not discounted."
+msgstr "Varer som ikkje kan vera i handlekorga for at rabattkupongen skal gjelda, eller når det gjeld enkeltvarerabattar: kva varer som ikkje har rabatt."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:116
+msgid "Product categories"
+msgstr "Varekategoriar"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:117
+msgid "Any category"
+msgstr "Alle kategoriar"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:125
+msgid "A product must be in this category for the coupon to remain valid or, for \"Product Discounts\", products in these categories will be discounted."
+msgstr "Ei vare må vera i denne kategorien for at rabattkupongen skal gjelda, eller når det gjeld enkeltvarerabattar: varer i desse kategoriane får rabatten."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:130
+msgid "Exclude categories"
+msgstr "Utelat kategoriar"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:131
+msgid "No categories"
+msgstr "Ingen kategoriar"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:139
+msgid "Product must not be in this category for the coupon to remain valid or, for \"Product Discounts\", products in these categories will not be discounted."
+msgstr "Ei vare kan ikkje vera i denne kategorien for at rabattkupongen skal gjelda, eller når det gjeld enkeltvarerabattar: varer i desse kategoriane er ikkje rabatterte."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:145
+msgid "Customer emails"
+msgstr "Kunde-epostar"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:145
+msgid "Any customer"
+msgstr "Alle kundar"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:145
+msgid "Comma separate email addresses to restrict this coupon to specific billing and user emails."
+msgstr "Skil epostadressene med komma for å avgrensa denne rabattkupongen til visse epostar."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:152
+msgid "Usage limit"
+msgstr "Bruksavgrensing"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:152
+msgctxt "placeholder"
+msgid "Unlimited usage"
+msgstr "Uavgrensa bruk"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:152
+msgid "How many times this coupon can be used before it is void."
+msgstr "Kor mange gonger denne rabattkupongen kan brukast før han blir ugyldig"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:158
+msgctxt "placeholder"
+msgid "Never expire"
+msgstr "Går aldri ut"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:158
+msgid "The date this coupon will expire, <code>YYYY-MM-DD</code>."
+msgstr "Datoen denne rabattkupongen går ut, på forma <code>ÅÅÅÅ-MM-DD</code>"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:195
+msgid "Coupon code already exists - customers will use the latest coupon with this code."
+msgstr "Kupongkoden finst frå før - kundane vil bruka den siste kupongen med denne koden."
+
+#: admin/post-types/writepanels/writepanel-order_data.php:59
+msgid "Order Details"
+msgstr "Tingingsdetaljar"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:62
+msgid "Order number"
+msgstr "Ordrenummer"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:67
+msgid "Customer IP:"
+msgstr "IP-adressa åt kunden:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:74
+msgid "General Details"
+msgstr "Almenne detaljar"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:76
+msgid "Order status:"
+msgstr "Ordrestatus:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:86
+msgid "Order Date:"
+msgstr "Tingingsdato:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:87
+msgid "h"
+msgstr "h"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:87
+#: admin/settings/settings-init.php:577
+msgid "m"
+msgstr "m"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:91
+msgid "Customer:"
+msgstr "Kunde:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:131
+msgid "Customer Note:"
+msgstr "Kundemerknad: "
+
+#: admin/post-types/writepanels/writepanel-order_data.php:132
+msgid "Customer's notes about the order"
+msgstr "Kunden sine merknader om tinginga"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:140
+msgid "Billing Details"
+msgstr "Fakturadetaljar"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:144
+#: admin/post-types/writepanels/writepanel-order_data.php:234
+msgid "First Name"
+msgstr "Førenamn"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:148
+#: admin/post-types/writepanels/writepanel-order_data.php:238
+msgid "Last Name"
+msgstr "Etternamn"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:152
+#: admin/post-types/writepanels/writepanel-order_data.php:242
+#: admin/woocommerce-admin-users.php:155
+#: admin/woocommerce-admin-users.php:204
+msgid "Company"
+msgstr "Selskap"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:156
+#: admin/post-types/writepanels/writepanel-order_data.php:246
+#: admin/woocommerce-admin-users.php:159
+#: admin/woocommerce-admin-users.php:208
+msgid "Address 1"
+msgstr "Adresselinje 1"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:160
+#: admin/post-types/writepanels/writepanel-order_data.php:250
+#: admin/woocommerce-admin-users.php:163
+#: admin/woocommerce-admin-users.php:212
+msgid "Address 2"
+msgstr "Adresselinje 2"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:164
+#: admin/post-types/writepanels/writepanel-order_data.php:254
+#: admin/settings/settings-tax-rates.php:42
+#: admin/settings/settings-tax-rates.php:217
+#: admin/woocommerce-admin-users.php:167
+#: admin/woocommerce-admin-users.php:216
+msgid "City"
+msgstr "Poststad"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:168
+#: admin/post-types/writepanels/writepanel-order_data.php:258
+#: admin/woocommerce-admin-users.php:171
+#: admin/woocommerce-admin-users.php:220
+msgid "Postcode"
+msgstr "Postnummer"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:172
+#: admin/post-types/writepanels/writepanel-order_data.php:262
+#: admin/woocommerce-admin-users.php:179
+#: admin/woocommerce-admin-users.php:228
+msgid "Country"
+msgstr "Land"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:175
+#: admin/post-types/writepanels/writepanel-order_data.php:265
+msgid "Select a country&hellip;"
+msgstr "Vel land&hellip;"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:178
+#: admin/post-types/writepanels/writepanel-order_data.php:268
+#: admin/woocommerce-admin-users.php:175
+#: admin/woocommerce-admin-users.php:224
+msgid "State/County"
+msgstr "Delstat/land"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:182
+#: admin/woocommerce-admin-users.php:187
+msgid "Email"
+msgstr "Epost"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:185
+msgid "Phone"
+msgstr "Telefon"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:193
+#: admin/post-types/writepanels/writepanel-order_data.php:195
+#: admin/post-types/writepanels/writepanel-order_data.php:277
+#: admin/post-types/writepanels/writepanel-order_data.php:279
+msgid "Address"
+msgstr "Adresse"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:195
+msgid "No billing address set."
+msgstr "Du har ikkje skrive noko fakturaadresse."
+
+#: admin/post-types/writepanels/writepanel-order_data.php:208
+msgid "Load billing address"
+msgstr "Hent fakturaadressa til kunden"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:230
+msgid "Shipping Details"
+msgstr "Fraktdetaljar"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:279
+msgid "No shipping address set."
+msgstr "Du har ikkje skrive noko fraktadresse."
+
+#: admin/post-types/writepanels/writepanel-order_data.php:292
+msgid "Load shipping address"
+msgstr "Hent fraktadressa til kunden"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:292
+msgid "Copy from billing"
+msgstr "Kopier frå faktura"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:339
+msgid "Item"
+msgstr "Element"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:344
+#: admin/post-types/writepanels/writepanel-product_data.php:191
+#: admin/settings/settings-tax-rates.php:217
+msgid "Tax Class"
+msgstr "Avgiftsklasse"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:344
+msgid "Tax class for the line item"
+msgstr "Avgiftsklasse for varelinja"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:347
+msgid "Qty"
+msgstr "Mengd"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:349
+msgid "Cost"
+msgstr "Kostnad"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:349
+msgid "Line subtotals are before pre-tax discounts, totals are after."
+msgstr "Subtotalar pr. linje er før rabattar u.mva, summane er etter rabattar."
+
+#: admin/post-types/writepanels/writepanel-order_data.php:352
+#: admin/settings/settings-tax-rates.php:387
+#: admin/settings/settings-tax-rates.php:466
+#: admin/woocommerce-admin-content.php:48
+#: admin/woocommerce-admin-settings.php:184
+msgid "Tax"
+msgstr "Avgift"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:388
+msgid "Delete Lines"
+msgstr "Slett linjer"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:390
+msgid "Stock Actions"
+msgstr "Lagerhandlingar"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:391
+msgid "Reduce Line Stock"
+msgstr "Mink linjelagermengda"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:392
+msgid "Increase Line Stock"
+msgstr "Auk linjelagermengda"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:396
+#: admin/post-types/writepanels/writepanel-order_data.php:456
+msgid "Apply"
+msgstr "Bruk"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:402
+msgid "Add item(s)"
+msgstr "Legg til element"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:403
+msgid "Add fee"
+msgstr "Legg til gebyr"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:434
+msgid "Resend order emails"
+msgstr "Send tingings-epost på nytt"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:465
+msgid "Move to Trash"
+msgstr "Flytt til papirkorga"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:470
+msgid "Save Order"
+msgstr "Lagra tinginga"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:470
+msgid "Save/update the order"
+msgstr "Lagra/oppdater tinginga"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:495
+msgid "Discounts"
+msgstr "Rabattar"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:499
+msgid "Cart Discount:"
+msgstr "Rabatt på handlekorga:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:499
+msgid "Discounts before tax - calculated by comparing subtotals to totals."
+msgstr "Rabattar før mva - rekna ut ved å samanlikna subtotal med sluttsum."
+
+#: admin/post-types/writepanels/writepanel-order_data.php:507
+msgid "Order Discount:"
+msgstr "Rabatt på tinginga:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:507
+msgid "Discounts after tax - user defined."
+msgstr "Rabattar etter mva - brukardefinert."
+
+#: admin/post-types/writepanels/writepanel-order_data.php:540
+msgid "Label:"
+msgstr "Etikett:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:541
+msgid "The shipping title the customer sees"
+msgstr "Frakttittelen som kunden ser"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:548
+msgid "Cost:"
+msgstr "Kostnad:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:549
+msgid "(ex. tax)"
+msgstr "(u/mva)"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:556
+msgid "Method:"
+msgstr "Metode:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:578
+#: admin/post-types/writepanels/writepanel-order_data.php:580
+#: admin/post-types/writepanels/writepanel-order_data.php:679
+#: admin/post-types/writepanels/writepanel-order_data.php:681
+msgid "Other"
+msgstr "Annan"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:594
+msgid "Tax Rows"
+msgstr "Avgiftsrader"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:619
+msgid "+ Add tax row"
+msgstr "+ Legg til ny avgiftsrad"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:619
+msgid "These rows contain taxes for this order. This allows you to display multiple or compound taxes rather than a single total."
+msgstr "Desse radene inneheld avgiftene for denne tinginga. Det gjer at du kan visa fleire ulike avgifter eller toppsatsar i staden for ein samla sum."
+
+#: admin/post-types/writepanels/writepanel-order_data.php:623
+msgid "Tax Totals"
+msgstr "Avgifter i alt"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:627
+msgid "Total tax for line items + fees."
+msgstr "Total mva for linjeelement + gebyr"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:649
+#: admin/post-types/writepanels/writepanels-init.php:70
+msgid "Order Totals"
+msgstr "Ordretotal"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:653
+msgid "Order Total:"
+msgstr "I alt:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:661
+msgid "Payment Method:"
+msgstr "Betalingsmåte:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:692
+msgid "Calc taxes"
+msgstr "Rekn ut avgifter"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:694
+msgid "Calc totals"
+msgstr "Rekn ut sum"
+
+#: admin/post-types/writepanels/writepanel-order_downloads.php:57
+msgid "Choose a downloadable product&hellip;"
+msgstr "Vel ei nedlasting&hellip;"
+
+#: admin/post-types/writepanels/writepanel-order_downloads.php:87
+msgid "Grant Access"
+msgstr "Gje tilgangsløyve"
+
+#: admin/post-types/writepanels/writepanel-order_downloads.php:125
+msgid "Could not grant access - the user may already have permission for this file or billing email is not set. Ensure the billing email is set, and the order has been saved."
+msgstr "Greidde ikkje gje tilgangsløyve. Kunden kan allereie ha tilgangsløyve, eller fakturaeposten er ikkje sett. Pass på at kunden har fakturaepost, og at tinginga er lagra."
+
+#: admin/post-types/writepanels/writepanel-order_downloads.php:148
+msgid "Are you sure you want to revoke access to this download?"
+msgstr "Er du sikker på at du vil trekkja tilgangsløyvet til denne nedlastinga?"
+
+#: admin/post-types/writepanels/writepanel-order_notes.php:44
+msgid "added %s ago"
+msgstr "lagt til for %s sidan"
+
+#: admin/post-types/writepanels/writepanel-order_notes.php:44
+msgid "Delete note"
+msgstr "Slett merknaden"
+
+#: admin/post-types/writepanels/writepanel-order_notes.php:50
+msgid "There are no notes for this order yet."
+msgstr "Det er ingen merknader for denne tinginga enno."
+
+#: admin/post-types/writepanels/writepanel-order_notes.php:56
+msgid "Add note"
+msgstr "Legg til merknad"
+
+#: admin/post-types/writepanels/writepanel-order_notes.php:56
+msgid "Add a note for your reference, or add a customer note (the user will be notified)."
+msgstr "Legg til ein merknad til deg sjølv, eller ein kundemerknad (kunden vil få melding om han)."
+
+#: admin/post-types/writepanels/writepanel-order_notes.php:62
+msgid "Customer note"
+msgstr "Kundemerknad"
+
+#: admin/post-types/writepanels/writepanel-order_notes.php:63
+msgid "Private note"
+msgstr "Privat merknad"
+
+#: admin/post-types/writepanels/writepanel-order_notes.php:65
+#: admin/post-types/writepanels/writepanel-product_data.php:482
+msgid "Add"
+msgstr "Legg til"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:23
+msgid "Variations for variable products are defined here."
+msgstr "Her set du opp variantar for varer som har det."
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:23
+msgid "Variations"
+msgstr "Variantar"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:65
+msgid "Before adding variations, add and save some attributes on the <strong>Attributes</strong> tab."
+msgstr "Før du legg til variantar, må du lagra nokre eigenskapar under <strong>Eigenskapar</strong>-fana."
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:67
+msgid "Learn more"
+msgstr "Lær meir"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:74
+#: admin/post-types/writepanels/writepanel-product_data.php:329
+msgid "Close all"
+msgstr "Lukk alle"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:74
+#: admin/post-types/writepanels/writepanel-product_data.php:329
+msgid "Expand all"
+msgstr "Utvid alle"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:75
+msgid "Bulk edit:"
+msgstr "Masseendring:"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:77
+msgid "Toggle &quot;Enabled&quot;"
+msgstr "Skru &quot;på&quot;"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:78
+msgid "Toggle &quot;Downloadable&quot;"
+msgstr "Skru på &quot;nedlasting&quot;"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:79
+msgid "Toggle &quot;Virtual&quot;"
+msgstr "Skru på &quot;Virtuelt&quot;"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:80
+msgid "Delete all variations"
+msgstr "Slett alle variantane"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:81
+msgid "Prices"
+msgstr "Prisar"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:82
+msgid "Sale prices"
+msgstr "Tilbodsprisar"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:88
+msgid "File Path"
+msgstr "Filplassering"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:89
+msgid "Download limit"
+msgstr "Nedlastingsgrense"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:90
+#: admin/post-types/writepanels/writepanel-product_data.php:164
+msgid "Download Expiry"
+msgstr "Nedlastinga går ut"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:93
+msgid "Go"
+msgstr "Gå"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:193
+msgid "Add Variation"
+msgstr "Legg til variant"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:195
+msgid "Link all variations"
+msgstr "Lenk alle variantane"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:197
+msgid "Default selections:"
+msgstr "Standardval:"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:210
+msgid "No default"
+msgstr "Ingen standard"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:293
+msgid "Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes (max 50 per run)."
+msgstr "Er du sikker på at du vil lenka alle variantar? Då lagar du ein ny variant for kvar moglege kombinasjon av varianteigenskapar (maks 50 pr. omgang)."
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:310
+msgid "variation added"
+msgstr "Varianten er lagt til"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:312
+msgid "variations added"
+msgstr "Variantane er lagde til"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:314
+msgid "No variations added"
+msgstr "Du har ikkje lagt til nokon variantar"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:337
+msgid "Are you sure you want to remove this variation?"
+msgstr "Er du sikker på at du vil fjerna denne varianten?"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:393
+msgid "Are you sure you want to delete all variations? This cannot be undone."
+msgstr "Er du sikker på at du vil sletta alle variantar? Du kan ikkje angra etterpå."
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:396
+msgid "Last warning, are you sure?"
+msgstr "Siste åtvaring: Er du sikker?"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:433
+msgid "Enter a value"
+msgstr "Skriv inn ein verdi"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:511
+#: admin/woocommerce-admin-taxonomies.php:62
+#: admin/woocommerce-admin-taxonomies.php:154
+msgid "Choose an image"
+msgstr "Vel eit bilete"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:513
+msgid "Set variation image"
+msgstr "Set variantbilete"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:557
+msgid "Variable product"
+msgstr "Variabelt produkt"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:623
+msgid "Variation #%s of %s"
+msgstr "Variant nr %s av %s"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:43
+msgid "Product Type"
+msgstr "Varetype"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:53
+msgid "Virtual products are intangible and aren't shipped."
+msgstr "Virtuelle produkt er ikkje fysiske, og blir ikkje frakta."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:59
+msgid "Downloadable products give access to a file upon purchase."
+msgstr "Nedlastingsprodukt gjev tilgang til ei fil når dei er kjøpte."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:77
+#: admin/woocommerce-admin-content.php:44
+#: admin/woocommerce-admin-settings.php:180
+msgid "General"
+msgstr "Generelt"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:79
+#: admin/woocommerce-admin-content.php:47
+#: admin/woocommerce-admin-settings.php:183
+msgid "Inventory"
+msgstr "Lager"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:83
+msgid "Linked Products"
+msgstr "Lenka varer"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:85
+#: admin/woocommerce-admin-attributes.php:298
+#: admin/woocommerce-admin-init.php:66
+msgid "Attributes"
+msgstr "Attributtar"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:87
+msgid "Advanced"
+msgstr "Avansert"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:98
+msgid "Stock Keeping Unit"
+msgstr "Stock Keeping Unit"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:98
+msgid "SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased."
+msgstr "SKU tyder Stock-keeping unit, eit unikt nummer for kvar einskild vare og tenest som går an å kjøpa."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:109
+msgid "Product URL"
+msgstr "Vare-URL"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:109
+msgid "Enter the external URL to the product."
+msgstr "Skriv inn ekstern adresse til produktet."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:112
+msgid "Button text"
+msgstr "Teksten på knappen"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:112
+msgctxt "placeholder"
+msgid "Buy product"
+msgstr "Kjøp"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:112
+msgid "This text will be shown on the button linking to the external product."
+msgstr "Denne teksten kjem opp på knappen som lenkar til den eksterne vara."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:119
+msgid "Regular Price"
+msgstr "Vanleg pris"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:125
+msgid "Sale Price"
+msgstr "Tilbodspris"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:135
+msgid "Sale Price Dates"
+msgstr "Tilbodsprisdatoar"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:138
+#: admin/post-types/writepanels/writepanel-product_data.php:1064
+msgid "Cancel"
+msgstr "Avbryt"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:152
+msgid "File paths (one per line)"
+msgstr "Filplasseringar (ei per linje)"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:158
+msgid "Download Limit"
+msgstr "Nedlastingsgrense"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:178
+msgid "Tax Status"
+msgstr "Avgiftsstatus"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:180
+msgid "Shipping only"
+msgstr "Berre frakt"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:181
+msgid "None"
+msgstr "Ingen"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:212
+msgid "Enable stock management at product level"
+msgstr "Skru på lagerstyring på varenivå"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:219
+msgid "Stock quantity. If this is a variable product this value will be used to control stock for all variations, unless you define stock at variation level."
+msgstr "Lagermengd. Viss dette er eit variabelt produkt, vil verdien her bli brukt for å kontrollera lagermengd for alle variantane under eitt, med mindre du skriv inn lagermengd på variantnivå."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:230
+msgid "Stock status"
+msgstr "Lagerstatus"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:233
+msgid "Controls whether or not the product is listed as \"in stock\" or \"out of stock\" on the frontend."
+msgstr "Kontrollerer om denne vara er lista opp som «på lager» eller «ikkje på lager» på framsida av nettbutikken."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:240
+msgid "Allow Backorders?"
+msgstr "Bruk restordrar?"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:241
+msgid "Do not allow"
+msgstr "Ikkje tillat"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:242
+msgid "Allow, but notify customer"
+msgstr "Tillat, men sei frå til kunden"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:243
+msgid "Allow"
+msgstr "Tillat"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:244
+msgid "If managing stock, this controls whether or not backorders are allowed for this product and variations. If enabled, stock quantity can go below 0."
+msgstr "Viss du bruker lagerstyring, er det her du set opp om restordrar er lov for denne vara med variantar. Viss restordrar er lov, kan lagermengda gå under 0."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:255
+msgid "Sold Individually"
+msgstr "Blir selt enkeltvis"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:255
+msgid "Enable this to only allow one of this item to be bought in a single order"
+msgstr "Skru på dette for å selja denne vara enkeltvis, dvs. maks 1 per tinging"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:273
+msgid "Weight in decimal form"
+msgstr "Vekta som desimaltal"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:284
+msgid "Dimensions"
+msgstr "Storleik"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:290
+msgid "LxWxH in decimal form"
+msgstr "L*B*H som desimaltal"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:311
+msgid "No shipping class"
+msgstr "Inga fraktklasse"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:317
+msgid "Shipping class"
+msgstr "Fraktklasse"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:317
+msgid "Shipping classes are used by certain shipping methods to group similar products."
+msgstr "Fraktklasser er brukte av visse fraktmåtar for å gruppera liknande varer."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:380
+#: admin/post-types/writepanels/writepanel-product_data.php:457
+#: admin/woocommerce-admin-init.php:453
+msgid "Value(s)"
+msgstr "Verdi(ar)"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:382
+msgid "Select terms"
+msgstr "Vel termar"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:394
+msgid "Select all"
+msgstr "Vel alt"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:394
+msgid "Select none"
+msgstr "Vel ingen"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:396
+msgid "Add new"
+msgstr "Legg til ny"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:409
+msgid "Pipe separate terms"
+msgstr "Tverrstrek (|) mellom termane"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:416
+#: admin/post-types/writepanels/writepanel-product_data.php:463
+#: admin/woocommerce-admin-init.php:455
+msgid "Visible on the product page"
+msgstr "Synleg på varesida"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:422
+#: admin/post-types/writepanels/writepanel-product_data.php:469
+#: admin/woocommerce-admin-init.php:456
+msgid "Used for variations"
+msgstr "Brukt for variantar"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:458
+#: admin/woocommerce-admin-init.php:454
+msgid "Enter some text, or some attributes by pipe (|) separating values."
+msgstr "Skriv inn litt tekst, eller nokre eigenskapar skilde med røyr-teiknet (|)."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:484
+msgid "Custom product attribute"
+msgstr "Eigen vareeigenskap"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:496
+msgid "Save attributes"
+msgstr "Lagra eigenskapar"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:503
+msgid "Up-Sells"
+msgstr "Opp-sal"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:518
+msgid "Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive."
+msgstr "Oppsal tyder produkt som du tilrår i staden for det kunden ser på, til dømes produkt du tener meir på, eller har betre kvalitet eller høgare pris."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:520
+msgid "Cross-Sells"
+msgstr "Kryssal"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:535
+msgid "Cross-sells are products which you promote in the cart, based on the current product."
+msgstr "Kryssal tyder produkt du framhevar i handlekorga, basert på dette produktet."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:545
+msgid "Choose a grouped product&hellip;"
+msgstr "Vel ei gruppert vare&hellip;"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:571
+msgid "Grouping"
+msgstr "Gruppering"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:571
+msgid "Set this option to make this product part of a grouped product."
+msgstr "Skru på dett for å gjera vara til ein del av ei gruppert vare."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:591
+msgid "Purchase Note"
+msgstr "Kjøpsmerknad"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:591
+msgid "Enter an optional note to send the customer after purchase."
+msgstr "Skriv inn ein merknad du eventuelt vil senda til kunden etter kjøpet."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:598
+msgid "Menu order"
+msgstr "Menyrekkjefølgje"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:598
+msgid "Custom ordering position."
+msgstr "Eiga plassering for tinginga."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:606
+msgid "Enable reviews"
+msgstr "Bruk vurderingar"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:695
+msgid "Product SKU must be unique."
+msgstr "Produktnummeret (SKU) må vera unikt."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:1028
+msgid "Catalog/search"
+msgstr "Katalog/søk"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:1035
+msgid "Catalog visibility:"
+msgstr "Synleg katalog:"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:1051
+msgid "Define the loops this product should be visible in. The product will still be accessible directly."
+msgstr "Vis kva sløyfer denne vara skal vera synleg i. Vara vil framleis vera synleg direkte."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:1057
+msgid "Enable this option to feature this product."
+msgstr "Bruk dette valet for å framheva vara."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:1059
+msgid "Featured Product"
+msgstr "Framheva vare"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:1063
+msgid "OK"
+msgstr "OK"
+
+#: admin/post-types/writepanels/writepanel-product_images.php:42
+#: admin/post-types/writepanels/writepanel-product_images.php:102
+msgid "Delete image"
+msgstr "Slett biletet"
+
+#: admin/post-types/writepanels/writepanel-product_images.php:42
+#: admin/post-types/writepanels/writepanel-product_images.php:102
+#: admin/woocommerce-admin-attributes.php:322
+msgid "Delete"
+msgstr "Slett"
+
+#: admin/post-types/writepanels/writepanel-product_images.php:53
+msgid "Add product gallery images"
+msgstr "Legg til galleribilete til vara"
+
+#: admin/post-types/writepanels/writepanel-product_images.php:79
+msgid "Add Images to Product Gallery"
+msgstr "Leg bilete til i varegalleriet"
+
+#: admin/post-types/writepanels/writepanel-product_images.php:81
+msgid "Add to gallery"
+msgstr "Legg til galleri"
+
+#: admin/post-types/writepanels/writepanels-init.php:47
+msgid "Product Gallery"
+msgstr "Varegalleri"
+
+#: admin/post-types/writepanels/writepanels-init.php:55
+msgid "Product Short Description"
+msgstr "Ei kort skildring av vara"
+
+#: admin/post-types/writepanels/writepanels-init.php:64
+msgid "Reviews"
+msgstr "Vurderingar"
+
+#: admin/post-types/writepanels/writepanels-init.php:68
+msgid "Order Data"
+msgstr "Tingingsdata"
+
+#: admin/post-types/writepanels/writepanels-init.php:69
+msgid "Order Items"
+msgstr "Element i tinginga"
+
+#: admin/post-types/writepanels/writepanels-init.php:69
+msgid "Note: if you edit quantities or remove items from the order you will need to manually update stock levels."
+msgstr "Merk: Viss du endrar mengder eller fjernar varer frå tinginga, må du oppdatera lagermengdene manuelt."
+
+#: admin/post-types/writepanels/writepanels-init.php:72
+msgid "Downloadable Product Permissions"
+msgstr "Tilgangsløyve til nedlastingar"
+
+#: admin/post-types/writepanels/writepanels-init.php:72
+msgid "Note: Permissions for order items will automatically be granted when the order status changes to processing/completed."
+msgstr "Merk: Tilgang for tinga varer vil bli løyvd automatisk når ordrestatusen blir endra frå «handterer» til «fullført»"
+
+#: admin/post-types/writepanels/writepanels-init.php:73
+msgid "Order Actions"
+msgstr "Tingingshandlingar"
+
+#: admin/post-types/writepanels/writepanels-init.php:81
+msgid "Coupon Data"
+msgstr "Kupongdata"
+
+#: admin/post-types/writepanels/writepanels-init.php:100
+msgid "Coupon code"
+msgstr "Kupongkode"
+
+#: admin/post-types/writepanels/writepanels-init.php:101
+msgid "Product name"
+msgstr "Varenamn"
+
+#: admin/post-types/writepanels/writepanels-init.php:185
+msgid "Allow reviews."
+msgstr "Gje lov til å skriva vurderingar."
+
+#: admin/post-types/writepanels/writepanels-init.php:186
+msgid "Allow <a href=\"%s\" target=\"_blank\">trackbacks and pingbacks</a> on this page."
+msgstr "Bruk <a href=\"%s\" target=\"_blank\">tilbaketråkk og tilbakeping</a> på denne sida."
+
+#: admin/post-types/writepanels/writepanels-init.php:186
+msgid "http://codex.wordpress.org/Introduction_to_Blogging#Managing_Comments"
+msgstr "http://codex.wordpress.org/Introduction_to_Blogging#Managing_Comments"
+
+#: admin/settings/settings-frontend-styles.php:23
+msgid "Styles"
+msgstr "Stilar"
+
+#: admin/settings/settings-frontend-styles.php:43
+msgid "Primary"
+msgstr "Primær"
+
+#: admin/settings/settings-frontend-styles.php:43
+msgid "Call to action buttons/price slider/layered nav UI"
+msgstr "«Gjer noko»-knappar/prisfilter/lagnavigasjon"
+
+#: admin/settings/settings-frontend-styles.php:44
+msgid "Secondary"
+msgstr "Sekundær"
+
+#: admin/settings/settings-frontend-styles.php:44
+msgid "Buttons and tabs"
+msgstr "Knappar og faner"
+
+#: admin/settings/settings-frontend-styles.php:45
+msgid "Highlight"
+msgstr "Framheva"
+
+#: admin/settings/settings-frontend-styles.php:45
+msgid "Price labels and Sale Flashes"
+msgstr "Prislappar og salsplakatar"
+
+#: admin/settings/settings-frontend-styles.php:46
+msgid "Content"
+msgstr "Innhald"
+
+#: admin/settings/settings-frontend-styles.php:46
+msgid "Your themes page background - used for tab active states"
+msgstr "Sidebakgrunnen for bunaden din - blir brukt for tilstand på aktiv fane"
+
+#: admin/settings/settings-frontend-styles.php:47
+msgid "Subtext"
+msgstr "Undertekst"
+
+#: admin/settings/settings-frontend-styles.php:47
+msgid "Used for certain text and asides - breadcrumbs, small text etc."
+msgstr "Blir brukt på nokre tekstar og ekstraopplysingar - navigasjonstekst, lita skrift osb."
+
+#: admin/settings/settings-frontend-styles.php:51
+msgid "To edit colours <code>woocommerce/assets/css/woocommerce-base.less</code> and <code>woocommerce.css</code> need to be writable. See <a href=\"http://codex.wordpress.org/Changing_File_Permissions\">the Codex</a> for more information."
+msgstr "For å endra fargene, må <code>woocommerce/assets/css/woocommerce-base.less</code> og <code>woocommerce.css</code> vera skrivbare. Sjå <a href=\"http://codex.wordpress.org/Changing_File_Permissions\">WordPress-dokumentasjonen</a> for fleire opplysingar."
+
+#: admin/settings/settings-init.php:18
+msgid "Localisation"
+msgstr "Lokalisering"
+
+#: admin/settings/settings-init.php:19
+msgid "Use informal localisation for %s"
+msgstr "Bruk uformell lokalisering for %s"
+
+#: admin/settings/settings-init.php:33
+msgid "General Options"
+msgstr "Generelt oppsett"
+
+#: admin/settings/settings-init.php:36
+msgid "Base Location"
+msgstr "Heimstad"
+
+#: admin/settings/settings-init.php:37
+msgid "This is the base location for your business. Tax rates will be based on this country."
+msgstr "Dette er der verksemda di held til. Avgifter blir rekna ut frå dette landet."
+
+#: admin/settings/settings-init.php:46
+msgid "Currency"
+msgstr "Valuta"
+
+#: admin/settings/settings-init.php:47
+msgid "This controls what currency prices are listed at in the catalog and which currency gateways will take payments in."
+msgstr "Her kontrollerer kva valuta katalogprisane skal ha, og kva valutaer betalingsløysingane skal ta imot."
+
+#: admin/settings/settings-init.php:58
+msgid "Allowed Countries"
+msgstr "Tillatne land"
+
+#: admin/settings/settings-init.php:59
+msgid "These are countries that you are willing to ship to."
+msgstr "Dette er landa du er viljug til å senda til."
+
+#: admin/settings/settings-init.php:67
+msgid "All Countries"
+msgstr "Alle land"
+
+#: admin/settings/settings-init.php:68
+#: admin/settings/settings-init.php:73
+msgid "Specific Countries"
+msgstr "Visse land"
+
+#: admin/settings/settings-init.php:84
+msgid "Store Notice"
+msgstr "Butikkmerknad"
+
+#: admin/settings/settings-init.php:85
+msgid "Enable site-wide store notice text"
+msgstr "Skru på varslingstekst på heile nettstaden"
+
+#: admin/settings/settings-init.php:92
+msgid "Store Notice Text"
+msgstr "Butikknotis"
+
+#: admin/settings/settings-init.php:95
+msgid "This is a demo store for testing purposes &mdash; no orders shall be fulfilled."
+msgstr "Denne butikken er for utprøving, og tek ikkje imot tingingar."
+
+#: admin/settings/settings-init.php:102
+msgid "Cart, Checkout and Accounts"
+msgstr "Handlekorg, kasse og brukarkontoar"
+
+#: admin/settings/settings-init.php:105
+#: admin/woocommerce-admin-content.php:61
+#: admin/woocommerce-admin-content.php:76
+#: admin/woocommerce-admin-reports.php:72
+msgid "Coupons"
+msgstr "Rabattkupongar"
+
+#: admin/settings/settings-init.php:106
+msgid "Enable the use of coupons"
+msgstr "Bruk rabattkupongar"
+
+#: admin/settings/settings-init.php:110
+msgid "Coupons can be applied from the cart and checkout pages."
+msgstr "Du kan bruka rabattkupongane på handlekorg- og kassa-sidene."
+
+#: admin/settings/settings-init.php:114
+#: admin/woocommerce-admin-install.php:198
+#: admin/woocommerce-admin-status.php:281
+msgid "Checkout"
+msgstr "Kasse"
+
+#: admin/settings/settings-init.php:115
+msgid "Enable guest checkout (no account required)"
+msgstr "Gje gjestar høve til å gå til kassa (krev ingen brukarkonto)"
+
+#: admin/settings/settings-init.php:123
+msgid "Enable customer note field on checkout"
+msgstr "Ta i bruk kundenotat-felt på kassasida"
+
+#: admin/settings/settings-init.php:131
+msgid "Force secure checkout"
+msgstr "Tving sikker kasse"
+
+#: admin/settings/settings-init.php:137
+msgid "Force SSL (HTTPS) on the checkout pages (an SSL Certificate is required)."
+msgstr "Tving SSL (HTTPS) på kassasidene (du må ha eit SSL-sertifikat)"
+
+#: admin/settings/settings-init.php:141
+msgid "Un-force HTTPS when leaving the checkout"
+msgstr "Fjern HTTPS-tvangen når kunden forlèt kassa"
+
+#: admin/settings/settings-init.php:150
+msgid "Registration"
+msgstr "Registrering"
+
+#: admin/settings/settings-init.php:151
+msgid "Allow registration on the checkout page"
+msgstr "La kundane registrera seg på kassasida"
+
+#: admin/settings/settings-init.php:159
+msgid "Allow registration on the \"My Account\" page"
+msgstr "La kundane registrera seg på «Brukarkonto»-sida"
+
+#: admin/settings/settings-init.php:167
+msgid "Register using the email address for the username"
+msgstr "Registrer ved å bruka epostadressa som brukarnamn"
+
+#: admin/settings/settings-init.php:175
+msgid "Customer Accounts"
+msgstr "Kundekontoar"
+
+#: admin/settings/settings-init.php:176
+msgid "Prevent customers from accessing WordPress admin"
+msgstr "Hindra at kundane kjem til WordPress-administrasjonen"
+
+#: admin/settings/settings-init.php:184
+msgid "Clear cart when logging out"
+msgstr "Tøm korga ved utlogging"
+
+#: admin/settings/settings-init.php:192
+msgid "Allow customers to repurchase orders from their account page"
+msgstr "La kundar handla tidlegare tingingar på nytt frå kontosida deira"
+
+#: admin/settings/settings-init.php:201
+msgid "Styles and Scripts"
+msgstr "Stilar og skript"
+
+#: admin/settings/settings-init.php:204
+msgid "Styling"
+msgstr "Stilval"
+
+#: admin/settings/settings-init.php:205
+msgid "Enable WooCommerce CSS"
+msgstr "Bruk CSS-stilane til WooCommerce"
+
+#: admin/settings/settings-init.php:216
+msgid "Scripts"
+msgstr "Skript"
+
+#: admin/settings/settings-init.php:217
+msgid "Enable Lightbox"
+msgstr "Bruk Lightbox"
+
+#: admin/settings/settings-init.php:220
+msgid "Include WooCommerce's lightbox. Product gallery images and the add review form will open in a lightbox."
+msgstr "Bruk WooCommerce sin lightbox. Varegalleri og varevurderingar vil opna i eit lightbox-overlegg."
+
+#: admin/settings/settings-init.php:226
+msgid "Enable enhanced country select boxes"
+msgstr "Skru på utvida landsval-boksar"
+
+#: admin/settings/settings-init.php:231
+msgid "This will enable a script allowing the country fields to be searchable."
+msgstr "Å skru på dette gjer at landfelta blir søkbare."
+
+#: admin/settings/settings-init.php:236
+msgid "Downloadable Products"
+msgstr "Nedlastingar"
+
+#: admin/settings/settings-init.php:239
+msgid "File Download Method"
+msgstr "FIlnedlastingsmetode"
+
+#: admin/settings/settings-init.php:240
+msgid "Forcing downloads will keep URLs hidden, but some servers may serve large files unreliably. If supported, <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> can be used to serve downloads instead (server requires <code>mod_xsendfile</code>)."
+msgstr "Tvungne nedlastingar gøymer nedlastingsadressa, men nokre tenarar leverer ikkje slike filer feilfritt. Viss tenaren støttar det, kan du bruka <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code>-metoden i staden (tenaren må ha <code>mod_xsendfile</code>)."
+
+#: admin/settings/settings-init.php:248
+msgid "Force Downloads"
+msgstr "Tving nedlastingar"
+
+#: admin/settings/settings-init.php:249
+msgid "X-Accel-Redirect/X-Sendfile"
+msgstr "X-Accel-Redirect/X-Sendfile"
+
+#: admin/settings/settings-init.php:250
+msgid "Redirect only"
+msgstr "Berre omdiriger"
+
+#: admin/settings/settings-init.php:255
+msgid "Access Restriction"
+msgstr "Tilgangsavgrensing"
+
+#: admin/settings/settings-init.php:256
+msgid "Downloads require login"
+msgstr "Nedlastingar krev innlogging"
+
+#: admin/settings/settings-init.php:260
+msgid "This setting does not apply to guest purchases."
+msgstr "Denne innstillinga gjeld ikkje gjestenedlastingar."
+
+#: admin/settings/settings-init.php:265
+msgid "Grant access to downloadable products after payment"
+msgstr "Gje tilgjenge til nedlastbare produkt etter betaling"
+
+#: admin/settings/settings-init.php:269
+msgid "Enable this option to grant access to downloads when orders are \"processing\", rather than \"completed\"."
+msgstr "Skru på dette for å gje løyve til nedlasting når tingingane står som «handterer», heller enn «fullført»"
+
+#: admin/settings/settings-init.php:285
+msgid "Note: The shop page has children - child pages will not work if you enable this option."
+msgstr "Merk: Butikksida har undersider, og dei vil ikkje verka om du skrur på dette."
+
+#: admin/settings/settings-init.php:290
+msgid "Page Setup"
+msgstr "Sideoppsett"
+
+#: admin/settings/settings-init.php:292
+msgid "Set up core WooCommerce pages here, for example the base page. The base page can also be used in your %sproduct permalinks%s."
+msgstr "Her set du opp grunnsidene for WooCommerce, til dømes butikkbasesida. Denne sida kan du ma. bruka i %svare-fastlenkjene dine%s"
+
+#: admin/settings/settings-init.php:297
+msgid "Shop Base Page"
+msgstr "Butikkbaseside"
+
+#: admin/settings/settings-init.php:298
+msgid "This sets the base page of your shop - this is where your product archive will be."
+msgstr "Her set du opp basesida for butikken din - her vil varekatalogen din vera."
+
+#: admin/settings/settings-init.php:308
+msgid "Base Page Title"
+msgstr "Tittel på basesida"
+
+#: admin/settings/settings-init.php:309
+msgid "This title to show on the shop base page. Leave blank to use the page title."
+msgstr "Dette er tittelen på butikkbasesida. La det stå tomt for å bruka den vanlege sidetittelen."
+
+#: admin/settings/settings-init.php:318
+msgid "Terms Page ID"
+msgstr "Side-ID for kjøpsvilkårsida"
+
+#: admin/settings/settings-init.php:319
+msgid "If you define a \"Terms\" page the customer will be asked if they accept them when checking out."
+msgstr "Viss du har ei side med kjøpsvilkår, vil kunden bli beden om å godkjenna vilkåra i kassa."
+
+#: admin/settings/settings-init.php:330
+msgid "Shop Pages"
+msgstr "Butikksider"
+
+#: admin/settings/settings-init.php:330
+msgid "The following pages need selecting so that WooCommerce knows where they are. These pages should have been created upon installation of the plugin, if not you will need to create them."
+msgstr "Du må velja desse sidene, så WooCommerce veit kvar dei er. Sidene blir laga automatisk når du installerer WooCommerce, men viss ikkje det har skjedd, må du laga dei."
+
+#: admin/settings/settings-init.php:333
+msgid "Cart Page"
+msgstr "Handlekorgside"
+
+#: admin/settings/settings-init.php:334
+msgid "Page contents: [woocommerce_cart]"
+msgstr "Sideinnhald: [woocommerce_cart]"
+
+#: admin/settings/settings-init.php:344
+msgid "Checkout Page"
+msgstr "Kassa-sida"
+
+#: admin/settings/settings-init.php:345
+msgid "Page contents: [woocommerce_checkout]"
+msgstr "Sideinnhald: [woocommerce_checkout]"
+
+#: admin/settings/settings-init.php:355
+msgid "Pay Page"
+msgstr "Betal-sida"
+
+#: admin/settings/settings-init.php:356
+msgid "Page contents: [woocommerce_pay] Parent: \"Checkout\""
+msgstr "Sideinnhald: [woocommerce_pay] Forelder: «Kasse»"
+
+#: admin/settings/settings-init.php:366
+msgid "Thanks Page"
+msgstr "Takk-sida"
+
+#: admin/settings/settings-init.php:367
+msgid "Page contents: [woocommerce_thankyou] Parent: \"Checkout\""
+msgstr "Sideinnhald: [woocommerce_thankyou] Forelder: «Kasse»"
+
+#: admin/settings/settings-init.php:377
+msgid "My Account Page"
+msgstr "Brukarkontosida"
+
+#: admin/settings/settings-init.php:378
+msgid "Page contents: [woocommerce_my_account]"
+msgstr "Sideinnhald: [woocommerce_my_account]"
+
+#: admin/settings/settings-init.php:388
+msgid "Edit Address Page"
+msgstr "Endra adresse-sida"
+
+#: admin/settings/settings-init.php:389
+msgid "Page contents: [woocommerce_edit_address] Parent: \"My Account\""
+msgstr "Sideinnhald: [woocommerce_edit_address] Forelder: «Brukarkonto»"
+
+#: admin/settings/settings-init.php:399
+msgid "View Order Page"
+msgstr "Sjå tinging-sida"
+
+#: admin/settings/settings-init.php:400
+msgid "Page contents: [woocommerce_view_order] Parent: \"My Account\""
+msgstr "Sideinnhald: [woocommerce_view_order] Forelder: «Brukarkonto»"
+
+#: admin/settings/settings-init.php:410
+msgid "Change Password Page"
+msgstr "Endra passord-sida"
+
+#: admin/settings/settings-init.php:411
+msgid "Page contents: [woocommerce_change_password] Parent: \"My Account\""
+msgstr "Sideinnhald: [woocommerce_change_password] Forelder: «Brukarkonto»"
+
+#: admin/settings/settings-init.php:421
+msgid "Logout Page"
+msgstr "Utloggingsside"
+
+#: admin/settings/settings-init.php:422
+msgid "Parent: \"My Account\""
+msgstr "Forelder: «Brukarkonto»"
+
+#: admin/settings/settings-init.php:432
+msgid "Lost Password Page"
+msgstr "Mista passord-sida"
+
+#: admin/settings/settings-init.php:433
+msgid "Page contents: [woocommerce_lost_password] Parent: \"My Account\""
+msgstr "Sideinnhald: [woocommerce_lost_password] Forelder: «Brukarkonto»"
+
+#: admin/settings/settings-init.php:449
+msgid "Catalog Options"
+msgstr "Katalogval"
+
+#: admin/settings/settings-init.php:452
+msgid "Default Product Sorting"
+msgstr "Standard varesortering"
+
+#: admin/settings/settings-init.php:453
+msgid "This controls the default sort order of the catalog."
+msgstr "Her kontrollerer du standardsorteringa i katalogen."
+
+#: admin/settings/settings-init.php:459
+msgid "Default sorting (custom ordering + name)"
+msgstr "Standardsortering (eiga sortering + namn)"
+
+#: admin/settings/settings-init.php:460
+msgid "Popularity (sales)"
+msgstr "Popularitet (sal)"
+
+#: admin/settings/settings-init.php:461
+msgid "Average Rating"
+msgstr "Gjennomsnittleg vurdering"
+
+#: admin/settings/settings-init.php:462
+msgid "Sort by most recent"
+msgstr "Sorter etter nyaste"
+
+#: admin/settings/settings-init.php:463
+msgid "Sort by price (asc)"
+msgstr "Sorter etter pris (stigande)"
+
+#: admin/settings/settings-init.php:464
+msgid "Sort by price (desc)"
+msgstr "Sorter etter pris (minkande)"
+
+#: admin/settings/settings-init.php:470
+msgid "Shop Page Display"
+msgstr "Butikksidevising"
+
+#: admin/settings/settings-init.php:471
+msgid "This controls what is shown on the product archive."
+msgstr "Her kontrollerer du kva som blir vist i varearkivet."
+
+#: admin/settings/settings-init.php:477
+#: admin/settings/settings-init.php:492
+msgid "Show products"
+msgstr "Vis varer"
+
+#: admin/settings/settings-init.php:478
+#: admin/settings/settings-init.php:493
+msgid "Show subcategories"
+msgstr "Vis underkategoriar"
+
+#: admin/settings/settings-init.php:479
+#: admin/settings/settings-init.php:494
+msgid "Show both"
+msgstr "Vis båe"
+
+#: admin/settings/settings-init.php:485
+msgid "Default Category Display"
+msgstr "Standard kategorivising"
+
+#: admin/settings/settings-init.php:486
+msgid "This controls what is shown on category archives."
+msgstr "Her kontrollerer du kva som blir vist i kategoriarkiva."
+
+#: admin/settings/settings-init.php:500
+msgid "Add to cart"
+msgstr "Legg i korga"
+
+#: admin/settings/settings-init.php:501
+msgid "Redirect to the cart page after successful addition"
+msgstr "Send vidare til handlekorga når vara er lagt i korga"
+
+#: admin/settings/settings-init.php:509
+msgid "Enable AJAX add to cart buttons on archives"
+msgstr "Bruk AJAX-funksjonar på legg i korg-knappen på arkivsider"
+
+#: admin/settings/settings-init.php:518
+msgid "The following options affect the fields available on the edit product page."
+msgstr "Desse vala påverkar kva felt som er synlege på sida der du redigerer varene."
+
+#: admin/settings/settings-init.php:521
+msgid "Product Fields"
+msgstr "Varefelt"
+
+#: admin/settings/settings-init.php:522
+msgid "Enable the <strong>SKU</strong> field for products"
+msgstr "Bruk <strong>SKU</strong>-feltet for varer"
+
+#: admin/settings/settings-init.php:530
+msgid "Enable the <strong>weight</strong> field for products (some shipping methods may require this)"
+msgstr "Bruk <strong>vekt</strong>-feltet for varer (nokre fraktmåtar krev vekt)"
+
+#: admin/settings/settings-init.php:538
+msgid "Enable the <strong>dimension</strong> fields for products (some shipping methods may require this)"
+msgstr "Bruk <strong>storleik</strong>-feltet for varer (nokre fraktmåtar krev dette)"
+
+#: admin/settings/settings-init.php:546
+msgid "Show <strong>weight and dimension</strong> values on the <strong>Additional Information</strong> tab"
+msgstr "Vis <strong>vekt og storleik</strong>-tala på fana for <strong>fleire opplysingar</strong>"
+
+#: admin/settings/settings-init.php:554
+msgid "Weight Unit"
+msgstr "Vekteining"
+
+#: admin/settings/settings-init.php:555
+msgid "This controls what unit you will define weights in."
+msgstr "Her kontrollerer du kva vekteining du vil bruka."
+
+#: admin/settings/settings-init.php:561
+msgid "kg"
+msgstr "kg"
+
+#: admin/settings/settings-init.php:562
+msgid "g"
+msgstr "g"
+
+#: admin/settings/settings-init.php:563
+msgid "lbs"
+msgstr "pund"
+
+#: admin/settings/settings-init.php:564
+msgid "oz"
+msgstr "unsar"
+
+#: admin/settings/settings-init.php:570
+msgid "Dimensions Unit"
+msgstr "Måleeining"
+
+#: admin/settings/settings-init.php:571
+msgid "This controls what unit you will define lengths in."
+msgstr "Her kontrollerer du kva lengdeeining du vil bruka."
+
+#: admin/settings/settings-init.php:578
+msgid "cm"
+msgstr "cm"
+
+#: admin/settings/settings-init.php:579
+msgid "mm"
+msgstr "mm"
+
+#: admin/settings/settings-init.php:580
+msgid "in"
+msgstr "tommar"
+
+#: admin/settings/settings-init.php:581
+msgid "yd"
+msgstr "yards"
+
+#: admin/settings/settings-init.php:587
+msgid "Product Ratings"
+msgstr "Produktvurderingar"
+
+#: admin/settings/settings-init.php:588
+msgid "Enable ratings on reviews"
+msgstr "Skru på stjerner på varevurderingane"
+
+#: admin/settings/settings-init.php:597
+msgid "Ratings are required to leave a review"
+msgstr "Du må gje stjernekarakterar for å gje ei vurdering"
+
+#: admin/settings/settings-init.php:606
+msgid "Show \"verified owner\" label for customer reviews"
+msgstr "Vis «Eig denne vara»-merke for kundevurderingar"
+
+#: admin/settings/settings-init.php:616
+msgid "Pricing Options"
+msgstr "Prisval"
+
+#: admin/settings/settings-init.php:616
+msgid "The following options affect how prices are displayed on the frontend."
+msgstr "Dette styrer korleis prisane viser på nettbutikken."
+
+#: admin/settings/settings-init.php:619
+msgid "Currency Position"
+msgstr "Plassering for valutateikn"
+
+#: admin/settings/settings-init.php:620
+msgid "This controls the position of the currency symbol."
+msgstr "Her kontrollerer du kvar valutasymbolet skal stå."
+
+#: admin/settings/settings-init.php:626
+msgid "Left"
+msgstr "Venstre"
+
+#: admin/settings/settings-init.php:627
+msgid "Right"
+msgstr "Høgre"
+
+#: admin/settings/settings-init.php:628
+msgid "Left (with space)"
+msgstr "Venstre (med mellomrom)"
+
+#: admin/settings/settings-init.php:629
+msgid "Right (with space)"
+msgstr "Høgre (med mellomrom)"
+
+#: admin/settings/settings-init.php:635
+msgid "Thousand Separator"
+msgstr "Tusenskilje"
+
+#: admin/settings/settings-init.php:636
+msgid "This sets the thousand separator of displayed prices."
+msgstr "Avgjer tusenskiljet for prisane."
+
+#: admin/settings/settings-init.php:645
+msgid "Decimal Separator"
+msgstr "Desimalskilje"
+
+#: admin/settings/settings-init.php:646
+msgid "This sets the decimal separator of displayed prices."
+msgstr "Avgjer desimalskiljet for prisane."
+
+#: admin/settings/settings-init.php:655
+msgid "Number of Decimals"
+msgstr "Kor mange desimalar"
+
+#: admin/settings/settings-init.php:656
+msgid "This sets the number of decimal points shown in displayed prices."
+msgstr "Avgjer kor mange desimalar me skal visa prisane med"
+
+#: admin/settings/settings-init.php:669
+msgid "Trailing Zeros"
+msgstr "Etterfølgjande nullar"
+
+#: admin/settings/settings-init.php:670
+msgid "Remove zeros after the decimal point. e.g. <code>$10.00</code> becomes <code>$10</code>"
+msgstr "Fjern nullar etter desimalskiljet, td. <code>kr 10,00</code> blir <code>kr 10</code>"
+
+#: admin/settings/settings-init.php:678
+msgid "Image Options"
+msgstr "Biletval"
+
+#: admin/settings/settings-init.php:678
+msgid "These settings affect the actual dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a href=\"%s\">regenerate your thumbnails</a>."
+msgstr "Desse innstillingane har med dei faktiske biletstorleikane i katalogen din å gjera. CSS-innstillingane vil framleis spela inn på kva storleik som syner på butikken din. Når du har endra desse innstillingane, kan det henda du må <a href=\"%s\">laga miniatyrbileta på nytt</a>."
+
+#: admin/settings/settings-init.php:681
+msgid "Catalog Images"
+msgstr "Katalogbilete"
+
+#: admin/settings/settings-init.php:682
+msgid "This size is usually used in product listings"
+msgstr "Denne storleiken plar me bruka i varelister"
+
+#: admin/settings/settings-init.php:695
+msgid "Single Product Image"
+msgstr "Bilete for einskildprodukt"
+
+#: admin/settings/settings-init.php:696
+msgid "This is the size used by the main image on the product page."
+msgstr "Denne storleiken bruker me for hovudbiletet på varesida."
+
+#: admin/settings/settings-init.php:709
+msgid "Product Thumbnails"
+msgstr "Produktminiatyrar"
+
+#: admin/settings/settings-init.php:710
+msgid "This size is usually used for the gallery of images on the product page."
+msgstr "Denne storleiken plar me bruka for biletgalleri på varesida."
+
+#: admin/settings/settings-init.php:729
+msgid "Inventory Options"
+msgstr "Lagerval"
+
+#: admin/settings/settings-init.php:732
+msgid "Manage Stock"
+msgstr "Bruk lagerstyring"
+
+#: admin/settings/settings-init.php:733
+msgid "Enable stock management"
+msgstr "Slå på lagerstyring"
+
+#: admin/settings/settings-init.php:740
+msgid "Hold Stock (minutes)"
+msgstr "Reserver (kor mange minutt)"
+
+#: admin/settings/settings-init.php:741
+msgid "Hold stock (for unpaid orders) for x minutes. When this limit is reached, the pending order will be cancelled. Leave blank to disable."
+msgstr "Reserver varer (for ubetalte tingingar) i x minutt. Når denne grensa er nådd, blir den ventande tinginga kansellert. La stå tomt for å skru av."
+
+#: admin/settings/settings-init.php:753
+msgid "Notifications"
+msgstr "Varslingar"
+
+#: admin/settings/settings-init.php:754
+msgid "Enable low stock notifications"
+msgstr "Bruk meldingar om låg lagermengd"
+
+#: admin/settings/settings-init.php:762
+msgid "Enable out of stock notifications"
+msgstr "Bruk meldingar om tomt på lager"
+
+#: admin/settings/settings-init.php:770
+msgid "Notification Recipient"
+msgstr "Mottakar av e-postvarselet"
+
+#: admin/settings/settings-init.php:778
+msgid "Low Stock Threshold"
+msgstr "Snart tomt på lageret ved"
+
+#: admin/settings/settings-init.php:791
+msgid "Out Of Stock Threshold"
+msgstr "Tomt på lageret ved"
+
+#: admin/settings/settings-init.php:804
+msgid "Out Of Stock Visibility"
+msgstr "Synleg når tomt på lager"
+
+#: admin/settings/settings-init.php:805
+msgid "Hide out of stock items from the catalog"
+msgstr "Gøym varer som ikkje er på lager frå katalogen"
+
+#: admin/settings/settings-init.php:812
+msgid "Stock Display Format"
+msgstr "Format for lagermengd"
+
+#: admin/settings/settings-init.php:813
+msgid "This controls how stock is displayed on the frontend."
+msgstr "Dette styrer korleis lagermengda viser på framsida av nettbutikken."
+
+#: admin/settings/settings-init.php:819
+msgid "Always show stock e.g. \"12 in stock\""
+msgstr "Alltid vis lagermengd, td. «12 på lager»"
+
+#: admin/settings/settings-init.php:820
+msgid "Only show stock when low e.g. \"Only 2 left in stock\" vs. \"In Stock\""
+msgstr "Berre vis lagermengd når det er lite att, td. «Berre 2 att på lager», i motsetnad til «På lager»"
+
+#: admin/settings/settings-init.php:821
+msgid "Never show stock amount"
+msgstr "Aldri vis lagermengd"
+
+#: admin/settings/settings-init.php:833
+#: admin/woocommerce-admin-settings.php:290
+msgid "Shipping Options"
+msgstr "Val for frakt"
+
+#: admin/settings/settings-init.php:836
+msgid "Shipping Calculations"
+msgstr "Fraktutrekningar"
+
+#: admin/settings/settings-init.php:837
+msgid "Enable shipping"
+msgstr "Skru på frakt"
+
+#: admin/settings/settings-init.php:845
+msgid "Enable the shipping calculator on the cart page"
+msgstr "Bruk fraktkalkulatoren på kassa-sida"
+
+#: admin/settings/settings-init.php:853
+msgid "Hide shipping costs until an address is entered"
+msgstr "Gøym fraktkostnad til kunden har skrive inn ei adresse"
+
+#: admin/settings/settings-init.php:861
+msgid "Shipping Method Display"
+msgstr "Fraktmåte-vising"
+
+#: admin/settings/settings-init.php:862
+msgid "This controls how multiple shipping methods are displayed on the frontend."
+msgstr "Her kontrollerer du korleis fleire fraktmåtar blir viste på framsida av nettbutikken."
+
+#: admin/settings/settings-init.php:868
+msgid "Radio buttons"
+msgstr "Meldingsknappar"
+
+#: admin/settings/settings-init.php:869
+msgid "Select box"
+msgstr "Avkryssingsboks"
+
+#: admin/settings/settings-init.php:875
+msgid "Shipping Destination"
+msgstr "Skal sendast til"
+
+#: admin/settings/settings-init.php:876
+msgid "Only ship to the users billing address"
+msgstr "Send berre til fakturaadressa som kunden skriv inn"
+
+#: admin/settings/settings-init.php:884
+msgid "Ship to billing address by default"
+msgstr "Send til fakturaadressa som standard"
+
+#: admin/settings/settings-init.php:892
+msgid "Collect shipping address even when not required"
+msgstr "Samla inn fraktadresse sjøv når det ikkje trengst"
+
+#: admin/settings/settings-init.php:910
+#: admin/woocommerce-admin-settings.php:186
+#: admin/woocommerce-admin-settings.php:327
+msgid "Payment Gateways"
+msgstr "Betalingsportnarar"
+
+#: admin/settings/settings-init.php:910
+msgid "Installed payment gateways are displayed below. Drag and drop payment gateways to control their display order on the checkout."
+msgstr "Dei installerte betalingsløysingane står under. Dra og slepp betalingsløysingar for å kontrollera kva rekkjefylgje dei kjem i på kassa-sida."
+
+#: admin/settings/settings-init.php:928
+#: admin/woocommerce-admin-settings.php:220
+msgid "Tax Options"
+msgstr "Avgiftsinnstillingar"
+
+#: admin/settings/settings-init.php:931
+msgid "Enable Taxes"
+msgstr "Bruk avgifter"
+
+#: admin/settings/settings-init.php:932
+msgid "Enable taxes and tax calculations"
+msgstr "Bruk avgifter (mva) og avgiftsutrekningar"
+
+#: admin/settings/settings-init.php:939
+msgid "Prices Entered With Tax"
+msgstr "Prisar er inkl. mva."
+
+#: admin/settings/settings-init.php:943
+msgid "This option is important as it will affect how you input prices. Changing it will not update existing products."
+msgstr "Denne innstillinga er viktig, fordi ho vedrører korleis du skriv inn prisar. Viss du endrar henne, vil du ikkje oppdatera eksisterande varer."
+
+#: admin/settings/settings-init.php:945
+msgid "Yes, I will enter prices inclusive of tax"
+msgstr "Ja, eg skriv prisane inkl. mva."
+
+#: admin/settings/settings-init.php:946
+msgid "No, I will enter prices exclusive of tax"
+msgstr "Nei, eg skriv inn prisane ekskl. mva."
+
+#: admin/settings/settings-init.php:951
+msgid "Calculate Tax Based On:"
+msgstr "Rekna ut avgifter frå:"
+
+#: admin/settings/settings-init.php:953
+msgid "This option determines which address is used to calculate tax."
+msgstr "Her avgjer du kva adresser som blir brukte for å rekna ut avgifter."
+
+#: admin/settings/settings-init.php:957
+msgid "Customer shipping address"
+msgstr "Fraktadressa til kunden"
+
+#: admin/settings/settings-init.php:958
+msgid "Customer billing address"
+msgstr "Fakturaadressa til kunden"
+
+#: admin/settings/settings-init.php:959
+#: admin/settings/settings-init.php:971
+msgid "Shop base address"
+msgstr "Adresse til butikkbasesida"
+
+#: admin/settings/settings-init.php:964
+msgid "Default Customer Address:"
+msgstr "Standardadresse til kundane:"
+
+#: admin/settings/settings-init.php:966
+msgid "This option determines the customers default address (before they input their own)."
+msgstr "Her avgjer du standardadressa til kundane (før dei skriv inn si eiga adresse)."
+
+#: admin/settings/settings-init.php:970
+msgid "No address"
+msgstr "Inga adresse"
+
+#: admin/settings/settings-init.php:976
+msgid "Shipping Tax Class:"
+msgstr "Avgiftsklasse for frakt:"
+
+#: admin/settings/settings-init.php:977
+msgid "Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves."
+msgstr "Eventuelt kan du kontrollera kva avgiftsklasse frakta skal ha, eller la det stå tomt, slik at frakt-avgiftene blri rekna ut frå varene i handlekorga."
+
+#: admin/settings/settings-init.php:982
+msgid "Shipping tax class based on cart items"
+msgstr "Fraktavgifter er baserte på handlekorga"
+
+#: admin/settings/settings-init.php:987
+msgid "Rounding"
+msgstr "Avrunding"
+
+#: admin/settings/settings-init.php:988
+msgid "Round tax at subtotal level, instead of rounding per line"
+msgstr "Rund av avgiftene på subtotalnivå i staden for per varelinje"
+
+#: admin/settings/settings-init.php:995
+msgid "Additional Tax Classes"
+msgstr "Fleire avgiftsklasser"
+
+#: admin/settings/settings-init.php:996
+msgid "List additonal tax classes below (1 per line). This is in addition to the default <code>Standard Rate</code>. Tax classes can be assigned to products."
+msgstr "List opp fleire avgiftsklasser under (1 per linje). Dette kjem i tillegg til <code>standardsatsen</code>. Du kan bruka ulike avgiftsklasser på ulike varer."
+
+#: admin/settings/settings-init.php:1000
+msgid "Reduced Rate%sZero Rate"
+msgstr "Redusert sats%sFritt"
+
+#: admin/settings/settings-init.php:1004
+msgid "Display prices during cart/checkout:"
+msgstr "Vis prisar i handlekorga/kassa:"
+
+#: admin/settings/settings-init.php:1009
+msgid "Including tax"
+msgstr "Inkl. mva."
+
+#: admin/settings/settings-init.php:1010
+msgid "Excluding tax"
+msgstr "Ekskl. mva."
+
+#: admin/settings/settings-init.php:1022
+msgid "Email Sender Options"
+msgstr "Val for epostsending"
+
+#: admin/settings/settings-init.php:1022
+msgid "The following options affect the sender (email address and name) used in WooCommerce emails."
+msgstr "Her set du opp avsendaren (epostadresse og namn) for epostar frå WooCommerce."
+
+#: admin/settings/settings-init.php:1025
+msgid "\"From\" Name"
+msgstr "«Frå»-namn"
+
+#: admin/settings/settings-init.php:1034
+msgid "\"From\" Email Address"
+msgstr "«Frå»-epostadresse"
+
+#: admin/settings/settings-init.php:1047
+msgid "Email Template"
+msgstr "Epostmal"
+
+#: admin/settings/settings-init.php:1047
+msgid "This section lets you customise the WooCommerce emails. <a href=\"%s\" target=\"_blank\">Click here to preview your email template</a>. For more advanced control copy <code>woocommerce/templates/emails/</code> to <code>yourtheme/woocommerce/emails/</code>."
+msgstr "Her kan du setja opp epostane frå WooCommerce. <a href=\"%s\" target=\"_blank\">Klikk her for å sjå på epostmalen din</a>. For meir avanserte innstillingar kan du kopiera <code>woocommerce/templates/emails/</code> til <code>wordpress-bunad/woocommerce/emails/</code>."
+
+#: admin/settings/settings-init.php:1050
+msgid "Header Image"
+msgstr "Tittelbilete"
+
+#: admin/settings/settings-init.php:1051
+msgid "Enter a URL to an image you want to show in the email's header. Upload your image using the <a href=\"%s\">media uploader</a>."
+msgstr "Skriv inn adressa til eit bilete du vil visa på toppen av eposten. Last opp biletet med <a href=\"%s\">opplastaren</a>."
+
+#: admin/settings/settings-init.php:1059
+msgid "Email Footer Text"
+msgstr "Botntekst i eposten"
+
+#: admin/settings/settings-init.php:1060
+msgid "The text to appear in the footer of WooCommerce emails."
+msgstr "Teksten som skal stå i botnfeltet på WooCommerce-epostar."
+
+#: admin/settings/settings-init.php:1064
+msgid "Powered by WooCommerce"
+msgstr "Bruker WooCommerce"
+
+#: admin/settings/settings-init.php:1068
+msgid "Base Colour"
+msgstr "Basisfarge"
+
+#: admin/settings/settings-init.php:1069
+msgid "The base colour for WooCommerce email templates. Default <code>#557da1</code>."
+msgstr "Basisfarga for WooCommerce-epostmalar. Standarden er <code>#557da1</code>."
+
+#: admin/settings/settings-init.php:1077
+msgid "Background Colour"
+msgstr "Bakgrunnsfarge"
+
+#: admin/settings/settings-init.php:1078
+msgid "The background colour for WooCommerce email templates. Default <code>#f5f5f5</code>."
+msgstr "Bakgrunnsfarga for WooCommerce-epostmalar. Standarden er <code>#f5f5f5</code>."
+
+#: admin/settings/settings-init.php:1086
+msgid "Email Body Background Colour"
+msgstr "Bakgrunnsfarge for epostar"
+
+#: admin/settings/settings-init.php:1087
+msgid "The main body background colour. Default <code>#fdfdfd</code>."
+msgstr "Bakgrunnsfarga for hovuddelen. Standarden er <code>#fdfdfd</code>."
+
+#: admin/settings/settings-init.php:1095
+msgid "Email Body Text Colour"
+msgstr "Brødtekstfarge for epostar"
+
+#: admin/settings/settings-init.php:1096
+msgid "The main body text colour. Default <code>#505050</code>."
+msgstr "Brødtekstfarga for epostane. Standarden er <code>#505050</code>."
+
+#: admin/settings/settings-payment-gateways.php:27
+#: admin/settings/settings-shipping-methods.php:29
+#: admin/woocommerce-admin-init.php:767
+#: admin/woocommerce-admin-taxonomies.php:27
+#: admin/woocommerce-admin-taxonomies.php:121
+msgid "Default"
+msgstr "Standardval"
+
+#: admin/settings/settings-payment-gateways.php:28
+msgid "Gateway"
+msgstr "Portnar"
+
+#: admin/settings/settings-payment-gateways.php:45
+msgid "Gateway ID"
+msgstr "Portnar-ID"
+
+#: admin/settings/settings-shipping-methods.php:23
+msgid "Shipping Methods"
+msgstr "Fraktmåtar"
+
+#: admin/settings/settings-shipping-methods.php:25
+msgid "Drag and drop methods to control their display order."
+msgstr "Dra og slepp metodane for å avgjera kva rekkjefylgje dei syner i"
+
+#: admin/settings/settings-shipping-methods.php:30
+msgid "Shipping Method"
+msgstr "Fraktmåte"
+
+#: admin/settings/settings-shipping-methods.php:46
+msgid "Method ID"
+msgstr "Metode-ID"
+
+#: admin/settings/settings-tax-rates.php:29
+msgid "Tax Rates for the \"%s\" Class"
+msgstr "Avgiftssatsar for «%s»-klassa"
+
+#: admin/settings/settings-tax-rates.php:30
+msgid "Define tax rates for countries and states below. <a href=\"%s\">See here</a> for available alpha-2 country codes."
+msgstr "Set opp avgiftssatsar for land og delstatar under. <a href=\"%s\">Sjå her</a> for tilgjengelege alfa-2-landkodar."
+
+#: admin/settings/settings-tax-rates.php:36
+msgid "Country&nbsp;Code"
+msgstr "Landkode"
+
+#: admin/settings/settings-tax-rates.php:36
+msgid "A 2 digit country code, e.g. US. Leave blank to apply to all."
+msgstr "Ein landkode med to bokstavar, td. NO. La stå tomt for å bruka alle."
+
+#: admin/settings/settings-tax-rates.php:38
+msgid "State&nbsp;Code"
+msgstr "Delstatkode"
+
+#: admin/settings/settings-tax-rates.php:38
+msgid "A 2 digit state code, e.g. AL. Leave blank to apply to all."
+msgstr "Ein delstatskode med to bokstavar, td. AL. La stå tomt for å bruka alle."
+
+#: admin/settings/settings-tax-rates.php:40
+#: admin/settings/settings-tax-rates.php:217
+msgid "ZIP/Postcode"
+msgstr "Postnummer"
+
+#: admin/settings/settings-tax-rates.php:40
+msgid "Postcode for this rule. Semi-colon (;) separate multiple values. Leave blank to apply to all areas. Wildcards (*) can be used. Ranges for numeric postcodes (e.g. 12345-12350) will be expanded into individual postcodes."
+msgstr "Postnummeret for denne regelen. Semikolon (;) deler mellom fleire verdiar. La stå tomt for å bruka i alle område. Du kan bruka jokerteikn (*). Område for numeriske postnummer (td. 8000-9990) blir brukt for alle postnumra i området."
+
+#: admin/settings/settings-tax-rates.php:42
+msgid "Cities for this rule. Semi-colon (;) separate multiple values. Leave blank to apply to all cities."
+msgstr "Byar for denne regelen. Semikolon (;) deler mellom fleire verdiar. La stå tomt for å bruka i alle byar."
+
+#: admin/settings/settings-tax-rates.php:44
+msgid "Rate&nbsp;%"
+msgstr "Sats&nbsp;%"
+
+#: admin/settings/settings-tax-rates.php:44
+msgid "Enter a tax rate (percentage) to 4 decimal places."
+msgstr "Skriv inn ein avgiftssats (i prosent) med opp til 4 desimalar."
+
+#: admin/settings/settings-tax-rates.php:46
+msgid "Tax&nbsp;Name"
+msgstr "Namn&nbsp;på&nbsp;avgifta"
+
+#: admin/settings/settings-tax-rates.php:46
+msgid "Enter a name for this tax rate."
+msgstr "Skriv eit namn på denne avgiftssatsen."
+
+#: admin/settings/settings-tax-rates.php:48
+#: admin/settings/settings-tax-rates.php:217
+msgid "Priority"
+msgstr "Prioritet"
+
+#: admin/settings/settings-tax-rates.php:48
+msgid "Choose a priority for this tax rate. Only 1 matching rate per priority will be used. To define multiple tax rates for a single area you need to specify a different priority per rate."
+msgstr "Vel ein prioritet for denne avgiftssatsen. Det vil berre bli brukt 1 passande avgift per prioritet. For å setja opp fleire avgiftssatsar for eit enkelt område, må du laga ulike prioritetar per sats."
+
+#: admin/settings/settings-tax-rates.php:50
+#: admin/settings/settings-tax-rates.php:217
+msgid "Compound"
+msgstr "Toppsats"
+
+#: admin/settings/settings-tax-rates.php:50
+msgid "Choose whether or not this is a compound rate. Compound tax rates are applied on top of other tax rates."
+msgstr "Vel om dette er ein toppsats. Toppsatsar kjem på toppen av andre avgiftssatsar."
+
+#: admin/settings/settings-tax-rates.php:52
+msgid "Choose whether or not this tax rate also gets applied to shipping."
+msgstr "Vel om denne avgiftssatsen skal gjelda frakt eller ikkje."
+
+#: admin/settings/settings-tax-rates.php:59
+msgid "Insert row"
+msgstr "Set inn rad"
+
+#: admin/settings/settings-tax-rates.php:60
+msgid "Remove selected row(s)"
+msgstr "Fjern rada/radene"
+
+#: admin/settings/settings-tax-rates.php:62
+msgid "Export CSV"
+msgstr "Eksporter CSV"
+
+#: admin/settings/settings-tax-rates.php:63
+msgid "Import CSV"
+msgstr "Importer CSV"
+
+#: admin/settings/settings-tax-rates.php:163
+msgid "No row(s) selected"
+msgstr "Ingen valde rader"
+
+#: admin/settings/settings-tax-rates.php:217
+msgid "Country Code"
+msgstr "Landskode"
+
+#: admin/settings/settings-tax-rates.php:217
+msgid "State Code"
+msgstr "Delstatkode"
+
+#: admin/settings/settings-tax-rates.php:217
+msgid "Rate %"
+msgstr "Sats %"
+
+#: admin/settings/settings-tax-rates.php:217
+msgid "Tax Name"
+msgstr "Namn på avgifta"
+
+#: admin/woocommerce-admin-attributes.php:77
+msgid "Please, provide an attribute name, slug and type."
+msgstr "Skriv inn namn, korttekst og type for eigenskapen."
+
+#: admin/woocommerce-admin-attributes.php:79
+msgid "Slug “%s” is too long (28 characters max). Shorten it, please."
+msgstr "Kortteksten «%s er for lang (maks 28 teikn). Kort han ned, er du snill."
+
+#: admin/woocommerce-admin-attributes.php:81
+msgid "Slug “%s” is not allowed because it is a reserved term. Change it, please."
+msgstr "Kortteksten «%s» er ikkje lov fordi han er oppteken. Endra han, er du snill."
+
+#: admin/woocommerce-admin-attributes.php:85
+#: admin/woocommerce-admin-attributes.php:90
+msgid "Slug “%s” is already in use. Change it, please."
+msgstr "Kortteksten «%s» er i bruk. Endra han, er du snill."
+
+#: admin/woocommerce-admin-attributes.php:226
+msgid "Edit Attribute"
+msgstr "Rediger eigenskap"
+
+#: admin/woocommerce-admin-attributes.php:236
+#: admin/woocommerce-admin-attributes.php:375
+msgid "Name for the attribute (shown on the front-end)."
+msgstr "Namn på eigenskapen (kjem på framsida av butikken)."
+
+#: admin/woocommerce-admin-attributes.php:241
+#: admin/woocommerce-admin-attributes.php:307
+#: admin/woocommerce-admin-attributes.php:379
+msgid "Slug"
+msgstr "Korttekst"
+
+#: admin/woocommerce-admin-attributes.php:245
+#: admin/woocommerce-admin-attributes.php:381
+msgid "Unique slug/reference for the attribute; must be shorter than 28 characters."
+msgstr "Unikt kortnamn/referanse for eigenskapen. Må vera kortare enn 28 teikn."
+
+#: admin/woocommerce-admin-attributes.php:254
+#: admin/woocommerce-admin-attributes.php:387
+msgid "Select"
+msgstr "Vel"
+
+#: admin/woocommerce-admin-attributes.php:255
+#: admin/woocommerce-admin-attributes.php:388
+msgid "Text"
+msgstr "Tekst"
+
+#: admin/woocommerce-admin-attributes.php:258
+#: admin/woocommerce-admin-attributes.php:391
+msgid "Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>."
+msgstr "Avgjer korleis du vel vareeigenskapar. <strong>Tekst</strong> gjev høve til å skriva inn direkte på varesida, medan du kan laga utval med <strong>vel</strong>-eigenskapar. Viss du planlegg å bruka ein eigenskap for variantar, bør du bruka <strong>vel</strong>."
+
+#: admin/woocommerce-admin-attributes.php:263
+#: admin/woocommerce-admin-attributes.php:395
+msgid "Default sort order"
+msgstr "Standardsortering"
+
+#: admin/woocommerce-admin-attributes.php:267
+#: admin/woocommerce-admin-attributes.php:335
+#: admin/woocommerce-admin-attributes.php:397
+msgid "Custom ordering"
+msgstr "Eiga sortering"
+
+#: admin/woocommerce-admin-attributes.php:269
+#: admin/woocommerce-admin-attributes.php:332
+#: admin/woocommerce-admin-attributes.php:399
+msgid "Term ID"
+msgstr "Vilkår-ID"
+
+#: admin/woocommerce-admin-attributes.php:271
+#: admin/woocommerce-admin-attributes.php:401
+msgid "Determines the sort order on the frontend for this attribute. If using custom ordering, you can drag and drop the terms in this attribute"
+msgstr "Avgjer kva sortering som blir brukt på framsida av nettbutikken for denne eigenskapen. Viss du bruker eiga  sortering, kan du dra og sleppa termane i denne eigenskapen"
+
+#: admin/woocommerce-admin-attributes.php:276
+msgid "Update"
+msgstr "Oppdater"
+
+#: admin/woocommerce-admin-attributes.php:309
+msgid "Order by"
+msgstr "Sorter etter"
+
+#: admin/woocommerce-admin-attributes.php:310
+msgid "Terms"
+msgstr "Vilkår"
+
+#: admin/woocommerce-admin-attributes.php:355
+msgid "Configure&nbsp;terms"
+msgstr "Lag&nbsp;vilkår"
+
+#: admin/woocommerce-admin-attributes.php:359
+msgid "No attributes currently exist."
+msgstr "Det finst ingen eigenskapar enno."
+
+#: admin/woocommerce-admin-attributes.php:369
+msgid "Add New Attribute"
+msgstr "Legg til ny eigenskap"
+
+#: admin/woocommerce-admin-attributes.php:370
+msgid "Attributes let you define extra product data, such as size or colour. You can use these attributes in the shop sidebar using the \"layered nav\" widgets. Please note: you cannot rename an attribute later on."
+msgstr "Med eigenskapar kan du laga fleire opplysingar for ei vare, td. farge eller storleik. Du kan bruka eigenskapane i sidestolpen med småprogramma for lagnavigering. Merk at du ikkje kan endra namn på eigenskapane når du har laga dei."
+
+#: admin/woocommerce-admin-attributes.php:404
+msgid "Add Attribute"
+msgstr "Legg til eigenskap"
+
+#: admin/woocommerce-admin-attributes.php:415
+msgid "Are you sure you want to delete this attribute?"
+msgstr "Er du sikker på at du vil sletta denne eigenskapen?"
+
+#: admin/woocommerce-admin-content.php:26
+#: admin/woocommerce-admin-reports.php:30
+#: admin/woocommerce-admin-reports.php:75
+#: admin/woocommerce-admin-reports.php:91
+#: admin/woocommerce-admin-reports.php:102
+msgid "Overview"
+msgstr "Oversyn"
+
+#: admin/woocommerce-admin-content.php:29
+msgid "Thank you for using WooCommerce :) Should you need help using or extending WooCommerce please <a href=\"%s\">read the documentation</a>. For further assistance you can use the <a href=\"%s\">community forum</a> or if you have access, <a href=\"%s\">our support desk</a>."
+msgstr "Takk for at du bruker WooCommerce :) Viss du treng hjelp når du bruker eller utvidar WooCommerce, kan du <a href=\"%s\">lesa dokumentasjonen</a>. Treng du meir hjelp, kan du bruka <a href=\"%s\">forumet</a>, eller, viss du har tilgang, kontakta <a href=\"%s\">hjelpemannskapet</a>."
+
+#: admin/woocommerce-admin-content.php:31
+msgid "If you are having problems, or to assist us with support, please check the status page to identify any problems with your configuration:"
+msgstr "Sjå over statussida og leit etter eventuelle feil i oppsettet der. Det kan hjelpa oss å hjelpa deg i fall du har problem:"
+
+#: admin/woocommerce-admin-content.php:33
+#: admin/woocommerce-admin-init.php:87
+#: admin/woocommerce-admin-status.php:26
+msgid "System Status"
+msgstr "Systemstatus"
+
+#: admin/woocommerce-admin-content.php:35
+msgid "If you come across a bug, or wish to contribute to the project you can also <a href=\"%s\">get involved on GitHub</a>."
+msgstr "Viss du kjem over feil i programmet, kan du bidra til prosjektet ved å <a href=\"%s\">bli med på GitHub</a>."
+
+#: admin/woocommerce-admin-content.php:43
+msgid "Here you can set up your store and customise it to fit your needs. The sections available from the settings page include:"
+msgstr "Her kan du setja opp butikken, og tilpassa han slik du vil. På oppsettsida finn du desse avdelingane:"
+
+#: admin/woocommerce-admin-content.php:44
+msgid "General settings such as your shop base, currency, and script/styling options which affect features used in your store."
+msgstr "Generelle innstillingar slik som basesider, valuta, og skript/stilval som avgjer kva funskjonar butikken din får."
+
+#: admin/woocommerce-admin-content.php:45
+#: admin/woocommerce-admin-settings.php:182
+msgid "Pages"
+msgstr "Sider"
+
+#: admin/woocommerce-admin-content.php:45
+msgid "This is where important store page are defined. You can also set up other pages (such as a Terms page) here."
+msgstr "Her set du opp kva sider butikken din skal vera på. Du kan òg laga til andre sider (slik som ei side for kjøpsvilkår) her."
+
+#: admin/woocommerce-admin-content.php:46
+msgid "Options for how things like price, images and weights appear in your product catalog."
+msgstr "Val for korleis prisar, bilete og vekt viser i butikken din."
+
+#: admin/woocommerce-admin-content.php:47
+msgid "Options concerning stock and stock notices."
+msgstr "Val for lagermengd og -varslingar."
+
+#: admin/woocommerce-admin-content.php:48
+msgid "Options concerning tax, including international and local tax rates."
+msgstr "Val for skatt og moms, mellom anna internasjonale og lokale satsar."
+
+#: admin/woocommerce-admin-content.php:49
+msgid "This is where shipping options are defined, and shipping methods are set up."
+msgstr "Her set du opp fraktval og -metodar."
+
+#: admin/woocommerce-admin-content.php:50
+msgid "Payment Methods"
+msgstr "Betalingsmåtar"
+
+#: admin/woocommerce-admin-content.php:50
+msgid "This is where payment gateway options are defined, and individual payment gateways are set up."
+msgstr "Her set du opp dei ulike betalingsløysingane, og vel kven av dei du vil bruka."
+
+#: admin/woocommerce-admin-content.php:51
+#: admin/woocommerce-admin-settings.php:187
+msgid "Emails"
+msgstr "Epostar"
+
+#: admin/woocommerce-admin-content.php:51
+msgid "Here you can customise the way WooCommerce emails appear."
+msgstr "Her kan du velja korleis WooCommerce-epostane skal sjå ut."
+
+#: admin/woocommerce-admin-content.php:52
+#: admin/woocommerce-admin-settings.php:188
+msgid "Integration"
+msgstr "Innbygging"
+
+#: admin/woocommerce-admin-content.php:52
+msgid "The integration section contains options for third party services which integrate with WooCommerce."
+msgstr "Tredjepartsinnstillingane inneheld val for ulike tredjepartsløysingar som samarbeider med WooCommerce."
+
+#: admin/woocommerce-admin-content.php:57
+#: admin/woocommerce-admin-init.php:64
+msgid "Reports"
+msgstr "Rapportar"
+
+#: admin/woocommerce-admin-content.php:59
+msgid "The reports section can be accessed from the left-hand navigation menu. Here you can generate reports for sales and customers."
+msgstr "Du kjem til rapportane med menyen til venstre. Her kan du laga sals- og kunderapportar."
+
+#: admin/woocommerce-admin-content.php:60
+#: admin/woocommerce-admin-reports.php:27
+#: admin/woocommerce-admin-reports.php:986
+#: admin/woocommerce-admin-reports.php:1082
+#: admin/woocommerce-admin-reports.php:1199
+msgid "Sales"
+msgstr "Sal"
+
+#: admin/woocommerce-admin-content.php:60
+msgid "Reports for sales based on date, top sellers and top earners."
+msgstr "Salsrapportar etter dato, bestseljarar og best inntening."
+
+#: admin/woocommerce-admin-content.php:61
+msgid "Coupon usage reports."
+msgstr "Rapportar om kupongbruk."
+
+#: admin/woocommerce-admin-content.php:62
+#: admin/woocommerce-admin-reports.php:88
+msgid "Customers"
+msgstr "Kundar"
+
+#: admin/woocommerce-admin-content.php:62
+msgid "Customer reports, such as signups per day."
+msgstr "Kunderapportar, til dømes innmeldingar pr. dag."
+
+#: admin/woocommerce-admin-content.php:63
+msgid "Stock reports for low stock and out of stock items."
+msgstr "Lagerrapportar for lågt eller tomt varelager."
+
+#: admin/woocommerce-admin-content.php:68
+#: admin/woocommerce-admin-dashboard.php:142
+msgid "Orders"
+msgstr "Tingingar"
+
+#: admin/woocommerce-admin-content.php:70
+msgid "The orders section can be accessed from the left-hand navigation menu. Here you can view and manage customer orders."
+msgstr "Du kjem til tingingane med menyen til venstre. Her kan du sjå på og handtera tingingar."
+
+#: admin/woocommerce-admin-content.php:71
+msgid "Orders can also be added from this section if you want to set them up for a customer manually."
+msgstr "Du kan òg leggja til tingingane i denne avdelinga viss du vil setja dei opp for ein kunde manuelt."
+
+#: admin/woocommerce-admin-content.php:78
+msgid "Coupons can be managed from this section. Once added, customers will be able to enter coupon codes on the cart/checkout page. If a customer uses a coupon code they will be viewable when viewing orders."
+msgstr "Her kan du handtera rabattkupongar. Når du har laga kupongar, kan kundane dine skriva inn rabattkodar i kassa eller ved betaling. Viss kundane bruker ein kupongkode, vil dei kunne sjå dei når dei ser gjennom tinginga si."
+
+#: admin/woocommerce-admin-content.php:82
+msgid "For more information:"
+msgstr "For fleire opplysningar:"
+
+#: admin/woocommerce-admin-content.php:83
+#: admin/woocommerce-admin-init.php:62
+msgid "WooCommerce"
+msgstr "WooCommerce"
+
+#: admin/woocommerce-admin-content.php:84
+msgid "Project on WordPress.org"
+msgstr "Prosjektet på wordpress.org"
+
+#: admin/woocommerce-admin-content.php:85
+msgid "Project on Github"
+msgstr "Prosjektet på Github"
+
+#: admin/woocommerce-admin-content.php:86
+msgid "WooCommerce Docs"
+msgstr "WooCommerce-dokumentasjon"
+
+#: admin/woocommerce-admin-content.php:87
+msgid "Official Extensions"
+msgstr "Offisielle utvidingar"
+
+#: admin/woocommerce-admin-content.php:88
+msgid "Official Themes"
+msgstr "Offisielle bunader"
+
+#: admin/woocommerce-admin-dashboard.php:40
+msgid "Monthly Sales"
+msgstr "Sal pr. månad"
+
+#: admin/woocommerce-admin-dashboard.php:43
+msgid "WooCommerce Right Now"
+msgstr "WooCommerce nett no"
+
+#: admin/woocommerce-admin-dashboard.php:44
+msgid "WooCommerce Recent Orders"
+msgstr "Siste tingingane i WooCommerce"
+
+#: admin/woocommerce-admin-dashboard.php:45
+msgid "WooCommerce Recent Reviews"
+msgstr "Nyaste vurderingane i WooCommerce"
+
+#: admin/woocommerce-admin-dashboard.php:78
+msgid "Shop Content"
+msgstr "Butikkinnhald"
+
+#: admin/woocommerce-admin-dashboard.php:84
+#: admin/woocommerce-admin-functions.php:194
+#: admin/woocommerce-admin-init.php:771
+#: admin/woocommerce-admin-reports.php:985
+#: admin/woocommerce-admin-reports.php:1081
+msgid "Product"
+msgid_plural "Products"
+msgstr[0] "Vare"
+msgstr[1] "Varer"
+
+#: admin/woocommerce-admin-dashboard.php:98
+msgid "Product Category"
+msgid_plural "Product Categories"
+msgstr[0] "Varekategori"
+msgstr[1] "Varekategoriar"
+
+#: admin/woocommerce-admin-dashboard.php:112
+msgid "Product Tag"
+msgid_plural "Product Tags"
+msgstr[0] "Varemerkelapp"
+msgstr[1] "Varemerkelappar"
+
+#: admin/woocommerce-admin-dashboard.php:126
+msgid "Attribute"
+msgid_plural "Attributes"
+msgstr[0] "Vareeigenskap"
+msgstr[1] "Vareeigenskapar"
+
+#: admin/woocommerce-admin-dashboard.php:148
+msgid "Pending"
+msgstr "Ventar"
+
+#: admin/woocommerce-admin-dashboard.php:162
+msgid "On-Hold"
+msgstr "På vent"
+
+#: admin/woocommerce-admin-dashboard.php:190
+msgid "Completed"
+msgstr "Fullført"
+
+#: admin/woocommerce-admin-dashboard.php:207
+msgid "You are using <strong>WooCommerce %s</strong>."
+msgstr "Du brukar <strong>WooCommerce %s</strong>."
+
+#: admin/woocommerce-admin-dashboard.php:238
+msgid "l jS \\of F Y h:i:s A"
+msgstr "h:i:s D j. F Y"
+
+#: admin/woocommerce-admin-dashboard.php:239
+msgid "item"
+msgid_plural "items"
+msgstr[0] "element"
+msgstr[1] "element"
+
+#: admin/woocommerce-admin-dashboard.php:239
+msgid "Total:"
+msgstr "Sum:"
+
+#: admin/woocommerce-admin-dashboard.php:245
+msgid "There are no product orders yet."
+msgstr "Ingen tingingar enno."
+
+#: admin/woocommerce-admin-dashboard.php:279
+msgid "out of 5"
+msgstr "av 5"
+
+#: admin/woocommerce-admin-dashboard.php:287
+msgid "There are no product reviews yet."
+msgstr "Ingen vurderingar enno."
+
+#: admin/woocommerce-admin-dashboard.php:428
+msgid "Sold"
+msgstr "Selt"
+
+#: admin/woocommerce-admin-dashboard.php:429
+msgid "Earned"
+msgstr "Tent"
+
+#: admin/woocommerce-admin-functions.php:184
+#: admin/woocommerce-admin-install.php:222
+msgid "Order Received"
+msgstr "Tinginga motteken"
+
+#: admin/woocommerce-admin-functions.php:186
+msgid "Thank you, we are now processing your order. Your order's details are below."
+msgstr "Mange takk! Me handterer tinginga di no. Under står det kva du tinga."
+
+#: admin/woocommerce-admin-functions.php:188
+#, fuzzy
+msgid "Order:"
+msgstr "Tinging:"
+
+#: admin/woocommerce-admin-functions.php:195
+msgid "Quantity"
+msgstr "Mengd"
+
+#: admin/woocommerce-admin-functions.php:208
+msgid "Order total:"
+msgstr "I alt:"
+
+#: admin/woocommerce-admin-functions.php:214
+msgid "Customer details"
+msgstr "Kundedetaljar"
+
+#: admin/woocommerce-admin-functions.php:220
+msgid "Billing address"
+msgstr "Fakturaadresse"
+
+#: admin/woocommerce-admin-functions.php:227
+msgid "Shipping address"
+msgstr "Fraktadresse"
+
+#: admin/woocommerce-admin-functions.php:459
+msgid "Could not compile woocommerce.less:"
+msgstr "Greidde ikkje byggja woocommerce.less:"
+
+#: admin/woocommerce-admin-functions.php:480
+#: admin/woocommerce-admin-functions.php:481
+msgid "Mark processing"
+msgstr "Merk som «handterer»"
+
+#: admin/woocommerce-admin-functions.php:483
+#: admin/woocommerce-admin-functions.php:484
+msgid "Mark completed"
+msgstr "Merk som fullført"
+
+#: admin/woocommerce-admin-functions.php:521
+msgid "Order status changed by bulk edit:"
+msgstr "Ordrestatus endra ved masseendring:"
+
+#: admin/woocommerce-admin-functions.php:544
+msgid "Order status changed."
+msgid_plural "%s order statuses changed."
+msgstr[0] "Ordrestatusen er endra."
+msgstr[1] "%s ordrestatusar er endra."
+
+#: admin/woocommerce-admin-init.php:86
+msgid "WooCommerce Settings"
+msgstr "WooCommerce-innstillingar"
+
+#: admin/woocommerce-admin-init.php:87
+msgid "WooCommerce Status"
+msgstr "WooCommerce-status"
+
+#: admin/woocommerce-admin-init.php:140
+#: admin/woocommerce-admin-init.php:142
+msgctxt "Admin menu name"
+msgid "Orders"
+msgstr "Tingingar"
+
+#: admin/woocommerce-admin-init.php:446
+msgid "Are you sure you want to remove the selected items? If you have previously reduced this item's stock, or this order was submitted by a customer, you will need to manually restore the item's stock."
+msgstr "Er du sikker på at du vil fjerna desse varene? Viss du har redusert lagermengda for denne vara tidlegare, eller viss ein kunde har sendt inn ei tinging, må du gjenoppretta lagermengda manuelt."
+
+#: admin/woocommerce-admin-init.php:447
+msgid "Please select some items."
+msgstr "Vel nokre element."
+
+#: admin/woocommerce-admin-init.php:448
+msgid "Remove this item meta?"
+msgstr "Fjerne metaopplysingane til dette elementet?"
+
+#: admin/woocommerce-admin-init.php:449
+msgid "Remove this attribute?"
+msgstr "Fjern denne eigenskapen?"
+
+#: admin/woocommerce-admin-init.php:457
+msgid "Enter a name for the new attribute term:"
+msgstr "Skriv inn eit namn på den nye eigenskapstermen:"
+
+#: admin/woocommerce-admin-init.php:458
+msgid "Calculate totals based on order items, discounts, and shipping?"
+msgstr "Rekna ut summar ut frå varer, rabattar, og frakt?"
+
+#: admin/woocommerce-admin-init.php:459
+msgid "Calculate line taxes? This will calculate taxes based on the customers country. If no billing/shipping is set it will use the store base country."
+msgstr "Rekna ut linjeavgift? Dette vil rekna ut avgifter ut frå landet kunden bur i. Viss det ikkje er skrive inn frakt/fakturaadresse, vil avgiftene bli rekna ut frå opphavslandet."
+
+#: admin/woocommerce-admin-init.php:460
+msgid "Copy billing information to shipping information? This will remove any currently entered shipping information."
+msgstr "Kopier fakturaopplysingar til fraktopplysingar? Å gjera dette vil fjerna alle fraktopplysingar du har skrive inn."
+
+#: admin/woocommerce-admin-init.php:461
+msgid "Load the customer's billing information? This will remove any currently entered billing information."
+msgstr "Last fakturaadressa til kunden? Å gjera dette vil fjerna all fakturainformasjon kunden har skrive inn."
+
+#: admin/woocommerce-admin-init.php:462
+msgid "Load the customer's shipping information? This will remove any currently entered shipping information."
+msgstr "Last fraktadressa til kunden? Å gjera dette vil fjerna alle fraktadresser kunden har skrive inn."
+
+#: admin/woocommerce-admin-init.php:466
+msgid "No customer selected"
+msgstr "Ingen kunde er vald"
+
+#: admin/woocommerce-admin-init.php:675
+msgid "Product updated. <a href=\"%s\">View Product</a>"
+msgstr "Oppdaterte vara. <a href=\"%s\">Sjå på vara</a>"
+
+#: admin/woocommerce-admin-init.php:676
+#: admin/woocommerce-admin-init.php:691
+#: admin/woocommerce-admin-init.php:706
+msgid "Custom field updated."
+msgstr "Det eigendefinerte feltet vart oppdatert."
+
+#: admin/woocommerce-admin-init.php:677
+#: admin/woocommerce-admin-init.php:692
+#: admin/woocommerce-admin-init.php:707
+msgid "Custom field deleted."
+msgstr "Sletta eigendefinert felt."
+
+#: admin/woocommerce-admin-init.php:678
+msgid "Product updated."
+msgstr "Vara er oppdatert."
+
+#: admin/woocommerce-admin-init.php:679
+msgid "Product restored to revision from %s"
+msgstr "Vara gjenoppretta til utgåva frå %s"
+
+#: admin/woocommerce-admin-init.php:680
+msgid "Product published. <a href=\"%s\">View Product</a>"
+msgstr "Vara vart publisert. <a href=\"%s\">Sjå på vara</a>"
+
+#: admin/woocommerce-admin-init.php:681
+msgid "Product saved."
+msgstr "Lagra vara."
+
+#: admin/woocommerce-admin-init.php:682
+msgid "Product submitted. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
+msgstr "Vara er lagt ut. <a target=\"_blank\" href=\"%s\">Vis vara</a>"
+
+#: admin/woocommerce-admin-init.php:683
+msgid "Product scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" href=\"%2$s\">Preview Product</a>"
+msgstr "Vara er planlagt lagt ut: <strong>%1$s</strong>. <a target=\"_blank\" href=\"%2$s\">Vis vara</a>"
+
+#: admin/woocommerce-admin-init.php:684
+#: admin/woocommerce-admin-init.php:699
+#: admin/woocommerce-admin-init.php:714
+msgid "M j, Y @ G:i"
+msgstr "j. F Y @ H:i"
+
+#: admin/woocommerce-admin-init.php:685
+msgid "Product draft updated. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
+msgstr "Produkt-kladden er oppdatert. <a target=\"_blank\" href=\"%s\">Vis vara</a>"
+
+#: admin/woocommerce-admin-init.php:690
+#: admin/woocommerce-admin-init.php:693
+#: admin/woocommerce-admin-init.php:695
+msgid "Order updated."
+msgstr "Tinginga er oppdatert."
+
+#: admin/woocommerce-admin-init.php:694
+msgid "Order restored to revision from %s"
+msgstr "Tinginga er gjenoppretta til utgåva frå %s"
+
+#: admin/woocommerce-admin-init.php:696
+msgid "Order saved."
+msgstr "Tinginga er lagra."
+
+#: admin/woocommerce-admin-init.php:697
+msgid "Order submitted."
+msgstr "Tinginga er send inn."
+
+#: admin/woocommerce-admin-init.php:698
+msgid "Order scheduled for: <strong>%1$s</strong>."
+msgstr "Tinginga er planlagt til: <strong>%1$s</strong>."
+
+#: admin/woocommerce-admin-init.php:700
+msgid "Order draft updated."
+msgstr "Oppdaterte tingingsutkastet."
+
+#: admin/woocommerce-admin-init.php:705
+#: admin/woocommerce-admin-init.php:708
+#: admin/woocommerce-admin-init.php:710
+msgid "Coupon updated."
+msgstr "Kupongen er oppdatert."
+
+#: admin/woocommerce-admin-init.php:709
+msgid "Coupon restored to revision from %s"
+msgstr "Kupongen er gjenoppretta til utgåva frå %s"
+
+#: admin/woocommerce-admin-init.php:711
+msgid "Coupon saved."
+msgstr "Kupongen er lagra."
+
+#: admin/woocommerce-admin-init.php:712
+msgid "Coupon submitted."
+msgstr "Kupongen er send inn."
+
+#: admin/woocommerce-admin-init.php:713
+msgid "Coupon scheduled for: <strong>%1$s</strong>."
+msgstr "Kupongen er planlagt til: <strong>%1$s</strong>."
+
+#: admin/woocommerce-admin-init.php:715
+msgid "Coupon draft updated."
+msgstr "Kupongutkastet er oppdatert."
+
+#: admin/woocommerce-admin-init.php:732
+msgid "Order notes"
+msgstr "Merknader"
+
+#: admin/woocommerce-admin-init.php:747
+msgid "These settings control the permalinks used for products. These settings only apply when <strong>not using \"default\" permalinks above</strong>."
+msgstr "Her kontrollerer du fastlenkjene for varer. Desse innstillingane er berre i bruk når du <strong>ikkje bruker«standard»-fastlenkjene over</strong>."
+
+#: admin/woocommerce-admin-init.php:754
+msgctxt "default-slug"
+msgid "shop"
+msgstr "butikk"
+
+#: admin/woocommerce-admin-init.php:755
+msgctxt "default-slug"
+msgid "product"
+msgstr "vare"
+
+#: admin/woocommerce-admin-init.php:776
+msgid "Shop base"
+msgstr "Butikkbaseside"
+
+#: admin/woocommerce-admin-init.php:780
+msgid "Shop base with category"
+msgstr "Butikkbase med kategori"
+
+#: admin/woocommerce-admin-init.php:786
+msgid "Custom Base"
+msgstr "Eigen base"
+
+#: admin/woocommerce-admin-init.php:788
+msgid "Enter a custom base to use. A base <strong>must</strong> be set or WordPress will use default instead."
+msgstr "Skriv inn ein eigen base å bruka. Du <strong>må</strong> bruka ein base, elles kjem WordPress til å bruke standardbasen."
+
+#: admin/woocommerce-admin-init.php:816
+msgid "Product permalink base"
+msgstr "Base for vare-fastlenkjer"
+
+#: admin/woocommerce-admin-init.php:821
+msgid "Product category base"
+msgstr "Base for varekategoriar"
+
+#: admin/woocommerce-admin-init.php:828
+msgid "Product tag base"
+msgstr "Base for varemerkelappar"
+
+#: admin/woocommerce-admin-init.php:835
+msgid "Product attribute base"
+msgstr "Base for vareeigenskapar"
+
+#: admin/woocommerce-admin-install.php:192
+msgctxt "page_slug"
+msgid "shop"
+msgstr "butikk"
+
+#: admin/woocommerce-admin-install.php:192
+msgid "Shop"
+msgstr "Butikk"
+
+#: admin/woocommerce-admin-install.php:195
+msgctxt "page_slug"
+msgid "cart"
+msgstr "handlekorg"
+
+#: admin/woocommerce-admin-install.php:195
+#: admin/woocommerce-admin-status.php:277
+msgid "Cart"
+msgstr "Handlekorg"
+
+#: admin/woocommerce-admin-install.php:198
+msgctxt "page_slug"
+msgid "checkout"
+msgstr "kasse"
+
+#: admin/woocommerce-admin-install.php:201
+msgctxt "page_slug"
+msgid "my-account"
+msgstr "brukarkonto"
+
+#: admin/woocommerce-admin-install.php:201
+#: admin/woocommerce-admin-status.php:293
+msgid "My Account"
+msgstr "Brukarkonto"
+
+#: admin/woocommerce-admin-install.php:207
+msgctxt "page_slug"
+msgid "edit-address"
+msgstr "endra-adresse"
+
+#: admin/woocommerce-admin-install.php:207
+msgid "Edit My Address"
+msgstr "Endra adressa mi"
+
+#: admin/woocommerce-admin-install.php:210
+msgctxt "page_slug"
+msgid "view-order"
+msgstr "tinginga"
+
+#: admin/woocommerce-admin-install.php:210
+#: admin/woocommerce-admin-status.php:301
+msgid "View Order"
+msgstr "Sjå på tinginga"
+
+#: admin/woocommerce-admin-install.php:213
+msgctxt "page_slug"
+msgid "change-password"
+msgstr "byt-passord"
+
+#: admin/woocommerce-admin-install.php:213
+#: admin/woocommerce-admin-status.php:305
+msgid "Change Password"
+msgstr "Byt passord"
+
+#: admin/woocommerce-admin-install.php:216
+msgctxt "page_slug"
+msgid "logout"
+msgstr "logg-ut"
+
+#: admin/woocommerce-admin-install.php:216
+msgid "Logout"
+msgstr "Logg ut"
+
+#: admin/woocommerce-admin-install.php:219
+msgctxt "page_slug"
+msgid "pay"
+msgstr "betal"
+
+#: admin/woocommerce-admin-install.php:219
+msgid "Checkout &rarr; Pay"
+msgstr "Kasse &rarr; betaling"
+
+#: admin/woocommerce-admin-install.php:222
+msgctxt "page_slug"
+msgid "order-received"
+msgstr "tinginga-motteken"
+
+#: admin/woocommerce-admin-reports.php:36
+msgid "Sales by day"
+msgstr "Sal pr. dag"
+
+#: admin/woocommerce-admin-reports.php:41
+msgid "Sales by month"
+msgstr "Sal pr. månad"
+
+#: admin/woocommerce-admin-reports.php:46
+msgid "Taxes by month"
+msgstr "Avgifter pr. månad"
+
+#: admin/woocommerce-admin-reports.php:51
+msgid "Product Sales"
+msgstr "Varesal"
+
+#: admin/woocommerce-admin-reports.php:56
+msgid "Top sellers"
+msgstr "Bestseljarar"
+
+#: admin/woocommerce-admin-reports.php:61
+msgid "Top earners"
+msgstr "Toppinntekter"
+
+#: admin/woocommerce-admin-reports.php:66
+msgid "Sales by category"
+msgstr "Sal pr. kategori"
+
+#: admin/woocommerce-admin-reports.php:81
+msgid "Discounts by coupon"
+msgstr "Rabattar frå kupongar"
+
+#: admin/woocommerce-admin-reports.php:232
+#: admin/woocommerce-admin-reports.php:497
+#: admin/woocommerce-admin-reports.php:702
+#: admin/woocommerce-admin-reports.php:883
+msgid "Sales amount"
+msgstr "Salssum"
+
+#: admin/woocommerce-admin-reports.php:237
+#: admin/woocommerce-admin-reports.php:497
+#: admin/woocommerce-admin-reports.php:702
+#: admin/woocommerce-admin-reports.php:883
+msgid "Number of sales"
+msgstr "Kor mange sal"
+
+#: admin/woocommerce-admin-reports.php:369
+msgid "Total sales"
+msgstr "Sal i alt"
+
+#: admin/woocommerce-admin-reports.php:371
+#: admin/woocommerce-admin-reports.php:377
+#: admin/woocommerce-admin-reports.php:383
+#: admin/woocommerce-admin-reports.php:389
+#: admin/woocommerce-admin-reports.php:395
+#: admin/woocommerce-admin-reports.php:401
+#: admin/woocommerce-admin-reports.php:644
+#: admin/woocommerce-admin-reports.php:650
+#: admin/woocommerce-admin-reports.php:656
+#: admin/woocommerce-admin-reports.php:662
+#: admin/woocommerce-admin-reports.php:828
+#: admin/woocommerce-admin-reports.php:834
+#: admin/woocommerce-admin-reports.php:840
+#: admin/woocommerce-admin-reports.php:846
+#: admin/woocommerce-admin-reports.php:1364
+#: admin/woocommerce-admin-reports.php:1370
+#: admin/woocommerce-admin-reports.php:1376
+#: admin/woocommerce-admin-reports.php:1810
+#: admin/woocommerce-admin-reports.php:1816
+#: admin/woocommerce-admin-reports.php:1822
+#: admin/woocommerce-admin-reports.php:1828
+#: admin/woocommerce-admin-reports.php:1834
+#: admin/woocommerce-admin-reports.php:1840
+#: admin/woocommerce-admin-reports.php:2304
+#: admin/woocommerce-admin-reports.php:2315
+#: admin/woocommerce-admin-reports.php:2326
+msgid "n/a"
+msgstr "-"
+
+#: admin/woocommerce-admin-reports.php:375
+msgid "Total orders"
+msgstr "Tingingar i alt"
+
+#: admin/woocommerce-admin-reports.php:377
+#: admin/woocommerce-admin-reports.php:650
+#: admin/woocommerce-admin-reports.php:834
+msgid "items"
+msgstr "element"
+
+#: admin/woocommerce-admin-reports.php:381
+msgid "Average order total"
+msgstr "Ordresum i snitt"
+
+#: admin/woocommerce-admin-reports.php:387
+msgid "Average order items"
+msgstr "Tinga varer i snitt"
+
+#: admin/woocommerce-admin-reports.php:393
+msgid "Discounts used"
+msgstr "Brukte rabattar"
+
+#: admin/woocommerce-admin-reports.php:399
+msgid "Total shipping costs"
+msgstr "Frakt i alt"
+
+#: admin/woocommerce-admin-reports.php:407
+msgid "This month's sales"
+msgstr "Salet denne månaden"
+
+#: admin/woocommerce-admin-reports.php:636
+#: admin/woocommerce-admin-reports.php:980
+#: admin/woocommerce-admin-reports.php:1076
+#: admin/woocommerce-admin-reports.php:1356
+msgid "From:"
+msgstr "Frå:"
+
+#: admin/woocommerce-admin-reports.php:636
+#: admin/woocommerce-admin-reports.php:980
+#: admin/woocommerce-admin-reports.php:1076
+#: admin/woocommerce-admin-reports.php:1356
+msgid "To:"
+msgstr "Til:"
+
+#: admin/woocommerce-admin-reports.php:636
+#: admin/woocommerce-admin-reports.php:821
+#: admin/woocommerce-admin-reports.php:980
+#: admin/woocommerce-admin-reports.php:1076
+#: admin/woocommerce-admin-reports.php:1229
+#: admin/woocommerce-admin-reports.php:1356
+#: admin/woocommerce-admin-reports.php:1489
+#: admin/woocommerce-admin-reports.php:2293
+#: admin/woocommerce-admin-reports.php:2476
+msgid "Show"
+msgstr "Vis"
+
+#: admin/woocommerce-admin-reports.php:642
+msgid "Total sales in range"
+msgstr "Sal i perioden"
+
+#: admin/woocommerce-admin-reports.php:648
+msgid "Total orders in range"
+msgstr "Tingingar i perioden"
+
+#: admin/woocommerce-admin-reports.php:654
+msgid "Average order total in range"
+msgstr "Ordresum i snitt i perioden"
+
+#: admin/woocommerce-admin-reports.php:660
+msgid "Average order items in range"
+msgstr "Tinga varer i snitt i perioden"
+
+#: admin/woocommerce-admin-reports.php:668
+msgid "Sales in range"
+msgstr "Tingingar i perioden"
+
+#: admin/woocommerce-admin-reports.php:815
+#: admin/woocommerce-admin-reports.php:2287
+msgid "Year:"
+msgstr "År:"
+
+#: admin/woocommerce-admin-reports.php:826
+msgid "Total sales for year"
+msgstr "Sal i alt for året"
+
+#: admin/woocommerce-admin-reports.php:832
+msgid "Total orders for year"
+msgstr "Tingingar gjennom året"
+
+#: admin/woocommerce-admin-reports.php:838
+msgid "Average order total for year"
+msgstr "Snitt tingingar for året"
+
+#: admin/woocommerce-admin-reports.php:844
+msgid "Average order items for year"
+msgstr "Kor mange varer tinga i snitt for året"
+
+#: admin/woocommerce-admin-reports.php:852
+msgid "Monthly sales for year"
+msgstr "Månadssal for året"
+
+#: admin/woocommerce-admin-reports.php:1000
+msgid "Product does not exist"
+msgstr "Vara finst ikkje"
+
+#: admin/woocommerce-admin-reports.php:1097
+msgid "Product no longer exists"
+msgstr "Vara finst ikkje lenger"
+
+#: admin/woocommerce-admin-reports.php:1194
+msgid "Sales for %s:"
+msgstr "Sal for %s:"
+
+#: admin/woocommerce-admin-reports.php:1198
+#: admin/woocommerce-admin-reports.php:2335
+msgid "Month"
+msgstr "Månad"
+
+#: admin/woocommerce-admin-reports.php:1219
+msgid "No sales :("
+msgstr "Ingen sal :("
+
+#: admin/woocommerce-admin-reports.php:1362
+msgid "Total orders containing coupons"
+msgstr "Tingingar som har brukt kupongar"
+
+#: admin/woocommerce-admin-reports.php:1368
+msgid "Percent of orders containing coupons"
+msgstr "Prosentdel av tingingane som har brukt kupongar"
+
+#: admin/woocommerce-admin-reports.php:1374
+msgid "Total coupon discount"
+msgstr "Kupongrabatt i alt"
+
+#: admin/woocommerce-admin-reports.php:1383
+msgid "Most popular coupons"
+msgstr "Dei mest populære kupongane"
+
+#: admin/woocommerce-admin-reports.php:1393
+msgid "Used 1 time"
+msgid_plural "Used %d times"
+msgstr[0] "Brukt 1 gong"
+msgstr[1] "Brukt %s gonger"
+
+#: admin/woocommerce-admin-reports.php:1396
+#: admin/woocommerce-admin-reports.php:1418
+msgid "No coupons found"
+msgstr "Fann ingen rabattkupongar"
+
+#: admin/woocommerce-admin-reports.php:1405
+msgid "Greatest discount amount"
+msgstr "Største kupongrabatt"
+
+#: admin/woocommerce-admin-reports.php:1415
+msgid "Discounted %s"
+msgstr "Rabattert %s"
+
+#: admin/woocommerce-admin-reports.php:1474
+#: admin/woocommerce-admin-reports.php:2453
+msgid "Show:"
+msgstr "Vis:"
+
+#: admin/woocommerce-admin-reports.php:1531
+msgid "Coupon"
+msgstr "Rabattkupong"
+
+#: admin/woocommerce-admin-reports.php:1614
+msgid "Top coupon"
+msgstr "Beste kupongar"
+
+#: admin/woocommerce-admin-reports.php:1622
+msgid "Worst coupon"
+msgstr "Verste kupongar"
+
+#: admin/woocommerce-admin-reports.php:1630
+msgid "Discount average"
+msgstr "Snittrabatt"
+
+#: admin/woocommerce-admin-reports.php:1638
+msgid "Discount median"
+msgstr "Medianrabatt"
+
+#: admin/woocommerce-admin-reports.php:1658
+msgid "Monthly discounts by coupon"
+msgstr "Kupongrabattar pr. månad"
+
+#: admin/woocommerce-admin-reports.php:1808
+msgid "Total customers"
+msgstr "Kundar i alt"
+
+#: admin/woocommerce-admin-reports.php:1814
+msgid "Total customer sales"
+msgstr "Sal til kundar i alt"
+
+#: admin/woocommerce-admin-reports.php:1820
+msgid "Total guest sales"
+msgstr "Sal til gjester i alt"
+
+#: admin/woocommerce-admin-reports.php:1826
+msgid "Total customer orders"
+msgstr "Kundetingingar i alt"
+
+#: admin/woocommerce-admin-reports.php:1832
+msgid "Total guest orders"
+msgstr "Gjestetingingar i alt"
+
+#: admin/woocommerce-admin-reports.php:1838
+msgid "Average orders per customer"
+msgstr "Snitt tingingar pr. kunde"
+
+#: admin/woocommerce-admin-reports.php:1846
+msgid "Signups per day"
+msgstr "Innmeldingar pr. dag"
+
+#: admin/woocommerce-admin-reports.php:2067
+msgid "Low stock"
+msgstr "Låg lagermengd"
+
+#: admin/woocommerce-admin-reports.php:2090
+#: admin/woocommerce-admin-reports.php:2129
+msgid "%d in stock"
+msgid_plural "%d in stock"
+msgstr[0] "%d på lager"
+msgstr[1] "%d på lager"
+
+#: admin/woocommerce-admin-reports.php:2095
+msgid "No products are low in stock."
+msgstr "Ingen varer har låg lagermengd."
+
+#: admin/woocommerce-admin-reports.php:2127
+msgid "Marked out of stock"
+msgstr "Merka ikkje på lager"
+
+#: admin/woocommerce-admin-reports.php:2134
+msgid "No products are out in stock."
+msgstr "Det er ikkje tomt for nokon varer på lageret."
+
+#: admin/woocommerce-admin-reports.php:2298
+msgid "Total taxes for year"
+msgstr "Avgifter i alt for året"
+
+#: admin/woocommerce-admin-reports.php:2309
+msgid "Total product taxes for year"
+msgstr "Vareavgifter i alt for året"
+
+#: admin/woocommerce-admin-reports.php:2320
+msgid "Total shipping tax for year"
+msgstr "Fraktavgifter i alt for året"
+
+#: admin/woocommerce-admin-reports.php:2336
+msgid "Total Sales"
+msgstr "Samla sal"
+
+#: admin/woocommerce-admin-reports.php:2336
+msgid "This is the sum of the 'Order Total' field within your orders."
+msgstr "Her er summen for «Ordresum»-feltet i tingingane dine."
+
+#: admin/woocommerce-admin-reports.php:2337
+msgid "Total Shipping"
+msgstr "Samla frakt"
+
+#: admin/woocommerce-admin-reports.php:2337
+msgid "This is the sum of the 'Shipping Total' field within your orders."
+msgstr "Her er summen for «Frakt i alt»-feltet i tingingane dine."
+
+#: admin/woocommerce-admin-reports.php:2338
+msgid "Total Product Taxes"
+msgstr "Vareavgifter i alt"
+
+#: admin/woocommerce-admin-reports.php:2338
+msgid "This is the sum of the 'Cart Tax' field within your orders."
+msgstr "Her er summen for «Avgifter handlekorg» i tingingane dine."
+
+#: admin/woocommerce-admin-reports.php:2339
+msgid "Total Shipping Taxes"
+msgstr "Samla mva frakt"
+
+#: admin/woocommerce-admin-reports.php:2339
+msgid "This is the sum of the 'Shipping Tax' field within your orders."
+msgstr "Her er summen for «Fraktavgifter» i tingingane dine."
+
+#: admin/woocommerce-admin-reports.php:2340
+msgid "Total Taxes"
+msgstr "Samla avgifter"
+
+#: admin/woocommerce-admin-reports.php:2340
+msgid "This is the sum of the 'Cart Tax' and 'Shipping Tax' fields within your orders."
+msgstr "Her er summen for «Avgifter handlekorg» og «fraktavgifter» i tingingane dine."
+
+#: admin/woocommerce-admin-reports.php:2341
+msgid "Net profit"
+msgstr "Nettoinntening"
+
+#: admin/woocommerce-admin-reports.php:2341
+msgid "Total sales minus shipping and tax."
+msgstr "Sal i alt minus frakt og mva."
+
+#: admin/woocommerce-admin-reports.php:2386
+msgid "Toggle tax rows"
+msgstr "Bruk mva-rader"
+
+#: admin/woocommerce-admin-reports.php:2529
+msgid "Category"
+msgstr "Kategori"
+
+#: admin/woocommerce-admin-reports.php:2632
+msgid "Top category"
+msgstr "Beste kategori"
+
+#: admin/woocommerce-admin-reports.php:2641
+msgid "Worst category"
+msgstr "Verste kategori"
+
+#: admin/woocommerce-admin-reports.php:2649
+msgid "Category sales average"
+msgstr "Snittsal pr. kategori"
+
+#: admin/woocommerce-admin-reports.php:2660
+msgid "Category sales median"
+msgstr "Mediansal pr. kategori"
+
+#: admin/woocommerce-admin-reports.php:2680
+msgid "Monthly sales by category"
+msgstr "Månadssal fordelt på kategoriar"
+
+#: admin/woocommerce-admin-settings.php:45
+msgid "Action failed. Please refresh the page and retry."
+msgstr "Dette gjekk ikkje. Last sida på nytt, og prøv ein gong til."
+
+#: admin/woocommerce-admin-settings.php:162
+msgid "Your settings have been saved."
+msgstr "Endringane dine er lagra."
+
+#: admin/woocommerce-admin-settings.php:208
+msgid "More functionality and gateway options available via <a href=\"%s\" target=\"_blank\">WC official extensions</a>."
+msgstr "Fleire funksjonar og betalingsløysingar finn du hjå <a href=\"%s\" target=\"_blank\">WooCommerce offisielle utvidingar</a>."
+
+#: admin/woocommerce-admin-settings.php:226
+msgid "Tax Rates"
+msgstr "Avgiftssatsar"
+
+#: admin/woocommerce-admin-settings.php:253
+msgid "Email Options"
+msgstr "Epostinnstillingar"
+
+#: admin/woocommerce-admin-settings.php:386
+msgid "Save changes"
+msgstr "Lagra endringar"
+
+#: admin/woocommerce-admin-settings.php:427
+msgid "The changes you made will be lost if you navigate away from this page."
+msgstr "Endringane du har gjort vil bli borte viss du går vekk frå denne sida."
+
+#: admin/woocommerce-admin-settings.php:799
+msgid "Hard Crop"
+msgstr "Skjer til bilete hardt"
+
+#: admin/woocommerce-admin-settings.php:824
+msgid "Select a page&hellip;"
+msgstr "Vel side&hellip;"
+
+#: admin/woocommerce-admin-settings.php:847
+msgid "Choose a country&hellip;"
+msgstr "Vel land&hellip;"
+
+#: admin/woocommerce-admin-settings.php:867
+msgid "Choose countries&hellip;"
+msgstr "Vel land&hellip;"
+
+#: admin/woocommerce-admin-status.php:27
+#: admin/woocommerce-admin-status.php:622
+msgid "Tools"
+msgstr "Verktøy"
+
+#: admin/woocommerce-admin-status.php:62
+msgid "Please include this information when requesting support:"
+msgstr "Ta med denne informasjonen når du bed om hjelp:"
+
+#: admin/woocommerce-admin-status.php:63
+msgid "Download System Report File"
+msgstr "Last ned systemrapportfil"
+
+#: admin/woocommerce-admin-status.php:71
+msgid "Environment"
+msgstr "Tenarmiljø"
+
+#: admin/woocommerce-admin-status.php:77
+msgid "Home URL"
+msgstr "Heime-URL"
+
+#: admin/woocommerce-admin-status.php:81
+msgid "Site URL"
+msgstr "Nettstad-adresse"
+
+#: admin/woocommerce-admin-status.php:85
+msgid "WC Version"
+msgstr "WC-versjon"
+
+#: admin/woocommerce-admin-status.php:89
+msgid "WC Database Version"
+msgstr "WC-databaseversjon"
+
+#: admin/woocommerce-admin-status.php:93
+msgid "WP Version"
+msgstr "WP-versjon"
+
+#: admin/woocommerce-admin-status.php:97
+msgid "Web Server Info"
+msgstr "Info om vevtenaren"
+
+#: admin/woocommerce-admin-status.php:101
+msgid "PHP Version"
+msgstr "PHP-versjon"
+
+#: admin/woocommerce-admin-status.php:105
+msgid "MySQL Version"
+msgstr "MySQL-versjon"
+
+#: admin/woocommerce-admin-status.php:109
+msgid "WP Memory Limit"
+msgstr "Minnegrense for WP"
+
+#: admin/woocommerce-admin-status.php:114
+msgid "%s - We recommend setting memory to at least 64MB. See: <a href=\"%s\">Increasing memory allocated to PHP</a>"
+msgstr "%s -Me tilrår at du har minst 64MB minne tilgjengeleg. Les meir: <a href=\"%s\">Korleis auka minnet for PHP (engelsk)</a>"
+
+#: admin/woocommerce-admin-status.php:121
+msgid "WP Debug Mode"
+msgstr "Avlusingsmodus"
+
+#: admin/woocommerce-admin-status.php:125
+msgid "WP Max Upload Size"
+msgstr "Største opplastingsstorleik i WP"
+
+#: admin/woocommerce-admin-status.php:129
+msgid "PHP Post Max Size"
+msgstr "Største innsendingsstorleik for PHP"
+
+#: admin/woocommerce-admin-status.php:133
+msgid "PHP Time Limit"
+msgstr "PHP-tidsgrense"
+
+#: admin/woocommerce-admin-status.php:137
+msgid "WC Logging"
+msgstr "WC-Logging"
+
+#: admin/woocommerce-admin-status.php:140
+msgid "Log directory is writable."
+msgstr "Loggmappa er skrivbar."
+
+#: admin/woocommerce-admin-status.php:142
+msgid "Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will not be possible."
+msgstr "Loggmappa (<code>woocommerce/logs/</code>) er ikkje skrivbar. Det er ikkje mogleg å logga."
+
+#: admin/woocommerce-admin-status.php:149
+msgid "fsockopen/cURL"
+msgstr "fsockopen/cURL"
+
+#: admin/woocommerce-admin-status.php:152
+msgid "Your server has fsockopen and cURL enabled."
+msgstr "Tenaren din har fsockopen- og cURL-funksjonane i bruk."
+
+#: admin/woocommerce-admin-status.php:154
+msgid "Your server has fsockopen enabled, cURL is disabled."
+msgstr "Tenaren din har fsocopen i bruk, cURL er ikkje i bruk."
+
+#: admin/woocommerce-admin-status.php:156
+msgid "Your server has cURL enabled, fsockopen is disabled."
+msgstr "Tenaren din har cURL i bruk, fsockopen er ikkje i bruk."
+
+#: admin/woocommerce-admin-status.php:160
+msgid "Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider."
+msgstr "Tenaren din har korkje fsockopen eller cURL i bruk - PayPal-direktebetaling og andre skript som samhandlar med andre tenarar vil ikkje fungera. Kontakt nettverten din."
+
+#: admin/woocommerce-admin-status.php:165
+msgid "SOAP Client"
+msgstr "SOAP-klient"
+
+#: admin/woocommerce-admin-status.php:167
+msgid "Your server has the SOAP Client class enabled."
+msgstr "Tenaren din bruker SOAP-klientklassen."
+
+#: admin/woocommerce-admin-status.php:170
+msgid "Your server does not have the <a href=\"%s\">SOAP Client</a> class enabled - some gateway plugins which use SOAP may not work as expected."
+msgstr "Tenaren din bruker ikkje <a href=\"%s\">SOAP-klient</a>-klassen - portnarinnstikk som bruker SOAP vil truleg ikkje verka slik du ventar."
+
+#: admin/woocommerce-admin-status.php:175
+msgid "WP Remote Post"
+msgstr "Fjerninnlegg for WP"
+
+#: admin/woocommerce-admin-status.php:186
+msgid "wp_remote_post() was successful - PayPal IPN is working."
+msgstr "wp_remote_post() verka - PayPal-direktebetalinga fungerer."
+
+#: admin/woocommerce-admin-status.php:189
+msgid "wp_remote_post() failed. PayPal IPN won't work with your server. Contact your hosting provider. Error:"
+msgstr "wp_remote_post() verka ikkje. PayPal-direktebetaling verkar ikkje på denne tenaren. Kontakt nettverten din. Feil: "
+
+#: admin/woocommerce-admin-status.php:192
+msgid "wp_remote_post() failed. PayPal IPN may not work with your server."
+msgstr "wp_remote_post() verka ikkje. Det kan henda at PayPal-direktebetaling ikkje verkar på denne tenaren."
+
+#: admin/woocommerce-admin-status.php:215
+msgid "Plugins"
+msgstr "Innstikk"
+
+#: admin/woocommerce-admin-status.php:221
+msgid "Installed Plugins"
+msgstr "Installerte innstikk"
+
+#: admin/woocommerce-admin-status.php:236
+msgid "by"
+msgstr "av"
+
+#: admin/woocommerce-admin-status.php:236
+msgid "version"
+msgstr "versjon"
+
+#: admin/woocommerce-admin-status.php:259
+msgid "Force SSL"
+msgstr "Tving SSL"
+
+#: admin/woocommerce-admin-status.php:266
+msgid "WC Pages"
+msgstr "WC-sider"
+
+#: admin/woocommerce-admin-status.php:273
+msgid "Shop Base"
+msgstr "Butikkbaseside"
+
+#: admin/woocommerce-admin-status.php:285
+msgid "Pay"
+msgstr "Betal"
+
+#: admin/woocommerce-admin-status.php:289
+msgid "Thanks"
+msgstr "Takk"
+
+#: admin/woocommerce-admin-status.php:297
+msgid "Edit Address"
+msgstr "Endra adresse"
+
+#: admin/woocommerce-admin-status.php:329
+msgid "Page not set"
+msgstr "Sida er ikkje sett opp"
+
+#: admin/woocommerce-admin-status.php:339
+msgid "Page does not exist"
+msgstr "Sida finst ikkje"
+
+#: admin/woocommerce-admin-status.php:344
+msgid "Page does not contain the shortcode: %s"
+msgstr "Sida inneheld ikkje denne kortkoden: %s"
+
+#: admin/woocommerce-admin-status.php:363
+msgid "WC Taxonomies"
+msgstr "WC-taksonomiar"
+
+#: admin/woocommerce-admin-status.php:369
+msgid "Order Statuses"
+msgstr "Tingingsstatusar"
+
+#: admin/woocommerce-admin-status.php:379
+msgid "Product Types"
+msgstr "Varetypar"
+
+#: admin/woocommerce-admin-status.php:392
+msgid "Templates"
+msgstr "Malar"
+
+#: admin/woocommerce-admin-status.php:398
+msgid "Template Overrides"
+msgstr "Overstyrte malar"
+
+#: admin/woocommerce-admin-status.php:416
+msgid "No core overrides present in theme."
+msgstr "Ingen overstyringar i WP-bunaden."
+
+#: admin/woocommerce-admin-status.php:510
+msgid "WC Transients"
+msgstr "WC-toppar"
+
+#: admin/woocommerce-admin-status.php:511
+msgid "Clear transients"
+msgstr "Tøm toppar"
+
+#: admin/woocommerce-admin-status.php:512
+msgid "This tool will clear the product/shop transients cache."
+msgstr "Dette verktyet fjernar toppane frå produkt/varemellomlageret ditt."
+
+#: admin/woocommerce-admin-status.php:515
+msgid "Expired Transients"
+msgstr "Utgåtte toppar"
+
+#: admin/woocommerce-admin-status.php:516
+msgid "Clear expired transients"
+msgstr "Tømte utgåtte toppar"
+
+#: admin/woocommerce-admin-status.php:517
+msgid "This tool will clear ALL expired transients from Wordpress."
+msgstr "Dette verktyet tømmer ALLE utgåtte toppar frå WordPress."
+
+#: admin/woocommerce-admin-status.php:520
+msgid "Term counts"
+msgstr "Termteljing"
+
+#: admin/woocommerce-admin-status.php:521
+msgid "Recount terms"
+msgstr "Tell termane på nytt"
+
+#: admin/woocommerce-admin-status.php:522
+msgid "This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog."
+msgstr "Dette verktyet tel varetermar på nytt - det er nyttig når du endrar innstillingane slik at nokre varer blir gøymde frå katalogen."
+
+#: admin/woocommerce-admin-status.php:525
+msgid "Capabilities"
+msgstr "Evner"
+
+#: admin/woocommerce-admin-status.php:526
+msgid "Reset capabilities"
+msgstr "Nullstill evner"
+
+#: admin/woocommerce-admin-status.php:527
+msgid "This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages."
+msgstr "Dette verktyet nullstiller styrar-, kunde- og butikkeigarrollene til standardverdiane. Gjer dette viss brukarane dine ikkje får tilgang tilalle WooCommerce-styrarsidene."
+
+#: admin/woocommerce-admin-status.php:537
+msgid "Product Transients Cleared"
+msgstr "Tømte varetoppane"
+
+#: admin/woocommerce-admin-status.php:578
+msgid "%d Transients Rows Cleared"
+msgstr "Tømte %d topprader"
+
+#: admin/woocommerce-admin-status.php:586
+msgid "Roles successfully reset"
+msgstr "Nullstilte rollene"
+
+#: admin/woocommerce-admin-status.php:598
+msgid "Terms successfully recounted"
+msgstr "Talde termane på nytt"
+
+#: admin/woocommerce-admin-status.php:607
+msgid "There was an error calling %s::%s"
+msgstr "Ein feil oppstod då «%s» vart køyrt: %s"
+
+#: admin/woocommerce-admin-status.php:610
+msgid "There was an error calling %s"
+msgstr "Ein feil oppstod då «%s» vart køyrt"
+
+#: admin/woocommerce-admin-taxonomies.php:25
+#: admin/woocommerce-admin-taxonomies.php:118
+msgid "Display type"
+msgstr "Visingstype"
+
+#: admin/woocommerce-admin-taxonomies.php:29
+#: admin/woocommerce-admin-taxonomies.php:123
+msgid "Subcategories"
+msgstr "Underkategoriar"
+
+#: admin/woocommerce-admin-taxonomies.php:30
+#: admin/woocommerce-admin-taxonomies.php:124
+msgid "Both"
+msgstr "Båe"
+
+#: admin/woocommerce-admin-taxonomies.php:34
+#: admin/woocommerce-admin-taxonomies.php:129
+msgid "Thumbnail"
+msgstr "Miniatyr"
+
+#: admin/woocommerce-admin-taxonomies.php:38
+#: admin/woocommerce-admin-taxonomies.php:134
+msgid "Upload/Add image"
+msgstr "Legg til/last opp bilete"
+
+#: admin/woocommerce-admin-taxonomies.php:39
+#: admin/woocommerce-admin-taxonomies.php:135
+msgid "Remove image"
+msgstr "Fjern bilete"
+
+#: admin/woocommerce-admin-taxonomies.php:64
+#: admin/woocommerce-admin-taxonomies.php:156
+msgid "Use image"
+msgstr "Bruk bilete"
+
+#: admin/woocommerce-admin-taxonomies.php:222
+msgid "Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. To see more categories listed click the \"screen options\" link at the top of the page."
+msgstr "Her styrer du varekategoriar. For å endra kva rekkjefylgje kategoriane kjem i på framsida av butikken, kan du dra og sleppa dei. For å få opp fleire kategoriar, klikkar du «skjermval»-lenkja øvst på denne sida."
+
+#: admin/woocommerce-admin-taxonomies.php:237
+msgid "Shipping classes can be used to group products of similar type. These groups can then be used by certain shipping methods to provide different rates to different products."
+msgstr "Du kan bruka fraktklasser til å gruppera varer av same type. Desse gruppene kan du bruke med visse fraktmåtar for å gje ulike fraktsatsar til ulike varer."
+
+#: admin/woocommerce-admin-taxonomies.php:365
+msgid "Configure shipping class"
+msgstr "Set opp fraktklasse"
+
+#: admin/woocommerce-admin-users.php:26
+msgid "Billing Address"
+msgstr "Fakturaadresse"
+
+#: admin/woocommerce-admin-users.php:27
+msgid "Shipping Address"
+msgstr "Fraktadresse"
+
+#: admin/woocommerce-admin-users.php:28
+msgid "Paying Customer?"
+msgstr "Betaler kunden?"
+
+#: admin/woocommerce-admin-users.php:29
+msgid "Completed Orders"
+msgstr "Fullførte tingingar"
+
+#: admin/woocommerce-admin-users.php:144
+msgid "Customer Billing Address"
+msgstr "Fakturaadressa til kunden"
+
+#: admin/woocommerce-admin-users.php:147
+#: admin/woocommerce-admin-users.php:196
+msgid "First name"
+msgstr "Førenamn"
+
+#: admin/woocommerce-admin-users.php:151
+#: admin/woocommerce-admin-users.php:200
+msgid "Last name"
+msgstr "Etternamn"
+
+#: admin/woocommerce-admin-users.php:176
+msgid "Country or state code"
+msgstr "Delstat/fylke eller statkode"
+
+#: admin/woocommerce-admin-users.php:180
+#: admin/woocommerce-admin-users.php:229
+msgid "2 letter Country code"
+msgstr "Landkode (to bokstavar)"
+
+#: admin/woocommerce-admin-users.php:183
+msgid "Telephone"
+msgstr "Telefon"
+
+#: admin/woocommerce-admin-users.php:193
+msgid "Customer Shipping Address"
+msgstr "Fraktadressa til kunden"
+
+#: admin/woocommerce-admin-users.php:225
+msgid "State/County or state code"
+msgstr "Delstat/fylke eller statkode"
+

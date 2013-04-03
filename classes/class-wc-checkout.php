@@ -76,8 +76,8 @@ class WC_Checkout {
 
 		$this->checkout_fields['account']['account_password-2'] = array(
 			'type' 				=> 'password',
-			'label' 			=> __( 'Account password', 'woocommerce' ),
-			'placeholder' 		=> _x( 'Password', 'placeholder', 'woocommerce' ),
+			'label' 			=> __( 'Confirm password', 'woocommerce' ),
+			'placeholder' 		=> _x( 'Confirm password', 'placeholder', 'woocommerce' ),
 			'class' 			=> array( 'form-row-last' ),
 			'label_class' 		=> array( 'hidden' )
 		);

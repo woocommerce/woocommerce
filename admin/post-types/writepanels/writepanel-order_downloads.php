@@ -25,7 +25,6 @@ function woocommerce_order_downloads_meta_box() {
 	<div class="order_download_permissions wc-metaboxes-wrapper">
 
 		<div class="wc-metaboxes">
-
 			<?php
 				$download_permissions = $wpdb->get_results( $wpdb->prepare( "
 					SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
@@ -33,11 +32,12 @@ function woocommerce_order_downloads_meta_box() {
 				", $post->ID ) );
 
 				$product = null;
+				$loop    = 0;
 				if ( $download_permissions && sizeof( $download_permissions ) > 0 ) foreach ( $download_permissions as $download ) {
 
 					if ( ! $product || $product->id != $download->product_id ) {
 						$product = get_product( absint( $download->product_id ) );
-						$file_count = $loop = 0;
+						$file_count = 0;
 					}
 
 					// don't show permissions to files that have since been removed

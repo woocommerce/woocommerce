@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 2.0.4
+ * Version: 2.0.5
  * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 3.5
@@ -37,7 +37,7 @@ class Woocommerce {
 	/**
 	 * @var string
 	 */
-	public $version = '2.0.4';
+	public $version = '2.0.5';
 
 	/**
 	 * @var string
@@ -124,6 +124,9 @@ class Woocommerce {
 	public function __construct() {
 
 		// Auto-load classes on demand
+		if ( function_exists( "__autoload" ) ) {
+			spl_autoload_register( "__autoload" );
+    	}
 		spl_autoload_register( array( $this, 'autoload' ) );
 
 		// Define version constant
@@ -487,7 +490,7 @@ class Woocommerce {
 			add_action( 'wp_footer', array( $this, 'output_inline_js' ), 25 );
 
 			// HTTPS urls with SSL on
-			$filters = array( 'post_thumbnail_html', 'widget_text', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_siteurl', 'option_homeurl', 'option_home', 'option_url', 'option_wpurl', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
+			$filters = array( 'post_thumbnail_html', 'widget_text', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
 
 			foreach ( $filters as $filter )
 				add_filter( $filter, array( $this, 'force_ssl' ) );
@@ -623,6 +626,8 @@ class Woocommerce {
 
 		if ( file_exists( STYLESHEETPATH . '/' . $this->template_url . 'single-product-reviews.php' ))
 			return STYLESHEETPATH . '/' . $this->template_url . 'single-product-reviews.php';
+		elseif ( file_exists( TEMPLATEPATH . '/' . $this->template_url . 'single-product-reviews.php' ))
+			return TEMPLATEPATH . '/' . $this->template_url . 'single-product-reviews.php';
 		else
 			return $this->plugin_path() . '/templates/single-product-reviews.php';
 	}
@@ -775,7 +780,7 @@ class Woocommerce {
 		 **/
 		do_action( 'woocommerce_register_taxonomy' );
 
-		$admin_only_query_var = ( is_admin() ) ? true : false;
+		$admin_only_query_var = is_admin();
 
 		register_taxonomy( 'product_type',
 	        apply_filters( 'woocommerce_taxonomy_objects_product_type', array('product') ),
@@ -1364,13 +1369,15 @@ class Woocommerce {
 	 * @return string
 	 */
 	public function api_request_url( $request, $ssl = null ) {
-		if ( is_null( $ssl ) )
-			$ssl = is_ssl();
+		if ( is_null( $ssl ) ) {
+			$scheme = parse_url( get_option( 'home' ), PHP_URL_SCHEME );
+		} elseif ( $ssl ) {
+			$scheme = 'https';
+		} else {
+			$scheme = 'http';
+		}
 
-		$url = trailingslashit( home_url( '/wc-api/' . $request ) );
-		$url = $ssl ? str_replace( 'http:', 'https:', $url ) : str_replace( 'https:', 'http:', $url );
-
-		return esc_url_raw( $url );
+		return esc_url_raw( trailingslashit( home_url( '/wc-api/' . $request, $scheme ) ) );
 	}
 
 

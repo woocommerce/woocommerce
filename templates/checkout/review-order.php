@@ -67,58 +67,16 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 			<?php
 				// Show the tax row if showing prices exlcusive of tax only
 				if ( $woocommerce->cart->tax_display_cart == 'excl' ) {
-
-					$taxes = $woocommerce->cart->get_formatted_taxes();
-
-					if ( sizeof( $taxes ) > 0 ) {
-
-						$has_compound_tax = false;
-
-						foreach ( $taxes as $key => $tax ) {
-							if ( $woocommerce->cart->tax->is_compound( $key ) ) {
-								$has_compound_tax = true;
-								continue;
-							}
-							?>
-							<tr class="tax-rate tax-rate-<?php echo $key; ?>">
-								<th><?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
-								<td><?php echo $tax; ?></td>
-							</tr>
-							<?php
-						}
-
-						if ( $has_compound_tax ) {
-							?>
-							<tr class="order-subtotal">
-								<th><?php _e( 'Subtotal', 'woocommerce' ); ?></th>
-								<td><?php echo $woocommerce->cart->get_cart_subtotal( true ); ?></td>
-							</tr>
-							<?php
-						}
-
-						foreach ( $taxes as $key => $tax ) {
-							if ( ! $woocommerce->cart->tax->is_compound( $key ) )
-								continue;
-							?>
-							<tr class="tax-rate tax-rate-<?php echo $key; ?>">
-								<th><?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
-								<td><?php echo $tax; ?></td>
-							</tr>
-							<?php
-						}
-
-					} elseif ( $woocommerce->cart->get_cart_tax() ) {
-						?>
-						<tr class="tax">
-							<th><?php _e( 'Tax', 'woocommerce' ); ?></th>
-							<td><?php echo $woocommerce->cart->get_cart_tax(); ?></td>
-						</tr>
-						<?php
+					foreach ( $woocommerce->cart->get_tax_totals() as $code => $tax ) {
+						echo '<tr class="tax-rate tax-rate-' . $code . '">
+							<th>' . $tax->label . '</th>
+							<td>' . $tax->formatted_amount . '</td>
+						</tr>';
 					}
 				}
 			?>
 
-			<?php if ($woocommerce->cart->get_discounts_after_tax()) : ?>
+			<?php if ( $woocommerce->cart->get_discounts_after_tax() ) : ?>
 
 			<tr class="discount">
 				<th><?php _e( 'Order Discount', 'woocommerce' ); ?></th>
@@ -137,14 +95,9 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 						// If prices are tax inclusive, show taxes here
 						if ( $woocommerce->cart->tax_display_cart == 'incl' ) {
 							$tax_string_array = array();
-							$taxes = $woocommerce->cart->get_formatted_taxes();
 
-							if ( sizeof( $taxes ) > 0 ) {
-								foreach ( $taxes as $key => $tax ) {
-									$tax_string_array[] = sprintf( '%s %s', $tax, $woocommerce->cart->tax->get_rate_label( $key ) );
-								}
-							} elseif ( $woocommerce->cart->get_cart_tax() ) {
-								$tax_string_array[] = sprintf( '%s tax', $tax );
+							foreach ( $woocommerce->cart->get_tax_totals() as $code => $tax ) {
+								$tax_string_array[] = sprintf( '%s %s', $tax->formatted_amount, $tax->label );
 							}
 
 							if ( ! empty( $tax_string_array ) ) {
@@ -235,7 +188,11 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 			<?php do_action( 'woocommerce_review_order_before_submit' ); ?>
 
-			<input type="submit" class="button alt" name="woocommerce_checkout_place_order" id="place_order" value="<?php echo apply_filters('woocommerce_order_button_text', __( 'Place order', 'woocommerce' )); ?>" />
+			<?php
+			$order_button_text = apply_filters('woocommerce_order_button_text', __( 'Place order', 'woocommerce' ));
+			
+			echo apply_filters('woocommerce_order_button_html', '<input type="submit" class="button alt" name="woocommerce_checkout_place_order" id="place_order" value="' . $order_button_text . '" />' );
+			?>
 
 			<?php if (woocommerce_get_page_id('terms')>0) : ?>
 			<p class="form-row terms">

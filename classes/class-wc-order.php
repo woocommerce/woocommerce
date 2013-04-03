@@ -487,6 +487,34 @@ class WC_Order {
 	}
 
 	/**
+	 * Get taxes, merged by code, formatted ready for output.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function get_tax_totals() {
+		$taxes      = $this->get_items( 'tax' );
+		$tax_totals = array();
+
+		foreach ( $taxes as $key => $tax ) {
+
+			$code = $tax[ 'name' ];
+
+			if ( ! isset( $tax_totals[ $code ] ) ) {
+				$tax_totals[ $code ] = new stdClass();
+				$tax_totals[ $code ]->amount = 0;
+			}
+
+			$tax_totals[ $code ]->is_compound       = $tax[ 'compound' ];
+			$tax_totals[ $code ]->label             = isset( $tax[ 'label' ] ) ? $tax[ 'label' ] : $tax[ 'name' ];
+			$tax_totals[ $code ]->amount           += $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ];
+			$tax_totals[ $code ]->formatted_amount  = woocommerce_price( $tax_totals[ $code ]->amount );
+		}
+
+		return apply_filters( 'woocommerce_order_tax_totals', $tax_totals, $this );
+	}
+
+	/**
 	 * has_meta function for order items.
 	 *
 	 * @access public
@@ -957,45 +985,10 @@ class WC_Order {
 
 		// Tax for tax exclusive prices
 		if ( $tax_display == 'excl' ) {
-			if ( sizeof( $this->get_taxes() ) > 0 ) {
-
-				$has_compound_tax = false;
-
-				foreach ( $this->get_taxes() as $tax ) {
-					if ( $tax[ 'compound' ] ) {
-						$has_compound_tax = true;
-						continue;
-					}
-
-					$total_rows[ sanitize_title( $tax[ 'name' ] ) ] = array(
-						'label' => isset( $tax[ 'label' ] ) ? $tax[ 'label' ] : $tax[ 'name' ] . ':',
-						'value'	=> woocommerce_price( ( $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ] ) )
-					);
-				}
-
-				if ( $has_compound_tax ) {
-					if ( $subtotal = $this->get_subtotal_to_display( true ) ) {
-						$total_rows['subtotal'] = array(
-							'label' => __( 'Subtotal:', 'woocommerce' ),
-							'value'	=> $subtotal
-						);
-					}
-				}
-
-				foreach ( $this->get_taxes() as $tax ) {
-					if ( ! $tax[ 'compound' ] )
-						continue;
-
-					$total_rows[ sanitize_title( $tax[ 'name' ] ) ] = array(
-						'label' => isset( $tax[ 'label' ] ) ? $tax[ 'label' ] : $tax[ 'name' ] . ':',
-						'value'	=> woocommerce_price( ( $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ] ) )
-					);
-				}
-
-			} elseif ( $this->get_total_tax() > 0 ) {
-				$total_rows['tax'] = array(
-					'label' => $woocommerce->countries->tax_or_vat(),
-					'value'	=> woocommerce_price( $this->get_total_tax() )
+			foreach ( $this->get_tax_totals() as $code => $tax ) {
+				$total_rows[ sanitize_title( $code ) ] = array(
+					'label' => $tax->label . ':',
+					'value'	=> $tax->formatted_amount
 				);
 			}
 		}
@@ -1016,17 +1009,8 @@ class WC_Order {
 
 			$tax_string_array = array();
 
-			if ( sizeof( $this->get_taxes() ) > 0 ) {
-
-				foreach ( $this->get_taxes() as $tax ) {
-
-					$tax_string_array[] = sprintf( '%s %s', woocommerce_price( ( $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ] ) ), isset( $tax[ 'label' ] ) ? $tax[ 'label' ] : $tax[ 'name' ] );
-				}
-
-			} elseif ( $this->get_total_tax() > 0 ) {
-
-				$tax_string_array[] = sprintf( '%s %s', woocommerce_price( $this->get_total_tax() ), $woocommerce->countries->tax_or_vat() );
-
+			foreach ( $this->get_tax_totals() as $code => $tax ) {
+				$tax_string_array[] = sprintf( '%s %s', $tax->formatted_amount, $tax->label );
 			}
 
 			if ( ! empty( $tax_string_array ) )
@@ -1251,6 +1235,9 @@ class WC_Order {
 				// If the order is cancelled, restore used coupons
 				if ( $new_status->slug == 'cancelled' )
 					$this->decrease_coupon_usage_counts();
+
+				// Update last modified
+  				wp_update_post( array( 'ID' => $this->id ) );
 
 				$this->status = $new_status->slug;
 			}

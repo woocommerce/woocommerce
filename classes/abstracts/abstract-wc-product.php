@@ -231,7 +231,7 @@ class WC_Product {
 	 * @return void
 	 */
 	function set_stock_status( $status ) {
-		$status = 'outofstock' ? 'outofstock' : 'instock';
+		$status = ( 'outofstock' === $status ) ? 'outofstock' : 'instock';
 
 		if ( $this->stock_status != $status ) {
 			update_post_meta( $this->id, '_stock_status', $status );
@@ -943,24 +943,22 @@ class WC_Product {
 	}
 
 	/**
-	 * Returns the product rating in html format - ratings are stored in transient cache.
+	 * Returns the product rating in html format.
 	 *
 	 * @access public
-	 * @param string $location (default: '')
-	 * @return void
+	 * @param string $rating (default: '')
+	 * @return string
 	 */
-	function get_rating_html( $location = '' ) {
+	function get_rating_html( $rating = null ) {
 
-		$average_rating = $this->get_average_rating();
+		if ( ! is_numeric( $rating ) )
+			$rating = $this->get_average_rating();
 
-		if ( $average_rating > 0 ) {
+		if ( $rating > 0 ) {
 
-			if ( $location )
-				$location = '_' . $location;
+			$rating_html  = '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '">';
 
-			$rating_html  = '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $average_rating ) . '">';
-
-			$rating_html .= '<span style="width:' . ( ( $average_rating / 5 ) * 100 ) . '%"><strong class="rating">' . $average_rating . '</strong> ' . __( 'out of 5', 'woocommerce' ) . '</span>';
+			$rating_html .= '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%"><strong class="rating">' . $rating . '</strong> ' . __( 'out of 5', 'woocommerce' ) . '</span>';
 
 			$rating_html .= '</div>';
 

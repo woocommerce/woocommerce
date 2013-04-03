@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 global $wpdb, $woocommerce;
 
 // Upgrade old style files paths to support multiple file paths
-$existing_file_paths = $wpdb->get_results( "SELECT * FROM {$wpdb->postmeta} WHERE meta_key = '_file_path'" );
+$existing_file_paths = $wpdb->get_results( "SELECT * FROM {$wpdb->postmeta} WHERE meta_key = '_file_path' AND meta_value != '';" );
 
 if ( $existing_file_paths ) {
 
@@ -22,8 +22,7 @@ if ( $existing_file_paths ) {
 		$old_file_path = trim( $existing_file_path->meta_value );
 
 		if ( ! empty( $old_file_path ) ) {
-			$file_paths = maybe_serialize( array( md5( $old_file_path ) => $old_file_path ) );
-
+			$file_paths = serialize( array( md5( $old_file_path ) => $old_file_path ) );
 
 			$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_key = '_file_paths', meta_value = %s WHERE meta_id = %d", $file_paths, $existing_file_path->meta_id ) );
 
@@ -310,10 +309,10 @@ foreach ( array( 'catalog', 'single', 'thumbnail' ) as $value ) {
 	) );
 
 	if ( ! empty(  $old_settings  ) && update_option( 'shop_' . $value . '_image_size', $old_settings ) ){
-	
+
 		delete_option( 'woocommerce_' . $value . '_image_width' );
 		delete_option( 'woocommerce_' . $value . '_image_height' );
 		delete_option( 'woocommerce_' . $value . '_image_crop' );
-	
+
 	}
 }

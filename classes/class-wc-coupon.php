@@ -376,7 +376,8 @@ class WC_Coupon {
 			if ( $valid ) {
 				return true;
 			} else {
-				$error_code = self::E_WC_COUPON_INVALID_FILTERED;
+				if ( is_null( $error_code ) )
+					$error_code = self::E_WC_COUPON_INVALID_FILTERED;
 			}
 
 		} else {

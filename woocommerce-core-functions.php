@@ -685,6 +685,7 @@ function get_woocommerce_currencies() {
 				'INR' => __( 'Indian Rupee', 'woocommerce' ),
 				'ILS' => __( 'Israeli Shekel', 'woocommerce' ),
 				'JPY' => __( 'Japanese Yen', 'woocommerce' ),
+				'KRW' => __( 'South Korean Won', 'woocommerce' ),
 				'MYR' => __( 'Malaysian Ringgits', 'woocommerce' ),
 				'MXN' => __( 'Mexican Peso', 'woocommerce' ),
 				'NOK' => __( 'Norwegian Krone', 'woocommerce' ),
@@ -738,6 +739,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'JPY' :
 			$currency_symbol = '&yen;';
 			break;
+		case 'KRW' : $currency_symbol = '&#8361;'; break;
 		case 'TRY' : $currency_symbol = '&#84;&#76;'; break;
 		case 'NOK' : $currency_symbol = '&#107;&#114;'; break;
 		case 'ZAR' : $currency_symbol = '&#82;'; break;
@@ -2115,6 +2117,16 @@ function woocommerce_date_format() {
 }
 
 /**
+ * WooCommerce Time Format - Allows to change time format for everything WooCommerce
+ *
+ * @access public
+ * @return string
+ */
+function woocommerce_time_format() {
+	return apply_filters( 'woocommerce_time_format', get_option( 'time_format' ) );
+}
+
+/**
  * Function for recounting product terms, ignoring hidden products.
  *
  * @access public
@@ -2419,7 +2431,7 @@ function woocommerce_cancel_unpaid_orders() {
 
 	$held_duration = get_option( 'woocommerce_hold_stock_minutes' );
 
-	if ( $held_duration == '' || get_option( 'woocommerce_manage_stock' ) != 'yes' )
+	if ( $held_duration < 1 || get_option( 'woocommerce_manage_stock' ) != 'yes' )
 		return;
 
 	$date = date( "Y-m-d H:i:s", strtotime( '-' . absint( $held_duration ) . ' MINUTES', current_time( 'timestamp' ) ) );
@@ -2435,7 +2447,7 @@ function woocommerce_cancel_unpaid_orders() {
 		AND 	posts.post_status = 'publish'
 		AND 	tax.taxonomy      = 'shop_order_status'
 		AND		term.slug	      IN ('pending')
-		AND 	posts.post_date   < %s
+		AND 	posts.post_modified < %s
 	", $date ) );
 
 	if ( $unpaid_orders ) {

@@ -54,6 +54,7 @@ function woocommerce_duplicate_product() {
  */
 function woocommerce_get_product_to_duplicate($id) {
 	global $wpdb;
+	$id = intval( $id );
 	$post = $wpdb->get_results("SELECT * FROM $wpdb->posts WHERE ID=$id");
 	if (isset($post->post_type) && $post->post_type == "revision"){
 		$id = $post->post_parent;

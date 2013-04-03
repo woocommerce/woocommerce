@@ -357,13 +357,17 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 						$paypal_args[ 'item_name_' . $item_loop ] 	= $item_name;
 						$paypal_args[ 'quantity_' . $item_loop ] 	= $item['qty'];
-						$paypal_args[ 'amount_' . $item_loop ] 		= $order->get_item_total( $item, false );
+						$paypal_args[ 'amount_' . $item_loop ] 		= $order->get_item_subtotal( $item, false );
 
 						if ( $product->get_sku() )
 							$paypal_args[ 'item_number_' . $item_loop ] = $product->get_sku();
 					}
 				}
 			}
+
+			// Discount
+			if ( $order->get_cart_discount() > 0 )
+				$paypal_args['discount_amount_cart'] = round( $order->get_cart_discount(), 2 );
 
 			// Fees
 			if ( sizeof( $order->get_fees() ) > 0 ) {
@@ -604,6 +608,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	        $posted['payment_status'] 	= strtolower( $posted['payment_status'] );
 	        $posted['txn_type'] 		= strtolower( $posted['txn_type'] );
 
+	        // Sandbox fix
+	        if ( $posted['test_ipn'] == 1 && $posted['payment_status'] == 'pending' )
+	        	$posted['payment_status'] = 'completed';
+
 	        if ( 'yes' == $this->debug )
 	        	$this->log->add( 'paypal', 'Payment status: ' . $posted['payment_status'] );
 
@@ -651,15 +659,15 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 					 // Store PP Details
 	                if ( ! empty( $posted['payer_email'] ) )
-	                	update_post_meta( $order_id, 'Payer PayPal address', $posted['payer_email'] );
+	                	update_post_meta( $order->id, 'Payer PayPal address', $posted['payer_email'] );
 	                if ( ! empty( $posted['txn_id'] ) )
-	                	update_post_meta( $order_id, 'Transaction ID', $posted['txn_id'] );
+	                	update_post_meta( $order->id, 'Transaction ID', $posted['txn_id'] );
 	                if ( ! empty( $posted['first_name'] ) )
-	                	update_post_meta( $order_id, 'Payer first name', $posted['first_name'] );
+	                	update_post_meta( $order->id, 'Payer first name', $posted['first_name'] );
 	                if ( ! empty( $posted['last_name'] ) )
-	                	update_post_meta( $order_id, 'Payer last name', $posted['last_name'] );
+	                	update_post_meta( $order->id, 'Payer last name', $posted['last_name'] );
 	                if ( ! empty( $posted['payment_type'] ) )
-	                	update_post_meta( $order_id, 'Payment type', $posted['payment_type'] );
+	                	update_post_meta( $order->id, 'Payment type', $posted['payment_type'] );
 
 	            	// Payment completed
 	                $order->add_order_note( __( 'IPN payment completed', 'woocommerce' ) );

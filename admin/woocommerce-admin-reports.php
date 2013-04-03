@@ -22,94 +22,99 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 function woocommerce_reports() {
 
-	$charts = apply_filters( 'woocommerce_reports_charts', array(
-		'sales' => array(
-			'title' 	=>  __( 'Sales', 'woocommerce' ),
-			'charts' 	=> array(
+	$charts            = array(
+		'sales'          => array(
+			'title'         => __( 'Sales', 'woocommerce' ),
+			'charts'        => array(
 				array(
-					'title' => __( 'Overview', 'woocommerce' ),
+					'title'       => __( 'Overview', 'woocommerce' ),
 					'description' => '',
-					'hide_title' => true,
-					'function' => 'woocommerce_sales_overview'
+					'hide_title'  => true,
+					'function'    => 'woocommerce_sales_overview'
 				),
 				array(
-					'title' => __( 'Sales by day', 'woocommerce' ),
+					'title'       => __( 'Sales by day', 'woocommerce' ),
 					'description' => '',
-					'function' => 'woocommerce_daily_sales'
+					'function'    => 'woocommerce_daily_sales'
 				),
 				array(
-					'title' => __( 'Sales by month', 'woocommerce' ),
+					'title'       => __( 'Sales by month', 'woocommerce' ),
 					'description' => '',
-					'function' => 'woocommerce_monthly_sales'
+					'function'    => 'woocommerce_monthly_sales'
 				),
 				array(
-					'title' => __( 'Taxes by month', 'woocommerce' ),
+					'title'       => __( 'Product Sales', 'woocommerce' ),
 					'description' => '',
-					'function' => 'woocommerce_monthly_taxes'
+					'function'    => 'woocommerce_product_sales'
 				),
 				array(
-					'title' => __( 'Product Sales', 'woocommerce' ),
+					'title'       => __( 'Top sellers', 'woocommerce' ),
 					'description' => '',
-					'function' => 'woocommerce_product_sales'
+					'function'    => 'woocommerce_top_sellers'
 				),
 				array(
-					'title' => __( 'Top sellers', 'woocommerce' ),
+					'title'       => __( 'Top earners', 'woocommerce' ),
 					'description' => '',
-					'function' => 'woocommerce_top_sellers'
+					'function'    => 'woocommerce_top_earners'
 				),
 				array(
-					'title' => __( 'Top earners', 'woocommerce' ),
+					'title'       => __( 'Sales by category', 'woocommerce' ),
 					'description' => '',
-					'function' => 'woocommerce_top_earners'
-				),
-				array(
-					'title' => __( 'Sales by category', 'woocommerce' ),
-					'description' => '',
-					'function' => 'woocommerce_category_sales'
+					'function'    => 'woocommerce_category_sales'
 				)			)
 		),
-		'coupons' => array(
-			'title' 	=>  __( 'Coupons', 'woocommerce' ),
-			'charts' 	=> array(
+		'coupons'        => array(
+			'title'         => __( 'Coupons', 'woocommerce' ),
+			'charts'        => array(
 				array(
-					'title' => __( 'Overview', 'woocommerce' ),
+					'title'       => __( 'Overview', 'woocommerce' ),
 					'description' => '',
-					'hide_title' => true,
-					'function' => 'woocommerce_coupons_overview'
+					'hide_title'  => true,
+					'function'    => 'woocommerce_coupons_overview'
 				),
 				array(
-					'title' => __( 'Discounts by coupon', 'woocommerce' ),
+					'title'       => __( 'Discounts by coupon', 'woocommerce' ),
 					'description' => '',
-					'function' => 'woocommerce_coupon_discounts'
+					'function'    => 'woocommerce_coupon_discounts'
 				)
 			)
 		),
-		'customers' => array(
-			'title' 	=>  __( 'Customers', 'woocommerce' ),
-			'charts' 	=> array(
+		'customers'      => array(
+			'title'         => __( 'Customers', 'woocommerce' ),
+			'charts'        => array(
 				array(
-					'title' => __( 'Overview', 'woocommerce' ),
+					'title'       => __( 'Overview', 'woocommerce' ),
 					'description' => '',
-					'hide_title' => true,
-					'function' => 'woocommerce_customer_overview'
+					'hide_title'  => true,
+					'function'    => 'woocommerce_customer_overview'
 				),
 			)
 		),
-		'stock' => array(
-			'title' 	=>  __( 'Stock', 'woocommerce' ),
-			'charts' 	=> array(
+		'stock'          => array(
+			'title'         => __( 'Stock', 'woocommerce' ),
+			'charts'        => array(
 				array(
-					'title' => __( 'Overview', 'woocommerce' ),
+					'title'       => __( 'Overview', 'woocommerce' ),
 					'description' => '',
-					'hide_title' => true,
-					'function' => 'woocommerce_stock_overview'
+					'hide_title'  => true,
+					'function'    => 'woocommerce_stock_overview'
 				),
 			)
 		)
-	) );
+	);
 
-	$first_tab = array_keys($charts);
-	$first_chart = array_keys($charts[$first_tab[0]]['charts']);
+	if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) {
+		$charts['sales']['charts'][] = array(
+			'title'       => __( 'Taxes by month', 'woocommerce' ),
+			'description' => '',
+			'function'    => 'woocommerce_monthly_taxes'
+		);
+	}
+
+	$charts = apply_filters( 'woocommerce_reports_charts', $charts );
+
+	$first_tab      = array_keys($charts);
+	$first_chart    = array_keys($charts[$first_tab[0]]['charts']);
 
 	$current_tab 	= isset( $_GET['tab'] ) ? sanitize_title( urldecode( $_GET['tab'] ) ) : $first_tab[0];
 	$current_chart 	= isset( $_GET['chart'] ) ? absint( urldecode( $_GET['chart'] ) ) : $first_chart[0];
@@ -1001,6 +1006,8 @@ function woocommerce_top_sellers() {
 						$orders_link = admin_url( 'edit.php?s&post_status=all&post_type=shop_order&action=-1&s=&shop_order_status=' . implode( ",", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) );
 					}
 
+					$orders_link = apply_filters( 'woocommerce_reports_order_link', $orders_link, $product_id, $product_title );
+
 					echo '<tr><th>' . $product_name . '</th><td width="1%"><span>' . esc_html( $sales ) . '</span></td><td class="bars"><a href="' . esc_url( $orders_link ) . '" style="width:' . esc_attr( $width ) . '%">&nbsp;</a></td></tr>';
 				}
 			?>
@@ -1097,6 +1104,8 @@ function woocommerce_top_earners() {
 						$product_name = __( 'Product no longer exists', 'woocommerce' );
 						$orders_link = admin_url( 'edit.php?s&post_status=all&post_type=shop_order&action=-1&s=&shop_order_status=' . implode( ",", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) );
 					}
+
+					$orders_link = apply_filters( 'woocommerce_reports_order_link', $orders_link, $product_id, $product_title );
 
 					echo '<tr><th>' . $product_name . '</th><td width="1%"><span>' . woocommerce_price( $sales ) . '</span></td><td class="bars"><a href="' . esc_url( $orders_link ) . '" style="width:' . esc_attr( $width ) . '%">&nbsp;</a></td></tr>';
 				}
@@ -1207,6 +1216,7 @@ function woocommerce_product_sales() {
 							$width2 = ($product_totals[$date]>0) ? (round($product_totals[$date]) / round($max_totals)) * 100 : 0;
 
 							$orders_link = admin_url( 'edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode( implode( ' ', $chosen_product_titles ) ) . '&m=' . date( 'Ym', strtotime( $date . '01' ) ) . '&shop_order_status=' . implode( ",", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) );
+							$orders_link = apply_filters( 'woocommerce_reports_order_link', $orders_link, $chosen_product_ids, $chosen_product_titles );
 
 							echo '<tr><th><a href="' . esc_url( $orders_link ) . '">' . date_i18n( 'F', strtotime( $date . '01' ) ) . '</a></th>
 							<td width="1%"><span>' . esc_html( $sales ) . '</span><span class="alt">' . woocommerce_price( $product_totals[ $date ] ) . '</span></td>

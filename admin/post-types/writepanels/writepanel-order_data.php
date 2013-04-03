@@ -427,7 +427,7 @@ function woocommerce_order_actions_meta_box( $post ) {
 	?>
 	<ul class="order_actions submitbox">
 
-		<?php do_action( 'woocommerce_order_actions', $post->ID ); ?>
+		<?php do_action( 'woocommerce_order_actions_start', $post->ID ); ?>
 
 		<li class="wide" id="actions">
 			<select name="wc_order_action">
@@ -470,6 +470,9 @@ function woocommerce_order_actions_meta_box( $post ) {
 
 			<input type="submit" class="button save_order button-primary tips" name="save" value="<?php _e( 'Save Order', 'woocommerce' ); ?>" data-tip="<?php _e( 'Save/update the order', 'woocommerce' ); ?>" />
 		</li>
+
+		<?php do_action( 'woocommerce_order_actions_end', $post->ID ); ?>
+
 	</ul>
 	<?php
 }

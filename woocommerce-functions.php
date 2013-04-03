@@ -68,11 +68,11 @@ function woocommerce_template_redirect() {
 	}
 
 	// Redirect to the product page if we have a single product
-	elseif ( is_search() && is_post_type_archive( 'product' ) ) {
-		if ( $wp_query->post_count == 1 ) {
-			$product = get_product( $wp_query->post );
-			if ( $product->is_visible() )
-				wp_safe_redirect( get_permalink( $product->id ), 302 );
+	elseif ( is_search() && is_post_type_archive( 'product' ) && apply_filters( 'woocommerce_redirect_single_search_result', true ) && $wp_query->post_count == 1 ) {
+		$product = get_product( $wp_query->post );
+
+		if ( $product->is_visible() ) {
+			wp_safe_redirect( get_permalink( $product->id ), 302 );
 			exit;
 		}
 	}
@@ -131,7 +131,7 @@ function woocommerce_nav_menu_items( $items, $args ) {
 		$hide_pages   = apply_filters( 'woocommerce_logged_out_hidden_page_ids', $hide_pages );
 
 		foreach ( $items as $key => $item ) {
-			if ( ! empty( $item->object_id ) && in_array( $item->object_id, $hide_pages ) ) {
+			if ( ! empty( $item->object_id ) && ! empty( $item->object ) && in_array( $item->object_id, $hide_pages ) && $item->object == 'page' ) {
 				unset( $items[ $key ] );
 			}
 		}
@@ -244,7 +244,7 @@ function woocommerce_update_cart_action() {
 					continue;
 
 				// Sanitize
-				$quantity = apply_filters( 'woocommerce_stock_amount_cart_item', preg_replace( "/[^0-9\.]/", "", $cart_totals[ $cart_item_key ]['qty'] ), $cart_item_key );
+				$quantity = apply_filters( 'woocommerce_stock_amount_cart_item', apply_filters( 'woocommerce_stock_amount', preg_replace( "/[^0-9\.]/", "", $cart_totals[ $cart_item_key ]['qty'] ) ), $cart_item_key );
 
 				if ( "" === $quantity )
 					continue;
@@ -298,6 +298,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 
 	$product_id          = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_REQUEST['add-to-cart'] ) );
 	$was_added_to_cart   = false;
+	$added_to_cart       = array();
 	$adding_to_cart      = get_product( $product_id );
 	$add_to_cart_handler = apply_filters( 'woocommerce_add_to_cart_handler', $adding_to_cart->product_type, $adding_to_cart );
 
@@ -312,8 +313,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 		// Only allow integer variation ID - if its not set, redirect to the product page
 		if ( empty( $variation_id ) ) {
 			$woocommerce->add_error( __( 'Please choose product options&hellip;', 'woocommerce' ) );
-			wp_redirect( get_permalink( $product_id ) );
-			exit;
+			return;
 		}
 
 		$attributes = $adding_to_cart->get_attributes();
@@ -366,12 +366,12 @@ function woocommerce_add_to_cart_action( $url = false ) {
 				if ( $woocommerce->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) ) {
 					woocommerce_add_to_cart_message( $product_id );
 					$was_added_to_cart = true;
+					$added_to_cart[] = $product_id;
 				}
 			}
         } else {
             $woocommerce->add_error( __( 'Please choose product options&hellip;', 'woocommerce' ) );
-            wp_redirect( get_permalink( $product_id ) );
-			exit;
+            return;
        }
 
     // Grouped Products
@@ -380,7 +380,6 @@ function woocommerce_add_to_cart_action( $url = false ) {
 		if ( ! empty( $_REQUEST['quantity'] ) && is_array( $_REQUEST['quantity'] ) ) {
 
 			$quantity_set = false;
-			$added_to_cart = array();
 
 			foreach ( $_REQUEST['quantity'] as $item => $quantity ) {
 				if ( $quantity <= 0 )
@@ -405,16 +404,14 @@ function woocommerce_add_to_cart_action( $url = false ) {
 
 			if ( ! $was_added_to_cart && ! $quantity_set ) {
 				$woocommerce->add_error( __( 'Please choose the quantity of items you wish to add to your cart&hellip;', 'woocommerce' ) );
-				wp_redirect( get_permalink( $product_id ) );
-				exit;
+				return;
 			}
 
 		} elseif ( $product_id ) {
 
 			/* Link on product archives */
 			$woocommerce->add_error( __( 'Please choose a product to add to your cart&hellip;', 'woocommerce' ) );
-			wp_redirect( get_permalink( $product_id ) );
-			exit;
+			return;
 
 		}
 
@@ -431,6 +428,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
     		if ( $woocommerce->cart->add_to_cart( $product_id, $quantity ) ) {
     			woocommerce_add_to_cart_message( $product_id );
     			$was_added_to_cart = true;
+    			$added_to_cart[] = $product_id;
     		}
 		}
 
@@ -455,7 +453,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 
 		// Redirect to page without querystring args
 		elseif ( wp_get_referer() ) {
-			wp_safe_redirect( remove_query_arg( array( 'add-to-cart', 'quantity', 'product_id' ), wp_get_referer() ) );
+			wp_safe_redirect( add_query_arg( 'added-to-cart', implode( ',', $added_to_cart ), remove_query_arg( array( 'add-to-cart', 'quantity', 'product_id' ), wp_get_referer() ) ) );
 			exit;
 		}
 

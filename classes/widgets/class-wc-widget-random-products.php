@@ -107,7 +107,7 @@ class WC_Widget_Random_Products extends WP_Widget {
 	function update( $new_instance, $old_instance ) {
 		$instance = array(
 			'title'           => strip_tags($new_instance['title']),
-			'number'          => min(15, max(1, (int) $new_instance['number'])),
+			'number'          => absint( $new_instance['number'] ),
 			'show_variations' => ! empty($new_instance['show_variations'])
 		);
 
