@@ -180,6 +180,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Ensure API Request URL scheme is not relative to the current page.
 * Fix - Fix saving of download permissions in order admin.
 * Fix - Action woocommerce_product_bulk_edit_end is now properly executed instead of outputted as HTML.
+* Tweak - Added a check to parent theme for comments_template before loading plugin template.
+* Tweak - Remove hard coded max from random products widget.
+* Tweak - Add filter hook to the place order button for easy 3rd party manipulation.
 * Tweak - UX - Placeholder fades out on focus
 * Tweak - UX - Only display validation result on required fields
 * Tweak - Product column widths in admin
