@@ -929,7 +929,7 @@ function woocommerce_download_product() {
 
 	if ( isset( $_GET['download_file'] ) && isset( $_GET['order'] ) && isset( $_GET['email'] ) ) {
 
-		global $wpdb;
+		global $wpdb, $is_IE;
 
 		$product_id           = (int) urldecode($_GET['download_file']);
 		$order_key            = urldecode( $_GET['order'] );
@@ -1036,14 +1036,16 @@ function woocommerce_download_product() {
 		if ( ! is_multisite() ) {
 
 			/*
-			 * If WP FORCE_SSL_ADMIN is enabled, file will have been inserted as https from Media Library
-			 * site_url() depends on whether the page containing the download (ie; My Account) is served via SSL.
-			 * So blindly doing a str_replace is incorrect because it will fail with schemes are mismatched.
+			 * Download file may be either http or https.
+			 * site_url() depends on whether the page containing the download (ie; My Account) is served via SSL because WC
+			 * modifies site_url() via a filter to force_ssl.
+			 * So blindly doing a str_replace is incorrect because it will fail when schemes are mismatched. This code
+			 * handles the various permutations.
 			 */
 			$scheme = parse_url( $file_path, PHP_URL_SCHEME );
 
 			if ( $scheme ) {
-				$site_url = site_url( '', $scheme );
+				$site_url = set_url_scheme( site_url( '' ), $scheme );
 			} else {
 				$site_url = is_ssl() ? str_replace( 'https:', 'http:', site_url() ) : site_url();
 			}
@@ -1104,6 +1106,17 @@ function woocommerce_download_product() {
 			@ob_end_clean(); // Zip corruption fix
 
 		nocache_headers();
+		if ( $is_IE ) {
+			// IE bug prevents download via SSL when both Cache Control and Pragma no-cache headers set.
+						
+			if ( function_exists( 'header_remove' ) ) {
+				// For PHP 5.3+
+				@header_remove( 'Pragma' );
+			} else {
+				// For PHP 5.2
+				header( 'Pragma:' );
+			}
+		}
 
 		$file_name = basename( $file_path );
 
