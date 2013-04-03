@@ -626,6 +626,8 @@ class Woocommerce {
 
 		if ( file_exists( STYLESHEETPATH . '/' . $this->template_url . 'single-product-reviews.php' ))
 			return STYLESHEETPATH . '/' . $this->template_url . 'single-product-reviews.php';
+		elseif ( file_exists( TEMPLATEPATH . '/' . $this->template_url . 'single-product-reviews.php' ))
+			return TEMPLATEPATH . '/' . $this->template_url . 'single-product-reviews.php';
 		else
 			return $this->plugin_path() . '/templates/single-product-reviews.php';
 	}
