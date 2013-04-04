@@ -978,9 +978,9 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 					</label>
 				</div>
 
-			<?php endif; ?>
+			<?php endif;
 
-			do_action( 'woocommerce_product_bulk_edit_end' );
+			do_action( 'woocommerce_product_bulk_edit_end' ); ?>
 
 			<input type="hidden" name="woocommerce_bulk_edit_nonce" value="<?php echo wp_create_nonce( 'woocommerce_bulk_edit_nonce' ); ?>" />
 		</div>

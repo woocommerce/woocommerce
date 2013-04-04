@@ -785,6 +785,9 @@ function process_product_meta_variable( $post_id ) {
 			$child_regular_price 	= get_post_meta( $child, '_regular_price', true );
 			$child_sale_price 		= get_post_meta( $child, '_sale_price', true );
 
+			if ( $child_price === '' && $child_regular_price === '' )
+				continue;
+
 			// Regular prices
 			if ( ! is_numeric( $lowest_regular_price ) || $child_regular_price < $lowest_regular_price )
 				$lowest_regular_price = $child_regular_price;

@@ -145,6 +145,7 @@ class Woocommerce {
 		$this->api = new WC_API();
 
 		// Hooks
+		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'action_links' ) );
 		add_filter( 'woocommerce_shipping_methods', array( $this, 'core_shipping' ) );
 		add_filter( 'woocommerce_payment_gateways', array( $this, 'core_gateways' ) );
 		add_action( 'widgets_init', array( $this, 'register_widgets' ) );
@@ -154,6 +155,24 @@ class Woocommerce {
 
 		// Loaded action
 		do_action( 'woocommerce_loaded' );
+	}
+
+	/**
+	 * action_links function.
+	 *
+	 * @access public
+	 * @param mixed $links
+	 * @return void
+	 */
+	public function action_links( $links ) {
+
+		$plugin_links = array(
+			'<a href="' . admin_url( 'admin.php?page=woocommerce_settings' ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
+			'<a href="http://docs.woothemes.com/">' . __( 'Docs', 'woocommerce' ) . '</a>',
+			'<a href="http://support.woothemes.com/">' . __( 'Premium Support', 'woocommerce' ) . '</a>',
+		);
+
+		return array_merge( $plugin_links, $links );
 	}
 
 	/**
@@ -626,6 +645,8 @@ class Woocommerce {
 
 		if ( file_exists( STYLESHEETPATH . '/' . $this->template_url . 'single-product-reviews.php' ))
 			return STYLESHEETPATH . '/' . $this->template_url . 'single-product-reviews.php';
+		elseif ( file_exists( TEMPLATEPATH . '/' . $this->template_url . 'single-product-reviews.php' ))
+			return TEMPLATEPATH . '/' . $this->template_url . 'single-product-reviews.php';
 		else
 			return $this->plugin_path() . '/templates/single-product-reviews.php';
 	}
@@ -1330,7 +1351,7 @@ class Woocommerce {
 	 */
 	public function plugin_url() {
 		if ( $this->plugin_url ) return $this->plugin_url;
-		return $this->plugin_url = plugins_url( basename( plugin_dir_path(__FILE__) ), basename( __FILE__ ) );
+		return $this->plugin_url = untrailingslashit( plugins_url( '/', __FILE__ ) );
 	}
 
 
