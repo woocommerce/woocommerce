@@ -1351,7 +1351,7 @@ class Woocommerce {
 	 */
 	public function plugin_url() {
 		if ( $this->plugin_url ) return $this->plugin_url;
-		return $this->plugin_url = plugins_url( basename( plugin_dir_path(__FILE__) ), basename( __FILE__ ) );
+		return $this->plugin_url = untrailingslashit( plugins_url( '/', __FILE__ ) );
 	}
 
 
