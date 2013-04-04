@@ -465,6 +465,9 @@ class WC_Product_Variable extends WC_Product {
 				$child_regular_price 	= get_post_meta( $child, '_regular_price', true );
 				$child_sale_price 		= get_post_meta( $child, '_sale_price', true );
 
+				if ( $child_price === '' && $child_regular_price === '' )
+					continue;
+
 				// Regular prices
 				if ( $child_regular_price !== '' ) {
 					if ( ! is_numeric( $this->min_variation_regular_price ) || $child_regular_price < $this->min_variation_regular_price )
