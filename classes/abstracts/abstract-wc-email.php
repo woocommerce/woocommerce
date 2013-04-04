@@ -262,12 +262,12 @@ abstract class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	* Proxy to parent's get_option and attempty to localize the result using gettext.
+	* Proxy to parent's get_option and attempt to localize the result using gettext.
 	*
 	* @access public
 	* @return string
 	*/
-	function get_option($opt) {
+	function get_option( $opt ) {
 		return __( parent::get_option( $opt ) );
 	}
 
