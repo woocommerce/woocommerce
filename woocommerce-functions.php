@@ -1041,7 +1041,7 @@ function woocommerce_download_product() {
 			 * handles the various permutations.
 			 */
 			$scheme = parse_url( $file_path, PHP_URL_SCHEME );
-
+			
 			if ( $scheme ) {
 				$site_url = set_url_scheme( site_url( '' ), $scheme );
 			} else {
@@ -1103,17 +1103,12 @@ function woocommerce_download_product() {
 		if ( ob_get_level() )
 			@ob_end_clean(); // Zip corruption fix
 
-		nocache_headers();
-		if ( $is_IE ) {
-			// IE bug prevents download via SSL when both Cache Control and Pragma no-cache headers set.
-						
-			if ( function_exists( 'header_remove' ) ) {
-				// For PHP 5.3+
-				@header_remove( 'Pragma' );
-			} else {
-				// For PHP 5.2
-				header( 'Pragma:' );
-			}
+		if ( $is_IE && is_ssl() ) {
+			// IE bug prevents download via SSL when Cache Control and Pragma no-cache headers set.
+			header( 'Expires: Wed, 11 Jan 1984 05:00:00 GMT' );
+			header( 'Cache-Control: private' );
+		} else {			
+			nocache_headers();
 		}
 
 		$file_name = basename( $file_path );
