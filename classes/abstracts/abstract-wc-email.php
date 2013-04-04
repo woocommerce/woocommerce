@@ -142,8 +142,8 @@ abstract class WC_Email extends WC_Settings_API {
 			$this->template_base = $woocommerce->plugin_path() . '/templates/';
 
 		// Settings
-		$this->heading 			= $this->get_option( 'heading', $this->heading );
-		$this->subject      	= $this->get_option( 'subject', $this->subject );
+		$this->heading 			= __( $this->get_option( 'heading', $this->heading ) );
+		$this->subject      	= __( $this->get_option( 'subject', $this->subject ) );
 		$this->email_type     	= $this->get_option( 'email_type' );
 		$this->enabled   		= $this->get_option( 'enabled' );
 
@@ -259,16 +259,6 @@ abstract class WC_Email extends WC_Settings_API {
 			default :
 				return 'text/plain';
 		}
-	}
-
-	/**
-	* Proxy to parent's get_option and attempty to localize the result using gettext.
-	*
-	* @access public
-	* @return string
-	*/
-	function get_option($opt) {
-		return __( parent::get_option( $opt ) );
 	}
 
 	/**
