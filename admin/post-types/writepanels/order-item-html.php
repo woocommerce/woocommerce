@@ -4,27 +4,38 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 <tr class="item <?php if ( ! empty( $class ) ) echo $class; ?>" data-order_item_id="<?php echo $item_id; ?>">
 	<td class="check-column"><input type="checkbox" /></td>
 	<td class="thumb">
-		<a href="<?php echo esc_url( admin_url( 'post.php?post=' . absint( $_product->id ) . '&action=edit' ) ); ?>" class="tips" data-tip="<?php
+		<?php if ( $_product ) : ?>
+			<a href="<?php echo esc_url( admin_url( 'post.php?post=' . absint( $_product->id ) . '&action=edit' ) ); ?>" class="tips" data-tip="<?php
 
-			echo '<strong>' . __( 'Product ID:', 'woocommerce' ) . '</strong> ' . absint( $item['product_id'] );
+				echo '<strong>' . __( 'Product ID:', 'woocommerce' ) . '</strong> ' . absint( $item['product_id'] );
 
-			if ( $item['variation_id'] )
-				echo '<br/><strong>' . __( 'Variation ID:', 'woocommerce' ) . '</strong> ' . absint( $item['variation_id'] );
+				if ( $item['variation_id'] )
+					echo '<br/><strong>' . __( 'Variation ID:', 'woocommerce' ) . '</strong> ' . absint( $item['variation_id'] );
 
-			if ( $_product->get_sku() )
-				echo '<br/><strong>' . __( 'Product SKU:', 'woocommerce' ).'</strong> ' . esc_html( $_product->get_sku() );
+				if ( $_product && $_product->get_sku() )
+					echo '<br/><strong>' . __( 'Product SKU:', 'woocommerce' ).'</strong> ' . esc_html( $_product->get_sku() );
 
-		?>"><?php echo $_product->get_image( 'shop_thumbnail', array( 'title' => '' ) ); ?></a>
+			?>"><?php echo $_product->get_image( 'shop_thumbnail', array( 'title' => '' ) ); ?></a>
+		<?php else : ?>
+			<?php echo woocommerce_placeholder_img( 'shop_thumbnail' ); ?>
+		<?php endif; ?>
 	</td>
 	<td class="name">
 
-		<?php if ( $_product->get_sku() ) echo esc_html( $_product->get_sku() ) . ' &ndash; '; ?>
+		<?php if ( $_product && $_product->get_sku() ) echo esc_html( $_product->get_sku() ) . ' &ndash; '; ?>
 
-		<a target="_blank" href="<?php echo esc_url( admin_url( 'post.php?post='. absint( $_product->id ) .'&action=edit' ) ); ?>"><?php echo esc_html( $item['name'] ); ?></a>
+		<?php if ( $_product ) : ?>
+			<a target="_blank" href="<?php echo esc_url( admin_url( 'post.php?post='. absint( $_product->id ) .'&action=edit' ) ); ?>">
+				<?php echo esc_html( $item['name'] ); ?>
+			</a>
+		<?php else : ?>
+			<?php echo esc_html( $item['name'] ); ?>
+		<?php endif; ?>
+
 		<input type="hidden" class="order_item_id" name="order_item_id[]" value="<?php echo esc_attr( $item_id ); ?>" />
 
 		<?php
-			if ( isset( $_product->variation_data ) )
+			if ( $_product && isset( $_product->variation_data ) )
 				echo '<br/>' . woocommerce_get_formatted_variation( $_product->variation_data, true );
 		?>
 		<table class="meta" cellspacing="0">
