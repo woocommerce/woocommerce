@@ -116,6 +116,18 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 			if ( $terms = wp_get_object_terms( $post->ID, 'product_cat' ) ) {
 				$term = current( $terms );
+				$children = get_term_children( $term->term_id, 'product_cat' );
+				if ( !empty( $children ) )
+					foreach( $terms as $cur_term )
+					{
+					$children = get_term_children( $cur_term->term_id, 'product_cat' );
+						if( empty( $children ) )
+						{
+						$term = $cur_term;
+						break;
+						}
+					}
+				
 				$parents = array();
 				$parent = $term->parent;
 
