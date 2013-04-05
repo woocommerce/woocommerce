@@ -544,6 +544,7 @@ p.demo_store {
 		ul {
 			display: inline-block;
 			white-space: nowrap;
+			padding:0;
 			clear: both;
 			border: 1px solid darken( @secondary, 10 );
 			border-right: 0;
@@ -1758,6 +1759,16 @@ p.demo_store {
 		}
 	}
 } // end .woocommerce-page namespacing wrap
+
+
+/* =Twenty Thirteen Specific styles
+-------------------------------------------------------------- */
+.twentythirteen {
+	.entry-summary {
+		padding:0;
+	}
+}
+
 @media
 (-webkit-min-device-pixel-ratio: 2),
 (min-resolution: 192dpi) {
