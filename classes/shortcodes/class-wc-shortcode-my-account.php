@@ -34,8 +34,6 @@ class WC_Shortcode_My_Account {
 	public static function output( $atts ) {
 		global $woocommerce;
 
-		$woocommerce->nocache();
-
 		if ( ! is_user_logged_in() ) {
 
 			woocommerce_get_template( 'myaccount/form-login.php' );

@@ -34,7 +34,6 @@ class WC_Shortcode_Thankyou {
 	public static function output( $atts ) {
 		global $woocommerce;
 
-		$woocommerce->nocache();
 		$woocommerce->show_messages();
 
 		$order = false;

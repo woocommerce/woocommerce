@@ -136,6 +136,8 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 			// Clear any unwanted data
 			$woocommerce->clear_product_transients();
 
+			delete_transient( 'woocommerce_cache_excluded_uris' );
+
 			// Redirect back to the settings page
 			$redirect = add_query_arg( 'saved', 'true' );
 

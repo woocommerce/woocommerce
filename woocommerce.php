@@ -471,6 +471,9 @@ class Woocommerce {
 		// Set up localisation
 		$this->load_plugin_textdomain();
 
+		// Prevent Caching on dynamic pages
+		$this->cache_helper();
+
 		// Variables
 		$this->template_url			= apply_filters( 'woocommerce_template_url', 'woocommerce/' );
 
@@ -1800,14 +1803,50 @@ class Woocommerce {
 	/** Cache Helpers *********************************************************/
 
 	/**
-	 * Sets a constant preventing some caching plugins from caching a page. Used on dynamic pages
+	 * cache_helper function.
+	 *
+	 * @access private
+	 * @return void
+	 */
+	private function cache_helper() {
+
+		if ( false === ( $wc_page_uris = get_transient( 'woocommerce_cache_excluded_uris' ) ) ) {
+
+			if ( ! woocommerce_get_page_id( 'cart' ) || ! woocommerce_get_page_id( 'checkout' ) || ! woocommerce_get_page_id( 'myaccount' ) )
+				return;
+
+			$wc_page_uris   = array();
+			$cart_page      = get_post( woocommerce_get_page_id( 'cart' ) );
+			$checkout_page  = get_post( woocommerce_get_page_id( 'checkout' ) );
+			$account_page   = get_post( woocommerce_get_page_id( 'myaccount' ) );
+
+			$wc_page_uris[] = '/' . $cart_page->post_name;
+	    	$wc_page_uris[] = '/' . $checkout_page->post_name;
+	    	$wc_page_uris[] = '/' . $account_page->post_name;
+	    	$wc_page_uris[] = 'p=' . $cart_page->ID;
+	    	$wc_page_uris[] = 'p=' . $checkout_page->ID;
+	    	$wc_page_uris[] = 'p=' . $account_page->ID;
+
+	    	set_transient( 'woocommerce_cache_excluded_uris', $wc_page_uris );
+		}
+
+		if ( is_array( $wc_page_uris ) )
+			foreach( $wc_page_uris as $uri )
+				if ( strstr( $_SERVER['REQUEST_URI'], $uri ) ) {
+					$this->nocache();
+					break;
+				}
+	}
+
+	/**
+	 * Sets a constant preventing some caching plugins from caching a page. Used on dynamic pages.
 	 *
 	 * @access public
 	 * @return void
 	 */
 	public function nocache() {
-		if ( ! defined('DONOTCACHEPAGE') )
-			define("DONOTCACHEPAGE", "true"); // WP Super Cache constant
+		if ( ! defined( 'DONOTCACHEPAGE' ) )
+			define( "DONOTCACHEPAGE", "true" );
 	}
 
 

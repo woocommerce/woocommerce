@@ -34,9 +34,6 @@ class WC_Shortcode_Checkout {
 	public static function output( $atts ) {
 		global $woocommerce;
 
-		// Prevent cache
-		$woocommerce->nocache();
-
 		// Show non-cart errors
 		$woocommerce->show_messages();
 

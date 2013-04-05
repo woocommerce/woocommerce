@@ -32,8 +32,6 @@ class WC_Shortcode_View_Order {
 	public static function output( $atts ) {
 		global $woocommerce;
 
-		$woocommerce->nocache();
-
 		if ( ! is_user_logged_in() ) return;
 
 		extract( shortcode_atts( array(

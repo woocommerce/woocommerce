@@ -182,6 +182,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Action woocommerce_product_bulk_edit_end is now properly executed instead of outputted as HTML.
 * Fix - Fix IE Download via SSL bug and fix http file over SSL.
 * Fix - Show non-existing product line items.
+* Fix - Conflicts with W3 Total Cache DB Cache
 * Tweak - Added a check to parent theme for comments_template before loading plugin template.
 * Tweak - Remove hard coded max from random products widget.
 * Tweak - Add filter hook to the place order button for easy 3rd party manipulation.

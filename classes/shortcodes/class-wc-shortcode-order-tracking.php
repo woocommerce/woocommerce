@@ -34,8 +34,6 @@ class WC_Shortcode_Order_Tracking {
 	public static function output( $atts ) {
 		global $woocommerce;
 
-		$woocommerce->nocache();
-
 		extract(shortcode_atts(array(
 		), $atts));
 

@@ -429,7 +429,7 @@ class WC_Product {
 	 * @return string
 	 */
 	function add_to_cart_url() {
-		return apply_filters( 'woocommerce_add_to_cart_url', add_query_arg( 'add-to-cart', $this->id ) );
+		return apply_filters( 'woocommerce_add_to_cart_url', remove_query_arg( 'added-to-cart', add_query_arg( 'add-to-cart', $this->id ) ) );
 	}
 
 

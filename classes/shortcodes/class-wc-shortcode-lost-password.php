@@ -34,8 +34,6 @@ class WC_Shortcode_Lost_Password {
 	public static function output( $atts ) {
 		global $woocommerce;
 
-		$woocommerce->nocache();
-
 		global $post;
 
 		// arguments to pass to template
