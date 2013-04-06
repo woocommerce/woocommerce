@@ -471,6 +471,9 @@ class Woocommerce {
 		// Set up localisation
 		$this->load_plugin_textdomain();
 
+		// Prevent Caching on dynamic pages
+		$this->cache_helper();
+
 		// Variables
 		$this->template_url			= apply_filters( 'woocommerce_template_url', 'woocommerce/' );
 
@@ -1158,8 +1161,8 @@ class Woocommerce {
 		$frontend_script_path 	= $this->plugin_url() . '/assets/js/frontend/';
 
 		// Register any scripts for later use, or used as dependencies
-		wp_register_script( 'chosen', $this->plugin_url() . '/assets/js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), $this->version, true );
-		wp_register_script( 'jquery-blockui', $this->plugin_url() . '/assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), $this->version, true );
+		wp_register_script( 'chosen', $this->plugin_url() . '/assets/js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), '0.9.11', true );
+		wp_register_script( 'jquery-blockui', $this->plugin_url() . '/assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.50', true );
 		wp_register_script( 'jquery-placeholder', $this->plugin_url() . '/assets/js/jquery-placeholder/jquery.placeholder' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 
 		wp_register_script( 'wc-add-to-cart-variation', $frontend_script_path . 'add-to-cart-variation' . $suffix . '.js', array( 'jquery' ), $this->version, true );
@@ -1183,7 +1186,7 @@ class Woocommerce {
 		}
 
 		if ( $lightbox_en && ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) ) {
-			wp_enqueue_script( 'prettyPhoto', $this->plugin_url() . '/assets/js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js', array( 'jquery' ), $this->version, true );
+			wp_enqueue_script( 'prettyPhoto', $this->plugin_url() . '/assets/js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js', array( 'jquery' ), '3.1.5', true );
 			wp_enqueue_script( 'prettyPhoto-init', $this->plugin_url() . '/assets/js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 			wp_enqueue_style( 'woocommerce_prettyPhoto_css', $this->plugin_url() . '/assets/css/prettyPhoto.css' );
 		}
@@ -1800,14 +1803,50 @@ class Woocommerce {
 	/** Cache Helpers *********************************************************/
 
 	/**
-	 * Sets a constant preventing some caching plugins from caching a page. Used on dynamic pages
+	 * cache_helper function.
+	 *
+	 * @access private
+	 * @return void
+	 */
+	private function cache_helper() {
+
+		if ( false === ( $wc_page_uris = get_transient( 'woocommerce_cache_excluded_uris' ) ) ) {
+
+			if ( ! woocommerce_get_page_id( 'cart' ) || ! woocommerce_get_page_id( 'checkout' ) || ! woocommerce_get_page_id( 'myaccount' ) )
+				return;
+
+			$wc_page_uris   = array();
+			$cart_page      = get_post( woocommerce_get_page_id( 'cart' ) );
+			$checkout_page  = get_post( woocommerce_get_page_id( 'checkout' ) );
+			$account_page   = get_post( woocommerce_get_page_id( 'myaccount' ) );
+
+			$wc_page_uris[] = '/' . $cart_page->post_name;
+	    	$wc_page_uris[] = '/' . $checkout_page->post_name;
+	    	$wc_page_uris[] = '/' . $account_page->post_name;
+	    	$wc_page_uris[] = 'p=' . $cart_page->ID;
+	    	$wc_page_uris[] = 'p=' . $checkout_page->ID;
+	    	$wc_page_uris[] = 'p=' . $account_page->ID;
+
+	    	set_transient( 'woocommerce_cache_excluded_uris', $wc_page_uris );
+		}
+
+		if ( is_array( $wc_page_uris ) )
+			foreach( $wc_page_uris as $uri )
+				if ( strstr( $_SERVER['REQUEST_URI'], $uri ) ) {
+					$this->nocache();
+					break;
+				}
+	}
+
+	/**
+	 * Sets a constant preventing some caching plugins from caching a page. Used on dynamic pages.
 	 *
 	 * @access public
 	 * @return void
 	 */
 	public function nocache() {
-		if ( ! defined('DONOTCACHEPAGE') )
-			define("DONOTCACHEPAGE", "true"); // WP Super Cache constant
+		if ( ! defined( 'DONOTCACHEPAGE' ) )
+			define( "DONOTCACHEPAGE", "true" );
 	}
 
 

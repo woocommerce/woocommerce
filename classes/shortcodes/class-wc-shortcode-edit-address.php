@@ -36,8 +36,6 @@ class WC_Shortcode_Edit_Address {
 	public static function output( $atts ) {
 		global $woocommerce;
 
-		$woocommerce->nocache();
-
 		if ( ! is_user_logged_in() ) return;
 
 		$load_address = self::get_address_to_edit();

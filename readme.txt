@@ -181,6 +181,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Fix saving of download permissions in order admin.
 * Fix - Action woocommerce_product_bulk_edit_end is now properly executed instead of outputted as HTML.
 * Fix - Fix IE Download via SSL bug and fix http file over SSL.
+* Fix - Show non-existing product line items.
+* Fix - Conflicts with W3 Total Cache DB Cache
 * Tweak - Added a check to parent theme for comments_template before loading plugin template.
 * Tweak - Remove hard coded max from random products widget.
 * Tweak - Add filter hook to the place order button for easy 3rd party manipulation.
@@ -188,6 +190,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - UX - Only display validation result on required fields
 * Tweak - Product column widths in admin
 * Tweak - .shipping_address clears to avoid flash of ugliness in some themes when revealing shipping address
+* Tweak - created an icon font for the star ratings to improve consistency
+* Tweak - woocommerce_show_page_title filter
+* Tweak - wrapper / css tweaks for TwentyThirteen compatibility
 * Localisation - NZ States
 
 = 2.0.5 - 26/03/2013 =

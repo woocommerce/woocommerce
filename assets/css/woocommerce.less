@@ -6,6 +6,19 @@
 @tertiarytext: 	@primarytext;								/* Text on tertiary colour bg */
 @quaternary: 	desaturate( darken( @tertiary, 45%), 40% ); /* Price slider bg */
 
+/* =Custom Font
+-------------------------------------------------------------- */
+@font-face {
+	font-family: 'star';
+	src:url('../fonts/star.eot');
+	src:url('../fonts/star.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/star.woff') format('woff'),
+		url('../fonts/star.ttf') format('truetype'),
+		url('../fonts/star.svg#star') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
 /* =Global styles/layout
 -------------------------------------------------------------- */
 .woocommerce-message, .woocommerce-error, .woocommerce-info {
@@ -531,6 +544,7 @@ p.demo_store {
 		ul {
 			display: inline-block;
 			white-space: nowrap;
+			padding:0;
 			clear: both;
 			border: 1px solid darken( @secondary, 10 );
 			border-right: 0;
@@ -832,6 +846,7 @@ p.demo_store {
 	}
 
 	/* Star rating */
+
 	.star-rating {
 		float: right;
 		overflow: hidden;
@@ -840,16 +855,14 @@ p.demo_store {
 		line-height: 1em;
 		font-size: 1em;
 		width: 5.4em;
-		font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+		font-family: 'star';
 		&:before {
-			content: "\2606\2606\2606\2606\2606";
+			content: "\73\73\73\73\73";
 			color: darken( @secondary, 10 );
 			float: left;
 			top: 0;
 			left: 0;
 			position: absolute;
-			letter-spacing: 0.1em;
-			letter-spacing:0\9; // IE8 & below hack ;-(
 		}
 		span {
 			overflow: hidden;
@@ -860,12 +873,10 @@ p.demo_store {
 			padding-top: 1.5em;
 		}
 		span:before {
-			content: "\2605\2605\2605\2605\2605";
+			content: "\53\53\53\53\53";
 			top: 0;
 			position: absolute;
 			left: 0;
-			letter-spacing: 0.1em;
-			letter-spacing:0\9; // IE8 & below hack ;-(
 		}
 	}
 
@@ -916,15 +927,13 @@ p.demo_store {
 		line-height: 1em;
 		font-size: 1em;
 		width: 5.4em;
-		font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+		font-family: "star";
 		&:before {
-			content: "\2606\2606\2606\2606\2606";
+			content: "\73\73\73\73\73";
 			float: left;
 			top: 0;
 			left: 0;
 			position: absolute;
-			letter-spacing: 0.1em;
-			letter-spacing:0\9; // IE8 & below hack ;-(
 			color: darken( @secondary, 10 );
 		}
 
@@ -938,12 +947,10 @@ p.demo_store {
 			padding-top: 1em;
 			overflow: hidden;
 			&:before {
-				content: "\2605\2605\2605\2605\2605";
+				content: "\53\53\53\53\53";
 				top: 0;
 				position: absolute;
 				left: 0;
-				letter-spacing: 0.1em;
-				letter-spacing:0\9; // IE8 & below hack ;-(
 				visibility: hidden;
 			}
 		}
@@ -1752,6 +1759,16 @@ p.demo_store {
 		}
 	}
 } // end .woocommerce-page namespacing wrap
+
+
+/* =Twenty Thirteen Specific styles
+-------------------------------------------------------------- */
+.twentythirteen {
+	.entry-summary {
+		padding:0;
+	}
+}
+
 @media
 (-webkit-min-device-pixel-ratio: 2),
 (min-resolution: 192dpi) {
@@ -1775,32 +1792,6 @@ p.demo_store {
 		.woocommerce form .form-row.woocommerce-invalid input.input-text, .woocommerce-page form .form-row.woocommerce-invalid input.input-text {
 			background-image: url(../images/icons/invalid@2x.png);
 			background-size: 12px 9px;
-		}
-	}
-}
-// Firefox hack :( (for some reason Firefox doesn't like applying font-size to pseudo-elements containing unicode chars in the content property)
-@-moz-document url-prefix() {
-	.woocommerce .star-rating, .woocommerce-page .star-rating {
-		width:3.4em;
-		font-size:1.5em;
-	}
-	.woocommerce p.stars, .woocommerce-page p.stars {
-		width:3.5em;
-		font-size:1.5em;
-		a.star-1 {
-			width:.7em;
-		}
-		a.star-2 {
-			width:1.4em;
-		}
-		a.star-3 {
-			width:2.1em;
-		}
-		a.star-4 {
-			width:2.8em;
-		}
-		a.star-5 {
-			width:3.5em;
 		}
 	}
 }

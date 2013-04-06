@@ -34,8 +34,6 @@ class WC_Shortcode_Pay {
 	public static function output( $atts ) {
 		global $woocommerce;
 
-		$woocommerce->nocache();
-
 		do_action( 'before_woocommerce_pay' );
 
 		$woocommerce->show_messages();
