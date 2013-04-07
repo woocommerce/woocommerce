@@ -41,12 +41,14 @@ foreach ($items as $item) :
 				foreach ( $download_file_urls as $file_url => $download_file_url ) {
 					echo '<br/><small>';
 
+					$filename = woocommerce_get_filename_from_url( $file_url );
+
 					if ( count( $download_file_urls ) > 1 ) {
 						echo sprintf( __('Download %d:', 'woocommerce' ), $i + 1 );
 					} elseif ( $i == 0 )
 						echo __( 'Download:', 'woocommerce' );
 
-					echo ' <a href="' . $download_file_url . '" target="_blank">' . current( explode( '?', basename( $file_url ) ) ) . '</a></small>';
+					echo ' <a href="' . $download_file_url . '" target="_blank">' . $filename . '</a></small>';
 
 					$i++;
 				}

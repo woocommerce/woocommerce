@@ -59,7 +59,9 @@ $order = new WC_Order( $order_id );
 
 					foreach ( $download_file_urls as $file_url => $download_file_url ) {
 
-						$links[] = '<small><a href="' . $download_file_url . '">' . sprintf( __( 'Download file%s', 'woocommerce' ), ( count( $download_file_urls ) > 1 ? ' ' . ( $i + 1 ) . ': ' : ': ' ) ) . basename( $file_url ) . '</a></small>';
+						$filename = woocommerce_get_filename_from_url( $file_url );
+
+						$links[] = '<small><a href="' . $download_file_url . '">' . sprintf( __( 'Download file%s', 'woocommerce' ), ( count( $download_file_urls ) > 1 ? ' ' . ( $i + 1 ) . ': ' : ': ' ) ) . $filename . '</a></small>';
 
 						$i++;
 					}
