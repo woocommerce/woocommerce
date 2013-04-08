@@ -190,6 +190,10 @@ if ( ! class_exists( 'ShareYourCartWooCommerce', false ) ) {
 			return $post_id;
 	    }
 
+        public function showCheckoutButton() {
+            echo $this->getButton();
+        }
+
 		/**
 		 * getButtonCallbackURL function.
 		 *
