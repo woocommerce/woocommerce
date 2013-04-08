@@ -647,7 +647,7 @@ class WC_Countries {
 			'{state_upper}'      => strtoupper( $full_state ),
 			'{postcode_upper}'   => strtoupper( $postcode ),
 			'{country_upper}'    => strtoupper( $full_country ),
-		) ) ;
+		), $args ) ;
 
 		$replace = array_map( 'esc_html', $replace );
 

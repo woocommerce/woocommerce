@@ -46,7 +46,7 @@ $col = 1;
 		</header>
 		<address>
 			<?php
-				$address = array(
+				$address = apply_filters( 'woocommerce_my_address_formatted_address', array(
 					'first_name' 	=> get_user_meta( $customer_id, $name . '_first_name', true ),
 					'last_name'		=> get_user_meta( $customer_id, $name . '_last_name', true ),
 					'company'		=> get_user_meta( $customer_id, $name . '_company', true ),
@@ -56,7 +56,7 @@ $col = 1;
 					'state'			=> get_user_meta( $customer_id, $name . '_state', true ),
 					'postcode'		=> get_user_meta( $customer_id, $name . '_postcode', true ),
 					'country'		=> get_user_meta( $customer_id, $name . '_country', true )
-				);
+				), $customer_id, $name );
 
 				$formatted_address = $woocommerce->countries->get_formatted_address( $address );
 
