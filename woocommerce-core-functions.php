@@ -86,14 +86,20 @@ function woocommerce_get_product_ids_on_sale() {
 }
 
 /**
- * woocommerce_sanitize_taxonomy_name function.
+ * Sanitize taxonomy names. Slug format (no spaces, lowercase).
+ *
+ * Doesn't use sanitize_title as this destroys utf chars.
  *
  * @access public
  * @param mixed $taxonomy
  * @return void
  */
 function woocommerce_sanitize_taxonomy_name( $taxonomy ) {
-	return str_replace( array( ' ', '_' ), '-', strtolower( $taxonomy ) );
+	$taxonomy = strtolower( stripslashes( strip_tags( $taxonomy ) ) );
+	$taxonomy = preg_replace( '/&.+?;/', '', $taxonomy ); // Kill entities
+	$taxonomy = str_replace( array( '.', '\'', '"' ), '', $taxonomy ); // Kill quotes and full stops.
+	$taxonomy = str_replace( array( ' ', '_' ), '-', $taxonomy ); // Replace spaces and underscores.
+	return $taxonomy;
 }
 
 /**

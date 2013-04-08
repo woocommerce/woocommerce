@@ -47,10 +47,10 @@ function woocommerce_attributes() {
 		}
 
 		// Grab the submitted data
-		$attribute_label   = ( isset( $_POST['attribute_label'] ) )   ? (string) $_POST['attribute_label'] : '';
+		$attribute_label   = ( isset( $_POST['attribute_label'] ) )   ? (string) stripslashes( $_POST['attribute_label'] ) : '';
 		$attribute_name    = ( isset( $_POST['attribute_name'] ) )    ? woocommerce_sanitize_taxonomy_name( stripslashes( (string) $_POST['attribute_name'] ) ) : '';
-		$attribute_type    = ( isset( $_POST['attribute_type'] ) )    ? (string) $_POST['attribute_type'] : '';
-		$attribute_orderby = ( isset( $_POST['attribute_orderby'] ) ) ? (string) $_POST['attribute_orderby'] : '';
+		$attribute_type    = ( isset( $_POST['attribute_type'] ) )    ? (string) stripslashes( $_POST['attribute_type'] ) : '';
+		$attribute_orderby = ( isset( $_POST['attribute_orderby'] ) ) ? (string) stripslashes( $_POST['attribute_orderby'] ) : '';
 
 		// Auto-generate the label or slug if only one of both was provided
 		if ( ! $attribute_label ) {
