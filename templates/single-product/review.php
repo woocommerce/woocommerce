@@ -39,7 +39,7 @@ $rating = esc_attr( get_comment_meta( $GLOBALS['comment']->comment_ID, 'rating',
 							if ( woocommerce_customer_bought_product( $GLOBALS['comment']->comment_author_email, $GLOBALS['comment']->user_id, $post->ID ) )
 								echo '<em class="verified">(' . __( 'verified owner', 'woocommerce' ) . ')</em> ';
 
-					?>&ndash; <time itemprop="datePublished" time datetime="<?php echo get_comment_date('c'); ?>"><?php echo get_comment_date(__( get_option('date_format'), 'woocommerce' )); ?></time>:
+					?>&ndash; <time itemprop="datePublished" datetime="<?php echo get_comment_date('c'); ?>"><?php echo get_comment_date(__( get_option('date_format'), 'woocommerce' )); ?></time>:
 				</p>
 			<?php endif; ?>
 
