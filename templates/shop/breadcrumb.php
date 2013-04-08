@@ -44,26 +44,18 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 	} elseif ( is_tax('product_cat') ) {
 
 		echo $prepend;
-		$term = get_term_by( 'slug', get_query_var( 'term' ), get_query_var( 'taxonomy' ) );
 
-		$parents = array();
-		$parent = $term->parent;
-		while ( $parent ) {
-			$parents[] = $parent;
-			$new_parent = get_term_by( 'id', $parent, get_query_var( 'taxonomy' ) );
-			$parent = $new_parent->parent;
+		$current_term = get_term_by( 'slug', get_query_var( 'term' ), get_query_var( 'taxonomy' ) );
+
+		$ancestors = array_reverse( get_ancestors( $current_term->term_id, get_query_var( 'taxonomy' ) ) );
+
+		foreach ( $ancestors as $ancestor ) {
+			$ancestor = get_term( $ancestor, get_query_var( 'taxonomy' ) );
+
+			echo $before .  '<a href="' . get_term_link( $ancestor->slug, get_query_var( 'taxonomy' ) ) . '">' . esc_html( $ancestor->name ) . '</a>' . $after . $delimiter;
 		}
 
-		if ( ! empty( $parents ) ) {
-			$parents = array_reverse( $parents );
-			foreach ( $parents as $parent ) {
-				$item = get_term_by( 'id', $parent, get_query_var( 'taxonomy' ));
-				echo $before .  '<a href="' . get_term_link( $item->slug, 'product_cat' ) . '">' . esc_html( $item->name ) . '</a>' . $after . $delimiter;
-			}
-		}
-
-		$queried_object = $wp_query->get_queried_object();
-		echo $before . esc_html( $queried_object->name ) . $after;
+		echo $before . esc_html( $current_term->name ) . $after;
 
 	} elseif ( is_tax('product_tag') ) {
 
@@ -108,32 +100,27 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 		}
 
-	} elseif ( is_single() && !is_attachment() ) {
+	} elseif ( is_single() && ! is_attachment() ) {
 
 		if ( get_post_type() == 'product' ) {
 
 			echo $prepend;
 
-			if ( $terms = wp_get_object_terms( $post->ID, 'product_cat' ) ) {
-				$term = current( $terms );
-				$parents = array();
-				$parent = $term->parent;
+			if ( $terms = wp_get_post_terms( $post->ID, 'product_cat', array( 'orderby' => 'parent', 'order' => 'DESC' ) ) ) {
 
-				while ( $parent ) {
-					$parents[] = $parent;
-					$new_parent = get_term_by( 'id', $parent, 'product_cat' );
-					$parent = $new_parent->parent;
+				$main_term = $terms[0];
+
+				$ancestors = array_reverse( get_ancestors( $main_term->term_id, 'product_cat' ) );
+
+				$ancestors = array_reverse( $ancestors );
+
+				foreach ( $ancestors as $ancestor ) {
+					$ancestor = get_term( $ancestor, 'product_cat' );
+
+					echo $before . '<a href="' . get_term_link( $ancestor->slug, 'product_cat' ) . '">' . $ancestor->name . '</a>' . $after . $delimiter;
 				}
 
-				if ( ! empty( $parents ) ) {
-					$parents = array_reverse($parents);
-					foreach ( $parents as $parent ) {
-						$item = get_term_by( 'id', $parent, 'product_cat');
-						echo $before . '<a href="' . get_term_link( $item->slug, 'product_cat' ) . '">' . $item->name . '</a>' . $after . $delimiter;
-					}
-				}
-
-				echo $before . '<a href="' . get_term_link( $term->slug, 'product_cat' ) . '">' . $term->name . '</a>' . $after . $delimiter;
+				echo $before . '<a href="' . get_term_link( $main_term->slug, 'product_cat' ) . '">' . $main_term->name . '</a>' . $after . $delimiter;
 
 			}
 
