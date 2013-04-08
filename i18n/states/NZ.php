@@ -27,4 +27,3 @@ $states['NZ'] = array(
 	'SL' => __( 'Southland', 'woocommerce')
 );
 
-
