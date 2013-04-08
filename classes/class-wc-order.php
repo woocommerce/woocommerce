@@ -294,8 +294,8 @@ class WC_Order {
 			global $woocommerce;
 
 			// Formatted Addresses
-			$address = array(
-				'first_name' 	=> $this->billing_first_name,
+			$address = apply_filters( 'woocommerce_order_formatted_billing_address', array(
+				'first_name'	=> $this->billing_first_name,
 				'last_name'		=> $this->billing_last_name,
 				'company'		=> $this->billing_company,
 				'address_1'		=> $this->billing_address_1,
@@ -304,7 +304,7 @@ class WC_Order {
 				'state'			=> $this->billing_state,
 				'postcode'		=> $this->billing_postcode,
 				'country'		=> $this->billing_country
-			);
+			), $this );
 
 			$this->formatted_billing_address = $woocommerce->countries->get_formatted_address( $address );
 		}
@@ -347,7 +347,7 @@ class WC_Order {
 				global $woocommerce;
 
 				// Formatted Addresses
-				$address = array(
+				$address = apply_filters( 'woocommerce_order_formatted_shipping_address', array(
 					'first_name' 	=> $this->shipping_first_name,
 					'last_name'		=> $this->shipping_last_name,
 					'company'		=> $this->shipping_company,
@@ -357,7 +357,7 @@ class WC_Order {
 					'state'			=> $this->shipping_state,
 					'postcode'		=> $this->shipping_postcode,
 					'country'		=> $this->shipping_country
-				);
+				), $this );
 
 				$this->formatted_shipping_address = $woocommerce->countries->get_formatted_address( $address );
 			}

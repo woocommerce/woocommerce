@@ -72,7 +72,7 @@ function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 
 		break;
 		case "woocommerce_billing_address" :
-			$address = array(
+			$address = apply_filters( 'woocommerce_user_column_billing_address', array(
 				'first_name' 	=> get_user_meta( $user_id, 'billing_first_name', true ),
 				'last_name'		=> get_user_meta( $user_id, 'billing_last_name', true ),
 				'company'		=> get_user_meta( $user_id, 'billing_company', true ),
@@ -82,7 +82,7 @@ function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 				'state'			=> get_user_meta( $user_id, 'billing_state', true ),
 				'postcode'		=> get_user_meta( $user_id, 'billing_postcode', true ),
 				'country'		=> get_user_meta( $user_id, 'billing_country', true )
-			);
+			), $user_id );
 
 			$formatted_address = $woocommerce->countries->get_formatted_address( $address );
 
@@ -94,7 +94,7 @@ function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 			$value = wpautop( $value );
 		break;
 		case "woocommerce_shipping_address" :
-			$address = array(
+			$address = apply_filters( 'woocommerce_user_column_shipping_address', array(
 				'first_name' 	=> get_user_meta( $user_id, 'shipping_first_name', true ),
 				'last_name'		=> get_user_meta( $user_id, 'shipping_last_name', true ),
 				'company'		=> get_user_meta( $user_id, 'shipping_company', true ),
@@ -104,7 +104,7 @@ function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 				'state'			=> get_user_meta( $user_id, 'shipping_state', true ),
 				'postcode'		=> get_user_meta( $user_id, 'shipping_postcode', true ),
 				'country'		=> get_user_meta( $user_id, 'shipping_country', true )
-			);
+			), $user_id );
 
 			$formatted_address = $woocommerce->countries->get_formatted_address( $address );
 
