@@ -22,7 +22,7 @@ $meta_query[] = $woocommerce->query->stock_status_meta_query();
 $args = array(
 	'post_type'           => 'product',
 	'ignore_sticky_posts' => 1,
-	'posts_per_page'      => 2,
+	'posts_per_page'      => apply_filters( 'woocommerce_cross_sells_total', 2 ),
 	'no_found_rows'       => 1,
 	'orderby'             => 'rand',
 	'post__in'            => $crosssells,
@@ -31,7 +31,7 @@ $args = array(
 
 $products = new WP_Query( $args );
 
-$woocommerce_loop['columns'] 	= 2;
+$woocommerce_loop['columns'] 	= apply_filters( 'woocommerce_cross_sells_columns', 2 );
 
 if ( $products->have_posts() ) : ?>
 
