@@ -193,6 +193,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - created an icon font for the star ratings to improve consistency
 * Tweak - woocommerce_show_page_title filter
 * Tweak - wrapper / css tweaks for TwentyThirteen compatibility
+* Tweak - Added filters for controlling cross-sell display
 * Localisation - NZ States
 
 = 2.0.5 - 26/03/2013 =
