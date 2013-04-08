@@ -802,14 +802,14 @@ function woocommerce_process_registration() {
             wp_set_auth_cookie($user_id, true, $secure_cookie);
 
             // Redirect
-            if ( wp_get_referer() ) {
-				wp_safe_redirect( wp_get_referer() );
-				exit;
+			if ( wp_get_referer() ) {
+				$redirect = esc_url( wp_get_referer() );
 			} else {
-				wp_redirect(get_permalink(woocommerce_get_page_id('myaccount')));
-				exit;
+				$redirect = esc_url( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
 			}
 
+			wp_redirect( apply_filters( 'woocommerce_registration_redirect', $redirect ) );
+			exit;
 		}
 
 	}
@@ -1725,7 +1725,6 @@ add_action( 'template_redirect', 'woocommerce_save_address' );
  * @param string $file_url
  * @return string
  */
-
 function woocommerce_get_filename_from_url( $file_url ) {
 	$parts = parse_url( $file_url );
 	return basename( $parts['path'] );
