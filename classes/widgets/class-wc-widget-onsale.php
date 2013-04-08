@@ -77,6 +77,7 @@ class WC_Widget_Onsale extends WP_Widget {
 
 		// Get products on sale
 		$product_ids_on_sale = woocommerce_get_product_ids_on_sale();
+		$product_ids_on_sale[] = 0;
 
 		$meta_query = array();
 		$meta_query[] = $woocommerce->query->visibility_meta_query();
