@@ -46,7 +46,7 @@ $col = 1;
 		</header>
 		<address>
 			<?php
-				$address = apply_filters( 'oocommerce_my_account_my_address_formatted_address', array(
+				$address = apply_filters( 'woocommerce_my_account_my_address_formatted_address', array(
 					'first_name' 	=> get_user_meta( $customer_id, $name . '_first_name', true ),
 					'last_name'		=> get_user_meta( $customer_id, $name . '_last_name', true ),
 					'company'		=> get_user_meta( $customer_id, $name . '_company', true ),
