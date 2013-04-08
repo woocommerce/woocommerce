@@ -17,7 +17,6 @@ jQuery(document).ready(function($) {
 				action: 		'woocommerce_add_to_cart',
 				product_id: 	$thisbutton.attr('data-product_id'),
 				quantity:       $thisbutton.attr('data-quantity'),
-				security: 		woocommerce_params.add_to_cart_nonce
 			};
 
 			// Trigger event

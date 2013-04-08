@@ -1041,7 +1041,7 @@ function woocommerce_download_product() {
 			 * handles the various permutations.
 			 */
 			$scheme = parse_url( $file_path, PHP_URL_SCHEME );
-			
+
 			if ( $scheme ) {
 				$site_url = set_url_scheme( site_url( '' ), $scheme );
 			} else {
@@ -1107,7 +1107,7 @@ function woocommerce_download_product() {
 			// IE bug prevents download via SSL when Cache Control and Pragma no-cache headers set.
 			header( 'Expires: Wed, 11 Jan 1984 05:00:00 GMT' );
 			header( 'Cache-Control: private' );
-		} else {			
+		} else {
 			nocache_headers();
 		}
 

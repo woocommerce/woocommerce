@@ -52,4 +52,10 @@ jQuery(document).ready(function($) {
 		$.ajax( $fragment_refresh );
 	}
 
+	/* Cart hiding */
+	if ( $.cookie( "woocommerce_items_in_cart" ) > 0 )
+		jQuery('.hide_cart_widget_if_empty').closest('.widget_shopping_cart').show();
+	else
+		jQuery('.hide_cart_widget_if_empty').closest('.widget_shopping_cart').hide();
+
 });

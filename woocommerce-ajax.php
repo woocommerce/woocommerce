@@ -179,15 +179,11 @@ add_action('wp_ajax_nopriv_woocommerce_update_order_review', 'woocommerce_ajax_u
  * @return void
  */
 function woocommerce_ajax_add_to_cart() {
-
 	global $woocommerce;
 
-	check_ajax_referer( 'add-to-cart', 'security' );
-
-	$product_id = apply_filters('woocommerce_add_to_cart_product_id', absint( $_POST['product_id'] ) );
-	$quantity   = empty( $_POST['quantity'] ) ? 1 : apply_filters( 'woocommerce_stock_amount', $_POST['quantity'] );
-
-	$passed_validation = apply_filters('woocommerce_add_to_cart_validation', true, $product_id, $quantity );
+	$product_id        = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_POST['product_id'] ) );
+	$quantity          = empty( $_POST['quantity'] ) ? 1 : apply_filters( 'woocommerce_stock_amount', $_POST['quantity'] );
+	$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
 	if ( $passed_validation && $woocommerce->cart->add_to_cart( $product_id, $quantity ) ) {
 
@@ -208,7 +204,7 @@ function woocommerce_ajax_add_to_cart() {
 		// If there was an error adding to the cart, redirect to the product page to show any errors
 		$data = array(
 			'error' => true,
-			'product_url' => apply_filters('woocommerce_cart_redirect_after_error', get_permalink( $product_id ), $product_id)
+			'product_url' => apply_filters( 'woocommerce_cart_redirect_after_error', get_permalink( $product_id ), $product_id )
 		);
 
 		$woocommerce->set_messages();

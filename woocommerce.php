@@ -1847,6 +1847,8 @@ class Woocommerce {
 	public function nocache() {
 		if ( ! defined( 'DONOTCACHEPAGE' ) )
 			define( "DONOTCACHEPAGE", "true" );
+
+		nocache_headers();
 	}
 
 
