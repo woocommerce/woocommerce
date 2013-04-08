@@ -50,7 +50,7 @@ $order = new WC_Order( $order_id );
 				$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
 				$item_meta->display();
 
-				if ( $_product->exists() && $_product->is_downloadable() && $order->is_download_permitted() ) {
+				if ( $_product && $_product->exists() && $_product->is_downloadable() && $order->is_download_permitted() ) {
 
 					$download_file_urls = $order->get_downloadable_file_urls( $item['product_id'], $item['variation_id'], $item );
 

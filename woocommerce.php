@@ -1073,7 +1073,7 @@ class Woocommerce {
 							'menu_name'				=> $menu_name
 						),
 					'description' 			=> __( 'This is where store orders are stored.', 'woocommerce' ),
-					'public' 				=> true,
+					'public' 				=> false,
 					'show_ui' 				=> true,
 					'capability_type' 		=> 'shop_order',
 					'map_meta_cap'			=> true,
@@ -1083,7 +1083,7 @@ class Woocommerce {
 					'hierarchical' 			=> false,
 					'show_in_nav_menus' 	=> false,
 					'rewrite' 				=> false,
-					'query_var' 			=> true,
+					'query_var' 			=> false,
 					'supports' 				=> array( 'title', 'comments', 'custom-fields' ),
 					'has_archive' 			=> false,
 				)
