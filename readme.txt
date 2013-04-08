@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.5
 Tested up to: 3.5
-Stable tag: 2.0.5
+Stable tag: 2.0.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -165,7 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= X =
+= 2.0.6 - 09/04/2013 =
 * Tweak/Fix - Merge taxes by CODE so totals are displayed clearer. Also added additonal function for getting merged tax totals, and to keep compatibility with themes.
 * Tweak/Fix - Recent reviews show actual review stars, and allowed get_rating_html() to be passed a rating. Also removed unused $location var.
 * Fix - Saving of meta values from paypal after payment.
