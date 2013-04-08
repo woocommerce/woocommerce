@@ -183,6 +183,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Fix IE Download via SSL bug and fix http file over SSL.
 * Fix - Show non-existing product line items.
 * Fix - Conflicts with W3 Total Cache DB Cache
+* Fix - piwik tracking.
 * Tweak - Added a check to parent theme for comments_template before loading plugin template.
 * Tweak - Remove hard coded max from random products widget.
 * Tweak - Add filter hook to the place order button for easy 3rd party manipulation.
@@ -194,7 +195,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - woocommerce_show_page_title filter
 * Tweak - wrapper / css tweaks for TwentyThirteen compatibility
 * Tweak - Added filters for controlling cross-sell display
+* Tweak - Made hierarchy code in breadcrumbs more reliable.
 * Localisation - NZ States
+* Other minor fixes and localisation updates.
 
 = 2.0.5 - 26/03/2013 =
 * Tweak - Made no shipping available messages filterable via woocommerce_cart_no_shipping_available_html and woocommerce_no_shipping_available_html.
