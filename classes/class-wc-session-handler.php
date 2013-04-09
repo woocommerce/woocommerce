@@ -137,8 +137,8 @@ class WC_Session_Handler extends WC_Session {
     		$session_expiry_option = '_wc_session_expires_' . $this->_customer_id;
 
 	    	if ( false === get_option( $session_option ) ) {
-	    		add_option( $session_option, $this->_data ); // No autoload - W3TC compat
-		    	add_option( $session_expiry_option, $this->_session_expiration );
+	    		add_option( $session_option, $this->_data, '', 'no' );
+		    	add_option( $session_expiry_option, $this->_session_expiration, '', 'no' );
 	    	} else {
 		    	update_option( $session_option, $this->_data );
 	    	}
