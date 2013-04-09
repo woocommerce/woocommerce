@@ -146,7 +146,7 @@ function woocommerce_restrict_manage_coupons() {
 	// Type
 	?>
 	<select name='coupon_type' id='dropdown_shop_coupon_type'>
-		<option value=""><?php _e( 'Show all statuses', 'woocommerce' ); ?></option>
+		<option value=""><?php _e( 'Show all types', 'woocommerce' ); ?></option>
 		<?php
 			$types = $woocommerce->get_coupon_discount_types();
 
