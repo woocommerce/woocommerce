@@ -308,15 +308,16 @@ class Woocommerce {
 
 		// Include abstract classes
 		include_once( 'classes/abstracts/abstract-wc-product.php' );			// Products
-		include_once( 'classes/abstracts/abstract-wc-settings-api.php' );	// Settings API (for gateways, shipping, and integrations)
+		include_once( 'classes/abstracts/abstract-wc-settings-api.php' );		// Settings API (for gateways, shipping, and integrations)
 		include_once( 'classes/abstracts/abstract-wc-shipping-method.php' );	// A Shipping method
-		include_once( 'classes/abstracts/abstract-wc-payment-gateway.php' ); // A Payment gateway
+		include_once( 'classes/abstracts/abstract-wc-payment-gateway.php' ); 	// A Payment gateway
 		include_once( 'classes/abstracts/abstract-wc-integration.php' );		// An integration with a service
 
 		// Classes (used on all pages)
-		include_once( 'classes/class-wc-product-factory.php' );				// Product factory
-		include_once( 'classes/class-wc-countries.php' );					// Defines countries and states
+		include_once( 'classes/class-wc-product-factory.php' );					// Product factory
+		include_once( 'classes/class-wc-countries.php' );						// Defines countries and states
 		include_once( 'classes/class-wc-integrations.php' );					// Loads integrations
+		include_once( 'classes/class-wc-cache-helper.php' );					// Cache Helper
 
 		// Include Core Integrations - these are included sitewide
 		include_once( 'classes/integrations/google-analytics/class-wc-google-analytics.php' );
@@ -470,9 +471,6 @@ class Woocommerce {
 
 		// Set up localisation
 		$this->load_plugin_textdomain();
-
-		// Prevent Caching on dynamic pages
-		$this->cache_helper();
 
 		// Variables
 		$this->template_url			= apply_filters( 'woocommerce_template_url', 'woocommerce/' );
@@ -1800,100 +1798,6 @@ class Woocommerce {
 		return ob_get_clean();
 	}
 
-	/** Cache Helpers *********************************************************/
-
-	/**
-	 * cache_helper function.
-	 *
-	 * @access private
-	 * @return void
-	 */
-	private function cache_helper() {
-
-		if ( false === ( $wc_page_uris = get_transient( 'woocommerce_cache_excluded_uris' ) ) ) {
-
-			if ( ! woocommerce_get_page_id( 'cart' ) || ! woocommerce_get_page_id( 'checkout' ) || ! woocommerce_get_page_id( 'myaccount' ) )
-				return;
-
-			$wc_page_uris   = array();
-			$cart_page      = get_post( woocommerce_get_page_id( 'cart' ) );
-			$checkout_page  = get_post( woocommerce_get_page_id( 'checkout' ) );
-			$account_page   = get_post( woocommerce_get_page_id( 'myaccount' ) );
-
-			$wc_page_uris[] = '/' . $cart_page->post_name;
-	    	$wc_page_uris[] = '/' . $checkout_page->post_name;
-	    	$wc_page_uris[] = '/' . $account_page->post_name;
-	    	$wc_page_uris[] = 'p=' . $cart_page->ID;
-	    	$wc_page_uris[] = 'p=' . $checkout_page->ID;
-	    	$wc_page_uris[] = 'p=' . $account_page->ID;
-
-	    	set_transient( 'woocommerce_cache_excluded_uris', $wc_page_uris );
-		}
-
-		if ( is_array( $wc_page_uris ) )
-			foreach( $wc_page_uris as $uri )
-				if ( strstr( $_SERVER['REQUEST_URI'], $uri ) ) {
-					$this->nocache();
-					break;
-				}
-	}
-
-	/**
-	 * Sets a constant preventing some caching plugins from caching a page. Used on dynamic pages.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function nocache() {
-		if ( ! defined( 'DONOTCACHEPAGE' ) )
-			define( "DONOTCACHEPAGE", "true" );
-
-		nocache_headers();
-	}
-
-
-	/**
-	 * Sets a cookie when the cart has something in it. Can be used by hosts to prevent caching if set.
-	 *
-	 * @access public
-	 * @param mixed $set
-	 * @return void
-	 */
-	public function cart_has_contents_cookie( $set ) {
-		if ( ! headers_sent() ) {
-			if ( $set ) {
-				setcookie( "woocommerce_items_in_cart", "1", 0, COOKIEPATH, COOKIE_DOMAIN, false );
-				setcookie( "woocommerce_cart_hash", md5( json_encode( $this->cart->get_cart() ) ), 0, COOKIEPATH, COOKIE_DOMAIN, false );
-			} else {
-				setcookie( "woocommerce_items_in_cart", "0", time() - 3600, COOKIEPATH, COOKIE_DOMAIN, false );
-				setcookie( "woocommerce_cart_hash", "0", time() - 3600, COOKIEPATH, COOKIE_DOMAIN, false );
-			}
-		}
-	}
-
-	/**
-	 * mfunc_wrapper function.
-	 *
-	 * Wraps a function in mfunc to keep it dynamic.
-	 *
-	 * If running WP Super Cache this checks for late_init (because functions calling this require WP to be loaded)
-	 *
-	 * @access public
-	 * @param mixed $function
-	 * @return void
-	 */
-	public function mfunc_wrapper( $mfunction, $function, $args ) {
-		global $wp_super_cache_late_init;
-
-		if ( is_null( $wp_super_cache_late_init ) || $wp_super_cache_late_init == 1 ) {
-			echo '<!--mfunc ' . $mfunction . ' -->';
-			$function( $args );
-			echo '<!--/mfunc-->';
-		} else {
-			$function( $args );
-		}
-	}
-
 	/** Transients ************************************************************/
 
 	/**
@@ -2053,6 +1957,46 @@ class Woocommerce {
 			$this->_inline_js = '';
 		}
 	}
+
+	/** Deprecated functions *********************************************************/
+
+	/**
+	 * Sets a constant preventing some caching plugins from caching a page. Used on dynamic pages.
+	 *
+	 * @deprecated 2.0.0 No longer needed - Cache Helper class sets up nocache automatically.
+	 * @access public
+	 * @return void
+	 */
+	public function nocache() {
+		_deprecated_function( 'Woocommerce::nocache', '2.0.6' );
+	}
+
+	/**
+	 * mfunc_wrapper function.
+	 *
+	 * Wraps a function in mfunc to keep it dynamic.
+	 *
+	 * If running WP Super Cache this checks for late_init (because functions calling this require WP to be loaded)
+	 *
+	 * @deprecated 2.0.0 No longer needed - cart fragments are cache friendly.
+	 * @access public
+	 * @param mixed $function
+	 * @return void
+	 */
+	public function mfunc_wrapper( $mfunction, $function, $args ) {
+		global $wp_super_cache_late_init;
+
+		_deprecated_function( 'Woocommerce::mfunc_wrapper', '2.0.0' );
+
+		if ( is_null( $wp_super_cache_late_init ) || $wp_super_cache_late_init == 1 ) {
+			echo '<!--mfunc ' . $mfunction . ' -->';
+			$function( $args );
+			echo '<!--/mfunc-->';
+		} else {
+			$function( $args );
+		}
+	}
+
 }
 
 /**

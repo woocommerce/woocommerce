@@ -144,24 +144,20 @@ class WC_Cart {
 							'quantity' 		=> $values['quantity'],
 							'data'			=> $_product
 						), $values, $key );
-
 					}
 				}
-
-				do_action( 'woocommerce_cart_loaded_from_session', $this );
-
-				if ( ! is_array( $this->cart_contents ) )
-					$this->cart_contents = array();
-
-			} else {
-				$this->cart_contents = array();
 			}
 
-			// Cookie
+			if ( empty( $this->cart_contents ) || ! is_array( $this->cart_contents ) )
+				$this->cart_contents = array();
+
 			if ( sizeof( $this->cart_contents ) > 0 )
-				$woocommerce->cart_has_contents_cookie( true );
+				$this->set_cart_cookies();
 			else
-				$woocommerce->cart_has_contents_cookie( false );
+				$this->set_cart_cookies( false );
+
+			// Trigger action
+			do_action( 'woocommerce_cart_loaded_from_session', $this );
 
 			// Load totals
 			$this->cart_contents_total 	= isset( $woocommerce->session->cart_contents_total ) ? $woocommerce->session->cart_contents_total : 0;
@@ -922,8 +918,7 @@ class WC_Cart {
 
 			do_action( 'woocommerce_add_to_cart', $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data );
 
-			$woocommerce->cart_has_contents_cookie( true );
-
+			$this->set_cart_cookies();
 			$this->calculate_totals();
 
 			return true;
@@ -946,6 +941,25 @@ class WC_Cart {
 			}
 
 			$this->calculate_totals();
+		}
+
+		/**
+		 * Set cart hash cookie and items in cart.
+		 *
+		 * @access private
+		 * @param bool $set (default: true)
+		 * @return void
+		 */
+		private function set_cart_cookies( $set = true ) {
+			if ( ! headers_sent() ) {
+				if ( $set ) {
+					setcookie( "woocommerce_items_in_cart", "1", 0, COOKIEPATH, COOKIE_DOMAIN, false );
+					setcookie( "woocommerce_cart_hash", md5( json_encode( $this->get_cart() ) ), 0, COOKIEPATH, COOKIE_DOMAIN, false );
+				} else {
+					setcookie( "woocommerce_items_in_cart", "0", time() - 3600, COOKIEPATH, COOKIE_DOMAIN, false );
+					setcookie( "woocommerce_cart_hash", "0", time() - 3600, COOKIEPATH, COOKIE_DOMAIN, false );
+				}
+			}
 		}
 
     /*-----------------------------------------------------------------------------------*/
