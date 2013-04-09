@@ -54,8 +54,12 @@ jQuery(document).ready(function($) {
 
 	/* Cart hiding */
 	if ( $.cookie( "woocommerce_items_in_cart" ) > 0 )
-		jQuery('.hide_cart_widget_if_empty').closest('.widget_shopping_cart').show();
+		$('.hide_cart_widget_if_empty').closest('.widget_shopping_cart').show();
 	else
-		jQuery('.hide_cart_widget_if_empty').closest('.widget_shopping_cart').hide();
+		$('.hide_cart_widget_if_empty').closest('.widget_shopping_cart').hide();
+
+	$('body').bind( 'adding_to_cart', function() {
+		$('.hide_cart_widget_if_empty').closest('.widget_shopping_cart').show();
+	} );
 
 });
