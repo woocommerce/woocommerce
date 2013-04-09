@@ -553,6 +553,11 @@ function woocommerce_status_tools() {
 			'button'	=> __('Reset capabilities','woocommerce'),
 			'desc'		=> __( 'This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages.', 'woocommerce' ),
 		),
+		'clear_sessions' => array(
+			'name'		=> __('Customer Sessions','woocommerce'),
+			'button'	=> __('Clear all sessions','woocommerce'),
+			'desc'		=> __( '<strong class="red">Warning</strong> This tool will delete all customer session data from the database, including any current live carts.', 'woocommerce' ),
+		),
 	) );
 
 	if ( ! empty( $_GET['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
@@ -623,6 +628,16 @@ function woocommerce_status_tools() {
 				_woocommerce_term_recount( $product_cats, get_taxonomy( 'product_tag' ), false, false );
 
 				echo '<div class="updated"><p>' . __( 'Terms successfully recounted', 'woocommerce' ) . '</p></div>';
+			break;
+			case "clear_sessions" :
+
+				$wpdb->query( "
+					DELETE FROM {$wpdb->options}
+					WHERE option_name LIKE '_wc_session_%' OR option_name LIKE '_wc_session_expires_%'
+				" );
+
+				wp_cache_flush();
+
 			break;
 			default:
 				$action = esc_attr( $_GET['action'] );
