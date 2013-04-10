@@ -1428,7 +1428,7 @@ function woocommerce_terms_clauses( $clauses, $taxonomies, $args ) {
 	// default to ASC
 	if ( ! isset($args['menu_order']) || ! in_array( strtoupper($args['menu_order']), array('ASC', 'DESC')) ) $args['menu_order'] = 'ASC';
 
-	$order = "ORDER BY CAST(tm.meta_value AS SIGNED) " . $args['menu_order'];
+	$order = "ORDER BY tm.meta_value+0 " . $args['menu_order'];
 
 	if ( $clauses['orderby'] ):
 		$clauses['orderby'] = str_replace('ORDER BY', $order . ',', $clauses['orderby'] );
