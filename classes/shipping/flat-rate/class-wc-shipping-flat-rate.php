@@ -223,14 +223,18 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			}
 		}
 
-		if ( ! isset( $rate ) )
-			return;
-
-		// Register the rate
-		$this->add_rate( $rate );
+		if ( isset( $rate ) )
+			$this->add_rate( $rate );
 
 		// Add any extra rates
 		if ( sizeof( $this->options ) > 0) {
+
+			if ( ! isset( $rate ) )
+				$rate = array(
+					'id' 	=> $this->id,
+					'label' => $this->title,
+					'cost' 	=> 0,
+				);
 
 			// Get item qty
 			$total_quantity = 0;
