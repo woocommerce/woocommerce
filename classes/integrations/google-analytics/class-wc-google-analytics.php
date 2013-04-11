@@ -32,6 +32,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 		// Define user set variables
 		$this->ga_id 							= $this->get_option( 'ga_id' );
+		$this->ga_set_domain_name               = $this->get_option( 'ga_set_domain_name' );
 		$this->ga_standard_tracking_enabled 	= $this->get_option( 'ga_standard_tracking_enabled' );
 		$this->ga_ecommerce_tracking_enabled 	= $this->get_option( 'ga_ecommerce_tracking_enabled' );
 		$this->ga_event_tracking_enabled		= $this->get_option( 'ga_event_tracking_enabled' );
@@ -63,6 +64,12 @@ class WC_Google_Analytics extends WC_Integration {
 				'description' 		=> __( 'Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woocommerce' ),
 				'type' 				=> 'text',
 		    	'default' 			=> get_option('woocommerce_ga_id') // Backwards compat
+			),
+			'ga_set_domain_name' => array(
+				'title' 			=> __( 'Set Domain Name', 'woocommerce' ),
+				'description' 		=> sprintf( __( '(Optional) Sets the <code>_setDomainName</code> variable. <a href="%s">See here for more information</a>.', 'woocommerce' ), 'https://developers.google.com/analytics/devguides/collection/gajs/gaTrackingSite#multipleDomains' ),
+				'type' 				=> 'text',
+		    	'default' 			=> ''
 			),
 			'ga_standard_tracking_enabled' => array(
 				'title' 			=> __( 'Tracking code', 'woocommerce' ),
@@ -113,11 +120,16 @@ class WC_Google_Analytics extends WC_Integration {
 			$username 		= __( 'Guest', 'woocommerce' );
 		}
 
+		if ( ! empty( $this->ga_set_domain_name ) )
+			$set_domain_name = "['_setDomainName', '" . esc_js( $this->ga_set_domain_name ) . "'],\n";
+		else
+			$set_domain_name = '';
+
 		echo "<script type='text/javascript'>
 
 			var _gaq = _gaq || [];
 			_gaq.push(
-				['_setAccount', '" . esc_js( $tracking_id ) . "'],
+				['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name . "
 				['_setCustomVar', 1, 'logged-in', '" . $loggedin . "', 1],
 				['_setCustomVar', 2, 'user-id', '" . $user_id . "', 1],
 				['_setCustomVar', 3, 'username', '" . $username . "', 1],
@@ -168,11 +180,16 @@ class WC_Google_Analytics extends WC_Integration {
 			$username 		= __( 'Guest', 'woocommerce' );
 		}
 
+		if ( ! empty( $this->ga_set_domain_name ) )
+			$set_domain_name = "['_setDomainName', '" . esc_js( $this->ga_set_domain_name ) . "'],";
+		else
+			$set_domain_name = '';
+
 		$code = "
 			var _gaq = _gaq || [];
 
 			_gaq.push(
-				['_setAccount', '" . esc_js( $tracking_id ) . "'],
+				['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name . "
 				['_setCustomVar', 1, 'logged-in', '" . esc_js( $loggedin ) . "', 1],
 				['_setCustomVar', 2, 'user-id', '" . esc_js( $user_id ) . "', 1],
 				['_setCustomVar', 3, 'username', '" . esc_js( $username ) . "', 1],
