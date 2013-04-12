@@ -388,7 +388,7 @@ function woocommerce_product_data_box() {
 						        						if ( $all_terms ) {
 							        						foreach ( $all_terms as $term ) {
 							        							$has_term = has_term( $term->term_id, $attribute_taxonomy_name, $thepostid ) ? 1 : 0;
-							        							echo '<option value="' . $term->slug . '" ' . selected( $has_term, 1, false ) . '>' . $term->name . '</option>';
+							        							echo '<option value="' . esc_attr( $term->slug ) . '" ' . selected( $has_term, 1, false ) . '>' . $term->name . '</option>';
 															}
 														}
 														?>
@@ -749,12 +749,12 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 
 				if ( isset( $attribute_values[ $i ] ) ) {
 
-			 		// Format values
+			 		// Format values (posted values are slugs)
 			 		if ( is_array( $attribute_values[ $i ] ) ) {
-				 		$values = array_map( 'woocommerce_clean', $attribute_values[ $i ] );
+				 		$values = array_map( 'sanitize_title', $attribute_values[ $i ] );
 				 	} else {
 				 		// Text based, separate by pipe
-				 		$values = array_map( 'woocommerce_clean', explode( '|', $attribute_values[ $i ] ) );
+				 		$values = array_map( 'sanitize_title', explode( '|', $attribute_values[ $i ] ) );
 				 	}
 
 				 	// Remove empty items in the array

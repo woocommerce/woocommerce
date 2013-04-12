@@ -442,12 +442,12 @@ function woocommerce_save_attributes() {
 
 				if ( isset( $attribute_values[ $i ] ) ) {
 
-			 		// Format values
+			 		// Format values (slug format)
 			 		if ( is_array( $attribute_values[ $i ] ) ) {
-				 		$values = array_map( 'woocommerce_clean', array_map( 'stripslashes', $attribute_values[ $i ] ) );
+				 		$values = array_map( 'sanitize_title', array_map( 'stripslashes', $attribute_values[ $i ] ) );
 				 	} else {
 				 		// Text based, separate by pipe
-				 		$values = array_map( 'woocommerce_clean', array_map( 'stripslashes', explode( '|', $attribute_values[ $i ] ) ) );
+				 		$values = array_map( 'sanitize_title', array_map( 'stripslashes', explode( '|', $attribute_values[ $i ] ) ) );
 				 	}
 
 				 	// Remove empty items in the array
