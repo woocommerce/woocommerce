@@ -170,6 +170,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Allow extra flat rate options even if main rate is 0.
 * Fix - Fix email subject lines if options not set.
 * Fix - Prevent over-sanitization of attribute terms when editing products.
+* Fix - Sanitize coupon code names before checking/applying.
 
 = 2.0.6 - 10/04/2013 =
 * Tweak/Fix - Merge taxes by CODE so totals are displayed clearer. Also added additonal function for getting merged tax totals, and to keep compatibility with themes.

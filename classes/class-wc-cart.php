@@ -1807,9 +1807,13 @@ class WC_Cart {
 		 *
 		 * @return bool
 		 */
-		public function has_discount( $code ) {
-			if ( in_array( $code, $this->applied_coupons ) ) return true;
-			return false;
+		public function has_discount( $coupon_code ) {
+
+			// Sanitize coupon code
+			$coupon_code = apply_filters( 'woocommerce_coupon_code', $coupon_code );
+
+			// Check if its set
+			return in_array( $coupon_code, $this->applied_coupons );
 		}
 
 		/**
@@ -1825,6 +1829,10 @@ class WC_Cart {
 			if ( ! $woocommerce->cart->coupons_enabled() )
 				return false;
 
+			// Sanitize coupon code
+			$coupon_code = apply_filters( 'woocommerce_coupon_code', $coupon_code );
+
+			// Get the coupon
 			$the_coupon = new WC_Coupon( $coupon_code );
 
 			if ( $the_coupon->id ) {
