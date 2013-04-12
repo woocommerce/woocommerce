@@ -267,8 +267,8 @@ abstract class WC_Email extends WC_Settings_API {
 	* @access public
 	* @return string
 	*/
-	function get_option( $opt ) {
-		return __( parent::get_option( $opt ) );
+	function get_option( $key, $empty_value = null ) {
+		return __( parent::get_option( $key, $empty_value ) );
 	}
 
 	/**
