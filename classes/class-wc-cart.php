@@ -1571,53 +1571,69 @@ class WC_Cart {
 				}
 			}
 
-			// Set tax total to sum of all tax rows
-			$this->tax_total = $this->tax->get_tax_total( $this->taxes );
-
-			// VAT exemption done at this point - so all totals are correct before exemption
-			if ( $woocommerce->customer->is_vat_exempt() ) {
-				$this->shipping_tax_total = $this->tax_total = 0;
-				$this->taxes = $this->shipping_taxes = array();
-
-				foreach ( $this->cart_contents as $cart_item_key => $item )
-					$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = $this->cart_contents[ $cart_item_key ]['line_tax'] = 0;
-			}
-
-			// Cart Discounts (after tax)
-			$this->apply_cart_discounts_after_tax();
-
 			// Only calculate the grand total + shipping if on the cart/checkout
 			if ( is_checkout() || is_cart() || defined('WOOCOMMERCE_CHECKOUT') || defined('WOOCOMMERCE_CART') ) {
+
+				// Total up/round taxes
+				if ( get_option('woocommerce_tax_round_at_subtotal') == 'no' ) {
+					$this->tax_total          = $this->tax->get_tax_total( $this->taxes );
+					$this->taxes              = array_map( array( $this->tax, 'round' ), $this->taxes );
+				} else {
+					$this->tax_total          = array_sum( $this->taxes );
+				}
 
 				// Cart Shipping
 				$this->calculate_shipping();
 
-				// VAT exemption for shipping
-				if ( $woocommerce->customer->is_vat_exempt() ) {
-					$this->shipping_tax_total = 0;
-					$this->shipping_taxes = array();
+				// Total up/round taxes for shipping
+				if ( get_option('woocommerce_tax_round_at_subtotal') == 'no' ) {
+					$this->shipping_tax_total = $this->tax->get_tax_total( $this->shipping_taxes );
+					$this->shipping_taxes     = array_map( array( $this->tax, 'round' ), $this->shipping_taxes );
+				} else {
+					$this->shipping_tax_total = array_sum( $this->shipping_taxes );
 				}
 
-				// Round cart/shipping tax rows
-				$this->taxes = array_map( array( $this->tax, 'round' ), $this->taxes );
-				$this->shipping_taxes = array_map( array( $this->tax, 'round' ), $this->shipping_taxes );
+				// VAT exemption done at this point - so all totals are correct before exemption
+				if ( $woocommerce->customer->is_vat_exempt() )
+					$this->remove_taxes();
+
+				// Cart Discounts (after tax)
+				$this->apply_cart_discounts_after_tax();
 
 				// Allow plugins to hook and alter totals before final total is calculated
 				do_action( 'woocommerce_calculate_totals', $this );
 
-				/**
-				 * Grand Total
-				 *
-				 * Based on discounted product prices, discounted tax, shipping cost + tax, and any discounts to be added after tax (e.g. store credit)
-				 */
-				$this->total = apply_filters( 'woocommerce_calculated_total', number_format( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total - $this->discount_total + $this->fee_total, $this->dp, '.', '' ), $this );
+				// Grand Total - Discounted product prices, discounted tax, shipping cost + tax, and any discounts to be added after tax (e.g. store credit)
+				$this->total = max( 0, apply_filters( 'woocommerce_calculated_total', number_format( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total - $this->discount_total + $this->fee_total, $this->dp, '.', '' ), $this ) );
 
-				if ( $this->total < 0 )
-					$this->total = 0;
+			} else {
 
+				// Set tax total to sum of all tax rows
+				$this->tax_total = $this->tax->get_tax_total( $this->taxes );
+
+				// VAT exemption done at this point - so all totals are correct before exemption
+				if ( $woocommerce->customer->is_vat_exempt() )
+					$this->remove_taxes();
+
+				// Cart Discounts (after tax)
+				$this->apply_cart_discounts_after_tax();
 			}
 
 			$this->set_session();
+		}
+
+		/**
+		 * remove_taxes function.
+		 *
+		 * @access public
+		 * @return void
+		 */
+		public function remove_taxes() {
+			$this->shipping_tax_total = $this->tax_total = 0;
+			$this->taxes = $this->shipping_taxes = array();
+
+			foreach ( $this->cart_contents as $cart_item_key => $item )
+				$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = $this->cart_contents[ $cart_item_key ]['line_tax'] = 0;
 		}
 
 		/**
@@ -1653,7 +1669,6 @@ class WC_Cart {
 			$this->shipping_total 		= $woocommerce->shipping->shipping_total;	// Shipping Total
 			$this->shipping_label 		= $woocommerce->shipping->shipping_label;	// Shipping Label
 			$this->shipping_taxes		= $woocommerce->shipping->shipping_taxes;	// Shipping Taxes
-			$this->shipping_tax_total 	= $this->tax->get_tax_total( $this->shipping_taxes );	// Shipping tax amount
 		}
 
 		/**

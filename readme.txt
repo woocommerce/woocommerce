@@ -167,6 +167,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = X =
 * Feature - Option for GA _setDomainName.
+* Tweak - Removed rounding when option to round at subtotal is set.
 * Fix - Allow extra flat rate options even if main rate is 0.
 * Fix - Fix email subject lines if options not set.
 * Fix - Prevent over-sanitization of attribute terms when editing products.
