@@ -61,8 +61,11 @@ jQuery(document).ready(function($) {
 					$('.shop_table.cart, .updating, .cart_totals').fadeTo('400', '0.6').block({message: null, overlayCSS: {background: 'transparent url(' + woocommerce_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6 } } );
 
 					// Changes button classes
+					$thisbutton.addClass('added');
+
+					// View cart text
 					if ( $thisbutton.parent().find('.added_to_cart').size() == 0 )
-						$thisbutton.addClass('added').after( ' <a href="' + woocommerce_params.cart_url + '" class="added_to_cart" title="' + woocommerce_params.i18n_view_cart + '">' + woocommerce_params.i18n_view_cart + '</a>' );
+						$thisbutton.after( ' <a href="' + woocommerce_params.cart_url + '" class="added_to_cart" title="' + woocommerce_params.i18n_view_cart + '">' + woocommerce_params.i18n_view_cart + '</a>' );
 
 					// Replace fragments
 					if ( fragments ) {
