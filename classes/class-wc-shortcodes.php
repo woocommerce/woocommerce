@@ -27,6 +27,7 @@ class WC_Shortcodes {
 		add_shortcode( 'featured_products', array( $this, 'featured_products' ) );
 		add_shortcode( 'woocommerce_messages', array( $this, 'messages_shortcode' ) );
 		add_shortcode( 'product_attribute', array( $this, 'product_attribute' ) );
+		add_shortcode( 'related_products', array( $this, 'related_products_shortcode' ) );
 
 		// Pages
 		add_shortcode( 'woocommerce_cart', array( $this, 'cart' ) );
@@ -1025,5 +1026,19 @@ class WC_Shortcodes {
 		wp_reset_postdata();
 
 		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
+	}
+
+	function related_products_shortcode( $atts ) {
+		extract( shortcode_atts( array(
+			'per_page' 	=> '2',
+			'columns' 	=> '2',
+			'orderby' => 'rand',
+		), $atts));
+
+		ob_start();
+
+		woocommerce_related_products( $per_page, $columns, $orderby );
+
+		return ob_get_clean();
 	}
 }
