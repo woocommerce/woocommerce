@@ -17,7 +17,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 	//this array is used to hold function calls between different instances of this class
 	private static $_SINGLE_FUNCTIONS_CALLS = array();
-	private static $_SDK_VERSION = '1.10';  //the first one is the SDK main version, while the second one is it's revision
+	private static $_SDK_VERSION = '1.11';  //the first one is the SDK main version, while the second one is it's revision
 	protected static $_DB_VERSION = '1.1';
 	protected $SDK_ANALYTICS = true;
 	
@@ -29,7 +29,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	
 		//set exception handler
 		if(set_exception_handler(array(&$this,'UncaughtExceptionHandler')) !== null)
-			restore_exception_handler(); //if there already was an exception handler, revert back to it
+			restore_exception_handler(); //if there allready was an exception handler, revert back to it
 	
 		parent::__construct();
 		
@@ -109,7 +109,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 	/**
 	*
-	* Return FALSE if the current single product is out of stock, or not
+	* Return FALSE if the curent single product is out of stock, or not
 	*
 	*/
 	public function isOutOfStock(){
@@ -225,7 +225,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	/**
 	*
 	* Check if this instance can load, or not!
-	* This is meant so that at ALL times, only the latest plugin version will work
+	* This is ment so that at ALL times, only the latest plugin version will work
 	*
 	*/
 	protected function canLoad()
@@ -253,7 +253,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		return;
 
 		//create the tokens table
-		$this->createTable($this->getTableName('shareyourcart_tokens'), array(
+		/*$this->createTable($this->getTableName('shareyourcart_tokens'), array(
             'id' => 'int(11)',
             'token' => 'varchar(255)',
             'session_id' => 'varchar(255)',
@@ -264,7 +264,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
             'id' => 'int(11)',
             'token' => 'varchar(255)',
             'coupon_id' => 'varchar(255)',
-		), 'id');
+		), 'id');*/
 
 		//save the DB version, for later use
 		$this->setConfigValue('db_version', self::$_DB_VERSION);
@@ -303,8 +303,8 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		$this->deactivate($message);
 
 		//remove the tables
-		$this->dropTable($this->getTableName('shareyourcart_tokens'));
-		$this->dropTable($this->getTableName('shareyourcart_coupons'));
+		/*$this->dropTable($this->getTableName('shareyourcart_tokens'));
+		$this->dropTable($this->getTableName('shareyourcart_coupons'));*/
 
 		//remove the db version
 		$this->setConfigValue('db_version', null);
@@ -399,22 +399,23 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 		//reset the Location, as the following code might give an error
 		//and the developer needs to be aware of it
-		$headers = headers_list();
+		/*$headers = headers_list();
 		header('Location:'); 
 
 		//save session details
 		$this->insertRow($this->getTableName('shareyourcart_tokens'), $data);
 		
+		//UPDATE: do not throw any error
 		//we can't rely on the fact that the row has been inserted, so check!
-		if($this->getSessionId($data['token']) === null)
-			throw new Exception(SyC::t('sdk','Token cannot be saved. Check your "{table_name}" table permissions.', array('{table_name}' => $this->getTableName('shareyourcart_tokens'))));
+		//if($this->getSessionId($data['token']) === null)
+		//	throw new Exception(SyC::t('sdk','Token cannot be saved. Check your "{table_name}" table permissions.', array('{table_name}' => $this->getTableName('shareyourcart_tokens'))));
 
 
 		//since everything is ok, resume the Location header
 		foreach($headers as $header)
 		{
 			header($header);
-		}
+		}*/
 
 		return true;
 	}
@@ -430,11 +431,12 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		parent::assertCouponIsValid($token, $coupon_code, $coupon_value, $coupon_type);
 
 		//get the session_id associated with the token
-		$session_id = $this->getSessionId($token);
+		/*$session_id = $this->getSessionId($token);
 
 		//make sure the session is valid
 		if ($session_id === null) {
-			throw new Exception(SyC::t('sdk','Token not found'));
+		//   UPDATE: do not throw any errors anymore
+		//	throw new Exception(SyC::t('sdk','Token not found'));
 		}
 
 		//resume the session
@@ -442,9 +444,17 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		session_id($session_id);
 		session_start();
 
-		$this->loadSessionData();
+		$this->loadSessionData();*/
 	}
 
+        /**
+	 * simply show the button with no positioning (ex: checkout page on woocommerce)
+	 */
+        
+        public function showCheckoutButton() {
+            echo $this->getButton();
+        }
+        
 	/**
 	 * simply show the button
 	 * @param null
@@ -698,7 +708,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 			//since we might have changed the status, REFRESH
 			$refresh = true;
 		}  
-		//check if the user wants to recover his account
+		//check if the user want's to recover his account
 		else if (@$_REQUEST['syc-account'] === 'recover'){
 
 			//by default, show the form if we are here
@@ -1003,9 +1013,9 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 			$this->saveCoupon($_POST['token'], $_POST['coupon_code'], $_POST['coupon_value'], $_POST['coupon_type'], (isset($_POST['product_unique_ids']) && is_array($_POST['product_unique_ids']) ? $_POST['product_unique_ids'] : array()));
 
 			//check if the coupon is intended to be applied to the current cart
-			if (empty($_POST['save_only'])) {
+			/*if (empty($_POST['save_only'])) {
 				$this->applyCoupon($_POST['coupon_code']);
-			}
+			}*/
 		} catch (Exception $e) {
 
 			header("HTTP/1.0 403");
@@ -1024,13 +1034,14 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	 */
 	protected function saveCoupon($token, $coupon_code, $coupon_value, $coupon_type, $product_unique_ids = array()) {
 
+		//UPDATE: not using anymore this table
 		//add the coupon id in shareyourcart coupons table
-		$data = array(
+		/*$data = array(
             'token' => $token,
             'coupon_id' => $coupon_code,
 		);
 
-		$this->insertRow($this->getTableName('shareyourcart_coupons'), $data);
+		$this->insertRow($this->getTableName('shareyourcart_coupons'), $data);*/
 	}
 
 	/**
@@ -1040,9 +1051,10 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	 */
 	protected function getSessionId($token) {
 
-		$result = $this->getRow("SELECT session_id FROM " . $this->getTableName('shareyourcart_tokens') . " WHERE token='$token'");
+		/*$result = $this->getRow("SELECT session_id FROM " . $this->getTableName('shareyourcart_tokens') . " WHERE token='$token'");
 
-		return isset($result) ? $result['session_id'] : null;
+		return isset($result) ? $result['session_id'] : null;*/
+		return null;
 	}
 
 	/**
@@ -1071,7 +1083,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 		$this->executeNonQuery($sql);
 		
-		//we can't rely on the fact that the table has been properly created, so check it!
+		//we can't relly on the fact that the table has been properly created, so check it!
 		if(!$this->existsTable($tableName))
 			throw new Exception(SyC::t('sdk','Cannot create table "{table_name}". Check your database permissions or manually run the following SQL command and try again:<br /><strong>{sql}</strong>', array('{table_name}' => $tableName,'{sql}' => nl2br($sql))));
 	}
@@ -1099,7 +1111,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		$sql = "DROP TABLE $tableName";
 		$this->executeNonQuery($sql);
 		
-		//we can't rely on the fact that the table has been properly dropped, so check it!
+		//we can't relly on the fact that the table has been properly droped, so check it!
 		if($this->existsTable($tableName))
 			throw new Exception(SyC::t('sdk','Cannot drop table "{table_name}". Check your database permissions or manually run the following SQL command and try again:<br /><strong>{sql}</strong>', array('{table_name}' => $tableName, '{sql}' => nl2br($sql))));
 	}
@@ -1118,7 +1130,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		//check if there is a file in the specified location
 		if(!file_exists($_viewFile_)){
 			
-			//the view has not been overridden, so use the SDK one
+			//the view has not been overrided, so use the SDK one
 			$_viewFile_ = dirname(__FILE__) . "/views/$_viewName_.php";
 		}
 
@@ -1266,7 +1278,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	
 	/**
 	*
-	* User to catch any unhandled exceptions and print them nicely
+	* User to catch any unhandled exceptions and print them nicelly
 	*
 	*/
 	public function UncaughtExceptionHandler(Exception $e) {

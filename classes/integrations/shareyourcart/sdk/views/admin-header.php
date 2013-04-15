@@ -5,10 +5,10 @@
 
 $_reflection_ = new ReflectionClass(get_class($this));
 $_file_ = dirname($_reflection_->getFileName())."/css/admin-style.css";
-
+		
 //check if there is a file in the specified location
 if(file_exists($_file_)):?>
-
+		
 <link rel="stylesheet" type="text/css" href="<?php echo $this->getUrl($_file_); ?>" />
 
 <?php endif; ?>
@@ -29,10 +29,10 @@ if(file_exists($_file_)):?>
 
 window.onload = function() {
 document.getElementById('syc-form').addEventListener('submit', changetext, false);
-};
+}; 
 
 var changetext = function(){
 	var textarea = document.getElementById('syc_button_textarea').value;
-	document.getElementById('syc_button_textarea').value = encodeURIComponent(textarea);
+	document.getElementById('syc_button_textarea').value = encodeURIComponent(textarea);	
 }
 </script>
