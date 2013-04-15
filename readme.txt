@@ -165,6 +165,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= X =
+* Tweak - Support for the city field in shipping calc (filterable)
+
 = 2.0.7 - 12/04/2013 =
 * Feature - Option for GA _setDomainName.
 * Tweak - Removed rounding when option to round at subtotal is set.
