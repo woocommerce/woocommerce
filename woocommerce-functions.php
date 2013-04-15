@@ -1723,15 +1723,3 @@ function woocommerce_save_address() {
 }
 
 add_action( 'template_redirect', 'woocommerce_save_address' );
-
-/**
- * Gets the filename part of a download URL
- *
- * @access public
- * @param string $file_url
- * @return string
- */
-function woocommerce_get_filename_from_url( $file_url ) {
-	$parts = parse_url( $file_url );
-	return basename( $parts['path'] );
-}

@@ -1288,6 +1288,17 @@ function woocommerce_downloadable_file_permission( $download_id, $product_id, $o
 if ( get_option('woocommerce_downloads_grant_access_after_payment') == 'yes' )
 	add_action( 'woocommerce_order_status_processing', 'woocommerce_downloadable_product_permissions' );
 
+/**
+ * Gets the filename part of a download URL
+ *
+ * @access public
+ * @param string $file_url
+ * @return string
+ */
+function woocommerce_get_filename_from_url( $file_url ) {
+	$parts = parse_url( $file_url );
+	return basename( $parts['path'] );
+}
 
 /**
  * Order Status completed - This is a paying customer

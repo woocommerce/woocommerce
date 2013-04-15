@@ -167,6 +167,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = X =
 * Tweak - Support for the city field in shipping calc (filterable)
+* Fix - moved woocommerce_get_filename_from_url to core-functions as it is required in admin too.
 
 = 2.0.7 - 12/04/2013 =
 * Feature - Option for GA _setDomainName.
