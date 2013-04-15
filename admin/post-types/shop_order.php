@@ -132,7 +132,7 @@ function woocommerce_custom_order_columns( $column ) {
 			} else {
 				$t_time = get_the_time( __( 'Y/m/d g:i:s A', 'woocommerce' ), $post );
 
-				$gmt_time = strtotime( $post->post_date_gmt );
+				$gmt_time = strtotime( $post->post_date_gmt . ' UTC' );
 				$time_diff = current_time('timestamp', 1) - $gmt_time;
 
 				if ( $time_diff > 0 && $time_diff < 24*60*60 )
