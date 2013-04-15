@@ -1281,12 +1281,15 @@ jQuery( function($){
 
 	// Uploading files
 	var downloadable_file_frame;
+	var file_path_field;
+	var file_paths;
 
 	jQuery(document).on( 'click', '.upload_file_button', function( event ){
 
 		var $el = $(this);
-		var $file_path_field = $el.parent().find('.file_paths');
-		var file_paths = $file_path_field.val();
+
+		file_path_field = $el.parent().find('.file_paths');
+		file_paths      = file_path_field.val();
 
 		event.preventDefault();
 
@@ -1335,7 +1338,7 @@ jQuery( function($){
 
 			} );
 
-			$file_path_field.val( file_paths );
+			file_path_field.val( file_paths );
 		});
 
 		// Set post to 0 and set our custom type

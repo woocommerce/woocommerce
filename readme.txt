@@ -171,6 +171,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Updated shareyourcart SDK.
 * Fix - moved woocommerce_get_filename_from_url to core-functions as it is required in admin too.
 * Fix - checkmark after adding to cart multiple times.
+* Fix - Saving text attributes. Posted 'text' terms are not slugs. Only striptags/slashes - don't change to slugs.
+* Fix - Insert URL button when working with multiple variations.
 
 = 2.0.7 - 12/04/2013 =
 * Feature - Option for GA _setDomainName.
