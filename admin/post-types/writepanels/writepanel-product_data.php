@@ -749,12 +749,13 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 
 				if ( isset( $attribute_values[ $i ] ) ) {
 
-			 		// Format values (posted values are slugs)
+			 		// Select based attributes - Format values (posted values are slugs)
 			 		if ( is_array( $attribute_values[ $i ] ) ) {
 				 		$values = array_map( 'sanitize_title', $attribute_values[ $i ] );
+
+				 	// Text based attributes - Posted values are term names - don't change to slugs
 				 	} else {
-				 		// Text based, separate by pipe
-				 		$values = array_map( 'sanitize_title', explode( '|', $attribute_values[ $i ] ) );
+				 		$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( '|', $attribute_values[ $i ] ) ) );
 				 	}
 
 				 	// Remove empty items in the array
