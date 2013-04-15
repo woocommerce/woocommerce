@@ -204,6 +204,18 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 					}
 
 				}
+			} else {
+				$ship_to_countries = '';
+
+				if ( $this->availability == 'specific' ) {
+					$ship_to_countries = $this->countries;
+				} elseif ( get_option( 'woocommerce_allowed_countries' ) == 'specific' ) {
+					$ship_to_countries = get_option( 'woocommerce_specific_allowed_countries' );
+				}
+
+				if ( is_array( $ship_to_countries ) && ! in_array( $package['destination']['country'], $ship_to_countries ) ) {
+					$is_available = false;
+				}
 			}
 
 		}
