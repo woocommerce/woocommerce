@@ -352,8 +352,8 @@ function woocommerce_product_data_box() {
 				    			continue;
 
 				    		// Get product data values for current taxonomy - this contains ordering and visibility data
-				    		if ( isset( $attributes[ $attribute_taxonomy_name ] ) )
-				    			$attribute = $attributes[ $attribute_taxonomy_name ];
+				    		if ( isset( $attributes[ sanitize_title( $attribute_taxonomy_name ) ] ) )
+				    			$attribute = $attributes[ sanitize_title( $attribute_taxonomy_name ) ];
 
 				    		$position = empty( $attribute['position'] ) ? 0 : absint( $attribute['position'] );
 
@@ -772,7 +772,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 
 		 		if ( $values ) {
 			 		// Add attribute to array, but don't set values
-			 		$attributes[ woocommerce_sanitize_taxonomy_name( $attribute_names[ $i ] ) ] = array(
+			 		$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
 				 		'name' 			=> woocommerce_clean( $attribute_names[ $i ] ),
 				 		'value' 		=> '',
 				 		'position' 		=> $attribute_position[ $i ],
@@ -788,7 +788,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		 		$values = implode( ' | ', array_map( 'woocommerce_clean', explode( '|', $attribute_values[ $i ] ) ) );
 
 		 		// Custom attribute - Add attribute to array and set the values
-			 	$attributes[ woocommerce_sanitize_taxonomy_name( $attribute_names[ $i ] ) ] = array(
+			 	$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
 			 		'name' 			=> woocommerce_clean( $attribute_names[ $i ] ),
 			 		'value' 		=> $values,
 			 		'position' 		=> $attribute_position[ $i ],

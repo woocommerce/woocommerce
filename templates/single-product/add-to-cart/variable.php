@@ -31,7 +31,7 @@ global $woocommerce, $product, $post;
 									$selected_value = isset( $_POST[ 'attribute_' . sanitize_title( $name ) ] ) ? $_POST[ 'attribute_' . sanitize_title( $name ) ] : '';
 
 								// Get terms if this is a taxonomy - ordered
-								if ( taxonomy_exists( sanitize_title( $name ) ) ) {
+								if ( taxonomy_exists( $name ) ) {
 
 									$orderby = $woocommerce->attribute_orderby( $name );
 
@@ -47,7 +47,7 @@ global $woocommerce, $product, $post;
 										break;
 									}
 
-									$terms = get_terms( sanitize_title( $name ), $args );
+									$terms = get_terms( $name, $args );
 
 									foreach ( $terms as $term ) {
 										if ( ! in_array( $term->slug, $options ) )

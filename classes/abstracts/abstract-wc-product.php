@@ -1122,7 +1122,7 @@ class WC_Product {
 	function get_attribute( $attr ) {
 		$attributes = $this->get_attributes();
 
-		$attr = woocommerce_sanitize_taxonomy_name( $attr );
+		$attr = sanitize_title( $attr );
 
 		if ( isset( $attributes[ $attr ] ) || isset( $attributes[ 'pa_' . $attr ] ) ) {
 

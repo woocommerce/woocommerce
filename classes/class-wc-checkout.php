@@ -277,7 +277,7 @@ class WC_Checkout {
 			 	if ( $_product->backorders_require_notification() && $_product->is_on_backorder( $values['quantity'] ) )
 			 		woocommerce_add_order_item_meta( $item_id, apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ), $cart_item_key, $order_id ), $values['quantity'] - max( 0, $_product->get_total_stock() ) );
 
-			 	//allow plugins to add order item meta
+			 	// Allow plugins to add order item meta
 			 	do_action( 'woocommerce_add_order_item_meta', $item_id, $values );
 		 	}
 		}
