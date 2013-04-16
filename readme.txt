@@ -174,6 +174,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Saving text attributes. Posted 'text' terms are not slugs. Only striptags/slashes - don't change to slugs.
 * Fix - Insert URL button when working with multiple variations.
 * Localization - Norwegian updates by Tore Hjartland
+* Localization - Spanish updates by Laguna Sanchez
 
 = 2.0.7 - 12/04/2013 =
 * Feature - Option for GA _setDomainName.
