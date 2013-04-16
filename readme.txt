@@ -167,6 +167,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = X =
 * Feature - Related products shortcode.
+* Tweak - Order item meta - skip serialized fields.
 * Tweak - Support for the city field in shipping calc (filterable).
 * Tweak - use base_country for tax calculations in manually created orders.
 * Tweak - Download permissions meta box show cleaner filenames.

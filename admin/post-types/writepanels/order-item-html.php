@@ -61,19 +61,13 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 							'_line_tax',
 						) ) ) ) continue;
 
-						// Handle serialised fields
-						if ( is_serialized( $meta['meta_value'] ) ) {
-							if ( is_serialized_string( $meta['meta_value'] ) ) {
-								// this is a serialized string, so we should display it
-								$meta['meta_value'] = maybe_unserialize( $meta['meta_value'] );
-							} else {
-								continue;
-							}
-						}
+						// Skip serialised meta
+						if ( is_serialized( $meta['meta_value'] ) )
+							continue;
 
-						$meta['meta_key'] = esc_attr( $meta['meta_key'] );
+						$meta['meta_key']   = esc_attr( $meta['meta_key'] );
 						$meta['meta_value'] = esc_textarea( $meta['meta_value'] ); // using a <textarea />
-						$meta['meta_id'] = (int) $meta['meta_id'];
+						$meta['meta_id']    = absint( $meta['meta_id'] );
 
 						echo '<tr data-meta_id="' . $meta['meta_id'] . '">
 							<td><input type="text" name="meta_key[' . $meta['meta_id'] . ']" value="' . $meta['meta_key'] . '" /></td>

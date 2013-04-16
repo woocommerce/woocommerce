@@ -49,6 +49,10 @@ class WC_Order_Item_Meta {
 
 				foreach( $meta_values as $meta_value ) {
 
+					// Skip serialised meta
+					if ( is_serialized( $meta_value ) )
+						continue;
+
 					// If this is a term slug, get the term's nice name
 		            if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $meta_key ) ) ) ) {
 		            	$term = get_term_by('slug', $meta_value, esc_attr( str_replace( 'attribute_', '', $meta_key ) ) );
