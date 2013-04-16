@@ -306,16 +306,24 @@ jQuery( function($){
 
 			var $items = $('#order_items_list').find('tr.item, tr.fee');
 
-			var country = $('#_shipping_country').val();
-			if (country) {
+			var shipping_country = $('#_shipping_country').val();
+			var billing_country = $('#_billing_country').val();
+			
+			if (shipping_country) {
+				var country = shipping_country;
 				var state = $('#_shipping_state').val();
 				var postcode = $('#_shipping_postcode').val();
 				var city = $('#_shipping_city').val();
-			} else {
-				country = $('#_billing_country').val();
+			} else if(billing_country) {
+				var country = billing_country;
 				var state = $('#_billing_state').val();
 				var postcode = $('#_billing_postcode').val();
 				var city = $('#_billing_city').val();
+			} else {
+				var country = woocommerce_writepanel_params.base_country;
+				var state = '';
+				var postcode = '';
+				var city = '';
 			}
 
 			// Get items and values
