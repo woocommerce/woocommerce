@@ -458,6 +458,7 @@ function woocommerce_admin_scripts() {
 			'search_products_nonce' 		=> wp_create_nonce("search-products"),
 			'calendar_image'				=> $woocommerce->plugin_url().'/assets/images/calendar.png',
 			'post_id'						=> $post->ID,
+			'base_country'					=> $woocommerce->countries->get_base_country(),
 			'currency_format_num_decimals'	=> absint( get_option( 'woocommerce_price_num_decimals' ) ),
 			'currency_format_symbol'		=> get_woocommerce_currency_symbol(),
 			'currency_format_decimal_sep'	=> esc_attr( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ) ),
