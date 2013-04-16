@@ -368,7 +368,7 @@ class WC_Countries {
 		foreach ( $allowed_countries_raw as $country )
 			$allowed_countries[ $country ] = $this->countries[ $country ];
 
-		return $allowed_countries;
+		return apply_filters( 'woocommerce_countries_allowed_countries', $allowed_countries );
 	}
 
 
@@ -391,7 +391,7 @@ class WC_Countries {
 			if ( ! empty( $this->states[ $country ] ) )
 				$allowed_states[ $country ] = $this->states[ $country ];
 
-		return $allowed_states;
+		return apply_filters( 'woocommerce_countries_allowed_country_states', $allowed_states );
 	}
 
 
