@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 		<strong>
 			<?php
 				$filename_parts = parse_url( $product->get_file_download_path( $download->download_id ) );
- 				$filename = basename( $filename_parts['path'] );
+				$filename = basename( $filename_parts['path'] );
 			?>
 			<?php echo '#' . absint( $product->id ) . ' &mdash; ' . apply_filters( 'woocommerce_admin_download_permissions_title', $product->get_title(), $download->product_id, $download->order_id, $download->order_key, $download->download_id ) . ' &mdash; ' . sprintf( __( 'File %d: %s', 'woocommerce' ), $file_count, $filename ) . ' &mdash; ' . sprintf( _n('Downloaded %s time', 'Downloaded %s times', absint( $download->download_count ), 'woocommerce'), absint( $download->download_count ) ); ?>
 		</strong>
