@@ -44,7 +44,7 @@ if ( empty( $attributes ) && ( ! $product->enable_dimensions_display() || ( ! $p
 
 	<?php foreach ( $attributes as $attribute ) :
 
-		if ( ! isset( $attribute['is_visible'] ) || ! $attribute['is_visible'] || $attribute['is_taxonomy'] && ! taxonomy_exists( $attribute['name'] ) )
+		if ( empty( $attribute['is_visible'] ) || ( $attribute['is_taxonomy'] && ! taxonomy_exists( $attribute['name'] ) ) )
 			continue;
 		?>
 
