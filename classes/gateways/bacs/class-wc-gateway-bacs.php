@@ -58,7 +58,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
      */
     function init_form_fields() {
 
-     	$this->form_fields = array(
+    	$this->form_fields = array(
 			'enabled' => array(
 							'title' => __( 'Enable/Disable', 'woocommerce' ),
 							'type' => 'checkbox',
@@ -85,41 +85,41 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 							'default' => ''
 						),
 			'account_name' => array(
-							'title' => __( apply_filters('woocommerce_bacs_account_name_admin_label', __( 'Account Name', 'woocommerce' ) ) ),
+							'title' => __( 'Account Name', 'woocommerce' ),
 							'type' => 'text',
 							'description' => '',
 							'default' => ''
 						),
 			'account_number' => array(
-							'title' => __( apply_filters('woocommerce_bacs_account_number_admin_label', __( 'Account Number', 'woocommerce' ) ) ),
+							'title' => __( 'Account Number', 'woocommerce' ),
 							'type' => 'text',
 							'description' => '',
 							'default' => ''
 						),
 			'sort_code' => array(
-							'title' => __( apply_filters('woocommerce_bacs_sort_code_admin_label', __( 'Sort Code', 'woocommerce' ) ) ),
+							'title' => __( 'Sort Code', 'woocommerce' ),
 							'type' => 'text',
 							'description' => '',
 							'default' => ''
 						),
 			'bank_name' => array(
-							'title' => __( apply_filters('woocommerce_bacs_bank_name_admin_label', __( 'Bank Name', 'woocommerce' ) ) ),
+							'title' => __( 'Bank Name', 'woocommerce' ),
 							'type' => 'text',
 							'description' => '',
 							'default' => ''
 						),
 			'iban' => array(
-							'title' => __( apply_filters('woocommerce_bacs_iban_admin_label', __( 'IBAN', 'woocommerce' ) ) ),
+							'title' => __( 'IBAN', 'woocommerce' ),
 							'type' => 'text',
 							'default' => ''
 						),
 			'bic' => array(
-							'title' => __( apply_filters('woocommerce_bacs_bic_admin_label', __( 'BIC (formerly Swift)', 'woocommerce' ) ) ),
+							'title' => __( 'BIC (formerly Swift)', 'woocommerce' ),
 							'type' => 'text',
 							'default' => ''
 						),
 
-			); 
+			);
 
     }
 
