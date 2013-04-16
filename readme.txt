@@ -168,6 +168,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = X =
 * Feature - Related products shortcode.
 * Tweak - Support for the city field in shipping calc (filterable).
+* Tweak - use base_country for tax calculations in manually created orders.
+* Tweak - Download permissions meta box show cleaner filenames.
 * Fix - Updated shareyourcart SDK.
 * Fix - moved woocommerce_get_filename_from_url to core-functions as it is required in admin too.
 * Fix - checkmark after adding to cart multiple times.
