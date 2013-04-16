@@ -267,7 +267,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 				switch ( $this_type ) {
 					case 'class' :
-						$this_cost = $this_cost * $found_shipping_classes;
+						$this_cost = $this_cost * sizeof( $this->find_shipping_classes( $package ) );
 					break;
 					case 'item' :
 						$this_cost = $this_cost * $total_quantity;
@@ -299,20 +299,10 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 		if ( sizeof( $this->flat_rates ) > 0 ) {
 
-    		$found_shipping_classes = array();
-
-    		// Find shipping classes for products in the cart
-    		if ( sizeof( $package['contents'] ) > 0 ) {
-    			foreach ( $package['contents'] as $item_id => $values ) {
-    				if ( $values['data']->needs_shipping() )
-    					$found_shipping_classes[] = $values['data']->get_shipping_class();
-    			}
-    		}
-
-    		$found_shipping_classes = array_unique( $found_shipping_classes );
+    		$found_shipping_classes = $this->find_shipping_classes( $package );
 
     		// Find most expensive class (if found)
-    		foreach ( $found_shipping_classes as $shipping_class ) {
+    		foreach ( $found_shipping_classes as $shipping_class => $products ) {
     			if ( isset( $this->flat_rates[ $shipping_class ] ) ) {
     				if ( $this->flat_rates[ $shipping_class ]['cost'] > $cost ) {
     					$cost 	= $this->flat_rates[ $shipping_class ]['cost'];
@@ -354,28 +344,27 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$cost 	= null;
     	$fee 	= null;
 
-		if ( sizeof( $this->flat_rates ) > 0 ) {
-    		$found_shipping_classes = array();
+		if ( sizeof( $this->flat_rates ) > 0 || $this->cost !== '' ) {
 
-    		// Find shipping classes for products in the cart. Store prices too, so we can calc a fee for the class.
-    		if ( sizeof( $package['contents'] ) > 0 ) {
-    			foreach ( $package['contents'] as $item_id => $values ) {
-    				if ( $values['data']->needs_shipping() ) {
-    					if ( isset( $found_shipping_classes[ $values['data']->get_shipping_class() ] ) ) {
-    						$found_shipping_classes[ $values['data']->get_shipping_class() ] = ( $values['data']->get_price() * $values['quantity'] ) + $found_shipping_classes[ $values['data']->get_shipping_class() ];
-    					} else {
-    						$found_shipping_classes[ $values['data']->get_shipping_class() ] = ( $values['data']->get_price() * $values['quantity'] );
-    					}
-    				}
-    			}
+    		// Find shipping classes for products in the cart.
+    		$found_shipping_classes = $this->find_shipping_classes( $package );
+
+    		//  Store prices too, so we can calc a fee for the class.
+    		$found_shipping_classes_values = array();
+
+    		foreach ( $found_shipping_classes as $shipping_class => $products ) {
+	    		if ( ! isset( $found_shipping_classes_values[ $shipping_class ] ) )
+	    			$found_shipping_classes_values[ $shipping_class ] = 0;
+
+	    		foreach ( $products as $product ) {
+		    		$found_shipping_classes_values[ $shipping_class ] += $product['data']->get_price() * $product['quantity'];
+	    		}
     		}
-
-    		$found_shipping_classes = array_unique( $found_shipping_classes );
 
     		$matched = false;
 
     		// For each found class, add up the costs and fees
-    		foreach ( $found_shipping_classes as $shipping_class => $class_price ) {
+    		foreach ( $found_shipping_classes_values as $shipping_class => $class_price ) {
     			if ( isset( $this->flat_rates[ $shipping_class ] ) ) {
     				$cost 	+= $this->flat_rates[ $shipping_class ]['cost'];
     				$fee	+= $this->get_fee( $this->flat_rates[ $shipping_class ]['fee'], $class_price );
@@ -437,6 +426,32 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			return $costs;
 		else
 			return null;
+    }
+
+    /**
+     * Finds and returns shipping classes and the products with said class.
+     *
+     * @access public
+     * @param mixed $package
+     * @return array
+     */
+    public function find_shipping_classes( $package ) {
+	    $found_shipping_classes = array();
+
+		// Find shipping classes for products in the cart
+		if ( sizeof( $package['contents'] ) > 0 ) {
+			foreach ( $package['contents'] as $item_id => $values ) {
+				if ( $values['data']->needs_shipping() ) {
+					$found_class = $values['data']->get_shipping_class();
+					if ( ! isset( $found_shipping_classes[ $found_class ] ) )
+						$found_shipping_classes[ $found_class ] = array();
+
+					$found_shipping_classes[ $found_class ][ $item_id ] = $values;
+				}
+			}
+		}
+
+		return $found_shipping_classes;
     }
 
     /**
