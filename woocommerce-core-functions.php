@@ -95,11 +95,21 @@ function woocommerce_get_product_ids_on_sale() {
  * @return void
  */
 function woocommerce_sanitize_taxonomy_name( $taxonomy ) {
+
+	// If taxonomy name already has pa_ in front, don't sanitize the pa_ part
+	if ( strpos( $taxonomy, 'pa_' ) === 0 ) {
+		$taxonomy = substr( $taxonomy, 3 );
+		$prepend  = 'pa_';
+	} else {
+		$prepend  = '';
+	}
+
 	$taxonomy = strtolower( stripslashes( strip_tags( $taxonomy ) ) );
 	$taxonomy = preg_replace( '/&.+?;/', '', $taxonomy ); // Kill entities
 	$taxonomy = str_replace( array( '.', '\'', '"' ), '', $taxonomy ); // Kill quotes and full stops.
 	$taxonomy = str_replace( array( ' ', '_' ), '-', $taxonomy ); // Replace spaces and underscores.
-	return $taxonomy;
+
+	return $prepend . $taxonomy;
 }
 
 /**

@@ -1629,7 +1629,7 @@ class Woocommerce {
 		if ( strstr( $name, 'pa_' ) ) {
 			$name = woocommerce_sanitize_taxonomy_name( str_replace( 'pa_', '', $name ) );
 
-			$label = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_label FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
+			$label = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_label FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
 
 			if ( ! $label )
 				$label = ucfirst( $name );
