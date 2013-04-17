@@ -261,8 +261,6 @@ class WC_Query {
 		$this->post__in   = $post__in;
 		$this->meta_query = $meta_query;
 
-		var_dump($q);
-
 		do_action( 'woocommerce_product_query', $q, $this );
 	}
 
