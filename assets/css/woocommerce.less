@@ -921,52 +921,35 @@ p.demo_store {
 	}
 
 	p.stars {
-		overflow: hidden;
-		position: relative;
-		height: 1em;
-		line-height: 1em;
-		font-size: 1em;
-		width: 5.4em;
-		font-family: "star";
-		&:before {
-			content: "\73\73\73\73\73";
-			float: left;
-			top: 0;
-			left: 0;
-			position: absolute;
-			color: darken( @secondary, 10 );
-		}
-
-		a {
-			float: left;
-			position: absolute;
-			left: 0;
-			top: 0;
-			width: 1em;
-			height: 0;
-			padding-top: 1em;
-			overflow: hidden;
-			&:before {
-				content: "\53\53\53\53\53";
-				top: 0;
-				position: absolute;
+		.clearfix();
+		span {
+			width: 80px;
+			height: 16px;
+			position: relative;
+			float:left;
+			background: url(../images/star.png) repeat-x left 0;
+			a {
+				float:left;
+				position:absolute;
 				left: 0;
-				visibility: hidden;
+				top: 0;
+				width: 16px;
+				height: 0;
+				padding-top: 16px;
+				overflow:hidden;
 			}
+			a:hover, a:focus {
+				background: url(../images/star.png) repeat-x left -16px;
+			}
+			a.active {
+				background: url(../images/star.png) repeat-x left -32px;
+			}
+			a.star-1 { width: 16px; z-index: 10; }
+			a.star-2 { width: 32px; z-index: 9; }
+			a.star-3 { width: 48px; z-index: 8; }
+			a.star-4 { width: 64px; z-index: 7; }
+			a.star-5 { width: 80px; z-index: 6; }
 		}
-		a:hover:before, a:focus:before {
-			color: @primary;
-			visibility: visible;
-		}
-		a.active:before {
-			color: @primary;
-			visibility: visible;
-		}
-		a.star-1 { width: 1em; z-index: 10; }
-		a.star-2 { width: 2.1em; z-index: 9; }
-		a.star-3 { width: 3.2em; z-index: 8; }
-		a.star-4 { width: 4.3em; z-index: 7; }
-		a.star-5 { width: 5.4em; z-index: 6; }
 	}
 
 	/* =Tables
@@ -1792,6 +1775,20 @@ p.demo_store {
 		.woocommerce form .form-row.woocommerce-invalid input.input-text, .woocommerce-page form .form-row.woocommerce-invalid input.input-text {
 			background-image: url(../images/icons/invalid@2x.png);
 			background-size: 12px 9px;
+		}
+		p.stars {
+			span {
+				background-image: url(../images/star@2x.png);
+				background-size: 16px 48px;
+				a:hover, a:focus {
+					background-image: url(../images/star@2x.png);
+					background-size: 16px 48px;
+				}
+				a.active {
+					background-image: url(../images/star@2x.png);
+					background-size: 16px 48px;
+				}
+			}
 		}
 	}
 }
