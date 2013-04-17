@@ -27,6 +27,7 @@ function woocommerce_payment_gateways_setting() {
 						<th width="1%"><?php _e( 'Default', 'woocommerce' ); ?></th>
 						<th><?php _e( 'Gateway', 'woocommerce' ); ?></th>
 						<th><?php _e( 'Status', 'woocommerce' ); ?></th>
+						<?php do_action( 'woocommerce_payment_gateways_th_headings' ) ?>
 					</tr>
 				</thead>
 				<tbody>
@@ -51,8 +52,11 @@ function woocommerce_payment_gateways_setting() {
 						else
 							echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/success-off@2x.png" width="16" height="14" alt="no" />';
 
-		        		echo '</td>
-		        		</tr>';
+		        		echo '</td>'; 
+
+		        		do_action( 'woocommerce_payment_gateways_td_columns' );
+		        		
+		        		echo '</tr>';
 
 		        	endforeach;
 		        	?>
