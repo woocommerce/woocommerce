@@ -134,13 +134,13 @@ WordPress.org is home to some cool free extensions too ([search WordPress.org fo
 
 For help setting up and configuring WooCommerce please refer to our [user guide](http://docs.woothemes.com/document/woocommerce/)
 
-For extending or theming WooCommerce, see our [developer documentation](http://docs.woothemes.com/product/woocommerce-plugin/developer-reference/).
+For extending or theming WooCommerce, see our [codex](http://docs.woothemes.com/documentation/plugins/woocommerce/woocommerce-codex/).
 
 If you get stuck and you're not a WooThemes customer, you can ask for help on the [Community Forums](http://wordpress.org/support/plugin/woocommerce).
 
 = Will WooCommerce work with my theme? =
 
-Yes; WooCommerce will work with any theme, but may require some styling to make it match nicely. Please see our [developer documentation](http://docs.woothemes.com/product/woocommerce-plugin/developer-reference/) for help.
+Yes; WooCommerce will work with any theme, but may require some styling to make it match nicely. Please see our [codex](http://docs.woothemes.com/documentation/plugins/woocommerce/woocommerce-codex/) for help.
 
 = Where can I request new features, eCommerce themes and extensions? =
 

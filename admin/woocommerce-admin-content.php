@@ -26,7 +26,7 @@ function woocommerce_admin_help_tab_content() {
 	    'title'	=> __( 'Overview', 'woocommerce' ),
 	    'content'	=>
 
-	    	'<p>' . sprintf(__( 'Thank you for using WooCommerce :) Should you need help using or extending WooCommerce please <a href="%s">read the documentation</a>. For further assistance you can use the <a href="%s">community forum</a> or if you have access, <a href="%s">our support desk</a>.', 'woocommerce' ), 'http://docs.woothemes.com/', 'http://wordpress.org/support/plugin/woocommerce', 'http://support.woothemes.com') . '</p>' .
+	    	'<p>' . sprintf(__( 'Thank you for using WooCommerce :) Should you need help using or extending WooCommerce please <a href="%s">read the documentation</a>. For further assistance you can use the <a href="%s">community forum</a> or if you have access, <a href="%s">our support desk</a>.', 'woocommerce' ), 'http://docs.woothemes.com/documentation/plugins/woocommerce/', 'http://wordpress.org/support/plugin/woocommerce', 'http://support.woothemes.com') . '</p>' .
 
 	    	'<p>' . __( 'If you are having problems, or to assist us with support, please check the status page to identify any problems with your configuration:', 'woocommerce' ) . '</p>' .
 
@@ -83,7 +83,7 @@ function woocommerce_admin_help_tab_content() {
 		'<p><a href="http://www.woothemes.com/woocommerce/" target="_blank">' . __( 'WooCommerce', 'woocommerce' ) . '</a></p>' .
 		'<p><a href="http://wordpress.org/extend/plugins/woocommerce/" target="_blank">' . __( 'Project on WordPress.org', 'woocommerce' ) . '</a></p>' .
 		'<p><a href="https://github.com/woothemes/woocommerce" target="_blank">' . __( 'Project on Github', 'woocommerce' ) . '</a></p>' .
-		'<p><a href="http://docs.woothemes.com/" target="_blank">' . __( 'WooCommerce Docs', 'woocommerce' ) . '</a></p>' .
+		'<p><a href="http://docs.woothemes.com/documentation/plugins/woocommerce/" target="_blank">' . __( 'WooCommerce Docs', 'woocommerce' ) . '</a></p>' .
 		'<p><a href="http://www.woothemes.com/product-category/woocommerce-extensions/" target="_blank">' . __( 'Official Extensions', 'woocommerce' ) . '</a></p>' .
 		'<p><a href="http://www.woothemes.com/product-category/themes/woocommerce/" target="_blank">' . __( 'Official Themes', 'woocommerce' ) . '</a></p>'
 	);
