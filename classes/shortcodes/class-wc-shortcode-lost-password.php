@@ -147,7 +147,7 @@ class WC_Shortcode_Lost_Password {
 
 		if ( ! $allow ) {
 
-			$woocommerce->add_error( __( 'Password reset is not allowed for this user') );
+			$woocommerce->add_error( __( 'Password reset is not allowed for this user' ) );
 
 			return false;
 

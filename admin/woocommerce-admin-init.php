@@ -751,7 +751,7 @@ function woocommerce_permalink_settings() {
 	<table class="form-table">
 		<tbody>
 			<tr>
-				<th><label><input name="product_permalink" type="radio" value="<?php echo $structures[0]; ?>" class="wctog" <?php checked( $structures[0], $product_permalink ); ?> /> <?php _e( 'Default' ); ?></label></th>
+				<th><label><input name="product_permalink" type="radio" value="<?php echo $structures[0]; ?>" class="wctog" <?php checked( $structures[0], $product_permalink ); ?> /> <?php _e( 'Default', 'woocommerce' ); ?></label></th>
 				<td><code><?php echo home_url(); ?>/?product=sample-product</code></td>
 			</tr>
 			<tr>

@@ -147,7 +147,7 @@ class WC_Welcome_Page {
 			?>
 		</div>
 
-		<div class="wc-badge"><?php printf( __( 'Version %s' ), $woocommerce->version ); ?></div>
+		<div class="wc-badge"><?php printf( __( 'Version %s', 'woocommerce' ), $woocommerce->version ); ?></div>
 
 		<p class="woocommerce-actions">
 			<a href="<?php echo admin_url('admin.php?page=woocommerce_settings'); ?>" class="button button-primary"><?php _e( 'Settings', 'woocommerce' ); ?></a>

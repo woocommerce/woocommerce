@@ -210,7 +210,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 							'type' => 'checkbox',
 							'label' => __( 'Enable logging', 'woocommerce' ),
 							'default' => 'no',
-							'description' => sprintf( __( 'Log PayPal events, such as IPN requests, inside <code>woocommerce/logs/paypal-%s.txt</code>' ), sanitize_file_name( wp_hash( 'paypal' ) ) ),
+							'description' => sprintf( __( 'Log PayPal events, such as IPN requests, inside <code>woocommerce/logs/paypal-%s.txt</code>', 'woocommerce' ), sanitize_file_name( wp_hash( 'paypal' ) ) ),
 						)
 			);
 
