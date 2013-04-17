@@ -982,6 +982,8 @@ function woocommerce_ajax_add_order_item() {
 	 	woocommerce_add_order_item_meta( $item_id, '_line_tax', $item['line_tax'] );
  	}
 
+	do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
+
 	include( 'admin/post-types/writepanels/order-item-html.php' );
 
 	// Quit out
