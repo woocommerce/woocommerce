@@ -1083,6 +1083,7 @@ class WC_Product {
 		$meta_query = array();
 		$meta_query[] = $woocommerce->query->visibility_meta_query();
 	    $meta_query[] = $woocommerce->query->stock_status_meta_query();
+	    $meta_query   = array_filter( $meta_query );
 
 		// Get the posts
 		$related_posts = get_posts( apply_filters('woocommerce_product_related_posts', array(

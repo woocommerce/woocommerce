@@ -79,9 +79,7 @@ class WC_Widget_Onsale extends WP_Widget {
 		$product_ids_on_sale = woocommerce_get_product_ids_on_sale();
 		$product_ids_on_sale[] = 0;
 
-		$meta_query = array();
-		$meta_query[] = $woocommerce->query->visibility_meta_query();
-	    $meta_query[] = $woocommerce->query->stock_status_meta_query();
+		$meta_query = $woocommerce->query->get_meta_query();
 
     	$query_args = array(
     		'posts_per_page' 	=> $number,

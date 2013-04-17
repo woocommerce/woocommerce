@@ -85,7 +85,7 @@ class WC_Widget_Best_Sellers extends WP_Widget {
     		'no_found_rows'  => 1,
     	);
 
-    	$query_args['meta_query'] = array();
+    	$query_args['meta_query'] = $woocommerce->query->get_meta_query();
 
     	if ( isset( $instance['hide_free'] ) && 1 == $instance['hide_free'] ) {
     		$query_args['meta_query'][] = array(
@@ -95,9 +95,6 @@ class WC_Widget_Best_Sellers extends WP_Widget {
 			    'type'    => 'DECIMAL',
 			);
     	}
-
-	    $query_args['meta_query'][] = $woocommerce->query->stock_status_meta_query();
-	    $query_args['meta_query'][] = $woocommerce->query->visibility_meta_query();
 
 		$r = new WP_Query($query_args);
 

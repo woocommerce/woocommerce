@@ -15,9 +15,7 @@ $upsells = $product->get_upsells();
 
 if ( sizeof( $upsells ) == 0 ) return;
 
-$meta_query = array();
-$meta_query[] = $woocommerce->query->visibility_meta_query();
-$meta_query[] = $woocommerce->query->stock_status_meta_query();
+$meta_query = $woocommerce->query->get_meta_query();
 
 $args = array(
 	'post_type'           => 'product',

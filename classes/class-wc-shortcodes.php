@@ -335,9 +335,7 @@ class WC_Shortcodes {
 			'order' => 'desc'
 		), $atts));
 
-		$meta_query = array();
-		$meta_query[] = $woocommerce->query->visibility_meta_query();
-		$meta_query[] = $woocommerce->query->stock_status_meta_query();
+		$meta_query = $woocommerce->query->get_meta_query();
 
 		$args = array(
 			'post_type'	=> 'product',
@@ -643,6 +641,7 @@ class WC_Shortcodes {
 		$meta_query = array();
 		$meta_query[] = $woocommerce->query->visibility_meta_query();
 	    $meta_query[] = $woocommerce->query->stock_status_meta_query();
+	    $meta_query   = array_filter( $meta_query );
 
 		$args = array(
 			'posts_per_page'=> $per_page,

@@ -63,6 +63,7 @@ class WC_Widget_Random_Products extends WP_Widget {
 		}
 
 	    $query_args['meta_query'][] = $woocommerce->query->stock_status_meta_query();
+	    $query_args['meta_query']   = array_filter( $query_args['meta_query'] );
 
 		$query = new WP_Query( $query_args );
 

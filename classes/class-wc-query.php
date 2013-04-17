@@ -233,9 +233,7 @@ class WC_Query {
 	public function product_query( $q ) {
 
 		// Meta query
-		$meta_query = (array) $q->get( 'meta_query' );
-		$meta_query[] = $this->visibility_meta_query();
-		$meta_query[] = $this->stock_status_meta_query();
+		$meta_query = $this->get_meta_query( $q->get( 'meta_query' ) );
 
 		// Ordering
 		$ordering = $this->get_catalog_ordering_args();
@@ -260,8 +258,10 @@ class WC_Query {
 		$q->set( 'wc_query', true );
 
 		// Store variables
-		$this->post__in = $post__in;
+		$this->post__in   = $post__in;
 		$this->meta_query = $meta_query;
+
+		var_dump($q);
 
 		do_action( 'woocommerce_product_query', $q, $this );
 	}
@@ -439,6 +439,22 @@ class WC_Query {
 	}
 
 	/**
+	 * Appends meta queries to an array.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function get_meta_query( $meta_query = array() ) {
+		if ( ! is_array( $meta_query ) )
+			$meta_query = array();
+
+		$meta_query[] = $this->visibility_meta_query();
+		$meta_query[] = $this->stock_status_meta_query();
+
+		return array_filter( $meta_query );
+	}
+
+	/**
 	 * Returns a meta query to handle product visibility
 	 *
 	 * @access public
@@ -446,17 +462,19 @@ class WC_Query {
 	 * @return array
 	 */
 	public function visibility_meta_query( $compare = 'IN' ) {
-		if ( is_search() ) $in = array( 'visible', 'search' ); else $in = array( 'visible', 'catalog' );
+		if ( is_search() )
+			$in = array( 'visible', 'search' );
+		else
+			$in = array( 'visible', 'catalog' );
 
 		$meta_query = array(
-		    'key' => '_visibility',
-		    'value' => $in,
+		    'key'     => '_visibility',
+		    'value'   => $in,
 		    'compare' => $compare
 		);
 
 		return $meta_query;
 	}
-
 
 	/**
 	 * Returns a meta query to handle product stock status

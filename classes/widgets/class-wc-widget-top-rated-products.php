@@ -79,10 +79,7 @@ class WC_Widget_Top_Rated_Products extends WP_Widget {
 
 		$query_args = array('posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product' );
 
-		$query_args['meta_query'] = array();
-
-	    $query_args['meta_query'][] = $woocommerce->query->stock_status_meta_query();
-	    $query_args['meta_query'][] = $woocommerce->query->visibility_meta_query();
+		$query_args['meta_query'] = $woocommerce->query->get_meta_query();
 
 		$top_rated_posts = new WP_Query( $query_args );
 

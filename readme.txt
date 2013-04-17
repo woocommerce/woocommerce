@@ -178,6 +178,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Insert URL button when working with multiple variations.
 * Fix - Undefined found_shipping_classes in flat rate shipping.
 * Fix - Fix saving options for attribute taxonomies containing special chars.
+* Fix - Prevent empty meta queries.
 * Localization - Norwegian updates by Tore Hjartland
 * Localization - Spanish updates by Laguna Sanchez
 * Localization - Romanian updates by by Aurel Roman

@@ -87,6 +87,7 @@ class WC_Widget_Recent_Products extends WP_Widget {
 	    }
 
 	    $query_args['meta_query'][] = $woocommerce->query->stock_status_meta_query();
+	    $query_args['meta_query']   = array_filter( $query_args['meta_query'] );
 
 		$r = new WP_Query($query_args);
 
