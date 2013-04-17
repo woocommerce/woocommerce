@@ -181,7 +181,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Prevent empty meta queries.
 * Localization - Norwegian updates by Tore Hjartland
 * Localization - Spanish updates by Laguna Sanchez
-* Localization - Romanian updates by by Aurel Roman
+* Localization - Romanian updates by Aurel Roman
+* Localization - Finnish updates by arhipaiva
 
 = 2.0.7 - 12/04/2013 =
 * Feature - Option for GA _setDomainName.
