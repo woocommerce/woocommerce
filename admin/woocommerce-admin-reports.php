@@ -170,8 +170,8 @@ function woocommerce_reports() {
 				echo '<p>' . $chart['description'] . '</p>';
 
 			$func = $chart['function'];
-			if ( $func && function_exists( $func ) )
-				$func();
+			if ( $func && ( is_callable( $func ) ) )
+				call_user_func( $func );
 		}
 		?>
 	</div>
