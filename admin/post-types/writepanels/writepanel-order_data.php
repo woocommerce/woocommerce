@@ -346,7 +346,7 @@ function woocommerce_order_items_meta_box( $post ) {
 
 					<th class="quantity"><?php _e( 'Qty', 'woocommerce' ); ?></th>
 
-					<th class="line_cost"><?php _e( 'Cost', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Line subtotals are before pre-tax discounts, totals are after.', 'woocommerce' ); ?>" href="#">[?]</a></th>
+					<th class="line_cost"><?php _e( 'Totals', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Line subtotals are before pre-tax discounts, totals are after.', 'woocommerce' ); ?>" href="#">[?]</a></th>
 
 					<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
 						<th class="line_tax"><?php _e( 'Tax', 'woocommerce' ); ?></th>
