@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce v2.0.7\n"
+"Project-Id-Version: WooCommerce v2.0.8\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-03-04 09:46:18+00:00\n"
-"PO-Revision-Date: 2013-04-13 12:12+0100\n"
+"PO-Revision-Date: 2013-04-19 02:23+0100\n"
 "Last-Translator: jb <jb@jb.es>\n"
 "Language-Team: \n"
 "Language: es_ES\n"
@@ -1057,12 +1057,12 @@ msgstr "Invitado"
 # @ woocommerce
 #: admin/post-types/shop_order.php:98
 msgid "Order %s"
-msgstr "Orden %s"
+msgstr "Pedido %s"
 
 # @ woocommerce
 #: admin/post-types/shop_order.php:98
 msgid "made by"
-msgstr "elaborado por"
+msgstr "hecho por"
 
 # @ woocommerce
 #: admin/post-types/shop_order.php:101
@@ -1284,7 +1284,7 @@ msgstr ""
 # @ woocommerce
 #: admin/post-types/writepanels/variation-admin-html.php:57
 msgid "Stock Qty:"
-msgstr "Cantidad Stock:"
+msgstr "Cantidad stock:"
 
 # @ woocommerce
 #: admin/post-types/writepanels/variation-admin-html.php:57
@@ -1822,7 +1822,7 @@ msgstr "Selecciona un país&hellip;"
 #: admin/post-types/writepanels/writepanel-order_data.php:268
 #: admin/woocommerce-admin-users.php:175 admin/woocommerce-admin-users.php:224
 msgid "State/County"
-msgstr "Estado/Provincia"
+msgstr "Estado/País"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:182
@@ -5759,7 +5759,7 @@ msgstr "No hay productos en stock bajo"
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2127
 msgid "Marked out of stock"
-msgstr "Marcado fuera de stock"
+msgstr "Marcado agotado"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2134
