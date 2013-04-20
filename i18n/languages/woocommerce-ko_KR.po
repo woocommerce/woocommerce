@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-01-09 09:36:51+00:00\n"
-"PO-Revision-Date: 2013-04-21 02:02+0900\n"
+"PO-Revision-Date: 2013-04-21 02:12+0900\n"
 "Last-Translator: jido park <parkmap@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -3474,7 +3474,7 @@ msgstr ""
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:84
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:145
 msgid "Free Shipping"
-msgstr ""
+msgstr "무료 배송"
 
 # @ woocommerce
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:77
