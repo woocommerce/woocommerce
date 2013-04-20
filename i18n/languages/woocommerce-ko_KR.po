@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-01-09 09:36:51+00:00\n"
-"PO-Revision-Date: 2013-04-21 02:12+0900\n"
+"PO-Revision-Date: 2013-04-21 02:22+0900\n"
 "Last-Translator: jido park <parkmap@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -188,9 +188,8 @@ msgstr ""
 #: classes/emails/class-wc-email-customer-completed-order.php:169
 #: classes/emails/class-wc-email-customer-invoice.php:172
 #: classes/emails/class-wc-email-new-order.php:142
-#, fuzzy
 msgid "Email type"
-msgstr "이메일 주소"
+msgstr ""
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:443
@@ -2232,9 +2231,8 @@ msgstr "장바구니에 넣기"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:24
-#, fuzzy
 msgid "Completed order"
-msgstr "주문하기"
+msgstr "완료된 주문"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:25
@@ -2245,9 +2243,8 @@ msgstr ""
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:27
-#, fuzzy
 msgid "Your order is complete"
-msgstr "고객님의 주문"
+msgstr "주문이 완료 되었습니다"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:28
@@ -2289,9 +2286,8 @@ msgstr ""
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-invoice.php:27
-#, fuzzy
 msgid "Customer invoice"
-msgstr "고객님의 정보"
+msgstr "고객 invoice"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-invoice.php:28
@@ -6434,9 +6430,9 @@ msgstr ""
 #: templates/emails/plain/customer-invoice.php:21
 #: templates/emails/plain/customer-note.php:28
 #: templates/emails/plain/customer-processing-order.php:20
-#, fuzzy, php-format
+#, php-format
 msgid "Order date: %s"
-msgstr "주문 정보"
+msgstr "주문 날짜: %s"
 
 # @ woocommerce
 #: templates/emails/plain/admin-new-order.php:20
@@ -6453,9 +6449,9 @@ msgstr "고객님의 정보"
 
 # @ woocommerce
 #: templates/emails/plain/email-order-items.php:28
-#, fuzzy, php-format
+#, php-format
 msgid "Quantity: %s"
-msgstr "양"
+msgstr "수량: %s"
 
 # @ woocommerce
 #: templates/emails/plain/email-order-items.php:31
@@ -6486,9 +6482,9 @@ msgstr ""
 
 # @ woocommerce
 #: templates/loop/result-count.php:30
-#, fuzzy, php-format
+#, php-format
 msgid "Showing all %d results"
-msgstr "배송지"
+msgstr "Showing all %d results"
 
 # @ woocommerce
 #: templates/loop/result-count.php:32
@@ -7081,9 +7077,9 @@ msgstr ""
 
 # @ woocommerce
 #: woocommerce-functions.php:458
-#, fuzzy, php-format
+#, php-format
 msgid "&quot;%s&quot; was successfully added to your cart."
-msgstr "제품이 장바구니에 포함 되었습니다."
+msgstr "&quot;%s&quot;  제품이 장바구니에 포함 되었습니다."
 
 # @ woocommerce
 #: woocommerce-functions.php:466
@@ -7722,9 +7718,8 @@ msgstr ""
 
 # @ woocommerce
 #: woocommerce.php:1173
-#, fuzzy
 msgid "Please select a rating"
-msgstr "체크 지우기"
+msgstr ""
 
 # @ woocommerce
 #: woocommerce.php:1174
@@ -14066,17 +14061,17 @@ msgstr ""
 # @ woocommerce
 #: woocommerce-functions.php:996
 msgid "No file defined"
-msgstr ""
+msgstr "파일을 찾지 못하였습니다."
 
 # @ woocommerce
 #: woocommerce-functions.php:1575
 msgid "Password changed successfully."
-msgstr ""
+msgstr "암호 변경에 성공하였습니다."
 
 # @ woocommerce
 #: woocommerce-functions.php:1651
 msgid "Address changed successfully."
-msgstr ""
+msgstr "주소 변경에 성공하였습니다."
 
 # @ woocommerce
 #: woocommerce-template.php:764
