@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-01-09 09:36:51+00:00\n"
-"PO-Revision-Date: 2013-04-21 20:43+0900\n"
+"PO-Revision-Date: 2013-04-21 20:59+0900\n"
 "Last-Translator: jido park <parkmap@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -3678,7 +3678,7 @@ msgstr ""
 #: classes/shortcodes/class-wc-shortcode-cart.php:65
 #: classes/shortcodes/class-wc-shortcode-cart.php:71
 msgid "Shipping costs updated."
-msgstr ""
+msgstr "배송 비가 업데이트됨."
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-checkout.php:64
@@ -5962,7 +5962,7 @@ msgstr "주"
 # @ woocommerce
 #: templates/cart/shipping-calculator.php:71
 msgid "Update Totals"
-msgstr ""
+msgstr "총합 업데이트"
 
 # @ woocommerce
 #: templates/cart/shipping-methods.php:32
@@ -7045,7 +7045,7 @@ msgstr ""
 # @ woocommerce
 #: woocommerce-functions.php:208 woocommerce-functions.php:253
 msgid "Cart updated."
-msgstr ""
+msgstr "장바구니가 업데이트됨."
 
 # @ woocommerce
 #: woocommerce-functions.php:239
