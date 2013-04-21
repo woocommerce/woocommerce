@@ -6,7 +6,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2013-04-21 14:22+0900\n"
+"PO-Revision-Date: 2013-04-21 15:00+0900\n"
 "Last-Translator: jido park <parkmap@gmail.com>\n"
 "Language-Team: jido park <parkmap@gmail.com>\n"
 "X-Generator: Poedit 1.5.4\n"
@@ -4292,11 +4292,11 @@ msgstr ""
 
 #: admin/woocommerce-admin-reports.php:36
 msgid "Sales by day"
-msgstr ""
+msgstr "일별 판매"
 
 #: admin/woocommerce-admin-reports.php:41
 msgid "Sales by month"
-msgstr ""
+msgstr "월별 판매"
 
 #: admin/woocommerce-admin-reports.php:46
 msgid "Taxes by month"

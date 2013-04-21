@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-01-09 09:36:51+00:00\n"
-"PO-Revision-Date: 2013-04-21 15:09+0900\n"
+"PO-Revision-Date: 2013-04-21 20:43+0900\n"
 "Last-Translator: jido park <parkmap@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -545,7 +545,7 @@ msgstr ""
 # @ woocommerce
 #: classes/class-wc-checkout.php:438 woocommerce-functions.php:1632
 msgid "is a required field."
-msgstr ""
+msgstr "는 필수사항입니다."
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:451
@@ -3800,7 +3800,7 @@ msgstr "주문정보:"
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-view-order.php:49
 msgid "My Account &rarr;"
-msgstr ""
+msgstr "내 계정 &rarr;"
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-view-order.php:56
@@ -4263,7 +4263,7 @@ msgstr ""
 # @ woocommerce
 #: classes/widgets/class-wc-widget-recent-reviews.php:71
 msgid "Recent Reviews"
-msgstr ""
+msgstr "최근리뷰"
 
 # @ woocommerce
 #: templates/single-product/review.php:26
@@ -5808,7 +5808,7 @@ msgstr ""
 # @ woocommerce
 #: i18n/strings.php:18
 msgid "on-hold"
-msgstr ""
+msgstr "입금대기중"
 
 # @ woocommerce
 #: i18n/strings.php:19
@@ -6512,24 +6512,24 @@ msgstr ""
 #: templates/myaccount/form-change-password.php:20
 #: templates/myaccount/form-lost-password.php:31
 msgid "New password"
-msgstr ""
+msgstr "새 암호"
 
 # @ woocommerce
 #: templates/myaccount/form-change-password.php:24
 #: templates/myaccount/form-lost-password.php:35
 msgid "Re-enter new password"
-msgstr ""
+msgstr "새 암호 재입력"
 
 # @ woocommerce
 #: templates/myaccount/form-change-password.php:29
 #: templates/myaccount/form-lost-password.php:45
 msgid "Save"
-msgstr ""
+msgstr "저장"
 
 # @ woocommerce
 #: templates/myaccount/form-edit-address.php:43
 msgid "Save Address"
-msgstr ""
+msgstr "주소 저장"
 
 # @ woocommerce
 #: templates/myaccount/form-login.php:26 templates/myaccount/form-login.php:40
@@ -6571,6 +6571,8 @@ msgid ""
 "Lost your password? Please enter your username or email address. You will "
 "receive a link to create a new password via email."
 msgstr ""
+"암호를 잃어버리셨나요? 사용자아이디 또는 이메일 주소를 입력해주세요. 새 암호"
+"를 입력한 이메일 주소로 보냅니다."
 
 # @ woocommerce
 #: templates/myaccount/form-lost-password.php:28
@@ -6580,7 +6582,7 @@ msgstr ""
 # @ woocommerce
 #: templates/myaccount/form-lost-password.php:45
 msgid "Reset Password"
-msgstr ""
+msgstr "암호 재설정"
 
 # @ woocommerce
 #: templates/myaccount/my-account.php:19
@@ -6590,22 +6592,23 @@ msgid ""
 "recent orders, manage your shipping and billing addresses and <a href=\"%s"
 "\">change your password</a>."
 msgstr ""
+"안녕하세요, <strong>%s</strong>. 여기서 최근주문상태 확인과 기본 주소 변경을 "
+"할 수 있습니다. <a href=\"%s\">암호변경</a>."
 
 # @ woocommerce
 #: templates/myaccount/my-address.php:17
-#, fuzzy
 msgid "My Addresses"
-msgstr "주소"
+msgstr "내 주소"
 
 # @ woocommerce
 #: templates/myaccount/my-address.php:23
 msgid "My Address"
-msgstr ""
+msgstr "내 주소"
 
 # @ woocommerce
 #: templates/myaccount/my-address.php:35
 msgid "The following addresses will be used on the checkout page by default."
-msgstr ""
+msgstr "저장된 주소는 주문 시 기본 주소로 사용됩니다."
 
 # @ default
 # @ woocommerce
@@ -6619,7 +6622,7 @@ msgstr ""
 #: woocommerce.php:953 woocommerce.php:990 woocommerce.php:1028
 #: woocommerce.php:1066
 msgid "Edit"
-msgstr ""
+msgstr "수정"
 
 # @ woocommerce
 #: templates/myaccount/my-address.php:64
@@ -6642,7 +6645,7 @@ msgstr[1] ""
 # @ woocommerce
 #: templates/myaccount/my-orders.php:26
 msgid "Recent Orders"
-msgstr ""
+msgstr "최근 주문"
 
 # @ woocommerce
 #: admin/post-types/shop_order.php:44 templates/myaccount/my-orders.php:32
@@ -6656,7 +6659,7 @@ msgstr "주문"
 #: admin/settings/settings-shipping-methods.php:31
 #: templates/myaccount/my-orders.php:34
 msgid "Status"
-msgstr ""
+msgstr "상태"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:138
@@ -6843,7 +6846,7 @@ msgstr "제품 설명"
 #: templates/single-product-reviews.php:51
 #: templates/single-product-reviews.php:57
 msgid "Reviews"
-msgstr ""
+msgstr "리뷰"
 
 # @ woocommerce
 #: templates/single-product/up-sells.php:41
@@ -6881,7 +6884,7 @@ msgstr ""
 # @ woocommerce
 #: templates/single-product-reviews.php:84
 msgid "Be the first to review"
-msgstr ""
+msgstr "첫 리뷰를 남겨주세요."
 
 # @ woocommerce
 #: templates/single-product-reviews.php:86
@@ -6889,11 +6892,13 @@ msgid ""
 "There are no reviews yet, would you like to <a href=\"#review_form\" class="
 "\"inline show_review_form\">submit yours</a>?"
 msgstr ""
+"저장된 리뷰가 없습니다. <a href=\"#review_form\" class=\"inline "
+"show_review_form\">리뷰 작성하기</a>"
 
 # @ woocommerce
 #: templates/single-product-reviews.php:104
 msgid "Submit Review"
-msgstr ""
+msgstr "리뷰작성"
 
 # @ woocommerce
 #: templates/single-product-reviews.php:111
@@ -8317,7 +8322,7 @@ msgstr ""
 #: admin/post-types/product.php:102 admin/post-types/shop_order.php:50
 #: templates/myaccount/my-orders.php:33
 msgid "Date"
-msgstr ""
+msgstr "날짜"
 
 # @ default
 #: admin/post-types/product.php:151
@@ -10629,7 +10634,7 @@ msgstr ""
 # @ woocommerce
 #: admin/settings/settings-init.php:377
 msgid "My Account Page"
-msgstr ""
+msgstr "내 계정 페이지"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:378
@@ -10659,7 +10664,7 @@ msgstr ""
 # @ woocommerce
 #: admin/settings/settings-init.php:410
 msgid "Change Password Page"
-msgstr ""
+msgstr "암호 변경 페이지"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:411
@@ -12022,7 +12027,7 @@ msgstr ""
 #: templates/order/order-details.php:20 woocommerce.php:949
 msgid "Product"
 msgid_plural "Products"
-msgstr[0] ""
+msgstr[0] "상품"
 
 # @ woocommerce
 #. gettext fix: identical singular and plural forms found, that may be ambiguous! Please check the code!
@@ -12455,7 +12460,7 @@ msgstr ""
 # @ woocommerce
 #: admin/woocommerce-admin-install.php:207
 msgid "Edit My Address"
-msgstr ""
+msgstr "내 주소 수정하기"
 
 # @ woocommerce
 #: admin/woocommerce-admin-install.php:210
@@ -14077,7 +14082,7 @@ msgstr "주소 변경에 성공하였습니다."
 #: woocommerce-template.php:764
 #, php-format
 msgid "Reviews (%d)"
-msgstr ""
+msgstr "리뷰 (%d)"
 
 # @ woocommerce
 #. translators: plugin header field 'PluginURI'
