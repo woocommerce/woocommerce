@@ -2485,3 +2485,22 @@ function woocommerce_cancel_unpaid_orders() {
 }
 
 add_action( 'woocommerce_cancel_unpaid_orders', 'woocommerce_cancel_unpaid_orders' );
+
+/**
+ * woocommerce_clear_comment_rating_transients function.
+ *
+ * @access public
+ * @param mixed $comment_id
+ * @return void
+ */
+function woocommerce_clear_comment_rating_transients( $comment_id ) {
+	$comment = get_comment( $comment_id );
+
+	if ( ! empty( $comment->comment_post_ID ) ) {
+		delete_transient( 'wc_average_rating_' . absint( $comment->comment_post_ID ) );
+		delete_transient( 'wc_rating_count_' . absint( $comment->comment_post_ID ) );
+	}
+}
+
+add_action( 'wp_set_comment_status', 'woocommerce_clear_comment_rating_transients' );
+add_action( 'edit_comment', 'woocommerce_clear_comment_rating_transients' );

@@ -1299,17 +1299,15 @@ function woocommerce_products_rss_feed() {
  * @param mixed $comment_id
  * @return void
  */
-function woocommerce_add_comment_rating($comment_id) {
+function woocommerce_add_comment_rating( $comment_id ) {
 	if ( isset( $_POST['rating'] ) ) {
-		global $post;
 
 		if ( ! $_POST['rating'] || $_POST['rating'] > 5 || $_POST['rating'] < 0 )
 			return;
 
 		add_comment_meta( $comment_id, 'rating', (int) esc_attr( $_POST['rating'] ), true );
 
-		delete_transient( 'wc_average_rating_' . esc_attr($post->ID) );
-		delete_transient( 'wc_rating_count_' . esc_attr($post->ID) );
+		woocommerce_clear_comment_rating_transients( $comment_id );
 	}
 }
 
@@ -1321,7 +1319,7 @@ function woocommerce_add_comment_rating($comment_id) {
  * @param array $comment_data
  * @return array
  */
-function woocommerce_check_comment_rating($comment_data) {
+function woocommerce_check_comment_rating( $comment_data ) {
 	global $woocommerce;
 
 	// If posting a comment (not trackback etc) and not logged in
