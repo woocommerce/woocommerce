@@ -34,11 +34,23 @@ class WC_Shortcode_Checkout {
 	public static function output( $atts ) {
 		global $woocommerce;
 
+		// Check checkout is configured correctly
+		if ( current_user_can( 'manage_options' ) ) {
+			$pay_page_id    = woocommerce_get_page_id( 'pay' );
+			$thanks_page_id = woocommerce_get_page_id( 'thanks' );
+			$pay_page       = get_permalink( $pay_page_id );
+			$thanks_page    = get_permalink( $thanks_page_id );
+
+			if ( ! $pay_page_id || ! $thanks_page_id || empty( $pay_page ) || empty( $thanks_page ) )
+				$woocommerce->add_error( sprintf( __( 'WooCommerce Config Error: The checkout thanks/pay pages are missing - these pages are required for the checkout to function correctly. Please configure the pages <a href="%s">here</a>.', 'woocommerce' ), admin_url( 'admin.php?page=woocommerce_settings&tab=pages' ) ) );
+		}
+
 		// Show non-cart errors
 		$woocommerce->show_messages();
 
 		// Check cart has contents
-		if ( sizeof( $woocommerce->cart->get_cart() ) == 0 ) return;
+		if ( sizeof( $woocommerce->cart->get_cart() ) == 0 )
+			return;
 
 		// Calc totals
 		$woocommerce->cart->calculate_totals();
