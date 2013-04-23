@@ -407,8 +407,11 @@ if ( ! function_exists( 'woocommerce_disable_admin_bar' ) ) {
  * @param mixed $user
  * @return void
  */
-function woocommerce_load_persistent_cart( $user_login, $user ) {
+function woocommerce_load_persistent_cart( $user_login, $user = 0 ) {
 	global $woocommerce;
+
+	if ( ! $user )
+		return;
 
 	$saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart', true );
 

@@ -165,6 +165,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= X =
+* Localization - Netherlands, Hungarian, Taiwan, Italian, Spanish updates.
+* Other minor fixes and localisation updates.
+
 = 2.0.8 - 17/04/2013 =
 * Feature - Related products shortcode.
 * Tweak - Order item meta - skip serialized fields.
