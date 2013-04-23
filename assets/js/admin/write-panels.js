@@ -228,6 +228,8 @@ jQuery( function($){
 		$row.find('input.line_total').val( total );
 		$row.find('input.line_subtotal_tax').val( tax );
 		$row.find('input.line_tax').val( total_tax );
+
+		$(this).trigger('quantity_changed');
 	});
 
 	// When subtotal is changed, update the unit costs
