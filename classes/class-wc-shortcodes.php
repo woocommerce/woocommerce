@@ -171,7 +171,7 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function product_category( $atts ){
-		global $woocommerce, $woocommerce_loop;
+		global $woocommerce, $woocommerce_loop, $post;
 
 	  	if ( empty( $atts ) ) return;
 
@@ -218,6 +218,7 @@ class WC_Shortcodes {
 
 	  	ob_start();
 
+	  	$temp = $post;
 		$products = new WP_Query( $args );
 
 		$woocommerce_loop['columns'] = $columns;
@@ -236,7 +237,7 @@ class WC_Shortcodes {
 
 		<?php endif;
 
-		wp_reset_postdata();
+		$post = $temp;
 
 		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
@@ -326,7 +327,7 @@ class WC_Shortcodes {
 	 */
 	public function recent_products( $atts ) {
 
-		global $woocommerce_loop, $woocommerce;
+		global $woocommerce_loop, $woocommerce, $post;
 
 		extract(shortcode_atts(array(
 			'per_page' 	=> '12',
@@ -349,6 +350,7 @@ class WC_Shortcodes {
 
 		ob_start();
 
+		$temp = $post;
 		$products = new WP_Query( $args );
 
 		$woocommerce_loop['columns'] = $columns;
@@ -367,7 +369,7 @@ class WC_Shortcodes {
 
 		<?php endif;
 
-		wp_reset_postdata();
+		$post = $temp;
 
 		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
@@ -381,7 +383,7 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function products( $atts ) {
-		global $woocommerce_loop;
+		global $woocommerce_loop, $post;
 
 	  	if (empty($atts)) return;
 
@@ -425,6 +427,7 @@ class WC_Shortcodes {
 
 	  	ob_start();
 
+	  	$temp = $post;
 		$products = new WP_Query( $args );
 
 		$woocommerce_loop['columns'] = $columns;
@@ -443,7 +446,7 @@ class WC_Shortcodes {
 
 		<?php endif;
 
-		wp_reset_postdata();
+		$post = $temp;
 
 		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
@@ -457,6 +460,9 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function product( $atts ) {
+
+		global $post;
+
 	  	if (empty($atts)) return;
 
 	  	$args = array(
@@ -487,6 +493,7 @@ class WC_Shortcodes {
 
 	  	ob_start();
 
+	  	$temp = $post;
 		$products = new WP_Query( $args );
 
 		if ( $products->have_posts() ) : ?>
@@ -503,7 +510,7 @@ class WC_Shortcodes {
 
 		<?php endif;
 
-		wp_reset_postdata();
+		$post = $temp;
 
 		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
@@ -517,7 +524,7 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function product_add_to_cart( $atts ) {
-	  	global $wpdb, $woocommerce;
+	  	global $wpdb, $woocommerce, $post;
 
 	  	if ( empty( $atts ) ) return;
 
@@ -534,6 +541,7 @@ class WC_Shortcodes {
 
 		if ( 'product' == $product_data->post_type ) {
 
+			$temp = $post;
 			$product = $woocommerce->setup_product_data( $product_data );
 
 			ob_start();
@@ -546,12 +554,13 @@ class WC_Shortcodes {
 
 			</p><?php
 
-			wp_reset_postdata();
+			$post = $temp;
 
 			return ob_get_clean();
 
 		} elseif ( 'product_variation' == $product_data->post_type ) {
 
+			$temp = $post;
 			$product = get_product( $product_data->post_parent );
 
 			$GLOBALS['product'] = $product;
@@ -582,7 +591,7 @@ class WC_Shortcodes {
 
 			</p><?php
 
-			wp_reset_postdata();
+			$post = $temp;
 
 			return ob_get_clean();
 
@@ -626,7 +635,7 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function sale_products( $atts ){
-	    global $woocommerce_loop, $woocommerce;
+	    global $woocommerce_loop, $woocommerce, $post;
 
 	    extract( shortcode_atts( array(
 	        'per_page'      => '12',
@@ -658,6 +667,7 @@ class WC_Shortcodes {
 
 	  	ob_start();
 
+	  	$temp = $post;
 		$products = new WP_Query( $args );
 
 		$woocommerce_loop['columns'] = $columns;
@@ -676,7 +686,7 @@ class WC_Shortcodes {
 
 		<?php endif;
 
-		wp_reset_postdata();
+		$post = $temp;
 
 		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
@@ -689,7 +699,7 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function best_selling_products( $atts ){
-	    global $woocommerce_loop;
+	    global $woocommerce_loop, $post;
 
 	    extract( shortcode_atts( array(
 	        'per_page'      => '12',
@@ -714,6 +724,7 @@ class WC_Shortcodes {
 
 	  	ob_start();
 
+	  	$temp = $post;
 		$products = new WP_Query( $args );
 
 		$woocommerce_loop['columns'] = $columns;
@@ -732,7 +743,7 @@ class WC_Shortcodes {
 
 		<?php endif;
 
-		wp_reset_postdata();
+		$post = $temp;
 
 		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
@@ -745,7 +756,7 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function top_rated_products( $atts ){
-	    global $woocommerce_loop;
+	    global $woocommerce_loop, $post;
 
 	    extract( shortcode_atts( array(
 	        'per_page'      => '12',
@@ -774,6 +785,7 @@ class WC_Shortcodes {
 
 	  	add_filter( 'posts_clauses', array( &$this, 'order_by_rating_post_clauses' ) );
 
+	  	$temp = $post;
 		$products = new WP_Query( $args );
 
 		remove_filter( 'posts_clauses', array( &$this, 'order_by_rating_post_clauses' ) );
@@ -794,7 +806,7 @@ class WC_Shortcodes {
 
 		<?php endif;
 
-		wp_reset_postdata();
+		$post = $temp;
 
 		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
@@ -808,7 +820,7 @@ class WC_Shortcodes {
 	 */
 	public function featured_products( $atts ) {
 
-		global $woocommerce_loop;
+		global $woocommerce_loop, $post;
 
 		extract(shortcode_atts(array(
 			'per_page' 	=> '12',
@@ -839,6 +851,7 @@ class WC_Shortcodes {
 
 		ob_start();
 
+		$temp = $post;
 		$products = new WP_Query( $args );
 
 		$woocommerce_loop['columns'] = $columns;
@@ -857,7 +870,7 @@ class WC_Shortcodes {
 
 		<?php endif;
 
-		wp_reset_postdata();
+		$post = $temp;
 
 		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
@@ -871,6 +884,9 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function product_page_shortcode( $atts ) {
+
+		global $post;
+
 	  	if ( empty( $atts ) ) return;
 
 		if ( ! isset( $atts['id'] ) && ! isset( $atts['sku'] ) ) return;
@@ -895,6 +911,7 @@ class WC_Shortcodes {
 	    	$args['p'] = $atts['id'];
 	  	}
 
+	  	$temp = $post;
 	  	$single_product = new WP_Query( $args );
 
 	  	ob_start();
@@ -909,7 +926,7 @@ class WC_Shortcodes {
 
 		<?php endwhile; // end of the loop.
 
-		wp_reset_postdata();
+		$post = $temp;
 
 		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
@@ -965,7 +982,7 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	function product_attribute( $atts ) {
-		global $woocommerce_loop;
+		global $woocommerce_loop, $post;
 
 		extract( shortcode_atts( array(
 			'per_page'  => '12',
@@ -1004,6 +1021,7 @@ class WC_Shortcodes {
 
 		ob_start();
 
+		$temp = $post;
 		$products = new WP_Query( $args );
 
 		$woocommerce_loop['columns'] = $columns;
@@ -1022,7 +1040,7 @@ class WC_Shortcodes {
 
 		<?php endif;
 
-		wp_reset_postdata();
+		$post = $temp;
 
 		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
