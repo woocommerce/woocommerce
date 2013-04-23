@@ -19,6 +19,7 @@ jQuery(document).ready(function($) {
 					sessionStorage.setItem( "wc_cart_hash", data.cart_hash );
 				}
 
+				$('body').trigger( 'wc_fragments_refreshed' );
 			}
 		}
 	};
@@ -39,6 +40,8 @@ jQuery(document).ready(function($) {
 				$.each( wc_fragments, function( key, value ) {
 					$(key).replaceWith(value);
 				});
+
+				$('body').trigger( 'wc_fragments_loaded' );
 
 			} else {
 				throw "No fragment";
