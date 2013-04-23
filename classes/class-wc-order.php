@@ -926,8 +926,7 @@ class WC_Order {
 	 */
 	public function get_product_from_item( $item ) {
 		$_product = get_product( $item['variation_id'] ? $item['variation_id'] : $item['product_id'] );
-
-		return $_product;
+                return apply_filters( 'woocommerce_get_product_from_item', $_product, $item, $this );
 	}
 
 
