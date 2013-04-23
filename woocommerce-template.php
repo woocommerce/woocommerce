@@ -283,9 +283,9 @@ if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 	 */
 	function woocommerce_taxonomy_archive_description() {
 		if ( is_tax( array( 'product_cat', 'product_tag' ) ) && get_query_var( 'paged' ) == 0 ) {
-			$description = term_description();
+			$description = apply_filters( 'the_content', term_description() );
 			if ( $description ) {
-				echo '<div class="term-description">' . wpautop( wptexturize( $description ) ) . '</div>';
+				echo '<div class="term-description">' . $description . '</div>';
 			}
 		}
 	}
