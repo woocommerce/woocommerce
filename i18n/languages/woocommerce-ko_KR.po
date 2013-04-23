@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-01-09 09:36:51+00:00\n"
-"PO-Revision-Date: 2013-04-21 20:59+0900\n"
+"PO-Revision-Date: 2013-04-21 23:09+0900\n"
 "Last-Translator: jido park <parkmap@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -5813,12 +5813,12 @@ msgstr "입금대기중"
 # @ woocommerce
 #: i18n/strings.php:19
 msgid "processing"
-msgstr ""
+msgstr "배송 준비중"
 
 # @ woocommerce
 #: i18n/strings.php:20
 msgid "completed"
-msgstr ""
+msgstr "상품 발송됨"
 
 # @ woocommerce
 #: i18n/strings.php:21
@@ -6102,7 +6102,8 @@ msgid ""
 "customer please login at the top of the page."
 msgstr ""
 "이미 회원 가입을 하셨다면 로그인해주세요. 회원 가입 하시려면 아래 정보를 입력"
-"해 주세요. 회원 가입하시면 주문정보를 사이트 내에서 확인 하실수 있습니다."
+"해 주세요. 회원으로 가입 하시면 주문정보를 사이트 내에서 확인 하실수 있습니"
+"다."
 
 # @ woocommerce
 #: templates/checkout/form-checkout.php:20
@@ -8740,12 +8741,12 @@ msgstr ""
 #: admin/post-types/shop_order.php:158
 #: admin/woocommerce-admin-dashboard.php:176
 msgid "Processing"
-msgstr ""
+msgstr "배송 준비중"
 
 # @ woocommerce
 #: admin/post-types/shop_order.php:165
 msgid "Complete"
-msgstr ""
+msgstr "상품 발송"
 
 # @ woocommerce
 #: admin/post-types/shop_order.php:301 admin/post-types/shop_order.php:326
