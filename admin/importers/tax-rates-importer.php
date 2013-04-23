@@ -108,6 +108,8 @@ if ( class_exists( 'WP_Importer' ) ) {
 
 			$new_rates = array();
 
+			ini_set( 'auto_detect_line_endings', '1' );
+
 			if ( ( $handle = fopen( $file, "r" ) ) !== FALSE ) {
 
 				$header = fgetcsv( $handle, 0, $this->delimiter );
