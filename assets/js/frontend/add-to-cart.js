@@ -16,7 +16,7 @@ jQuery(document).ready(function($) {
 			var data = {
 				action: 		'woocommerce_add_to_cart',
 				product_id: 	$thisbutton.attr('data-product_id'),
-				quantity:       $thisbutton.attr('data-quantity'),
+				quantity:       $thisbutton.attr('data-quantity')
 			};
 
 			// Trigger event
