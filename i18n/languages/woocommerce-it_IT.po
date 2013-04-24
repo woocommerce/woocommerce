@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-04-11 09:58+0100\n"
-"PO-Revision-Date: 2013-04-22 12:28+0100\n"
+"PO-Revision-Date: 2013-04-24 01:28+0100\n"
 "Last-Translator: Adriano Calvitto <adriano.calvitto@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -4483,7 +4483,7 @@ msgstr "Mostra tutti i sottotipi"
 #: admin/post-types/product.php:520
 #, php-format
 msgid "[%s with SKU of %s]"
-msgstr "[%s con SKU di %s]"
+msgstr "[%s con COD di %s]"
 
 # @ woocommerce
 #: admin/post-types/product.php:526
@@ -4864,7 +4864,7 @@ msgstr "ID variazione:"
 # @ woocommerce
 #: admin/post-types/writepanels/order-item-html.php:16
 msgid "Product SKU:"
-msgstr "SKU Prodotto:"
+msgstr "Codice Prodotto:"
 
 # @ woocommerce
 #: admin/post-types/writepanels/order-item-html.php:44
@@ -4904,8 +4904,8 @@ msgstr "Qualsiasi"
 msgid ""
 "Enter a SKU for this variation or leave blank to use the parent product SKU."
 msgstr ""
-"Immettere una SKU per questa variante o lascia vuoto per usare lo SKU del "
-"prodotto principale."
+"Immettere un codice per questa variante o lascia vuoto per usare il codice "
+"del prodotto principale."
 
 # @ woocommerce
 #: admin/post-types/writepanels/variation-admin-html.php:63
@@ -5895,7 +5895,7 @@ msgid ""
 "SKU refers to a Stock-keeping unit, a unique identifier for each distinct "
 "product and service that can be purchased."
 msgstr ""
-"SKU si riferisce a una Stock-keeping unit, un identificatore univoco per "
+"COD si riferisce a una Stock-keeping unit, un identificatore univoco per "
 "ogni distinto prodotto o servizio che possono essere acquistati."
 
 # @ woocommerce
@@ -6193,7 +6193,7 @@ msgstr "Attiva le recensioni"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:713
 msgid "Product SKU must be unique."
-msgstr "Lo SKU del prodotto deve essere univoco"
+msgstr "Il COD del prodotto deve essere univoco"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:1044
@@ -6984,7 +6984,7 @@ msgstr "Campi del prodotto"
 #: admin/settings/settings-init.php:512
 msgid "Enable the <strong>SKU</strong> field for products"
 msgstr ""
-"Abilitare il campo <strong>SKU</strong> (identificatore univoco) per i "
+"Abilitare il campo <strong>COD</strong> (identificatore univoco) per i "
 "prodotti"
 
 # @ woocommerce
@@ -7889,12 +7889,12 @@ msgstr "Prezzo prodotto / Pulsante Carrello"
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:7
 msgid "Product by SKU/ID"
-msgstr "Prodotto per SKU/ID"
+msgstr "Prodotto per COD/ID"
 
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:8
 msgid "Products by SKU/ID"
-msgstr "Prodotti per SKU/ID"
+msgstr "Prodotti per COD/ID"
 
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:10
@@ -10855,7 +10855,7 @@ msgstr "Aggiungi un codice di tracciamento evento per le aggiunte al carrello"
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:258
 #: templates/single-product/meta.php:19
 msgid "SKU:"
-msgstr "SKU:"
+msgstr "COD:"
 
 # @ woocommerce
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:277
