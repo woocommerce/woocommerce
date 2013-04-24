@@ -89,6 +89,9 @@ function do_install_woocommerce() {
 	// Clear transient cache
 	$woocommerce->clear_product_transients();
 
+	// Fix the Brazilian states.
+	woocommerce_update_brazil_states();
+
 	// Recompile LESS styles if they are custom
 	if ( get_option( 'woocommerce_frontend_css' ) == 'yes' ) {
 
@@ -371,6 +374,52 @@ function woocommerce_default_taxonomies() {
 			if ( ! get_term_by( 'slug', sanitize_title( $term ), $taxonomy ) ) {
 				wp_insert_term( $term, $taxonomy );
 			}
+		}
+	}
+}
+
+/**
+ * Fix the Brazilian states. Change BH for BA.
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_update_brazil_states() {
+	global $wpdb;
+
+	// Fix the billing state for orders.
+	$orders_billing_state = $wpdb->get_results( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_billing_state' AND meta_value = 'BH'" );
+
+	if ( $orders_billing_state ) {
+		foreach ( $orders_billing_state as $value ) {
+			update_post_meta( $value->post_id, '_billing_state', 'BA', 'BH' );
+		}
+	}
+
+	// Fix the shipping state for orders.
+	$orders_shipping_state = $wpdb->get_results( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_shipping_state' AND meta_value = 'BH'" );
+
+	if ( $orders_shipping_state ) {
+		foreach ( $orders_shipping_state as $value ) {
+			update_post_meta( $value->post_id, '_shipping_state', 'BA', 'BH' );
+		}
+	}
+
+	// Fix the billing state for clients.
+	$clients_billing_state = $wpdb->get_results( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = 'billing_state' AND meta_value = 'BH'" );
+
+	if ( $clients_billing_state ) {
+		foreach ( $clients_billing_state as $value ) {
+			update_user_meta( $value->user_id, 'billing_state', 'BA', 'BH' );
+		}
+	}
+
+	// Fix the shipping state for clients.
+	$clients_shipping_state = $wpdb->get_results( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = 'shipping_state' AND meta_value = 'BH'" );
+
+	if ( $clients_shipping_state ) {
+		foreach ( $clients_shipping_state as $value ) {
+			update_user_meta( $value->user_id, 'shipping_state', 'BA', 'BH' );
 		}
 	}
 }
