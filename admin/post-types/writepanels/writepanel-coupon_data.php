@@ -237,7 +237,8 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 	update_post_meta( $post_id, 'minimum_amount', $minimum_amount );
 	update_post_meta( $post_id, 'customer_email', $customer_email );
 
-	do_action( 'woocommerce_coupon_options' );
+	/* Deprecated - same hook name as in the meta */ do_action( 'woocommerce_coupon_options' );
+	do_action( 'woocommerce_coupon_options_save' );
 }
 
 add_action( 'woocommerce_process_shop_coupon_meta', 'woocommerce_process_shop_coupon_meta', 1, 2 );
