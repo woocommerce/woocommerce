@@ -170,6 +170,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Disable autocomplete for checkout fields which refresh totals - no events get fired on autocomplete.
 * Fix - Clear rating transients when editing comments.
 * Fix - Screen ids when plugin name localised.
+* Fix - Brazillian state code BH -> BA. Data update required to update old values in orders.
 * Localization - Netherlands, Hungarian, Taiwan, Italian, Spanish updates.
 * Other minor fixes and localisation updates.
 
