@@ -1412,11 +1412,10 @@ function woocommerce_layered_nav_init( ) {
 
 		    		$_chosen_attributes[ $taxonomy ]['terms'] = explode( ',', $_GET[ $name ] );
 
-		    		if ( ! empty( $_GET[ $query_type_name ] ) && $_GET[ $query_type_name ] == 'or' )
-		    			$_chosen_attributes[ $taxonomy ]['query_type'] = 'or';
-		    		else
-		    			$_chosen_attributes[ $taxonomy ]['query_type'] = 'and';
-
+		    		if ( empty( $_GET[ $query_type_name ] ) || ! in_array( strtolower( $_GET[ $query_type_name ] ), array( 'and', 'or' ) ) )
+						$_chosen_attributes[ $taxonomy ]['query_type'] = apply_filters( 'woocommerce_layered_nav_default_type', 'and' );
+					else
+						$_chosen_attributes[ $taxonomy ]['query_type'] = $_GET[ $query_type_name ];
 				}
 			}
 	    }
