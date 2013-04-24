@@ -167,6 +167,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = X =
 * Tweak - Notices during checkout for admin users if the checkout is mis-configured.
+* Fix - Disable autocomplete for checkout fields which refresh totals - no events get fired on autocomplete.
 * Fix - Clear rating transients when editing comments.
 * Localization - Netherlands, Hungarian, Taiwan, Italian, Spanish updates.
 * Other minor fixes and localisation updates.
