@@ -642,13 +642,6 @@ class WC_Customer {
 							$previous_result['download_id'],
 							0
 						);
-						/*$downloads[ count( $downloads ) - 1 ]['download_name'] = apply_filters(
-							'woocommerce_downloadable_product_name',
-							$downloads[ count( $downloads ) - 1 ]['download_name'] . ' &mdash; ' . sprintf( __( 'File %d', 'woocommerce' ), $file_number ),
-							$_product,
-							$result->download_id,
-							0
-						);*/
 					}
 
 					$downloads[] = array(
