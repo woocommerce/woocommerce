@@ -214,14 +214,13 @@ class WC_Shipping {
 		if ( ! empty( $woocommerce->session->chosen_shipping_method ) )
 			$chosen_method = $woocommerce->session->chosen_shipping_method;
 
-		$woocommerce->session->available_methods_count = sizeof( $_available_methods );
-
+		// Set method if we have mehtods available
 		if ( sizeof( $_available_methods ) > 0 ) {
 
-			// If not set, set a default
-			if ( empty( $chosen_method ) || ! isset( $_available_methods[ $chosen_method ] ) ) {
+			// If not set, not available, or available methods have changed, set to the default option
+			if ( empty( $chosen_method ) || ! isset( $_available_methods[ $chosen_method ] ) || $woocommerce->session->available_methods_count != sizeof( $_available_methods ) ) {
 
-				$chosen_method = apply_filters( 'woocommerce_shipping_chosen_method', get_option('woocommerce_default_shipping_method'), $_available_methods );
+				$chosen_method = apply_filters( 'woocommerce_shipping_chosen_method', get_option( 'woocommerce_default_shipping_method' ), $_available_methods );
 
 				// Loops methods and find a match
 				if ( ! empty( $chosen_method ) && ! isset( $_available_methods[ $chosen_method ] ) ) {
@@ -258,6 +257,8 @@ class WC_Shipping {
 				$this->shipping_label 	= $_available_methods[ $chosen_method ]->label;
 			}
 		}
+
+		$woocommerce->session->available_methods_count = sizeof( $_available_methods );
 	}
 
 	/**
