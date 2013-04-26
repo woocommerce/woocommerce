@@ -328,8 +328,10 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 
 		$page 	= get_page( absint( $_POST['page_id'] ) );
 		$url 	= get_permalink( $page->ID );
-		wp_update_post( array( 'ID' => $page->ID, 'post_status' => 'publish' ) );
-		$job_id = Mijireh::slurp( $url, $page->ID, str_replace( 'https:', 'http:', add_query_arg( 'wc-api', 'WC_Gateway_Mijireh', home_url( '/' ) ) ) );
+    $job_id = $url;
+		if ( wp_update_post( array( 'ID' => $page->ID, 'post_status' => 'publish' ) ) ) {
+		  $job_id = Mijireh::slurp( $url, $page->ID, str_replace( 'https:', 'http:', add_query_arg( 'wc-api', 'WC_Gateway_Mijireh', home_url( '/' ) ) ) );
+    }
 		echo $job_id;
 		die;
 	}
