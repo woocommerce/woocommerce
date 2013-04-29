@@ -13,76 +13,72 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
- * Reports page
+ * Returns the definitions for the reports and charts
  *
- * Handles the display of the reports page in admin.
- *
- * @access public
- * @return void
+ * @return array
  */
-function woocommerce_reports() {
-
-	$charts            = array(
-		'sales'          => array(
-			'title'         => __( 'Sales', 'woocommerce' ),
-			'charts'        => array(
-				array(
+function woocommerce_get_reports_charts() {
+	$charts = array(
+		'sales'     => array(
+			'title'  => __( 'Sales', 'woocommerce' ),
+			'charts' => array(
+				"overview"          => array(
 					'title'       => __( 'Overview', 'woocommerce' ),
 					'description' => '',
 					'hide_title'  => true,
 					'function'    => 'woocommerce_sales_overview'
 				),
-				array(
+				"sales_by_day"      => array(
 					'title'       => __( 'Sales by day', 'woocommerce' ),
 					'description' => '',
 					'function'    => 'woocommerce_daily_sales'
 				),
-				array(
+				"sales_by_month"    => array(
 					'title'       => __( 'Sales by month', 'woocommerce' ),
 					'description' => '',
 					'function'    => 'woocommerce_monthly_sales'
 				),
-				array(
+				"product_sales"     => array(
 					'title'       => __( 'Product Sales', 'woocommerce' ),
 					'description' => '',
 					'function'    => 'woocommerce_product_sales'
 				),
-				array(
+				"top_sellers"       => array(
 					'title'       => __( 'Top sellers', 'woocommerce' ),
 					'description' => '',
 					'function'    => 'woocommerce_top_sellers'
 				),
-				array(
+				"top_earners"       => array(
 					'title'       => __( 'Top earners', 'woocommerce' ),
 					'description' => '',
 					'function'    => 'woocommerce_top_earners'
 				),
-				array(
+				"sales_by_category" => array(
 					'title'       => __( 'Sales by category', 'woocommerce' ),
 					'description' => '',
 					'function'    => 'woocommerce_category_sales'
-				)			)
+				) )
 		),
-		'coupons'        => array(
-			'title'         => __( 'Coupons', 'woocommerce' ),
-			'charts'        => array(
-				array(
+		'coupons'   => array(
+			'title'  => __( 'Coupons', 'woocommerce' ),
+			'charts' => array(
+				"overview"            => array(
 					'title'       => __( 'Overview', 'woocommerce' ),
 					'description' => '',
 					'hide_title'  => true,
 					'function'    => 'woocommerce_coupons_overview'
 				),
-				array(
+				"discounts_by_coupon" => array(
 					'title'       => __( 'Discounts by coupon', 'woocommerce' ),
 					'description' => '',
 					'function'    => 'woocommerce_coupon_discounts'
 				)
 			)
 		),
-		'customers'      => array(
-			'title'         => __( 'Customers', 'woocommerce' ),
-			'charts'        => array(
-				array(
+		'customers' => array(
+			'title'  => __( 'Customers', 'woocommerce' ),
+			'charts' => array(
+				"overview" => array(
 					'title'       => __( 'Overview', 'woocommerce' ),
 					'description' => '',
 					'hide_title'  => true,
@@ -90,10 +86,10 @@ function woocommerce_reports() {
 				),
 			)
 		),
-		'stock'          => array(
-			'title'         => __( 'Stock', 'woocommerce' ),
-			'charts'        => array(
-				array(
+		'stock'     => array(
+			'title'  => __( 'Stock', 'woocommerce' ),
+			'charts' => array(
+				"overview" => array(
 					'title'       => __( 'Overview', 'woocommerce' ),
 					'description' => '',
 					'hide_title'  => true,
@@ -104,20 +100,33 @@ function woocommerce_reports() {
 	);
 
 	if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) {
-		$charts['sales']['charts'][] = array(
+		$charts['sales']['charts']["taxes_by_month"] = array(
 			'title'       => __( 'Taxes by month', 'woocommerce' ),
 			'description' => '',
 			'function'    => 'woocommerce_monthly_taxes'
 		);
 	}
 
-	$charts = apply_filters( 'woocommerce_reports_charts', $charts );
+	return apply_filters( 'woocommerce_reports_charts', $charts );
+}
+
+/**
+ * Reports page
+ *
+ * Handles the display of the reports page in admin.
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_reports() {
+
+	$charts = woocommerce_get_reports_charts();
 
 	$first_tab      = array_keys($charts);
 	$first_chart    = array_keys($charts[$first_tab[0]]['charts']);
 
 	$current_tab 	= isset( $_GET['tab'] ) ? sanitize_title( urldecode( $_GET['tab'] ) ) : $first_tab[0];
-	$current_chart 	= isset( $_GET['chart'] ) ? absint( urldecode( $_GET['chart'] ) ) : $first_chart[0];
+	$current_chart 	= isset( $_GET['chart'] ) ?  sanitize_title( urldecode( $_GET['chart'] ) ) : $first_chart[0];
 
     ?>
 	<div class="wrap woocommerce">
@@ -158,7 +167,7 @@ function woocommerce_reports() {
 			<br class="clear" />
 			<?php
 		}
-
+		
 		if ( isset( $charts[ $current_tab ][ 'charts' ][ $current_chart ] ) ) {
 
 			$chart = $charts[ $current_tab ][ 'charts' ][ $current_chart ];
