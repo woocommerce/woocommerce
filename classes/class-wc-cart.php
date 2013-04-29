@@ -663,12 +663,14 @@ class WC_Cart {
 		 */
 		public function get_checkout_url() {
 			$checkout_page_id = woocommerce_get_page_id('checkout');
+			$checkout_url     = '';
 			if ( $checkout_page_id ) {
-				if ( is_ssl() )
-					return str_replace( 'http:', 'https:', get_permalink($checkout_page_id) );
+				if ( is_ssl() || get_option('woocommerce_force_ssl_checkout') == 'yes' )
+					$checkout_url = str_replace( 'http:', 'https:', get_permalink( $checkout_page_id ) );
 				else
-					return apply_filters( 'woocommerce_get_checkout_url', get_permalink($checkout_page_id) );
+					$checkout_url = get_permalink( $checkout_page_id );
 			}
+			return apply_filters( 'woocommerce_get_checkout_url', $checkout_url );
 		}
 
 		/**
