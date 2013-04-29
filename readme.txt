@@ -166,12 +166,15 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = X =
+* Feature - Added is_product_taxonomy() conditonal.
 * Tweak - Notices during checkout for admin users if the checkout is mis-configured.
 * Fix - Disable autocomplete for checkout fields which refresh totals - no events get fired on autocomplete.
 * Fix - Clear rating transients when editing comments.
 * Fix - Screen ids when plugin name localised.
 * Fix - Brazillian state code BH -> BA. Data update required to update old values in orders.
-* Localization - Netherlands, Hungarian, Taiwan, Italian, Spanish updates.
+* Fix - Fix incorrect CSS class being output in product image gallery.
+* Fix - Mijireh page slurp.
+* Localization - Netherlands, Hungarian, Taiwan, Italian, CZ, Spanish updates.
 * Other minor fixes and localisation updates.
 
 = 2.0.8 - 17/04/2013 =

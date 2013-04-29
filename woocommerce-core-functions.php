@@ -443,6 +443,19 @@ if ( ! function_exists( 'is_shop' ) ) {
 	}
 }
 
+if ( ! function_exists( 'is_product_taxonomy' ) ) {
+
+	/**
+	 * is_product_taxonomy - Returns true when viewing a product taxonomy archive.
+	 *
+	 * @access public
+	 * @return bool
+	 */
+	function is_product_taxonomy() {
+		return is_tax( get_object_taxonomies( 'product' ) );
+	}
+}
+
 if ( ! function_exists( 'is_product_category' ) ) {
 
 	/**

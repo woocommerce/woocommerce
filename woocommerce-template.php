@@ -1043,7 +1043,7 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 	function woocommerce_products_will_display() {
 		global $woocommerce, $wpdb;
 
-		if ( ! is_product_category() && ! is_product_tag() && ! is_shop() )
+		if ( ! is_product_category() && ! is_product_tag() && ! is_shop() && ! is_product_taxonomy() )
 			return false;
 
 		if ( is_search() || is_filtered() || is_paged() )
