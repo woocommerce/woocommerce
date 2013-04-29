@@ -932,7 +932,7 @@ function woocommerce_download_product() {
 		$product_id           = (int) urldecode($_GET['download_file']);
 		$order_key            = urldecode( $_GET['order'] );
 		$email                = sanitize_email( str_replace( ' ', '+', urldecode( $_GET['email'] ) ) );
-		$download_id          = isset( $_GET['key'] ) ? urldecode( $_GET['key'] ) : '';  // backwards compatibility for existing download URLs
+		$download_id          = isset( $_GET['key'] ) ? preg_replace( '/\s+/', ' ', urldecode( $_GET['key'] ) ) : '';
 		$_product             = get_product( $product_id );
 		$file_download_method = apply_filters( 'woocommerce_file_download_method', get_option( 'woocommerce_file_download_method' ), $product_id );
 
@@ -950,6 +950,7 @@ function woocommerce_download_product() {
 			$order_key,
 			$product_id
 		);
+
 		if ( $download_id ) {
 			// backwards compatibility for existing download URLs
 			$query .= " AND download_id = %s";
