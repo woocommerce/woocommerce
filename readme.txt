@@ -174,6 +174,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Brazillian state code BH -> BA. Data update required to update old values in orders.
 * Fix - Fix incorrect CSS class being output in product image gallery.
 * Fix - Mijireh page slurp.
+* Fix - woocommerce_downloadable_product_name filter fixes.
 * Localization - Netherlands, Hungarian, Taiwan, Italian, CZ, Spanish updates.
 * Other minor fixes and localisation updates.
 
