@@ -84,30 +84,38 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 	 * @return void
 	 */
 	public function mijireh_notification() {
-	   global $woocommerce;
+    if( isset( $_GET['order_number'] ) ) {
+  	  global $woocommerce;
 
-		$this->init_mijireh();
+  		$this->init_mijireh();
 
-		try {
-		      $mj_order 	= new Mijireh_Order( esc_attr( $_GET['order_number'] ) );
-		      $wc_order_id 	= $mj_order->get_meta_value( 'wc_order_id' );
-		      $wc_order 	= new WC_Order( absint( $wc_order_id ) );
+  		try {
+  		      $mj_order 	= new Mijireh_Order( esc_attr( $_GET['order_number'] ) );
+  		      $wc_order_id 	= $mj_order->get_meta_value( 'wc_order_id' );
+  		      $wc_order 	= new WC_Order( absint( $wc_order_id ) );
 
-		      // Mark order complete
-		      $wc_order->payment_complete();
+  		      // Mark order complete
+  		      $wc_order->payment_complete();
 
-		      // Empty cart and clear session
-		      $woocommerce->cart->empty_cart();
+  		      // Empty cart and clear session
+  		      $woocommerce->cart->empty_cart();
 
-		      wp_redirect( $this->get_return_url( $wc_order ) );
-		      exit;
+  		      wp_redirect( $this->get_return_url( $wc_order ) );
+  		      exit;
 
-		} catch (Mijireh_Exception $e) {
+  		} catch (Mijireh_Exception $e) {
 
-			$woocommerce->add_error( __( 'Mijireh error:', 'woocommerce' ) . $e->getMessage() );
+  			$woocommerce->add_error( __( 'Mijireh error:', 'woocommerce' ) . $e->getMessage() );
 
-		}
+  		}
+    }
+    elseif( isset( $_POST['page_id'] ) ) {
+      if( isset( $_POST['access_key'] ) && $_POST['access_key'] == $this->access_key ) {
+        wp_update_post( array( 'ID' => $_POST['page_id'], 'post_status' => 'private' ) );
+      }
+    }
 	}
+	
 
 
     /**
@@ -320,12 +328,14 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 
 		$page 	= get_page( absint( $_POST['page_id'] ) );
 		$url 	= get_permalink( $page->ID );
-		wp_update_post( array( 'ID' => $page->ID, 'post_status' => 'publish' ) );
-		$job_id = Mijireh::slurp( $url );
-		wp_update_post( array( 'ID' => $page->ID, 'post_status' => 'private' ) );
+    $job_id = $url;
+		if ( wp_update_post( array( 'ID' => $page->ID, 'post_status' => 'publish' ) ) ) {
+		  $job_id = Mijireh::slurp( $url, $page->ID, str_replace( 'https:', 'http:', add_query_arg( 'wc-api', 'WC_Gateway_Mijireh', home_url( '/' ) ) ) );
+    }
 		echo $job_id;
 		die;
 	}
+    
 
 
     /**
