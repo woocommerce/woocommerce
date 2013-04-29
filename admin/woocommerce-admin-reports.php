@@ -122,12 +122,9 @@ function woocommerce_reports() {
 
 	$charts = woocommerce_get_reports_charts();
 
-	$first_tab      = array_keys($charts);
-	$first_chart    = array_keys($charts[$first_tab[0]]['charts']);
-
+	$first_tab      = array_keys( $charts );
 	$current_tab 	= isset( $_GET['tab'] ) ? sanitize_title( urldecode( $_GET['tab'] ) ) : $first_tab[0];
-	$current_chart 	= isset( $_GET['chart'] ) ?  sanitize_title( urldecode( $_GET['chart'] ) ) : $first_chart[0];
-
+	$current_chart 	= isset( $_GET['chart'] ) ?  sanitize_title( urldecode( $_GET['chart'] ) ) : current( array_keys( $charts[ $current_tab ]['charts'] ) );
     ?>
 	<div class="wrap woocommerce">
 		<div class="icon32 icon32-woocommerce-reports" id="icon-woocommerce"><br /></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
@@ -167,7 +164,7 @@ function woocommerce_reports() {
 			<br class="clear" />
 			<?php
 		}
-		
+
 		if ( isset( $charts[ $current_tab ][ 'charts' ][ $current_chart ] ) ) {
 
 			$chart = $charts[ $current_tab ][ 'charts' ][ $current_chart ];
