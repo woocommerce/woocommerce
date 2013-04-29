@@ -190,7 +190,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 			<?php
 			$order_button_text = apply_filters('woocommerce_order_button_text', __( 'Place order', 'woocommerce' ));
-			
+
 			echo apply_filters('woocommerce_order_button_html', '<input type="submit" class="button alt" name="woocommerce_checkout_place_order" id="place_order" value="' . $order_button_text . '" />' );
 			?>
 

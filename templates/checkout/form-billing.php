@@ -38,7 +38,7 @@ global $woocommerce;
 
 	<?php if ( $checkout->enable_guest_checkout ) : ?>
 
-		<p class="form-row">
+		<p class="form-row form-row-wide">
 			<input class="input-checkbox" id="createaccount" <?php checked($checkout->get_value('createaccount'), true) ?> type="checkbox" name="createaccount" value="1" /> <label for="createaccount" class="checkbox"><?php _e( 'Create an account?', 'woocommerce' ); ?></label>
 		</p>
 
