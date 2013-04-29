@@ -9,7 +9,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-global $post, $woocommerce;
+global $post, $woocommerce, $product;
 
 ?>
 <div class="images">
@@ -20,9 +20,9 @@ global $post, $woocommerce;
 			$image       		= get_the_post_thumbnail( $post->ID, apply_filters( 'single_product_large_thumbnail_size', 'shop_single' ) );
 			$image_title 		= esc_attr( get_the_title( get_post_thumbnail_id() ) );
 			$image_link  		= wp_get_attachment_url( get_post_thumbnail_id() );
-			$attachment_count   = count( get_children( array( 'post_parent' => $post->ID, 'post_mime_type' => 'image', 'post_type' => 'attachment' ) ) );
+			$attachment_count   = count( $product->get_gallery_attachment_ids() );
 
-			if ( $attachment_count != 1 ) {
+			if ( $attachment_count > 0 ) {
 				$gallery = '[product-gallery]';
 			} else {
 				$gallery = '';
