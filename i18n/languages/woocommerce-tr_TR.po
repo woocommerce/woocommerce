@@ -6349,7 +6349,7 @@ msgstr "Gösterilen: (%s - %s) / Toplam: %s"
 #, fuzzy, php-format
 #@ woocommerce
 msgid "Showing all %d results"
-msgstr "Gösterilen: (%s - %s) / Toplam: %s"
+msgstr ""
 
 #: templates/loop/result-count.php:32
 #, fuzzy, php-format
