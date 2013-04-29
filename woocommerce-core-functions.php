@@ -1208,7 +1208,7 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 		if ($item['product_id']>0) :
 			$_product = $order->get_product_from_item( $item );
 
-			if ( $_product->exists() && $_product->is_downloadable() ) :
+			if ( $_product && $_product->exists() && $_product->is_downloadable() ) :
 
 				$product_id = ($item['variation_id']>0) ? $item['variation_id'] : $item['product_id'];
 
