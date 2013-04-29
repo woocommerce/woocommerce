@@ -24,7 +24,6 @@ class PotExtMeta {
 		'Tags',
 	);
 
-
 	function usage() {
 		fwrite(STDERR, "Usage: php pot-ext-meta.php EXT POT\n");
 		fwrite(STDERR, "Adds metadata from a WordPress theme or plugin file EXT to POT file\n");
@@ -32,10 +31,10 @@ class PotExtMeta {
 	}
 
 	function load_from_file($ext_filename) {
-		$source = MakePOT::get_first_lines($ext_filename);
+		$source = WC_Makepot::get_first_lines($ext_filename);
 		$pot = '';
 		foreach($this->headers as $header) {
-			$string = MakePOT::get_addon_header($header, $source);
+			$string = WC_Makepot::get_addon_header($header, $source);
 			if (!$string) continue;
 			$args = array(
 				'singular' => $string,
@@ -55,7 +54,7 @@ class PotExtMeta {
 		} else {
 			$pot = $this->load_from_file($ext_filename);
 		}
-		$potf = '-' == $pot_filename? STDOUT : fopen($pot_filename, 'a');
+		$potf = '-' == $pot_filename? STDOUT : fopen( $pot_filename, 'a' );
 		if (!$potf) return false;
 		fwrite($potf, $pot);
 		if ('-' != $pot_filename) fclose($potf);
@@ -72,5 +71,3 @@ if ($included_files[0] == __FILE__) {
 	}
 	$potextmeta->append( $argv[1], isset( $argv[2] ) ? $argv[2] : '-', isset( $argv[3] ) ? $argv[3] : null );
 }
-
-?>

@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.0.8 Admin\n"
+"Project-Id-Version: WooCommerce 2.0.9 Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2013-04-19 06:24:35+00:00\n"
+"POT-Creation-Date: 2013-04-29 16:02:07+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -130,13 +130,13 @@ msgid "It is strongly recommended that you backup your database before proceedin
 msgstr ""
 
 #: admin/includes/updates/woocommerce-update-2.0.php:49
-#: admin/woocommerce-admin-init.php:882
+#: admin/woocommerce-admin-init.php:885
 msgctxt "slug"
 msgid "product-category"
 msgstr ""
 
 #: admin/includes/updates/woocommerce-update-2.0.php:50
-#: admin/woocommerce-admin-init.php:895
+#: admin/woocommerce-admin-init.php:898
 msgctxt "slug"
 msgid "product-tag"
 msgstr ""
@@ -187,7 +187,7 @@ msgid "Version %s"
 msgstr ""
 
 #: admin/includes/welcome.php:153 admin/woocommerce-admin-content.php:41
-#: admin/woocommerce-admin-init.php:86 admin/woocommerce-admin-status.php:278
+#: admin/woocommerce-admin-init.php:88 admin/woocommerce-admin-status.php:278
 msgid "Settings"
 msgstr ""
 
@@ -404,22 +404,22 @@ msgstr ""
 #: admin/woocommerce-admin-attributes.php:330
 #: admin/woocommerce-admin-attributes.php:374
 #: admin/woocommerce-admin-attributes.php:399
-#: admin/woocommerce-admin-init.php:434
+#: admin/woocommerce-admin-init.php:437
 msgid "Name"
 msgstr ""
 
 #: admin/post-types/product.php:91 admin/post-types/product.php:557
 #: admin/post-types/writepanels/variation-admin-html.php:52
 #: admin/post-types/writepanels/writepanel-product_data.php:98
-#: admin/woocommerce-admin-reports.php:2093
-#: admin/woocommerce-admin-reports.php:2129
+#: admin/woocommerce-admin-reports.php:2099
+#: admin/woocommerce-admin-reports.php:2135
 msgid "SKU"
 msgstr ""
 
 #: admin/post-types/product.php:94
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:83
 #: admin/woocommerce-admin-content.php:63
-#: admin/woocommerce-admin-reports.php:94
+#: admin/woocommerce-admin-reports.php:90
 msgid "Stock"
 msgstr ""
 
@@ -439,7 +439,7 @@ msgstr ""
 #: admin/post-types/product.php:100 admin/post-types/product.php:632
 #: admin/post-types/product.php:906
 #: admin/post-types/writepanels/writepanel-product_data.php:1058
-#: admin/woocommerce-admin-init.php:447
+#: admin/woocommerce-admin-init.php:450
 msgid "Featured"
 msgstr ""
 
@@ -564,7 +564,7 @@ msgstr ""
 #: admin/post-types/product.php:264 admin/post-types/product.php:642
 #: admin/post-types/product.php:931
 #: admin/post-types/writepanels/writepanel-product_data.php:232
-#: admin/woocommerce-admin-reports.php:2113
+#: admin/woocommerce-admin-reports.php:2119
 msgid "Out of stock"
 msgstr ""
 
@@ -897,7 +897,7 @@ msgstr ""
 #: admin/post-types/writepanels/variation-admin-html.php:7
 #: admin/post-types/writepanels/writepanel-product_data.php:369
 #: admin/post-types/writepanels/writepanel-product_data.php:463
-#: admin/woocommerce-admin-init.php:436
+#: admin/woocommerce-admin-init.php:439
 msgid "Click to toggle"
 msgstr ""
 
@@ -944,9 +944,9 @@ msgstr ""
 #: admin/post-types/writepanels/order-tax-html.php:8
 #: admin/post-types/writepanels/writepanel-order_data.php:561
 #: admin/post-types/writepanels/writepanel-order_data.php:666
-#: admin/woocommerce-admin-reports.php:1652
-#: admin/woocommerce-admin-reports.php:2665
-#: admin/woocommerce-admin-reports.php:2674
+#: admin/woocommerce-admin-reports.php:1658
+#: admin/woocommerce-admin-reports.php:2671
+#: admin/woocommerce-admin-reports.php:2680
 #: admin/woocommerce-admin-users.php:90 admin/woocommerce-admin-users.php:112
 msgid "N/A"
 msgstr ""
@@ -968,11 +968,11 @@ msgstr ""
 
 #: admin/post-types/writepanels/order-fee-html.php:43
 #: admin/post-types/writepanels/order-item-html.php:115
-#: admin/woocommerce-admin-reports.php:1556
-#: admin/woocommerce-admin-reports.php:1609
-#: admin/woocommerce-admin-reports.php:2380
-#: admin/woocommerce-admin-reports.php:2549
-#: admin/woocommerce-admin-reports.php:2627
+#: admin/woocommerce-admin-reports.php:1562
+#: admin/woocommerce-admin-reports.php:1615
+#: admin/woocommerce-admin-reports.php:2386
+#: admin/woocommerce-admin-reports.php:2555
+#: admin/woocommerce-admin-reports.php:2633
 msgid "Total"
 msgstr ""
 
@@ -1013,7 +1013,7 @@ msgstr ""
 #: admin/post-types/writepanels/variation-admin-html.php:6
 #: admin/post-types/writepanels/writepanel-product_data.php:368
 #: admin/post-types/writepanels/writepanel-product_data.php:462
-#: admin/woocommerce-admin-init.php:435
+#: admin/woocommerce-admin-init.php:438
 msgid "Remove"
 msgstr ""
 
@@ -1222,7 +1222,7 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-order_data.php:400
 #: admin/post-types/writepanels/writepanel-product_data.php:523
 #: admin/post-types/writepanels/writepanel-product_data.php:540
-#: admin/woocommerce-admin-reports.php:1239
+#: admin/woocommerce-admin-reports.php:1245
 msgid "Search for a product&hellip;"
 msgstr ""
 
@@ -1267,15 +1267,15 @@ msgid "Product must not be in this category for the coupon to remain valid or, f
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:145
-msgid "Customer emails"
+msgid "Email restrictions"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:145
-msgid "Any customer"
+msgid "No restrictions"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:145
-msgid "Comma separate email addresses to restrict this coupon to specific billing and user emails."
+msgid "List of emails to check against the customer's billing email when an order is placed."
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:152
@@ -1979,7 +1979,7 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-product_data.php:384
 #: admin/post-types/writepanels/writepanel-product_data.php:476
-#: admin/woocommerce-admin-init.php:437
+#: admin/woocommerce-admin-init.php:440
 msgid "Value(s)"
 msgstr ""
 
@@ -2005,18 +2005,18 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-product_data.php:427
 #: admin/post-types/writepanels/writepanel-product_data.php:482
-#: admin/woocommerce-admin-init.php:439
+#: admin/woocommerce-admin-init.php:442
 msgid "Visible on the product page"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-product_data.php:440
 #: admin/post-types/writepanels/writepanel-product_data.php:488
-#: admin/woocommerce-admin-init.php:440
+#: admin/woocommerce-admin-init.php:443
 msgid "Used for variations"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-product_data.php:477
-#: admin/woocommerce-admin-init.php:438
+#: admin/woocommerce-admin-init.php:441
 msgid "Enter some text, or some attributes by pipe (|) separating values."
 msgstr ""
 
@@ -2301,7 +2301,7 @@ msgstr ""
 
 #: admin/settings/settings-init.php:105 admin/woocommerce-admin-content.php:61
 #: admin/woocommerce-admin-content.php:76
-#: admin/woocommerce-admin-reports.php:67
+#: admin/woocommerce-admin-reports.php:63
 msgid "Coupons"
 msgstr ""
 
@@ -3140,7 +3140,7 @@ msgstr ""
 
 #: admin/settings/settings-payment-gateways.php:27
 #: admin/settings/settings-shipping-methods.php:29
-#: admin/woocommerce-admin-init.php:754
+#: admin/woocommerce-admin-init.php:757
 #: admin/woocommerce-admin-taxonomies.php:27
 #: admin/woocommerce-admin-taxonomies.php:121
 msgid "Default"
@@ -3392,10 +3392,10 @@ msgid "Are you sure you want to delete this attribute?"
 msgstr ""
 
 #: admin/woocommerce-admin-content.php:26
-#: admin/woocommerce-admin-reports.php:30
-#: admin/woocommerce-admin-reports.php:70
-#: admin/woocommerce-admin-reports.php:86
-#: admin/woocommerce-admin-reports.php:97
+#: admin/woocommerce-admin-reports.php:26
+#: admin/woocommerce-admin-reports.php:66
+#: admin/woocommerce-admin-reports.php:82
+#: admin/woocommerce-admin-reports.php:93
 msgid "Overview"
 msgstr ""
 
@@ -3407,7 +3407,7 @@ msgstr ""
 msgid "If you are having problems, or to assist us with support, please check the status page to identify any problems with your configuration:"
 msgstr ""
 
-#: admin/woocommerce-admin-content.php:33 admin/woocommerce-admin-init.php:87
+#: admin/woocommerce-admin-content.php:33 admin/woocommerce-admin-init.php:89
 #: admin/woocommerce-admin-status.php:26
 msgid "System Status"
 msgstr ""
@@ -3484,10 +3484,10 @@ msgid "The reports section can be accessed from the left-hand navigation menu. H
 msgstr ""
 
 #: admin/woocommerce-admin-content.php:60
-#: admin/woocommerce-admin-reports.php:27
-#: admin/woocommerce-admin-reports.php:991
-#: admin/woocommerce-admin-reports.php:1089
-#: admin/woocommerce-admin-reports.php:1208
+#: admin/woocommerce-admin-reports.php:23
+#: admin/woocommerce-admin-reports.php:997
+#: admin/woocommerce-admin-reports.php:1095
+#: admin/woocommerce-admin-reports.php:1214
 msgid "Sales"
 msgstr ""
 
@@ -3500,7 +3500,7 @@ msgid "Coupon usage reports."
 msgstr ""
 
 #: admin/woocommerce-admin-content.php:62
-#: admin/woocommerce-admin-reports.php:83
+#: admin/woocommerce-admin-reports.php:79
 msgid "Customers"
 msgstr ""
 
@@ -3534,6 +3534,7 @@ msgid "For more information:"
 msgstr ""
 
 #: admin/woocommerce-admin-content.php:83 admin/woocommerce-admin-init.php:62
+#: admin/woocommerce-admin-init.php:71 admin/woocommerce-admin-init.php:404
 msgid "WooCommerce"
 msgstr ""
 
@@ -3579,8 +3580,8 @@ msgstr ""
 
 #: admin/woocommerce-admin-dashboard.php:84
 #: admin/woocommerce-admin-functions.php:200
-#: admin/woocommerce-admin-init.php:758 admin/woocommerce-admin-reports.php:990
-#: admin/woocommerce-admin-reports.php:1088
+#: admin/woocommerce-admin-init.php:761 admin/woocommerce-admin-reports.php:996
+#: admin/woocommerce-admin-reports.php:1094
 msgid "Product"
 msgid_plural "Products"
 msgstr[0] ""
@@ -3711,207 +3712,207 @@ msgid_plural "%s order statuses changed."
 msgstr[0] ""
 msgstr[1] ""
 
-#: admin/woocommerce-admin-init.php:86
+#: admin/woocommerce-admin-init.php:88
 msgid "WooCommerce Settings"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:87
+#: admin/woocommerce-admin-init.php:89
 msgid "WooCommerce Status"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:140 admin/woocommerce-admin-init.php:142
+#: admin/woocommerce-admin-init.php:142 admin/woocommerce-admin-init.php:144
 msgctxt "Admin menu name"
 msgid "Orders"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:430
+#: admin/woocommerce-admin-init.php:433
 msgid "Are you sure you want to remove the selected items? If you have previously reduced this item's stock, or this order was submitted by a customer, you will need to manually restore the item's stock."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:431
+#: admin/woocommerce-admin-init.php:434
 msgid "Please select some items."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:432
+#: admin/woocommerce-admin-init.php:435
 msgid "Remove this item meta?"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:433
+#: admin/woocommerce-admin-init.php:436
 msgid "Remove this attribute?"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:441
+#: admin/woocommerce-admin-init.php:444
 msgid "Enter a name for the new attribute term:"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:442
+#: admin/woocommerce-admin-init.php:445
 msgid "Calculate totals based on order items, discounts, and shipping?"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:443
+#: admin/woocommerce-admin-init.php:446
 msgid "Calculate line taxes? This will calculate taxes based on the customers country. If no billing/shipping is set it will use the store base country."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:444
+#: admin/woocommerce-admin-init.php:447
 msgid "Copy billing information to shipping information? This will remove any currently entered shipping information."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:445
+#: admin/woocommerce-admin-init.php:448
 msgid "Load the customer's billing information? This will remove any currently entered billing information."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:446
+#: admin/woocommerce-admin-init.php:449
 msgid "Load the customer's shipping information? This will remove any currently entered shipping information."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:450
+#: admin/woocommerce-admin-init.php:453
 msgid "No customer selected"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:662
+#: admin/woocommerce-admin-init.php:665
 msgid "Product updated. <a href=\"%s\">View Product</a>"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:663 admin/woocommerce-admin-init.php:678
-#: admin/woocommerce-admin-init.php:693
+#: admin/woocommerce-admin-init.php:666 admin/woocommerce-admin-init.php:681
+#: admin/woocommerce-admin-init.php:696
 msgid "Custom field updated."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:664 admin/woocommerce-admin-init.php:679
-#: admin/woocommerce-admin-init.php:694
+#: admin/woocommerce-admin-init.php:667 admin/woocommerce-admin-init.php:682
+#: admin/woocommerce-admin-init.php:697
 msgid "Custom field deleted."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:665
+#: admin/woocommerce-admin-init.php:668
 msgid "Product updated."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:666
+#: admin/woocommerce-admin-init.php:669
 msgid "Product restored to revision from %s"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:667
+#: admin/woocommerce-admin-init.php:670
 msgid "Product published. <a href=\"%s\">View Product</a>"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:668
+#: admin/woocommerce-admin-init.php:671
 msgid "Product saved."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:669
+#: admin/woocommerce-admin-init.php:672
 msgid "Product submitted. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:670
+#: admin/woocommerce-admin-init.php:673
 msgid "Product scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" href=\"%2$s\">Preview Product</a>"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:671 admin/woocommerce-admin-init.php:686
-#: admin/woocommerce-admin-init.php:701
+#: admin/woocommerce-admin-init.php:674 admin/woocommerce-admin-init.php:689
+#: admin/woocommerce-admin-init.php:704
 msgid "M j, Y @ G:i"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:672
+#: admin/woocommerce-admin-init.php:675
 msgid "Product draft updated. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:677 admin/woocommerce-admin-init.php:680
-#: admin/woocommerce-admin-init.php:682
+#: admin/woocommerce-admin-init.php:680 admin/woocommerce-admin-init.php:683
+#: admin/woocommerce-admin-init.php:685
 msgid "Order updated."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:681
+#: admin/woocommerce-admin-init.php:684
 msgid "Order restored to revision from %s"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:683
+#: admin/woocommerce-admin-init.php:686
 msgid "Order saved."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:684
+#: admin/woocommerce-admin-init.php:687
 msgid "Order submitted."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:685
+#: admin/woocommerce-admin-init.php:688
 msgid "Order scheduled for: <strong>%1$s</strong>."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:687
+#: admin/woocommerce-admin-init.php:690
 msgid "Order draft updated."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:692 admin/woocommerce-admin-init.php:695
-#: admin/woocommerce-admin-init.php:697
+#: admin/woocommerce-admin-init.php:695 admin/woocommerce-admin-init.php:698
+#: admin/woocommerce-admin-init.php:700
 msgid "Coupon updated."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:696
+#: admin/woocommerce-admin-init.php:699
 msgid "Coupon restored to revision from %s"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:698
+#: admin/woocommerce-admin-init.php:701
 msgid "Coupon saved."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:699
+#: admin/woocommerce-admin-init.php:702
 msgid "Coupon submitted."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:700
+#: admin/woocommerce-admin-init.php:703
 msgid "Coupon scheduled for: <strong>%1$s</strong>."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:702
+#: admin/woocommerce-admin-init.php:705
 msgid "Coupon draft updated."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:719
+#: admin/woocommerce-admin-init.php:722
 msgid "Order notes"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:734
+#: admin/woocommerce-admin-init.php:737
 msgid "These settings control the permalinks used for products. These settings only apply when <strong>not using \"default\" permalinks above</strong>."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:741
+#: admin/woocommerce-admin-init.php:744
 msgctxt "default-slug"
 msgid "shop"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:742
+#: admin/woocommerce-admin-init.php:745
 msgctxt "default-slug"
 msgid "product"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:763
+#: admin/woocommerce-admin-init.php:766
 msgid "Shop base"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:767
+#: admin/woocommerce-admin-init.php:770
 msgid "Shop base with category"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:773
+#: admin/woocommerce-admin-init.php:776
 msgid "Custom Base"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:775
+#: admin/woocommerce-admin-init.php:778
 msgid "Enter a custom base to use. A base <strong>must</strong> be set or WordPress will use default instead."
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:803
+#: admin/woocommerce-admin-init.php:806
 msgid "Product permalink base"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:808
+#: admin/woocommerce-admin-init.php:811
 msgid "Product category base"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:815
+#: admin/woocommerce-admin-init.php:818
 msgid "Product tag base"
 msgstr ""
 
-#: admin/woocommerce-admin-init.php:822
+#: admin/woocommerce-admin-init.php:825
 msgid "Product attribute base"
 msgstr ""
 
@@ -4001,407 +4002,407 @@ msgctxt "page_slug"
 msgid "order-received"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:36
+#: admin/woocommerce-admin-reports.php:32
 msgid "Sales by day"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:41
+#: admin/woocommerce-admin-reports.php:37
 msgid "Sales by month"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:46
+#: admin/woocommerce-admin-reports.php:42
 msgid "Product Sales"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:51
+#: admin/woocommerce-admin-reports.php:47
 msgid "Top sellers"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:56
+#: admin/woocommerce-admin-reports.php:52
 msgid "Top earners"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:61
+#: admin/woocommerce-admin-reports.php:57
 msgid "Sales by category"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:76
+#: admin/woocommerce-admin-reports.php:72
 msgid "Discounts by coupon"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:108
+#: admin/woocommerce-admin-reports.php:104
 msgid "Taxes by month"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:237
-#: admin/woocommerce-admin-reports.php:502
-#: admin/woocommerce-admin-reports.php:707
-#: admin/woocommerce-admin-reports.php:888
+#: admin/woocommerce-admin-reports.php:243
+#: admin/woocommerce-admin-reports.php:508
+#: admin/woocommerce-admin-reports.php:713
+#: admin/woocommerce-admin-reports.php:894
 msgid "Sales amount"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:242
-#: admin/woocommerce-admin-reports.php:502
-#: admin/woocommerce-admin-reports.php:707
-#: admin/woocommerce-admin-reports.php:888
+#: admin/woocommerce-admin-reports.php:248
+#: admin/woocommerce-admin-reports.php:508
+#: admin/woocommerce-admin-reports.php:713
+#: admin/woocommerce-admin-reports.php:894
 msgid "Number of sales"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:374
+#: admin/woocommerce-admin-reports.php:380
 msgid "Total sales"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:376
 #: admin/woocommerce-admin-reports.php:382
 #: admin/woocommerce-admin-reports.php:388
 #: admin/woocommerce-admin-reports.php:394
 #: admin/woocommerce-admin-reports.php:400
 #: admin/woocommerce-admin-reports.php:406
-#: admin/woocommerce-admin-reports.php:649
+#: admin/woocommerce-admin-reports.php:412
 #: admin/woocommerce-admin-reports.php:655
 #: admin/woocommerce-admin-reports.php:661
 #: admin/woocommerce-admin-reports.php:667
-#: admin/woocommerce-admin-reports.php:833
+#: admin/woocommerce-admin-reports.php:673
 #: admin/woocommerce-admin-reports.php:839
 #: admin/woocommerce-admin-reports.php:845
 #: admin/woocommerce-admin-reports.php:851
-#: admin/woocommerce-admin-reports.php:1374
+#: admin/woocommerce-admin-reports.php:857
 #: admin/woocommerce-admin-reports.php:1380
 #: admin/woocommerce-admin-reports.php:1386
-#: admin/woocommerce-admin-reports.php:1820
+#: admin/woocommerce-admin-reports.php:1392
 #: admin/woocommerce-admin-reports.php:1826
 #: admin/woocommerce-admin-reports.php:1832
 #: admin/woocommerce-admin-reports.php:1838
 #: admin/woocommerce-admin-reports.php:1844
 #: admin/woocommerce-admin-reports.php:1850
-#: admin/woocommerce-admin-reports.php:2314
-#: admin/woocommerce-admin-reports.php:2325
-#: admin/woocommerce-admin-reports.php:2336
+#: admin/woocommerce-admin-reports.php:1856
+#: admin/woocommerce-admin-reports.php:2320
+#: admin/woocommerce-admin-reports.php:2331
+#: admin/woocommerce-admin-reports.php:2342
 msgid "n/a"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:380
+#: admin/woocommerce-admin-reports.php:386
 msgid "Total orders"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:382
-#: admin/woocommerce-admin-reports.php:655
-#: admin/woocommerce-admin-reports.php:839
+#: admin/woocommerce-admin-reports.php:388
+#: admin/woocommerce-admin-reports.php:661
+#: admin/woocommerce-admin-reports.php:845
 msgid "items"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:386
+#: admin/woocommerce-admin-reports.php:392
 msgid "Average order total"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:392
+#: admin/woocommerce-admin-reports.php:398
 msgid "Average order items"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:398
+#: admin/woocommerce-admin-reports.php:404
 msgid "Discounts used"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:404
+#: admin/woocommerce-admin-reports.php:410
 msgid "Total shipping costs"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:412
+#: admin/woocommerce-admin-reports.php:418
 msgid "This month's sales"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:641
-#: admin/woocommerce-admin-reports.php:985
-#: admin/woocommerce-admin-reports.php:1083
-#: admin/woocommerce-admin-reports.php:1366
+#: admin/woocommerce-admin-reports.php:647
+#: admin/woocommerce-admin-reports.php:991
+#: admin/woocommerce-admin-reports.php:1089
+#: admin/woocommerce-admin-reports.php:1372
 msgid "From:"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:641
-#: admin/woocommerce-admin-reports.php:985
-#: admin/woocommerce-admin-reports.php:1083
-#: admin/woocommerce-admin-reports.php:1366
+#: admin/woocommerce-admin-reports.php:647
+#: admin/woocommerce-admin-reports.php:991
+#: admin/woocommerce-admin-reports.php:1089
+#: admin/woocommerce-admin-reports.php:1372
 msgid "To:"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:641
-#: admin/woocommerce-admin-reports.php:826
-#: admin/woocommerce-admin-reports.php:985
-#: admin/woocommerce-admin-reports.php:1083
-#: admin/woocommerce-admin-reports.php:1239
-#: admin/woocommerce-admin-reports.php:1366
-#: admin/woocommerce-admin-reports.php:1499
-#: admin/woocommerce-admin-reports.php:2303
-#: admin/woocommerce-admin-reports.php:2486
+#: admin/woocommerce-admin-reports.php:647
+#: admin/woocommerce-admin-reports.php:832
+#: admin/woocommerce-admin-reports.php:991
+#: admin/woocommerce-admin-reports.php:1089
+#: admin/woocommerce-admin-reports.php:1245
+#: admin/woocommerce-admin-reports.php:1372
+#: admin/woocommerce-admin-reports.php:1505
+#: admin/woocommerce-admin-reports.php:2309
+#: admin/woocommerce-admin-reports.php:2492
 msgid "Show"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:647
+#: admin/woocommerce-admin-reports.php:653
 msgid "Total sales in range"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:653
+#: admin/woocommerce-admin-reports.php:659
 msgid "Total orders in range"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:659
+#: admin/woocommerce-admin-reports.php:665
 msgid "Average order total in range"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:665
+#: admin/woocommerce-admin-reports.php:671
 msgid "Average order items in range"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:673
+#: admin/woocommerce-admin-reports.php:679
 msgid "Sales in range"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:820
-#: admin/woocommerce-admin-reports.php:2297
+#: admin/woocommerce-admin-reports.php:826
+#: admin/woocommerce-admin-reports.php:2303
 msgid "Year:"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:831
+#: admin/woocommerce-admin-reports.php:837
 msgid "Total sales for year"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:837
+#: admin/woocommerce-admin-reports.php:843
 msgid "Total orders for year"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:843
+#: admin/woocommerce-admin-reports.php:849
 msgid "Average order total for year"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:849
+#: admin/woocommerce-admin-reports.php:855
 msgid "Average order items for year"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:857
+#: admin/woocommerce-admin-reports.php:863
 msgid "Monthly sales for year"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1005
+#: admin/woocommerce-admin-reports.php:1011
 msgid "Product does not exist"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1104
+#: admin/woocommerce-admin-reports.php:1110
 msgid "Product no longer exists"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1203
+#: admin/woocommerce-admin-reports.php:1209
 msgid "Sales for %s:"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1207
-#: admin/woocommerce-admin-reports.php:2345
+#: admin/woocommerce-admin-reports.php:1213
+#: admin/woocommerce-admin-reports.php:2351
 msgid "Month"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1229
+#: admin/woocommerce-admin-reports.php:1235
 msgid "No sales :("
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1372
+#: admin/woocommerce-admin-reports.php:1378
 msgid "Total orders containing coupons"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1378
+#: admin/woocommerce-admin-reports.php:1384
 msgid "Percent of orders containing coupons"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1384
+#: admin/woocommerce-admin-reports.php:1390
 msgid "Total coupon discount"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1393
+#: admin/woocommerce-admin-reports.php:1399
 msgid "Most popular coupons"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1403
+#: admin/woocommerce-admin-reports.php:1409
 msgid "Used 1 time"
 msgid_plural "Used %d times"
 msgstr[0] ""
 msgstr[1] ""
 
-#: admin/woocommerce-admin-reports.php:1406
-#: admin/woocommerce-admin-reports.php:1428
+#: admin/woocommerce-admin-reports.php:1412
+#: admin/woocommerce-admin-reports.php:1434
 msgid "No coupons found"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1415
+#: admin/woocommerce-admin-reports.php:1421
 msgid "Greatest discount amount"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1425
+#: admin/woocommerce-admin-reports.php:1431
 msgid "Discounted %s"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1484
-#: admin/woocommerce-admin-reports.php:2463
+#: admin/woocommerce-admin-reports.php:1490
+#: admin/woocommerce-admin-reports.php:2469
 msgid "Show:"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1541
+#: admin/woocommerce-admin-reports.php:1547
 msgid "Coupon"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1624
+#: admin/woocommerce-admin-reports.php:1630
 msgid "Top coupon"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1632
+#: admin/woocommerce-admin-reports.php:1638
 msgid "Worst coupon"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1640
+#: admin/woocommerce-admin-reports.php:1646
 msgid "Discount average"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1648
+#: admin/woocommerce-admin-reports.php:1654
 msgid "Discount median"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1668
+#: admin/woocommerce-admin-reports.php:1674
 msgid "Monthly discounts by coupon"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1818
+#: admin/woocommerce-admin-reports.php:1824
 msgid "Total customers"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1824
+#: admin/woocommerce-admin-reports.php:1830
 msgid "Total customer sales"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1830
+#: admin/woocommerce-admin-reports.php:1836
 msgid "Total guest sales"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1836
+#: admin/woocommerce-admin-reports.php:1842
 msgid "Total customer orders"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1842
+#: admin/woocommerce-admin-reports.php:1848
 msgid "Total guest orders"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1848
+#: admin/woocommerce-admin-reports.php:1854
 msgid "Average orders per customer"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:1856
+#: admin/woocommerce-admin-reports.php:1862
 msgid "Signups per day"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2077
+#: admin/woocommerce-admin-reports.php:2083
 msgid "Low stock"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2100
-#: admin/woocommerce-admin-reports.php:2139
+#: admin/woocommerce-admin-reports.php:2106
+#: admin/woocommerce-admin-reports.php:2145
 msgid "%d in stock"
 msgid_plural "%d in stock"
 msgstr[0] ""
 msgstr[1] ""
 
-#: admin/woocommerce-admin-reports.php:2105
+#: admin/woocommerce-admin-reports.php:2111
 msgid "No products are low in stock."
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2137
+#: admin/woocommerce-admin-reports.php:2143
 msgid "Marked out of stock"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2144
+#: admin/woocommerce-admin-reports.php:2150
 msgid "No products are out in stock."
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2308
+#: admin/woocommerce-admin-reports.php:2314
 msgid "Total taxes for year"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2319
+#: admin/woocommerce-admin-reports.php:2325
 msgid "Total product taxes for year"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2330
+#: admin/woocommerce-admin-reports.php:2336
 msgid "Total shipping tax for year"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2346
+#: admin/woocommerce-admin-reports.php:2352
 msgid "Total Sales"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2346
+#: admin/woocommerce-admin-reports.php:2352
 msgid "This is the sum of the 'Order Total' field within your orders."
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2347
+#: admin/woocommerce-admin-reports.php:2353
 msgid "Total Shipping"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2347
+#: admin/woocommerce-admin-reports.php:2353
 msgid "This is the sum of the 'Shipping Total' field within your orders."
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2348
+#: admin/woocommerce-admin-reports.php:2354
 msgid "Total Product Taxes"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2348
+#: admin/woocommerce-admin-reports.php:2354
 msgid "This is the sum of the 'Cart Tax' field within your orders."
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2349
+#: admin/woocommerce-admin-reports.php:2355
 msgid "Total Shipping Taxes"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2349
+#: admin/woocommerce-admin-reports.php:2355
 msgid "This is the sum of the 'Shipping Tax' field within your orders."
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2350
+#: admin/woocommerce-admin-reports.php:2356
 msgid "Total Taxes"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2350
+#: admin/woocommerce-admin-reports.php:2356
 msgid "This is the sum of the 'Cart Tax' and 'Shipping Tax' fields within your orders."
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2351
+#: admin/woocommerce-admin-reports.php:2357
 msgid "Net profit"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2351
+#: admin/woocommerce-admin-reports.php:2357
 msgid "Total sales minus shipping and tax."
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2396
+#: admin/woocommerce-admin-reports.php:2402
 msgid "Toggle tax rows"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2539
+#: admin/woocommerce-admin-reports.php:2545
 msgid "Category"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2642
+#: admin/woocommerce-admin-reports.php:2648
 msgid "Top category"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2651
+#: admin/woocommerce-admin-reports.php:2657
 msgid "Worst category"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2659
+#: admin/woocommerce-admin-reports.php:2665
 msgid "Category sales average"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2670
+#: admin/woocommerce-admin-reports.php:2676
 msgid "Category sales median"
 msgstr ""
 
-#: admin/woocommerce-admin-reports.php:2690
+#: admin/woocommerce-admin-reports.php:2696
 msgid "Monthly sales by category"
 msgstr ""
 
@@ -4838,4 +4839,23 @@ msgstr ""
 
 #: admin/woocommerce-admin-users.php:225
 msgid "State/County or state code"
+msgstr ""
+#. Plugin Name of the plugin/theme
+msgid "WooCommerce"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "http://www.woothemes.com/woocommerce/"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "WooThemes"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://woothemes.com"
 msgstr ""
