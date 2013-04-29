@@ -32,7 +32,7 @@ foreach ( $items as $item ) :
 
 	// Download URLs
 	if ( $show_download_links && $_product->exists() && $_product->is_downloadable() )
-		echo "\n" . implode( ', ', $order->get_downloadable_file_urls( $item['product_id'], $item['variation_id'], $item ) );
+		echo "\n" . implode( "\n", $order->get_downloadable_file_urls( $item['product_id'], $item['variation_id'], $item ) );
 
 	// Note
 	if ( $show_purchase_note && $purchase_note = get_post_meta( $_product->id, '_purchase_note', true ) )
