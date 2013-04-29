@@ -2074,6 +2074,8 @@ function woocommerce_delete_order_item( $item_id ) {
 	if ( ! $item_id )
 		return false;
 
+	do_action( 'woocommerce_before_delete_order_item', $item_id );
+
 	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d", $item_id ) );
 	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d", $item_id ) );
 
