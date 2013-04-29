@@ -176,6 +176,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Fix incorrect CSS class being output in product image gallery.
 * Fix - Mijireh page slurp.
 * Fix - woocommerce_downloadable_product_name filter fixes.
+* Fix - Pass order number to google analytics, not id
 * Localization - Netherlands, Hungarian, Taiwan, Italian, CZ, Spanish updates.
 * Other minor fixes and localisation updates.
 

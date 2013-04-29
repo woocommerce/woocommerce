@@ -197,14 +197,14 @@ class WC_Google_Analytics extends WC_Integration {
 			);
 
 			_gaq.push(['_addTrans',
-				'" . esc_js( $order_id ) . "',           		// order ID - required
+				'" . esc_js( $order->get_order_number() ) . "', // order ID - required
 				'" . esc_js( get_bloginfo( 'name' ) ) . "',  	// affiliation or store name
-				'" . esc_js( $order->get_total() ) . "',   	// total - required
-				'" . esc_js( $order->get_total_tax() ) . "',  // tax
-				'" . esc_js( $order->get_shipping() ) . "',	// shipping
-				'" . esc_js( $order->billing_city ) . "',     // city
-				'" . esc_js( $order->billing_state ) . "',    // state or province
-				'" . esc_js( $order->billing_country ) . "'   // country
+				'" . esc_js( $order->get_total() ) . "',   	    // total - required
+				'" . esc_js( $order->get_total_tax() ) . "',    // tax
+				'" . esc_js( $order->get_shipping() ) . "',	    // shipping
+				'" . esc_js( $order->billing_city ) . "',       // city
+				'" . esc_js( $order->billing_state ) . "',      // state or province
+				'" . esc_js( $order->billing_country ) . "'     // country
 			]);
 		";
 
