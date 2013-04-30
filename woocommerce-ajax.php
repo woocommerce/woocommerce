@@ -533,8 +533,6 @@ function woocommerce_add_variation() {
 
 	$variation_id = wp_insert_post( $variation );
 
-	do_action( 'woocommerce_create_product_variation', $variation_id );
-
 	if ( $variation_id ) {
 
 		$variation_post_status = 'publish';
@@ -580,7 +578,8 @@ function woocommerce_add_variation() {
 		$_tax_class = '';
 		$image_id = 0;
 		$variation = get_post( $variation_id ); // Get the variation object
-
+		
+		do_action_ref_array( 'woocommerce_create_product_variation', array( $variation_id, &$variation_data, &$parent_data ) );
 		include( 'admin/post-types/writepanels/variation-admin-html.php' );
 	}
 
