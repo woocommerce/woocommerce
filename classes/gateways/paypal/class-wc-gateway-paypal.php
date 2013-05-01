@@ -424,20 +424,22 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		$woocommerce->add_inline_js( '
 			jQuery("body").block({
-					message: "<img src=\"' . esc_url( apply_filters( 'woocommerce_ajax_loader_url', $woocommerce->plugin_url() . '/assets/images/ajax-loader.gif' ) ) . '\" alt=\"Redirecting&hellip;\" style=\"float:left; margin-right: 10px;\" />'.__( 'Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woocommerce' ).'",
+					message: "' . __( 'Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woocommerce' ) . '",
+					baseZ: 99999,
 					overlayCSS:
 					{
 						background: "#fff",
 						opacity: 0.6
 					},
 					css: {
-				        padding:        20,
+				        padding:        "20px",
+				        zindex:         "9999999",
 				        textAlign:      "center",
 				        color:          "#555",
 				        border:         "3px solid #aaa",
 				        backgroundColor:"#fff",
 				        cursor:         "wait",
-				        lineHeight:		"32px"
+				        lineHeight:		"24px",
 				    }
 				});
 			jQuery("#submit_paypal_payment_form").click();
