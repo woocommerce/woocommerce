@@ -657,12 +657,13 @@ function woocommerce_process_login() {
 
 		$woocommerce->verify_nonce( 'login' );
 
-		if ( empty( $_POST['username'] ) ) $woocommerce->add_error( __( 'Username is required.', 'woocommerce' ) );
-		if ( empty( $_POST['password'] ) ) $woocommerce->add_error( __( 'Password is required.', 'woocommerce' ) );
-
-		if ( $woocommerce->error_count() == 0 ) {
-
+		try {
 			$creds = array();
+
+			if ( empty( $_POST['username'] ) )
+				throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'Username is required.', 'woocommerce' ) );
+			if ( empty( $_POST['password'] ) )
+				throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'Password is required.', 'woocommerce' ) );
 
 			if ( is_email( $_POST['username'] ) ) {
 				$user = get_user_by( 'email', $_POST['username'] );
@@ -670,7 +671,7 @@ function woocommerce_process_login() {
 				if ( isset( $user->user_login ) )
 					$creds['user_login'] 	= $user->user_login;
 				else
-					$creds['user_login'] 	= '';
+					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'A user could not be found with this email address.', 'woocommerce' ) );
 			} else {
 				$creds['user_login'] 	= $_POST['username'];
 			}
@@ -681,7 +682,7 @@ function woocommerce_process_login() {
 			$user                   = wp_signon( $creds, $secure_cookie );
 
 			if ( is_wp_error( $user ) ) {
-				$woocommerce->add_error( $user->get_error_message() );
+				throw new Exception( $user->get_error_message() );
 			} else {
 
 				if ( ! empty( $_POST['redirect'] ) ) {
@@ -694,8 +695,9 @@ function woocommerce_process_login() {
 
 				wp_redirect( apply_filters( 'woocommerce_login_redirect', $redirect, $user ) );
 				exit;
-
 			}
+		} catch (Exception $e) {
+			$woocommerce->add_error( $e->getMessage() );
 		}
 	}
 }
