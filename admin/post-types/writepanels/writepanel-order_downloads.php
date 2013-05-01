@@ -41,7 +41,7 @@ function woocommerce_order_downloads_meta_box() {
 					}
 
 					// don't show permissions to files that have since been removed
-					if ( ! $product->exists() || ! $product->has_file( $download->download_id ) )
+					if ( ! $product || ! $product->exists() || ! $product->has_file( $download->download_id ) )
 						continue;
 
 					include( 'order-download-permission-html.php' );
