@@ -110,7 +110,7 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 				$main_term = $terms[0];
 
-				$ancestors = array_reverse( get_ancestors( $main_term->term_id, 'product_cat' ) );
+				$ancestors = get_ancestors( $main_term->term_id, 'product_cat' );
 
 				$ancestors = array_reverse( $ancestors );
 
