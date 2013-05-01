@@ -46,7 +46,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 		// Event tracking code
 		add_action( 'woocommerce_after_add_to_cart_button', array( $this, 'add_to_cart' ) );
-		add_action( 'woocommerce_after_shop_loop', array( $this, 'loop_add_to_cart' ) );
+		add_action( 'wp_footer', array( $this, 'loop_add_to_cart' ) );
     }
 
 

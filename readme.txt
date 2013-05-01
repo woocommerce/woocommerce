@@ -179,6 +179,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - woocommerce_downloadable_product_name filter fixes.
 * Fix - Pass order number to google analytics, not id
 * Fix - check_jquery in WP 3.6 beta
+* Fix - GA click tracking moved code to footer.
 * Localization - Netherlands, Hungarian, Taiwan, Italian, CZ, Spanish, Catalan updates.
 * Localization - Slovak translation by Dusan Belescak.
 * Other minor fixes and localisation updates.
