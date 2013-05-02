@@ -467,24 +467,24 @@ add_filter( 'parse_query', 'woocommerce_admin_product_filter_query' );
 function woocommerce_admin_product_search( $wp ) {
     global $pagenow, $wpdb;
 
-	if( 'edit.php' != $pagenow ) return;
-	if( !isset( $wp->query_vars['s'] ) ) return;
-	if ($wp->query_vars['post_type']!='product') return;
+	if ( 'edit.php' != $pagenow ) return;
+	if ( ! isset( $wp->query_vars['s'] ) ) return;
+	if ( 'product' != $wp->query_vars['post_type'] ) return;
 
-	if( '#' == substr( $wp->query_vars['s'], 0, 1 ) ) :
+	if ( '#' == substr( $wp->query_vars['s'], 0, 1 ) ) {
 
 		$id = absint( substr( $wp->query_vars['s'], 1 ) );
 
-		if( !$id ) return;
+		if ( ! $id ) return;
 
 		unset( $wp->query_vars['s'] );
 		$wp->query_vars['p'] = $id;
 
-	elseif( 'SKU:' == strtoupper( substr( $wp->query_vars['s'], 0, 4 ) ) ) :
+	} elseif( 'SKU:' == strtoupper( substr( $wp->query_vars['s'], 0, 4 ) ) ) {
 
 		$sku = trim( substr( $wp->query_vars['s'], 4 ) );
 
-		if( !$sku ) return;
+		if ( ! $sku ) return;
 
 		$ids = $wpdb->get_col( 'SELECT post_id FROM ' . $wpdb->postmeta . ' WHERE meta_key="_sku" AND meta_value LIKE "%' . $sku . '%";' );
 
@@ -493,8 +493,7 @@ function woocommerce_admin_product_search( $wp ) {
 		unset( $wp->query_vars['s'] );
 		$wp->query_vars['post__in'] = $ids;
 		$wp->query_vars['sku'] = $sku;
-
-	endif;
+	}
 }
 
 
