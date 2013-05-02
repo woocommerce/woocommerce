@@ -322,7 +322,6 @@ class Woocommerce {
 		// Include Core Integrations - these are included sitewide
 		include_once( 'classes/integrations/google-analytics/class-wc-google-analytics.php' );
 		include_once( 'classes/integrations/sharethis/class-wc-sharethis.php' );
-		include_once( 'classes/integrations/shareyourcart/class-wc-shareyourcart.php' );
 		include_once( 'classes/integrations/sharedaddy/class-wc-sharedaddy.php' );
 	}
 
