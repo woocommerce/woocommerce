@@ -717,6 +717,7 @@ function get_woocommerce_currencies() {
 				'PLN' => __( 'Polish Zloty', 'woocommerce' ),
 				'GBP' => __( 'Pounds Sterling', 'woocommerce' ),
 				'RON' => __( 'Romanian Leu', 'woocommerce' ),
+				'RUB' => __( 'Russian Ruble', 'woocommerce' ),
 				'SGD' => __( 'Singapore Dollar', 'woocommerce' ),
 				'ZAR' => __( 'South African rand', 'woocommerce' ),
 				'SEK' => __( 'Swedish Krona', 'woocommerce' ),
@@ -761,6 +762,9 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'RMB' :
 		case 'JPY' :
 			$currency_symbol = '&yen;';
+			break;
+		case 'RUB' :
+			$currency_symbol = '&#1088;&#1091;&#1073;';
 			break;
 		case 'KRW' : $currency_symbol = '&#8361;'; break;
 		case 'TRY' : $currency_symbol = '&#84;&#76;'; break;

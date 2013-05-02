@@ -182,6 +182,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - GA click tracking moved code to footer.
 * Localization - Netherlands, Hungarian, Taiwan, Italian, CZ, Spanish, Catalan updates.
 * Localization - Slovak translation by Dusan Belescak.
+* Localization - Added RUB currency.
 * Other minor fixes and localisation updates.
 
 = 2.0.8 - 17/04/2013 =
