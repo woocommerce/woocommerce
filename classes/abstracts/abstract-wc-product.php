@@ -1270,4 +1270,22 @@ class WC_Product {
 
 		return $image;
     }
+
+
+	/**
+	 * Get product name with SKU or ID. Used within admin.
+	 *
+	 * @access public
+	 * @param mixed $product
+	 * @return string Formatted product name
+	 */
+	function get_formatted_name() {
+
+		if ( $this->get_sku() )
+			$identifier = $this->get_sku();
+		else
+			$identifier = '#' . $this->id;
+
+		return sprintf( __( '%s &ndash; %s', 'woocommerce' ), $identifier, $this->get_title() );
+	}
 }
