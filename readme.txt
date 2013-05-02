@@ -165,6 +165,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.1 - x =
+* Refactor - Taken out Piwik integration, use http://wordpress.org/extend/plugins/woocommerce-piwik-integration/ from now on
+
 = 2.0.9 - 02/05/2013 =
 * Feature - Added is_product_taxonomy() conditonal.
 * Tweak - Notices during checkout for admin users if the checkout is mis-configured.

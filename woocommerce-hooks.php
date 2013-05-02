@@ -268,13 +268,6 @@ add_action( 'init', 'woocommerce_process_registration' );
 add_action('init', 'woocommerce_download_product');
 
 /**
- * Analytics
- *
- * @see woocommerce_ecommerce_tracking_piwik()
- */
-add_action( 'woocommerce_thankyou', 'woocommerce_ecommerce_tracking_piwik' );
-
-/**
  * RSS Feeds
  *
  * @see woocommerce_products_rss_feed()
