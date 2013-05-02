@@ -23,7 +23,7 @@ function woocommerce_duplicate_product_link_row($actions, $post) {
 	if ( function_exists( 'duplicate_post_plugin_activation' ) )
 		return $actions;
 
-	if ( ! current_user_can( 'manage_woocommerce' ) ) return $actions;
+	if ( ! current_user_can( apply_filters( 'woocommerce_duplicate_product_capability', 'manage_woocommerce' ) ) ) return $actions;
 
 	if ( $post->post_type != 'product' )
 		return $actions;
@@ -49,7 +49,7 @@ function woocommerce_duplicate_product_post_button() {
 
 	if ( function_exists( 'duplicate_post_plugin_activation' ) ) return;
 
-	if ( ! current_user_can( 'manage_woocommerce' ) ) return;
+	if ( ! current_user_can( apply_filters( 'woocommerce_duplicate_product_capability', 'manage_woocommerce' ) ) ) return $actions;
 
 	if ( ! is_object( $post ) ) return;
 
