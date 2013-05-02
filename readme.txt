@@ -3,8 +3,8 @@ Contributors: woothemes, mikejolley, jameskoster, CoenJacobs
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.5
-Tested up to: 3.5
-Stable tag: 2.0.8
+Tested up to: 3.6 beta 2
+Stable tag: 2.0.9
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -165,7 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= X =
+= 2.0.9 - 02/05/2013 =
 * Feature - Added is_product_taxonomy() conditonal.
 * Tweak - Notices during checkout for admin users if the checkout is mis-configured.
 * Tweak - Named charts on report page to make modifications easier.
