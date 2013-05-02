@@ -165,6 +165,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.0.10 - x =
+* Tweak - Searching for SKU in admin panel can also be done via lowercase 'sku:' instead of just 'SKU:'
+* Fix - Cast term_id as int in product data write panel that will resolve issues with numerical attributes
+
 = 2.0.9 - 02/05/2013 =
 * Feature - Added is_product_taxonomy() conditonal.
 * Tweak - Notices during checkout for admin users if the checkout is mis-configured.
