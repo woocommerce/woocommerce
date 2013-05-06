@@ -646,8 +646,8 @@ abstract class WC_Email extends WC_Settings_API {
 
 				}).change();
 
-				var view = '" . __( 'View template', 'woocommerce' ) . "';
-				var hide = '" . __( 'Hide template', 'woocommerce' ) . "';
+				var view = '" . esc_js( __( 'View template', 'woocommerce' ) ) . "';
+				var hide = '" . esc_js( __( 'Hide template', 'woocommerce' ) ) . "';
 
 				jQuery('a.toggle_editor').text( view ).toggle( function() {
 					jQuery( this ).text( hide ).closest('.template').find('.editor').slideToggle();
@@ -658,7 +658,7 @@ abstract class WC_Email extends WC_Settings_API {
 				} );
 
 				jQuery('a.delete_template').click(function(){
-					var answer = confirm('" . __( 'Are you sure you want to delete this template file?', 'woocommerce' ) . "');
+					var answer = confirm('" . esc_js( __( 'Are you sure you want to delete this template file?', 'woocommerce' ) ) . "');
 
 					if (answer)
 						return true;

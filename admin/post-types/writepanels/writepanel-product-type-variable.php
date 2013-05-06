@@ -296,7 +296,7 @@ function variable_product_type_options() {
 
 		jQuery('#variable_product_options').on('click', 'button.link_all_variations', function(){
 
-			var answer = confirm('<?php _e( 'Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes (max 50 per run).', 'woocommerce' ); ?>');
+			var answer = confirm('<?php echo esc_js( __( 'Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes (max 50 per run).', 'woocommerce' ) ); ?>');
 
 			if (answer) {
 
@@ -313,11 +313,11 @@ function variable_product_type_options() {
 					var count = parseInt( response );
 
 					if (count==1) {
-						alert( count + ' <?php _e( "variation added", 'woocommerce' ); ?>');
+						alert( count + ' <?php echo esc_js( __( "variation added", 'woocommerce' ) ); ?>');
 					} else if (count==0 || count>1) {
-						alert( count + ' <?php _e( "variations added", 'woocommerce' ); ?>');
+						alert( count + ' <?php echo esc_js( __( "variations added", 'woocommerce' ) ); ?>');
 					} else {
-						alert('<?php _e( "No variations added", 'woocommerce' ); ?>');
+						alert('<?php echo esc_js( __( "No variations added", 'woocommerce' ) ); ?>');
 					}
 
 					if (count>0) {
@@ -340,7 +340,7 @@ function variable_product_type_options() {
 
 		jQuery('#variable_product_options').on('click', 'button.remove_variation', function(e){
 			e.preventDefault();
-			var answer = confirm('<?php _e( 'Are you sure you want to remove this variation?', 'woocommerce' ); ?>');
+			var answer = confirm('<?php echo esc_js( __( 'Are you sure you want to remove this variation?', 'woocommerce' ) ); ?>');
 			if (answer){
 
 				var el = jQuery(this).parent().parent();
@@ -396,10 +396,10 @@ function variable_product_type_options() {
 			}
 			else if ( field_to_edit == 'delete_all' ) {
 
-				var answer = confirm('<?php _e( 'Are you sure you want to delete all variations? This cannot be undone.', 'woocommerce' ); ?>');
+				var answer = confirm('<?php echo esc_js( __( 'Are you sure you want to delete all variations? This cannot be undone.', 'woocommerce' ) ); ?>');
 				if (answer){
 
-					var answer = confirm('<?php _e( 'Last warning, are you sure?', 'woocommerce' ); ?>');
+					var answer = confirm('<?php echo esc_js( __( 'Last warning, are you sure?', 'woocommerce' ) ); ?>');
 
 					if (answer) {
 
@@ -436,7 +436,7 @@ function variable_product_type_options() {
 
 				var input_tag = jQuery('select#field_to_edit :selected').attr('rel') ? jQuery('select#field_to_edit :selected').attr('rel') : 'input';
 
-				var value = prompt("<?php _e( 'Enter a value', 'woocommerce' ); ?>");
+				var value = prompt("<?php echo esc_js( __( 'Enter a value', 'woocommerce' ) ); ?>");
 				jQuery(input_tag + '[name^="' + field_to_edit + '["]').val( value ).change();
 				return false;
 
@@ -514,9 +514,9 @@ function variable_product_type_options() {
 				// Create the media frame.
 				variable_image_frame = wp.media.frames.variable_image = wp.media({
 					// Set the title of the modal.
-					title: '<?php _e( 'Choose an image', 'woocommerce' ); ?>',
+					title: '<?php echo esc_js( __( 'Choose an image', 'woocommerce' ) ); ?>',
 					button: {
-						text: '<?php _e( 'Set variation image', 'woocommerce' ); ?>'
+						text: '<?php echo esc_js( __( 'Set variation image', 'woocommerce' ) ); ?>'
 					}
 				});
 
