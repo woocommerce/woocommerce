@@ -160,7 +160,7 @@ function woocommerce_tax_rates_setting() {
 
 					});
 				} else {
-					alert('<?php _e( 'No row(s) selected', 'woocommerce' ); ?>');
+					alert('<?php echo esc_js( __( 'No row(s) selected', 'woocommerce' ) ); ?>');
 				}
 				return false;
 			});
