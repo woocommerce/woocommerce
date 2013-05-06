@@ -764,7 +764,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			$currency_symbol = '&yen;';
 			break;
 		case 'RUB' :
-			$currency_symbol = '&#1088;&#1091;&#1073;';
+			$currency_symbol = '&#1088;&#1091;&#1073;.';
 			break;
 		case 'KRW' : $currency_symbol = '&#8361;'; break;
 		case 'TRY' : $currency_symbol = '&#84;&#76;'; break;
