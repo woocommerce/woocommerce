@@ -459,8 +459,6 @@ function woocommerce_status_report() {
 			var o = i.toString();
 			if (!s) { s = '0'; }
 			while (o.length < l) {
-				
-				console.log( w );
 				// empty 
 				if(w == 'undefined'){
 					o = s + o;
