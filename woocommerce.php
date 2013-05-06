@@ -1030,7 +1030,7 @@ class Woocommerce {
 							'not_found_in_trash' 	=> __( 'No Variations found in trash', 'woocommerce' ),
 							'parent' 				=> __( 'Parent Variation', 'woocommerce' )
 						),
-					'public' 				=> true,
+					'public' 				=> false,
 					'show_ui' 				=> false,
 					'capability_type' 		=> 'product',
 					'map_meta_cap'			=> true,
@@ -1038,7 +1038,7 @@ class Woocommerce {
 					'exclude_from_search' 	=> true,
 					'hierarchical' 			=> false,
 					'rewrite' 				=> false,
-					'query_var'				=> true,
+					'query_var'				=> false,
 					'supports' 				=> array( 'title', 'editor', 'custom-fields', 'page-attributes', 'thumbnail' ),
 					'show_in_nav_menus' 	=> false
 				)
@@ -1107,7 +1107,7 @@ class Woocommerce {
 							'parent' 				=> __( 'Parent Coupon', 'woocommerce' )
 						),
 					'description' 			=> __( 'This is where you can add new coupons that customers can use in your store.', 'woocommerce' ),
-					'public' 				=> true,
+					'public' 				=> false,
 					'show_ui' 				=> true,
 					'capability_type' 		=> 'shop_coupon',
 					'map_meta_cap'			=> true,
