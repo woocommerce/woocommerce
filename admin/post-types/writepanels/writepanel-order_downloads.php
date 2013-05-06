@@ -122,7 +122,7 @@ function woocommerce_order_downloads_meta_box() {
 
 				} else {
 
-					alert('<?php _e( 'Could not grant access - the user may already have permission for this file or billing email is not set. Ensure the billing email is set, and the order has been saved.', 'woocommerce' ); ?>');
+					alert('<?php echo esc_js( __( 'Could not grant access - the user may already have permission for this file or billing email is not set. Ensure the billing email is set, and the order has been saved.', 'woocommerce' ) ); ?>');
 
 				}
 
@@ -145,7 +145,7 @@ function woocommerce_order_downloads_meta_box() {
 
 		jQuery('.order_download_permissions').on('click', 'button.revoke_access', function(e){
 			e.preventDefault();
-			var answer = confirm('<?php _e( 'Are you sure you want to revoke access to this download?', 'woocommerce' ); ?>');
+			var answer = confirm('<?php echo esc_js( __( 'Are you sure you want to revoke access to this download?', 'woocommerce' ) ); ?>');
 			if (answer){
 
 				var el = jQuery(this).parent().parent();
