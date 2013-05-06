@@ -447,7 +447,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		return '<form action="'.esc_url( $paypal_adr ).'" method="post" id="paypal_payment_form" target="_top">
 				' . implode( '', $paypal_args_array) . '
-				<input type="submit" class="button-alt" id="submit_paypal_payment_form" value="'.__( 'Pay via PayPal', 'woocommerce' ).'" /> <a class="button cancel" href="'.esc_url( $order->get_cancel_order_url() ).'">'.__( 'Cancel order &amp; restore cart', 'woocommerce' ).'</a>
+				<input type="submit" class="button alt" id="submit_paypal_payment_form" value="'.__( 'Pay via PayPal', 'woocommerce' ).'" /> <a class="button cancel" href="'.esc_url( $order->get_cancel_order_url() ).'">'.__( 'Cancel order &amp; restore cart', 'woocommerce' ).'</a>
 			</form>';
 
 	}
