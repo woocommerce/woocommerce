@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.9\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-01-09 09:36:51+00:00\n"
-"PO-Revision-Date: 2013-05-07 03:57:31+0000\n"
+"PO-Revision-Date: 2013-05-07 04:03:48+0000\n"
 "Last-Translator: Almaz Mannanov <AlmazWorks@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -11913,7 +11913,7 @@ msgstr ""
 #: admin/woocommerce-admin-init.php:685
 #@ woocommerce
 msgid "Order updated."
-msgstr ""
+msgstr "Заказ обновлен."
 
 #: admin/woocommerce-admin-init.php:684
 #, php-format
