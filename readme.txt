@@ -172,6 +172,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Cast term_id as int in product data write panel that will resolve issues with numerical attributes
 * Fix - Correct label for RUB symbol - added a dot after it
 * Fix - Javascript escapes to stop breaking scripts when used with translations
+* Fix - PayPal button should use classes 'button' and 'alt', not 'button-alt'
 * Refactor - Taken out Piwik integration, use http://wordpress.org/extend/plugins/woocommerce-piwik-integration/ from now on
 * Refactor - Taken out ShareYourCart integration, use http://wordpress.org/extend/plugins/shareyourcart/ from now on
 * Refactor - Moved woocommerce_get_formatted_product_name function into WC_Product class
