@@ -173,6 +173,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Correct label for RUB symbol - added a dot after it
 * Fix - Javascript escapes to stop breaking scripts when used with translations
 * Fix - PayPal button should use classes 'button' and 'alt', not 'button-alt'
+* Fix - Have the remove_taxes() method set subtotal to subtotal_ex_tax
 * Refactor - Taken out Piwik integration, use http://wordpress.org/extend/plugins/woocommerce-piwik-integration/ from now on
 * Refactor - Taken out ShareYourCart integration, use http://wordpress.org/extend/plugins/shareyourcart/ from now on
 * Refactor - Moved woocommerce_get_formatted_product_name function into WC_Product class
