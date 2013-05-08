@@ -1633,6 +1633,7 @@ class WC_Cart {
 		public function remove_taxes() {
 			$this->shipping_tax_total = $this->tax_total = 0;
 			$this->taxes = $this->shipping_taxes = array();
+			$this->subtotal = $this->subtotal_ex_tax;
 
 			foreach ( $this->cart_contents as $cart_item_key => $item )
 				$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = $this->cart_contents[ $cart_item_key ]['line_tax'] = 0;
