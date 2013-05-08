@@ -229,17 +229,20 @@ class WC_Widget_Layered_Nav extends WP_Widget {
 						foreach ( $_chosen_attributes as $name => $data ) {
 							if ( $name !== $taxonomy ) {
 
-								//exclude query arg for current term archive term
+								// Exclude query arg for current term archive term
 								while ( in_array( $current_term, $data['terms'] ) ) {
 									$key = array_search( $current_term, $data );
 									unset( $data['terms'][$key] );
 								}
 
+								// Remove pa_ and sanitize
+								$filter_name = sanitize_title( str_replace( 'pa_', '', $name ) );
+
 								if ( ! empty( $data['terms'] ) )
-									$link = add_query_arg( sanitize_title( str_replace( 'pa_', 'filter_', $name ) ), implode(',', $data['terms']), $link );
+									$link = add_query_arg( 'filter_' . $filter_name, implode( ',', $data['terms'] ), $link );
 
 								if ( $data['query_type'] == 'or' )
-									$link = add_query_arg( sanitize_title( str_replace( 'pa_', 'query_type_', $name ) ), 'or', $link );
+									$link = add_query_arg( 'query_type_' . $filter_name, 'or', $link );
 							}
 						}
 					}
