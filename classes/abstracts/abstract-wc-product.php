@@ -108,7 +108,8 @@ class WC_Product {
 	function get_gallery_attachment_ids() {
 		if ( ! isset( $this->product_image_gallery ) ) {
 			// Backwards compat
-			$attachment_ids = array_diff( get_posts( 'post_parent=' . $this->id . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image&fields=ids' ), array( get_post_thumbnail_id() ) );
+			$attachment_ids = get_posts( 'post_parent=' . $this->id . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image&fields=ids&meta_key=_woocommerce_exclude_image&meta_value=0' );
+			$attachment_ids = array_diff( $attachment_ids, array( get_post_thumbnail_id() ) );
 			$this->product_image_gallery = implode( ',', $attachment_ids );
 		}
 
