@@ -173,6 +173,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - PayPal button should use classes 'button' and 'alt', not 'button-alt'
 * Fix - Have the remove_taxes() method set subtotal to subtotal_ex_tax
 * Fix - Allow layered nav to work with non pa_ prepended taxonomies
+* Fix - Better backwards compatibility with _woocommerce_exclude_image
 
 = 2.0.9 - 02/05/2013 =
 * Feature - Added is_product_taxonomy() conditonal.
