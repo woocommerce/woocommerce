@@ -174,6 +174,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Have the remove_taxes() method set subtotal to subtotal_ex_tax
 * Fix - Allow layered nav to work with non pa_ prepended taxonomies
 * Fix - Better backwards compatibility with _woocommerce_exclude_image
+* Fix - is_on_sale() method now returns true for products with a sale product of 0
 
 = 2.0.9 - 02/05/2013 =
 * Feature - Added is_product_taxonomy() conditonal.
