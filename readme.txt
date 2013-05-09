@@ -178,9 +178,11 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Allow layered nav to work with non pa_ prepended taxonomies
 * Fix - Better backwards compatibility with _woocommerce_exclude_image
 * Fix - is_on_sale() method now returns true for products with a sale product of 0
+* Fix - Changed MyException to Exception in Checkout class as MyException class does not exist in WooCommerce
 * Refactor - Taken out Piwik integration, use http://wordpress.org/extend/plugins/woocommerce-piwik-integration/ from now on
 * Refactor - Taken out ShareYourCart integration, use http://wordpress.org/extend/plugins/shareyourcart/ from now on
 * Refactor - Moved woocommerce_get_formatted_product_name function into WC_Product class
+* Feature - Bulk edit increase / decrease variation prices by fixed or percentage values
 
 = 2.0.9 - 02/05/2013 =
 * Feature - Added is_product_taxonomy() conditonal.
