@@ -201,9 +201,17 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	array(	'title' => __( 'Styles and Scripts', 'woocommerce' ), 'type' => 'title', 'id' => 'script_styling_options' ),
 
 	array(
-		'title' => __( 'Styling', 'woocommerce' ),
-		'desc' 		=> __( 'Enable WooCommerce CSS', 'woocommerce' ),
+		'title' => __( 'Appearance', 'woocommerce' ),
+		'desc' 		=> __( 'Enable WooCommerce Appearance CSS', 'woocommerce' ),
 		'id' 		=> 'woocommerce_frontend_css',
+		'default'	=> 'yes',
+		'type' 		=> 'checkbox'
+	),
+
+	array(
+		'title' => __( 'Layout', 'woocommerce' ),
+		'desc' 		=> __( 'Enable WooCommerce Layout CSS', 'woocommerce' ),
+		'id' 		=> 'woocommerce_frontend_css_layout',
 		'default'	=> 'yes',
 		'type' 		=> 'checkbox'
 	),

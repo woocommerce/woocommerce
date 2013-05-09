@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.1 - x =
+* Feature - Split frontend styles into separate appearance/layout stylesheets and added option for the new 'layout' stylesheet.
 * Tweak - Searching for SKU in admin panel can also be done via lowercase 'sku:' instead of just 'SKU:'
 * Tweak - Added filter to check the 'Create account' checkbox on checkout by default
 * Tweak - Update CPT parameters for 'product_variation' and 'shop_coupon' to be no longer public
