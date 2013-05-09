@@ -135,7 +135,7 @@ abstract class WC_Settings_API {
      * @access public
      * @param mixed $key
      * @param mixed $empty_value
-     * @return void
+     * @return string The value specified for the option or a default value for the option
      */
     public function get_option( $key, $empty_value = null ) {
 
