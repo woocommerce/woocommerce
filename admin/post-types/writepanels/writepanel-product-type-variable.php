@@ -79,7 +79,11 @@ function variable_product_type_options() {
 					<option value="toggle_virtual"><?php _e( 'Toggle &quot;Virtual&quot;', 'woocommerce' ); ?></option>
 					<option value="delete_all"><?php _e( 'Delete all variations', 'woocommerce' ); ?></option>
 					<option value="variable_regular_price"><?php _e( 'Prices', 'woocommerce' ); ?></option>
+					<option value="variable_regular_price_increase"><?php _e( 'Prices increase by (fixed amount or %)', 'woocommerce' ); ?></option>
+					<option value="variable_regular_price_decrease"><?php _e( 'Prices decrease by (fixed amount or %)', 'woocommerce' ); ?></option>
 					<option value="variable_sale_price"><?php _e( 'Sale prices', 'woocommerce' ); ?></option>
+					<option value="variable_sale_price_increase"><?php _e( 'Sale prices increase by (fixed amount or %)', 'woocommerce' ); ?></option>
+					<option value="variable_sale_price_decrease"><?php _e( 'Sale prices decrease by (fixed amount or %)', 'woocommerce' ); ?></option>
 					<option value="variable_stock"><?php _e( 'Stock', 'woocommerce' ); ?></option>
 					<option value="variable_weight"><?php _e( 'Weight', 'woocommerce' ); ?></option>
 					<option value="variable_length"><?php _e( 'Length', 'woocommerce' ); ?></option>
@@ -432,6 +436,74 @@ function variable_product_type_options() {
 				}
 				return false;
 			}
+			else if ( field_to_edit == 'variable_regular_price_increase' ) {
+				field_to_edit = 'variable_regular_price';
+				var input_tag = jQuery('select#field_to_edit :selected').attr('rel') ? jQuery('select#field_to_edit :selected').attr('rel') : 'input';
+
+				var value = prompt("<?php echo esc_js( __( 'Enter a value (fixed or %)', 'woocommerce' ) ); ?>");
+				jQuery(input_tag + '[name^="' + field_to_edit + '"]').each(function() {
+					var current_value = jQuery(this).val();
+
+					if ( value.indexOf("%") >= 0 ) {
+						var new_value = Number( current_value ) + ( ( Number( current_value ) / 100 ) * Number( value.replace(/\%/, "" ) ) );
+					} else {
+						var new_value = Number( current_value ) + Number ( value );
+					}
+					jQuery(this).val( new_value ).change();
+				});
+				return false;
+			}
+			else if ( field_to_edit == 'variable_regular_price_decrease' ) {
+				field_to_edit = 'variable_regular_price';
+				var input_tag = jQuery('select#field_to_edit :selected').attr('rel') ? jQuery('select#field_to_edit :selected').attr('rel') : 'input';
+
+				var value = prompt("<?php echo esc_js( __( 'Enter a value (fixed or %)', 'woocommerce' ) ); ?>");
+				jQuery(input_tag + '[name^="' + field_to_edit + '"]').each(function() {
+					var current_value = jQuery(this).val();
+
+					if ( value.indexOf("%") >= 0 ) {
+						var new_value = Number( current_value ) - ( ( Number( current_value ) / 100 ) * Number( value.replace(/\%/, "" ) ) );
+					} else {
+						var new_value = Number( current_value ) - Number ( value );
+					}
+					jQuery(this).val( new_value ).change();
+				});
+				return false;
+			}
+			else if ( field_to_edit == 'variable_sale_price_increase' ) {
+				field_to_edit = 'variable_sale_price';
+				var input_tag = jQuery('select#field_to_edit :selected').attr('rel') ? jQuery('select#field_to_edit :selected').attr('rel') : 'input';
+
+				var value = prompt("<?php echo esc_js( __( 'Enter a value (fixed or %)', 'woocommerce' ) ); ?>");
+				jQuery(input_tag + '[name^="' + field_to_edit + '"]').each(function() {
+					var current_value = jQuery(this).val();
+
+					if ( value.indexOf("%") >= 0 ) {
+						var new_value = Number( current_value ) + ( ( Number( current_value ) / 100 ) * Number( value.replace(/\%/, "" ) ) );
+					} else {
+						var new_value = Number( current_value ) + Number ( value );
+					}
+					jQuery(this).val( new_value ).change();
+				});
+				return false;
+			}
+			else if ( field_to_edit == 'variable_sale_price_decrease' ) {
+				field_to_edit = 'variable_sale_price';
+				var input_tag = jQuery('select#field_to_edit :selected').attr('rel') ? jQuery('select#field_to_edit :selected').attr('rel') : 'input';
+
+				var value = prompt("<?php echo esc_js( __( 'Enter a value (fixed or %)', 'woocommerce' ) ); ?>");
+				jQuery(input_tag + '[name^="' + field_to_edit + '"]').each(function() {
+					var current_value = jQuery(this).val();
+
+					if ( value.indexOf("%") >= 0 ) {
+						var new_value = Number( current_value ) - ( ( Number( current_value ) / 100 ) * Number( value.replace(/\%/, "" ) ) );
+					} else {
+						var new_value = Number( current_value ) - Number ( value );
+					}
+					jQuery(this).val( new_value ).change();
+				});
+				return false;
+			}
 			else {
 
 				var input_tag = jQuery('select#field_to_edit :selected').attr('rel') ? jQuery('select#field_to_edit :selected').attr('rel') : 'input';
@@ -439,7 +511,6 @@ function variable_product_type_options() {
 				var value = prompt("<?php echo esc_js( __( 'Enter a value', 'woocommerce' ) ); ?>");
 				jQuery(input_tag + '[name^="' + field_to_edit + '["]').val( value ).change();
 				return false;
-
 			}
 		});
 
