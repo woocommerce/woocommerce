@@ -167,6 +167,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 2.1 - x =
 * Feature - Split frontend styles into separate appearance/layout stylesheets and added option for the new 'layout' stylesheet.
+* Feature - Bulk edit increase / decrease variation prices by fixed or percentage values
 * Tweak - Searching for SKU in admin panel can also be done via lowercase 'sku:' instead of just 'SKU:'
 * Tweak - Added filter to check the 'Create account' checkbox on checkout by default
 * Tweak - Update CPT parameters for 'product_variation' and 'shop_coupon' to be no longer public
@@ -182,7 +183,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Refactor - Taken out Piwik integration, use http://wordpress.org/extend/plugins/woocommerce-piwik-integration/ from now on
 * Refactor - Taken out ShareYourCart integration, use http://wordpress.org/extend/plugins/shareyourcart/ from now on
 * Refactor - Moved woocommerce_get_formatted_product_name function into WC_Product class
-* Feature - Bulk edit increase / decrease variation prices by fixed or percentage values
+* Localization - Portugese locale by jpBenfica
+* Localization - Spanish, Romanian updates.
 
 = 2.0.9 - 02/05/2013 =
 * Feature - Added is_product_taxonomy() conditonal.
