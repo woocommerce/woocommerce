@@ -1,1 +1,167 @@
-// WooCommerce layout styles
+@import "mixins";
+@import "woocommerce-base"; /* Contains base colours like @primary */
+
+.woocommerce, .woocommerce-page {
+
+	/* =General Layout Styles
+	-------------------------------------------------------------- */
+
+	.col2-set {
+		.clearfix;
+		width: 100%;
+		.col-1 {
+			float:left;
+			width: 48%;
+		}
+		.col-2 {
+			float: right;
+			width: 48%;
+		}
+	}
+
+	img {
+		height:auto;
+		max-width:100%;
+	}
+
+	/* =Product Page
+	-------------------------------------------------------------- */
+
+	div.product, #content div.product {
+		div.images {
+			float:left;
+			width: 48%;
+		}
+		div.thumbnails {
+			.clearfix;
+			a {
+				float:left;
+				width: 30.75%;
+				margin-right: 3.8%;
+			}
+			a.last {
+				margin-right: 0;
+			}
+			a.first {
+				clear:both;
+			}
+		}
+		div.summary {
+			float: right;
+			width: 48%;
+		}
+	}
+
+	/* =Product Loops
+	-------------------------------------------------------------- */
+
+	.related, .upsells.products {
+		.clearfix();
+		ul.products, ul {
+			float:none;
+			li.product {
+				width: 48%;
+				img {
+					width: 100%;
+					height:auto;
+				}
+			}
+		}
+	}
+
+	ul.products {
+		li.product {
+			float:left;
+			margin: 0 3.8% 2.992em 0;
+			padding: 0;
+			position: relative;
+			width: 22.05%;
+			margin-left: 0;
+		}
+		li.first {
+			clear:both;
+		}
+		li.last {
+			margin-right: 0;
+		}
+	}
+
+	.woocommerce-result-count {
+		float: left;
+	}
+	.woocommerce-ordering {
+		float: right;
+	}
+
+	.woocommerce-pagination {
+		ul.page-numbers {
+			li {
+				display: inline;
+			}
+		}
+	}
+
+	/* =Cart Page
+	-------------------------------------------------------------- */
+
+	table.cart, #content table.cart {
+		img {
+			height:auto;
+		}
+	}
+
+	.cart-collaterals {
+		.clearfix;
+		width: 100%;
+		.related {
+			width: 30.75%;
+			float:left;
+		}
+
+		.cross-sells {
+			width: 48%;
+			float:left;
+
+			ul.products {
+				float:none;
+
+				li {
+					width: 48%;
+				}
+			}
+		}
+		.shipping_calculator {
+			width: 48%;
+			.clearfix;
+			clear: right;
+			float: right;
+			.col2-set {
+				.col-1, .col-2 {
+					width: 47%;
+				}
+			}
+		}
+		.cart_totals {
+			float: right;
+			width: 48%;
+		}
+	}
+
+	/* =Forms
+	-------------------------------------------------------------- */
+
+	form {
+		.form-row-first, .form-row-last {
+			float:left;
+			width: 47%;
+			overflow: visible;
+		}
+		.form-row-last {
+			float: right;
+		}
+		.form-row-wide {
+			clear: both;
+		}
+	}
+}
+

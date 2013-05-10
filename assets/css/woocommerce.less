@@ -142,19 +142,6 @@ p.demo_store {
 		}
 	}
 
-	.col2-set {
-		.clearfix;
-		width: 100%;
-		.col-1 {
-			float:left;
-			width: 48%;
-		}
-		.col-2 {
-			float: right;
-			width: 48%;
-		}
-	}
-
 	/* =Product Page
 	-------------------------------------------------------------- */
 
@@ -195,8 +182,6 @@ p.demo_store {
 
 		/* Product image and thumbnail */
 		div.images {
-			float:left;
-			width: 48%;
 			margin-bottom: 2em;
 			img {
 				display:block;
@@ -207,25 +192,11 @@ p.demo_store {
 			}
 			div.thumbnails {
 				padding-top: 1em;
-				.clearfix;
-				a {
-					float:left;
-					width: 30.75%;
-					margin-right: 3.8%;
-				}
-				a.last {
-					margin-right: 0;
-				}
-				a.first {
-					clear:both;
-				}
 			}
 		}
 
 		/* Summary div (contains title, price etc) */
 		div.summary {
-			float: right;
-			width: 48%;
 			margin-bottom: 2em;
 		}
 
@@ -436,7 +407,8 @@ p.demo_store {
 			0 1px 2px rgba(0,0,0,0.2);
 	}
 
-	/* Product loops */
+	/* =Product Loops
+	-------------------------------------------------------------- */
 
 	.products ul, ul.products {
 		margin: 0 0 1em;
@@ -449,28 +421,8 @@ p.demo_store {
 		}
 	}
 
-	.related, .upsells.products {
-		.clearfix();
-		ul.products, ul {
-			float:none;
-			li.product {
-				width: 48%;
-				img {
-					width: 100%;
-					height:auto;
-				}
-			}
-		}
-	}
-
 	ul.products {
 		li.product {
-			float:left;
-			margin: 0 3.8% 2.992em 0;
-			padding: 0;
-			position: relative;
-			width: 22.05%;
-			margin-left: 0;
 			.onsale {
 				top: 0;
 				right: 0;
@@ -520,21 +472,13 @@ p.demo_store {
 				}
 			}
 		}
-		li.first {
-			clear:both;
-		}
-		li.last {
-			margin-right: 0;
-		}
 	}
 
 	.woocommerce-result-count {
-		float: left;
 		margin: 0 0 1em;
 	}
 	.woocommerce-ordering {
 		margin: 0 0 1em;
-		float: right;
 		select {
 			vertical-align: top;
 		}
@@ -1062,7 +1006,6 @@ p.demo_store {
 		}
 		img {
 			width: 32px;
-			height:auto;
 		}
 		th, td {
 			vertical-align: middle;
@@ -1184,47 +1127,14 @@ p.demo_store {
 	-------------------------------------------------------------- */
 
 	.cart-collaterals {
-		.clearfix;
-		width: 100%;
-		.related {
-			width: 30.75%;
-			float:left;
-		}
-
-		.cross-sells {
-			width: 48%;
-			float:left;
-
-			ul.products {
-				float:none;
-
-				li {
-					width: 48%;
-				}
-			}
-		}
 		.shipping_calculator {
-			width: 48%;
-			text-align: right;
-			.clearfix;
-			margin: 20px 0 0 0;
-			clear: right;
-			float: right;
 			.button {
 				width: 100%;
 				float:none;
 				display:block;
 			}
-			.col2-set {
-				.col-1, .col-2 {
-					width: 47%;
-				}
-			}
 		}
 		.cart_totals {
-			float: right;
-
-			width: 48%;
 			text-align: right;
 			p {
 				margin: 0;
@@ -1356,17 +1266,6 @@ p.demo_store {
 				line-height: 1em;
 				padding-top: 2px;
 			}
-		}
-		.form-row-first, .form-row-last {
-			float:left;
-			width: 47%;
-			overflow: visible;
-		}
-		.form-row-last {
-			float: right;
-		}
-		.form-row-wide {
-			clear: both;
 		}
 	}
 
