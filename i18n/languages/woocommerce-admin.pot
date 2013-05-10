@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.0.9 Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2013-04-29 16:02:07+00:00\n"
+"POT-Creation-Date: 2013-05-10 11:38:26+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -1471,7 +1471,7 @@ msgid "Qty"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:349
-msgid "Cost"
+msgid "Totals"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:349
@@ -2104,26 +2104,26 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_images.php:42
-#: admin/post-types/writepanels/writepanel-product_images.php:102
+#: admin/post-types/writepanels/writepanel-product_images.php:43
+#: admin/post-types/writepanels/writepanel-product_images.php:103
 msgid "Delete image"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_images.php:42
-#: admin/post-types/writepanels/writepanel-product_images.php:102
+#: admin/post-types/writepanels/writepanel-product_images.php:43
+#: admin/post-types/writepanels/writepanel-product_images.php:103
 #: admin/woocommerce-admin-attributes.php:323
 msgid "Delete"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_images.php:53
+#: admin/post-types/writepanels/writepanel-product_images.php:54
 msgid "Add product gallery images"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_images.php:79
+#: admin/post-types/writepanels/writepanel-product_images.php:80
 msgid "Add Images to Product Gallery"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product_images.php:81
+#: admin/post-types/writepanels/writepanel-product_images.php:82
 msgid "Add to gallery"
 msgstr ""
 
@@ -4840,10 +4840,6 @@ msgstr ""
 #: admin/woocommerce-admin-users.php:225
 msgid "State/County or state code"
 msgstr ""
-#. Plugin Name of the plugin/theme
-msgid "WooCommerce"
-msgstr ""
-
 #. Plugin URI of the plugin/theme
 msgid "http://www.woothemes.com/woocommerce/"
 msgstr ""

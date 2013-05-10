@@ -14,8 +14,8 @@ require_once dirname( __FILE__ ) . '/makepot.php';
 class PotExtMeta {
 
 	var $headers = array(
-		'Plugin Name',
-		'Theme Name',
+		//'Plugin Name',
+		//'Theme Name',
 		'Plugin URI',
 		'Theme URI',
 		'Description',
