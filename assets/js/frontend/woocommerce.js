@@ -1,7 +1,7 @@
 jQuery(document).ready(function($) {
 
 	// Orderby
-	$('select.orderby').change(function(){
+	$(document).on( 'change', 'select.orderby', function() {
 		$(this).closest('form').submit();
 	});
 
