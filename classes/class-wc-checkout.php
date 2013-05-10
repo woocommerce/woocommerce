@@ -394,7 +394,8 @@ class WC_Checkout {
 		$this->posted['terms'] 				= isset( $_POST['terms'] ) ? 1 : 0;
 		$this->posted['createaccount'] 		= isset( $_POST['createaccount'] ) ? 1 : 0;
 		$this->posted['payment_method'] 	= isset( $_POST['payment_method'] ) ? woocommerce_clean( $_POST['payment_method'] ) : '';
-		$this->posted['shipping_method']	= isset( $_POST['shipping_method'] ) ? woocommerce_clean( $_POST['shipping_method'] ) : '';
+		$this->posted['shipping_method']	= isset( $_POST['shipping_method'] ) ? woocommerce_clean( urldecode( $_POST['shipping_method'] ) ) : '';
+		$this->posted['shipping_method']	= substr_replace( $this->posted['shipping_method'], strtolower( urlencode( substr( $this->posted['shipping_method'], 10 ) ) ), 10);
 
 		// Ship to billing only option
 		if ( $woocommerce->cart->ship_to_billing_address_only() )
