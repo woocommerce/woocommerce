@@ -96,3 +96,27 @@
 
 .darkorlighttextshadow ( @a, @opacity: 0.8 ) when (lightness(@a) >= 65%) { .text_shadow( 0, -1px, 0, rgba(0,0,0,@opacity) ); }
 .darkorlighttextshadow ( @a, @opacity: 0.8 ) when (lightness(@a) < 65%) { .text_shadow( 0, 1px, 0, rgba(255,255,255,@opacity) ); }
+
+/**
+ * Objects
+ */
+.menu() {
+	.clearfix;
+	li {
+		display:inline;
+	}
+}
+.mediaright() {
+	.clearfix;
+	img {
+		float:right;
+		height:auto;
+	}
+}
+.medialeft() {
+	.clearfix;
+	img {
+		float:right;
+		height:auto;
+	}
+}
