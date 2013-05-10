@@ -167,13 +167,13 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
      * @param int $order_id
      * @return array
      */
-	function process_payment ($order_id) {
+	function process_payment($order_id) {
 		global $woocommerce;
 
 		$order = new WC_Order( $order_id );
 
-		// Mark as on-hold (we're awaiting the cheque)
-		$order->update_status('on-hold', __( 'Payment to be made upon delivery.', 'woocommerce' ));
+		// Mark as processing (payment won't be taken until delivery)
+		$order->update_status( 'processing', __( 'Payment to be made upon delivery.', 'woocommerce' ) );
 
 		// Reduce stock levels
 		$order->reduce_order_stock();
