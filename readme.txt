@@ -171,6 +171,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Searching for SKU in admin panel can also be done via lowercase 'sku:' instead of just 'SKU:'
 * Tweak - Added filter to check the 'Create account' checkbox on checkout by default
 * Tweak - Update CPT parameters for 'product_variation' and 'shop_coupon' to be no longer public
+* Tweak - New status reporting system, now plugin list is better visually and very better to read
 * Fix - Cast term_id as int in product data write panel that will resolve issues with numerical attributes
 * Fix - Correct label for RUB symbol - added a dot after it
 * Fix - Javascript escapes to stop breaking scripts when used with translations
