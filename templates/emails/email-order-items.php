@@ -25,6 +25,9 @@ foreach ($items as $item) :
 			// Show title/image etc
 			echo 	apply_filters( 'woocommerce_order_product_image', $image, $_product, $show_image);
 
+			// Product name preamble
+			echo 	apply_filters( 'woocommerce_order_before_product_title', '', $item, $order );
+
 			// Product name
 			echo 	apply_filters( 'woocommerce_order_product_title', $item['name'], $_product );
 
