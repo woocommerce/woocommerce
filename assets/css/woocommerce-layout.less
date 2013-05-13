@@ -178,6 +178,22 @@
 	-------------------------------------------------------------- */
 
 	form {
+		.form-row {
+			.clearfix;
+			label {
+				display:block;
+				&.checkbox {
+					display: inline;
+				}
+			}
+			select {
+				width: 100%;
+			}
+			.input-text {
+				.borderbox;
+				width:100%;
+			}
+		}
 		.form-row-first, .form-row-last {
 			float:left;
 			width: 47%;
@@ -188,6 +204,14 @@
 		}
 		.form-row-wide {
 			clear: both;
+		}
+	}
+
+	#payment {
+		.form-row {
+			select {
+				width:auto;
+			}
 		}
 	}
 }

@@ -20,7 +20,6 @@ function woocommerce_frontend_styles_setting() {
 	global $woocommerce;
 	?><tr valign="top" class="woocommerce_frontend_css_colors">
 		<th scope="row" class="titledesc">
-			<label><?php _e( 'Styles', 'woocommerce' ); ?></label>
 		</th>
 	    <td class="forminp"><?php
 

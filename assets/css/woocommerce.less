@@ -1178,7 +1178,6 @@ p.demo_store {
 
 	form {
 		.form-row {
-			.clearfix;
 			padding: 3px;
 			margin: 0 0 6px;
 
@@ -1188,15 +1187,10 @@ p.demo_store {
 				transition: opacity 0.5s 0.5s ease;
 				opacity: 0;
 			}
-
-			label {
-				display:block;
-			}
 			label.hidden {
 				visibility:hidden;
 			}
 			select {
-				width: 100%;
 				cursor: pointer;
 				margin: 0;
 			}
@@ -1211,13 +1205,8 @@ p.demo_store {
 				text-align: center;
 				vertical-align: middle;
 			}
-			label.checkbox {
-				display: inline;
-			}
 			input.input-text, textarea {
-				-webkit-box-sizing:border-box;
-				-moz-box-sizing:border-box;
-				box-sizing:border-box;
+				.borderbox;
 				width: 100%;
 				margin: 0;
 				outline: 0;

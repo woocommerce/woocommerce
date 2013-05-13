@@ -1231,16 +1231,15 @@ class Woocommerce {
 		if ( ! defined( 'WOOCOMMERCE_USE_CSS_LAYOUT' ) )
 			define( 'WOOCOMMERCE_USE_CSS_LAYOUT', get_option( 'woocommerce_frontend_css_layout' ) == 'yes' ? true : false );
 
-		if ( WOOCOMMERCE_USE_CSS_APPEARANCE && ! defined( 'WOOCOMMERCE_USE_CSS' ) ) {
-			$css = file_exists( get_stylesheet_directory() . '/woocommerce/style.css' ) ? get_stylesheet_directory_uri() . '/woocommerce/style.css' : $this->plugin_url() . '/assets/css/woocommerce.css';
-			wp_enqueue_style( 'woocommerce_frontend_styles', $css );
-		}
-
 		if ( WOOCOMMERCE_USE_CSS_LAYOUT && ! defined( 'WOOCOMMERCE_USE_CSS' ) ) {
 			$css_layout = file_exists( get_stylesheet_directory() . '/woocommerce/style-layout.css' ) ? get_stylesheet_directory_uri() . '/woocommerce/style-layout.css' : $this->plugin_url() . '/assets/css/woocommerce-layout.css';
 			wp_enqueue_style( 'woocommerce_frontend_styles_layout', $css_layout );
 		}
 
+		if ( WOOCOMMERCE_USE_CSS_APPEARANCE && ! defined( 'WOOCOMMERCE_USE_CSS' ) ) {
+			$css = file_exists( get_stylesheet_directory() . '/woocommerce/style.css' ) ? get_stylesheet_directory_uri() . '/woocommerce/style.css' : $this->plugin_url() . '/assets/css/woocommerce.css';
+			wp_enqueue_style( 'woocommerce_frontend_styles', $css );
+		}
 	}
 
 	/**
