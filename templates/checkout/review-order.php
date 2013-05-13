@@ -194,7 +194,9 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 			echo apply_filters('woocommerce_order_button_html', '<input type="submit" class="button alt" name="woocommerce_checkout_place_order" id="place_order" value="' . $order_button_text . '" />' );
 			?>
 
-			<?php if (woocommerce_get_page_id('terms')>0) : ?>
+			<?php 
+			$show_terms_checkbox = apply_filters('woocommerce_checkout_show_terms', true);
+            		if ( (woocommerce_get_page_id('terms')>0) && $show_terms_checkbox ) : ?>
 			<p class="form-row terms">
 				<label for="terms" class="checkbox"><?php _e( 'I have read and accept the', 'woocommerce' ); ?> <a href="<?php echo esc_url( get_permalink(woocommerce_get_page_id('terms')) ); ?>" target="_blank"><?php _e( 'terms &amp; conditions', 'woocommerce' ); ?></a></label>
 				<input type="checkbox" class="input-checkbox" name="terms" <?php checked( isset( $_POST['terms'] ), true ); ?> id="terms" />
