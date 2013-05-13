@@ -28,7 +28,7 @@ function woocommerce_product_images_box() {
 					$product_image_gallery = get_post_meta( $post->ID, '_product_image_gallery', true );
 				} else {
 					// Backwards compat
-					$attachment_ids = get_posts( 'post_parent=' . $this->id . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image&fields=ids&meta_key=_woocommerce_exclude_image&meta_value=0' );
+					$attachment_ids = get_posts( 'post_parent=' . $post->id . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image&fields=ids&meta_key=_woocommerce_exclude_image&meta_value=0' );
 					$attachment_ids = array_diff( $attachment_ids, array( get_post_thumbnail_id() ) );
 					$product_image_gallery = implode( ',', $attachment_ids );
 				}
