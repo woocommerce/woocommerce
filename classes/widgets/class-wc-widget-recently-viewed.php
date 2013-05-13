@@ -100,13 +100,7 @@ class WC_Widget_Recently_Viewed extends WP_Widget {
 
 			while ( $r->have_posts()) {
 				$r->the_post();
-				global $product;
-
-				echo '<li>
-					<a href="' . get_permalink() . '">
-						' . ( has_post_thumbnail() ? get_the_post_thumbnail( $r->post->ID, 'shop_thumbnail' ) : woocommerce_placeholder_img( 'shop_thumbnail' ) ) . ' ' . get_the_title() . '
-					</a> ' . $product->get_price_html() . '
-				</li>';
+				woocommerce_get_template( 'content-widget-product.php' );
 			}
 
 			echo '</ul>';

@@ -173,6 +173,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Update CPT parameters for 'product_variation' and 'shop_coupon' to be no longer public
 * Tweak - COD processing instead of on-hold
 * Tweak - Added filter to explicitly hide terms agreement checkbox
+* Tweak - content-widget-product.php template for product lists inside core widgets
 * Fix - Cast term_id as int in product data write panel that will resolve issues with numerical attributes
 * Fix - Correct label for RUB symbol - added a dot after it
 * Fix - Javascript escapes to stop breaking scripts when used with translations

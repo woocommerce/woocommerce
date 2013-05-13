@@ -42,6 +42,8 @@ class WC_Widget_Random_Products extends WP_Widget {
 	function widget( $args, $instance ) {
 		global $woocommerce;
 
+		extract( $args) ;
+
 		// Use default title as fallback
 		$title = ( '' === $instance['title'] ) ? __('Random Products', 'woocommerce' ) : $instance['title'];
 		$title = apply_filters('widget_title', $title, $instance, $this->id_base);
@@ -65,34 +67,25 @@ class WC_Widget_Random_Products extends WP_Widget {
 	    $query_args['meta_query'][] = $woocommerce->query->stock_status_meta_query();
 	    $query_args['meta_query']   = array_filter( $query_args['meta_query'] );
 
-		$query = new WP_Query( $query_args );
+		$r = new WP_Query( $query_args );
 
-		if ( $query->have_posts() ) {
-			echo $args['before_widget'];
+		if ( $r->have_posts() ) {
 
-			if ( '' !== $title ) {
-				echo $args['before_title'], $title, $args['after_title'];
-			} ?>
+			echo $before_widget;
 
-			<ul class="product_list_widget">
-				<?php while ($query->have_posts()) : $query->the_post(); global $product; ?>
-					<li>
-						<a href="<?php the_permalink() ?>">
-							<?php
-								if ( has_post_thumbnail() )
-									the_post_thumbnail( 'shop_thumbnail' );
-								else
-									echo woocommerce_placeholder_img( 'shop_thumbnail' );
-							?>
-							<?php the_title() ?>
-						</a>
-						<?php echo $product->get_price_html() ?>
-					</li>
-				<?php endwhile; ?>
-			</ul>
+			if ( $title )
+				echo $before_title . $title . $after_title;
 
-			<?php
-			echo $args['after_widget'];
+			echo '<ul class="product_list_widget">';
+
+			while ( $r->have_posts() ) {
+				$r->the_post();
+				woocommerce_get_template( 'content-widget-product.php' );
+			}
+
+			echo '</ul>';
+
+			echo $after_widget;
 		}
 	}
 
