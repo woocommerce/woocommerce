@@ -78,7 +78,7 @@ class WC_Widget_Recent_Reviews extends WP_Widget {
 			if ( $title ) echo $before_title . $title . $after_title;
 			echo '<ul class="product_list_widget">';
 
-			foreach ( (array) $comments as $comment) {
+			foreach ( (array) $comments as $comment ) {
 
 				$_product = get_product( $comment->comment_post_ID );
 

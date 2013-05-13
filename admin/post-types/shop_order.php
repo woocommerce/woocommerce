@@ -466,28 +466,6 @@ function woocommerce_shop_order_search_custom_fields( $wp ) {
 				esc_attr( $_GET['s'] )
 			)
 		),
-		$wpdb->get_col(
-			$wpdb->prepare( "
-				SELECT posts.ID
-				FROM {$wpdb->posts} as posts
-				LEFT JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
-				LEFT JOIN {$wpdb->users} as users ON postmeta.meta_value = users.ID
-				WHERE
-					post_excerpt 	LIKE '%%%1\$s%%' OR
-					post_title 		LIKE '%%%1\$s%%' OR
-					(
-						meta_key		= '_customer_user' AND
-						(
-							user_login		LIKE '%%%1\$s%%' OR
-							user_nicename	LIKE '%%%1\$s%%' OR
-							user_email		LIKE '%%%1\$s%%' OR
-							display_name	LIKE '%%%1\$s%%'
-						)
-					)
-				",
-				esc_attr( $_GET['s'] )
-			)
-		),
 		array( $search_order_id )
 	);
 

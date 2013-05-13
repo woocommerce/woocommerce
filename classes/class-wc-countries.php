@@ -619,7 +619,7 @@ class WC_Countries {
 		$full_country 	= ( isset( $this->countries[ $country ] ) ) ? $this->countries[ $country ] : $country;
 
 		// Country is not needed if the same as base
-		if ( $country == $this->get_base_country() )
+		if ( $country == $this->get_base_country() && ! apply_filters( 'woocommerce_formatted_address_force_country_display', false ) )
 			$format = str_replace( '{country}', '', $format );
 
 		// Handle full state name

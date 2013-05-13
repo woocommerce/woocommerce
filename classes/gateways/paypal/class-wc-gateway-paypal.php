@@ -306,7 +306,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		// If prices include tax or have order discounts, send the whole order as a single item
-		if ( get_option( 'woocommerce_prices_include_tax' ) == 'yes' || $order->get_order_discount() > 0 ) {
+		if ( get_option( 'woocommerce_prices_include_tax' ) == 'yes' || $order->get_order_discount() > 0 || ( sizeof( $order->get_items() ) + sizeof( $order->get_fees() ) ) >= 9 ) {
 
 			// Discount
 			$paypal_args['discount_amount_cart'] = $order->get_order_discount();

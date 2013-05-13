@@ -174,6 +174,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - COD processing instead of on-hold
 * Tweak - Added filter to explicitly hide terms agreement checkbox
 * Tweak - New System Status report layout, now plugin list is better visually and very better to read
+* Tweak - content-widget-product.php template for product lists inside core widgets
 * Fix - Cast term_id as int in product data write panel that will resolve issues with numerical attributes
 * Fix - Correct label for RUB symbol - added a dot after it
 * Fix - Javascript escapes to stop breaking scripts when used with translations
@@ -184,6 +185,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - is_on_sale() method now returns true for products with a sale product of 0
 * Fix - Changed MyException to Exception in Checkout class as MyException class does not exist in WooCommerce
 * Fix - For when get_the_terms() returns false inside woocommerce_get_product_terms()
+* Fix - PayPal has a 9 item limit.
 * Refactor - Taken out Piwik integration, use http://wordpress.org/extend/plugins/woocommerce-piwik-integration/ from now on
 * Refactor - Taken out ShareYourCart integration, use http://wordpress.org/extend/plugins/shareyourcart/ from now on
 * Refactor - Moved woocommerce_get_formatted_product_name function into WC_Product class

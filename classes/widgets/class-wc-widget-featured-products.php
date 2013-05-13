@@ -91,23 +91,24 @@ class WC_Widget_Featured_Products extends WP_Widget {
 
 		$r = new WP_Query($query_args);
 
-		if ($r->have_posts()) : ?>
+		if ( $r->have_posts() ) {
 
-		<?php echo $before_widget; ?>
-		<?php if ( $title ) echo $before_title . $title . $after_title; ?>
-		<ul class="product_list_widget">
-		<?php while ($r->have_posts()) : $r->the_post(); global $product; ?>
+			echo $before_widget;
 
-		<li><a href="<?php echo esc_url( get_permalink( $r->post->ID ) ); ?>" title="<?php echo esc_attr($r->post->post_title ? $r->post->post_title : $r->post->ID); ?>">
-			<?php echo $product->get_image(); ?>
-			<?php if ( $r->post->post_title ) echo get_the_title( $r->post->ID ); else echo $r->post->ID; ?>
-		</a> <?php echo $product->get_price_html(); ?></li>
+			if ( $title )
+				echo $before_title . $title . $after_title;
 
-		<?php endwhile; ?>
-		</ul>
-		<?php echo $after_widget; ?>
+			echo '<ul class="product_list_widget">';
 
-		<?php endif;
+			while ( $r->have_posts() ) {
+				$r->the_post();
+				woocommerce_get_template( 'content-widget-product.php' );
+			}
+
+			echo '</ul>';
+
+			echo $after_widget;
+		}
 
 		$content = ob_get_clean();
 
