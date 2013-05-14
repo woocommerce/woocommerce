@@ -113,7 +113,7 @@ function woocommerce_status_report() {
                 	if ( $memory < 67108864 ) {
                 		echo '<mark class="error">' . sprintf( __( '%s - We recommend setting memory to at least 64MB. See: <a href="%s">Increasing memory allocated to PHP</a>', 'woocommerce' ), size_format( $memory ), 'http://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP' ) . '</mark>';
                 	} else {
-                		echo '<mark class="yes">' . size_format $memory ) . '</mark>';
+                		echo '<mark class="yes">' . size_format( $memory ) . '</mark>';
                 	}
                 ?></td>
             </tr>
