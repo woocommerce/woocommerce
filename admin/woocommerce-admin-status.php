@@ -111,9 +111,9 @@ function woocommerce_status_report() {
                 	$memory = woocommerce_let_to_num( WP_MEMORY_LIMIT );
 
                 	if ( $memory < 67108864 ) {
-                		echo '<mark class="error">' . sprintf( __( '%s - We recommend setting memory to at least 64MB. See: <a href="%s">Increasing memory allocated to PHP</a>', 'woocommerce' ), wp_convert_bytes_to_hr( $memory ), 'http://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP' ) . '</mark>';
+                		echo '<mark class="error">' . sprintf( __( '%s - We recommend setting memory to at least 64MB. See: <a href="%s">Increasing memory allocated to PHP</a>', 'woocommerce' ), size_format( $memory ), 'http://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP' ) . '</mark>';
                 	} else {
-                		echo '<mark class="yes">' . wp_convert_bytes_to_hr( $memory ) . '</mark>';
+                		echo '<mark class="yes">' . size_format $memory ) . '</mark>';
                 	}
                 ?></td>
             </tr>
@@ -123,11 +123,11 @@ function woocommerce_status_report() {
             </tr>
             <tr>
                 <td><?php _e( 'WP Max Upload Size','woocommerce' ); ?>:</td>
-                <td><?php echo wp_convert_bytes_to_hr( wp_max_upload_size() ); ?></td>
+                <td><?php echo size_format( wp_max_upload_size() ); ?></td>
             </tr>
             <tr>
                 <td><?php _e('PHP Post Max Size','woocommerce' ); ?>:</td>
-                <td><?php if ( function_exists( 'ini_get' ) ) echo wp_convert_bytes_to_hr( woocommerce_let_to_num( ini_get('post_max_size') ) ); ?></td>
+                <td><?php if ( function_exists( 'ini_get' ) ) echo size_format( woocommerce_let_to_num( ini_get('post_max_size') ) ); ?></td>
             </tr>
             <tr>
                 <td><?php _e('PHP Time Limit','woocommerce' ); ?>:</td>
