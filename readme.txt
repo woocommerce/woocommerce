@@ -177,6 +177,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - is_on_sale() method now returns true for products with a sale product of 0
 * Fix - For when get_the_terms() returns false inside woocommerce_get_product_terms()
 * Fix - PayPal has a 9 item limit
+* Fix - Replace deprecated wp_convert_bytes_to_hr() with size_format()
 
 = 2.0.9 - 02/05/2013 =
 * Feature - Added is_product_taxonomy() conditonal.
