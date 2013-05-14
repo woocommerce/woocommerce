@@ -201,23 +201,6 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	array(	'title' => __( 'Styles and Scripts', 'woocommerce' ), 'type' => 'title', 'id' => 'script_styling_options' ),
 
 	array(
-		'title' => __( 'Styles', 'woocommerce' ),
-		'desc' 		=> __( 'Enable WooCommerce Layout CSS', 'woocommerce' ),
-		'id' 		=> 'woocommerce_frontend_css_layout',
-		'desc_tip'	=> __( 'Applies layout to forms, product grids etc.', 'woocommerce' ),
-		'default'	=> 'yes',
-		'type' 		=> 'checkbox'
-	),
-
-	array(
-		'desc' 		=> __( 'Enable WooCommerce Appearance CSS', 'woocommerce' ),
-		'id' 		=> 'woocommerce_frontend_css',
-		'desc_tip'	=> __( 'Applies style/color to buttons, tabs, ratings etc.', 'woocommerce' ),
-		'default'	=> 'yes',
-		'type' 		=> 'checkbox'
-	),
-
-	array(
 		'type' 		=> 'frontend_styles'
 	),
 

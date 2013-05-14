@@ -20,6 +20,7 @@ function woocommerce_frontend_styles_setting() {
 	global $woocommerce;
 	?><tr valign="top" class="woocommerce_frontend_css_colors">
 		<th scope="row" class="titledesc">
+			<?php _e( 'Styles', 'woocommerce' ); ?>
 		</th>
 	    <td class="forminp"><?php
 
@@ -53,15 +54,6 @@ function woocommerce_frontend_styles_setting() {
 
 	    ?></td>
 		</tr>
-		<script type="text/javascript">
-			jQuery('input#woocommerce_frontend_css').change(function() {
-				if (jQuery(this).is(':checked')) {
-					jQuery('tr.woocommerce_frontend_css_colors').show();
-				} else {
-					jQuery('tr.woocommerce_frontend_css_colors').hide();
-				}
-			}).change();
-		</script>
 		<?php
 }
 

@@ -1224,21 +1224,17 @@ class Woocommerce {
 		wp_localize_script( 'woocommerce', 'woocommerce_params', apply_filters( 'woocommerce_params', $woocommerce_params ) );
 
 		// CSS Styles
+		if ( ! defined( 'WOOCOMMERCE_USE_CSS' ) )
+			define( 'WOOCOMMERCE_USE_CSS', true );
 
-		if ( ! defined( 'WOOCOMMERCE_USE_CSS_APPEARANCE' ) )
-			define( 'WOOCOMMERCE_USE_CSS_APPEARANCE', get_option( 'woocommerce_frontend_css' ) == 'yes' ? true : false );
+		if ( WOOCOMMERCE_USE_CSS ) {
+			$css 			= file_exists( get_stylesheet_directory() . '/woocommerce/style.css' ) ? get_stylesheet_directory_uri() . '/woocommerce/style.css' : $this->plugin_url() . '/assets/css/woocommerce.css';
+			$css_layout 	= file_exists( get_stylesheet_directory() . '/woocommerce/style-layout.css' ) ? get_stylesheet_directory_uri() . '/woocommerce/style-layout.css' : $this->plugin_url() . '/assets/css/woocommerce-layout.css';
+			$css_responsive = file_exists( get_stylesheet_directory() . '/woocommerce/style-responsive.css' ) ? get_stylesheet_directory_uri() . '/woocommerce/style-responsive.css' : $this->plugin_url() . '/assets/css/woocommerce-responsive.css';
 
-		if ( ! defined( 'WOOCOMMERCE_USE_CSS_LAYOUT' ) )
-			define( 'WOOCOMMERCE_USE_CSS_LAYOUT', get_option( 'woocommerce_frontend_css_layout' ) == 'yes' ? true : false );
-
-		if ( WOOCOMMERCE_USE_CSS_LAYOUT && ! defined( 'WOOCOMMERCE_USE_CSS' ) ) {
-			$css_layout = file_exists( get_stylesheet_directory() . '/woocommerce/style-layout.css' ) ? get_stylesheet_directory_uri() . '/woocommerce/style-layout.css' : $this->plugin_url() . '/assets/css/woocommerce-layout.css';
-			wp_enqueue_style( 'woocommerce_frontend_styles_layout', $css_layout );
-		}
-
-		if ( WOOCOMMERCE_USE_CSS_APPEARANCE && ! defined( 'WOOCOMMERCE_USE_CSS' ) ) {
-			$css = file_exists( get_stylesheet_directory() . '/woocommerce/style.css' ) ? get_stylesheet_directory_uri() . '/woocommerce/style.css' : $this->plugin_url() . '/assets/css/woocommerce.css';
 			wp_enqueue_style( 'woocommerce_frontend_styles', $css );
+			wp_enqueue_style( 'woocommerce_frontend_styles_layout', $css_layout );
+			wp_enqueue_style( 'woocommerce_frontend_styles_responsive', $css_responsive, '','' ,'only screen and (max-width: ' . apply_filters( 'woocommerce_responsive_breakpoint', $breakpoint = '768px' ) . ' )' );
 		}
 	}
 
