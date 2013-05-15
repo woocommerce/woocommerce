@@ -1228,13 +1228,13 @@ class Woocommerce {
 			define( 'WOOCOMMERCE_USE_CSS', true );
 
 		if ( WOOCOMMERCE_USE_CSS ) {
-			$css 			= file_exists( get_stylesheet_directory() . '/woocommerce/style.css' ) ? get_stylesheet_directory_uri() . '/woocommerce/style.css' : $this->plugin_url() . '/assets/css/woocommerce.css';
-			$css_layout 	= file_exists( get_stylesheet_directory() . '/woocommerce/style-layout.css' ) ? get_stylesheet_directory_uri() . '/woocommerce/style-layout.css' : $this->plugin_url() . '/assets/css/woocommerce-layout.css';
-			$css_responsive = file_exists( get_stylesheet_directory() . '/woocommerce/style-responsive.css' ) ? get_stylesheet_directory_uri() . '/woocommerce/style-responsive.css' : $this->plugin_url() . '/assets/css/woocommerce-responsive.css';
+			$css 				= file_exists( get_stylesheet_directory() . '/woocommerce/style.css' ) ? get_stylesheet_directory_uri() . '/woocommerce/style.css' : $this->plugin_url() . '/assets/css/woocommerce.css';
+			$css_layout 		= file_exists( get_stylesheet_directory() . '/woocommerce/style-layout.css' ) ? get_stylesheet_directory_uri() . '/woocommerce/style-layout.css' : $this->plugin_url() . '/assets/css/woocommerce-layout.css';
+			$css_smallscreen 	= file_exists( get_stylesheet_directory() . '/woocommerce/style-smallscreen.css' ) ? get_stylesheet_directory_uri() . '/woocommerce/style-smallscreen.css' : $this->plugin_url() . '/assets/css/woocommerce-smallscreen.css';
 
-			wp_enqueue_style( 'woocommerce_frontend_styles', $css );
 			wp_enqueue_style( 'woocommerce_frontend_styles_layout', $css_layout );
-			wp_enqueue_style( 'woocommerce_frontend_styles_responsive', $css_responsive, '','' ,'only screen and (max-width: ' . apply_filters( 'woocommerce_responsive_breakpoint', $breakpoint = '768px' ) . ' )' );
+			wp_enqueue_style( 'woocommerce_frontend_styles_smallscreen', $css_smallscreen, '','' ,'only screen and (max-width: ' . apply_filters( 'woocommerce_smallscreen_breakpoint', $breakpoint = '768px' ) . ' )' );
+			wp_enqueue_style( 'woocommerce_frontend_styles', $css );
 		}
 	}
 

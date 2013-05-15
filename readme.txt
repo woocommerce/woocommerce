@@ -166,8 +166,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.1 - x =
-* Feature - Split frontend styles into separate appearance/layout stylesheets and removed the enable/disable options.
-* Feature - Added woocommerce-responsive.css to optimise default layout on handheld devices.
+* Feature - Split frontend styles into separate appearance/layout stylesheets and removed the enable/disable option.
+* Feature - Added woocommerce-smallscreen.css to optimise default layout on handheld devices.
 * Feature - Bulk edit increase / decrease variation prices by fixed or percentage values
 * Tweak - Added filter to check the 'Create account' checkbox on checkout by default
 * Tweak - Update CPT parameters for 'product_variation' and 'shop_coupon' to be no longer public
