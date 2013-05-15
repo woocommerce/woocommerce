@@ -1482,7 +1482,7 @@ function woocommerce_get_product_terms( $object_id, $taxonomy, $fields = 'all' )
 	
 	if ( ! is_array( $object_terms ) )
     	return array();
-    
+
 	$all_terms 		= array_flip( get_terms( $taxonomy, array( 'menu_order' => 'ASC', 'fields' => 'ids' ) ) );
 
 	switch ( $fields ) {
