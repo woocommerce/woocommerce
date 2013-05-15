@@ -63,6 +63,10 @@ $woocommerce->show_messages();
 						<!-- Product Name -->
 						<td class="product-name">
 							<?php
+								// Title preamble
+								echo apply_filters( 'woocommerce_before_in_cart_product_title', '', $values, $cart_item_key );
+
+								// Title
 								if ( ! $_product->is_visible() || ( ! empty( $_product->variation_id ) && ! $_product->parent_is_visible() ) )
 									echo apply_filters( 'woocommerce_in_cart_product_title', $_product->get_title(), $values, $cart_item_key );
 								else
