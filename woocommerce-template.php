@@ -823,7 +823,14 @@ if ( ! function_exists( 'woocommerce_output_related_products' ) ) {
 	 * @return void
 	 */
 	function woocommerce_output_related_products() {
-		woocommerce_related_products( 2, 2 );
+
+		$args = array(
+			'posts_per_page' => 2,
+			'columns' => 2,
+			'orderby' => 'rand'
+		);
+
+		woocommerce_related_products( apply_filters( 'woocommerce_output_related_products_args', $args ) );
 	}
 }
 
@@ -833,17 +840,19 @@ if ( ! function_exists( 'woocommerce_related_products' ) ) {
 	 * Output the related products.
 	 *
 	 * @access public
-	 * @param int $posts_per_page (default: 2)
-	 * @param int $columns (default: 2)
-	 * @param string $orderby (default: 'rand')
 	 * @return void
 	 */
-	function woocommerce_related_products( $posts_per_page = 2, $columns = 2, $orderby = 'rand'  ) {
-		woocommerce_get_template( 'single-product/related.php', array(
-				'posts_per_page'  => $posts_per_page,
-				'orderby'    => $orderby,
-				'columns'    => $columns
-			) );
+	function woocommerce_related_products( $args = array() ) {
+
+		$defaults = array(
+			'posts_per_page' => 2,
+			'columns' => 2,
+			'orderby' => 'rand'
+		);
+
+		$args = wp_parse_args( $args, $defaults );
+
+		woocommerce_get_template( 'single-product/related.php', $args );
 	}
 }
 
