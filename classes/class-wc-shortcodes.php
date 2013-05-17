@@ -1028,13 +1028,16 @@ class WC_Shortcodes {
 	function related_products_shortcode( $atts ) {
 		
 		$atts = shortcode_atts( array(
-			'per_page' 	=> '2',
-			'columns' 	=> '2',
-			'orderby' => 'rand',
+			'posts_per_page' => '2',
+			'columns' 	     => '2',
+			'orderby'        => 'rand',
 		), $atts);
 
-		$atts['posts_per_page'] = $atts['per_page'];
-		unset($atts['per_page']);
+		if ( isset( $atts['per_page'] ) ) {
+			_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.1', __( 'Use $args["posts_per_page"] instead. Deprecated argument will be removed in WC 2.1.', 'woocommerce' ) );
+			$atts['posts_per_page'] = $atts['per_page'];
+			unset( $atts['per_page'] );
+		}
 
 		ob_start();
 

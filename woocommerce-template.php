@@ -840,14 +840,28 @@ if ( ! function_exists( 'woocommerce_related_products' ) ) {
 	 * Output the related products.
 	 *
 	 * @access public
+	 * @param array Provided arguments
+	 * @param bool Columns argument for backwards compat
+	 * @param bool Order by argument for backwards compat
 	 * @return void
 	 */
-	function woocommerce_related_products( $args = array() ) {
+	function woocommerce_related_products( $args = array(), $columns = false, $orderby = false ) {
+		if ( ! is_array( $args ) ) {
+			_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.1', __( 'Use $args argument as an array instead. Deprecated argument will be removed in WC 2.1.', 'woocommerce' ) );
+
+			$argsvalue = $args;
+
+			$args = array(
+				'posts_per_page' => $argsvalue,
+				'columns'        => $columns,
+				'orderby'        => $orderby,
+			);
+		}
 
 		$defaults = array(
 			'posts_per_page' => 2,
-			'columns' => 2,
-			'orderby' => 'rand'
+			'columns'        => 2,
+			'orderby'        => 'rand'
 		);
 
 		$args = wp_parse_args( $args, $defaults );
