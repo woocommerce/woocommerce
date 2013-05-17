@@ -176,7 +176,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - New System Status report layout, now plugin list is better visually and very better to read
 * Tweak - content-widget-product.php template for product lists inside core widgets
 * Fix - Changed MyException to Exception in Checkout class as MyException class does not exist in WooCommerce
-* Fix - Default cat widget styling on non-wc pages.
+* Fix - Default cart widget styling on non-wc pages.
 * Refactor - Taken out Piwik integration, use http://wordpress.org/extend/plugins/woocommerce-piwik-integration/ from now on
 * Refactor - Taken out ShareYourCart integration, use http://wordpress.org/extend/plugins/shareyourcart/ from now on
 * Refactor - Moved woocommerce_get_formatted_product_name function into WC_Product class
