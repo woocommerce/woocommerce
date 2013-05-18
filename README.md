@@ -78,8 +78,8 @@ In the search field type “WooCommerce” and click Search Plugins. Once you’
 
 The manual installation method involves downloading our eCommerce plugin and uploading it to your webserver via your favourite FTP application.
 
-1. Download the plugin file to your computer and unzip it
-2. Using an FTP program, or your hosting control panel, upload the unzipped plugin folder to your WordPress installation’s wp-content/plugins/ directory.
+1. [Download the plugin file](http://www.woothemes.com/woocommerce/) to your computer and unzip it.
+2. Using an [FTP program](https://filezilla-project.org/), or your hosting control panel, upload the unzipped plugin folder to your WordPress installation’s *wp-content/plugins/* directory.
 3. Activate the plugin from the Plugins menu within the WordPress admin.
 
 ## Upgrading 
@@ -143,7 +143,7 @@ If you get stuck and you're not a WooThemes customer, you can ask for help on th
 
 #### Will WooCommerce work with my theme?
 
-Yes; WooCommerce will work with any theme, but may require some styling to make it match nicely. Please see our [codex](http://docs.woothemes.com/documentation/plugins/woocommerce/woocommerce-codex/) for help.
+Yes! WooCommerce will work with any theme, but may require some styling to make it match nicely. Please see our [codex](http://docs.woothemes.com/documentation/plugins/woocommerce/woocommerce-codex/) for help.
 
 #### Where can I request new features, eCommerce themes and extensions?
 
