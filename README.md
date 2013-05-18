@@ -467,7 +467,7 @@ This is a major update - Test extensions and your theme prior to updating and en
 * Fix  - Variation attribute saving issue (cache related).
 * Fixed jQuery issues, now using WordPress core jQuery UI library
 * Tweak - Checkout JSON responses to avoid garbage code breaking requests.
-* 
+
 #### 1.6.5.2 - 12/09/2012 
 * Tweak - Extra validation for PayPal IPN.
 
