@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0-beta2\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-01-09 09:36:51+00:00\n"
-"PO-Revision-Date: 2013-05-20 19:18+0100\n"
+"PO-Revision-Date: 2013-05-20 19:51+0100\n"
 "Last-Translator: Björn Sennbrink <konsult@sennbrink.se>\n"
 "Language-Team: FS Data and Sennbrink Kommunikation <konsult@sennbrink.se>\n"
 "Language: sv_SE\n"
@@ -6032,7 +6032,7 @@ msgstr "WP Remote Post Check"
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:424
 msgid "wp_remote_post() was successful - PayPal IPN is working."
-msgstr "wp_remote_post() fungerarr korrekt - PayPal IPN fungerar."
+msgstr "wp_remote_post() fungerar korrekt - PayPal IPN fungerar."
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:427
