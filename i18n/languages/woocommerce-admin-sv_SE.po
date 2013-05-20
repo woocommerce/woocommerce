@@ -3,9 +3,9 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0-beta2\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-01-09 09:36:51+00:00\n"
-"PO-Revision-Date: 2013-03-02 17:42+0100\n"
-"Last-Translator: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
-"Language-Team: Humblebrag <mikael@humblebrag.nu>\n"
+"PO-Revision-Date: 2013-05-20 19:18+0100\n"
+"Last-Translator: Björn Sennbrink <konsult@sennbrink.se>\n"
+"Language-Team: FS Data and Sennbrink Kommunikation <konsult@sennbrink.se>\n"
 "Language: sv_SE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -2817,7 +2817,7 @@ msgstr "Tvinga SSL (HTTPS) vid utcheckning (ett SSL-certifikat krävs)"
 # @ woocommerce
 #: admin/settings/settings-init.php:139
 msgid "Un-force HTTPS when leaving the checkout"
-msgstr "Tvinga användaren att lämna HTTPS när utcheckningen lämnas"
+msgstr "Tvinga användaren att lämna HTTPS när kassan lämnas"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:148 admin/woocommerce-admin-content.php:75
@@ -2899,7 +2899,7 @@ msgstr "Utseende"
 # @ woocommerce
 #: admin/settings/settings-init.php:231
 msgid "Enable WooCommerce CSS styles"
-msgstr "Aktivera WooCommerce CSS stilar"
+msgstr "Aktivera WooCommerce CSS-stilar"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:242
@@ -4801,7 +4801,7 @@ msgstr "WooCommerce Inställningar"
 # @ woocommerce
 #: admin/woocommerce-admin-init.php:82
 msgid "WooCommerce Status"
-msgstr "WooCommerce - Status"
+msgstr "WooCommerce Status"
 
 # @ woocommerce
 #: admin/woocommerce-admin-init.php:135 admin/woocommerce-admin-init.php:137
@@ -6032,7 +6032,7 @@ msgstr "WP Remote Post Check"
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:424
 msgid "wp_remote_post() was successful - PayPal IPN is working."
-msgstr "wp_remote_post() fingerer korrekt - PayPal IPN fungerar."
+msgstr "wp_remote_post() fungerarr korrekt - PayPal IPN fungerar."
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:427
@@ -6104,10 +6104,10 @@ msgid ""
 "more categories listed click the \"screen options\" link at the top of the "
 "page."
 msgstr ""
-"Produktkategorier för din affär kan hanteras här. För att ändra ordning av "
-"visningen av kategorierna för kunden kan du dra och släppa för att sortera. "
-"För att se fler kategorier klicka på \"skärminställningar\" längst upp på "
-"sidan."
+"Produktkategorier för din webbutik kan hanteras här. För att ändra ordning "
+"av visningen av kategorierna för kunden kan du dra och släppa för att "
+"sortera. För att se fler kategorier klicka på \"skärminställningar\" längst "
+"upp på sidan."
 
 # @ woocommerce
 #: admin/woocommerce-admin-taxonomies.php:237
@@ -6116,8 +6116,8 @@ msgid ""
 "can then be used by certain shipping methods to provide different rates to "
 "different products."
 msgstr ""
-"Fraktklasser kan användas för att gruppera likartade produkter. Dessa "
-"grupper kan sen användas av olika fraktmetoder för att ge olika lösningar/"
+"Fraktklasser kan användas för att gruppera liknande produkter. Dessa grupper "
+"kan sen användas av olika fraktmetoder för att ge olika lösningar/"
 "prisförlsag för frakt."
 
 # @ woocommerce
