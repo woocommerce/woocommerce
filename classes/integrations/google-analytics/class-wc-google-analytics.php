@@ -214,7 +214,7 @@ class WC_Google_Analytics extends WC_Integration {
 				$_product = $order->get_product_from_item( $item );
 
 				$code .= "_gaq.push(['_addItem',";
-				$code .= "'" . esc_js( $order_id ) . "',";
+				$code .= "'" . esc_js( $order->get_order_number() ) . "',";
 				$code .= "'" . esc_js( $_product->get_sku() ? __( 'SKU:', 'woocommerce' ) . ' ' . $_product->get_sku() : $_product->id ) . "',";
 				$code .= "'" . esc_js( $item['name'] ) . "',";
 
