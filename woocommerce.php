@@ -1353,7 +1353,7 @@ class Woocommerce {
 	 * @return string
 	 */
 	public function plugin_url() {
-		if ( $this->plugin_url ) return $this->plugin_url;
+		if ( isset( $this->plugin_url ) ) return $this->plugin_url;
 		return $this->plugin_url = untrailingslashit( plugins_url( '/', __FILE__ ) );
 	}
 
@@ -1365,7 +1365,7 @@ class Woocommerce {
 	 * @return string
 	 */
 	public function plugin_path() {
-		if ( $this->plugin_path ) return $this->plugin_path;
+		if ( isset( $this->plugin_path ) ) return $this->plugin_path;
 
 		return $this->plugin_path = untrailingslashit( plugin_dir_path( __FILE__ ) );
 	}
