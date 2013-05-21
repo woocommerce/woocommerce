@@ -178,6 +178,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Shipping is now renamed to Shipping and Handling on checkout
 * Fix - Changed MyException to Exception in Checkout class as MyException class does not exist in WooCommerce
 * Fix - Default cart widget styling on non-wc pages.
+* Fix - Replaced jQuery placeholder plugin to provide support in older browsers
 * Refactor - Taken out Piwik integration, use http://wordpress.org/extend/plugins/woocommerce-piwik-integration/ from now on
 * Refactor - Taken out ShareYourCart integration, use http://wordpress.org/extend/plugins/shareyourcart/ from now on
 * Refactor - Moved woocommerce_get_formatted_product_name function into WC_Product class
