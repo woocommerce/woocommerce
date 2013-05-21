@@ -184,6 +184,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 2.0.11 - x =
 * Fix - Duplicate param keys for sale_product shortcodes
+* Fix - Google Analytics tracking use get_order_number() method instead of id
 
 = 2.0.10 - 15/05/2013 =
 * Tweak - Searching for SKU in admin panel can also be done via lowercase 'sku:' instead of just 'SKU:'
