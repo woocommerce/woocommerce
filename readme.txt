@@ -180,6 +180,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Refactor - Taken out Piwik integration, use http://wordpress.org/extend/plugins/woocommerce-piwik-integration/ from now on
 * Refactor - Taken out ShareYourCart integration, use http://wordpress.org/extend/plugins/shareyourcart/ from now on
 * Refactor - Moved woocommerce_get_formatted_product_name function into WC_Product class
+* Refactor - Improved parameter handling in woocommerce_related_products() function
 * Localization - Portugese locale by jpBenfica
 * Localization - Spanish, Romanian updates.
 
