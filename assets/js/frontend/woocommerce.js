@@ -1,5 +1,8 @@
 jQuery(document).ready(function($) {
 
+	// Placeholder
+	$('.woocommerce textarea[placeholder], .woocommerce-page textarea[placeholder], .woocommerce input[placeholder], .woocommerce-page input[placeholder]').simplePlaceholder();
+
 	// Orderby
 	$(document).on( 'change', 'select.orderby', function() {
 		$(this).closest('form').submit();
