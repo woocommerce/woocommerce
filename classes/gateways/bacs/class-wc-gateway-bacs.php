@@ -41,6 +41,16 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		$this->iban             = $this->get_option( 'iban' );
 		$this->bic              = $this->get_option( 'bic' );
 
+		// BACS account fields shown on the thanks page and in emails
+		$this->account_fields   = array(
+			'account_name' 	=> __( 'Account Name', 'woocommerce' ),
+			'account_number'=> __( 'Account Number', 'woocommerce' ),
+			'sort_code'		=> __( 'Sort Code', 'woocommerce' ),
+			'bank_name'		=> __( 'Bank Name', 'woocommerce' ),
+			'iban'			=> __( 'IBAN', 'woocommerce' ),
+			'bic'			=> __( 'BIC', 'woocommerce' )
+		);
+
 		// Actions
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
     	add_action( 'woocommerce_thankyou_bacs', array( $this, 'thankyou_page' ) );
@@ -151,7 +161,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
      * @access public
      * @return void
      */
-    function thankyou_page() {
+    function thankyou_page( $order_id ) {
 		if ( $description = $this->get_description() )
         	echo wpautop( wptexturize( wp_kses_post( $description ) ) );
 
@@ -159,14 +169,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 		echo '<ul class="order_details bacs_details">';
 
-		$fields = apply_filters('woocommerce_bacs_fields', array(
-			'account_name' 	=> __( 'Account Name', 'woocommerce' ),
-			'account_number'=> __( 'Account Number', 'woocommerce' ),
-			'sort_code'		=> __( 'Sort Code', 'woocommerce' ),
-			'bank_name'		=> __( 'Bank Name', 'woocommerce' ),
-			'iban'			=> __( 'IBAN', 'woocommerce' ),
-			'bic'			=> __( 'BIC', 'woocommerce' )
-		));
+		$fields = apply_filters( 'woocommerce_bacs_fields', $this->account_fields, $order_id );
 
 		foreach ( $fields as $key=>$value ) {
 		    if ( ! empty( $this->$key ) ) {
@@ -199,14 +202,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 		?><h2><?php _e( 'Our Details', 'woocommerce' ) ?></h2><ul class="order_details bacs_details"><?php
 
-		$fields = apply_filters('woocommerce_bacs_fields', array(
-			'account_name' 	=> __( 'Account Name', 'woocommerce' ),
-			'account_number'=> __( 'Account Number', 'woocommerce' ),
-			'sort_code'		=> __( 'Sort Code', 'woocommerce' ),
-			'bank_name'		=> __( 'Bank Name', 'woocommerce' ),
-			'iban'			=> __( 'IBAN', 'woocommerce' ),
-			'bic'			=> __( 'BIC', 'woocommerce' )
-		));
+		$fields = apply_filters( 'woocommerce_bacs_fields', $this->account_fields, $order->id );
 
 		foreach ($fields as $key=>$value) :
 		    if(!empty($this->$key)) :
