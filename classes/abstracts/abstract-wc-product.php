@@ -637,7 +637,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	function is_on_sale() {
-		return isset( $this->sale_price ) && $this->sale_price == $this->price ? true : false;
+		return ( $this->sale_price !== "" && $this->sale_price >= 0 ) ? true : false;
 	}
 
 
