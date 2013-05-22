@@ -1479,7 +1479,7 @@ function woocommerce_get_product_terms( $object_id, $taxonomy, $fields = 'all' )
 
 	$terms 			= array();
 	$object_terms 	= get_the_terms( $object_id, $taxonomy );
-	
+
 	if ( ! is_array( $object_terms ) )
     	return array();
 
@@ -1525,16 +1525,13 @@ function woocommerce_get_product_terms( $object_id, $taxonomy, $fields = 'all' )
 function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchical = 1, $show_uncategorized = 1, $orderby = '' ) {
 	global $wp_query, $woocommerce;
 
-	include_once( $woocommerce->plugin_path() . '/classes/walkers/class-product-cat-dropdown-walker.php' );
-
-	$r = array();
-	$r['pad_counts'] 	= 1;
-	$r['hierarchical'] 	= $hierarchical;
-	$r['hide_empty'] 	= 1;
-	$r['show_count'] 	= $show_counts;
-	$r['selected'] 		= ( isset( $wp_query->query['product_cat'] ) ) ? $wp_query->query['product_cat'] : '';
-
-	$r['menu_order'] = false;
+	$r                 = array();
+	$r['pad_counts']   = 1;
+	$r['hierarchical'] = $hierarchical;
+	$r['hide_empty']   = 1;
+	$r['show_count']   = $show_counts;
+	$r['selected']     = ( isset( $wp_query->query['product_cat'] ) ) ? $wp_query->query['product_cat'] : '';
+	$r['menu_order']   = false;
 
 	if ( $orderby == 'order' )
 		$r['menu_order'] = 'asc';
@@ -1543,7 +1540,8 @@ function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchica
 
 	$terms = get_terms( 'product_cat', $r );
 
-	if (!$terms) return;
+	if ( ! $terms )
+		return;
 
 	$output  = "<select name='product_cat' id='dropdown_product_cat'>";
 	$output .= '<option value="" ' .  selected( isset( $_GET['product_cat'] ) ? $_GET['product_cat'] : '', '', false ) . '>'.__( 'Select a category', 'woocommerce' ).'</option>';
@@ -1565,6 +1563,11 @@ function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchica
  * @return void
  */
 function woocommerce_walk_category_dropdown_tree() {
+	global $woocommerce;
+
+	if ( ! class_exists( 'WC_Product_Cat_Dropdown_Walker' ) )
+		include_once( $woocommerce->plugin_path() . '/classes/walkers/class-product-cat-dropdown-walker.php' );
+
 	$args = func_get_args();
 
 	// the user's options are the third parameter
