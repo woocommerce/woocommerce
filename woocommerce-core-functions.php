@@ -1541,7 +1541,7 @@ function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchica
 	elseif ( $orderby )
 		$r['orderby'] = $orderby;
 
-	$terms = get_terms( 'product_cat', $r );
+	$terms = get_terms( 'product_cat', apply_filters( 'woocommerce_product_category_dropdown_term_args', $r ) );
 
 	if (!$terms) return;
 
