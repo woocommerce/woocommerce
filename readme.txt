@@ -176,6 +176,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - New System Status report layout, now plugin list is better visually and very better to read
 * Tweak - content-widget-product.php template for product lists inside core widgets
 * Tweak - Shipping is now renamed to Shipping and Handling on checkout
+* Tweak - Select all/none for countries in admin
+* Tweak - Handle pending status for paypal
 * Fix - Changed MyException to Exception in Checkout class as MyException class does not exist in WooCommerce
 * Fix - Default cart widget styling on non-wc pages.
 * Fix - Rounding for mijireh tax ex. price.
