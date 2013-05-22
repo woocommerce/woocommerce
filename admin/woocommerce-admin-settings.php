@@ -466,6 +466,19 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 					jQuery("select.chosen_select_nostd").chosen({
 						allow_single_deselect: 'true'
 					});
+
+					// Select all/none
+					jQuery('.select_all').live('click', function() {
+						jQuery(this).closest( 'td' ).find( 'select option' ).attr( "selected", "selected" );
+						jQuery(this).closest( 'td' ).find('select').trigger( 'liszt:updated' );
+						return false;
+					});
+
+					jQuery('.select_none').live('click', function() {
+						jQuery(this).closest( 'td' ).find( 'select option' ).removeAttr( "selected" );
+						jQuery(this).closest( 'td' ).find('select').trigger( 'liszt:updated' );
+						return false;
+					});
 				});
 			</script>
 		</div>
@@ -866,13 +879,13 @@ function woocommerce_admin_fields( $options ) {
 						<?php echo $tip; ?>
 					</th>
                     <td class="forminp">
-	                    <select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:450px;" data-placeholder="<?php _e( 'Choose countries&hellip;', 'woocommerce' ); ?>" title="Country" class="chosen_select">
+	                    <select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px" data-placeholder="<?php _e( 'Choose countries&hellip;', 'woocommerce' ); ?>" title="Country" class="chosen_select">
 				        	<?php
 				        		if ( $countries )
 				        			foreach ( $countries as $key => $val )
 	                    				echo '<option value="'.$key.'" ' . selected( in_array( $key, $selections ), true, false ).'>' . $val . '</option>';
 	                    	?>
-				        </select> <?php echo $description; ?>
+				        </select> <?php echo $description; ?> <br/><a class="select_all button" href="#"><?php _e( 'Select all', 'woocommerce' ); ?></a> <a class="select_none button" href="#"><?php _e( 'Select none', 'woocommerce' ); ?></a>
                		</td>
                	</tr><?php
             break;
