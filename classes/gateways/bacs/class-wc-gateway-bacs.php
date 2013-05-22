@@ -178,6 +178,8 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		}
 
 		echo '</ul>';
+
+		add_action( 'woocommerce_after_bacs_details', $order->id );
     }
 
 
@@ -198,9 +200,10 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
     	if ( $order->payment_method !== 'bacs') return;
 
 		if ( $description = $this->get_description() )
-        	echo wpautop( wptexturize( $description ) );
+        	echo wpautop( wptexturize( $description ) ); ?>
 
-		?><h2><?php _e( 'Our Details', 'woocommerce' ) ?></h2><ul class="order_details bacs_details"><?php
+		<h2><?php _e( 'Our Details', 'woocommerce' ) ?></h2>
+		<ul class="order_details bacs_details"><?php
 
 		$fields = apply_filters( 'woocommerce_bacs_fields', $this->account_fields, $order->id );
 
@@ -211,6 +214,8 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		endforeach;
 
 		?></ul><?php
+
+		add_action( 'woocommerce_after_bacs_details', $order->id );
     }
 
 
