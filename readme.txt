@@ -183,6 +183,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - Spanish, Romanian updates.
 
 = 2.0.11 - x =
+* Tweak - Handling for multiselect fields on checkout, and a filter for third party handling
 * Fix - Duplicate param keys for sale_product shortcodes
 * Fix - Google Analytics tracking use get_order_number() method instead of id
 * Fix - Replaced jQuery placeholder plugin to provide support in older browsers
