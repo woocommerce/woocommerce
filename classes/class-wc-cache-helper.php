@@ -37,16 +37,23 @@ class WC_Cache_Helper {
 				return;
 
 			$wc_page_uris   = array();
+
+			// Exclude querystring when using page ID
+			$wc_page_uris[] = 'p=' . woocommerce_get_page_id( 'cart' );
+	    	$wc_page_uris[] = 'p=' . woocommerce_get_page_id( 'checkout' );
+	    	$wc_page_uris[] = 'p=' . woocommerce_get_page_id( 'myaccount' );
+
+	    	// Exclude permalinks
 			$cart_page      = get_post( woocommerce_get_page_id( 'cart' ) );
 			$checkout_page  = get_post( woocommerce_get_page_id( 'checkout' ) );
 			$account_page   = get_post( woocommerce_get_page_id( 'myaccount' ) );
 
-			$wc_page_uris[] = '/' . $cart_page->post_name;
-	    	$wc_page_uris[] = '/' . $checkout_page->post_name;
-	    	$wc_page_uris[] = '/' . $account_page->post_name;
-	    	$wc_page_uris[] = 'p=' . $cart_page->ID;
-	    	$wc_page_uris[] = 'p=' . $checkout_page->ID;
-	    	$wc_page_uris[] = 'p=' . $account_page->ID;
+			if ( ! is_null( $cart_page ) )
+				$wc_page_uris[] = '/' . $cart_page->post_name;
+	    	if ( ! is_null( $checkout_page ) )
+	    		$wc_page_uris[] = '/' . $checkout_page->post_name;
+	    	if ( ! is_null( $account_page ) )
+	    		$wc_page_uris[] = '/' . $account_page->post_name;
 
 	    	set_transient( 'woocommerce_cache_excluded_uris', $wc_page_uris );
 		}
