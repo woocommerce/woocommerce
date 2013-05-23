@@ -178,6 +178,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Shipping is now renamed to Shipping and Handling on checkout
 * Tweak - Select all/none for countries in admin
 * Tweak - Handle pending status for paypal
+* Tweak - Handling for multiselect fields on checkout, and a filter for third party handling.
 * Tweak - Made scripts/styles use protocol-relative URLs
 * Fix - Changed MyException to Exception in Checkout class as MyException class does not exist in WooCommerce
 * Fix - Default cart widget styling on non-wc pages.
