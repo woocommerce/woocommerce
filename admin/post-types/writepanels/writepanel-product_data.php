@@ -545,7 +545,8 @@ function woocommerce_product_data_box() {
 
 							$product = get_product( $product_id );
 
-							echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $product->get_formatted_name() ) . '</option>';
+							if ( $product )
+								echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $product->get_formatted_name() ) . '</option>';
 						}
 					}
 				?>
