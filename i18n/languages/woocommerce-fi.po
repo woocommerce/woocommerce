@@ -1,11 +1,21 @@
+#
+# Translators:
+# Arhi Paivarinta <info@swratkaisut.com> 2012-2013
+# Antti Tuppurainen <>, 2012
+# Eccola <esa@eccola.fi>, 2012-2013
+# Ilari Mäkelä <ilari@i28.fi>, 2011, 2012
+# netura <joona@netura.fi>, 2012
+# jupstejuho <jupstejuho@motiel.net>, 2012
+# NikoV <niko@innovitale.com>, 2013
+# Sami Hyytiä <>, 2011-2012
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.0.7 Front-end\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2013-04-16 19:34:41+00:00\n"
-"PO-Revision-Date: 2013-04-17 15:35+0200\n"
-"Last-Translator: Arhi Paivarinta <info@swratkaisut.com>\n"
-"Language-Team: Arhi Paivarinta <info@swratkaisut.com>\n"
+"POT-Creation-Date: 2013-04-29 16:02:06+00:00\n"
+"PO-Revision-Date: 2013-05-22 23:05+0200\n"
+"Last-Translator: Otto Kekäläinen <otto@seravo.fi>\n"
+"Language-Team: Finnish (http://www.transifex.com/projects/p/woocommerce/language/fi/)\n"
 "Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -98,14 +108,16 @@ msgid "Change Password"
 msgstr "Vaihda salasana"
 
 # @ woocommerce
-#: assets/js/admin/editor_plugin_lang.php:21 woocommerce.php:1065
+#: assets/js/admin/editor_plugin_lang.php:21
+#: woocommerce.php:1065
 #: woocommerce.php:1066
 msgid "View Order"
 msgstr "Tarkastele tilausta"
 
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:22
-#: templates/checkout/thankyou.php:28 templates/myaccount/my-orders.php:71
+#: templates/checkout/thankyou.php:28
+#: templates/myaccount/my-orders.php:71
 msgid "Pay"
 msgstr "Maksa"
 
@@ -222,7 +234,8 @@ msgstr "Pohja (malline) tiedosto poistettu teeman hakemistosta."
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:560
 #: classes/abstracts/abstract-wc-integration.php:30
-#: classes/abstracts/abstract-wc-settings-api.php:39 woocommerce.php:170
+#: classes/abstracts/abstract-wc-settings-api.php:39
+#: woocommerce.php:170
 msgid "Settings"
 msgstr "Asetukset"
 
@@ -243,11 +256,8 @@ msgstr "Poista pohja (malline) tiedosto"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:595
-msgid ""
-"This template has been overridden by your theme and can be found in: <code>"
-"%s</code>."
-msgstr ""
-"Teema käyttää korvaavaa pohjaa (mallinetta). Se on täällä: <code>%s</code>."
+msgid "This template has been overridden by your theme and can be found in: <code>%s</code>."
+msgstr "Teema käyttää korvaavaa pohjaa (mallinetta). Se on täällä: <code>%s</code>."
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:610
@@ -256,12 +266,8 @@ msgstr "Kopioi tiedostio teeman hakemistoon"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:613
-msgid ""
-"To override and edit this email template copy <code>%s</code> to your theme "
-"folder: <code>%s</code>."
-msgstr ""
-"Tämä pohja ohitetaan, kun <code>%s</code> kopioidaan teeman hakemistoon: "
-"<code>%s</code>. Malline on muokattavissa siellä."
+msgid "To override and edit this email template copy <code>%s</code> to your theme folder: <code>%s</code>."
+msgstr "Tämä pohja ohitetaan, kun <code>%s</code> kopioidaan teeman hakemistoon: <code>%s</code>. Malline on muokattavissa siellä."
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:624
@@ -284,14 +290,8 @@ msgid "Are you sure you want to delete this template file?"
 msgstr "Oletko varma, että haluat poistaa tämän pohjan?"
 
 #: classes/abstracts/abstract-wc-product.php:33
-msgid ""
-"The <code>WC_Product</code> class is now abstract. Use <code>get_product()</"
-"code> to instantiate an instance of a product instead of calling this class "
-"directly."
-msgstr ""
-"Koodi <code>WC_Product</code> luokka on nyt abstrakti. Käytä "
-"<code>get_product()</code> koodia kun haluat kutsua tuotetta (instantiate an "
-"instance of a product). Älä kutsu tätä luokkaa suoraan."
+msgid "The <code>WC_Product</code> class is now abstract. Use <code>get_product()</code> to instantiate an instance of a product instead of calling this class directly."
+msgstr "Koodi <code>WC_Product</code> luokka on nyt abstrakti. Käytä <code>get_product()</code> koodia kun haluat kutsua tuotetta (instantiate an instance of a product). Älä kutsu tätä luokkaa suoraan."
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-product.php:545
@@ -317,7 +317,8 @@ msgstr "(jälkitoimitus sallitaan)"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-product.php:566
-#: classes/abstracts/abstract-wc-product.php:579 templates/cart/cart.php:76
+#: classes/abstracts/abstract-wc-product.php:579
+#: templates/cart/cart.php:76
 msgid "Available on backorder"
 msgstr "Ei varastossa, vain jälkitoimituksena"
 
@@ -331,7 +332,8 @@ msgstr "Varasto loppu"
 # @ woocommerce
 #: classes/abstracts/abstract-wc-product.php:846
 #: classes/abstracts/abstract-wc-product.php:852
-#: classes/class-wc-cart.php:1799 classes/class-wc-order.php:891
+#: classes/class-wc-cart.php:1801
+#: classes/class-wc-order.php:891
 #: classes/class-wc-product-variable.php:274
 #: classes/class-wc-product-variable.php:283
 #: classes/class-wc-product-variation.php:246
@@ -358,104 +360,68 @@ msgid "out of 5"
 msgstr "/ 5"
 
 #: classes/class-wc-cache-helper.php:92
-msgid ""
-"In order for <strong>database caching</strong> to work with WooCommerce you "
-"must add <code>_wc_session_</code> to the \"Ignored Query Strings\" option "
-"in W3 Total Cache settings <a href=\"%s\">here</a>."
-msgstr ""
-"Jotta  W3 Total Cache lisäosan <strong>tietokanta välimuisti / database "
-"caching</strong> toimisi WooCommercen kanssa, on <code>_wc_session_</"
-"code>lisättävä \"Ignored Query Strings\" kohtaan lisäosan asetuksissa <a "
-"href=\"%s\">täällä</a>."
+msgid "In order for <strong>database caching</strong> to work with WooCommerce you must add <code>_wc_session_</code> to the \"Ignored Query Strings\" option in W3 Total Cache settings <a href=\"%s\">here</a>."
+msgstr "Jotta  W3 Total Cache lisäosan <strong>tietokanta välimuisti / database caching</strong> toimisi WooCommercen kanssa, on <code>_wc_session_</code>lisättävä \"Ignored Query Strings\" kohtaan lisäosan asetuksissa <a href=\"%s\">täällä</a>."
 
 # @ woocommerce
 #: classes/class-wc-cart.php:460
-msgid ""
-"Sorry, we do not have enough \"%s\" in stock to fulfill your order (%s in "
-"stock). Please edit your cart and try again. We apologise for any "
-"inconvenience caused."
-msgstr ""
-"Varastossa ei ole tarpeeksi '%s' tuotetta. Voimme korkeintaan toimittaa "
-"varastossa olevat %s kpl. Ole hyvä ja muokkaa tilausta ja yritä uudelleen. "
-"Pahoittelemme aiheutunutta haittaa."
+msgid "Sorry, we do not have enough \"%s\" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused."
+msgstr "Varastossa ei ole tarpeeksi '%s' tuotetta. Voimme korkeintaan toimittaa varastossa olevat %s kpl. Ole hyvä ja muokkaa tilausta ja yritä uudelleen. Pahoittelemme aiheutunutta haittaa."
 
 # @ woocommerce
-#: classes/class-wc-cart.php:479 classes/class-wc-cart.php:488
-msgid ""
-"Sorry, we do not have enough \"%s\" in stock to fulfil your order (%s in "
-"stock). Please edit your cart and try again. We apologise for any "
-"inconvenience caused."
-msgstr ""
-"Varastossa ei ole tarpeeksi '%s' tuotetta. Voimme korkeintaan toimittaa "
-"varastossa olevat %s kpl.  Ole hyvä ja muokkaa tilausta ja yritä uudelleen. "
-"Pahoittelemme aiheutunutta haittaa."
+#: classes/class-wc-cart.php:479
+#: classes/class-wc-cart.php:488
+msgid "Sorry, we do not have enough \"%s\" in stock to fulfil your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused."
+msgstr "Varastossa ei ole tarpeeksi '%s' tuotetta. Voimme korkeintaan toimittaa varastossa olevat %s kpl.  Ole hyvä ja muokkaa tilausta ja yritä uudelleen. Pahoittelemme aiheutunutta haittaa."
 
 # @ woocommerce
 #: classes/class-wc-cart.php:523
-msgid ""
-"Sorry, we do not have enough \"%s\" in stock to fulfil your order right now. "
-"Please try again in %d minutes or edit your cart and try again. We apologise "
-"for any inconvenience caused."
-msgstr ""
-"Varastossa ei ole tarpeeksi '%s' tuotetta joten emme voi nyt täyttää "
-"tilausta.  Ole hyvä ja yritä uudelleen %d minuutin kuluttua tai muokkaa "
-"tilausta ja yritä uudelleen. Pahoittelemme aiheutunutta haittaa."
+msgid "Sorry, we do not have enough \"%s\" in stock to fulfil your order right now. Please try again in %d minutes or edit your cart and try again. We apologise for any inconvenience caused."
+msgstr "Varastossa ei ole tarpeeksi '%s' tuotetta joten emme voi nyt täyttää tilausta.  Ole hyvä ja yritä uudelleen %d minuutin kuluttua tai muokkaa tilausta ja yritä uudelleen. Pahoittelemme aiheutunutta haittaa."
 
 # @ woocommerce
 #: classes/class-wc-cart.php:533
-msgid ""
-"Sorry, \"%s\" is not in stock. Please edit your cart and try again. We "
-"apologise for any inconvenience caused."
-msgstr ""
-"'%s' ei ole varastossa. Muokkaa tilausta ja yritä uudelleen, ole hyvä. "
-"Pahoittelemme aiheutunutta haittaa."
+msgid "Sorry, \"%s\" is not in stock. Please edit your cart and try again. We apologise for any inconvenience caused."
+msgstr "'%s' ei ole varastossa. Muokkaa tilausta ja yritä uudelleen, ole hyvä. Pahoittelemme aiheutunutta haittaa."
 
 # @ woocommerce
-#: classes/class-wc-cart.php:843
+#: classes/class-wc-cart.php:845
 msgid "Sorry, &quot;%s&quot; cannot be purchased."
 msgstr "Pahoittelemme, &quot;%s&quot; tuotetta ei ole mahdollista ostaa."
 
 # @ woocommerce
-#: classes/class-wc-cart.php:850
-msgid ""
-"You cannot add &quot;%s&quot; to the cart because the product is out of "
-"stock."
-msgstr ""
-"&quot;%s&quot; ei voi lisätä ostoskoriin, koska tuote on loppunut varastosta."
+#: classes/class-wc-cart.php:852
+msgid "You cannot add &quot;%s&quot; to the cart because the product is out of stock."
+msgstr "&quot;%s&quot; ei voi lisätä ostoskoriin, koska tuote on loppunut varastosta."
 
 # @ woocommerce
-#: classes/class-wc-cart.php:855
-msgid ""
-"You cannot add that amount of &quot;%s&quot; to the cart because there is "
-"not enough stock (%s remaining)."
-msgstr ""
-"Lisää ostoskoriin vähemmän &quot;%s&quot; tuotetta, koska sitä on varastossa "
-"vain %s kappaletta."
+#: classes/class-wc-cart.php:857
+msgid "You cannot add that amount of &quot;%s&quot; to the cart because there is not enough stock (%s remaining)."
+msgstr "Lisää ostoskoriin vähemmän &quot;%s&quot; tuotetta, koska sitä on varastossa vain %s kappaletta."
 
 # @ woocommerce
-#: classes/class-wc-cart.php:867 classes/class-wc-cart.php:881
-#: classes/class-wc-cart.php:889 templates/cart/mini-cart.php:68
-#: woocommerce-functions.php:497 woocommerce.php:1210
+#: classes/class-wc-cart.php:869
+#: classes/class-wc-cart.php:883
+#: classes/class-wc-cart.php:891
+#: templates/cart/mini-cart.php:68
+#: woocommerce-functions.php:497
+#: woocommerce.php:1210
 msgid "View Cart &rarr;"
 msgstr "Katso ostoskori &rarr;"
 
 # @ woocommerce
-#: classes/class-wc-cart.php:867
+#: classes/class-wc-cart.php:869
 msgid "You already have this item in your cart."
 msgstr "Tuote on jo ostoskorissa."
 
 # @ woocommerce
-#: classes/class-wc-cart.php:881 classes/class-wc-cart.php:889
-msgid ""
-"<a href=\"%s\" class=\"button\">%s</a> You cannot add that amount to the "
-"cart &mdash; we have %s in stock and you already have %s in your cart."
-msgstr ""
-"<a href=\"%s\" class=\"button\">%s</a> Lisää ostoskoriin vähemmän tuotetta, "
-"koska sitä on varastossa vain %s kappaletta ja olet jo lisännyt ostoskoriin "
-"%s kpl."
+#: classes/class-wc-cart.php:883
+#: classes/class-wc-cart.php:891
+msgid "<a href=\"%s\" class=\"button\">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart."
+msgstr "<a href=\"%s\" class=\"button\">%s</a> Lisää ostoskoriin vähemmän tuotetta, koska sitä on varastossa vain %s kappaletta ja olet jo lisännyt ostoskoriin %s kpl."
 
 # @ woocommerce
-#: classes/class-wc-cart.php:1811
+#: classes/class-wc-cart.php:1813
 msgid "via"
 msgstr "kuljetustapa"
 
@@ -521,12 +487,12 @@ msgstr "Jälkitoimitus"
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:388
-msgid ""
-"Sorry, your session has expired. <a href=\"%s\">Return to homepage &rarr;</a>"
+msgid "Sorry, your session has expired. <a href=\"%s\">Return to homepage &rarr;</a>"
 msgstr "Istunto on umpeutunut. <a href=\"%s\">Palaa etusivulle &rarr;</a>"
 
 # @ woocommerce
-#: classes/class-wc-checkout.php:440 woocommerce-functions.php:1697
+#: classes/class-wc-checkout.php:440
+#: woocommerce-functions.php:1696
 msgid "is a required field."
 msgstr "on vaadittu tieto."
 
@@ -562,8 +528,7 @@ msgstr "Sähköposti tai salasana ei kelpaa."
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:552
-msgid ""
-"An account is already registered with that username. Please choose another."
+msgid "An account is already registered with that username. Please choose another."
 msgstr "Käyttäjätunnus on varattu. Ole hyvä, valitse toinen."
 
 # @ woocommerce
@@ -574,16 +539,15 @@ msgstr "Anna salasana"
 # @ woocommerce
 #: classes/class-wc-checkout.php:565
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:83
-#: woocommerce-functions.php:758 woocommerce-functions.php:1627
+#: woocommerce-functions.php:758
+#: woocommerce-functions.php:1626
 msgid "Passwords do not match."
 msgstr "Salasanat poikkeavat toisistaan."
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:569
 msgid "An account is already registered with your email address. Please login."
-msgstr ""
-"Samalle sähköpostiosoitteelle on jo rekisteröity tili. Ole hyvä, kirjaudu "
-"sisään."
+msgstr "Samalle sähköpostiosoitteelle on jo rekisteröity tili. Ole hyvä, kirjaudu sisään."
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:575
@@ -601,21 +565,22 @@ msgid "Invalid payment method."
 msgstr "Maksutapa ei kelpaa."
 
 # @ woocommerce
-#: classes/class-wc-checkout.php:637 woocommerce-functions.php:730
-#: woocommerce-functions.php:732 woocommerce-functions.php:735
-#: woocommerce-functions.php:747 woocommerce-functions.php:749
-#: woocommerce-functions.php:752 woocommerce-functions.php:786
+#: classes/class-wc-checkout.php:637
+#: woocommerce-functions.php:730
+#: woocommerce-functions.php:732
+#: woocommerce-functions.php:735
+#: woocommerce-functions.php:747
+#: woocommerce-functions.php:749
+#: woocommerce-functions.php:752
+#: woocommerce-functions.php:786
 msgid "ERROR"
 msgstr "VIRHE"
 
 # @ woocommerce
-#: classes/class-wc-checkout.php:637 woocommerce-functions.php:786
-msgid ""
-"Couldn&#8217;t register you&hellip; please contact us if you continue to "
-"have problems."
-msgstr ""
-"Rekisteröinti epäonnistui... - Ota yhteyttä, jos tilanne toistuu etkä pääse "
-"sen ohi."
+#: classes/class-wc-checkout.php:637
+#: woocommerce-functions.php:786
+msgid "Couldn&#8217;t register you&hellip; please contact us if you continue to have problems."
+msgstr "Rekisteröinti epäonnistui... - Ota yhteyttä, jos tilanne toistuu etkä pääse sen ohi."
 
 # @ woocommerce
 #: classes/class-wc-countries.php:37
@@ -1023,7 +988,8 @@ msgid "Gambia"
 msgstr "Gambia"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:118 i18n/states/US.php:23
+#: classes/class-wc-countries.php:118
+#: i18n/states/US.php:23
 msgid "Georgia"
 msgstr "Georgia"
 
@@ -1913,82 +1879,90 @@ msgctxt "placeholder"
 msgid "Street address"
 msgstr "Katuosoite"
 
-#: classes/class-wc-countries.php:704
+#: classes/class-wc-countries.php:707
 msgctxt "placeholder"
 msgid "Apartment, suite, unit etc. (optional)"
 msgstr "Huoneisto, PL tms. (valinnainen)"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:709 classes/class-wc-countries.php:710
+#: classes/class-wc-countries.php:715
+#: classes/class-wc-countries.php:716
 msgid "Town / City"
 msgstr "Kaupunki"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:716 classes/class-wc-countries.php:717
+#: classes/class-wc-countries.php:725
+#: classes/class-wc-countries.php:726
 msgid "State / County"
 msgstr "Lääni / alue ym."
 
 # @ woocommerce
-#: classes/class-wc-countries.php:722 classes/class-wc-countries.php:723
+#: classes/class-wc-countries.php:734
+#: classes/class-wc-countries.php:735
 #: templates/cart/shipping-calculator.php:80
 msgid "Postcode / Zip"
 msgstr "Postinumero"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:759 classes/class-wc-countries.php:769
-#: classes/class-wc-countries.php:789 classes/class-wc-countries.php:844
-#: classes/class-wc-countries.php:868 classes/class-wc-countries.php:918
-#: classes/class-wc-countries.php:942 classes/class-wc-countries.php:983
+#: classes/class-wc-countries.php:774
+#: classes/class-wc-countries.php:784
+#: classes/class-wc-countries.php:804
+#: classes/class-wc-countries.php:859
+#: classes/class-wc-countries.php:883
+#: classes/class-wc-countries.php:933
+#: classes/class-wc-countries.php:957
+#: classes/class-wc-countries.php:998
 msgid "Province"
 msgstr "Provinssi"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:775
+#: classes/class-wc-countries.php:790
 msgid "Canton"
 msgstr "Canton"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:784 classes/class-wc-countries.php:924
+#: classes/class-wc-countries.php:799
+#: classes/class-wc-countries.php:939
 msgid "Municipality"
 msgstr "Kunta"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:831
+#: classes/class-wc-countries.php:846
 msgid "Town / District"
 msgstr "Kaupunki / alue"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:834
+#: classes/class-wc-countries.php:849
 msgid "Region"
 msgstr "Alue"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:947
+#: classes/class-wc-countries.php:962
 msgid "Zip"
 msgstr "Postinumero"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:950
+#: classes/class-wc-countries.php:965
 msgid "State"
 msgstr "Osavaltio"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:955
+#: classes/class-wc-countries.php:970
 msgid "Postcode"
 msgstr "Postinumero"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:958
+#: classes/class-wc-countries.php:973
 msgid "County"
 msgstr "Kunta"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:1059
+#: classes/class-wc-countries.php:1074
 msgid "Email Address"
 msgstr "Sähköpostiosoite"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:1065
+#: classes/class-wc-countries.php:1080
 msgid "Phone"
 msgstr "Puhelin"
 
@@ -2003,26 +1977,20 @@ msgid "Coupon is not valid."
 msgstr "Kuponki ei ole kelvollinen."
 
 # @ woocommerce
-#: classes/class-wc-coupon.php:445 classes/class-wc-coupon.php:495
+#: classes/class-wc-coupon.php:445
+#: classes/class-wc-coupon.php:495
 msgid "Coupon does not exist!"
 msgstr "Kuponkia ei ole olemassa!"
 
 # @ woocommerce
 #: classes/class-wc-coupon.php:448
-msgid ""
-"Sorry, it seems the coupon \"%s\" is invalid - it has now been removed from "
-"your order."
-msgstr ""
-"Pahoittelemme, kuponki '%s' ei kelpaa - se on nyt irrotettu tilauksesta."
+msgid "Sorry, it seems the coupon \"%s\" is invalid - it has now been removed from your order."
+msgstr "Pahoittelemme, kuponki '%s' ei kelpaa - se on nyt irrotettu tilauksesta."
 
 # @ woocommerce
 #: classes/class-wc-coupon.php:451
-msgid ""
-"Sorry, it seems the coupon \"%s\" is not yours - it has now been removed "
-"from your order."
-msgstr ""
-"Pahoittelemme, kuponki '%s' ei liity tiliisi - se on nyt irrotettu "
-"tilauksesta."
+msgid "Sorry, it seems the coupon \"%s\" is not yours - it has now been removed from your order."
+msgstr "Pahoittelemme, kuponki '%s' ei liity tiliisi - se on nyt irrotettu tilauksesta."
 
 # @ woocommerce
 #: classes/class-wc-coupon.php:454
@@ -2030,12 +1998,8 @@ msgid "Coupon code already applied!"
 msgstr "Alennuskoodi on jo käytetty!"
 
 #: classes/class-wc-coupon.php:457
-msgid ""
-"Sorry, coupon \"%s\" has already been applied and cannot be used in "
-"conjunction with other coupons."
-msgstr ""
-"Pahoittelemme, \"%s\" kuponki on jo asetettu ja sitä ei voi käyttää muun "
-"kupongin kanssa."
+msgid "Sorry, coupon \"%s\" has already been applied and cannot be used in conjunction with other coupons."
+msgstr "Pahoittelemme, \"%s\" kuponki on jo asetettu ja sitä ei voi käyttää muun kupongin kanssa."
 
 # @ woocommerce
 #: classes/class-wc-coupon.php:460
@@ -2055,8 +2019,7 @@ msgstr "Kupongin (hyväksymisen) minimiostos on %s."
 # @ woocommerce
 #: classes/class-wc-coupon.php:469
 msgid "Sorry, this coupon is not applicable to your cart contents."
-msgstr ""
-"Pahoittelemme, kuponkia ei voi käyttää ostoskorissa oleville tuotteille."
+msgstr "Pahoittelemme, kuponkia ei voi käyttää ostoskorissa oleville tuotteille."
 
 # @ woocommerce
 #: classes/class-wc-coupon.php:472
@@ -2069,7 +2032,8 @@ msgid "Please enter a coupon code."
 msgstr "Kirjoita kupongin koodi, ole hyvä"
 
 # @ woocommerce
-#: classes/class-wc-customer.php:628 classes/class-wc-customer.php:638
+#: classes/class-wc-customer.php:628
+#: classes/class-wc-customer.php:638
 msgid "File %d"
 msgstr "Tiedosto %d"
 
@@ -2084,13 +2048,15 @@ msgid "Product low in stock"
 msgstr "Tuotetta on vain vähän varastossa."
 
 # @ woocommerce
-#: classes/class-wc-emails.php:286 classes/class-wc-emails.php:318
+#: classes/class-wc-emails.php:286
+#: classes/class-wc-emails.php:318
 #: classes/class-wc-emails.php:362
 msgid "Variation #%s of %s"
 msgstr "Muunnelma nro.%s / %s"
 
 # @ woocommerce
-#: classes/class-wc-emails.php:288 classes/class-wc-emails.php:320
+#: classes/class-wc-emails.php:288
+#: classes/class-wc-emails.php:320
 #: classes/class-wc-emails.php:364
 msgid "Product #%s - %s"
 msgstr "Tuote nro. %s - %s"
@@ -2157,13 +2123,15 @@ msgid "Order Total:"
 msgstr "Tilaus yhteensä:"
 
 # @ woocommerce
-#: classes/class-wc-order.php:1017 templates/cart/totals.php:105
+#: classes/class-wc-order.php:1017
+#: templates/cart/totals.php:105
 #: templates/checkout/review-order.php:104
 msgid "(Includes %s)"
 msgstr "(Sisältää %s)"
 
 # @ woocommerce
-#: classes/class-wc-order.php:1168 classes/class-wc-order.php:1170
+#: classes/class-wc-order.php:1168
+#: classes/class-wc-order.php:1170
 #: classes/class-wc-order.php:1173
 msgid "WooCommerce"
 msgstr "WooCommerce"
@@ -2174,7 +2142,8 @@ msgid "Order status changed from %s to %s."
 msgstr "Tilaus vaihtui %s -tilasta %s -tilaan."
 
 # @ woocommerce
-#: classes/class-wc-order.php:1452 woocommerce-ajax.php:1089
+#: classes/class-wc-order.php:1452
+#: woocommerce-ajax.php:1089
 #: woocommerce-ajax.php:1090
 msgid "Item #%s stock reduced from %s to %s."
 msgstr "Tuotteen #%s varastoa vähennetty määrästä %s määrään %s."
@@ -2190,7 +2159,7 @@ msgid "Buy product"
 msgstr "Osta tuote"
 
 # @ woocommerce
-#: classes/class-wc-shortcodes.php:573
+#: classes/class-wc-shortcodes.php:571
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:274
 #: templates/loop/add-to-cart.php:46
 #: templates/single-product/add-to-cart/grouped.php:45
@@ -2207,13 +2176,8 @@ msgstr "Tilaus valmis"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:25
-msgid ""
-"Order complete emails are sent to the customer when the order is marked "
-"complete and usual indicates that the order has been shipped."
-msgstr ""
-"Kun tuote on merkitty 'valmis', niin sähköposti on lähetetty asiakkaalle. "
-"Yleensä se tarkoittaa myös, että tuote on toimitettu (tai luovutettu "
-"kuljetukseen)."
+msgid "Order complete emails are sent to the customer when the order is marked complete and usual indicates that the order has been shipped."
+msgstr "Kun tuote on merkitty 'valmis', niin sähköposti on lähetetty asiakkaalle. Yleensä se tarkoittaa myös, että tuote on toimitettu (tai luovutettu kuljetukseen)."
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:27
@@ -2232,11 +2196,8 @@ msgstr "Tilaus on valmis - tiedostot voi ladata"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:38
-msgid ""
-"Your {blogname} order from {order_date} is complete - download your files"
-msgstr ""
-"Tilaus {blogname} verkkokaupassa, tehty pvm. {order_date} on valmis - "
-"tiedostot voi ladata"
+msgid "Your {blogname} order from {order_date} is complete - download your files"
+msgstr "Tilaus {blogname} verkkokaupassa, tehty pvm. {order_date} on valmis - tiedostot voi ladata"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:141
@@ -2267,12 +2228,8 @@ msgstr "Lasku asiakkaalle"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-invoice.php:28
-msgid ""
-"Customer invoice emails can be sent to the user containing order info and "
-"payment links."
-msgstr ""
-"Asiakkaalle voidaan lähettää sähköpostilla lasku jossa on tilauksen tiedot "
-"ja linkki tilauksen maksamiseen. "
+msgid "Customer invoice emails can be sent to the user containing order info and payment links."
+msgstr "Asiakkaalle voidaan lähettää sähköpostilla lasku jossa on tilauksen tiedot ja linkki tilauksen maksamiseen. "
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-invoice.php:33
@@ -2311,12 +2268,8 @@ msgstr "Uusi tili"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-new-account.php:32
-msgid ""
-"Customer new account emails are sent when a customer signs up via the "
-"checkout or My Account page."
-msgstr ""
-"Asiakkaalle lähetetään 'uusi tili' sähköpostiviesti kun hän rekisteröityy "
-"kassasivulla tai Oma tili -sivulla."
+msgid "Customer new account emails are sent when a customer signs up via the checkout or My Account page."
+msgstr "Asiakkaalle lähetetään 'uusi tili' sähköpostiviesti kun hän rekisteröityy kassasivulla tai Oma tili -sivulla."
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-new-account.php:37
@@ -2336,16 +2289,12 @@ msgstr "Kommentti asiakkaalle"
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-note.php:30
 msgid "Customer note emails are sent when you add a note to an order."
-msgstr ""
-"Asiakkaalle lähetetään ilmoitus, jos kauppias lisää kommentin tilauksen "
-"tietoihin"
+msgstr "Asiakkaalle lähetetään ilmoitus, jos kauppias lisää kommentin tilauksen tietoihin"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-note.php:35
 msgid "Note added to your {blogname} order from {order_date}"
-msgstr ""
-"Kommentti on lisätty {blogname} verkkokaupassa {order_date} tehtyyn "
-"tilaukseen"
+msgstr "Kommentti on lisätty {blogname} verkkokaupassa {order_date} tehtyyn tilaukseen"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-note.php:36
@@ -2359,12 +2308,8 @@ msgstr "Tilausta käsitellään"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-processing-order.php:25
-msgid ""
-"This is an order notification sent to the customer after payment containing "
-"order details."
-msgstr ""
-"Kun asiakas on maksanut tilauksen, hänelle lähetetään ilmoitus tilauksesta "
-"sekä tilauksen tiedot."
+msgid "This is an order notification sent to the customer after payment containing order details."
+msgstr "Kun asiakas on maksanut tilauksen, hänelle lähetetään ilmoitus tilauksesta sekä tilauksen tiedot."
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-processing-order.php:27
@@ -2383,9 +2328,7 @@ msgstr "Salasanan palautus"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-reset-password.php:37
-msgid ""
-"Customer reset password emails are sent when a customer resets their "
-"password."
+msgid "Customer reset password emails are sent when a customer resets their password."
 msgstr "Asiakkaalle lähetetään sähköposti kun hän haluaa palauttaa salasanan"
 
 # @ woocommerce
@@ -2425,30 +2368,18 @@ msgstr "Vastaanottaja(t)"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-new-order.php:123
-msgid ""
-"Enter recipients (comma separated) for this email. Defaults to <code>%s</"
-"code>."
-msgstr ""
-"Kirjoita tämän viestin vastaanottajat. Erota pilkulla. Oletus <code>%s</"
-"code>."
+msgid "Enter recipients (comma separated) for this email. Defaults to <code>%s</code>."
+msgstr "Kirjoita tämän viestin vastaanottajat. Erota pilkulla. Oletus <code>%s</code>."
 
 # @ woocommerce
 #: classes/emails/class-wc-email-new-order.php:130
-msgid ""
-"This controls the email subject line. Leave blank to use the default "
-"subject: <code>%s</code>."
-msgstr ""
-"Tässä asetetaan sähköpostin 'Aihe'. Kun tyhjä, käytetään oletusta: <code>%s</"
-"code>."
+msgid "This controls the email subject line. Leave blank to use the default subject: <code>%s</code>."
+msgstr "Tässä asetetaan sähköpostin 'Aihe'. Kun tyhjä, käytetään oletusta: <code>%s</code>."
 
 # @ woocommerce
 #: classes/emails/class-wc-email-new-order.php:137
-msgid ""
-"This controls the main heading contained within the email notification. "
-"Leave blank to use the default heading: <code>%s</code>."
-msgstr ""
-"Tässä asetetaan sähköpostin viestiosan (=tekstin) otsikko. Kun tyhjä, "
-"käytetään oletusta: <code>%s</code>."
+msgid "This controls the main heading contained within the email notification. Leave blank to use the default heading: <code>%s</code>."
+msgstr "Tässä asetetaan sähköpostin viestiosan (=tekstin) otsikko. Kun tyhjä, käytetään oletusta: <code>%s</code>."
 
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:28
@@ -2497,22 +2428,13 @@ msgstr "Tiedotus asiakkaalle"
 
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:78
-msgid ""
-"Give the customer instructions for paying via BACS, and let them know that "
-"their order won't be shipping until the money is received."
-msgstr ""
-"Anna asiakkaalle ohjeet maksaa tuotteet tilisiirtona. Ilmoita myös, että "
-"tavarat toimitetaan vasta kun suoritus näkyy myyjän tilillä."
+msgid "Give the customer instructions for paying via BACS, and let them know that their order won't be shipping until the money is received."
+msgstr "Anna asiakkaalle ohjeet maksaa tuotteet tilisiirtona. Ilmoita myös, että tavarat toimitetaan vasta kun suoritus näkyy myyjän tilillä."
 
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:79
-msgid ""
-"Make your payment directly into our bank account. Please use your Order ID "
-"as the payment reference. Your order wont be shipped until the funds have "
-"cleared in our account."
-msgstr ""
-"Maksa myyjän pankkitilille, numero ABC.... Kirjoita viestikenttään tilauksen "
-"numero. Tuotteet lähetetään sen jälkeen, kun suoritus näkyy myyjän tilillä."
+msgid "Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order wont be shipped until the funds have cleared in our account."
+msgstr "Maksa myyjän pankkitilille, numero ABC.... Kirjoita viestikenttään tilauksen numero. Tuotteet lähetetään sen jälkeen, kun suoritus näkyy myyjän tilillä."
 
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:82
@@ -2571,12 +2493,8 @@ msgstr "Maksu pankkitilille"
 
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:137
-msgid ""
-"Allows payments by BACS (Bank Account Clearing System), more commonly known "
-"as direct bank/wire transfer."
-msgstr ""
-"Maksu suoritetaan pankkisiirtona, lähes poikkeuksetta ennakkomaksuna. "
-"Ulkomaankaupassa nimellä: Wire Transfer ja Bank Transfer."
+msgid "Allows payments by BACS (Bank Account Clearing System), more commonly known as direct bank/wire transfer."
+msgstr "Maksu suoritetaan pankkisiirtona, lähes poikkeuksetta ennakkomaksuna. Ulkomaankaupassa nimellä: Wire Transfer ja Bank Transfer."
 
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:158
@@ -2613,34 +2531,18 @@ msgstr "Shekillä maksaminen"
 
 # @ woocommerce
 #: classes/gateways/cheque/class-wc-gateway-cheque.php:72
-msgid ""
-"Let the customer know the payee and where they should be sending the cheque "
-"to and that their order won't be shipping until you receive it."
-msgstr ""
-"Anna asiakkaalle tarvittavat tiedot: maksun saaja, osoite johon shekki tulee "
-"lähettää. Ilmoita myös, että tavarat lähetetään vasta kun shekki on saapunut "
-"tai se on lunastettu."
+msgid "Let the customer know the payee and where they should be sending the cheque to and that their order won't be shipping until you receive it."
+msgstr "Anna asiakkaalle tarvittavat tiedot: maksun saaja, osoite johon shekki tulee lähettää. Ilmoita myös, että tavarat lähetetään vasta kun shekki on saapunut tai se on lunastettu."
 
 # @ woocommerce
 #: classes/gateways/cheque/class-wc-gateway-cheque.php:73
-msgid ""
-"Please send your cheque to Store Name, Store Street, Store Town, Store "
-"State / County, Store Postcode."
-msgstr ""
-"Ole hyvä ja lähetä shekki osoitteella: Kaupan nimi, kaupan katu, kaupan "
-"kaupunki, kaupan lääni/alue/osavaltio/provinssi, kaupan postinumero."
+msgid "Please send your cheque to Store Name, Store Street, Store Town, Store State / County, Store Postcode."
+msgstr "Ole hyvä ja lähetä shekki osoitteella: Kaupan nimi, kaupan katu, kaupan kaupunki, kaupan lääni/alue/osavaltio/provinssi, kaupan postinumero."
 
 # @ woocommerce
 #: classes/gateways/cheque/class-wc-gateway-cheque.php:91
-msgid ""
-"Allows cheque payments. Why would you take cheques in this day and age? Well "
-"you probably wouldn't but it does allow you to make test purchases for "
-"testing order emails and the 'success' pages etc."
-msgstr ""
-"Maksu suoritetaan shekillä. Miksi hyväksyisit shekkejä enää tähän "
-"maailmanaikaan? No todennäkölisesti et hyväksyisikään, mutta tämä antaa "
-"sinun tehdä testiostoksia testataksesi tilaussähköposteja ja järjestelmän "
-"toimivuutta."
+msgid "Allows cheque payments. Why would you take cheques in this day and age? Well you probably wouldn't but it does allow you to make test purchases for testing order emails and the 'success' pages etc."
+msgstr "Maksu suoritetaan shekillä. Miksi hyväksyisit shekkejä enää tähän maailmanaikaan? No todennäkölisesti et hyväksyisikään, mutta tämä antaa sinun tehdä testiostoksia testataksesi tilaussähköposteja ja järjestelmän toimivuutta."
 
 # @ woocommerce
 #: classes/gateways/cheque/class-wc-gateway-cheque.php:147
@@ -2657,8 +2559,7 @@ msgstr "Maksu toimitettaessa"
 # @ woocommerce
 #: classes/gateways/cod/class-wc-gateway-cod.php:55
 msgid "Have your customers pay with cash (or by other means) upon delivery."
-msgstr ""
-"Maksu suoritetaan käteisellä (tai muilla tavoilla) kun tuote toimitetaan."
+msgstr "Maksu suoritetaan käteisellä (tai muilla tavoilla) kun tuote toimitetaan."
 
 # @ woocommerce
 #: classes/gateways/cod/class-wc-gateway-cod.php:80
@@ -2679,7 +2580,6 @@ msgstr "Kirjoita tähän tieto josta käyttäjä tunnistaa maksutavan."
 #: classes/gateways/cod/class-wc-gateway-cod.php:94
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:142
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:133
-#: templates/single-product/tabs/tab-description.php:15
 #: woocommerce-template.php:751
 msgid "Description"
 msgstr "Kuvaus"
@@ -2712,19 +2612,13 @@ msgstr "Ota käyttöön toimitustavoille"
 
 # @ woocommerce
 #: classes/gateways/cod/class-wc-gateway-cod.php:111
-msgid ""
-"If COD is only available for certain methods, set it up here. Leave blank to "
-"enable for all methods."
-msgstr ""
-"Tässä kohdistetaan 'Maksu toimitettaessa' toimitustapa vain tietyille "
-"toimitustavoille. Kun tyhjä, käytössä kaikille tavoille."
+msgid "If COD is only available for certain methods, set it up here. Leave blank to enable for all methods."
+msgstr "Tässä kohdistetaan 'Maksu toimitettaessa' toimitustapa vain tietyille toimitustavoille. Kun tyhjä, käytössä kaikille tavoille."
 
 # @ woocommerce
 #: classes/gateways/cod/class-wc-gateway-cod.php:176
 msgid "Payment to be made upon delivery."
-msgstr ""
-"Maksu toimituksen yhteydessä. Hyväksytään käteinen, mielellään tasaraha, "
-"maksukortit: aa, bb, cc, jne."
+msgstr "Maksu toimituksen yhteydessä. Hyväksytään käteinen, mielellään tasaraha, maksukortit: aa, bb, cc, jne."
 
 # @ woocommerce
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:31
@@ -2776,17 +2670,8 @@ msgstr "Tutustu Mijireh Checkout -palveluun"
 
 # @ woocommerce
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:165
-msgid ""
-"provides a fully PCI Compliant, secure way to collect and transmit credit "
-"card data to your payment gateway while keeping you in control of the design "
-"of your site. Mijireh supports a wide variety of payment gateways: Stripe, "
-"Authorize.net, PayPal, eWay, SagePay, Braintree, PayLeap, and more."
-msgstr ""
-"tarjoaa 'PCI Compliant' edellytykset täyttävän (PCI Compliant, PCI "
-"DSS=Payment Card Industry Data Security Standard) tavan ottaa vastaan ja "
-"siirtää luottokortin tiedot maksukäytävään JA hallita maksussa käytetyn "
-"sivun ulkoasua. Mijireh tukee useita maksukäytäviä: Stripe, Authorize.net, "
-"PayPal, eWay, SagePay, Braintree, PayLeap, jne."
+msgid "provides a fully PCI Compliant, secure way to collect and transmit credit card data to your payment gateway while keeping you in control of the design of your site. Mijireh supports a wide variety of payment gateways: Stripe, Authorize.net, PayPal, eWay, SagePay, Braintree, PayLeap, and more."
+msgstr "tarjoaa 'PCI Compliant' edellytykset täyttävän (PCI Compliant, PCI DSS=Payment Card Industry Data Security Standard) tavan ottaa vastaan ja siirtää luottokortin tiedot maksukäytävään JA hallita maksussa käytetyn sivun ulkoasua. Mijireh tukee useita maksukäytäviä: Stripe, Authorize.net, PayPal, eWay, SagePay, Braintree, PayLeap, jne."
 
 # @ woocommerce
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:167
@@ -2800,14 +2685,8 @@ msgstr "Lue lisää WooCommerce ja Mijireh"
 
 # @ woocommerce
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:171
-msgid ""
-"provides a fully PCI Compliant, secure way to collect and transmit credit "
-"card data to your payment gateway while keeping you in control of the design "
-"of your site."
-msgstr ""
-"tarjoaa 'PCI Compliant' edellytykset täyttävän tavan ottaa vastaan ja "
-"siirtää luottokortin tiedot maksukäytävään JA hallita maksussa käytetyn "
-"sivun ulkoasua."
+msgid "provides a fully PCI Compliant, secure way to collect and transmit credit card data to your payment gateway while keeping you in control of the design of your site."
+msgstr "tarjoaa 'PCI Compliant' edellytykset täyttävän tavan ottaa vastaan ja siirtää luottokortin tiedot maksukäytävään JA hallita maksussa käytetyn sivun ulkoasua."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:34
@@ -2822,13 +2701,8 @@ msgstr "PayPal Standard"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:92
-msgid ""
-"PayPal standard works by sending the user to PayPal to enter their payment "
-"information."
-msgstr ""
-"Maksu suoritetaan PayPal Standard -maksukäytävän kautta. Asiakas voi maksaa "
-"luottokortilla tai PayPal tililtä. Asiakas siirtyy PayPal'in sivulle "
-"maksamaan. Sivu on useilla kielillä (esim. englanti) mutta ei suomeksi."
+msgid "PayPal standard works by sending the user to PayPal to enter their payment information."
+msgstr "Maksu suoritetaan PayPal Standard -maksukäytävän kautta. Asiakas voi maksaa luottokortilla tai PayPal tililtä. Asiakas siirtyy PayPal'in sivulle maksamaan. Sivu on useilla kielillä (esim. englanti) mutta ei suomeksi."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:104
@@ -2847,12 +2721,8 @@ msgstr "Ota käyttöön PayPal Standard -maksutapa"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:136
-msgid ""
-"Pay via PayPal; you can pay with your credit card if you don't have a PayPal "
-"account"
-msgstr ""
-"Maksu PayPal palvelussa. Voit maksaa luottokortilla, PayPal tiliä ei "
-"tarvita. Voit myös maksaa PayPal-tililtäsi."
+msgid "Pay via PayPal; you can pay with your credit card if you don't have a PayPal account"
+msgstr "Maksu PayPal palvelussa. Voit maksaa luottokortilla, PayPal tiliä ei tarvita. Voit myös maksaa PayPal-tililtäsi."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:139
@@ -2861,25 +2731,16 @@ msgstr "PayPal sähköposti"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:141
-msgid ""
-"Please enter your PayPal email address; this is needed in order to take "
-"payment."
-msgstr ""
-"Syötä PayPal-tilisi sähköpostiosoite; tämä tarvitaan maksun "
-"vastaanottamiseen."
+msgid "Please enter your PayPal email address; this is needed in order to take payment."
+msgstr "Syötä PayPal-tilisi sähköpostiosoite; tämä tarvitaan maksun vastaanottamiseen."
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:147
 msgid "Receiver Email"
 msgstr "Vastaanotto s-postiosoite"
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:149
-msgid ""
-"If this differs from the email entered above, input your main receiver email "
-"for your PayPal account. This is used to validate IPN requests."
-msgstr ""
-"Jos tämä poikkeaa yllä annetusta s-postiosoitteesta, kirjoita PayPal tilin "
-"viestien vastaanottamiseen käytettävä sähköpostiosoite. Käytetään IPN "
-"viestien todentamiseen."
+msgid "If this differs from the email entered above, input your main receiver email for your PayPal account. This is used to validate IPN requests."
+msgstr "Jos tämä poikkeaa yllä annetusta s-postiosoitteesta, kirjoita PayPal tilin viestien vastaanottamiseen käytettävä sähköpostiosoite. Käytetään IPN viestien todentamiseen."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:155
@@ -2888,14 +2749,8 @@ msgstr "Maksun etuliite"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:157
-msgid ""
-"Please enter a prefix for your invoice numbers. If you use your PayPal "
-"account for multiple stores ensure this prefix is unique as PayPal will not "
-"allow orders with the same invoice number."
-msgstr ""
-"Aseta etuliite laskuille. Jos myyt usean verkkokaupan kautta ja maksut "
-"ohjataan samalle PayPal tilille niin varmista että etuliite on toisista "
-"poikkeava. PayPal ei salli laskuja joilla on sama numero. "
+msgid "Please enter a prefix for your invoice numbers. If you use your PayPal account for multiple stores ensure this prefix is unique as PayPal will not allow orders with the same invoice number."
+msgstr "Aseta etuliite laskuille. Jos myyt usean verkkokaupan kautta ja maksut ohjataan samalle PayPal tilille niin varmista että etuliite on toisista poikkeava. PayPal ei salli laskuja joilla on sama numero. "
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:162
@@ -2909,12 +2764,8 @@ msgstr "Käytä lomake (Form submission) lähetystapaa."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:165
-msgid ""
-"Enable this to post order data to PayPal via a form instead of using a "
-"redirect/querystring."
-msgstr ""
-"Ota tämä käyttöön jos tiedot siirretään PayPal palveluun lomakkeella eikä "
-"edelleenohjauksella/verkko-osoitepolussa (redirect/querystring)."
+msgid "Enable this to post order data to PayPal via a form instead of using a redirect/querystring."
+msgstr "Ota tämä käyttöön jos tiedot siirretään PayPal palveluun lomakkeella eikä edelleenohjauksella/verkko-osoitepolussa (redirect/querystring)."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:169
@@ -2923,11 +2774,8 @@ msgstr "Sivun tyyli"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:171
-msgid ""
-"Optionally enter the name of the page style you wish to use. These are "
-"defined within your PayPal account."
-msgstr ""
-"Kirjoita sen sivun tyyli jota käytetään. Ne ovat PayPal tilissä. Valinnainen."
+msgid "Optionally enter the name of the page style you wish to use. These are defined within your PayPal account."
+msgstr "Kirjoita sen sivun tyyli jota käytetään. Ne ovat PayPal tilissä. Valinnainen."
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:174
 msgid "Optional"
@@ -2950,12 +2798,8 @@ msgstr "Lähetä toimitustiedot PayPal palveluun, ei laskutustietoja."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:186
-msgid ""
-"PayPal allows us to send 1 address. If you are using PayPal for shipping "
-"labels you may prefer to send the shipping address rather than billing."
-msgstr ""
-"PayPal sallii vain yhden (1) osoitteen. Jos osoitelaput tulostetaan PayPal "
-"palvelussa, voi toimitusosoitteen lähettäminen olla tarpeen."
+msgid "PayPal allows us to send 1 address. If you are using PayPal for shipping labels you may prefer to send the shipping address rather than billing."
+msgstr "PayPal sallii vain yhden (1) osoitteen. Jos osoitelaput tulostetaan PayPal palvelussa, voi toimitusosoitteen lähettäminen olla tarpeen."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:190
@@ -2964,21 +2808,13 @@ msgstr "Osoitteen korvaaminen"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:192
-msgid ""
-"Enable \"address_override\" to prevent address information from being "
-"changed."
-msgstr ""
-"Ota käyttöön 'Osoitteen korvaamattomuus' (address_override) jolla estetään "
-"osoitetietojen muuttaminen."
+msgid "Enable \"address_override\" to prevent address information from being changed."
+msgstr "Ota käyttöön 'Osoitteen korvaamattomuus' (address_override) jolla estetään osoitetietojen muuttaminen."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:193
-msgid ""
-"PayPal verifies addresses therefore this setting can cause errors (we "
-"recommend keeping it disabled)."
-msgstr ""
-"PayPal tarkastaa osoitteet ja siksi tämä asetus voi tuottaa virheitä. "
-"Suositus: ei oteta käyttöön."
+msgid "PayPal verifies addresses therefore this setting can cause errors (we recommend keeping it disabled)."
+msgstr "PayPal tarkastaa osoitteet ja siksi tämä asetus voi tuottaa virheitä. Suositus: ei oteta käyttöön."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:197
@@ -2997,12 +2833,8 @@ msgstr "Ota käyttöön PayPal sandbox (hiekkalaatikko)"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:206
-msgid ""
-"PayPal sandbox can be used to test payments. Sign up for a developer account "
-"<a href=\"%s\">here</a>."
-msgstr ""
-"PayPal sandbox (hiekkalaatikko) palvelua voi käyttää toimivuuden kokeiluun. "
-"Kehittäjän tilin (developer account) voi avata <a href=\"%s\">täällä</a>."
+msgid "PayPal sandbox can be used to test payments. Sign up for a developer account <a href=\"%s\">here</a>."
+msgstr "PayPal sandbox (hiekkalaatikko) palvelua voi käyttää toimivuuden kokeiluun. Kehittäjän tilin (developer account) voi avata <a href=\"%s\">täällä</a>."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:209
@@ -3016,12 +2848,8 @@ msgstr "Ota käyttöön loki"
 
 # @ default
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:213
-msgid ""
-"Log PayPal events, such as IPN requests, inside <code>woocommerce/logs/"
-"paypal-%s.txt</code>"
-msgstr ""
-"Kirjaa PayPal tapahtumat, kuten IPN viestit tähän tiedostoon: "
-"<code>woocommerce/logs/paypal-%s.txt</code>"
+msgid "Log PayPal events, such as IPN requests, inside <code>woocommerce/logs/paypal-%s.txt</code>"
+msgstr "Kirjaa PayPal tapahtumat, kuten IPN viestit tähän tiedostoon: <code>woocommerce/logs/paypal-%s.txt</code>"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:322
@@ -3036,9 +2864,7 @@ msgstr "Toimitustapa"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:427
-msgid ""
-"Thank you for your order. We are now redirecting you to PayPal to make "
-"payment."
+msgid "Thank you for your order. We are now redirecting you to PayPal to make payment."
 msgstr "Kiitos tilauksestasi! Ohjaamme sinut nyt PayPaliin maksamista varten."
 
 # @ woocommerce
@@ -3053,11 +2879,8 @@ msgstr "Peruuta tilaus &amp; palauta ostoskori"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:502
-msgid ""
-"Thank you for your order, please click the button below to pay with PayPal."
-msgstr ""
-"Kiitos tilauksestasi! Maksa painamalla alla olevaa painiketta - käyt "
-"PayPal'in sivulla."
+msgid "Thank you for your order, please click the button below to pay with PayPal."
+msgstr "Kiitos tilauksestasi! Maksa painamalla alla olevaa painiketta - käyt PayPal'in sivulla."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:644
@@ -3066,10 +2889,8 @@ msgstr "Tarkastusvirhe: PayPal summat eivät täsmää (brutto %s)"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:655
-msgid ""
-"Validation error: PayPal IPN response from a different email address (%s)."
-msgstr ""
-"Tarkastusvirhe: PayPal IPN vastausviesti eri sähköpostiosoitteesta (%s)."
+msgid "Validation error: PayPal IPN response from a different email address (%s)."
+msgstr "Tarkastusvirhe: PayPal IPN vastausviesti eri sähköpostiosoitteesta (%s)."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:673
@@ -3093,9 +2914,7 @@ msgstr "Tilaus hyvitetty/peruutettu"
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:699
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:717
 msgid "Order %s has been marked as refunded - PayPal reason code: %s"
-msgstr ""
-"Tilaus %s on merkitty hyvitetyksi (takaisin asiakkaalle) - PayPal "
-"selityskoodi: %s"
+msgstr "Tilaus %s on merkitty hyvitetyksi (takaisin asiakkaalle) - PayPal selityskoodi: %s"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:702
@@ -3110,13 +2929,8 @@ msgstr "Google Analytics"
 
 # @ woocommerce
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:27
-msgid ""
-"Google Analytics is a free service offered by Google that generates detailed "
-"statistics about the visitors to a website."
-msgstr ""
-"Google Analytics on Googlen ilmainen palvelu. Sen avulla voi saada "
-"tilastotietoja sivustolla kävijöistä ja heidän liikkeistään sivustolla. "
-"Kävijöitä ei voi tunnistaa."
+msgid "Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website."
+msgstr "Google Analytics on Googlen ilmainen palvelu. Sen avulla voi saada tilastotietoja sivustolla kävijöistä ja heidän liikkeistään sivustolla. Kävijöitä ei voi tunnistaa."
 
 # @ woocommerce
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:63
@@ -3125,12 +2939,8 @@ msgstr "Google Analytics ID"
 
 # @ woocommerce
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:64
-msgid ""
-"Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-"
-"X</code>"
-msgstr ""
-"Etsi Google Analytics tilistäsi sen ID-numero. Esim. <code>UA-XXXXX-X</"
-"code>. Syötä se kenttään."
+msgid "Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>"
+msgstr "Etsi Google Analytics tilistäsi sen ID-numero. Esim. <code>UA-XXXXX-X</code>. Syötä se kenttään."
 
 # @ woocommerce
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:69
@@ -3138,12 +2948,8 @@ msgid "Set Domain Name"
 msgstr "Aseta verkkotunnus"
 
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:70
-msgid ""
-"(Optional) Sets the <code>_setDomainName</code> variable. <a href=\"%s\">See "
-"here for more information</a>."
-msgstr ""
-"(Valinnainen) Asettaa <code>_setDomainName</code> muuttujan. <a href=\"%s"
-"\">Lisätietoja täällä</a>."
+msgid "(Optional) Sets the <code>_setDomainName</code> variable. <a href=\"%s\">See here for more information</a>."
+msgstr "(Valinnainen) Asettaa <code>_setDomainName</code> muuttujan. <a href=\"%s\">Lisätietoja täällä</a>."
 
 # @ woocommerce
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:75
@@ -3152,12 +2958,8 @@ msgstr "Seurantakoodi"
 
 # @ woocommerce
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:76
-msgid ""
-"Add tracking code to your site's footer. You don't need to enable this if "
-"using a 3rd party analytics plugin."
-msgstr ""
-"Seurantakoodi lisätään sivuston alatunnisteeseen. - Tätä ei tarvita jos joku "
-"lisäosa on jo sijoittanut vastaavan seurantakoodin."
+msgid "Add tracking code to your site's footer. You don't need to enable this if using a 3rd party analytics plugin."
+msgstr "Seurantakoodi lisätään sivuston alatunnisteeseen. - Tätä ei tarvita jos joku lisäosa on jo sijoittanut vastaavan seurantakoodin."
 
 # @ woocommerce
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:82
@@ -3222,12 +3024,8 @@ msgstr "ShareThis"
 
 # @ woocommerce
 #: classes/integrations/sharethis/class-wc-sharethis.php:30
-msgid ""
-"ShareThis offers a sharing widget which will allow customers to share links "
-"to products with their friends."
-msgstr ""
-"ShareThis vimpaimella voi jakaa tuotteen linkin kavereille ja sosiaalisiin "
-"medioihin."
+msgid "ShareThis offers a sharing widget which will allow customers to share links to products with their friends."
+msgstr "ShareThis vimpaimella voi jakaa tuotteen linkin kavereille ja sosiaalisiin medioihin."
 
 # @ woocommerce
 #: classes/integrations/sharethis/class-wc-sharethis.php:63
@@ -3236,12 +3034,8 @@ msgstr "ShareThis julkaisijan ID"
 
 # @ woocommerce
 #: classes/integrations/sharethis/class-wc-sharethis.php:64
-msgid ""
-"Enter your %1$sShareThis publisher ID%2$s to show social sharing buttons on "
-"product pages."
-msgstr ""
-"Kun syötät %1$sShareThis publisher ID%2$s kenttään, niin 'jaa' painikkeet "
-"näytetään tuotesivuilla."
+msgid "Enter your %1$sShareThis publisher ID%2$s to show social sharing buttons on product pages."
+msgstr "Kun syötät %1$sShareThis publisher ID%2$s kenttään, niin 'jaa' painikkeet näytetään tuotesivuilla."
 
 # @ woocommerce
 #: classes/integrations/sharethis/class-wc-sharethis.php:69
@@ -3262,18 +3056,8 @@ msgstr "ShareYourCart"
 
 # @ woocommerce
 #: classes/integrations/shareyourcart/class-wc-shareyourcart.php:23
-msgid ""
-"Increase your social media exposure by 10 percent! ShareYourCart helps you "
-"get more customers by motivating satisfied customers to talk with their "
-"friends about your products. For help with ShareYourCart view the <a href="
-"\"http://docs.woothemes.com/document/shareyourcart/\" target=\"__blank"
-"\">documentation</a>."
-msgstr ""
-"Kasvata näkyvyyttä sosiaalisissa medioissa 10 prosenttia! ShareYourCart "
-"auttaa uusien asiakkaiden hankinnassa koska se motivoi tyytyväisiä "
-"asiakkaita kertomaan tuttavilleen tuotteista. Tutustu aiheeseen lisää <a "
-"href=\"http://docs.woothemes.com/document/shareyourcart/\" target=\"__blank"
-"\">täällä</a>."
+msgid "Increase your social media exposure by 10 percent! ShareYourCart helps you get more customers by motivating satisfied customers to talk with their friends about your products. For help with ShareYourCart view the <a href=\"http://docs.woothemes.com/document/shareyourcart/\" target=\"__blank\">documentation</a>."
+msgstr "Kasvata näkyvyyttä sosiaalisissa medioissa 10 prosenttia! ShareYourCart auttaa uusien asiakkaiden hankinnassa koska se motivoi tyytyväisiä asiakkaita kertomaan tuttavilleen tuotteista. Tutustu aiheeseen lisää <a href=\"http://docs.woothemes.com/document/shareyourcart/\" target=\"__blank\">täällä</a>."
 
 # @ default
 #: classes/integrations/shareyourcart/class.shareyourcart-wp.php:328
@@ -3337,9 +3121,7 @@ msgstr "Kiinteä toimituskulu"
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:27
 msgid "Flat rates let you define a standard rate per item, or per order."
-msgstr ""
-"Kun kiinteä toimituskulu, sen voi laskea kohdistettuna koko tilaukselle tai "
-"kohdistettuna erikseen jokaiselle tuotteelle tai toimitusluokalle."
+msgstr "Kun kiinteä toimituskulu, sen voi laskea kohdistettuna koko tilaukselle tai kohdistettuna erikseen jokaiselle tuotteelle tai toimitusluokalle."
 
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:78
@@ -3405,8 +3187,7 @@ msgstr "Hinta/tilaus"
 
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:122
-msgid ""
-"Enter a cost (excluding tax) per order, e.g. 5.00. Leave blank to disable."
+msgid "Enter a cost (excluding tax) per order, e.g. 5.00. Leave blank to disable."
 msgstr "Aseta hinta / tilaus (ilman veroa), esim. 5,00. Kun tyhjä, ei käytetä."
 
 # @ woocommerce
@@ -3416,22 +3197,12 @@ msgstr "Muut toimitusvalinnat"
 
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:130
-msgid ""
-"Optional extra shipping options with additional costs (one per line): Option "
-"Name | Additional Cost | Per Cost Type (order, class, or item) Example: "
-"<code>Priority Mail | 6.95 | order</code>."
-msgstr ""
-"Valinnainen: muut toimitusvalinnat ja niiden hinnat, kukin omalle riville: "
-"Toimitusvalinnan nimi | Lisähinta | Hinnan kohdistus (tilaus, luokka, tai "
-"tuote). Esimerkki: <code>Kirje 500g, 1.luokka | 3.00 | order</code>. Suom. "
-"huom. ei ole kokeiltu onko suomi korvattava englannilla: tilaus=>order;  "
-"luokka=>class; tuote=>item"
+msgid "Optional extra shipping options with additional costs (one per line): Option Name | Additional Cost | Per Cost Type (order, class, or item) Example: <code>Priority Mail | 6.95 | order</code>."
+msgstr "Valinnainen: muut toimitusvalinnat ja niiden hinnat, kukin omalle riville: Toimitusvalinnan nimi | Lisähinta | Hinnan kohdistus (tilaus, luokka, tai tuote). Esimerkki: <code>Kirje 500g, 1.luokka | 3.00 | order</code>. Suom. huom. ei ole kokeiltu onko suomi korvattava englannilla: tilaus=>order;  luokka=>class; tuote=>item"
 
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:133
 msgid "Option Name | Additional Cost | Per Cost Type (order, class, or item)"
-msgstr ""
-"Toimitusvalinnan nimi | Lisähinta | Hinnan kohdistus (tilaus, luokka tai "
-"tuote)."
+msgstr "Toimitusvalinnan nimi | Lisähinta | Hinnan kohdistus (tilaus, luokka tai tuote)."
 
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:136
@@ -3439,12 +3210,8 @@ msgid "Additional Costs"
 msgstr "Lisämaksut"
 
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:138
-msgid ""
-"Additional costs can be added below - these will all be added to the per-"
-"order cost above."
-msgstr ""
-"Lisämaksuja voi lisätä tässä. Nämä kaikki lisätään tilauskohtaiseen hintaan "
-"(joka asetetaan yllä)."
+msgid "Additional costs can be added below - these will all be added to the per-order cost above."
+msgstr "Lisämaksuja voi lisätä tässä. Nämä kaikki lisätään tilauskohtaiseen hintaan (joka asetetaan yllä)."
 
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:141
 msgid "Costs Added..."
@@ -3460,17 +3227,13 @@ msgstr "Koko tilaus - laske toimituskulut (könttänä) koko tilaukselle"
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:146
 #: classes/shipping/international-delivery/class-wc-shipping-international-delivery.php:95
 msgid "Per Item - charge shipping for each item individually"
-msgstr ""
-"Tuote kerrallaan - laske toimituskulu tilauksen jokaiselle tuotteelle "
-"erikseen"
+msgstr "Tuote kerrallaan - laske toimituskulu tilauksen jokaiselle tuotteelle erikseen"
 
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:147
 #: classes/shipping/international-delivery/class-wc-shipping-international-delivery.php:96
 msgid "Per Class - charge shipping for each shipping class in an order"
-msgstr ""
-"Toimitusluokka kerrallaan - laske toimituskulu jokaiselle toimitusluokalle "
-"erikseen"
+msgstr "Toimitusluokka kerrallaan - laske toimituskulu jokaiselle toimitusluokalle erikseen"
 
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:154
@@ -3481,12 +3244,8 @@ msgstr "Pienin käsittelymaksu"
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:160
 #: classes/shipping/international-delivery/class-wc-shipping-international-delivery.php:126
-msgid ""
-"Enter a minimum fee amount. Fee's less than this will be increased. Leave "
-"blank to disable."
-msgstr ""
-"Kirjoita pienin veloitettava maksu. Tätä pienemmät korotetaan. Kun tyhjä, ei "
-"käytetä."
+msgid "Enter a minimum fee amount. Fee's less than this will be increased. Leave blank to disable."
+msgstr "Kirjoita pienin veloitettava maksu. Tätä pienemmät korotetaan. Kun tyhjä, ei käytetä."
 
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:479
@@ -3518,8 +3277,7 @@ msgstr "Käsittelykulut"
 
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:487
-msgid ""
-"Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%."
+msgid "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%."
 msgstr "Kulut ilman veroja. Syötä määrä, esim. 2.50, tai prosentti, esim. 5%."
 
 # @ woocommerce
@@ -3541,7 +3299,8 @@ msgstr "Mikä tahansa luokka"
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:499
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:500
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:110
-#: templates/order/order-details.php:119 templates/order/order-details.php:134
+#: templates/order/order-details.php:119
+#: templates/order/order-details.php:134
 msgid "N/A"
 msgstr "Ei saatavilla/-tietoa"
 
@@ -3613,11 +3372,8 @@ msgstr "Pienin hyväksyttävä tilaus (€)"
 
 # @ woocommerce
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:124
-msgid ""
-"Users will need to spend this amount to get free shipping (if enabled above)."
-msgstr ""
-"Maksuton toimitus vain silloin kun asiakkaan tilaus on vähintään näin suuri "
-"(jos otettu käyttöön yllä)."
+msgid "Users will need to spend this amount to get free shipping (if enabled above)."
+msgstr "Maksuton toimitus vain silloin kun asiakkaan tilaus on vähintään näin suuri (jos otettu käyttöön yllä)."
 
 # @ woocommerce
 #: classes/shipping/international-delivery/class-wc-shipping-international-delivery.php:29
@@ -3628,8 +3384,7 @@ msgstr "Kansainvälinen toimitus"
 # @ woocommerce
 #: classes/shipping/international-delivery/class-wc-shipping-international-delivery.php:30
 msgid "International delivery based on flat rate shipping."
-msgstr ""
-"Kiinteä toimituskulu muihin maihin. Eri maihin voi asettaa eri hinnan, jne."
+msgstr "Kiinteä toimituskulu muihin maihin. Eri maihin voi asettaa eri hinnan, jne."
 
 # @ woocommerce
 #: classes/shipping/international-delivery/class-wc-shipping-international-delivery.php:68
@@ -3657,12 +3412,8 @@ msgstr "Toimituskulu ilman veroja. Syötä määrä, esim. 2.50 (€)."
 
 # @ woocommerce
 #: classes/shipping/international-delivery/class-wc-shipping-international-delivery.php:114
-msgid ""
-"Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. "
-"Leave blank to disable."
-msgstr ""
-"Hinta ilman veroja. Syötä määrä, esim. 2.50 tai prosentti, esim. 5%. Jos "
-"tyhjä, ei käytetä."
+msgid "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable."
+msgstr "Hinta ilman veroja. Syötä määrä, esim. 2.50 tai prosentti, esim. 5%. Jos tyhjä, ei käytetä."
 
 # @ woocommerce
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:25
@@ -3713,12 +3464,8 @@ msgstr "Toimitusmaksu"
 
 # @ woocommerce
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:129
-msgid ""
-"What fee do you want to charge for local delivery, disregarded if you choose "
-"free. Leave blank to disable."
-msgstr ""
-"Kirjoita lähialueelle toimituksesta valoitettava hinta. Ei huomioida jos "
-"maksuton toimitus. Kun tyhjä, ei käytetä."
+msgid "What fee do you want to charge for local delivery, disregarded if you choose free. Leave blank to disable."
+msgstr "Kirjoita lähialueelle toimituksesta valoitettava hinta. Ei huomioida jos maksuton toimitus. Kun tyhjä, ei käytetä."
 
 # @ woocommerce
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:135
@@ -3729,21 +3476,13 @@ msgstr "Postinumerot"
 # @ woocommerce
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:137
 #: classes/shipping/local-pickup/class-wc-shipping-local-pickup.php:93
-msgid ""
-"What zip/post codes would you like to offer delivery to? Separate codes with "
-"a comma. Accepts wildcards, e.g. P* will match a postcode of PE30."
-msgstr ""
-"Luettele postinumerot, joiden alueelle 'Toimitus lähialueelle' on "
-"mahdollinen. Erota pilkulla. Jokerimerkit hyväksytään, esim. P* hyväksyy "
-"PE30, jne."
+msgid "What zip/post codes would you like to offer delivery to? Separate codes with a comma. Accepts wildcards, e.g. P* will match a postcode of PE30."
+msgstr "Luettele postinumerot, joiden alueelle 'Toimitus lähialueelle' on mahdollinen. Erota pilkulla. Jokerimerkit hyväksytään, esim. P* hyväksyy PE30, jne."
 
 # @ woocommerce
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:172
-msgid ""
-"Local delivery is a simple shipping method for delivering orders locally."
-msgstr ""
-"Toimitus lähialueelle voi olla miellyttävä ja edullinen palvelu asiakkaalle "
-"joka toimii esim. samassa kaupungissa."
+msgid "Local delivery is a simple shipping method for delivering orders locally."
+msgstr "Toimitus lähialueelle voi olla miellyttävä ja edullinen palvelu asiakkaalle joka toimii esim. samassa kaupungissa."
 
 # @ woocommerce
 #: classes/shipping/local-pickup/class-wc-shipping-local-pickup.php:25
@@ -3763,26 +3502,17 @@ msgstr "Käytä 'pohja/perus (base)' vero%"
 
 # @ woocommerce
 #: classes/shipping/local-pickup/class-wc-shipping-local-pickup.php:119
-msgid ""
-"When this shipping method is chosen, apply the base tax rate rather than for "
-"the customer's given address."
-msgstr ""
-"Tälle toimitustavalle käytetään 'pohja/perus vero%' eikä asiakkaan osoitteen "
-"veroprosenttia.(suom. huom. epäselvää: joko 0% tai 'Yleinen verokanta' eli "
-"24%)."
+msgid "When this shipping method is chosen, apply the base tax rate rather than for the customer's given address."
+msgstr "Tälle toimitustavalle käytetään 'pohja/perus vero%' eikä asiakkaan osoitteen veroprosenttia.(suom. huom. epäselvää: joko 0% tai 'Yleinen verokanta' eli 24%)."
 
 # @ woocommerce
 #: classes/shipping/local-pickup/class-wc-shipping-local-pickup.php:134
-msgid ""
-"Local pickup is a simple method which allows the customer to pick up their "
-"order themselves."
-msgstr ""
-"Nouto voi olla miellyttävä ja edullinen palvelu asiakkaalle joka haluaa "
-"tuotteet viivytyksettä ja kykenee noutamaan tuotteet."
+msgid "Local pickup is a simple method which allows the customer to pick up their order themselves."
+msgstr "Nouto voi olla miellyttävä ja edullinen palvelu asiakkaalle joka haluaa tuotteet viivytyksettä ja kykenee noutamaan tuotteet."
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-cart.php:53
-#: woocommerce-functions.php:1702
+#: woocommerce-functions.php:1701
 msgid "Please enter a valid postcode/ZIP."
 msgstr "Syötä kelvollinen postinumero."
 
@@ -3792,18 +3522,18 @@ msgstr "Syötä kelvollinen postinumero."
 msgid "Shipping costs updated."
 msgstr "Toimituskulut päivitetty."
 
-# @ woocommerce
-#: classes/shortcodes/class-wc-shortcode-checkout.php:61
-msgid ""
-"The order totals have been updated. Please confirm your order by pressing "
-"the Place Order button at the bottom of the page."
+#: classes/shortcodes/class-wc-shortcode-checkout.php:45
+msgid "WooCommerce Config Error: The checkout thanks/pay pages are missing - these pages are required for the checkout to function correctly. Please configure the pages <a href=\"%s\">here</a>."
 msgstr ""
-"Tilauksen loppusummat päivitetty. Tee tilaus painamalla Lähetä tilaus -"
-"painiketta sivun alaosassa."
+
+# @ woocommerce
+#: classes/shortcodes/class-wc-shortcode-checkout.php:73
+msgid "The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page."
+msgstr "Tilauksen loppusummat päivitetty. Tee tilaus painamalla Lähetä tilaus -painiketta sivun alaosassa."
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:78
-#: woocommerce-functions.php:1624
+#: woocommerce-functions.php:1623
 msgid "Please enter your password."
 msgstr "Anna salasana, ole hyvä."
 
@@ -3820,8 +3550,7 @@ msgstr "Kirjaudu sisään"
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:114
 msgid "Enter a username or e-mail address."
-msgstr ""
-"Kirjoita käyttäjätunnus tai sähköpostiosoite (jolla on rekisteröidytty)."
+msgstr "Kirjoita käyttäjätunnus tai sähköpostiosoite (jolla on rekisteröidytty)."
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:121
@@ -3868,18 +3597,15 @@ msgstr "Pahoittelemme. Tilausnumeroa ei löytynyt tietokannasta."
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-pay.php:64
 #: classes/shortcodes/class-wc-shortcode-pay.php:118
-msgid ""
-"Your order has already been paid for. Please contact us if you need "
-"assistance."
-msgstr ""
-"Tilaus on jo maksettu. Epäselvässä tapauksessa ota meihin yhteyttä, "
-"selvitämme asian."
+msgid "Your order has already been paid for. Please contact us if you need assistance."
+msgstr "Tilaus on jo maksettu. Epäselvässä tapauksessa ota meihin yhteyttä, selvitämme asian."
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-pay.php:69
 #: classes/shortcodes/class-wc-shortcode-pay.php:125
 #: classes/shortcodes/class-wc-shortcode-view-order.php:51
-#: woocommerce-functions.php:909 woocommerce-functions.php:988
+#: woocommerce-functions.php:909
+#: woocommerce-functions.php:989
 msgid "Invalid order."
 msgstr "Tilaus ei kelpaa."
 
@@ -3918,12 +3644,8 @@ msgstr "Oma tili &rarr;"
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-view-order.php:58
-msgid ""
-"Order <mark class=\"order-number\">%s</mark> made on <mark class=\"order-date"
-"\">%s</mark>"
-msgstr ""
-"Tilaus <mark class=\"order-number\">%s</mark>joka luotu <mark class=\"order-"
-"date\">%s</mark>"
+msgid "Order <mark class=\"order-number\">%s</mark> made on <mark class=\"order-date\">%s</mark>"
+msgstr "Tilaus <mark class=\"order-number\">%s</mark>joka luotu <mark class=\"order-date\">%s</mark>"
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-view-order.php:59
@@ -3957,37 +3679,37 @@ msgid "Best Sellers"
 msgstr "Eniten myydyt"
 
 # @ woocommerce
-#: classes/widgets/class-wc-widget-best-sellers.php:192
+#: classes/widgets/class-wc-widget-best-sellers.php:189
 #: classes/widgets/class-wc-widget-cart.php:109
-#: classes/widgets/class-wc-widget-featured-products.php:172
+#: classes/widgets/class-wc-widget-featured-products.php:169
 #: classes/widgets/class-wc-widget-layered-nav.php:349
-#: classes/widgets/class-wc-widget-onsale.php:178
+#: classes/widgets/class-wc-widget-onsale.php:176
 #: classes/widgets/class-wc-widget-price-filter.php:179
 #: classes/widgets/class-wc-widget-product-categories.php:185
 #: classes/widgets/class-wc-widget-product-search.php:91
 #: classes/widgets/class-wc-widget-product-tag-cloud.php:101
-#: classes/widgets/class-wc-widget-random-products.php:133
-#: classes/widgets/class-wc-widget-recent-products.php:169
+#: classes/widgets/class-wc-widget-random-products.php:134
+#: classes/widgets/class-wc-widget-recent-products.php:170
 #: classes/widgets/class-wc-widget-recent-reviews.php:158
 #: classes/widgets/class-wc-widget-recently-viewed.php:166
-#: classes/widgets/class-wc-widget-top-rated-products.php:159
+#: classes/widgets/class-wc-widget-top-rated-products.php:156
 msgid "Title:"
 msgstr "Otsikko:"
 
 # @ woocommerce
-#: classes/widgets/class-wc-widget-best-sellers.php:195
-#: classes/widgets/class-wc-widget-featured-products.php:175
-#: classes/widgets/class-wc-widget-onsale.php:181
-#: classes/widgets/class-wc-widget-random-products.php:138
-#: classes/widgets/class-wc-widget-recent-products.php:172
+#: classes/widgets/class-wc-widget-best-sellers.php:192
+#: classes/widgets/class-wc-widget-featured-products.php:172
+#: classes/widgets/class-wc-widget-onsale.php:179
+#: classes/widgets/class-wc-widget-random-products.php:139
+#: classes/widgets/class-wc-widget-recent-products.php:173
 #: classes/widgets/class-wc-widget-recent-reviews.php:161
 #: classes/widgets/class-wc-widget-recently-viewed.php:169
-#: classes/widgets/class-wc-widget-top-rated-products.php:162
+#: classes/widgets/class-wc-widget-top-rated-products.php:159
 msgid "Number of products to show:"
 msgstr "Näytetään tuotteita kpl:"
 
 # @ woocommerce
-#: classes/widgets/class-wc-widget-best-sellers.php:199
+#: classes/widgets/class-wc-widget-best-sellers.php:196
 msgid "Hide free products"
 msgstr "Piilota maksuttomat tuotteet"
 
@@ -4024,9 +3746,7 @@ msgstr "Esitelyssä olevat tuotteet"
 # @ woocommerce
 #: classes/widgets/class-wc-widget-layered-nav-filters.php:31
 msgid "Shows active layered nav filters so users can see and deactivate them."
-msgstr ""
-"Näyttää 'Ominaisuuksilla haku' vimpaimen käytössä olevat suodattimet. "
-"Käyttäjä voi silloin ottaa suodattimen pois käytöstä."
+msgstr "Näyttää 'Ominaisuuksilla haku' vimpaimen käytössä olevat suodattimet. Käyttäjä voi silloin ottaa suodattimen pois käytöstä."
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-layered-nav-filters.php:33
@@ -4057,12 +3777,8 @@ msgstr "Max"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-layered-nav.php:31
-msgid ""
-"Shows a custom attribute in a widget which lets you narrow down the list of "
-"products when viewing product categories."
-msgstr ""
-"Mukautetut ominaisuudet näytetään vimpaimessa jonka tehtävä on rajata hakua "
-"tuotteen ominaisuuksien pohjalta, kun selataan osastoa."
+msgid "Shows a custom attribute in a widget which lets you narrow down the list of products when viewing product categories."
+msgstr "Mukautetut ominaisuudet näytetään vimpaimessa jonka tehtävä on rajata hakua tuotteen ominaisuuksien pohjalta, kun selataan osastoa."
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-layered-nav.php:33
@@ -4110,78 +3826,6 @@ msgid "OR"
 msgstr "TAI"
 
 # @ woocommerce
-#: classes/widgets/class-wc-widget-login.php:31
-msgid "Display a login area and \"My Account\" links in the sidebar."
-msgstr "Näytä 'Kirjaudu sisään' ja 'Oma tili' linkit sivupalkissa."
-
-# @ woocommerce
-#: classes/widgets/class-wc-widget-login.php:33
-msgid "WooCommerce Login"
-msgstr "WooCommerce kirjautuminen"
-
-# @ woocommerce
-#: classes/widgets/class-wc-widget-login.php:59
-#: classes/widgets/class-wc-widget-login.php:223
-msgid "Customer Login"
-msgstr "Sisäänkirjautuminen"
-
-# @ woocommerce
-#: classes/widgets/class-wc-widget-login.php:60
-#: classes/widgets/class-wc-widget-login.php:226
-msgid "Welcome %s"
-msgstr "Tervetuloa %s"
-
-# @ woocommerce
-#: classes/widgets/class-wc-widget-login.php:76
-msgid "My account"
-msgstr "Oma tili"
-
-# @ woocommerce
-#: classes/widgets/class-wc-widget-login.php:77
-msgid "Change my password"
-msgstr "Vaihda salasana"
-
-# @ woocommerce
-#: classes/widgets/class-wc-widget-login.php:78
-msgid "Logout"
-msgstr "Kirjaudu ulos"
-
-# @ woocommerce
-#: classes/widgets/class-wc-widget-login.php:116
-#: templates/myaccount/form-login.php:29
-#: templates/myaccount/form-lost-password.php:24
-#: templates/shop/form-login.php:20
-msgid "Username or email"
-msgstr "Käyttäjätunnus tai sähköpostiosoite"
-
-# @ woocommerce
-#: classes/widgets/class-wc-widget-login.php:118
-#: templates/myaccount/form-login.php:33 templates/myaccount/form-login.php:85
-#: templates/shop/form-login.php:24
-msgid "Password"
-msgstr "Salasana"
-
-# @ woocommerce
-#: classes/widgets/class-wc-widget-login.php:120 woocommerce-functions.php:974
-msgid "Login &rarr;"
-msgstr "Kirjaudu &rarr;"
-
-# @ woocommerce
-#: classes/widgets/class-wc-widget-login.php:120
-msgid "Lost password?"
-msgstr "Salasana unohtunut?"
-
-# @ woocommerce
-#: classes/widgets/class-wc-widget-login.php:222
-msgid "Logged out title:"
-msgstr "Otsikko 'ei kirjautuneelle':"
-
-# @ woocommerce
-#: classes/widgets/class-wc-widget-login.php:225
-msgid "Logged in title:"
-msgstr "Otsikko 'sisään kirjautuneelle':"
-
-# @ woocommerce
 #: classes/widgets/class-wc-widget-onsale.php:31
 msgid "Display a list of your on-sale products on your site."
 msgstr "Näytä alennettujen tuotteiden lista."
@@ -4198,12 +3842,8 @@ msgstr "Alennuksessa"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-price-filter.php:33
-msgid ""
-"Shows a price filter slider in a widget which lets you narrow down the list "
-"of shown products when viewing product categories."
-msgstr ""
-"Liukusäädin näytetään vimpaimessa jonka avulla on mahdollista rajata "
-"tuotteita hinnan mukaan, kun selataan osastoa."
+msgid "Shows a price filter slider in a widget which lets you narrow down the list of shown products when viewing product categories."
+msgstr "Liukusäädin näytetään vimpaimessa jonka avulla on mahdollista rajata tuotteita hinnan mukaan, kun selataan osastoa."
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-price-filter.php:35
@@ -4247,7 +3887,8 @@ msgstr "WooCommerce Osastot"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-product-categories.php:57
-#: woocommerce.php:821 woocommerce.php:823
+#: woocommerce.php:821
+#: woocommerce.php:823
 msgid "Product Categories"
 msgstr "Osastot"
 
@@ -4268,7 +3909,8 @@ msgstr "Osastojen järjestys"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-product-categories.php:191
-#: templates/single-product-reviews.php:84 woocommerce-ajax.php:1171
+#: templates/single-product-reviews.php:84
+#: woocommerce-ajax.php:1171
 msgid "Name"
 msgstr "Nimi"
 
@@ -4314,7 +3956,8 @@ msgstr "WooCommerce Tuote avainsanat"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-product-tag-cloud.php:58
-#: woocommerce.php:857 woocommerce.php:859
+#: woocommerce.php:857
+#: woocommerce.php:859
 msgid "Product Tags"
 msgstr "Avainsanat tuotteelle"
 
@@ -4334,8 +3977,8 @@ msgid "Random Products"
 msgstr "Satunnaiset tuotteet"
 
 # @ woocommerce
-#: classes/widgets/class-wc-widget-random-products.php:144
-#: classes/widgets/class-wc-widget-recent-products.php:176
+#: classes/widgets/class-wc-widget-random-products.php:145
+#: classes/widgets/class-wc-widget-recent-products.php:177
 msgid "Show hidden product variations"
 msgstr "Näytä piilotetut (tuote)muunnelmat"
 
@@ -4870,77 +4513,92 @@ msgid "Zala"
 msgstr "Zala"
 
 # @ woocommerce
-#: i18n/states/HZ.php:13 i18n/states/NZ.php:14
+#: i18n/states/HZ.php:13
+#: i18n/states/NZ.php:14
 msgid "Auckland"
 msgstr "Auckland"
 
 # @ woocommerce
-#: i18n/states/HZ.php:14 i18n/states/NZ.php:16
+#: i18n/states/HZ.php:14
+#: i18n/states/NZ.php:16
 msgid "Bay of Plenty"
 msgstr "Bay of Plenty"
 
 # @ woocommerce
-#: i18n/states/HZ.php:15 i18n/states/NZ.php:25
+#: i18n/states/HZ.php:15
+#: i18n/states/NZ.php:25
 msgid "Canterbury"
 msgstr "Canterbury"
 
 # @ woocommerce
-#: i18n/states/HZ.php:16 i18n/states/NZ.php:18
+#: i18n/states/HZ.php:16
+#: i18n/states/NZ.php:18
 msgid "Hawke&rsquo;s Bay"
 msgstr "Hawke&rsquo;s Bay"
 
 # @ woocommerce
-#: i18n/states/HZ.php:17 i18n/states/NZ.php:19
+#: i18n/states/HZ.php:17
+#: i18n/states/NZ.php:19
 msgid "Manawatu-Wanganui"
 msgstr "Manawatu-Wanganui"
 
 # @ woocommerce
-#: i18n/states/HZ.php:18 i18n/states/NZ.php:22
+#: i18n/states/HZ.php:18
+#: i18n/states/NZ.php:22
 msgid "Marlborough"
 msgstr "Marlborough"
 
 # @ woocommerce
-#: i18n/states/HZ.php:19 i18n/states/NZ.php:21
+#: i18n/states/HZ.php:19
+#: i18n/states/NZ.php:21
 msgid "Nelson"
 msgstr "Nelson"
 
 # @ woocommerce
-#: i18n/states/HZ.php:20 i18n/states/NZ.php:13
+#: i18n/states/HZ.php:20
+#: i18n/states/NZ.php:13
 msgid "Northland"
 msgstr "Northland"
 
 # @ woocommerce
-#: i18n/states/HZ.php:21 i18n/states/NZ.php:26
+#: i18n/states/HZ.php:21
+#: i18n/states/NZ.php:26
 msgid "Otago"
 msgstr "Otago"
 
 # @ woocommerce
-#: i18n/states/HZ.php:22 i18n/states/NZ.php:27
+#: i18n/states/HZ.php:22
+#: i18n/states/NZ.php:27
 msgid "Southland"
 msgstr "Southland"
 
 # @ woocommerce
-#: i18n/states/HZ.php:23 i18n/states/NZ.php:17
+#: i18n/states/HZ.php:23
+#: i18n/states/NZ.php:17
 msgid "Taranaki"
 msgstr "Taranaki"
 
 # @ woocommerce
-#: i18n/states/HZ.php:24 i18n/states/NZ.php:23
+#: i18n/states/HZ.php:24
+#: i18n/states/NZ.php:23
 msgid "Tasman"
 msgstr "Tasman"
 
 # @ woocommerce
-#: i18n/states/HZ.php:25 i18n/states/NZ.php:15
+#: i18n/states/HZ.php:25
+#: i18n/states/NZ.php:15
 msgid "Waikato"
 msgstr "Waikato"
 
 # @ woocommerce
-#: i18n/states/HZ.php:26 i18n/states/NZ.php:20
+#: i18n/states/HZ.php:26
+#: i18n/states/NZ.php:20
 msgid "Wellington"
 msgstr "Wellington"
 
 # @ woocommerce
-#: i18n/states/HZ.php:27 i18n/states/NZ.php:24
+#: i18n/states/HZ.php:27
+#: i18n/states/NZ.php:24
 msgid "West Coast"
 msgstr "West Coast"
 
@@ -5295,50 +4953,32 @@ msgid "W.P. Putrajaya"
 msgstr "W.P. Putrajaya"
 
 #: i18n/states/TH.php:13
-msgid ""
-"Amnat Charoen (&#3629;&#3635;&#3609;&#3634;&#3592;&#3648;&#3592;&#3619;"
-"&#3636;&#3597;)"
-msgstr ""
-"Amnat Charoen (&#3629;&#3635;&#3609;&#3634;&#3592;&#3648;&#3592;&#3619;"
-"&#3636;&#3597;)"
+msgid "Amnat Charoen (&#3629;&#3635;&#3609;&#3634;&#3592;&#3648;&#3592;&#3619;&#3636;&#3597;)"
+msgstr "Amnat Charoen (&#3629;&#3635;&#3609;&#3634;&#3592;&#3648;&#3592;&#3619;&#3636;&#3597;)"
 
 #: i18n/states/TH.php:14
 msgid "Ang Thong (&#3629;&#3656;&#3634;&#3591;&#3607;&#3629;&#3591;)"
 msgstr "Ang Thong (&#3629;&#3656;&#3634;&#3591;&#3607;&#3629;&#3591;)"
 
 #: i18n/states/TH.php:15
-msgid ""
-"Ayutthaya (&#3614;&#3619;&#3632;&#3609;&#3588;&#3619;&#3624;&#3619;&#3637;"
-"&#3629;&#3618;&#3640;&#3608;&#3618;&#3634;)"
-msgstr ""
-"Ayutthaya (&#3614;&#3619;&#3632;&#3609;&#3588;&#3619;&#3624;&#3619;&#3637;"
-"&#3629;&#3618;&#3640;&#3608;&#3618;&#3634;)"
+msgid "Ayutthaya (&#3614;&#3619;&#3632;&#3609;&#3588;&#3619;&#3624;&#3619;&#3637;&#3629;&#3618;&#3640;&#3608;&#3618;&#3634;)"
+msgstr "Ayutthaya (&#3614;&#3619;&#3632;&#3609;&#3588;&#3619;&#3624;&#3619;&#3637;&#3629;&#3618;&#3640;&#3608;&#3618;&#3634;)"
 
 #: i18n/states/TH.php:16
-msgid ""
-"Bangkok (&#3585;&#3619;&#3640;&#3591;&#3648;&#3607;&#3614;&#3617;&#3627;"
-"&#3634;&#3609;&#3588;&#3619;)"
-msgstr ""
-"Bangkok (&#3585;&#3619;&#3640;&#3591;&#3648;&#3607;&#3614;&#3617;&#3627;"
-"&#3634;&#3609;&#3588;&#3619;)"
+msgid "Bangkok (&#3585;&#3619;&#3640;&#3591;&#3648;&#3607;&#3614;&#3617;&#3627;&#3634;&#3609;&#3588;&#3619;)"
+msgstr "Bangkok (&#3585;&#3619;&#3640;&#3591;&#3648;&#3607;&#3614;&#3617;&#3627;&#3634;&#3609;&#3588;&#3619;)"
 
 #: i18n/states/TH.php:17
 msgid "Bueng Kan (&#3610;&#3638;&#3591;&#3585;&#3634;&#3628;)"
 msgstr "Bueng Kan (&#3610;&#3638;&#3591;&#3585;&#3634;&#3628;)"
 
 #: i18n/states/TH.php:18
-msgid ""
-"Buri Ram (&#3610;&#3640;&#3619;&#3637;&#3619;&#3633;&#3617;&#3618;&#3660;)"
-msgstr ""
-"Buri Ram (&#3610;&#3640;&#3619;&#3637;&#3619;&#3633;&#3617;&#3618;&#3660;)"
+msgid "Buri Ram (&#3610;&#3640;&#3619;&#3637;&#3619;&#3633;&#3617;&#3618;&#3660;)"
+msgstr "Buri Ram (&#3610;&#3640;&#3619;&#3637;&#3619;&#3633;&#3617;&#3618;&#3660;)"
 
 #: i18n/states/TH.php:19
-msgid ""
-"Chachoengsao (&#3593;&#3632;&#3648;&#3594;&#3636;&#3591;&#3648;&#3607;&#3619;"
-"&#3634;)"
-msgstr ""
-"Chachoengsao (&#3593;&#3632;&#3648;&#3594;&#3636;&#3591;&#3648;&#3607;&#3619;"
-"&#3634;)"
+msgid "Chachoengsao (&#3593;&#3632;&#3648;&#3594;&#3636;&#3591;&#3648;&#3607;&#3619;&#3634;)"
+msgstr "Chachoengsao (&#3593;&#3632;&#3648;&#3594;&#3636;&#3591;&#3648;&#3607;&#3619;&#3634;)"
 
 #: i18n/states/TH.php:20
 msgid "Chai Nat (&#3594;&#3633;&#3618;&#3609;&#3634;&#3607;)"
@@ -5353,10 +4993,8 @@ msgid "Chanthaburi (&#3592;&#3633;&#3609;&#3607;&#3610;&#3640;&#3619;&#3637;)"
 msgstr "Chanthaburi (&#3592;&#3633;&#3609;&#3607;&#3610;&#3640;&#3619;&#3637;)"
 
 #: i18n/states/TH.php:23
-msgid ""
-"Chiang Mai (&#3648;&#3594;&#3637;&#3618;&#3591;&#3651;&#3627;&#3617;&#3656;)"
-msgstr ""
-"Chiang Mai (&#3648;&#3594;&#3637;&#3618;&#3591;&#3651;&#3627;&#3617;&#3656;)"
+msgid "Chiang Mai (&#3648;&#3594;&#3637;&#3618;&#3591;&#3651;&#3627;&#3617;&#3656;)"
+msgstr "Chiang Mai (&#3648;&#3594;&#3637;&#3618;&#3591;&#3651;&#3627;&#3617;&#3656;)"
 
 #: i18n/states/TH.php:24
 msgid "Chiang Rai (&#3648;&#3594;&#3637;&#3618;&#3591;&#3619;&#3634;&#3618;)"
@@ -5371,26 +5009,16 @@ msgid "Chumphon (&#3594;&#3640;&#3617;&#3614;&#3619;)"
 msgstr "Chumphon (&#3594;&#3640;&#3617;&#3614;&#3619;)"
 
 #: i18n/states/TH.php:27
-msgid ""
-"Kalasin (&#3585;&#3634;&#3628;&#3626;&#3636;&#3609;&#3608;&#3640;&#3660;)"
-msgstr ""
-"Kalasin (&#3585;&#3634;&#3628;&#3626;&#3636;&#3609;&#3608;&#3640;&#3660;)"
+msgid "Kalasin (&#3585;&#3634;&#3628;&#3626;&#3636;&#3609;&#3608;&#3640;&#3660;)"
+msgstr "Kalasin (&#3585;&#3634;&#3628;&#3626;&#3636;&#3609;&#3608;&#3640;&#3660;)"
 
 #: i18n/states/TH.php:28
-msgid ""
-"Kamphaeng Phet (&#3585;&#3635;&#3649;&#3614;&#3591;&#3648;&#3614;&#3594;"
-"&#3619;)"
-msgstr ""
-"Kamphaeng Phet (&#3585;&#3635;&#3649;&#3614;&#3591;&#3648;&#3614;&#3594;"
-"&#3619;)"
+msgid "Kamphaeng Phet (&#3585;&#3635;&#3649;&#3614;&#3591;&#3648;&#3614;&#3594;&#3619;)"
+msgstr "Kamphaeng Phet (&#3585;&#3635;&#3649;&#3614;&#3591;&#3648;&#3614;&#3594;&#3619;)"
 
 #: i18n/states/TH.php:29
-msgid ""
-"Kanchanaburi (&#3585;&#3634;&#3597;&#3592;&#3609;&#3610;&#3640;&#3619;"
-"&#3637;)"
-msgstr ""
-"Kanchanaburi (&#3585;&#3634;&#3597;&#3592;&#3609;&#3610;&#3640;&#3619;"
-"&#3637;)"
+msgid "Kanchanaburi (&#3585;&#3634;&#3597;&#3592;&#3609;&#3610;&#3640;&#3619;&#3637;)"
+msgstr "Kanchanaburi (&#3585;&#3634;&#3597;&#3592;&#3609;&#3610;&#3640;&#3619;&#3637;)"
 
 #: i18n/states/TH.php:30
 msgid "Khon Kaen (&#3586;&#3629;&#3609;&#3649;&#3585;&#3656;&#3609;)"
@@ -5417,20 +5045,12 @@ msgid "Lopburi (&#3621;&#3614;&#3610;&#3640;&#3619;&#3637;)"
 msgstr "Lopburi (&#3621;&#3614;&#3610;&#3640;&#3619;&#3637;)"
 
 #: i18n/states/TH.php:36
-msgid ""
-"Mae Hong Son (&#3649;&#3617;&#3656;&#3630;&#3656;&#3629;&#3591;&#3626;&#3629;"
-"&#3609;)"
-msgstr ""
-"Mae Hong Son (&#3649;&#3617;&#3656;&#3630;&#3656;&#3629;&#3591;&#3626;&#3629;"
-"&#3609;)"
+msgid "Mae Hong Son (&#3649;&#3617;&#3656;&#3630;&#3656;&#3629;&#3591;&#3626;&#3629;&#3609;)"
+msgstr "Mae Hong Son (&#3649;&#3617;&#3656;&#3630;&#3656;&#3629;&#3591;&#3626;&#3629;&#3609;)"
 
 #: i18n/states/TH.php:37
-msgid ""
-"Maha Sarakham (&#3617;&#3627;&#3634;&#3626;&#3634;&#3619;&#3588;&#3634;"
-"&#3617;)"
-msgstr ""
-"Maha Sarakham (&#3617;&#3627;&#3634;&#3626;&#3634;&#3619;&#3588;&#3634;"
-"&#3617;)"
+msgid "Maha Sarakham (&#3617;&#3627;&#3634;&#3626;&#3634;&#3619;&#3588;&#3634;&#3617;)"
+msgstr "Maha Sarakham (&#3617;&#3627;&#3634;&#3626;&#3634;&#3619;&#3588;&#3634;&#3617;)"
 
 #: i18n/states/TH.php:38
 msgid "Mukdahan (&#3617;&#3640;&#3585;&#3604;&#3634;&#3627;&#3634;&#3619;)"
@@ -5449,28 +5069,16 @@ msgid "Nakhon Phanom (&#3609;&#3588;&#3619;&#3614;&#3609;&#3617;)"
 msgstr "Nakhon Phanom (&#3609;&#3588;&#3619;&#3614;&#3609;&#3617;)"
 
 #: i18n/states/TH.php:42
-msgid ""
-"Nakhon Ratchasima (&#3609;&#3588;&#3619;&#3619;&#3634;&#3594;&#3626;&#3637;"
-"&#3617;&#3634;)"
-msgstr ""
-"Nakhon Ratchasima (&#3609;&#3588;&#3619;&#3619;&#3634;&#3594;&#3626;&#3637;"
-"&#3617;&#3634;)"
+msgid "Nakhon Ratchasima (&#3609;&#3588;&#3619;&#3619;&#3634;&#3594;&#3626;&#3637;&#3617;&#3634;)"
+msgstr "Nakhon Ratchasima (&#3609;&#3588;&#3619;&#3619;&#3634;&#3594;&#3626;&#3637;&#3617;&#3634;)"
 
 #: i18n/states/TH.php:43
-msgid ""
-"Nakhon Sawan (&#3609;&#3588;&#3619;&#3626;&#3623;&#3619;&#3619;&#3588;"
-"&#3660;)"
-msgstr ""
-"Nakhon Sawan (&#3609;&#3588;&#3619;&#3626;&#3623;&#3619;&#3619;&#3588;"
-"&#3660;)"
+msgid "Nakhon Sawan (&#3609;&#3588;&#3619;&#3626;&#3623;&#3619;&#3619;&#3588;&#3660;)"
+msgstr "Nakhon Sawan (&#3609;&#3588;&#3619;&#3626;&#3623;&#3619;&#3619;&#3588;&#3660;)"
 
 #: i18n/states/TH.php:44
-msgid ""
-"Nakhon Si Thammarat (&#3609;&#3588;&#3619;&#3624;&#3619;&#3637;&#3608;&#3619;"
-"&#3619;&#3617;&#3619;&#3634;&#3594;)"
-msgstr ""
-"Nakhon Si Thammarat (&#3609;&#3588;&#3619;&#3624;&#3619;&#3637;&#3608;&#3619;"
-"&#3619;&#3617;&#3619;&#3634;&#3594;)"
+msgid "Nakhon Si Thammarat (&#3609;&#3588;&#3619;&#3624;&#3619;&#3637;&#3608;&#3619;&#3619;&#3617;&#3619;&#3634;&#3594;)"
+msgstr "Nakhon Si Thammarat (&#3609;&#3588;&#3619;&#3624;&#3619;&#3637;&#3608;&#3619;&#3619;&#3617;&#3619;&#3634;&#3594;)"
 
 #: i18n/states/TH.php:45
 msgid "Nan (&#3609;&#3656;&#3634;&#3609;)"
@@ -5481,12 +5089,8 @@ msgid "Narathiwat (&#3609;&#3619;&#3634;&#3608;&#3636;&#3623;&#3634;&#3626;)"
 msgstr "Narathiwat (&#3609;&#3619;&#3634;&#3608;&#3636;&#3623;&#3634;&#3626;)"
 
 #: i18n/states/TH.php:47
-msgid ""
-"Nong Bua Lam Phu (&#3627;&#3609;&#3629;&#3591;&#3610;&#3633;&#3623;&#3621;"
-"&#3635;&#3616;&#3641;)"
-msgstr ""
-"Nong Bua Lam Phu (&#3627;&#3609;&#3629;&#3591;&#3610;&#3633;&#3623;&#3621;"
-"&#3635;&#3616;&#3641;)"
+msgid "Nong Bua Lam Phu (&#3627;&#3609;&#3629;&#3591;&#3610;&#3633;&#3623;&#3621;&#3635;&#3616;&#3641;)"
+msgstr "Nong Bua Lam Phu (&#3627;&#3609;&#3629;&#3591;&#3610;&#3633;&#3623;&#3621;&#3635;&#3616;&#3641;)"
 
 #: i18n/states/TH.php:48
 msgid "Nong Khai (&#3627;&#3609;&#3629;&#3591;&#3588;&#3634;&#3618;)"
@@ -5498,8 +5102,7 @@ msgstr "Nonthaburi (&#3609;&#3609;&#3607;&#3610;&#3640;&#3619;&#3637;)"
 
 #: i18n/states/TH.php:50
 msgid "Pathum Thani (&#3611;&#3607;&#3640;&#3617;&#3608;&#3634;&#3609;&#3637;)"
-msgstr ""
-"Pathum Thani (&#3611;&#3607;&#3640;&#3617;&#3608;&#3634;&#3609;&#3637;)"
+msgstr "Pathum Thani (&#3611;&#3607;&#3640;&#3617;&#3608;&#3634;&#3609;&#3637;)"
 
 #: i18n/states/TH.php:51
 msgid "Pattani (&#3611;&#3633;&#3605;&#3605;&#3634;&#3609;&#3637;)"
@@ -5518,10 +5121,8 @@ msgid "Phayao (&#3614;&#3632;&#3648;&#3618;&#3634;)"
 msgstr "Phayao (&#3614;&#3632;&#3648;&#3618;&#3634;)"
 
 #: i18n/states/TH.php:55
-msgid ""
-"Phetchabun (&#3648;&#3614;&#3594;&#3619;&#3610;&#3641;&#3619;&#3603;&#3660;)"
-msgstr ""
-"Phetchabun (&#3648;&#3614;&#3594;&#3619;&#3610;&#3641;&#3619;&#3603;&#3660;)"
+msgid "Phetchabun (&#3648;&#3614;&#3594;&#3619;&#3610;&#3641;&#3619;&#3603;&#3660;)"
+msgstr "Phetchabun (&#3648;&#3614;&#3594;&#3619;&#3610;&#3641;&#3619;&#3603;&#3660;)"
 
 #: i18n/states/TH.php:56
 msgid "Phetchaburi (&#3648;&#3614;&#3594;&#3619;&#3610;&#3640;&#3619;&#3637;)"
@@ -5544,20 +5145,12 @@ msgid "Phuket (&#3616;&#3641;&#3648;&#3585;&#3655;&#3605;)"
 msgstr "Phuket (&#3616;&#3641;&#3648;&#3585;&#3655;&#3605;)"
 
 #: i18n/states/TH.php:61
-msgid ""
-"Prachin Buri (&#3611;&#3619;&#3634;&#3592;&#3637;&#3609;&#3610;&#3640;&#3619;"
-"&#3637;)"
-msgstr ""
-"Prachin Buri (&#3611;&#3619;&#3634;&#3592;&#3637;&#3609;&#3610;&#3640;&#3619;"
-"&#3637;)"
+msgid "Prachin Buri (&#3611;&#3619;&#3634;&#3592;&#3637;&#3609;&#3610;&#3640;&#3619;&#3637;)"
+msgstr "Prachin Buri (&#3611;&#3619;&#3634;&#3592;&#3637;&#3609;&#3610;&#3640;&#3619;&#3637;)"
 
 #: i18n/states/TH.php:62
-msgid ""
-"Prachuap Khiri Khan (&#3611;&#3619;&#3632;&#3592;&#3623;&#3610;&#3588;&#3637;"
-"&#3619;&#3637;&#3586;&#3633;&#3609;&#3608;&#3660;)"
-msgstr ""
-"Prachuap Khiri Khan (&#3611;&#3619;&#3632;&#3592;&#3623;&#3610;&#3588;&#3637;"
-"&#3619;&#3637;&#3586;&#3633;&#3609;&#3608;&#3660;)"
+msgid "Prachuap Khiri Khan (&#3611;&#3619;&#3632;&#3592;&#3623;&#3610;&#3588;&#3637;&#3619;&#3637;&#3586;&#3633;&#3609;&#3608;&#3660;)"
+msgstr "Prachuap Khiri Khan (&#3611;&#3619;&#3632;&#3592;&#3623;&#3610;&#3588;&#3637;&#3619;&#3637;&#3586;&#3633;&#3609;&#3608;&#3660;)"
 
 #: i18n/states/TH.php:63
 msgid "Ranong (&#3619;&#3632;&#3609;&#3629;&#3591;)"
@@ -5584,28 +5177,16 @@ msgid "Sakon Nakhon (&#3626;&#3585;&#3621;&#3609;&#3588;&#3619;)"
 msgstr "Sakon Nakhon (&#3626;&#3585;&#3621;&#3609;&#3588;&#3619;)"
 
 #: i18n/states/TH.php:69
-msgid ""
-"Samut Prakan (&#3626;&#3617;&#3640;&#3607;&#3619;&#3611;&#3619;&#3634;&#3585;"
-"&#3634;&#3619;)"
-msgstr ""
-"Samut Prakan (&#3626;&#3617;&#3640;&#3607;&#3619;&#3611;&#3619;&#3634;&#3585;"
-"&#3634;&#3619;)"
+msgid "Samut Prakan (&#3626;&#3617;&#3640;&#3607;&#3619;&#3611;&#3619;&#3634;&#3585;&#3634;&#3619;)"
+msgstr "Samut Prakan (&#3626;&#3617;&#3640;&#3607;&#3619;&#3611;&#3619;&#3634;&#3585;&#3634;&#3619;)"
 
 #: i18n/states/TH.php:70
-msgid ""
-"Samut Sakhon (&#3626;&#3617;&#3640;&#3607;&#3619;&#3626;&#3634;&#3588;"
-"&#3619;)"
-msgstr ""
-"Samut Sakhon (&#3626;&#3617;&#3640;&#3607;&#3619;&#3626;&#3634;&#3588;"
-"&#3619;)"
+msgid "Samut Sakhon (&#3626;&#3617;&#3640;&#3607;&#3619;&#3626;&#3634;&#3588;&#3619;)"
+msgstr "Samut Sakhon (&#3626;&#3617;&#3640;&#3607;&#3619;&#3626;&#3634;&#3588;&#3619;)"
 
 #: i18n/states/TH.php:71
-msgid ""
-"Samut Songkhram (&#3626;&#3617;&#3640;&#3607;&#3619;&#3626;&#3591;&#3588;"
-"&#3619;&#3634;&#3617;)"
-msgstr ""
-"Samut Songkhram (&#3626;&#3617;&#3640;&#3607;&#3619;&#3626;&#3591;&#3588;"
-"&#3619;&#3634;&#3617;)"
+msgid "Samut Songkhram (&#3626;&#3617;&#3640;&#3607;&#3619;&#3626;&#3591;&#3588;&#3619;&#3634;&#3617;)"
+msgstr "Samut Songkhram (&#3626;&#3617;&#3640;&#3607;&#3619;&#3626;&#3591;&#3588;&#3619;&#3634;&#3617;)"
 
 #: i18n/states/TH.php:72
 msgid "Saraburi (&#3626;&#3619;&#3632;&#3610;&#3640;&#3619;&#3637;)"
@@ -5616,10 +5197,8 @@ msgid "Satun (&#3626;&#3605;&#3641;&#3621;)"
 msgstr "Satun (&#3626;&#3605;&#3641;&#3621;)"
 
 #: i18n/states/TH.php:74
-msgid ""
-"Sing Buri (&#3626;&#3636;&#3591;&#3627;&#3660;&#3610;&#3640;&#3619;&#3637;)"
-msgstr ""
-"Sing Buri (&#3626;&#3636;&#3591;&#3627;&#3660;&#3610;&#3640;&#3619;&#3637;)"
+msgid "Sing Buri (&#3626;&#3636;&#3591;&#3627;&#3660;&#3610;&#3640;&#3619;&#3637;)"
+msgstr "Sing Buri (&#3626;&#3636;&#3591;&#3627;&#3660;&#3610;&#3640;&#3619;&#3637;)"
 
 #: i18n/states/TH.php:75
 msgid "Sisaket (&#3624;&#3619;&#3637;&#3626;&#3632;&#3648;&#3585;&#3625;)"
@@ -5634,20 +5213,12 @@ msgid "Sukhothai (&#3626;&#3640;&#3650;&#3586;&#3607;&#3633;&#3618;)"
 msgstr "Sukhothai (&#3626;&#3640;&#3650;&#3586;&#3607;&#3633;&#3618;)"
 
 #: i18n/states/TH.php:78
-msgid ""
-"Suphan Buri (&#3626;&#3640;&#3614;&#3619;&#3619;&#3603;&#3610;&#3640;&#3619;"
-"&#3637;)"
-msgstr ""
-"Suphan Buri (&#3626;&#3640;&#3614;&#3619;&#3619;&#3603;&#3610;&#3640;&#3619;"
-"&#3637;)"
+msgid "Suphan Buri (&#3626;&#3640;&#3614;&#3619;&#3619;&#3603;&#3610;&#3640;&#3619;&#3637;)"
+msgstr "Suphan Buri (&#3626;&#3640;&#3614;&#3619;&#3619;&#3603;&#3610;&#3640;&#3619;&#3637;)"
 
 #: i18n/states/TH.php:79
-msgid ""
-"Surat Thani (&#3626;&#3640;&#3619;&#3634;&#3625;&#3598;&#3619;&#3660;&#3608;"
-"&#3634;&#3609;&#3637;)"
-msgstr ""
-"Surat Thani (&#3626;&#3640;&#3619;&#3634;&#3625;&#3598;&#3619;&#3660;&#3608;"
-"&#3634;&#3609;&#3637;)"
+msgid "Surat Thani (&#3626;&#3640;&#3619;&#3634;&#3625;&#3598;&#3619;&#3660;&#3608;&#3634;&#3609;&#3637;)"
+msgstr "Surat Thani (&#3626;&#3640;&#3619;&#3634;&#3625;&#3598;&#3619;&#3660;&#3608;&#3634;&#3609;&#3637;)"
 
 #: i18n/states/TH.php:80
 msgid "Surin (&#3626;&#3640;&#3619;&#3636;&#3609;&#3607;&#3619;&#3660;)"
@@ -5666,28 +5237,20 @@ msgid "Trat (&#3605;&#3619;&#3634;&#3604;)"
 msgstr "Trat (&#3605;&#3619;&#3634;&#3604;)"
 
 #: i18n/states/TH.php:84
-msgid ""
-"Ubon Ratchathani (&#3629;&#3640;&#3610;&#3621;&#3619;&#3634;&#3594;&#3608;"
-"&#3634;&#3609;&#3637;)"
-msgstr ""
-"Ubon Ratchathani (&#3629;&#3640;&#3610;&#3621;&#3619;&#3634;&#3594;&#3608;"
-"&#3634;&#3609;&#3637;)"
+msgid "Ubon Ratchathani (&#3629;&#3640;&#3610;&#3621;&#3619;&#3634;&#3594;&#3608;&#3634;&#3609;&#3637;)"
+msgstr "Ubon Ratchathani (&#3629;&#3640;&#3610;&#3621;&#3619;&#3634;&#3594;&#3608;&#3634;&#3609;&#3637;)"
 
 #: i18n/states/TH.php:85
 msgid "Udon Thani (&#3629;&#3640;&#3604;&#3619;&#3608;&#3634;&#3609;&#3637;)"
 msgstr "Udon Thani (&#3629;&#3640;&#3604;&#3619;&#3608;&#3634;&#3609;&#3637;)"
 
 #: i18n/states/TH.php:86
-msgid ""
-"Uthai Thani (&#3629;&#3640;&#3607;&#3633;&#3618;&#3608;&#3634;&#3609;&#3637;)"
-msgstr ""
-"Uthai Thani (&#3629;&#3640;&#3607;&#3633;&#3618;&#3608;&#3634;&#3609;&#3637;)"
+msgid "Uthai Thani (&#3629;&#3640;&#3607;&#3633;&#3618;&#3608;&#3634;&#3609;&#3637;)"
+msgstr "Uthai Thani (&#3629;&#3640;&#3607;&#3633;&#3618;&#3608;&#3634;&#3609;&#3637;)"
 
 #: i18n/states/TH.php:87
-msgid ""
-"Uttaradit (&#3629;&#3640;&#3605;&#3619;&#3604;&#3636;&#3605;&#3606;&#3660;)"
-msgstr ""
-"Uttaradit (&#3629;&#3640;&#3605;&#3619;&#3604;&#3636;&#3605;&#3606;&#3660;)"
+msgid "Uttaradit (&#3629;&#3640;&#3605;&#3619;&#3604;&#3636;&#3605;&#3606;&#3660;)"
+msgstr "Uttaradit (&#3629;&#3640;&#3605;&#3619;&#3604;&#3636;&#3605;&#3606;&#3660;)"
 
 #: i18n/states/TH.php:88
 msgid "Yala (&#3618;&#3632;&#3621;&#3634;)"
@@ -6068,29 +5631,32 @@ msgid "cancelled"
 msgstr "peruttu"
 
 # @ woocommerce
-#: templates/cart/cart-empty.php:14 templates/cart/empty.php:14
+#: templates/cart/cart-empty.php:14
 msgid "Your cart is currently empty."
 msgstr "Ostoskori on tyhjä."
 
 # @ woocommerce
-#: templates/cart/cart-empty.php:18 templates/cart/empty.php:18
+#: templates/cart/cart-empty.php:18
 msgid "&larr; Return To Shop"
 msgstr "&larr; Palaa kauppaan"
 
 # @ woocommerce
-#: templates/cart/cart.php:28 templates/checkout/form-pay.php:19
+#: templates/cart/cart.php:28
+#: templates/checkout/form-pay.php:19
 #: templates/checkout/review-order.php:21
 #: templates/emails/admin-new-order.php:22
 #: templates/emails/customer-completed-order.php:23
 #: templates/emails/customer-invoice.php:27
 #: templates/emails/customer-note.php:27
 #: templates/emails/customer-processing-order.php:23
-#: templates/order/order-details.php:20 woocommerce.php:983
+#: templates/order/order-details.php:20
+#: woocommerce.php:983
 msgid "Product"
 msgstr "Tuote"
 
 # @ woocommerce
-#: templates/cart/cart.php:29 templates/emails/admin-new-order.php:24
+#: templates/cart/cart.php:29
+#: templates/emails/admin-new-order.php:24
 #: templates/emails/customer-completed-order.php:25
 #: templates/emails/customer-invoice.php:29
 #: templates/emails/customer-note.php:29
@@ -6099,7 +5665,8 @@ msgid "Price"
 msgstr "Hinta"
 
 # @ woocommerce
-#: templates/cart/cart.php:30 templates/emails/admin-new-order.php:23
+#: templates/cart/cart.php:30
+#: templates/emails/admin-new-order.php:23
 #: templates/emails/customer-completed-order.php:24
 #: templates/emails/customer-invoice.php:28
 #: templates/emails/customer-note.php:28
@@ -6108,8 +5675,10 @@ msgid "Quantity"
 msgstr "Määrä"
 
 # @ woocommerce
-#: templates/cart/cart.php:31 templates/checkout/review-order.php:22
-#: templates/myaccount/my-orders.php:35 templates/order/order-details.php:21
+#: templates/cart/cart.php:31
+#: templates/checkout/review-order.php:22
+#: templates/myaccount/my-orders.php:35
+#: templates/order/order-details.php:21
 msgid "Total"
 msgstr "Yhteensä"
 
@@ -6126,12 +5695,14 @@ msgid "Qty"
 msgstr "Määrä"
 
 # @ woocommerce
-#: templates/cart/cart.php:127 woocommerce.php:1096
+#: templates/cart/cart.php:127
+#: woocommerce.php:1096
 msgid "Coupon"
 msgstr "Kuponki"
 
 # @ woocommerce
-#: templates/cart/cart.php:127 templates/checkout/form-coupon.php:29
+#: templates/cart/cart.php:127
+#: templates/checkout/form-coupon.php:29
 msgid "Apply Coupon"
 msgstr "Käytä kuponki"
 
@@ -6146,7 +5717,7 @@ msgid "Proceed to Checkout &rarr;"
 msgstr "Siirry kassalle &rarr;"
 
 # @ woocommerce
-#: templates/cart/cross-sells.php:40
+#: templates/cart/cross-sells.php:38
 msgid "You may be interested in&hellip;"
 msgstr "Saatat olla kiinnostunut..."
 
@@ -6171,7 +5742,8 @@ msgid "Calculate Shipping"
 msgstr "Laske toimituskulut"
 
 # @ woocommerce
-#: templates/cart/shipping-calculator.php:28 woocommerce-template.php:1334
+#: templates/cart/shipping-calculator.php:28
+#: woocommerce-template.php:1334
 msgid "Select a country&hellip;"
 msgstr "Valitse maa..."
 
@@ -6183,7 +5755,8 @@ msgid "State / county"
 msgstr "Lääni / alue ym."
 
 # @ woocommerce
-#: templates/cart/shipping-calculator.php:52 woocommerce-template.php:1384
+#: templates/cart/shipping-calculator.php:52
+#: woocommerce-template.php:1384
 msgid "Select a state&hellip;"
 msgstr "Valitse alue..."
 
@@ -6204,26 +5777,19 @@ msgstr "Maksuton"
 # @ woocommerce
 #: templates/cart/shipping-methods.php:68
 msgid "Please fill in your details to see available shipping methods."
-msgstr ""
-"Kirjoita vähintään toimitusosoite. Sen jälkeen voit valita toimitustavan."
+msgstr "Kirjoita vähintään toimitusosoite. Sen jälkeen voit valita toimitustavan."
 
 # @ woocommerce
-#: templates/cart/shipping-methods.php:76 templates/cart/totals.php:147
-msgid ""
-"Sorry, it seems that there are no available shipping methods for your "
-"location (%s)."
-msgstr ""
-"Pahoittelemme, sopivaa (ennalta asetettua) toimitustapaa ei löytynyt (%s) "
-"kohteeseen."
+#: templates/cart/shipping-methods.php:76
+#: templates/cart/totals.php:147
+msgid "Sorry, it seems that there are no available shipping methods for your location (%s)."
+msgstr "Pahoittelemme, sopivaa (ennalta asetettua) toimitustapaa ei löytynyt (%s) kohteeseen."
 
 # @ woocommerce
-#: templates/cart/shipping-methods.php:76 templates/cart/totals.php:147
-msgid ""
-"If you require assistance or wish to make alternate arrangements please "
-"contact us."
-msgstr ""
-"Ole hyvä ja ota yhteyttä, jos tarvitset ohjeita tai haluat keskustella mitä "
-"voisi olla tehtävissä."
+#: templates/cart/shipping-methods.php:76
+#: templates/cart/totals.php:147
+msgid "If you require assistance or wish to make alternate arrangements please contact us."
+msgstr "Ole hyvä ja ota yhteyttä, jos tarvitset ohjeita tai haluat keskustella mitä voisi olla tehtävissä."
 
 # @ woocommerce
 #: templates/cart/totals.php:22
@@ -6231,33 +5797,39 @@ msgid "Cart Totals"
 msgstr "Ostoskori yhteensä"
 
 # @ woocommerce
-#: templates/cart/totals.php:28 templates/checkout/review-order.php:27
+#: templates/cart/totals.php:28
+#: templates/checkout/review-order.php:27
 msgid "Cart Subtotal"
 msgstr "Välisumma"
 
 # @ woocommerce
-#: templates/cart/totals.php:35 templates/checkout/review-order.php:34
-#: woocommerce.php:1691
+#: templates/cart/totals.php:35
+#: templates/checkout/review-order.php:34
+#: woocommerce.php:1690
 msgid "Cart Discount"
 msgstr "Alennus ostoskorissa"
 
 # @ woocommerce
-#: templates/cart/totals.php:35 templates/cart/totals.php:83
+#: templates/cart/totals.php:35
+#: templates/cart/totals.php:83
 msgid "[Remove]"
 msgstr "[Poista]"
 
 # @ woocommerce
-#: templates/cart/totals.php:46 templates/checkout/review-order.php:45
+#: templates/cart/totals.php:46
+#: templates/checkout/review-order.php:45
 msgid "Shipping"
 msgstr "Toimitus"
 
 # @ woocommerce
-#: templates/cart/totals.php:83 templates/checkout/review-order.php:82
+#: templates/cart/totals.php:83
+#: templates/checkout/review-order.php:82
 msgid "Order Discount"
 msgstr "Tilauksen alennus"
 
 # @ woocommerce
-#: templates/cart/totals.php:92 templates/checkout/review-order.php:91
+#: templates/cart/totals.php:92
+#: templates/checkout/review-order.php:91
 msgid "Order Total"
 msgstr "Tilaus yhteensä"
 
@@ -6268,32 +5840,18 @@ msgstr "(arvio veroista %s)"
 
 # @ woocommerce
 #: templates/cart/totals.php:123
-msgid ""
-"Note: Shipping and taxes are estimated%s and will be updated during checkout "
-"based on your billing and shipping information."
-msgstr ""
-"Note: Shipping and taxes are estimated%s and will be updated during checkout "
-"based on your billing and shipping information."
+msgid "Note: Shipping and taxes are estimated%s and will be updated during checkout based on your billing and shipping information."
+msgstr "Note: Shipping and taxes are estimated%s and will be updated during checkout based on your billing and shipping information."
 
 # @ woocommerce
 #: templates/cart/totals.php:135
-msgid ""
-"No shipping methods were found; please recalculate your shipping and enter "
-"your state/county and zip/postcode to ensure there are no other available "
-"methods for your location."
-msgstr ""
-"Sopivaa toimitustapaa ei löytynyt. Syötä tiedot uudelleen ja varmista että "
-"alue/maa sekä postinumero on syötetty oikein. Yritä laskea toimituskulut "
-"uudelleen."
+msgid "No shipping methods were found; please recalculate your shipping and enter your state/county and zip/postcode to ensure there are no other available methods for your location."
+msgstr "Sopivaa toimitustapaa ei löytynyt. Syötä tiedot uudelleen ja varmista että alue/maa sekä postinumero on syötetty oikein. Yritä laskea toimituskulut uudelleen."
 
 # @ woocommerce
 #: templates/checkout/cart-errors.php:16
-msgid ""
-"There are some issues with the items in your cart (shown above). Please go "
-"back to the cart page and resolve these issues before checking out."
-msgstr ""
-"Ostoskorissa olevissa tuotteissa on jotain selvitettävää. Ole hyvä ja palaa "
-"ostoskoriin ja pyri selvittämään asiat ennen kassalle siirtymistä."
+msgid "There are some issues with the items in your cart (shown above). Please go back to the cart page and resolve these issues before checking out."
+msgstr "Ostoskorissa olevissa tuotteissa on jotain selvitettävää. Ole hyvä ja palaa ostoskoriin ja pyri selvittämään asiat ennen kassalle siirtymistä."
 
 # @ woocommerce
 #: templates/checkout/cart-errors.php:20
@@ -6308,7 +5866,8 @@ msgstr "Laskutus &amp; Toimitus"
 # @ woocommerce
 #: templates/checkout/form-billing.php:21
 #: templates/myaccount/form-edit-address.php:27
-#: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
+#: templates/myaccount/my-address.php:19
+#: templates/myaccount/my-address.php:25
 #: templates/order/order-details.php:115
 msgid "Billing Address"
 msgstr "Laskutusosoite"
@@ -6320,12 +5879,8 @@ msgstr "Rekisteröidy?"
 
 # @ woocommerce
 #: templates/checkout/form-billing.php:51
-msgid ""
-"Create an account by entering the information below. If you are a returning "
-"customer please login at the top of the page."
-msgstr ""
-"Tee tili. Aloita kirjoittamalla alle pyydetyt tiedot. Jos olet jo "
-"rekisteröitynyt, ole hyvä ja kirjaudu sisään - kentät ovat sivun yläreunassa."
+msgid "Create an account by entering the information below. If you are a returning customer please login at the top of the page."
+msgstr "Tee tili. Aloita kirjoittamalla alle pyydetyt tiedot. Jos olet jo rekisteröitynyt, ole hyvä ja kirjaudu sisään - kentät ovat sivun yläreunassa."
 
 # @ woocommerce
 #: templates/checkout/form-checkout.php:20
@@ -6363,14 +5918,8 @@ msgstr "Kirjaudu tästä"
 
 # @ woocommerce
 #: templates/checkout/form-login.php:22
-msgid ""
-"If you have shopped with us before, please enter your details in the boxes "
-"below. If you are a new customer please proceed to the Billing &amp; "
-"Shipping section."
-msgstr ""
-"Jos olet ostanut tästä kaupasta aiemmin, syötä käyttäjätunnus ja salasana "
-"alla oleviin kenttiin. Jos olet uusi asiakas, jatka Maksutavat &amp; "
-"Postitus näyttöön."
+msgid "If you have shopped with us before, please enter your details in the boxes below. If you are a new customer please proceed to the Billing &amp; Shipping section."
+msgstr "Jos olet ostanut tästä kaupasta aiemmin, syötä käyttäjätunnus ja salasana alla oleviin kenttiin. Jos olet uusi asiakas, jatka Maksutavat &amp; Postitus näyttöön."
 
 # @ woocommerce
 #: templates/checkout/form-pay.php:20
@@ -6384,14 +5933,8 @@ msgstr "Yhteensä"
 
 # @ woocommerce
 #: templates/checkout/form-pay.php:78
-msgid ""
-"Sorry, it seems that there are no available payment methods for your "
-"location. Please contact us if you require assistance or wish to make "
-"alternate arrangements."
-msgstr ""
-"Pahoittelemme, (ennalta asetetut) maksutavat eivät ole käytettävissä tässä "
-"sijainnissa. Ole hyvä ja ota yhteyttä, jos tarvitset ohjeita tai haluat "
-"keskustella mitä voisi olla tehtävissä."
+msgid "Sorry, it seems that there are no available payment methods for your location. Please contact us if you require assistance or wish to make alternate arrangements."
+msgstr "Pahoittelemme, (ennalta asetetut) maksutavat eivät ole käytettävissä tässä sijainnissa. Ole hyvä ja ota yhteyttä, jos tarvitset ohjeita tai haluat keskustella mitä voisi olla tehtävissä."
 
 # @ woocommerce
 #: templates/checkout/form-pay.php:87
@@ -6406,15 +5949,14 @@ msgstr "Toimitus laskutusosoitteeseen?"
 # @ woocommerce
 #: templates/checkout/form-shipping.php:35
 #: templates/myaccount/form-edit-address.php:27
-#: templates/myaccount/my-address.php:20 templates/order/order-details.php:130
+#: templates/myaccount/my-address.php:20
+#: templates/order/order-details.php:130
 msgid "Shipping Address"
 msgstr "Toimitusosoite"
 
 # @ woocommerce
 #: templates/checkout/form-shipping.php:59
 #: templates/single-product/tabs/additional-information.php:14
-#: templates/single-product/tabs/attributes.php:20
-#: templates/single-product/tabs/tab-attributes.php:18
 #: woocommerce-template.php:759
 msgid "Additional Information"
 msgstr "Lisätiedot"
@@ -6426,26 +5968,13 @@ msgstr "Kirjoita vähintään toimitusosoite. Sen jälkeen voit valita maksutava
 
 # @ woocommerce
 #: templates/checkout/review-order.php:176
-msgid ""
-"Sorry, it seems that there are no available payment methods for your state. "
-"Please contact us if you require assistance or wish to make alternate "
-"arrangements."
-msgstr ""
-"Pahoittelemme, (ennalta asetetut) maksutavat eivät ole käytettävissä tällä "
-"alueella. Ole hyvä ja ota yhteyttä, jos tarvitset ohjeita tai haluat "
-"keskustella mitä voisi olla tehtävissä."
+msgid "Sorry, it seems that there are no available payment methods for your state. Please contact us if you require assistance or wish to make alternate arrangements."
+msgstr "Pahoittelemme, (ennalta asetetut) maksutavat eivät ole käytettävissä tällä alueella. Ole hyvä ja ota yhteyttä, jos tarvitset ohjeita tai haluat keskustella mitä voisi olla tehtävissä."
 
 # @ woocommerce
 #: templates/checkout/review-order.php:185
-msgid ""
-"Since your browser does not support JavaScript, or it is disabled, please "
-"ensure you click the <em>Update Totals</em> button before placing your "
-"order. You may be charged more than the amount stated above if you fail to "
-"do so."
-msgstr ""
-"Selaimesi ei tue JavaScriptiä tai sen käyttö on estetty. Paina <em>Laske "
-"uudelleen</em> painiketta ennen tilauksen jatkamista. Muuten veloitettu "
-"rahamäärä voi olla virheellinen, jopa liian suuri."
+msgid "Since your browser does not support JavaScript, or it is disabled, please ensure you click the <em>Update Totals</em> button before placing your order. You may be charged more than the amount stated above if you fail to do so."
+msgstr "Selaimesi ei tue JavaScriptiä tai sen käyttö on estetty. Paina <em>Laske uudelleen</em> painiketta ennen tilauksen jatkamista. Muuten veloitettu rahamäärä voi olla virheellinen, jopa liian suuri."
 
 # @ woocommerce
 #: templates/checkout/review-order.php:185
@@ -6469,11 +5998,8 @@ msgstr "Tilaus-/Sopimusehdot"
 
 # @ woocommerce
 #: templates/checkout/thankyou.php:18
-msgid ""
-"Unfortunately your order cannot be processed as the originating bank/"
-"merchant has declined your transaction."
-msgstr ""
-"Valittevasti tilausta ei voi käsitellä, koska pankkisi on estänyt maksun."
+msgid "Unfortunately your order cannot be processed as the originating bank/merchant has declined your transaction."
+msgstr "Valittevasti tilausta ei voi käsitellä, koska pankkisi on estänyt maksun."
 
 # @ woocommerce
 #: templates/checkout/thankyou.php:22
@@ -6486,7 +6012,8 @@ msgid "Please attempt your purchase again."
 msgstr "Yritä maksaa uudelleen, ole hyvä."
 
 # @ woocommerce
-#: templates/checkout/thankyou.php:36 templates/checkout/thankyou.php:67
+#: templates/checkout/thankyou.php:36
+#: templates/checkout/thankyou.php:67
 msgid "Thank you. Your order has been received."
 msgstr "Kiitos. Tilaus on otettu vastaan."
 
@@ -6539,20 +6066,14 @@ msgstr "Puh:"
 # @ woocommerce
 #: templates/emails/customer-completed-order.php:14
 #: templates/emails/plain/customer-completed-order.php:13
-msgid ""
-"Hi there. Your recent order on %s has been completed. Your order details are "
-"shown below for your reference:"
+msgid "Hi there. Your recent order on %s has been completed. Your order details are shown below for your reference:"
 msgstr "Hei! Tilaus %s on valmis. Tilauksen tiedot ovat tässä:"
 
 # @ woocommerce
 #: templates/emails/customer-invoice.php:16
 #: templates/emails/plain/customer-invoice.php:14
-msgid ""
-"An order has been created for you on %s. To pay for this order please use "
-"the following link: %s"
-msgstr ""
-"Verkkokaupassa %s on tehty tilaus. Voit aloittaa tilauksen maksamisen "
-"painamalla linkkiä: %s"
+msgid "An order has been created for you on %s. To pay for this order please use the following link: %s"
+msgstr "Verkkokaupassa %s on tehty tilaus. Voit aloittaa tilauksen maksamisen painamalla linkkiä: %s"
 
 # @ woocommerce
 #: templates/emails/customer-invoice.php:16
@@ -6562,8 +6083,7 @@ msgstr "maksa"
 # @ woocommerce
 #: templates/emails/customer-new-account.php:14
 #: templates/emails/plain/customer-new-account.php:13
-msgid ""
-"Thanks for creating an account on %s. Your username is <strong>%s</strong>."
+msgid "Thanks for creating an account on %s. Your username is <strong>%s</strong>."
 msgstr "Kiitos tilin luomisesta %s. Käyttäjätunnus on <strong>%s</strong>."
 
 # @ woocommerce
@@ -6587,11 +6107,8 @@ msgstr "Tiedoksi: Tilauksen tiedot alla."
 # @ woocommerce
 #: templates/emails/customer-processing-order.php:14
 #: templates/emails/plain/customer-processing-order.php:13
-msgid ""
-"Your order has been received and is now being processed. Your order details "
-"are shown below for your reference:"
-msgstr ""
-"Tilaus on vastaanotettu ja sitä käsitellään. Tilauksen tiedot ovat tässä: "
+msgid "Your order has been received and is now being processed. Your order details are shown below for your reference:"
+msgstr "Tilaus on vastaanotettu ja sitä käsitellään. Tilauksen tiedot ovat tässä: "
 
 # @ woocommerce
 #: templates/emails/customer-reset-password.php:14
@@ -6609,8 +6126,7 @@ msgstr "Käyttäjätunnus: %s"
 #: templates/emails/customer-reset-password.php:16
 #: templates/emails/plain/customer-reset-password.php:16
 msgid "If this was a mistake, just ignore this email and nothing will happen."
-msgstr ""
-"Jos tämä on vahinko, jätä huomioimatta tämä viesti ja mitään ei tapahdu."
+msgstr "Jos tämä on vahinko, jätä huomioimatta tämä viesti ja mitään ei tapahdu."
 
 # @ woocommerce
 #: templates/emails/customer-reset-password.php:17
@@ -6686,7 +6202,8 @@ msgid "Cost: %s"
 msgstr "Hinta: %s"
 
 # @ woocommerce
-#: templates/loop/add-to-cart.php:17 templates/loop/add-to-cart.php:41
+#: templates/loop/add-to-cart.php:17
+#: templates/loop/add-to-cart.php:41
 #: templates/loop/add-to-cart.php:50
 msgid "Read More"
 msgstr "Lue Lisää"
@@ -6702,34 +6219,35 @@ msgid "View options"
 msgstr "Katso vaihtoehdot"
 
 # @ woocommerce
-#: templates/loop/no-products-found.php:14 templates/loop-shop.php:40
+#: templates/loop/no-products-found.php:14
+#: templates/loop-shop.php:40
 msgid "No products found which match your selection."
 msgstr "Valitun kaltaisia tuotteita ei löytynyt."
 
 # @ woocommerce
-#: templates/loop/orderby.php:21 templates/loop/sorting.php:21
+#: templates/loop/orderby.php:21
 msgid "Default sorting"
 msgstr "Lajittelu, oletustapa"
 
-#: templates/loop/orderby.php:22 templates/loop/sorting.php:22
+#: templates/loop/orderby.php:22
 msgid "Sort by popularity"
 msgstr "Lajittele: ostetuin ensin"
 
-#: templates/loop/orderby.php:23 templates/loop/sorting.php:23
+#: templates/loop/orderby.php:23
 msgid "Sort by average rating"
 msgstr "Lajittele: arvostetuin ensin"
 
-#: templates/loop/orderby.php:24 templates/loop/sorting.php:24
+#: templates/loop/orderby.php:24
 msgid "Sort by newness"
 msgstr "Lajittele: uusin ensin"
 
 # @ woocommerce
-#: templates/loop/orderby.php:25 templates/loop/sorting.php:25
+#: templates/loop/orderby.php:25
 msgid "Sort by price: low to high"
 msgstr "Lajittele: halvin ensin"
 
 # @ woocommerce
-#: templates/loop/orderby.php:26 templates/loop/sorting.php:26
+#: templates/loop/orderby.php:26
 msgid "Sort by price: high to low"
 msgstr "Lajittele: kallein ensin"
 
@@ -6750,7 +6268,8 @@ msgid "Showing %1$d–%2$d of %3$d results"
 msgstr "Näytetään %1$d–%2$d väli %3$d tuloksista"
 
 # @ woocommerce
-#: templates/loop/sale-flash.php:16 templates/single-product/sale-flash.php:16
+#: templates/loop/sale-flash.php:16
+#: templates/single-product/sale-flash.php:16
 msgid "Sale!"
 msgstr "Ale!"
 
@@ -6778,13 +6297,29 @@ msgid "Save Address"
 msgstr "Tallenna osoite"
 
 # @ woocommerce
-#: templates/myaccount/form-login.php:26 templates/myaccount/form-login.php:40
+#: templates/myaccount/form-login.php:26
+#: templates/myaccount/form-login.php:40
 #: templates/shop/form-login.php:31
 msgid "Login"
 msgstr "Kirjaudu"
 
 # @ woocommerce
-#: templates/myaccount/form-login.php:50 templates/shop/form-login.php:33
+#: templates/myaccount/form-login.php:29
+#: templates/myaccount/form-lost-password.php:24
+#: templates/shop/form-login.php:20
+msgid "Username or email"
+msgstr "Käyttäjätunnus tai sähköpostiosoite"
+
+# @ woocommerce
+#: templates/myaccount/form-login.php:33
+#: templates/myaccount/form-login.php:85
+#: templates/shop/form-login.php:24
+msgid "Password"
+msgstr "Salasana"
+
+# @ woocommerce
+#: templates/myaccount/form-login.php:50
+#: templates/shop/form-login.php:33
 msgid "Lost Password?"
 msgstr "Salasana unohtunut?"
 
@@ -6812,13 +6347,8 @@ msgstr "Syötä salasana uudelleen"
 
 # @ woocommerce
 #: templates/myaccount/form-lost-password.php:22
-msgid ""
-"Lost your password? Please enter your username or email address. You will "
-"receive a link to create a new password via email."
-msgstr ""
-"Etkö voi käyttää tiliäsi? Kirjoita käyttäjätunnus tai sähköpostiosoite. "
-"Sinulle lähetetään sähköpostilla linkki, jota painamalla pääset asettamaan "
-"uuden salasanan."
+msgid "Lost your password? Please enter your username or email address. You will receive a link to create a new password via email."
+msgstr "Etkö voi käyttää tiliäsi? Kirjoita käyttäjätunnus tai sähköpostiosoite. Sinulle lähetetään sähköpostilla linkki, jota painamalla pääset asettamaan uuden salasanan."
 
 # @ woocommerce
 #: templates/myaccount/form-lost-password.php:28
@@ -6832,14 +6362,8 @@ msgstr "Salasanan palautus"
 
 # @ woocommerce
 #: templates/myaccount/my-account.php:19
-msgid ""
-"Hello, <strong>%s</strong>. From your account dashboard you can view your "
-"recent orders, manage your shipping and billing addresses and <a href=\"%s"
-"\">change your password</a>."
-msgstr ""
-"Hei <strong>%s</strong>. Tilisi hallintapaneelissa voit katsoa aiempia "
-"tilauksia, muuttaa toimitus- ja laskutusosoitteita ja <a href=\"%s\">vaihtaa "
-"salasanan</a>."
+msgid "Hello, <strong>%s</strong>. From your account dashboard you can view your recent orders, manage your shipping and billing addresses and <a href=\"%s\">change your password</a>."
+msgstr "Hei <strong>%s</strong>. Tilisi hallintapaneelissa voit katsoa aiempia tilauksia, muuttaa toimitus- ja laskutusosoitteita ja <a href=\"%s\">vaihtaa salasanan</a>."
 
 # @ woocommerce
 #: templates/myaccount/my-address.php:17
@@ -6857,8 +6381,11 @@ msgid "The following addresses will be used on the checkout page by default."
 msgstr "Kassalla käytetään näitä osoitteita oletuksena."
 
 # @ woocommerce
-#: templates/myaccount/my-address.php:45 woocommerce.php:951
-#: woocommerce.php:987 woocommerce.php:1024 woocommerce.php:1062
+#: templates/myaccount/my-address.php:45
+#: woocommerce.php:951
+#: woocommerce.php:987
+#: woocommerce.php:1024
+#: woocommerce.php:1062
 #: woocommerce.php:1100
 msgid "Edit"
 msgstr "Muokkaa"
@@ -6886,7 +6413,8 @@ msgid "Recent Orders"
 msgstr "Viimeisimmät tilaukset"
 
 # @ woocommerce
-#: templates/myaccount/my-orders.php:32 woocommerce.php:1059
+#: templates/myaccount/my-orders.php:32
+#: woocommerce.php:1059
 msgid "Order"
 msgstr "Tilaus"
 
@@ -6919,14 +6447,8 @@ msgstr "Katso"
 
 # @ woocommerce
 #: templates/order/form-tracking.php:17
-msgid ""
-"To track your order please enter your Order ID in the box below and press "
-"return. This was given to you on your receipt and in the confirmation email "
-"you should have received."
-msgstr ""
-"Kun haluat seurata tilauksen etenemistä, syötä tilausnumero kenttään ja "
-"paina Enter (rivinvaihto). Tilausnumero on tilausvahvistuksessa joka "
-"lähetettiin antamaasi sähköpostiosoitteeseen."
+msgid "To track your order please enter your Order ID in the box below and press return. This was given to you on your receipt and in the confirmation email you should have received."
+msgstr "Kun haluat seurata tilauksen etenemistä, syötä tilausnumero kenttään ja paina Enter (rivinvaihto). Tilausnumero on tilausvahvistuksessa joka lähetettiin antamaasi sähköpostiosoitteeseen."
 
 # @ woocommerce
 #: templates/order/form-tracking.php:19
@@ -6999,7 +6521,8 @@ msgid "Products tagged &ldquo;"
 msgstr "Tuotteet avainsalla &ldquo;"
 
 # @ woocommerce
-#: templates/shop/breadcrumb.php:91 templates/shop/breadcrumb.php:188
+#: templates/shop/breadcrumb.php:91
+#: templates/shop/breadcrumb.php:188
 msgid "Search results for &ldquo;"
 msgstr "Hakutulokset &ldquo;"
 
@@ -7083,14 +6606,7 @@ msgid "Product Description"
 msgstr "Tuotekuvaus"
 
 # @ woocommerce
-#: templates/single-product/tabs/tab-reviews.php:13
-#: templates/single-product-reviews.php:36
-#: templates/single-product-reviews.php:42
-msgid "Reviews"
-msgstr "Arviot"
-
-# @ woocommerce
-#: templates/single-product/up-sells.php:41
+#: templates/single-product/up-sells.php:39
 msgid "You may also like&hellip;"
 msgstr "Saatat myös pitää..."
 
@@ -7100,6 +6616,12 @@ msgid "%s review for %s"
 msgid_plural "%s reviews for %s"
 msgstr[0] "%s arvio tuotteelle %s"
 msgstr[1] "%s arviot tuotteelle %s"
+
+# @ woocommerce
+#: templates/single-product-reviews.php:36
+#: templates/single-product-reviews.php:42
+msgid "Reviews"
+msgstr "Arviot"
 
 # @ woocommerce
 #: templates/single-product-reviews.php:58
@@ -7133,12 +6655,8 @@ msgstr "Kirjoita ensimmäinen tuotearvio tuotteelle"
 
 # @ woocommerce
 #: templates/single-product-reviews.php:71
-msgid ""
-"There are no reviews yet, would you like to <a href=\"#review_form\" class="
-"\"inline show_review_form\">submit yours</a>?"
-msgstr ""
-"Ei arvioita, haluaisitko <a href=\"#review_form\" class=\"inline "
-"show_review_form\">kirjoittaa oman arvion</a>?"
+msgid "There are no reviews yet, would you like to <a href=\"#review_form\" class=\"inline show_review_form\">submit yours</a>?"
+msgstr "Ei arvioita, haluaisitko <a href=\"#review_form\" class=\"inline show_review_form\">kirjoittaa oman arvion</a>?"
 
 # @ woocommerce
 #: templates/single-product-reviews.php:89
@@ -7196,16 +6714,18 @@ msgid "Return to homepage &rarr;"
 msgstr "Palaa etusivulle &rarr;"
 
 # @ woocommerce
-#: woocommerce-ajax.php:256 woocommerce-ajax.php:290 woocommerce-ajax.php:313
+#: woocommerce-ajax.php:256
+#: woocommerce-ajax.php:290
+#: woocommerce-ajax.php:313
 msgid "You do not have sufficient permissions to access this page."
 msgstr "Sivulle pääsyä on rajoitettu. Tarvitset laajemmat oikeudet."
 
 # @ woocommerce
-#: woocommerce-ajax.php:258 woocommerce-ajax.php:291 woocommerce-ajax.php:314
+#: woocommerce-ajax.php:258
+#: woocommerce-ajax.php:291
+#: woocommerce-ajax.php:314
 msgid "You have taken too long. Please go back and retry."
-msgstr ""
-"Toimenpide on ylittänyt sille asetetun (turvallisuus) aikarajan. Ole hyvä ja "
-"tee uudelleen."
+msgstr "Toimenpide on ylittänyt sille asetetun (turvallisuus) aikarajan. Ole hyvä ja tee uudelleen."
 
 # @ woocommerce
 #: woocommerce-ajax.php:550
@@ -7218,25 +6738,18 @@ msgid "Standard"
 msgstr "Standardi"
 
 #: woocommerce-ajax.php:1098
-msgid ""
-"No products had their stock reduced - they may not have stock management "
-"enabled."
-msgstr ""
-"Tuotteiden varastomääriä ei vähennetty - ehkä tuotteilla ei ole käytössä "
-"varastoseurantaa."
+msgid "No products had their stock reduced - they may not have stock management enabled."
+msgstr "Tuotteiden varastomääriä ei vähennetty - ehkä tuotteilla ei ole käytössä varastoseurantaa."
 
 # @ woocommerce
-#: woocommerce-ajax.php:1142 woocommerce-ajax.php:1143
+#: woocommerce-ajax.php:1142
+#: woocommerce-ajax.php:1143
 msgid "Item #%s stock increased from %s to %s."
 msgstr "Tuotteen #%s varastoa lisätty määrästä %s määrään %s."
 
 #: woocommerce-ajax.php:1150
-msgid ""
-"No products had their stock increased - they may not have stock management "
-"enabled."
-msgstr ""
-"Tuotteiden varastomääriä ei lisätty - ehkä tuotteilla ei ole käytössä "
-"varastoseurantaa."
+msgid "No products had their stock increased - they may not have stock management enabled."
+msgstr "Tuotteiden varastomääriä ei lisätty - ehkä tuotteilla ei ole käytössä varastoseurantaa."
 
 # @ woocommerce
 #: woocommerce-ajax.php:1171
@@ -7254,177 +6767,179 @@ msgid "%s &ndash; %s%s"
 msgstr "%s &ndash; %s%s"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:682
+#: woocommerce-core-functions.php:698
 msgid "Australian Dollars"
 msgstr "Australian dollari AUD"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:683
+#: woocommerce-core-functions.php:699
 msgid "Brazilian Real"
 msgstr "Brasilian real BRL"
 
-#: woocommerce-core-functions.php:684
+#: woocommerce-core-functions.php:700
 msgid "Canadian Dollars"
 msgstr "Kanadan dollari CAD"
 
-#: woocommerce-core-functions.php:685
+#: woocommerce-core-functions.php:701
 msgid "Chinese Yuan"
 msgstr "Kiinan renminbi yuan CNY"
 
-#: woocommerce-core-functions.php:686
+#: woocommerce-core-functions.php:702
 msgid "Czech Koruna"
 msgstr "Tsekin koruna CZK"
 
-#: woocommerce-core-functions.php:687
+#: woocommerce-core-functions.php:703
 msgid "Danish Krone"
 msgstr "Tanskan kruunu DKK"
 
-#: woocommerce-core-functions.php:688
+#: woocommerce-core-functions.php:704
 msgid "Euros"
 msgstr "Euro EUR"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:689
+#: woocommerce-core-functions.php:705
 msgid "Hong Kong Dollar"
 msgstr "Hong Kongin Dollari HKD"
 
-#: woocommerce-core-functions.php:690
+#: woocommerce-core-functions.php:706
 msgid "Hungarian Forint"
 msgstr "Unkarin forintti HUF"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:691
+#: woocommerce-core-functions.php:707
 msgid "Indonesia Rupiah"
 msgstr "Indonesian rupia IDR"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:692
+#: woocommerce-core-functions.php:708
 msgid "Indian Rupee"
 msgstr "Intian rupia INR"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:693
+#: woocommerce-core-functions.php:709
 msgid "Israeli Shekel"
 msgstr "Israelin sekeli ILS"
 
-#: woocommerce-core-functions.php:694
+#: woocommerce-core-functions.php:710
 msgid "Japanese Yen"
 msgstr "Japanin jeni JPY"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:695
+#: woocommerce-core-functions.php:711
 msgid "South Korean Won"
 msgstr "Etelä-Korean won"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:696
+#: woocommerce-core-functions.php:712
 msgid "Malaysian Ringgits"
 msgstr "Malesian Ringgits MYR"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:697
+#: woocommerce-core-functions.php:713
 msgid "Mexican Peso"
 msgstr "Meksikon peso MXN"
 
-#: woocommerce-core-functions.php:698
+#: woocommerce-core-functions.php:714
 msgid "Norwegian Krone"
 msgstr "Norjan kruunu NOK"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:699
+#: woocommerce-core-functions.php:715
 msgid "New Zealand Dollar"
 msgstr "Uuden-Seelannin dollari NZD"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:700
+#: woocommerce-core-functions.php:716
 msgid "Philippine Pesos"
 msgstr "Filippiinien peso PHP"
 
-#: woocommerce-core-functions.php:701
+#: woocommerce-core-functions.php:717
 msgid "Polish Zloty"
 msgstr "Puolan zloty PLN"
 
-#: woocommerce-core-functions.php:702
+#: woocommerce-core-functions.php:718
 msgid "Pounds Sterling"
 msgstr "Punta GBP"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:703
+#: woocommerce-core-functions.php:719
 msgid "Romanian Leu"
 msgstr "Romanian lei RON"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:704
+#: woocommerce-core-functions.php:720
 msgid "Singapore Dollar"
 msgstr "Singaporen dollari SGD"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:705
+#: woocommerce-core-functions.php:721
 msgid "South African rand"
 msgstr "Etelä-Afrikan randi ZAR"
 
-#: woocommerce-core-functions.php:706
+#: woocommerce-core-functions.php:722
 msgid "Swedish Krona"
 msgstr "Ruotsin kruunu SEK"
 
-#: woocommerce-core-functions.php:707
+#: woocommerce-core-functions.php:723
 msgid "Swiss Franc"
 msgstr "Sveitsin frangi CHF"
 
-#: woocommerce-core-functions.php:708
+#: woocommerce-core-functions.php:724
 msgid "Taiwan New Dollars"
 msgstr "Taiwanin uusi dollari TWD"
 
-#: woocommerce-core-functions.php:709
+#: woocommerce-core-functions.php:725
 msgid "Thai Baht"
 msgstr "Thaimaan baht THB"
 
-#: woocommerce-core-functions.php:710
+#: woocommerce-core-functions.php:726
 msgid "Turkish Lira"
 msgstr "Turkin liira TRY"
 
-#: woocommerce-core-functions.php:711
+#: woocommerce-core-functions.php:727
 msgid "US Dollars"
 msgstr "Yhdysvaltain dollari USD"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:1199 woocommerce-core-functions.php:1225
+#: woocommerce-core-functions.php:1215
+#: woocommerce-core-functions.php:1241
 msgid "Download Permissions Granted"
 msgstr "Myönnetty pääsy tiedoston lataamiseen."
 
 # @ woocommerce
-#: woocommerce-core-functions.php:1349
+#: woocommerce-core-functions.php:1365
 msgctxt "slug"
 msgid "uncategorized"
 msgstr "Ei-luokiteltu"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:1538
+#: woocommerce-core-functions.php:1554
 msgid "Select a category"
 msgstr "Valitse osasto"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:1542
+#: woocommerce-core-functions.php:1558
 msgid "Uncategorized"
 msgstr "Ei-luokiteltu"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:1914
+#: woocommerce-core-functions.php:1930
 msgid "Customer"
 msgstr "Asiakas"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:1921
+#: woocommerce-core-functions.php:1937
 msgid "Shop Manager"
 msgstr "Kauppias"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:2476
+#: woocommerce-core-functions.php:2494
 msgid "Unpaid order cancelled - time limit reached."
 msgstr "Maksamaton tilaus peruutettu - aikaraja ylittyi."
 
 # @ woocommerce
-#: woocommerce-functions.php:226 woocommerce-functions.php:271
+#: woocommerce-functions.php:226
+#: woocommerce-functions.php:271
 msgid "Cart updated."
 msgstr "Ostoskori päivitetty."
 
@@ -7434,14 +6949,14 @@ msgid "You can only have 1 %s in your cart."
 msgstr "Ostoskoriin voi lisätä vain yhden (1 kpl) %s."
 
 # @ woocommerce
-#: woocommerce-functions.php:315 woocommerce-functions.php:373
+#: woocommerce-functions.php:315
+#: woocommerce-functions.php:373
 msgid "Please choose product options&hellip;"
 msgstr "Valitse tuotteen vaihtoehdoista..."
 
 # @ woocommerce
 #: woocommerce-functions.php:406
-msgid ""
-"Please choose the quantity of items you wish to add to your cart&hellip;"
+msgid "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr "Ole hyvä, valitse kuinka monta tuotetta lisätään ostoskoriin..."
 
 # @ woocommerce
@@ -7475,7 +6990,8 @@ msgid "Username is required."
 msgstr "Käyttäjätunnus vaaditaan."
 
 # @ woocommerce
-#: woocommerce-functions.php:661 woocommerce-functions.php:756
+#: woocommerce-functions.php:661
+#: woocommerce-functions.php:756
 msgid "Password is required."
 msgstr "Salasana vaaditaan."
 
@@ -7486,12 +7002,8 @@ msgstr "Syötä käyttäjätunnus."
 
 # @ woocommerce
 #: woocommerce-functions.php:732
-msgid ""
-"This username is invalid because it uses illegal characters. Please enter a "
-"valid username."
-msgstr ""
-"Käyttäjätunnus ei kelpaa koska siinä on (kirjoitus)merkkejä joita ei voi "
-"käyttää tunnuksessa. Ole hyvä ja syötä muu käyttäjätunnus."
+msgid "This username is invalid because it uses illegal characters. Please enter a valid username."
+msgstr "Käyttäjätunnus ei kelpaa koska siinä on (kirjoitus)merkkejä joita ei voi käyttää tunnuksessa. Ole hyvä ja syötä muu käyttäjätunnus."
 
 # @ woocommerce
 #: woocommerce-functions.php:735
@@ -7511,9 +7023,7 @@ msgstr "Sähköpostiosoite ei kelpaa."
 # @ woocommerce
 #: woocommerce-functions.php:752
 msgid "This email is already registered, please choose another one."
-msgstr ""
-"Samalle sähköpostiosoitteelle on jo rekisteröity tili. Ole hyvä, kirjaudu "
-"sisään - tai valitse toinen."
+msgstr "Samalle sähköpostiosoitteelle on jo rekisteröity tili. Ole hyvä, kirjaudu sisään - tai valitse toinen."
 
 # @ woocommerce
 #: woocommerce-functions.php:757
@@ -7542,12 +7052,8 @@ msgstr "Tilaus peruttiin."
 
 # @ woocommerce
 #: woocommerce-functions.php:905
-msgid ""
-"Your order is no longer pending and could not be cancelled. Please contact "
-"us if you need assistance."
-msgstr ""
-"Tilauksesi on käsitelty ja sitä ei voi enää peruuttaa. Ota yhteyttä, jos "
-"tarvitset ohjeita."
+msgid "Your order is no longer pending and could not be cancelled. Please contact us if you need assistance."
+msgstr "Tilauksesi on käsitelty ja sitä ei voi enää peruuttaa. Ota yhteyttä, jos tarvitset ohjeita."
 
 # @ woocommerce
 #: woocommerce-functions.php:940
@@ -7555,97 +7061,100 @@ msgid "Invalid email address."
 msgstr "Sähköpostiosoite ei kelpaa."
 
 # @ woocommerce
-#: woocommerce-functions.php:940 woocommerce-functions.php:962
-#: woocommerce-functions.php:982 woocommerce-functions.php:988
-#: woocommerce-functions.php:992 woocommerce-functions.php:995
-#: woocommerce-functions.php:1025 woocommerce-functions.php:1157
+#: woocommerce-functions.php:940
+#: woocommerce-functions.php:963
+#: woocommerce-functions.php:983
+#: woocommerce-functions.php:989
+#: woocommerce-functions.php:993
+#: woocommerce-functions.php:996
+#: woocommerce-functions.php:1026
+#: woocommerce-functions.php:1158
 msgid "Go to homepage &rarr;"
 msgstr "Siirry etusivulle &rarr;"
 
 # @ woocommerce
-#: woocommerce-functions.php:962
+#: woocommerce-functions.php:963
 msgid "Invalid download."
 msgstr "Lataus ei ole käytettävissä."
 
 # @ woocommerce
-#: woocommerce-functions.php:974
+#: woocommerce-functions.php:975
 msgid "You must be logged in to download files."
-msgstr ""
-"Vain sisäänkirjautuneena voit ladata tiedostoja. Kirjaudu sisään, ole hyvä."
+msgstr "Vain sisäänkirjautuneena voit ladata tiedostoja. Kirjaudu sisään, ole hyvä."
 
 # @ woocommerce
-#: woocommerce-functions.php:977
+#: woocommerce-functions.php:975
+msgid "Login &rarr;"
+msgstr "Kirjaudu &rarr;"
+
+# @ woocommerce
+#: woocommerce-functions.php:978
 msgid "This is not your download link."
 msgstr "Tämä ei ole (sinulle tarkoitettu) latauslinkki."
 
 # @ woocommerce
-#: woocommerce-functions.php:982
+#: woocommerce-functions.php:983
 msgid "Product no longer exists."
 msgstr "Tuotetta ei enää ole."
 
 # @ woocommerce
-#: woocommerce-functions.php:992
+#: woocommerce-functions.php:993
 msgid "Sorry, you have reached your download limit for this file"
 msgstr "Pahoittelemme, tiedoston latausten määrä on ylittänyt maksimimäärän."
 
 # @ woocommerce
-#: woocommerce-functions.php:995
+#: woocommerce-functions.php:996
 msgid "Sorry, this download has expired"
 msgstr "Pahoittelemme, pääsy lataukseen on umpeutunut."
 
-#: woocommerce-functions.php:1025
+#: woocommerce-functions.php:1026
 msgid "No file defined"
 msgstr "Tiedostoa ei ole asetettu"
 
 # @ woocommerce
-#: woocommerce-functions.php:1157
+#: woocommerce-functions.php:1158
 msgid "File not found"
 msgstr "Tiedostoa ei löydy"
 
 # @ woocommerce
-#: woocommerce-functions.php:1273
+#: woocommerce-functions.php:1274
 msgid "New products"
 msgstr "Uudet tuotteet"
 
 # @ woocommerce
-#: woocommerce-functions.php:1281
+#: woocommerce-functions.php:1282
 msgid "New products added to %s"
 msgstr "Uudet tuotteet lisätty %s"
 
 # @ woocommerce
-#: woocommerce-functions.php:1289
+#: woocommerce-functions.php:1290
 msgid "New products tagged %s"
 msgstr "Uudet tuotteet avainsanalla %s"
 
 # @ woocommerce
-#: woocommerce-functions.php:1329
+#: woocommerce-functions.php:1328
 msgid "You have taken too long. Please go back and refresh the page."
-msgstr ""
-"Toimenpide on ylittänyt (turvallisuus) aikarajan. Palaa taaksepäin ja "
-"päivitä sivu, ole hyvä."
+msgstr "Toimenpide on ylittänyt (turvallisuus) aikarajan. Palaa taaksepäin ja päivitä sivu, ole hyvä."
 
 # @ woocommerce
-#: woocommerce-functions.php:1332
+#: woocommerce-functions.php:1331
 msgid "Please rate the product."
 msgstr "Arvostele tuote, ole hyvä."
 
 # @ woocommerce
-#: woocommerce-functions.php:1640
+#: woocommerce-functions.php:1639
 msgid "Password changed successfully."
 msgstr "Salasana vaihdettiin."
 
 # @ woocommerce
-#: woocommerce-functions.php:1716
+#: woocommerce-functions.php:1715
 msgid "Address changed successfully."
 msgstr "Osoite vaihdettiin."
 
 # @ woocommerce
 #: woocommerce-template.php:200
-msgid ""
-"This is a demo store for testing purposes &mdash; no orders shall be "
-"fulfilled."
-msgstr ""
-"Tämä verkkokauppa on vain esittelyä varten &mdash; tilauksia ei käsitellä."
+msgid "This is a demo store for testing purposes &mdash; no orders shall be fulfilled."
+msgstr "Tämä verkkokauppa on vain esittelyä varten &mdash; tilauksia ei käsitellä."
 
 # @ woocommerce
 #: woocommerce-template.php:219
@@ -7668,7 +7177,8 @@ msgctxt "breadcrumb"
 msgid "Home"
 msgstr "Etusivu"
 
-#: woocommerce-template.php:1292 woocommerce.php:1209
+#: woocommerce-template.php:1292
+#: woocommerce.php:1209
 msgid "required"
 msgstr "vaaditaan"
 
@@ -7688,7 +7198,8 @@ msgid "Search for products"
 msgstr "Etsi tuotteita"
 
 # @ woocommerce
-#: woocommerce-template.php:1498 woocommerce.php:947
+#: woocommerce-template.php:1498
+#: woocommerce.php:947
 msgid "Search"
 msgstr "Haku"
 
@@ -7821,7 +7332,8 @@ msgid "New Product Tag Name"
 msgstr "Uusi avainsanan nimi"
 
 # @ woocommerce
-#: woocommerce.php:888 woocommerce.php:890
+#: woocommerce.php:888
+#: woocommerce.php:890
 msgid "Shipping Classes"
 msgstr "Toimitusluokat"
 
@@ -7877,7 +7389,8 @@ msgid "All"
 msgstr "Kaikki"
 
 # @ woocommerce
-#: woocommerce.php:949 woocommerce.php:950
+#: woocommerce.php:949
+#: woocommerce.php:950
 msgid "Parent"
 msgstr "Ylempi taso"
 
@@ -7923,7 +7436,8 @@ msgid "New Product"
 msgstr "Uusi tuote"
 
 # @ woocommerce
-#: woocommerce.php:990 woocommerce.php:991
+#: woocommerce.php:990
+#: woocommerce.php:991
 msgid "View Product"
 msgstr "Tarkastele tuotetta"
 
@@ -7983,7 +7497,8 @@ msgid "New Variation"
 msgstr "Uusi muunnelma"
 
 # @ woocommerce
-#: woocommerce.php:1027 woocommerce.php:1028
+#: woocommerce.php:1027
+#: woocommerce.php:1028
 msgid "View Variation"
 msgstr "Tarkastele muunnelmaa"
 
@@ -8126,11 +7641,8 @@ msgstr "Ylemmän tason kuponki"
 
 # @ woocommerce
 #: woocommerce.php:1110
-msgid ""
-"This is where you can add new coupons that customers can use in your store."
-msgstr ""
-"Tässä tehdään uusia kuponkeja. Asiakkaat saavat niillä alennuksia/etuja "
-"tuotteista ja palveluista."
+msgid "This is where you can add new coupons that customers can use in your store."
+msgstr "Tässä tehdään uusia kuponkeja. Asiakkaat saavat niillä alennuksia/etuja tuotteista ja palveluista."
 
 # @ woocommerce
 #: woocommerce.php:1206
@@ -8143,29 +7655,26 @@ msgid "Please select a rating"
 msgstr "Valitse arvostelu, ole hyvä."
 
 #: woocommerce.php:1208
-msgid ""
-"Sorry, no products matched your selection. Please choose a different "
-"combination."
-msgstr ""
-"Pahoittelemme, valitun kaltaisia tuotteita ei löytynyt. Ole hyvä, valitse "
-"eri tavalla."
+msgid "Sorry, no products matched your selection. Please choose a different combination."
+msgstr "Pahoittelemme, valitun kaltaisia tuotteita ei löytynyt. Ole hyvä, valitse eri tavalla."
 
 # @ woocommerce
-#: woocommerce.php:1692
+#: woocommerce.php:1691
 msgid "Cart % Discount"
 msgstr "Alennus % ostoskorissa"
 
 # @ woocommerce
-#: woocommerce.php:1693
+#: woocommerce.php:1692
 msgid "Product Discount"
 msgstr "Alennus tuotteesta"
 
 # @ woocommerce
-#: woocommerce.php:1694
+#: woocommerce.php:1693
 msgid "Product % Discount"
 msgstr "Alennus % tuotteesta"
 
 # @ woocommerce
-#: woocommerce.php:1759
+#: woocommerce.php:1758
 msgid "Action failed. Please refresh the page and retry."
 msgstr "Toiminto ei onnistunut. Päivitä sivu ja yritä uudelleen."
+
