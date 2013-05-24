@@ -5,38 +5,64 @@
  * @author 		WooThemes
  * @category 	Widgets
  * @package 	WooCommerce/Widgets
- * @version 	1.6.4
- * @extends 	WP_Widget
+ * @version 	2.1.0
+ * @extends 	WC_Widget
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class WC_Widget_Layered_Nav extends WP_Widget {
-
-	var $woo_widget_cssclass;
-	var $woo_widget_description;
-	var $woo_widget_idbase;
-	var $woo_widget_name;
+class WC_Widget_Layered_Nav extends WC_Widget {
 
 	/**
-	 * constructor
-	 *
-	 * @access public
-	 * @return void
+	 * Constructor
 	 */
-	function WC_Widget_Layered_Nav() {
+	public function __construct() {
+		global $woocommerce;
 
-		/* Widget variable settings. */
-		$this->woo_widget_cssclass 		= 'woocommerce widget_layered_nav';
-		$this->woo_widget_description	= __( 'Shows a custom attribute in a widget which lets you narrow down the list of products when viewing product categories.', 'woocommerce' );
-		$this->woo_widget_idbase 		= 'woocommerce_layered_nav';
-		$this->woo_widget_name 			= __( 'WooCommerce Layered Nav', 'woocommerce' );
+		$this->widget_cssclass    = 'woocommerce widget_layered_nav';
+		$this->widget_description = __( 'Shows a custom attribute in a widget which lets you narrow down the list of products when viewing product categories.', 'woocommerce' );
+		$this->widget_id          = 'woocommerce_layered_nav';
+		$this->widget_name        = __( 'WooCommerce Layered Nav', 'woocommerce' );
 
-		/* Widget settings. */
-		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
+		$attribute_array = array();
+		$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();
+			if ( $attribute_taxonomies )
+				foreach ( $attribute_taxonomies as $tax )
+					if ( taxonomy_exists( $woocommerce->attribute_taxonomy_name( $tax->attribute_name ) ) )
+						$attribute_array[ $tax->attribute_name ] = $tax->attribute_name;
 
-		/* Create the widget. */
-		$this->WP_Widget( 'woocommerce_layered_nav', $this->woo_widget_name, $widget_ops );
+		$this->settings           = array(
+			'title'  => array(
+				'type'  => 'text',
+				'std'   => __( 'Filter by', 'woocommerce' ),
+				'label' => __( 'Title', 'woocommerce' )
+			),
+			'attribute' => array(
+				'type'  => 'select',
+				'std'   => '',
+				'label' => __( 'Attribute', 'woocommerce' ),
+				'options' => $attribute_array
+			),
+			'display_type' => array(
+				'type'  => 'select',
+				'std'   => 'list',
+				'label' => __( 'Display type', 'woocommerce' ),
+				'options' => array(
+					'list'      => __( 'List', 'woocommerce' ),
+					'dropdown'  => __( 'Dropdown', 'woocommerce' )
+				)
+			),
+			'query_type' => array(
+				'type'  => 'select',
+				'std'   => 'and',
+				'label' => __( 'Query type', 'woocommerce' ),
+				'options' => array(
+					'and' => __( 'AND', 'woocommerce' ),
+					'or'  => __( 'OR', 'woocommerce' )
+				)
+			),
+		);
+		parent::__construct();
 	}
 
 	/**
@@ -48,7 +74,7 @@ class WC_Widget_Layered_Nav extends WP_Widget {
 	 * @param array $instance
 	 * @return void
 	 */
-	function widget( $args, $instance ) {
+	public function widget( $args, $instance ) {
 		global $_chosen_attributes, $woocommerce, $_attributes_array;
 
 		extract( $args );
@@ -308,72 +334,6 @@ class WC_Widget_Layered_Nav extends WP_Widget {
 				echo ob_get_clean();
 		}
 	}
-
-	/**
-	 * update function.
-	 *
-	 * @see WP_Widget->update
-	 * @access public
-	 * @param array $new_instance
-	 * @param array $old_instance
-	 * @return array
-	 */
-	function update( $new_instance, $old_instance ) {
-		global $woocommerce;
-
-		if ( empty( $new_instance['title'] ) )
-			$new_instance['title'] = $woocommerce->attribute_label( $new_instance['attribute'] );
-
-		$instance['title'] 			= strip_tags( stripslashes($new_instance['title'] ) );
-		$instance['attribute'] 		= stripslashes( $new_instance['attribute'] );
-		$instance['query_type'] 	= stripslashes( $new_instance['query_type'] );
-		$instance['display_type'] 	= stripslashes( $new_instance['display_type'] );
-
-		return $instance;
-	}
-
-	/**
-	 * form function.
-	 *
-	 * @see WP_Widget->form
-	 * @access public
-	 * @param array $instance
-	 * @return void
-	 */
-	function form( $instance ) {
-		global $woocommerce;
-
-		if ( ! isset( $instance['query_type'] ) )
-			$instance['query_type'] = 'and';
-
-		if ( ! isset( $instance['display_type'] ) )
-			$instance['display_type'] = 'list';
-		?>
-		<p><label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:', 'woocommerce' ) ?></label>
-		<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" value="<?php if ( isset( $instance['title'] ) ) echo esc_attr( $instance['title'] ); ?>" /></p>
-
-		<p><label for="<?php echo $this->get_field_id( 'attribute' ); ?>"><?php _e( 'Attribute:', 'woocommerce' ) ?></label>
-		<select id="<?php echo esc_attr( $this->get_field_id( 'attribute' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'attribute' ) ); ?>">
-			<?php
-			$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();
-			if ( $attribute_taxonomies )
-				foreach ( $attribute_taxonomies as $tax )
-					if ( taxonomy_exists( $woocommerce->attribute_taxonomy_name( $tax->attribute_name ) ) )
-						echo '<option value="' . $tax->attribute_name . '" ' . selected( ( isset( $instance['attribute'] ) && $instance['attribute'] == $tax->attribute_name ), true, false ) . '>' . $tax->attribute_name . '</option>';
-			?>
-		</select></p>
-
-		<p><label for="<?php echo $this->get_field_id( 'display_type' ); ?>"><?php _e( 'Display Type:', 'woocommerce' ) ?></label>
-		<select id="<?php echo esc_attr( $this->get_field_id( 'display_type' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'display_type' ) ); ?>">
-			<option value="list" <?php selected( $instance['display_type'], 'list' ); ?>><?php _e( 'List', 'woocommerce' ); ?></option>
-			<option value="dropdown" <?php selected( $instance['display_type'], 'dropdown' ); ?>><?php _e( 'Dropdown', 'woocommerce' ); ?></option>
-		</select></p>
-
-		<p><label for="<?php echo $this->get_field_id( 'query_type' ); ?>"><?php _e( 'Query Type:', 'woocommerce' ) ?></label>
-		<select id="<?php echo esc_attr( $this->get_field_id( 'query_type' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'query_type' ) ); ?>">
-			<option value="and" <?php selected( $instance['query_type'], 'and' ); ?>><?php _e( 'AND', 'woocommerce' ); ?></option>
-			<option value="or" <?php selected( $instance['query_type'], 'or' ); ?>><?php _e( 'OR', 'woocommerce' ); ?></option>
-		</select></p>
-		<?php
-	}
 }
+
+register_widget( 'WC_Widget_Layered_Nav' );

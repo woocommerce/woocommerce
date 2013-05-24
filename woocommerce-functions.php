@@ -1471,7 +1471,7 @@ function woocommerce_layered_nav_query( $filtered_posts ) {
 function woocommerce_price_filter_init() {
 	global $woocommerce;
 
-	if ( is_active_widget( false, false, 'price_filter', true ) && ! is_admin() ) {
+	if ( is_active_widget( false, false, 'woocommerce_price_filter', true ) && ! is_admin() ) {
 
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 

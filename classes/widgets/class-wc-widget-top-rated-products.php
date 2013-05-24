@@ -7,42 +7,38 @@
  * @author 		WooThemes
  * @category 	Widgets
  * @package 	WooCommerce/Widgets
- * @version 	1.6.4
- * @extends 	WP_Widget
+ * @version 	2.1.0
+ * @extends 	WC_Widget
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class WC_Widget_Top_Rated_Products extends WP_Widget {
-
-	var $woo_widget_cssclass;
-	var $woo_widget_description;
-	var $woo_widget_idbase;
-	var $woo_widget_name;
+class WC_Widget_Top_Rated_Products extends WC_Widget {
 
 	/**
-	 * constructor
-	 *
-	 * @access public
-	 * @return void
+	 * Constructor
 	 */
-	function WC_Widget_Top_Rated_Products() {
-
-		/* Widget variable settings. */
-		$this->woo_widget_cssclass = 'woocommerce widget_top_rated_products';
-		$this->woo_widget_description = __( 'Display a list of top rated products on your site.', 'woocommerce' );
-		$this->woo_widget_idbase = 'woocommerce_top_rated_products';
-		$this->woo_widget_name = __( 'WooCommerce Top Rated Products', 'woocommerce' );
-
-		/* Widget settings. */
-		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
-
-		/* Create the widget. */
-		$this->WP_Widget('top-rated-products', $this->woo_widget_name, $widget_ops);
-
-		add_action( 'save_post', array( $this, 'flush_widget_cache' ) );
-		add_action( 'deleted_post', array( $this, 'flush_widget_cache' ) );
-		add_action( 'switch_theme', array( $this, 'flush_widget_cache' ) );
+	public function __construct() {
+		$this->widget_cssclass    = 'woocommerce widget_top_rated_products';
+		$this->widget_description = __( 'Display a list of your top rated products on your site.', 'woocommerce' );
+		$this->widget_id          = 'woocommerce_top_rated_products';
+		$this->widget_name        = __( 'WooCommerce Top Rated Products', 'woocommerce' );
+		$this->settings           = array(
+			'title'  => array(
+				'type'  => 'text',
+				'std'   => __( 'Top Rated Products', 'woocommerce' ),
+				'label' => __( 'Title', 'woocommerce' )
+			),
+			'number' => array(
+				'type'  => 'number',
+				'step'  => 1,
+				'min'   => 1,
+				'max'   => '',
+				'std'   => 5,
+				'label' => __( 'Number of products to show', 'woocommerce' )
+			)
+		);
+		parent::__construct();
 	}
 
 	/**
@@ -54,26 +50,17 @@ class WC_Widget_Top_Rated_Products extends WP_Widget {
 	 * @param array $instance
 	 * @return void
 	 */
-	function widget($args, $instance) {
+	public function widget($args, $instance) {
 		global $woocommerce;
 
-		$cache = wp_cache_get('widget_top_rated_products', 'widget');
-
-		if ( !is_array($cache) ) $cache = array();
-
-		if ( isset($cache[$args['widget_id']]) ) {
-			echo $cache[$args['widget_id']];
+		if ( $this->get_cached_widget( $args ) )
 			return;
-		}
 
 		ob_start();
-		extract($args);
+		extract( $args );
 
-		$title = apply_filters('widget_title', empty($instance['title']) ? __('Top Rated Products', 'woocommerce' ) : $instance['title'], $instance, $this->id_base);
-
-		if ( !$number = (int) $instance['number'] ) $number = 10;
-		else if ( $number < 1 ) $number = 1;
-		else if ( $number > 15 ) $number = 15;
+		$title  = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
+		$number = absint( $instance['number'] );
 
 		add_filter( 'posts_clauses',  array( $woocommerce->query, 'order_by_rating_post_clauses' ) );
 
@@ -102,62 +89,16 @@ class WC_Widget_Top_Rated_Products extends WP_Widget {
 			echo $after_widget;
 		}
 
-		wp_reset_query();
 		remove_filter( 'posts_clauses', array( $woocommerce->query, 'order_by_rating_post_clauses' ) );
+
+		wp_reset_postdata();
 
 		$content = ob_get_clean();
 
-		if ( isset( $args['widget_id'] ) ) $cache[$args['widget_id']] = $content;
-
 		echo $content;
 
-		wp_cache_set('widget_top_rated_products', $cache, 'widget');
+		$this->cache_widget( $args, $content );
 	}
-
-	/**
-	 * update function.
-	 *
-	 * @see WP_Widget->update
-	 * @access public
-	 * @param array $new_instance
-	 * @param array $old_instance
-	 * @return array
-	 */
-	function update( $new_instance, $old_instance ) {
-		$instance = $old_instance;
-		$instance['title'] = strip_tags($new_instance['title']);
-		$instance['number'] = (int) $new_instance['number'];
-		$this->flush_widget_cache();
-
-		$alloptions = wp_cache_get( 'alloptions', 'options' );
-		if ( isset($alloptions['widget_top_rated_products']) ) delete_option('widget_top_rated_products');
-
-		return $instance;
-	}
-
-	function flush_widget_cache() {
-		wp_cache_delete('widget_top_rated_products', 'widget');
-	}
-
-	/**
-	 * form function.
-	 *
-	 * @see WP_Widget->form
-	 * @access public
-	 * @param array $instance
-	 * @return void
-	 */
-	function form( $instance ) {
-		$title = isset($instance['title']) ? esc_attr($instance['title']) : '';
-		if ( !isset($instance['number']) || !$number = (int) $instance['number'] )
-			$number = 5;
-?>
-		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e( 'Title:', 'woocommerce' ); ?></label>
-		<input class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('title') ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" /></p>
-
-		<p><label for="<?php echo $this->get_field_id('number'); ?>"><?php _e( 'Number of products to show:', 'woocommerce' ); ?></label>
-		<input id="<?php echo esc_attr( $this->get_field_id('number') ); ?>" name="<?php echo esc_attr( $this->get_field_name('number') ); ?>" type="text" value="<?php echo esc_attr( $number ); ?>" size="3" /></p>
-<?php
-	}
-
 }
+
+register_widget( 'WC_Widget_Top_Rated_Products' );

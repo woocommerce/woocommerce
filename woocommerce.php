@@ -148,7 +148,7 @@ class Woocommerce {
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'action_links' ) );
 		add_filter( 'woocommerce_shipping_methods', array( $this, 'core_shipping' ) );
 		add_filter( 'woocommerce_payment_gateways', array( $this, 'core_gateways' ) );
-		add_action( 'widgets_init', array( $this, 'register_widgets' ) );
+		add_action( 'widgets_init', array( $this, 'include_widgets' ) );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( $this, 'include_template_functions' ), 25 );
 		add_action( 'after_setup_theme', array( $this, 'compatibility' ) );
@@ -416,45 +416,24 @@ class Woocommerce {
 
 
 	/**
-	 * register_widgets function.
+	 * include_widgets function.
 	 *
 	 * @access public
 	 * @return void
 	 */
-	function register_widgets() {
-		// Include - no need to use autoload as WP loads them anyway
+	public function include_widgets() {
+		include_once( 'classes/abstracts/abstract-wc-widget.php' );
 		include_once( 'classes/widgets/class-wc-widget-cart.php' );
-		include_once( 'classes/widgets/class-wc-widget-featured-products.php' );
+		include_once( 'classes/widgets/class-wc-widget-products.php' );
 		include_once( 'classes/widgets/class-wc-widget-layered-nav.php' );
 		include_once( 'classes/widgets/class-wc-widget-layered-nav-filters.php' );
 		include_once( 'classes/widgets/class-wc-widget-price-filter.php' );
 		include_once( 'classes/widgets/class-wc-widget-product-categories.php' );
 		include_once( 'classes/widgets/class-wc-widget-product-search.php' );
 		include_once( 'classes/widgets/class-wc-widget-product-tag-cloud.php' );
-		include_once( 'classes/widgets/class-wc-widget-recent-products.php' );
-		include_once( 'classes/widgets/class-wc-widget-top-rated-products.php' );
 		include_once( 'classes/widgets/class-wc-widget-recent-reviews.php' );
 		include_once( 'classes/widgets/class-wc-widget-recently-viewed.php' );
-		include_once( 'classes/widgets/class-wc-widget-best-sellers.php' );
-		include_once( 'classes/widgets/class-wc-widget-onsale.php' );
-		include_once( 'classes/widgets/class-wc-widget-random-products.php' );
-
-		// Register widgets
-		register_widget( 'WC_Widget_Recent_Products' );
-		register_widget( 'WC_Widget_Featured_Products' );
-		register_widget( 'WC_Widget_Product_Categories' );
-		register_widget( 'WC_Widget_Product_Tag_Cloud' );
-		register_widget( 'WC_Widget_Cart' );
-		register_widget( 'WC_Widget_Layered_Nav' );
-		register_widget( 'WC_Widget_Layered_Nav_Filters' );
-		register_widget( 'WC_Widget_Price_Filter' );
-		register_widget( 'WC_Widget_Product_Search' );
-		register_widget( 'WC_Widget_Top_Rated_Products' );
-		register_widget( 'WC_Widget_Recent_Reviews' );
-		register_widget( 'WC_Widget_Recently_Viewed' );
-		register_widget( 'WC_Widget_Best_Sellers' );
-		register_widget( 'WC_Widget_Onsale' );
-		register_widget( 'WC_Widget_Random_Products' );
+		include_once( 'classes/widgets/class-wc-widget-top-rated-products.php' );
 	}
 
 
