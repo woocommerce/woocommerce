@@ -563,18 +563,20 @@ class Woocommerce {
 	 */
 	public function load_plugin_textdomain() {
 		$locale = apply_filters( 'plugin_locale', get_locale(), 'woocommerce' );
-		$formal = 'yes' == get_option( 'woocommerce_informal_localisation_type' ) ? 'informal' : 'formal';
 
-		load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-$locale.mo" );
-
-		// Load admin specific MO files
+		// Admin Locale
 		if ( is_admin() ) {
 			load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-admin-$locale.mo" );
 			load_textdomain( 'woocommerce', $this->plugin_path() . "/i18n/languages/woocommerce-admin-$locale.mo" );
 		}
 
-		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . "/i18n/languages/$formal" );
-		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . "/i18n/languages" );
+		// Frontend Locale
+		load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-$locale.mo" );
+
+		if ( apply_filters( 'woocommerce_load_alt_locale', false ) )
+			load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . "/i18n/languages/alt" );
+		else
+			load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . "/i18n/languages" );
 	}
 
 

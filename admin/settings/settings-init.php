@@ -14,14 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $woocommerce;
 
-$localisation_setting = defined( 'WPLANG' ) && file_exists( $woocommerce->plugin_path() . '/i18n/languages/informal/woocommerce-' . WPLANG . '.mo' ) ? array(
-	'title' => __( 'Localisation', 'woocommerce' ),
-	'desc' 		=> sprintf( __( 'Use informal localisation for %s', 'woocommerce' ), WPLANG ),
-	'id' 		=> 'woocommerce_informal_localisation_type',
-	'type' 		=> 'checkbox',
-	'default'	=> 'no',
-) : array();
-
 $currency_code_options = get_woocommerce_currencies();
 
 foreach ( $currency_code_options as $code => $name ) {
@@ -77,8 +69,6 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'default'	=> '',
 		'type' 		=> 'multi_select_countries'
 	),
-
-	$localisation_setting,
 
 	array(
 		'title' => __( 'Store Notice', 'woocommerce' ),
