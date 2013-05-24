@@ -1010,37 +1010,13 @@ class Woocommerce {
 			)
 		);
 
-		// Sort out attachment urls (removed, breaks pagination) no alternatives add_rewrite_rule( '^' . $attachment_base . '([^/]*)/([^/]*)/([^/]*)/?', 'index.php?attachment=$matches[3]', 'top' );
-
 		register_post_type( "product_variation",
 			apply_filters( 'woocommerce_register_post_type_product_variation',
 				array(
-					'labels' => array(
-							'name' 					=> __( 'Variations', 'woocommerce' ),
-							'singular_name' 		=> __( 'Variation', 'woocommerce' ),
-							'add_new' 				=> __( 'Add Variation', 'woocommerce' ),
-							'add_new_item' 			=> __( 'Add New Variation', 'woocommerce' ),
-							'edit' 					=> __( 'Edit', 'woocommerce' ),
-							'edit_item' 			=> __( 'Edit Variation', 'woocommerce' ),
-							'new_item' 				=> __( 'New Variation', 'woocommerce' ),
-							'view' 					=> __( 'View Variation', 'woocommerce' ),
-							'view_item' 			=> __( 'View Variation', 'woocommerce' ),
-							'search_items' 			=> __( 'Search Variations', 'woocommerce' ),
-							'not_found' 			=> __( 'No Variations found', 'woocommerce' ),
-							'not_found_in_trash' 	=> __( 'No Variations found in trash', 'woocommerce' ),
-							'parent' 				=> __( 'Parent Variation', 'woocommerce' )
-						),
-					'public' 				=> false,
-					'show_ui' 				=> false,
-					'capability_type' 		=> 'product',
-					'map_meta_cap'			=> true,
-					'publicly_queryable' 	=> false,
-					'exclude_from_search' 	=> true,
-					'hierarchical' 			=> false,
-					'rewrite' 				=> false,
-					'query_var'				=> false,
-					'supports' 				=> array( 'title', 'editor', 'custom-fields', 'page-attributes', 'thumbnail' ),
-					'show_in_nav_menus' 	=> false
+					'label'        => 'Variations',
+					'public'       => false,
+					'hierarchical' => false,
+					'supports'     => false
 				)
 			)
 		);
