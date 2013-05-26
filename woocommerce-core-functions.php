@@ -1838,6 +1838,95 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
 	", $product_id, $product_id, $user_id ) );
 }
 
+
+/**
+ * Return a count of how many of the specified product a user has purchased. 
+ *
+ * User can be specified by email or by user id.
+ * 
+ * @access public
+ * @param string $customer_email
+ * @param integer $user_id
+ * @param integer $product_id
+ * @return integer count of how many of this product was purchased by the user
+ */
+function woocommerce_customer_bought_product_count($customer_email, $user_id, $product_id) {
+    global $wpdb;
+        
+    // prepare and sanitize the variables that will be inserted in the query string
+    $emails = array();
+    
+    if ($user_id) {
+        $user = get_user_by('id', $user_id);
+        $emails[] = $user->user_email;
+    }
+    
+    if (is_email($customer_email)) {
+        $emails[] = $customer_email;
+    }
+
+    $emails = array_unique($emails);
+    $emails = array_map('sanitize_email', $emails);
+    $emails = implode("','", $emails);
+    
+    $terms = apply_filters('woocommerce_reports_order_statuses', array('completed', 'processing', 'on-hold'));
+    $terms = array_map('sanitize_key', $terms);
+    $terms = implode("','", $terms);
+    
+    $user_id = intval($user_id);
+    $product_id = intval($product_id);
+    
+    //  run the actual query
+    $product_count = $wpdb->get_var("
+        SELECT
+    	SUM({$wpdb->prefix}woocommerce_order_itemmeta.meta_value) AS quantity
+    	FROM
+    	{$wpdb->prefix}woocommerce_order_itemmeta
+    	WHERE
+    	{$wpdb->prefix}woocommerce_order_itemmeta.meta_key = '_qty' AND {$wpdb->prefix}woocommerce_order_itemmeta.order_item_id IN (
+    	
+    		SELECT distinct
+    		{$wpdb->prefix}woocommerce_order_items.order_item_id
+    		FROM
+    		{$wpdb->prefix}woocommerce_order_items
+    		JOIN
+    		{$wpdb->prefix}woocommerce_order_itemmeta ON {$wpdb->prefix}woocommerce_order_itemmeta.order_item_id = {$wpdb->prefix}woocommerce_order_items.order_item_id
+    		JOIN
+    		{$wpdb->posts} ON {$wpdb->prefix}woocommerce_order_items.order_id = {$wpdb->posts}.ID
+    		JOIN
+    		{$wpdb->postmeta} ON {$wpdb->postmeta}.post_id = {$wpdb->posts}.ID
+    		JOIN
+    		{$wpdb->term_relationships} ON {$wpdb->term_relationships}.object_id = {$wpdb->posts}.ID
+    		JOIN
+    		{$wpdb->term_taxonomy} ON {$wpdb->term_taxonomy}.term_taxonomy_id = {$wpdb->term_relationships}.term_taxonomy_id
+    		JOIN
+    		{$wpdb->terms} ON {$wpdb->terms}.term_id = {$wpdb->term_taxonomy}.term_id
+    		
+    		WHERE
+    		{$wpdb->posts}.post_type = 'shop_order'
+    		AND
+    		{$wpdb->term_taxonomy}.taxonomy = 'shop_order_status'
+    		AND
+    		{$wpdb->terms}.slug IN ('{$terms}')
+    		AND
+    		(({$wpdb->postmeta}.meta_key = '_customer_user' AND {$wpdb->postmeta}.meta_value = '{$user_id}')
+    		OR
+    		({$wpdb->postmeta}.meta_key = '_billing_email' AND {$wpdb->postmeta}.meta_value IN ('{$emails}')))
+    		AND
+    		{$wpdb->prefix}woocommerce_order_itemmeta.meta_key = '_product_id' AND {$wpdb->prefix}woocommerce_order_itemmeta.meta_value = '{$product_id}'	
+    	);
+    ");
+    
+    // always return an integer value (not NULL on no result)
+    if ($product_count) {
+        return $product_count;
+    } else {
+        return 0;
+    }
+}
+
+
+
 /**
  * Return the count of processing orders.
  *
