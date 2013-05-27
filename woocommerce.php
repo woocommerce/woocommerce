@@ -994,7 +994,7 @@ class Woocommerce {
 		register_post_type( "product_variation",
 			apply_filters( 'woocommerce_register_post_type_product_variation',
 				array(
-					'label'        => 'Variations',
+					'label'        => __( 'Variations', 'woocommerce' ),
 					'public'       => false,
 					'hierarchical' => false,
 					'supports'     => false
