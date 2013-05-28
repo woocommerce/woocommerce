@@ -1,6 +1,6 @@
 jQuery(function(){
-	
-	function weekendAreas(axes) {
+
+    function weekendAreas(axes) {
         var markings = [];
         var d = new Date(axes.xaxis.min);
         // go to the first Saturday
@@ -15,20 +15,20 @@ jQuery(function(){
             markings.push({ xaxis: { from: i, to: i + 2 * 24 * 60 * 60 * 1000 } });
             i += 7 * 24 * 60 * 60 * 1000;
         } while (i < axes.xaxis.max);
- 
+
         return markings;
     }
-	
+
 	var order_data = jQuery.parseJSON( params.order_data.replace(/&quot;/g, '"') );
-	
+
 	var d = order_data.order_counts;
     var d2 = order_data.order_amounts;
-	
+
 	for (var i = 0; i < d.length; ++i) d[i][0] += 60 * 60 * 1000;
     for (var i = 0; i < d2.length; ++i) d2[i][0] += 60 * 60 * 1000;
-	
+
 	var placeholder = jQuery("#placeholder");
-	 
+
 	var plot = jQuery.plot(placeholder, [ { label: params.number_of_sales, data: d }, { label: params.sales_amount, data: d2, yaxis: 2 } ], {
 		series: {
 			lines: { show: true, fill: true },
@@ -45,10 +45,10 @@ jQuery(function(){
 			hoverable: true,
 			markings: weekendAreas
 		},
-		xaxis: { 
+		xaxis: {
 			mode: "time",
-			timeformat: "%d %b", 
-			monthNames: params.month_names,
+			timeformat: "%d %b",
+			monthNames: params.i18n_month_names,
 			tickLength: 1,
 			minTickSize: [1, "day"]
 		},
@@ -59,47 +59,55 @@ jQuery(function(){
 		    position: "nw"
 		}
  	});
- 	
+
  	placeholder.resize();
-     
+
 	function showTooltip(x, y, contents) {
         jQuery('<div id="tooltip">' + contents + '</div>').css( {
             position: 'absolute',
             display: 'none',
             top: y + 5,
             left: x + 5,
-		    padding: '5px 10px',  
-			border: '3px solid #3da5d5',  
+		    padding: '5px 10px',
+			border: '3px solid #3da5d5',
 			background: '#288ab7'
         }).appendTo("body").fadeIn(200);
     }
- 
+
     var previousPoint = null;
     jQuery("#placeholder").bind("plothover", function (event, pos, item) {
         if (item) {
             if (previousPoint != item.dataIndex) {
                 previousPoint = item.dataIndex;
-                
+
                 jQuery("#tooltip").remove();
-                
+
                 if (item.series.label==params.number_of_sales) {
-                	
+
                 	var y = item.datapoint[1];
-                	showTooltip(item.pageX, item.pageY, params.sold + ": " + y);
-                	
+                	showTooltip(item.pageX, item.pageY, params.i18n_sold + ": " + y);
+
                 } else {
-                	
+
                 	var y = item.datapoint[1].toFixed(2);
-                	showTooltip(item.pageX, item.pageY, params.earned + ": " + params.currency_symbol + y);
-                
+
+                    var formatted_total = accounting.formatMoney( y, {
+                        symbol      : params.currency_format_symbol,
+                        decimal     : params.currency_format_decimal_sep,
+                        thousand    : params.currency_format_thousand_sep,
+                        precision   : params.currency_format_num_decimals,
+                        format      : params.currency_format
+                    } );
+
+                	showTooltip( item.pageX, item.pageY, params.i18n_earned + ": " + formatted_total );
                 }
 
             }
         }
         else {
             jQuery("#tooltip").remove();
-            previousPoint = null;            
+            previousPoint = null;
         }
     });
-	
+
 });

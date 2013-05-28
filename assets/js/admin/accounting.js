@@ -169,7 +169,7 @@
 	 * alias: accounting.`parse(string)`
 	 *
 	 * Decimal must be included in the regular expression to match floats (defaults to
-	 * accounting.settings.number.decimal), so if the number uses a non-standard decimal 
+	 * accounting.settings.number.decimal), so if the number uses a non-standard decimal
 	 * separator, provide it as the second argument.
 	 *
 	 * Also matches bracketed negatives (eg. "$ (1.99)" => -1.99)

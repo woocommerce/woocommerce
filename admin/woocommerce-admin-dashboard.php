@@ -422,12 +422,16 @@ function woocommerce_dashboard_sales_js() {
 
 	/* Script variables */
 	$params = array(
-		'currency_symbol' 	=> get_woocommerce_currency_symbol(),
-		'number_of_sales' 	=> absint( array_sum( $order_counts ) ),
-		'sales_amount'    	=> woocommerce_price( array_sum( $order_amounts ) ),
-		'sold' 				=> __( 'Sold', 'woocommerce' ),
-		'earned'    		=> __( 'Earned', 'woocommerce' ),
-		'month_names'     	=> array_values( $wp_locale->month_abbrev ),
+		'currency_format_num_decimals' => absint( get_option( 'woocommerce_price_num_decimals' ) ),
+		'currency_format_symbol'       => get_woocommerce_currency_symbol(),
+		'currency_format_decimal_sep'  => esc_attr( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ) ),
+		'currency_format_thousand_sep' => esc_attr( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ) ),
+		'currency_format'              => esc_attr( str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) ),
+		'number_of_sales'              => absint( array_sum( $order_counts ) ),
+		'sales_amount'                 => woocommerce_price( array_sum( $order_amounts ) ),
+		'i18n_sold'                    => __( 'Sold', 'woocommerce' ),
+		'i18n_earned'                  => __( 'Earned', 'woocommerce' ),
+		'i18n_month_names'             => array_values( $wp_locale->month_abbrev ),
 	);
 
 	$order_counts_array = array();
@@ -447,11 +451,11 @@ function woocommerce_dashboard_sales_js() {
 	// Queue scripts
 	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 
-	wp_register_script( 'woocommerce_dashboard_sales', $woocommerce->plugin_url() . '/assets/js/admin/dashboard_sales' . $suffix . '.js', array( 'jquery', 'flot', 'flot-resize' ), '1.0' );
+	wp_register_script( 'woocommerce_dashboard_sales', $woocommerce->plugin_url() . '/assets/js/admin/dashboard_sales' . $suffix . '.js', array( 'jquery', 'flot', 'flot-resize', 'accounting' ), $woocommerce->version );
 	wp_register_script( 'flot', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot'.$suffix.'.js', 'jquery', '1.0' );
 	wp_register_script( 'flot-resize', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.resize'.$suffix.'.js', 'jquery', '1.0' );
 
 	wp_localize_script( 'woocommerce_dashboard_sales', 'params', $params );
 
-	wp_print_scripts('woocommerce_dashboard_sales');
+	wp_print_scripts( 'woocommerce_dashboard_sales' );
 }
