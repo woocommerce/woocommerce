@@ -38,14 +38,14 @@ class WC_Order_Item_Meta {
 
 		if ( ! empty( $this->meta ) ) {
 
-			$output = $flat ? '' : '<dl class="variation">';
-
 			$meta_list = array();
 
 			foreach ( $this->meta as $meta_key => $meta_values ) {
 
 				if ( empty( $meta_values ) || ( ! empty( $hideprefix ) && substr( $meta_key, 0, 1 ) == $hideprefix ) )
 					continue;
+
+				$found_meta = true;
 
 				foreach( $meta_values as $meta_value ) {
 
@@ -67,6 +67,11 @@ class WC_Order_Item_Meta {
 
 				}
 			}
+
+			if ( ! sizeof( $meta_list ) )
+				return;
+
+			$output = $flat ? '' : '<dl class="variation">';
 
 			if ( $flat )
 				$output .= implode( ", \n", $meta_list );
