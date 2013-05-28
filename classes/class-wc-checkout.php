@@ -226,7 +226,7 @@ class WC_Checkout {
 			foreach ( $this->checkout_fields['shipping'] as $key => $field ) {
 				$postvalue = false;
 
-				if ( $this->posted['shiptobilling'] ) {
+				if ( $this->posted['ship_to_different_address'] == false ) {
 					if ( isset( $this->posted[ str_replace( 'shipping_', 'billing_', $key ) ] ) ) {
 						$postvalue = $this->posted[ str_replace( 'shipping_', 'billing_', $key ) ];
 						update_post_meta( $order_id, '_' . $key, $postvalue );
@@ -390,15 +390,21 @@ class WC_Checkout {
 		do_action( 'woocommerce_checkout_process' );
 
 		// Checkout fields (not defined in checkout_fields)
-		$this->posted['shiptobilling'] 		= isset( $_POST['shiptobilling'] ) ? 1 : 0;
-		$this->posted['terms'] 				= isset( $_POST['terms'] ) ? 1 : 0;
-		$this->posted['createaccount'] 		= isset( $_POST['createaccount'] ) ? 1 : 0;
-		$this->posted['payment_method'] 	= isset( $_POST['payment_method'] ) ? woocommerce_clean( $_POST['payment_method'] ) : '';
-		$this->posted['shipping_method']	= isset( $_POST['shipping_method'] ) ? woocommerce_clean( $_POST['shipping_method'] ) : '';
+		$this->posted['terms']                     = isset( $_POST['terms'] ) ? 1 : 0;
+		$this->posted['createaccount']             = isset( $_POST['createaccount'] ) ? 1 : 0;
+		$this->posted['payment_method']            = isset( $_POST['payment_method'] ) ? woocommerce_clean( $_POST['payment_method'] ) : '';
+		$this->posted['shipping_method']           = isset( $_POST['shipping_method'] ) ? woocommerce_clean( $_POST['shipping_method'] ) : '';
+		$this->posted['ship_to_different_address'] = isset( $_POST['ship_to_different_address'] ) ? true : false;
+
+		if ( isset( $_POST['shiptobilling'] ) ) {
+			_deprecated_argument( 'WC_Checkout::process_checkout()', '2.1', 'The "shiptobilling" field is deprecated. THe template files are out of date' );
+
+			$this->posted['ship_to_different_address'] = $_POST['shiptobilling'] ? false : true;
+		}
 
 		// Ship to billing only option
 		if ( $woocommerce->cart->ship_to_billing_address_only() )
-			$this->posted['shiptobilling'] = 1;
+			$this->posted['ship_to_different_address']  = false;
 
 		// Update customer shipping and payment method to posted method
 		$woocommerce->session->chosen_shipping_method 	= $this->posted['shipping_method'];
@@ -413,8 +419,8 @@ class WC_Checkout {
 		// Get posted checkout_fields and do validation
 		foreach ( $this->checkout_fields as $fieldset_key => $fieldset ) {
 
-			// Skip shipping if its not needed
-			if ( $fieldset_key == 'shipping' && ( $woocommerce->cart->ship_to_billing_address_only() || $this->posted['shiptobilling'] || ( ! $woocommerce->cart->needs_shipping() && get_option('woocommerce_require_shipping_address') == 'no' ) ) ) {
+			// Skip shipping if not needed
+			if ( $fieldset_key == 'shipping' && ( $this->posted['ship_to_different_address'] == false || ( ! $woocommerce->cart->needs_shipping() && get_option('woocommerce_require_shipping_address') == 'no' ) ) ) {
 				$skipped_shipping = true;
 				continue;
 			}

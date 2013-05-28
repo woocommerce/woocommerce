@@ -854,7 +854,7 @@ $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings
 
 	array(
 		'desc' 		=> __( 'Ship to billing address by default', 'woocommerce' ),
-		'id' 		=> 'woocommerce_ship_to_same_address',
+		'id' 		=> 'woocommerce_ship_to_billing',
 		'default'	=> 'yes',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> ''

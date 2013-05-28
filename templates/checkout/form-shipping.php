@@ -15,24 +15,22 @@ global $woocommerce;
 <?php if ( ( $woocommerce->cart->needs_shipping() || get_option('woocommerce_require_shipping_address') == 'yes' ) && ! $woocommerce->cart->ship_to_billing_address_only() ) : ?>
 
 	<?php
-		if ( empty( $_POST ) ) :
+		if ( empty( $_POST ) ) {
 
-			$shiptobilling = (get_option('woocommerce_ship_to_same_address')=='yes') ? 1 : 0;
-			$shiptobilling = apply_filters('woocommerce_shiptobilling_default', $shiptobilling);
+			$ship_to_different_address = get_option( 'woocommerce_ship_to_billing' ) == 'no' ? 1 : 0;
+			$ship_to_different_address = apply_filters( 'woocommerce_ship_to_different_address_checked', $ship_to_different_address );
 
-		else :
+		} else {
 
-			$shiptobilling = $checkout->get_value('shiptobilling');
+			$ship_to_different_address = $checkout->get_value( 'ship_to_different_address' );
 
-		endif;
+		}
 	?>
 
-	<p class="form-row" id="shiptobilling">
-		<input id="shiptobilling-checkbox" class="input-checkbox" <?php checked($shiptobilling, 1); ?> type="checkbox" name="shiptobilling" value="1" />
-		<label for="shiptobilling-checkbox" class="checkbox"><?php _e( 'Ship to billing address?', 'woocommerce' ); ?></label>
-	</p>
-
-	<h3><?php _e( 'Shipping Address', 'woocommerce' ); ?></h3>
+	<h3 id="ship-to-different-address">
+		<label for="ship-to-different-address-checkbox" class="checkbox"><?php _e( 'Ship to a different address?', 'woocommerce' ); ?></label>
+		<input id="ship-to-different-address-checkbox" class="input-checkbox" <?php checked( $ship_to_different_address, 1 ); ?> type="checkbox" name="ship_to_different_address" value="1" />
+	</h3>
 
 	<div class="shipping_address">
 

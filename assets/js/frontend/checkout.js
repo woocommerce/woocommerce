@@ -21,20 +21,20 @@ jQuery(document).ready(function($) {
 		var address	 		= $('input#billing_address_1').val();
 		var address_2	 	= $('input#billing_address_2').val();
 
-		if ( $('#shiptobilling input').is(':checked') || $('#shiptobilling input').size() == 0 ) {
-			var s_country 	= country;
-			var s_state 	= state;
-			var s_postcode 	= postcode;
-			var s_city 		= city;
-			var s_address 	= address;
-			var s_address_2	= address_2;
-		} else {
+		if ( $('#ship-to-different-address input').is(':checked') || $('#ship-to-different-address input').size() == 0 ) {
 			var s_country 	= $('#shipping_country').val();
 			var s_state 	= $('#shipping_state').val();
 			var s_postcode 	= $('input#shipping_postcode').val();
 			var s_city 		= $('input#shipping_city').val();
 			var s_address 	= $('input#shipping_address_1').val();
 			var s_address_2	= $('input#shipping_address_2').val();
+		} else {
+			var s_country 	= country;
+			var s_state 	= state;
+			var s_postcode 	= postcode;
+			var s_city 		= city;
+			var s_address 	= address;
+			var s_address_2	= address_2;
 		}
 
 		$('#order_methods, #order_review').block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6}});
@@ -97,9 +97,9 @@ jQuery(document).ready(function($) {
 		return false;
 	});
 
-	$('#shiptobilling input').change(function(){
+	$('#ship-to-different-address input').change(function(){
 		$('div.shipping_address').hide();
-		if (!$(this).is(':checked')) {
+		if ($(this).is(':checked')) {
 			$('div.shipping_address').slideDown();
 		}
 	}).change();
@@ -164,7 +164,7 @@ jQuery(document).ready(function($) {
 	/* Update totals/taxes/shipping */
 
 	// Inputs/selects which update totals instantly
-	.on( 'change', 'select#shipping_method, input[name=shipping_method], #shiptobilling input, .update_totals_on_change select', function(){
+	.on( 'change', 'select#shipping_method, input[name=shipping_method], #ship-to-different-address input, .update_totals_on_change select', function(){
 		clearTimeout( updateTimer );
 		dirtyInput = false;
 		$('body').trigger('update_checkout');

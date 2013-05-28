@@ -180,6 +180,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Handle pending status for paypal
 * Tweak - Handling for multiselect fields on checkout, and a filter for third party handling.
 * Tweak - Made scripts/styles use protocol-relative URLs
+* Tweak - Revised shiptobilling functionality on the checkout. "ship to different address" option used instead.
 * Fix - Changed MyException to Exception in Checkout class as MyException class does not exist in WooCommerce
 * Fix - Default cart widget styling on non-wc pages.
 * Fix - Rounding for mijireh tax ex. price.
