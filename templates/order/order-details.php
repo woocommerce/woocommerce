@@ -48,7 +48,10 @@ $order = new WC_Order( $order_id );
 							apply_filters( 'woocommerce_order_table_item_quantity', '<strong class="product-quantity">&times; ' . $item['qty'] . '</strong>', $item );
 
 				$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
-				$item_meta->display();
+				
+				if ($item_meta->meta['_variation_id'][0]) {
+					$item_meta->display();
+				}
 
 				if ( $_product && $_product->exists() && $_product->is_downloadable() && $order->is_download_permitted() ) {
 
