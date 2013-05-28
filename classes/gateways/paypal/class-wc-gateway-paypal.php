@@ -423,7 +423,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		$woocommerce->add_inline_js( '
-			jQuery("body").block({
+			$.blockUI({
 					message: "' . esc_js( __( 'Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woocommerce' ) ) . '",
 					baseZ: 99999,
 					overlayCSS:
@@ -447,7 +447,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		return '<form action="'.esc_url( $paypal_adr ).'" method="post" id="paypal_payment_form" target="_top">
 				' . implode( '', $paypal_args_array) . '
-				<input type="submit" class="button alt" id="submit_paypal_payment_form" value="' . __( 'Pay via PayPal', 'woocommerce' ) . '" /> <a class="button cancel" href="'.esc_url( $order->get_cancel_order_url() ).'">'.__( 'Cancel order &amp; restore cart', 'woocommerce' ).'</a>
+				<!-- Button Fallback -->
+				<div class="payment_buttons">
+					<input type="submit" class="button alt" id="submit_paypal_payment_form" value="' . __( 'Pay via PayPal', 'woocommerce' ) . '" /> <a class="button cancel" href="'.esc_url( $order->get_cancel_order_url() ).'">'.__( 'Cancel order &amp; restore cart', 'woocommerce' ).'</a>
+				</div>
+				<script type="text/javascript">
+					jQuery(".payment_buttons").hide();
+				</script>
 			</form>';
 
 	}
@@ -501,7 +507,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
      */
 	function receipt_page( $order ) {
 
-		echo '<p>'.__( 'Thank you for your order, please click the button below to pay with PayPal.', 'woocommerce' ).'</p>';
+		echo '<p>'.__( 'Thank you - your order is now pending payment. You should be automatically redirected to PayPal to make payment.', 'woocommerce' ).'</p>';
 
 		echo $this->generate_paypal_form( $order );
 
