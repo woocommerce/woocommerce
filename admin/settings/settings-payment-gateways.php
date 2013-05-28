@@ -24,37 +24,59 @@ function woocommerce_payment_gateways_setting() {
 			<table class="wc_gateways widefat" cellspacing="0">
 				<thead>
 					<tr>
-						<th width="1%"><?php _e( 'Default', 'woocommerce' ); ?></th>
-						<th><?php _e( 'Gateway', 'woocommerce' ); ?></th>
-						<th><?php _e( 'Status', 'woocommerce' ); ?></th>
+						<?php
+							$columns = apply_filters( 'woocommerce_payment_gateways_setting_columns', array(
+								'default' => __( 'Default', 'woocommerce' ),
+								'gateway' => __( 'Gateway', 'woocommerce' ),
+								'status'  => __( 'Status', 'woocommerce' )
+							) );
+
+							foreach ( $columns as $key => $column ) {
+								echo '<th class="' . esc_attr( $key ) . '">' . esc_html( $column ) . '</th>';
+							}
+						?>
 					</tr>
 				</thead>
 				<tbody>
 		        	<?php
-		        	foreach ( $woocommerce->payment_gateways->payment_gateways() as $gateway ) :
+		        	$default_gateway = get_option( 'woocommerce_default_gateway' );
 
-		        		$default_gateway = get_option('woocommerce_default_gateway');
+		        	foreach ( $woocommerce->payment_gateways->payment_gateways() as $gateway ) {
 
-		        		echo '<tr>
-		        			<td width="1%" class="radio">
-		        				<input type="radio" name="default_gateway" value="' . esc_attr( $gateway->id ) . '" ' . checked( $default_gateway, esc_attr( $gateway->id ), false ) . ' />
-		        				<input type="hidden" name="gateway_order[]" value="' . esc_attr( $gateway->id ) . '" />
-		        			</td>
-		        			<td>
-		        				<p><strong>' . $gateway->get_title() . '</strong><br/>
-		        				<small>' . __( 'Gateway ID', 'woocommerce' ) . ': ' . esc_html( $gateway->id ) . '</small></p>
-		        			</td>
-		        			<td>';
+		        		echo '<tr>';
 
-		        		if ( $gateway->enabled == 'yes' )
-		        			echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/success@2x.png" width="16" height="14" alt="yes" />';
-						else
-							echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/success-off@2x.png" width="16" height="14" alt="no" />';
+		        		foreach ( $columns as $key => $column ) {
+							switch ( $key ) {
+								case 'default' :
+									echo '<td width="1%" class="radio">
+				        				<input type="radio" name="default_gateway" value="' . esc_attr( $gateway->id ) . '" ' . checked( $default_gateway, esc_attr( $gateway->id ), false ) . ' />
+				        				<input type="hidden" name="gateway_order[]" value="' . esc_attr( $gateway->id ) . '" />
+				        			</td>';
+								break;
+								case 'gateway' :
+									echo '<td>
+				        				<p><strong>' . $gateway->get_title() . '</strong><br/>
+				        				<small>' . __( 'Gateway ID', 'woocommerce' ) . ': ' . esc_html( $gateway->id ) . '</small></p>
+				        			</td>';
+								break;
+								case 'status' :
+									echo '<td>';
 
-		        		echo '</td>
-		        		</tr>';
+					        		if ( $gateway->enabled == 'yes' )
+					        			echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/success@2x.png" width="16" height="14" alt="yes" />';
+									else
+										echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/success-off@2x.png" width="16" height="14" alt="no" />';
 
-		        	endforeach;
+					        		echo '</td>';
+								break;
+								default :
+									do_action( 'woocommerce_payment_gateways_setting_column_' . $key, $gateway );
+								break;
+							}
+						}
+
+						echo '</tr>';
+		        	}
 		        	?>
 				</tbody>
 			</table>
