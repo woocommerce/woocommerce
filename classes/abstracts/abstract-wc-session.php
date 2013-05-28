@@ -63,8 +63,13 @@ abstract class WC_Session {
      */
     public function __unset( $property ) {
     	if ( isset( $this->_data[ $property ] ) ) {
-       		unset( $this->_data[ $property ] );
-       		$this->_dirty = true;
+            try {
+       		   unset( $this->_data[ $property ] );
+       		   $this->_dirty = true;
+            } catch( Exception $e ) {
+                if ( defined( 'WP_DEBUG' ) && WP_DEBUG )
+                    $GLOBALS['woocommerce']->add_error( "Error: Cannot unset " . strval( $property ) . " - " . $e->getMessage() );
+            }
         }
     }
 
