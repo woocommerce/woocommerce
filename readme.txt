@@ -189,6 +189,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Replaced jQuery placeholder plugin to provide support in older browsers
 * Fix - Rounding for mijireh tax ex. price
 * Fix - Fixed is_on_sale function for products without prices
+* Fix - Updated blockui to prevent errors in WP 3.6
 
 = 2.0.10 - 15/05/2013 =
 * Tweak - Searching for SKU in admin panel can also be done via lowercase 'sku:' instead of just 'SKU:'
