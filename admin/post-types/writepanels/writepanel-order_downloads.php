@@ -209,7 +209,7 @@ function woocommerce_order_downloads_save( $post_id, $post ) {
 
 		// Order data
 		$order_key 				= get_post_meta( $post->ID, '_order_key', true );
-		$customer_email 		= get_post_meta( $post->ID, '_billing_email', true );
+		$customer_email 		= $_POST['_billing_email'];
 		$customer_user 			= get_post_meta( $post->ID, '_customer_user', true );
 		$product_ids_count 		= sizeof( $product_ids );
 
