@@ -1784,6 +1784,7 @@ class Woocommerce {
 		);
 
 		foreach( $transients_to_clear as $transient ) {
+			delete_transient( 'wc_products_onsale' );
 			$wpdb->query( $wpdb->prepare( "DELETE FROM `$wpdb->options` WHERE `option_name` = %s OR `option_name` = %s", '_transient_' . $transient, '_transient_timeout_' . $transient ) );
 		}
 
