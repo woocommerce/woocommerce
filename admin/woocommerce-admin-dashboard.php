@@ -235,8 +235,8 @@ function woocommerce_dashboard_recent_orders() {
 
 			echo '
 			<li>
-				<span class="order-status '.sanitize_title($this_order->status).'">'.ucwords(__($this_order->status, 'woocommerce')).'</span> <a href="'.admin_url('post.php?post='.$order->ID).'&action=edit">' . get_the_time( __( 'l jS \of F Y h:i:s A', 'woocommerce' ), $order->ID ) . '</a><br />
-				<small>'.sizeof($this_order->get_items()).' '._n('item', 'items', sizeof($this_order->get_items()), 'woocommerce').' <span class="order-cost">'.__('Total:', 'woocommerce' ) . ' ' . woocommerce_price($this_order->order_total).'</span></small>
+				<span class="order-status ' . sanitize_title( $this_order->status ) . '">' . ucwords( __($this_order->status, 'woocommerce') ) . '</span> <a href="' . admin_url( 'post.php?post='.$order->ID ) . '&action=edit">' . get_the_time( __( 'l jS \of F Y h:i:s A', 'woocommerce' ), $order->ID ) . '</a><br />
+				<small>' . apply_filters( 'woocommerce_dashboard_recent_orders_count', sizeof( $this_order->get_items() ), $this_order ) . ' ' . _n('item', 'items', apply_filters( 'woocommerce_dashboard_recent_orders_count', sizeof( $this_order->get_items() ), $this_order ), 'woocommerce' ) . ' <span class="order-cost">'.__('Total:', 'woocommerce' ) . ' ' . woocommerce_price($this_order->order_total).'</span></small>
 			</li>';
 
 		endforeach;
