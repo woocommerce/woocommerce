@@ -38,8 +38,6 @@ class WC_Shortcodes {
 		add_shortcode( 'woocommerce_change_password', array( $this, 'change_password' ) );
 		add_shortcode( 'woocommerce_lost_password', array( $this, 'lost_password' ) );
 		add_shortcode( 'woocommerce_view_order', array( $this, 'view_order' ) );
-		add_shortcode( 'woocommerce_pay', array( $this, 'pay' ) );
-		add_shortcode( 'woocommerce_thankyou', array( $this, 'thankyou' ) );
 	}
 
 	/**
@@ -137,30 +135,6 @@ class WC_Shortcodes {
 	public function view_order( $atts ) {
 		global $woocommerce;
 		return $woocommerce->shortcode_wrapper( array( 'WC_Shortcode_View_Order', 'output' ), $atts );
-	}
-
-	/**
-	 * Pay page shortcode.
-	 *
-	 * @access public
-	 * @param mixed $atts
-	 * @return string
-	 */
-	public function pay( $atts ) {
-		global $woocommerce;
-		return $woocommerce->shortcode_wrapper( array( 'WC_Shortcode_Pay', 'output' ), $atts );
-	}
-
-	/**
-	 * Thankyou page shortcode.
-	 *
-	 * @access public
-	 * @param mixed $atts
-	 * @return string
-	 */
-	public function thankyou( $atts ) {
-		global $woocommerce;
-		return $woocommerce->shortcode_wrapper( array( 'WC_Shortcode_Thankyou', 'output' ), $atts );
 	}
 
 	/**
@@ -1026,7 +1000,7 @@ class WC_Shortcodes {
 	}
 
 	function related_products_shortcode( $atts ) {
-		
+
 		$atts = shortcode_atts( array(
 			'posts_per_page' => '2',
 			'columns' 	     => '2',

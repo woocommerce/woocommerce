@@ -308,14 +308,6 @@ function woocommerce_status_report() {
 							'option' => 'woocommerce_checkout_page_id',
 							'shortcode' => '[woocommerce_checkout]'
 						),
-					__( 'Pay', 'woocommerce' ) => array(
-							'option' => 'woocommerce_pay_page_id',
-							'shortcode' => '[woocommerce_pay]'
-						),
-					__( 'Thanks', 'woocommerce' ) => array(
-							'option' => 'woocommerce_thanks_page_id',
-							'shortcode' => '[woocommerce_thankyou]'
-						),
 					__( 'My Account', 'woocommerce' ) => array(
 							'option' => 'woocommerce_myaccount_page_id',
 							'shortcode' => '[woocommerce_my_account]'
@@ -460,7 +452,7 @@ function woocommerce_status_report() {
 			var o = i.toString();
 			if (!s) { s = '0'; }
 			while (o.length < l) {
-				// empty 
+				// empty
 				if(w == 'undefined'){
 					o = s + o;
 				}else{
@@ -469,7 +461,7 @@ function woocommerce_status_report() {
 			}
 			return o;
 		};
-		
+
 
 		jQuery('a.debug-report').click(function(){
 
@@ -491,30 +483,30 @@ function woocommerce_status_report() {
 
 						name = jQuery.wc_strPad( jQuery.trim( $this.find('td:eq(0)').text() ), 25, ' ' );
 						value = jQuery.trim( $this.find('td:eq(1)').text() );
-						
-						
+
+
 						value_array = value.split( ', ' );
 						if( value_array.length > 1 ){
-							
+
 							// if value have a list of plugins ','
 							// split to add new line
 							output = '';
 							temp_line ='';
 							jQuery.each( value_array, function(key, line){
-								
+
 								tab = ( key == 0 )?0:25;
 							    temp_line = temp_line + jQuery.wc_strPad( '', tab, ' ', 'f' ) + line +'\n';
 							});
-						
+
 							value = temp_line;
 						}
-						
+
 						report = report +''+ name + value + "\n";
 					});
 
 				}
 			} );
-			
+
 			var blob = new Blob( [report] );
 
 			jQuery(this).attr( 'href', window.URL.createObjectURL( blob ) );

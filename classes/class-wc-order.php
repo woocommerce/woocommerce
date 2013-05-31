@@ -1087,18 +1087,55 @@ class WC_Order {
 
 
 	/**
-	 * Generates a URL so that a customer can checkout/pay for their (unpaid - pending) order via a link.
+	 * Generates a URL so that a customer can pay for their (unpaid - pending) order. Pass 'true' for the checkout version which doesn't offer gateway choices.
+	 *
+	 * @access public
+	 * @param  boolean $on_checkout
+	 * @return string
+	 */
+	public function get_checkout_payment_url( $on_checkout = false ) {
+
+		$pay_url = get_permalink( woocommerce_get_page_id( 'checkout' ) );
+
+		if ( get_option( 'permalink_structure' ) )
+			$pay_url = trailingslashit( $pay_url ) . 'order-pay/' . $this->id;
+		else
+			$pay_url = add_query_arg( 'order-pay', $this->id, $pay_url );
+
+		if ( get_option( 'woocommerce_force_ssl_checkout' ) == 'yes' || is_ssl() )
+			$pay_url = str_replace( 'http:', 'https:', $pay_url );
+
+		if ( $on_checkout ) {
+			$pay_url = add_query_arg( 'key', $this->order_key, $pay_url );
+		} else {
+			$pay_url = add_query_arg( array( 'pay_for_order' => 'true', 'key' => $this->order_key ), $pay_url );
+		}
+
+		return apply_filters( 'woocommerce_get_checkout_payment_url', $pay_url, $this );
+	}
+
+
+	/**
+	 * Generates a URL for the thanks page (order received)
 	 *
 	 * @access public
 	 * @return string
 	 */
-	public function get_checkout_payment_url() {
+	public function get_checkout_order_received_url() {
 
-		$payment_page = get_permalink(woocommerce_get_page_id('pay'));
+		$order_received_url = get_permalink( woocommerce_get_page_id( 'checkout' ) );
 
-		if (get_option('woocommerce_force_ssl_checkout')=='yes' || is_ssl()) $payment_page = str_replace('http:', 'https:', $payment_page);
+		if ( get_option( 'permalink_structure' ) )
+			$order_received_url = trailingslashit( $order_received_url ) . 'order-received/' . $this->id;
+		else
+			$order_received_url = add_query_arg( 'order-received', $this->id, $order_received_url );
 
-		return apply_filters('woocommerce_get_checkout_payment_url', add_query_arg('pay_for_order', 'true', add_query_arg('order', $this->order_key, add_query_arg('order_id', $this->id, $payment_page))));
+		if ( get_option( 'woocommerce_force_ssl_checkout' ) == 'yes' || is_ssl() )
+			$order_received_url = str_replace( 'http:', 'https:', $order_received_url );
+
+		$order_received_url = add_query_arg( 'key', $this->order_key, $order_received_url );
+
+		return apply_filters( 'woocommerce_get_checkout_order_received_url', $order_received_url, $this );
 	}
 
 

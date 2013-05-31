@@ -217,12 +217,6 @@ function woocommerce_create_pages() {
 
     // Logout page
     woocommerce_create_page( esc_sql( _x( 'logout', 'page_slug', 'woocommerce' ) ), 'woocommerce_logout_page_id', __( 'Logout', 'woocommerce' ), '', woocommerce_get_page_id( 'myaccount' ) );
-
-	// Pay page
-    woocommerce_create_page( esc_sql( _x( 'pay', 'page_slug', 'woocommerce' ) ), 'woocommerce_pay_page_id', __( 'Checkout &rarr; Pay', 'woocommerce' ), '[woocommerce_pay]', woocommerce_get_page_id( 'checkout' ) );
-
-    // Thanks page
-    woocommerce_create_page( esc_sql( _x( 'order-received', 'page_slug', 'woocommerce' ) ), 'woocommerce_thanks_page_id', __( 'Order Received', 'woocommerce' ), '[woocommerce_thankyou]', woocommerce_get_page_id( 'checkout' ) );
 }
 
 

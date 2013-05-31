@@ -35,7 +35,7 @@ add_action( 'init', 'woocommerce_legacy_paypal_ipn' );
  * @return void
  */
 function woocommerce_template_redirect() {
-	global $woocommerce, $wp_query;
+	global $woocommerce, $wp_query, $wp;
 
 	// When default permalinks are enabled, redirect shop page to post type archive url
 	if ( ! empty( $_GET['page_id'] ) && get_option( 'permalink_structure' ) == "" && $_GET['page_id'] == woocommerce_get_page_id( 'shop' ) ) {
@@ -44,14 +44,8 @@ function woocommerce_template_redirect() {
 	}
 
 	// When on the checkout with an empty cart, redirect to cart page
-	elseif ( is_page( woocommerce_get_page_id( 'checkout' ) ) && sizeof( $woocommerce->cart->get_cart() ) == 0 ) {
+	elseif ( is_page( woocommerce_get_page_id( 'checkout' ) ) && sizeof( $woocommerce->cart->get_cart() ) == 0 && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ) {
 		wp_redirect( get_permalink( woocommerce_get_page_id( 'cart' ) ) );
-		exit;
-	}
-
-	// When on pay page with no query string, redirect to checkout
-	elseif ( is_page( woocommerce_get_page_id( 'pay' ) ) && ! isset( $_GET['order'] ) ) {
-		wp_redirect( get_permalink( woocommerce_get_page_id( 'checkout' ) ) );
 		exit;
 	}
 
@@ -92,8 +86,8 @@ function woocommerce_template_redirect() {
 
 	}
 
-	// Break out of SSL if we leave the checkout/my accounts (anywhere but thanks)
-	elseif ( get_option('woocommerce_force_ssl_checkout') == 'yes' && get_option('woocommerce_unforce_ssl_checkout') == 'yes' && is_ssl() && $_SERVER['REQUEST_URI'] && ! is_checkout() && ! is_page( woocommerce_get_page_id('thanks') ) && ! is_ajax() && ! is_account_page() && apply_filters( 'woocommerce_unforce_ssl_checkout', true ) ) {
+	// Break out of SSL if we leave the checkout/my accounts
+	elseif ( get_option('woocommerce_force_ssl_checkout') == 'yes' && get_option('woocommerce_unforce_ssl_checkout') == 'yes' && is_ssl() && $_SERVER['REQUEST_URI'] && ! is_checkout() && ! is_ajax() && ! is_account_page() && apply_filters( 'woocommerce_unforce_ssl_checkout', true ) ) {
 
 		if ( 0 === strpos( $_SERVER['REQUEST_URI'], 'http' ) ) {
 			wp_safe_redirect( preg_replace( '|^https://|', 'http://', $_SERVER['REQUEST_URI'] ) );
@@ -509,14 +503,11 @@ function woocommerce_add_to_cart_message( $product_id ) {
  * @return void
  */
 function woocommerce_clear_cart_after_payment() {
-	global $woocommerce;
+	global $woocommerce, $wp;
 
-	if ( is_page( woocommerce_get_page_id( 'thanks' ) ) ) {
+	if ( ! empty( $wp->query_vars['order-received'] ) ) {
 
-		if ( isset( $_GET['order'] ) )
-			$order_id = $_GET['order'];
-		else
-			$order_id = 0;
+		$order_id = absint( $wp->query_vars['order-received'] );
 
 		if ( isset( $_GET['key'] ) )
 			$order_key = $_GET['key'];
@@ -576,15 +567,15 @@ function woocommerce_checkout_action() {
  * @return void
  */
 function woocommerce_pay_action() {
-	global $woocommerce;
+	global $woocommerce, $wp;
 
 	if ( isset( $_POST['woocommerce_pay'] ) && $woocommerce->verify_nonce( 'pay' ) ) {
 
 		ob_start();
 
 		// Pay for existing order
-		$order_key 	= urldecode( $_GET['order'] );
-		$order_id 	= absint( $_GET['order_id'] );
+		$order_key 	= urldecode( $_GET['key'] );
+		$order_id 	= absint( $wp->query_vars['order-pay'] );
 		$order 		= new WC_Order( $order_id );
 
 		if ( $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, array( 'pending', 'failed' ) ) ) {
@@ -633,7 +624,7 @@ function woocommerce_pay_action() {
 
 				// No payment was required for order
 				$order->payment_complete();
-				wp_safe_redirect( get_permalink( woocommerce_get_page_id( 'thanks' ) ) );
+				wp_safe_redirect( $order->get_checkout_order_received_url() );
 				exit;
 
 			}

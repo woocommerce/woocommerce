@@ -453,6 +453,10 @@ class Woocommerce {
 		// Variables
 		$this->template_url			= apply_filters( 'woocommerce_template_url', 'woocommerce/' );
 
+		// Add endpoints
+		add_rewrite_endpoint( 'order-pay', EP_PAGES );
+		add_rewrite_endpoint( 'order-received', EP_PAGES );
+
 		// Load class instances
 		$this->product_factory 		= new WC_Product_Factory();     // Product Factory to create new product instances
 		$this->countries 			= new WC_Countries();			// Countries class
@@ -525,7 +529,7 @@ class Woocommerce {
 	 * @return void
 	 */
 	public function init_checkout() {
-		if ( is_checkout() || is_order_received_page() ) {
+		if ( is_checkout() ) {
 			$this->payment_gateways();
 			$this->shipping();
 		}
@@ -721,7 +725,7 @@ class Woocommerce {
 			return;
 		}
 
-		if ( is_checkout() || is_order_received_page() ) {
+		if ( is_checkout() ) {
 			$this->add_body_class( 'woocommerce-checkout' );
 			$this->add_body_class( 'woocommerce-page' );
 			return;
@@ -1106,7 +1110,7 @@ class Woocommerce {
 	 * @return void
 	 */
 	public function frontend_scripts() {
-		global $post;
+		global $post, $wp;
 
 		$suffix               = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		$lightbox_en          = get_option( 'woocommerce_enable_lightbox' ) == 'yes' ? true : false;
@@ -1170,7 +1174,7 @@ class Woocommerce {
 			'apply_coupon_nonce'               => wp_create_nonce( "apply-coupon" ),
 			'option_guest_checkout'            => get_option( 'woocommerce_enable_guest_checkout' ),
 			'checkout_url'                     => add_query_arg( 'action', 'woocommerce-checkout', $this->ajax_url() ),
-			'is_checkout'                      => is_page( woocommerce_get_page_id( 'checkout' ) ) ? 1 : 0,
+			'is_checkout'                      => is_page( woocommerce_get_page_id( 'checkout' ) ) && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ? 1 : 0,
 			'update_shipping_method_nonce'     => wp_create_nonce( "update-shipping-method" ),
 			'cart_url'                         => get_permalink( woocommerce_get_page_id( 'cart' ) ),
 			'cart_redirect_after_add'          => get_option( 'woocommerce_cart_redirect_after_add' )

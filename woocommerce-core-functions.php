@@ -333,7 +333,7 @@ if ( ! function_exists( 'woocommerce_get_page_id' ) ) {
 	/**
 	 * WooCommerce page IDs
 	 *
-	 * retrieve page ids - used for myaccount, edit_address, change_password, shop, cart, checkout, pay, view_order, thanks, terms
+	 * retrieve page ids - used for myaccount, edit_address, change_password, shop, cart, checkout, pay, view_order, terms
 	 *
 	 * returns -1 if no page is found
 	 *
@@ -342,8 +342,16 @@ if ( ! function_exists( 'woocommerce_get_page_id' ) ) {
 	 * @return int
 	 */
 	function woocommerce_get_page_id( $page ) {
-		$page = apply_filters('woocommerce_get_' . $page . '_page_id', get_option('woocommerce_' . $page . '_page_id'));
-		return ( $page ) ? $page : -1;
+
+		if ( $page == 'pay' || $page == 'thanks' ) {
+			_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.1', 'The "pay" and "thanks" pages are no-longer used - an endpoint is added to the checkout instead. To get a valid link use the WC_Order::get_checkout_payment_url() or WC_Order::get_checkout_order_received_url() methods instead.' );
+
+			$page = 'checkout';
+		}
+
+		$page = apply_filters( 'woocommerce_get_' . $page . '_page_id', get_option('woocommerce_' . $page . '_page_id' ) );
+
+		return $page ? $page : -1;
 	}
 }
 
@@ -506,7 +514,7 @@ if ( ! function_exists( 'is_checkout' ) ) {
 	 * @return bool
 	 */
 	function is_checkout() {
-		return ( is_page( woocommerce_get_page_id( 'checkout' ) ) || is_page( woocommerce_get_page_id( 'pay' ) ) ) ? true : false;
+		return is_page( woocommerce_get_page_id( 'checkout' ) ) ? true : false;
 	}
 }
 
@@ -532,7 +540,7 @@ if ( ! function_exists( 'is_order_received_page' ) ) {
     * @return bool
     */
     function is_order_received_page() {
-        return ( is_page( woocommerce_get_page_id( 'thanks' ) ) ) ? true : false;
+        return ( is_page( woocommerce_get_page_id( 'checkout' ) ) && isset( $wp->query_vars['order-received'] ) ) ? true : false;
     }
 }
 

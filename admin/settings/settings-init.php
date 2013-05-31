@@ -324,28 +324,6 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 	),
 
 	array(
-		'title' => __( 'Pay Page', 'woocommerce' ),
-		'desc' 		=> __( 'Page contents: [woocommerce_pay] Parent: "Checkout"', 'woocommerce' ),
-		'id' 		=> 'woocommerce_pay_page_id',
-		'type' 		=> 'single_select_page',
-		'default'	=> '',
-		'class'		=> 'chosen_select_nostd',
-		'css' 		=> 'min-width:300px;',
-		'desc_tip'	=>  true,
-	),
-
-	array(
-		'title' => __( 'Thanks Page', 'woocommerce' ),
-		'desc' 		=> __( 'Page contents: [woocommerce_thankyou] Parent: "Checkout"', 'woocommerce' ),
-		'id' 		=> 'woocommerce_thanks_page_id',
-		'type' 		=> 'single_select_page',
-		'default'	=> '',
-		'class'		=> 'chosen_select_nostd',
-		'css' 		=> 'min-width:300px;',
-		'desc_tip'	=>  true,
-	),
-
-	array(
 		'title' => __( 'My Account Page', 'woocommerce' ),
 		'desc' 		=> __( 'Page contents: [woocommerce_my_account]', 'woocommerce' ),
 		'id' 		=> 'woocommerce_myaccount_page_id',

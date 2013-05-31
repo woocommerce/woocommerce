@@ -54,17 +54,12 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return string
 	 */
 	function get_return_url( $order = '' ) {
-
-		$thanks_page_id = woocommerce_get_page_id('thanks');
-		if ( $thanks_page_id ) :
-			$return_url = get_permalink($thanks_page_id);
-		else :
-			$return_url = home_url();
-		endif;
-
-		if ( $order ) :
-			$return_url = add_query_arg( 'key', $order->order_key, add_query_arg( 'order', $order->id, $return_url ) );
-		endif;
+		if ( $order )
+			$return_url = $order->get_checkout_order_received_url();
+		elseif ( get_option( 'permalink_structure' ) )
+			$return_url = trailingslashit( get_permalink( woocommerce_get_page_id( 'checkout' ) ) ) . 'order-received/';
+		else
+			$return_url = add_query_arg( 'order-received', '', get_permalink( woocommerce_get_page_id( 'checkout' ) ) );
 
 		if ( is_ssl() || get_option('woocommerce_force_ssl_checkout') == 'yes' )
 			$return_url = str_replace( 'http:', 'https:', $return_url );

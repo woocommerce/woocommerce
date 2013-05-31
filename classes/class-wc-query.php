@@ -35,9 +35,36 @@ class WC_Query {
 	 * @return void
 	 */
 	public function __construct() {
+		add_filter( 'query_vars', array( $this, 'add_query_vars'), 0 );
+		add_action( 'parse_request', array( $this, 'parse_request'), 0 );
 		add_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 		add_filter( 'the_posts', array( $this, 'the_posts' ), 11, 2 );
 		add_filter( 'wp', array( $this, 'remove_product_query' ) );
+	}
+
+	/**
+	 * add_query_vars function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function add_query_vars( $vars ) {
+		$vars[] = 'order-pay';
+		$vars[] = 'order-received';
+		return $vars;
+	}
+
+	/**
+	 * Parse the request and look for query vars - endpoints may not be supported
+	 */
+	public function parse_request() {
+		global $wp;
+
+		if ( ! empty( $_GET['order-pay'] ) )
+			$wp->query_vars['order-pay'] = $_GET['order-pay'];
+
+		if ( ! empty( $_GET['order-received'] ) )
+			$wp->query_vars['order-received'] = $_GET['order-received'];
 	}
 
 	/**

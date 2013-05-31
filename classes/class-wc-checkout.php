@@ -714,21 +714,20 @@ class WC_Checkout {
 					$woocommerce->cart->empty_cart();
 
 					// Get redirect
-					$return_url = get_permalink( woocommerce_get_page_id( 'thanks' ) );
-					$return_url = add_query_arg( 'key', $order->order_key, add_query_arg( 'order', $order->id, $return_url ) );
+					$return_url = $order->get_checkout_order_received_url();
 
 					// Redirect to success/confirmation/payment page
 					if ( is_ajax() ) {
 						echo '<!--WC_START-->' . json_encode(
 							array(
 								'result' 	=> 'success',
-								'redirect' => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order)
+								'redirect' => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order )
 							)
 						) . '<!--WC_END-->';
 						exit;
 					} else {
 						wp_safe_redirect(
-							apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order)
+							apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order )
 						);
 						exit;
 					}
