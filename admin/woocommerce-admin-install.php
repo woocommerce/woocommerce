@@ -159,16 +159,17 @@ function woocommerce_create_page( $slug, $option, $page_title = '', $page_conten
 
 	if ( $option_value > 0 && get_post( $option_value ) )
 		return;
-	
+
 	$page_found = null;
-	if ( strlen($page_content) > 0 ) {
+
+	if ( strlen( $page_content ) > 0 ) {
 		// Search for an existing page with the specified page content (typically a shortcode)
 		$page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM " . $wpdb->posts . " WHERE post_type='page' AND post_content LIKE %s LIMIT 1;", "%{$page_content}%" ) );
 	} else {
 		// Search for an existing page with the specified page slug
 		$page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM " . $wpdb->posts . " WHERE post_type='page' AND post_name = %s LIMIT 1;", $slug ) );
 	}
-	
+
 	if ( $page_found ) {
 		if ( ! $option_value )
 			update_option( $option, $page_found );

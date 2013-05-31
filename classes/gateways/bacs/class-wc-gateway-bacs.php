@@ -31,24 +31,32 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		$this->init_form_fields();
 		$this->init_settings();
 
-		// Define user set variables
-		$this->title 			= $this->get_option( 'title' );
-		$this->description      = $this->get_option( 'description' );
-		$this->account_name     = $this->get_option( 'account_name' );
-		$this->account_number   = $this->get_option( 'account_number' );
-		$this->sort_code        = $this->get_option( 'sort_code' );
-		$this->bank_name        = $this->get_option( 'bank_name' );
-		$this->iban             = $this->get_option( 'iban' );
-		$this->bic              = $this->get_option( 'bic' );
-
 		// BACS account fields shown on the thanks page and in emails
 		$this->account_fields   = array(
-			'account_name' 	=> __( 'Account Name', 'woocommerce' ),
-			'account_number'=> __( 'Account Number', 'woocommerce' ),
-			'sort_code'		=> __( 'Sort Code', 'woocommerce' ),
-			'bank_name'		=> __( 'Bank Name', 'woocommerce' ),
-			'iban'			=> __( 'IBAN', 'woocommerce' ),
-			'bic'			=> __( 'BIC', 'woocommerce' )
+			'account_name' 	=> array(
+				'label' => __( 'Account Name', 'woocommerce' ),
+				'value' => $this->get_option( 'account_name' )
+			),
+			'account_number'=> array(
+				'label' => __( 'Account Number', 'woocommerce' ),
+				'value' => $this->get_option( 'account_number' )
+			),
+			'sort_code'		=> array(
+				'label' => __( 'Sort Code', 'woocommerce' ),
+				'value' => $this->get_option( 'sort_code' )
+			),
+			'bank_name'		=> array(
+				'label' => __( 'Bank Name', 'woocommerce' ),
+				'value' => $this->get_option( 'bank_name' )
+			),
+			'iban'			=> array(
+				'label' => __( 'IBAN', 'woocommerce' ),
+				'value' => $this->get_option( 'iban' )
+			),
+			'bic'			=> array(
+				'label' => __( 'BIC', 'woocommerce' ),
+				'value' => $this->get_option( 'bic' )
+			)
 		);
 
 		// Actions
@@ -171,9 +179,9 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 		$fields = apply_filters( 'woocommerce_bacs_fields', $this->account_fields, $order_id );
 
-		foreach ( $fields as $key=>$value ) {
-		    if ( ! empty( $this->$key ) ) {
-		    	echo '<li class="' . esc_attr( $key ) . '">' . esc_attr( $value ) . ': <strong>' . wptexturize( $this->$key ) . '</strong></li>';
+		foreach ( $fields as $field_key => $field ) {
+		    if ( ! empty( $field['value'] ) ) {
+		    	echo '<li class="' . esc_attr( $field_key ) . '">' . esc_attr( $field['label'] ) . ': <strong>' . wptexturize( $field['value'] ) . '</strong></li>';
 		    }
 		}
 
@@ -204,11 +212,11 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 		$fields = apply_filters( 'woocommerce_bacs_fields', $this->account_fields, $order->id );
 
-		foreach ($fields as $key=>$value) :
-		    if(!empty($this->$key)) :
-		    	echo '<li class="'.$key.'">'.$value.': <strong>'.wptexturize($this->$key).'</strong></li>';
-		    endif;
-		endforeach;
+		foreach ( $fields as $field_key => $field ) {
+		    if ( ! empty( $field['value'] ) ) {
+		    	echo '<li class="' . esc_attr( $field_key ) . '">' . esc_attr( $field['label'] ) . ': <strong>' . wptexturize( $field['value'] ) . '</strong></li>';
+		    }
+		}
 
 		?></ul><?php
     }
