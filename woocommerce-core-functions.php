@@ -40,6 +40,8 @@ function get_product( $the_product = false, $args = array() ) {
  * @return array
  */
 function woocommerce_get_product_ids_on_sale() {
+	global $wpdb;
+
 	// Load from cache
 	$product_ids_on_sale = get_transient( 'wc_products_onsale' );
 
@@ -47,26 +49,22 @@ function woocommerce_get_product_ids_on_sale() {
 	if ( false !== $product_ids_on_sale )
 		return $product_ids_on_sale;
 
-	$on_sale = get_posts( array(
-		'post_type'      => array( 'product', 'product_variation' ),
-		'posts_per_page' => -1,
-		'post_status'    => 'publish',
-		'meta_query'     => array(
-			array(
-				'key'        => '_sale_price',
-				'value'      => 0,
-				'compare'    => '>=',
-				'type'       => 'DECIMAL',
-			),
-			array(
-				'key'        => '_sale_price',
-				'value'      => '',
-				'compare'    => '!=',
-				'type'       => '',
-			)
-		),
-		'fields'         => 'id=>parent',
-	) );
+	$on_sale = array();
+	$results = $wpdb->get_results(
+		$wpdb->prepare("SELECT post.ID, post.post_parent FROM `$wpdb->posts` AS post
+			LEFT JOIN `$wpdb->postmeta` AS meta ON post.ID = meta.post_id
+			WHERE post.post_type IN ('product', 'product_variation')
+				AND post.post_status = 'publish'
+				AND meta.meta_key = '_sale_price'
+				AND CAST(meta.meta_value AS DECIMAL) >= '0'
+				AND CAST(meta.meta_value AS CHAR) != ''
+			GROUP BY post.ID;
+		")
+	);
+
+	foreach ($results as $post) {
+		$on_sale[$post->ID] = $post->post_parent;
+	}
 
 	$product_ids = array_keys( $on_sale );
 	$parent_ids  = array_values( $on_sale );
