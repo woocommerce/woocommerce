@@ -392,8 +392,8 @@ class WC_Checkout {
 		// Checkout fields (not defined in checkout_fields)
 		$this->posted['terms']                     = isset( $_POST['terms'] ) ? 1 : 0;
 		$this->posted['createaccount']             = isset( $_POST['createaccount'] ) ? 1 : 0;
-		$this->posted['payment_method']            = isset( $_POST['payment_method'] ) ? woocommerce_clean( $_POST['payment_method'] ) : '';
-		$this->posted['shipping_method']           = isset( $_POST['shipping_method'] ) ? woocommerce_clean( $_POST['shipping_method'] ) : '';
+		$this->posted['payment_method']            = isset( $_POST['payment_method'] ) ? stripslashes( $_POST['payment_method'] ) : '';
+		$this->posted['shipping_method']           = isset( $_POST['shipping_method'] ) ? stripslashes( $_POST['shipping_method'] ) : '';
 		$this->posted['ship_to_different_address'] = isset( $_POST['ship_to_different_address'] ) ? true : false;
 
 		if ( isset( $_POST['shiptobilling'] ) ) {
