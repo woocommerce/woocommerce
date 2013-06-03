@@ -2739,6 +2739,18 @@ table.bar_chart {
 		}
 	}
 }
+// Small screen optimisation
+@media only screen and (max-width: 1280px) {
+	#order_data {
+		.order_data_column {
+			width:48%;
+			&:first-child {
+				width:100%;
+			}
+		}
+	}
+}
+
 // HiDPI optimisation
 @media
 (-webkit-min-device-pixel-ratio: 2),
