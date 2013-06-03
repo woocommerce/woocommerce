@@ -156,7 +156,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	array(
 		'desc' 		=> __( 'Automatically generate username from customer email', 'woocommerce' ),
 		'id' 		=> 'woocommerce_registration_generate_username',
-		'default'	=> 'no',
+		'default'	=> 'yes',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> ''
 	),

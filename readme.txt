@@ -183,6 +183,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Revised shiptobilling functionality on the checkout. "ship to different address" option used instead.
 * Tweak - Filterable page installer.
 * Tweak - Order details optimised for small screens.
+* Tweak - Streamlined account process - username and passwords are optional and can be automatically generated.
 * Fix - Changed MyException to Exception in Checkout class as MyException class does not exist in WooCommerce
 * Fix - Default cart widget styling on non-wc pages.
 * Fix - Rounding for mijireh tax ex. price.

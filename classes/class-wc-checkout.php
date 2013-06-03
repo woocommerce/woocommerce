@@ -541,7 +541,13 @@ class WC_Checkout {
 
 		if ( $this->creating_account ) {
 
-			if ( get_option( 'woocommerce_registration_email_for_username' ) == 'no' ) {
+			// Check the e-mail address
+			if ( email_exists( $this->posted['billing_email'] ) )
+				$woocommerce->add_error( __( 'An account is already registered with your email address. Please login.', 'woocommerce' ) );
+
+			if ( get_option( 'woocommerce_registration_generate_username' ) == 'no' ) {
+
+				$this->posted['account_username'] = sanitize_user( $this->posted['account_username'] );
 
 				if ( empty( $this->posted['account_username'] ) )
 					$woocommerce->add_error( __( 'Please enter an account username.', 'woocommerce' ) );
@@ -555,18 +561,28 @@ class WC_Checkout {
 
 			} else {
 
-				$this->posted['account_username'] = $this->posted['billing_email'];
+				$this->posted['account_username'] = sanitize_user( current( explode( '@', $this->posted['billing_email'] ) ) );
 
+				// Ensure username is unique
+				$append     = 1;
+				$o_username = $this->posted['account_username'];
+
+				while ( username_exists( $this->posted['account_username'] ) ) {
+					$this->posted['account_username'] = $o_username . $append;
+					$append ++;
+				}
 			}
 
-			// Validate passwords
-			if ( empty($this->posted['account_password']) )
-				$woocommerce->add_error( __( 'Please enter an account password.', 'woocommerce' ) );
+			if ( get_option( 'woocommerce_registration_generate_password' ) == 'no' ) {
 
-			// Check the e-mail address
-			if ( email_exists( $this->posted['billing_email'] ) )
-				$woocommerce->add_error( __( 'An account is already registered with your email address. Please login.', 'woocommerce' ) );
+				if ( empty( $this->posted['account_password'] ) )
+					$woocommerce->add_error( __( 'Please enter an account password.', 'woocommerce' ) );
 
+			} else {
+
+				$this->posted['account_password'] = wp_generate_password();
+
+			}
 		}
 
 		// Terms
@@ -621,7 +637,7 @@ class WC_Checkout {
 	                // if there are no errors, let's create the user account
 					if ( ! $reg_errors->get_error_code() ) {
 
-		                $user_pass = esc_attr( $this->posted['account_password'] );
+		                $user_pass = $this->posted['account_password'];
 
 		                $new_customer_data = array(
 		                	'user_login' => $this->posted['account_username'],
