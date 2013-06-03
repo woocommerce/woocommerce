@@ -1145,7 +1145,6 @@ class WC_Product {
 		return '';
 	}
 
-
 	/**
 	 * Returns product attributes.
 	 *

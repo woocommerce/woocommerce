@@ -164,9 +164,9 @@ class WC_Post_types {
 	        ) )
 	    );
 
-	    global $wc_attributes, $woocommerce;
+	    global $wc_product_attributes, $woocommerce;
 
-	    $wc_attributes = array();
+	    $wc_product_attributes = array();
 
 		if ( $attribute_taxonomies = $woocommerce->get_attribute_taxonomies() ) {
 			foreach ( $attribute_taxonomies as $tax ) {
@@ -174,7 +174,7 @@ class WC_Post_types {
 
 		    		$label = ! empty( $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
 
-		    		$wc_attributes[ $name ] = $tax;
+		    		$wc_product_attributes[ $name ] = $tax;
 
 		    		register_taxonomy( $name,
 				        apply_filters( 'woocommerce_taxonomy_objects_' . $name, array( 'product' ) ),
