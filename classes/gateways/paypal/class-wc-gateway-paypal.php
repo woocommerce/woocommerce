@@ -519,8 +519,14 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	function check_ipn_request_is_valid() {
 		global $woocommerce;
 
+		// Get url
+       	if ( $this->testmode == 'yes' )
+			$paypal_adr = $this->testurl;
+		else
+			$paypal_adr = $this->liveurl;
+
 		if ( 'yes' == $this->debug )
-			$this->log->add( 'paypal', 'Checking IPN response is valid...' );
+			$this->log->add( 'paypal', 'Checking IPN response is valid via ' . $paypal_adr . '...' );
 
     	// Get recieved values from post data
 		$received_values = array( 'cmd' => '_notify-validate' );
@@ -536,12 +542,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
         if ( 'yes' == $this->debug )
 			$this->log->add( 'paypal', 'IPN Request: ' . print_r( $params, true ) );
-
-        // Get url
-       	if ( $this->testmode == 'yes' )
-			$paypal_adr = $this->testurl;
-		else
-			$paypal_adr = $this->liveurl;
 
 		// Post back to get a response
         $response = wp_remote_post( $paypal_adr, $params );
@@ -585,7 +585,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		} else {
 
-			wp_die( "PayPal IPN Request Failure" );
+			wp_die( "PayPal IPN Request Failure", "PayPal IPN", array( 'response' => 200 ) );
 
    		}
 
