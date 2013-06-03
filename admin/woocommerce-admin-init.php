@@ -124,7 +124,7 @@ function woocommerce_admin_menu_highlight() {
 		if ( 'product' == $post_type ) {
 			$screen = get_current_screen();
 
-			if ( $screen->base == 'edit-tags' && 'pa_' == substr( $taxonomy, 0, 3 ) ) {
+			if ( $screen->base == 'edit-tags' && taxonomy_is_product_attribute( $taxonomy ) ) {
 				$submenu_file = 'woocommerce_attributes';
 				$parent_file  = 'edit.php?post_type=' . esc_attr( $post_type );
 			}

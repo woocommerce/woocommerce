@@ -858,7 +858,7 @@ function woocommerce_order_again() {
 		$cart_item_data = apply_filters( 'woocommerce_order_again_cart_item_data', array(), $item, $order );
 
 		foreach ( $item['item_meta'] as $meta_name => $meta_value ) {
-			if ( 'pa_' === substr( $meta_name, 0, 3 ) )
+			if ( taxonomy_is_product_attribute( $meta_name ) )
 				$variations[ $meta_name ] = $meta_value[0];
 		}
 

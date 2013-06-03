@@ -384,10 +384,10 @@ function woocommerce_refresh_mce( $ver ) {
  */
 function woocommerce_create_term( $term_id, $tt_id = '', $taxonomy = '' ) {
 
-	if ( ! $taxonomy == 'product_cat' && ! strstr( $taxonomy, 'pa_' ) )
+	if ( $taxonomy != 'product_cat' && ! taxonomy_is_product_attribute( $taxonomy ) )
 		return;
 
-	$meta_name = strstr( $taxonomy, 'pa_' ) ? 'order_' . esc_attr( $taxonomy ) : 'order';
+	$meta_name = taxonomy_is_product_attribute( $taxonomy ) ? 'order_' . esc_attr( $taxonomy ) : 'order';
 
 	update_woocommerce_term_meta( $term_id, $meta_name, 0 );
 }

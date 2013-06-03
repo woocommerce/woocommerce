@@ -580,6 +580,21 @@ if ( ! function_exists( 'is_filtered' ) ) {
 	}
 }
 
+if ( ! function_exists( 'taxonomy_is_product_attribute' ) ) {
+
+	/**
+	 * taxonomy_is_product_attribute - Returns true when the passed taxonomy name is a product attribute.
+	 *
+	 * @uses  $wc_product_attributes global which stores taxonomy names upon registration
+	 * @access public
+	 * @return bool
+	 */
+	function taxonomy_is_product_attribute( $name ) {
+		global $wc_product_attributes;
+
+		return taxonomy_exists( $name ) && array_key_exists( $name, (array) $wc_product_attributes );
+	}
+}
 
 /**
  * Get template part (for templates like the shop-loop).
@@ -1436,17 +1451,17 @@ function woocommerce_terms_clauses( $clauses, $taxonomies, $args ) {
 
 	// wordpress should give us the taxonomies asked when calling the get_terms function. Only apply to categories and pa_ attributes
 	$found = false;
-	foreach ( (array) $taxonomies as $taxonomy ) :
-		if ( strstr($taxonomy, 'pa_') || in_array( $taxonomy, apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ) ) ) :
+	foreach ( (array) $taxonomies as $taxonomy ) {
+		if ( taxonomy_is_product_attribute( $taxonomy ) || in_array( $taxonomy, apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ) ) ) {
 			$found = true;
 			break;
-		endif;
-	endforeach;
+		}
+	}
 	if (!$found) return $clauses;
 
 	// Meta name
-	if ( ! empty( $taxonomies[0] ) && strstr($taxonomies[0], 'pa_') ) {
-		$meta_name =  'order_' . esc_attr($taxonomies[0]);
+	if ( ! empty( $taxonomies[0] ) && taxonomy_is_product_attribute( $taxonomies[0] ) ) {
+		$meta_name =  'order_' . esc_attr( $taxonomies[0] );
 	} else {
 		$meta_name = 'order';
 	}
@@ -1739,11 +1754,10 @@ function woocommerce_set_term_order( $term_id, $index, $taxonomy, $recursive = f
 	$index 		= (int) $index;
 
 	// Meta name
-	if (strstr($taxonomy, 'pa_')) :
-		$meta_name =  'order_' . esc_attr($taxonomy);
-	else :
+	if ( taxonomy_is_product_attribute( $taxonomy ) )
+		$meta_name =  'order_' . esc_attr( $taxonomy );
+	else
 		$meta_name = 'order';
-	endif;
 
 	update_woocommerce_term_meta( $term_id, $meta_name, $index );
 

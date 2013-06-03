@@ -1606,7 +1606,6 @@ class Woocommerce {
 		return apply_filters( 'woocommerce_attribute_taxonomies', $attribute_taxonomies );
 	}
 
-
 	/**
 	 * Get a product attributes name.
 	 *
@@ -1618,7 +1617,6 @@ class Woocommerce {
 		return 'pa_' . woocommerce_sanitize_taxonomy_name( $name );
 	}
 
-
 	/**
 	 * Get a product attributes label.
 	 *
@@ -1629,7 +1627,7 @@ class Woocommerce {
 	public function attribute_label( $name ) {
 		global $wpdb;
 
-		if ( strstr( $name, 'pa_' ) ) {
+		if ( taxonomy_is_product_attribute( $name ) ) {
 			$name = woocommerce_sanitize_taxonomy_name( str_replace( 'pa_', '', $name ) );
 
 			$label = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_label FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
@@ -1642,7 +1640,6 @@ class Woocommerce {
 
 		return apply_filters( 'woocommerce_attribute_label', $label, $name );
 	}
-
 
 	/**
 	 * Get a product attributes orderby setting.
@@ -1660,8 +1657,6 @@ class Woocommerce {
 
 		return apply_filters( 'woocommerce_attribute_orderby', $orderby, $name );
 	}
-
-
 
 	/**
 	 * Get an array of product attribute taxonomies.
