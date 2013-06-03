@@ -225,6 +225,8 @@ function woocommerce_product_data_box() {
 				echo '</div>';
 
 			}
+			
+			do_action('woocommerce_after_product_manage_stock');
 
 			// Stock status
 			woocommerce_wp_select( array( 'id' => '_stock_status', 'label' => __( 'Stock status', 'woocommerce' ), 'options' => array(
@@ -249,6 +251,8 @@ function woocommerce_product_data_box() {
 
 			echo '</div>';
 
+            do_action('woocommerce_after_product_stock_status');
+
 			echo '<div class="options_group show_if_simple show_if_variable">';
 
 			// Individual product
@@ -257,6 +261,8 @@ function woocommerce_product_data_box() {
 			do_action('woocommerce_product_options_sold_individually');
 
 			echo '</div>';
+			
+			do_action('woocommerce_after_product_sold_individually');
 
 			?>
 
