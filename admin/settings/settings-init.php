@@ -138,7 +138,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 	array(
 		'title' => __( 'Registration', 'woocommerce' ),
-		'desc' 		=> __( 'Allow registration on the checkout page', 'woocommerce' ),
+		'desc' 		=> __( 'Enable registration on the "Checkout" page', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_signup_and_login_from_checkout',
 		'default'	=> 'yes',
 		'type' 		=> 'checkbox',
@@ -146,7 +146,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 
 	array(
-		'desc' 		=> __( 'Allow registration on the "My Account" page', 'woocommerce' ),
+		'desc' 		=> __( 'Enable registration on the "My Account" page', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_myaccount_registration',
 		'default'	=> 'no',
 		'type' 		=> 'checkbox',
@@ -154,8 +154,16 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 
 	array(
-		'desc' 		=> __( 'Register using the email address for the username', 'woocommerce' ),
-		'id' 		=> 'woocommerce_registration_email_for_username',
+		'desc' 		=> __( 'Automatically generate username from customer email', 'woocommerce' ),
+		'id' 		=> 'woocommerce_registration_generate_username',
+		'default'	=> 'no',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
+	),
+
+	array(
+		'desc' 		=> __( 'Automatically generate customer password', 'woocommerce' ),
+		'id' 		=> 'woocommerce_registration_generate_password',
 		'default'	=> 'no',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end'

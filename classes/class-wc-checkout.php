@@ -57,30 +57,21 @@ class WC_Checkout {
 		$this->checkout_fields['billing'] 	= $woocommerce->countries->get_address_fields( $this->get_value('billing_country'), 'billing_' );
 		$this->checkout_fields['shipping'] 	= $woocommerce->countries->get_address_fields( $this->get_value('shipping_country'), 'shipping_' );
 
-		if ( get_option( 'woocommerce_registration_email_for_username' ) == 'no' ) {
-
+		if ( get_option( 'woocommerce_registration_generate_username' ) == 'no' ) {
 			$this->checkout_fields['account']['account_username'] = array(
 				'type' 			=> 'text',
 				'label' 		=> __( 'Account username', 'woocommerce' ),
 				'placeholder' 	=> _x( 'Username', 'placeholder', 'woocommerce' )
 			);
-
 		}
 
-		$this->checkout_fields['account']['account_password'] = array(
-			'type' 				=> 'password',
-			'label' 			=> __( 'Account password', 'woocommerce' ),
-			'placeholder' 		=> _x( 'Password', 'placeholder', 'woocommerce' ),
-			'class' 			=> array( 'form-row-first' )
-		);
-
-		$this->checkout_fields['account']['account_password-2'] = array(
-			'type' 				=> 'password',
-			'label' 			=> __( 'Confirm password', 'woocommerce' ),
-			'placeholder' 		=> _x( 'Confirm password', 'placeholder', 'woocommerce' ),
-			'class' 			=> array( 'form-row-last' ),
-			'label_class' 		=> array( 'hidden' )
-		);
+		if ( get_option( 'woocommerce_registration_generate_password' ) == 'no' ) {
+			$this->checkout_fields['account']['account_password'] = array(
+				'type' 				=> 'password',
+				'label' 			=> __( 'Account password', 'woocommerce' ),
+				'placeholder' 		=> _x( 'Password', 'placeholder', 'woocommerce' )
+			);
+		}
 
 		$this->checkout_fields['order']	= array(
 			'order_comments' => array(
@@ -571,9 +562,6 @@ class WC_Checkout {
 			// Validate passwords
 			if ( empty($this->posted['account_password']) )
 				$woocommerce->add_error( __( 'Please enter an account password.', 'woocommerce' ) );
-
-			if ( $this->posted['account_password-2'] !== $this->posted['account_password'] )
-				$woocommerce->add_error( __( 'Passwords do not match.', 'woocommerce' ) );
 
 			// Check the e-mail address
 			if ( email_exists( $this->posted['billing_email'] ) )
