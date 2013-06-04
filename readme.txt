@@ -3,7 +3,7 @@ Contributors: woothemes, mikejolley, jameskoster, CoenJacobs
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.5
-Tested up to: 3.6 beta 2
+Tested up to: 3.6 beta 3
 Stable tag: 2.0.10
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -190,6 +190,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Rounding for mijireh tax ex. price
 * Fix - Fixed is_on_sale function for products without prices
 * Fix - Updated blockui to prevent errors in WP 3.6
+* Fix - Extra data sanitization in some places
 
 = 2.0.10 - 15/05/2013 =
 * Tweak - Searching for SKU in admin panel can also be done via lowercase 'sku:' instead of just 'SKU:'
