@@ -169,6 +169,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Split frontend styles into separate appearance/layout stylesheets and removed the enable/disable option.
 * Feature - Added woocommerce-smallscreen.css to optimise default layout on handheld devices.
 * Feature - Bulk edit increase / decrease variation prices by fixed or percentage values
+* Feature - Admin action to link past orders of the same email address to a new user.
 * Tweak - Added filter to check the 'Create account' checkbox on checkout by default
 * Tweak - Update CPT parameters for 'product_variation' and 'shop_coupon' to be no longer public
 * Tweak - COD processing instead of on-hold

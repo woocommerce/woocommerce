@@ -72,7 +72,8 @@ class WC_Emails {
 		// Hooks for sending emails during store events
 		add_action( 'woocommerce_low_stock_notification', array( $this, 'low_stock' ) );
 		add_action( 'woocommerce_no_stock_notification', array( $this, 'no_stock' ) );
-		add_action( 'woocommerce_product_on_backorder_notification', array( $this, 'backorder' ));
+		add_action( 'woocommerce_product_on_backorder_notification', array( $this, 'backorder' ) );
+		add_action( 'woocommerce_created_customer_notification', array( $this, 'customer_new_account' ), 10, 3 );
 
 		// Let 3rd parties unhook the above via this hook
 		do_action( 'woocommerce_email', $this );
@@ -216,16 +217,18 @@ class WC_Emails {
 	 * Customer new account welcome email.
 	 *
 	 * @access public
-	 * @param mixed $user_id
-	 * @param mixed $plaintext_pass
+	 * @param int $customer_id
+	 * @param array $new_customer_data
 	 * @return void
 	 */
-	function customer_new_account( $user_id, $plaintext_pass ) {
-		if ( ! $user_id || ! $plaintext_pass)
+	function customer_new_account( $customer_id, $new_customer_data = array(), $password_generated = false ) {
+		if ( ! $customer_id )
 			return;
 
+		$user_pass = ! empty( $new_customer_data['user_pass'] ) ? $new_customer_data['user_pass'] : '';
+
 		$email = $this->emails['WC_Email_Customer_New_Account'];
-		$email->trigger( $user_id, $plaintext_pass );
+		$email->trigger( $customer_id, $user_pass, $password_generated );
 	}
 
 	/**

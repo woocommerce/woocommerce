@@ -47,16 +47,17 @@ class WC_Email_Customer_New_Account extends WC_Email {
 	 * @access public
 	 * @return void
 	 */
-	function trigger( $user_id, $user_pass = '' ) {
+	function trigger( $user_id, $user_pass = '', $password_generated = false ) {
 		global $woocommerce;
 
 		if ( $user_id ) {
 			$this->object 		= new WP_User( $user_id );
 
-			$this->user_pass	= $user_pass;
-			$this->user_login 	= stripslashes( $this->object->user_login );
-			$this->user_email 	= stripslashes( $this->object->user_email );
-			$this->recipient	= $this->user_email;
+			$this->user_pass          = $user_pass;
+			$this->user_login         = stripslashes( $this->object->user_login );
+			$this->user_email         = stripslashes( $this->object->user_email );
+			$this->recipient          = $this->user_email;
+			$this->password_generated = $password_generated;
 		}
 
 		if ( ! $this->is_enabled() || ! $this->get_recipient() )
@@ -74,10 +75,11 @@ class WC_Email_Customer_New_Account extends WC_Email {
 	function get_content_html() {
 		ob_start();
 		woocommerce_get_template( $this->template_html, array(
-			'email_heading' => $this->get_heading(),
-			'user_login' 	=> $this->user_login,
-			'user_pass'		=> $this->user_pass,
-			'blogname'		=> $this->get_blogname()
+			'email_heading'      => $this->get_heading(),
+			'user_login'         => $this->user_login,
+			'user_pass'          => $this->user_pass,
+			'blogname'           => $this->get_blogname(),
+			'password_generated' => $this->password_generated
 		) );
 		return ob_get_clean();
 	}
@@ -91,10 +93,11 @@ class WC_Email_Customer_New_Account extends WC_Email {
 	function get_content_plain() {
 		ob_start();
 		woocommerce_get_template( $this->template_plain, array(
-			'email_heading' => $this->get_heading(),
-			'user_login' 	=> $this->user_login,
-			'user_pass'		=> $this->user_pass,
-			'blogname'		=> $this->get_blogname()
+			'email_heading'      => $this->get_heading(),
+			'user_login'         => $this->user_login,
+			'user_pass'          => $this->user_pass,
+			'blogname'           => $this->get_blogname(),
+			'password_generated' => $this->password_generated
 		) );
 		return ob_get_clean();
 	}

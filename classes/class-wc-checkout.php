@@ -24,9 +24,6 @@ class WC_Checkout {
 	/** @var bool Whether or not signups are allowed. */
 	public $enable_signup;
 
-	/** @var bool True when the user is creating an account. */
-	public $creating_account;
-
 	/** @var object The shipping method being used. */
 	private $shipping_method;
 
@@ -529,62 +526,6 @@ class WC_Checkout {
 		// Update cart totals now we have customer address
 		$woocommerce->cart->calculate_totals();
 
-		// Handle accounts
-		if ( is_user_logged_in() )
-			$this->creating_account = false;
-		elseif ( ! empty( $this->posted['createaccount'] ) )
-			$this->creating_account = true;
-		elseif ($this->must_create_account)
-			$this->creating_account = true;
-		else
-			$this->creating_account = false;
-
-		if ( $this->creating_account ) {
-
-			// Check the e-mail address
-			if ( email_exists( $this->posted['billing_email'] ) )
-				$woocommerce->add_error( __( 'An account is already registered with your email address. Please login.', 'woocommerce' ) );
-
-			if ( get_option( 'woocommerce_registration_generate_username' ) == 'no' ) {
-
-				$this->posted['account_username'] = sanitize_user( $this->posted['account_username'] );
-
-				if ( empty( $this->posted['account_username'] ) )
-					$woocommerce->add_error( __( 'Please enter an account username.', 'woocommerce' ) );
-
-				// Check the username
-				if ( ! validate_username( $this->posted['account_username'] ) )
-					$woocommerce->add_error( __( 'Invalid email/username.', 'woocommerce' ) );
-
-				elseif ( username_exists( $this->posted['account_username'] ) )
-					$woocommerce->add_error( __( 'An account is already registered with that username. Please choose another.', 'woocommerce' ) );
-
-			} else {
-
-				$this->posted['account_username'] = sanitize_user( current( explode( '@', $this->posted['billing_email'] ) ) );
-
-				// Ensure username is unique
-				$append     = 1;
-				$o_username = $this->posted['account_username'];
-
-				while ( username_exists( $this->posted['account_username'] ) ) {
-					$this->posted['account_username'] = $o_username . $append;
-					$append ++;
-				}
-			}
-
-			if ( get_option( 'woocommerce_registration_generate_password' ) == 'no' ) {
-
-				if ( empty( $this->posted['account_password'] ) )
-					$woocommerce->add_error( __( 'Please enter an account password.', 'woocommerce' ) );
-
-			} else {
-
-				$this->posted['account_password'] = wp_generate_password();
-
-			}
-		}
-
 		// Terms
 		if ( ! isset( $_POST['woocommerce_checkout_update_totals'] ) && empty( $this->posted['terms'] ) && woocommerce_get_page_id( 'terms' ) > 0 )
 			$woocommerce->add_error( __( 'You must accept our Terms &amp; Conditions.', 'woocommerce' ) );
@@ -621,55 +562,23 @@ class WC_Checkout {
 
 		if ( ! isset( $_POST['woocommerce_checkout_update_totals'] ) && $woocommerce->error_count() == 0 ) {
 
-			$this->customer_id = get_current_user_id();
-
 			try {
 
-				// Create customer account and log them in
-				if ( $this->creating_account && ! $this->customer_id ) {
+				// Customer accounts
+				$this->customer_id = get_current_user_id();
 
-					$reg_errors = new WP_Error();
+				if ( ! is_user_logged_in() && ( $this->must_create_account || ! empty( $this->posted['createaccount'] ) ) ) {
 
-					do_action( 'woocommerce_register_post', $this->posted['account_username'], $this->posted['billing_email'], $reg_errors );
+					$username     = ! empty( $this->posted['account_username'] ) ? $this->posted['account_username'] : '';
+					$password     = ! empty( $this->posted['account_password'] ) ? $this->posted['account_password'] : '';
+					$new_customer = woocommerce_create_new_customer( $this->posted['billing_email'], $username, $password );
 
-					$errors = apply_filters( 'woocommerce_registration_errors', $reg_errors, $this->posted['account_username'], $this->posted['billing_email'] );
+                	if ( is_wp_error( $new_customer ) )
+                		throw new Exception( $new_customer->get_error_message() );
 
-	                // if there are no errors, let's create the user account
-					if ( ! $reg_errors->get_error_code() ) {
+                	$this->customer_id = $new_customer;
 
-		                $user_pass = $this->posted['account_password'];
-
-		                $new_customer_data = array(
-		                	'user_login' => $this->posted['account_username'],
-		                	'user_pass'  => $user_pass,
-		                	'user_email' => $this->posted['billing_email'],
-		                	'role'       => 'customer'
-		                );
-
-		                $this->customer_id = wp_insert_user( apply_filters( 'woocommerce_new_customer_data', $new_customer_data ) );
-
-		                if ( is_wp_error( $this->customer_id ) ) {
-		                	throw new Exception( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
-						}
-
-                        // Set the global user object
-                        $current_user = get_user_by ( 'id', $this->customer_id );
-
-	                    // Action
-	                    do_action( 'woocommerce_created_customer', $this->customer_id );
-
-	                    // send the user a confirmation and their login details
-	                    $mailer = $woocommerce->mailer();
-						$mailer->customer_new_account( $this->customer_id, $user_pass );
-
-	                    // set the WP login cookie
-	                    $secure_cookie = is_ssl() ? true : false;
-	                    wp_set_auth_cookie( $this->customer_id, true, $secure_cookie );
-
-					} else {
-						throw new Exception( $reg_errors->get_error_message() );
-					}
-
+                	woocommerce_set_customer_auth_cookie( $this->customer_id );
 				}
 
 				// Abort if errors are present
