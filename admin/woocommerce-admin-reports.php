@@ -1461,7 +1461,7 @@ function woocommerce_coupon_discounts() {
 	$first_year = $wpdb->get_var( "SELECT post_date FROM $wpdb->posts WHERE post_date != 0 AND post_type='shop_order' ORDER BY post_date ASC LIMIT 1;" );
 	$first_year = ( $first_year ) ? date( 'Y', strtotime( $first_year ) ) : date( 'Y' );
 
-	$current_year 	= isset( $_POST['show_year'] ) 	? $_POST['show_year'] 	: date( 'Y', current_time( 'timestamp' ) );
+	$current_year 	= isset( $_POST['show_year'] ) 	? absint( $_POST['show_year'] ) : date( 'Y', current_time( 'timestamp' ) );
 	$start_date 	= strtotime( $current_year . '0101' );
 
 	$order_statuses = implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) );
