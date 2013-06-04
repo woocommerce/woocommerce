@@ -1468,6 +1468,13 @@ function woocommerce_price_filter_init() {
 
 		wp_register_script( 'wc-price-slider', $woocommerce->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider' ), '1.6', true );
 
+		wp_localize_script( 'wc-price-slider', 'woocommerce_price_slider_params', array(
+			'currency_symbol' 	=> get_woocommerce_currency_symbol(),
+			'currency_pos'      => get_option( 'woocommerce_currency_pos' ),
+			'min_price'			=> isset( $_GET['min_price'] ) ? esc_attr( $_GET['min_price'] ) : '',
+			'max_price'			=> isset( $_GET['max_price'] ) ? esc_attr( $_GET['max_price'] ) : ''
+		) );
+
 		add_filter( 'loop_shop_post_in', 'woocommerce_price_filter' );
 	}
 }

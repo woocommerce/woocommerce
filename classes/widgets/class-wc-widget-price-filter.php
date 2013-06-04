@@ -58,13 +58,6 @@ class WC_Widget_Price_Filter extends WC_Widget {
 
 		wp_enqueue_script( 'wc-price-slider' );
 
-		wp_localize_script( 'wc-price-slider', 'woocommerce_price_slider_params', array(
-			'currency_symbol' 	=> get_woocommerce_currency_symbol(),
-			'currency_pos'      => get_option( 'woocommerce_currency_pos' ),
-			'min_price'			=> $min_price,
-			'max_price'			=> $max_price
-		) );
-
 		$title  = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 
 		// Remember current filters/search
