@@ -194,7 +194,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Refactor - Moved woocommerce_get_formatted_product_name function into WC_Product class
 * Refactor - Improved parameter handling in woocommerce_related_products() function
 * Refactor - Widget classes (added abstract and combined similar widgets)
-* Refactor - Removed pay and thanks pages. Endpoints are used instead.
+* Refactor - Removed pay and thanks pages. Endpoints are used instead
+* Refactor - Removed certain my-account pages. Endpoints are used instead.
 * Localization - Portugese locale by jpBenfica
 * Localization - Swedish translation by Björn Sennbrink
 * Localization - Spanish, Romanian, Danish, Korean updates.

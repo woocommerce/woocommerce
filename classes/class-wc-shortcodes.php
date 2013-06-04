@@ -37,7 +37,6 @@ class WC_Shortcodes {
 		add_shortcode( 'woocommerce_edit_address', array( $this, 'edit_address' ) );
 		add_shortcode( 'woocommerce_change_password', array( $this, 'change_password' ) );
 		add_shortcode( 'woocommerce_lost_password', array( $this, 'lost_password' ) );
-		add_shortcode( 'woocommerce_view_order', array( $this, 'view_order' ) );
 	}
 
 	/**
@@ -123,18 +122,6 @@ class WC_Shortcodes {
 	public function lost_password( $atts ) {
 		global $woocommerce;
 		return $woocommerce->shortcode_wrapper( array( 'WC_Shortcode_Lost_Password', 'output' ), $atts );
-	}
-
-	/**
-	 * View order page shortcode.
-	 *
-	 * @access public
-	 * @param mixed $atts
-	 * @return string
-	 */
-	public function view_order( $atts ) {
-		global $woocommerce;
-		return $woocommerce->shortcode_wrapper( array( 'WC_Shortcode_View_Order', 'output' ), $atts );
 	}
 
 	/**

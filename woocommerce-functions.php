@@ -50,7 +50,7 @@ function woocommerce_template_redirect() {
 	}
 
 	// My account page redirects (logged out)
-	elseif ( ! is_user_logged_in() && ( is_page( woocommerce_get_page_id( 'edit_address' ) ) || is_page( woocommerce_get_page_id( 'view_order' ) ) || is_page( woocommerce_get_page_id( 'change_password' ) ) ) ) {
+	elseif ( ! is_user_logged_in() && ( is_page( woocommerce_get_page_id( 'edit_address' ) ) || is_page( woocommerce_get_page_id( 'change_password' ) ) ) ) {
 		wp_redirect( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
 		exit;
 	}
@@ -121,7 +121,6 @@ function woocommerce_nav_menu_items( $items, $args ) {
 		$hide_pages[] = (int) woocommerce_get_page_id( 'change_password' );
 		$hide_pages[] = (int) woocommerce_get_page_id( 'logout' );
 		$hide_pages[] = (int) woocommerce_get_page_id( 'edit_address' );
-		$hide_pages[] = (int) woocommerce_get_page_id( 'view_order' );
 		$hide_pages   = apply_filters( 'woocommerce_logged_out_hidden_page_ids', $hide_pages );
 
 		foreach ( $items as $key => $item ) {
@@ -843,23 +842,28 @@ function woocommerce_order_again() {
 	global $woocommerce;
 
 	// Nothing to do
-	if ( ! isset( $_GET['order_again'] ) || ! is_user_logged_in() || get_option('woocommerce_allow_customers_to_reorder') == 'no' ) return;
+	if ( ! isset( $_GET['order_again'] ) || ! is_user_logged_in() || get_option('woocommerce_allow_customers_to_reorder') == 'no' )
+		return;
 
 	// Nonce security check
-	if ( ! $woocommerce->verify_nonce( 'order_again', '_GET' ) ) return;
+	if ( ! $woocommerce->verify_nonce( 'order_again', '_GET' ) )
+		return;
 
 	// Clear current cart
 	$woocommerce->cart->empty_cart();
 
 	// Load the previous order - Stop if the order does not exist
-	$order = new WC_Order( (int) $_GET['order_again'] );
+	$order = new WC_Order( absint( $_GET['order_again'] ) );
 
-	if ( empty( $order->id ) ) return;
+	if ( empty( $order->id ) )
+		return;
 
-	if ( $order->status!='completed' ) return;
+	if ( $order->status != 'completed' )
+		return;
 
 	// Make sure the previous order belongs to the current customer
-	if ( $order->user_id != get_current_user_id() ) return;
+	if ( $order->user_id != get_current_user_id() )
+		return;
 
 	// Copy products from the order to the cart
 	foreach ( $order->get_items() as $item ) {

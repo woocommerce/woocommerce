@@ -87,7 +87,7 @@ $order = new WC_Order( $order_id );
 
 <?php if ( get_option('woocommerce_allow_customers_to_reorder') == 'yes' && $order->status=='completed' ) : ?>
 	<p class="order-again">
-		<a href="<?php echo esc_url( $woocommerce->nonce_url( 'order_again', add_query_arg( 'order_again', $order->id, add_query_arg( 'order', $order->id, get_permalink( woocommerce_get_page_id( 'view_order' ) ) ) ) ) ); ?>" class="button"><?php _e( 'Order Again', 'woocommerce' ); ?></a>
+		<a href="<?php echo esc_url( $woocommerce->nonce_url( 'order_again', add_query_arg( 'order_again', $order->id ) ) ); ?>" class="button"><?php _e( 'Order Again', 'woocommerce' ); ?></a>
 	</p>
 <?php endif; ?>
 

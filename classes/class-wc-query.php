@@ -10,6 +10,9 @@
  */
 class WC_Query {
 
+	/** @public array Query vars to add to wp */
+	public $query_vars = array();
+
 	/** @public array Unfiltered product ids (before layered nav etc) */
 	public $unfiltered_product_ids 	= array();
 
@@ -40,6 +43,17 @@ class WC_Query {
 		add_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 		add_filter( 'the_posts', array( $this, 'the_posts' ), 11, 2 );
 		add_filter( 'wp', array( $this, 'remove_product_query' ) );
+
+		// Define query vars for endpoints
+		$this->query_vars = array(
+			// Checkout actions
+			'order-pay',
+			'order-received',
+
+			// My account actions
+			'account-logout',
+			'view-order'
+		);
 	}
 
 	/**
@@ -49,8 +63,9 @@ class WC_Query {
 	 * @return void
 	 */
 	public function add_query_vars( $vars ) {
-		$vars[] = 'order-pay';
-		$vars[] = 'order-received';
+		foreach ( $this->query_vars as $var )
+			$vars[] = $var;
+
 		return $vars;
 	}
 
@@ -60,11 +75,9 @@ class WC_Query {
 	public function parse_request() {
 		global $wp;
 
-		if ( ! empty( $_GET['order-pay'] ) )
-			$wp->query_vars['order-pay'] = $_GET['order-pay'];
-
-		if ( ! empty( $_GET['order-received'] ) )
-			$wp->query_vars['order-received'] = $_GET['order-received'];
+		foreach ( $this->query_vars as $var )
+			if ( ! empty( $_GET[ $var ] ) )
+				$wp->query_vars[ $var ] = $_GET[ $var ];
 	}
 
 	/**

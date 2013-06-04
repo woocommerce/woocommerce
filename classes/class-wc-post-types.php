@@ -23,8 +23,8 @@ class WC_Post_types {
 	public function __construct() {
 		$this->permalinks = get_option( 'woocommerce_permalinks' );
 
-		add_action( 'init', array( $this, 'register_taxonomies' ) );
-		add_action( 'init', array( $this, 'register_post_types' ) );
+		add_action( 'init', array( $this, 'register_taxonomies' ), 5 );
+		add_action( 'init', array( $this, 'register_post_types' ), 5 );
 	}
 
 	/**

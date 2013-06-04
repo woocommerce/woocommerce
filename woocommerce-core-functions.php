@@ -527,7 +527,7 @@ if ( ! function_exists( 'is_account_page' ) ) {
 	 * @return bool
 	 */
 	function is_account_page() {
-		return is_page( woocommerce_get_page_id( 'myaccount' ) ) || is_page( woocommerce_get_page_id( 'edit_address' ) ) || is_page( woocommerce_get_page_id( 'view_order' ) ) || is_page( woocommerce_get_page_id( 'change_password' ) ) || is_page( woocommerce_get_page_id( 'lost_password' ) ) || apply_filters( 'woocommerce_is_account_page', false ) ? true : false;
+		return is_page( woocommerce_get_page_id( 'myaccount' ) ) || is_page( woocommerce_get_page_id( 'edit_address' ) ) || is_page( woocommerce_get_page_id( 'change_password' ) ) || is_page( woocommerce_get_page_id( 'lost_password' ) ) || apply_filters( 'woocommerce_is_account_page', false ) ? true : false;
 	}
 }
 

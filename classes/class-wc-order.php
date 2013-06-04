@@ -253,8 +253,8 @@ class WC_Order {
 		$this->user_id = (int) $this->customer_user;
 
 		// Get status
-		$terms = wp_get_object_terms( $this->id, 'shop_order_status', array('fields' => 'slugs') );
-		$this->status = (isset($terms[0])) ? $terms[0] : 'pending';
+		$terms = wp_get_object_terms( $this->id, 'shop_order_status', array( 'fields' => 'slugs' ) );
+		$this->status = isset( $terms[0] ) ? $terms[0] : 'pending';
 	}
 
 
@@ -1150,6 +1150,21 @@ class WC_Order {
 		return apply_filters('woocommerce_get_cancel_order_url', $woocommerce->nonce_url( 'cancel_order', add_query_arg('cancel_order', 'true', add_query_arg('order', $this->order_key, add_query_arg('order_id', $this->id, trailingslashit( home_url() ))))));
 	}
 
+	/**
+	 * Generates a URL to view an order from the my account page
+	 *
+	 * @return string
+	 */
+	public function get_view_order_url() {
+		$view_order_url = get_permalink( woocommerce_get_page_id( 'myaccount' ) );
+
+		if ( get_option( 'permalink_structure' ) )
+			$view_order_url = trailingslashit( $view_order_url ) . 'view-order/' . $this->id;
+		else
+			$view_order_url = add_query_arg( 'view-order', $this->id, $view_order_url );
+
+		return apply_filters( 'woocommerce_get_view_order_url', $view_order_url, $this );
+	}
 
 	/**
 	 * Gets any downloadable product file urls.

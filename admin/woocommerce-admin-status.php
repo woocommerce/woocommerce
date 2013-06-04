@@ -316,10 +316,6 @@ function woocommerce_status_report() {
 							'option' => 'woocommerce_edit_address_page_id',
 							'shortcode' => '[woocommerce_edit_address]'
 						),
-					__( 'View Order', 'woocommerce' ) => array(
-							'option' => 'woocommerce_view_order_page_id',
-							'shortcode' => '[woocommerce_view_order]'
-						),
 					__( 'Change Password', 'woocommerce' ) => array(
 							'option' => 'woocommerce_change_password_page_id',
 							'shortcode' => '[woocommerce_change_password]'
