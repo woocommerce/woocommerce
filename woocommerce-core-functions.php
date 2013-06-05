@@ -33,6 +33,37 @@ function get_product( $the_product = false, $args = array() ) {
 }
 
 /**
+ * Get past orders (by email) and update them
+ *
+ * @param  int $customer_id
+ * @return void
+ */
+function woocommerce_update_new_customer_past_orders( $customer_id ) {
+    global $wpdb;
+
+    $customer = get_user_by( 'id', absint( $customer_id ) );
+
+    $customer_orders = get_posts( array(
+        'numberposts' => -1,
+        'meta_key'    => '_billing_email',
+        'meta_value'  => $customer->user_email,
+        'post_type'   => 'shop_order',
+        'post_status' => 'publish',
+        'fields'      => 'ids'
+    ) );
+
+    $linked = 0;
+
+    if ( $customer_orders )
+        foreach ( $customer_orders as $order_id ) {
+            update_post_meta( $order_id, '_customer_user', $customer->ID );
+            $linked ++;
+        }
+
+    return $linked;
+}
+
+/**
  * Function that returns an array containing the IDs of the products that are on sale.
  *
  * @since 2.0

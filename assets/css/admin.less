@@ -1025,7 +1025,24 @@ ul.wc_coupon_list_block {
 	}
 }
 
+#woocommerce_customers {
+	p.search-box {
+		margin: 6px 0 4px;
+		float: left;
+	}
+	.tablenav  {
+		float: right;
+		clear: none;
+	}
+}
+
 .widefat {
+	&.customers {
+		td {
+			vertical-align: middle;
+			padding: 4px 7px;
+		}
+	}
 	.column-order_title {
 		time {
 			display: block;
@@ -1033,7 +1050,14 @@ ul.wc_coupon_list_block {
 			margin: 3px 0;
 		}
 	}
-	.column-order_actions {
+	.column-orders, .column-paying, .column-spent {
+		text-align: center;
+		width: 8%;
+	}
+	.column-last_order {
+		width: 11%;
+	}
+	.column-order_actions, .column-user_actions {
 		width:110px;
 		a.button {
 			float:left;
