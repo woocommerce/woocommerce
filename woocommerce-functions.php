@@ -1329,12 +1329,12 @@ function woocommerce_layered_nav_init( ) {
 
 		$_chosen_attributes = $_attributes_array = array();
 
-		$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();
+		$attribute_taxonomies = $woocommerce->get_helper( 'attribute' )->get_attribute_taxonomies();
 		if ( $attribute_taxonomies ) {
 			foreach ( $attribute_taxonomies as $tax ) {
 
 		    	$attribute = sanitize_title( $tax->attribute_name );
-		    	$taxonomy = $woocommerce->attribute_taxonomy_name( $attribute );
+		    	$taxonomy = $woocommerce->get_helper( 'attribute' )->attribute_taxonomy_name( $attribute );
 
 				// create an array of product attribute taxonomies
 				$_attributes_array[] = $taxonomy;

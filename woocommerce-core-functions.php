@@ -994,9 +994,9 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
             }
 
 			if ( $flat )
-				$variation_list[] = $woocommerce->attribute_label(str_replace('attribute_', '', $name)).': '.$value;
+				$variation_list[] = $woocommerce->get_helper( 'attribute' )->attribute_label(str_replace('attribute_', '', $name)).': '.$value;
 			else
-				$variation_list[] = '<dt>'.$woocommerce->attribute_label(str_replace('attribute_', '', $name)).':</dt><dd>'.$value.'</dd>';
+				$variation_list[] = '<dt>'.$woocommerce->get_helper( 'attribute' )->attribute_label(str_replace('attribute_', '', $name)).':</dt><dd>'.$value.'</dd>';
 		}
 
 		if ( $flat )

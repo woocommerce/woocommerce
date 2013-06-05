@@ -61,9 +61,9 @@ class WC_Order_Item_Meta {
 		            }
 
 					if ( $flat )
-						$meta_list[] = esc_attr( $woocommerce->attribute_label( str_replace( 'attribute_', '', $meta_key ) ) . ': ' . apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value ) );
+						$meta_list[] = esc_attr( $woocommerce->get_helper( 'attribute' )->attribute_label( str_replace( 'attribute_', '', $meta_key ) ) . ': ' . apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value ) );
 					else
-						$meta_list[] = '<dt>' . wp_kses_post( $woocommerce->attribute_label( str_replace( 'attribute_', '', $meta_key ) ) ) . ':</dt><dd>' . wp_kses_post( apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value ) ) . '</dd>';
+						$meta_list[] = '<dt>' . wp_kses_post( $woocommerce->get_helper( 'attribute' )->attribute_label( str_replace( 'attribute_', '', $meta_key ) ) ) . ':</dt><dd>' . wp_kses_post( apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value ) ) . '</dd>';
 
 				}
 			}
