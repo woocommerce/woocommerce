@@ -169,7 +169,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 					echo '</select>';
 
-					$woocommerce->add_inline_js("
+					$woocommerce->get_helper( 'inline-javascript' )->add_inline_js("
 
 						jQuery('#dropdown_layered_nav_$taxonomy_filter').change(function(){
 

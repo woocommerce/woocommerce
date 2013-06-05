@@ -162,7 +162,7 @@ function woocommerce_restrict_manage_coupons() {
 		</select>
 	<?php
 
-	$woocommerce->add_inline_js( "
+	$woocommerce->get_helper( 'inline-javascript' )->add_inline_js( "
 		jQuery('select#dropdown_shop_coupon_type, select[name=m]').css('width', '150px').chosen();
 	" );
 }

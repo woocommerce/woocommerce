@@ -422,7 +422,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$paypal_args_array[] = '<input type="hidden" name="'.esc_attr( $key ).'" value="'.esc_attr( $value ).'" />';
 		}
 
-		$woocommerce->add_inline_js( '
+		$woocommerce->get_helper( 'inline-javascript' )->add_inline_js( '
 			$.blockUI({
 					message: "' . esc_js( __( 'Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woocommerce' ) ) . '",
 					baseZ: 99999,

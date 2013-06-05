@@ -616,7 +616,7 @@ function variable_product_type_options() {
 	});
 	<?php
 	$javascript = ob_get_clean();
-	$woocommerce->add_inline_js( $javascript );
+	$woocommerce->get_helper( 'inline-javascript' )->add_inline_js( $javascript );
 }
 
 add_action('woocommerce_product_write_panels', 'variable_product_type_options');

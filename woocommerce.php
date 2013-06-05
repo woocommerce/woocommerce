@@ -1489,44 +1489,6 @@ class Woocommerce {
 		return $classes;
 	}
 
-	/** Inline JavaScript Helper **********************************************/
-
-	/**
-	 * Add some JavaScript inline to be output in the footer.
-	 *
-	 * @access public
-	 * @param string $code
-	 * @return void
-	 */
-	public function add_inline_js( $code ) {
-		$this->_inline_js .= "\n" . $code . "\n";
-	}
-
-	/**
-	 * Output any queued inline JS.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function output_inline_js() {
-		if ( $this->_inline_js ) {
-
-			echo "<!-- WooCommerce JavaScript-->\n<script type=\"text/javascript\">\njQuery(document).ready(function($) {";
-
-			// Sanitize
-			$this->_inline_js = wp_check_invalid_utf8( $this->_inline_js );
-			$this->_inline_js = preg_replace( '/&#(x)?0*(?(1)27|39);?/i', "'", $this->_inline_js );
-			$this->_inline_js = str_replace( "\r", '', $this->_inline_js );
-
-			// Output
-			echo $this->_inline_js;
-
-			echo "});\n</script>\n";
-
-			$this->_inline_js = '';
-		}
-	}
-
 	/** Deprecated functions *********************************************************/
 
 	/**
@@ -1580,6 +1542,32 @@ class Woocommerce {
 		$helper->clear_product_transients( $post_id );
 	}
 
+	/**
+	 * Add some JavaScript inline to be output in the footer.
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @param string $code
+	 * @return void
+	 */
+	public function add_inline_js( $code ) {
+		_deprecated_function( 'Woocommerce->add_inline_js', '2.1', 'WC_Inline_Javascript_Helper->add_inline_js' );
+		$helper = $this->get_helper( 'inline-javascript' );
+		$helper->add_inline_js( $code );
+	}
+
+	/**
+	 * Output any queued inline JS.
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @return void
+	 */
+	public function output_inline_js() {
+		_deprecated_function( 'Woocommerce->output_inline_js', '2.1', 'WC_Inline_Javascript_Helper->output_inline_js' );
+		$helper = $this->get_helper( 'inline-javascript' );
+		$helper->output_inline_js();
+	}
 }
 
 /**
