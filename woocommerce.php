@@ -310,6 +310,7 @@ class Woocommerce {
 		include_once( 'classes/class-wc-api.php' );
 
 		// Include abstract classes
+		include_once( 'classes/abstracts/abstract-wc-helper.php' );				// Helper classes
 		include_once( 'classes/abstracts/abstract-wc-product.php' );			// Products
 		include_once( 'classes/abstracts/abstract-wc-settings-api.php' );		// Settings API (for gateways, shipping, and integrations)
 		include_once( 'classes/abstracts/abstract-wc-shipping-method.php' );	// A Shipping method
@@ -328,6 +329,15 @@ class Woocommerce {
 		include_once( 'classes/integrations/sharedaddy/class-wc-sharedaddy.php' );
 	}
 
+	// Temporarily staying here until there is a better spot
+	// And this needs to be optimized/sanitized as well
+	public function get_helper( $id ) {
+		if ( ! isset( $this->helpers[ $id ] ) ) {
+			$this->helpers[ $id ] = include( 'classes/helpers/class-wc-' . $id . '-helper.php' );
+		}
+
+		return $this->helpers[ $id ];
+	}
 
 	/**
 	 * Include required admin files.
@@ -464,6 +474,9 @@ class Woocommerce {
 		$this->product_factory 		= new WC_Product_Factory();     // Product Factory to create new product instances
 		$this->countries 			= new WC_Countries();			// Countries class
 		$this->integrations			= new WC_Integrations();		// Integrations class
+
+		// Helpers blank array
+		$this->helpers = array();
 
 		// Classes/actions loaded for the frontend and for ajax requests
 		if ( ! is_admin() || defined('DOING_AJAX') ) {
