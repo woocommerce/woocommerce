@@ -576,9 +576,9 @@ class WC_Cart {
 					}
 
 					if ( $flat )
-						$variation_list[] = $woocommerce->attribute_label( str_replace( 'attribute_', '', $name ) ) . ': ' . $value;
+						$variation_list[] = $woocommerce->get_helper( 'attribute' )->attribute_label( str_replace( 'attribute_', '', $name ) ) . ': ' . $value;
 					else
-						$variation_list[] = '<dt>' . $woocommerce->attribute_label( str_replace( 'attribute_', '', $name ) ) . ':</dt><dd>' . $value . '</dd>';
+						$variation_list[] = '<dt>' . $woocommerce->get_helper( 'attribute' )->attribute_label( str_replace( 'attribute_', '', $name ) ) . ':</dt><dd>' . $value . '</dd>';
 
 				}
 
@@ -682,7 +682,7 @@ class WC_Cart {
 			global $woocommerce;
 			$cart_page_id = woocommerce_get_page_id('cart');
 			if ($cart_page_id)
-				return apply_filters( 'woocommerce_get_remove_url', $woocommerce->nonce_url( 'cart', add_query_arg( 'remove_item', $cart_item_key, get_permalink($cart_page_id) ) ) );
+				return apply_filters( 'woocommerce_get_remove_url', $woocommerce->get_helper( 'nonce' )->nonce_url( 'cart', add_query_arg( 'remove_item', $cart_item_key, get_permalink($cart_page_id) ) ) );
 		}
 
 		/**

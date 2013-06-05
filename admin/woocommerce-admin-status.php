@@ -586,7 +586,7 @@ function woocommerce_status_tools() {
 
 		switch ( $_GET['action'] ) {
 			case "clear_transients" :
-				$woocommerce->clear_product_transients();
+				$woocommerce->get_helper( 'transient' )->clear_product_transients();
 
 				echo '<div class="updated"><p>' . __( 'Product Transients Cleared', 'woocommerce' ) . '</p></div>';
 			break;

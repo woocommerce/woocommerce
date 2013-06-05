@@ -23,7 +23,7 @@ class WC_Shortcode_Edit_Address {
 	 */
 	public static function get( $atts ) {
 		global $woocommerce;
-		return $woocommerce->shortcode_wrapper( array( __CLASS__, 'output' ), $atts );
+		return $woocommerce->get_helper( 'shortcode' )->shortcode_wrapper( array( __CLASS__, 'output' ), $atts );
 	}
 
 	/**

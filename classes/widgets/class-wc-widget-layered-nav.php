@@ -25,10 +25,10 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$this->widget_name        = __( 'WooCommerce Layered Nav', 'woocommerce' );
 
 		$attribute_array = array();
-		$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();
+		$attribute_taxonomies = $woocommerce->get_helper( 'attribute' )->get_attribute_taxonomies();
 			if ( $attribute_taxonomies )
 				foreach ( $attribute_taxonomies as $tax )
-					if ( taxonomy_exists( $woocommerce->attribute_taxonomy_name( $tax->attribute_name ) ) )
+					if ( taxonomy_exists( $woocommerce->get_helper( 'attribute' )->attribute_taxonomy_name( $tax->attribute_name ) ) )
 						$attribute_array[ $tax->attribute_name ] = $tax->attribute_name;
 
 		$this->settings           = array(
@@ -86,7 +86,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$current_tax 	= $_attributes_array && is_tax( $_attributes_array ) ? get_queried_object()->taxonomy : '';
 
 		$title 			= apply_filters('widget_title', $instance['title'], $instance, $this->id_base);
-		$taxonomy 		= $woocommerce->attribute_taxonomy_name($instance['attribute']);
+		$taxonomy 		= $woocommerce->get_helper( 'attribute' )->attribute_taxonomy_name($instance['attribute']);
 		$query_type 	= isset( $instance['query_type'] ) ? $instance['query_type'] : 'and';
 		$display_type 	= isset( $instance['display_type'] ) ? $instance['display_type'] : 'list';
 
@@ -123,7 +123,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 					echo '<select id="dropdown_layered_nav_' . $taxonomy_filter . '">';
 
-					echo '<option value="">' . sprintf( __( 'Any %s', 'woocommerce' ), $woocommerce->attribute_label( $taxonomy ) ) .'</option>';
+					echo '<option value="">' . sprintf( __( 'Any %s', 'woocommerce' ), $woocommerce->get_helper( 'attribute' )->attribute_label( $taxonomy ) ) .'</option>';
 
 					foreach ( $terms as $term ) {
 
@@ -169,7 +169,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 					echo '</select>';
 
-					$woocommerce->add_inline_js("
+					$woocommerce->get_helper( 'inline-javascript' )->add_inline_js("
 
 						jQuery('#dropdown_layered_nav_$taxonomy_filter').change(function(){
 

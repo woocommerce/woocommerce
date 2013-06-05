@@ -38,7 +38,7 @@ class WC_Shortcode_Cart {
 			$woocommerce->cart->remove_coupons( $_GET['remove_discounts'] );
 
 		// Update Shipping
-		} elseif ( ! empty( $_POST['calc_shipping'] ) && $woocommerce->verify_nonce('cart') ) {
+		} elseif ( ! empty( $_POST['calc_shipping'] ) && $woocommerce->get_helper( 'nonce' )->verify_nonce('cart') ) {
 
 			$validation = $woocommerce->validation();
 

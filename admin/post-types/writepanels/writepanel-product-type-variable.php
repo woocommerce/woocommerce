@@ -211,7 +211,7 @@ function variable_product_type_options() {
 						$variation_selected_value = isset( $default_attributes[ sanitize_title( $attribute['name'] ) ] ) ? $default_attributes[ sanitize_title( $attribute['name'] ) ] : '';
 
 						// Name will be something like attribute_pa_color
-						echo '<select name="default_attribute_' . sanitize_title( $attribute['name'] ) . '"><option value="">' . __( 'No default', 'woocommerce' ) . ' ' . esc_html( $woocommerce->attribute_label( $attribute['name'] ) ) . '&hellip;</option>';
+						echo '<select name="default_attribute_' . sanitize_title( $attribute['name'] ) . '"><option value="">' . __( 'No default', 'woocommerce' ) . ' ' . esc_html( $woocommerce->get_helper( 'attribute' )->attribute_label( $attribute['name'] ) ) . '&hellip;</option>';
 
 						// Get terms for attribute taxonomy or value if its a custom attribute
 						if ( $attribute['is_taxonomy'] ) {
@@ -616,7 +616,7 @@ function variable_product_type_options() {
 	});
 	<?php
 	$javascript = ob_get_clean();
-	$woocommerce->add_inline_js( $javascript );
+	$woocommerce->get_helper( 'inline-javascript' )->add_inline_js( $javascript );
 }
 
 add_action('woocommerce_product_write_panels', 'variable_product_type_options');
