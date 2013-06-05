@@ -925,12 +925,16 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 	/**
 	 * Output the cart cross-sells.
 	 *
-	 * @access public
-	 * @subpackage	Cart
-	 * @return void
+	 * @param  integer $posts_per_page
+	 * @param  integer $columns
+	 * @param  string $orderby
 	 */
-	function woocommerce_cross_sell_display() {
-		woocommerce_get_template( 'cart/cross-sells.php' );
+	function woocommerce_cross_sell_display( $posts_per_page = 2, $columns = 2, $orderby = 'rand' ) {
+		woocommerce_get_template( 'cart/cross-sells.php', array(
+				'posts_per_page' => $posts_per_page,
+				'orderby'        => $orderby,
+				'columns'        => $columns
+			) );
 	}
 }
 
