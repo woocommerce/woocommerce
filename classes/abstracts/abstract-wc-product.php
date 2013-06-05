@@ -35,8 +35,11 @@ class WC_Product {
 			$product = get_product( $product );
 		}
 
-		if ( is_object( $product ) ) {
+		if ( $product instanceof WP_Post ) {
 			$this->id   = absint( $product->ID );
+			$this->post = $product;
+		} elseif ( $product instanceof WC_Product ) {
+			$this->id   = absint( $product->id );
 			$this->post = $product;
 		} else {
 			$this->id   = absint( $product );
