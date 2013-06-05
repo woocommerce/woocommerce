@@ -503,7 +503,7 @@ class Woocommerce {
 			add_action( 'wp_print_scripts', array( $this, 'check_jquery' ), 25 );
 			add_action( 'wp_head', array( $this, 'generator' ) );
 			add_action( 'wp_head', array( $this, 'wp_head' ) );
-			add_filter( 'body_class', array( $this, 'output_body_class' ) );
+			add_filter( 'body_class', array( $this->get_helper( 'body-class' ), 'output_body_class' ) );
 			add_filter( 'post_class', array( $this->get_help( 'post-class' ), 'post_class' ), 20, 3 );
 			add_action( 'wp_footer', array( $this->get_helper( 'inline-javascript' ), 'output_inline_js' ), 25 );
 
@@ -733,26 +733,26 @@ class Woocommerce {
 	public function wp_head() {
 
 		if ( is_woocommerce() ) {
-			$this->add_body_class( 'woocommerce' );
-			$this->add_body_class( 'woocommerce-page' );
+			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce' );
+			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-page' );
 			return;
 		}
 
 		if ( is_checkout() ) {
-			$this->add_body_class( 'woocommerce-checkout' );
-			$this->add_body_class( 'woocommerce-page' );
+			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-checkout' );
+			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-page' );
 			return;
 		}
 
 		if ( is_cart() ) {
-			$this->add_body_class( 'woocommerce-cart' );
-			$this->add_body_class( 'woocommerce-page' );
+			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-cart' );
+			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-page' );
 			return;
 		}
 
 		if ( is_account_page() ) {
-			$this->add_body_class( 'woocommerce-account' );
-			$this->add_body_class( 'woocommerce-page' );
+			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-account' );
+			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-page' );
 			return;
 		}
 
@@ -1216,37 +1216,6 @@ class Woocommerce {
 		return apply_filters( 'woocommerce_redirect', $location );
 	}
 
-	/** Body Classes **********************************************************/
-
-	/**
-	 * Add a class to the webpage body.
-	 *
-	 * @access public
-	 * @param string $class
-	 * @return void
-	 */
-	public function add_body_class( $class ) {
-		$this->_body_classes[] = sanitize_html_class( strtolower($class) );
-	}
-
-	/**
-	 * Output classes on the body tag.
-	 *
-	 * @access public
-	 * @param mixed $classes
-	 * @return array
-	 */
-	public function output_body_class( $classes ) {
-		if ( sizeof( $this->_body_classes ) > 0 ) $classes = array_merge( $classes, $this->_body_classes );
-
-		if ( is_singular('product') ) {
-			$key = array_search( 'singular', $classes );
-			if ( $key !== false ) unset( $classes[$key] );
-		}
-
-		return $classes;
-	}
-
 	/** Deprecated functions *********************************************************/
 
 	/**
@@ -1496,6 +1465,30 @@ class Woocommerce {
 	public function post_class( $classes, $class, $post_id ) {
 		_deprecated_function( 'Woocommerce->post_class', '2.1', 'WC_Post_Class_Helper->post_class' );
 		return $this->get_helper( 'post-class' )->post_class( $classes, $class, $post_id );
+	}
+
+	/**
+	 * Add a class to the webpage body.
+	 *
+	 * @access public
+	 * @param string $class
+	 * @return void
+	 */
+	public function add_body_class( $class ) {
+		_deprecated_function( 'Woocommerce->add_body_class', '2.1', 'WC_Body_Class_Helper->add_body_class' );
+		$this->get_helper( 'body-class' )->add_body_class( $class );
+	}
+
+	/**
+	 * Output classes on the body tag.
+	 *
+	 * @access public
+	 * @param mixed $classes
+	 * @return array
+	 */
+	public function output_body_class( $classes ) {
+		_deprecated_function( 'Woocommerce->output_body_class', '2.1', 'WC_Body_Class_Helper->output_body_class' );
+		return $this->get_helper( 'body-class' )->output_body_class( $classes );
 	}
 }
 
