@@ -1342,35 +1342,6 @@ class Woocommerce {
 		if ( isset( $types[$type] ) ) return $types[$type];
 	}
 
-	/** Nonces ****************************************************************/
-
-	/**
-	 * Return a nonce field.
-	 *
-	 * @access public
-	 * @param mixed $action
-	 * @param bool $referer (default: true)
-	 * @param bool $echo (default: true)
-	 * @return void
-	 */
-	public function nonce_field( $action, $referer = true , $echo = true ) {
-		return wp_nonce_field('woocommerce-' . $action, '_n', $referer, $echo );
-	}
-
-
-	/**
-	 * Return a url with a nonce appended.
-	 *
-	 * @access public
-	 * @param mixed $action
-	 * @param string $url (default: '')
-	 * @return string
-	 */
-	public function nonce_url( $action, $url = '' ) {
-		return add_query_arg( '_n', wp_create_nonce( 'woocommerce-' . $action ), $url );
-	}
-
-
 	/**
 	 * Check a nonce and sets woocommerce error in case it is invalid.
 	 *
@@ -1567,6 +1538,37 @@ class Woocommerce {
 		_deprecated_function( 'Woocommerce->output_inline_js', '2.1', 'WC_Inline_Javascript_Helper->output_inline_js' );
 		$helper = $this->get_helper( 'inline-javascript' );
 		$helper->output_inline_js();
+	}
+
+	/**
+	 * Return a nonce field.
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @param mixed $action
+	 * @param bool $referer (default: true)
+	 * @param bool $echo (default: true)
+	 * @return void
+	 */
+	public function nonce_field( $action, $referer = true , $echo = true ) {
+		_deprecated_function( 'Woocommerce->nonce_field', '2.1', 'WC_Nonce_Helper->nonce_field' );
+		$helper = $this->get_helper( 'nonce' );
+		return $helper->nonce_field( $action, $referer = true , $echo = true );
+	}
+
+	/**
+	 * Return a url with a nonce appended.
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @param mixed $action
+	 * @param string $url (default: '')
+	 * @return string
+	 */
+	public function nonce_url( $action, $url = '' ) {
+		_deprecated_function( 'Woocommerce->nonce_url', '2.1', 'WC_Nonce_Helper->nonce_url' );
+		$helper = $this->get_helper( 'nonce' );
+		return $helper->nonce_url( $action, $url = '' );
 	}
 }
 
