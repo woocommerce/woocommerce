@@ -299,7 +299,6 @@ class WC_Countries {
 			'HU' => array(),
 			'IS' => array(),
 			'IL' => array(),
-			'JP' => array(),
 			'NL' => array(),
 			'NO' => array(),
 			'PL' => array(),
@@ -580,7 +579,7 @@ class WC_Countries {
 				'HK' => "{company}\n{first_name} {last_name_upper}\n{address_1}\n{address_2}\n{city_upper}\n{state_upper}\n{country}",
 				'HU' => "{name}\n{company}\n{city}\n{address_1}\n{address_2}\n{postcode}\n{country}",
 				'IS' => $postcode_before_city,
-				'JP' => "{country}\n{company}\n{name}\n{postcode}\n{state} {city}\n{address_2} {address_1}",
+				'IS' => $postcode_before_city,
 				'LI' => $postcode_before_city,
 				'NL' => $postcode_before_city,
 				'NZ' => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {postcode}\n{country}",
@@ -789,22 +788,6 @@ class WC_Countries {
 						'required' => false
 					)
 				),
-				'JP' => array(
-					'last_name'          => array(
-						'class'             => array( 'form-row-first' ),
-					),
-					'first_name'         => array(
-						'class'             => array( 'form-row-last' ),
-						'clear'             => true
-					),
-					'postcode'          => array(
-						'class'             => array( 'form-row-first' ),
-					),
-					'state'         => array(
-						'class'             => array( 'form-row-last' ),
-						'clear'             => true
-					)
-				),
 				'NL' => array(
 					'postcode_before_city' => true,
 					'state'		=> array(
@@ -1001,13 +984,6 @@ class WC_Countries {
 				'clear'			=> true
 				),
 		);
-
-		/*　Japanese address sort*/
-		if($country=='JP'){
-			$fields_jp = array();
-			array_push($fields_jp,$fields['country'],$fields['last_name'],$fields['first_name'],$fields['company'],$fields['postcode'],$fields['state'],$fields['city'],$fields['address_1'],$fields['address_2']);
-			$fields     = $fields_jp;
-		}
 
 		if ( isset( $locale[ $country ] ) ) {
 
