@@ -504,7 +504,7 @@ class Woocommerce {
 			add_action( 'wp_head', array( $this, 'generator' ) );
 			add_action( 'wp_head', array( $this, 'wp_head' ) );
 			add_filter( 'body_class', array( $this, 'output_body_class' ) );
-			add_filter( 'post_class', array( $this, 'post_class' ), 20, 3 );
+			add_filter( 'post_class', array( $this->get_help( 'post-class' ), 'post_class' ), 20, 3 );
 			add_action( 'wp_footer', array( $this->get_helper( 'inline-javascript' ), 'output_inline_js' ), 25 );
 
 			// HTTPS urls with SSL on
@@ -1247,34 +1247,6 @@ class Woocommerce {
 		return $classes;
 	}
 
-	/** Post Classes **********************************************************/
-
-	/**
-	 * Adds extra post classes for products
-	 *
-	 * @since 2.0
-	 * @access public
-	 * @param array $classes
-	 * @param string|array $class
-	 * @param int $post_id
-	 * @return array
-	 */
-	public function post_class( $classes, $class, $post_id ) {
-		$product = get_product( $post_id );
-
-		if ( $product ) {
-			if ( $product->is_on_sale() ) {
-				$classes[] = 'sale';
-			}
-			if ( $product->is_featured() ) {
-				$classes[] = 'featured';
-			}
-			$classes[] = $product->stock_status;
-		}
-
-		return $classes;
-	}
-
 	/** Deprecated functions *********************************************************/
 
 	/**
@@ -1508,6 +1480,22 @@ class Woocommerce {
 	public function get_coupon_discount_type( $type = '' ) {
 		_deprecated_function( 'Woocommerce->get_coupon_discount_type', '2.1', 'WC_Attribute_Helper->get_coupon_discount_type' );
 		return $this->get_helper( 'coupon' )->get_coupon_discount_type( $type );
+	}
+
+	/**
+	 * Adds extra post classes for products
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @since 2.0
+	 * @access public
+	 * @param array $classes
+	 * @param string|array $class
+	 * @param int $post_id
+	 * @return array
+	 */
+	public function post_class( $classes, $class, $post_id ) {
+		_deprecated_function( 'Woocommerce->post_class', '2.1', 'WC_Post_Class_Helper->post_class' );
+		return $this->get_helper( 'post-class' )->post_class( $classes, $class, $post_id );
 	}
 }
 
