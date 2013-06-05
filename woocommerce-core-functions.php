@@ -45,20 +45,47 @@ function woocommerce_update_new_customer_past_orders( $customer_id ) {
 
     $customer_orders = get_posts( array(
         'numberposts' => -1,
-        'meta_key'    => '_billing_email',
-        'meta_value'  => $customer->user_email,
         'post_type'   => 'shop_order',
         'post_status' => 'publish',
-        'fields'      => 'ids'
+        'fields'      => 'ids',
+        'meta_query' => array(
+			array(
+				'key'     => '_customer_user',
+				'value'   => array( 0, '' ),
+				'compare' => 'IN'
+			),
+			array(
+				'key'     => '_billing_email',
+				'value'   => $customer->user_email,
+			)
+		),
     ) );
 
     $linked = 0;
+    $complete = 0;
 
     if ( $customer_orders )
         foreach ( $customer_orders as $order_id ) {
-            update_post_meta( $order_id, '_customer_user', $customer->ID );
+        	update_post_meta( $order_id, '_customer_user', $customer->ID );
+
+        	$order_status = wp_get_post_terms( $order_id, 'shop_order_status' );
+
+			if ( $order_status ) {
+				$order_status = current( $order_status );
+				$order_status = sanitize_title( $order_status->slug );
+			}
+
+			if ( $order_status == 'completed' )
+				$complete ++;
+
             $linked ++;
         }
+
+    if ( $complete ) {
+    	update_user_meta( $customer_id, 'paying_customer', 1 );
+    	update_user_meta( $customer_id, '_order_count', '' );
+    	update_user_meta( $customer_id, '_money_spent', '' );
+    }
 
     return $linked;
 }
@@ -1384,6 +1411,9 @@ function woocommerce_paying_customer( $order_id ) {
 
 	if ( $order->user_id > 0 ) {
 		update_user_meta( $order->user_id, 'paying_customer', 1 );
+
+		$old_spent = absint( get_user_meta( $order->user_id, '_money_spent', true ) );
+		update_user_meta( $order->user_id, '_money_spent', $old_spent + $order->order_total );
 
 		$old_count = absint( get_user_meta( $order->user_id, '_order_count', true ) );
 		update_user_meta( $order->user_id, '_order_count', $old_count + 1 );

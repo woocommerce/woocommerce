@@ -135,7 +135,8 @@ function woocommerce_trash_post( $id ) {
 			$user_id = get_post_meta( $id, '_customer_user', true );
 
 			if ( $user_id > 0 ) {
-				delete_user_meta( $user_id, '_order_count' );
+				update_user_meta( $user_id, '_order_count', '' );
+				update_user_meta( $user_id, '_money_spent', '' );
 			}
 
 			delete_transient( 'woocommerce_processing_order_count' );
@@ -162,7 +163,8 @@ function woocommerce_untrash_post( $id ) {
 			$user_id = get_post_meta( $id, '_customer_user', true );
 
 			if ( $user_id > 0 ) {
-				delete_user_meta( $user_id, '_order_count' );
+				update_user_meta( $user_id, '_order_count', '' );
+				update_user_meta( $user_id, '_money_spent', '' );
 			}
 
 			delete_transient( 'woocommerce_processing_order_count' );

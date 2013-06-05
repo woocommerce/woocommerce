@@ -126,7 +126,7 @@ class WC_Admin_Customers extends WP_List_Table {
 					update_user_meta( $user->ID, '_order_count', $count );
 				}
 
-				return '<a href="' . admin_url( 'edit.php?post_status=all&post_type=shop_order&shop_order_status=completed&_customer_user=' . absint( $user->ID ) . '' ) . '">' . absint( $count ) . '</a>';
+				return absint( $count );
 			break;
 			case 'last_order' :
 
@@ -221,8 +221,8 @@ class WC_Admin_Customers extends WP_List_Table {
 			'email'           => __( 'Email address', 'woocommerce' ),
 			'location'        => __( 'Location', 'woocommerce' ),
 			'paying'          => __( 'Paying customer?', 'woocommerce' ),
+			'orders'          => __( 'Complete orders', 'woocommerce' ),
 			'spent'           => __( 'Money spent', 'woocommerce' ),
-			'orders'          => __( 'Orders', 'woocommerce' ),
 			'last_order'      => __( 'Last order', 'woocommerce' ),
 			'user_actions'    => __( 'Actions', 'woocommerce' )
         );
