@@ -50,7 +50,7 @@ function woocommerce_template_redirect() {
 	}
 
 	// My account page redirects (logged out)
-	elseif ( ! is_user_logged_in() && ( is_page( woocommerce_get_page_id( 'edit_address' ) ) || is_page( woocommerce_get_page_id( 'change_password' ) ) ) ) {
+	elseif ( ! is_user_logged_in() && ( is_page( woocommerce_get_page_id( 'edit_address' ) ) ) ) {
 		wp_redirect( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
 		exit;
 	}
@@ -118,7 +118,6 @@ function woocommerce_nav_menu_items( $items, $args ) {
 	if ( ! is_user_logged_in() ) {
 
 		$hide_pages   = array();
-		$hide_pages[] = (int) woocommerce_get_page_id( 'change_password' );
 		$hide_pages[] = (int) woocommerce_get_page_id( 'logout' );
 		$hide_pages[] = (int) woocommerce_get_page_id( 'edit_address' );
 		$hide_pages   = apply_filters( 'woocommerce_logged_out_hidden_page_ids', $hide_pages );
@@ -830,6 +829,27 @@ function woocommerce_process_registration() {
 		exit;
 	}
 }
+
+/**
+ * Get the link to the edit account details page
+ *
+ * @return string
+ */
+function woocommerce_customer_edit_account_url() {
+	$edit_account_url = get_permalink( woocommerce_get_page_id( 'myaccount' ) );
+
+	if ( get_option( 'permalink_structure' ) )
+		$edit_account_url = trailingslashit( $edit_account_url ) . 'edit-account/';
+	else
+		$edit_account_url = add_query_arg( 'edit-account', '', $edit_account_url );
+
+	return apply_filters( 'woocommerce_customer_edit_account_url', $edit_account_url );
+}
+
+
+
+
+
 
 
 /**
@@ -1553,40 +1573,58 @@ function woocommerce_price_filter($filtered_posts) {
 }
 
 /**
- * Save the password and redirect back to the my account page.
+ * Save the password/account details and redirect back to the my account page.
  *
  * @access public
  */
-function woocommerce_save_password() {
+function woocommerce_save_account_details() {
 	global $woocommerce;
 
 	if ( 'POST' !== strtoupper( $_SERVER[ 'REQUEST_METHOD' ] ) )
 		return;
 
-	if ( empty( $_POST[ 'action' ] ) || ( 'change_password' !== $_POST[ 'action' ] ) )
+	if ( empty( $_POST[ 'action' ] ) || ( 'save_account_details' !== $_POST[ 'action' ] ) )
 		return;
 
-	$woocommerce->verify_nonce( 'change_password' );
+	$woocommerce->verify_nonce( 'save_account_details' );
 
-	$update = true;
-	$errors = new WP_Error();
-	$user   = new stdClass();
+	$update       = true;
+	$errors       = new WP_Error();
+	$user         = new stdClass();
 
-	$user->ID = (int) get_current_user_id();
+	$user->ID     = (int) get_current_user_id();
+	$current_user = get_user_by( 'id', $user->ID );
 
 	if ( $user->ID <= 0 )
 		return;
 
-	$_POST = array_map( 'woocommerce_clean', $_POST );
+	$account_first_name = ! empty( $_POST[ 'account_first_name' ] ) ? woocommerce_clean( $_POST[ 'account_first_name' ] ) : '';
+	$account_last_name  = ! empty( $_POST[ 'account_last_name' ] ) ? woocommerce_clean( $_POST[ 'account_last_name' ] ) : '';
+	$account_email      = ! empty( $_POST[ 'account_email' ] ) ? woocommerce_clean( $_POST[ 'account_email' ] ) : '';
+	$pass1              = ! empty( $_POST[ 'password_1' ] ) ? woocommerce_clean( $_POST[ 'password_1' ] ) : '';
+	$pass2              = ! empty( $_POST[ 'password_2' ] ) ? woocommerce_clean( $_POST[ 'password_2' ] ) : '';
 
-	$pass1           = ! empty( $_POST[ 'password_1' ] ) ? $_POST[ 'password_1' ] : '';
-	$pass2           = ! empty( $_POST[ 'password_2' ] ) ? $_POST[ 'password_2' ] : '';
-	$user->user_pass = $pass1;
+	$user->first_name   = $account_first_name;
+	$user->last_name    = $account_last_name;
+	$user->user_email   = $account_email;
+	$user->display_name = $user->first_name;
 
-	if ( empty( $pass1 ) || empty( $pass2 ) )
-		$woocommerce->add_error( __( 'Please enter your password.', 'woocommerce' ) );
+	if ( $pass1 )
+		$user->user_pass    = $pass1;
 
-	if ( $pass1 !== $pass2 )
+	if ( empty( $account_first_name ) || empty( $account_last_name ) )
+		$woocommerce->add_error( __( 'Please enter your name.', 'woocommerce' ) );
+
+	if ( empty( $account_email ) || ! is_email( $account_email ) )
+		$woocommerce->add_error( __( 'Please provide a valid email address.', 'woocommerce' ) );
+
+	elseif ( email_exists( $account_email ) && $account_email !== $current_user->user_email )
+		$woocommerce->add_error( __( 'This email address is already registered.', 'woocommerce' ) );
+
+	if ( ! empty( $pass1 ) && empty( $pass2 ) )
+		$woocommerce->add_error( __( 'Please re-enter your password.', 'woocommerce' ) );
+
+	elseif ( ! empty( $pass1 ) && $pass1 !== $pass2 )
 		$woocommerce->add_error( __( 'Passwords do not match.', 'woocommerce' ) );
 
 	// Allow plugins to return their own errors.
@@ -1600,16 +1638,16 @@ function woocommerce_save_password() {
 
 		wp_update_user( $user ) ;
 
-		$woocommerce->add_message( __( 'Password changed successfully.', 'woocommerce' ) );
+		$woocommerce->add_message( __( 'Account details changed successfully.', 'woocommerce' ) );
 
-		do_action( 'woocommerce_customer_change_password', $user->ID );
+		do_action( 'woocommerce_save_account_details', $user->ID );
 
-		wp_safe_redirect( get_permalink( woocommerce_get_page_id('myaccount') ) );
+		wp_safe_redirect( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
 		exit;
 	}
 }
 
-add_action( 'template_redirect', 'woocommerce_save_password' );
+add_action( 'template_redirect', 'woocommerce_save_account_details' );
 
 /**
  * Save and and update a billing or shipping address if the

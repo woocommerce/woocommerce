@@ -184,31 +184,9 @@ class WC_Checkout {
 		}
 
 		// Store user data
-		if ( $this->checkout_fields['billing'] ) {
-			foreach ( $this->checkout_fields['billing'] as $key => $field ) {
-
+		if ( $this->checkout_fields['billing'] )
+			foreach ( $this->checkout_fields['billing'] as $key => $field )
 				update_post_meta( $order_id, '_' . $key, $this->posted[ $key ] );
-
-				// User
-				if ( $this->customer_id && ! empty( $this->posted[ $key ] ) ) {
-					update_user_meta( $this->customer_id, $key, $this->posted[ $key ] );
-
-					// Special fields
-					switch ( $key ) {
-						case "billing_email" :
-							if ( ! email_exists( $this->posted[ $key ] ) )
-								wp_update_user( array ( 'ID' => $this->customer_id, 'user_email' => $this->posted[ $key ] ) ) ;
-						break;
-						case "billing_first_name" :
-							wp_update_user( array ( 'ID' => $this->customer_id, 'first_name' => $this->posted[ $key ] ) ) ;
-						break;
-						case "billing_last_name" :
-							wp_update_user( array ( 'ID' => $this->customer_id, 'last_name' => $this->posted[ $key ] ) ) ;
-						break;
-					}
-				}
-			}
-		}
 
 		if ( $this->checkout_fields['shipping'] && ( $woocommerce->cart->needs_shipping() || get_option('woocommerce_require_shipping_address') == 'yes' ) ) {
 			foreach ( $this->checkout_fields['shipping'] as $key => $field ) {
@@ -579,6 +557,13 @@ class WC_Checkout {
                 	$this->customer_id = $new_customer;
 
                 	woocommerce_set_customer_auth_cookie( $this->customer_id );
+
+                	// Add customer info from other billing fields
+                	if ( $this->posted['billing_first_name'] )
+                		wp_update_user( array ( 'ID' => $this->customer_id, 'first_name' => $this->posted['billing_first_name'], 'display_name' => $this->posted['billing_first_name'] ) );
+
+                	if ( $this->posted['billing_last_name'] )
+                		wp_update_user( array ( 'ID' => $this->customer_id, 'last_name' => $this->posted['billing_last_name'] ) ) ;
 				}
 
 				// Abort if errors are present

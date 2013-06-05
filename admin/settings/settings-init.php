@@ -322,17 +322,6 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 	),
 
 	array(
-		'title' => __( 'Change Password Page', 'woocommerce' ),
-		'desc' 		=> __( 'Page contents: [woocommerce_change_password] Parent: "My Account"', 'woocommerce' ),
-		'id' 		=> 'woocommerce_change_password_page_id',
-		'type' 		=> 'single_select_page',
-		'default'	=> '',
-		'class'		=> 'chosen_select_nostd',
-		'css' 		=> 'min-width:300px;',
-		'desc_tip'	=>  true,
-	),
-
-	array(
 		'title' => __( 'Logout Page', 'woocommerce' ),
 		'desc' 		=> __( 'Parent: "My Account"', 'woocommerce' ),
 		'id' 		=> 'woocommerce_logout_page_id',

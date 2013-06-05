@@ -18,7 +18,7 @@ $woocommerce->show_messages(); ?>
 	printf(
 		__( 'Hello, <strong>%s</strong>. From your account dashboard you can view your recent orders, manage your shipping and billing addresses and <a href="%s">edit your password and account details</a>.', 'woocommerce' ),
 		$current_user->display_name,
-		get_permalink( woocommerce_get_page_id( 'change_password' ) )
+		woocommerce_customer_edit_account_url()
 	);
 	?>
 </p>

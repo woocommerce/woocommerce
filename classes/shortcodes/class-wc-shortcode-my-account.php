@@ -43,6 +43,10 @@ class WC_Shortcode_My_Account {
 
 				self::view_order( absint( $wp->query_vars['view-order'] ) );
 
+			} elseif ( isset( $wp->query_vars['edit-account'] ) ) {
+
+				self::edit_account();
+
 			} else {
 
 				self::my_account( $atts );
@@ -113,5 +117,12 @@ class WC_Shortcode_My_Account {
 		endif;
 
 		do_action( 'woocommerce_view_order', $order_id );
+	}
+
+	/**
+	 * Edit account details page
+	 */
+	private function edit_account() {
+		woocommerce_get_template( 'myaccount/form-edit-account.php', array( 'user' => get_user_by( 'id', get_current_user_id() ) ) );
 	}
 }

@@ -233,12 +233,6 @@ function woocommerce_create_pages() {
 			'content' => '[woocommerce_edit_address]',
 			'parent'  => 'myaccount'
 		),
-		'change_password' => array(
-			'name'    => _x( 'change-password', 'page_slug', 'woocommerce' ),
-			'title'   => __( 'Change Password', 'woocommerce' ),
-			'content' => '[woocommerce_change_password]',
-			'parent'  => 'myaccount'
-		),
 		'logout' => array(
 			'name'    => _x( 'logout', 'page_slug', 'woocommerce' ),
 			'title'   => __( 'Logout', 'woocommerce' ),

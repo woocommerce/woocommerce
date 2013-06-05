@@ -35,7 +35,6 @@ class WC_Shortcodes {
 		add_shortcode( 'woocommerce_order_tracking', array( $this, 'order_tracking' ) );
 		add_shortcode( 'woocommerce_my_account', array( $this, 'my_account' ) );
 		add_shortcode( 'woocommerce_edit_address', array( $this, 'edit_address' ) );
-		add_shortcode( 'woocommerce_change_password', array( $this, 'change_password' ) );
 		add_shortcode( 'woocommerce_lost_password', array( $this, 'lost_password' ) );
 	}
 
@@ -97,19 +96,6 @@ class WC_Shortcodes {
 	public function edit_address( $atts ) {
 		global $woocommerce;
 		return $woocommerce->shortcode_wrapper( array( 'WC_Shortcode_Edit_Address', 'output' ), $atts );
-	}
-
-
-	/**
-	 * Change password page shortcode.
-	 *
-	 * @access public
-	 * @param mixed $atts
-	 * @return string
-	 */
-	public function change_password( $atts ) {
-		global $woocommerce;
-		return $woocommerce->shortcode_wrapper( array( 'WC_Shortcode_Change_Password', 'output' ), $atts );
 	}
 
 	/**

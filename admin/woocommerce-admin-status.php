@@ -316,10 +316,6 @@ function woocommerce_status_report() {
 							'option' => 'woocommerce_edit_address_page_id',
 							'shortcode' => '[woocommerce_edit_address]'
 						),
-					__( 'Change Password', 'woocommerce' ) => array(
-							'option' => 'woocommerce_change_password_page_id',
-							'shortcode' => '[woocommerce_change_password]'
-						),
 					__( 'Lost Password', 'woocommerce' ) => array(
 							'option' => 'woocommerce_lost_password_page_id',
 							'shortcode' => '[woocommerce_lost_password]'

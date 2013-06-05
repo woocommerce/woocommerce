@@ -333,7 +333,7 @@ if ( ! function_exists( 'woocommerce_get_page_id' ) ) {
 	/**
 	 * WooCommerce page IDs
 	 *
-	 * retrieve page ids - used for myaccount, edit_address, change_password, shop, cart, checkout, pay, view_order, terms
+	 * retrieve page ids - used for myaccount, edit_address, shop, cart, checkout, pay, view_order, terms
 	 *
 	 * returns -1 if no page is found
 	 *
@@ -347,6 +347,11 @@ if ( ! function_exists( 'woocommerce_get_page_id' ) ) {
 			_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.1', 'The "pay" and "thanks" pages are no-longer used - an endpoint is added to the checkout instead. To get a valid link use the WC_Order::get_checkout_payment_url() or WC_Order::get_checkout_order_received_url() methods instead.' );
 
 			$page = 'checkout';
+		}
+		if ( $page == 'change_password' ) {
+			_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.1', 'The "change_password" page is no-longer used - an endpoint is added to the my-account instead. To get a valid link use the woocommerce_customer_edit_account_url() function instead.' );
+
+			$page = 'myaccount';
 		}
 
 		$page = apply_filters( 'woocommerce_get_' . $page . '_page_id', get_option('woocommerce_' . $page . '_page_id' ) );
@@ -531,7 +536,7 @@ if ( ! function_exists( 'is_account_page' ) ) {
 	 * @return bool
 	 */
 	function is_account_page() {
-		return is_page( woocommerce_get_page_id( 'myaccount' ) ) || is_page( woocommerce_get_page_id( 'edit_address' ) ) || is_page( woocommerce_get_page_id( 'change_password' ) ) || is_page( woocommerce_get_page_id( 'lost_password' ) ) || apply_filters( 'woocommerce_is_account_page', false ) ? true : false;
+		return is_page( woocommerce_get_page_id( 'myaccount' ) ) || is_page( woocommerce_get_page_id( 'edit_address' ) ) || is_page( woocommerce_get_page_id( 'lost_password' ) ) || apply_filters( 'woocommerce_is_account_page', false ) ? true : false;
 	}
 }
 

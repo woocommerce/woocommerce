@@ -460,6 +460,7 @@ class Woocommerce {
 		add_rewrite_endpoint( 'order-pay', EP_PAGES );
 		add_rewrite_endpoint( 'order-received', EP_PAGES );
 		add_rewrite_endpoint( 'view-order', EP_PAGES );
+		add_rewrite_endpoint( 'edit-account', EP_PAGES );
 
 		// Load class instances
 		$this->product_factory 		= new WC_Product_Factory();     // Product Factory to create new product instances

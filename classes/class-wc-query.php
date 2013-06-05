@@ -51,8 +51,8 @@ class WC_Query {
 			'order-received',
 
 			// My account actions
-			'account-logout',
-			'view-order'
+			'view-order',
+			'edit-account'
 		);
 	}
 
@@ -76,7 +76,7 @@ class WC_Query {
 		global $wp;
 
 		foreach ( $this->query_vars as $var )
-			if ( ! empty( $_GET[ $var ] ) )
+			if ( isset( $_GET[ $var ] ) )
 				$wp->query_vars[ $var ] = $_GET[ $var ];
 	}
 

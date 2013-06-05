@@ -17,6 +17,5 @@ $strings = 'tinyMCE.addI18n({' . _WP_Editors::$mce_locale . ':{
         order_tracking: "' . esc_js( __( 'Order tracking', 'woocommerce' ) ) . '",
         my_account: "' . esc_js( __( 'My Account', 'woocommerce' ) ) . '",
         edit_address: "' . esc_js( __( 'Edit Address', 'woocommerce' ) ) . '",
-        change_password: "' . esc_js( __( 'Change Password', 'woocommerce' ) ) . '",
     }
 }})';
