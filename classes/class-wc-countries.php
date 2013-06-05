@@ -576,7 +576,7 @@ class WC_Countries {
 				'HK' => "{company}\n{first_name} {last_name_upper}\n{address_1}\n{address_2}\n{city_upper}\n{state_upper}\n{country}",
 				'HU' => "{name}\n{company}\n{city}\n{address_1}\n{address_2}\n{postcode}\n{country}",
 				'IS' => $postcode_before_city,
-				'IS' => $postcode_before_city,
+				'IT' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city} {state_upper}\n{country}",
 				'LI' => $postcode_before_city,
 				'NL' => $postcode_before_city,
 				'NZ' => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {postcode}\n{country}",
@@ -869,6 +869,13 @@ class WC_Countries {
 					'postcode_before_city' => true,
 					'state'		=> array(
 						'required' => false
+					)
+				),
+				'IT' => array(
+					'postcode_before_city' => true,
+					'state'		=> array(
+						'required' => true,
+						'label'    => __( 'Province', 'woocommerce' ),
 					)
 				),
 				'KR' => array(
