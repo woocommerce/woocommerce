@@ -1464,7 +1464,7 @@ class Woocommerce {
 	 * @return array
 	 */
 	public function get_coupon_discount_types() {
-		_deprecated_function( 'Woocommerce->get_coupon_discount_types', '2.1', 'WC_Attribute_Helper->get_coupon_discount_types' );
+		_deprecated_function( 'Woocommerce->get_coupon_discount_types', '2.1', 'WC_Coupon_Helper->get_coupon_discount_types' );
 		return $this->get_helper( 'coupon' )->get_coupon_discount_types();
 	}
 
@@ -1478,7 +1478,7 @@ class Woocommerce {
 	 * @return string
 	 */
 	public function get_coupon_discount_type( $type = '' ) {
-		_deprecated_function( 'Woocommerce->get_coupon_discount_type', '2.1', 'WC_Attribute_Helper->get_coupon_discount_type' );
+		_deprecated_function( 'Woocommerce->get_coupon_discount_type', '2.1', 'WC_Coupon_Helper->get_coupon_discount_type' );
 		return $this->get_helper( 'coupon' )->get_coupon_discount_type( $type );
 	}
 
