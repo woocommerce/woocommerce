@@ -49,7 +49,7 @@ class WC_Shortcodes {
 	 */
 	public function cart( $atts ) {
 		global $woocommerce;
-		return $woocommerce->shortcode_wrapper( array( 'WC_Shortcode_Cart', 'output' ), $atts );
+		return $woocommerce->get_helper( 'shortcode' )->shortcode_wrapper( array( 'WC_Shortcode_Cart', 'output' ), $atts );
 	}
 
 	/**
@@ -61,7 +61,7 @@ class WC_Shortcodes {
 	 */
 	public function checkout( $atts ) {
 		global $woocommerce;
-		return $woocommerce->shortcode_wrapper( array( 'WC_Shortcode_Checkout', 'output' ), $atts );
+		return $woocommerce->get_helper( 'shortcode' )->shortcode_wrapper( array( 'WC_Shortcode_Checkout', 'output' ), $atts );
 	}
 
 	/**
@@ -73,7 +73,7 @@ class WC_Shortcodes {
 	 */
 	public function order_tracking( $atts ) {
 		global $woocommerce;
-		return $woocommerce->shortcode_wrapper( array( 'WC_Shortcode_Order_Tracking', 'output' ), $atts );
+		return $woocommerce->get_helper( 'shortcode' )->shortcode_wrapper( array( 'WC_Shortcode_Order_Tracking', 'output' ), $atts );
 	}
 
 	/**
@@ -85,7 +85,7 @@ class WC_Shortcodes {
 	 */
 	public function my_account( $atts ) {
 		global $woocommerce;
-		return $woocommerce->shortcode_wrapper( array( 'WC_Shortcode_My_Account', 'output' ), $atts );
+		return $woocommerce->get_helper( 'shortcode' )->shortcode_wrapper( array( 'WC_Shortcode_My_Account', 'output' ), $atts );
 	}
 
 	/**
@@ -97,7 +97,7 @@ class WC_Shortcodes {
 	 */
 	public function edit_address( $atts ) {
 		global $woocommerce;
-		return $woocommerce->shortcode_wrapper( array( 'WC_Shortcode_Edit_Address', 'output' ), $atts );
+		return $woocommerce->get_helper( 'shortcode' )->shortcode_wrapper( array( 'WC_Shortcode_Edit_Address', 'output' ), $atts );
 	}
 
 
@@ -110,7 +110,7 @@ class WC_Shortcodes {
 	 */
 	public function change_password( $atts ) {
 		global $woocommerce;
-		return $woocommerce->shortcode_wrapper( array( 'WC_Shortcode_Change_Password', 'output' ), $atts );
+		return $woocommerce->get_helper( 'shortcode' )->shortcode_wrapper( array( 'WC_Shortcode_Change_Password', 'output' ), $atts );
 	}
 
 	/**
@@ -122,7 +122,7 @@ class WC_Shortcodes {
 	 */
 	public function lost_password( $atts ) {
 		global $woocommerce;
-		return $woocommerce->shortcode_wrapper( array( 'WC_Shortcode_Lost_Password', 'output' ), $atts );
+		return $woocommerce->get_helper( 'shortcode' )->shortcode_wrapper( array( 'WC_Shortcode_Lost_Password', 'output' ), $atts );
 	}
 
 	/**
@@ -134,7 +134,7 @@ class WC_Shortcodes {
 	 */
 	public function view_order( $atts ) {
 		global $woocommerce;
-		return $woocommerce->shortcode_wrapper( array( 'WC_Shortcode_View_Order', 'output' ), $atts );
+		return $woocommerce->get_helper( 'shortcode' )->shortcode_wrapper( array( 'WC_Shortcode_View_Order', 'output' ), $atts );
 	}
 
 	/**

@@ -1370,37 +1370,6 @@ class Woocommerce {
 		return false;
 	}
 
-	/** Shortcode Helpers *********************************************************/
-
-	/**
-	 * Shortcode Wrapper
-	 *
-	 * @access public
-	 * @param mixed $function
-	 * @param array $atts (default: array())
-	 * @return string
-	 */
-	public function shortcode_wrapper(
-		$function,
-		$atts = array(),
-		$wrapper = array(
-			'class' => 'woocommerce',
-			'before' => null,
-			'after' => null
-		)
-	){
-		ob_start();
-
-		$before 	= empty( $wrapper['before'] ) ? '<div class="' . $wrapper['class'] . '">' : $wrapper['before'];
-		$after 		= empty( $wrapper['after'] ) ? '</div>' : $wrapper['after'];
-
-		echo $before;
-		call_user_func( $function, $atts );
-		echo $after;
-
-		return ob_get_clean();
-	}
-
 	/** Body Classes **********************************************************/
 
 	/**
@@ -1569,6 +1538,29 @@ class Woocommerce {
 		_deprecated_function( 'Woocommerce->nonce_url', '2.1', 'WC_Nonce_Helper->nonce_url' );
 		$helper = $this->get_helper( 'nonce' );
 		return $helper->nonce_url( $action, $url = '' );
+	}
+
+	/**
+	 * Shortcode Wrapper
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @param mixed $function
+	 * @param array $atts (default: array())
+	 * @return string
+	 */
+	public function shortcode_wrapper(
+		$function,
+		$atts = array(),
+		$wrapper = array(
+			'class' => 'woocommerce',
+			'before' => null,
+			'after' => null
+		)
+	) {
+		_deprecated_function( 'Woocommerce->shortcode_wrapper', '2.1', 'WC_Shortcode_Helper->shortcode_wrapper' );
+		$helper = $this->get_helper( 'shortcode' );
+		return $helper->shortcode_wrapper( $function, $atts, $wrapper );
 	}
 }
 
