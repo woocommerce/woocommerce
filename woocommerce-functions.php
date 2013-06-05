@@ -842,11 +842,7 @@ function woocommerce_order_again() {
 	global $woocommerce;
 
 	// Nothing to do
-	if ( ! isset( $_GET['order_again'] ) || ! is_user_logged_in() || get_option('woocommerce_allow_customers_to_reorder') == 'no' )
-		return;
-
-	// Nonce security check
-	if ( ! $woocommerce->verify_nonce( 'order_again', '_GET' ) )
+	if ( ! isset( $_GET['order_again'] ) || ! is_user_logged_in() || ! $woocommerce->verify_nonce( 'order_again', '_GET' ) )
 		return;
 
 	// Clear current cart

@@ -126,7 +126,7 @@ function woocommerce_order_data_meta_box($post) {
 						?>
 					</p>
 
-					<?php if ( get_option( 'woocommerce_enable_order_comments' ) != 'no' ) : ?>
+					<?php if ( apply_filters( 'woocommerce_enable_order_notes_field', get_option( 'woocommerce_enable_order_comments', 'yes' ) == 'yes' ) ) : ?>
 
 						<p class="form-field form-field-wide"><label for="excerpt"><?php _e( 'Customer Note:', 'woocommerce' ) ?></label>
 						<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php _e( 'Customer\'s notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses_post( $post->post_excerpt ); ?></textarea></p>

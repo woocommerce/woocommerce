@@ -378,20 +378,24 @@ if ( ! function_exists( 'woocommerce_empty_cart' ) ) {
 if ( ! function_exists( 'woocommerce_disable_admin_bar' ) ) {
 
 	/**
-	 * WooCommerce disable admin bar
+	 * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from seeing the admin bar
+	 *
+	 * Note: get_option( 'woocommerce_lock_down_admin', true ) is a deprecated option here for backwards compat. Defaults to true.
 	 *
 	 * @access public
 	 * @param bool $show_admin_bar
 	 * @return bool
 	 */
 	function woocommerce_disable_admin_bar( $show_admin_bar ) {
-		if ( get_option('woocommerce_lock_down_admin')=='yes' && ! ( current_user_can('edit_posts') || current_user_can('manage_woocommerce') ) ) {
+		if ( apply_filters( 'woocommerce_disable_admin_bar', get_option( 'woocommerce_lock_down_admin', "yes" ) == "yes" ) && ! ( current_user_can('edit_posts') || current_user_can('manage_woocommerce') ) ) {
 			$show_admin_bar = false;
 		}
 
 		return $show_admin_bar;
 	}
 }
+
+add_filter( 'show_admin_bar', 'woocommerce_disable_admin_bar', 10, 1 );
 
 
 /**

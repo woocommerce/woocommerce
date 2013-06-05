@@ -102,19 +102,12 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 	array(
 		'title' => __( 'Checkout', 'woocommerce' ),
-		'desc' 		=> __( 'Enable guest checkout (no account required)', 'woocommerce' ),
+		'desc' 		=> __( 'Enable guest checkout', 'woocommerce' ),
+		'desc_tip'	=>  __( 'Allows customers to checkout without creating an account.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_guest_checkout',
 		'default'	=> 'yes',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'	=> 'start'
-	),
-
-	array(
-		'desc' 		=> __( 'Enable customer note field on checkout', 'woocommerce' ),
-		'id' 		=> 'woocommerce_enable_order_comments',
-		'default'	=> 'yes',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
 	),
 
 	array(
@@ -164,31 +157,6 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	array(
 		'desc' 		=> __( 'Automatically generate customer password', 'woocommerce' ),
 		'id' 		=> 'woocommerce_registration_generate_password',
-		'default'	=> 'no',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end'
-	),
-
-	array(
-		'title' => __( 'Customer Accounts', 'woocommerce' ),
-		'desc' 		=> __( 'Prevent customers from accessing WordPress admin', 'woocommerce' ),
-		'id' 		=> 'woocommerce_lock_down_admin',
-		'default'	=> 'no',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start'
-	),
-
-	array(
-		'desc' 		=> __( 'Clear cart when logging out', 'woocommerce' ),
-		'id' 		=> 'woocommerce_clear_cart_on_logout',
-		'default'	=> 'no',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
-	),
-
-	array(
-		'desc' 		=> __( 'Allow customers to repurchase orders from their account page', 'woocommerce' ),
-		'id' 		=> 'woocommerce_allow_customers_to_reorder',
 		'default'	=> 'no',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end'

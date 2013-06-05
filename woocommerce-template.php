@@ -1274,6 +1274,31 @@ if ( ! function_exists( 'woocommerce_order_details_table' ) ) {
 	}
 }
 
+
+if ( ! function_exists( 'woocommerce_order_again_button' ) ) {
+
+	/**
+	 * Display an 'order again' button on the view order page.
+	 *
+	 * @access public
+	 * @param object $order
+	 * @subpackage	Orders
+	 * @return void
+	 */
+	function woocommerce_order_again_button( $order ) {
+		global $woocommerce;
+
+		if ( ! $order || $order->status != 'completed' )
+			return;
+
+		?>
+		<p class="order-again">
+			<a href="<?php echo esc_url( $woocommerce->nonce_url( 'order_again', add_query_arg( 'order_again', $order->id ) ) ); ?>" class="button"><?php _e( 'Order Again', 'woocommerce' ); ?></a>
+		</p>
+		<?php
+	}
+}
+
 /** Forms ****************************************************************/
 
 if ( ! function_exists( 'woocommerce_form_field' ) ) {
