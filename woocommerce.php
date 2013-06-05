@@ -505,7 +505,7 @@ class Woocommerce {
 			add_action( 'wp_head', array( $this, 'wp_head' ) );
 			add_filter( 'body_class', array( $this, 'output_body_class' ) );
 			add_filter( 'post_class', array( $this, 'post_class' ), 20, 3 );
-			add_action( 'wp_footer', array( $this, 'output_inline_js' ), 25 );
+			add_action( 'wp_footer', array( $this->get_helper( 'inline-javascript' ), 'output_inline_js' ), 25 );
 
 			// HTTPS urls with SSL on
 			$filters = array( 'post_thumbnail_html', 'widget_text', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
@@ -516,7 +516,7 @@ class Woocommerce {
 
 		// Actions
 		add_action( 'the_post', array( $this, 'setup_product_data' ) );
-		add_action( 'admin_footer', array( $this, 'output_inline_js' ), 25 );
+		add_action( 'admin_footer', array( $this->get_helper( 'inline-javascript' ), 'output_inline_js' ), 25 );
 
 		// Email Actions
 		$email_actions = array( 'woocommerce_low_stock', 'woocommerce_no_stock', 'woocommerce_product_on_backorder', 'woocommerce_order_status_pending_to_processing', 'woocommerce_order_status_pending_to_completed', 'woocommerce_order_status_pending_to_on-hold', 'woocommerce_order_status_failed_to_processing', 'woocommerce_order_status_failed_to_completed', 'woocommerce_order_status_completed', 'woocommerce_new_customer_note' );
