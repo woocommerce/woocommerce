@@ -201,7 +201,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Refactor - Removed certain my-account pages. Endpoints are used instead.
 * Localization - Portugese locale by jpBenfica
 * Localization - Swedish translation by Björn Sennbrink
-* Localization - Spanish, Romanian, Danish, Korean updates.
+* Localization - French, Spanish, Romanian, Danish, Korean updates.
 
 = 2.0.10 - 15/05/2013 =
 * Tweak - Searching for SKU in admin panel can also be done via lowercase 'sku:' instead of just 'SKU:'
