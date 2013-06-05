@@ -759,7 +759,7 @@ function woocommerce_admin_product_quick_edit_save( $post_id, $post ) {
 	}
 
 	// Clear transient
-	$woocommerce->clear_product_transients( $post_id );
+	$woocommerce->get_helper( 'transient' )->clear_product_transients( $post_id );
 }
 
 add_action( 'save_post', 'woocommerce_admin_product_quick_edit_save', 10, 2 );
@@ -1156,7 +1156,7 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 	do_action( 'woocommerce_product_bulk_edit_save', $product );
 
 	// Clear transient
-	$woocommerce->clear_product_transients( $post_id );
+	$woocommerce->get_helper( 'transient' )->clear_product_transients( $post_id );
 }
 
 add_action( 'save_post', 'woocommerce_admin_product_bulk_edit_save', 10, 2 );

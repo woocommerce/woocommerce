@@ -87,7 +87,7 @@ function do_install_woocommerce() {
 	}
 
 	// Clear transient cache
-	$woocommerce->clear_product_transients();
+	$woocommerce->get_helper( 'transient' )->clear_product_transients();
 
 	// Recompile LESS styles if they are custom
 	if ( get_option( 'woocommerce_frontend_css' ) == 'yes' ) {

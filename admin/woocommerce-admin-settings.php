@@ -134,7 +134,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 			}
 
 			// Clear any unwanted data
-			$woocommerce->clear_product_transients();
+			$woocommerce->get_helper( 'transient' )->clear_product_transients();
 
 			delete_transient( 'woocommerce_cache_excluded_uris' );
 

@@ -890,7 +890,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 				}
 
 				// Clear cache/transients
-				$woocommerce->clear_product_transients( $clear_id );
+				$woocommerce->get_helper( 'transient' )->clear_product_transients( $clear_id );
 			}
 		}
 	}
@@ -1021,7 +1021,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	do_action( 'woocommerce_process_product_meta_' . $product_type, $post_id );
 
 	// Clear cache/transients
-	$woocommerce->clear_product_transients( $post_id );
+	$woocommerce->get_helper( 'transient' )->clear_product_transients( $post_id );
 }
 
 add_action('woocommerce_process_product_meta', 'woocommerce_process_product_meta', 1, 2);

@@ -2412,7 +2412,7 @@ function woocommerce_scheduled_sales() {
 				update_post_meta( $product_id, '_sale_price_dates_to', '' );
 			}
 
-			$woocommerce->clear_product_transients( $product_id );
+			$woocommerce->get_helper( 'transient' )->clear_product_transients( $product_id );
 
 			$parent = wp_get_post_parent_id( $product_id );
 
@@ -2426,7 +2426,7 @@ function woocommerce_scheduled_sales() {
 				if ( $this_product->is_type( 'simple' ) )
 					$this_product->grouped_product_sync();
 
-				$woocommerce->clear_product_transients( $parent );
+				$woocommerce->get_helper( 'transient' )->clear_product_transients( $parent );
 			}
 		}
 	}
@@ -2453,7 +2453,7 @@ function woocommerce_scheduled_sales() {
 			update_post_meta( $product_id, '_sale_price_dates_from', '' );
 			update_post_meta( $product_id, '_sale_price_dates_to', '' );
 
-			$woocommerce->clear_product_transients( $product_id );
+			$woocommerce->get_helper( 'transient' )->clear_product_transients( $product_id );
 
 			$parent = wp_get_post_parent_id( $product_id );
 
@@ -2467,7 +2467,7 @@ function woocommerce_scheduled_sales() {
 				if ( $this_product->is_type( 'simple' ) )
 					$this_product->grouped_product_sync();
 
-				$woocommerce->clear_product_transients( $parent );
+				$woocommerce->get_helper( 'transient' )->clear_product_transients( $parent );
 			}
 		}
 	}
