@@ -1324,8 +1324,7 @@ class Woocommerce {
 	 */
 	public function clear_product_transients( $post_id = 0 ) {
 		_deprecated_function( 'Woocommerce->clear_product_transients', '2.1', 'WC_Transient_Helper->clear_product_transients' );
-		$helper = $this->get_helper( 'transient' );
-		$helper->clear_product_transients( $post_id );
+		$this->get_helper( 'transient' )->clear_product_transients( $post_id );
 	}
 
 	/**
@@ -1338,8 +1337,7 @@ class Woocommerce {
 	 */
 	public function add_inline_js( $code ) {
 		_deprecated_function( 'Woocommerce->add_inline_js', '2.1', 'WC_Inline_Javascript_Helper->add_inline_js' );
-		$helper = $this->get_helper( 'inline-javascript' );
-		$helper->add_inline_js( $code );
+		$this->get_helper( 'inline-javascript' )->add_inline_js( $code );
 	}
 
 	/**
@@ -1351,8 +1349,7 @@ class Woocommerce {
 	 */
 	public function output_inline_js() {
 		_deprecated_function( 'Woocommerce->output_inline_js', '2.1', 'WC_Inline_Javascript_Helper->output_inline_js' );
-		$helper = $this->get_helper( 'inline-javascript' );
-		$helper->output_inline_js();
+		$this->get_helper( 'inline-javascript' )->output_inline_js();
 	}
 
 	/**
@@ -1367,8 +1364,7 @@ class Woocommerce {
 	 */
 	public function nonce_field( $action, $referer = true , $echo = true ) {
 		_deprecated_function( 'Woocommerce->nonce_field', '2.1', 'WC_Nonce_Helper->nonce_field' );
-		$helper = $this->get_helper( 'nonce' );
-		return $helper->nonce_field( $action, $referer = true , $echo = true );
+		return $this->get_helper( 'nonce' )->nonce_field( $action, $referer, $echo );
 	}
 
 	/**
@@ -1382,8 +1378,7 @@ class Woocommerce {
 	 */
 	public function nonce_url( $action, $url = '' ) {
 		_deprecated_function( 'Woocommerce->nonce_url', '2.1', 'WC_Nonce_Helper->nonce_url' );
-		$helper = $this->get_helper( 'nonce' );
-		return $helper->nonce_url( $action, $url = '' );
+		return $this->get_helper( 'nonce' )->nonce_url( $action, $url );
 	}
 
 	/**
@@ -1401,8 +1396,7 @@ class Woocommerce {
 	 */
 	public function verify_nonce( $action, $method='_POST', $error_message = false ) {
 		_deprecated_function( 'Woocommerce->verify_nonce', '2.1', 'WC_Nonce_Helper->verify_nonce' );
-		$helper = $this->get_helper( 'nonce' );
-		return $helper->verify_nonce( $action, $method, $error_message );
+		return $this->get_helper( 'nonce' )->verify_nonce( $action, $method, $error_message );
 	}
 
 	/**
@@ -1424,8 +1418,7 @@ class Woocommerce {
 		)
 	) {
 		_deprecated_function( 'Woocommerce->shortcode_wrapper', '2.1', 'WC_Shortcode_Helper->shortcode_wrapper' );
-		$helper = $this->get_helper( 'shortcode' );
-		return $helper->shortcode_wrapper( $function, $atts, $wrapper );
+		return $this->get_helper( 'shortcode' )->shortcode_wrapper( $function, $atts, $wrapper );
 	}
 
 	/**
@@ -1437,8 +1430,7 @@ class Woocommerce {
 	 */
 	public function get_attribute_taxonomies() {
 		_deprecated_function( 'Woocommerce->get_attribute_taxonomies', '2.1', 'WC_Attribute_Helper->get_attribute_taxonomies' );
-		$helper = $this->get_helper( 'attribute' );
-		return $helper->get_attribute_taxonomies();
+		return $this->get_helper( 'attribute' )->get_attribute_taxonomies();
 	}
 
 	/**
@@ -1451,8 +1443,7 @@ class Woocommerce {
 	 */
 	public function attribute_taxonomy_name( $name ) {
 		_deprecated_function( 'Woocommerce->attribute_taxonomy_name', '2.1', 'WC_Attribute_Helper->attribute_taxonomy_name' );
-		$helper = $this->get_helper( 'attribute' );
-		return $helper->attribute_taxonomy_name( $name );
+		return $this->get_helper( 'attribute' )->attribute_taxonomy_name( $name );
 	}
 
 	/**
@@ -1465,8 +1456,7 @@ class Woocommerce {
 	 */
 	public function attribute_label( $name ) {
 		_deprecated_function( 'Woocommerce->attribute_label', '2.1', 'WC_Attribute_Helper->attribute_label' );
-		$helper = $this->get_helper( 'attribute' );
-		return $helper->attribute_label( $name );
+		return $this->get_helper( 'attribute' )->attribute_label( $name );
 	}
 
 	/**
@@ -1479,46 +1469,45 @@ class Woocommerce {
 	 */
 	public function attribute_orderby( $name ) {
 		_deprecated_function( 'Woocommerce->attribute_orderby', '2.1', 'WC_Attribute_Helper->attribute_orderby' );
-		$helper = $this->get_helper( 'attribute' );
-		return $helper->attribute_orderby( $name );
+		return $this->get_helper( 'attribute' )->attribute_orderby( $name );
 	}
 
 	/**
 	 * Get an array of product attribute taxonomies.
 	 *
+	 * @deprecated 2.1.0 Access via the helpers
 	 * @access public
 	 * @return array
 	 */
 	public function get_attribute_taxonomy_names() {
 		_deprecated_function( 'Woocommerce->get_attribute_taxonomy_names', '2.1', 'WC_Attribute_Helper->get_attribute_taxonomy_names' );
-		$helper = $this->get_helper( 'attribute' );
-		return $helper->get_attribute_taxonomy_names();
+		return $this->get_helper( 'attribute' )->get_attribute_taxonomy_names();
 	}
 
 	/**
 	 * Get coupon types.
 	 *
+	 * @deprecated 2.1.0 Access via the helpers
 	 * @access public
 	 * @return array
 	 */
 	public function get_coupon_discount_types() {
 		_deprecated_function( 'Woocommerce->get_coupon_discount_types', '2.1', 'WC_Attribute_Helper->get_coupon_discount_types' );
-		$helper = $this->get_helper( 'coupon' );
-		return $helper->get_coupon_discount_types();
+		return $this->get_helper( 'coupon' )->get_coupon_discount_types();
 	}
 
 
 	/**
 	 * Get a coupon type's name.
 	 *
+	 * @deprecated 2.1.0 Access via the helpers
 	 * @access public
 	 * @param string $type (default: '')
 	 * @return string
 	 */
 	public function get_coupon_discount_type( $type = '' ) {
 		_deprecated_function( 'Woocommerce->get_coupon_discount_type', '2.1', 'WC_Attribute_Helper->get_coupon_discount_type' );
-		$helper = $this->get_helper( 'coupon' );
-		return $helper->get_coupon_discount_type( $type );
+		return $this->get_helper( 'coupon' )->get_coupon_discount_type( $type );
 	}
 }
 

@@ -2,7 +2,7 @@
 
 return new WC_Attribute_Helper();
 
-class WC_Attribute_Helper {
+class WC_Attribute_Helper extends WC_Helper {
 	/**
 	 * Get attribute taxonomies.
 	 *
