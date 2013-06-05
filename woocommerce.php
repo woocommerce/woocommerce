@@ -1216,39 +1216,6 @@ class Woocommerce {
 		return apply_filters( 'woocommerce_redirect', $location );
 	}
 
-	/** Coupon Helpers ********************************************************/
-
-	/**
-	 * Get coupon types.
-	 *
-	 * @access public
-	 * @return array
-	 */
-	public function get_coupon_discount_types() {
-		if ( ! isset( $this->coupon_discount_types ) ) {
-			$this->coupon_discount_types = apply_filters( 'woocommerce_coupon_discount_types', array(
-    			'fixed_cart' 	=> __( 'Cart Discount', 'woocommerce' ),
-    			'percent' 		=> __( 'Cart % Discount', 'woocommerce' ),
-    			'fixed_product'	=> __( 'Product Discount', 'woocommerce' ),
-    			'percent_product'	=> __( 'Product % Discount', 'woocommerce' )
-    		) );
-		}
-		return $this->coupon_discount_types;
-	}
-
-
-	/**
-	 * Get a coupon type's name.
-	 *
-	 * @access public
-	 * @param string $type (default: '')
-	 * @return string
-	 */
-	public function get_coupon_discount_type( $type = '' ) {
-		$types = (array) $this->get_coupon_discount_types();
-		if ( isset( $types[$type] ) ) return $types[$type];
-	}
-
 	/** Body Classes **********************************************************/
 
 	/**
@@ -1526,6 +1493,32 @@ class Woocommerce {
 		_deprecated_function( 'Woocommerce->get_attribute_taxonomy_names', '2.1', 'WC_Attribute_Helper->get_attribute_taxonomy_names' );
 		$helper = $this->get_helper( 'attribute' );
 		return $helper->get_attribute_taxonomy_names();
+	}
+
+	/**
+	 * Get coupon types.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function get_coupon_discount_types() {
+		_deprecated_function( 'Woocommerce->get_coupon_discount_types', '2.1', 'WC_Attribute_Helper->get_coupon_discount_types' );
+		$helper = $this->get_helper( 'coupon' );
+		return $helper->get_coupon_discount_types();
+	}
+
+
+	/**
+	 * Get a coupon type's name.
+	 *
+	 * @access public
+	 * @param string $type (default: '')
+	 * @return string
+	 */
+	public function get_coupon_discount_type( $type = '' ) {
+		_deprecated_function( 'Woocommerce->get_coupon_discount_type', '2.1', 'WC_Attribute_Helper->get_coupon_discount_type' );
+		$helper = $this->get_helper( 'coupon' );
+		return $helper->get_coupon_discount_type( $type );
 	}
 }
 
