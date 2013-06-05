@@ -1342,34 +1342,6 @@ class Woocommerce {
 		if ( isset( $types[$type] ) ) return $types[$type];
 	}
 
-	/**
-	 * Check a nonce and sets woocommerce error in case it is invalid.
-	 *
-	 * To fail silently, set the error_message to an empty string
-	 *
-	 * @access public
-	 * @param string $name the nonce name
-	 * @param string $action then nonce action
-	 * @param string $method the http request method _POST, _GET or _REQUEST
-	 * @param string $error_message custom error message, or false for default message, or an empty string to fail silently
-	 * @return bool
-	 */
-	public function verify_nonce( $action, $method='_POST', $error_message = false ) {
-
-		$name = '_n';
-		$action = 'woocommerce-' . $action;
-
-		if ( $error_message === false ) $error_message = __( 'Action failed. Please refresh the page and retry.', 'woocommerce' );
-
-		if ( ! in_array( $method, array( '_GET', '_POST', '_REQUEST' ) ) ) $method = '_POST';
-
-		if ( isset($_REQUEST[$name] ) && wp_verify_nonce( $_REQUEST[$name], $action ) ) return true;
-
-		if ( $error_message ) $this->add_error( $error_message );
-
-		return false;
-	}
-
 	/** Body Classes **********************************************************/
 
 	/**
@@ -1538,6 +1510,25 @@ class Woocommerce {
 		_deprecated_function( 'Woocommerce->nonce_url', '2.1', 'WC_Nonce_Helper->nonce_url' );
 		$helper = $this->get_helper( 'nonce' );
 		return $helper->nonce_url( $action, $url = '' );
+	}
+
+	/**
+	 * Check a nonce and sets woocommerce error in case it is invalid.
+	 *
+	 * To fail silently, set the error_message to an empty string
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @param string $name the nonce name
+	 * @param string $action then nonce action
+	 * @param string $method the http request method _POST, _GET or _REQUEST
+	 * @param string $error_message custom error message, or false for default message, or an empty string to fail silently
+	 * @return bool
+	 */
+	public function verify_nonce( $action, $method='_POST', $error_message = false ) {
+		_deprecated_function( 'Woocommerce->verify_nonce', '2.1', 'WC_Nonce_Helper->verify_nonce' );
+		$helper = $this->get_helper( 'nonce' );
+		return $helper->verify_nonce( $action, $method, $error_message );
 	}
 
 	/**
