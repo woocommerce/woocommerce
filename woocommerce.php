@@ -105,11 +105,6 @@ class Woocommerce {
 	public $integrations;
 
 	/**
-	 * @var array
-	 */
-	private $_body_classes = array();
-
-	/**
 	 * @var string
 	 */
 	private $_inline_js = '';

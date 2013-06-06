@@ -3,6 +3,8 @@
 return new WC_Body_Class_Helper();
 
 class WC_Body_Class_Helper extends WC_Helper {
+	private $_body_classes = array();
+	
 	/**
 	 * Add a class to the webpage body.
 	 *
