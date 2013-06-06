@@ -50,11 +50,6 @@ class Woocommerce {
 	public $plugin_path;
 
 	/**
-	 * @var string
-	 */
-	public $template_url;
-
-	/**
 	 * @var array
 	 */
 	public $errors = array();
@@ -103,11 +98,6 @@ class Woocommerce {
 	 * @var WC_Integrations
 	 */
 	public $integrations;
-
-	/**
-	 * @var string
-	 */
-	private $_inline_js = '';
 
 
 	/**
@@ -178,16 +168,17 @@ class Woocommerce {
 	 * @return mixed
 	 */
 	public function __get( $key ) {
-
-		if ( 'payment_gateways' == $key ) {
-			return $this->payment_gateways();
+		switch( $key ) {
+			case 'payment_gateways':
+				return $this->payment_gateways();
+			case 'shipping':
+				return $this->shipping();
+			case 'template_url':
+				_deprecated_argument( 'Woocommerce->template_url', '2.1', 'The "template_url" field is moved to the template helper class.' );
+				return $this->get_helper( 'template' )->template_url;
+			default:
+				return false;
 		}
-
-		elseif ( 'shipping' == $key ) {
-			return $this->shipping();
-		}
-
-		return false;
 	}
 
 	/**

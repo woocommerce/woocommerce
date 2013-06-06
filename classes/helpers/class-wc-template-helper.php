@@ -3,6 +3,8 @@
 return new WC_Template_Helper();
 
 class WC_Template_Helper extends WC_Helper {
+	public $template_url;
+	
 	public function __construct() {
 		$this->template_url = apply_filters( 'woocommerce_template_url', 'woocommerce/' );
 	}
