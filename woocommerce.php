@@ -498,8 +498,8 @@ class Woocommerce {
 
 			// Hooks
 			add_action( 'get_header', array( $this, 'init_checkout' ) );
-			add_filter( 'template_include', array( $this, 'template_loader' ) );
-			add_filter( 'comments_template', array( $this, 'comments_template_loader' ) );
+			add_filter( 'template_include', array( $this->get_helper( 'template' ), 'template_loader' ) );
+			add_filter( 'comments_template', array( $this->get_helper( 'template' ), 'comments_template_loader' ) );
 			add_filter( 'wp_redirect', array( $this, 'redirect' ), 1, 2 );
 			add_action( 'wp_enqueue_scripts', array( $this, 'frontend_scripts' ) );
 			add_action( 'wp_print_scripts', array( $this, 'check_jquery' ), 25 );
@@ -576,81 +576,6 @@ class Woocommerce {
 		else
 			load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . "/i18n/languages" );
 	}
-
-
-	/**
-	 * Load a template.
-	 *
-	 * Handles template usage so that we can use our own templates instead of the themes.
-	 *
-	 * Templates are in the 'templates' folder. woocommerce looks for theme
-	 * overrides in /theme/woocommerce/ by default
-	 *
-	 * For beginners, it also looks for a woocommerce.php template first. If the user adds
-	 * this to the theme (containing a woocommerce() inside) this will be used for all
-	 * woocommerce templates.
-	 *
-	 * @access public
-	 * @param mixed $template
-	 * @return string
-	 */
-	public function template_loader( $template ) {
-
-		$find = array( 'woocommerce.php' );
-		$file = '';
-
-		if ( is_single() && get_post_type() == 'product' ) {
-
-			$file 	= 'single-product.php';
-			$find[] = $file;
-			$find[] = $this->template_url . $file;
-
-		} elseif ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
-
-			$term = get_queried_object();
-
-			$file 		= 'taxonomy-' . $term->taxonomy . '.php';
-			$find[] 	= 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
-			$find[] 	= $this->template_url . 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
-			$find[] 	= $file;
-			$find[] 	= $this->template_url . $file;
-
-		} elseif ( is_post_type_archive( 'product' ) || is_page( woocommerce_get_page_id( 'shop' ) ) ) {
-
-			$file 	= 'archive-product.php';
-			$find[] = $file;
-			$find[] = $this->template_url . $file;
-
-		}
-
-		if ( $file ) {
-			$template = locate_template( $find );
-			if ( ! $template ) $template = $this->plugin_path() . '/templates/' . $file;
-		}
-
-		return $template;
-	}
-
-
-	/**
-	 * comments_template_loader function.
-	 *
-	 * @access public
-	 * @param mixed $template
-	 * @return string
-	 */
-	public function comments_template_loader( $template ) {
-		if ( get_post_type() !== 'product' )
-			return $template;
-
-		if ( file_exists( STYLESHEETPATH . '/' . $this->template_url . 'single-product-reviews.php' ))
-			return STYLESHEETPATH . '/' . $this->template_url . 'single-product-reviews.php';
-		elseif ( file_exists( TEMPLATEPATH . '/' . $this->template_url . 'single-product-reviews.php' ))
-			return TEMPLATEPATH . '/' . $this->template_url . 'single-product-reviews.php';
-		else
-			return $this->plugin_path() . '/templates/single-product-reviews.php';
-	}
-
 
 	/**
 	 * Register WC environment globals.
@@ -1454,6 +1379,33 @@ class Woocommerce {
 	public function output_body_class( $classes ) {
 		_deprecated_function( 'Woocommerce->output_body_class', '2.1', 'WC_Body_Class_Helper->output_body_class' );
 		return $this->get_helper( 'body-class' )->output_body_class( $classes );
+	}
+
+	/**
+	 * Load a template.
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @param mixed $template
+	 * @return string
+	 */
+	public function template_loader( $template ) {
+		_deprecated_function( 'Woocommerce->template_loader', '2.1', 'WC_Template_Helper->template_loader' );
+		return $this->get_helper( 'template' )->template_loader( $template );
+	}
+
+
+	/**
+	 * comments_template_loader function.
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @param mixed $template
+	 * @return string
+	 */
+	public function comments_template_loader( $template ) {
+		_deprecated_function( 'Woocommerce->comments_template_loader', '2.1', 'WC_Template_Helper->comments_template_loader' );
+		return $this->get_helper( 'template' )->comments_template_loader( $template );
 	}
 }
 
