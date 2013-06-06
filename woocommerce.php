@@ -473,7 +473,7 @@ class Woocommerce {
 			$this->shortcodes		= new WC_Shortcodes();			// Shortcodes class, controls all frontend shortcodes
 
 			// Load messages
-			$this->load_messages();
+			$this->get_helper( 'messages' )->load_messages();
 
 			// Hooks
 			add_action( 'get_header', array( $this, 'init_checkout' ) );
@@ -874,7 +874,7 @@ class Woocommerce {
 	 * @return string
 	 */
 	public function redirect( $location, $status ) {
-		$this->set_messages();
+		$this->get_helper( 'messages' )->set_messages();
 
 		return apply_filters( 'woocommerce_redirect', $location );
 	}
