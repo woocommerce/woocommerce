@@ -5,7 +5,7 @@
  *
  * Contains the main functions for WooCommerce, stores variables, and handles error messages
  *
- * @class Woocommerce
+ * @class WooCommerce
  * @version	2.0.0
  * @since 1.4
  * @package	WooCommerce
