@@ -74,49 +74,6 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 	}
 }
 
-if ( ! function_exists( 'woocommerce_single_product_content' ) ) {
-
-	/**
-	 * woocommerce_single_product_content function.
-	 *
-	 * @access public
-	 * @return void
-	 * @deprecated 1.6
-	 */
-	function woocommerce_single_product_content() {
-		_deprecated_function( __FUNCTION__, '1.6' );
-		woocommerce_content();
-	}
-}
-if ( ! function_exists( 'woocommerce_archive_product_content' ) ) {
-
-	/**
-	 * woocommerce_archive_product_content function.
-	 *
-	 * @access public
-	 * @return void
-	 * @deprecated 1.6
-	 */
-	function woocommerce_archive_product_content() {
-		_deprecated_function( __FUNCTION__, '1.6' );
-		woocommerce_content();
-	}
-}
-if ( ! function_exists( 'woocommerce_product_taxonomy_content' ) ) {
-
-	/**
-	 * woocommerce_product_taxonomy_content function.
-	 *
-	 * @access public
-	 * @return void
-	 * @deprecated 1.6
-	 */
-	function woocommerce_product_taxonomy_content() {
-		_deprecated_function( __FUNCTION__, '1.6' );
-		woocommerce_content();
-	}
-}
-
 /** Global ****************************************************************/
 
 if ( ! function_exists( 'woocommerce_output_content_wrapper' ) ) {

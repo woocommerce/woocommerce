@@ -1221,43 +1221,6 @@ class Woocommerce {
 	/** Deprecated functions *********************************************************/
 
 	/**
-	 * Sets a constant preventing some caching plugins from caching a page. Used on dynamic pages.
-	 *
-	 * @deprecated 2.0.0 No longer needed - Cache Helper class sets up nocache automatically.
-	 * @access public
-	 * @return void
-	 */
-	public function nocache() {
-		_deprecated_function( 'Woocommerce::nocache', '2.0.6' );
-	}
-
-	/**
-	 * mfunc_wrapper function.
-	 *
-	 * Wraps a function in mfunc to keep it dynamic.
-	 *
-	 * If running WP Super Cache this checks for late_init (because functions calling this require WP to be loaded)
-	 *
-	 * @deprecated 2.0.0 No longer needed - cart fragments are cache friendly.
-	 * @access public
-	 * @param mixed $function
-	 * @return void
-	 */
-	public function mfunc_wrapper( $mfunction, $function, $args ) {
-		global $wp_super_cache_late_init;
-
-		_deprecated_function( 'Woocommerce::mfunc_wrapper', '2.0.0' );
-
-		if ( is_null( $wp_super_cache_late_init ) || $wp_super_cache_late_init == 1 ) {
-			echo '<!--mfunc ' . $mfunction . ' -->';
-			$function( $args );
-			echo '<!--/mfunc-->';
-		} else {
-			$function( $args );
-		}
-	}
-
-	/**
 	 * Clear all transients cache for product data.
 	 *
 	 * @deprecated 2.1.0 Access via the helpers

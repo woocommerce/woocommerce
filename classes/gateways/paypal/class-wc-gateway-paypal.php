@@ -781,12 +781,4 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
         return $order;
 	}
-
-}
-
-class WC_Paypal extends WC_Gateway_Paypal {
-	public function __construct() {
-		_deprecated_function( 'WC_Paypal', '1.4', 'WC_Gateway_Paypal' );
-		parent::__construct();
-	}
 }
