@@ -1007,293 +1007,129 @@ class Woocommerce {
 
 	/** Deprecated functions *********************************************************/
 
-	/**
-	 * Clear all transients cache for product data.
-	 *
-	 * @deprecated 2.1.0 Access via the helpers
-	 * @access public
-	 * @param int $post_id (default: 0)
-	 * @return void
-	 */
+	// Deprecated 2.1.0 Access via the WC_Transient_Helper helper
 	public function clear_product_transients( $post_id = 0 ) {
 		_deprecated_function( 'Woocommerce->clear_product_transients', '2.1', 'WC_Transient_Helper->clear_product_transients' );
 		$this->get_helper( 'transient' )->clear_product_transients( $post_id );
 	}
 
-	/**
-	 * Add some JavaScript inline to be output in the footer.
-	 *
-	 * @deprecated 2.1.0 Access via the helpers
-	 * @access public
-	 * @param string $code
-	 * @return void
-	 */
+	// Deprecated 2.1.0 Access via the WC_Inline_Javascript_Helper helper
 	public function add_inline_js( $code ) {
 		_deprecated_function( 'Woocommerce->add_inline_js', '2.1', 'WC_Inline_Javascript_Helper->add_inline_js' );
 		$this->get_helper( 'inline-javascript' )->add_inline_js( $code );
 	}
 
-	/**
-	 * Output any queued inline JS.
-	 *
-	 * @deprecated 2.1.0 Access via the helpers
-	 * @access public
-	 * @return void
-	 */
+	// Deprecated 2.1.0 Access via the WC_Inline_Javascript_Helper helper
 	public function output_inline_js() {
 		_deprecated_function( 'Woocommerce->output_inline_js', '2.1', 'WC_Inline_Javascript_Helper->output_inline_js' );
 		$this->get_helper( 'inline-javascript' )->output_inline_js();
 	}
 
-	/**
-	 * Return a nonce field.
-	 *
-	 * @deprecated 2.1.0 Access via the helpers
-	 * @access public
-	 * @param mixed $action
-	 * @param bool $referer (default: true)
-	 * @param bool $echo (default: true)
-	 * @return void
-	 */
+	// Deprecated 2.1.0 Access via the WC_Nonce_Helper helper
 	public function nonce_field( $action, $referer = true , $echo = true ) {
 		_deprecated_function( 'Woocommerce->nonce_field', '2.1', 'WC_Nonce_Helper->nonce_field' );
 		return $this->get_helper( 'nonce' )->nonce_field( $action, $referer, $echo );
 	}
 
-	/**
-	 * Return a url with a nonce appended.
-	 *
-	 * @deprecated 2.1.0 Access via the helpers
-	 * @access public
-	 * @param mixed $action
-	 * @param string $url (default: '')
-	 * @return string
-	 */
+	// Deprecated 2.1.0 Access via the WC_Nonce_Helper helper
 	public function nonce_url( $action, $url = '' ) {
 		_deprecated_function( 'Woocommerce->nonce_url', '2.1', 'WC_Nonce_Helper->nonce_url' );
 		return $this->get_helper( 'nonce' )->nonce_url( $action, $url );
 	}
 
-	/**
-	 * Check a nonce and sets woocommerce error in case it is invalid.
-	 *
-	 * To fail silently, set the error_message to an empty string
-	 *
-	 * @deprecated 2.1.0 Access via the helpers
-	 * @access public
-	 * @param string $name the nonce name
-	 * @param string $action then nonce action
-	 * @param string $method the http request method _POST, _GET or _REQUEST
-	 * @param string $error_message custom error message, or false for default message, or an empty string to fail silently
-	 * @return bool
-	 */
+	// Deprecated 2.1.0 Access via the WC_Nonce_Helper helper
 	public function verify_nonce( $action, $method='_POST', $error_message = false ) {
 		_deprecated_function( 'Woocommerce->verify_nonce', '2.1', 'WC_Nonce_Helper->verify_nonce' );
 		return $this->get_helper( 'nonce' )->verify_nonce( $action, $method, $error_message );
 	}
 
-	/**
-	 * Shortcode Wrapper
-	 *
-	 * @deprecated 2.1.0 Access via the helpers
-	 * @access public
-	 * @param mixed $function
-	 * @param array $atts (default: array())
-	 * @return string
-	 */
-	public function shortcode_wrapper(
-		$function,
-		$atts = array(),
-		$wrapper = array(
-			'class' => 'woocommerce',
-			'before' => null,
-			'after' => null
-		)
-	) {
+	// Deprecated 2.1.0 Access via the WC_Shortcode_Helper helper
+	public function shortcode_wrapper( $function, $atts = array(), $wrapper = array( 'class' => 'woocommerce', 'before' => null, 'after' => null ) ) {
 		_deprecated_function( 'Woocommerce->shortcode_wrapper', '2.1', 'WC_Shortcode_Helper->shortcode_wrapper' );
 		return $this->get_helper( 'shortcode' )->shortcode_wrapper( $function, $atts, $wrapper );
 	}
 
-	/**
-	 * Get attribute taxonomies.
-	 *
-	 * @deprecated 2.1.0 Access via the helpers
-	 * @access public
-	 * @return object
-	 */
+	// Deprecated 2.1.0 Access via the WC_Attribute_Helper helper
 	public function get_attribute_taxonomies() {
 		_deprecated_function( 'Woocommerce->get_attribute_taxonomies', '2.1', 'WC_Attribute_Helper->get_attribute_taxonomies' );
 		return $this->get_helper( 'attribute' )->get_attribute_taxonomies();
 	}
 
-	/**
-	 * Get a product attributes name.
-	 *
-	 * @deprecated 2.1.0 Access via the helpers
-	 * @access public
-	 * @param mixed $name
-	 * @return string
-	 */
+	// Deprecated 2.1.0 Access via the WC_Attribute_Helper helper
 	public function attribute_taxonomy_name( $name ) {
 		_deprecated_function( 'Woocommerce->attribute_taxonomy_name', '2.1', 'WC_Attribute_Helper->attribute_taxonomy_name' );
 		return $this->get_helper( 'attribute' )->attribute_taxonomy_name( $name );
 	}
 
-	/**
-	 * Get a product attributes label.
-	 *
-	 * @deprecated 2.1.0 Access via the helpers
-	 * @access public
-	 * @param mixed $name
-	 * @return string
-	 */
+	// Deprecated 2.1.0 Access via the WC_Attribute_Helper helper
 	public function attribute_label( $name ) {
 		_deprecated_function( 'Woocommerce->attribute_label', '2.1', 'WC_Attribute_Helper->attribute_label' );
 		return $this->get_helper( 'attribute' )->attribute_label( $name );
 	}
 
-	/**
-	 * Get a product attributes orderby setting.
-	 *
-	 * @deprecated 2.1.0 Access via the helpers
-	 * @access public
-	 * @param mixed $name
-	 * @return string
-	 */
+	// Deprecated 2.1.0 Access via the WC_Attribute_Helper helper
 	public function attribute_orderby( $name ) {
 		_deprecated_function( 'Woocommerce->attribute_orderby', '2.1', 'WC_Attribute_Helper->attribute_orderby' );
 		return $this->get_helper( 'attribute' )->attribute_orderby( $name );
 	}
 
-	/**
-	 * Get an array of product attribute taxonomies.
-	 *
-	 * @deprecated 2.1.0 Access via the helpers
-	 * @access public
-	 * @return array
-	 */
+	// Deprecated 2.1.0 Access via the WC_Attribute_Helper helper
 	public function get_attribute_taxonomy_names() {
 		_deprecated_function( 'Woocommerce->get_attribute_taxonomy_names', '2.1', 'WC_Attribute_Helper->get_attribute_taxonomy_names' );
 		return $this->get_helper( 'attribute' )->get_attribute_taxonomy_names();
 	}
 
-	/**
-	 * Get coupon types.
-	 *
-	 * @deprecated 2.1.0 Access via the helpers
-	 * @access public
-	 * @return array
-	 */
+	// Deprecated 2.1.0 Access via the WC_Coupon_Helper helper
 	public function get_coupon_discount_types() {
 		_deprecated_function( 'Woocommerce->get_coupon_discount_types', '2.1', 'WC_Coupon_Helper->get_coupon_discount_types' );
 		return $this->get_helper( 'coupon' )->get_coupon_discount_types();
 	}
 
-
-	/**
-	 * Get a coupon type's name.
-	 *
-	 * @deprecated 2.1.0 Access via the helpers
-	 * @access public
-	 * @param string $type (default: '')
-	 * @return string
-	 */
+	// Deprecated 2.1.0 Access via the WC_Coupon_Helper helper
 	public function get_coupon_discount_type( $type = '' ) {
 		_deprecated_function( 'Woocommerce->get_coupon_discount_type', '2.1', 'WC_Coupon_Helper->get_coupon_discount_type' );
 		return $this->get_helper( 'coupon' )->get_coupon_discount_type( $type );
 	}
 
-	/**
-	 * Adds extra post classes for products
-	 *
-	 * @deprecated 2.1.0 Access via the helpers
-	 * @since 2.0
-	 * @access public
-	 * @param array $classes
-	 * @param string|array $class
-	 * @param int $post_id
-	 * @return array
-	 */
+	// Deprecated 2.1.0 Access via the WC_Post_Class_Helper helper
 	public function post_class( $classes, $class, $post_id ) {
 		_deprecated_function( 'Woocommerce->post_class', '2.1', 'WC_Post_Class_Helper->post_class' );
 		return $this->get_helper( 'post-class' )->post_class( $classes, $class, $post_id );
 	}
 
-	/**
-	 * Add a class to the webpage body.
-	 *
-	 * @access public
-	 * @param string $class
-	 * @return void
-	 */
+	// Deprecated 2.1.0 Access via the WC_Body_Class_Helper helper
 	public function add_body_class( $class ) {
 		_deprecated_function( 'Woocommerce->add_body_class', '2.1', 'WC_Body_Class_Helper->add_body_class' );
 		$this->get_helper( 'body-class' )->add_body_class( $class );
 	}
 
-	/**
-	 * Output classes on the body tag.
-	 *
-	 * @access public
-	 * @param mixed $classes
-	 * @return array
-	 */
+	// Deprecated 2.1.0 Access via the WC_Body_Class_Helper helper
 	public function output_body_class( $classes ) {
 		_deprecated_function( 'Woocommerce->output_body_class', '2.1', 'WC_Body_Class_Helper->output_body_class' );
 		return $this->get_helper( 'body-class' )->output_body_class( $classes );
 	}
 
-	/**
-	 * Load a template.
-	 *
-	 * @deprecated 2.1.0 Access via the helpers
-	 * @access public
-	 * @param mixed $template
-	 * @return string
-	 */
+	// Deprecated 2.1.0 Access via the WC_Template_Helper helper
 	public function template_loader( $template ) {
 		_deprecated_function( 'Woocommerce->template_loader', '2.1', 'WC_Template_Helper->template_loader' );
 		return $this->get_helper( 'template' )->template_loader( $template );
 	}
 
-
-	/**
-	 * comments_template_loader function.
-	 *
-	 * @deprecated 2.1.0 Access via the helpers
-	 * @access public
-	 * @param mixed $template
-	 * @return string
-	 */
+	// Deprecated 2.1.0 Access via the WC_Template_Helper helper
 	public function comments_template_loader( $template ) {
 		_deprecated_function( 'Woocommerce->comments_template_loader', '2.1', 'WC_Template_Helper->comments_template_loader' );
 		return $this->get_helper( 'template' )->comments_template_loader( $template );
 	}
 
-	/**
-	 * Register/queue frontend scripts.
-	 *
-	 * @deprecated 2.1.0 Access via the helpers
-	 * @access public
-	 * @return void
-	 */
+	// Deprecated 2.1.0 Access via the WC_Frontend_Scripts_Helper helper
 	public function frontend_scripts() {
-		_deprecated_function( 'Woocommerce->frontend_scripts', '2.1', 'WC_Template_Helper->load_scripts' );
+		_deprecated_function( 'Woocommerce->frontend_scripts', '2.1', 'WC_Frontend_Scripts_Helper->load_scripts' );
 		$this->get_helper( 'frontend-scripts' )->load_scripts();
 	}
 
-	/**
-	 * WC requires jQuery 1.7 since it uses functions like .on() for events.
-	 * If, by the time wp_print_scrips is called, jQuery is outdated (i.e not
-	 * using the version in core) we need to deregister it and register the
-	 * core version of the file.
-	 *
-	 * @deprecated 2.1.0 Access via the helpers
-	 * @access public
-	 * @return void
-	 */
+	// Deprecated 2.1.0 Access via the WC_Frontend_Scripts_Helper helper
 	public function check_jquery() {
-		_deprecated_function( 'Woocommerce->check_jquery', '2.1', 'WC_Template_Helper->check_jquery' );
+		_deprecated_function( 'Woocommerce->check_jquery', '2.1', 'WC_Frontend_Scripts_Helper->check_jquery' );
 		$this->get_helper( 'frontend-scripts' )->check_jquery();
 	}
 }
