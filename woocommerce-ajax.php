@@ -62,10 +62,10 @@ function woocommerce_ajax_apply_coupon() {
 	if ( ! empty( $_POST['coupon_code'] ) ) {
 		$woocommerce->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
 	} else {
-		$woocommerce->add_error( WC_Coupon::get_generic_coupon_error( WC_Coupon::E_WC_COUPON_PLEASE_ENTER ) );
+		$woocommerce->get_helper( 'messages' )->add_error( WC_Coupon::get_generic_coupon_error( WC_Coupon::E_WC_COUPON_PLEASE_ENTER ) );
 	}
 
-	$woocommerce->show_messages();
+	$woocommerce->get_helper( 'messages' )->show_messages();
 
 	die();
 }
@@ -191,7 +191,7 @@ function woocommerce_ajax_add_to_cart() {
 
 		if ( get_option( 'woocommerce_cart_redirect_after_add' ) == 'yes' ) {
 			woocommerce_add_to_cart_message( $product_id );
-			$woocommerce->set_messages();
+			$woocommerce->get_helper( 'messages' )->set_messages();
 		}
 
 		// Return fragments
@@ -207,7 +207,7 @@ function woocommerce_ajax_add_to_cart() {
 			'product_url' => apply_filters( 'woocommerce_cart_redirect_after_error', get_permalink( $product_id ), $product_id )
 		);
 
-		$woocommerce->set_messages();
+		$woocommerce->get_helper( 'messages' )->set_messages();
 
 		echo json_encode( $data );
 	}

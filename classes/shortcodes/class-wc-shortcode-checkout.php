@@ -72,7 +72,7 @@ class WC_Shortcode_Checkout {
 
 		do_action( 'before_woocommerce_pay' );
 
-		$woocommerce->show_messages();
+		$woocommerce->get_helper( 'messages' )->show_messages();
 
 		$order_id = absint( $order_id );
 
@@ -100,13 +100,13 @@ class WC_Shortcode_Checkout {
 
 			} elseif ( ! in_array( $order->status, $valid_order_statuses ) ) {
 
-				$woocommerce->add_error( __( 'Your order has already been paid for. Please contact us if you need assistance.', 'woocommerce' ) );
-				$woocommerce->show_messages();
+				$woocommerce->get_helper( 'messages' )->add_error( __( 'Your order has already been paid for. Please contact us if you need assistance.', 'woocommerce' ) );
+				$woocommerce->get_helper( 'messages' )->show_messages();
 
 			} else {
 
-				$woocommerce->add_error( __( 'Invalid order.', 'woocommerce' ) );
-				$woocommerce->show_messages();
+				$woocommerce->get_helper( 'messages' )->add_error( __( 'Invalid order.', 'woocommerce' ) );
+				$woocommerce->get_helper( 'messages' )->show_messages();
 
 			}
 
@@ -150,15 +150,15 @@ class WC_Shortcode_Checkout {
 
 			} elseif ( ! in_array( $order->status, $valid_order_statuses ) ) {
 
-				$woocommerce->add_error( __( 'Your order has already been paid for. Please contact us if you need assistance.', 'woocommerce' ) );
-				$woocommerce->show_messages();
+				$woocommerce->get_helper( 'messages' )->add_error( __( 'Your order has already been paid for. Please contact us if you need assistance.', 'woocommerce' ) );
+				$woocommerce->get_helper( 'messages' )->show_messages();
 
 			}
 
 		} else {
 
-			$woocommerce->add_error( __( 'Invalid order.', 'woocommerce' ) );
-			$woocommerce->show_messages();
+			$woocommerce->get_helper( 'messages' )->add_error( __( 'Invalid order.', 'woocommerce' ) );
+			$woocommerce->get_helper( 'messages' )->show_messages();
 
 		}
 
@@ -171,7 +171,7 @@ class WC_Shortcode_Checkout {
 	private function order_received( $order_id = 0 ) {
 		global $woocommerce;
 
-		$woocommerce->show_messages();
+		$woocommerce->get_helper( 'messages' )->show_messages();
 
 		$order = false;
 
@@ -198,7 +198,7 @@ class WC_Shortcode_Checkout {
 		global $woocommerce;
 
 		// Show non-cart errors
-		$woocommerce->show_messages();
+		$woocommerce->get_helper( 'messages' )->show_messages();
 
 		// Check cart has contents
 		if ( sizeof( $woocommerce->cart->get_cart() ) == 0 )
@@ -213,7 +213,7 @@ class WC_Shortcode_Checkout {
 		// Get checkout object
 		$checkout = $woocommerce->checkout();
 
-		if ( empty( $_POST ) && $woocommerce->error_count() > 0 ) {
+		if ( empty( $_POST ) && $woocommerce->get_helper( 'messages' )->error_count() > 0 ) {
 
 			woocommerce_get_template( 'checkout/cart-errors.php', array( 'checkout' => $checkout ) );
 
@@ -221,8 +221,8 @@ class WC_Shortcode_Checkout {
 
 			$non_js_checkout = ! empty( $_POST['woocommerce_checkout_update_totals'] ) ? true : false;
 
-			if ( $woocommerce->error_count() == 0 && $non_js_checkout )
-				$woocommerce->add_message( __( 'The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page.', 'woocommerce' ) );
+			if ( $woocommerce->get_helper( 'messages' )->error_count() == 0 && $non_js_checkout )
+				$woocommerce->get_helper( 'messages' )->add_message( __( 'The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page.', 'woocommerce' ) );
 
 			woocommerce_get_template( 'checkout/form-checkout.php', array( 'checkout' => $checkout ) );
 

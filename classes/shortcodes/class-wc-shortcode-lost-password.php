@@ -75,22 +75,22 @@ class WC_Shortcode_Lost_Password {
 				$woocommerce->get_helper( 'nonce' )->verify_nonce( 'reset_password' );
 
 				if( empty( $_POST['password_1'] ) || empty( $_POST['password_2'] ) ) {
-					$woocommerce->add_error( __( 'Please enter your password.', 'woocommerce' ) );
+					$woocommerce->get_helper( 'messages' )->add_error( __( 'Please enter your password.', 'woocommerce' ) );
 					$args['form'] = 'reset_password';
 				}
 
 				if( $_POST[ 'password_1' ] !== $_POST[ 'password_2' ] ) {
-					$woocommerce->add_error( __( 'Passwords do not match.', 'woocommerce' ) );
+					$woocommerce->get_helper( 'messages' )->add_error( __( 'Passwords do not match.', 'woocommerce' ) );
 					$args['form'] = 'reset_password';
 				}
 
-				if( 0 == $woocommerce->error_count() && ( $_POST['password_1'] == $_POST['password_2'] ) ) {
+				if( 0 == $woocommerce->get_helper( 'messages' )->error_count() && ( $_POST['password_1'] == $_POST['password_2'] ) ) {
 
 					self::reset_password( $user, esc_attr( $_POST['password_1'] ) );
 
 					do_action( 'woocommerce_customer_reset_password', $user );
 
-					$woocommerce->add_message( __( 'Your password has been reset.', 'woocommerce' ) . ' <a href="' . get_permalink( woocommerce_get_page_id( 'myaccount' ) ) . '">' . __( 'Log in', 'woocommerce' ) . '</a>' );
+					$woocommerce->get_helper( 'messages' )->add_message( __( 'Your password has been reset.', 'woocommerce' ) . ' <a href="' . get_permalink( woocommerce_get_page_id( 'myaccount' ) ) . '">' . __( 'Log in', 'woocommerce' ) . '</a>' );
 				}
 			}
 
@@ -111,14 +111,14 @@ class WC_Shortcode_Lost_Password {
 
 		if ( empty( $_POST['user_login'] ) ) {
 
-			$woocommerce->add_error( __( 'Enter a username or e-mail address.', 'woocommerce' ) );
+			$woocommerce->get_helper( 'messages' )->add_error( __( 'Enter a username or e-mail address.', 'woocommerce' ) );
 
 		} elseif ( strpos( $_POST['user_login'], '@' ) ) {
 
 			$user_data = get_user_by( 'email', trim( $_POST['user_login'] ) );
 
 			if ( empty( $user_data ) )
-				$woocommerce->add_error( __( 'There is no user registered with that email address.', 'woocommerce' ) );
+				$woocommerce->get_helper( 'messages' )->add_error( __( 'There is no user registered with that email address.', 'woocommerce' ) );
 
 		} else {
 
@@ -129,11 +129,11 @@ class WC_Shortcode_Lost_Password {
 
 		do_action('lostpassword_post');
 
-		if( $woocommerce->error_count() > 0 )
+		if( $woocommerce->get_helper( 'messages' )->error_count() > 0 )
 			return false;
 
 		if ( ! $user_data ) {
-			$woocommerce->add_error( __( 'Invalid username or e-mail.', 'woocommerce' ) );
+			$woocommerce->get_helper( 'messages' )->add_error( __( 'Invalid username or e-mail.', 'woocommerce' ) );
 			return false;
 		}
 
@@ -147,13 +147,13 @@ class WC_Shortcode_Lost_Password {
 
 		if ( ! $allow ) {
 
-			$woocommerce->add_error( __( 'Password reset is not allowed for this user' ) );
+			$woocommerce->get_helper( 'messages' )->add_error( __( 'Password reset is not allowed for this user' ) );
 
 			return false;
 
 		} elseif ( is_wp_error( $allow ) ) {
 
-			$woocommerce->add_error( $allow->get_error_message );
+			$woocommerce->get_helper( 'messages' )->add_error( $allow->get_error_message );
 
 			return false;
 		}
@@ -175,7 +175,7 @@ class WC_Shortcode_Lost_Password {
 		$mailer = $woocommerce->mailer();
 		do_action( 'woocommerce_reset_password_notification', $user_login, $key );
 
-		$woocommerce->add_message( __( 'Check your e-mail for the confirmation link.' ) );
+		$woocommerce->get_helper( 'messages' )->add_message( __( 'Check your e-mail for the confirmation link.' ) );
 		return true;
 	}
 
@@ -195,19 +195,19 @@ class WC_Shortcode_Lost_Password {
 		$key = preg_replace( '/[^a-z0-9]/i', '', $key );
 
 		if ( empty( $key ) || ! is_string( $key ) ) {
-			$woocommerce->add_error( __( 'Invalid key', 'woocommerce' ) );
+			$woocommerce->get_helper( 'messages' )->add_error( __( 'Invalid key', 'woocommerce' ) );
 			return false;
 		}
 
 		if ( empty( $login ) || ! is_string( $login ) ) {
-			$woocommerce->add_error( __( 'Invalid key', 'woocommerce' ) );
+			$woocommerce->get_helper( 'messages' )->add_error( __( 'Invalid key', 'woocommerce' ) );
 			return false;
 		}
 
 		$user = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->users WHERE user_activation_key = %s AND user_login = %s", $key, $login ) );
 
 		if ( empty( $user ) ) {
-			$woocommerce->add_error( __( 'Invalid key', 'woocommerce' ) );
+			$woocommerce->get_helper( 'messages' )->add_error( __( 'Invalid key', 'woocommerce' ) );
 			return false;
 		}
 

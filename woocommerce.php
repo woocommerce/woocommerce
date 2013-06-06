@@ -40,16 +40,6 @@ class Woocommerce {
 	public $version = '2.1-bleeding';
 
 	/**
-	 * @var array
-	 */
-	public $errors = array();
-
-	/**
-	 * @var array
-	 */
-	public $messages = array();
-
-	/**
 	 * @var WC_Query
 	 */
 	public $query;
@@ -173,6 +163,12 @@ class Woocommerce {
 			case 'plugin_path':
 				_deprecated_argument( 'Woocommerce->plugin_path', '2.1', 'The "plugin_path" field is removed, please use the Woocommerce->plugin_path() function.' );
 				return $this->plugin_path();
+			case 'messages':
+				_deprecated_argument( 'Woocommerce->messages', '2.1', 'The "messages" field is moved to the messages helper class.' );
+				return $this->get_helper( 'messages' )->messages;
+			case 'errors':
+				_deprecated_argument( 'Woocommerce->errors', '2.1', 'The "errors" field is moved to the messages helper class.' );
+				return $this->get_helper( 'messages' )->errors;
 			default:
 				return false;
 		}
@@ -869,128 +865,6 @@ class Woocommerce {
 		return apply_filters( 'woocommerce_get_image_size_' . $image_size, $size );
 	}
 
-	/** Messages ****************************************************************/
-
-	/**
-	 * Load Messages.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function load_messages() {
-		$this->errors = $this->session->errors;
-		$this->messages = $this->session->messages;
-		unset( $this->session->errors, $this->session->messages );
-
-		// Load errors from querystring
-		if ( isset( $_GET['wc_error'] ) )
-			$this->add_error( esc_attr( $_GET['wc_error'] ) );
-	}
-
-
-	/**
-	 * Add an error.
-	 *
-	 * @access public
-	 * @param string $error
-	 * @return void
-	 */
-	public function add_error( $error ) {
-		$this->errors[] = apply_filters( 'woocommerce_add_error', $error );
-	}
-
-
-	/**
-	 * Add a message.
-	 *
-	 * @access public
-	 * @param string $message
-	 * @return void
-	 */
-	public function add_message( $message ) {
-		$this->messages[] = apply_filters( 'woocommerce_add_message', $message );
-	}
-
-
-	/**
-	 * Clear messages and errors from the session data.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function clear_messages() {
-		$this->errors = $this->messages = array();
-		unset( $this->session->errors, $this->session->messages );
-	}
-
-
-	/**
-	 * error_count function.
-	 *
-	 * @access public
-	 * @return int
-	 */
-	public function error_count() {
-		return sizeof( $this->errors );
-	}
-
-
-	/**
-	 * Get message count.
-	 *
-	 * @access public
-	 * @return int
-	 */
-	public function message_count() {
-		return sizeof( $this->messages );
-	}
-
-
-	/**
-	 * Get errors.
-	 *
-	 * @access public
-	 * @return array
-	 */
-	public function get_errors() {
-		return (array) $this->errors;
-	}
-
-
-	/**
-	 * Get messages.
-	 *
-	 * @access public
-	 * @return array
-	 */
-	public function get_messages() {
-		return (array) $this->messages;
-	}
-
-
-	/**
-	 * Output the errors and messages.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function show_messages() {
-		woocommerce_show_messages();
-	}
-
-
-	/**
-	 * Set session data for messages.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function set_messages() {
-		$this->session->errors = $this->errors;
-		$this->session->messages = $this->messages;
-	}
-
-
 	/**
 	 * Redirection hook which stores messages into session data.
 	 *
@@ -1131,6 +1005,66 @@ class Woocommerce {
 	public function check_jquery() {
 		_deprecated_function( 'Woocommerce->check_jquery', '2.1', 'WC_Frontend_Scripts_Helper->check_jquery' );
 		$this->get_helper( 'frontend-scripts' )->check_jquery();
+	}
+
+	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	public function load_messages() {
+		_deprecated_function( 'Woocommerce->load_messages', '2.1', 'WC_Messages_Helper->load_messages' );
+		$this->get_helper( 'messages' )->load_messages();
+	}
+
+	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	public function add_error( $error ) {
+		_deprecated_function( 'Woocommerce->add_error', '2.1', 'WC_Messages_Helper->add_error' );
+		$this->get_helper( 'messages' )->add_error( $error );
+	}
+
+	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	public function add_message( $message ) {
+		_deprecated_function( 'Woocommerce->add_message', '2.1', 'WC_Messages_Helper->add_message' );
+		$this->get_helper( 'messages' )->add_message( $message );
+	}
+
+	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	public function clear_messages() {
+		_deprecated_function( 'Woocommerce->clear_messages', '2.1', 'WC_Messages_Helper->clear_messages' );
+		$this->get_helper( 'messages' )->clear_messages();
+	}
+
+	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	public function error_count() {
+		_deprecated_function( 'Woocommerce->error_count', '2.1', 'WC_Messages_Helper->error_count' );
+		$this->get_helper( 'messages' )->error_count();
+	}
+
+	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	public function message_count() {
+		_deprecated_function( 'Woocommerce->message_count', '2.1', 'WC_Messages_Helper->message_count' );
+		$this->get_helper( 'messages' )->message_count();
+	}
+
+	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	public function get_errors() {
+		_deprecated_function( 'Woocommerce->get_errors', '2.1', 'WC_Messages_Helper->get_errors' );
+		$this->get_helper( 'messages' )->get_errors();
+	}
+
+	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	public function get_messages() {
+		_deprecated_function( 'Woocommerce->get_messages', '2.1', 'WC_Messages_Helper->get_messages' );
+		$this->get_helper( 'messages' )->get_messages();
+	}
+
+	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	public function show_messages() {
+		_deprecated_function( 'Woocommerce->show_messages', '2.1', 'WC_Messages_Helper->show_messages' );
+		$this->get_helper( 'messages' )->show_messages();
+	}
+
+	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	public function set_messages() {
+		_deprecated_function( 'Woocommerce->set_messages', '2.1', 'WC_Messages_Helper->set_messages' );
+		$this->get_helper( 'messages' )->set_messages();
 	}
 }
 

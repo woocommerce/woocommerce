@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 global $woocommerce;
 ?>
 
-<?php $woocommerce->show_messages(); ?>
+<?php $woocommerce->get_helper( 'messages' )->show_messages(); ?>
 
 <form action="" method="post">
 

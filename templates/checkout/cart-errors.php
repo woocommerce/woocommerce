@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 ?>
 
-<?php $woocommerce->show_messages(); ?>
+<?php $woocommerce->get_helper( 'messages' )->show_messages(); ?>
 
 <p><?php _e( 'There are some issues with the items in your cart (shown above). Please go back to the cart page and resolve these issues before checking out.', 'woocommerce' ) ?></p>
 

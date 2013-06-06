@@ -351,7 +351,7 @@ class WC_Checkout {
 		do_action( 'woocommerce_before_checkout_process' );
 
 		if ( sizeof( $woocommerce->cart->get_cart() ) == 0 )
-			$woocommerce->add_error( sprintf( __( 'Sorry, your session has expired. <a href="%s">Return to homepage &rarr;</a>', 'woocommerce' ), home_url() ) );
+			$woocommerce->get_helper( 'messages' )->add_error( sprintf( __( 'Sorry, your session has expired. <a href="%s">Return to homepage &rarr;</a>', 'woocommerce' ), home_url() ) );
 
 		do_action( 'woocommerce_checkout_process' );
 
@@ -414,7 +414,7 @@ class WC_Checkout {
 				$this->posted[ $key ] = apply_filters( 'woocommerce_process_checkout_field_' . $key, $this->posted[ $key ] );
 
 				// Validation: Required fields
-				if ( isset( $field['required'] ) && $field['required'] && empty( $this->posted[ $key ] ) ) $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is a required field.', 'woocommerce' ) );
+				if ( isset( $field['required'] ) && $field['required'] && empty( $this->posted[ $key ] ) ) $woocommerce->get_helper( 'messages' )->add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is a required field.', 'woocommerce' ) );
 
 				if ( ! empty( $this->posted[ $key ] ) ) {
 
@@ -427,7 +427,7 @@ class WC_Checkout {
 							$this->posted[ $key ] = strtoupper( str_replace( ' ', '', $this->posted[ $key ] ) );
 
 							if ( ! $validation->is_postcode( $this->posted[ $key ], $_POST[ $validate_against ] ) )
-								$woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . sprintf( __( '(%s) is not a valid postcode/ZIP.', 'woocommerce' ), $this->posted[ $key ] ) );
+								$woocommerce->get_helper( 'messages' )->add_error( '<strong>' . $field['label'] . '</strong> ' . sprintf( __( '(%s) is not a valid postcode/ZIP.', 'woocommerce' ), $this->posted[ $key ] ) );
 							else
 								$this->posted[ $key ] = $validation->format_postcode( $this->posted[ $key ], $_POST[ $validate_against ] );
 
@@ -448,7 +448,7 @@ class WC_Checkout {
 							// Only validate if the country has specific state options
 							if ( $valid_states && sizeof( $valid_states ) > 0 )
 								if ( ! in_array( $this->posted[ $key ], array_keys( $valid_states ) ) )
-									$woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not valid. Please enter one of the following:', 'woocommerce' ) . ' ' . implode( ', ', $valid_states ) );
+									$woocommerce->get_helper( 'messages' )->add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not valid. Please enter one of the following:', 'woocommerce' ) . ' ' . implode( ', ', $valid_states ) );
 
 						break;
 						case "billing_phone" :
@@ -456,14 +456,14 @@ class WC_Checkout {
 							$this->posted[ $key ] = $validation->format_phone( $this->posted[ $key ] );
 
 							if ( ! $validation->is_phone( $this->posted[ $key ] ) )
-								$woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid number.', 'woocommerce' ) );
+								$woocommerce->get_helper( 'messages' )->add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid number.', 'woocommerce' ) );
 						break;
 						case "billing_email" :
 
 							$this->posted[ $key ] = strtolower( $this->posted[ $key ] );
 
 							if ( ! $validation->is_email( $this->posted[ $key ] ) )
-								$woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ) );
+								$woocommerce->get_helper( 'messages' )->add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ) );
 						break;
 					}
 				}
@@ -506,7 +506,7 @@ class WC_Checkout {
 
 		// Terms
 		if ( ! isset( $_POST['woocommerce_checkout_update_totals'] ) && empty( $this->posted['terms'] ) && woocommerce_get_page_id( 'terms' ) > 0 )
-			$woocommerce->add_error( __( 'You must accept our Terms &amp; Conditions.', 'woocommerce' ) );
+			$woocommerce->get_helper( 'messages' )->add_error( __( 'You must accept our Terms &amp; Conditions.', 'woocommerce' ) );
 
 		if ( $woocommerce->cart->needs_shipping() ) {
 
@@ -515,7 +515,7 @@ class WC_Checkout {
 
 			if ( ! isset( $available_methods[ $this->posted['shipping_method'] ] ) ) {
 				$this->shipping_method = '';
-				$woocommerce->add_error( __( 'Invalid shipping method.', 'woocommerce' ) );
+				$woocommerce->get_helper( 'messages' )->add_error( __( 'Invalid shipping method.', 'woocommerce' ) );
 			} else {
 				$this->shipping_method = $available_methods[ $this->posted['shipping_method'] ];
 			}
@@ -528,7 +528,7 @@ class WC_Checkout {
 
 			if ( ! isset( $available_gateways[ $this->posted['payment_method'] ] ) ) {
 				$this->payment_method = '';
-				$woocommerce->add_error( __( 'Invalid payment method.', 'woocommerce' ) );
+				$woocommerce->get_helper( 'messages' )->add_error( __( 'Invalid payment method.', 'woocommerce' ) );
 			} else {
 				$this->payment_method = $available_gateways[ $this->posted['payment_method'] ];
 				$this->payment_method->validate_fields();
@@ -538,7 +538,7 @@ class WC_Checkout {
 		// Action after validation
 		do_action( 'woocommerce_after_checkout_validation', $this->posted );
 
-		if ( ! isset( $_POST['woocommerce_checkout_update_totals'] ) && $woocommerce->error_count() == 0 ) {
+		if ( ! isset( $_POST['woocommerce_checkout_update_totals'] ) && $woocommerce->get_helper( 'messages' )->error_count() == 0 ) {
 
 			try {
 
@@ -567,7 +567,7 @@ class WC_Checkout {
 				}
 
 				// Abort if errors are present
-				if ( $woocommerce->error_count() > 0 )
+				if ( $woocommerce->get_helper( 'messages' )->error_count() > 0 )
 					throw new Exception();
 
 				// Create the order
@@ -635,7 +635,7 @@ class WC_Checkout {
 			} catch ( Exception $e ) {
 
 				if ( ! empty( $e ) )
-					$woocommerce->add_error( $e );
+					$woocommerce->get_helper( 'messages' )->add_error( $e );
 
 			}
 
@@ -645,7 +645,7 @@ class WC_Checkout {
 		if ( is_ajax() ) {
 
 			ob_start();
-			$woocommerce->show_messages();
+			$woocommerce->get_helper( 'messages' )->show_messages();
 			$messages = ob_get_clean();
 
 			echo '<!--WC_START-->' . json_encode(

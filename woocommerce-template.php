@@ -112,18 +112,18 @@ if ( ! function_exists( 'woocommerce_show_messages' ) ) {
 	function woocommerce_show_messages() {
 		global $woocommerce;
 
-		if ( $woocommerce->error_count() > 0  )
+		if ( $woocommerce->get_helper( 'messages' )->error_count() > 0  )
 			woocommerce_get_template( 'shop/errors.php', array(
-					'errors' => $woocommerce->get_errors()
+					'errors' => $woocommerce->get_helper( 'messages' )->get_errors()
 				) );
 
 
-		if ( $woocommerce->message_count() > 0  )
+		if ( $woocommerce->get_helper( 'messages' )->message_count() > 0  )
 			woocommerce_get_template( 'shop/messages.php', array(
-					'messages' => $woocommerce->get_messages()
+					'messages' => $woocommerce->get_helper( 'messages' )->get_messages()
 				) );
 
-		$woocommerce->clear_messages();
+		$woocommerce->get_helper( 'messages' )->clear_messages();
 	}
 }
 
