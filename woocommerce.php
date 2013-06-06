@@ -40,16 +40,6 @@ class Woocommerce {
 	public $version = '2.1-bleeding';
 
 	/**
-	 * @var string
-	 */
-	public $plugin_url;
-
-	/**
-	 * @var string
-	 */
-	public $plugin_path;
-
-	/**
 	 * @var array
 	 */
 	public $errors = array();
@@ -162,6 +152,7 @@ class Woocommerce {
 
 	/**
 	 * Auto-load in-accessible properties on demand.
+	 * TODO: Need to find a permanent solution for loading/deprecating these.
 	 *
 	 * @access public
 	 * @param mixed $key
@@ -176,6 +167,12 @@ class Woocommerce {
 			case 'template_url':
 				_deprecated_argument( 'Woocommerce->template_url', '2.1', 'The "template_url" field is moved to the template helper class.' );
 				return $this->get_helper( 'template' )->template_url;
+			case 'plugin_url':
+				_deprecated_argument( 'Woocommerce->plugin_url', '2.1', 'The "plugin_url" field is removed, please use the Woocommerce->plugin_url() function.' );
+				return $this->plugin_url();
+			case 'plugin_path':
+				_deprecated_argument( 'Woocommerce->plugin_path', '2.1', 'The "plugin_path" field is removed, please use the Woocommerce->plugin_path() function.' );
+				return $this->plugin_path();
 			default:
 				return false;
 		}
@@ -901,8 +898,7 @@ class Woocommerce {
 	 * @return string
 	 */
 	public function plugin_url() {
-		if ( isset( $this->plugin_url ) ) return $this->plugin_url;
-		return $this->plugin_url = untrailingslashit( plugins_url( '/', __FILE__ ) );
+		return untrailingslashit( plugins_url( '/', __FILE__ ) );
 	}
 
 
@@ -913,9 +909,7 @@ class Woocommerce {
 	 * @return string
 	 */
 	public function plugin_path() {
-		if ( isset( $this->plugin_path ) ) return $this->plugin_path;
-
-		return $this->plugin_path = untrailingslashit( plugin_dir_path( __FILE__ ) );
+		return untrailingslashit( plugin_dir_path( __FILE__ ) );
 	}
 
 
