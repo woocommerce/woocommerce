@@ -125,14 +125,24 @@ function woocommerce_status_report() {
                 <td><?php _e( 'WP Max Upload Size','woocommerce' ); ?>:</td>
                 <td><?php echo size_format( wp_max_upload_size() ); ?></td>
             </tr>
-            <tr>
-                <td><?php _e('PHP Post Max Size','woocommerce' ); ?>:</td>
-                <td><?php if ( function_exists( 'ini_get' ) ) echo size_format( woocommerce_let_to_num( ini_get('post_max_size') ) ); ?></td>
-            </tr>
-            <tr>
-                <td><?php _e('PHP Time Limit','woocommerce' ); ?>:</td>
-                <td><?php if ( function_exists( 'ini_get' ) ) echo ini_get('max_execution_time'); ?></td>
-            </tr>
+            <?php if ( function_exists( 'ini_get' ) ) : ?>
+	            <tr>
+	                <td><?php _e('PHP Post Max Size','woocommerce' ); ?>:</td>
+	                <td><?php echo size_format( woocommerce_let_to_num( ini_get('post_max_size') ) ); ?></td>
+	            </tr>
+	            <tr>
+	                <td><?php _e('PHP Time Limit','woocommerce' ); ?>:</td>
+	                <td><?php echo ini_get('max_execution_time'); ?></td>
+	            </tr>
+	            <tr>
+	                <td><?php _e( 'PHP Max Input Vars','woocommerce' ); ?>:</td>
+	                <td><?php echo ini_get('max_input_vars'); ?></td>
+	            </tr>
+	            <tr>
+	                <td><?php _e( 'SUHOSIN Installed','woocommerce' ); ?>:</td>
+	                <td><?php echo extension_loaded( 'suhosin' ) ? __( 'Yes', 'woocommerce' ) : __( 'No', 'woocommerce' ); ?></td>
+	            </tr>
+	        <?php endif; ?>
             <tr>
                 <td><?php _e( 'WC Logging','woocommerce' ); ?>:</td>
                 <td><?php
