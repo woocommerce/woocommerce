@@ -340,7 +340,7 @@ class WC_Checkout {
 	public function process_checkout() {
 		global $wpdb, $woocommerce, $current_user;
 
-		$woocommerce->verify_nonce( 'process_checkout' );
+		$woocommerce->get_helper( 'nonce' )->verify_nonce( 'process_checkout' );
 
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) )
 			define( 'WOOCOMMERCE_CHECKOUT', true );

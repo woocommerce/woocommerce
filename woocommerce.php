@@ -310,6 +310,7 @@ class Woocommerce {
 		include_once( 'classes/class-wc-api.php' );
 
 		// Include abstract classes
+		include_once( 'classes/abstracts/abstract-wc-helper.php' );				// Helper classes
 		include_once( 'classes/abstracts/abstract-wc-product.php' );			// Products
 		include_once( 'classes/abstracts/abstract-wc-settings-api.php' );		// Settings API (for gateways, shipping, and integrations)
 		include_once( 'classes/abstracts/abstract-wc-shipping-method.php' );	// A Shipping method
@@ -328,6 +329,15 @@ class Woocommerce {
 		include_once( 'classes/integrations/sharedaddy/class-wc-sharedaddy.php' );
 	}
 
+	// Temporarily staying here until there is a better spot
+	// And this needs to be optimized/sanitized as well
+	public function get_helper( $id ) {
+		if ( ! isset( $this->helpers[ $id ] ) ) {
+			$this->helpers[ $id ] = include( 'classes/helpers/class-wc-' . $id . '-helper.php' );
+		}
+
+		return $this->helpers[ $id ];
+	}
 
 	/**
 	 * Include required admin files.
@@ -467,6 +477,9 @@ class Woocommerce {
 		$this->countries 			= new WC_Countries();			// Countries class
 		$this->integrations			= new WC_Integrations();		// Integrations class
 
+		// Helpers blank array
+		$this->helpers = array();
+
 		// Classes/actions loaded for the frontend and for ajax requests
 		if ( ! is_admin() || defined('DOING_AJAX') ) {
 
@@ -492,9 +505,9 @@ class Woocommerce {
 			add_action( 'wp_print_scripts', array( $this, 'check_jquery' ), 25 );
 			add_action( 'wp_head', array( $this, 'generator' ) );
 			add_action( 'wp_head', array( $this, 'wp_head' ) );
-			add_filter( 'body_class', array( $this, 'output_body_class' ) );
-			add_filter( 'post_class', array( $this, 'post_class' ), 20, 3 );
-			add_action( 'wp_footer', array( $this, 'output_inline_js' ), 25 );
+			add_filter( 'body_class', array( $this->get_helper( 'body-class' ), 'output_body_class' ) );
+			add_filter( 'post_class', array( $this->get_help( 'post-class' ), 'post_class' ), 20, 3 );
+			add_action( 'wp_footer', array( $this->get_helper( 'inline-javascript' ), 'output_inline_js' ), 25 );
 
 			// HTTPS urls with SSL on
 			$filters = array( 'post_thumbnail_html', 'widget_text', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
@@ -505,7 +518,7 @@ class Woocommerce {
 
 		// Actions
 		add_action( 'the_post', array( $this, 'setup_product_data' ) );
-		add_action( 'admin_footer', array( $this, 'output_inline_js' ), 25 );
+		add_action( 'admin_footer', array( $this->get_helper( 'inline-javascript' ), 'output_inline_js' ), 25 );
 
 		// Email Actions
 		$email_actions = array( 'woocommerce_low_stock', 'woocommerce_no_stock', 'woocommerce_product_on_backorder', 'woocommerce_order_status_pending_to_processing', 'woocommerce_order_status_pending_to_completed', 'woocommerce_order_status_pending_to_on-hold', 'woocommerce_order_status_failed_to_processing', 'woocommerce_order_status_failed_to_completed', 'woocommerce_order_status_completed', 'woocommerce_new_customer_note', 'woocommerce_created_customer' );
@@ -722,26 +735,26 @@ class Woocommerce {
 	public function wp_head() {
 
 		if ( is_woocommerce() ) {
-			$this->add_body_class( 'woocommerce' );
-			$this->add_body_class( 'woocommerce-page' );
+			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce' );
+			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-page' );
 			return;
 		}
 
 		if ( is_checkout() ) {
-			$this->add_body_class( 'woocommerce-checkout' );
-			$this->add_body_class( 'woocommerce-page' );
+			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-checkout' );
+			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-page' );
 			return;
 		}
 
 		if ( is_cart() ) {
-			$this->add_body_class( 'woocommerce-cart' );
-			$this->add_body_class( 'woocommerce-page' );
+			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-cart' );
+			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-page' );
 			return;
 		}
 
 		if ( is_account_page() ) {
-			$this->add_body_class( 'woocommerce-account' );
-			$this->add_body_class( 'woocommerce-page' );
+			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-account' );
+			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-page' );
 			return;
 		}
 
@@ -1205,379 +1218,6 @@ class Woocommerce {
 		return apply_filters( 'woocommerce_redirect', $location );
 	}
 
-	/** Attribute Helpers ****************************************************************/
-
-	/**
-	 * Get attribute taxonomies.
-	 *
-	 * @access public
-	 * @return object
-	 */
-	public function get_attribute_taxonomies() {
-
-		$transient_name = 'wc_attribute_taxonomies';
-
-		if ( false === ( $attribute_taxonomies = get_transient( $transient_name ) ) ) {
-
-			global $wpdb;
-
-			$attribute_taxonomies = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies" );
-
-			set_transient( $transient_name, $attribute_taxonomies );
-		}
-
-		return apply_filters( 'woocommerce_attribute_taxonomies', $attribute_taxonomies );
-	}
-
-	/**
-	 * Get a product attributes name.
-	 *
-	 * @access public
-	 * @param mixed $name
-	 * @return string
-	 */
-	public function attribute_taxonomy_name( $name ) {
-		return 'pa_' . woocommerce_sanitize_taxonomy_name( $name );
-	}
-
-	/**
-	 * Get a product attributes label.
-	 *
-	 * @access public
-	 * @param mixed $name
-	 * @return string
-	 */
-	public function attribute_label( $name ) {
-		global $wpdb;
-
-		if ( taxonomy_is_product_attribute( $name ) ) {
-			$name = woocommerce_sanitize_taxonomy_name( str_replace( 'pa_', '', $name ) );
-
-			$label = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_label FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
-
-			if ( ! $label )
-				$label = ucfirst( $name );
-		} else {
-			$label = $name;
-		}
-
-		return apply_filters( 'woocommerce_attribute_label', $label, $name );
-	}
-
-	/**
-	 * Get a product attributes orderby setting.
-	 *
-	 * @access public
-	 * @param mixed $name
-	 * @return string
-	 */
-	public function attribute_orderby( $name ) {
-		global $wpdb;
-
-		$name = str_replace( 'pa_', '', sanitize_title( $name ) );
-
-		$orderby = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_orderby FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
-
-		return apply_filters( 'woocommerce_attribute_orderby', $orderby, $name );
-	}
-
-	/**
-	 * Get an array of product attribute taxonomies.
-	 *
-	 * @access public
-	 * @return array
-	 */
-	public function get_attribute_taxonomy_names() {
-		$taxonomy_names = array();
-		$attribute_taxonomies = $this->get_attribute_taxonomies();
-		if ( $attribute_taxonomies ) {
-			foreach ( $attribute_taxonomies as $tax ) {
-				$taxonomy_names[] = $this->attribute_taxonomy_name( $tax->attribute_name );
-			}
-		}
-		return $taxonomy_names;
-	}
-
-	/** Coupon Helpers ********************************************************/
-
-	/**
-	 * Get coupon types.
-	 *
-	 * @access public
-	 * @return array
-	 */
-	public function get_coupon_discount_types() {
-		if ( ! isset( $this->coupon_discount_types ) ) {
-			$this->coupon_discount_types = apply_filters( 'woocommerce_coupon_discount_types', array(
-    			'fixed_cart' 	=> __( 'Cart Discount', 'woocommerce' ),
-    			'percent' 		=> __( 'Cart % Discount', 'woocommerce' ),
-    			'fixed_product'	=> __( 'Product Discount', 'woocommerce' ),
-    			'percent_product'	=> __( 'Product % Discount', 'woocommerce' )
-    		) );
-		}
-		return $this->coupon_discount_types;
-	}
-
-
-	/**
-	 * Get a coupon type's name.
-	 *
-	 * @access public
-	 * @param string $type (default: '')
-	 * @return string
-	 */
-	public function get_coupon_discount_type( $type = '' ) {
-		$types = (array) $this->get_coupon_discount_types();
-		if ( isset( $types[$type] ) ) return $types[$type];
-	}
-
-	/** Nonces ****************************************************************/
-
-	/**
-	 * Return a nonce field.
-	 *
-	 * @access public
-	 * @param mixed $action
-	 * @param bool $referer (default: true)
-	 * @param bool $echo (default: true)
-	 * @return void
-	 */
-	public function nonce_field( $action, $referer = true , $echo = true ) {
-		return wp_nonce_field('woocommerce-' . $action, '_n', $referer, $echo );
-	}
-
-
-	/**
-	 * Return a url with a nonce appended.
-	 *
-	 * @access public
-	 * @param mixed $action
-	 * @param string $url (default: '')
-	 * @return string
-	 */
-	public function nonce_url( $action, $url = '' ) {
-		return add_query_arg( '_n', wp_create_nonce( 'woocommerce-' . $action ), $url );
-	}
-
-
-	/**
-	 * Check a nonce and sets woocommerce error in case it is invalid.
-	 *
-	 * To fail silently, set the error_message to an empty string
-	 *
-	 * @access public
-	 * @param string $name the nonce name
-	 * @param string $action then nonce action
-	 * @param string $method the http request method _POST, _GET or _REQUEST
-	 * @param string $error_message custom error message, or false for default message, or an empty string to fail silently
-	 * @return bool
-	 */
-	public function verify_nonce( $action, $method='_POST', $error_message = false ) {
-
-		$name = '_n';
-		$action = 'woocommerce-' . $action;
-
-		if ( $error_message === false ) $error_message = __( 'Action failed. Please refresh the page and retry.', 'woocommerce' );
-
-		if ( ! in_array( $method, array( '_GET', '_POST', '_REQUEST' ) ) ) $method = '_POST';
-
-		if ( isset($_REQUEST[$name] ) && wp_verify_nonce( $_REQUEST[$name], $action ) ) return true;
-
-		if ( $error_message ) $this->add_error( $error_message );
-
-		return false;
-	}
-
-	/** Shortcode Helpers *********************************************************/
-
-	/**
-	 * Shortcode Wrapper
-	 *
-	 * @access public
-	 * @param mixed $function
-	 * @param array $atts (default: array())
-	 * @return string
-	 */
-	public function shortcode_wrapper(
-		$function,
-		$atts = array(),
-		$wrapper = array(
-			'class' => 'woocommerce',
-			'before' => null,
-			'after' => null
-		)
-	){
-		ob_start();
-
-		$before 	= empty( $wrapper['before'] ) ? '<div class="' . $wrapper['class'] . '">' : $wrapper['before'];
-		$after 		= empty( $wrapper['after'] ) ? '</div>' : $wrapper['after'];
-
-		echo $before;
-		call_user_func( $function, $atts );
-		echo $after;
-
-		return ob_get_clean();
-	}
-
-	/** Transients ************************************************************/
-
-	/**
-	 * Clear all transients cache for product data.
-	 *
-	 * @access public
-	 * @param int $post_id (default: 0)
-	 * @return void
-	 */
-	public function clear_product_transients( $post_id = 0 ) {
-		global $wpdb;
-
-		$post_id = absint( $post_id );
-
-		$wpdb->show_errors();
-
-		// Clear core transients
-		$transients_to_clear = array(
-			'wc_products_onsale',
-			'wc_hidden_product_ids',
-			'wc_hidden_product_ids_search',
-			'wc_attribute_taxonomies',
-			'wc_term_counts'
-		);
-
-		foreach( $transients_to_clear as $transient ) {
-			delete_transient( $transient );
-		}
-
-		// Clear transients for which we don't have the name
-		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_uf_pid_%') OR `option_name` LIKE ('_transient_timeout_wc_uf_pid_%')" );
-		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ln_count_%') OR `option_name` LIKE ('_transient_timeout_wc_ln_count_%')" );
-		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ship_%') OR `option_name` LIKE ('_transient_timeout_wc_ship_%')" );
-
-		// Clear product specific transients
-		$post_transients_to_clear = array(
-			'wc_product_children_ids_',
-			'wc_product_total_stock_',
-			'wc_average_rating_',
-			'wc_rating_count_',
-			'woocommerce_product_type_', // No longer used
-			'wc_product_type_', // No longer used
-		);
-
-		if ( $post_id > 0 ) {
-
-			foreach( $post_transients_to_clear as $transient ) {
-				delete_transient( $transient . $post_id );
-				$wpdb->query( $wpdb->prepare( "DELETE FROM `$wpdb->options` WHERE `option_name` = %s OR `option_name` = %s", '_transient_' . $transient . $post_id, '_transient_timeout_' . $transient . $post_id ) );
-			}
-
-			clean_post_cache( $post_id );
-
-		} else {
-
-			foreach( $post_transients_to_clear as $transient ) {
-				$wpdb->query( $wpdb->prepare( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE %s OR `option_name` LIKE %s", '_transient_' . $transient . '%', '_transient_timeout_' . $transient . '%' ) );
-			}
-
-		}
-	}
-
-	/** Body Classes **********************************************************/
-
-	/**
-	 * Add a class to the webpage body.
-	 *
-	 * @access public
-	 * @param string $class
-	 * @return void
-	 */
-	public function add_body_class( $class ) {
-		$this->_body_classes[] = sanitize_html_class( strtolower($class) );
-	}
-
-	/**
-	 * Output classes on the body tag.
-	 *
-	 * @access public
-	 * @param mixed $classes
-	 * @return array
-	 */
-	public function output_body_class( $classes ) {
-		if ( sizeof( $this->_body_classes ) > 0 ) $classes = array_merge( $classes, $this->_body_classes );
-
-		if ( is_singular('product') ) {
-			$key = array_search( 'singular', $classes );
-			if ( $key !== false ) unset( $classes[$key] );
-		}
-
-		return $classes;
-	}
-
-	/** Post Classes **********************************************************/
-
-	/**
-	 * Adds extra post classes for products
-	 *
-	 * @since 2.0
-	 * @access public
-	 * @param array $classes
-	 * @param string|array $class
-	 * @param int $post_id
-	 * @return array
-	 */
-	public function post_class( $classes, $class, $post_id ) {
-		$product = get_product( $post_id );
-
-		if ( $product ) {
-			if ( $product->is_on_sale() ) {
-				$classes[] = 'sale';
-			}
-			if ( $product->is_featured() ) {
-				$classes[] = 'featured';
-			}
-			$classes[] = $product->stock_status;
-		}
-
-		return $classes;
-	}
-
-	/** Inline JavaScript Helper **********************************************/
-
-	/**
-	 * Add some JavaScript inline to be output in the footer.
-	 *
-	 * @access public
-	 * @param string $code
-	 * @return void
-	 */
-	public function add_inline_js( $code ) {
-		$this->_inline_js .= "\n" . $code . "\n";
-	}
-
-	/**
-	 * Output any queued inline JS.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function output_inline_js() {
-		if ( $this->_inline_js ) {
-
-			echo "<!-- WooCommerce JavaScript-->\n<script type=\"text/javascript\">\njQuery(document).ready(function($) {";
-
-			// Sanitize
-			$this->_inline_js = wp_check_invalid_utf8( $this->_inline_js );
-			$this->_inline_js = preg_replace( '/&#(x)?0*(?(1)27|39);?/i', "'", $this->_inline_js );
-			$this->_inline_js = str_replace( "\r", '', $this->_inline_js );
-
-			// Output
-			echo $this->_inline_js;
-
-			echo "});\n</script>\n";
-
-			$this->_inline_js = '';
-		}
-	}
-
 	/** Deprecated functions *********************************************************/
 
 	/**
@@ -1617,6 +1257,241 @@ class Woocommerce {
 		}
 	}
 
+	/**
+	 * Clear all transients cache for product data.
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @param int $post_id (default: 0)
+	 * @return void
+	 */
+	public function clear_product_transients( $post_id = 0 ) {
+		_deprecated_function( 'Woocommerce->clear_product_transients', '2.1', 'WC_Transient_Helper->clear_product_transients' );
+		$this->get_helper( 'transient' )->clear_product_transients( $post_id );
+	}
+
+	/**
+	 * Add some JavaScript inline to be output in the footer.
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @param string $code
+	 * @return void
+	 */
+	public function add_inline_js( $code ) {
+		_deprecated_function( 'Woocommerce->add_inline_js', '2.1', 'WC_Inline_Javascript_Helper->add_inline_js' );
+		$this->get_helper( 'inline-javascript' )->add_inline_js( $code );
+	}
+
+	/**
+	 * Output any queued inline JS.
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @return void
+	 */
+	public function output_inline_js() {
+		_deprecated_function( 'Woocommerce->output_inline_js', '2.1', 'WC_Inline_Javascript_Helper->output_inline_js' );
+		$this->get_helper( 'inline-javascript' )->output_inline_js();
+	}
+
+	/**
+	 * Return a nonce field.
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @param mixed $action
+	 * @param bool $referer (default: true)
+	 * @param bool $echo (default: true)
+	 * @return void
+	 */
+	public function nonce_field( $action, $referer = true , $echo = true ) {
+		_deprecated_function( 'Woocommerce->nonce_field', '2.1', 'WC_Nonce_Helper->nonce_field' );
+		return $this->get_helper( 'nonce' )->nonce_field( $action, $referer, $echo );
+	}
+
+	/**
+	 * Return a url with a nonce appended.
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @param mixed $action
+	 * @param string $url (default: '')
+	 * @return string
+	 */
+	public function nonce_url( $action, $url = '' ) {
+		_deprecated_function( 'Woocommerce->nonce_url', '2.1', 'WC_Nonce_Helper->nonce_url' );
+		return $this->get_helper( 'nonce' )->nonce_url( $action, $url );
+	}
+
+	/**
+	 * Check a nonce and sets woocommerce error in case it is invalid.
+	 *
+	 * To fail silently, set the error_message to an empty string
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @param string $name the nonce name
+	 * @param string $action then nonce action
+	 * @param string $method the http request method _POST, _GET or _REQUEST
+	 * @param string $error_message custom error message, or false for default message, or an empty string to fail silently
+	 * @return bool
+	 */
+	public function verify_nonce( $action, $method='_POST', $error_message = false ) {
+		_deprecated_function( 'Woocommerce->verify_nonce', '2.1', 'WC_Nonce_Helper->verify_nonce' );
+		return $this->get_helper( 'nonce' )->verify_nonce( $action, $method, $error_message );
+	}
+
+	/**
+	 * Shortcode Wrapper
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @param mixed $function
+	 * @param array $atts (default: array())
+	 * @return string
+	 */
+	public function shortcode_wrapper(
+		$function,
+		$atts = array(),
+		$wrapper = array(
+			'class' => 'woocommerce',
+			'before' => null,
+			'after' => null
+		)
+	) {
+		_deprecated_function( 'Woocommerce->shortcode_wrapper', '2.1', 'WC_Shortcode_Helper->shortcode_wrapper' );
+		return $this->get_helper( 'shortcode' )->shortcode_wrapper( $function, $atts, $wrapper );
+	}
+
+	/**
+	 * Get attribute taxonomies.
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @return object
+	 */
+	public function get_attribute_taxonomies() {
+		_deprecated_function( 'Woocommerce->get_attribute_taxonomies', '2.1', 'WC_Attribute_Helper->get_attribute_taxonomies' );
+		return $this->get_helper( 'attribute' )->get_attribute_taxonomies();
+	}
+
+	/**
+	 * Get a product attributes name.
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @param mixed $name
+	 * @return string
+	 */
+	public function attribute_taxonomy_name( $name ) {
+		_deprecated_function( 'Woocommerce->attribute_taxonomy_name', '2.1', 'WC_Attribute_Helper->attribute_taxonomy_name' );
+		return $this->get_helper( 'attribute' )->attribute_taxonomy_name( $name );
+	}
+
+	/**
+	 * Get a product attributes label.
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @param mixed $name
+	 * @return string
+	 */
+	public function attribute_label( $name ) {
+		_deprecated_function( 'Woocommerce->attribute_label', '2.1', 'WC_Attribute_Helper->attribute_label' );
+		return $this->get_helper( 'attribute' )->attribute_label( $name );
+	}
+
+	/**
+	 * Get a product attributes orderby setting.
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @param mixed $name
+	 * @return string
+	 */
+	public function attribute_orderby( $name ) {
+		_deprecated_function( 'Woocommerce->attribute_orderby', '2.1', 'WC_Attribute_Helper->attribute_orderby' );
+		return $this->get_helper( 'attribute' )->attribute_orderby( $name );
+	}
+
+	/**
+	 * Get an array of product attribute taxonomies.
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @return array
+	 */
+	public function get_attribute_taxonomy_names() {
+		_deprecated_function( 'Woocommerce->get_attribute_taxonomy_names', '2.1', 'WC_Attribute_Helper->get_attribute_taxonomy_names' );
+		return $this->get_helper( 'attribute' )->get_attribute_taxonomy_names();
+	}
+
+	/**
+	 * Get coupon types.
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @return array
+	 */
+	public function get_coupon_discount_types() {
+		_deprecated_function( 'Woocommerce->get_coupon_discount_types', '2.1', 'WC_Coupon_Helper->get_coupon_discount_types' );
+		return $this->get_helper( 'coupon' )->get_coupon_discount_types();
+	}
+
+
+	/**
+	 * Get a coupon type's name.
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @access public
+	 * @param string $type (default: '')
+	 * @return string
+	 */
+	public function get_coupon_discount_type( $type = '' ) {
+		_deprecated_function( 'Woocommerce->get_coupon_discount_type', '2.1', 'WC_Coupon_Helper->get_coupon_discount_type' );
+		return $this->get_helper( 'coupon' )->get_coupon_discount_type( $type );
+	}
+
+	/**
+	 * Adds extra post classes for products
+	 *
+	 * @deprecated 2.1.0 Access via the helpers
+	 * @since 2.0
+	 * @access public
+	 * @param array $classes
+	 * @param string|array $class
+	 * @param int $post_id
+	 * @return array
+	 */
+	public function post_class( $classes, $class, $post_id ) {
+		_deprecated_function( 'Woocommerce->post_class', '2.1', 'WC_Post_Class_Helper->post_class' );
+		return $this->get_helper( 'post-class' )->post_class( $classes, $class, $post_id );
+	}
+
+	/**
+	 * Add a class to the webpage body.
+	 *
+	 * @access public
+	 * @param string $class
+	 * @return void
+	 */
+	public function add_body_class( $class ) {
+		_deprecated_function( 'Woocommerce->add_body_class', '2.1', 'WC_Body_Class_Helper->add_body_class' );
+		$this->get_helper( 'body-class' )->add_body_class( $class );
+	}
+
+	/**
+	 * Output classes on the body tag.
+	 *
+	 * @access public
+	 * @param mixed $classes
+	 * @return array
+	 */
+	public function output_body_class( $classes ) {
+		_deprecated_function( 'Woocommerce->output_body_class', '2.1', 'WC_Body_Class_Helper->output_body_class' );
+		return $this->get_helper( 'body-class' )->output_body_class( $classes );
+	}
 }
 
 /**

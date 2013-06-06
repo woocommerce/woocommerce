@@ -211,7 +211,7 @@ function woocommerce_update_cart_action() {
 	global $woocommerce;
 
 	// Remove from cart
-	if ( isset($_GET['remove_item']) && $_GET['remove_item'] && $woocommerce->verify_nonce('cart', '_GET')) {
+	if ( isset($_GET['remove_item']) && $_GET['remove_item'] && $woocommerce->get_helper( 'nonce' )->verify_nonce('cart', '_GET')) {
 
 		$woocommerce->cart->set_quantity( $_GET['remove_item'], 0 );
 
@@ -222,7 +222,7 @@ function woocommerce_update_cart_action() {
 		exit;
 
 	// Update Cart
-	} elseif ( ( ! empty( $_POST['update_cart'] ) || ! empty( $_POST['proceed'] ) ) && $woocommerce->verify_nonce('cart')) {
+	} elseif ( ( ! empty( $_POST['update_cart'] ) || ! empty( $_POST['proceed'] ) ) && $woocommerce->get_helper( 'nonce' )->verify_nonce('cart')) {
 
 		$cart_totals = isset( $_POST['cart'] ) ? $_POST['cart'] : '';
 
@@ -567,7 +567,7 @@ function woocommerce_checkout_action() {
 function woocommerce_pay_action() {
 	global $woocommerce, $wp;
 
-	if ( isset( $_POST['woocommerce_pay'] ) && $woocommerce->verify_nonce( 'pay' ) ) {
+	if ( isset( $_POST['woocommerce_pay'] ) && $woocommerce->get_helper( 'nonce' )->verify_nonce( 'pay' ) ) {
 
 		ob_start();
 
@@ -644,7 +644,7 @@ function woocommerce_process_login() {
 
 	if ( ! empty( $_POST['login'] ) ) {
 
-		$woocommerce->verify_nonce( 'login' );
+		$woocommerce->get_helper( 'nonce' )->verify_nonce( 'login' );
 
 		try {
 			$creds = array();
@@ -710,6 +710,8 @@ function woocommerce_create_new_customer( $email, $username = '', $password = ''
 
 	if ( email_exists( $email ) )
 		return new WP_Error( "registration-error", __( "An account is already registered with your email address. Please login.", "woocommerce" ) );
+
+	$woocommerce->get_helper( 'nonce' )->verify_nonce( 'register' );
 
 	// Handle username creation
 	if ( get_option( 'woocommerce_registration_generate_username' ) == 'no' || ! empty( $username ) ) {
@@ -862,7 +864,7 @@ function woocommerce_order_again() {
 	global $woocommerce;
 
 	// Nothing to do
-	if ( ! isset( $_GET['order_again'] ) || ! is_user_logged_in() || ! $woocommerce->verify_nonce( 'order_again', '_GET' ) )
+	if ( ! isset( $_GET['order_again'] ) || ! is_user_logged_in() || ! $woocommerce->verify_nonce( 'order_again', '_GET' ) || ! $woocommerce->get_helper( 'nonce' )->verify_nonce( 'order_again', '_GET' ) )
 		return;
 
 	// Clear current cart
@@ -927,7 +929,7 @@ function woocommerce_cancel_order() {
 
 		$order = new WC_Order( $order_id );
 
-		if ( $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, array( 'pending', 'failed' ) ) && $woocommerce->verify_nonce( 'cancel_order', '_GET' ) ) :
+		if ( $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, array( 'pending', 'failed' ) ) && $woocommerce->get_helper( 'nonce' )->verify_nonce( 'cancel_order', '_GET' ) ) :
 
 			// Cancel the order + restore stock
 			$order->cancel_order( __('Order cancelled by customer.', 'woocommerce' ) );
@@ -1301,7 +1303,7 @@ function woocommerce_check_comment_rating( $comment_data ) {
 	global $woocommerce;
 
 	// If posting a comment (not trackback etc) and not logged in
-	if ( isset( $_POST['rating'] ) && ! $woocommerce->verify_nonce('comment_rating') )
+	if ( isset( $_POST['rating'] ) && ! $woocommerce->get_helper( 'nonce' )->verify_nonce('comment_rating') )
 		wp_die( __( 'You have taken too long. Please go back and refresh the page.', 'woocommerce' ) );
 
 	elseif ( isset( $_POST['rating'] ) && empty( $_POST['rating'] ) && $comment_data['comment_type'] == '' && get_option('woocommerce_review_rating_required') == 'yes' ) {
@@ -1373,12 +1375,12 @@ function woocommerce_layered_nav_init( ) {
 
 		$_chosen_attributes = $_attributes_array = array();
 
-		$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();
+		$attribute_taxonomies = $woocommerce->get_helper( 'attribute' )->get_attribute_taxonomies();
 		if ( $attribute_taxonomies ) {
 			foreach ( $attribute_taxonomies as $tax ) {
 
 		    	$attribute = sanitize_title( $tax->attribute_name );
-		    	$taxonomy = $woocommerce->attribute_taxonomy_name( $attribute );
+		    	$taxonomy = $woocommerce->get_helper( 'attribute' )->attribute_taxonomy_name( $attribute );
 
 				// create an array of product attribute taxonomies
 				$_attributes_array[] = $taxonomy;
@@ -1586,7 +1588,7 @@ function woocommerce_save_account_details() {
 	if ( empty( $_POST[ 'action' ] ) || ( 'save_account_details' !== $_POST[ 'action' ] ) )
 		return;
 
-	$woocommerce->verify_nonce( 'save_account_details' );
+	$woocommerce->get_helper( 'nonce' )->verify_nonce( 'save_account_details' );
 
 	$update       = true;
 	$errors       = new WP_Error();
@@ -1664,7 +1666,7 @@ function woocommerce_save_address() {
 	if ( empty( $_POST[ 'action' ] ) || ( 'edit_address' !== $_POST[ 'action' ] ) )
 		return;
 
-	$woocommerce->verify_nonce( 'edit_address' );
+	$woocommerce->get_helper( 'nonce' )->verify_nonce( 'edit_address' );
 
 	$validation = $woocommerce->validation();
 

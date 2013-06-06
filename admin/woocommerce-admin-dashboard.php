@@ -66,7 +66,7 @@ function woocommerce_dashboard_widget_right_now() {
 	$product_count      = wp_count_posts( 'product' );
 	$product_cat_count  = wp_count_terms( 'product_cat' );
 	$product_tag_count  = wp_count_terms( 'product_tag' );
-	$product_attr_count = count( $woocommerce->get_attribute_taxonomies() );
+	$product_attr_count = count( $woocommerce->get_helper( 'attribute' )->get_attribute_taxonomies() );
 
 	$pending_count      = get_term_by( 'slug', 'pending', 'shop_order_status' )->count;
 	$completed_count    = get_term_by( 'slug', 'completed', 'shop_order_status' )->count;

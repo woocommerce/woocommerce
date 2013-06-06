@@ -184,7 +184,7 @@ function woocommerce_order_downloads_meta_box() {
 	});
 	<?php
 	$javascript = ob_get_clean();
-	$woocommerce->add_inline_js( $javascript );
+	$woocommerce->get_helper( 'inline-javascript' )->add_inline_js( $javascript );
 }
 
 
