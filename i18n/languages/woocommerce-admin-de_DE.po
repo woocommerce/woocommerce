@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce 2.0.9 Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-05-10 11:38:26+00:00\n"
-"PO-Revision-Date: 2013-05-13 15:33+0100\n"
+"PO-Revision-Date: 2013-06-06 19:29+0100\n"
 "Last-Translator: Birgit Olzem <coachbirgit@gmail.com>\n"
 "Language-Team: Inpsyde GmbH <info@inpsyde.com>\n"
 "Language: german\n"
@@ -2558,7 +2558,7 @@ msgstr ""
 
 #: admin/settings/settings-frontend-styles.php:47
 msgid "Subtext"
-msgstr "Untergeordneter Text"
+msgstr "Subtexte"
 
 #: admin/settings/settings-frontend-styles.php:47
 msgid "Used for certain text and asides - breadcrumbs, small text etc."
@@ -2586,7 +2586,7 @@ msgstr "Sprachdateien"
 #: admin/settings/settings-init.php:19
 msgid "Use informal localisation for %s"
 msgstr ""
-"Informelle Übersetzungen für diese Lokale (%s) verwenden - \"DU\"-Anrede"
+"Informelle Übersetzungen für diese Sprache  (%s) verwenden - \"DU\"-Anrede"
 
 #: admin/settings/settings-init.php:33
 msgid "General Options"
@@ -2816,7 +2816,7 @@ msgstr "Zugriffsbeschränkung"
 
 #: admin/settings/settings-init.php:256
 msgid "Downloads require login"
-msgstr "Downloads erfordern Anmelden"
+msgstr "Downloads erfordern eine Anmeldung"
 
 #: admin/settings/settings-init.php:260
 msgid "This setting does not apply to guest purchases."
@@ -3557,7 +3557,7 @@ msgstr ""
 
 #: admin/settings/settings-init.php:990
 msgid "Reduced Rate%sZero Rate"
-msgstr "Ermäßigter Satz%ssteuerfrei"
+msgstr "Ermäßigter Steuersatz%sSteuerfrei"
 
 #: admin/settings/settings-init.php:994
 msgid "Display prices during cart/checkout:"
