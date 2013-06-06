@@ -315,7 +315,7 @@ class WooCommerce {
 	 * @return void
 	 */
 	public function ajax_includes() {
-		include_once( 'woocommerce-ajax.php' );						// Ajax functions for admin and the front-end
+		include_once( $this->plugin_path() . '/woocommerce-ajax.php' );		// Ajax functions for admin and the front-end
 	}
 
 
