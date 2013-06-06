@@ -506,7 +506,7 @@ class Woocommerce {
 			add_action( 'wp_head', array( $this, 'generator' ) );
 			add_action( 'wp_head', array( $this, 'wp_head' ) );
 			add_filter( 'body_class', array( $this->get_helper( 'body-class' ), 'output_body_class' ) );
-			add_filter( 'post_class', array( $this->get_help( 'post-class' ), 'post_class' ), 20, 3 );
+			add_filter( 'post_class', array( $this->get_helper( 'post-class' ), 'post_class' ), 20, 3 );
 			add_action( 'wp_footer', array( $this->get_helper( 'inline-javascript' ), 'output_inline_js' ), 25 );
 
 			// HTTPS urls with SSL on
