@@ -464,6 +464,21 @@ if ( ! function_exists( 'woocommerce_pagination' ) ) {
 
 /** Single Product ********************************************************/
 
+if ( ! function_exists( 'woocommerce_product_schema' ) ) {
+
+	/**
+	 * Outputs the correct Schema for the beginning of the product container.
+	 * 
+	 * @access public
+	 * @subpackage	Product
+	 * @return void
+	 */
+
+	function woocommerce_product_schema(){
+		woocommerce_get_template( 'single-product/schema.php' );
+	}
+}
+
 if ( ! function_exists( 'woocommerce_show_product_images' ) ) {
 
 	/**

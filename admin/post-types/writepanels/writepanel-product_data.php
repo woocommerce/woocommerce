@@ -166,6 +166,12 @@ function woocommerce_product_data_box() {
 					'min'	=> '0'
 				) ) );
 
+				// Download Type
+				woocommerce_wp_select( array( 'id' => '_download_type', 'label' => __( 'Download Type', 'woocommerce' ), 'options' => array(
+					'application' 	=> __( 'Application/Software', 'woocommerce' ),
+					'music' 	=> __( 'Music', 'woocommerce' ),
+				) ) );
+
 				do_action( 'woocommerce_product_options_downloads' );
 
 			echo '</div>';
@@ -1007,6 +1013,9 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 			update_post_meta( $post_id, '_download_limit', esc_attr( $_download_limit ) );
 		if ( isset( $_POST['_download_expiry'] ) )
 			update_post_meta( $post_id, '_download_expiry', esc_attr( $_download_expiry ) );
+		if ( isset( $_POST['_download_type'] ) )
+			update_post_meta( $post_id, '_download_type', esc_attr( $_POST['_download_type'] ) );
+
 	}
 
 	// Product url

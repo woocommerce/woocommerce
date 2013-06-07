@@ -93,8 +93,10 @@ if ( ! is_admin() || defined('DOING_AJAX') ) {
 	 * Before Single Products
 	 *
 	 * @see woocommerce_show_messages()
+	 * @see woocommerce_product_scheme()
 	 */
 	add_action( 'woocommerce_before_single_product', 'woocommerce_show_messages', 10 );
+	add_action( 'woocommerce_before_single_product', 'woocommerce_product_schema', 10 );
 
 	/**
 	 * Before Single Products Summary Div
