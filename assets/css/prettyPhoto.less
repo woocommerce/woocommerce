@@ -66,7 +66,7 @@ div.pp_woocommerce {
 	// Next / Previous
 	.pp_arrow_previous, .pp_arrow_next, .pp_previous, .pp_next {
 		&:before {
-			line-height: 1.15 !important;
+			line-height: 1.15;
 		}
 	}
 	.pp_previous, .pp_next {
@@ -201,6 +201,45 @@ div.pp_woocommerce {
 	}
 }
 
+@media only screen and (max-width: 480px) {
+	div.pp_woocommerce {
+		left: 5% !important;
+		right:5% !important;
+		.borderbox;
+		width: 90% !important;
+		.pp_gallery, .pp_previous, .pp_next, .pp_expand, .pp_contract {
+			display: none !important;
+		}
+		.pp_arrow_previous, .pp_arrow_next, .pp_close {
+			height:44px;
+			width:44px;
+			&:before {
+				font-size:2em;
+			}
+		}
+		.pp_arrow_previous, .pp_arrow_next {
+			&:before {
+				line-height: 1.45;
+			}
+		}
+		.pp_description {
+			display: none !important;
+		}
+		.pp_details {
+			width:100% !important;
+		}
+	}
+	.pp_content {
+		width:100% !important;
+		img {
+			width:100% !important;
+			height:auto !important;
+		}
+	}
+	.currentTextHolder {
+		line-height: 3;
+	}
+}
 /* ------------------------------------------------------------------------
 	DO NOT CHANGE
 ------------------------------------------------------------------------- */
