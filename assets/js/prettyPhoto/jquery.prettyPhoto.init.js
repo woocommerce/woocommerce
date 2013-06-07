@@ -8,21 +8,21 @@ $(document).ready(function() {
 	$("a.zoom").prettyPhoto({
 		social_tools: false,
 		theme: 'pp_woocommerce',
-		horizontal_padding: 40,
+		horizontal_padding: 20,
 		opacity: 0.9,
 		deeplinking: false
 	});
 	$("a.show_review_form").prettyPhoto({
 		social_tools: false,
 		theme: 'pp_woocommerce',
-		horizontal_padding: 40,
+		horizontal_padding: 20,
 		opacity: 0.9,
 		deeplinking: false
 	});
 	$("a[rel^='prettyPhoto']").prettyPhoto({
 		social_tools: false,
 		theme: 'pp_woocommerce',
-		horizontal_padding: 40,
+		horizontal_padding: 20,
 		opacity: 0.9,
 		deeplinking: false
 	});
