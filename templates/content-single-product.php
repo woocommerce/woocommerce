@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 	 do_action( 'woocommerce_before_single_product' );
 ?>
 
-<?php /* The beginning of the product container is added by the hook - woocommerce_product_scheme */ ?>
+<?php /* The beginning of the product container is added by the hook - woocommerce_product_schema */ ?>
 
 	<?php
 		/**
