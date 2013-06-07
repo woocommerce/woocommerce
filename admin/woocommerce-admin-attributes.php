@@ -127,7 +127,7 @@ function woocommerce_attributes() {
 
 				$wpdb->update( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $attribute, array( 'attribute_id' => $attribute_id ) );
 
-				do_action( 'woocommerce_attribute_updated', $attribute_id, $attribute );
+				do_action( 'woocommerce_attribute_updated', $attribute_id, $attribute, $old_attribute_name );
 
 				if ( $old_attribute_name != $attribute_name && ! empty( $old_attribute_name ) ) {
 					// Update taxonomies in the wp term taxonomy table
