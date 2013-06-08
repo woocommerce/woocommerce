@@ -1011,9 +1011,9 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 
 	// Product url
 	if ( $product_type == 'external' ) {
-		if ( isset( $_POST['_product_url'] ) && $_POST['_product_url'] )
+		if ( isset( $_POST['_product_url'] ) )
 			update_post_meta( $post_id, '_product_url', esc_attr( $_POST['_product_url'] ) );
-		if ( isset( $_POST['_button_text'] ) && $_POST['_button_text'] )
+		if ( isset( $_POST['_button_text'] ) )
 			update_post_meta( $post_id, '_button_text', esc_attr( $_POST['_button_text'] ) );
 	}
 
