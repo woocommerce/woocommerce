@@ -165,7 +165,7 @@ class WC_Shortcodes {
 
 	  	ob_start();
 
-		$products = new WP_Query( $args );
+		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts ) );
 
 		$woocommerce_loop['columns'] = $columns;
 
@@ -296,7 +296,7 @@ class WC_Shortcodes {
 
 		ob_start();
 
-		$products = new WP_Query( $args );
+		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts ) );
 
 		$woocommerce_loop['columns'] = $columns;
 
@@ -372,7 +372,7 @@ class WC_Shortcodes {
 
 	  	ob_start();
 
-		$products = new WP_Query( $args );
+		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts ) );
 
 		$woocommerce_loop['columns'] = $columns;
 
@@ -434,7 +434,7 @@ class WC_Shortcodes {
 
 	  	ob_start();
 
-		$products = new WP_Query( $args );
+		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts ) );
 
 		if ( $products->have_posts() ) : ?>
 
@@ -603,7 +603,7 @@ class WC_Shortcodes {
 
 	  	ob_start();
 
-		$products = new WP_Query( $args );
+		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts ) );
 
 		$woocommerce_loop['columns'] = $columns;
 
@@ -659,7 +659,7 @@ class WC_Shortcodes {
 
 	  	ob_start();
 
-		$products = new WP_Query( $args );
+		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts ) );
 
 		$woocommerce_loop['columns'] = $columns;
 
@@ -719,7 +719,7 @@ class WC_Shortcodes {
 
 	  	add_filter( 'posts_clauses', array( &$this, 'order_by_rating_post_clauses' ) );
 
-		$products = new WP_Query( $args );
+		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts ) );
 
 		remove_filter( 'posts_clauses', array( &$this, 'order_by_rating_post_clauses' ) );
 
@@ -784,7 +784,7 @@ class WC_Shortcodes {
 
 		ob_start();
 
-		$products = new WP_Query( $args );
+		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts ) );
 
 		$woocommerce_loop['columns'] = $columns;
 
@@ -949,7 +949,7 @@ class WC_Shortcodes {
 
 		ob_start();
 
-		$products = new WP_Query( $args );
+		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts ) );
 
 		$woocommerce_loop['columns'] = $columns;
 
