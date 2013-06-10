@@ -100,31 +100,34 @@ function woocommerce_attributes() {
 
 			// Add new attribute
 			if ( 'add' === $action ) {
-				$wpdb->insert(
-					$wpdb->prefix . 'woocommerce_attribute_taxonomies',
-					array(
-						'attribute_label'   => $attribute_label,
-						'attribute_name'    => $attribute_name,
-						'attribute_type'    => $attribute_type,
-						'attribute_orderby' => $attribute_orderby,
-					)
+
+				$attribute = array(
+					'attribute_label'   => $attribute_label,
+					'attribute_name'    => $attribute_name,
+					'attribute_type'    => $attribute_type,
+					'attribute_orderby' => $attribute_orderby,
 				);
+
+				$wpdb->insert( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $attribute );
+
+				do_action( 'woocommerce_attribute_added', $wpdb->insert_id, $attribute );
 
 				$action_completed = true;
 			}
 
 			// Edit existing attribute
 			if ( 'edit' === $action ) {
-				$wpdb->update(
-					$wpdb->prefix . 'woocommerce_attribute_taxonomies',
-					array(
-						'attribute_label'   => $attribute_label,
-						'attribute_name'    => $attribute_name,
-						'attribute_type'    => $attribute_type,
-						'attribute_orderby' => $attribute_orderby,
-					),
-					array( 'attribute_id' => $attribute_id )
+
+				$attribute = array(
+					'attribute_label'   => $attribute_label,
+					'attribute_name'    => $attribute_name,
+					'attribute_type'    => $attribute_type,
+					'attribute_orderby' => $attribute_orderby,
 				);
+
+				$wpdb->update( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $attribute, array( 'attribute_id' => $attribute_id ) );
+
+				do_action( 'woocommerce_attribute_updated', $attribute_id, $attribute, $old_attribute_name );
 
 				if ( $old_attribute_name != $attribute_name && ! empty( $old_attribute_name ) ) {
 					// Update taxonomies in the wp term taxonomy table
@@ -182,6 +185,8 @@ function woocommerce_attributes() {
 					wp_delete_term( $term->term_id, $taxonomy );
 				}
 			}
+
+			do_action( 'woocommerce_attribute_deleted', $attribute_id, $attribute_name, $taxonomy );
 
 			$action_completed = true;
 		}
