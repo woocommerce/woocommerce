@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.1-bleeding\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-06-10 06:38:30+0000\n"
+"PO-Revision-Date: 2013-06-10 06:50:14+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -11997,6 +11997,7 @@ msgid "Rated %d out of 5"
 msgstr "Avaliado em %d de 5"
 
 #: templates/single-product-reviews.php:63
+#: templates/single-product-reviews.php:71
 #@ woocommerce
 msgid "Add Your Review"
 msgstr "Dê sua opinião"
@@ -13563,11 +13564,6 @@ msgstr ""
 msgid "Hello, <strong>%s</strong>. From your account dashboard you can view your recent orders, manage your shipping and billing addresses and <a href=\"%s\">edit your password and account details</a>."
 msgstr ""
 
-#: templates/single-product-reviews.php:71
-#@ woocommerce
-msgid "There are no reviews yet, would you like to <a href=\"#review_form\" class=\"inline show_review_form\" title=\"Add Your Review"
-msgstr "Não existem avaliações ainda, gostaria de <a href=\"#review_form\" class=\"inline show_review_form\" title=\"Adicionar a sua Avaliação"
-
 #: woocommerce-core-functions.php:797
 #@ woocommerce
 msgid "Russian Ruble"
@@ -13626,4 +13622,10 @@ msgstr ""
 #@ woocommerce
 msgid "2.1-bleeding"
 msgstr ""
+
+#: templates/single-product-reviews.php:71
+#, php-format
+#@ woocommerce
+msgid "There are no reviews yet, would you like to %s submit yours%s?"
+msgstr "Não existem avaliações ainda, gostaria de %s enviar a sua%s?"
 
