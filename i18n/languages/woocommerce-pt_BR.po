@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.1-bleeding\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-06-10 06:50:14+0000\n"
+"PO-Revision-Date: 2013-06-10 13:56:11+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -13205,7 +13205,7 @@ msgstr ""
 #: admin/settings/settings-init.php:105
 #@ woocommerce
 msgid "Enable guest checkout"
-msgstr ""
+msgstr "Habilitar finalização como convidado"
 
 #: admin/settings/settings-init.php:106
 #@ woocommerce
