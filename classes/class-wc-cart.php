@@ -553,7 +553,11 @@ class WC_Cart {
 			$return = '';
 			$has_data = false;
 
-			if ( ! $flat ) $return .= '<dl class="variation">';
+			// get tags for the HTML output 
+			$container_tag = apply_filters( 'woocommerce_products_list_container_tag', 'dl' );
+			$container_class = apply_filters( 'woocommerce_products_list_container_class', 'variation' );
+		
+			if ( ! $flat ) $return .= '<' . $container_tag . ' class="' . $container_class . '">';
 
 			// Variation data
 			if ( ! empty( $cart_item['data']->variation_id ) && is_array( $cart_item['variation'] ) ) {
@@ -577,9 +581,11 @@ class WC_Cart {
 
 					if ( $flat )
 						$variation_list[] = $woocommerce->attribute_label( str_replace( 'attribute_', '', $name ) ) . ': ' . $value;
-					else
-						$variation_list[] = '<dt>' . $woocommerce->attribute_label( str_replace( 'attribute_', '', $name ) ) . ':</dt><dd>' . $value . '</dd>';
-
+					else {
+						$label = $woocommerce->attribute_label( str_replace( 'attribute_', '', $name ) );
+						$variation_list_entry = '<dt>' . $label . ':</dt><dd>' . $value . '</dd>';
+						$variation_list[] = apply_filters( 'woocommerce_variation_list_entry', $variation_list_entry, $label, $name, $value );
+					}
 				}
 
 				if ($flat)
@@ -605,8 +611,11 @@ class WC_Cart {
 
 						if ($flat)
 							$data_list[] = $data['name'].': '.$display_value;
-						else
-							$data_list[] = '<dt>'.$data['name'].':</dt><dd>'.$display_value.'</dd>';
+						else {
+							$name = $data['name'];
+							$data_list_entry = '<dt>' . $name . ':</dt><dd>' . $display_value . '</dd>';
+							$data_list[] = apply_filters('woo_commerce_data_list_entry', $data_list_entry, $name, $display_value);
+						}
 					}
 				}
 
@@ -620,7 +629,7 @@ class WC_Cart {
 			}
 
 			if ( ! $flat )
-				$return .= '</dl>';
+				$return .= '</' . $container_tag . '>';
 
 			if ( $has_data )
 				return $return;
