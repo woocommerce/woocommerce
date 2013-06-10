@@ -15,21 +15,16 @@ global $post, $product;
 
 /* If the product is not downloadable. */
 if(!$product->is_downloadable()){
-?>
-	<div itemscope itemtype="http://schema.org/Product" id="product-<?php echo $post->ID; ?>" <?php post_class(); ?>>
-<?php
+	$schema = "Product";
 }
 /* If the product is downloadable, what type of downloadable product is it. */
 else{
 	if(get_post_meta($post->ID, '_download_type', true) == 'application'){
-?>
-		<div itemscope itemtype="http://schema.org/SoftwareApplication" id="product-<?php echo $post->ID; ?>" <?php post_class(); ?>>
-<?php
+		$schema = "SoftwareApplication";
 	}
 	else if(get_post_meta($post->ID, '_download_type', true) == 'music'){
-?>
-		<div itemscope itemtype="http://schema.org/MusicAlbum" id="product-<?php echo $post->ID; ?>" <?php post_class(); ?>>
-<?php
+		$schema = "MusicAlbum";
 	}
 }
 ?>
+<div itemscope itemtype="http://schema.org/<?php echo $schema; ?>" id="product-<?php echo $post->ID; ?>" <?php post_class(); ?>>
