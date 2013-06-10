@@ -31,6 +31,10 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		$this->init_form_fields();
 		$this->init_settings();
 
+        // Define user set variables
+        $this->title            = $this->get_option( 'title' );
+        $this->description      = $this->get_option( 'description' );
+
 		// BACS account fields shown on the thanks page and in emails
 		$this->account_fields   = array(
 			'account_name' 	=> array(
