@@ -39,7 +39,7 @@ function woocommerce_coupon_data_meta_box( $post ) {
 			echo '</div><div class="options_group">';
 
 			// Type
-    		woocommerce_wp_select( array( 'id' => 'discount_type', 'label' => __( 'Discount type', 'woocommerce' ), 'options' => $woocommerce->get_coupon_discount_types() ) );
+    		woocommerce_wp_select( array( 'id' => 'discount_type', 'label' => __( 'Discount type', 'woocommerce' ), 'options' => $woocommerce->get_helper( 'coupon' )->get_coupon_discount_types() ) );
 
 			// Amount
 			woocommerce_wp_text_input( array( 'id' => 'coupon_amount', 'label' => __( 'Coupon amount', 'woocommerce' ), 'placeholder' => '0.00', 'description' => __( 'Value of the coupon.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(

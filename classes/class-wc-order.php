@@ -1147,7 +1147,7 @@ class WC_Order {
 	 */
 	public function get_cancel_order_url() {
 		global $woocommerce;
-		return apply_filters('woocommerce_get_cancel_order_url', $woocommerce->nonce_url( 'cancel_order', add_query_arg('cancel_order', 'true', add_query_arg('order', $this->order_key, add_query_arg('order_id', $this->id, trailingslashit( home_url() ))))));
+		return apply_filters('woocommerce_get_cancel_order_url', $woocommerce->get_helper( 'nonce' )->nonce_url( 'cancel_order', add_query_arg('cancel_order', 'true', add_query_arg('order', $this->order_key, add_query_arg('order_id', $this->id, trailingslashit( home_url() ))))));
 	}
 
 	/**

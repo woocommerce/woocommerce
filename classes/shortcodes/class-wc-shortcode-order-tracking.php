@@ -21,7 +21,7 @@ class WC_Shortcode_Order_Tracking {
 	 */
 	public static function get( $atts ) {
 		global $woocommerce;
-		return $woocommerce->shortcode_wrapper( array( __CLASS__, 'output' ), $atts );
+		return $woocommerce->get_helper( 'shortcode' )->shortcode_wrapper( array( __CLASS__, 'output' ), $atts );
 	}
 
 	/**
@@ -41,7 +41,7 @@ class WC_Shortcode_Order_Tracking {
 
 		if ( ! empty( $_REQUEST['orderid'] ) ) {
 
-			$woocommerce->verify_nonce( 'order_tracking' );
+			$woocommerce->get_helper( 'nonce' )->verify_nonce( 'order_tracking' );
 
 			$order_id 		= empty( $_REQUEST['orderid'] ) ? 0 : esc_attr( $_REQUEST['orderid'] );
 			$order_email	= empty( $_REQUEST['order_email'] ) ? '' : esc_attr( $_REQUEST['order_email']) ;

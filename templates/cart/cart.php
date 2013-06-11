@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $woocommerce;
 
-$woocommerce->show_messages();
+$woocommerce->get_helper( 'messages' )->show_messages();
 ?>
 
 <?php do_action( 'woocommerce_before_cart' ); ?>
@@ -135,7 +135,7 @@ $woocommerce->show_messages();
 
 				<?php do_action('woocommerce_proceed_to_checkout'); ?>
 
-				<?php $woocommerce->nonce_field('cart') ?>
+				<?php $woocommerce->get_helper( 'nonce' )->nonce_field('cart') ?>
 			</td>
 		</tr>
 

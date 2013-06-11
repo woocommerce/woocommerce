@@ -105,12 +105,12 @@ function woocommerce_delete_post( $id ) {
 							wp_update_post( $child_post );
 						}
 
-				$woocommerce->clear_product_transients();
+				$woocommerce->get_helper( 'transient' )->clear_product_transients();
 
 			break;
 			case 'product_variation' :
 
-				$woocommerce->clear_product_transients();
+				$woocommerce->get_helper( 'transient' )->clear_product_transients();
 
 			break;
 		}

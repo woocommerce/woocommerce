@@ -80,7 +80,7 @@ function woocommerce_attributes() {
 		} elseif ( in_array( $attribute_name, $reserved_terms ) ) {
 			$error = sprintf( __( 'Slug “%s” is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) );
 		} else {
-			$taxonomy_exists = taxonomy_exists( $woocommerce->attribute_taxonomy_name( $attribute_name ) );
+			$taxonomy_exists = taxonomy_exists( $woocommerce->get_helper( 'attribute' )->attribute_taxonomy_name( $attribute_name ) );
 
 			if ( 'add' === $action && $taxonomy_exists ) {
 				$error = sprintf( __( 'Slug “%s” is already in use. Change it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) );
@@ -133,7 +133,7 @@ function woocommerce_attributes() {
 					// Update taxonomies in the wp term taxonomy table
 					$wpdb->update(
 						$wpdb->term_taxonomy,
-						array( 'taxonomy' => $woocommerce->attribute_taxonomy_name( $attribute_name ) ),
+						array( 'taxonomy' => $woocommerce->get_helper( 'attribute' )->attribute_taxonomy_name( $attribute_name ) ),
 						array( 'taxonomy' => 'pa_' . $old_attribute_name )
 					);
 
@@ -177,7 +177,7 @@ function woocommerce_attributes() {
 
 		if ( $attribute_name && $wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" ) ) {
 
-			$taxonomy = $woocommerce->attribute_taxonomy_name( $attribute_name );
+			$taxonomy = $woocommerce->get_helper( 'attribute' )->attribute_taxonomy_name( $attribute_name );
 
 			if ( taxonomy_exists( $taxonomy ) ) {
 				$terms = get_terms( $taxonomy, 'orderby=name&hide_empty=0' );
@@ -318,12 +318,12 @@ function woocommerce_add_attribute() {
 				        </thead>
 				        <tbody>
 				        	<?php
-				        		$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();
+				        		$attribute_taxonomies = $woocommerce->get_helper( 'attribute' )->get_attribute_taxonomies();
 				        		if ( $attribute_taxonomies ) :
 				        			foreach ($attribute_taxonomies as $tax) :
 				        				?><tr>
 
-				        					<td><a href="edit-tags.php?taxonomy=<?php echo esc_html($woocommerce->attribute_taxonomy_name($tax->attribute_name)); ?>&amp;post_type=product"><?php echo esc_html( $tax->attribute_label ); ?></a>
+				        					<td><a href="edit-tags.php?taxonomy=<?php echo esc_html($woocommerce->get_helper( 'attribute' )->attribute_taxonomy_name($tax->attribute_name)); ?>&amp;post_type=product"><?php echo esc_html( $tax->attribute_label ); ?></a>
 
 				        					<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg('edit', $tax->attribute_id, 'admin.php?page=woocommerce_attributes') ); ?>"><?php _e( 'Edit', 'woocommerce' ); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg('delete', $tax->attribute_id, 'admin.php?page=woocommerce_attributes'), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ); ?>"><?php _e( 'Delete', 'woocommerce' ); ?></a></span></div>
 				        					</td>
@@ -343,9 +343,9 @@ function woocommerce_add_attribute() {
 					        					}
 				        					?></td>
 				        					<td><?php
-				        						if (taxonomy_exists($woocommerce->attribute_taxonomy_name($tax->attribute_name))) :
+				        						if (taxonomy_exists($woocommerce->get_helper( 'attribute' )->attribute_taxonomy_name($tax->attribute_name))) :
 					        						$terms_array = array();
-					        						$terms = get_terms( $woocommerce->attribute_taxonomy_name($tax->attribute_name), 'orderby=name&hide_empty=0' );
+					        						$terms = get_terms( $woocommerce->get_helper( 'attribute' )->attribute_taxonomy_name($tax->attribute_name), 'orderby=name&hide_empty=0' );
 					        						if ($terms) :
 						        						foreach ($terms as $term) :
 															$terms_array[] = $term->name;
@@ -358,7 +358,7 @@ function woocommerce_add_attribute() {
 													echo '<span class="na">&ndash;</span>';
 												endif;
 				        					?></td>
-				        					<td><a href="edit-tags.php?taxonomy=<?php echo esc_html($woocommerce->attribute_taxonomy_name($tax->attribute_name)); ?>&amp;post_type=product" class="button alignright"><?php _e( 'Configure&nbsp;terms', 'woocommerce' ); ?></a></td>
+				        					<td><a href="edit-tags.php?taxonomy=<?php echo esc_html($woocommerce->get_helper( 'attribute' )->attribute_taxonomy_name($tax->attribute_name)); ?>&amp;post_type=product" class="button alignright"><?php _e( 'Configure&nbsp;terms', 'woocommerce' ); ?></a></td>
 				        				</tr><?php
 				        			endforeach;
 				        		else :

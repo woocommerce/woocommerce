@@ -211,18 +211,18 @@ function woocommerce_update_cart_action() {
 	global $woocommerce;
 
 	// Remove from cart
-	if ( isset($_GET['remove_item']) && $_GET['remove_item'] && $woocommerce->verify_nonce('cart', '_GET')) {
+	if ( isset($_GET['remove_item']) && $_GET['remove_item'] && $woocommerce->get_helper( 'nonce' )->verify_nonce('cart', '_GET')) {
 
 		$woocommerce->cart->set_quantity( $_GET['remove_item'], 0 );
 
-		$woocommerce->add_message( __( 'Cart updated.', 'woocommerce' ) );
+		$woocommerce->get_helper( 'messages' )->add_message( __( 'Cart updated.', 'woocommerce' ) );
 
 		$referer = ( wp_get_referer() ) ? wp_get_referer() : $woocommerce->cart->get_cart_url();
 		wp_safe_redirect( $referer );
 		exit;
 
 	// Update Cart
-	} elseif ( ( ! empty( $_POST['update_cart'] ) || ! empty( $_POST['proceed'] ) ) && $woocommerce->verify_nonce('cart')) {
+	} elseif ( ( ! empty( $_POST['update_cart'] ) || ! empty( $_POST['proceed'] ) ) && $woocommerce->get_helper( 'nonce' )->verify_nonce('cart')) {
 
 		$cart_totals = isset( $_POST['cart'] ) ? $_POST['cart'] : '';
 
@@ -246,7 +246,7 @@ function woocommerce_update_cart_action() {
 
 	    		// is_sold_individually
 				if ( $_product->is_sold_individually() && $quantity > 1 ) {
-					$woocommerce->add_error( sprintf( __( 'You can only have 1 %s in your cart.', 'woocommerce' ), $_product->get_title() ) );
+					$woocommerce->get_helper( 'messages' )->add_error( sprintf( __( 'You can only have 1 %s in your cart.', 'woocommerce' ), $_product->get_title() ) );
 					$passed_validation = false;
 				}
 
@@ -260,7 +260,7 @@ function woocommerce_update_cart_action() {
 			wp_safe_redirect( $woocommerce->cart->get_checkout_url() );
 			exit;
 		} else {
-			$woocommerce->add_message( __( 'Cart updated.', 'woocommerce' ) );
+			$woocommerce->get_helper( 'messages' )->add_message( __( 'Cart updated.', 'woocommerce' ) );
 
 			$referer = ( wp_get_referer() ) ? wp_get_referer() : $woocommerce->cart->get_cart_url();
 			$referer = remove_query_arg( 'remove_discounts', $referer );
@@ -304,7 +304,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 
 		// Only allow integer variation ID - if its not set, redirect to the product page
 		if ( empty( $variation_id ) ) {
-			$woocommerce->add_error( __( 'Please choose product options&hellip;', 'woocommerce' ) );
+			$woocommerce->get_helper( 'messages' )->add_error( __( 'Please choose product options&hellip;', 'woocommerce' ) );
 			return;
 		}
 
@@ -362,7 +362,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 				}
 			}
         } else {
-            $woocommerce->add_error( __( 'Please choose product options&hellip;', 'woocommerce' ) );
+            $woocommerce->get_helper( 'messages' )->add_error( __( 'Please choose product options&hellip;', 'woocommerce' ) );
             return;
        }
 
@@ -395,14 +395,14 @@ function woocommerce_add_to_cart_action( $url = false ) {
 			}
 
 			if ( ! $was_added_to_cart && ! $quantity_set ) {
-				$woocommerce->add_error( __( 'Please choose the quantity of items you wish to add to your cart&hellip;', 'woocommerce' ) );
+				$woocommerce->get_helper( 'messages' )->add_error( __( 'Please choose the quantity of items you wish to add to your cart&hellip;', 'woocommerce' ) );
 				return;
 			}
 
 		} elseif ( $product_id ) {
 
 			/* Link on product archives */
-			$woocommerce->add_error( __( 'Please choose a product to add to your cart&hellip;', 'woocommerce' ) );
+			$woocommerce->get_helper( 'messages' )->add_error( __( 'Please choose a product to add to your cart&hellip;', 'woocommerce' ) );
 			return;
 
 		}
@@ -438,7 +438,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 		}
 
 		// Redirect to cart option
-		elseif ( get_option('woocommerce_cart_redirect_after_add') == 'yes' && $woocommerce->error_count() == 0 ) {
+		elseif ( get_option('woocommerce_cart_redirect_after_add') == 'yes' && $woocommerce->get_helper( 'messages' )->error_count() == 0 ) {
 			wp_safe_redirect( $woocommerce->cart->get_cart_url() );
 			exit;
 		}
@@ -490,7 +490,7 @@ function woocommerce_add_to_cart_message( $product_id ) {
 
 	endif;
 
-	$woocommerce->add_message( apply_filters('woocommerce_add_to_cart_message', $message) );
+	$woocommerce->get_helper( 'messages' )->add_message( apply_filters('woocommerce_add_to_cart_message', $message) );
 }
 
 
@@ -567,7 +567,7 @@ function woocommerce_checkout_action() {
 function woocommerce_pay_action() {
 	global $woocommerce, $wp;
 
-	if ( isset( $_POST['woocommerce_pay'] ) && $woocommerce->verify_nonce( 'pay' ) ) {
+	if ( isset( $_POST['woocommerce_pay'] ) && $woocommerce->get_helper( 'nonce' )->verify_nonce( 'pay' ) ) {
 
 		ob_start();
 
@@ -606,7 +606,7 @@ function woocommerce_pay_action() {
 				$available_gateways[ $payment_method ]->validate_fields();
 
 				// Process
-				if ( $woocommerce->error_count() == 0 ) {
+				if ( $woocommerce->get_helper( 'messages' )->error_count() == 0 ) {
 
 					$result = $available_gateways[ $payment_method ]->process_payment( $order_id );
 
@@ -644,7 +644,7 @@ function woocommerce_process_login() {
 
 	if ( ! empty( $_POST['login'] ) ) {
 
-		$woocommerce->verify_nonce( 'login' );
+		$woocommerce->get_helper( 'nonce' )->verify_nonce( 'login' );
 
 		try {
 			$creds = array();
@@ -686,7 +686,7 @@ function woocommerce_process_login() {
 				exit;
 			}
 		} catch (Exception $e) {
-			$woocommerce->add_error( $e->getMessage() );
+			$woocommerce->get_helper( 'messages' )->add_error( $e->getMessage() );
 		}
 	}
 }
@@ -710,6 +710,8 @@ function woocommerce_create_new_customer( $email, $username = '', $password = ''
 
 	if ( email_exists( $email ) )
 		return new WP_Error( "registration-error", __( "An account is already registered with your email address. Please login.", "woocommerce" ) );
+
+	$woocommerce->get_helper( 'nonce' )->verify_nonce( 'register' );
 
 	// Handle username creation
 	if ( get_option( 'woocommerce_registration_generate_username' ) == 'no' || ! empty( $username ) ) {
@@ -805,14 +807,14 @@ function woocommerce_process_registration() {
 
 		// Anti-spam trap
 		if ( ! empty( $_POST['email_2'] ) ) {
-			$woocommerce->add_error( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Anti-spam field was filled in.', 'woocommerce' ) );
+			$woocommerce->get_helper( 'messages' )->add_error( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Anti-spam field was filled in.', 'woocommerce' ) );
 			return;
 		}
 
 		$new_customer = woocommerce_create_new_customer( $email, $username, $password );
 
 		if ( is_wp_error( $new_customer ) ) {
-			$woocommerce->add_error( $new_customer->get_error_message() );
+			$woocommerce->get_helper( 'messages' )->add_error( $new_customer->get_error_message() );
 			return;
 		}
 
@@ -862,7 +864,7 @@ function woocommerce_order_again() {
 	global $woocommerce;
 
 	// Nothing to do
-	if ( ! isset( $_GET['order_again'] ) || ! is_user_logged_in() || ! $woocommerce->verify_nonce( 'order_again', '_GET' ) )
+	if ( ! isset( $_GET['order_again'] ) || ! is_user_logged_in() || ! $woocommerce->verify_nonce( 'order_again', '_GET' ) || ! $woocommerce->get_helper( 'nonce' )->verify_nonce( 'order_again', '_GET' ) )
 		return;
 
 	// Clear current cart
@@ -904,7 +906,7 @@ function woocommerce_order_again() {
 	do_action( 'woocommerce_ordered_again', $order->id );
 
 	// Redirect to cart
-	$woocommerce->add_message( __( 'The cart has been filled with the items from your previous order.', 'woocommerce' ) );
+	$woocommerce->get_helper( 'messages' )->add_message( __( 'The cart has been filled with the items from your previous order.', 'woocommerce' ) );
 	wp_safe_redirect( $woocommerce->cart->get_cart_url() );
 	exit;
 }
@@ -927,23 +929,23 @@ function woocommerce_cancel_order() {
 
 		$order = new WC_Order( $order_id );
 
-		if ( $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, array( 'pending', 'failed' ) ) && $woocommerce->verify_nonce( 'cancel_order', '_GET' ) ) :
+		if ( $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, array( 'pending', 'failed' ) ) && $woocommerce->get_helper( 'nonce' )->verify_nonce( 'cancel_order', '_GET' ) ) :
 
 			// Cancel the order + restore stock
 			$order->cancel_order( __('Order cancelled by customer.', 'woocommerce' ) );
 
 			// Message
-			$woocommerce->add_message( __( 'Your order was cancelled.', 'woocommerce' ) );
+			$woocommerce->get_helper( 'messages' )->add_message( __( 'Your order was cancelled.', 'woocommerce' ) );
 
 			do_action( 'woocommerce_cancelled_order', $order->id );
 
 		elseif ( $order->status != 'pending' ) :
 
-			$woocommerce->add_error( __( 'Your order is no longer pending and could not be cancelled. Please contact us if you need assistance.', 'woocommerce' ) );
+			$woocommerce->get_helper( 'messages' )->add_error( __( 'Your order is no longer pending and could not be cancelled. Please contact us if you need assistance.', 'woocommerce' ) );
 
 		else :
 
-			$woocommerce->add_error( __( 'Invalid order.', 'woocommerce' ) );
+			$woocommerce->get_helper( 'messages' )->add_error( __( 'Invalid order.', 'woocommerce' ) );
 
 		endif;
 
@@ -1301,7 +1303,7 @@ function woocommerce_check_comment_rating( $comment_data ) {
 	global $woocommerce;
 
 	// If posting a comment (not trackback etc) and not logged in
-	if ( isset( $_POST['rating'] ) && ! $woocommerce->verify_nonce('comment_rating') )
+	if ( isset( $_POST['rating'] ) && ! $woocommerce->get_helper( 'nonce' )->verify_nonce('comment_rating') )
 		wp_die( __( 'You have taken too long. Please go back and refresh the page.', 'woocommerce' ) );
 
 	elseif ( isset( $_POST['rating'] ) && empty( $_POST['rating'] ) && $comment_data['comment_type'] == '' && get_option('woocommerce_review_rating_required') == 'yes' ) {
@@ -1373,12 +1375,12 @@ function woocommerce_layered_nav_init( ) {
 
 		$_chosen_attributes = $_attributes_array = array();
 
-		$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();
+		$attribute_taxonomies = $woocommerce->get_helper( 'attribute' )->get_attribute_taxonomies();
 		if ( $attribute_taxonomies ) {
 			foreach ( $attribute_taxonomies as $tax ) {
 
 		    	$attribute = sanitize_title( $tax->attribute_name );
-		    	$taxonomy = $woocommerce->attribute_taxonomy_name( $attribute );
+		    	$taxonomy = $woocommerce->get_helper( 'attribute' )->attribute_taxonomy_name( $attribute );
 
 				// create an array of product attribute taxonomies
 				$_attributes_array[] = $taxonomy;
@@ -1586,7 +1588,7 @@ function woocommerce_save_account_details() {
 	if ( empty( $_POST[ 'action' ] ) || ( 'save_account_details' !== $_POST[ 'action' ] ) )
 		return;
 
-	$woocommerce->verify_nonce( 'save_account_details' );
+	$woocommerce->get_helper( 'nonce' )->verify_nonce( 'save_account_details' );
 
 	$update       = true;
 	$errors       = new WP_Error();
@@ -1613,32 +1615,32 @@ function woocommerce_save_account_details() {
 		$user->user_pass    = $pass1;
 
 	if ( empty( $account_first_name ) || empty( $account_last_name ) )
-		$woocommerce->add_error( __( 'Please enter your name.', 'woocommerce' ) );
+		$woocommerce->get_helper( 'messages' )->add_error( __( 'Please enter your name.', 'woocommerce' ) );
 
 	if ( empty( $account_email ) || ! is_email( $account_email ) )
-		$woocommerce->add_error( __( 'Please provide a valid email address.', 'woocommerce' ) );
+		$woocommerce->get_helper( 'messages' )->add_error( __( 'Please provide a valid email address.', 'woocommerce' ) );
 
 	elseif ( email_exists( $account_email ) && $account_email !== $current_user->user_email )
-		$woocommerce->add_error( __( 'This email address is already registered.', 'woocommerce' ) );
+		$woocommerce->get_helper( 'messages' )->add_error( __( 'This email address is already registered.', 'woocommerce' ) );
 
 	if ( ! empty( $pass1 ) && empty( $pass2 ) )
-		$woocommerce->add_error( __( 'Please re-enter your password.', 'woocommerce' ) );
+		$woocommerce->get_helper( 'messages' )->add_error( __( 'Please re-enter your password.', 'woocommerce' ) );
 
 	elseif ( ! empty( $pass1 ) && $pass1 !== $pass2 )
-		$woocommerce->add_error( __( 'Passwords do not match.', 'woocommerce' ) );
+		$woocommerce->get_helper( 'messages' )->add_error( __( 'Passwords do not match.', 'woocommerce' ) );
 
 	// Allow plugins to return their own errors.
 	do_action_ref_array( 'user_profile_update_errors', array ( &$errors, $update, &$user ) );
 
 	if ( $errors->get_error_messages() )
 		foreach( $errors->get_error_messages() as $error )
-			$woocommerce->add_error( $error );
+			$woocommerce->get_helper( 'messages' )->add_error( $error );
 
-	if ( $woocommerce->error_count() == 0 ) {
+	if ( $woocommerce->get_helper( 'messages' )->error_count() == 0 ) {
 
 		wp_update_user( $user ) ;
 
-		$woocommerce->add_message( __( 'Account details changed successfully.', 'woocommerce' ) );
+		$woocommerce->get_helper( 'messages' )->add_message( __( 'Account details changed successfully.', 'woocommerce' ) );
 
 		do_action( 'woocommerce_save_account_details', $user->ID );
 
@@ -1664,7 +1666,7 @@ function woocommerce_save_address() {
 	if ( empty( $_POST[ 'action' ] ) || ( 'edit_address' !== $_POST[ 'action' ] ) )
 		return;
 
-	$woocommerce->verify_nonce( 'edit_address' );
+	$woocommerce->get_helper( 'nonce' )->verify_nonce( 'edit_address' );
 
 	$validation = $woocommerce->validation();
 
@@ -1695,12 +1697,12 @@ function woocommerce_save_address() {
 		$_POST[$key] = apply_filters('woocommerce_process_myaccount_field_' . $key, $_POST[$key]);
 
 		// Validation: Required fields
-		if ( isset($field['required']) && $field['required'] && empty($_POST[$key]) ) $woocommerce->add_error( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce' ) );
+		if ( isset($field['required']) && $field['required'] && empty($_POST[$key]) ) $woocommerce->get_helper( 'messages' )->add_error( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce' ) );
 
 		// Postcode
 		if ($key=='billing_postcode' || $key=='shipping_postcode') :
 			if ( ! $validation->is_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] ) ) :
-				$woocommerce->add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
+				$woocommerce->get_helper( 'messages' )->add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
 			else :
 				$_POST[$key] = $validation->format_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] );
 			endif;
@@ -1708,13 +1710,13 @@ function woocommerce_save_address() {
 
 	endforeach;
 
-	if ( $woocommerce->error_count() == 0 ) {
+	if ( $woocommerce->get_helper( 'messages' )->error_count() == 0 ) {
 
 		foreach ($address as $key => $field) :
 			update_user_meta( $user_id, $key, $_POST[$key] );
 		endforeach;
 
-		$woocommerce->add_message( __( 'Address changed successfully.', 'woocommerce' ) );
+		$woocommerce->get_helper( 'messages' )->add_message( __( 'Address changed successfully.', 'woocommerce' ) );
 
 		do_action( 'woocommerce_customer_save_address', $user_id );
 

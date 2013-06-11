@@ -74,49 +74,6 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 	}
 }
 
-if ( ! function_exists( 'woocommerce_single_product_content' ) ) {
-
-	/**
-	 * woocommerce_single_product_content function.
-	 *
-	 * @access public
-	 * @return void
-	 * @deprecated 1.6
-	 */
-	function woocommerce_single_product_content() {
-		_deprecated_function( __FUNCTION__, '1.6' );
-		woocommerce_content();
-	}
-}
-if ( ! function_exists( 'woocommerce_archive_product_content' ) ) {
-
-	/**
-	 * woocommerce_archive_product_content function.
-	 *
-	 * @access public
-	 * @return void
-	 * @deprecated 1.6
-	 */
-	function woocommerce_archive_product_content() {
-		_deprecated_function( __FUNCTION__, '1.6' );
-		woocommerce_content();
-	}
-}
-if ( ! function_exists( 'woocommerce_product_taxonomy_content' ) ) {
-
-	/**
-	 * woocommerce_product_taxonomy_content function.
-	 *
-	 * @access public
-	 * @return void
-	 * @deprecated 1.6
-	 */
-	function woocommerce_product_taxonomy_content() {
-		_deprecated_function( __FUNCTION__, '1.6' );
-		woocommerce_content();
-	}
-}
-
 /** Global ****************************************************************/
 
 if ( ! function_exists( 'woocommerce_output_content_wrapper' ) ) {
@@ -155,18 +112,18 @@ if ( ! function_exists( 'woocommerce_show_messages' ) ) {
 	function woocommerce_show_messages() {
 		global $woocommerce;
 
-		if ( $woocommerce->error_count() > 0  )
+		if ( $woocommerce->get_helper( 'messages' )->error_count() > 0  )
 			woocommerce_get_template( 'shop/errors.php', array(
-					'errors' => $woocommerce->get_errors()
+					'errors' => $woocommerce->get_helper( 'messages' )->get_errors()
 				) );
 
 
-		if ( $woocommerce->message_count() > 0  )
+		if ( $woocommerce->get_helper( 'messages' )->message_count() > 0  )
 			woocommerce_get_template( 'shop/messages.php', array(
-					'messages' => $woocommerce->get_messages()
+					'messages' => $woocommerce->get_helper( 'messages' )->get_messages()
 				) );
 
-		$woocommerce->clear_messages();
+		$woocommerce->get_helper( 'messages' )->clear_messages();
 	}
 }
 
