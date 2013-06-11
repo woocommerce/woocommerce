@@ -37,11 +37,11 @@ jQuery(document).ready(function($) {
 			var s_address_2	= address_2;
 		}
 
-		$('#order_methods, #order_review').block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6}});
+		$('#order_methods, #order_review').block({message: null, overlayCSS: {background: '#fff url(' + wc_checkout_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6}});
 
 		var data = {
 			action: 			'woocommerce_update_order_review',
-			security: 			woocommerce_params.update_order_review_nonce,
+			security: 			wc_checkout_params.update_order_review_nonce,
 			shipping_method: 	method,
 			payment_method:		payment_method,
 			country: 			country,
@@ -61,7 +61,7 @@ jQuery(document).ready(function($) {
 
 		xhr = $.ajax({
 			type: 		'POST',
-			url: 		woocommerce_params.ajax_url,
+			url: 		wc_checkout_params.ajax_url,
 			data: 		data,
 			success: 	function( response ) {
 				if ( response ) {
@@ -104,7 +104,7 @@ jQuery(document).ready(function($) {
 		}
 	}).change();
 
-	if ( woocommerce_params.option_guest_checkout == 'yes' ) {
+	if ( wc_checkout_params.option_guest_checkout == 'yes' ) {
 
 		$('div.create-account').hide();
 
@@ -241,11 +241,11 @@ jQuery(document).ready(function($) {
 			var form_data = $form.data();
 
 			if ( form_data["blockUI.isBlocked"] != 1 )
-				$form.block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6}});
+				$form.block({message: null, overlayCSS: {background: '#fff url(' + wc_checkout_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6}});
 
 			$.ajax({
 				type: 		'POST',
-				url: 		woocommerce_params.checkout_url,
+				url: 		wc_checkout_params.checkout_url,
 				data: 		$form.serialize(),
 				success: 	function( code ) {
 						try {
@@ -305,17 +305,17 @@ jQuery(document).ready(function($) {
 
 		if ( $form.is('.processing') ) return false;
 
-		$form.addClass('processing').block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6}});
+		$form.addClass('processing').block({message: null, overlayCSS: {background: '#fff url(' + wc_checkout_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6}});
 
 		var data = {
 			action: 			'woocommerce_apply_coupon',
-			security: 			woocommerce_params.apply_coupon_nonce,
+			security: 			wc_checkout_params.apply_coupon_nonce,
 			coupon_code:		$form.find('input[name=coupon_code]').val()
 		};
 
 		$.ajax({
 			type: 		'POST',
-			url: 		woocommerce_params.ajax_url,
+			url: 		wc_checkout_params.ajax_url,
 			data: 		data,
 			success: 	function( code ) {
 				$('.woocommerce-error, .woocommerce-message').remove();
@@ -334,9 +334,9 @@ jQuery(document).ready(function($) {
 	});
 
 	/* Localisation */
-	var locale_json = woocommerce_params.locale.replace(/&quot;/g, '"');
+	var locale_json = wc_checkout_params.locale.replace(/&quot;/g, '"');
 	var locale = $.parseJSON( locale_json );
-	var required = ' <abbr class="required" title="' + woocommerce_params.i18n_required_text + '">*</abbr>';
+	var required = ' <abbr class="required" title="' + wc_checkout_params.i18n_required_text + '">*</abbr>';
 
 	$('body')
 
@@ -434,7 +434,7 @@ jQuery(document).ready(function($) {
 	});
 
 	// Update on page load
-	if ( woocommerce_params.is_checkout == 1 ) {
+	if ( wc_checkout_params.is_checkout == 1 ) {
 		$('body').trigger('init_checkout');
 	}
 

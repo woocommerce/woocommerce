@@ -1,8 +1,17 @@
 <?php
+/**
+ * WC_Frontend_Scripts
+ */
+class WC_Frontend_Scripts {
 
-return new WC_Frontend_Scripts_Helper();
+	/**
+	 * Constructor
+	 */
+	public function __construct () {
+		add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ) );
+		add_action( 'wp_print_scripts', array( $this, 'check_jquery' ), 25 );
+	}
 
-class WC_Frontend_Scripts_Helper {
 	/**
 	 * Register/queue frontend scripts.
 	 *
@@ -25,6 +34,7 @@ class WC_Frontend_Scripts_Helper {
 
 		wp_register_script( 'wc-add-to-cart-variation', $frontend_script_path . 'add-to-cart-variation' . $suffix . '.js', array( 'jquery' ), $woocommerce->version, true );
 		wp_register_script( 'wc-single-product', $frontend_script_path . 'single-product' . $suffix . '.js', array( 'jquery' ), $woocommerce->version, true );
+		wp_register_script( 'wc-country-select', $frontend_script_path . 'country-select' . $suffix . '.js', array( 'jquery' ), $woocommerce->version, true );
 		wp_register_script( 'jquery-cookie', $assets_path . 'js/jquery-cookie/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '1.3.1', true );
 
 		// Queue frontend scripts conditionally
@@ -32,15 +42,16 @@ class WC_Frontend_Scripts_Helper {
 			wp_enqueue_script( 'wc-add-to-cart', $frontend_script_path . 'add-to-cart' . $suffix . '.js', array( 'jquery' ), $woocommerce->version, true );
 
 		if ( is_cart() )
-			wp_enqueue_script( 'wc-cart', $frontend_script_path . 'cart' . $suffix . '.js', array( 'jquery' ), $woocommerce->version, true );
+			wp_enqueue_script( 'wc-cart', $frontend_script_path . 'cart' . $suffix . '.js', array( 'jquery', 'wc-country-select' ), $woocommerce->version, true );
 
 		if ( is_checkout() ) {
+
 			if ( get_option( 'woocommerce_enable_chosen' ) == 'yes' ) {
 				wp_enqueue_script( 'wc-chosen', $frontend_script_path . 'chosen-frontend' . $suffix . '.js', array( 'chosen' ), $woocommerce->version, true );
 				wp_enqueue_style( 'woocommerce_chosen_styles', $assets_path . 'css/chosen.css' );
 			}
 
-			wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce' ), $woocommerce->version, true );
+			wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce', 'wc-country-select' ), $woocommerce->version, true );
 		}
 
 		if ( $lightbox_en && ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) ) {
@@ -53,49 +64,68 @@ class WC_Frontend_Scripts_Helper {
 			wp_enqueue_script( 'wc-single-product' );
 
 		// Global frontend scripts
-		wp_enqueue_script( 'woocommerce', $frontend_script_path . 'woocommerce' . $suffix . '.js', array( 'jquery', 'jquery-blockui' ), $woocommerce->version, true );
+		wp_enqueue_script( 'woocommerce', $frontend_script_path . 'woocommerce' . $suffix . '.js', array( 'jquery', 'jquery-blockui', 'jquery-placeholder' ), $woocommerce->version, true );
 		wp_enqueue_script( 'wc-cart-fragments', $frontend_script_path . 'cart-fragments' . $suffix . '.js', array( 'jquery', 'jquery-cookie' ), $woocommerce->version, true );
-		wp_enqueue_script( 'jquery-placeholder' );
 
 		// Variables for JS scripts
-		$woocommerce_params = array(
-			'countries'                        => json_encode( $woocommerce->countries->get_allowed_country_states() ),
-			'plugin_url'                       => $woocommerce->plugin_url(),
+		wp_localize_script( 'wc-single-product', 'wc_single_product_params', apply_filters( 'wc_single_product_params', array(
+			'i18n_required_rating_text'        => esc_attr__( 'Please select a rating', 'woocommerce' ),
+			'review_rating_required'           => get_option( 'woocommerce_review_rating_required' ),
+		) ) );
+
+		wp_localize_script( 'wc-checkout', 'wc_checkout_params', apply_filters( 'wc_checkout_params', array(
 			'ajax_url'                         => $woocommerce->ajax_url(),
 			'ajax_loader_url'                  => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
-			'i18n_select_state_text'           => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
-			'i18n_required_rating_text'        => esc_attr__( 'Please select a rating', 'woocommerce' ),
-			'i18n_no_matching_variations_text' => esc_attr__( 'Sorry, no products matched your selection. Please choose a different combination.', 'woocommerce' ),
 			'i18n_required_text'               => esc_attr__( 'required', 'woocommerce' ),
-			'i18n_view_cart'                   => esc_attr__( 'View Cart &rarr;', 'woocommerce' ),
-			'review_rating_required'           => get_option( 'woocommerce_review_rating_required' ),
 			'update_order_review_nonce'        => wp_create_nonce( "update-order-review" ),
 			'apply_coupon_nonce'               => wp_create_nonce( "apply-coupon" ),
 			'option_guest_checkout'            => get_option( 'woocommerce_enable_guest_checkout' ),
 			'checkout_url'                     => add_query_arg( 'action', 'woocommerce-checkout', $woocommerce->ajax_url() ),
 			'is_checkout'                      => is_page( woocommerce_get_page_id( 'checkout' ) ) && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ? 1 : 0,
+			'locale'                           => json_encode( $woocommerce->countries->get_country_locale() )
+		) ) );
+
+		wp_localize_script( 'wc-cart', 'wc_cart_params', apply_filters( 'wc_cart_params', array(
+			'ajax_url'                         => $woocommerce->ajax_url(),
+			'ajax_loader_url'                  => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
 			'update_shipping_method_nonce'     => wp_create_nonce( "update-shipping-method" ),
+		) ) );
+
+		wp_localize_script( 'wc-cart-fragments', 'wc_cart_fragments_params', apply_filters( 'wc_cart_fragments_params', array(
+			'ajax_url'                         => $woocommerce->ajax_url()
+		) ) );
+
+		wp_localize_script( 'wc-add-to-cart', 'wc_add_to_cart_params', apply_filters( 'wc_add_to_cart_params', array(
+			'ajax_url'                         => $woocommerce->ajax_url(),
+			'ajax_loader_url'                  => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
+			'i18n_view_cart'                   => esc_attr__( 'View Cart &rarr;', 'woocommerce' ),
 			'cart_url'                         => get_permalink( woocommerce_get_page_id( 'cart' ) ),
 			'cart_redirect_after_add'          => get_option( 'woocommerce_cart_redirect_after_add' )
-		);
+		) ) );
 
-		if ( is_checkout() || is_cart() )
-			$woocommerce_params['locale'] = json_encode( $woocommerce->countries->get_country_locale() );
+		wp_localize_script( 'wc-add-to-cart-variation', 'wc_add_to_cart_variation_params', apply_filters( 'wc_add_to_cart_variation_params', array(
+			'i18n_no_matching_variations_text' => esc_attr__( 'Sorry, no products matched your selection. Please choose a different combination.', 'woocommerce' ),
+		) ) );
 
-		wp_localize_script( 'woocommerce', 'woocommerce_params', apply_filters( 'woocommerce_params', $woocommerce_params ) );
+		wp_localize_script( 'wc-country-select', 'wc_country_select_params', apply_filters( 'wc_country_select_params', array(
+			'countries'                        => json_encode( $woocommerce->countries->get_allowed_country_states() ),
+			'i18n_select_state_text'           => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
+		) ) );
 
 		// CSS Styles
-		if ( ! defined( 'WOOCOMMERCE_USE_CSS' ) )
-			define( 'WOOCOMMERCE_USE_CSS', true );
+		wp_register_style( 'woocommerce_frontend_styles_layout', $assets_path . 'css/woocommerce-layout.css' );
+		wp_register_style( 'woocommerce_frontend_styles_smallscreen', $assets_path . 'css/woocommerce-smallscreen.css', 'woocommerce_frontend_styles_layout', '', 'only screen and (max-width: ' . apply_filters( 'woocommerce_smallscreen_breakpoint', $breakpoint = '768px' ) . ' )' );
+		wp_register_style( 'woocommerce_frontend_styles', $assets_path . 'css/woocommerce.css' );
 
-		if ( WOOCOMMERCE_USE_CSS ) {
-			$css 				= file_exists( get_stylesheet_directory() . '/woocommerce/style.css' ) ? get_stylesheet_directory_uri() . '/woocommerce/style.css' : $assets_path . 'css/woocommerce.css';
-			$css_layout 		= file_exists( get_stylesheet_directory() . '/woocommerce/style-layout.css' ) ? get_stylesheet_directory_uri() . '/woocommerce/style-layout.css' : $assets_path . 'css/woocommerce-layout.css';
-			$css_smallscreen 	= file_exists( get_stylesheet_directory() . '/woocommerce/style-smallscreen.css' ) ? get_stylesheet_directory_uri() . '/woocommerce/style-smallscreen.css' : $assets_path . 'css/woocommerce-smallscreen.css';
+		if ( defined( 'WOOCOMMERCE_USE_CSS' ) )
+			_deprecated_function( 'WOOCOMMERCE_USE_CSS', '2.1', 'Styles should be removed using wp_deregister_style rather than the constant.' );
 
-			wp_enqueue_style( 'woocommerce_frontend_styles_layout', $css_layout );
-			wp_enqueue_style( 'woocommerce_frontend_styles_smallscreen', $css_smallscreen, '','' ,'only screen and (max-width: ' . apply_filters( 'woocommerce_smallscreen_breakpoint', $breakpoint = '768px' ) . ' )' );
-			wp_enqueue_style( 'woocommerce_frontend_styles', $css );
+		$load_styles = defined( 'WOOCOMMERCE_USE_CSS' ) ? WOOCOMMERCE_USE_CSS : true;
+
+		if ( $load_styles ) {
+			wp_enqueue_style( 'woocommerce_frontend_styles_layout' );
+			wp_enqueue_style( 'woocommerce_frontend_styles_smallscreen' );
+			wp_enqueue_style( 'woocommerce_frontend_styles' );
 		}
 	}
 
@@ -119,3 +149,5 @@ class WC_Frontend_Scripts_Helper {
 		}
 	}
 }
+
+new WC_Frontend_Scripts();

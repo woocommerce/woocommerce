@@ -157,7 +157,7 @@
 			            	if ( ! focus )
 			            		$variation_form.trigger( 'reset_image' );
 
-			            	alert( woocommerce_params.i18n_no_matching_variations_text );
+			            	alert( wc_add_to_cart_variation_params.i18n_no_matching_variations_text );
 
 			            }
 

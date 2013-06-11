@@ -331,6 +331,7 @@ class WooCommerce {
 		include_once( $this->plugin_path() . '/woocommerce-functions.php' );    // Contains functions for various front-end events
 
 		// Classes
+		include_once( 'class-wc-frontend-scripts.php' );
 		include_once( 'class-wc-query.php' );				// The main store queries
 		include_once( 'class-wc-cart.php' );					// The main cart class
 		include_once( 'class-wc-tax.php' );					// Tax class
@@ -459,8 +460,6 @@ class WooCommerce {
 			add_filter( 'template_include', array( $this->get_helper( 'template' ), 'template_loader' ) );
 			add_filter( 'comments_template', array( $this->get_helper( 'template' ), 'comments_template_loader' ) );
 			add_filter( 'wp_redirect', array( $this, 'redirect' ), 1, 2 );
-			add_action( 'wp_enqueue_scripts', array( $this->get_helper( 'frontend-scripts' ), 'load_scripts' ) );
-			add_action( 'wp_print_scripts', array( $this->get_helper( 'frontend-scripts' ), 'check_jquery' ), 25 );
 			add_action( 'wp_head', array( $this, 'generator' ) );
 			add_action( 'wp_head', array( $this, 'wp_head' ) );
 			add_filter( 'body_class', array( $this->get_helper( 'body-class' ), 'output_body_class' ) );
@@ -972,18 +971,6 @@ class WooCommerce {
 	public function comments_template_loader( $template ) {
 		_deprecated_function( 'Woocommerce->comments_template_loader', '2.1', 'WC_Template_Helper->comments_template_loader' );
 		return $this->get_helper( 'template' )->comments_template_loader( $template );
-	}
-
-	// Deprecated 2.1.0 Access via the WC_Frontend_Scripts_Helper helper
-	public function frontend_scripts() {
-		_deprecated_function( 'Woocommerce->frontend_scripts', '2.1', 'WC_Frontend_Scripts_Helper->load_scripts' );
-		$this->get_helper( 'frontend-scripts' )->load_scripts();
-	}
-
-	// Deprecated 2.1.0 Access via the WC_Frontend_Scripts_Helper helper
-	public function check_jquery() {
-		_deprecated_function( 'Woocommerce->check_jquery', '2.1', 'WC_Frontend_Scripts_Helper->check_jquery' );
-		$this->get_helper( 'frontend-scripts' )->check_jquery();
 	}
 
 	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
