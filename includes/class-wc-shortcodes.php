@@ -870,7 +870,7 @@ class WC_Shortcodes {
 	public function messages_shortcode() {
 		ob_start();
 
-		woocommerce_show_messages();
+		wc_print_messages();
 
 		return ob_get_clean();
 	}

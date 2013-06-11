@@ -14,7 +14,7 @@ global $woocommerce, $current_user;
 get_currentuserinfo();
 ?>
 
-<?php $woocommerce->get_helper( 'messages' )->show_messages(); ?>
+<?php wc_print_messages(); ?>
 
 <?php if (!$load_address) : ?>
 

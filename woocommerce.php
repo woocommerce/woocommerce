@@ -294,7 +294,7 @@ final class WooCommerce {
 	 * @return void
 	 */
 	function install() {
-		include_once( $this->plugin_path() . '/admin/woocommerce-admin-install.php' );
+		include_once( 'admin/woocommerce-admin-install.php' );
 		set_transient( '_wc_activation_redirect', 1, 60 * 60 );
 		do_install_woocommerce();
 	}
@@ -307,6 +307,12 @@ final class WooCommerce {
 	 * @return void
 	 */
 	function includes() {
+
+		include( 'includes/wc-deprecated-functions.php' );
+		include( 'includes/wc-message-functions.php' );
+
+
+
 		if ( is_admin() )
 			$this->admin_includes();
 		if ( defined('DOING_AJAX') )
@@ -318,18 +324,18 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-post-types.php' );					// Registers post types
 
 		// Functions
-		include_once( $this->plugin_path() . '/woocommerce-core-functions.php' );  // Contains core functions for the front/back end
+		include_once( 'woocommerce-core-functions.php' );  // Contains core functions for the front/back end
 
 		// API Class
 		include_once( 'includes/class-wc-api.php' );
 
 		// Include abstract classes
-		include_once( 'abstracts/abstract-wc-helper.php' );				// Helper classes
-		include_once( 'abstracts/abstract-wc-product.php' );			// Products
-		include_once( 'abstracts/abstract-wc-settings-api.php' );		// Settings API (for gateways, shipping, and integrations)
-		include_once( 'abstracts/abstract-wc-shipping-method.php' );	// A Shipping method
-		include_once( 'abstracts/abstract-wc-payment-gateway.php' ); 	// A Payment gateway
-		include_once( 'abstracts/abstract-wc-integration.php' );		// An integration with a service
+		include_once( 'includes/abstracts/abstract-wc-helper.php' );				// Helper classes
+		include_once( 'includes/abstracts/abstract-wc-product.php' );			// Products
+		include_once( 'includes/abstracts/abstract-wc-settings-api.php' );		// Settings API (for gateways, shipping, and integrations)
+		include_once( 'includes/abstracts/abstract-wc-shipping-method.php' );	// A Shipping method
+		include_once( 'includes/abstracts/abstract-wc-payment-gateway.php' ); 	// A Payment gateway
+		include_once( 'includes/abstracts/abstract-wc-integration.php' );		// An integration with a service
 
 		// Classes (used on all pages)
 		include_once( 'includes/class-wc-product-factory.php' );					// Product factory
@@ -338,16 +344,16 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-cache-helper.php' );					// Cache Helper
 
 		// Include Core Integrations - these are included sitewide
-		include_once( 'integrations/google-analytics/class-wc-google-analytics.php' );
-		include_once( 'integrations/sharethis/class-wc-sharethis.php' );
-		include_once( 'integrations/sharedaddy/class-wc-sharedaddy.php' );
+		include_once( 'includes/integrations/google-analytics/class-wc-google-analytics.php' );
+		include_once( 'includes/integrations/sharethis/class-wc-sharethis.php' );
+		include_once( 'includes/integrations/sharedaddy/class-wc-sharedaddy.php' );
 	}
 
 	// Temporarily staying here until there is a better spot
 	// And this needs to be optimized/sanitized as well
 	public function get_helper( $id ) {
 		if ( ! isset( $this->helpers[ $id ] ) ) {
-			$this->helpers[ $id ] = include( 'helpers/class-wc-' . $id . '-helper.php' );
+			$this->helpers[ $id ] = include( 'includes/helpers/class-wc-' . $id . '-helper.php' );
 		}
 
 		return $this->helpers[ $id ];
@@ -360,7 +366,7 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function admin_includes() {
-		include_once( $this->plugin_path() . '/admin/woocommerce-admin-init.php' );			// Admin section
+		include_once( 'admin/woocommerce-admin-init.php' );			// Admin section
 	}
 
 
@@ -371,7 +377,7 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function ajax_includes() {
-		include_once( $this->plugin_path() . '/woocommerce-ajax.php' );		// Ajax functions for admin and the front-end
+		include_once( 'woocommerce-ajax.php' );		// Ajax functions for admin and the front-end
 	}
 
 
@@ -383,8 +389,8 @@ final class WooCommerce {
 	 */
 	public function frontend_includes() {
 		// Functions
-		include_once( $this->plugin_path() . '/woocommerce-hooks.php' );        // Template hooks used on the front-end
-		include_once( $this->plugin_path() . '/woocommerce-functions.php' );    // Contains functions for various front-end events
+		include_once( 'woocommerce-hooks.php' );        // Template hooks used on the front-end
+		include_once( 'woocommerce-functions.php' );    // Contains functions for various front-end events
 
 		// Classes
 		include_once( 'includes/class-wc-frontend-scripts.php' );
@@ -392,7 +398,7 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-cart.php' );					// The main cart class
 		include_once( 'includes/class-wc-tax.php' );					// Tax class
 		include_once( 'includes/class-wc-customer.php' ); 			// Customer class
-		include_once( 'abstracts/abstract-wc-session.php' ); // Abstract for session implementations
+		include_once( 'includes/abstracts/abstract-wc-session.php' ); // Abstract for session implementations
 		include_once( 'includes/class-wc-session-handler.php' );   	// WC Session class
 		include_once( 'includes/class-wc-shortcodes.php' );			// Shortcodes class
 	}
@@ -405,7 +411,7 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function include_template_functions() {
-		include_once( $this->plugin_path() . '/woocommerce-template.php' );
+		include_once( 'woocommerce-template.php' );
 	}
 
 
@@ -450,18 +456,18 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function include_widgets() {
-		include_once( 'abstracts/abstract-wc-widget.php' );
-		include_once( 'widgets/class-wc-widget-cart.php' );
-		include_once( 'widgets/class-wc-widget-products.php' );
-		include_once( 'widgets/class-wc-widget-layered-nav.php' );
-		include_once( 'widgets/class-wc-widget-layered-nav-filters.php' );
-		include_once( 'widgets/class-wc-widget-price-filter.php' );
-		include_once( 'widgets/class-wc-widget-product-categories.php' );
-		include_once( 'widgets/class-wc-widget-product-search.php' );
-		include_once( 'widgets/class-wc-widget-product-tag-cloud.php' );
-		include_once( 'widgets/class-wc-widget-recent-reviews.php' );
-		include_once( 'widgets/class-wc-widget-recently-viewed.php' );
-		include_once( 'widgets/class-wc-widget-top-rated-products.php' );
+		include_once( 'includes/abstracts/abstract-wc-widget.php' );
+		include_once( 'includes/widgets/class-wc-widget-cart.php' );
+		include_once( 'includes/widgets/class-wc-widget-products.php' );
+		include_once( 'includes/widgets/class-wc-widget-layered-nav.php' );
+		include_once( 'includes/widgets/class-wc-widget-layered-nav-filters.php' );
+		include_once( 'includes/widgets/class-wc-widget-price-filter.php' );
+		include_once( 'includes/widgets/class-wc-widget-product-categories.php' );
+		include_once( 'includes/widgets/class-wc-widget-product-search.php' );
+		include_once( 'includes/widgets/class-wc-widget-product-tag-cloud.php' );
+		include_once( 'includes/widgets/class-wc-widget-recent-reviews.php' );
+		include_once( 'includes/widgets/class-wc-widget-recently-viewed.php' );
+		include_once( 'includes/widgets/class-wc-widget-top-rated-products.php' );
 	}
 
 
@@ -507,9 +513,6 @@ final class WooCommerce {
 			$this->customer 		= new WC_Customer();			// Customer class, handles data such as customer location
 			$this->query			= new WC_Query();				// Query class, handles front-end queries and loops
 			$this->shortcodes		= new WC_Shortcodes();			// Shortcodes class, controls all frontend shortcodes
-
-			// Load messages
-			$this->get_helper( 'messages' )->load_messages();
 
 			// Hooks
 			add_action( 'get_header', array( $this, 'init_checkout' ) );
@@ -578,16 +581,16 @@ final class WooCommerce {
 		// Admin Locale
 		if ( is_admin() ) {
 			load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-admin-$locale.mo" );
-			load_textdomain( 'woocommerce', $this->plugin_path() . "/i18n/languages/woocommerce-admin-$locale.mo" );
+			load_textdomain( 'woocommerce', "i18n/languages/woocommerce-admin-$locale.mo" );
 		}
 
 		// Frontend Locale
 		load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-$locale.mo" );
 
 		if ( apply_filters( 'woocommerce_load_alt_locale', false ) )
-			load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . "/i18n/languages/alt" );
+			load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages/alt" );
 		else
-			load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . "/i18n/languages" );
+			load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages" );
 	}
 
 	/**
@@ -810,7 +813,7 @@ final class WooCommerce {
 	 * @return string
 	 */
 	public function plugin_url() {
-		return untrailingslashit( plugins_url( '/', dirname( __FILE__ ) ) );
+		return untrailingslashit( plugins_url( '/', __FILE__ ) );
 	}
 
 
@@ -821,7 +824,7 @@ final class WooCommerce {
 	 * @return string
 	 */
 	public function plugin_path() {
-		return untrailingslashit( plugin_dir_path( dirname( __FILE__ ) ) );
+		return untrailingslashit( plugin_dir_path( __FILE__ ) );
 	}
 
 
@@ -1029,64 +1032,57 @@ final class WooCommerce {
 		return $this->get_helper( 'template' )->comments_template_loader( $template );
 	}
 
-	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
-	public function load_messages() {
-		_deprecated_function( 'Woocommerce->load_messages', '2.1', 'WC_Messages_Helper->load_messages' );
-		$this->get_helper( 'messages' )->load_messages();
-	}
-
-	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	// Deprecated 2.1.0
 	public function add_error( $error ) {
-		_deprecated_function( 'Woocommerce->add_error', '2.1', 'WC_Messages_Helper->add_error' );
-		$this->get_helper( 'messages' )->add_error( $error );
+		_deprecated_function( 'Woocommerce->add_error', '2.1', 'wc_add_error' );
+		wc_add_error( $error );
 	}
 
-	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	// Deprecated 2.1.0
 	public function add_message( $message ) {
-		_deprecated_function( 'Woocommerce->add_message', '2.1', 'WC_Messages_Helper->add_message' );
-		$this->get_helper( 'messages' )->add_message( $message );
+		_deprecated_function( 'Woocommerce->add_message', '2.1', 'wc_add_message' );
+		wc_add_message( $message );
 	}
 
-	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	// Deprecated 2.1.0
 	public function clear_messages() {
-		_deprecated_function( 'Woocommerce->clear_messages', '2.1', 'WC_Messages_Helper->clear_messages' );
-		$this->get_helper( 'messages' )->clear_messages();
+		_deprecated_function( 'Woocommerce->clear_messages', '2.1', 'wc_clear_messages' );
+		wc_clear_messages();
 	}
 
-	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	// Deprecated 2.1.0
 	public function error_count() {
-		_deprecated_function( 'Woocommerce->error_count', '2.1', 'WC_Messages_Helper->error_count' );
-		$this->get_helper( 'messages' )->error_count();
+		_deprecated_function( 'Woocommerce->error_count', '2.1', 'wc_error_count' );
+		return wc_error_count();
 	}
 
-	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	// Deprecated 2.1.0
 	public function message_count() {
-		_deprecated_function( 'Woocommerce->message_count', '2.1', 'WC_Messages_Helper->message_count' );
-		$this->get_helper( 'messages' )->message_count();
+		_deprecated_function( 'Woocommerce->message_count', '2.1', 'wc_message_count' );
+		return wc_message_count();
 	}
 
 	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
 	public function get_errors() {
 		_deprecated_function( 'Woocommerce->get_errors', '2.1', 'WC_Messages_Helper->get_errors' );
-		$this->get_helper( 'messages' )->get_errors();
+		return WC()->session->get( 'wc_errors', array() );
 	}
 
 	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
 	public function get_messages() {
 		_deprecated_function( 'Woocommerce->get_messages', '2.1', 'WC_Messages_Helper->get_messages' );
-		$this->get_helper( 'messages' )->get_messages();
+		return WC()->session->get( 'wc_messages', array() );
 	}
 
 	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
 	public function show_messages() {
-		_deprecated_function( 'Woocommerce->show_messages', '2.1', 'WC_Messages_Helper->show_messages' );
-		$this->get_helper( 'messages' )->show_messages();
+		_deprecated_function( 'Woocommerce->show_messages', '2.1', 'wc_print_messages()' );
+		wc_print_messages();
 	}
 
 	// Deprecated 2.1.0 Access via the WC_Messages_Helper helper
 	public function set_messages() {
-		_deprecated_function( 'Woocommerce->set_messages', '2.1', 'WC_Messages_Helper->set_messages' );
-		$this->get_helper( 'messages' )->set_messages();
+		_deprecated_function( 'Woocommerce->set_messages', '2.1' );
 	}
 }
 
@@ -1103,4 +1099,4 @@ function WC() {
 }
 
 // Global for backwards compatibilty.
-$GLOBALS['WooCommerce'] = WC();
+$GLOBALS['woocommerce'] = WC();

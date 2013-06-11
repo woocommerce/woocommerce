@@ -105,7 +105,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 
   		} catch (Mijireh_Exception $e) {
 
-  			$woocommerce->get_helper( 'messages' )->add_error( __( 'Mijireh error:', 'woocommerce' ) . $e->getMessage() );
+  			wc_add_error( __( 'Mijireh error:', 'woocommerce' ) . $e->getMessage() );
 
   		}
     }
@@ -290,7 +290,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 			);
 			return $result;
 		} catch (Mijireh_Exception $e) {
-			$woocommerce->get_helper( 'messages' )->add_error( __('Mijireh error:', 'woocommerce' ) . $e->getMessage() );
+			wc_add_error( __('Mijireh error:', 'woocommerce' ) . $e->getMessage() );
 		}
     }
 

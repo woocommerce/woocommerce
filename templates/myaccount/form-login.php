@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $woocommerce; ?>
 
-<?php $woocommerce->get_helper( 'messages' )->show_messages(); ?>
+<?php wc_print_messages(); ?>
 
 <?php do_action('woocommerce_before_customer_login_form'); ?>
 

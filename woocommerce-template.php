@@ -101,32 +101,6 @@ if ( ! function_exists( 'woocommerce_output_content_wrapper_end' ) ) {
 	}
 }
 
-if ( ! function_exists( 'woocommerce_show_messages' ) ) {
-
-	/**
-	 * Show messages on the frontend.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	function woocommerce_show_messages() {
-		global $woocommerce;
-
-		if ( $woocommerce->get_helper( 'messages' )->error_count() > 0  )
-			woocommerce_get_template( 'shop/errors.php', array(
-					'errors' => $woocommerce->get_helper( 'messages' )->get_errors()
-				) );
-
-
-		if ( $woocommerce->get_helper( 'messages' )->message_count() > 0  )
-			woocommerce_get_template( 'shop/messages.php', array(
-					'messages' => $woocommerce->get_helper( 'messages' )->get_messages()
-				) );
-
-		$woocommerce->get_helper( 'messages' )->clear_messages();
-	}
-}
-
 if ( ! function_exists( 'woocommerce_get_sidebar' ) ) {
 
 	/**

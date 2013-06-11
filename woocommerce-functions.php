@@ -215,7 +215,7 @@ function woocommerce_update_cart_action() {
 
 		$woocommerce->cart->set_quantity( $_GET['remove_item'], 0 );
 
-		$woocommerce->get_helper( 'messages' )->add_message( __( 'Cart updated.', 'woocommerce' ) );
+		wc_add_message( __( 'Cart updated.', 'woocommerce' ) );
 
 		$referer = ( wp_get_referer() ) ? wp_get_referer() : $woocommerce->cart->get_cart_url();
 		wp_safe_redirect( $referer );
@@ -246,7 +246,7 @@ function woocommerce_update_cart_action() {
 
 	    		// is_sold_individually
 				if ( $_product->is_sold_individually() && $quantity > 1 ) {
-					$woocommerce->get_helper( 'messages' )->add_error( sprintf( __( 'You can only have 1 %s in your cart.', 'woocommerce' ), $_product->get_title() ) );
+					wc_add_error( sprintf( __( 'You can only have 1 %s in your cart.', 'woocommerce' ), $_product->get_title() ) );
 					$passed_validation = false;
 				}
 
@@ -260,7 +260,7 @@ function woocommerce_update_cart_action() {
 			wp_safe_redirect( $woocommerce->cart->get_checkout_url() );
 			exit;
 		} else {
-			$woocommerce->get_helper( 'messages' )->add_message( __( 'Cart updated.', 'woocommerce' ) );
+			wc_add_message( __( 'Cart updated.', 'woocommerce' ) );
 
 			$referer = ( wp_get_referer() ) ? wp_get_referer() : $woocommerce->cart->get_cart_url();
 			$referer = remove_query_arg( 'remove_discounts', $referer );
@@ -304,7 +304,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 
 		// Only allow integer variation ID - if its not set, redirect to the product page
 		if ( empty( $variation_id ) ) {
-			$woocommerce->get_helper( 'messages' )->add_error( __( 'Please choose product options&hellip;', 'woocommerce' ) );
+			wc_add_error( __( 'Please choose product options&hellip;', 'woocommerce' ) );
 			return;
 		}
 
@@ -362,7 +362,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 				}
 			}
         } else {
-            $woocommerce->get_helper( 'messages' )->add_error( __( 'Please choose product options&hellip;', 'woocommerce' ) );
+            wc_add_error( __( 'Please choose product options&hellip;', 'woocommerce' ) );
             return;
        }
 
@@ -395,14 +395,14 @@ function woocommerce_add_to_cart_action( $url = false ) {
 			}
 
 			if ( ! $was_added_to_cart && ! $quantity_set ) {
-				$woocommerce->get_helper( 'messages' )->add_error( __( 'Please choose the quantity of items you wish to add to your cart&hellip;', 'woocommerce' ) );
+				wc_add_error( __( 'Please choose the quantity of items you wish to add to your cart&hellip;', 'woocommerce' ) );
 				return;
 			}
 
 		} elseif ( $product_id ) {
 
 			/* Link on product archives */
-			$woocommerce->get_helper( 'messages' )->add_error( __( 'Please choose a product to add to your cart&hellip;', 'woocommerce' ) );
+			wc_add_error( __( 'Please choose a product to add to your cart&hellip;', 'woocommerce' ) );
 			return;
 
 		}
@@ -438,7 +438,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 		}
 
 		// Redirect to cart option
-		elseif ( get_option('woocommerce_cart_redirect_after_add') == 'yes' && $woocommerce->get_helper( 'messages' )->error_count() == 0 ) {
+		elseif ( get_option('woocommerce_cart_redirect_after_add') == 'yes' && wc_error_count() == 0 ) {
 			wp_safe_redirect( $woocommerce->cart->get_cart_url() );
 			exit;
 		}
@@ -490,7 +490,7 @@ function woocommerce_add_to_cart_message( $product_id ) {
 
 	endif;
 
-	$woocommerce->get_helper( 'messages' )->add_message( apply_filters('woocommerce_add_to_cart_message', $message) );
+	wc_add_message( apply_filters('woocommerce_add_to_cart_message', $message) );
 }
 
 
@@ -606,7 +606,7 @@ function woocommerce_pay_action() {
 				$available_gateways[ $payment_method ]->validate_fields();
 
 				// Process
-				if ( $woocommerce->get_helper( 'messages' )->error_count() == 0 ) {
+				if ( wc_error_count() == 0 ) {
 
 					$result = $available_gateways[ $payment_method ]->process_payment( $order_id );
 
@@ -686,7 +686,7 @@ function woocommerce_process_login() {
 				exit;
 			}
 		} catch (Exception $e) {
-			$woocommerce->get_helper( 'messages' )->add_error( $e->getMessage() );
+			wc_add_error( $e->getMessage() );
 		}
 	}
 }
@@ -807,14 +807,14 @@ function woocommerce_process_registration() {
 
 		// Anti-spam trap
 		if ( ! empty( $_POST['email_2'] ) ) {
-			$woocommerce->get_helper( 'messages' )->add_error( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Anti-spam field was filled in.', 'woocommerce' ) );
+			wc_add_error( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Anti-spam field was filled in.', 'woocommerce' ) );
 			return;
 		}
 
 		$new_customer = woocommerce_create_new_customer( $email, $username, $password );
 
 		if ( is_wp_error( $new_customer ) ) {
-			$woocommerce->get_helper( 'messages' )->add_error( $new_customer->get_error_message() );
+			wc_add_error( $new_customer->get_error_message() );
 			return;
 		}
 
@@ -906,7 +906,7 @@ function woocommerce_order_again() {
 	do_action( 'woocommerce_ordered_again', $order->id );
 
 	// Redirect to cart
-	$woocommerce->get_helper( 'messages' )->add_message( __( 'The cart has been filled with the items from your previous order.', 'woocommerce' ) );
+	wc_add_message( __( 'The cart has been filled with the items from your previous order.', 'woocommerce' ) );
 	wp_safe_redirect( $woocommerce->cart->get_cart_url() );
 	exit;
 }
@@ -935,17 +935,17 @@ function woocommerce_cancel_order() {
 			$order->cancel_order( __('Order cancelled by customer.', 'woocommerce' ) );
 
 			// Message
-			$woocommerce->get_helper( 'messages' )->add_message( __( 'Your order was cancelled.', 'woocommerce' ) );
+			wc_add_message( __( 'Your order was cancelled.', 'woocommerce' ) );
 
 			do_action( 'woocommerce_cancelled_order', $order->id );
 
 		elseif ( $order->status != 'pending' ) :
 
-			$woocommerce->get_helper( 'messages' )->add_error( __( 'Your order is no longer pending and could not be cancelled. Please contact us if you need assistance.', 'woocommerce' ) );
+			wc_add_error( __( 'Your order is no longer pending and could not be cancelled. Please contact us if you need assistance.', 'woocommerce' ) );
 
 		else :
 
-			$woocommerce->get_helper( 'messages' )->add_error( __( 'Invalid order.', 'woocommerce' ) );
+			wc_add_error( __( 'Invalid order.', 'woocommerce' ) );
 
 		endif;
 
@@ -1615,32 +1615,32 @@ function woocommerce_save_account_details() {
 		$user->user_pass    = $pass1;
 
 	if ( empty( $account_first_name ) || empty( $account_last_name ) )
-		$woocommerce->get_helper( 'messages' )->add_error( __( 'Please enter your name.', 'woocommerce' ) );
+		wc_add_error( __( 'Please enter your name.', 'woocommerce' ) );
 
 	if ( empty( $account_email ) || ! is_email( $account_email ) )
-		$woocommerce->get_helper( 'messages' )->add_error( __( 'Please provide a valid email address.', 'woocommerce' ) );
+		wc_add_error( __( 'Please provide a valid email address.', 'woocommerce' ) );
 
 	elseif ( email_exists( $account_email ) && $account_email !== $current_user->user_email )
-		$woocommerce->get_helper( 'messages' )->add_error( __( 'This email address is already registered.', 'woocommerce' ) );
+		wc_add_error( __( 'This email address is already registered.', 'woocommerce' ) );
 
 	if ( ! empty( $pass1 ) && empty( $pass2 ) )
-		$woocommerce->get_helper( 'messages' )->add_error( __( 'Please re-enter your password.', 'woocommerce' ) );
+		wc_add_error( __( 'Please re-enter your password.', 'woocommerce' ) );
 
 	elseif ( ! empty( $pass1 ) && $pass1 !== $pass2 )
-		$woocommerce->get_helper( 'messages' )->add_error( __( 'Passwords do not match.', 'woocommerce' ) );
+		wc_add_error( __( 'Passwords do not match.', 'woocommerce' ) );
 
 	// Allow plugins to return their own errors.
 	do_action_ref_array( 'user_profile_update_errors', array ( &$errors, $update, &$user ) );
 
 	if ( $errors->get_error_messages() )
 		foreach( $errors->get_error_messages() as $error )
-			$woocommerce->get_helper( 'messages' )->add_error( $error );
+			wc_add_error( $error );
 
-	if ( $woocommerce->get_helper( 'messages' )->error_count() == 0 ) {
+	if ( wc_error_count() == 0 ) {
 
 		wp_update_user( $user ) ;
 
-		$woocommerce->get_helper( 'messages' )->add_message( __( 'Account details changed successfully.', 'woocommerce' ) );
+		wc_add_message( __( 'Account details changed successfully.', 'woocommerce' ) );
 
 		do_action( 'woocommerce_save_account_details', $user->ID );
 
@@ -1697,12 +1697,12 @@ function woocommerce_save_address() {
 		$_POST[$key] = apply_filters('woocommerce_process_myaccount_field_' . $key, $_POST[$key]);
 
 		// Validation: Required fields
-		if ( isset($field['required']) && $field['required'] && empty($_POST[$key]) ) $woocommerce->get_helper( 'messages' )->add_error( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce' ) );
+		if ( isset($field['required']) && $field['required'] && empty($_POST[$key]) ) wc_add_error( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce' ) );
 
 		// Postcode
 		if ($key=='billing_postcode' || $key=='shipping_postcode') :
 			if ( ! $validation->is_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] ) ) :
-				$woocommerce->get_helper( 'messages' )->add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
+				wc_add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
 			else :
 				$_POST[$key] = $validation->format_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] );
 			endif;
@@ -1710,13 +1710,13 @@ function woocommerce_save_address() {
 
 	endforeach;
 
-	if ( $woocommerce->get_helper( 'messages' )->error_count() == 0 ) {
+	if ( wc_error_count() == 0 ) {
 
 		foreach ($address as $key => $field) :
 			update_user_meta( $user_id, $key, $_POST[$key] );
 		endforeach;
 
-		$woocommerce->get_helper( 'messages' )->add_message( __( 'Address changed successfully.', 'woocommerce' ) );
+		wc_add_message( __( 'Address changed successfully.', 'woocommerce' ) );
 
 		do_action( 'woocommerce_customer_save_address', $user_id );
 

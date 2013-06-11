@@ -44,6 +44,10 @@ class WC_Query {
 		add_filter( 'the_posts', array( $this, 'the_posts' ), 11, 2 );
 		add_filter( 'wp', array( $this, 'remove_product_query' ) );
 
+		// Get any errors from querystring
+		if ( isset( $_GET['wc_error'] ) )
+			wc_add_error( esc_attr( $_GET['wc_error'] ) );
+
 		// Define query vars for endpoints
 		$this->query_vars = array(
 			// Checkout actions

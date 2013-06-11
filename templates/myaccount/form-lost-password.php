@@ -13,7 +13,7 @@ global $woocommerce, $post;
 
 ?>
 
-<?php $woocommerce->get_helper( 'messages' )->show_messages(); ?>
+<?php wc_print_messages(); ?>
 
 <form action="<?php echo esc_url( get_permalink($post->ID) ); ?>" method="post" class="lost_reset_password">
 
