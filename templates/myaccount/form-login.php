@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $woocommerce; ?>
 
-<?php $woocommerce->show_messages(); ?>
+<?php $woocommerce->get_helper( 'messages' )->show_messages(); ?>
 
 <?php do_action('woocommerce_before_customer_login_form'); ?>
 
@@ -36,7 +36,7 @@ global $woocommerce; ?>
 			</p>
 
 			<p class="form-row">
-				<?php $woocommerce->nonce_field('login', 'login') ?>
+				<?php $woocommerce->get_helper( 'nonce' )->nonce_field('login', 'login') ?>
 				<input type="submit" class="button" name="login" value="<?php _e( 'Login', 'woocommerce' ); ?>" /> <a class="lost_password" href="<?php
 
 				$lost_password_page_id = woocommerce_get_page_id( 'lost_password' );
@@ -85,7 +85,7 @@ global $woocommerce; ?>
 			<?php do_action( 'register_form' ); ?>
 
 			<p class="form-row">
-				<?php $woocommerce->nonce_field('register', 'register') ?>
+				<?php $woocommerce->get_helper( 'nonce' )->nonce_field('register', 'register') ?>
 				<input type="submit" class="button" name="register" value="<?php _e( 'Register', 'woocommerce' ); ?>" />
 			</p>
 		</form>

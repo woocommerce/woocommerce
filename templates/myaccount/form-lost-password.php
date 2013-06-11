@@ -13,7 +13,7 @@ global $woocommerce, $post;
 
 ?>
 
-<?php $woocommerce->show_messages(); ?>
+<?php $woocommerce->get_helper( 'messages' )->show_messages(); ?>
 
 <form action="<?php echo esc_url( get_permalink($post->ID) ); ?>" method="post" class="lost_reset_password">
 
@@ -43,6 +43,6 @@ global $woocommerce, $post;
     <div class="clear"></div>
 
     <p class="form-row"><input type="submit" class="button" name="reset" value="<?php echo 'lost_password' == $args['form'] ? __( 'Reset Password', 'woocommerce' ) : __( 'Save', 'woocommerce' ); ?>" /></p>
-	<?php $woocommerce->nonce_field( $args['form'] ); ?>
+	<?php $woocommerce->get_helper( 'nonce' )->nonce_field( $args['form'] ); ?>
 
 </form>

@@ -1061,9 +1061,9 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
             }
 
 			if ( $flat )
-				$variation_list[] = $woocommerce->attribute_label(str_replace('attribute_', '', $name)).': '.$value;
+				$variation_list[] = $woocommerce->get_helper( 'attribute' )->attribute_label(str_replace('attribute_', '', $name)).': '.$value;
 			else
-				$variation_list[] = '<dt>'.$woocommerce->attribute_label(str_replace('attribute_', '', $name)).':</dt><dd>'.$value.'</dd>';
+				$variation_list[] = '<dt>'.$woocommerce->get_helper( 'attribute' )->attribute_label(str_replace('attribute_', '', $name)).':</dt><dd>'.$value.'</dd>';
 		}
 
 		if ( $flat )
@@ -2482,7 +2482,7 @@ function woocommerce_scheduled_sales() {
 				update_post_meta( $product_id, '_sale_price_dates_to', '' );
 			}
 
-			$woocommerce->clear_product_transients( $product_id );
+			$woocommerce->get_helper( 'transient' )->clear_product_transients( $product_id );
 
 			$parent = wp_get_post_parent_id( $product_id );
 
@@ -2496,7 +2496,7 @@ function woocommerce_scheduled_sales() {
 				if ( $this_product->is_type( 'simple' ) )
 					$this_product->grouped_product_sync();
 
-				$woocommerce->clear_product_transients( $parent );
+				$woocommerce->get_helper( 'transient' )->clear_product_transients( $parent );
 			}
 		}
 	}
@@ -2523,7 +2523,7 @@ function woocommerce_scheduled_sales() {
 			update_post_meta( $product_id, '_sale_price_dates_from', '' );
 			update_post_meta( $product_id, '_sale_price_dates_to', '' );
 
-			$woocommerce->clear_product_transients( $product_id );
+			$woocommerce->get_helper( 'transient' )->clear_product_transients( $product_id );
 
 			$parent = wp_get_post_parent_id( $product_id );
 
@@ -2537,7 +2537,7 @@ function woocommerce_scheduled_sales() {
 				if ( $this_product->is_type( 'simple' ) )
 					$this_product->grouped_product_sync();
 
-				$woocommerce->clear_product_transients( $parent );
+				$woocommerce->get_helper( 'transient' )->clear_product_transients( $parent );
 			}
 		}
 	}

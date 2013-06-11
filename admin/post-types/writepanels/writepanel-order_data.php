@@ -101,7 +101,7 @@ function woocommerce_order_data_meta_box($post) {
 						<?php
 
 						// Ajax Chosen Customer Selectors JS
-						$woocommerce->add_inline_js( "
+						$woocommerce->get_helper( 'inline-javascript' )->add_inline_js( "
 							jQuery('select.ajax_chosen_select_customer').ajaxChosen({
 							    method: 		'GET',
 							    url: 			'" . admin_url('admin-ajax.php') . "',

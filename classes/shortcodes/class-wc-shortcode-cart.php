@@ -29,7 +29,7 @@ class WC_Shortcode_Cart {
 			if ( ! empty( $_POST['coupon_code'] ) ) {
 				$woocommerce->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
 			} else {
-				$woocommerce->add_error( WC_Coupon::get_generic_coupon_error( WC_Coupon::E_WC_COUPON_PLEASE_ENTER ) );
+				$woocommerce->get_helper( 'messages' )->add_error( WC_Coupon::get_generic_coupon_error( WC_Coupon::E_WC_COUPON_PLEASE_ENTER ) );
 			}
 
 		// Remove Coupon Codes
@@ -38,7 +38,7 @@ class WC_Shortcode_Cart {
 			$woocommerce->cart->remove_coupons( $_GET['remove_discounts'] );
 
 		// Update Shipping
-		} elseif ( ! empty( $_POST['calc_shipping'] ) && $woocommerce->verify_nonce('cart') ) {
+		} elseif ( ! empty( $_POST['calc_shipping'] ) && $woocommerce->get_helper( 'nonce' )->verify_nonce('cart') ) {
 
 			$validation = $woocommerce->validation();
 
@@ -50,7 +50,7 @@ class WC_Shortcode_Cart {
 			$city       = apply_filters( 'woocommerce_shipping_calculator_enable_city', false ) ? stripslashes( $_POST['calc_shipping_city'] ) : '';
 
 			if ( $postcode && ! $validation->is_postcode( $postcode, $country ) ) {
-				$woocommerce->add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
+				$woocommerce->get_helper( 'messages' )->add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
 				$postcode = '';
 			} elseif ( $postcode ) {
 				$postcode = $validation->format_postcode( $postcode, $country );
@@ -61,13 +61,13 @@ class WC_Shortcode_Cart {
 				// Update customer location
 				$woocommerce->customer->set_location( $country, $state, $postcode, $city );
 				$woocommerce->customer->set_shipping_location( $country, $state, $postcode, $city );
-				$woocommerce->add_message(  __( 'Shipping costs updated.', 'woocommerce' ) );
+				$woocommerce->get_helper( 'messages' )->add_message(  __( 'Shipping costs updated.', 'woocommerce' ) );
 
 			} else {
 
 				$woocommerce->customer->set_to_base();
 				$woocommerce->customer->set_shipping_to_base();
-				$woocommerce->add_message(  __( 'Shipping costs updated.', 'woocommerce' ) );
+				$woocommerce->get_helper( 'messages' )->add_message(  __( 'Shipping costs updated.', 'woocommerce' ) );
 
 			}
 

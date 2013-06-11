@@ -333,7 +333,7 @@ function woocommerce_product_data_box() {
 
 				<?php
 					// Array of defined attribute taxonomies
-					$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();
+					$attribute_taxonomies = $woocommerce->get_helper( 'attribute' )->get_attribute_taxonomies();
 
 					// Product attributes - taxonomies and custom, ordered, with visibility and variation attributes set
 					$attributes = maybe_unserialize( get_post_meta( $thepostid, '_product_attributes', true ) );
@@ -345,7 +345,7 @@ function woocommerce_product_data_box() {
 				    	foreach ( $attribute_taxonomies as $tax ) { $i++;
 
 				    		// Get name of taxonomy we're now outputting (pa_xxx)
-				    		$attribute_taxonomy_name = $woocommerce->attribute_taxonomy_name( $tax->attribute_name );
+				    		$attribute_taxonomy_name = $woocommerce->get_helper( 'attribute' )->attribute_taxonomy_name( $tax->attribute_name );
 
 				    		// Ensure it exists
 				    		if ( ! taxonomy_exists( $attribute_taxonomy_name ) )
@@ -504,7 +504,7 @@ function woocommerce_product_data_box() {
 					<?php
 						if ( $attribute_taxonomies ) {
 					    	foreach ( $attribute_taxonomies as $tax ) {
-					    		$attribute_taxonomy_name = $woocommerce->attribute_taxonomy_name( $tax->attribute_name );
+					    		$attribute_taxonomy_name = $woocommerce->get_helper( 'attribute' )->attribute_taxonomy_name( $tax->attribute_name );
 					    		$label = $tax->attribute_label ? $tax->attribute_label : $tax->attribute_name;
 					    		echo '<option value="' . esc_attr( $attribute_taxonomy_name ) . '">' . esc_html( $label ) . '</option>';
 					    	}
@@ -890,7 +890,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 				}
 
 				// Clear cache/transients
-				$woocommerce->clear_product_transients( $clear_id );
+				$woocommerce->get_helper( 'transient' )->clear_product_transients( $clear_id );
 			}
 		}
 	}
@@ -1021,7 +1021,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	do_action( 'woocommerce_process_product_meta_' . $product_type, $post_id );
 
 	// Clear cache/transients
-	$woocommerce->clear_product_transients( $post_id );
+	$woocommerce->get_helper( 'transient' )->clear_product_transients( $post_id );
 }
 
 add_action('woocommerce_process_product_meta', 'woocommerce_process_product_meta', 1, 2);
