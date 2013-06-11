@@ -168,6 +168,7 @@ function woocommerce_product_data_box() {
 
 				// Download Type
 				woocommerce_wp_select( array( 'id' => '_download_type', 'label' => __( 'Download Type', 'woocommerce' ), 'options' => array(
+					'default' 	=> __( 'Standard Product', 'woocommerce' ),
 					'application' 	=> __( 'Application/Software', 'woocommerce' ),
 					'music' 	=> __( 'Music', 'woocommerce' ),
 				) ) );
