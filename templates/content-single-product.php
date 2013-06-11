@@ -21,7 +21,16 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 	 do_action( 'woocommerce_before_single_product' );
 ?>
 
-<?php /* The beginning of the product container is added by the hook - woocommerce_product_schema */ ?>
+	<?php
+	/*
+	 * Get and load product schema.
+	 *
+	 * @function: woocommerce_get_product_schema
+	 * @since: 2.1
+	 * @added by: Seb's Studio
+	 */
+	 woocommerce_get_product_schema();
+	?>
 
 	<?php
 		/**
