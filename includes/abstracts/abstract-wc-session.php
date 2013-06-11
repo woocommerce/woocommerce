@@ -23,54 +23,73 @@ abstract class WC_Session {
      * __get function.
      *
      * @access public
-     * @param mixed $property
+     * @param mixed $key
      * @return mixed
      */
-    public function __get( $property ) {
-        return isset( $this->_data[ $property ] ) ? $this->_data[ $property ] : null;
+    public function __get( $key ) {
+        return $this->get( $key );
     }
 
     /**
      * __set function.
      *
      * @access public
-     * @param mixed $property
+     * @param mixed $key
      * @param mixed $value
      * @return void
      */
-    public function __set( $property, $value ) {
-        $this->_data[ $property ] = $value;
-        $this->_dirty = true;
+    public function __set( $key, $value ) {
+        $this->set( $key, $value );
     }
 
      /**
      * __isset function.
      *
      * @access public
-     * @param mixed $property
+     * @param mixed $key
      * @return bool
      */
-    public function __isset( $property ) {
-        return isset( $this->_data[ $property ] );
+    public function __isset( $key ) {
+        return isset( $this->_data[ sanitize_title( $key ) ] );
     }
 
     /**
      * __unset function.
      *
      * @access public
-     * @param mixed $property
+     * @param mixed $key
      * @return void
      */
-    public function __unset( $property ) {
-    	if ( isset( $this->_data[ $property ] ) ) {
+    public function __unset( $key ) {
+    	if ( isset( $this->_data[ $key ] ) ) {
             try {
-       		   unset( $this->_data[ $property ] );
+       		   unset( $this->_data[ $key ] );
        		   $this->_dirty = true;
-            } catch( Exception $e ) {
-                if ( defined( 'WP_DEBUG' ) && WP_DEBUG )
-                    $GLOBALS['woocommerce']->add_error( "Error: Cannot unset " . strval( $property ) . " - " . $e->getMessage() );
-            }
+            } catch( Exception $e ) {}
         }
+    }
+
+    /**
+     * Get a session variable
+     *
+     * @param string $key
+     * @param  mixed $default used if the session variable isn't set
+     * @return mixed value of session variable
+     */
+    public function get( $key, $default = null ) {
+        $key = sanitize_key( $key );
+        return isset( $this->_data[ $key ] ) ? $this->_data[ $key ] : $default;
+    }
+
+    /**
+     * Set a session variable
+     *
+     * @param string $key
+     * @param mixed $value
+     */
+    public function set( $key, $value ) {
+        $this->_data[ sanitize_key( $key ) ] = $value;
+        $this->_dirty = true;
     }
 
    	/**
