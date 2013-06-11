@@ -27,7 +27,7 @@ function do_install_woocommerce() {
 	woocommerce_init_roles();
 
 	// Register post types
-	include_once( '../classes/class-wc-post-types.php' );
+	include_once( untrailingslashit( plugin_dir_path( dirname( __FILE__ ) ) ) . '/classes/class-wc-post-types.php' );
 
 	// Add default taxonomies
 	woocommerce_default_taxonomies();
@@ -134,7 +134,8 @@ function woocommerce_default_options() {
 	foreach ( $woocommerce_settings as $section ) {
 		foreach ( $section as $value ) {
 	        if ( isset( $value['default'] ) && isset( $value['id'] ) ) {
-	        	add_option( $value['id'], $value['default'] );
+	        	$autoload = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;
+	        	add_option( $value['id'], $value['default'], '', ( $autoload ? 'yes' : 'no' ) );
 	        }
         }
     }

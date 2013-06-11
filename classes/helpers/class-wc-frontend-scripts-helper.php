@@ -14,7 +14,6 @@ class WC_Frontend_Scripts_Helper {
 
 		$suffix               = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		$lightbox_en          = get_option( 'woocommerce_enable_lightbox' ) == 'yes' ? true : false;
-		$chosen_en            = get_option( 'woocommerce_enable_chosen' ) == 'yes' ? true : false;
 		$ajax_cart_en         = get_option( 'woocommerce_enable_ajax_add_to_cart' ) == 'yes' ? true : false;
 		$assets_path          = str_replace( array( 'http:', 'https:' ), '', $woocommerce->plugin_url() ) . '/assets/';
 		$frontend_script_path = $assets_path . 'js/frontend/';
@@ -36,7 +35,7 @@ class WC_Frontend_Scripts_Helper {
 			wp_enqueue_script( 'wc-cart', $frontend_script_path . 'cart' . $suffix . '.js', array( 'jquery' ), $woocommerce->version, true );
 
 		if ( is_checkout() ) {
-			if ( $chosen_en ) {
+			if ( get_option( 'woocommerce_enable_chosen' ) == 'yes' ) {
 				wp_enqueue_script( 'wc-chosen', $frontend_script_path . 'chosen-frontend' . $suffix . '.js', array( 'chosen' ), $woocommerce->version, true );
 				wp_enqueue_style( 'woocommerce_chosen_styles', $assets_path . 'css/chosen.css' );
 			}

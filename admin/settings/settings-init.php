@@ -85,6 +85,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'default'	=> __( 'This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woocommerce' ),
 		'type' 		=> 'text',
 		'css' 		=> 'min-width:300px;',
+		'autoload'  => false
 	),
 
 	array( 'type' => 'sectionend', 'id' => 'general_options'),
@@ -98,6 +99,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'default'       => 'yes',
 		'type'          => 'checkbox',
 		'desc_tip'		=>  __( 'Coupons can be applied from the cart and checkout pages.', 'woocommerce' ),
+		'autoload'      => false
 	),
 
 	array(
@@ -107,7 +109,8 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'id' 		=> 'woocommerce_enable_guest_checkout',
 		'default'	=> 'yes',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'	=> 'start'
+		'checkboxgroup'	=> 'start',
+		'autoload'  => false
 	),
 
 	array(
@@ -135,7 +138,8 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'id' 		=> 'woocommerce_enable_signup_and_login_from_checkout',
 		'default'	=> 'yes',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start'
+		'checkboxgroup'		=> 'start',
+		'autoload'      => false
 	),
 
 	array(
@@ -143,7 +147,8 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'id' 		=> 'woocommerce_enable_myaccount_registration',
 		'default'	=> 'no',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
+		'checkboxgroup'		=> '',
+		'autoload'      => false
 	),
 
 	array(
@@ -151,7 +156,8 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'id' 		=> 'woocommerce_registration_generate_username',
 		'default'	=> 'yes',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
+		'checkboxgroup'		=> '',
+		'autoload'      => false
 	),
 
 	array(
@@ -159,7 +165,8 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'id' 		=> 'woocommerce_registration_generate_password',
 		'default'	=> 'no',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end'
+		'checkboxgroup'		=> 'end',
+		'autoload'      => false
 	),
 
 	array( 'type' => 'sectionend', 'id' => 'checkout_account_options'),
@@ -187,6 +194,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end',
 		'desc_tip'	=> __( 'This will enable a script allowing the country fields to be searchable.', 'woocommerce' ),
+		'autoload'  => false
 	),
 
 	array( 'type' => 'sectionend', 'id' => 'script_styling_options'),
@@ -206,7 +214,8 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 			'force'  	=> __( 'Force Downloads', 'woocommerce' ),
 			'xsendfile' => __( 'X-Accel-Redirect/X-Sendfile', 'woocommerce' ),
 			'redirect'  => __( 'Redirect only', 'woocommerce' ),
-		)
+		),
+		'autoload'      => false
 	),
 
 	array(
@@ -216,7 +225,8 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'type' 		=> 'checkbox',
 		'default'	=> 'no',
 		'desc_tip'	=> __( 'This setting does not apply to guest purchases.', 'woocommerce' ),
-		'checkboxgroup'		=> 'start'
+		'checkboxgroup'		=> 'start',
+		'autoload'      => false
 	),
 
 	array(
@@ -225,7 +235,8 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'type' 		=> 'checkbox',
 		'default'	=> 'yes',
 		'desc_tip'	=> __( 'Enable this option to grant access to downloads when orders are "processing", rather than "completed".', 'woocommerce' ),
-		'checkboxgroup'		=> 'end'
+		'checkboxgroup'		=> 'end',
+		'autoload'      => false
 	),
 
 	array( 'type' => 'sectionend', 'id' => 'digital_download_options' ),
@@ -259,7 +270,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'default'	=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
-		'desc_tip'	=>  true
+		'desc_tip'	=> true
 	),
 
 	array(
@@ -270,7 +281,8 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
 		'type' 		=> 'single_select_page',
-		'desc_tip'	=>  true,
+		'desc_tip'	=> true,
+		'autoload'  => false
 	),
 
 	array( 'type' => 'sectionend', 'id' => 'page_options' ),
@@ -285,7 +297,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'default'	=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
-		'desc_tip'	=>  true,
+		'desc_tip'	=> true,
 	),
 
 	array(
@@ -296,7 +308,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'default'	=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
-		'desc_tip'	=>  true,
+		'desc_tip'	=> true,
 	),
 
 	array(
@@ -307,7 +319,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'default'	=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
-		'desc_tip'	=>  true,
+		'desc_tip'	=> true,
 	),
 
 	array(
@@ -318,7 +330,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'default'	=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
-		'desc_tip'	=>  true,
+		'desc_tip'	=> true,
 	),
 
 	array(
@@ -329,7 +341,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'default'	=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
-		'desc_tip'	=>  true,
+		'desc_tip'	=> true,
 	),
 
 	array(
@@ -340,7 +352,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'default'	=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
-		'desc_tip'	=>  true,
+		'desc_tip'	=> true,
 	),
 
 	array( 'type' => 'sectionend', 'id' => 'page_options')
@@ -495,6 +507,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'start',
 		'show_if_checked' => 'option',
+		'autoload'      => false
 	),
 
 	array(
@@ -504,6 +517,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> '',
 		'show_if_checked' => 'yes',
+		'autoload'      => false
 	),
 
 	array(
@@ -513,6 +527,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end',
 		'show_if_checked' => 'yes',
+		'autoload'      => false
 	),
 
 	array( 'type' => 'sectionend', 'id' => 'product_review_options' ),
@@ -630,7 +645,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 
 $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settings', array(
 
-	array(	'title' => __( 'Inventory Options', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'inventory_options' ),
+	array(	'title' => __( 'Inventory Options', 'woocommerce' ), 'type' => 'title', 'desc' => '', 'id' => 'inventory_options' ),
 
 	array(
 		'title' => __( 'Manage Stock', 'woocommerce' ),
@@ -650,7 +665,8 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 			'step' 	=> 1
 		),
 		'css' 		=> 'width:50px;',
-		'default'	=> '60'
+		'default'	=> '60',
+		'autoload'  => false
 	),
 
 	array(
@@ -659,7 +675,8 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 		'id' 		=> 'woocommerce_notify_low_stock',
 		'default'	=> 'yes',
 		'type' 		=> 'checkbox',
-		'checkboxgroup' => 'start'
+		'checkboxgroup' => 'start',
+		'autoload'      => false
 	),
 
 	array(
@@ -667,7 +684,8 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 		'id' 		=> 'woocommerce_notify_no_stock',
 		'default'	=> 'yes',
 		'type' 		=> 'checkbox',
-		'checkboxgroup' => 'end'
+		'checkboxgroup' => 'end',
+		'autoload'      => false
 	),
 
 	array(
@@ -675,7 +693,8 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 		'desc' 		=> '',
 		'id' 		=> 'woocommerce_stock_email_recipient',
 		'type' 		=> 'email',
-		'default'	=> get_option( 'admin_email' )
+		'default'	=> get_option( 'admin_email' ),
+		'autoload'      => false
 	),
 
 	array(
@@ -688,7 +707,8 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 			'min' 	=> 0,
 			'step' 	=> 1
 		),
-		'default'	=> '2'
+		'default'	=> '2',
+		'autoload'      => false
 	),
 
 	array(
@@ -701,7 +721,8 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 			'min' 	=> 0,
 			'step' 	=> 1
 		),
-		'default'	=> '0'
+		'default'	=> '0',
+		'autoload'      => false
 	),
 
 	array(
@@ -750,7 +771,8 @@ $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings
 		'id' 		=> 'woocommerce_enable_shipping_calc',
 		'default'	=> 'yes',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
+		'checkboxgroup'		=> '',
+		'autoload'      => false
 	),
 
 	array(
@@ -758,7 +780,8 @@ $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings
 		'id' 		=> 'woocommerce_shipping_cost_requires_address',
 		'default'	=> 'no',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end'
+		'checkboxgroup'		=> 'end',
+		'autoload'      => false
 	),
 
 	array(
@@ -773,6 +796,7 @@ $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings
 			'select'		=> __( 'Select box', 'woocommerce' ),
 		),
 		'desc_tip'	=>  true,
+		'autoload'      => false
 	),
 
 	array(
@@ -781,7 +805,8 @@ $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings
 		'id' 		=> 'woocommerce_ship_to_billing_address_only',
 		'default'	=> 'no',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start'
+		'checkboxgroup'		=> 'start',
+		'autoload'      => false
 	),
 
 	array(
@@ -789,7 +814,8 @@ $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings
 		'id' 		=> 'woocommerce_ship_to_billing',
 		'default'	=> 'yes',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
+		'checkboxgroup'		=> '',
+		'autoload'      => false
 	),
 
 	array(
@@ -797,7 +823,8 @@ $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings
 		'id' 		=> 'woocommerce_require_shipping_address',
 		'default'	=> 'no',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end'
+		'checkboxgroup'		=> 'end',
+		'autoload'      => false
 	),
 
 	array(
@@ -913,6 +940,7 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 			'incl'   => __( 'Including tax', 'woocommerce' ),
 			'excl'   => __( 'Excluding tax', 'woocommerce' ),
 		),
+		'autoload'      => false
 	),
 
 	array( 'type' => 'sectionend', 'id' => 'tax_options' ),
@@ -931,7 +959,8 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 		'id' 		=> 'woocommerce_email_from_name',
 		'type' 		=> 'text',
 		'css' 		=> 'min-width:300px;',
-		'default'	=> esc_attr(get_bloginfo('title'))
+		'default'	=> esc_attr(get_bloginfo('title')),
+		'autoload'      => false
 	),
 
 	array(
@@ -943,7 +972,8 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 			'multiple' 	=> 'multiple'
 		),
 		'css' 		=> 'min-width:300px;',
-		'default'	=> get_option('admin_email')
+		'default'	=> get_option('admin_email'),
+		'autoload'      => false
 	),
 
 	array( 'type' => 'sectionend', 'id' => 'email_options' ),
@@ -956,7 +986,8 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 		'id' 		=> 'woocommerce_email_header_image',
 		'type' 		=> 'text',
 		'css' 		=> 'min-width:300px;',
-		'default'	=> ''
+		'default'	=> '',
+		'autoload'  => false
 	),
 
 	array(
@@ -965,7 +996,8 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 		'id' 		=> 'woocommerce_email_footer_text',
 		'css' 		=> 'width:100%; height: 75px;',
 		'type' 		=> 'textarea',
-		'default'	=> get_bloginfo('title') . ' - ' . __( 'Powered by WooCommerce', 'woocommerce' )
+		'default'	=> get_bloginfo('title') . ' - ' . __( 'Powered by WooCommerce', 'woocommerce' ),
+		'autoload'  => false
 	),
 
 	array(
@@ -974,7 +1006,8 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 		'id' 		=> 'woocommerce_email_base_color',
 		'type' 		=> 'color',
 		'css' 		=> 'width:6em;',
-		'default'	=> '#557da1'
+		'default'	=> '#557da1',
+		'autoload'  => false
 	),
 
 	array(
@@ -983,7 +1016,8 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 		'id' 		=> 'woocommerce_email_background_color',
 		'type' 		=> 'color',
 		'css' 		=> 'width:6em;',
-		'default'	=> '#f5f5f5'
+		'default'	=> '#f5f5f5',
+		'autoload'  => false
 	),
 
 	array(
@@ -992,7 +1026,8 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 		'id' 		=> 'woocommerce_email_body_background_color',
 		'type' 		=> 'color',
 		'css' 		=> 'width:6em;',
-		'default'	=> '#fdfdfd'
+		'default'	=> '#fdfdfd',
+		'autoload'  => false
 	),
 
 	array(
@@ -1001,7 +1036,8 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 		'id' 		=> 'woocommerce_email_text_color',
 		'type' 		=> 'color',
 		'css' 		=> 'width:6em;',
-		'default'	=> '#505050'
+		'default'	=> '#505050',
+		'autoload'  => false
 	),
 
 	array( 'type' => 'sectionend', 'id' => 'email_template_options' ),
