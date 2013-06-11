@@ -2483,7 +2483,7 @@ function woocommerce_category_sales() {
 					$r['value']			= 'id';
 					$r['selected'] 		= isset( $_POST['show_categories'] ) ? $_POST['show_categories'] : '';
 
-					include_once( $woocommerce->plugin_path() . '/classes/walkers/class-product-cat-dropdown-walker.php' );
+					include_once( $woocommerce->plugin_path() . '/includes/walkers/class-product-cat-dropdown-walker.php' );
 
 					echo woocommerce_walk_category_dropdown_tree( $categories, 0, $r );
 				?>

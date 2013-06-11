@@ -29,7 +29,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 
 		$this->id 			= 'mijireh_checkout';
 		$this->method_title = __( 'Mijireh Checkout', 'woocommerce' );
-		$this->icon 		= apply_filters( 'woocommerce_mijireh_checkout_icon', $woocommerce->plugin_url() . '/classes/gateways/mijireh/assets/images/credit_cards.png' );
+		$this->icon 		= apply_filters( 'woocommerce_mijireh_checkout_icon', $woocommerce->plugin_url() . '/includes/gateways/mijireh/assets/images/credit_cards.png' );
 		$this->has_fields = false;
 
 		// Load the settings.
@@ -348,9 +348,9 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
     	global $woocommerce;
 
     	if ( self::is_slurp_page() ) {
-        	wp_enqueue_style( 'mijireh_css', $woocommerce->plugin_url() . '/classes/gateways/mijireh/assets/css/mijireh.css' );
+        	wp_enqueue_style( 'mijireh_css', $woocommerce->plugin_url() . '/includes/gateways/mijireh/assets/css/mijireh.css' );
         	wp_enqueue_script( 'pusher', 'https://d3dy5gmtp8yhk7.cloudfront.net/1.11/pusher.min.js', null, false, true );
-        	wp_enqueue_script( 'page_slurp', $woocommerce->plugin_url() . '/classes/gateways/mijireh/assets/js/page_slurp.js', array('jquery'), false, true );
+        	wp_enqueue_script( 'page_slurp', $woocommerce->plugin_url() . '/includes/gateways/mijireh/assets/js/page_slurp.js', array('jquery'), false, true );
 
 			add_meta_box(
 				'slurp_meta_box', 		// $id

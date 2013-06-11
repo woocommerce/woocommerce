@@ -142,7 +142,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 
 			}
 
-			include_once( $woocommerce->plugin_path() . '/classes/walkers/class-product-cat-list-walker.php' );
+			include_once( $woocommerce->plugin_path() . '/includes/walkers/class-product-cat-list-walker.php' );
 
 			$cat_args['walker'] 			= new WC_Product_Cat_List_Walker;
 			$cat_args['title_li'] 			= '';

@@ -166,7 +166,7 @@ class WooCommerce {
 
 		if ( strpos( $class, 'wc_gateway_' ) === 0 ) {
 
-			$path = $this->plugin_path() . '/classes/gateways/' . trailingslashit( substr( str_replace( '_', '-', $class ), 11 ) );
+			$path = $this->plugin_path() . '/includes/gateways/' . trailingslashit( substr( str_replace( '_', '-', $class ), 11 ) );
 			$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
 
 			if ( is_readable( $path . $file ) ) {
@@ -176,7 +176,7 @@ class WooCommerce {
 
 		} elseif ( strpos( $class, 'wc_shipping_' ) === 0 ) {
 
-			$path = $this->plugin_path() . '/classes/shipping/' . trailingslashit( substr( str_replace( '_', '-', $class ), 12 ) );
+			$path = $this->plugin_path() . '/includes/shipping/' . trailingslashit( substr( str_replace( '_', '-', $class ), 12 ) );
 			$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
 
 			if ( is_readable( $path . $file ) ) {
@@ -186,7 +186,7 @@ class WooCommerce {
 
 		} elseif ( strpos( $class, 'wc_shortcode_' ) === 0 ) {
 
-			$path = $this->plugin_path() . '/classes/shortcodes/';
+			$path = $this->plugin_path() . '/includes/shortcodes/';
 			$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
 
 			if ( is_readable( $path . $file ) ) {
@@ -197,7 +197,7 @@ class WooCommerce {
 
 		if ( strpos( $class, 'wc_' ) === 0 ) {
 
-			$path = $this->plugin_path() . '/classes/';
+			$path = $this->plugin_path() . '/includes/';
 			$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
 
 			if ( is_readable( $path . $file ) ) {

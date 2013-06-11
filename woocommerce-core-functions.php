@@ -1659,7 +1659,7 @@ function woocommerce_walk_category_dropdown_tree() {
 	global $woocommerce;
 
 	if ( ! class_exists( 'WC_Product_Cat_Dropdown_Walker' ) )
-		include_once( $woocommerce->plugin_path() . '/classes/walkers/class-product-cat-dropdown-walker.php' );
+		include_once( $woocommerce->plugin_path() . '/includes/walkers/class-product-cat-dropdown-walker.php' );
 
 	$args = func_get_args();
 

@@ -27,7 +27,7 @@ function do_install_woocommerce() {
 	woocommerce_init_roles();
 
 	// Register post types
-	include_once( untrailingslashit( plugin_dir_path( dirname( __FILE__ ) ) ) . '/classes/class-wc-post-types.php' );
+	include_once( untrailingslashit( plugin_dir_path( dirname( __FILE__ ) ) ) . '/includes/class-wc-post-types.php' );
 
 	// Add default taxonomies
 	woocommerce_default_taxonomies();
