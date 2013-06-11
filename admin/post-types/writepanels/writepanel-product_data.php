@@ -667,12 +667,12 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	update_post_meta( $post_id, '_product_image_gallery', implode( ',', $attachment_ids ) );
 
 	// Update post meta
-	update_post_meta( $post_id, '_regular_price', stripslashes( $_POST['_regular_price'] ) );
-	update_post_meta( $post_id, '_sale_price', stripslashes( $_POST['_sale_price'] ) );
-	update_post_meta( $post_id, '_tax_status', stripslashes( $_POST['_tax_status'] ) );
-	update_post_meta( $post_id, '_tax_class', stripslashes( $_POST['_tax_class'] ) );
-	update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
-	update_post_meta( $post_id, '_purchase_note', stripslashes( $_POST['_purchase_note'] ) );
+	if ( isset( $_POST['_regular_price'] ) ) update_post_meta( $post_id, '_regular_price', stripslashes( $_POST['_regular_price'] ) );
+	if ( isset( $_POST['_sale_price'] ) ) update_post_meta( $post_id, '_sale_price', stripslashes( $_POST['_sale_price'] ) );
+	if ( isset( $_POST['_tax_status'] ) ) update_post_meta( $post_id, '_tax_status', stripslashes( $_POST['_tax_status'] ) );
+	if ( isset( $_POST['_tax_class'] ) ) update_post_meta( $post_id, '_tax_class', stripslashes( $_POST['_tax_class'] ) );
+	if ( isset( $_POST['_visibility'] ) ) update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
+	if ( isset( $_POST['_purchase_note'] ) ) update_post_meta( $post_id, '_purchase_note', stripslashes( $_POST['_purchase_note'] ) );
 	update_post_meta( $post_id, '_featured', isset( $_POST['_featured'] ) ? 'yes' : 'no' );
 
 	// Dimensions
