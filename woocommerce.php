@@ -936,22 +936,22 @@ final class WooCommerce {
 		$this->get_helper( 'inline-javascript' )->output_inline_js();
 	}
 
-	// Deprecated 2.1.0 Access via the WC_Nonce_Helper helper
+	// Deprecated 2.1.0
 	public function nonce_field( $action, $referer = true , $echo = true ) {
-		_deprecated_function( 'Woocommerce->nonce_field', '2.1', 'WC_Nonce_Helper->nonce_field' );
-		return $this->get_helper( 'nonce' )->nonce_field( $action, $referer, $echo );
+		_deprecated_function( 'Woocommerce->nonce_field', '2.1', 'wp_nonce_field' );
+		return wp_nonce_field('woocommerce-' . $action, '_wpnonce', $referer, $echo );
 	}
 
-	// Deprecated 2.1.0 Access via the WC_Nonce_Helper helper
+	// Deprecated 2.1.0
 	public function nonce_url( $action, $url = '' ) {
-		_deprecated_function( 'Woocommerce->nonce_url', '2.1', 'WC_Nonce_Helper->nonce_url' );
-		return $this->get_helper( 'nonce' )->nonce_url( $action, $url );
+		_deprecated_function( 'Woocommerce->nonce_url', '2.1', 'wp_nonce_url' );
+		return wp_nonce_url( $url , 'woocommerce-' . $action );
 	}
 
 	// Deprecated 2.1.0 Access via the WC_Nonce_Helper helper
-	public function verify_nonce( $action, $method='_POST', $error_message = false ) {
+	public function verify_nonce( $action, $method = '_POST', $error_message = false ) {
 		_deprecated_function( 'Woocommerce->verify_nonce', '2.1', 'WC_Nonce_Helper->verify_nonce' );
-		return $this->get_helper( 'nonce' )->verify_nonce( $action, $method, $error_message );
+		return wp_verify_nonce( $$_method[ '_wpnonce' ], 'woocommerce-' . $action );
 	}
 
 	// Deprecated 2.1.0 Access via the WC_Shortcode_Helper helper

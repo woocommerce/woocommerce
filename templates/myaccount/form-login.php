@@ -36,7 +36,7 @@ global $woocommerce; ?>
 			</p>
 
 			<p class="form-row">
-				<?php $woocommerce->get_helper( 'nonce' )->nonce_field('login', 'login') ?>
+				<?php wp_nonce_field( 'woocommerce-login', 'login') ?>
 				<input type="submit" class="button" name="login" value="<?php _e( 'Login', 'woocommerce' ); ?>" /> <a class="lost_password" href="<?php
 
 				$lost_password_page_id = woocommerce_get_page_id( 'lost_password' );
@@ -85,7 +85,7 @@ global $woocommerce; ?>
 			<?php do_action( 'register_form' ); ?>
 
 			<p class="form-row">
-				<?php $woocommerce->get_helper( 'nonce' )->nonce_field('register', 'register') ?>
+				<?php wp_nonce_field( 'woocommerce-register', 'register') ?>
 				<input type="submit" class="button" name="register" value="<?php _e( 'Register', 'woocommerce' ); ?>" />
 			</p>
 		</form>

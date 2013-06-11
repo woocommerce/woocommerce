@@ -42,7 +42,7 @@ class WC_Shortcode_Lost_Password {
 		// process lost password form
 		if( isset( $_POST['user_login'] ) ) {
 
-			$woocommerce->get_helper( 'nonce' )->verify_nonce( 'lost_password' );
+			wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-lost_password' );
 
 			self::retrieve_password();
 		}
@@ -72,7 +72,7 @@ class WC_Shortcode_Lost_Password {
 				$args['key'] = esc_attr( $_POST['reset_key'] );
 				$args['login'] = esc_attr( $_POST['reset_login'] );
 
-				$woocommerce->get_helper( 'nonce' )->verify_nonce( 'reset_password' );
+				wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-reset_password' );
 
 				if( empty( $_POST['password_1'] ) || empty( $_POST['password_2'] ) ) {
 					wc_add_error( __( 'Please enter your password.', 'woocommerce' ) );

@@ -204,7 +204,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 						do_action( 'woocommerce_settings_tabs' );
 					?>
 				</h2>
-				<?php wp_nonce_field( 'woocommerce-settings', '_wpnonce', true, true ); ?>
+				<?php wp_nonce_field( 'woocommerce-settings' ); ?>
 
 				<?php if ( ! get_option('hide-wc-extensions-message') ) : ?>
 					<div id="woocommerce_extensions"><a href="<?php echo add_query_arg('hide-wc-extensions-message', 'true') ?>" class="hide">&times;</a><?php printf(__( 'More functionality and gateway options available via <a href="%s" target="_blank">WC official extensions</a>.', 'woocommerce' ), 'http://www.woothemes.com/extensions/woocommerce-extensions/'); ?></div>

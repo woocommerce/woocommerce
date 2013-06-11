@@ -135,7 +135,7 @@ wc_print_messages();
 
 				<?php do_action('woocommerce_proceed_to_checkout'); ?>
 
-				<?php $woocommerce->get_helper( 'nonce' )->nonce_field('cart') ?>
+				<?php wp_nonce_field( 'woocommerce-cart') ?>
 			</td>
 		</tr>
 

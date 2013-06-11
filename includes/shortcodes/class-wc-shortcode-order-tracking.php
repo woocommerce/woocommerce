@@ -41,7 +41,7 @@ class WC_Shortcode_Order_Tracking {
 
 		if ( ! empty( $_REQUEST['orderid'] ) ) {
 
-			$woocommerce->get_helper( 'nonce' )->verify_nonce( 'order_tracking' );
+			wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-order_tracking' );
 
 			$order_id 		= empty( $_REQUEST['orderid'] ) ? 0 : esc_attr( $_REQUEST['orderid'] );
 			$order_email	= empty( $_REQUEST['order_email'] ) ? '' : esc_attr( $_REQUEST['order_email']) ;
