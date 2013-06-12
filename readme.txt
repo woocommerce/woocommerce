@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.5
 Tested up to: 3.6 beta 3
-Stable tag: 2.0.10
+Stable tag: 2.0.11
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -165,24 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.1 - x =
-* Feature - Split frontend styles into separate appearance/layout stylesheets and removed the enable/disable options.
-* Feature - Added woocommerce-responsive.css to optimise default layout on handheld devices.
-* Feature - Bulk edit increase / decrease variation prices by fixed or percentage values
-* Tweak - Added filter to check the 'Create account' checkbox on checkout by default
-* Tweak - Update CPT parameters for 'product_variation' and 'shop_coupon' to be no longer public
-* Tweak - COD processing instead of on-hold
-* Tweak - Added filter to explicitly hide terms agreement checkbox
-* Tweak - New System Status report layout, now plugin list is better visually and very better to read
-* Tweak - content-widget-product.php template for product lists inside core widgets
-* Fix - Changed MyException to Exception in Checkout class as MyException class does not exist in WooCommerce
-* Refactor - Taken out Piwik integration, use http://wordpress.org/extend/plugins/woocommerce-piwik-integration/ from now on
-* Refactor - Taken out ShareYourCart integration, use http://wordpress.org/extend/plugins/shareyourcart/ from now on
-* Refactor - Moved woocommerce_get_formatted_product_name function into WC_Product class
-* Localization - Portugese locale by jpBenfica
-* Localization - Spanish, Romanian updates.
-
-= 2.0.11 - x =
+= 2.0.11 - 12/06/2013 =
 * Tweak - Handling for multiselect fields on checkout, and a filter for third party handling
 * Fix - Duplicate param keys for sale_product shortcodes
 * Fix - Google Analytics tracking use get_order_number() method instead of id
