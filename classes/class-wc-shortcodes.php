@@ -650,8 +650,6 @@ class WC_Shortcodes {
 			'no_found_rows' => 1,
 			'post_status' 	=> 'publish',
 			'post_type' 	=> 'product',
-			'orderby' 		=> 'date',
-			'order' 		=> 'ASC',
 			'meta_query' 	=> $meta_query,
 			'post__in'		=> $product_ids_on_sale
 		);
