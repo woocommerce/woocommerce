@@ -165,7 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.0.11 - 12/06/2013 =
+= 2.0.11 - 13/06/2013 =
 * Tweak - Handling for multiselect fields on checkout, and a filter for third party handling
 * Fix - Duplicate param keys for sale_product shortcodes
 * Fix - Google Analytics tracking use get_order_number() method instead of id
