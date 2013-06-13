@@ -782,8 +782,7 @@ class WC_Product {
 			$_tax       = new WC_Tax();
 			$tax_rates  = $_tax->get_shop_base_rate( $this->tax_class );
 			$taxes      = $_tax->calc_tax( $price * $qty, $tax_rates, true );
-			$tax_amount = $_tax->get_tax_total( $taxes );
-			$price      = round( $price * $qty - $tax_amount, 2 );
+			$price      = $_tax->round( $price * $qty - array_sum( $taxes ) );
 
 		} else {
 			$price = $price * $qty;
