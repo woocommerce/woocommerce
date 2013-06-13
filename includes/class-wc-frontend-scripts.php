@@ -68,6 +68,11 @@ class WC_Frontend_Scripts {
 		wp_enqueue_script( 'wc-cart-fragments', $frontend_script_path . 'cart-fragments' . $suffix . '.js', array( 'jquery', 'jquery-cookie' ), $woocommerce->version, true );
 
 		// Variables for JS scripts
+		wp_localize_script( 'woocommerce', 'woocommerce_params', apply_filters( 'woocommerce_params', array(
+			'ajax_url'                         => $woocommerce->ajax_url(),
+			'ajax_loader_url'                  => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
+		) ) );
+
 		wp_localize_script( 'wc-single-product', 'wc_single_product_params', apply_filters( 'wc_single_product_params', array(
 			'i18n_required_rating_text'        => esc_attr__( 'Please select a rating', 'woocommerce' ),
 			'review_rating_required'           => get_option( 'woocommerce_review_rating_required' ),
