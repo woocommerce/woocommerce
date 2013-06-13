@@ -166,8 +166,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.0.11 - x =
+* Tweak - Handling for multiselect fields on checkout, and a filter for third party handling
 * Fix - Duplicate param keys for sale_product shortcodes
 * Fix - Google Analytics tracking use get_order_number() method instead of id
+* Fix - Replaced jQuery placeholder plugin to provide support in older browsers
+* Fix - Rounding for mijireh tax ex. price
+* Fix - Fixed is_on_sale function for products without prices
 
 = 2.0.10 - 15/05/2013 =
 * Tweak - Searching for SKU in admin panel can also be done via lowercase 'sku:' instead of just 'SKU:'

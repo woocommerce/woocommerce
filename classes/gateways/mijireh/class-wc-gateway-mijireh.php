@@ -115,7 +115,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
       }
     }
 	}
-	
+
 
 
     /**
@@ -213,7 +213,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 
 			} else {
 
-				$mj_order->add_item( $item['name'], $wc_order->get_item_subtotal( $item, false, false ), $item['qty'], $product->get_sku() );
+				$mj_order->add_item( $item['name'], $wc_order->get_item_subtotal( $item, false, true ), $item['qty'], $product->get_sku() );
 
 			}
 
@@ -224,7 +224,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 		$items = $wc_order->get_fees();
 
 		foreach( $items as $item ) {
-			$mj_order->add_item( $item['name'], $item['line_total'], 1, '' );
+			$mj_order->add_item( $item['name'], number_format( $item['line_total'], 2, '.', ',' ), 1, '' );
 		}
 
 		// add billing address to order
@@ -335,7 +335,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 		echo $job_id;
 		die;
 	}
-    
+
 
 
     /**

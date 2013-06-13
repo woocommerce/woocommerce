@@ -421,23 +421,28 @@ class WC_Checkout {
 
 			foreach ( $fieldset as $key => $field ) {
 
-				if ( ! isset( $field['type'] ) ) $field['type'] = 'text';
+				if ( ! isset( $field['type'] ) )
+					$field['type'] = 'text';
 
 				// Get Value
 				switch ( $field['type'] ) {
 					case "checkbox" :
-						$this->posted[ $key ] = isset( $_POST[$key] ) ? 1 : 0;
+						$this->posted[ $key ] = isset( $_POST[ $key ] ) ? 1 : 0;
+					break;
+					case "multiselect" :
+						$this->posted[ $key ] = isset( $_POST[ $key ] ) ? implode( ', ', array_map( 'woocommerce_clean', $_POST[ $key ] ) ) : '';
 					break;
 					default :
-						$this->posted[ $key ] = isset( $_POST[$key] ) ? woocommerce_clean( $_POST[ $key ] ) : '';
+						$this->posted[ $key ] = isset( $_POST[ $key ] ) ? woocommerce_clean( $_POST[ $key ] ) : '';
 					break;
 				}
 
-				// Hook to allow modification of value
-				$this->posted[ $key ] = apply_filters( 'woocommerce_process_checkout_field_' . $key, $this->posted[$key] );
+				// Hooks to allow modification of value
+				$this->posted[ $key ] = apply_filters( 'woocommerce_process_checkout_' . sanitize_title( $field['type'] ) . '_field', $this->posted[ $key ] );
+				$this->posted[ $key ] = apply_filters( 'woocommerce_process_checkout_field_' . $key, $this->posted[ $key ] );
 
 				// Validation: Required fields
-				if ( isset( $field['required'] ) && $field['required'] && empty( $this->posted[$key] ) ) $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is a required field.', 'woocommerce' ) );
+				if ( isset( $field['required'] ) && $field['required'] && empty( $this->posted[ $key ] ) ) $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is a required field.', 'woocommerce' ) );
 
 				if ( ! empty( $this->posted[ $key ] ) ) {
 
@@ -452,7 +457,7 @@ class WC_Checkout {
 							if ( ! $validation->is_postcode( $this->posted[ $key ], $_POST[ $validate_against ] ) )
 								$woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . sprintf( __( '(%s) is not a valid postcode/ZIP.', 'woocommerce' ), $this->posted[ $key ] ) );
 							else
-								$this->posted[ $key ] = $validation->format_postcode( $this->posted[$key], $_POST[ $validate_against ] );
+								$this->posted[ $key ] = $validation->format_postcode( $this->posted[ $key ], $_POST[ $validate_against ] );
 
 						break;
 						case "billing_state" :
@@ -483,9 +488,9 @@ class WC_Checkout {
 						break;
 						case "billing_email" :
 
-							$this->posted[ $key ] = strtolower( $this->posted[$key] );
+							$this->posted[ $key ] = strtolower( $this->posted[ $key ] );
 
-							if ( ! $validation->is_email( $this->posted[$key] ) )
+							if ( ! $validation->is_email( $this->posted[ $key ] ) )
 								$woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ) );
 						break;
 					}
