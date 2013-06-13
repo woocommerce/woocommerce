@@ -30,7 +30,6 @@ if ( ! class_exists( 'WooCommerce' ) ) :
  * @author WooThemes
  */
 final class WooCommerce {
-
 	/**
 	 * @var WooCommerce The single instance of WooCommerce
 	 * @since 2.1
