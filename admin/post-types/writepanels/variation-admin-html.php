@@ -128,9 +128,11 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 							<td>
 								<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
 								<label><?php _e( 'Tax class:', 'woocommerce' ); ?></label>
-								<select name="variable_tax_class[<?php echo $loop; ?>]"><?php
+								<select name="variable_tax_class[<?php echo $loop; ?>]">
+									<option value="parent" <?php selected( is_null( $_tax_class), true ); ?>><?php _e( 'Same as parent', 'woocommerce' ); ?></option>
+									<?php
 									foreach ( $parent_data['tax_class_options'] as $key => $value )
-										echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key, $_tax_class, false ) . '>' . esc_html( $value ) . '</option>';
+										echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key === $_tax_class, true, false ) . '>' . esc_html( $value ) . '</option>';
 								?></select>
 								<?php endif; ?>
 							</td>

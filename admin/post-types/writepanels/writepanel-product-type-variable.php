@@ -50,7 +50,6 @@ function variable_product_type_options() {
 	// Get tax classes
 	$tax_classes = array_filter( array_map('trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
 	$tax_class_options = array();
-	$tax_class_options['parent'] = __( 'Same as parent', 'woocommerce' );
 	$tax_class_options[''] = __( 'Standard', 'woocommerce' );
 	if ( $tax_classes )
 		foreach ( $tax_classes as $class )
@@ -152,7 +151,6 @@ function variable_product_type_options() {
 						'_length',
 						'_width',
 						'_height',
-						'_tax_class',
 						'_download_limit',
 						'_download_expiry',
 						'_file_paths',
@@ -165,6 +163,9 @@ function variable_product_type_options() {
 
 					foreach ( $variation_fields as $field )
 						$$field = isset( $variation_data[ $field ][0] ) ? $variation_data[ $field ][0] : '';
+
+					// Tax class handling
+					$_tax_class = isset( $variation_data['_tax_class'][0] ) ? $variation_data['_tax_class'][0] : null;
 
 					// Price backwards compat
 					if ( $_regular_price == '' && $_price )
