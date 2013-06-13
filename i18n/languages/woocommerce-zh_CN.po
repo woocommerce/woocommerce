@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-01-09 09:36:51+00:00\n"
-"PO-Revision-Date: 2013-06-08 13:14-0500\n"
+"PO-Revision-Date: 2013-06-12 22:33-0500\n"
 "Last-Translator: Greg Wang <gregwym@qq.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -25,9 +25,8 @@ msgstr ""
 
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:6
-#, fuzzy
 msgid "Product price/cart button"
-msgstr "商品介绍"
+msgstr "商品价格按钮"
 
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:7
@@ -44,7 +43,6 @@ msgstr "商品 SKU："
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-coupon_data.php:116
 #: assets/js/admin/editor_plugin_lang.php:9
-#, fuzzy
 msgid "Product categories"
 msgstr "商品分类"
 
@@ -68,9 +66,8 @@ msgstr "特色商品"
 
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:13
-#, fuzzy
 msgid "Shop Messages"
-msgstr "商店页面"
+msgstr "商店公告"
 
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:45
@@ -97,7 +94,6 @@ msgstr "结帐"
 
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:17
-#, fuzzy
 msgid "Order tracking"
 msgstr "订单追踪"
 
@@ -107,14 +103,13 @@ msgstr "订单追踪"
 #: assets/js/admin/editor_plugin_lang.php:18
 #: templates/checkout/thankyou.php:30
 msgid "My Account"
-msgstr "帐号设定"
+msgstr "我的账户"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:297
 #: assets/js/admin/editor_plugin_lang.php:19
-#, fuzzy
 msgid "Edit Address"
-msgstr "编辑我的地址资讯"
+msgstr "编辑我的地址信息"
 
 # @ woocommerce
 #: admin/woocommerce-admin-install.php:213
@@ -141,7 +136,7 @@ msgstr "付款"
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:23
 msgid "Thankyou"
-msgstr ""
+msgstr "谢谢您"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:421
@@ -170,9 +165,8 @@ msgstr "启用低库存通知"
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:427
 #: classes/emails/class-wc-email-customer-invoice.php:144
-#, fuzzy
 msgid "Email subject"
-msgstr "电子邮件"
+msgstr "电子邮件主题"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:429
@@ -187,7 +181,7 @@ msgstr "电子邮件"
 #: classes/emails/class-wc-email-customer-invoice.php:167
 #, php-format
 msgid "Defaults to <code>%s</code>"
-msgstr ""
+msgstr "<code>%s</code>的默认值"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:434
@@ -211,7 +205,7 @@ msgstr "电子邮件模板"
 #: classes/emails/class-wc-email-customer-invoice.php:174
 #: classes/emails/class-wc-email-new-order.php:144
 msgid "Choose which format of email to send."
-msgstr ""
+msgstr "选择电子邮件的格式"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:447
@@ -309,15 +303,13 @@ msgstr "找不到档案"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:639
-#, fuzzy
 msgid "View template"
-msgstr "电子邮件模板"
+msgstr "查看电子邮件模板"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:640
-#, fuzzy
 msgid "Hide template"
-msgstr "电子邮件模板"
+msgstr "隐藏电子邮件模板"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:651
@@ -461,25 +453,25 @@ msgstr ""
 
 # @ woocommerce
 #: classes/class-wc-cart.php:818
-#, fuzzy, php-format
+#, php-format
 msgid "Sorry, &quot;%s&quot; cannot be purchased."
-msgstr "抱歉, 此商品无法被购买."
+msgstr "抱歉, &quot;%s&quot;无法被购买."
 
 # @ woocommerce
 #: classes/class-wc-cart.php:825
-#, fuzzy, php-format
+#, php-format
 msgid ""
 "You cannot add &quot;%s&quot; to the cart because the product is out of "
 "stock."
-msgstr "无法将此商品加入购物车 (已无库存)."
+msgstr "&quot;%s&quot;已无库存, 无法加入购物车. "
 
 # @ woocommerce
 #: classes/class-wc-cart.php:830
-#, fuzzy, php-format
+#, php-format
 msgid ""
 "You cannot add that amount of &quot;%s&quot; to the cart because there is "
 "not enough stock (%s remaining)."
-msgstr "我们无法将此数量加到购物车内 (库存不足). 目前库存只剩 %s."
+msgstr "我们无法将此数量的&quot;%s&quot;加到购物车内. 目前库存只剩 %s."
 
 # @ woocommerce
 #: classes/class-wc-cart.php:842 classes/class-wc-cart.php:856
@@ -516,13 +508,13 @@ msgstr "优惠券不存在!"
 # @ woocommerce
 #: classes/class-wc-checkout.php:64
 msgid "Account username"
-msgstr "帐号使用者名称"
+msgstr "帐号用户名"
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:65
 msgctxt "placeholder"
 msgid "Username"
-msgstr "使用者名称"
+msgstr "用户名"
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:72 classes/class-wc-checkout.php:79
@@ -540,13 +532,13 @@ msgstr "密码"
 #: admin/post-types/writepanels/writepanels-init.php:71
 #: classes/class-wc-checkout.php:89
 msgid "Order Notes"
-msgstr "订单备註"
+msgstr "订单备注"
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:90
 msgctxt "placeholder"
 msgid "Notes about your order, e.g. special notes for delivery."
-msgstr "您的订单的备註, 例如: 运送时的特殊备註."
+msgstr "您对于订单的备注, 例如: 运送时的特殊需求."
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:152
@@ -602,18 +594,18 @@ msgstr "不是有效的电子邮件地址."
 # @ woocommerce
 #: classes/class-wc-checkout.php:543
 msgid "Please enter an account username."
-msgstr "请输入一个帐号使用者名称"
+msgstr "请输入一个用户名"
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:547
 msgid "Invalid email/username."
-msgstr "无效的 电子邮件/使用者名称"
+msgstr "无效的 电子邮件/用户名"
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:550
 msgid ""
 "An account is already registered with that username. Please choose another."
-msgstr "已有帐号使用改比使用者名称。请选择其他名称。"
+msgstr "已有帐号使用此用户名。请选择其他名称。"
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:560
@@ -1977,9 +1969,8 @@ msgstr "市"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:766
-#, fuzzy
 msgid "Town / District"
-msgstr "市/区"
+msgstr "区"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:769
@@ -2014,23 +2005,20 @@ msgstr "县"
 #: classes/class-wc-countries.php:920 classes/class-wc-countries.php:921
 #: classes/class-wc-countries.php:996
 #: templates/cart/shipping-calculator.php:68
-#, fuzzy
 msgid "Postcode / Zip"
-msgstr "邮递区号"
+msgstr "邮政编码"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:925 classes/class-wc-countries.php:926
 #: classes/class-wc-countries.php:985
-#, fuzzy
 msgid "Town / City"
 msgstr "县市"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:930 classes/class-wc-countries.php:931
 #: classes/class-wc-countries.php:991
-#, fuzzy
 msgid "State / County"
-msgstr "乡/镇/区"
+msgstr "乡镇区"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:172
@@ -2070,16 +2058,15 @@ msgstr "地址"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:976
-#, fuzzy
 msgctxt "placeholder"
 msgid "Street address"
-msgstr "储存地址"
+msgstr "街道地址"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:981
 msgctxt "placeholder"
 msgid "Apartment, suite, unit etc. (optional)"
-msgstr ""
+msgstr "单元, 房间号, 等…"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:1038
@@ -2111,18 +2098,18 @@ msgstr "此优惠券的最低花费为 %s."
 # @ woocommerce
 #: classes/class-wc-coupon.php:468
 msgid "Sorry, this coupon is not applicable to your cart contents."
-msgstr ""
+msgstr "抱歉, 这个优惠卷不能用于您购物车中的物品. "
 
 # @ woocommerce
 #: classes/class-wc-customer.php:628 classes/class-wc-customer.php:638
-#, fuzzy, php-format
+#, php-format
 msgid "File %d"
-msgstr "档案路径"
+msgstr "文件 %d"
 
 # @ woocommerce
 #: classes/class-wc-emails.php:246
 msgid "Note"
-msgstr "备註"
+msgstr "备注"
 
 # @ woocommerce
 #: classes/class-wc-emails.php:281
@@ -2168,7 +2155,7 @@ msgstr "商品延期出货单"
 #: classes/class-wc-emails.php:366
 #, php-format
 msgid "%s units of %s have been backordered in order #%s."
-msgstr "%s 个单位的 %s 在订单 #%s 裡延期出货."
+msgstr "%s 个单位的 %s 在订单 #%s 里延期出货."
 
 # @ woocommerce
 #: classes/class-wc-order.php:283
@@ -2191,7 +2178,7 @@ msgstr "购物车小计："
 #: admin/post-types/writepanels/writepanel-order_data.php:499
 #: classes/class-wc-order.php:929
 msgid "Cart Discount:"
-msgstr "购物车折价:"
+msgstr "购物车折扣:"
 
 # @ woocommerce
 #: classes/class-wc-order.php:935
@@ -2207,7 +2194,7 @@ msgstr "小计："
 #: admin/post-types/writepanels/writepanel-order_data.php:507
 #: classes/class-wc-order.php:1006
 msgid "Order Discount:"
-msgstr "订单折价:"
+msgstr "订单折扣:"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:653
@@ -2279,9 +2266,8 @@ msgstr ""
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:27
-#, fuzzy
 msgid "Your order is complete"
-msgstr "您的订单已被取消。"
+msgstr "您的订单已被取消"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:28
@@ -2290,9 +2276,8 @@ msgstr ""
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:37
-#, fuzzy
 msgid "Your order is complete - download your files"
-msgstr "您的订单已经完成。订单细节如下："
+msgstr "您的订单已经完成 - 下载您的文件"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:38
@@ -2304,14 +2289,13 @@ msgstr ""
 #: classes/emails/class-wc-email-customer-completed-order.php:141
 #: classes/emails/class-wc-email-new-order.php:128
 msgid "Subject"
-msgstr ""
+msgstr "主题"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:148
 #: classes/emails/class-wc-email-new-order.php:135
-#, fuzzy
 msgid "Email Heading"
-msgstr "电子邮件明细"
+msgstr "电子邮件台头"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:155
@@ -2326,17 +2310,15 @@ msgstr ""
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-invoice.php:27
-#, fuzzy
 msgid "Customer invoice"
-msgstr "顾客备註"
+msgstr "订单明细"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-invoice.php:28
-#, fuzzy
 msgid ""
 "Customer invoice emails can be sent to the user containing order info and "
 "payment links."
-msgstr "用电子邮件寄订单给顾客. 尚未付款的订单将包含一个付费连结."
+msgstr "用电子邮件将订单明细寄给顾客. 尚未付款的订单将包含一个付费链接. "
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-invoice.php:33
@@ -2371,9 +2353,8 @@ msgstr ""
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-new-account.php:31
-#, fuzzy
 msgid "New account"
-msgstr "帐号设定"
+msgstr "新建账户"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-new-account.php:32
@@ -2398,7 +2379,7 @@ msgstr "欢迎来到 %s"
 #: admin/post-types/writepanels/writepanel-order_notes.php:62
 #: classes/emails/class-wc-email-customer-note.php:29
 msgid "Customer note"
-msgstr "顾客备註"
+msgstr "顾客备注"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-note.php:30
@@ -2413,7 +2394,7 @@ msgstr ""
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-note.php:36
 msgid "A note has been added to your order"
-msgstr "您的订单添加了一笔备註"
+msgstr "已把备注添加到了您的订单"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-processing-order.php:24
@@ -2430,9 +2411,8 @@ msgstr ""
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-processing-order.php:27
-#, fuzzy
 msgid "Thank you for your order"
-msgstr "追踪你的订单"
+msgstr "谢谢您的订单"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-processing-order.php:28
@@ -2441,9 +2421,8 @@ msgstr ""
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-reset-password.php:36
-#, fuzzy
 msgid "Reset password"
-msgstr "再次输入密码"
+msgstr "重置密码"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-reset-password.php:37
@@ -2459,13 +2438,11 @@ msgstr ""
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-reset-password.php:43
-#, fuzzy
 msgid "Password Reset Instructions"
-msgstr "指示"
+msgstr "重置密码的方法"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-new-order.php:24
-#, fuzzy
 msgid "New order"
 msgstr "新订单"
 
@@ -2476,7 +2453,6 @@ msgstr ""
 
 # @ woocommerce
 #: classes/emails/class-wc-email-new-order.php:27
-#, fuzzy
 msgid "New customer order"
 msgstr "新的顾客订单"
 
@@ -2500,11 +2476,11 @@ msgstr ""
 
 # @ woocommerce
 #: classes/emails/class-wc-email-new-order.php:130
-#, fuzzy, php-format
+#, php-format
 msgid ""
 "This controls the email subject line. Leave blank to use the default "
 "subject: <code>%s</code>."
-msgstr "显示於商品标籤 URL. 留白则使用预设缩略名."
+msgstr "这用于设置邮件主题. 留白则使用预设缩略名: <code>%s</code>."
 
 # @ woocommerce
 #: classes/emails/class-wc-email-new-order.php:137
@@ -2546,7 +2522,7 @@ msgstr "标题"
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:106
 #: classes/shipping/local-pickup/class-wc-shipping-local-pickup.php:86
 msgid "This controls the title which the user sees during checkout."
-msgstr "控制使用者在结帐时所看到的标题."
+msgstr "控制用户在结帐时所看到的标题."
 
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:72
@@ -2642,7 +2618,7 @@ msgstr "允许使用 BACS (Bank Account Clearing System) 付款, 一般通常称
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:158
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:200
 msgid "Our Details"
-msgstr "我们的详细资讯"
+msgstr "我们的详细信息"
 
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:168
@@ -2734,7 +2710,7 @@ msgstr "顾客在您的网站上会看到的付款方式标题."
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:132
 #: woocommerce-template.php:748
 msgid "Description"
-msgstr "商品资讯"
+msgstr "商品介绍"
 
 # @ woocommerce
 #: classes/gateways/cod/class-wc-gateway-cod.php:96
@@ -2753,7 +2729,6 @@ msgstr "会被加在感谢页面的指示."
 
 # @ woocommerce
 #: classes/gateways/cod/class-wc-gateway-cod.php:106
-#, fuzzy
 msgid "Enable for shipping methods"
 msgstr "启用该发货方式"
 
@@ -2810,7 +2785,7 @@ msgstr "使用您的信用卡来安全付款."
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:181
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:134
 msgid "This controls the description which the user sees during checkout."
-msgstr "此项目控制使用者在结帐时说看到的叙述."
+msgstr "此项目控制用户在结帐时说看到的叙述."
 
 # @ woocommerce
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:200
@@ -2825,7 +2800,7 @@ msgid ""
 "of your site. Mijireh supports a wide variety of payment gateways: Stripe, "
 "Authorize.net, PayPal, eWay, SagePay, Braintree, PayLeap, and more."
 msgstr ""
-"提供一个 PCI 合格, 安全的方式来收集以及传输信用卡资讯到您的付费通道. 同时让您"
+"提供一个 PCI 合格, 安全的方式来收集以及传输信用卡信息到您的付费通道. 同时让您"
 "控制网站的设计. Mijireh 支援多项付费通道: Stripe, Authorize.net, PayPal, "
 "eWay, SagePay, Braintree, PayLeap, 以及更多."
 
@@ -2837,7 +2812,7 @@ msgstr "免费参加"
 # @ woocommerce
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:203
 msgid "Learn more about WooCommerce and Mijireh"
-msgstr "瞭解更多关於 WooCommerce 以及 Mijireh"
+msgstr "了解更多关于 WooCommerce 以及 Mijireh"
 
 # @ woocommerce
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:207
@@ -2846,7 +2821,7 @@ msgid ""
 "card data to your payment gateway while keeping you in control of the design "
 "of your site."
 msgstr ""
-"提供一个 PCI 合格, 安全的方式来收集以及传输信用卡资讯到您的付费通道. 同时让您"
+"提供一个 PCI 合格, 安全的方式来收集以及传输信用卡信息到您的付费通道. 同时让您"
 "保留网站设计的控制权."
 
 # @ woocommerce
@@ -2858,14 +2833,14 @@ msgstr ""
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:90
 msgid "PayPal standard"
-msgstr "PayPal 标準"
+msgstr "PayPal 标准"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:91
 msgid ""
 "PayPal standard works by sending the user to PayPal to enter their payment "
 "information."
-msgstr "PayPal 标準是将使用者送往 PayPal 使其输入付费资讯."
+msgstr "PayPal 标准是将用户送往 PayPal 使其输入付费信息."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:103
@@ -2945,7 +2920,7 @@ msgstr "运送选项"
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:173
 msgid "Shipping details"
-msgstr "运送资讯"
+msgstr "运送信息"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:175
@@ -2958,7 +2933,7 @@ msgid ""
 "PayPal allows us to send 1 address. If you are using PayPal for shipping "
 "labels you may prefer to send the shipping address rather than billing."
 msgstr ""
-"PayPal 允许我们使用一个地址. 如果您使用 PayPal 为运输标籤, 您可能会偏向使用发"
+"PayPal 允许我们使用一个地址. 如果您使用 PayPal 为运输标签, 您可能会偏向使用发"
 "货地址而非帐单地址."
 
 # @ woocommerce
@@ -2971,7 +2946,7 @@ msgstr "覆盖地址"
 msgid ""
 "Enable \"address_override\" to prevent address information from being "
 "changed."
-msgstr "启用 \"覆盖地址\" 来避免地址资讯被更变."
+msgstr "启用 \"覆盖地址\" 来避免地址信息被更变."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:184
@@ -3001,7 +2976,7 @@ msgstr "启用 PayPal 沙盒"
 msgid ""
 "PayPal sandbox can be used to test payments. Sign up for a developer account "
 "<a href=\"%s\">here</a>."
-msgstr "PayPal 沙盒可用於付款测试. <a href=\"%s\">在此</a> 报名一个开发者帐号."
+msgstr "PayPal 沙盒可用于付款测试. <a href=\"%s\">在此</a> 报名一个开发者帐号."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:200
@@ -3142,7 +3117,7 @@ msgstr "新增电子商务追踪代码至感谢页面"
 # @ woocommerce
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:81
 msgid "Add event tracking code for add to cart actions"
-msgstr "在 加入购物车 动作裡加入事件追踪代码."
+msgstr "在 加入购物车 动作里加入事件追踪代码."
 
 # @ woocommerce
 #: admin/post-types/shop_order.php:95
@@ -3244,15 +3219,13 @@ msgstr ""
 
 # @ default
 #: classes/integrations/shareyourcart/class.shareyourcart-wp.php:342
-#, fuzzy
 msgid "Button"
 msgstr "按键文字"
 
 # @ default
 #: classes/integrations/shareyourcart/class.shareyourcart-wp.php:343
-#, fuzzy
 msgid "Customize Button"
-msgstr "顾客登录"
+msgstr "自定义按钮"
 
 # @ default
 #: classes/integrations/shareyourcart/class.shareyourcart-wp.php:351
@@ -3285,7 +3258,7 @@ msgstr "选项设定"
 #: classes/integrations/shareyourcart/views/admin-page.php:110
 #: classes/integrations/shareyourcart/views/button-settings-page.php:120
 msgid "Save changes"
-msgstr "储存修改"
+msgstr "保存修改"
 
 # @ woocommerce
 #: classes/integrations/shareyourcart/views/button-settings-page.php:8
@@ -3334,7 +3307,6 @@ msgstr "每笔订单的花费"
 
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:96
-#, fuzzy
 msgid ""
 "Enter a cost (excluding tax) per order, e.g. 5.00. Leave blank to disable."
 msgstr "输入每笔订单的花费, 例如: 5.00. 留白以关闭功能."
@@ -3453,7 +3425,7 @@ msgstr "最低费用"
 msgid ""
 "Enter a minimum fee amount. Fee's less than this will be increased. Leave "
 "blank to disable."
-msgstr "输入一个最低费用. 低於此的费用会被增加. 留白以关闭功能."
+msgstr "输入一个最低费用. 低于此的费用会被增加. 留白以关闭功能."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:833
@@ -3550,9 +3522,8 @@ msgstr "启用免费运送"
 
 # @ woocommerce
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:106
-#, fuzzy
 msgid "Free Shipping Requires..."
-msgstr "免费运送"
+msgstr "请求免费运送"
 
 # @ woocommerce
 #: admin/post-types/writepanels/order-fee-html.php:19
@@ -3570,9 +3541,8 @@ msgstr "无法提供"
 
 # @ woocommerce
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:111
-#, fuzzy
 msgid "A valid free shipping coupon"
-msgstr "开启免费运送"
+msgstr "一个有效的免费运送优惠卷"
 
 # @ woocommerce
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:112
@@ -3581,13 +3551,11 @@ msgstr ""
 
 # @ woocommerce
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:113
-#, fuzzy
 msgid "A minimum order amount OR a coupon"
 msgstr "最低订单量"
 
 # @ woocommerce
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:114
-#, fuzzy
 msgid "A minimum order amount AND a coupon"
 msgstr "最低订单量"
 
@@ -3598,10 +3566,9 @@ msgstr "最低订单量"
 
 # @ woocommerce
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:124
-#, fuzzy
 msgid ""
 "Users will need to spend this amount to get free shipping (if enabled above)."
-msgstr "使用者需要花费比这多才能使用免费运送. 留白以关闭选项."
+msgstr "用户需要花费比这多才能使用免费运送. 留白以关闭选项."
 
 # @ woocommerce
 #: classes/shipping/international-delivery/class-wc-shipping-international-delivery.php:28
@@ -3613,7 +3580,7 @@ msgstr "国际运送"
 # @ woocommerce
 #: classes/shipping/international-delivery/class-wc-shipping-international-delivery.php:32
 msgid "International delivery based on flat rate shipping."
-msgstr "基於平价运费的国际运送."
+msgstr "基于平价运费的国际运送."
 
 # @ woocommerce
 #: classes/shipping/international-delivery/class-wc-shipping-international-delivery.php:65
@@ -3698,7 +3665,6 @@ msgstr "邮政编码"
 # @ woocommerce
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:137
 #: classes/shipping/local-pickup/class-wc-shipping-local-pickup.php:93
-#, fuzzy
 msgid ""
 "What zip/post codes would you like to offer delivery to? Separate codes with "
 "a comma. Accepts wildcards, e.g. P* will match a postcode of PE30."
@@ -3773,9 +3739,8 @@ msgstr "请输入您的密码"
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:95
-#, fuzzy
 msgid "Your password has been reset."
-msgstr "您的设定已经储存完成。"
+msgstr "您的密码已经被重置。"
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:95
@@ -3784,21 +3749,18 @@ msgstr ""
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:116
-#, fuzzy
 msgid "Enter a username or e-mail address."
 msgstr "请输入您的电子邮件."
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:123
-#, fuzzy
 msgid "There is no user registered with that email address."
 msgstr "已经有帐号註册在该电子邮件地址之下。请登录。"
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:138
-#, fuzzy
 msgid "Invalid username or e-mail."
-msgstr "使用者名称或密码"
+msgstr "无效的用户名或密码"
 
 # @ default
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:152
@@ -3807,9 +3769,8 @@ msgstr ""
 
 # @ default
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:180
-#, fuzzy
 msgid "Check your e-mail for the confirmation link."
-msgstr "您可以在确认订单的电子邮件裡找到订单编号"
+msgstr "您可以在确认订单的电子邮件里找到订单编号"
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:200
@@ -3832,7 +3793,7 @@ msgstr "请输入有效的电子邮件"
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-order-tracking.php:76
 msgid "Sorry, we could not find that order id in our database."
-msgstr "很抱歉，我们无法找到该订单资讯。"
+msgstr "很抱歉，我们无法找到该订单信息。"
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-pay.php:65
@@ -3883,7 +3844,7 @@ msgstr "付款方式："
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-view-order.php:49
 msgid "My Account &rarr;"
-msgstr "帐号设定 &rarr;"
+msgstr "我的帐号 &rarr;"
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-view-order.php:56
@@ -3892,8 +3853,8 @@ msgid ""
 "Order <mark class=\"order-number\">%s</mark> made on <mark class=\"order-date"
 "\">%s</mark>"
 msgstr ""
-"订单 <mark class=\"order-number\">%s</mark> 於 <mark class=\"order-date\">"
-"%s</mark> 提出"
+"订单 <mark class=\"order-number\">%s</mark> 提交于 <mark class=\"order-date"
+"\">%s</mark>"
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-view-order.php:57
@@ -3965,7 +3926,7 @@ msgstr "隐藏免费商品"
 # @ woocommerce
 #: classes/widgets/class-wc-widget-cart.php:33
 msgid "Display the user's Cart in the sidebar."
-msgstr "在侧边栏显示使用者的购物车."
+msgstr "在侧边栏显示用户的购物车."
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-cart.php:35
@@ -4012,28 +3973,25 @@ msgstr ""
 #: classes/widgets/class-wc-widget-layered-nav-filters.php:93
 #: classes/widgets/class-wc-widget-layered-nav-filters.php:99
 #: classes/widgets/class-wc-widget-layered-nav-filters.php:104
-#, fuzzy
 msgid "Remove filter"
-msgstr "移除图像"
+msgstr "移除过滤器"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-layered-nav-filters.php:99
-#, fuzzy
 msgid "Min"
-msgstr "英寸"
+msgstr "最小"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-layered-nav-filters.php:104
-#, fuzzy
 msgid "Max"
-msgstr "税金"
+msgstr "最大"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-layered-nav.php:31
 msgid ""
 "Shows a custom attribute in a widget which lets you narrow down the list of "
 "products when viewing product categories."
-msgstr "在小工具裡显示定製属性, 可使您在检视商品类别时缩小检视范围."
+msgstr "在小工具里显示定制属性, 可使您在查看商品类别时缩小视图范围."
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-layered-nav.php:33
@@ -4084,7 +4042,7 @@ msgstr "或者"
 # @ woocommerce
 #: classes/widgets/class-wc-widget-login.php:31
 msgid "Display a login area and \"My Account\" links in the sidebar."
-msgstr "在 sidebar 的 \"帐号设定\" 连接显示登录区域。"
+msgstr "在 sidebar 的 \"我的账户\" 连接显示登录区域。"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-login.php:33
@@ -4107,7 +4065,7 @@ msgstr "%s 欢迎您"
 # @ woocommerce
 #: classes/widgets/class-wc-widget-login.php:76
 msgid "My account"
-msgstr "帐号设定"
+msgstr "我的账户"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-login.php:77
@@ -4126,7 +4084,7 @@ msgstr "登出"
 #: templates/myaccount/form-lost-password.php:24
 #: templates/shop/form-login.php:20
 msgid "Username or email"
-msgstr "使用者名称或密码"
+msgstr "用户名或电子邮件地址"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-login.php:118
@@ -4175,7 +4133,7 @@ msgstr "折扣中"
 msgid ""
 "Shows a price filter slider in a widget which lets you narrow down the list "
 "of shown products when viewing product categories."
-msgstr "显示一个价格筛选滑动杆, 可使您在检视商品时缩小列表范围."
+msgstr "显示一个价格筛选滑动杆, 可使您在查看商品时缩小列表范围."
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-price-filter.php:35
@@ -4231,7 +4189,7 @@ msgstr "没有商品分类"
 # @ woocommerce
 #: classes/widgets/class-wc-widget-product-categories.php:188
 msgid "Order by:"
-msgstr "排序基準:"
+msgstr "排序依据:"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-product-categories.php:190
@@ -4287,18 +4245,18 @@ msgstr "WooCommerce 三品搜寻"
 # @ woocommerce
 #: classes/widgets/class-wc-widget-product-tag-cloud.php:31
 msgid "Your most used product tags in cloud format."
-msgstr "您最常用的云模式商品标籤."
+msgstr "您最常用的云模式商品标签."
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-product-tag-cloud.php:33
 msgid "WooCommerce Product Tags"
-msgstr "WooCommerce 商品标籤"
+msgstr "WooCommerce 商品标签"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-product-tag-cloud.php:58
 #: woocommerce.php:823 woocommerce.php:825
 msgid "Product Tags"
-msgstr "商品标籤"
+msgstr "商品标签"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-random-products.php:24
@@ -4368,17 +4326,17 @@ msgstr "由 %1$s"
 # @ woocommerce
 #: classes/widgets/class-wc-widget-recently-viewed.php:31
 msgid "Display a list of recently viewed products."
-msgstr "排列显示近期被检视的商品."
+msgstr "排列显示近期被查看的商品."
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-recently-viewed.php:33
 msgid "WooCommerce Recently Viewed Products"
-msgstr "WooCommerce 近期被检视的商品"
+msgstr "WooCommerce 近期查看过的商品"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-recently-viewed.php:76
 msgid "Recently viewed"
-msgstr "最近瀏览商品"
+msgstr "最近浏览的商品"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-top-rated-products.php:33
@@ -5979,7 +5937,6 @@ msgstr "移除这个商品"
 # @ woocommerce
 #: templates/cart/cart.php:100
 #: templates/single-product/add-to-cart/quantity.php:13
-#, fuzzy
 msgctxt "Product quantity input tooltip"
 msgid "Qty"
 msgstr "数量"
@@ -5993,7 +5950,7 @@ msgstr "优惠券"
 # @ woocommerce
 #: templates/cart/cart.php:127 templates/checkout/form-coupon.php:29
 msgid "Apply Coupon"
-msgstr "使用折价券"
+msgstr "使用优惠券"
 
 # @ woocommerce
 #: templates/cart/cart.php:134
@@ -6013,7 +5970,7 @@ msgstr "您可能对此有兴趣&hellip;"
 # @ woocommerce
 #: templates/cart/cart-empty.php:14
 msgid "Your cart is currently empty."
-msgstr "您的购物车裡还没有任何商品。"
+msgstr "您的购物车里还没有任何商品。"
 
 # @ woocommerce
 #: templates/cart/cart-empty.php:18
@@ -6058,9 +6015,8 @@ msgstr "选择一个状态&hellip;"
 #: templates/cart/shipping-calculator.php:42
 #: templates/cart/shipping-calculator.php:50
 #: templates/cart/shipping-calculator.php:61
-#, fuzzy
 msgid "State / county"
-msgstr "乡/镇/区"
+msgstr "州"
 
 # @ woocommerce
 #: templates/cart/shipping-calculator.php:71
@@ -6069,9 +6025,8 @@ msgstr "更新总计"
 
 # @ woocommerce
 #: templates/cart/shipping-methods.php:32
-#, fuzzy
 msgid "Free"
-msgstr "免费!"
+msgstr "免费"
 
 # @ woocommerce
 #: templates/cart/shipping-methods.php:67
@@ -6134,7 +6089,7 @@ msgstr "订单总计"
 
 # @ woocommerce
 #: templates/cart/totals.php:161
-#, fuzzy, php-format
+#, php-format
 msgid " (taxes estimated for %s)"
 msgstr "(为 %s 估算的税金)"
 
@@ -6144,11 +6099,10 @@ msgstr "(为 %s 估算的税金)"
 msgid ""
 "Note: Shipping and taxes are estimated%s and will be updated during checkout "
 "based on your billing and shipping information."
-msgstr "注意: 运费与税金皆为估计%s 并且会在结帐时根据账单以及运送资讯而更新."
+msgstr "注意: 运费与税金皆为估计%s 并且会在结帐时根据账单以及运送信息而更新."
 
 # @ woocommerce
 #: templates/cart/totals.php:175
-#, fuzzy
 msgid ""
 "No shipping methods were found; please recalculate your shipping and enter "
 "your state/county and zip/postcode to ensure there are no other available "
@@ -6296,7 +6250,7 @@ msgstr "运送地址"
 #: templates/single-product/tabs/additional-information.php:14
 #: woocommerce-template.php:756
 msgid "Additional Information"
-msgstr "其它资讯"
+msgstr "其它信息"
 
 # @ woocommerce
 #: templates/checkout/review-order.php:217
@@ -6336,9 +6290,8 @@ msgstr "下单"
 
 # @ woocommerce
 #: templates/checkout/review-order.php:238
-#, fuzzy
 msgid "I have read and accept the"
-msgstr "我接受"
+msgstr "我已经阅读并接受"
 
 # @ woocommerce
 #: templates/checkout/review-order.php:238
@@ -6350,12 +6303,12 @@ msgstr "条款 &amp; 条件"
 msgid ""
 "Unfortunately your order cannot be processed as the originating bank/"
 "merchant has declined your transaction."
-msgstr "很不幸的您的账单因为发起银行/商人拒绝了您的交易而无法被处理."
+msgstr "抱歉, 您的订单因为银行/商户拒绝了您的交易请求而无法被继续处理."
 
 # @ woocommerce
 #: templates/checkout/thankyou.php:22
 msgid "Please attempt your purchase again or go to your account page."
-msgstr "请在一次尝试付款或者去您的帐号页面。"
+msgstr "请重新尝试付款或者回到您的帐号页面。"
 
 # @ woocommerce
 #: templates/checkout/thankyou.php:24
@@ -6370,15 +6323,15 @@ msgstr "谢谢，我们已经收到您的订单。"
 # @ woocommerce
 #: templates/emails/admin-new-order.php:13
 #: templates/emails/plain/admin-new-order.php:13
-#, fuzzy, php-format
+#, php-format
 msgid "You have received an order from %s. Their order is as follows:"
-msgstr "您收到了一封订单来自"
+msgstr "您收到了一个来自%s的订单: "
 
 # @ woocommerce
 #: templates/emails/admin-new-order.php:17
-#, fuzzy, php-format
+#, php-format
 msgid "Order: %s"
-msgstr "订单 %s"
+msgstr "订单: %s"
 
 # @ woocommerce
 #: admin/woocommerce-admin-functions.php:214
@@ -6389,7 +6342,7 @@ msgstr "订单 %s"
 #: templates/emails/plain/admin-new-order.php:38
 #: templates/order/order-details.php:88
 msgid "Customer details"
-msgstr "顾客资讯"
+msgstr "顾客信息"
 
 # @ woocommerce
 #: admin/post-types/shop_order.php:101 templates/emails/admin-new-order.php:53
@@ -6419,26 +6372,25 @@ msgstr "电话："
 # @ woocommerce
 #: templates/emails/customer-completed-order.php:14
 #: templates/emails/plain/customer-completed-order.php:13
-#, fuzzy, php-format
+#, php-format
 msgid ""
 "Hi there. Your recent order on %s has been completed. Your order details are "
 "shown below for your reference:"
-msgstr "您的订单已经完成。订单细节如下："
+msgstr "您%s的订单已经完成。订单细节如下："
 
 # @ woocommerce
 #: templates/emails/customer-invoice.php:16
 #: templates/emails/plain/customer-invoice.php:14
-#, fuzzy, php-format
+#, php-format
 msgid ""
 "An order has been created for you on %s. To pay for this order please use "
 "the following link: %s"
 msgstr ""
 "您在 &ldquo;%s&rdquo; 上建立了一笔订单. 若要付费请到此连接：<a href=\"%s\">付"
-"费</a>"
+"款</a>"
 
 # @ woocommerce
 #: templates/emails/customer-invoice.php:16
-#, fuzzy
 msgid "pay"
 msgstr "付款"
 
@@ -6475,38 +6427,37 @@ msgstr "为提供您参考，您的订单细节如下："
 msgid ""
 "Your order has been received and is now being processed. Your order details "
 "are shown below for your reference:"
-msgstr ""
+msgstr "我们已经收到并且正在处理您的订单. 以下是订单详情, 供您参考: "
 
 # @ woocommerce
 #: templates/emails/customer-reset-password.php:14
 #: templates/emails/plain/customer-reset-password.php:13
 msgid "Someone requested that the password be reset for the following account:"
-msgstr ""
+msgstr "有人请求重置您这个帐号的密码: "
 
 # @ woocommerce
 #: templates/emails/customer-reset-password.php:15
 #: templates/emails/plain/customer-reset-password.php:15
-#, fuzzy, php-format
+#, php-format
 msgid "Username: %s"
-msgstr "使用者名称"
+msgstr "用户名: %s"
 
 # @ woocommerce
 #: templates/emails/customer-reset-password.php:16
 #: templates/emails/plain/customer-reset-password.php:16
 msgid "If this was a mistake, just ignore this email and nothing will happen."
-msgstr ""
+msgstr "如果您并没有要求重置密码, 您可以无视这封邮件. "
 
 # @ woocommerce
 #: templates/emails/customer-reset-password.php:17
 #: templates/emails/plain/customer-reset-password.php:17
 msgid "To reset your password, visit the following address:"
-msgstr ""
+msgstr "请访问这个地址来重置您的密码: "
 
 # @ woocommerce
 #: templates/emails/customer-reset-password.php:20
-#, fuzzy
 msgid "Click here to reset your password"
-msgstr "按此输入您的代码"
+msgstr "点击此处重置您的代码"
 
 # @ woocommerce
 #: admin/woocommerce-admin-functions.php:220
@@ -6524,9 +6475,9 @@ msgstr "运送地址"
 
 # @ woocommerce
 #: templates/emails/email-order-items.php:40
-#, fuzzy, php-format
+#, php-format
 msgid "Download %d:"
-msgstr "下载:"
+msgstr "下载 %d:"
 
 # @ woocommerce
 #: templates/emails/email-order-items.php:42
@@ -6539,9 +6490,9 @@ msgstr "下载:"
 #: templates/emails/plain/customer-invoice.php:20
 #: templates/emails/plain/customer-note.php:27
 #: templates/emails/plain/customer-processing-order.php:19
-#, fuzzy, php-format
+#, php-format
 msgid "Order number: %s"
-msgstr "订单备註"
+msgstr "订单号码: %s"
 
 # @ woocommerce
 #: templates/emails/plain/admin-new-order.php:20
@@ -6549,9 +6500,9 @@ msgstr "订单备註"
 #: templates/emails/plain/customer-invoice.php:21
 #: templates/emails/plain/customer-note.php:28
 #: templates/emails/plain/customer-processing-order.php:20
-#, fuzzy, php-format
+#, php-format
 msgid "Order date: %s"
-msgstr "订单更新讯息"
+msgstr "订单日期: %s"
 
 # @ woocommerce
 #: templates/emails/plain/admin-new-order.php:20
@@ -6562,21 +6513,20 @@ msgstr "F j号, Y"
 #: templates/emails/plain/customer-completed-order.php:38
 #: templates/emails/plain/customer-note.php:46
 #: templates/emails/plain/customer-processing-order.php:38
-#, fuzzy
 msgid "Your details"
-msgstr "我们的详细资讯"
+msgstr "你的详细信息"
 
 # @ woocommerce
 #: templates/emails/plain/email-order-items.php:28
-#, fuzzy, php-format
+#, php-format
 msgid "Quantity: %s"
-msgstr "数量"
+msgstr "数量: %s"
 
 # @ woocommerce
 #: templates/emails/plain/email-order-items.php:31
-#, fuzzy, php-format
+#, php-format
 msgid "Cost: %s"
-msgstr "成本"
+msgstr "成本: %s"
 
 # @ woocommerce
 #: templates/loop/add-to-cart.php:17 templates/loop/add-to-cart.php:41
@@ -6592,7 +6542,7 @@ msgstr "选择选项"
 # @ woocommerce
 #: templates/loop/add-to-cart.php:37
 msgid "View options"
-msgstr "检视选项"
+msgstr "视图选项"
 
 # @ woocommerce
 #: templates/loop/result-count.php:28
@@ -6601,9 +6551,9 @@ msgstr ""
 
 # @ woocommerce
 #: templates/loop/result-count.php:30
-#, fuzzy, php-format
+#, php-format
 msgid "Showing all %d results"
-msgstr "显示所有副类型"
+msgstr "显示所有 %d 结果"
 
 # @ woocommerce
 #: templates/loop/result-count.php:32
@@ -6643,12 +6593,12 @@ msgstr "请再次输入新密码"
 #: templates/myaccount/form-change-password.php:29
 #: templates/myaccount/form-lost-password.php:45
 msgid "Save"
-msgstr "储存"
+msgstr "保存"
 
 # @ woocommerce
 #: templates/myaccount/form-edit-address.php:43
 msgid "Save Address"
-msgstr "储存地址"
+msgstr "保存地址"
 
 # @ woocommerce
 #: templates/myaccount/form-login.php:26 templates/myaccount/form-login.php:40
@@ -6665,12 +6615,12 @@ msgstr "忘记密码？"
 #: templates/myaccount/form-login.php:60
 #: templates/myaccount/form-login.php:101
 msgid "Register"
-msgstr "註册"
+msgstr "注册"
 
 # @ woocommerce
 #: templates/myaccount/form-login.php:66
 msgid "Username"
-msgstr "使用者名称"
+msgstr "用户名"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:182
@@ -6690,16 +6640,16 @@ msgid ""
 "Lost your password? Please enter your username or email address. You will "
 "receive a link to create a new password via email."
 msgstr ""
+"想不起来密码了? 请输入你的用户名或者邮箱地址. 你会通过邮件收到一个重置密码的"
+"链接. "
 
 # @ woocommerce
 #: templates/myaccount/form-lost-password.php:28
-#, fuzzy
 msgid "Enter a new password below."
-msgstr "请再次输入新密码"
+msgstr "请输入新密码"
 
 # @ woocommerce
 #: templates/myaccount/form-lost-password.php:45
-#, fuzzy
 msgid "Reset Password"
 msgstr "忘记密码？"
 
@@ -6711,12 +6661,11 @@ msgid ""
 "recent orders, manage your shipping and billing addresses and <a href=\"%s"
 "\">change your password</a>."
 msgstr ""
-"<strong>%s</strong> 您好，您可以在这裡找到订单的歷史纪录，管理帐单、运送地址"
+"<strong>%s</strong> 您好，您可以在这里找到订单的历史纪录，管理帐单、运送地址"
 "以及<a href=\"%s\">修改密码</a>。"
 
 # @ woocommerce
 #: templates/myaccount/my-address.php:17
-#, fuzzy
 msgid "My Addresses"
 msgstr "我的地址"
 
@@ -6746,7 +6695,6 @@ msgstr "编辑"
 
 # @ woocommerce
 #: templates/myaccount/my-address.php:64
-#, fuzzy
 msgid "You have not set up this type of address yet."
 msgstr "您还没有设定运送地址。"
 
@@ -6757,11 +6705,11 @@ msgstr "可提供的下载"
 
 # @ woocommerce
 #: templates/myaccount/my-downloads.php:27
-#, fuzzy, php-format
+#, php-format
 msgid "%s download remaining"
 msgid_plural "%s downloads remaining"
-msgstr[0] "&nbsp;个剩餘下载"
-msgstr[1] "&nbsp;个剩餘下载"
+msgstr[0] "%s 个剩餘下载"
+msgstr[1] "%s 个剩餘下载"
 
 # @ woocommerce
 #: templates/myaccount/my-orders.php:26
@@ -6794,7 +6742,7 @@ msgstr "取消"
 #: admin/post-types/product.php:167 admin/post-types/shop_order.php:171
 #: templates/myaccount/my-orders.php:82
 msgid "View"
-msgstr "检视"
+msgstr "查看"
 
 # @ woocommerce
 #: templates/order/form-tracking.php:17
@@ -6803,7 +6751,7 @@ msgid ""
 "return. This was given to you on your receipt and in the confirmation email "
 "you should have received."
 msgstr ""
-"请输入您的订单编号来追踪订单，您可以在收据和确认订单的电子邮件裡找到订单编"
+"请输入您的订单编号来追踪订单，您可以在收据和确认订单的电子邮件里找到订单编"
 "号。"
 
 # @ woocommerce
@@ -6814,7 +6762,7 @@ msgstr "订单编号"
 # @ woocommerce
 #: templates/order/form-tracking.php:19
 msgid "Found in your order confirmation email."
-msgstr "您可以在确认订单的电子邮件裡找到订单编号"
+msgstr "您可以在确认订单的电子邮件里找到订单编号"
 
 # @ woocommerce
 #: templates/order/form-tracking.php:20
@@ -6828,21 +6776,20 @@ msgstr "您在结帐时所输入的电子邮件信箱"
 
 # @ woocommerce
 #: templates/order/form-tracking.php:23
-#, fuzzy
 msgid "Track"
-msgstr "追踪\""
+msgstr "追踪"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:59
 #: templates/order/order-details.php:16
 msgid "Order Details"
-msgstr "订单资讯"
+msgstr "订单信息"
 
 # @ woocommerce
 #: templates/order/order-details.php:57
-#, fuzzy, php-format
+#, php-format
 msgid "Download file %s &rarr;"
-msgstr "下载档案 &rarr;"
+msgstr "下载档案 %s &rarr;"
 
 # @ woocommerce
 #: templates/order/order-details.php:81
@@ -6917,11 +6864,10 @@ msgstr "清除已选项目"
 
 # @ product_cat
 #: templates/single-product/meta.php:22
-#, fuzzy
 msgid "Category:"
 msgid_plural "Categories:"
 msgstr[0] "商品分类："
-msgstr[1] "商品分类："
+msgstr[1] "商品分类:"
 
 # @ product_tag
 #: templates/single-product/meta.php:24
@@ -7067,12 +7013,12 @@ msgstr "您的评论"
 # @ woocommerce
 #: woocommerce-ajax.php:111
 msgid "Please enter your username and password to login."
-msgstr "请输入使用者名称以及密码来登录。"
+msgstr "请输入用户名以及密码来登录。"
 
 # @ woocommerce
 #: woocommerce-ajax.php:191
 msgid "Sorry, your session has expired."
-msgstr "很抱歉, 您的会话已经逾期."
+msgstr "很抱歉, 您的会话已经过期."
 
 # @ woocommerce
 #: woocommerce-ajax.php:191
@@ -7082,12 +7028,12 @@ msgstr "回到首页 &rarr;"
 # @ woocommerce
 #: woocommerce-ajax.php:332 woocommerce-ajax.php:366 woocommerce-ajax.php:389
 msgid "You do not have sufficient permissions to access this page."
-msgstr "您不够权限拜访此页面."
+msgstr "您不够权限访问此页面."
 
 # @ woocommerce
 #: woocommerce-ajax.php:334 woocommerce-ajax.php:367 woocommerce-ajax.php:390
 msgid "You have taken too long. Please go back and retry."
-msgstr "您花费过久的时间. 请回头重新尝试."
+msgstr "您花费太久的时间. 请后退并重新尝试."
 
 # @ woocommerce
 #: admin/post-types/writepanels/variation-admin-html.php:113
@@ -7105,17 +7051,16 @@ msgstr "与父母相同"
 #: admin/settings/settings-tax-rates.php:29
 #: admin/woocommerce-admin-settings.php:226 woocommerce-ajax.php:627
 msgid "Standard"
-msgstr "标準"
+msgstr "标准"
 
 # @ woocommerce
 #: woocommerce-ajax.php:1215 woocommerce-ajax.php:1216
 #, php-format
 msgid "Item #%s stock increased from %s to %s."
-msgstr "商品 #%s 库存由 %s 恢復到 %s。"
+msgstr "商品 #%s 库存由 %s 增加到 %s。"
 
 # @ woocommerce
 #: woocommerce-ajax.php:1244
-#, fuzzy
 msgid "Value"
 msgstr "数值"
 
@@ -7123,7 +7068,7 @@ msgstr "数值"
 #: admin/post-types/writepanels/writepanel-order_notes.php:44
 #: woocommerce-ajax.php:1558
 msgid "Delete note"
-msgstr "删除备註"
+msgstr "删除备注"
 
 # @ woocommerce
 #: woocommerce-core-functions.php:1189 woocommerce-core-functions.php:1215
@@ -7132,7 +7077,6 @@ msgstr "获得下载权限"
 
 # @ woocommerce
 #: woocommerce-core-functions.php:1328
-#, fuzzy
 msgctxt "slug"
 msgid "uncategorized"
 msgstr "无类别"
@@ -7160,12 +7104,12 @@ msgstr "商店管理员"
 # @ woocommerce
 #: woocommerce-core-functions.php:2433
 msgid "Unpaid order cancelled - time limit reached."
-msgstr ""
+msgstr "超时未支付的订单被取消"
 
 # @ woocommerce
 #: woocommerce-core-functions.php:2485 woocommerce-functions.php:703
 msgid "Please enter a username."
-msgstr "请输入使用者名称。"
+msgstr "请输入一个用户名. "
 
 # @ woocommerce
 #: woocommerce-functions.php:208 woocommerce-functions.php:253
@@ -7187,11 +7131,10 @@ msgstr "请选择商品选项&hellip;"
 #: woocommerce-functions.php:378
 msgid ""
 "Please choose the quantity of items you wish to add to your cart&hellip;"
-msgstr ""
+msgstr "请选择您想加入购物车的商品数量&hellip;"
 
 # @ woocommerce
 #: woocommerce-functions.php:386
-#, fuzzy
 msgid "Please choose a product to add to your cart&hellip;"
 msgstr "请选择商品&hellip;"
 
@@ -7199,18 +7142,18 @@ msgstr "请选择商品&hellip;"
 #: woocommerce-functions.php:455
 #, php-format
 msgid "Added &quot;%s&quot; to your cart."
-msgstr ""
+msgstr "&quot;%s&quot; 已经加入了您的购物车"
 
 # @ default
 #: woocommerce-functions.php:455
 msgid "&quot; and &quot;"
-msgstr ""
+msgstr "&quot; 和 &quot;"
 
 # @ woocommerce
 #: woocommerce-functions.php:458
-#, fuzzy, php-format
+#, php-format
 msgid "&quot;%s&quot; was successfully added to your cart."
-msgstr "商品已经成功加入到您的购物车。"
+msgstr "&quot;%s&quot;已经成功加入到您的购物车。"
 
 # @ woocommerce
 #: woocommerce-functions.php:466
@@ -7220,7 +7163,7 @@ msgstr "继续购物 &rarr;"
 # @ woocommerce
 #: woocommerce-functions.php:633
 msgid "Username is required."
-msgstr "必须填入使用者名称。"
+msgstr "必须填入用户名。"
 
 # @ woocommerce
 #: woocommerce-functions.php:634 woocommerce-functions.php:729
@@ -7232,12 +7175,12 @@ msgstr "必须填入密码。"
 msgid ""
 "This username is invalid because it uses illegal characters. Please enter a "
 "valid username."
-msgstr "此笔使用者名称因为包含违规字元而无法使用。请输入有效的使用者名称。"
+msgstr "此用户名因为包含无效字符而无法使用。请输入有效的用户名。"
 
 # @ woocommerce
 #: woocommerce-functions.php:708
 msgid "This username is already registered, please choose another one."
-msgstr "此笔使用者名称已被註册，请选择其他名称。"
+msgstr "此用户名已被注册，请选择其他名称。"
 
 # @ woocommerce
 #: woocommerce-functions.php:720
@@ -7267,7 +7210,7 @@ msgstr "防垃圾讯息栏位被填入了."
 # @ woocommerce
 #: woocommerce-functions.php:841
 msgid "The cart has been filled with the items from your previous order."
-msgstr "购物车已经匯入您上次订单的商品."
+msgstr "购物车已经增加了您上次订单的商品."
 
 # @ woocommerce
 #: woocommerce-functions.php:867
@@ -7316,24 +7259,23 @@ msgstr "这不是您的下载连结."
 
 # @ woocommerce
 #: woocommerce-functions.php:953
-#, fuzzy
 msgid "Product no longer exists."
 msgstr "商品不再存在"
 
 # @ woocommerce
 #: woocommerce-functions.php:963
 msgid "Sorry, you have reached your download limit for this file"
-msgstr "很抱歉, 您已经达到此档案的下载上限"
+msgstr "很抱歉, 您已经达到此文件的下载上限"
 
 # @ woocommerce
 #: woocommerce-functions.php:966
 msgid "Sorry, this download has expired"
-msgstr "很抱歉, 此下载已经逾期."
+msgstr "很抱歉, 此下载已经过期."
 
 # @ woocommerce
 #: woocommerce-functions.php:1099
 msgid "File not found"
-msgstr "找不到档案"
+msgstr "找不到文件"
 
 # @ woocommerce
 #: woocommerce-functions.php:1209
@@ -7426,7 +7368,7 @@ msgstr "商品类别"
 #: admin/woocommerce-admin-init.php:908 woocommerce.php:753
 msgctxt "slug"
 msgid "product-tag"
-msgstr "商品标籤"
+msgstr "商品标签"
 
 # @ woocommerce
 #: admin/includes/updates/woocommerce-update-2.0.php:59 woocommerce.php:755
@@ -7484,42 +7426,42 @@ msgstr "新增商品分类名称"
 #: woocommerce.php:827
 msgctxt "Admin menu name"
 msgid "Tags"
-msgstr "标籤"
+msgstr "标签"
 
 # @ woocommerce
 #: woocommerce.php:828
 msgid "Search Product Tags"
-msgstr "搜寻商品标籤"
+msgstr "搜寻商品标签"
 
 # @ woocommerce
 #: woocommerce.php:829
 msgid "All Product Tags"
-msgstr "所有商品标籤"
+msgstr "所有商品标签"
 
 # @ woocommerce
 #: woocommerce.php:830
 msgid "Parent Product Tag"
-msgstr "父母商品标籤"
+msgstr "父母商品标签"
 
 # @ woocommerce
 #: woocommerce.php:831
 msgid "Parent Product Tag:"
-msgstr "父母商品标籤:"
+msgstr "父母商品标签:"
 
 # @ woocommerce
 #: woocommerce.php:832
 msgid "Edit Product Tag"
-msgstr "编辑商品标籤"
+msgstr "编辑商品标签"
 
 # @ woocommerce
 #: woocommerce.php:833
 msgid "Update Product Tag"
-msgstr "更新商品标籤"
+msgstr "更新商品标签"
 
 # @ woocommerce
 #: woocommerce.php:834
 msgid "Add New Product Tag"
-msgstr "新增商品标籤"
+msgstr "新增商品标签"
 
 # @ woocommerce
 #: woocommerce.php:835
@@ -7529,53 +7471,53 @@ msgstr "新商品标签的名称"
 # @ woocommerce
 #: woocommerce.php:854 woocommerce.php:856
 msgid "Shipping Classes"
-msgstr "运送课别"
+msgstr "运送类别"
 
 # @ woocommerce
 #: woocommerce.php:858
 msgctxt "Admin menu name"
 msgid "Shipping Classes"
-msgstr "运送课别"
+msgstr "运送类别"
 
 # @ woocommerce
 #: woocommerce.php:859
 msgid "Search Shipping Classes"
-msgstr "搜寻运送课别"
+msgstr "搜寻运送类别"
 
 # @ woocommerce
 #: woocommerce.php:860
 msgid "All Shipping Classes"
-msgstr "全部运送课别"
+msgstr "全部运送类别"
 
 # @ woocommerce
 #: woocommerce.php:861
 msgid "Parent Shipping Class"
-msgstr "父母运送课别"
+msgstr "父母运送类别"
 
 # @ woocommerce
 #: woocommerce.php:862
 msgid "Parent Shipping Class:"
-msgstr "父母运送课别:"
+msgstr "父母运送类别:"
 
 # @ woocommerce
 #: woocommerce.php:863
 msgid "Edit Shipping Class"
-msgstr "编辑运送课别"
+msgstr "编辑运送类别"
 
 # @ woocommerce
 #: woocommerce.php:864
 msgid "Update Shipping Class"
-msgstr "更新运送课别"
+msgstr "更新运送类别"
 
 # @ woocommerce
 #: woocommerce.php:865
 msgid "Add New Shipping Class"
-msgstr "新增运送课别"
+msgstr "新增运送类别"
 
 # @ woocommerce
 #: woocommerce.php:866
 msgid "New Shipping Class Name"
-msgstr "新运送课别的名称"
+msgstr "新运送类别的名称"
 
 # @ woocommerce
 #: woocommerce.php:914
@@ -7631,7 +7573,7 @@ msgstr "新商品"
 # @ woocommerce
 #: woocommerce.php:956 woocommerce.php:957
 msgid "View Product"
-msgstr "检视商品"
+msgstr "查看商品"
 
 # @ woocommerce
 #: woocommerce.php:958
@@ -7646,7 +7588,7 @@ msgstr "找不到商品"
 # @ woocommerce
 #: woocommerce.php:960
 msgid "No Products found in trash"
-msgstr "垃圾桶裡找不到商品"
+msgstr "垃圾桶里找不到商品"
 
 # @ woocommerce
 #: woocommerce.php:961
@@ -7693,7 +7635,7 @@ msgstr "新变化类型"
 # @ woocommerce
 #: woocommerce.php:993 woocommerce.php:994
 msgid "View Variation"
-msgstr "检视变化类型"
+msgstr "查看变化类型"
 
 # @ woocommerce
 #: woocommerce.php:995
@@ -7708,7 +7650,7 @@ msgstr "找不到任何变化类型"
 # @ woocommerce
 #: woocommerce.php:997
 msgid "No Variations found in trash"
-msgstr "垃圾桶裡找不到变化类型"
+msgstr "垃圾桶里找不到变化类型"
 
 # @ woocommerce
 #: woocommerce.php:998
@@ -7761,7 +7703,7 @@ msgstr "找不到订单"
 # @ woocommerce
 #: woocommerce.php:1035
 msgid "No Orders found in trash"
-msgstr "垃圾桶裡找不到订单"
+msgstr "垃圾桶里找不到订单"
 
 # @ woocommerce
 #: woocommerce.php:1036
@@ -7771,7 +7713,7 @@ msgstr "父母订单"
 # @ woocommerce
 #: woocommerce.php:1039
 msgid "This is where store orders are stored."
-msgstr "商店订单储存在此."
+msgstr "商店订单保存在此."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:105 admin/woocommerce-admin-content.php:61
@@ -7809,12 +7751,12 @@ msgstr "新优惠券"
 # @ woocommerce
 #: woocommerce.php:1069
 msgid "View Coupons"
-msgstr "检视优惠券"
+msgstr "查看优惠券"
 
 # @ woocommerce
 #: woocommerce.php:1070
 msgid "View Coupon"
-msgstr "检视优惠券"
+msgstr "查看优惠券"
 
 # @ woocommerce
 #: woocommerce.php:1071
@@ -7829,7 +7771,7 @@ msgstr "找不到优惠券"
 # @ woocommerce
 #: woocommerce.php:1073
 msgid "No Coupons found in trash"
-msgstr "垃圾桶裡找不到优惠券"
+msgstr "垃圾桶里找不到优惠券"
 
 # @ woocommerce
 #: woocommerce.php:1074
@@ -7857,7 +7799,7 @@ msgstr "请选择评分"
 msgid ""
 "Sorry, no products matched your selection. Please choose a different "
 "combination."
-msgstr ""
+msgstr "抱歉, 没有符合您要求的产品, 请重新选择. "
 
 # @ woocommerce
 #: woocommerce.php:1656
@@ -8004,12 +7946,12 @@ msgstr ""
 # @ woocommerce
 #: admin/includes/notice-install.php:7
 msgid "Install WooCommerce Pages"
-msgstr ""
+msgstr "安装WooCommerce的页面"
 
 # @ woocommerce
 #: admin/includes/notice-install.php:7
 msgid "Skip setup"
-msgstr ""
+msgstr "跳过安装"
 
 # @ woocommerce
 #: admin/includes/notice-theme-support.php:6
@@ -8060,7 +8002,7 @@ msgstr ""
 #: admin/woocommerce-admin-install.php:204
 #: admin/woocommerce-admin-status.php:309
 msgid "Lost Password"
-msgstr ""
+msgstr "找回密码"
 
 # @ woocommerce
 #: admin/includes/welcome.php:33
@@ -12154,8 +12096,8 @@ msgstr ""
 #: templates/order/order-details.php:20 woocommerce.php:949
 msgid "Product"
 msgid_plural "Products"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "商品"
+msgstr[1] "商品"
 
 # @ woocommerce
 #. gettext fix: identical singular and plural forms found, that may be ambiguous! Please check the code!
@@ -12237,7 +12179,7 @@ msgstr ""
 #: admin/woocommerce-admin-functions.php:184
 #: admin/woocommerce-admin-install.php:222
 msgid "Order Received"
-msgstr ""
+msgstr "订单提交"
 
 # @ woocommerce
 #: admin/woocommerce-admin-functions.php:186
@@ -12564,7 +12506,7 @@ msgstr ""
 # @ woocommerce
 #: admin/woocommerce-admin-install.php:192
 msgid "Shop"
-msgstr ""
+msgstr "商店"
 
 # @ woocommerce
 #: admin/woocommerce-admin-install.php:195
@@ -12593,7 +12535,7 @@ msgstr ""
 # @ woocommerce
 #: admin/woocommerce-admin-install.php:207
 msgid "Edit My Address"
-msgstr ""
+msgstr "编辑我的地址"
 
 # @ woocommerce
 #: admin/woocommerce-admin-install.php:210
@@ -12622,7 +12564,7 @@ msgstr ""
 # @ woocommerce
 #: admin/woocommerce-admin-install.php:219
 msgid "Checkout &rarr; Pay"
-msgstr ""
+msgstr "结账并付款"
 
 # @ woocommerce
 #: admin/woocommerce-admin-install.php:222
@@ -13999,7 +13941,7 @@ msgstr ""
 # @ woocommerce
 #: templates/checkout/form-login.php:14
 msgid "Returning customer?"
-msgstr ""
+msgstr "已经有帐号了?"
 
 # @ woocommerce
 #: templates/loop/orderby.php:22
