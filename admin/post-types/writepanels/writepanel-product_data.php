@@ -73,21 +73,48 @@ function woocommerce_product_data_box() {
 		<div class="wc-tabs-back"></div>
 
 		<ul class="product_data_tabs wc-tabs" style="display:none;">
+			<?php
+				$product_data_tabs = apply_filters( 'woocommerce_product_data_tabs', array(
+					'general' => array(
+						'label'  => __( 'General', 'woocommerce' ),
+						'target' => 'general_product_data',
+						'class'  => array( 'hide_if_grouped' ),
+					),
+					'inventory' => array(
+						'label'  => __( 'Inventory', 'woocommerce' ),
+						'target' => 'inventory_product_data',
+						'class'  => array( 'show_if_simple', 'show_if_variable', 'show_if_grouped' ),
+					),
+					'shipping' => array(
+						'label'  => __( 'Shipping', 'woocommerce' ),
+						'target' => 'shipping_product_data',
+						'class'  => array( 'hide_if_virtual', 'hide_if_grouped', 'hide_if_external' ),
+					),
+					'linked_product' => array(
+						'label'  => __( 'Linked Products', 'woocommerce' ),
+						'target' => 'linked_product_data',
+						'class'  => array(),
+					),
+					'attribute' => array(
+						'label'  => __( 'Attributes', 'woocommerce' ),
+						'target' => 'woocommerce_attributes',
+						'class'  => array(),
+					),
+					'advanced' => array(
+						'label'  => __( 'Advanced', 'woocommerce' ),
+						'target' => 'advanced_product_data',
+						'class'  => array(),
+					)
+				) );
 
-			<li class="active general_options hide_if_grouped"><a href="#general_product_data"><?php _e( 'General', 'woocommerce' ); ?></a></li>
+				foreach ( $product_data_tabs as $key => $tab ) {
+					?><li class="<?php echo $key; ?>_options <?php echo $key; ?>_tab <?php echo implode( ' ' , $tab['class'] ); ?>">
+						<a href="#<?php echo $tab['target']; ?>"><?php echo esc_html( $tab['label'] ); ?></a>
+					</li><?php
+				}
 
-			<li class="inventory_tab show_if_simple show_if_variable show_if_grouped inventory_options"><a href="#inventory_product_data"><?php _e( 'Inventory', 'woocommerce' ); ?></a></li>
-
-			<li class="shipping_tab hide_if_virtual shipping_options hide_if_grouped hide_if_external"><a href="#shipping_product_data"><?php _e( 'Shipping', 'woocommerce' ); ?></a></li>
-
-			<li class="linked_product_tab linked_product_options"><a href="#linked_product_data"><?php _e( 'Linked Products', 'woocommerce' ); ?></a></li>
-
-			<li class="attributes_tab attribute_options"><a href="#woocommerce_attributes"><?php _e( 'Attributes', 'woocommerce' ); ?></a></li>
-
-			<li class="advanced_tab advanced_options"><a href="#advanced_product_data"><?php _e( 'Advanced', 'woocommerce' ); ?></a></li>
-
-			<?php do_action( 'woocommerce_product_write_panel_tabs' ); ?>
-
+				do_action( 'woocommerce_product_write_panel_tabs' );
+			?>
 		</ul>
 		<div id="general_product_data" class="panel woocommerce_options_panel"><?php
 
@@ -631,7 +658,10 @@ function woocommerce_product_data_box() {
 
 		</div>
 
-		<?php do_action( 'woocommerce_product_write_panels' ); ?>
+		<?php
+			do_action( 'woocommerce_product_data_panels' );
+			do_action( 'woocommerce_product_write_panels' ); // _deprecated
+		?>
 
 		<div class="clear"></div>
 
