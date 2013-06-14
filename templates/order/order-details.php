@@ -38,14 +38,17 @@ $order = new WC_Order( $order_id );
 		if (sizeof($order->get_items())>0) {
 
 			foreach($order->get_items() as $item) {
-
 				$_product = get_product( $item['variation_id'] ? $item['variation_id'] : $item['product_id'] );
 
-				echo '
-					<tr class = "' . esc_attr( apply_filters( 'woocommerce_order_table_item_class', 'order_table_item', $item, $order ) ) . '">
-						<td class="product-name">' .
-							apply_filters( 'woocommerce_order_table_product_title', '<a href="' . get_permalink( $item['product_id'] ) . '">' . $item['name'] . '</a>', $item ) . ' ' .
-							apply_filters( 'woocommerce_order_table_item_quantity', '<strong class="product-quantity">&times; ' . $item['qty'] . '</strong>', $item );
+				echo '<tr class = "' . esc_attr( apply_filters( 'woocommerce_order_table_item_class', 'order_table_item', $item, $order ) ) . '">
+						<td class="product-name">';
+
+				if ( $_product && ! $_product->is_visible() )
+					echo apply_filters( 'woocommerce_order_table_product_title', $item['name'], $item );
+				else
+					echo apply_filters( 'woocommerce_order_table_product_title', sprintf( '<a href="%s">%s</a>', get_permalink( $item['product_id'] ), $item['name'] ), $item );
+
+				echo apply_filters( 'woocommerce_order_table_item_quantity', ' <strong class="product-quantity">&times; ' . $item['qty'] . '</strong>', $item );
 
 				$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
 				$item_meta->display();

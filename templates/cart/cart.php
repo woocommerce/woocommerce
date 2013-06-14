@@ -37,7 +37,9 @@ wc_print_messages();
 		<?php
 		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 			foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $values ) {
-				$_product = $values['data'];
+				$_product   = $values['data'];
+				$product_id = apply_filters('woocommerce_in_cart_product_id', $values['product_id'] );
+
 				if ( $_product->exists() && $values['quantity'] > 0 ) {
 					?>
 					<tr class = "<?php echo esc_attr( apply_filters('woocommerce_cart_table_item_class', 'cart_table_item', $values, $cart_item_key ) ); ?>">
@@ -53,20 +55,20 @@ wc_print_messages();
 							<?php
 								$thumbnail = apply_filters( 'woocommerce_in_cart_product_thumbnail', $_product->get_image(), $values, $cart_item_key );
 
-								if ( ! $_product->is_visible() || ( ! empty( $_product->variation_id ) && ! $_product->parent_is_visible() ) )
+								if ( ! $_product->is_visible() )
 									echo $thumbnail;
 								else
-									printf('<a href="%s">%s</a>', esc_url( get_permalink( apply_filters('woocommerce_in_cart_product_id', $values['product_id'] ) ) ), $thumbnail );
+									printf('<a href="%s">%s</a>', get_permalink( $product_id ), $thumbnail );
 							?>
 						</td>
 
 						<!-- Product Name -->
 						<td class="product-name">
 							<?php
-								if ( ! $_product->is_visible() || ( ! empty( $_product->variation_id ) && ! $_product->parent_is_visible() ) )
+								if ( ! $_product->is_visible() )
 									echo apply_filters( 'woocommerce_in_cart_product_title', $_product->get_title(), $values, $cart_item_key );
 								else
-									printf('<a href="%s">%s</a>', esc_url( get_permalink( apply_filters('woocommerce_in_cart_product_id', $values['product_id'] ) ) ), apply_filters('woocommerce_in_cart_product_title', $_product->get_title(), $values, $cart_item_key ) );
+									echo apply_filters( 'woocommerce_in_cart_product_title', sprintf( '<a href="%s">%s</a>', get_permalink( $product_id ), $_product->get_title() ), $values, $cart_item_key );
 
 								// Meta data
 								echo $woocommerce->cart->get_item_data( $values );
