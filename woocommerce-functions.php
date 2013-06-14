@@ -282,7 +282,6 @@ function woocommerce_update_cart_action() {
  * @return void
  */
 function woocommerce_add_to_cart_action( $url = false ) {
-
 	if ( empty( $_REQUEST['add-to-cart'] ) || ! is_numeric( $_REQUEST['add-to-cart'] ) )
 		return;
 
@@ -426,8 +425,8 @@ function woocommerce_add_to_cart_action( $url = false ) {
 
     }
 
-    // If we added the product to the cart we can now do a redirect, otherwise just continue loading the page to show errors
-    if ( $was_added_to_cart ) {
+    // If we added the product to the cart we can now optionally do a redirect.
+    if ( $was_added_to_cart && wc_error_count() == 0 ) {
 
 		$url = apply_filters( 'add_to_cart_redirect', $url );
 
@@ -438,14 +437,8 @@ function woocommerce_add_to_cart_action( $url = false ) {
 		}
 
 		// Redirect to cart option
-		elseif ( get_option('woocommerce_cart_redirect_after_add') == 'yes' && wc_error_count() == 0 ) {
+		elseif ( get_option('woocommerce_cart_redirect_after_add') == 'yes' ) {
 			wp_safe_redirect( $woocommerce->cart->get_cart_url() );
-			exit;
-		}
-
-		// Redirect to page without querystring args
-		elseif ( wp_get_referer() ) {
-			wp_safe_redirect( add_query_arg( 'added-to-cart', implode( ',', $added_to_cart ), remove_query_arg( array( 'add-to-cart', 'quantity', 'product_id' ), wp_get_referer() ) ) );
 			exit;
 		}
 
