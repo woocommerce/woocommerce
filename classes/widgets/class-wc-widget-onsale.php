@@ -119,6 +119,8 @@ class WC_Widget_Onsale extends WP_Widget {
 			echo $after_widget;
 		}
 
+		wp_reset_postdata();
+
 		$content = ob_get_clean();
 
 		if ( isset( $args['widget_id'] ) ) $cache[$args['widget_id']] = $content;

@@ -94,6 +94,8 @@ class WC_Widget_Random_Products extends WP_Widget {
 			<?php
 			echo $args['after_widget'];
 		}
+
+		wp_reset_postdata();
 	}
 
 	/**
