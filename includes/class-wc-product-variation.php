@@ -174,26 +174,27 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * Returns whether or not the variation is visible.
+	 * Checks if this particular variation is visible (variations with no price, or out of stock, can be hidden)
 	 *
-	 * @access public
 	 * @return bool
 	 */
-	public function is_visible() {
-
+	public function variation_is_visible() {
 		$visible = true;
 
+		// Published
+		if ( get_post_status( $this->variation_id ) != 'publish' )
+			$visible = false;
+
 		// Out of stock visibility
-		if ( get_option('woocommerce_hide_out_of_stock_items') == 'yes' && ! $this->is_in_stock() )
+		elseif ( get_option('woocommerce_hide_out_of_stock_items') == 'yes' && ! $this->is_in_stock() )
 			$visible = false;
 
 		// Price not set
 		elseif ( $this->price == "" )
 			$visible = false;
 
-		return apply_filters( 'woocommerce_product_is_visible', $visible, $this->id );
+		return apply_filters( 'woocommerce_variation_is_visible', $visible, $this->variation_id, $this->id );
 	}
-
 
 	/**
 	 * Returns whether or not the variations parent is visible.
@@ -202,7 +203,7 @@ class WC_Product_Variation extends WC_Product {
 	 * @return bool
 	 */
 	public function parent_is_visible() {
-		return parent::is_visible();
+		return $this->is_visible();
 	}
 
 	/**

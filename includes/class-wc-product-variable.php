@@ -393,7 +393,7 @@ class WC_Product_Variable extends WC_Product {
 
 			if ( ! empty( $variation->variation_id ) ) {
 
-				if ( get_post_status( $variation->get_variation_id() ) != 'publish' || ! $variation->is_visible() )
+				if ( ! $variation->variation_is_visible() )
 					continue; // Disabled or hidden
 
 				$variation_attributes 	= $variation->get_variation_attributes();
