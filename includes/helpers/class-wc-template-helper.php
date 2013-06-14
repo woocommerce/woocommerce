@@ -4,7 +4,7 @@ return new WC_Template_Helper();
 
 class WC_Template_Helper extends WC_Helper {
 	public $template_url;
-	
+
 	public function __construct() {
 		$this->template_url = apply_filters( 'woocommerce_template_url', 'woocommerce/' );
 	}
@@ -73,7 +73,7 @@ class WC_Template_Helper extends WC_Helper {
 	 */
 	public function comments_template_loader( $template ) {
 		global $woocommerce;
-		
+
 		if ( get_post_type() !== 'product' )
 			return $template;
 
@@ -81,6 +81,10 @@ class WC_Template_Helper extends WC_Helper {
 			return STYLESHEETPATH . '/' . $this->template_url . 'single-product-reviews.php';
 		elseif ( file_exists( TEMPLATEPATH . '/' . $this->template_url . 'single-product-reviews.php' ))
 			return TEMPLATEPATH . '/' . $this->template_url . 'single-product-reviews.php';
+		elseif ( file_exists( STYLESHEETPATH . '/' . 'single-product-reviews.php' ))
+			return STYLESHEETPATH . '/' . 'single-product-reviews.php';
+		elseif ( file_exists( TEMPLATEPATH . '/' . 'single-product-reviews.php' ))
+			return TEMPLATEPATH . '/' . 'single-product-reviews.php';
 		else
 			return $woocommerce->plugin_path() . '/templates/single-product-reviews.php';
 	}

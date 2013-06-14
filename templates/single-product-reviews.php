@@ -104,7 +104,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 	}
 
-	$comment_form['comment_field'] .= '<p class="comment-form-comment"><label for="comment">' . __( 'Your Review', 'woocommerce' ) . '</label><textarea id="comment" name="comment" cols="45" rows="8" aria-required="true"></textarea></p>' . wp_nonce_field( 'woocommerce-comment_rating', true, false);
+	$comment_form['comment_field'] .= '<p class="comment-form-comment"><label for="comment">' . __( 'Your Review', 'woocommerce' ) . '</label><textarea id="comment" name="comment" cols="45" rows="8" aria-required="true"></textarea>' . wp_nonce_field( 'woocommerce-comment_rating', '_wpnonce', true, false ) . '</p>';
 
 	comment_form( apply_filters( 'woocommerce_product_review_comment_form_args', $comment_form ) );
 
