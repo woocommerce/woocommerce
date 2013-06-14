@@ -910,8 +910,6 @@ final class WooCommerce {
 	 * @return string
 	 */
 	public function redirect( $location, $status ) {
-		$this->get_helper( 'messages' )->set_messages();
-
 		return apply_filters( 'woocommerce_redirect', $location );
 	}
 
