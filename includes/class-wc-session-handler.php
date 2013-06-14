@@ -120,7 +120,7 @@ class WC_Session_Handler extends WC_Session {
 	 * @return array
 	 */
 	private function get_session_data() {
-		return get_option( '_wc_session_' . $this->_customer_id, array() );
+		return (array) get_option( '_wc_session_' . $this->_customer_id, array() );
 	}
 
     /**
