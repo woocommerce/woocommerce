@@ -283,12 +283,12 @@ function woocommerce_update_cart_action() {
  */
 function woocommerce_add_to_cart_action( $url = false ) {
 
-	if ( empty( $_REQUEST['add-to-cart'] ) || ! is_numeric( $_REQUEST['add-to-cart'] ) )
+	if ( empty( $_GET['add-to-cart'] ) || ! is_numeric( $_GET['add-to-cart'] ) )
 		return;
 
 	global $woocommerce;
 
-	$product_id          = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_REQUEST['add-to-cart'] ) );
+	$product_id          = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_GET['add-to-cart'] ) );
 	$was_added_to_cart   = false;
 	$added_to_cart       = array();
 	$adding_to_cart      = get_product( $product_id );
