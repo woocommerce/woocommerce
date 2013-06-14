@@ -8,8 +8,8 @@ jQuery(document).ready(function($) {
 
 		if (xhr) xhr.abort();
 
-		if ( $('select#shipping_method').size() > 0 )
-			var method = $('select#shipping_method').val();
+		if ( $('select#shipping_method').size() > 0 || $('input#shipping_method').size() > 0 )
+			var method = $('#shipping_method').val();
 		else
 			var method = $('input[name=shipping_method]:checked').val();
 
