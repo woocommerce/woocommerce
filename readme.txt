@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.0.12 - x =
+* Tweak - Add actions for attribute create/update/delete
 * Fix - Fixed bug in cross sells loading in product data write panel
 * Fix - Fixed posting shipping method when only one is available
 * Fix - Fixed query breaking when using some product widgets
