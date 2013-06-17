@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.5
 Tested up to: 3.6 beta 3
-Stable tag: 2.0.11
+Stable tag: 2.0.12
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -165,7 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.0.12 - x =
+= 2.0.12 - 17/06/2013 =
 * Tweak - Add actions for attribute create/update/delete
 * Fix - Fixed bug in cross sells loading in product data write panel
 * Fix - Fixed posting shipping method when only one is available
