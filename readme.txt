@@ -201,7 +201,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Refactor - Removed certain my-account pages. Endpoints are used instead.
 * Localization - Portugese locale by jpBenfica
 * Localization - Swedish translation by Björn Sennbrink
-* Localization - French, Spanish, Romanian, Danish, Korean, Arabic updates.
+* Localization - Spanish states.
+* Localization - French, Spanish, Romanian, Danish, Korean, Czech, Arabic updates.
 
 = 2.0.11 - 13/06/2013 =
 * Tweak - Handling for multiselect fields on checkout, and a filter for third party handling
