@@ -26,7 +26,7 @@ foreach ($items as $item) :
 			echo 	apply_filters( 'woocommerce_order_product_image', $image, $_product, $show_image);
 
 			// Product name
-			echo 	apply_filters( 'woocommerce_order_product_title', $item['name'], $_product );
+			echo 	apply_filters( 'woocommerce_order_product_title', $item['name'], $item );
 
 			// SKU
 			echo 	($show_sku && $_product->get_sku()) ? ' (#' . $_product->get_sku() . ')' : '';

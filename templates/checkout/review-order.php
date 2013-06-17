@@ -122,7 +122,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							echo '
 								<tr class="' . esc_attr( apply_filters('woocommerce_checkout_table_item_class', 'checkout_table_item', $values, $cart_item_key ) ) . '">
 									<td class="product-name">' .
-										apply_filters( 'woocommerce_checkout_product_title', $_product->get_title(), $_product ) . ' ' .
+										apply_filters( 'woocommerce_checkout_product_title', $_product->get_title(), $values, $cart_item_key ) . ' ' .
 										apply_filters( 'woocommerce_checkout_item_quantity', '<strong class="product-quantity">&times; ' . $values['quantity'] . '</strong>', $values, $cart_item_key ) .
 										$woocommerce->cart->get_item_data( $values ) .
 									'</td>
