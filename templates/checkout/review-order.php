@@ -4,7 +4,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @version     2.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -115,22 +115,24 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 			<?php
 				do_action( 'woocommerce_review_order_before_cart_contents' );
 
-				if (sizeof($woocommerce->cart->get_cart())>0) :
-					foreach ($woocommerce->cart->get_cart() as $cart_item_key => $values) :
-						$_product = $values['data'];
-						if ($_product->exists() && $values['quantity']>0) :
-							echo '
-								<tr class="' . esc_attr( apply_filters('woocommerce_checkout_table_item_class', 'checkout_table_item', $values, $cart_item_key ) ) . '">
-									<td class="product-name">' .
-										apply_filters( 'woocommerce_checkout_product_title', $_product->get_title(), $_product ) . ' ' .
-										apply_filters( 'woocommerce_checkout_item_quantity', '<strong class="product-quantity">&times; ' . $values['quantity'] . '</strong>', $values, $cart_item_key ) .
-										$woocommerce->cart->get_item_data( $values ) .
-									'</td>
-									<td class="product-total">' . apply_filters( 'woocommerce_checkout_item_subtotal', $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] ), $values, $cart_item_key ) . '</td>
-								</tr>';
-						endif;
-					endforeach;
-				endif;
+				foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
+					$_product     = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
+
+					if ( $_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters( 'woocommerce_checkout_cart_item_visible', true, $cart_item, $cart_item_key ) ) {
+						?>
+						<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_cart_item_class', 'cart_item', $cart_item, $cart_item_key ) ); ?>">
+							<td class="product-name">
+								<?php echo apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key ); ?>
+								<?php echo apply_filters( 'woocommerce_checkout_cart_item_quantity', ' <strong class="product-quantity">' . sprintf( '&times; %s', $cart_item['quantity'] ) . '</strong>', $cart_item, $cart_item_key ); ?>
+								<?php echo $woocommerce->cart->get_item_data( $cart_item ); ?>
+							</td>
+							<td class="product-total">
+								<?php echo apply_filters( 'woocommerce_cart_item_subtotal', $woocommerce->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key ); ?>
+							</td>
+						</tr>
+						<?php
+					}
+				}
 
 				do_action( 'woocommerce_review_order_after_cart_contents' );
 			?>

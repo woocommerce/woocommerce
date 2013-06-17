@@ -6,7 +6,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @version     2.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -20,35 +20,31 @@ global $woocommerce;
 
 	<?php if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) : ?>
 
-		<?php foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) :
+		<?php
+			foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
+				$_product     = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
+				$product_id   = apply_filters( 'woocommerce_cart_item_product_id', $cart_item['product_id'], $cart_item, $cart_item_key );
 
-			$_product = $cart_item['data'];
+				if ( $_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters( 'woocommerce_widget_cart_item_visible', true, $cart_item, $cart_item_key ) ) {
 
-			// Only display if allowed
-			if ( ! apply_filters('woocommerce_widget_cart_item_visible', true, $cart_item, $cart_item_key ) || ! $_product->exists() || $cart_item['quantity'] == 0 )
-				continue;
+					$product_name  = apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key );
+					$thumbnail     = apply_filters( 'woocommerce_cart_item_thumbnail', $_product->get_image(), $cart_item, $cart_item_key );
+					$product_price = apply_filters( 'woocommerce_cart_item_price', $woocommerce->cart->get_product_price( $_product ), $cart_item, $cart_item_key );
 
-			// Get price
-			$product_price = get_option( 'woocommerce_tax_display_cart' ) == 'excl' ? $_product->get_price_excluding_tax() : $_product->get_price_including_tax();
+					?>
+					<li>
+						<a href="<?php echo get_permalink( $product_id ); ?>">
+							<?php echo $thumbnail . $product_name; ?>
+						</a>
 
-			$product_price = apply_filters( 'woocommerce_cart_item_price_html', woocommerce_price( $product_price ), $cart_item, $cart_item_key );
-			?>
+						<?php echo $woocommerce->cart->get_item_data( $cart_item ); ?>
 
-			<li>
-				<a href="<?php echo get_permalink( $cart_item['product_id'] ); ?>">
-
-					<?php echo $_product->get_image(); ?>
-
-					<?php echo apply_filters('woocommerce_widget_cart_product_title', $_product->get_title(), $_product ); ?>
-
-				</a>
-
-				<?php echo $woocommerce->cart->get_item_data( $cart_item ); ?>
-
-				<?php echo apply_filters( 'woocommerce_widget_cart_item_quantity', '<span class="quantity">' . sprintf( '%s &times; %s', $cart_item['quantity'], $product_price ) . '</span>', $cart_item, $cart_item_key ); ?>
-			</li>
-
-		<?php endforeach; ?>
+						<?php echo apply_filters( 'woocommerce_widget_cart_item_quantity', '<span class="quantity">' . sprintf( '%s &times; %s', $cart_item['quantity'], $product_price ) . '</span>', $cart_item, $cart_item_key ); ?>
+					</li>
+					<?php
+				}
+			}
+		?>
 
 	<?php else : ?>
 

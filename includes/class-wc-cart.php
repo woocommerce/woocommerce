@@ -2119,6 +2119,21 @@ class WC_Cart {
 		}
 
 		/**
+		 * Get the product row price per item.
+		 *
+		 * @params object product
+		 * @return string formatted price
+		 */
+		public function get_product_price( $_product ) {
+			if ( $this->tax_display_cart == 'excl' )
+				$product_price = $_product->get_price_excluding_tax();
+			else
+				$product_price = $_product->get_price_including_tax();
+
+			return apply_filters( 'woocommerce_cart_product_price', woocommerce_price( $product_price ), $_product );
+		}
+
+		/**
 		 * Get the product row subtotal.
 		 *
 		 * Gets the tax etc to avoid rounding issues.
