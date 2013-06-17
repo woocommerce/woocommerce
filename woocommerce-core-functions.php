@@ -585,6 +585,21 @@ if ( ! function_exists( 'is_checkout' ) ) {
 	}
 }
 
+if ( ! function_exists( 'is_checkout_pay_page' ) ) {
+
+	/**
+	 * is_checkout_pay - Returns true when viewing the checkout's pay page.
+	 *
+	 * @access public
+	 * @return bool
+	 */
+	function is_checkout_pay_page() {
+		global $wp;
+
+		return is_checkout() && ! empty( $wp->query_vars['order-pay'] ) ? true : false;
+	}
+}
+
 if ( ! function_exists( 'is_account_page' ) ) {
 
 	/**
