@@ -172,35 +172,36 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Admin action to link past orders of the same email address to a new user.
 * Feature - Account edit page for editing profile data such as email.
 * Feature - Customers panel.
-* Feature - Ability to link past orders to a customer (before they registered)
-* Tweak - Added filter to check the 'Create account' checkbox on checkout by default
-* Tweak - Update CPT parameters for 'product_variation' and 'shop_coupon' to be no longer public
-* Tweak - COD processing instead of on-hold
-* Tweak - Added filter to explicitly hide terms agreement checkbox
-* Tweak - New System Status report layout, now plugin list is better visually and very better to read
-* Tweak - content-widget-product.php template for product lists inside core widgets
-* Tweak - Shipping is now renamed to Shipping and Handling on checkout
-* Tweak - Select all/none for countries in admin
-* Tweak - Handle pending status for paypal
+* Feature - Ability to link past orders to a customer (before they registered).
+* Tweak - Added filter to check the 'Create account' checkbox on checkout by default.
+* Tweak - Update CPT parameters for 'product_variation' and 'shop_coupon' to be no longer public.
+* Tweak - COD processing instead of on-hold.
+* Tweak - Added filter to explicitly hide terms agreement checkbox.
+* Tweak - New System Status report layout, now plugin list is better visually and very better to read.
+* Tweak - content-widget-product.php template for product lists inside core widgets.
+* Tweak - Shipping is now renamed to Shipping and Handling on checkout.
+* Tweak - Select all/none for countries in admin.
+* Tweak - Handle pending status for paypal.
 * Tweak - Handling for multiselect fields on checkout, and a filter for third party handling.
-* Tweak - Made scripts/styles use protocol-relative URLs
+* Tweak - Made scripts/styles use protocol-relative URLs.
 * Tweak - Revised shiptobilling functionality on the checkout. "ship to different address" option used instead.
 * Tweak - Filterable page installer.
 * Tweak - Order details optimised for small screens.
 * Tweak - Streamlined account process - username and passwords are optional and can be automatically generated.
+* Tweak - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](http://www.woothemes.com/products/product-csv-import-suite/)).
 * Fix - Changed MyException to Exception in Checkout class as MyException class does not exist in WooCommerce
 * Fix - Default cart widget styling on non-wc pages.
 * Fix - Rounding for mijireh tax ex. price.
 * Fix - Updated blockui to prevent errors in WP 3.6.
-* Refactor - Taken out Piwik integration, use http://wordpress.org/extend/plugins/woocommerce-piwik-integration/ from now on
-* Refactor - Taken out ShareYourCart integration, use http://wordpress.org/extend/plugins/shareyourcart/ from now on
-* Refactor - Moved woocommerce_get_formatted_product_name function into WC_Product class
-* Refactor - Improved parameter handling in woocommerce_related_products() function
-* Refactor - Widget classes (added abstract and combined similar widgets)
-* Refactor - Removed pay and thanks pages. Endpoints are used instead
+* Refactor - Taken out Piwik integration, use http://wordpress.org/extend/plugins/woocommerce-piwik-integration/ from now on.
+* Refactor - Taken out ShareYourCart integration, use http://wordpress.org/extend/plugins/shareyourcart/ from now on.
+* Refactor - Moved woocommerce_get_formatted_product_name function into WC_Product class.
+* Refactor - Improved parameter handling in woocommerce_related_products() function.
+* Refactor - Widget classes (added abstract and combined similar widgets).
+* Refactor - Removed pay and thanks pages. Endpoints are used instead.
 * Refactor - Removed certain my-account pages. Endpoints are used instead.
-* Localization - Portugese locale by jpBenfica
-* Localization - Swedish translation by Björn Sennbrink
+* Localization - Portugese locale by jpBenfica.
+* Localization - Swedish translation by Björn Sennbrink.
 * Localization - Spanish states.
 * Localization - French, Spanish, Romanian, Danish, Korean, Czech, Arabic updates.
 
