@@ -49,7 +49,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 		echo '<ol class="commentlist">';
 
-		wp_list_comments( array( 'callback' => 'woocommerce_comments' ) );
+		wp_list_comments( apply_filters( 'woocommerce_product_review_list_args', array( 'callback' => 'woocommerce_comments' ) ) );
 
 		echo '</ol>';
 
