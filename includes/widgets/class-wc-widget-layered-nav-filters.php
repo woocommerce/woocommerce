@@ -41,15 +41,15 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 	 * @return void
 	 */
 	public function widget( $args, $instance ) {
-		global $_chosen_attributes, $woocommerce, $_attributes_array;
+		global $_chosen_attributes, $woocommerce;
 
 		extract( $args );
 
-		if ( ! is_post_type_archive( 'product' ) && is_array( $_attributes_array ) && ! is_tax( array_merge( $_attributes_array, array( 'product_cat', 'product_tag' ) ) ) )
+		if ( ! is_post_type_archive( 'product' ) && ! is_tax( get_object_taxonomies( 'product' ) ) )
 			return;
 
-		$current_term 	= $_attributes_array && is_tax( $_attributes_array ) ? get_queried_object()->term_id : '';
-		$current_tax 	= $_attributes_array && is_tax( $_attributes_array ) ? get_queried_object()->taxonomy : '';
+		$current_term 	= is_tax() ? get_queried_object()->term_id : '';
+		$current_tax 	= is_tax() ? get_queried_object()->taxonomy : '';
 		$title          = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 
 		// Price

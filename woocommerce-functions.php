@@ -1364,9 +1364,9 @@ function woocommerce_layered_nav_init( ) {
 
 	if ( is_active_widget( false, false, 'woocommerce_layered_nav', true ) && ! is_admin() ) {
 
-		global $_chosen_attributes, $woocommerce, $_attributes_array;
+		global $_chosen_attributes, $woocommerce;
 
-		$_chosen_attributes = $_attributes_array = array();
+		$_chosen_attributes = array();
 
 		$attribute_taxonomies = $woocommerce->get_helper( 'attribute' )->get_attribute_taxonomies();
 		if ( $attribute_taxonomies ) {
@@ -1374,10 +1374,6 @@ function woocommerce_layered_nav_init( ) {
 
 		    	$attribute = sanitize_title( $tax->attribute_name );
 		    	$taxonomy = $woocommerce->get_helper( 'attribute' )->attribute_taxonomy_name( $attribute );
-
-				// create an array of product attribute taxonomies
-				$_attributes_array[] = $taxonomy;
-
 		    	$name = 'filter_' . $attribute;
 		    	$query_type_name = 'query_type_' . $attribute;
 
