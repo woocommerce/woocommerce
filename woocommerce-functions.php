@@ -1394,7 +1394,7 @@ function woocommerce_layered_nav_init( ) {
     }
 }
 
-add_action( 'init', 'woocommerce_layered_nav_init', 1 );
+add_action( 'init', 'woocommerce_layered_nav_init' );
 
 
 /**

@@ -24,6 +24,42 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$this->widget_id          = 'woocommerce_layered_nav';
 		$this->widget_name        = __( 'WooCommerce Layered Nav', 'woocommerce' );
 
+		parent::__construct();
+	}
+
+	/**
+	 * update function.
+	 *
+	 * @see WP_Widget->update
+	 * @access public
+	 * @param array $new_instance
+	 * @param array $old_instance
+	 * @return array
+	 */
+	public function update( $new_instance, $old_instance ) {
+		$this->init_settings();
+		return parent::update( $new_instance, $old_instance );
+	}
+
+	/**
+	 * form function.
+	 *
+	 * @see WP_Widget->form
+	 * @access public
+	 * @param array $instance
+	 * @return void
+	 */
+	public function form( $instance ) {
+		$this->init_settings();
+		return parent::form( $instance );
+	}
+
+	/**
+	 * Init settings after post types are registered
+	 */
+	public function init_settings() {
+		global $woocommerce;
+
 		$attribute_array = array();
 		$attribute_taxonomies = $woocommerce->get_helper( 'attribute' )->get_attribute_taxonomies();
 			if ( $attribute_taxonomies )
@@ -62,7 +98,6 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				)
 			),
 		);
-		parent::__construct();
 	}
 
 	/**
