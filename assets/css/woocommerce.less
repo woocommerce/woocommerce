@@ -969,17 +969,22 @@ p.demo_store {
 
 	td.product-name {
 		dl.variation {
-			margin: .25em 0 .5em;
+			margin: .25em 0;
 			font-size: 0.8751em;
+			dt, dd {
+				display: inline;
+			}
+			dd:after {
+				content: '\A';
+				white-space: pre;
+			}
 			dt {
 				font-weight:bold;
-				float:left;
-				clear:left;
-				margin: 0 .25em 0 0;
-				padding: 0;
+				padding: 0 0 .25em 0;
+				margin: 0 4px 0 0;
 			}
 			dd {
-				margin: 0 0 .25em 0;
+				padding: 0 0 .25em 0;
 			}
 		}
 		p.backorder_notification {
@@ -1075,14 +1080,20 @@ p.demo_store {
 				padding-left: 1em;
 				border-left: 2px solid rgba(0,0,0,0.1);
 
-				dt {
-					float:left;
-					clear:left;
-					margin-right: .25em;
+				dt, dd {
+					display: inline;
 				}
-
+				dd:after {
+					content: '\A';
+					white-space: pre;
+				}
+				dt {
+					font-weight:bold;
+					padding: 0 0 .25em 0;
+					margin: 0 4px 0 0;
+				}
 				dd {
-					margin-bottom: .5em;
+					padding: 0 0 .25em 0;
 				}
 			}
 			.star-rating {
