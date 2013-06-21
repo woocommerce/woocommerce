@@ -1230,7 +1230,7 @@ class WC_Order {
 		$comment_approved 		= 1;
 		$commentdata 			= compact( 'comment_post_ID', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_agent', 'comment_type', 'comment_parent', 'comment_approved' );
 
-		$comment_id = wp_insert_comment( $commentdata );
+		$comment_id = wp_insert_comment( apply_filters( 'woocommerce_new_comment_data', $commentdata, array( 'order_id' => $this->id, 'customer_note' => $note, 'is_customer_note' => $is_customer_note ) ) );
 
 		add_comment_meta( $comment_id, 'is_customer_note', $is_customer_note );
 
