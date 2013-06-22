@@ -2520,11 +2520,11 @@ img.tips {
 #tiptip_holder.tip_left {
 	padding-right: 5px;
 }
-#tiptip_content {
+#tiptip_content, .chart-tooltip  {
 	font-size: 11px;
 	color: #fff;
-	padding: 4px 8px;
-	background:#a2678c;
+	padding: .75em 1em;
+	background:#464646;
 	border-radius: 3px;
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
@@ -2533,7 +2533,7 @@ img.tips {
 	-moz-box-shadow: 1px 1px 3px rgba(0,0,0,0.10);
 	text-align: center;
 	code {
-    	background: #855c76;
+    	background: #888;
     	padding: 1px;
     }
 }
@@ -2548,25 +2548,25 @@ img.tips {
 #tiptip_holder.tip_top #tiptip_arrow_inner {
 	margin-top: -7px;
 	margin-left: -6px;
-	border-top-color: #a2678c;
+	border-top-color: #464646;
 }
 
 #tiptip_holder.tip_bottom #tiptip_arrow_inner {
 	margin-top: -5px;
 	margin-left: -6px;
-	border-bottom-color: #a2678c;
+	border-bottom-color: #464646;
 }
 
 #tiptip_holder.tip_right #tiptip_arrow_inner {
 	margin-top: -6px;
 	margin-left: -5px;
-	border-right-color: #a2678c;
+	border-right-color: #464646;
 }
 
 #tiptip_holder.tip_left #tiptip_arrow_inner {
 	margin-top: -6px;
 	margin-left: -7px;
-	border-left-color: #a2678c;
+	border-left-color: #464646;
 }
 
 
@@ -2576,25 +2576,103 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 #ui-datepicker-div { display: none }
 
 /* Reports */
-.woocommerce-reports-wrap {
-	margin-left: 300px;
-	padding-top: 18px;
+.woocommerce-reports-wrap, .woocommerce-reports-wide {
+	&.woocommerce-reports-wrap {
+		margin-left: 300px;
+		padding-top: 18px;
+	}
 	&.halved {
 		margin: 0;
 		overflow: hidden;
 		zoom: 1;
 	}
 	.postbox {
+		overflow: hidden;
+		zoom: 1;
 		h3 {
 			cursor: default !important;
+		}
+		h3.stats_range {
+			padding: 0 !important;
+			ul {
+				overflow: hidden;
+				zoom : 1;
+				list-style: none outside;
+				margin: 0;
+				padding: 0;
+				li {
+					float: left;
+					margin: 0;
+					padding: 0;
+					a {
+						border-right: 1px solid #dfdfdf;
+						padding: 7px 10px;
+						display: block;
+					}
+				}
+			}
+		}
+		.split {
+			padding: 12px 12px 12px 224px;
+			margin: 0 !important;
+			.side {
+				width: 200px;
+				margin-left: -212px;
+				float: left;
+			}
+		}
+		.chart-legend {
+			list-style: none outside;
+			overflow: hidden;
+			zoom : 1;
+			margin: 0;
+			padding: 0;
+			li {
+				background: #fff;
+				color: #aaa;
+				padding: 1em 1.5em;
+				border-right: 4px solid #aaa;
+				display: block;
+				margin: 0 0 8px 0;
+				strong {
+					font-size: 3em;
+					line-height: 1.2em;
+					color: #464646;
+					font-weight: normal;
+					display: block;
+					font-family: "HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",sans-serif;
+				}
+				-webkit-box-shadow: 0px 1px 2px rgba(0,0,0,.1);
+		   		-moz-box-shadow: 0px 1px 2px rgba(0,0,0,.1);
+		    	box-shadow: 0px 1px 2px rgba(0,0,0,.1);
+			}
 		}
 		.stat {
 			font-size: 1.5em !important;
 			font-weight: bold;
 			text-align: center;
 		}
-		.chart {
-			padding: 16px 16px 0;
+		.chart-placeholder {
+			width:100%;
+			overflow:hidden;
+			position:relative;
+		}
+		.chart-container {
+		    background: #fff;
+		    padding: 12px;
+    		position: relative;
+		    -webkit-box-shadow: 0px 1px 2px rgba(0,0,0,.1);
+		    -moz-box-shadow: 0px 1px 2px rgba(0,0,0,.1);
+		    box-shadow: 0px 1px 2px rgba(0,0,0,.1);
+		}
+		.main .chart-legend {
+			margin-top: 12px;
+			li {
+				border-right: 0;
+				margin: 0 8px 0 0;
+				float: left;
+				border-top: 4px solid #aaa;
+			}
 		}
 	}
 	.woocommerce-reports-main {
@@ -2646,15 +2724,10 @@ form.report_filters {
 }
 
 /* Chart tooltips */
-#tooltip {
-	color: #fff;
-	font-size: 12px;
-	-moz-border-radius:4px;
-	-webkit-border-radius:4px;
-	-o-border-radius:4px;
-	-khtml-border-radius:4px;
-	border-radius:4px;
-    opacity: 0.80;
+.chart-tooltip {
+    position: absolute;
+    display: none;
+    line-height: 1;
 }
 
 /* Custom charts */

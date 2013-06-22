@@ -452,8 +452,9 @@ function woocommerce_dashboard_sales_js() {
 	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 
 	wp_register_script( 'woocommerce_dashboard_sales', $woocommerce->plugin_url() . '/assets/js/admin/dashboard_sales' . $suffix . '.js', array( 'jquery', 'flot', 'flot-resize', 'accounting' ), $woocommerce->version );
-	wp_register_script( 'flot', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot'.$suffix.'.js', 'jquery', '1.0' );
-	wp_register_script( 'flot-resize', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.resize'.$suffix.'.js', 'jquery', '1.0' );
+	wp_register_script( 'flot', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot'.$suffix.'.js', array('jquery'), '1.0' );
+	wp_register_script( 'flot-resize', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.resize'.$suffix.'.js',  array('jquery', 'flot'), '1.0' );
+	wp_register_script( 'flot-time', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.time'.$suffix.'.js',  array('jquery', 'flot'), '1.0' );
 
 	wp_localize_script( 'woocommerce_dashboard_sales', 'params', $params );
 

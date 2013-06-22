@@ -17,6 +17,10 @@ function woocommerce_show_messages() {
 	wc_show_messages();
 }
 
+function woocommerce_weekend_area_js() {
+	_deprecated_function( 'woocommerce_weekend_area_js', '2.1', '' );
+}
+
 /**
  * Handle renamed filters
  */
