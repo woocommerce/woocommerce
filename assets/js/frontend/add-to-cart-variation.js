@@ -258,7 +258,7 @@
 					                    	attr_val = attr_val.replace(/'/g, "\\'");
 					                    	attr_val = attr_val.replace(/"/g, "\\\"");
 
-					                    	// Compare the meercat
+					                    	// Compare the meerkat
 					                    	current_attr_select.find('option[value="' + attr_val + '"]').addClass('active');
 
 					                    } else {
