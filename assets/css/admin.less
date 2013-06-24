@@ -2604,21 +2604,68 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 					float: left;
 					margin: 0;
 					padding: 0;
+					line-height: 26px;
 					a {
 						border-right: 1px solid #dfdfdf;
-						padding: 7px 10px;
+						padding: 9px 10px;
 						display: block;
+						text-decoration: none;
+					}
+					&.active {
+						background: #dfdfdf;
+						color: #777;
+					}
+					&.custom {
+						padding: 9px 10px;
+						vertical-align: middle;
+						form, div {
+							display: inline;
+							margin:0;
+							input.range_datepicker {
+								padding: 0;
+								margin:0 10px 0 0;
+								background: transparent;
+								border: 0;
+								color: #777;
+							}
+						}
 					}
 				}
 			}
 		}
 		.split {
-			padding: 12px 12px 12px 224px;
+			padding: 12px 12px 12px 249px;
 			margin: 0 !important;
 			.side {
-				width: 200px;
-				margin-left: -212px;
+				width: 225px;
+				margin-left: -237px;
 				float: left;
+			}
+		}
+		.chart-stats {
+			margin:0;
+			padding: 0;
+			li.stats {
+				margin: 0 0 1em;
+				background: #fff;
+				-webkit-box-shadow: 0px 1px 2px rgba(0,0,0,.1);
+		   		-moz-box-shadow: 0px 1px 2px rgba(0,0,0,.1);
+		    	box-shadow: 0px 1px 2px rgba(0,0,0,.1);
+				h4 {
+					background: #e9e9e9;
+					padding: 10px;
+					margin:0;
+				}
+				table {
+					td {
+						padding: 10px;
+						vertical-align: top;
+						border-top: 1px solid #e5e5e5;
+					}
+					td.count {
+						background: #e9e9e9;
+					}
+				}
 			}
 		}
 		.chart-legend {
