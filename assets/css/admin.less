@@ -2613,7 +2613,9 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 					}
 					&.active {
 						background: #dfdfdf;
-						color: #777;
+						a {
+							color: #777;
+						}
 					}
 					&.custom {
 						padding: 9px 10px;
@@ -2652,18 +2654,32 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 		   		-moz-box-shadow: 0px 1px 2px rgba(0,0,0,.1);
 		    	box-shadow: 0px 1px 2px rgba(0,0,0,.1);
 				h4 {
-					background: #e9e9e9;
-					padding: 10px;
+					background: #e5e5e5;
+					padding: 7px 10px 6px;
 					margin:0;
 				}
 				table {
+					width: 100%;
 					td {
-						padding: 10px;
+						padding: 7px 10px;
 						vertical-align: top;
 						border-top: 1px solid #e5e5e5;
+						line-height: 1.4em;
 					}
 					td.count {
 						background: #e9e9e9;
+					}
+					td.name {
+						padding-right: 0;
+					}
+					td.sparkline {
+						vertical-align: middle;
+					}
+					.wc_sparkline {
+						width: 32px;
+						height: 1em;
+						display: block;
+						float: right;
 					}
 				}
 			}

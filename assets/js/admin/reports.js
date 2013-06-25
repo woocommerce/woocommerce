@@ -9,28 +9,48 @@ jQuery(document).ready(function($) {
 
     jQuery(".chart-placeholder").bind( "plothover", function (event, pos, item) {
         if (item) {
-           // if (previousPoint != item.dataIndex) {
+            if (previousPoint != item.dataIndex) {
                 previousPoint = item.dataIndex;
 
                 jQuery( ".chart-tooltip" ).remove();
 
-                /*if (item.series.label=="<?php echo esc_js( __( 'Sales amount', 'woocommerce' ) ) ?>") {
-
-                	var y = item.datapoint[1].toFixed(2);
-                	showTooltip(item.pageX, item.pageY, "<?php echo get_woocommerce_currency_symbol(); ?>" + y);
-
-                } else*/ if ( item.series.points.show ) {
+                if ( item.series.points.show ) {
 
                 	var y = item.datapoint[1];
-                	showTooltip( item.pageX, item.pageY, item.series.label + ": " + y );
+
+                    if ( ! item.series.prepend_tooltip )
+                        item.series.prepend_tooltip = item.series.label + ": ";
+
+                	showTooltip( item.pageX, item.pageY, item.series.prepend_tooltip + y );
 
                 }
-            //}
+            }
         }
         else {
             jQuery(".chart-tooltip").remove();
             previousPoint = null;
         }
+    });
+
+    $('.wc_sparkline').each(function() {
+        var chart_data = $(this).data('sparkline');
+
+        var options = {
+            grid: {
+                show: false
+            }
+        };
+
+        // main series
+        var series = [{
+            data: chart_data,
+            color: $(this).data('color'),
+            bars: { fillColor: $(this).data('color'), fill: true, show: true, lineWidth: 1, barWidth: $(this).data('barwidth'), align: 'center' },
+            shadowSize: 0
+        }];
+
+        // draw the sparkline
+        var plot = $.plot( $(this), series, options );
     });
 
     var dates = jQuery( ".range_datepicker" ).datepicker({
