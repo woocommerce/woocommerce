@@ -251,7 +251,7 @@ class WC_Admin_Reports {
 		if ( $filter_range ) {
 			$query['where'] .= "
 				AND 	post_date > '" . date('Y-m-d', $this->start_date ) . "'
-				AND 	post_date < '" . date('Y-m-d', $this->end_date ) . "'
+				AND 	post_date < '" . date('Y-m-d', strtotime( '+1 DAY', $this->end_date ) ) . "'
 			";
 		}
 
@@ -400,7 +400,7 @@ class WC_Admin_Reports {
 			$tooltip = sprintf( _n( 'Sold 1 time in the last %d days', 'Sold %d times in the last %d days', $total, 'woocommerce' ), $total, $days );
 		}
 
-		$sparkline_data = array_values( $this->prepare_chart_data( $data, 'post_date', 'order_item_value', $days - 1, strtotime( 'midnight -' . $days . ' days', current_time( 'timestamp' ) ), 'day' ) );
+		$sparkline_data = array_values( $this->prepare_chart_data( $data, 'post_date', 'order_item_value', $days - 1, strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ), 'day' ) );
 
 		return '<span class="wc_sparkline tips" data-color="#777" data-tip="' . $tooltip . '" data-barwidth="' . 60*60*16*1000 . '" data-sparkline="' . esc_attr( json_encode( $sparkline_data ) ) . '"></span>';
 	}
@@ -431,7 +431,7 @@ class WC_Admin_Reports {
 		switch ( $current_range ) {
 			case 'custom' :
 				$this->start_date = strtotime( sanitize_text_field( $_GET['start_date'] ) );
-				$this->end_date   = strtotime( sanitize_text_field( $_GET['end_date'] ) );
+				$this->end_date   = strtotime( 'midnight', strtotime( sanitize_text_field( $_GET['end_date'] ) ) );
 
 				if ( ! $this->end_date )
 					$this->end_date = current_time('timestamp');
@@ -476,6 +476,24 @@ class WC_Admin_Reports {
 			break;
 		}
 
+		// Group by
+		switch ( $group_by ) {
+			case 'day' :
+				$group_by_query = 'YEAR(post_date), MONTH(post_date), DAY(post_date)';
+				$interval       = max( 0, ( $this->end_date - $this->start_date ) / ( 60 * 60 * 24 ) );
+				$barwidth       = 60 * 60 * 24 * 1000;
+			break;
+			case 'month' :
+				$group_by_query = 'YEAR(post_date), MONTH(post_date)';
+				$interval = 0;
+				$min_date = $this->start_date;
+				while ( ( $min_date = strtotime( "+1 MONTH", $min_date ) ) <= $this->end_date ) {
+				    $interval ++;
+				}
+				$barwidth       = 60 * 60 * 24 * 7 * 4 * 1000;
+			break;
+		}
+
 		$order_totals = $this->get_order_report_data( array(
 			'data' => array(
 				'_order_total' => array(
@@ -487,18 +505,12 @@ class WC_Admin_Reports {
 					'type'     => 'post_data',
 					'function' => 'COUNT',
 					'name'     => 'total_orders'
-				),
-				'_order_shipping' => array(
-					'type'     => 'meta',
-					'function' => 'SUM',
-					'name'     => 'total_shipping'
 				)
 			),
 			'filter_range' => true
 		) );
 		$total_sales 	= $order_totals->total_sales;
 		$total_orders 	= absint( $order_totals->total_orders );
-		$total_shipping = $order_totals->total_shipping;
 		$order_items    = absint( $this->get_order_report_data( array(
 			'data' => array(
 				'_qty' => array(
@@ -625,7 +637,18 @@ class WC_Admin_Reports {
 								<?php printf( __( '%s sales in this period', 'woocommerce' ), '<strong>' . woocommerce_price( $total_sales ) . '</strong>' ); ?>
 							</li>
 							<li style="border-color: <?php echo $chart_colours['average']; ?>">
-								<?php printf( __( '%s average order amount', 'woocommerce' ), '<strong>' . woocommerce_price( $total_orders > 0 ? $total_sales / $total_orders : 0 ) . '</strong>' ); ?>
+								<?php
+								$average_sales = $total_sales / ( $interval + 1 );
+
+								switch ( $group_by ) {
+									case 'day' :
+										printf( __( '%s average daily sales', 'woocommerce' ), '<strong>' . woocommerce_price( $average_sales ) . '</strong>' );
+									break;
+									case 'month' :
+										printf( __( '%s average monthly sales', 'woocommerce' ), '<strong>' . woocommerce_price( $average_sales ) . '</strong>' );
+									break;
+								}
+								?>
 							</li>
 							<li style="border-color: <?php echo $chart_colours['order_count']; ?>">
 								<?php printf( __( '%s orders placed', 'woocommerce' ), '<strong>' . $total_orders . '</strong>' ); ?>
@@ -639,25 +662,6 @@ class WC_Admin_Reports {
 			</div>
 		</div>
 		<?php
-
-		// Group by
-		switch ( $group_by ) {
-			case 'day' :
-				$group_by_query = 'YEAR(post_date), MONTH(post_date), DAY(post_date)';
-				$interval       = max( 1, ( $this->end_date - $this->start_date ) / ( 60 * 60 * 24 ) );
-				$barwidth       = 60 * 60 * 24 * 1000;
-			break;
-			case 'month' :
-				$group_by_query = 'YEAR(post_date), MONTH(post_date)';
-				$interval = 0;
-				$min_date = $this->start_date;
-				while ( ( $min_date = strtotime( "+1 MONTH", $min_date ) ) <= $this->end_date ) {
-				    $interval ++;
-				}
-				$barwidth       = 60 * 60 * 24 * 7 * 4 * 1000;
-			break;
-		}
-
 		// Get orders and dates in range - we want the SUM of order totals, COUNT of order items, COUNT of orders, and the date
 		$orders = $this->get_order_report_data( array(
 			'data' => array(
@@ -726,7 +730,7 @@ class WC_Admin_Reports {
 						},
 						{
 							label: "<?php echo esc_js( __( 'Average sales amount', 'woocommerce' ) ) ?>",
-							data: [ [ <?php echo min( array_keys( $order_amounts ) ); ?>, <?php echo $total_orders > 0 ? $total_sales / $total_orders : 0; ?> ], [ <?php echo max( array_keys( $order_amounts ) ); ?>, <?php echo $total_orders > 0 ? $total_sales / $total_orders : 0; ?> ] ],
+							data: [ [ <?php echo min( array_keys( $order_amounts ) ); ?>, <?php echo $average_sales; ?> ], [ <?php echo max( array_keys( $order_amounts ) ); ?>, <?php echo $average_sales; ?> ] ],
 							yaxis: 2,
 							color: '<?php echo $chart_colours['average']; ?>',
 							points: { show: false },
