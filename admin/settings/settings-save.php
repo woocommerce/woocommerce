@@ -43,7 +43,7 @@ function woocommerce_update_options( $options ) {
 	    	// Standard types
 	    	case "checkbox" :
 
-	    		if ( isset( $_POST[$value['id']] ) ) {
+	    		if ( isset( $_POST[ $value['id'] ] ) ) {
 	    			$option_value = 'yes';
 	            } else {
 	            	$option_value = 'no';
@@ -54,7 +54,7 @@ function woocommerce_update_options( $options ) {
 	    	case "textarea" :
 
 		    	if ( isset( $_POST[$value['id']] ) ) {
-		    		$option_value = wp_kses_post( $_POST[ $value['id'] ] );
+		    		$option_value = wp_kses_post( trim( stripslashes( $_POST[ $value['id'] ] ) ) );
 	            } else {
 	                $option_value = '';
 	            }
@@ -75,7 +75,7 @@ function woocommerce_update_options( $options ) {
 
 					// price separators get a special treatment as they should allow a spaces (don't trim)
 					if ( isset( $_POST[ $value['id'] ] )  ) {
-						$option_value = esc_attr( $_POST[ $value['id'] ] );
+						$option_value = wp_kses_post( stripslashes( $_POST[ $value['id'] ] ) );
 					} else {
 		            	$option_value = '';
 		            }
@@ -84,15 +84,16 @@ function woocommerce_update_options( $options ) {
 
 					// price separators get a special treatment as they should allow a spaces (don't trim)
 					if ( isset( $_POST[ $value['id'] ] )  ) {
-						$option_value = absint( esc_attr( $_POST[ $value['id'] ] ) );
+						$option_value = absint( $_POST[ $value['id'] ] );
 					} else {
 		               $option_value = 2;
 		            }
 
 	    		} elseif ( $value['id'] == 'woocommerce_hold_stock_minutes' ) {
 
-		            if ( isset( $_POST[ $value['id'] ] )  ) {
-						$option_value = esc_attr( $_POST[ $value['id'] ] );
+	    			// Allow > 0 or set to ''
+		            if ( ! empty( $_POST[ $value['id'] ] )  ) {
+						$option_value = absint( $_POST[ $value['id'] ] );
 					} else {
 		            	$option_value = '';
 		            }
@@ -105,7 +106,7 @@ function woocommerce_update_options( $options ) {
 		        } else {
 
 			       if ( isset( $_POST[$value['id']] ) ) {
-		            	$option_value = woocommerce_clean( $_POST[ $value['id'] ] );
+		            	$option_value = woocommerce_clean( stripslashes( $_POST[ $value['id'] ] ) );
 		            } else {
 		                $option_value = '';
 		            }
@@ -120,7 +121,7 @@ function woocommerce_update_options( $options ) {
 
 	    		// Get countries array
 				if ( isset( $_POST[ $value['id'] ] ) )
-					$selected_countries = array_map( 'woocommerce_clean', (array) $_POST[ $value['id'] ] );
+					$selected_countries = array_map( 'woocommerce_clean', array_map( 'stripslashes', (array) $_POST[ $value['id'] ] ) );
 				else
 					$selected_countries = array();
 
@@ -132,8 +133,8 @@ function woocommerce_update_options( $options ) {
 
 		    	if ( isset( $_POST[$value['id'] ]['width'] ) ) {
 
-	              	$update_options[ $value['id'] ]['width'] = woocommerce_clean( $_POST[$value['id'] ]['width'] );
-	              	$update_options[ $value['id'] ]['height'] = woocommerce_clean( $_POST[$value['id'] ]['height'] );
+	              	$update_options[ $value['id'] ]['width']  = woocommerce_clean( stripslashes( $_POST[ $value['id'] ]['width'] ) );
+	              	$update_options[ $value['id'] ]['height'] = woocommerce_clean( stripslashes( $_POST[ $value['id'] ]['height'] ) );
 
 					if ( isset( $_POST[ $value['id'] ]['crop'] ) )
 						$update_options[ $value['id'] ]['crop'] = 1;
