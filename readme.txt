@@ -165,6 +165,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.0.13 - x =
+* Fix - Extra escaping on layered nav variables to prevent injection
+
 = 2.0.12 - 17/06/2013 =
 * Tweak - Add actions for attribute create/update/delete
 * Fix - Fixed bug in cross sells loading in product data write panel
