@@ -73,14 +73,26 @@ class WC_Admin_Reports {
 			'sales'     => array(
 				'title'  => __( 'Sales', 'woocommerce' ),
 				'reports' => array(
-					"sales"          => array(
+					"sales_by_date"    => array(
 						'title'       => __( 'Sales by date', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
-						'callback'    => array( $this, 'sales_report' )
+						'callback'    => array( $this, 'get_report' )
 					),
-					"product_sales"     => array(
-						'title'       => __( 'Product Sales', 'woocommerce' ),
+					"top_sellers"    => array(
+						'title'       => __( 'Top Sellers', 'woocommerce' ),
+						'description' => '',
+						'hide_title'  => true,
+						'callback'    => array( $this, 'get_report' )
+					),
+					"top_earners"    => array(
+						'title'       => __( 'Top Earners', 'woocommerce' ),
+						'description' => '',
+						'hide_title'  => true,
+						'callback'    => array( $this, 'get_report' )
+					),
+					"sales_by_product"     => array(
+						'title'       => __( 'Sales by product', 'woocommerce' ),
 						'description' => '',
 						'callback'    => 'woocommerce_product_sales'
 					),
@@ -131,10 +143,15 @@ class WC_Admin_Reports {
 		);
 
 		if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) {
-			$reports['sales']['reports']["taxes_by_month"] = array(
-				'title'       => __( 'Taxes by month', 'woocommerce' ),
-				'description' => '',
-				'callback'    => 'woocommerce_monthly_taxes'
+			$reports['taxes'] = array(
+				'title'  => __( 'Tax', 'woocommerce' ),
+				'reports' => array(
+					"taxes_by_month" => array(
+						'title'       => __( 'Taxes by month', 'woocommerce' ),
+						'description' => '',
+						'callback'    => 'woocommerce_monthly_taxes'
+					)
+				)
 			);
 		}
 
@@ -165,650 +182,95 @@ class WC_Admin_Reports {
 		$current_tab    = ! empty( $_GET['tab'] ) ? sanitize_title( urldecode( $_GET['tab'] ) ) : $first_tab[0];
 		$current_report = isset( $_GET['report'] ) ? sanitize_title( urldecode( $_GET['report'] ) ) : current( array_keys( $reports[ $current_tab ]['reports'] ) );
 
-		include( 'views/html-admin-page-reports.php' );
+		include_once( 'reports/class-wc-admin-report.php' );
+		include_once( 'views/html-admin-page-reports.php' );
 	}
 
 	/**
-	 * Get report totals such as order totals and discount amounts.
-	 *
-	 * Data example:
-	 *
-	 * '_order_total' => array(
-	 * 		'type'     => 'meta',
-	 *    	'function' => 'SUM',
-	 *      'name'     => 'total_sales'
-	 * )
-	 *
-	 * @param  array $args
-	 * @return array of results
+	 * Get a report from our reports subfolder
 	 */
-	public function get_order_report_data( $args = array() ) {
-		global $wpdb;
+	public function get_report( $name ) {
+		$name  = sanitize_title( str_replace( '_', '-', $name ) );
+		$class = 'WC_Report_' . str_replace( '-', '_', $name );
 
-		$defaults = array(
-			'data'         => array(),
-			'where'        => array(),
-			'where_meta'   => array(),
- 			'query_type'   => 'get_row',
-			'group_by'     => '',
-			'order_by'     => '',
-			'limit'        => '',
-			'filter_range' => false
-		);
+		include_once( 'reports/class-wc-report-' . $name . '.php' );
 
-		$args = wp_parse_args( $args, $defaults );
+		if ( ! class_exists( $class ) )
+			return;
 
-		extract( $args );
-
-		if ( empty( $data ) )
-			return false;
-
-		$select = array();
-
-		foreach ( $data as $key => $value ) {
-			if ( $value['type'] == 'meta' )
-				$select[] = "{$value['function']}(meta_{$key}.meta_value) as {$value['name']}";
-			elseif( $value['type'] == 'post_data' )
-				$select[] = "{$value['function']}(posts.{$key}) as {$value['name']}";
-			elseif( $value['type'] == 'order_item_meta' )
-				$select[] = "{$value['function']}(order_item_meta_{$key}.meta_value) as {$value['name']}";
-		}
-
-		$query['select'] = "SELECT " . implode( ',', $select );
-		$query['from']   = "FROM {$wpdb->posts} AS posts";
-		$query['join']   = "
-			LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
-			LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
-			LEFT JOIN {$wpdb->terms} AS term USING( term_id )";
-
-		foreach ( $data as $key => $value ) {
-			if ( $value['type'] == 'meta' ) {
-
-				$query['join'] .= " LEFT JOIN {$wpdb->postmeta} AS meta_{$key} ON posts.ID = meta_{$key}.post_id";
-
-			} elseif ( $value['type'] == 'order_item_meta' ) {
-
-				$query['join'] .= " LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items_{$key} ON posts.ID = order_items_{$key}.order_id";
-				$query['join'] .= " LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON order_items_{$key}.order_item_id = order_item_meta_{$key}.order_item_id";
-
-			}
-		}
-
-		if ( ! empty( $where_meta ) ) {
-			foreach ( $where_meta as $value ) {
-				// If we have a where clause for meta, join the postmeta table
-				$query['join'] .= " LEFT JOIN {$wpdb->postmeta} AS meta_{$value['meta_key']} ON posts.ID = meta_{$value['meta_key']}.post_id";
-			}
-		}
-
-		$query['where']  = "
-			WHERE 	posts.post_type 	= 'shop_order'
-			AND 	posts.post_status 	= 'publish'
-			AND 	tax.taxonomy		= 'shop_order_status'
-			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-			";
-
-		if ( $filter_range ) {
-			$query['where'] .= "
-				AND 	post_date > '" . date('Y-m-d', $this->start_date ) . "'
-				AND 	post_date < '" . date('Y-m-d', strtotime( '+1 DAY', $this->end_date ) ) . "'
-			";
-		}
-
-		foreach ( $data as $key => $value ) {
-			if ( $value['type'] == 'meta' ) {
-
-				$query['where'] .= " AND meta_{$key}.meta_key = '{$key}'";
-
-			} elseif ( $value['type'] == 'order_item_meta' ) {
-
-				$query['where'] .= " AND order_items_{$key}.order_item_type = '{$value['order_item_type']}'";
-				$query['where'] .= " AND order_item_meta_{$key}.meta_key = '{$key}'";
-
-			}
-		}
-
-		if ( ! empty( $where_meta ) ) {
-			foreach ( $where_meta as $value ) {
-				$query['where'] .= " AND meta_{$value['meta_key']}.meta_key   = '{$value['meta_key']}'";
-				$query['where'] .= " AND meta_{$value['meta_key']}.meta_value {$value['operator']} '{$value['meta_value']}'";
-			}
-		}
-
-		if ( ! empty( $where ) ) {
-			foreach ( $where as $value ) {
-				$query['where'] .= " AND {$value['key']} {$value['operator']} '{$value['value']}'";
-			}
-		}
-
-		if ( $group_by ) {
-			$query['group_by'] = "GROUP BY {$group_by}";
-		}
-
-		if ( $order_by ) {
-			$query['order_by'] = "ORDER BY {$order_by}";
-		}
-
-		if ( $limit ) {
-			$query['limit'] = "LIMIT {$limit}";
-		}
-
-		return apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( implode( ' ', $query ) ), $data );
-	}
-
-	/**
-	 * Put data with post_date's into an array of times
-	 *
-	 * @param  array $data array of your data
-	 * @param  string $date_key key for the 'date' field. e.g. 'post_date'
-	 * @param  string $data_key key for the data you are charting
-	 * @param  int $interval
-	 * @param  string $start_date
-	 * @param  string $group_by
-	 * @return string
-	 */
-	public function prepare_chart_data( $data, $date_key, $data_key, $interval, $start_date, $group_by ) {
-		$prepared_data = array();
-
-		// Ensure all days (or months) have values first in this range
-		for ( $i = 0; $i <= $interval; $i ++ ) {
-			switch ( $group_by ) {
-				case 'day' :
-					$time = strtotime( date( 'Ymd', strtotime( "+{$i} DAY", $start_date ) ) ) * 1000;
-				break;
-				case 'month' :
-					$time = strtotime( date( 'Ym', strtotime( "+{$i} MONTH", $start_date ) ) . '01' ) * 1000;
-				break;
-			}
-
-			if ( ! isset( $prepared_data[ $time ] ) )
-				$prepared_data[ $time ] = array( esc_js( $time ), 0 );
-		}
-
-		foreach ( $data as $d ) {
-			switch ( $group_by ) {
-				case 'day' :
-					$time = strtotime( date( 'Ymd', strtotime( $d->$date_key ) ) ) * 1000;
-				break;
-				case 'month' :
-					$time = strtotime( date( 'Ym', strtotime( $d->$date_key ) ) . '01' ) * 1000;
-				break;
-			}
-
-			if ( ! isset( $prepared_data[ $time ] ) )
-				continue;
-
-			$prepared_data[ $time ][1] += $d->$data_key;
-		}
-
-		return $prepared_data;
-	}
-
-	/**
-	 * Prepares a sparkline to show sales in the last X days
-	 *
-	 * @param  int $id
-	 * @param  int $days
-	 */
-	public function sales_sparkline( $id, $days, $type ) {
-		$meta_key = $type == 'sales' ? '_line_total' : '_qty';
-
-		$data = $this->get_order_report_data( array(
-			'data' => array(
-				'_product_id' => array(
-					'type'            => 'order_item_meta',
-					'order_item_type' => 'line_item',
-					'function'        => '',
-					'name'            => 'product_id'
-				),
-				$meta_key => array(
-					'type'            => 'order_item_meta',
-					'order_item_type' => 'line_item',
-					'function'        => 'SUM',
-					'name'            => 'order_item_value'
-				),
-				'post_date' => array(
-					'type'     => 'post_data',
-					'function' => '',
-					'name'     => 'post_date'
-				),
-			),
-			'where' => array(
-				array(
-					'key'      => 'post_date',
-					'value'    => date( 'Y-m-d', strtotime( 'midnight -7 days', current_time( 'timestamp' ) ) ),
-					'operator' => '>'
-				),
-				array(
-					'key'      => 'order_item_meta__product_id.meta_value',
-					'value'    => $id,
-					'operator' => '='
-				)
-			),
-			'group_by'     => 'YEAR(post_date), MONTH(post_date), DAY(post_date)',
-			'query_type'   => 'get_results',
-			'filter_range' => false
-		) );
-
-		$total = 0;
-		foreach ( $data as $d )
-			$total += $d->order_item_value;
-
-		if ( $type == 'sales' ) {
-			$tooltip = sprintf( __( 'Sold %s worth in the last %d days', 'woocommerce' ), strip_tags( woocommerce_price( $total ) ), $days );
-		} else {
-			$tooltip = sprintf( _n( 'Sold 1 time in the last %d days', 'Sold %d times in the last %d days', $total, 'woocommerce' ), $total, $days );
-		}
-
-		$sparkline_data = array_values( $this->prepare_chart_data( $data, 'post_date', 'order_item_value', $days - 1, strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ), 'day' ) );
-
-		return '<span class="wc_sparkline tips" data-color="#777" data-tip="' . $tooltip . '" data-barwidth="' . 60*60*16*1000 . '" data-sparkline="' . esc_attr( json_encode( $sparkline_data ) ) . '"></span>';
-	}
-
-	/**
-	 * Main Sales report
-	 */
-	public function sales_report() {
-		global $woocommerce, $wpdb, $wp_locale;
-
-		$ranges = array(
-			'year'         => __( 'Year', 'woocommerce' ),
-			'last_3months' => __( 'Last 3 Months', 'woocommerce' ),
-			'last_month'   => __( 'Last Month', 'woocommerce' ),
-			'month'        => __( 'This Month', 'woocommerce' ),
-			'7day'         => __( 'Last 7 Days', 'woocommerce' )
-		);
-
-		$chart_colours = array(
-			'sales_amount' => '#3498db',
-			'average'      => '#9bcced',
-			'order_count'  => '#d4d9dc',
-			'item_count'   => '#ecf0f1',
-		);
-
-		$current_range = ! empty( $_GET['range'] ) ? $_GET['range'] : '7day';
-
-		switch ( $current_range ) {
-			case 'custom' :
-				$this->start_date = strtotime( sanitize_text_field( $_GET['start_date'] ) );
-				$this->end_date   = strtotime( 'midnight', strtotime( sanitize_text_field( $_GET['end_date'] ) ) );
-
-				if ( ! $this->end_date )
-					$this->end_date = current_time('timestamp');
-
-				$interval = 0;
-				$min_date = $this->start_date;
-				while ( ( $min_date = strtotime( "+1 MONTH", $min_date ) ) <= $this->end_date ) {
-				    $interval ++;
-				}
-
-				// 3 months max for day view
-				if ( $interval > 3 )
-					$group_by         = 'month';
-				else
-					$group_by         = 'day';
-			break;
-			case 'year' :
-				$this->start_date = strtotime( 'first day of january', current_time('timestamp') );
-				$this->end_date   = strtotime( 'midnight', current_time( 'timestamp' ) );
-				$group_by         = 'month';
-			break;
-			case 'last_month' :
-				$this->start_date = strtotime( 'first day of last month', current_time('timestamp') );
-				$this->end_date   = strtotime( 'last day of last month', current_time('timestamp') );
-				$group_by         = 'day';
-			break;
-			case 'last_3months' :
-				$this->start_date = strtotime( 'first day of ' . date( 'F', strtotime( '-2 months', current_time( 'timestamp' ) ) ) );
-				$this->end_date   = strtotime( 'midnight', current_time( 'timestamp' ) );
-				$group_by         = 'month';
-			break;
-			case 'month' :
-				$this->start_date = strtotime( 'first day of this month', current_time('timestamp') );
-				$this->end_date   = strtotime( 'midnight', current_time( 'timestamp' ) );
-				$group_by         = 'day';
-			break;
-			case '7day' :
-			default :
-				$this->start_date = strtotime( 'midnight -6 days', current_time( 'timestamp' ) );
-				$this->end_date   = strtotime( 'midnight', current_time( 'timestamp' ) );
-				$group_by         = 'day';
-			break;
-		}
-
-		// Group by
-		switch ( $group_by ) {
-			case 'day' :
-				$group_by_query = 'YEAR(post_date), MONTH(post_date), DAY(post_date)';
-				$interval       = max( 0, ( $this->end_date - $this->start_date ) / ( 60 * 60 * 24 ) );
-				$barwidth       = 60 * 60 * 24 * 1000;
-			break;
-			case 'month' :
-				$group_by_query = 'YEAR(post_date), MONTH(post_date)';
-				$interval = 0;
-				$min_date = $this->start_date;
-				while ( ( $min_date = strtotime( "+1 MONTH", $min_date ) ) <= $this->end_date ) {
-				    $interval ++;
-				}
-				$barwidth       = 60 * 60 * 24 * 7 * 4 * 1000;
-			break;
-		}
-
-		$order_totals = $this->get_order_report_data( array(
-			'data' => array(
-				'_order_total' => array(
-					'type'     => 'meta',
-					'function' => 'SUM',
-					'name'     => 'total_sales'
-				),
-				'ID' => array(
-					'type'     => 'post_data',
-					'function' => 'COUNT',
-					'name'     => 'total_orders'
-				)
-			),
-			'filter_range' => true
-		) );
-		$total_sales 	= $order_totals->total_sales;
-		$total_orders 	= absint( $order_totals->total_orders );
-		$order_items    = absint( $this->get_order_report_data( array(
-			'data' => array(
-				'_qty' => array(
-					'type'            => 'order_item_meta',
-					'order_item_type' => 'line_item',
-					'function'        => 'SUM',
-					'name'            => 'order_item_qty'
-				)
-			),
-			'query_type' => 'get_var',
-			'filter_range' => true
-		) ) );
-		?>
-		<div id="poststuff" class="woocommerce-reports-wide">
-			<div class="postbox">
-				<h3 class="stats_range">
-					<ul>
-						<?php
-							foreach ( $ranges as $range => $name )
-								echo '<li class="' . ( $current_range == $range ? 'active' : '' ) . '"><a href="' . remove_query_arg( array( 'start_date', 'end_date' ), add_query_arg( 'range', $range ) ) . '">' . $name . '</a></li>';
-						?>
-						<li class="custom <?php echo $current_range == 'custom' ? 'active' : ''; ?>">
-							<?php _e( 'Custom:', 'woocommerce' ); ?>
-							<form method="GET">
-								<div>
-									<input type="text" size="9" placeholder="yyyy-mm-dd" value="<?php if ( ! empty( $_GET['start_date'] ) ) echo esc_attr( $_GET['start_date'] ); ?>" name="start_date" class="range_datepicker from" />
-									<input type="text" size="9" placeholder="yyyy-mm-dd" value="<?php if ( ! empty( $_GET['end_date'] ) ) echo esc_attr( $_GET['end_date'] ); ?>" name="end_date" class="range_datepicker to" />
-									<input type="hidden" name="range" value="custom" />
-									<input type="hidden" name="page" value="<?php if ( ! empty( $_GET['page'] ) ) echo esc_attr( $_GET['page'] ) ?>" />
-									<input type="hidden" name="tab" value="<?php if ( ! empty( $_GET['tab'] ) ) echo esc_attr( $_GET['tab'] ) ?>" />
-									<input type="submit" class="button" value="<?php _e( 'Go', 'woocommerce' ); ?>" />
-								</div>
-							</form>
-						</li>
-					</ul>
-				</h3>
-				<div class="inside split">
-					<div class="side">
-						<ul class="chart-stats">
-							<li class="stats">
-								<h4><?php _e( 'Top Sellers', 'woocommerce' ); ?></h4>
-								<table cellspacing="0">
-									<?php
-									$top_sellers = $this->get_order_report_data( array(
-										'data' => array(
-											'_product_id' => array(
-												'type'            => 'order_item_meta',
-												'order_item_type' => 'line_item',
-												'function'        => '',
-												'name'            => 'product_id'
-											),
-											'_qty' => array(
-												'type'            => 'order_item_meta',
-												'order_item_type' => 'line_item',
-												'function'        => 'SUM',
-												'name'            => 'order_item_qty'
-											)
-										),
-										'order_by' => 'order_item_qty DESC',
-										'group_by' => 'product_id',
-										'limit'    => 6,
-										'query_type'    => 'get_results',
-										'filter_range' => true
-									) );
-
-									if ( $top_sellers ) {
-										foreach ( $top_sellers as $top_seller ) {
-											echo '<tr>
-												<td class="count">' . $top_seller->order_item_qty . '</td>
-												<td class="name">' . get_the_title( $top_seller->product_id ) . '</td>
-												<td class="sparkline">' . $this->sales_sparkline( $top_seller->product_id, 7, 'count' ) . '</td>
-											</tr>';
-										}
-									}
-									?>
-								</table>
-							</li>
-							<li class="stats">
-								<h4><?php _e( 'Top Earners', 'woocommerce' ); ?></h4>
-								<table cellspacing="0">
-									<?php
-									$top_earners = $this->get_order_report_data( array(
-										'data' => array(
-											'_product_id' => array(
-												'type'            => 'order_item_meta',
-												'order_item_type' => 'line_item',
-												'function'        => '',
-												'name'            => 'product_id'
-											),
-											'_line_total' => array(
-												'type'            => 'order_item_meta',
-												'order_item_type' => 'line_item',
-												'function'        => 'SUM',
-												'name'            => 'order_item_total'
-											)
-										),
-										'order_by' => 'order_item_total DESC',
-										'group_by' => 'product_id',
-										'limit'    => 6,
-										'query_type'    => 'get_results',
-										'filter_range' => true
-									) );
-
-									if ( $top_earners ) {
-										foreach ( $top_earners as $top_earner ) {
-											echo '<tr>
-												<td class="count">' . woocommerce_price( round( $top_earner->order_item_total ) ) . '</td>
-												<td class="name">' . get_the_title( $top_earner->product_id ) . '</td>
-												<td class="sparkline">' . $this->sales_sparkline( $top_earner->product_id, 7, 'sales' ) . '</td>
-											</tr>';
-										}
-									}
-									?>
-								</table>
-							</li>
-						</ul>
-					</div>
-					<div class="main">
-						<div class="chart-container">
-							<div class="chart-placeholder main" style="height:568px;"></div>
-						</div>
-						<ul class="chart-legend">
-							<li style="border-color: <?php echo $chart_colours['sales_amount']; ?>">
-								<?php printf( __( '%s sales in this period', 'woocommerce' ), '<strong>' . woocommerce_price( $total_sales ) . '</strong>' ); ?>
-							</li>
-							<li style="border-color: <?php echo $chart_colours['average']; ?>">
-								<?php
-								$average_sales = $total_sales / ( $interval + 1 );
-
-								switch ( $group_by ) {
-									case 'day' :
-										printf( __( '%s average daily sales', 'woocommerce' ), '<strong>' . woocommerce_price( $average_sales ) . '</strong>' );
-									break;
-									case 'month' :
-										printf( __( '%s average monthly sales', 'woocommerce' ), '<strong>' . woocommerce_price( $average_sales ) . '</strong>' );
-									break;
-								}
-								?>
-							</li>
-							<li style="border-color: <?php echo $chart_colours['order_count']; ?>">
-								<?php printf( __( '%s orders placed', 'woocommerce' ), '<strong>' . $total_orders . '</strong>' ); ?>
-							</li>
-							<li style="border-color: <?php echo $chart_colours['item_count']; ?>">
-								<?php printf( __( '%s items purchased', 'woocommerce' ), '<strong>' . $order_items . '</strong>' ); ?>
-							</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-		</div>
-		<?php
-		// Get orders and dates in range - we want the SUM of order totals, COUNT of order items, COUNT of orders, and the date
-		$orders = $this->get_order_report_data( array(
-			'data' => array(
-				'_order_total' => array(
-					'type'     => 'meta',
-					'function' => 'SUM',
-					'name'     => 'total_sales'
-				),
-				'_qty' => array(
-					'type'            => 'order_item_meta',
-					'order_item_type' => 'line_item',
-					'function'        => 'SUM',
-					'name'            => 'order_item_count'
-				),
-				'ID' => array(
-					'type'     => 'post_data',
-					'function' => 'COUNT',
-					'name'     => 'total_orders'
-				),
-				'post_date' => array(
-					'type'     => 'post_data',
-					'function' => '',
-					'name'     => 'post_date'
-				),
-			),
-			'group_by'     => $group_by_query,
-			'order_by'     => 'post_date ASC',
-			'query_type'   => 'get_results',
-			'filter_range' => true
-		) );
-
-		// Prepare data for report
-		$order_counts      = $this->prepare_chart_data( $orders, 'post_date', 'total_orders', $interval, $this->start_date, $group_by );
-		$order_item_counts = $this->prepare_chart_data( $orders, 'post_date', 'order_item_count', $interval, $this->start_date, $group_by );
-		$order_amounts     = $this->prepare_chart_data( $orders, 'post_date', 'total_sales', $interval, $this->start_date, $group_by );
-
-		// Encode in json format
-		$chart_data = json_encode( array(
-			'order_counts'      => array_values( $order_counts ),
-			'order_item_counts' => array_values( $order_item_counts ),
-			'order_amounts'     => array_values( $order_amounts )
-		) );
-		?>
-		<script type="text/javascript">
-			jQuery(function(){
-				var order_data = jQuery.parseJSON( '<?php echo $chart_data; ?>' );
-
-				jQuery.plot(
-					jQuery('.chart-placeholder.main'),
-					[
-						{
-							label: "<?php echo esc_js( __( 'Number of items sold', 'woocommerce' ) ) ?>",
-							data: order_data.order_item_counts,
-							color: '<?php echo $chart_colours['item_count']; ?>',
-							bars: { fillColor: '<?php echo $chart_colours['item_count']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $barwidth; ?> * 0.5, align: 'center' },
-							shadowSize: 0,
-							hoverable: false
-						},
-						{
-							label: "<?php echo esc_js( __( 'Number of orders', 'woocommerce' ) ) ?>",
-							data: order_data.order_counts,
-							color: '<?php echo $chart_colours['order_count']; ?>',
-							bars: { fillColor: '<?php echo $chart_colours['order_count']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $barwidth; ?> * 0.5, align: 'center' },
-							shadowSize: 0,
-							hoverable: false
-						},
-						{
-							label: "<?php echo esc_js( __( 'Average sales amount', 'woocommerce' ) ) ?>",
-							data: [ [ <?php echo min( array_keys( $order_amounts ) ); ?>, <?php echo $average_sales; ?> ], [ <?php echo max( array_keys( $order_amounts ) ); ?>, <?php echo $average_sales; ?> ] ],
-							yaxis: 2,
-							color: '<?php echo $chart_colours['average']; ?>',
-							points: { show: false },
-							lines: { show: true, lineWidth: 1, fill: false },
-							shadowSize: 0,
-							hoverable: false
-						},
-						{
-							label: "<?php echo esc_js( __( 'Sales amount', 'woocommerce' ) ) ?>",
-							data: order_data.order_amounts,
-							yaxis: 2,
-							color: '<?php echo $chart_colours['sales_amount']; ?>',
-							points: { show: true, radius: 5, lineWidth: 3, fillColor: '#fff', fill: true },
-							lines: { show: true, lineWidth: 4, fill: false },
-							shadowSize: 0,
-							prepend_tooltip: "<?php echo get_woocommerce_currency_symbol(); ?>"
-						}
-					],
-					{
-						legend: {
-							show: false
-						},
-				   		series: {
-				   			stack: true
-				   		},
-					    grid: {
-					        color: '#aaa',
-					        borderColor: 'transparent',
-					        borderWidth: 0,
-					        hoverable: true
-					    },
-					    xaxes: [ {
-					    	color: '#aaa',
-					    	position: "bottom",
-					    	tickColor: 'transparent',
-							mode: "time",
-							timeformat: "<?php if ( $group_by == 'day' ) echo '%d %b'; else echo '%b'; ?>",
-							monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
-							tickLength: 1,
-							minTickSize: [1, "<?php echo $group_by; ?>"],
-							font: {
-					    		color: "#aaa"
-					    	}
-						} ],
-					    yaxes: [
-					    	{
-					    		min: 0,
-					    		minTickSize: 1,
-					    		tickDecimals: 0,
-					    		color: '#ecf0f1',
-					    		font: {
-					    			color: "#aaa"
-					    		}
-					    	},
-					    	{
-					    		position: "right",
-					    		min: 0,
-					    		tickDecimals: 2,
-					    		alignTicksWithAxis: 1,
-					    		color: 'transparent',
-					    		font: {
-					    			color: "#aaa"
-					    		}
-					    	}
-					    ],
-			 		}
-			 	);
-
-			 	jQuery('.chart-placeholder').resize();
-			});
-		</script>
-		<?php
+		$report = new $class();
+		$report->output_report();
 	}
 }
 
 new WC_Admin_Reports();
 
 
+
+
+
+
+
+
+
+
+
+
+
+/*
+<li class="item">
+								<h4><?php _e( 'Product Sales', 'woocommerce' ); ?></h4>
+								<?php
+								if ( ! empty( $product_id_filter ) ) {
+
+									$product_id_filter_titles = array();
+
+									foreach ( $product_id_filter as $product_id ) {
+										$product_id_filter_titles[] = get_the_title( $product_id );
+									}
+
+									echo '<p>' . __( 'Showing reports for:' ) . ' <strong>' . implode( ', ', $product_id_filter_titles ) . '</strong></p>';
+
+								} else {
+									?>
+									<form method="GET">
+										<div>
+											<select id="product_ids" name="product_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>"></select>
+											<input type="submit" class="button" value="<?php _e( 'Show', 'woocommerce' ); ?>" />
+											<input type="hidden" name="range" value="<?php if ( ! empty( $_GET['range'] ) ) echo esc_attr( $_GET['range'] ) ?>" />
+											<input type="hidden" name="start_date" value="<?php if ( ! empty( $_GET['start_date'] ) ) echo esc_attr( $_GET['start_date'] ) ?>" />
+											<input type="hidden" name="end_date" value="<?php if ( ! empty( $_GET['end_date'] ) ) echo esc_attr( $_GET['end_date'] ) ?>" />
+											<input type="hidden" name="page" value="<?php if ( ! empty( $_GET['page'] ) ) echo esc_attr( $_GET['page'] ) ?>" />
+											<input type="hidden" name="tab" value="<?php if ( ! empty( $_GET['tab'] ) ) echo esc_attr( $_GET['tab'] ) ?>" />
+										</div>
+										<script type="text/javascript">
+											jQuery(function(){
+												// Ajax Chosen Product Selectors
+												jQuery("select.ajax_chosen_select_products").ajaxChosen({
+												    method: 	'GET',
+												    url: 		'<?php echo admin_url('admin-ajax.php'); ?>',
+												    dataType: 	'json',
+												    afterTypeDelay: 100,
+												    data:		{
+												    	action: 		'woocommerce_json_search_products',
+														security: 		'<?php echo wp_create_nonce("search-products"); ?>'
+												    }
+												}, function (data) {
+													var terms = {};
+
+												    jQuery.each(data, function (i, val) {
+												        terms[i] = val;
+												    });
+												    return terms;
+												});
+											});
+										</script>
+									</form>
+									<?php
+								}
+								?>
+							</li>
+ */
 
 
 /*

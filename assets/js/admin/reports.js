@@ -1,10 +1,12 @@
 jQuery(document).ready(function($) {
+
     function showTooltip(x, y, contents) {
         jQuery('<div class="chart-tooltip">' + contents + '</div>').css( {
             top: y - 16,
        		left: x + 20
         }).appendTo("body").fadeIn(200);
     }
+
     var previousPoint = null;
 
     jQuery(".chart-placeholder").bind( "plothover", function (event, pos, item) {
@@ -32,7 +34,7 @@ jQuery(document).ready(function($) {
         }
     });
 
-    $('.wc_sparkline').each(function() {
+    $('.wc_sparkline.bars').each(function() {
         var chart_data = $(this).data('sparkline');
 
         var options = {
@@ -46,6 +48,27 @@ jQuery(document).ready(function($) {
             data: chart_data,
             color: $(this).data('color'),
             bars: { fillColor: $(this).data('color'), fill: true, show: true, lineWidth: 1, barWidth: $(this).data('barwidth'), align: 'center' },
+            shadowSize: 0
+        }];
+
+        // draw the sparkline
+        var plot = $.plot( $(this), series, options );
+    });
+
+    $('.wc_sparkline.lines').each(function() {
+        var chart_data = $(this).data('sparkline');
+
+        var options = {
+            grid: {
+                show: false
+            }
+        };
+
+        // main series
+        var series = [{
+            data: chart_data,
+            color: $(this).data('color'),
+            lines: { fill: false, show: true, lineWidth: 1, align: 'center' },
             shadowSize: 0
         }];
 
