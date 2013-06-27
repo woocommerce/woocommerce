@@ -79,22 +79,11 @@ class WC_Admin_Reports {
 						'hide_title'  => true,
 						'callback'    => array( $this, 'get_report' )
 					),
-					"top_sellers"    => array(
-						'title'       => __( 'Top Sellers', 'woocommerce' ),
-						'description' => '',
-						'hide_title'  => true,
-						'callback'    => array( $this, 'get_report' )
-					),
-					"top_earners"    => array(
-						'title'       => __( 'Top Earners', 'woocommerce' ),
-						'description' => '',
-						'hide_title'  => true,
-						'callback'    => array( $this, 'get_report' )
-					),
 					"sales_by_product"     => array(
 						'title'       => __( 'Sales by product', 'woocommerce' ),
 						'description' => '',
-						'callback'    => 'woocommerce_product_sales'
+						'hide_title'  => true,
+						'callback'    => array( $this, 'get_report' )
 					),
 					"sales_by_category" => array(
 						'title'       => __( 'Sales by category', 'woocommerce' ),
@@ -218,59 +207,6 @@ new WC_Admin_Reports();
 
 
 /*
-<li class="item">
-								<h4><?php _e( 'Product Sales', 'woocommerce' ); ?></h4>
-								<?php
-								if ( ! empty( $product_id_filter ) ) {
-
-									$product_id_filter_titles = array();
-
-									foreach ( $product_id_filter as $product_id ) {
-										$product_id_filter_titles[] = get_the_title( $product_id );
-									}
-
-									echo '<p>' . __( 'Showing reports for:' ) . ' <strong>' . implode( ', ', $product_id_filter_titles ) . '</strong></p>';
-
-								} else {
-									?>
-									<form method="GET">
-										<div>
-											<select id="product_ids" name="product_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>"></select>
-											<input type="submit" class="button" value="<?php _e( 'Show', 'woocommerce' ); ?>" />
-											<input type="hidden" name="range" value="<?php if ( ! empty( $_GET['range'] ) ) echo esc_attr( $_GET['range'] ) ?>" />
-											<input type="hidden" name="start_date" value="<?php if ( ! empty( $_GET['start_date'] ) ) echo esc_attr( $_GET['start_date'] ) ?>" />
-											<input type="hidden" name="end_date" value="<?php if ( ! empty( $_GET['end_date'] ) ) echo esc_attr( $_GET['end_date'] ) ?>" />
-											<input type="hidden" name="page" value="<?php if ( ! empty( $_GET['page'] ) ) echo esc_attr( $_GET['page'] ) ?>" />
-											<input type="hidden" name="tab" value="<?php if ( ! empty( $_GET['tab'] ) ) echo esc_attr( $_GET['tab'] ) ?>" />
-										</div>
-										<script type="text/javascript">
-											jQuery(function(){
-												// Ajax Chosen Product Selectors
-												jQuery("select.ajax_chosen_select_products").ajaxChosen({
-												    method: 	'GET',
-												    url: 		'<?php echo admin_url('admin-ajax.php'); ?>',
-												    dataType: 	'json',
-												    afterTypeDelay: 100,
-												    data:		{
-												    	action: 		'woocommerce_json_search_products',
-														security: 		'<?php echo wp_create_nonce("search-products"); ?>'
-												    }
-												}, function (data) {
-													var terms = {};
-
-												    jQuery.each(data, function (i, val) {
-												        terms[i] = val;
-												    });
-												    return terms;
-												});
-											});
-										</script>
-									</form>
-									<?php
-								}
-								?>
-							</li>
- */
 
 
 /*
@@ -406,155 +342,6 @@ $customer_orders = $this->get_order_report_data( array(
 			 	*/
 
 
-
-
-
-/**
- * Output the product sales chart for single products.
- *
- * @access public
- * @return void
- */
-function woocommerce_product_sales() {
-
-	global $wpdb, $woocommerce;
-
-	$chosen_product_ids = ( isset( $_POST['product_ids'] ) ) ? array_map( 'absint', (array) $_POST['product_ids'] ) : '';
-
-	if ( $chosen_product_ids && is_array( $chosen_product_ids ) ) {
-
-		$start_date = date( 'Ym', strtotime( '-12 MONTHS', current_time('timestamp') ) ) . '01';
-		$end_date 	= date( 'Ymd', current_time( 'timestamp' ) );
-
-		$max_sales = $max_totals = 0;
-		$product_sales = $product_totals = array();
-
-		// Get titles and ID's related to product
-		$chosen_product_titles = array();
-		$children_ids = array();
-
-		foreach ( $chosen_product_ids as $product_id ) {
-			$children = (array) get_posts( 'post_parent=' . $product_id . '&fields=ids&post_status=any&numberposts=-1' );
-			$children_ids = $children_ids + $children;
-			$chosen_product_titles[] = get_the_title( $product_id );
-		}
-
-		// Get order items
-		$order_items = apply_filters( 'woocommerce_reports_product_sales_order_items', $wpdb->get_results( "
-			SELECT order_item_meta_2.meta_value as product_id, posts.post_date, SUM( order_item_meta.meta_value ) as item_quantity, SUM( order_item_meta_3.meta_value ) as line_total
-			FROM {$wpdb->prefix}woocommerce_order_items as order_items
-
-			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
-			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta_2 ON order_items.order_item_id = order_item_meta_2.order_item_id
-			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta_3 ON order_items.order_item_id = order_item_meta_3.order_item_id
-			LEFT JOIN {$wpdb->posts} AS posts ON order_items.order_id = posts.ID
-			LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
-			LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
-			LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-
-			WHERE 	posts.post_type 	= 'shop_order'
-			AND 	order_item_meta_2.meta_value IN ('" . implode( "','", array_merge( $chosen_product_ids, $children_ids ) ) . "')
-			AND 	posts.post_status 	= 'publish'
-			AND 	tax.taxonomy		= 'shop_order_status'
-			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-			AND 	order_items.order_item_type = 'line_item'
-			AND 	order_item_meta.meta_key = '_qty'
-			AND 	order_item_meta_2.meta_key = '_product_id'
-			AND 	order_item_meta_3.meta_key = '_line_total'
-			GROUP BY order_items.order_id
-			ORDER BY posts.post_date ASC
-		" ), array_merge( $chosen_product_ids, $children_ids ) );
-
-		$found_products = array();
-
-		if ( $order_items ) {
-			foreach ( $order_items as $order_item ) {
-
-				if ( $order_item->line_total == 0 && $order_item->item_quantity == 0 )
-					continue;
-
-				// Get date
-				$date 	= date( 'Ym', strtotime( $order_item->post_date ) );
-
-				// Set values
-				$product_sales[ $date ] 	= isset( $product_sales[ $date ] ) ? $product_sales[ $date ] + $order_item->item_quantity : $order_item->item_quantity;
-				$product_totals[ $date ] 	= isset( $product_totals[ $date ] ) ? $product_totals[ $date ] + $order_item->line_total : $order_item->line_total;
-
-				if ( $product_sales[ $date ] > $max_sales )
-					$max_sales = $product_sales[ $date ];
-
-				if ( $product_totals[ $date ] > $max_totals )
-					$max_totals = $product_totals[ $date ];
-			}
-		}
-		?>
-		<h4><?php printf( __( 'Sales for %s:', 'woocommerce' ), implode( ', ', $chosen_product_titles ) ); ?></h4>
-		<table class="bar_chart">
-			<thead>
-				<tr>
-					<th><?php _e( 'Month', 'woocommerce' ); ?></th>
-					<th colspan="2"><?php _e( 'Sales', 'woocommerce' ); ?></th>
-				</tr>
-			</thead>
-			<tbody>
-				<?php
-					if ( sizeof( $product_sales ) > 0 ) {
-						foreach ( $product_sales as $date => $sales ) {
-							$width = ($sales>0) ? (round($sales) / round($max_sales)) * 100 : 0;
-							$width2 = ($product_totals[$date]>0) ? (round($product_totals[$date]) / round($max_totals)) * 100 : 0;
-
-							$orders_link = admin_url( 'edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode( implode( ' ', $chosen_product_titles ) ) . '&m=' . date( 'Ym', strtotime( $date . '01' ) ) . '&shop_order_status=' . implode( ",", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) );
-							$orders_link = apply_filters( 'woocommerce_reports_order_link', $orders_link, $chosen_product_ids, $chosen_product_titles );
-
-							echo '<tr><th><a href="' . esc_url( $orders_link ) . '">' . date_i18n( 'F', strtotime( $date . '01' ) ) . '</a></th>
-							<td width="1%"><span>' . esc_html( $sales ) . '</span><span class="alt">' . woocommerce_price( $product_totals[ $date ] ) . '</span></td>
-							<td class="bars">
-								<span style="width:' . esc_attr( $width ) . '%">&nbsp;</span>
-								<span class="alt" style="width:' . esc_attr( $width2 ) . '%">&nbsp;</span>
-							</td></tr>';
-						}
-					} else {
-						echo '<tr><td colspan="3">' . __( 'No sales :(', 'woocommerce' ) . '</td></tr>';
-					}
-				?>
-			</tbody>
-		</table>
-		<?php
-
-	} else {
-		?>
-		<form method="post" action="">
-			<p><select id="product_ids" name="product_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" style="width: 400px;"></select> <input type="submit" style="vertical-align: top;" class="button" value="<?php _e( 'Show', 'woocommerce' ); ?>" /></p>
-			<script type="text/javascript">
-				jQuery(function(){
-
-					// Ajax Chosen Product Selectors
-					jQuery("select.ajax_chosen_select_products").ajaxChosen({
-					    method: 	'GET',
-					    url: 		'<?php echo admin_url('admin-ajax.php'); ?>',
-					    dataType: 	'json',
-					    afterTypeDelay: 100,
-					    data:		{
-					    	action: 		'woocommerce_json_search_products',
-							security: 		'<?php echo wp_create_nonce("search-products"); ?>'
-					    }
-					}, function (data) {
-
-						var terms = {};
-
-					    jQuery.each(data, function (i, val) {
-					        terms[i] = val;
-					    });
-
-					    return terms;
-					});
-
-				});
-			</script>
-		</form>
-		<?php
-	}
-}
 
 
 /**

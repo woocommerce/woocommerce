@@ -1,14 +1,19 @@
 <?php
 /**
- * WC_Report_Top_Sellers class
+ * WC_Report_Sales_By_Product class
  */
-class WC_Report_Top_Sellers extends WC_Admin_Report {
+class WC_Report_Sales_By_Product extends WC_Admin_Report {
+
+	public $product_ids = array();
 
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->product_id = isset( $_GET['product_id'] ) ? absint( $_GET['product_id'] ) : '';
+		if ( isset( $_GET['product_ids'] ) && is_array( $_GET['product_ids'] ) )
+			$this->product_ids = array_map( 'absint', $_GET['product_ids'] );
+		elseif ( isset( $_GET['product_ids'] ) )
+			$this->product_ids = array( absint( $_GET['product_ids'] ) );
 	}
 
 	/**
@@ -16,7 +21,7 @@ class WC_Report_Top_Sellers extends WC_Admin_Report {
 	 * @return array
 	 */
 	public function get_chart_legend() {
-		if ( ! $this->product_id )
+		if ( ! $this->product_ids )
 			return array();
 
 		$legend   = array();
@@ -34,8 +39,8 @@ class WC_Report_Top_Sellers extends WC_Admin_Report {
 				array(
 					'type'       => 'order_item_meta',
 					'meta_key'   => '_product_id',
-					'meta_value' => $this->product_id,
-					'operator'   => '='
+					'meta_value' => $this->product_ids,
+					'operator'   => 'IN'
 				)
 			),
 			'query_type'   => 'get_var',
@@ -54,8 +59,8 @@ class WC_Report_Top_Sellers extends WC_Admin_Report {
 				array(
 					'type'       => 'order_item_meta',
 					'meta_key'   => '_product_id',
-					'meta_value' => $this->product_id,
-					'operator'   => '='
+					'meta_value' => $this->product_ids,
+					'operator'   => 'IN'
 				)
 			),
 			'query_type'   => 'get_var',
@@ -163,55 +168,177 @@ class WC_Report_Top_Sellers extends WC_Admin_Report {
 	 * @return array
 	 */
 	public function get_chart_widgets() {
-		return array(
-			array(
-				'title'    => __( 'Top Sellers', 'woocommerce' ),
-				'callback' => array( $this, 'top_seller_widget' )
-			)
+
+		$widgets = array();
+
+		if ( ! empty( $this->product_ids ) ) {
+			$widgets[] = array(
+				'title'    => __( 'Showing reports for:', 'woocommerce' ),
+				'callback' => array( $this, 'current_filters' )
+			);
+		}
+
+		$widgets[] = array(
+			'title'    => '',
+			'callback' => array( $this, 'products_widget' )
 		);
+
+		return $widgets;
 	}
 
 	/**
-	 * Show the list of top sellers
+	 * Show current filters
 	 * @return void
 	 */
-	public function top_seller_widget() {
-		?>
-		<table cellspacing="0">
-			<?php
-			$top_sellers = $this->get_order_report_data( array(
-				'data' => array(
-					'_product_id' => array(
-						'type'            => 'order_item_meta',
-						'order_item_type' => 'line_item',
-						'function'        => '',
-						'name'            => 'product_id'
-					),
-					'_qty' => array(
-						'type'            => 'order_item_meta',
-						'order_item_type' => 'line_item',
-						'function'        => 'SUM',
-						'name'            => 'order_item_qty'
-					)
-				),
-				'order_by' => 'order_item_qty DESC',
-				'group_by' => 'product_id',
-				'limit'    => 10,
-				'query_type'    => 'get_results',
-				'filter_range' => true
-			) );
+	public function current_filters() {
+		$this->product_ids_titles = array();
 
-			if ( $top_sellers ) {
-				foreach ( $top_sellers as $product ) {
-					echo '<tr class="' . ( $this->product_id == $product->product_id ? 'active' : '' ) . '">
-						<td class="count">' . $product->order_item_qty . '</td>
-						<td class="name"><a href="' . add_query_arg( 'product_id', $product->product_id ) . '">' . get_the_title( $product->product_id ) . '</a></td>
-						<td class="sparkline">' . $this->sales_sparkline( $product->product_id, 14, 'count' ) . '</td>
-					</tr>';
+		foreach ( $this->product_ids as $product_id ) {
+			$this->product_ids_titles[] = get_the_title( $product_id );
+		}
+
+		echo '<p>' . ' <strong>' . implode( ', ', $this->product_ids_titles ) . '</strong></p>';
+		echo '<p><a class="button" href="' . remove_query_arg( 'product_ids' ) . '">' . __( 'Reset', 'woocommerce' ) . '</a></p>';
+	}
+
+	/**
+	 * Product selection
+	 * @return void
+	 */
+	public function products_widget() {
+		?>
+		<h4 class="section_title"><span><?php _e( 'Product Search', 'woocommerce' ); ?></span></h4>
+		<div class="section">
+			<form method="GET">
+				<div>
+					<select id="product_ids" name="product_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>"></select>
+					<input type="submit" class="submit button" value="<?php _e( 'Show', 'woocommerce' ); ?>" />
+					<input type="hidden" name="range" value="<?php if ( ! empty( $_GET['range'] ) ) echo esc_attr( $_GET['range'] ) ?>" />
+					<input type="hidden" name="start_date" value="<?php if ( ! empty( $_GET['start_date'] ) ) echo esc_attr( $_GET['start_date'] ) ?>" />
+					<input type="hidden" name="end_date" value="<?php if ( ! empty( $_GET['end_date'] ) ) echo esc_attr( $_GET['end_date'] ) ?>" />
+					<input type="hidden" name="page" value="<?php if ( ! empty( $_GET['page'] ) ) echo esc_attr( $_GET['page'] ) ?>" />
+					<input type="hidden" name="tab" value="<?php if ( ! empty( $_GET['tab'] ) ) echo esc_attr( $_GET['tab'] ) ?>" />
+					<input type="hidden" name="report" value="<?php if ( ! empty( $_GET['report'] ) ) echo esc_attr( $_GET['report'] ) ?>" />
+				</div>
+				<script type="text/javascript">
+					jQuery(function(){
+						// Ajax Chosen Product Selectors
+						jQuery("select.ajax_chosen_select_products").ajaxChosen({
+						    method: 	'GET',
+						    url: 		'<?php echo admin_url('admin-ajax.php'); ?>',
+						    dataType: 	'json',
+						    afterTypeDelay: 100,
+						    data:		{
+						    	action: 		'woocommerce_json_search_products',
+								security: 		'<?php echo wp_create_nonce("search-products"); ?>'
+						    }
+						}, function (data) {
+							var terms = {};
+
+						    jQuery.each(data, function (i, val) {
+						        terms[i] = val;
+						    });
+						    return terms;
+						});
+					});
+				</script>
+			</form>
+		</div>
+		<h4 class="section_title"><span><?php _e( 'Top Sellers', 'woocommerce' ); ?></span></h4>
+		<div class="section">
+			<table cellspacing="0">
+				<?php
+				$top_sellers = $this->get_order_report_data( array(
+					'data' => array(
+						'_product_id' => array(
+							'type'            => 'order_item_meta',
+							'order_item_type' => 'line_item',
+							'function'        => '',
+							'name'            => 'product_id'
+						),
+						'_qty' => array(
+							'type'            => 'order_item_meta',
+							'order_item_type' => 'line_item',
+							'function'        => 'SUM',
+							'name'            => 'order_item_qty'
+						)
+					),
+					'order_by' => 'order_item_qty DESC',
+					'group_by' => 'product_id',
+					'limit'    => 12,
+					'query_type'    => 'get_results',
+					'filter_range' => true
+				) );
+
+				if ( $top_sellers ) {
+					foreach ( $top_sellers as $product ) {
+						echo '<tr class="' . ( in_array( $product->product_id, $this->product_ids ) ? 'active' : '' ) . '">
+							<td class="count">' . $product->order_item_qty . '</td>
+							<td class="name"><a href="' . add_query_arg( 'product_ids', $product->product_id ) . '">' . get_the_title( $product->product_id ) . '</a></td>
+							<td class="sparkline">' . $this->sales_sparkline( $product->product_id, 14, 'count' ) . '</td>
+						</tr>';
+					}
 				}
-			}
-			?>
-		</table>
+				?>
+			</table>
+		</div>
+		<h4 class="section_title"><span><?php _e( 'Top Earners', 'woocommerce' ); ?></span></h4>
+		<div class="section">
+			<table cellspacing="0">
+				<?php
+				$top_earners = $this->get_order_report_data( array(
+					'data' => array(
+						'_product_id' => array(
+							'type'            => 'order_item_meta',
+							'order_item_type' => 'line_item',
+							'function'        => '',
+							'name'            => 'product_id'
+						),
+						'_line_total' => array(
+							'type'            => 'order_item_meta',
+							'order_item_type' => 'line_item',
+							'function'        => 'SUM',
+							'name'            => 'order_item_total'
+						)
+					),
+					'order_by' => 'order_item_total DESC',
+					'group_by' => 'product_id',
+					'limit'    => 12,
+					'query_type'    => 'get_results',
+					'filter_range' => true
+				) );
+
+				if ( $top_earners ) {
+					foreach ( $top_earners as $product ) {
+						echo '<tr class="' . ( in_array( $product->product_id, $this->product_ids ) ? 'active' : '' ) . '">
+							<td class="count">' . woocommerce_price( $product->order_item_total ) . '</td>
+							<td class="name"><a href="' . add_query_arg( 'product_ids', $product->product_id ) . '">' . get_the_title( $product->product_id ) . '</a></td>
+							<td class="sparkline">' . $this->sales_sparkline( $product->product_id, 14, 'sales' ) . '</td>
+						</tr>';
+					}
+				}
+				?>
+			</table>
+		</div>
+		<script type="text/javascript">
+			jQuery('.section_title').click(function(){
+				var next_section = jQuery(this).next('.section');
+
+				if ( jQuery(next_section).is(':visible') )
+					return false;
+
+				jQuery('.section:visible').slideUp();
+				jQuery('.section_title').removeClass('open');
+				jQuery(this).addClass('open').next('.section').slideDown();
+
+				return false;
+			});
+			jQuery('.section').slideUp( 100, function() {
+				<?php if ( empty( $this->product_ids ) ) : ?>
+					jQuery('.section_title:eq(1)').click();
+				<?php endif; ?>
+			});
+		</script>
 		<?php
 	}
 
@@ -222,7 +349,7 @@ class WC_Report_Top_Sellers extends WC_Admin_Report {
 	public function get_main_chart() {
 		global $wp_locale;
 
-		if ( ! $this->product_id ) {
+		if ( ! $this->product_ids ) {
 			?>
 			<div class="chart-container">
 				<p class="chart-prompt"><?php _e( '&larr; Choose a product to view stats', 'woocommerce' ); ?></p>
@@ -248,8 +375,8 @@ class WC_Report_Top_Sellers extends WC_Admin_Report {
 					array(
 						'type'       => 'order_item_meta',
 						'meta_key'   => '_product_id',
-						'meta_value' => $this->product_id,
-						'operator'   => '='
+						'meta_value' => $this->product_ids,
+						'operator'   => 'IN'
 					)
 				),
 				'group_by'     => $this->group_by_query,
@@ -276,8 +403,8 @@ class WC_Report_Top_Sellers extends WC_Admin_Report {
 					array(
 						'type'       => 'order_item_meta',
 						'meta_key'   => '_product_id',
-						'meta_value' => $this->product_id,
-						'operator'   => '='
+						'meta_value' => $this->product_ids,
+						'operator'   => 'IN'
 					)
 				),
 				'group_by'     => $this->group_by_query,
