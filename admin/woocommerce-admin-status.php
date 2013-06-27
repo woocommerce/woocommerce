@@ -248,7 +248,7 @@ function woocommerce_status_report() {
 							if ( strstr( $dirname, 'woocommerce' ) ) {
 
 								if ( false === ( $version_data = get_transient( $plugin . '_version_data' ) ) ) {
-									$changelog = wp_remote_get( 'http://www.woothemes.com/changelogs/extensions/' . $dirname . '/changelog.txt' );
+									$changelog = wp_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
 									$cl_lines  = explode( "\n", wp_remote_retrieve_body( $changelog ) );
 									if ( ! empty( $cl_lines ) ) {
 										foreach ( $cl_lines as $line_num => $cl_line ) {
