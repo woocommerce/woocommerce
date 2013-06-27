@@ -20,10 +20,15 @@ jQuery(document).ready(function($) {
 
                 	var y = item.datapoint[1];
 
-                    if ( ! item.series.prepend_tooltip )
-                        item.series.prepend_tooltip = item.series.label + ": ";
+                    tooltip_content = '';
 
-                	showTooltip( item.pageX, item.pageY, item.series.prepend_tooltip + y );
+                    if ( item.series.prepend_label )
+                        tooltip_content = tooltip_content + item.series.label + ": ";
+
+                    if ( item.series.prepend_tooltip )
+                        tooltip_content = tooltip_content + item.series.prepend_tooltip;
+
+                	showTooltip( item.pageX, item.pageY, tooltip_content + y );
 
                 }
             }
