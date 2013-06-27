@@ -88,7 +88,8 @@ class WC_Admin_Reports {
 					"sales_by_category" => array(
 						'title'       => __( 'Sales by category', 'woocommerce' ),
 						'description' => '',
-						'callback'    => 'woocommerce_category_sales'
+						'hide_title'  => true,
+						'callback'    => array( $this, 'get_report' )
 					) )
 			),
 			'discounts'   => array(

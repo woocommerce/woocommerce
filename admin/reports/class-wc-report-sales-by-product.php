@@ -68,11 +68,11 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 		) ) );
 
 		$legend[] = array(
-			'title' => sprintf( __( '%s sales for this item', 'woocommerce' ), '<strong>' . woocommerce_price( $total_sales ) . '</strong>' ),
+			'title' => sprintf( __( '%s sales for the selected items', 'woocommerce' ), '<strong>' . woocommerce_price( $total_sales ) . '</strong>' ),
 			'color' => $this->chart_colours['sales_amount']
 		);
 		$legend[] = array(
-			'title' => sprintf( __( '%s purchases of this item', 'woocommerce' ), '<strong>' . $total_items . '</strong>' ),
+			'title' => sprintf( __( '%s purchases for the selected items', 'woocommerce' ), '<strong>' . $total_items . '</strong>' ),
 			'color' => $this->chart_colours['item_count']
 		);
 

@@ -16,7 +16,7 @@ jQuery(document).ready(function($) {
 
                 jQuery( ".chart-tooltip" ).remove();
 
-                if ( item.series.points.show ) {
+                if ( item.series.points.show || item.series.enable_tooltip ) {
 
                 	var y = item.datapoint[1];
 
