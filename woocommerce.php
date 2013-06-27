@@ -76,6 +76,12 @@ final class WooCommerce {
 	 */
 	public $checkout;
 
+    /**
+    * @var Helpers blank array
+    */
+    public $helpers = array();
+
+
 	/**
 	 * @var WC_Integrations
 	 */
@@ -496,9 +502,6 @@ final class WooCommerce {
 		$this->product_factory 		= new WC_Product_Factory();     // Product Factory to create new product instances
 		$this->countries 			= new WC_Countries();			// Countries class
 		$this->integrations			= new WC_Integrations();		// Integrations class
-
-		// Helpers blank array
-		$this->helpers = array();
 
 		// Classes/actions loaded for the frontend and for ajax requests
 		if ( ! is_admin() || defined('DOING_AJAX') ) {
