@@ -315,6 +315,7 @@ final class WooCommerce {
 
 		include( 'includes/wc-deprecated-functions.php' );
 		include( 'includes/wc-message-functions.php' );
+		include( 'includes/wc-coupon-functions.php' );
 
 
 
@@ -990,16 +991,16 @@ final class WooCommerce {
 		return $this->get_helper( 'attribute' )->get_attribute_taxonomy_names();
 	}
 
-	// Deprecated 2.1.0 Access via the WC_Coupon_Helper helper
+	// Deprecated 2.1.0
 	public function get_coupon_discount_types() {
-		_deprecated_function( 'Woocommerce->get_coupon_discount_types', '2.1', 'WC_Coupon_Helper->get_coupon_discount_types' );
-		return $this->get_helper( 'coupon' )->get_coupon_discount_types();
+		_deprecated_function( 'Woocommerce->get_coupon_discount_types', '2.1', 'wc_get_coupon_types' );
+		return wc_get_coupon_types();
 	}
 
-	// Deprecated 2.1.0 Access via the WC_Coupon_Helper helper
+	// Deprecated 2.1.0
 	public function get_coupon_discount_type( $type = '' ) {
-		_deprecated_function( 'Woocommerce->get_coupon_discount_type', '2.1', 'WC_Coupon_Helper->get_coupon_discount_type' );
-		return $this->get_helper( 'coupon' )->get_coupon_discount_type( $type );
+		_deprecated_function( 'Woocommerce->get_coupon_discount_type', '2.1', 'wc_get_coupon_type' );
+		return wc_get_coupon_type( $type );
 	}
 
 	// Deprecated 2.1.0 Access via the WC_Post_Class_Helper helper

@@ -85,7 +85,7 @@ function woocommerce_custom_coupon_columns( $column ) {
 
 		break;
 		case "type" :
-			echo esc_html( $woocommerce->get_helper( 'coupon' )->get_coupon_discount_type( get_post_meta( $post->ID, 'discount_type', true ) ) );
+			echo esc_html( wc_get_coupon_type( get_post_meta( $post->ID, 'discount_type', true ) ) );
 		break;
 		case "amount" :
 			echo esc_html( get_post_meta( $post->ID, 'coupon_amount', true ) );
@@ -148,7 +148,7 @@ function woocommerce_restrict_manage_coupons() {
 	<select name='coupon_type' id='dropdown_shop_coupon_type'>
 		<option value=""><?php _e( 'Show all types', 'woocommerce' ); ?></option>
 		<?php
-			$types = $woocommerce->get_helper( 'coupon' )->get_coupon_discount_types();
+			$types = wc_get_coupon_types();
 
 			foreach ( $types as $name => $type ) {
 				echo '<option value="' . esc_attr( $name ) . '"';
