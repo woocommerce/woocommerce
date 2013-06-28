@@ -708,6 +708,10 @@ class WC_Product {
 		elseif ( $this->get_price() === '' )
 			$purchasable = false;
 
+		// Check the product is published
+		elseif ( $this->post->post_status !== 'publish' && ! current_user_can( 'edit_post', $this->id ) )
+			$purchasable = false;
+
 		return apply_filters( 'woocommerce_is_purchasable', $purchasable, $this );
 	}
 
