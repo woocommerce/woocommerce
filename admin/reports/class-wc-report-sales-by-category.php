@@ -40,8 +40,8 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 				}
 			}
 
-			if ( ! $total )
-				continue;
+			//if ( ! $total )
+			//	continue;
 
 			$legend[] = array(
 				'title' => sprintf( __( '%s sales in %s', 'woocommerce' ), '<strong>' . woocommerce_price( $total ) . '</strong>', $category->name ),
@@ -300,8 +300,8 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 					$category_chart_data[] = array( $time, $interval_total );
 				}
 
-				if ( ! $category_total )
-					continue;
+				//if ( ! $category_total )
+				//	continue;
 
 				$chart_data[ $category->term_id ]['category'] = $category->name;
 				$chart_data[ $category->term_id ]['data'] = $category_chart_data;

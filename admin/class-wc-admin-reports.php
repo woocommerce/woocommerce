@@ -70,8 +70,8 @@ class WC_Admin_Reports {
 	 */
 	public function get_reports() {
 		$reports = array(
-			'sales'     => array(
-				'title'  => __( 'Sales', 'woocommerce' ),
+			'orders'     => array(
+				'title'  => __( 'Orders', 'woocommerce' ),
 				'reports' => array(
 					"sales_by_date"    => array(
 						'title'       => __( 'Sales by date', 'woocommerce' ),

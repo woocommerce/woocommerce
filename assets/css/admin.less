@@ -2587,8 +2587,13 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 		zoom: 1;
 	}
 	.postbox {
-		overflow: hidden;
-		zoom: 1;
+		&:after {
+		    content: ".";
+		    display: block;
+		    height: 0;
+		    clear: both;
+		    visibility: hidden;
+		}
 		h3 {
 			cursor: default !important;
 		}
@@ -2735,7 +2740,7 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 				background: #fff;
 				color: #aaa;
 				padding: 1em 1.5em;
-				border-right: 4px solid #aaa;
+				border-right: 5px solid #aaa;
 				display: block;
 				margin: 0 0 8px 0;
 				strong {

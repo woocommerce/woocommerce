@@ -45,7 +45,8 @@ class WC_Admin_Report {
 			'group_by'     => '',
 			'order_by'     => '',
 			'limit'        => '',
-			'filter_range' => false
+			'filter_range' => false,
+			'nocache'      => false
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -63,21 +64,21 @@ class WC_Admin_Report {
 			if ( isset( $value['distinct'] ) )
 				$distinct = 'DISTINCT';
 
-			if ( $value['function'] ) {
-				if ( $value['type'] == 'meta' )
-					$select[] = "{$value['function']}({$distinct} meta_{$key}.meta_value) as {$value['name']}";
-				elseif( $value['type'] == 'post_data' )
-					$select[] = "{$value['function']}({$distinct} posts.{$key}) as {$value['name']}";
-				elseif( $value['type'] == 'order_item_meta' )
-					$select[] = "{$value['function']}({$distinct} order_item_meta_{$key}.meta_value) as {$value['name']}";
-			} else {
-				if ( $value['type'] == 'meta' )
-					$select[] = "{$distinct} meta_{$key}.meta_value as {$value['name']}";
-				elseif( $value['type'] == 'post_data' )
-					$select[] = "{$distinct} posts.{$key} as {$value['name']}";
-				elseif( $value['type'] == 'order_item_meta' )
-					$select[] = "{$distinct} order_item_meta_{$key}.meta_value as {$value['name']}";
-			}
+			if ( $value['type'] == 'meta' )
+				$get_key = "meta_{$key}.meta_value";
+			elseif( $value['type'] == 'post_data' )
+				$get_key = "posts.{$key}";
+			elseif( $value['type'] == 'order_item_meta' )
+				$get_key = "order_item_meta_{$key}.meta_value";
+			elseif( $value['type'] == 'order_item' )
+				$get_key = "order_items.{$key}";
+
+			if ( $value['function'] )
+				$get = "{$value['function']}({$distinct} {$get_key})";
+			else
+				$get = "{$distinct} {$get_key}";
+
+			$select[] = "{$get} as {$value['name']}";
 		}
 
 		$query['select'] = "SELECT " . implode( ',', $select );
@@ -96,8 +97,12 @@ class WC_Admin_Report {
 
 			} elseif ( $value['type'] == 'order_item_meta' ) {
 
-				$joins["order_items_{$key}"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items_{$key} ON posts.ID = order_items_{$key}.order_id";
-				$joins["order_item_meta_{$key}"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON order_items_{$key}.order_item_id = order_item_meta_{$key}.order_item_id";
+				$joins["order_items"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id";
+				$joins["order_item_meta_{$key}"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON order_items.order_item_id = order_item_meta_{$key}.order_item_id";
+
+			} elseif ( $value['type'] == 'order_item' ) {
+
+				$joins["order_items"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id";
 
 			}
 		}
@@ -106,8 +111,8 @@ class WC_Admin_Report {
 			foreach ( $where_meta as $value ) {
 				if ( isset( $value['type'] ) && $value['type'] == 'order_item_meta' ) {
 
-					$joins["order_items_{$value['meta_key']}"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items_{$value['meta_key']} ON posts.ID = order_items_{$value['meta_key']}.order_id";
-					$joins["order_item_meta_{$value['meta_key']}"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$value['meta_key']} ON order_items_{$value['meta_key']}.order_item_id = order_item_meta_{$value['meta_key']}.order_item_id";
+					$joins["order_items"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id";
+					$joins["order_item_meta_{$value['meta_key']}"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$value['meta_key']} ON order_items.order_item_id = order_item_meta_{$value['meta_key']}.order_item_id";
 
 				} else {
 					// If we have a where clause for meta, join the postmeta table
@@ -139,7 +144,7 @@ class WC_Admin_Report {
 
 			} elseif ( $value['type'] == 'order_item_meta' ) {
 
-				$query['where'] .= " AND order_items_{$key}.order_item_type = '{$value['order_item_type']}'";
+				$query['where'] .= " AND order_items.order_item_type = '{$value['order_item_type']}'";
 				$query['where'] .= " AND order_item_meta_{$key}.meta_key = '{$key}'";
 
 			}
@@ -194,7 +199,7 @@ class WC_Admin_Report {
 		$query      = implode( ' ', $query );
 		$query_hash = md5( $query_type . $query );
 
-		if ( false === ( $result = get_transient( 'wc_report_' . $query_hash ) ) ) {
+		if ( $nocache || ( false === ( $result = get_transient( 'wc_report_' . $query_hash ) ) ) ) {
 			$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
 
 			if ( $filter_range ) {

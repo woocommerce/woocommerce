@@ -18,6 +18,11 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 					'function' => 'SUM',
 					'name'     => 'total_sales'
 				),
+				'_order_shipping' => array(
+					'type'     => 'meta',
+					'function' => 'SUM',
+					'name'     => 'total_shipping'
+				),
 				'ID' => array(
 					'type'     => 'post_data',
 					'function' => 'COUNT',
@@ -26,8 +31,9 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			),
 			'filter_range' => true
 		) );
-		$total_sales 	= $order_totals->total_sales;
-		$total_orders 	= absint( $order_totals->total_orders );
+		$total_sales    = $order_totals->total_sales;
+		$total_shipping = $order_totals->total_shipping;
+		$total_orders   = absint( $order_totals->total_orders );
 		$total_items    = absint( $this->get_order_report_data( array(
 			'data' => array(
 				'_qty' => array(
@@ -40,6 +46,26 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'query_type' => 'get_var',
 			'filter_range' => true
 		) ) );
+		// Get discount amounts in range
+		$total_coupons = $this->get_order_report_data( array(
+			'data' => array(
+				'discount_amount' => array(
+					'type'            => 'order_item_meta',
+					'order_item_type' => 'coupon',
+					'function'        => 'SUM',
+					'name'            => 'discount_amount'
+				)
+			),
+			'where' => array(
+				array(
+					'key'      => 'order_item_type',
+					'value'    => 'coupon',
+					'operator' => '='
+				)
+			),
+			'query_type' => 'get_var',
+			'filter_range' => true
+		) );
 
 		$this->average_sales = $total_sales / ( $this->chart_interval + 1 );
 
@@ -68,6 +94,14 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'title' => sprintf( __( '%s items purchased', 'woocommerce' ), '<strong>' . $total_items . '</strong>' ),
 			'color' => $this->chart_colours['item_count']
 		);
+		$legend[] = array(
+			'title' => sprintf( __( '%s charged for shipping', 'woocommerce' ), '<strong>' . woocommerce_price( $total_shipping ) . '</strong>' ),
+			'color' => $this->chart_colours['shipping_amount']
+		);
+		$legend[] = array(
+			'title' => sprintf( __( '%s worth of coupons used', 'woocommerce' ), '<strong>' . woocommerce_price( $total_coupons ) . '</strong>' ),
+			'color' => $this->chart_colours['coupon_amount']
+		);
 
 		return $legend;
 	}
@@ -90,6 +124,8 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'average'      => '#9bcced',
 			'order_count'  => '#d4d9dc',
 			'item_count'   => '#ecf0f1',
+			'coupon_amount' => '#e67e22',
+			'shipping_amount' => '#1abc9c'
 		);
 
 		$current_range = ! empty( $_GET['range'] ) ? $_GET['range'] : '7day';
@@ -173,11 +209,10 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 					'function' => 'SUM',
 					'name'     => 'total_sales'
 				),
-				'_qty' => array(
-					'type'            => 'order_item_meta',
-					'order_item_type' => 'line_item',
-					'function'        => 'SUM',
-					'name'            => 'order_item_count'
+				'_order_shipping' => array(
+					'type'     => 'meta',
+					'function' => 'SUM',
+					'name'     => 'total_shipping'
 				),
 				'ID' => array(
 					'type'     => 'post_data',
@@ -197,16 +232,81 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'filter_range' => true
 		) );
 
+		// Order items
+		$order_items = $this->get_order_report_data( array(
+			'data' => array(
+				'_qty' => array(
+					'type'            => 'order_item_meta',
+					'order_item_type' => 'line_item',
+					'function'        => 'SUM',
+					'name'            => 'order_item_count'
+				),
+				'post_date' => array(
+					'type'     => 'post_data',
+					'function' => '',
+					'name'     => 'post_date'
+				),
+			),
+			'where' => array(
+				array(
+					'key'      => 'order_item_type',
+					'value'    => 'line_item',
+					'operator' => '='
+				)
+			),
+			'group_by'     => $this->group_by_query,
+			'order_by'     => 'post_date ASC',
+			'query_type'   => 'get_results',
+			'filter_range' => true
+		) );
+
+		// Get discount amounts in range
+		$coupons = $this->get_order_report_data( array(
+			'data' => array(
+				'order_item_name' => array(
+					'type'     => 'order_item',
+					'function' => '',
+					'name'     => 'order_item_name'
+				),
+				'discount_amount' => array(
+					'type'            => 'order_item_meta',
+					'order_item_type' => 'coupon',
+					'function'        => 'SUM',
+					'name'            => 'discount_amount'
+				),
+				'post_date' => array(
+					'type'     => 'post_data',
+					'function' => '',
+					'name'     => 'post_date'
+				),
+			),
+			'where' => array(
+				array(
+					'key'      => 'order_item_type',
+					'value'    => 'coupon',
+					'operator' => '='
+				)
+			),
+			'group_by'     => $this->group_by_query . ', order_item_name',
+			'order_by'     => 'post_date ASC',
+			'query_type'   => 'get_results',
+			'filter_range' => true
+		) );
+
 		// Prepare data for report
 		$order_counts      = $this->prepare_chart_data( $orders, 'post_date', 'total_orders', $this->chart_interval, $this->start_date, $this->chart_groupby );
-		$order_item_counts = $this->prepare_chart_data( $orders, 'post_date', 'order_item_count', $this->chart_interval, $this->start_date, $this->chart_groupby );
+		$order_item_counts = $this->prepare_chart_data( $order_items, 'post_date', 'order_item_count', $this->chart_interval, $this->start_date, $this->chart_groupby );
 		$order_amounts     = $this->prepare_chart_data( $orders, 'post_date', 'total_sales', $this->chart_interval, $this->start_date, $this->chart_groupby );
+		$coupon_amounts    = $this->prepare_chart_data( $coupons, 'post_date', 'discount_amount', $this->chart_interval, $this->start_date, $this->chart_groupby );
+		$shipping_amounts    = $this->prepare_chart_data( $orders, 'post_date', 'total_shipping', $this->chart_interval, $this->start_date, $this->chart_groupby );
 
 		// Encode in json format
 		$chart_data = json_encode( array(
 			'order_counts'      => array_values( $order_counts ),
 			'order_item_counts' => array_values( $order_item_counts ),
-			'order_amounts'     => array_values( $order_amounts )
+			'order_amounts'     => array_values( $order_amounts ),
+			'coupon_amounts'    => array_values( $coupon_amounts ),
+			'shipping_amounts'  => array_values( $shipping_amounts )
 		) );
 		?>
 		<div class="chart-container">
@@ -241,9 +341,29 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							yaxis: 2,
 							color: '<?php echo $this->chart_colours['average']; ?>',
 							points: { show: false },
-							lines: { show: true, lineWidth: 1, fill: false },
+							lines: { show: true, lineWidth: 2, fill: false },
 							shadowSize: 0,
 							hoverable: false
+						},
+						{
+							label: "<?php echo esc_js( __( 'Coupon amount', 'woocommerce' ) ) ?>",
+							data: order_data.coupon_amounts,
+							yaxis: 2,
+							color: '<?php echo $this->chart_colours['coupon_amount']; ?>',
+							points: { show: true, radius: 5, lineWidth: 3, fillColor: '#fff', fill: true },
+							lines: { show: true, lineWidth: 4, fill: false },
+							shadowSize: 0,
+							prepend_tooltip: "<?php echo get_woocommerce_currency_symbol(); ?>"
+						},
+						{
+							label: "<?php echo esc_js( __( 'Shipping amount', 'woocommerce' ) ) ?>",
+							data: order_data.shipping_amounts,
+							yaxis: 2,
+							color: '<?php echo $this->chart_colours['shipping_amount']; ?>',
+							points: { show: true, radius: 5, lineWidth: 3, fillColor: '#fff', fill: true },
+							lines: { show: true, lineWidth: 4, fill: false },
+							shadowSize: 0,
+							prepend_tooltip: "<?php echo get_woocommerce_currency_symbol(); ?>"
 						},
 						{
 							label: "<?php echo esc_js( __( 'Sales amount', 'woocommerce' ) ) ?>",

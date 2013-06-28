@@ -947,6 +947,8 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 	}
 
 	delete_transient( 'woocommerce_processing_order_count' );
+
+	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_report_%') OR `option_name` LIKE ('_transient_timeout_wc_report_%')" );
 }
 
 add_action( 'woocommerce_process_shop_order_meta', 'woocommerce_process_shop_order_meta', 10, 2 );
