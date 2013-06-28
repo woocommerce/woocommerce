@@ -64,6 +64,9 @@ class WC_Product_Cat_List_Walker extends Walker {
 		if ( $args['current_category'] == $cat->term_id )
 			$output .= ' current-cat';
 
+		if ( $args['has_children'] && $args['hierarchical'] )
+			$output .= ' cat-parent';
+
 		if ( $args['current_category_ancestors'] && $args['current_category'] && in_array( $cat->term_id, $args['current_category_ancestors'] ) )
 			$output .= ' current-cat-parent';
 

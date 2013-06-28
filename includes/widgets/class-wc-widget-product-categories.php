@@ -27,7 +27,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
-				'std'   => __( 'Top Rated Products', 'woocommerce' ),
+				'std'   => __( 'Product Categories', 'woocommerce' ),
 				'label' => __( 'Title', 'woocommerce' )
 			),
 			'orderby' => array(
