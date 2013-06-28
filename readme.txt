@@ -172,6 +172,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Add fee total to cart total
 * Fix - Flush rewrite rules after adding or editing attributes
 * Fix - Set session after removing item from cart to prevent issues after removing last item
+* Fix - Sale expiration now works for variations as well
 
 = 2.0.12 - 17/06/2013 =
 * Tweak - Add actions for attribute create/update/delete
