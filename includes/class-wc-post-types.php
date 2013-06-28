@@ -47,7 +47,8 @@ class WC_Post_types {
 	            'show_ui' 				=> false,
 	            'show_in_nav_menus' 	=> false,
 	            'query_var' 			=> is_admin(),
-	            'rewrite'				=> false
+	            'rewrite'				=> false,
+	            'public'                => false
 	        ) )
 	    );
 
@@ -161,6 +162,7 @@ class WC_Post_types {
 	            'show_in_nav_menus' 	=> false,
 	            'query_var' 			=> is_admin(),
 	            'rewrite' 				=> false,
+	            'public'                => false
 	        ) )
 	    );
 
