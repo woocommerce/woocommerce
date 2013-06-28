@@ -235,10 +235,8 @@ class WC_Product_Variable extends WC_Product {
 	public function get_price_html( $price = '' ) {
 
 		// Ensure variation prices are synced with variations
-		if ( $this->min_variation_price === '' || $this->min_variation_regular_price === '' || $this->price === '' ) {
+		if ( $this->min_variation_price === '' || $this->min_variation_regular_price === '' || $this->price === '' )
 			$this->variable_product_sync();
-			$this->price = $this->min_variation_price;
-		}
 
 		// Get the price
 		if ( $this->price > 0 ) {
@@ -499,7 +497,9 @@ class WC_Product_Variable extends WC_Product {
 				}
 			}
 
-			update_post_meta( $this->id, '_price', $this->min_variation_price );
+			$this->price = $this->min_variation_price;
+
+			update_post_meta( $this->id, '_price', $this->price );
 			update_post_meta( $this->id, '_min_variation_price', $this->min_variation_price );
 			update_post_meta( $this->id, '_max_variation_price', $this->max_variation_price );
 			update_post_meta( $this->id, '_min_variation_regular_price', $this->min_variation_regular_price );
