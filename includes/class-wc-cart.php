@@ -944,6 +944,7 @@ class WC_Cart {
 			}
 
 			$this->calculate_totals();
+			$this->set_session();
 		}
 
 		/**
