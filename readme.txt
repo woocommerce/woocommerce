@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.0.13 - x =
+* Tweak - Allow users with edit rights to add draft products to cart (and nobody else)
 * Fix - Extra escaping on layered nav variables to prevent injection
 * Fix - Improved sanitization of option fields
 * Fix - Add fee total to cart total

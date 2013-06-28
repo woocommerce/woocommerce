@@ -320,7 +320,7 @@ class WC_Cart {
 			// Check item stock
 			$result = $this->check_cart_item_stock();
 
-			if (is_wp_error($result))
+			if ( is_wp_error( $result ) )
 				$woocommerce->add_error( $result->get_error_message() );
 		}
 
