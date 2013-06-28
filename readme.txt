@@ -168,6 +168,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.0.13 - x =
 * Fix - Extra escaping on layered nav variables to prevent injection
 * Fix - Improved sanitization of option fields
+* Fix - Add fee total to cart total
 
 = 2.0.12 - 17/06/2013 =
 * Tweak - Add actions for attribute create/update/delete
