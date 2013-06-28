@@ -639,7 +639,7 @@ class WC_Order {
 	 * @return string
 	 */
 	public function get_shipping_method() {
-		return apply_filters( 'woocommerce_order_shipping_method', ucwords( $this->shipping_method_title ) );
+		return apply_filters( 'woocommerce_order_shipping_method', $this->shipping_method_title );
 	}
 
 
