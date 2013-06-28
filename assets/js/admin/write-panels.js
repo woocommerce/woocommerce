@@ -9,7 +9,7 @@ jQuery( function($){
 			if ( !$firstChecked.length )
 				return;
 
-			var pos_first = $list.find(':checkbox').position().top;
+			var pos_first = $list.find('input').position().top;
 			var pos_checked = $firstChecked.position().top;
 
 			$list.closest('.tabs-panel').scrollTop(pos_checked - pos_first + 5);
