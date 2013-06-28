@@ -164,6 +164,8 @@ function woocommerce_attributes() {
 
 				$action_completed = true;
 			}
+
+			flush_rewrite_rules();
 		}
 	}
 
