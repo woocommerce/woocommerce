@@ -92,7 +92,7 @@ msgstr "Wählen Sie eine Datei von Ihrem Rechner:"
 
 #: admin/importers/tax-rates-importer.php:307
 msgid "Maximum size: %s"
-msgstr "Maximale Größe: %s"
+msgstr "Maximale Grösse: %s"
 
 #: admin/importers/tax-rates-importer.php:312
 msgid "OR enter path to file:"
@@ -331,7 +331,7 @@ msgid ""
 msgstr ""
 "Die Seiten zur Steuern-Eingabe wurden gestrafft, um die Pflege zu "
 "erleichtern. Mehrere Steuern für eine einzelne Zuständigkeit sind jetzt viel "
-"leichter anzulegen mit dem neuen Prioritätssystem. Es gibt außerdem eine "
+"leichter anzulegen mit dem neuen Prioritätssystem. Es gibt ausserdem eine "
 "Import-/ Exportfunktion via CSV-Datei."
 
 #: admin/includes/welcome.php:229
@@ -1240,7 +1240,7 @@ msgstr ""
 
 #: admin/post-types/writepanels/variation-admin-html.php:104
 msgid "Dimensions (L&times;W&times;H)"
-msgstr "Größe (Tiefe&times;Breite&times;Höhe)"
+msgstr "Grösse (Tiefe&times;Breite&times;Höhe)"
 
 #: admin/post-types/writepanels/variation-admin-html.php:115
 msgid "Shipping class:"
@@ -1384,7 +1384,7 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:60
 msgid "Exclude sale items"
-msgstr "Produkte mit Aktionspreis ausschließen"
+msgstr "Produkte mit Aktionspreis ausschliessen"
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:60
 msgid ""
@@ -1438,7 +1438,7 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:94
 msgid "Exclude products"
-msgstr "Produkte ausschließen"
+msgstr "Produkte ausschliessen"
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:95
 msgid "Search for a product…"
@@ -1472,7 +1472,7 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:130
 msgid "Exclude categories"
-msgstr "Kategorien ausschließen"
+msgstr "Kategorien ausschliessen"
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:131
 msgid "No categories"
@@ -1604,7 +1604,7 @@ msgstr "Firma"
 #: admin/post-types/writepanels/writepanel-order_data.php:246
 #: admin/woocommerce-admin-users.php:159 admin/woocommerce-admin-users.php:208
 msgid "Address 1"
-msgstr "Straße und Hausnummer"
+msgstr "Strasse und Hausnummer"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:160
 #: admin/post-types/writepanels/writepanel-order_data.php:250
@@ -1943,7 +1943,7 @@ msgstr "Mehr erfahren"
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:74
 #: admin/post-types/writepanels/writepanel-product_data.php:329
 msgid "Close all"
-msgstr "Alle schließen"
+msgstr "Alle schliessen"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:74
 #: admin/post-types/writepanels/writepanel-product_data.php:329
@@ -2119,7 +2119,7 @@ msgid ""
 "product and service that can be purchased."
 msgstr ""
 "Artikel-Nr. bezieht sich auf eine Einheit zur Lagerhaltung, ein einzigartige "
-"Identifkationsgröße für jedes Produkt und jede Dienstleistung, die man "
+"Identifkationsgrösse für jedes Produkt und jede Dienstleistung, die man "
 "kaufen kann."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:109
@@ -2249,7 +2249,7 @@ msgstr "Gewicht in dezimaler Einheit"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:284
 msgid "Dimensions"
-msgstr "Größe"
+msgstr "Grösse"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:290
 msgid "LxWxH in decimal form"
@@ -2793,7 +2793,7 @@ msgid ""
 "<code>mod_xsendfile</code>)."
 msgstr ""
 "Downloads zu erzwingen, belässt die URLs im verborgenen Zustand, doch einige "
-"Webserver stellen große Dateien nur unzuverlässig bereit. Falls unterstützt, "
+"Webserver stellen grosse Dateien nur unzuverlässig bereit. Falls unterstützt, "
 "können <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> verwendet "
 "werden, um damit die Downloads bereitzustellen (der Webserver erfordert dann "
 "das Modul <code>mod_xsendfile</code>)."
@@ -3093,7 +3093,7 @@ msgid ""
 "Enable the <strong>dimension</strong> fields for products (some shipping "
 "methods may require this)"
 msgstr ""
-"Das <strong>Größen</strong>-Feld für Produkte aktivieren (manche "
+"Das <strong>Grössen</strong>-Feld für Produkte aktivieren (manche "
 "Versandmethoden könnten dies erfordern)."
 
 #: admin/settings/settings-init.php:536
@@ -3101,7 +3101,7 @@ msgid ""
 "Show <strong>weight and dimension</strong> values on the <strong>Additional "
 "Information</strong> tab"
 msgstr ""
-"Die Werte für <strong>Gewicht und Größe</strong> unter dem Tab "
+"Die Werte für <strong>Gewicht und Grösse</strong> unter dem Tab "
 "<strong>Zusätzliche Informationen</strong> anzeigen"
 
 #: admin/settings/settings-init.php:544
@@ -3130,12 +3130,12 @@ msgstr "oz"
 
 #: admin/settings/settings-init.php:560
 msgid "Dimensions Unit"
-msgstr "Größeneinheit"
+msgstr "Grösseneinheit"
 
 #: admin/settings/settings-init.php:561
 msgid "This controls what unit you will define lengths in."
 msgstr ""
-"Dies legt fest, in welcher Einheit Sie die Größe bzw. Länge definieren."
+"Dies legt fest, in welcher Einheit Sie die Grösse bzw. Länge definieren."
 
 #: admin/settings/settings-init.php:568
 msgid "cm"
@@ -3256,7 +3256,7 @@ msgid ""
 "changing these settings you may need to <a href=\"%s\">regenerate your "
 "thumbnails</a>."
 msgstr ""
-"Diese Einstellungen wirken sich direkt auf die tatsächlichen Bildgrößen in "
+"Diese Einstellungen wirken sich direkt auf die tatsächlichen Bildgrössen in "
 "Ihrem Produktkatalog aus. Die Anzeige in der Besucheransicht (Frontend) wird "
 "dennoch (auch) von den CSS-Stilen beeinflusst. Nachdem diese Einstellungen "
 "hier geändert wurden, ist es empfehlenswert, die Bilder bzw. Vorschaubilder "
@@ -3269,7 +3269,7 @@ msgstr "Katalogbilder"
 
 #: admin/settings/settings-init.php:672
 msgid "This size is usually used in product listings"
-msgstr "Diese Größe wird üblicherweise in Produktauflistungen verwendet"
+msgstr "Diese Grösse wird üblicherweise in Produktauflistungen verwendet"
 
 #: admin/settings/settings-init.php:685
 msgid "Single Product Image"
@@ -3278,7 +3278,7 @@ msgstr "Einzelnes Produktbild"
 #: admin/settings/settings-init.php:686
 msgid "This is the size used by the main image on the product page."
 msgstr ""
-"Dies ist die Größe, die vom Hauptproduktbild auf der Produktseite verwendet "
+"Dies ist die Grösse, die vom Hauptproduktbild auf der Produktseite verwendet "
 "wird."
 
 #: admin/settings/settings-init.php:699
@@ -3289,7 +3289,7 @@ msgstr "Produktvorschaubilder"
 msgid ""
 "This size is usually used for the gallery of images on the product page."
 msgstr ""
-"Diese Größe wird üblicherweise für die Produktbildergalerie auf der "
+"Diese Grösse wird üblicherweise für die Produktbildergalerie auf der "
 "Produktseite verwendet."
 
 #: admin/settings/settings-init.php:719
@@ -3423,7 +3423,7 @@ msgstr "Nur an die Versandanschrift des Kunden versenden"
 
 #: admin/settings/settings-init.php:874
 msgid "Ship to billing address by default"
-msgstr "Standardmäßig an die Rechnungsanschrift versenden"
+msgstr "Standardmässig an die Rechnungsanschrift versenden"
 
 #: admin/settings/settings-init.php:882
 msgid "Collect shipping address even when not required"
@@ -3552,12 +3552,12 @@ msgid ""
 "default <code>Standard Rate</code>. Tax classes can be assigned to products."
 msgstr ""
 "Listen Sie unten zusätzliche Steuerklassen auf (1 pro Zeile). Dies ist "
-"zusätzlich zum standardmäßigen <code>Regelsatz</code>. Steuerklassen können "
+"zusätzlich zum standardmässigen <code>Regelsatz</code>. Steuerklassen können "
 "Produkten zugewiesen werden."
 
 #: admin/settings/settings-init.php:990
 msgid "Reduced Rate%sZero Rate"
-msgstr "Ermäßigter Steuersatz%sSteuerfrei"
+msgstr "Ermässigter Steuersatz%sSteuerfrei"
 
 #: admin/settings/settings-init.php:994
 msgid "Display prices during cart/checkout:"
@@ -3624,11 +3624,11 @@ msgstr ""
 
 #: admin/settings/settings-init.php:1049
 msgid "Email Footer Text"
-msgstr "E-Mail-Fußzeilentext"
+msgstr "E-Mail-Fusszeilentext"
 
 #: admin/settings/settings-init.php:1050
 msgid "The text to appear in the footer of WooCommerce emails."
-msgstr "Text, der in der Fußzeile von WooCommerce E-Mails erscheint."
+msgstr "Text, der in der Fusszeile von WooCommerce E-Mails erscheint."
 
 #: admin/settings/settings-init.php:1054
 msgid "Powered by WooCommerce"
@@ -3976,10 +3976,10 @@ msgid ""
 "can use these attributes in the shop sidebar using the \"layered nav\" "
 "widgets. Please note: you cannot rename an attribute later on."
 msgstr ""
-"Mit Merkmalen lassen sich zusätzliche Produktdaten wie Größe und Farbe "
+"Mit Merkmalen lassen sich zusätzliche Produktdaten wie Grösse und Farbe "
 "bestimmen. Sie können diese Merkmale in der Shop-Sidebar benutzen, wenn Sie "
 "die \"Ebenen-Navigation (Layered Nav)\" Widgets einsetzen. -- <strong>Info:</"
-"strong> Außerdem werden Merkmale des Feldtyps 'Auswahlfeld' für die "
+"strong> Ausserdem werden Merkmale des Feldtyps 'Auswahlfeld' für die "
 "Produktvariationen (konfigurierbare Produkte) benötigt. -- <strong>Bitte "
 "beachten Sie:</strong> Sie können den Namen eines Merkmals nachträglich "
 "nicht mehr verändern."
@@ -4082,7 +4082,7 @@ msgstr ""
 #: admin/woocommerce-admin-content.php:48
 msgid "Options concerning tax, including international and local tax rates."
 msgstr ""
-"Einstellungen, die Mehrwertsteuer betreffend - einschließlich "
+"Einstellungen, die Mehrwertsteuer betreffend - einschliesslich "
 "internationaler und lokaler Steuersätze."
 
 #: admin/woocommerce-admin-content.php:49
@@ -5257,7 +5257,7 @@ msgstr "WordPress Debug-Modus"
 
 #: admin/woocommerce-admin-status.php:125
 msgid "WP Max Upload Size"
-msgstr "WordPress max. Hochladen-Größe"
+msgstr "WordPress max. Hochladen-Grösse"
 
 #: admin/woocommerce-admin-status.php:129
 msgid "PHP Post Max Size"

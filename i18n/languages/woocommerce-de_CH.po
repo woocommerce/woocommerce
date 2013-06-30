@@ -1820,7 +1820,7 @@ msgstr ""
 
 #: templates/checkout/form-checkout.php:20
 msgid "You must be logged in to checkout."
-msgstr "Bitte loggen Sie sich ein, um die Bestellung abschließen zu können."
+msgstr "Bitte loggen Sie sich ein, um die Bestellung abschliessen zu können."
 
 #: templates/checkout/form-checkout.php:51
 msgid "Your order"
@@ -3715,7 +3715,7 @@ msgid ""
 msgstr ""
 "Bedaure, wir haben nicht genug \"%s\" auf Lager um Ihre Bestellung "
 "vollständig zu erfüllen. Bitte versuchen Sie es erneut in %d Minuten oder "
-"bearbeiten Sie Ihren Warenkorb um die Bestellung abzuschließen. Wir bitten "
+"bearbeiten Sie Ihren Warenkorb um die Bestellung abzuschliessen. Wir bitten "
 "diese Unannehmlichkeiten zu entschuldigen."
 
 #: classes/class-wc-cart.php:533
@@ -4942,7 +4942,7 @@ msgstr "Adresse"
 #: classes/class-wc-countries.php:699
 msgctxt "placeholder"
 msgid "Street address"
-msgstr "Straße"
+msgstr "Strasse"
 
 #: classes/class-wc-countries.php:707
 msgctxt "placeholder"
@@ -5675,7 +5675,7 @@ msgstr ""
 "stellt einen voll PCI konforme, sicheren Weg zur Verfügung, um "
 "Kreditkartendaten zu sammeln und zu ihrem Payment Gateway zu übertragen und "
 "lässt ihnen die Kontrolle über das Design Ihrer Seite. Mijireh unterstützt "
-"eine große Auswahl an Zahlungsschnittstellen: Stripe, Authorize.net, PayPal, "
+"eine grosse Auswahl an Zahlungsschnittstellen: Stripe, Authorize.net, PayPal, "
 "eWay, SagePay, Braintree, PayLeap, und mehr."
 
 #: classes/gateways/mijireh/class-wc-gateway-mijireh.php:167
@@ -5743,7 +5743,7 @@ msgid ""
 "payment."
 msgstr ""
 "Bitte geben Sie Ihre PayPal E-Mailadresse ein; diese wird benötigt, um die "
-"Bezahlung abschließen zu können."
+"Bezahlung abschliessen zu können."
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:147
 msgid "Receiver Email"
@@ -6403,7 +6403,7 @@ msgstr "Ausgewählte Länder"
 
 #: classes/shipping/international-delivery/class-wc-shipping-international-delivery.php:69
 msgid "Excluding selected countries"
-msgstr "Ausgewählte Länder ausschließen"
+msgstr "Ausgewählte Länder ausschliessen"
 
 #: classes/shipping/international-delivery/class-wc-shipping-international-delivery.php:73
 msgid "Countries"
