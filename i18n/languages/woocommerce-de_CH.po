@@ -1696,7 +1696,7 @@ msgstr "Staat / Bezirk"
 
 #: templates/cart/shipping-calculator.php:52 woocommerce-template.php:1384
 msgid "Select a state&hellip;"
-msgstr "Bundesland auswählen&hellip;"
+msgstr "Kanton auswählen&hellip;"
 
 #: templates/cart/shipping-calculator.php:72
 msgid "City"
@@ -1906,7 +1906,7 @@ msgid ""
 "Please contact us if you require assistance or wish to make alternate "
 "arrangements."
 msgstr ""
-"Entschuldigung, aber es sind keine Zahlungsarten für Ihr Bundesland/Region "
+"Entschuldigung, aber es sind keine Zahlungsarten für Ihren Kanton/Region "
 "verfügbar. Bitte kontaktieren Sie uns für weitere Hilfe oder wenn Sie "
 "alternative Absprachen treffen möchten."
 
@@ -4991,7 +4991,7 @@ msgstr "PLZ"
 
 #: classes/class-wc-countries.php:965
 msgid "State"
-msgstr "Bundesland"
+msgstr "Kanton"
 
 #: classes/class-wc-countries.php:970
 msgid "Postcode"
