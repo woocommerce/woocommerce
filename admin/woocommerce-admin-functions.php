@@ -256,7 +256,15 @@ function woocommerce_preview_emails() {
  * @return void
  */
 function woocommerce_prevent_admin_access() {
-	if ( apply_filters( 'woocommerce_prevent_admin_access', get_option( 'woocommerce_lock_down_admin', "yes" ) == "yes" ) && ! is_ajax() && ! ( current_user_can('edit_posts') || current_user_can('manage_woocommerce') ) ) {
+	$prevent_access = false;
+
+	if ( 'yes' == get_option( 'woocommerce_lock_down_admin' ) && ! is_ajax() && ! ( current_user_can( 'edit_posts' ) || current_user_can( 'manage_woocommerce' ) ) ) {
+		$prevent_access = true;
+	}
+
+	$prevent_access = apply_filters( 'woocommerce_prevent_admin_access', $prevent_access );
+
+	if ( $prevent_access ) {
 		wp_safe_redirect( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
 		exit;
 	}
