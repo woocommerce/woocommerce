@@ -24,7 +24,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @param int $depth Depth of category. Used for tab indentation.
 	 * @param array $args Will only append content if style argument value is 'list'.
 	 */
-	function start_lvl( &$output, $depth, $args ) {
+	function start_lvl( &$output, $depth = 0, $args = array() ) {
 		if ( 'list' != $args['style'] )
 			return;
 
@@ -40,7 +40,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @param int $depth Depth of category. Used for tab indentation.
 	 * @param array $args Will only append content if style argument value is 'list'.
 	 */
-	function end_lvl( &$output, $depth, $args ) {
+	function end_lvl( &$output, $depth = 0, $args = array() ) {
 		if ( 'list' != $args['style'] )
 			return;
 
@@ -53,11 +53,12 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @since 2.1.0
 	 *
 	 * @param string $output Passed by reference. Used to append additional content.
-	 * @param object $category Category data object.
+	 * @param object $cat Category data object.
 	 * @param int $depth Depth of category in reference to parents.
 	 * @param array $args
+	 * @param int $current_object_id
 	 */
-	function start_el( &$output, $cat, $depth, $args ) {
+	function start_el( &$output, $cat, $depth, $args, $current_object_id = 0 ) {
 
 		$output .= '<li class="cat-item cat-item-' . $cat->term_id;
 
@@ -79,11 +80,11 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @since 2.1.0
 	 *
 	 * @param string $output Passed by reference. Used to append additional content.
-	 * @param object $page Not used.
+	 * @param object $object Not used.
 	 * @param int $depth Depth of category. Not used.
 	 * @param array $args Only uses 'list' for whether should append to output.
 	 */
-	function end_el( &$output, $cat, $depth, $args ) {
+	function end_el( &$output, $object, $depth = 0, $args = array() ) {
 
 		$output .= "</li>\n";
 

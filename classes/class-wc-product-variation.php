@@ -226,9 +226,10 @@ class WC_Product_Variation extends WC_Product {
 	/**
      * Get variation price HTML. Prices are not inherited from parents.
      *
+	 * @param string $price (default: '')
      * @return string containing the formatted price
      */
-	public function get_price_html() {
+	public function get_price_html( $price = '' ) {
 
 		if ( $this->price !== '' ) {
 			if ( $this->price == $this->sale_price && $this->sale_price < $this->regular_price ) {
