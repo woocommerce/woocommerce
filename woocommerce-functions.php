@@ -1751,10 +1751,11 @@ function woocommerce_get_product_schema(){
 		else if($download_type == 'music'){
 			$schema = "MusicAlbum";
 		}
-		// Not sure if this last bit is needed so I disabled it for now.
-		/*else if($download_type == 'default' || $download_type == ''){
-			$schema = "Product";
-		}*/
+	}
+	else{
+		if($product->is_on_sale()){
+			$schema = "SaleEvent";
+		}
 	}
 	?>
 	<div itemscope itemtype="http://schema.org/<?php echo $schema; ?>" id="product-<?php echo $post->ID; ?>" <?php post_class(); ?>>
