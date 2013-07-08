@@ -113,11 +113,11 @@ class WC_Admin_Reports {
 			'stock'     => array(
 				'title'  => __( 'Stock', 'woocommerce' ),
 				'reports' => array(
-					"overview" => array(
-						'title'       => __( 'Overview', 'woocommerce' ),
+					"stock" => array(
+						'title'       => __( 'Stock', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
-						'callback'    => 'woocommerce_stock_overview'
+						'callback'    => array( $this, 'get_report' )
 					),
 				)
 			)

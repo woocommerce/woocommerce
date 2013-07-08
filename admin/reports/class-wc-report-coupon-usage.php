@@ -75,7 +75,6 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 			'color' => $this->chart_colours['coupon_count' ]
 		);
 
-
 		return $legend;
 	}
 
