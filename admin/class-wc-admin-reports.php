@@ -152,11 +152,11 @@ class WC_Admin_Reports {
 
 		foreach ( $reports as $key => $report_group ) {
 			if ( isset( $reports[ $key ]['charts'] ) )
-					$reports[ $key ]['charts'] = $reports[ $key ]['reports'];
+				$reports[ $key ]['reports'] = $reports[ $key ]['charts'];
 
-			foreach ( $report_group['reports'] as $report_key => $report ) {
-				if ( isset( $reports[ $key ][ $report_key ]['function'] ) )
-					$reports[ $key ][ $report_key ]['callback'] = $reports[ $key ][ $report_key ]['function'];
+			foreach ( $reports[ $key ]['reports'] as $report_key => $report ) {
+				if ( isset( $reports[ $key ]['reports'][ $report_key ]['function'] ) )
+					$reports[ $key ]['reports'][ $report_key ]['callback'] = $reports[ $key ]['reports'][ $report_key ]['function'];
 			}
 		}
 
