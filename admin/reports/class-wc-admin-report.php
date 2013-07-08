@@ -46,7 +46,8 @@ class WC_Admin_Report {
 			'order_by'     => '',
 			'limit'        => '',
 			'filter_range' => false,
-			'nocache'      => false
+			'nocache'      => false,
+			'debug'        => false
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -155,17 +156,20 @@ class WC_Admin_Report {
 				if ( strtolower( $value['operator'] ) == 'in' ) {
 					if ( is_array( $value['meta_value'] ) )
 						$value['meta_value'] = implode( "','", $value['meta_value'] );
-					$where_value = "IN ('{$value['meta_value']}')";
+					if ( ! empty( $value['meta_value'] ) )
+						$where_value = "IN ('{$value['meta_value']}')";
 				} else {
 					$where_value = "{$value['operator']} '{$value['meta_value']}'";
 				}
 
-				if ( isset( $value['type'] ) && $value['type'] == 'order_item_meta' ) {
-					$query['where'] .= " AND order_item_meta_{$value['meta_key']}.meta_key   = '{$value['meta_key']}'";
-					$query['where'] .= " AND order_item_meta_{$value['meta_key']}.meta_value {$where_value}";
-				} else {
-					$query['where'] .= " AND meta_{$value['meta_key']}.meta_key   = '{$value['meta_key']}'";
-					$query['where'] .= " AND meta_{$value['meta_key']}.meta_value {$where_value}";
+				if ( ! empty( $where_value ) ) {
+					if ( isset( $value['type'] ) && $value['type'] == 'order_item_meta' ) {
+						$query['where'] .= " AND order_item_meta_{$value['meta_key']}.meta_key   = '{$value['meta_key']}'";
+						$query['where'] .= " AND order_item_meta_{$value['meta_key']}.meta_value {$where_value}";
+					} else {
+						$query['where'] .= " AND meta_{$value['meta_key']}.meta_key   = '{$value['meta_key']}'";
+						$query['where'] .= " AND meta_{$value['meta_key']}.meta_value {$where_value}";
+					}
 				}
 			}
 		}
@@ -175,12 +179,14 @@ class WC_Admin_Report {
 				if ( strtolower( $value['operator'] ) == 'in' ) {
 					if ( is_array( $value['value'] ) )
 						$value['value'] = implode( "','", $value['value'] );
-					$where_value = "IN ('{$value['value']}')";
+					if ( ! empty( $value['value'] ) )
+						$where_value = "IN ('{$value['value']}')";
 				} else {
 					$where_value = "{$value['operator']} '{$value['value']}'";
 				}
 
-				$query['where'] .= " AND {$value['key']} {$where_value}";
+				if ( ! empty( $where_value ) )
+					$query['where'] .= " AND {$value['key']} {$where_value}";
 			}
 		}
 
@@ -199,7 +205,10 @@ class WC_Admin_Report {
 		$query      = implode( ' ', $query );
 		$query_hash = md5( $query_type . $query );
 
-		if ( $nocache || ( false === ( $result = get_transient( 'wc_report_' . $query_hash ) ) ) ) {
+		if ( $debug )
+			var_dump( $query );
+
+		if ( $debug || $nocache || ( false === ( $result = get_transient( 'wc_report_' . $query_hash ) ) ) ) {
 			$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
 
 			if ( $filter_range ) {

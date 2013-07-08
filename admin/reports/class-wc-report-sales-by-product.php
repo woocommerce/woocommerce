@@ -278,6 +278,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 							<td class="sparkline">' . $this->sales_sparkline( $product->product_id, 14, 'count' ) . '</td>
 						</tr>';
 					}
+				} else {
+					echo '<tr><td colspan="3">' . __( 'No products found in range', 'woocommerce' ) . '</td></tr>';
 				}
 				?>
 			</table>
@@ -316,6 +318,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 							<td class="sparkline">' . $this->sales_sparkline( $product->product_id, 14, 'sales' ) . '</td>
 						</tr>';
 					}
+				} else {
+					echo '<tr><td colspan="3">' . __( 'No products found in range', 'woocommerce' ) . '</td></tr>';
 				}
 				?>
 			</table>
