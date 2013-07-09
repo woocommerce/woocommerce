@@ -434,7 +434,7 @@ function woocommerce_product_data_box() {
 															$values = array();
 															foreach ( $post_terms as $term )
 																$values[] = $term->name;
-															echo implode( ' | ', $values );
+															echo htmlspecialchars(implode( ' | ', $values ));
 														}
 
 													?>" placeholder="<?php _e( 'Pipe (|) separate terms', 'woocommerce' ); ?>" />
