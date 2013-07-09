@@ -88,7 +88,6 @@ add_action( 'admin_menu', 'woocommerce_admin_menu', 9 );
  * @return void
  */
 function woocommerce_admin_menu_after() {
-	$customers_page = add_submenu_page( 'woocommerce', __( 'Customers', 'woocommerce' ),  __( 'Customers', 'woocommerce' ) , 'manage_woocommerce', 'woocommerce_customers', 'woocommerce_customers_page' );
 	$settings_page = add_submenu_page( 'woocommerce', __( 'WooCommerce Settings', 'woocommerce' ),  __( 'Settings', 'woocommerce' ) , 'manage_woocommerce', 'woocommerce_settings', 'woocommerce_settings_page');
 	$status_page = add_submenu_page( 'woocommerce', __( 'WooCommerce Status', 'woocommerce' ),  __( 'System Status', 'woocommerce' ) , 'manage_woocommerce', 'woocommerce_status', 'woocommerce_status_page');
 
@@ -329,38 +328,6 @@ add_action('admin_init', 'woocommerce_admin_init');
 function woocommerce_settings_page() {
 	include_once( 'woocommerce-admin-settings.php' );
 	woocommerce_settings();
-}
-
-/**
- * Include and display the customers page.
- *
- * @access public
- * @return void
- */
-function woocommerce_customers_page() {
-	include_once( 'woocommerce-admin-customers.php' );
-
-	$WC_Admin_Customers = new WC_Admin_Customers();
-    $WC_Admin_Customers->prepare_items();
-    ?>
-    <div class="wrap">
-        <div id="icon-woocommerce" class="icon32 icon32-woocommerce-users"><br/></div>
-        <h2><?php _e( 'Customers', 'wc_software' ); ?></h2>
-
-        <?php
-	        if ( ! empty( $_GET['link_orders'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'link_orders' ) ) {
-				$linked = woocommerce_update_new_customer_past_orders( absint( $_GET['link_orders'] ) );
-
-				echo '<div class="updated"><p>' . sprintf( _n( '%s previous order linked', '%s previous orders linked', $linked, 'woocommerce' ), $linked ) . '</p></div>';
-			}
-		?>
-
-        <form method="post" id="woocommerce_customers">
-			<?php $WC_Admin_Customers->search_box( __( 'Search customers', 'woocommerce' ), 'customer_search' ); ?>
- 			<?php $WC_Admin_Customers->display() ?>
-		</form>
-    </div>
-    <?php
 }
 
 /**

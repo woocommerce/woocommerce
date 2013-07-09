@@ -6,16 +6,9 @@ if ( ! class_exists( 'WP_List_Table' ) )
 	require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 
 /**
- * Admin customers table
- *
- * Lists customers.
- *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin/Users
- * @version     2.0.1
+ * WC_Report_Customer_List class
  */
-class WC_Admin_Customers extends WP_List_Table {
+class WC_Report_Customer_List extends WP_List_Table {
 
     /**
      * __construct function.
@@ -31,6 +24,36 @@ class WC_Admin_Customers extends WP_List_Table {
             'ajax'      => false
         ) );
     }
+
+    /**
+     * No items found text
+     */
+    public function no_items() {
+        _e( 'No customers found.', 'woocommerce' );
+    }
+
+	/**
+	 * Output the report
+	 */
+	public function output_report() {
+		$this->prepare_items();
+
+		echo '<div id="poststuff" class="woocommerce-reports-wide">';
+
+        if ( ! empty( $_GET['link_orders'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'link_orders' ) ) {
+			$linked = woocommerce_update_new_customer_past_orders( absint( $_GET['link_orders'] ) );
+
+			echo '<div class="updated"><p>' . sprintf( _n( '%s previous order linked', '%s previous orders linked', $linked, 'woocommerce' ), $linked ) . '</p></div>';
+		}
+
+        echo '<form method="post" id="woocommerce_customers">';
+
+		$this->search_box( __( 'Search customers', 'woocommerce' ), 'customer_search' );
+ 		$this->display();
+
+		echo '</form>';
+		echo '</div>';
+	}
 
     /**
      * column_default function.
@@ -66,18 +89,13 @@ class WC_Admin_Customers extends WP_List_Table {
 
 				$value .= $country;
 
-				return $value;
+				if ( $value )
+					return $value;
+				else
+        			return '-';
         	break;
         	case 'email' :
         		return '<a href="mailto:' . $user->user_email . '">' . $user->user_email . '</a>';
-			case 'paying' :
-				$paying_customer = get_user_meta( $user->ID, 'paying_customer', true );
-
-				if ( $paying_customer )
-					return '<img src="' . $woocommerce->plugin_url() . '/assets/images/success@2x.png" alt="yes" width="16px" />';
-				else
-					return ' - ';
-			break;
 			case 'spent' :
 				if ( ! $spent = get_user_meta( $user->ID, '_money_spent', true ) ) {
 
@@ -148,7 +166,7 @@ class WC_Admin_Customers extends WP_List_Table {
 					$order = new WC_Order( $order_ids[0] );
 
 					echo '<a href="' . admin_url( 'post.php?post=' . $order->id . '&action=edit' ) . '">' . $order->get_order_number() . '</a> &ndash; ' . date_i18n( get_option( 'date_format', strtotime( $order->order_date ) ) );
-				}
+				} else echo '-';
 
 			break;
 			case 'user_actions' :
@@ -218,11 +236,10 @@ class WC_Admin_Customers extends WP_List_Table {
         $columns = array(
 			'customer_name'   => __( 'Name (Last, First)', 'woocommerce' ),
 			'username'        => __( 'Username', 'woocommerce' ),
-			'email'           => __( 'Email address', 'woocommerce' ),
+			'email'           => __( 'Email', 'woocommerce' ),
 			'location'        => __( 'Location', 'woocommerce' ),
-			'paying'          => __( 'Paying customer?', 'woocommerce' ),
-			'orders'          => __( 'Complete orders', 'woocommerce' ),
-			'spent'           => __( 'Money spent', 'woocommerce' ),
+			'orders'          => __( 'Orders', 'woocommerce' ),
+			'spent'           => __( 'Spent', 'woocommerce' ),
 			'last_order'      => __( 'Last order', 'woocommerce' ),
 			'user_actions'    => __( 'Actions', 'woocommerce' )
         );
@@ -272,8 +289,22 @@ class WC_Admin_Customers extends WP_List_Table {
         /**
          * Get users
          */
+        $admin_users = new WP_User_Query(
+			array(
+				'role'   => 'administrator',
+				'fields' => 'ID'
+			)
+		);
+
+		$manager_users = new WP_User_Query(
+			array(
+				'role'   => 'shop_manager',
+				'fields' => 'ID'
+			)
+		);
+
 		$query = new WP_User_Query( array(
-			'role'    => 'customer',
+			//'exclude' => array_merge( $admin_users->get_results(), $manager_users->get_results() ),
 			'number'  => $per_page,
 			'offset'  => ( $current_page - 1 ) * $per_page
 		) );
