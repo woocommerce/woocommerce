@@ -102,7 +102,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 		switch ( $current_range ) {
 			case 'custom' :
 				$this->start_date = strtotime( sanitize_text_field( $_GET['start_date'] ) );
-				$this->end_date   = strtotime( 'midnight', strtotime( sanitize_text_field( $_GET['end_date'] ) ) );
+				$this->end_date   = strtotime( '12am + 1 day', strtotime( sanitize_text_field( $_GET['end_date'] ) ) );
 
 				if ( ! $this->end_date )
 					$this->end_date = current_time('timestamp');
@@ -121,7 +121,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			break;
 			case 'year' :
 				$this->start_date = strtotime( 'first day of january', current_time('timestamp') );
-				$this->end_date   = strtotime( 'midnight', current_time( 'timestamp' ) );
+				$this->end_date   = strtotime( '12am + 1 day', current_time( 'timestamp' ) );
 				$this->chart_groupby         = 'month';
 			break;
 			case 'last_month' :
@@ -131,13 +131,13 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			break;
 			case 'month' :
 				$this->start_date = strtotime( 'first day of this month', current_time('timestamp') );
-				$this->end_date   = strtotime( 'midnight', current_time( 'timestamp' ) );
+				$this->end_date   = strtotime( '12am + 1 day', current_time( 'timestamp' ) );
 				$this->chart_groupby         = 'day';
 			break;
 			case '7day' :
 			default :
-				$this->start_date = strtotime( 'midnight -6 days', current_time( 'timestamp' ) );
-				$this->end_date   = strtotime( 'midnight', current_time( 'timestamp' ) );
+				$this->start_date = strtotime( '-6 days', current_time( 'timestamp' ) );
+				$this->end_date   = strtotime( '12am + 1 day', current_time( 'timestamp' ) );
 				$this->chart_groupby         = 'day';
 			break;
 		}
@@ -460,9 +460,6 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 							legend: {
 								show: false
 							},
-					   		series: {
-					   			stack: true
-					   		},
 						    grid: {
 						        color: '#aaa',
 						        borderColor: 'transparent',

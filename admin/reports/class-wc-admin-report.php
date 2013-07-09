@@ -269,7 +269,10 @@ class WC_Admin_Report {
 			if ( ! isset( $prepared_data[ $time ] ) )
 				continue;
 
-			$prepared_data[ $time ][1] += $d->$data_key;
+			if ( $data_key )
+				$prepared_data[ $time ][1] += $d->$data_key;
+			else
+				$prepared_data[ $time ][1] ++;
 		}
 
 		return $prepared_data;
