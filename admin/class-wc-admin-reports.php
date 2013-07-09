@@ -113,8 +113,20 @@ class WC_Admin_Reports {
 			'stock'     => array(
 				'title'  => __( 'Stock', 'woocommerce' ),
 				'reports' => array(
-					"stock" => array(
-						'title'       => __( 'Stock', 'woocommerce' ),
+					"low_in_stock" => array(
+						'title'       => __( 'Low in stock', 'woocommerce' ),
+						'description' => '',
+						'hide_title'  => true,
+						'callback'    => array( $this, 'get_report' )
+					),
+					"out_of_stock" => array(
+						'title'       => __( 'Out of stock', 'woocommerce' ),
+						'description' => '',
+						'hide_title'  => true,
+						'callback'    => array( $this, 'get_report' )
+					),
+					"most_stocked" => array(
+						'title'       => __( 'Most Stocked', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
 						'callback'    => array( $this, 'get_report' )

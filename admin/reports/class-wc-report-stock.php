@@ -15,7 +15,7 @@ class WC_Report_Stock extends WP_List_Table {
      *
      * @access public
      */
-    function __construct(){
+    public function __construct(){
         parent::__construct( array(
             'singular'  => __( 'Stock', 'woocommerce' ),
             'plural'    => __( 'Stock', 'woocommerce' ),
@@ -24,9 +24,19 @@ class WC_Report_Stock extends WP_List_Table {
     }
 
     /**
+     * No items found text
+     */
+    public function no_items() {
+        _e( 'No products found.', 'woocommerce' );
+    }
+
+    /**
      * Don't need this
      */
-    function display_tablenav() {}
+    public function display_tablenav( $position ) {
+        if ( $position != 'top' )
+            parent::display_tablenav( $position );
+    }
 
 	/**
 	 * Output the report
@@ -42,25 +52,78 @@ class WC_Report_Stock extends WP_List_Table {
      * column_default function.
      *
      * @access public
-     * @param mixed $user
+     * @param mixed $item
      * @param mixed $column_name
      */
-    function column_default( $product_id, $column_name ) {
+    function column_default( $item, $column_name ) {
     	global $woocommerce, $wpdb, $product;
 
-    	if ( ! $product || $product->id !== $product_id )
-    		$product = get_product( $product_id );
+    	if ( ! $product || $product->id !== $item->id )
+    		$product = get_product( $item->id );
 
         switch( $column_name ) {
-        	case 'stock_status' :
-
-        	break;
         	case 'product' :
+                if ( $sku = $product->get_sku() )
+                    echo $sku . ' - ';
+
         		echo $product->get_title();
+
+                // Get variation data
+                if ( $product->is_type( 'variation' ) ) {
+                    $list_attributes = array();
+                    $attributes = $product->get_variation_attributes();
+
+                    foreach ( $attributes as $name => $attribute ) {
+                        $list_attributes[] = $woocommerce->get_helper( 'attribute' )->attribute_label( str_replace( 'attribute_', '', $name ) ) . ': <strong>' . $attribute . '</strong>';
+                    }
+
+                   echo '<div class="description">' . implode( ', ', $list_attributes ) . '</div>';
+                }
         	break;
+            case 'parent' :
+                if ( $item->parent )
+                    echo get_the_title( $item->parent );
+                else
+                    echo '-';
+            break;
+            case 'stock_status' :
+                if ( $product->is_in_stock() ) {
+                    echo '<mark class="instock">' . __( 'In stock', 'woocommerce' ) . '</mark>';
+                } else {
+                    echo '<mark class="outofstock">' . __( 'Out of stock', 'woocommerce' ) . '</mark>';
+                }
+            break;
         	case 'stock_level' :
         		echo $product->get_stock_quantity();
         	break;
+            case 'wc_actions' :
+                ?><p>
+                    <?php
+                        $actions = array();
+                        $action_id = $product->is_type( 'variation' ) ? $item->parent : $item->id;
+
+                        $actions['edit'] = array(
+                            'url'       => admin_url( 'post.php?post=' . $action_id . '&action=edit' ),
+                            'name'      => __( 'Edit', 'woocommerce' ),
+                            'action'    => "edit"
+                        );
+
+                        if ( $product->is_visible() )
+                            $actions['view'] = array(
+                                'url'       => get_permalink( $action_id ),
+                                'name'      => __( 'View', 'woocommerce' ),
+                                'action'    => "view"
+                            );
+
+                        $actions = apply_filters( 'woocommerce_admin_stock_report_product_actions', $actions, $product );
+
+                        foreach ( $actions as $action ) {
+                            $image = ( isset( $action['image_url'] ) ) ? $action['image_url'] : $woocommerce->plugin_url() . '/assets/images/icons/' . $action['action'] . '.png';
+                            printf( '<a class="button tips" href="%s" data-tip="%s"><img src="%s" alt="%s" width="14" /></a>', esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $image ), esc_attr( $action['name'] ) );
+                        }
+                    ?>
+                </p><?php
+            break;
         }
 	}
 
@@ -71,9 +134,11 @@ class WC_Report_Stock extends WP_List_Table {
      */
     function get_columns(){
         $columns = array(
-			'stock_status' => __( 'Stock Status', 'woocommerce' ),
-			'product'      => __( 'Product', 'woocommerce' ),
-			'stock_level'  => __( 'Units in stock', 'woocommerce' ),
+            'product'      => __( 'Product', 'woocommerce' ),
+            'parent'       => __( 'Parent', 'woocommerce' ),
+            'stock_level'  => __( 'Units in stock', 'woocommerce' ),
+            'stock_status' => __( 'Stock status', 'woocommerce' ),
+            'wc_actions'   => __( 'Actions', 'woocommerce' ),
         );
 
         return $columns;
@@ -85,56 +150,19 @@ class WC_Report_Stock extends WP_List_Table {
      * @access public
      */
     public function prepare_items() {
-        global $wpdb;
-
-		$current_page = 1;
-		$per_page     = 999999999999;
-
-        /**
-         * Init column headers
-         */
         $this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns() );
+        $current_page          = absint( $this->get_pagenum() );
+        $per_page              = 20;
+
+        $this->get_items( $current_page, $per_page );
 
         /**
-         * Get Products
+         * Pagination
          */
-        // Low/No stock lists
-		$lowstockamount = get_option('woocommerce_notify_low_stock_amount');
-		if (!is_numeric($lowstockamount)) $lowstockamount = 1;
-
-		$nostockamount = get_option('woocommerce_notify_no_stock_amount');
-		if (!is_numeric($nostockamount)) $nostockamount = 0;
-
-		// Get low in stock simple/downloadable/virtual products. Grouped don't have stock. Variations need a separate query.
-		$args = array(
-			'post_type'			=> 'product',
-			'post_status' 		=> 'publish',
-			'posts_per_page' 	=> -1,
-			'meta_query' => array(
-				array(
-					'key' 		=> '_manage_stock',
-					'value' 	=> 'yes'
-				),
-				array(
-					'key' 		=> '_stock',
-					'value' 	=> $lowstockamount,
-					'compare' 	=> '<=',
-					'type' 		=> 'NUMERIC'
-				)
-			),
-			'tax_query' => array(
-				array(
-					'taxonomy' 	=> 'product_type',
-					'field' 	=> 'name',
-					'terms' 	=> array('simple'),
-					'operator' 	=> 'IN'
-				)
-			),
-			'fields' => 'id=>parent'
-		);
-
-		$low_stock_products = array_flip( (array) get_posts($args) );
-
-		$this->items = $low_stock_products;
+        $this->set_pagination_args( array(
+            'total_items' => $this->max_items,
+            'per_page'    => $per_page,
+            'total_pages' => ceil( $this->max_items / $per_page )
+        ) );
     }
 }
