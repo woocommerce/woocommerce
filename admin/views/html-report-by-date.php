@@ -33,27 +33,33 @@
 				</li>
 			</ul>
 		</h3>
-		<div class="inside chart-with-sidebar">
-			<div class="chart-sidebar">
-				<ul class="chart-legend">
-					<?php foreach ( $this->get_chart_legend() as $legend ) : ?>
-						<li style="border-color: <?php echo $legend['color']; ?>">
-							<?php echo $legend['title']; ?>
-						</li>
-					<?php endforeach; ?>
-				</ul>
-				<ul class="chart-widgets">
-					<?php foreach ( $this->get_chart_widgets() as $widget ) : ?>
-						<li class="chart-widget">
-							<?php if ( $widget['title'] ) : ?><h4><?php echo $widget['title']; ?></h4><?php endif; ?>
-							<?php call_user_func( $widget['callback'] ); ?>
-						</li>
-					<?php endforeach; ?>
-				</ul>
+		<?php if ( empty( $hide_sidebar ) ) : ?>
+			<div class="inside chart-with-sidebar">
+				<div class="chart-sidebar">
+					<ul class="chart-legend">
+						<?php foreach ( $this->get_chart_legend() as $legend ) : ?>
+							<li style="border-color: <?php echo $legend['color']; ?>">
+								<?php echo $legend['title']; ?>
+							</li>
+						<?php endforeach; ?>
+					</ul>
+					<ul class="chart-widgets">
+						<?php foreach ( $this->get_chart_widgets() as $widget ) : ?>
+							<li class="chart-widget">
+								<?php if ( $widget['title'] ) : ?><h4><?php echo $widget['title']; ?></h4><?php endif; ?>
+								<?php call_user_func( $widget['callback'] ); ?>
+							</li>
+						<?php endforeach; ?>
+					</ul>
+				</div>
+				<div class="main">
+					<?php $this->get_main_chart(); ?>
+				</div>
 			</div>
-			<div class="main">
+		<?php else : ?>
+			<div class="inside">
 				<?php $this->get_main_chart(); ?>
 			</div>
-		</div>
+		<?php endif; ?>
 	</div>
 </div>

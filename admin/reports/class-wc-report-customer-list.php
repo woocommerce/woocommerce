@@ -304,7 +304,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 		);
 
 		$query = new WP_User_Query( array(
-			//'exclude' => array_merge( $admin_users->get_results(), $manager_users->get_results() ),
+			'exclude' => array_merge( $admin_users->get_results(), $manager_users->get_results() ),
 			'number'  => $per_page,
 			'offset'  => ( $current_page - 1 ) * $per_page
 		) );
