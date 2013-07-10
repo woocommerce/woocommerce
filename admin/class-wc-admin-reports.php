@@ -144,7 +144,7 @@ class WC_Admin_Reports {
 
 		if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) {
 			$reports['taxes'] = array(
-				'title'  => __( 'Tax', 'woocommerce' ),
+				'title'  => __( 'Taxes', 'woocommerce' ),
 				'reports' => array(
 					"taxes_by_code" => array(
 						'title'       => __( 'Taxes by code', 'woocommerce' ),
