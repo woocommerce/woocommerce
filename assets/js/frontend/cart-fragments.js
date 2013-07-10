@@ -48,7 +48,8 @@ jQuery(document).ready(function($) {
 			}
 
 		} catch(err) {
-			$.ajax( $fragment_refresh );
+			if ( $.cookie( "woocommerce_items_in_cart" ) > 0 )
+				$.ajax( $fragment_refresh );
 		}
 
 	} else {
