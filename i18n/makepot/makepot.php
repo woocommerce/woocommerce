@@ -173,33 +173,33 @@ class WC_Makepot {
 	 * @param int $lines (default: 30)
 	 * @return void
 	 */
-	public function get_first_lines($filename, $lines = 30) {
-        $extf = fopen($filename, 'r');
-        if (!$extf) return false;
-        $first_lines = '';
-        foreach(range(1, $lines) as $x) {
-            $line = fgets($extf);
-            if (feof($extf)) break;
-            if (false === $line) {
-                return false;
-            }
-            $first_lines .= $line;
-        }
-        return $first_lines;
-    }
+	public static function get_first_lines($filename, $lines = 30) {
+		$extf = fopen($filename, 'r');
+		if (!$extf) return false;
+		$first_lines = '';
+		foreach(range(1, $lines) as $x) {
+			$line = fgets($extf);
+			if (feof($extf)) break;
+			if (false === $line) {
+				return false;
+			}
+			$first_lines .= $line;
+		}
+		return $first_lines;
+	}
 
-    /**
-     * get_addon_header function.
-     *
-     * @access public
-     * @param mixed $header
-     * @param mixed &$source
-     * @return void
-     */
-    public function get_addon_header($header, &$source) {
-        if (preg_match('|'.$header.':(.*)$|mi', $source, $matches))
-            return trim($matches[1]);
-        else
-            return false;
-    }
+	/**
+	 * get_addon_header function.
+	 *
+	 * @access public
+	 * @param mixed $header
+	 * @param mixed &$source
+	 * @return void
+	 */
+	public static function get_addon_header($header, &$source) {
+		if (preg_match('|'.$header.':(.*)$|mi', $source, $matches))
+			return trim($matches[1]);
+		else
+			return false;
+	}
 }
