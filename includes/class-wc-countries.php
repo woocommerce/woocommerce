@@ -1039,6 +1039,10 @@ class WC_Countries {
 	 * @return void
 	 */
 	public function get_address_fields( $country, $type = 'billing_' ) {
+
+		if (!$country)
+            $country = $this->get_base_country();
+		
 		$fields     = $this->get_default_address_fields();
 		$locale		= $this->get_country_locale();
 
