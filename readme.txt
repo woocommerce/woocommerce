@@ -202,6 +202,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Refactor - Removed certain my-account pages. Endpoints are used instead.
 * Localization - Portugese locale by jpBenfica.
 * Localization - Swedish translation by Björn Sennbrink.
+* Localization - Japanese translation by Shohei Tanaka.
+* Localization - Danish translation by Mikael Lyngvig.
+* Localization - Spanish translation by Luis Giménez.
 * Localization - Spanish states.
 * Localization - French, Spanish, Romanian, Danish, Korean, Czech, Arabic updates.
 
