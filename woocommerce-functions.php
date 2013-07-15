@@ -1131,10 +1131,10 @@ function woocommerce_download_product() {
 
 		@session_write_close();
 		@ini_set( 'zlib.output_compression', 'Off' );
-		@ob_end_clean();
+		//@ob_end_clean();
 
-		if ( ob_get_level() )
-			@ob_end_clean(); // Zip corruption fix
+		//if ( ob_get_level() )
+		//	@ob_end_clean(); // Zip corruption fix
 
 		if ( $is_IE && is_ssl() ) {
 			// IE bug prevents download via SSL when Cache Control and Pragma no-cache headers set.
