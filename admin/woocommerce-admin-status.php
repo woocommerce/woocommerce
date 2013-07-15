@@ -407,6 +407,34 @@ function woocommerce_status_report() {
             </tr>
 		</tbody>
 
+        	<thead>
+			<tr>
+				<th colspan="2"><?php _e( 'Theme', 'woocommerce' ); ?></th>
+			</tr>
+		</thead>
+
+		<tbody>
+            <tr>
+                <td><?php _e( 'Theme Name', 'woocommerce' ); ?>:</td>
+                <td><?php
+					$active_theme = wp_get_theme();
+					echo $active_theme->Name;
+                ?></td>
+            </tr>
+            <tr>
+                <td><?php _e( 'Theme Version', 'woocommerce' ); ?>:</td>
+                <td><?php
+					echo $active_theme->Version;
+                ?></td>
+            </tr>
+            <tr>
+                <td><?php _e( 'Author URL', 'woocommerce' ); ?>:</td>
+                <td><?php
+					echo $active_theme->{'Author URI'};
+                ?></td>
+            </tr>
+		</tbody>
+
 		<thead>
 			<tr>
 				<th colspan="2"><?php _e( 'Templates', 'woocommerce' ); ?></th>
