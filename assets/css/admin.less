@@ -1,3 +1,24 @@
+/* =Mixins
+-------------------------------------------------------------- */
+@import "mixins";
+
+
+/* =Custom Font
+-------------------------------------------------------------- */
+@font-face {
+	font-family: 'WooCommerce';
+	src:url('../fonts/WooCommerce.eot');
+	src:url('../fonts/WooCommerce.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/WooCommerce.woff') format('woff'),
+		url('../fonts/WooCommerce.ttf') format('truetype'),
+		url('../fonts/WooCommerce.svg#WooCommerce') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+
+/* =Styles
+-------------------------------------------------------------- */
 .woocommerce-message {
 	position: relative;
 	z-index: 100;
@@ -1912,48 +1933,51 @@ img.help_tip {
 
 		&.general_options, &.tax_options, &.inventory_options, &.shipping_options, &.linked_product_options, &.attribute_options, &.variation_options, &.advanced_options {
 			a {
-				padding: 5px 5px 5px 28px;
-				background: #f1f1f1 url(../images/icons/wc-tab-icons.png) no-repeat 5px 5px;
+				padding-left:10px;
+				&:before {
+					.icon;
+					.iconbefore;
+				}
 			}
 		}
 		&.general_options {
-			a {
-				background-position: 5px 5px;
+			a:before {
+				content: "\e006";
 			}
 		}
 		&.tax_options {
-			a {
-				background-position: 5px -59px;
+			a:before {
+
 			}
 		}
 		&.inventory_options {
-			a {
-				background-position: 5px -123px;
+			a:before {
+				content: "\e02c";
 			}
 		}
 		&.shipping_options {
-			a {
-				background-position: 5px -635px;
+			a:before {
+				content: "\e01a";
 			}
 		}
 		&.linked_product_options {
-			a {
-				background-position: 5px -571px;
+			a:before {
+				content: "\e00d";
 			}
 		}
 		&.attribute_options {
-			a {
-				background-position: 5px -251px;
+			a:before {
+				content: "\e02b";
 			}
 		}
 		&.advanced_options {
-			a {
-				background-position: 5px -698px;
+			a:before {
+				content: "\e01c";
 			}
 		}
 		&.variation_options {
-			a {
-				background-position: 5px -443px;
+			a:before {
+				content: "\e003";
 			}
 		}
 
@@ -1964,7 +1988,6 @@ img.help_tip {
 				background-color: #f8f8f8;
 				color: #555;
 				margin: 0 -1px 0 0;
-				width: 113px;
 			}
 		}
 	}
@@ -2776,6 +2799,7 @@ table.bar_chart {
 }
 
 // HiDPI optimisation
+/*
 @media
 (-webkit-min-device-pixel-ratio: 2),
 (min-resolution: 192dpi) {
@@ -2856,5 +2880,5 @@ table.bar_chart {
 		background-image: url(../images/icons/reload@2x.png);
 		background-size: 12px 12px;
 	}
-}
+}*/
 @import 'chosen.less';
