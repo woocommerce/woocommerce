@@ -18,7 +18,7 @@ function woocommerce_status() {
 	global $woocommerce, $wpdb;
 
 	$current_tab = ! empty( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 'status';
-    ?>
+	?>
 	<div class="wrap woocommerce">
 		<div class="icon32 icon32-woocommerce-status" id="icon-woocommerce"><br /></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
 			<?php
@@ -74,85 +74,85 @@ function woocommerce_status_report() {
 
 		<tbody>
 			<tr>
-                <td><?php _e( 'Home URL','woocommerce' ); ?>:</td>
-                <td><?php echo home_url(); ?></td>
-            </tr>
-            <tr>
-                <td><?php _e( 'Site URL','woocommerce' ); ?>:</td>
-                <td><?php echo site_url(); ?></td>
-            </tr>
-            <tr>
-                <td><?php _e( 'WC Version','woocommerce' ); ?>:</td>
-                <td><?php echo esc_html( $woocommerce->version ); ?></td>
-            </tr>
-            <tr>
-                <td><?php _e( 'WC Database Version','woocommerce' ); ?>:</td>
-                <td><?php echo esc_html( get_option( 'woocommerce_db_version' ) ); ?></td>
-            </tr>
-            <tr>
-                <td><?php _e( 'WP Version','woocommerce' ); ?>:</td>
-                <td><?php if ( is_multisite() ) echo 'WPMU'; else echo 'WP'; ?> <?php echo bloginfo('version'); ?></td>
-            </tr>
-            <tr>
-                <td><?php _e( 'Web Server Info','woocommerce' ); ?>:</td>
-                <td><?php echo esc_html( $_SERVER['SERVER_SOFTWARE'] );  ?></td>
-            </tr>
-            <tr>
-                <td><?php _e( 'PHP Version','woocommerce' ); ?>:</td>
-                <td><?php if ( function_exists( 'phpversion' ) ) echo esc_html( phpversion() ); ?></td>
-            </tr>
-            <tr>
-                <td><?php _e( 'MySQL Version','woocommerce' ); ?>:</td>
-                <td><?php if ( function_exists( 'mysql_get_server_info' ) ) echo esc_html( mysql_get_server_info() ); ?></td>
-            </tr>
-            <tr>
-                <td><?php _e( 'WP Memory Limit','woocommerce' ); ?>:</td>
-                <td><?php
-                	$memory = woocommerce_let_to_num( WP_MEMORY_LIMIT );
+				<td><?php _e( 'Home URL','woocommerce' ); ?>:</td>
+				<td><?php echo home_url(); ?></td>
+			</tr>
+			<tr>
+				<td><?php _e( 'Site URL','woocommerce' ); ?>:</td>
+				<td><?php echo site_url(); ?></td>
+			</tr>
+			<tr>
+				<td><?php _e( 'WC Version','woocommerce' ); ?>:</td>
+				<td><?php echo esc_html( $woocommerce->version ); ?></td>
+			</tr>
+			<tr>
+				<td><?php _e( 'WC Database Version','woocommerce' ); ?>:</td>
+				<td><?php echo esc_html( get_option( 'woocommerce_db_version' ) ); ?></td>
+			</tr>
+			<tr>
+				<td><?php _e( 'WP Version','woocommerce' ); ?>:</td>
+				<td><?php if ( is_multisite() ) echo 'WPMU'; else echo 'WP'; ?> <?php echo bloginfo('version'); ?></td>
+			</tr>
+			<tr>
+				<td><?php _e( 'Web Server Info','woocommerce' ); ?>:</td>
+				<td><?php echo esc_html( $_SERVER['SERVER_SOFTWARE'] );  ?></td>
+			</tr>
+			<tr>
+				<td><?php _e( 'PHP Version','woocommerce' ); ?>:</td>
+				<td><?php if ( function_exists( 'phpversion' ) ) echo esc_html( phpversion() ); ?></td>
+			</tr>
+			<tr>
+				<td><?php _e( 'MySQL Version','woocommerce' ); ?>:</td>
+				<td><?php if ( function_exists( 'mysql_get_server_info' ) ) echo esc_html( mysql_get_server_info() ); ?></td>
+			</tr>
+			<tr>
+				<td><?php _e( 'WP Memory Limit','woocommerce' ); ?>:</td>
+				<td><?php
+					$memory = woocommerce_let_to_num( WP_MEMORY_LIMIT );
 
-                	if ( $memory < 67108864 ) {
-                		echo '<mark class="error">' . sprintf( __( '%s - We recommend setting memory to at least 64MB. See: <a href="%s">Increasing memory allocated to PHP</a>', 'woocommerce' ), size_format( $memory ), 'http://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP' ) . '</mark>';
-                	} else {
-                		echo '<mark class="yes">' . size_format( $memory ) . '</mark>';
-                	}
-                ?></td>
-            </tr>
-            <tr>
-                <td><?php _e( 'WP Debug Mode','woocommerce' ); ?>:</td>
-                <td><?php if ( defined('WP_DEBUG') && WP_DEBUG ) echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>'; else echo '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>'; ?></td>
-            </tr>
-            <tr>
-                <td><?php _e( 'WP Max Upload Size','woocommerce' ); ?>:</td>
-                <td><?php echo size_format( wp_max_upload_size() ); ?></td>
-            </tr>
-            <?php if ( function_exists( 'ini_get' ) ) : ?>
-	            <tr>
-	                <td><?php _e('PHP Post Max Size','woocommerce' ); ?>:</td>
-	                <td><?php echo size_format( woocommerce_let_to_num( ini_get('post_max_size') ) ); ?></td>
-	            </tr>
-	            <tr>
-	                <td><?php _e('PHP Time Limit','woocommerce' ); ?>:</td>
-	                <td><?php echo ini_get('max_execution_time'); ?></td>
-	            </tr>
-	            <tr>
-	                <td><?php _e( 'PHP Max Input Vars','woocommerce' ); ?>:</td>
-	                <td><?php echo ini_get('max_input_vars'); ?></td>
-	            </tr>
-	            <tr>
-	                <td><?php _e( 'SUHOSIN Installed','woocommerce' ); ?>:</td>
-	                <td><?php echo extension_loaded( 'suhosin' ) ? __( 'Yes', 'woocommerce' ) : __( 'No', 'woocommerce' ); ?></td>
-	            </tr>
-	        <?php endif; ?>
-            <tr>
-                <td><?php _e( 'WC Logging','woocommerce' ); ?>:</td>
-                <td><?php
-                	if ( @fopen( $woocommerce->plugin_path() . '/logs/paypal.txt', 'a' ) )
-                		echo '<mark class="yes">' . __( 'Log directory is writable.', 'woocommerce' ) . '</mark>';
-                	else
-                		echo '<mark class="error">' . __( 'Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will not be possible.', 'woocommerce' ) . '</mark>';
-                ?></td>
-            </tr>
-            <?php
+					if ( $memory < 67108864 ) {
+						echo '<mark class="error">' . sprintf( __( '%s - We recommend setting memory to at least 64MB. See: <a href="%s">Increasing memory allocated to PHP</a>', 'woocommerce' ), size_format( $memory ), 'http://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP' ) . '</mark>';
+					} else {
+						echo '<mark class="yes">' . size_format( $memory ) . '</mark>';
+					}
+				?></td>
+			</tr>
+			<tr>
+				<td><?php _e( 'WP Debug Mode','woocommerce' ); ?>:</td>
+				<td><?php if ( defined('WP_DEBUG') && WP_DEBUG ) echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>'; else echo '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>'; ?></td>
+			</tr>
+			<tr>
+				<td><?php _e( 'WP Max Upload Size','woocommerce' ); ?>:</td>
+				<td><?php echo size_format( wp_max_upload_size() ); ?></td>
+			</tr>
+			<?php if ( function_exists( 'ini_get' ) ) : ?>
+				<tr>
+					<td><?php _e('PHP Post Max Size','woocommerce' ); ?>:</td>
+					<td><?php echo size_format( woocommerce_let_to_num( ini_get('post_max_size') ) ); ?></td>
+				</tr>
+				<tr>
+					<td><?php _e('PHP Time Limit','woocommerce' ); ?>:</td>
+					<td><?php echo ini_get('max_execution_time'); ?></td>
+				</tr>
+				<tr>
+					<td><?php _e( 'PHP Max Input Vars','woocommerce' ); ?>:</td>
+					<td><?php echo ini_get('max_input_vars'); ?></td>
+				</tr>
+				<tr>
+					<td><?php _e( 'SUHOSIN Installed','woocommerce' ); ?>:</td>
+					<td><?php echo extension_loaded( 'suhosin' ) ? __( 'Yes', 'woocommerce' ) : __( 'No', 'woocommerce' ); ?></td>
+				</tr>
+			<?php endif; ?>
+			<tr>
+				<td><?php _e( 'WC Logging','woocommerce' ); ?>:</td>
+				<td><?php
+					if ( @fopen( $woocommerce->plugin_path() . '/logs/paypal.txt', 'a' ) )
+						echo '<mark class="yes">' . __( 'Log directory is writable.', 'woocommerce' ) . '</mark>';
+					else
+						echo '<mark class="error">' . __( 'Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will not be possible.', 'woocommerce' ) . '</mark>';
+				?></td>
+			</tr>
+			<?php
 				$posting = array();
 
 				// fsockopen/cURL
@@ -167,57 +167,57 @@ function woocommerce_status_report() {
 					}
 					$posting['fsockopen_curl']['success'] = true;
 				} else {
-	        		$posting['fsockopen_curl']['note'] = __( 'Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce' ). '</mark>';
-	        		$posting['fsockopen_curl']['success'] = false;
-	        	}
+					$posting['fsockopen_curl']['note'] = __( 'Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce' ). '</mark>';
+					$posting['fsockopen_curl']['success'] = false;
+				}
 
-	        	// SOAP
-	        	$posting['soap_client']['name'] = __( 'SOAP Client','woocommerce' );
+				// SOAP
+				$posting['soap_client']['name'] = __( 'SOAP Client','woocommerce' );
 				if ( class_exists( 'SoapClient' ) ) {
 					$posting['soap_client']['note'] = __('Your server has the SOAP Client class enabled.', 'woocommerce' );
 					$posting['soap_client']['success'] = true;
 				} else {
-	        		$posting['soap_client']['note'] = sprintf( __( 'Your server does not have the <a href="%s">SOAP Client</a> class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), 'http://php.net/manual/en/class.soapclient.php' ) . '</mark>';
-	        		$posting['soap_client']['success'] = false;
-	        	}
+					$posting['soap_client']['note'] = sprintf( __( 'Your server does not have the <a href="%s">SOAP Client</a> class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), 'http://php.net/manual/en/class.soapclient.php' ) . '</mark>';
+					$posting['soap_client']['success'] = false;
+				}
 
-	        	// WP Remote Post Check
+				// WP Remote Post Check
 				$posting['wp_remote_post']['name'] = __( 'WP Remote Post','woocommerce');
 				$request['cmd'] = '_notify-validate';
 				$params = array(
 					'sslverify' 	=> false,
-		        	'timeout' 		=> 60,
-		        	'user-agent'	=> 'WooCommerce/' . $woocommerce->version,
-		        	'body'			=> $request
+					'timeout' 		=> 60,
+					'user-agent'	=> 'WooCommerce/' . $woocommerce->version,
+					'body'			=> $request
 				);
 				$response = wp_remote_post( 'https://www.paypal.com/cgi-bin/webscr', $params );
 
 				if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
-	        		$posting['wp_remote_post']['note'] = __('wp_remote_post() was successful - PayPal IPN is working.', 'woocommerce' );
-	        		$posting['wp_remote_post']['success'] = true;
-	        	} elseif ( is_wp_error( $response ) ) {
-	        		$posting['wp_remote_post']['note'] = __( 'wp_remote_post() failed. PayPal IPN won\'t work with your server. Contact your hosting provider. Error:', 'woocommerce' ) . ' ' . $response->get_error_message();
-	        		$posting['wp_remote_post']['success'] = false;
-	        	} else {
-	            	$posting['wp_remote_post']['note'] = __( 'wp_remote_post() failed. PayPal IPN may not work with your server.', 'woocommerce' );
-	        		$posting['wp_remote_post']['success'] = false;
-	        	}
+					$posting['wp_remote_post']['note'] = __('wp_remote_post() was successful - PayPal IPN is working.', 'woocommerce' );
+					$posting['wp_remote_post']['success'] = true;
+				} elseif ( is_wp_error( $response ) ) {
+					$posting['wp_remote_post']['note'] = __( 'wp_remote_post() failed. PayPal IPN won\'t work with your server. Contact your hosting provider. Error:', 'woocommerce' ) . ' ' . $response->get_error_message();
+					$posting['wp_remote_post']['success'] = false;
+				} else {
+					$posting['wp_remote_post']['note'] = __( 'wp_remote_post() failed. PayPal IPN may not work with your server.', 'woocommerce' );
+					$posting['wp_remote_post']['success'] = false;
+				}
 
-	        	$posting = apply_filters( 'woocommerce_debug_posting', $posting );
+				$posting = apply_filters( 'woocommerce_debug_posting', $posting );
 
-	        	foreach( $posting as $post ) { $mark = ( isset( $post['success'] ) && $post['success'] == true ) ? 'yes' : 'error';
-	        		?>
+				foreach( $posting as $post ) { $mark = ( isset( $post['success'] ) && $post['success'] == true ) ? 'yes' : 'error';
+					?>
 					<tr>
-		                <td><?php echo esc_html( $post['name'] ); ?>:</td>
-		                <td>
-		                	<mark class="<?php echo $mark; ?>">
-		                    	<?php echo wp_kses_data( $post['note'] ); ?>
-		                	</mark>
-		                </td>
-		            </tr>
-		            <?php
-	            }
-	        ?>
+						<td><?php echo esc_html( $post['name'] ); ?>:</td>
+						<td>
+							<mark class="<?php echo $mark; ?>">
+								<?php echo wp_kses_data( $post['note'] ); ?>
+							</mark>
+						</td>
+					</tr>
+					<?php
+				}
+			?>
 		</tbody>
 
 		<thead>
@@ -227,12 +227,12 @@ function woocommerce_status_report() {
 		</thead>
 
 		<tbody>
-         	<tr>
-         		<td><?php _e( 'Installed Plugins','woocommerce' ); ?>:</td>
-         		<td><?php
-         			$active_plugins = (array) get_option( 'active_plugins', array() );
+		 	<tr>
+				<td><?php _e( 'Installed Plugins','woocommerce' ); ?>:</td>
+		 		<td><?php
+					$active_plugins = (array) get_option( 'active_plugins', array() );
 
-         			if ( is_multisite() )
+					if ( is_multisite() )
 						$active_plugins = array_merge( $active_plugins, get_site_option( 'active_sitewide_plugins', array() ) );
 
 					$wc_plugins = array();
@@ -279,8 +279,8 @@ function woocommerce_status_report() {
 					else
 						echo implode( ', <br/>', $wc_plugins );
 
-         		?></td>
-         	</tr>
+				?></td>
+			</tr>
 		</tbody>
 
 		<thead>
@@ -291,10 +291,10 @@ function woocommerce_status_report() {
 
 		<tbody>
 
-            <tr>
-                <td><?php _e( 'Force SSL','woocommerce' ); ?>:</td>
+			<tr>
+				<td><?php _e( 'Force SSL','woocommerce' ); ?>:</td>
 				<td><?php echo get_option( 'woocommerce_force_ssl_checkout' ) === 'yes' ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
-            </tr>
+			</tr>
 		</tbody>
 
 		<thead>
@@ -385,54 +385,54 @@ function woocommerce_status_report() {
 		</thead>
 
 		<tbody>
-            <tr>
-                <td><?php _e( 'Order Statuses', 'woocommerce' ); ?>:</td>
-                <td><?php
-                	$display_terms = array();
-                	$terms = get_terms( 'shop_order_status', array( 'hide_empty' => 0 ) );
-                	foreach ( $terms as $term )
-                		$display_terms[] = $term->name . ' (' . $term->slug . ')';
-                	echo implode( ', ', array_map( 'esc_html', $display_terms ) );
-                ?></td>
-            </tr>
-            <tr>
-                <td><?php _e( 'Product Types', 'woocommerce' ); ?>:</td>
-                <td><?php
-                	$display_terms = array();
-                	$terms = get_terms( 'product_type', array( 'hide_empty' => 0 ) );
-                	foreach ( $terms as $term )
-                		$display_terms[] = $term->name . ' (' . $term->slug . ')';
-                	echo implode( ', ', array_map( 'esc_html', $display_terms ) );
-                ?></td>
-            </tr>
+			<tr>
+				<td><?php _e( 'Order Statuses', 'woocommerce' ); ?>:</td>
+				<td><?php
+					$display_terms = array();
+					$terms = get_terms( 'shop_order_status', array( 'hide_empty' => 0 ) );
+					foreach ( $terms as $term )
+						$display_terms[] = $term->name . ' (' . $term->slug . ')';
+					echo implode( ', ', array_map( 'esc_html', $display_terms ) );
+				?></td>
+			</tr>
+			<tr>
+				<td><?php _e( 'Product Types', 'woocommerce' ); ?>:</td>
+				<td><?php
+					$display_terms = array();
+					$terms = get_terms( 'product_type', array( 'hide_empty' => 0 ) );
+					foreach ( $terms as $term )
+						$display_terms[] = $term->name . ' (' . $term->slug . ')';
+					echo implode( ', ', array_map( 'esc_html', $display_terms ) );
+				?></td>
+			</tr>
 		</tbody>
 
-        	<thead>
+		<thead>
 			<tr>
 				<th colspan="2"><?php _e( 'Theme', 'woocommerce' ); ?></th>
 			</tr>
 		</thead>
 
 		<tbody>
-            <tr>
-                <td><?php _e( 'Theme Name', 'woocommerce' ); ?>:</td>
-                <td><?php
+			<tr>
+				<td><?php _e( 'Theme Name', 'woocommerce' ); ?>:</td>
+				<td><?php
 					$active_theme = wp_get_theme();
 					echo $active_theme->Name;
-                ?></td>
-            </tr>
-            <tr>
-                <td><?php _e( 'Theme Version', 'woocommerce' ); ?>:</td>
-                <td><?php
+				?></td>
+			</tr>
+			<tr>
+				<td><?php _e( 'Theme Version', 'woocommerce' ); ?>:</td>
+				<td><?php
 					echo $active_theme->Version;
-                ?></td>
-            </tr>
-            <tr>
-                <td><?php _e( 'Author URL', 'woocommerce' ); ?>:</td>
-                <td><?php
+				?></td>
+			</tr>
+			<tr>
+				<td><?php _e( 'Author URL', 'woocommerce' ); ?>:</td>
+				<td><?php
 					echo $active_theme->{'Author URI'};
-                ?></td>
-            </tr>
+				?></td>
+			</tr>
 		</tbody>
 
 		<thead>
@@ -442,9 +442,9 @@ function woocommerce_status_report() {
 		</thead>
 
 		<tbody>
-            <tr>
-                <td><?php _e( 'Template Overrides', 'woocommerce' ); ?>:</td>
-                <td><?php
+			<tr>
+				<td><?php _e( 'Template Overrides', 'woocommerce' ); ?>:</td>
+				<td><?php
 
 					$template_path = $woocommerce->plugin_path() . '/templates/';
 					$found_files   = array();
@@ -464,8 +464,8 @@ function woocommerce_status_report() {
 						_e( 'No core overrides present in theme.', 'woocommerce' );
 					}
 
-                ?></td>
-            </tr>
+				?></td>
+			</tr>
 		</tbody>
 
 	</table>
@@ -525,7 +525,7 @@ function woocommerce_status_report() {
 							jQuery.each( value_array, function(key, line){
 
 								tab = ( key == 0 )?0:25;
-							    temp_line = temp_line + jQuery.wc_strPad( '', tab, ' ', 'f' ) + line +'\n';
+								temp_line = temp_line + jQuery.wc_strPad( '', tab, ' ', 'f' ) + line +'\n';
 							});
 
 							value = temp_line;
@@ -541,7 +541,7 @@ function woocommerce_status_report() {
 
 			jQuery(this).attr( 'href', window.URL.createObjectURL( blob ) );
 
-      		return true;
+			return true;
 		});
 
 	</script>
@@ -711,7 +711,7 @@ function woocommerce_status_tools() {
 	?>
 	<table class="wc_status_table widefat" cellspacing="0">
 
-        <thead class="tools">
+	<thead class="tools">
 			<tr>
 				<th colspan="2"><?php _e( 'Tools', 'woocommerce' ); ?></th>
 			</tr>
@@ -720,14 +720,14 @@ function woocommerce_status_tools() {
 		<tbody class="tools">
 		<?php foreach($tools as $action => $tool) { ?>
 			<tr>
-                <td><?php echo esc_html( $tool['name'] ); ?></td>
-                <td>
-                	<p>
-                    	<a href="<?php echo wp_nonce_url( admin_url('admin.php?page=woocommerce_status&tab=tools&action=' . $action ), 'debug_action' ); ?>" class="button"><?php echo esc_html( $tool['button'] ); ?></a>
-                    	<span class="description"><?php echo wp_kses_post( $tool['desc'] ); ?></span>
-                	</p>
-                </td>
-            </tr>
+				<td><?php echo esc_html( $tool['name'] ); ?></td>
+				<td>
+					<p>
+						<a href="<?php echo wp_nonce_url( admin_url('admin.php?page=woocommerce_status&tab=tools&action=' . $action ), 'debug_action' ); ?>" class="button"><?php echo esc_html( $tool['button'] ); ?></a>
+						<span class="description"><?php echo wp_kses_post( $tool['desc'] ); ?></span>
+					</p>
+				</td>
+			</tr>
 		<?php } ?>
 		</tbody>
 	</table>
