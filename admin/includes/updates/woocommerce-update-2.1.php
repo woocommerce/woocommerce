@@ -17,3 +17,8 @@ wp_delete_post( get_option('woocommerce_pay_page_id'), true );
 wp_delete_post( get_option('woocommerce_thanks_page_id'), true );
 wp_delete_post( get_option('woocommerce_view_order_page_id'), true );
 wp_delete_post( get_option('woocommerce_change_password_page_id'), true );
+
+// Update table primary keys - remove old key and then add new 'permission_id' row.
+//$wpdb->hide_errors();
+$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions DROP PRIMARY KEY" );
+$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions ADD `permission_id` bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT" );

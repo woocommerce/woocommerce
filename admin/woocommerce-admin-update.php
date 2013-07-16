@@ -47,5 +47,10 @@ function do_update_woocommerce() {
 		update_option( 'woocommerce_db_version', '2.0.9' );
 	}
 
+	if ( version_compare( $current_db_version, '2.1.0', '<' ) ) {
+		include( 'includes/updates/woocommerce-update-2.1.php' );
+		update_option( 'woocommerce_db_version', '2.1.0' );
+	}
+
 	update_option( 'woocommerce_db_version', $woocommerce->version );
 }

@@ -103,7 +103,7 @@ function do_install_woocommerce() {
 	$current_version = get_option( 'woocommerce_version', null );
 	$current_db_version = get_option( 'woocommerce_db_version', null );
 
-	if ( version_compare( $current_db_version, '2.0.9', '<' ) && null !== $current_db_version ) {
+	if ( version_compare( $current_db_version, '2.1.0', '<' ) && null !== $current_db_version ) {
 		update_option( '_wc_needs_update', 1 );
 	} else {
 		update_option( 'woocommerce_db_version', $woocommerce->version );
@@ -301,6 +301,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
   KEY meta_key (meta_key)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
+  permission_id bigint(20) NOT NULL auto_increment,
   download_id varchar(32) NOT NULL,
   product_id bigint(20) NOT NULL,
   order_id bigint(20) NOT NULL DEFAULT 0,
@@ -311,7 +312,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   access_granted datetime NOT NULL default '0000-00-00 00:00:00',
   access_expires datetime NULL default null,
   download_count bigint(20) NOT NULL DEFAULT 0,
-  PRIMARY KEY  (product_id,order_id,order_key,download_id),
+  PRIMARY KEY  (permission_id),
+  KEY download_order_key_product (product_id,order_id,order_key,download_id),
   KEY download_order_product (download_id,order_id,product_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_order_items (

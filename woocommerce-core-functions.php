@@ -1346,11 +1346,12 @@ add_action('woocommerce_order_status_completed', 'woocommerce_downloadable_produ
  * @param string $download_id file identifier
  * @param int $product_id product identifier
  * @param WC_Order $order the order
+ * @return int insert id | bool false on failure
  */
 function woocommerce_downloadable_file_permission( $download_id, $product_id, $order ) {
 	global $wpdb;
 
-	$user_email = $order->billing_email;
+	$user_email = sanitize_email( $order->billing_email );
 	$limit      = trim( get_post_meta( $product_id, '_download_limit', true ) );
 	$expiry     = trim( get_post_meta( $product_id, '_download_expiry', true ) );
 
@@ -1365,7 +1366,7 @@ function woocommerce_downloadable_file_permission( $download_id, $product_id, $o
     $data = array(
     	'download_id'			=> $download_id,
 		'product_id' 			=> $product_id,
-		'user_id' 				=> $order->user_id,
+		'user_id' 				=> absint( $order->user_id ),
 		'user_email' 			=> $user_email,
 		'order_id' 				=> $order->id,
 		'order_key' 			=> $order->order_key,
@@ -1392,10 +1393,12 @@ function woocommerce_downloadable_file_permission( $download_id, $product_id, $o
     }
 
 	// Downloadable product - give access to the customer
-    $wpdb->insert( $wpdb->prefix . 'woocommerce_downloadable_product_permissions',
+	$result = $wpdb->insert( $wpdb->prefix . 'woocommerce_downloadable_product_permissions',
         apply_filters( 'woocommerce_downloadable_file_permission_data', $data ),
         apply_filters( 'woocommerce_downloadable_file_permission_format', $format )
     );
+
+    return $result ? $wpdb->insert_id : false;
 }
 
 if ( get_option('woocommerce_downloads_grant_access_after_payment') == 'yes' )
