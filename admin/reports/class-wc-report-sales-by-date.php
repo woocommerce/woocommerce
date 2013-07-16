@@ -121,9 +121,9 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 		$this->chart_colours = array(
 			'sales_amount' => '#3498db',
-			'average'      => '#9bcced',
-			'order_count'  => '#d4d9dc',
-			'item_count'   => '#ecf0f1',
+			'average'      => '#75b9e7',
+			'order_count'  => '#b8c0c5',
+			'item_count'   => '#d4d9dc',
 			'coupon_amount' => '#e67e22',
 			'shipping_amount' => '#1abc9c'
 		);
@@ -404,7 +404,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 					    		min: 0,
 					    		minTickSize: 1,
 					    		tickDecimals: 0,
-					    		color: '#ecf0f1',
+					    		color: '#d4d9dc',
 					    		font: { color: "#aaa" }
 					    	},
 					    	{

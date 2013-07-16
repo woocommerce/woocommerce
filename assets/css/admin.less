@@ -2613,11 +2613,17 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 		h3.stats_range {
 			padding: 0 !important;
 			ul {
-				overflow: hidden;
-				zoom : 1;
 				list-style: none outside;
 				margin: 0;
 				padding: 0;
+				zoom:1;
+				&:before, &:after {
+					content: " ";
+				    display: table;
+				}
+				&:after {
+					clear:both;
+				}
 				li {
 					float: left;
 					margin: 0;
@@ -2630,7 +2636,9 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 						text-decoration: none;
 					}
 					&.active {
-						background: #dfdfdf;
+						background: #f9f9f9;
+						-webkit-box-shadow:0 4px 0 0 #f9f9f9;
+						box-shadow:0 4px 0 0 #f9f9f9;
 						a {
 							color: #777;
 						}
@@ -2648,6 +2656,8 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 								border: 0;
 								color: #777;
 								text-align: center;
+								-webkit-box-shadow:none;
+								box-shadow:none;
 							}
 						}
 					}
@@ -2668,10 +2678,7 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 			padding: 0;
 			li.chart-widget {
 				margin: 0 0 1em;
-				background: #fff;
-				-webkit-box-shadow: 0px 1px 2px rgba(0,0,0,.1);
-		   		-moz-box-shadow: 0px 1px 2px rgba(0,0,0,.1);
-		    	box-shadow: 0px 1px 2px rgba(0,0,0,.1);
+				background: #fafafa;
 
 		    	&:after {
 				    content: ".";
@@ -2681,10 +2688,20 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 				    visibility: hidden;
 				}
 				h4 {
-					background: #e5e5e5;
-					border-bottom: 1px solid #d9d9d9;
-					padding: 7px 10px 6px;
+					background: #fff;
+					border:1px solid #dfdfdf;
+					padding: 10px;
 					margin:0;
+					color: #21759b;
+					border-top-width:0;
+					background-image: -webkit-gradient(linear,left bottom,left top,from(#ececec),to(#f9f9f9));
+					background-image: -webkit-linear-gradient(bottom,#ececec,#f9f9f9);
+					background-image: -moz-linear-gradient(bottom,#ececec,#f9f9f9);
+					background-image: -o-linear-gradient(bottom,#ececec,#f9f9f9);
+					background-image: linear-gradient(to top,#ececec,#f9f9f9);
+					&:hover {
+						color:#d54e21;
+					}
 				}
 				.section_title {
 					cursor: pointer;
@@ -2693,18 +2710,30 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 						background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAFCAYAAACXU8ZrAAAAMElEQVQIW2OcOXPmfwYgSE9PZwTRyAAmB5bAphBZDK4bWRBdE4oVMEl067G6A919AJAYHtDVRR5EAAAAAElFTkSuQmCC) no-repeat right;
 					}
 					&.open {
+						color: #333;
 						span {
 							background-image: none;
 						}
 					}
 				}
+				.section {
+					border-bottom:1px solid #dfdfdf;
+					&:last-of-type {
+						border-radius:0 0 3px 3px;
+					}
+				}
 				table {
 					width: 100%;
+					border-left:1px solid #dfdfdf;
+					border-right:1px solid #dfdfdf;
 					td {
 						padding: 7px 10px;
 						vertical-align: top;
 						border-top: 1px solid #e5e5e5;
 						line-height: 1.4em;
+					}
+					tr:first-child td {
+						border-top:0;
 					}
 					td.count {
 						background: #f5f5f5;
@@ -2726,11 +2755,15 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 					}
 				}
 				form, p {
-					margin: 10px 0;
-					padding: 0 10px;
+					margin: 0;
+					padding: 10px;
 					.submit {
 						margin-top: 10px;
 					}
+				}
+				form {
+					border-left:1px solid #dfdfdf;
+					border-right:1px solid #dfdfdf;
 				}
 				#product_ids {
 					width: 100%;
@@ -2745,28 +2778,37 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 		}
 		.chart-legend {
 			list-style: none outside;
-			overflow: hidden;
-			zoom : 1;
 			margin: 0;
 			padding: 0;
+			border:1px solid #dfdfdf;
+			border-right-width:0;
+			border-bottom-width:0;
+			background: #fff;
 			li {
-				background: #fff;
+				border-right: 5px solid #aaa;
 				color: #aaa;
 				padding: 1em 1.5em;
-				border-right: 5px solid #aaa;
 				display: block;
-				margin: 0 0 8px 0;
+				margin: 0;
+				-webkit-transition:all ease .5s;
+				box-shadow:
+					inset 0 -1px 0 0 #dfdfdf;
 				strong {
-					font-size: 3em;
+					font-size: 2.618em;
 					line-height: 1.2em;
 					color: #464646;
 					font-weight: normal;
 					display: block;
 					font-family: "HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",sans-serif;
 				}
-				-webkit-box-shadow: 0px 1px 2px rgba(0,0,0,.1);
-		   		-moz-box-shadow: 0px 1px 2px rgba(0,0,0,.1);
-		    	box-shadow: 0px 1px 2px rgba(0,0,0,.1);
+				&:hover {
+					box-shadow:
+						inset 0 -1px 0 0 #dfdfdf,
+						inset 300px 0 0 fade(#9c5d90,10%);
+					border-right: 5px solid #9c5d90 !important;
+					padding-left:2em;
+					color: #9c5d90;
+				}
 			}
 		}
 		.pie-chart-legend {
@@ -2807,9 +2849,8 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 		    background: #fff;
 		    padding: 12px;
     		position: relative;
-		    -webkit-box-shadow: 0px 1px 2px rgba(0,0,0,.1);
-		    -moz-box-shadow: 0px 1px 2px rgba(0,0,0,.1);
-		    box-shadow: 0px 1px 2px rgba(0,0,0,.1);
+		    border:1px solid #dfdfdf;
+		    border-radius:3px;
 		}
 		.main .chart-legend {
 			margin-top: 12px;
