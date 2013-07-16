@@ -1351,16 +1351,16 @@ function woocommerce_downloadable_file_permission( $download_id, $product_id, $o
 	global $wpdb;
 
 	$user_email = $order->billing_email;
+	$limit      = trim( get_post_meta( $product_id, '_download_limit', true ) );
+	$expiry     = trim( get_post_meta( $product_id, '_download_expiry', true ) );
 
-	$limit = trim( get_post_meta( $product_id, '_download_limit', true ) );
-	$expiry = trim( get_post_meta( $product_id, '_download_expiry', true ) );
+	$limit      = empty( $limit ) ? '' : absint( $limit );
 
-    $limit = empty( $limit ) ? '' : (int) $limit;
+	// Default value is NULL in the table schema
+	$expiry     = empty( $expiry ) ? null : absint( $expiry );
 
-    // Default value is NULL in the table schema
-	$expiry = empty( $expiry ) ? null : (int) $expiry;
-
-	if ( $expiry ) $expiry = date_i18n( "Y-m-d", strtotime( 'NOW + ' . $expiry . ' DAY' ) );
+	if ( $expiry )
+		$expiry = date_i18n( "Y-m-d", strtotime( 'NOW + ' . $expiry . ' DAY' ) );
 
     $data = array(
     	'download_id'			=> $download_id,
@@ -1393,8 +1393,8 @@ function woocommerce_downloadable_file_permission( $download_id, $product_id, $o
 
 	// Downloadable product - give access to the customer
     $wpdb->insert( $wpdb->prefix . 'woocommerce_downloadable_product_permissions',
-        $data,
-        $format
+        apply_filters( 'woocommerce_downloadable_file_permission_data', $data ),
+        apply_filters( 'woocommerce_downloadable_file_permission_format', $format )
     );
 }
 
