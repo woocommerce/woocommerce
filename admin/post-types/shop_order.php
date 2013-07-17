@@ -45,8 +45,8 @@ function woocommerce_edit_order_columns($columns){
 	$columns["billing_address"] 	= __( 'Billing', 'woocommerce' );
 	$columns["shipping_address"] 	= __( 'Shipping', 'woocommerce' );
 	$columns["total_cost"] 			= __( 'Order Total', 'woocommerce' );
-	$columns["order_comments"] 		= '<img alt="' . esc_attr__( 'Order Notes', 'woocommerce' ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/order-notes_head.png" class="tips" data-tip="' . __( 'Order Notes', 'woocommerce' ) . '" width="12" height="12" />';
-	$columns["note"] 				= '<img src="' . $woocommerce->plugin_url() . '/assets/images/note_head.png" alt="' . __( 'Customer Notes', 'woocommerce' ) . '" class="tips" data-tip="' . __( 'Customer Notes', 'woocommerce' ) . '" width="12" height="12" />';
+	$columns["order_comments"] 		= '<span class="order-notes_head tips" data-tip="' . esc_attr__( 'Order Notes', 'woocommerce' ) . '">' . esc_attr__( 'Order Notes', 'woocommerce' ) . '</span>';
+	$columns["note"] 				= '<span class="notes_head tips" data-tip="' . esc_attr__( 'Customer Notes', 'woocommerce' ) . '">' . esc_attr__( 'Customer Notes', 'woocommerce' ) . '</span>';
 	$columns["order_date"] 			= __( 'Date', 'woocommerce' );
 	$columns["order_actions"] 		= __( 'Actions', 'woocommerce' );
 

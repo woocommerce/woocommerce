@@ -1206,7 +1206,7 @@ ul.order_notes {
 	}
 }
 
-/* Product list */
+/* Product / Order list */
 table.wp-list-table {
 	.column-thumb {
 		width: 52px;
@@ -1295,6 +1295,21 @@ table.wp-list-table {
 		color: #aa4444;
 		background: transparent none;
 		line-height: 1;
+	}
+	.order-notes_head, .notes_head {
+		.ir;
+		&:after {
+			.icon;
+		}
+	}
+	.order-notes_head:after {
+		content: "\e028";
+	}
+	.notes_head {
+		margin:0 auto;
+		&:after {
+			content: "\e026";
+		}
 	}
 }
 
