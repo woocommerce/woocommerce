@@ -1935,7 +1935,6 @@ img.help_tip {
 			a {
 				padding-left:10px;
 				&:before {
-					.icon;
 					.iconbefore;
 				}
 			}
@@ -2318,13 +2317,17 @@ img.help_tip {
 		float: right;
 		margin-left: 9px;
 		line-height: 22px;
-		padding-left: 20px;
-		background-image: url(../images/icons/edit_variations.png) !important;
-		background-repeat: no-repeat;
-		background-position: 1px -61px;
+		text-decoration: none;
+		&:before {
+			.iconbefore;
+			content: "\e004";
+			color: #999;
+		}
 	}
 	.expand_all {
-		background-position: 1px -82px;
+		&:before {
+			content: "\e005";
+		}
 	}
 	a.plus, a.minus {
 		padding-left:20px;
