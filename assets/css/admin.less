@@ -1106,43 +1106,42 @@ ul.wc_coupon_list_block {
 		width:45px;
 		text-align: center;
 		mark {
-			display:block;
-			height:18px;
-			width:18px;
-			text-indent: -999em;
-			margin:0 auto;
-			background: #bbb;
-			background-repeat: no-repeat;
-			background-position: center;
-			-webkit-border-radius:100%;
-			border-radius:100%;
+			.ir;
+			background: none;
+			font-size:1.4em;
 		}
-		mark.pending {
-			background-image:url(../images/icons/pending.png);
-			background-color: #999;
+		mark.pending, mark.completed, mark.on-hold, mark.failed, mark.cancelled, mark.processing, mark.refunded {
+			&:after {
+				.icon;
+			}
 		}
-		mark.completed {
-			background-image:url(../images/icons/completed.png);
-			background-color: #21759b;
+		mark.pending:after {
+			content: "\e012";
+			color: #de9e0c;
 		}
-		mark.on-hold {
-			background-image:url(../images/icons/on-hold.png);
-			background-color: #de9e0c;
+		mark.completed:after {
+			content: "\e015";
+			color: #21759b;
 		}
-		mark.failed {
-			background-image:url(../images/icons/failed.png);
-			background-color: #e6db55;
+		mark.on-hold:after {
+			content: "\e033";
+			color: #999;
 		}
-		mark.cancelled {
-			background-image:url(../images/icons/cancelled.png);
-			background-color: #d54e21;
+		mark.failed:after {
+			content: "\e016";
+			color: #d0c21f;
 		}
-		mark.processing {
-			background-image:url(../images/icons/st-processing.png);
-			background-color: #73a724;
+		mark.cancelled:after {
+			content: "\e013";
+			color: #d54e21;
 		}
-		mark.refunded {
-			background-image:url(../images/icons/refunded.png);
+		mark.processing:after {
+			content: "\e011";
+			color: #73a724;
+		}
+		mark.refunded:after {
+			content: "\e014";
+			color: #999;
 		}
 	}
 	td.column-order_status {
