@@ -172,6 +172,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Allow quotes in store name for display in emails
 * Fix - Regression bug throwing warning in ShareThis integration
 * Fix - Correct state code for Canadian state Newfoundland
+* Fix - Tweaked popularity sorting to work better when no sales are present.
 
 = 2.0.14 - 05/09/2013 =
 * Tweak - Update cart performance improvements
