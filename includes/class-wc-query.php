@@ -414,11 +414,15 @@ class WC_Query {
 
 		$args = array();
 
+		// default - menu_order
+		$args['orderby']  = 'menu_order title';
+		$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
+		$args['meta_key'] = '';
+
 		switch ( $orderby ) {
 			case 'date' :
 				$args['orderby']  = 'date';
 				$args['order']    = $order == 'ASC' ? 'ASC' : 'DESC';
-				$args['meta_key'] = '';
 			break;
 			case 'price' :
 				$args['orderby']  = 'meta_value_num';
@@ -426,31 +430,39 @@ class WC_Query {
 				$args['meta_key'] = '_price';
 			break;
 			case 'popularity' :
-				$args['orderby']  = 'meta_value_num';
-				$args['order']    = $order == 'ASC' ? 'ASC' : 'DESC';
 				$args['meta_key'] = 'total_sales';
+
+				// Sorting handled later though a hook
+				add_filter( 'posts_clauses', array( $this, 'order_by_popularity_post_clauses' ) );
 			break;
 			case 'rating' :
-				$args['orderby']  = 'menu_order title';
-				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
-				$args['meta_key'] = '';
-
+				// Sorting handled later though a hook
 				add_filter( 'posts_clauses', array( $this, 'order_by_rating_post_clauses' ) );
 			break;
 			case 'title' :
 				$args['orderby']  = 'title';
 				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
-				$args['meta_key'] = '';
-			break;
-			// default - menu_order
-			default :
-				$args['orderby']  = 'menu_order title';
-				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
-				$args['meta_key'] = '';
 			break;
 		}
 
 		return apply_filters( 'woocommerce_get_catalog_ordering_args', $args );
+	}
+
+	/**
+	 * WP Core doens't let us change the sort direction for invidual orderby params - http://core.trac.wordpress.org/ticket/17065
+	 *
+	 * This lets us sort by meta value desc, and have a second orderby param.
+	 *
+	 * @access public
+	 * @param array $args
+	 * @return array
+	 */
+	public function order_by_popularity_post_clauses( $args ) {
+		global $wpdb;
+
+		$args['orderby'] = "$wpdb->postmeta.meta_value+0 DESC, $wpdb->posts.post_date DESC";
+
+		return $args;
 	}
 
 	/**
@@ -461,7 +473,6 @@ class WC_Query {
 	 * @return array
 	 */
 	public function order_by_rating_post_clauses( $args ) {
-
 		global $wpdb;
 
 		$args['fields'] .= ", AVG( $wpdb->commentmeta.meta_value ) as average_rating ";
@@ -473,7 +484,7 @@ class WC_Query {
 			LEFT JOIN $wpdb->commentmeta ON($wpdb->comments.comment_ID = $wpdb->commentmeta.comment_id)
 		";
 
-		$args['orderby'] = "average_rating DESC";
+		$args['orderby'] = "average_rating DESC, $wpdb->posts.post_date DESC";
 
 		$args['groupby'] = "$wpdb->posts.ID";
 
