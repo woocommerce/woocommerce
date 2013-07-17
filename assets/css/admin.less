@@ -481,17 +481,17 @@ ul.wc_coupon_list_block {
 
 /* Orders */
 .button.wc-reload {
+	.ir;
 	padding:0;
 	-webkit-border-radius:100%;
 	border-radius:100%;
-	span {
-		display: block;
-		text-indent: -999em;
-		background-image:url(../images/icons/reload.png);
-		background-repeat: no-repeat;
-		background-position: center center;
-		width:22px;
-		height:22px;
+	height:24px;
+	width:24px !important;
+	display: inline-block;
+	&:after {
+		.icon;
+		content: "\e031";
+		line-height: 22px;
 	}
 }
 .tablenav .actions {
