@@ -1148,6 +1148,42 @@ ul.wc_coupon_list_block {
 		padding-top:10px;
 	}
 }
+.column-note {
+	.note-off, .note-on {
+		.ir;
+		margin:0 auto;
+		color: #999;
+		&:after {
+			.icon;
+			content: "\e028";
+		}
+	}
+	.note-on:after {
+		color: @woocommerce;
+		content: "\e026";
+	}
+}
+.order_actions {
+	.processing, .complete, .view {
+		.ir;
+		padding:0 !important;
+		height: 2em !important;
+		width:2em;
+		&:after {
+			.icon;
+			line-height: 1.85;
+		}
+	}
+	.processing:after {
+		content: "\e00f";
+	}
+	.complete:after {
+		content: "\e017";
+	}
+	.view:after {
+		content: "\e010";
+	}
+}
 
 /* Order notes */
 ul.order_notes {

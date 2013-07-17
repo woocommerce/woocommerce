@@ -175,8 +175,7 @@ function woocommerce_custom_order_columns( $column ) {
 					$actions = apply_filters( 'woocommerce_admin_order_actions', $actions, $the_order );
 
 					foreach ( $actions as $action ) {
-						$image = ( isset( $action['image_url'] ) ) ? $action['image_url'] : $woocommerce->plugin_url() . '/assets/images/icons/' . $action['action'] . '.png';
-						printf( '<a class="button tips" href="%s" data-tip="%s"><img src="%s" alt="%s" width="14" /></a>', esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $image ), esc_attr( $action['name'] ) );
+						printf( '<a class="button tips %s" href="%s" data-tip="%s">%s</a>', esc_attr( $action['action'] ), esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $action['name'] ) );
 					}
 
 					do_action( 'woocommerce_admin_order_actions_end', $the_order );
@@ -187,9 +186,9 @@ function woocommerce_custom_order_columns( $column ) {
 		case "note" :
 
 			if ( $the_order->customer_note )
-				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/note.png" alt="yes" class="tips" data-tip="' . __( 'Yes', 'woocommerce' ) . '" width="14" height="14" />';
+				echo '<span class="note-on tips" data-tip="' . __( 'Yes', 'woocommerce' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 			else
-				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/note-off.png" alt="no" class="tips" data-tip="' . __( 'No', 'woocommerce' ) . '" width="14" height="14" />';
+				echo '<span class="note-off tips" data-tip="' . __( 'No', 'woocommerce' ) . '">' . __( 'No', 'woocommerce' ) . '</span>';
 
 		break;
 		case "order_comments" :
