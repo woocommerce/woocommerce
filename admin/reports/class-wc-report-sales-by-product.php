@@ -33,12 +33,25 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'order_item_type' => 'line_item',
 					'function' => 'SUM',
 					'name'     => 'order_item_amount'
-				)
+				),
+				'_product_id' => array(
+					'type'            => 'order_item_meta',
+					'order_item_type' => 'line_item',
+					'function'        => '',
+					'name'            => 'product_id'
+				),
 			),
 			'where_meta' => array(
+				'relation' => 'OR',
 				array(
 					'type'       => 'order_item_meta',
 					'meta_key'   => '_product_id',
+					'meta_value' => $this->product_ids,
+					'operator'   => 'IN'
+				),
+				array(
+					'type'       => 'order_item_meta',
+					'meta_key'   => '_variation_id',
 					'meta_value' => $this->product_ids,
 					'operator'   => 'IN'
 				)
@@ -53,16 +66,30 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'order_item_type' => 'line_item',
 					'function'        => 'SUM',
 					'name'            => 'order_item_count'
-				)
+				),
+				'_product_id' => array(
+					'type'            => 'order_item_meta',
+					'order_item_type' => 'line_item',
+					'function'        => '',
+					'name'            => 'product_id'
+				),
 			),
 			'where_meta' => array(
+				'relation' => 'OR',
 				array(
 					'type'       => 'order_item_meta',
 					'meta_key'   => '_product_id',
 					'meta_value' => $this->product_ids,
 					'operator'   => 'IN'
+				),
+				array(
+					'type'       => 'order_item_meta',
+					'meta_key'   => '_variation_id',
+					'meta_value' => $this->product_ids,
+					'operator'   => 'IN'
 				)
 			),
+			'group_by' => 'product_id',
 			'query_type'   => 'get_var',
 			'filter_range' => true
 		) ) );
@@ -196,7 +223,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 		$this->product_ids_titles = array();
 
 		foreach ( $this->product_ids as $product_id ) {
-			$this->product_ids_titles[] = get_the_title( $product_id );
+			$product = get_product( $product_id );
+			$this->product_ids_titles[] = $product->get_formatted_name();
 		}
 
 		echo '<p>' . ' <strong>' . implode( ', ', $this->product_ids_titles ) . '</strong></p>';
@@ -231,7 +259,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						    dataType: 	'json',
 						    afterTypeDelay: 100,
 						    data:		{
-						    	action: 		'woocommerce_json_search_products',
+						    	action: 		'woocommerce_json_search_products_and_variations',
 								security: 		'<?php echo wp_create_nonce("search-products"); ?>'
 						    }
 						}, function (data) {
@@ -395,16 +423,29 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'function' => '',
 						'name'     => 'post_date'
 					),
+					'_product_id' => array(
+						'type'            => 'order_item_meta',
+						'order_item_type' => 'line_item',
+						'function'        => '',
+						'name'            => 'product_id'
+					)
 				),
 				'where_meta' => array(
+					'relation' => 'OR',
 					array(
 						'type'       => 'order_item_meta',
 						'meta_key'   => '_product_id',
 						'meta_value' => $this->product_ids,
 						'operator'   => 'IN'
+					),
+					array(
+						'type'       => 'order_item_meta',
+						'meta_key'   => '_variation_id',
+						'meta_value' => $this->product_ids,
+						'operator'   => 'IN'
 					)
 				),
-				'group_by'     => $this->group_by_query,
+				'group_by'     => 'product_id,' . $this->group_by_query,
 				'order_by'     => 'post_date ASC',
 				'query_type'   => 'get_results',
 				'filter_range' => true
@@ -423,16 +464,29 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'function' => '',
 						'name'     => 'post_date'
 					),
+					'_product_id' => array(
+						'type'            => 'order_item_meta',
+						'order_item_type' => 'line_item',
+						'function'        => '',
+						'name'            => 'product_id'
+					)
 				),
 				'where_meta' => array(
+					'relation' => 'OR',
 					array(
 						'type'       => 'order_item_meta',
 						'meta_key'   => '_product_id',
 						'meta_value' => $this->product_ids,
 						'operator'   => 'IN'
+					),
+					array(
+						'type'       => 'order_item_meta',
+						'meta_key'   => '_variation_id',
+						'meta_value' => $this->product_ids,
+						'operator'   => 'IN'
 					)
 				),
-				'group_by'     => $this->group_by_query,
+				'group_by'     => 'product_id,' . $this->group_by_query,
 				'order_by'     => 'post_date ASC',
 				'query_type'   => 'get_results',
 				'filter_range' => true

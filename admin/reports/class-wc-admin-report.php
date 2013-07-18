@@ -110,6 +110,9 @@ class WC_Admin_Report {
 
 		if ( ! empty( $where_meta ) ) {
 			foreach ( $where_meta as $value ) {
+				if ( ! is_array( $value ) )
+					continue;
+
 				if ( isset( $value['type'] ) && $value['type'] == 'order_item_meta' ) {
 
 					$joins["order_items"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id";
@@ -152,7 +155,14 @@ class WC_Admin_Report {
 		}
 
 		if ( ! empty( $where_meta ) ) {
-			foreach ( $where_meta as $value ) {
+			$relation = isset( $where_meta['relation'] ) ? $where_meta['relation'] : 'AND';
+
+			$query['where'] .= " AND (";
+
+			foreach ( $where_meta as $index => $value ) {
+				if ( ! is_array( $value ) )
+					continue;
+
 				if ( strtolower( $value['operator'] ) == 'in' ) {
 					if ( is_array( $value['meta_value'] ) )
 						$value['meta_value'] = implode( "','", $value['meta_value'] );
@@ -163,15 +173,20 @@ class WC_Admin_Report {
 				}
 
 				if ( ! empty( $where_value ) ) {
+					if ( $index > 0 )
+						$query['where'] .= ' ' . $relation;
+
 					if ( isset( $value['type'] ) && $value['type'] == 'order_item_meta' ) {
-						$query['where'] .= " AND order_item_meta_{$value['meta_key']}.meta_key   = '{$value['meta_key']}'";
-						$query['where'] .= " AND order_item_meta_{$value['meta_key']}.meta_value {$where_value}";
+						$query['where'] .= " ( order_item_meta_{$value['meta_key']}.meta_key   = '{$value['meta_key']}'";
+						$query['where'] .= " AND order_item_meta_{$value['meta_key']}.meta_value {$where_value} )";
 					} else {
-						$query['where'] .= " AND meta_{$value['meta_key']}.meta_key   = '{$value['meta_key']}'";
-						$query['where'] .= " AND meta_{$value['meta_key']}.meta_value {$where_value}";
+						$query['where'] .= " ( meta_{$value['meta_key']}.meta_key   = '{$value['meta_key']}'";
+						$query['where'] .= " AND meta_{$value['meta_key']}.meta_value {$where_value} )";
 					}
 				}
 			}
+
+			$query['where'] .= ")";
 		}
 
 		if ( ! empty( $where ) ) {
