@@ -6,6 +6,7 @@
 <div id="poststuff" class="woocommerce-reports-wide">
 	<div class="postbox">
 		<h3 class="stats_range">
+			<?php $this->get_export_button(); ?>
 			<ul>
 				<?php
 					foreach ( $ranges as $range => $name )

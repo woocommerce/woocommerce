@@ -253,6 +253,25 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	}
 
 	/**
+	 * Output an export link
+	 */
+	public function get_export_button() {
+		$current_range = ! empty( $_GET['range'] ) ? $_GET['range'] : '7day';
+		?>
+		<a
+			href="#"
+			download="report-<?php echo $current_range; ?>-<?php echo date_i18n( 'Y-m-d', current_time('timestamp') ); ?>.csv"
+			class="export_csv"
+			data-export="chart"
+			data-xaxes="<?php _e( 'Date', 'woocommerce' ); ?>"
+			data-groupby="<?php echo $this->chart_groupby; ?>"
+		>
+			<?php _e( 'Export CSV', 'woocommerce' ); ?>
+		</a>
+		<?php
+	}
+
+	/**
 	 * Get the main chart
 	 * @return string
 	 */
@@ -314,6 +333,8 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 				<div class="chart-placeholder main"></div>
 			</div>
 			<script type="text/javascript">
+				var main_chart;
+
 				jQuery(function(){
 					var drawGraph = function( highlight ) {
 						var series = [
@@ -353,7 +374,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 							}
 						}
 
-						jQuery.plot(
+						main_chart = jQuery.plot(
 							jQuery('.chart-placeholder.main'),
 							series,
 							{

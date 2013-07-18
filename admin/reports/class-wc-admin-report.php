@@ -362,6 +362,11 @@ class WC_Admin_Report {
 	}
 
 	/**
+	 * Get an export link if needed
+	 */
+	public function get_export_button() {}
+
+	/**
 	 * Output the report
 	 */
 	public function output_report() {}

@@ -114,4 +114,111 @@ jQuery(document).ready(function($) {
             dates.not( this ).datepicker( "option", option, date );
         }
     });
+
+    // Export
+    $('.export_csv').click(function(){
+        var exclude_series = $(this).data( 'exclude_series' ) || '';
+        exclude_series     = exclude_series.toString();
+        exclude_series     = exclude_series.split(',');
+        var xaxes_label    = $(this).data('xaxes');
+        var groupby        = $(this).data('groupby');
+        var export         = $(this).data('export');
+        var csv_data       = "data:application/csv;charset=utf-8,"
+
+        if ( export == 'table' ) {
+
+            $(this).closest('div').find('thead tr,tbody tr').each(function() {
+                $(this).find('th,td').each(function() {
+                    value = $(this).text();
+                    value = value.replace( '[?]', '' );
+                    csv_data += '"' + value + '"' + ",";
+                });
+                csv_data = csv_data.substring( 0, csv_data.length - 1 );
+                csv_data += "\n";
+            });
+
+            $(this).closest('div').find('tfoot tr').each(function() {
+                $(this).find('th,td').each(function() {
+                    value = $(this).text();
+                    value = value.replace( '[?]', '' );
+                    csv_data += '"' + value + '"' + ",";
+                    if ( $(this).attr('colspan') > 0 )
+                        for ( i = 1; i < $(this).attr('colspan'); i++ )
+                            csv_data += '"",';
+                });
+                csv_data = csv_data.substring( 0, csv_data.length - 1 );
+                csv_data += "\n";
+            });
+
+        } else {
+
+            if ( ! window.main_chart )
+                return false;
+
+            var the_series = window.main_chart.getData();
+            var series     = [];
+            csv_data   += xaxes_label + ",";
+
+            $.each(the_series, function( index, value ) {
+                if ( ! exclude_series || $.inArray( index.toString(), exclude_series ) == -1 )
+                    series.push( value );
+            });
+
+            // CSV Headers
+            for ( var s = 0; s < series.length; ++s ) {
+                csv_data += series[s].label + ',';
+            }
+
+            csv_data = csv_data.substring( 0, csv_data.length - 1 );
+            csv_data += "\n";
+
+            // Get x axis values
+            var xaxis = {}
+
+            for ( var s = 0; s < series.length; ++s ) {
+                var series_data = series[s].data;
+                for ( var d = 0; d < series_data.length; ++d ) {
+                    xaxis[series_data[d][0]] = new Array();
+                    // Zero values to start
+                    for ( var i = 0; i < series.length; ++i ) {
+                        xaxis[series_data[d][0]].push(0);
+                    }
+                }
+            }
+
+            // Add chart data
+            for ( var s = 0; s < series.length; ++s ) {
+                var series_data = series[s].data;
+                for ( var d = 0; d < series_data.length; ++d ) {
+                    xaxis[series_data[d][0]][s] = series_data[d][1];
+                }
+            }
+
+            // Loop data and output to csv string
+            $.each( xaxis, function( index, value ) {
+                var date = new Date( parseInt( index ) );
+
+                if ( groupby == 'day' )
+                    csv_data += date.getFullYear() + "-" + parseInt( date.getMonth() + 1 ) + "-" + date.getDate() + ',';
+                else
+                    csv_data += date.getFullYear() + "-" + parseInt( date.getMonth() + 1 ) + ',';
+
+                for ( var d = 0; d < value.length; ++d ) {
+                    val = value[d];
+
+                    if( Math.round( val ) != val )
+                        val = val.toFixed(2);
+
+                    csv_data += val + ',';
+                }
+                csv_data = csv_data.substring( 0, csv_data.length - 1 );
+                csv_data += "\n";
+            } );
+
+        }
+
+        // Set data as href and return
+        $(this).attr( 'href', encodeURI( csv_data ) );
+        return true;
+    });
 });
