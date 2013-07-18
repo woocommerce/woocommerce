@@ -80,27 +80,33 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 		$legend[] = array(
 			'title' => sprintf( __( '%s sales in this period', 'woocommerce' ), '<strong>' . woocommerce_price( $total_sales ) . '</strong>' ),
-			'color' => $this->chart_colours['sales_amount']
+			'color' => $this->chart_colours['sales_amount'],
+			'highlight_series' => 5
 		);
 		$legend[] = array(
 			'title' => $average_sales_title,
-			'color' => $this->chart_colours['average']
+			'color' => $this->chart_colours['average'],
+			'highlight_series' => 2
 		);
 		$legend[] = array(
 			'title' => sprintf( __( '%s orders placed', 'woocommerce' ), '<strong>' . $total_orders . '</strong>' ),
-			'color' => $this->chart_colours['order_count']
+			'color' => $this->chart_colours['order_count'],
+			'highlight_series' => 1
 		);
 		$legend[] = array(
 			'title' => sprintf( __( '%s items purchased', 'woocommerce' ), '<strong>' . $total_items . '</strong>' ),
-			'color' => $this->chart_colours['item_count']
+			'color' => $this->chart_colours['item_count'],
+			'highlight_series' => 0
 		);
 		$legend[] = array(
 			'title' => sprintf( __( '%s charged for shipping', 'woocommerce' ), '<strong>' . woocommerce_price( $total_shipping ) . '</strong>' ),
-			'color' => $this->chart_colours['shipping_amount']
+			'color' => $this->chart_colours['shipping_amount'],
+			'highlight_series' => 4
 		);
 		$legend[] = array(
 			'title' => sprintf( __( '%s worth of coupons used', 'woocommerce' ), '<strong>' . woocommerce_price( $total_coupons ) . '</strong>' ),
-			'color' => $this->chart_colours['coupon_amount']
+			'color' => $this->chart_colours['coupon_amount'],
+			'highlight_series' => 3
 		);
 
 		return $legend;
@@ -316,9 +322,8 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			jQuery(function(){
 				var order_data = jQuery.parseJSON( '<?php echo $chart_data; ?>' );
 
-				jQuery.plot(
-					jQuery('.chart-placeholder.main'),
-					[
+				var drawGraph = function( highlight ) {
+					var series = [
 						{
 							label: "<?php echo esc_js( __( 'Number of items sold', 'woocommerce' ) ) ?>",
 							data: order_data.order_item_counts,
@@ -375,51 +380,80 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							shadowSize: 0,
 							prepend_tooltip: "<?php echo get_woocommerce_currency_symbol(); ?>"
 						}
-					],
-					{
-						legend: {
-							show: false
-						},
-					    grid: {
-					        color: '#aaa',
-					        borderColor: 'transparent',
-					        borderWidth: 0,
-					        hoverable: true
-					    },
-					    xaxes: [ {
-					    	color: '#aaa',
-					    	position: "bottom",
-					    	tickColor: 'transparent',
-							mode: "time",
-							timeformat: "<?php if ( $this->chart_groupby == 'day' ) echo '%d %b'; else echo '%b'; ?>",
-							monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
-							tickLength: 1,
-							minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],
-							font: {
-					    		color: "#aaa"
-					    	}
-						} ],
-					    yaxes: [
-					    	{
-					    		min: 0,
-					    		minTickSize: 1,
-					    		tickDecimals: 0,
-					    		color: '#d4d9dc',
-					    		font: { color: "#aaa" }
-					    	},
-					    	{
-					    		position: "right",
-					    		min: 0,
-					    		tickDecimals: 2,
-					    		alignTicksWithAxis: 1,
-					    		color: 'transparent',
-					    		font: { color: "#aaa" }
-					    	}
-					    ],
-			 		}
-			 	);
+					];
 
-			 	jQuery('.chart-placeholder').resize();
+					if ( highlight !== 'undefined' && series[ highlight ] ) {
+						highlight_series = series[ highlight ];
+
+						highlight_series.color = '#9c5d90';
+
+						if ( highlight_series.bars )
+							highlight_series.bars.fillColor = '#9c5d90';
+
+						if ( highlight_series.lines ) {
+							highlight_series.lines.lineWidth = 5;
+						}
+					}
+
+					jQuery.plot(
+						jQuery('.chart-placeholder.main'),
+						series,
+						{
+							legend: {
+								show: false
+							},
+						    grid: {
+						        color: '#aaa',
+						        borderColor: 'transparent',
+						        borderWidth: 0,
+						        hoverable: true
+						    },
+						    xaxes: [ {
+						    	color: '#aaa',
+						    	position: "bottom",
+						    	tickColor: 'transparent',
+								mode: "time",
+								timeformat: "<?php if ( $this->chart_groupby == 'day' ) echo '%d %b'; else echo '%b'; ?>",
+								monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
+								tickLength: 1,
+								minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],
+								font: {
+						    		color: "#aaa"
+						    	}
+							} ],
+						    yaxes: [
+						    	{
+						    		min: 0,
+						    		minTickSize: 1,
+						    		tickDecimals: 0,
+						    		color: '#d4d9dc',
+						    		font: { color: "#aaa" }
+						    	},
+						    	{
+						    		position: "right",
+						    		min: 0,
+						    		tickDecimals: 2,
+						    		alignTicksWithAxis: 1,
+						    		color: 'transparent',
+						    		font: { color: "#aaa" }
+						    	}
+						    ],
+				 		}
+				 	);
+
+					jQuery('.chart-placeholder').resize();
+				}
+
+				drawGraph();
+
+				jQuery('.highlight_series').hover(
+					function() {
+						drawGraph( jQuery(this).data('series') );
+					},
+					function() {
+						drawGraph();
+					}
+				);
 			});
 		</script>
 		<?php

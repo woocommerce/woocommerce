@@ -36,13 +36,15 @@
 		<?php if ( empty( $hide_sidebar ) ) : ?>
 			<div class="inside chart-with-sidebar">
 				<div class="chart-sidebar">
-					<ul class="chart-legend">
-						<?php foreach ( $this->get_chart_legend() as $legend ) : ?>
-							<li style="border-color: <?php echo $legend['color']; ?>">
-								<?php echo $legend['title']; ?>
-							</li>
-						<?php endforeach; ?>
-					</ul>
+					<?php if ( $legends = $this->get_chart_legend() ) : ?>
+						<ul class="chart-legend">
+							<?php foreach ( $legends as $legend ) : ?>
+								<li style="border-color: <?php echo $legend['color']; ?>" <?php if ( isset( $legend['highlight_series'] ) ) echo 'class="highlight_series" data-series="' . $legend['highlight_series'] . '"'; ?>>
+									<?php echo $legend['title']; ?>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					<?php endif; ?>
 					<ul class="chart-widgets">
 						<?php foreach ( $this->get_chart_widgets() as $widget ) : ?>
 							<li class="chart-widget">

@@ -45,7 +45,8 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
 			$legend[] = array(
 				'title' => sprintf( __( '%s sales in %s', 'woocommerce' ), '<strong>' . woocommerce_price( $total ) . '</strong>', $category->name ),
-				'color' => isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[ 0 ]
+				'color' => isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[ 0 ],
+				'highlight_series' => $index
 			);
 
 			$index++;
@@ -67,7 +68,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			'7day'         => __( 'Last 7 Days', 'woocommerce' )
 		);
 
-		$this->chart_colours = array( '#3498db', '#9b59b6', '#34495e', '#1abc9c', '#2ecc71', '#f1c40f', '#e67e22', '#e74c3c', '#2980b9', '#8e44ad', '#2c3e50', '#16a085', '#27ae60', '#f39c12', '#d35400', '#c0392b' );
+		$this->chart_colours = array( '#3498db', '#34495e', '#1abc9c', '#2ecc71', '#f1c40f', '#e67e22', '#e74c3c', '#2980b9', '#8e44ad', '#2c3e50', '#16a085', '#27ae60', '#f39c12', '#d35400', '#c0392b' );
 
 		$current_range = ! empty( $_GET['range'] ) ? $_GET['range'] : '7day';
 
@@ -314,9 +315,8 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			</div>
 			<script type="text/javascript">
 				jQuery(function(){
-					jQuery.plot(
-						jQuery('.chart-placeholder.main'),
-						[
+					var drawGraph = function( highlight ) {
+						var series = [
 							<?php
 								$index = 0;
 								foreach ( $chart_data as $data ) {
@@ -338,44 +338,74 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 									$index++;
 								}
 							?>
-						],
-						{
-							legend: {
-								show: false
-							},
-						    grid: {
-						        color: '#aaa',
-						        borderColor: 'transparent',
-						        borderWidth: 0,
-						        hoverable: true
-						    },
-						    xaxes: [ {
-						    	color: '#aaa',
-						    	reserveSpace: true,
-						    	position: "bottom",
-						    	tickColor: 'transparent',
-								mode: "time",
-								timeformat: "<?php if ( $this->chart_groupby == 'day' ) echo '%d %b'; else echo '%b'; ?>",
-								monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
-								tickLength: 1,
-								minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],
-								tickSize: [1, "<?php echo $this->chart_groupby; ?>"],
-								font: {
-						    		color: "#aaa"
-						    	}
-							} ],
-						    yaxes: [
-						    	{
-						    		min: 0,
-						    		tickDecimals: 2,
-						    		color: 'transparent',
-						    		font: { color: "#aaa" }
-						    	}
-						    ],
-				 		}
-				 	);
+						];
 
-				 	jQuery('.chart-placeholder').resize();
+						if ( highlight !== 'undefined' && series[ highlight ] ) {
+							highlight_series = series[ highlight ];
+
+							highlight_series.color = '#9c5d90';
+
+							if ( highlight_series.bars )
+								highlight_series.bars.fillColor = '#9c5d90';
+
+							if ( highlight_series.lines ) {
+								highlight_series.lines.lineWidth = 5;
+							}
+						}
+
+						jQuery.plot(
+							jQuery('.chart-placeholder.main'),
+							series,
+							{
+								legend: {
+									show: false
+								},
+							    grid: {
+							        color: '#aaa',
+							        borderColor: 'transparent',
+							        borderWidth: 0,
+							        hoverable: true
+							    },
+							    xaxes: [ {
+							    	color: '#aaa',
+							    	reserveSpace: true,
+							    	position: "bottom",
+							    	tickColor: 'transparent',
+									mode: "time",
+									timeformat: "<?php if ( $this->chart_groupby == 'day' ) echo '%d %b'; else echo '%b'; ?>",
+									monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
+									tickLength: 1,
+									minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],
+									tickSize: [1, "<?php echo $this->chart_groupby; ?>"],
+									font: {
+							    		color: "#aaa"
+							    	}
+								} ],
+							    yaxes: [
+							    	{
+							    		min: 0,
+							    		tickDecimals: 2,
+							    		color: 'transparent',
+							    		font: { color: "#aaa" }
+							    	}
+							    ],
+					 		}
+					 	);
+
+					 	jQuery('.chart-placeholder').resize();
+
+				 	}
+
+					drawGraph();
+
+					jQuery('.highlight_series').hover(
+						function() {
+							drawGraph( jQuery(this).data('series') );
+						},
+						function() {
+							drawGraph();
+						}
+					);
 				});
 			</script>
 			<?php

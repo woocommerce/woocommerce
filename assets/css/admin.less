@@ -2679,6 +2679,7 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 			li.chart-widget {
 				margin: 0 0 1em;
 				background: #fafafa;
+				border:1px solid #dfdfdf;
 
 		    	&:after {
 				    content: ".";
@@ -2690,6 +2691,8 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 				h4 {
 					background: #fff;
 					border:1px solid #dfdfdf;
+					border-left-width: 0;
+					border-right-width: 0;
 					padding: 10px;
 					margin:0;
 					color: #21759b;
@@ -2699,7 +2702,7 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 					background-image: -moz-linear-gradient(bottom,#ececec,#f9f9f9);
 					background-image: -o-linear-gradient(bottom,#ececec,#f9f9f9);
 					background-image: linear-gradient(to top,#ececec,#f9f9f9);
-					&:hover {
+					&.section_title:hover {
 						color:#d54e21;
 					}
 				}
@@ -2724,8 +2727,6 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 				}
 				table {
 					width: 100%;
-					border-left:1px solid #dfdfdf;
-					border-right:1px solid #dfdfdf;
 					td {
 						padding: 7px 10px;
 						vertical-align: top;
@@ -2761,10 +2762,6 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 						margin-top: 10px;
 					}
 				}
-				form {
-					border-left:1px solid #dfdfdf;
-					border-right:1px solid #dfdfdf;
-				}
 				#product_ids {
 					width: 100%;
 				}
@@ -2778,7 +2775,7 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 		}
 		.chart-legend {
 			list-style: none outside;
-			margin: 0;
+			margin: 0 0 1em;
 			padding: 0;
 			border:1px solid #dfdfdf;
 			border-right-width:0;

@@ -67,12 +67,14 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
 		$legend[] = array(
 			'title' => sprintf( __( '%s discounts in total', 'woocommerce' ), '<strong>' . woocommerce_price( $total_discount ) . '</strong>' ),
-			'color' => $this->chart_colours['discount_amount']
+			'color' => $this->chart_colours['discount_amount'],
+			'highlight_series' => 1
 		);
 
 		$legend[] = array(
 			'title' => sprintf( __( '%s coupons used in total', 'woocommerce' ), '<strong>' . $total_coupons . '</strong>' ),
-			'color' => $this->chart_colours['coupon_count' ]
+			'color' => $this->chart_colours['coupon_count' ],
+			'highlight_series' => 0
 		);
 
 		return $legend;
@@ -434,9 +436,8 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 			jQuery(function(){
 				var order_data = jQuery.parseJSON( '<?php echo $chart_data; ?>' );
 
-				jQuery.plot(
-					jQuery('.chart-placeholder.main'),
-					[
+				var drawGraph = function( highlight ) {
+					var series = [
 						{
 							label: "<?php echo esc_js( __( 'Number of coupons used', 'woocommerce' ) ) ?>",
 							data: order_data.order_coupon_counts,
@@ -455,51 +456,80 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 							shadowSize: 0,
 							prepend_tooltip: "<?php echo get_woocommerce_currency_symbol(); ?>"
 						}
-					],
-					{
-						legend: {
-							show: false
-						},
-					    grid: {
-					        color: '#aaa',
-					        borderColor: 'transparent',
-					        borderWidth: 0,
-					        hoverable: true
-					    },
-					    xaxes: [ {
-					    	color: '#aaa',
-					    	position: "bottom",
-					    	tickColor: 'transparent',
-							mode: "time",
-							timeformat: "<?php if ( $this->chart_groupby == 'day' ) echo '%d %b'; else echo '%b'; ?>",
-							monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
-							tickLength: 1,
-							minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],
-							font: {
-					    		color: "#aaa"
-					    	}
-						} ],
-					    yaxes: [
-					    	{
-					    		min: 0,
-					    		minTickSize: 1,
-					    		tickDecimals: 0,
-					    		color: '#ecf0f1',
-					    		font: { color: "#aaa" }
-					    	},
-					    	{
-					    		position: "right",
-					    		min: 0,
-					    		tickDecimals: 2,
-					    		alignTicksWithAxis: 1,
-					    		color: 'transparent',
-					    		font: { color: "#aaa" }
-					    	}
-					    ],
-			 		}
-			 	);
+					];
 
-			 	jQuery('.chart-placeholder').resize();
+					if ( highlight !== 'undefined' && series[ highlight ] ) {
+						highlight_series = series[ highlight ];
+
+						highlight_series.color = '#9c5d90';
+
+						if ( highlight_series.bars )
+							highlight_series.bars.fillColor = '#9c5d90';
+
+						if ( highlight_series.lines ) {
+							highlight_series.lines.lineWidth = 5;
+						}
+					}
+
+					jQuery.plot(
+						jQuery('.chart-placeholder.main'),
+						series,
+						{
+							legend: {
+								show: false
+							},
+						    grid: {
+						        color: '#aaa',
+						        borderColor: 'transparent',
+						        borderWidth: 0,
+						        hoverable: true
+						    },
+						    xaxes: [ {
+						    	color: '#aaa',
+						    	position: "bottom",
+						    	tickColor: 'transparent',
+								mode: "time",
+								timeformat: "<?php if ( $this->chart_groupby == 'day' ) echo '%d %b'; else echo '%b'; ?>",
+								monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
+								tickLength: 1,
+								minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],
+								font: {
+						    		color: "#aaa"
+						    	}
+							} ],
+						    yaxes: [
+						    	{
+						    		min: 0,
+						    		minTickSize: 1,
+						    		tickDecimals: 0,
+						    		color: '#ecf0f1',
+						    		font: { color: "#aaa" }
+						    	},
+						    	{
+						    		position: "right",
+						    		min: 0,
+						    		tickDecimals: 2,
+						    		alignTicksWithAxis: 1,
+						    		color: 'transparent',
+						    		font: { color: "#aaa" }
+						    	}
+						    ],
+				 		}
+				 	);
+
+				 	jQuery('.chart-placeholder').resize();
+				}
+
+				drawGraph();
+
+				jQuery('.highlight_series').hover(
+					function() {
+						drawGraph( jQuery(this).data('series') );
+					},
+					function() {
+						drawGraph();
+					}
+				);
 			});
 		</script>
 		<?php

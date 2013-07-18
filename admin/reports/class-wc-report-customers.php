@@ -13,7 +13,8 @@ class WC_Report_Customers extends WC_Admin_Report {
 
 		$legend[] = array(
 			'title' => sprintf( __( '%s signups in this period', 'woocommerce' ), '<strong>' . sizeof( $this->customers ) . '</strong>' ),
-			'color' => $this->chart_colours['signups']
+			'color' => $this->chart_colours['signups'],
+			'highlight_series' => 2
 		);
 
 		return $legend;
@@ -232,6 +233,11 @@ class WC_Report_Customers extends WC_Admin_Report {
 
 		$this->customers = $users_query->get_results();
 
+		foreach ( $this->customers as $key => $customer ) {
+			if ( strtotime( $customer->user_registered ) < $this->start_date || strtotime( $customer->user_registered ) > $this->end_date )
+				unset( $this->customers[ $key ] );
+		}
+
 		include( WC()->plugin_path() . '/admin/views/html-report-by-date.php' );
 	}
 
@@ -312,78 +318,105 @@ class WC_Report_Customers extends WC_Admin_Report {
 			jQuery(function(){
 				var chart_data = jQuery.parseJSON( '<?php echo $chart_data; ?>' );
 
-				jQuery.plot(
-					jQuery('.chart-placeholder.main'),
-					[
-						{
-							label: "<?php echo esc_js( __( 'Customer Orders', 'woocommerce' ) ) ?>",
-							data: chart_data.customer_orders,
-							color: '<?php echo $this->chart_colours['customers']; ?>',
-							bars: { fillColor: '<?php echo $this->chart_colours['customers']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },
-							shadowSize: 0,
-							enable_tooltip: true,
-							append_tooltip: "<?php echo ' ' . __( 'customer orders', 'woocommerce' ); ?>",
-							stack: true,
-						},
-						{
-							label: "<?php echo esc_js( __( 'Guest Orders', 'woocommerce' ) ) ?>",
-							data: chart_data.guest_orders,
-							color: '<?php echo $this->chart_colours['guests']; ?>',
-							bars: { fillColor: '<?php echo $this->chart_colours['guests']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },
-							shadowSize: 0,
-							enable_tooltip: true,
-							append_tooltip: "<?php echo ' ' . __( 'guest orders', 'woocommerce' ); ?>",
-							stack: true,
-						},
-						{
-							label: "<?php echo esc_js( __( 'Signups', 'woocommerce' ) ) ?>",
-							data: chart_data.signups,
-							color: '<?php echo $this->chart_colours['signups']; ?>',
-							points: { show: true, radius: 5, lineWidth: 3, fillColor: '#fff', fill: true },
-							lines: { show: true, lineWidth: 4, fill: false },
-							shadowSize: 0,
-							enable_tooltip: true,
-							append_tooltip: "<?php echo ' ' . __( 'new users', 'woocommerce' ); ?>",
-							stack: false
-						},
-					],
-					{
-						legend: {
-							show: false
-						},
-					    grid: {
-					        color: '#aaa',
-					        borderColor: 'transparent',
-					        borderWidth: 0,
-					        hoverable: true
-					    },
-					    xaxes: [ {
-					    	color: '#aaa',
-					    	position: "bottom",
-					    	tickColor: 'transparent',
-							mode: "time",
-							timeformat: "<?php if ( $this->chart_groupby == 'day' ) echo '%d %b'; else echo '%b'; ?>",
-							monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
-							tickLength: 1,
-							minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],
-							tickSize: [1, "<?php echo $this->chart_groupby; ?>"],
-							font: {
-					    		color: "#aaa"
-					    	}
-						} ],
-					    yaxes: [
-					    	{
-					    		min: 0,
-					    		minTickSize: 1,
-					    		tickDecimals: 0,
-					    		color: '#ecf0f1',
-					    		font: { color: "#aaa" }
-					    	}
-					    ],
-			 		}
-			 	);
+				var drawGraph = function( highlight ) {
+					var series = [
+							{
+								label: "<?php echo esc_js( __( 'Customer Orders', 'woocommerce' ) ) ?>",
+								data: chart_data.customer_orders,
+								color: '<?php echo $this->chart_colours['customers']; ?>',
+								bars: { fillColor: '<?php echo $this->chart_colours['customers']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },
+								shadowSize: 0,
+								enable_tooltip: true,
+								append_tooltip: "<?php echo ' ' . __( 'customer orders', 'woocommerce' ); ?>",
+								stack: true,
+							},
+							{
+								label: "<?php echo esc_js( __( 'Guest Orders', 'woocommerce' ) ) ?>",
+								data: chart_data.guest_orders,
+								color: '<?php echo $this->chart_colours['guests']; ?>',
+								bars: { fillColor: '<?php echo $this->chart_colours['guests']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },
+								shadowSize: 0,
+								enable_tooltip: true,
+								append_tooltip: "<?php echo ' ' . __( 'guest orders', 'woocommerce' ); ?>",
+								stack: true,
+							},
+							{
+								label: "<?php echo esc_js( __( 'Signups', 'woocommerce' ) ) ?>",
+								data: chart_data.signups,
+								color: '<?php echo $this->chart_colours['signups']; ?>',
+								points: { show: true, radius: 5, lineWidth: 3, fillColor: '#fff', fill: true },
+								lines: { show: true, lineWidth: 4, fill: false },
+								shadowSize: 0,
+								enable_tooltip: true,
+								append_tooltip: "<?php echo ' ' . __( 'new users', 'woocommerce' ); ?>",
+								stack: false
+							},
+						];
 
-			 	jQuery('.chart-placeholder.main').resize();
+					if ( highlight !== 'undefined' && series[ highlight ] ) {
+						highlight_series = series[ highlight ];
+
+						highlight_series.color = '#9c5d90';
+
+						if ( highlight_series.bars )
+							highlight_series.bars.fillColor = '#9c5d90';
+
+						if ( highlight_series.lines ) {
+							highlight_series.lines.lineWidth = 5;
+						}
+					}
+
+					jQuery.plot(
+						jQuery('.chart-placeholder.main'),
+						series,
+						{
+							legend: {
+								show: false
+							},
+						    grid: {
+						        color: '#aaa',
+						        borderColor: 'transparent',
+						        borderWidth: 0,
+						        hoverable: true
+						    },
+						    xaxes: [ {
+						    	color: '#aaa',
+						    	position: "bottom",
+						    	tickColor: 'transparent',
+								mode: "time",
+								timeformat: "<?php if ( $this->chart_groupby == 'day' ) echo '%d %b'; else echo '%b'; ?>",
+								monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
+								tickLength: 1,
+								minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],
+								tickSize: [1, "<?php echo $this->chart_groupby; ?>"],
+								font: {
+						    		color: "#aaa"
+						    	}
+							} ],
+						    yaxes: [
+						    	{
+						    		min: 0,
+						    		minTickSize: 1,
+						    		tickDecimals: 0,
+						    		color: '#ecf0f1',
+						    		font: { color: "#aaa" }
+						    	}
+						    ],
+				 		}
+				 	);
+				 	jQuery('.chart-placeholder').resize();
+				}
+
+				drawGraph();
+
+				jQuery('.highlight_series').hover(
+					function() {
+						drawGraph( jQuery(this).data('series') );
+					},
+					function() {
+						drawGraph();
+					}
+				);
 			});
 		</script>
 		<?php
