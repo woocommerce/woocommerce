@@ -12,8 +12,76 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
+/**
+ * @todo Load all pages conditonally when needed from this class
+ */
+class WC_Admin {
 
-include_once( 'class-wc-admin-reports.php' );
+	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		add_filter( 'admin_menu', array( $this, 'reports_menu' ), 20 );
+		add_filter( 'admin_menu', array( $this, 'status_menu' ), 60 );
+		add_filter( 'woocommerce_screen_ids', array( $this, 'add_screen_ids' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'scripts_and_styles' ) );
+	}
+
+	/**
+	 * Add menu item
+	 */
+	public function reports_menu() {
+		add_submenu_page( 'woocommerce', __( 'Reports', 'woocommerce' ),  __( 'Reports', 'woocommerce' ) , 'view_woocommerce_reports', 'wc_reports', array( $this, 'reports_page' ) );
+	}
+
+	/**
+	 * Add menu item
+	 */
+	public function status_menu() {
+		add_submenu_page( 'woocommerce', __( 'WooCommerce Status', 'woocommerce' ),  __( 'System Status', 'woocommerce' ) , 'manage_woocommerce', 'wc_status', array( $this, 'status_page' ) );
+	}
+
+	/**
+	 * Add screen ID
+	 * @param array $ids
+	 */
+	public function add_screen_ids( $ids ) {
+		$wc_screen_id = strtolower( __( 'WooCommerce', 'woocommerce' ) );
+		$ids[]        = $wc_screen_id . '_page_wc_reports';
+		$ids[]        = $wc_screen_id . '_page_wc_status';
+		return $ids;
+	}
+
+	public function reports_page() {
+		$page = include_once( 'class-wc-admin-reports.php' );
+		$page->output();
+	}
+
+	public function status_page() {
+		$page = include_once( 'class-wc-admin-status.php' );
+		$page->output();
+	}
+
+	/**
+	 * Script and styles
+	 */
+	public function scripts_and_styles() {
+		$screen       = get_current_screen();
+		$wc_screen_id = strtolower( __( 'WooCommerce', 'woocommerce' ) );
+		$suffix       = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+
+		if ( in_array( $screen->id, apply_filters( 'woocommerce_reports_screen_ids', array( $wc_screen_id . '_page_wc_reports' ) ) ) ) {
+			wp_enqueue_script( 'wc-reports', WC()->plugin_url() . '/assets/js/admin/reports' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker' ), '1.0' );
+			wp_enqueue_script( 'flot', WC()->plugin_url() . '/assets/js/admin/jquery.flot' . $suffix . '.js', array( 'jquery' ), '1.0' );
+			wp_enqueue_script( 'flot-resize', WC()->plugin_url() . '/assets/js/admin/jquery.flot.resize' . $suffix . '.js', array('jquery', 'flot'), '1.0' );
+			wp_enqueue_script( 'flot-time', WC()->plugin_url() . '/assets/js/admin/jquery.flot.time' . $suffix . '.js', array( 'jquery', 'flot' ), '1.0' );
+			wp_enqueue_script( 'flot-pie', WC()->plugin_url() . '/assets/js/admin/jquery.flot.pie' . $suffix . '.js', array( 'jquery', 'flot' ), '1.0' );
+			wp_enqueue_script( 'flot-stack', WC()->plugin_url() . '/assets/js/admin/jquery.flot.stack' . $suffix . '.js', array( 'jquery', 'flot' ), '1.0' );
+		}
+	}
+}
+
+new WC_Admin();
 
 
 
@@ -73,7 +141,7 @@ function woocommerce_admin_menu() {
 
     $wc_screen_id = strtolower( __( 'WooCommerce', 'woocommerce' ) );
 
-    $print_css_on = apply_filters( 'woocommerce_screen_ids', array( 'toplevel_page_' . $wc_screen_id, $wc_screen_id . '_page_woocommerce_settings', $wc_screen_id . '_page_woocommerce_status', $wc_screen_id . '_page_woocommerce_customers', 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_woocommerce_customers', 'woocommerce_page_woocommerce_status', 'product_page_woocommerce_attributes', 'edit-tags.php', 'edit.php', 'index.php', 'post-new.php', 'post.php' ) );
+    $print_css_on = apply_filters( 'woocommerce_screen_ids', array( 'toplevel_page_' . $wc_screen_id, $wc_screen_id . '_page_woocommerce_settings', $wc_screen_id . '_page_wc_status', $wc_screen_id . '_page_woocommerce_customers', 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_woocommerce_customers', 'woocommerce_page_wc_status', 'product_page_woocommerce_attributes', 'edit-tags.php', 'edit.php', 'index.php', 'post-new.php', 'post.php' ) );
 
     foreach ( $print_css_on as $page )
     	add_action( 'admin_print_styles-'. $page, 'woocommerce_admin_css' );
@@ -89,7 +157,6 @@ add_action( 'admin_menu', 'woocommerce_admin_menu', 9 );
  */
 function woocommerce_admin_menu_after() {
 	$settings_page = add_submenu_page( 'woocommerce', __( 'WooCommerce Settings', 'woocommerce' ),  __( 'Settings', 'woocommerce' ) , 'manage_woocommerce', 'woocommerce_settings', 'woocommerce_settings_page');
-	$status_page = add_submenu_page( 'woocommerce', __( 'WooCommerce Status', 'woocommerce' ),  __( 'System Status', 'woocommerce' ) , 'manage_woocommerce', 'woocommerce_status', 'woocommerce_status_page');
 
 	add_action( 'load-' . $settings_page, 'woocommerce_settings_page_init' );
 }
@@ -341,17 +408,6 @@ function woocommerce_attributes_page() {
 	woocommerce_attributes();
 }
 
-/**
- * Include and display the status page.
- *
- * @access public
- * @return void
- */
-function woocommerce_status_page() {
-	include_once( 'woocommerce-admin-status.php' );
-	woocommerce_status();
-}
-
 
 /**
  * Include and add help tabs to WordPress admin.
@@ -398,7 +454,7 @@ function woocommerce_admin_scripts() {
     $wc_screen_id = strtolower( __( 'WooCommerce', 'woocommerce' ) );
 
     // WooCommerce admin pages
-    if ( in_array( $screen->id, apply_filters( 'woocommerce_screen_ids', array( 'toplevel_page_' . $wc_screen_id, $wc_screen_id . '_page_woocommerce_settings', $wc_screen_id . '_page_woocommerce_status', $wc_screen_id . '_page_woocommerce_customers', 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_woocommerce_status', 'woocommerce_page_woocommerce_customers', 'edit-shop_order', 'edit-shop_coupon', 'shop_coupon', 'shop_order', 'edit-product', 'product' ) ) ) ) {
+    if ( in_array( $screen->id, apply_filters( 'woocommerce_screen_ids', array( 'toplevel_page_' . $wc_screen_id, $wc_screen_id . '_page_woocommerce_settings', $wc_screen_id . '_page_wc_status', $wc_screen_id . '_page_woocommerce_customers', 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_wc_status', 'woocommerce_page_woocommerce_customers', 'edit-shop_order', 'edit-shop_coupon', 'shop_coupon', 'shop_order', 'edit-product', 'product' ) ) ) ) {
 
     	wp_enqueue_script( 'woocommerce_admin' );
     	wp_enqueue_script( 'farbtastic' );

@@ -30,7 +30,7 @@ function woocommerce_admin_help_tab_content() {
 
 	    	'<p>' . __( 'If you are having problems, or to assist us with support, please check the status page to identify any problems with your configuration:', 'woocommerce' ) . '</p>' .
 
-	    	'<p><a href="' . admin_url('admin.php?page=woocommerce_status') . '" class="button">' . __( 'System Status', 'woocommerce' ) . '</a></p>' .
+	    	'<p><a href="' . admin_url('admin.php?page=wc_status') . '" class="button">' . __( 'System Status', 'woocommerce' ) . '</a></p>' .
 
 	    	'<p>' . sprintf(__( 'If you come across a bug, or wish to contribute to the project you can also <a href="%s">get involved on GitHub</a>.', 'woocommerce' ), 'https://github.com/woothemes/woocommerce') . '</p>'
 
