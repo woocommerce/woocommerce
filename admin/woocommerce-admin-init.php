@@ -12,6 +12,12 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
+
+include_once( 'class-wc-admin-reports.php' );
+
+
+
+
 /**
  * Functions for the product post type
  */
@@ -57,26 +63,23 @@ function woocommerce_admin_menu() {
     global $menu, $woocommerce;
 
     if ( current_user_can( 'manage_woocommerce' ) )
-    $menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );
+    	$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );
 
     $main_page = add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings_page', null, '55.5' );
-
-    $reports_page = add_submenu_page( 'woocommerce', __( 'Reports', 'woocommerce' ),  __( 'Reports', 'woocommerce' ) , 'view_woocommerce_reports', 'woocommerce_reports', 'woocommerce_reports_page' );
 
     add_submenu_page( 'edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'woocommerce_attributes', 'woocommerce_attributes_page');
 
     add_action( 'load-' . $main_page, 'woocommerce_admin_help_tab' );
-    add_action( 'load-' . $reports_page, 'woocommerce_admin_help_tab' );
 
     $wc_screen_id = strtolower( __( 'WooCommerce', 'woocommerce' ) );
 
-    $print_css_on = apply_filters( 'woocommerce_screen_ids', array( 'toplevel_page_' . $wc_screen_id, $wc_screen_id . '_page_woocommerce_settings', $wc_screen_id . '_page_woocommerce_reports', $wc_screen_id . '_page_woocommerce_status', $wc_screen_id . '_page_woocommerce_customers', 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_woocommerce_reports', 'woocommerce_page_woocommerce_customers', 'woocommerce_page_woocommerce_status', 'product_page_woocommerce_attributes', 'edit-tags.php', 'edit.php', 'index.php', 'post-new.php', 'post.php' ) );
+    $print_css_on = apply_filters( 'woocommerce_screen_ids', array( 'toplevel_page_' . $wc_screen_id, $wc_screen_id . '_page_woocommerce_settings', $wc_screen_id . '_page_woocommerce_status', $wc_screen_id . '_page_woocommerce_customers', 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_woocommerce_customers', 'woocommerce_page_woocommerce_status', 'product_page_woocommerce_attributes', 'edit-tags.php', 'edit.php', 'index.php', 'post-new.php', 'post.php' ) );
 
     foreach ( $print_css_on as $page )
     	add_action( 'admin_print_styles-'. $page, 'woocommerce_admin_css' );
 }
 
-add_action('admin_menu', 'woocommerce_admin_menu', 9);
+add_action( 'admin_menu', 'woocommerce_admin_menu', 9 );
 
 /**
  * Setup the Admin menu in WordPress - later priority so they appear last
@@ -85,7 +88,6 @@ add_action('admin_menu', 'woocommerce_admin_menu', 9);
  * @return void
  */
 function woocommerce_admin_menu_after() {
-	$customers_page = add_submenu_page( 'woocommerce', __( 'Customers', 'woocommerce' ),  __( 'Customers', 'woocommerce' ) , 'manage_woocommerce', 'woocommerce_customers', 'woocommerce_customers_page' );
 	$settings_page = add_submenu_page( 'woocommerce', __( 'WooCommerce Settings', 'woocommerce' ),  __( 'Settings', 'woocommerce' ) , 'manage_woocommerce', 'woocommerce_settings', 'woocommerce_settings_page');
 	$status_page = add_submenu_page( 'woocommerce', __( 'WooCommerce Status', 'woocommerce' ),  __( 'System Status', 'woocommerce' ) , 'manage_woocommerce', 'woocommerce_status', 'woocommerce_status_page');
 
@@ -132,9 +134,9 @@ function woocommerce_admin_menu_highlight() {
 		}
 	}
 
-	if ( isset( $submenu['woocommerce'] ) && isset( $submenu['woocommerce'][2] ) ) {
-		$submenu['woocommerce'][0] = $submenu['woocommerce'][2];
-		unset( $submenu['woocommerce'][2] );
+	if ( isset( $submenu['woocommerce'] ) && isset( $submenu['woocommerce'][1] ) ) {
+		$submenu['woocommerce'][0] = $submenu['woocommerce'][1];
+		unset( $submenu['woocommerce'][1] );
 	}
 
 	// Sort out Orders menu when on the top level
@@ -329,49 +331,6 @@ function woocommerce_settings_page() {
 }
 
 /**
- * Include and display the customers page.
- *
- * @access public
- * @return void
- */
-function woocommerce_customers_page() {
-	include_once( 'woocommerce-admin-customers.php' );
-
-	$WC_Admin_Customers = new WC_Admin_Customers();
-    $WC_Admin_Customers->prepare_items();
-    ?>
-    <div class="wrap">
-        <div id="icon-woocommerce" class="icon32 icon32-woocommerce-users"><br/></div>
-        <h2><?php _e( 'Customers', 'wc_software' ); ?></h2>
-
-        <?php
-	        if ( ! empty( $_GET['link_orders'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'link_orders' ) ) {
-				$linked = woocommerce_update_new_customer_past_orders( absint( $_GET['link_orders'] ) );
-
-				echo '<div class="updated"><p>' . sprintf( _n( '%s previous order linked', '%s previous orders linked', $linked, 'woocommerce' ), $linked ) . '</p></div>';
-			}
-		?>
-
-        <form method="post" id="woocommerce_customers">
-			<?php $WC_Admin_Customers->search_box( __( 'Search customers', 'woocommerce' ), 'customer_search' ); ?>
- 			<?php $WC_Admin_Customers->display() ?>
-		</form>
-    </div>
-    <?php
-}
-
-/**
- * Include and display the reports page.
- *
- * @access public
- * @return void
- */
-function woocommerce_reports_page() {
-	include_once( 'woocommerce-admin-reports.php' );
-	woocommerce_reports();
-}
-
-/**
  * Include and display the attibutes page.
  *
  * @access public
@@ -439,7 +398,7 @@ function woocommerce_admin_scripts() {
     $wc_screen_id = strtolower( __( 'WooCommerce', 'woocommerce' ) );
 
     // WooCommerce admin pages
-    if ( in_array( $screen->id, apply_filters( 'woocommerce_screen_ids', array( 'toplevel_page_' . $wc_screen_id, $wc_screen_id . '_page_woocommerce_settings', $wc_screen_id . '_page_woocommerce_reports', $wc_screen_id . '_page_woocommerce_status', $wc_screen_id . '_page_woocommerce_customers', 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_woocommerce_reports', 'woocommerce_page_woocommerce_status', 'woocommerce_page_woocommerce_customers', 'edit-shop_order', 'edit-shop_coupon', 'shop_coupon', 'shop_order', 'edit-product', 'product' ) ) ) ) {
+    if ( in_array( $screen->id, apply_filters( 'woocommerce_screen_ids', array( 'toplevel_page_' . $wc_screen_id, $wc_screen_id . '_page_woocommerce_settings', $wc_screen_id . '_page_woocommerce_status', $wc_screen_id . '_page_woocommerce_customers', 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_woocommerce_status', 'woocommerce_page_woocommerce_customers', 'edit-shop_order', 'edit-shop_coupon', 'shop_coupon', 'shop_order', 'edit-product', 'product' ) ) ) ) {
 
     	wp_enqueue_script( 'woocommerce_admin' );
     	wp_enqueue_script( 'farbtastic' );
@@ -529,15 +488,6 @@ function woocommerce_admin_scripts() {
 	if ( current_user_can('edit_others_pages') && $screen->id == 'edit-product' && isset( $wp_query->query['orderby'] ) && $wp_query->query['orderby'] == 'menu_order title' ) {
 
 		wp_enqueue_script( 'woocommerce_product_ordering', $woocommerce->plugin_url() . '/assets/js/admin/product-ordering.js', array('jquery-ui-sortable'), '1.0', true );
-
-	}
-
-	// Reports pages
-    if ( in_array( $screen->id, apply_filters( 'woocommerce_reports_screen_ids', array( $wc_screen_id . '_page_woocommerce_reports', apply_filters( 'woocommerce_reports_screen_id', 'woocommerce_page_woocommerce_reports' ) ) ) ) ) {
-
-		wp_enqueue_script( 'jquery-ui-datepicker' );
-		wp_enqueue_script( 'flot', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot' . $suffix . '.js', 'jquery', '1.0' );
-		wp_enqueue_script( 'flot-resize', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.resize' . $suffix . '.js', array('jquery', 'flot'), '1.0' );
 
 	}
 }
