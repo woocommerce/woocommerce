@@ -201,6 +201,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Refactor - Widget classes (added abstract and combined similar widgets).
 * Refactor - Removed pay and thanks pages. Endpoints are used instead.
 * Refactor - Removed certain my-account pages. Endpoints are used instead.
+* Refactor - Reports. New design, export csvs, more data.
 * Localization - Portugese locale by jpBenfica.
 * Localization - Swedish translation by Björn Sennbrink.
 * Localization - Japanese translation by Shohei Tanaka.
