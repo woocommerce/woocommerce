@@ -1530,9 +1530,9 @@ ul.recent-orders, ul.stock_list {
 		line-height: 1.5;
 		margin-left:.5em;
 		width: 5.4em;
-		font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+		font-family: 'WooCommerce' !important;
 		&:before {
-			content: "\2605\2605\2605\2605\2605";
+			content: "\e021\e021\e021\e021\e021";
 			color: darken( #ccc, 10 );
 			float: left;
 			top: 0;
@@ -1550,7 +1550,7 @@ ul.recent-orders, ul.stock_list {
 			padding-top: 1.5em;
 		}
 		span:before {
-			content: "\2605\2605\2605\2605\2605";
+			content: "\e020\e020\e020\e020\e020";
 			top: 0;
 			position: absolute;
 			left: 0;
@@ -2688,6 +2688,11 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 				padding: 9px 10px;
 				display: block;
 				text-decoration: none;
+				&:before {
+					.iconbefore;
+					content: "\e00a";
+					margin-right:4px;
+				}
 			}
 			ul {
 				list-style: none outside;
