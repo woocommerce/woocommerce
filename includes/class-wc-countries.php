@@ -758,6 +758,12 @@ class WC_Countries {
 
 			// Locale information used by the checkout
 			$this->locale = apply_filters('woocommerce_get_country_locale', array(
+				'AE' => array(
+					'postcode' => array(
+						'required' 	=> false,
+						'hidden'	=> true
+					),
+				),
 				'AF' => array(
 					'state' => array(
 						'required' => false,
@@ -1060,7 +1066,7 @@ class WC_Countries {
 
 		if (!$country)
             $country = $this->get_base_country();
-		
+
 		$fields     = $this->get_default_address_fields();
 		$locale		= $this->get_country_locale();
 
