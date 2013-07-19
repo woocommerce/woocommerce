@@ -44,10 +44,10 @@ class WC_Shortcode_Cart {
 
 			$woocommerce->shipping->reset_shipping();
 			$woocommerce->customer->calculated_shipping( true );
-			$country 	= $_POST['calc_shipping_country'];
-			$state 		= $_POST['calc_shipping_state'];
-			$postcode   = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true ) ? stripslashes( $_POST['calc_shipping_postcode'] ) : '';
-			$city       = apply_filters( 'woocommerce_shipping_calculator_enable_city', false ) ? stripslashes( $_POST['calc_shipping_city'] ) : '';
+			$country 	= woocommerce_clean( $_POST['calc_shipping_country'] );
+			$state 		= woocommerce_clean( $_POST['calc_shipping_state'] );
+			$postcode   = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true ) ? woocommerce_clean( $_POST['calc_shipping_postcode'] ) : '';
+			$city       = apply_filters( 'woocommerce_shipping_calculator_enable_city', false ) ? woocommerce_clean( $_POST['calc_shipping_city'] ) : '';
 
 			if ( $postcode && ! $validation->is_postcode( $postcode, $country ) ) {
 				$woocommerce->add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
