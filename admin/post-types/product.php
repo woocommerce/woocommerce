@@ -83,7 +83,7 @@ function woocommerce_edit_product_columns( $existing_columns ) {
 
 	$columns = array();
 	$columns["cb"] = "<input type=\"checkbox\" />";
-	$columns["thumb"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/image.png" alt="' . __( 'Image', 'woocommerce' ) . '" class="tips" data-tip="' . __( 'Image', 'woocommerce' ) . '" width="14" height="14" />';
+	$columns["thumb"] = '<span class="wc-image tips" data-tip="' . __( 'Image', 'woocommerce' ) . '">' . __( 'Image', 'woocommerce' ) . '</span>';
 
 	$columns["name"] = __( 'Name', 'woocommerce' );
 
@@ -97,8 +97,8 @@ function woocommerce_edit_product_columns( $existing_columns ) {
 
 	$columns["product_cat"] = __( 'Categories', 'woocommerce' );
 	$columns["product_tag"] = __( 'Tags', 'woocommerce' );
-	$columns["featured"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/featured.png" alt="' . __( 'Featured', 'woocommerce' ) . '" class="tips" data-tip="' . __( 'Featured', 'woocommerce' ) . '" width="12" height="12" />';
-	$columns["product_type"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/product_type_head.png" alt="' . __( 'Type', 'woocommerce' ) . '" class="tips" data-tip="' . __( 'Type', 'woocommerce' ) . '" width="14" height="12" />';
+	$columns["featured"] = '<span class="wc-featured tips" data-tip="' . __( 'Featured', 'woocommerce' ) . '">' . __( 'Featured', 'woocommerce' ) . '</span>';
+	$columns["product_type"] = '<span class="wc-type tips" data-tip="' . __( 'Type', 'woocommerce' ) . '">' . __( 'Type', 'woocommerce' ) . '</span>';
 	$columns["date"] = __( 'Date', 'woocommerce' );
 
 	return array_merge( $columns, $existing_columns );
@@ -250,9 +250,9 @@ function woocommerce_custom_product_columns( $column ) {
 			$url = wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce-feature-product&product_id=' . $post->ID ), 'woocommerce-feature-product' );
 			echo '<a href="' . $url . '" title="'. __( 'Toggle featured', 'woocommerce' ) . '">';
 			if ( $the_product->is_featured() ) {
-				echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/featured.png" alt="'. __( 'yes', 'woocommerce' ) . '" height="14" width="14" />';
+				echo '<span class="wc-featured tips" data-tip="' . __( 'Yes', 'woocommerce' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 			} else {
-				echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/featured-off.png" alt="'. __( 'no', 'woocommerce' ) . '" height="14" width="14" />';
+				echo '<span class="wc-featured not-featured tips" data-tip="' . __( 'No', 'woocommerce' ) . '">' . __( 'No', 'woocommerce' ) . '</span>';
 			}
 			echo '</a>';
 		break;

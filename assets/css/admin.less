@@ -1297,26 +1297,58 @@ table.wp-list-table {
 	.column-is_in_stock {
 		text-align: left !important;
 	}
+	span.wc-image, span.wc-featured, span.wc-type {
+		.ir;
+		margin:0 auto;
+		&:before {
+			.icon;
+			content: "\e00c";
+		}
+	}
+	span.wc-featured {
+		margin:0;
+		cursor: pointer;
+		&:before {
+			content: "\e020";
+		}
+		&.not-featured {
+			&:before {
+				content: "\e021";
+			}
+		}
+	}
+	td.column-featured {
+		span.wc-featured {
+			font-size:1.2em;
+		}
+	}
+	span.wc-type {
+		margin:0;
+		&:before {
+			content: "\e01d";
+		}
+	}
 	span.product-type {
-		width: 16px;
-		height: 16px;
-		margin: 1px 2px;
-		display: block;
-		background:url(../images/product_types.png) no-repeat -16px 0;
-		&.grouped {
-			background-position: 0 0;
+		.ir;
+		font-size:1.2em;
+		&:before {
+			.icon;
+			content: "\e006";
 		}
-		&.external {
-			background-position: -32px 0;
+		&.grouped:before {
+			content: "\e002";
 		}
-		&.variable {
-			background-position: -48px 0;
+		&.external:before {
+			// TODO
 		}
-		&.downloadable {
-			background-position: -64px 0;
+		&.variable:before {
+			content: "\e003";
 		}
-		&.virtual {
-			background-position: -80px 0;
+		&.downloadable:before {
+			content: "\e001";
+		}
+		&.virtual:before {
+			content: "\e000";
 		}
 	}
 	mark.instock {
@@ -3127,7 +3159,6 @@ table.bar_chart {
 }
 
 // HiDPI optimisation
-/*
 @media
 (-webkit-min-device-pixel-ratio: 2),
 (min-resolution: 192dpi) {
@@ -3140,73 +3171,5 @@ table.bar_chart {
 		background-size: 16px 17px;
 		background-position: 6px 6px;
 	}
-	table.wp-list-table span.product-type {
-		background-image: url(../images/product_types-x2.png) !important;
-		background-size:96px 16px !important;
-	}
-	#woocommerce-product-data ul.product_data_tabs li {
-		&.general_options, &.tax_options, &.inventory_options, &.shipping_options, &.linked_product_options, &.attribute_options, &.variation_options, &.advanced_options {
-			a {
-				background-image: url(../images/icons/wc-tab-icons-x2.png) !important;
-				background-size: 17px 720px !important;
-			}
-		}
-	}
-	.wc-metaboxes-wrapper {
-		a.plus, a.minus, .expand_all, .close_all {
-			background-image: url(../images/icons/edit_variations@2x.png) !important;
-			background-size: 21px 165px;
-			&:hover {
-				background-size: 21px 165px;
-			}
-		}
-	}
-	#variable_product_options {
-		p.toolbar {
-			a.set, a.toggle, a.delete_variations {
-				background-image: url(../images/icons/edit_variations@2x.png) !important;
-				background-size: 21px 165px;
-				&:hover {
-					background-size: 21px 165px;
-				}
-			}
-		}
-	}
-	.widefat {
-		.column-order_status {
-			mark.pending {
-				background-image:url(../images/icons/pending@2x.png);
-				background-size: 10px 8px;
-			}
-			mark.completed {
-				background-image:url(../images/icons/completed@2x.png);
-				background-size: 10px 8px;
-			}
-			mark.on-hold {
-				background-image:url(../images/icons/on-hold@2x.png);
-				background-size: 10px 10px;
-			}
-			mark.failed {
-				background-image:url(../images/icons/failed@2x.png);
-				background-size: 10px 8px;
-			}
-			mark.cancelled {
-				background-image:url(../images/icons/cancelled@2x.png);
-				background-size: 10px 8px;
-			}
-			mark.processing {
-				background-image:url(../images/icons/st-processing@2x.png);
-				background-size: 10px 8px;
-			}
-			mark.refunded {
-				background-image:url(../images/icons/refunded@2x.png);
-				background-size: 10px 8px;
-			}
-		}
-	}
-	.button.wc-reload span {
-		background-image: url(../images/icons/reload@2x.png);
-		background-size: 12px 12px;
-	}
-}*/
+}
 @import 'chosen.less';
