@@ -33,7 +33,7 @@ class WC_Cache_Helper {
 	public function init() {
 		if ( false === ( $wc_page_uris = get_transient( 'woocommerce_cache_excluded_uris' ) ) ) {
 
-			if ( ! woocommerce_get_page_id( 'cart' ) || ! woocommerce_get_page_id( 'checkout' ) || ! woocommerce_get_page_id( 'myaccount' ) )
+			if ( woocommerce_get_page_id( 'cart' ) < 1 || woocommerce_get_page_id( 'checkout' ) < 1 || woocommerce_get_page_id( 'myaccount' ) < 1 )
 				return;
 
 			$wc_page_uris   = array();
