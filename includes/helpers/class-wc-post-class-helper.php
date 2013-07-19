@@ -13,7 +13,10 @@ class WC_Post_Class_Helper extends WC_Helper {
 	 * @param int $post_id
 	 * @return array
 	 */
-	public function post_class( $classes, $class, $post_id ) {
+	public function post_class( $classes, $class = '', $post_id = '' ) {
+		if ( ! $post_id )
+			return $classes;
+
 		$product = get_product( $post_id );
 
 		if ( $product ) {
