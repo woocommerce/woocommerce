@@ -169,6 +169,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Allow users with edit rights to add draft products to cart (and nobody else)
 * Tweak - Handle pending status for paypal
 * Tweak - Only refresh fragment when cart cookie > 0
+* Tweak - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](http://www.woothemes.com/products/product-csv-import-suite/)).
 * Fix - Extra escaping on layered nav variables to prevent injection
 * Fix - Improved sanitization of option fields
 * Fix - Add fee total to cart total
