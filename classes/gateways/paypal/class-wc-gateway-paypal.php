@@ -524,6 +524,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
         	'body' 			=> $received_values,
         	'sslverify' 	=> false,
         	'timeout' 		=> 60,
+        	'httpversion'   => '1.1',
         	'user-agent'	=> 'WooCommerce/' . $woocommerce->version
         );
 
@@ -619,6 +620,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	        // We are here so lets check status and do actions
 	        switch ( $posted['payment_status'] ) {
 	            case 'completed' :
+	            case 'pending' :
 
 	            	// Check order not already completed
 	            	if ( $order->status == 'completed' ) {
@@ -670,11 +672,14 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	                if ( ! empty( $posted['payment_type'] ) )
 	                	update_post_meta( $order->id, 'Payment type', $posted['payment_type'] );
 
-	            	// Payment completed
-	                $order->add_order_note( __( 'IPN payment completed', 'woocommerce' ) );
-	                $order->payment_complete();
+	                if ( $posted['payment_status'] == 'completed' ) {
+	                	$order->add_order_note( __( 'IPN payment completed', 'woocommerce' ) );
+	                	$order->payment_complete();
+	                } else {
+	                	$order->update_status( 'on-hold', sprintf( __( 'Payment pending: %s', 'woocommerce' ), $posted['pending_reason'] ) );
+	                }
 
-	                if ( 'yes' == $this->debug )
+	            	if ( 'yes' == $this->debug )
 	                	$this->log->add( 'paypal', 'Payment complete.' );
 
 	            break;

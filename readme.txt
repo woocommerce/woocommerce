@@ -167,12 +167,14 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 2.0.13 - x =
 * Tweak - Allow users with edit rights to add draft products to cart (and nobody else)
+* Tweak - Handle pending status for paypal
 * Fix - Extra escaping on layered nav variables to prevent injection
 * Fix - Improved sanitization of option fields
 * Fix - Add fee total to cart total
 * Fix - Flush rewrite rules after adding or editing attributes
 * Fix - Set session after removing item from cart to prevent issues after removing last item
 * Fix - Sale expiration now works for variations as well
+* Fix - httpversion 1.1 for paypal upcoming changes
 
 = 2.0.12 - 17/06/2013 =
 * Tweak - Add actions for attribute create/update/delete
