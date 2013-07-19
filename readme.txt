@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.5
 Tested up to: 3.6 beta 3
-Stable tag: 2.0.12
+Stable tag: 2.0.13
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -181,7 +181,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - content-widget-product.php template for product lists inside core widgets.
 * Tweak - Shipping is now renamed to Shipping and Handling on checkout.
 * Tweak - Select all/none for countries in admin.
-* Tweak - Handle pending status for paypal.
 * Tweak - Handling for multiselect fields on checkout, and a filter for third party handling.
 * Tweak - Made scripts/styles use protocol-relative URLs.
 * Tweak - Revised shiptobilling functionality on the checkout. "ship to different address" option used instead.
@@ -207,8 +206,25 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - Japanese translation by Shohei Tanaka.
 * Localization - Danish translation by Mikael Lyngvig.
 * Localization - Spanish translation by Luis Giménez.
-* Localization - Spanish states.
 * Localization - French, Spanish, Romanian, Danish, Korean, Czech, Arabic updates.
+
+= 2.0.13 - 19/07/2013 =
+* Tweak - Allow users with edit rights to add draft products to cart (and nobody else)
+* Tweak - Handle pending status for paypal
+* Tweak - Only refresh fragment when cart cookie > 0
+* Tweak - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](http://www.woothemes.com/products/product-csv-import-suite/)).
+* Fix - Extra escaping on layered nav variables to prevent injection
+* Fix - Improved sanitization of option fields
+* Fix - Add fee total to cart total
+* Fix - Flush rewrite rules after adding or editing attributes
+* Fix - Set session after removing item from cart to prevent issues after removing last item
+* Fix - Sale expiration now works for variations as well
+* Fix - httpversion 1.1 for paypal upcoming changes
+* Fix - Price filter widget: preserve orderby
+* Fix - Fix paypal phone mask (whitespace)
+* Fix - Correct sanitization of option fields
+* Fix - Sanitized shipping calc form to fix persistent XSS issue.
+* Localisation - ES States
 
 = 2.0.12 - 17/06/2013 =
 * Tweak - Add actions for attribute create/update/delete
