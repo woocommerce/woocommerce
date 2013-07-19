@@ -233,7 +233,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$this->log->add( 'paypal', 'Generating payment form for order ' . $order->get_order_number() . '. Notify URL: ' . $this->notify_url );
 
 		if ( in_array( $order->billing_country, array( 'US','CA' ) ) ) {
-			$order->billing_phone = str_replace( array( '( ', '-', ' ', ' )', '.' ), '', $order->billing_phone );
+			$order->billing_phone = str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->billing_phone );
 			$phone_args = array(
 				'night_phone_a' => substr( $order->billing_phone, 0, 3 ),
 				'night_phone_b' => substr( $order->billing_phone, 3, 3 ),
