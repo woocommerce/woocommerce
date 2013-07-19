@@ -64,8 +64,6 @@ function woocommerce_payment_gateways_setting() {
 
 					        		if ( $gateway->enabled == 'yes' )
 					        			echo '<span class="status-enabled tips" data-tip="' . __ ( 'Enabled', 'woocommerce' ) . '">' . __ ( 'Enabled', 'woocommerce' ) . '</span>';
-									else
-					        			echo '<span class="status-disabled tips" data-tip="' . __ ( 'Disabled', 'woocommerce' ) . '">' . __ ( 'Disabled', 'woocommerce' ) . '</span>';
 
 					        		echo '</td>';
 								break;
