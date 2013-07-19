@@ -1666,6 +1666,18 @@ img.help_tip {
 	margin-top: -4px;
 }
 
+.status-enabled, .status-disabled {
+	font-size:1.4em;
+	.ir;
+}
+.status-enabled {
+	&:before {
+		.icon;
+		content: "\e015";
+		color: @woocommerce;
+	}
+}
+
 .woocommerce {
 	#template div {
 		margin: 0;

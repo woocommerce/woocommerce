@@ -60,12 +60,12 @@ function woocommerce_payment_gateways_setting() {
 				        			</td>';
 								break;
 								case 'status' :
-									echo '<td>';
+									echo '<td class="status">';
 
 					        		if ( $gateway->enabled == 'yes' )
-					        			echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/success@2x.png" width="16" height="14" alt="yes" />';
+					        			echo '<span class="status-enabled tips" data-tip="' . __ ( 'Enabled', 'woocommerce' ) . '">' . __ ( 'Enabled', 'woocommerce' ) . '</span>';
 									else
-										echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/success-off@2x.png" width="16" height="14" alt="no" />';
+					        			echo '<span class="status-disabled tips" data-tip="' . __ ( 'Disabled', 'woocommerce' ) . '">' . __ ( 'Disabled', 'woocommerce' ) . '</span>';
 
 					        		echo '</td>';
 								break;
