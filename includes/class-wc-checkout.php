@@ -58,6 +58,7 @@ class WC_Checkout {
 			$this->checkout_fields['account']['account_username'] = array(
 				'type' 			=> 'text',
 				'label' 		=> __( 'Account username', 'woocommerce' ),
+				'required'      => true,
 				'placeholder' 	=> _x( 'Username', 'placeholder', 'woocommerce' )
 			);
 		}
@@ -66,6 +67,7 @@ class WC_Checkout {
 			$this->checkout_fields['account']['account_password'] = array(
 				'type' 				=> 'password',
 				'label' 			=> __( 'Account password', 'woocommerce' ),
+				'required'          => true,
 				'placeholder' 		=> _x( 'Password', 'placeholder', 'woocommerce' )
 			);
 		}
@@ -388,6 +390,11 @@ class WC_Checkout {
 			// Skip shipping if not needed
 			if ( $fieldset_key == 'shipping' && ( $this->posted['ship_to_different_address'] == false || ( ! $woocommerce->cart->needs_shipping() && get_option('woocommerce_require_shipping_address') == 'no' ) ) ) {
 				$skipped_shipping = true;
+				continue;
+			}
+
+			// Ship account if not needed
+			if ( $fieldset_key == 'account' && ( is_user_logged_in() || ( $this->must_create_account == false && empty( $this->posted['createaccount'] ) ) ) ) {
 				continue;
 			}
 
