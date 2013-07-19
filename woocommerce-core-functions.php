@@ -2586,7 +2586,7 @@ function woocommerce_cancel_unpaid_orders() {
 		WHERE 	posts.post_type   = 'shop_order'
 		AND 	posts.post_status = 'publish'
 		AND 	tax.taxonomy      = 'shop_order_status'
-		AND		term.slug	      IN ('pending')
+		AND		term.slug	      = 'pending'
 		AND 	posts.post_modified < %s
 	", $date ) );
 

@@ -649,11 +649,6 @@ function process_product_meta_variable( $post_id ) {
 
 		$variable_post_id 					= $_POST['variable_post_id'];
 		$variable_sku 						= $_POST['variable_sku'];
-		$variable_weight					= $_POST['variable_weight'];
-		$variable_length					= $_POST['variable_length'];
-		$variable_width						= $_POST['variable_width'];
-		$variable_height					= $_POST['variable_height'];
-		$variable_stock 					= $_POST['variable_stock'];
 		$variable_regular_price 			= $_POST['variable_regular_price'];
 		$variable_sale_price				= $_POST['variable_sale_price'];
 		$upload_image_id					= $_POST['upload_image_id'];
@@ -666,14 +661,14 @@ function process_product_meta_variable( $post_id ) {
 		$variable_sale_price_dates_from 	= $_POST['variable_sale_price_dates_from'];
 		$variable_sale_price_dates_to 		= $_POST['variable_sale_price_dates_to'];
 
-		if ( isset( $_POST['variable_enabled'] ) )
-			$variable_enabled 				= $_POST['variable_enabled'];
-
-		if ( isset( $_POST['variable_is_virtual'] ) )
-			$variable_is_virtual			= $_POST['variable_is_virtual'];
-
-		if ( isset( $_POST['variable_is_downloadable'] ) )
-			$variable_is_downloadable 		= $_POST['variable_is_downloadable'];
+		$variable_weight					= isset( $_POST['variable_weight'] ) ? $_POST['variable_weight'] : array();
+		$variable_length					= isset( $_POST['variable_length'] ) ? $_POST['variable_length'] : array();
+		$variable_width						= isset( $_POST['variable_width'] ) ? $_POST['variable_width'] : array();
+		$variable_height					= isset( $_POST['variable_height'] ) ? $_POST['variable_height'] : array();
+		$variable_stock 					= isset( $_POST['variable_stock'] ) ? $_POST['variable_stock'] : array();
+		$variable_enabled 					= isset( $_POST['variable_enabled'] ) ? $_POST['variable_enabled'] : array();
+		$variable_is_virtual				= isset( $_POST['variable_is_virtual'] ) ? $_POST['variable_is_virtual'] : array();
+		$variable_is_downloadable 			= isset( $_POST['variable_is_downloadable'] ) ? $_POST['variable_is_downloadable'] : array();
 
 		$attributes = (array) maybe_unserialize( get_post_meta( $post_id, '_product_attributes', true ) );
 
