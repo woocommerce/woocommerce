@@ -600,7 +600,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$key = key( $values );
 
 		for ( $i = 0; $i <= $key; $i++ ) {
-			if ( isset( $flat_rate_class[ $i ] ) && isset( $flat_rate_cost[ $i ] ) && isset( $flat_rate_fee[ $i ] ) ) {
+			if ( ! empty( $flat_rate_class[ $i ] ) && isset( $flat_rate_cost[ $i ] ) && isset( $flat_rate_fee[ $i ] ) ) {
 
 				$flat_rate_cost[$i] = number_format($flat_rate_cost[$i], 2,  '.', '');
 
