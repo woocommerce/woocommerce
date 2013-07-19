@@ -81,33 +81,32 @@ class WC_Shortcode_Checkout {
 
 			// Pay for existing order
 			$order_key            = urldecode( $_GET[ 'key' ] );
-			$order_id             = absint( $order_id );
 			$order                = new WC_Order( $order_id );
 			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
 
-			if ( $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, $valid_order_statuses ) ) {
+			if ( $order->id == $order_id && $order->order_key == $order_key ) {
 
-				// Set customer location to order location
-				if ( $order->billing_country )
-					$woocommerce->customer->set_country( $order->billing_country );
-				if ( $order->billing_state )
-					$woocommerce->customer->set_state( $order->billing_state );
-				if ( $order->billing_postcode )
-					$woocommerce->customer->set_postcode( $order->billing_postcode );
+				if ( in_array( $order->status, $valid_order_statuses ) ) {
 
-				// Show form
-				woocommerce_get_template( 'checkout/form-pay.php', array( 'order' => $order ) );
+					// Set customer location to order location
+					if ( $order->billing_country )
+						$woocommerce->customer->set_country( $order->billing_country );
+					if ( $order->billing_state )
+						$woocommerce->customer->set_state( $order->billing_state );
+					if ( $order->billing_postcode )
+						$woocommerce->customer->set_postcode( $order->billing_postcode );
 
-			} elseif ( ! in_array( $order->status, $valid_order_statuses ) ) {
+					woocommerce_get_template( 'checkout/form-pay.php', array( 'order' => $order ) );
 
-				wc_add_error( __( 'Your order has already been paid for. Please contact us if you need assistance.', 'woocommerce' ) );
-				wc_print_messages();
+				} else {
+
+					$status = get_term_by('slug', $order->status, 'shop_order_status');
+
+					wc_add_error( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), $status->name ) );
+				}
 
 			} else {
-
-				wc_add_error( __( 'Invalid order.', 'woocommerce' ) );
-				wc_print_messages();
-
+				wc_add_error( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ) );
 			}
 
 		} elseif ( $order_id ) {
@@ -117,50 +116,55 @@ class WC_Shortcode_Checkout {
 			$order                = new WC_Order( $order_id );
 			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
 
-			if ( $order->order_key == $order_key && in_array( $order->status, $valid_order_statuses ) ) {
+			if ( $order->id == $order_id && $order->order_key == $order_key ) {
 
-				?>
-				<ul class="order_details">
-					<li class="order">
-						<?php _e( 'Order:', 'woocommerce' ); ?>
-						<strong><?php echo $order->get_order_number(); ?></strong>
-					</li>
-					<li class="date">
-						<?php _e( 'Date:', 'woocommerce' ); ?>
-						<strong><?php echo date_i18n(get_option('date_format'), strtotime($order->order_date)); ?></strong>
-					</li>
-					<li class="total">
-						<?php _e( 'Total:', 'woocommerce' ); ?>
-						<strong><?php echo $order->get_formatted_order_total(); ?></strong>
-					</li>
-					<?php if ($order->payment_method_title) : ?>
-					<li class="method">
-						<?php _e( 'Payment method:', 'woocommerce' ); ?>
-						<strong><?php
-							echo $order->payment_method_title;
-						?></strong>
-					</li>
-					<?php endif; ?>
-				</ul>
+				if ( in_array( $order->status, $valid_order_statuses ) ) {
 
-				<?php do_action( 'woocommerce_receipt_' . $order->payment_method, $order_id ); ?>
+					?>
+					<ul class="order_details">
+						<li class="order">
+							<?php _e( 'Order:', 'woocommerce' ); ?>
+							<strong><?php echo $order->get_order_number(); ?></strong>
+						</li>
+						<li class="date">
+							<?php _e( 'Date:', 'woocommerce' ); ?>
+							<strong><?php echo date_i18n(get_option('date_format'), strtotime($order->order_date)); ?></strong>
+						</li>
+						<li class="total">
+							<?php _e( 'Total:', 'woocommerce' ); ?>
+							<strong><?php echo $order->get_formatted_order_total(); ?></strong>
+						</li>
+						<?php if ($order->payment_method_title) : ?>
+						<li class="method">
+							<?php _e( 'Payment method:', 'woocommerce' ); ?>
+							<strong><?php
+								echo $order->payment_method_title;
+							?></strong>
+						</li>
+						<?php endif; ?>
+					</ul>
 
-				<div class="clear"></div>
-				<?php
+					<?php do_action( 'woocommerce_receipt_' . $order->payment_method, $order_id ); ?>
 
-			} elseif ( ! in_array( $order->status, $valid_order_statuses ) ) {
+					<div class="clear"></div>
+					<?php
 
-				wc_add_error( __( 'Your order has already been paid for. Please contact us if you need assistance.', 'woocommerce' ) );
-				wc_print_messages();
+				} else {
 
+					$status = get_term_by('slug', $order->status, 'shop_order_status');
+
+					wc_add_error( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), $status->name ) );
+				}
+
+			} else {
+				wc_add_error( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ) );
 			}
 
 		} else {
-
 			wc_add_error( __( 'Invalid order.', 'woocommerce' ) );
-			wc_print_messages();
-
 		}
+
+		wc_print_messages();
 
 		do_action( 'after_woocommerce_pay' );
 	}
