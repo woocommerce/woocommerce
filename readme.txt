@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.5
 Tested up to: 3.6 beta 3
-Stable tag: 2.0.12
+Stable tag: 2.0.13
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -165,9 +165,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.0.13 - x =
+= 2.0.13 - 19/07/2013 =
 * Tweak - Allow users with edit rights to add draft products to cart (and nobody else)
 * Tweak - Handle pending status for paypal
+* Tweak - Only refresh fragment when cart cookie > 0
 * Fix - Extra escaping on layered nav variables to prevent injection
 * Fix - Improved sanitization of option fields
 * Fix - Add fee total to cart total
@@ -175,6 +176,11 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Set session after removing item from cart to prevent issues after removing last item
 * Fix - Sale expiration now works for variations as well
 * Fix - httpversion 1.1 for paypal upcoming changes
+* Fix - Price filter widget: preserve orderby
+* Fix - Fix paypal phone mask (whitespace)
+* Fix - Correct sanitization of option fields
+* Fix - Sanitized shipping calc form to fix persistent XSS issue.
+* Localisation - ES States
 
 = 2.0.12 - 17/06/2013 =
 * Tweak - Add actions for attribute create/update/delete
