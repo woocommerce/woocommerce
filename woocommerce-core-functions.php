@@ -1907,7 +1907,7 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
 	$emails = array();
 
 	if ( $user_id ) {
-		$user = get_user_by( 'id', $user_id );
+		$user     = get_user_by( 'id', $user_id );
 		$emails[] = $user->user_email;
 	}
 
@@ -1917,36 +1917,32 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
 	if ( sizeof( $emails ) == 0 )
 		return false;
 
-	return $wpdb->get_var( $wpdb->prepare( "
-		SELECT COUNT( order_items.order_item_id )
-		FROM {$wpdb->prefix}woocommerce_order_items as order_items
-		LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS itemmeta ON order_items.order_item_id = itemmeta.order_item_id
-		LEFT JOIN {$wpdb->postmeta} AS postmeta ON order_items.order_id = postmeta.post_id
-		LEFT JOIN {$wpdb->term_relationships} AS rel ON postmeta.post_id = rel.object_ID
-		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
-		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-		WHERE 	term.slug IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-		AND 	tax.taxonomy		= 'shop_order_status'
-		AND		(
+	$completed = get_term_by( 'slug', 'completed', 'shop_order_status' );
+
+	return $wpdb->get_var(
+		$wpdb->prepare( "
+			SELECT COUNT( DISTINCT order_items.order_item_id )
+			FROM {$wpdb->prefix}woocommerce_order_items as order_items
+			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS itemmeta ON order_items.order_item_id = itemmeta.order_item_id
+			LEFT JOIN {$wpdb->postmeta} AS postmeta ON order_items.order_id = postmeta.post_id
+			LEFT JOIN {$wpdb->term_relationships} AS rel ON order_items.order_id = rel.object_ID
+			WHERE
+				rel.term_taxonomy_id = %d AND
+				itemmeta.meta_value  = %s AND
+				itemmeta.meta_key    IN ( '_variation_id', '_product_id' ) AND
+				postmeta.meta_key    IN ( '_billing_email', '_customer_user' ) AND
+				(
+					postmeta.meta_value  IN ( '" . implode( "','", array_unique( $emails ) ) . "' ) OR
 					(
-						itemmeta.meta_key = '_variation_id'
-						AND itemmeta.meta_value = %s
-					) OR (
-						itemmeta.meta_key = '_product_id'
-						AND itemmeta.meta_value = %s
-					)
-		)
-		AND 	(
-					(
-						postmeta.meta_key = '_billing_email'
-						AND postmeta.meta_value IN ( '" . implode( "','", array_unique( $emails ) ) . "' )
-					) OR (
-						postmeta.meta_key = '_customer_user'
-						AND postmeta.meta_value = %s AND postmeta.meta_value > 0
+						postmeta.meta_value = %d AND
+						postmeta.meta_value > 0
 					)
 				)
-	", $product_id, $product_id, $user_id ) );
+			", $completed->term_taxonomy_id, $product_id, $user_id
+		)
+	);
 }
+
 
 /**
  * Return the count of processing orders.
