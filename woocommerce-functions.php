@@ -675,6 +675,9 @@ function woocommerce_process_login() {
 					$redirect = esc_url( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
 				}
 
+				// Feedback
+				wc_add_message( sprintf( __( 'You are now logged in as <strong>%s</strong>', 'woocommerce' ), $user->display_name ) );
+
 				wp_redirect( apply_filters( 'woocommerce_login_redirect', $redirect, $user ) );
 				exit;
 			}
