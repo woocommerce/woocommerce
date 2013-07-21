@@ -164,20 +164,20 @@ jQuery(document).ready(function($) {
 	/* Update totals/taxes/shipping */
 
 	// Inputs/selects which update totals instantly
-	.on( 'change', 'select#shipping_method, input[name=shipping_method], #ship-to-different-address input, .update_totals_on_change select', function(){
+	.on( 'input change', 'select#shipping_method, input[name=shipping_method], #ship-to-different-address input, .update_totals_on_change select', function(){
 		clearTimeout( updateTimer );
 		dirtyInput = false;
 		$('body').trigger('update_checkout');
 	})
 
 	// Address-fields which refresh totals when all required fields are filled
-	.on( 'change', '.address-field input.input-text, .update_totals_on_change input.input-text', function() {
+	.on( 'input change', '.address-field input.input-text, .update_totals_on_change input.input-text', function() {
 		if ( dirtyInput ) {
 			input_changed();
 		}
 	})
 
-	.on( 'change', '.address-field select', function() {
+	.on( 'input change', '.address-field select', function() {
 		dirtyInput = this;
 		input_changed();
 	})
@@ -193,7 +193,7 @@ jQuery(document).ready(function($) {
 
 	/* Inline validation */
 
-	.on( 'blur change', '.input-text, select', function() {
+	.on( 'blur input change', '.input-text, select', function() {
 		var $this = $(this);
 		var $parent = $this.closest('.form-row');
 		var validated = true;

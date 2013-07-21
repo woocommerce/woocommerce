@@ -700,47 +700,32 @@ class WC_Countries {
 				'label'             => __( 'Address', 'woocommerce' ),
 				'placeholder'       => _x( 'Street address', 'placeholder', 'woocommerce' ),
 				'required'          => true,
-				'class'             => array( 'form-row-wide', 'address-field' ),
-				'custom_attributes' => array(
-					'autocomplete'     => 'no'
-				)
+				'class'             => array( 'form-row-wide', 'address-field' )
 			),
 			'address_2'          => array(
 				'placeholder'       => _x( 'Apartment, suite, unit etc. (optional)', 'placeholder', 'woocommerce' ),
 				'class'             => array( 'form-row-wide', 'address-field' ),
-				'required'          => false,
-				'custom_attributes' => array(
-					'autocomplete'     => 'no'
-				)
+				'required'          => false
 			),
 			'city'               => array(
 				'label'             => __( 'Town / City', 'woocommerce' ),
 				'placeholder'       => __( 'Town / City', 'woocommerce' ),
 				'required'          => true,
-				'class'             => array( 'form-row-wide', 'address-field' ),
-				'custom_attributes' => array(
-					'autocomplete'     => 'no'
-				)
+				'class'             => array( 'form-row-wide', 'address-field' )
 			),
 			'state'              => array(
 				'type'              => 'state',
 				'label'             => __( 'State / County', 'woocommerce' ),
 				'placeholder'       => __( 'State / County', 'woocommerce' ),
 				'required'          => true,
-				'class'             => array( 'form-row-first', 'address-field' ),
-				'custom_attributes' => array(
-					'autocomplete'     => 'no'
-				)
+				'class'             => array( 'form-row-first', 'address-field' )
 			),
 			'postcode'           => array(
 				'label'             => __( 'Postcode / Zip', 'woocommerce' ),
 				'placeholder'       => __( 'Postcode / Zip', 'woocommerce' ),
 				'required'          => true,
 				'class'             => array( 'form-row-last', 'address-field' ),
-				'clear'             => true,
-				'custom_attributes' => array(
-					'autocomplete'     => 'no'
-				)
+				'clear'             => true
 			),
 		);
 
