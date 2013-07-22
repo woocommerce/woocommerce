@@ -138,7 +138,9 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 			?>
 		</tbody>
 	</table>
-
+        
+        <h3 id="payment_methods_heading"><?php _e( 'Payment Options', 'woocommerce' ); ?></h3>
+        
 	<div id="payment">
 		<?php if ($woocommerce->cart->needs_payment()) : ?>
 		<ul class="payment_methods methods">
