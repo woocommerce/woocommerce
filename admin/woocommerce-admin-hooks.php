@@ -30,6 +30,7 @@ add_action('admin_init', 'woocommerce_preview_emails');
 add_action('admin_init', 'woocommerce_prevent_admin_access');
 add_action('woocommerce_settings_saved', 'woocommerce_check_download_folder_protection');
 add_filter('mod_rewrite_rules', 'woocommerce_ms_protect_download_rewite_rules');
+add_action('install_plugins_pre_plugin-information', 'woocommerce_plugin_release_notes');
 
 /**
  * File uploads

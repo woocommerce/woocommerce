@@ -562,3 +562,28 @@ function woocommerce_order_bulk_admin_notices() {
 		}
 	}
 }
+
+function woocommerce_plugin_release_notes() {
+	$dirname = dirname( $_GET['plugin'] );
+
+	if ( false === strstr( $dirname, 'woocommerce' ) ) {
+		return;
+	}
+
+	$url = 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt';
+	$data = wp_remote_get( $url, array( 'timeout' => 10 ) );
+
+	if ( true || is_wp_error( $data ) || 200 != $data['response']['code'] ) {
+		// It's possible the plugin has 'woocommerce' in its directory name
+		// but is hosted on wordpress.org and not at WooThemes, so let's let 
+		// it fall through and try wordpress.org
+		return;
+	}
+	else {
+		echo '<html><body><pre style="white-space: pre-wrap;">';
+		echo $data['body'];
+		echo '</pre></body></html>';
+	}
+
+	exit;
+}
