@@ -202,7 +202,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 							'title' => __( 'PayPal sandbox', 'woocommerce' ),
 							'type' => 'checkbox',
 							'label' => __( 'Enable PayPal sandbox', 'woocommerce' ),
-							'default' => 'yes',
+							'default' => 'no',
 							'description' => sprintf( __( 'PayPal sandbox can be used to test payments. Sign up for a developer account <a href="%s">here</a>.', 'woocommerce' ), 'https://developer.paypal.com/' ),
 						),
 			'debug' => array(
