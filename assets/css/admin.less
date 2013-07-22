@@ -2033,20 +2033,16 @@ img.help_tip {
 			text-decoration: none;
 			border-bottom: 1px solid #f1f1f1;
 			border-top: 1px solid #f1f1f1;
+			padding-left:10px;
+			&:before {
+				.iconbefore;
+				content: "\e028";
+			}
 		}
 
 		&:first-child {
 			a {
 				border-top: 0 !important;
-			}
-		}
-
-		&.general_options, &.tax_options, &.inventory_options, &.shipping_options, &.linked_product_options, &.attribute_options, &.variation_options, &.advanced_options {
-			a {
-				padding-left:10px;
-				&:before {
-					.iconbefore;
-				}
 			}
 		}
 		&.general_options {
