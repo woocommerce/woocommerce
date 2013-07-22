@@ -168,7 +168,6 @@ class WC_Admin_Reports {
 	}
 }
 
-
 endif;
 
 return new WC_Admin_Reports();

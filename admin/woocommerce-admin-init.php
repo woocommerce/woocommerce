@@ -85,6 +85,10 @@ new WC_Admin();
 
 
 
+include_once( 'class-wc-admin-updates.php' );
+
+
+
 
 /**
  * Functions for the product post type
