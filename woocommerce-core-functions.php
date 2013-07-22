@@ -1238,14 +1238,14 @@ if ( ! function_exists( 'woocommerce_format_hex' ) ) {
 function woocommerce_exclude_order_comments( $clauses ) {
 	global $wpdb, $typenow, $pagenow;
 
-	if ( is_admin() && ( $typenow == 'shop_order' || $pagenow == 'edit-comments.php' ) && current_user_can( 'manage_woocommerce' ) )
+	if ( is_admin() && $typenow == 'shop_order' && current_user_can( 'manage_woocommerce' ) )
 		return $clauses; // Don't hide when viewing orders in admin
 
 	if ( ! $clauses['join'] )
 		$clauses['join'] = '';
 
 	if ( ! strstr( $clauses['join'], "JOIN $wpdb->posts" ) )
-		$clauses['join'] .= " LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID ";
+		$clauses['join'] .= " LEFT JOIN $wpdb->posts ON comment_post_ID = $wpdb->posts.ID ";
 
 	if ( $clauses['where'] )
 		$clauses['where'] .= ' AND ';
@@ -1256,7 +1256,6 @@ function woocommerce_exclude_order_comments( $clauses ) {
 }
 
 add_filter( 'comments_clauses', 'woocommerce_exclude_order_comments', 10, 1);
-
 
 /**
  * Exclude order comments from queries and RSS

@@ -756,21 +756,6 @@ add_filter('post_updated_messages', 'woocommerce_product_updated_messages');
 
 
 /**
- * Post updated messages
- *
- * @access public
- * @param mixed $types
- * @return void
- */
-function woocommerce_admin_comment_types_dropdown( $types ) {
-	$types['order_note'] = __( 'Order notes', 'woocommerce' );
-	return $types;
-}
-
-add_filter( 'admin_comment_types_dropdown', 'woocommerce_admin_comment_types_dropdown' );
-
-
-/**
  * woocommerce_permalink_settings function.
  *
  * @access public
