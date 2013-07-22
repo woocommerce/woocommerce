@@ -1339,7 +1339,7 @@ table.wp-list-table {
 			content: "\e002";
 		}
 		&.external:before {
-			// TODO
+			content: "\e034";
 		}
 		&.variable:before {
 			content: "\e003";
@@ -1861,13 +1861,12 @@ img.help_tip {
 		#product_images_container {
 			padding: 0 0 0 9px;
 			ul {
-				overflow: hidden;
+				.clearfix;
 				margin: 0;
 				padding: 0;
 				li.image, li.add, li.wc-metabox-sortable-placeholder {
 					width: 80px;
 					height: 80px;
-					overflow: hidden;
 					float: left;
 					cursor: move;
 					border: 1px solid #d5d5d5;
@@ -1887,37 +1886,61 @@ img.help_tip {
 					}
 				}
 				li.wc-metabox-sortable-placeholder {
-					border: 4px dashed #dddddd;
-					background: #f7f7f7 url(../images/image_watermark.png) no-repeat center;
+					border: 3px dashed #dddddd;
+					position: relative;
+					&:after {
+						.icon;
+						font-size:2.618em;
+						content: "\e00c";
+						line-height: 72px;
+						color: #ddd;
+					}
 				}
 				ul.actions {
 					position: absolute;
-					top:0;
-					right: 0;
+					top:-8px;
+					right: -8px;
 					padding: 2px;
 					display: none;
 					li {
-						background: #eee;
-						border: 1px solid #ddd;
-						-webkit-border-radius: 2px;
-						-moz-border-radius: 2px;
-						border-radius: 2px;
-						padding: 1px;
 						float: right;
 						margin: 0 0 0 2px;
 						a {
-							width: 10px;
-							padding: 10px 0 0 0;
+							width: 1em;
+							height:1em;
 							margin: 0;
 							height: 0;
 							display: block;
 							overflow: hidden;
+							&.tips {
+								cursor: pointer;
+							}
 						}
 						a.view {
-							background: url(../images/icons/image_10.png) no-repeat top left;
+							.ir;
+							font-size:1.4em;
+							&:before {
+								.icon;
+								content: "\e00c";
+								background-color: #000;
+								color: #fff;
+							}
 						}
 						a.delete {
-							background: url(../images/icons/delete_10.png) no-repeat top left;
+							.ir;
+							font-size:1.4em;
+							&:before {
+								.icon;
+								content: "\e013";
+								color:white;
+								background-color: #000;
+								-webkit-border-radius:100%;
+								border-radius:100%;
+								box-shadow:0 1px 2px rgba(0,0,0,0.2);
+							}
+							&:hover:before {
+								background-color: #d54e21;
+							}
 						}
 					}
 				}
@@ -2407,66 +2430,19 @@ img.help_tip {
 		text-decoration: none;
 		&:before {
 			.iconbefore;
-			content: "\e004";
+			content: "\e036";
 			color: #999;
 		}
 	}
 	.expand_all {
 		&:before {
-			content: "\e005";
+			content: "\e035";
 		}
-	}
-	a.plus, a.minus {
-		padding-left:20px;
-		background-image: url(../images/icons/edit_variations.png) !important;
-		background-color: #FEFEFE !important;
-		background-repeat: no-repeat !important;
-		background-position: 1px -1px;
-		&:hover {
-			background-position: 1px 0px;
-		}
-	}
-	a.plus {
-		background-position: 1px 0px;
-	}
-	a.minus {
-		background-position: 1px -41px;
 	}
 }
 
 /* Configuration */
 #variable_product_options {
-	p.toolbar {
-		strong {
-			margin: 0 6px 0 0;
-			float: left;
-			line-height: 23px;
-		}
-		.button, select {
-			margin: 0 6px 0 0;
-			float: left;
-		}
-		a.set, a.toggle, a.delete_variations {
-			padding-left:20px;
-			background-image: url(../images/icons/edit_variations.png) !important;
-			background-color: #FEFEFE !important;
-			background-repeat: no-repeat !important;
-			background-position: 1px 0px;
-		}
-		a.set {
-			background-position: 1px 0px;
-		}
-		a.toggle {
-			background-position: 1px -21px;
-		}
-		a.delete_variations {
-			background-position: 1px -41px;
-		}
-		.add_variation, .link_all_variations, .fr {
-			float: right;
-			margin: 0 0 0 6px;
-		}
-	}
 	.woocommerce_variation {
 		table {
 			background: #f5f5f5;

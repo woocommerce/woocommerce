@@ -40,7 +40,7 @@ function woocommerce_product_images_box() {
 						echo '<li class="image" data-attachment_id="' . $attachment_id . '">
 							' . wp_get_attachment_image( $attachment_id, 'thumbnail' ) . '
 							<ul class="actions">
-								<li><a href="#" class="delete" title="' . __( 'Delete image', 'woocommerce' ) . '">' . __( 'Delete', 'woocommerce' ) . '</a></li>
+								<li><a href="#" class="delete tips" data-tip="' . __( 'Delete image', 'woocommerce' ) . '">' . __( 'Delete', 'woocommerce' ) . '</a></li>
 							</ul>
 						</li>';
 					}
