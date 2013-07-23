@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * The WooCommerce product variation class handles product variation data.
  *
  * @class 		WC_Product_Variation
- * @version		2.0.0
+ * @version		2.1.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
@@ -169,7 +169,7 @@ class WC_Product_Variation extends WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function exists() {
+	public function exists() {
 		return empty( $this->id ) ? false : true;
 	}
 
@@ -190,7 +190,7 @@ class WC_Product_Variation extends WC_Product {
 			$visible = false;
 
 		// Price not set
-		elseif ( $this->price == "" )
+		elseif ( $this->get_price() == "" )
 			$visible = false;
 
 		return apply_filters( 'woocommerce_variation_is_visible', $visible, $this->variation_id, $this->id );
@@ -231,15 +231,15 @@ class WC_Product_Variation extends WC_Product {
      */
 	public function get_price_html() {
 
-		if ( $this->price !== '' ) {
-			if ( $this->price == $this->sale_price && $this->sale_price < $this->regular_price ) {
+		if ( $this->get_price() !== '' ) {
+			if ( $this->is_on_sale() ) {
 
-				$price = '<del>' . woocommerce_price( $this->regular_price ) . '</del> <ins>' . woocommerce_price( $this->sale_price ) . '</ins>';
+				$price = '<del>' . woocommerce_price( $this->get_regular_price() ) . '</del> <ins>' . woocommerce_price( $this->get_sale_price() ) . '</ins>';
 				$price = apply_filters( 'woocommerce_variation_sale_price_html', $price, $this );
 
-			} elseif ( $this->price > 0 ) {
+			} elseif ( $this->get_price() > 0 ) {
 
-				$price = woocommerce_price( $this->price );
+				$price = woocommerce_price( $this->get_price() );
 				$price = apply_filters( 'woocommerce_variation_price_html', $price, $this );
 
 			} else {
@@ -254,7 +254,6 @@ class WC_Product_Variation extends WC_Product {
 
 		return $price;
 	}
-
 
     /**
      * Gets the main product image.
@@ -280,7 +279,6 @@ class WC_Product_Variation extends WC_Product {
 
 		return $image;
     }
-
 
 	/**
 	 * Set stock level of the product.
@@ -321,7 +319,6 @@ class WC_Product_Variation extends WC_Product {
 		}
 	}
 
-
 	/**
 	 * Reduce stock level of the product.
 	 *
@@ -359,7 +356,6 @@ class WC_Product_Variation extends WC_Product {
 		}
 	}
 
-
 	/**
 	 * Increase stock level of the product.
 	 *
@@ -389,7 +385,6 @@ class WC_Product_Variation extends WC_Product {
 		endif;
 	}
 
-
 	/**
 	 * Get the shipping class, and if not set, get the shipping class of the parent.
 	 *
@@ -409,7 +404,6 @@ class WC_Product_Variation extends WC_Product {
 
 		return $this->variation_shipping_class;
 	}
-
 
 	/**
 	 * Returns the product shipping class ID.
@@ -453,7 +447,6 @@ class WC_Product_Variation extends WC_Product {
 		// allow overriding based on the particular file being requested
 		return apply_filters( 'woocommerce_file_download_path', $file_path, $this->variation_id, $download_id );
 	}
-
 
 	/**
 	 * Get product name with extra details such as SKU, price and attributes. Used within admin.
