@@ -814,9 +814,9 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 	 */
 	function woocommerce_upsell_display( $posts_per_page = '-1', $columns = 2, $orderby = 'rand' ) {
 		woocommerce_get_template( 'single-product/up-sells.php', array(
-				'posts_per_page'  => $posts_per_page,
-				'orderby'    => $orderby,
-				'columns'    => $columns
+				'posts_per_page'	=> $posts_per_page,
+				'orderby'			=> apply_filters( 'woocommerce_upsells_orderby', $orderby ),
+				'columns'			=> $columns
 			) );
 	}
 }
