@@ -50,6 +50,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->form_submission_method = $this->get_option( 'form_submission_method' ) == 'yes' ? true : false;
 		$this->page_style 		= $this->get_option( 'page_style' );
 		$this->invoice_prefix	= $this->get_option( 'invoice_prefix', 'WC-' );
+		$this->paymentaction    = $this->get_option( 'paymentaction', 'sale' );
 
 		// Logs
 		if ( 'yes' == $this->debug )
@@ -158,6 +159,17 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 							'default' => 'WC-',
 							'desc_tip'      => true,
 						),
+			'paymentaction' => array(
+							'title' => __( 'Payment Action', 'woocommerce' ),
+							'type' 			=> 'select',
+							'description' => __( 'Choose whether you wish to capture funds immediately or authorize payment only.', 'woocommerce' ),
+							'default' => 'sale',
+							'desc_tip'      => true,
+							'options'	=> array(
+								'sale' => __( 'Capture', 'woocommerce' ),
+								'authorization' => __( 'Authorize', 'woocommerce' )
+							)
+						),
 			'form_submission_method' => array(
 							'title' => __( 'Submission method', 'woocommerce' ),
 							'type' => 'checkbox',
@@ -262,6 +274,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				'return' 				=> add_query_arg( 'utm_nooverride', '1', $this->get_return_url( $order ) ),
 				'cancel_return'			=> $order->get_cancel_order_url(),
 				'page_style'			=> $this->page_style,
+				'paymentaction'         => $this->paymentaction,
 
 				// Order key + ID
 				'invoice'				=> $this->invoice_prefix . ltrim( $order->get_order_number(), '#' ),

@@ -171,8 +171,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Bulk edit increase / decrease variation prices by fixed or percentage values
 * Feature - Admin action to link past orders of the same email address to a new user.
 * Feature - Account edit page for editing profile data such as email.
-* Feature - Customers panel.
+* Feature - Customer list reports.
+* Feature - Reports - New design, export csvs, more data.
 * Feature - Ability to link past orders to a customer (before they registered).
+* Feature - Authorize option for paypal standard.
 * Tweak - Added filter to check the 'Create account' checkbox on checkout by default.
 * Tweak - Update CPT parameters for 'product_variation' and 'shop_coupon' to be no longer public.
 * Tweak - COD processing instead of on-hold.
@@ -200,7 +202,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Refactor - Widget classes (added abstract and combined similar widgets).
 * Refactor - Removed pay and thanks pages. Endpoints are used instead.
 * Refactor - Removed certain my-account pages. Endpoints are used instead.
-* Refactor - Reports. New design, export csvs, more data.
 * Localization - Portugese locale by jpBenfica.
 * Localization - Swedish translation by Björn Sennbrink.
 * Localization - Japanese translation by Shohei Tanaka.
