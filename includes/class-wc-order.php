@@ -1095,12 +1095,7 @@ class WC_Order {
 	 */
 	public function get_checkout_payment_url( $on_checkout = false ) {
 
-		$pay_url = get_permalink( woocommerce_get_page_id( 'checkout' ) );
-
-		if ( get_option( 'permalink_structure' ) )
-			$pay_url = trailingslashit( $pay_url ) . 'order-pay/' . $this->id;
-		else
-			$pay_url = add_query_arg( 'order-pay', $this->id, $pay_url );
+		$pay_url = woocommerce_get_endpoint_url( 'order-pay', $this->id, get_permalink( woocommerce_get_page_id( 'checkout' ) ) );
 
 		if ( get_option( 'woocommerce_force_ssl_checkout' ) == 'yes' || is_ssl() )
 			$pay_url = str_replace( 'http:', 'https:', $pay_url );
@@ -1123,12 +1118,7 @@ class WC_Order {
 	 */
 	public function get_checkout_order_received_url() {
 
-		$order_received_url = get_permalink( woocommerce_get_page_id( 'checkout' ) );
-
-		if ( get_option( 'permalink_structure' ) )
-			$order_received_url = trailingslashit( $order_received_url ) . 'order-received/' . $this->id;
-		else
-			$order_received_url = add_query_arg( 'order-received', $this->id, $order_received_url );
+		$order_received_url = woocommerce_get_endpoint_url( 'order-received', $this->id, get_permalink( woocommerce_get_page_id( 'checkout' ) ) );
 
 		if ( get_option( 'woocommerce_force_ssl_checkout' ) == 'yes' || is_ssl() )
 			$order_received_url = str_replace( 'http:', 'https:', $order_received_url );
@@ -1156,12 +1146,7 @@ class WC_Order {
 	 * @return string
 	 */
 	public function get_view_order_url() {
-		$view_order_url = get_permalink( woocommerce_get_page_id( 'myaccount' ) );
-
-		if ( get_option( 'permalink_structure' ) )
-			$view_order_url = trailingslashit( $view_order_url ) . 'view-order/' . $this->id;
-		else
-			$view_order_url = add_query_arg( 'view-order', $this->id, $view_order_url );
+		$view_order_url = woocommerce_get_endpoint_url( 'view-order', $this->id, get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
 
 		return apply_filters( 'woocommerce_get_view_order_url', $view_order_url, $this );
 	}

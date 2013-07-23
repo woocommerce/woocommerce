@@ -357,11 +357,7 @@ function woocommerce_placeholder_img( $size = 'shop_thumbnail' ) {
  * @return void
  */
 function woocommerce_lostpassword_url( $url ) {
-    $id = woocommerce_get_page_id( 'lost_password' );
-    if ( $id != -1 )
-    	 $url = get_permalink( $id );
-
-    return $url;
+    return woocommerce_get_endpoint_url( 'lost-password', '', get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
 }
 
 add_filter( 'lostpassword_url',  'woocommerce_lostpassword_url' );
@@ -406,8 +402,8 @@ if ( ! function_exists( 'woocommerce_get_page_id' ) ) {
 
 			$page = 'checkout';
 		}
-		if ( $page == 'change_password' ) {
-			_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.1', 'The "change_password" page is no-longer used - an endpoint is added to the my-account instead. To get a valid link use the woocommerce_customer_edit_account_url() function instead.' );
+		if ( $page == 'change_password' || $page == 'edit_address' || $page == 'lost_password' ) {
+			_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.1', 'The "change_password", "edit_address" and "lost_password" pages are no-longer used - an endpoint is added to the my-account instead. To get a valid link use the woocommerce_customer_edit_account_url() function instead.' );
 
 			$page = 'myaccount';
 		}
@@ -415,6 +411,29 @@ if ( ! function_exists( 'woocommerce_get_page_id' ) ) {
 		$page = apply_filters( 'woocommerce_get_' . $page . '_page_id', get_option('woocommerce_' . $page . '_page_id' ) );
 
 		return $page ? $page : -1;
+	}
+}
+
+if ( ! function_exists( 'woocommerce_get_endpoint_url' ) ) {
+
+	/**
+	 * Get endpoint URL
+	 *
+	 * Gets the URL for an endpoint, which varies depending on permalink settings.
+	 *
+	 * @param string $page
+	 * @return string
+	 */
+	function woocommerce_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
+		if ( ! $permalink )
+			$permalink = get_permalink();
+
+		if ( get_option( 'permalink_structure' ) )
+			$url = trailingslashit( $permalink ) . $endpoint . '/' . $value;
+		else
+			$url = add_query_arg( $endpoint, $value, $permalink );
+
+		return apply_filters( 'woocommerce_get_endpoint_url', $url );
 	}
 }
 
@@ -609,7 +628,7 @@ if ( ! function_exists( 'is_account_page' ) ) {
 	 * @return bool
 	 */
 	function is_account_page() {
-		return is_page( woocommerce_get_page_id( 'myaccount' ) ) || is_page( woocommerce_get_page_id( 'edit_address' ) ) || is_page( woocommerce_get_page_id( 'lost_password' ) ) || apply_filters( 'woocommerce_is_account_page', false ) ? true : false;
+		return is_page( woocommerce_get_page_id( 'myaccount' ) ) || apply_filters( 'woocommerce_is_account_page', false ) ? true : false;
 	}
 }
 

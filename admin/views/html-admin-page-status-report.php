@@ -265,14 +265,6 @@
 				__( 'My Account', 'woocommerce' ) => array(
 						'option' => 'woocommerce_myaccount_page_id',
 						'shortcode' => '[woocommerce_my_account]'
-					),
-				__( 'Edit Address', 'woocommerce' ) => array(
-						'option' => 'woocommerce_edit_address_page_id',
-						'shortcode' => '[woocommerce_edit_address]'
-					),
-				__( 'Lost Password', 'woocommerce' ) => array(
-						'option' => 'woocommerce_lost_password_page_id',
-						'shortcode' => '[woocommerce_lost_password]'
 					)
 			);
 

@@ -22,9 +22,9 @@ get_currentuserinfo();
 
 <?php else : ?>
 
-	<form action="<?php echo esc_url( add_query_arg( 'address', $load_address, get_permalink( woocommerce_get_page_id('edit_address') ) ) ); ?>" method="post">
+	<form method="post">
 
-		<h3><?php if ($load_address=='billing') _e( 'Billing Address', 'woocommerce' ); else _e( 'Shipping Address', 'woocommerce' ); ?></h3>
+		<h3><?php if ( $load_address == 'billing' ) _e( 'Billing Address', 'woocommerce' ); else _e( 'Shipping Address', 'woocommerce' ); ?></h3>
 
 		<?php
 		foreach ($address as $key => $field) :

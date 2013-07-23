@@ -222,18 +222,6 @@ function woocommerce_create_pages() {
 			'title'   => __( 'My Account', 'woocommerce' ),
 			'content' => '[woocommerce_my_account]'
 		),
-		'lost_password' => array(
-			'name'    => _x( 'lost-password', 'page_slug', 'woocommerce' ),
-			'title'   => __( 'Lost Password', 'woocommerce' ),
-			'content' => '[woocommerce_lost_password]',
-			'parent'  => 'myaccount'
-		),
-		'edit_address' => array(
-			'name'    => _x( 'edit-address', 'page_slug', 'woocommerce' ),
-			'title'   => __( 'Edit My Address', 'woocommerce' ),
-			'content' => '[woocommerce_edit_address]',
-			'parent'  => 'myaccount'
-		),
 		'logout' => array(
 			'name'    => _x( 'logout', 'page_slug', 'woocommerce' ),
 			'title'   => __( 'Logout', 'woocommerce' ),

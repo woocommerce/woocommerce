@@ -326,6 +326,9 @@ final class WooCommerce {
 		if ( ! is_admin() || defined('DOING_AJAX') )
 			$this->frontend_includes();
 
+		// Query class
+		$this->query = include( 'includes/class-wc-query.php' );				// The main query class
+
 		// Post types
 		include_once( 'includes/class-wc-post-types.php' );					// Registers post types
 
@@ -400,7 +403,6 @@ final class WooCommerce {
 
 		// Classes
 		include_once( 'includes/class-wc-frontend-scripts.php' );
-		include_once( 'includes/class-wc-query.php' );				// The main store queries
 		include_once( 'includes/class-wc-cart.php' );					// The main cart class
 		include_once( 'includes/class-wc-tax.php' );					// Tax class
 		include_once( 'includes/class-wc-customer.php' ); 			// Customer class
@@ -493,12 +495,6 @@ final class WooCommerce {
 		// Variables
 		$this->template_url			= apply_filters( 'woocommerce_template_url', 'woocommerce/' );
 
-		// Add endpoints
-		add_rewrite_endpoint( 'order-pay', EP_PAGES );
-		add_rewrite_endpoint( 'order-received', EP_PAGES );
-		add_rewrite_endpoint( 'view-order', EP_PAGES );
-		add_rewrite_endpoint( 'edit-account', EP_PAGES );
-
 		// Load class instances
 		$this->product_factory 		= new WC_Product_Factory();     // Product Factory to create new product instances
 		$this->countries 			= new WC_Countries();			// Countries class
@@ -514,7 +510,6 @@ final class WooCommerce {
 			// Class instances
 			$this->cart 			= new WC_Cart();				// Cart class, stores the cart contents
 			$this->customer 		= new WC_Customer();			// Customer class, handles data such as customer location
-			$this->query			= new WC_Query();				// Query class, handles front-end queries and loops
 			$this->shortcodes		= new WC_Shortcodes();			// Shortcodes class, controls all frontend shortcodes
 
 			// Hooks

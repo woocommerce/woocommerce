@@ -37,16 +37,7 @@ global $woocommerce; ?>
 
 			<p class="form-row">
 				<?php wp_nonce_field( 'woocommerce-login', 'login') ?>
-				<input type="submit" class="button" name="login" value="<?php _e( 'Login', 'woocommerce' ); ?>" /> <a class="lost_password" href="<?php
-
-				$lost_password_page_id = woocommerce_get_page_id( 'lost_password' );
-
-				if ( $lost_password_page_id )
-					echo esc_url( get_permalink( $lost_password_page_id ) );
-				else
-					echo esc_url( wp_lostpassword_url( home_url() ) );
-
-				?>"><?php _e( 'Lost Password?', 'woocommerce' ); ?></a>
+				<input type="submit" class="button" name="login" value="<?php _e( 'Login', 'woocommerce' ); ?>" /> <a class="lost_password" href="<?php echo esc_url( woocommerce_get_endpoint_url( 'lost-password', '', get_permalink( woocommerce_get_page_id( 'myaccount' ) ) ) ); ?>"><?php _e( 'Lost Password?', 'woocommerce' ); ?></a>
 			</p>
 		</form>
 

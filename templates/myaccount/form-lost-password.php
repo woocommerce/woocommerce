@@ -15,7 +15,7 @@ global $woocommerce, $post;
 
 <?php wc_print_messages(); ?>
 
-<form action="<?php echo esc_url( get_permalink($post->ID) ); ?>" method="post" class="lost_reset_password">
+<form method="post" class="lost_reset_password">
 
 	<?php	if( 'lost_password' == $args['form'] ) : ?>
 

@@ -8,10 +8,28 @@
  * @category	Class
  * @author 		WooThemes
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
+if ( ! class_exists( 'WC_Query' ) ) :
+
+/**
+ * WC_Query Class
+ */
 class WC_Query {
 
 	/** @public array Query vars to add to wp */
-	public $query_vars = array();
+	public $query_vars = array(
+		// Checkout actions
+		'order-pay',
+		'order-received',
+
+		// My account actions
+		'view-order',
+		'edit-account',
+		'edit-address',
+		'lost-password'
+		);
 
 	/** @public array Unfiltered product ids (before layered nav etc) */
 	public $unfiltered_product_ids 	= array();
@@ -38,26 +56,27 @@ class WC_Query {
 	 * @return void
 	 */
 	public function __construct() {
-		add_filter( 'query_vars', array( $this, 'add_query_vars'), 0 );
-		add_action( 'parse_request', array( $this, 'parse_request'), 0 );
-		add_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
-		add_filter( 'the_posts', array( $this, 'the_posts' ), 11, 2 );
-		add_filter( 'wp', array( $this, 'remove_product_query' ) );
+		add_action( 'init', array( $this, 'add_endpoints' ) );
 
-		// Get any errors from querystring
-		if ( isset( $_GET['wc_error'] ) )
-			wc_add_error( esc_attr( $_GET['wc_error'] ) );
+		if ( ! is_admin() ) {
+			add_filter( 'query_vars', array( $this, 'add_query_vars'), 0 );
+			add_action( 'parse_request', array( $this, 'parse_request'), 0 );
+			add_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
+			add_filter( 'the_posts', array( $this, 'the_posts' ), 11, 2 );
+			add_filter( 'wp', array( $this, 'remove_product_query' ) );
 
-		// Define query vars for endpoints
-		$this->query_vars = array(
-			// Checkout actions
-			'order-pay',
-			'order-received',
+			// Get any errors from querystring
+			if ( isset( $_GET['wc_error'] ) )
+				wc_add_error( esc_attr( $_GET['wc_error'] ) );
+		}
+	}
 
-			// My account actions
-			'view-order',
-			'edit-account'
-		);
+	/**
+	 * Add endpoints for query vars
+	 */
+	public function add_endpoints() {
+		foreach ( $this->query_vars as $var )
+			add_rewrite_endpoint( $var, EP_PAGES );
 	}
 
 	/**
@@ -547,5 +566,8 @@ class WC_Query {
 		}
 		return $meta_query;
 	}
-
 }
+
+endif;
+
+return new WC_Query();

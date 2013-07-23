@@ -175,9 +175,6 @@ update_option( 'woocommerce_local_tax_rates_backup', $local_tax_rates );
 delete_option( 'woocommerce_tax_rates' );
 delete_option( 'woocommerce_local_tax_rates' );
 
-// Create lost password page
-woocommerce_create_page( esc_sql( _x( 'lost-password', 'page_slug', 'woocommerce' ) ), 'woocommerce_lost_password_page_id', __( 'Lost Password', 'woocommerce' ), '[woocommerce_lost_password]', woocommerce_get_page_id( 'myaccount' ) );
-
 
 // Now its time for the massive update to line items - move them to the new DB tables
 // Reverse with UPDATE `wpwc_postmeta` SET meta_key = '_order_items' WHERE meta_key = '_order_items_old'

@@ -17,6 +17,8 @@ wp_delete_post( get_option('woocommerce_pay_page_id'), true );
 wp_delete_post( get_option('woocommerce_thanks_page_id'), true );
 wp_delete_post( get_option('woocommerce_view_order_page_id'), true );
 wp_delete_post( get_option('woocommerce_change_password_page_id'), true );
+wp_delete_post( get_option('woocommerce_edit_address_page_id'), true );
+wp_delete_post( get_option('woocommerce_lost_password_page_id'), true );
 
 // Update table primary keys - remove old key and then add new 'permission_id' row.
 //$wpdb->hide_errors();

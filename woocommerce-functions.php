@@ -49,12 +49,6 @@ function woocommerce_template_redirect() {
 		exit;
 	}
 
-	// My account page redirects (logged out)
-	elseif ( ! is_user_logged_in() && ( is_page( woocommerce_get_page_id( 'edit_address' ) ) ) ) {
-		wp_redirect( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
-		exit;
-	}
-
 	// Logout
 	elseif ( is_page( woocommerce_get_page_id( 'logout' ) ) ) {
 		wp_redirect( str_replace( '&amp;', '&', wp_logout_url( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) ) ) );
@@ -119,7 +113,6 @@ function woocommerce_nav_menu_items( $items, $args ) {
 
 		$hide_pages   = array();
 		$hide_pages[] = (int) woocommerce_get_page_id( 'logout' );
-		$hide_pages[] = (int) woocommerce_get_page_id( 'edit_address' );
 		$hide_pages   = apply_filters( 'woocommerce_logged_out_hidden_page_ids', $hide_pages );
 
 		foreach ( $items as $key => $item ) {
@@ -834,21 +827,10 @@ function woocommerce_process_registration() {
  * @return string
  */
 function woocommerce_customer_edit_account_url() {
-	$edit_account_url = get_permalink( woocommerce_get_page_id( 'myaccount' ) );
-
-	if ( get_option( 'permalink_structure' ) )
-		$edit_account_url = trailingslashit( $edit_account_url ) . 'edit-account/';
-	else
-		$edit_account_url = add_query_arg( 'edit-account', '', $edit_account_url );
+	$edit_account_url = woocommerce_get_endpoint_url( 'edit-account', '', get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
 
 	return apply_filters( 'woocommerce_customer_edit_account_url', $edit_account_url );
 }
-
-
-
-
-
-
 
 /**
  * Place a previous order again.
@@ -1650,7 +1632,7 @@ add_action( 'template_redirect', 'woocommerce_save_account_details' );
  * @access public
  */
 function woocommerce_save_address() {
-	global $woocommerce;
+	global $woocommerce, $wp;
 
 	if ( 'POST' !== strtoupper( $_SERVER[ 'REQUEST_METHOD' ] ) )
 		return;
@@ -1666,10 +1648,9 @@ function woocommerce_save_address() {
 
 	if ( $user_id <= 0 ) return;
 
-	$load_address = ( isset( $_GET[ 'address' ] ) ) ? esc_attr( $_GET[ 'address' ] ) : '';
-	$load_address = ( $load_address == 'billing' || $load_address == 'shipping' ) ? $load_address : '';
+	$load_address = ( $wp->query_vars['edit-address'] == 'billing' || $wp->query_vars['edit-address'] == 'shipping' ) ? $wp->query_vars['edit-address'] : 'billing';
 
-	$address = $woocommerce->countries->get_address_fields( esc_attr($_POST[ $load_address . '_country' ]), $load_address . '_' );
+	$address = $woocommerce->countries->get_address_fields( esc_attr( $_POST[ $load_address . '_country' ] ), $load_address . '_' );
 
 	foreach ($address as $key => $field) :
 

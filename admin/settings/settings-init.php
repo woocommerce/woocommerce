@@ -274,7 +274,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 	),
 
 	array(
-		'title' => __( 'Terms Page ID', 'woocommerce' ),
+		'title' => __( 'Terms Page', 'woocommerce' ),
 		'desc' 		=> __( 'If you define a "Terms" page the customer will be asked if they accept them when checking out.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_terms_page_id',
 		'default'	=> '',
@@ -287,7 +287,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 
 	array( 'type' => 'sectionend', 'id' => 'page_options' ),
 
-	array( 'title' => __( 'Shop Pages', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following pages need selecting so that WooCommerce knows where they are. These pages should have been created upon installation of the plugin, if not you will need to create them.', 'woocommerce' ) ),
+	array( 'title' => __( 'Shop Pages', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following pages need selecting so that WooCommerce knows where they are. These pages should have been created upon installation of the plugin, if not you will need to create them.', 'woocommerce' ), 'id' => 'shop_page_options' ),
 
 	array(
 		'title' => __( 'Cart Page', 'woocommerce' ),
@@ -323,17 +323,6 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 	),
 
 	array(
-		'title' => __( 'Edit Address Page', 'woocommerce' ),
-		'desc' 		=> __( 'Page contents: [woocommerce_edit_address] Parent: "My Account"', 'woocommerce' ),
-		'id' 		=> 'woocommerce_edit_address_page_id',
-		'type' 		=> 'single_select_page',
-		'default'	=> '',
-		'class'		=> 'chosen_select_nostd',
-		'css' 		=> 'min-width:300px;',
-		'desc_tip'	=> true,
-	),
-
-	array(
 		'title' => __( 'Logout Page', 'woocommerce' ),
 		'desc' 		=> __( 'Parent: "My Account"', 'woocommerce' ),
 		'id' 		=> 'woocommerce_logout_page_id',
@@ -344,18 +333,65 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'desc_tip'	=> true,
 	),
 
+	array( 'type' => 'sectionend', 'id' => 'shop_page_options'),
+
+	array( 'title' => __( 'Endpoints', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following endpoints are used on the frontend for certain pages.', 'woocommerce' ), 'id' => 'endpoint_options' ),
+
 	array(
-		'title' => __( 'Lost Password Page', 'woocommerce' ),
-		'desc' 		=> __( 'Page contents: [woocommerce_lost_password] Parent: "My Account"', 'woocommerce' ),
-		'id' 		=> 'woocommerce_lost_password_page_id',
-		'type' 		=> 'single_select_page',
-		'default'	=> '',
-		'class'		=> 'chosen_select_nostd',
-		'css' 		=> 'min-width:300px;',
+		'title' => __( 'Checkout &rarr; Pay', 'woocommerce' ),
+		'desc' 		=> __( 'Endpoint for the Checkout &rarr; Pay page', 'woocommerce' ),
+		'id' 		=> 'woocommerce_checkout_pay_endpoint',
+		'type' 		=> 'text',
+		'default'	=> 'order-pay',
 		'desc_tip'	=> true,
 	),
 
-	array( 'type' => 'sectionend', 'id' => 'page_options')
+	array(
+		'title' => __( 'Checkout &rarr; Order Received', 'woocommerce' ),
+		'desc' 		=> __( 'Endpoint for the Checkout &rarr; Pay page', 'woocommerce' ),
+		'id' 		=> 'woocommerce_checkout_order_received_endpoint',
+		'type' 		=> 'text',
+		'default'	=> 'order-received',
+		'desc_tip'	=> true,
+	),
+
+	array(
+		'title' => __( 'My Account &rarr; View Order', 'woocommerce' ),
+		'desc' 		=> __( 'Endpoint for the My Account &rarr; View Order page', 'woocommerce' ),
+		'id' 		=> 'woocommerce_myaccount_view_order_endpoint',
+		'type' 		=> 'text',
+		'default'	=> 'view-order',
+		'desc_tip'	=> true,
+	),
+
+	array(
+		'title' => __( 'My Account &rarr; Edit Account', 'woocommerce' ),
+		'desc' 		=> __( 'Endpoint for the My Account &rarr; Edit Account page', 'woocommerce' ),
+		'id' 		=> 'woocommerce_myaccount_edit_account_endpoint',
+		'type' 		=> 'text',
+		'default'	=> 'edit-account',
+		'desc_tip'	=> true,
+	),
+
+	array(
+		'title' => __( 'My Account &rarr; Edit Address', 'woocommerce' ),
+		'desc' 		=> __( 'Endpoint for the My Account &rarr; Edit Address page', 'woocommerce' ),
+		'id' 		=> 'woocommerce_myaccount_edit_address_endpoint',
+		'type' 		=> 'text',
+		'default'	=> 'edit-address',
+		'desc_tip'	=> true,
+	),
+
+	array(
+		'title' => __( 'My Account &rarr; Lost Password', 'woocommerce' ),
+		'desc' 		=> __( 'Endpoint for the My Account &rarr; Lost Password page', 'woocommerce' ),
+		'id' 		=> 'woocommerce_myaccount_lost_password_endpoint',
+		'type' 		=> 'text',
+		'default'	=> 'lost-password',
+		'desc_tip'	=> true,
+	),
+
+	array( 'type' => 'sectionend', 'id' => 'endpoint_options'),
 
 )); // End pages settings
 
