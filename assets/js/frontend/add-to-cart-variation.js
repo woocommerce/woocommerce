@@ -399,7 +399,9 @@
 		return $form;
     };
 
-    $('form.variations_form').wc_variation_form();
-    $('form.variations_form .variations select').change();
+    $(function() {
+    	$('form.variations_form').wc_variation_form();
+   		$('form.variations_form .variations select').change();
+    });
 
 })( jQuery, window, document );
