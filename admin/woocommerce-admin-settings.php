@@ -404,15 +404,26 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 					}).change();
 
 					// Color picker
-					jQuery('.colorpick').each(function(){
-						jQuery('.colorpickdiv', jQuery(this).parent()).farbtastic(this);
-						jQuery(this).click(function() {
-							if ( jQuery(this).val() == "" ) jQuery(this).val('#');
-							jQuery('.colorpickdiv', jQuery(this).parent() ).show();
-						});
+					jQuery('.colorpick').iris( {
+						change: function(event, ui){
+							jQuery(this).css( { backgroundColor: ui.color.toString() } );
+						},
+						hide: true,
+						border: true
+					} ).each( function() {
+						jQuery(this).css( { backgroundColor: jQuery(this).val() } );
+					})
+					.click(function(){
+						jQuery('.iris-picker').hide();
+						jQuery(this).closest('.color_box, td').find('.iris-picker').show();
 					});
-					jQuery(document).mousedown(function(){
-						jQuery('.colorpickdiv').hide();
+
+					jQuery('body').click(function() {
+						jQuery('.iris-picker').hide();
+					});
+
+					jQuery('.color_box, .colorpick').click(function(event){
+					    event.stopPropagation();
 					});
 
 					// Edit prompt

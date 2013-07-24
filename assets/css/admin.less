@@ -1802,7 +1802,7 @@ img.help_tip {
 					margin: 1px 0 0 0;
 				}
 			}
-			input {
+			input.colorpick {
 				width: 100%;
 				margin: 0;
 				font-family: monospace;
@@ -1810,18 +1810,36 @@ img.help_tip {
 				-moz-box-sizing: border-box;    /* Firefox, other Gecko */
 				box-sizing: border-box;         /* Opera/IE 8+ */
 			}
-			.colorpickdiv {
-				z-index: 100;
-				background:#eee;
-				border:1px solid #ccc;
-				position:absolute;
-				display:none;
+			.iris-picker {
+				margin: 15px 0 0 -7px;
 			}
 		}
 		.color_box_clear {
 			display: block;
 			clear: both;
 			padding-bottom: 10px;
+		}
+		.iris-picker {
+			z-index: 100;
+			position:absolute;
+			display:none;
+			border: 1px solid #ccc;
+			box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+			-webkit-box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+			-moz-box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+			-webkit-border-radius:3px;
+			-moz-border-radius:3px;
+			border-radius:3px;
+			.ui-slider {
+				border: 0 !important;
+				background: none transparent !important;
+				margin: 0 !important;
+				width: auto !important;
+				height: auto !important;
+				.ui-slider-handle {
+					margin-bottom: 0 !important;
+				}
+			}
 		}
 	}
 }

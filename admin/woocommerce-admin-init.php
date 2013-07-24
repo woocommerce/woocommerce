@@ -21,10 +21,19 @@ class WC_Admin {
 	 * Constructor
 	 */
 	public function __construct() {
+		add_filter( 'admin_init', array( $this, 'includes' ) );
 		add_filter( 'admin_menu', array( $this, 'reports_menu' ), 20 );
 		add_filter( 'admin_menu', array( $this, 'status_menu' ), 60 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_styles' ) );
 		add_filter( 'woocommerce_screen_ids', array( $this, 'add_screen_ids' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'scripts_and_styles' ) );
+	}
+
+	/**
+	 * Include any classes we need within admin.
+	 */
+	public function includes() {
+		include( 'class-wc-admin-help.php' );
 	}
 
 	/**
@@ -39,6 +48,30 @@ class WC_Admin {
 	 */
 	public function status_menu() {
 		add_submenu_page( 'woocommerce', __( 'WooCommerce Status', 'woocommerce' ),  __( 'System Status', 'woocommerce' ) , 'manage_woocommerce', 'wc_status', array( $this, 'status_page' ) );
+	}
+
+	/**
+	 * Enqueue scripts and styles
+	 */
+	public function admin_styles() {
+		global $woocommerce, $wp_scripts;
+
+		// Sitewide menu CSS
+		wp_enqueue_style( 'woocommerce_admin_menu_styles', $woocommerce->plugin_url() . '/assets/css/menu.css' );
+
+		$screen = get_current_screen();
+
+		if ( in_array( $screen->id, get_woocommerce_screen_ids() ) ) {
+
+			$jquery_version = isset( $wp_scripts->registered['jquery-ui-core']->ver ) ? $wp_scripts->registered['jquery-ui-core']->ver : '1.9.2';
+
+			// Admin styles for WC pages only
+			wp_enqueue_style( 'woocommerce_admin_styles', $woocommerce->plugin_url() . '/assets/css/admin.css' );
+			wp_enqueue_style( 'jquery-ui-style', '//ajax.googleapis.com/ajax/libs/jqueryui/' . $jquery_version . '/themes/smoothness/jquery-ui.css' );
+			wp_enqueue_style( 'wp-color-picker' );
+		}
+
+		do_action( 'woocommerce_admin_css' );
 	}
 
 	/**
@@ -86,6 +119,35 @@ new WC_Admin();
 
 
 include_once( 'class-wc-admin-updates.php' );
+
+
+
+
+
+function get_woocommerce_screen_ids() {
+	$wc_screen_id = strtolower( __( 'WooCommerce', 'woocommerce' ) );
+
+    return apply_filters( 'woocommerce_screen_ids', array(
+    	'toplevel_page_' . $wc_screen_id,
+    	$wc_screen_id . '_page_woocommerce_settings',
+    	$wc_screen_id . '_page_wc_status',
+    	$wc_screen_id . '_page_woocommerce_customers',
+    	'toplevel_page_woocommerce',
+    	'woocommerce_page_woocommerce_settings',
+    	'woocommerce_page_wc_status',
+    	'product_page_woocommerce_attributes',
+    	'edit-shop_order',
+    	'shop_order',
+    	'edit-product',
+    	'product',
+    	'edit-shop_coupon',
+    	'shop_coupon',
+    	'edit-product_cat',
+    	'edit-product_tag',
+    	'edit-product_shipping_class'
+    ) );
+}
+
 
 
 
@@ -140,15 +202,6 @@ function woocommerce_admin_menu() {
     $main_page = add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings_page', null, '55.5' );
 
     add_submenu_page( 'edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'woocommerce_attributes', 'woocommerce_attributes_page');
-
-    add_action( 'load-' . $main_page, 'woocommerce_admin_help_tab' );
-
-    $wc_screen_id = strtolower( __( 'WooCommerce', 'woocommerce' ) );
-
-    $print_css_on = apply_filters( 'woocommerce_screen_ids', array( 'toplevel_page_' . $wc_screen_id, $wc_screen_id . '_page_woocommerce_settings', $wc_screen_id . '_page_wc_status', $wc_screen_id . '_page_woocommerce_customers', 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_woocommerce_customers', 'woocommerce_page_wc_status', 'product_page_woocommerce_attributes', 'edit-tags.php', 'edit.php', 'index.php', 'post-new.php', 'post.php' ) );
-
-    foreach ( $print_css_on as $page )
-    	add_action( 'admin_print_styles-'. $page, 'woocommerce_admin_css' );
 }
 
 add_action( 'admin_menu', 'woocommerce_admin_menu', 9 );
@@ -372,9 +425,6 @@ function woocommerce_admin_init() {
 
 		include_once( 'post-types/writepanels/writepanels-init.php' );
 
-		if ( in_array( $typenow, array( 'product', 'shop_coupon', 'shop_order' ) ) )
-			add_action('admin_print_styles', 'woocommerce_admin_help_tab');
-
 	} elseif ( $pagenow == 'user-edit.php' || $pagenow == 'profile.php' ) {
 
 		include_once( 'woocommerce-admin-profile.php' );
@@ -414,18 +464,6 @@ function woocommerce_attributes_page() {
 
 
 /**
- * Include and add help tabs to WordPress admin.
- *
- * @access public
- * @return void
- */
-function woocommerce_admin_help_tab() {
-	include_once( 'woocommerce-admin-content.php' );
-	woocommerce_admin_help_tab_content();
-}
-
-
-/**
  * Include admin scripts and styles.
  *
  * @access public
@@ -458,10 +496,10 @@ function woocommerce_admin_scripts() {
     $wc_screen_id = strtolower( __( 'WooCommerce', 'woocommerce' ) );
 
     // WooCommerce admin pages
-    if ( in_array( $screen->id, apply_filters( 'woocommerce_screen_ids', array( 'toplevel_page_' . $wc_screen_id, $wc_screen_id . '_page_woocommerce_settings', $wc_screen_id . '_page_wc_status', $wc_screen_id . '_page_woocommerce_customers', 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_wc_status', 'woocommerce_page_woocommerce_customers', 'edit-shop_order', 'edit-shop_coupon', 'shop_coupon', 'shop_order', 'edit-product', 'product' ) ) ) ) {
+    if ( in_array( $screen->id, get_woocommerce_screen_ids() ) ) {
 
     	wp_enqueue_script( 'woocommerce_admin' );
-    	wp_enqueue_script( 'farbtastic' );
+    	wp_enqueue_script( 'iris' );
     	wp_enqueue_script( 'ajax-chosen' );
     	wp_enqueue_script( 'chosen' );
     	wp_enqueue_script( 'jquery-ui-sortable' );
@@ -553,51 +591,6 @@ function woocommerce_admin_scripts() {
 }
 
 add_action( 'admin_enqueue_scripts', 'woocommerce_admin_scripts' );
-
-
-/**
- * Queue WooCommerce CSS.
- *
- * @access public
- * @return void
- */
-function woocommerce_admin_css() {
-	global $woocommerce, $typenow, $post, $wp_scripts;
-
-	if ( $typenow == 'post' && ! empty( $_GET['post'] ) ) {
-		$typenow = $post->post_type;
-	} elseif ( empty( $typenow ) && ! empty( $_GET['post'] ) ) {
-        $post = get_post( $_GET['post'] );
-        $typenow = $post->post_type;
-    }
-
-	if ( $typenow == '' || $typenow == "product" || $typenow == "shop_order" || $typenow == "shop_coupon" ) {
-		wp_enqueue_style( 'woocommerce_admin_styles', $woocommerce->plugin_url() . '/assets/css/admin.css' );
-
-		$jquery_version = isset( $wp_scripts->registered['jquery-ui-core']->ver ) ? $wp_scripts->registered['jquery-ui-core']->ver : '1.9.2';
-
-		wp_enqueue_style( 'jquery-ui-style', '//ajax.googleapis.com/ajax/libs/jqueryui/' . $jquery_version . '/themes/smoothness/jquery-ui.css' );
-	}
-
-	wp_enqueue_style('farbtastic');
-
-	do_action('woocommerce_admin_css');
-}
-
-
-/**
- * Queue admin menu icons CSS.
- *
- * @access public
- * @return void
- */
-function woocommerce_admin_menu_styles() {
-	global $woocommerce;
-	wp_enqueue_style( 'woocommerce_admin_menu_styles', $woocommerce->plugin_url() . '/assets/css/menu.css' );
-}
-
-add_action( 'admin_print_styles', 'woocommerce_admin_menu_styles' );
-
 
 /**
  * Reorder the WC menu items in admin.
