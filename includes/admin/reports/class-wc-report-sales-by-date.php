@@ -197,7 +197,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			break;
 		}
 
-		include( WC()->plugin_path() . '/admin/views/html-report-by-date.php');
+		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php');
 	}
 
 	/**

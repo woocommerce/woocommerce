@@ -299,7 +299,7 @@ final class WooCommerce {
 	 * @return void
 	 */
 	function install() {
-		include_once( 'admin/woocommerce-admin-install.php' );
+		include_once( 'includes/admin/woocommerce-admin-install.php' );
 		set_transient( '_wc_activation_redirect', 1, 60 * 60 );
 		do_install_woocommerce();
 	}
@@ -317,12 +317,12 @@ final class WooCommerce {
 		include( 'includes/wc-message-functions.php' );
 		include( 'includes/wc-coupon-functions.php' );
 
-
-
 		if ( is_admin() )
-			$this->admin_includes();
+			include_once( 'includes/admin/class-wc-admin.php' );
+
 		if ( defined('DOING_AJAX') )
 			$this->ajax_includes();
+
 		if ( ! is_admin() || defined('DOING_AJAX') )
 			$this->frontend_includes();
 
@@ -367,17 +367,6 @@ final class WooCommerce {
 
 		return $this->helpers[ $id ];
 	}
-
-	/**
-	 * Include required admin files.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function admin_includes() {
-		include_once( 'admin/woocommerce-admin-init.php' );			// Admin section
-	}
-
 
 	/**
 	 * Include required ajax files.

@@ -15,11 +15,11 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
- * WC_Welcome_Page class.
+ * WC_Admin_Welcome class.
  *
  * @since 2.0
  */
-class WC_Welcome_Page {
+class WC_Admin_Welcome {
 
 	private $plugin;
 
@@ -429,4 +429,4 @@ class WC_Welcome_Page {
 	}
 }
 
-new WC_Welcome_Page();
+new WC_Admin_Welcome();

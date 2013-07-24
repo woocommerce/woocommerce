@@ -28,27 +28,27 @@ function do_update_woocommerce() {
 	$current_db_version = get_option( 'woocommerce_db_version' );
 
 	if ( version_compare( $current_db_version, '1.4', '<' ) ) {
-		include( 'includes/updates/woocommerce-update-1.4.php' );
+		include( 'updates/woocommerce-update-1.4.php' );
 		update_option( 'woocommerce_db_version', '1.4' );
 	}
 
 	if ( version_compare( $current_db_version, '1.5', '<' ) ) {
-		include( 'includes/updates/woocommerce-update-1.5.php' );
+		include( 'updates/woocommerce-update-1.5.php' );
 		update_option( 'woocommerce_db_version', '1.5' );
 	}
 
 	if ( version_compare( $current_db_version, '2.0', '<' ) ) {
-		include( 'includes/updates/woocommerce-update-2.0.php' );
+		include( 'updates/woocommerce-update-2.0.php' );
 		update_option( 'woocommerce_db_version', '2.0' );
 	}
 
 	if ( version_compare( $current_db_version, '2.0.9', '<' ) ) {
-		include( 'includes/updates/woocommerce-update-2.0.9.php' );
+		include( 'updates/woocommerce-update-2.0.9.php' );
 		update_option( 'woocommerce_db_version', '2.0.9' );
 	}
 
 	if ( version_compare( $current_db_version, '2.1.0', '<' ) ) {
-		include( 'includes/updates/woocommerce-update-2.1.php' );
+		include( 'updates/woocommerce-update-2.1.php' );
 		update_option( 'woocommerce_db_version', '2.1.0' );
 	}
 

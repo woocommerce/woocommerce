@@ -433,9 +433,9 @@ function woocommerce_compile_less_styles() {
 
 		// Colours changed - recompile less
 		if ( ! class_exists( 'lessc' ) )
-			include_once('includes/class-lessc.php');
+			include_once( WC()->plugin_path() . '/includes/libraries/class-lessc.php' );
 		if ( ! class_exists( 'cssmin' ) )
-			include_once('includes/class-cssmin.php');
+			include_once( WC()->plugin_path() . '/includes/libraries/class-cssmin.php' );
 
 		try {
 			// Set default if colours not set

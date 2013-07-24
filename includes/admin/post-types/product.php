@@ -11,62 +11,6 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
- * Duplicate a product link on products list
- *
- * @access public
- * @param mixed $actions
- * @param mixed $post
- * @return array
- */
-function woocommerce_duplicate_product_link_row($actions, $post) {
-
-	if ( function_exists( 'duplicate_post_plugin_activation' ) )
-		return $actions;
-
-	if ( ! current_user_can( apply_filters( 'woocommerce_duplicate_product_capability', 'manage_woocommerce' ) ) ) return $actions;
-
-	if ( $post->post_type != 'product' )
-		return $actions;
-
-	$actions['duplicate'] = '<a href="' . wp_nonce_url( admin_url( 'admin.php?action=duplicate_product&amp;post=' . $post->ID ), 'woocommerce-duplicate-product_' . $post->ID ) . '" title="' . __( 'Make a duplicate from this product', 'woocommerce' )
-		. '" rel="permalink">' .  __( 'Duplicate', 'woocommerce' ) . '</a>';
-
-	return $actions;
-}
-
-add_filter( 'post_row_actions', 'woocommerce_duplicate_product_link_row',10,2 );
-add_filter( 'page_row_actions', 'woocommerce_duplicate_product_link_row',10,2 );
-
-
-/**
- *  Duplicate a product link on edit screen
- *
- * @access public
- * @return void
- */
-function woocommerce_duplicate_product_post_button() {
-	global $post;
-
-	if ( function_exists( 'duplicate_post_plugin_activation' ) ) return;
-
-	if ( ! current_user_can( apply_filters( 'woocommerce_duplicate_product_capability', 'manage_woocommerce' ) ) ) return $actions;
-
-	if ( ! is_object( $post ) ) return;
-
-	if ( $post->post_type != 'product' ) return;
-
-	if ( isset( $_GET['post'] ) ) {
-		$notifyUrl = wp_nonce_url( admin_url( "admin.php?action=duplicate_product&post=" . absint( $_GET['post'] ) ), 'woocommerce-duplicate-product_' . $_GET['post'] );
-		?>
-		<div id="duplicate-action"><a class="submitduplicate duplication" href="<?php echo esc_url( $notifyUrl ); ?>"><?php _e( 'Copy to a new draft', 'woocommerce' ); ?></a></div>
-		<?php
-	}
-}
-
-add_action( 'post_submitbox_start', 'woocommerce_duplicate_product_post_button' );
-
-
-/**
  * Columns for Products page
  *
  * @access public

@@ -103,7 +103,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 
 		$hide_sidebar = true;
 
-		include( WC()->plugin_path() . '/admin/views/html-report-by-date.php');
+		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php');
 	}
 
 	/**

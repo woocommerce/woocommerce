@@ -238,7 +238,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 				unset( $this->customers[ $key ] );
 		}
 
-		include( WC()->plugin_path() . '/admin/views/html-report-by-date.php' );
+		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php' );
 	}
 
 	/**

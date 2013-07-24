@@ -181,7 +181,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			}
 		}
 
-		include( WC()->plugin_path() . '/admin/views/html-report-by-date.php');
+		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php');
 	}
 
 	/**
