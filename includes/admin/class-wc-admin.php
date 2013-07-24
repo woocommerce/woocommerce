@@ -32,10 +32,6 @@ class WC_Admin {
 
 		include_once( 'class-wc-admin-updates.php' );
 
-		/**
-		 * Functions for the product post type
-		 */
-		include_once( 'post-types/product.php' );
 
 		/**
 		 * Functions for the shop_coupon post type
@@ -91,7 +87,7 @@ class WC_Admin {
 			case 'users' :
 			case 'user' :
 			case 'profile' :
-				include_once( 'woocommerce-admin-profile.php' );
+				include( 'class-wc-admin-profile.php' );
 			break;
 		}
 	}

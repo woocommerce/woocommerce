@@ -21,7 +21,7 @@ class WC_Admin_Post_Types {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'current_screen', array( $this, 'include_post_type_handlers' ) );
+		add_action( 'admin_init', array( $this, 'include_post_type_handlers' ) );
 		add_filter( 'post_updated_messages', array( $this, 'post_updated_messages' ) );
 	}
 
@@ -29,17 +29,14 @@ class WC_Admin_Post_Types {
 	 * Conditonally load classes and functions only needed when viewing a post type.
 	 */
 	public function include_post_type_handlers() {
-		$screen = get_current_screen();
+		global $pagenow;
 
 		include_once( 'post-types/writepanels/writepanels-init.php' );
 
-		switch ( $screen->id ) {
-			case 'product' :
-			case 'edit-product' :
-				if ( ! function_exists( 'duplicate_post_plugin_activation' ) )
-					include( 'class-wc-admin-duplicate-product.php' );
-			break;
-		}
+		include( 'post-types/class-wc-admin-cpt-product.php' );
+
+		if ( ! function_exists( 'duplicate_post_plugin_activation' ) )
+			include( 'class-wc-admin-duplicate-product.php' );
 	}
 
 	/**

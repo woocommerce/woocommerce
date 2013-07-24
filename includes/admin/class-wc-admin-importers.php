@@ -46,11 +46,11 @@ class WC_Admin_Importers {
 		}
 
 		// includes
-		require 'importers/tax-rates-importer.php';
+		require 'importers/class-wc-tax-rate-importer.php';
 
 		// Dispatch
-		$WC_CSV_Tax_Rates_Import = new WC_CSV_Tax_Rates_Import();
-		$WC_CSV_Tax_Rates_Import->dispatch();
+		$importer = new WC_Tax_Rate_Importer();
+		$importer->dispatch();
 	}
 
 	/**

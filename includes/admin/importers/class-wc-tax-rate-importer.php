@@ -11,7 +11,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 if ( class_exists( 'WP_Importer' ) ) {
-	class WC_CSV_Tax_Rates_Import extends WP_Importer {
+	class WC_Tax_Rate_Importer extends WP_Importer {
 
 		var $id;
 		var $file_url;
