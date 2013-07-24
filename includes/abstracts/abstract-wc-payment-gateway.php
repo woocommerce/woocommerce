@@ -144,10 +144,11 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 *
 	 * Process the payment. Override this in your gateway.
 	 *
+	 * @param int $order_id
 	 * @access public
 	 * @return void
 	 */
-	function process_payment() {}
+	function process_payment( $order_id ) {}
 
 
 	/**
