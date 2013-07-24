@@ -26,6 +26,9 @@ function woocommerce_tooltip_js() {
 function woocommerce_datepicker_js() {
 	_deprecated_function( 'woocommerce_datepicker_js', '2.1', '' );
 }
+function woocommerce_admin_scripts() {
+	_deprecated_function( 'woocommerce_admin_scripts', '2.1', '' );
+}
 
 /**
  * Handle renamed filters
