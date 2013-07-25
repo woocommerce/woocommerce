@@ -1114,7 +1114,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 
 			foreach ( $product_categories as $category ) {
 
-				if ( $category->parent != $parent_id )
+				if ( $category->parent != $parent_id || $category->count == 0 )
 					continue;
 
 				if ( ! $product_category_found ) {
