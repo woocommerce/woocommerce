@@ -29,7 +29,7 @@ class WC_Admin_Notices {
 	 */
 	public function add_notices() {
 		if ( get_option( '_wc_needs_update' ) == 1 || get_option( '_wc_needs_pages' ) == 1 ) {
-			wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', dirname( __FILE__ ) ) );
+			wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WOOCOMMERCE_PLUGIN_FILE ) );
 			add_action( 'admin_notices', array( $this, 'install_notice' ) );
 		}
 
@@ -43,7 +43,7 @@ class WC_Admin_Notices {
 			}
 
 			if ( get_option( 'woocommerce_theme_support_check' ) !== $template ) {
-				wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', dirname( __FILE__ ) ) );
+				wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WOOCOMMERCE_PLUGIN_FILE ) );
 				add_action( 'admin_notices', array( $this, 'theme_check_notice' ) );
 			}
 		}

@@ -129,19 +129,14 @@ final class WooCommerce {
 	 */
 	public function __construct() {
 		// Auto-load classes on demand
-		if ( function_exists( "__autoload" ) ) {
+		if ( function_exists( "__autoload" ) )
 			spl_autoload_register( "__autoload" );
-    	}
+
 		spl_autoload_register( array( $this, 'autoload' ) );
 
-		// Define version constant
+		// Define constants
+		define( 'WOOCOMMERCE_PLUGIN_FILE', __FILE__ );
 		define( 'WOOCOMMERCE_VERSION', $this->version );
-
-		// Installation
-		register_activation_hook( __FILE__, array( $this, 'activate' ) );
-
-		// Updates
-		add_action( 'admin_init', array( $this, 'update' ), 5 );
 
 		// Include required files
 		$this->includes();
@@ -268,43 +263,6 @@ final class WooCommerce {
 		}
 	}
 
-
-	/**
-	 * activate function.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function activate() {
-		if ( woocommerce_get_page_id( 'shop' ) < 1 )
-			update_option( '_wc_needs_pages', 1 );
-		$this->install();
-	}
-
-	/**
-	 * update function.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function update() {
-		if ( ! defined( 'IFRAME_REQUEST' ) && ( get_option( 'woocommerce_version' ) != $this->version || get_option( 'woocommerce_db_version' ) != $this->version ) )
-			$this->install();
-	}
-
-	/**
-	 * upgrade function.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	function install() {
-		include_once( 'includes/admin/woocommerce-admin-install.php' );
-		set_transient( '_wc_activation_redirect', 1, 60 * 60 );
-		do_install_woocommerce();
-	}
-
-
 	/**
 	 * Include required core files used in admin and on the frontend.
 	 *
@@ -316,6 +274,7 @@ final class WooCommerce {
 		include( 'includes/wc-deprecated-functions.php' );
 		include( 'includes/wc-message-functions.php' );
 		include( 'includes/wc-coupon-functions.php' );
+		include( 'includes/class-wc-install.php' );
 
 		if ( is_admin() )
 			include_once( 'includes/admin/class-wc-admin.php' );

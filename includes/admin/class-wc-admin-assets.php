@@ -37,7 +37,7 @@ class WC_Admin_Assets {
 
 		$screen = get_current_screen();
 
-		if ( in_array( $screen->id, get_woocommerce_screen_ids() ) ) {
+		if ( in_array( $screen->id, wc_get_screen_ids() ) ) {
 
 			$jquery_version = isset( $wp_scripts->registered['jquery-ui-core']->ver ) ? $wp_scripts->registered['jquery-ui-core']->ver : '1.9.2';
 
@@ -83,7 +83,7 @@ class WC_Admin_Assets {
 		wp_register_script( 'chosen', $woocommerce->plugin_url() . '/assets/js/chosen/chosen.jquery' . $suffix . '.js', array('jquery'), $woocommerce->version );
 
 		 // WooCommerce admin pages
-	    if ( in_array( $screen->id, get_woocommerce_screen_ids() ) ) {
+	    if ( in_array( $screen->id, wc_get_screen_ids() ) ) {
 
 	    	wp_enqueue_script( 'woocommerce_admin' );
 	    	wp_enqueue_script( 'iris' );

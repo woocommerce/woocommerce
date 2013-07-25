@@ -21,6 +21,6 @@ wp_delete_post( get_option('woocommerce_edit_address_page_id'), true );
 wp_delete_post( get_option('woocommerce_lost_password_page_id'), true );
 
 // Update table primary keys - remove old key and then add new 'permission_id' row.
-//$wpdb->hide_errors();
+$wpdb->hide_errors();
 $wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions DROP PRIMARY KEY" );
 $wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions ADD `permission_id` bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT" );

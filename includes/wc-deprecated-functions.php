@@ -16,7 +16,6 @@ function woocommerce_show_messages() {
 	_deprecated_function( 'woocommerce_show_messages', '2.1', 'wc_print_messages' );
 	wc_show_messages();
 }
-
 function woocommerce_weekend_area_js() {
 	_deprecated_function( 'woocommerce_weekend_area_js', '2.1', '' );
 }
@@ -28,6 +27,10 @@ function woocommerce_datepicker_js() {
 }
 function woocommerce_admin_scripts() {
 	_deprecated_function( 'woocommerce_admin_scripts', '2.1', '' );
+}
+function woocommerce_create_page( $slug, $option = '', $page_title = '', $page_content = '', $post_parent = 0 ) {
+	_deprecated_function( 'woocommerce_create_page', '2.1', 'wc_create_page' );
+	return wc_create_page( $slug, $option, $page_title, $page_content, $post_parent );
 }
 
 /**

@@ -30,7 +30,7 @@ class WC_Admin_Help {
 	public function add_tabs() {
 		$screen = get_current_screen();
 
-		if ( ! in_array( $screen->id, get_woocommerce_screen_ids() ) )
+		if ( ! in_array( $screen->id, wc_get_screen_ids() ) )
 			return;
 
 		$screen->add_help_tab( array(

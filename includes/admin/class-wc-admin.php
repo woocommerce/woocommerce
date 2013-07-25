@@ -30,9 +30,6 @@ class WC_Admin {
 	 */
 	public function includes() {
 
-		include_once( 'class-wc-admin-updates.php' );
-
-
 		/**
 		 * Functions for the shop_coupon post type
 		 */
@@ -63,7 +60,6 @@ class WC_Admin {
 		include( 'wc-admin-functions.php' );
 
 		// Classes
-		include( 'class-wc-admin-install.php' );
 		include( 'class-wc-admin-help.php' );
 		include( 'class-wc-admin-menus.php' );
 		include( 'class-wc-admin-welcome.php' );
