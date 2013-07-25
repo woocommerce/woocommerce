@@ -50,12 +50,6 @@ class WC_Admin {
 		 */
 		include_once( 'woocommerce-admin-functions.php' );
 
-		/**
-		 * Functions for handling taxonomies
-		 */
-		include_once( 'woocommerce-admin-taxonomies.php' );
-
-
 		// Functions
 		include( 'wc-admin-functions.php' );
 
@@ -67,6 +61,7 @@ class WC_Admin {
 		include( 'class-wc-admin-assets.php' );
 		include( 'class-wc-admin-permalink-settings.php' );
 		include( 'class-wc-admin-post-types.php' );
+		include( 'class-wc-admin-taxonomies.php' );
 
 		// Importers
 		if ( defined( 'WP_LOAD_IMPORTERS' ) )
