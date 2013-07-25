@@ -39,23 +39,18 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'order_item_type' => 'line_item',
 					'function'        => '',
 					'name'            => 'product_id'
-				),
+				)
 			),
 			'where_meta' => array(
 				'relation' => 'OR',
 				array(
 					'type'       => 'order_item_meta',
-					'meta_key'   => '_product_id',
-					'meta_value' => $this->product_ids,
-					'operator'   => 'IN'
-				),
-				array(
-					'type'       => 'order_item_meta',
-					'meta_key'   => '_variation_id',
+					'meta_key'   => array( '_product_id', '_variation_id' ),
 					'meta_value' => $this->product_ids,
 					'operator'   => 'IN'
 				)
 			),
+			'group_by' => 'product_id',
 			'query_type'   => 'get_var',
 			'filter_range' => true
 		) );
@@ -78,13 +73,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 				'relation' => 'OR',
 				array(
 					'type'       => 'order_item_meta',
-					'meta_key'   => '_product_id',
-					'meta_value' => $this->product_ids,
-					'operator'   => 'IN'
-				),
-				array(
-					'type'       => 'order_item_meta',
-					'meta_key'   => '_variation_id',
+					'meta_key'   => array( '_product_id', '_variation_id' ),
 					'meta_value' => $this->product_ids,
 					'operator'   => 'IN'
 				)
@@ -293,10 +282,10 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 							'name'            => 'order_item_qty'
 						)
 					),
-					'order_by' => 'order_item_qty DESC',
-					'group_by' => 'product_id',
-					'limit'    => 12,
-					'query_type'    => 'get_results',
+					'order_by'     => 'order_item_qty DESC',
+					'group_by'     => 'product_id',
+					'limit'        => 12,
+					'query_type'   => 'get_results',
 					'filter_range' => true
 				) );
 
@@ -305,7 +294,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						echo '<tr class="' . ( in_array( $product->product_id, $this->product_ids ) ? 'active' : '' ) . '">
 							<td class="count">' . $product->order_item_qty . '</td>
 							<td class="name"><a href="' . add_query_arg( 'product_ids', $product->product_id ) . '">' . get_the_title( $product->product_id ) . '</a></td>
-							<td class="sparkline">' . $this->sales_sparkline( $product->product_id, 14, 'count' ) . '</td>
+							<td class="sparkline">' . $this->sales_sparkline( $product->product_id, 7, 'count' ) . '</td>
 						</tr>';
 					}
 				} else {
@@ -333,10 +322,10 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 							'name'            => 'order_item_total'
 						)
 					),
-					'order_by' => 'order_item_total DESC',
-					'group_by' => 'product_id',
-					'limit'    => 12,
-					'query_type'    => 'get_results',
+					'order_by'     => 'order_item_total DESC',
+					'group_by'     => 'product_id',
+					'limit'        => 12,
+					'query_type'   => 'get_results',
 					'filter_range' => true
 				) );
 
@@ -345,7 +334,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						echo '<tr class="' . ( in_array( $product->product_id, $this->product_ids ) ? 'active' : '' ) . '">
 							<td class="count">' . woocommerce_price( $product->order_item_total ) . '</td>
 							<td class="name"><a href="' . add_query_arg( 'product_ids', $product->product_id ) . '">' . get_the_title( $product->product_id ) . '</a></td>
-							<td class="sparkline">' . $this->sales_sparkline( $product->product_id, 14, 'sales' ) . '</td>
+							<td class="sparkline">' . $this->sales_sparkline( $product->product_id, 7, 'sales' ) . '</td>
 						</tr>';
 					}
 				} else {
@@ -434,13 +423,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'relation' => 'OR',
 					array(
 						'type'       => 'order_item_meta',
-						'meta_key'   => '_product_id',
-						'meta_value' => $this->product_ids,
-						'operator'   => 'IN'
-					),
-					array(
-						'type'       => 'order_item_meta',
-						'meta_key'   => '_variation_id',
+						'meta_key'   => array( '_product_id', '_variation_id' ),
 						'meta_value' => $this->product_ids,
 						'operator'   => 'IN'
 					)
@@ -469,27 +452,22 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'order_item_type' => 'line_item',
 						'function'        => '',
 						'name'            => 'product_id'
-					)
+					),
 				),
 				'where_meta' => array(
 					'relation' => 'OR',
 					array(
 						'type'       => 'order_item_meta',
-						'meta_key'   => '_product_id',
-						'meta_value' => $this->product_ids,
-						'operator'   => 'IN'
-					),
-					array(
-						'type'       => 'order_item_meta',
-						'meta_key'   => '_variation_id',
+						'meta_key'   => array( '_product_id', '_variation_id' ),
 						'meta_value' => $this->product_ids,
 						'operator'   => 'IN'
 					)
 				),
-				'group_by'     => 'product_id,' . $this->group_by_query,
+				'group_by'     => 'product_id, ' . $this->group_by_query,
 				'order_by'     => 'post_date ASC',
 				'query_type'   => 'get_results',
-				'filter_range' => true
+				'filter_range' => true,
+				'nocache' => true
 			) );
 
 			// Prepare data for report

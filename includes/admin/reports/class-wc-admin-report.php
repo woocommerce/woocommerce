@@ -113,14 +113,16 @@ class WC_Admin_Report {
 				if ( ! is_array( $value ) )
 					continue;
 
+				$key = is_array( $value['meta_key'] ) ? $value['meta_key'][0] : $value['meta_key'];
+
 				if ( isset( $value['type'] ) && $value['type'] == 'order_item_meta' ) {
 
 					$joins["order_items"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id";
-					$joins["order_item_meta_{$value['meta_key']}"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$value['meta_key']} ON order_items.order_item_id = order_item_meta_{$value['meta_key']}.order_item_id";
+					$joins["order_item_meta_{$key}"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON order_items.order_item_id = order_item_meta_{$key}.order_item_id";
 
 				} else {
 					// If we have a where clause for meta, join the postmeta table
-					$joins["meta_{$value['meta_key']}"] = "LEFT JOIN {$wpdb->postmeta} AS meta_{$value['meta_key']} ON posts.ID = meta_{$value['meta_key']}.post_id";
+					$joins["meta_{$key}"] = "LEFT JOIN {$wpdb->postmeta} AS meta_{$key} ON posts.ID = meta_{$key}.post_id";
 				}
 			}
 		}
@@ -163,6 +165,8 @@ class WC_Admin_Report {
 				if ( ! is_array( $value ) )
 					continue;
 
+				$key = is_array( $value['meta_key'] ) ? $value['meta_key'][0] : $value['meta_key'];
+
 				if ( strtolower( $value['operator'] ) == 'in' ) {
 					if ( is_array( $value['meta_value'] ) )
 						$value['meta_value'] = implode( "','", $value['meta_value'] );
@@ -177,11 +181,19 @@ class WC_Admin_Report {
 						$query['where'] .= ' ' . $relation;
 
 					if ( isset( $value['type'] ) && $value['type'] == 'order_item_meta' ) {
-						$query['where'] .= " ( order_item_meta_{$value['meta_key']}.meta_key   = '{$value['meta_key']}'";
-						$query['where'] .= " AND order_item_meta_{$value['meta_key']}.meta_value {$where_value} )";
+						if ( is_array( $value['meta_key'] ) )
+							$query['where'] .= " ( order_item_meta_{$key}.meta_key   IN ('" . implode( "','", $value['meta_key'] ) . "')";
+						else
+							$query['where'] .= " ( order_item_meta_{$key}.meta_key   = '{$value['meta_key']}'";
+
+						$query['where'] .= " AND order_item_meta_{$key}.meta_value {$where_value} )";
 					} else {
-						$query['where'] .= " ( meta_{$value['meta_key']}.meta_key   = '{$value['meta_key']}'";
-						$query['where'] .= " AND meta_{$value['meta_key']}.meta_value {$where_value} )";
+						if ( is_array( $value['meta_key'] ) )
+							$query['where'] .= " ( meta_{$key}.meta_key   IN ('" . implode( "','", $value['meta_key'] ) . "')";
+						else
+							$query['where'] .= " ( meta_{$key}.meta_key   = '{$value['meta_key']}'";
+
+						$query['where'] .= " AND meta_{$key}.meta_value {$where_value} )";
 					}
 				}
 			}
@@ -296,60 +308,90 @@ class WC_Admin_Report {
 	/**
 	 * Prepares a sparkline to show sales in the last X days
 	 *
-	 * @param  int $id
-	 * @param  int $days
+	 * @param  int $id ID of the product to show. Blank to get all orders.
+	 * @param  int $days Days of stats to get.
+	 * @param  string $type Type of sparkline to get. Ignored if ID is not set.
+	 * @return string
 	 */
-	public function sales_sparkline( $id, $days, $type ) {
-		$meta_key = $type == 'sales' ? '_line_total' : '_qty';
+	public function sales_sparkline( $id = '', $days = 7, $type = 'sales' ) {
 
-		$data = $this->get_order_report_data( array(
-			'data' => array(
-				'_product_id' => array(
-					'type'            => 'order_item_meta',
-					'order_item_type' => 'line_item',
-					'function'        => '',
-					'name'            => 'product_id'
+		if ( $id ) {
+			$meta_key = $type == 'sales' ? '_line_total' : '_qty';
+
+			$data = $this->get_order_report_data( array(
+				'data' => array(
+					'_product_id' => array(
+						'type'            => 'order_item_meta',
+						'order_item_type' => 'line_item',
+						'function'        => '',
+						'name'            => 'product_id'
+					),
+					$meta_key => array(
+						'type'            => 'order_item_meta',
+						'order_item_type' => 'line_item',
+						'function'        => 'SUM',
+						'name'            => 'sparkline_value'
+					),
+					'post_date' => array(
+						'type'     => 'post_data',
+						'function' => '',
+						'name'     => 'post_date'
+					),
 				),
-				$meta_key => array(
-					'type'            => 'order_item_meta',
-					'order_item_type' => 'line_item',
-					'function'        => 'SUM',
-					'name'            => 'order_item_value'
+				'where' => array(
+					array(
+						'key'      => 'post_date',
+						'value'    => date( 'Y-m-d', strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ) ),
+						'operator' => '>'
+					),
+					array(
+						'key'      => 'order_item_meta__product_id.meta_value',
+						'value'    => $id,
+						'operator' => '='
+					)
 				),
-				'post_date' => array(
-					'type'     => 'post_data',
-					'function' => '',
-					'name'     => 'post_date'
+				'group_by'     => 'YEAR(post_date), MONTH(post_date), DAY(post_date)',
+				'query_type'   => 'get_results',
+				'filter_range' => false
+			) );
+		} else {
+			$data = $this->get_order_report_data( array(
+				'data' => array(
+					'_order_total' => array(
+						'type'     => 'meta',
+						'function' => 'SUM',
+						'name'     => 'sparkline_value'
+					),
+					'post_date' => array(
+						'type'     => 'post_data',
+						'function' => '',
+						'name'     => 'post_date'
+					),
 				),
-			),
-			'where' => array(
-				array(
-					'key'      => 'post_date',
-					'value'    => date( 'Y-m-d', strtotime( 'midnight -7 days', current_time( 'timestamp' ) ) ),
-					'operator' => '>'
+				'where' => array(
+					array(
+						'key'      => 'post_date',
+						'value'    => date( 'Y-m-d', strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ) ),
+						'operator' => '>'
+					)
 				),
-				array(
-					'key'      => 'order_item_meta__product_id.meta_value',
-					'value'    => $id,
-					'operator' => '='
-				)
-			),
-			'group_by'     => 'YEAR(post_date), MONTH(post_date), DAY(post_date)',
-			'query_type'   => 'get_results',
-			'filter_range' => false
-		) );
+				'group_by'     => 'YEAR(post_date), MONTH(post_date), DAY(post_date)',
+				'query_type'   => 'get_results',
+				'filter_range' => false
+			) );
+		}
 
 		$total = 0;
 		foreach ( $data as $d )
-			$total += $d->order_item_value;
+			$total += $d->sparkline_value;
 
 		if ( $type == 'sales' ) {
 			$tooltip = sprintf( __( 'Sold %s worth in the last %d days', 'woocommerce' ), strip_tags( woocommerce_price( $total ) ), $days );
 		} else {
-			$tooltip = sprintf( _n( 'Sold 1 time in the last %d days', 'Sold %d times in the last %d days', $total, 'woocommerce' ), $total, $days );
+			$tooltip = sprintf( _n( 'Sold 1 item in the last %d days', 'Sold %d items in the last %d days', $total, 'woocommerce' ), $total, $days );
 		}
 
-		$sparkline_data = array_values( $this->prepare_chart_data( $data, 'post_date', 'order_item_value', $days - 1, strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ), 'day' ) );
+		$sparkline_data = array_values( $this->prepare_chart_data( $data, 'post_date', 'sparkline_value', $days - 1, strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ), 'day' ) );
 
 		return '<span class="wc_sparkline ' . ( $type == 'sales' ? 'lines' : 'bars' ) . ' tips" data-color="#777" data-tip="' . $tooltip . '" data-barwidth="' . 60*60*16*1000 . '" data-sparkline="' . esc_attr( json_encode( $sparkline_data ) ) . '"></span>';
 	}

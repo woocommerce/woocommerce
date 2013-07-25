@@ -47,6 +47,10 @@ class WC_Admin_Assets {
 			wp_enqueue_style( 'wp-color-picker' );
 		}
 
+		if ( in_array( $screen->id, array( 'dashboard' ) ) ) {
+			wp_enqueue_style( 'woocommerce_admin_dashboard_styles', $woocommerce->plugin_url() . '/assets/css/dashboard.css' );
+		}
+
 		do_action( 'woocommerce_admin_css' );
 	}
 
@@ -176,7 +180,7 @@ class WC_Admin_Assets {
 		}
 
 		// Reports Pages
-		if ( in_array( $screen->id, apply_filters( 'woocommerce_reports_screen_ids', array( $wc_screen_id . '_page_wc_reports' ) ) ) ) {
+		if ( in_array( $screen->id, apply_filters( 'woocommerce_reports_screen_ids', array( $wc_screen_id . '_page_wc_reports', 'dashboard' ) ) ) ) {
 			wp_enqueue_script( 'wc-reports', WC()->plugin_url() . '/assets/js/admin/reports' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker' ), '1.0' );
 			wp_enqueue_script( 'flot', WC()->plugin_url() . '/assets/js/admin/jquery.flot' . $suffix . '.js', array( 'jquery' ), '1.0' );
 			wp_enqueue_script( 'flot-resize', WC()->plugin_url() . '/assets/js/admin/jquery.flot.resize' . $suffix . '.js', array('jquery', 'flot'), '1.0' );

@@ -82,7 +82,7 @@ class WC_Admin {
 
 		switch ( $screen->id ) {
 			case 'dashboard' :
-				include_once( 'woocommerce-admin-dashboard.php' );
+				include( 'class-wc-admin-dashboard.php' );
 			break;
 			case 'users' :
 			case 'user' :
