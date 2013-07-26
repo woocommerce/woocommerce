@@ -39,7 +39,6 @@ function get_product( $the_product = false, $args = array() ) {
  * @return void
  */
 function woocommerce_update_new_customer_past_orders( $customer_id ) {
-    global $wpdb;
 
     $customer = get_user_by( 'id', absint( $customer_id ) );
 
@@ -1324,9 +1323,9 @@ add_action( 'comment_feed_where', 'woocommerce_exclude_order_comments_from_feed_
  * @return void
  */
 function woocommerce_downloadable_product_permissions( $order_id ) {
-	global $wpdb;
 
-	if (get_post_meta( $order_id, __( 'Download Permissions Granted', 'woocommerce' ), true)==1) return; // Only do this once
+	if ( get_post_meta( $order_id, __( 'Download Permissions Granted', 'woocommerce' ), true ) == 1 ) 
+		return; // Only do this once
 
 	$order = new WC_Order( $order_id );
 
@@ -1852,7 +1851,6 @@ function woocommerce_order_terms( $the_term, $next_id, $taxonomy, $index = 0, $t
  * @return int
  */
 function woocommerce_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
-	global $wpdb;
 
 	$term_id 	= (int) $term_id;
 	$index 		= (int) $index;
