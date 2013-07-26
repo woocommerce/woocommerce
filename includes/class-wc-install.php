@@ -272,12 +272,13 @@ class WC_Install {
 	 * @access public
 	 */
 	function create_options() {
-		global $woocommerce_settings;
-
 		// Include settings so that we can run through defaults
-		include_once( 'admin/settings/settings-init.php' );
+		include_once( 'admin/class-wc-admin-settings.php' );
 
-		foreach ( $woocommerce_settings as $section ) {
+		$settings = WC_Admin_Settings::get_settings_pages();
+
+		foreach ( $settings as $section ) {
+			$section = $section->get_settings();
 			foreach ( $section as $value ) {
 		        if ( isset( $value['default'] ) && isset( $value['id'] ) ) {
 		        	$autoload = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;

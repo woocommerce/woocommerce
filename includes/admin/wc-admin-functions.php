@@ -93,3 +93,44 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 
     return $page_id;
 }
+
+/**
+ * Output admin fields.
+ *
+ * Loops though the woocommerce options array and outputs each field.
+ *
+ * @param array $options Opens array to output
+ */
+function woocommerce_admin_fields( $options ) {
+    if ( ! class_exists( 'WC_Admin_Settings' ) )
+        include 'class-wc-admin-settings.php';
+
+    WC_Admin_Settings::output_fields( $options );
+}
+
+/**
+ * Update all settings which are passed.
+ *
+ * @access public
+ * @param array $options
+ * @return void
+ */
+function woocommerce_update_options( $options ) {
+    if ( ! class_exists( 'WC_Admin_Settings' ) )
+        include 'class-wc-admin-settings.php';
+
+    WC_Admin_Settings::save_fields( $options );
+}
+
+/**
+ * Get a setting from the settings API.
+ *
+ * @param mixed $option
+ * @return string
+ */
+function woocommerce_settings_get_option( $option_name, $default = '' ) {
+    if ( ! class_exists( 'WC_Admin_Settings' ) )
+        include 'class-wc-admin-settings.php';
+
+    return WC_Admin_Settings::get_option( $option_name, $default );
+}

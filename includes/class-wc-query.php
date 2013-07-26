@@ -59,16 +59,21 @@ class WC_Query {
 		add_action( 'init', array( $this, 'add_endpoints' ) );
 
 		if ( ! is_admin() ) {
+			add_action( 'init', array( $this, 'get_errors' ) );
 			add_filter( 'query_vars', array( $this, 'add_query_vars'), 0 );
 			add_action( 'parse_request', array( $this, 'parse_request'), 0 );
 			add_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 			add_filter( 'the_posts', array( $this, 'the_posts' ), 11, 2 );
 			add_filter( 'wp', array( $this, 'remove_product_query' ) );
-
-			// Get any errors from querystring
-			if ( isset( $_GET['wc_error'] ) )
-				wc_add_error( esc_attr( $_GET['wc_error'] ) );
 		}
+	}
+
+	/**
+	 * Get any errors from querystring
+	 */
+	public function get_errors() {
+		if ( isset( $_GET['wc_error'] ) )
+			wc_add_error( esc_attr( $_GET['wc_error'] ) );
 	}
 
 	/**

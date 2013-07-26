@@ -66,8 +66,8 @@ class WC_Admin_Menus {
 	 * Loads gateways and shipping methods into memory for use within settings.
 	 */
 	public function settings_page_init() {
-		$GLOBALS['woocommerce']->payment_gateways();
-		$GLOBALS['woocommerce']->shipping();
+		WC()->payment_gateways();
+		WC()->shipping();
 	}
 
 	/**
@@ -177,7 +177,7 @@ class WC_Admin_Menus {
 	 * Init the reports page
 	 */
 	public function reports_page() {
-		$page = include_once( 'class-wc-admin-reports.php' );
+		$page = include( 'class-wc-admin-reports.php' );
 		$page->output();
 	}
 
@@ -185,8 +185,8 @@ class WC_Admin_Menus {
 	 * Init the settings page
 	 */
 	public function settings_page() {
-		include_once( 'woocommerce-admin-settings.php' );
-		woocommerce_settings();
+		include_once( 'class-wc-admin-settings.php' );
+		WC_Admin_Settings::output();
 	}
 
 	/**
@@ -201,7 +201,7 @@ class WC_Admin_Menus {
 	 * Init the reports page
 	 */
 	public function status_page() {
-		$page = include_once( 'class-wc-admin-status.php' );
+		$page = include( 'class-wc-admin-status.php' );
 		$page->output();
 	}
 }
