@@ -44,6 +44,27 @@ class WC_Emails {
 	 */
 	function __construct() {
 
+		$this->init();
+
+		// Email Header, Footer and content hooks
+		add_action( 'woocommerce_email_header', array( $this, 'email_header' ) );
+		add_action( 'woocommerce_email_footer', array( $this, 'email_footer' ) );
+		add_action( 'woocommerce_email_order_meta', array( $this, 'order_meta' ), 10, 3 );
+
+		// Hooks for sending emails during store events
+		add_action( 'woocommerce_low_stock_notification', array( $this, 'low_stock' ) );
+		add_action( 'woocommerce_no_stock_notification', array( $this, 'no_stock' ) );
+		add_action( 'woocommerce_product_on_backorder_notification', array( $this, 'backorder' ) );
+		add_action( 'woocommerce_created_customer_notification', array( $this, 'customer_new_account' ), 10, 3 );
+
+		// Let 3rd parties unhook the above via this hook
+		do_action( 'woocommerce_email', $this );
+	}
+
+	/**
+	 * Init email classes
+	 */
+	function init() {
 		// Include email classes
 		include_once( 'abstracts/abstract-wc-email.php' );
 		include_once( 'emails/class-wc-email-customer-completed-order.php' );
@@ -63,20 +84,6 @@ class WC_Emails {
 		$this->emails['WC_Email_Customer_New_Account'] = new WC_Email_Customer_New_Account();
 
 		$this->emails = apply_filters( 'woocommerce_email_classes', $this->emails );
-
-		// Email Header, Footer and content hooks
-		add_action( 'woocommerce_email_header', array( $this, 'email_header' ) );
-		add_action( 'woocommerce_email_footer', array( $this, 'email_footer' ) );
-		add_action( 'woocommerce_email_order_meta', array( $this, 'order_meta' ), 10, 3 );
-
-		// Hooks for sending emails during store events
-		add_action( 'woocommerce_low_stock_notification', array( $this, 'low_stock' ) );
-		add_action( 'woocommerce_no_stock_notification', array( $this, 'no_stock' ) );
-		add_action( 'woocommerce_product_on_backorder_notification', array( $this, 'backorder' ) );
-		add_action( 'woocommerce_created_customer_notification', array( $this, 'customer_new_account' ), 10, 3 );
-
-		// Let 3rd parties unhook the above via this hook
-		do_action( 'woocommerce_email', $this );
 	}
 
 	/**
