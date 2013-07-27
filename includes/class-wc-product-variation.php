@@ -252,7 +252,7 @@ class WC_Product_Variation extends WC_Product {
 			$price = apply_filters( 'woocommerce_variation_empty_price_html', '', $this );
 		}
 
-		return $price;
+		return apply_filters( 'woocommerce_get_variation_price_html', $price, $this );
 	}
 
     /**
