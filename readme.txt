@@ -207,7 +207,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - Japanese translation by Shohei Tanaka.
 * Localization - Danish translation by Mikael Lyngvig.
 * Localization - Spanish translation by Luis Giménez.
-* Localization - French, Spanish, Romanian, Danish, Korean, Czech, Arabic, Hungarian updates.
+* Localization - French, Spanish, Romanian, Danish, Korean, Czech, Arabic updates.
 
 = 2.0.13 - 19/07/2013 =
 * Tweak - Allow users with edit rights to add draft products to cart (and nobody else)
