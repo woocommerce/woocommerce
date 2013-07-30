@@ -215,7 +215,7 @@ class WC_Shortcode_My_Account {
 
 				if( 0 == wc_error_count() && ( $_POST['password_1'] == $_POST['password_2'] ) ) {
 
-					self::reset_password( $user, esc_attr( $_POST['password_1'] ) );
+					self::reset_password( $user, woocommerce_clean( $_POST['password_1'] ) );
 
 					do_action( 'woocommerce_customer_reset_password', $user );
 
