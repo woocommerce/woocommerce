@@ -101,7 +101,8 @@ class WC_Shortcodes {
 			'columns' 		=> '4',
 		  	'orderby'   	=> 'title',
 		  	'order'     	=> 'desc',
-		  	'category'		=> ''
+		  	'category'		=> '',
+		  	'operator'      => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
 			), $atts ) );
 
 		if ( ! $category ) return;
@@ -126,9 +127,9 @@ class WC_Shortcodes {
 			'tax_query' 			=> array(
 		    	array(
 			    	'taxonomy' 		=> 'product_cat',
-					'terms' 		=> array( esc_attr($category) ),
+					'terms' 		=> array( esc_attr( $category ) ),
 					'field' 		=> 'slug',
-					'operator' 		=> 'IN'
+					'operator' 		=> $operator
 				)
 		    )
 		);
