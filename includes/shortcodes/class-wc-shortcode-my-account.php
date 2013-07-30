@@ -35,6 +35,11 @@ class WC_Shortcode_My_Account {
 
 		if ( ! is_user_logged_in() ) {
 
+			$message = apply_filters( 'login_message', '' );
+
+			if ( ! empty( $message ) )
+				wc_add_message( $message );
+
 			if ( isset( $wp->query_vars['lost-password'] ) ) {
 
 				self::lost_password();
@@ -168,14 +173,6 @@ class WC_Shortcode_My_Account {
 		// arguments to pass to template
 		$args = array( 'form' => 'lost_password' );
 
-		// process lost password form
-		if( isset( $_POST['user_login'] ) ) {
-
-			wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-lost_password' );
-
-			self::retrieve_password();
-		}
-
 		// process reset key / login from email confirmation link
 		if( isset( $_GET['key'] ) && isset( $_GET['login'] ) ) {
 
@@ -188,42 +185,6 @@ class WC_Shortcode_My_Account {
 				$args['login'] = esc_attr( $_GET['login'] );
 			}
 		}
-
-		// process reset password form
-		if( isset( $_POST['password_1'] ) && isset( $_POST['password_2'] ) && isset( $_POST['reset_key'] ) && isset( $_POST['reset_login'] ) ) :
-
-			// verify reset key again
-			$user = self::check_password_reset_key( $_POST['reset_key'], $_POST['reset_login'] );
-
-			if( is_object( $user ) ) {
-
-				// save these values into the form again in case of errors
-				$args['key'] = esc_attr( $_POST['reset_key'] );
-				$args['login'] = esc_attr( $_POST['reset_login'] );
-
-				wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-reset_password' );
-
-				if( empty( $_POST['password_1'] ) || empty( $_POST['password_2'] ) ) {
-					wc_add_error( __( 'Please enter your password.', 'woocommerce' ) );
-					$args['form'] = 'reset_password';
-				}
-
-				if( $_POST[ 'password_1' ] !== $_POST[ 'password_2' ] ) {
-					wc_add_error( __( 'Passwords do not match.', 'woocommerce' ) );
-					$args['form'] = 'reset_password';
-				}
-
-				if( 0 == wc_error_count() && ( $_POST['password_1'] == $_POST['password_2'] ) ) {
-
-					self::reset_password( $user, woocommerce_clean( $_POST['password_1'] ) );
-
-					do_action( 'woocommerce_customer_reset_password', $user );
-
-					wc_add_message( __( 'Your password has been reset.', 'woocommerce' ) . ' <a href="' . get_permalink( woocommerce_get_page_id( 'myaccount' ) ) . '">' . __( 'Log in', 'woocommerce' ) . '</a>' );
-				}
-			}
-
-		endif;
 
 		woocommerce_get_template( 'myaccount/form-lost-password.php', $args );
 	}
