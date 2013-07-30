@@ -181,6 +181,8 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 						<div class="featured">' . $the_product->featured . '</div>
 						<div class="product_type">' . $the_product->product_type . '</div>
 						<div class="product_is_virtual">' . $the_product->virtual . '</div>
+						<div class="tax_status">' . $the_product->tax_status . '</div>
+						<div class="tax_class">' . $the_product->tax_class . '</div>
 					</div>
 				';
 
@@ -564,6 +566,12 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		if ( isset( $_REQUEST['_visibility'] ) ) update_post_meta( $post_id, '_visibility', woocommerce_clean( $_REQUEST['_visibility'] ) );
 		if ( isset( $_REQUEST['_featured'] ) ) update_post_meta( $post_id, '_featured', 'yes' ); else update_post_meta( $post_id, '_featured', 'no' );
 
+		if ( isset( $_REQUEST['_tax_status'] ) )
+			update_post_meta( $post_id, '_tax_status', woocommerce_clean( $_REQUEST['_tax_status'] ) );
+
+		if ( isset( $_REQUEST['_tax_class'] ) )
+			update_post_meta( $post_id, '_tax_class', woocommerce_clean( $_REQUEST['_tax_class'] ) );
+
 		if ( $product->is_type('simple') || $product->is_type('external') ) {
 
 			if ( isset( $_REQUEST['_regular_price'] ) ) update_post_meta( $post_id, '_regular_price', woocommerce_clean( $_REQUEST['_regular_price'] ) );
@@ -611,15 +619,25 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 		// Save fields
 		if ( ! empty( $_REQUEST['change_weight'] ) && isset( $_REQUEST['_weight'] ) )
-			update_post_meta( $post_id, '_weight', esc_html( stripslashes( $_REQUEST['_weight'] ) ) );
+			update_post_meta( $post_id, '_weight', woocommerce_clean( stripslashes( $_REQUEST['_weight'] ) ) );
 
 		if ( ! empty( $_REQUEST['change_dimensions'] ) ) {
 			if ( isset( $_REQUEST['_length'] ) )
-				update_post_meta( $post_id, '_length', esc_html( stripslashes( $_REQUEST['_length'] ) ) );
+				update_post_meta( $post_id, '_length', woocommerce_clean( stripslashes( $_REQUEST['_length'] ) ) );
 			if ( isset( $_REQUEST['_width'] ) )
-				update_post_meta( $post_id, '_width', esc_html( stripslashes( $_REQUEST['_width'] ) ) );
+				update_post_meta( $post_id, '_width', woocommerce_clean( stripslashes( $_REQUEST['_width'] ) ) );
 			if ( isset( $_REQUEST['_height'] ) )
-				update_post_meta( $post_id, '_height', esc_html( stripslashes( $_REQUEST['_height'] ) ) );
+				update_post_meta( $post_id, '_height', woocommerce_clean( stripslashes( $_REQUEST['_height'] ) ) );
+		}
+
+		if ( ! empty( $_REQUEST['_tax_status'] ) )
+			update_post_meta( $post_id, '_tax_status', woocommerce_clean( $_REQUEST['_tax_status'] ) );
+
+		if ( ! empty( $_REQUEST['_tax_class'] ) ) {
+			$tax_class = woocommerce_clean( $_REQUEST['_tax_class'] );
+			if ( $tax_class == 'standard' )
+				$tax_class = '';
+			update_post_meta( $post_id, '_tax_class', $tax_class );
 		}
 
 		if ( ! empty( $_REQUEST['_stock_status'] ) )

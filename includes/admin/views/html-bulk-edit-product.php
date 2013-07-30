@@ -54,6 +54,49 @@
 			</label>
 		</div>
 
+		<label>
+		    <span class="title"><?php _e( 'Tax Status', 'woocommerce' ); ?></span>
+		    <span class="input-text-wrap">
+		    	<select class="tax_status" name="_tax_status">
+				<?php
+					$options = array(
+						''         => __( '— No Change —', 'woocommerce' ),
+						'taxable'  => __( 'Taxable', 'woocommerce' ),
+						'shipping' => __( 'Shipping only', 'woocommerce' ),
+						'none'     => __( 'None', 'woocommerce' )
+					);
+					foreach ($options as $key => $value) {
+						echo '<option value="' . $key . '">' . $value . '</option>';
+					}
+				?>
+				</select>
+			</span>
+		</label>
+
+		<label>
+		    <span class="title"><?php _e( 'Tax Class', 'woocommerce' ); ?></span>
+		    <span class="input-text-wrap">
+		    	<select class="tax_class" name="_tax_class">
+				<?php
+					$options = array(
+						''         => __( '— No Change —', 'woocommerce' ),
+						'standard' => __( 'Standard', 'woocommerce' )
+					);
+
+					$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
+
+		    		if ( $tax_classes )
+		    			foreach ( $tax_classes as $class )
+		    				$options[ sanitize_title( $class ) ] = esc_html( $class );
+
+					foreach ($options as $key => $value) {
+						echo '<option value="' . $key . '">' . $value . '</option>';
+					}
+				?>
+				</select>
+			</span>
+		</label>
+
 		<?php if ( get_option('woocommerce_enable_weight') == "yes" ) : ?>
 			<div class="inline-edit-group">
 				<label class="alignleft">
@@ -66,7 +109,7 @@
 								'1' => __( 'Change to:', 'woocommerce' )
 							);
 							foreach ($options as $key => $value) {
-								echo '<option value="'.$key.'">'. $value .'</option>';
+								echo '<option value="' . $key . '">'. $value .'</option>';
 							}
 						?>
 						</select>
@@ -90,7 +133,7 @@
 								'1' => __( 'Change to:', 'woocommerce' )
 							);
 							foreach ($options as $key => $value) {
-								echo '<option value="'.$key.'">'. $value .'</option>';
+								echo '<option value="' . $key . '">'. $value .'</option>';
 							}
 						?>
 						</select>
@@ -117,7 +160,7 @@
 						'hidden' => __( 'Hidden', 'woocommerce' )
 					);
 					foreach ($options as $key => $value) {
-						echo '<option value="'.$key.'">'. $value .'</option>';
+						echo '<option value="' . $key . '">'. $value .'</option>';
 					}
 				?>
 				</select>
@@ -134,7 +177,7 @@
 						'no' => __( 'No', 'woocommerce' )
 					);
 					foreach ($options as $key => $value) {
-						echo '<option value="'.$key.'">'. $value .'</option>';
+						echo '<option value="' . $key . '">'. $value .'</option>';
 					}
 				?>
 				</select>
@@ -152,13 +195,14 @@
 						'outofstock' => __( 'Out of stock', 'woocommerce' )
 					);
 					foreach ($options as $key => $value) {
-						echo '<option value="'.$key.'">'. $value .'</option>';
+						echo '<option value="' . $key . '">'. $value .'</option>';
 					}
 				?>
 				</select>
 			</span>
 		</label>
 		<?php if (get_option('woocommerce_manage_stock')=='yes') : ?>
+
 			<label>
 			    <span class="title"><?php _e( 'Manage stock?', 'woocommerce' ); ?></span>
 			    <span class="input-text-wrap">
@@ -170,14 +214,14 @@
 							'no' => __( 'No', 'woocommerce' )
 						);
 						foreach ($options as $key => $value) {
-							echo '<option value="'.$key.'">'. $value .'</option>';
+							echo '<option value="' . $key . '">'. $value .'</option>';
 						}
 					?>
 					</select>
 				</span>
 			</label>
 
-			<div class="inline-edit-group dimensions">
+			<div class="inline-edit-group">
 				<label class="alignleft stock_qty_field">
 				    <span class="title"><?php _e( 'Stock Qty', 'woocommerce' ); ?></span>
 				    <span class="input-text-wrap">
@@ -188,7 +232,7 @@
 								'1' => __( 'Change to:', 'woocommerce' )
 							);
 							foreach ($options as $key => $value) {
-								echo '<option value="'.$key.'">'. $value .'</option>';
+								echo '<option value="' . $key . '">'. $value .'</option>';
 							}
 						?>
 						</select>
@@ -199,9 +243,9 @@
 				</label>
 			</div>
 
-		<?php endif;
+		<?php endif; ?>
 
-		do_action( 'woocommerce_product_bulk_edit_end' ); ?>
+		<?php do_action( 'woocommerce_product_bulk_edit_end' ); ?>
 
 		<input type="hidden" name="woocommerce_bulk_edit" value="1" />
 		<input type="hidden" name="woocommerce_bulk_edit_nonce" value="<?php echo wp_create_nonce( 'woocommerce_bulk_edit_nonce' ); ?>" />
