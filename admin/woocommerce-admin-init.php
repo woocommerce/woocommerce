@@ -230,7 +230,7 @@ function woocommerce_admin_install_notices() {
  * @return void
  */
 function woocommerce_admin_init() {
-	global $pagenow, $typenow;
+	global $pagenow, $typenow, $post;
 
 	ob_start();
 
