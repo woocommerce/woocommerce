@@ -64,7 +64,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 			$this->replace[] = $this->object->get_order_number();
 		}
 
-		if ( ! $this->is_enabled() || ! $this->get_recipient() )
+		if ( ! $this->get_recipient() )
 			return;
 
 		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
@@ -134,12 +134,6 @@ class WC_Email_Customer_Invoice extends WC_Email {
      */
     function init_form_fields() {
     	$this->form_fields = array(
-			'enabled' => array(
-				'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
-				'type' 			=> 'checkbox',
-				'label' 		=> __( 'Enable this email notification', 'woocommerce' ),
-				'default' 		=> 'yes'
-			),
 			'subject' => array(
 				'title' 		=> __( 'Email subject', 'woocommerce' ),
 				'type' 			=> 'text',
