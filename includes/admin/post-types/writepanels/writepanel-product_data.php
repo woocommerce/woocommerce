@@ -753,8 +753,8 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	// Save Attributes
 	$attributes = array();
 
-	if ( isset( $_POST['attribute_names'] ) ) {
-		$attribute_names = $_POST['attribute_names'];
+	if ( isset( $_POST['attribute_names'] ) && isset( $_POST['attribute_values'] ) ) {
+		$attribute_names  = $_POST['attribute_names'];
 		$attribute_values = $_POST['attribute_values'];
 
 		if ( isset( $_POST['attribute_visibility'] ) )
