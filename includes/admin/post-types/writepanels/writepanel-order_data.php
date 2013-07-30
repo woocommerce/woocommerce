@@ -373,7 +373,7 @@ function woocommerce_order_items_meta_box( $post ) {
 							break;
 						}
 
-						do_action( 'woocommerce_order_item_' . $item['type'] . '_html' );
+						do_action( 'woocommerce_order_item_' . $item['type'] . '_html', $item_id, $item );
 
 					}
 				?>
