@@ -551,7 +551,7 @@ class WC_Checkout {
 			try {
 
 				// Customer accounts
-				$this->customer_id = get_current_user_id();
+				$this->customer_id = apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() );
 
 				if ( ! is_user_logged_in() && ( $this->must_create_account || ! empty( $this->posted['createaccount'] ) ) ) {
 
