@@ -829,56 +829,7 @@ function process_product_meta_variable( $post_id ) {
 	}
 
 	// Update parent if variable so price sorting works and stays in sync with the cheapest child
-	$post_parent = $post_id;
-
-	$children = get_posts( array(
-		'post_parent' 	=> $post_parent,
-		'posts_per_page'=> -1,
-		'post_type' 	=> 'product_variation',
-		'fields' 		=> 'ids',
-		'post_status'	=> 'publish'
-	) );
-
-	$lowest_price = $lowest_regular_price = $lowest_sale_price = $highest_price = $highest_regular_price = $highest_sale_price = '';
-
-	if ( $children ) {
-		foreach ( $children as $child ) {
-
-			$child_price 			= get_post_meta( $child, '_price', true );
-			$child_regular_price 	= get_post_meta( $child, '_regular_price', true );
-			$child_sale_price 		= get_post_meta( $child, '_sale_price', true );
-
-			if ( $child_price === '' && $child_regular_price === '' )
-				continue;
-
-			// Regular prices
-			if ( ! is_numeric( $lowest_regular_price ) || $child_regular_price < $lowest_regular_price )
-				$lowest_regular_price = $child_regular_price;
-
-			if ( ! is_numeric( $highest_regular_price ) || $child_regular_price > $highest_regular_price )
-				$highest_regular_price = $child_regular_price;
-
-			// Sale prices
-			if ( $child_price == $child_sale_price ) {
-				if ( $child_sale_price !== '' && ( ! is_numeric( $lowest_sale_price ) || $child_sale_price < $lowest_sale_price ) )
-					$lowest_sale_price = $child_sale_price;
-
-				if ( $child_sale_price !== '' && ( ! is_numeric( $highest_sale_price ) || $child_sale_price > $highest_sale_price ) )
-					$highest_sale_price = $child_sale_price;
-			}
-		}
-
-    	$lowest_price 	= $lowest_sale_price === '' || $lowest_regular_price < $lowest_sale_price ? $lowest_regular_price : $lowest_sale_price;
-		$highest_price 	= $highest_sale_price === '' || $highest_regular_price > $highest_sale_price ? $highest_regular_price : $highest_sale_price;
-	}
-
-	update_post_meta( $post_parent, '_price', $lowest_price );
-	update_post_meta( $post_parent, '_min_variation_price', $lowest_price );
-	update_post_meta( $post_parent, '_max_variation_price', $highest_price );
-	update_post_meta( $post_parent, '_min_variation_regular_price', $lowest_regular_price );
-	update_post_meta( $post_parent, '_max_variation_regular_price', $highest_regular_price );
-	update_post_meta( $post_parent, '_min_variation_sale_price', $lowest_sale_price );
-	update_post_meta( $post_parent, '_max_variation_sale_price', $highest_sale_price );
+	WC_Product_Variable::variable_product_sync( $post_id );
 
 	// Update default attribute options setting
 	$default_attributes = array();
@@ -894,7 +845,7 @@ function process_product_meta_variable( $post_id ) {
 		}
 	}
 
-	update_post_meta( $post_parent, '_default_attributes', $default_attributes );
+	update_post_meta( $post_id, '_default_attributes', $default_attributes );
 }
 
 add_action( 'woocommerce_process_product_meta_variable', 'process_product_meta_variable' );
