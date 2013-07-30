@@ -636,7 +636,7 @@ function woocommerce_process_login() {
 
 	if ( ! empty( $_POST['login'] ) ) {
 
-		wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-login' );
+		wp_verify_nonce( $_POST['login'], 'woocommerce-login' );
 
 		try {
 			$creds = array();
