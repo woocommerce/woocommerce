@@ -496,6 +496,9 @@ function woocommerce_bulk_admin_footer() {
 			jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo("select[name='action']");
 			jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo("select[name='action2']");
 
+			jQuery('<option>').val('mark_on-hold').text('<?php _e( 'Mark on-hold', 'woocommerce' )?>').appendTo("select[name='action']");
+			jQuery('<option>').val('mark_on-hold').text('<?php _e( 'Mark on-hold', 'woocommerce' )?>').appendTo("select[name='action2']");
+
 			jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark completed', 'woocommerce' )?>').appendTo("select[name='action']");
 			jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark completed', 'woocommerce' )?>').appendTo("select[name='action2']");
 		});
@@ -524,6 +527,11 @@ function woocommerce_order_bulk_action() {
 			$new_status = 'processing';
 			$report_action = 'marked_processing';
 			break;
+		case 'mark_on-hold' :
+			$new_status = 'on-hold';
+			$report_action = 'marked_on-hold';
+			break;
+		break;
 		default:
 			return;
 	}
@@ -538,7 +546,7 @@ function woocommerce_order_bulk_action() {
 		$changed++;
 	}
 
-	$sendback = add_query_arg( array( 'post_type' => 'shop_order', $report_action => $changed, 'ids' => join( ',', $post_ids ) ), '' );
+	$sendback = add_query_arg( array( 'post_type' => 'shop_order', $report_action => true, 'changed' => $changed, 'ids' => join( ',', $post_ids ) ), '' );
 	wp_redirect( $sendback );
 	exit();
 }
@@ -553,8 +561,8 @@ function woocommerce_order_bulk_action() {
 function woocommerce_order_bulk_admin_notices() {
 	global $post_type, $pagenow;
 
-	if ( isset( $_REQUEST['marked_completed'] ) || isset( $_REQUEST['marked_processing'] ) ) {
-		$number = isset( $_REQUEST['marked_processing'] ) ? absint( $_REQUEST['marked_processing'] ) : absint( $_REQUEST['marked_completed'] );
+	if ( isset( $_REQUEST['marked_completed'] ) || isset( $_REQUEST['marked_processing'] ) || isset( $_REQUEST['marked_on-hold'] ) ) {
+		$number = isset( $_REQUEST['changed'] ) ? absint( $_REQUEST['changed'] ) : 0;
 
 		if ( 'edit.php' == $pagenow && 'shop_order' == $post_type ) {
 			$message = sprintf( _n( 'Order status changed.', '%s order statuses changed.', $number ), number_format_i18n( $number ) );
