@@ -138,7 +138,7 @@ class WC_Admin_Report {
 
 		if ( $filter_range ) {
 			$query['where'] .= "
-				AND 	post_date > '" . date('Y-m-d', $this->start_date ) . "'
+				AND 	post_date >= '" . date('Y-m-d', $this->start_date ) . "'
 				AND 	post_date < '" . date('Y-m-d', strtotime( '+1 DAY', $this->end_date ) ) . "'
 			";
 		}
@@ -394,6 +394,73 @@ class WC_Admin_Report {
 		$sparkline_data = array_values( $this->prepare_chart_data( $data, 'post_date', 'sparkline_value', $days - 1, strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ), 'day' ) );
 
 		return '<span class="wc_sparkline ' . ( $type == 'sales' ? 'lines' : 'bars' ) . ' tips" data-color="#777" data-tip="' . $tooltip . '" data-barwidth="' . 60*60*16*1000 . '" data-sparkline="' . esc_attr( json_encode( $sparkline_data ) ) . '"></span>';
+	}
+
+	/**
+	 * Get the current range and calculate the start and end dates
+	 *
+	 * @param  string $current_range
+	 */
+	public function calculate_current_range( $current_range ) {
+		switch ( $current_range ) {
+			case 'custom' :
+				$this->start_date = strtotime( sanitize_text_field( $_GET['start_date'] ) );
+				$this->end_date   = strtotime( 'midnight', strtotime( sanitize_text_field( $_GET['end_date'] ) ) );
+
+				if ( ! $this->end_date )
+					$this->end_date = current_time('timestamp');
+
+				$interval = 0;
+				$min_date = $this->start_date;
+				while ( ( $min_date = strtotime( "+1 MONTH", $min_date ) ) <= $this->end_date ) {
+				    $interval ++;
+				}
+
+				// 3 months max for day view
+				if ( $interval > 3 )
+					$this->chart_groupby         = 'month';
+				else
+					$this->chart_groupby         = 'day';
+			break;
+			case 'year' :
+				$this->start_date    = strtotime( date( 'Y-01-01', current_time('timestamp') ) );
+				$this->end_date      = strtotime( 'midnight', current_time( 'timestamp' ) );
+				$this->chart_groupby = 'month';
+			break;
+			case 'last_month' :
+				$this->start_date = strtotime( date( 'Y-m-01', strtotime( '-1 MONTH', current_time('timestamp') ) ) );
+				$this->end_date   = strtotime( date( 'Y-m-t', strtotime( '-1 MONTH', current_time('timestamp') ) ) );
+				$this->chart_groupby         = 'day';
+			break;
+			case 'month' :
+				$this->start_date = strtotime( date( 'Y-m-01', current_time('timestamp') ) );
+				$this->end_date   = strtotime( 'midnight', current_time( 'timestamp' ) );
+				$this->chart_groupby         = 'day';
+			break;
+			case '7day' :
+				$this->start_date = strtotime( '-6 days', current_time( 'timestamp' ) );
+				$this->end_date   = strtotime( 'midnight', current_time( 'timestamp' ) );
+				$this->chart_groupby         = 'day';
+			break;
+		}
+
+		// Group by
+		switch ( $this->chart_groupby ) {
+			case 'day' :
+				$this->group_by_query       = 'YEAR(post_date), MONTH(post_date), DAY(post_date)';
+				$this->chart_interval       = ceil( max( 0, ( $this->end_date - $this->start_date ) / ( 60 * 60 * 24 ) ) );
+				$this->barwidth             = 60 * 60 * 24 * 1000;
+			break;
+			case 'month' :
+				$this->group_by_query       = 'YEAR(post_date), MONTH(post_date)';
+				$this->chart_interval = 0;
+				$min_date             = $this->start_date;
+				while ( ( $min_date   = strtotime( "+1 MONTH", $min_date ) ) <= $this->end_date ) {
+					$this->chart_interval ++;
+				}
+				$this->barwidth             = 60 * 60 * 24 * 7 * 4 * 1000;
+			break;
+		}
 	}
 
 	/**

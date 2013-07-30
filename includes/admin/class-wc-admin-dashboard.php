@@ -58,8 +58,8 @@ class WC_Admin_Dashboard {
 			AND 	tax.taxonomy		= 'shop_order_status'
 			AND		term.slug			IN ( 'completed', 'processing', 'on-hold' )
 			AND 	postmeta.meta_key   = '_order_total'
-			AND 	posts.post_date > '" . date( 'Y-m-d', strtotime( 'first day of this month', current_time('timestamp') ) ) . "'
-			AND 	posts.post_date < '" . date( 'Y-m-d', current_time('timestamp') ) . "'
+			AND 	posts.post_date >= '" . date( 'Y-m-01', current_time('timestamp') ) . "'
+			AND 	posts.post_date <= '" . date( 'Y-m-d', current_time('timestamp') ) . "'
 		" );
 
 		// Get top seller
@@ -77,8 +77,8 @@ class WC_Admin_Dashboard {
 			AND		term.slug			IN ( 'completed', 'processing', 'on-hold' )
 			AND 	order_item_meta.meta_key = '_qty'
 			AND 	order_item_meta_2.meta_key = '_product_id'
-			AND 	posts.post_date > '" . date( 'Y-m-d', strtotime( 'first day of this month', current_time('timestamp') ) ) . "'
-			AND 	posts.post_date < '" . date( 'Y-m-d', current_time('timestamp') ) . "'
+			AND 	posts.post_date >= '" . date( 'Y-m-01', current_time('timestamp') ) . "'
+			AND 	posts.post_date <= '" . date( 'Y-m-d', current_time('timestamp') ) . "'
 			GROUP BY product_id
 			ORDER BY qty DESC
 			LIMIT   1

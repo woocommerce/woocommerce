@@ -149,66 +149,10 @@ class WC_Report_Customers extends WC_Admin_Report {
 
 		$current_range = ! empty( $_GET['range'] ) ? $_GET['range'] : '7day';
 
-		switch ( $current_range ) {
-			case 'custom' :
-				$this->start_date = strtotime( sanitize_text_field( $_GET['start_date'] ) );
-				$this->end_date   = strtotime( '12am + 1 day', strtotime( sanitize_text_field( $_GET['end_date'] ) ) );
+		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) )
+			$current_range = '7day';
 
-				if ( ! $this->end_date )
-					$this->end_date = current_time('timestamp');
-
-				$interval = 0;
-				$min_date = $this->start_date;
-				while ( ( $min_date = strtotime( "+1 MONTH", $min_date ) ) <= $this->end_date ) {
-				    $interval ++;
-				}
-
-				// 3 months max for day view
-				if ( $interval > 3 )
-					$this->chart_groupby         = 'month';
-				else
-					$this->chart_groupby         = 'day';
-			break;
-			case 'year' :
-				$this->start_date = strtotime( 'first day of january', current_time('timestamp') );
-				$this->end_date   = strtotime( '12am + 1 day', current_time( 'timestamp' ) );
-				$this->chart_groupby         = 'month';
-			break;
-			case 'last_month' :
-				$this->start_date = strtotime( 'first day of last month', current_time('timestamp') );
-				$this->end_date   = strtotime( 'last day of last month', current_time('timestamp') );
-				$this->chart_groupby         = 'day';
-			break;
-			case 'month' :
-				$this->start_date = strtotime( 'first day of this month', current_time('timestamp') );
-				$this->end_date   = strtotime( '12am + 1 day', current_time( 'timestamp' ) );
-				$this->chart_groupby         = 'day';
-			break;
-			case '7day' :
-			default :
-				$this->start_date = strtotime( '-6 days', current_time( 'timestamp' ) );
-				$this->end_date   = strtotime( '12am + 1 day', current_time( 'timestamp' ) );
-				$this->chart_groupby         = 'day';
-			break;
-		}
-
-		// Group by
-		switch ( $this->chart_groupby ) {
-			case 'day' :
-				$this->group_by_query       = 'YEAR(post_date), MONTH(post_date), DAY(post_date)';
-				$this->chart_interval       = max( 0, ( $this->end_date - $this->start_date ) / ( 60 * 60 * 24 ) );
-				$this->barwidth             = 60 * 60 * 24 * 1000;
-			break;
-			case 'month' :
-				$this->group_by_query       = 'YEAR(post_date), MONTH(post_date)';
-				$this->chart_interval = 0;
-				$min_date             = $this->start_date;
-				while ( ( $min_date   = strtotime( "+1 MONTH", $min_date ) ) <= $this->end_date ) {
-					$this->chart_interval ++;
-				}
-				$this->barwidth             = 60 * 60 * 24 * 7 * 4 * 1000;
-			break;
-		}
+		$this->calculate_current_range( $current_range );
 
 		$admin_users = new WP_User_Query(
 			array(
