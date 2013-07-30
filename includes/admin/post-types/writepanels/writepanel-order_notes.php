@@ -41,7 +41,9 @@ function woocommerce_order_notes_meta_box() {
 					<?php echo wpautop( wptexturize( wp_kses_post( $note->comment_content ) ) ); ?>
 				</div>
 				<p class="meta">
-					<?php printf( __( 'added %s ago', 'woocommerce' ), human_time_diff( strtotime( $note->comment_date_gmt ), current_time( 'timestamp', 1 ) ) ); ?> <a href="#" class="delete_note"><?php _e( 'Delete note', 'woocommerce' ); ?></a>
+					<?php printf( __( 'added %s ago', 'woocommerce' ), human_time_diff( strtotime( $note->comment_date_gmt ), current_time( 'timestamp', 1 ) ) ); ?>
+					<?php if ( $note->comment_author !== __( 'WooCommerce', 'woocommerce' ) ) printf( ' ' . __( 'by %s', 'woocommerce' ), $note->comment_author ); ?>
+					<a href="#" class="delete_note"><?php _e( 'Delete note', 'woocommerce' ); ?></a>
 				</p>
 			</li>
 			<?php
