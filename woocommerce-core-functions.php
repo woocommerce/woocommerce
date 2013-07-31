@@ -1324,7 +1324,7 @@ add_action( 'comment_feed_where', 'woocommerce_exclude_order_comments_from_feed_
  */
 function woocommerce_downloadable_product_permissions( $order_id ) {
 
-	if ( get_post_meta( $order_id, __( 'Download Permissions Granted', 'woocommerce' ), true ) == 1 ) 
+	if ( get_post_meta( $order_id, __( 'Download Permissions Granted', 'woocommerce' ), true ) == 1 )
 		return; // Only do this once
 
 	$order = new WC_Order( $order_id );
