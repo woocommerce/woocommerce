@@ -19,6 +19,12 @@ jQuery(function(){
 		}
 	}).change();
 
+	// Show order items on orders page
+	jQuery('body').on( 'click', '.show_order_items', function() {
+		jQuery(this).closest('td').find('table').toggle();
+		return false;
+	});
+
 	// Hidden options
 	jQuery('.hide_options_if_checked').each(function(){
 

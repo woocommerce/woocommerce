@@ -23,6 +23,7 @@ class WC_Admin_Post_Types {
 	public function __construct() {
 		add_action( 'admin_init', array( $this, 'include_post_type_handlers' ) );
 		add_filter( 'post_updated_messages', array( $this, 'post_updated_messages' ) );
+		add_action( 'admin_print_scripts', array( $this, 'disable_autosave' ) );
 	}
 
 	/**
@@ -34,6 +35,7 @@ class WC_Admin_Post_Types {
 		include_once( 'post-types/writepanels/writepanels-init.php' );
 
 		include( 'post-types/class-wc-admin-cpt-product.php' );
+		include( 'post-types/class-wc-admin-cpt-shop_order.php' );
 
 		if ( ! function_exists( 'duplicate_post_plugin_activation' ) )
 			include( 'class-wc-admin-duplicate-product.php' );
@@ -96,6 +98,19 @@ class WC_Admin_Post_Types {
 		return $messages;
 	}
 
+	/**
+	 * Disable the auto-save functionality for Orders.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function disable_autosave(){
+	    global $post;
+
+	    if ( $post && get_post_type( $post->ID ) === 'shop_order' ) {
+	        wp_dequeue_script( 'autosave' );
+	    }
+	}
 
 }
 

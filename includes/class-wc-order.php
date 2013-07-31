@@ -24,8 +24,8 @@ class WC_Order {
 	/** @public string Order date (paid). */
 	public $modified_date;
 
-	/** @public string Note added by the customer. */
-	public $customer_note;
+	/** @public string Message added by the customer. */
+	public $customer_message;
 
 	/** @public array Order (post) meta/custom fields. */
 	public $order_custom_fields;
@@ -196,11 +196,12 @@ class WC_Order {
 	 */
 	public function populate( $result ) {
 		// Standard post data
-		$this->id = $result->ID;
-		$this->order_date = $result->post_date;
-		$this->modified_date = $result->post_modified;
-		$this->customer_note = $result->post_excerpt;
-		$this->post_status = $result->post_status;
+		$this->id                  = $result->ID;
+		$this->order_date          = $result->post_date;
+		$this->modified_date       = $result->post_modified;
+		$this->customer_message    = $result->post_excerpt;
+		$this->customer_note       = $this->customer_message;
+		$this->post_status         = $result->post_status;
 		$this->order_custom_fields = get_post_meta( $this->id );
 
 		// Define the data we're going to load: Key => Default value

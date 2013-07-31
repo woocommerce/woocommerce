@@ -35,10 +35,6 @@ class WC_Admin {
 		 */
 		include_once( 'post-types/shop_coupon.php' );
 
-		/**
-		 * Functions for the shop_order post type
-		 */
-		include_once( 'post-types/shop_order.php' );
 
 		/**
 		 * Hooks in admin

@@ -1065,6 +1065,7 @@ ul.wc_coupon_list_block {
 		}
 	}
 	.column-order_title {
+		width: 15%;
 		time {
 			display: block;
 			color:#999;
@@ -1099,7 +1100,7 @@ ul.wc_coupon_list_block {
 		font-size: inherit;
 		margin: 3px 0;
 	}
-	.column-total_cost, .column-order_date {
+	.column-order_total, .column-order_date {
 		width:9%;
 	}
 	.column-order_status {
@@ -1108,7 +1109,8 @@ ul.wc_coupon_list_block {
 		mark {
 			.ir;
 			background: none;
-			font-size:1.4em;
+			font-size: 1.4em;
+			margin: 0 auto;
 		}
 		mark.pending, mark.completed, mark.on-hold, mark.failed, mark.cancelled, mark.processing, mark.refunded {
 			&:after {
@@ -1145,22 +1147,31 @@ ul.wc_coupon_list_block {
 		}
 	}
 	td.column-order_status {
-		padding-top:10px;
+		padding-top:9px;
 	}
 }
-.column-note {
-	.note-off, .note-on {
+.column-customer_message {
+	.note-on {
 		.ir;
 		margin:0 auto;
 		color: #999;
 		&:after {
 			.icon;
-			content: "\e028";
+			content: "\e026";
+			line-height: 16px;
 		}
 	}
-	.note-on:after {
-		color: @woocommerce;
-		content: "\e026";
+}
+.column-order_notes {
+	.note-on {
+		.ir;
+		margin:0 auto;
+		color: #999;
+		&:after {
+			.icon;
+			content: "\e027";
+			line-height: 16px;
+		}
 	}
 }
 .order_actions {
@@ -1258,23 +1269,12 @@ table.wp-list-table {
 		width: 46px;
 		text-align: left !important;
 	}
-	.column-note {
+	.column-customer_message, .column-order_notes {
 		width: 46px;
 		text-align: center;
 		img {
 			margin: 0 auto;
 			padding-top: 0 !important;
-		}
-	}
-	.column-order_comments {
-		width: 3em !important;
-		.post-com-count {
-			float: left;
-		}
-	}
-	th.column-note, th.column-order_comments {
-		img {
-			padding-top: 1px !important;
 		}
 	}
 	.manage-column.column-featured img, .manage-column.column-product_type img {
@@ -1363,8 +1363,10 @@ table.wp-list-table {
 		background: transparent none;
 		line-height: 1;
 	}
-	.order-notes_head, .notes_head {
+	.order-notes_head, .notes_head, .status_head {
 		.ir;
+		margin:0 auto;
+
 		&:after {
 			.icon;
 		}
@@ -1372,10 +1374,29 @@ table.wp-list-table {
 	.order-notes_head:after {
 		content: "\e028";
 	}
-	.notes_head {
-		margin:0 auto;
-		&:after {
-			content: "\e026";
+	.notes_head:after {
+		content: "\e026";
+	}
+	.status_head:after {
+		content: "\e011";
+	}
+	.column-order_items {
+		width:12%;
+		table.order_items {
+			width: 100%;
+			margin: 3px 0 0 0;
+			padding: 0;
+			display: none;
+			td {
+				border: 0;
+				margin: 0;
+				padding: 0 0 3px;
+			}
+			td.qty {
+				color: #999;
+				padding-right: 6px;
+				text-align: left;
+			}
 		}
 	}
 }
