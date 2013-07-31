@@ -59,7 +59,7 @@ class WC_Admin_Dashboard {
 			AND		term.slug			IN ( 'completed', 'processing', 'on-hold' )
 			AND 	postmeta.meta_key   = '_order_total'
 			AND 	posts.post_date >= '" . date( 'Y-m-01', current_time('timestamp') ) . "'
-			AND 	posts.post_date <= '" . date( 'Y-m-d', current_time('timestamp') ) . "'
+			AND 	posts.post_date <= '" . date( 'Y-m-d H:i:s', current_time('timestamp') ) . "'
 		" );
 
 		// Get top seller
@@ -78,7 +78,7 @@ class WC_Admin_Dashboard {
 			AND 	order_item_meta.meta_key = '_qty'
 			AND 	order_item_meta_2.meta_key = '_product_id'
 			AND 	posts.post_date >= '" . date( 'Y-m-01', current_time('timestamp') ) . "'
-			AND 	posts.post_date <= '" . date( 'Y-m-d', current_time('timestamp') ) . "'
+			AND 	posts.post_date <= '" . date( 'Y-m-d H:i:s', current_time('timestamp') ) . "'
 			GROUP BY product_id
 			ORDER BY qty DESC
 			LIMIT   1
@@ -127,14 +127,14 @@ class WC_Admin_Dashboard {
 		<ul class="wc_status_list">
 			<li class="sales-this-month">
 				<a href="<?php echo admin_url( 'admin.php?page=wc_reports&tab=orders&range=month' ); ?>">
-					<?php echo $reports->sales_sparkline( '', date( 'd', current_time('timestamp') ) ); ?>
+					<?php echo $reports->sales_sparkline( '', max( 7, date( 'd', current_time('timestamp') ) ) ); ?>
 					<?php printf( __( "<strong>%s</strong> sales this month", 'woocommerce' ), woocommerce_price( $sales ) ); ?>
 				</a>
 			</li>
-			<?php if ( $top_seller->qty ) : ?>
+			<?php if ( $top_seller && $top_seller->qty ) : ?>
 				<li class="best-seller-this-month">
 					<a href="<?php echo admin_url( 'admin.php?page=wc_reports&tab=orders&report=sales_by_product&range=month&product_ids=' . $top_seller->product_id ); ?>">
-						<?php echo $reports->sales_sparkline( $top_seller->product_id, date( 'd', current_time('timestamp') ), 'count' ); ?>
+						<?php echo $reports->sales_sparkline( $top_seller->product_id, max( 7, date( 'd', current_time('timestamp') ) ), 'count' ); ?>
 						<?php printf( __( "%s top seller this month (sold %d)", 'woocommerce' ), "<strong>" . get_the_title( $top_seller->product_id ) . "</strong>", $top_seller->qty ); ?>
 					</a>
 				</li>
