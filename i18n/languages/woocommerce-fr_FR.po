@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.0.10\n"
+"Project-Id-Version: WooCommerce 2.0.13\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-04-29 16:02:06+00:00\n"
 "PO-Revision-Date: \n"
@@ -46,7 +46,7 @@ msgstr "Catégories de produits"
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:10
 msgid "Products by category slug"
-msgstr "Produits par slug catégorie"
+msgstr "Produits par identifiant de catégorie"
 
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:11
@@ -56,7 +56,7 @@ msgstr "Produits récents"
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:12
 msgid "Featured products"
-msgstr "Produits Mis en Avant"
+msgstr "Produits mis en avant"
 
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:13
@@ -93,7 +93,7 @@ msgstr "Mon Compte"
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:19
 msgid "Edit Address"
-msgstr "Modifier adresse"
+msgstr "Modifier l'adresse"
 
 # @ woocommerce
 #: assets/js/admin/editor_plugin_lang.php:20
@@ -137,13 +137,13 @@ msgstr "Activer/Désactiver"
 #: classes/emails/class-wc-email-customer-invoice.php:140
 #: classes/emails/class-wc-email-new-order.php:117
 msgid "Enable this email notification"
-msgstr "Activer cet notification email"
+msgstr "Activer cette notification courriel"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:437
 #: classes/emails/class-wc-email-customer-invoice.php:144
 msgid "Email subject"
-msgstr "Sujet email"
+msgstr "Sujet courriel"
 
 #: classes/abstracts/abstract-wc-email.php:439
 #: classes/abstracts/abstract-wc-email.php:446
@@ -162,7 +162,7 @@ msgstr "Par défaut à <code>%s</code>"
 #: classes/abstracts/abstract-wc-email.php:444
 #: classes/emails/class-wc-email-customer-invoice.php:151
 msgid "Email heading"
-msgstr "Entête email"
+msgstr "Entête courriel"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-email.php:451
@@ -170,14 +170,14 @@ msgstr "Entête email"
 #: classes/emails/class-wc-email-customer-invoice.php:172
 #: classes/emails/class-wc-email-new-order.php:142
 msgid "Email type"
-msgstr "Type d'email"
+msgstr "Type de courriel"
 
 #: classes/abstracts/abstract-wc-email.php:453
 #: classes/emails/class-wc-email-customer-completed-order.php:171
 #: classes/emails/class-wc-email-customer-invoice.php:174
 #: classes/emails/class-wc-email-new-order.php:144
 msgid "Choose which format of email to send."
-msgstr "Choisissez quel format d'email envoyer."
+msgstr "Choisissez quel format de courriel à envoyer."
 
 #: classes/abstracts/abstract-wc-email.php:457
 #: classes/emails/class-wc-email-customer-completed-order.php:175
@@ -198,7 +198,7 @@ msgstr "HTML"
 #: classes/emails/class-wc-email-customer-invoice.php:180
 #: classes/emails/class-wc-email-new-order.php:150
 msgid "Multipart"
-msgstr "Multipart"
+msgstr "Multiparties"
 
 #: classes/abstracts/abstract-wc-email.php:495
 #: classes/abstracts/abstract-wc-email.php:516
@@ -245,14 +245,14 @@ msgstr ""
 
 #: classes/abstracts/abstract-wc-email.php:610
 msgid "Copy file to theme"
-msgstr "Copié le fichier dans le thème"
+msgstr "Copier le fichier dans le thème"
 
 #: classes/abstracts/abstract-wc-email.php:613
 msgid ""
 "To override and edit this email template copy <code>%s</code> to your theme "
 "folder: <code>%s</code>."
 msgstr ""
-"Pour écraser et modifier ce modèle d'email, copiez <code>%s</code> dans le "
+"Pour écraser et modifier ce modèle de courriel, copiez <code>%s</code> dans le "
 "dossier de votre thème : <code>%s</code>."
 
 #: classes/abstracts/abstract-wc-email.php:624
@@ -304,13 +304,13 @@ msgstr " %s en stock"
 # @ woocommerce
 #: classes/abstracts/abstract-wc-product.php:560
 msgid "(backorders allowed)"
-msgstr "(réservation autorisé)"
+msgstr "(réservation autorisée)"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-product.php:566
 #: classes/abstracts/abstract-wc-product.php:579 templates/cart/cart.php:76
 msgid "Available on backorder"
-msgstr "Disponible en backorder"
+msgstr "Disponible pour réservation"
 
 # @ woocommerce
 #: classes/abstracts/abstract-wc-product.php:572
@@ -433,7 +433,7 @@ msgstr "Voir panier &rarr;"
 
 #: classes/class-wc-cart.php:869
 msgid "You already have this item in your cart."
-msgstr "Vous avez dèjà ce produit dans votre panier."
+msgstr "Vous avez déjà ce produit dans votre panier."
 
 # @ woocommerce
 #: classes/class-wc-cart.php:883 classes/class-wc-cart.php:891
@@ -459,29 +459,29 @@ msgstr "Nom d'utilisateur du compte"
 #: classes/class-wc-checkout.php:65
 msgctxt "placeholder"
 msgid "Username"
-msgstr "Nom d'Utilisateur"
+msgstr "Nom d'utilisateur"
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:72
 msgid "Account password"
-msgstr "Mot de Passe du compte"
+msgstr "Mot de passe du compte"
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:73
 msgctxt "placeholder"
 msgid "Password"
-msgstr "Mot de Passe"
+msgstr "Mot de passe"
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:79
 msgid "Confirm password"
-msgstr "Confirmation mot de passe"
+msgstr "Confirmation du mot de passe"
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:80
 msgctxt "placeholder"
 msgid "Confirm password"
-msgstr "Confirmation mot de passe"
+msgstr "Confirmation du mot de passe"
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:89
@@ -538,7 +538,7 @@ msgstr "n'est pas un nombre valide."
 # @ woocommerce
 #: classes/class-wc-checkout.php:489
 msgid "is not a valid email address."
-msgstr "n'est pas une adresse email valide."
+msgstr "n'est pas une adresse courriel valide."
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:545
@@ -548,7 +548,7 @@ msgstr "Entrez un nom d'utilisateur."
 # @ woocommerce
 #: classes/class-wc-checkout.php:549
 msgid "Invalid email/username."
-msgstr "Email/nom d'utilisateur non valide."
+msgstr "Courriel/nom d'utilisateur non valide."
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:552
@@ -561,7 +561,7 @@ msgstr ""
 # @ woocommerce
 #: classes/class-wc-checkout.php:562
 msgid "Please enter an account password."
-msgstr "Entre un mot de passe, svp."
+msgstr "SVP, entrez un mot de passe."
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:565
@@ -574,7 +574,7 @@ msgstr "Mots de passe non correspondants"
 #: classes/class-wc-checkout.php:569
 msgid "An account is already registered with your email address. Please login."
 msgstr ""
-"Un compte est déjà enregistré avec cette adresse email. Connectez vous, svp."
+"Un compte est déjà enregistré avec cette adresse courriel. Connectez-vous, svp."
 
 # @ woocommerce
 #: classes/class-wc-checkout.php:575
@@ -619,17 +619,17 @@ msgstr "Aland Islands"
 # @ woocommerce
 #: classes/class-wc-countries.php:39
 msgid "Albania"
-msgstr "Albania"
+msgstr "Albanie"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:40
 msgid "Algeria"
-msgstr "Algeria"
+msgstr "Algerie"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:41
 msgid "Andorra"
-msgstr "Andorra"
+msgstr "Andorre"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:42
@@ -654,12 +654,12 @@ msgstr "Antigua and Barbuda"
 # @ woocommerce
 #: classes/class-wc-countries.php:46
 msgid "Argentina"
-msgstr "Argentina"
+msgstr "Argentine"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:47
 msgid "Armenia"
-msgstr "Armenia"
+msgstr "Armenie"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:48
@@ -669,12 +669,12 @@ msgstr "Aruba"
 # @ woocommerce
 #: classes/class-wc-countries.php:49
 msgid "Australia"
-msgstr "Australia"
+msgstr "Australie"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:50
 msgid "Austria"
-msgstr "Austria"
+msgstr "Austriche"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:51
@@ -739,7 +739,7 @@ msgstr "Bhutan"
 # @ woocommerce
 #: classes/class-wc-countries.php:63
 msgid "Bolivia"
-msgstr "Bolivia"
+msgstr "Bolivie"
 
 #: classes/class-wc-countries.php:64
 msgid "Bonaire, Saint Eustatius and Saba"
@@ -763,7 +763,7 @@ msgstr "Île Bouvet"
 # @ woocommerce
 #: classes/class-wc-countries.php:68
 msgid "Brazil"
-msgstr "Brazil"
+msgstr "Brésil"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:69
@@ -783,7 +783,7 @@ msgstr "Brunei"
 # @ woocommerce
 #: classes/class-wc-countries.php:72
 msgid "Bulgaria"
-msgstr "Bulgaria"
+msgstr "Bulgarie"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:73
@@ -813,7 +813,7 @@ msgstr "Canada"
 # @ woocommerce
 #: classes/class-wc-countries.php:78
 msgid "Cape Verde"
-msgstr "Cape Verde"
+msgstr "Cap Vert"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:79
@@ -833,12 +833,12 @@ msgstr "Chad"
 # @ woocommerce
 #: classes/class-wc-countries.php:82
 msgid "Chile"
-msgstr "Chile"
+msgstr "Chili"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:83
 msgid "China"
-msgstr "China"
+msgstr "Chine"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:84
@@ -853,7 +853,7 @@ msgstr "Cocos (Keeling) Islands"
 # @ woocommerce
 #: classes/class-wc-countries.php:86
 msgid "Colombia"
-msgstr "Colombia"
+msgstr "Colombie"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:87
@@ -927,12 +927,12 @@ msgstr "Dominican Republic"
 # @ woocommerce
 #: classes/class-wc-countries.php:101
 msgid "Ecuador"
-msgstr "Ecuador"
+msgstr "Équateur"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:102
 msgid "Egypt"
-msgstr "Egypt"
+msgstr "Egypte"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:103
@@ -957,7 +957,7 @@ msgstr "Estonia"
 # @ woocommerce
 #: classes/class-wc-countries.php:107
 msgid "Ethiopia"
-msgstr "Ethiopia"
+msgstr "Éthiopie"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:108
@@ -977,7 +977,7 @@ msgstr "Fiji"
 # @ woocommerce
 #: classes/class-wc-countries.php:111
 msgid "Finland"
-msgstr "Finland"
+msgstr "Finlande"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:112
@@ -1017,7 +1017,7 @@ msgstr "Georgia"
 # @ woocommerce
 #: classes/class-wc-countries.php:119
 msgid "Germany"
-msgstr "Germany"
+msgstr "Allemagne"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:120
@@ -1032,7 +1032,7 @@ msgstr "Gibraltar"
 # @ woocommerce
 #: classes/class-wc-countries.php:122
 msgid "Greece"
-msgstr "Greece"
+msgstr "Grèce"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:123
@@ -1100,7 +1100,7 @@ msgstr "Hungary"
 # @ woocommerce
 #: classes/class-wc-countries.php:136
 msgid "Iceland"
-msgstr "Iceland"
+msgstr "Islande"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:137
@@ -1454,7 +1454,7 @@ msgstr "Paraguay"
 # @ woocommerce
 #: classes/class-wc-countries.php:207
 msgid "Peru"
-msgstr "Peru"
+msgstr "Pérou"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:208
@@ -1489,12 +1489,12 @@ msgstr "Reunion"
 # @ woocommerce
 #: classes/class-wc-countries.php:214
 msgid "Romania"
-msgstr "Romania"
+msgstr "Roumanie"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:215
 msgid "Russia"
-msgstr "Russia"
+msgstr "Russie"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:216
@@ -1664,7 +1664,7 @@ msgstr "Suisse"
 # @ woocommerce
 #: classes/class-wc-countries.php:249
 msgid "Syria"
-msgstr "Syria"
+msgstr "Syrie"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:250
@@ -1684,7 +1684,7 @@ msgstr "Tanzania"
 # @ woocommerce
 #: classes/class-wc-countries.php:253
 msgid "Thailand"
-msgstr "Thailand"
+msgstr "Thailande"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:254
@@ -1714,12 +1714,12 @@ msgstr "Trinidad and Tobago"
 # @ woocommerce
 #: classes/class-wc-countries.php:259
 msgid "Tunisia"
-msgstr "Tunisia"
+msgstr "Tunisie"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:260
 msgid "Turkey"
-msgstr "Turkey"
+msgstr "Turquie"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:261
@@ -1956,7 +1956,7 @@ msgstr "État"
 # @ woocommerce
 #: classes/class-wc-countries.php:970
 msgid "Postcode"
-msgstr "Code Postal"
+msgstr "Code postal"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:973
@@ -1966,7 +1966,7 @@ msgstr "Comté"
 # @ woocommerce
 #: classes/class-wc-countries.php:1074
 msgid "Email Address"
-msgstr "Adresse email"
+msgstr "Adresse de courriel"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:1080
@@ -1976,24 +1976,24 @@ msgstr "Téléphone"
 # @ woocommerce
 #: classes/class-wc-coupon.php:421
 msgid "Coupon code applied successfully."
-msgstr "Code Promo appliqué avec succès."
+msgstr "Code promotionnel appliqué avec succès."
 
 # @ woocommerce
 #: classes/class-wc-coupon.php:442
 msgid "Coupon is not valid."
-msgstr "Code promo invalide."
+msgstr "Code promotionnel invalide."
 
 # @ woocommerce
 #: classes/class-wc-coupon.php:445 classes/class-wc-coupon.php:495
 msgid "Coupon does not exist!"
-msgstr "Code Promo inexistant !"
+msgstr "Code promotionnel inexistant !"
 
 #: classes/class-wc-coupon.php:448
 msgid ""
 "Sorry, it seems the coupon \"%s\" is invalid - it has now been removed from "
 "your order."
 msgstr ""
-"Désolé, il semblerait que le code promo \"%s\" soit invalide - il vient "
+"Désolé, il semblerait que le code promotionnel \"%s\" soit invalide - il vient "
 "d'être retiré de votre commande."
 
 #: classes/class-wc-coupon.php:451
@@ -2001,13 +2001,13 @@ msgid ""
 "Sorry, it seems the coupon \"%s\" is not yours - it has now been removed "
 "from your order."
 msgstr ""
-"Désolé, il semblerait que le code promo \"%s\" n'est pas le vôtre - il vient "
+"Désolé, il semblerait que le code promotionnel \"%s\" n'est pas le vôtre - il vient "
 "d'être retiré de votre commande."
 
 # @ woocommerce
 #: classes/class-wc-coupon.php:454
 msgid "Coupon code already applied!"
-msgstr "Code Promo déjà appliqué !"
+msgstr "Code promotionnel déjà appliqué !"
 
 # @ woocommerce
 #: classes/class-wc-coupon.php:457
@@ -2015,34 +2015,34 @@ msgid ""
 "Sorry, coupon \"%s\" has already been applied and cannot be used in "
 "conjunction with other coupons."
 msgstr ""
-"Désolé, le code promo \"%s\" a déjà été appliqué et ne peut être utilisé "
-"conjointement avec d'autres codes promo."
+"Désolé, le code promotionnel \"%s\" a déjà été appliqué et ne peut être utilisé "
+"conjointement avec d'autres codes promotionnels."
 
 #: classes/class-wc-coupon.php:460
 msgid "Coupon usage limit has been reached."
-msgstr "La limite d'utilisation du coupon a été atteinte."
+msgstr "La limite d'utilisation du code promotionnel a été atteinte."
 
 # @ woocommerce
 #: classes/class-wc-coupon.php:463
 msgid "This coupon has expired."
-msgstr "Ce code promo esr expiré."
+msgstr "Ce code promotionnel est expiré."
 
 #: classes/class-wc-coupon.php:466
 msgid "The minimum spend for this coupon is %s."
-msgstr "Le minimum de dépense pour ce coupon est %s."
+msgstr "Le minimum de dépense pour ce code promotionnel est %s."
 
 #: classes/class-wc-coupon.php:469
 msgid "Sorry, this coupon is not applicable to your cart contents."
-msgstr "Désolé, ce code promo ne s'applique pas au contenu de votre panier."
+msgstr "Désolé, ce code promotionnel ne s'applique pas au contenu de votre panier."
 
 #: classes/class-wc-coupon.php:472
 msgid "Sorry, this coupon is not valid for sale items."
-msgstr "Désolé, ce code promo ne s'applique pas aux articles en promo."
+msgstr "Désolé, ce code promotionnel ne s'applique pas aux articles en promotion."
 
 # @ woocommerce
 #: classes/class-wc-coupon.php:498
 msgid "Please enter a coupon code."
-msgstr "Veuillez entrer un code de remise."
+msgstr "Veuillez entrer un code promotionnel."
 
 # @ woocommerce
 #: classes/class-wc-customer.php:628 classes/class-wc-customer.php:638
@@ -2109,7 +2109,7 @@ msgstr "&nbsp;<small>%s via %s</small>"
 # @ woocommerce
 #: classes/class-wc-order.php:950
 msgid "Cart Subtotal:"
-msgstr "Sous-Total du panier :"
+msgstr "Sous-total du panier :"
 
 # @ woocommerce
 #: classes/class-wc-order.php:956
@@ -2145,7 +2145,7 @@ msgstr "WooCommerce"
 # @ woocommerce
 #: classes/class-wc-order.php:1220
 msgid "Order status changed from %s to %s."
-msgstr "État de la commande modifié de %s à %s"
+msgstr "État de la commande modifiée de %s à %s"
 
 # @ woocommerce
 #: classes/class-wc-order.php:1452 woocommerce-ajax.php:1089
@@ -2161,7 +2161,7 @@ msgstr "Articles de la commande sortis du stock."
 # @ woocommerce
 #: classes/class-wc-product-external.php:56
 msgid "Buy product"
-msgstr "Achater le produit"
+msgstr "Acheter le produit"
 
 # @ woocommerce
 #: classes/class-wc-shortcodes.php:571
@@ -2184,7 +2184,7 @@ msgid ""
 "Order complete emails are sent to the customer when the order is marked "
 "complete and usual indicates that the order has been shipped."
 msgstr ""
-"Les emails de commande terminée sont expédiés au client lorsque la commande "
+"Les courriels de commande terminée sont expédiés au client lorsque la commande "
 "est marquée terminée et indiquent généralement que la commande a été "
 "expédiée."
 
@@ -2218,7 +2218,7 @@ msgstr "Sujet"
 #: classes/emails/class-wc-email-customer-completed-order.php:148
 #: classes/emails/class-wc-email-new-order.php:135
 msgid "Email Heading"
-msgstr "Entête Email"
+msgstr "Entête de courriel"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-completed-order.php:155
@@ -2227,7 +2227,7 @@ msgstr "Sujet (téléchargeable)"
 
 #: classes/emails/class-wc-email-customer-completed-order.php:162
 msgid "Email Heading (downloadable)"
-msgstr "Entête email (téléchargeable)"
+msgstr "Entête de courriel (téléchargeable)"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-invoice.php:27
@@ -2240,7 +2240,7 @@ msgid ""
 "Customer invoice emails can be sent to the user containing order info and "
 "payment links."
 msgstr ""
-"Les emails de facture client peuvent être expédiés à l'utilisateur, "
+"Les courriels de facture client peuvent être expédiés à l'utilisateur, "
 "contenant les informations de commande et les liens de paiement."
 
 #: classes/emails/class-wc-email-customer-invoice.php:33
@@ -2262,11 +2262,11 @@ msgstr "Détails de la commande {order_number}"
 
 #: classes/emails/class-wc-email-customer-invoice.php:158
 msgid "Email subject (paid)"
-msgstr "Sujet email (payée)"
+msgstr "Sujet courriel (payée)"
 
 #: classes/emails/class-wc-email-customer-invoice.php:165
 msgid "Email heading (paid)"
-msgstr "Entête email (payée)"
+msgstr "Entête courriel (payée)"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-new-account.php:31
@@ -2278,7 +2278,7 @@ msgid ""
 "Customer new account emails are sent when a customer signs up via the "
 "checkout or My Account page."
 msgstr ""
-"Les emails de nouveau compte client sont envoyés lorsqu'un client "
+"Les courriels de nouveau compte client sont envoyés lorsqu'un client "
 "s'enregistre depuis la page commande ou Mon Compte."
 
 #: classes/emails/class-wc-email-customer-new-account.php:37
@@ -2297,7 +2297,7 @@ msgstr "Note client"
 #: classes/emails/class-wc-email-customer-note.php:30
 msgid "Customer note emails are sent when you add a note to an order."
 msgstr ""
-"Les emails de notes client sont expédiés lorsque vous ajoutez une note à une "
+"Les courriels de notes client sont expédiés lorsque vous ajoutez une note à une "
 "commande."
 
 #: classes/emails/class-wc-email-customer-note.php:35
@@ -2333,14 +2333,14 @@ msgstr "Votre reçu de commande {blogname} du {order_date}"
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-reset-password.php:36
 msgid "Reset password"
-msgstr "Réinitialisation mot de passe"
+msgstr "Réinitialisation du mot de passe"
 
 #: classes/emails/class-wc-email-customer-reset-password.php:37
 msgid ""
 "Customer reset password emails are sent when a customer resets their "
 "password."
 msgstr ""
-"Les emails de rénitialisation du mot de passe client sont expédiés lorsqu'un "
+"Les courriels de rénitialisation du mot de passe client sont expédiés lorsqu'un "
 "client réinitialise son mot de passe."
 
 #: classes/emails/class-wc-email-customer-reset-password.php:42
@@ -2360,7 +2360,7 @@ msgstr "Nouvelle commande"
 #: classes/emails/class-wc-email-new-order.php:25
 msgid "New order emails are sent when an order is received/paid by a customer."
 msgstr ""
-"Les emails de nouvelle commande sont expédiés lorsqu'une nouvelle commande "
+"Les courriels de nouvelle commande sont expédiés lorsqu'une nouvelle commande "
 "est reçue/payée par un client."
 
 # @ woocommerce
@@ -2381,7 +2381,7 @@ msgid ""
 "Enter recipients (comma separated) for this email. Defaults to <code>%s</"
 "code>."
 msgstr ""
-"Entrez les destinataires (séparés par un virgule) pour cet email. Par défaut "
+"Entrez les destinataires (séparés par un virgule) pour ce courriel. Par défaut "
 "à <code>%s</code>."
 
 # @ woocommerce
@@ -2390,7 +2390,7 @@ msgid ""
 "This controls the email subject line. Leave blank to use the default "
 "subject: <code>%s</code>."
 msgstr ""
-"Ceci détermine la ligne sujet de l'email. Laisser vide pour utiliser le "
+"Ceci détermine la ligne sujet du courriel. Laisser vide pour utiliser le "
 "sujet par défaut :  <code>%s</code>."
 
 #: classes/emails/class-wc-email-new-order.php:137
@@ -2398,7 +2398,7 @@ msgid ""
 "This controls the main heading contained within the email notification. "
 "Leave blank to use the default heading: <code>%s</code>."
 msgstr ""
-"Ceci détermine l'entête principale contenue dans la notification par email. "
+"Ceci détermine l'entête principale contenue dans la notification par courriel. "
 "Laisse vide pour utiliser l'entête par défaut : <code>%s</code>."
 
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:28
@@ -2408,7 +2408,7 @@ msgstr "Bacs"
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:65
 msgid "Enable Bank Transfer"
-msgstr "Activer le Virement Bancaire"
+msgstr "Activer le virement bancaire"
 
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:69
@@ -2438,13 +2438,13 @@ msgstr ""
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:72
 msgid "Direct Bank Transfer"
-msgstr "Virement Bancaire"
+msgstr "Virement bancaire"
 
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:76
 #: classes/gateways/cheque/class-wc-gateway-cheque.php:70
 msgid "Customer Message"
-msgstr "Message Client"
+msgstr "Message client"
 
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:78
@@ -2482,28 +2482,28 @@ msgstr ""
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:163
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:203
 msgid "Account Name"
-msgstr "Nom du Compte"
+msgstr "Nom du compte"
 
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:94
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:164
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:204
 msgid "Account Number"
-msgstr "Numéro de Compte"
+msgstr "Numéro de compte"
 
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:100
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:165
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:205
 msgid "Sort Code"
-msgstr "Sort Code"
+msgstr "Code de tri"
 
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:106
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:166
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:206
 msgid "Bank Name"
-msgstr "Nom de la Banque"
+msgstr "Nom de la banque"
 
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:112
@@ -2535,7 +2535,7 @@ msgstr ""
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:158
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:200
 msgid "Our Details"
-msgstr "Nos Détails"
+msgstr "Nos détails"
 
 # @ woocommerce
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:168
@@ -2556,13 +2556,13 @@ msgstr "Chèque"
 # @ woocommerce
 #: classes/gateways/cheque/class-wc-gateway-cheque.php:59
 msgid "Enable Cheque Payment"
-msgstr "Activer le Paiement par Chèque"
+msgstr "Activer le Paiement par chèque"
 
 # @ woocommerce
 #: classes/gateways/cheque/class-wc-gateway-cheque.php:66
 #: classes/gateways/cheque/class-wc-gateway-cheque.php:90
 msgid "Cheque Payment"
-msgstr "Paiement Chèque"
+msgstr "Paiement par chèque"
 
 # @ woocommerce
 #: classes/gateways/cheque/class-wc-gateway-cheque.php:72
@@ -2591,7 +2591,7 @@ msgid ""
 msgstr ""
 "Autorise les paiements par chèque. Pourquoi voudriez-vous prendre des "
 "chèques ? Et bien, vous ne l'utiliserez peut-être pas, mais cela vous permet "
-"de faire des tests d'achats pour tester les emails de commande et les pages "
+"de faire des tests d'achats pour tester les courriels de commande et les pages "
 "« remerciement », etc.."
 
 # @ woocommerce
@@ -2614,11 +2614,11 @@ msgstr ""
 # COD : Cash On Delivery
 #: classes/gateways/cod/class-wc-gateway-cod.php:80
 msgid "Enable COD"
-msgstr "Activer"
+msgstr "Activer COD"
 
 #: classes/gateways/cod/class-wc-gateway-cod.php:81
 msgid "Enable Cash on Delivery"
-msgstr "Activer le Paiement à la Livraison"
+msgstr "Activer le Paiement à la livraison"
 
 #: classes/gateways/cod/class-wc-gateway-cod.php:89
 msgid "Payment method title that the customer will see on your website."
@@ -2792,7 +2792,7 @@ msgstr ""
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:139
 msgid "PayPal Email"
-msgstr "Email PayPal"
+msgstr "Courriel PayPal"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:141
@@ -2800,20 +2800,20 @@ msgid ""
 "Please enter your PayPal email address; this is needed in order to take "
 "payment."
 msgstr ""
-"Veuillez entrez votre adresse email PayPal, ceci est nécessaire dans la "
+"Veuillez entrez votre adresse courriel PayPal, ceci est nécessaire dans la "
 "commande pour prendre le paiement."
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:147
 msgid "Receiver Email"
-msgstr "Email Destinataire"
+msgstr "Courriel du destinataire"
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:149
 msgid ""
 "If this differs from the email entered above, input your main receiver email "
 "for your PayPal account. This is used to validate IPN requests."
 msgstr ""
-"S'il diffère de l'email renseigné ci-dessus, saisissez l'email principal de "
+"S'il diffère du courriel indiqué ci-dessus, saisissez le courriel principal de "
 "votre compte PayPal. Il est utilisé pour valider les requêtes IPN."
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:155
@@ -2868,12 +2868,12 @@ msgstr "Optionnel"
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:177
 msgid "Shipping options"
-msgstr "Options des livraison"
+msgstr "Options de livraison"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:182
 msgid "Shipping details"
-msgstr "Détails Expédition"
+msgstr "Détails d'expédition"
 
 # @ woocommerce
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:184
@@ -2886,7 +2886,7 @@ msgid ""
 "PayPal allows us to send 1 address. If you are using PayPal for shipping "
 "labels you may prefer to send the shipping address rather than billing."
 msgstr ""
-"PayPal permet d'envoyer 1 adresse. Si vous utilisez PayPal pour les "
+"PayPal permet d'envoyer à une adresse. Si vous utilisez PayPal pour les "
 "étiquettes de livraison, vous pouvez préférer envoyer l'adresse de livraison "
 "plutôt que celle de facturation."
 
@@ -3056,14 +3056,14 @@ msgstr ""
 # @ woocommerce
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:69
 msgid "Set Domain Name"
-msgstr "Définir le Nom de Domaine"
+msgstr "Définir le Nom de domaine"
 
 #: classes/integrations/google-analytics/class-wc-google-analytics.php:70
 msgid ""
 "(Optional) Sets the <code>_setDomainName</code> variable. <a href=\"%s\">See "
 "here for more information</a>."
 msgstr ""
-"(Optionnel) Renseignez  la variable <code>_setDomainName</code>. <a href=\"%s"
+"(Optionnel) Indiquez la variable <code>_setDomainName</code>. <a href=\"%s"
 "\">Voir ici pour plus d'informations</a>."
 
 # @ woocommerce
@@ -3240,7 +3240,7 @@ msgstr "Style bouton"
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:25
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:85
 msgid "Flat Rate"
-msgstr "Taux Fixe"
+msgstr "Taux fixe"
 
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:27
@@ -3321,7 +3321,7 @@ msgstr ""
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:128
 msgid "Additional Rates"
-msgstr "Taxes Additionnelles"
+msgstr "Taxes additionnelles"
 
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:130
 msgid ""
@@ -3340,7 +3340,7 @@ msgstr "Nom Option | Coût Additionnel | Coût Par Type (order, class ou item)"
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:136
 msgid "Additional Costs"
-msgstr "Coûts Additionnels"
+msgstr "Coûts additionnels"
 
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:138
 msgid ""
@@ -3352,7 +3352,7 @@ msgstr ""
 
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:141
 msgid "Costs Added..."
-msgstr "Coûts Ajoutés..."
+msgstr "Coûts ajoutés..."
 
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:145
 #: classes/shipping/international-delivery/class-wc-shipping-international-delivery.php:94
@@ -3362,13 +3362,13 @@ msgstr "Par Commande - frais d'envoi pour toute la commande dans son ensemble"
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:146
 #: classes/shipping/international-delivery/class-wc-shipping-international-delivery.php:95
 msgid "Per Item - charge shipping for each item individually"
-msgstr "Par Article - frais d'envoi pour chaque article individuellement"
+msgstr "Par article - frais d'envoi pour chaque article individuellement"
 
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:147
 #: classes/shipping/international-delivery/class-wc-shipping-international-delivery.php:96
 msgid "Per Class - charge shipping for each shipping class in an order"
 msgstr ""
-"Par Classe - frais d'envoi pour chaque classe de livraison dans une commande"
+"Par classe - frais d'envoi pour chaque classe de livraison dans une commande"
 
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:154
@@ -3422,7 +3422,7 @@ msgstr "Frais H.T.. Entrez un montant, ex.: 2.50, ou un pourcentage, ex.: 5%."
 # @ woocommerce
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:492
 msgid "+ Add Cost"
-msgstr "+ Ajouter un Coût"
+msgstr "+ Ajouter un coût"
 
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:492
 msgid "Delete selected costs"
@@ -3463,7 +3463,7 @@ msgstr "Supprimer les taux sélectionnés"
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:84
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:145
 msgid "Free Shipping"
-msgstr "Livraison Gratuite"
+msgstr "Livraison gratuite"
 
 # @ woocommerce
 #: classes/shipping/free-shipping/class-wc-shipping-free-shipping.php:77
@@ -3540,7 +3540,7 @@ msgstr "Pays"
 
 #: classes/shipping/international-delivery/class-wc-shipping-international-delivery.php:90
 msgid "Cost Added..."
-msgstr "Coût Ajouté..."
+msgstr "Coût ajouté..."
 
 # @ woocommerce
 #: classes/shipping/international-delivery/class-wc-shipping-international-delivery.php:106
@@ -3610,7 +3610,7 @@ msgstr ""
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:135
 #: classes/shipping/local-pickup/class-wc-shipping-local-pickup.php:91
 msgid "Zip/Post Codes"
-msgstr "Codes Postaux"
+msgstr "Codes postaux"
 
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:137
 #: classes/shipping/local-pickup/class-wc-shipping-local-pickup.php:93
@@ -3708,17 +3708,17 @@ msgstr "Identification"
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:114
 msgid "Enter a username or e-mail address."
-msgstr "Saisissez un identifiant ou une adresse email."
+msgstr "Saisissez un identifiant ou une adresse courriel."
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:121
 msgid "There is no user registered with that email address."
-msgstr "Il n'y a pas d'utilisateur enregistré avec cette adresse email."
+msgstr "Il n'y a pas d'utilisateur enregistré avec cette adresse courriel."
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:136
 msgid "Invalid username or e-mail."
-msgstr "Identifiant ou email invalide."
+msgstr "Identifiant ou courriel invalide."
 
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:150
 msgid "Password reset is not allowed for this user"
@@ -3728,7 +3728,7 @@ msgstr ""
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:178
 msgid "Check your e-mail for the confirmation link."
-msgstr "Vérifiez votre email pour le lien de confirmation."
+msgstr "Vérifiez votre courriel pour le lien de confirmation."
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:198
@@ -3745,7 +3745,7 @@ msgstr "Veuillez entrer un ID commande valide"
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-order-tracking.php:55
 msgid "Please enter a valid order email"
-msgstr "Veuillez entrer un email de commande valide"
+msgstr "Veuillez entrer un courriel de commande valide"
 
 #: classes/shortcodes/class-wc-shortcode-order-tracking.php:74
 msgid "Sorry, we could not find that order id in our database."
@@ -3797,7 +3797,7 @@ msgstr "Total :"
 #: classes/shortcodes/class-wc-shortcode-pay.php:103
 #: templates/checkout/thankyou.php:53
 msgid "Payment method:"
-msgstr "Méthode de Paiement :"
+msgstr "Méthode de paiement :"
 
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-view-order.php:51
@@ -3905,7 +3905,7 @@ msgstr "WooCommerce Produits mis en avant"
 # @ woocommerce
 #: classes/widgets/class-wc-widget-featured-products.php:75
 msgid "Featured Products"
-msgstr "Produits Mis en Avant"
+msgstr "Produits Mis en avant"
 
 #: classes/widgets/class-wc-widget-layered-nav-filters.php:31
 msgid "Shows active layered nav filters so users can see and deactivate them."
@@ -4014,7 +4014,7 @@ msgstr ""
 # @ woocommerce
 #: classes/widgets/class-wc-widget-price-filter.php:35
 msgid "WooCommerce Price Filter"
-msgstr "WooCommerce Filtre de Prix"
+msgstr "WooCommerce Filtre de prix"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-price-filter.php:136
@@ -4092,7 +4092,7 @@ msgstr "Afficher compteur articles"
 # @ woocommerce
 #: classes/widgets/class-wc-widget-product-categories.php:201
 msgid "Show hierarchy"
-msgstr "Afficher Hiérarchie"
+msgstr "Afficher la hiérarchie"
 
 #: classes/widgets/class-wc-widget-product-categories.php:204
 msgid "Only show children for the current category"
@@ -5855,7 +5855,7 @@ msgstr "Votre panier est actuellement vide."
 # @ woocommerce
 #: templates/cart/cart-empty.php:18
 msgid "&larr; Return To Shop"
-msgstr "&larr; Retour à la Boutique"
+msgstr "&larr; Retour à la boutique"
 
 # @ woocommerce
 #: templates/cart/cart.php:28 templates/checkout/form-pay.php:19
@@ -5908,12 +5908,12 @@ msgstr "Qté"
 # @ woocommerce
 #: templates/cart/cart.php:127 woocommerce.php:1096
 msgid "Coupon"
-msgstr "Code Promo"
+msgstr "Code promotionnel"
 
 # @ woocommerce
 #: templates/cart/cart.php:127 templates/checkout/form-coupon.php:29
 msgid "Apply Coupon"
-msgstr "Valider Code Promo"
+msgstr "Appliquer le Code promotionnel"
 
 # @ woocommerce
 #: templates/cart/cart.php:134
@@ -5948,7 +5948,7 @@ msgstr "Commander &rarr;"
 # @ woocommerce
 #: templates/cart/shipping-calculator.php:22
 msgid "Calculate Shipping"
-msgstr "Calculer frais d'expédition"
+msgstr "Calculer les frais d'expédition"
 
 # @ woocommerce
 #: templates/cart/shipping-calculator.php:28 woocommerce-template.php:1334
@@ -5975,7 +5975,7 @@ msgstr "Ville"
 # @ woocommerce
 #: templates/cart/shipping-calculator.php:85
 msgid "Update Totals"
-msgstr "Mise à jour totaux"
+msgstr "Mettre à jour les totaux"
 
 # @ woocommerce
 #: templates/cart/shipping-methods.php:32
@@ -6080,12 +6080,12 @@ msgstr ""
 # @ woocommerce
 #: templates/checkout/cart-errors.php:20
 msgid "&larr; Return To Cart"
-msgstr "&larr; Retour au Panier"
+msgstr "&larr; Retour au panier"
 
 # @ woocommerce
 #: templates/checkout/form-billing.php:17
 msgid "Billing &amp; Shipping"
-msgstr "Facturation &amp; Expédition"
+msgstr "Facturation &amp; expédition"
 
 # @ woocommerce
 #: templates/checkout/form-billing.php:21
@@ -6093,12 +6093,12 @@ msgstr "Facturation &amp; Expédition"
 #: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
 #: templates/order/order-details.php:115
 msgid "Billing Address"
-msgstr "Adresse de Facturation"
+msgstr "Adresse de facturation"
 
 # @ woocommerce
 #: templates/checkout/form-billing.php:42
 msgid "Create an account?"
-msgstr "Créer un Compte?"
+msgstr "Créer un compte?"
 
 # @ woocommerce
 #: templates/checkout/form-billing.php:51
@@ -6122,7 +6122,7 @@ msgstr "Votre commande"
 # @ woocommerce
 #: templates/checkout/form-coupon.php:17
 msgid "Have a coupon?"
-msgstr "Avez-vous un code promo ?"
+msgstr "Avez-vous un code promotionnel ?"
 
 # @ woocommerce
 #: templates/checkout/form-coupon.php:20
@@ -6132,7 +6132,7 @@ msgstr "Cliquez ici pour entrer votre code"
 # @ woocommerce
 #: templates/checkout/form-coupon.php:25
 msgid "Coupon code"
-msgstr "Code Promo"
+msgstr "Code promotionnel"
 
 # @ woocommerce
 #: templates/checkout/form-login.php:14
@@ -6179,7 +6179,7 @@ msgstr ""
 # @ woocommerce
 #: templates/checkout/form-pay.php:87
 msgid "Pay for order"
-msgstr "Règlement pour la commande"
+msgstr "Payer la commande"
 
 # @ woocommerce
 #: templates/checkout/form-shipping.php:32
@@ -6191,14 +6191,14 @@ msgstr "Livrer à l'adresse de facturation"
 #: templates/myaccount/form-edit-address.php:27
 #: templates/myaccount/my-address.php:20 templates/order/order-details.php:130
 msgid "Shipping Address"
-msgstr "Adresse de Livraison"
+msgstr "Adresse de livraison"
 
 # @ woocommerce
 #: templates/checkout/form-shipping.php:59
 #: templates/single-product/tabs/additional-information.php:14
 #: woocommerce-template.php:759
 msgid "Additional Information"
-msgstr "Information Complémentaire"
+msgstr "Information complémentaire"
 
 # @ woocommerce
 #: templates/checkout/review-order.php:174
@@ -6234,12 +6234,12 @@ msgstr ""
 # @ woocommerce
 #: templates/checkout/review-order.php:185
 msgid "Update totals"
-msgstr "Mise à Jour Totaux"
+msgstr "Mise à jour des totaux"
 
 # @ woocommerce
 #: templates/checkout/review-order.php:192
 msgid "Place order"
-msgstr "Payer"
+msgstr "Placer la commande"
 
 # @ woocommerce
 #: templates/checkout/review-order.php:199
@@ -6296,7 +6296,7 @@ msgstr "Commande : %s"
 #: templates/emails/plain/admin-new-order.php:38
 #: templates/order/order-details.php:97
 msgid "Customer details"
-msgstr "Détails Client"
+msgstr "Détails du client"
 
 # @ woocommerce
 #: templates/emails/admin-new-order.php:53
@@ -6309,7 +6309,7 @@ msgstr "Détails Client"
 #: templates/emails/plain/customer-processing-order.php:41
 #: templates/order/order-details.php:101
 msgid "Email:"
-msgstr "Email :"
+msgstr "Courriel :"
 
 # @ woocommerce
 #: templates/emails/admin-new-order.php:56
@@ -6394,13 +6394,13 @@ msgstr ""
 #: templates/emails/customer-reset-password.php:15
 #: templates/emails/plain/customer-reset-password.php:15
 msgid "Username: %s"
-msgstr "Nom d'Utilisateur : %s"
+msgstr "Nom d'utilisateur : %s"
 
 #: templates/emails/customer-reset-password.php:16
 #: templates/emails/plain/customer-reset-password.php:16
 msgid "If this was a mistake, just ignore this email and nothing will happen."
 msgstr ""
-"S'il s'agit d'une erreur, ignorez simplement cet email et rien ne se "
+"S'il s'agit d'une erreur, ignorez simplement ce courriel et rien ne se "
 "produira."
 
 #: templates/emails/customer-reset-password.php:17
@@ -6417,13 +6417,13 @@ msgstr "Cliquez ici pour réinitialiser votre mot de passe"
 #: templates/emails/email-addresses.php:18
 #: templates/emails/plain/email-addresses.php:12
 msgid "Billing address"
-msgstr "Adresse de Facturation"
+msgstr "Adresse de facturation"
 
 # @ woocommerce
 #: templates/emails/email-addresses.php:28
 #: templates/emails/plain/email-addresses.php:17
 msgid "Shipping address"
-msgstr "Adresse de Livraison"
+msgstr "Adresse de livraison"
 
 # @ woocommerce
 #: templates/emails/email-order-items.php:47
@@ -6442,7 +6442,7 @@ msgstr "Téléchargement :"
 #: templates/emails/plain/customer-note.php:27
 #: templates/emails/plain/customer-processing-order.php:19
 msgid "Order number: %s"
-msgstr "Numéro commande : %s"
+msgstr "Numéro de commande : %s"
 
 # @ woocommerce
 #: templates/emails/plain/admin-new-order.php:20
@@ -6451,7 +6451,7 @@ msgstr "Numéro commande : %s"
 #: templates/emails/plain/customer-note.php:28
 #: templates/emails/plain/customer-processing-order.php:20
 msgid "Order date: %s"
-msgstr "Date commande : %s"
+msgstr "Date de commande : %s"
 
 #: templates/emails/plain/admin-new-order.php:20
 msgid "jS F Y"
@@ -6478,12 +6478,12 @@ msgstr "Coût : %s"
 #: templates/loop/add-to-cart.php:17 templates/loop/add-to-cart.php:41
 #: templates/loop/add-to-cart.php:50
 msgid "Read More"
-msgstr "Lire Plus"
+msgstr "Lire plus"
 
 # @ woocommerce
 #: templates/loop/add-to-cart.php:33
 msgid "Select options"
-msgstr "Choix options"
+msgstr "Choix des options"
 
 # @ woocommerce
 #: templates/loop/add-to-cart.php:37
@@ -6541,7 +6541,7 @@ msgstr "Voici les résultats %1$d–%2$d sur %3$d"
 # @ woocommerce
 #: templates/loop/sale-flash.php:16 templates/single-product/sale-flash.php:16
 msgid "Sale!"
-msgstr "Promo !"
+msgstr "Promotion !"
 
 # @ woocommerce
 #: templates/myaccount/form-change-password.php:20
@@ -6559,12 +6559,12 @@ msgstr "Réentrez le nouveau mot de passe"
 #: templates/myaccount/form-change-password.php:29
 #: templates/myaccount/form-lost-password.php:45
 msgid "Save"
-msgstr "Sauver"
+msgstr "Sauvegarder"
 
 # @ woocommerce
 #: templates/myaccount/form-edit-address.php:43
 msgid "Save Address"
-msgstr "Sauver Adresse"
+msgstr "Sauvegarder l'adresse"
 
 # @ woocommerce
 #: templates/myaccount/form-login.php:26 templates/myaccount/form-login.php:40
@@ -6577,18 +6577,18 @@ msgstr "Connexion"
 #: templates/myaccount/form-lost-password.php:24
 #: templates/shop/form-login.php:20
 msgid "Username or email"
-msgstr "Identifiant ou email"
+msgstr "Identifiant ou courriel"
 
 # @ woocommerce
 #: templates/myaccount/form-login.php:33 templates/myaccount/form-login.php:85
 #: templates/shop/form-login.php:24
 msgid "Password"
-msgstr "Mot de Passe"
+msgstr "Mot de passe"
 
 # @ woocommerce
 #: templates/myaccount/form-login.php:50 templates/shop/form-login.php:33
 msgid "Lost Password?"
-msgstr "Mot de Passe perdu ?"
+msgstr "Mot de passe perdu ?"
 
 #: templates/myaccount/form-login.php:60
 #: templates/myaccount/form-login.php:101
@@ -6598,13 +6598,13 @@ msgstr "S'enregistrer"
 # @ woocommerce
 #: templates/myaccount/form-login.php:66
 msgid "Username"
-msgstr "Nom d'Utilisateur"
+msgstr "Nom d'utilisateur"
 
 # @ woocommerce
 #: templates/myaccount/form-login.php:78
 #: templates/single-product-reviews.php:86
 msgid "Email"
-msgstr "Email"
+msgstr "Courriel"
 
 # @ woocommerce
 #: templates/myaccount/form-login.php:89
@@ -6636,25 +6636,25 @@ msgid ""
 "recent orders, manage your shipping and billing addresses and <a href=\"%s"
 "\">change your password</a>."
 msgstr ""
-"Hello, <strong>%s</strong>. Vous pouvez voir vos commandes récentes, gérer "
+"Bonjour, <strong>%s</strong>. Vous pouvez voir vos commandes récentes, gérer "
 "vos adresses de livraison et de facturation et <a href=\"%s\">changer votre "
 "mot de passe</a> à partir du tableau de bord de votre compte"
 
 # @ woocommerce
 #: templates/myaccount/my-address.php:17
 msgid "My Addresses"
-msgstr "Mes Adresses"
+msgstr "Mes adresses"
 
 # @ woocommerce
 #: templates/myaccount/my-address.php:23
 msgid "My Address"
-msgstr "Mes Adresses"
+msgstr "Mes adresses"
 
 # @ woocommerce
 #: templates/myaccount/my-address.php:35
 msgid "The following addresses will be used on the checkout page by default."
 msgstr ""
-"Les adresse suivantes seront utilisées par défaut sur la page de commande."
+"Les adresses suivantes seront utilisées par défaut sur la page de commande."
 
 # @ woocommerce
 #: templates/myaccount/my-address.php:45 woocommerce.php:951
@@ -6671,7 +6671,7 @@ msgstr "Vous n'avez pas encore défini ce type d'adresse."
 # @ woocommerce
 #: templates/myaccount/my-downloads.php:18
 msgid "Available downloads"
-msgstr "Téléchargements Disponibles"
+msgstr "Téléchargements disponibles"
 
 # @ woocommerce
 #: templates/myaccount/my-downloads.php:27
@@ -6724,9 +6724,9 @@ msgid ""
 "return. This was given to you on your receipt and in the confirmation email "
 "you should have received."
 msgstr ""
-"Pour suivre votre commande saisissez votre n&deg; et votre email de commande "
+"Pour suivre votre commande saisissez votre n&deg; et votre courriel de commande "
 "dans les champs ci-dessous et cliquez sur le bouton \"Suivi\". Le n&deg; de "
-"commande vous a été indiqué dans votre reçu et dans l'email de confirmation "
+"commande vous a été indiqué dans votre reçu et dans le courriel de confirmation "
 "qui vous a été envoyé."
 
 # @ woocommerce
@@ -6737,17 +6737,17 @@ msgstr "N&deg; de commande"
 # @ woocommerce
 #: templates/order/form-tracking.php:19
 msgid "Found in your order confirmation email."
-msgstr "Présent dans l'email de confirmation"
+msgstr "Présent dans le courriel de confirmation"
 
 # @ woocommerce
 #: templates/order/form-tracking.php:20
 msgid "Billing Email"
-msgstr "Email de facturation"
+msgstr "Courriel de facturation"
 
 # @ woocommerce
 #: templates/order/form-tracking.php:20
 msgid "Email you used during checkout."
-msgstr "Email utilisé pour la commande"
+msgstr "Courriel utilisé pour la commande"
 
 # @ woocommerce
 #: templates/order/form-tracking.php:23
@@ -6757,7 +6757,7 @@ msgstr "Suivi"
 # @ woocommerce
 #: templates/order/order-details.php:16
 msgid "Order Details"
-msgstr "Détails Commande"
+msgstr "Détails de la commande"
 
 # @ woocommerce
 #: templates/order/order-details.php:64
@@ -6861,7 +6861,7 @@ msgstr "Dimensions"
 # @ woocommerce
 #: templates/single-product/related.php:36
 msgid "Related Products"
-msgstr "Produits en Rapport"
+msgstr "Produits associés"
 
 # @ woocommerce
 #: templates/single-product/review.php:26
@@ -6880,7 +6880,7 @@ msgstr "propriétaire vérifié"
 # @ woocommerce
 #: templates/single-product/tabs/description.php:14
 msgid "Product Description"
-msgstr "Description Produit"
+msgstr "Description du produit"
 
 # @ woocommerce
 #: templates/single-product/up-sells.php:39
@@ -6913,7 +6913,7 @@ msgstr "Suivant <span class=\"meta-nav\">&rarr;</span>"
 # @ woocommerce
 #: templates/single-product-reviews.php:63
 msgid "Add Your Review"
-msgstr "Ajouter Votre Avis"
+msgstr "Ajouter votre avis"
 
 # @ woocommerce
 #: templates/single-product-reviews.php:63
@@ -6937,7 +6937,7 @@ msgid ""
 "\"inline show_review_form\">submit yours</a>?"
 msgstr ""
 "Il n'y a pas encore d'avis, voulez-vous <a href=\"#review_form\" class="
-"\"inline show_review_form\">donner le votre</a> ?"
+"\"inline show_review_form\">donner le vôtre</a> ?"
 
 # @ woocommerce
 #: templates/single-product-reviews.php:89
@@ -6972,22 +6972,22 @@ msgstr "Moyen"
 # @ woocommerce
 #: templates/single-product-reviews.php:101
 msgid "Not that bad"
-msgstr "Pas Mal"
+msgstr "Pas mal"
 
 # @ woocommerce
 #: templates/single-product-reviews.php:102
 msgid "Very Poor"
-msgstr "Très Mauvais"
+msgstr "Très mauvais"
 
 # @ woocommerce
 #: templates/single-product-reviews.php:107
 msgid "Your Review"
-msgstr "Votre Avis"
+msgstr "Votre avis"
 
 # @ woocommerce
 #: woocommerce-ajax.php:119
 msgid "Sorry, your session has expired."
-msgstr "Désolé, votre session a expiré"
+msgstr "Désolé, votre session web a expiré"
 
 # @ woocommerce
 #: woocommerce-ajax.php:119
@@ -7231,7 +7231,7 @@ msgstr "Gestionnaire Boutique"
 
 #: woocommerce-core-functions.php:2494
 msgid "Unpaid order cancelled - time limit reached."
-msgstr "Commande impayée annulée - temp limite atteind."
+msgstr "Commande impayée annulée - temp limite atteint."
 
 # @ woocommerce
 #: woocommerce-functions.php:226 woocommerce-functions.php:271
@@ -7307,15 +7307,15 @@ msgstr "Ce nom est déjà enregistré, veuillez en choisir un autre."
 # @ woocommerce
 #: woocommerce-functions.php:747
 msgid "Please type your e-mail address."
-msgstr "Veuillez saisir votre adresse email."
+msgstr "Veuillez saisir votre adresse courriel."
 
 #: woocommerce-functions.php:749
 msgid "The email address isn&#8217;t correct."
-msgstr "L'adresse email n'est pas correcte."
+msgstr "L'adresse courriel n'est pas correcte."
 
 #: woocommerce-functions.php:752
 msgid "This email is already registered, please choose another one."
-msgstr "Cet email est déjà enregistré, veuillez en choisir un autre."
+msgstr "Ce courriel est déjà enregistré, veuillez en choisir un autre."
 
 # @ woocommerce
 #: woocommerce-functions.php:757
@@ -7324,7 +7324,7 @@ msgstr "Entrez à nouveau votre mot de passe."
 
 #: woocommerce-functions.php:762
 msgid "Anti-spam field was filled in."
-msgstr "Le champ Anti-spam a été rempli."
+msgstr "Le champ anti-spam a été rempli."
 
 #: woocommerce-functions.php:870
 msgid "The cart has been filled with the items from your previous order."
@@ -7352,7 +7352,7 @@ msgstr ""
 # @ woocommerce
 #: woocommerce-functions.php:940
 msgid "Invalid email address."
-msgstr "Adresse email invalide."
+msgstr "Adresse courriel invalide."
 
 # @ woocommerce
 #: woocommerce-functions.php:940 woocommerce-functions.php:963
@@ -7706,7 +7706,7 @@ msgstr "Produits"
 # @ woocommerce
 #: woocommerce.php:985
 msgid "Add Product"
-msgstr "Ajouter"
+msgstr "Ajouter produit"
 
 # @ woocommerce
 #: woocommerce.php:986
@@ -7869,70 +7869,70 @@ msgstr "Voici où les produits sont stockés"
 # @ woocommerce
 #: woocommerce.php:1095
 msgid "Coupons"
-msgstr "Codes Promo"
+msgstr "Codes promotionnels"
 
 # @ woocommerce
 #: woocommerce.php:1097
 msgctxt "Admin menu name"
 msgid "Coupons"
-msgstr "Codes Promo"
+msgstr "Codes promotionnels"
 
 # @ woocommerce
 #: woocommerce.php:1098
 msgid "Add Coupon"
-msgstr "Ajouter Code Promo"
+msgstr "Ajouter un code promotionnel"
 
 # @ woocommerce
 #: woocommerce.php:1099
 msgid "Add New Coupon"
-msgstr "Ajouter un nouveau Code Promo"
+msgstr "Ajouter un nouveau Code promotionnel"
 
 # @ woocommerce
 #: woocommerce.php:1101
 msgid "Edit Coupon"
-msgstr "Modifier Code Promo"
+msgstr "Modifier le Code promotionnel"
 
 # @ woocommerce
 #: woocommerce.php:1102
 msgid "New Coupon"
-msgstr "Nouveau Code Promo"
+msgstr "Nouveau Code promotionnel"
 
 # @ woocommerce
 #: woocommerce.php:1103
 msgid "View Coupons"
-msgstr "Voir Codes Promo"
+msgstr "Voir les Codes promotionnels"
 
 # @ woocommerce
 #: woocommerce.php:1104
 msgid "View Coupon"
-msgstr "Voir Code Promo"
+msgstr "Voir Code promotionnel"
 
 # @ woocommerce
 #: woocommerce.php:1105
 msgid "Search Coupons"
-msgstr "Recherche Codes Promo"
+msgstr "Recherche de Codes promotionnels"
 
 # @ woocommerce
 #: woocommerce.php:1106
 msgid "No Coupons found"
-msgstr "Aucun Code Promo trouvé"
+msgstr "Aucun code promotionnel trouvé"
 
 # @ woocommerce
 #: woocommerce.php:1107
 msgid "No Coupons found in trash"
-msgstr "Aucun Code Promo trouvé dans la corbeille"
+msgstr "Aucun code promotionnel trouvé dans la corbeille"
 
 # @ woocommerce
 #: woocommerce.php:1108
 msgid "Parent Coupon"
-msgstr "Code Promo parent"
+msgstr "Code promotionnel parent"
 
 # @ woocommerce
 #: woocommerce.php:1110
 msgid ""
 "This is where you can add new coupons that customers can use in your store."
 msgstr ""
-"Voici où vous pouvez ajouter de nouveaux codes promo que vos clients peuvent "
+"Voici où vous pouvez ajouter de nouveaux codes promotionnels que vos clients peuvent "
 "utiliser dans votre boutique."
 
 # @ woocommerce
@@ -7982,11 +7982,11 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Flat rate"
-#~ msgstr "Taux Fixe"
+#~ msgstr "Taux fixe"
 
 # @ woocommerce
 #~ msgid "Flat Rates"
-#~ msgstr "Taux Fixes"
+#~ msgstr "Taux fixes"
 
 # @ woocommerce
 #~ msgid "Calculation Type"
@@ -8013,7 +8013,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "+ Add Flat Rate"
-#~ msgstr "+ Ajout Taux Fixe"
+#~ msgstr "+ Ajout Taux fixe"
 
 #~ msgid ""
 #~ "Add rates for shipping classes here &mdash; they will override the "
@@ -8044,7 +8044,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "My account"
-#~ msgstr "Mon Compte"
+#~ msgstr "Mon compte"
 
 # @ woocommerce
 #~ msgid "Logout"
@@ -8052,7 +8052,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Lost password?"
-#~ msgstr "Mot de Passe perdu ?"
+#~ msgstr "Mot de passe perdu ?"
 
 #~ msgid "Logged out title:"
 #~ msgstr "Titre Déconnecté :"
@@ -8080,12 +8080,12 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 #~ "Sorry, coupon <code>%s</code> has already been applied and cannot be used "
 #~ "in conjunction with other coupons."
 #~ msgstr ""
-#~ "Désolé, le code promo <code>%s</code> a déjà été appliqué et ne peut être "
-#~ "utilisé conjointement avec d'autres codes promo."
+#~ "Désolé, le code promotionnel <code>%s</code> a déjà été appliqué et ne peut être "
+#~ "utilisé conjointement avec d'autres codes promotionnels."
 
 # @ woocommerce
 #~ msgid "Invalid coupon"
-#~ msgstr "Code Promo non valide"
+#~ msgstr "Code promotionnel non valide"
 
 # @ woocommerce
 #~ msgid "Ship to"
@@ -8130,7 +8130,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Menu Title"
-#~ msgstr "Titre du Menu"
+#~ msgstr "Titre du menu"
 
 #~ msgid ""
 #~ "Choose the order by which you would like to display the terms within each "
@@ -8151,7 +8151,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 #~ msgstr "Afficher compteur articles ?"
 
 #~ msgid "Show Taxonomy Title?"
-#~ msgstr "Afficher le Titre de la Taxonomie ?"
+#~ msgstr "Afficher le Titre de la taxonomie ?"
 
 # @ woocommerce
 #~ msgid "Show Terms as hierarchy?"
@@ -8172,7 +8172,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Configuration Guide"
-#~ msgstr "Guide de Configuration"
+#~ msgstr "Guide de configuration"
 
 #~ msgid ""
 #~ "Warning! This version of Custom Taxonomies Menu Widget requires WordPress"
@@ -8204,7 +8204,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "View product"
-#~ msgstr "Voir Produit"
+#~ msgstr "Voir le produit"
 
 # @ woocommerce
 #~ msgid "Add&nbsp;meta"
@@ -8232,7 +8232,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Order status"
-#~ msgstr "États de commande"
+#~ msgstr "État de commande"
 
 # @ woocommerce
 #~ msgid "Search Order statuses"
@@ -8469,7 +8469,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Payment Methods"
-#~ msgstr "Méthodes de Paiement"
+#~ msgstr "Méthodes de paiement"
 
 #~ msgid ""
 #~ "This is where payment gateway options are defined, and individual payment "
@@ -8480,7 +8480,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Emails"
-#~ msgstr "Emails"
+#~ msgstr "Courriels"
 
 # @ woocommerce
 #~ msgid "Here you can customise the way WooCommerce emails appear."
@@ -8637,11 +8637,11 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Processing"
-#~ msgstr "En cours"
+#~ msgstr "Traitement"
 
 # @ woocommerce
 #~ msgid "Completed"
-#~ msgstr "Expédiée"
+#~ msgstr "Complété"
 
 #~ msgid "You are using <strong>WooCommerce %s</strong>."
 #~ msgstr "Vous utilisez <strong>WooCommerce %s</strong>."
@@ -8657,7 +8657,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "There are no product orders yet."
-#~ msgstr "Il n'y a pas encore de commande produit."
+#~ msgstr "Il n'y a pas encore de commande de produits."
 
 # @ woocommerce
 #~ msgid "There are no product reviews yet."
@@ -8691,7 +8691,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Mark processing"
-#~ msgstr "Marquée en cours"
+#~ msgstr "Marquée en traitement"
 
 # @ woocommerce
 #~ msgid "Mark completed"
@@ -8935,25 +8935,25 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Coupon updated."
-#~ msgstr "Code promo mis à jour."
+#~ msgstr "Code promotionnel mis à jour."
 
 #~ msgid "Coupon restored to revision from %s"
-#~ msgstr "Code Promo restoré à la révision de %s"
+#~ msgstr "Code promotionnel restoré à la révision de %s"
 
 # @ woocommerce
 #~ msgid "Coupon saved."
-#~ msgstr "Code Promo sauvegardé."
+#~ msgstr "Code promotionnel sauvegardé."
 
 # @ woocommerce
 #~ msgid "Coupon submitted."
-#~ msgstr "Code Promo soumis."
+#~ msgstr "Code promotionnel soumis."
 
 #~ msgid "Coupon scheduled for: <strong>%1$s</strong>."
-#~ msgstr "Code Promo programmé pour : <strong>%1$s</strong>."
+#~ msgstr "Code promotionnel programmé pour : <strong>%1$s</strong>."
 
 # @ woocommerce
 #~ msgid "Coupon draft updated."
-#~ msgstr "Code Promo en brouillon mis à jour."
+#~ msgstr "Code promotionnel brouillon mis à jour."
 
 # @ woocommerce
 #~ msgid "Order notes"
@@ -9014,7 +9014,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 # @ woocommerce
 #~ msgctxt "page_slug"
 #~ msgid "pay"
-#~ msgstr "Payer"
+#~ msgstr "payer"
 
 # @ woocommerce
 #~ msgid "Checkout &rarr; Pay"
@@ -9032,7 +9032,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Lost Password"
-#~ msgstr "Mot de Passe perdu"
+#~ msgstr "Mot de passe perdu"
 
 # @ woocommerce
 #~ msgid "Sales by day"
@@ -9046,7 +9046,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Product Sales"
-#~ msgstr "Ventes produits"
+#~ msgstr "Vente de produits"
 
 # @ woocommerce
 #~ msgid "Top sellers"
@@ -9061,7 +9061,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 #~ msgstr "Ventes par catégorie"
 
 #~ msgid "Sales by coupon"
-#~ msgstr "Ventes par code promo"
+#~ msgstr "Ventes par code promotionnels"
 
 # @ woocommerce
 #~ msgid "Total sales"
@@ -9172,7 +9172,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "No sales :("
-#~ msgstr "Pas de Ventes :("
+#~ msgstr "Pas de ventes :("
 
 # @ woocommerce
 #~ msgid "Search for a product&hellip;"
@@ -9328,17 +9328,17 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Worst coupon"
-#~ msgstr "Pire code promo"
+#~ msgstr "Pire code promotionnel"
 
 # @ woocommerce
 #~ msgid "Coupon sales average"
-#~ msgstr "Moyenne des ventes codes promo"
+#~ msgstr "Moyenne des ventes codes promotionnels"
 
 #~ msgid "Coupon sales median"
-#~ msgstr "Ventes moyennes codes promo"
+#~ msgstr "Ventes moyennes codes promotionnels"
 
 #~ msgid "Monthly sales by coupon"
-#~ msgstr "Remises mensuel par codes promo"
+#~ msgstr "Remises mensuel par codes promotionnels"
 
 # @ woocommerce
 #~ msgid "Your settings have been saved."
@@ -9354,7 +9354,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Payment Gateways"
-#~ msgstr "Passerelles de Paiement"
+#~ msgstr "Passerelles de paiement"
 
 #~ msgid ""
 #~ "More functionality and gateway options available via <a href=\"%s\" "
@@ -9365,7 +9365,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Email Options"
-#~ msgstr "Options d'email"
+#~ msgstr "Options de courriel"
 
 # @ woocommerce
 #~ msgid ""
@@ -9540,7 +9540,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 #~ msgstr "Version PHP"
 
 #~ msgid "Server Software"
-#~ msgstr "Serveur"
+#~ msgstr "Logiciel du serveur"
 
 #~ msgid "WP Max Upload Size"
 #~ msgstr "WP Téléchargement  max."
@@ -9667,7 +9667,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Paying Customer?"
-#~ msgstr "Payer au Client ?"
+#~ msgstr "Payer au client ?"
 
 # @ woocommerce
 #~ msgid "Customer Billing Address"
@@ -9828,7 +9828,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Tags"
-#~ msgstr "Mots-Clés"
+#~ msgstr "Mots-clés"
 
 #~ msgid "Edit this item inline"
 #~ msgstr "Editer cet article en ligne"
@@ -9960,7 +9960,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "In stock?"
-#~ msgstr "En Stock ?"
+#~ msgstr "En stock ?"
 
 # @ woocommerce
 #~ msgid "Manage stock?"
@@ -10354,7 +10354,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Coupon code already exists."
-#~ msgstr "Code promo exitant."
+#~ msgstr "Code promotionnel exitant."
 
 # @ woocommerce
 #~ msgid "Order status:"
@@ -10481,7 +10481,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Email invoice"
-#~ msgstr "Email de facture"
+#~ msgstr "Courriel de facture"
 
 # @ woocommerce
 #~ msgid ""
@@ -10562,7 +10562,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 #~ msgstr "Restauration de stock manuelle complète."
 
 #~ msgid "Revoke Access"
-#~ msgstr "Révoquer l'Accès"
+#~ msgstr "Révoquer l'accès"
 
 #~ msgid "File %d: %s"
 #~ msgstr "Fichier %d : %s"
@@ -10578,7 +10578,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 #~ msgstr "Téléchargements restant"
 
 #~ msgid "Access Expires"
-#~ msgstr "Accès Expiré"
+#~ msgstr "Accès expiré"
 
 # @ woocommerce
 #~ msgid "Never"
@@ -10589,7 +10589,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 #~ msgstr "Choisir un produit téléchargeable&hellip;"
 
 #~ msgid "Grant Access"
-#~ msgstr "Accorder l'Accès"
+#~ msgstr "Accorder l'accès"
 
 # @ woocommerce
 #~ msgid "File"
@@ -11047,7 +11047,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Coupon Data"
-#~ msgstr "Données Code Promo"
+#~ msgstr "Données Code promotionnel"
 
 # @ woocommerce
 #~ msgid "Product name"
@@ -11274,10 +11274,10 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 #~ msgstr "Activer les codes promo"
 
 #~ msgid "Enable coupon form on cart"
-#~ msgstr "Activer le formulaire de codes promo sur le panier"
+#~ msgstr "Activer le formulaire de codes promotionnel sur le panier"
 
 #~ msgid "Enable coupon form on checkout"
-#~ msgstr "Activer le formulaire de codes promo sur la commande"
+#~ msgstr "Activer le formulaire de codes promotionnel sur la commande"
 
 #~ msgid "Registration"
 #~ msgstr "Inscription"
@@ -11327,7 +11327,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Store Notice"
-#~ msgstr "Notice Boutique"
+#~ msgstr "Notice boutique"
 
 # @ woocommerce
 #~ msgid "Enable the \"Demo Store\" notice on your site"
@@ -11504,7 +11504,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Taxonomy base page"
-#~ msgstr "Page de base de la taxinomie"
+#~ msgstr "Page de base de la taxonomie"
 
 # @ woocommerce
 #~ msgid "Prepend shop categories/tags with shop base page (<code>%s</code>)"
@@ -11795,7 +11795,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Image Options"
-#~ msgstr "Options images"
+#~ msgstr "Options d'image"
 
 # @ woocommerce
 #~ msgid ""
@@ -11829,7 +11829,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Product Thumbnails"
-#~ msgstr "Vignettes produit"
+#~ msgstr "Vignettes de produit"
 
 # @ woocommerce
 #~ msgid ""
@@ -11840,7 +11840,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Inventory Options"
-#~ msgstr "Options inventaire"
+#~ msgstr "Options d'inventaire"
 
 # @ woocommerce
 #~ msgid "Manage stock"
@@ -12014,7 +12014,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 #~ "The following options affect the sender (email address and name) used in "
 #~ "WooCommerce emails."
 #~ msgstr ""
-#~ "Les options suivantes affectent l'expéditeur (adresse email et nom) "
+#~ "Les options suivantes affectent l'expéditeur (adresse courriel et nom) "
 #~ "utilisé dans les emails WooCommerce."
 
 # @ woocommerce
@@ -12023,11 +12023,11 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "\"From\" email address"
-#~ msgstr "\"From\" adresse email"
+#~ msgstr "\"From\" adresse courriel"
 
 # @ woocommerce
 #~ msgid "Email template"
-#~ msgstr "Modèle d'email"
+#~ msgstr "Modèle de courriel"
 
 # @ woocommerce
 #~ msgid ""
@@ -12036,7 +12036,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 #~ "advanced control copy <code>woocommerce/templates/emails/</code> to "
 #~ "<code>yourtheme/woocommerce/emails/</code>."
 #~ msgstr ""
-#~ "Cette section vous laisse la possibilité de personnaliser les emails "
+#~ "Cette section vous laisse la possibilité de personnaliser les courriels "
 #~ "WooCommerce. <a href=\"%s\" target=\"_blank\">Cliquer ici pour "
 #~ "prévisualiser votre modèle d'email</a>. Pour davantage de contrôles "
 #~ "copiez <code>woocommerce/templates/emails/</code> dans <code>votretheme/"
@@ -12051,17 +12051,17 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 #~ "Enter a URL to an image you want to show in the email's header. Upload "
 #~ "your image using the <a href=\"%s\">media uploader</a>."
 #~ msgstr ""
-#~ "Entrer l'URL d'une image que vous souhaitez afficher dans l'entête de "
-#~ "l'email. Transférez votre image en utilisant le <a href=\"%s\">transfert "
+#~ "Entrer l'URL d'une image que vous souhaitez afficher dans l'entête du "
+#~ "courriel. Transférez votre image en utilisant le <a href=\"%s\">transfert "
 #~ "de médias</a>."
 
 # @ woocommerce
 #~ msgid "Email footer text"
-#~ msgstr "Texte de pied de page de l'email"
+#~ msgstr "Texte de pied de page du courriel"
 
 # @ woocommerce
 #~ msgid "The text to appear in the footer of WooCommerce emails."
-#~ msgstr "Le texte à afficher dans le pied de page des emails WooCommerce."
+#~ msgstr "Le texte à afficher dans le pied de page des courriels WooCommerce."
 
 # @ woocommerce
 #~ msgid "Powered by WooCommerce"
@@ -12076,7 +12076,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 #~ "The base colour for WooCommerce email templates. Default <code>#557da1</"
 #~ "code>."
 #~ msgstr ""
-#~ "La couleur de base pour les modèles d'emails WooCommerce. Par défaut "
+#~ "La couleur de base pour les modèles de courriels WooCommerce. Par défaut "
 #~ "<code>#557da1</code>."
 
 # @ woocommerce
@@ -12088,12 +12088,12 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 #~ "The background colour for WooCommerce email templates. Default "
 #~ "<code>#f5f5f5</code>."
 #~ msgstr ""
-#~ "La couleur de fond pour les modèles d'emails WooCommerce. Par défaut "
+#~ "La couleur de fond pour les modèles de courriels WooCommerce. Par défaut "
 #~ "<code>#f5f5f5</code>."
 
 # @ woocommerce
 #~ msgid "Email body background colour"
-#~ msgstr "Couleur de fond du corps de l'email"
+#~ msgstr "Couleur de fond du corps du courriel"
 
 # @ woocommerce
 #~ msgid "The main body background colour. Default <code>#fdfdfd</code>."
@@ -12102,7 +12102,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Email body text colour"
-#~ msgstr "Couleur du texte du corps de l'email"
+#~ msgstr "Couleur du texte du corps du courriel"
 
 # @ woocommerce
 #~ msgid "The main body text colour. Default <code>#505050</code>."
@@ -12122,7 +12122,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Shipping Methods"
-#~ msgstr "Expédition"
+#~ msgstr "Méthodes de livraison"
 
 #~ msgid "Drag and drop methods to control their display order."
 #~ msgstr ""
@@ -12254,7 +12254,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Postcodes/zips"
-#~ msgstr "Codes Postaux"
+#~ msgstr "Codes postaux"
 
 #~ msgid "Cities"
 #~ msgstr "Villes"
@@ -12315,11 +12315,11 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Discount code already applied!"
-#~ msgstr "Code Promo déjà appliqué !"
+#~ msgstr "Code promotionnel déjà appliqué !"
 
 # @ woocommerce
 #~ msgid "Discount code applied successfully."
-#~ msgstr "Code Promo appliqué avec succès."
+#~ msgstr "Code promotionnel appliqué avec succès."
 
 # @ woocommerce
 #~ msgid "Customer IP Address"
@@ -12331,7 +12331,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Coupon Code Used: %s"
-#~ msgstr "Code Promo utilisé : %s"
+#~ msgstr "Code promotionnel utilisé : %s"
 
 # @ woocommerce
 #~ msgid "Palau"
@@ -12411,7 +12411,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 # @ woocommerce
 #~ msgctxt "placeholder"
 #~ msgid "Email Address"
-#~ msgstr "Adresse email"
+#~ msgstr "Adresse courriel"
 
 # @ woocommerce
 #~ msgctxt "placeholder"
@@ -12480,7 +12480,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Email me my details"
-#~ msgstr "M'envoyer par email mes infos"
+#~ msgstr "M'envoyer par courriel mes infos"
 
 #~ msgid "Configure ShareYourCart"
 #~ msgstr "Configurez ShareYourCart"
@@ -12513,10 +12513,10 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Email address"
-#~ msgstr "Adresse email"
+#~ msgstr "Adresse courriel"
 
 #~ msgid "The email address you used to sign up for ShareYourCart."
-#~ msgstr "L'email que vous avez utilisé pour vous inscrire sur ShareYourCart."
+#~ msgstr "Le courriel que vous avez utilisé pour vous inscrire sur ShareYourCart."
 
 #~ msgid "Show button by default on:"
 #~ msgstr "Afficher le bouton par défaut sur : "
@@ -12897,7 +12897,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 #~ msgstr "Base Boutique"
 
 #~ msgid "Thanks"
-#~ msgstr "Thanks"
+#~ msgstr "Merci"
 
 # @ woocommerce
 #~ msgid "Page does not exist"
@@ -13071,7 +13071,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Coupon description"
-#~ msgstr "Description code promo"
+#~ msgstr "Description code promotionnel"
 
 #~ msgid "Optionally enter a description for this coupon for your reference."
 #~ msgstr ""
@@ -13132,7 +13132,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Customer emails"
-#~ msgstr "Emails client"
+#~ msgstr "Courriels client"
 
 # @ woocommerce
 #~ msgid "How many times this coupon can be used before it is void."
@@ -13148,7 +13148,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 #~ "Coupon code already exists - customers will use the latest coupon with "
 #~ "this code."
 #~ msgstr ""
-#~ "Le code promo existe déjà - les clients utiliserons le dernier code promo "
+#~ "Le code promotionnel existe déjà - les clients utiliserons le dernier code promotionnel "
 #~ "correspondant."
 
 # @ woocommerce
@@ -13556,11 +13556,11 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "\"From\" Email Address"
-#~ msgstr "\"From\" Adresse email"
+#~ msgstr "\"From\" Adresse courriel"
 
 # @ woocommerce
 #~ msgid "Email Template"
-#~ msgstr "Modèle d'email"
+#~ msgstr "Modèle de courriel"
 
 # @ woocommerce
 #~ msgid "Header Image"
@@ -13614,7 +13614,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "ZIP/Postcode"
-#~ msgstr "Code Postal"
+#~ msgstr "Code postal"
 
 #~ msgid ""
 #~ "Postcode for this rule. Semi-colon (;) separate multiple values. Leave "
@@ -13922,7 +13922,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Post/zip codes"
-#~ msgstr "Codes Postaux"
+#~ msgstr "Codes postaux"
 
 #~ msgid "PHP Sessions"
 #~ msgstr "Sessions PHP"
@@ -13983,7 +13983,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 
 # @ woocommerce
 #~ msgid "Email Recipient Options"
-#~ msgstr "Options d'email du destinataire"
+#~ msgstr "Options de courriel du destinataire"
 
 # @ woocommerce
 #~ msgid "New order notifications"
@@ -13992,7 +13992,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 # @ woocommerce
 #~ msgid "The recipient of new order emails. Defaults to the admin email."
 #~ msgstr ""
-#~ "Le destinataire des emails de nouvelle commande. Par défaut l'email de "
+#~ "Le destinataire des courriels de nouvelle commande. Par défaut le courriel de "
 #~ "l'administrateur."
 
 # @ woocommerce
@@ -14002,7 +14002,7 @@ msgstr "L'action a échoué. Rafraîchissez la page et essayez à nouveau, svp."
 # @ woocommerce
 #~ msgid "The recipient of stock emails. Defaults to the admin email."
 #~ msgstr ""
-#~ "Le destinataire des emails d'inventaire. Par défaut l'email de "
+#~ "Le destinataire des courriels d'inventaire. Par défaut le courriel de "
 #~ "l'administrateur."
 
 # @ woocommerce
