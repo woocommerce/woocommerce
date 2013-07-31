@@ -190,6 +190,12 @@
 
 					if ( ! empty( $plugin_data['Name'] ) ) {
 
+						// link the plugin name to the plugin url if available
+						$plugin_name = $plugin_data['Name'];
+						if ( ! empty( $plugin_data['PluginURI'] ) ) {
+							$plugin_name = '<a href="' . $plugin_data['PluginURI'] . '" title="' . __( 'Visit plugin homepage' , 'woocommerce' ) . '">' . $plugin_name . '</a>';
+						}
+
 						if ( strstr( $dirname, 'woocommerce' ) ) {
 
 							if ( false === ( $version_data = get_transient( $plugin . '_version_data' ) ) ) {
@@ -214,7 +220,7 @@
 								$version_string = ' &ndash; <strong style="color:red;">' . $version_data['version'] . ' ' . __( 'is available', 'woocommerce' ) . '</strong>';
 						}
 
-						$wc_plugins[] = $plugin_data['Name'] . ' ' . __( 'by', 'woocommerce' ) . ' ' . $plugin_data['Author'] . ' ' . __( 'version', 'woocommerce' ) . ' ' . $plugin_data['Version'] . $version_string;
+						$wc_plugins[] = $plugin_name . ' ' . __( 'by', 'woocommerce' ) . ' ' . $plugin_data['Author'] . ' ' . __( 'version', 'woocommerce' ) . ' ' . $plugin_data['Version'] . $version_string;
 
 					}
 				}
