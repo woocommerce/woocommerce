@@ -41,7 +41,6 @@
 										a.addImmediate(c, ed.getLang('woocommerce.cart'),"[woocommerce_cart]" );
 										a.addImmediate(c, ed.getLang('woocommerce.checkout'),"[woocommerce_checkout]" );
 										a.addImmediate(c, ed.getLang('woocommerce.my_account'),"[woocommerce_my_account]" );
-										a.addImmediate(c, ed.getLang('woocommerce.edit_address'),"[woocommerce_edit_address]" );
 										a.addImmediate(c, ed.getLang('woocommerce.pay'),"[woocommerce_pay]" );
 										a.addImmediate(c, ed.getLang('woocommerce.thankyou'),"[woocommerce_thankyou]" );
 

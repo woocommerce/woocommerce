@@ -58,6 +58,7 @@ class WC_Checkout {
 			$this->checkout_fields['account']['account_username'] = array(
 				'type' 			=> 'text',
 				'label' 		=> __( 'Account username', 'woocommerce' ),
+				'required'      => true,
 				'placeholder' 	=> _x( 'Username', 'placeholder', 'woocommerce' )
 			);
 		}
@@ -66,6 +67,7 @@ class WC_Checkout {
 			$this->checkout_fields['account']['account_password'] = array(
 				'type' 				=> 'password',
 				'label' 			=> __( 'Account password', 'woocommerce' ),
+				'required'          => true,
 				'placeholder' 		=> _x( 'Password', 'placeholder', 'woocommerce' )
 			);
 		}
@@ -391,6 +393,11 @@ class WC_Checkout {
 				continue;
 			}
 
+			// Ship account if not needed
+			if ( $fieldset_key == 'account' && ( is_user_logged_in() || ( $this->must_create_account == false && empty( $this->posted['createaccount'] ) ) ) ) {
+				continue;
+			}
+
 			foreach ( $fieldset as $key => $field ) {
 
 				if ( ! isset( $field['type'] ) )
@@ -544,7 +551,7 @@ class WC_Checkout {
 			try {
 
 				// Customer accounts
-				$this->customer_id = get_current_user_id();
+				$this->customer_id = apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() );
 
 				if ( ! is_user_logged_in() && ( $this->must_create_account || ! empty( $this->posted['createaccount'] ) ) ) {
 

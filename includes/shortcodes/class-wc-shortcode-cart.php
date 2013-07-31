@@ -40,38 +40,40 @@ class WC_Shortcode_Cart {
 		// Update Shipping
 		} elseif ( ! empty( $_POST['calc_shipping'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-cart' ) ) {
 
-			$validation = $woocommerce->validation();
+			try {
+				$validation = $woocommerce->validation();
+				$woocommerce->shipping->reset_shipping();
 
-			$woocommerce->shipping->reset_shipping();
-			$woocommerce->customer->calculated_shipping( true );
-			$country 	= $_POST['calc_shipping_country'];
-			$state 		= $_POST['calc_shipping_state'];
-			$postcode   = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true ) ? stripslashes( $_POST['calc_shipping_postcode'] ) : '';
-			$city       = apply_filters( 'woocommerce_shipping_calculator_enable_city', false ) ? stripslashes( $_POST['calc_shipping_city'] ) : '';
+				$country 	= woocommerce_clean( $_POST['calc_shipping_country'] );
+				$state 		= woocommerce_clean( $_POST['calc_shipping_state'] );
+				$postcode   = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true ) ? woocommerce_clean( $_POST['calc_shipping_postcode'] ) : '';
+				$city       = apply_filters( 'woocommerce_shipping_calculator_enable_city', false ) ? woocommerce_clean( $_POST['calc_shipping_city'] ) : '';
 
-			if ( $postcode && ! $validation->is_postcode( $postcode, $country ) ) {
-				wc_add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
-				$postcode = '';
-			} elseif ( $postcode ) {
-				$postcode = $validation->format_postcode( $postcode, $country );
-			}
+				if ( $postcode && ! $validation->is_postcode( $postcode, $country ) ) {
+					throw new Exception( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
+				} elseif ( $postcode ) {
+					$postcode = $validation->format_postcode( $postcode, $country );
+				}
 
-			if ( $country ) {
+				if ( $country ) {
+					$woocommerce->customer->set_location( $country, $state, $postcode, $city );
+					$woocommerce->customer->set_shipping_location( $country, $state, $postcode, $city );
+				} else {
+					$woocommerce->customer->set_to_base();
+					$woocommerce->customer->set_shipping_to_base();
+				}
 
-				// Update customer location
-				$woocommerce->customer->set_location( $country, $state, $postcode, $city );
-				$woocommerce->customer->set_shipping_location( $country, $state, $postcode, $city );
+				$woocommerce->customer->calculated_shipping( true );
+
 				wc_add_message(  __( 'Shipping costs updated.', 'woocommerce' ) );
 
-			} else {
+				do_action( 'woocommerce_calculated_shipping' );
 
-				$woocommerce->customer->set_to_base();
-				$woocommerce->customer->set_shipping_to_base();
-				wc_add_message(  __( 'Shipping costs updated.', 'woocommerce' ) );
+			} catch ( Exception $e ) {
 
+				if ( ! empty( $e ) )
+					wc_add_error( $e );
 			}
-
-			do_action( 'woocommerce_calculated_shipping' );
 		}
 
 		// Check cart items are valid

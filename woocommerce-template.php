@@ -740,7 +740,7 @@ if ( ! function_exists( 'woocommerce_comments' ) ) {
 	 */
 	function woocommerce_comments( $comment, $args, $depth ) {
 		$GLOBALS['comment'] = $comment;
-		woocommerce_get_template( 'single-product/review.php' );
+		woocommerce_get_template( 'single-product/review.php', array( 'comment' => $comment, 'args' => $args, 'depth' => $depth ) );
 	}
 }
 
@@ -814,9 +814,9 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 	 */
 	function woocommerce_upsell_display( $posts_per_page = '-1', $columns = 2, $orderby = 'rand' ) {
 		woocommerce_get_template( 'single-product/up-sells.php', array(
-				'posts_per_page'  => $posts_per_page,
-				'orderby'    => $orderby,
-				'columns'    => $columns
+				'posts_per_page'	=> $posts_per_page,
+				'orderby'			=> apply_filters( 'woocommerce_upsells_orderby', $orderby ),
+				'columns'			=> $columns
 			) );
 	}
 }
@@ -1114,7 +1114,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 
 			foreach ( $product_categories as $category ) {
 
-				if ( $category->parent != $parent_id )
+				if ( $category->parent != $parent_id || $category->count == 0 )
 					continue;
 
 				if ( ! $product_category_found ) {

@@ -13,7 +13,10 @@ class WC_Post_Class_Helper extends WC_Helper {
 	 * @param int $post_id
 	 * @return array
 	 */
-	public function post_class( $classes, $class, $post_id ) {
+	public function post_class( $classes, $class = '', $post_id = '' ) {
+		if ( ! $post_id )
+			return $classes;
+
 		$product = get_product( $post_id );
 
 		if ( $product ) {
@@ -22,6 +25,27 @@ class WC_Post_Class_Helper extends WC_Helper {
 			}
 			if ( $product->is_featured() ) {
 				$classes[] = 'featured';
+			}
+			if ( $product->is_downloadable() ) {
+				$classes[] = 'downloadable';
+			}
+			if ( $product->is_virtual() ) {
+				$classes[] = 'virtual';
+			}
+			if ( $product->is_sold_individually() ) {
+				$classes[] = 'sold-individually';
+			}
+			if ( $product->is_taxable() ) {
+				$classes[] = 'taxable';
+			}
+			if ( $product->is_shipping_taxable() ) {
+				$classes[] = 'shipping-taxable';
+			}
+			if ( $product->is_purchasable() ) {
+				$classes[] = 'purchasable';
+			}
+			if ( isset( $product->product_type ) ) {
+				$classes[] = "product-type-".$product->product_type;
 			}
 			$classes[] = $product->stock_status;
 		}

@@ -75,6 +75,9 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		if ( ! empty( $_GET['product_tag'] ) )
 			$fields .= '<input type="hidden" name="product_tag" value="' . esc_attr( $_GET['product_tag'] ) . '" />';
 
+		if ( ! empty( $_GET['orderby'] ) )
+			$fields .= '<input type="hidden" name="orderby" value="' . esc_attr( $_GET['orderby'] ) . '" />';
+
 		if ( $_chosen_attributes ) foreach ( $_chosen_attributes as $attribute => $data ) {
 
 			$fields .= '<input type="hidden" name="' . esc_attr( str_replace( 'pa_', 'filter_', $attribute ) ).'" value="' . esc_attr( implode( ',', $data['terms'] ) ) . '" />';

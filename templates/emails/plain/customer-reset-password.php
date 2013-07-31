@@ -16,7 +16,7 @@ echo sprintf(__( 'Username: %s', 'woocommerce' ), $user_login) . "\r\n\r\n";
 echo __( 'If this was a mistake, just ignore this email and nothing will happen.', 'woocommerce' ) . "\r\n\r\n";
 echo __( 'To reset your password, visit the following address:', 'woocommerce' ) . "\r\n\r\n";
 
-echo get_permalink( woocommerce_get_page_id( 'lost_password' ) ) . sprintf( '?key=%s&login=%s', $reset_key, $user_login ) . "\r\n";
+echo add_query_arg( array( 'key' => $reset_key, 'login' => $user_login ), woocommerce_get_endpoint_url( 'lost-password', '', get_permalink( woocommerce_get_page_id( 'myaccount' ) ) ) ) . "\r\n";
 
 echo "\n****************************************************\n\n";
 

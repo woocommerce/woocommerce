@@ -108,7 +108,7 @@ class WC_Product {
 	 * @access public
 	 * @return array
 	 */
-	function get_gallery_attachment_ids() {
+	public function get_gallery_attachment_ids() {
 		if ( ! isset( $this->product_image_gallery ) ) {
 			// Backwards compat
 			$attachment_ids = get_posts( 'post_parent=' . $this->id . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image&fields=ids&meta_key=_woocommerce_exclude_image&meta_value=0' );
@@ -124,10 +124,9 @@ class WC_Product {
      *
      * @return string
      */
-    function get_sku() {
+    public function get_sku() {
         return $this->sku;
     }
-
 
     /**
      * Returns number of items available for sale.
@@ -135,10 +134,9 @@ class WC_Product {
      * @access public
      * @return int
      */
-    function get_stock_quantity() {
+    public function get_stock_quantity() {
         return $this->managing_stock() ? apply_filters( 'woocommerce_stock_amount', $this->stock ) : '';
     }
-
 
     /**
      * Get total stock.
@@ -146,10 +144,9 @@ class WC_Product {
      * @access public
      * @return int
      */
-    function get_total_stock() {
+    public function get_total_stock() {
 		return $this->get_stock_quantity();
     }
-
 
 	/**
 	 * Set stock level of the product.
@@ -158,7 +155,7 @@ class WC_Product {
 	 * @param mixed $amount (default: null)
 	 * @return int Stock
 	 */
-	function set_stock( $amount = null ) {
+	public function set_stock( $amount = null ) {
 		global $woocommerce;
 
 		if ( $this->managing_stock() && ! is_null( $amount ) ) {
@@ -177,7 +174,6 @@ class WC_Product {
 		}
 	}
 
-
 	/**
 	 * Reduce stock level of the product.
 	 *
@@ -185,7 +181,7 @@ class WC_Product {
 	 * @param int $by (default: 1) Amount to reduce by.
 	 * @return int Stock
 	 */
-	function reduce_stock( $by = 1 ) {
+	public function reduce_stock( $by = 1 ) {
 		global $woocommerce;
 
 		if ( $this->managing_stock() ) {
@@ -202,7 +198,6 @@ class WC_Product {
 		}
 	}
 
-
 	/**
 	 * Increase stock level of the product.
 	 *
@@ -210,7 +205,7 @@ class WC_Product {
 	 * @param int $by (default: 1) Amount to increase by
 	 * @return int Stock
 	 */
-	function increase_stock( $by = 1 ) {
+	public function increase_stock( $by = 1 ) {
 		global $woocommerce;
 
 		if ( $this->managing_stock() ) {
@@ -227,14 +222,13 @@ class WC_Product {
 		}
 	}
 
-
 	/**
 	 * set_stock_status function.
 	 *
 	 * @access public
 	 * @return void
 	 */
-	function set_stock_status( $status ) {
+	public function set_stock_status( $status ) {
 		$status = ( 'outofstock' === $status ) ? 'outofstock' : 'instock';
 
 		if ( $this->stock_status != $status ) {
@@ -243,7 +237,6 @@ class WC_Product {
 			do_action( 'woocommerce_product_set_stock_status', $this->id, $status );
 		}
 	}
-
 
 	/**
 	 * Checks the product type.
@@ -254,10 +247,9 @@ class WC_Product {
 	 * @param mixed $type Array or string of types
 	 * @return bool
 	 */
-	function is_type( $type ) {
+	public function is_type( $type ) {
 		return ( $this->product_type == $type || ( is_array( $type ) && in_array( $this->product_type, $type ) ) ) ? true : false;
 	}
-
 
 	/**
 	 * Checks if a product is downloadable
@@ -265,10 +257,9 @@ class WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function is_downloadable() {
+	public function is_downloadable() {
 		return $this->downloadable == 'yes' ? true : false;
 	}
-
 
 	/**
 	 * Check if downloadable product has a file attached.
@@ -279,10 +270,9 @@ class WC_Product {
 	 * @param string $download_id file identifier
 	 * @return bool Whether downloadable product has a file attached.
 	 */
-	function has_file( $download_id = '' ) {
+	public function has_file( $download_id = '' ) {
 		return ( $this->is_downloadable() && $this->get_file_download_path( $download_id ) ) ? true : false;
 	}
-
 
 	/**
 	 * Get file download path identified by $download_id
@@ -291,7 +281,7 @@ class WC_Product {
 	 * @param string $download_id file identifier
 	 * @return array
 	 */
-	function get_file_download_path( $download_id ) {
+	public function get_file_download_path( $download_id ) {
 
 		$file_paths = isset( $this->file_paths ) ? $this->file_paths : '';
 		$file_paths = maybe_unserialize( $file_paths );
@@ -310,17 +300,15 @@ class WC_Product {
 		return apply_filters( 'woocommerce_file_download_path', $file_path, $this->id, $download_id );
 	}
 
-
 	/**
 	 * Checks if a product is virtual (has no shipping).
 	 *
 	 * @access public
 	 * @return bool
 	 */
-	function is_virtual() {
+	public function is_virtual() {
 		return $this->virtual == 'yes' ? true : false;
 	}
-
 
 	/**
 	 * Checks if a product needs shipping.
@@ -328,10 +316,9 @@ class WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function needs_shipping() {
+	public function needs_shipping() {
 		return $this->is_virtual() ? false : true;
 	}
-
 
 	/**
 	 * Check if a product is sold individually (no quantities)
@@ -339,7 +326,7 @@ class WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function is_sold_individually() {
+	public function is_sold_individually() {
 		$return = false;
 
 		if ( 'yes' == $this->sold_individually || ( ! $this->backorders_allowed() && $this->get_stock_quantity() == 1 ) ) {
@@ -355,10 +342,9 @@ class WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function get_children() {
+	public function get_children() {
 		return array();
 	}
-
 
 	/**
 	 * Returns whether or not the product has any child product.
@@ -366,10 +352,9 @@ class WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function has_child() {
+	public function has_child() {
 		return false;
 	}
-
 
 	/**
 	 * Returns whether or not the product post exists.
@@ -377,10 +362,9 @@ class WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function exists() {
+	public function exists() {
 		return empty( $this->post ) ? false : true;
 	}
-
 
 	/**
 	 * Returns whether or not the product is taxable.
@@ -388,10 +372,9 @@ class WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function is_taxable() {
+	public function is_taxable() {
 		return $this->tax_status == 'taxable' && get_option( 'woocommerce_calc_taxes' ) == 'yes' ? true : false;
 	}
-
 
 	/**
 	 * Returns whether or not the product shipping is taxable.
@@ -399,10 +382,9 @@ class WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function is_shipping_taxable() {
+	public function is_shipping_taxable() {
 		return $this->tax_status=='taxable' || $this->tax_status=='shipping' ? true : false;
 	}
-
 
 	/**
 	 * Get the title of the post.
@@ -410,10 +392,9 @@ class WC_Product {
 	 * @access public
 	 * @return string
 	 */
-	function get_title() {
+	public function get_title() {
 		return apply_filters( 'woocommerce_product_title', apply_filters( 'the_title', $this->post->post_title, $this->id ), $this );
 	}
-
 
 	/**
 	 * Get the parent of the post.
@@ -421,10 +402,9 @@ class WC_Product {
 	 * @access public
 	 * @return int
 	 */
-	function get_parent() {
+	public function get_parent() {
 		return apply_filters('woocommerce_product_parent', $this->post->post_parent, $this);
 	}
-
 
 	/**
 	 * Get the add to url.
@@ -432,10 +412,9 @@ class WC_Product {
 	 * @access public
 	 * @return string
 	 */
-	function add_to_cart_url() {
+	public function add_to_cart_url() {
 		return apply_filters( 'woocommerce_add_to_cart_url', remove_query_arg( 'added-to-cart', add_query_arg( 'add-to-cart', $this->id ) ) );
 	}
-
 
 	/**
 	 * Returns whether or not the product is stock managed.
@@ -443,10 +422,9 @@ class WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function managing_stock() {
+	public function managing_stock() {
 		return ( ! isset( $this->manage_stock ) || $this->manage_stock == 'no' || get_option('woocommerce_manage_stock') != 'yes' ) ? false : true;
 	}
-
 
 	/**
 	 * Returns whether or not the product is in stock.
@@ -454,7 +432,7 @@ class WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function is_in_stock() {
+	public function is_in_stock() {
 		if ( $this->managing_stock() ) {
 
 			if ( $this->backorders_allowed() ) {
@@ -480,17 +458,15 @@ class WC_Product {
 		}
 	}
 
-
 	/**
 	 * Returns whether or not the product can be backordered.
 	 *
 	 * @access public
 	 * @return bool
 	 */
-	function backorders_allowed() {
+	public function backorders_allowed() {
 		return $this->backorders == 'yes' || $this->backorders == 'notify' ? true : false;
 	}
-
 
 	/**
 	 * Returns whether or not the product needs to notify the customer on backorder.
@@ -498,10 +474,9 @@ class WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function backorders_require_notification() {
+	public function backorders_require_notification() {
 		return $this->managing_stock() && $this->backorders == 'notify' ? true : false;
 	}
-
 
 	/**
 	 * is_on_backorder function.
@@ -510,10 +485,9 @@ class WC_Product {
 	 * @param int $qty_in_cart (default: 0)
 	 * @return bool
 	 */
-	function is_on_backorder( $qty_in_cart = 0 ) {
+	public function is_on_backorder( $qty_in_cart = 0 ) {
 		return $this->managing_stock() && $this->backorders_allowed() && ( $this->get_total_stock() - $qty_in_cart ) < 0 ? true : false;
 	}
-
 
 	/**
 	 * Returns whether or not the product has enough stock for the order.
@@ -522,10 +496,9 @@ class WC_Product {
 	 * @param mixed $quantity
 	 * @return bool
 	 */
-	function has_enough_stock( $quantity ) {
+	public function has_enough_stock( $quantity ) {
 		return ! $this->managing_stock() || $this->backorders_allowed() || $this->stock >= $quantity ? true : false;
 	}
-
 
 	/**
 	 * Returns the availability of the product.
@@ -533,7 +506,7 @@ class WC_Product {
 	 * @access public
 	 * @return string
 	 */
-	function get_availability() {
+	public function get_availability() {
 
 		$availability = $class = "";
 
@@ -594,17 +567,15 @@ class WC_Product {
 		return apply_filters( 'woocommerce_get_availability', array( 'availability' => $availability, 'class' => $class ), $this );
 	}
 
-
 	/**
 	 * Returns whether or not the product is featured.
 	 *
 	 * @access public
 	 * @return bool
 	 */
-	function is_featured() {
+	public function is_featured() {
 		return $this->featured == 'yes' ? true : false;
 	}
-
 
 	/**
 	 * Returns whether or not the product is visible.
@@ -612,7 +583,7 @@ class WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function is_visible() {
+	public function is_visible() {
 
 		$visible = true;
 
@@ -632,17 +603,15 @@ class WC_Product {
 		return apply_filters( 'woocommerce_product_is_visible', $visible, $this->id );
 	}
 
-
 	/**
 	 * Returns whether or not the product is on sale.
 	 *
 	 * @access public
 	 * @return bool
 	 */
-	function is_on_sale() {
-		return ( $this->sale_price != $this->regular_price && $this->sale_price == $this->price );
+	public function is_on_sale() {
+		return ( $this->get_sale_price() != $this->get_regular_price() && $this->get_sale_price() == $this->get_price() );
 	}
-
 
 	/**
 	 * Returns the product's weight.
@@ -650,45 +619,9 @@ class WC_Product {
 	 * @access public
 	 * @return string
 	 */
-	function get_weight() {
+	public function get_weight() {
 		if ( $this->weight ) return $this->weight;
 	}
-
-
-	/**
-	 * Set a products price dynamically.
-	 *
-	 * @access public
-	 * @param float $price Price to set.
-	 * @return void
-	 */
-	function set_price( $price ) {
-		$this->price = $price;
-	}
-
-
-	/**
-	 * Adjust a products price dynamically.
-	 *
-	 * @access public
-	 * @param mixed $price
-	 * @return void
-	 */
-	function adjust_price( $price ) {
-		$this->price = $this->price + $price;
-	}
-
-
-	/**
-	 * Returns the product's price.
-	 *
-	 * @access public
-	 * @return string
-	 */
-	function get_price() {
-		return apply_filters( 'woocommerce_get_price', $this->price, $this );
-	}
-
 
 	/**
 	 * Returns false if the product cannot be bought.
@@ -696,7 +629,7 @@ class WC_Product {
 	 * @access public
 	 * @return cool
 	 */
-	function is_purchasable() {
+	public function is_purchasable() {
 
 		$purchasable = true;
 
@@ -715,6 +648,54 @@ class WC_Product {
 		return apply_filters( 'woocommerce_is_purchasable', $purchasable, $this );
 	}
 
+	/**
+	 * Set a products price dynamically.
+	 *
+	 * @access public
+	 * @param float $price Price to set.
+	 * @return void
+	 */
+	public function set_price( $price ) {
+		$this->price = $price;
+	}
+
+	/**
+	 * Adjust a products price dynamically.
+	 *
+	 * @access public
+	 * @param mixed $price
+	 * @return void
+	 */
+	public function adjust_price( $price ) {
+		$this->price = $this->price + $price;
+	}
+
+	/**
+	 * Returns the product's sale price.
+	 *
+	 * @return string price
+	 */
+	public function get_sale_price() {
+		return apply_filters( 'woocommerce_get_sale_price', $this->sale_price, $this );
+	}
+
+	/**
+	 * Returns the product's regular price.
+	 *
+	 * @return string price
+	 */
+	public function get_regular_price() {
+		return apply_filters( 'woocommerce_get_regular_price', $this->regular_price, $this );
+	}
+
+	/**
+	 * Returns the product's active price.
+	 *
+	 * @return string price
+	 */
+	public function get_price() {
+		return apply_filters( 'woocommerce_get_price', $this->price, $this );
+	}
 
 	/**
 	 * Returns the price (including tax). Uses customer tax rates. Can work for a specific $qty for more accurate taxes.
@@ -722,7 +703,7 @@ class WC_Product {
 	 * @access public
 	 * @return string
 	 */
-	function get_price_including_tax( $qty = 1 ) {
+	public function get_price_including_tax( $qty = 1 ) {
 		global $woocommerce;
 
 		$_tax  = new WC_Tax();
@@ -769,7 +750,6 @@ class WC_Product {
 		return apply_filters( 'woocommerce_get_price_including_tax', $price, $qty, $this );
 	}
 
-
 	/**
 	 * Returns the price (excluding tax) - ignores tax_class filters since the price may *include* tax and thus needs subtracting.
 	 * Uses store base tax rates. Can work for a specific $qty for more accurate taxes.
@@ -777,7 +757,7 @@ class WC_Product {
 	 * @access public
 	 * @return string
 	 */
-	function get_price_excluding_tax( $qty = 1 ) {
+	public function get_price_excluding_tax( $qty = 1 ) {
 
 		$price = $this->get_price();
 
@@ -795,29 +775,6 @@ class WC_Product {
 		return apply_filters( 'woocommerce_get_price_excluding_tax', $price, $qty, $this );
 	}
 
-
-	/**
-	 * Returns the tax class.
-	 *
-	 * @access public
-	 * @return string
-	 */
-	function get_tax_class() {
-		return apply_filters( 'woocommerce_product_tax_class', $this->tax_class, $this );
-	}
-
-
-	/**
-	 * Returns the tax status.
-	 *
-	 * @access public
-	 * @return string
-	 */
-	function get_tax_status() {
-		return $this->tax_status;
-	}
-
-
 	/**
 	 * Returns the price in html format.
 	 *
@@ -825,13 +782,17 @@ class WC_Product {
 	 * @param string $price (default: '')
 	 * @return string
 	 */
-	function get_price_html( $price = '' ) {
+	public function get_price_html( $price = '' ) {
 
-		if ( $this->price > 0 ) {
+		if ( $this->get_price() === '' ) {
 
-			if ( $this->is_on_sale() && isset( $this->regular_price ) ) {
+			$price = apply_filters( 'woocommerce_empty_price_html', '', $this );
 
-				$price .= $this->get_price_html_from_to( $this->regular_price, $this->get_price() );
+		} elseif ( $this->get_price() > 0 ) {
+
+			if ( $this->is_on_sale() && $this->get_regular_price() ) {
+
+				$price .= $this->get_price_html_from_to( $this->get_regular_price(), $this->get_price() );
 
 				$price = apply_filters( 'woocommerce_sale_price_html', $price, $this );
 
@@ -842,15 +803,12 @@ class WC_Product {
 				$price = apply_filters( 'woocommerce_price_html', $price, $this );
 
 			}
-		} elseif ( $this->price === '' ) {
 
-			$price = apply_filters( 'woocommerce_empty_price_html', '', $this );
+		} elseif ( $this->get_price() == 0 ) {
 
-		} elseif ( $this->price == 0 ) {
+			if ( $this->is_on_sale() && $this->get_regular_price() ) {
 
-			if ( $this->is_on_sale() && isset( $this->regular_price ) ) {
-
-				$price .= $this->get_price_html_from_to( $this->regular_price, __( 'Free!', 'woocommerce' ) );
+				$price .= $this->get_price_html_from_to( $this->get_regular_price(), __( 'Free!', 'woocommerce' ) );
 
 				$price = apply_filters( 'woocommerce_free_sale_price_html', $price, $this );
 
@@ -866,26 +824,44 @@ class WC_Product {
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
 	}
 
-
 	/**
 	 * Functions for getting parts of a price, in html, used by get_price_html.
 	 *
 	 * @access public
 	 * @return string
 	 */
-	function get_price_html_from_text() {
-		return '<span class="from">' . _x('From:', 'min_price', 'woocommerce') . ' </span>';
+	public function get_price_html_from_text() {
+		return '<span class="from">' . _x( 'From:', 'min_price', 'woocommerce' ) . ' </span>';
 	}
 
-
 	/**
 	 * Functions for getting parts of a price, in html, used by get_price_html.
 	 *
 	 * @access public
 	 * @return string
 	 */
-	function get_price_html_from_to( $from, $to ) {
+	public function get_price_html_from_to( $from, $to ) {
 		return '<del>' . ( ( is_numeric( $from ) ) ? woocommerce_price( $from ) : $from ) . '</del> <ins>' . ( ( is_numeric( $to ) ) ? woocommerce_price( $to ) : $to ) . '</ins>';
+	}
+
+	/**
+	 * Returns the tax class.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function get_tax_class() {
+		return apply_filters( 'woocommerce_product_tax_class', $this->tax_class, $this );
+	}
+
+	/**
+	 * Returns the tax status.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function get_tax_status() {
+		return $this->tax_status;
 	}
 
 	/**
@@ -894,7 +870,7 @@ class WC_Product {
 	 * @access public
 	 * @return void
 	 */
-	function get_average_rating() {
+	public function get_average_rating() {
 		if ( false === ( $average_rating = get_transient( 'wc_average_rating_' . $this->id ) ) ) {
 
 			global $wpdb;
@@ -929,7 +905,7 @@ class WC_Product {
 	 * @access public
 	 * @return void
 	 */
-	function get_rating_count() {
+	public function get_rating_count() {
 		if ( false === ( $count = get_transient( 'wc_rating_count_' . $this->id ) ) ) {
 
 			global $wpdb;
@@ -956,7 +932,7 @@ class WC_Product {
 	 * @param string $rating (default: '')
 	 * @return string
 	 */
-	function get_rating_html( $rating = null ) {
+	public function get_rating_html( $rating = null ) {
 
 		if ( ! is_numeric( $rating ) )
 			$rating = $this->get_average_rating();
@@ -980,10 +956,9 @@ class WC_Product {
 	 * @access public
 	 * @return array
 	 */
-	function get_upsells() {
+	public function get_upsells() {
 		return (array) maybe_unserialize( $this->upsell_ids );
 	}
-
 
 	/**
 	 * Returns the cross sell product ids.
@@ -991,10 +966,9 @@ class WC_Product {
 	 * @access public
 	 * @return array
 	 */
-	function get_cross_sells() {
+	public function get_cross_sells() {
 		return (array) maybe_unserialize( $this->crosssell_ids );
 	}
-
 
 	/**
 	 * Returns the product categories.
@@ -1006,10 +980,9 @@ class WC_Product {
 	 * @param string $after (default: '')
 	 * @return array
 	 */
-	function get_categories( $sep = ', ', $before = '', $after = '' ) {
+	public function get_categories( $sep = ', ', $before = '', $after = '' ) {
 		return get_the_term_list( $this->id, 'product_cat', $before, $sep, $after );
 	}
-
 
 	/**
 	 * Returns the product tags.
@@ -1020,10 +993,9 @@ class WC_Product {
 	 * @param string $after (default: '')
 	 * @return array
 	 */
-	function get_tags( $sep = ', ', $before = '', $after = '' ) {
+	public function get_tags( $sep = ', ', $before = '', $after = '' ) {
 		return get_the_term_list( $this->id, 'product_tag', $before, $sep, $after );
 	}
-
 
 	/**
 	 * Returns the product shipping class.
@@ -1031,7 +1003,7 @@ class WC_Product {
 	 * @access public
 	 * @return string
 	 */
-	function get_shipping_class() {
+	public function get_shipping_class() {
 		if ( ! $this->shipping_class ) {
 			$classes = get_the_terms( $this->id, 'product_shipping_class' );
 			if ( $classes && ! is_wp_error( $classes ) )
@@ -1042,14 +1014,13 @@ class WC_Product {
 		return $this->shipping_class;
 	}
 
-
 	/**
 	 * Returns the product shipping class ID.
 	 *
 	 * @access public
 	 * @return int
 	 */
-	function get_shipping_class_id() {
+	public function get_shipping_class_id() {
 		if ( ! $this->shipping_class_id ) {
 			$classes = get_the_terms( $this->id, 'product_shipping_class' );
 			if ( $classes && ! is_wp_error( $classes ) )
@@ -1060,7 +1031,6 @@ class WC_Product {
 		return absint( $this->shipping_class_id );
 	}
 
-
 	/**
 	 * Get and return related products.
 	 *
@@ -1068,7 +1038,7 @@ class WC_Product {
 	 * @param int $limit (default: 5)
 	 * @return array Array of post IDs
 	 */
-	function get_related( $limit = 5 ) {
+	public function get_related( $limit = 5 ) {
 		global $woocommerce;
 
 		// Related products are found from category and tag
@@ -1119,7 +1089,6 @@ class WC_Product {
 		return $related_posts;
 	}
 
-
 	/**
 	 * Returns a single product attribute.
 	 *
@@ -1127,7 +1096,7 @@ class WC_Product {
 	 * @param mixed $attr
 	 * @return string
 	 */
-	function get_attribute( $attr ) {
+	public function get_attribute( $attr ) {
 		$attributes = $this->get_attributes();
 
 		$attr = sanitize_title( $attr );
@@ -1157,10 +1126,9 @@ class WC_Product {
 	 * @access public
 	 * @return array
 	 */
-	function get_attributes() {
+	public function get_attributes() {
 		return (array) maybe_unserialize( $this->product_attributes );
 	}
-
 
 	/**
 	 * Returns whether or not the product has any attributes set.
@@ -1168,7 +1136,7 @@ class WC_Product {
 	 * @access public
 	 * @return mixed
 	 */
-	function has_attributes() {
+	public function has_attributes() {
 		if ( sizeof( $this->get_attributes() ) > 0 ) {
 			foreach ( $this->get_attributes() as $attribute ) {
 				if ( isset( $attribute['is_visible'] ) && $attribute['is_visible'] )
@@ -1178,17 +1146,15 @@ class WC_Product {
 		return false;
 	}
 
-
 	/**
 	 * Returns whether or not we are showing dimensions on the product page.
 	 *
 	 * @access public
 	 * @return bool
 	 */
-	function enable_dimensions_display() {
+	public function enable_dimensions_display() {
 		return get_option( 'woocommerce_enable_dimension_product_attributes' ) == 'yes' ? true : false;
 	}
-
 
 	/**
 	 * Returns whether or not the product has dimensions set.
@@ -1196,10 +1162,9 @@ class WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function has_dimensions() {
+	public function has_dimensions() {
 		return $this->get_dimensions() ? true : false;
 	}
-
 
 	/**
 	 * Returns whether or not the product has weight set.
@@ -1207,10 +1172,9 @@ class WC_Product {
 	 * @access public
 	 * @return bool
 	 */
-	function has_weight() {
+	public function has_weight() {
 		return $this->get_weight() ? true : false;
 	}
-
 
 	/**
 	 * Returns dimensions.
@@ -1218,7 +1182,7 @@ class WC_Product {
 	 * @access public
 	 * @return string
 	 */
-	function get_dimensions() {
+	public function get_dimensions() {
 		if ( ! $this->dimensions ) {
 			$dimensions = array();
 
@@ -1240,19 +1204,17 @@ class WC_Product {
 		return $this->dimensions;
 	}
 
-
 	/**
 	 * Lists a table of attributes for the product page.
 	 *
 	 * @access public
 	 * @return void
 	 */
-	function list_attributes() {
+	public function list_attributes() {
 		woocommerce_get_template( 'single-product/product-attributes.php', array(
 			'product'    => $this
 		) );
 	}
-
 
     /**
      * Returns the main product image
@@ -1261,7 +1223,7 @@ class WC_Product {
      * @param string $size (default: 'shop_thumbnail')
      * @return string
      */
-    function get_image( $size = 'shop_thumbnail', $attr = array() ) {
+    public function get_image( $size = 'shop_thumbnail', $attr = array() ) {
     	global $woocommerce;
 
     	$image = '';
@@ -1277,7 +1239,6 @@ class WC_Product {
 		return $image;
     }
 
-
 	/**
 	 * Get product name with SKU or ID. Used within admin.
 	 *
@@ -1285,7 +1246,7 @@ class WC_Product {
 	 * @param mixed $product
 	 * @return string Formatted product name
 	 */
-	function get_formatted_name() {
+	public function get_formatted_name() {
 
 		if ( $this->get_sku() )
 			$identifier = $this->get_sku();

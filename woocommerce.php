@@ -129,19 +129,14 @@ final class WooCommerce {
 	 */
 	public function __construct() {
 		// Auto-load classes on demand
-		if ( function_exists( "__autoload" ) ) {
+		if ( function_exists( "__autoload" ) )
 			spl_autoload_register( "__autoload" );
-    	}
+
 		spl_autoload_register( array( $this, 'autoload' ) );
 
-		// Define version constant
+		// Define constants
+		define( 'WOOCOMMERCE_PLUGIN_FILE', __FILE__ );
 		define( 'WOOCOMMERCE_VERSION', $this->version );
-
-		// Installation
-		register_activation_hook( __FILE__, array( $this, 'activate' ) );
-
-		// Updates
-		add_action( 'admin_init', array( $this, 'update' ), 5 );
 
 		// Include required files
 		$this->includes();
@@ -268,43 +263,6 @@ final class WooCommerce {
 		}
 	}
 
-
-	/**
-	 * activate function.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function activate() {
-		if ( woocommerce_get_page_id( 'shop' ) < 1 )
-			update_option( '_wc_needs_pages', 1 );
-		$this->install();
-	}
-
-	/**
-	 * update function.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function update() {
-		if ( ! defined( 'IFRAME_REQUEST' ) && ( get_option( 'woocommerce_version' ) != $this->version || get_option( 'woocommerce_db_version' ) != $this->version ) )
-			$this->install();
-	}
-
-	/**
-	 * upgrade function.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	function install() {
-		include_once( 'admin/woocommerce-admin-install.php' );
-		set_transient( '_wc_activation_redirect', 1, 60 * 60 );
-		do_install_woocommerce();
-	}
-
-
 	/**
 	 * Include required core files used in admin and on the frontend.
 	 *
@@ -316,15 +274,19 @@ final class WooCommerce {
 		include( 'includes/wc-deprecated-functions.php' );
 		include( 'includes/wc-message-functions.php' );
 		include( 'includes/wc-coupon-functions.php' );
-
-
+		include( 'includes/class-wc-install.php' );
 
 		if ( is_admin() )
-			$this->admin_includes();
+			include_once( 'includes/admin/class-wc-admin.php' );
+
 		if ( defined('DOING_AJAX') )
 			$this->ajax_includes();
+
 		if ( ! is_admin() || defined('DOING_AJAX') )
 			$this->frontend_includes();
+
+		// Query class
+		$this->query = include( 'includes/class-wc-query.php' );				// The main query class
 
 		// Post types
 		include_once( 'includes/class-wc-post-types.php' );					// Registers post types
@@ -366,17 +328,6 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Include required admin files.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function admin_includes() {
-		include_once( 'admin/woocommerce-admin-init.php' );			// Admin section
-	}
-
-
-	/**
 	 * Include required ajax files.
 	 *
 	 * @access public
@@ -400,7 +351,6 @@ final class WooCommerce {
 
 		// Classes
 		include_once( 'includes/class-wc-frontend-scripts.php' );
-		include_once( 'includes/class-wc-query.php' );				// The main store queries
 		include_once( 'includes/class-wc-cart.php' );					// The main cart class
 		include_once( 'includes/class-wc-tax.php' );					// Tax class
 		include_once( 'includes/class-wc-customer.php' ); 			// Customer class
@@ -493,12 +443,6 @@ final class WooCommerce {
 		// Variables
 		$this->template_url			= apply_filters( 'woocommerce_template_url', 'woocommerce/' );
 
-		// Add endpoints
-		add_rewrite_endpoint( 'order-pay', EP_PAGES );
-		add_rewrite_endpoint( 'order-received', EP_PAGES );
-		add_rewrite_endpoint( 'view-order', EP_PAGES );
-		add_rewrite_endpoint( 'edit-account', EP_PAGES );
-
 		// Load class instances
 		$this->product_factory 		= new WC_Product_Factory();     // Product Factory to create new product instances
 		$this->countries 			= new WC_Countries();			// Countries class
@@ -514,7 +458,6 @@ final class WooCommerce {
 			// Class instances
 			$this->cart 			= new WC_Cart();				// Cart class, stores the cart contents
 			$this->customer 		= new WC_Customer();			// Customer class, handles data such as customer location
-			$this->query			= new WC_Query();				// Query class, handles front-end queries and loops
 			$this->shortcodes		= new WC_Shortcodes();			// Shortcodes class, controls all frontend shortcodes
 
 			// Hooks
@@ -791,7 +734,8 @@ final class WooCommerce {
 	 */
 	public function send_transactional_email() {
 		$this->mailer();
-		do_action_ref_array( current_filter() . '_notification', func_get_args() );
+		$args = func_get_args();
+		do_action_ref_array( current_filter() . '_notification', $args );
 	}
 
 	/**

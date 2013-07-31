@@ -294,6 +294,7 @@ class WC_Countries {
 			'HU' => array(),
 			'IS' => array(),
 			'IL' => array(),
+			'JP' => array(),
 			'KR' => array(),
 			'NL' => array(),
 			'NO' => array(),
@@ -577,6 +578,7 @@ class WC_Countries {
 				'HU' => "{name}\n{company}\n{city}\n{address_1}\n{address_2}\n{postcode}\n{country}",
 				'IS' => $postcode_before_city,
 				'IT' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city} {state_upper}\n{country}",
+				'JP' => "{postcode}\n{state}{city}{address_2}\n{address_1}\n{company}\n{name}\n {country}",
 				'LI' => $postcode_before_city,
 				'NL' => $postcode_before_city,
 				'NZ' => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {postcode}\n{country}",
@@ -698,47 +700,32 @@ class WC_Countries {
 				'label'             => __( 'Address', 'woocommerce' ),
 				'placeholder'       => _x( 'Street address', 'placeholder', 'woocommerce' ),
 				'required'          => true,
-				'class'             => array( 'form-row-wide', 'address-field' ),
-				'custom_attributes' => array(
-					'autocomplete'     => 'no'
-				)
+				'class'             => array( 'form-row-wide', 'address-field' )
 			),
 			'address_2'          => array(
 				'placeholder'       => _x( 'Apartment, suite, unit etc. (optional)', 'placeholder', 'woocommerce' ),
 				'class'             => array( 'form-row-wide', 'address-field' ),
-				'required'          => false,
-				'custom_attributes' => array(
-					'autocomplete'     => 'no'
-				)
+				'required'          => false
 			),
 			'city'               => array(
 				'label'             => __( 'Town / City', 'woocommerce' ),
 				'placeholder'       => __( 'Town / City', 'woocommerce' ),
 				'required'          => true,
-				'class'             => array( 'form-row-wide', 'address-field' ),
-				'custom_attributes' => array(
-					'autocomplete'     => 'no'
-				)
+				'class'             => array( 'form-row-wide', 'address-field' )
 			),
 			'state'              => array(
 				'type'              => 'state',
 				'label'             => __( 'State / County', 'woocommerce' ),
 				'placeholder'       => __( 'State / County', 'woocommerce' ),
 				'required'          => true,
-				'class'             => array( 'form-row-first', 'address-field' ),
-				'custom_attributes' => array(
-					'autocomplete'     => 'no'
-				)
+				'class'             => array( 'form-row-first', 'address-field' )
 			),
 			'postcode'           => array(
 				'label'             => __( 'Postcode / Zip', 'woocommerce' ),
 				'placeholder'       => __( 'Postcode / Zip', 'woocommerce' ),
 				'required'          => true,
 				'class'             => array( 'form-row-last', 'address-field' ),
-				'clear'             => true,
-				'custom_attributes' => array(
-					'autocomplete'     => 'no'
-				)
+				'clear'             => true
 			),
 		);
 
@@ -756,6 +743,12 @@ class WC_Countries {
 
 			// Locale information used by the checkout
 			$this->locale = apply_filters('woocommerce_get_country_locale', array(
+				'AE' => array(
+					'postcode' => array(
+						'required' 	=> false,
+						'hidden'	=> true
+					),
+				),
 				'AF' => array(
 					'state' => array(
 						'required' => false,
@@ -876,6 +869,22 @@ class WC_Countries {
 					'state'		=> array(
 						'required' => true,
 						'label'    => __( 'Province', 'woocommerce' ),
+					)
+				),
+				'JP' => array(
+					'last_name'          => array(
+						'class'             => array( 'form-row-first' ),
+					),
+					'first_name'         => array(
+						'class'             => array( 'form-row-last' ),
+						'clear'             => true
+					),
+					'postcode'          => array(
+						'class'             => array( 'form-row-first' ),
+					),
+					'state'         => array(
+						'class'             => array( 'form-row-last' ),
+						'clear'             => true
 					)
 				),
 				'KR' => array(
@@ -1039,6 +1048,10 @@ class WC_Countries {
 	 * @return void
 	 */
 	public function get_address_fields( $country, $type = 'billing_' ) {
+
+		if (!$country)
+            $country = $this->get_base_country();
+
 		$fields     = $this->get_default_address_fields();
 		$locale		= $this->get_country_locale();
 

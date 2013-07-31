@@ -50,6 +50,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->form_submission_method = $this->get_option( 'form_submission_method' ) == 'yes' ? true : false;
 		$this->page_style 		= $this->get_option( 'page_style' );
 		$this->invoice_prefix	= $this->get_option( 'invoice_prefix', 'WC-' );
+		$this->paymentaction    = $this->get_option( 'paymentaction', 'sale' );
 
 		// Logs
 		if ( 'yes' == $this->debug )
@@ -158,6 +159,17 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 							'default' => 'WC-',
 							'desc_tip'      => true,
 						),
+			'paymentaction' => array(
+							'title' => __( 'Payment Action', 'woocommerce' ),
+							'type' 			=> 'select',
+							'description' => __( 'Choose whether you wish to capture funds immediately or authorize payment only.', 'woocommerce' ),
+							'default' => 'sale',
+							'desc_tip'      => true,
+							'options'	=> array(
+								'sale' => __( 'Capture', 'woocommerce' ),
+								'authorization' => __( 'Authorize', 'woocommerce' )
+							)
+						),
 			'form_submission_method' => array(
 							'title' => __( 'Submission method', 'woocommerce' ),
 							'type' => 'checkbox',
@@ -202,7 +214,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 							'title' => __( 'PayPal sandbox', 'woocommerce' ),
 							'type' => 'checkbox',
 							'label' => __( 'Enable PayPal sandbox', 'woocommerce' ),
-							'default' => 'yes',
+							'default' => 'no',
 							'description' => sprintf( __( 'PayPal sandbox can be used to test payments. Sign up for a developer account <a href="%s">here</a>.', 'woocommerce' ), 'https://developer.paypal.com/' ),
 						),
 			'debug' => array(
@@ -233,7 +245,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$this->log->add( 'paypal', 'Generating payment form for order ' . $order->get_order_number() . '. Notify URL: ' . $this->notify_url );
 
 		if ( in_array( $order->billing_country, array( 'US','CA' ) ) ) {
-			$order->billing_phone = str_replace( array( '( ', '-', ' ', ' )', '.' ), '', $order->billing_phone );
+			$order->billing_phone = str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->billing_phone );
 			$phone_args = array(
 				'night_phone_a' => substr( $order->billing_phone, 0, 3 ),
 				'night_phone_b' => substr( $order->billing_phone, 3, 3 ),
@@ -262,6 +274,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				'return' 				=> add_query_arg( 'utm_nooverride', '1', $this->get_return_url( $order ) ),
 				'cancel_return'			=> $order->get_cancel_order_url(),
 				'page_style'			=> $this->page_style,
+				'paymentaction'         => $this->paymentaction,
+				'BUTTONSOURCE'          => 'WooThemes_Cart',
 
 				// Order key + ID
 				'invoice'				=> $this->invoice_prefix . ltrim( $order->get_order_number(), '#' ),
@@ -537,6 +551,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
         	'body' 			=> $received_values,
         	'sslverify' 	=> false,
         	'timeout' 		=> 60,
+        	'httpversion'   => '1.1',
         	'user-agent'	=> 'WooCommerce/' . $woocommerce->version
         );
 
