@@ -291,7 +291,6 @@ class WC_Countries {
 			'DK' => array(),
 			'FI' => array(),
 			'FR' => array(),
-			'HU' => array(),
 			'IS' => array(),
 			'IL' => array(),
 			'JP' => array(),
