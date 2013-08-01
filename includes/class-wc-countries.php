@@ -842,8 +842,8 @@ class WC_Countries {
 					)
 				),
 				'HU' => array(
-					'state'		=> array(
-						'required' => false
+					'state' => array(
+					    'label'         => __( 'County', 'woocommerce' ),
 					)
 				),
 				'ID' => array(
