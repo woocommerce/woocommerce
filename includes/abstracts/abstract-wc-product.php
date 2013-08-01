@@ -162,7 +162,7 @@ class WC_Product {
 			$this->stock = intval( $amount );
 			update_post_meta( $this->id, '_stock', $this->stock );
 
-			do_action( 'woocommerce_set_stock', $this );
+			do_action( 'woocommerce_product_set_stock', $this );
 
 			// Out of stock attribute
 			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= 0 )
@@ -190,7 +190,7 @@ class WC_Product {
 			$this->stock = $this->stock - $by;
 			update_post_meta( $this->id, '_stock', $this->stock );
 
-			do_action( 'woocommerce_reduce_stock', $this, $by );
+			do_action( 'woocommerce_product_reduce_stock', $this, $by );
 
 			// Out of stock attribute
 			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= 0 )
@@ -216,7 +216,7 @@ class WC_Product {
 			$this->stock = $this->stock + $by;
 			update_post_meta( $this->id, '_stock', $this->stock );
 
-			do_action( 'woocommerce_increase_stock', $this, $by );
+			do_action( 'woocommerce_product_increase_stock', $this, $by );
 
 			// Out of stock attribute
 			if ( $this->backorders_allowed() || $this->get_total_stock() > 0 )
