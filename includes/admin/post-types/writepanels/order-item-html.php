@@ -69,11 +69,15 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 						$meta['meta_value'] = esc_textarea( $meta['meta_value'] ); // using a <textarea />
 						$meta['meta_id']    = absint( $meta['meta_id'] );
 
-						echo '<tr data-meta_id="' . $meta['meta_id'] . '">
+						// A plugin may have added order_itemmeta, and may want to override how the input
+						// is displayed.
+						$possible_order_itemmeta_input = '<tr data-meta_id="' . $meta['meta_id'] . '">
 							<td><input type="text" name="meta_key[' . $meta['meta_id'] . ']" value="' . $meta['meta_key'] . '" /></td>
 							<td><input type="text" name="meta_value[' . $meta['meta_id'] . ']" value="' . $meta['meta_value'] . '" /></td>
 							<td width="1%"><button class="remove_order_item_meta button">&times;</button></td>
 						</tr>';
+						$possible_order_itemmeta_input = apply_filters( 'woocommerce_admin_order_itemmeta_input', $possible_order_itemmeta_input, $meta );
+						echo $possible_order_itemmeta_input;
 					}
 				}
 			?>
