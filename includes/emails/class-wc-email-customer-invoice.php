@@ -2,6 +2,8 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
+if ( ! class_exists( 'WC_Email_Customer_Invoice' ) ) :
+
 /**
  * Customer Invoice
  *
@@ -177,3 +179,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 		);
     }
 }
+
+endif;
+
+return new WC_Email_Customer_Invoice();

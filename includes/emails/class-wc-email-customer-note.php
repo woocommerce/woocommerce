@@ -2,6 +2,8 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
+if ( ! class_exists( 'WC_Email_Customer_Note' ) ) :
+
 /**
  * Customer Note Order Email
  *
@@ -111,3 +113,7 @@ class WC_Email_Customer_Note extends WC_Email {
 		return ob_get_clean();
 	}
 }
+
+endif;
+
+return new WC_Email_Customer_Note();

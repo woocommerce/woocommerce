@@ -67,21 +67,14 @@ class WC_Emails {
 	function init() {
 		// Include email classes
 		include_once( 'abstracts/abstract-wc-email.php' );
-		include_once( 'emails/class-wc-email-customer-completed-order.php' );
-		include_once( 'emails/class-wc-email-customer-invoice.php' );
-		include_once( 'emails/class-wc-email-customer-new-account.php' );
-		include_once( 'emails/class-wc-email-customer-note.php' );
-		include_once( 'emails/class-wc-email-customer-reset-password.php' );
-		include_once( 'emails/class-wc-email-customer-processing-order.php' );
-		include_once( 'emails/class-wc-email-new-order.php' );
 
-		$this->emails['WC_Email_New_Order'] = new WC_Email_New_Order();
-		$this->emails['WC_Email_Customer_Processing_Order'] = new WC_Email_Customer_Processing_Order();
-		$this->emails['WC_Email_Customer_Completed_Order'] = new WC_Email_Customer_Completed_Order();
-		$this->emails['WC_Email_Customer_Invoice'] = new WC_Email_Customer_Invoice();
-		$this->emails['WC_Email_Customer_Note'] = new WC_Email_Customer_Note();
-		$this->emails['WC_Email_Customer_Reset_Password'] = new WC_Email_Customer_Reset_Password();
-		$this->emails['WC_Email_Customer_New_Account'] = new WC_Email_Customer_New_Account();
+		$this->emails['WC_Email_New_Order']                 = include( 'emails/class-wc-email-new-order.php' );
+		$this->emails['WC_Email_Customer_Processing_Order'] = include( 'emails/class-wc-email-customer-processing-order.php' );
+		$this->emails['WC_Email_Customer_Completed_Order']  = include( 'emails/class-wc-email-customer-completed-order.php' );
+		$this->emails['WC_Email_Customer_Invoice']          = include( 'emails/class-wc-email-customer-invoice.php' );
+		$this->emails['WC_Email_Customer_Note']             = include( 'emails/class-wc-email-customer-note.php' );
+		$this->emails['WC_Email_Customer_Reset_Password']   = include( 'emails/class-wc-email-customer-reset-password.php' );
+		$this->emails['WC_Email_Customer_New_Account']      = include( 'emails/class-wc-email-customer-new-account.php' );
 
 		$this->emails = apply_filters( 'woocommerce_email_classes', $this->emails );
 	}
