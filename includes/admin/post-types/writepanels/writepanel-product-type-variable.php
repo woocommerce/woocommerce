@@ -829,7 +829,7 @@ function process_product_meta_variable( $post_id ) {
 	}
 
 	// Update parent if variable so price sorting works and stays in sync with the cheapest child
-	WC_Product_Variable::variable_product_sync( $post_id );
+	WC_Product_Variable::sync( $post_id );
 
 	// Update default attribute options setting
 	$default_attributes = array();
