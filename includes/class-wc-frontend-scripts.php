@@ -14,6 +14,33 @@ class WC_Frontend_Scripts {
 	}
 
 	/**
+	 * Get styles for the frontend
+	 * @return array
+	 */
+	public static function get_styles() {
+		return apply_filters( 'woocommerce_enqueue_styles', array(
+			'woocommerce-layout' => array(
+				'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce-layout.css',
+				'deps'    => '',
+				'version' => WOOCOMMERCE_VERSION,
+				'media'   => ''
+			),
+			'woocommerce-smallscreen' => array(
+				'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce-smallscreen.css',
+				'deps'    => 'woocommerce-layout',
+				'version' => WOOCOMMERCE_VERSION,
+				'media'   => 'only screen and (max-width: ' . apply_filters( 'woocommerce_style_smallscreen_breakpoint', $breakpoint = '768px' ) . ')'
+			),
+			'woocommerce-general' => array(
+				'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce.css',
+				'deps'    => '',
+				'version' => WOOCOMMERCE_VERSION,
+				'media'   => ''
+			),
+		) );
+	}
+
+	/**
 	 * Register/queue frontend scripts.
 	 *
 	 * @access public
@@ -119,26 +146,7 @@ class WC_Frontend_Scripts {
 		) ) );
 
 		// CSS Styles
-		$enqueue_styles = apply_filters( 'woocommerce_enqueue_styles', array(
-			'woocommerce-layout' => array(
-				'src'     => $assets_path . 'css/woocommerce-layout.css',
-				'deps'    => '',
-				'version' => WOOCOMMERCE_VERSION,
-				'media'   => ''
-			),
-			'woocommerce-smallscreen' => array(
-				'src'     => $assets_path . 'css/woocommerce-smallscreen.css',
-				'deps'    => 'woocommerce-layout',
-				'version' => WOOCOMMERCE_VERSION,
-				'media'   => 'only screen and (max-width: ' . apply_filters( 'woocommerce_style_smallscreen_breakpoint', $breakpoint = '768px' ) . ')'
-			),
-			'woocommerce-general' => array(
-				'src'     => $assets_path . 'css/woocommerce.css',
-				'deps'    => '',
-				'version' => WOOCOMMERCE_VERSION,
-				'media'   => ''
-			),
-		) );
+		$enqueue_styles = $this->get_styles();
 
 		if ( $enqueue_styles )
 			foreach ( $enqueue_styles as $handle => $args )
