@@ -463,7 +463,15 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Sync variable product prices with the children lowest/highest prices.
 	 */
-	public static function variable_product_sync( $product_id ) {
+	public function variable_product_sync( $product_id = '' ) {
+		self::sync( $product_id );
+	}
+
+
+	/**
+	 * Sync variable product prices with the children lowest/highest prices.
+	 */
+	public static function sync( $product_id ) {
 		$children = get_posts( array(
 			'post_parent' 	=> $product_id,
 			'posts_per_page'=> -1,
