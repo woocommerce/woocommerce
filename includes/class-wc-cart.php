@@ -501,7 +501,7 @@ class WC_Cart {
 						$in_cart = $product_qty_in_cart[ $values['variation_id'] ];
 
 						if ( ! $_product->has_enough_stock( $product_qty_in_cart[ $values['variation_id'] ] ) ) {
-							$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfil your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), $_product->stock ) );
+							$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), $_product->stock ) );
 							return $error;
 						}
 
@@ -510,7 +510,7 @@ class WC_Cart {
 						$in_cart = $product_qty_in_cart[ $values['product_id'] ];
 
 						if ( ! $_product->has_enough_stock( $product_qty_in_cart[ $values['product_id'] ] ) ) {
-							$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfil your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), $_product->stock ) );
+							$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), $_product->stock ) );
 							return $error;
 						}
 
@@ -545,7 +545,7 @@ class WC_Cart {
 						", $key, $value, $order_id ) );
 
 						if ( $_product->stock < ( $held_stock + $in_cart ) ) {
-							$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfil your order right now. Please try again in %d minutes or edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), get_option( 'woocommerce_hold_stock_minutes' ) ) );
+							$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfill your order right now. Please try again in %d minutes or edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), get_option( 'woocommerce_hold_stock_minutes' ) ) );
 							return $error;
 						}
 					}
