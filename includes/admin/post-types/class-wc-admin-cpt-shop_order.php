@@ -33,7 +33,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 		// Views and filtering
 		add_filter( 'views_edit-shop_order', array( $this, 'custom_order_views' ) );
 		add_filter( 'bulk_actions-edit-shop_order', array( $this, 'bulk_actions' ) );
-		add_filter( 'post_row_actions', array( $this, 'remove_row_actions', 10, 1 ) );
+		add_filter( 'post_row_actions', array( $this, 'remove_row_actions' ), 10, 1 );
 		add_action( 'restrict_manage_posts', array( $this, 'restrict_manage_orders' ) );
 		add_filter( 'request', array( $this, 'orders_by_customer_query' ) );
 		add_filter( "manage_edit-shop_order_sortable_columns", array( $this, 'custom_shop_order_sort' ) );
