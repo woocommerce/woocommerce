@@ -291,7 +291,6 @@ class WC_Countries {
 			'DK' => array(),
 			'FI' => array(),
 			'FR' => array(),
-			'HU' => array(),
 			'IS' => array(),
 			'IL' => array(),
 			'JP' => array(),
@@ -843,8 +842,8 @@ class WC_Countries {
 					)
 				),
 				'HU' => array(
-					'state'		=> array(
-						'required' => false
+					'state' => array(
+					    'label'         => __( 'County', 'woocommerce' ),
 					)
 				),
 				'ID' => array(
