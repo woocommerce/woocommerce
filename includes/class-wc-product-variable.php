@@ -464,6 +464,10 @@ class WC_Product_Variable extends WC_Product {
 	 * Sync variable product prices with the children lowest/highest prices.
 	 */
 	public function variable_product_sync( $product_id = '' ) {
+
+		if ( empty( $product_id ) )
+			$product_id = $this->id;
+
 		self::sync( $product_id );
 	}
 
