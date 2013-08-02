@@ -1,7 +1,7 @@
 jQuery(window).load(function(){
 
 	// Countries
-	jQuery('select#woocommerce_allowed_countries').change(function(){
+	jQuery('select#woocommerce_allowed_countries, select#woocommerce_ship_to_countries').change(function(){
 		if (jQuery(this).val()=="specific") {
 			jQuery(this).parent().parent().next('tr').show();
 		} else {
@@ -78,22 +78,27 @@ jQuery(window).load(function(){
 	});
 
 	// Chosen selects
-	jQuery("select.chosen_select").chosen();
+	jQuery("select.chosen_select").chosen({
+		width: '350px',
+		disable_search_threshold: 5
+	});
 
 	jQuery("select.chosen_select_nostd").chosen({
-		allow_single_deselect: 'true'
+		allow_single_deselect: 'true',
+		width: '350px',
+		disable_search_threshold: 5
 	});
 
 	// Select all/none
 	jQuery('.select_all').live('click', function() {
 		jQuery(this).closest( 'td' ).find( 'select option' ).attr( "selected", "selected" );
-		jQuery(this).closest( 'td' ).find('select').trigger( 'liszt:updated' );
+		jQuery(this).closest( 'td' ).find('select').trigger( 'chosen:updated' );
 		return false;
 	});
 
 	jQuery('.select_none').live('click', function() {
 		jQuery(this).closest( 'td' ).find( 'select option' ).removeAttr( "selected" );
-		jQuery(this).closest( 'td' ).find('select').trigger( 'liszt:updated' );
+		jQuery(this).closest( 'td' ).find('select').trigger( 'chosen:updated' );
 		return false;
 	});
 });

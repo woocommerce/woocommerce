@@ -141,7 +141,7 @@ class WC_Frontend_Scripts {
 		) ) );
 
 		wp_localize_script( 'wc-country-select', 'wc_country_select_params', apply_filters( 'wc_country_select_params', array(
-			'countries'                        => json_encode( WC()->countries->get_allowed_country_states() ),
+			'countries'                        => json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
 			'i18n_select_state_text'           => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
 		) ) );
 

@@ -100,7 +100,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 							'class'			=> 'chosen_select',
 							'css'			=> 'width: 450px;',
 							'default' 		=> '',
-							'options'		=> $woocommerce->countries->countries
+							'options'		=> $woocommerce->countries->get_shipping_countries()
 						),
 			'requires' => array(
 							'title' 		=> __( 'Free Shipping Requires...', 'woocommerce' ),
@@ -167,12 +167,10 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 
 		$ship_to_countries = '';
 
-		if ( $this->availability == 'specific' ) {
+		if ( $this->availability == 'specific' )
 			$ship_to_countries = $this->countries;
-		} else {
-			if ( get_option('woocommerce_allowed_countries') == 'specific' )
-				$ship_to_countries = get_option('woocommerce_specific_allowed_countries');
-		}
+		else
+			$ship_to_countries = array_keys( $woocommerce->countries->get_shipping_countries() );
 
 		if ( is_array( $ship_to_countries ) )
 			if ( ! in_array( $package['destination']['country'], $ship_to_countries ) )

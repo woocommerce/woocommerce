@@ -33,7 +33,7 @@ class WC_Countries {
 	public function __construct() {
 		global $woocommerce, $states;
 
-		$this->countries = apply_filters('woocommerce_countries', array(
+		$this->countries = apply_filters( 'woocommerce_countries', array(
 			'AF' => __( 'Afghanistan', 'woocommerce' ),
 			'AX' => __( '&#197;land Islands', 'woocommerce' ),
 			'AL' => __( 'Albania', 'woocommerce' ),
@@ -308,7 +308,7 @@ class WC_Countries {
 		);
 
 		// Load only the state files the shop owner wants/needs
-		$allowed = $this->get_allowed_countries();
+		$allowed = array_merge( $this->get_allowed_countries(), $this->get_shipping_countries() );
 
 		if ( $allowed )
 			foreach ( $allowed as $CC => $country )
@@ -346,7 +346,6 @@ class WC_Countries {
 		return substr( $default, $pos + 1 );
 	}
 
-
 	/**
 	 * Get the allowed countries for the store.
 	 *
@@ -361,16 +360,42 @@ class WC_Countries {
 		if ( get_option('woocommerce_allowed_countries') !== 'specific' )
 			return $this->countries;
 
-		$allowed_countries = array();
+		$countries = array();
 
-		$allowed_countries_raw = get_option( 'woocommerce_specific_allowed_countries' );
+		$raw_countries = get_option( 'woocommerce_specific_allowed_countries' );
 
-		foreach ( $allowed_countries_raw as $country )
-			$allowed_countries[ $country ] = $this->countries[ $country ];
+		foreach ( $raw_countries as $country )
+			$countries[ $country ] = $this->countries[ $country ];
 
-		return apply_filters( 'woocommerce_countries_allowed_countries', $allowed_countries );
+		return apply_filters( 'woocommerce_countries_allowed_countries', $countries );
 	}
 
+	/**
+	 * Get the countries you ship to.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function get_shipping_countries() {
+
+		if ( apply_filters( 'woocommerce_sort_countries', true ) )
+			asort( $this->countries );
+
+		if ( get_option( 'woocommerce_ship_to_countries' ) == '' )
+			return $this->get_allowed_countries();
+
+		if ( get_option('woocommerce_ship_to_countries') !== 'specific' )
+			return $this->countries;
+
+		$countries = array();
+
+		$raw_countries = get_option( 'woocommerce_specific_ship_to_countries' );
+
+		foreach ( $raw_countries as $country )
+			$countries[ $country ] = $this->countries[ $country ];
+
+		return apply_filters( 'woocommerce_countries_shipping_countries', $countries );
+	}
 
 	/**
 	 * get_allowed_country_states function.
@@ -383,17 +408,41 @@ class WC_Countries {
 		if ( get_option('woocommerce_allowed_countries') !== 'specific' )
 			return $this->states;
 
-		$allowed_states = array();
+		$states = array();
 
-		$allowed_countries_raw = get_option( 'woocommerce_specific_allowed_countries' );
+		$raw_countries = get_option( 'woocommerce_specific_allowed_countries' );
 
-		foreach ( $allowed_countries_raw as $country )
+		foreach ( $raw_countries as $country )
 			if ( ! empty( $this->states[ $country ] ) )
-				$allowed_states[ $country ] = $this->states[ $country ];
+				$states[ $country ] = $this->states[ $country ];
 
-		return apply_filters( 'woocommerce_countries_allowed_country_states', $allowed_states );
+		return apply_filters( 'woocommerce_countries_allowed_country_states', $states );
 	}
 
+	/**
+	 * get_shipping_country_states function.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function get_shipping_country_states() {
+
+		if ( get_option( 'woocommerce_ship_to_countries' ) == '' )
+			return $this->get_allowed_country_states();
+
+		if ( get_option( 'woocommerce_ship_to_countries' ) !== 'specific' )
+			return $this->states;
+
+		$states = array();
+
+		$raw_countries = get_option( 'woocommerce_specific_ship_to_countries' );
+
+		foreach ( $raw_countries as $country )
+			if ( ! empty( $this->states[ $country ] ) )
+				$states[ $country ] = $this->states[ $country ];
+
+		return apply_filters( 'woocommerce_countries_shipping_country_states', $states );
+	}
 
 	/**
 	 * Gets an array of countries in the EU.
@@ -516,34 +565,6 @@ class WC_Countries {
     			echo ' value="'.$key.'">'. ($escape ? esc_js( $value ) : $value) .'</option>';
 			endif;
 		endforeach;
-	}
-
-
-	/**
-	 * Outputs the list of countries and states for use in multiselect boxes.
-	 *
-	 * @access public
-	 * @param string $selected_countries (default: '')
-	 * @param bool $escape (default: false)
-	 * @return void
-	 */
-	public function country_multiselect_options( $selected_countries = '', $escape = false ) {
-
-		$countries = $this->get_allowed_countries();
-
-		foreach ( $countries as $key => $val ) {
-
-			echo '<option value="' . $key . '" ' . selected( isset( $selected_countries[ $key ] ) && in_array( '*', $selected_countries[ $key ] ), true, false ) . '>' . ( $escape ? esc_js( $val ) : $val ) . '</option>';
-
-			if ( $states = $this->get_states( $key ) ) {
-				foreach ($states as $state_key => $state_value ) {
-
-	    			echo '<option value="' . $key . ':' . $state_key . '" ' . selected(  isset( $selected_countries[ $key ] ) && in_array( $state_key, $selected_countries[ $key ] ), true, false ) . '>' . ( $escape ? esc_js( $val . ' &gt; ' . $state_value ) : $val . ' &gt; ' . $state_value ) . '</option>';
-
-	    		}
-			}
-
-		}
 	}
 
 
@@ -1021,7 +1042,7 @@ class WC_Countries {
 				),
 			));
 
-			$this->locale = array_intersect_key( $this->locale, $this->get_allowed_countries() );
+			$this->locale = array_intersect_key( $this->locale, array_merge( $this->get_allowed_countries(), $this->get_shipping_countries() ) );
 
 			// Default Locale Can be filters to override fields in get_address_fields().
 			// Countries with no specific locale will use default.

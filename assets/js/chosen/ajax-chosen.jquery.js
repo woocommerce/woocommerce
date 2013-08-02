@@ -19,11 +19,11 @@
     options = $.extend({}, defaultOptions, settings);
     this.chosen();
     return this.each(function() {
-      return $(this).next('.chzn-container').find(".search-field > input, .chzn-search > input").bind('keyup', function() {
+      return $(this).next('.chosen-container').find(".search-field > input, .chosen-search > input").bind('keyup', function() {
         var field, msg, success, val;
         val = $.trim($(this).attr('value'));
         msg = val.length < options.minTermLength ? "Keep typing..." : "Looking for '" + val + "'";
-        select.next('.chzn-container').find('.no-results').text(msg);
+        select.next('.chosen-container').find('.no-results').text(msg);
         if (val === $(this).data('prevVal')) {
           return false;
         }
@@ -62,7 +62,7 @@
               return $("<option />").attr('value', value).html(text).appendTo(select);
             }
           });
-          select.trigger("liszt:updated");
+          select.trigger("chosen:updated");
           if (success != null) {
             success(data);
           }

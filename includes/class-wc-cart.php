@@ -1772,15 +1772,17 @@ class WC_Cart {
 		 * @return bool whether or not the cart needs shipping
 		 */
 		public function needs_shipping() {
-			if ( get_option('woocommerce_calc_shipping')=='no' ) return false;
-			if ( ! is_array( $this->cart_contents ) ) return false;
+			if ( get_option('woocommerce_calc_shipping') == 'no' )
+				return false;
 
 			$needs_shipping = false;
 
-			foreach ( $this->cart_contents as $cart_item_key => $values ) {
-				$_product = $values['data'];
-				if ( $_product->needs_shipping() ) {
-					$needs_shipping = true;
+			if ( $this->cart_contents ) {
+				foreach ( $this->cart_contents as $cart_item_key => $values ) {
+					$_product = $values['data'];
+					if ( $_product->needs_shipping() ) {
+						$needs_shipping = true;
+					}
 				}
 			}
 

@@ -520,7 +520,11 @@ class WC_Admin_Settings {
 
 	            	$selections = (array) self::get_option( $value['id'] );
 
-	            	$countries = WC()->countries->countries;
+	            	if ( ! empty( $value['options'] ) )
+	            		$countries = $value['options'];
+	            	else
+	            		$countries = WC()->countries->countries;
+
 	            	asort( $countries );
 	            	?><tr valign="top">
 						<th scope="row" class="titledesc">
@@ -534,7 +538,7 @@ class WC_Admin_Settings {
 					        			foreach ( $countries as $key => $val )
 		                    				echo '<option value="'.$key.'" ' . selected( in_array( $key, $selections ), true, false ).'>' . $val . '</option>';
 		                    	?>
-					        </select> <?php echo $description; ?> <br/><a class="select_all button" href="#"><?php _e( 'Select all', 'woocommerce' ); ?></a> <a class="select_none button" href="#"><?php _e( 'Select none', 'woocommerce' ); ?></a>
+					        </select> <?php if ( $description ) echo $description; ?> </br><a class="select_all button" href="#"><?php _e( 'Select all', 'woocommerce' ); ?></a> <a class="select_none button" href="#"><?php _e( 'Select none', 'woocommerce' ); ?></a>
 	               		</td>
 	               	</tr><?php
 	            break;

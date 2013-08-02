@@ -70,8 +70,8 @@ class WC_Settings_General extends WC_Settings_Page {
 			),
 
 			array(
-				'title' => __( 'Allowed Countries', 'woocommerce' ),
-				'desc' 		=> __( 'These are countries that you are willing to ship to.', 'woocommerce' ),
+				'title' => __( 'Selling Location(s)', 'woocommerce' ),
+				'desc' 		=> __( 'This option lets you limit which countries you are willing to sell to.', 'woocommerce' ),
 				'id' 		=> 'woocommerce_allowed_countries',
 				'default'	=> 'all',
 				'type' 		=> 'select',
@@ -79,8 +79,8 @@ class WC_Settings_General extends WC_Settings_Page {
 				'css' 		=> 'min-width: 350px;',
 				'desc_tip'	=>  true,
 				'options' => array(
-					'all'  => __( 'All Countries', 'woocommerce' ),
-					'specific' => __( 'Specific Countries', 'woocommerce' )
+					'all'      => __( 'Sell to all countries', 'woocommerce' ),
+					'specific' => __( 'Sell to specific countries only', 'woocommerce' )
 				)
 			),
 
@@ -88,7 +88,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'title' => __( 'Specific Countries', 'woocommerce' ),
 				'desc' 		=> '',
 				'id' 		=> 'woocommerce_specific_allowed_countries',
-				'css' 		=> '',
+				'css' 		=> 'min-width: 350px;',
 				'default'	=> '',
 				'type' 		=> 'multi_select_countries'
 			),

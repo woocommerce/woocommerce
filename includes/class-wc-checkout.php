@@ -190,7 +190,7 @@ class WC_Checkout {
 			foreach ( $this->checkout_fields['billing'] as $key => $field )
 				update_post_meta( $order_id, '_' . $key, $this->posted[ $key ] );
 
-		if ( $this->checkout_fields['shipping'] && ( $woocommerce->cart->needs_shipping() || get_option('woocommerce_require_shipping_address') == 'yes' ) ) {
+		if ( $this->checkout_fields['shipping'] && $woocommerce->cart->needs_shipping() ) {
 			foreach ( $this->checkout_fields['shipping'] as $key => $field ) {
 				$postvalue = false;
 
@@ -388,7 +388,7 @@ class WC_Checkout {
 		foreach ( $this->checkout_fields as $fieldset_key => $fieldset ) {
 
 			// Skip shipping if not needed
-			if ( $fieldset_key == 'shipping' && ( $this->posted['ship_to_different_address'] == false || ( ! $woocommerce->cart->needs_shipping() && get_option('woocommerce_require_shipping_address') == 'no' ) ) ) {
+			if ( $fieldset_key == 'shipping' && ( $this->posted['ship_to_different_address'] == false || ! $woocommerce->cart->needs_shipping() ) ) {
 				$skipped_shipping = true;
 				continue;
 			}
@@ -432,7 +432,7 @@ class WC_Checkout {
 						case "shipping_postcode" :
 
 							$validate_against = $key == 'billing_postcode' ? 'billing_country' : 'shipping_country';
-							$this->posted[ $key ] = strtoupper( str_replace( ' ', '', $this->posted[ $key ] ) );
+							$this->posted[ $key ]    = strtoupper( str_replace( ' ', '', $this->posted[ $key ] ) );
 
 							if ( ! $validation->is_postcode( $this->posted[ $key ], $_POST[ $validate_against ] ) )
 								wc_add_error( '<strong>' . $field['label'] . '</strong> ' . sprintf( __( '(%s) is not a valid postcode/ZIP.', 'woocommerce' ), $this->posted[ $key ] ) );
@@ -517,6 +517,9 @@ class WC_Checkout {
 			wc_add_error( __( 'You must accept our Terms &amp; Conditions.', 'woocommerce' ) );
 
 		if ( $woocommerce->cart->needs_shipping() ) {
+
+			if ( ! in_array( $woocommerce->customer->get_shipping_country(), array_keys( WC()->countries->get_shipping_countries() ) ) )
+				wc_add_error( sprintf( __( 'Unfortunately <strong>we do not ship to %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), $woocommerce->countries->shipping_to_prefix() . ' ' . $woocommerce->customer->get_shipping_country() ) );
 
 			// Shipping Method
 			$available_methods = $woocommerce->shipping->get_available_shipping_methods();

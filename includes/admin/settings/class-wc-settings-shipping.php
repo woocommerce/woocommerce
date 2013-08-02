@@ -94,46 +94,63 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			),
 
 			array(
-				'title' 	=> __( 'Shipping Method Display', 'woocommerce' ),
+				'title' 	=> __( 'Shipping Display Mode', 'woocommerce' ),
 				'desc' 		=> __( 'This controls how multiple shipping methods are displayed on the frontend.', 'woocommerce' ),
 				'id' 		=> 'woocommerce_shipping_method_format',
 				'css' 		=> 'min-width:150px;',
 				'default'	=> '',
-				'type' 		=> 'select',
+				'type' 		=> 'radio',
 				'options' => array(
-					''  			=> __( 'Radio buttons', 'woocommerce' ),
-					'select'		=> __( 'Select box', 'woocommerce' ),
+					''  			=> __( 'Display shipping methods with "radio" buttons', 'woocommerce' ),
+					'select'		=> __( 'Display shipping methods in a dropdown', 'woocommerce' ),
 				),
 				'desc_tip'	=>  true,
 				'autoload'      => false
 			),
 
 			array(
-				'title' 	=> __( 'Shipping Destination', 'woocommerce' ),
-				'desc' 		=> __( 'Only ship to the users billing address', 'woocommerce' ),
-				'id' 		=> 'woocommerce_ship_to_billing_address_only',
-				'default'	=> 'no',
-				'type' 		=> 'checkbox',
-				'checkboxgroup'		=> 'start',
-				'autoload'      => false
+				'title'           => __( 'Shipping Destination', 'woocommerce' ),
+				'desc'            => __( 'Ship to billing address by default', 'woocommerce' ),
+				'id'              => 'woocommerce_ship_to_billing',
+				'default'         => 'yes',
+				'type'            => 'checkbox',
+				'checkboxgroup'   => 'start',
+				'autoload'        => false,
+				'show_if_checked' => 'option',
 			),
 
 			array(
-				'desc' 		=> __( 'Ship to billing address by default', 'woocommerce' ),
-				'id' 		=> 'woocommerce_ship_to_billing',
-				'default'	=> 'yes',
-				'type' 		=> 'checkbox',
-				'checkboxgroup'		=> '',
-				'autoload'      => false
+				'desc'            => __( 'Only ship to the users billing address', 'woocommerce' ),
+				'id'              => 'woocommerce_ship_to_billing_address_only',
+				'default'         => 'no',
+				'type'            => 'checkbox',
+				'checkboxgroup'   => 'end',
+				'autoload'        => false,
+				'show_if_checked' => 'yes',
 			),
 
 			array(
-				'desc' 		=> __( 'Collect shipping address even when not required', 'woocommerce' ),
-				'id' 		=> 'woocommerce_require_shipping_address',
-				'default'	=> 'no',
-				'type' 		=> 'checkbox',
-				'checkboxgroup'		=> 'end',
-				'autoload'      => false
+				'title' => __( 'Restrict shipping to Location(s)', 'woocommerce' ),
+				'desc' 		=> sprintf( __( 'Choose which countries you want to ship to, or choose to ship to all <a href="%s">locations you sell to</a>.', 'woocommerce' ), admin_url( 'admin.php?page=woocommerce_settings&tab=general' ) ),
+				'id' 		=> 'woocommerce_ship_to_countries',
+				'default'	=> '',
+				'type' 		=> 'select',
+				'class'		=> 'chosen_select',
+				'desc_tip'	=> false,
+				'options' => array(
+					''         => __( 'Ship to all countries you sell to', 'woocommerce' ),
+					'all'      => __( 'Ship to all countries', 'woocommerce' ),
+					'specific' => __( 'Ship to specific countries only', 'woocommerce' )
+				)
+			),
+
+			array(
+				'title' => __( 'Specific Countries', 'woocommerce' ),
+				'desc' 		=> '',
+				'id' 		=> 'woocommerce_specific_ship_to_countries',
+				'css' 		=> '',
+				'default'	=> '',
+				'type' 		=> 'multi_select_countries'
 			),
 
 			array(
