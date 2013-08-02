@@ -57,7 +57,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @param int $depth Depth of category in reference to parents.
 	 * @param array $args
 	 */
-	function start_el( &$output, $cat, $depth, $args ) {
+	function start_el( &$output, $cat, $depth = 0, $args = array(), $current_object_id = 0 ) {
 
 		$output .= '<li class="cat-item cat-item-' . $cat->term_id;
 
