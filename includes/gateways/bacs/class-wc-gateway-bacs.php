@@ -33,7 +33,8 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
         // Define user set variables
         $this->title            = $this->get_option( 'title' );
-        $this->description      = $this->get_option( 'description' );
+        $this->description  = $this->get_option( 'description' );
+		$this->instructions = $this->get_option( 'instructions', $this->description );
 
 		// BACS account fields shown on the thanks page and in emails
 		$this->account_fields   = array(
@@ -82,67 +83,73 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
     	$this->form_fields = array(
 			'enabled' => array(
-							'title' => __( 'Enable/Disable', 'woocommerce' ),
-							'type' => 'checkbox',
-							'label' => __( 'Enable Bank Transfer', 'woocommerce' ),
-							'default' => 'yes'
-						),
+				'title' => __( 'Enable/Disable', 'woocommerce' ),
+				'type' => 'checkbox',
+				'label' => __( 'Enable Bank Transfer', 'woocommerce' ),
+				'default' => 'yes'
+			),
 			'title' => array(
-							'title' => __( 'Title', 'woocommerce' ),
-							'type' => 'text',
-							'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-							'default' => __( 'Direct Bank Transfer', 'woocommerce' ),
-							'desc_tip'      => true,
-						),
+				'title' => __( 'Title', 'woocommerce' ),
+				'type' => 'text',
+				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
+				'default' => __( 'Direct Bank Transfer', 'woocommerce' ),
+				'desc_tip'      => true,
+			),
 			'description' => array(
-							'title' => __( 'Customer Message', 'woocommerce' ),
-							'type' => 'textarea',
-							'description' => __( 'Give the customer instructions for paying via BACS, and let them know that their order won\'t be shipping until the money is received.', 'woocommerce' ),
-							'default' => __( 'Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order won\'t be shipped until the funds have cleared in our account.', 'woocommerce' )
-						),
+				'title'       => __( 'Description', 'woocommerce' ),
+				'type'        => 'textarea',
+				'description' => __( 'Payment method description that the customer will see on your checkout.', 'woocommerce' ),
+				'default'     => __( 'Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order won\'t be shipped until the funds have cleared in our account.', 'woocommerce' ),
+				'desc_tip'    => true,
+			),
+			'instructions' => array(
+				'title'       => __( 'Instructions', 'woocommerce' ),
+				'type'        => 'textarea',
+				'description' => __( 'Instructions that will be added to the thank you page and emails.', 'woocommerce' ),
+				'default'     => '',
+				'desc_tip'    => true,
+			),
 			'account_details' => array(
-							'title' => __( 'Account Details', 'woocommerce' ),
-							'type' => 'title',
-							'description' => __( 'Optionally enter your bank details below for customers to pay into.', 'woocommerce' ),
-							'default' => ''
-						),
+				'title'       => __( 'Account Details', 'woocommerce' ),
+				'type'        => 'title',
+				'description' => __( 'Optionally enter your bank details below for customers to pay into.', 'woocommerce' ),
+				'default'     => ''
+			),
 			'account_name' => array(
-							'title' => __( 'Account Name', 'woocommerce' ),
-							'type' => 'text',
-							'description' => '',
-							'default' => ''
-						),
+				'title'       => __( 'Account Name', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => '',
+				'default'     => ''
+			),
 			'account_number' => array(
-							'title' => __( 'Account Number', 'woocommerce' ),
-							'type' => 'text',
-							'description' => '',
-							'default' => ''
-						),
+				'title'       => __( 'Account Number', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => '',
+				'default'     => ''
+			),
 			'sort_code' => array(
-							'title' => __( 'Sort Code', 'woocommerce' ),
-							'type' => 'text',
-							'description' => '',
-							'default' => ''
-						),
+				'title'       => __( 'Sort Code', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => '',
+				'default'     => ''
+			),
 			'bank_name' => array(
-							'title' => __( 'Bank Name', 'woocommerce' ),
-							'type' => 'text',
-							'description' => '',
-							'default' => ''
-						),
+				'title'       => __( 'Bank Name', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => '',
+				'default'     => ''
+			),
 			'iban' => array(
-							'title' => __( 'IBAN', 'woocommerce' ),
-							'type' => 'text',
-							'default' => ''
-						),
+				'title'   => __( 'IBAN', 'woocommerce' ),
+				'type'    => 'text',
+				'default' => ''
+			),
 			'bic' => array(
-							'title' => __( 'BIC (formerly Swift)', 'woocommerce' ),
-							'type' => 'text',
-							'default' => ''
-						),
-
-			);
-
+				'title'   => __( 'BIC (formerly Swift)', 'woocommerce' ),
+				'type'    => 'text',
+				'default' => ''
+			),
+		);
     }
 
 
@@ -174,8 +181,8 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
      * @return void
      */
     function thankyou_page( $order_id ) {
-		if ( $description = $this->get_description() )
-        	echo wpautop( wptexturize( wp_kses_post( $description ) ) );
+		if ( $this->instructions )
+        	echo wpautop( wptexturize( wp_kses_post( $this->instructions ) ) );
 
 		echo '<h2>' . __( 'Our Details', 'woocommerce' ) . '</h2>';
 
@@ -209,8 +216,8 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
     	if ( $order->payment_method !== 'bacs') return;
 
-		if ( $description = $this->get_description() )
-        	echo wpautop( wptexturize( $description ) );
+		if ( $this->instructions )
+        	echo wpautop( wptexturize( $this->instructions ) );
 
 		?><h2><?php _e( 'Our Details', 'woocommerce' ) ?></h2><ul class="order_details bacs_details"><?php
 
