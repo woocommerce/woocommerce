@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-07-23 08:42:12+00:00\n"
-"PO-Revision-Date: 2013-07-23 13:35+0100\n"
+"PO-Revision-Date: 2013-08-01 16:57+0100\n"
 "Last-Translator: Szabolcs Légrádi <szabolcs.legradi@gmail.com>\n"
 "Language-Team: Szabolcs Légrádi <szabolcs.legradi@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -1619,7 +1619,7 @@ msgstr "Város"
 
 #: classes/class-wc-countries.php:725 classes/class-wc-countries.php:726
 msgid "State / County"
-msgstr "Megye"
+msgstr "Állam / Megye"
 
 #: classes/class-wc-countries.php:734 classes/class-wc-countries.php:735
 #: templates/cart/shipping-calculator.php:80
@@ -1655,7 +1655,7 @@ msgstr "Irányítószám"
 
 #: classes/class-wc-countries.php:965
 msgid "State"
-msgstr "Megye"
+msgstr "Állam"
 
 #: classes/class-wc-countries.php:970
 msgid "Postcode"
@@ -1663,7 +1663,7 @@ msgstr "Irányítószám"
 
 #: classes/class-wc-countries.php:973
 msgid "County"
-msgstr "Ország"
+msgstr "Megye"
 
 #: classes/class-wc-countries.php:1074
 msgid "Email Address"
