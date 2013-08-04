@@ -25,7 +25,7 @@ add_filter( 'woocommerce_stock_amount', 'intval' ); // Stock amounts are integer
  * @access public
  * @param mixed $the_product Post object or post ID of the product.
  * @param array $args (default: array()) Contains all arguments to be used to get this product.
- * @return void
+ * @return WC_Product
  */
 function get_product( $the_product = false, $args = array() ) {
 	global $woocommerce;
@@ -39,7 +39,6 @@ function get_product( $the_product = false, $args = array() ) {
  * @return void
  */
 function woocommerce_update_new_customer_past_orders( $customer_id ) {
-    global $wpdb;
 
     $customer = get_user_by( 'id', absint( $customer_id ) );
 
@@ -357,11 +356,7 @@ function woocommerce_placeholder_img( $size = 'shop_thumbnail' ) {
  * @return void
  */
 function woocommerce_lostpassword_url( $url ) {
-    $id = woocommerce_get_page_id( 'lost_password' );
-    if ( $id != -1 )
-    	 $url = get_permalink( $id );
-
-    return $url;
+    return woocommerce_get_endpoint_url( 'lost-password', '', get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
 }
 
 add_filter( 'lostpassword_url',  'woocommerce_lostpassword_url' );
@@ -406,8 +401,8 @@ if ( ! function_exists( 'woocommerce_get_page_id' ) ) {
 
 			$page = 'checkout';
 		}
-		if ( $page == 'change_password' ) {
-			_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.1', 'The "change_password" page is no-longer used - an endpoint is added to the my-account instead. To get a valid link use the woocommerce_customer_edit_account_url() function instead.' );
+		if ( $page == 'change_password' || $page == 'edit_address' || $page == 'lost_password' ) {
+			_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.1', 'The "change_password", "edit_address" and "lost_password" pages are no-longer used - an endpoint is added to the my-account instead. To get a valid link use the woocommerce_customer_edit_account_url() function instead.' );
 
 			$page = 'myaccount';
 		}
@@ -415,6 +410,29 @@ if ( ! function_exists( 'woocommerce_get_page_id' ) ) {
 		$page = apply_filters( 'woocommerce_get_' . $page . '_page_id', get_option('woocommerce_' . $page . '_page_id' ) );
 
 		return $page ? $page : -1;
+	}
+}
+
+if ( ! function_exists( 'woocommerce_get_endpoint_url' ) ) {
+
+	/**
+	 * Get endpoint URL
+	 *
+	 * Gets the URL for an endpoint, which varies depending on permalink settings.
+	 *
+	 * @param string $page
+	 * @return string
+	 */
+	function woocommerce_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
+		if ( ! $permalink )
+			$permalink = get_permalink();
+
+		if ( get_option( 'permalink_structure' ) )
+			$url = trailingslashit( $permalink ) . $endpoint . '/' . $value;
+		else
+			$url = add_query_arg( $endpoint, $value, $permalink );
+
+		return apply_filters( 'woocommerce_get_endpoint_url', $url );
 	}
 }
 
@@ -609,7 +627,7 @@ if ( ! function_exists( 'is_account_page' ) ) {
 	 * @return bool
 	 */
 	function is_account_page() {
-		return is_page( woocommerce_get_page_id( 'myaccount' ) ) || is_page( woocommerce_get_page_id( 'edit_address' ) ) || is_page( woocommerce_get_page_id( 'lost_password' ) ) || apply_filters( 'woocommerce_is_account_page', false ) ? true : false;
+		return is_page( woocommerce_get_page_id( 'myaccount' ) ) || apply_filters( 'woocommerce_is_account_page', false ) ? true : false;
 	}
 }
 
@@ -1238,14 +1256,14 @@ if ( ! function_exists( 'woocommerce_format_hex' ) ) {
 function woocommerce_exclude_order_comments( $clauses ) {
 	global $wpdb, $typenow, $pagenow;
 
-	if ( is_admin() && ( $typenow == 'shop_order' || $pagenow == 'edit-comments.php' ) && current_user_can( 'manage_woocommerce' ) )
+	if ( is_admin() && $typenow == 'shop_order' && current_user_can( 'manage_woocommerce' ) )
 		return $clauses; // Don't hide when viewing orders in admin
 
 	if ( ! $clauses['join'] )
 		$clauses['join'] = '';
 
 	if ( ! strstr( $clauses['join'], "JOIN $wpdb->posts" ) )
-		$clauses['join'] .= " LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID ";
+		$clauses['join'] .= " LEFT JOIN $wpdb->posts ON comment_post_ID = $wpdb->posts.ID ";
 
 	if ( $clauses['where'] )
 		$clauses['where'] .= ' AND ';
@@ -1256,7 +1274,6 @@ function woocommerce_exclude_order_comments( $clauses ) {
 }
 
 add_filter( 'comments_clauses', 'woocommerce_exclude_order_comments', 10, 1);
-
 
 /**
  * Exclude order comments from queries and RSS
@@ -1306,9 +1323,9 @@ add_action( 'comment_feed_where', 'woocommerce_exclude_order_comments_from_feed_
  * @return void
  */
 function woocommerce_downloadable_product_permissions( $order_id ) {
-	global $wpdb;
 
-	if (get_post_meta( $order_id, __( 'Download Permissions Granted', 'woocommerce' ), true)==1) return; // Only do this once
+	if ( get_post_meta( $order_id, __( 'Download Permissions Granted', 'woocommerce' ), true ) == 1 )
+		return; // Only do this once
 
 	$order = new WC_Order( $order_id );
 
@@ -1346,26 +1363,27 @@ add_action('woocommerce_order_status_completed', 'woocommerce_downloadable_produ
  * @param string $download_id file identifier
  * @param int $product_id product identifier
  * @param WC_Order $order the order
+ * @return int insert id | bool false on failure
  */
 function woocommerce_downloadable_file_permission( $download_id, $product_id, $order ) {
 	global $wpdb;
 
-	$user_email = $order->billing_email;
+	$user_email = sanitize_email( $order->billing_email );
+	$limit      = trim( get_post_meta( $product_id, '_download_limit', true ) );
+	$expiry     = trim( get_post_meta( $product_id, '_download_expiry', true ) );
 
-	$limit = trim( get_post_meta( $product_id, '_download_limit', true ) );
-	$expiry = trim( get_post_meta( $product_id, '_download_expiry', true ) );
+	$limit      = empty( $limit ) ? '' : absint( $limit );
 
-    $limit = empty( $limit ) ? '' : (int) $limit;
+	// Default value is NULL in the table schema
+	$expiry     = empty( $expiry ) ? null : absint( $expiry );
 
-    // Default value is NULL in the table schema
-	$expiry = empty( $expiry ) ? null : (int) $expiry;
-
-	if ( $expiry ) $expiry = date_i18n( "Y-m-d", strtotime( 'NOW + ' . $expiry . ' DAY' ) );
+	if ( $expiry )
+		$expiry = date_i18n( "Y-m-d", strtotime( 'NOW + ' . $expiry . ' DAY' ) );
 
     $data = array(
     	'download_id'			=> $download_id,
 		'product_id' 			=> $product_id,
-		'user_id' 				=> $order->user_id,
+		'user_id' 				=> absint( $order->user_id ),
 		'user_email' 			=> $user_email,
 		'order_id' 				=> $order->id,
 		'order_key' 			=> $order->order_key,
@@ -1392,10 +1410,12 @@ function woocommerce_downloadable_file_permission( $download_id, $product_id, $o
     }
 
 	// Downloadable product - give access to the customer
-    $wpdb->insert( $wpdb->prefix . 'woocommerce_downloadable_product_permissions',
-        $data,
-        $format
+	$result = $wpdb->insert( $wpdb->prefix . 'woocommerce_downloadable_product_permissions',
+        apply_filters( 'woocommerce_downloadable_file_permission_data', $data ),
+        apply_filters( 'woocommerce_downloadable_file_permission_format', $format )
     );
+
+    return $result ? $wpdb->insert_id : false;
 }
 
 if ( get_option('woocommerce_downloads_grant_access_after_payment') == 'yes' )
@@ -1831,7 +1851,6 @@ function woocommerce_order_terms( $the_term, $next_id, $taxonomy, $index = 0, $t
  * @return int
  */
 function woocommerce_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
-	global $wpdb;
 
 	$term_id 	= (int) $term_id;
 	$index 		= (int) $index;
@@ -1904,7 +1923,7 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
 	$emails = array();
 
 	if ( $user_id ) {
-		$user = get_user_by( 'id', $user_id );
+		$user     = get_user_by( 'id', $user_id );
 		$emails[] = $user->user_email;
 	}
 
@@ -1914,36 +1933,32 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
 	if ( sizeof( $emails ) == 0 )
 		return false;
 
-	return $wpdb->get_var( $wpdb->prepare( "
-		SELECT COUNT( order_items.order_item_id )
-		FROM {$wpdb->prefix}woocommerce_order_items as order_items
-		LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS itemmeta ON order_items.order_item_id = itemmeta.order_item_id
-		LEFT JOIN {$wpdb->postmeta} AS postmeta ON order_items.order_id = postmeta.post_id
-		LEFT JOIN {$wpdb->term_relationships} AS rel ON postmeta.post_id = rel.object_ID
-		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
-		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-		WHERE 	term.slug IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-		AND 	tax.taxonomy		= 'shop_order_status'
-		AND		(
+	$completed = get_term_by( 'slug', 'completed', 'shop_order_status' );
+
+	return $wpdb->get_var(
+		$wpdb->prepare( "
+			SELECT COUNT( DISTINCT order_items.order_item_id )
+			FROM {$wpdb->prefix}woocommerce_order_items as order_items
+			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS itemmeta ON order_items.order_item_id = itemmeta.order_item_id
+			LEFT JOIN {$wpdb->postmeta} AS postmeta ON order_items.order_id = postmeta.post_id
+			LEFT JOIN {$wpdb->term_relationships} AS rel ON order_items.order_id = rel.object_ID
+			WHERE
+				rel.term_taxonomy_id = %d AND
+				itemmeta.meta_value  = %s AND
+				itemmeta.meta_key    IN ( '_variation_id', '_product_id' ) AND
+				postmeta.meta_key    IN ( '_billing_email', '_customer_user' ) AND
+				(
+					postmeta.meta_value  IN ( '" . implode( "','", array_unique( $emails ) ) . "' ) OR
 					(
-						itemmeta.meta_key = '_variation_id'
-						AND itemmeta.meta_value = %s
-					) OR (
-						itemmeta.meta_key = '_product_id'
-						AND itemmeta.meta_value = %s
-					)
-		)
-		AND 	(
-					(
-						postmeta.meta_key = '_billing_email'
-						AND postmeta.meta_value IN ( '" . implode( "','", array_unique( $emails ) ) . "' )
-					) OR (
-						postmeta.meta_key = '_customer_user'
-						AND postmeta.meta_value = %s AND postmeta.meta_value > 0
+						postmeta.meta_value = %d AND
+						postmeta.meta_value > 0
 					)
 				)
-	", $product_id, $product_id, $user_id ) );
+			", $completed->term_taxonomy_id, $product_id, $user_id
+		)
+	);
 }
+
 
 /**
  * Return the count of processing orders.
@@ -2587,7 +2602,7 @@ function woocommerce_cancel_unpaid_orders() {
 		WHERE 	posts.post_type   = 'shop_order'
 		AND 	posts.post_status = 'publish'
 		AND 	tax.taxonomy      = 'shop_order_status'
-		AND		term.slug	      IN ('pending')
+		AND		term.slug	      = 'pending'
 		AND 	posts.post_modified < %s
 	", $date ) );
 

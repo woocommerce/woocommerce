@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 <p><?php _e( 'If this was a mistake, just ignore this email and nothing will happen.', 'woocommerce' ); ?></p>
 <p><?php _e( 'To reset your password, visit the following address:', 'woocommerce' ); ?></p>
 <p>
-    <a href="<?php echo esc_url( add_query_arg( array( 'key' => $reset_key, 'login' => rawurlencode( $user_login ) ), get_permalink( woocommerce_get_page_id( 'lost_password' ) ) ) ); ?>">
+    <a href="<?php echo esc_url( add_query_arg( array( 'key' => $reset_key, 'login' => rawurlencode( $user_login ) ), woocommerce_get_endpoint_url( 'lost-password', '', get_permalink( woocommerce_get_page_id( 'myaccount' ) ) ) ) ); ?>">
 			<?php _e( 'Click here to reset your password', 'woocommerce' ); ?></a>
 </p>
 <p></p>

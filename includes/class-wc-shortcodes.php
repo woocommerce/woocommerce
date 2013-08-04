@@ -34,8 +34,6 @@ class WC_Shortcodes {
 		add_shortcode( 'woocommerce_checkout', array( $this, 'checkout' ) );
 		add_shortcode( 'woocommerce_order_tracking', array( $this, 'order_tracking' ) );
 		add_shortcode( 'woocommerce_my_account', array( $this, 'my_account' ) );
-		add_shortcode( 'woocommerce_edit_address', array( $this, 'edit_address' ) );
-		add_shortcode( 'woocommerce_lost_password', array( $this, 'lost_password' ) );
 	}
 
 	/**
@@ -87,30 +85,6 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Edit address page shortcode.
-	 *
-	 * @access public
-	 * @param mixed $atts
-	 * @return string
-	 */
-	public function edit_address( $atts ) {
-		global $woocommerce;
-		return $woocommerce->get_helper( 'shortcode' )->shortcode_wrapper( array( 'WC_Shortcode_Edit_Address', 'output' ), $atts );
-	}
-
-	/**
-	 * Lost password page shortcode.
-	 *
-	 * @access public
-	 * @param mixed $atts
-	 * @return string
-	 */
-	public function lost_password( $atts ) {
-		global $woocommerce;
-		return $woocommerce->get_helper( 'shortcode' )->shortcode_wrapper( array( 'WC_Shortcode_Lost_Password', 'output' ), $atts );
-	}
-
-	/**
 	 * List products in a category shortcode
 	 *
 	 * @access public
@@ -127,7 +101,8 @@ class WC_Shortcodes {
 			'columns' 		=> '4',
 		  	'orderby'   	=> 'title',
 		  	'order'     	=> 'desc',
-		  	'category'		=> ''
+		  	'category'		=> '',
+		  	'operator'      => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
 			), $atts ) );
 
 		if ( ! $category ) return;
@@ -152,9 +127,9 @@ class WC_Shortcodes {
 			'tax_query' 			=> array(
 		    	array(
 			    	'taxonomy' 		=> 'product_cat',
-					'terms' 		=> array( esc_attr($category) ),
+					'terms' 		=> array( esc_attr( $category ) ),
 					'field' 		=> 'slug',
-					'operator' 		=> 'IN'
+					'operator' 		=> $operator
 				)
 		    )
 		);

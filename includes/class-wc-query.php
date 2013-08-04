@@ -8,10 +8,28 @@
  * @category	Class
  * @author 		WooThemes
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
+if ( ! class_exists( 'WC_Query' ) ) :
+
+/**
+ * WC_Query Class
+ */
 class WC_Query {
 
 	/** @public array Query vars to add to wp */
-	public $query_vars = array();
+	public $query_vars = array(
+		// Checkout actions
+		'order-pay',
+		'order-received',
+
+		// My account actions
+		'view-order',
+		'edit-account',
+		'edit-address',
+		'lost-password'
+		);
 
 	/** @public array Unfiltered product ids (before layered nav etc) */
 	public $unfiltered_product_ids 	= array();
@@ -38,26 +56,32 @@ class WC_Query {
 	 * @return void
 	 */
 	public function __construct() {
-		add_filter( 'query_vars', array( $this, 'add_query_vars'), 0 );
-		add_action( 'parse_request', array( $this, 'parse_request'), 0 );
-		add_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
-		add_filter( 'the_posts', array( $this, 'the_posts' ), 11, 2 );
-		add_filter( 'wp', array( $this, 'remove_product_query' ) );
+		add_action( 'init', array( $this, 'add_endpoints' ) );
 
-		// Get any errors from querystring
+		if ( ! is_admin() ) {
+			add_action( 'init', array( $this, 'get_errors' ) );
+			add_filter( 'query_vars', array( $this, 'add_query_vars'), 0 );
+			add_action( 'parse_request', array( $this, 'parse_request'), 0 );
+			add_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
+			add_filter( 'the_posts', array( $this, 'the_posts' ), 11, 2 );
+			add_filter( 'wp', array( $this, 'remove_product_query' ) );
+		}
+	}
+
+	/**
+	 * Get any errors from querystring
+	 */
+	public function get_errors() {
 		if ( isset( $_GET['wc_error'] ) )
 			wc_add_error( esc_attr( $_GET['wc_error'] ) );
+	}
 
-		// Define query vars for endpoints
-		$this->query_vars = array(
-			// Checkout actions
-			'order-pay',
-			'order-received',
-
-			// My account actions
-			'view-order',
-			'edit-account'
-		);
+	/**
+	 * Add endpoints for query vars
+	 */
+	public function add_endpoints() {
+		foreach ( $this->query_vars as $var )
+			add_rewrite_endpoint( $var, EP_PAGES );
 	}
 
 	/**
@@ -414,11 +438,15 @@ class WC_Query {
 
 		$args = array();
 
+		// default - menu_order
+		$args['orderby']  = 'menu_order title';
+		$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
+		$args['meta_key'] = '';
+
 		switch ( $orderby ) {
 			case 'date' :
 				$args['orderby']  = 'date';
 				$args['order']    = $order == 'ASC' ? 'ASC' : 'DESC';
-				$args['meta_key'] = '';
 			break;
 			case 'price' :
 				$args['orderby']  = 'meta_value_num';
@@ -426,31 +454,39 @@ class WC_Query {
 				$args['meta_key'] = '_price';
 			break;
 			case 'popularity' :
-				$args['orderby']  = 'meta_value_num';
-				$args['order']    = $order == 'ASC' ? 'ASC' : 'DESC';
 				$args['meta_key'] = 'total_sales';
+
+				// Sorting handled later though a hook
+				add_filter( 'posts_clauses', array( $this, 'order_by_popularity_post_clauses' ) );
 			break;
 			case 'rating' :
-				$args['orderby']  = 'menu_order title';
-				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
-				$args['meta_key'] = '';
-
+				// Sorting handled later though a hook
 				add_filter( 'posts_clauses', array( $this, 'order_by_rating_post_clauses' ) );
 			break;
 			case 'title' :
 				$args['orderby']  = 'title';
 				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
-				$args['meta_key'] = '';
-			break;
-			// default - menu_order
-			default :
-				$args['orderby']  = 'menu_order title';
-				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
-				$args['meta_key'] = '';
 			break;
 		}
 
 		return apply_filters( 'woocommerce_get_catalog_ordering_args', $args );
+	}
+
+	/**
+	 * WP Core doens't let us change the sort direction for invidual orderby params - http://core.trac.wordpress.org/ticket/17065
+	 *
+	 * This lets us sort by meta value desc, and have a second orderby param.
+	 *
+	 * @access public
+	 * @param array $args
+	 * @return array
+	 */
+	public function order_by_popularity_post_clauses( $args ) {
+		global $wpdb;
+
+		$args['orderby'] = "$wpdb->postmeta.meta_value+0 DESC, $wpdb->posts.post_date DESC";
+
+		return $args;
 	}
 
 	/**
@@ -461,7 +497,6 @@ class WC_Query {
 	 * @return array
 	 */
 	public function order_by_rating_post_clauses( $args ) {
-
 		global $wpdb;
 
 		$args['fields'] .= ", AVG( $wpdb->commentmeta.meta_value ) as average_rating ";
@@ -473,7 +508,7 @@ class WC_Query {
 			LEFT JOIN $wpdb->commentmeta ON($wpdb->comments.comment_ID = $wpdb->commentmeta.comment_id)
 		";
 
-		$args['orderby'] = "average_rating DESC";
+		$args['orderby'] = "average_rating DESC, $wpdb->posts.post_date DESC";
 
 		$args['groupby'] = "$wpdb->posts.ID";
 
@@ -536,5 +571,8 @@ class WC_Query {
 		}
 		return $meta_query;
 	}
-
 }
+
+endif;
+
+return new WC_Query();

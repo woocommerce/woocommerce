@@ -2,6 +2,8 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
+if ( ! class_exists( 'WC_Email_Customer_New_Account' ) ) :
+
 /**
  * Customer New Account
  *
@@ -102,3 +104,7 @@ class WC_Email_Customer_New_Account extends WC_Email {
 		return ob_get_clean();
 	}
 }
+
+endif;
+
+return new WC_Email_Customer_New_Account();

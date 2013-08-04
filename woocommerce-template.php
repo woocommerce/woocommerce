@@ -740,7 +740,7 @@ if ( ! function_exists( 'woocommerce_comments' ) ) {
 	 */
 	function woocommerce_comments( $comment, $args, $depth ) {
 		$GLOBALS['comment'] = $comment;
-		woocommerce_get_template( 'single-product/review.php' );
+		woocommerce_get_template( 'single-product/review.php', array( 'comment' => $comment, 'args' => $args, 'depth' => $depth ) );
 	}
 }
 
@@ -814,9 +814,9 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 	 */
 	function woocommerce_upsell_display( $posts_per_page = '-1', $columns = 2, $orderby = 'rand' ) {
 		woocommerce_get_template( 'single-product/up-sells.php', array(
-				'posts_per_page'  => $posts_per_page,
-				'orderby'    => $orderby,
-				'columns'    => $columns
+				'posts_per_page'	=> $posts_per_page,
+				'orderby'			=> apply_filters( 'woocommerce_upsells_orderby', $orderby ),
+				'columns'			=> $columns
 			) );
 	}
 }
@@ -1114,7 +1114,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 
 			foreach ( $product_categories as $category ) {
 
-				if ( $category->parent != $parent_id )
+				if ( $category->parent != $parent_id || $category->count == 0 )
 					continue;
 
 				if ( ! $product_category_found ) {
@@ -1296,16 +1296,18 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		switch ( $args['type'] ) {
 		case "country" :
 
-			if ( sizeof( $woocommerce->countries->get_allowed_countries() ) == 1 ) {
+			$countries = $key == 'shipping_country' ? $woocommerce->countries->get_shipping_countries() : $woocommerce->countries->get_allowed_countries();
+
+			if ( sizeof( $countries ) == 1 ) {
 
 				$field = '<p class="form-row ' . esc_attr( implode( ' ', $args['class'] ) ) .'" id="' . esc_attr( $key ) . '_field">';
 
 				if ( $args['label'] )
 					$field .= '<label class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label']  . '</label>';
 
-				$field .= '<strong>' . current( array_values( $woocommerce->countries->get_allowed_countries() ) ) . '</strong>';
+				$field .= '<strong>' . current( array_values( $countries ) ) . '</strong>';
 
-				$field .= '<input type="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" value="' . current( array_keys( $woocommerce->countries->get_allowed_countries() ) ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
+				$field .= '<input type="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" value="' . current( array_keys($countries ) ) . '" ' . implode( ' ', $custom_attributes ) . ' class="country_to_state" />';
 
 				$field .= '</p>' . $after;
 
@@ -1316,7 +1318,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 						<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" class="country_to_state country_select" ' . implode( ' ', $custom_attributes ) . '>
 							<option value="">'.__( 'Select a country&hellip;', 'woocommerce' ) .'</option>';
 
-				foreach ( $woocommerce->countries->get_allowed_countries() as $ckey => $cvalue )
+				foreach ( $countries as $ckey => $cvalue )
 					$field .= '<option value="' . $ckey . '" '.selected( $value, $ckey, false ) .'>'.__( $cvalue, 'woocommerce' ) .'</option>';
 
 				$field .= '</select>';

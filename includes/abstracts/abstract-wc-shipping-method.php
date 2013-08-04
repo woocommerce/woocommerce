@@ -177,13 +177,10 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 		$ship_to_countries = '';
 
-		if ( $this->availability == 'specific' ) :
+		if ( $this->availability == 'specific' )
 			$ship_to_countries = $this->countries;
-		else :
-			if ( get_option( 'woocommerce_allowed_countries' ) == 'specific' ) :
-				$ship_to_countries = get_option( 'woocommerce_specific_allowed_countries' );
-			endif;
-		endif;
+		else
+			$ship_to_countries = array_keys( $woocommerce->countries->get_shipping_countries() );
 
 		if ( is_array( $ship_to_countries ) ) :
 			if ( ! in_array( $package['destination']['country'], $ship_to_countries ) ) return false;

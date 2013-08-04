@@ -239,9 +239,11 @@ add_action( 'wp', 'woocommerce_pay_action', 20 );
  *
  * @see woocommerce_process_login()
  * @see woocommerce_process_registration()
+ * @see woocommerce_process_reset_password()
  */
 add_action( 'init', 'woocommerce_process_login' );
 add_action( 'init', 'woocommerce_process_registration' );
+add_action( 'init', 'woocommerce_process_reset_password' );
 
 /**
  * Product Downloads

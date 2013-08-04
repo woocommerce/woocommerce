@@ -69,14 +69,14 @@ class WC_Makepot {
 			'woocommerce' => array(
 				'title'    => 'Front-end',
 				'file'     => $this->woocommerce_path . 'i18n/languages/woocommerce.pot',
-				'excludes' => array( 'admin/.*' ),
+				'excludes' => array( 'includes/admin/.*' ),
 				'includes' => array(),
 			),
 			'woocommerce-admin' => array(
 				'title'    => 'Admin',
 				'file'     => $this->woocommerce_path . 'i18n/languages/woocommerce-admin.pot',
 				'excludes' => array(),
-				'includes' => array( 'admin/.*' ),
+				'includes' => array( 'includes/admin/.*' ),
 			),
 		);
 

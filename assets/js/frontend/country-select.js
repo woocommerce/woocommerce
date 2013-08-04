@@ -4,7 +4,7 @@ jQuery(document).ready(function($) {
 	var states_json = wc_country_select_params.countries.replace(/&quot;/g, '"');
 	var states = $.parseJSON( states_json );
 
-	$('select.country_to_state').change(function(){
+	$('select.country_to_state, input.country_to_state').change(function(){
 
 		var country = $(this).val();
 
@@ -19,7 +19,7 @@ jQuery(document).ready(function($) {
 		if (states[country]) {
 			if (states[country].length == 0) {
 
-				$statebox.parent().hide().find('.chzn-container').remove();
+				$statebox.parent().hide().find('.chosen-container').remove();
 				$statebox.replaceWith('<input type="hidden" class="hidden" name="' + input_name + '" id="' + input_id + '" value="" placeholder="' + placeholder + '" />');
 
 				$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
@@ -47,14 +47,14 @@ jQuery(document).ready(function($) {
 		} else {
 			if ($statebox.is('select')) {
 
-				$parent.show().find('.chzn-container').remove();
+				$parent.show().find('.chosen-container').remove();
 				$statebox.replaceWith('<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />');
 
 				$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
 
 			} else if ($statebox.is('.hidden')) {
 
-				$parent.show().find('.chzn-container').remove();
+				$parent.show().find('.chosen-container').remove();
 				$statebox.replaceWith('<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />');
 
 				$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);

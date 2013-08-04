@@ -24,8 +24,8 @@ class WC_Order {
 	/** @public string Order date (paid). */
 	public $modified_date;
 
-	/** @public string Note added by the customer. */
-	public $customer_note;
+	/** @public string Message added by the customer. */
+	public $customer_message;
 
 	/** @public array Order (post) meta/custom fields. */
 	public $order_custom_fields;
@@ -196,11 +196,12 @@ class WC_Order {
 	 */
 	public function populate( $result ) {
 		// Standard post data
-		$this->id = $result->ID;
-		$this->order_date = $result->post_date;
-		$this->modified_date = $result->post_modified;
-		$this->customer_note = $result->post_excerpt;
-		$this->post_status = $result->post_status;
+		$this->id                  = $result->ID;
+		$this->order_date          = $result->post_date;
+		$this->modified_date       = $result->post_modified;
+		$this->customer_message    = $result->post_excerpt;
+		$this->customer_note       = $this->customer_message;
+		$this->post_status         = $result->post_status;
 		$this->order_custom_fields = get_post_meta( $this->id );
 
 		// Define the data we're going to load: Key => Default value
@@ -1076,7 +1077,7 @@ class WC_Order {
 
 			$_product = $this->get_product_from_item( $item );
 
-			if ($_product->exists() && $_product->is_downloadable()) :
+			if ( $_product && $_product->exists() && $_product->is_downloadable() ) :
 				$has_downloadable_item = true;
 			endif;
 
@@ -1095,12 +1096,7 @@ class WC_Order {
 	 */
 	public function get_checkout_payment_url( $on_checkout = false ) {
 
-		$pay_url = get_permalink( woocommerce_get_page_id( 'checkout' ) );
-
-		if ( get_option( 'permalink_structure' ) )
-			$pay_url = trailingslashit( $pay_url ) . 'order-pay/' . $this->id;
-		else
-			$pay_url = add_query_arg( 'order-pay', $this->id, $pay_url );
+		$pay_url = woocommerce_get_endpoint_url( 'order-pay', $this->id, get_permalink( woocommerce_get_page_id( 'checkout' ) ) );
 
 		if ( get_option( 'woocommerce_force_ssl_checkout' ) == 'yes' || is_ssl() )
 			$pay_url = str_replace( 'http:', 'https:', $pay_url );
@@ -1123,12 +1119,7 @@ class WC_Order {
 	 */
 	public function get_checkout_order_received_url() {
 
-		$order_received_url = get_permalink( woocommerce_get_page_id( 'checkout' ) );
-
-		if ( get_option( 'permalink_structure' ) )
-			$order_received_url = trailingslashit( $order_received_url ) . 'order-received/' . $this->id;
-		else
-			$order_received_url = add_query_arg( 'order-received', $this->id, $order_received_url );
+		$order_received_url = woocommerce_get_endpoint_url( 'order-received', $this->id, get_permalink( woocommerce_get_page_id( 'checkout' ) ) );
 
 		if ( get_option( 'woocommerce_force_ssl_checkout' ) == 'yes' || is_ssl() )
 			$order_received_url = str_replace( 'http:', 'https:', $order_received_url );
@@ -1156,12 +1147,7 @@ class WC_Order {
 	 * @return string
 	 */
 	public function get_view_order_url() {
-		$view_order_url = get_permalink( woocommerce_get_page_id( 'myaccount' ) );
-
-		if ( get_option( 'permalink_structure' ) )
-			$view_order_url = trailingslashit( $view_order_url ) . 'view-order/' . $this->id;
-		else
-			$view_order_url = add_query_arg( 'view-order', $this->id, $view_order_url );
+		$view_order_url = woocommerce_get_endpoint_url( 'view-order', $this->id, get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
 
 		return apply_filters( 'woocommerce_get_view_order_url', $view_order_url, $this );
 	}
@@ -1215,13 +1201,18 @@ class WC_Order {
 
 		$is_customer_note = intval( $is_customer_note );
 
-		if ( isset( $_SERVER['HTTP_HOST'] ) )
-			$comment_author_email 	= sanitize_email( strtolower( __( 'WooCommerce', 'woocommerce' ) ) . '@' . str_replace( 'www.', '', $_SERVER['HTTP_HOST'] ) );
-		else
-			$comment_author_email 	= sanitize_email( strtolower( __( 'WooCommerce', 'woocommerce' ) ) . '@noreply.com' );
+		if ( is_user_logged_in() && current_user_can( 'manage_woocommerce' ) ) {
+			$user                 = get_user_by( 'id', get_current_user_id() );
+			$comment_author       = $user->display_name;
+			$comment_author_email = $user->user_email;
+		} else {
+			$comment_author       = __( 'WooCommerce', 'woocommerce' );
+			$comment_author_email = strtolower( __( 'WooCommerce', 'woocommerce' ) ) . '@';
+			$comment_author_email .= isset( $_SERVER['HTTP_HOST'] ) ? str_replace( 'www.', '', $_SERVER['HTTP_HOST'] ) : 'noreply.com';
+			$comment_author_email = sanitize_email( $comment_author_email );
+		}
 
 		$comment_post_ID 		= $this->id;
-		$comment_author 		= __( 'WooCommerce', 'woocommerce' );
 		$comment_author_url 	= '';
 		$comment_content 		= $note;
 		$comment_agent			= 'WooCommerce';

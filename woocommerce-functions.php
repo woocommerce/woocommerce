@@ -49,12 +49,6 @@ function woocommerce_template_redirect() {
 		exit;
 	}
 
-	// My account page redirects (logged out)
-	elseif ( ! is_user_logged_in() && ( is_page( woocommerce_get_page_id( 'edit_address' ) ) ) ) {
-		wp_redirect( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
-		exit;
-	}
-
 	// Logout
 	elseif ( is_page( woocommerce_get_page_id( 'logout' ) ) ) {
 		wp_redirect( str_replace( '&amp;', '&', wp_logout_url( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) ) ) );
@@ -119,7 +113,6 @@ function woocommerce_nav_menu_items( $items, $args ) {
 
 		$hide_pages   = array();
 		$hide_pages[] = (int) woocommerce_get_page_id( 'logout' );
-		$hide_pages[] = (int) woocommerce_get_page_id( 'edit_address' );
 		$hide_pages   = apply_filters( 'woocommerce_logged_out_hidden_page_ids', $hide_pages );
 
 		foreach ( $items as $key => $item ) {
@@ -519,8 +512,14 @@ function woocommerce_clear_cart_after_payment() {
 
 		$order = new WC_Order( $woocommerce->session->order_awaiting_payment );
 
-		if ( $order->id > 0 && $order->status !== 'pending' ) {
-			$woocommerce->cart->empty_cart();
+		if ( $order->id > 0 ) {
+			// If the order has failed, and the customer is logged in, they can try again from their account page
+			if ( $order->status == 'failed' && is_user_logged_in() )
+				$woocommerce->cart->empty_cart();
+
+			// If the order has not failed, or is not pending, the order must have gone through
+			if ( $order->status != 'failed' && $order->status != 'pending' )
+				$woocommerce->cart->empty_cart();
 		}
 	}
 }
@@ -675,16 +674,74 @@ function woocommerce_process_login() {
 					$redirect = esc_url( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
 				}
 
+				// Feedback
+				wc_add_message( sprintf( __( 'You are now logged in as <strong>%s</strong>', 'woocommerce' ), $user->display_name ) );
+
 				wp_redirect( apply_filters( 'woocommerce_login_redirect', $redirect, $user ) );
 				exit;
 			}
 		} catch (Exception $e) {
-			wc_add_error( $e->getMessage() );
+
+			wc_add_error( apply_filters('login_errors', $e->getMessage() ) );
+
 		}
 	}
 }
 
+/**
+ * Handle reset password form
+ */
+function woocommerce_process_reset_password() {
+	if ( ! isset( $_POST['wc_reset_password'] ) )
+		return;
 
+	// process lost password form
+	if ( isset( $_POST['user_login'] ) ) {
+
+		wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-lost_password' );
+
+		WC_Shortcode_My_Account::retrieve_password();
+	}
+
+	// process reset password form
+	if( isset( $_POST['password_1'] ) && isset( $_POST['password_2'] ) && isset( $_POST['reset_key'] ) && isset( $_POST['reset_login'] ) ) {
+
+		// verify reset key again
+		$user = WC_Shortcode_My_Account::check_password_reset_key( $_POST['reset_key'], $_POST['reset_login'] );
+
+		if ( is_object( $user ) ) {
+
+			// save these values into the form again in case of errors
+			$args['key']   = woocommerce_clean( $_POST['reset_key'] );
+			$args['login'] = woocommerce_clean( $_POST['reset_login'] );
+
+			wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-reset_password' );
+
+			if( empty( $_POST['password_1'] ) || empty( $_POST['password_2'] ) ) {
+				wc_add_error( __( 'Please enter your password.', 'woocommerce' ) );
+				$args['form'] = 'reset_password';
+			}
+
+			if( $_POST[ 'password_1' ] !== $_POST[ 'password_2' ] ) {
+				wc_add_error( __( 'Passwords do not match.', 'woocommerce' ) );
+				$args['form'] = 'reset_password';
+			}
+
+			if( 0 == wc_error_count() && ( $_POST['password_1'] == $_POST['password_2'] ) ) {
+
+				WC_Shortcode_My_Account::reset_password( $user, woocommerce_clean( $_POST['password_1'] ) );
+
+				do_action( 'woocommerce_customer_reset_password', $user );
+
+				wc_add_message( __( 'Your password has been reset.', 'woocommerce' ) . ' <a href="' . get_permalink( woocommerce_get_page_id( 'myaccount' ) ) . '">' . __( 'Log in', 'woocommerce' ) . '</a>' );
+
+				wp_redirect( remove_query_arg( array( 'key', 'login' ) ) );
+				exit;
+			}
+		}
+
+	}
+}
 
 
 /**
@@ -831,21 +888,10 @@ function woocommerce_process_registration() {
  * @return string
  */
 function woocommerce_customer_edit_account_url() {
-	$edit_account_url = get_permalink( woocommerce_get_page_id( 'myaccount' ) );
-
-	if ( get_option( 'permalink_structure' ) )
-		$edit_account_url = trailingslashit( $edit_account_url ) . 'edit-account/';
-	else
-		$edit_account_url = add_query_arg( 'edit-account', '', $edit_account_url );
+	$edit_account_url = woocommerce_get_endpoint_url( 'edit-account', '', get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
 
 	return apply_filters( 'woocommerce_customer_edit_account_url', $edit_account_url );
 }
-
-
-
-
-
-
 
 /**
  * Place a previous order again.
@@ -1647,7 +1693,7 @@ add_action( 'template_redirect', 'woocommerce_save_account_details' );
  * @access public
  */
 function woocommerce_save_address() {
-	global $woocommerce;
+	global $woocommerce, $wp;
 
 	if ( 'POST' !== strtoupper( $_SERVER[ 'REQUEST_METHOD' ] ) )
 		return;
@@ -1663,10 +1709,9 @@ function woocommerce_save_address() {
 
 	if ( $user_id <= 0 ) return;
 
-	$load_address = ( isset( $_GET[ 'address' ] ) ) ? esc_attr( $_GET[ 'address' ] ) : '';
-	$load_address = ( $load_address == 'billing' || $load_address == 'shipping' ) ? $load_address : '';
+	$load_address = ( $wp->query_vars['edit-address'] == 'billing' || $wp->query_vars['edit-address'] == 'shipping' ) ? $wp->query_vars['edit-address'] : 'billing';
 
-	$address = $woocommerce->countries->get_address_fields( esc_attr($_POST[ $load_address . '_country' ]), $load_address . '_' );
+	$address = $woocommerce->countries->get_address_fields( esc_attr( $_POST[ $load_address . '_country' ] ), $load_address . '_' );
 
 	foreach ($address as $key => $field) :
 

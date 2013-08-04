@@ -32,8 +32,9 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 		$this->init_settings();
 
 		// Define user set variables
-		$this->title       = $this->get_option( 'title' );
-		$this->description = $this->get_option( 'description' );
+		$this->title        = $this->get_option( 'title' );
+		$this->description  = $this->get_option( 'description' );
+		$this->instructions = $this->get_option( 'instructions', $this->description );
 
 		// Actions
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -54,25 +55,33 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 
     	$this->form_fields = array(
 			'enabled' => array(
-							'title' => __( 'Enable/Disable', 'woocommerce' ),
-							'type' => 'checkbox',
-							'label' => __( 'Enable Cheque Payment', 'woocommerce' ),
-							'default' => 'yes'
-						),
+				'title'   => __( 'Enable/Disable', 'woocommerce' ),
+				'type'    => 'checkbox',
+				'label'   => __( 'Enable Cheque Payment', 'woocommerce' ),
+				'default' => 'yes'
+			),
 			'title' => array(
-							'title' => __( 'Title', 'woocommerce' ),
-							'type' => 'text',
-							'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-							'default' => __( 'Cheque Payment', 'woocommerce' ),
-							'desc_tip'      => true,
-						),
+				'title'       => __( 'Title', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
+				'default'     => __( 'Cheque Payment', 'woocommerce' ),
+				'desc_tip'    => true,
+			),
 			'description' => array(
-							'title' => __( 'Customer Message', 'woocommerce' ),
-							'type' => 'textarea',
-							'description' => __( 'Let the customer know the payee and where they should be sending the cheque to and that their order won\'t be shipping until you receive it.', 'woocommerce' ),
-							'default' => __( 'Please send your cheque to Store Name, Store Street, Store Town, Store State / County, Store Postcode.', 'woocommerce' )
-						)
-			);
+				'title'       => __( 'Description', 'woocommerce' ),
+				'type'        => 'textarea',
+				'description' => __( 'Payment method description that the customer will see on your checkout.', 'woocommerce' ),
+				'default'     => __( 'Please send your cheque to Store Name, Store Street, Store Town, Store State / County, Store Postcode.', 'woocommerce' ),
+				'desc_tip'    => true,
+			),
+			'instructions' => array(
+				'title'       => __( 'Instructions', 'woocommerce' ),
+				'type'        => 'textarea',
+				'description' => __( 'Instructions that will be added to the thank you page and emails.', 'woocommerce' ),
+				'default'     => '',
+				'desc_tip'    => true,
+			),
+		);
 
     }
 
@@ -106,8 +115,8 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
      * @return void
      */
 	function thankyou_page() {
-		if ( $description = $this->get_description() )
-        	echo wpautop( wptexturize( $description ) );
+		if ( $this->instructions )
+        	echo wpautop( wptexturize( $this->instructions ) );
 	}
 
 
@@ -126,8 +135,8 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 
     	if ( $order->payment_method !== 'cheque') return;
 
-		if ( $description = $this->get_description() )
-        	echo wpautop( wptexturize( $description ) );
+		if ( $this->instructions )
+        	echo wpautop( wptexturize( $this->instructions ) );
 	}
 
 

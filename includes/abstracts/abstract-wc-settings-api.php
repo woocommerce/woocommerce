@@ -733,7 +733,14 @@ abstract class WC_Settings_API {
     	$text = $this->get_option( $key );
 
     	if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
-    		$text = wp_kses_post( trim( stripslashes( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) );
+    		$text = wp_kses( trim( stripslashes( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ),
+    			array_merge(
+    				array(
+    					'iframe' => array( 'src' => true, 'style' => true, 'id' => true, 'class' => true )
+    				),
+    				wp_kses_allowed_html( 'post' )
+    			)
+    		);
     	}
 
     	return $text;

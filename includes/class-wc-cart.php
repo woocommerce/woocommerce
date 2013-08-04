@@ -318,6 +318,11 @@ class WC_Cart {
 		public function check_cart_items() {
 			global $woocommerce;
 
+			$result = $this->check_cart_item_validity();
+
+			if ( is_wp_error( $result ) )
+				wc_add_error( $result->get_error_message() );
+
 			// Check item stock
 			$result = $this->check_cart_item_stock();
 
@@ -432,13 +437,32 @@ class WC_Cart {
 		}
 
 		/**
+		 * Looks through cart items and checks the posts are not trashed or deleted.
+		 * @return bool or WP_ERROR
+		 */
+		public function check_cart_item_validity() {
+			foreach ( $this->get_cart() as $cart_item_key => $values ) {
+
+				$_product = $values['data'];
+
+				if ( ! $_product || ! $_product->exists() || $_product->post->post_status == 'trash' ) {
+					$this->set_quantity( $cart_item_key, 0 );
+
+					return new WP_Error( 'invalid', __( 'An item which is no longer available was removed from your cart.', 'woocommerce' ) );
+				}
+			}
+
+			return true;
+		}
+
+		/**
 		 * Looks through the cart to check each item is in stock. If not, add an error.
 		 *
 		 * @access public
-		 * @return bool
+		 * @return bool or WP_ERROR
 		 */
 		public function check_cart_item_stock() {
-			global $woocommerce, $wpdb;
+			global $wpdb;
 
 			$error = new WP_Error();
 
@@ -477,7 +501,7 @@ class WC_Cart {
 						$in_cart = $product_qty_in_cart[ $values['variation_id'] ];
 
 						if ( ! $_product->has_enough_stock( $product_qty_in_cart[ $values['variation_id'] ] ) ) {
-							$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfil your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), $_product->stock ) );
+							$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), $_product->stock ) );
 							return $error;
 						}
 
@@ -486,7 +510,7 @@ class WC_Cart {
 						$in_cart = $product_qty_in_cart[ $values['product_id'] ];
 
 						if ( ! $_product->has_enough_stock( $product_qty_in_cart[ $values['product_id'] ] ) ) {
-							$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfil your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), $_product->stock ) );
+							$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), $_product->stock ) );
 							return $error;
 						}
 
@@ -497,7 +521,7 @@ class WC_Cart {
 					 */
 					if ( get_option( 'woocommerce_hold_stock_minutes' ) > 0 && ! $_product->backorders_allowed() ) {
 
-						$order_id = isset( $woocommerce->session->order_awaiting_payment ) ? absint( $woocommerce->session->order_awaiting_payment ) : 0;
+						$order_id = isset( WC()->session->order_awaiting_payment ) ? absint( WC()->session->order_awaiting_payment ) : 0;
 
 						$held_stock = $wpdb->get_var( $wpdb->prepare( "
 							SELECT SUM( order_item_meta.meta_value ) AS held_qty
@@ -521,7 +545,7 @@ class WC_Cart {
 						", $key, $value, $order_id ) );
 
 						if ( $_product->stock < ( $held_stock + $in_cart ) ) {
-							$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfil your order right now. Please try again in %d minutes or edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), get_option( 'woocommerce_hold_stock_minutes' ) ) );
+							$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfill your order right now. Please try again in %d minutes or edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), get_option( 'woocommerce_hold_stock_minutes' ) ) );
 							return $error;
 						}
 					}
@@ -1748,15 +1772,17 @@ class WC_Cart {
 		 * @return bool whether or not the cart needs shipping
 		 */
 		public function needs_shipping() {
-			if ( get_option('woocommerce_calc_shipping')=='no' ) return false;
-			if ( ! is_array( $this->cart_contents ) ) return false;
+			if ( get_option('woocommerce_calc_shipping') == 'no' )
+				return false;
 
 			$needs_shipping = false;
 
-			foreach ( $this->cart_contents as $cart_item_key => $values ) {
-				$_product = $values['data'];
-				if ( $_product->needs_shipping() ) {
-					$needs_shipping = true;
+			if ( $this->cart_contents ) {
+				foreach ( $this->cart_contents as $cart_item_key => $values ) {
+					$_product = $values['data'];
+					if ( $_product->needs_shipping() ) {
+						$needs_shipping = true;
+					}
 				}
 			}
 

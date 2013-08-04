@@ -513,14 +513,14 @@ jQuery( function($){
 					$('table.woocommerce_order_items tbody#order_items_list').append( response );
 
 					if (!--count) {
-						$('select#add_item_id, #add_item_id_chzn .chzn-choices').css('border-color', '').val('');
+						$('select#add_item_id, #add_item_id_chosen .chosen-choices').css('border-color', '').val('');
 					    jQuery(".tips").tipTip({
 					    	'attribute' : 'data-tip',
 					    	'fadeIn' : 50,
 					    	'fadeOut' : 50,
 					    	'delay' : 200
 					    });
-					    $('select#add_item_id').trigger("liszt:updated");
+					    $('select#add_item_id').trigger("chosen:updated");
 					    $('table.woocommerce_order_items').unblock();
 					}
 
@@ -530,7 +530,7 @@ jQuery( function($){
 			});
 
 		} else {
-			$('select#add_item_id, #add_item_id_chzn .chzn-choices').css('border-color', 'red');
+			$('select#add_item_id, #add_item_id_chosen .chosen-choices').css('border-color', 'red');
 		}
 		return false;
 	});
@@ -1171,13 +1171,13 @@ jQuery( function($){
 
 		$('.woocommerce_attributes').on('click', 'button.select_all_attributes', function(){
 			$(this).closest('td').find('select option').attr("selected","selected");
-			$(this).closest('td').find('select').trigger("liszt:updated");
+			$(this).closest('td').find('select').trigger("chosen:updated");
 			return false;
 		});
 
 		$('.woocommerce_attributes').on('click', 'button.select_no_attributes', function(){
 			$(this).closest('td').find('select option').removeAttr("selected");
-			$(this).closest('td').find('select').trigger("liszt:updated");
+			$(this).closest('td').find('select').trigger("chosen:updated");
 			return false;
 		});
 
@@ -1244,7 +1244,7 @@ jQuery( function($){
 					} else if ( response.slug ) {
 						// Success
 						$wrapper.find('select.attribute_values').append('<option value="' + response.slug + '" selected="selected">' + response.name + '</option>');
-						$wrapper.find('select.attribute_values').trigger("liszt:updated");
+						$wrapper.find('select.attribute_values').trigger("chosen:updated");
 					}
 
 					$('.woocommerce_attributes').unblock();

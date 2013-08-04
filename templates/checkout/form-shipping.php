@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 global $woocommerce;
 ?>
 
-<?php if ( ( $woocommerce->cart->needs_shipping() || get_option('woocommerce_require_shipping_address') == 'yes' ) && ! $woocommerce->cart->ship_to_billing_address_only() ) : ?>
+<?php if ( $woocommerce->cart->needs_shipping() && ! $woocommerce->cart->ship_to_billing_address_only() ) : ?>
 
 	<?php
 		if ( empty( $_POST ) ) {

@@ -216,13 +216,38 @@ class WC_Product_Variable extends WC_Product {
 					return true;
 			}
 
-		} else {
-
-			if ( $this->sale_price && $this->sale_price == $this->price )
-				return true;
-
 		}
 		return false;
+	}
+
+	/**
+	 * Get the min or max variation regular price.
+	 * @param  string $min_or_max - min or max
+	 * @return string
+	 */
+	public function get_variation_regular_price( $min_or_max = 'min' ) {
+		$get = $min_or_max . '_variation_regular_price';
+		return apply_filters( 'woocommerce_get_variation_regular_price', $this->$get, $this );
+	}
+
+	/**
+	 * Get the min or max variation sale price.
+	 * @param  string $min_or_max - min or max
+	 * @return string
+	 */
+	public function get_variation_sale_price( $min_or_max = 'min' ) {
+		$get = $min_or_max . '_variation_sale_price';
+		return apply_filters( 'woocommerce_get_variation_sale_price', $this->$get, $this );
+	}
+
+	/**
+	 * Get the min or max variation (active) price.
+	 * @param  string $min_or_max - min or max
+	 * @return string
+	 */
+	public function get_variation_price( $min_or_max = 'min' ) {
+		$get = $min_or_max . '_variation_price';
+		return apply_filters( 'woocommerce_get_variation_price', $this->$get, $this );
 	}
 
 	/**
@@ -235,49 +260,47 @@ class WC_Product_Variable extends WC_Product {
 	public function get_price_html( $price = '' ) {
 
 		// Ensure variation prices are synced with variations
-		if ( $this->min_variation_price === '' || $this->min_variation_regular_price === '' || $this->price === '' )
-			$this->variable_product_sync();
+		if ( $this->get_variation_price( 'max' ) === '' || $this->get_price() === '' )
+			$this->variable_product_sync( $this->id );
 
 		// Get the price
-		if ( $this->price > 0 ) {
-			if ( $this->is_on_sale() && isset( $this->min_variation_price ) && $this->min_variation_regular_price !== $this->get_price() ) {
+		if ( $this->get_price() === '' ) {
 
-				if ( ! $this->min_variation_price || $this->min_variation_price !== $this->max_variation_price )
-					$price .= $this->get_price_html_from_text();
+			$price = apply_filters( 'woocommerce_variable_empty_price_html', '', $this );
 
-				$price .= $this->get_price_html_from_to( $this->min_variation_regular_price, $this->get_price() );
+		} elseif ( $this->get_price() > 0 ) {
+
+			// Only show 'from' if the min price varies from the max price
+			if ( $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ) )
+				$price .= $this->get_price_html_from_text();
+
+			if ( $this->is_on_sale() && $this->get_variation_regular_price( 'min' ) !== $this->get_price() ) {
+
+				$price .= $this->get_price_html_from_to( $this->get_variation_regular_price( 'min' ), $this->get_price() );
 
 				$price = apply_filters( 'woocommerce_variable_sale_price_html', $price, $this );
 
 			} else {
-
-				if ( $this->min_variation_price !== $this->max_variation_price )
-					$price .= $this->get_price_html_from_text();
 
 				$price .= woocommerce_price( $this->get_price() );
 
 				$price = apply_filters('woocommerce_variable_price_html', $price, $this);
 
 			}
-		} elseif ( $this->price === '' ) {
 
-			$price = apply_filters('woocommerce_variable_empty_price_html', '', $this);
+		} elseif ( $this->get_price() == 0 ) {
 
-		} elseif ( $this->price == 0 ) {
+			// Only show 'from' if the min price varies from the max price
+			if ( $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ) )
+				$price .= $this->get_price_html_from_text();
 
-			if ( $this->is_on_sale() && isset( $this->min_variation_regular_price ) && $this->min_variation_regular_price !== $this->get_price() ) {
+			if ( $this->is_on_sale() && $this->get_variation_regular_price( 'min' ) > 0 ) {
 
-				if ( $this->min_variation_price !== $this->max_variation_price )
-					$price .= $this->get_price_html_from_text();
-
-				$price .= $this->get_price_html_from_to( $this->min_variation_regular_price, __( 'Free!', 'woocommerce' ) );
+				$price .= $this->get_price_html_from_to( $this->get_variation_regular_price( 'min' ), __( 'Free!', 'woocommerce' ) );
 
 				$price = apply_filters( 'woocommerce_variable_free_sale_price_html', $price, $this );
 
 			} else {
-
-				if ( $this->min_variation_price !== $this->max_variation_price )
-					$price .= $this->get_price_html_from_text();
 
 				$price .= __( 'Free!', 'woocommerce' );
 
@@ -437,25 +460,31 @@ class WC_Product_Variable extends WC_Product {
 		return $available_variations;
     }
 
+	/**
+	 * Sync variable product prices with the children lowest/highest prices.
+	 */
+	public function variable_product_sync( $product_id = '' ) {
+
+		if ( empty( $product_id ) )
+			$product_id = $this->id;
+
+		self::sync( $product_id );
+	}
+
 
 	/**
 	 * Sync variable product prices with the children lowest/highest prices.
-	 *
-	 * @access public
-	 * @return void
 	 */
-	public function variable_product_sync() {
-		global $woocommerce;
-
+	public static function sync( $product_id ) {
 		$children = get_posts( array(
-			'post_parent' 	=> $this->id,
+			'post_parent' 	=> $product_id,
 			'posts_per_page'=> -1,
 			'post_type' 	=> 'product_variation',
 			'fields' 		=> 'ids',
 			'post_status'	=> 'publish'
 		));
 
-		$this->min_variation_price = $this->min_variation_regular_price = $this->min_variation_sale_price = $this->max_variation_price = $this->max_variation_regular_price = $this->max_variation_sale_price = '';
+		$min_variation_price = $min_variation_regular_price = $min_variation_sale_price = $max_variation_price = $max_variation_regular_price = $max_variation_sale_price = '';
 
 		if ( $children ) {
 			foreach ( $children as $child ) {
@@ -469,45 +498,56 @@ class WC_Product_Variable extends WC_Product {
 
 				// Regular prices
 				if ( $child_regular_price !== '' ) {
-					if ( ! is_numeric( $this->min_variation_regular_price ) || $child_regular_price < $this->min_variation_regular_price )
-						$this->min_variation_regular_price = $child_regular_price;
+					if ( ! is_numeric( $min_variation_regular_price ) || $child_regular_price < $min_variation_regular_price )
+						$min_variation_regular_price = $child_regular_price;
 
-					if ( ! is_numeric( $this->max_variation_regular_price ) || $child_regular_price > $this->max_variation_regular_price )
-						$this->max_variation_regular_price = $child_regular_price;
+					if ( ! is_numeric( $max_variation_regular_price ) || $child_regular_price > $max_variation_regular_price )
+						$max_variation_regular_price = $child_regular_price;
 				}
 
 				// Sale prices
 				if ( $child_sale_price !== '' ) {
 					if ( $child_price == $child_sale_price ) {
-						if ( ! is_numeric( $this->min_variation_sale_price ) || $child_sale_price < $this->min_variation_sale_price )
-							$this->min_variation_sale_price = $child_sale_price;
+						if ( ! is_numeric( $min_variation_sale_price ) || $child_sale_price < $min_variation_sale_price )
+							$min_variation_sale_price = $child_sale_price;
 
-						if ( ! is_numeric( $this->max_variation_sale_price ) || $child_sale_price > $this->max_variation_sale_price )
-							$this->max_variation_sale_price = $child_sale_price;
+						if ( ! is_numeric( $max_variation_sale_price ) || $child_sale_price > $max_variation_sale_price )
+							$max_variation_sale_price = $child_sale_price;
 					}
 				}
 
 				// Actual prices
 				if ( $child_price !== '' ) {
-					if ( $child_price > $this->max_variation_price )
-						$this->max_variation_price = $child_price;
+					if ( $child_price > $max_variation_price )
+						$max_variation_price = $child_price;
 
-					if ( $this->min_variation_price === '' || $child_price < $this->min_variation_price )
-						$this->min_variation_price = $child_price;
+					if ( $min_variation_price === '' || $child_price < $min_variation_price )
+						$min_variation_price = $child_price;
 				}
 			}
 
-			$this->price = $this->min_variation_price;
+			update_post_meta( $product_id, '_price', $min_variation_price );
+			update_post_meta( $product_id, '_min_variation_price', $min_variation_price );
+			update_post_meta( $product_id, '_max_variation_price', $max_variation_price );
+			update_post_meta( $product_id, '_min_variation_regular_price', $min_variation_regular_price );
+			update_post_meta( $product_id, '_max_variation_regular_price', $max_variation_regular_price );
+			update_post_meta( $product_id, '_min_variation_sale_price', $min_variation_sale_price );
+			update_post_meta( $product_id, '_max_variation_sale_price', $max_variation_sale_price );
 
-			update_post_meta( $this->id, '_price', $this->price );
-			update_post_meta( $this->id, '_min_variation_price', $this->min_variation_price );
-			update_post_meta( $this->id, '_max_variation_price', $this->max_variation_price );
-			update_post_meta( $this->id, '_min_variation_regular_price', $this->min_variation_regular_price );
-			update_post_meta( $this->id, '_max_variation_regular_price', $this->max_variation_regular_price );
-			update_post_meta( $this->id, '_min_variation_sale_price', $this->min_variation_sale_price );
-			update_post_meta( $this->id, '_max_variation_sale_price', $this->max_variation_sale_price );
+			// Update object if exists
+			if ( isset( $this ) ) {
+				$this->price                       = $min_variation_price;
+				$this->min_variation_price         = $min_variation_price;
+				$this->max_variation_price         = $max_variation_price;
+				$this->min_variation_regular_price = $min_variation_regular_price;
+				$this->max_variation_regular_price = $max_variation_regular_price;
+				$this->min_variation_sale_price    = $min_variation_sale_price;
+				$this->max_variation_sale_price    = $max_variation_sale_price;
+			}
 
-			$woocommerce->get_helper( 'transient' )->clear_product_transients( $this->id );
+			do_action( 'woocommerce_variable_product_sync', $product_id );
+
+			WC()->get_helper( 'transient' )->clear_product_transients( $product_id );
 		}
 	}
 }
