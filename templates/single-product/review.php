@@ -17,7 +17,7 @@ $rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 
 	<div id="comment-<?php comment_ID(); ?>" class="comment_container">
 
-		<?php echo get_avatar( $comment, '60' ); ?>
+		<?php echo get_avatar( $comment, apply_filters( 'woocommerce_review_gravatar_size', '60' ), '', get_comment_author() ); ?>
 
 		<div class="comment-text">
 
