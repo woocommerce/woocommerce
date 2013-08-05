@@ -9,23 +9,21 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  *
  * @class 		WC_Gateway_COD
  * @extends		WC_Payment_Gateway
- * @version		2.0.0
+ * @version		2.1.0
  * @package		WooCommerce/Classes/Payment
- * @author 		Patrick Garman
+ * @author 		WooThemes
  */
 class WC_Gateway_COD extends WC_Payment_Gateway {
 
     /**
      * Constructor for the gateway.
-     *
-     * @access public
-     * @return void
      */
-	function __construct() {
-		$this->id           = 'cod';
-		$this->icon         = apply_filters( 'woocommerce_cod_icon', '' );
-		$this->method_title = __( 'Cash on Delivery', 'woocommerce' );
-		$this->has_fields   = false;
+	public function __construct() {
+		$this->id                 = 'cod';
+		$this->icon               = apply_filters( 'woocommerce_cod_icon', '' );
+		$this->method_title       = __( 'Cash on Delivery', 'woocommerce' );
+		$this->method_description = __( 'Have your customers pay with cash (or by other means) upon delivery.', 'woocommerce' );
+		$this->has_fields         = false;
 
 		// Load the settings
 		$this->init_form_fields();
@@ -41,31 +39,10 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		add_action( 'woocommerce_thankyou_cod', array( $this, 'thankyou' ) );
 	}
 
-
-	/**
-	 * Admin Panel Options
-	 * - Options for bits like 'title' and availability on a country-by-country basis
-	 *
-	 * @access public
-	 * @return void
-	 */
-	function admin_options() {
-		?>
-		<h3><?php _e('Cash on Delivery','woocommerce'); ?></h3>
-    	<p><?php _e('Have your customers pay with cash (or by other means) upon delivery.', 'woocommerce' ); ?></p>
-    	<table class="form-table">
-    		<?php $this->generate_settings_html(); ?>
-		</table> <?php
-    }
-
-
     /**
      * Initialise Gateway Settings Form Fields
-     *
-     * @access public
-     * @return void
      */
-    function init_form_fields() {
+    public function init_form_fields() {
     	global $woocommerce;
 
     	$shipping_methods = array();
@@ -77,30 +54,32 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 
     	$this->form_fields = array(
 			'enabled' => array(
-				'title' => __( 'Enable COD', 'woocommerce' ),
-				'label' => __( 'Enable Cash on Delivery', 'woocommerce' ),
-				'type' => 'checkbox',
+				'title'       => __( 'Enable COD', 'woocommerce' ),
+				'label'       => __( 'Enable Cash on Delivery', 'woocommerce' ),
+				'type'        => 'checkbox',
 				'description' => '',
-				'default' => 'no'
+				'default'     => 'no'
 			),
 			'title' => array(
-				'title' => __( 'Title', 'woocommerce' ),
-				'type' => 'text',
-				'description' => __( 'Payment method title that the customer will see on your website.', 'woocommerce' ),
-				'default' => __( 'Cash on Delivery', 'woocommerce' ),
-				'desc_tip'      => true,
+				'title'       => __( 'Title', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => __( 'Payment method description that the customer will see on your checkout.', 'woocommerce' ),
+				'default'     => __( 'Cash on Delivery', 'woocommerce' ),
+				'desc_tip'    => true,
 			),
 			'description' => array(
-				'title' => __( 'Description', 'woocommerce' ),
-				'type' => 'textarea',
+				'title'       => __( 'Description', 'woocommerce' ),
+				'type'        => 'textarea',
 				'description' => __( 'Payment method description that the customer will see on your website.', 'woocommerce' ),
-				'default' => __( 'Pay with cash upon delivery.', 'woocommerce' ),
+				'default'     => __( 'Pay with cash upon delivery.', 'woocommerce' ),
+				'desc_tip'    => true,
 			),
 			'instructions' => array(
-				'title' => __( 'Instructions', 'woocommerce' ),
-				'type' => 'textarea',
+				'title'       => __( 'Instructions', 'woocommerce' ),
+				'type'        => 'textarea',
 				'description' => __( 'Instructions that will be added to the thank you page.', 'woocommerce' ),
-				'default' => __( 'Pay with cash upon delivery.', 'woocommerce' )
+				'default'     => __( 'Pay with cash upon delivery.', 'woocommerce' ),
+				'desc_tip'    => true,
 			),
 			'enable_for_methods' => array(
 				'title' 		=> __( 'Enable for shipping methods', 'woocommerce' ),
@@ -115,14 +94,12 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
  	   );
     }
 
-
 	/**
 	 * Check If The Gateway Is Available For Use
 	 *
-	 * @access public
 	 * @return bool
 	 */
-	function is_available() {
+	public function is_available() {
 		global $woocommerce;
 
 		if ( ! empty( $this->enable_for_methods ) ) {
@@ -159,16 +136,13 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		return parent::is_available();
 	}
 
-
     /**
      * Process the payment and return the result
      *
-     * @access public
      * @param int $order_id
      * @return array
      */
-	function process_payment($order_id) {
-		global $woocommerce;
+	public function process_payment( $order_id ) {
 
 		$order = new WC_Order( $order_id );
 
@@ -179,7 +153,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		$order->reduce_order_stock();
 
 		// Remove cart
-		$woocommerce->cart->empty_cart();
+		WC()->cart->empty_cart();
 
 		// Return thankyou redirect
 		return array(
@@ -188,15 +162,11 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		);
 	}
 
-
     /**
      * Output for the order received page.
-     *
-     * @access public
-     * @return void
      */
-	function thankyou() {
-		echo $this->instructions != '' ? wpautop( $this->instructions ) : '';
+	public function thankyou_page() {
+		if ( $this->instructions )
+        	echo wpautop( wptexturize( $this->instructions ) );
 	}
-
 }

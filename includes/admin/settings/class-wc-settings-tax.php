@@ -207,7 +207,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		?>
 		<h3><?php printf( __( 'Tax Rates for the "%s" Class', 'woocommerce' ), $current_class ? esc_html( $current_class ) : __( 'Standard', 'woocommerce' ) ); ?></h3>
 		<p><?php printf( __( 'Define tax rates for countries and states below. <a href="%s">See here</a> for available alpha-2 country codes.', 'woocommerce' ), 'http://en.wikipedia.org/wiki/ISO_3166-1#Current_codes' ); ?></p>
-		<table class="wc_tax_rates widefat">
+		<table class="wc_tax_rates wc_input_table sortable widefat">
 			<thead>
 				<tr>
 					<th class="sort">&nbsp;</th>
@@ -236,7 +236,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				<tr>
 					<th colspan="10">
 						<a href="#" class="button plus insert"><?php _e( 'Insert row', 'woocommerce' ); ?></a>
-						<a href="#" class="button minus remove"><?php _e( 'Remove selected row(s)', 'woocommerce' ); ?></a>
+						<a href="#" class="button minus remove_tax_rates"><?php _e( 'Remove selected row(s)', 'woocommerce' ); ?></a>
 
 						<a href="#" download="tax_rates.csv" class="button export"><?php _e( 'Export CSV', 'woocommerce' ); ?></a>
 						<a href="<?php echo admin_url( 'admin.php?import=woocommerce_tax_rate_csv' ); ?>" class="button import"><?php _e( 'Import CSV', 'woocommerce' ); ?></a>
@@ -306,24 +306,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		</table>
 		<script type="text/javascript">
 			jQuery( function() {
-				jQuery('.wc_tax_rates tbody').sortable({
-					items:'tr',
-					cursor:'move',
-					axis:'y',
-					scrollSensitivity:40,
-					forcePlaceholderSize: true,
-					helper: 'clone',
-					opacity: 0.65,
-					placeholder: 'wc-metabox-sortable-placeholder',
-					start:function(event,ui){
-						ui.item.css('background-color','#f6f6f6');
-					},
-					stop:function(event,ui){
-						ui.item.removeAttr('style');
-					}
-				});
-
-				jQuery('.wc_tax_rates .remove').click(function() {
+				jQuery('.wc_tax_rates .remove_tax_rates').click(function() {
 					var $tbody = jQuery('.wc_tax_rates').find('tbody');
 					if ( $tbody.find('tr.current').size() > 0 ) {
 						$current = $tbody.find('tr.current');
@@ -331,64 +314,15 @@ class WC_Settings_Tax extends WC_Settings_Page {
 						$current.find('input.remove_tax_rate').val('1');
 
 						$current.each(function(){
-
 							if ( jQuery(this).is('.new') )
 								jQuery(this).remove();
 							else
 								jQuery(this).hide();
-
 						});
 					} else {
 						alert('<?php echo esc_js( __( 'No row(s) selected', 'woocommerce' ) ); ?>');
 					}
 					return false;
-				});
-
-				var controlled = false;
-				var shifted = false;
-				var hasFocus = false;
-
-				jQuery(document).bind('keyup keydown', function(e){ shifted = e.shiftKey; controlled = e.ctrlKey || e.metaKey } );
-
-				jQuery('#rates').on( 'focus click', 'input', function( e ) {
-
-					$this_row = jQuery(this).closest('tr');
-
-					if ( ( e.type == 'focus' && hasFocus != $this_row.index() ) || ( e.type == 'click' && jQuery(this).is(':focus') ) ) {
-
-						hasFocus = $this_row.index();
-
-						if ( ! shifted && ! controlled ) {
-							jQuery('#rates tr').removeClass('current').removeClass('last_selected');
-							$this_row.addClass('current').addClass('last_selected');
-						} else if ( shifted ) {
-							jQuery('#rates tr').removeClass('current');
-							$this_row.addClass('selected_now').addClass('current');
-
-							if ( jQuery('#rates tr.last_selected').size() > 0 ) {
-								if ( $this_row.index() > jQuery('#rates tr.last_selected').index() ) {
-									jQuery('#rates tr').slice( jQuery('#rates tr.last_selected').index(), $this_row.index() ).addClass('current');
-								} else {
-									jQuery('#rates tr').slice( $this_row.index(), jQuery('#rates tr.last_selected').index() + 1 ).addClass('current');
-								}
-							}
-
-							jQuery('#rates tr').removeClass('last_selected');
-							$this_row.addClass('last_selected');
-						} else {
-							jQuery('#rates tr').removeClass('last_selected');
-							if ( controlled && jQuery(this).closest('tr').is('.current') ) {
-								$this_row.removeClass('current');
-							} else {
-								$this_row.addClass('current').addClass('last_selected');
-							}
-						}
-
-						jQuery('#rates tr').removeClass('selected_now');
-
-					}
-				}).on( 'blur', 'input', function( e ) {
-					hasFocus = false;
 				});
 
 				jQuery('.wc_tax_rates .export').click(function() {
