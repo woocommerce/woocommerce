@@ -507,7 +507,7 @@ function woocommerce_load_persistent_cart( $user_login, $user = 0 ) {
  * @return bool
  */
 function is_woocommerce() {
-	return ( is_shop() || is_product_category() || is_product_tag() || is_product() ) ? true : false;
+	return ( is_shop() || is_product_taxonomy() || is_product() ) ? true : false;
 }
 
 if ( ! function_exists( 'is_shop' ) ) {
