@@ -131,8 +131,6 @@ class WC_Google_Analytics extends WC_Integration {
 			_gaq.push(
 				['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name . "
 				['_setCustomVar', 1, 'logged-in', '" . $loggedin . "', 1],
-				['_setCustomVar', 2, 'user-id', '" . $user_id . "', 1],
-				['_setCustomVar', 3, 'username', '" . $username . "', 1],
 				['_trackPageview']
 			);
 
@@ -191,8 +189,6 @@ class WC_Google_Analytics extends WC_Integration {
 			_gaq.push(
 				['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name . "
 				['_setCustomVar', 1, 'logged-in', '" . esc_js( $loggedin ) . "', 1],
-				['_setCustomVar', 2, 'user-id', '" . esc_js( $user_id ) . "', 1],
-				['_setCustomVar', 3, 'username', '" . esc_js( $username ) . "', 1],
 				['_trackPageview']
 			);
 

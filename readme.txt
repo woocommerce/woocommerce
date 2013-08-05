@@ -165,6 +165,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.0.14 - xx/xx/xxxx =
+* Fix - Google Analytics no longer identifies users using custom vars
+
 = 2.0.13 - 19/07/2013 =
 * Tweak - Allow users with edit rights to add draft products to cart (and nobody else)
 * Tweak - Handle pending status for paypal
