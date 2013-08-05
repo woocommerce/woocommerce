@@ -36,7 +36,7 @@ function woocommerce_get_refreshed_fragments() {
 				'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>'
 			)
 		),
-		'cart_hash' => md5( json_encode( $woocommerce->cart->get_cart() ) )
+		'cart_hash' => $woocommerce->cart->get_cart() ? md5( json_encode( $woocommerce->cart->get_cart() ) ) : ''
 	);
 
 	echo json_encode( $data );
