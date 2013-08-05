@@ -808,7 +808,7 @@ function get_woocommerce_currencies() {
 				'AUD' => __( 'Australian Dollars', 'woocommerce' ),
 				'BRL' => __( 'Brazilian Real', 'woocommerce' ),
 				'CAD' => __( 'Canadian Dollars', 'woocommerce' ),
-				'RMB' => __( 'Chinese Yuan', 'woocommerce' ),
+				'CNY' => __( 'Chinese Yuan', 'woocommerce' ),
 				'CZK' => __( 'Czech Koruna', 'woocommerce' ),
 				'DKK' => __( 'Danish Krone', 'woocommerce' ),
 				'EUR' => __( 'Euros', 'woocommerce' ),
