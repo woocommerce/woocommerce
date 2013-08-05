@@ -47,7 +47,12 @@ class WC_Product_Factory {
 			}
 
 			// Create a WC coding standards compliant class name e.g. WC_Product_Type_Class instead of WC_Product_type-class
-			$classname = 'WC_Product_' . preg_replace( '/-(.)/e', "'_' . strtoupper( '$1' )", ucfirst( $product_type ) );
+			// Check for PHP version and use 'preg_replace_callback' for php > 5.3 (when closures were available) because 'preg_replace' with '/e' modifier is deprecated in PHP 5.5
+			if ( defined('PHP_VERSION_ID') && PHP_VERSION_ID >= 50300 ) {
+				$classname = 'WC_Product_' . preg_replace_callback ( '/-(.)/', function ($matches) { return '_' . strtoupper($matches[1]); }, ucfirst( $product_type ) );
+			} else {
+				$classname = 'WC_Product_' . preg_replace( '/-(.)/e', "'_' . strtoupper( '$1' )", ucfirst( $product_type ) );
+			}
 		} else {
 			$classname = false;
 			$product_type = false;
