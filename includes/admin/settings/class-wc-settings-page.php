@@ -61,7 +61,7 @@ class WC_Settings_Page {
 		echo '<ul class="subsubsub">';
 
 		foreach ( $sections as $id => $label )
-			echo '<li><a href="' . admin_url( 'admin.php?page=woocommerce_settings&tab=' . $this->id . '&section=' . sanitize_title( $id ) ) . '" class="' . ( $current_section == $id ? 'current' : '' ) . '">' . $label . '</a> | </li>';
+			echo '<li><a href="' . admin_url( 'admin.php?page=woocommerce_settings&tab=' . $this->id . '&section=' . sanitize_title( $id ) ) . '" class="' . ( $current_section == $id ? 'current' : '' ) . '">' . $label . '</a> ' . ( end( array_keys( $sections ) ) == $id ? '' : '|' ) . ' </li>';
 
 		echo '</ul><br class="clear" />';
 	}
