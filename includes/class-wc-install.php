@@ -403,6 +403,7 @@ class WC_Install {
 	  tax_rate_id bigint(20) NOT NULL,
 	  location_type varchar(40) NOT NULL,
 	  PRIMARY KEY  (location_id),
+      KEY tax_rate_id (tax_rate_id),
 	  KEY location_type (location_type),
 	  KEY location_type_code (location_type,location_code)
 	) $collate;
