@@ -27,6 +27,9 @@ class WC_Admin_Menus {
 		add_action( 'admin_menu', array( $this, 'settings_menu' ), 50 );
 		add_action( 'admin_menu', array( $this, 'status_menu' ), 60 );
 
+		if ( apply_filters( 'woocommerce_show_addons_page', true ) )
+			add_action( 'admin_menu', array( $this, 'addons_menu' ), 70 );
+
 		add_action( 'admin_head', array( $this, 'menu_highlight' ) );
 		add_filter( 'menu_order', array( $this, 'menu_order' ) );
 		add_filter( 'custom_menu_order', array( $this, 'custom_menu_order' ) );
@@ -75,6 +78,13 @@ class WC_Admin_Menus {
 	 */
 	public function status_menu() {
 		add_submenu_page( 'woocommerce', __( 'WooCommerce Status', 'woocommerce' ),  __( 'System Status', 'woocommerce' ) , 'manage_woocommerce', 'wc_status', array( $this, 'status_page' ) );
+	}
+
+	/**
+	 * Addons menu item
+	 */
+	public function addons_menu() {
+		add_submenu_page( 'woocommerce', __( 'WooCommerce Add-ons/Extensions', 'woocommerce' ),  __( 'Add-ons', 'woocommerce' ) , 'manage_woocommerce', 'wc_addons', array( $this, 'addons_page' ) );
 	}
 
 	/**
@@ -198,10 +208,18 @@ class WC_Admin_Menus {
 	}
 
 	/**
-	 * Init the reports page
+	 * Init the status page
 	 */
 	public function status_page() {
 		$page = include( 'class-wc-admin-status.php' );
+		$page->output();
+	}
+
+	/**
+	 * Init the addons page
+	 */
+	public function addons_page() {
+		$page = include( 'class-wc-admin-addons.php' );
 		$page->output();
 	}
 }

@@ -24,6 +24,7 @@ function wc_get_screen_ids() {
     	$wc_screen_id . '_page_wc_status',
     	$wc_screen_id . '_page_woocommerce_settings',
     	$wc_screen_id . '_page_wc_status',
+        $wc_screen_id . '_page_wc_addons',
     	$wc_screen_id . '_page_woocommerce_customers',
     	'toplevel_page_woocommerce',
     	'woocommerce_page_woocommerce_settings',
