@@ -1,7 +1,5 @@
 <?php
 
-return new WC_Transient_Helper();
-
 class WC_Transient_Helper extends WC_Helper {
 	/**
 	 * Clear all transients cache for product data.
@@ -63,3 +61,5 @@ class WC_Transient_Helper extends WC_Helper {
 		}
 	}
 }
+
+return new WC_Transient_Helper();

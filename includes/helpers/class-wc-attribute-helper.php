@@ -1,7 +1,5 @@
 <?php
 
-return new WC_Attribute_Helper();
-
 class WC_Attribute_Helper extends WC_Helper {
 	/**
 	 * Get attribute taxonomies.
@@ -94,3 +92,5 @@ class WC_Attribute_Helper extends WC_Helper {
 		return $taxonomy_names;
 	}
 }
+
+return new WC_Attribute_Helper();

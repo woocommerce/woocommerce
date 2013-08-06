@@ -1,7 +1,5 @@
 <?php
 
-return new WC_Shortcode_Helper();
-
 class WC_Shortcode_Helper extends WC_Helper {
 	/**
 	 * Shortcode Wrapper
@@ -32,3 +30,5 @@ class WC_Shortcode_Helper extends WC_Helper {
 		return ob_get_clean();
 	}
 }
+
+return new WC_Shortcode_Helper();
