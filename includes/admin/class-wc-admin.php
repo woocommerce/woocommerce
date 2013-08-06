@@ -31,12 +31,6 @@ class WC_Admin {
 	public function includes() {
 
 		/**
-		 * Functions for the shop_coupon post type
-		 */
-		include_once( 'post-types/shop_coupon.php' );
-
-
-		/**
 		 * Hooks in admin
 		 */
 		include_once( 'woocommerce-admin-hooks.php' );
@@ -48,6 +42,7 @@ class WC_Admin {
 
 		// Functions
 		include( 'wc-admin-functions.php' );
+		include( 'wc-meta-box-functions.php' );
 
 		// Classes
 		include( 'class-wc-admin-help.php' );

@@ -26,6 +26,9 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	public function __construct() {
 		$this->type = 'shop_order';
 
+		// Before data updates
+		add_filter( 'wp_insert_post_data', array( $this, 'wp_insert_post_data' ) );
+
 		// Admin Columns
 		add_filter( 'manage_edit-' . $this->type . '_columns', array( $this, 'edit_columns' ) );
 		add_action( 'manage_' . $this->type . '_posts_custom_column', array( $this, 'custom_columns' ), 2 );
@@ -47,6 +50,26 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 		parent::__construct();
 	}
 
+	/**
+	 * Forces the order posts to have a title in a certain format (containing the date)
+	 *
+	 * @param array $data
+	 * @return array
+	 */
+	public function wp_insert_post_data( $data ) {
+		global $post;
+
+		if ( $data['post_type'] == 'shop_order' && isset( $data['post_date'] ) ) {
+
+			$order_title = 'Order';
+			if ( $data['post_date'] )
+				$order_title.= ' &ndash; ' . date_i18n( 'F j, Y @ h:i A', strtotime( $data['post_date'] ) );
+
+			$data['post_title'] = $order_title;
+		}
+
+		return $data;
+	}
 
 	/**
 	 * Change the columns shown in admin.

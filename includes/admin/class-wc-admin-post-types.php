@@ -30,12 +30,10 @@ class WC_Admin_Post_Types {
 	 * Conditonally load classes and functions only needed when viewing a post type.
 	 */
 	public function include_post_type_handlers() {
-		global $pagenow;
-
-		include_once( 'post-types/writepanels/writepanels-init.php' );
-
+		include( 'post-types/class-wc-admin-meta-boxes.php' );
 		include( 'post-types/class-wc-admin-cpt-product.php' );
 		include( 'post-types/class-wc-admin-cpt-shop_order.php' );
+		include( 'post-types/class-wc-admin-cpt-shop_coupon.php' );
 
 		if ( ! function_exists( 'duplicate_post_plugin_activation' ) )
 			include( 'class-wc-admin-duplicate-product.php' );

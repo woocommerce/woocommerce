@@ -26,6 +26,16 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 	public function __construct() {
 		$this->type = 'product';
 
+		// Post title fields
+		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
+
+		// Visibility option
+		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ) );
+
+		// Before data updates
+		add_action( 'pre_post_update', array( $this, 'pre_post_update' ) );
+		add_filter( 'wp_insert_post_data', array( $this, 'wp_insert_post_data' ) );
+
 		// Admin Columns
 		add_filter( 'manage_edit-product_columns', array( $this, 'edit_columns' ) );
 		add_action( 'manage_product_posts_custom_column', array( $this, 'custom_columns' ), 2 );
@@ -54,6 +64,109 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		parent::__construct();
 	}
 
+	/**
+	 * Change title boxes in admin.
+	 * @param  string $text
+	 * @param  object $post
+	 * @return string
+	 */
+	public function enter_title_here( $text, $post ) {
+		if ( $post->post_type == 'product' )
+			return __( 'Product name', 'woocommerce' );
+
+		return $text;
+	}
+
+	/**
+	 * Output product visibility options.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function product_data_visibility() {
+		global $post;
+
+		if ( $post->post_type != 'product' )
+			return;
+
+		$current_visibility = ( $current_visibility = get_post_meta( $post->ID, '_visibility', true ) ) ? $current_visibility : 'visible';
+		$current_featured 	= ( $current_featured = get_post_meta( $post->ID, '_featured', true ) ) ? $current_featured : 'no';
+
+		$visibility_options = apply_filters( 'woocommerce_product_visibility_options', array(
+			'visible' 	=> __( 'Catalog/search', 'woocommerce' ),
+			'catalog' 	=> __( 'Catalog', 'woocommerce' ),
+			'search' 	=> __( 'Search', 'woocommerce' ),
+			'hidden' 	=> __( 'Hidden', 'woocommerce' )
+		) );
+		?>
+		<div class="misc-pub-section" id="catalog-visibility">
+			<?php _e( 'Catalog visibility:', 'woocommerce' ); ?> <strong id="catalog-visibility-display"><?php
+				echo isset( $visibility_options[ $current_visibility ]  ) ? esc_html( $visibility_options[ $current_visibility ] ) : esc_html( $current_visibility );
+
+				if ( $current_featured == 'yes' )
+					echo ', ' . __( 'Featured', 'woocommerce' );
+			?></strong>
+
+			<a href="#catalog-visibility" class="edit-catalog-visibility hide-if-no-js"><?php _e( 'Edit', 'woocommerce' ); ?></a>
+
+			<div id="catalog-visibility-select" class="hide-if-js">
+
+				<input type="hidden" name="current_visibility" id="current_visibility" value="<?php echo esc_attr( $current_visibility ); ?>" />
+				<input type="hidden" name="current_featured" id="current_featured" value="<?php echo esc_attr( $current_featured ); ?>" />
+
+				<?php
+					echo '<p>' . __( 'Define the loops this product should be visible in. The product will still be accessible directly.', 'woocommerce' ) . '</p>';
+
+					foreach ( $visibility_options as $name => $label ) {
+						echo '<input type="radio" name="_visibility" id="_visibility_' . esc_attr( $name ) . '" value="' . esc_attr( $name ) . '" ' . checked( $current_visibility, $name, false ) . ' data-label="' . esc_attr( $label ) . '" /> <label for="_visibility_' . esc_attr( $name ) . '" class="selectit">' . esc_html( $label ) . '</label><br />';
+					}
+
+					echo '<p>' . __( 'Enable this option to feature this product.', 'woocommerce' ) . '</p>';
+
+					echo '<input type="checkbox" name="_featured" id="_featured" ' . checked( $current_featured, 'yes', false ) . ' /> <label for="_featured">' . __( 'Featured Product', 'woocommerce' ) . '</label><br />';
+				?>
+				<p>
+					<a href="#catalog-visibility" class="save-post-visibility hide-if-no-js button"><?php _e( 'OK', 'woocommerce' ); ?></a>
+					<a href="#catalog-visibility" class="cancel-post-visibility hide-if-no-js"><?php _e( 'Cancel', 'woocommerce' ); ?></a>
+				</p>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Some functions, like the term recount, require the visibility to be set prior. Lets save that here.
+	 *
+	 * @param int $post_id
+	 */
+	public function pre_post_update( $post_id ) {
+		if ( isset( $_POST['_visibility'] ) )
+			update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
+		if ( isset( $_POST['_stock_status'] ) )
+			update_post_meta( $post_id, '_stock_status', stripslashes( $_POST['_stock_status'] ) );
+	}
+
+	/**
+	 * Forces certain product data based on the product's type, e.g. grouped products cannot have a parent.
+	 *
+	 * @param array $data
+	 * @return array
+	 */
+	public function wp_insert_post_data( $data ) {
+		global $post;
+
+		if ( $data['post_type'] == 'product' && isset( $_POST['product-type'] ) ) {
+			$product_type = stripslashes( $_POST['product-type'] );
+			switch( $product_type ) :
+				case "grouped" :
+				case "variable" :
+					$data['post_parent'] = 0;
+				break;
+			endswitch;
+		}
+
+		return $data;
+	}
 
 	/**
 	 * Change the columns shown in admin.

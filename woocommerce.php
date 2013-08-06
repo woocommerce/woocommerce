@@ -249,6 +249,16 @@ final class WooCommerce {
 				include_once( $path . $file );
 				return;
 			}
+
+		} elseif ( strpos( $class, 'wc_meta_box' ) === 0 ) {
+
+			$path = $this->plugin_path() . '/includes/admin/post-types/meta-boxes/';
+			$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
+
+			if ( is_readable( $path . $file ) ) {
+				include_once( $path . $file );
+				return;
+			}
 		}
 
 		if ( strpos( $class, 'wc_' ) === 0 ) {

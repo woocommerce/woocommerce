@@ -255,7 +255,7 @@ class WC_Order {
 
 		// Get status
 		$terms = wp_get_object_terms( $this->id, 'shop_order_status', array( 'fields' => 'slugs' ) );
-		$this->status = isset( $terms[0] ) ? $terms[0] : 'pending';
+		$this->status = isset( $terms[0] ) ? $terms[0] : apply_filters( 'woocommerce_default_order_status', 'pending' );
 	}
 
 

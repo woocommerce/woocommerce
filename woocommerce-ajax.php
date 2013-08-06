@@ -578,7 +578,7 @@ function woocommerce_add_variation() {
 		$image_id = 0;
 		$variation = get_post( $variation_id ); // Get the variation object
 
-		include( 'includes/admin/post-types/writepanels/variation-admin-html.php' );
+		include( 'includes/admin/post-types/meta-boxes/views/html-variation-admin.php' );
 	}
 
 	die();
@@ -811,7 +811,7 @@ function woocommerce_grant_access_to_download() {
 				$loop ++;
 				$file_count ++;
 
-				include( 'includes/admin/post-types/writepanels/order-download-permission-html.php' );
+				include( 'includes/admin/post-types/meta-boxes/views/html-order-download-permission.php' );
 			}
 		}
 	}
@@ -925,7 +925,7 @@ function woocommerce_ajax_add_order_item() {
 
 	do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
 
-	include( 'includes/admin/post-types/writepanels/order-item-html.php' );
+	include( 'includes/admin/post-types/meta-boxes/views/html-order-item.php' );
 
 	// Quit out
 	die();
@@ -961,7 +961,7 @@ function woocommerce_ajax_add_order_fee() {
 	 	woocommerce_add_order_item_meta( $item_id, '_line_tax', '' );
  	}
 
-	include( 'includes/admin/post-types/writepanels/order-fee-html.php' );
+	include( 'includes/admin/post-types/meta-boxes-views/html-order-fee.php' );
 
 	// Quit out
 	die();
@@ -1306,7 +1306,7 @@ function woocommerce_calc_line_taxes() {
 		 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', $item['shipping_tax_amount'] );
 	 	}
 
-		include( 'includes/admin/post-types/writepanels/order-tax-html.php' );
+		include( 'includes/admin/post-types/meta-boxes/views/html-order-tax.php' );
 	}
 
 	$tax_row_html = ob_get_clean();
@@ -1370,7 +1370,7 @@ function woocommerce_add_line_tax() {
 	 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', '' );
  	}
 
-	include( 'includes/admin/post-types/writepanels/order-tax-html.php' );
+	include( 'includes/admin/post-types/meta-boxes/views/html-order-tax.php' );
 
 	// Quit out
 	die();
