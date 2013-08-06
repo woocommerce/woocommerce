@@ -604,6 +604,8 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 				update_post_meta( $post_id, '_manage_stock', 'no' );
 				update_post_meta( $post_id, '_stock', '0' );
 			}
+
+			do_action( 'woocommerce_product_set_stock', $product );
 		}
 
 		do_action( 'woocommerce_product_quick_edit_save', $product );
@@ -753,6 +755,8 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 			if ( ! empty( $_REQUEST['change_stock'] ) ) {
 				update_post_meta( $post_id, '_stock', (int) $_REQUEST['_stock'] );
 				update_post_meta( $post_id, '_manage_stock', 'yes' );
+
+				do_action( 'woocommerce_product_set_stock', $product );
 			}
 
 			if ( ! empty( $_REQUEST['_manage_stock'] ) ) {
@@ -762,6 +766,8 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 				} else {
 					update_post_meta( $post_id, '_manage_stock', 'no' );
 					update_post_meta( $post_id, '_stock', '0' );
+					
+					do_action( 'woocommerce_product_set_stock', $product );
 				}
 			}
 

@@ -942,12 +942,18 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 			update_post_meta( $post_id, '_manage_stock', 'no' );
 			update_post_meta( $post_id, '_backorders', 'no' );
 
+			do_action( 'woocommerce_product_set_stock', $post );
+			do_action( 'woocommerce_product_set_stock_status', $post_id, stripslashes( $_POST['_stock_status'] ) );			
+
 		} elseif ( $product_type == 'external' ) {
 
 			update_post_meta( $post_id, '_stock_status', 'instock' );
 			update_post_meta( $post_id, '_stock', '' );
 			update_post_meta( $post_id, '_manage_stock', 'no' );
 			update_post_meta( $post_id, '_backorders', 'no' );
+
+			do_action( 'woocommerce_product_set_stock', $post );
+			do_action( 'woocommerce_product_set_stock_status', $post_id, 'instock' );
 
 		} elseif ( ! empty( $_POST['_manage_stock'] ) ) {
 
@@ -957,9 +963,14 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 			update_post_meta( $post_id, '_backorders', stripslashes( $_POST['_backorders'] ) );
 			update_post_meta( $post_id, '_manage_stock', 'yes' );
 
+			do_action( 'woocommerce_product_set_stock', $post );
+			do_action( 'woocommerce_product_set_stock_status', $post_id, stripslashes( $_POST['_stock_status'] ) );
+
 			// Check stock level
-			if ( $product_type !== 'variable' && $_POST['_backorders'] == 'no' && (int) $_POST['_stock'] < 1 )
+			if ( $product_type !== 'variable' && $_POST['_backorders'] == 'no' && (int) $_POST['_stock'] < 1 ) {
 				update_post_meta( $post_id, '_stock_status', 'outofstock' );
+				do_action( 'woocommerce_product_set_stock_status', $post_id, 'outofstock' );
+			}
 
 		} else {
 
@@ -968,12 +979,16 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 			update_post_meta( $post_id, '_stock_status', stripslashes( $_POST['_stock_status'] ) );
 			update_post_meta( $post_id, '_backorders', stripslashes( $_POST['_backorders'] ) );
 			update_post_meta( $post_id, '_manage_stock', 'no' );
+			
+			do_action( 'woocommerce_product_set_stock', $post );
+			do_action( 'woocommerce_product_set_stock_status', $post_id, stripslashes( $_POST['_stock_status'] ) );
 
 		}
 
 	} else {
 
 		update_post_meta( $post_id, '_stock_status', stripslashes( $_POST['_stock_status'] ) );
+		do_action( 'woocommerce_product_set_stock_status', $post_id, stripslashes( $_POST['_stock_status'] ) );
 
 	}
 
