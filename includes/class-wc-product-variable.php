@@ -81,6 +81,8 @@ class WC_Product_Variable extends WC_Product {
 			$this->total_stock = intval( $amount );
 			update_post_meta( $this->id, '_stock', $this->stock );
 
+			do_action( 'woocommerce_product_set_stock', $this );
+
 			// Check parents out of stock attribute
 			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= 0 )
 				$this->set_stock_status( 'outofstock' );
@@ -108,6 +110,8 @@ class WC_Product_Variable extends WC_Product {
 			$this->total_stock = $this->get_total_stock() - $by;
 			update_post_meta($this->id, '_stock', $this->stock);
 
+			do_action( 'woocommerce_product_reduce_stock', $this, $by );
+
 			// Out of stock attribute
 			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= 0 )
 				$this->set_stock_status( 'outofstock' );
@@ -133,6 +137,8 @@ class WC_Product_Variable extends WC_Product {
 			$this->stock = $this->stock + $by;
 			$this->total_stock = $this->get_total_stock() + $by;
 			update_post_meta($this->id, '_stock', $this->stock);
+
+			do_action( 'woocommerce_product_increase_stock', $this, $by );
 
 			// Out of stock attribute
 			if ( $this->backorders_allowed() || $this->get_total_stock() > 0 )

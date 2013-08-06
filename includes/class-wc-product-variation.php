@@ -298,6 +298,8 @@ class WC_Product_Variation extends WC_Product {
 				update_post_meta( $this->variation_id, '_stock', $this->stock );
 				$woocommerce->get_helper( 'transient' )->clear_product_transients( $this->id ); // Clear transient
 
+				do_action( 'woocommerce_product_set_stock', $this );
+
 				// Check parents out of stock attribute
 				if ( ! $this->is_in_stock() ) {
 
@@ -337,6 +339,8 @@ class WC_Product_Variation extends WC_Product {
 				update_post_meta( $this->variation_id, '_stock', $this->stock );
 				$woocommerce->get_helper( 'transient' )->clear_product_transients( $this->id ); // Clear transient
 
+				do_action( 'woocommerce_product_reduce_stock', $this, $by );
+
 				// Check parents out of stock attribute
 				if ( ! $this->is_in_stock() ) {
 
@@ -373,6 +377,8 @@ class WC_Product_Variation extends WC_Product {
 				$this->total_stock 	= $this->total_stock + $by;
 				update_post_meta( $this->variation_id, '_stock', $this->stock );
 				$woocommerce->get_helper( 'transient' )->clear_product_transients( $this->id ); // Clear transient
+
+				do_action( 'woocommerce_product_increase_stock', $this, $by );
 
 				// Parents out of stock attribute
 				if ( $this->is_in_stock() )
