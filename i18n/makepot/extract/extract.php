@@ -19,10 +19,12 @@ class StringExtractor {
 		foreach ( $file_names as $file_name ) {
 			if ( '.' == $file_name || '..' == $file_name ) continue;
 			if ( preg_match( '/\.php$/', $file_name ) && $this->does_file_name_match( $prefix . $file_name, $excludes, $includes ) ) {
-				$translations->merge_originals_with( $this->extract_from_file( $file_name, $prefix ) );
+				$t = $this->extract_from_file( $file_name, $prefix );
+				$translations->merge_originals_with( $t );
 			}
 			if ( is_dir( $file_name ) ) {
-				$translations->merge_originals_with( $this->extract_from_directory( $file_name, $excludes, $includes, $prefix . $file_name . '/' ) );
+				$t = $this->extract_from_directory( $file_name, $excludes, $includes, $prefix . $file_name . '/' );
+				$translations->merge_originals_with( $t );
 			}
 		}
 		chdir( $old_cwd );
