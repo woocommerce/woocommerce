@@ -46,6 +46,11 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 		add_filter( 'query_vars', array( $this, 'add_custom_query_var' ) );
 		add_action( 'before_delete_post', array( $this, 'delete_order_items' ) );
 
+		// Bulk edit
+		add_action( 'admin_footer', array( $this, 'bulk_admin_footer' ), 10 );
+		add_action( 'load-edit.php', array( $this, 'bulk_action' ) );
+		add_action( 'admin_notices', array( $this, 'bulk_admin_notices' ) );
+
 		// Call WC_Admin_CPT constructor
 		parent::__construct();
 	}
@@ -611,6 +616,97 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 				JOIN {$wpdb->prefix}woocommerce_order_itemmeta ON {$wpdb->prefix}woocommerce_order_items.order_item_id = {$wpdb->prefix}woocommerce_order_itemmeta.order_item_id
 				WHERE {$wpdb->prefix}woocommerce_order_items.order_id = '{$postid}';
 				" );
+		}
+	}
+
+	/**
+	 * Add extra bulk action options to mark orders as complete or processing
+	 *
+	 * Using Javascript until WordPress core fixes: http://core.trac.wordpress.org/ticket/16031
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function bulk_admin_footer() {
+		global $post_type;
+
+		if ( 'shop_order' == $post_type ) {
+			?>
+			<script type="text/javascript">
+			jQuery(document).ready(function() {
+				jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo("select[name='action']");
+				jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo("select[name='action2']");
+
+				jQuery('<option>').val('mark_on-hold').text('<?php _e( 'Mark on-hold', 'woocommerce' )?>').appendTo("select[name='action']");
+				jQuery('<option>').val('mark_on-hold').text('<?php _e( 'Mark on-hold', 'woocommerce' )?>').appendTo("select[name='action2']");
+
+				jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark completed', 'woocommerce' )?>').appendTo("select[name='action']");
+				jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark completed', 'woocommerce' )?>').appendTo("select[name='action2']");
+			});
+			</script>
+			<?php
+		}
+	}
+
+	/**
+	 * Process the new bulk actions for changing order status
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function bulk_action() {
+		$wp_list_table = _get_list_table( 'WP_Posts_List_Table' );
+		$action = $wp_list_table->current_action();
+
+		switch ( $action ) {
+			case 'mark_completed':
+				$new_status = 'completed';
+				$report_action = 'marked_completed';
+				break;
+			case 'mark_processing':
+				$new_status = 'processing';
+				$report_action = 'marked_processing';
+				break;
+			case 'mark_on-hold' :
+				$new_status = 'on-hold';
+				$report_action = 'marked_on-hold';
+				break;
+			break;
+			default:
+				return;
+		}
+
+		$changed = 0;
+
+		$post_ids = array_map( 'absint', (array) $_REQUEST['post'] );
+
+		foreach( $post_ids as $post_id ) {
+			$order = new WC_Order( $post_id );
+			$order->update_status( $new_status, __( 'Order status changed by bulk edit:', 'woocommerce' ) );
+			$changed++;
+		}
+
+		$sendback = add_query_arg( array( 'post_type' => 'shop_order', $report_action => true, 'changed' => $changed, 'ids' => join( ',', $post_ids ) ), '' );
+		wp_redirect( $sendback );
+		exit();
+	}
+
+	/**
+	 * Show confirmation message that order status changed for number of orders
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function bulk_admin_notices() {
+		global $post_type, $pagenow;
+
+		if ( isset( $_REQUEST['marked_completed'] ) || isset( $_REQUEST['marked_processing'] ) || isset( $_REQUEST['marked_on-hold'] ) ) {
+			$number = isset( $_REQUEST['changed'] ) ? absint( $_REQUEST['changed'] ) : 0;
+
+			if ( 'edit.php' == $pagenow && 'shop_order' == $post_type ) {
+				$message = sprintf( _n( 'Order status changed.', '%s order statuses changed.', $number ), number_format_i18n( $number ) );
+				echo '<div class="updated"><p>' . $message . '</p></div>';
+			}
 		}
 	}
 

@@ -26,6 +26,7 @@ class WC_Admin_Meta_Boxes {
 		add_action( 'add_meta_boxes', array( $this, 'remove_meta_boxes' ), 10 );
 		add_action( 'add_meta_boxes', array( $this, 'rename_meta_boxes' ), 20 );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 30 );
+		add_action( 'add_meta_boxes', array( 'WC_Gateway_Mijireh', 'add_page_slurp_meta' ) );
 		add_action( 'save_post', array( $this, 'save_meta_boxes' ), 1, 2 );
 
 		// Save Order Meta Boxes

@@ -22,6 +22,10 @@ class WC_Admin_Taxonomies {
 	 */
 	public function __construct() {
 
+		// Category/term ordering
+		add_action( "create_term", array( $this, 'create_term' ), 5, 3 );
+		add_action( "delete_term", array( $this, 'delete_term' ), 5 );
+
 		// Add form
 		add_action( 'product_cat_add_form_fields', array( $this, 'add_category_fields' ) );
 		add_action( 'product_cat_edit_form_fields', array( $this, 'edit_category_fields' ), 10, 2 );
@@ -35,6 +39,42 @@ class WC_Admin_Taxonomies {
 		// Taxonomy page descriptions
 		add_action( 'product_cat_pre_add_form', array( $this, 'product_cat_description' ) );
 		add_action( 'product_shipping_class_pre_add_form', array( $this, 'shipping_class_description' ) );
+	}
+
+	/**
+	 * Order term when created (put in position 0).
+	 *
+	 * @access public
+	 * @param mixed $term_id
+	 * @param mixed $tt_id
+	 * @param mixed $taxonomy
+	 * @return void
+	 */
+	public function create_term( $term_id, $tt_id = '', $taxonomy = '' ) {
+		if ( $taxonomy != 'product_cat' && ! taxonomy_is_product_attribute( $taxonomy ) )
+			return;
+
+		$meta_name = taxonomy_is_product_attribute( $taxonomy ) ? 'order_' . esc_attr( $taxonomy ) : 'order';
+
+		update_woocommerce_term_meta( $term_id, $meta_name, 0 );
+	}
+
+	/**
+	 * When a term is deleted, delete its meta.
+	 *
+	 * @access public
+	 * @param mixed $term_id
+	 * @return void
+	 */
+	public function delete_term( $term_id ) {
+
+		$term_id = (int) $term_id;
+
+		if ( ! $term_id )
+			return;
+
+		global $wpdb;
+		$wpdb->query( "DELETE FROM {$wpdb->woocommerce_termmeta} WHERE `woocommerce_term_id` = " . $term_id );
 	}
 
 	/**

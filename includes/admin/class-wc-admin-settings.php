@@ -62,6 +62,7 @@ class WC_Admin_Settings {
 		delete_transient( 'woocommerce_cache_excluded_uris' );
 
 		self::add_message( __( 'Your settings have been saved.', 'woocommerce' ) );
+		self::check_download_folder_protection();
 
 		do_action( 'woocommerce_settings_saved' );
 	}
@@ -733,6 +734,39 @@ class WC_Admin_Settings {
 	    	update_option( $name, $value );
 
 	    return true;
+	}
+
+	/**
+	 * Checks which method we're using to serve downloads
+	 *
+	 * If using force or x-sendfile, this ensures the .htaccess is in place
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public static function check_download_folder_protection() {
+		$upload_dir 		= wp_upload_dir();
+		$downloads_url 		= $upload_dir['basedir'] . '/woocommerce_uploads';
+		$download_method	= get_option('woocommerce_file_download_method');
+
+		if ( $download_method == 'redirect' ) {
+
+			// Redirect method - don't protect
+			if ( file_exists( $downloads_url . '/.htaccess' ) )
+				unlink( $downloads_url . '/.htaccess' );
+
+		} else {
+
+			// Force method - protect, add rules to the htaccess file
+			if ( ! file_exists( $downloads_url . '/.htaccess' ) ) {
+				if ( $file_handle = @fopen( $downloads_url . '/.htaccess', 'w' ) ) {
+					fwrite( $file_handle, 'deny from all' );
+					fclose( $file_handle );
+				}
+			}
+		}
+
+		flush_rewrite_rules();
 	}
 }
 

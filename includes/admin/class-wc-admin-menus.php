@@ -203,8 +203,8 @@ class WC_Admin_Menus {
 	 * Init the attributes page
 	 */
 	public function attributes_page() {
-		include_once( 'woocommerce-admin-attributes.php' );
-		woocommerce_attributes();
+		$page = include( 'class-wc-admin-attributes.php' );
+		$page->output();
 	}
 
 	/**

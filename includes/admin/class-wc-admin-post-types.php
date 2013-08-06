@@ -24,6 +24,11 @@ class WC_Admin_Post_Types {
 		add_action( 'admin_init', array( $this, 'include_post_type_handlers' ) );
 		add_filter( 'post_updated_messages', array( $this, 'post_updated_messages' ) );
 		add_action( 'admin_print_scripts', array( $this, 'disable_autosave' ) );
+
+		// Status transitions
+		add_action( 'delete_post', array( $this, 'delete_post' ) );
+		add_action( 'wp_trash_post', array( $this, 'trash_post' ) );
+		add_action( 'untrash_post', array( $this, 'untrash_post' ) );
 	}
 
 	/**
@@ -110,6 +115,107 @@ class WC_Admin_Post_Types {
 	    }
 	}
 
+	/**
+	 * Removes variations etc belonging to a deleted post, and clears transients
+	 *
+	 * @access public
+	 * @param mixed $id ID of post being deleted
+	 * @return void
+	 */
+	public function delete_post( $id ) {
+		global $woocommerce, $wpdb;
+
+		if ( ! current_user_can( 'delete_posts' ) )
+			return;
+
+		if ( $id > 0 ) {
+
+			$post_type = get_post_type( $id );
+
+			switch( $post_type ) {
+				case 'product' :
+
+					if ( $child_product_variations =& get_children( 'post_parent=' . $id . '&post_type=product_variation' ) )
+						if ( $child_product_variations )
+							foreach ( $child_product_variations as $child )
+								wp_delete_post( $child->ID, true );
+
+					if ( $child_products =& get_children( 'post_parent=' . $id . '&post_type=product' ) )
+						if ( $child_products )
+							foreach ( $child_products as $child ) {
+								$child_post = array();
+								$child_post['ID'] = $child->ID;
+								$child_post['post_parent'] = 0;
+								wp_update_post( $child_post );
+							}
+
+					WC()->get_helper( 'transient' )->clear_product_transients();
+
+				break;
+				case 'product_variation' :
+
+					WC()->get_helper( 'transient' )->clear_product_transients();
+
+				break;
+			}
+		}
+	}
+
+	/**
+	 * woocommerce_trash_post function.
+	 *
+	 * @access public
+	 * @param mixed $id
+	 * @return void
+	 */
+	public function trash_post( $id ) {
+		if ( $id > 0 ) {
+
+			$post_type = get_post_type( $id );
+
+			if ( 'shop_order' == $post_type ) {
+
+				// Delete count - meta doesn't work on trashed posts
+				$user_id = get_post_meta( $id, '_customer_user', true );
+
+				if ( $user_id > 0 ) {
+					update_user_meta( $user_id, '_order_count', '' );
+					update_user_meta( $user_id, '_money_spent', '' );
+				}
+
+				delete_transient( 'woocommerce_processing_order_count' );
+			}
+
+		}
+	}
+
+	/**
+	 * woocommerce_untrash_post function.
+	 *
+	 * @access public
+	 * @param mixed $id
+	 * @return void
+	 */
+	public function untrash_post( $id ) {
+		if ( $id > 0 ) {
+
+			$post_type = get_post_type( $id );
+
+			if ( 'shop_order' == $post_type ) {
+
+				// Delete count - meta doesn't work on trashed posts
+				$user_id = get_post_meta( $id, '_customer_user', true );
+
+				if ( $user_id > 0 ) {
+					update_user_meta( $user_id, '_order_count', '' );
+					update_user_meta( $user_id, '_money_spent', '' );
+				}
+
+				delete_transient( 'woocommerce_processing_order_count' );
+			}
+
+		}
+	}
 }
 
 endif;

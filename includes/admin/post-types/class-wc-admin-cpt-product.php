@@ -60,6 +60,14 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		add_action( 'quick_edit_custom_box',  array( $this, 'quick_edit' ), 10, 2 );
 		add_action( 'save_post', array( $this, 'bulk_and_quick_edit_save_post' ), 10, 2 );
 
+		// Uploads
+		add_filter( 'upload_dir', array( $this, 'upload_dir' ) );
+		add_action( 'media_upload_downloadable_product', array( $this, 'media_upload_downloadable_product' ) );
+		add_filter( 'mod_rewrite_rules', array( $this, 'ms_protect_download_rewite_rules' ) );
+
+		// Download permissions
+		add_action( 'woocommerce_process_product_file_download_paths', array( $this, 'process_product_file_download_paths' ), 10, 3 );
+
 		// Call WC_Admin_CPT constructor
 		parent::__construct();
 	}
@@ -881,6 +889,93 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		}
 
 		do_action( 'woocommerce_product_bulk_edit_save', $product );
+	}
+
+	/**
+	 * Filter the directory for uploads.
+	 *
+	 * @param array $pathdata
+	 * @return array
+	 */
+	public function upload_dir( $pathdata ) {
+		// Change upload dir
+		if ( isset( $_POST['type'] ) && $_POST['type'] == 'downloadable_product' ) {
+			// Uploading a downloadable file
+			$subdir = '/woocommerce_uploads'.$pathdata['subdir'];
+		 	$pathdata['path'] = str_replace($pathdata['subdir'], $subdir, $pathdata['path']);
+		 	$pathdata['url'] = str_replace($pathdata['subdir'], $subdir, $pathdata['url']);
+			$pathdata['subdir'] = str_replace($pathdata['subdir'], $subdir, $pathdata['subdir']);
+			return $pathdata;
+		}
+
+		return $pathdata;
+	}
+
+	/**
+	 * Run a filter when uploading a downloadable product.
+	 */
+	public function woocommerce_media_upload_downloadable_product() {
+		do_action('media_upload_file');
+	}
+
+	/**
+	 * Protect downlodas from ms-files.php in multisite
+	 *
+	 * @param mixed $rewrite
+	 * @return string
+	 */
+	public function ms_protect_download_rewite_rules( $rewrite ) {
+	    global $wp_rewrite;
+
+	    if ( ! is_multisite() || get_option( 'woocommerce_file_download_method' ) == 'redirect' )
+	    	return $rewrite;
+
+		$rule  = "\n# WooCommerce Rules - Protect Files from ms-files.php\n\n";
+		$rule .= "<IfModule mod_rewrite.c>\n";
+		$rule .= "RewriteEngine On\n";
+		$rule .= "RewriteCond %{QUERY_STRING} file=woocommerce_uploads/ [NC]\n";
+		$rule .= "RewriteRule /ms-files.php$ - [F]\n";
+		$rule .= "</IfModule>\n\n";
+
+		return $rule . $rewrite;
+	}
+
+	/**
+	 * Grant downloadable file access to any newly added files on any existing
+	 * orders for this product that have previously been granted downloadable file access
+	 *
+	 * @access public
+	 * @param int $product_id product identifier
+	 * @param int $variation_id optional product variation identifier
+	 * @param array $file_paths newly set file paths
+	 */
+	public function process_product_file_download_paths( $product_id, $variation_id, $file_paths ) {
+		global $wpdb;
+
+		if ( $variation_id )
+			$product_id = $variation_id;
+
+		// determine whether any new files have been added
+		$existing_file_paths = apply_filters( 'woocommerce_file_download_paths', get_post_meta( $product_id, '_file_paths', true ), $product_id, null, null );
+		if ( ! $existing_file_paths ) $existing_file_paths = array();
+		$new_download_ids = array_diff( array_keys( $file_paths ), array_keys( $existing_file_paths ) );
+
+		if ( $new_download_ids ) {
+			// determine whether downloadable file access has been granted (either via the typical order completion, or via the admin ajax method)
+			$existing_permissions = $wpdb->get_results( $wpdb->prepare( "SELECT * from {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE product_id = %d GROUP BY order_id", $product_id ) );
+			foreach ( $existing_permissions as $existing_permission ) {
+				$order = new WC_Order( $existing_permission->order_id );
+
+				if ( $order->id ) {
+					foreach ( $new_download_ids as $new_download_id ) {
+						// grant permission if it doesn't already exist
+						if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT true FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->id, $product_id, $new_download_id ) ) ) {
+							woocommerce_downloadable_file_permission( $new_download_id, $product_id, $order );
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
