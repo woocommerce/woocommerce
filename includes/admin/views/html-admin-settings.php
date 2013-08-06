@@ -9,15 +9,6 @@
 			?>
 		</h2>
 
-		<?php if ( ! empty( $_GET['hide-wc-extensions-message'] ) ) : ?>
-			<?php update_option( 'hide-wc-extensions-message', 1 ); ?>
-		<?php elseif ( ! get_option('hide-wc-extensions-message') ) : ?>
-			<div id="woocommerce_extensions">
-				<a href="<?php echo add_query_arg( 'hide-wc-extensions-message', 'true') ?>" class="hide">&times;</a>
-				<?php printf(__( 'More functionality and gateway options available via <a href="%s" target="_blank">WC official extensions</a>.', 'woocommerce' ), 'http://www.woothemes.com/extensions/woocommerce-extensions/'); ?>
-			</div>
-		<?php endif; ?>
-
 		<?php
 			do_action( 'woocommerce_sections_' . $current_tab );
 			do_action( 'woocommerce_settings_' . $current_tab );
