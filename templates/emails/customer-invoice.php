@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 
 <?php endif; ?>
 
-<?php do_action('woocommerce_email_before_order_table', $order, false); ?>
+<?php do_action('woocommerce_email_before_order_table', $order, $sent_to_admin = false, $plain_text = false ); ?>
 
 <h2><?php echo __( 'Order:', 'woocommerce' ) . ' ' . $order->get_order_number(); ?> (<?php printf( '<time datetime="%s">%s</time>', date_i18n( 'c', strtotime( $order->order_date ) ), date_i18n( woocommerce_date_format(), strtotime( $order->order_date ) ) ); ?>)</h2>
 
@@ -60,8 +60,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 	</tfoot>
 </table>
 
-<?php do_action('woocommerce_email_after_order_table', $order, false); ?>
+<?php do_action('woocommerce_email_after_order_table', $order, $sent_to_admin = false, $plain_text = false ); ?>
 
-<?php do_action( 'woocommerce_email_order_meta', $order, false ); ?>
+<?php do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin = false, $plain_text = false ); ?>
 
 <?php do_action('woocommerce_email_footer'); ?>

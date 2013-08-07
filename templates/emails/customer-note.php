@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 
 <p><?php _e("For your reference, your order details are shown below.", 'woocommerce'); ?></p>
 
-<?php do_action('woocommerce_email_before_order_table', $order, false); ?>
+<?php do_action('woocommerce_email_before_order_table', $order, $sent_to_admin = false, $plain_text = false ); ?>
 
 <h2><?php echo __( 'Order:', 'woocommerce' ) . ' ' . $order->get_order_number(); ?></h2>
 
@@ -48,9 +48,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 	</tfoot>
 </table>
 
-<?php do_action('woocommerce_email_after_order_table', $order, false); ?>
+<?php do_action('woocommerce_email_after_order_table', $order, $sent_to_admin = false, $plain_text = false ); ?>
 
-<?php do_action( 'woocommerce_email_order_meta', $order, false ); ?>
+<?php do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin = false, $plain_text = false ); ?>
 
 <h2><?php _e( 'Customer details', 'woocommerce' ); ?></h2>
 
