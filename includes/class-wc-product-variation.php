@@ -229,7 +229,7 @@ class WC_Product_Variation extends WC_Product {
      *
      * @return string containing the formatted price
      */
-	public function get_price_html() {
+	public function get_price_html( $price = '' ) {
 
 		if ( $this->get_price() !== '' ) {
 			if ( $this->is_on_sale() ) {
