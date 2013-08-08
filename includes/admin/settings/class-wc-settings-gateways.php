@@ -84,7 +84,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 		if ( $current_section ) {
  			foreach ( $payment_gateways as $gateway ) {
-				if ( strtolower( get_class( $gateway ) ) == $current_section ) {
+				if ( strtolower( get_class( $gateway ) ) == strtolower( $current_section ) ) {
 					$gateway->admin_options();
 					break;
 				}
