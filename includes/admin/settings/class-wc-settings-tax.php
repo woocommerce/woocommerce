@@ -532,12 +532,12 @@ class WC_Settings_Tax extends WC_Settings_Page {
 								if ( is_numeric( $postcode_parts[0] ) && is_numeric( $postcode_parts[1] ) && $postcode_parts[1] > $postcode_parts[0] ) {
 									for ( $i = $postcode_parts[0]; $i <= $postcode_parts[1]; $i ++ ) {
 										if ( $i )
-											$postcode_query[] = "( '" . $wpdb->escape( $i ) . "', $tax_rate_id, 'postcode' )";
+											$postcode_query[] = "( '" . esc_sql( $i ) . "', $tax_rate_id, 'postcode' )";
 									}
 								}
 							} else {
 								if ( $postcode )
-									$postcode_query[] = "( '" . $wpdb->escape( $postcode ) . "', $tax_rate_id, 'postcode' )";
+									$postcode_query[] = "( '" . esc_sql( $postcode ) . "', $tax_rate_id, 'postcode' )";
 							}
 
 						$wpdb->query( "INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES " . implode( ',', $postcode_query ) );
@@ -626,12 +626,12 @@ class WC_Settings_Tax extends WC_Settings_Page {
 							if ( is_numeric( $postcode_parts[0] ) && is_numeric( $postcode_parts[1] ) && $postcode_parts[1] > $postcode_parts[0] ) {
 								for ( $i = $postcode_parts[0]; $i <= $postcode_parts[1]; $i ++ ) {
 									if ( $i )
-										$postcode_query[] = "( '" . $wpdb->escape( $i ) . "', $tax_rate_id, 'postcode' )";
+										$postcode_query[] = "( '" . esc_sql( $i ) . "', $tax_rate_id, 'postcode' )";
 								}
 							}
 						} else {
 							if ( $postcode )
-								$postcode_query[] = "( '" . $wpdb->escape( $postcode ) . "', $tax_rate_id, 'postcode' )";
+								$postcode_query[] = "( '" . esc_sql( $postcode ) . "', $tax_rate_id, 'postcode' )";
 						}
 
 					$wpdb->query( "INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES " . implode( ',', $postcode_query ) );
