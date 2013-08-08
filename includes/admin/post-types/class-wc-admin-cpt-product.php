@@ -958,7 +958,8 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		// determine whether any new files have been added
 		$existing_file_paths = apply_filters( 'woocommerce_file_download_paths', get_post_meta( $product_id, '_file_paths', true ), $product_id, null, null );
 		if ( ! $existing_file_paths ) $existing_file_paths = array();
-		$new_download_ids = array_diff( array_keys( $file_paths ), array_keys( $existing_file_paths ) );
+
+		$new_download_ids = array_diff( array_keys( (array) $file_paths ), array_keys( (array) $existing_file_paths ) );
 
 		if ( $new_download_ids ) {
 			// determine whether downloadable file access has been granted (either via the typical order completion, or via the admin ajax method)
