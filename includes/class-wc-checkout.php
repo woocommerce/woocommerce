@@ -187,8 +187,12 @@ class WC_Checkout {
 
 		// Store user data
 		if ( $this->checkout_fields['billing'] )
-			foreach ( $this->checkout_fields['billing'] as $key => $field )
+			foreach ( $this->checkout_fields['billing'] as $key => $field ) {
 				update_post_meta( $order_id, '_' . $key, $this->posted[ $key ] );
+
+				if ( $this->customer_id )
+					update_user_meta( $this->customer_id, $key, $this->posted[ $key ] );
+			}
 
 		if ( $this->checkout_fields['shipping'] && $woocommerce->cart->needs_shipping() ) {
 			foreach ( $this->checkout_fields['shipping'] as $key => $field ) {
