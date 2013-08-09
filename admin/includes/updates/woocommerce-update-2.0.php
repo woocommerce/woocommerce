@@ -227,9 +227,9 @@ foreach ( $order_item_rows as $order_item_row ) {
 				foreach ( $order_item['item_meta'] as $key => $meta ) {
 					// Backwards compatibility
 					if ( is_array( $meta ) && isset( $meta['meta_name'] ) ) {
-						$meta_rows[] = '(' . $item_id . ',"' . $wpdb->escape( $meta['meta_name'] ) . '","' . $wpdb->escape( $meta['meta_value'] ) . '")';
+						$meta_rows[] = '(' . $item_id . ',"' . esc_sql( $meta['meta_name'] ) . '","' . esc_sql( $meta['meta_value'] ) . '")';
 					} else {
-						$meta_rows[] = '(' . $item_id . ',"' . $wpdb->escape( $key ) . '","' . $wpdb->escape( $meta ) . '")';
+						$meta_rows[] = '(' . $item_id . ',"' . esc_sql( $key ) . '","' . esc_sql( $meta ) . '")';
 					}
 				}
 			}
