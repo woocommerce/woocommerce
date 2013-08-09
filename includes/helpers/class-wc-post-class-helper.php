@@ -1,7 +1,5 @@
 <?php
 
-return new WC_Post_Class_Helper();
-
 class WC_Post_Class_Helper extends WC_Helper {
 	/**
 	 * Adds extra post classes for products
@@ -53,3 +51,5 @@ class WC_Post_Class_Helper extends WC_Helper {
 		return $classes;
 	}
 }
+
+return new WC_Post_Class_Helper();

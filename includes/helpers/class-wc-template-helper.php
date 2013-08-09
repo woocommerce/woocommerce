@@ -1,7 +1,5 @@
 <?php
 
-return new WC_Template_Helper();
-
 class WC_Template_Helper extends WC_Helper {
 	public $template_url;
 
@@ -89,3 +87,5 @@ class WC_Template_Helper extends WC_Helper {
 			return $woocommerce->plugin_path() . '/templates/single-product-reviews.php';
 	}
 }
+
+return new WC_Template_Helper();

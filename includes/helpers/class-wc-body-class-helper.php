@@ -1,7 +1,5 @@
 <?php
 
-return new WC_Body_Class_Helper();
-
 class WC_Body_Class_Helper extends WC_Helper {
 	private $_body_classes = array();
 	
@@ -34,3 +32,5 @@ class WC_Body_Class_Helper extends WC_Helper {
 		return $classes;
 	}
 }
+
+return new WC_Body_Class_Helper();
