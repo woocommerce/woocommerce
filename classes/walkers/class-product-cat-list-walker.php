@@ -58,7 +58,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @param array $args
 	 * @param int $current_object_id
 	 */
-	function start_el( &$output, $cat, $depth, $args, $current_object_id = 0 ) {
+	function start_el( &$output, $cat, $depth = 0, $args = array(), $current_object_id = 0 ) {
 
 		$output .= '<li class="cat-item cat-item-' . $cat->term_id;
 
