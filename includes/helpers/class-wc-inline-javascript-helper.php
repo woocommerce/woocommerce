@@ -1,7 +1,5 @@
 <?php
 
-return new WC_Inline_Javascript_Helper();
-
 class WC_Inline_Javascript_Helper extends WC_Helper {
 	protected $_inline_js;
 	
@@ -41,3 +39,5 @@ class WC_Inline_Javascript_Helper extends WC_Helper {
 		}
 	}
 }
+
+return new WC_Inline_Javascript_Helper();
