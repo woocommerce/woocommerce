@@ -239,7 +239,7 @@
 					</span>
 				</label>
 				<label class="alignright">
-					<input type="text" name="_stock" class="text stock" placeholder="<?php _e( 'Stock Qty', 'woocommerce' ); ?>" value="">
+					<input type="number" name="_stock" class="text stock" placeholder="<?php _e( 'Stock Qty', 'woocommerce' ); ?>" step="any" value="">
 				</label>
 			</div>
 

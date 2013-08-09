@@ -156,7 +156,7 @@
 				<label class="stock_qty_field">
 				    <span class="title"><?php _e( 'Stock Qty', 'woocommerce' ); ?></span>
 				    <span class="input-text-wrap">
-						<input type="text" name="_stock" class="text stock" value="">
+						<input type="number" name="_stock" class="text stock" step="any" value="">
 					</span>
 				</label>
 			<?php endif; ?>
