@@ -32,6 +32,41 @@ function woocommerce_create_page( $slug, $option = '', $page_title = '', $page_c
 	_deprecated_function( 'woocommerce_create_page', '2.1', 'wc_create_page' );
 	return wc_create_page( $slug, $option, $page_title, $page_content, $post_parent );
 }
+function woocommerce_readfile_chunked( $file, $retbytes = true ) {
+	_deprecated_function( 'woocommerce_readfile_chunked', '2.1', 'WC_Download_Handler::readfile_chunked()' );
+	return WC_Download_Handler::readfile_chunked( $file, $retbytes );
+}
+
+/**
+ * Get product name with extra details such as SKU price and attributes. Used within admin.
+ *
+ * @access public
+ * @param mixed $product
+ * @deprecated 2.1
+ * @return void
+ */
+function woocommerce_get_formatted_product_name( $product ) {
+	_deprecated_function( __FUNCTION__, '2.1', 'WC_Product::get_formatted_name()' );
+	return $product->get_formatted_name();
+}
+
+/**
+ * Handle IPN requests for the legacy paypal gateway by calling gateways manually if needed.
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_legacy_paypal_ipn() {
+	if ( ! empty( $_GET['paypalListener'] ) && $_GET['paypalListener'] == 'paypal_standard_IPN' ) {
+		global $woocommerce;
+
+		$woocommerce->payment_gateways();
+
+		do_action( 'woocommerce_api_wc_gateway_paypal' );
+	}
+}
+add_action( 'init', 'woocommerce_legacy_paypal_ipn' );
+
 
 /**
  * Handle renamed filters

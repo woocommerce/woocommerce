@@ -666,7 +666,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 			$this->bulk_edit_save( $post_id, $product );
 
 		// Clear transient
-		$woocommerce->get_helper( 'transient' )->clear_product_transients( $post_id );
+		wc_delete_product_transients( $post_id );
 	}
 
 	/**

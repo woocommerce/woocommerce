@@ -47,7 +47,7 @@ class WC_Admin_Status {
 
 			switch ( $_GET['action'] ) {
 				case "clear_transients" :
-					$woocommerce->get_helper( 'transient' )->clear_product_transients();
+					wc_delete_product_transients();
 
 					echo '<div class="updated"><p>' . __( 'Product Transients Cleared', 'woocommerce' ) . '</p></div>';
 				break;
@@ -95,8 +95,9 @@ class WC_Admin_Status {
 				break;
 				case "reset_roles" :
 					// Remove then re-add caps and roles
-					woocommerce_remove_roles();
-					woocommerce_init_roles();
+					$installer = include( WC()->plugin_path() . '/includes/class-wc-install.php' );
+					$installer->remove_roles();
+					$installer->create_roles();
 
 					echo '<div class="updated"><p>' . __( 'Roles successfully reset', 'woocommerce' ) . '</p></div>';
 				break;

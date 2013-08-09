@@ -20,11 +20,12 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 if ( ! class_exists( 'WooCommerce' ) ) :
+
 /**
  * Main WooCommerce Class
  *
  * @class WooCommerce
- * @version	2.0.1
+ * @version	2.1.0
  * @since 1.4
  * @package	WooCommerce
  * @author WooThemes
@@ -281,10 +282,10 @@ final class WooCommerce {
 	 */
 	function includes() {
 
-		include( 'includes/wc-deprecated-functions.php' );
-		include( 'includes/wc-message-functions.php' );
-		include( 'includes/wc-coupon-functions.php' );
+		include( 'includes/wc-core-functions.php' );
 		include( 'includes/class-wc-install.php' );
+		include( 'includes/class-wc-download-handler.php' );
+		include( 'includes/class-wc-comments.php' );
 
 		if ( is_admin() )
 			include_once( 'includes/admin/class-wc-admin.php' );
@@ -300,9 +301,6 @@ final class WooCommerce {
 
 		// Post types
 		include_once( 'includes/class-wc-post-types.php' );					// Registers post types
-
-		// Functions
-		include_once( 'woocommerce-core-functions.php' );  // Contains core functions for the front/back end
 
 		// API Class
 		include_once( 'includes/class-wc-api.php' );
@@ -355,12 +353,9 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function frontend_includes() {
-		// Functions
-		include_once( 'woocommerce-hooks.php' );        // Template hooks used on the front-end
-		include_once( 'woocommerce-functions.php' );    // Contains functions for various front-end events
-
 		// Classes
 		include_once( 'includes/class-wc-frontend-scripts.php' );
+		include_once( 'includes/class-wc-form-handler.php' );
 		include_once( 'includes/class-wc-cart.php' );					// The main cart class
 		include_once( 'includes/class-wc-tax.php' );					// Tax class
 		include_once( 'includes/class-wc-customer.php' ); 			// Customer class
@@ -377,7 +372,8 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function include_template_functions() {
-		include_once( 'woocommerce-template.php' );
+		include_once( 'includes/wc-template-hooks.php' );
+		include_once( 'includes/wc-template-functions.php' );
 	}
 
 
@@ -476,9 +472,7 @@ final class WooCommerce {
 			add_filter( 'comments_template', array( $this->get_helper( 'template' ), 'comments_template_loader' ) );
 			add_filter( 'wp_redirect', array( $this, 'redirect' ), 1, 2 );
 			add_action( 'wp_head', array( $this, 'generator' ) );
-			add_action( 'wp_head', array( $this, 'wp_head' ) );
-			add_filter( 'body_class', array( $this->get_helper( 'body-class' ), 'output_body_class' ) );
-			add_filter( 'post_class', array( $this->get_helper( 'post-class' ), 'post_class' ), 20, 3 );
+
 			add_action( 'wp_footer', array( $this->get_helper( 'inline-javascript' ), 'output_inline_js' ), 25 );
 
 			// HTTPS urls with SSL on
@@ -620,41 +614,6 @@ final class WooCommerce {
 	 */
 	public function generator() {
 		echo "\n\n" . '<!-- WooCommerce Version -->' . "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( $this->version ) . '" />' . "\n\n";
-	}
-
-
-	/**
-	 * Add body classes.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function wp_head() {
-
-		if ( is_woocommerce() ) {
-			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce' );
-			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-page' );
-			return;
-		}
-
-		if ( is_checkout() ) {
-			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-checkout' );
-			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-page' );
-			return;
-		}
-
-		if ( is_cart() ) {
-			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-cart' );
-			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-page' );
-			return;
-		}
-
-		if ( is_account_page() ) {
-			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-account' );
-			$this->get_helper( 'body-class' )->add_body_class( 'woocommerce-page' );
-			return;
-		}
-
 	}
 
 
@@ -875,8 +834,8 @@ final class WooCommerce {
 
 	// Deprecated 2.1.0 Access via the WC_Transient_Helper helper
 	public function clear_product_transients( $post_id = 0 ) {
-		_deprecated_function( 'Woocommerce->clear_product_transients', '2.1', 'WC_Transient_Helper->clear_product_transients' );
-		$this->get_helper( 'transient' )->clear_product_transients( $post_id );
+		_deprecated_function( 'Woocommerce->clear_product_transients', '2.1', 'wc_delete_product_transients' );
+		wc_delete_product_transients( $post_id );
 	}
 
 	// Deprecated 2.1.0 Access via the WC_Inline_Javascript_Helper helper
@@ -911,8 +870,8 @@ final class WooCommerce {
 
 	// Deprecated 2.1.0 Access via the WC_Shortcode_Helper helper
 	public function shortcode_wrapper( $function, $atts = array(), $wrapper = array( 'class' => 'woocommerce', 'before' => null, 'after' => null ) ) {
-		_deprecated_function( 'Woocommerce->shortcode_wrapper', '2.1', 'WC_Shortcode_Helper->shortcode_wrapper' );
-		return $this->get_helper( 'shortcode' )->shortcode_wrapper( $function, $atts, $wrapper );
+		_deprecated_function( 'Woocommerce->shortcode_wrapper', '2.1', 'WC_Shortcodes::shortcode_wrapper' );
+		return WC_Shortcodes::shortcode_wrapper( $function, $atts, $wrapper );
 	}
 
 	// Deprecated 2.1.0 Access via the WC_Attribute_Helper helper
@@ -957,22 +916,14 @@ final class WooCommerce {
 		return wc_get_coupon_type( $type );
 	}
 
-	// Deprecated 2.1.0 Access via the WC_Post_Class_Helper helper
-	public function post_class( $classes, $class, $post_id ) {
-		_deprecated_function( 'Woocommerce->post_class', '2.1', 'WC_Post_Class_Helper->post_class' );
-		return $this->get_helper( 'post-class' )->post_class( $classes, $class, $post_id );
-	}
-
 	// Deprecated 2.1.0 Access via the WC_Body_Class_Helper helper
 	public function add_body_class( $class ) {
-		_deprecated_function( 'Woocommerce->add_body_class', '2.1', 'WC_Body_Class_Helper->add_body_class' );
-		$this->get_helper( 'body-class' )->add_body_class( $class );
+		_deprecated_function( 'Woocommerce->add_body_class', '2.1' );
 	}
 
 	// Deprecated 2.1.0 Access via the WC_Body_Class_Helper helper
 	public function output_body_class( $classes ) {
-		_deprecated_function( 'Woocommerce->output_body_class', '2.1', 'WC_Body_Class_Helper->output_body_class' );
-		return $this->get_helper( 'body-class' )->output_body_class( $classes );
+		_deprecated_function( 'Woocommerce->output_body_class', '2.1' );
 	}
 
 	// Deprecated 2.1.0 Access via the WC_Template_Helper helper

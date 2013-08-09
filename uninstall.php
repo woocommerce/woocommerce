@@ -14,11 +14,8 @@ if( !defined('WP_UNINSTALL_PLUGIN') ) exit();
 global $wpdb, $wp_roles;
 
 // Roles + caps
-if ( ! function_exists( 'woocommerce_remove_roles' ) )
-	include_once( 'woocommerce-core-functions.php' );
-
-if ( function_exists( 'woocommerce_remove_roles' ) )
-	woocommerce_remove_roles();
+$installer = include( 'includes/class-wc-install.php' );
+$installer->remove_roles();
 
 // Pages
 wp_delete_post( get_option('woocommerce_shop_page_id'), true );

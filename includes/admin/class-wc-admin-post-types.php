@@ -149,12 +149,12 @@ class WC_Admin_Post_Types {
 								wp_update_post( $child_post );
 							}
 
-					WC()->get_helper( 'transient' )->clear_product_transients();
+					wc_delete_product_transients();
 
 				break;
 				case 'product_variation' :
 
-					WC()->get_helper( 'transient' )->clear_product_transients();
+					wc_delete_product_transients();
 
 				break;
 			}

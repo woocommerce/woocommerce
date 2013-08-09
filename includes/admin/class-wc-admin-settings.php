@@ -58,7 +58,7 @@ class WC_Admin_Settings {
 	    do_action( 'woocommerce_update_options' );
 
     	// Clear any unwanted data
-		WC()->get_helper( 'transient' )->clear_product_transients();
+		wc_delete_product_transients();
 		delete_transient( 'woocommerce_cache_excluded_uris' );
 
 		self::add_message( __( 'Your settings have been saved.', 'woocommerce' ) );

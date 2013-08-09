@@ -1131,7 +1131,7 @@ class WC_Meta_Box_Product_Data {
 					}
 
 					// Clear cache/transients
-					WC()->get_helper( 'transient' )->clear_product_transients( $clear_id );
+					wc_delete_product_transients( $clear_id );
 				}
 			}
 		}
@@ -1265,7 +1265,7 @@ class WC_Meta_Box_Product_Data {
 		do_action( 'woocommerce_process_product_meta_' . $product_type, $post_id );
 
 		// Clear cache/transients
-		WC()->get_helper( 'transient' )->clear_product_transients( $post_id );
+		wc_delete_product_transients( $post_id );
 	}
 
 	/**

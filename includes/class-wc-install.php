@@ -104,7 +104,7 @@ class WC_Install {
 		$this->create_css_from_less();
 
 		// Clear transient cache
-		WC()->get_helper( 'transient' )->clear_product_transients();
+		wc_delete_product_transients();
 
 		// Queue upgrades
 		$current_version = get_option( 'woocommerce_version', null );
@@ -473,7 +473,7 @@ class WC_Install {
 				'import'                 => true
 			) );
 
-			$capabilities = woocommerce_get_core_capabilities();
+			$capabilities = $this->get_core_capabilities();
 
 			foreach( $capabilities as $cap_group ) {
 				foreach( $cap_group as $cap ) {
@@ -481,6 +481,80 @@ class WC_Install {
 					$wp_roles->add_cap( 'administrator', $cap );
 				}
 			}
+		}
+	}
+
+	/**
+	 * Get capabilities for WooCommerce - these are assigned to admin/shop manager during installation or reset
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function get_core_capabilities() {
+		$capabilities = array();
+
+		$capabilities['core'] = array(
+			"manage_woocommerce",
+			"view_woocommerce_reports"
+		);
+
+		$capability_types = array( 'product', 'shop_order', 'shop_coupon' );
+
+		foreach( $capability_types as $capability_type ) {
+
+			$capabilities[ $capability_type ] = array(
+				// Post type
+				"edit_{$capability_type}",
+				"read_{$capability_type}",
+				"delete_{$capability_type}",
+				"edit_{$capability_type}s",
+				"edit_others_{$capability_type}s",
+				"publish_{$capability_type}s",
+				"read_private_{$capability_type}s",
+				"delete_{$capability_type}s",
+				"delete_private_{$capability_type}s",
+				"delete_published_{$capability_type}s",
+				"delete_others_{$capability_type}s",
+				"edit_private_{$capability_type}s",
+				"edit_published_{$capability_type}s",
+
+				// Terms
+				"manage_{$capability_type}_terms",
+				"edit_{$capability_type}_terms",
+				"delete_{$capability_type}_terms",
+				"assign_{$capability_type}_terms"
+			);
+		}
+
+		return $capabilities;
+	}
+
+	/**
+	 * woocommerce_remove_roles function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function remove_roles() {
+		global $wp_roles;
+
+		if ( class_exists('WP_Roles') )
+			if ( ! isset( $wp_roles ) )
+				$wp_roles = new WP_Roles();
+
+		if ( is_object( $wp_roles ) ) {
+
+			$capabilities = $this->get_core_capabilities();
+
+			foreach( $capabilities as $cap_group ) {
+				foreach( $cap_group as $cap ) {
+					$wp_roles->remove_cap( 'shop_manager', $cap );
+					$wp_roles->remove_cap( 'administrator', $cap );
+				}
+			}
+
+			remove_role( 'customer' );
+			remove_role( 'shop_manager' );
 		}
 	}
 

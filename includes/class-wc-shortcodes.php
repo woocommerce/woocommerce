@@ -37,6 +37,34 @@ class WC_Shortcodes {
 	}
 
 	/**
+	 * Shortcode Wrapper
+	 *
+	 * @param mixed $function
+	 * @param array $atts (default: array())
+	 * @return string
+	 */
+	public static function shortcode_wrapper(
+		$function,
+		$atts = array(),
+		$wrapper = array(
+			'class' => 'woocommerce',
+			'before' => null,
+			'after' => null
+		)
+	){
+		ob_start();
+
+		$before 	= empty( $wrapper['before'] ) ? '<div class="' . $wrapper['class'] . '">' : $wrapper['before'];
+		$after 		= empty( $wrapper['after'] ) ? '</div>' : $wrapper['after'];
+
+		echo $before;
+		call_user_func( $function, $atts );
+		echo $after;
+
+		return ob_get_clean();
+	}
+
+	/**
 	 * Cart page shortcode.
 	 *
 	 * @access public
@@ -44,8 +72,7 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function cart( $atts ) {
-		global $woocommerce;
-		return $woocommerce->get_helper( 'shortcode' )->shortcode_wrapper( array( 'WC_Shortcode_Cart', 'output' ), $atts );
+		return $this->shortcode_wrapper( array( 'WC_Shortcode_Cart', 'output' ), $atts );
 	}
 
 	/**
@@ -56,8 +83,7 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function checkout( $atts ) {
-		global $woocommerce;
-		return $woocommerce->get_helper( 'shortcode' )->shortcode_wrapper( array( 'WC_Shortcode_Checkout', 'output' ), $atts );
+		return $this->shortcode_wrapper( array( 'WC_Shortcode_Checkout', 'output' ), $atts );
 	}
 
 	/**
@@ -68,8 +94,7 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function order_tracking( $atts ) {
-		global $woocommerce;
-		return $woocommerce->get_helper( 'shortcode' )->shortcode_wrapper( array( 'WC_Shortcode_Order_Tracking', 'output' ), $atts );
+		return $this->shortcode_wrapper( array( 'WC_Shortcode_Order_Tracking', 'output' ), $atts );
 	}
 
 	/**
@@ -80,8 +105,7 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function my_account( $atts ) {
-		global $woocommerce;
-		return $woocommerce->get_helper( 'shortcode' )->shortcode_wrapper( array( 'WC_Shortcode_My_Account', 'output' ), $atts );
+		return $this->shortcode_wrapper( array( 'WC_Shortcode_My_Account', 'output' ), $atts );
 	}
 
 	/**
@@ -92,7 +116,7 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function product_category( $atts ){
-		global $woocommerce, $woocommerce_loop;
+		global $woocommerce_loop;
 
 	  	if ( empty( $atts ) ) return;
 
@@ -108,7 +132,7 @@ class WC_Shortcodes {
 		if ( ! $category ) return;
 
 		// Default ordering args
-		$ordering_args = $woocommerce->query->get_catalog_ordering_args( $orderby, $order );
+		$ordering_args = WC()->query->get_catalog_ordering_args( $orderby, $order );
 
 	  	$args = array(
 			'post_type'				=> 'product',
@@ -238,7 +262,6 @@ class WC_Shortcodes {
 		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
 
-
 	/**
 	 * Recent Products shortcode
 	 *
@@ -248,7 +271,7 @@ class WC_Shortcodes {
 	 */
 	public function recent_products( $atts ) {
 
-		global $woocommerce_loop, $woocommerce;
+		global $woocommerce_loop;
 
 		extract(shortcode_atts(array(
 			'per_page' 	=> '12',
@@ -257,7 +280,7 @@ class WC_Shortcodes {
 			'order' => 'desc'
 		), $atts));
 
-		$meta_query = $woocommerce->query->get_meta_query();
+		$meta_query = WC()->query->get_meta_query();
 
 		$args = array(
 			'post_type'	=> 'product',
@@ -430,7 +453,6 @@ class WC_Shortcodes {
 		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
 
-
 	/**
 	 * Display a single product price + cart button
 	 *
@@ -439,7 +461,7 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function product_add_to_cart( $atts ) {
-	  	global $wpdb, $woocommerce;
+	  	global $wpdb;
 
 	  	if ( empty( $atts ) ) return;
 
@@ -456,7 +478,7 @@ class WC_Shortcodes {
 
 		if ( 'product' == $product_data->post_type ) {
 
-			$product = $woocommerce->setup_product_data( $product_data );
+			$product = WC()->setup_product_data( $product_data );
 
 			ob_start();
 			?>
@@ -511,7 +533,6 @@ class WC_Shortcodes {
 		}
 	}
 
-
 	/**
 	 * Get the add to cart URL for a product
 	 *
@@ -548,7 +569,7 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function sale_products( $atts ){
-	    global $woocommerce_loop, $woocommerce;
+	    global $woocommerce_loop;
 
 	    extract( shortcode_atts( array(
 	        'per_page'      => '12',
@@ -561,8 +582,8 @@ class WC_Shortcodes {
 		$product_ids_on_sale = woocommerce_get_product_ids_on_sale();
 
 		$meta_query = array();
-		$meta_query[] = $woocommerce->query->visibility_meta_query();
-	    $meta_query[] = $woocommerce->query->stock_status_meta_query();
+		$meta_query[] = WC()->query->visibility_meta_query();
+	    $meta_query[] = WC()->query->stock_status_meta_query();
 	    $meta_query   = array_filter( $meta_query );
 
 		$args = array(

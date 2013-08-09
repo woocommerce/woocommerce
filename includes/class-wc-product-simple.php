@@ -70,6 +70,6 @@ class WC_Product_Simple extends WC_Product {
 			}
 		}
 
-		$woocommerce->get_helper( 'transient' )->clear_product_transients( $this->id );
+		wc_delete_product_transients( $this->id );
 	}
 }

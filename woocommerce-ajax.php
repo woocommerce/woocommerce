@@ -741,7 +741,7 @@ function woocommerce_link_all_variations() {
 			break;
 	}
 
-	$woocommerce->get_helper( 'transient' )->clear_product_transients( $post_id );
+	wc_delete_product_transients( $post_id );
 
 	echo $added;
 

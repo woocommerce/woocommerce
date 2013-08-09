@@ -1,16 +1,209 @@
 <?php
 /**
- * WooCommerce Template Functions
+ * WooCommerce Template
  *
- * Functions used in the template files to output content - in most cases hooked in via the template actions. All functions are pluggable.
+ * Functions for the templating system.
  *
  * @author 		WooThemes
  * @category 	Core
- * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @package 	WooCommerce/Functions
+ * @version     2.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
+/**
+ * Get template part (for templates like the shop-loop).
+ *
+ * @access public
+ * @param mixed $slug
+ * @param string $name (default: '')
+ * @return void
+ */
+function woocommerce_get_template_part( $slug, $name = '' ) {
+	global $woocommerce;
+	$template = '';
+
+	// Look in yourtheme/slug-name.php and yourtheme/woocommerce/slug-name.php
+	if ( $name )
+		$template = locate_template( array ( "{$slug}-{$name}.php", "{$woocommerce->template_url}{$slug}-{$name}.php" ) );
+
+	// Get default slug-name.php
+	if ( !$template && $name && file_exists( $woocommerce->plugin_path() . "/templates/{$slug}-{$name}.php" ) )
+		$template = $woocommerce->plugin_path() . "/templates/{$slug}-{$name}.php";
+
+	// If template file doesn't exist, look in yourtheme/slug.php and yourtheme/woocommerce/slug.php
+	if ( !$template )
+		$template = locate_template( array ( "{$slug}.php", "{$woocommerce->template_url}{$slug}.php" ) );
+
+	if ( $template )
+		load_template( $template, false );
+}
+
+/**
+ * Get other templates (e.g. product attributes) passing attributes and including the file.
+ *
+ * @access public
+ * @param mixed $template_name
+ * @param array $args (default: array())
+ * @param string $template_path (default: '')
+ * @param string $default_path (default: '')
+ * @return void
+ */
+function woocommerce_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
+	global $woocommerce;
+
+	if ( $args && is_array($args) )
+		extract( $args );
+
+	$located = woocommerce_locate_template( $template_name, $template_path, $default_path );
+
+	do_action( 'woocommerce_before_template_part', $template_name, $template_path, $located, $args );
+
+	include( $located );
+
+	do_action( 'woocommerce_after_template_part', $template_name, $template_path, $located, $args );
+}
+
+/**
+ * Locate a template and return the path for inclusion.
+ *
+ * This is the load order:
+ *
+ *		yourtheme		/	$template_path	/	$template_name
+ *		yourtheme		/	$template_name
+ *		$default_path	/	$template_name
+ *
+ * @access public
+ * @param mixed $template_name
+ * @param string $template_path (default: '')
+ * @param string $default_path (default: '')
+ * @return string
+ */
+function woocommerce_locate_template( $template_name, $template_path = '', $default_path = '' ) {
+	global $woocommerce;
+
+	if ( ! $template_path ) $template_path = $woocommerce->template_url;
+	if ( ! $default_path ) $default_path = $woocommerce->plugin_path() . '/templates/';
+
+	// Look within passed path within the theme - this is priority
+	$template = locate_template(
+		array(
+			trailingslashit( $template_path ) . $template_name,
+			$template_name
+		)
+	);
+
+	// Get default template
+	if ( ! $template )
+		$template = $default_path . $template_name;
+
+	// Return what we found
+	return apply_filters('woocommerce_locate_template', $template, $template_name, $template_path);
+}
+
+/**
+ * Handle redirects before content is output - hooked into template_redirect so is_page works.
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_template_redirect() {
+	global $woocommerce, $wp_query, $wp;
+
+	// When default permalinks are enabled, redirect shop page to post type archive url
+	if ( ! empty( $_GET['page_id'] ) && get_option( 'permalink_structure' ) == "" && $_GET['page_id'] == woocommerce_get_page_id( 'shop' ) ) {
+		wp_safe_redirect( get_post_type_archive_link('product') );
+		exit;
+	}
+
+	// When on the checkout with an empty cart, redirect to cart page
+	elseif ( is_page( woocommerce_get_page_id( 'checkout' ) ) && sizeof( $woocommerce->cart->get_cart() ) == 0 && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ) {
+		wp_redirect( get_permalink( woocommerce_get_page_id( 'cart' ) ) );
+		exit;
+	}
+
+	// Logout
+	elseif ( is_page( woocommerce_get_page_id( 'logout' ) ) ) {
+		wp_redirect( str_replace( '&amp;', '&', wp_logout_url( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) ) ) );
+		exit;
+	}
+
+	// Redirect to the product page if we have a single product
+	elseif ( is_search() && is_post_type_archive( 'product' ) && apply_filters( 'woocommerce_redirect_single_search_result', true ) && $wp_query->post_count == 1 ) {
+		$product = get_product( $wp_query->post );
+
+		if ( $product->is_visible() ) {
+			wp_safe_redirect( get_permalink( $product->id ), 302 );
+			exit;
+		}
+	}
+
+	// Force SSL
+	elseif ( get_option('woocommerce_force_ssl_checkout') == 'yes' && ! is_ssl() ) {
+
+		if ( is_checkout() || is_account_page() || apply_filters( 'woocommerce_force_ssl_checkout', false ) ) {
+			if ( 0 === strpos( $_SERVER['REQUEST_URI'], 'http' ) ) {
+				wp_safe_redirect( preg_replace( '|^http://|', 'https://', $_SERVER['REQUEST_URI'] ) );
+				exit;
+			} else {
+				wp_safe_redirect( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+				exit;
+			}
+		}
+
+	}
+
+	// Break out of SSL if we leave the checkout/my accounts
+	elseif ( get_option('woocommerce_force_ssl_checkout') == 'yes' && get_option('woocommerce_unforce_ssl_checkout') == 'yes' && is_ssl() && $_SERVER['REQUEST_URI'] && ! is_checkout() && ! is_ajax() && ! is_account_page() && apply_filters( 'woocommerce_unforce_ssl_checkout', true ) ) {
+
+		if ( 0 === strpos( $_SERVER['REQUEST_URI'], 'http' ) ) {
+			wp_safe_redirect( preg_replace( '|^https://|', 'http://', $_SERVER['REQUEST_URI'] ) );
+			exit;
+		} else {
+			wp_safe_redirect( 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+			exit;
+		}
+
+	}
+
+	// Buffer the checkout page
+	elseif ( is_checkout() ) {
+		ob_start();
+	}
+}
+
+/**
+ * Add body classes for WC pages
+ *
+ * @param  array $classes
+ * @return array
+ */
+function wc_body_class( $classes ) {
+	$classes = (array) $classes;
+
+	if ( is_woocommerce() ) {
+		$classes[] = 'woocommerce';
+		$classes[] = 'woocommerce-page';
+	}
+
+	elseif ( is_checkout() ) {
+		$classes[] = 'woocommerce-checkout';
+		$classes[] = 'woocommerce-page';
+	}
+
+	elseif ( is_cart() ) {
+		$classes[] = 'woocommerce-cart';
+		$classes[] = 'woocommerce-page';
+	}
+
+	elseif ( is_account_page() ) {
+		$classes[] = 'woocommerce-account';
+		$classes[] = 'woocommerce-page';
+	}
+
+	return array_unique( $classes );
+}
 
 /** Template pages ********************************************************/
 
@@ -75,6 +268,58 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 }
 
 /** Global ****************************************************************/
+
+if ( ! function_exists( 'wc_product_post_class' ) ) {
+
+	/**
+	 * Adds extra post classes for products
+	 *
+	 * @since 2.1.0
+	 * @param array $classes
+	 * @param string|array $class
+	 * @param int $post_id
+	 * @return array
+	 */
+	function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
+		if ( ! $post_id || get_post_type( $post_id ) !== 'product' )
+			return $classes;
+
+		$product = get_product( $post_id );
+
+		if ( $product ) {
+			if ( $product->is_on_sale() ) {
+				$classes[] = 'sale';
+			}
+			if ( $product->is_featured() ) {
+				$classes[] = 'featured';
+			}
+			if ( $product->is_downloadable() ) {
+				$classes[] = 'downloadable';
+			}
+			if ( $product->is_virtual() ) {
+				$classes[] = 'virtual';
+			}
+			if ( $product->is_sold_individually() ) {
+				$classes[] = 'sold-individually';
+			}
+			if ( $product->is_taxable() ) {
+				$classes[] = 'taxable';
+			}
+			if ( $product->is_shipping_taxable() ) {
+				$classes[] = 'shipping-taxable';
+			}
+			if ( $product->is_purchasable() ) {
+				$classes[] = 'purchasable';
+			}
+			if ( isset( $product->product_type ) ) {
+				$classes[] = "product-type-" . $product->product_type;
+			}
+			$classes[] = $product->stock_status;
+		}
+
+		return $classes;
+	}
+}
 
 if ( ! function_exists( 'woocommerce_output_content_wrapper' ) ) {
 
@@ -306,6 +551,7 @@ if ( ! function_exists( 'woocommerce_show_product_loop_sale_flash' ) ) {
 		woocommerce_get_template( 'loop/sale-flash.php' );
 	}
 }
+
 if ( ! function_exists( 'woocommerce_reset_loop' ) ) {
 
 	/**
@@ -321,9 +567,6 @@ if ( ! function_exists( 'woocommerce_reset_loop' ) ) {
 		$woocommerce_loop['loop'] = $woocommerce_loop['column'] = '';
 	}
 }
-
-add_filter( 'loop_end', 'woocommerce_reset_loop' );
-
 
 if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 
@@ -1489,5 +1732,41 @@ if ( ! function_exists( 'get_product_search_form' ) ) {
 			echo apply_filters( 'get_product_search_form', $form );
 		else
 			return apply_filters( 'get_product_search_form', $form );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_products_rss_feed' ) ) {
+
+	/**
+	 * Products RSS Feed.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function woocommerce_products_rss_feed() {
+		// Product RSS
+		if ( is_post_type_archive( 'product' ) || is_singular( 'product' ) ) {
+
+			$feed = get_post_type_archive_feed_link( 'product' );
+
+			echo '<link rel="alternate" type="application/rss+xml"  title="' . __( 'New products', 'woocommerce' ) . '" href="' . esc_attr( $feed ) . '" />';
+
+		} elseif ( is_tax( 'product_cat' ) ) {
+
+			$term = get_term_by('slug', esc_attr( get_query_var('product_cat') ), 'product_cat');
+
+			$feed = add_query_arg('product_cat', $term->slug, get_post_type_archive_feed_link( 'product' ));
+
+			echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__( 'New products added to %s', 'woocommerce' ), urlencode($term->name)) . '" href="' . esc_attr( $feed ) . '" />';
+
+		} elseif ( is_tax( 'product_tag' ) ) {
+
+			$term = get_term_by('slug', esc_attr( get_query_var('product_tag') ), 'product_tag');
+
+			$feed = add_query_arg('product_tag', $term->slug, get_post_type_archive_feed_link( 'product' ));
+
+			echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__( 'New products tagged %s', 'woocommerce' ), urlencode($term->name)) . '" href="' . esc_attr( $feed ) . '" />';
+
+		}
 	}
 }

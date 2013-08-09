@@ -170,7 +170,7 @@ class WC_Product {
 			elseif ( $this->backorders_allowed() || $this->get_total_stock() > 0 )
 				$this->set_stock_status( 'instock' );
 
-			$woocommerce->get_helper( 'transient' )->clear_product_transients( $this->id ); // Clear transient
+			wc_delete_product_transients( $this->id ); // Clear transient
 
 			return $this->get_stock_quantity();
 		}
@@ -196,7 +196,7 @@ class WC_Product {
 			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= 0 )
 				$this->set_stock_status( 'outofstock' );
 
-			$woocommerce->get_helper( 'transient' )->clear_product_transients( $this->id ); // Clear transient
+			wc_delete_product_transients( $this->id ); // Clear transient
 
 			return $this->get_stock_quantity();
 		}
@@ -222,7 +222,7 @@ class WC_Product {
 			if ( $this->backorders_allowed() || $this->get_total_stock() > 0 )
 				$this->set_stock_status( 'instock' );
 
-			$woocommerce->get_helper( 'transient' )->clear_product_transients( $this->id ); // Clear transient
+			wc_delete_product_transients( $this->id ); // Clear transient
 
 			return $this->get_stock_quantity();
 		}

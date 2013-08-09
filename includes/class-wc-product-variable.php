@@ -87,7 +87,7 @@ class WC_Product_Variable extends WC_Product {
 			elseif ( $this->backorders_allowed() || $this->get_total_stock() > 0 )
 				$this->set_stock_status( 'instock' );
 
-			$woocommerce->get_helper( 'transient' )->clear_product_transients( $this->id ); // Clear transient
+			wc_delete_product_transients( $this->id ); // Clear transient
 
 			return apply_filters( 'woocommerce_stock_amount', $this->stock );
 		}
@@ -112,7 +112,7 @@ class WC_Product_Variable extends WC_Product {
 			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= 0 )
 				$this->set_stock_status( 'outofstock' );
 
-			$woocommerce->get_helper( 'transient' )->clear_product_transients( $this->id ); // Clear transient
+			wc_delete_product_transients( $this->id ); // Clear transient
 
 			return apply_filters( 'woocommerce_stock_amount', $this->stock );
 		}
@@ -138,7 +138,7 @@ class WC_Product_Variable extends WC_Product {
 			if ( $this->backorders_allowed() || $this->get_total_stock() > 0 )
 				$this->set_stock_status( 'instock' );
 
-			$woocommerce->get_helper( 'transient' )->clear_product_transients( $this->id ); // Clear transient
+			wc_delete_product_transients( $this->id ); // Clear transient
 
 			return apply_filters( 'woocommerce_stock_amount', $this->stock );
 		endif;
@@ -547,7 +547,7 @@ class WC_Product_Variable extends WC_Product {
 
 			do_action( 'woocommerce_variable_product_sync', $product_id );
 
-			WC()->get_helper( 'transient' )->clear_product_transients( $product_id );
+			wc_delete_product_transients( $product_id );
 		}
 	}
 }

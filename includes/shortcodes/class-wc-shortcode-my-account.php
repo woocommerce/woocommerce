@@ -19,8 +19,7 @@ class WC_Shortcode_My_Account {
 	 * @return string
 	 */
 	public static function get( $atts ) {
-		global $woocommerce;
-		return $woocommerce->get_helper( 'shortcode' )->shortcode_wrapper( array( __CLASS__, 'output' ), $atts );
+		return WC_Shortcodes::shortcode_wrapper( array( __CLASS__, 'output' ), $atts );
 	}
 
 	/**

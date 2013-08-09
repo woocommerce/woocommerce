@@ -84,6 +84,5 @@ function wc_print_messages() {
 	wc_clear_errors();
 	wc_clear_messages();
 }
-
 add_action( 'woocommerce_before_shop_loop', 'wc_print_messages', 10 );
 add_action( 'woocommerce_before_single_product', 'wc_print_messages', 10 );
