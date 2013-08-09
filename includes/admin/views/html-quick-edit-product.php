@@ -3,6 +3,8 @@
 
 		<h4><?php _e( 'Product Data', 'woocommerce' ); ?></h4>
 
+		<?php do_action( 'woocommerce_product_quick_edit_start' ); ?>
+
 		<?php if( get_option('woocommerce_enable_sku', true) !== 'no' ) : ?>
 
 			<label>
@@ -160,6 +162,8 @@
 			<?php endif; ?>
 
 		</div>
+
+		<?php do_action( 'woocommerce_product_quick_edit_end' ); ?>
 
 		<input type="hidden" name="woocommerce_quick_edit" value="1" />
 		<input type="hidden" name="woocommerce_quick_edit_nonce" value="<?php echo wp_create_nonce( 'woocommerce_quick_edit_nonce' ); ?>" />
