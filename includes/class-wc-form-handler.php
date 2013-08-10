@@ -624,7 +624,7 @@ class WC_Form_Handler {
 				$creds['user_password'] = $_POST['password'];
 				$creds['remember']      = true;
 				$secure_cookie          = is_ssl() ? true : false;
-				$user                   = wp_signon( $creds, $secure_cookie );
+				$user                   = wp_signon( apply_filters( 'woocommerce_login_credentials', $creds ), $secure_cookie );
 
 				if ( is_wp_error( $user ) ) {
 					throw new Exception( $user->get_error_message() );
