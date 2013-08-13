@@ -575,10 +575,7 @@ class WC_Cart {
 		public function get_item_data( $cart_item, $flat = false ) {
 			global $woocommerce;
 
-			$return = '';
-			$has_data = false;
-
-			if ( ! $flat ) $return .= '<dl class="variation">';
+			$item_data = array();
 
 			// Variation data
 			if ( ! empty( $cart_item['data']->variation_id ) && is_array( $cart_item['variation'] ) ) {
@@ -587,7 +584,8 @@ class WC_Cart {
 
 				foreach ( $cart_item['variation'] as $name => $value ) {
 
-					if ( ! $value ) continue;
+					if ( ! $value )
+						continue;
 
 					// If this is a term slug, get the term's nice name
 		            if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $name ) ) ) ) {
@@ -600,20 +598,11 @@ class WC_Cart {
 		            	$value = apply_filters( 'woocommerce_variation_option_name', $value );
 					}
 
-					if ( $flat )
-						$variation_list[] = $woocommerce->get_helper( 'attribute' )->attribute_label( str_replace( 'attribute_', '', $name ) ) . ': ' . $value;
-					else
-						$variation_list[] = '<dt>' . $woocommerce->get_helper( 'attribute' )->attribute_label( str_replace( 'attribute_', '', $name ) ) . ':</dt><dd>' . $value . '</dd>';
-
+					$item_data[] = array(
+						'key'   => $woocommerce->get_helper( 'attribute' )->attribute_label( str_replace( 'attribute_', '', $name ) ),
+						'value' => $value
+					);
 				}
-
-				if ($flat)
-					$return .= implode( ", \n", $variation_list );
-				else
-					$return .= implode( '', $variation_list );
-
-				$has_data = true;
-
 			}
 
 			// Other data - returned as array with name/value values
@@ -621,34 +610,34 @@ class WC_Cart {
 
 			if ( $other_data && is_array( $other_data ) && sizeof( $other_data ) > 0 ) {
 
-				$data_list = array();
-
-				foreach ($other_data as $data ) {
+				foreach ( $other_data as $data ) {
 					// Set hidden to true to not display meta on cart.
 					if ( empty( $data['hidden'] ) ) {
-						$display_value = !empty($data['display']) ? $data['display'] : $data['value'];
+						$display_value = ! empty( $data['display'] ) ? $data['display'] : $data['value'];
 
-						if ($flat)
-							$data_list[] = $data['name'].': '.$display_value;
-						else
-							$data_list[] = '<dt>'.$data['name'].':</dt><dd>'.$display_value.'</dd>';
+						$item_data[] = array(
+							'key'   => $data['name'],
+							'value' => $display_value
+						);
 					}
 				}
-
-				if ($flat)
-					$return .= implode(', ', $data_list);
-				else
-					$return .= implode('', $data_list);
-
-				$has_data = true;
-
 			}
 
-			if ( ! $flat )
-				$return .= '</dl>';
+			// Output flat or in list format
+			if ( sizeof( $item_data ) > 0 ) {
 
-			if ( $has_data )
-				return $return;
+				ob_start();
+
+				if ( $flat ) {
+					foreach ( $item_data as $data )
+						echo esc_html( $data['key'] ) . ': ' . wp_kses_post( $data['value'] ) . "\n";
+
+				} else {
+					woocommerce_get_template( 'cart/cart-item-data.php', array( 'item_data' => $item_data ) );
+				}
+
+				return ob_get_clean();
+			}
 		}
 
 		/**
