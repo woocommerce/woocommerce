@@ -1555,27 +1555,14 @@ class WC_Cart {
 				}
 			}
 
-			// Add fees
-			foreach ( $this->get_fees() as $fee ) {
-				$this->fee_total += $fee->amount;
-
-				if ( $fee->taxable ) {
-					// Get tax rates
-					$tax_rates 				= $this->tax->get_rates( $fee->tax_class );
-					$fee_taxes				= $this->tax->calc_tax( $fee->amount, $tax_rates, false );
-
-					// Store
-					$fee->tax 				= array_sum( $fee_taxes );
-
-					// Tax rows - merge the totals we just got
-					foreach ( array_keys( $this->taxes + $fee_taxes ) as $key ) {
-					    $this->taxes[ $key ] = ( isset( $fee_taxes[ $key ] ) ? $fee_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
-					}
-				}
-			}
-
 			// Only calculate the grand total + shipping if on the cart/checkout
 			if ( is_checkout() || is_cart() || defined('WOOCOMMERCE_CHECKOUT') || defined('WOOCOMMERCE_CART') ) {
+
+				// Calculate the Shipping
+				$this->calculate_shipping();
+
+				// Trigger the fees API where developers can add fees to the cart
+				$this->calculate_fees();
 
 				// Total up/round taxes
 				if ( get_option('woocommerce_tax_round_at_subtotal') == 'no' ) {
@@ -1584,9 +1571,6 @@ class WC_Cart {
 				} else {
 					$this->tax_total          = array_sum( $this->taxes );
 				}
-
-				// Cart Shipping
-				$this->calculate_shipping();
 
 				// Total up/round taxes for shipping
 				if ( get_option('woocommerce_tax_round_at_subtotal') == 'no' ) {
@@ -1958,15 +1942,12 @@ class WC_Cart {
 		/**
 		 * add_fee function.
 		 *
-		 * @access public
 		 * @param mixed $name
 		 * @param mixed $amount
 		 * @param bool $taxable (default: false)
 		 * @param string $tax_class (default: '')
-		 * @return void
 		 */
 		public function add_fee( $name, $amount, $taxable = false, $tax_class = '' ) {
-
 			if ( empty( $this->fees ) )
 				$this->fees = array();
 
@@ -1988,7 +1969,37 @@ class WC_Cart {
 		 * @return void
 		 */
 		public function get_fees() {
-			return (array) $this->fees;
+			return array_filter( (array) $this->fees );
+		}
+
+		/**
+		 * Calculate fees
+		 */
+		public function calculate_fees() {
+
+			// Fire an action where developers can add their fees
+			do_action( 'woocommerce_cart_calculate_fees', $this );
+
+			// If fees were added, total them and calculate tax
+			if ( $fees = $this->get_fees() ) {
+				foreach ( $fees as $fee ) {
+					$this->fee_total += $fee->amount;
+
+					if ( $fee->taxable ) {
+						// Get tax rates
+						$tax_rates = $this->tax->get_rates( $fee->tax_class );
+						$fee_taxes = $this->tax->calc_tax( $fee->amount, $tax_rates, false );
+
+						// Store
+						$fee->tax  = array_sum( $fee_taxes );
+
+						// Tax rows - merge the totals we just got
+						foreach ( array_keys( $this->taxes + $fee_taxes ) as $key ) {
+						    $this->taxes[ $key ] = ( isset( $fee_taxes[ $key ] ) ? $fee_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
+						}
+					}
+				}
+			}
 		}
 
     /*-----------------------------------------------------------------------------------*/
