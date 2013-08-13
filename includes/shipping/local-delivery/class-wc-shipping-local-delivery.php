@@ -26,13 +26,13 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 		$this->init();
 	}
 
-    /**
-     * init function.
-     *
-     * @access public
-     * @return void
-     */
-    function init() {
+	/**
+	 * init function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function init() {
 
 		// Load the settings.
 		$this->init_form_fields();
@@ -92,69 +92,69 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 	 * @return void
 	 */
 	function init_form_fields() {
-    	global $woocommerce;
-    	$this->form_fields = array(
+		global $woocommerce;
+		$this->form_fields = array(
 			'enabled' => array(
-				'title' 		=> __( 'Enable', 'woocommerce' ),
-				'type' 			=> 'checkbox',
-				'label' 		=> __( 'Enable local delivery', 'woocommerce' ),
-				'default' 		=> 'no'
+				'title'			=> __( 'Enable', 'woocommerce' ),
+				'type'			=> 'checkbox',
+				'label'			=> __( 'Enable local delivery', 'woocommerce' ),
+				'default'		=> 'no'
 			),
 			'title' => array(
-				'title' 		=> __( 'Title', 'woocommerce' ),
-				'type' 			=> 'text',
-				'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
+				'title'			=> __( 'Title', 'woocommerce' ),
+				'type'			=> 'text',
+				'description'	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 				'default'		=> __( 'Local Delivery', 'woocommerce' ),
-				'desc_tip'      => true,
+				'desc_tip'		=> true,
 			),
 			'type' => array(
-				'title' 		=> __( 'Fee Type', 'woocommerce' ),
-				'type' 			=> 'select',
-				'description' 	=> __( 'How to calculate delivery charges', 'woocommerce' ),
-				'default' 		=> 'fixed',
-				'options' 		=> array(
-					'fixed' 	=> __( 'Fixed amount', 'woocommerce' ),
+				'title'			=> __( 'Fee Type', 'woocommerce' ),
+				'type'			=> 'select',
+				'description'	=> __( 'How to calculate delivery charges', 'woocommerce' ),
+				'default'		=> 'fixed',
+				'options'		=> array(
+					'fixed'		=> __( 'Fixed amount', 'woocommerce' ),
 					'percent'	=> __( 'Percentage of cart total', 'woocommerce' ),
 					'product'	=> __( 'Fixed amount per product', 'woocommerce' ),
 				),
-				'desc_tip'      => true,
+				'desc_tip'		=> true,
 			),
 			'fee' => array(
-				'title' 		=> __( 'Delivery Fee', 'woocommerce' ),
-				'type' 			=> 'number',
+				'title'			=> __( 'Delivery Fee', 'woocommerce' ),
+				'type'			=> 'number',
 				'custom_attributes' => array(
 					'step'	=> 'any',
 					'min'	=> '0'
 				),
-				'description' 	=> __( 'What fee do you want to charge for local delivery, disregarded if you choose free. Leave blank to disable.', 'woocommerce' ),
+				'description'	=> __( 'What fee do you want to charge for local delivery, disregarded if you choose free. Leave blank to disable.', 'woocommerce' ),
 				'default'		=> '',
-				'desc_tip'      => true,
+				'desc_tip'		=> true,
 				'placeholder'	=> '0.00'
 			),
 			'codes' => array(
-				'title' 		=> __( 'Zip/Post Codes', 'woocommerce' ),
-				'type' 			=> 'textarea',
-				'description' 	=> __( 'What zip/post codes would you like to offer delivery to? Separate codes with a comma. Accepts wildcards, e.g. P* will match a postcode of PE30.', 'woocommerce' ),
+				'title'			=> __( 'Zip/Post Codes', 'woocommerce' ),
+				'type'			=> 'textarea',
+				'description'	=> __( 'What zip/post codes would you like to offer delivery to? Separate codes with a comma. Accepts wildcards, e.g. P* will match a postcode of PE30.', 'woocommerce' ),
 				'default'		=> '',
-				'desc_tip'      => true,
+				'desc_tip'		=> true,
 				'placeholder'	=> '12345, 56789 etc'
 			),
 			'availability' => array(
-							'title' 		=> __( 'Method availability', 'woocommerce' ),
-							'type' 			=> 'select',
-							'default' 		=> 'all',
+							'title'			=> __( 'Method availability', 'woocommerce' ),
+							'type'			=> 'select',
+							'default'		=> 'all',
 							'class'			=> 'availability',
 							'options'		=> array(
-								'all' 		=> __( 'All allowed countries', 'woocommerce' ),
-								'specific' 	=> __( 'Specific Countries', 'woocommerce' )
+								'all'		=> __( 'All allowed countries', 'woocommerce' ),
+								'specific'	=> __( 'Specific Countries', 'woocommerce' )
 							)
 						),
 			'countries' => array(
-							'title' 		=> __( 'Specific Countries', 'woocommerce' ),
-							'type' 			=> 'multiselect',
+							'title'			=> __( 'Specific Countries', 'woocommerce' ),
+							'type'			=> 'multiselect',
 							'class'			=> 'chosen_select',
 							'css'			=> 'width: 450px;',
-							'default' 		=> '',
+							'default'		=> '',
 							'options'		=> $woocommerce->countries->get_shipping_countries()
 						)
 		);
@@ -171,22 +171,22 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 		<h3><?php echo $this->method_title; ?></h3>
 		<p><?php _e( 'Local delivery is a simple shipping method for delivering orders locally.', 'woocommerce' ); ?></p>
 		<table class="form-table">
-    		<?php $this->generate_settings_html(); ?>
-    	</table> <?php
+			<?php $this->generate_settings_html(); ?>
+		</table> <?php
 	}
 
 
-    /**
-     * is_available function.
-     *
-     * @access public
-     * @param array $package
-     * @return bool
-     */
-    function is_available( $package ) {
-    	global $woocommerce;
+	/**
+	 * is_available function.
+	 *
+	 * @access public
+	 * @param array $package
+	 * @return bool
+	 */
+	function is_available( $package ) {
+		global $woocommerce;
 
-    	if ($this->enabled=="no") return false;
+		if ($this->enabled=="no") return false;
 
 		// If post codes are listed, let's use them.
 		$codes = '';
@@ -234,18 +234,18 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 
 		// Yay! We passed!
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true );
-    }
+	}
 
 
-    /**
-     * clean function.
-     *
-     * @access public
-     * @param mixed $code
-     * @return string
-     */
-    function clean( $code ) {
-    	return str_replace( '-', '', sanitize_title( $code ) ) . ( strstr( $code, '*' ) ? '*' : '' );
-    }
+	/**
+	 * clean function.
+	 *
+	 * @access public
+	 * @param mixed $code
+	 * @return string
+	 */
+	function clean( $code ) {
+		return str_replace( '-', '', sanitize_title( $code ) ) . ( strstr( $code, '*' ) ? '*' : '' );
+	}
 
 }
