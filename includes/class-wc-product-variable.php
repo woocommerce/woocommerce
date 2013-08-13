@@ -68,82 +68,16 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Set stock level of the product.
 	 *
-	 * @access public
 	 * @param mixed $amount (default: null)
 	 * @return int Stock
 	 */
 	function set_stock( $amount = null ) {
-		global $woocommerce;
+		// Empty total stock so its refreshed
+		$this->total_stock = '';
 
-		if ( $this->managing_stock() && ! is_null( $amount ) ) {
-
-			$this->stock = intval( $amount );
-			$this->total_stock = intval( $amount );
-			update_post_meta( $this->id, '_stock', $this->stock );
-
-			// Check parents out of stock attribute
-			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= 0 )
-				$this->set_stock_status( 'outofstock' );
-			elseif ( $this->backorders_allowed() || $this->get_total_stock() > 0 )
-				$this->set_stock_status( 'instock' );
-
-			wc_delete_product_transients( $this->id ); // Clear transient
-
-			return apply_filters( 'woocommerce_stock_amount', $this->stock );
-		}
+		// Call parent set_stock
+		return parent::set_stock( $amount );
 	}
-
-	/**
-	 * Reduce stock level of the product.
-	 *
-	 * @access public
-	 * @param int $by (default: 1) Amount to reduce by.
-	 * @return int Stock
-	 */
-	public function reduce_stock( $by = 1 ) {
-		global $woocommerce;
-
-		if ( $this->managing_stock() ) {
-			$this->stock = $this->stock - $by;
-			$this->total_stock = $this->get_total_stock() - $by;
-			update_post_meta($this->id, '_stock', $this->stock);
-
-			// Out of stock attribute
-			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= 0 )
-				$this->set_stock_status( 'outofstock' );
-
-			wc_delete_product_transients( $this->id ); // Clear transient
-
-			return apply_filters( 'woocommerce_stock_amount', $this->stock );
-		}
-	}
-
-
-	/**
-	 * Increase stock level of the product.
-	 *
-	 * @access public
-	 * @param int $by (default: 1) Amount to increase by
-	 * @return int Stock
-	 */
-	public function increase_stock( $by = 1 ) {
-		global $woocommerce;
-
-		if ($this->managing_stock()) :
-			$this->stock = $this->stock + $by;
-			$this->total_stock = $this->get_total_stock() + $by;
-			update_post_meta($this->id, '_stock', $this->stock);
-
-			// Out of stock attribute
-			if ( $this->backorders_allowed() || $this->get_total_stock() > 0 )
-				$this->set_stock_status( 'instock' );
-
-			wc_delete_product_transients( $this->id ); // Clear transient
-
-			return apply_filters( 'woocommerce_stock_amount', $this->stock );
-		endif;
-	}
-
 
 	/**
 	 * Return the products children posts.

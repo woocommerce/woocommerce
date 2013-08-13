@@ -281,76 +281,71 @@ class WC_Product_Variation extends WC_Product {
     }
 
 	/**
-	 * Set stock level of the product.
+	 * Set stock level of the product variation.
 	 *
-	 * @access public
-	 * @param mixed $amount (default: null)
-	 * @return int Stock
+	 * @param int $amount
+	 * @param boolean $force_variation_stock If true, the variation's stock will be updated and not the parents.
 	 */
-	function set_stock( $amount = null ) {
-		global $woocommerce;
+	function set_stock( $amount = null, $force_variation_stock = false ) {
+		if ( is_null( $amount ) )
+			return;
 
-		if ( $this->variation_has_stock ) {
-			if ( $this->managing_stock() && ! is_null( $amount ) ) {
+		if ( $amount === '' && $force_variation_stock ) {
 
-				$this->stock = intval( $amount );
-				$this->total_stock = intval( $amount );
-				update_post_meta( $this->variation_id, '_stock', $this->stock );
-				wc_delete_product_transients( $this->id ); // Clear transient
+			// If amount is an empty string, stock management is being turned off at variation level
+			$this->variation_has_stock = false;
+			$this->stock               = '';
+			unset( $this->manage_stock );
 
-				// Check parents out of stock attribute
-				if ( ! $this->is_in_stock() ) {
+			// Update meta
+			update_post_meta( $this->variation_id, '_stock', '' );
 
-					// Check parent
-					$parent_product = get_product( $this->id );
+		} elseif ( $this->variation_has_stock || $force_variation_stock ) {
 
-					// Only continue if the parent has backorders off
-					if ( ! $parent_product->backorders_allowed() && $parent_product->get_total_stock() <= 0 )
-						$this->set_stock_status( 'outofstock' );
+			// Update stock amount
+			$this->stock = intval( $amount );
 
-				} elseif ( $this->is_in_stock() ) {
-					$this->set_stock_status( 'instock' );
-				}
+			// Update meta
+			update_post_meta( $this->variation_id, '_stock', $this->stock );
 
-				return apply_filters( 'woocommerce_stock_amount', $this->stock );
+			// Clear total stock transient
+			delete_transient( 'wc_product_total_stock_' . $this->id );
+
+			// Check parents out of stock attribute
+			if ( ! $this->is_in_stock() ) {
+
+				// Check parent
+				$parent_product = get_product( $this->id );
+
+				// Only continue if the parent has backorders off
+				if ( ! $parent_product->backorders_allowed() && $parent_product->get_total_stock() <= 0 )
+					$this->set_stock_status( 'outofstock' );
+
+			} elseif ( $this->is_in_stock() ) {
+				$this->set_stock_status( 'instock' );
 			}
+
+			// Trigger action
+			do_action( 'woocommerce_product_set_stock', $this );
+
+			return $this->get_stock_quantity();
+
 		} else {
+
 			return parent::set_stock( $amount );
+
 		}
 	}
 
 	/**
 	 * Reduce stock level of the product.
 	 *
-	 * @access public
 	 * @param int $by (default: 1) Amount to reduce by
 	 * @return int stock level
 	 */
 	public function reduce_stock( $by = 1 ) {
-		global $woocommerce;
-
 		if ( $this->variation_has_stock ) {
-			if ( $this->managing_stock() ) {
-
-				$this->stock 		= $this->stock - $by;
-				$this->total_stock 	= $this->total_stock - $by;
-				update_post_meta( $this->variation_id, '_stock', $this->stock );
-				wc_delete_product_transients( $this->id ); // Clear transient
-
-				// Check parents out of stock attribute
-				if ( ! $this->is_in_stock() ) {
-
-					// Check parent
-					$parent_product = get_product( $this->id );
-
-					// Only continue if the parent has backorders off
-					if ( ! $parent_product->backorders_allowed() && $parent_product->get_total_stock() <= 0 )
-						$this->set_stock_status( 'outofstock' );
-
-				}
-
-				return apply_filters( 'woocommerce_stock_amount', $this->stock );
-			}
+			return $this->set_stock( $this->stock - $by );
 		} else {
 			return parent::reduce_stock( $by );
 		}
@@ -359,30 +354,15 @@ class WC_Product_Variation extends WC_Product {
 	/**
 	 * Increase stock level of the product.
 	 *
-	 * @access public
 	 * @param int $by (default: 1) Amount to increase by
 	 * @return int stock level
 	 */
 	public function increase_stock( $by = 1 ) {
-		global $woocommerce;
-
-		if ($this->variation_has_stock) :
-			if ($this->managing_stock()) :
-
-				$this->stock 		= $this->stock + $by;
-				$this->total_stock 	= $this->total_stock + $by;
-				update_post_meta( $this->variation_id, '_stock', $this->stock );
-				wc_delete_product_transients( $this->id ); // Clear transient
-
-				// Parents out of stock attribute
-				if ( $this->is_in_stock() )
-					$this->set_stock_status( 'instock' );
-
-				return apply_filters( 'woocommerce_stock_amount', $this->stock );
-			endif;
-		else :
+		if ( $this->variation_has_stock ) {
+			return $this->set_stock( $this->stock + $by );
+		} else {
 			return parent::increase_stock( $by );
-		endif;
+		}
 	}
 
 	/**

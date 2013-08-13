@@ -151,26 +151,33 @@ class WC_Product {
 	/**
 	 * Set stock level of the product.
 	 *
-	 * @access public
 	 * @param mixed $amount (default: null)
 	 * @return int Stock
 	 */
 	public function set_stock( $amount = null ) {
-		global $woocommerce;
+		if ( is_null( $amount ) )
+			return;
 
-		if ( $this->managing_stock() && ! is_null( $amount ) ) {
+		if ( $this->managing_stock() ) {
+
+			// Update stock amount
 			$this->stock = intval( $amount );
+
+			// Update meta
 			update_post_meta( $this->id, '_stock', $this->stock );
 
-			do_action( 'woocommerce_product_set_stock', $this );
-
-			// Out of stock attribute
+			// Update stock status
 			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= 0 )
 				$this->set_stock_status( 'outofstock' );
+
 			elseif ( $this->backorders_allowed() || $this->get_total_stock() > 0 )
 				$this->set_stock_status( 'instock' );
 
-			wc_delete_product_transients( $this->id ); // Clear transient
+			// Clear total stock transient
+			delete_transient( 'wc_product_total_stock_' . $this->id );
+
+			// Trigger action
+			do_action( 'woocommerce_product_set_stock', $this );
 
 			return $this->get_stock_quantity();
 		}
@@ -179,53 +186,21 @@ class WC_Product {
 	/**
 	 * Reduce stock level of the product.
 	 *
-	 * @access public
 	 * @param int $by (default: 1) Amount to reduce by.
 	 * @return int Stock
 	 */
 	public function reduce_stock( $by = 1 ) {
-		global $woocommerce;
-
-		if ( $this->managing_stock() ) {
-			$this->stock = $this->stock - $by;
-			update_post_meta( $this->id, '_stock', $this->stock );
-
-			do_action( 'woocommerce_product_reduce_stock', $this, $by );
-
-			// Out of stock attribute
-			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= 0 )
-				$this->set_stock_status( 'outofstock' );
-
-			wc_delete_product_transients( $this->id ); // Clear transient
-
-			return $this->get_stock_quantity();
-		}
+		return $this->set_stock( $this->stock - $by );
 	}
 
 	/**
 	 * Increase stock level of the product.
 	 *
-	 * @access public
 	 * @param int $by (default: 1) Amount to increase by
 	 * @return int Stock
 	 */
 	public function increase_stock( $by = 1 ) {
-		global $woocommerce;
-
-		if ( $this->managing_stock() ) {
-			$this->stock = $this->stock + $by;
-			update_post_meta( $this->id, '_stock', $this->stock );
-
-			do_action( 'woocommerce_product_increase_stock', $this, $by );
-
-			// Out of stock attribute
-			if ( $this->backorders_allowed() || $this->get_total_stock() > 0 )
-				$this->set_stock_status( 'instock' );
-
-			wc_delete_product_transients( $this->id ); // Clear transient
-
-			return $this->get_stock_quantity();
-		}
+		return $this->set_stock( $this->stock + $by );
 	}
 
 	/**

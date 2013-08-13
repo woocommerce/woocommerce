@@ -13,7 +13,6 @@
 /**
  * Main function for returning products, uses the WC_Product_Factory class.
  *
- * @access public
  * @param mixed $the_product Post object or post ID of the product.
  * @param array $args (default: array()) Contains all arguments to be used to get this product.
  * @return WC_Product
@@ -21,6 +20,32 @@
 function get_product( $the_product = false, $args = array() ) {
 	global $woocommerce;
 	return $woocommerce->product_factory->get_product( $the_product, $args );
+}
+
+/**
+ * Update a product's stock amount
+ *
+ * @param  int $product_id
+ * @param  int $new_stock_level
+ */
+function wc_update_product_stock( $product_id, $new_stock_level ) {
+	$product = get_product( $product_id );
+
+	if ( $product->is_type( 'variation' ) )
+		$product->set_stock( $new_stock_level, true );
+	else
+		$product->set_stock( $new_stock_level );
+}
+
+/**
+ * Update a product's stock status
+ *
+ * @param  int $product_id
+ * @param  int $status
+ */
+function wc_update_product_stock_status( $product_id, $status ) {
+	$product = get_product( $product_id );
+	$product-> set_stock_status( $status );
 }
 
 /**

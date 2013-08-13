@@ -1148,44 +1148,40 @@ class WC_Meta_Box_Product_Data {
 
 			if ( $product_type == 'grouped' ) {
 
-				update_post_meta( $post_id, '_stock_status', stripslashes( $_POST['_stock_status'] ) );
-				update_post_meta( $post_id, '_stock', '' );
 				update_post_meta( $post_id, '_manage_stock', 'no' );
 				update_post_meta( $post_id, '_backorders', 'no' );
+				update_post_meta( $post_id, '_stock', '' );
+
+				wc_update_product_stock_status( $post_id, woocommerce_clean( $_POST['_stock_status'] ) );
 
 			} elseif ( $product_type == 'external' ) {
 
-				update_post_meta( $post_id, '_stock_status', 'instock' );
-				update_post_meta( $post_id, '_stock', '' );
 				update_post_meta( $post_id, '_manage_stock', 'no' );
 				update_post_meta( $post_id, '_backorders', 'no' );
+				update_post_meta( $post_id, '_stock', '' );
+
+				wc_update_product_stock_status( $post_id, 'instock' );
 
 			} elseif ( ! empty( $_POST['_manage_stock'] ) ) {
 
-				// Manage stock
-				update_post_meta( $post_id, '_stock', (int) $_POST['_stock'] );
-				update_post_meta( $post_id, '_stock_status', stripslashes( $_POST['_stock_status'] ) );
-				update_post_meta( $post_id, '_backorders', stripslashes( $_POST['_backorders'] ) );
 				update_post_meta( $post_id, '_manage_stock', 'yes' );
+				update_post_meta( $post_id, '_backorders', woocommerce_clean( $_POST['_backorders'] ) );
 
-				// Check stock level
-				if ( $product_type !== 'variable' && $_POST['_backorders'] == 'no' && (int) $_POST['_stock'] < 1 )
-					update_post_meta( $post_id, '_stock_status', 'outofstock' );
+				wc_update_product_stock_status( $post_id, woocommerce_clean( $_POST['_stock_status'] ) );
+				wc_update_product_stock( $post_id, intval( $_POST['_stock'] ) );
 
 			} else {
 
 				// Don't manage stock
-				update_post_meta( $post_id, '_stock', '' );
-				update_post_meta( $post_id, '_stock_status', stripslashes( $_POST['_stock_status'] ) );
-				update_post_meta( $post_id, '_backorders', stripslashes( $_POST['_backorders'] ) );
 				update_post_meta( $post_id, '_manage_stock', 'no' );
+				update_post_meta( $post_id, '_backorders', woocommerce_clean( $_POST['_backorders'] ) );
+				update_post_meta( $post_id, '_stock', '' );
 
+				wc_update_product_stock_status( $post_id, woocommerce_clean( $_POST['_stock_status'] ) );
 			}
 
 		} else {
-
-			update_post_meta( $post_id, '_stock_status', stripslashes( $_POST['_stock_status'] ) );
-
+			wc_update_product_stock_status( $post_id, woocommerce_clean( $_POST['_stock_status'] ) );
 		}
 
 		// Upsells
@@ -1274,6 +1270,8 @@ class WC_Meta_Box_Product_Data {
 	public static function save_variations( $post_id, $post ) {
 		global $woocommerce, $wpdb;
 
+		$attributes = (array) maybe_unserialize( get_post_meta( $post_id, '_product_attributes', true ) );
+
 		if ( isset( $_POST['variable_sku'] ) ) {
 
 			$variable_post_id 					= $_POST['variable_post_id'];
@@ -1298,8 +1296,6 @@ class WC_Meta_Box_Product_Data {
 			$variable_enabled 					= isset( $_POST['variable_enabled'] ) ? $_POST['variable_enabled'] : array();
 			$variable_is_virtual				= isset( $_POST['variable_is_virtual'] ) ? $_POST['variable_is_virtual'] : array();
 			$variable_is_downloadable 			= isset( $_POST['variable_is_downloadable'] ) ? $_POST['variable_is_downloadable'] : array();
-
-			$attributes = (array) maybe_unserialize( get_post_meta( $post_id, '_product_attributes', true ) );
 
 			$max_loop = max( array_keys( $_POST['variable_post_id'] ) );
 
@@ -1348,16 +1344,15 @@ class WC_Meta_Box_Product_Data {
 				// Update post meta
 				update_post_meta( $variation_id, '_sku', woocommerce_clean( $variable_sku[ $i ] ) );
 				update_post_meta( $variation_id, '_weight', woocommerce_clean( $variable_weight[ $i ] ) );
-
 				update_post_meta( $variation_id, '_length', woocommerce_clean( $variable_length[ $i ] ) );
 				update_post_meta( $variation_id, '_width', woocommerce_clean( $variable_width[ $i ] ) );
 				update_post_meta( $variation_id, '_height', woocommerce_clean( $variable_height[ $i ] ) );
-
-				update_post_meta( $variation_id, '_stock', woocommerce_clean( $variable_stock[ $i ] ) );
 				update_post_meta( $variation_id, '_thumbnail_id', absint( $upload_image_id[ $i ] ) );
-
 				update_post_meta( $variation_id, '_virtual', woocommerce_clean( $is_virtual ) );
 				update_post_meta( $variation_id, '_downloadable', woocommerce_clean( $is_downloadable ) );
+
+				// Stock handling
+				wc_update_product_stock( $variation_id, woocommerce_clean( $variable_stock[ $i ] ) );
 
 				// Price handling
 				$regular_price 	= woocommerce_clean( $variable_regular_price[ $i ] );
