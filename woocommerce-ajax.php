@@ -1596,12 +1596,16 @@ function woocommerce_json_search_customers() {
 
 	$found_customers = array( '' => $default );
 
+	add_action( 'pre_user_query', 'woocommerce_json_search_customer_name' );
+
 	$customers_query = new WP_User_Query( array(
 		'fields'			=> 'all',
 		'orderby'			=> 'display_name',
 		'search'			=> '*' . $term . '*',
 		'search_columns'	=> array( 'ID', 'user_login', 'user_email', 'user_nicename' )
 	) );
+
+	remove_action( 'pre_user_query', 'woocommerce_json_search_customer_name' );
 
 	$customers = $customers_query->get_results();
 
@@ -1617,6 +1621,22 @@ function woocommerce_json_search_customers() {
 
 add_action('wp_ajax_woocommerce_json_search_customers', 'woocommerce_json_search_customers');
 
+/**
+ * When searching using the WP_User_Query, search names (user meta) too
+ * @param  object $query
+ * @return object
+ */
+function woocommerce_json_search_customer_name( $query ) {
+	global $wpdb;
+
+	$term = urldecode( stripslashes( strip_tags( $_GET['term'] ) ) );
+
+	$query->query_from  .= " LEFT JOIN {$wpdb->usermeta} as meta2 ON ({$wpdb->users}.ID = meta2.user_id) ";
+	$query->query_from  .= " LEFT JOIN {$wpdb->usermeta} as meta3 ON ({$wpdb->users}.ID = meta3.user_id) ";
+
+	$query->query_where .= $wpdb->prepare( " OR ( meta2.meta_value LIKE %s OR meta3.meta_value LIKE %s )", '%' . like_escape( $term ) . '%', '%' . like_escape( $term ) . '%' );
+	$query->query_where .= " AND meta2.meta_key = 'first_name' AND meta3.meta_key = 'last_name' ";
+}
 
 /**
  * Ajax request handling for categories ordering
