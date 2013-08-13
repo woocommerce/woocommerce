@@ -47,7 +47,7 @@ class WC_Product_Factory {
 			}
 
 			// Create a WC coding standards compliant class name e.g. WC_Product_Type_Class instead of WC_Product_type-class
-			$classname = 'WC_Product_' . preg_replace( '/-(.)/e', "'_' . strtoupper( '$1' )", ucfirst( $product_type ) );
+			$classname = 'WC_Product_' . implode( '_', array_map( 'ucfirst', explode( '-', $product_type ) ) );
 		} else {
 			$classname = false;
 			$product_type = false;
