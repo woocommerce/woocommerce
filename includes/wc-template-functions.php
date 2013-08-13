@@ -1522,6 +1522,9 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 		$args['maxlength'] = ( $args['maxlength'] ) ? 'maxlength="' . absint( $args['maxlength'] ) . '"' : '';
 
+		if ( is_string( $args['label_class'] ) )
+			$args['label_class'] = array( $args['label_class'] );
+
 		if ( is_null( $value ) )
 			$value = $args['default'];
 
