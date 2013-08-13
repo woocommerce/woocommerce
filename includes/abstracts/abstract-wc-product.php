@@ -790,6 +790,8 @@ class WC_Product {
 	 */
 	public function get_price_html( $price = '' ) {
 
+		$this->price = apply_filters( 'woocommerce_price_pre_html', '', $this->price );
+
 		if ( $this->get_price() === '' ) {
 
 			$price = apply_filters( 'woocommerce_empty_price_html', '', $this );
