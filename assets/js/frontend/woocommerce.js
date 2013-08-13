@@ -1,7 +1,7 @@
 jQuery(document).ready(function($) {
 
 	// Placeholder
-	$('.woocommerce textarea[placeholder], .woocommerce-page textarea[placeholder], .woocommerce input[placeholder], .woocommerce-page input[placeholder]').simplePlaceholder();
+	$('.woocommerce textarea[placeholder], .woocommerce-page textarea[placeholder], .woocommerce input[placeholder], .woocommerce-page input[placeholder]').placeholder();
 
 	// Orderby
 	$('select.orderby').change(function(){
