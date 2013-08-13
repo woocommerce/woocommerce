@@ -1598,25 +1598,6 @@ class WC_Cart {
 				}
 			}
 
-			// Add fees
-			foreach ( $this->get_fees() as $fee ) {
-				$this->fee_total += $fee->amount;
-
-				if ( $fee->taxable ) {
-					// Get tax rates
-					$tax_rates 				= $this->tax->get_rates( $fee->tax_class );
-					$fee_taxes				= $this->tax->calc_tax( $fee->amount, $tax_rates, false );
-
-					// Store
-					$fee->tax 				= array_sum( $fee_taxes );
-
-					// Tax rows - merge the totals we just got
-					foreach ( array_keys( $this->taxes + $fee_taxes ) as $key ) {
-					    $this->taxes[ $key ] = ( isset( $fee_taxes[ $key ] ) ? $fee_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
-					}
-				}
-			}
-
 			// Only calculate the grand total + shipping if on the cart/checkout
 			if ( is_checkout() || is_cart() || defined('WOOCOMMERCE_CHECKOUT') || defined('WOOCOMMERCE_CART') ) {
 
@@ -1649,6 +1630,26 @@ class WC_Cart {
 				// Allow plugins to hook and alter totals before final total is calculated
 				do_action( 'woocommerce_calculate_totals', $this );
 
+
+		// Add fees
+			foreach ( $this->get_fees() as $fee ) {
+				$this->fee_total += $fee->amount;
+
+				if ( $fee->taxable ) {
+					// Get tax rates
+					$tax_rates 				= $this->tax->get_rates( $fee->tax_class );
+					$fee_taxes				= $this->tax->calc_tax( $fee->amount, $tax_rates, false );
+
+					// Store
+					$fee->tax 				= array_sum( $fee_taxes );
+
+					// Tax rows - merge the totals we just got
+					foreach ( array_keys( $this->taxes + $fee_taxes ) as $key ) {
+					    $this->taxes[ $key ] = ( isset( $fee_taxes[ $key ] ) ? $fee_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
+					}
+				}
+			}
+			
 				// Grand Total - Discounted product prices, discounted tax, shipping cost + tax, and any discounts to be added after tax (e.g. store credit)
 				$this->total = max( 0, apply_filters( 'woocommerce_calculated_total', number_format( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total - $this->discount_total + $this->fee_total, $this->dp, '.', '' ), $this ) );
 
