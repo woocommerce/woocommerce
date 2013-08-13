@@ -438,7 +438,7 @@ class WC_Meta_Box_Product_Data {
 																$values = array();
 																foreach ( $post_terms as $term )
 																	$values[] = $term->name;
-																echo implode( ' | ', $values );
+																echo esc_attr( implode( ' | ', $values ) );
 															}
 
 														?>" placeholder="<?php _e( 'Pipe (|) separate terms', 'woocommerce' ); ?>" />
