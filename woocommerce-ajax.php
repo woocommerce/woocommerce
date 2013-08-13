@@ -1582,7 +1582,8 @@ add_action('wp_ajax_woocommerce_json_search_products_and_variations', 'woocommer
  * @return void
  */
 function woocommerce_json_search_customers() {
-
+	global $wpdb;
+	
 	check_ajax_referer( 'search-customers', 'security' );
 
 	header( 'Content-Type: application/json; charset=utf-8' );
@@ -1592,26 +1593,49 @@ function woocommerce_json_search_customers() {
 	if ( empty( $term ) )
 		die();
 
+	$term = mysql_real_escape_string($term);
+			
 	$default = isset( $_GET['default'] ) ? $_GET['default'] : __( 'Guest', 'woocommerce' );
 
 	$found_customers = array( '' => $default );
+	
+	$sql = "
+		SELECT u.display_name, u.ID, u.user_email from
+			{$wpdb->users} as u,
+			{$wpdb->usermeta} as um
+		WHERE (
+				um.meta_key = 'first_name' AND
+				um.meta_value LIKE '%{$term}%' AND
+				u.ID = um.user_id
+			) OR (
+				um.meta_key = 'last_name' AND
+				um.meta_value LIKE '%{$term}%' AND
+				u.ID = um.user_id
+			) OR (
+				u.user_login LIKE '%{$term}%'
+			) OR (
+				u.user_email LIKE '%{$term}%'
+			) OR (
+				u.user_nicename LIKE '%{$term}%'
+			)
+		ORDER BY u.display_name ASC
+	";
 
-	$customers_query = new WP_User_Query( array(
-		'fields'			=> 'all',
-		'orderby'			=> 'display_name',
-		'search'			=> '*' . $term . '*',
-		'search_columns'	=> array( 'ID', 'user_login', 'user_email', 'user_nicename' )
-	) );
-
-	$customers = $customers_query->get_results();
+	$customers = $wpdb->get_results( $sql );
 
 	if ( $customers ) {
+	
 		foreach ( $customers as $customer ) {
-			$found_customers[ $customer->ID ] = $customer->display_name . ' (#' . $customer->ID . ' &ndash; ' . sanitize_email( $customer->user_email ) . ')';
+		
+			$meta = get_user_meta( $customer->ID );
+			
+			$found_customers[ $customer->ID ] = $meta['last_name'][0] . ', ' . $meta['first_name'][0] . ' &ndash; ' . $customer->display_name . ' (#' . $customer->ID . ' &ndash; ' . sanitize_email( $customer->user_email ) . ')';
 		}
+		
 	}
 
 	echo json_encode( $found_customers );
+	
 	die();
 }
 
