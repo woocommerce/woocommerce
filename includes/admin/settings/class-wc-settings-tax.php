@@ -198,6 +198,8 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	public function output_tax_rates() {
 		global $woocommerce, $current_section, $wpdb;
 
+		$page          = ! empty( $_GET['p'] ) ? absint( $_GET['p'] ) : 1;
+		$limit         = 100;
 		$tax_classes   = array_filter( array_map( 'trim', explode( "\n", get_option('woocommerce_tax_classes' ) ) ) );
 		$current_class = '';
 
@@ -238,6 +240,19 @@ class WC_Settings_Tax extends WC_Settings_Page {
 						<a href="#" class="button plus insert"><?php _e( 'Insert row', 'woocommerce' ); ?></a>
 						<a href="#" class="button minus remove_tax_rates"><?php _e( 'Remove selected row(s)', 'woocommerce' ); ?></a>
 
+						<div class="pagination">
+							<?php
+								echo str_replace( 'page-numbers', 'page-numbers button', paginate_links( array(
+									'base'      => add_query_arg( 'p', '%#%' ),
+									'type'      => 'plain',
+									'prev_text' => '&laquo;',
+									'next_text' => '&raquo;',
+									'total'     => absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(tax_rate_id) FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_class = %s;", sanitize_title( $current_class ) ) ) ),
+									'current'   => $page
+								) ) );
+							?>
+						</div>
+
 						<a href="#" download="tax_rates.csv" class="button export"><?php _e( 'Export CSV', 'woocommerce' ); ?></a>
 						<a href="<?php echo admin_url( 'admin.php?import=woocommerce_tax_rate_csv' ); ?>" class="button import"><?php _e( 'Import CSV', 'woocommerce' ); ?></a>
 					</th>
@@ -249,7 +264,12 @@ class WC_Settings_Tax extends WC_Settings_Page {
 						"SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates
 						WHERE tax_rate_class = %s
 						ORDER BY tax_rate_order
-						" , sanitize_title( $current_class ) ) );
+						LIMIT %d, %d
+						" ,
+						sanitize_title( $current_class ),
+						( $page - 1 ) * $limit,
+						$limit
+					) );
 
 					foreach ( $rates as $rate ) {
 						?>
