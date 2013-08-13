@@ -129,7 +129,7 @@ class WC_Meta_Box_Order_Downloads {
 						numberOfMonths: 1,
 						showButtonPanel: true,
 						showOn: "button",
-						buttonImage: woocommerce_writepanel_params.calendar_image,
+						buttonImage: woocommerce_admin_meta_boxes.calendar_image,
 						buttonImageOnly: true
 					});
 

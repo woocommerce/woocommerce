@@ -25,7 +25,7 @@ class WC_Download_Handler {
 	public function download_product() {
 		if ( isset( $_GET['download_file'] ) && isset( $_GET['order'] ) && isset( $_GET['email'] ) ) {
 
-			global $wpdb, $is_IE;
+			global $wpdb;
 
 			$product_id           = (int) urldecode($_GET['download_file']);
 			$order_key            = urldecode( $_GET['order'] );
@@ -121,17 +121,15 @@ class WC_Download_Handler {
 			$file_path = $_product->get_file_download_path( $download_id );
 
 			// Download it!
-			$this->download( $file_path );
+			$this->download( $file_path, $product_id );
 		}
 	}
 
 	/**
 	 * Download a file - hook into init function.
-	 *
-	 * @access public
-	 * @return void
 	 */
-	function download( $file_path ) {
+	public function download( $file_path, $product_id ) {
+		global $wpdb, $is_IE;
 
 		$file_download_method = apply_filters( 'woocommerce_file_download_method', get_option( 'woocommerce_file_download_method' ), $product_id );
 
@@ -212,10 +210,8 @@ class WC_Download_Handler {
 
 		@session_write_close();
 		@ini_set( 'zlib.output_compression', 'Off' );
-		@ob_end_clean();
 
-		if ( ob_get_level() )
-			@ob_end_clean(); // Zip corruption fix
+		@ob_clean(); // Clear the output buffer
 
 		if ( $is_IE && is_ssl() ) {
 			// IE bug prevents download via SSL when Cache Control and Pragma no-cache headers set.
