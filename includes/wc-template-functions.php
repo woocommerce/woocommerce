@@ -1090,9 +1090,106 @@ if ( ! function_exists( 'woocommerce_cart_totals' ) ) {
 	 * @return void
 	 */
 	function woocommerce_cart_totals() {
-		woocommerce_get_template( 'cart/totals.php' );
+		woocommerce_get_template( 'cart/cart-totals.php' );
 	}
 }
+
+/**
+ * Get shipping methods
+ */
+function wc_cart_totals_shipping_html() {
+	$packages = WC()->shipping->get_packages();
+
+	foreach ( $packages as $i => $package ) {
+		$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
+
+		woocommerce_get_template( 'cart/cart-shipping.php', array( 'package' => $package, 'available_methods' => $package['rates'], 'show_package_details' => ( sizeof( $packages ) > 1 ), 'index' => $i, 'chosen_method' => $chosen_method ) );
+	}
+}
+
+/**
+ * Get the subtotal
+ */
+function wc_cart_totals_subtotal_html() {
+	echo WC()->cart->get_cart_subtotal();
+}
+
+/**
+ * Get a coupon value
+ * @param  string $code
+ */
+function wc_cart_totals_coupon_html( $code ) {
+	$coupon = new WC_Coupon( $code );
+	$value  = array();
+
+	if ( ! empty( WC()->cart->coupon_discount_amounts[ $code ] ) )
+		$value[] = '-' . woocommerce_price( WC()->cart->coupon_discount_amounts[ $code ] );
+
+	if ( $coupon->enable_free_shipping() )
+		$value[] = __( 'Free shipping coupon', 'woocommerce' );
+
+	echo implode( ', ', $value ) . ' <a href="' . add_query_arg( 'remove_coupon', $code, WC()->cart->get_cart_url() ) . '" class="woocommerce-remove-coupon">' . __( '[Remove]', 'woocommerce' ) . '</a>';
+}
+
+/**
+ * Get order total html including inc tax if needed
+ */
+function wc_cart_totals_order_total_html() {
+	echo '<strong>' . WC()->cart->get_total() . '</strong> ';
+
+	// If prices are tax inclusive, show taxes here
+	if (  WC()->cart->tax_display_cart == 'incl' ) {
+		$tax_string_array = array();
+
+		foreach ( WC()->cart->get_tax_totals() as $code => $tax )
+			$tax_string_array[] = sprintf( '%s %s', $tax->formatted_amount, $tax->label );
+
+		if ( ! empty( $tax_string_array ) )
+			echo '<small class="includes_tax">' . sprintf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) ) . '</small>';
+	}
+}
+
+/**
+ * Get the fee value
+ * @param  object $fee
+ */
+function wc_cart_totals_fee_html( $fee ) {
+	echo WC()->cart->tax_display_cart == 'excl' ? woocommerce_price( $fee->amount ) : woocommerce_price( $fee->amount + $fee->tax );
+}
+
+/**
+ * Get a shipping methods full label including price
+ * @param  object $method
+ * @return string
+ */
+function wc_cart_totals_shipping_method_label( $method ) {
+	$label = $method->label;
+
+	if ( $method->cost > 0 ) {
+		if ( WC()->cart->tax_display_cart == 'excl' ) {
+			$label .= ': ' . woocommerce_price( $method->cost );
+			if ( $method->get_shipping_tax() > 0 && WC()->cart->prices_include_tax ) {
+				$label .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
+			}
+		} else {
+			$label .= ': ' . woocommerce_price( $method->cost + $method->get_shipping_tax() );
+			if ( $method->get_shipping_tax() > 0 && ! WC()->cart->prices_include_tax ) {
+				$label .= ' <small>' . WC()->countries->inc_tax_or_vat() . '</small>';
+			}
+		}
+	} elseif ( $method->id !== 'free_shipping' ) {
+		$label .= ' (' . __( 'Free', 'woocommerce' ) . ')';
+	}
+
+	return apply_filters( 'woocommerce_cart_shipping_method_full_label', $label, $method );
+}
+
+
+
+
+
+
+
 
 if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 

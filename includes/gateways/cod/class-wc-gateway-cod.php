@@ -104,26 +104,31 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 
 		if ( ! empty( $this->enable_for_methods ) ) {
 
+			// Only apply if all packages are being shipped via local pickup
+			$chosen_shipping_methods = array_unique( WC()->session->get( 'chosen_shipping_methods' ) );
+			$check_method = false;
+
 			if ( is_page( woocommerce_get_page_id( 'checkout' ) ) && ! empty( $wp->query_vars['order-pay'] ) ) {
 
 				$order_id = absint( $wp->query_vars['order-pay'] );
 				$order    = new WC_Order( $order_id );
 
-				if ( ! $order->shipping_method )
-					return false;
+				if ( $order->shipping_method )
+					$check_method = $order->shipping_method;
 
-				$chosen_method = $order->shipping_method;
-
-			} elseif ( empty( $woocommerce->session->chosen_shipping_method ) ) {
-				return false;
-			} else {
-				$chosen_method = $woocommerce->session->chosen_shipping_method;
+			} elseif ( empty( $chosen_shipping_methods ) || sizeof( $chosen_shipping_methods ) > 1 ) {
+				$check_method = false;
+			} elseif ( sizeof( $chosen_shipping_methods ) == 1 ) {
+				$check_method = $chosen_shipping_methods[0];
 			}
+
+			if ( ! $check_method )
+				return false;
 
 			$found = false;
 
 			foreach ( $this->enable_for_methods as $method_id ) {
-				if ( strpos( $chosen_method, $method_id ) === 0 ) {
+				if ( strpos( $check_method, $method_id ) === 0 ) {
 					$found = true;
 					break;
 				}

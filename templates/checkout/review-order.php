@@ -9,9 +9,6 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-global $woocommerce;
-
-$available_methods = $woocommerce->shipping->get_available_shipping_methods();
 ?>
 <div id="order_review">
 
@@ -23,89 +20,57 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 			</tr>
 		</thead>
 		<tfoot>
+
 			<tr class="cart-subtotal">
 				<th><?php _e( 'Cart Subtotal', 'woocommerce' ); ?></th>
-				<td><?php echo $woocommerce->cart->get_cart_subtotal(); ?></td>
+				<td><?php wc_cart_totals_subtotal_html(); ?></td>
 			</tr>
 
-			<?php if ( $woocommerce->cart->get_discounts_before_tax() ) : ?>
-
-			<tr class="discount">
-				<th><?php _e( 'Cart Discount', 'woocommerce' ); ?></th>
-				<td>-<?php echo $woocommerce->cart->get_discounts_before_tax(); ?></td>
-			</tr>
-
-			<?php endif; ?>
-
-			<?php if ( $woocommerce->cart->needs_shipping() && $woocommerce->cart->show_shipping() ) : ?>
-
-				<?php do_action('woocommerce_review_order_before_shipping'); ?>
-
-				<tr class="shipping">
-					<th><?php _e( 'Shipping and Handling', 'woocommerce' ); ?></th>
-					<td><?php woocommerce_get_template( 'cart/shipping-methods.php', array( 'available_methods' => $available_methods ) ); ?></td>
+			<?php foreach ( WC()->cart->get_applied_coupons( 'cart' ) as $code ) : ?>
+				<tr class="cart-discount coupon-<?php echo esc_attr( $code ); ?>">
+					<th><?php echo esc_html( $code ); ?></th>
+					<td><?php wc_cart_totals_coupon_html( $code ); ?></td>
 				</tr>
-
-				<?php do_action('woocommerce_review_order_after_shipping'); ?>
-
-			<?php endif; ?>
-
-			<?php foreach ( $woocommerce->cart->get_fees() as $fee ) : ?>
-
-				<tr class="fee fee-<?php echo $fee->id ?>">
-					<th><?php echo $fee->name ?></th>
-					<td><?php
-						if ( $woocommerce->cart->tax_display_cart == 'excl' )
-							echo woocommerce_price( $fee->amount );
-						else
-							echo woocommerce_price( $fee->amount + $fee->tax );
-					?></td>
-				</tr>
-
 			<?php endforeach; ?>
 
-			<?php
-				// Show the tax row if showing prices exlcusive of tax only
-				if ( $woocommerce->cart->tax_display_cart == 'excl' ) {
-					foreach ( $woocommerce->cart->get_tax_totals() as $code => $tax ) {
-						echo '<tr class="tax-rate tax-rate-' . $code . '">
-							<th>' . $tax->label . '</th>
-							<td>' . $tax->formatted_amount . '</td>
-						</tr>';
-					}
-				}
-			?>
+			<?php if ( WC()->cart->needs_shipping() && WC()->cart->show_shipping() ) : ?>
 
-			<?php if ( $woocommerce->cart->get_discounts_after_tax() ) : ?>
+				<?php do_action( 'woocommerce_review_order_before_shipping' ); ?>
 
-			<tr class="discount">
-				<th><?php _e( 'Order Discount', 'woocommerce' ); ?></th>
-				<td>-<?php echo $woocommerce->cart->get_discounts_after_tax(); ?></td>
-			</tr>
+				<?php wc_cart_totals_shipping_html(); ?>
+
+				<?php do_action( 'woocommerce_review_order_after_shipping' ); ?>
 
 			<?php endif; ?>
+
+			<?php foreach ( WC()->cart->get_fees() as $fee ) : ?>
+				<tr class="fee">
+					<th><?php echo esc_html( $fee->name ); ?></th>
+					<td><?php wc_cart_totals_fee_html( $fee ); ?></td>
+				</tr>
+			<?php endforeach; ?>
+
+			<?php if ( WC()->cart->tax_display_cart == 'excl' ) : ?>
+				<?php foreach ( WC()->cart->get_tax_totals() as $code => $tax ) : ?>
+					<tr class="tax-rate tax-rate-<?php echo sanitize_title( $code ); ?>">
+						<th><?php echo esc_html( $tax->label ); ?></th>
+						<td><?php echo wp_kses_post( $tax->formatted_amount ); ?></td>
+					</tr>
+				<?php endforeach; ?>
+			<?php endif; ?>
+
+			<?php foreach ( WC()->cart->get_applied_coupons( 'order' ) as $code ) : ?>
+				<tr class="order-discount coupon-<?php echo esc_attr( $code ); ?>">
+					<th><?php echo esc_html( $code ); ?></th>
+					<td><?php wc_cart_totals_coupon_html( $code ); ?></td>
+				</tr>
+			<?php endforeach; ?>
 
 			<?php do_action( 'woocommerce_review_order_before_order_total' ); ?>
 
-			<tr class="total">
-				<th><strong><?php _e( 'Order Total', 'woocommerce' ); ?></strong></th>
-				<td>
-					<strong><?php echo $woocommerce->cart->get_total(); ?></strong>
-					<?php
-						// If prices are tax inclusive, show taxes here
-						if ( $woocommerce->cart->tax_display_cart == 'incl' ) {
-							$tax_string_array = array();
-
-							foreach ( $woocommerce->cart->get_tax_totals() as $code => $tax ) {
-								$tax_string_array[] = sprintf( '%s %s', $tax->formatted_amount, $tax->label );
-							}
-
-							if ( ! empty( $tax_string_array ) ) {
-								?><small class="includes_tax"><?php printf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) ); ?></small><?php
-							}
-						}
-					?>
-				</td>
+			<tr class="order-total">
+				<th><?php _e( 'Order Total', 'woocommerce' ); ?></th>
+				<td><?php wc_cart_totals_order_total_html(); ?></td>
 			</tr>
 
 			<?php do_action( 'woocommerce_review_order_after_order_total' ); ?>
@@ -115,7 +80,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 			<?php
 				do_action( 'woocommerce_review_order_before_cart_contents' );
 
-				foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
+				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 					$_product     = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
 
 					if ( $_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters( 'woocommerce_checkout_cart_item_visible', true, $cart_item, $cart_item_key ) ) {
@@ -124,10 +89,10 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							<td class="product-name">
 								<?php echo apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key ); ?>
 								<?php echo apply_filters( 'woocommerce_checkout_cart_item_quantity', ' <strong class="product-quantity">' . sprintf( '&times; %s', $cart_item['quantity'] ) . '</strong>', $cart_item, $cart_item_key ); ?>
-								<?php echo $woocommerce->cart->get_item_data( $cart_item ); ?>
+								<?php echo WC()->cart->get_item_data( $cart_item ); ?>
 							</td>
 							<td class="product-total">
-								<?php echo apply_filters( 'woocommerce_cart_item_subtotal', $woocommerce->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key ); ?>
+								<?php echo apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key ); ?>
 							</td>
 						</tr>
 						<?php
@@ -142,15 +107,15 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 	<?php do_action( 'woocommerce_review_order_before_payment' ); ?>
 
 	<div id="payment">
-		<?php if ($woocommerce->cart->needs_payment()) : ?>
+		<?php if (WC()->cart->needs_payment()) : ?>
 		<ul class="payment_methods methods">
 			<?php
-				$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
+				$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 				if ( ! empty( $available_gateways ) ) {
 
 					// Chosen Method
-					if ( isset( $woocommerce->session->chosen_payment_method ) && isset( $available_gateways[ $woocommerce->session->chosen_payment_method ] ) ) {
-						$available_gateways[ $woocommerce->session->chosen_payment_method ]->set_current();
+					if ( isset( WC()->session->chosen_payment_method ) && isset( $available_gateways[ WC()->session->chosen_payment_method ] ) ) {
+						$available_gateways[ WC()->session->chosen_payment_method ]->set_current();
 					} elseif ( isset( $available_gateways[ get_option( 'woocommerce_default_gateway' ) ] ) ) {
 						$available_gateways[ get_option( 'woocommerce_default_gateway' ) ]->set_current();
 					} else {
@@ -174,7 +139,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					}
 				} else {
 
-					if ( ! $woocommerce->customer->get_country() )
+					if ( ! WC()->customer->get_country() )
 						echo '<p>' . __( 'Please fill in your details above to see available payment methods.', 'woocommerce' ) . '</p>';
 					else
 						echo '<p>' . __( 'Sorry, it seems that there are no available payment methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce' ) . '</p>';

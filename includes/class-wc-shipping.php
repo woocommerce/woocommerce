@@ -27,9 +27,6 @@ class WC_Shipping {
 	/**  @var array Stores an array of shipping taxes. */
 	var $shipping_taxes				= array();
 
-	/**  @var string Stores the label for the chosen method. */
-	var $shipping_label				= null;
-
 	/** @var array Stores the shipping classes. */
 	var $shipping_classes			= array();
 
@@ -189,16 +186,12 @@ class WC_Shipping {
 	 * @param array $packages multi-dimensional array of cart items to calc shipping for
 	 */
 	function calculate_shipping( $packages = array() ) {
-		global $woocommerce;
-
 		if ( ! $this->enabled || empty( $packages ) )
 			return;
 
-		$this->shipping_total 	= 0;
+		$this->shipping_total 	= null;
 		$this->shipping_taxes 	= array();
-		$this->shipping_label 	= null;
 		$this->packages 		= array();
-		$_cheapest_cost = $_cheapest_method = $chosen_method = '';
 
 		// Calculate costs for passed packages
 		$package_keys 		= array_keys( $packages );
@@ -207,58 +200,80 @@ class WC_Shipping {
 		for ( $i = 0; $i < $package_keys_size; $i ++ )
 			$this->packages[ $package_keys[ $i ] ] = $this->calculate_shipping_for_package( $packages[ $package_keys[ $i ] ] );
 
-		// Get available methods (in this case methods for all packages)
-		$_available_methods = $this->get_available_shipping_methods();
+		// Get all chosen methods
+		$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
+		$method_counts  = WC()->session->get( 'shipping_method_counts' );
 
-		// Get chosen method
-		if ( ! empty( $woocommerce->session->chosen_shipping_method ) )
-			$chosen_method = $woocommerce->session->chosen_shipping_method;
+		// Get chosen methods for each package
+		foreach ( $this->packages as $i => $package ) {
 
-		// Set method if we have mehtods available
-		if ( sizeof( $_available_methods ) > 0 ) {
+			$_cheapest_cost   = false;
+			$_cheapest_method = false;
+			$chosen_method    = false;
+			$method_count     = false;
 
-			// If not set, not available, or available methods have changed, set to the default option
-			if ( empty( $chosen_method ) || ! isset( $_available_methods[ $chosen_method ] ) || $woocommerce->session->available_methods_count != sizeof( $_available_methods ) ) {
+			if ( ! empty( $chosen_methods[ $i ] ) )
+				$chosen_method = $chosen_methods[ $i ];
 
-				$chosen_method = apply_filters( 'woocommerce_shipping_chosen_method', get_option( 'woocommerce_default_shipping_method' ), $_available_methods );
+			if ( ! empty( $method_counts[ $i ] ) )
+				$method_count = $method_counts[ $i ];
 
-				// Loops methods and find a match
-				if ( ! empty( $chosen_method ) && ! isset( $_available_methods[ $chosen_method ] ) ) {
-					foreach ( $_available_methods as $method_id => $method ) {
-						if ( strpos( $method->id, $chosen_method ) === 0 ) {
-							$chosen_method = $method->id;
-							break;
+			// Get available methods for package
+			$_available_methods = $package['rates'];
+
+			if ( sizeof( $_available_methods ) > 0 ) {
+
+				// If not set, not available, or available methods have changed, set to the default option
+				if ( empty( $chosen_method ) || ! isset( $_available_methods[ $chosen_method ] ) || $method_count != sizeof( $_available_methods ) ) {
+
+					$chosen_method = apply_filters( 'woocommerce_shipping_chosen_method', get_option( 'woocommerce_default_shipping_method' ), $_available_methods );
+
+					// Loops methods and find a match
+					if ( ! empty( $chosen_method ) && ! isset( $_available_methods[ $chosen_method ] ) ) {
+						foreach ( $_available_methods as $method_id => $method ) {
+							if ( strpos( $method->id, $chosen_method ) === 0 ) {
+								$chosen_method = $method->id;
+								break;
+							}
 						}
 					}
-				}
 
-				if ( empty( $chosen_method ) || ! isset( $_available_methods[$chosen_method] ) ) {
-
-					// Default to cheapest
-					foreach ( $_available_methods as $method_id => $method ) {
-						if ( $method->cost < $_cheapest_cost || ! is_numeric( $_cheapest_cost ) ) {
-							$_cheapest_cost 	= $method->cost;
-							$_cheapest_method 	= $method_id;
+					if ( empty( $chosen_method ) || ! isset( $_available_methods[ $chosen_method ] ) ) {
+						// Default to cheapest
+						foreach ( $_available_methods as $method_id => $method ) {
+							if ( $method->cost < $_cheapest_cost || ! is_numeric( $_cheapest_cost ) ) {
+								$_cheapest_cost 	= $method->cost;
+								$_cheapest_method 	= $method_id;
+							}
 						}
+						$chosen_method = $_cheapest_method;
 					}
-					$chosen_method = $_cheapest_method;
+
+					// Store chosen method
+					$chosen_methods[ $i ] = $chosen_method;
+					$method_counts[ $i ]  = sizeof( $_available_methods );
+
+					// Do action for this chosen method
+					do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
 				}
 
-				// Store chosen method
-				$woocommerce->session->chosen_shipping_method = $chosen_method;
+				// Store total costs
+				if ( $chosen_method ) {
+					$rate = $_available_methods[ $chosen_method ];
 
-				// Do action for this chosen method
-				do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
-			}
+					// Merge cost and taxes - label and ID will be the same
+					$this->shipping_total += $rate->cost;
 
-			if ( $chosen_method ) {
-				$this->shipping_total 	= $_available_methods[ $chosen_method ]->cost;
-				$this->shipping_taxes 	= $_available_methods[ $chosen_method ]->taxes;
-				$this->shipping_label 	= $_available_methods[ $chosen_method ]->label;
+					foreach ( array_keys( $this->shipping_taxes + $rate->taxes ) as $key ) {
+					    $this->shipping_taxes[ $key ] = ( isset( $rate->taxes[$key] ) ? $rate->taxes[$key] : 0 ) + ( isset( $this->shipping_taxes[$key] ) ? $this->shipping_taxes[$key] : 0 );
+					}
+				}
 			}
 		}
 
-		$woocommerce->session->available_methods_count = sizeof( $_available_methods );
+		// Save all chosen methods (array)
+		WC()->session->set( 'chosen_shipping_methods', $chosen_methods );
+		WC()->session->set( 'shipping_method_counts', $method_counts );
 	}
 
 	/**
@@ -283,7 +298,7 @@ class WC_Shipping {
 
 			foreach ( $this->load_shipping_methods( $package ) as $shipping_method ) {
 
-				if ( $shipping_method->is_available( $package ) ) {
+				if ( $shipping_method->is_available( $package ) && ( empty( $package['ship_via'] ) || in_array( $shipping_method->id, $package['ship_via'] ) ) ) {
 
 					// Reset Rates
 					$shipping_method->rates = array();
@@ -294,9 +309,8 @@ class WC_Shipping {
 					// Place rates in package array
 					if ( ! empty( $shipping_method->rates ) && is_array( $shipping_method->rates ) )
 						foreach ( $shipping_method->rates as $rate )
-							$package['rates'][$rate->id] = $rate;
+							$package['rates'][ $rate->id ] = $rate;
 				}
-
 			}
 
 			// Filter the calculated rates
@@ -355,6 +369,10 @@ class WC_Shipping {
 		return apply_filters( 'woocommerce_available_shipping_methods', $available_methods );
 	}
 
+	function get_packages() {
+		return $this->packages;
+	}
+
 
 	/**
 	 * reset_shipping function.
@@ -366,10 +384,9 @@ class WC_Shipping {
 	 */
 	function reset_shipping() {
 		global $woocommerce;
-		unset( $woocommerce->session->chosen_shipping_method );
-		$this->shipping_total = 0;
+		unset( $woocommerce->session->chosen_shipping_methods );
+		$this->shipping_total = null;
 		$this->shipping_taxes = array();
-		$this->shipping_label = null;
 		$this->packages = array();
 	}
 

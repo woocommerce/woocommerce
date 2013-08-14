@@ -25,6 +25,7 @@ class WC_Coupon {
 	const E_WC_COUPON_NOT_VALID_SALE_ITEMS           = 110;
 	const E_WC_COUPON_PLEASE_ENTER                   = 111;
 	const WC_COUPON_SUCCESS                          = 200;
+	const WC_COUPON_REMOVED                          = 201;
 
 	/** @public string Coupon code. */
 	public $code;
@@ -417,8 +418,11 @@ class WC_Coupon {
 	public function get_coupon_message( $msg_code ) {
 
 		switch ( $msg_code ) {
-			case self::WC_COUPON_SUCCESS:
+			case self::WC_COUPON_SUCCESS :
 				$msg = __( 'Coupon code applied successfully.', 'woocommerce' );
+			break;
+			case self::WC_COUPON_REMOVED :
+				$msg = __( 'Coupon code removed successfully.', 'woocommerce' );
 			break;
 			default:
 				$msg = '';

@@ -379,8 +379,14 @@ class WC_Checkout {
 			$this->posted['ship_to_different_address']  = false;
 
 		// Update customer shipping and payment method to posted method
-		$woocommerce->session->chosen_shipping_method 	= $this->posted['shipping_method'];
-		$woocommerce->session->chosen_payment_method	= $this->posted['payment_method'];
+		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+
+		if ( isset( $this->posted['shipping_method'] ) && is_array( $this->posted['shipping_method'] ) )
+			foreach ( $this->posted['shipping_method'] as $i => $value )
+				$chosen_shipping_methods[ $i ] = woocommerce_clean( $value );
+
+		WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
+		WC()->session->set( 'chosen_payment_method', $this->posted['payment_method'] );
 
 		// Note if we skip shipping
 		$skipped_shipping = false;
@@ -525,14 +531,15 @@ class WC_Checkout {
 			if ( ! in_array( $woocommerce->customer->get_shipping_country(), array_keys( WC()->countries->get_shipping_countries() ) ) )
 				wc_add_error( sprintf( __( 'Unfortunately <strong>we do not ship to %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), $woocommerce->countries->shipping_to_prefix() . ' ' . $woocommerce->customer->get_shipping_country() ) );
 
-			// Shipping Method
-			$available_methods = $woocommerce->shipping->get_available_shipping_methods();
+			// Validate Shipping Methods
+			$packages               = WC()->shipping->get_packages();
+			$this->shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
-			if ( ! isset( $available_methods[ $this->posted['shipping_method'] ] ) ) {
-				$this->shipping_method = '';
-				wc_add_error( __( 'Invalid shipping method.', 'woocommerce' ) );
-			} else {
-				$this->shipping_method = $available_methods[ $this->posted['shipping_method'] ];
+			foreach ( $packages as $i => $package ) {
+				if ( ! isset( $package['rates'][ $this->shipping_methods[ $i ] ] ) ) {
+					wc_add_error( __( 'Invalid shipping method.', 'woocommerce' ) );
+					$this->shipping_methods[ $i ] = '';
+				}
 			}
 		}
 
