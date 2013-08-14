@@ -298,7 +298,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function needs_shipping() {
-		return $this->is_virtual() ? false : true;
+		return apply_filters( 'woocommerce_product_needs_shipping', $this->is_virtual() ? false : true, $this );
 	}
 
 	/**
