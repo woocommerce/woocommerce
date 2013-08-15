@@ -40,7 +40,7 @@ class WC_Meta_Box_Order_Items {
 
 						<th class="quantity"><?php _e( 'Qty', 'woocommerce' ); ?></th>
 
-						<th class="line_cost"><?php _e( 'Totals', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Line subtotals are before pre-tax discounts, totals are after.', 'woocommerce' ); ?>" href="#">[?]</a></th>
+						<th class="line_cost"><?php _e( 'Total', 'woocommerce' ); ?></th>
 
 						<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
 							<th class="line_tax"><?php _e( 'Tax', 'woocommerce' ); ?></th>
