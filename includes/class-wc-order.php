@@ -965,6 +965,8 @@ class WC_Order {
 
 		if ( $fees = $this->get_fees() )
 			foreach( $fees as $id => $fee ) {
+				if ( $fee['line_total'] + $fee['line_tax'] == 0 )
+					continue;
 
 				if ( $tax_display == 'excl' ) {
 

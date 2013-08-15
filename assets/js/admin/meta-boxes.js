@@ -206,6 +206,14 @@ jQuery( function($){
 	// When the page is loaded, store the unit costs
 	$('#order_items_list tr.item').each( function() {
 		$(this).trigger('init_row');
+		$(this).find('.edit').hide();
+	} );
+
+	$('#order_items_list').on( 'click', 'a.edit_order_item', function() {
+		$(this).closest('tr').find('.view').hide();
+		$(this).closest('tr').find('.edit').show();
+		$(this).hide();
+		return false;
 	} );
 
 	// When the qty is changed, increase or decrease costs

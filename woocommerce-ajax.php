@@ -970,7 +970,7 @@ function woocommerce_ajax_add_order_fee() {
 	 	woocommerce_add_order_item_meta( $item_id, '_line_tax', '' );
  	}
 
-	include( 'includes/admin/post-types/meta-boxes-views/html-order-fee.php' );
+	include( 'includes/admin/post-types/meta-boxes/views/html-order-fee.php' );
 
 	// Quit out
 	die();

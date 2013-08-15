@@ -733,6 +733,12 @@ ul.wc_coupon_list_block {
 	h3 small {
 		color: #999;
 	}
+	a.edit_order_item {
+		opacity: 0.4;
+		&:hover, &:focus {
+			opacity: 1;
+		}
+	}
 }
 #woocommerce-order-downloads {
 	.buttons {
@@ -1017,6 +1023,7 @@ ul.wc_coupon_list_block {
 				width: 85px;
 				height: 26px;
 				vertical-align:middle;
+				font-size: 1em;
 			}
 		}
 		.quantity {
@@ -1038,7 +1045,13 @@ ul.wc_coupon_list_block {
 		}
 		table.meta {
 			width: 100%;
+		}
+		table.meta, table.display_meta {
 			tr {
+				th {
+					border: 0;
+					padding: 1px 4px 1px 0;
+				}
 				td {
 					padding: 1px 4px 1px 0;
 					border: 0;
@@ -1050,17 +1063,17 @@ ul.wc_coupon_list_block {
 		}
 		.thumb {
 			text-align: left;
-			width: 52px;
+			width: 27px;
 			a {
 				display: block;
 			}
 			img {
-				padding: 2px;
+				padding: 1px;
 				margin: 0;
 				border: 1px solid #dfdfdf;
 				vertical-align: middle;
-				width: 46px;
-				height: 46px;
+				width: 21px;
+				height: 21px;
 			}
 		}
 		tr.fee {

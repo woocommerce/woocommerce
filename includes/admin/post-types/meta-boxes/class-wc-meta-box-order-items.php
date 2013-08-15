@@ -35,7 +35,7 @@ class WC_Meta_Box_Order_Items {
 						<?php do_action( 'woocommerce_admin_order_item_headers' ); ?>
 
 						<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
-							<th class="tax_class"><?php _e( 'Tax Class', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Tax class for the line item', 'woocommerce' ); ?>." href="#">[?]</a></th>
+							<th class="tax_class"><?php _e( 'Tax&nbsp;Class', 'woocommerce' ); ?></th>
 						<?php endif; ?>
 
 						<th class="quantity"><?php _e( 'Qty', 'woocommerce' ); ?></th>
@@ -45,6 +45,8 @@ class WC_Meta_Box_Order_Items {
 						<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
 							<th class="line_tax"><?php _e( 'Tax', 'woocommerce' ); ?></th>
 						<?php endif; ?>
+
+						<th width="1%">&nbsp;</th>
 					</tr>
 				</thead>
 				<tbody id="order_items_list">

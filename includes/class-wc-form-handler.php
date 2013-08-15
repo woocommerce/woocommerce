@@ -467,9 +467,14 @@ class WC_Form_Handler {
 
 	            if ( ! empty( $_REQUEST[ $taxonomy ] ) ) {
 
+
+	            	var_dump($_REQUEST[ $taxonomy ]);
+
 	                // Get value from post data
 	                // Don't use woocommerce_clean as it destroys sanitized characters
 	                $value = sanitize_title( trim( stripslashes( $_REQUEST[ $taxonomy ] ) ) );
+
+	                var_dump( $value);
 
 	                // Get valid value from variation
 	                $valid_value = $variation->variation_data[ $taxonomy ];
