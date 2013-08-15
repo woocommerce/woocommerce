@@ -41,7 +41,7 @@ class WC_Meta_Box_Order_Notes {
 						<?php echo wpautop( wptexturize( wp_kses_post( $note->comment_content ) ) ); ?>
 					</div>
 					<p class="meta">
-						<?php printf( __( 'added %s ago', 'woocommerce' ), human_time_diff( strtotime( $note->comment_date_gmt ), current_time( 'timestamp', 1 ) ) ); ?>
+						<abbr class="exact-date" title="<?php echo $note->comment_date_gmt; ?> GMT"><?php printf( __( 'added %s ago', 'woocommerce' ), human_time_diff( strtotime( $note->comment_date_gmt ), current_time( 'timestamp', 1 ) ) ); ?></abbr>
 						<?php if ( $note->comment_author !== __( 'WooCommerce', 'woocommerce' ) ) printf( ' ' . __( 'by %s', 'woocommerce' ), $note->comment_author ); ?>
 						<a href="#" class="delete_note"><?php _e( 'Delete note', 'woocommerce' ); ?></a>
 					</p>
