@@ -157,7 +157,13 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 	<td class="line_cost" width="1%">
 		<div class="view">
-			<?php if ( isset( $item['line_total'] ) ) echo woocommerce_price( $item['line_total'] ); ?>
+			<?php
+				if ( isset( $item['line_total'] ) ) {
+					if ( isset( $item['line_subtotal'] ) && $item['line_subtotal'] != $item['line_total'] ) echo '<del>' . woocommerce_price( $item['line_subtotal'] ) . '</del> ';
+
+					echo woocommerce_price( $item['line_total'] );
+				}
+			?>
 		</div>
 		<div class="edit" style="display:none">
 			<label><?php _e( 'Total', 'woocommerce' ); ?>: <a class="tips" data-tip="<?php _e( 'After pre-tax discounts.', 'woocommerce' ); ?>" href="#">[?]</a> <input type="number" step="any" min="0" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_total'] ) ) echo esc_attr( $item['line_total'] ); ?>" class="line_total" /></label>
@@ -170,7 +176,13 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 	<td class="line_tax" width="1%">
 		<div class="view">
-			<?php if ( isset( $item['line_tax'] ) ) echo woocommerce_price( $item['line_tax'] ); ?>
+			<?php
+				if ( isset( $item['line_tax'] ) ) {
+					if ( isset( $item['line_subtotal_tax'] ) && $item['line_subtotal_tax'] != $item['line_tax'] ) echo '<del>' . woocommerce_price( $item['line_subtotal_tax'] ) . '</del> ';
+
+					echo woocommerce_price( $item['line_tax'] );
+				}
+			?>
 		</div>
 		<div class="edit" style="display:none">
 			<input type="number" step="any" min="0" name="line_tax[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_tax'] ) ) echo esc_attr( $item['line_tax'] ); ?>" class="line_tax" />

@@ -572,6 +572,11 @@ ul.wc_coupon_list_block {
 		p {
 			padding: 0 !important;
 		}
+		.address {
+			strong {
+				display: block;
+			}
+		}
 		.form-field {
 			float: left;
 			width: 48%;
@@ -596,7 +601,7 @@ ul.wc_coupon_list_block {
 				width: 100% !important;
 			}
 			.date-picker-field {
-				width: 9em;
+				width: 50%;
 			}
 			.hour, .minute {
 				width: 2.5em;
@@ -643,6 +648,12 @@ ul.wc_coupon_list_block {
 			overflow: hidden;
 			zoom: 1;
 			padding-right: 1px;
+		}
+	}
+	a.edit_address {
+		opacity: 0.4;
+		&:hover, &:focus {
+			opacity: 1;
 		}
 	}
 }
@@ -784,8 +795,8 @@ ul.wc_coupon_list_block {
 	}
 	h4 {
 		margin:0 !important;
-		a.add_tax_row {
-			display: block;
+		a.add_tax_row, a.add_total_row {
+			display: inline-block;
 			padding-bottom: 10px;
 		}
 		.inline_total {
@@ -799,6 +810,31 @@ ul.wc_coupon_list_block {
 		padding: 10px 10px 0 10px;
 		&:first-child {
 			border-top:0;
+		}
+		input, select {
+			font-size: 1.4em;
+			width: 100%;
+			vertical-align: top;
+			margin: 0;
+			font-weight: normal;
+			color: #999;
+			line-height: 1em;
+			&:focus {
+				color: #555;
+			}
+		}
+		select {
+			height: 30px !important;
+		}
+		input {
+			padding: 4px 6px;
+		}
+		::-webkit-input-placeholder { line-height: 1.4em; }
+		::-moz-placeholder { line-height: 1.4em; } /* firefox 19+ */
+		:-ms-input-placeholder { line-height: 1.4em; } /* ie */
+		input:-moz-placeholder { line-height: 1.4em; }
+		#_order_total, #_order_discount {
+			margin: 6px 0 10px;
 		}
 	}
 	.buttons {
@@ -827,25 +863,6 @@ ul.wc_coupon_list_block {
 				display: block;
 				font-size: 0.8em;
 				color: #333;
-			}
-			input {
-				padding: 4px;
-			}
-			input, select {
-				width: 100%;
-				vertical-align: top;
-				font-size: 1em !important;
-				margin: 0 !important;
-				font-weight: normal;
-				color: #555;
-			}
-			input.first {
-				width: 49%;
-				float: left;
-			}
-			input.last {
-				width: 49%;
-				float: right;
 			}
 		}
 		li.left {
@@ -877,29 +894,24 @@ ul.wc_coupon_list_block {
 			border-style: dotted;
 		}
 	}
-	#tax_rows {
+	.total_rows {
 		margin: 6px 0 0;
 	}
-	.tax_row {
+	.total_row {
 		margin:0 0 9px;
 		border:1px solid #DFDFDF;
 		border-right-width: 2px;
 		border-bottom-width: 2px;
 		background: #fff;
-		padding:6px 6px 0;
+		padding: 9px 9px 0;
 		position: relative;
-		opacity:0.75;
-		&:hover, &:focus {
-			opacity:1;
-		}
 		p {
-			margin:0 0 6px;
+			margin:0 0 9px;
 		}
 		label {
-			color:#555;
-			.checkbox {
-				line-height: 26px;
-			}
+			color:#999;
+			display: block;
+			margin: 0 0 3px;
 		}
 		p.first {
 			float: left;
@@ -923,7 +935,7 @@ ul.wc_coupon_list_block {
 				width: 100%;
 			}
 		}
-		a.delete_tax_row {
+		a.delete_tax_row, a.delete_total_row {
 			padding:0;
 			text-decoration: none;
 			font-size: 11px;
@@ -947,7 +959,7 @@ ul.wc_coupon_list_block {
 			display: none;
 		}
 		&:hover, &:focus {
-			a.delete_tax_row {
+			a.delete_tax_row, a.delete_total_row {
 				display: block;
 			}
 		}
@@ -1608,6 +1620,7 @@ a.export_rates, a.import_rates {
 	margin-bottom: 0;
 }
 table.wc_tax_rates, table.wc_input_table {
+	width: 100%;
 	td {
 		padding: 0;
 		border-right: 1px solid #DFDFDF;

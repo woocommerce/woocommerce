@@ -149,7 +149,11 @@ class WC_Meta_Box_Order_Data {
 					<div class="order_data_column">
 						<h4><?php _e( 'General Details', 'woocommerce' ); ?></h4>
 
-						<p class="form-field"><label for="order_status"><?php _e( 'Order status:', 'woocommerce' ) ?></label>
+						<p class="form-field form-field-wide"><label for="order_date"><?php _e( 'Order date:', 'woocommerce' ) ?></label>
+							<input type="text" class="date-picker-field" name="order_date" id="order_date" maxlength="10" value="<?php echo date_i18n( 'Y-m-d', strtotime( $post->post_date ) ); ?>" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />@<input type="text" class="hour" placeholder="<?php _e( 'h', 'woocommerce' ) ?>" name="order_date_hour" id="order_date_hour" maxlength="2" size="2" value="<?php echo date_i18n( 'H', strtotime( $post->post_date ) ); ?>" pattern="\-?\d+(\.\d{0,})?" />:<input type="text" class="minute" placeholder="<?php _e( 'm', 'woocommerce' ) ?>" name="order_date_minute" id="order_date_minute" maxlength="2" size="2" value="<?php echo date_i18n( 'i', strtotime( $post->post_date ) ); ?>" pattern="\-?\d+(\.\d{0,})?" />
+						</p>
+
+						<p class="form-field form-field-wide"><label for="order_status"><?php _e( 'Order status:', 'woocommerce' ) ?></label>
 						<select id="order_status" name="order_status" class="chosen_select">
 							<?php
 								$statuses = (array) get_terms( 'shop_order_status', array( 'hide_empty' => 0, 'orderby' => 'id' ) );
@@ -158,10 +162,6 @@ class WC_Meta_Box_Order_Data {
 								}
 							?>
 						</select></p>
-
-						<p class="form-field last"><label for="order_date"><?php _e( 'Order Date:', 'woocommerce' ) ?></label>
-							<input type="text" class="date-picker-field" name="order_date" id="order_date" maxlength="10" value="<?php echo date_i18n( 'Y-m-d', strtotime( $post->post_date ) ); ?>" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" /> @ <input type="text" class="hour" placeholder="<?php _e( 'h', 'woocommerce' ) ?>" name="order_date_hour" id="order_date_hour" maxlength="2" size="2" value="<?php echo date_i18n( 'H', strtotime( $post->post_date ) ); ?>" pattern="\-?\d+(\.\d{0,})?" />:<input type="text" class="minute" placeholder="<?php _e( 'm', 'woocommerce' ) ?>" name="order_date_minute" id="order_date_minute" maxlength="2" size="2" value="<?php echo date_i18n( 'i', strtotime( $post->post_date ) ); ?>" pattern="\-?\d+(\.\d{0,})?" />
-						</p>
 
 						<p class="form-field form-field-wide">
 							<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?></label>
@@ -176,23 +176,16 @@ class WC_Meta_Box_Order_Data {
 							</select>
 						</p>
 
-						<?php if ( apply_filters( 'woocommerce_enable_order_notes_field', get_option( 'woocommerce_enable_order_comments', 'yes' ) == 'yes' ) ) : ?>
-
-							<p class="form-field form-field-wide"><label for="excerpt"><?php _e( 'Customer Note:', 'woocommerce' ) ?></label>
-							<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php _e( 'Customer\'s notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses_post( $post->post_excerpt ); ?></textarea></p>
-
-						<?php endif; ?>
-
 						<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); ?>
 					</div>
 					<div class="order_data_column">
-						<h4><?php _e( 'Billing Details', 'woocommerce' ); ?> <a class="edit_address" href="#">(<?php _e( 'Edit', 'woocommerce' ) ;?>)</a></h4>
+						<h4><?php _e( 'Billing Details', 'woocommerce' ); ?> <a class="edit_address" href="#"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/icons/edit.png" alt="Edit" width="14" /></a></h4>
 						<?php
 							// Display values
 							echo '<div class="address">';
 
 								if ( $order->get_formatted_billing_address() )
-									echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong><br/> ' . $order->get_formatted_billing_address() . '</p>';
+									echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong>' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $order->get_formatted_billing_address() ) ) . '</p>';
 								else
 									echo '<p class="none_set"><strong>' . __( 'Address', 'woocommerce' ) . ':</strong> ' . __( 'No billing address set.', 'woocommerce' ) . '</p>';
 
@@ -203,8 +196,16 @@ class WC_Meta_Box_Order_Data {
 									$field_name = 'billing_' . $key;
 
 									if ( $order->$field_name )
-										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . esc_html( $order->$field_name ) . '</p>';
+										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $order->$field_name ) ) . '</p>';
 								}
+
+								if ( WC()->payment_gateways() )
+									$payment_gateways = WC()->payment_gateways->payment_gateways();
+
+								$payment_method = ! empty( $order->payment_method ) ? $order->payment_method : '';
+
+								if ( $payment_method )
+									echo '<p><strong>' . __( 'Payment Method', 'woocommerce' ) . ':</strong> ' . ( isset( $payment_gateways[ $payment_method ] ) ? esc_html( $payment_gateways[ $payment_method ]->get_title() ) : esc_html( $payment_method ) ) . '</p>';
 
 							echo '</div>';
 
@@ -224,6 +225,32 @@ class WC_Meta_Box_Order_Data {
 								}
 							}
 
+							?>
+							<p class="form-field form-field-wide">
+								<label><?php _e( 'Payment Method:', 'woocommerce' ); ?></label>
+								<select name="_payment_method" id="_payment_method" class="first">
+									<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
+									<?php
+										$found_method 	= false;
+
+										foreach ( $payment_gateways as $gateway ) {
+											if ( $gateway->enabled == "yes" ) {
+												echo '<option value="' . esc_attr( $gateway->id ) . '" ' . selected( $payment_method, $gateway->id, false ) . '>' . esc_html( $gateway->get_title() ) . '</option>';
+												if ( $payment_method == $gateway->id )
+													$found_method = true;
+											}
+										}
+
+										if ( ! $found_method && ! empty( $payment_method ) ) {
+											echo '<option value="' . esc_attr( $payment_method ) . '" selected="selected">' . __( 'Other', 'woocommerce' ) . '</option>';
+										} else {
+											echo '<option value="other">' . __( 'Other', 'woocommerce' ) . '</option>';
+										}
+									?>
+								</select>
+							</p>
+							<?php
+
 							echo '</div>';
 
 							do_action( 'woocommerce_admin_order_data_after_billing_address', $order );
@@ -231,13 +258,13 @@ class WC_Meta_Box_Order_Data {
 					</div>
 					<div class="order_data_column">
 
-						<h4><?php _e( 'Shipping Details', 'woocommerce' ); ?> <a class="edit_address" href="#">(<?php _e( 'Edit', 'woocommerce' ) ;?>)</a></h4>
+						<h4><?php _e( 'Shipping Details', 'woocommerce' ); ?> <a class="edit_address" href="#"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/icons/edit.png" alt="Edit" width="14" /></a></h4>
 						<?php
 							// Display values
 							echo '<div class="address">';
 
 								if ( $order->get_formatted_shipping_address() )
-									echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong><br/> ' . $order->get_formatted_shipping_address() . '</p>';
+									echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong>' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $order->get_formatted_shipping_address() ) ) . '</p>';
 								else
 									echo '<p class="none_set"><strong>' . __( 'Address', 'woocommerce' ) . ':</strong> ' . __( 'No shipping address set.', 'woocommerce' ) . '</p>';
 
@@ -248,8 +275,11 @@ class WC_Meta_Box_Order_Data {
 									$field_name = 'shipping_' . $key;
 
 									if ( ! empty( $order->$field_name ) )
-										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . esc_html( $order->$field_name ) . '</p>';
+										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $order->$field_name ) ) . '</p>';
 								}
+
+								if ( apply_filters( 'woocommerce_enable_order_notes_field', get_option( 'woocommerce_enable_order_comments', 'yes' ) == 'yes' ) && $post->post_excerpt )
+									echo '<p><strong>' . __( 'Customer Note', 'woocommerce' ) . ':</strong> ' . esc_html( $post->post_excerpt ) . '</p>';
 
 							echo '</div>';
 
@@ -267,6 +297,13 @@ class WC_Meta_Box_Order_Data {
 										woocommerce_wp_text_input( array( 'id' => '_shipping_' . $key, 'label' => $field['label'] ) );
 									break;
 								}
+							}
+
+							if ( apply_filters( 'woocommerce_enable_order_notes_field', get_option( 'woocommerce_enable_order_comments', 'yes' ) == 'yes' ) ) {
+								?>
+								<p class="form-field form-field-wide"><label for="excerpt"><?php _e( 'Customer Note:', 'woocommerce' ) ?></label>
+								<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php _e( 'Customer\'s notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses_post( $post->post_excerpt ); ?></textarea></p>
+								<?php
 							}
 
 							echo '</div>';
@@ -326,6 +363,20 @@ class WC_Meta_Box_Order_Data {
 		if ( self::$shipping_fields )
 			foreach ( self::$shipping_fields as $key => $field )
 				update_post_meta( $post_id, '_shipping_' . $key, woocommerce_clean( $_POST[ '_shipping_' . $key ] ) );
+
+		// Payment method handling
+		if ( get_post_meta( $post_id, '_payment_method', true ) !== stripslashes( $_POST['_payment_method'] ) ) {
+
+			$methods 				= $woocommerce->payment_gateways->payment_gateways();
+			$payment_method 		= woocommerce_clean( $_POST['_payment_method'] );
+			$payment_method_title 	= $payment_method;
+
+			if ( isset( $methods) && isset( $methods[ $payment_method ] ) )
+				$payment_method_title = $methods[ $payment_method ]->get_title();
+
+			update_post_meta( $post_id, '_payment_method', $payment_method );
+			update_post_meta( $post_id, '_payment_method_title', $payment_method_title );
+		}
 
 		// Update date
 		if ( empty( $_POST['order_date'] ) ) {

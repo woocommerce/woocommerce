@@ -108,6 +108,9 @@ class WC_Meta_Box_Order_Items {
 		global $wpdb;
 
 		// Order items + fees
+		$subtotal = 0;
+		$total    = 0;
+
 		if ( isset( $_POST['order_item_id'] ) ) {
 
 			$get_values = array( 'order_item_id', 'order_item_name', 'order_item_qty', 'line_subtotal', 'line_subtotal_tax', 'line_total', 'line_tax', 'order_item_tax_class' );
@@ -134,14 +137,20 @@ class WC_Meta_Box_Order_Items {
 			 	if ( isset( $item_tax_class[ $item_id ] ) )
 			 		woocommerce_update_order_item_meta( $item_id, '_tax_class', woocommerce_clean( $item_tax_class[ $item_id ] ) );
 
-			 	if ( isset( $line_subtotal[ $item_id ] ) )
+			 	if ( isset( $line_subtotal[ $item_id ] ) ) {
 			 		woocommerce_update_order_item_meta( $item_id, '_line_subtotal', woocommerce_clean( $line_subtotal[ $item_id ] ) );
+
+			 		$subtotal += woocommerce_clean( $line_subtotal[ $item_id ] );
+			 	}
 
 			 	if ( isset(  $line_subtotal_tax[ $item_id ] ) )
 			 		woocommerce_update_order_item_meta( $item_id, '_line_subtotal_tax', woocommerce_clean( $line_subtotal_tax[ $item_id ] ) );
 
-			 	if ( isset( $line_total[ $item_id ] ) )
+			 	if ( isset( $line_total[ $item_id ] ) ) {
 			 		woocommerce_update_order_item_meta( $item_id, '_line_total', woocommerce_clean( $line_total[ $item_id ] ) );
+
+			 		$total += woocommerce_clean( $line_total[ $item_id ] );
+			 	}
 
 			 	if ( isset( $line_tax[ $item_id ] ) )
 			 		woocommerce_update_order_item_meta( $item_id, '_line_tax', woocommerce_clean( $line_tax[ $item_id ] ) );
@@ -168,5 +177,8 @@ class WC_Meta_Box_Order_Items {
 				array( '%d' )
 			);
 		}
+
+		// Update cart discount from item totals
+		update_post_meta( $post_id, '_cart_discount', woocommerce_format_total( $subtotal - $total ) );
 	}
 }

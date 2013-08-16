@@ -343,7 +343,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			//		b) paypal ignore anything over 5 digits, so 999.99 is the max
 			// $paypal_args['shipping_1']		= number_format( $order->get_shipping() + $order->get_shipping_tax() , 2, '.', '' );
 			if ( ( $order->get_shipping() + $order->get_shipping_tax() ) > 0 ) {
-				$paypal_args['item_name_2'] = __( 'Shipping via', 'woocommerce' ) . ' ' . ucwords( $order->shipping_method_title );
+				$paypal_args['item_name_2'] = __( 'Shipping via', 'woocommerce' ) . ' ' . ucwords( $order->get_shipping_method() );
 				$paypal_args['quantity_2'] 	= '1';
 				$paypal_args['amount_2'] 	= number_format( $order->get_shipping() + $order->get_shipping_tax() , 2, '.', '' );
 			}

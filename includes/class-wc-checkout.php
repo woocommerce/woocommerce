@@ -270,6 +270,26 @@ class WC_Checkout {
 			woocommerce_add_order_item_meta( $item_id, '_line_tax', woocommerce_format_decimal( $fee->tax ) );
 		}
 
+		// Store shipping for all packages
+		$packages = WC()->shipping->get_packages();
+
+		foreach ( $packages as $i => $package ) {
+			if ( isset( $package['rates'][ $this->shipping_methods[ $i ] ] ) ) {
+
+				$method = $package['rates'][ $this->shipping_methods[ $i ] ];
+
+				$item_id = woocommerce_add_order_item( $order_id, array(
+			 		'order_item_name' 		=> $method->label,
+			 		'order_item_type' 		=> 'shipping'
+			 	) );
+
+				if ( $item_id ) {
+			 		woocommerce_add_order_item_meta( $item_id, 'method_id', $method->id );
+		 			woocommerce_add_order_item_meta( $item_id, 'cost', woocommerce_format_decimal( $method->cost ) );
+		 		}
+			}
+		}
+
 		// Store tax rows
 		foreach ( array_keys( $woocommerce->cart->taxes + $woocommerce->cart->shipping_taxes ) as $key ) {
 
@@ -304,17 +324,10 @@ class WC_Checkout {
 			}
 		}
 
-		// Store meta
-		if ( $this->shipping_method ) {
-			update_post_meta( $order_id, '_shipping_method', 		$this->shipping_method->id );
-			update_post_meta( $order_id, '_shipping_method_title', 	$this->shipping_method->label );
-		}
-
 		if ( $this->payment_method ) {
 			update_post_meta( $order_id, '_payment_method', 		$this->payment_method->id );
 			update_post_meta( $order_id, '_payment_method_title', 	$this->payment_method->get_title() );
 		}
-
 		update_post_meta( $order_id, '_order_shipping', 		woocommerce_format_total( $woocommerce->cart->shipping_total ) );
 		update_post_meta( $order_id, '_order_discount', 		woocommerce_format_total( $woocommerce->cart->get_order_discount_total() ) );
 		update_post_meta( $order_id, '_cart_discount', 			woocommerce_format_total( $woocommerce->cart->get_cart_discount_total() ) );
