@@ -8,10 +8,11 @@ jQuery(document).ready(function($) {
 
 		if (xhr) xhr.abort();
 
-		if ( $('select#shipping_method').size() > 0 || $('input#shipping_method').size() > 0 )
-			var method = $('#shipping_method').val();
-		else
-			var method = $('input[name=shipping_method]:checked').val();
+		var shipping_methods = [];
+
+		$('select#shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]').each( function( index, input ) {
+			shipping_methods[ $(this).data( 'index' ) ] = $(this).val();
+		} );
 
 		var payment_method 	= $('#order_review input[name=payment_method]:checked').val();
 		var country 		= $('#billing_country').val();
@@ -42,7 +43,7 @@ jQuery(document).ready(function($) {
 		var data = {
 			action: 			'woocommerce_update_order_review',
 			security: 			wc_checkout_params.update_order_review_nonce,
-			shipping_method: 	method,
+			shipping_method: 	shipping_methods,
 			payment_method:		payment_method,
 			country: 			country,
 			state: 				state,
@@ -165,7 +166,7 @@ jQuery(document).ready(function($) {
 	/* Update totals/taxes/shipping */
 
 	// Inputs/selects which update totals instantly
-	.on( 'input change', 'select#shipping_method, input[name=shipping_method], #ship-to-different-address input, .update_totals_on_change select', function(){
+	.on( 'input change', 'select#shipping_method, input[name^=shipping_method], #ship-to-different-address input, .update_totals_on_change select', function(){
 		clearTimeout( updateTimer );
 		dirtyInput = false;
 		$('body').trigger('update_checkout');

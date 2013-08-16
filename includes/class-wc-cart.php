@@ -67,9 +67,6 @@ class WC_Cart {
 	/** @var float Shipping tax. */
 	public $shipping_tax_total;
 
-	/** @var float Shipping title/label. */
-	public $shipping_label;
-
 	/** @var WC_Tax */
 	public $tax;
 
@@ -175,7 +172,6 @@ class WC_Cart {
 			$this->discount_total 		= isset( $woocommerce->session->discount_total ) ? $woocommerce->session->discount_total : 0;
 			$this->shipping_total 		= isset( $woocommerce->session->shipping_total ) ? $woocommerce->session->shipping_total : 0;
 			$this->shipping_tax_total 	= isset( $woocommerce->session->shipping_tax_total ) ? $woocommerce->session->shipping_tax_total : 0;
-			$this->shipping_label		= isset( $woocommerce->session->shipping_label ) ? $woocommerce->session->shipping_label : '';
 
 			// Queue re-calc if subtotal is not set
 			if ( ! $this->subtotal && sizeof( $this->cart_contents ) > 0 )
@@ -224,7 +220,6 @@ class WC_Cart {
 			$woocommerce->session->discount_total       = $this->discount_total;
 			$woocommerce->session->shipping_total       = $this->shipping_total;
 			$woocommerce->session->shipping_tax_total   = $this->shipping_tax_total;
-			$woocommerce->session->shipping_label       = $this->shipping_label;
 
 			if ( get_current_user_id() )
 				$this->persistent_cart_update();
@@ -995,7 +990,7 @@ class WC_Cart {
 			$this->total = $this->cart_contents_total = $this->cart_contents_weight = $this->cart_contents_count = $this->cart_contents_tax = $this->tax_total = $this->shipping_tax_total = $this->subtotal = $this->subtotal_ex_tax = $this->discount_total = $this->discount_cart = $this->shipping_total = $this->fee_total = 0;
 			$this->shipping_taxes = $this->taxes = $this->coupon_discount_amounts = array();
 
-			unset( $woocommerce->session->cart_contents_total, $woocommerce->session->cart_contents_weight, $woocommerce->session->cart_contents_count, $woocommerce->session->cart_contents_tax, $woocommerce->session->total, $woocommerce->session->subtotal, $woocommerce->session->subtotal_ex_tax, $woocommerce->session->tax_total, $woocommerce->session->taxes, $woocommerce->session->shipping_taxes, $woocommerce->session->discount_cart, $woocommerce->session->discount_total, $woocommerce->session->shipping_total, $woocommerce->session->shipping_tax_total, $woocommerce->session->shipping_label );
+			unset( $woocommerce->session->cart_contents_total, $woocommerce->session->cart_contents_weight, $woocommerce->session->cart_contents_count, $woocommerce->session->cart_contents_tax, $woocommerce->session->total, $woocommerce->session->subtotal, $woocommerce->session->subtotal_ex_tax, $woocommerce->session->tax_total, $woocommerce->session->taxes, $woocommerce->session->shipping_taxes, $woocommerce->session->discount_cart, $woocommerce->session->discount_total, $woocommerce->session->shipping_total, $woocommerce->session->shipping_tax_total );
 		}
 
 		/**
@@ -1698,7 +1693,6 @@ class WC_Cart {
 
 			// Get totals for the chosen shipping method
 			$this->shipping_total 		= $woocommerce->shipping->shipping_total;	// Shipping Total
-			$this->shipping_label 		= $woocommerce->shipping->shipping_label;	// Shipping Label
 			$this->shipping_taxes		= $woocommerce->shipping->shipping_taxes;	// Shipping Taxes
 		}
 
@@ -1734,7 +1728,8 @@ class WC_Cart {
 
 			foreach ( $this->get_cart() as $item )
 				if ( $item['data']->needs_shipping() )
-					$packages[0]['contents_cost'] += $item['line_total'];
+					if ( isset( $item['line_total'] ) )
+						$packages[0]['contents_cost'] += $item['line_total'];
 
 			return apply_filters( 'woocommerce_cart_shipping_packages', $packages );
 		}
@@ -1770,12 +1765,13 @@ class WC_Cart {
 		public function show_shipping() {
 			global $woocommerce;
 
-			if ( get_option('woocommerce_calc_shipping')=='no' ) return false;
-			if ( ! is_array( $this->cart_contents ) ) return false;
+			if ( get_option('woocommerce_calc_shipping') == 'no' || ! is_array( $this->cart_contents ) )
+				return false;
 
 			if ( get_option( 'woocommerce_shipping_cost_requires_address' ) == 'yes' ) {
 				if ( ! $woocommerce->customer->has_calculated_shipping() ) {
-					if ( ! $woocommerce->customer->get_shipping_country() || ( ! $woocommerce->customer->get_shipping_state() && ! $woocommerce->customer->get_shipping_postcode() ) ) return false;
+					if ( ! $woocommerce->customer->get_shipping_country() || ( ! $woocommerce->customer->get_shipping_state() && ! $woocommerce->customer->get_shipping_postcode() ) )
+						return false;
 				}
 			}
 
@@ -1802,7 +1798,7 @@ class WC_Cart {
 		public function get_cart_shipping_total() {
 			global $woocommerce;
 
-			if ( isset( $this->shipping_label ) ) {
+			if ( isset( $this->shipping_total ) ) {
 				if ( $this->shipping_total > 0 ) {
 
 					// Display varies depending on settings
@@ -1834,18 +1830,6 @@ class WC_Cart {
 			}
 		}
 
-		/**
-		 * Gets title of the chosen shipping method.
-		 *
-		 * @return string shipping method title
-		 */
-		public function get_cart_shipping_title() {
-			if ( isset( $this->shipping_label ) ) {
-				return __( 'via', 'woocommerce' ) . ' ' . $this->shipping_label;
-			}
-			return false;
-		}
-
     /*-----------------------------------------------------------------------------------*/
 	/* Coupons/Discount related functions */
 	/*-----------------------------------------------------------------------------------*/
@@ -1874,7 +1858,7 @@ class WC_Cart {
 			global $woocommerce;
 
 			// Coupons are globally disabled
-			if ( ! $woocommerce->cart->coupons_enabled() )
+			if ( ! $this->coupons_enabled() )
 				return false;
 
 			// Sanitize coupon code
@@ -1892,7 +1876,7 @@ class WC_Cart {
 				}
 
 				// Check if applied
-				if ( $woocommerce->cart->has_discount( $coupon_code ) ) {
+				if ( $this->has_discount( $coupon_code ) ) {
 					$the_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED );
 					return false;
 				}
@@ -1921,7 +1905,14 @@ class WC_Cart {
 
 				// Choose free shipping
 				if ( $the_coupon->enable_free_shipping() ) {
-					$woocommerce->session->chosen_shipping_method = 'free_shipping';
+					$packages = WC()->shipping->get_packages();
+					$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+
+					foreach ( $packages as $i => $package ) {
+						$chosen_shipping_methods[ $i ] = 'free_shipping';
+					}
+
+					WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
 				}
 
 				$this->calculate_totals();
@@ -1942,10 +1933,33 @@ class WC_Cart {
 		/**
 		 * Gets the array of applied coupon codes.
 		 *
+		 * @param  Type Type of coupons to get. Can be 'cart' or 'order' which are before and after tax respectively.
 		 * @return array of applied coupons
 		 */
-		public function get_applied_coupons() {
-			return (array) $this->applied_coupons;
+		public function get_applied_coupons( $type = '' ) {
+			$coupons = array();
+
+			if ( 'cart' == $type ) {
+				if ( $this->applied_coupons ) {
+					foreach ( $this->applied_coupons as $index => $code ) {
+						$coupon = new WC_Coupon( $code );
+						if ( $coupon->is_valid() && $coupon->apply_before_tax() )
+							$coupons[] = $code;
+					}
+				}
+			} elseif ( 'order' == $type ) {
+				if ( $this->applied_coupons ) {
+					foreach ( $this->applied_coupons as $index => $code ) {
+						$coupon = new WC_Coupon( $code );
+						if ( $coupon->is_valid() && ! $coupon->apply_before_tax() )
+							$coupons[] = $code;
+					}
+				}
+			} else {
+				$coupons = array_filter( (array) $this->applied_coupons );
+			}
+
+			return $coupons;
 		}
 
 		/**
@@ -1964,7 +1978,8 @@ class WC_Cart {
 					}
 				}
 
-				$woocommerce->session->coupon_codes   = $this->applied_coupons;
+				WC()->session->set( 'coupon_codes', $this->applied_coupons );
+
 			} elseif ( $type == 2 ) {
 				if ( $this->applied_coupons ) {
 					foreach ( $this->applied_coupons as $index => $code ) {
@@ -1973,11 +1988,38 @@ class WC_Cart {
 					}
 				}
 
-				$woocommerce->session->coupon_codes   = $this->applied_coupons;
+				WC()->session->set( 'coupon_codes', $this->applied_coupons );
+
 			} else {
 				unset( $woocommerce->session->coupon_codes, $woocommerce->session->coupon_amounts );
 				$this->applied_coupons = array();
 			}
+		}
+
+		/**
+		 * Remove a single coupon by code
+		 */
+		public function remove_coupon( $coupon_code ) {
+
+			// Coupons are globally disabled
+			if ( ! $this->coupons_enabled() )
+				return false;
+
+			// Sanitize coupon code
+			$coupon_code = apply_filters( 'woocommerce_coupon_code', $coupon_code );
+
+			// Get the coupon
+			$the_coupon = new WC_Coupon( $coupon_code );
+
+			$coupon_index = array_search( $coupon_code, $this->applied_coupons );
+
+			if ( $coupon_index >= 0 ) {
+				unset( $this->applied_coupons[ $coupon_index ] );
+
+				$the_coupon->add_coupon_message( WC_Coupon::WC_COUPON_REMOVED );
+			}
+
+			WC()->session->set( 'coupon_codes', $this->applied_coupons );
 		}
 
  	/*-----------------------------------------------------------------------------------*/

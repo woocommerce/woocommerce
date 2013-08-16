@@ -221,14 +221,16 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	/**
 	 * taxable_address function.
 	 *
-	 * @access public
-	 * @param mixed $address
-	 * @return void
+	 * @param array $address
+	 * @return array
 	 */
-	function taxable_address( $address ) {
+	public function taxable_address( $address ) {
 		global $woocommerce;
 
-		if ( ! empty( $woocommerce->session->chosen_shipping_method ) && $woocommerce->session->chosen_shipping_method == 'local_pickup' ) {
+		// Only apply if all packages are being shipped via local pickup
+		$chosen_shipping_methods = array_unique( WC()->session->get( 'chosen_shipping_methods' ) );
+
+		if ( sizeof( $chosen_shipping_methods ) == 1 && $chosen_shipping_methods[0] == 'local_pickup' ) {
 			if ( $this->get_option( 'apply_base_tax' ) == 'yes' ) {
 
 				$country 	= $woocommerce->countries->get_base_country();
@@ -246,7 +248,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	 * @access public
 	 * @return void
 	 */
-	function method_chosen( $method ) {
+	public function method_chosen( $method ) {
 		global $woocommerce;
 
 		if ( $method == 'local_pickup' && $this->get_option( 'apply_base_tax' ) == 'yes' ) {

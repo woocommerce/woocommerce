@@ -33,9 +33,9 @@ class WC_Shortcode_Cart {
 			}
 
 		// Remove Coupon Codes
-		} elseif ( isset( $_GET['remove_discounts'] ) ) {
+		} elseif ( isset( $_GET['remove_coupon'] ) ) {
 
-			$woocommerce->cart->remove_coupons( $_GET['remove_discounts'] );
+			$woocommerce->cart->remove_coupon( woocommerce_clean( $_GET['remove_coupon'] ) );
 
 		// Update Shipping
 		} elseif ( ! empty( $_POST['calc_shipping'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-cart' ) ) {

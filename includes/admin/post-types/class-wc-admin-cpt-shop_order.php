@@ -181,8 +181,8 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	        	else
 	        		echo '&ndash;';
 
-	        	if ( $the_order->shipping_method_title )
-	        		echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->shipping_method_title ) . '</small>';
+	        	if ( $the_order->get_shipping_method() )
+	        		echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->get_shipping_method() ) . '</small>';
 
 			break;
 			case "order_notes" :

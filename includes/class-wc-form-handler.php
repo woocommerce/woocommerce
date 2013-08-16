@@ -323,7 +323,7 @@ class WC_Form_Handler {
 				wc_add_message( __( 'Cart updated.', 'woocommerce' ) );
 
 				$referer = ( wp_get_referer() ) ? wp_get_referer() : WC()->cart->get_cart_url();
-				$referer = remove_query_arg( 'remove_discounts', $referer );
+				$referer = remove_query_arg( 'remove_coupon', $referer );
 				wp_safe_redirect( $referer );
 				exit;
 			}
@@ -467,9 +467,14 @@ class WC_Form_Handler {
 
 	            if ( ! empty( $_REQUEST[ $taxonomy ] ) ) {
 
+
+	            	var_dump($_REQUEST[ $taxonomy ]);
+
 	                // Get value from post data
 	                // Don't use woocommerce_clean as it destroys sanitized characters
 	                $value = sanitize_title( trim( stripslashes( $_REQUEST[ $taxonomy ] ) ) );
+
+	                var_dump( $value);
 
 	                // Get valid value from variation
 	                $valid_value = $variation->variation_data[ $taxonomy ];

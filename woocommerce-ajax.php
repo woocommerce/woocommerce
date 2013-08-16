@@ -81,16 +81,20 @@ add_action('wp_ajax_nopriv_woocommerce_apply_coupon', 'woocommerce_ajax_apply_co
  * @return void
  */
 function woocommerce_ajax_update_shipping_method() {
-	global $woocommerce;
 
 	check_ajax_referer( 'update-shipping-method', 'security' );
 
 	if ( ! defined('WOOCOMMERCE_CART') ) define( 'WOOCOMMERCE_CART', true );
 
-	if ( isset( $_POST['shipping_method'] ) )
-		$woocommerce->session->chosen_shipping_method = $_POST['shipping_method'];
+	$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
-	$woocommerce->cart->calculate_totals();
+	if ( isset( $_POST['shipping_method'] ) && is_array( $_POST['shipping_method'] ) )
+		foreach ( $_POST['shipping_method'] as $i => $value )
+			$chosen_shipping_methods[ $i ] = woocommerce_clean( $value );
+
+	WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
+
+	WC()->cart->calculate_totals();
 
 	woocommerce_cart_totals();
 
@@ -108,60 +112,65 @@ add_action('wp_ajax_nopriv_woocommerce_update_shipping_method', 'woocommerce_aja
  * @return void
  */
 function woocommerce_ajax_update_order_review() {
-	global $woocommerce;
 
 	check_ajax_referer( 'update-order-review', 'security' );
 
 	if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) )
 		define( 'WOOCOMMERCE_CHECKOUT', true );
 
-	if ( sizeof( $woocommerce->cart->get_cart() ) == 0 ) {
+	if ( sizeof( WC()->cart->get_cart() ) == 0 ) {
 		echo '<div class="woocommerce-error">' . __( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . home_url() . '">' . __( 'Return to homepage &rarr;', 'woocommerce' ) . '</a></div>';
 		die();
 	}
 
 	do_action( 'woocommerce_checkout_update_order_review', $_POST['post_data'] );
 
-	$woocommerce->session->chosen_shipping_method = empty( $_POST['shipping_method'] ) ? '' : $_POST['shipping_method'];
-	$woocommerce->session->chosen_payment_method  = empty( $_POST['payment_method'] ) ? '' : $_POST['payment_method'];
+	$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+
+	if ( isset( $_POST['shipping_method'] ) && is_array( $_POST['shipping_method'] ) )
+		foreach ( $_POST['shipping_method'] as $i => $value )
+			$chosen_shipping_methods[ $i ] = woocommerce_clean( $value );
+
+	WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
+	WC()->session->set( 'chosen_payment_method', empty( $_POST['payment_method'] ) ? '' : $_POST['payment_method'] );
 
 	if ( isset( $_POST['country'] ) )
-		$woocommerce->customer->set_country( $_POST['country'] );
+		WC()->customer->set_country( $_POST['country'] );
 
 	if ( isset( $_POST['state'] ) )
-		$woocommerce->customer->set_state( $_POST['state'] );
+		WC()->customer->set_state( $_POST['state'] );
 
 	if ( isset( $_POST['postcode'] ) )
-		$woocommerce->customer->set_postcode( $_POST['postcode'] );
+		WC()->customer->set_postcode( $_POST['postcode'] );
 
 	if ( isset( $_POST['city'] ) )
-		$woocommerce->customer->set_city( $_POST['city'] );
+		WC()->customer->set_city( $_POST['city'] );
 
 	if ( isset( $_POST['address'] ) )
-		$woocommerce->customer->set_address( $_POST['address'] );
+		WC()->customer->set_address( $_POST['address'] );
 
 	if ( isset( $_POST['address_2'] ) )
-		$woocommerce->customer->set_address_2( $_POST['address_2'] );
+		WC()->customer->set_address_2( $_POST['address_2'] );
 
 	if ( isset( $_POST['s_country'] ) )
-		$woocommerce->customer->set_shipping_country( $_POST['s_country'] );
+		WC()->customer->set_shipping_country( $_POST['s_country'] );
 
 	if ( isset( $_POST['s_state'] ) )
-		$woocommerce->customer->set_shipping_state( $_POST['s_state'] );
+		WC()->customer->set_shipping_state( $_POST['s_state'] );
 
 	if ( isset( $_POST['s_postcode'] ) )
-		$woocommerce->customer->set_shipping_postcode( $_POST['s_postcode'] );
+		WC()->customer->set_shipping_postcode( $_POST['s_postcode'] );
 
 	if ( isset( $_POST['s_city'] ) )
-		$woocommerce->customer->set_shipping_city( $_POST['s_city'] );
+		WC()->customer->set_shipping_city( $_POST['s_city'] );
 
 	if ( isset( $_POST['s_address'] ) )
-		$woocommerce->customer->set_shipping_address( $_POST['s_address'] );
+		WC()->customer->set_shipping_address( $_POST['s_address'] );
 
 	if ( isset( $_POST['s_address_2'] ) )
-		$woocommerce->customer->set_shipping_address_2( $_POST['s_address_2'] );
+		WC()->customer->set_shipping_address_2( $_POST['s_address_2'] );
 
-	$woocommerce->cart->calculate_totals();
+	WC()->cart->calculate_totals();
 
 	do_action( 'woocommerce_checkout_order_review' ); // Display review order table
 
@@ -961,7 +970,7 @@ function woocommerce_ajax_add_order_fee() {
 	 	woocommerce_add_order_item_meta( $item_id, '_line_tax', '' );
  	}
 
-	include( 'includes/admin/post-types/meta-boxes-views/html-order-fee.php' );
+	include( 'includes/admin/post-types/meta-boxes/views/html-order-fee.php' );
 
 	// Quit out
 	die();
@@ -1324,80 +1333,6 @@ function woocommerce_calc_line_taxes() {
 }
 
 add_action('wp_ajax_woocommerce_calc_line_taxes', 'woocommerce_calc_line_taxes');
-
-/**
- * woocommerce_add_line_tax function.
- *
- * @access public
- * @return void
- */
-function woocommerce_add_line_tax() {
-	global $woocommerce, $wpdb;
-
-	check_ajax_referer( 'calc-totals', 'security' );
-
-	$order_id 	= absint( $_POST['order_id'] );
-	$order 		= new WC_Order( $order_id );
-
- 	// Get tax rates
-	$rates = $wpdb->get_results( "SELECT tax_rate_id, tax_rate_country, tax_rate_state, tax_rate_name, tax_rate_priority FROM {$wpdb->prefix}woocommerce_tax_rates ORDER BY tax_rate_name" );
-
-	$tax_codes = array();
-
-	foreach( $rates as $rate ) {
-		$code = array();
-
-		$code[] = $rate->tax_rate_country;
-		$code[] = $rate->tax_rate_state;
-		$code[] = $rate->tax_rate_name ? sanitize_title( $rate->tax_rate_name ) : 'TAX';
-		$code[] = absint( $rate->tax_rate_priority );
-
-		$tax_codes[ $rate->tax_rate_id ] = strtoupper( implode( '-', array_filter( $code ) ) );
-	}
-
-	// Add line item
-   	$item_id = woocommerce_add_order_item( $order_id, array(
- 		'order_item_name' 		=> '',
- 		'order_item_type' 		=> 'tax'
- 	) );
-
- 	// Add line item meta
- 	if ( $item_id ) {
- 		woocommerce_add_order_item_meta( $item_id, 'rate_id', '' );
- 		woocommerce_add_order_item_meta( $item_id, 'label', '' );
-	 	woocommerce_add_order_item_meta( $item_id, 'compound', '' );
-	 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', '' );
-	 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', '' );
- 	}
-
-	include( 'includes/admin/post-types/meta-boxes/views/html-order-tax.php' );
-
-	// Quit out
-	die();
-}
-
-add_action('wp_ajax_woocommerce_add_line_tax', 'woocommerce_add_line_tax');
-
-/**
- * woocommerce_add_line_tax function.
- *
- * @access public
- * @return void
- */
-function woocommerce_remove_line_tax() {
-	global $woocommerce;
-
-	check_ajax_referer( 'calc-totals', 'security' );
-
-	$tax_row_id = absint( $_POST['tax_row_id'] );
-
-	woocommerce_delete_order_item( $tax_row_id );
-
-	// Quit out
-	die();
-}
-
-add_action('wp_ajax_woocommerce_remove_line_tax', 'woocommerce_remove_line_tax');
 
 /**
  * Add order note via ajax
