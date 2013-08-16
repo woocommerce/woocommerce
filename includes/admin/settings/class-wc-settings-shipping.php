@@ -97,7 +97,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'title' 	=> __( 'Shipping Display Mode', 'woocommerce' ),
 				'desc' 		=> __( 'This controls how multiple shipping methods are displayed on the frontend.', 'woocommerce' ),
 				'id' 		=> 'woocommerce_shipping_method_format',
-				'css' 		=> 'min-width:150px;',
 				'default'	=> '',
 				'type' 		=> 'radio',
 				'options' => array(
