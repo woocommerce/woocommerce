@@ -984,6 +984,8 @@ function woocommerce_ajax_add_order_item() {
 
 	do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
 
+	$item = apply_filters( 'woocommerce_ajax_order_item', $item, $item_id );
+
 	include( 'admin/post-types/writepanels/order-item-html.php' );
 
 	// Quit out
