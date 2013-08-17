@@ -918,7 +918,6 @@ class WC_Shortcodes {
 		), $atts ) );
 
 		$attribute 	= strstr( $attribute, 'pa_' ) ? sanitize_title( $attribute ) : 'pa_' . sanitize_title( $attribute );
-		$filter 	= sanitize_title( $filter );
 
 		$args = array(
 			'post_type'           => 'product',
@@ -937,7 +936,7 @@ class WC_Shortcodes {
 			'tax_query' 			=> array(
 				array(
 					'taxonomy' 	=> $attribute,
-					'terms' 	=> $filter,
+					'terms'     => array_map( 'sanitize_title', explode( ",", $filter ) ),
 					'field' 	=> 'slug'
 				)
 			)
