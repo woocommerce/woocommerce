@@ -324,8 +324,9 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			$cost 	= $this->cost;
 			$fee 	= $this->fee;
 		} elseif ( is_null( $cost ) ) {
-			// No match
-			return null;
+			// Set rates to 0 if nothing is set by the user
+			$cost 	= 0;
+			$fee 	= 0;
 		}
 
 		// Shipping for whole order
