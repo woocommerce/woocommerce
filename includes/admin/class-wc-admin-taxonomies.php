@@ -171,7 +171,7 @@ class WC_Admin_Taxonomies {
 		$image 			= '';
 		$thumbnail_id 	= absint( get_woocommerce_term_meta( $term->term_id, 'thumbnail_id', true ) );
 		if ( $thumbnail_id )
-			$image = wp_get_attachment_url( $thumbnail_id );
+			$image = wp_get_attachment_thumb_url( $thumbnail_id );
 		else
 			$image = woocommerce_placeholder_img_src();
 		?>
@@ -320,7 +320,7 @@ class WC_Admin_Taxonomies {
 			$thumbnail_id 	= get_woocommerce_term_meta( $id, 'thumbnail_id', true );
 
 			if ($thumbnail_id)
-				$image = wp_get_attachment_url( $thumbnail_id );
+				$image = wp_get_attachment_thumb_url( $thumbnail_id );
 			else
 				$image = woocommerce_placeholder_img_src();
 
