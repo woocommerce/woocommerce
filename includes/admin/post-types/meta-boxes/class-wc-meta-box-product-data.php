@@ -44,23 +44,29 @@ class WC_Meta_Box_Product_Data {
 			$type_box .= '<option value="' . esc_attr( $value ) . '" ' . selected( $product_type, $value, false ) .'>' . esc_html( $label ) . '</option>';
 		$type_box .= '</optgroup></select></label>';
 
-		$product_type_options = apply_filters('product_type_options', array(
+		$product_type_options = apply_filters( 'product_type_options', array(
 			'virtual' => array(
-				'id' => '_virtual',
+				'id'            => '_virtual',
 				'wrapper_class' => 'show_if_simple',
-				'label' => __( 'Virtual', 'woocommerce' ),
-				'description' => __( 'Virtual products are intangible and aren\'t shipped.', 'woocommerce' )
+				'label'         => __( 'Virtual', 'woocommerce' ),
+				'description'   => __( 'Virtual products are intangible and aren\'t shipped.', 'woocommerce' ),
+				'default'       => 'no'
 			),
 			'downloadable' => array(
-				'id' => '_downloadable',
+				'id'            => '_downloadable',
 				'wrapper_class' => 'show_if_simple',
-				'label' => __( 'Downloadable', 'woocommerce' ),
-				'description' => __( 'Downloadable products give access to a file upon purchase.', 'woocommerce' )
+				'label'         => __( 'Downloadable', 'woocommerce' ),
+				'description'   => __( 'Downloadable products give access to a file upon purchase.', 'woocommerce' ),
+				'default'       => 'no'
 			)
 		) );
 
 		foreach ( $product_type_options as $key => $option ) {
 			$selected_value = get_post_meta( $post->ID, '_' . $key, true );
+
+			if ( $selected_value == '' )
+				$selected_value = $option['default'];
+
 			$type_box .= '<label for="' . esc_attr( $option['id'] ) . '" class="'. esc_attr( $option['wrapper_class'] ) . ' tips" data-tip="' . esc_attr( $option['description'] ) . '">' . esc_html( $option['label'] ) . ': <input type="checkbox" name="' . esc_attr( $option['id'] ) . '" id="' . esc_attr( $option['id'] ) . '" ' . checked( $selected_value, 'yes', false ) .' /></label>';
 		}
 
