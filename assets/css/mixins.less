@@ -1,16 +1,16 @@
 @woocommerce: 	#ad74a2;
 @red: 			#d54e21;
 
-.clearfix:before,
-.clearfix:after {
-    content: " ";
-    display: table;
-}
-.clearfix:after {
-    clear: both;
-}
-.clearfix {
-    *zoom: 1;
+.clearfix() {
+	*zoom:1;
+	&:before,
+	&:after {
+		content: " ";
+		display: table;
+	}
+	&:after {
+		clear: both;
+	}
 }
 .border_radius(@radius:4px) {
 	-webkit-border-radius:@radius;

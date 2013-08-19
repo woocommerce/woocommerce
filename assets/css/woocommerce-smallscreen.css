@@ -1,17 +1,6 @@
 /**
  * This stylesheet optimises the default WooCommerce layout when viewed on smaller screens.
  */
-.clearfix:before,
-.clearfix:after {
-  content: " ";
-  display: table;
-}
-.clearfix:after {
-  clear: both;
-}
-.clearfix {
-  *zoom: 1;
-}
 .clear {
   clear: both;
 }
@@ -93,6 +82,23 @@
   float: none;
   *zoom: 1;
   padding-bottom: .5em;
+}
+.woocommerce table.cart td.actions .coupon:before,
+.woocommerce-page table.cart td.actions .coupon:before,
+.woocommerce #content table.cart td.actions .coupon:before,
+.woocommerce-page #content table.cart td.actions .coupon:before,
+.woocommerce table.cart td.actions .coupon:after,
+.woocommerce-page table.cart td.actions .coupon:after,
+.woocommerce #content table.cart td.actions .coupon:after,
+.woocommerce-page #content table.cart td.actions .coupon:after {
+  content: " ";
+  display: table;
+}
+.woocommerce table.cart td.actions .coupon:after,
+.woocommerce-page table.cart td.actions .coupon:after,
+.woocommerce #content table.cart td.actions .coupon:after,
+.woocommerce-page #content table.cart td.actions .coupon:after {
+  clear: both;
 }
 .woocommerce table.cart td.actions input,
 .woocommerce-page table.cart td.actions input,
