@@ -938,25 +938,29 @@ ul.wc_coupon_list_block {
 		a.delete_tax_row, a.delete_total_row {
 			padding:0;
 			text-decoration: none;
-			font-size: 11px;
-			line-height: 16px;
-			width: 16px;
-			height: 16px;
+			font-size: 12px;
+			line-height: 18px;
+			width: 18px;
+			height: 18px;
 			text-align: center;
-			color:#999;
+			color:#fff;
 			float: right;
-			background: #ddd;
-			border: 1px solid #eee;
-			-webkit-box-shadow: 0 0 0 1px #ccc;
-			-webkit-border-radius:8px;
-			-moz-border-radius:8px;
-			-o-border-radius:8px;
-			border-radius:8px;
+			background-color: @red;
+			-webkit-border-radius:100%;
+			-moz-border-radius:100%;
+			-o-border-radius:100%;
+			border-radius:100%;
 			position: absolute;
 			top: 0;
 			right: 0;
-			margin: -8px -8px 0 0;
+			margin: -9px -9px 0 0;
 			display: none;
+			font-weight: bold;
+			border:2px solid #fff;
+			.box_shadow(0,1px,2px,0,rgba(0,0,0,0.4));
+			&:hover {
+				background-color: @red - #222;
+			}
 		}
 		&:hover, &:focus {
 			a.delete_tax_row, a.delete_total_row {
@@ -1185,7 +1189,7 @@ ul.wc_coupon_list_block {
 		}
 		mark.cancelled:after {
 			content: "\e013";
-			color: #d54e21;
+			color: @red;
 		}
 		mark.processing:after {
 			content: "\e011";
@@ -1534,7 +1538,7 @@ ul.woocommerce_stats {
 	font-size: 18px;
 }
 #woocommerce_dashboard_right_now td.b a:hover {
-	color: #d54e21;
+	color: @red;
 }
 #woocommerce_dashboard_right_now .t {
 	font-size: 12px;
@@ -1990,7 +1994,7 @@ img.help_tip {
 								box-shadow:0 1px 2px rgba(0,0,0,0.2);
 							}
 							&:hover:before {
-								background-color: #d54e21;
+								background-color: @red;
 							}
 						}
 					}
@@ -2853,7 +2857,7 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 					background-image: -o-linear-gradient(bottom,#ececec,#f9f9f9);
 					background-image: linear-gradient(to top,#ececec,#f9f9f9);
 					&.section_title:hover {
-						color:#d54e21;
+						color:@red;
 					}
 				}
 				.section_title {
