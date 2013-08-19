@@ -178,6 +178,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Separate options for countries you can ship to and sell to.
 * Feature - BACS supports multiple account details.
 * Feature - PayPal PDT support (as alternative to IPN).
+* Feature - Handling for password protected products.
 * Tweak - Added pagination to tax rate screens.
 * Tweak - Added filter to check the 'Create account' checkbox on checkout by default.
 * Tweak - Update CPT parameters for 'product_variation' and 'shop_coupon' to be no longer public.

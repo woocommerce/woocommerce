@@ -182,6 +182,8 @@ class WC_Query {
 		    add_filter( 'wp', array( $this, 'remove_posts_where' ) );
 		}
 
+		add_filter( 'posts_where', array( $this, 'exclude_protected_products' ) );
+
 		// We're on a shop page so queue the woocommerce_get_products_in_view function
 		add_action( 'wp', array( $this, 'get_products_in_view' ), 2);
 
@@ -208,6 +210,17 @@ class WC_Query {
 		    "post_title LIKE $1) OR (post_excerpt LIKE $1", $where );
 
 		return $where;
+	}
+
+	/**
+	 * Prevent password protected products appearing in the loops
+	 *
+	 * @param  string $where
+	 * @return string
+	 */
+	public function exclude_protected_products( $where ) {
+		$where .= " AND post_password = ''";
+    	return $where;
 	}
 
 	/**

@@ -13,6 +13,22 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
+ * Prevent password protected products being added to the cart
+ *
+ * @param  bool $passed
+ * @param  int $product_id
+ * @return bool
+ */
+function woocommerce_protected_product_add_to_cart( $passed, $product_id ) {
+	if ( post_password_required( $product_id ) ) {
+		$passed = false;
+		wc_add_error( __( 'This product is protected and cannot be purchased.', 'woocommerce' ) );
+	}
+	return $passed;
+}
+add_filter( 'woocommerce_add_to_cart_validation', 'woocommerce_protected_product_add_to_cart', 10, 2 );
+
+/**
  * WooCommerce clear cart
  *
  * Clears the cart session when called
