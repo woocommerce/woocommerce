@@ -369,7 +369,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 						if ( $meta = $item_meta->display( true, true ) )
 							$item_name .= ' ( ' . $meta . ' )';
 
-						$paypal_args[ 'item_name_' . $item_loop ] 	= $item_name;
+						$paypal_args[ 'item_name_' . $item_loop ] 	= html_entity_decode( $item_name, ENT_NOQUOTES, 'UTF-8' );
 						$paypal_args[ 'quantity_' . $item_loop ] 	= $item['qty'];
 						$paypal_args[ 'amount_' . $item_loop ] 		= $order->get_item_subtotal( $item, false );
 
