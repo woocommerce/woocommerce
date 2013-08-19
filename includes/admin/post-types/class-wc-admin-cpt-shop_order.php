@@ -517,7 +517,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 		if ( 'edit.php' != $pagenow || empty( $wp->query_vars['s'] ) || $wp->query_vars['post_type'] != 'shop_order' )
 			return $wp;
 
-		$search_fields = array_map( 'esc_attr', apply_filters( 'woocommerce_shop_order_search_fields', array(
+		$search_fields = array_map( 'woocommerce_clean', apply_filters( 'woocommerce_shop_order_search_fields', array(
 			'_order_key',
 			'_billing_first_name',
 			'_billing_last_name',
@@ -529,7 +529,15 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 			'_billing_country',
 			'_billing_state',
 			'_billing_email',
-			'_billing_phone'
+			'_billing_phone',
+			'_shipping_first_name',
+			'_shipping_last_name',
+			'_shipping_address_1',
+			'_shipping_address_2',
+			'_shipping_city',
+			'_shipping_postcode',
+			'_shipping_country',
+			'_shipping_state'
 		) ) );
 
 		$search_order_id = str_replace( 'Order #', '', $_GET['s'] );
