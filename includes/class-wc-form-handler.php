@@ -292,13 +292,13 @@ class WC_Form_Handler {
 					$_product = $values['data'];
 
 					// Skip product if no updated quantity was posted
-					if ( ! isset( $cart_totals[$cart_item_key]['qty'] ) )
+					if ( ! isset( $cart_totals[ $cart_item_key ]['qty'] ) )
 						continue;
 
 					// Sanitize
 					$quantity = apply_filters( 'woocommerce_stock_amount_cart_item', apply_filters( 'woocommerce_stock_amount', preg_replace( "/[^0-9\.]/", "", $cart_totals[ $cart_item_key ]['qty'] ) ), $cart_item_key );
 
-					if ( "" === $quantity )
+					if ( "" === $quantity || $quantity == $values['quantity'] )
 						continue;
 
 					// Update cart validation
@@ -311,9 +311,11 @@ class WC_Form_Handler {
 					}
 
 		    		if ( $passed_validation )
-			    		WC()->cart->set_quantity( $cart_item_key, $quantity );
+			    		WC()->cart->set_quantity( $cart_item_key, $quantity, false );
 
 				}
+
+				WC()->cart->calculate_totals();
 			}
 
 			if ( ! empty( $_POST['proceed'] ) ) {
