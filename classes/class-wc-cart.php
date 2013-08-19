@@ -901,7 +901,7 @@ class WC_Cart {
 
 				$new_quantity = $quantity + $this->cart_contents[$cart_item_key]['quantity'];
 
-				$this->set_quantity( $cart_item_key, $new_quantity );
+				$this->set_quantity( $cart_item_key, $new_quantity, false );
 
 			} else {
 
@@ -929,10 +929,11 @@ class WC_Cart {
 		/**
 		 * Set the quantity for an item in the cart.
 		 *
-		 * @param   string	cart_item_key	contains the id of the cart item
-		 * @param   string	quantity	contains the quantity of the item
+		 * @param string	cart_item_key	contains the id of the cart item
+		 * @param string	quantity		contains the quantity of the item
+		 * @param boolean 	$refresh_totals	whether or not to calculate totals after setting the new qty
 		 */
-		public function set_quantity( $cart_item_key, $quantity = 1 ) {
+		public function set_quantity( $cart_item_key, $quantity = 1, $refresh_totals = true ) {
 
 			if ( $quantity == 0 || $quantity < 0 ) {
 				do_action( 'woocommerce_before_cart_item_quantity_zero', $cart_item_key );
@@ -942,8 +943,8 @@ class WC_Cart {
 				do_action( 'woocommerce_after_cart_item_quantity_update', $cart_item_key, $quantity );
 			}
 
-			$this->calculate_totals();
-			$this->set_session();
+			if ( $refresh_totals )
+				$this->calculate_totals();
 		}
 
 		/**
