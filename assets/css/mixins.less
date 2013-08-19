@@ -1,47 +1,42 @@
 @woocommerce: 	#ad74a2;
 @red: 			#d54e21;
 
-.clearfix() {
-	&:after {
-		content:"";
-		display:block;
-		clear:both;
-	}
+.clearfix:before,
+.clearfix:after {
+    content: " ";
+    display: table;
+}
+.clearfix:after {
+    clear: both;
+}
+.clearfix {
+    *zoom: 1;
 }
 .border_radius(@radius:4px) {
 	-webkit-border-radius:@radius;
-	-moz-border-radius:@radius;
 	border-radius:@radius;
 }
 .border_radius_right(@radius:4px) {
 	-webkit-border-top-right-radius: @radius;
 	-webkit-border-bottom-right-radius: @radius;
-	-moz-border-radius-topright: @radius;
-	-moz-border-radius-bottomright: @radius;
 	border-top-right-radius: @radius;
 	border-bottom-right-radius: @radius;
 }
 .border_radius_left(@radius:4px) {
 	-webkit-border-top-left-radius: @radius;
 	-webkit-border-bottom-left-radius: @radius;
-	-moz-border-radius-topleft: @radius;
-	-moz-border-radius-bottomleft: @radius;
 	border-top-left-radius: @radius;
 	border-bottom-left-radius: @radius;
 }
 .border_radius_bottom(@radius:4px) {
 	-webkit-border-bottom-left-radius: @radius;
 	-webkit-border-bottom-right-radius: @radius;
-	-moz-border-radius-bottomleft: @radius;
-	-moz-border-radius-bottomright: @radius;
 	border-bottom-left-radius: @radius;
 	border-bottom-right-radius: @radius;
 }
 .border_radius_top(@radius:4px) {
 	-webkit-border-top-left-radius: @radius;
 	-webkit-border-top-right-radius: @radius;
-	-moz-border-radius-topleft: @radius;
-	-moz-border-radius-topright: @radius;
 	border-top-left-radius: @radius;
 	border-top-right-radius: @radius;
 }
@@ -54,12 +49,10 @@
 .box_shadow(@shadow_x:3px, @shadow_y:3px, @shadow_rad:3px, @shadow_in:3px, @shadow_color:#888) {
 	box-shadow:@shadow_x @shadow_y @shadow_rad @shadow_in @shadow_color;
 	-webkit-box-shadow:@shadow_x @shadow_y @shadow_rad @shadow_in @shadow_color;
-	-moz-box-shadow:@shadow_x @shadow_y @shadow_rad @shadow_in @shadow_color;
 }
 .inset_box_shadow(@shadow_x:3px, @shadow_y:3px, @shadow_rad:3px, @shadow_in:3px, @shadow_color:#888) {
 	box-shadow:inset @shadow_x @shadow_y @shadow_rad @shadow_in @shadow_color;
 	-webkit-box-shadow:inset @shadow_x @shadow_y @shadow_rad @shadow_in @shadow_color;
-	-moz-box-shadow:inset @shadow_x @shadow_y @shadow_rad @shadow_in @shadow_color;
 }
 .text_shadow(@shadow_x:3px, @shadow_y:3px, @shadow_rad:3px, @shadow_color:#fff) {
 	text-shadow:@shadow_x @shadow_y @shadow_rad @shadow_color;
