@@ -175,7 +175,26 @@ function woocommerce_get_product_terms( $object_id, $taxonomy, $fields = 'all' )
 	if ( ! is_array( $object_terms ) )
     	return array();
 
-	$all_terms 		= array_flip( get_terms( $taxonomy, array( 'menu_order' => 'ASC', 'fields' => 'ids' ) ) );
+    $args = array( 'fields' => 'ids' );
+
+	$orderby = WC()->get_helper( 'attribute' )->attribute_orderby( $taxonomy );
+
+	switch ( $orderby ) {
+		case 'name' :
+			$args['orderby']    = 'name';
+			$args['menu_order'] = false;
+		break;
+		case 'id' :
+			$args['orderby']    = 'id';
+			$args['order']      = 'ASC';
+			$args['menu_order'] = false;
+		break;
+		case 'menu_order' :
+			$args['menu_order'] = 'ASC';
+		break;
+	}
+
+	$all_terms 		= array_flip( get_terms( $taxonomy, $args ) );
 
 	switch ( $fields ) {
 		case 'names' :

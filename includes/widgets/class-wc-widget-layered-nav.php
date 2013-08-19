@@ -127,7 +127,26 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		if ( ! taxonomy_exists( $taxonomy ) )
 			return;
 
-		$terms = get_terms( $taxonomy, array( 'hide_empty' => '1' ) );
+	    $get_terms_args = array( 'hide_empty' => '1' );
+
+		$orderby = WC()->get_helper( 'attribute' )->attribute_orderby( $taxonomy );
+
+		switch ( $orderby ) {
+			case 'name' :
+				$get_terms_args['orderby']    = 'name';
+				$get_terms_args['menu_order'] = false;
+			break;
+			case 'id' :
+				$get_terms_args['orderby']    = 'id';
+				$get_terms_args['order']      = 'ASC';
+				$get_terms_args['menu_order'] = false;
+			break;
+			case 'menu_order' :
+				$get_terms_args['menu_order'] = 'ASC';
+			break;
+		}
+
+		$terms = get_terms( $taxonomy, $get_terms_args );
 
 		if ( count( $terms ) > 0 ) {
 
