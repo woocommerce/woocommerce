@@ -583,14 +583,14 @@ p.demo_store {
 
 		&.added {
 			&:before {
-				content: "";
 				position:absolute;
 				height: 16px;
 				width: 16px;
 				top: 0.35em;
 				right: -26px;
 				text-indent: 0;
-				background: url(../images/success.png) no-repeat;
+				font-family: 'WooCommerce';
+				content: "\e017";
 			}
 		}
 
@@ -1674,10 +1674,6 @@ p.demo_store {
 					background-image: url(../images/ajax-loader@2x.gif);
 					background-size: 16px 16px;
 				}
-			}
-			&.added:before {
-				background: url(../images/success@2x.png) no-repeat;
-				background-size:16px 14px;
 			}
 		}
 		.woocommerce form .form-row.validate-required.woocommerce-validated input.input-text, .woocommerce-page form .form-row.validate-required.woocommerce-validated input.input-text {
