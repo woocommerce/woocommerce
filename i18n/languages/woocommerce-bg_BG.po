@@ -23,7 +23,7 @@ msgstr ""
 #: assets/js/admin/editor_plugin_lang.php:5
 #@ woocommerce
 msgid "Insert Shortcode"
-msgstr ""
+msgstr "Вмъкване на кратък код"
 
 #: assets/js/admin/editor_plugin_lang.php:6
 #, fuzzy
@@ -35,13 +35,13 @@ msgstr "Описание на продукта:"
 #, fuzzy
 #@ woocommerce
 msgid "Product by SKU/ID"
-msgstr "Продукт SKU:"
+msgstr "Продукт по SKU/ID"
 
 #: assets/js/admin/editor_plugin_lang.php:8
 #, fuzzy
 #@ woocommerce
 msgid "Products by SKU/ID"
-msgstr "Продукт SKU:"
+msgstr "Продукти по SKU/ID"
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:116
 #: assets/js/admin/editor_plugin_lang.php:9
@@ -145,7 +145,7 @@ msgstr "Плати"
 #: assets/js/admin/editor_plugin_lang.php:23
 #@ woocommerce
 msgid "Thankyou"
-msgstr ""
+msgstr "Благодарим"
 
 #: classes/abstracts/abstract-wc-email.php:421
 #: classes/emails/class-wc-email-customer-completed-order.php:135
@@ -191,7 +191,7 @@ msgstr "Email адреси"
 #, php-format
 #@ woocommerce
 msgid "Defaults to <code>%s</code>"
-msgstr ""
+msgstr "По подразбиране <code>%s</code>"
 
 #: classes/abstracts/abstract-wc-email.php:434
 #: classes/emails/class-wc-email-customer-invoice.php:151
@@ -215,7 +215,7 @@ msgstr "Email темплейт"
 #: classes/emails/class-wc-email-new-order.php:144
 #@ woocommerce
 msgid "Choose which format of email to send."
-msgstr ""
+msgstr "Избор формат на email за изпращане."
 
 #: classes/abstracts/abstract-wc-email.php:447
 #: classes/emails/class-wc-email-customer-completed-order.php:175
@@ -223,7 +223,7 @@ msgstr ""
 #: classes/emails/class-wc-email-new-order.php:148
 #@ woocommerce
 msgid "Plain text"
-msgstr ""
+msgstr "Обикновен текст"
 
 #: classes/abstracts/abstract-wc-email.php:448
 #: classes/emails/class-wc-email-customer-completed-order.php:176
@@ -250,12 +250,12 @@ msgstr ""
 #: classes/abstracts/abstract-wc-email.php:533
 #@ woocommerce
 msgid "Template file copied to theme."
-msgstr ""
+msgstr "Темплейт файла е копиран в темата."
 
 #: classes/abstracts/abstract-wc-email.php:542
 #@ woocommerce
 msgid "Template file deleted from theme."
-msgstr ""
+msgstr "Темплейт файла е изтрит от темата."
 
 #: admin/includes/welcome.php:146
 #: admin/woocommerce-admin-content.php:41
@@ -290,7 +290,7 @@ msgstr "Изтрий продукт"
 #, php-format
 #@ woocommerce
 msgid "This template has been overridden by your theme and can be found in: <code>%s</code>."
-msgstr ""
+msgstr "Този темплейт е препокрит от вашата тема и може да бъде намерен тук: <code>%s</code>."
 
 #: classes/abstracts/abstract-wc-email.php:600
 #@ woocommerce
@@ -301,7 +301,7 @@ msgstr ""
 #, php-format
 #@ woocommerce
 msgid "To override and edit this email template copy <code>%s</code> to your theme folder: <code>%s</code>."
-msgstr ""
+msgstr "За да препокриете и редактирате темплейта на email-а, копирайте <code>%s</code> в папката на темата: <code>%s</code>"
 
 #: classes/abstracts/abstract-wc-email.php:614
 #, fuzzy
@@ -469,7 +469,7 @@ msgstr "Не може да добавите това количество към
 #: woocommerce.php:1176
 #@ woocommerce
 msgid "View Cart &rarr;"
-msgstr "Виж кошницата &rarr;"
+msgstr "Преглед кошница &rarr;"
 
 #: classes/class-wc-cart.php:842
 #@ woocommerce
@@ -1897,17 +1897,17 @@ msgstr "Зимбабве"
 #: classes/class-wc-countries.php:418
 #@ woocommerce
 msgid "to the"
-msgstr "to the"
+msgstr "към"
 
 #: classes/class-wc-countries.php:419
 #@ woocommerce
 msgid "to"
-msgstr "to"
+msgstr "към"
 
 #: classes/class-wc-countries.php:432
 #@ woocommerce
 msgid "the"
-msgstr "the"
+msgstr ""
 
 #: classes/class-wc-countries.php:444
 #@ woocommerce
@@ -2020,7 +2020,7 @@ msgstr "Пощенски код"
 #, fuzzy
 #@ woocommerce
 msgid "Town / City"
-msgstr "Град"
+msgstr "Град/Село"
 
 #: classes/class-wc-countries.php:930
 #: classes/class-wc-countries.php:931
@@ -2110,7 +2110,7 @@ msgstr "Минималната сума на поръчката за този к
 #: classes/class-wc-coupon.php:468
 #@ woocommerce
 msgid "Sorry, this coupon is not applicable to your cart contents."
-msgstr ""
+msgstr "За съжаление този купон не може да бъде използван за продуктите от вашата поръчка."
 
 #: classes/class-wc-customer.php:628
 #: classes/class-wc-customer.php:638
@@ -2193,7 +2193,7 @@ msgstr "Кошница"
 #: classes/class-wc-order.php:929
 #@ woocommerce
 msgid "Cart Discount:"
-msgstr "Намаления на количката:"
+msgstr "Намаления на кошницата:"
 
 #: classes/class-wc-order.php:935
 #@ woocommerce
@@ -2223,7 +2223,7 @@ msgstr "Общо:"
 #, php-format
 #@ woocommerce
 msgid "(Includes %s)"
-msgstr ""
+msgstr "(Включително %s)"
 
 #. translators: plugin header field 'Name'
 #: admin/woocommerce-admin-content.php:83
@@ -2292,7 +2292,7 @@ msgstr "Вашата поръчка беше канселирана."
 #: classes/emails/class-wc-email-customer-completed-order.php:28
 #@ woocommerce
 msgid "Your {blogname} order from {order_date} is complete"
-msgstr ""
+msgstr "Вашата {blogname} поръчка от {order_date} е завършена"
 
 #: classes/emails/class-wc-email-customer-completed-order.php:37
 #, fuzzy
@@ -2309,7 +2309,7 @@ msgstr ""
 #: classes/emails/class-wc-email-new-order.php:128
 #@ woocommerce
 msgid "Subject"
-msgstr ""
+msgstr "Относно"
 
 #: classes/emails/class-wc-email-customer-completed-order.php:148
 #: classes/emails/class-wc-email-new-order.php:135
@@ -2355,22 +2355,22 @@ msgstr "Фактура за поръчка %s"
 #: classes/emails/class-wc-email-customer-invoice.php:36
 #@ woocommerce
 msgid "Your {blogname} order from {order_date}"
-msgstr ""
+msgstr "Вашата {blogname} поръчка от {order_date}"
 
 #: classes/emails/class-wc-email-customer-invoice.php:37
 #@ woocommerce
 msgid "Order {order_number} details"
-msgstr ""
+msgstr "Детайли към поръчка {order_number}"
 
 #: classes/emails/class-wc-email-customer-invoice.php:158
 #@ woocommerce
 msgid "Email subject (paid)"
-msgstr ""
+msgstr "Тема на email (платено)"
 
 #: classes/emails/class-wc-email-customer-invoice.php:165
 #@ woocommerce
 msgid "Email heading (paid)"
-msgstr ""
+msgstr "Заглавие на email (платено)"
 
 #: classes/emails/class-wc-email-customer-new-account.php:31
 #, fuzzy
@@ -2436,7 +2436,7 @@ msgstr "Проследи поръчкта"
 #: classes/emails/class-wc-email-customer-processing-order.php:28
 #@ woocommerce
 msgid "Your {blogname} order receipt from {order_date}"
-msgstr ""
+msgstr "Вашата {blogname} поръчка от {order_date}"
 
 #: classes/emails/class-wc-email-customer-reset-password.php:36
 #, fuzzy
@@ -6997,7 +6997,7 @@ msgstr "Кошницата е обновена."
 #, php-format
 #@ woocommerce
 msgid "You can only have 1 %s in your cart."
-msgstr "Имате само 1 %s в количката."
+msgstr "Имате само 1 %s в кошницата."
 
 #: woocommerce-functions.php:296
 #: woocommerce-functions.php:343
@@ -7008,7 +7008,7 @@ msgstr "Моля, изберете опции на продукта&hellip;"
 #: woocommerce-functions.php:378
 #@ woocommerce
 msgid "Please choose the quantity of items you wish to add to your cart&hellip;"
-msgstr ""
+msgstr "Моля изберете наличност за продуктите които искате да добавите към кошницата&hellip;"
 
 #: woocommerce-functions.php:386
 #, fuzzy
@@ -12357,7 +12357,7 @@ msgstr ""
 #: admin/woocommerce-admin-reports.php:834
 #@ woocommerce
 msgid "items"
-msgstr ""
+msgstr "продукти"
 
 #: admin/woocommerce-admin-reports.php:381
 #@ woocommerce
@@ -12372,7 +12372,7 @@ msgstr ""
 #: admin/woocommerce-admin-reports.php:393
 #@ woocommerce
 msgid "Discounts used"
-msgstr ""
+msgstr "Използвани намаления"
 
 #: admin/woocommerce-admin-reports.php:399
 #@ woocommerce
@@ -12390,7 +12390,7 @@ msgstr ""
 #: admin/woocommerce-admin-reports.php:1356
 #@ woocommerce
 msgid "From:"
-msgstr ""
+msgstr "От:"
 
 #: admin/woocommerce-admin-reports.php:636
 #: admin/woocommerce-admin-reports.php:980
@@ -12398,7 +12398,7 @@ msgstr ""
 #: admin/woocommerce-admin-reports.php:1356
 #@ woocommerce
 msgid "To:"
-msgstr ""
+msgstr "До:"
 
 #: admin/woocommerce-admin-reports.php:636
 #: admin/woocommerce-admin-reports.php:821
@@ -12411,7 +12411,7 @@ msgstr ""
 #: admin/woocommerce-admin-reports.php:2476
 #@ woocommerce
 msgid "Show"
-msgstr ""
+msgstr "Показване"
 
 #: admin/woocommerce-admin-reports.php:642
 #@ woocommerce
@@ -12436,99 +12436,99 @@ msgstr ""
 #: admin/woocommerce-admin-reports.php:668
 #@ woocommerce
 msgid "Sales in range"
-msgstr ""
+msgstr "Продажби в норма"
 
 #: admin/woocommerce-admin-reports.php:815
 #: admin/woocommerce-admin-reports.php:2287
 #@ woocommerce
 msgid "Year:"
-msgstr ""
+msgstr "Година:"
 
 #: admin/woocommerce-admin-reports.php:826
 #@ woocommerce
 msgid "Total sales for year"
-msgstr ""
+msgstr "Общо продажби на година"
 
 #: admin/woocommerce-admin-reports.php:832
 #@ woocommerce
 msgid "Total orders for year"
-msgstr ""
+msgstr "Средно поръчки на година"
 
 #: admin/woocommerce-admin-reports.php:838
 #@ woocommerce
 msgid "Average order total for year"
-msgstr ""
+msgstr "Средно общи поръчки на година"
 
 #: admin/woocommerce-admin-reports.php:844
 #@ woocommerce
 msgid "Average order items for year"
-msgstr ""
+msgstr "Средно продажби на година"
 
 #: admin/woocommerce-admin-reports.php:852
 #@ woocommerce
 msgid "Monthly sales for year"
-msgstr ""
+msgstr "Продажби на месец за година"
 
 #: admin/woocommerce-admin-reports.php:1000
 #@ woocommerce
 msgid "Product does not exist"
-msgstr ""
+msgstr "Продуктът не съществува"
 
 #: admin/woocommerce-admin-reports.php:1097
 #@ woocommerce
 msgid "Product no longer exists"
-msgstr ""
+msgstr "Продуктът вече не съществува"
 
 #: admin/woocommerce-admin-reports.php:1194
 #, php-format
 #@ woocommerce
 msgid "Sales for %s:"
-msgstr ""
+msgstr "Продажби за %s:"
 
 #: admin/woocommerce-admin-reports.php:1198
 #: admin/woocommerce-admin-reports.php:2335
 #@ woocommerce
 msgid "Month"
-msgstr ""
+msgstr "Месец"
 
 #: admin/woocommerce-admin-reports.php:1219
 #@ woocommerce
 msgid "No sales :("
-msgstr ""
+msgstr "Без продажби :("
 
 #: admin/woocommerce-admin-reports.php:1362
 #@ woocommerce
 msgid "Total orders containing coupons"
-msgstr ""
+msgstr "Общо поръчки използващи купони"
 
 #: admin/woocommerce-admin-reports.php:1368
 #@ woocommerce
 msgid "Percent of orders containing coupons"
-msgstr ""
+msgstr "Процентност на поръчки с използвани купони"
 
 #: admin/woocommerce-admin-reports.php:1374
 #@ woocommerce
 msgid "Total coupon discount"
-msgstr ""
+msgstr "Общо намаление от купони"
 
 #: admin/woocommerce-admin-reports.php:1383
 #@ woocommerce
 msgid "Most popular coupons"
-msgstr ""
+msgstr "Най-популярни купони"
 
 #: admin/woocommerce-admin-reports.php:1393
 #, php-format
 #@ woocommerce
 msgid "Used 1 time"
 msgid_plural "Used %d times"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Използван 1 път"
+msgstr[1] "Използван %d пъти"
 
 #: admin/woocommerce-admin-reports.php:1396
 #: admin/woocommerce-admin-reports.php:1418
 #@ woocommerce
 msgid "No coupons found"
-msgstr ""
+msgstr "Няма купони"
 
 #: admin/woocommerce-admin-reports.php:1405
 #@ woocommerce
@@ -12539,28 +12539,28 @@ msgstr ""
 #, php-format
 #@ woocommerce
 msgid "Discounted %s"
-msgstr ""
+msgstr "Намален %s"
 
 #: admin/woocommerce-admin-reports.php:1474
 #: admin/woocommerce-admin-reports.php:2453
 #@ woocommerce
 msgid "Show:"
-msgstr ""
+msgstr "Показване:"
 
 #: admin/woocommerce-admin-reports.php:1614
 #@ woocommerce
 msgid "Top coupon"
-msgstr ""
+msgstr "Топ купони"
 
 #: admin/woocommerce-admin-reports.php:1622
 #@ woocommerce
 msgid "Worst coupon"
-msgstr ""
+msgstr "Лоши купони"
 
 #: admin/woocommerce-admin-reports.php:1630
 #@ woocommerce
 msgid "Discount average"
-msgstr ""
+msgstr "Средна отстъпка"
 
 #: admin/woocommerce-admin-reports.php:1638
 #@ woocommerce
@@ -12618,8 +12618,8 @@ msgstr ""
 #@ woocommerce
 msgid "%d in stock"
 msgid_plural "%d in stock"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%d в наличност"
+msgstr[1] "%d в наличност"
 
 #: admin/woocommerce-admin-reports.php:2095
 #@ woocommerce
@@ -12724,12 +12724,12 @@ msgstr ""
 #: admin/woocommerce-admin-reports.php:2632
 #@ woocommerce
 msgid "Top category"
-msgstr ""
+msgstr "Топ категории"
 
 #: admin/woocommerce-admin-reports.php:2641
 #@ woocommerce
 msgid "Worst category"
-msgstr ""
+msgstr "Лоши категории"
 
 #: admin/woocommerce-admin-reports.php:2649
 #@ woocommerce
@@ -12811,17 +12811,17 @@ msgstr ""
 #: admin/woocommerce-admin-status.php:71
 #@ woocommerce
 msgid "Environment"
-msgstr ""
+msgstr "Среда"
 
 #: admin/woocommerce-admin-status.php:77
 #@ woocommerce
 msgid "Home URL"
-msgstr ""
+msgstr "Начален адрес"
 
 #: admin/woocommerce-admin-status.php:81
 #@ woocommerce
 msgid "Site URL"
-msgstr ""
+msgstr "Адрес на сайта"
 
 #: admin/woocommerce-admin-status.php:85
 #@ woocommerce
@@ -13008,7 +13008,7 @@ msgstr ""
 #: admin/woocommerce-admin-status.php:339
 #@ woocommerce
 msgid "Page does not exist"
-msgstr ""
+msgstr "Страницата не съществува"
 
 #: admin/woocommerce-admin-status.php:344
 #, php-format
@@ -13024,22 +13024,22 @@ msgstr ""
 #: admin/woocommerce-admin-status.php:369
 #@ woocommerce
 msgid "Order Statuses"
-msgstr ""
+msgstr "Статуси на поръчка"
 
 #: admin/woocommerce-admin-status.php:379
 #@ woocommerce
 msgid "Product Types"
-msgstr ""
+msgstr "Типове продукти"
 
 #: admin/woocommerce-admin-status.php:392
 #@ woocommerce
 msgid "Templates"
-msgstr ""
+msgstr "Темплейти"
 
 #: admin/woocommerce-admin-status.php:398
 #@ woocommerce
 msgid "Template Overrides"
-msgstr ""
+msgstr "Препокриване на темплейт"
 
 #: admin/woocommerce-admin-status.php:416
 #@ woocommerce
@@ -13084,7 +13084,7 @@ msgstr ""
 #: admin/woocommerce-admin-status.php:521
 #@ woocommerce
 msgid "Recount terms"
-msgstr ""
+msgstr "Преброяване на търмовете"
 
 #: admin/woocommerce-admin-status.php:522
 #@ woocommerce
@@ -13149,37 +13149,37 @@ msgstr ""
 #: admin/woocommerce-admin-taxonomies.php:123
 #@ woocommerce
 msgid "Subcategories"
-msgstr ""
+msgstr "Подкатегории"
 
 #: admin/woocommerce-admin-taxonomies.php:30
 #: admin/woocommerce-admin-taxonomies.php:124
 #@ woocommerce
 msgid "Both"
-msgstr ""
+msgstr "Всичко"
 
 #: admin/woocommerce-admin-taxonomies.php:34
 #: admin/woocommerce-admin-taxonomies.php:129
 #@ woocommerce
 msgid "Thumbnail"
-msgstr ""
+msgstr "Картинка"
 
 #: admin/woocommerce-admin-taxonomies.php:38
 #: admin/woocommerce-admin-taxonomies.php:134
 #@ woocommerce
 msgid "Upload/Add image"
-msgstr ""
+msgstr "Качване/Добавяне изображение"
 
 #: admin/woocommerce-admin-taxonomies.php:39
 #: admin/woocommerce-admin-taxonomies.php:135
 #@ woocommerce
 msgid "Remove image"
-msgstr ""
+msgstr "Премахни изображение"
 
 #: admin/woocommerce-admin-taxonomies.php:64
 #: admin/woocommerce-admin-taxonomies.php:156
 #@ woocommerce
 msgid "Use image"
-msgstr ""
+msgstr "Използвай изображение"
 
 #: admin/woocommerce-admin-taxonomies.php:222
 #@ woocommerce
@@ -13204,50 +13204,50 @@ msgstr ""
 #: admin/woocommerce-admin-users.php:29
 #@ woocommerce
 msgid "Completed Orders"
-msgstr ""
+msgstr "Завършени поръчки"
 
 #: admin/woocommerce-admin-users.php:144
 #@ woocommerce
 msgid "Customer Billing Address"
-msgstr ""
+msgstr "Адрес"
 
 #: admin/woocommerce-admin-users.php:147
 #: admin/woocommerce-admin-users.php:196
 #@ woocommerce
 msgid "First name"
-msgstr ""
+msgstr "Име"
 
 #: admin/woocommerce-admin-users.php:151
 #: admin/woocommerce-admin-users.php:200
 #@ woocommerce
 msgid "Last name"
-msgstr ""
+msgstr "Фамилия"
 
 #: admin/woocommerce-admin-users.php:176
 #@ woocommerce
 msgid "Country or state code"
-msgstr ""
+msgstr "Държава или код"
 
 #: admin/woocommerce-admin-users.php:180
 #: admin/woocommerce-admin-users.php:229
 #@ woocommerce
 msgid "2 letter Country code"
-msgstr ""
+msgstr "2 символен държавен код"
 
 #: admin/woocommerce-admin-users.php:183
 #@ woocommerce
 msgid "Telephone"
-msgstr ""
+msgstr "Телефон"
 
 #: admin/woocommerce-admin-users.php:193
 #@ woocommerce
 msgid "Customer Shipping Address"
-msgstr ""
+msgstr "Адрес за доставка"
 
 #: admin/woocommerce-admin-users.php:225
 #@ woocommerce
 msgid "State/County or state code"
-msgstr ""
+msgstr "Област или код."
 
 #: classes/abstracts/abstract-wc-product.php:33
 #@ woocommerce
@@ -13262,34 +13262,34 @@ msgstr ""
 #: classes/class-wc-coupon.php:420
 #@ woocommerce
 msgid "Coupon code applied successfully."
-msgstr ""
+msgstr "Купонът е приложен успешно."
 
 #: classes/class-wc-coupon.php:441
 #@ woocommerce
 msgid "Coupon is not valid."
-msgstr ""
+msgstr "Купонът е невалиден."
 
 #: classes/class-wc-coupon.php:453
 #@ woocommerce
 msgid "Coupon code already applied!"
-msgstr ""
+msgstr "Купонът е вече приложен!"
 
 #: classes/class-wc-coupon.php:456
 #, php-format
 #@ woocommerce
 msgid "Sorry, coupon \"%s\" has already been applied and cannot be used in conjunction with other coupons."
-msgstr ""
+msgstr "Този купон \"%s\" е вече приложен и не може да бъде използван заедно с други купони."
 
 #: classes/class-wc-coupon.php:471
 #@ woocommerce
 msgid "Sorry, this coupon is not valid for sale items."
-msgstr ""
+msgstr "Съжаляваме, този купон не е валиден за продуктите в разпродажба."
 
 #: classes/gateways/cod/class-wc-gateway-cod.php:97
 #: classes/gateways/cod/class-wc-gateway-cod.php:103
 #@ woocommerce
 msgid "Pay with cash upon delivery."
-msgstr ""
+msgstr "Плащане при доставка."
 
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:148
 #@ woocommerce
@@ -13299,17 +13299,17 @@ msgstr ""
 #: classes/gateways/paypal/class-wc-gateway-paypal.php:165
 #@ woocommerce
 msgid "Optional"
-msgstr ""
+msgstr "По желание"
 
 #: classes/integrations/shareyourcart/class-wc-shareyourcart.php:23
 #@ woocommerce
 msgid "Increase your social media exposure by 10 percent! ShareYourCart helps you get more customers by motivating satisfied customers to talk with their friends about your products. For help with ShareYourCart view the <a href=\"http://docs.woothemes.com/document/shareyourcart/\" target=\"__blank\">documentation</a>."
-msgstr ""
+msgstr "Увеличете вашите точки с 10% с нашата социална програма. ShareYourCart ви помага да достигнете до повече клиенти и да ги накарате да говорят за вашите продукти. За повече информация погледнете в <a href=\"http://docs.woothemes.com/document/shareyourcart/\" target=\"__blank\">документацията</a>."
 
 #: classes/shipping/flat-rate/class-wc-shipping-flat-rate.php:176
 #@ woocommerce
 msgid "Option Name|Cost|Per-order (yes or no)"
-msgstr ""
+msgstr "Име опция|Цена|За поръчка (yes или no)"
 
 #: i18n/states/HU.php:13
 #@ woocommerce
@@ -13589,45 +13589,45 @@ msgstr ""
 #: templates/checkout/form-login.php:14
 #@ woocommerce
 msgid "Returning customer?"
-msgstr ""
+msgstr "Завърнал се клиент?"
 
 #: templates/loop/orderby.php:22
 #@ woocommerce
 msgid "Sort by popularity"
-msgstr ""
+msgstr "Сортиране по популярност"
 
 #: templates/loop/orderby.php:23
 #@ woocommerce
 msgid "Sort by average rating"
-msgstr ""
+msgstr "Сортиране по среден рейтинг"
 
 #: templates/loop/orderby.php:24
 #@ woocommerce
 msgid "Sort by newness"
-msgstr ""
+msgstr "Сортиране по хронология"
 
 #: templates/loop/orderby.php:25
 #@ woocommerce
 msgid "Sort by price: low to high"
-msgstr ""
+msgstr "Сортиране по цена: ниска към висока"
 
 #: templates/loop/orderby.php:26
 #@ woocommerce
 msgid "Sort by price: high to low"
-msgstr ""
+msgstr "Сортиране по цена: висока към ниска"
 
 #: templates/myaccount/my-orders.php:62
 #, php-format
 #@ woocommerce
 msgid "%s for %s item"
 msgid_plural "%s for %s items"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%s за %s продукт"
+msgstr[1] "%s за %s продукти"
 
 #: templates/single-product-reviews.php:78
 #@ woocommerce
 msgid "Add Your Review"
-msgstr ""
+msgstr "Добавяне на ревю"
 
 #: woocommerce-ajax.php:1172
 #@ woocommerce
@@ -13643,7 +13643,7 @@ msgstr ""
 #, php-format
 #@ woocommerce
 msgid "%s &ndash; %s%s"
-msgstr ""
+msgstr "%s &ndash; %s%s"
 
 #: woocommerce-core-functions.php:675
 #@ woocommerce
@@ -13788,23 +13788,23 @@ msgstr ""
 #: woocommerce-functions.php:996
 #@ woocommerce
 msgid "No file defined"
-msgstr ""
+msgstr "Няма зададен файл."
 
 #: woocommerce-functions.php:1575
 #@ woocommerce
 msgid "Password changed successfully."
-msgstr ""
+msgstr "Паролата беше променена успешно."
 
 #: woocommerce-functions.php:1651
 #@ woocommerce
 msgid "Address changed successfully."
-msgstr ""
+msgstr "Адресът беше променен успешно."
 
 #: woocommerce-template.php:764
 #, php-format
 #@ woocommerce
 msgid "Reviews (%d)"
-msgstr ""
+msgstr "Ревюта (%s)"
 
 #. translators: plugin header field 'PluginURI'
 #: woocommerce.php:0
