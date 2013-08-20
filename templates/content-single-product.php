@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 	 }
 ?>
 
-<div itemscope itemtype="http://schema.org/Product" id="product-<?php the_ID(); ?>" <?php post_class(); ?>>
+<div itemscope itemtype="<?php echo woocommerce_get_product_schema(); ?>" id="product-<?php the_ID(); ?>" <?php post_class(); ?>>
 
 	<?php
 		/**
