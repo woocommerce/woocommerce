@@ -18,6 +18,16 @@
 	font-weight: normal;
 	font-style: normal;
 }
+@font-face {
+	font-family: 'WooCommerce';
+	src:url('../fonts/WooCommerce.eot');
+	src:url('../fonts/WooCommerce.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/WooCommerce.woff') format('woff'),
+		url('../fonts/WooCommerce.ttf') format('truetype'),
+		url('../fonts/WooCommerce.svg#WooCommerce') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
 
 /* =Global styles/layout
 -------------------------------------------------------------- */
@@ -1515,12 +1525,17 @@ p.demo_store {
 			}
 			li.chosen {
 				a {
-					padding: 0 6px 0 18px;
+					padding:0 6px;
+					text-decoration: none;
 					border: 1px solid @tertiary;
-					background: @tertiary url(../images/cross_white.png) no-repeat 6px center;
+					background: @tertiary;
 					.inset_box_shadow(0, 1px, 1px, rgba(255,255,255,0.5));
 					color: @tertiarytext;
 					.border_radius(3px);
+					&:before {
+						.iconbefore;
+						content: "\e013";
+					}
 				}
 			}
 			small.count {
@@ -1546,13 +1561,18 @@ p.demo_store {
 				padding: 0 1px 1px 0;
 				list-style:none;
 				a {
-					padding: 0 6px 0 18px;
+					padding:0 6px;
+					text-decoration: none;
 					border: 1px solid @tertiary;
-					background: @tertiary url(../images/cross_white.png) no-repeat 6px center;
+					background: @tertiary;
 					.inset_box_shadow(0, 1px, 1px, rgba(255,255,255,0.5));
 					color: @tertiarytext;
 					.border_radius(3px);
 					float: left;
+					&:before {
+						.iconbefore;
+						content: "\e013";
+					}
 				}
 			}
 		}
