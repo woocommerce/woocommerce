@@ -353,7 +353,6 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function frontend_includes() {
-		// Classes
 		include_once( 'includes/class-wc-frontend-scripts.php' );
 		include_once( 'includes/class-wc-form-handler.php' );
 		include_once( 'includes/class-wc-cart.php' );					// The main cart class

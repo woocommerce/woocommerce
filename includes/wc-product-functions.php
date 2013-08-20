@@ -18,8 +18,7 @@
  * @return WC_Product
  */
 function get_product( $the_product = false, $args = array() ) {
-	global $woocommerce;
-	return $woocommerce->product_factory->get_product( $the_product, $args );
+	return WC()->product_factory->get_product( $the_product, $args );
 }
 
 /**
