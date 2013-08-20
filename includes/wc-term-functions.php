@@ -18,38 +18,49 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258
  * We use a custom walker, just like WordPress does
  *
- * @access public
  * @param int $show_counts (default: 1)
  * @param int $hierarchical (default: 1)
  * @param int $show_uncategorized (default: 1)
  * @return string
  */
-function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchical = 1, $show_uncategorized = 1, $orderby = '' ) {
+function woocommerce_product_dropdown_categories( $args = array(), $deprecated_hierarchical = 1, $deprecated_show_uncategorized = 1, $deprecated_orderby = '' ) {
 	global $wp_query, $woocommerce;
 
-	$r                 = array();
-	$r['pad_counts']   = 1;
-	$r['hierarchical'] = $hierarchical;
-	$r['hide_empty']   = 1;
-	$r['show_count']   = $show_counts;
-	$r['selected']     = ( isset( $wp_query->query['product_cat'] ) ) ? $wp_query->query['product_cat'] : '';
-	$r['menu_order']   = false;
+	if ( ! is_array( $args ) ) {
+		_deprecated_argument( 'woocommerce_product_dropdown_categories()', '2.1', 'show_counts, hierarchical, show_uncategorized and orderby arguments are invalid - pass a single array of values instead.' );
 
-	if ( $orderby == 'order' )
+		$args['show_counts']        = $args;
+		$args['hierarchical']       = $deprecated_hierarchical;
+		$args['show_uncategorized'] = $deprecated_show_uncategorized;
+		$args['orderby']            = $deprecated_orderby;
+	}
+
+	$defaults = array(
+		'pad_counts'         => 1,
+		'show_counts'        => 1,
+		'hierarchical'       => 1,
+		'hide_empty'         => 1,
+		'show_uncategorized' => 1,
+		'orderby'            => 'name',
+		'selected'           => isset( $wp_query->query['product_cat'] ) ? $wp_query->query['product_cat'] : '',
+		'menu_order'         => false
+	);
+
+	$args = wp_parse_args( $args, $defaults );
+
+	if ( $args['orderby'] == 'order' )
 		$r['menu_order'] = 'asc';
-	elseif ( $orderby )
-		$r['orderby'] = $orderby;
 
-	$terms = get_terms( 'product_cat', $r );
+	$terms = get_terms( 'product_cat', $args );
 
 	if ( ! $terms )
 		return;
 
 	$output  = "<select name='product_cat' id='dropdown_product_cat'>";
-	$output .= '<option value="" ' .  selected( isset( $_GET['product_cat'] ) ? $_GET['product_cat'] : '', '', false ) . '>'.__( 'Select a category', 'woocommerce' ).'</option>';
-	$output .= woocommerce_walk_category_dropdown_tree( $terms, 0, $r );
+	$output .= '<option value="" ' .  selected( isset( $_GET['product_cat'] ) ? $_GET['product_cat'] : '', '', false ) . '>' . __( 'Select a category', 'woocommerce' ) . '</option>';
+	$output .= woocommerce_walk_category_dropdown_tree( $terms, 0, $args );
 
-	if ( $show_uncategorized )
+	if ( $args['show_uncategorized'] )
 		$output .= '<option value="0" ' . selected( isset( $_GET['product_cat'] ) ? $_GET['product_cat'] : '', '0', false ) . '>' . __( 'Uncategorized', 'woocommerce' ) . '</option>';
 
 	$output .="</select>";
