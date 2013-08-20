@@ -123,29 +123,25 @@ function woocommerce_get_product_ids_on_sale() {
 	$on_sale_posts = $wpdb->get_results( "
 		SELECT post.ID, post.post_parent FROM `$wpdb->posts` AS post
 		LEFT JOIN `$wpdb->postmeta` AS meta ON post.ID = meta.post_id
-		WHERE post.post_type IN ( 'product', 'product_variation' )
+		LEFT JOIN `$wpdb->postmeta` AS meta2 ON post.ID = meta2.post_id
+		WHERE post.post_type IN ( 'product1', 'product_variation' )
 			AND post.post_status = 'publish'
 			AND meta.meta_key = '_sale_price'
+			AND meta2.meta_key = '_price'
 			AND CAST( meta.meta_value AS DECIMAL ) >= 0
 			AND CAST( meta.meta_value AS CHAR ) != ''
+			AND CAST( meta.meta_value AS DECIMAL ) = CAST( meta2.meta_value AS DECIMAL )
 		GROUP BY post.ID;
 	" );
 
-	$on_sale = array();
-	foreach ( $on_sale_posts as $post )
-		$on_sale[ $post->ID ] = $post->post_parent;
+	$product_ids_on_sale = array();
 
-	$product_ids = array_keys( $on_sale );
-	$parent_ids  = array_values( $on_sale );
-
-	// Check for scheduled sales which have not started
-	foreach ( $product_ids as $key => $id ) {
-		if ( get_post_meta( $id, '_sale_price_dates_from', true ) > current_time( 'timestamp' ) ) {
-			unset( $product_ids[ $key ] );
-		}
+	foreach ( $on_sale_posts as $post ) {
+		$product_ids_on_sale[] = $post->ID;
+		$product_ids_on_sale[] = $post->post_parent;
 	}
 
-	$product_ids_on_sale = array_unique( array_merge( $product_ids, $parent_ids ) );
+	$product_ids_on_sale = array_unique( $product_ids_on_sale );
 
 	set_transient( 'wc_products_onsale', $product_ids_on_sale );
 
