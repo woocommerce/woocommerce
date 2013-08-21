@@ -3883,7 +3883,7 @@ msgstr "Actualizaciones del Pedido"
 # @ woocommerce
 #: classes/shortcodes/class-wc-shortcode-view-order.php:71
 msgid "l jS \\of F Y, h:ia"
-msgstr "l jS \\de F Y, h:ia"
+msgstr "l j \\d\\e F Y, h:ia"
 
 # @ woocommerce
 #: classes/widgets/class-wc-widget-best-sellers.php:31
