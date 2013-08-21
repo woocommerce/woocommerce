@@ -61,6 +61,7 @@ function get_woocommerce_currencies() {
 			array(
 				'AUD' => __( 'Australian Dollars', 'woocommerce' ),
 				'BRL' => __( 'Brazilian Real', 'woocommerce' ),
+				'BGN' => __( 'Bulgarian Lev', 'woocommerce' ),
 				'CAD' => __( 'Canadian Dollars', 'woocommerce' ),
 				'CNY' => __( 'Chinese Yuan', 'woocommerce' ),
 				'CZK' => __( 'Czech Koruna', 'woocommerce' ),
@@ -107,6 +108,9 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 	switch ( $currency ) {
 		case 'BRL' :
 			$currency_symbol = '&#82;&#36;';
+			break;
+		case 'BGN' :
+			$currency_symbol = '&#1083;&#1074;.';
 			break;
 		case 'AUD' :
 		case 'CAD' :
