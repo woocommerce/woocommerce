@@ -1485,8 +1485,11 @@ p.demo_store {
 		li {
 			list-style:none;
 			margin-left: 0;
-			padding-left: 1.5em;
-			background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAHCAYAAAA1WQxeAAAAQUlEQVQIHWP8//8/AwgwMjLWgxlQAijeCGIyIQtiYxNUwAjUhWI0uilMMLvQJUB8kBzYCmyKYGJwN8AEYDphJgIAPtccffZCsOoAAAAASUVORK5CYII=) left no-repeat; /* download icon */
+			padding-left: 0;
+			&:before {
+				.iconbefore;
+				content: "\e00a";
+			}
 			.count {
 				float: right;
 			}
