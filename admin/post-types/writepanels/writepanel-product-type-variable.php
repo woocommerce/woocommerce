@@ -175,7 +175,7 @@ function variable_product_type_options() {
 					$image = '';
 					$image_id = absint( $_thumbnail_id );
 					if ( $image_id )
-						$image = wp_get_attachment_url( $image_id );
+						$image = wp_get_attachment_thumb_url( $image_id );
 
 					// Format file paths
 					$_file_paths = maybe_unserialize( $_file_paths );

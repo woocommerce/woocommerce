@@ -109,7 +109,7 @@ function woocommerce_edit_category_fields( $term, $taxonomy ) {
 	$image 			= '';
 	$thumbnail_id 	= absint( get_woocommerce_term_meta( $term->term_id, 'thumbnail_id', true ) );
 	if ($thumbnail_id) :
-		$image = wp_get_attachment_url( $thumbnail_id );
+		$image = wp_get_attachment_thumb_url( $thumbnail_id );
 	else :
 		$image = woocommerce_placeholder_img_src();
 	endif;
@@ -322,7 +322,7 @@ function woocommerce_product_cat_column( $columns, $column, $id ) {
 		$thumbnail_id 	= get_woocommerce_term_meta( $id, 'thumbnail_id', true );
 
 		if ($thumbnail_id)
-			$image = wp_get_attachment_url( $thumbnail_id );
+			$image = wp_get_attachment_thumb_url( $thumbnail_id );
 		else
 			$image = woocommerce_placeholder_img_src();
 
