@@ -412,6 +412,37 @@ if ( ! function_exists( 'woocommerce_page_title' ) ) {
 	}
 }
 
+if ( ! function_exists( 'get_woocommerce_page_title' ) ) {
+
+	/**
+	 * get_woocommerce_page_title function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function get_woocommerce_page_title() {
+
+		if ( is_search() ) {
+			$page_title = sprintf( __( 'Search Results: &ldquo;%s&rdquo;', 'woocommerce' ), get_search_query() );
+
+			if ( get_query_var( 'paged' ) )
+				$page_title .= sprintf( __( '&nbsp;&ndash; Page %s', 'woocommerce' ), get_query_var( 'paged' ) );
+
+		} elseif ( is_tax() ) {
+
+			$page_title = single_term_title( "", false );
+
+		} else {
+
+			$shop_page_id = woocommerce_get_page_id( 'shop' );
+			$page_title   = get_the_title( $shop_page_id );
+
+		}
+
+	    return apply_filters( 'woocommerce_page_title', $page_title );
+	}
+}
+
 if ( ! function_exists( 'woocommerce_product_loop_start' ) ) {
 
 	/**
