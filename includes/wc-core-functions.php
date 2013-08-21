@@ -90,6 +90,7 @@ function get_woocommerce_currencies() {
 				'THB' => __( 'Thai Baht', 'woocommerce' ),
 				'TRY' => __( 'Turkish Lira', 'woocommerce' ),
 				'USD' => __( 'US Dollars', 'woocommerce' ),
+				'VND' => __( 'Vietnamese Dong', 'woocommerce' ),
 			)
 		)
 	);
@@ -147,6 +148,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'THB' : $currency_symbol = '&#3647;'; break;
 		case 'GBP' : $currency_symbol = '&pound;'; break;
 		case 'RON' : $currency_symbol = 'lei'; break;
+		case 'VND' : $currency_symbol = '&#8363;'; break;
 		default    : $currency_symbol = ''; break;
 	}
 
