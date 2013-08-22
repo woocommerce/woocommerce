@@ -66,7 +66,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 							continue;
 
 						$meta['meta_key']   = esc_attr( $meta['meta_key'] );
-						$meta['meta_value'] = esc_textarea( $meta['meta_value'] ); // using a <textarea />
+						$meta['meta_value'] = esc_textarea( urldecode( $meta['meta_value'] ) ); // using a <textarea />
 						$meta['meta_id']    = absint( $meta['meta_id'] );
 
 						echo '<tr data-meta_id="' . $meta['meta_id'] . '">

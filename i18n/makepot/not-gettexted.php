@@ -7,11 +7,12 @@
  * @package wordpress-i18n
  * @subpackage tools
  */
+
 // see: http://php.net/tokenizer
-if (!defined('T_ML_COMMENT'))
-	    define('T_ML_COMMENT', T_COMMENT);
+if ( ! defined('T_ML_COMMENT') )
+	define('T_ML_COMMENT', T_COMMENT);
 else
-	    define('T_DOC_COMMENT', T_ML_COMMENT);
+	define('T_DOC_COMMENT', T_ML_COMMENT);
 
 require_once dirname( __FILE__ ) . '/pomo/po.php';
 require_once dirname( __FILE__ ) . '/pomo/mo.php';
@@ -59,7 +60,7 @@ class NotGettexted {
 			if ('.' == $item || '..' == $item)
 				continue;
 			if ('.php' == substr($item, -4))
-				$files[] = $full_item; 
+				$files[] = $full_item;
 			if (is_dir($full_item))
 				$files += array_merge($files, NotGettexted::list_php_files($full_item, $files));
 		}
@@ -99,7 +100,7 @@ class NotGettexted {
 						continue;
 					}
 					if ($this->STAGE_START_COMMENT <= $stage && $stage <= $this->STAGE_WHITESPACE_AFTER && '/'.$current_comment_id == $matches[1]) {
-						$stage = $this->STAGE_END_COMMENT; 
+						$stage = $this->STAGE_END_COMMENT;
 						$this->logmsg('end comment', $current_comment_id);
 						$result .= call_user_func($other_action, $token);
 						if (!is_null($register_action)) call_user_func($register_action, $current_string, $current_comment_id, $current_string_line);
@@ -225,10 +226,15 @@ class NotGettexted {
 // run the CLI only if the file
 // wasn't included
 $included_files = get_included_files();
-if ($included_files[0] == __FILE__) {
+if ( $included_files[0] == __FILE__ ) {
+
+	/**
+	 * Note: this file is locked by default since it should not be publicly accessible
+	 * on a live website. You can unlock it by temporarily removing the following line.
+	 */
+	exit( 'Locked' );
+
 	error_reporting(E_ALL);
 	$not_gettexted = new NotGettexted;
 	$not_gettexted->cli();
 }
-
-?>

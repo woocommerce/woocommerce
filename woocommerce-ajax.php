@@ -36,7 +36,7 @@ function woocommerce_get_refreshed_fragments() {
 				'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>'
 			)
 		),
-		'cart_hash' => md5( json_encode( $woocommerce->cart->get_cart() ) )
+		'cart_hash' => $woocommerce->cart->get_cart() ? md5( json_encode( $woocommerce->cart->get_cart() ) ) : ''
 	);
 
 	echo json_encode( $data );
@@ -983,6 +983,8 @@ function woocommerce_ajax_add_order_item() {
  	}
 
 	do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
+
+	$item = apply_filters( 'woocommerce_ajax_order_item', $item, $item_id );
 
 	include( 'admin/post-types/writepanels/order-item-html.php' );
 

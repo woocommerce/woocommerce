@@ -63,7 +63,14 @@ class PotExtMeta {
 }
 
 $included_files = get_included_files();
-if ($included_files[0] == __FILE__) {
+if ( $included_files[0] == __FILE__ ) {
+
+	/**
+	 * Note: this file is locked by default since it should not be publicly accessible
+	 * on a live website. You can unlock it by temporarily removing the following line.
+	 */
+	exit( 'Locked' );
+
 	ini_set('display_errors', 1);
 	$potextmeta = new PotExtMeta;
 	if (!isset($argv[1])) {
