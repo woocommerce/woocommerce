@@ -321,41 +321,42 @@ class WC_Post_types {
 			)
 		);
 
-	    register_post_type( "shop_coupon",
-		    apply_filters( 'woocommerce_register_post_type_shop_coupon',
-				array(
-					'labels' => array(
-							'name' 					=> __( 'Coupons', 'woocommerce' ),
-							'singular_name' 		=> __( 'Coupon', 'woocommerce' ),
-							'menu_name'				=> _x( 'Coupons', 'Admin menu name', 'woocommerce' ),
-							'add_new' 				=> __( 'Add Coupon', 'woocommerce' ),
-							'add_new_item' 			=> __( 'Add New Coupon', 'woocommerce' ),
-							'edit' 					=> __( 'Edit', 'woocommerce' ),
-							'edit_item' 			=> __( 'Edit Coupon', 'woocommerce' ),
-							'new_item' 				=> __( 'New Coupon', 'woocommerce' ),
-							'view' 					=> __( 'View Coupons', 'woocommerce' ),
-							'view_item' 			=> __( 'View Coupon', 'woocommerce' ),
-							'search_items' 			=> __( 'Search Coupons', 'woocommerce' ),
-							'not_found' 			=> __( 'No Coupons found', 'woocommerce' ),
-							'not_found_in_trash' 	=> __( 'No Coupons found in trash', 'woocommerce' ),
-							'parent' 				=> __( 'Parent Coupon', 'woocommerce' )
-						),
-					'description' 			=> __( 'This is where you can add new coupons that customers can use in your store.', 'woocommerce' ),
-					'public' 				=> false,
-					'show_ui' 				=> true,
-					'capability_type' 		=> 'shop_coupon',
-					'map_meta_cap'			=> true,
-					'publicly_queryable' 	=> false,
-					'exclude_from_search' 	=> true,
-					'show_in_menu' 			=> current_user_can( 'manage_woocommerce' ) ? 'woocommerce' : true,
-					'hierarchical' 			=> false,
-					'rewrite' 				=> false,
-					'query_var' 			=> false,
-					'supports' 				=> array( 'title' ),
-					'show_in_nav_menus'		=> false
+		if ( get_option( 'woocommerce_enable_coupons' ) == 'yes' )
+		    register_post_type( "shop_coupon",
+			    apply_filters( 'woocommerce_register_post_type_shop_coupon',
+					array(
+						'labels' => array(
+								'name' 					=> __( 'Coupons', 'woocommerce' ),
+								'singular_name' 		=> __( 'Coupon', 'woocommerce' ),
+								'menu_name'				=> _x( 'Coupons', 'Admin menu name', 'woocommerce' ),
+								'add_new' 				=> __( 'Add Coupon', 'woocommerce' ),
+								'add_new_item' 			=> __( 'Add New Coupon', 'woocommerce' ),
+								'edit' 					=> __( 'Edit', 'woocommerce' ),
+								'edit_item' 			=> __( 'Edit Coupon', 'woocommerce' ),
+								'new_item' 				=> __( 'New Coupon', 'woocommerce' ),
+								'view' 					=> __( 'View Coupons', 'woocommerce' ),
+								'view_item' 			=> __( 'View Coupon', 'woocommerce' ),
+								'search_items' 			=> __( 'Search Coupons', 'woocommerce' ),
+								'not_found' 			=> __( 'No Coupons found', 'woocommerce' ),
+								'not_found_in_trash' 	=> __( 'No Coupons found in trash', 'woocommerce' ),
+								'parent' 				=> __( 'Parent Coupon', 'woocommerce' )
+							),
+						'description' 			=> __( 'This is where you can add new coupons that customers can use in your store.', 'woocommerce' ),
+						'public' 				=> false,
+						'show_ui' 				=> true,
+						'capability_type' 		=> 'shop_coupon',
+						'map_meta_cap'			=> true,
+						'publicly_queryable' 	=> false,
+						'exclude_from_search' 	=> true,
+						'show_in_menu' 			=> current_user_can( 'manage_woocommerce' ) ? 'woocommerce' : true,
+						'hierarchical' 			=> false,
+						'rewrite' 				=> false,
+						'query_var' 			=> false,
+						'supports' 				=> array( 'title' ),
+						'show_in_nav_menus'		=> false
+					)
 				)
-			)
-		);
+			);
 	}
 }
 

@@ -97,7 +97,7 @@
 			</span>
 		</label>
 
-		<?php if ( get_option('woocommerce_enable_weight') == "yes" ) : ?>
+		<?php if ( wc_product_weight_enabled() ) : ?>
 			<div class="inline-edit-group">
 				<label class="alignleft">
 				    <span class="title"><?php _e( 'Weight', 'woocommerce' ); ?></span>
@@ -121,7 +121,7 @@
 			</div>
 		<?php endif; ?>
 
-		<?php if ( get_option('woocommerce_enable_dimensions') == "yes" ) : ?>
+		<?php if ( wc_product_dimensions_enabled() ) : ?>
 			<div class="inline-edit-group dimensions">
 				<label class="alignleft">
 				    <span class="title"><?php _e( 'L/W/H', 'woocommerce' ); ?></span>

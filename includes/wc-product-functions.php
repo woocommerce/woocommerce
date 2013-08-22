@@ -48,6 +48,30 @@ function wc_update_product_stock_status( $product_id, $status ) {
 }
 
 /**
+ * Returns whether or not SKUS are enabled.
+ * @return bool
+ */
+function wc_product_sku_enabled() {
+	return apply_filters( 'wc_product_sku_enabled', true );
+}
+
+/**
+ * Returns whether or not product weights are enabled.
+ * @return bool
+ */
+function wc_product_weight_enabled() {
+	return apply_filters( 'wc_product_weight_enabled', true );
+}
+
+/**
+ * Returns whether or not product dimensions (HxWxD) are enabled.
+ * @return bool
+ */
+function wc_product_dimensions_enabled() {
+	return apply_filters( 'wc_product_dimensions_enabled', true );
+}
+
+/**
  * Clear all transients cache for product data.
  *
  * @param int $post_id (default: 0)

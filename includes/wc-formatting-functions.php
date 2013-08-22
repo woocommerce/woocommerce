@@ -268,7 +268,7 @@ function woocommerce_price( $price, $args = array() ) {
 	$price           = apply_filters( 'raw_woocommerce_price', (double) $price );
 	$price           = number_format( $price, $num_decimals, $decimal_sep, $thousands_sep );
 
-	if ( get_option( 'woocommerce_price_trim_zeros' ) == 'yes' && $num_decimals > 0 )
+	if ( apply_filters( 'woocommerce_price_trim_zeros', true ) && $num_decimals > 0 )
 		$price = woocommerce_trim_zeros( $price );
 
 	$return = '<span class="amount">' . sprintf( get_woocommerce_price_format(), $currency_symbol, $price ) . '</span>';

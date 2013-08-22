@@ -5,7 +5,7 @@
 
 		<?php do_action( 'woocommerce_product_quick_edit_start' ); ?>
 
-		<?php if( get_option('woocommerce_enable_sku', true) !== 'no' ) : ?>
+		<?php if ( wc_product_sku_enabled() ) : ?>
 
 			<label>
 			    <span class="title"><?php _e( 'SKU', 'woocommerce' ); ?></span>
@@ -76,10 +76,10 @@
 		</label>
 		<br class="clear" />
 
-		<?php if ( get_option('woocommerce_enable_weight') == "yes" || get_option('woocommerce_enable_dimensions') == "yes" ) : ?>
+		<?php if ( wc_product_weight_enabled() || wc_product_dimensions_enabled() ) : ?>
 		<div class="dimension_fields">
 
-			<?php if ( get_option('woocommerce_enable_weight') == "yes" ) : ?>
+			<?php if ( wc_product_weight_enabled() ) : ?>
 				<label>
 				    <span class="title"><?php _e( 'Weight', 'woocommerce' ); ?></span>
 				    <span class="input-text-wrap">
@@ -89,7 +89,7 @@
 				<br class="clear" />
 			<?php endif; ?>
 
-			<?php if ( get_option('woocommerce_enable_dimensions') == "yes" ) : ?>
+			<?php if ( wc_product_dimensions_enabled() ) : ?>
 				<div class="inline-edit-group dimensions">
 					<div>
 					    <span class="title"><?php _e( 'L/W/H', 'woocommerce' ); ?></span>

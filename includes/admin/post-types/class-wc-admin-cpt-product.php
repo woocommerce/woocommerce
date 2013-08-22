@@ -193,7 +193,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 		$columns["name"] = __( 'Name', 'woocommerce' );
 
-		if ( get_option( 'woocommerce_enable_sku', true ) == 'yes' )
+		if ( wc_product_sku_enabled() )
 			$columns["sku"] = __( 'SKU', 'woocommerce' );
 
 		if ( get_option( 'woocommerce_manage_stock' ) == 'yes' )

@@ -162,7 +162,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 						<tr>
 							<td class="qty"><?php echo absint( $item['qty'] ); ?></td>
 							<td class="name">
-								<?php if ( get_option( 'woocommerce_enable_sku', true ) !== 'no' && $_product && $_product->get_sku() ) echo $_product->get_sku() . ' - '; ?><?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?>
+								<?php if ( wc_product_sku_enabled() && $_product && $_product->get_sku() ) echo $_product->get_sku() . ' - '; ?><?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?>
 								<?php if ( $item_meta_html ) : ?>
 									<a class="tips" href="#" data-tip="<?php echo esc_attr( $item_meta_html ); ?>">[?]</a>
 								<?php endif; ?>

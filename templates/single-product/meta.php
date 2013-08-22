@@ -15,7 +15,7 @@ global $post, $product;
 
 	<?php do_action( 'woocommerce_product_meta_start' ); ?>
 
-	<?php if ( get_option( 'woocommerce_enable_sku' ) == 'yes' && ( $product->get_sku() || $product->is_type( 'variable' ) ) ) : ?>
+	<?php if ( wc_product_sku_enabled() && ( $product->get_sku() || $product->is_type( 'variable' ) ) ) : ?>
 
 		<span itemprop="productID" class="sku_wrapper"><?php _e( 'SKU:', 'woocommerce' ); ?> <span class="sku"><?php echo ( $sku = $product->get_sku() ) ? $sku : __( 'n/a', 'woocommerce' ); ?></span>.</span>
 

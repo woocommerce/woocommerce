@@ -91,10 +91,10 @@ jQuery(function(){
 
 	// Availability inputs
     jQuery('select.availability').change(function(){
-		if (jQuery(this).val()=="specific") {
-			jQuery(this).closest('tr').next('tr').show();
-		} else {
+		if ( jQuery(this).val() == "all" ) {
 			jQuery(this).closest('tr').next('tr').hide();
+		} else {
+			jQuery(this).closest('tr').next('tr').show();
 		}
 	}).change();
 

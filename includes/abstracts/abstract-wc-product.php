@@ -1134,7 +1134,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function enable_dimensions_display() {
-		return get_option( 'woocommerce_enable_dimension_product_attributes' ) == 'yes' ? true : false;
+		return apply_filters( 'wc_product_enable_dimensions_display', true );
 	}
 
 	/**

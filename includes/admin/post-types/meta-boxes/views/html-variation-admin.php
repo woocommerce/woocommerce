@@ -48,7 +48,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 		<tbody>
 			<tr>
 				<td class="sku" colspan="2">
-					<?php if ( get_option( 'woocommerce_enable_sku', true ) !== 'no' ) : ?>
+					<?php if ( wc_product_sku_enabled() ) : ?>
 						<label><?php _e( 'SKU', 'woocommerce' ); ?>: <a class="tips" data-tip="<?php _e( 'Enter a SKU for this variation or leave blank to use the parent product SKU.', 'woocommerce' ); ?>" href="#">[?]</a></label>
 						<input type="text" size="5" name="variable_sku[<?php echo $loop; ?>]" value="<?php if ( isset( $_sku ) ) echo esc_attr( $_sku ); ?>" placeholder="<?php echo esc_attr( $parent_data['sku'] ); ?>" />
 					<?php else : ?>
@@ -89,9 +89,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 							</td>
 						</tr>
 
-						<?php if ( get_option( 'woocommerce_enable_weight', true ) !== 'no' || get_option( 'woocommerce_enable_dimensions', true ) !== 'no' ) : ?>
+						<?php if ( wc_product_weight_enabled() || wc_product_dimensions_enabled() ) : ?>
 							<tr>
-								<?php if ( get_option( 'woocommerce_enable_weight', true ) !== 'no' ) : ?>
+								<?php if ( wc_product_weight_enabled() ) : ?>
 									<td class="hide_if_variation_virtual">
 										<label><?php _e( 'Weight', 'woocommerce' ) . ' (' . esc_html( get_option( 'woocommerce_weight_unit' ) ) . '):'; ?> <a class="tips" data-tip="<?php _e( 'Enter a weight for this variation or leave blank to use the parent product weight.', 'woocommerce' ); ?>" href="#">[?]</a></label>
 										<input type="number" size="5" name="variable_weight[<?php echo $loop; ?>]" value="<?php if ( isset( $_weight ) ) echo esc_attr( $_weight ); ?>" placeholder="<?php echo esc_attr( $parent_data['weight'] ); ?>" step="any" min="0" />
@@ -99,7 +99,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 								<?php else : ?>
 									<td>&nbsp;</td>
 								<?php endif; ?>
-								<?php if ( get_option( 'woocommerce_enable_dimensions', true ) !== 'no' ) : ?>
+								<?php if ( wc_product_dimensions_enabled() ) : ?>
 									<td class="dimensions_field hide_if_variation_virtual">
 										<label for"product_length"><?php echo __( 'Dimensions (L&times;W&times;H)', 'woocommerce' ); ?></label>
 										<input id="product_length" class="input-text" size="6" type="number" step="any" min="0" name="variable_length[<?php echo $loop; ?>]" value="<?php if ( isset( $_length ) ) echo esc_attr( $_length ); ?>" placeholder="<?php echo esc_attr( $parent_data['length'] ); ?>" />

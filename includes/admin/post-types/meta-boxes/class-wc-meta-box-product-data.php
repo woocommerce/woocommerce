@@ -131,7 +131,7 @@ class WC_Meta_Box_Product_Data {
 				echo '<div class="options_group hide_if_grouped">';
 
 					// SKU
-					if( get_option('woocommerce_enable_sku', true) !== 'no' )
+					if( wc_product_sku_enabled() )
 						woocommerce_wp_text_input( array( 'id' => '_sku', 'label' => '<abbr title="'. __( 'Stock Keeping Unit', 'woocommerce' ) .'">' . __( 'SKU', 'woocommerce' ) . '</abbr>', 'desc_tip' => 'true', 'description' => __( 'SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased.', 'woocommerce' ) ) );
 					else
 						echo '<input type="hidden" name="_sku" value="' . esc_attr( get_post_meta( $thepostid, '_sku', true ) ) . '" />';
@@ -313,7 +313,7 @@ class WC_Meta_Box_Product_Data {
 				echo '<div class="options_group">';
 
 					// Weight
-					if( get_option('woocommerce_enable_weight', true) !== 'no' ) :
+					if ( wc_product_weight_enabled() ) :
 						woocommerce_wp_text_input( array( 'id' => '_weight', 'label' => __( 'Weight', 'woocommerce' ) . ' ('.get_option('woocommerce_weight_unit').')', 'placeholder' => '0.00', 'description' => __( 'Weight in decimal form', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
 						'step' 	=> 'any',
 						'min'	=> '0'
@@ -323,7 +323,7 @@ class WC_Meta_Box_Product_Data {
 					endif;
 
 					// Size fields
-					if( get_option( 'woocommerce_enable_dimensions', true ) !== 'no' ) :
+					if ( wc_product_dimensions_enabled() ) :
 						?><p class="form-field dimensions_field">
 							<label for="product_length"><?php echo __( 'Dimensions', 'woocommerce' ) . ' (' . get_option( 'woocommerce_dimension_unit' ) . ')'; ?></label>
 							<span class="wrap">

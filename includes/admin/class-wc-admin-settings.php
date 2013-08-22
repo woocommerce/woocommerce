@@ -29,12 +29,11 @@ class WC_Admin_Settings {
 		include_once( 'settings/class-wc-settings-page.php' );
 
 		$settings[] = include( 'settings/class-wc-settings-general.php' );
-		$settings[] = include( 'settings/class-wc-settings-pages.php' );
-		$settings[] = include( 'settings/class-wc-settings-catalog.php' );
-		$settings[] = include( 'settings/class-wc-settings-inventory.php' );
-		$settings[] = include( 'settings/class-wc-settings-tax.php' );
+		$settings[] = include( 'settings/class-wc-settings-products.php' );
+		$settings[] = include( 'settings/class-wc-settings-checkout.php' );
+		$settings[] = include( 'settings/class-wc-settings-accounts.php' );
 		$settings[] = include( 'settings/class-wc-settings-shipping.php' );
-		$settings[] = include( 'settings/class-wc-settings-gateways.php' );
+		$settings[] = include( 'settings/class-wc-settings-tax.php' );
 		$settings[] = include( 'settings/class-wc-settings-emails.php' );
 		$settings[] = include( 'settings/class-wc-settings-integrations.php' );
 
@@ -455,13 +454,11 @@ class WC_Admin_Settings {
 
 	            	?><tr valign="top">
 						<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?> <?php echo $tip; ?></th>
-	                    <td class="forminp">
+	                    <td class="forminp image_width_settings">
 
-	                    	<?php _e( 'Width', 'woocommerce' ); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>[width]" id="<?php echo esc_attr( $value['id'] ); ?>-width" type="text" size="3" value="<?php echo $width; ?>" />
+	                    	<input name="<?php echo esc_attr( $value['id'] ); ?>[width]" id="<?php echo esc_attr( $value['id'] ); ?>-width" type="text" size="3" value="<?php echo $width; ?>" /> &times; <input name="<?php echo esc_attr( $value['id'] ); ?>[height]" id="<?php echo esc_attr( $value['id'] ); ?>-height" type="text" size="3" value="<?php echo $height; ?>" />px
 
-	                    	<?php _e( 'Height', 'woocommerce' ); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>[height]" id="<?php echo esc_attr( $value['id'] ); ?>-height" type="text" size="3" value="<?php echo $height; ?>" />
-
-	                    	<label><?php _e( 'Hard Crop', 'woocommerce' ); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>[crop]" id="<?php echo esc_attr( $value['id'] ); ?>-crop" type="checkbox" <?php echo $crop; ?> /></label>
+	                    	<label><input name="<?php echo esc_attr( $value['id'] ); ?>[crop]" id="<?php echo esc_attr( $value['id'] ); ?>-crop" type="checkbox" <?php echo $crop; ?> /> <?php _e( 'Hard Crop?', 'woocommerce' ); ?></label>
 
 	                    	</td>
 	                </tr><?php

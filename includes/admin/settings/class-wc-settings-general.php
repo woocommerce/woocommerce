@@ -58,18 +58,6 @@ class WC_Settings_General extends WC_Settings_Page {
 			),
 
 			array(
-				'title' 	=> __( 'Currency', 'woocommerce' ),
-				'desc' 		=> __( "This controls what currency prices are listed at in the catalog and which currency gateways will take payments in.", 'woocommerce' ),
-				'id' 		=> 'woocommerce_currency',
-				'css' 		=> 'min-width:350px;',
-				'default'	=> 'GBP',
-				'type' 		=> 'select',
-				'class'		=> 'chosen_select',
-				'desc_tip'	=>  true,
-				'options'   => $currency_code_options
-			),
-
-			array(
 				'title' => __( 'Selling Location(s)', 'woocommerce' ),
 				'desc' 		=> __( 'This option lets you limit which countries you are willing to sell to.', 'woocommerce' ),
 				'id' 		=> 'woocommerce_allowed_countries',
@@ -113,92 +101,76 @@ class WC_Settings_General extends WC_Settings_Page {
 
 			array( 'type' => 'sectionend', 'id' => 'general_options'),
 
-			array(	'title' => __( 'Cart, Checkout and Accounts', 'woocommerce' ), 'type' => 'title', 'id' => 'checkout_account_options' ),
+			array(	'title' => __( 'Currency Options', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following options affect how prices are displayed on the frontend.', 'woocommerce' ), 'id' => 'pricing_options' ),
 
 			array(
-				'title' => __( 'Coupons', 'woocommerce' ),
-				'desc'          => __( 'Enable the use of coupons', 'woocommerce' ),
-				'id'            => 'woocommerce_enable_coupons',
-				'default'       => 'yes',
-				'type'          => 'checkbox',
-				'desc_tip'		=>  __( 'Coupons can be applied from the cart and checkout pages.', 'woocommerce' ),
-				'autoload'      => false
+				'title' 	=> __( 'Currency', 'woocommerce' ),
+				'desc' 		=> __( "This controls what currency prices are listed at in the catalog and which currency gateways will take payments in.", 'woocommerce' ),
+				'id' 		=> 'woocommerce_currency',
+				'css' 		=> 'min-width:350px;',
+				'default'	=> 'GBP',
+				'type' 		=> 'select',
+				'class'		=> 'chosen_select',
+				'desc_tip'	=>  true,
+				'options'   => $currency_code_options
 			),
 
 			array(
-				'title' => __( 'Checkout', 'woocommerce' ),
-				'desc' 		=> __( 'Enable guest checkout', 'woocommerce' ),
-				'desc_tip'	=>  __( 'Allows customers to checkout without creating an account.', 'woocommerce' ),
-				'id' 		=> 'woocommerce_enable_guest_checkout',
-				'default'	=> 'yes',
-				'type' 		=> 'checkbox',
-				'checkboxgroup'	=> 'start',
-				'autoload'  => false
+				'title' => __( 'Currency Position', 'woocommerce' ),
+				'desc' 		=> __( 'This controls the position of the currency symbol.', 'woocommerce' ),
+				'id' 		=> 'woocommerce_currency_pos',
+				'css' 		=> 'min-width:350px;',
+				'class'		=> 'chosen_select',
+				'default'	=> 'left',
+				'type' 		=> 'select',
+				'options' => array(
+					'left'        => __( 'Left', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . '99.99)',
+					'right'       => __( 'Right', 'woocommerce' ) . ' (99.99' . get_woocommerce_currency_symbol() . ')',
+					'left_space'  => __( 'Left with space', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ' 99.99)',
+					'right_space' => __( 'Right with space', 'woocommerce' ) . ' (99.99 ' . get_woocommerce_currency_symbol() . ')'
+				),
+				'desc_tip'	=>  true,
 			),
 
 			array(
-				'desc' 		=> __( 'Force secure checkout', 'woocommerce' ),
-				'id' 		=> 'woocommerce_force_ssl_checkout',
-				'default'	=> 'no',
-				'type' 		=> 'checkbox',
-				'checkboxgroup'		=> '',
-				'show_if_checked' => 'option',
-				'desc_tip'	=>  __( 'Force SSL (HTTPS) on the checkout pages (an SSL Certificate is required).', 'woocommerce' ),
+				'title' => __( 'Thousand Separator', 'woocommerce' ),
+				'desc' 		=> __( 'This sets the thousand separator of displayed prices.', 'woocommerce' ),
+				'id' 		=> 'woocommerce_price_thousand_sep',
+				'css' 		=> 'width:50px;',
+				'default'	=> ',',
+				'type' 		=> 'text',
+				'desc_tip'	=>  true,
 			),
 
 			array(
-				'desc' 		=> __( 'Un-force HTTPS when leaving the checkout', 'woocommerce' ),
-				'id' 		=> 'woocommerce_unforce_ssl_checkout',
-				'default'	=> 'no',
-				'type' 		=> 'checkbox',
-				'checkboxgroup'		=> 'end',
-				'show_if_checked' => 'yes',
+				'title' => __( 'Decimal Separator', 'woocommerce' ),
+				'desc' 		=> __( 'This sets the decimal separator of displayed prices.', 'woocommerce' ),
+				'id' 		=> 'woocommerce_price_decimal_sep',
+				'css' 		=> 'width:50px;',
+				'default'	=> '.',
+				'type' 		=> 'text',
+				'desc_tip'	=>  true,
 			),
 
 			array(
-				'title' => __( 'Registration', 'woocommerce' ),
-				'desc' 		=> __( 'Enable registration on the "Checkout" page', 'woocommerce' ),
-				'id' 		=> 'woocommerce_enable_signup_and_login_from_checkout',
-				'default'	=> 'yes',
-				'type' 		=> 'checkbox',
-				'checkboxgroup'		=> 'start',
-				'autoload'      => false
+				'title' => __( 'Number of Decimals', 'woocommerce' ),
+				'desc' 		=> __( 'This sets the number of decimal points shown in displayed prices.', 'woocommerce' ),
+				'id' 		=> 'woocommerce_price_num_decimals',
+				'css' 		=> 'width:50px;',
+				'default'	=> '2',
+				'desc_tip'	=>  true,
+				'type' 		=> 'number',
+				'custom_attributes' => array(
+					'min' 	=> 0,
+					'step' 	=> 1
+				)
 			),
 
-			array(
-				'desc' 		=> __( 'Enable registration on the "My Account" page', 'woocommerce' ),
-				'id' 		=> 'woocommerce_enable_myaccount_registration',
-				'default'	=> 'no',
-				'type' 		=> 'checkbox',
-				'checkboxgroup'		=> '',
-				'autoload'      => false
-			),
-
-			array(
-				'desc' 		=> __( 'Automatically generate username from customer email', 'woocommerce' ),
-				'id' 		=> 'woocommerce_registration_generate_username',
-				'default'	=> 'yes',
-				'type' 		=> 'checkbox',
-				'checkboxgroup'		=> '',
-				'autoload'      => false
-			),
-
-			array(
-				'desc' 		=> __( 'Automatically generate customer password', 'woocommerce' ),
-				'id' 		=> 'woocommerce_registration_generate_password',
-				'default'	=> 'no',
-				'type' 		=> 'checkbox',
-				'checkboxgroup'		=> 'end',
-				'autoload'      => false
-			),
-
-			array( 'type' => 'sectionend', 'id' => 'checkout_account_options'),
+			array( 'type' => 'sectionend', 'id' => 'pricing_options' ),
 
 			array(	'title' => __( 'Styles and Scripts', 'woocommerce' ), 'type' => 'title', 'id' => 'script_styling_options' ),
 
-			array(
-				'type' 		=> 'frontend_styles'
-			),
+			array( 'type' 		=> 'frontend_styles' ),
 
 			array(
 				'title' => __( 'Scripts', 'woocommerce' ),
@@ -220,49 +192,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'autoload'  => false
 			),
 
-			array( 'type' => 'sectionend', 'id' => 'script_styling_options'),
-
-			array(	'title' => __( 'Downloadable Products', 'woocommerce' ), 'type' => 'title', 'id' => 'digital_download_options' ),
-
-			array(
-				'title' => __( 'File Download Method', 'woocommerce' ),
-				'desc' 		=> __( 'Forcing downloads will keep URLs hidden, but some servers may serve large files unreliably. If supported, <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> can be used to serve downloads instead (server requires <code>mod_xsendfile</code>).', 'woocommerce' ),
-				'id' 		=> 'woocommerce_file_download_method',
-				'type' 		=> 'select',
-				'class'		=> 'chosen_select',
-				'css' 		=> 'min-width:300px;',
-				'default'	=> 'force',
-				'desc_tip'	=>  true,
-				'options' => array(
-					'force'  	=> __( 'Force Downloads', 'woocommerce' ),
-					'xsendfile' => __( 'X-Accel-Redirect/X-Sendfile', 'woocommerce' ),
-					'redirect'  => __( 'Redirect only', 'woocommerce' ),
-				),
-				'autoload'      => false
-			),
-
-			array(
-				'title' => __( 'Access Restriction', 'woocommerce' ),
-				'desc' 		=> __( 'Downloads require login', 'woocommerce' ),
-				'id' 		=> 'woocommerce_downloads_require_login',
-				'type' 		=> 'checkbox',
-				'default'	=> 'no',
-				'desc_tip'	=> __( 'This setting does not apply to guest purchases.', 'woocommerce' ),
-				'checkboxgroup'		=> 'start',
-				'autoload'      => false
-			),
-
-			array(
-				'desc' 		=> __( 'Grant access to downloadable products after payment', 'woocommerce' ),
-				'id' 		=> 'woocommerce_downloads_grant_access_after_payment',
-				'type' 		=> 'checkbox',
-				'default'	=> 'yes',
-				'desc_tip'	=> __( 'Enable this option to grant access to downloads when orders are "processing", rather than "completed".', 'woocommerce' ),
-				'checkboxgroup'		=> 'end',
-				'autoload'      => false
-			),
-
-			array( 'type' => 'sectionend', 'id' => 'digital_download_options' ),
+			array( 'type' => 'sectionend', 'id' => 'script_styling_options' ),
 
 		)); // End general settings
 	}
@@ -276,7 +206,7 @@ class WC_Settings_General extends WC_Settings_Page {
 	public function frontend_styles_setting() {
 		?><tr valign="top" class="woocommerce_frontend_css_colors">
 			<th scope="row" class="titledesc">
-				<?php _e( 'Styles', 'woocommerce' ); ?>
+				<?php _e( 'Frontend Styles', 'woocommerce' ); ?>
 			</th>
 		    <td class="forminp"><?php
 
