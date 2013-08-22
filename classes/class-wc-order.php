@@ -1089,16 +1089,22 @@ class WC_Order {
 	/**
 	 * Generates a URL so that a customer can checkout/pay for their (unpaid - pending) order via a link.
 	 *
-	 * @access public
 	 * @return string
 	 */
-	public function get_checkout_payment_url() {
+	public function get_checkout_payment_url( $on_checkout = false ) {
 
-		$payment_page = get_permalink(woocommerce_get_page_id('pay'));
+		$pay_url = get_permalink( woocommerce_get_page_id( 'pay' ) );
 
-		if (get_option('woocommerce_force_ssl_checkout')=='yes' || is_ssl()) $payment_page = str_replace('http:', 'https:', $payment_page);
+		if ( get_option( 'woocommerce_force_ssl_checkout' ) == 'yes' || is_ssl() )
+			$pay_url = str_replace( 'http:', 'https:', $pay_url );
 
-		return apply_filters('woocommerce_get_checkout_payment_url', add_query_arg('pay_for_order', 'true', add_query_arg('order', $this->order_key, add_query_arg('order_id', $this->id, $payment_page))));
+		if ( $on_checkout ) {
+			$pay_url = add_query_arg( 'order', $this->id, add_query_arg('key', $this->order_key, $pay_url ) );
+		} else {
+			$pay_url = add_query_arg( 'pay_for_order', 'true', add_query_arg('order', $this->order_key, add_query_arg( 'order_id', $this->id, $pay_url ) ) );
+		}
+
+		return apply_filters( 'woocommerce_get_checkout_payment_url', $pay_url, $this );
 	}
 
 
