@@ -93,7 +93,7 @@ class WC_Meta_Box_Order_Actions {
 
 				do_action( 'woocommerce_before_resend_order_emails', $order );
 
-				$mailer = $woocommerce->mailer();
+				$mailer = WC()->mailer();
 
 				$email_to_send = str_replace( 'send_email_', '', $action );
 
