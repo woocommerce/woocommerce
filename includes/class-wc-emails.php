@@ -249,10 +249,11 @@ class WC_Emails {
 			$meta[ __( 'Note', 'woocommerce' ) ] = wptexturize( $order->customer_note );
 
 		if ( $show_fields )
-			foreach ( $show_fields as $field ) {
-				$value = get_post_meta( $order->id, $field, true );
-				if ( $value )
-					$meta[ ucwords( esc_attr( $field ) ) ] = wptexturize( $value );
+			foreach ( $show_fields as $key => $field ) {
+				if ( is_numeric( $key ) )
+					$key = $field;
+
+				$meta[ wptexturize( $key ) ] = wptexturize( get_post_meta( $order->id, $field, true ) );
 			}
 
 		if ( sizeof( $meta ) > 0 ) {
