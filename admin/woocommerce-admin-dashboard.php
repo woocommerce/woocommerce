@@ -15,13 +15,12 @@ if ( current_user_can( 'view_woocommerce_reports' ) || current_user_can( 'manage
 	add_action( 'wp_dashboard_setup', 'woocommerce_init_dashboard_widgets' );
 
 /**
- * Init the dashboard widgets.
+ * Init the dashboard widget variables.
  *
  * @access public
  * @return void
  */
-function woocommerce_init_dashboard_widgets() {
-
+function woocommerce_init_dashboard_widget_vars() {
 	global $current_month_offset, $the_month_num, $the_year;
 
 	$current_month_offset = 0;
@@ -30,6 +29,18 @@ function woocommerce_init_dashboard_widgets() {
 
 	$the_month_num 	= date('n', strtotime('NOW '.($current_month_offset).' MONTH'));
 	$the_year 		= date('Y', strtotime('NOW '.($current_month_offset).' MONTH'));
+}
+
+/**
+ * Init the dashboard widgets.
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_init_dashboard_widgets() {
+	global $current_month_offset, $the_month_num, $the_year;
+
+	woocommerce_init_dashboard_widget_vars();
 
 	$sales_heading = '';
 
@@ -325,10 +336,52 @@ function orders_this_month( $where = '' ) {
 function woocommerce_dashboard_sales() {
 
 	add_action( 'admin_footer', 'woocommerce_dashboard_sales_js' );
+	wp_enqueue_script( 'heartbeat' );
+    add_action( 'admin_print_footer_scripts', 'woocommerce_dashboard_sales_heartbeat_js', 20 );
 
 	?><div id="placeholder" style="width:100%; height:300px; position:relative;"></div><?php
 }
 
+/**
+ * JS to handle updates for the sales widget via Heartbeat API
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_dashboard_sales_heartbeat_js() {
+    // Only proceed if on the dashboard
+ 	$screen = get_current_screen();
+
+	if ( !$screen || $screen->id !== 'dashboard' ) return;
+	?>
+    <script>
+	(function($) {
+
+	    // Hook into the heartbeat-send
+	    $(document).on('heartbeat-send', function(e, data) {
+	        data['woocommerce_heartbeat'] = {
+	        	action: 'dashboard_sales',
+	        	current_month_offset: params.current_month_offset
+	        }
+	    });
+
+	    // Listen for the custom event "heartbeat-tick" on $(document).
+	    $(document).on('heartbeat-tick', function(e, data) {
+
+	        if (typeof data['woocommerce-sales-data'] === undefined || JSON.stringify(params) == JSON.stringify(data['woocommerce-sales-data'])) {
+	            return;
+	        }
+
+	        params = data['woocommerce-sales-data'];
+
+	        wc_dashboard_sales.plot();
+
+	    });
+
+	})(jQuery);
+    </script>
+<?php
+}
 
 /**
  * Sales widget javascript
@@ -359,6 +412,12 @@ function woocommerce_dashboard_sales_js() {
 
 }
 
+/**
+ * Gets the sales data for the sales widget
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_dashboard_sales_data() {
 	global $wp_locale, $current_month_offset, $the_month_num, $the_year;
 
@@ -438,12 +497,13 @@ function woocommerce_dashboard_sales_data() {
 
 	/* Script variables */
 	$params = array(
-		'currency_symbol' 	=> get_woocommerce_currency_symbol(),
-		'number_of_sales' 	=> absint( array_sum( $order_counts ) ),
-		'sales_amount'    	=> woocommerce_price( array_sum( $order_amounts ) ),
-		'sold' 				=> __( 'Sold', 'woocommerce' ),
-		'earned'    		=> __( 'Earned', 'woocommerce' ),
-		'month_names'     	=> array_values( $wp_locale->month_abbrev ),
+		'currency_symbol' 		=> get_woocommerce_currency_symbol(),
+		'number_of_sales' 		=> absint( array_sum( $order_counts ) ),
+		'sales_amount'    		=> woocommerce_price( array_sum( $order_amounts ) ),
+		'sold' 					=> __( 'Sold', 'woocommerce' ),
+		'earned'    			=> __( 'Earned', 'woocommerce' ),
+		'month_names'     	    => array_values( $wp_locale->month_abbrev ),
+		'current_month_offset'  => $current_month_offset
 	);
 
 	$order_counts_array = array();
