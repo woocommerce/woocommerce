@@ -38,7 +38,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 		return apply_filters( 'woocommerce_' . $this->id . '_settings', array(
 
-			array( 'title' => __( 'Account Pages', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following pages need to be selected so that WooCommerce knows where they are located.', 'woocommerce' ), 'id' => 'account_page_options' ),
+			array( 'title' => __( 'Account Pages', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'These pages need to be set so that WooCommerce knows where to send users to access account related functionality.', 'woocommerce' ), 'id' => 'account_page_options' ),
 
 			array(
 				'title' => __( 'My Account Page', 'woocommerce' ),
@@ -64,7 +64,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array( 'type' => 'sectionend', 'id' => 'account_page_options' ),
 
-			array( 'title' => __( 'My Account Endpoints', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following endpoints are used on the frontend for certain pages.', 'woocommerce' ), 'id' => 'account_endpoint_options' ),
+			array( 'title' => __( 'My Account Endpoints', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'Endpoints are appended to your page URLs to handle specific actions on the accounts pages. They should be unique.', 'woocommerce' ), 'id' => 'account_endpoint_options' ),
 
 			array(
 				'title' => __( 'View Order', 'woocommerce' ),

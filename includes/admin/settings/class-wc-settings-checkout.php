@@ -62,67 +62,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	public function get_settings() {
 		return apply_filters( 'woocommerce_payment_gateways_settings', array(
 
-			array(	'title' => __( 'Checkout Pages', 'woocommerce' ), 'type' => 'title', 'id' => 'checkout_page_options' ),
-
-			array(
-				'title' => __( 'Cart Page', 'woocommerce' ),
-				'desc' 		=> __( 'Page contents: [woocommerce_cart]', 'woocommerce' ),
-				'id' 		=> 'woocommerce_cart_page_id',
-				'type' 		=> 'single_select_page',
-				'default'	=> '',
-				'class'		=> 'chosen_select_nostd',
-				'css' 		=> 'min-width:300px;',
-				'desc_tip'	=> true,
-			),
-
-			array(
-				'title' => __( 'Checkout Page', 'woocommerce' ),
-				'desc' 		=> __( 'Page contents: [woocommerce_checkout]', 'woocommerce' ),
-				'id' 		=> 'woocommerce_checkout_page_id',
-				'type' 		=> 'single_select_page',
-				'default'	=> '',
-				'class'		=> 'chosen_select_nostd',
-				'css' 		=> 'min-width:300px;',
-				'desc_tip'	=> true,
-			),
-
-			array(
-				'title' => __( 'Terms and Conditions', 'woocommerce' ),
-				'desc' 		=> __( 'If you define a "Terms" page the customer will be asked if they accept them when checking out.', 'woocommerce' ),
-				'id' 		=> 'woocommerce_terms_page_id',
-				'default'	=> '',
-				'class'		=> 'chosen_select_nostd',
-				'css' 		=> 'min-width:300px;',
-				'type' 		=> 'single_select_page',
-				'desc_tip'	=> true,
-				'autoload'  => false
-			),
-
-			array( 'type' => 'sectionend', 'id' => 'checkout_page_options' ),
-
-			array( 'title' => __( 'Checkout Endpoints', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following endpoints are used on the frontend for certain pages.', 'woocommerce' ), 'id' => 'account_endpoint_options' ),
-
-			array(
-				'title' => __( 'Pay', 'woocommerce' ),
-				'desc' 		=> __( 'Endpoint for the Checkout &rarr; Pay page', 'woocommerce' ),
-				'id' 		=> 'woocommerce_checkout_pay_endpoint',
-				'type' 		=> 'text',
-				'default'	=> 'order-pay',
-				'desc_tip'	=> true,
-			),
-
-			array(
-				'title' => __( 'Order Received', 'woocommerce' ),
-				'desc' 		=> __( 'Endpoint for the Checkout &rarr; Pay page', 'woocommerce' ),
-				'id' 		=> 'woocommerce_checkout_order_received_endpoint',
-				'type' 		=> 'text',
-				'default'	=> 'order-received',
-				'desc_tip'	=> true,
-			),
-
-			array( 'type' => 'sectionend', 'id' => 'checkout_endpoint_options' ),
-
-			array(	'title' => __( 'Checkout Process', 'woocommerce' ), 'type' => 'title', 'id' => 'checkout_account_options' ),
+			array(	'title' => __( 'Checkout Process', 'woocommerce' ), 'type' => 'title', 'id' => 'checkout_process_options' ),
 
 			array(
 				'title' => __( 'Coupons', 'woocommerce' ),
@@ -164,11 +104,69 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 				'show_if_checked' => 'yes',
 			),
 
+			array( 'type' => 'sectionend', 'id' => 'checkout_process_options'),
 
+			array(	'title' => __( 'Checkout Pages', 'woocommerce' ), 'desc' => __( 'These pages need to be set so that WooCommerce knows where to send users to checkout.', 'woocommerce' ), 'type' => 'title', 'id' => 'checkout_page_options' ),
 
-			array( 'type' => 'sectionend', 'id' => 'checkout_account_options'),
+			array(
+				'title' => __( 'Cart Page', 'woocommerce' ),
+				'desc' 		=> __( 'Page contents: [woocommerce_cart]', 'woocommerce' ),
+				'id' 		=> 'woocommerce_cart_page_id',
+				'type' 		=> 'single_select_page',
+				'default'	=> '',
+				'class'		=> 'chosen_select_nostd',
+				'css' 		=> 'min-width:300px;',
+				'desc_tip'	=> true,
+			),
 
-			array( 'type' => 'title', 'id' => 'payment_gateways_options' ),
+			array(
+				'title' => __( 'Checkout Page', 'woocommerce' ),
+				'desc' 		=> __( 'Page contents: [woocommerce_checkout]', 'woocommerce' ),
+				'id' 		=> 'woocommerce_checkout_page_id',
+				'type' 		=> 'single_select_page',
+				'default'	=> '',
+				'class'		=> 'chosen_select_nostd',
+				'css' 		=> 'min-width:300px;',
+				'desc_tip'	=> true,
+			),
+
+			array(
+				'title' => __( 'Terms and Conditions', 'woocommerce' ),
+				'desc' 		=> __( 'If you define a "Terms" page the customer will be asked if they accept them when checking out.', 'woocommerce' ),
+				'id' 		=> 'woocommerce_terms_page_id',
+				'default'	=> '',
+				'class'		=> 'chosen_select_nostd',
+				'css' 		=> 'min-width:300px;',
+				'type' 		=> 'single_select_page',
+				'desc_tip'	=> true,
+				'autoload'  => false
+			),
+
+			array( 'type' => 'sectionend', 'id' => 'checkout_page_options' ),
+
+			array( 'title' => __( 'Checkout Endpoints', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'Endpoints are appended to your page URLs to handle specific actions during the checkout process. They should be unique.', 'woocommerce' ), 'id' => 'account_endpoint_options' ),
+
+			array(
+				'title' => __( 'Pay', 'woocommerce' ),
+				'desc' 		=> __( 'Endpoint for the Checkout &rarr; Pay page', 'woocommerce' ),
+				'id' 		=> 'woocommerce_checkout_pay_endpoint',
+				'type' 		=> 'text',
+				'default'	=> 'order-pay',
+				'desc_tip'	=> true,
+			),
+
+			array(
+				'title' => __( 'Order Received', 'woocommerce' ),
+				'desc' 		=> __( 'Endpoint for the Checkout &rarr; Pay page', 'woocommerce' ),
+				'id' 		=> 'woocommerce_checkout_order_received_endpoint',
+				'type' 		=> 'text',
+				'default'	=> 'order-received',
+				'desc_tip'	=> true,
+			),
+
+			array( 'type' => 'sectionend', 'id' => 'checkout_endpoint_options' ),
+
+			array( 'title' => __( 'Payment Gateways', 'woocommerce' ),  'desc' => __( 'Installed gateways are listed below. Drag and drop gateways to control their display order on the frontend.', 'woocommerce' ), 'type' => 'title', 'id' => 'payment_gateways_options' ),
 
 			array( 'type' => 'payment_gateways' ),
 
@@ -209,9 +207,8 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	public function payment_gateways_setting() {
 		?>
 		<tr valign="top">
-			<th scope="row" class="titledesc"><?php _e( 'Payment Gateways', 'woocommerce' ) ?></th>
+			<th scope="row" class="titledesc"><?php _e( 'Gateway Display', 'woocommerce' ) ?></th>
 		    <td class="forminp">
-		    	<p class="description" style="margin-top: 0;"><?php _e( 'Drag and drop payment gateways to control their display order on the checkout.', 'woocommerce' ); ?></p>
 				<table class="wc_gateways widefat" cellspacing="0">
 					<thead>
 						<tr>
