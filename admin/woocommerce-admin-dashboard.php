@@ -338,13 +338,29 @@ function woocommerce_dashboard_sales() {
  */
 function woocommerce_dashboard_sales_js() {
 
-	global $woocommerce, $wp_locale;
+	global $woocommerce;
 
 	$screen = get_current_screen();
 
 	if (!$screen || $screen->id!=='dashboard') return;
 
-	global $current_month_offset, $the_month_num, $the_year;
+	$params = woocommerce_dashboard_sales_data();
+
+	// Queue scripts
+	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
+
+	wp_register_script( 'woocommerce_dashboard_sales', $woocommerce->plugin_url() . '/assets/js/admin/dashboard_sales' . $suffix . '.js', array( 'jquery', 'flot', 'flot-resize' ), '1.0' );
+	wp_register_script( 'flot', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot'.$suffix.'.js', 'jquery', '1.0' );
+	wp_register_script( 'flot-resize', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.resize'.$suffix.'.js', 'jquery', '1.0' );
+
+	wp_localize_script( 'woocommerce_dashboard_sales', 'params', $params );
+
+	wp_print_scripts('woocommerce_dashboard_sales');
+
+}
+
+function woocommerce_dashboard_sales_data() {
+	global $wp_locale, $current_month_offset, $the_month_num, $the_year;
 
 	// Get orders to display in widget
 	add_filter( 'posts_where', 'orders_this_month' );
@@ -444,14 +460,5 @@ function woocommerce_dashboard_sales_js() {
 
 	$params['order_data'] = json_encode($order_data);
 
-	// Queue scripts
-	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
-
-	wp_register_script( 'woocommerce_dashboard_sales', $woocommerce->plugin_url() . '/assets/js/admin/dashboard_sales' . $suffix . '.js', array( 'jquery', 'flot', 'flot-resize' ), '1.0' );
-	wp_register_script( 'flot', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot'.$suffix.'.js', 'jquery', '1.0' );
-	wp_register_script( 'flot-resize', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.resize'.$suffix.'.js', 'jquery', '1.0' );
-
-	wp_localize_script( 'woocommerce_dashboard_sales', 'params', $params );
-
-	wp_print_scripts('woocommerce_dashboard_sales');
+	return $params;
 }
