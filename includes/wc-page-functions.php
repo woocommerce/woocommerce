@@ -79,7 +79,7 @@ function woocommerce_customer_edit_account_url() {
 }
 
 /**
- * woocommerce_nav_menu_items function.
+ * Hide menu items conditionally
  *
  * @param array $items
  * @param mixed $args
@@ -93,9 +93,8 @@ function woocommerce_nav_menu_items( $items, $args ) {
 		$hide_pages   = apply_filters( 'woocommerce_logged_out_hidden_page_ids', $hide_pages );
 
 		foreach ( $items as $key => $item ) {
-			if ( ! empty( $item->object_id ) && ! empty( $item->object ) && in_array( $item->object_id, $hide_pages ) && $item->object == 'page' ) {
+			if ( strstr( $item->url, 'customer-logout' ) )
 				unset( $items[ $key ] );
-			}
 		}
 	}
     return $items;

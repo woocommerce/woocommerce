@@ -223,12 +223,6 @@ class WC_Install {
 				'name'    => _x( 'my-account', 'page_slug', 'woocommerce' ),
 				'title'   => __( 'My Account', 'woocommerce' ),
 				'content' => '[woocommerce_my_account]'
-			),
-			'logout' => array(
-				'name'    => _x( 'logout', 'page_slug', 'woocommerce' ),
-				'title'   => __( 'Logout', 'woocommerce' ),
-				'content' => '',
-				'parent'  => 'myaccount'
 			)
 		) );
 

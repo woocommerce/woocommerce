@@ -28,7 +28,8 @@ class WC_Query {
 		'view-order',
 		'edit-account',
 		'edit-address',
-		'lost-password'
+		'lost-password',
+		'customer-logout'
 		);
 
 	/** @public array Unfiltered product ids (before layered nav etc) */

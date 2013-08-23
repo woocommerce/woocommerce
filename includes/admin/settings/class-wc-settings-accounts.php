@@ -51,17 +51,6 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'desc_tip'	=> true,
 			),
 
-			array(
-				'title' => __( 'Logout Page', 'woocommerce' ),
-				'desc' 		=> __( 'Parent: "My Account"', 'woocommerce' ),
-				'id' 		=> 'woocommerce_logout_page_id',
-				'type' 		=> 'single_select_page',
-				'default'	=> '',
-				'class'		=> 'chosen_select_nostd',
-				'css' 		=> 'min-width:300px;',
-				'desc_tip'	=> true,
-			),
-
 			array( 'type' => 'sectionend', 'id' => 'account_page_options' ),
 
 			array( 'title' => __( 'My Account Endpoints', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'Endpoints are appended to your page URLs to handle specific actions on the accounts pages. They should be unique.', 'woocommerce' ), 'id' => 'account_endpoint_options' ),
@@ -99,6 +88,15 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'id' 		=> 'woocommerce_myaccount_lost_password_endpoint',
 				'type' 		=> 'text',
 				'default'	=> 'lost-password',
+				'desc_tip'	=> true,
+			),
+
+			array(
+				'title' => __( 'Logout', 'woocommerce' ),
+				'desc' 		=> __( 'Endpoint for the triggering logout. You can add this to your menus via a custom link: yoursite.com/?customer-logout=true', 'woocommerce' ),
+				'id' 		=> 'woocommerce_logout_endpoint',
+				'type' 		=> 'text',
+				'default'	=> 'customer-logout',
 				'desc_tip'	=> true,
 			),
 

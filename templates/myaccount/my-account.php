@@ -16,8 +16,13 @@ wc_print_messages(); ?>
 <p class="myaccount_user">
 	<?php
 	printf(
-		__( 'Hello, <strong>%s</strong>. From your account dashboard you can view your recent orders, manage your shipping and billing addresses and <a href="%s">edit your password and account details</a>.', 'woocommerce' ),
+		__( 'Hello <strong>%s</strong> (not %s? <a href="%s">Sign out</a>).', 'woocommerce' ) . ' ',
 		$current_user->display_name,
+		$current_user->display_name,
+		wp_logout_url()
+	);
+
+	printf( __( 'From your account dashboard you can view your recent orders, manage your shipping and billing addresses and <a href="%s">edit your password and account details</a>.', 'woocommerce' ),
 		woocommerce_customer_edit_account_url()
 	);
 	?>
