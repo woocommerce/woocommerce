@@ -759,7 +759,11 @@ final class WooCommerce {
 			$scheme = 'http';
 		}
 
-		return esc_url_raw( trailingslashit( home_url( '/wc-api/' . $request, $scheme ) ) );
+		if ( get_option('permalink_structure') ) {
+			return esc_url_raw( trailingslashit( home_url( '/wc-api/' . $request, $scheme ) ) );
+		} else {
+			return esc_url_raw( add_query_arg( 'wc-api', $request, trailingslashit( home_url( '', $scheme ) ) ) );
+		}
 	}
 
 
