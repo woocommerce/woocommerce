@@ -386,10 +386,10 @@ if ( ! function_exists( 'woocommerce_page_title' ) ) {
 	/**
 	 * woocommerce_page_title function.
 	 *
-	 * @access public
-	 * @return void
+	 * @param  boolean $echo
+	 * @return string
 	 */
-	function woocommerce_page_title() {
+	function woocommerce_page_title( $echo = true ) {
 
 		if ( is_search() ) {
 			$page_title = sprintf( __( 'Search Results: &ldquo;%s&rdquo;', 'woocommerce' ), get_search_query() );
@@ -408,7 +408,12 @@ if ( ! function_exists( 'woocommerce_page_title' ) ) {
 
 		}
 
-	    echo apply_filters( 'woocommerce_page_title', $page_title );
+		$page_title = apply_filters( 'woocommerce_page_title', $page_title );
+
+		if ( $echo )
+	    	echo $page_title;
+	    else
+	    	return $page_title;
 	}
 }
 
