@@ -151,7 +151,7 @@ final class WooCommerce {
 		add_filter( 'woocommerce_payment_gateways', array( $this, 'core_gateways' ) );
 		add_action( 'widgets_init', array( $this, 'include_widgets' ) );
 		add_action( 'init', array( $this, 'init' ), 0 );
-		add_action( 'init', array( $this, 'include_template_functions' ), 25 );
+		add_action( 'init', array( $this, 'include_template_functions' ) );
 		add_action( 'after_setup_theme', array( $this, 'compatibility' ) );
 
 		// Loaded action
@@ -323,6 +323,9 @@ final class WooCommerce {
 		include_once( 'includes/integrations/google-analytics/class-wc-google-analytics.php' );
 		include_once( 'includes/integrations/sharethis/class-wc-sharethis.php' );
 		include_once( 'includes/integrations/sharedaddy/class-wc-sharedaddy.php' );
+
+		// Include template hooks in time for themes to remove/modify them
+		include_once( 'includes/wc-template-hooks.php' );
 	}
 
 	// Temporarily staying here until there is a better spot
@@ -345,7 +348,6 @@ final class WooCommerce {
 		include_once( 'woocommerce-ajax.php' );		// Ajax functions for admin and the front-end
 	}
 
-
 	/**
 	 * Include required frontend files.
 	 *
@@ -363,18 +365,12 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-shortcodes.php' );			// Shortcodes class
 	}
 
-
 	/**
 	 * Function used to Init WooCommerce Template Functions - This makes them pluggable by plugins and themes.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function include_template_functions() {
-		include_once( 'includes/wc-template-hooks.php' );
 		include_once( 'includes/wc-template-functions.php' );
 	}
-
 
 	/**
 	 * core_gateways function.
@@ -409,7 +405,6 @@ final class WooCommerce {
 		return $methods;
 	}
 
-
 	/**
 	 * include_widgets function.
 	 *
@@ -430,7 +425,6 @@ final class WooCommerce {
 		include_once( 'includes/widgets/class-wc-widget-recently-viewed.php' );
 		include_once( 'includes/widgets/class-wc-widget-top-rated-products.php' );
 	}
-
 
 	/**
 	 * Init WooCommerce when WordPress Initialises.
@@ -501,7 +495,6 @@ final class WooCommerce {
 		do_action( 'woocommerce_init' );
 	}
 
-
 	/**
 	 * During checkout, ensure gateways and shipping classes are loaded so they can hook into the respective pages.
 	 *
@@ -514,7 +507,6 @@ final class WooCommerce {
 			$this->shipping();
 		}
 	}
-
 
 	/**
 	 * Load Localisation files.
@@ -552,7 +544,6 @@ final class WooCommerce {
 		$GLOBALS['product'] = null;
 	}
 
-
 	/**
 	 * When the_post is called, get product data too.
 	 *
@@ -567,7 +558,6 @@ final class WooCommerce {
 		$GLOBALS['product'] = get_product( $post );
 		return $GLOBALS['product'];
 	}
-
 
 	/**
 	 * Add Compatibility for various bits.
@@ -604,7 +594,6 @@ final class WooCommerce {
 			$_SERVER['HTTPS'] = '1';
 	}
 
-
 	/**
 	 * Output generator to aid debugging.
 	 *
@@ -614,7 +603,6 @@ final class WooCommerce {
 	public function generator() {
 		echo "\n\n" . '<!-- WooCommerce Version -->' . "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( $this->version ) . '" />' . "\n\n";
 	}
-
 
 	/**
 	 * Init images.
