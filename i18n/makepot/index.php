@@ -18,7 +18,7 @@ require './makepot.php';
 $makepot = new WC_Makepot;
 
 // Regeneration requested
-if ( ! empty( $_GET['generate'] ) ) {
+if ( (isset($_GET) and ! empty( $_GET['generate']) || (isset($argc, $argv) && $argc==2 && $argv[1]=="generate")) ) {
 	// Generate woocommerce and woocommerce-admin POT files
 	$results = array();
 	foreach ( $makepot->projects as $name => $project ) {
