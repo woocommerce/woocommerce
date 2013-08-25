@@ -322,6 +322,7 @@ class WC_Install {
 	    require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
 	    // WooCommerce Tables
+	    //Updated woocommerce_downloadable_product_permissions table to hold current timestamp for last download date
 	    $woocommerce_tables = "
 	CREATE TABLE {$wpdb->prefix}woocommerce_attribute_taxonomies (
 	  attribute_id bigint(20) NOT NULL auto_increment,
@@ -353,6 +354,7 @@ class WC_Install {
 	  access_granted datetime NOT NULL default '0000-00-00 00:00:00',
 	  access_expires datetime NULL default null,
 	  download_count bigint(20) NOT NULL DEFAULT 0,
+	  download_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	  PRIMARY KEY  (permission_id),
 	  KEY download_order_key_product (product_id,order_id,order_key,download_id),
 	  KEY download_order_product (download_id,order_id,product_id)
