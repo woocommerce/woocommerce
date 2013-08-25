@@ -127,10 +127,10 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			'options' => array(
 							'title' 		=> __( 'Additional Rates', 'woocommerce' ),
 							'type' 			=> 'textarea',
-							'description'	=> __( 'Optional extra shipping options with additional costs (one per line): Option Name | Additional Cost | Per Cost Type (order, class, or item) Example: <code>Priority Mail | 6.95 | order</code>.', 'woocommerce' ),
+							'description'	=> __( 'Optional extra shipping options with additional costs (one per line): Option Name | Additional Cost [+- Percents] | Per Cost Type (order, class, or item) Example: <code>Priority Mail | 6.95 [+ 0.2%] | order</code>.', 'woocommerce' ),
 							'default'		=> '',
 							'desc_tip'		=> true,
-							'placeholder'	=> __( 'Option Name | Additional Cost | Per Cost Type (order, class, or item)', 'woocommerce' )
+							'placeholder'	=> __( 'Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, or item)', 'woocommerce' )
 						),
 			'additional_costs' => array(
 							'title'			=> __( 'Additional Costs', 'woocommerce' ),
@@ -256,6 +256,13 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				$extra_rate['label']	= $this_option[0];
 				$this_cost				= $this_option[1];
 
+				if (preg_match('/(\d+\.?\d*)\s*(\+|-)\s*(\d+\.?\d*)\%/', $this_cost, $this_cost_matches)) {
+					$this_cost_mathop = $this_cost_matches[2];
+					$this_cost_percents = $this_cost_matches[3] / 100;
+					$this_cost = $this_cost_matches[1];
+					unset( $this_cost_matches );
+				}
+
 				// Backwards compat with yes and no
 				if ( $this_option[2] == 'yes' ) {
 					$this_type = 'order';
@@ -268,9 +275,47 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				switch ( $this_type ) {
 					case 'class' :
 						$this_cost = $this_cost * sizeof( $this->find_shipping_classes( $package ) );
+						
+						// Factor $this_cost by the percentage if provided.
+						if ( $this_cost_percents ) {
+							foreach ( $this->find_shipping_classes( $package ) as $shipping_class => $items ){
+								foreach ( $items as $item_id => $values ) {
+									if ($this_cost_mathop == '+') {
+										$this_cost += $this_cost_percents * $values['line_total'];
+									}
+									else {
+										$this_cost -= $this_cost_percents * $values['line_total'];
+									}
+								}
+							}
+						}
 					break;
 					case 'item' :
 						$this_cost = $this_cost * $total_quantity;
+						
+						// Factor $this_cost by the percentage if provided.
+						if ( $this_cost_percents ) {
+							foreach ( $package['contents'] as $item_id => $values ) {
+								if ($this_cost_mathop == '+') {
+									$this_cost += $this_cost_percents * $values['line_total'];
+								}
+								else {
+									$this_cost -= $this_cost_percents * $values['line_total'];
+								}
+							}
+						}
+					break;
+					case  'order' :
+						// Factor $this_cost by the percentage if provided.
+						var_dump($this_cost_percents);
+						if ( $this_cost_percents ) {
+							if ($this_cost_mathop == '+') {
+								$this_cost += $this_cost_percents * $package['contents_cost'];
+							}
+							else {
+								$this_cost -= $this_cost_percents * $package['contents_cost'];
+							}
+						}
 					break;
 				}
 
