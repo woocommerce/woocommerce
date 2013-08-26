@@ -37,7 +37,7 @@ function woocommerce_empty_cart() {
 	global $woocommerce;
 
 	if ( ! isset( $woocommerce->cart ) || $woocommerce->cart == '' )
-		$woocommerce->cart = new WC_Cart();
+		$woocommerce->cart = apply_filters( 'woocommerce_instance_cart', new WC_Cart() );
 
 	$woocommerce->cart->empty_cart( false );
 }
