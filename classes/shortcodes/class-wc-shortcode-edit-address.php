@@ -44,7 +44,7 @@ class WC_Shortcode_Edit_Address {
 
 		woocommerce_get_template( 'myaccount/form-edit-address.php', array(
 			'load_address' 	=> $load_address,
-			'address'		=> $address
+			'address'		=> apply_filters( 'woocommerce_address_to_edit', $address )
 		) );
 	}
 
