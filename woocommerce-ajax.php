@@ -452,7 +452,7 @@ function woocommerce_save_attributes() {
 				 	}
 
 				 	// Remove empty items in the array
-				 	$values = array_filter( $values );
+				 	$values = array_filter( $values, 'strlen' );
 
 			 	} else {
 			 		$values = array();
