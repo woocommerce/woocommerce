@@ -78,6 +78,7 @@ class WC_Admin_CPT_Shop_Coupon extends WC_Admin_CPT {
 	 */
 	public function custom_columns( $column ) {
 		global $post, $woocommerce;
+		$discount_type = get_post_meta( $post->ID, 'discount_type', true );
 
 		switch ( $column ) {
 			case "coupon_code" :
@@ -118,10 +119,10 @@ class WC_Admin_CPT_Shop_Coupon extends WC_Admin_CPT {
 
 			break;
 			case "type" :
-				echo esc_html( wc_get_coupon_type( get_post_meta( $post->ID, 'discount_type', true ) ) );
+				echo esc_html( wc_get_coupon_type( $discount_type ) );
 			break;
 			case "amount" :
-				echo esc_html( get_post_meta( $post->ID, 'coupon_amount', true ) );
+				echo esc_html( wc_get_coupon_formatted_amount( get_post_meta( $post->ID, 'coupon_amount', true ), $discount_type );
 			break;
 			case "products" :
 				$product_ids = get_post_meta( $post->ID, 'product_ids', true );

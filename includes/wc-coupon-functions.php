@@ -37,3 +37,23 @@ function wc_get_coupon_type( $type = '' ) {
 	if ( isset( $types[ $type ] ) )
 		return $types[ $type ];
 }
+
+/**
+ * Get a coupon's formatted amount.
+ *
+ * @access public
+ * @param mixed $amount
+ * @param string $type
+ * @return string
+ */
+public function get_coupon_formatted_amount( $amount, $type ) {
+  if ( empty( $amount ) ) {
+    $formatted_amount = '–';
+  } else if ( preg_match( '/percent/', $type ) ) {
+    $formatted_amount = woocommerce_format_decimal( $amount * 100 ) . '%';
+  } else {
+    $formatted_amount = strip_tags( woocommerce_price( $amount ) );
+  }
+
+  return apply_filters( 'woocommerce_coupon_formatted_amount', $formatted_amount, $amount, $type );
+}
