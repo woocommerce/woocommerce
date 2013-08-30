@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 	<?php
 		/**
-		 * woocommerce_show_product_images hook
+		 * woocommerce_before_single_product_summary hook
 		 *
 		 * @hooked woocommerce_show_product_sale_flash - 10
 		 * @hooked woocommerce_show_product_images - 20
