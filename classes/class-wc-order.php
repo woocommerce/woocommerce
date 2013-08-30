@@ -551,7 +551,7 @@ class WC_Order {
 	 * @return float
 	 */
 	public function get_total_tax() {
-		return apply_filters( 'woocommerce_order_amount_total_tax', number_format( (double) $this->order_tax + (double) $this->order_shipping_tax, 2, '.', '' ) );
+		return apply_filters( 'woocommerce_order_amount_total_tax', number_format( (double) $this->order_tax + (double) $this->order_shipping_tax, 2, '.', '' ), $this );
 	}
 
 
@@ -562,7 +562,7 @@ class WC_Order {
 	 * @return float
 	 */
 	public function get_cart_discount() {
-		return apply_filters( 'woocommerce_order_amount_cart_discount', number_format( (double) $this->cart_discount, 2, '.', '' ) );
+		return apply_filters( 'woocommerce_order_amount_cart_discount', number_format( (double) $this->cart_discount, 2, '.', '' ), $this );
 	}
 
 
@@ -573,7 +573,7 @@ class WC_Order {
 	 * @return float
 	 */
 	public function get_order_discount() {
-		return apply_filters( 'woocommerce_order_amount_order_discount', number_format( (double) $this->order_discount, 2, '.', '' ) );
+		return apply_filters( 'woocommerce_order_amount_order_discount', number_format( (double) $this->order_discount, 2, '.', '' ), $this );
 	}
 
 
@@ -585,7 +585,7 @@ class WC_Order {
 	 */
 	public function get_total_discount() {
 		if ( $this->order_discount || $this->cart_discount )
-			return apply_filters( 'woocommerce_order_amount_total_discount', number_format( (double) $this->order_discount + (double) $this->cart_discount, 2, '.', '' ) );
+			return apply_filters( 'woocommerce_order_amount_total_discount', number_format( (double) $this->order_discount + (double) $this->cart_discount, 2, '.', '' ), $this );
 	}
 
 
@@ -596,7 +596,7 @@ class WC_Order {
 	 * @return float
 	 */
 	public function get_shipping() {
-		return apply_filters( 'woocommerce_order_amount_shipping', number_format( (double) $this->order_shipping, 2, '.', '' ) );
+		return apply_filters( 'woocommerce_order_amount_shipping', number_format( (double) $this->order_shipping, 2, '.', '' ), $this );
 	}
 
 
@@ -607,7 +607,7 @@ class WC_Order {
 	 * @return float
 	 */
 	public function get_shipping_tax() {
-		return apply_filters( 'woocommerce_order_amount_shipping_tax', number_format( (double) $this->order_shipping_tax, 2, '.', '' ) );
+		return apply_filters( 'woocommerce_order_amount_shipping_tax', number_format( (double) $this->order_shipping_tax, 2, '.', '' ), $this );
 	}
 
 
@@ -618,7 +618,7 @@ class WC_Order {
 	 * @return float
 	 */
 	public function get_total() {
-		return apply_filters( 'woocommerce_order_amount_total', number_format( (double) $this->order_total, 2, '.', '' ) );
+		return apply_filters( 'woocommerce_order_amount_total', number_format( (double) $this->order_total, 2, '.', '' ), $this );
 	}
 
 
@@ -639,7 +639,7 @@ class WC_Order {
 	 * @return string
 	 */
 	public function get_shipping_method() {
-		return apply_filters( 'woocommerce_order_shipping_method', ucwords( $this->shipping_method_title ) );
+		return apply_filters( 'woocommerce_order_shipping_method', ucwords( $this->shipping_method_title ), $this );
 	}
 
 
@@ -657,7 +657,7 @@ class WC_Order {
 			$price = ( $item['line_subtotal'] + $item['line_subtotal_tax'] / $item['qty'] );
 		else
 			$price = ( $item['line_subtotal'] / $item['qty'] );
-		return apply_filters( 'woocommerce_order_amount_item_subtotal', ($round) ? number_format( $price, 2, '.', '') : $price );
+		return apply_filters( 'woocommerce_order_amount_item_subtotal', (($round) ? number_format( $price, 2, '.', '') : $price ), $this );
 	}
 
 
@@ -675,7 +675,7 @@ class WC_Order {
 			$price = $item['line_subtotal'] + $item['line_subtotal_tax'];
 		else
 			$price = $item['line_subtotal'];
-		return apply_filters( 'woocommerce_order_amount_line_subtotal', ($round) ? number_format( $price, 2, '.', '') : $price );
+		return apply_filters( 'woocommerce_order_amount_line_subtotal', ( ($round) ? number_format( $price, 2, '.', '') : $price ), $this );
 	}
 
 
@@ -693,7 +693,7 @@ class WC_Order {
 			$price = ( ( $item['line_total'] + $item['line_tax'] ) / $item['qty'] );
 		else
 			$price = $item['line_total'] / $item['qty'];
-		return apply_filters( 'woocommerce_order_amount_item_total', ($round) ? number_format( $price, 2, '.', '') : $price );
+		return apply_filters( 'woocommerce_order_amount_item_total', ( ($round) ? number_format( $price, 2, '.', '') : $price ), $this );
 	}
 
 
@@ -707,7 +707,7 @@ class WC_Order {
 	 */
 	public function get_item_tax( $item, $round = true ) {
 		$price = $item['line_tax'] / $item['qty'];
-		return apply_filters( 'woocommerce_order_amount_item_tax', ($round) ? number_format( $price, 2, '.', '') : $price );
+		return apply_filters( 'woocommerce_order_amount_item_tax', ( ($round) ? number_format( $price, 2, '.', '') : $price ), $this );
 	}
 
 
@@ -721,9 +721,9 @@ class WC_Order {
 	 */
 	public function get_line_total( $item, $inc_tax = false ) {
 		if ( $inc_tax )
-			return apply_filters( 'woocommerce_order_amount_line_total', number_format( $item['line_total'] + $item['line_tax'] , 2, '.', '') );
+			return apply_filters( 'woocommerce_order_amount_line_total', number_format( $item['line_total'] + $item['line_tax'] , 2, '.', ''), $this );
 		else
-			return apply_filters( 'woocommerce_order_amount_line_total', number_format( $item['line_total'] , 2, '.', '') );
+			return apply_filters( 'woocommerce_order_amount_line_total', number_format( $item['line_total'] , 2, '.', ''), $this );
 	}
 
 
@@ -735,7 +735,7 @@ class WC_Order {
 	 * @return float
 	 */
 	public function get_line_tax( $item ) {
-		return apply_filters( 'woocommerce_order_amount_line_tax', number_format( $item['line_tax'], 2, '.', '') );
+		return apply_filters( 'woocommerce_order_amount_line_tax', number_format( $item['line_tax'], 2, '.', ''), $this );
 	}
 
 	/** End Total Getters *******************************************************/
@@ -1048,7 +1048,7 @@ class WC_Order {
 			'image_size'			=> $image_size
 		) );
 
-		$return = apply_filters( 'woocommerce_email_order_items_table', ob_get_clean() );
+		$return = apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $this );
 
 		return $return;
 	}
