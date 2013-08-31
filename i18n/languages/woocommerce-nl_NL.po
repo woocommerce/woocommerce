@@ -9424,7 +9424,7 @@ msgstr "is geen geldig e-mailadres."
 # @ woocommerce
 #: includes/class-wc-checkout.php:510
 msgid "You must accept our Terms &amp; Conditions."
-msgstr "U dient akkoord gaan onze Algemene Voorwaarden."
+msgstr "U dient akkoord te gaan met onze Algemene Voorwaarden."
 
 # @ woocommerce
 #: includes/class-wc-checkout.php:519
