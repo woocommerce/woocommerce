@@ -333,8 +333,6 @@ class WC_Cart {
 		 * @return void
 		 */
 		public function check_cart_coupons() {
-			global $woocommerce;
-
 			if ( ! empty( $this->applied_coupons ) ) {
 				foreach ( $this->applied_coupons as $key => $code ) {
 					$coupon = new WC_Coupon( $code );
@@ -346,8 +344,8 @@ class WC_Cart {
 						// Remove the coupon
 						unset( $this->applied_coupons[ $key ] );
 
-						$woocommerce->session->coupon_codes   = $this->applied_coupons;
-						$woocommerce->session->refresh_totals     = true;
+						WC()->session->set( 'coupon_codes', $this->applied_coupons );
+						WC()->session->set( 'refresh_totals', true );
 					}
 				}
 			}
@@ -399,8 +397,6 @@ class WC_Cart {
 		 * @param array $posted
 		 */
 		public function check_customer_coupons( $posted ) {
-			global $woocommerce;
-
 			if ( ! empty( $this->applied_coupons ) ) {
 				foreach ( $this->applied_coupons as $key => $code ) {
 					$coupon = new WC_Coupon( $code );
@@ -423,8 +419,8 @@ class WC_Cart {
 							// Remove the coupon
 							unset( $this->applied_coupons[ $key ] );
 
-							$woocommerce->session->coupon_codes   = $this->applied_coupons;
-							$woocommerce->session->refresh_totals     = true;
+							WC()->session->set( 'coupon_codes', $this->applied_coupons );
+							WC()->session->set( 'refresh_totals', true );
 						}
 					}
 				}

@@ -593,6 +593,9 @@ class WC_Checkout {
 
                 	woocommerce_set_customer_auth_cookie( $this->customer_id );
 
+                	// As we are now logged in, checkout will need to refresh to serve a new nonce
+                	WC()->session->set( 'refresh_totals', true );
+
                 	// Add customer info from other billing fields
                 	if ( $this->posted['billing_first_name'] )
                 		wp_update_user( array ( 'ID' => $this->customer_id, 'first_name' => $this->posted['billing_first_name'], 'display_name' => $this->posted['billing_first_name'] ) );
@@ -654,7 +657,7 @@ class WC_Checkout {
 						echo '<!--WC_START-->' . json_encode(
 							array(
 								'result' 	=> 'success',
-								'redirect' => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order )
+								'redirect'  => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order )
 							)
 						) . '<!--WC_END-->';
 						exit;
@@ -670,7 +673,7 @@ class WC_Checkout {
 			} catch ( Exception $e ) {
 
 				if ( ! empty( $e ) )
-					wc_add_error( $e );
+					wc_add_error( $e->getMessage() );
 
 			}
 
