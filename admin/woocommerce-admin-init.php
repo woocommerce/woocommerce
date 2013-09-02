@@ -506,6 +506,11 @@ function woocommerce_admin_scripts() {
 		wp_enqueue_script( 'flot-resize', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.resize'.$suffix.'.js', array('jquery', 'flot'), '1.0' );
 
 	}
+
+	// Chosen RTL
+	if ( is_rtl() ) {
+		wp_enqueue_script( 'chosen-rtl', $woocommerce->plugin_url() . '/assets/js/chosen/chosen-rtl' . $suffix . '.js', array( 'jquery' ), $woocommerce->version, true );
+	}
 }
 
 add_action( 'admin_enqueue_scripts', 'woocommerce_admin_scripts' );
