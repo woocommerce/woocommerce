@@ -16,7 +16,7 @@ msgstr ""
 "_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
 "X-Poedit-Basepath: ../../\n"
 "X-Textdomain-Support: yes\n"
-"X-Generator: Poedit 1.5.5\n"
+"X-Generator: Poedit 1.5.7\n"
 "X-Poedit-SearchPath-0: ../..\n"
 
 # @ woocommerce
@@ -6277,7 +6277,7 @@ msgstr "Adresse de Livraison"
 # @ woocommerce
 #: admin/woocommerce-admin-users.php:28
 msgid "Paying Customer?"
-msgstr "Payer au Client ?"
+msgstr "Client ?"
 
 # @ woocommerce
 #: admin/woocommerce-admin-users.php:29
