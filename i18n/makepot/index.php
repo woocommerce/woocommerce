@@ -13,12 +13,18 @@
  */
 exit( 'Locked' );
 
+if(isset($_SERVER['SHELL'])){
+	$is_shell = True;
+} else {
+	$is_shell = False;
+}
+
 // Load the makepot generator
 require './makepot.php';
 $makepot = new WC_Makepot;
 
 // Regeneration requested
-if ( ! empty( $_GET['generate'] ) ) {
+if ( (isset($_GET) and ! empty( $_GET['generate']) || (isset($argc, $argv) && $argc==2 && $argv[1]=="generate")) ) {
 	// Generate woocommerce and woocommerce-admin POT files
 	$results = array();
 	foreach ( $makepot->projects as $name => $project ) {
@@ -38,6 +44,26 @@ foreach( $makepot->projects as $name => $project ) {
 		'filesize'    => ( is_readable( $project['file'] ) ) ? filesize( $project['file'] ) : false,
 	);
 }
+
+if($is_shell) {
+	printf("WooCommerce %s POT Generator\n\n", $makepot->woocommerce_version());
+	if ( ! empty( $results ) ) {
+		foreach ( $results as $pot_file => $succeeded ) {
+			printf(" * %s %s\n", basename( $pot_files[ $pot_file ]['file'] ), $succeeded ? 'successfully generated' : 'could not be generated');
+		}
+		echo "\n";
+	}
+	echo "This tool will (re)generate and overwrite the following WooCommerce POT-files:\n\n";
+	foreach ( $pot_files as $pot_file ) {
+		printf(" - %-30s\t[%swritable]\n", basename( $pot_file['file'] ), $pot_file['is_writable'] ? "" : "not ");
+		printf("   * Path: %s\n", dirname( $pot_file['file'] ) . '/');
+		printf("   * Size: %s\n", $pot_file['file_exists'] ? number_format( $pot_file['filesize'], 0 ) : '--');
+		printf("   * Last updated: %s\n", $pot_file['filemtime'] ? @date( 'F jS Y H:i:s', $pot_file['filemtime'] ) : '--');
+	}
+	
+	printf("\nTo Generate POT-files now you must run:\n\n");
+	printf("\tphp %s generate\n\n", $argv[0]);
+} else {
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -117,3 +143,4 @@ foreach( $makepot->projects as $name => $project ) {
 
 </body>
 </html>
+<?php } ?>
