@@ -57,6 +57,7 @@ if ( 0 == $woocommerce_loop['loop'] % $woocommerce_loop['columns'] )
 			/**
 			 * woocommerce_after_shop_loop_item_title hook
 			 *
+			 * @hooked woocommerce_template_loop_rating - 5
 			 * @hooked woocommerce_template_loop_price - 10
 			 */
 			do_action( 'woocommerce_after_shop_loop_item_title' );
