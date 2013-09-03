@@ -38,9 +38,8 @@ class WC_Emails {
 
 	/**
 	 * Constructor for the email class hooks in all emails that can be sent.
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Emails
 	 */
 	function __construct() {
 
@@ -147,10 +146,10 @@ class WC_Emails {
 
 	/**
 	 * Wraps a message in the woocommerce mail template.
-	 *
 	 * @access public
 	 * @param mixed $email_heading
 	 * @param mixed $message
+	 * @param bool  $plain_text
 	 * @return string
 	 */
 	function wrap_message( $email_heading, $message, $plain_text = false ) {
@@ -202,12 +201,13 @@ class WC_Emails {
 
 	/**
 	 * Prepare and send the customer invoice email on demand.
-	 *
-	 * @access public
-	 * @param mixed $pay_for_order
+	 * @access   public
+	 * @param $order
+	 * @internal param mixed $pay_for_order
 	 * @return void
 	 */
 	function customer_invoice( $order ) {
+		/** @var WC_Email_Customer_Invoice $email */
 		$email = $this->emails['WC_Email_Customer_Invoice'];
 		$email->trigger( $order );
 	}
@@ -224,6 +224,7 @@ class WC_Emails {
 		if ( ! $user_id || ! $plaintext_pass)
 			return;
 
+		/** @var WC_Email_Customer_New_Account $email */
 		$email = $this->emails['WC_Email_Customer_New_Account'];
 		$email->trigger( $user_id, $plaintext_pass );
 	}

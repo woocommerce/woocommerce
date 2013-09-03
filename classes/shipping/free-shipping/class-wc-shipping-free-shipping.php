@@ -16,9 +16,8 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 
 	/**
 	 * __construct function.
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Shipping_Free_Shipping
 	 */
 	function __construct() {
         $this->id 			= 'free_shipping';

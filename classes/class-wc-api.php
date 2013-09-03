@@ -14,9 +14,8 @@ class WC_API {
 
 	/**
 	 * __construct function.
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_API
 	 */
 	public function __construct() {
 		add_filter( 'query_vars', array( $this, 'add_query_vars'), 0 );
@@ -26,9 +25,9 @@ class WC_API {
 
 	/**
 	 * add_query_vars function.
-	 *
 	 * @access public
-	 * @return void
+	 * @param array $vars
+	 * @return array
 	 */
 	public function add_query_vars( $vars ) {
 		$vars[] = 'wc-api';

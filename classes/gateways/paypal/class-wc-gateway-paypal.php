@@ -17,13 +17,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 	var $notify_url;
 
-    /**
-     * Constructor for the gateway.
-     *
-     * @access public
-     * @return void
-     */
+	/**
+	 * Constructor for the gateway.
+	 * @access public
+	 * @return \WC_Gateway_Paypal
+	 */
 	public function __construct() {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 
         $this->id           = 'paypal';
@@ -182,7 +182,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 							'title' => __( 'Shipping details', 'woocommerce' ),
 							'type' => 'checkbox',
 							'label' => __( 'Send shipping details to PayPal instead of billing.', 'woocommerce' ),
-							'description' => '',
 							'description' => __( 'PayPal allows us to send 1 address. If you are using PayPal for shipping labels you may prefer to send the shipping address rather than billing.', 'woocommerce' ),
 							'default' => 'no'
 						),
@@ -399,10 +398,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * Generate the paypal button link
      *
      * @access public
-     * @param mixed $order_id
+     * @param string $order_id
      * @return string
      */
     function generate_paypal_form( $order_id ) {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 
 		$order = new WC_Order( $order_id );
@@ -492,12 +492,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 
-    /**
-     * Output for the order received page.
-     *
-     * @access public
-     * @return void
-     */
+	/**
+	 * Output for the order received page.
+	 * @access public
+	 * @param string $order
+	 * @return void
+	 */
 	function receipt_page( $order ) {
 
 		echo '<p>'.__( 'Thank you for your order, please click the button below to pay with PayPal.', 'woocommerce' ).'</p>';
@@ -510,6 +510,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * Check PayPal IPN validity
 	 **/
 	function check_ipn_request_is_valid() {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 
 		if ( 'yes' == $this->debug )
@@ -753,7 +754,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 *
 	 * @access public
 	 * @param mixed $posted
-	 * @return void
+	 * @return WC_Order
 	 */
 	function get_paypal_order( $posted ) {
 		$custom = maybe_unserialize( $posted['custom'] );

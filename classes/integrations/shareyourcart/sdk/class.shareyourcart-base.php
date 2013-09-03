@@ -49,32 +49,31 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	
 	/**
 	 * Execute NonQuery SQL
-	 * @param string action
-	 * @param string extra
+	 * @param string $sql
 	 * @return boolean
 	 */
 	protected abstract function executeNonQuery($sql);
 
+
 	/**
-	 *
 	 * Get the row returned from the SQL
-	 *
-	 * @return an associative array containing the data of the row OR NULL
+	 * @param string $sql
+	 * @return array an associative array containing the data of the row OR NULL
 	 *         if there is none
 	 */
 	protected abstract function getRow($sql);
 
 	/**
 	 * Abstract getTableName
-	 * @param string key
+	 * @param string $key
 	 *
 	 */
 	protected abstract function getTableName($key);
 
 	/**
 	 * Abstract setConfigValue
-	 * @param string option
-	 * @param string value
+	 * @param string $field
+	 * @param string $value
 	 * @return boolean
 	 */
 	protected abstract function setConfigValue($field, $value);
@@ -225,7 +224,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	/**
 	*
 	* Check if this instance can load, or not!
-	* This is ment so that at ALL times, only the latest plugin version will work
+	* This is meant so that at ALL times, only the latest plugin version will work
 	*
 	*/
 	protected function canLoad()
@@ -243,14 +242,15 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 	/**
 	 * install the plugin
-	 * @param null
+	 * @param $message string|null
 	 * @return boolean
 	 */
 	public function install(&$message = null) {
 
 		//this is a single call function
-		if (!$this->isFirstCall(__FUNCTION__))
-		return;
+		if (!$this->isFirstCall(__FUNCTION__)) {
+			return false;
+		}
 
 		//create the tokens table
 		/*$this->createTable($this->getTableName('shareyourcart_tokens'), array(
@@ -290,14 +290,15 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 	/**
 	 * uninstall the plugin
-	 * @param null
-	 * @return boolean
+	 * @param $message string|null
+	 * @return bool
 	 */
 	public function uninstall(&$message = null) {
 
 		//this is a single call function
-		if (!$this->isFirstCall(__FUNCTION__))
-		return;
+		if (!$this->isFirstCall(__FUNCTION__)) {
+			return false;
+		}
 
 		//first, make sure we deactivate the plugin
 		$this->deactivate($message);
@@ -315,13 +316,14 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	/**
 	 * activate the plugin
 	 * @param null
-	 * @return boolean
+	 * @return bool
 	 */
 	public function activate(&$message = null) {
 
 		//this is a single call function
-		if (!$this->isFirstCall(__FUNCTION__))
-		return;
+		if (!$this->isFirstCall(__FUNCTION__)) {
+			return false;
+		}
 
 		//active the API
 		if ($this->setAccountStatus($this->getSecretKey(), $this->getClientID(), $this->getAppKey(), true, $message) === TRUE) {
@@ -422,7 +424,10 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 	/**
 	 * ensureCouponIsValid
-	 * @param string $params
+	 * @param $token
+	 * @param $coupon_code
+	 * @param $coupon_value
+	 * @param $coupon_type
 	 * @return boolean
 	 */
 	public function assertCouponIsValid($token, $coupon_code, $coupon_value, $coupon_type) {
@@ -470,17 +475,23 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	 * get the button code
 	 *
 	 */
+	/**
+	 * @param null $position
+	 * @return bool
+	 */
 	public function getButton($position = null) {
 
 		//make sure the API is active
-		if(!$this->isActive()) return;
+		if(!$this->isActive()) return false;
 
 		return $this->renderButton($this->getButtonCallbackURL(), $position);
 	}
 
 	/**
 	 * renderButton
-	 * @param null
+	 * @param      $callback_url
+	 * @param null $position
+	 * @param null $languageISO
 	 * @return boolean
 	 */
 	protected function renderButton($callback_url,$position = null,$languageISO = null) {
@@ -589,13 +600,14 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	/**
 	 * Get the page header code
 	 * @param null
-	 * @return boolean
+	 * @return bool
 	 */
 	public function getPageHeader() {
 
 		//this is a single call function
-		if (!$this->isFirstCall(__FUNCTION__))
-		return;
+		if (!$this->isFirstCall(__FUNCTION__)) {
+			return false;
+		}
 
 		return $this->renderView('page-header',array(
 			'data' => $this->getCurrentProductDetails(),
@@ -620,9 +632,10 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	public function getAdminHeader() {
 			
 		//this is a single call function
-		if (!$this->isFirstCall(__FUNCTION__))
-		return;
-		
+		if (!$this->isFirstCall(__FUNCTION__)) {
+			return false;
+		}
+
 		//check the SDK status
 		$this->checkSDKStatus(true); //force a check, as the admin might have changed the language in the configure page, so we need to sync with it
 
@@ -631,7 +644,9 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 	/**
 	 * show the admin page
-	 * @param null
+	 * @param string $html
+	 * @param bool   $show_header
+	 * @param bool   $show_footer
 	 * @return boolean
 	 */
 	public function showAdminPage($html='',$show_header=TRUE,$show_footer=TRUE) {
@@ -647,8 +662,9 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	public function getAdminPage($html='',$show_header=TRUE,$show_footer=TRUE) {
 
 		//this is a single call function
-		if (!$this->isFirstCall(__FUNCTION__))
-		return;
+		if (!$this->isFirstCall(__FUNCTION__)) {
+			return false;
+		}
 
 		$status_message = ''; //this is to be used for good messages
 		$error_message = ''; //this is to be used for bad messages
@@ -941,12 +957,14 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	*
 	*/
 	public function getUploadDir(){
-      return dirname(_FILE_). "/img/";
+      return dirname(__FILE__). "/img/";
     }
-	
+
 	/**
 	 * showDocumentation
-	 * @param null
+	 * @param string $html
+	 * @param bool   $show_header
+	 * @param bool   $show_footer
 	 * @return boolean
 	 */
 	public function showDocumentationPage($html='',$show_header=TRUE,$show_footer=TRUE) {
@@ -956,14 +974,17 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 	/**
 	 * get the documentation page
-	 * @param null
-	 * @return boolean
+	 * @param string $html
+	 * @param bool   $show_header
+	 * @param bool   $show_footer
+	 * @return bool
 	 */
 	public function getDocumentationPage($html='',$show_header=TRUE,$show_footer=TRUE) {
 
 		//this is a single call function
-		if (!$this->isFirstCall(__FUNCTION__))
-		return;
+		if (!$this->isFirstCall(__FUNCTION__)) {
+			return false;
+		}
 
 		//render the view
 		return $this->renderView('documentation',array(
@@ -1029,7 +1050,11 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 	/**
 	 * Save the coupon
-	 * @param null
+	 * @param       $token
+	 * @param       $coupon_code
+	 * @param       $coupon_value
+	 * @param       $coupon_type
+	 * @param array $product_unique_ids
 	 * @return boolean
 	 */
 	protected function saveCoupon($token, $coupon_code, $coupon_value, $coupon_type, $product_unique_ids = array()) {
@@ -1058,11 +1083,12 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	}
 
 	/**
-	 *
 	 * createTable
-	 * @param table
-	 * @param array columns
-	 * @param string @option
+	 * @param      $tableName
+	 * @param      $columns
+	 * @param      $primaryKey
+	 * @param null $options
+	 * @throws Exception
 	 */
 	protected function createTable($tableName, $columns, $primaryKey, $options=NULL) {
 
@@ -1083,16 +1109,16 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 		$this->executeNonQuery($sql);
 		
-		//we can't relly on the fact that the table has been properly created, so check it!
+		//we can't rely on the fact that the table has been properly created, so check it!
 		if(!$this->existsTable($tableName))
 			throw new Exception(SyC::t('sdk','Cannot create table "{table_name}". Check your database permissions or manually run the following SQL command and try again:<br /><strong>{sql}</strong>', array('{table_name}' => $tableName,'{sql}' => nl2br($sql))));
 	}
-	
+
 	/**
-	*
-	* existsTable
-	* @return TRUE if the table exists, otherwise false
-	*/
+	 * existsTable
+	 * @param $tableName
+	 * @return bool TRUE if the table exists, otherwise false
+	 */
 	protected function existsTable($tableName){
 	
 		$table_details = $this->getRow("show tables like '$tableName'");
@@ -1103,8 +1129,8 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 	/**
 	 * Drop the specified table
-	 *
-	 * @param string tableName
+	 * @param string $tableName
+	 * @throws Exception
 	 */
 	protected function dropTable($tableName) {
 
@@ -1292,4 +1318,3 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 }
 
 } //END IF
-?>

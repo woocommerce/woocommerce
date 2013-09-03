@@ -15,12 +15,11 @@ class WC_Integrations {
 	/** @var array Array of integration classes */
 	var $integrations = array();
 
-    /**
-     * __construct function.
-     *
-     * @access public
-     * @return void
-     */
+	/**
+	 * __construct function.
+	 * @access public
+	 * @return \WC_Integrations
+	 */
     public function __construct() {
 
 		do_action( 'woocommerce_integrations_init' );

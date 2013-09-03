@@ -26,9 +26,8 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 
 	/**
 	 * Constructor
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Email_Customer_Reset_Password
 	 */
 	function __construct() {
 
@@ -51,8 +50,9 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 
 	/**
 	 * trigger function.
-	 *
 	 * @access public
+	 * @param string $user_login
+	 * @param string $reset_key
 	 * @return void
 	 */
 	function trigger( $user_login = '', $reset_key = '' ) {

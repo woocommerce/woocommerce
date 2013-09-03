@@ -15,9 +15,8 @@ class WC_Widget_Random_Products extends WP_Widget {
 
 	/**
 	 * constructor
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Widget_Random_Products
 	 */
 	function __construct() {
 		$this->id_base = 'woocommerce_random_products';

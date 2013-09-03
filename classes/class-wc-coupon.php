@@ -88,12 +88,12 @@ class WC_Coupon {
 
 	/**
 	 * Coupon constructor. Loads coupon data.
-	 *
 	 * @access public
 	 * @param mixed $code code of the coupon to load
-	 * @return void
+	 * @return \WC_Coupon
 	 */
 	public function __construct( $code ) {
+		/** @var wpdb $wpdb */
 		global $wpdb;
 
 		$this->code  = apply_filters( 'woocommerce_coupon_code', $code );
@@ -189,7 +189,7 @@ class WC_Coupon {
 	 * Check if a coupon enables free shipping.
 	 *
 	 * @access public
-	 * @return void
+	 * @return bool
 	 */
 	public function enable_free_shipping() {
 		return $this->free_shipping == 'yes' ? true : false;
@@ -200,7 +200,7 @@ class WC_Coupon {
 	 * Check if a coupon excludes sale items.
 	 *
 	 * @access public
-	 * @return void
+	 * @return bool
 	 */
 	public function exclude_sale_items() {
 		return $this->exclude_sale_items == 'yes' ? true : false;

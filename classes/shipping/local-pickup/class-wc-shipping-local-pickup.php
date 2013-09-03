@@ -16,9 +16,8 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 
 	/**
 	 * __construct function.
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Shipping_Local_Pickup
 	 */
 	function __construct() {
 		$this->id 			= 'local_pickup';
@@ -228,8 +227,8 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	 * taxable_address function.
 	 *
 	 * @access public
-	 * @param mixed $address
-	 * @return void
+	 * @param array $address
+	 * @return array
 	 */
 	function taxable_address( $address ) {
 		global $woocommerce;
@@ -248,8 +247,8 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 
 	/**
 	 * Refresh totals when chosen so we can refresh the tax if we are using local pickup.
-	 *
 	 * @access public
+	 * @param string $method
 	 * @return void
 	 */
 	function method_chosen( $method ) {

@@ -50,8 +50,8 @@ class WC_Email_New_Order extends WC_Email {
 
 	/**
 	 * trigger function.
-	 *
 	 * @access public
+	 * @param string $order_id
 	 * @return void
 	 */
 	function trigger( $order_id ) {

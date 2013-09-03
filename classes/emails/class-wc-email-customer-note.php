@@ -19,9 +19,8 @@ class WC_Email_Customer_Note extends WC_Email {
 
 	/**
 	 * Constructor
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Email_Customer_Note
 	 */
 	function __construct() {
 
@@ -44,8 +43,8 @@ class WC_Email_Customer_Note extends WC_Email {
 
 	/**
 	 * trigger function.
-	 *
 	 * @access public
+	 * @param array $args
 	 * @return void
 	 */
 	function trigger( $args ) {

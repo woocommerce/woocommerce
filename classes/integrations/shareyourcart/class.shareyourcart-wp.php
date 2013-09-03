@@ -145,12 +145,10 @@ if(!class_exists('ShareYourCartWordpressPlugin',false)){
 		}
 
 		/**
-	*
-	* Get the row returned from the SQL
-	*
-	* @return an associative array containing the data of the row OR NULL
-	*         if there is none
-	*/
+		 * Get the row returned from the SQL
+		 * @param string $sql
+		 * @return array an associative array containing the data of the row OR NULL if there is none
+		 */
 		protected function getRow($sql){
 
 			global $wpdb;
@@ -379,4 +377,3 @@ if(!class_exists('ShareYourCartWordpressPlugin',false)){
 	}
 
 } //END IF
-?>

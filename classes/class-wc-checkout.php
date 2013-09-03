@@ -38,9 +38,8 @@ class WC_Checkout {
 
 	/**
 	 * Constructor for the checkout class. Hooks in methods and defines checkout fields.
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Checkout
 	 */
 	public function __construct () {
 		global $woocommerce;
@@ -133,11 +132,14 @@ class WC_Checkout {
 
 	/**
 	 * create_order function.
-	 *
 	 * @access public
-	 * @return void
+	 * @todo MyException is undefined
+	 * @throws MyException
+	 * @return int
 	 */
 	public function create_order() {
+		/** @var Woocommerce $woocommerce */
+		/** @var wpdb $wpdb */
 		global $woocommerce, $wpdb;
 
 		// Give plugins the opportunity to create an order themselves
@@ -367,11 +369,13 @@ class WC_Checkout {
 
 	/**
 	 * Process the checkout after the confirm order button is pressed
-	 *
 	 * @access public
+	 * @todo What is MyException?
+	 * @throws MyException
 	 * @return void
 	 */
 	public function process_checkout() {
+		/** @var Woocommerce $woocommerce */
 		global $wpdb, $woocommerce, $current_user;
 
 		$woocommerce->verify_nonce( 'process_checkout' );
@@ -774,6 +778,7 @@ class WC_Checkout {
 	 * @return string
 	 */
 	public function get_value( $input ) {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 
 		if ( ! empty( $_POST[ $input ] ) ) {
@@ -823,5 +828,6 @@ class WC_Checkout {
 			if ( $input == "shipping_postcode" )
 				return $woocommerce->customer->get_shipping_postcode() ? $woocommerce->customer->get_shipping_postcode() : '';
 		}
+	return '';
 	}
 }

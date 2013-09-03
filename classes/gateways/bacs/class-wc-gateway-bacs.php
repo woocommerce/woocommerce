@@ -15,12 +15,11 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 class WC_Gateway_BACS extends WC_Payment_Gateway {
 
-    /**
-     * Constructor for the gateway.
-     *
-     * @access public
-     * @return void
-     */
+	/**
+	 * Constructor for the gateway.
+	 * @access public
+	 * @return \WC_Gateway_BACS
+	 */
     public function __construct() {
 		$this->id				= 'bacs';
 		$this->icon 			= apply_filters('woocommerce_bacs_icon', '');

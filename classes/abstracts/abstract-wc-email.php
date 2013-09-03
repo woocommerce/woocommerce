@@ -123,11 +123,11 @@ abstract class WC_Email extends WC_Settings_API {
 
 	/**
 	 * Constructor
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Email
 	 */
 	function __construct() {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 
 		// Init settings
@@ -159,8 +159,8 @@ abstract class WC_Email extends WC_Settings_API {
 	 * handle_multipart function.
 	 *
 	 * @access public
-	 * @param mixed $mailer
-	 * @return void
+	 * @param \PHPMailer $mailer
+	 * @return \PHPMailer
 	 */
 	function handle_multipart( $mailer )  {
 
@@ -248,7 +248,7 @@ abstract class WC_Email extends WC_Settings_API {
 	 * get_content_type function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	function get_content_type() {
 		switch ( $this->get_email_type() ) {
@@ -262,11 +262,12 @@ abstract class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	* Proxy to parent's get_option and attempt to localize the result using gettext.
-	*
-	* @access public
-	* @return string
-	*/
+	 * Proxy to parent's get_option and attempt to localize the result using gettext.
+	 * @access public
+	 * @param mixed $key
+	 * @param null  $empty_value
+	 * @return string
+	 */
 	function get_option( $key, $empty_value = null ) {
 		return __( parent::get_option( $key, $empty_value ) );
 	}
@@ -287,7 +288,7 @@ abstract class WC_Email extends WC_Settings_API {
 	 * get_blogname function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	function get_blogname() {
 		return wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
@@ -317,7 +318,7 @@ abstract class WC_Email extends WC_Settings_API {
 	 *
 	 * @access public
 	 * @param mixed $content
-	 * @return void
+	 * @return string
 	 */
 	function style_inline( $content ) {
 
@@ -329,7 +330,9 @@ abstract class WC_Email extends WC_Settings_API {
 
 		$nodes = $dom->getElementsByTagName('img');
 
+
 		foreach( $nodes as $node )
+			/** @var DOMElement $node */
 			if ( ! $node->hasAttribute( 'style' ) )
 				$node->setAttribute( "style", "display:inline; border:none; font-size:14px; font-weight:bold; height:auto; line-height:100%; outline:none; text-decoration:none; text-transform:capitalize;" );
 
@@ -364,7 +367,7 @@ abstract class WC_Email extends WC_Settings_API {
 	 * get_content_plain function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	function get_content_plain() {}
 

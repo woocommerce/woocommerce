@@ -30,9 +30,8 @@ class WC_Session_Handler extends WC_Session {
 
 	/**
 	 * Constructor for the session class.
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Session_Handler
 	 */
 	public function __construct() {
 		$this->_cookie = 'wc_session_cookie_' . COOKIEHASH;

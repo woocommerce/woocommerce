@@ -30,7 +30,7 @@ class WC_Product_External extends WC_Product {
 	 * Returns false if the product cannot be bought.
 	 *
 	 * @access public
-	 * @return cool
+	 * @return bool
 	 */
 	public function is_purchasable() {
 		return apply_filters( 'woocommerce_is_purchasable', false, $this );
@@ -40,7 +40,7 @@ class WC_Product_External extends WC_Product {
 	 * get_product_url function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_product_url() {
 		return $this->product_url;
@@ -50,7 +50,7 @@ class WC_Product_External extends WC_Product {
 	 * get_button_text function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_button_text() {
 		return $this->button_text ? $this->button_text : __( 'Buy product', 'woocommerce' );

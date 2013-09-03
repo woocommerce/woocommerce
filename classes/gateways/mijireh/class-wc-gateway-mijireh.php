@@ -18,13 +18,13 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 	/** @var string Access key for mijireh */
 	var $access_key;
 
-    /**
-     * Constructor for the gateway.
-     *
-     * @access public
-     * @return void
-     */
+	/**
+	 * Constructor for the gateway.
+	 * @access public
+	 * @return \WC_Gateway_Mijireh
+	 */
 	public function __construct() {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 
 		$this->id 			= 'mijireh_checkout';
@@ -194,6 +194,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
      * @return array
      */
     public function process_payment( $order_id ) {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 
 		$this->init_mijireh();
@@ -291,6 +292,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 			return $result;
 		} catch (Mijireh_Exception $e) {
 			$woocommerce->add_error( __('Mijireh error:', 'woocommerce' ) . $e->getMessage() );
+			/** @todo Still need to return $result with 'faulure' status */
 		}
     }
 
@@ -368,7 +370,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
      * is_slurp_page function.
      *
      * @access public
-     * @return void
+     * @return bool
      */
     public static function is_slurp_page() {
 		global $post;

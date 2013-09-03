@@ -18,9 +18,8 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 
 	/**
 	 * __construct function.
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Shipping_International_Delivery
 	 */
 	function __construct() {
 

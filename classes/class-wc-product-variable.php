@@ -73,6 +73,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return int Stock
 	 */
 	function set_stock( $amount = null ) {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 
 		if ( $this->managing_stock() && ! is_null( $amount ) ) {
@@ -91,6 +92,7 @@ class WC_Product_Variable extends WC_Product {
 
 			return apply_filters( 'woocommerce_stock_amount', $this->stock );
 		}
+		return 0;
 	}
 
 	/**
@@ -101,6 +103,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return int Stock
 	 */
 	public function reduce_stock( $by = 1 ) {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 
 		if ( $this->managing_stock() ) {
@@ -116,6 +119,7 @@ class WC_Product_Variable extends WC_Product {
 
 			return apply_filters( 'woocommerce_stock_amount', $this->stock );
 		}
+		return 0;
 	}
 
 
@@ -127,6 +131,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return int Stock
 	 */
 	public function increase_stock( $by = 1 ) {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 
 		if ($this->managing_stock()) :
@@ -142,6 +147,7 @@ class WC_Product_Variable extends WC_Product {
 
 			return apply_filters( 'woocommerce_stock_amount', $this->stock );
 		endif;
+		return 0;
 	}
 
 

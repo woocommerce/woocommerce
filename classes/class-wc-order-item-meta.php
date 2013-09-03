@@ -15,10 +15,9 @@ class WC_Order_Item_Meta {
 
 	/**
 	 * Constructor
-	 *
 	 * @access public
-	 * @param string $item_meta (default: '')
-	 * @return void
+	 * @param array|string $item_meta (default: '')
+	 * @return \WC_Order_Item_Meta
 	 */
 	public function __construct( $item_meta = array() ) {
 		$this->meta = $item_meta;
@@ -31,9 +30,10 @@ class WC_Order_Item_Meta {
 	 * @param bool $flat (default: false)
 	 * @param bool $return (default: false)
 	 * @param string $hideprefix (default: _)
-	 * @return void
+	 * @return void|string
 	 */
 	public function display( $flat = false, $return = false, $hideprefix = '_' ) {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 
 		if ( ! empty( $this->meta ) ) {
@@ -81,5 +81,6 @@ class WC_Order_Item_Meta {
 			else
 				echo $output;
 		}
+		return '';
 	}
 }

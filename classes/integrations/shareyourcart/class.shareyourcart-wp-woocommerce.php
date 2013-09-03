@@ -171,7 +171,8 @@ if ( ! class_exists( 'ShareYourCartWooCommerce', false ) ) {
 	     *
 	     * @access private
 	     * @param mixed $coupon_code
-	     * @return void
+	     * @return int
+		 * @todo ereg_replace is deprecated
 	     */
 	    private function _saveCouponPost( $coupon_code ){
 			$new_post = array(
