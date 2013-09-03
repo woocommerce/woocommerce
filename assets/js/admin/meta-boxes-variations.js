@@ -133,27 +133,26 @@ jQuery( function($){
 	});
 
 	jQuery('.wc-metaboxes-wrapper').on('click', 'a.bulk_edit', function(event){
-		var field_to_edit = jQuery('select#field_to_edit').val();
+		var bulk_edit  = jQuery('select#field_to_edit').val();
 
-		switch( field_to_edit ) {
-
+		switch( bulk_edit ) {
 			case 'toggle_enabled':
 				var checkbox = jQuery('input[name^="variable_enabled"]');
 	       		checkbox.attr('checked', !checkbox.attr('checked'));
-				break;
+			break;
 			case 'toggle_downloadable':
 				var checkbox = jQuery('input[name^="variable_is_downloadable"]');
 	       		checkbox.attr('checked', !checkbox.attr('checked'));
 	       		jQuery('input.variable_is_downloadable').change();
-				break;
+			break;
 			case 'toggle_virtual':
 				var checkbox = jQuery('input[name^="variable_is_virtual"]');
 	       		checkbox.attr('checked', !checkbox.attr('checked'));
 	       		jQuery('input.variable_is_virtual').change();
-				break;
+			break;
 			case 'delete_all':
-
 				var answer = confirm( woocommerce_admin_meta_boxes_variations.i18n_delete_all_variations );
+
 				if (answer){
 
 					var answer = confirm( woocommerce_admin_meta_boxes_variations.i18n_last_warning );
@@ -183,75 +182,36 @@ jQuery( function($){
 								jQuery('.woocommerce_variations .woocommerce_variation').remove();
 							});
 						});
-
 					}
-
 				}
-				break;
+			break;
 			case 'variable_regular_price_increase':
-				field_to_edit = 'variable_regular_price';
-				var input_tag = jQuery('select#field_to_edit :selected').attr('rel') ? jQuery('select#field_to_edit :selected').attr('rel') : 'input';
-
-				var value = prompt( woocommerce_admin_meta_boxes_variations.i18n_enter_a_value_fixed_or_percent );
-				jQuery(input_tag + '[name^="' + field_to_edit + '"]').each(function() {
-					var current_value = jQuery(this).val();
-
-					if ( value.indexOf("%") >= 0 ) {
-						var new_value = Number( current_value ) + ( ( Number( current_value ) / 100 ) * Number( value.replace(/\%/, "" ) ) );
-					} else {
-						var new_value = Number( current_value ) + Number ( value );
-					}
-					jQuery(this).val( new_value ).change();
-				});
-				break;
 			case 'variable_regular_price_decrease':
-				field_to_edit = 'variable_regular_price';
-				var input_tag = jQuery('select#field_to_edit :selected').attr('rel') ? jQuery('select#field_to_edit :selected').attr('rel') : 'input';
-
-				var value = prompt( woocommerce_admin_meta_boxes_variations.i18n_enter_a_value_fixed_or_percent );
-				jQuery(input_tag + '[name^="' + field_to_edit + '"]').each(function() {
-					var current_value = jQuery(this).val();
-
-					if ( value.indexOf("%") >= 0 ) {
-						var new_value = Number( current_value ) - ( ( Number( current_value ) / 100 ) * Number( value.replace(/\%/, "" ) ) );
-					} else {
-						var new_value = Number( current_value ) - Number ( value );
-					}
-					jQuery(this).val( new_value ).change();
-				});
-				break;
 			case 'variable_sale_price_increase':
-				field_to_edit = 'variable_sale_price';
-				var input_tag = jQuery('select#field_to_edit :selected').attr('rel') ? jQuery('select#field_to_edit :selected').attr('rel') : 'input';
-
-				var value = prompt( woocommerce_admin_meta_boxes_variations.i18n_enter_a_value_fixed_or_percent );
-				jQuery(input_tag + '[name^="' + field_to_edit + '"]').each(function() {
-					var current_value = jQuery(this).val();
-
-					if ( value.indexOf("%") >= 0 ) {
-						var new_value = Number( current_value ) + ( ( Number( current_value ) / 100 ) * Number( value.replace(/\%/, "" ) ) );
-					} else {
-						var new_value = Number( current_value ) + Number ( value );
-					}
-					jQuery(this).val( new_value ).change();
-				});
-				break;
 			case 'variable_sale_price_decrease':
-				field_to_edit = 'variable_sale_price';
-				var input_tag = jQuery('select#field_to_edit :selected').attr('rel') ? jQuery('select#field_to_edit :selected').attr('rel') : 'input';
+				if ( bulk_edit.lastIndexOf( 'variable_regular_price', 0 ) === 0 )
+					var edit_field = 'variable_regular_price';
+				else
+					var edit_field = 'variable_sale_price';
 
 				var value = prompt( woocommerce_admin_meta_boxes_variations.i18n_enter_a_value_fixed_or_percent );
-				jQuery(input_tag + '[name^="' + field_to_edit + '"]').each(function() {
-					var current_value = jQuery(this).val();
 
-					if ( value.indexOf("%") >= 0 ) {
-						var new_value = Number( current_value ) - ( ( Number( current_value ) / 100 ) * Number( value.replace(/\%/, "" ) ) );
-					} else {
-						var new_value = Number( current_value ) - Number ( value );
-					}
+				jQuery( ':input[name^="' + edit_field + '["]').each(function() {
+					var current_value = Number( jQuery(this).val() );
+
+					if ( value.indexOf("%") >= 0 )
+						value = Number( ( Number( current_value ) / 100 ) * Number( value.replace(/\%/, "" ) ) );
+					else
+						value = Number( value );
+
+					if ( bulk_edit.indexOf( "increase" ) != -1 )
+						var new_value = current_value + value;
+					else
+						var new_value = current_value - value;
+
 					jQuery(this).val( new_value ).change();
 				});
-				break;
+			break;
 			case 'variable_regular_price' :
 			case 'variable_sale_price' :
 			case 'variable_stock' :
@@ -262,13 +222,11 @@ jQuery( function($){
 			case 'variable_file_paths' :
 			case 'variable_download_limit' :
 			case 'variable_download_expiry' :
-				var input_tag = jQuery('select#field_to_edit :selected').attr('rel') ? jQuery('select#field_to_edit :selected').attr('rel') : 'input';
-
 				var value = prompt( woocommerce_admin_meta_boxes_variations.i18n_enter_a_value );
-				jQuery(input_tag + '[name^="' + field_to_edit + '["]').val( value ).change();
-				break;
-		}
 
+				jQuery( ':input[name^="' + bulk_edit + '["]').val( value ).change();
+			break;
+		}
 	});
 
 	jQuery('#variable_product_options').on('change', 'input.variable_is_downloadable', function(){

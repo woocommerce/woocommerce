@@ -746,7 +746,7 @@ class WC_Meta_Box_Product_Data {
 						<option value="variable_length"><?php _e( 'Length', 'woocommerce' ); ?></option>
 						<option value="variable_width"><?php _e( 'Width', 'woocommerce' ); ?></option>
 						<option value="variable_height"><?php _e( 'Height', 'woocommerce' ); ?></option>
-						<option value="variable_file_paths" rel="textarea"><?php _e( 'File Path', 'woocommerce' ); ?></option>
+						<option value="variable_file_paths"><?php _e( 'File Path', 'woocommerce' ); ?></option>
 						<option value="variable_download_limit"><?php _e( 'Download limit', 'woocommerce' ); ?></option>
 						<option value="variable_download_expiry"><?php _e( 'Download Expiry', 'woocommerce' ); ?></option>
 						<?php do_action( 'woocommerce_variable_product_bulk_edit_actions' ); ?>
