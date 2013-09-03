@@ -39,7 +39,7 @@ function woocommerce_wp_text_input( $field ) {
 
 	if ( ! empty( $field['description'] ) ) {
 
-		if ( isset( $field['desc_tip'] ) ) {
+		if ( isset( $field['desc_tip'] ) && false !== $field['desc_tip'] ) {
 			echo '<img class="help_tip" data-tip="' . esc_attr( $field['description'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
 		} else {
 			echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
@@ -86,7 +86,7 @@ function woocommerce_wp_textarea_input( $field ) {
 
 	if ( ! empty( $field['description'] ) ) {
 
-		if ( isset( $field['desc_tip'] ) ) {
+		if ( isset( $field['desc_tip'] ) && false !== $field['desc_tip'] ) {
 			echo '<img class="help_tip" data-tip="' . esc_attr( $field['description'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
 		} else {
 			echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
@@ -146,7 +146,7 @@ function woocommerce_wp_select( $field ) {
 
 	if ( ! empty( $field['description'] ) ) {
 
-		if ( isset( $field['desc_tip'] ) ) {
+		if ( isset( $field['desc_tip'] ) && false !== $field['desc_tip'] ) {
 			echo '<img class="help_tip" data-tip="' . esc_attr( $field['description'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
 		} else {
 			echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
