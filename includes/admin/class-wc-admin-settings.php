@@ -63,6 +63,11 @@ class WC_Admin_Settings {
 		self::add_message( __( 'Your settings have been saved.', 'woocommerce' ) );
 		self::check_download_folder_protection();
 
+		// Re-add endpoints and flush rules
+		WC()->query->init_query_vars();
+		WC()->query->add_endpoints();
+		flush_rewrite_rules();
+
 		do_action( 'woocommerce_settings_saved' );
 	}
 
@@ -762,8 +767,6 @@ class WC_Admin_Settings {
 				}
 			}
 		}
-
-		flush_rewrite_rules();
 	}
 }
 

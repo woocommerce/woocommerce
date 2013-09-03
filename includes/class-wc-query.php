@@ -19,18 +19,7 @@ if ( ! class_exists( 'WC_Query' ) ) :
 class WC_Query {
 
 	/** @public array Query vars to add to wp */
-	public $query_vars = array(
-		// Checkout actions
-		'order-pay',
-		'order-received',
-
-		// My account actions
-		'view-order',
-		'edit-account',
-		'edit-address',
-		'lost-password',
-		'customer-logout'
-		);
+	public $query_vars = array();
 
 	/** @public array Unfiltered product ids (before layered nav etc) */
 	public $unfiltered_product_ids 	= array();
@@ -69,6 +58,27 @@ class WC_Query {
 			add_filter( 'the_posts', array( $this, 'the_posts' ), 11, 2 );
 			add_filter( 'wp', array( $this, 'remove_product_query' ) );
 		}
+
+		$this->init_query_vars();
+	}
+
+	/**
+	 * Init query vars by loading options.
+	 */
+	public function init_query_vars() {
+		// Query vars to add to WP
+		$this->query_vars = array(
+			// Checkout actions
+			'order-pay'       => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
+			'order-received'  => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
+
+			// My account actions
+			'view-order'      => get_option( 'woocommerce_myaccount_view_order_endpoint', 'view-order' ),
+			'edit-account'    => get_option( 'woocommerce_myaccount_edit_account_endpoint', 'edit-account' ),
+			'edit-address'    => get_option( 'woocommerce_myaccount_edit_address_endpoint', 'edit-address' ),
+			'lost-password'   => get_option( 'woocommerce_myaccount_lost_password_endpoint', 'lost-password' ),
+			'customer-logout' => get_option( 'woocommerce_logout_endpoint', 'customer-logout' )
+		);
 	}
 
 	/**
@@ -83,7 +93,7 @@ class WC_Query {
 	 * Add endpoints for query vars
 	 */
 	public function add_endpoints() {
-		foreach ( $this->query_vars as $var )
+		foreach ( $this->query_vars as $key => $var )
 			add_rewrite_endpoint( $var, EP_PAGES );
 	}
 
@@ -94,8 +104,8 @@ class WC_Query {
 	 * @return void
 	 */
 	public function add_query_vars( $vars ) {
-		foreach ( $this->query_vars as $var )
-			$vars[] = $var;
+		foreach ( $this->query_vars as $key => $var )
+			$vars[] = $key;
 
 		return $vars;
 	}
@@ -106,9 +116,16 @@ class WC_Query {
 	public function parse_request() {
 		global $wp;
 
-		foreach ( $this->query_vars as $var )
-			if ( isset( $_GET[ $var ] ) )
-				$wp->query_vars[ $var ] = $_GET[ $var ];
+		// Map query vars to their keys, or get them if endpoints are not supported
+		foreach ( $this->query_vars as $key => $var ) {
+			if ( isset( $_GET[ $var ] ) ) {
+				$wp->query_vars[ $key ] = $_GET[ $var ];
+			}
+
+			elseif ( isset( $wp->query_vars[ $var ] ) ) {
+				$wp->query_vars[ $key ] = $wp->query_vars[ $var ];
+			}
+		}
 	}
 
 	/**

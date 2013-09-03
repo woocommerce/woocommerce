@@ -46,6 +46,9 @@ function woocommerce_get_endpoint_url( $endpoint, $value = '', $permalink = '' )
 	if ( ! $permalink )
 		$permalink = get_permalink();
 
+	// Map endpoint to options
+	$endpoint = isset( WC()->query->query_vars[ $endpoint ] ) ? WC()->query->query_vars[ $endpoint ] : $endpoint;
+
 	if ( get_option( 'permalink_structure' ) )
 		$url = trailingslashit( $permalink ) . $endpoint . '/' . $value;
 	else
