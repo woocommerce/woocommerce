@@ -2,7 +2,7 @@
 /**
  * WooCommerce Core Functions
  *
- * Genral core functions available on both the front-end and admin.
+ * General core functions available on both the front-end and admin.
  *
  * @author 		WooThemes
  * @category 	Core

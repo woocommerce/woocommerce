@@ -318,6 +318,7 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-countries.php' );						// Defines countries and states
 		include_once( 'includes/class-wc-integrations.php' );					// Loads integrations
 		include_once( 'includes/class-wc-cache-helper.php' );					// Cache Helper
+		include_once( 'includes/class-wc-https.php' );							// https Helper
 
 		// Include Core Integrations - these are included sitewide
 		include_once( 'includes/integrations/google-analytics/class-wc-google-analytics.php' );
@@ -467,12 +468,6 @@ final class WooCommerce {
 			add_action( 'wp_head', array( $this, 'generator' ) );
 
 			add_action( 'wp_footer', array( $this->get_helper( 'inline-javascript' ), 'output_inline_js' ), 25 );
-
-			// HTTPS urls with SSL on
-			$filters = array( 'post_thumbnail_html', 'widget_text', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
-
-			foreach ( $filters as $filter )
-				add_filter( $filter, array( $this, 'force_ssl' ) );
 		}
 
 		// Actions
@@ -766,25 +761,6 @@ final class WooCommerce {
 		}
 	}
 
-
-	/**
-	 * force_ssl function.
-	 *
-	 * @access public
-	 * @param mixed $content
-	 * @return void
-	 */
-	public function force_ssl( $content ) {
-		if ( is_ssl() ) {
-			if ( is_array($content) )
-				$content = array_map( array( $this, 'force_ssl' ) , $content );
-			else
-				$content = str_replace( 'http:', 'https:', $content );
-		}
-		return $content;
-	}
-
-
 	/**
 	 * Get an image size.
 	 *
@@ -822,6 +798,12 @@ final class WooCommerce {
 	}
 
 	/** Deprecated functions *********************************************************/
+
+	// Deprecated 2.1.0 Access via the WC_Transient_Helper helper
+	public function force_ssl( $content ) {
+		_deprecated_function( 'Woocommerce->force_ssl', '2.1', 'WC_HTTPS::force_https_url' );
+		return WC_HTTPS::force_https_url( $content );
+	}
 
 	// Deprecated 2.1.0 Access via the WC_Transient_Helper helper
 	public function clear_product_transients( $post_id = 0 ) {
