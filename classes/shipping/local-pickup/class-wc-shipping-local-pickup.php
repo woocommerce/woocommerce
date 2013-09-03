@@ -46,8 +46,6 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 
 		// Actions
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'taxable_address' ) );
-		add_action( 'woocommerce_shipping_method_chosen', array( $this, 'method_chosen' ) );
 	}
 
 	/**
@@ -111,13 +109,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 				'css'			=> 'width: 450px;',
 				'default' 		=> '',
 				'options'		=> $woocommerce->countries->countries
-			),
-			'apply_base_tax' => array(
-				'title' 		=> __( 'Apply base tax rate', 'woocommerce' ),
-				'type' 			=> 'checkbox',
-				'label' 		=> __( 'When this shipping method is chosen, apply the base tax rate rather than for the customer\'s given address.', 'woocommerce' ),
-				'default' 		=> 'no'
-			),
+			)
 		);
 	}
 
@@ -222,6 +214,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available, $package );
 	}
 
+<<<<<<< HEAD
 
 	/**
 	 * taxable_address function.
@@ -259,6 +252,8 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 		}
 	}
 
+=======
+>>>>>>> 69704113a1b16325da21a510f068fa690fec6001
     /**
      * clean function.
      *
