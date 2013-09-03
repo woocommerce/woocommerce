@@ -47,8 +47,6 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 
 		// Actions
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'taxable_address' ) );
-		add_action( 'woocommerce_shipping_method_chosen', array( $this, 'method_chosen' ) );
 	}
 
 	/**
@@ -112,13 +110,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 				'css'			=> 'width: 450px;',
 				'default'		=> '',
 				'options'		=> $woocommerce->countries->get_shipping_countries()
-			),
-			'apply_base_tax' => array(
-				'title'			=> __( 'Apply base tax rate', 'woocommerce' ),
-				'type'			=> 'checkbox',
-				'label'			=> __( 'When this shipping method is chosen, apply the base tax rate rather than for the customer\'s given address.', 'woocommerce' ),
-				'default'		=> 'no'
-			),
+			)
 		);
 	}
 
@@ -215,45 +207,6 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 		}
 
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available, $package );
-	}
-
-
-	/**
-	 * taxable_address function.
-	 *
-	 * @param array $address
-	 * @return array
-	 */
-	public function taxable_address( $address ) {
-		global $woocommerce;
-
-		// Only apply if all packages are being shipped via local pickup
-		$chosen_shipping_methods = array_unique( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		if ( sizeof( $chosen_shipping_methods ) == 1 && $chosen_shipping_methods[0] == 'local_pickup' ) {
-			if ( $this->get_option( 'apply_base_tax' ) == 'yes' ) {
-
-				$country 	= $woocommerce->countries->get_base_country();
-				$state 		= $woocommerce->countries->get_base_state();
-
-				$address = array( $country, $state, '', '' );
-			}
-		}
-		return $address;
-	}
-
-	/**
-	 * Refresh totals when chosen so we can refresh the tax if we are using local pickup.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function method_chosen( $method ) {
-		global $woocommerce;
-
-		if ( $method == 'local_pickup' && $this->get_option( 'apply_base_tax' ) == 'yes' ) {
-			$woocommerce->cart->calculate_totals();
-		}
 	}
 
 	/**
