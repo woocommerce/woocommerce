@@ -233,7 +233,7 @@ class WC_Google_Analytics extends WC_Integration {
 					$code .= "'" . esc_js( join( "/", $out) ) . "',";
 				}
 
-				$code .= "'" . esc_js( $order->get_item_total( $item ) ) . "',";
+				$code .= "'" . esc_js( $order->get_item_total( $item, true, true ) ) . "',";
 				$code .= "'" . esc_js( $item['qty'] ) . "'";
 				$code .= "]);";
 			}
