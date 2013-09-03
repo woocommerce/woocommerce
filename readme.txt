@@ -166,13 +166,17 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.0.14 - xx/xx/xxxx =
+* Tweak - Update cart performance improvements
 * Fix - Google Analytics no longer identifies users using custom vars
+* Fix - Send tax inclusive, rounded item price to Google Analytics
 * Fix - Use version_compare to check for required jQuery
 * Fix - Made gateway abstract compatible with implementations to prevent strict notices
 * Fix - Update order's GMT date ('post_date_gmt') when changing the order date via the "Edit Order" screen
 * Fix - Hardened the checkout payment URL method
 * Fix - Regression bug fixed, allowing 0 value attributes again
 * Fix - API url function work when permalinks are not pretty
+* Fix - Chosen select boxes now support RTL languages
+* Fix - Refresh when creating an account to prevent nonce issues
 
 = 2.0.13 - 19/07/2013 =
 * Tweak - Allow users with edit rights to add draft products to cart (and nobody else)
