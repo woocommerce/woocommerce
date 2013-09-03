@@ -1419,26 +1419,25 @@ class WC_Cart {
 
 								// Get tax rate for the store base, ensuring we use the unmodified tax_class for the product
 								$base_tax_rates 		= $this->tax->get_shop_base_rate( $_product->tax_class );
-
-								// Work out new price based on region
 								$row_base_price 		= $base_price * $values['quantity'];
-								$base_taxes				= $this->tax->calc_tax( $row_base_price, $base_tax_rates, true, true ); // Unrounded
-								$taxes					= $this->tax->calc_tax( $row_base_price - array_sum($base_taxes), $tax_rates, false );
 
-								// Tax amount
-								$tax_amount				= array_sum( $taxes );
+								// Work out a new base price without the shop's base tax
+								$line_tax              = array_sum( $this->tax->calc_tax( $row_base_price, $base_tax_rates, true ) );
 
-								// Line subtotal + tax
-								$line_subtotal_tax 		= get_option('woocommerce_tax_round_at_subtotal') == 'no' ? $this->tax->round( $tax_amount ) : $tax_amount;
-								$line_subtotal			= $row_base_price - array_sum( $base_taxes );
+								// Now we have a new item price (excluding TAX)
+								$line_subtotal         = $this->tax->round( $row_base_price - $line_tax );
 
-								// Adjusted price
-								$adjusted_price 		= ( $row_base_price - array_sum( $base_taxes ) + array_sum( $taxes ) ) / $values['quantity'];
+								// Now add taxes for the users location
+								$line_subtotal_tax     = array_sum( $this->tax->calc_tax( $line_subtotal, $tax_rates, false ) );
+								$line_subtotal_tax     = $this->round_at_subtotal ? $line_subtotal_tax : $this->tax->round( $line_subtotal_tax );
+
+								// Adjusted price (this is the price including the new tax rate)
+								$adjusted_price        = ( $line_subtotal + $line_subtotal_tax ) / $values['quantity'];
 
 								// Apply discounts
-								$discounted_price 		= $this->get_discounted_price( $values, $adjusted_price, true );
-								$discounted_taxes		= $this->tax->calc_tax( $discounted_price * $values['quantity'], $tax_rates, true );
-								$discounted_tax_amount	= array_sum( $discounted_taxes ); // Sum taxes
+								$discounted_price      = $this->get_discounted_price( $values, $adjusted_price, true );
+								$discounted_taxes      = $this->tax->calc_tax( $discounted_price * $values['quantity'], $tax_rates, true );
+								$discounted_tax_amount = array_sum( $discounted_taxes ); // Sum taxes
 
 							/**
 							 * Regular tax calculation (customer inside base and the tax class is unmodified
