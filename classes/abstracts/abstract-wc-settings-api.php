@@ -186,7 +186,8 @@ abstract class WC_Settings_API {
 
     	$html = '';
     	foreach ( $form_fields as $k => $v ) {
-    		if ( ! isset( $v['type'] ) || ( $v['type'] == '' ) ) { $v['type'] == 'text'; } // Default to "text" field type.
+    		if ( ! isset( $v['type'] ) || ( $v['type'] == '' ) )
+    			$v['type'] = 'text'; // Default to "text" field type.
 
     		if ( method_exists( $this, 'generate_' . $v['type'] . '_html' ) ) {
     			$html .= $this->{'generate_' . $v['type'] . '_html'}( $k, $v );
@@ -645,7 +646,7 @@ abstract class WC_Settings_API {
 
     	foreach ( $form_fields as $k => $v ) {
     		if ( empty( $v['type'] ) )
-    			$v['type'] == 'text'; // Default to "text" field type.
+    			$v['type'] = 'text'; // Default to "text" field type.
 
     		if ( method_exists( $this, 'validate_' . $v['type'] . '_field' ) ) {
     			$field = $this->{'validate_' . $v['type'] . '_field'}( $k );
