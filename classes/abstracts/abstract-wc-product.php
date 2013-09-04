@@ -156,6 +156,7 @@ class WC_Product {
 	 * @return int Stock
 	 */
 	function set_stock( $amount = null ) {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 
 		if ( $this->managing_stock() && ! is_null( $amount ) ) {
@@ -172,6 +173,7 @@ class WC_Product {
 
 			return $this->get_stock_quantity();
 		}
+		return 0;
 	}
 
 
@@ -183,6 +185,7 @@ class WC_Product {
 	 * @return int Stock
 	 */
 	function reduce_stock( $by = 1 ) {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 
 		if ( $this->managing_stock() ) {
@@ -197,6 +200,7 @@ class WC_Product {
 
 			return $this->get_stock_quantity();
 		}
+		return 0;
 	}
 
 
@@ -208,6 +212,7 @@ class WC_Product {
 	 * @return int Stock
 	 */
 	function increase_stock( $by = 1 ) {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 
 		if ( $this->managing_stock() ) {
@@ -222,13 +227,14 @@ class WC_Product {
 
 			return $this->get_stock_quantity();
 		}
+		return 0;
 	}
 
 
 	/**
 	 * set_stock_status function.
-	 *
 	 * @access public
+	 * @param $status
 	 * @return void
 	 */
 	function set_stock_status( $status ) {
@@ -286,7 +292,7 @@ class WC_Product {
 	 *
 	 * @access public
 	 * @param string $download_id file identifier
-	 * @return array
+	 * @return array|string
 	 */
 	function get_file_download_path( $download_id ) {
 
@@ -649,6 +655,7 @@ class WC_Product {
 	 */
 	function get_weight() {
 		if ( $this->weight ) return $this->weight;
+		return '';
 	}
 
 
@@ -715,8 +722,8 @@ class WC_Product {
 
 	/**
 	 * Returns the price (including tax). Uses customer tax rates. Can work for a specific $qty for more accurate taxes.
-	 *
 	 * @access public
+	 * @param int $qty
 	 * @return string
 	 */
 	function get_price_including_tax( $qty = 1 ) {
@@ -732,7 +739,7 @@ class WC_Product {
 				$tax_rates  = $_tax->get_rates( $this->get_tax_class() );
 				$taxes      = $_tax->calc_tax( $price * $qty, $tax_rates, false );
 				$tax_amount = $_tax->get_tax_total( $taxes );
-				$price      = round( $price * $qty + $tax_amount, 2 );
+				$price      = round( (float)$price * $qty + $tax_amount, 2 );
 
 			} else {
 
@@ -749,7 +756,7 @@ class WC_Product {
 
 					$base_taxes			= $_tax->calc_tax( $price * $qty, $base_tax_rates, true, true );
 					$modded_taxes		= $_tax->calc_tax( $price * $qty - array_sum( $base_taxes ), $tax_rates, false );
-					$price      		= round( $price * $qty - array_sum( $base_taxes ) + array_sum( $modded_taxes ), 2 );
+					$price      		= round( (float)$price * $qty - array_sum( $base_taxes ) + array_sum( $modded_taxes ), 2 );
 
 				} else {
 
@@ -770,8 +777,8 @@ class WC_Product {
 	/**
 	 * Returns the price (excluding tax) - ignores tax_class filters since the price may *include* tax and thus needs subtracting.
 	 * Uses store base tax rates. Can work for a specific $qty for more accurate taxes.
-	 *
 	 * @access public
+	 * @param int $qty
 	 * @return string
 	 */
 	function get_price_excluding_tax( $qty = 1 ) {
@@ -878,8 +885,9 @@ class WC_Product {
 
 	/**
 	 * Functions for getting parts of a price, in html, used by get_price_html.
-	 *
 	 * @access public
+	 * @param $from
+	 * @param $to
 	 * @return string
 	 */
 	function get_price_html_from_to( $from, $to ) {
@@ -890,7 +898,7 @@ class WC_Product {
 	 * get_average_rating function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	function get_average_rating() {
 		if ( false === ( $average_rating = get_transient( 'wc_average_rating_' . $this->id ) ) ) {
@@ -925,11 +933,12 @@ class WC_Product {
 	 * get_rating_count function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return int
 	 */
 	function get_rating_count() {
 		if ( false === ( $count = get_transient( 'wc_rating_count_' . $this->id ) ) ) {
 
+			/** @var wpdb $wpdb */
 			global $wpdb;
 
 			$count = $wpdb->get_var( $wpdb->prepare("
@@ -969,6 +978,7 @@ class WC_Product {
 
 			return $rating_html;
 		}
+	return '';
 	}
 
 
@@ -1253,13 +1263,13 @@ class WC_Product {
 	}
 
 
-    /**
-     * Returns the main product image
-     *
-     * @access public
-     * @param string $size (default: 'shop_thumbnail')
-     * @return string
-     */
+	/**
+	 * Returns the main product image
+	 * @access public
+	 * @param string $size (default: 'shop_thumbnail')
+	 * @param array  $attr
+	 * @return string
+	 */
     function get_image( $size = 'shop_thumbnail', $attr = array() ) {
     	global $woocommerce;
 

@@ -1976,14 +1976,13 @@ class Woocommerce {
 
 	/**
 	 * mfunc_wrapper function.
-	 *
 	 * Wraps a function in mfunc to keep it dynamic.
-	 *
 	 * If running WP Super Cache this checks for late_init (because functions calling this require WP to be loaded)
-	 *
 	 * @deprecated 2.0.0 No longer needed - cart fragments are cache friendly.
-	 * @access public
-	 * @param mixed $function
+	 * @access     public
+	 * @param        $mfunction
+	 * @param string $function
+	 * @param mixed  $args
 	 * @return void
 	 */
 	public function mfunc_wrapper( $mfunction, $function, $args ) {

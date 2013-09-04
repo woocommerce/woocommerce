@@ -82,6 +82,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	function is_available() {
 		if ( $this->enabled == "yes" )
 			return true;
+		return false;
 	}
 
 

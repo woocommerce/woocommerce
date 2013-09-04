@@ -16,9 +16,8 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 
 	/**
 	 * __construct function.
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Shipping_Local_Delivery
 	 */
 	function __construct() {
 		$this->id			= 'local_delivery';

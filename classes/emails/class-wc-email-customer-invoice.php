@@ -42,8 +42,8 @@ class WC_Email_Customer_Invoice extends WC_Email {
 
 	/**
 	 * trigger function.
-	 *
 	 * @access public
+	 * @param WC_Order|int $order
 	 * @return void
 	 */
 	function trigger( $order ) {

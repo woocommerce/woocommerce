@@ -65,7 +65,7 @@ class WC_Validation {
 	 *
 	 * @author John Gardner
 	 * @access public
-	 * @param mixed $toCheck A postcode
+	 * @param string $toCheck A postcode
 	 * @return bool
 	 */
 	public function is_GB_postcode( $toCheck ) {
@@ -105,6 +105,7 @@ class WC_Validation {
 		// Check the string against the six types of postcodes
 		foreach ($pcexp as $regexp) {
 
+			/** @todo Function ereg is deprecated */
 			if (ereg($regexp,$postcode, $matches)) {
 
 				// Load new postcode back into the form element
@@ -119,14 +120,14 @@ class WC_Validation {
 			}
 		}
 
-		if ($valid){return true;} else {return false;};
+		return $valid;
 	}
 
 	/**
 	 * Format the postcode according to the country and length of the postcode
 	 *
-	 * @param   string	postcode
-	 * @param	string	country
+	 * @param   string	$postcode
+	 * @param	string	$country
 	 * @return  string	formatted postcode
 	 */
 	public function format_postcode( $postcode, $country ) {

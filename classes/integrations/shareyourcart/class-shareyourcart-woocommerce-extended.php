@@ -13,10 +13,9 @@ class ShareYourCartWooCommerceEx extends ShareYourCartWooCommerce {
 
 	/**
 	 * __construct function.
-	 *
 	 * @access public
 	 * @param mixed $settings
-	 * @return void
+	 * @return \ShareYourCartWooCommerceEx
 	 */
 	function __construct( $settings ) {
 		$this->settings = $settings;

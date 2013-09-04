@@ -23,13 +23,13 @@ class WC_Shipping_Rate {
 
 	/**
 	 * __construct function.
-	 *
 	 * @access public
 	 * @param mixed $id
 	 * @param mixed $label
 	 * @param mixed $cost
 	 * @param mixed $taxes
-	 * @return void
+	 * @param       $method_id
+	 * @return \WC_Shipping_Rate
 	 */
 	public function __construct( $id, $label, $cost, $taxes, $method_id ) {
 		$this->id 			= $id;

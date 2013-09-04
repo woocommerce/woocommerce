@@ -152,10 +152,9 @@ class WC_Order {
 
 	/**
 	 * Get the order if ID is passed, otherwise the order is new and empty.
-	 *
 	 * @access public
 	 * @param string $id (default: '')
-	 * @return void
+	 * @return \WC_Order
 	 */
 	public function __construct( $id = '' ) {
 		$this->prices_include_tax = get_option('woocommerce_prices_include_tax') == 'yes' ? true : false;
@@ -339,7 +338,7 @@ class WC_Order {
 	 * Get a formatted shipping address for the order.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_formatted_shipping_address() {
 		if ( ! $this->formatted_shipping_address ) {
@@ -397,9 +396,10 @@ class WC_Order {
 	 *
 	 * @access public
 	 * @param string $type Types of line items to get (array or string)
-	 * @return void
+	 * @return array
 	 */
 	public function get_items( $type = '' ) {
+		/** @var wpdb $wpdb */
 		global $wpdb, $woocommerce;
 
 		if ( empty( $type ) )
@@ -439,8 +439,8 @@ class WC_Order {
 
 	/**
 	 * Gets order total - formatted for display.
-	 *
 	 * @access public
+	 * @param string $type
 	 * @return string
 	 */
 	public function get_item_count( $type = '' ) {
@@ -480,7 +480,7 @@ class WC_Order {
 	 * Return an array of taxes within this order.
 	 *
 	 * @access public
-	 * @return void
+	 * @return array
 	 */
 	public function get_taxes() {
 		return $this->get_items( 'tax' );
@@ -490,7 +490,7 @@ class WC_Order {
 	 * Get taxes, merged by code, formatted ready for output.
 	 *
 	 * @access public
-	 * @return void
+	 * @return array
 	 */
 	public function get_tax_totals() {
 		$taxes      = $this->get_items( 'tax' );
@@ -516,11 +516,12 @@ class WC_Order {
 
 	/**
 	 * has_meta function for order items.
-	 *
 	 * @access public
+	 * @param int $order_item_id
 	 * @return array of meta data
 	 */
 	public function has_meta( $order_item_id ) {
+		/** @var wpdb $wpdb */
 		global $wpdb;
 
 		return $wpdb->get_results( $wpdb->prepare("SELECT meta_key, meta_value, meta_id, order_item_id
@@ -530,12 +531,11 @@ class WC_Order {
 
 	/**
 	 * Get order item meta.
-	 *
-	 * @access public
-	 * @param mixed $item_id
-	 * @param string $key (default: '')
-	 * @param bool $single (default: false)
-	 * @return void
+	 * @access   public
+	 * @param        $order_item_id
+	 * @param string $key    (default: '')
+	 * @param bool   $single (default: false)
+	 * @return array|string
 	 */
 	public function get_item_meta( $order_item_id, $key = '', $single = false ) {
 		return get_metadata( 'order_item', $order_item_id, $key, $single );
@@ -586,6 +586,8 @@ class WC_Order {
 	public function get_total_discount() {
 		if ( $this->order_discount || $this->cart_discount )
 			return apply_filters( 'woocommerce_order_amount_total_discount', number_format( (double) $this->order_discount + (double) $this->cart_discount, 2, '.', '' ), $this );
+		else
+			return 0;
 	}
 
 
@@ -626,7 +628,7 @@ class WC_Order {
 	 * get_order_total function. Alias for get_total()
 	 *
 	 * @access public
-	 * @return void
+	 * @return float
 	 */
 	public function get_order_total() {
 		return $this->get_total();
@@ -742,9 +744,9 @@ class WC_Order {
 
 	/**
 	 * Gets line subtotal - formatted for display.
-	 *
 	 * @access public
-	 * @param mixed $item
+	 * @param mixed  $item
+	 * @param string $tax_display
 	 * @return string
 	 */
 	public function get_formatted_line_subtotal( $item, $tax_display = '' ) {
@@ -754,7 +756,7 @@ class WC_Order {
 
 		$subtotal = 0;
 
-		if (!isset($item['line_subtotal']) || !isset($item['line_subtotal_tax'])) return;
+		if (!isset($item['line_subtotal']) || !isset($item['line_subtotal_tax'])) return '';
 
 		if ( $tax_display == 'excl' ) {
 			if ( $this->prices_include_tax ) $ex_tax_label = 1; else $ex_tax_label = 0;
@@ -783,9 +785,9 @@ class WC_Order {
 
 	/**
 	 * Gets subtotal - subtotal is shown before discounts, but with localised taxes.
-	 *
 	 * @access public
-	 * @param bool $compound (default: false)
+	 * @param bool   $compound (default: false)
+	 * @param string $tax_display
 	 * @return string
 	 */
 	public function get_subtotal_to_display( $compound = false, $tax_display = '' ) {
@@ -800,7 +802,7 @@ class WC_Order {
 
 			foreach ( $this->get_items() as $item ) {
 
-				if ( ! isset( $item['line_subtotal'] ) || ! isset( $item['line_subtotal_tax'] ) ) return;
+				if ( ! isset( $item['line_subtotal'] ) || ! isset( $item['line_subtotal_tax'] ) ) return '';
 
 				$subtotal += $this->get_line_subtotal( $item );
 
@@ -818,7 +820,7 @@ class WC_Order {
 		} else {
 
 			if ( $tax_display == 'incl' )
-				return;
+				return '';
 
 			foreach ( $this->get_items() as $item ) {
 
@@ -851,8 +853,8 @@ class WC_Order {
 
 	/**
 	 * Gets shipping (formatted).
-	 *
 	 * @access public
+	 * @param string $tax_display
 	 * @return string
 	 */
 	public function get_shipping_to_display( $tax_display = '' ) {
@@ -932,8 +934,8 @@ class WC_Order {
 
 	/**
 	 * Get totals for display on pages and in emails.
-	 *
 	 * @access public
+	 * @param string $tax_display
 	 * @return array
 	 */
 	public function get_order_item_totals( $tax_display = '' ) {
@@ -1029,7 +1031,7 @@ class WC_Order {
 	 * @param bool $show_purchase_note (default: false)
 	 * @param bool $show_image (default: false)
 	 * @param array $image_size (default: array( 32, 32 )
-	 * @param bool plain text
+	 * @param bool $plain_text
 	 * @return string
 	 */
 	public function email_order_items_table( $show_download_links = false, $show_sku = false, $show_purchase_note = false, $show_image = false, $image_size = array( 32, 32 ), $plain_text = false ) {
@@ -1088,7 +1090,7 @@ class WC_Order {
 
 	/**
 	 * Generates a URL so that a customer can checkout/pay for their (unpaid - pending) order via a link.
-	 *
+	 * @param bool $on_checkout
 	 * @return string
 	 */
 	public function get_checkout_payment_url( $on_checkout = false ) {
@@ -1115,6 +1117,7 @@ class WC_Order {
 	 * @return string
 	 */
 	public function get_cancel_order_url() {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 		return apply_filters('woocommerce_get_cancel_order_url', $woocommerce->nonce_url( 'cancel_order', add_query_arg('cancel_order', 'true', add_query_arg('order', $this->order_key, add_query_arg('order_id', $this->id, trailingslashit( home_url() ))))));
 	}
@@ -1130,6 +1133,7 @@ class WC_Order {
 	 * @return array available downloadable file urls
 	 */
 	public function get_downloadable_file_urls( $product_id, $variation_id, $item ) {
+		/** @var wpdb $wpdb */
 		global $wpdb;
 
 	 	$download_file = $variation_id > 0 ? $variation_id : $product_id;
@@ -1163,7 +1167,7 @@ class WC_Order {
 	 * @access public
 	 * @param string $note Note to add
 	 * @param int $is_customer_note (default: 0) Is this a note for the customer?
-	 * @return id Comment ID
+	 * @return int Comment ID
 	 */
 	public function add_order_note( $note, $is_customer_note = 0 ) {
 

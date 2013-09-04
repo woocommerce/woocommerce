@@ -20,9 +20,8 @@ class WC_ShareThis extends WC_Integration {
 
 	/**
 	 * Init and hook in the integration.
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_ShareThis
 	 */
 	public function __construct() {
         $this->id					= 'sharethis';

@@ -26,9 +26,8 @@ class WC_Countries {
 
 	/**
 	 * Constructor for the counties class - defines all countries and states.
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Countries
 	 */
 	public function __construct() {
 		global $woocommerce, $states;
@@ -482,6 +481,7 @@ class WC_Countries {
 	 */
 	public function get_states( $cc ) {
 		if (isset( $this->states[$cc] )) return $this->states[$cc];
+		return array();
 	}
 
 
@@ -576,7 +576,6 @@ class WC_Countries {
 				'HK' => "{company}\n{first_name} {last_name_upper}\n{address_1}\n{address_2}\n{city_upper}\n{state_upper}\n{country}",
 				'HU' => "{name}\n{company}\n{city}\n{address_1}\n{address_2}\n{postcode}\n{country}",
 				'IS' => $postcode_before_city,
-				'IS' => $postcode_before_city,
 				'LI' => $postcode_before_city,
 				'NL' => $postcode_before_city,
 				'NZ' => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {postcode}\n{country}",
@@ -669,7 +668,7 @@ class WC_Countries {
 	 * Returns the fields we show by default. This can be filtered later on.
 	 *
 	 * @access public
-	 * @return void
+	 * @return array
 	 */
 	public function get_default_address_fields() {
 		$fields = array(
@@ -1029,7 +1028,7 @@ class WC_Countries {
 	 * @access public
 	 * @param mixed $country
 	 * @param string $type (default: 'billing_')
-	 * @return void
+	 * @return array
 	 */
 	public function get_address_fields( $country, $type = 'billing_' ) {
 		$fields     = $this->get_default_address_fields();

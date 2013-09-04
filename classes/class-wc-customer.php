@@ -20,9 +20,8 @@ class WC_Customer {
 
 	/**
 	 * Constructor for the customer class loads the customer data.
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Customer
 	 */
 	public function __construct() {
 		global $woocommerce;
@@ -81,8 +80,7 @@ class WC_Customer {
      *
      * @access public
      * @param mixed $property
-     * @param mixed $value
-     * @return void
+     * @return bool
      */
     public function __isset( $property ) {
         return isset( $this->_data[ $property ] );
@@ -214,6 +212,7 @@ class WC_Customer {
 	 */
 	public function get_state() {
 		if ( isset( $this->state ) ) return $this->state;
+		return '';
 	}
 
 
@@ -225,6 +224,7 @@ class WC_Customer {
 	 */
 	public function get_country() {
 		if ( isset( $this->country ) ) return $this->country;
+		return '';
 	}
 
 
@@ -235,10 +235,12 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_postcode() {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 		$validation = $woocommerce->validation();
 		if ( isset( $this->postcode ) && $this->postcode !== false )
 			return $validation->format_postcode( $this->postcode, $this->get_country() );
+		return '';
 	}
 
 
@@ -246,30 +248,33 @@ class WC_Customer {
 	 * Get the city from the current session.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_city() {
 		if ( isset( $this->city ) ) return $this->city;
+		return '';
 	}
 
 	/**
 	 * Gets the address from the current session.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_address() {
 		if ( isset( $this->address ) ) return $this->address;
+		return '';
 	}
 
 	/**
 	 * Gets the address_2 from the current session.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_address_2() {
 		if ( isset( $this->address_2 ) ) return $this->address_2;
+		return '';
 	}
 
 	/**
@@ -280,6 +285,7 @@ class WC_Customer {
 	 */
 	public function get_shipping_state() {
 		if ( isset( $this->shipping_state ) ) return $this->shipping_state;
+		return '';
 	}
 
 
@@ -291,6 +297,7 @@ class WC_Customer {
 	 */
 	public function get_shipping_country() {
 		if ( isset( $this->shipping_country ) ) return $this->shipping_country;
+		return '';
 	}
 
 
@@ -301,10 +308,12 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_shipping_postcode() {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 		$validation = $woocommerce->validation();
 		if ( isset( $this->shipping_postcode ) )
 			return $validation->format_postcode( $this->shipping_postcode, $this->get_shipping_country() );
+		return '';
 	}
 
 
@@ -312,37 +321,40 @@ class WC_Customer {
 	 * Gets the city from the current session.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_shipping_city() {
 		if ( isset( $this->shipping_city ) ) return $this->shipping_city;
+		return '';
 	}
 
 	/**
 	 * Gets the address from the current session.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_shipping_address() {
 		if ( isset( $this->shipping_address ) ) return $this->shipping_address;
+		return '';
 	}
 
 	/**
 	 * Gets the address_2 from the current session.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_shipping_address_2() {
 		if ( isset( $this->shipping_address_2 ) ) return $this->shipping_address_2;
+		return '';
 	}
 
 	/**
 	 * get_taxable_address function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return array
 	 */
 	public function get_taxable_address() {
 		global $woocommerce;
@@ -443,9 +455,8 @@ class WC_Customer {
 
 	/**
 	 * Sets session data for the city.
-	 *
-	 * @access public
-	 * @param mixed $postcode
+	 * @access   public
+	 * @param $city
 	 * @return void
 	 */
 	public function set_city( $city ) {
@@ -530,9 +541,8 @@ class WC_Customer {
 
 	/**
 	 * Sets session data for the city.
-	 *
-	 * @access public
-	 * @param mixed $postcode
+	 * @access   public
+	 * @param $city
 	 * @return void
 	 */
 	public function set_shipping_city( $city ) {

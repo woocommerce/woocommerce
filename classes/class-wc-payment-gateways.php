@@ -17,9 +17,8 @@ class WC_Payment_Gateways {
 
 	/**
 	 * __construct function.
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Payment_Gateways
 	 */
 	public function __construct() {
 		$this->init();

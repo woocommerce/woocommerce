@@ -115,11 +115,16 @@ class ShareYourCartAPI {
         //show the raw response received ( for debug purposes )
         throw new Exception($response);
     }
-    
-    /**
-    * make sure the coupon is valid
-    * @param null 
-    */
+
+	/**
+	 * make sure the coupon is valid
+	 * @param $token
+	 * @param $coupon_code
+	 * @param $coupon_value
+	 * @param $coupon_type
+	 * @throws Exception
+	 * @internal param $null
+	 */
     public function assertCouponIsValid($token, $coupon_code, $coupon_value, $coupon_type) {
         
         // Verifies POST information
@@ -262,16 +267,16 @@ class ShareYourCartAPI {
         return true;
         
     }
-    
-    /**
-    * setAccountStatus
-    * @param string $secretKey
-    * @param string $clientId
-    * @param string $appKey
-    * @param string $activate
-    * @param string $message  
-    * @return boolean
-    */
+
+	/**
+	 * setAccountStatus
+	 * @param string      $secretKey
+	 * @param string      $clientId
+	 * @param string      $appKey
+	 * @param bool|string $activate
+	 * @param string      $message
+	 * @return boolean
+	 */
     public function setAccountStatus($secretKey, $clientId, $appKey, $activate = true, &$message = null) {
         
         // Urlencode and concatenate the POST arguments
@@ -522,10 +527,11 @@ class SyC
 	}
 
 	/**
-* rel2Abs
-* @param string $src
-* @return string
-*/
+	 * rel2Abs
+	 * @param $rel
+	 * @param $base
+	 * @return string
+	 */
 	public static function rel2Abs($rel, $base) {
 
 		/* return if already absolute URL */
@@ -592,4 +598,3 @@ class SyC
 }
 
 } //END IF
-?>

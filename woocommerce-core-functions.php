@@ -25,9 +25,10 @@ add_filter( 'woocommerce_stock_amount', 'intval' ); // Stock amounts are integer
  * @access public
  * @param mixed $the_product Post object or post ID of the product.
  * @param array $args (default: array()) Contains all arguments to be used to get this product.
- * @return void
+ * @return WC_Product
  */
 function get_product( $the_product = false, $args = array() ) {
+	/** @var Woocommerce woocommerce */
 	global $woocommerce;
 	return $woocommerce->product_factory->get_product( $the_product, $args );
 }

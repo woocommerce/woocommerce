@@ -152,11 +152,10 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * has_settings function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return bool
 	 */
 	function has_settings() {
-		if ( $this->has_settings )
-			return true;
+		return ( $this->has_settings );
 	}
 
     /**
@@ -196,7 +195,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * Return the gateways title
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	function get_title() {
 		return apply_filters( 'woocommerce_shipping_method_title', $this->title, $this->id );

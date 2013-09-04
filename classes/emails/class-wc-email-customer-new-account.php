@@ -21,9 +21,8 @@ class WC_Email_Customer_New_Account extends WC_Email {
 
 	/**
 	 * Constructor
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Email_Customer_New_Account
 	 */
 	function __construct() {
 
@@ -37,14 +36,15 @@ class WC_Email_Customer_New_Account extends WC_Email {
 		$this->subject 			= __( 'Your account on {blogname}', 'woocommerce');
 		$this->heading      	= __( 'Welcome to {blogname}', 'woocommerce');
 
-		// Call parent constuctor
+		// Call parent constructor
 		parent::__construct();
 	}
 
 	/**
 	 * trigger function.
-	 *
 	 * @access public
+	 * @param  int   $user_id
+	 * @param string $user_pass
 	 * @return void
 	 */
 	function trigger( $user_id, $user_pass = '' ) {

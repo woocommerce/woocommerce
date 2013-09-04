@@ -17,9 +17,8 @@ class WC_Google_Analytics extends WC_Integration {
 
 	/**
 	 * Init and hook in the integration.
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Google_Analytics
 	 */
 	public function __construct() {
         $this->id					= 'google_analytics';
@@ -325,6 +324,7 @@ class WC_Google_Analytics extends WC_Integration {
 	private function disable_tracking( $type ) {
 
 		if ( is_admin() || current_user_can( 'manage_options' ) || ( ! $this->ga_id ) || 'no' == $type ) return true;
+		return false;
 
 	}
 

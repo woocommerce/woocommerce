@@ -30,9 +30,8 @@ class WC_Query {
 
 	/**
 	 * Constructor for the query class. Hooks in methods.
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Query
 	 */
 	public function __construct() {
 		add_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
@@ -144,13 +143,16 @@ class WC_Query {
 
 	/**
 	 * wpseo_metadesc function.
-	 *
-	 * @access public
-	 * @param mixed $meta
-	 * @return void
+	 * @access   public
+	 * @return string
 	 */
 	public function wpseo_metadesc() {
-		return wpseo_get_value( 'metadesc', woocommerce_get_page_id('shop') );
+		if (function_exists('wpseo_get_value')) {
+			return wpseo_get_value('metadesc', woocommerce_get_page_id('shop'));
+		}
+		else {
+			return '';
+		}
 	}
 
 
@@ -158,10 +160,15 @@ class WC_Query {
 	 * wpseo_metakey function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function wpseo_metakey() {
-		return wpseo_get_value( 'metakey', woocommerce_get_page_id('shop') );
+		if (function_exists('wpseo_get_value')) {
+			return wpseo_get_value('metakey', woocommerce_get_page_id('shop'));
+		}
+		else {
+			return '';
+		}
 	}
 
 
@@ -169,9 +176,9 @@ class WC_Query {
 	 * Hook into the_posts to do the main product query if needed - relevanssi compatibility
 	 *
 	 * @access public
-	 * @param mixed $posts
-	 * @param bool $query (default: false)
-	 * @return void
+	 * @param array $posts
+	 * @param bool|WP_Query $query (default: false)
+	 * @return array
 	 */
 	public function the_posts( $posts, $query = false ) {
 		global $woocommerce;
@@ -348,8 +355,9 @@ class WC_Query {
 
 	/**
 	 * Returns an array of arguments for ordering products based on the selected values
-	 *
 	 * @access public
+	 * @param string $orderby
+	 * @param string $order
 	 * @return array
 	 */
 	public function get_catalog_ordering_args( $orderby = '', $order = '' ) {
@@ -438,9 +446,9 @@ class WC_Query {
 
 	/**
 	 * Appends meta queries to an array.
-	 *
 	 * @access public
-	 * @return void
+	 * @param array $meta_query
+	 * @return array
 	 */
 	public function get_meta_query( $meta_query = array() ) {
 		if ( ! is_array( $meta_query ) )

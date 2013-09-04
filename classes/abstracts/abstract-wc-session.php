@@ -72,7 +72,7 @@ abstract class WC_Session {
 	 * get_customer_id function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return int
 	 */
 	public function get_customer_id() {
 		return $this->_customer_id;

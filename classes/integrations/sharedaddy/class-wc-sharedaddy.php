@@ -15,12 +15,11 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 class WC_ShareDaddy extends WC_Integration {
 
-	/**
-	 * Init and hook in the integration.
-	 *
-	 * @access public
-	 * @return void
-	 */
+/**
+ * Init and hook in the integration.
+ * @access public
+ * @return \WC_ShareDaddy
+ */
 	public function __construct() {
         $this->id					= 'sharedaddy';
         $this->method_title     	= __( 'ShareDaddy', 'woocommerce' );

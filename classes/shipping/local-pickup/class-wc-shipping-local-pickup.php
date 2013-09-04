@@ -16,9 +16,8 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 
 	/**
 	 * __construct function.
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Shipping_Local_Pickup
 	 */
 	function __construct() {
 		$this->id 			= 'local_pickup';
@@ -215,6 +214,46 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available, $package );
 	}
 
+<<<<<<< HEAD
+
+	/**
+	 * taxable_address function.
+	 *
+	 * @access public
+	 * @param array $address
+	 * @return array
+	 */
+	function taxable_address( $address ) {
+		global $woocommerce;
+
+		if ( ! empty( $woocommerce->session->chosen_shipping_method ) && $woocommerce->session->chosen_shipping_method == 'local_pickup' ) {
+			if ( $this->get_option( 'apply_base_tax' ) == 'yes' ) {
+
+				$country 	= $woocommerce->countries->get_base_country();
+				$state 		= $woocommerce->countries->get_base_state();
+
+				$address = array( $country, $state, '', '' );
+			}
+		}
+		return $address;
+	}
+
+	/**
+	 * Refresh totals when chosen so we can refresh the tax if we are using local pickup.
+	 * @access public
+	 * @param string $method
+	 * @return void
+	 */
+	function method_chosen( $method ) {
+		global $woocommerce;
+
+		if ( $method == 'local_pickup' && $this->get_option( 'apply_base_tax' ) == 'yes' ) {
+			$woocommerce->cart->calculate_totals();
+		}
+	}
+
+=======
+>>>>>>> 69704113a1b16325da21a510f068fa690fec6001
     /**
      * clean function.
      *

@@ -14,11 +14,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
+	public $flat_rates = array();
+
 	/**
 	 * __construct function.
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Shipping_Flat_Rate
 	 */
 	function __construct() {
         $this->id 						= 'flat_rate';
@@ -459,7 +460,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
      *
      * @access public
      * @param mixed $key
-     * @return void
+     * @return bool
      */
     function validate_additional_costs_table_field( $key ) {
 	    return false;
@@ -469,7 +470,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
      * generate_additional_costs_html function.
      *
      * @access public
-     * @return void
+     * @return string
      */
     function generate_additional_costs_table_html() {
     	global $woocommerce;
@@ -559,7 +560,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 						// Remove row
 						jQuery('#<?php echo $this->id; ?>_flat_rates').on( 'click', 'a.remove', function(){
-							var answer = confirm("<?php _e( 'Delete the selected rates?', 'woocommerce' ); ?>")
+							var answer = confirm("<?php _e( 'Delete the selected rates?', 'woocommerce' ); ?>");
 							if (answer) {
 								jQuery('#<?php echo $this->id; ?>_flat_rates table tbody tr th.check-column input:checked').each(function(i, el){
 									jQuery(el).closest('tr').remove();
@@ -617,13 +618,12 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$this->get_flat_rates();
     }
 
-    /**
-     * save_default_costs function.
-     *
-     * @access public
-     * @param mixed $values
-     * @return void
-     */
+	/**
+	 * save_default_costs function.
+	 * @access   public
+	 * @param array $fields
+	 * @return array
+	 */
     function save_default_costs( $fields ) {
 	 	$default_cost = woocommerce_clean( $_POST['default_cost'] );
 	 	$default_fee  = woocommerce_clean( $_POST['default_fee'] );

@@ -173,7 +173,7 @@ class WC_Shortcodes {
 	public function product_category( $atts ){
 		global $woocommerce, $woocommerce_loop;
 
-	  	if ( empty( $atts ) ) return;
+	  	if ( empty( $atts ) ) return '';
 
 		extract( shortcode_atts( array(
 			'per_page' 		=> '12',
@@ -183,7 +183,7 @@ class WC_Shortcodes {
 		  	'category'		=> ''
 			), $atts ) );
 
-		if ( ! $category ) return;
+		if ( ! $category ) return '';
 
 		// Default ordering args
 		$ordering_args = $woocommerce->query->get_catalog_ordering_args( $orderby, $order );
@@ -383,7 +383,7 @@ class WC_Shortcodes {
 	public function products( $atts ) {
 		global $woocommerce_loop;
 
-	  	if (empty($atts)) return;
+	  	if (empty($atts)) return '';
 
 		extract(shortcode_atts(array(
 			'columns' 	=> '4',
@@ -457,7 +457,7 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function product( $atts ) {
-	  	if (empty($atts)) return;
+	  	if (empty($atts)) return '';
 
 	  	$args = array(
 	    	'post_type' => 'product',
@@ -517,9 +517,11 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function product_add_to_cart( $atts ) {
-	  	global $wpdb, $woocommerce;
+	  	/** @var wpdb $wpdb */
+	  	/** @var Woocommerce $woocommerce */
+		global $wpdb, $woocommerce;
 
-	  	if ( empty( $atts ) ) return;
+	  	if ( empty( $atts ) ) return '';
 
 	  	if ( ! isset( $atts['style'] ) ) $atts['style'] = 'border:4px solid #ccc; padding: 12px;';
 
@@ -529,7 +531,7 @@ class WC_Shortcodes {
 			$product_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $atts['sku'] ) );
 			$product_data = get_post( $product_id );
 		} else {
-			return;
+			return '';
 		}
 
 		if ( 'product' == $product_data->post_type ) {
@@ -587,6 +589,7 @@ class WC_Shortcodes {
 			return ob_get_clean();
 
 		}
+		return '';
 	}
 
 
@@ -598,9 +601,10 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function product_add_to_cart_url( $atts ) {
-	  	global $wpdb;
+	  	/** @var wpdb $wpdb */
+		global $wpdb;
 
-	  	if ( empty( $atts ) ) return;
+	  	if ( empty( $atts ) ) return '';
 
 	  	if ( isset( $atts['id'] ) ) {
 	  		$product_data = get_post( $atts['id'] );
@@ -608,10 +612,10 @@ class WC_Shortcodes {
 			$product_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $atts['sku'] ) );
 			$product_data = get_post( $product_id );
 		} else {
-			return;
+			return '';
 		}
 
-		if ( 'product' !== $product_data->post_type ) return;
+		if ( 'product' !== $product_data->post_type ) return '';
 
 		$_product = get_product( $product_data );
 
@@ -869,9 +873,9 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function product_page_shortcode( $atts ) {
-	  	if ( empty( $atts ) ) return;
+	  	if ( empty( $atts ) ) return '';
 
-		if ( ! isset( $atts['id'] ) && ! isset( $atts['sku'] ) ) return;
+		if ( ! isset( $atts['id'] ) && ! isset( $atts['sku'] ) ) return '';
 
 	  	$args = array(
 	    	'posts_per_page' 	=> 1,
@@ -915,9 +919,7 @@ class WC_Shortcodes {
 
 	/**
 	 * Show messages
-	 *
-	 * @access public
-	 * @param array $atts
+	 * @access   public
 	 * @return string
 	 */
 	public function messages_shortcode() {
@@ -932,11 +934,12 @@ class WC_Shortcodes {
 	 * woocommerce_order_by_rating_post_clauses function.
 	 *
 	 * @access public
-	 * @param mixed $args
-	 * @return void
+	 * @param array $args
+	 * @return array
 	 */
 	public function order_by_rating_post_clauses( $args ) {
 
+		/** @var wpdb $wpdb */
 		global $wpdb;
 
 		$args['where'] .= " AND $wpdb->commentmeta.meta_key = 'rating' ";

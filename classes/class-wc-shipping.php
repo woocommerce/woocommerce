@@ -38,9 +38,8 @@ class WC_Shipping {
 
 	/**
 	 * __construct function.
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Shipping
 	 */
 	public function __construct() {
 		$this->init();
@@ -59,12 +58,10 @@ class WC_Shipping {
 
 	/**
 	 * load_shipping_methods function.
-	 *
 	 * Loads all shipping methods which are hooked in. If a $package is passed some methods may add themselves conditionally.
-	 *
 	 * Methods are sorted into their user-defined order after being loaded.
-	 *
 	 * @access public
+	 * @param array|bool $package
 	 * @return array
 	 */
 	function load_shipping_methods( $package = false ) {
@@ -87,8 +84,8 @@ class WC_Shipping {
 
 	/**
 	 * Register a shipping method for use in calculations.
-	 *
 	 * @access public
+	 * @param $method
 	 * @return void
 	 */
 	function register_shipping_method( $method ) {
@@ -158,8 +155,7 @@ class WC_Shipping {
 	 * Returns all registered shipping methods for usage.
 	 *
 	 * @access public
-	 * @param mixed $package
-	 * @return void
+	 * @return array
 	 */
 	function get_shipping_methods() {
 		return $this->shipping_methods;
@@ -268,6 +264,7 @@ class WC_Shipping {
 	 *
 	 * @access public
 	 * @param array $package cart items
+	 * @return array|bool
 	 */
 	function calculate_shipping_for_package( $package = array() ) {
 		if ( ! $this->enabled ) return false;
@@ -282,7 +279,7 @@ class WC_Shipping {
 			$package['rates'] = array();
 
 			foreach ( $this->load_shipping_methods( $package ) as $shipping_method ) {
-
+				/** @var WC_Shipping $shipping_method */
 				if ( $shipping_method->is_available( $package ) ) {
 
 					// Reset Rates
@@ -326,8 +323,8 @@ class WC_Shipping {
 	 * @return array
 	 */
 	function get_available_shipping_methods() {
-		if ( ! $this->enabled ) return;
-		if ( empty( $this->packages ) ) return;
+		if ( ! $this->enabled ) return array();
+		if ( empty( $this->packages ) ) return array();
 
 		// Loop packages and merge rates to get a total for each shipping method
 		$available_methods = array();

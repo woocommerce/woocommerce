@@ -18,9 +18,8 @@ class WC_Logger {
 
 	/**
 	 * Constructor for the logger.
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Logger
 	 */
 	public function __construct() {
 		$this->_handles = array();
@@ -94,7 +93,7 @@ class WC_Logger {
 	 *
 	 * @access private
 	 * @param mixed $handle
-	 * @return void
+	 * @return string
 	 */
 	private function file_name( $handle ) {
 		return $handle . '-' . sanitize_file_name( wp_hash( $handle ) );

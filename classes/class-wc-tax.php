@@ -15,9 +15,8 @@ class WC_Tax {
 
 	/**
 	 * __construct function.
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Tax
 	 */
 	public function __construct() {
 		$this->dp = (int) get_option( 'woocommerce_price_num_decimals' );
@@ -25,9 +24,11 @@ class WC_Tax {
 
 	/**
 	 * Searches for all matching country/state/postcode tax rates.
-	 *
 	 * @access public
-	 * @param string $args (default: '')
+	 * @param array|string $args (default: '')
+	 * @param null         $deprecated_state
+	 * @param null         $deprecated_postcode
+	 * @param null         $deprecated_class
 	 * @return array
 	 */
 	public function find_rates( $args = array(), $deprecated_state = null, $deprecated_postcode = null, $deprecated_class = null ) {
@@ -164,11 +165,11 @@ class WC_Tax {
 
 	/**
 	 * Get's an array of matching rates for a tax class.
-	 *
-	 * @param   object	Tax Class
+	 * @param string $tax_class
 	 * @return  array
 	 */
 	public function get_rates( $tax_class = '' ) {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 
 		$tax_class = sanitize_title( $tax_class );
@@ -223,7 +224,7 @@ class WC_Tax {
 	/**
 	 * Gets an array of matching shipping tax rates for a given class.
 	 *
-	 * @param   string	Tax Class
+	 * @param   string $tax_class	Tax Class
 	 * @return  mixed
 	 */
 	public function get_shipping_tax_rates( $tax_class = null ) {
@@ -360,16 +361,16 @@ class WC_Tax {
 			return $matched_tax_rates;
 		}
 
-		return array(); // return false
+		// return array(); // return false - never get here
 	}
 
 	/**
 	 * Calculate the tax using a passed array of rates.
-	 *
-	 * @param   float	price
-	 * @param   array	rates
-	 * @param	bool	passed price includes tax
-	 * @return  array	array of rates/amounts
+	 * @param      $price
+	 * @param      $rates
+	 * @param bool $price_includes_tax
+	 * @param bool $suppress_rounding
+	 * @return  array    array of rates/amounts
 	 */
 	public function calc_tax( $price, $rates, $price_includes_tax = true, $suppress_rounding = false ) {
 
@@ -556,10 +557,11 @@ class WC_Tax {
 	 * Get a rates code. Code is made up of COUNTRY-STATE-NAME-Priority. E.g GB-VAT-1, US-AL-TAX-1
 	 *
 	 * @access public
-	 * @param mixed $key
-	 * @return void
+	 * @param string $key
+	 * @return string
 	 */
 	public function get_rate_code( $key ) {
+		/** @var wpdb $wpdb */
 		global $wpdb;
 
 		$rate = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );

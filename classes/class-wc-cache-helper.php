@@ -15,9 +15,8 @@ class WC_Cache_Helper {
 
 	/**
 	 * __construct function.
-	 *
 	 * @access public
-	 * @return void
+	 * @return \WC_Cache_Helper
 	 */
 	public function __construct() {
 		add_action( 'before_woocommerce_init', array( $this, 'init' ) );

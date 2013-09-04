@@ -53,11 +53,10 @@ class WC_Product_Variation extends WC_Product {
 
 	/**
 	 * Loads all product data from custom fields
-	 *
-	 * @access public
-	 * @param int $variation_id ID of the variation to load
+	 * @access   public
+	 * @param \WC_Product_Variation|int $variation
 	 * @param array $args Array of the arguments containing parent product data
-	 * @return void
+	 * @return \WC_Product_Variation
 	 */
 	public function __construct( $variation, $args = array() ) {
 
@@ -73,6 +72,7 @@ class WC_Product_Variation extends WC_Product {
 		$this->id   = ! empty( $args['parent_id'] ) ? intval( $args['parent_id'] ) : wp_get_post_parent_id( $this->variation_id );
 
 		// The post doesn't have a parent id, therefore its invalid.
+		/** @todo Constructors must not return anything except the class object. This must be written as Exception */
 		if ( empty( $this->id ) )
 			return false;
 
@@ -256,13 +256,13 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 
-    /**
-     * Gets the main product image.
-     *
-     * @access public
-     * @param string $size (default: 'shop_thumbnail')
-     * @return string
-     */
+	/**
+	 * Gets the main product image.
+	 * @access public
+	 * @param string $size (default: 'shop_thumbnail')
+	 * @param array  $attr
+	 * @return string
+	 */
     public function get_image( $size = 'shop_thumbnail', $attr = array() ) {
     	global $woocommerce;
 
@@ -272,7 +272,7 @@ class WC_Product_Variation extends WC_Product {
 			$image = get_the_post_thumbnail( $this->variation_id, $size, $attr );
 		} elseif ( has_post_thumbnail( $this->id ) ) {
 			$image = get_the_post_thumbnail( $this->id, $size, $attr );
-		} elseif ( $parent_id = wp_get_post_parent_id( $this->id ) && has_post_thumbnail( $parent_id ) ) {
+		} elseif ( ($parent_id = wp_get_post_parent_id( $this->id )) && has_post_thumbnail( $parent_id ) ) {
 			$image = get_the_post_thumbnail( $parent_id, $size , $attr);
 		} else {
 			$image = woocommerce_placeholder_img( $size );
@@ -290,6 +290,7 @@ class WC_Product_Variation extends WC_Product {
 	 * @return int Stock
 	 */
 	function set_stock( $amount = null ) {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 
 		if ( $this->variation_has_stock ) {
@@ -319,6 +320,7 @@ class WC_Product_Variation extends WC_Product {
 		} else {
 			return parent::set_stock( $amount );
 		}
+	return 0;
 	}
 
 
@@ -330,32 +332,36 @@ class WC_Product_Variation extends WC_Product {
 	 * @return int stock level
 	 */
 	public function reduce_stock( $by = 1 ) {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 
 		if ( $this->variation_has_stock ) {
-			if ( $this->managing_stock() ) {
+			if ($this->managing_stock()) {
 
-				$this->stock 		= $this->stock - $by;
-				$this->total_stock 	= $this->total_stock - $by;
-				update_post_meta( $this->variation_id, '_stock', $this->stock );
-				$woocommerce->clear_product_transients( $this->id ); // Clear transient
+				$this->stock       = $this->stock - $by;
+				$this->total_stock = $this->total_stock - $by;
+				update_post_meta($this->variation_id, '_stock', $this->stock);
+				$woocommerce->clear_product_transients($this->id); // Clear transient
 
 				// Check parents out of stock attribute
-				if ( ! $this->is_in_stock() ) {
+				if (!$this->is_in_stock()) {
 
 					// Check parent
-					$parent_product = get_product( $this->id );
+					$parent_product = get_product($this->id);
 
 					// Only continue if the parent has backorders off
-					if ( ! $parent_product->backorders_allowed() && $parent_product->get_total_stock() <= 0 )
-						$this->set_stock_status( 'outofstock' );
+					if (!$parent_product->backorders_allowed() && $parent_product->get_total_stock() <= 0) {
+						$this->set_stock_status('outofstock');
+					}
 
 				}
 
-				return apply_filters( 'woocommerce_stock_amount', $this->stock );
+				return apply_filters('woocommerce_stock_amount', $this->stock);
 			}
-		} else {
-			return parent::reduce_stock( $by );
+			/** @todo Need a return here, in else{} - or check the entire logic */
+		}
+		else {
+			return parent::reduce_stock($by);
 		}
 	}
 
@@ -368,6 +374,7 @@ class WC_Product_Variation extends WC_Product {
 	 * @return int stock level
 	 */
 	public function increase_stock( $by = 1 ) {
+		/** @var Woocommerce $woocommerce */
 		global $woocommerce;
 
 		if ($this->variation_has_stock) :
@@ -384,6 +391,8 @@ class WC_Product_Variation extends WC_Product {
 
 				return apply_filters( 'woocommerce_stock_amount', $this->stock );
 			endif;
+			/** @todo Need a return here, in else{} - or check the entire logic */
+			/** @todo Make consistent coding style with the method above */
 		else :
 			return parent::increase_stock( $by );
 		endif;
