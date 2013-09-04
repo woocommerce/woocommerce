@@ -400,15 +400,16 @@ class WC_Product_Variable extends WC_Product {
 				if ( has_post_thumbnail( $variation->get_variation_id() ) ) {
 					$attachment_id = get_post_thumbnail_id( $variation->get_variation_id() );
 
-					$attachment = wp_get_attachment_image_src( $attachment_id, apply_filters( 'single_product_large_thumbnail_size', 'shop_single' )  );
-					$image = $attachment ? current( $attachment ) : '';
+					$attachment    = wp_get_attachment_image_src( $attachment_id, apply_filters( 'single_product_large_thumbnail_size', 'shop_single' )  );
+					$image         = $attachment ? current( $attachment ) : '';
 
-					$attachment = wp_get_attachment_image_src( $attachment_id, 'full'  );
-					$image_link = $attachment ? current( $attachment ) : '';
+					$attachment    = wp_get_attachment_image_src( $attachment_id, 'full'  );
+					$image_link    = $attachment ? current( $attachment ) : '';
 
-					$image_title = get_the_title( $attachment_id );
+					$image_title   = get_the_title( $attachment_id );
+					$image_alt     = get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
 				} else {
-					$image = $image_link = $image_title = '';
+					$image = $image_link = $image_title = $image_alt = '';
 				}
 
 				$available_variations[] = apply_filters( 'woocommerce_available_variation', array(
@@ -417,6 +418,7 @@ class WC_Product_Variable extends WC_Product {
 					'image_src' 			=> $image,
 					'image_link' 			=> $image_link,
 					'image_title'			=> $image_title,
+					'image_alt'			    => $image_alt,
 					'price_html' 			=> $this->min_variation_price != $this->max_variation_price ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 					'availability_html' 	=> $availability_html,
 					'sku' 					=> $variation->get_sku(),

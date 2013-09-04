@@ -195,6 +195,7 @@
 					var $product_link 	= $product.find( 'div.images a.zoom:eq(0)' );
 					var o_src 			= $product_img.attr('data-o_src');
 					var o_title 		= $product_img.attr('data-o_title');
+					var o_alt           = $product_img.attr('data-o_alt');
 			        var o_href 			= $product_link.attr('data-o_href');
 
 			        if ( o_src != undefined ) {
@@ -207,12 +208,14 @@
 			        }
 			        if ( o_title != undefined ) {
 				        $product_img
-				        	.attr( 'alt', o_title )
 				        	.attr( 'title', o_title );
 			            $product_link
 							.attr( 'title', o_title );
 			        }
-
+			        if ( o_alt != undefined ) {
+			        	 $product_img
+				        	.attr( 'alt', o_alt );
+			        }
 				} )
 
 				// Disable option fields that are unavaiable for current set of attributes
@@ -295,11 +298,13 @@
 
 					var o_src 			= $product_img.attr('data-o_src');
 					var o_title 		= $product_img.attr('data-o_title');
+					var o_alt 		    = $product_img.attr('data-o_alt');
 			        var o_href 			= $product_link.attr('data-o_href');
 
 			        var variation_image = variation.image_src;
 			        var variation_link  = variation.image_link;
 					var variation_title = variation.image_title;
+					var variation_alt   = variation.image_alt;
 
 					$variation_form.find('.variations_button').show();
 			        $variation_form.find('.single_variation').html( variation.price_html + variation.availability_html );
@@ -319,10 +324,15 @@
 			            $product_img.attr('data-o_title', o_title );
 			        }
 
+			        if ( o_alt == undefined ) {
+			        	o_alt = ( ! $product_img.attr('alt') ) ? '' : $product_img.attr('alt');
+			            $product_img.attr('data-o_alt', o_alt );
+			        }
+
 			        if ( variation_image && variation_image.length > 1 ) {
 			            $product_img
 			            	.attr( 'src', variation_image )
-			            	.attr( 'alt', variation_title )
+			            	.attr( 'alt', variation_alt )
 			            	.attr( 'title', variation_title );
 			            $product_link
 			            	.attr( 'href', variation_link )
@@ -330,7 +340,7 @@
 			        } else {
 			            $product_img
 			            	.attr( 'src', o_src )
-			            	.attr( 'alt', o_title )
+			            	.attr( 'alt', o_alt )
 			            	.attr( 'title', o_title );
 			            $product_link
 			            	.attr( 'href', o_href )
