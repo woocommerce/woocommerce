@@ -20,19 +20,19 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	private static $_SDK_VERSION = '1.11';  //the first one is the SDK main version, while the second one is it's revision
 	protected static $_DB_VERSION = '1.1';
 	protected $SDK_ANALYTICS = true;
-	
+
 	/**
     * Constructor
     * @param null
     */
     function __construct() {
-	
+
 		//set exception handler
 		if(set_exception_handler(array(&$this,'UncaughtExceptionHandler')) !== null)
 			restore_exception_handler(); //if there allready was an exception handler, revert back to it
-	
+
 		parent::__construct();
-		
+
 		//now, add the api version to the button_js, in order to force users to download the latest
 		//JS file
 		if(!$this->isDebugMode()){
@@ -41,12 +41,12 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 			$this->SHAREYOURCART_BUTTON_JS = $this->SHAREYOURCART_API.'/js/button.dev.js';
 		}
 		$this->SHAREYOURCART_BUTTON_URL .= '?client_id='. $this->getClientId();
-		
+
 		//set the language & it's loader
 		SyC::setLanguageLoader(array(&$this,'loadLanguage'));
 		SyC::setLanguage($this->getConfigValue('lang'));
 	}
-	
+
 	/**
 	 * Execute NonQuery SQL
 	 * @param string action
@@ -96,10 +96,10 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	 * @return boolean / array
 	 */
 	protected function getCurrentProductDetails(){
-		
+
 		return FALSE;
 	}
-	
+
 	/**
 	*
 	* Return TRUE if this page describes a single product, otherwise FALSE
@@ -115,7 +115,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	public function isOutOfStock(){
 		return FALSE;
 	}
-	
+
 	/**
 	 *
 	 * Return the URL to be called when the button is pressed
@@ -159,7 +159,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	 *
 	 */
 	protected abstract function applyCoupon($coupon_code);
-	
+
 	/**
 	*
 	* Return the jQuery sibling selector for the product button
@@ -168,7 +168,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	protected function getProductButtonPosition(){
 		return $this->getConfigValue('product_button_position');
 	}
-	
+
 	/**
 	*
 	* Return the jQuery sibling selector for the cart button
@@ -177,7 +177,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	protected function getCartButtonPosition(){
 		return $this->getConfigValue('cart_button_position');
 	}
-	
+
 	/**
 	*
 	* Get the plugin version.
@@ -196,10 +196,10 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		//make sure a developer enters only a number as a version
 		if(!is_int($minor_version = $this->getPluginVersion()))
 			throw new Exception(SyC::t('sdk','The Plugin Version must be an integer'));
-		
+
 		return self::$_SDK_VERSION.'.'.$minor_version;
 	}
-	
+
 	/**
 	*
 	* Returns TRUE if the account is in debug mode
@@ -208,10 +208,10 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	public function isDebugMode()
 	{
 		$val =$this->getConfigValue('debug');
-		
+
 		return !empty($val);
 	}
-	
+
 	/**
 	*
 	* Return TRUE if there is a newer version of the plugin
@@ -221,7 +221,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	{
 		return version_compare($this->getVersion(),$this->getConfigValue('latest_version'),'<');
 	}
-	
+
 	/**
 	*
 	* Check if this instance can load, or not!
@@ -230,14 +230,14 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	*/
 	protected function canLoad()
 	{
-		$v = version_compare($this->getVersion(),$this->getConfigValue('plugin_current_version')); 
+		$v = version_compare($this->getVersion(),$this->getConfigValue('plugin_current_version'));
 		//first, check if this instance is the latest one, or not
 		if($v < 0) return false;
-			 
+
 		//save the latest version, for later reference
 		if($v > 0 )
 			$this->setConfigValue('plugin_current_version',$this->getVersion());
-			
+
 		return true;
 	}
 
@@ -275,10 +275,10 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		$appKey = $this->getAppKey();
 		$clientId = $this->getClientId();
 		if(!empty($appKey) && !empty($clientId)){
-		
+
 			$activated = $this->activate($message);
 		}
-		
+
 		//set some default value, like the button skin
 		$skin = $this->getConfigValue('button_skin');
 		if(empty($skin)){
@@ -400,11 +400,11 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		//reset the Location, as the following code might give an error
 		//and the developer needs to be aware of it
 		/*$headers = headers_list();
-		header('Location:'); 
+		header('Location:');
 
 		//save session details
 		$this->insertRow($this->getTableName('shareyourcart_tokens'), $data);
-		
+
 		//UPDATE: do not throw any error
 		//we can't rely on the fact that the row has been inserted, so check!
 		//if($this->getSessionId($data['token']) === null)
@@ -450,11 +450,11 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
         /**
 	 * simply show the button with no positioning (ex: checkout page on woocommerce)
 	 */
-        
+
         public function showCheckoutButton() {
             echo $this->getButton();
         }
-        
+
 	/**
 	 * simply show the button
 	 * @param null
@@ -484,25 +484,25 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	 * @return boolean
 	 */
 	protected function renderButton($callback_url,$position = null,$languageISO = null) {
-		
+
 		$data = array(
 		'current_button_type' => $this->getConfigValue("button_type"),
 		'button_html' => $this->getConfigValue("button_html"),
-		
+
 		'button_img' => $this->getUrl($this->getConfigValue("btn-img")),
 		'button_img_width' => $this->getConfigValue("btn-img-width"),
 		'button_img_height' => $this->getConfigValue("btn-img-height"),
-		
+
 		'button_img_hover' => $this->getUrl($this->getConfigValue("btn-img-h")),
 		'button_img_hover_width' => $this->getConfigValue("btn-img-h-width"),
 		'button_img_hover_height' => $this->getConfigValue("btn-img-h-height"),
 
 		'is_product_page' => $this->isSingleProduct(),
-		
+
 		'position_'.(SyC::startsWith($position,"/*before*/") ? 'before' : 'after') => $position,
 		'language' => $languageISO,
 		);
-		
+
 		$output = null;
 		switch ($data['current_button_type'])
 		{
@@ -556,7 +556,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	 *
 	 */
 	public function showCartButton() {
-		
+
 		echo $this->getCartButton();
 	}
 
@@ -618,11 +618,11 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	 * @return boolean
 	 */
 	public function getAdminHeader() {
-			
+
 		//this is a single call function
 		if (!$this->isFirstCall(__FUNCTION__))
 		return;
-		
+
 		//check the SDK status
 		$this->checkSDKStatus(true); //force a check, as the admin might have changed the language in the configure page, so we need to sync with it
 
@@ -653,7 +653,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		$status_message = ''; //this is to be used for good messages
 		$error_message = ''; //this is to be used for bad messages
 		$refresh = false;
-		
+
 		//check if this is a post for this particular page
 		if ($_SERVER['REQUEST_METHOD'] == 'POST' &&
 		!empty($_POST['syc-account-form'])) {
@@ -672,42 +672,42 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 				//the account did not activate, so show the error
 				$error_message = $message;
 			}
-			
+
 			//since we might have changed the status, REFRESH
 			$refresh = true;
 		}
 		//the user decided to disable the API
 		else if ($_SERVER['REQUEST_METHOD'] == 'POST' &&
 		!empty($_POST['disable-API'])){
-			
+
 			$message = '';
 			if($this->deactivate($message) == true) {
-				
+
 				$status_message = $message;
 			} else {
-			
+
 				$error_message = $message;
 			}
-			
+
 			//since we might have changed the status, REFRESH
 			$refresh = true;
 		}
 		//the user decided to activate the API
 		else if ($_SERVER['REQUEST_METHOD'] == 'POST' &&
 		!empty($_POST['enable-API'])){
-			
+
 			$message = '';
 			if($this->activate($message) == true) {
-				
+
 				$status_message = $message;
 			} else {
-			
+
 				$error_message = $message;
 			}
-			
+
 			//since we might have changed the status, REFRESH
 			$refresh = true;
-		}  
+		}
 		//check if the user want's to recover his account
 		else if (@$_REQUEST['syc-account'] === 'recover'){
 
@@ -719,7 +719,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 				//try to recover if the user posted the form
 				$show_form = !$this->recover($this->getSecretKey(), @$_REQUEST['domain'], @$_REQUEST['email'], $status_message);
 			}
-			
+
 			//if we need to show the form, the recovery failed
 			if($show_form)
 			{
@@ -728,15 +728,15 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 				$status_message = $this->renderView('account-recover-partial', array(
 					'html' => $html,
 				));
-			} 
-			else 
+			}
+			else
 			{
 				//Refresh in order to get rid of the GET parameter
 				$refresh = true;
 			}
 		}
 		else if (@$_REQUEST['syc-account'] === 'create'){
-			
+
 			//by default, show the form if we are here
 			$show_form = true;
 			if($_SERVER['REQUEST_METHOD'] == 'POST' &&
@@ -746,14 +746,14 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 				if(isset($_POST['syc-terms-agreement']))
 				{
 					//try to create the account if the user posted the form
-					if (!(($register = $this->register($this->getSecretKey(), @$_REQUEST['domain'], @$_REQUEST['email'], $status_message)) === false)) 
+					if (!(($register = $this->register($this->getSecretKey(), @$_REQUEST['domain'], @$_REQUEST['email'], $status_message)) === false))
 					{
 						$this->setConfigValue('appKey', @$register['app_key']);
 						$this->setConfigValue('clientId', @$register['client_id']);
-                        
+
 						$this->setConfigValue("account_status", "active");
 						$show_form = false; //no need to show the register form anymore
-						
+
 						//since we might have changed the status, REFRESH
 						$refresh = true;
 					}
@@ -764,7 +764,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 					$status_message = SyC::t('sdk',"Error. You must agree with the terms and conditions bellow");
 				}
 			}
-			
+
 			//if we need to show the form
 			if($show_form)
 			{
@@ -775,10 +775,10 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 				));
 			}
 		}
-		
+
 		//make sure there is a session variable setup
 		@session_start();
-		
+
 		//since switching the API status has a great impact on how the UI looks, refresh the page
 		//just to make sure the UI is using the latest value
 		if($refresh)
@@ -790,14 +790,14 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		else
 		{
 			//load the variables, if any
-		
+
 			//if there is a status message
 			if(!empty($_SESSION['_syc_status_message']))
 			{
 				$status_message = $_SESSION['_syc_status_message'];
 				unset($_SESSION['_syc_status_message']);
 			}
-		
+
 			//if there is an error message
 			if(!empty($_SESSION['_syc_error_message']))
 			{
@@ -805,7 +805,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 				unset($_SESSION['_syc_error_message']);
 			}
 		}
-		
+
 		// Display the view
 		return $this->renderView('admin-page',array(
 			'html' => $html,
@@ -845,7 +845,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 			//set the button position
 			$this->setConfigValue("button_position", $_POST['button_position']);
-			
+
 			//set the button height
 			$this->setConfigValue("dont_set_height", empty($_POST['show_on_single_row']));
 
@@ -857,7 +857,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 			//set the show'
 			$this->setConfigValue("hide_on_checkout", empty($_POST['show_on_checkout']));
-			
+
 			//set button position
 			$this->setConfigValue("product_button_position",$_POST['product_button_position']);
 			$this->setConfigValue("cart_button_position",$_POST['cart_button_position']);
@@ -866,13 +866,13 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 				$target_path = $this->getUploadDir();
 				if(!SyC::endsWith($target_path,'/')) $target_path .= '/'; //make sure that the path has a / in it's end
-				
+
 				$target_path = $target_path . 'button-img.png';
 
 				if(file_exists($target_path)) unlink($target_path);
-				
+
 				list($width, $height, $type, $attr) = getimagesize($_FILES['button-img']['tmp_name']);
-				
+
 				if (move_uploaded_file($_FILES['button-img']['tmp_name'], $target_path))
 				{
 					//set the button img
@@ -894,7 +894,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 				$target_path = $target_path . 'btn-img-hover.png';
 
 				if(file_exists($target_path)) unlink($target_path);
-				
+
 				list($width, $height, $type, $attr) = getimagesize($_FILES['button-img-hover']['tmp_name']);
 
 				if(move_uploaded_file($_FILES['button-img-hover']['tmp_name'], $target_path))
@@ -926,7 +926,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 			'button_html' => $this->getConfigValue("button_html"),
 			'button_img' => $this->getUrl($this->getConfigValue("btn-img")),
 			'button_img_hover' => $this->getUrl($this->getConfigValue("btn-img-h")),
-			
+
 			'html' => $html,
 			'show_header' => $show_header,
 			'show_footer' => $show_footer,
@@ -941,9 +941,9 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	*
 	*/
 	public function getUploadDir(){
-      return dirname(_FILE_). "/img/";
+      return dirname( __FILE__ ). "/img/";
     }
-	
+
 	/**
 	 * showDocumentation
 	 * @param null
@@ -968,13 +968,13 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		//render the view
 		return $this->renderView('documentation',array(
 			'action_url' => $this->getButtonCallbackURL(),
-			
+
 			'html' => $html,
 			'show_header' => $show_header,
 			'show_footer' => $show_footer,
 		));
 	}
-	
+
 	/**
 	 * show the update notification
 	 * @param null
@@ -982,7 +982,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	public function showUpdateNotification(){
 		echo $this->getUpdateNotification();
 	}
-	
+
 	/**
 	 * get the update notification
 	 * @param null
@@ -1020,7 +1020,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 			header("HTTP/1.0 403");
 			echo $e->getMessage();
-			
+
 			if($this->isDebugMode()){
 				echo $e->getTraceAsString();
 			}
@@ -1082,21 +1082,21 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		$sql .= "PRIMARY KEY ($primaryKey));";
 
 		$this->executeNonQuery($sql);
-		
+
 		//we can't relly on the fact that the table has been properly created, so check it!
 		if(!$this->existsTable($tableName))
 			throw new Exception(SyC::t('sdk','Cannot create table "{table_name}". Check your database permissions or manually run the following SQL command and try again:<br /><strong>{sql}</strong>', array('{table_name}' => $tableName,'{sql}' => nl2br($sql))));
 	}
-	
+
 	/**
 	*
 	* existsTable
 	* @return TRUE if the table exists, otherwise false
 	*/
 	protected function existsTable($tableName){
-	
+
 		$table_details = $this->getRow("show tables like '$tableName'");
-		
+
 		//if there are table details, it means the table exists
 		return !empty($table_details);
 	}
@@ -1110,26 +1110,26 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 		$sql = "DROP TABLE $tableName";
 		$this->executeNonQuery($sql);
-		
+
 		//we can't relly on the fact that the table has been properly droped, so check it!
 		if($this->existsTable($tableName))
 			throw new Exception(SyC::t('sdk','Cannot drop table "{table_name}". Check your database permissions or manually run the following SQL command and try again:<br /><strong>{sql}</strong>', array('{table_name}' => $tableName, '{sql}' => nl2br($sql))));
 	}
-	
+
 	/**
 	*
 	* Render the specified views. we use special variable names here to avoid conflict when extracting data
 	*
 	*/
 	protected function renderView($_viewName_, $_data_=NULL, $_return_=true){
-		
+
 		//get information about the Top Parent class
 		$_reflection_ = new ReflectionClass(get_class($this));
 		$_viewFile_ = dirname($_reflection_->getFileName())."/views/$_viewName_.php";
-		
+
 		//check if there is a file in the specified location
 		if(!file_exists($_viewFile_)){
-			
+
 			//the view has not been overrided, so use the SDK one
 			$_viewFile_ = dirname(__FILE__) . "/views/$_viewName_.php";
 		}
@@ -1139,7 +1139,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 			extract($_data_,EXTR_PREFIX_SAME,'data');
 		else
 			$data=$_data_;
-			
+
 		//render the view
 		if($_return_)
 		{
@@ -1151,21 +1151,21 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		else
 			require($_viewFile_);
 	}
-	
+
 	/**
 	*
 	* This function is used to make sure that the created url returns a proper scheme
 	*
 	*/
 	protected function getUrl($file){
-	
+
 		//if there is no file, return an empty string
 		if(empty($file)) return $file;
-	
+
 		//test if the files is a url, as one migt send it that way
 		$parts = parse_url($file);
 		$is_url = is_array($parts) && isset($parts['scheme']) && SyC::startsWith($parts['scheme'],'http');
-	
+
 		//if this is not a url, create one for it
 		if(!$is_url)
 		{
@@ -1177,19 +1177,19 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		{
 			$url = $file;
 		}
-	
+
 		//do it here. the problem is loading an insecure object over a secure page, so check for this situation
-		
+
 		if( (isset($_SERVER['HTTPS']) && !strcasecmp($_SERVER['HTTPS'],'on')) && //the page is a secure one
 		SyC::startsWith($url,'http://') //the created url is an insecure one, adjust it
 		)
 		{
 			$url = "https://".substr($url, 7);
 		}
-		
+
 		return $url;
 	}
- 
+
 
 	/**
 	*
@@ -1198,39 +1198,39 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	*
 	*/
 	public function checkSDKStatus($force = false) {
-		
+
 		//call the API at most only once every 5 minutes, not sooner
-		if(!$force && (time()-$this->getConfigValue('api_last_check')) < 5*60) 
+		if(!$force && (time()-$this->getConfigValue('api_last_check')) < 5*60)
 			return;
-		
+
 		//set the latest check time
 		$this->setConfigValue('api_last_check',time());
-		
+
 		//get an update from the API
 		$message = '';
 		if(is_array($result = $this->getSDKStatus($this->getSecretKey(), $this->getClientId(), $this->getAppKey(), $message)))
 		{
-		   
+
 			//save the data
 			$this->setConfigValue('api_version', @$result['api_version']);
 			$this->setConfigValue('latest_version', @$result['plugin_latest_version']);
 			$this->setConfigValue('download_url', @$result['plugin_download_url']);
 			$this->setConfigValue('debug', @$result['debug']);
-			
+
 			//set the current language the SDK should be displayed in
 			if(isset($result['lang'])){
 				$this->setConfigValue('lang', $result['lang']);
 				SyC::setLanguage($result['lang']);
-			
+
 				//check if there is a new translation available for this language
 				if(!empty($result['lang_checksum']) && $result['lang_checksum'] != SyC::getLanguageChecksum()){
-				
+
 					//download the translation
 					$messages = $this->getSDKTranslation(SyC::getLanguage());
-				
+
 					//save the translation
 					$this->setConfigValue('messages', $messages);
-					
+
 					//reset the loaded messages so that the new ones are being used
 					SyC::reloadLanguage();
 				}
@@ -1238,9 +1238,9 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		}else{
 			//simply log the error, for now!
 			error_log(print_r($message,true));
-		}	
+		}
 	}
-	
+
 	/**
 	*
 	* Language loader ( from the DB )
@@ -1250,18 +1250,18 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	{
 		//see if we have the language saved in the db
 		$messages = $this->getConfigValue('messages');
-		
+
 		if(empty($messages)) //no language is saved, so revert to the file one
 		{
 			$messages = SyC::loadFileLanguage($lang,$category);
 		}
-		
+
 		//make sure we have an array for this variable
 		if(!is_array($messages)) $messages=array();
-		
+
 		return $messages;
 	}
-	
+
 	/*
 	 *
 	 * Call to see if the function was called once, or not
@@ -1275,7 +1275,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		self::$_SINGLE_FUNCTIONS_CALLS[$functionName] = true;
 		return true;
 	}
-	
+
 	/**
 	*
 	* User to catch any unhandled exceptions and print them nicelly
@@ -1284,7 +1284,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	public function UncaughtExceptionHandler(Exception $e) {
 		//@header("HTTP/1.0 403");
 		echo $e->getMessage();
-		
+
 		if($this->isDebugMode()){
 			echo $e->getTraceAsString();
 		}
