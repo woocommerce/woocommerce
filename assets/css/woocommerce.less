@@ -615,6 +615,22 @@ p.demo_store {
 				.darkorlighttextshadow( @primarytext + #111, 0.6 );
 			}
 		}
+
+		&:disabled,
+		&.disabled {
+			color: lighten( @secondarytext, 30 );
+			border: 1px solid darken( @secondary, 10 );
+
+			background: @secondary;
+			-webkit-box-shadow: none;
+			-moz-box-shadow: none;
+			box-shadow: none;
+
+			cursor: not-allowed;
+			&:active {
+				top: 0;
+			}	
+		}
 	}
 
 	.cart .button, .cart input.button {
