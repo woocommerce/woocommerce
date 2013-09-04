@@ -180,6 +180,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - PayPal PDT support (as alternative to IPN).
 * Feature - Handling for password protected products.
 * Feature - Schema markup selector for downloadables.
+* Feature - woocommerce_get_featured_product_ids function.
 * Tweak - Added pagination to tax rate screens.
 * Tweak - Added filter to check the 'Create account' checkbox on checkout by default.
 * Tweak - Update CPT parameters for 'product_variation' and 'shop_coupon' to be no longer public.
@@ -197,11 +198,13 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Streamlined account process - username and passwords are optional and can be automatically generated.
 * Tweak - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](http://www.woothemes.com/products/product-csv-import-suite/)).
 * Tweak - Product shortcodes columns paramter now affects layout correctly.
+* Tweak - Disabled button styles
 * Fix - Changed MyException to Exception in Checkout class as MyException class does not exist in WooCommerce
 * Fix - Default cart widget styling on non-wc pages.
 * Fix - Rounding for mijireh tax ex. price.
 * Fix - Updated blockui to prevent errors in WP 3.6.
 * Fix - Tweaked popularity sorting to work better when no sales are present.
+* Fix - Quote encoding in email subjects.
 * Refactor - Taken out Piwik integration, use http://wordpress.org/extend/plugins/woocommerce-piwik-integration/ from now on.
 * Refactor - Taken out ShareYourCart integration, use http://wordpress.org/extend/plugins/shareyourcart/ from now on.
 * Refactor - Moved woocommerce_get_formatted_product_name function into WC_Product class.
