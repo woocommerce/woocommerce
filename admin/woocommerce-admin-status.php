@@ -91,7 +91,7 @@ function woocommerce_status_report() {
             </tr>
             <tr>
                 <td><?php _e( 'WP Version','woocommerce' ); ?>:</td>
-                <td><?php if ( is_multisite() ) echo 'WPMU'; else echo 'WP'; ?> <?php echo bloginfo('version'); ?></td>
+                <td><?php if ( is_multisite() ) echo 'WPMU'; else echo 'WP'; ?> <?php bloginfo('version'); ?></td>
             </tr>
             <tr>
                 <td><?php _e( 'Web Server Info','woocommerce' ); ?>:</td>
