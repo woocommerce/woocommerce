@@ -3,8 +3,8 @@ Contributors: woothemes, mikejolley, jameskoster, CoenJacobs
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.5
-Tested up to: 3.6 beta 3
-Stable tag: 2.0.13
+Tested up to: 3.6
+Stable tag: 2.0.14
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -165,14 +165,19 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.0.14 - xx/xx/xxxx =
+= 2.0.14 - 04/09/2013 =
+* Tweak - Update cart performance improvements
 * Fix - Google Analytics no longer identifies users using custom vars
+* Fix - Send tax inclusive, rounded item price to Google Analytics
 * Fix - Use version_compare to check for required jQuery
 * Fix - Made gateway abstract compatible with implementations to prevent strict notices
 * Fix - Update order's GMT date ('post_date_gmt') when changing the order date via the "Edit Order" screen
 * Fix - Hardened the checkout payment URL method
 * Fix - Regression bug fixed, allowing 0 value attributes again
 * Fix - API url function work when permalinks are not pretty
+* Fix - Chosen select boxes now support RTL languages
+* Fix - Refresh when creating an account to prevent nonce issues
+* Other minor fixes
 
 = 2.0.13 - 19/07/2013 =
 * Tweak - Allow users with edit rights to add draft products to cart (and nobody else)
