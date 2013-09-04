@@ -959,7 +959,7 @@ class WC_Product {
 	 * @param mixed '
 	 * @param string $before (default: '')
 	 * @param string $after (default: '')
-	 * @return array
+	 * @return string
 	 */
 	public function get_categories( $sep = ', ', $before = '', $after = '' ) {
 		return get_the_term_list( $this->id, 'product_cat', $before, $sep, $after );
