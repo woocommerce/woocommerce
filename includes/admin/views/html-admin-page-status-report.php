@@ -32,7 +32,7 @@
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Version','woocommerce' ); ?>:</td>
-			<td><?php echo bloginfo('version'); ?></td>
+			<td><?php bloginfo('version'); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Multisite Enabled','woocommerce' ); ?>:</td>
