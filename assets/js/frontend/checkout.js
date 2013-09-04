@@ -250,55 +250,59 @@ jQuery(document).ready(function($) {
 				url: 		wc_checkout_params.checkout_url,
 				data: 		$form.serialize(),
 				success: 	function( code ) {
-						var result = '';
+					var result = '';
 
-						try {
-							// Get the valid JSON only from the returned string
-							if ( code.indexOf("<!--WC_START-->") >= 0 )
-								code = code.split("<!--WC_START-->")[1]; // Strip off before after WC_START
+					try {
+						// Get the valid JSON only from the returned string
+						if ( code.indexOf("<!--WC_START-->") >= 0 )
+							code = code.split("<!--WC_START-->")[1]; // Strip off before after WC_START
 
-							if ( code.indexOf("<!--WC_END-->") >= 0 )
-								code = code.split("<!--WC_END-->")[0]; // Strip off anything after WC_END
+						if ( code.indexOf("<!--WC_END-->") >= 0 )
+							code = code.split("<!--WC_END-->")[0]; // Strip off anything after WC_END
 
-							// Parse
-							result = $.parseJSON( code );
+						// Parse
+						result = $.parseJSON( code );
 
-							if ( result.result == 'success' ) {
-
-								window.location = decodeURI(result.redirect);
-
-							} else if ( result.result == 'failure' ) {
-								throw "Result failure";
-							} else {
-								throw "Invalid response";
-							}
+						if ( result.result == 'success' ) {
+							window.location = decodeURI(result.redirect);
+						} else if ( result.result == 'failure' ) {
+							throw "Result failure";
+						} else {
+							throw "Invalid response";
 						}
-						catch( err ) {
-							// Remove old errors
-							$('.woocommerce-error, .woocommerce-message').remove();
+					}
+					catch( err ) {
 
-							// Add new errors
-							if ( result.messages )
-								$form.prepend( result.messages );
-							else
-								$form.prepend( code );
-
-						  	// Cancel processing
-							$form.removeClass('processing').unblock();
-
-							// Lose focus for all fields
-							$form.find( '.input-text, select' ).blur();
-
-							// Scroll to top
-							$('html, body').animate({
-							    scrollTop: ($('form.checkout').offset().top - 100)
-							}, 1000);
-
-							// Trigger update in case we need a fresh nonce
-							if ( result.refresh == 'true' )
-								$('body').trigger('update_checkout');
+						if ( result.reload == 'true' ) {
+							window.location.reload();
+							return;
 						}
-					},
+
+						// Remove old errors
+						$('.woocommerce-error, .woocommerce-message').remove();
+
+						// Add new errors
+						if ( result.messages )
+							$form.prepend( result.messages );
+						else
+							$form.prepend( code );
+
+					  	// Cancel processing
+						$form.removeClass('processing').unblock();
+
+						// Lose focus for all fields
+						$form.find( '.input-text, select' ).blur();
+
+						// Scroll to top
+						$('html, body').animate({
+						    scrollTop: ($('form.checkout').offset().top - 100)
+						}, 1000);
+
+						// Trigger update in case we need a fresh nonce
+						if ( result.refresh == 'true' )
+							$('body').trigger('update_checkout');
+					}
+				},
 				dataType: 	"html"
 			});
 

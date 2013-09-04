@@ -122,7 +122,7 @@ function woocommerce_set_customer_auth_cookie( $customer_id ) {
 
 	$current_user = get_user_by( 'id', $customer_id );
 
-	wp_set_auth_cookie( $customer_id, true, is_ssl() );
+	wp_set_auth_cookie( $customer_id, true );
 }
 
 /**

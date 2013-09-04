@@ -42,7 +42,6 @@ class WC_Checkout {
 	public function __construct () {
 		global $woocommerce;
 
-		add_action( 'woocommerce_checkout_process', array( $this,'checkout_process' ) );
 		add_action( 'woocommerce_checkout_billing', array( $this,'checkout_form_billing' ) );
 		add_action( 'woocommerce_checkout_shipping', array( $this,'checkout_form_shipping' ) );
 
@@ -89,11 +88,8 @@ class WC_Checkout {
 
 	/**
 	 * Checkout process
-	 *
-	 * @access public
-	 * @return void
 	 */
-	public function checkout_process() {
+	public function check_cart_items() {
 		// When we process the checkout, lets ensure cart items are rechecked to prevent checkout
 		do_action('woocommerce_check_cart_items');
 	}
@@ -378,7 +374,7 @@ class WC_Checkout {
 		$this->posted['terms']                     = isset( $_POST['terms'] ) ? 1 : 0;
 		$this->posted['createaccount']             = isset( $_POST['createaccount'] ) ? 1 : 0;
 		$this->posted['payment_method']            = isset( $_POST['payment_method'] ) ? stripslashes( $_POST['payment_method'] ) : '';
-		$this->posted['shipping_method']           = isset( $_POST['shipping_method'] ) ? stripslashes( $_POST['shipping_method'] ) : '';
+		$this->posted['shipping_method']           = isset( $_POST['shipping_method'] ) ? $_POST['shipping_method'] : '';
 		$this->posted['ship_to_different_address'] = isset( $_POST['ship_to_different_address'] ) ? true : false;
 
 		if ( isset( $_POST['shiptobilling'] ) ) {
@@ -593,8 +589,8 @@ class WC_Checkout {
 
                 	woocommerce_set_customer_auth_cookie( $this->customer_id );
 
-                	// As we are now logged in, checkout will need to refresh to serve a new nonce
-                	WC()->session->set( 'refresh_totals', true );
+                	// As we are now logged in, checkout will need to refresh to show logged in data
+                	WC()->session->set( 'reload_checkout', true );
 
                 	// Add customer info from other billing fields
                 	if ( $this->posted['billing_first_name'] )
@@ -604,14 +600,15 @@ class WC_Checkout {
                 		wp_update_user( array ( 'ID' => $this->customer_id, 'last_name' => $this->posted['billing_last_name'] ) ) ;
 				}
 
+				// Do a final stock check at this point
+				$this->check_cart_items();
+
 				// Abort if errors are present
 				if ( wc_error_count() > 0 )
 					throw new Exception();
 
-				// Create the order
 				$order_id = $this->create_order();
 
-				// Order is saved
 				do_action( 'woocommerce_checkout_order_processed', $order_id, $this->posted );
 
 				// Process payment
@@ -690,11 +687,12 @@ class WC_Checkout {
 				array(
 					'result'	=> 'failure',
 					'messages' 	=> $messages,
-					'refresh' 	=> isset( $woocommerce->session->refresh_totals ) ? 'true' : 'false'
+					'refresh' 	=> isset( $woocommerce->session->refresh_totals ) ? 'true' : 'false',
+					'reload'    => isset( $woocommerce->session->reload_checkout ) ? 'true' : 'false'
 				)
 			) . '<!--WC_END-->';
 
-			unset( $woocommerce->session->refresh_totals );
+			unset( $woocommerce->session->refresh_totals, $woocommerce->session->reload_checkout );
 			exit;
 		}
 	}
