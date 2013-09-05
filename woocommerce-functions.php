@@ -1074,8 +1074,10 @@ function woocommerce_download_product() {
 			$remote_file = false;
 
 			// Remove Query String
-			if ( strstr( $file_path, '?' ) )
-				$file_path = current( explode( '?', $file_path ) );
+			if ( strstr( $file_path, '?' ) ) {
+				$exploded_file_path = explode( '?', $file_path );
+				$file_path = current( $exploded_file_path );
+			}
 
 			$file_path   = realpath( $file_path );
 		}
@@ -1118,8 +1120,10 @@ function woocommerce_download_product() {
 
 		$file_name = basename( $file_path );
 
-		if ( strstr( $file_name, '?' ) )
-			$file_name = current( explode( '?', $file_name ) );
+		if ( strstr( $file_name, '?' ) ) {
+			$exploded_file_name = explode( '?', $file_name );
+			$file_name = current( $exploded_file_name );
+		}
 
 		header( "Robots: none" );
 		header( "Content-Type: " . $ctype );
