@@ -441,7 +441,7 @@ class WC_Product_Variation extends WC_Product {
 	public function get_file_download_path( $download_id ) {
 
 		$file_path = '';
-		$file_paths = apply_filters( 'woocommerce_file_download_paths', get_post_meta( $this->variation_id, '_file_paths', true ), $this->variation_id, null, null );
+		$file_paths = (array) apply_filters( 'woocommerce_file_download_paths', get_post_meta( $this->variation_id, '_file_paths', true ), $this->variation_id, null, null );
 
 		if ( ! $download_id && count( $file_paths ) == 1 ) {
 			// backwards compatibility for old-style download URLs and template files
