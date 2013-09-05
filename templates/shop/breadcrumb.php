@@ -135,7 +135,8 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 		} else {
 
-			$cat = current( get_the_category() );
+			$the_category = get_the_category();
+			$cat = current( $the_category );
 			echo get_category_parents( $cat, true, $delimiter );
 			echo $before . get_the_title() . $after;
 

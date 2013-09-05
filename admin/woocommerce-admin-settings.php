@@ -488,7 +488,8 @@ function woocommerce_settings_get_option( $option_name, $default = '' ) {
 		parse_str( $option_name, $option_array );
 
 		// Option name is first key
-		$option_name = current( array_keys( $option_array ) );
+		$option_keys = array_keys( $option_array );
+		$option_name = current( $option_keys );
 
 		// Get value
 		$option_values = get_option( $option_name, '' );
@@ -834,13 +835,16 @@ function woocommerce_admin_fields( $options ) {
             	$country_setting = (string) woocommerce_settings_get_option( $value['id'] );
 
             	$countries = $woocommerce->countries->countries;
-            	if (strstr($country_setting, ':')) :
-            		$country = current(explode(':', $country_setting));
-            		$state = end(explode(':', $country_setting));
-            	else :
+
+            	if ( strstr( $country_setting, ':' ) ) {
+            		$exploded_settings = explode( ':', $country_setting );
+            		$country = current( $exploded_settings );
+            		$state = end( $exploded_settings );
+            	} else {
             		$country = $country_setting;
             		$state = '*';
-            	endif;
+            	}
+
             	?><tr valign="top">
 					<th scope="row" class="titledesc">
 						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>

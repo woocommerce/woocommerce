@@ -165,7 +165,8 @@ function woocommerce_update_options( $options ) {
 				parse_str( $value['id'], $option_array );
 
 	    		// Option name is first key
-	    		$option_name = current( array_keys( $option_array ) );
+	    		$option_keys = array_keys( $option_array );
+	    		$option_name = current( $option_keys );
 
 	    		// Get old option value
 	    		if ( ! isset( $update_options[ $option_name ] ) )

@@ -1320,9 +1320,11 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				if ( $args['label'] )
 					$field .= '<label class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label']  . '</label>';
 
-				$field .= '<strong>' . current( array_values( $woocommerce->countries->get_allowed_countries() ) ) . '</strong>';
+				$allowed_country_values = array_values( $woocommerce->countries->get_allowed_countries() );
+				$field .= '<strong>' . current( $allowed_country_values ) . '</strong>';
 
-				$field .= '<input type="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" value="' . current( array_keys( $woocommerce->countries->get_allowed_countries() ) ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
+				$allowed_country_keys = array_keys( $woocommerce->countries->get_allowed_countries() );
+				$field .= '<input type="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" value="' . current( $allowed_country_keys ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
 
 				$field .= '</p>' . $after;
 
