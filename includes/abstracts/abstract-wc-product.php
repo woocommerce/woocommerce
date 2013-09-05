@@ -266,7 +266,7 @@ class WC_Product {
 
 		$file_paths = isset( $this->file_paths ) ? $this->file_paths : '';
 		$file_paths = maybe_unserialize( $file_paths );
-		$file_paths = apply_filters( 'woocommerce_file_download_paths', $file_paths, $this->id, null, null );
+		$file_paths = (array) apply_filters( 'woocommerce_file_download_paths', $file_paths, $this->id, null, null );
 
 		if ( ! $download_id && count( $file_paths ) == 1 ) {
 			// backwards compatibility for old-style download URLs and template files
