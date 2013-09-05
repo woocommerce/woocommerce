@@ -2,16 +2,16 @@
 /**
  * Handle data for the current customers session.
  *
- * @class 		WC_Session
- * @version		2.0.0
- * @package		WooCommerce/Abstracts
- * @category	Abstract Class
- * @author 		WooThemes
+ * @class       WC_Session
+ * @version     2.0.0
+ * @package     WooCommerce/Abstracts
+ * @category    Abstract Class
+ * @author      WooThemes
  */
 abstract class WC_Session {
 
-	/** customer_id */
-	protected $_customer_id;
+    /** customer_id */
+    protected $_customer_id;
 
     /** _data  */
     protected $_data = array();
@@ -23,58 +23,80 @@ abstract class WC_Session {
      * __get function.
      *
      * @access public
-     * @param mixed $property
+     * @param mixed $key
      * @return mixed
      */
-    public function __get( $property ) {
-        return isset( $this->_data[ $property ] ) ? $this->_data[ $property ] : null;
+    public function __get( $key ) {
+        return $this->get( $key );
     }
 
     /**
      * __set function.
      *
      * @access public
-     * @param mixed $property
+     * @param mixed $key
      * @param mixed $value
      * @return void
      */
-    public function __set( $property, $value ) {
-        $this->_data[ $property ] = $value;
-        $this->_dirty = true;
+    public function __set( $key, $value ) {
+        $this->set( $key, $value );
     }
 
      /**
      * __isset function.
      *
      * @access public
-     * @param mixed $property
+     * @param mixed $key
      * @return bool
      */
-    public function __isset( $property ) {
-        return isset( $this->_data[ $property ] );
+    public function __isset( $key ) {
+        return isset( $this->_data[ sanitize_title( $key ) ] );
     }
 
     /**
      * __unset function.
      *
      * @access public
-     * @param mixed $property
+     * @param mixed $key
      * @return void
      */
-    public function __unset( $property ) {
-    	if ( isset( $this->_data[ $property ] ) ) {
-       		unset( $this->_data[ $property ] );
-       		$this->_dirty = true;
+    public function __unset( $key ) {
+        if ( isset( $this->_data[ $key ] ) ) {
+            unset( $this->_data[ $key ] );
+            $this->_dirty = true;
         }
     }
 
-   	/**
-	 * get_customer_id function.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function get_customer_id() {
-		return $this->_customer_id;
-	}
+    /**
+     * Get a session variable
+     *
+     * @param string $key
+     * @param  mixed $default used if the session variable isn't set
+     * @return mixed value of session variable
+     */
+    public function get( $key, $default = null ) {
+        $key = sanitize_key( $key );
+        return isset( $this->_data[ $key ] ) ? maybe_unserialize( $this->_data[ $key ] ) : $default;
+    }
+
+    /**
+     * Set a session variable
+     *
+     * @param string $key
+     * @param mixed $value
+     */
+    public function set( $key, $value ) {
+        $this->_data[ sanitize_key( $key ) ] = maybe_serialize( $value );
+        $this->_dirty = true;
+    }
+
+    /**
+     * get_customer_id function.
+     *
+     * @access public
+     * @return void
+     */
+    public function get_customer_id() {
+        return $this->_customer_id;
+    }
 }
