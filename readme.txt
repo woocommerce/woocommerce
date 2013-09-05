@@ -165,7 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.0.14 - 04/09/2013 =
+= 2.0.14 - 05/09/2013 =
 * Tweak - Update cart performance improvements
 * Fix - Google Analytics no longer identifies users using custom vars
 * Fix - Send tax inclusive, rounded item price to Google Analytics
