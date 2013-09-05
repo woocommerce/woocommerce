@@ -86,8 +86,8 @@ class WC_ShareThis extends WC_Integration {
     	global $post;
 
     	if ( $this->publisher_id ) {
-
-    		$thumbnail = ( $thumbnail_id = get_post_thumbnail_id( $post->ID ) ) ? current(wp_get_attachment_image_src( $thumbnail_id, 'large' )) : '';
+    		$attachment_image_src = wp_get_attachment_image_src( $thumbnail_id, 'large' );
+    		$thumbnail = ( $thumbnail_id = get_post_thumbnail_id( $post->ID ) ) ? current( $attachment_image_src ) : '';
 
     		$sharethis = ( is_ssl() ) ? 'https://ws.sharethis.com/button/buttons.js' : 'http://w.sharethis.com/button/buttons.js';
 

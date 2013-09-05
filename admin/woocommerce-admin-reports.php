@@ -122,9 +122,10 @@ function woocommerce_reports() {
 
 	$charts = woocommerce_get_reports_charts();
 
-	$first_tab      = array_keys( $charts );
-	$current_tab 	= isset( $_GET['tab'] ) ? sanitize_title( urldecode( $_GET['tab'] ) ) : $first_tab[0];
-	$current_chart 	= isset( $_GET['chart'] ) ?  sanitize_title( urldecode( $_GET['chart'] ) ) : current( array_keys( $charts[ $current_tab ]['charts'] ) );
+	$first_tab       = array_keys( $charts );
+	$current_tab     = isset( $_GET['tab'] ) ? sanitize_title( urldecode( $_GET['tab'] ) ) : $first_tab[0];
+	$charts_tab_keys = array_keys( $charts[ $current_tab ]['charts'] );
+	$current_chart   = isset( $_GET['chart'] ) ? sanitize_title( urldecode( $_GET['chart'] ) ) : current( $charts_tab_keys );
     ?>
 	<div class="wrap woocommerce">
 		<div class="icon32 icon32-woocommerce-reports" id="icon-woocommerce"><br /></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
@@ -1598,16 +1599,16 @@ function woocommerce_coupon_discounts() {
 					}
 
 					if ( $coupon_totals ) {
+						$coupon_max_keys = array_keys( $coupon_totals, max( $coupon_totals ) );
+						$top_coupon_name = current( $coupon_max_keys );
+						$top_coupon_sales = $coupon_totals[ $top_coupon_name ];
 
-						$top_coupon_name = current( array_keys( $coupon_totals, max( $coupon_totals ) ) );
-						$top_coupon_sales = $coupon_totals[$top_coupon_name];
-
-						$worst_coupon_name = current( array_keys( $coupon_totals, min( $coupon_totals ) ) );
-						$worst_coupon_sales = $coupon_totals[$worst_coupon_name];
+						$coupon_min_keys = array_keys( $coupon_totals, min( $coupon_totals ) );
+						$worst_coupon_name = current( $coupon_min_keys );
+						$worst_coupon_sales = $coupon_totals[ $worst_coupon_name ];
 
 						$median_coupon_sales = array_values( $coupon_totals );
-						sort($median_coupon_sales);
-
+						sort( $median_coupon_sales );
 					} else {
 						$top_coupon_name = $top_coupon_sales = $worst_coupon_name = $worst_coupon_sales = $median_coupon_sales = '';
 					}
