@@ -165,6 +165,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.0.15 - x =
+* Fix - Added missing line break in plain text email.
+
 = 2.0.14 - 05/09/2013 =
 * Tweak - Update cart performance improvements
 * Fix - Google Analytics no longer identifies users using custom vars

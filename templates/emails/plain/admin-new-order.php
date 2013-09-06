@@ -35,7 +35,7 @@ echo "\n****************************************************\n\n";
 
 do_action( 'woocommerce_email_after_order_table', $order, true, true );
 
-_e( 'Customer details', 'woocommerce' );
+echo __( 'Customer details', 'woocommerce' ) . "\n";
 
 if ( $order->billing_email )
 	echo __( 'Email:', 'woocommerce' ); echo $order->billing_email. "\n";
