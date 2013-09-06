@@ -118,7 +118,7 @@ class WC_Shortcode_My_Account {
 				<li class="comment note">
 					<div class="comment_container">
 						<div class="comment-text">
-							<p class="meta"><?php echo date_i18n(__( 'l jS \of F Y, h:ia', 'woocommerce' ), strtotime($note->comment_date)); ?></p>
+							<p class="meta"><?php echo date_i18n(__( 'l jS \o\f F Y, h:ia', 'woocommerce' ), strtotime($note->comment_date)); ?></p>
 							<div class="description">
 								<?php echo wpautop( wptexturize( $note->comment_content ) ); ?>
 							</div>
