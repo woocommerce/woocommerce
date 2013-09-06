@@ -258,3 +258,59 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
 		)
 	);
 }
+
+/**
+ * woocommerce_customer_has_capability
+ *
+ * Checks if a user has a certain capability 
+ *
+ * @access public
+ * @param array $allcaps
+ * @param array $caps
+ * @param array $args
+ * @return bool
+ */
+function woocommerce_customer_has_capability( $allcaps, $caps, $args ) {
+  if ( isset( $caps[0] ) ) {
+    switch ( $caps[0] ) {
+
+      case 'view_order':
+        $user_id = $args[1];
+        $order = new WC_Order( $args[2] );
+
+        if ( $user_id == $order->user_id )
+          $allcaps['view_order'] = true;
+
+        break;
+
+      case 'pay_for_order':
+        $user_id = $args[1];
+        $order = new WC_Order( $args[2] );
+
+        if ( $user_id == $order->user_id )
+          $allcaps['pay_for_order'] = true;
+
+        break;
+
+      case 'order_again':
+        $user_id = $args[1];
+        $order = new WC_Order( $args[2] );
+
+        if ( $user_id == $order->user_id )
+          $allcaps['order_again'] = true;
+
+        break;
+
+      case 'cancel_order':
+        $user_id = $args[1];
+        $order = new WC_Order( $args[2] );
+
+        if ( $user_id == $order->user_id )
+          $allcaps['cancel_order'] = true;
+
+        break;
+    }
+  }
+  return $allcaps;
+}
+add_filter( 'user_has_cap', 'woocommerce_customer_has_capability', 11, 3);
