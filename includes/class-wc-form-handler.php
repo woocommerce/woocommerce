@@ -354,8 +354,9 @@ class WC_Form_Handler {
 		if ( $order->status != 'completed' )
 			return;
 
-		// Make sure the previous order belongs to the current customer
-		if ( $order->user_id != get_current_user_id() )
+		// Make sure the user is allowed to order again. By default it check if the 
+		// previous order belonged to the current user.
+		if ( !current_user_can( 'order_again', $order->id ) )
 			return;
 
 		// Copy products from the order to the cart
@@ -402,7 +403,9 @@ class WC_Form_Handler {
 
 			$order = new WC_Order( $order_id );
 
-			if ( $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, array( 'pending', 'failed' ) ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) ) :
+			$can_cancel = current_user_can( 'cancel_order', $order_id );
+
+			if ( $can_cancel && $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, array( 'pending', 'failed' ) ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) ) :
 
 				// Cancel the order + restore stock
 				$order->cancel_order( __('Order cancelled by customer.', 'woocommerce' ) );
@@ -412,7 +415,7 @@ class WC_Form_Handler {
 
 				do_action( 'woocommerce_cancelled_order', $order->id );
 
-			elseif ( $order->status != 'pending' ) :
+			elseif ( $can_cancel && $order->status != 'pending' ) :
 
 				wc_add_error( __( 'Your order is no longer pending and could not be cancelled. Please contact us if you need assistance.', 'woocommerce' ) );
 

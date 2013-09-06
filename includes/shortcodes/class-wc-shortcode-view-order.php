@@ -46,7 +46,7 @@ class WC_Shortcode_View_Order {
 			return;
 		}
 
-		if ( $order->user_id != $user_id ) {
+		if ( !current_user_can( 'view_order', $order_id ) ) {
 			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="'.get_permalink( woocommerce_get_page_id('myaccount') ).'">'. __( 'My Account &rarr;', 'woocommerce' ) .'</a>' . '</div>';
 			return;
 		}
