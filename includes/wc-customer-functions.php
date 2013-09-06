@@ -309,6 +309,15 @@ function woocommerce_customer_has_capability( $allcaps, $caps, $args ) {
           $allcaps['cancel_order'] = true;
 
         break;
+
+      case 'download_file':
+        $user_id = $args[1];
+        $download = $args[2]
+
+        if ( $user_id == $download->user_id )
+          $allcaps['download_file'] = true;
+
+        break;
     }
   }
   return $allcaps;
