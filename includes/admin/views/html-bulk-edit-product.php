@@ -243,6 +243,25 @@
 				</label>
 			</div>
 
+			<label>
+			    <span class="title"><?php _e( 'Backorders?', 'woocommerce' ); ?></span>
+			    <span class="input-text-wrap">
+			    	<select class="backorders" name="_backorders">
+					<?php
+						$options = array(
+							''       => __( '— No Change —', 'woocommerce' ),
+							'no'     => __( 'Do not allow', 'woocommerce' ),
+							'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
+							'yes'    => __( 'Allow', 'woocommerce' )
+						);
+						foreach ($options as $key => $value) {
+							echo '<option value="' . $key . '">'. $value .'</option>';
+						}
+					?>
+					</select>
+				</span>
+			</label>
+
 		<?php endif; ?>
 
 		<?php do_action( 'woocommerce_product_bulk_edit_end' ); ?>

@@ -24,6 +24,7 @@ jQuery(document).ready(function(){
 		var menu_order			= $wc_inline_data.find('.menu_order').text();
 		var tax_status			= $wc_inline_data.find('.tax_status').text();
 		var tax_class			= $wc_inline_data.find('.tax_class').text();
+		var backorders			= $wc_inline_data.find('.backorders').text();
 
 		jQuery('input[name="_sku"]', '.inline-edit-row').val(sku);
 		jQuery('input[name="_regular_price"]', '.inline-edit-row').val(regular_price);
@@ -38,10 +39,11 @@ jQuery(document).ready(function(){
 		jQuery('select[name="_tax_status"] option[value="' + tax_status + '"]', '.inline-edit-row').attr('selected', 'selected');
 		jQuery('select[name="_tax_class"] option[value="' + tax_class + '"]', '.inline-edit-row').attr('selected', 'selected');
 
-		jQuery('select[name="_visibility"] option, select[name="_stock_status"] option').removeAttr('selected');
+		jQuery('select[name="_visibility"] option, select[name="_stock_status"] option, select[name="_backorders"] option').removeAttr('selected');
 
 		jQuery('select[name="_visibility"] option[value="' + visibility + '"]', '.inline-edit-row').attr('selected', 'selected');
 		jQuery('select[name="_stock_status"] option[value="' + stock_status + '"]', '.inline-edit-row').attr('selected', 'selected');
+		jQuery('select[name="_backorders"] option[value="' + backorders + '"]', '.inline-edit-row').attr('selected', 'selected');
 
 		if (featured=='yes') {
 			jQuery('input[name="_featured"]', '.inline-edit-row').attr('checked', 'checked');
@@ -91,7 +93,8 @@ jQuery(document).ready(function(){
     });
 
     jQuery('#wpbody').on('click', '#doaction, #doaction2', function(){
-		jQuery('select, input.text', '.inline-edit-row').val('');
+		jQuery('input.text', '.inline-edit-row').val('');
+		jQuery('select').prop('selectedIndex',0);
 		jQuery('#woocommerce-fields-bulk .inline-edit-group .alignright').hide();
 	});
 

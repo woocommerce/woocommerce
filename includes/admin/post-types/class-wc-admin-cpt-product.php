@@ -304,6 +304,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 						<div class="product_is_virtual">' . $the_product->virtual . '</div>
 						<div class="tax_status">' . $the_product->tax_status . '</div>
 						<div class="tax_class">' . $the_product->tax_class . '</div>
+						<div class="backorders">' . $the_product->backorders . '</div>
 					</div>
 				';
 
@@ -728,6 +729,10 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 				update_post_meta( $post_id, '_manage_stock', 'no' );
 				wc_update_product_stock( $post_id, 0 );
 			}
+
+			if ( ! empty( $_REQUEST['_backorders'] ) ) {
+				update_post_meta( $post_id, '_backorders', woocommerce_clean( $_REQUEST['_backorders'] ) );
+			}
 		}
 
 		do_action( 'woocommerce_product_quick_edit_save', $product );
@@ -887,6 +892,10 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 					update_post_meta( $post_id, '_manage_stock', 'no' );
 					wc_update_product_stock( $post_id, 0 );
 				}
+			}
+
+			if ( ! empty( $_REQUEST['_backorders'] ) ) {
+				update_post_meta( $post_id, '_backorders', woocommerce_clean( $_REQUEST['_backorders'] ) );
 			}
 
 		}

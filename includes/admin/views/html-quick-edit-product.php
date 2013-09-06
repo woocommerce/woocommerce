@@ -163,6 +163,24 @@
 
 		</div>
 
+		<label class="alignleft">
+		    <span class="title"><?php _e( 'Backorders?', 'woocommerce' ); ?></span>
+		    <span class="input-text-wrap">
+		    	<select class="backorders" name="_backorders">
+				<?php
+					$options = array(
+						'no'     => __( 'Do not allow', 'woocommerce' ),
+						'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
+						'yes'    => __( 'Allow', 'woocommerce' )
+					);
+					foreach ($options as $key => $value) {
+						echo '<option value="'.$key.'">'. $value .'</option>';
+					}
+				?>
+				</select>
+			</span>
+		</label>
+
 		<?php do_action( 'woocommerce_product_quick_edit_end' ); ?>
 
 		<input type="hidden" name="woocommerce_quick_edit" value="1" />
