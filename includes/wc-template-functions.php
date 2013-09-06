@@ -174,6 +174,10 @@ function wc_body_class( $classes ) {
 		$classes[] = 'woocommerce-page';
 	}
 
+	if ( get_option( 'woocommerce_demo_store' ) != 'no' ) {
+		$classes[] = 'woocommerce-demo-store';
+	}
+
 	return array_unique( $classes );
 }
 
