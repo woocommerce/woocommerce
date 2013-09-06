@@ -313,4 +313,4 @@ function woocommerce_customer_has_capability( $allcaps, $caps, $args ) {
   }
   return $allcaps;
 }
-add_filter( 'user_has_cap', 'woocommerce_customer_has_capability', 11, 3);
+add_filter( 'user_has_cap', 'woocommerce_customer_has_capability', 10, 3);
