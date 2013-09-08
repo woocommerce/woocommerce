@@ -370,26 +370,59 @@
 		</tr>
 	</thead>
 
+        <?php
+        $active_theme = wp_get_theme();
+        if ( $active_theme->{'Author URI'} == 'http://www.woothemes.com' ) :
+		
+			$theme_dir = strtolower( str_replace( ' ','', $active_theme->Name ) );
+        
+			if ( false === ( $theme_version_data = get_transient( $theme_dir . '_version_data' ) ) ) :
+        	
+        		$theme_changelog = wp_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $theme_dir . '/changelog.txt' );
+				$cl_lines  = explode( "\n", wp_remote_retrieve_body( $theme_changelog ) );
+				if ( ! empty( $cl_lines ) ) :
+			
+					foreach ( $cl_lines as $line_num => $cl_line ) {
+						if ( preg_match( '/^[0-9]/', $cl_line ) ) :
+
+							$theme_date    		= str_replace( '.' , '-' , trim( substr( $cl_line , 0 , strpos( $cl_line , '-' ) ) ) );
+							$theme_version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
+							$theme_update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
+							$theme_version_data = array( 'date' => $theme_date , 'version' => $theme_version , 'update' => $theme_update , 'changelog' => $theme_changelog );
+							set_transient( $theme_dir . '_version_data', $theme_version_data , 60*60*12 );
+							break;
+					
+						endif;
+					}
+				
+				endif;
+			
+			endif;
+			
+		endif;
+		?>
 	<tbody>
-		<tr>
-			<td><?php _e( 'Theme Name', 'woocommerce' ); ?>:</td>
-			<td><?php
-				$active_theme = wp_get_theme();
-				echo $active_theme->Name;
-			?></td>
-		</tr>
-		<tr>
-			<td><?php _e( 'Theme Version', 'woocommerce' ); ?>:</td>
-			<td><?php
-				echo $active_theme->Version;
-			?></td>
-		</tr>
-		<tr>
-			<td><?php _e( 'Author URL', 'woocommerce' ); ?>:</td>
-			<td><?php
-				echo $active_theme->{'Author URI'};
-			?></td>
-		</tr>
+            <tr>
+                <td><?php _e( 'Theme Name', 'woocommerce' ); ?>:</td>
+                <td><?php
+					echo $active_theme->Name;
+                ?></td>
+            </tr>
+            <tr>
+                <td><?php _e( 'Theme Version', 'woocommerce' ); ?>:</td>
+                <td><?php
+					echo $active_theme->Version;
+					
+					if ( ! empty( $theme_version_data['version'] ) && version_compare( $theme_version_data['version'], $active_theme->Version, '!=' ) )
+						echo ' &ndash; <strong style="color:red;">' . $theme_version_data['version'] . ' ' . __( 'is available', 'woocommerce' ) . '</strong>';
+                ?></td>
+            </tr>
+            <tr>
+                <td><?php _e( 'Author URL', 'woocommerce' ); ?>:</td>
+                <td><?php
+					echo $active_theme->{'Author URI'};
+                ?></td>
+            </tr>
 	</tbody>
 
 	<thead>
