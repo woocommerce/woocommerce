@@ -92,28 +92,15 @@
 				<td><?php echo extension_loaded( 'suhosin' ) ? __( 'Yes', 'woocommerce' ) : __( 'No', 'woocommerce' ); ?></td>
 			</tr>
 		<?php endif; ?>
-            <tr>
-                <td><?php _e( 'WC Logging','woocommerce' ); ?>:</td>
-                <td><?php
-                	if ( @fopen( $woocommerce->plugin_path() . '/logs/paypal.txt', 'a' ) ) :
-					
-                		echo '<mark class="yes">' . __( 'Log directory is writable.', 'woocommerce' ) . '</mark>';
-						
-						$url 	= str_replace('/admin/', '/logs/', plugin_dir_url(__FILE__) );
-						$path	= str_replace('/admin/', '/logs/', plugin_dir_path(__FILE__) );
-						
-						foreach ( glob( $woocommerce->plugin_path() . '/logs/*.txt') as $filename ) {
-							if ( str_replace( $path,'',$filename ) != 'paypal.txt') 
-								echo "\r\n<br />" . '<a href="'.$url.str_replace( $path,'',$filename ).'" target="_blank">' . str_replace( $path,'',$filename ) .'</a>';
-						}
-
-                	else :
-					
-                		echo '<mark class="error">' . __( 'Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will not be possible.', 'woocommerce' ) . '</mark>';
-						
-					endif;
-                ?></td>
-            </tr>
+		<tr>
+			<td><?php _e( 'WC Logging','woocommerce' ); ?>:</td>
+			<td><?php
+				if ( @fopen( $woocommerce->plugin_path() . '/logs/paypal.txt', 'a' ) )
+					echo '<mark class="yes">' . __( 'Log directory is writable.', 'woocommerce' ) . '</mark>';
+				else
+					echo '<mark class="error">' . __( 'Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will not be possible.', 'woocommerce' ) . '</mark>';
+			?></td>
+		</tr>
 		<tr>
 			<td><?php _e( 'Default Timezone','woocommerce' ); ?>:</td>
 			<td><?php
