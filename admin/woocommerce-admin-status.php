@@ -122,10 +122,6 @@ function woocommerce_status_report() {
                 <td><?php if ( defined('WP_DEBUG') && WP_DEBUG ) echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>'; else echo '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>'; ?></td>
             </tr>
             <tr>
-                <td><?php _e( 'WP Language','woocommerce' ); ?>:</td>
-                <td><?php if ( defined('WPLANG') && WPLANG ) echo '<mark class="yes">' . __( WPLANG, 'woocommerce' ) . '</mark>'; else echo '<mark class="no">' . __( 'Not set', 'woocommerce' ) . '</mark>'; ?></td>
-            </tr>
-            <tr>
                 <td><?php _e( 'WP Max Upload Size','woocommerce' ); ?>:</td>
                 <td><?php echo size_format( wp_max_upload_size() ); ?></td>
             </tr>
@@ -140,23 +136,10 @@ function woocommerce_status_report() {
             <tr>
                 <td><?php _e( 'WC Logging','woocommerce' ); ?>:</td>
                 <td><?php
-                	if ( @fopen( $woocommerce->plugin_path() . '/logs/paypal.txt', 'a' ) ) :
-					
+                	if ( @fopen( $woocommerce->plugin_path() . '/logs/paypal.txt', 'a' ) )
                 		echo '<mark class="yes">' . __( 'Log directory is writable.', 'woocommerce' ) . '</mark>';
-						
-						$url 	= str_replace('/admin/', '/logs/', plugin_dir_url(__FILE__) );
-						$path	= str_replace('/admin/', '/logs/', plugin_dir_path(__FILE__) );
-						
-						foreach ( glob( $woocommerce->plugin_path() . '/logs/*.txt') as $filename ) {
-							if ( str_replace( $path,'',$filename ) != 'paypal.txt') 
-								echo "\r\n<br />" . '<a href="'.$url.str_replace( $path,'',$filename ).'" target="_blank">' . str_replace( $path,'',$filename ) .'</a>';
-						}
-
-                	else :
-					
+                	else
                 		echo '<mark class="error">' . __( 'Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will not be possible.', 'woocommerce' ) . '</mark>';
-						
-					endif;
                 ?></td>
             </tr>
 			<tr>
