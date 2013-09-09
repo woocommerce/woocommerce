@@ -170,6 +170,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Strict standards warnings in category walkers
 * Fix - Remember which attributes get registered to minimize conflicts
 * Fix - Allow quotes in store name for display in emails
+* Fix - Regression bug throwing warning in ShareThis integration
 
 = 2.0.14 - 05/09/2013 =
 * Tweak - Update cart performance improvements
