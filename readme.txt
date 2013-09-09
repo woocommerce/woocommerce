@@ -168,6 +168,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.0.15 - x =
 * Fix - Added missing line break in plain text email.
 * Fix - Strict standards warnings in category walkers
+* Fix - Remember which attributes get registered to minimize conflicts
+* Fix - Allow quotes in store name for display in emails
 
 = 2.0.14 - 05/09/2013 =
 * Tweak - Update cart performance improvements
