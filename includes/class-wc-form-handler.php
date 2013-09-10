@@ -55,7 +55,7 @@ class WC_Form_Handler {
 
 		if ( $user_id <= 0 ) return;
 
-		$load_address = isset( $wp->query_vars['edit-address'] ) sanitize_key( $wp->query_vars['edit-address'] ) : 'billing';
+		$load_address = isset( $wp->query_vars['edit-address'] ) ? sanitize_key( $wp->query_vars['edit-address'] ) : 'billing';
 
 		$address = $woocommerce->countries->get_address_fields( esc_attr( $_POST[ $load_address . '_country' ] ), $load_address . '_' );
 
