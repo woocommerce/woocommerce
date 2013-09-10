@@ -87,7 +87,7 @@ function woocommerce_downloadable_file_permission( $download_id, $product_id, $o
 	// Downloadable product - give access to the customer
 	$result = $wpdb->insert( $wpdb->prefix . 'woocommerce_downloadable_product_permissions',
 		$data,
-		$format )
+		$format
 	);
 
 	do_action( 'woocommerce_grant_product_download_access', $data );
