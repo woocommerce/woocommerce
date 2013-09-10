@@ -151,7 +151,7 @@ class WC_Shortcode_My_Account {
 	private function edit_address( $load_address = 'billing' ) {
 		global $woocommerce;
 
-		$load_address = ( $load_address == 'billing' || $load_address == 'shipping' ) ? $load_address : 'billing';
+		$load_address = sanitize_key( $load_address );
 
 		$address = $woocommerce->countries->get_address_fields( get_user_meta( get_current_user_id(), $load_address . '_country', true ), $load_address . '_' );
 
