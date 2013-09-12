@@ -8,7 +8,6 @@
  * @category	Class
  * @author 		WooThemes
  */
-
 class WC_Shortcodes {
 
 	public function __construct() {
@@ -988,3 +987,5 @@ class WC_Shortcodes {
 		return ob_get_clean();
 	}
 }
+
+new WC_Shortcodes();

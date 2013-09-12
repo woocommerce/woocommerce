@@ -24,6 +24,7 @@ include( 'wc-order-functions.php' );
 include( 'wc-page-functions.php' );
 include( 'wc-product-functions.php' );
 include( 'wc-term-functions.php' );
+include( 'wc-attribute-functions.php' );
 
 /**
  * Filters on data used in admin and frontend
@@ -174,4 +175,63 @@ function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: te
 	$mailer = $woocommerce->mailer();
 
 	$mailer->send( $to, $subject, $message, $headers, $attachments );
+}
+
+/**
+ * Get an image size.
+ *
+ * Variable is filtered by woocommerce_get_image_size_{image_size}
+ *
+ * @param string $image_size
+ * @return array
+ */
+function wc_get_image_size( $image_size ) {
+	if ( in_array( $image_size, array( 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ) ) {
+		$size           = get_option( $image_size . '_image_size', array() );
+		$size['width']  = isset( $size['width'] ) ? $size['width'] : '300';
+		$size['height'] = isset( $size['height'] ) ? $size['height'] : '300';
+		$size['crop']   = isset( $size['crop'] ) ? $size['crop'] : 1;
+	} else {
+		$size = array(
+			'width'  => '300',
+			'height' => '300',
+			'crop'   => 1
+		);
+	}
+	return apply_filters( 'woocommerce_get_image_size_' . $image_size, $size );
+}
+
+/**
+ * Queue some JavaScript code to be output in the footer.
+ *
+ * @param string $code
+ */
+function wc_enqueue_js( $code ) {
+	global $wc_queued_js;
+
+	if ( empty( $wc_queued_js ) )
+		$wc_queued_js = "";
+
+	$wc_queued_js .= "\n" . $code . "\n";
+}
+
+/**
+ * Output any queued javascript code in the footer.
+ */
+function wc_print_js() {
+	global $wc_queued_js;
+
+	if ( ! empty( $wc_queued_js ) ) {
+
+		echo "<!-- WooCommerce JavaScript-->\n<script type=\"text/javascript\">\njQuery(document).ready(function($) {";
+
+		// Sanitize
+		$wc_queued_js = wp_check_invalid_utf8( $wc_queued_js );
+		$wc_queued_js = preg_replace( '/&#(x)?0*(?(1)27|39);?/i', "'", $wc_queued_js );
+		$wc_queued_js = str_replace( "\r", '', $wc_queued_js );
+
+		echo $wc_queued_js . "});\n</script>\n";
+
+		unset( $wc_queued_js );
+	}
 }

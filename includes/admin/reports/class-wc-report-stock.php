@@ -74,7 +74,7 @@ class WC_Report_Stock extends WP_List_Table {
                     $attributes = $product->get_variation_attributes();
 
                     foreach ( $attributes as $name => $attribute ) {
-                        $list_attributes[] = $woocommerce->get_helper( 'attribute' )->attribute_label( str_replace( 'attribute_', '', $name ) ) . ': <strong>' . $attribute . '</strong>';
+                        $list_attributes[] = wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ': <strong>' . $attribute . '</strong>';
                     }
 
                    echo '<div class="description">' . implode( ', ', $list_attributes ) . '</div>';

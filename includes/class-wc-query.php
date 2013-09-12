@@ -610,12 +610,12 @@ class WC_Query {
 
 			$_chosen_attributes = array();
 
-			$attribute_taxonomies = WC()->get_helper( 'attribute' )->get_attribute_taxonomies();
+			$attribute_taxonomies = wc_get_attribute_taxonomies();
 			if ( $attribute_taxonomies ) {
 				foreach ( $attribute_taxonomies as $tax ) {
 
 			    	$attribute = sanitize_title( $tax->attribute_name );
-			    	$taxonomy = WC()->get_helper( 'attribute' )->attribute_taxonomy_name( $attribute );
+			    	$taxonomy = wc_attribute_taxonomy_name( $attribute );
 			    	$name = 'filter_' . $attribute;
 			    	$query_type_name = 'query_type_' . $attribute;
 

@@ -208,7 +208,7 @@ class WC_Admin_CPT_Shop_Coupon extends WC_Admin_CPT {
 			</select>
 		<?php
 
-		$woocommerce->get_helper( 'inline-javascript' )->add_inline_js( "
+		wc_enqueue_js( "
 			jQuery('select#dropdown_shop_coupon_type, select[name=m]').css('width', '150px').chosen();
 		" );
 	}

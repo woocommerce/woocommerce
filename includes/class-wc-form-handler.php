@@ -49,8 +49,6 @@ class WC_Form_Handler {
 
 		wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-edit_address' );
 
-		$validation = $woocommerce->validation();
-
 		$user_id = get_current_user_id();
 
 		if ( $user_id <= 0 ) return;
@@ -81,10 +79,10 @@ class WC_Form_Handler {
 
 			// Postcode
 			if ($key=='billing_postcode' || $key=='shipping_postcode') :
-				if ( ! $validation->is_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] ) ) :
+				if ( ! WC_Validation::is_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] ) ) :
 					wc_add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
 				else :
-					$_POST[$key] = $validation->format_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] );
+					$_POST[$key] = wc_format_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] );
 				endif;
 			endif;
 

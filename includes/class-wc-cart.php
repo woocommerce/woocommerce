@@ -6,7 +6,7 @@
  * The cart class also has a price calculation function which calls upon other classes to calculate totals.
  *
  * @class 		WC_Cart
- * @version		2.0.0
+ * @version		2.1.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
@@ -590,7 +590,7 @@ class WC_Cart {
 					}
 
 					$item_data[] = array(
-						'key'   => $woocommerce->get_helper( 'attribute' )->attribute_label( str_replace( 'attribute_', '', $name ) ),
+						'key'   => wc_attribute_label( str_replace( 'attribute_', '', $name ) ),
 						'value' => $value
 					);
 				}

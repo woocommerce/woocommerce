@@ -55,7 +55,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		// Logs
 		if ( 'yes' == $this->debug )
-			$this->log = $woocommerce->logger();
+			$this->log = new WC_Logger();
 
 		// Actions
 		add_action( 'valid-paypal-standard-ipn-request', array( $this, 'successful_request' ) );
@@ -441,7 +441,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$paypal_args_array[] = '<input type="hidden" name="'.esc_attr( $key ).'" value="'.esc_attr( $value ).'" />';
 		}
 
-		$woocommerce->get_helper( 'inline-javascript' )->add_inline_js( '
+		wc_enqueue_js( '
 			$.blockUI({
 					message: "' . esc_js( __( 'Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woocommerce' ) ) . '",
 					baseZ: 99999,

@@ -26,6 +26,7 @@ class WC_Admin {
 		add_action( 'admin_init', array( $this, 'prevent_admin_access' ) );
 		add_action( 'wp_ajax_page_slurp', array( 'WC_Gateway_Mijireh', 'page_slurp' ) );
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
+		add_action( 'admin_footer', 'wc_print_js', 25 );
 	}
 
 	/**

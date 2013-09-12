@@ -631,7 +631,7 @@ abstract class WC_Email extends WC_Settings_API {
 			?>
 			</div>
 			<?php
-			$woocommerce->get_helper( 'inline-javascript' )->add_inline_js("
+			wc_enqueue_js("
 				jQuery('select.email_type').change(function(){
 
 					var val = jQuery( this ).val();
