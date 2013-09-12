@@ -152,6 +152,18 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				'autoload'      => false
 			),
 
+            array(
+                'title'   => __( 'Display prices in shop:', 'woocommerce' ),
+                'id'      => 'woocommerce_tax_display_shop',
+                'default' => 'excl',
+                'type'    => 'select',
+                'options' => array(
+                    'incl'   => __( 'Including tax', 'woocommerce' ),
+                    'excl'   => __( 'Excluding tax', 'woocommerce' ),
+                ),
+                'autoload'      => false
+            ),
+
 			array( 'type' => 'sectionend', 'id' => 'tax_options' ),
 
 		)); // End tax settings
