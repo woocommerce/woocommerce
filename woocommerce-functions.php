@@ -439,7 +439,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
     // If we added the product to the cart we can now do a redirect, otherwise just continue loading the page to show errors
     if ( $was_added_to_cart ) {
 
-		$url = apply_filters( 'add_to_cart_redirect', $url );
+		$url = apply_filters( 'add_to_cart_redirect', $url, $product_id );
 
 		// If has custom URL redirect there
 		if ( $url ) {
