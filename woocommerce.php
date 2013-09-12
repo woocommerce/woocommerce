@@ -443,10 +443,10 @@ final class WooCommerce {
 		// Variables
 		$this->template_url			= apply_filters( 'woocommerce_template_url', 'woocommerce/' );
 
-		// Load class instances
-		$this->product_factory 		= new WC_Product_Factory();     // Product Factory to create new product instances
-		$this->countries 			= new WC_Countries();			// Countries class
-		$this->integrations			= new WC_Integrations();		// Integrations class
+		// Load class instances, can be overriden if need be
+		$this->product_factory = apply_filters( 'woocommerce_instance_product_factory', new WC_Product_Factory() ); // Product Factory to create new product instances
+		$this->countries       = apply_filters( 'woocommerce_instance_countries', new WC_Countries() ); // Countries class
+		$this->integrations    = apply_filters( 'woocommerce_instance_integrations', new WC_Integrations() ); // Integrations class
 
 		// Classes/actions loaded for the frontend and for ajax requests
 		if ( ! is_admin() || defined('DOING_AJAX') ) {
@@ -455,10 +455,10 @@ final class WooCommerce {
 			$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
 			$this->session = new $session_class();
 
-			// Class instances
-			$this->cart 			= new WC_Cart();				// Cart class, stores the cart contents
-			$this->customer 		= new WC_Customer();			// Customer class, handles data such as customer location
-			$this->shortcodes		= new WC_Shortcodes();			// Shortcodes class, controls all frontend shortcodes
+			// Class instances, can be overriden if need be
+			$this->cart       = apply_filters( 'woocommerce_instance_cart', new WC_Cart() ); // Cart class, stores the cart contents
+			$this->customer   = apply_filters( 'woocommerce_instance_customer', new WC_Customer() ); // Customer class, handles data such as customer location
+			$this->shortcodes = apply_filters( 'woocommerce_instance_shortcodes', new WC_Shortcodes() ); // Shortcodes class, controls all frontend shortcodes
 
 			// Hooks
 			add_action( 'get_header', array( $this, 'init_checkout' ) );
