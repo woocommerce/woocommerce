@@ -914,7 +914,7 @@ function woocommerce_cancel_order() {
 
 		endif;
 
-		wp_safe_redirect($woocommerce->cart->get_cart_url());
+		wp_safe_redirect( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
 		exit;
 
 	endif;
