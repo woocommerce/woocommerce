@@ -79,7 +79,7 @@
 				} )
 
 				// Upon gaining focus
-				.on( 'focusin', '.variations select', function( event ) {
+				.on( 'focusin touchstart', '.variations select', function( event ) {
 
 					$variation_form = $(this).closest('form.variations_form');
 
