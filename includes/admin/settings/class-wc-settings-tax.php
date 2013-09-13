@@ -247,7 +247,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 									'type'      => 'plain',
 									'prev_text' => '&laquo;',
 									'next_text' => '&raquo;',
-									'total'     => absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(tax_rate_id) FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_class = %s;", sanitize_title( $current_class ) ) ) ),
+									'total'     => ceil( absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(tax_rate_id) FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_class = %s;", sanitize_title( $current_class ) ) ) ) / $limit ),
 									'current'   => $page
 								) ) );
 							?>
