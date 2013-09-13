@@ -751,6 +751,10 @@ class WC_Checkout {
 
 		} else {
 
+			$value = apply_filters( 'woocommerce_checkout_get_value', null, $input );
+
+			if ( $value ) return $value;
+
 			if ( is_user_logged_in() ) {
 
 				$current_user = wp_get_current_user();
