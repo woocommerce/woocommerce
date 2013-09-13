@@ -1739,8 +1739,8 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 			break;
 		default :
-
-			$field = apply_filters( 'woocommerce_form_field_' . $args['type'], '', $key, $args, $value );
+			//Change to ref array instead apply_filters(), it's more easy to get the variable, and empty 
+			$field = apply_filters_ref_array( 'woocommerce_form_field_' . $args['type'], array( $key, $args, $value ) );
 
 			break;
 		}
