@@ -1734,13 +1734,8 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" class="select" ' . implode( ' ', $custom_attributes ) . '>
 						' . $options . '
-					</select>
-				</p>' . $after;
-
-			break;
-		default :
-			//Change to ref array instead apply_filters(), it's more easy to get the variable, and empty 
-			$field = apply_filters_ref_array( 'woocommerce_form_field_' . $args['type'], array( $key, $args, $value ) );
+					</selec
+			$field = apply_filters( 'woocommerce_form_field_' . $args['type'], '', $key, $args, $value );
 
 			break;
 		}
