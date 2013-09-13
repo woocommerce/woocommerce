@@ -20,7 +20,7 @@ class WC_HTTPS {
 		if ( get_option( 'woocommerce_force_ssl_checkout' ) == 'yes' ) {
 			if ( ! is_admin() || defined('DOING_AJAX') ) {
 				// HTTPS urls with SSL on
-				$filters = array( 'post_thumbnail_html', 'widget_text', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
+				$filters = array( 'post_thumbnail_html', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
 
 				foreach ( $filters as $filter )
 					add_filter( $filter, 'WC_HTTPS::force_https_url' );
