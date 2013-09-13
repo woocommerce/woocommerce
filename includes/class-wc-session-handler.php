@@ -70,10 +70,10 @@ class WC_Session_Handler extends WC_Session {
     /**
      * set_session_expiration function.
      *
-     * @access private
+     * @access public
      * @return void
      */
-    private function set_session_expiration() {
+    public function set_session_expiration() {
 	    $this->_session_expiring    = time() + intval( apply_filters( 'wc_session_expiring', 60 * 60 * 47 ) ); // 47 Hours
 		$this->_session_expiration  = time() + intval( apply_filters( 'wc_session_expiration', 60 * 60 * 48 ) ); // 48 Hours
     }
@@ -81,10 +81,10 @@ class WC_Session_Handler extends WC_Session {
 	/**
 	 * generate_customer_id function.
 	 *
-	 * @access private
+	 * @access public
 	 * @return mixed
 	 */
-	private function generate_customer_id() {
+	public function generate_customer_id() {
 		if ( is_user_logged_in() )
 			return get_current_user_id();
 		else
@@ -94,10 +94,10 @@ class WC_Session_Handler extends WC_Session {
 	/**
 	 * get_session_cookie function.
 	 *
-	 * @access private
+	 * @access public
 	 * @return mixed
 	 */
-	private function get_session_cookie() {
+	public function get_session_cookie() {
 		if ( empty( $_COOKIE[ $this->_cookie ] ) )
 			return false;
 
@@ -116,10 +116,10 @@ class WC_Session_Handler extends WC_Session {
 	/**
 	 * get_session_data function.
 	 *
-	 * @access private
+	 * @access public
 	 * @return array
 	 */
-	private function get_session_data() {
+	public function get_session_data() {
 		return (array) get_option( '_wc_session_' . $this->_customer_id, array() );
 	}
 
