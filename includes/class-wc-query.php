@@ -220,11 +220,11 @@ class WC_Query {
 		global $wp_the_query;
 
 		// If this is not a WC Query, do not modify the query
-		if ( empty( $wp_the_query->query_vars['wc_query'] ) )
+		if ( empty( $wp_the_query->query_vars['wc_query'] ) || empty( $wp_the_query->query_vars['s'] ) )
 		    return $where;
 
 		$where = preg_replace(
-		    "/post_title\s+LIKE\s*(\'[^\']+\')/",
+		    "/post_title\s+LIKE\s*(\'\%[^\%]+\%\')/",
 		    "post_title LIKE $1) OR (post_excerpt LIKE $1", $where );
 
 		return $where;
