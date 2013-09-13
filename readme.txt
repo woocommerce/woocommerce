@@ -198,7 +198,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Streamlined account process - username and passwords are optional and can be automatically generated.
 * Tweak - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](http://www.woothemes.com/products/product-csv-import-suite/)).
 * Tweak - Product shortcodes columns paramter now affects layout correctly.
-* Tweak - Disabled button styles
+* Tweak - Disabled button styles.
+* Tweak - Hooks for overriding default email inline styles.
+* Tweak - Flat rate shipping support for percentage factor of additional costs.
 * Fix - Changed MyException to Exception in Checkout class as MyException class does not exist in WooCommerce
 * Fix - Default cart widget styling on non-wc pages.
 * Fix - Rounding for mijireh tax ex. price.
