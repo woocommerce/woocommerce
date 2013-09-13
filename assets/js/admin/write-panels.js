@@ -366,9 +366,13 @@ jQuery( function($){
 						var $row = $(this);
 						var item_id = $row.find('input.order_item_id').val();
 
-						$row.find('input.line_tax').val( response['item_taxes'][ item_id ]['line_tax'] ).change();
-						$row.find('input.line_subtotal_tax').val( response['item_taxes'][ item_id ]['line_subtotal_tax'] ).change();
-						$('#tax_rows').empty().append( response['tax_row_html'] );
+						if ( response['item_taxes'][ item_id ] ) {
+							$row.find('input.line_tax').val( response['item_taxes'][ item_id ]['line_tax'] ).change();
+							$row.find('input.line_subtotal_tax').val( response['item_taxes'][ item_id ]['line_subtotal_tax'] ).change();
+						}
+
+						if ( response['tax_row_html'] )
+							$('#tax_rows').empty().append( response['tax_row_html'] );
 					} );
 
 					$('#_order_tax').val( response['item_tax'] ).change();
