@@ -4,7 +4,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-04-29 16:02:07+00:00\n"
 "PO-Revision-Date: \n"
-"Last-Translator: Geoffrey <rikuasakura@hotmail.fr>\n"
+"Last-Translator: Jean-Francois Arseneault <jeanfrancois@arseneault.ca>\n"
 "Language-Team: ABSOLUTE Web et prédécesseurs <woocommerce@absoluteweb.net>\n"
 "Language: fr_FR\n"
 "MIME-Version: 1.0\n"
@@ -91,8 +91,8 @@ msgid ""
 "Before you can upload your import file, you will need to fix the following "
 "error:"
 msgstr ""
-"Avant de pouvoir transférer votre fichier d'import, vous devez corriger les "
-"erreurs suivantes : "
+"Avant de pouvoir transférer votre fichier d'importation, vous devez corriger "
+"les erreurs suivantes : "
 
 #: admin/importers/tax-rates-importer.php:301
 msgid "Choose a file from your computer:"
@@ -157,7 +157,7 @@ msgid ""
 "WooCommerce theme :)"
 msgstr ""
 "<strong>Votre thème ne déclare pas le support WooCommerce</strong> &#8211; "
-"si vous rencontrez des problèmes d'affichage, veuilelz lire notre guide "
+"si vous rencontrez des problèmes d'affichage, veuillez lire notre guide "
 "d'intégration ou choisir un thème WooCommerce :-)"
 
 # @ woocommerce
@@ -224,7 +224,7 @@ msgstr "lost-password"
 #: admin/woocommerce-admin-install.php:207
 #: admin/woocommerce-admin-status.php:335
 msgid "Lost Password"
-msgstr "Mot de Passe perdu"
+msgstr "Mot de passe perdu"
 
 # @ woocommerce
 #: admin/includes/welcome.php:48
@@ -296,28 +296,29 @@ msgid ""
 "your website is powered by one of the most powerful and stable eCommerce "
 "plugins available."
 msgstr ""
-"Vous serez heureux d'apprendre que WooCommerce a été audité et certifié par "
-"l'équipe sécurité de Sucuri. Alors il n'y a pas grand-chose de visuel pour "
-"comprendre la quantité de travail générée par cette vérification, soyez "
-"assuré que votre site est propulsé par un des plugins de commerce "
-"électronique les plus puissants et stables disponibles."
+"Vous serez heureux d'apprendre que WooCommerce a été vérifié et certifié par "
+"l'équipe de sécurité de Sucuri. Quoiqu'il n'y ait pas grand-chose de visuel "
+"pour comprendre la quantité de travail générée par cette certification, "
+"soyez assuré que votre site est propulsé par une des extensions de commerce "
+"électronique les plus puissantes et stables disponibles."
 
 #: admin/includes/welcome.php:194
 msgid "A Smoother Admin Experience"
-msgstr "Une expérience Admin plus douce"
+msgstr "Une expérience d'administration tout en douceur"
 
 # @ woocommerce
 #: admin/includes/welcome.php:200
 msgid "New Product Panel"
-msgstr "Nouveau Panneau Produit"
+msgstr "Nouveau panneau de produits"
 
 #: admin/includes/welcome.php:201
 msgid ""
 "We have revised the product data panel making it cleaner, more streamlined, "
 "and more logical. Adding products is a breeze!"
 msgstr ""
-"Nous avons revu le panneau de données produit pour le rendre plus clair, "
-"plus simple et plus logique. Ajouter de produits est un jeu d'enfant !"
+"Nous avons revu le panneau d'entrée de données des produits pour le rendre "
+"plus clair, plus simple et plus logique. Ajouter des produits est un jeu "
+"d'enfant !"
 
 #: admin/includes/welcome.php:206
 msgid "Nicer Order Screens"
@@ -328,13 +329,13 @@ msgid ""
 "Order pages have had a cleanup, with a more easily scannable interface. We "
 "particularly like the new status icons!"
 msgstr ""
-"Les pages de commande ont subi un lifting, avec une interface plus "
-"facilement analysable. Nous aimons particulièrement les nouvelles icônes "
-"d'état !"
+"Les pages de commande ont subi un lifting, avec une interface qui s'utilise "
+"plus facilement. Nous aimons particulièrement les nouvelles icônes de "
+"statut !"
 
 #: admin/includes/welcome.php:212
 msgid "Multi-Download Support"
-msgstr "Support du multi-téléchagement"
+msgstr "Support du multi-téléchargement"
 
 #: admin/includes/welcome.php:213
 msgid ""
@@ -346,7 +347,7 @@ msgstr ""
 
 #: admin/includes/welcome.php:218
 msgid "Less Taxing Taxes"
-msgstr "Moins de taxation de Taxes"
+msgstr "Moins de taxation des taxes"
 
 #: admin/includes/welcome.php:224
 msgid "New Tax Input Panel"
@@ -360,13 +361,13 @@ msgid ""
 msgstr ""
 "Les pages de saisie de taxes ont été simplifiées - l'ajout de taxes "
 "multiples pour une seule juridiction est maintenant beaucoup plus facile "
-"d'utilisation en utilisant le système de priorité. Il y a aussi le support "
-"d'importation / exportation CSV."
+"d'utilisation en utilisant le système de priorités. Il y a aussi le support "
+"d'importation / exportation en mode CSV."
 
 # @ woocommerce
 #: admin/includes/welcome.php:229
 msgid "Improved Tax Options"
-msgstr "Amélioration des Options de Taxes"
+msgstr "Amélioration des options des taxes"
 
 #: admin/includes/welcome.php:230
 msgid ""
@@ -375,18 +376,18 @@ msgid ""
 "applies to shipping."
 msgstr ""
 "Comme demandé par certains utilisateurs, nous supportons désormais la "
-"taxation de l'adresse de facturation au lieu de livraison (en option), et "
-"nous vous permettons de choisir la classe d'impôt qui s'applique à "
-"l'expédition."
+"taxation de l'adresse de facturation au lieu de l'adresse de livraison (en "
+"option), et nous vous permettons de choisir la classe de taxation qui "
+"s'applique à l'expédition."
 
 #: admin/includes/welcome.php:235
 msgid "Product Listing Improvements Customers Will Love"
-msgstr "Améliorations de l'affichage des produits, les Clients Aimerons"
+msgstr "Améliorations de l'affichage des produits que les clients adoreront"
 
 # @ woocommerce
 #: admin/includes/welcome.php:241
 msgid "New Sorting Options"
-msgstr "Nouvelles Options de Tri"
+msgstr "Nouvelles options de tri"
 
 #: admin/includes/welcome.php:242
 msgid "Customers can now sort products by popularity and ratings."
@@ -395,15 +396,15 @@ msgstr ""
 
 #: admin/includes/welcome.php:247
 msgid "Better Pagination and Result Counts"
-msgstr "Meilleure Pagination et Comptage des Résultats"
+msgstr "Pagination améliorée et décompte des résultats"
 
 #: admin/includes/welcome.php:248
 msgid ""
 "Numbered pagination has been added to core, and we show the number of "
 "results found above the listings."
 msgstr ""
-"La pagination numérotée a été ajouté au noyau, et nous affichons le nombre "
-"de résultats trouvés au-dessus des produits."
+"La pagination numérotée a été ajouté au noyau, et nous affichons désormais "
+"le nombre de résultats au-dessus des produits."
 
 #: admin/includes/welcome.php:253
 msgid "Inline Star Rating Display"
@@ -432,12 +433,12 @@ msgid ""
 "code> function."
 msgstr ""
 "Les classes de produits ont été réécrites. Elles sont beaucoup plus "
-"extensibles et il est plus facile de requêter les produits à l'aide de la "
-"nouvelle fonction <code>get_product()</code>."
+"extensibles et il est plus facile de faire une requête des produits à l'aide "
+"de la nouvelle fonction <code>get_product()</code>."
 
 #: admin/includes/welcome.php:271
 msgid "Capability overhaul"
-msgstr "Capacités révisées"
+msgstr "Permissions révisées"
 
 #: admin/includes/welcome.php:272
 msgid ""
@@ -462,7 +463,7 @@ msgstr ""
 
 #: admin/includes/welcome.php:283
 msgid "Cache-friendly cart widgets"
-msgstr "Widgets panier compatible avec le cache"
+msgstr "Widgets de panier compatible avec le cache"
 
 #: admin/includes/welcome.php:284
 msgid ""
@@ -470,7 +471,7 @@ msgid ""
 "wonders with static page caching."
 msgstr ""
 "Les widgets panier et autres \"fragments \" sont désormais gérés via AJAX - "
-"cela fonctionne à merveilles avec la mise en cache de pages statiques."
+"cela fonctionne à merveille avec la mise en cache de pages statiques."
 
 # @ woocommerce
 #: admin/includes/welcome.php:288
@@ -489,13 +490,11 @@ msgstr ""
 
 #: admin/includes/welcome.php:293
 msgid "Retina Ready"
-msgstr "Retina Ready"
+msgstr "Optimisé pour les écrans Retina"
 
 #: admin/includes/welcome.php:294
 msgid "All graphics within WC have been optimised for HiDPI displays."
-msgstr ""
-"Tous les graphiques à l'intérieur de WC ont été optimisé pour les écrans "
-"HiDPI."
+msgstr "Toutes les images dans WC ont été optimisées pour les écrans HiDPI."
 
 #: admin/includes/welcome.php:301
 msgid "Better stock handling"
@@ -523,7 +522,7 @@ msgid ""
 msgstr ""
 "Nous avons changé la façon dont les articles de commandes sont stockés, ce "
 "qui les rend plus facile (et plus rapide) d'accès pour des rapports. Les "
-"articles de commande ne sont plus sérialisé dans une commande - ils sont "
+"articles de commande ne sont plus sérialisés dans une commande - ils sont "
 "stockés dans leur propre table."
 
 #: admin/includes/welcome.php:311
@@ -535,8 +534,8 @@ msgid ""
 "We have setup autoloading for classes - this has dramatically reduced memory "
 "usage in 2.0."
 msgstr ""
-"Nous avons paramétré le chargement auto pour les classes - ceci à "
-"considérablement l'usage de la mémoire dans la 2.0."
+"Nous avons paramètre le chargement automatique pour les classes - ceci a "
+"considérablement réduit l'usage de la mémoire dans la version 2.0."
 
 # @ woocommerce
 #: admin/includes/welcome.php:319
@@ -553,7 +552,7 @@ msgstr ""
 "WooCommerce est développé et maintenu par une équipe de passionnés dans le "
 "monde entier et soutenu par une communauté de développeurs impressionnante. "
 "Vous voulez voir votre nom ? <a href=\"https://github.com/woothemes/"
-"woocommerce/blob/master/CONTRIBUTING.md\">Contribuer à WooCommerce</a>."
+"woocommerce/blob/master/CONTRIBUTING.md\">Contribuez à WooCommerce</a>."
 
 # @ woocommerce
 #: admin/includes/welcome.php:363
@@ -563,7 +562,7 @@ msgstr "Voir %s"
 # @ woocommerce
 #: admin/post-types/product.php:31
 msgid "Make a duplicate from this product"
-msgstr "Duplique ce produit"
+msgstr "Dupliquer ce produit"
 
 # @ woocommerce
 #: admin/post-types/product.php:32
@@ -650,7 +649,7 @@ msgstr "Date"
 
 #: admin/post-types/product.php:151
 msgid "Edit this item"
-msgstr "Editer cet article"
+msgstr "Modifier cet article"
 
 # @ woocommerce
 #: admin/post-types/product.php:151
@@ -664,15 +663,15 @@ msgstr "Modifier"
 
 #: admin/post-types/product.php:152
 msgid "Edit this item inline"
-msgstr "Editer cet article en ligne"
+msgstr "Modifier cet article en ligne"
 
 #: admin/post-types/product.php:152
 msgid "Quick&nbsp;Edit"
-msgstr "Edition&nbsp;rapide"
+msgstr "Modification&nbsp;rapide"
 
 #: admin/post-types/product.php:156 admin/post-types/shop_coupon.php:65
 msgid "Restore this item from the Trash"
-msgstr "Récupérer cet élément de la Corbeille"
+msgstr "Récupérer cet élément de la corbeille"
 
 # @ woocommerce
 #: admin/post-types/product.php:156 admin/post-types/shop_coupon.php:65
@@ -698,7 +697,7 @@ msgstr "Supprimer cet article définitivement"
 #: admin/post-types/product.php:160 admin/post-types/shop_coupon.php:69
 #: admin/post-types/writepanels/writepanel-order_data.php:463
 msgid "Delete Permanently"
-msgstr "Supprimer Définitivement"
+msgstr "Supprimer définitivement"
 
 #: admin/post-types/product.php:165
 msgid "Preview &#8220;%s&#8221;"
@@ -804,7 +803,7 @@ msgstr "Produit simple"
 # @ woocommerce
 #: admin/post-types/product.php:399
 msgid "Show all sub-types"
-msgstr "Afficher tous les sous types"
+msgstr "Afficher tous les sous-types"
 
 # @ woocommerce
 #: admin/post-types/product.php:520
@@ -1162,7 +1161,7 @@ msgstr "Afficher tous les clients"
 
 #: admin/post-types/writepanels/order-download-permission-html.php:6
 msgid "Revoke Access"
-msgstr "Révoquer l'Accès"
+msgstr "Révoquer l'accès"
 
 # @ woocommerce
 #: admin/post-types/writepanels/order-download-permission-html.php:7
@@ -1671,7 +1670,7 @@ msgstr ""
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-coupon_data.php:145
 msgid "Email restrictions"
-msgstr "Restrictions d'email"
+msgstr "Restrictions de courriel"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-coupon_data.php:145
@@ -1683,8 +1682,8 @@ msgid ""
 "List of emails to check against the customer's billing email when an order "
 "is placed."
 msgstr ""
-"Liste des e-mails pour vérifier l'email de facturation du client lorsqu'une "
-"commande est passée."
+"Liste des courriels pour vérifier le courriel de facturation du client "
+"lorsqu'une commande est passée."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-coupon_data.php:152
@@ -1948,7 +1947,7 @@ msgstr "Supprimer lignes"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:390
 msgid "Stock Actions"
-msgstr "Actions sur le Stock"
+msgstr "Actions sur le stock"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:391
@@ -1978,7 +1977,7 @@ msgstr "Ajouter frais"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:434
 msgid "Resend order emails"
-msgstr "Renvoyer les emails de commande"
+msgstr "Renvoyer les courriels de commande"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:465
@@ -2112,7 +2111,7 @@ msgstr "Choisir un produit téléchargeable&hellip;"
 
 #: admin/post-types/writepanels/writepanel-order_downloads.php:87
 msgid "Grant Access"
-msgstr "Accorder l'Accès"
+msgstr "Accorder l'accès"
 
 #: admin/post-types/writepanels/writepanel-order_downloads.php:125
 msgid ""
@@ -2308,14 +2307,14 @@ msgstr "Aucune variation ajoutée"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:343
 msgid "Are you sure you want to remove this variation?"
-msgstr "Êtes vous sur de vouloir supprimer cette variation?"
+msgstr "Êtes-vous certain de vouloir supprimer cette variation?"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:399
 msgid "Are you sure you want to delete all variations? This cannot be undone."
 msgstr ""
-"Êtes-vous sur de vouloir supprimer toutes les attributs ? Cela ne pourra pas "
-"être annulé."
+"Êtes-vous certain de vouloir supprimer toutes les attributs ? Cela ne pourra "
+"pas être annulé."
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:402
 msgid "Last warning, are you sure?"
@@ -2601,7 +2600,7 @@ msgstr "Ajouter"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:413
 msgid "Pipe (|) separate terms"
-msgstr "Un Pipe (|) sépare les termes"
+msgstr "Un pipe (|) sépare les termes"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:427
@@ -2636,7 +2635,7 @@ msgstr "Sauvegarder les attributs"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:522
 msgid "Up-Sells"
-msgstr "A la Une"
+msgstr "Ventes ascendantes"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:537
@@ -2645,14 +2644,14 @@ msgid ""
 "product, for example, products that are more profitable or better quality or "
 "more expensive."
 msgstr ""
-"Les produits A la Une sont des produits que vous recommandez à la place de "
-"ceux actuellement vus, par exemple, les produits qui sont plus profitables "
-"ou de meilleure qualité ou plus chers."
+"Les produits Ventes Ascendentes sont des produits que vous recommandez à la "
+"place de ceux actuellement vus, par exemple, les produits qui sont plus "
+"profitables ou de meilleure qualité ou plus chers."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:539
 msgid "Cross-Sells"
-msgstr "Ventes Croisées"
+msgstr "Ventes croisées"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:554
@@ -2729,12 +2728,13 @@ msgstr ""
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:1075
 msgid "Enable this option to feature this product."
-msgstr "Activer cette option pour mettre en avant ce produit."
+msgstr "Activer cette option pour mettre en vedette ce produit."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:1077
+#, fuzzy
 msgid "Featured Product"
-msgstr "Produits Mis en Avant"
+msgstr "Produits en vedette"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:1081
 msgid "OK"
@@ -3117,8 +3117,8 @@ msgid ""
 "Include WooCommerce's lightbox. Product gallery images and the add review "
 "form will open in a lightbox."
 msgstr ""
-"Inclure la lightbox WooCommerce. Les images de galerie produit et le "
-"formulaire d'avis s'ouvriront dans une lightbox."
+"Inclure le lightbox WooCommerce. Les images de galerie produit et le "
+"formulaire d'avis s'ouvriront dans un lightbox."
 
 #: admin/settings/settings-init.php:226
 msgid "Enable enhanced country select boxes"
@@ -4011,7 +4011,7 @@ msgstr "HT"
 # @ woocommerce
 #: admin/settings/settings-init.php:1012
 msgid "Email Sender Options"
-msgstr "Options d'email de l'expéditeur"
+msgstr "Options de courriel de l'expéditeur"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1012
@@ -4019,8 +4019,8 @@ msgid ""
 "The following options affect the sender (email address and name) used in "
 "WooCommerce emails."
 msgstr ""
-"Les options suivantes affectent l'expéditeur (adresse email et nom) utilisé "
-"dans les emails WooCommerce."
+"Les options suivantes affectent l'expéditeur (adresse courriel et nom) "
+"utilisé dans les courriels WooCommerce."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1015
@@ -4030,12 +4030,12 @@ msgstr "\"From\" Nom"
 # @ woocommerce
 #: admin/settings/settings-init.php:1024
 msgid "\"From\" Email Address"
-msgstr "\"From\" Adresse email"
+msgstr "\"From\" Adresse courriel"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1037
 msgid "Email Template"
-msgstr "Modèle d'email"
+msgstr "Modèle de courriel"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1037
@@ -4767,15 +4767,15 @@ msgstr[1] "Produits"
 #: admin/woocommerce-admin-dashboard.php:98
 msgid "Product Category"
 msgid_plural "Product Categories"
-msgstr[0] "Catégorie Produit"
-msgstr[1] "Catégories Produit"
+msgstr[0] "Catégorie de produit"
+msgstr[1] "Catégories de produits"
 
 # @ woocommerce
 #: admin/woocommerce-admin-dashboard.php:112
 msgid "Product Tag"
 msgid_plural "Product Tags"
-msgstr[0] "Mot clé Produit"
-msgstr[1] "Mots clés Produit"
+msgstr[0] "Mot-clé de produit"
+msgstr[1] "Mots-clés de produits"
 
 # @ woocommerce
 #: admin/woocommerce-admin-dashboard.php:126
@@ -4879,12 +4879,12 @@ msgstr "Détails Client"
 # @ woocommerce
 #: admin/woocommerce-admin-functions.php:226
 msgid "Billing address"
-msgstr "Adresse de Facturation"
+msgstr "Adresse de facturation"
 
 # @ woocommerce
 #: admin/woocommerce-admin-functions.php:233
 msgid "Shipping address"
-msgstr "Adresse de Livraison"
+msgstr "Adresse de livraison"
 
 #: admin/woocommerce-admin-functions.php:465
 msgid "Could not compile woocommerce.less:"
@@ -5454,27 +5454,27 @@ msgstr "Afficher"
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:653
 msgid "Total sales in range"
-msgstr "Total ventes sur la période"
+msgstr "Total ventes pour la période"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:659
 msgid "Total orders in range"
-msgstr "Total commandes sur la période"
+msgstr "Total commandes pour la période"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:665
 msgid "Average order total in range"
-msgstr "Total moyen de commandes sur la période"
+msgstr "Total moyen de commandes pour la période"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:671
 msgid "Average order items in range"
-msgstr "Moyenne des articles commandés sur la période"
+msgstr "Moyenne des articles commandés pour la période"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:679
 msgid "Sales in range"
-msgstr "Ventes sur la période"
+msgstr "Ventes pour la période"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:826
@@ -5485,37 +5485,37 @@ msgstr "Année :"
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:837
 msgid "Total sales for year"
-msgstr "Total ventes sur l'année"
+msgstr "Total ventes pour l'année"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:843
 msgid "Total orders for year"
-msgstr "Total commandes sur l'année"
+msgstr "Total commandes pour l'année"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:849
 msgid "Average order total for year"
-msgstr "Montant moyen des commandes sur l'année"
+msgstr "Montant moyen des commandes pour l'année"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:855
 msgid "Average order items for year"
-msgstr "Moyenne d'articles commandés sur l'année"
+msgstr "Moyenne d'articles commandés pour l'année"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:863
 msgid "Monthly sales for year"
-msgstr "Ventes mensuelles sur l'année"
+msgstr "Ventes mensuelles pour l'année"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1011
 msgid "Product does not exist"
-msgstr "Produit Inexistant"
+msgstr "Produit inexistant"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1110
 msgid "Product no longer exists"
-msgstr "Produit inexistant"
+msgstr "Produit n'existe plus"
 
 #: admin/woocommerce-admin-reports.php:1209
 msgid "Sales for %s:"
@@ -5604,7 +5604,7 @@ msgstr "Remise médiane"
 
 #: admin/woocommerce-admin-reports.php:1674
 msgid "Monthly discounts by coupon"
-msgstr "Remises mensuel par code promo"
+msgstr "Remises mensuelles par code promo"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1824
@@ -5672,17 +5672,17 @@ msgstr "Aucun produit épuisé."
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2314
 msgid "Total taxes for year"
-msgstr "Total des taxes sur l'année"
+msgstr "Total des taxes pour l'année"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2325
 msgid "Total product taxes for year"
-msgstr "Total des taxes de produits sur l'année"
+msgstr "Total des taxes de produits pour l'année"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2336
 msgid "Total shipping tax for year"
-msgstr "Total des taxe de livraison sur l'année"
+msgstr "Total des taxes de livraison pour l'année"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2352
@@ -5691,7 +5691,7 @@ msgstr "Total des ventes"
 
 #: admin/woocommerce-admin-reports.php:2352
 msgid "This is the sum of the 'Order Total' field within your orders."
-msgstr "C'est la somme du champ 'Total Commande' de vos commandes."
+msgstr "C'est la somme du champ 'Total de commande' de vos commandes."
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2353
@@ -5700,7 +5700,7 @@ msgstr "Total livraison"
 
 #: admin/woocommerce-admin-reports.php:2353
 msgid "This is the sum of the 'Shipping Total' field within your orders."
-msgstr "C'est la somme du champ 'Total Livraison' de vos commandes."
+msgstr "C'est la somme du champ 'Total de livraison' de vos commandes."
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2354
@@ -5709,7 +5709,7 @@ msgstr "Total des taxes produits"
 
 #: admin/woocommerce-admin-reports.php:2354
 msgid "This is the sum of the 'Cart Tax' field within your orders."
-msgstr "C'est la somme du champ 'Taxe du Panier' de vos commandes."
+msgstr "C'est la somme du champ 'Taxe du panier' de vos commandes."
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2355
@@ -5718,7 +5718,7 @@ msgstr "Total des taxes de livraison"
 
 #: admin/woocommerce-admin-reports.php:2355
 msgid "This is the sum of the 'Shipping Tax' field within your orders."
-msgstr "C'est la somme du champ 'Taxe del Livraison' de vos commandes."
+msgstr "C'est la somme du champ 'Taxe de livraison' de vos commandes."
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2356
@@ -5730,7 +5730,7 @@ msgid ""
 "This is the sum of the 'Cart Tax' and 'Shipping Tax' fields within your "
 "orders."
 msgstr ""
-"C'est la somme des champs 'Taxe du Panier' et 'Taxe de Livraison' de vos "
+"C'est la somme des champs 'Taxe du panier' et 'Taxe de livraison' de vos "
 "commandes."
 
 # @ woocommerce
@@ -5741,7 +5741,7 @@ msgstr "Profit net"
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2357
 msgid "Total sales minus shipping and tax."
-msgstr "Total des ventes diminué de la livraison et des taxes."
+msgstr "Total des ventes moins la livraison et les taxes."
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:2402
@@ -5848,7 +5848,7 @@ msgstr "Veuillez inclure cette information lorsque vous contactez le support :"
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:63
 msgid "Download System Report File"
-msgstr "Téléchargé le Fichier de Report Système"
+msgstr "Télécharger le fichier du rapport de système"
 
 #: admin/woocommerce-admin-status.php:71
 msgid "Environment"
@@ -6043,7 +6043,7 @@ msgstr "Payer"
 
 #: admin/woocommerce-admin-status.php:315
 msgid "Thanks"
-msgstr "Thanks"
+msgstr "Merci"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:323
@@ -6141,16 +6141,17 @@ msgstr "Capacités"
 
 #: admin/woocommerce-admin-status.php:553
 msgid "Reset capabilities"
-msgstr "Réinitialiser les capacités"
+msgstr "Réinitialiser les permissions"
 
 #: admin/woocommerce-admin-status.php:554
 msgid ""
 "This tool will reset the admin, customer and shop_manager roles to default. "
 "Use this if your users cannot access all of the WooCommerce admin pages."
 msgstr ""
-"Cet outil réinitialise les rôles de l'admin, du client et du shop_manager "
-"aux valeurs par défaut. A utiliser si vos utilisateurs ne peuvent plus "
-"accéder aux pages d'administration de WooCommerce."
+"Cet outil réinitialise les rôles de l'administrateur, du client et du "
+"gestionnaire de la boutique aux valeurs par défaut. A utiliser si vos "
+"utilisateurs ne peuvent plus accéder aux pages d'administration de "
+"WooCommerce."
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:557
@@ -6262,17 +6263,17 @@ msgstr ""
 # @ woocommerce
 #: admin/woocommerce-admin-taxonomies.php:365
 msgid "Edit Class"
-msgstr "Editer la Classe"
+msgstr "Modifier la Classe"
 
 # @ woocommerce
 #: admin/woocommerce-admin-users.php:26
 msgid "Billing Address"
-msgstr "Adresse de Facturation"
+msgstr "Adresse de facturation"
 
 # @ woocommerce
 #: admin/woocommerce-admin-users.php:27
 msgid "Shipping Address"
-msgstr "Adresse de Livraison"
+msgstr "Adresse de livraison"
 
 # @ woocommerce
 #: admin/woocommerce-admin-users.php:28
@@ -6331,8 +6332,8 @@ msgstr "http://www.woothemes.com/woocommerce/"
 #. Description of the plugin/theme
 msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
 msgstr ""
-"Une boite à outils e-commerce qui vous aide à vendre n'importe quoi. "
-"Magnifiquement. "
+"Une boite à outils de commerce électronique qui vous aide à vendre n'importe "
+"quoi. Simplement."
 
 #. Author of the plugin/theme
 msgid "WooThemes"
@@ -7493,11 +7494,11 @@ msgstr "http://woothemes.com"
 
 # @ woocommerce
 #~ msgid "Related Products"
-#~ msgstr "Produits en Rapport"
+#~ msgstr "Produits apparentés"
 
 # @ woocommerce
 #~ msgid "Use this file"
-#~ msgstr "Utiliser ce fichier"
+#~ msgstr "Utilisez ce fichier"
 
 #~ msgid "Drop files here"
 #~ msgstr "Déposez les fichier ici"
