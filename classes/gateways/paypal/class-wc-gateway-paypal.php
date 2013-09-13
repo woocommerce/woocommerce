@@ -574,6 +574,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
     	if ( ! empty( $_POST ) && $this->check_ipn_request_is_valid() ) {
 
     		header( 'HTTP/1.1 200 OK' );
+    		header( 'Host: www.paypal.com' );
 
         	do_action( "valid-paypal-standard-ipn-request", $_POST );
 
