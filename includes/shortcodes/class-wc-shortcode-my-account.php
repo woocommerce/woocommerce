@@ -98,7 +98,7 @@ class WC_Shortcode_My_Account {
 		$user_id      	= get_current_user_id();
 		$order 			= new WC_Order( $order_id );
 
-		if ( $order->user_id != $user_id ) {
+		if ( !current_user_can( 'view_order', $order_id ) ) {
 			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . get_permalink( woocommerce_get_page_id( 'myaccount' ) ).'">'. __( 'My Account &rarr;', 'woocommerce' ) .'</a>' . '</div>';
 			return;
 		}
