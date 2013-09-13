@@ -1730,3 +1730,31 @@ function woocommerce_save_address() {
 }
 
 add_action( 'template_redirect', 'woocommerce_save_address' );
+
+/**
+ * Wrapper for wp_get_post_terms which supports ordering by parent
+ * @return array of terms
+ */
+function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
+	if ( $args['orderby'] == 'parent' ) {
+		unset( $args['orderby'] );
+		$orderby_parent = true;
+	}
+
+	$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
+
+	if ( ! empty( $orderby_parent ) )
+		usort( $terms, '_wc_get_product_terms_parent_usort_callback' );
+
+	return $terms;
+}
+
+/**
+ * Sort by parent
+ * @return array
+ */
+function _wc_get_product_terms_parent_usort_callback( $a, $b ) {
+	if( $a->parent === $b->parent )
+		return 0;
+	return ( $a->parent < $b->parent ) ? 1 : -1;
+}
