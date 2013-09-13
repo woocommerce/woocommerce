@@ -1177,6 +1177,7 @@ function woocommerce_calc_line_taxes() {
 	$taxes = $tax_rows = $item_taxes = $shipping_taxes = array();
 
 	$order_id 		= absint( $_POST['order_id'] );
+	$order          = new WC_Order( $order_id );
 	$country 		= strtoupper( esc_attr( $_POST['country'] ) );
 	$state 			= strtoupper( esc_attr( $_POST['state'] ) );
 	$postcode 		= strtoupper( esc_attr( $_POST['postcode'] ) );
@@ -1194,13 +1195,14 @@ function woocommerce_calc_line_taxes() {
 			$line_subtotal 	= isset( $item['line_subtotal']  ) ? esc_attr( $item['line_subtotal'] ) : '';
 			$line_total		= esc_attr( $item['line_total'] );
 			$tax_class 		= esc_attr( $item['tax_class'] );
+			$product_id     = $order->get_item_meta( $item_id, '_product_id', true );
 
 			if ( ! $item_id || $tax_class == '0' )
 				continue;
 
 			// Get product details
-			if ( get_post_type( $item_id ) == 'product' ) {
-				$_product			= get_product( $item_id );
+			if ( get_post_type( $product_id ) == 'product' ) {
+				$_product			= get_product( $product_id );
 				$item_tax_status 	= $_product->get_tax_status();
 			} else {
 				$item_tax_status 	= 'taxable';
@@ -1222,9 +1224,6 @@ function woocommerce_calc_line_taxes() {
 
 				$line_subtotal_tax = $tax->round( array_sum( $line_subtotal_taxes ) );
 				$line_tax = $tax->round( array_sum( $line_taxes ) );
-
-				//$line_subtotal_tax = rtrim( rtrim( number_format( array_sum( $line_subtotal_taxes ), 4, '.', '' ), '0' ), '.' );
-				//$line_tax = rtrim( rtrim( number_format( array_sum( $line_taxes ), 4, '.', '' ), '0' ), '.' );
 
 				if ( $line_subtotal_tax < 0 )
 					$line_subtotal_tax = 0;
@@ -1264,7 +1263,6 @@ function woocommerce_calc_line_taxes() {
 				$matched_tax_rates[ $key ] = $rate;
 
 	$shipping_taxes = $tax->calc_shipping_tax( $shipping, $matched_tax_rates );
-	//$shipping_tax = rtrim( rtrim( number_format( array_sum( $shipping_taxes ), 2, '.', '' ), '0' ), '.' );
 	$shipping_tax = $tax->round( array_sum( $shipping_taxes ) );
 
 	// Remove old tax rows
