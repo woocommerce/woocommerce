@@ -153,6 +153,14 @@ abstract class WC_Email extends WC_Settings_API {
 
 		// For multipart messages
 		add_filter( 'phpmailer_init', array( $this, 'handle_multipart' ) );
+
+		// For default inline styles
+		add_filter( 'woocommerce_email_style_inline_tags', array( $this, 'style_inline_tags' ) );
+		add_filter( 'woocommerce_email_style_inline_h1_tag', array( $this, 'style_inline_h1_tag' ) );
+		add_filter( 'woocommerce_email_style_inline_h2_tag', array( $this, 'style_inline_h2_tag' ) );
+		add_filter( 'woocommerce_email_style_inline_h3_tag', array( $this, 'style_inline_h3_tag' ) );
+		add_filter( 'woocommerce_email_style_inline_a_tag', array( $this, 'style_inline_a_tag' ) );
+		add_filter( 'woocommerce_email_style_inline_img_tag', array( $this, 'style_inline_img_tag' ) );
 	}
 
 	/**
@@ -313,6 +321,137 @@ abstract class WC_Email extends WC_Settings_API {
 	}
 
 	/**
+	 * style_inline_tags function.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	function style_inline_tags($tags) {
+		return array_unique( array_merge( $tags, array( 'h1', 'h2', 'h3', 'a', 'img' ) ) );
+	}
+
+	/**
+	 * style_inline_h1_tag function.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	function style_inline_h1_tag($styles) {
+		$styles['color'] = get_option( 'woocommerce_email_text_color' );
+		$styles['display'] = 'block';
+		$styles['font-family'] = 'Arial';
+		$styles['font-size'] = '34px';
+		$styles['font-weight'] = 'bold';
+		$styles['margin-top'] = '10px';
+		$styles['margin-right'] = '0';
+		$styles['margin-bottom'] = '10px';
+		$styles['margin-left'] = '0';
+		$styles['text-align'] = 'left';
+		$styles['line-height'] = '150%';
+
+		return $styles;
+	}
+
+	/**
+	 * style_inline_h2_tag function.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	function style_inline_h2_tag($styles) {
+		$styles['color'] = get_option( 'woocommerce_email_text_color' );
+		$styles['display'] = 'block';
+		$styles['font-family'] = 'Arial';
+		$styles['font-size'] = '30px';
+		$styles['font-weight'] = 'bold';
+		$styles['margin-top'] = '10px';
+		$styles['margin-right'] = '0';
+		$styles['margin-bottom'] = '10px';
+		$styles['margin-left'] = '0';
+		$styles['text-align'] = 'left';
+		$styles['line-height'] = '150%';
+
+		return $styles;
+	}
+
+	/**
+	 * style_inline_h3_tag function.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	function style_inline_h3_tag($styles) {
+		$styles['color'] = get_option( 'woocommerce_email_text_color' );
+		$styles['display'] = 'block';
+		$styles['font-family'] = 'Arial';
+		$styles['font-size'] = '26px';
+		$styles['font-weight'] = 'bold';
+		$styles['margin-top'] = '10px';
+		$styles['margin-right'] = '0';
+		$styles['margin-bottom'] = '10px';
+		$styles['margin-left'] = '0';
+		$styles['text-align'] = 'left';
+		$styles['line-height'] = '150%';
+
+		return $styles;
+	}
+
+	function style_inline_a_tag($styles) {
+		$styles['color'] = get_option( 'woocommerce_email_text_color' );
+		$styles['font-weight'] = 'normal';
+		$styles['text-decoration'] = 'underline';
+
+		return $styles;
+	}
+
+	/**
+	 * style_inline_img_tag function.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	function style_inline_img_tag($styles) {
+		$styles['display'] = 'inline';
+		$styles['border'] = 'none';
+		$styles['font-size'] = '14px';
+		$styles['font-weight'] = 'bold';
+		$styles['height'] = 'auto';
+		$styles['line-height'] = '100%';
+		$styles['outline'] = 'none';
+		$styles['text-decoration'] = 'none';
+		$styles['text-transform'] = 'capitalize';
+
+		return $styles;
+	}
+
+	/**
+	 * get_style_inline_tags function.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	function get_style_inline_tags() {
+		return apply_filters( 'woocommerce_email_style_inline_tags', array() );
+	}
+
+	/**
+	 * get_style_inline_for_tag function.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	function get_style_inline_for_tag($tag) {
+		$styles = apply_filters( 'woocommerce_email_style_inline_' . $tag . '_tag',  array() );
+		$css = array();
+
+		foreach( $styles as $property => $value ) {
+			$css[] = $property . ':' . $value;
+		}
+
+		return implode('; ', $css);
+	}
+
+	/**
 	 * Apply inline styles to dynamic content.
 	 *
 	 * @access public
@@ -320,40 +459,20 @@ abstract class WC_Email extends WC_Settings_API {
 	 * @return void
 	 */
 	function style_inline( $content ) {
-
 		if ( ! class_exists( 'DOMDocument' ) )
 			return $content;
 
 		$dom = new DOMDocument();
 		@$dom->loadHTML( $content );
 
-		$nodes = $dom->getElementsByTagName('img');
+		foreach( $this->get_style_inline_tags() as $tag ) {
+			$nodes = $dom->getElementsByTagName($tag);
 
-		foreach( $nodes as $node )
-			if ( ! $node->hasAttribute( 'style' ) )
-				$node->setAttribute( "style", "display:inline; border:none; font-size:14px; font-weight:bold; height:auto; line-height:100%; outline:none; text-decoration:none; text-transform:capitalize;" );
-
-		$nodes_h1 = $dom->getElementsByTagName('h1');
-		$nodes_h2 = $dom->getElementsByTagName('h2');
-		$nodes_h3 = $dom->getElementsByTagName('h3');
-
-		foreach( $nodes_h1 as $node )
-			if ( ! $node->hasAttribute( 'style' ) )
-				$node->setAttribute( "style", "color: " . get_option( 'woocommerce_email_text_color' ) . "; display:block; font-family:Arial; font-size:34px; font-weight:bold; margin-top: 10px; margin-right:0; margin-bottom:10px; margin-left:0; text-align:left; line-height: 150%;" );
-
-		foreach( $nodes_h2 as $node )
-			if ( ! $node->hasAttribute( 'style' ) )
-				$node->setAttribute( "style", "color: " . get_option( 'woocommerce_email_text_color' ) . "; display:block; font-family:Arial; font-size:30px; font-weight:bold; margin-top: 10px; margin-right:0; margin-bottom:10px; margin-left:0; text-align:left; line-height: 150%;" );
-
-		foreach( $nodes_h3 as $node )
-			if ( ! $node->hasAttribute( 'style' ) )
-				$node->setAttribute( "style", "color: " . get_option( 'woocommerce_email_text_color' ) . "; display:block; font-family:Arial; font-size:26px; font-weight:bold; margin-top: 10px; margin-right:0; margin-bottom:10px; margin-left:0; text-align:left; line-height: 150%;" );
-
-		$nodes = $dom->getElementsByTagName('a');
-
-		foreach( $nodes as $node )
-			if ( ! $node->hasAttribute( 'style' ) )
-				$node->setAttribute( "style", "color: " . get_option( 'woocommerce_email_text_color' ) . "; font-weight:normal; text-decoration:underline;" );
+			foreach( $nodes as $node ) {
+				if ( ! $node->hasAttribute( 'style' ) )
+					$node->setAttribute( 'style', $this->get_style_inline_for_tag($tag) );
+			}
+		}
 
 		$content = $dom->saveHTML();
 
