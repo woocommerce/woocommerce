@@ -106,7 +106,19 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 			echo $prepend;
 
-			if ( $terms = wp_get_post_terms( $post->ID, 'product_cat', array( 'orderby' => 'parent', 'order' => 'DESC' ) ) ) {
+			if ( $terms = wp_get_post_terms( $post->ID, 'product_cat' ) ) {
+
+				usort( $terms, function( $a, $b ) {
+				
+					if( $a->parent === $b->parent ) {
+					
+						return 0;
+						
+					}
+					
+					return ( $a->parent < $b->parent ) ? 1 : -1;	
+									
+				} );
 
 				$main_term = $terms[0];
 
