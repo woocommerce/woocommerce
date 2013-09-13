@@ -72,7 +72,7 @@ class WC_Download_Handler {
 				if ( ! is_user_logged_in() )
 					wp_die( __( 'You must be logged in to download files.', 'woocommerce' ) . ' <a href="' . wp_login_url( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) ) . '">' . __( 'Login &rarr;', 'woocommerce' ) . '</a>', __( 'Log in to Download Files', 'woocommerce' ) );
 
-				elseif ( $user_id != get_current_user_id() )
+				elseif ( !current_user_can( 'download_file', $download_result ) )
 					wp_die( __( 'This is not your download link.', 'woocommerce' ) );
 
 			}
