@@ -352,7 +352,7 @@ class WC_Form_Handler {
 		if ( $order->status != 'completed' )
 			return;
 
-		// Make sure the user is allowed to order again. By default it check if the 
+		// Make sure the user is allowed to order again. By default it check if the
 		// previous order belonged to the current user.
 		if ( !current_user_can( 'order_again', $order->id ) )
 			return;
@@ -423,7 +423,7 @@ class WC_Form_Handler {
 
 			endif;
 
-			wp_safe_redirect($woocommerce->cart->get_cart_url());
+			wp_safe_redirect( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
 			exit;
 
 		endif;
