@@ -1070,19 +1070,15 @@ class WC_Order {
 	 * @return bool
 	 */
 	public function has_downloadable_item() {
-		$has_downloadable_item = false;
-
-		foreach($this->get_items() as $item) :
-
+		foreach ( $this->get_items() as $item ) {
 			$_product = $this->get_product_from_item( $item );
 
-			if ($_product->exists() && $_product->is_downloadable()) :
-				$has_downloadable_item = true;
-			endif;
+			if ( false !== $_product && $_product->exists() && $_product->is_downloadable() ) {
+				return true;
+			}
+		}
 
-		endforeach;
-
-		return $has_downloadable_item;
+		return false;
 	}
 
 
