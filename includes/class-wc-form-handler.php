@@ -53,7 +53,7 @@ class WC_Form_Handler {
 
 		if ( $user_id <= 0 ) return;
 
-		$load_address = ( $wp->query_vars['edit-address'] == 'billing' || $wp->query_vars['edit-address'] == 'shipping' ) ? $wp->query_vars['edit-address'] : 'billing';
+		$load_address = isset( $wp->query_vars['edit-address'] ) ? sanitize_key( $wp->query_vars['edit-address'] ) : 'billing';
 
 		$address = $woocommerce->countries->get_address_fields( esc_attr( $_POST[ $load_address . '_country' ] ), $load_address . '_' );
 
@@ -96,7 +96,7 @@ class WC_Form_Handler {
 
 			wc_add_message( __( 'Address changed successfully.', 'woocommerce' ) );
 
-			do_action( 'woocommerce_customer_save_address', $user_id );
+			do_action( 'woocommerce_customer_save_address', $user_id, $load_address );
 
 			wp_safe_redirect( get_permalink( woocommerce_get_page_id('myaccount') ) );
 			exit;

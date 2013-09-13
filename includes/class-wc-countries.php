@@ -1123,10 +1123,9 @@ class WC_Countries {
 				'clear'			=> true
 			);
 
-			$address_fields = apply_filters( 'woocommerce_billing_fields', $address_fields, $country );
-		} else {
-			$address_fields = apply_filters( 'woocommerce_shipping_fields', $address_fields, $country );
 		}
+
+		$address_fields = apply_filters( 'woocommerce_' . $type . 'fields', $address_fields, $country );
 
 		// Return
 		return $address_fields;
