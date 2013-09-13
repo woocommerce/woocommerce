@@ -13,6 +13,34 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
+ * Handles the Heartbeat API request, checking for a WooCommerce action
+ *
+ * @access public
+ * @param array $response
+ * @param array $data
+ * @return array
+ */
+function woocommerce_heartbeat_received( $response, $data ) {
+ 
+	if ( empty( $data['woocommerce_heartbeat']['action'] ) ) return $response;
+
+    // Make sure we only run our query if the edd_heartbeat key is present
+    if( $data['woocommerce_heartbeat']['action'] == 'dashboard_sales' ) {
+
+    	include_once( 'woocommerce-admin-dashboard.php' );
+
+    	$_GET['wc_sales_month'] = $data['woocommerce_heartbeat']['current_month_offset'];
+
+		woocommerce_init_dashboard_widget_vars();
+
+        $response['woocommerce-sales-data'] = woocommerce_dashboard_sales_data();
+ 
+    }
+
+    return $response;
+}
+
+/**
  * Checks which method we're using to serve downloads
  *
  * If using force or x-sendfile, this ensures the .htaccess is in place
