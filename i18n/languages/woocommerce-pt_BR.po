@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.14\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-09-14 02:58:48+0000\n"
+"PO-Revision-Date: 2013-09-14 03:46:56+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -5193,7 +5193,7 @@ msgstr "Página"
 #: templates/single-product/up-sells.php:39
 #@ woocommerce
 msgid "You may also like&hellip;"
-msgstr "Você vai gosta disso&hellip;"
+msgstr "Você também pode gostar de&hellip;"
 
 #: templates/cart/cross-sells.php:38
 #@ woocommerce
