@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.14\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-09-14 04:04:40+0000\n"
+"PO-Revision-Date: 2013-09-14 04:25:15+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -4496,7 +4496,7 @@ msgstr "Exibe uma lista de produtos em destaque no site."
 #: classes/widgets/class-wc-widget-featured-products.php:37
 #@ woocommerce
 msgid "WooCommerce Featured Products"
-msgstr "WooCommerce Produtos em destaque"
+msgstr "WooCommerce Produtos em Destaque"
 
 #: classes/widgets/class-wc-widget-featured-products.php:75
 #@ woocommerce
@@ -4523,7 +4523,7 @@ msgstr "Mostra um atributo personalizado em um widget que permite diminuir a lis
 #: classes/widgets/class-wc-widget-layered-nav.php:33
 #@ woocommerce
 msgid "WooCommerce Layered Nav"
-msgstr "WooCommerce  Camada de navegação"
+msgstr "WooCommerce Camada de Navegação"
 
 #: classes/widgets/class-wc-widget-layered-nav.php:355
 #@ woocommerce
@@ -4538,7 +4538,7 @@ msgstr "Mostra uma barra de filtro de preço em um widget que permite diminuir a
 #: classes/widgets/class-wc-widget-price-filter.php:35
 #@ woocommerce
 msgid "WooCommerce Price Filter"
-msgstr "WooCommerce filtro de preço"
+msgstr "WooCommerce Filtro por Preço"
 
 #: classes/widgets/class-wc-widget-price-filter.php:163
 #@ woocommerce
@@ -4548,12 +4548,12 @@ msgstr "Filtrado por preço"
 #: classes/widgets/class-wc-widget-product-categories.php:33
 #@ woocommerce
 msgid "A list or dropdown of product categories."
-msgstr "Uma lista da categoria de produtos."
+msgstr "Uma lista ou dropdown com categorias de produto."
 
 #: classes/widgets/class-wc-widget-product-categories.php:35
 #@ woocommerce
 msgid "WooCommerce Product Categories"
-msgstr "WooCommerce Categoria de produtos"
+msgstr "WooCommerce Categoria de Produtos"
 
 #: classes/widgets/class-wc-widget-product-categories.php:195
 #@ woocommerce
@@ -4578,7 +4578,7 @@ msgstr "A caixa de pesquisa apenas para os produtos."
 #: classes/widgets/class-wc-widget-product-search.php:33
 #@ woocommerce
 msgid "WooCommerce Product Search"
-msgstr "WooCommerce Pesquisa de produtos"
+msgstr "WooCommerce Pesquisa de Produtos"
 
 #: woocommerce-template.php:1498
 #@ woocommerce
@@ -4598,7 +4598,7 @@ msgstr "As etiquetas mais utilizadas são exibidas em forma de nuvem."
 #: classes/widgets/class-wc-widget-product-tag-cloud.php:33
 #@ woocommerce
 msgid "WooCommerce Product Tags"
-msgstr "WooCommerce Etiqueta de produtos"
+msgstr "WooCommerce Etiquetas de Produto"
 
 #: classes/widgets/class-wc-widget-recent-products.php:31
 #@ woocommerce
@@ -4608,7 +4608,7 @@ msgstr "Exibir uma lista de seus produtos mais recentes no seu site."
 #: classes/widgets/class-wc-widget-recent-products.php:33
 #@ woocommerce
 msgid "WooCommerce Recent Products"
-msgstr "WooCommerce Produtos recentes"
+msgstr "WooCommerce Produtos Recentes"
 
 #: classes/widgets/class-wc-widget-recent-products.php:70
 #@ woocommerce
@@ -4624,13 +4624,13 @@ msgstr "Mostrar variações de produtos"
 #: classes/widgets/class-wc-widget-recent-reviews.php:31
 #@ woocommerce
 msgid "Display a list of your most recent reviews on your site."
-msgstr "Exibir uma lista de seus avaliações mais recentes no seu site."
+msgstr "Exibir uma lista com as avaliações mais recentes no seu site."
 
 #: admin/woocommerce-admin-dashboard.php:45
 #: classes/widgets/class-wc-widget-recent-reviews.php:33
 #@ woocommerce
 msgid "WooCommerce Recent Reviews"
-msgstr "WooCommerce Avaliações recentes"
+msgstr "WooCommerce Avaliações Recentes"
 
 #: classes/widgets/class-wc-widget-recent-reviews.php:71
 #@ woocommerce
@@ -4645,7 +4645,7 @@ msgstr "Exibir uma lista de produtos visualizados recentemente."
 #: classes/widgets/class-wc-widget-recently-viewed.php:33
 #@ woocommerce
 msgid "WooCommerce Recently Viewed Products"
-msgstr "WooCommerce Produtos visualizados recentemente"
+msgstr "WooCommerce Produtos Visualizados Recentemente"
 
 #: classes/widgets/class-wc-widget-recently-viewed.php:76
 #@ woocommerce
@@ -4655,12 +4655,12 @@ msgstr "Recentemente visualizados"
 #: classes/widgets/class-wc-widget-top-rated-products.php:33
 #@ woocommerce
 msgid "Display a list of top rated products on your site."
-msgstr "Exibir uma lista de produtos mais avaliados em seu site."
+msgstr "Exibir uma lista dos produtos com melhores avaliações do site."
 
 #: classes/widgets/class-wc-widget-top-rated-products.php:35
 #@ woocommerce
 msgid "WooCommerce Top Rated Products"
-msgstr "WooCommerce Produtos mais avaliados"
+msgstr "WooCommerce Produtos com Melhores Avaliações"
 
 #: classes/widgets/class-wc-widget-top-rated-products.php:72
 #@ woocommerce
@@ -6151,12 +6151,12 @@ msgstr "Exibe uma lista dos produtos mais vendidos no site."
 #: classes/widgets/class-wc-widget-best-sellers.php:33
 #@ woocommerce
 msgid "WooCommerce Best Sellers"
-msgstr "WooCommerce - Mais vendidos"
+msgstr "WooCommerce Mais Vendidos"
 
 #: classes/widgets/class-wc-widget-best-sellers.php:71
 #@ woocommerce
 msgid "Best Sellers"
-msgstr "Mais vendidos"
+msgstr "Mais Vendidos"
 
 #: classes/widgets/class-wc-widget-cart.php:113
 #@ woocommerce
@@ -6191,7 +6191,7 @@ msgstr "Exibe uma lista dos produtos a venda no site."
 #: classes/widgets/class-wc-widget-onsale.php:33
 #@ woocommerce
 msgid "WooCommerce On-sale"
-msgstr "WooCommerce A venda"
+msgstr "WooCommerce A Venda"
 
 #: classes/widgets/class-wc-widget-onsale.php:70
 #@ woocommerce
@@ -7392,7 +7392,7 @@ msgstr "Por favor, insira um nome de usuário."
 #: classes/widgets/class-wc-widget-random-products.php:24
 #@ woocommerce
 msgid "WooCommerce Random Products"
-msgstr "Produtos Aleatórios WooCommerce"
+msgstr "WooCommerce Produtos Aleatórios"
 
 #: classes/widgets/class-wc-widget-random-products.php:27
 #@ woocommerce
@@ -8925,7 +8925,7 @@ msgstr "Exibir o carrinho de compras na barra lateral."
 #: classes/widgets/class-wc-widget-cart.php:35
 #@ woocommerce
 msgid "WooCommerce Cart"
-msgstr "Carrinho do WooCommerce"
+msgstr "WooCommerce Carrinho"
 
 #: classes/widgets/class-wc-widget-product-categories.php:129
 #@ woocommerce
