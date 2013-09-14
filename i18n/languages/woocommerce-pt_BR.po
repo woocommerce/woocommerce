@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.14\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-09-14 03:46:56+0000\n"
+"PO-Revision-Date: 2013-09-14 04:04:40+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -8807,7 +8807,7 @@ msgstr "Quantia fixa por produto"
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:123
 #@ woocommerce
 msgid "Delivery Fee"
-msgstr "Entrega grátis"
+msgstr "Frete grátis"
 
 #: classes/shipping/local-delivery/class-wc-shipping-local-delivery.php:129
 #@ woocommerce
@@ -9247,7 +9247,7 @@ msgstr "Opcional: digite uma descrição para este cupom (para seu controle)."
 #, php-format
 #@ woocommerce
 msgid "Check this box if the coupon grants free shipping. The <a href=\"%s\">free shipping method</a> must be enabled with the \"must use coupon\" setting checked."
-msgstr "Marque essa caixa se o cupom garante entrega grátis. O <a href=\"%s\">método de entrega grátis</a> precisa estar habilitado com a opção \"necessário usar cupom\" selecionada."
+msgstr "Marque essa caixa se o cupom garante frete grátis. O <a href=\"%s\">método de frete grátis</a> precisa estar habilitado com a opção \"necessário usar cupom\" selecionada."
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:54
 #@ woocommerce
