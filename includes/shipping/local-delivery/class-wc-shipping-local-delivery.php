@@ -202,6 +202,23 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 
 			if ( in_array( $this->clean( $package['destination']['postcode'] ), $codes ) )
 				$found_match = true;
+				
+			
+			// Pattern match
+			if ( ! $found_match ) {
+				
+				$customer_postcode = $this->clean( $package['destination']['postcode'] );
+			
+				foreach ($codes as $c) {
+					$pattern = '/^'.str_replace('_', '[0-9a-zA-Z]', $c).'$/i';
+					if(preg_match($pattern, $customer_postcode)) {
+						$found_match = true;
+						break;
+					}
+				}
+				
+			}
+			
 
 			// Wildcard search
 			if ( ! $found_match ) {
