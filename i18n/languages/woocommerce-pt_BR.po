@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.14\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-09-14 04:25:15+0000\n"
+"PO-Revision-Date: 2013-09-14 04:34:44+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -1422,14 +1422,14 @@ msgstr "Nota do cliente sobre o pedido"
 #: classes/class-wc-countries.php:683
 #@ woocommerce
 msgid "First Name"
-msgstr "Primeiro nome"
+msgstr "Nome"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:148
 #: admin/post-types/writepanels/writepanel-order_data.php:238
 #: classes/class-wc-countries.php:688
 #@ woocommerce
 msgid "Last Name"
-msgstr "Sobre nome"
+msgstr "Sobrenome"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:152
 #: admin/post-types/writepanels/writepanel-order_data.php:242
@@ -2177,7 +2177,7 @@ msgstr "Para fazer o pagamento diretamente em nossa conta bancária. Por favor u
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:203
 #@ woocommerce
 msgid "Account Name"
-msgstr "Nome da conta"
+msgstr "Nome da Conta"
 
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:94
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:164
@@ -2198,7 +2198,7 @@ msgstr "Agência"
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:206
 #@ woocommerce
 msgid "Bank Name"
-msgstr "Nome do banco"
+msgstr "Nome do Banco"
 
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:112
 #: classes/gateways/bacs/class-wc-gateway-bacs.php:167
@@ -4690,7 +4690,7 @@ msgstr "Avalie este produto."
 #: templates/single-product/review.php:33
 #@ woocommerce
 msgid "Your comment is awaiting approval"
-msgstr "Seu comentário está aguardando aprovação"
+msgstr "A sua avaliação está aguardando aprovação"
 
 #: woocommerce-ajax.php:119
 #@ woocommerce
@@ -5145,7 +5145,7 @@ msgstr "Total no carrinho"
 #: templates/shop/form-login.php:31
 #@ woocommerce
 msgid "Login"
-msgstr "Login"
+msgstr "Entrar"
 
 #: templates/myaccount/form-login.php:50
 #: templates/shop/form-login.php:33
