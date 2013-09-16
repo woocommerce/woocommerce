@@ -62,7 +62,7 @@ class WC_Makepot {
 	 */
 	public function __construct() {
 		// Default path
-		$this->set_woocommerce_path( '../../' );
+		$this->set_woocommerce_path( dirname(__FILE__) . '/../..' );
 
 		// All available projects with their settings
 		$this->projects = array(
@@ -84,9 +84,9 @@ class WC_Makepot {
 		error_reporting(E_ALL);
 
 		// Load required files and objects
-		require_once './not-gettexted.php';
-		require_once './pot-ext-meta.php';
-		require_once './extract/extract.php';
+		require_once 'not-gettexted.php';
+		require_once 'pot-ext-meta.php';
+		require_once 'extract/extract.php';
 		$this->extractor = new StringExtractor( $this->rules );
 	}
 
