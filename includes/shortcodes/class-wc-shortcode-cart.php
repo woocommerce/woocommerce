@@ -41,7 +41,6 @@ class WC_Shortcode_Cart {
 		} elseif ( ! empty( $_POST['calc_shipping'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-cart' ) ) {
 
 			try {
-				$validation = $woocommerce->validation();
 				$woocommerce->shipping->reset_shipping();
 
 				$country 	= woocommerce_clean( $_POST['calc_shipping_country'] );
@@ -49,10 +48,10 @@ class WC_Shortcode_Cart {
 				$postcode   = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true ) ? woocommerce_clean( $_POST['calc_shipping_postcode'] ) : '';
 				$city       = apply_filters( 'woocommerce_shipping_calculator_enable_city', false ) ? woocommerce_clean( $_POST['calc_shipping_city'] ) : '';
 
-				if ( $postcode && ! $validation->is_postcode( $postcode, $country ) ) {
+				if ( $postcode && ! WC_Validation::is_postcode( $postcode, $country ) ) {
 					throw new Exception( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
 				} elseif ( $postcode ) {
-					$postcode = $validation->format_postcode( $postcode, $country );
+					$postcode = wc_format_postcode( $postcode, $country );
 				}
 
 				if ( $country ) {

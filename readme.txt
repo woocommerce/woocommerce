@@ -198,7 +198,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Streamlined account process - username and passwords are optional and can be automatically generated.
 * Tweak - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](http://www.woothemes.com/products/product-csv-import-suite/)).
 * Tweak - Product shortcodes columns paramter now affects layout correctly.
-* Tweak - Disabled button styles
+* Tweak - Disabled button styles.
+* Tweak - Hooks for overriding default email inline styles.
+* Tweak - Flat rate shipping support for percentage factor of additional costs.
 * Fix - Changed MyException to Exception in Checkout class as MyException class does not exist in WooCommerce
 * Fix - Default cart widget styling on non-wc pages.
 * Fix - Rounding for mijireh tax ex. price.
@@ -218,6 +220,20 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - Danish translation by Mikael Lyngvig.
 * Localization - Spanish translation by Luis Giménez.
 * Localization - French, Spanish, Romanian, Danish, Korean, Czech, Arabic, Hungarian updates.
+
+= 2.0.14 - 05/09/2013 =
+* Tweak - Update cart performance improvements
+* Fix - Google Analytics no longer identifies users using custom vars
+* Fix - Send tax inclusive, rounded item price to Google Analytics
+* Fix - Use version_compare to check for required jQuery
+* Fix - Made gateway abstract compatible with implementations to prevent strict notices
+* Fix - Update order's GMT date ('post_date_gmt') when changing the order date via the "Edit Order" screen
+* Fix - Hardened the checkout payment URL method
+* Fix - Regression bug fixed, allowing 0 value attributes again
+* Fix - API url function work when permalinks are not pretty
+* Fix - Chosen select boxes now support RTL languages
+* Fix - Refresh when creating an account to prevent nonce issues
+* Other minor fixes
 
 = 2.0.13 - 19/07/2013 =
 * Tweak - Allow users with edit rights to add draft products to cart (and nobody else)

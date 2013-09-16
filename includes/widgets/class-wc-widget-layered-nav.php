@@ -61,10 +61,10 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		global $woocommerce;
 
 		$attribute_array = array();
-		$attribute_taxonomies = $woocommerce->get_helper( 'attribute' )->get_attribute_taxonomies();
+		$attribute_taxonomies = wc_get_attribute_taxonomies();
 			if ( $attribute_taxonomies )
 				foreach ( $attribute_taxonomies as $tax )
-					if ( taxonomy_exists( $woocommerce->get_helper( 'attribute' )->attribute_taxonomy_name( $tax->attribute_name ) ) )
+					if ( taxonomy_exists( wc_attribute_taxonomy_name( $tax->attribute_name ) ) )
 						$attribute_array[ $tax->attribute_name ] = $tax->attribute_name;
 
 		$this->settings           = array(
@@ -120,7 +120,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$current_term 	= is_tax() ? get_queried_object()->term_id : '';
 		$current_tax 	= is_tax() ? get_queried_object()->taxonomy : '';
 		$title 			= apply_filters('widget_title', $instance['title'], $instance, $this->id_base);
-		$taxonomy 		= $woocommerce->get_helper( 'attribute' )->attribute_taxonomy_name($instance['attribute']);
+		$taxonomy 		= wc_attribute_taxonomy_name($instance['attribute']);
 		$query_type 	= isset( $instance['query_type'] ) ? $instance['query_type'] : 'and';
 		$display_type 	= isset( $instance['display_type'] ) ? $instance['display_type'] : 'list';
 
@@ -129,7 +129,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 	    $get_terms_args = array( 'hide_empty' => '1' );
 
-		$orderby = WC()->get_helper( 'attribute' )->attribute_orderby( $taxonomy );
+		$orderby = wc_attribute_orderby( $taxonomy );
 
 		switch ( $orderby ) {
 			case 'name' :
@@ -175,7 +175,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 					echo '<select id="dropdown_layered_nav_' . $taxonomy_filter . '">';
 
-					echo '<option value="">' . sprintf( __( 'Any %s', 'woocommerce' ), $woocommerce->get_helper( 'attribute' )->attribute_label( $taxonomy ) ) .'</option>';
+					echo '<option value="">' . sprintf( __( 'Any %s', 'woocommerce' ), wc_attribute_label( $taxonomy ) ) .'</option>';
 
 					foreach ( $terms as $term ) {
 
@@ -221,7 +221,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 					echo '</select>';
 
-					$woocommerce->get_helper( 'inline-javascript' )->add_inline_js("
+					wc_enqueue_js("
 
 						jQuery('#dropdown_layered_nav_$taxonomy_filter').change(function(){
 

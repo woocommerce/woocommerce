@@ -5,7 +5,7 @@
  * The WooCommerce checkout class handles the checkout process, collecting user data and processing the payment.
  *
  * @class 		WC_Cart
- * @version		1.6.4
+ * @version		2.1.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
@@ -32,6 +32,46 @@ class WC_Checkout {
 
 	/** @var int ID of customer. */
 	private $customer_id;
+
+	/**
+	 * @var WooCommerce The single instance of the class
+	 * @since 2.1
+	 */
+	protected static $_instance = null;
+
+	/**
+	 * Main WooCommerce Instance
+	 *
+	 * Ensures only one instance of WooCommerce is loaded or can be loaded.
+	 *
+	 * @since 2.1
+	 * @static
+	 * @see WC()
+	 * @return Main WooCommerce instance
+	 */
+	public static function instance() {
+		if ( is_null( self::$_instance ) )
+			self::$_instance = new self();
+		return self::$_instance;
+	}
+
+	/**
+	 * Cloning is forbidden.
+	 *
+	 * @since 2.1
+	 */
+	public function __clone() {
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?' ), '2.1' );
+	}
+
+	/**
+	 * Unserializing instances of this class is forbidden.
+	 *
+	 * @since 2.1
+	 */
+	public function __wakeup() {
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?' ), '2.1' );
+	}
 
 	/**
 	 * Constructor for the checkout class. Hooks in methods and defines checkout fields.
@@ -400,9 +440,6 @@ class WC_Checkout {
 		// Note if we skip shipping
 		$skipped_shipping = false;
 
-		// Get validation class
-		$validation = $woocommerce->validation();
-
 		// Get posted checkout_fields and do validation
 		foreach ( $this->checkout_fields as $fieldset_key => $fieldset ) {
 
@@ -453,10 +490,10 @@ class WC_Checkout {
 							$validate_against = $key == 'billing_postcode' ? 'billing_country' : 'shipping_country';
 							$this->posted[ $key ]    = strtoupper( str_replace( ' ', '', $this->posted[ $key ] ) );
 
-							if ( ! $validation->is_postcode( $this->posted[ $key ], $_POST[ $validate_against ] ) )
+							if ( ! WC_Validation::is_postcode( $this->posted[ $key ], $_POST[ $validate_against ] ) )
 								wc_add_error( '<strong>' . $field['label'] . '</strong> ' . sprintf( __( '(%s) is not a valid postcode/ZIP.', 'woocommerce' ), $this->posted[ $key ] ) );
 							else
-								$this->posted[ $key ] = $validation->format_postcode( $this->posted[ $key ], $_POST[ $validate_against ] );
+								$this->posted[ $key ] = wc_format_postcode( $this->posted[ $key ], $_POST[ $validate_against ] );
 
 						break;
 						case "billing_state" :
@@ -480,16 +517,16 @@ class WC_Checkout {
 						break;
 						case "billing_phone" :
 
-							$this->posted[ $key ] = $validation->format_phone( $this->posted[ $key ] );
+							$this->posted[ $key ] = wc_format_phone_number( $this->posted[ $key ] );
 
-							if ( ! $validation->is_phone( $this->posted[ $key ] ) )
+							if ( ! WC_Validation::is_phone( $this->posted[ $key ] ) )
 								wc_add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid number.', 'woocommerce' ) );
 						break;
 						case "billing_email" :
 
 							$this->posted[ $key ] = strtolower( $this->posted[ $key ] );
 
-							if ( ! $validation->is_email( $this->posted[ $key ] ) )
+							if ( ! is_email( $this->posted[ $key ] ) )
 								wc_add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ) );
 						break;
 					}
@@ -713,6 +750,10 @@ class WC_Checkout {
 			return esc_attr( $_POST[ $input ] );
 
 		} else {
+
+			$value = apply_filters( 'woocommerce_checkout_get_value', null, $input );
+
+			if ( $value ) return $value;
 
 			if ( is_user_logged_in() ) {
 

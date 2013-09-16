@@ -195,37 +195,52 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		<tr valign="top">
 			<th scope="row" class="titledesc"><?php _e( 'Shipping Methods', 'woocommerce' ) ?></th>
 		    <td class="forminp">
-		    	<p class="description" style="margin-top: 0;"><?php _e( 'Drag and drop methods to control their display order.', 'woocommerce' ); ?></p>
 				<table class="wc_shipping widefat" cellspacing="0">
 					<thead>
 						<tr>
-							<th><?php _e( 'Default', 'woocommerce' ); ?></th>
-							<th><?php _e( 'Shipping Method', 'woocommerce' ); ?></th>
-							<th><?php _e( 'Status', 'woocommerce' ); ?></th>
+							<th class="default"><?php _e( 'Default', 'woocommerce' ); ?></th>
+							<th class="name"><?php _e( 'Name', 'woocommerce' ); ?></th>
+							<th class="id"><?php _e( 'ID', 'woocommerce' ); ?></th>
+							<th class="status"><?php _e( 'Status', 'woocommerce' ); ?></th>
+							<th class="settings">&nbsp;</th>
 						</tr>
 					</thead>
+					<tfoot>
+						<th width="1%" class="default">
+							<input type="radio" name="default_shipping_method" value="" <?php checked( $default_shipping_method, '' ); ?> />
+						</th>
+						<th><?php _e( 'No default', 'woocommerce' ); ?></th>
+						<th colspan="3"><span class="description"><?php _e( 'Drag and drop the above shipping methods to control their display order.', 'woocommerce' ); ?></span></th>
+					</foot>
 					<tbody>
 				    	<?php
-				    	foreach ( WC()->shipping->load_shipping_methods() as $method ) {
+				    	foreach ( WC()->shipping->load_shipping_methods() as $key => $method ) {
 
 					    	$default_shipping_method = esc_attr( get_option('woocommerce_default_shipping_method') );
 
 					    	echo '<tr>
-					    		<td width="1%" class="radio">
+					    		<td width="1%" class="default">
 					    			<input type="radio" name="default_shipping_method" value="' . $method->id . '" ' . checked( $default_shipping_method, $method->id, false ) . ' />
 					    			<input type="hidden" name="method_order[]" value="' . $method->id . '" />
-					    			<td>
-					    				<p><strong>' . $method->get_title() . '</strong><br/>
-					    				<small>' . __( 'Method ID', 'woocommerce' ) . ': ' . $method->id . '</small></p>
-					    			</td>
-					    			<td>';
+					    		</td>
+				    			<td class="name">
+				    				' . $method->get_title() . '
+				    			</td>
+				    			<td class="id">
+				    				' . $method->id . '
+				    			</td>
+				    			<td class="status">';
 
 				    		if ( $method->enabled == 'yes' )
 						        echo '<span class="status-enabled tips" data-tip="' . __ ( 'Enabled', 'woocommerce' ) . '">' . __ ( 'Enabled', 'woocommerce' ) . '</span>';
+						   	else
+						   		echo '-';
 
 				    		echo '</td>
+				    			<td class="settings">
+				    				<a class="button" href="' . admin_url( 'admin.php?page=woocommerce_settings&tab=shipping&section=' . strtolower( get_class( $method ) ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>
+				    			</td>
 				    		</tr>';
-
 				    	}
 				    	?>
 					</tbody>

@@ -34,6 +34,46 @@ class WC_Shipping {
 	var $packages					= array();
 
 	/**
+	 * @var WooCommerce The single instance of the class
+	 * @since 2.1
+	 */
+	protected static $_instance = null;
+
+	/**
+	 * Main WooCommerce Instance
+	 *
+	 * Ensures only one instance of WooCommerce is loaded or can be loaded.
+	 *
+	 * @since 2.1
+	 * @static
+	 * @see WC()
+	 * @return Main WooCommerce instance
+	 */
+	public static function instance() {
+		if ( is_null( self::$_instance ) )
+			self::$_instance = new self();
+		return self::$_instance;
+	}
+
+	/**
+	 * Cloning is forbidden.
+	 *
+	 * @since 2.1
+	 */
+	public function __clone() {
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?' ), '2.1' );
+	}
+
+	/**
+	 * Unserializing instances of this class is forbidden.
+	 *
+	 * @since 2.1
+	 */
+	public function __wakeup() {
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?' ), '2.1' );
+	}
+
+	/**
 	 * __construct function.
 	 *
 	 * @access public
@@ -72,7 +112,13 @@ class WC_Shipping {
 		do_action( 'woocommerce_load_shipping_methods', $package );
 
 		// Register methods through a filter
-		$shipping_methods_to_load = apply_filters( 'woocommerce_shipping_methods', array() );
+		$shipping_methods_to_load = apply_filters( 'woocommerce_shipping_methods', array(
+			'WC_Shipping_Flat_Rate',
+			'WC_Shipping_Free_Shipping',
+			'WC_Shipping_International_Delivery',
+			'WC_Shipping_Local_Delivery',
+			'WC_Shipping_Local_Pickup'
+		) );
 
 		foreach ( $shipping_methods_to_load as $method )
 			$this->register_shipping_method( $method );

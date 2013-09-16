@@ -3,7 +3,7 @@
  * Contains Validation functions
  *
  * @class 		WC_Validation
- * @version		1.6.4
+ * @version		2.1.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
@@ -16,10 +16,9 @@ class WC_Validation {
 	 * @param   string	email address
 	 * @return  bool
 	 */
-	public function is_email( $email ) {
+	public static function is_email( $email ) {
 		return is_email( $email );
 	}
-
 
 	/**
 	 * Validates a phone number using a regular expression
@@ -27,13 +26,12 @@ class WC_Validation {
 	 * @param   string	phone number
 	 * @return  bool
 	 */
-	public function is_phone( $phone ) {
+	public static function is_phone( $phone ) {
 		if ( strlen( trim( preg_replace( '/[\s\#0-9_\-\+\(\)]/', '', $phone ) ) ) > 0 )
 			return false;
 
 		return true;
 	}
-
 
 	/**
 	 * Checks for a valid postcode (UK)
@@ -42,13 +40,13 @@ class WC_Validation {
 	 * @param	string	country
 	 * @return  bool
 	 */
-	public function is_postcode( $postcode, $country ) {
+	public static function is_postcode( $postcode, $country ) {
 		if ( strlen( trim( preg_replace( '/[\s\-A-Za-z0-9]/', '', $postcode ) ) ) > 0 )
 			return false;
 
 		switch ( $country ) {
 			case "GB" :
-				return $this->is_GB_postcode( $postcode );
+				return self::is_GB_postcode( $postcode );
 			case "US" :
 				 if ( preg_match( "/^([0-9]{5})(-[0-9]{4})?$/i", $postcode ) )
 				 	return true;
@@ -59,7 +57,6 @@ class WC_Validation {
 		return true;
 	}
 
-
 	/**
 	 * is_GB_postcode function.
 	 *
@@ -68,7 +65,7 @@ class WC_Validation {
 	 * @param mixed $toCheck A postcode
 	 * @return bool
 	 */
-	public function is_GB_postcode( $toCheck ) {
+	public static function is_GB_postcode( $toCheck ) {
 
 		// Permitted letters depend upon their position in the postcode.
 		$alpha1 = "[abcdefghijklmnoprstuwyz]";                          // Character 1
@@ -119,7 +116,7 @@ class WC_Validation {
 			}
 		}
 
-		if ($valid){return true;} else {return false;};
+		return $valid;
 	}
 
 	/**
@@ -129,15 +126,8 @@ class WC_Validation {
 	 * @param	string	country
 	 * @return  string	formatted postcode
 	 */
-	public function format_postcode( $postcode, $country ) {
-		$postcode = strtoupper(trim($postcode));
-		$postcode = trim(preg_replace('/[\s]/', '', $postcode));
-
-		if ( in_array( $country, array('GB', 'CA') ) ) :
-			$postcode = trim( substr_replace( $postcode, ' ', -3, 0 ) );
-		endif;
-
-		return $postcode;
+	public static function format_postcode( $postcode, $country ) {
+		wc_format_postcode( $postcode, $country );
 	}
 
 	/**
@@ -147,9 +137,7 @@ class WC_Validation {
 	 * @param mixed $tel
 	 * @return string
 	 */
-	public function format_phone( $tel ) {
-		$tel = str_replace( '.', '-', $tel );
-		return $tel;
+	public static function format_phone( $tel ) {
+		wc_format_phone_number( $tel );
 	}
-
 }

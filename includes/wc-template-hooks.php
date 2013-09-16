@@ -12,6 +12,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
+add_action( 'the_post', 'wc_setup_product_data' );
 add_action( 'template_redirect', 'woocommerce_template_redirect' );
 add_filter( 'body_class', 'wc_body_class' );
 add_filter( 'post_class', 'wc_product_post_class', 20, 3 );
@@ -173,15 +174,19 @@ add_action( 'woocommerce_cart_collaterals', 'woocommerce_cross_sell_display' );
  * Header
  *
  * @see woocommerce_products_rss_feed()
+ * @see wc_generator_tag()
  */
 add_action( 'wp_head', 'woocommerce_products_rss_feed' );
+add_action( 'wp_head', 'wc_generator_tag' );
 
 /**
  * Footer
  *
  * @see woocommerce_demo_store()
+ * @see wc_print_js()
  */
 add_action( 'wp_footer', 'woocommerce_demo_store' );
+add_action( 'wp_footer', 'wc_print_js' );
 
 /**
  * Order details

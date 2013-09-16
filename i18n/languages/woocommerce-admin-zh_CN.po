@@ -1,0 +1,5995 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WooCommerce 2.0.3 Admin\n"
+"Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
+"POT-Creation-Date: 2013-03-04 09:46:18+00:00\n"
+"PO-Revision-Date: \n"
+"Last-Translator: whw <whwemail@163.com>\n"
+"Language-Team: comodo <whwemail@163.com>\n"
+"Language: zh_cn\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
+"_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
+"X-Poedit-Basepath: ../../\n"
+"X-Textdomain-Support: yes\n"
+"X-Generator: Poedit 1.5.7\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-1: ../..\n"
+
+# @ woocommerce
+#: admin/importers/importers-init.php:13
+msgid "WooCommerce Tax Rates (CSV)"
+msgstr "WooCommerce税率(CSV)"
+
+#: admin/importers/importers-init.php:13
+msgid "Import <strong>tax rates</strong> to your store via a csv file."
+msgstr "通过CSV文件导入<strong>税率</strong>到网店"
+
+#: admin/importers/tax-rates-importer.php:103
+#: admin/importers/tax-rates-importer.php:186
+#: admin/importers/tax-rates-importer.php:226
+#: admin/importers/tax-rates-importer.php:241
+msgid "Sorry, there has been an error."
+msgstr "对不起，出现了一个错误."
+
+#: admin/importers/tax-rates-importer.php:104
+msgid "The file does not exist, please try again."
+msgstr "文件不存在，请重试."
+
+#: admin/importers/tax-rates-importer.php:187
+msgid "The CSV is invalid."
+msgstr "页面模板无效。"
+
+#: admin/importers/tax-rates-importer.php:198
+msgid ""
+"Import complete - imported <strong>%s</strong> tax rates and skipped <strong>"
+"%s</strong>."
+msgstr "导入完成--已导入<strong>%s</strong>条税率,跳过<strong>%s</strong>条."
+
+# @ woocommerce
+#: admin/importers/tax-rates-importer.php:208
+msgid "All done!"
+msgstr "全部完成！"
+
+# @ woocommerce
+#: admin/importers/tax-rates-importer.php:208
+msgid "View Tax Rates"
+msgstr "本地税率"
+
+#: admin/importers/tax-rates-importer.php:259
+msgid "Import Tax Rates"
+msgstr "本地税率"
+
+#: admin/importers/tax-rates-importer.php:282
+msgid ""
+"Hi there! Upload a CSV file containing tax rates to import the contents into "
+"your shop. Choose a .csv file to upload, then click \"Upload file and import"
+"\"."
+msgstr ""
+"您好!上传CSV文件导入到您的店铺税率。选择csv文件，然后点击\"上传文件导入\"."
+
+#: admin/importers/tax-rates-importer.php:284
+msgid ""
+"Tax rates need to be defined with columns in a specific order (10 columns). "
+"<a href=\"%s\">Click here to download a sample</a>."
+msgstr ""
+"税率被定义在一个特定的顺序列（10列）。 <a href=\"%s\">点击此处下载示例</a>。"
+
+#: admin/importers/tax-rates-importer.php:292
+msgid ""
+"Before you can upload your import file, you will need to fix the following "
+"error:"
+msgstr "在上传您的导入文件之前，您需要修正以下错误："
+
+#: admin/importers/tax-rates-importer.php:301
+msgid "Choose a file from your computer:"
+msgstr "从您的计算机上选择一个文件："
+
+#: admin/importers/tax-rates-importer.php:307
+msgid "Maximum size: %s"
+msgstr "最大大小：%s"
+
+#: admin/importers/tax-rates-importer.php:312
+msgid "OR enter path to file:"
+msgstr "或者输入文件路径:"
+
+# @ woocommerce
+#: admin/importers/tax-rates-importer.php:319
+msgid "Delimiter"
+msgstr "分隔符"
+
+# @ woocommerce
+#: admin/importers/tax-rates-importer.php:325
+msgid "Upload file and import"
+msgstr "上传文件并导入"
+
+# @ woocommerce
+#: admin/includes/duplicate_product.php:23
+msgid "No product to duplicate has been supplied!"
+msgstr "没有提供要复制的产品"
+
+# @ woocommerce
+#: admin/includes/duplicate_product.php:43
+msgid "Product creation failed, could not find original product:"
+msgstr "产品创建失败，无法找到原来的产品："
+
+# @ woocommerce
+#: admin/includes/duplicate_product.php:89
+msgid "(Copy)"
+msgstr "(Kopieren)"
+
+#: admin/includes/notice-install.php:6
+msgid ""
+"<strong>Welcome to WooCommerce</strong> &#8211; You're almost ready to start "
+"selling :)"
+msgstr ""
+"<strong>欢迎使用 WooCommerce</strong> &#8211; 你即将开始你的销售生涯 :)"
+
+# @ woocommerce
+#: admin/includes/notice-install.php:7
+msgid "Install WooCommerce Pages"
+msgstr "安装WooCommerce页面"
+
+# @ woocommerce
+#: admin/includes/notice-install.php:7
+msgid "Skip setup"
+msgstr "跳过安装"
+
+#: admin/includes/notice-theme-support.php:6
+msgid ""
+"<strong>Your theme does not declare WooCommerce support</strong> &#8211; if "
+"you encounter layout issues please read our integration guide or choose a "
+"WooCommerce theme :)"
+msgstr ""
+"<strong>WooCommerce没有声明对您的主题支持</strong> &#8211;如果你遇到的布局问"
+"题，请阅读我们的集成指南，或选择WooCommerce主题 :)"
+
+# @ woocommerce
+#: admin/includes/notice-theme-support.php:7
+msgid "Theme Integration Guide"
+msgstr "启用分享"
+
+# @ woocommerce
+#: admin/includes/notice-theme-support.php:7
+msgid "Hide this notice"
+msgstr "关闭这个通知"
+
+#: admin/includes/notice-update.php:6
+msgid ""
+"<strong>Data Update Required</strong> &#8211; We just need to update your "
+"install to the latest version"
+msgstr " 我们只需要更新安装到最新版本&#8211;<strong>数据更新</strong> "
+
+# @ woocommerce
+#: admin/includes/notice-update.php:7
+msgid "Run the updater"
+msgstr "进行安装"
+
+#: admin/includes/notice-update.php:12
+msgid ""
+"It is strongly recommended that you backup your database before proceeding. "
+"Are you sure you wish to run the updater now?"
+msgstr "我们强烈建议您先备份你的数据库，然后再继续。你确定你想运行的更新吗？"
+
+# @ woocommerce
+#: admin/includes/updates/woocommerce-update-2.0.php:50
+#: admin/woocommerce-admin-init.php:895
+msgctxt "slug"
+msgid "product-category"
+msgstr "商品分类"
+
+# @ woocommerce
+#: admin/includes/updates/woocommerce-update-2.0.php:51
+#: admin/woocommerce-admin-init.php:908
+msgctxt "slug"
+msgid "product-tag"
+msgstr "商品标签"
+
+# @ woocommerce
+#: admin/includes/updates/woocommerce-update-2.0.php:59
+msgctxt "slug"
+msgid "product"
+msgstr "商品"
+
+# @ woocommerce
+#: admin/includes/updates/woocommerce-update-2.0.php:180
+#: admin/woocommerce-admin-install.php:204
+msgctxt "page_slug"
+msgid "lost-password"
+msgstr "忘记密码"
+
+# @ woocommerce
+#: admin/includes/updates/woocommerce-update-2.0.php:180
+#: admin/woocommerce-admin-install.php:204
+#: admin/woocommerce-admin-status.php:309
+msgid "Lost Password"
+msgstr "忘记密码"
+
+# @ woocommerce
+#: admin/includes/welcome.php:33
+msgid "Welcome to WooCommerce"
+msgstr "添加到相册"
+
+# @ woocommerce
+#: admin/includes/welcome.php:128
+msgid "Welcome to WooCommerce %s"
+msgstr "添加到相册"
+
+# @ woocommerce
+#: admin/includes/welcome.php:133
+msgid "Thanks, all done!"
+msgstr "所有订单状态"
+
+#: admin/includes/welcome.php:135
+msgid "Thank you for updating to the latest version!"
+msgstr "谢谢您更新到最新版本!"
+
+#: admin/includes/welcome.php:137
+msgid "Thanks for installing!"
+msgstr "开始安装插件"
+
+#: admin/includes/welcome.php:139
+msgid ""
+"%s WooCommerce %s is more powerful, stable, and secure than ever before. We "
+"hope you enjoy it."
+msgstr "%s WooCommerce %s非常强大,稳定,而且比之前更安全,我们希望您喜欢它."
+
+# @ woocommerce
+#: admin/includes/welcome.php:143
+msgid "Version %s"
+msgstr "%s 版本"
+
+# @ woocommerce
+#: admin/includes/welcome.php:146 admin/woocommerce-admin-content.php:41
+#: admin/woocommerce-admin-init.php:86 admin/woocommerce-admin-status.php:252
+msgid "Settings"
+msgstr "设置"
+
+#: admin/includes/welcome.php:147
+msgid "Docs"
+msgstr "Docs"
+
+#: admin/includes/welcome.php:154
+msgid "What's New"
+msgstr "更新内容"
+
+#: admin/includes/welcome.php:156
+msgid "Credits"
+msgstr "鸣谢"
+
+#: admin/includes/welcome.php:179
+msgid "Security in mind"
+msgstr "范围内销售"
+
+#: admin/includes/welcome.php:183
+msgid "Sucuri Safe Plugin"
+msgstr "插件激活成功。"
+
+#: admin/includes/welcome.php:184
+msgid ""
+"You will be happy to learn that WooCommerce has been audited and certified "
+"by the Sucuri Security team. Whilst there is not much to be seen visually to "
+"understand the amount of work that went into this audit, rest assured that "
+"your website is powered by one of the most powerful and stable eCommerce "
+"plugins available."
+msgstr ""
+"你会喜欢由安全团队Sucuri认证审核的WooCommerce。虽然没大量的审核工作您都不能亲"
+"眼所见、也不能参与到审核。请放心！你的网站在使用一个非常强大，非常稳定的电子"
+"商务插件。"
+
+#: admin/includes/welcome.php:187
+msgid "A Smoother Admin Experience"
+msgstr "用户体验主管"
+
+# @ woocommerce
+#: admin/includes/welcome.php:193
+msgid "New Product Panel"
+msgstr "添加新商品"
+
+#: admin/includes/welcome.php:194
+msgid ""
+"We have revised the product data panel making it cleaner, more streamlined, "
+"and more logical. Adding products is a breeze!"
+msgstr ""
+"我们已经修改了产品数据面板，使其更清洁，更精简，更符合逻辑。可以轻而易举的新"
+"增产品！"
+
+#: admin/includes/welcome.php:199
+msgid "Nicer Order Screens"
+msgstr "新添订单"
+
+#: admin/includes/welcome.php:200
+msgid ""
+"Order pages have had a cleanup, with a more easily scannable interface. We "
+"particularly like the new status icons!"
+msgstr "订购页面有一个清理，更容易扫描界面。我们特别喜欢新的状态图标！"
+
+#: admin/includes/welcome.php:205
+msgid "Multi-Download Support"
+msgstr "右至左书写方向支持"
+
+#: admin/includes/welcome.php:206
+msgid ""
+"Products can have multiple downloadable files - purchasers will get access "
+"to all the files added."
+msgstr "商品可以有多个下载文件 - 购买者将获得所有添加的文件。"
+
+#: admin/includes/welcome.php:211
+msgid "Less Taxing Taxes"
+msgstr "(税收估计为 %s)"
+
+#: admin/includes/welcome.php:217
+msgid "New Tax Input Panel"
+msgstr "新税率输入面板"
+
+#: admin/includes/welcome.php:218
+msgid ""
+"The tax input pages have been streamlined to make inputting taxes simpler - "
+"adding multiple taxes for a single jurisdiction is now much easier using the "
+"priority system. There is also CSV import/export support."
+msgstr ""
+"简化税率输入页可使输入税率更简便－此优先系统为一个管区添加多个税率现在更容"
+"易，当然也可以使用CSV导入/导出功能。"
+
+# @ woocommerce
+#: admin/includes/welcome.php:222
+msgid "Improved Tax Options"
+msgstr "Flash 视频选项"
+
+#: admin/includes/welcome.php:223
+msgid ""
+"As requested by some users, we now support taxing the billing address "
+"instead of shipping (optional), and we allow you to choose which tax class "
+"applies to shipping."
+msgstr ""
+"由于一些用户的要求，我们现在支持征税的帐单地址，而不是配送（可选），我们允许"
+"你选择税类适用于配送。"
+
+#: admin/includes/welcome.php:228
+msgid "Product Listing Improvements Customers Will Love"
+msgstr "顾客会爱上新品上市功能"
+
+# @ woocommerce
+#: admin/includes/welcome.php:234
+msgid "New Sorting Options"
+msgstr "Flash 视频选项"
+
+#: admin/includes/welcome.php:235
+msgid "Customers can now sort products by popularity and ratings."
+msgstr "顾客现在可以按商品的受关注和评级来排序。"
+
+#: admin/includes/welcome.php:240
+msgid "Better Pagination and Result Counts"
+msgstr "更好的分页和统计结果"
+
+#: admin/includes/welcome.php:241
+msgid ""
+"Numbered pagination has been added to core, and we show the number of "
+"results found above the listings."
+msgstr "编号的分页已被添加到核心，我们表明，发现上面的列表结果数。"
+
+#: admin/includes/welcome.php:246
+msgid "Inline Star Rating Display"
+msgstr "直列星级显示"
+
+#: admin/includes/welcome.php:247
+msgid ""
+"We have added star ratings to the catalog which are pulled from reviews."
+msgstr "我们已经增加了评论的星级目录被拉起。"
+
+#: admin/includes/welcome.php:255
+msgid "Under the Hood"
+msgstr "面板之下"
+
+# @ woocommerce
+#: admin/includes/welcome.php:259
+msgid "New product classes"
+msgstr "添加新商品"
+
+#: admin/includes/welcome.php:260
+msgid ""
+"The product classes have been rewritten and are now factory based. Much more "
+"extendable, and easier to query products using the new <code>get_product()</"
+"code> function."
+msgstr ""
+
+#: admin/includes/welcome.php:264
+msgid "Capability overhaul"
+msgstr ""
+
+#: admin/includes/welcome.php:265
+msgid ""
+"More granular capabilities for admin/shop manager roles covering products, "
+"orders and coupons."
+msgstr ""
+
+#: admin/includes/welcome.php:269
+msgid "API Improvements"
+msgstr "多站点功能增强"
+
+#: admin/includes/welcome.php:270
+msgid ""
+"<code>WC-API</code> now has real endpoints, and we've optimised the gateways "
+"API significantly by only loading gateways when needed."
+msgstr ""
+
+#: admin/includes/welcome.php:276
+msgid "Cache-friendly cart widgets"
+msgstr ""
+
+#: admin/includes/welcome.php:277
+msgid ""
+"Cart widgets and other \"fragments\" are now pulled in via AJAX - this works "
+"wonders with static page caching."
+msgstr ""
+
+# @ woocommerce
+#: admin/includes/welcome.php:281
+msgid "Session handling"
+msgstr "手续费"
+
+#: admin/includes/welcome.php:282
+msgid ""
+"PHP SESSIONS have been a problem for many users in the past, so we've "
+"developed our own handler using cookies and options to make these more "
+"reliable."
+msgstr ""
+
+#: admin/includes/welcome.php:286
+msgid "Retina Ready"
+msgstr "支持 Retina 显示屏"
+
+#: admin/includes/welcome.php:287
+msgid "All graphics within WC have been optimised for HiDPI displays."
+msgstr ""
+
+#: admin/includes/welcome.php:294
+msgid "Better stock handling"
+msgstr "默认手续费"
+
+#: admin/includes/welcome.php:295
+msgid ""
+"We have added an option to hold stock for unpaid orders (defaults to "
+"60mins). When this time limit is reached, and the order is not paid for, "
+"stock is released and the order is cancelled."
+msgstr ""
+
+#: admin/includes/welcome.php:299
+msgid "Improved Line-item storage"
+msgstr "线路税类"
+
+#: admin/includes/welcome.php:300
+msgid ""
+"We have changed how order items get stored making them easier (and faster) "
+"to access for reporting. Order items are no longer serialised within an "
+"order - they are stored within their own table."
+msgstr ""
+
+#: admin/includes/welcome.php:304
+msgid "Autoload"
+msgstr ""
+
+#: admin/includes/welcome.php:305
+msgid ""
+"We have setup autoloading for classes - this has dramatically reduced memory "
+"usage in 2.0."
+msgstr ""
+
+# @ woocommerce
+#: admin/includes/welcome.php:312
+msgid "Go to WooCommerce Settings"
+msgstr "回首页 &rarr;"
+
+#: admin/includes/welcome.php:330
+msgid ""
+"WooCommerce is developed and maintained by a worldwide team of passionate "
+"individuals and backed by an awesome developer community. Want to see your "
+"name? <a href=\"https://github.com/woothemes/woocommerce/blob/master/"
+"CONTRIBUTING.md\">Contribute to WooCommerce</a>."
+msgstr ""
+
+# @ woocommerce
+#: admin/includes/welcome.php:356
+msgid "View %s"
+msgstr "查看"
+
+# @ woocommerce
+#: admin/post-types/product.php:31
+msgid "Make a duplicate from this product"
+msgstr "将这个产品复制一份"
+
+# @ woocommerce
+#: admin/post-types/product.php:32
+msgid "Duplicate"
+msgstr "复制"
+
+# @ woocommerce
+#: admin/post-types/product.php:61
+msgid "Copy to a new draft"
+msgstr "复制到一个新的草稿"
+
+# @ woocommerce
+#: admin/post-types/product.php:86 admin/woocommerce-admin-taxonomies.php:297
+msgid "Image"
+msgstr "图像"
+
+# @ woocommerce
+# @ woocommerce
+#: admin/post-types/product.php:88
+#: admin/post-types/writepanels/writepanel-product_data.php:372
+#: admin/post-types/writepanels/writepanel-product_data.php:451
+#: admin/woocommerce-admin-attributes.php:232
+#: admin/woocommerce-admin-attributes.php:268
+#: admin/woocommerce-admin-attributes.php:306
+#: admin/woocommerce-admin-attributes.php:329
+#: admin/woocommerce-admin-attributes.php:373
+#: admin/woocommerce-admin-attributes.php:398
+#: admin/woocommerce-admin-init.php:450
+msgid "Name"
+msgstr "姓名"
+
+# @ woocommerce
+#: admin/post-types/product.php:91 admin/post-types/product.php:557
+#: admin/post-types/writepanels/variation-admin-html.php:46
+#: admin/post-types/writepanels/writepanel-product_data.php:98
+#: admin/woocommerce-admin-reports.php:2083
+#: admin/woocommerce-admin-reports.php:2119
+msgid "SKU"
+msgstr "编码"
+
+# @ woocommerce
+#: admin/post-types/product.php:94
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:83
+#: admin/woocommerce-admin-content.php:63
+#: admin/woocommerce-admin-reports.php:99
+msgid "Stock"
+msgstr "库存"
+
+# @ woocommerce
+#: admin/post-types/product.php:96 admin/post-types/product.php:568
+#: admin/post-types/product.php:787 admin/woocommerce-admin-functions.php:196
+msgid "Price"
+msgstr "价格"
+
+# @ woocommerce
+#: admin/post-types/product.php:98
+msgid "Categories"
+msgstr "分类"
+
+# @ woocommerce
+#: admin/post-types/product.php:99
+msgid "Tags"
+msgstr "标签"
+
+# @ woocommerce
+#: admin/post-types/product.php:100 admin/post-types/product.php:632
+#: admin/post-types/product.php:904
+#: admin/post-types/writepanels/writepanel-product_data.php:1040
+#: admin/woocommerce-admin-init.php:463
+msgid "Featured"
+msgstr "精选"
+
+# @ woocommerce
+#: admin/post-types/product.php:101 admin/woocommerce-admin-attributes.php:250
+#: admin/woocommerce-admin-attributes.php:308
+#: admin/woocommerce-admin-attributes.php:385
+msgid "Type"
+msgstr "类型"
+
+# @ woocommerce
+#: admin/post-types/product.php:102 admin/post-types/shop_order.php:50
+msgid "Date"
+msgstr "日期"
+
+#: admin/post-types/product.php:151
+msgid "Edit this item"
+msgstr "编辑此项目"
+
+# @ woocommerce
+#: admin/post-types/product.php:151
+#: admin/post-types/writepanels/writepanel-order_data.php:140
+#: admin/post-types/writepanels/writepanel-order_data.php:230
+#: admin/post-types/writepanels/writepanel-order_data.php:387
+#: admin/post-types/writepanels/writepanel-product_data.php:1043
+#: admin/woocommerce-admin-attributes.php:322
+msgid "Edit"
+msgstr "编辑"
+
+#: admin/post-types/product.php:152
+msgid "Edit this item inline"
+msgstr "编辑这个项目的内联"
+
+#: admin/post-types/product.php:152
+msgid "Quick&nbsp;Edit"
+msgstr "快速&nbsp;编辑"
+
+#: admin/post-types/product.php:156 admin/post-types/shop_coupon.php:65
+msgid "Restore this item from the Trash"
+msgstr "从垃圾桶还原此项"
+
+# @ woocommerce
+#: admin/post-types/product.php:156 admin/post-types/shop_coupon.php:65
+msgid "Restore"
+msgstr "还原"
+
+# @ woocommerce
+#: admin/post-types/product.php:158 admin/post-types/shop_coupon.php:67
+msgid "Move this item to the Trash"
+msgstr "将此项移至回收站"
+
+# @ woocommerce
+#: admin/post-types/product.php:158 admin/post-types/shop_coupon.php:67
+msgid "Trash"
+msgstr "回收站"
+
+# @ woocommerce
+#: admin/post-types/product.php:160 admin/post-types/shop_coupon.php:69
+msgid "Delete this item permanently"
+msgstr "永久删除此项"
+
+# @ woocommerce
+#: admin/post-types/product.php:160 admin/post-types/shop_coupon.php:69
+#: admin/post-types/writepanels/writepanel-order_data.php:463
+msgid "Delete Permanently"
+msgstr "永久删除"
+
+#: admin/post-types/product.php:165
+msgid "Preview &#8220;%s&#8221;"
+msgstr "预览&#8220;%s&#8221;"
+
+# @ woocommerce
+#: admin/post-types/product.php:165
+msgid "Preview"
+msgstr "预览"
+
+#: admin/post-types/product.php:167
+msgid "View &#8220;%s&#8221;"
+msgstr "查看 &#8220;%s&#8221;"
+
+# @ woocommerce
+#: admin/post-types/product.php:167 admin/post-types/shop_order.php:171
+msgid "View"
+msgstr "查看"
+
+# @ woocommerce
+#: admin/post-types/product.php:214
+msgid "Grouped"
+msgstr "分组"
+
+#: admin/post-types/product.php:216
+msgid "External/Affiliate"
+msgstr "外部/加盟"
+
+# @ woocommerce
+#: admin/post-types/product.php:220 admin/post-types/product.php:407
+#: admin/post-types/writepanels/variation-admin-html.php:168
+#: admin/post-types/writepanels/writepanel-product_data.php:52
+msgid "Virtual"
+msgstr "虚拟"
+
+# @ woocommerce
+#: admin/post-types/product.php:222 admin/post-types/product.php:403
+#: admin/post-types/writepanels/variation-admin-html.php:166
+#: admin/post-types/writepanels/writepanel-product_data.php:58
+msgid "Downloadable"
+msgstr "下载"
+
+# @ woocommerce
+#: admin/post-types/product.php:224
+msgid "Simple"
+msgstr "简单"
+
+# @ woocommerce
+#: admin/post-types/product.php:228 admin/post-types/product.php:387
+msgid "Variable"
+msgstr "变量"
+
+# @ woocommerce
+#: admin/post-types/product.php:251
+msgid "Toggle featured"
+msgstr "特色产品"
+
+#: admin/post-types/product.php:253
+msgid "yes"
+msgstr "是"
+
+#: admin/post-types/product.php:255
+msgid "no"
+msgstr "否"
+
+# @ woocommerce
+#: admin/post-types/product.php:262 admin/post-types/product.php:641
+#: admin/post-types/product.php:928
+#: admin/post-types/writepanels/writepanel-product_data.php:231
+msgid "In stock"
+msgstr "有货"
+
+# @ woocommerce
+#: admin/post-types/product.php:264 admin/post-types/product.php:642
+#: admin/post-types/product.php:929
+#: admin/post-types/writepanels/writepanel-product_data.php:232
+#: admin/woocommerce-admin-reports.php:2103
+msgid "Out of stock"
+msgstr "无货"
+
+# @ woocommerce
+#: admin/post-types/product.php:373
+msgid "Show all product types"
+msgstr "显示全部产品类型"
+
+# @ woocommerce
+#: admin/post-types/product.php:381
+#: admin/post-types/writepanels/writepanel-product_data.php:39
+msgid "Grouped product"
+msgstr "产品分组"
+
+#: admin/post-types/product.php:383
+#: admin/post-types/writepanels/writepanel-product_data.php:40
+msgid "External/Affiliate product"
+msgstr "外接/关联产品"
+
+# @ woocommerce
+#: admin/post-types/product.php:385
+#: admin/post-types/writepanels/writepanel-product_data.php:38
+msgid "Simple product"
+msgstr "单个产品"
+
+# @ woocommerce
+#: admin/post-types/product.php:399
+msgid "Show all sub-types"
+msgstr "显示全部子类型"
+
+# @ woocommerce
+#: admin/post-types/product.php:520
+msgid "[%s with SKU of %s]"
+msgstr "[%s with SKU of %s]"
+
+# @ woocommerce
+#: admin/post-types/product.php:526
+msgid "[%s with ID of %d]"
+msgstr "[%s with ID of %d]"
+
+# @ woocommerce
+#: admin/post-types/product.php:552 admin/post-types/product.php:783
+#: admin/post-types/writepanels/writepanels-init.php:46
+#: admin/settings/settings-init.php:518
+msgid "Product Data"
+msgstr "产品数据"
+
+# @ woocommerce
+#: admin/post-types/product.php:570
+msgid "Regular price"
+msgstr "原价"
+
+# @ woocommerce
+#: admin/post-types/product.php:575 admin/post-types/product.php:811
+msgid "Sale"
+msgstr "销售"
+
+# @ woocommerce
+#: admin/post-types/product.php:577
+msgid "Sale price"
+msgstr "网售价"
+
+# @ woocommerce
+#: admin/post-types/product.php:588 admin/post-types/product.php:837
+#: admin/post-types/writepanels/variation-admin-html.php:90
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:84
+#: admin/post-types/writepanels/writepanel-product_data.php:273
+msgid "Weight"
+msgstr "重量"
+
+#: admin/post-types/product.php:599 admin/post-types/product.php:861
+msgid "L/W/H"
+msgstr "长/宽/高"
+
+# @ woocommerce
+#: admin/post-types/product.php:601 admin/post-types/product.php:877
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:85
+#: admin/post-types/writepanels/writepanel-product_data.php:286
+msgid "Length"
+msgstr "长"
+
+# @ woocommerce
+# @ woocommerce
+#: admin/post-types/product.php:602 admin/post-types/product.php:878
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:86
+#: admin/post-types/writepanels/writepanel-product_data.php:287
+#: admin/woocommerce-admin-settings.php:795
+msgid "Width"
+msgstr "宽度"
+
+# @ woocommerce
+# @ woocommerce
+#: admin/post-types/product.php:603 admin/post-types/product.php:879
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:87
+#: admin/post-types/writepanels/writepanel-product_data.php:288
+#: admin/woocommerce-admin-settings.php:797
+msgid "Height"
+msgstr "高度"
+
+# @ woocommerce
+#: admin/post-types/product.php:613 admin/post-types/product.php:885
+msgid "Visibility"
+msgstr "能见度"
+
+# @ woocommerce
+#: admin/post-types/product.php:618 admin/post-types/product.php:891
+msgid "Catalog &amp; search"
+msgstr "分类&amp; 搜索"
+
+# @ woocommerce
+#: admin/post-types/product.php:619 admin/post-types/product.php:892
+#: admin/post-types/writepanels/writepanel-product_data.php:1029
+#: admin/woocommerce-admin-content.php:46
+#: admin/woocommerce-admin-settings.php:181
+msgid "Catalog"
+msgstr "分类"
+
+# @ woocommerce
+#: admin/post-types/product.php:620 admin/post-types/product.php:893
+#: admin/post-types/writepanels/writepanel-product_data.php:1030
+msgid "Search"
+msgstr "搜索"
+
+# @ woocommerce
+#: admin/post-types/product.php:621 admin/post-types/product.php:894
+#: admin/post-types/writepanels/writepanel-product_data.php:1031
+msgid "Hidden"
+msgstr "隐藏"
+
+# @ woocommerce
+#: admin/post-types/product.php:636 admin/post-types/product.php:922
+msgid "In stock?"
+msgstr "有货？"
+
+# @ woocommerce
+#: admin/post-types/product.php:657 admin/post-types/product.php:940
+#: admin/post-types/writepanels/writepanel-product_data.php:212
+msgid "Manage stock?"
+msgstr "管理库存？"
+
+# @ woocommerce
+#: admin/post-types/product.php:661 admin/post-types/product.php:959
+#: admin/post-types/product.php:975
+#: admin/post-types/writepanels/writepanel-product_data.php:219
+msgid "Stock Qty"
+msgstr "库存数量"
+
+#: admin/post-types/product.php:792 admin/post-types/product.php:816
+#: admin/post-types/product.php:842 admin/post-types/product.php:866
+#: admin/post-types/product.php:890 admin/post-types/product.php:909
+#: admin/post-types/product.php:927 admin/post-types/product.php:945
+#: admin/post-types/product.php:964
+msgid "— No Change —"
+msgstr "— 没有变化 —"
+
+# @ woocommerce
+#: admin/post-types/product.php:793 admin/post-types/product.php:817
+#: admin/post-types/product.php:843 admin/post-types/product.php:867
+#: admin/post-types/product.php:965
+msgid "Change to:"
+msgstr "更改为："
+
+#: admin/post-types/product.php:794 admin/post-types/product.php:818
+msgid "Increase by (fixed amount or %):"
+msgstr ""
+
+#: admin/post-types/product.php:795 admin/post-types/product.php:819
+msgid "Decrease by (fixed amount or %):"
+msgstr ""
+
+# @ woocommerce
+#: admin/post-types/product.php:805 admin/post-types/product.php:830
+msgid "Enter price"
+msgstr "原价"
+
+#: admin/post-types/product.php:820
+msgid "Decrease regular price by (fixed amount or %):"
+msgstr ""
+
+#: admin/post-types/product.php:910 admin/post-types/product.php:946
+#: admin/post-types/shop_order.php:190 admin/woocommerce-admin-status.php:122
+#: admin/woocommerce-admin-status.php:260
+msgid "Yes"
+msgstr "是"
+
+# @ woocommerce
+#: admin/post-types/product.php:911 admin/post-types/product.php:947
+#: admin/post-types/shop_order.php:192 admin/woocommerce-admin-status.php:122
+#: admin/woocommerce-admin-status.php:260
+msgid "No"
+msgstr "否"
+
+# @ woocommerce
+#: admin/post-types/product.php:1175
+msgid "Sort Products"
+msgstr "Produkte sortieren"
+
+# @ woocommerce
+#: admin/post-types/product.php:1214
+msgid "Insert into product"
+msgstr "插入至页面"
+
+# @ woocommerce
+#: admin/post-types/product.php:1215
+msgid "Uploaded to this product"
+msgstr "上传到本页面的"
+
+# @ woocommerce
+#: admin/post-types/shop_coupon.php:25
+msgid "Code"
+msgstr "代码"
+
+# @ woocommerce
+#: admin/post-types/shop_coupon.php:26
+msgid "Coupon type"
+msgstr "优惠券类型"
+
+# @ woocommerce
+#: admin/post-types/shop_coupon.php:27
+#: admin/post-types/writepanels/writepanel-coupon_data.php:45
+msgid "Coupon amount"
+msgstr "优惠券金额"
+
+# @ woocommerce
+#: admin/post-types/shop_coupon.php:28
+msgid "Description"
+msgstr "描述"
+
+# @ woocommerce
+#: admin/post-types/shop_coupon.php:29
+msgid "Product IDs"
+msgstr "产品 IDs"
+
+# @ woocommerce
+#: admin/post-types/shop_coupon.php:30
+msgid "Usage / Limit"
+msgstr "使用限制"
+
+# @ woocommerce
+#: admin/post-types/shop_coupon.php:31
+#: admin/post-types/writepanels/writepanel-coupon_data.php:158
+msgid "Expiry date"
+msgstr "到期日"
+
+# @ woocommerce
+#: admin/post-types/shop_coupon.php:56
+msgid "Edit coupon"
+msgstr "编辑优惠券"
+
+#: admin/post-types/shop_coupon.php:114
+msgid "%s / %s"
+msgstr ""
+
+#: admin/post-types/shop_coupon.php:116
+msgid "%s / &infin;"
+msgstr ""
+
+# @ woocommerce
+#: admin/post-types/shop_coupon.php:149 admin/post-types/shop_order.php:282
+msgid "Show all statuses"
+msgstr "显示所有状态"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:43
+#: admin/settings/settings-payment-gateways.php:29
+#: admin/settings/settings-shipping-methods.php:31
+msgid "Status"
+msgstr "状态"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:44
+msgid "Order"
+msgstr "订单"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:45
+msgid "Billing"
+msgstr "账单"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:46
+#: admin/post-types/writepanels/writepanel-order_data.php:536
+#: admin/post-types/writepanels/writepanel-product_data.php:81
+#: admin/settings/settings-tax-rates.php:52
+#: admin/settings/settings-tax-rates.php:217
+#: admin/woocommerce-admin-content.php:49
+#: admin/woocommerce-admin-settings.php:185
+msgid "Shipping"
+msgstr "配送"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:47
+msgid "Order Total"
+msgstr "订单总计"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:48
+#: admin/post-types/writepanels/writepanels-init.php:71
+msgid "Order Notes"
+msgstr "订单备注"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:49
+msgid "Customer Notes"
+msgstr "客户注意"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:51
+#: admin/post-types/writepanels/writepanel-order_data.php:386
+#: admin/post-types/writepanels/writepanel-order_data.php:433
+msgid "Actions"
+msgstr "操作"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:95
+#: admin/post-types/writepanels/writepanel-order_data.php:93
+msgid "Guest"
+msgstr "访客"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:98
+msgid "Order %s"
+msgstr "订单 %s"
+
+#: admin/post-types/shop_order.php:98
+msgid "made by"
+msgstr "创建顾客:"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:101
+msgid "Email:"
+msgstr "Email:"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:104
+msgid "Tel:"
+msgstr "电话："
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:114 admin/post-types/shop_order.php:123
+msgid "Via"
+msgstr "通过"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:131
+msgid "Unpublished"
+msgstr "未发布"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:133
+msgid "Y/m/d g:i:s A"
+msgstr "Y/m/d g:i:s A"
+
+# "il y a" déplacé dans la chaine parente car en anglais "ago" est placé après la durée.
+#: admin/post-types/shop_order.php:139
+msgid "%s ago"
+msgstr "%s前"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:141
+msgid "Y/m/d"
+msgstr "Y-m-d"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:158
+#: admin/woocommerce-admin-dashboard.php:176
+msgid "Processing"
+msgstr "处理"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:165
+msgid "Complete"
+msgstr "完成"
+
+# @ woocommerce
+#: admin/post-types/shop_order.php:301 admin/post-types/shop_order.php:326
+msgid "Show all customers"
+msgstr "显示所有客户"
+
+#: admin/post-types/writepanels/order-download-permission-html.php:6
+msgid "Revoke Access"
+msgstr "撤销访问"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-download-permission-html.php:7
+#: admin/post-types/writepanels/variation-admin-html.php:7
+#: admin/post-types/writepanels/writepanel-product_data.php:365
+#: admin/post-types/writepanels/writepanel-product_data.php:444
+#: admin/woocommerce-admin-init.php:452
+msgid "Click to toggle"
+msgstr "点击切换"
+
+#: admin/post-types/writepanels/order-download-permission-html.php:9
+msgid "File %d: %s"
+msgstr "文件已取消。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-download-permission-html.php:9
+msgid "Downloaded %s time"
+msgid_plural "Downloaded %s times"
+msgstr[0] "已下载 %s 次"
+msgstr[1] "已下载 %s 次"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-download-permission-html.php:16
+msgid "Downloads Remaining"
+msgstr "下载剩余"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-download-permission-html.php:19
+#: admin/post-types/writepanels/variation-admin-html.php:143
+#: admin/post-types/writepanels/variation-admin-html.php:151
+#: admin/post-types/writepanels/writepanel-product_data.php:158
+msgid "Unlimited"
+msgstr "不限制"
+
+#: admin/post-types/writepanels/order-download-permission-html.php:22
+msgid "Access Expires"
+msgstr "访问过期"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-download-permission-html.php:23
+#: admin/post-types/writepanels/writepanel-product_data.php:164
+msgid "Never"
+msgstr "永久有效"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-fee-html.php:10
+msgid "Fee Name"
+msgstr "锚名称"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-fee-html.php:17
+#: admin/post-types/writepanels/order-item-html.php:84
+msgid "Tax class"
+msgstr "税类"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-fee-html.php:19
+#: admin/post-types/writepanels/order-tax-html.php:8
+#: admin/post-types/writepanels/writepanel-order_data.php:558
+#: admin/post-types/writepanels/writepanel-order_data.php:663
+#: admin/woocommerce-admin-reports.php:1642
+#: admin/woocommerce-admin-reports.php:2655
+#: admin/woocommerce-admin-reports.php:2664
+#: admin/woocommerce-admin-users.php:90 admin/woocommerce-admin-users.php:112
+msgid "N/A"
+msgstr "N/A"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-fee-html.php:20
+#: admin/post-types/writepanels/writepanel-product_data.php:179
+msgid "Taxable"
+msgstr "应纳税"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-fee-html.php:25
+#: admin/post-types/writepanels/order-item-html.php:91
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:54
+#: admin/post-types/writepanels/writepanel-product_data.php:186
+#: admin/settings/settings-init.php:982
+#: admin/settings/settings-tax-rates.php:29
+#: admin/woocommerce-admin-settings.php:226
+msgid "Standard"
+msgstr "标准"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-fee-html.php:43
+#: admin/post-types/writepanels/order-item-html.php:110
+#: admin/woocommerce-admin-reports.php:1546
+#: admin/woocommerce-admin-reports.php:1599
+#: admin/woocommerce-admin-reports.php:2370
+#: admin/woocommerce-admin-reports.php:2539
+#: admin/woocommerce-admin-reports.php:2617
+msgid "Total"
+msgstr "合计"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-item-html.php:9
+msgid "Product ID:"
+msgstr "产品ID："
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-item-html.php:12
+msgid "Variation ID:"
+msgstr "变量 ID:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-item-html.php:15
+msgid "Product SKU:"
+msgstr "产品编码："
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-item-html.php:33
+msgid "Add&nbsp;meta"
+msgstr "添加&nbsp;meta"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-item-html.php:112
+msgid "Subtotal"
+msgstr "小计"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-tax-html.php:6
+msgid "Tax Rate:"
+msgstr "+ 添加税费"
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-tax-html.php:16
+#: admin/post-types/writepanels/writepanel-order_data.php:627
+msgid "Sales Tax:"
+msgstr "税标签："
+
+# @ woocommerce
+#: admin/post-types/writepanels/order-tax-html.php:20
+#: admin/post-types/writepanels/writepanel-order_data.php:635
+msgid "Shipping Tax:"
+msgstr "物流税："
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:6
+#: admin/post-types/writepanels/writepanel-product_data.php:364
+#: admin/post-types/writepanels/writepanel-product_data.php:443
+#: admin/woocommerce-admin-init.php:451
+msgid "Remove"
+msgstr "删除"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:20
+msgid "Any"
+msgstr "任何"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:46
+msgid ""
+"Enter a SKU for this variation or leave blank to use the parent product SKU."
+msgstr "为这个变量输入一个编码或留空使用父级产品编码。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:57
+msgid "Stock Qty:"
+msgstr "库存数量："
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:57
+msgid ""
+"Enter a quantity to enable stock management at variation level, or leave "
+"blank to use the parent product's options."
+msgstr ""
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:66
+msgid "Regular Price:"
+msgstr "原价"
+
+#: admin/post-types/writepanels/variation-admin-html.php:67
+msgid "Variation price (required)"
+msgstr "安装必要的插件"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:70
+msgid "Sale Price:"
+msgstr "促销价格："
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:70
+#: admin/post-types/writepanels/writepanel-product_data.php:125
+msgid "Schedule"
+msgstr "定时"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:70
+msgid "Cancel schedule"
+msgstr "定时："
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:77
+msgid "Sale start date:"
+msgstr "按天: "
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:78
+#: admin/post-types/writepanels/writepanel-product_data.php:136
+msgctxt "placeholder"
+msgid "From&hellip;"
+msgstr "从&hellip;"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:81
+msgid "Sale end date:"
+msgstr "按天: "
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:82
+#: admin/post-types/writepanels/writepanel-product_data.php:137
+msgctxt "placeholder"
+msgid "To&hellip;"
+msgstr "到&hellip;"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:90
+msgid ""
+"Enter a weight for this variation or leave blank to use the parent product "
+"weight."
+msgstr "输入此变更的重量或留空使用父级产品的重量。"
+
+#: admin/post-types/writepanels/variation-admin-html.php:98
+msgid "Dimensions (L&times;W&times;H)"
+msgstr "尺寸 (L&times;W&times;H)"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:109
+msgid "Shipping class:"
+msgstr "配送类:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:113
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:53
+msgid "Same as parent"
+msgstr "与父级相同"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:124
+msgid "Tax class:"
+msgstr "Steuerklasse:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:135
+msgid "File paths:"
+msgstr "文件已取消。"
+
+#: admin/post-types/writepanels/variation-admin-html.php:135
+msgid ""
+"Enter one or more File Paths, one per line, to make this variation a "
+"downloadable product, or leave blank."
+msgstr ""
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:136
+#: admin/post-types/writepanels/writepanel-product_data.php:153
+msgid "File paths/URLs, one per line"
+msgstr ""
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:137
+#: admin/post-types/writepanels/writepanel-product_data.php:154
+msgid "Choose a file"
+msgstr "文件已取消。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:137
+msgid "Upload"
+msgstr "上传"
+
+#: admin/post-types/writepanels/variation-admin-html.php:137
+#: admin/post-types/writepanels/writepanel-product_data.php:154
+msgid "Insert file URL"
+msgstr "文件路径/URL"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:142
+msgid "Download Limit:"
+msgstr "下载限制："
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:142
+#: admin/post-types/writepanels/writepanel-product_data.php:158
+msgid "Leave blank for unlimited re-downloads."
+msgstr "留空以不限制重复下载。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:150
+msgid "Download Expiry:"
+msgstr "下载截止"
+
+#: admin/post-types/writepanels/variation-admin-html.php:150
+#: admin/post-types/writepanels/writepanel-product_data.php:164
+msgid ""
+"Enter the number of days before a download link expires, or leave blank."
+msgstr "输入下载有效天数，或留空。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/variation-admin-html.php:164
+msgid "Enabled"
+msgstr "启用"
+
+#: admin/post-types/writepanels/variation-admin-html.php:166
+msgid ""
+"Enable this option if access is given to a downloadable file upon purchase "
+"of a product"
+msgstr "启用此选项，如果购买产品后可访问下载文件"
+
+#: admin/post-types/writepanels/variation-admin-html.php:168
+msgid ""
+"Enable this option if a product is not shipped or there is no shipping cost"
+msgstr "启用此选项，如果一个产品不需呀配送或有0运费"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:37
+msgid "Coupon description"
+msgstr "术语描述"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:37
+msgid "Optionally enter a description for this coupon for your reference."
+msgstr ""
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:42
+msgid "Discount type"
+msgstr "折扣类型"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:45
+msgid "Enter an amount or percentage e.g. 2.99 or 15%"
+msgstr "费用不含税。输入金额，例如2.50，或一个百分比，例如： 5%。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:51
+msgid "Enable free shipping"
+msgstr "启用免运费"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:51
+msgid ""
+"Check this box if the coupon grants free shipping. The <a href=\"%s\">free "
+"shipping method</a> must be enabled with the \"must use coupon\" setting "
+"checked."
+msgstr ""
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:54
+msgid "Individual use"
+msgstr "个人使用"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:54
+msgid ""
+"Check this box if the coupon cannot be used in conjunction with other "
+"coupons."
+msgstr "如果优惠券不能与其他优惠券一起使用请勾选此框"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:57
+msgid "Apply before tax"
+msgstr "应用税前"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:57
+msgid ""
+"Check this box if the coupon should be applied before calculating cart tax."
+msgstr "如果优惠券用在税前结账选中此框"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:60
+msgid "Exclude sale items"
+msgstr "所有多媒体项目"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:60
+msgid ""
+"Check this box if the coupon should not apply to items on sale. Per-item "
+"coupons will only work if the item is not on sale. Per-cart coupons will "
+"only work if there are no sale items in the cart."
+msgstr ""
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:65
+msgid "Minimum amount"
+msgstr "最低金额"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:65
+msgid "No minimum"
+msgstr "不限最低"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:65
+msgid ""
+"This field allows you to set the minimum subtotal needed to use the coupon."
+msgstr "此字段允许你设置需要使用优惠券的最低数目。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:74
+#: admin/woocommerce-admin-taxonomies.php:28
+#: admin/woocommerce-admin-taxonomies.php:122
+msgid "Products"
+msgstr "商品"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:75
+#: admin/post-types/writepanels/writepanel-order_data.php:400
+#: admin/post-types/writepanels/writepanel-product_data.php:504
+#: admin/post-types/writepanels/writepanel-product_data.php:521
+#: admin/woocommerce-admin-reports.php:1229
+msgid "Search for a product&hellip;"
+msgstr "搜索一个产品&hellip;"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:89
+msgid ""
+"Products which need to be in the cart to use this coupon or, for \"Product "
+"Discounts\", which products are discounted."
+msgstr "在购物车上哪些产品需要使用此优惠券，为\"折价产品\"，哪些产品已打折."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:94
+msgid "Exclude products"
+msgstr "排除产品"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:95
+msgid "Search for a product…"
+msgstr "搜索一个产品..."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:109
+msgid ""
+"Products which must not be in the cart to use this coupon or, for \"Product "
+"Discounts\", which products are not discounted."
+msgstr ""
+"哪些产品必须不在购物车上使用此优惠券，为\"折价产品\"，哪些产品没有打折."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:116
+msgid "Product categories"
+msgstr "产品类别"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:117
+msgid "Any category"
+msgstr "任何类别"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:125
+msgid ""
+"A product must be in this category for the coupon to remain valid or, for "
+"\"Product Discounts\", products in these categories will be discounted."
+msgstr ""
+"一个产品必须在这个类别才对这个优惠券有效，为\"折价产品\"，产品在这个类别将被"
+"打折。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:130
+msgid "Exclude categories"
+msgstr "排除类别"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:131
+msgid "No categories"
+msgstr "没有分类目录"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:139
+msgid ""
+"Product must not be in this category for the coupon to remain valid or, for "
+"\"Product Discounts\", products in these categories will not be discounted."
+msgstr ""
+"产品必须没有在这个类别才对这个优惠券有效，为 \"打折产品\"，产品在这些类别将不"
+"打折。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:145
+msgid "Customer emails"
+msgstr "客户Emails："
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:145
+msgid "Any customer"
+msgstr "任何顾客"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:145
+msgid ""
+"Comma separate email addresses to restrict this coupon to specific billing "
+"and user emails."
+msgstr "逗号分隔email地址来限制此优惠券到特定的账单和用户emails。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:152
+msgid "Usage limit"
+msgstr "使用限制"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:152
+msgctxt "placeholder"
+msgid "Unlimited usage"
+msgstr "无限次使用"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:152
+msgid "How many times this coupon can be used before it is void."
+msgstr "什么时间之前此优惠券可以使用"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:158
+msgctxt "placeholder"
+msgid "Never expire"
+msgstr "永久有效"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-coupon_data.php:158
+msgid "The date this coupon will expire, <code>YYYY-MM-DD</code>."
+msgstr "此优惠券的到期日期， <code>YYYY-MM-DD</code>"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:195
+msgid ""
+"Coupon code already exists - customers will use the latest coupon with this "
+"code."
+msgstr ""
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:59
+msgid "Order Details"
+msgstr "订单详情"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:62
+msgid "Order number"
+msgstr "销售数量:%s"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:67
+msgid "Customer IP:"
+msgstr "作者：%1$s（IP：%2$s，主机名：%3$s）"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:74
+msgid "General Details"
+msgstr "查看详情"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:76
+msgid "Order status:"
+msgstr "订单状态："
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:86
+msgid "Order Date:"
+msgstr "订单日期："
+
+#: admin/post-types/writepanels/writepanel-order_data.php:87
+msgid "h"
+msgstr "h"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:87
+#: admin/settings/settings-init.php:577
+msgid "m"
+msgstr "米"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:91
+msgid "Customer:"
+msgstr "客户："
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:131
+msgid "Customer Note:"
+msgstr "客户注意："
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:132
+msgid "Customer's notes about the order"
+msgstr "客户对订单的注释"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:140
+msgid "Billing Details"
+msgstr "账单详情"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:144
+#: admin/post-types/writepanels/writepanel-order_data.php:234
+msgid "First Name"
+msgstr "名"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:148
+#: admin/post-types/writepanels/writepanel-order_data.php:238
+msgid "Last Name"
+msgstr "姓"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:152
+#: admin/post-types/writepanels/writepanel-order_data.php:242
+#: admin/woocommerce-admin-users.php:155 admin/woocommerce-admin-users.php:204
+msgid "Company"
+msgstr "公司"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:156
+#: admin/post-types/writepanels/writepanel-order_data.php:246
+#: admin/woocommerce-admin-users.php:159 admin/woocommerce-admin-users.php:208
+msgid "Address 1"
+msgstr "地址1"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:160
+#: admin/post-types/writepanels/writepanel-order_data.php:250
+#: admin/woocommerce-admin-users.php:163 admin/woocommerce-admin-users.php:212
+msgid "Address 2"
+msgstr "地址2"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:164
+#: admin/post-types/writepanels/writepanel-order_data.php:254
+#: admin/settings/settings-tax-rates.php:42
+#: admin/settings/settings-tax-rates.php:217
+#: admin/woocommerce-admin-users.php:167 admin/woocommerce-admin-users.php:216
+msgid "City"
+msgstr "城市"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:168
+#: admin/post-types/writepanels/writepanel-order_data.php:258
+#: admin/woocommerce-admin-users.php:171 admin/woocommerce-admin-users.php:220
+msgid "Postcode"
+msgstr "邮编"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:172
+#: admin/post-types/writepanels/writepanel-order_data.php:262
+#: admin/woocommerce-admin-users.php:179 admin/woocommerce-admin-users.php:228
+msgid "Country"
+msgstr "国家"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:175
+#: admin/post-types/writepanels/writepanel-order_data.php:265
+msgid "Select a country&hellip;"
+msgstr "选择国家&hellip;"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:178
+#: admin/post-types/writepanels/writepanel-order_data.php:268
+#: admin/woocommerce-admin-users.php:175 admin/woocommerce-admin-users.php:224
+msgid "State/County"
+msgstr "地区/县"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:182
+#: admin/woocommerce-admin-users.php:187
+msgid "Email"
+msgstr "电子邮件"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:185
+msgid "Phone"
+msgstr "电话"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:193
+#: admin/post-types/writepanels/writepanel-order_data.php:195
+#: admin/post-types/writepanels/writepanel-order_data.php:277
+#: admin/post-types/writepanels/writepanel-order_data.php:279
+msgid "Address"
+msgstr "地址"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:195
+msgid "No billing address set."
+msgstr "还没设置账单地址。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:208
+msgid "Load billing address"
+msgstr "顾客账单地址"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:230
+msgid "Shipping Details"
+msgstr "配送详情"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:279
+msgid "No shipping address set."
+msgstr "没有设置配送地址。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:292
+msgid "Load shipping address"
+msgstr "顾客配送地址"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:292
+msgid "Copy from billing"
+msgstr "从帐单复制"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:339
+msgid "Item"
+msgstr "项"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:344
+#: admin/post-types/writepanels/writepanel-product_data.php:191
+#: admin/settings/settings-tax-rates.php:217
+msgid "Tax Class"
+msgstr "税类"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:344
+msgid "Tax class for the line item"
+msgstr "线路税类"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:347
+msgid "Qty"
+msgstr "数量"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:349
+msgid "Cost"
+msgstr "成本"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:349
+msgid "Line subtotals are before pre-tax discounts, totals are after."
+msgstr ""
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:352
+#: admin/settings/settings-tax-rates.php:387
+#: admin/settings/settings-tax-rates.php:466
+#: admin/woocommerce-admin-content.php:48
+#: admin/woocommerce-admin-settings.php:184
+msgid "Tax"
+msgstr "税"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:388
+msgid "Delete Lines"
+msgstr "删除相册"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:390
+msgid "Stock Actions"
+msgstr "订单操作"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:391
+msgid "Reduce Line Stock"
+msgstr "手动减少存货。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:392
+msgid "Increase Line Stock"
+msgstr "手动减少存货。"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:396
+#: admin/post-types/writepanels/writepanel-order_data.php:456
+msgid "Apply"
+msgstr "应用"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:402
+msgid "Add item(s)"
+msgstr "Produkt(e) hinzufügen"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:403
+msgid "Add fee"
+msgstr "手续费"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:434
+msgid "Resend order emails"
+msgstr "新添订单"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:465
+msgid "Move to Trash"
+msgstr "移至回收站"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:470
+msgid "Save Order"
+msgstr "保存订单"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:470
+msgid "Save/update the order"
+msgstr "保存/更新订单"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:495
+msgid "Discounts"
+msgstr "优惠"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:499
+msgid "Cart Discount:"
+msgstr "购物优惠："
+
+#: admin/post-types/writepanels/writepanel-order_data.php:499
+msgid "Discounts before tax - calculated by comparing subtotals to totals."
+msgstr ""
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:507
+msgid "Order Discount:"
+msgstr "订购优惠："
+
+#: admin/post-types/writepanels/writepanel-order_data.php:507
+msgid "Discounts after tax - user defined."
+msgstr "单税折扣之后的线路成本和线路税收"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:540
+msgid "Label:"
+msgstr "标签"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:541
+msgid "The shipping title the customer sees"
+msgstr "客户看到的配送标题"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:548
+msgid "Cost:"
+msgstr "成本"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:549
+msgid "(ex. tax)"
+msgstr "(税前)"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:556
+msgid "Method:"
+msgstr "Methode:"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:578
+#: admin/post-types/writepanels/writepanel-order_data.php:580
+#: admin/post-types/writepanels/writepanel-order_data.php:679
+#: admin/post-types/writepanels/writepanel-order_data.php:681
+msgid "Other"
+msgstr "其它"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:594
+msgid "Tax Rows"
+msgstr "税费数"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:619
+msgid "+ Add tax row"
+msgstr "+ 添加税费项目"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:619
+msgid ""
+"These rows contain taxes for this order. This allows you to display multiple "
+"or compound taxes rather than a single total."
+msgstr ""
+"这些行包含该订单的税费。这使您能够显示多个或复合税，而不是一个单一的合计。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:623
+msgid "Tax Totals"
+msgstr "税合计"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:627
+msgid "Total tax for line items + fees."
+msgstr ""
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:649
+#: admin/post-types/writepanels/writepanels-init.php:70
+msgid "Order Totals"
+msgstr "订单汇总"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:653
+msgid "Order Total:"
+msgstr "订单合计："
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:661
+msgid "Payment Method:"
+msgstr "付款方式："
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:692
+msgid "Calc taxes"
+msgstr "Gesamte Steuern"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_data.php:694
+msgid "Calc totals"
+msgstr "Calc 合计 &rarr;"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_downloads.php:57
+msgid "Choose a downloadable product&hellip;"
+msgstr "选择一个可下载的产品&hellip;"
+
+#: admin/post-types/writepanels/writepanel-order_downloads.php:87
+msgid "Grant Access"
+msgstr "授权访问"
+
+#: admin/post-types/writepanels/writepanel-order_downloads.php:125
+msgid ""
+"Could not grant access - the user may already have permission for this file "
+"or billing email is not set. Ensure the billing email is set, and the order "
+"has been saved."
+msgstr ""
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_downloads.php:148
+msgid "Are you sure you want to revoke access to this download?"
+msgstr "你确定要撤销访问此下载？"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_notes.php:44
+msgid "added %s ago"
+msgstr "added %s ago"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_notes.php:44
+msgid "Delete note"
+msgstr "删除备注"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_notes.php:50
+msgid "There are no notes for this order yet."
+msgstr "这个订单没有备注。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_notes.php:56
+msgid "Add note"
+msgstr "添加备注"
+
+#: admin/post-types/writepanels/writepanel-order_notes.php:56
+msgid ""
+"Add a note for your reference, or add a customer note (the user will be "
+"notified)."
+msgstr ""
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_notes.php:62
+msgid "Customer note"
+msgstr "客户备注"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_notes.php:63
+msgid "Private note"
+msgstr "私人备注"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-order_notes.php:65
+#: admin/post-types/writepanels/writepanel-product_data.php:482
+msgid "Add"
+msgstr "添加"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:23
+msgid "Variations for variable products are defined here."
+msgstr "这里定义的可变产品的变更。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:23
+msgid "Variations"
+msgstr "Variations"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:65
+msgid ""
+"Before adding variations, add and save some attributes on the "
+"<strong>Attributes</strong> tab."
+msgstr "在添加变更之前，添加和保存一些属性在<strong>属性</strong>选项卡。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:67
+msgid "Learn more"
+msgstr "了解更多"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:74
+#: admin/post-types/writepanels/writepanel-product_data.php:329
+msgid "Close all"
+msgstr "选择全部"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:74
+#: admin/post-types/writepanels/writepanel-product_data.php:329
+msgid "Expand all"
+msgstr "展开全部"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:75
+msgid "Bulk edit:"
+msgstr "批量编辑："
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:77
+msgid "Toggle &quot;Enabled&quot;"
+msgstr "切换绝对定位状态"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:78
+msgid "Toggle &quot;Downloadable&quot;"
+msgstr "电子邮件地址："
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:79
+msgid "Toggle &quot;Virtual&quot;"
+msgstr "切换绝对定位状态"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:80
+msgid "Delete all variations"
+msgstr "链接所有变更"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:81
+msgid "Prices"
+msgstr "价格"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:82
+msgid "Sale prices"
+msgstr "促销价格"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:88
+msgid "File Path"
+msgstr "Dateipfad"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:89
+msgid "Download limit"
+msgstr "Download Limit"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:90
+#: admin/post-types/writepanels/writepanel-product_data.php:164
+msgid "Download Expiry"
+msgstr "下载截止"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:93
+msgid "Go"
+msgstr "返回"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:193
+msgid "Add Variation"
+msgstr "Add Variation"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:195
+msgid "Link all variations"
+msgstr "链接所有变更"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:197
+msgid "Default selections:"
+msgstr "默认选择："
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:210
+msgid "No default"
+msgstr "无默认值"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:293
+msgid ""
+"Are you sure you want to link all variations? This will create a new "
+"variation for each and every possible combination of variation attributes "
+"(max 50 per run)."
+msgstr ""
+"你确定你要链接所有变更吗？这将为每一个可变属性可能的组合创建一个新的变更属"
+"性，（每圈最大50）。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:310
+msgid "variation added"
+msgstr "变更已添加"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:312
+msgid "variations added"
+msgstr "变更已添加"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:314
+msgid "No variations added"
+msgstr "没有变更被添加"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:337
+msgid "Are you sure you want to remove this variation?"
+msgstr "你确定要删除这个变更？"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:393
+msgid "Are you sure you want to delete all variations? This cannot be undone."
+msgstr "你确定要删除全部变更？此项操作不能恢复。"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:396
+msgid "Last warning, are you sure?"
+msgstr "最后警告，你确定吗？"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:433
+msgid "Enter a value"
+msgstr "输入一个值"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:511
+#: admin/woocommerce-admin-taxonomies.php:62
+#: admin/woocommerce-admin-taxonomies.php:154
+msgid "Choose an image"
+msgstr "选择图像"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:513
+msgid "Set variation image"
+msgstr "设为特色图像"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:557
+msgid "Variable product"
+msgstr "变更产品"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:623
+msgid "Variation #%s of %s"
+msgstr "#%s 变更为 %s"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:43
+msgid "Product Type"
+msgstr "产品类型"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:53
+msgid "Virtual products are intangible and aren't shipped."
+msgstr "虚拟物品，无需配送"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:59
+msgid "Downloadable products give access to a file upon purchase."
+msgstr "购买一个可下载的产品"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:77
+#: admin/woocommerce-admin-content.php:44
+#: admin/woocommerce-admin-settings.php:180
+msgid "General"
+msgstr "常规"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:79
+#: admin/woocommerce-admin-content.php:47
+#: admin/woocommerce-admin-settings.php:183
+msgid "Inventory"
+msgstr "库存"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:83
+msgid "Linked Products"
+msgstr "查找商品"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:85
+#: admin/woocommerce-admin-attributes.php:298
+#: admin/woocommerce-admin-init.php:66
+msgid "Attributes"
+msgstr "属性"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:87
+msgid "Advanced"
+msgstr "高级"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:98
+msgid "Stock Keeping Unit"
+msgstr "库存单位"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:98
+msgid ""
+"SKU refers to a Stock-keeping unit, a unique identifier for each distinct "
+"product and service that can be purchased."
+msgstr ""
+"SKU是指一个库存单位，为每个不同的产品和服务，可以购买一个唯一的标识符。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:109
+msgid "Product URL"
+msgstr "产品URL"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:109
+msgid "Enter the external URL to the product."
+msgstr "输入产品的外部URL。"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:112
+msgid "Button text"
+msgstr "按钮文本"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:112
+msgctxt "placeholder"
+msgid "Buy product"
+msgstr "买产品"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:112
+msgid "This text will be shown on the button linking to the external product."
+msgstr "这些文字将显示在链接到外部产品的按钮上。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:119
+msgid "Regular Price"
+msgstr "原价"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:125
+msgid "Sale Price"
+msgstr "网售价"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:135
+msgid "Sale Price Dates"
+msgstr "售价日期"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:138
+#: admin/post-types/writepanels/writepanel-product_data.php:1064
+msgid "Cancel"
+msgstr "取消"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:152
+msgid "File paths (one per line)"
+msgstr ""
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:158
+msgid "Download Limit"
+msgstr "下载限制"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:178
+msgid "Tax Status"
+msgstr "税务状态"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:180
+msgid "Shipping only"
+msgstr "运费仅"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:181
+msgid "None"
+msgstr "无"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:212
+msgid "Enable stock management at product level"
+msgstr ""
+
+#: admin/post-types/writepanels/writepanel-product_data.php:219
+msgid ""
+"Stock quantity. If this is a variable product this value will be used to "
+"control stock for all variations, unless you define stock at variation level."
+msgstr ""
+"库存数量。如果这是一个可变的产品，这个值将被用于控制所有变更的库存，除非你定"
+"义库存变化量。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:230
+msgid "Stock status"
+msgstr "库存状态"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:233
+msgid ""
+"Controls whether or not the product is listed as \"in stock\" or \"out of "
+"stock\" on the frontend."
+msgstr "控制在前端是否产品被列为\"有货\"或\"缺货\" 。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:240
+msgid "Allow Backorders?"
+msgstr "允许缺货？"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:241
+msgid "Do not allow"
+msgstr "不允许"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:242
+msgid "Allow, but notify customer"
+msgstr "允许，但通知客户"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:243
+msgid "Allow"
+msgstr "允许"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:244
+msgid ""
+"If managing stock, this controls whether or not backorders are allowed for "
+"this product and variations. If enabled, stock quantity can go below 0."
+msgstr ""
+"如果管理库存，这将控制无论是否缺货都允许该产品和变更。如果启用，库存量可以低"
+"于0。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:255
+msgid "Sold Individually"
+msgstr ""
+
+#: admin/post-types/writepanels/writepanel-product_data.php:255
+msgid ""
+"Enable this to only allow one of this item to be bought in a single order"
+msgstr ""
+
+#: admin/post-types/writepanels/writepanel-product_data.php:273
+msgid "Weight in decimal form"
+msgstr "十进制形式计重"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:284
+msgid "Dimensions"
+msgstr "尺寸"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:290
+msgid "LxWxH in decimal form"
+msgstr "十进制形式计长X宽X高"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:311
+msgid "No shipping class"
+msgstr "无运费类别"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:317
+msgid "Shipping class"
+msgstr "运费类"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:317
+msgid ""
+"Shipping classes are used by certain shipping methods to group similar "
+"products."
+msgstr "运费类 是由若干组同类产品的配送方式。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:380
+#: admin/post-types/writepanels/writepanel-product_data.php:457
+#: admin/woocommerce-admin-init.php:453
+msgid "Value(s)"
+msgstr "值(s)"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:382
+msgid "Select terms"
+msgstr "选择条款"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:394
+msgid "Select all"
+msgstr "全选"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:394
+msgid "Select none"
+msgstr "选择无"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:396
+msgid "Add new"
+msgstr "新添"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:409
+msgid "Pipe separate terms"
+msgstr "竖线单独的条款"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:416
+#: admin/post-types/writepanels/writepanel-product_data.php:463
+#: admin/woocommerce-admin-init.php:455
+msgid "Visible on the product page"
+msgstr "在产品页可见"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:422
+#: admin/post-types/writepanels/writepanel-product_data.php:469
+#: admin/woocommerce-admin-init.php:456
+msgid "Used for variations"
+msgstr "用于变更"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:458
+#: admin/woocommerce-admin-init.php:454
+msgid "Enter some text, or some attributes by pipe (|) separating values."
+msgstr "输入一些文字或某些属性，使用竖线 (|) 分隔值。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:484
+msgid "Custom product attribute"
+msgstr "自定义产品属性"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:496
+msgid "Save attributes"
+msgstr "页面属性"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:503
+msgid "Up-Sells"
+msgstr "附加销售"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:518
+msgid ""
+"Up-sells are products which you recommend instead of the currently viewed "
+"product, for example, products that are more profitable or better quality or "
+"more expensive."
+msgstr ""
+"向上销售产品由你推荐到用户当前查看的产品页面，例如，更加实惠或质量更好或更昂"
+"贵的产品。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:520
+msgid "Cross-Sells"
+msgstr "交叉销售"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:535
+msgid ""
+"Cross-sells are products which you promote in the cart, based on the current "
+"product."
+msgstr "交叉销售是基于目前产品推广更多的产品和商品。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:545
+msgid "Choose a grouped product&hellip;"
+msgstr "选择分组产品&hellip;"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:571
+msgid "Grouping"
+msgstr "编组"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:571
+msgid "Set this option to make this product part of a grouped product."
+msgstr ""
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:591
+msgid "Purchase Note"
+msgstr "购买注意"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:591
+msgid "Enter an optional note to send the customer after purchase."
+msgstr "输入一个可选说明在顾客购买后发送给他。"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:598
+msgid "Menu order"
+msgstr "菜单排序"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:598
+msgid "Custom ordering position."
+msgstr "顾客订单位置."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:606
+msgid "Enable reviews"
+msgstr "允许评论"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:695
+msgid "Product SKU must be unique."
+msgstr "产品编码为必填项"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:1028
+msgid "Catalog/search"
+msgstr "Catalog/search"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:1035
+msgid "Catalog visibility:"
+msgstr "目录可见:"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:1051
+msgid ""
+"Define the loops this product should be visible in. The product will still "
+"be accessible directly."
+msgstr ""
+"Definieren Sie die Schleifen in denen das Produkt sichtbar seien soll. Das "
+"Produkt bleib direkt zugreifbar."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:1057
+msgid "Enable this option to feature this product."
+msgstr "Aktivieren Sie diese Option damit das Produkt angepriesen wird."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:1059
+msgid "Featured Product"
+msgstr "添加商品"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:1063
+msgid "OK"
+msgstr "确定"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_images.php:42
+#: admin/post-types/writepanels/writepanel-product_images.php:102
+msgid "Delete image"
+msgstr "删除图像"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_images.php:42
+#: admin/post-types/writepanels/writepanel-product_images.php:102
+#: admin/woocommerce-admin-attributes.php:322
+msgid "Delete"
+msgstr "删除"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_images.php:53
+msgid "Add product gallery images"
+msgstr "添加新商品分类"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_images.php:79
+msgid "Add Images to Product Gallery"
+msgstr ""
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_images.php:81
+msgid "Add to gallery"
+msgstr "添加至相册"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:47
+msgid "Product Gallery"
+msgstr "创建相册"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:55
+msgid "Product Short Description"
+msgstr "产品简短描述"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:64
+msgid "Reviews"
+msgstr "评论"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:68
+msgid "Order Data"
+msgstr "订单数据"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:69
+msgid "Order Items"
+msgstr "平均订单项"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:69
+msgid ""
+"Note: if you edit quantities or remove items from the order you will need to "
+"manually update stock levels."
+msgstr ""
+
+#: admin/post-types/writepanels/writepanels-init.php:72
+msgid "Downloadable Product Permissions"
+msgstr "选择一个可下载的产品&hellip;"
+
+#: admin/post-types/writepanels/writepanels-init.php:72
+msgid ""
+"Note: Permissions for order items will automatically be granted when the "
+"order status changes to processing/completed."
+msgstr ""
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:73
+msgid "Order Actions"
+msgstr "订单动作"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:81
+msgid "Coupon Data"
+msgstr "优惠券数据"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:100
+msgid "Coupon code"
+msgstr "优惠券代码"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:101
+msgid "Product name"
+msgstr "产品名称"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:185
+msgid "Allow reviews."
+msgstr "允许评论。"
+
+#: admin/post-types/writepanels/writepanels-init.php:186
+msgid ""
+"Allow <a href=\"%s\" target=\"_blank\">trackbacks and pingbacks</a> on this "
+"page."
+msgstr "允许<a href=\"%s\" target=\"_blank\">引用通告和包括引用</a> 在本页."
+
+#: admin/post-types/writepanels/writepanels-init.php:186
+msgid "http://codex.wordpress.org/Introduction_to_Blogging#Managing_Comments"
+msgstr "http://codex.wordpress.org/Introduction_to_Blogging#Managing_Comments"
+
+# @ woocommerce
+#: admin/settings/settings-frontend-styles.php:23
+msgid "Styles"
+msgstr "样式"
+
+# @ woocommerce
+#: admin/settings/settings-frontend-styles.php:43
+msgid "Primary"
+msgstr "主"
+
+#: admin/settings/settings-frontend-styles.php:43
+msgid "Call to action buttons/price slider/layered nav UI"
+msgstr "调用按钮/价格滑块/层叠导航栏"
+
+#: admin/settings/settings-frontend-styles.php:44
+msgid "Secondary"
+msgstr "次"
+
+#: admin/settings/settings-frontend-styles.php:44
+msgid "Buttons and tabs"
+msgstr "按钮和标签"
+
+# @ woocommerce
+# @ woocommerce
+#: admin/settings/settings-frontend-styles.php:45
+msgid "Highlight"
+msgstr "Hervorheben"
+
+#: admin/settings/settings-frontend-styles.php:45
+msgid "Price labels and Sale Flashes"
+msgstr "价格标签和售价闪亮"
+
+# @ woocommerce
+#: admin/settings/settings-frontend-styles.php:46
+msgid "Content"
+msgstr "内容"
+
+#: admin/settings/settings-frontend-styles.php:46
+msgid "Your themes page background - used for tab active states"
+msgstr "你的主题页面背景 - 用于选项卡处于活动状态"
+
+# @ woocommerce
+#: admin/settings/settings-frontend-styles.php:47
+msgid "Subtext"
+msgstr "Subtext"
+
+#: admin/settings/settings-frontend-styles.php:47
+msgid "Used for certain text and asides - breadcrumbs, small text etc."
+msgstr "用于某些文字和旁白 - 面包屑导航，短文等。"
+
+#: admin/settings/settings-frontend-styles.php:51
+msgid ""
+"To edit colours <code>woocommerce/assets/css/woocommerce-base.less</code> "
+"and <code>woocommerce.css</code> need to be writable. See <a href=\"http://"
+"codex.wordpress.org/Changing_File_Permissions\">the Codex</a> for more "
+"information."
+msgstr ""
+"编辑颜色 <code>woocommerce/assets/css/woocommerce-base.less</code> 和 "
+"<code>woocommerce.css</code> 必须可写入. 参考 <a href=\"http://codex."
+"wordpress.org/Changing_File_Permissions\">the Codex</a> 获取更多帮助."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:18
+msgid "Localisation"
+msgstr "位置"
+
+#: admin/settings/settings-init.php:19
+msgid "Use informal localisation for %s"
+msgstr ""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:33
+msgid "General Options"
+msgstr "常规选项"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:36
+msgid "Base Location"
+msgstr "本地设置"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:37
+msgid ""
+"This is the base location for your business. Tax rates will be based on this "
+"country."
+msgstr ""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:46
+msgid "Currency"
+msgstr "货币"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:47
+msgid ""
+"This controls what currency prices are listed at in the catalog and which "
+"currency gateways will take payments in."
+msgstr "控制在类别中的货币价格列出的将支付的货币网关"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:58
+msgid "Allowed Countries"
+msgstr "允许的国家"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:59
+msgid "These are countries that you are willing to ship to."
+msgstr "这个国家你希望运送到。"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:67
+msgid "All Countries"
+msgstr "所有国家"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:68 admin/settings/settings-init.php:73
+msgid "Specific Countries"
+msgstr "特定国家"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:84
+msgid "Store Notice"
+msgstr "储存注意事项文本"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:85
+msgid "Enable site-wide store notice text"
+msgstr "启用\"演示商店\"通知在您的网站上"
+
+#: admin/settings/settings-init.php:92
+msgid "Store Notice Text"
+msgstr "储存注意事项文本"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:95
+msgid ""
+"This is a demo store for testing purposes &mdash; no orders shall be "
+"fulfilled."
+msgstr "这是一个用于测试的演示商店 - 应该没有订单能完成。"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:102
+msgid "Cart, Checkout and Accounts"
+msgstr ""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:105 admin/woocommerce-admin-content.php:61
+#: admin/woocommerce-admin-content.php:76
+#: admin/woocommerce-admin-reports.php:72
+msgid "Coupons"
+msgstr "优惠券"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:106
+msgid "Enable the use of coupons"
+msgstr "没有找到优惠券"
+
+#: admin/settings/settings-init.php:110
+msgid "Coupons can be applied from the cart and checkout pages."
+msgstr ""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:114
+#: admin/woocommerce-admin-install.php:198
+#: admin/woocommerce-admin-status.php:281
+msgid "Checkout"
+msgstr "结算"
+
+#: admin/settings/settings-init.php:115
+msgid "Enable guest checkout (no account required)"
+msgstr "Bezahlvorgang als Gast ermöglichen (Kundenkonto nicht nötig)"
+
+#: admin/settings/settings-init.php:123
+msgid "Enable customer note field on checkout"
+msgstr ""
+
+#: admin/settings/settings-init.php:131
+msgid "Force secure checkout"
+msgstr "强制安全结帐"
+
+#: admin/settings/settings-init.php:137
+msgid ""
+"Force SSL (HTTPS) on the checkout pages (an SSL Certificate is required)."
+msgstr "强制在结算页使用 SSL (HTTPS) 方式。（需要有SSL证书）"
+
+#: admin/settings/settings-init.php:141
+msgid "Un-force HTTPS when leaving the checkout"
+msgstr "不强制使用HTTPS 方式结账"
+
+#: admin/settings/settings-init.php:150
+msgid "Registration"
+msgstr "Registrierung"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:151
+msgid "Allow registration on the checkout page"
+msgstr ""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:159
+msgid "Allow registration on the \"My Account\" page"
+msgstr ""
+
+#: admin/settings/settings-init.php:167
+msgid "Register using the email address for the username"
+msgstr "注册用户名时使用的Email"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:175
+msgid "Customer Accounts"
+msgstr "客户帐户"
+
+#: admin/settings/settings-init.php:176
+msgid "Prevent customers from accessing WordPress admin"
+msgstr "防止客户访问WordPress的管理"
+
+#: admin/settings/settings-init.php:184
+msgid "Clear cart when logging out"
+msgstr "当登出则清空购物车"
+
+#: admin/settings/settings-init.php:192
+msgid "Allow customers to repurchase orders from their account page"
+msgstr ""
+
+#: admin/settings/settings-init.php:201
+msgid "Styles and Scripts"
+msgstr "样式和脚本"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:204
+msgid "Styling"
+msgstr "样式"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:205
+msgid "Enable WooCommerce CSS"
+msgstr "启用WooCommerce CSS样式"
+
+#: admin/settings/settings-init.php:216
+msgid "Scripts"
+msgstr "脚本"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:217
+msgid "Enable Lightbox"
+msgstr "启用 JavaScript"
+
+#: admin/settings/settings-init.php:220
+msgid ""
+"Include WooCommerce's lightbox. Product gallery images and the add review "
+"form will open in a lightbox."
+msgstr ""
+
+#: admin/settings/settings-init.php:226
+msgid "Enable enhanced country select boxes"
+msgstr "Enable enhanced country select boxes"
+
+#: admin/settings/settings-init.php:231
+msgid "This will enable a script allowing the country fields to be searchable."
+msgstr ""
+
+#: admin/settings/settings-init.php:236
+msgid "Downloadable Products"
+msgstr "查找商品"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:239
+msgid "File Download Method"
+msgstr "文件下载方式"
+
+#: admin/settings/settings-init.php:240
+msgid ""
+"Forcing downloads will keep URLs hidden, but some servers may serve large "
+"files unreliably. If supported, <code>X-Accel-Redirect</code>/ <code>X-"
+"Sendfile</code> can be used to serve downloads instead (server requires "
+"<code>mod_xsendfile</code>)."
+msgstr ""
+"强制隐藏下载网址，但有些服务器可能对大文件无效。如果支持<code>X-Accel-"
+"Redirect</code>/ <code>X-Sendfile</code> 可以用来代替下载服务 (服务器必须"
+"<code>mod_xsendfile</code>)."
+
+#: admin/settings/settings-init.php:248
+msgid "Force Downloads"
+msgstr "Force 下载"
+
+#: admin/settings/settings-init.php:249
+msgid "X-Accel-Redirect/X-Sendfile"
+msgstr "X-Accel-Redirect/X-Sendfile"
+
+#: admin/settings/settings-init.php:250
+msgid "Redirect only"
+msgstr "仅重定向"
+
+#: admin/settings/settings-init.php:255
+msgid "Access Restriction"
+msgstr "撤销访问"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:256
+msgid "Downloads require login"
+msgstr "未提交登录 ID"
+
+#: admin/settings/settings-init.php:260
+msgid "This setting does not apply to guest purchases."
+msgstr "This setting does not apply to guest purchases."
+
+#: admin/settings/settings-init.php:265
+msgid "Grant access to downloadable products after payment"
+msgstr "授权付款后下载的商品"
+
+#: admin/settings/settings-init.php:269
+msgid ""
+"Enable this option to grant access to downloads when orders are \"processing"
+"\", rather than \"completed\"."
+msgstr ""
+
+#: admin/settings/settings-init.php:285
+msgid ""
+"Note: The shop page has children - child pages will not work if you enable "
+"this option."
+msgstr "注意：如果启用此选项，店铺页面已有子页面 - 子页面将无法工作"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:290
+msgid "Page Setup"
+msgstr "页面安装"
+
+#: admin/settings/settings-init.php:292
+msgid ""
+"Set up core WooCommerce pages here, for example the base page. The base page "
+"can also be used in your %sproduct permalinks%s."
+msgstr ""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:297
+msgid "Shop Base Page"
+msgstr "店铺相应的页面"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:298
+msgid ""
+"This sets the base page of your shop - this is where your product archive "
+"will be."
+msgstr "这设置你的店铺的基本页 - 这将是你的产品存档。"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:308
+msgid "Base Page Title"
+msgstr "相应页面标题"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:309
+msgid ""
+"This title to show on the shop base page. Leave blank to use the page title."
+msgstr "这个标题显示在商店基本页面。留空使用页面标题。"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:318
+msgid "Terms Page ID"
+msgstr "条款页面ID"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:319
+msgid ""
+"If you define a \"Terms\" page the customer will be asked if they accept "
+"them when checking out."
+msgstr "如果你定义一个\"条款\"页面，将在客户结账时要求他们接受该条款。"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:330
+msgid "Shop Pages"
+msgstr "商品页"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:330
+msgid ""
+"The following pages need selecting so that WooCommerce knows where they are. "
+"These pages should have been created upon installation of the plugin, if not "
+"you will need to create them."
+msgstr ""
+"以下页面需要选择，所以WooCommerce要知道他们在哪里。这些网页应该在安装该插件后"
+"已经被创建，如果没有创建，您必须创建它们。"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:333
+msgid "Cart Page"
+msgstr "购物页"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:334
+msgid "Page contents: [woocommerce_cart]"
+msgstr "页面内容: [woocommerce_cart]"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:344
+msgid "Checkout Page"
+msgstr "结账页"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:345
+msgid "Page contents: [woocommerce_checkout]"
+msgstr "页面内容:  [woocommerce_checkout]"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:355
+msgid "Pay Page"
+msgstr "支付页"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:356
+msgid "Page contents: [woocommerce_pay] Parent: \"Checkout\""
+msgstr "页面内容: [woocommerce_pay] Parent: \"Checkout\""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:366
+msgid "Thanks Page"
+msgstr "感谢页"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:367
+msgid "Page contents: [woocommerce_thankyou] Parent: \"Checkout\""
+msgstr "页面内容:  [woocommerce_thankyou] Parent: \"Checkout\""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:377
+msgid "My Account Page"
+msgstr "我的账户页"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:378
+msgid "Page contents: [woocommerce_my_account]"
+msgstr "页面内容: [woocommerce_my_account]"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:388
+msgid "Edit Address Page"
+msgstr "编辑地址页"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:389
+msgid "Page contents: [woocommerce_edit_address] Parent: \"My Account\""
+msgstr "页面内容: [woocommerce_edit_address] Parent: \"My Account\""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:399
+msgid "View Order Page"
+msgstr "查看订单页"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:400
+msgid "Page contents: [woocommerce_view_order] Parent: \"My Account\""
+msgstr "页面内容:  [woocommerce_view_order] Parent: \"My Account\""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:410
+msgid "Change Password Page"
+msgstr "修改密码页"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:411
+msgid "Page contents: [woocommerce_change_password] Parent: \"My Account\""
+msgstr "页面内容: [woocommerce_change_password] Parent: \"My Account\""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:421
+msgid "Logout Page"
+msgstr "一个静态页面"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:422
+msgid "Parent: \"My Account\""
+msgstr "我的账户页"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:432
+msgid "Lost Password Page"
+msgstr "修改密码页"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:433
+msgid "Page contents: [woocommerce_lost_password] Parent: \"My Account\""
+msgstr "页面内容: [woocommerce_change_password] Parent: \"My Account\""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:449
+msgid "Catalog Options"
+msgstr "目录选项"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:452
+msgid "Default Product Sorting"
+msgstr "默认产品排序"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:453
+msgid "This controls the default sort order of the catalog."
+msgstr "这控制分类的默认排序"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:459
+msgid "Default sorting (custom ordering + name)"
+msgstr ""
+
+#: admin/settings/settings-init.php:460
+msgid "Popularity (sales)"
+msgstr "每月销售"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:461
+msgid "Average Rating"
+msgstr "综合评级"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:462
+msgid "Sort by most recent"
+msgstr "Sortieren nach neueste"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:463
+msgid "Sort by price (asc)"
+msgstr "按价格从低到高"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:464
+msgid "Sort by price (desc)"
+msgstr "按价格从低到高"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:470
+msgid "Shop Page Display"
+msgstr "店铺基本页面"
+
+#: admin/settings/settings-init.php:471
+msgid "This controls what is shown on the product archive."
+msgstr ""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:477 admin/settings/settings-init.php:492
+msgid "Show products"
+msgstr "产品数量显示："
+
+# @ woocommerce
+#: admin/settings/settings-init.php:478 admin/settings/settings-init.php:493
+msgid "Show subcategories"
+msgstr "显示子类别"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:479 admin/settings/settings-init.php:494
+msgid "Show both"
+msgstr "查看详情"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:485
+msgid "Default Category Display"
+msgstr "默认文章分类目录"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:486
+msgid "This controls what is shown on category archives."
+msgstr ""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:500
+msgid "Add to cart"
+msgstr "添加到购物车"
+
+#: admin/settings/settings-init.php:501
+msgid "Redirect to the cart page after successful addition"
+msgstr ""
+
+#: admin/settings/settings-init.php:509
+msgid "Enable AJAX add to cart buttons on archives"
+msgstr "启用AJAX添加到购物车按钮在产品存档"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:518
+msgid ""
+"The following options affect the fields available on the edit product page."
+msgstr "下列选项影响编辑产品页面上的可用字段。"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:521
+msgid "Product Fields"
+msgstr "产品字段"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:522
+msgid "Enable the <strong>SKU</strong> field for products"
+msgstr ""
+
+#: admin/settings/settings-init.php:530
+msgid ""
+"Enable the <strong>weight</strong> field for products (some shipping methods "
+"may require this)"
+msgstr ""
+
+#: admin/settings/settings-init.php:538
+msgid ""
+"Enable the <strong>dimension</strong> fields for products (some shipping "
+"methods may require this)"
+msgstr ""
+
+#: admin/settings/settings-init.php:546
+msgid ""
+"Show <strong>weight and dimension</strong> values on the <strong>Additional "
+"Information</strong> tab"
+msgstr ""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:554
+msgid "Weight Unit"
+msgstr "重量单位"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:555
+msgid "This controls what unit you will define weights in."
+msgstr "这个控制你定义的重量单位"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:561
+msgid "kg"
+msgstr "公斤"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:562
+msgid "g"
+msgstr "克"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:563
+msgid "lbs"
+msgstr "磅"
+
+#: admin/settings/settings-init.php:564
+msgid "oz"
+msgstr "oz"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:570
+msgid "Dimensions Unit"
+msgstr "尺寸单位"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:571
+msgid "This controls what unit you will define lengths in."
+msgstr "这个控制你定义的长度单位"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:578
+msgid "cm"
+msgstr "厘米"
+
+#: admin/settings/settings-init.php:579
+msgid "mm"
+msgstr "毫米"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:580
+msgid "in"
+msgstr "in"
+
+#: admin/settings/settings-init.php:581
+msgid "yd"
+msgstr "yd"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:587
+msgid "Product Ratings"
+msgstr "Product Ratings"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:588
+msgid "Enable ratings on reviews"
+msgstr "在结帐上启用优惠券表单"
+
+#: admin/settings/settings-init.php:597
+msgid "Ratings are required to leave a review"
+msgstr "评分需要发表评论"
+
+#: admin/settings/settings-init.php:606
+msgid "Show \"verified owner\" label for customer reviews"
+msgstr "用户评论时显示 \"verified owner\" 标签"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:616
+msgid "Pricing Options"
+msgstr "价格选项"
+
+#: admin/settings/settings-init.php:616
+msgid "The following options affect how prices are displayed on the frontend."
+msgstr "下列选项影响价格在前端如何显示。"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:619
+msgid "Currency Position"
+msgstr "货币位置"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:620
+msgid "This controls the position of the currency symbol."
+msgstr "这控制货币符号的位置。"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:626
+msgid "Left"
+msgstr "左"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:627
+msgid "Right"
+msgstr "右"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:628
+msgid "Left (with space)"
+msgstr "左（空间）"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:629
+msgid "Right (with space)"
+msgstr "右（空间）"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:635
+msgid "Thousand Separator"
+msgstr "千位分隔符"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:636
+msgid "This sets the thousand separator of displayed prices."
+msgstr "这设置显示为千位分隔符的价格。"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:645
+msgid "Decimal Separator"
+msgstr "小数分隔符"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:646
+msgid "This sets the decimal separator of displayed prices."
+msgstr "这设置显示小数点分隔符的价格。"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:655
+msgid "Number of Decimals"
+msgstr "小数点后的位数"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:656
+msgid "This sets the number of decimal points shown in displayed prices."
+msgstr "这设置显示价格中的小数点的位数。"
+
+#: admin/settings/settings-init.php:669
+msgid "Trailing Zeros"
+msgstr "结尾零"
+
+#: admin/settings/settings-init.php:670
+msgid ""
+"Remove zeros after the decimal point. e.g. <code>$10.00</code> becomes <code>"
+"$10</code>"
+msgstr "删除小数点后的零。例如：<code>$10.00</code>变为<code>$10</code>"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:678
+msgid "Image Options"
+msgstr "图像选项"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:678
+msgid ""
+"These settings affect the actual dimensions of images in your catalog - the "
+"display on the front-end will still be affected by CSS styles. After "
+"changing these settings you may need to <a href=\"%s\">regenerate your "
+"thumbnails</a>."
+msgstr ""
+"这些设置会影响分类中图像的实际尺寸 -前端的显示仍将受到CSS样式影响。改变这些设"
+"置后，你可能需要<a href=\"%s\">重新生成缩略图</a>."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:681
+msgid "Catalog Images"
+msgstr "分类图片"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:682
+msgid "This size is usually used in product listings"
+msgstr "此大小通常用在产品清单"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:695
+msgid "Single Product Image"
+msgstr "产品内页图像"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:696
+msgid "This is the size used by the main image on the product page."
+msgstr "这大小是用于产品页面的主图像"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:709
+msgid "Product Thumbnails"
+msgstr "产品缩略图"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:710
+msgid ""
+"This size is usually used for the gallery of images on the product page."
+msgstr "这个尺寸通常用于产品页上的图像画廊。"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:729
+msgid "Inventory Options"
+msgstr "库存选项"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:732
+msgid "Manage Stock"
+msgstr "管理库存？"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:733
+msgid "Enable stock management"
+msgstr "启用库存管理"
+
+#: admin/settings/settings-init.php:740
+msgid "Hold Stock (minutes)"
+msgstr "手动减少存货。"
+
+#: admin/settings/settings-init.php:741
+msgid ""
+"Hold stock (for unpaid orders) for x minutes. When this limit is reached, "
+"the pending order will be cancelled. Leave blank to disable."
+msgstr ""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:753
+msgid "Notifications"
+msgstr "通知"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:754
+msgid "Enable low stock notifications"
+msgstr "启用库存不足通知"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:762
+msgid "Enable out of stock notifications"
+msgstr "启用库存脱销通知"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:770
+msgid "Notification Recipient"
+msgstr "注册提醒"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:778
+msgid "Low Stock Threshold"
+msgstr "库存不足限制"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:791
+msgid "Out Of Stock Threshold"
+msgstr "库存脱销限制"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:804
+msgid "Out Of Stock Visibility"
+msgstr "超过了库存能见度"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:805
+msgid "Hide out of stock items from the catalog"
+msgstr "从分类隐藏库存脱销产品"
+
+#: admin/settings/settings-init.php:812
+msgid "Stock Display Format"
+msgstr "库存显示格式"
+
+#: admin/settings/settings-init.php:813
+msgid "This controls how stock is displayed on the frontend."
+msgstr "This controls how stock is displayed on the frontend."
+
+#: admin/settings/settings-init.php:819
+msgid "Always show stock e.g. \"12 in stock\""
+msgstr "一直显示库存 e.g. \"12 in stock\""
+
+#: admin/settings/settings-init.php:820
+msgid "Only show stock when low e.g. \"Only 2 left in stock\" vs. \"In Stock\""
+msgstr "库存低时显示 例如 \"Only 2 left in stock\" vs. \"In Stock\""
+
+#: admin/settings/settings-init.php:821
+msgid "Never show stock amount"
+msgstr "不显示库存"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:833
+#: admin/woocommerce-admin-settings.php:290
+msgid "Shipping Options"
+msgstr "配送选项"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:836
+msgid "Shipping Calculations"
+msgstr "运费计算"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:837
+msgid "Enable shipping"
+msgstr "启用配送"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:845
+msgid "Enable the shipping calculator on the cart page"
+msgstr "使购物车页上的配送计算器"
+
+#: admin/settings/settings-init.php:853
+msgid "Hide shipping costs until an address is entered"
+msgstr "隐藏配送成本直到地址被输入"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:861
+msgid "Shipping Method Display"
+msgstr "无效的送货方式。"
+
+#: admin/settings/settings-init.php:862
+msgid ""
+"This controls how multiple shipping methods are displayed on the frontend."
+msgstr ""
+"This controls how multiple shipping methods are displayed on the frontend."
+
+#: admin/settings/settings-init.php:868
+msgid "Radio buttons"
+msgstr "单选按钮"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:869
+msgid "Select box"
+msgstr "Select box"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:875
+msgid "Shipping Destination"
+msgstr "Shipping Destination"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:876
+msgid "Only ship to the users billing address"
+msgstr "只运送到用户的帐单地址"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:884
+msgid "Ship to billing address by default"
+msgstr "默认送货到账单地址"
+
+#: admin/settings/settings-init.php:892
+msgid "Collect shipping address even when not required"
+msgstr "收集送货地址，甚至非必要时。"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:910
+#: admin/woocommerce-admin-settings.php:186
+#: admin/woocommerce-admin-settings.php:327
+msgid "Payment Gateways"
+msgstr "支付网关"
+
+#: admin/settings/settings-init.php:910
+msgid ""
+"Installed payment gateways are displayed below. Drag and drop payment "
+"gateways to control their display order on the checkout."
+msgstr ""
+"Installierte Zahlungs-Gateways werden unten angezeigt. Drag & Drop Zahlungs-"
+"Gateways, um ihre Anzeigenreihenfolge bei der Kasse zu ändern."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:928
+#: admin/woocommerce-admin-settings.php:220
+msgid "Tax Options"
+msgstr "税选项"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:931
+msgid "Enable Taxes"
+msgstr "Gesamte Steuern"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:932
+msgid "Enable taxes and tax calculations"
+msgstr "启用税和所得税计算"
+
+#: admin/settings/settings-init.php:939
+msgid "Prices Entered With Tax"
+msgstr "定义产品分类价格含税"
+
+#: admin/settings/settings-init.php:943
+msgid ""
+"This option is important as it will affect how you input prices. Changing it "
+"will not update existing products."
+msgstr ""
+
+#: admin/settings/settings-init.php:945
+msgid "Yes, I will enter prices inclusive of tax"
+msgstr ""
+
+#: admin/settings/settings-init.php:946
+msgid "No, I will enter prices exclusive of tax"
+msgstr ""
+
+#: admin/settings/settings-init.php:951
+msgid "Calculate Tax Based On:"
+msgstr "根据主题特性寻找主题。"
+
+#: admin/settings/settings-init.php:953
+msgid "This option determines which address is used to calculate tax."
+msgstr ""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:957
+msgid "Customer shipping address"
+msgstr "顾客配送地址"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:958
+msgid "Customer billing address"
+msgstr "顾客账单地址"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:959 admin/settings/settings-init.php:971
+msgid "Shop base address"
+msgstr "店铺基本页面"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:964
+msgid "Default Customer Address:"
+msgstr "顾客账单地址"
+
+#: admin/settings/settings-init.php:966
+msgid ""
+"This option determines the customers default address (before they input "
+"their own)."
+msgstr ""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:970
+msgid "No address"
+msgstr "还没设置账单地址。"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:976
+msgid "Shipping Tax Class:"
+msgstr "父级配送类型"
+
+#: admin/settings/settings-init.php:977
+msgid ""
+"Optionally control which tax class shipping gets, or leave it so shipping "
+"tax is based on the cart items themselves."
+msgstr ""
+
+#: admin/settings/settings-init.php:982
+msgid "Shipping tax class based on cart items"
+msgstr ""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:987
+msgid "Rounding"
+msgstr ""
+
+#: admin/settings/settings-init.php:988
+msgid "Round tax at subtotal level, instead of rounding per line"
+msgstr ""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:995
+msgid "Additional Tax Classes"
+msgstr "附加税类"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:996
+msgid ""
+"List additonal tax classes below (1 per line). This is in addition to the "
+"default <code>Standard Rate</code>. Tax classes can be assigned to products."
+msgstr ""
+
+#: admin/settings/settings-init.php:1000
+msgid "Reduced Rate%sZero Rate"
+msgstr "降低费率 %s零费率"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1004
+msgid "Display prices during cart/checkout:"
+msgstr ""
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1009
+msgid "Including tax"
+msgstr "税标签："
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1010
+msgid "Excluding tax"
+msgstr "成本，不含税"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1022
+msgid "Email Sender Options"
+msgstr "电子邮件发件人选项"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1022
+msgid ""
+"The following options affect the sender (email address and name) used in "
+"WooCommerce emails."
+msgstr "下列选项影响用于WooCommerce电子邮件的发件人（电子邮件地址和姓名）。"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1025
+msgid "\"From\" Name"
+msgstr "\"来自\"名称"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1034
+msgid "\"From\" Email Address"
+msgstr "\"来自\" email 地址"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1047
+msgid "Email Template"
+msgstr "电子邮件模板"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1047
+msgid ""
+"This section lets you customise the WooCommerce emails. <a href=\"%s\" "
+"target=\"_blank\">Click here to preview your email template</a>. For more "
+"advanced control copy <code>woocommerce/templates/emails/</code> to "
+"<code>yourtheme/woocommerce/emails/</code>."
+msgstr ""
+"本节让你自定义WooCommerce的电子邮件。<a href=\"%s\" target=\"_blank\">单击预"
+"览你的邮件模板</a>.对于更高级控制复制 <code>woocommerce/templates/emails/</"
+"code> 到 <code>yourtheme/woocommerce/emails/</code>."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1050
+msgid "Header Image"
+msgstr "顶部图像"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1051
+msgid ""
+"Enter a URL to an image you want to show in the email's header. Upload your "
+"image using the <a href=\"%s\">media uploader</a>."
+msgstr ""
+"输入您想要显示在电子邮件的页眉上的图片的URL地址。上传图像使用的<a href=\"%s"
+"\">媒体上传</a>."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1059
+msgid "Email Footer Text"
+msgstr "电子邮件页脚文本"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1060
+msgid "The text to appear in the footer of WooCommerce emails."
+msgstr "出现在WooCommerce电子邮件的页脚文本。"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1064
+msgid "Powered by WooCommerce"
+msgstr "Powered by WooCommerce"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1068
+msgid "Base Colour"
+msgstr "基本颜色"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1069
+msgid ""
+"The base colour for WooCommerce email templates. Default <code>#557da1</"
+"code>."
+msgstr "WooCommerce电子邮件模板的基本颜色。默认的 <code>#557da1</code>."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1077
+msgid "Background Colour"
+msgstr "背景颜色"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1078
+msgid ""
+"The background colour for WooCommerce email templates. Default "
+"<code>#f5f5f5</code>."
+msgstr "WooCommerce电子邮件模板的背景颜色。默认<code>#eeeeee</code>."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1086
+msgid "Email Body Background Colour"
+msgstr "Email 主体背景颜色"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1087
+msgid "The main body background colour. Default <code>#fdfdfd</code>."
+msgstr "主体背景颜色。默认<code>#fdfdfd</code>."
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1095
+msgid "Email Body Text Colour"
+msgstr "Email 主题文本颜色"
+
+# @ woocommerce
+#: admin/settings/settings-init.php:1096
+msgid "The main body text colour. Default <code>#505050</code>."
+msgstr "主题文本颜色。默认<code>#505050</code>."
+
+# @ woocommerce
+#: admin/settings/settings-payment-gateways.php:27
+#: admin/settings/settings-shipping-methods.php:29
+#: admin/woocommerce-admin-init.php:767
+#: admin/woocommerce-admin-taxonomies.php:27
+#: admin/woocommerce-admin-taxonomies.php:121
+msgid "Default"
+msgstr "默认"
+
+# @ woocommerce
+#: admin/settings/settings-payment-gateways.php:28
+msgid "Gateway"
+msgstr "网关"
+
+#: admin/settings/settings-payment-gateways.php:45
+msgid "Gateway ID"
+msgstr "网关ID"
+
+# @ woocommerce
+#: admin/settings/settings-shipping-methods.php:23
+msgid "Shipping Methods"
+msgstr "送货方式"
+
+#: admin/settings/settings-shipping-methods.php:25
+msgid "Drag and drop methods to control their display order."
+msgstr "拖放的方法来控制他们的显示顺序。"
+
+# @ woocommerce
+#: admin/settings/settings-shipping-methods.php:30
+msgid "Shipping Method"
+msgstr "配送方式"
+
+# @ woocommerce
+#: admin/settings/settings-shipping-methods.php:46
+msgid "Method ID"
+msgstr "方法ID"
+
+#: admin/settings/settings-tax-rates.php:29
+msgid "Tax Rates for the \"%s\" Class"
+msgstr "线路税类"
+
+#: admin/settings/settings-tax-rates.php:30
+msgid ""
+"Define tax rates for countries and states below. <a href=\"%s\">See here</a> "
+"for available alpha-2 country codes."
+msgstr ""
+
+#: admin/settings/settings-tax-rates.php:36
+msgid "Country&nbsp;Code"
+msgstr "2字母国家代码"
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:36
+msgid "A 2 digit country code, e.g. US. Leave blank to apply to all."
+msgstr ""
+
+#: admin/settings/settings-tax-rates.php:38
+msgid "State&nbsp;Code"
+msgstr "州/县或地区代码"
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:38
+msgid "A 2 digit state code, e.g. AL. Leave blank to apply to all."
+msgstr ""
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:40
+#: admin/settings/settings-tax-rates.php:217
+msgid "ZIP/Postcode"
+msgstr "邮政编码"
+
+#: admin/settings/settings-tax-rates.php:40
+msgid ""
+"Postcode for this rule. Semi-colon (;) separate multiple values. Leave blank "
+"to apply to all areas. Wildcards (*) can be used. Ranges for numeric "
+"postcodes (e.g. 12345-12350) will be expanded into individual postcodes."
+msgstr ""
+
+#: admin/settings/settings-tax-rates.php:42
+msgid ""
+"Cities for this rule. Semi-colon (;) separate multiple values. Leave blank "
+"to apply to all cities."
+msgstr ""
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:44
+msgid "Rate&nbsp;%"
+msgstr "标准税率"
+
+#: admin/settings/settings-tax-rates.php:44
+msgid "Enter a tax rate (percentage) to 4 decimal places."
+msgstr "输入4位小数的税率（百分比）。"
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:46
+msgid "Tax&nbsp;Name"
+msgstr "新分类目录名"
+
+#: admin/settings/settings-tax-rates.php:46
+msgid "Enter a name for this tax rate."
+msgstr ""
+
+#: admin/settings/settings-tax-rates.php:48
+#: admin/settings/settings-tax-rates.php:217
+msgid "Priority"
+msgstr ""
+
+#: admin/settings/settings-tax-rates.php:48
+msgid ""
+"Choose a priority for this tax rate. Only 1 matching rate per priority will "
+"be used. To define multiple tax rates for a single area you need to specify "
+"a different priority per rate."
+msgstr ""
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:50
+#: admin/settings/settings-tax-rates.php:217
+msgid "Compound"
+msgstr "复合"
+
+#: admin/settings/settings-tax-rates.php:50
+msgid ""
+"Choose whether or not this is a compound rate. Compound tax rates are "
+"applied on top of other tax rates."
+msgstr "选择无论如何这都是一个复利税率。复合税率适用其他税率之上。"
+
+#: admin/settings/settings-tax-rates.php:52
+msgid "Choose whether or not this tax rate also gets applied to shipping."
+msgstr "选择税率这是否也被应用到配送。"
+
+#: admin/settings/settings-tax-rates.php:59
+msgid "Insert row"
+msgstr "在下方插入行"
+
+#: admin/settings/settings-tax-rates.php:60
+msgid "Remove selected row(s)"
+msgstr "复制该行"
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:62
+msgid "Export CSV"
+msgstr "导出率"
+
+#: admin/settings/settings-tax-rates.php:63
+msgid "Import CSV"
+msgstr "导入附件"
+
+#: admin/settings/settings-tax-rates.php:163
+msgid "No row(s) selected"
+msgstr "没有客户被选择"
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:217
+msgid "Country Code"
+msgstr "2字母国家代码"
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:217
+msgid "State Code"
+msgstr "州/县或地区代码"
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:217
+msgid "Rate %"
+msgstr "评级"
+
+# @ woocommerce
+#: admin/settings/settings-tax-rates.php:217
+msgid "Tax Name"
+msgstr "锚名称"
+
+#: admin/woocommerce-admin-attributes.php:77
+msgid "Please, provide an attribute name, slug and type."
+msgstr ""
+
+#: admin/woocommerce-admin-attributes.php:79
+msgid "Slug “%s” is too long (28 characters max). Shorten it, please."
+msgstr ""
+
+#: admin/woocommerce-admin-attributes.php:81
+msgid ""
+"Slug “%s” is not allowed because it is a reserved term. Change it, please."
+msgstr ""
+
+#: admin/woocommerce-admin-attributes.php:85
+#: admin/woocommerce-admin-attributes.php:90
+msgid "Slug “%s” is already in use. Change it, please."
+msgstr ""
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:226
+msgid "Edit Attribute"
+msgstr "编辑属性"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:236
+#: admin/woocommerce-admin-attributes.php:375
+msgid "Name for the attribute (shown on the front-end)."
+msgstr "属性的名称（显示在前端）。"
+
+#: admin/woocommerce-admin-attributes.php:241
+#: admin/woocommerce-admin-attributes.php:307
+#: admin/woocommerce-admin-attributes.php:379
+msgid "Slug"
+msgstr "Slug"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:245
+#: admin/woocommerce-admin-attributes.php:381
+msgid ""
+"Unique slug/reference for the attribute; must be shorter than 28 characters."
+msgstr "独特slug/参考该属性;必须少于28个字符。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:254
+#: admin/woocommerce-admin-attributes.php:387
+msgid "Select"
+msgstr "选择"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:255
+#: admin/woocommerce-admin-attributes.php:388
+msgid "Text"
+msgstr "文本"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:258
+#: admin/woocommerce-admin-attributes.php:391
+msgid ""
+"Determines how you select attributes for products. <strong>Text</strong> "
+"allows manual entry via the product page, whereas <strong>select</strong> "
+"attribute terms can be defined from this section. If you plan on using an "
+"attribute for variations use <strong>select</strong>."
+msgstr ""
+"确定你如何选择产品的属性。 <strong>文字</strong>允许通过产品页面手工录入，而"
+"<strong>选择</strong>属性可以从本节中定义。如果你打算使用属性的变更，使用"
+"<strong>选择</strong>。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:263
+#: admin/woocommerce-admin-attributes.php:395
+msgid "Default sort order"
+msgstr "新添订单"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:267
+#: admin/woocommerce-admin-attributes.php:335
+#: admin/woocommerce-admin-attributes.php:397
+msgid "Custom ordering"
+msgstr "Benutzerdefinierte bestell position"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:269
+#: admin/woocommerce-admin-attributes.php:332
+#: admin/woocommerce-admin-attributes.php:399
+msgid "Term ID"
+msgstr "条目 ID 无效"
+
+#: admin/woocommerce-admin-attributes.php:271
+#: admin/woocommerce-admin-attributes.php:401
+msgid ""
+"Determines the sort order on the frontend for this attribute. If using "
+"custom ordering, you can drag and drop the terms in this attribute"
+msgstr ""
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:276
+msgid "Update"
+msgstr "更新"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:309
+msgid "Order by"
+msgstr "排序方式为："
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:310
+msgid "Terms"
+msgstr "选项"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:355
+msgid "Configure&nbsp;terms"
+msgstr "配置&nbsp;选项"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:359
+msgid "No attributes currently exist."
+msgstr "当前不存在任何属性。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:369
+msgid "Add New Attribute"
+msgstr "添加新属性"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:370
+msgid ""
+"Attributes let you define extra product data, such as size or colour. You "
+"can use these attributes in the shop sidebar using the \"layered nav\" "
+"widgets. Please note: you cannot rename an attribute later on."
+msgstr ""
+"属性让你定义额外的产品数据，如大小或颜色。你可以使用这些属性在商店的侧边栏使"
+"用\"layered nav\"小工具。请注意：你不能重命名属性。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:404
+msgid "Add Attribute"
+msgstr "添加属性"
+
+# @ woocommerce
+#: admin/woocommerce-admin-attributes.php:415
+msgid "Are you sure you want to delete this attribute?"
+msgstr "你确定要删除这个属性吗？"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:26
+#: admin/woocommerce-admin-reports.php:30
+#: admin/woocommerce-admin-reports.php:75
+#: admin/woocommerce-admin-reports.php:91
+#: admin/woocommerce-admin-reports.php:102
+msgid "Overview"
+msgstr "概览"
+
+#: admin/woocommerce-admin-content.php:29
+msgid ""
+"Thank you for using WooCommerce :) Should you need help using or extending "
+"WooCommerce please <a href=\"%s\">read the documentation</a>. For further "
+"assistance you can use the <a href=\"%s\">community forum</a> or if you have "
+"access, <a href=\"%s\">our support desk</a>."
+msgstr ""
+
+#: admin/woocommerce-admin-content.php:31
+msgid ""
+"If you are having problems, or to assist us with support, please check the "
+"status page to identify any problems with your configuration:"
+msgstr ""
+"Wenn Sie Probleme haben, oder uns mit Support unterstützen, überprüfen Sie "
+"bitte die Status-Seite, um Probleme mit der Konfiguration zu identifizieren:"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:33 admin/woocommerce-admin-init.php:87
+#: admin/woocommerce-admin-status.php:26
+msgid "System Status"
+msgstr "Systemstatus"
+
+#: admin/woocommerce-admin-content.php:35
+msgid ""
+"If you come across a bug, or wish to contribute to the project you can also "
+"<a href=\"%s\">get involved on GitHub</a>."
+msgstr ""
+"如果你遇到一个错误，或者希望贡献项目，可以在GitHub上<a href=\"%s\">参与</a>。"
+
+#: admin/woocommerce-admin-content.php:43
+msgid ""
+"Here you can set up your store and customise it to fit your needs. The "
+"sections available from the settings page include:"
+msgstr ""
+"在这里你可以设置你的商店和对其自定义以满足您的需求。从设置页面中可用的部分包"
+"括："
+
+#: admin/woocommerce-admin-content.php:44
+msgid ""
+"General settings such as your shop base, currency, and script/styling "
+"options which affect features used in your store."
+msgstr ""
+"常规设置，例如你的店铺的目标市场，货币，和脚本/样式选项，这些影响您的商店的功"
+"能使用。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:45
+#: admin/woocommerce-admin-settings.php:182
+msgid "Pages"
+msgstr "页面"
+
+#: admin/woocommerce-admin-content.php:45
+msgid ""
+"This is where important store page are defined. You can also set up other "
+"pages (such as a Terms page) here."
+msgstr "这是其中重要的商店页面定义。你还可以在这里设置其他网页（如条款页）。"
+
+#: admin/woocommerce-admin-content.php:46
+msgid ""
+"Options for how things like price, images and weights appear in your product "
+"catalog."
+msgstr "设置显示在产品类别的价格，图片和重量。"
+
+#: admin/woocommerce-admin-content.php:47
+msgid "Options concerning stock and stock notices."
+msgstr "关于库存和库存注意的选项。"
+
+#: admin/woocommerce-admin-content.php:48
+msgid "Options concerning tax, including international and local tax rates."
+msgstr "关于税收，包括国际及本地税率的选项。"
+
+#: admin/woocommerce-admin-content.php:49
+msgid ""
+"This is where shipping options are defined, and shipping methods are set up."
+msgstr "这定义运输选项，并设置运输方式。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:50
+msgid "Payment Methods"
+msgstr "付款方式"
+
+#: admin/woocommerce-admin-content.php:50
+msgid ""
+"This is where payment gateway options are defined, and individual payment "
+"gateways are set up."
+msgstr "这是支付网关选项已定义，并设置单个支付网关。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:51
+#: admin/woocommerce-admin-settings.php:187
+msgid "Emails"
+msgstr "电子邮件"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:51
+msgid "Here you can customise the way WooCommerce emails appear."
+msgstr "在这里你可以自定义WooCommerce电子邮件出现方式。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:52
+#: admin/woocommerce-admin-settings.php:188
+msgid "Integration"
+msgstr "集成"
+
+#: admin/woocommerce-admin-content.php:52
+msgid ""
+"The integration section contains options for third party services which "
+"integrate with WooCommerce."
+msgstr "集成部分包含第三方服务的内容选项集成到WooCommerce。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:57 admin/woocommerce-admin-init.php:64
+msgid "Reports"
+msgstr "报表"
+
+#: admin/woocommerce-admin-content.php:59
+msgid ""
+"The reports section can be accessed from the left-hand navigation menu. Here "
+"you can generate reports for sales and customers."
+msgstr ""
+"报告的部分，可以从左侧的导航菜单访问。在这里，你可以生成销售和客户报告。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:60
+#: admin/woocommerce-admin-reports.php:27
+#: admin/woocommerce-admin-reports.php:986
+#: admin/woocommerce-admin-reports.php:1082
+#: admin/woocommerce-admin-reports.php:1199
+msgid "Sales"
+msgstr "销售"
+
+#: admin/woocommerce-admin-content.php:60
+msgid "Reports for sales based on date, top sellers and top earners."
+msgstr "为基于日期的最畅销和最赚钱销售报告"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:61
+msgid "Coupon usage reports."
+msgstr "添加新优惠券"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:62
+#: admin/woocommerce-admin-reports.php:88
+msgid "Customers"
+msgstr "顾客"
+
+#: admin/woocommerce-admin-content.php:62
+msgid "Customer reports, such as signups per day."
+msgstr "客户报告，例如每天的注册情况等。"
+
+#: admin/woocommerce-admin-content.php:63
+msgid "Stock reports for low stock and out of stock items."
+msgstr "Stock reports for low stock and out of stock items."
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:68
+#: admin/woocommerce-admin-dashboard.php:142
+msgid "Orders"
+msgstr "订单"
+
+#: admin/woocommerce-admin-content.php:70
+msgid ""
+"The orders section can be accessed from the left-hand navigation menu. Here "
+"you can view and manage customer orders."
+msgstr "订单部分，可以从左侧的导航菜单访问。在这里你可以查看和管理客户的订单。"
+
+#: admin/woocommerce-admin-content.php:71
+msgid ""
+"Orders can also be added from this section if you want to set them up for a "
+"customer manually."
+msgstr "订单也可以从本节为顾客手工添加，如果你想。"
+
+#: admin/woocommerce-admin-content.php:78
+msgid ""
+"Coupons can be managed from this section. Once added, customers will be able "
+"to enter coupon codes on the cart/checkout page. If a customer uses a coupon "
+"code they will be viewable when viewing orders."
+msgstr ""
+"优惠券可以从本节管理。添加完毕后，客户将可以在购物车车/结帐页输入你添加的优惠"
+"券代码。如果顾客使用了优惠券代码，他们可以在查看订单时看到。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:82
+msgid "For more information:"
+msgstr "欲了解更多信息："
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:83 admin/woocommerce-admin-init.php:62
+msgid "WooCommerce"
+msgstr "WooCommerce<br>商店设置"
+
+#: admin/woocommerce-admin-content.php:84
+msgid "Project on WordPress.org"
+msgstr "http://codex.wordpress.org/zh-cn:Main_Page"
+
+#: admin/woocommerce-admin-content.php:85
+msgid "Project on Github"
+msgstr "%2$s 对《%1$s》的评论"
+
+# @ woocommerce
+#: admin/woocommerce-admin-content.php:86
+msgid "WooCommerce Docs"
+msgstr "WooCommerce 设置"
+
+#: admin/woocommerce-admin-content.php:87
+msgid "Official Extensions"
+msgstr ""
+
+#: admin/woocommerce-admin-content.php:88
+msgid "Official Themes"
+msgstr "“主题”页面"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:40
+msgid "Monthly Sales"
+msgstr "每月销售"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:43
+msgid "WooCommerce Right Now"
+msgstr "WooCommerce目前"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:44
+msgid "WooCommerce Recent Orders"
+msgstr "WooCommerce最近订单"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:45
+msgid "WooCommerce Recent Reviews"
+msgstr "WooCommerce最近评论"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:78
+msgid "Shop Content"
+msgstr "店铺内容"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:84
+#: admin/woocommerce-admin-functions.php:194
+#: admin/woocommerce-admin-init.php:771
+#: admin/woocommerce-admin-reports.php:985
+#: admin/woocommerce-admin-reports.php:1081
+msgid "Product"
+msgid_plural "Products"
+msgstr[0] "商品"
+msgstr[1] "商品"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:98
+msgid "Product Category"
+msgid_plural "Product Categories"
+msgstr[0] "商品分类"
+msgstr[1] "商品分类"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:112
+msgid "Product Tag"
+msgid_plural "Product Tags"
+msgstr[0] "商品标签"
+msgstr[1] "商品标签"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:126
+msgid "Attribute"
+msgid_plural "Attributes"
+msgstr[0] "属性"
+msgstr[1] "属性"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:148
+msgid "Pending"
+msgstr "待审"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:162
+msgid "On-Hold"
+msgstr "保持"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:190
+msgid "Completed"
+msgstr "已完成"
+
+#: admin/woocommerce-admin-dashboard.php:207
+msgid "You are using <strong>WooCommerce %s</strong>."
+msgstr "你正在使用<strong>WooCommerce %s</strong>."
+
+#: admin/woocommerce-admin-dashboard.php:238
+msgid "l jS \\of F Y h:i:s A"
+msgstr "l jS \\of F Y h:i:s A"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:239
+msgid "item"
+msgid_plural "items"
+msgstr[0] "item"
+msgstr[1] "items"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:239
+msgid "Total:"
+msgstr "总计："
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:245
+msgid "There are no product orders yet."
+msgstr "这里还没有产品订单。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:279
+msgid "out of 5"
+msgstr "超出5"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:287
+msgid "There are no product reviews yet."
+msgstr "还没有产品评论。"
+
+#: admin/woocommerce-admin-dashboard.php:428
+msgid "Sold"
+msgstr ""
+
+#: admin/woocommerce-admin-dashboard.php:429
+msgid "Earned"
+msgstr ""
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:184
+#: admin/woocommerce-admin-install.php:222
+msgid "Order Received"
+msgstr "已收到订单"
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:186
+msgid ""
+"Thank you, we are now processing your order. Your order's details are below."
+msgstr "谢谢你，我们正在处理您的订单。您的订单的详细信息如下。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:188
+msgid "Order:"
+msgstr "订单："
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:195
+msgid "Quantity"
+msgstr "数量"
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:208
+msgid "Order total:"
+msgstr "订单总计"
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:214
+msgid "Customer details"
+msgstr "客户详情"
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:220
+msgid "Billing address"
+msgstr "账单地址"
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:227
+msgid "Shipping address"
+msgstr "送货地址"
+
+#: admin/woocommerce-admin-functions.php:459
+msgid "Could not compile woocommerce.less:"
+msgstr "无法编译的woocommerce.less"
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:480
+#: admin/woocommerce-admin-functions.php:481
+msgid "Mark processing"
+msgstr "Ziel wird bearbeitet"
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:483
+#: admin/woocommerce-admin-functions.php:484
+msgid "Mark completed"
+msgstr "Ziel fertig gestellt "
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:521
+msgid "Order status changed by bulk edit:"
+msgstr "Order status changed by bulk edit:"
+
+# @ woocommerce
+#: admin/woocommerce-admin-functions.php:544
+msgid "Order status changed."
+msgid_plural "%s order statuses changed."
+msgstr[0] "订单 %s 状态改变"
+msgstr[1] "订单 %s 状态改变"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:86
+msgid "WooCommerce Settings"
+msgstr "WooCommerce 设置"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:87
+msgid "WooCommerce Status"
+msgstr "WooCommerce Status"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:140 admin/woocommerce-admin-init.php:142
+msgctxt "Admin menu name"
+msgid "Orders"
+msgstr "订单"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:446
+msgid ""
+"Are you sure you want to remove the selected items? If you have previously "
+"reduced this item's stock, or this order was submitted by a customer, you "
+"will need to manually restore the item's stock."
+msgstr ""
+
+#: admin/woocommerce-admin-init.php:447
+msgid "Please select some items."
+msgstr ""
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:448
+msgid "Remove this item meta?"
+msgstr "编辑这个项目的内联"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:449
+msgid "Remove this attribute?"
+msgstr "删除这个属性？"
+
+#: admin/woocommerce-admin-init.php:457
+msgid "Enter a name for the new attribute term:"
+msgstr "输入一个新的属性项的名称："
+
+#: admin/woocommerce-admin-init.php:458
+msgid "Calculate totals based on order items, discounts, and shipping?"
+msgstr ""
+
+#: admin/woocommerce-admin-init.php:459
+msgid ""
+"Calculate line taxes? This will calculate taxes based on the customers "
+"country. If no billing/shipping is set it will use the store base country."
+msgstr ""
+"计算税？这将计算基于客户国家的税收。如果没有设置账单/配送，它将使用的商店目标"
+"对象国家。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:460
+msgid ""
+"Copy billing information to shipping information? This will remove any "
+"currently entered shipping information."
+msgstr "复制账单信息，收货地址？这将删除任何当前输入送货信息。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:461
+msgid ""
+"Load the customer's billing information? This will remove any currently "
+"entered billing information."
+msgstr "加载客户的账单信息？这将删除任何当前输入账单信息。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:462
+msgid ""
+"Load the customer's shipping information? This will remove any currently "
+"entered shipping information."
+msgstr "加载客户的收货地址？这将删除任何当前输入送货信息。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:466
+msgid "No customer selected"
+msgstr "没有客户被选择"
+
+#: admin/woocommerce-admin-init.php:675
+msgid "Product updated. <a href=\"%s\">View Product</a>"
+msgstr "产品已更新<a href=\"%s\">查看产品</a>"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:676 admin/woocommerce-admin-init.php:691
+#: admin/woocommerce-admin-init.php:706
+msgid "Custom field updated."
+msgstr "自定义字段已更新。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:677 admin/woocommerce-admin-init.php:692
+#: admin/woocommerce-admin-init.php:707
+msgid "Custom field deleted."
+msgstr "自定义字段已删除"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:678
+msgid "Product updated."
+msgstr "产品已更新。"
+
+#: admin/woocommerce-admin-init.php:679
+msgid "Product restored to revision from %s"
+msgstr "产品恢复到修订%s"
+
+#: admin/woocommerce-admin-init.php:680
+msgid "Product published. <a href=\"%s\">View Product</a>"
+msgstr "产品已发布。<a href=\"%s\">查看产品</a>"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:681
+msgid "Product saved."
+msgstr "产品已保存。"
+
+#: admin/woocommerce-admin-init.php:682
+msgid "Product submitted. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
+msgstr "产品已提交。<a target=\"_blank\" href=\"%s\">预览产品</a>"
+
+#: admin/woocommerce-admin-init.php:683
+msgid ""
+"Product scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" href="
+"\"%2$s\">Preview Product</a>"
+msgstr ""
+"产品计划为：<strong>%1$s</strong>. <a target=\"_blank\" href=\"%2$s\">预览产"
+"品</a>"
+
+#: admin/woocommerce-admin-init.php:684 admin/woocommerce-admin-init.php:699
+#: admin/woocommerce-admin-init.php:714
+msgid "M j, Y @ G:i"
+msgstr "M j, Y @ G:i"
+
+#: admin/woocommerce-admin-init.php:685
+msgid ""
+"Product draft updated. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
+msgstr "产品草案已更新。<a target=\"_blank\" href=\"%s\">预览产品</a>"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:690 admin/woocommerce-admin-init.php:693
+#: admin/woocommerce-admin-init.php:695
+msgid "Order updated."
+msgstr "订单已更新。"
+
+#: admin/woocommerce-admin-init.php:694
+msgid "Order restored to revision from %s"
+msgstr "订单恢复到修订从 %s"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:696
+msgid "Order saved."
+msgstr "订单已保存。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:697
+msgid "Order submitted."
+msgstr "订单已提交。"
+
+#: admin/woocommerce-admin-init.php:698
+msgid "Order scheduled for: <strong>%1$s</strong>."
+msgstr "订单计划为：<strong>%1$s</strong>."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:700
+msgid "Order draft updated."
+msgstr "订单草案已更新。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:705 admin/woocommerce-admin-init.php:708
+#: admin/woocommerce-admin-init.php:710
+msgid "Coupon updated."
+msgstr "优惠券已更新。"
+
+#: admin/woocommerce-admin-init.php:709
+msgid "Coupon restored to revision from %s"
+msgstr "优惠券从%s版本恢复"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:711
+msgid "Coupon saved."
+msgstr "优惠券已保存。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:712
+msgid "Coupon submitted."
+msgstr "优惠券已提交。"
+
+#: admin/woocommerce-admin-init.php:713
+msgid "Coupon scheduled for: <strong>%1$s</strong>."
+msgstr "优惠券计划为：<strong>%1$s</strong>."
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:715
+msgid "Coupon draft updated."
+msgstr "优惠券草案已更新。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:732
+msgid "Order notes"
+msgstr "订单备注"
+
+#: admin/woocommerce-admin-init.php:747
+msgid ""
+"These settings control the permalinks used for products. These settings only "
+"apply when <strong>not using \"default\" permalinks above</strong>."
+msgstr ""
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:754
+msgctxt "default-slug"
+msgid "shop"
+msgstr "shop"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:755
+msgctxt "default-slug"
+msgid "product"
+msgstr "product"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:776
+msgid "Shop base"
+msgstr "店铺基本页面"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:780
+msgid "Shop base with category"
+msgstr "添加网店和分类目录地址"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:786
+msgid "Custom Base"
+msgstr "自定义 URL"
+
+#: admin/woocommerce-admin-init.php:788
+msgid ""
+"Enter a custom base to use. A base <strong>must</strong> be set or WordPress "
+"will use default instead."
+msgstr ""
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:816
+msgid "Product permalink base"
+msgstr "产品相应页面"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:821
+msgid "Product category base"
+msgstr "产品基本类别"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:828
+msgid "Product tag base"
+msgstr "产品相应页面"
+
+# @ woocommerce
+#: admin/woocommerce-admin-init.php:835
+msgid "Product attribute base"
+msgstr "产品相应页面"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:192
+msgctxt "page_slug"
+msgid "shop"
+msgstr "商店"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:192
+msgid "Shop"
+msgstr "商店"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:195
+msgctxt "page_slug"
+msgid "cart"
+msgstr "购物车"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:195
+#: admin/woocommerce-admin-status.php:277
+msgid "Cart"
+msgstr "购物车"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:198
+msgctxt "page_slug"
+msgid "checkout"
+msgstr "结账"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:201
+msgctxt "page_slug"
+msgid "my-account"
+msgstr "我的账户"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:201
+#: admin/woocommerce-admin-status.php:293
+msgid "My Account"
+msgstr "我的帐户"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:207
+msgctxt "page_slug"
+msgid "edit-address"
+msgstr "编辑地址"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:207
+msgid "Edit My Address"
+msgstr "编辑我的地址"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:210
+msgctxt "page_slug"
+msgid "view-order"
+msgstr "查看订单"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:210
+#: admin/woocommerce-admin-status.php:301
+msgid "View Order"
+msgstr "查看订单"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:213
+msgctxt "page_slug"
+msgid "change-password"
+msgstr "改变密码"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:213
+#: admin/woocommerce-admin-status.php:305
+msgid "Change Password"
+msgstr "修改密码"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:216
+msgctxt "page_slug"
+msgid "logout"
+msgstr "注销"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:216
+msgid "Logout"
+msgstr "注销"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:219
+msgctxt "page_slug"
+msgid "pay"
+msgstr "支付"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:219
+msgid "Checkout &rarr; Pay"
+msgstr "结账 &rarr; 付款"
+
+# @ woocommerce
+#: admin/woocommerce-admin-install.php:222
+msgctxt "page_slug"
+msgid "order-received"
+msgstr "订单已收到"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:36
+msgid "Sales by day"
+msgstr "按天销售"
+
+#: admin/woocommerce-admin-reports.php:41
+msgid "Sales by month"
+msgstr "按月销售"
+
+#: admin/woocommerce-admin-reports.php:46
+msgid "Taxes by month"
+msgstr "Taxes by month"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:51
+msgid "Product Sales"
+msgstr "产品销售"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:56
+msgid "Top sellers"
+msgstr "热卖"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:61
+msgid "Top earners"
+msgstr "最赚钱"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:66
+msgid "Sales by category"
+msgstr "按天销售"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:81
+msgid "Discounts by coupon"
+msgstr "添加新优惠券"
+
+#: admin/woocommerce-admin-reports.php:232
+#: admin/woocommerce-admin-reports.php:497
+#: admin/woocommerce-admin-reports.php:702
+#: admin/woocommerce-admin-reports.php:883
+msgid "Sales amount"
+msgstr "销售金额"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:237
+#: admin/woocommerce-admin-reports.php:497
+#: admin/woocommerce-admin-reports.php:702
+#: admin/woocommerce-admin-reports.php:883
+msgid "Number of sales"
+msgstr "销售数量"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:369
+msgid "Total sales"
+msgstr "总销售"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:371
+#: admin/woocommerce-admin-reports.php:377
+#: admin/woocommerce-admin-reports.php:383
+#: admin/woocommerce-admin-reports.php:389
+#: admin/woocommerce-admin-reports.php:395
+#: admin/woocommerce-admin-reports.php:401
+#: admin/woocommerce-admin-reports.php:644
+#: admin/woocommerce-admin-reports.php:650
+#: admin/woocommerce-admin-reports.php:656
+#: admin/woocommerce-admin-reports.php:662
+#: admin/woocommerce-admin-reports.php:828
+#: admin/woocommerce-admin-reports.php:834
+#: admin/woocommerce-admin-reports.php:840
+#: admin/woocommerce-admin-reports.php:846
+#: admin/woocommerce-admin-reports.php:1364
+#: admin/woocommerce-admin-reports.php:1370
+#: admin/woocommerce-admin-reports.php:1376
+#: admin/woocommerce-admin-reports.php:1810
+#: admin/woocommerce-admin-reports.php:1816
+#: admin/woocommerce-admin-reports.php:1822
+#: admin/woocommerce-admin-reports.php:1828
+#: admin/woocommerce-admin-reports.php:1834
+#: admin/woocommerce-admin-reports.php:1840
+#: admin/woocommerce-admin-reports.php:2304
+#: admin/woocommerce-admin-reports.php:2315
+#: admin/woocommerce-admin-reports.php:2326
+msgid "n/a"
+msgstr "暂无数据"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:375
+msgid "Total orders"
+msgstr "总订单"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:377
+#: admin/woocommerce-admin-reports.php:650
+#: admin/woocommerce-admin-reports.php:834
+msgid "items"
+msgstr "个项目"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:381
+msgid "Average order total"
+msgstr "平均订单总额"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:387
+msgid "Average order items"
+msgstr "平均订单项"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:393
+msgid "Discounts used"
+msgstr "优惠已使用"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:399
+msgid "Total shipping costs"
+msgstr "总运费"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:407
+msgid "This month's sales"
+msgstr "按月销售"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:636
+#: admin/woocommerce-admin-reports.php:980
+#: admin/woocommerce-admin-reports.php:1076
+#: admin/woocommerce-admin-reports.php:1356
+msgid "From:"
+msgstr "来自："
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:636
+#: admin/woocommerce-admin-reports.php:980
+#: admin/woocommerce-admin-reports.php:1076
+#: admin/woocommerce-admin-reports.php:1356
+msgid "To:"
+msgstr "到："
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:636
+#: admin/woocommerce-admin-reports.php:821
+#: admin/woocommerce-admin-reports.php:980
+#: admin/woocommerce-admin-reports.php:1076
+#: admin/woocommerce-admin-reports.php:1229
+#: admin/woocommerce-admin-reports.php:1356
+#: admin/woocommerce-admin-reports.php:1489
+#: admin/woocommerce-admin-reports.php:2293
+#: admin/woocommerce-admin-reports.php:2476
+msgid "Show"
+msgstr "显示"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:642
+msgid "Total sales in range"
+msgstr "范围内总销售"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:648
+msgid "Total orders in range"
+msgstr "在范围内的总订单"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:654
+msgid "Average order total in range"
+msgstr "在范围内平均订单总额"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:660
+msgid "Average order items in range"
+msgstr "在范围内的平均订单项"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:668
+msgid "Sales in range"
+msgstr "范围内销售"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:815
+#: admin/woocommerce-admin-reports.php:2287
+msgid "Year:"
+msgstr "年："
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:826
+msgid "Total sales for year"
+msgstr "一年总销售"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:832
+msgid "Total orders for year"
+msgstr "年度总订单"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:838
+msgid "Average order total for year"
+msgstr "平均每年订单总额"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:844
+msgid "Average order items for year"
+msgstr "一年的平均订单项"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:852
+msgid "Monthly sales for year"
+msgstr "今年每月销售"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1000
+msgid "Product does not exist"
+msgstr "产品不存在"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1097
+msgid "Product no longer exists"
+msgstr "产品不再存在"
+
+#: admin/woocommerce-admin-reports.php:1194
+msgid "Sales for %s:"
+msgstr "出售 %s:"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1198
+#: admin/woocommerce-admin-reports.php:2335
+msgid "Month"
+msgstr "方法"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1219
+msgid "No sales :("
+msgstr "还没有销售 :("
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1362
+msgid "Total orders containing coupons"
+msgstr "在范围内的总订单"
+
+#: admin/woocommerce-admin-reports.php:1368
+msgid "Percent of orders containing coupons"
+msgstr ""
+
+#: admin/woocommerce-admin-reports.php:1374
+msgid "Total coupon discount"
+msgstr "添加新优惠券"
+
+#: admin/woocommerce-admin-reports.php:1383
+msgid "Most popular coupons"
+msgstr "没有找到优惠券"
+
+#: admin/woocommerce-admin-reports.php:1393
+msgid "Used 1 time"
+msgid_plural "Used %d times"
+msgstr[0] "Used 1 time"
+msgstr[1] "Used 1 time"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1396
+#: admin/woocommerce-admin-reports.php:1418
+msgid "No coupons found"
+msgstr "没有找到优惠券"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1405
+msgid "Greatest discount amount"
+msgstr "输入金额，例如2.99"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1415
+msgid "Discounted %s"
+msgstr ""
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1474
+#: admin/woocommerce-admin-reports.php:2453
+msgid "Show:"
+msgstr "显示"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1531
+msgid "Coupon"
+msgstr "优惠券"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1614
+msgid "Top coupon"
+msgstr "添加优惠券"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1622
+msgid "Worst coupon"
+msgstr "添加优惠券"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1630
+msgid "Discount average"
+msgstr "综合评级"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1638
+msgid "Discount median"
+msgstr "购物返现"
+
+#: admin/woocommerce-admin-reports.php:1658
+msgid "Monthly discounts by coupon"
+msgstr ""
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1808
+msgid "Total customers"
+msgstr "合计客户"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1814
+msgid "Total customer sales"
+msgstr "总顾客销售"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1820
+msgid "Total guest sales"
+msgstr "总访客销售"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1826
+msgid "Total customer orders"
+msgstr "合计客户订单"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1832
+msgid "Total guest orders"
+msgstr "合计访客订单"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1838
+msgid "Average orders per customer"
+msgstr "平均每个客户的订单"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:1846
+msgid "Signups per day"
+msgstr "每天注册数"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2067
+msgid "Low stock"
+msgstr "库存不足"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2090
+#: admin/woocommerce-admin-reports.php:2129
+msgid "%d in stock"
+msgid_plural "%d in stock"
+msgstr[0] "库存%d "
+msgstr[1] "库存%d "
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2095
+msgid "No products are low in stock."
+msgstr "没有产品库存不足"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2127
+msgid "Marked out of stock"
+msgstr "库存脱销限制"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2134
+msgid "No products are out in stock."
+msgstr "没有产品脱销"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2298
+msgid "Total taxes for year"
+msgstr "Total taxes for year"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2309
+msgid "Total product taxes for year"
+msgstr "Total product taxes for year"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2320
+msgid "Total shipping tax for year"
+msgstr "Total shipping tax for year"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2336
+msgid "Total Sales"
+msgstr "Total Sales"
+
+#: admin/woocommerce-admin-reports.php:2336
+msgid "This is the sum of the 'Order Total' field within your orders."
+msgstr "这是您“订单总计”栏内订单的总和。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2337
+msgid "Total Shipping"
+msgstr "Total Shipping"
+
+#: admin/woocommerce-admin-reports.php:2337
+msgid "This is the sum of the 'Shipping Total' field within your orders."
+msgstr "这是您的订单内“运费总计“的总和。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2338
+msgid "Total Product Taxes"
+msgstr "Total Product Taxes"
+
+#: admin/woocommerce-admin-reports.php:2338
+msgid "This is the sum of the 'Cart Tax' field within your orders."
+msgstr "这是您的订单“购物税款（Cart Tax）”总和。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2339
+msgid "Total Shipping Taxes"
+msgstr "Total Shipping Taxes"
+
+#: admin/woocommerce-admin-reports.php:2339
+msgid "This is the sum of the 'Shipping Tax' field within your orders."
+msgstr "这是您的订单“运费税”的总和。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2340
+msgid "Total Taxes"
+msgstr "Total Taxes"
+
+#: admin/woocommerce-admin-reports.php:2340
+msgid ""
+"This is the sum of the 'Cart Tax' and 'Shipping Tax' fields within your "
+"orders."
+msgstr "这是您的订单“购物税”“运费税”的总和。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2341
+msgid "Net profit"
+msgstr "Net profit"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2341
+msgid "Total sales minus shipping and tax."
+msgstr "Total sales minus shipping and tax."
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2386
+msgid "Toggle tax rows"
+msgstr "切换税行"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2529
+msgid "Category"
+msgstr "分类目录"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2632
+msgid "Top category"
+msgstr "畅销类目"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2641
+msgid "Worst category"
+msgstr "最差销售分类"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2649
+msgid "Category sales average"
+msgstr "平均订单总额"
+
+#: admin/woocommerce-admin-reports.php:2660
+msgid "Category sales median"
+msgstr "按天销售"
+
+# @ woocommerce
+#: admin/woocommerce-admin-reports.php:2680
+msgid "Monthly sales by category"
+msgstr "商品分类小工具"
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:45
+msgid "Action failed. Please refresh the page and retry."
+msgstr "动作失败。请刷新页面然后重试。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:162
+msgid "Your settings have been saved."
+msgstr "你的设置已保存。"
+
+#: admin/woocommerce-admin-settings.php:208
+msgid ""
+"More functionality and gateway options available via <a href=\"%s\" target="
+"\"_blank\">WC official extensions</a>."
+msgstr ""
+"更多功能和网关选项可以通过<a href=\"%s\" target=\"_blank\">WC 官方扩展</a>."
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:226
+msgid "Tax Rates"
+msgstr "税率"
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:253
+msgid "Email Options"
+msgstr "电子邮件收件人选项"
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:386
+msgid "Save changes"
+msgstr "保存变更"
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:427
+msgid "The changes you made will be lost if you navigate away from this page."
+msgstr "离开这个页面，您所做的更改将丢失。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:799
+msgid "Hard Crop"
+msgstr "Hard Crop"
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:824
+msgid "Select a page&hellip;"
+msgstr "Select a page&hellip;"
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:847
+msgid "Choose a country&hellip;"
+msgstr "选择一个国家&hellip;"
+
+# @ woocommerce
+#: admin/woocommerce-admin-settings.php:867
+msgid "Choose countries&hellip;"
+msgstr "选择国家&hellip;"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:27
+#: admin/woocommerce-admin-status.php:622
+msgid "Tools"
+msgstr "工具"
+
+#: admin/woocommerce-admin-status.php:62
+msgid "Please include this information when requesting support:"
+msgstr ""
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:63
+msgid "Download System Report File"
+msgstr "下载并导入文件附件"
+
+#: admin/woocommerce-admin-status.php:71
+msgid "Environment"
+msgstr "服务器环境"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:77
+msgid "Home URL"
+msgstr "首页 URL"
+
+#: admin/woocommerce-admin-status.php:81
+msgid "Site URL"
+msgstr "站点 URL"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:85
+msgid "WC Version"
+msgstr "软件版本"
+
+#: admin/woocommerce-admin-status.php:89
+msgid "WC Database Version"
+msgstr "更新到 %s 版本"
+
+#: admin/woocommerce-admin-status.php:93
+msgid "WP Version"
+msgstr "软件版本"
+
+#: admin/woocommerce-admin-status.php:97
+msgid "Web Server Info"
+msgstr "信息提示框的内容："
+
+#: admin/woocommerce-admin-status.php:101
+msgid "PHP Version"
+msgstr "PHP 版本"
+
+#: admin/woocommerce-admin-status.php:105
+msgid "MySQL Version"
+msgstr "软件版本"
+
+#: admin/woocommerce-admin-status.php:109
+msgid "WP Memory Limit"
+msgstr "WP内存限制"
+
+#: admin/woocommerce-admin-status.php:114
+msgid ""
+"%s - We recommend setting memory to at least 64MB. See: <a href=\"%s"
+"\">Increasing memory allocated to PHP</a>"
+msgstr ""
+"%s - 我们建议设置到至少64MB的内存。. 参考: <a href=\"%s\">增加内存分配给PHP</"
+"a>"
+
+#: admin/woocommerce-admin-status.php:121
+msgid "WP Debug Mode"
+msgstr "WP 调试模式"
+
+#: admin/woocommerce-admin-status.php:125
+msgid "WP Max Upload Size"
+msgstr "WP 最大上传大小"
+
+#: admin/woocommerce-admin-status.php:129
+msgid "PHP Post Max Size"
+msgstr "服务器的 post_max_size"
+
+#: admin/woocommerce-admin-status.php:133
+msgid "PHP Time Limit"
+msgstr "已达上传限制"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:137
+msgid "WC Logging"
+msgstr "WC 日志"
+
+#: admin/woocommerce-admin-status.php:140
+msgid "Log directory is writable."
+msgstr "日志目录是可写的。"
+
+#: admin/woocommerce-admin-status.php:142
+msgid ""
+"Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will "
+"not be possible."
+msgstr "日志目录 (<code>woocommerce/logs/</code>)不可写入。日志将无法创建。"
+
+#: admin/woocommerce-admin-status.php:149
+msgid "fsockopen/cURL"
+msgstr "fsockopen/cURL"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:152
+msgid "Your server has fsockopen and cURL enabled."
+msgstr "Your server has fsockopen and cURL enabled."
+
+#: admin/woocommerce-admin-status.php:154
+msgid "Your server has fsockopen enabled, cURL is disabled."
+msgstr "Your server has fsockopen enabled, cURL is disabled."
+
+#: admin/woocommerce-admin-status.php:156
+msgid "Your server has cURL enabled, fsockopen is disabled."
+msgstr "Your server has cURL enabled, fsockopen is disabled."
+
+#: admin/woocommerce-admin-status.php:160
+msgid ""
+"Your server does not have fsockopen or cURL enabled - PayPal IPN and other "
+"scripts which communicate with other servers will not work. Contact your "
+"hosting provider."
+msgstr ""
+"Your server does not have fsockopen or cURL enabled - PayPal IPN and other "
+"scripts which communicate with other servers will not work. Contact your "
+"hosting provider."
+
+#: admin/woocommerce-admin-status.php:165
+msgid "SOAP Client"
+msgstr "客户端ID"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:167
+msgid "Your server has the SOAP Client class enabled."
+msgstr ""
+
+#: admin/woocommerce-admin-status.php:170
+msgid ""
+"Your server does not have the <a href=\"%s\">SOAP Client</a> class enabled - "
+"some gateway plugins which use SOAP may not work as expected."
+msgstr ""
+
+#: admin/woocommerce-admin-status.php:175
+msgid "WP Remote Post"
+msgstr "WP远程发布项"
+
+#: admin/woocommerce-admin-status.php:186
+msgid "wp_remote_post() was successful - PayPal IPN is working."
+msgstr "wp_remote_post() was successful - PayPal IPN is working."
+
+#: admin/woocommerce-admin-status.php:189
+msgid ""
+"wp_remote_post() failed. PayPal IPN won't work with your server. Contact "
+"your hosting provider. Error:"
+msgstr ""
+"wp_remote_post() failed. PayPal IPN won't work with your server. Contact "
+"your hosting provider. Error:"
+
+#: admin/woocommerce-admin-status.php:192
+msgid "wp_remote_post() failed. PayPal IPN may not work with your server."
+msgstr "wp_remote_post() failed. PayPal IPN may not work with your server."
+
+#: admin/woocommerce-admin-status.php:215
+msgid "Plugins"
+msgstr "插件"
+
+#: admin/woocommerce-admin-status.php:221
+msgid "Installed Plugins"
+msgstr "已安装的插件"
+
+#: admin/woocommerce-admin-status.php:236
+msgid "by"
+msgstr "by"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:236
+msgid "version"
+msgstr "版本"
+
+#: admin/woocommerce-admin-status.php:259
+msgid "Force SSL"
+msgstr "Force SSL"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:266
+msgid "WC Pages"
+msgstr "可用的页面"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:273
+msgid "Shop Base"
+msgstr "店铺基本页面"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:285
+msgid "Pay"
+msgstr "付款"
+
+#: admin/woocommerce-admin-status.php:289
+msgid "Thanks"
+msgstr "感谢页"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:297
+msgid "Edit Address"
+msgstr "编辑地址"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:329
+msgid "Page not set"
+msgstr "页面没有设置"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:339
+msgid "Page does not exist"
+msgstr "连接不存在"
+
+#: admin/woocommerce-admin-status.php:344
+msgid "Page does not contain the shortcode: %s"
+msgstr "页面不包含简码: %s"
+
+#: admin/woocommerce-admin-status.php:363
+msgid "WC Taxonomies"
+msgstr "Core Taxonomies（核心分类法）"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:369
+msgid "Order Statuses"
+msgstr "订单状态"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:379
+msgid "Product Types"
+msgstr "显示全部产品类型"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:392
+msgid "Templates"
+msgstr "模板"
+
+#: admin/woocommerce-admin-status.php:398
+msgid "Template Overrides"
+msgstr "电子邮件模板"
+
+#: admin/woocommerce-admin-status.php:416
+msgid "No core overrides present in theme."
+msgstr ""
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:510
+msgid "WC Transients"
+msgstr "清除临时状态"
+
+#: admin/woocommerce-admin-status.php:511
+msgid "Clear transients"
+msgstr "清除临时状态"
+
+#: admin/woocommerce-admin-status.php:512
+msgid "This tool will clear the product/shop transients cache."
+msgstr "此工具会清除产品/商店临时缓存。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:515
+msgid "Expired Transients"
+msgstr "清除临时状态"
+
+#: admin/woocommerce-admin-status.php:516
+msgid "Clear expired transients"
+msgstr "产品临时状态已清除"
+
+#: admin/woocommerce-admin-status.php:517
+msgid "This tool will clear ALL expired transients from Wordpress."
+msgstr ""
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:520
+msgid "Term counts"
+msgstr "术语"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:521
+msgid "Recount terms"
+msgstr "选择条款"
+
+#: admin/woocommerce-admin-status.php:522
+msgid ""
+"This tool will recount product terms - useful when changing your settings in "
+"a way which hides products from the catalog."
+msgstr ""
+
+#: admin/woocommerce-admin-status.php:525
+msgid "Capabilities"
+msgstr "功能"
+
+#: admin/woocommerce-admin-status.php:526
+msgid "Reset capabilities"
+msgstr "重置功能"
+
+#: admin/woocommerce-admin-status.php:527
+msgid ""
+"This tool will reset the admin, customer and shop_manager roles to default. "
+"Use this if your users cannot access all of the WooCommerce admin pages."
+msgstr ""
+"此工具将重置管理员，顾客和shop_manager 角色为默认。如果你的用户不能访问所有的"
+"WooCommerce管理页面请使用这个。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:537
+msgid "Product Transients Cleared"
+msgstr "产品临时状态已清除"
+
+# @ woocommerce
+#: admin/woocommerce-admin-status.php:578
+msgid "%d Transients Rows Cleared"
+msgstr "产品 %d 临时状态已清除"
+
+#: admin/woocommerce-admin-status.php:586
+msgid "Roles successfully reset"
+msgstr "角色成功重置"
+
+#: admin/woocommerce-admin-status.php:598
+msgid "Terms successfully recounted"
+msgstr "插件激活成功。"
+
+#: admin/woocommerce-admin-status.php:607
+msgid "There was an error calling %s::%s"
+msgstr "调用 %s::%s 出错"
+
+#: admin/woocommerce-admin-status.php:610
+msgid "There was an error calling %s"
+msgstr "调用 %s 出错"
+
+#: admin/woocommerce-admin-taxonomies.php:25
+#: admin/woocommerce-admin-taxonomies.php:118
+msgid "Display type"
+msgstr "显示类型："
+
+# @ woocommerce
+#: admin/woocommerce-admin-taxonomies.php:29
+#: admin/woocommerce-admin-taxonomies.php:123
+msgid "Subcategories"
+msgstr "显示子类别"
+
+#: admin/woocommerce-admin-taxonomies.php:30
+#: admin/woocommerce-admin-taxonomies.php:124
+msgid "Both"
+msgstr ""
+
+# @ woocommerce
+#: admin/woocommerce-admin-taxonomies.php:34
+#: admin/woocommerce-admin-taxonomies.php:129
+msgid "Thumbnail"
+msgstr "缩略图"
+
+# @ woocommerce
+#: admin/woocommerce-admin-taxonomies.php:38
+#: admin/woocommerce-admin-taxonomies.php:134
+msgid "Upload/Add image"
+msgstr "上传/添加图片"
+
+# @ woocommerce
+#: admin/woocommerce-admin-taxonomies.php:39
+#: admin/woocommerce-admin-taxonomies.php:135
+msgid "Remove image"
+msgstr "删除图片"
+
+# @ woocommerce
+#: admin/woocommerce-admin-taxonomies.php:64
+#: admin/woocommerce-admin-taxonomies.php:156
+msgid "Use image"
+msgstr "作为特色图像"
+
+#: admin/woocommerce-admin-taxonomies.php:222
+msgid ""
+"Product categories for your store can be managed here. To change the order "
+"of categories on the front-end you can drag and drop to sort them. To see "
+"more categories listed click the \"screen options\" link at the top of the "
+"page."
+msgstr ""
+"你店铺的产品类别在这里修改。要改变前端的类别排序，你可以通过拖拽来对他们重新"
+"排序。要查看更多类别列表，单击页面顶部的\"屏幕选项\" 链接。"
+
+#: admin/woocommerce-admin-taxonomies.php:237
+msgid ""
+"Shipping classes can be used to group products of similar type. These groups "
+"can then be used by certain shipping methods to provide different rates to "
+"different products."
+msgstr ""
+"送货类型可用于相似类型的产品组。这些组可以使用某些运输方式，不同的产品提供不"
+"同的费率。"
+
+# @ woocommerce
+#: admin/woocommerce-admin-taxonomies.php:365
+msgid "Configure shipping class"
+msgstr "配置送货类"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:26
+msgid "Billing Address"
+msgstr "账单地址"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:27
+msgid "Shipping Address"
+msgstr "配送地址"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:28
+msgid "Paying Customer?"
+msgstr "付费客户？"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:29
+msgid "Completed Orders"
+msgstr "Parent Orders"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:144
+msgid "Customer Billing Address"
+msgstr "顾客账单地址"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:147 admin/woocommerce-admin-users.php:196
+msgid "First name"
+msgstr "姓"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:151 admin/woocommerce-admin-users.php:200
+msgid "Last name"
+msgstr "名"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:176
+msgid "Country or state code"
+msgstr "州/县或地区代码"
+
+#: admin/woocommerce-admin-users.php:180 admin/woocommerce-admin-users.php:229
+msgid "2 letter Country code"
+msgstr "2字母国家代码"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:183
+msgid "Telephone"
+msgstr "电话"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:193
+msgid "Customer Shipping Address"
+msgstr "顾客配送地址"
+
+# @ woocommerce
+#: admin/woocommerce-admin-users.php:225
+msgid "State/County or state code"
+msgstr "州/县或地区代码"

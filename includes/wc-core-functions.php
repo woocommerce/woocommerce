@@ -24,6 +24,7 @@ include( 'wc-order-functions.php' );
 include( 'wc-page-functions.php' );
 include( 'wc-product-functions.php' );
 include( 'wc-term-functions.php' );
+include( 'wc-attribute-functions.php' );
 
 /**
  * Filters on data used in admin and frontend
@@ -42,6 +43,91 @@ add_filter( 'woocommerce_short_description', 'wpautop' );
 add_filter( 'woocommerce_short_description', 'shortcode_unautop' );
 add_filter( 'woocommerce_short_description', 'prepend_attachment' );
 add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpautop()
+
+/**
+ * Get template part (for templates like the shop-loop).
+ *
+ * @access public
+ * @param mixed $slug
+ * @param string $name (default: '')
+ * @return void
+ */
+function woocommerce_get_template_part( $slug, $name = '' ) {
+	$template = '';
+
+	// Look in yourtheme/slug-name.php and yourtheme/woocommerce/slug-name.php
+	if ( $name )
+		$template = locate_template( array ( "{$slug}-{$name}.php", WC()->template_path() . "{$slug}-{$name}.php" ) );
+
+	// Get default slug-name.php
+	if ( !$template && $name && file_exists( WC()->plugin_path() . "/templates/{$slug}-{$name}.php" ) )
+		$template = WC()->plugin_path() . "/templates/{$slug}-{$name}.php";
+
+	// If template file doesn't exist, look in yourtheme/slug.php and yourtheme/woocommerce/slug.php
+	if ( !$template )
+		$template = locate_template( array ( "{$slug}.php", WC()->template_path() . "{$slug}.php" ) );
+
+	if ( $template )
+		load_template( $template, false );
+}
+
+/**
+ * Get other templates (e.g. product attributes) passing attributes and including the file.
+ *
+ * @access public
+ * @param mixed $template_name
+ * @param array $args (default: array())
+ * @param string $template_path (default: '')
+ * @param string $default_path (default: '')
+ * @return void
+ */
+function woocommerce_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
+	if ( $args && is_array($args) )
+		extract( $args );
+
+	$located = woocommerce_locate_template( $template_name, $template_path, $default_path );
+
+	do_action( 'woocommerce_before_template_part', $template_name, $template_path, $located, $args );
+
+	include( $located );
+
+	do_action( 'woocommerce_after_template_part', $template_name, $template_path, $located, $args );
+}
+
+/**
+ * Locate a template and return the path for inclusion.
+ *
+ * This is the load order:
+ *
+ *		yourtheme		/	$template_path	/	$template_name
+ *		yourtheme		/	$template_name
+ *		$default_path	/	$template_name
+ *
+ * @access public
+ * @param mixed $template_name
+ * @param string $template_path (default: '')
+ * @param string $default_path (default: '')
+ * @return string
+ */
+function woocommerce_locate_template( $template_name, $template_path = '', $default_path = '' ) {
+	if ( ! $template_path ) $template_path = WC()->template_path();
+	if ( ! $default_path ) $default_path = WC()->plugin_path() . '/templates/';
+
+	// Look within passed path within the theme - this is priority
+	$template = locate_template(
+		array(
+			trailingslashit( $template_path ) . $template_name,
+			$template_name
+		)
+	);
+
+	// Get default template
+	if ( ! $template )
+		$template = $default_path . $template_name;
+
+	// Return what we found
+	return apply_filters('woocommerce_locate_template', $template, $template_name, $template_path);
+}
 
 /**
  * Get Base Currency Code.
@@ -174,4 +260,63 @@ function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: te
 	$mailer = $woocommerce->mailer();
 
 	$mailer->send( $to, $subject, $message, $headers, $attachments );
+}
+
+/**
+ * Get an image size.
+ *
+ * Variable is filtered by woocommerce_get_image_size_{image_size}
+ *
+ * @param string $image_size
+ * @return array
+ */
+function wc_get_image_size( $image_size ) {
+	if ( in_array( $image_size, array( 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ) ) {
+		$size           = get_option( $image_size . '_image_size', array() );
+		$size['width']  = isset( $size['width'] ) ? $size['width'] : '300';
+		$size['height'] = isset( $size['height'] ) ? $size['height'] : '300';
+		$size['crop']   = isset( $size['crop'] ) ? $size['crop'] : 1;
+	} else {
+		$size = array(
+			'width'  => '300',
+			'height' => '300',
+			'crop'   => 1
+		);
+	}
+	return apply_filters( 'woocommerce_get_image_size_' . $image_size, $size );
+}
+
+/**
+ * Queue some JavaScript code to be output in the footer.
+ *
+ * @param string $code
+ */
+function wc_enqueue_js( $code ) {
+	global $wc_queued_js;
+
+	if ( empty( $wc_queued_js ) )
+		$wc_queued_js = "";
+
+	$wc_queued_js .= "\n" . $code . "\n";
+}
+
+/**
+ * Output any queued javascript code in the footer.
+ */
+function wc_print_js() {
+	global $wc_queued_js;
+
+	if ( ! empty( $wc_queued_js ) ) {
+
+		echo "<!-- WooCommerce JavaScript-->\n<script type=\"text/javascript\">\njQuery(document).ready(function($) {";
+
+		// Sanitize
+		$wc_queued_js = wp_check_invalid_utf8( $wc_queued_js );
+		$wc_queued_js = preg_replace( '/&#(x)?0*(?(1)27|39);?/i', "'", $wc_queued_js );
+		$wc_queued_js = str_replace( "\r", '', $wc_queued_js );
+
+		echo $wc_queued_js . "});\n</script>\n";
+
+		unset( $wc_queued_js );
+	}
 }

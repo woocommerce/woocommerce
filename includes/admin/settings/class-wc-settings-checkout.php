@@ -214,9 +214,11 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 						<tr>
 							<?php
 								$columns = apply_filters( 'woocommerce_payment_gateways_setting_columns', array(
-									'default' => __( 'Default', 'woocommerce' ),
-									'gateway' => __( 'Gateway', 'woocommerce' ),
-									'status'  => __( 'Status', 'woocommerce' )
+									'default'  => __( 'Default', 'woocommerce' ),
+									'name'     => __( 'Gateway', 'woocommerce' ),
+									'id'       => __( 'Gateway ID', 'woocommerce' ),
+									'status'   => __( 'Status', 'woocommerce' ),
+									'settings' => ''
 								) );
 
 								foreach ( $columns as $key => $column ) {
@@ -236,15 +238,19 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			        		foreach ( $columns as $key => $column ) {
 								switch ( $key ) {
 									case 'default' :
-										echo '<td width="1%" class="radio">
+										echo '<td width="1%" class="default">
 					        				<input type="radio" name="default_gateway" value="' . esc_attr( $gateway->id ) . '" ' . checked( $default_gateway, esc_attr( $gateway->id ), false ) . ' />
 					        				<input type="hidden" name="gateway_order[]" value="' . esc_attr( $gateway->id ) . '" />
 					        			</td>';
 									break;
-									case 'gateway' :
-										echo '<td>
-					        				<p><strong>' . $gateway->get_title() . '</strong><br/>
-					        				<small>' . __( 'Gateway ID', 'woocommerce' ) . ': ' . esc_html( $gateway->id ) . '</small></p>
+									case 'name' :
+										echo '<td class="name">
+					        				' . $gateway->get_title() . '
+					        			</td>';
+									break;
+									case 'id' :
+										echo '<td class="id">
+					        				' . esc_html( $gateway->id ) . '
 					        			</td>';
 									break;
 									case 'status' :
@@ -252,8 +258,15 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 						        		if ( $gateway->enabled == 'yes' )
 						        			echo '<span class="status-enabled tips" data-tip="' . __ ( 'Enabled', 'woocommerce' ) . '">' . __ ( 'Enabled', 'woocommerce' ) . '</span>';
+						        		else
+						        			echo '-';
 
 						        		echo '</td>';
+									break;
+									case 'settings' :
+										echo '<td class="settings">
+					        				<a class="button" href="' . admin_url( 'admin.php?page=woocommerce_settings&tab=checkout&section=' . strtolower( get_class( $gateway ) ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>
+					        			</td>';
 									break;
 									default :
 										do_action( 'woocommerce_payment_gateways_setting_column_' . $key, $gateway );

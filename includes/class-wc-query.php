@@ -220,11 +220,11 @@ class WC_Query {
 		global $wp_the_query;
 
 		// If this is not a WC Query, do not modify the query
-		if ( empty( $wp_the_query->query_vars['wc_query'] ) )
+		if ( empty( $wp_the_query->query_vars['wc_query'] ) || empty( $wp_the_query->query_vars['s'] ) )
 		    return $where;
 
 		$where = preg_replace(
-		    "/post_title\s+LIKE\s*(\'[^\']+\')/",
+		    "/post_title\s+LIKE\s*(\'\%[^\%]+\%\')/",
 		    "post_title LIKE $1) OR (post_excerpt LIKE $1", $where );
 
 		return $where;
@@ -610,12 +610,12 @@ class WC_Query {
 
 			$_chosen_attributes = array();
 
-			$attribute_taxonomies = WC()->get_helper( 'attribute' )->get_attribute_taxonomies();
+			$attribute_taxonomies = wc_get_attribute_taxonomies();
 			if ( $attribute_taxonomies ) {
 				foreach ( $attribute_taxonomies as $tax ) {
 
 			    	$attribute = sanitize_title( $tax->attribute_name );
-			    	$taxonomy = WC()->get_helper( 'attribute' )->attribute_taxonomy_name( $attribute );
+			    	$taxonomy = wc_attribute_taxonomy_name( $attribute );
 			    	$name = 'filter_' . $attribute;
 			    	$query_type_name = 'query_type_' . $attribute;
 

@@ -377,7 +377,7 @@ class WC_Meta_Box_Product_Data {
 
 					<?php
 						// Array of defined attribute taxonomies
-						$attribute_taxonomies = WC()->get_helper( 'attribute' )->get_attribute_taxonomies();
+						$attribute_taxonomies = wc_get_attribute_taxonomies();
 
 						// Product attributes - taxonomies and custom, ordered, with visibility and variation attributes set
 						$attributes = maybe_unserialize( get_post_meta( $thepostid, '_product_attributes', true ) );
@@ -389,7 +389,7 @@ class WC_Meta_Box_Product_Data {
 					    	foreach ( $attribute_taxonomies as $tax ) { $i++;
 
 					    		// Get name of taxonomy we're now outputting (pa_xxx)
-					    		$attribute_taxonomy_name = WC()->get_helper( 'attribute' )->attribute_taxonomy_name( $tax->attribute_name );
+					    		$attribute_taxonomy_name = wc_attribute_taxonomy_name( $tax->attribute_name );
 
 					    		// Ensure it exists
 					    		if ( ! taxonomy_exists( $attribute_taxonomy_name ) )
@@ -548,7 +548,7 @@ class WC_Meta_Box_Product_Data {
 						<?php
 							if ( $attribute_taxonomies ) {
 						    	foreach ( $attribute_taxonomies as $tax ) {
-						    		$attribute_taxonomy_name = WC()->get_helper( 'attribute' )->attribute_taxonomy_name( $tax->attribute_name );
+						    		$attribute_taxonomy_name = wc_attribute_taxonomy_name( $tax->attribute_name );
 						    		$label = $tax->attribute_label ? $tax->attribute_label : $tax->attribute_name;
 						    		echo '<option value="' . esc_attr( $attribute_taxonomy_name ) . '">' . esc_html( $label ) . '</option>';
 						    	}
@@ -870,7 +870,7 @@ class WC_Meta_Box_Product_Data {
 							$variation_selected_value = isset( $default_attributes[ sanitize_title( $attribute['name'] ) ] ) ? $default_attributes[ sanitize_title( $attribute['name'] ) ] : '';
 
 							// Name will be something like attribute_pa_color
-							echo '<select name="default_attribute_' . sanitize_title( $attribute['name'] ) . '"><option value="">' . __( 'No default', 'woocommerce' ) . ' ' . esc_html( $woocommerce->get_helper( 'attribute' )->attribute_label( $attribute['name'] ) ) . '&hellip;</option>';
+							echo '<select name="default_attribute_' . sanitize_title( $attribute['name'] ) . '"><option value="">' . __( 'No default', 'woocommerce' ) . ' ' . esc_html( wc_attribute_label( $attribute['name'] ) ) . '&hellip;</option>';
 
 							// Get terms for attribute taxonomy or value if its a custom attribute
 							if ( $attribute['is_taxonomy'] ) {

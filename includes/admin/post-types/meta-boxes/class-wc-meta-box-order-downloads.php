@@ -183,7 +183,7 @@ class WC_Meta_Box_Order_Downloads {
 		});
 		<?php
 		$javascript = ob_get_clean();
-		$woocommerce->get_helper( 'inline-javascript' )->add_inline_js( $javascript );
+		wc_enqueue_js( $javascript );
 	}
 
 	/**

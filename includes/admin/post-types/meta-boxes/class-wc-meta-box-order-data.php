@@ -318,7 +318,7 @@ class WC_Meta_Box_Order_Data {
 		<?php
 
 		// Ajax Chosen Customer Selectors JS
-		WC()->get_helper( 'inline-javascript' )->add_inline_js( "
+		wc_enqueue_js( "
 			jQuery('select.ajax_chosen_select_customer').ajaxChosen({
 			    method: 		'GET',
 			    url: 			'" . admin_url('admin-ajax.php') . "',

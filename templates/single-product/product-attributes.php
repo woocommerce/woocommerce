@@ -49,7 +49,7 @@ if ( empty( $attributes ) && ( ! $product->enable_dimensions_display() || ( ! $p
 		?>
 
 		<tr class="<?php if ( ( $alt = $alt * -1 ) == 1 ) echo 'alt'; ?>">
-			<th><?php echo $woocommerce->get_helper( 'attribute' )->attribute_label( $attribute['name'] ); ?></th>
+			<th><?php echo wc_attribute_label( $attribute['name'] ); ?></th>
 			<td><?php
 				if ( $attribute['is_taxonomy'] ) {
 

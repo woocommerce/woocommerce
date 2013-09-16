@@ -301,6 +301,8 @@ jQuery(document).ready(function($) {
 						// Trigger update in case we need a fresh nonce
 						if ( result.refresh == 'true' )
 							$('body').trigger('update_checkout');
+
+						$('body').trigger('checkout_error');
 					}
 				},
 				dataType: 	"html"

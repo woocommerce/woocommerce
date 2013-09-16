@@ -235,10 +235,8 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_postcode() {
-		global $woocommerce;
-		$validation = $woocommerce->validation();
 		if ( isset( $this->postcode ) && $this->postcode !== false )
-			return $validation->format_postcode( $this->postcode, $this->get_country() );
+			return wc_format_postcode( $this->postcode, $this->get_country() );
 	}
 
 
@@ -301,10 +299,8 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_shipping_postcode() {
-		global $woocommerce;
-		$validation = $woocommerce->validation();
 		if ( isset( $this->shipping_postcode ) )
-			return $validation->format_postcode( $this->shipping_postcode, $this->get_shipping_country() );
+			return wc_format_postcode( $this->shipping_postcode, $this->get_shipping_country() );
 	}
 
 

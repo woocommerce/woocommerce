@@ -1,10 +1,21 @@
 <?php
+/**
+ * Template Loader
+ *
+ * @class 		WC_Template
+ * @version		2.1.0
+ * @package		WooCommerce/Classes
+ * @category	Class
+ * @author 		WooThemes
+ */
+class WC_Template_Loader {
 
-class WC_Template_Helper extends WC_Helper {
-	public $template_url;
-
+	/**
+	 * Constructor
+	 */
 	public function __construct() {
-		$this->template_url = apply_filters( 'woocommerce_template_url', 'woocommerce/' );
+		add_filter( 'template_include', array( $this, 'template_loader' ) );
+		add_filter( 'comments_template', array( $this, 'comments_template_loader' ) );
 	}
 
 	/**
@@ -19,13 +30,10 @@ class WC_Template_Helper extends WC_Helper {
 	 * this to the theme (containing a woocommerce() inside) this will be used for all
 	 * woocommerce templates.
 	 *
-	 * @access public
 	 * @param mixed $template
 	 * @return string
 	 */
 	public function template_loader( $template ) {
-		global $woocommerce;
-
 		$find = array( 'woocommerce.php' );
 		$file = '';
 
@@ -33,7 +41,7 @@ class WC_Template_Helper extends WC_Helper {
 
 			$file 	= 'single-product.php';
 			$find[] = $file;
-			$find[] = $this->template_url . $file;
+			$find[] = WOOCOMMERCE_TEMPLATE_PATH . $file;
 
 		} elseif ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
 
@@ -41,51 +49,47 @@ class WC_Template_Helper extends WC_Helper {
 
 			$file 		= 'taxonomy-' . $term->taxonomy . '.php';
 			$find[] 	= 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
-			$find[] 	= $this->template_url . 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
+			$find[] 	= WOOCOMMERCE_TEMPLATE_PATH . 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
 			$find[] 	= $file;
-			$find[] 	= $this->template_url . $file;
+			$find[] 	= WOOCOMMERCE_TEMPLATE_PATH . $file;
 
 		} elseif ( is_post_type_archive( 'product' ) || is_page( woocommerce_get_page_id( 'shop' ) ) ) {
 
 			$file 	= 'archive-product.php';
 			$find[] = $file;
-			$find[] = $this->template_url . $file;
+			$find[] = WOOCOMMERCE_TEMPLATE_PATH . $file;
 
 		}
 
 		if ( $file ) {
 			$template = locate_template( $find );
-			if ( ! $template ) $template = $woocommerce->plugin_path() . '/templates/' . $file;
+			if ( ! $template ) $template = WC()->plugin_path() . '/templates/' . $file;
 		}
 
 		return $template;
 	}
 
-
 	/**
 	 * comments_template_loader function.
 	 *
-	 * @access public
 	 * @param mixed $template
 	 * @return string
 	 */
 	public function comments_template_loader( $template ) {
-		global $woocommerce;
-
 		if ( get_post_type() !== 'product' )
 			return $template;
 
-		if ( file_exists( STYLESHEETPATH . '/' . $this->template_url . 'single-product-reviews.php' ))
-			return STYLESHEETPATH . '/' . $this->template_url . 'single-product-reviews.php';
-		elseif ( file_exists( TEMPLATEPATH . '/' . $this->template_url . 'single-product-reviews.php' ))
-			return TEMPLATEPATH . '/' . $this->template_url . 'single-product-reviews.php';
+		if ( file_exists( STYLESHEETPATH . '/' . WOOCOMMERCE_TEMPLATE_PATH . 'single-product-reviews.php' ))
+			return STYLESHEETPATH . '/' . WOOCOMMERCE_TEMPLATE_PATH . 'single-product-reviews.php';
+		elseif ( file_exists( TEMPLATEPATH . '/' . WOOCOMMERCE_TEMPLATE_PATH . 'single-product-reviews.php' ))
+			return TEMPLATEPATH . '/' . WOOCOMMERCE_TEMPLATE_PATH . 'single-product-reviews.php';
 		elseif ( file_exists( STYLESHEETPATH . '/' . 'single-product-reviews.php' ))
 			return STYLESHEETPATH . '/' . 'single-product-reviews.php';
 		elseif ( file_exists( TEMPLATEPATH . '/' . 'single-product-reviews.php' ))
 			return TEMPLATEPATH . '/' . 'single-product-reviews.php';
 		else
-			return $woocommerce->plugin_path() . '/templates/single-product-reviews.php';
+			return WC()->plugin_path() . '/templates/single-product-reviews.php';
 	}
 }
 
-return new WC_Template_Helper();
+new WC_Template_Loader();

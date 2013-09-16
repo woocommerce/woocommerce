@@ -548,8 +548,14 @@ class WC_Tax {
 	 * @return  string
 	 */
 	public function get_rate_label( $key ) {
-		global $wpdb;
-		return apply_filters( 'woocommerce_rate_label', $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_name FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) ), $key, $this );
+		global $wpdb, $woocommerce;
+
+		$rate_name = $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_name FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
+
+		if ( ! $rate_name )
+			$rate_name = $woocommerce->countries->tax_or_vat();
+
+		return apply_filters( 'woocommerce_rate_label', $rate_name, $key, $this );
 	}
 
 	/**

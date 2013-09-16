@@ -49,13 +49,11 @@ class WC_Form_Handler {
 
 		wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-edit_address' );
 
-		$validation = $woocommerce->validation();
-
 		$user_id = get_current_user_id();
 
 		if ( $user_id <= 0 ) return;
 
-		$load_address = ( $wp->query_vars['edit-address'] == 'billing' || $wp->query_vars['edit-address'] == 'shipping' ) ? $wp->query_vars['edit-address'] : 'billing';
+		$load_address = isset( $wp->query_vars['edit-address'] ) ? sanitize_key( $wp->query_vars['edit-address'] ) : 'billing';
 
 		$address = $woocommerce->countries->get_address_fields( esc_attr( $_POST[ $load_address . '_country' ] ), $load_address . '_' );
 
@@ -81,10 +79,10 @@ class WC_Form_Handler {
 
 			// Postcode
 			if ($key=='billing_postcode' || $key=='shipping_postcode') :
-				if ( ! $validation->is_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] ) ) :
+				if ( ! WC_Validation::is_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] ) ) :
 					wc_add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
 				else :
-					$_POST[$key] = $validation->format_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] );
+					$_POST[$key] = wc_format_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] );
 				endif;
 			endif;
 
@@ -98,7 +96,7 @@ class WC_Form_Handler {
 
 			wc_add_message( __( 'Address changed successfully.', 'woocommerce' ) );
 
-			do_action( 'woocommerce_customer_save_address', $user_id );
+			do_action( 'woocommerce_customer_save_address', $user_id, $load_address );
 
 			wp_safe_redirect( get_permalink( woocommerce_get_page_id('myaccount') ) );
 			exit;
@@ -354,8 +352,9 @@ class WC_Form_Handler {
 		if ( $order->status != 'completed' )
 			return;
 
-		// Make sure the previous order belongs to the current customer
-		if ( $order->user_id != get_current_user_id() )
+		// Make sure the user is allowed to order again. By default it check if the
+		// previous order belonged to the current user.
+		if ( !current_user_can( 'order_again', $order->id ) )
 			return;
 
 		// Copy products from the order to the cart
@@ -402,7 +401,9 @@ class WC_Form_Handler {
 
 			$order = new WC_Order( $order_id );
 
-			if ( $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, array( 'pending', 'failed' ) ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) ) :
+			$can_cancel = current_user_can( 'cancel_order', $order_id );
+
+			if ( $can_cancel && $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, array( 'pending', 'failed' ) ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) ) :
 
 				// Cancel the order + restore stock
 				$order->cancel_order( __('Order cancelled by customer.', 'woocommerce' ) );
@@ -412,7 +413,7 @@ class WC_Form_Handler {
 
 				do_action( 'woocommerce_cancelled_order', $order->id );
 
-			elseif ( $order->status != 'pending' ) :
+			elseif ( $can_cancel && $order->status != 'pending' ) :
 
 				wc_add_error( __( 'Your order is no longer pending and could not be cancelled. Please contact us if you need assistance.', 'woocommerce' ) );
 
@@ -422,7 +423,7 @@ class WC_Form_Handler {
 
 			endif;
 
-			wp_safe_redirect($woocommerce->cart->get_cart_url());
+			wp_safe_redirect( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
 			exit;
 
 		endif;

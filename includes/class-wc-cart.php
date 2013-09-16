@@ -6,7 +6,7 @@
  * The cart class also has a price calculation function which calls upon other classes to calculate totals.
  *
  * @class 		WC_Cart
- * @version		2.0.0
+ * @version		2.1.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
@@ -590,7 +590,7 @@ class WC_Cart {
 					}
 
 					$item_data[] = array(
-						'key'   => $woocommerce->get_helper( 'attribute' )->attribute_label( str_replace( 'attribute_', '', $name ) ),
+						'key'   => wc_attribute_label( str_replace( 'attribute_', '', $name ) ),
 						'value' => $value
 					);
 				}
@@ -1652,11 +1652,17 @@ class WC_Cart {
 		 */
 		public function remove_taxes() {
 			$this->shipping_tax_total = $this->tax_total = 0;
-			$this->taxes = $this->shipping_taxes = array();
 			$this->subtotal = $this->subtotal_ex_tax;
 
 			foreach ( $this->cart_contents as $cart_item_key => $item )
 				$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = $this->cart_contents[ $cart_item_key ]['line_tax'] = 0;
+
+			// If true, zero rate is applied so '0' tax is displayed on the frontend rather than nothing.
+			if ( apply_filters( 'woocommerce_cart_remove_taxes_apply_zero_rate', true ) ) {
+				$this->taxes = $this->shipping_taxes = array( apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) => 0 );
+			} else {
+				$this->taxes = $this->shipping_taxes = array();
+			}
 		}
 
 		/**

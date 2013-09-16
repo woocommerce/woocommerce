@@ -46,7 +46,7 @@ class WC_Shortcode_View_Order {
 			return;
 		}
 
-		if ( $order->user_id != $user_id ) {
+		if ( !current_user_can( 'view_order', $order_id ) ) {
 			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="'.get_permalink( woocommerce_get_page_id('myaccount') ).'">'. __( 'My Account &rarr;', 'woocommerce' ) .'</a>' . '</div>';
 			return;
 		}
@@ -67,7 +67,7 @@ class WC_Shortcode_View_Order {
 				<li class="comment note">
 					<div class="comment_container">
 						<div class="comment-text">
-							<p class="meta"><?php echo date_i18n(__( 'l jS \of F Y, h:ia', 'woocommerce' ), strtotime($note->comment_date)); ?></p>
+							<p class="meta"><?php echo date_i18n(__( 'l jS \o\f F Y, h:ia', 'woocommerce' ), strtotime($note->comment_date)); ?></p>
 							<div class="description">
 								<?php echo wpautop(wptexturize($note->comment_content)); ?>
 							</div>
