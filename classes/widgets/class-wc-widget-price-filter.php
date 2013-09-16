@@ -86,7 +86,10 @@ class WC_Widget_Price_Filter extends WP_Widget {
 
 		if ($_chosen_attributes) foreach ($_chosen_attributes as $attribute => $data) :
 
-			$fields .= '<input type="hidden" name="'.esc_attr( str_replace('pa_', 'filter_', $attribute) ).'" value="'.esc_attr( implode(',', $data['terms']) ).'" />';
+			$taxonomy_filter = 'filter_' . str_replace( 'pa_', '', $attribute );
+
+			$fields .= '<input type="hidden" name="' . esc_attr( $taxonomy_filter ) . '" value="' . esc_attr( implode( ',', $data['terms'] ) ) . '" />';
+
 			if ($data['query_type']=='or') $fields .= '<input type="hidden" name="'.esc_attr( str_replace('pa_', 'query_type_', $attribute) ).'" value="or" />';
 
 		endforeach;
