@@ -463,7 +463,9 @@ abstract class WC_Email extends WC_Settings_API {
 			return $content;
 
 		$dom = new DOMDocument();
-		@$dom->loadHTML( $content );
+		libxml_use_internal_errors( true );
+    		@$dom->loadHTML( $content );
+    		libxml_clear_errors();
 
 		foreach( $this->get_style_inline_tags() as $tag ) {
 			$nodes = $dom->getElementsByTagName($tag);
