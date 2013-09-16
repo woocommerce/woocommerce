@@ -11,7 +11,7 @@
  * Note: this file is locked by default since it should not be publicly accessible
  * on a live website. You can unlock it by temporarily removing the following line.
  */
-//exit( 'Locked' );
+exit( 'Locked' );
 
 set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__));
 
