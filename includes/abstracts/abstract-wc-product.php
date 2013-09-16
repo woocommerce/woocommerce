@@ -763,7 +763,7 @@ class WC_Product {
 	 * @param string $price (default: '')
 	 * @return string
 	 */
-	public function get_price_html( $price = '' ) {
+	public function get_price_html( $price = '', $possibly_with_tax = true ) {
 
 
         if( get_option( 'woocommerce_tax_display_shop' ) == 'excl' or !$possibly_with_tax)
