@@ -11,7 +11,9 @@
  * Note: this file is locked by default since it should not be publicly accessible
  * on a live website. You can unlock it by temporarily removing the following line.
  */
-exit( 'Locked' );
+//exit( 'Locked' );
+
+set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__));
 
 if(isset($_SERVER['SHELL'])){
 	$is_shell = True;
@@ -20,7 +22,7 @@ if(isset($_SERVER['SHELL'])){
 }
 
 // Load the makepot generator
-require './makepot.php';
+require 'makepot.php';
 $makepot = new WC_Makepot;
 
 // Regeneration requested
