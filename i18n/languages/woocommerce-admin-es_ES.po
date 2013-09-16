@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce v2.1\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2013-08-25 01:07:11+00:00\n"
-"PO-Revision-Date: 2013-08-26 00:47-0300\n"
+"POT-Creation-Date: 2013-09-16 23:40:17+00:00\n"
+"PO-Revision-Date: 2013-09-16 20:47-0300\n"
 "Last-Translator: Renato Covarrubias <rnt@rnt.cl>\n"
 "Language-Team: Renato Covarrubias <rnt@rnt.cl>\n"
 "Language: es\n"
@@ -28,7 +28,7 @@ msgid "WooCommerce"
 msgstr "WooCommerce"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:117
+#: includes/admin/class-wc-admin-assets.php:121
 msgid ""
 "Are you sure you want to remove the selected items? If you have previously "
 "reduced this item's stock, or this order was submitted by a customer, you "
@@ -39,22 +39,22 @@ msgstr ""
 "cliente, tendrá que restaurar manualmente el stock del artículo."
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:118
+#: includes/admin/class-wc-admin-assets.php:122
 msgid "Please select some items."
 msgstr "Por favor, seleccione algunos artículos."
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:119
+#: includes/admin/class-wc-admin-assets.php:123
 msgid "Remove this item meta?"
 msgstr "¿Borrar este atributo del artículo?"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:120
+#: includes/admin/class-wc-admin-assets.php:124
 msgid "Remove this attribute?"
 msgstr "¿Quitar este atributo?"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:121
+#: includes/admin/class-wc-admin-assets.php:125
 #: includes/admin/class-wc-admin-attributes.php:240
 #: includes/admin/class-wc-admin-attributes.php:276
 #: includes/admin/class-wc-admin-attributes.php:309
@@ -64,11 +64,12 @@ msgstr "¿Quitar este atributo?"
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:194
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:420
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:514
+#: includes/admin/settings/class-wc-settings-shipping.php:202
 msgid "Name"
 msgstr "Nombre"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:122
+#: includes/admin/class-wc-admin-assets.php:126
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:412
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:506
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:6
@@ -76,7 +77,7 @@ msgid "Remove"
 msgstr "Eliminar"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:123
+#: includes/admin/class-wc-admin-assets.php:127
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:413
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:507
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:7
@@ -85,43 +86,43 @@ msgid "Click to toggle"
 msgstr "Clic para cambiar"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:124
+#: includes/admin/class-wc-admin-assets.php:128
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:428
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:520
 msgid "Value(s)"
 msgstr "Valor(es)"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:125
+#: includes/admin/class-wc-admin-assets.php:129
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:521
 msgid "Enter some text, or some attributes by pipe (|) separating values."
 msgstr "Introduzca algún texto, o algunos atributos separados por barras (|)."
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:126
+#: includes/admin/class-wc-admin-assets.php:130
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:471
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:526
 msgid "Visible on the product page"
 msgstr "Visible en la página de producto"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:127
+#: includes/admin/class-wc-admin-assets.php:131
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:484
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:532
 msgid "Used for variations"
 msgstr "Usado para variaciones"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:128
+#: includes/admin/class-wc-admin-assets.php:132
 msgid "Enter a name for the new attribute term:"
 msgstr "Introduzca un nombre para el nuevo término del atributo:"
 
-#: includes/admin/class-wc-admin-assets.php:129
+#: includes/admin/class-wc-admin-assets.php:133
 msgid "Calculate totals based on order items, discounts, and shipping?"
 msgstr "¿Calcular totales basado en los articulos, descuentos y envío?"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:130
+#: includes/admin/class-wc-admin-assets.php:134
 msgid ""
 "Calculate line taxes? This will calculate taxes based on the customers "
 "country. If no billing/shipping is set it will use the store base country."
@@ -131,7 +132,7 @@ msgstr ""
 "envío se usará el país base de la tienda."
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:131
+#: includes/admin/class-wc-admin-assets.php:135
 msgid ""
 "Copy billing information to shipping information? This will remove any "
 "currently entered shipping information."
@@ -140,7 +141,7 @@ msgstr ""
 "eliminará cualquier información de envío introducida actualmente."
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:132
+#: includes/admin/class-wc-admin-assets.php:136
 msgid ""
 "Load the customer's billing information? This will remove any currently "
 "entered billing information."
@@ -149,7 +150,7 @@ msgstr ""
 "información de facturación introducida actualmente."
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:133
+#: includes/admin/class-wc-admin-assets.php:137
 msgid ""
 "Load the customer's shipping information? This will remove any currently "
 "entered shipping information."
@@ -158,7 +159,7 @@ msgstr ""
 "de envío introducida actualmente."
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:134
+#: includes/admin/class-wc-admin-assets.php:138
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:115
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:206
 #: includes/admin/views/html-bulk-edit-product.php:170
@@ -167,12 +168,12 @@ msgid "Featured"
 msgstr "Destacado"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:137
+#: includes/admin/class-wc-admin-assets.php:141
 msgid "No customer selected"
 msgstr "No se ha seleccionado un cliente"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:176
+#: includes/admin/class-wc-admin-assets.php:180
 msgid ""
 "Are you sure you want to link all variations? This will create a new "
 "variation for each and every possible combination of variation attributes "
@@ -183,56 +184,56 @@ msgstr ""
 "deduzcan de los atributos de variación (máx. 50 cada vez)."
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:177
+#: includes/admin/class-wc-admin-assets.php:181
 msgid "Enter a value"
 msgstr "Introduzca un valor"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:178
+#: includes/admin/class-wc-admin-assets.php:182
 msgid "Enter a value (fixed or %)"
 msgstr "Introduzca un valor (absoluto o %)"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:179
+#: includes/admin/class-wc-admin-assets.php:183
 msgid "Are you sure you want to delete all variations? This cannot be undone."
 msgstr ""
 "¿Seguro que desea borrar todas las variaciones? Esta operación no puede "
 "deshacerse."
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:180
+#: includes/admin/class-wc-admin-assets.php:184
 msgid "Last warning, are you sure?"
 msgstr "Última advertencia, ¿estás seguro?"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:181
+#: includes/admin/class-wc-admin-assets.php:185
 #: includes/admin/class-wc-admin-taxonomies.php:127
 #: includes/admin/class-wc-admin-taxonomies.php:215
 msgid "Choose an image"
 msgstr "Seleccione una imagen"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:182
+#: includes/admin/class-wc-admin-assets.php:186
 msgid "Set variation image"
 msgstr "Establezca la imagén para esta variación"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:183
+#: includes/admin/class-wc-admin-assets.php:187
 msgid "variation added"
 msgstr "variación añadida"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:184
+#: includes/admin/class-wc-admin-assets.php:188
 msgid "variations added"
 msgstr "variaciones añadidas"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:185
+#: includes/admin/class-wc-admin-assets.php:189
 msgid "No variations added"
 msgstr "No se añadieron variaciones"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-assets.php:186
+#: includes/admin/class-wc-admin-assets.php:190
 msgid "Are you sure you want to remove this variation?"
 msgstr "¿Seguro que desea eliminar esta variación?"
 
@@ -640,6 +641,8 @@ msgstr "Preferencias de WooCommerce"
 # @ woocommerce
 #: includes/admin/class-wc-admin-menus.php:63
 #: includes/admin/class-wc-admin-welcome.php:153
+#: includes/admin/settings/class-wc-settings-checkout.php:268
+#: includes/admin/settings/class-wc-settings-shipping.php:241
 #: includes/admin/views/html-admin-page-status-report.php:254
 msgid "Settings"
 msgstr "Ajustes"
@@ -719,7 +722,7 @@ msgstr "producto"
 #: includes/admin/class-wc-admin-taxonomies.php:92
 #: includes/admin/class-wc-admin-taxonomies.php:182
 #: includes/admin/settings/class-wc-settings-checkout.php:217
-#: includes/admin/settings/class-wc-settings-shipping.php:202
+#: includes/admin/settings/class-wc-settings-shipping.php:201
 #: includes/admin/views/html-admin-page-status-report.php:71
 msgid "Default"
 msgstr "Predeterminado"
@@ -1054,7 +1057,7 @@ msgstr "Stock bajo"
 
 # @ woocommerce
 #: includes/admin/class-wc-admin-reports.php:101
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:366
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:367
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:276
 #: includes/admin/reports/class-wc-report-stock.php:93
 #: includes/admin/views/html-bulk-edit-product.php:195
@@ -1094,38 +1097,38 @@ msgid "Your settings have been saved."
 msgstr "Su configuración ha sido guardada."
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-settings.php:114
+#: includes/admin/class-wc-admin-settings.php:119
 msgid "The changes you made will be lost if you navigate away from this page."
 msgstr "Los cambios realizados se perderán si se navega fuera de esta página."
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-settings.php:461
+#: includes/admin/class-wc-admin-settings.php:466
 msgid "Hard Crop?"
 msgstr "Recortar a la fuerza"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-settings.php:486
+#: includes/admin/class-wc-admin-settings.php:491
 msgid "Select a page&hellip;"
 msgstr "Seleccione una página&hellip;"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-settings.php:509
+#: includes/admin/class-wc-admin-settings.php:514
 msgid "Choose a country&hellip;"
 msgstr "Seleccione un país&hellip;"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-settings.php:533
+#: includes/admin/class-wc-admin-settings.php:538
 msgid "Choose countries&hellip;"
 msgstr "Seleccione los paises&hellip;"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-settings.php:539
+#: includes/admin/class-wc-admin-settings.php:544
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:442
 msgid "Select all"
 msgstr "Seleccionar todos"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-settings.php:539
+#: includes/admin/class-wc-admin-settings.php:544
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:442
 msgid "Select none"
 msgstr "No seleccionar"
@@ -1654,7 +1657,7 @@ msgid "View %s"
 msgstr "Ver %s"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin.php:108
+#: includes/admin/class-wc-admin.php:109
 #: includes/admin/settings/class-wc-settings-checkout.php:159
 msgid "Order Received"
 msgstr "Pedido recibido"
@@ -1926,48 +1929,48 @@ msgid "View"
 msgstr "Ver"
 
 # @ woocommerce
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:316
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:317
 msgid "Grouped"
 msgstr "Agrupado"
 
 # @ woocommerce
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:318
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:319
 msgid "External/Affiliate"
 msgstr "Externo/Afiliado"
 
 # @ woocommerce
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:322
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:513
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:323
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:514
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:51
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:176
 msgid "Virtual"
 msgstr "Virtual"
 
 # @ woocommerce
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:324
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:506
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:325
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:507
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:58
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:174
 msgid "Downloadable"
 msgstr "Descargable"
 
 # @ woocommerce
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:326
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:327
 msgid "Simple"
 msgstr "Simple"
 
 # @ woocommerce
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:330
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:331
 msgid "Variable"
 msgstr "Variable"
 
 # @ woocommerce
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:353
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:354
 msgid "Toggle featured"
 msgstr "Marcar destacado"
 
 # @ woocommerce
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:355
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:356
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:135
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:200
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:202
@@ -1981,7 +1984,7 @@ msgid "Yes"
 msgstr "Si"
 
 # @ woocommerce
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:357
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:358
 #: includes/admin/views/html-admin-page-status-report.php:39
 #: includes/admin/views/html-admin-page-status-report.php:67
 #: includes/admin/views/html-admin-page-status-report.php:92
@@ -1992,7 +1995,7 @@ msgid "No"
 msgstr "No"
 
 # @ woocommerce
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:364
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:365
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:275
 #: includes/admin/reports/class-wc-report-stock.php:91
 #: includes/admin/views/html-bulk-edit-product.php:194
@@ -2001,35 +2004,35 @@ msgid "In stock"
 msgstr "En stock"
 
 # @ woocommerce
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:448
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:449
 msgid "Sort Products"
 msgstr "Ordenar Productos"
 
 # @ woocommerce
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:468
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:469
 msgid "Show all product types"
 msgstr "Mostrar todos los tipos de producto"
 
 # @ woocommerce
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:480
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:481
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:37
 msgid "Grouped product"
 msgstr "Producto agrupado"
 
 # @ woocommerce
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:483
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:484
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:38
 msgid "External/Affiliate product"
 msgstr "Producto Externo/Afiliado"
 
 # @ woocommerce
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:486
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:487
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:39
 msgid "Variable product"
 msgstr "Producto variable"
 
 # @ woocommerce
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:489
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:490
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:36
 msgid "Simple product"
 msgstr "Producto simple"
@@ -2097,7 +2100,7 @@ msgstr "Mostrar todos los tipos"
 
 # @ woocommerce
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:86
-#: includes/admin/settings/class-wc-settings-checkout.php:219
+#: includes/admin/settings/class-wc-settings-checkout.php:220
 #: includes/admin/settings/class-wc-settings-shipping.php:204
 msgid "Status"
 msgstr "Estado"
@@ -3218,16 +3221,22 @@ msgstr "¿Permitir reservas?"
 
 # @ woocommerce
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:285
+#: includes/admin/views/html-bulk-edit-product.php:253
+#: includes/admin/views/html-quick-edit-product.php:172
 msgid "Do not allow"
 msgstr "No permitir"
 
 # @ woocommerce
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:286
+#: includes/admin/views/html-bulk-edit-product.php:254
+#: includes/admin/views/html-quick-edit-product.php:173
 msgid "Allow, but notify customer"
 msgstr "Permitir, pero notificar al cliente"
 
 # @ woocommerce
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:287
+#: includes/admin/views/html-bulk-edit-product.php:255
+#: includes/admin/views/html-quick-edit-product.php:174
 msgid "Allow"
 msgstr "Permitir"
 
@@ -3526,6 +3535,7 @@ msgstr "Selecciones por defecto:"
 
 # @ woocommerce
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:873
+#: includes/admin/settings/class-wc-settings-shipping.php:212
 msgid "No default"
 msgstr "Sin valor predeterminado"
 
@@ -3641,7 +3651,6 @@ msgstr "Etiqueta"
 
 # @ woocommerce
 #: includes/admin/post-types/meta-boxes/views/html-order-shipping.php:11
-#: includes/admin/settings/class-wc-settings-shipping.php:203
 msgid "Shipping Method"
 msgstr "Método de envío"
 
@@ -3781,8 +3790,8 @@ msgstr "Descarga expira:"
 
 # @ woocommerce
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:172
-#: includes/admin/settings/class-wc-settings-checkout.php:254
-#: includes/admin/settings/class-wc-settings-shipping.php:224
+#: includes/admin/settings/class-wc-settings-checkout.php:260
+#: includes/admin/settings/class-wc-settings-shipping.php:235
 msgid "Enabled"
 msgstr "Activado"
 
@@ -4531,7 +4540,7 @@ msgid "Gateway"
 msgstr "Pasarela"
 
 # @ woocommerce
-#: includes/admin/settings/class-wc-settings-checkout.php:247
+#: includes/admin/settings/class-wc-settings-checkout.php:219
 msgid "Gateway ID"
 msgstr "ID de la pasarela"
 
@@ -5451,16 +5460,16 @@ msgstr "Envíar a países específicos"
 msgid "Shipping Methods"
 msgstr "Métodos de Envío"
 
-# @ woocommerce
-#: includes/admin/settings/class-wc-settings-shipping.php:198
-msgid "Drag and drop methods to control their display order."
-msgstr ""
-"Arrastre y suelte los métodos para cambiar el orden en que se muestran."
+#: includes/admin/settings/class-wc-settings-shipping.php:203
+msgid "ID"
+msgstr "ID"
 
 # @ woocommerce
-#: includes/admin/settings/class-wc-settings-shipping.php:219
-msgid "Method ID"
-msgstr "ID del método"
+#: includes/admin/settings/class-wc-settings-shipping.php:213
+msgid ""
+"Drag and drop the above shipping methods to control their display order."
+msgstr ""
+"Arrastre y suelte los métodos para cambiar el orden en que se muestran."
 
 # @ woocommerce
 #: includes/admin/settings/class-wc-settings-tax.php:40
@@ -6020,6 +6029,7 @@ msgstr "Visitar sitio web del plugin"
 
 # @ woocommerce
 #: includes/admin/views/html-admin-page-status-report.php:235
+#: includes/admin/views/html-admin-page-status-report.php:417
 msgid "is available"
 msgstr "está disponible"
 
@@ -6092,29 +6102,29 @@ msgid "Theme"
 msgstr "Tema"
 
 # @ woocommerce
-#: includes/admin/views/html-admin-page-status-report.php:375
+#: includes/admin/views/html-admin-page-status-report.php:406
 msgid "Theme Name"
 msgstr "Nombre del tema"
 
 # @ woocommerce
-#: includes/admin/views/html-admin-page-status-report.php:382
+#: includes/admin/views/html-admin-page-status-report.php:412
 msgid "Theme Version"
 msgstr "Versión del tema"
 
-#: includes/admin/views/html-admin-page-status-report.php:388
+#: includes/admin/views/html-admin-page-status-report.php:421
 msgid "Author URL"
 msgstr "URL del autor"
 
 # @ woocommerce
-#: includes/admin/views/html-admin-page-status-report.php:397
+#: includes/admin/views/html-admin-page-status-report.php:430
 msgid "Templates"
 msgstr "Plantillas"
 
-#: includes/admin/views/html-admin-page-status-report.php:403
+#: includes/admin/views/html-admin-page-status-report.php:436
 msgid "Template Overrides"
 msgstr "Anulación de plantillas"
 
-#: includes/admin/views/html-admin-page-status-report.php:421
+#: includes/admin/views/html-admin-page-status-report.php:454
 msgid "No core overrides present in theme."
 msgstr "No hay anulaciones del núcleo en el tema actualmente en uso."
 
@@ -6141,6 +6151,7 @@ msgstr "Guardar cambios"
 #: includes/admin/views/html-bulk-edit-product.php:193
 #: includes/admin/views/html-bulk-edit-product.php:212
 #: includes/admin/views/html-bulk-edit-product.php:231
+#: includes/admin/views/html-bulk-edit-product.php:252
 msgid "— No Change —"
 msgstr "— Sin cambio —"
 
@@ -6202,6 +6213,12 @@ msgstr "Búsqueda &amp; catálogo"
 #: includes/admin/views/html-quick-edit-product.php:132
 msgid "In stock?"
 msgstr "¿En stock?"
+
+# @ woocommerce
+#: includes/admin/views/html-bulk-edit-product.php:247
+#: includes/admin/views/html-quick-edit-product.php:167
+msgid "Backorders?"
+msgstr "¿Permitir reservas?"
 
 # @ woocommerce
 #: includes/admin/views/html-email-template-preview.php:1
@@ -6339,6 +6356,10 @@ msgstr "WooThemes"
 #. Author URI of the plugin/theme
 msgid "http://woothemes.com"
 msgstr "http://woothemes.com"
+
+# @ woocommerce
+#~ msgid "Method ID"
+#~ msgstr "ID del método"
 
 # @ woocommerce
 #~ msgctxt "slug"
