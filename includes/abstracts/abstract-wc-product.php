@@ -765,7 +765,15 @@ class WC_Product {
 	 */
 	public function get_price_html( $price = '' ) {
 
-        $display_price = get_option( 'woocommerce_tax_display_shop' ) == 'excl' ? $this->get_price_excluding_tax() : $this->get_price_including_tax();
+
+        if( get_option( 'woocommerce_tax_display_shop' ) == 'excl' or !$possibly_with_tax)
+        {
+            $display_price = $this->get_price();
+        }
+        else
+        {
+            $display_price = $this->get_price_including_tax();
+        }
 
 		if ( $this->get_price() === '' ) {
 

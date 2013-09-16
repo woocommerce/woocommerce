@@ -335,7 +335,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 				endif;
 			break;
 			case "price":
-				echo $the_product->get_price_html() ? $the_product->get_price_html() : '<span class="na">&ndash;</span>';
+				echo $the_product->get_price_html('', false) ? $the_product->get_price_html('', false) : '<span class="na">&ndash;</span>';
 			break;
 			case "product_cat" :
 			case "product_tag" :
