@@ -1,28 +1,30 @@
 @import 'mixins.less';
 
+// Load the WooCommerce font
+@font-face {
+	font-family: 'WooCommerce';
+	src:url('../fonts/WooCommerce.eot');
+	src:url('../fonts/WooCommerce.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/WooCommerce.woff') format('woff'),
+		url('../fonts/WooCommerce.ttf') format('truetype'),
+		url('../fonts/WooCommerce.svg#WooCommerce') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
 // Functions
 .button() {
 	.border_radius(100%);
-	height:16px;
-	width:16px;
-	color: #666 !important;
-	.vertical_gradient(#f6f6f6,#e8e8e8);
-	border:1px solid #999;
-	font-size:14px !important;
-	font-family: verdana !important;
-	text-shadow:0 1px 0 #fff;
-	font-weight: bold !important;
-	-webkit-box-shadow:
-		inset 0 -1px 0 rgba(0,0,0,0.05),
-		inset 0 1px 0 rgba(255,255,255,0.5),
-		0 1px 2px rgba(0,0,0,0.075);
-	box-shadow:
-		inset 0 -1px 0 rgba(0,0,0,0.05),
-		inset 0 1px 0 rgba(255,255,255,0.5),
-		0 1px 2px rgba(0,0,0,0.075);
+	height:1em;
+	width:1em;
+	text-shadow:0 1px 2px rgba(0,0,0,0.5);
+	background-color: #444;
+	color: #fff !important;
+	font-size:16px !important;
+	line-height: 1em;
+	.transition;
 	&:hover {
-		.vertical_gradient(#fff,#e8e8e8);
-		color: #444 !important;
+		background-color: #000;
 	}
 }
 
@@ -64,15 +66,11 @@ div.pp_woocommerce {
 	}
 
 	// Next / Previous
-	.pp_arrow_previous, .pp_arrow_next, .pp_previous, .pp_next {
-		&:before {
-			line-height: 1.15;
-		}
-	}
 	.pp_previous, .pp_next {
 		&:before {
 			.button;
-			content: "\2039";
+			font-family: 'WooCommerce';
+			content: "\e00b";
 			text-indent: 0;
 			display: none;
 			position: absolute;
@@ -94,7 +92,8 @@ div.pp_woocommerce {
 	.pp_next {
 		&:before {
 			right:1em;
-			content: "\203a";
+			font-family: 'WooCommerce';
+			content: "\e008";
 		}
 	}
 
@@ -116,12 +115,12 @@ div.pp_woocommerce {
 	}
 	.pp_close {
 		.button;
-		width:21px;
-		height:21px;
-		top:-10px;
-		right:-10px;
+		top:-.5em;
+		right:-.5em;
+		font-size:1.618em !important;
 		&:before {
-			content:"\00d7";
+			font-family: 'WooCommerce';
+			content:"\e013";
 			display: block;
 			position: absolute;
 			top:0;
@@ -130,7 +129,6 @@ div.pp_woocommerce {
 			bottom:0;
 			text-align: center;
 			text-indent: 0;
-			line-height: 1.45;
 		}
 	}
 	// Buttons
@@ -139,7 +137,8 @@ div.pp_woocommerce {
 		position: relative;
 		margin-top:-1px;
 		&:before {
-			content:"\2039";
+			font-family: 'WooCommerce';
+			content:"\e00b";
 			display: block;
 			position: absolute;
 			top:0;
@@ -156,18 +155,18 @@ div.pp_woocommerce {
 	.pp_arrow_next {
 		margin-left:.5em;
 		&:before {
-			content: "\203a";
+			content: "\e008";
 		}
 	}
 	a.pp_expand, a.pp_contract {
 		.button;
 		right:auto;
-		left:-10px;
-		top:-10px;
-		height:21px;
-		width:21px;
+		left:-.5em;
+		top:-.5em;
+		font-size:1.618em !important;
 		&:before {
-			content:"\2295";
+			font-family: 'WooCommerce';
+			content:"\e005";
 			display: block;
 			position: absolute;
 			top:0;
@@ -176,13 +175,11 @@ div.pp_woocommerce {
 			bottom:0;
 			text-align: center;
 			text-indent: 0;
-			line-height:0.9 !important;
-			font-size:19px !important;
 		}
 	}
 	a.pp_contract {
 		&:before {
-			content: "\2297";
+			content: "\e004";
 		}
 	}
 	#respond {
@@ -201,7 +198,7 @@ div.pp_woocommerce {
 	}
 }
 
-@media only screen and (max-width: 480px) {
+@media only screen and (max-width: 768px) {
 	div.pp_woocommerce {
 		left: 5% !important;
 		right:5% !important;
@@ -213,14 +210,14 @@ div.pp_woocommerce {
 		.pp_arrow_previous, .pp_arrow_next, .pp_close {
 			height:44px;
 			width:44px;
+			font-size:44px;
+			line-height: 44px;
 			&:before {
-				font-size:2em;
+				font-size:44px;
 			}
 		}
 		.pp_arrow_previous, .pp_arrow_next {
-			&:before {
-				line-height: 1.45;
-			}
+
 		}
 		.pp_description {
 			display: none !important;
@@ -348,8 +345,7 @@ div.pp_woocommerce {
 						float: left;
 						height: 15px;
 						margin-top: 3px;
-						overflow: hidden;
-						text-indent: -10000px;
+						text-indent: -100000px;
 						width: 14px;
 					}
 
@@ -449,7 +445,6 @@ div.pp_woocommerce {
 		a.pp_close {
 			position: absolute; right: 0; top: 0;
 			display: block;
-			line-height:22px;
 			text-indent: -10000px;
 		}
 
@@ -500,7 +495,8 @@ div.pp_woocommerce {
 			}
 
 		div.ppt {
-			color: #fff;
+			color: #fff !important;
+			font-weight: 700;
 			display: none;
 			font-size: 17px;
 			margin: 0 0 5px 15px;
