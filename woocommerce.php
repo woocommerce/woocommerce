@@ -238,7 +238,6 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-api.php' );
 
 		// Include abstract classes
-		include_once( 'includes/abstracts/abstract-wc-helper.php' );			// Helper classes
 		include_once( 'includes/abstracts/abstract-wc-product.php' );			// Products
 		include_once( 'includes/abstracts/abstract-wc-settings-api.php' );		// Settings API (for gateways, shipping, and integrations)
 		include_once( 'includes/abstracts/abstract-wc-shipping-method.php' );	// A Shipping method
