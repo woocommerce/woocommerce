@@ -27,7 +27,7 @@ if ( ! $product->is_purchasable() ) return;
 
 	<?php do_action('woocommerce_before_add_to_cart_form'); ?>
 
-	<form action="<?php echo esc_url( $product->add_to_cart_url() ); ?>" class="cart" method="post" enctype='multipart/form-data'>
+	<form class="cart" method="post" enctype='multipart/form-data'>
 
 	 	<?php do_action('woocommerce_before_add_to_cart_button'); ?>
 
@@ -38,6 +38,8 @@ if ( ! $product->is_purchasable() ) return;
 	 				'max_value' => apply_filters( 'woocommerce_quantity_input_max', $product->backorders_allowed() ? '' : $product->get_stock_quantity(), $product )
 	 			) );
 	 	?>
+
+	 	<input type="hidden" name="add-to-cart" value="<?php echo esc_attr( $product->id ); ?>" />
 
 	 	<button type="submit" class="single_add_to_cart_button button alt"><?php echo apply_filters('single_add_to_cart_text', __( 'Add to cart', 'woocommerce' ), $product->product_type); ?></button>
 
