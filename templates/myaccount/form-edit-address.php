@@ -11,6 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $woocommerce, $current_user;
 
+$page_title = ( $load_address == 'billing' ) ? __( 'Billing Address', 'woocommerce' ) : __( 'Shipping Address', 'woocommerce' );
+
 get_currentuserinfo();
 ?>
 
@@ -24,7 +26,7 @@ get_currentuserinfo();
 
 	<form method="post">
 
-		<h3><?php if ( $load_address == 'billing' ) _e( 'Billing Address', 'woocommerce' ); else _e( 'Shipping Address', 'woocommerce' ); ?></h3>
+		<h3><?php echo apply_filters( 'woocommerce_my_account_edit_address_title', $page_title ); ?></h3>
 
 		<?php
 		foreach ($address as $key => $field) :
