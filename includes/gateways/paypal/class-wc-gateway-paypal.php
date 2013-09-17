@@ -116,7 +116,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
      */
     function init_form_fields() {
 
-    	$this->form_fields = array(
+    	$this->form_fields = apply_filters('woocommerce_payment_gateway_form_fields_' . $this->id, array(
 			'enabled' => array(
 				'title'   => __( 'Enable/Disable', 'woocommerce' ),
 				'type'    => 'checkbox',
@@ -232,7 +232,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				'default'     => 'no',
 				'description' => sprintf( __( 'Log PayPal events, such as IPN requests, inside <code>woocommerce/logs/paypal-%s.txt</code>', 'woocommerce' ), sanitize_file_name( wp_hash( 'paypal' ) ) ),
 			)
-		);
+		));
     }
 
 	/**

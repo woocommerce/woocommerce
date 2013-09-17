@@ -71,7 +71,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	 */
 	function init_form_fields() {
 		global $woocommerce;
-		$this->form_fields = array(
+		$this->form_fields = apply_filters('woocommerce_shipping_method_form_fields_' . $this->id, array(
 			'enabled' => array(
 				'title'			=> __( 'Enable', 'woocommerce' ),
 				'type'			=> 'checkbox',
@@ -111,7 +111,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 				'default'		=> '',
 				'options'		=> $woocommerce->countries->get_shipping_countries()
 			)
-		);
+		));
 	}
 
 	/**

@@ -58,7 +58,7 @@ class WC_Google_Analytics extends WC_Integration {
      */
     function init_form_fields() {
 
-    	$this->form_fields = array(
+    	$this->form_fields = apply_filters('woocommerce_integration_form_fields_' . $this->id, array(
 			'ga_id' => array(
 				'title' 			=> __( 'Google Analytics ID', 'woocommerce' ),
 				'description' 		=> __( 'Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woocommerce' ),
@@ -90,7 +90,7 @@ class WC_Google_Analytics extends WC_Integration {
 				'checkboxgroup'		=> 'end',
 				'default' 			=> 'no'
 			)
-		);
+		));
 
     } // End init_form_fields()
 

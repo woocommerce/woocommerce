@@ -70,7 +70,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 		else
 			$default_requires = '';
 
-		$this->form_fields = array(
+		$this->form_fields = apply_filters('woocommerce_shipping_method_form_fields_' . $this->id, array(
 			'enabled' => array(
 							'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
 							'type' 			=> 'checkbox',
@@ -126,7 +126,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 							'desc_tip'		=> true,
 							'placeholder'	=> '0.00'
 						)
-			);
+			));
 
 	}
 

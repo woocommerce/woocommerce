@@ -47,7 +47,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
      */
     public function init_form_fields() {
 
-    	$this->form_fields = array(
+    	$this->form_fields = apply_filters('woocommerce_payment_gateway_form_fields_' . $this->id, array(
 			'enabled' => array(
 				'title'   => __( 'Enable/Disable', 'woocommerce' ),
 				'type'    => 'checkbox',
@@ -75,7 +75,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 				'default'     => '',
 				'desc_tip'    => true,
 			),
-		);
+		));
     }
 
     /**
