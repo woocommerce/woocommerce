@@ -30,7 +30,7 @@ get_currentuserinfo();
 
 		<?php
 		foreach ($address as $key => $field) :
-			$value = (isset($_POST[$key])) ? $_POST[$key] : get_user_meta( get_current_user_id(), $key, true );
+			$value = apply_filters( 'woocommerce_my_account_edit_address_field_value', (isset($_POST[$key])) ? $_POST[$key] : get_user_meta( get_current_user_id(), $key, true ), $key, $load_address );
 
 			// Default values
 			if (!$value && ($key=='billing_email' || $key=='shipping_email')) $value = $current_user->user_email;
