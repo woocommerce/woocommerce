@@ -78,7 +78,7 @@ class WC_Form_Handler {
 			if ( isset($field['required']) && $field['required'] && empty($_POST[$key]) ) wc_add_error( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce' ) );
 
 			// Postcode
-			if ( substr_compare($key, 'postcode', strlen($key) - strlen('postcode'), strlen('postcode')) === 0 ) :
+			if ( strlen($key) >= 8 && substr_compare($key, 'postcode', strlen($key) - 8, 8) === 0 ) :
 				if ( ! WC_Validation::is_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] ) ) :
 					wc_add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
 				else :
