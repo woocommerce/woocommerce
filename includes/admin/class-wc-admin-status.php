@@ -123,6 +123,10 @@ class WC_Admin_Status {
 					wp_cache_flush();
 
 				break;
+				case "create_pages" :
+					create_pages();
+					echo '<div class="updated"><p>' . __( 'WooCommerce Pages re-created.', 'woocommerce' ) . '</p></div>';
+				break;
 				default:
 					$action = esc_attr( $_GET['action'] );
 					if( isset( $tools[ $action ]['callback'] ) ) {
@@ -175,6 +179,11 @@ class WC_Admin_Status {
 				'name'		=> __('Customer Sessions','woocommerce'),
 				'button'	=> __('Clear all sessions','woocommerce'),
 				'desc'		=> __( '<strong class="red">Warning</strong> This tool will delete all customer session data from the database, including any current live carts.', 'woocommerce' ),
+			),
+			'create_pages' => array(
+				'name'		=> __( 'WC Pages','woocommerce'),
+				'button'	=> __('Re-create Pages','woocommerce'),
+				'desc'		=> __( 'This tool will re-create WooCommerce pages.', 'woocommerce' ),
 			),
 		) );
 	}
