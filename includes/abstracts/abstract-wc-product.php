@@ -763,7 +763,17 @@ class WC_Product {
 	 * @param string $price (default: '')
 	 * @return string
 	 */
-	public function get_price_html( $price = '' ) {
+	public function get_price_html( $price = '', $possibly_with_tax = true ) {
+
+
+        if( get_option( 'woocommerce_tax_display_shop' ) == 'excl' or !$possibly_with_tax)
+        {
+            $display_price = $this->get_price();
+        }
+        else
+        {
+            $display_price = $this->get_price_including_tax();
+        }
 
 		if ( $this->get_price() === '' ) {
 
@@ -773,13 +783,13 @@ class WC_Product {
 
 			if ( $this->is_on_sale() && $this->get_regular_price() ) {
 
-				$price .= $this->get_price_html_from_to( $this->get_regular_price(), $this->get_price() );
+				$price .= $this->get_price_html_from_to( $this->get_regular_price(), $display_price );
 
 				$price = apply_filters( 'woocommerce_sale_price_html', $price, $this );
 
 			} else {
 
-				$price .= woocommerce_price( $this->get_price() );
+				$price .= woocommerce_price( $display_price );
 
 				$price = apply_filters( 'woocommerce_price_html', $price, $this );
 
