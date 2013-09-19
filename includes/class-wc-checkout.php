@@ -482,53 +482,48 @@ class WC_Checkout {
 
 				if ( ! empty( $this->posted[ $key ] ) ) {
 
-					// Special handling for validation and formatting
-					switch ( $key ) {
-						case "billing_postcode" :
-						case "shipping_postcode" :
+					// Validation rules
+					if ( ! empty( $field['validate'] ) && is_array( $field['validate'] ) ) {
+						foreach ( $field['validate'] as $rule ) {
+							switch ( $rule ) {
+								case 'postcode' :
+									$this->posted[ $key ] = strtoupper( str_replace( ' ', '', $this->posted[ $key ] ) );
 
-							$validate_against = $key == 'billing_postcode' ? 'billing_country' : 'shipping_country';
-							$this->posted[ $key ]    = strtoupper( str_replace( ' ', '', $this->posted[ $key ] ) );
+									if ( ! WC_Validation::is_postcode( $this->posted[ $key ], $_POST[ $fieldset_key . '_country' ] ) ) :
+										wc_add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
+									else :
+										$this->posted[ $key ] = wc_format_postcode( $this->posted[ $key ], $_POST[ $fieldset_key . '_country' ] );
+									endif;
+								break;
+								case 'phone' :
+									$this->posted[ $key ] = wc_format_phone_number( $this->posted[ $key ] );
 
-							if ( ! WC_Validation::is_postcode( $this->posted[ $key ], $_POST[ $validate_against ] ) )
-								wc_add_error( '<strong>' . $field['label'] . '</strong> ' . sprintf( __( '(%s) is not a valid postcode/ZIP.', 'woocommerce' ), $this->posted[ $key ] ) );
-							else
-								$this->posted[ $key ] = wc_format_postcode( $this->posted[ $key ], $_POST[ $validate_against ] );
+									if ( ! WC_Validation::is_phone( $this->posted[ $key ] ) )
+										wc_add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid phone number.', 'woocommerce' ) );
+								break;
+								case 'email' :
+									$this->posted[ $key ] = strtolower( $this->posted[ $key ] );
 
-						break;
-						case "billing_state" :
-						case "shipping_state" :
+									if ( ! is_email( $this->posted[ $key ] ) )
+										wc_add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ) );
+								break;
+								case 'state' :
+									// Get valid states
+									$valid_states = $woocommerce->countries->get_states( $_POST[ $fieldset_key . '_country' ] );
+									if ( $valid_states )
+										$valid_state_values = array_flip( array_map( 'strtolower', $valid_states ) );
 
-							// Get valid states
-							$validate_against = $key == 'billing_state' ? 'billing_country' : 'shipping_country';
-							$valid_states = $woocommerce->countries->get_states( $_POST[ $validate_against ] );
-							if ( $valid_states )
-								$valid_state_values = array_flip( array_map( 'strtolower', $valid_states ) );
+									// Convert value to key if set
+									if ( isset( $valid_state_values[ strtolower( $this->posted[ $key ] ) ] ) )
+										 $this->posted[ $key ] = $valid_state_values[ strtolower( $this->posted[ $key ] ) ];
 
-							// Convert value to key if set
-							if ( isset( $valid_state_values[ strtolower( $this->posted[ $key ] ) ] ) )
-								 $this->posted[ $key ] = $valid_state_values[ strtolower( $this->posted[ $key ] ) ];
-
-							// Only validate if the country has specific state options
-							if ( $valid_states && sizeof( $valid_states ) > 0 )
-								if ( ! in_array( $this->posted[ $key ], array_keys( $valid_states ) ) )
-									wc_add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not valid. Please enter one of the following:', 'woocommerce' ) . ' ' . implode( ', ', $valid_states ) );
-
-						break;
-						case "billing_phone" :
-
-							$this->posted[ $key ] = wc_format_phone_number( $this->posted[ $key ] );
-
-							if ( ! WC_Validation::is_phone( $this->posted[ $key ] ) )
-								wc_add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid number.', 'woocommerce' ) );
-						break;
-						case "billing_email" :
-
-							$this->posted[ $key ] = strtolower( $this->posted[ $key ] );
-
-							if ( ! is_email( $this->posted[ $key ] ) )
-								wc_add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ) );
-						break;
+									// Only validate if the country has specific state options
+									if ( $valid_states && sizeof( $valid_states ) > 0 )
+										if ( ! in_array( $this->posted[ $key ], array_keys( $valid_states ) ) )
+											wc_add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not valid. Please enter one of the following:', 'woocommerce' ) . ' ' . implode( ', ', $valid_states ) );
+								break;
+							}
+						}
 					}
 				}
 			}

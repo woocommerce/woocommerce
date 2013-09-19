@@ -155,6 +155,31 @@ class WC_Shortcode_My_Account {
 
 		$address = $woocommerce->countries->get_address_fields( get_user_meta( get_current_user_id(), $load_address . '_country', true ), $load_address . '_' );
 
+		// Prepare values
+		foreach ( $address as $key => $field ) {
+
+			$value = get_user_meta( get_current_user_id(), $key, true );
+
+			if ( ! $value ) {
+				switch( $key ) {
+					case 'billing_email' :
+					case 'shipping_email' :
+						$value = $current_user->user_email;
+					break;
+					case 'billing_country' :
+					case 'shipping_country' :
+						$value = $woocommerce->countries->get_base_country();
+					break;
+					case 'billing_state' :
+					case 'shipping_state' :
+						$value = $woocommerce->countries->get_base_state();
+					break;
+				}
+			}
+
+			$address[ $key ]['value'] = apply_filters( 'woocommerce_my_account_edit_address_field_value', $value, $key, $load_address );
+		}
+
 		woocommerce_get_template( 'myaccount/form-edit-address.php', array(
 			'load_address' 	=> $load_address,
 			'address'		=> apply_filters( 'woocommerce_address_to_edit', $address )
