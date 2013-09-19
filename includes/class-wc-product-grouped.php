@@ -151,7 +151,6 @@ class WC_Product_Grouped extends WC_Product {
 		return apply_filters( 'woocommerce_is_purchasable', false, $this );
 	}
 
-
 	/**
 	 * Returns the price in html format.
 	 *
@@ -174,11 +173,18 @@ class WC_Product_Grouped extends WC_Product {
 			$min_price = '';
 		}
 
-		if ( sizeof( $child_prices ) > 1 ) $price .= $this->get_price_html_from_text();
+		if ( sizeof( $child_prices ) > 1 )
+			$price .= $this->get_price_html_from_text();
 
-		$price .= woocommerce_price( $min_price );
+		if ( $min_price ) {
+			$display_price = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $min_price ) : $this->get_price_excluding_tax( 1, $min_price );
 
-		$price = apply_filters( 'woocommerce_grouped_price_html', $price, $this );
+			$price .= woocommerce_price( $display_price ) . $this->get_price_suffix();
+
+			$price = apply_filters( 'woocommerce_grouped_price_html', $price, $this );
+		} else {
+			$price = apply_filters( 'woocommerce_grouped_empty_price_html', '', $this );
+		}
 
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
 	}

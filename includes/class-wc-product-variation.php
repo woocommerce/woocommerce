@@ -231,20 +231,28 @@ class WC_Product_Variation extends WC_Product {
      */
 	public function get_price_html( $price = '' ) {
 
+		$tax_display_mode      = get_option( 'woocommerce_tax_display_shop' );
+		$display_price         = $tax_display_mode == 'incl' ? $this->get_price_including_tax() : $this->get_price_excluding_tax();
+		$display_regular_price = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $this->get_regular_price() ) : $this->get_price_excluding_tax( 1, $this->get_regular_price() );
+		$display_sale_price    = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $this->get_sale_price() ) : $this->get_price_excluding_tax( 1, $this->get_sale_price() );
+
 		if ( $this->get_price() !== '' ) {
 			if ( $this->is_on_sale() ) {
 
-				$price = '<del>' . woocommerce_price( $this->get_regular_price() ) . '</del> <ins>' . woocommerce_price( $this->get_sale_price() ) . '</ins>';
+				$price = '<del>' . woocommerce_price( $display_regular_price ) . '</del> <ins>' . woocommerce_price( $display_sale_price ) . '</ins>' . $this->get_price_suffix();
+
 				$price = apply_filters( 'woocommerce_variation_sale_price_html', $price, $this );
 
 			} elseif ( $this->get_price() > 0 ) {
 
-				$price = woocommerce_price( $this->get_price() );
+				$price = woocommerce_price( $display_price ) . $this->get_price_suffix();
+
 				$price = apply_filters( 'woocommerce_variation_price_html', $price, $this );
 
 			} else {
 
 				$price = __( 'Free!', 'woocommerce' );
+
 				$price = apply_filters( 'woocommerce_variation_free_price_html', $price, $this );
 
 			}

@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.1 - x =
+* Feature - Define whether prices should be shown incl. or excl. of tax, and add an optional suffix.
 * Feature - Split frontend styles into separate appearance/layout stylesheets and removed the enable/disable option.
 * Feature - Added woocommerce-smallscreen.css to optimise default layout on handheld devices.
 * Feature - Bulk edit increase / decrease variation prices by fixed or percentage values
