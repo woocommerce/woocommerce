@@ -1734,15 +1734,14 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" class="select" ' . implode( ' ', $custom_attributes ) . '>
 						' . $options . '
-					</select>
-				</p>' . $after;
-
-			break;
+					</select>';
+		break;
+		
 		default :
-
+			
 			$field = apply_filters( 'woocommerce_form_field_' . $args['type'], '', $key, $args, $value );
 
-			break;
+		break;
 		}
 
 		if ( $args['return'] ) return $field; else echo $field;

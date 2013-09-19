@@ -761,35 +761,52 @@ class WC_Checkout {
 					return $current_user->user_email;
 			}
 
-			$default_billing_country = apply_filters('default_checkout_country', ($woocommerce->customer->get_country()) ? $woocommerce->customer->get_country() : $woocommerce->countries->get_base_country());
+			$default_billing_country = apply_filters('default_checkout_country', ($woocommerce->customer->get_country()) ? $woocommerce->customer->get_country() : $woocommerce->countries->get_base_country(), 'billing' );
 
-			$default_shipping_country = apply_filters('default_checkout_country', ($woocommerce->customer->get_shipping_country()) ? $woocommerce->customer->get_shipping_country() : $woocommerce->countries->get_base_country());
+			$default_shipping_country = apply_filters('default_checkout_country', ($woocommerce->customer->get_shipping_country()) ? $woocommerce->customer->get_shipping_country() : $woocommerce->countries->get_base_country(), 'shipping' );
 
 			if ( $woocommerce->customer->has_calculated_shipping() ) {
-				$default_billing_state  = apply_filters('default_checkout_state', $woocommerce->customer->get_state());
-				$default_shipping_state = apply_filters('default_checkout_state', $woocommerce->customer->get_shipping_state());
+				$default_billing_state  = apply_filters('default_checkout_state', $woocommerce->customer->get_state(), 'billing' );
+				$default_shipping_state = apply_filters('default_checkout_state', $woocommerce->customer->get_shipping_state(), 'shipping' );
 			} else {
-				$default_billing_state  = apply_filters('default_checkout_state', '');
-				$default_shipping_state = apply_filters('default_checkout_state', '');
+				$default_billing_state  = apply_filters('default_checkout_state', '', 'billing' );
+				$default_shipping_state = apply_filters('default_checkout_state', '', 'shipping' );
 			}
-
-			if ( $input == "billing_country" )
-				return $default_billing_country;
-
-			if ( $input == "billing_state" )
-				return $default_billing_state;
-
-			if ( $input == "billing_postcode" )
-				return $woocommerce->customer->get_postcode() ? $woocommerce->customer->get_postcode() : '';
-
-			if ( $input == "shipping_country" )
-				return $default_shipping_country;
-
-			if ( $input == "shipping_state" )
-				return $default_shipping_state;
-
-			if ( $input == "shipping_postcode" )
-				return $woocommerce->customer->get_shipping_postcode() ? $woocommerce->customer->get_shipping_postcode() : '';
+			
+			switch ( $input ) {
+				
+				case 'billing_country' :
+					return $default_billing_country;
+					
+				break;
+				
+				case  'shipping_country' :
+					return	$default_shipping_country;
+				break;
+				
+				case 'billing_state' :
+					return $default_billing_state;
+				break;
+				
+				case 'shipping_state' :
+					return $default_shipping_state;	
+				break;
+				
+				case 'billing_postcode' :
+					$default_billing_postcode = $woocommerce->customer->get_postcode() ? $woocommerce->customer->get_postcode() : '';
+					return apply_filters( 'default_checkout_postcode', $default_billing_postcode, 'billing' );
+				break;
+				
+				case 'shipping_postcode' :
+					$default_shipping_postcode = $woocommerce->customer->get_shipping_postcode() ? $woocommerce->customer->get_shipping_postcode() : '';
+					return apply_filters( 'default_checkout_postcode', 	$default_shipping_postcode, 'shipping' );
+				break;
+				
+				default :
+					return apply_filters( 'default_checkout_' . $input, '', $input );
+				break;
+				
+			}
 		}
 	}
 }
