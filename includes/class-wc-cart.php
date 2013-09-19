@@ -337,7 +337,7 @@ class WC_Cart {
 				foreach ( $this->applied_coupons as $key => $code ) {
 					$coupon = new WC_Coupon( $code );
 
-					if ( $coupon->is_valid() ) {
+					if ( ! $coupon->is_valid() ) {
 
 						$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_INVALID_REMOVED );
 
