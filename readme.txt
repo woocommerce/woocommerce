@@ -201,6 +201,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Disabled button styles.
 * Tweak - Hooks for overriding default email inline styles.
 * Tweak - Flat rate shipping support for percentage factor of additional costs.
+* Tweak - local delivery _ pattern matching for postcodes. e.g. NG1___ would match NG1 1AA but not NG10 1AA.
 * Fix - Changed MyException to Exception in Checkout class as MyException class does not exist in WooCommerce
 * Fix - Default cart widget styling on non-wc pages.
 * Fix - Rounding for mijireh tax ex. price.
