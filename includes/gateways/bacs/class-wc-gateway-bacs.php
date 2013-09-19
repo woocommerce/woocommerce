@@ -61,7 +61,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
      * Initialise Gateway Settings Form Fields
      */
     public function init_form_fields() {
-    	$this->form_fields = array(
+    	$this->form_fields = apply_filters('woocommerce_payment_gateway_form_fields_' . $this->id, array(
 			'enabled' => array(
 				'title'   => __( 'Enable/Disable', 'woocommerce' ),
 				'type'    => 'checkbox',
@@ -92,7 +92,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 			'account_details' => array(
 				'type'        => 'account_details'
 			),
-		);
+		));
     }
 
     /**

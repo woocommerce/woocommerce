@@ -58,7 +58,7 @@ class WC_ShareThis extends WC_Integration {
      */
     function init_form_fields() {
 
-    	$this->form_fields = array(
+    	$this->form_fields = apply_filters('woocommerce_integration_form_fields_' . $this->id, array(
 			'publisher_id' => array(
 				'title' 		=> __( 'ShareThis Publisher ID', 'woocommerce' ),
 				'description' 	=> sprintf( __( 'Enter your %1$sShareThis publisher ID%2$s to show social sharing buttons on product pages.', 'woocommerce' ), '<a href="http://sharethis.com/account/">', '</a>' ),
@@ -71,7 +71,7 @@ class WC_ShareThis extends WC_Integration {
 				'type' 			=> 'textarea',
 				'default' 		=> $this->default_code
 			)
-		);
+		));
 
     }
 

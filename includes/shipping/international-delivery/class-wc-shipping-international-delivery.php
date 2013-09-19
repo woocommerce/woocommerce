@@ -45,7 +45,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 	function init_form_fields() {
 		global $woocommerce;
 
-		$this->form_fields = array(
+		$this->form_fields = apply_filters('woocommerce_shipping_method_form_fields_' . $this->id, array(
 			'enabled' => array(
 							'title'			=> __( 'Enable/Disable', 'woocommerce' ),
 							'type'			=> 'checkbox',
@@ -128,7 +128,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 							'desc_tip'		=> true,
 							'placeholder'	=> '0.00'
 						),
-			);
+			));
 
 	}
 

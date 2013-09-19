@@ -52,7 +52,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		    	$shipping_methods[ $method->id ] = $method->get_title();
 	    	}
 
-    	$this->form_fields = array(
+    	$this->form_fields = apply_filters('woocommerce_payment_gateway_form_fields_' . $this->id, array(
 			'enabled' => array(
 				'title'       => __( 'Enable COD', 'woocommerce' ),
 				'label'       => __( 'Enable Cash on Delivery', 'woocommerce' ),
@@ -91,7 +91,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 				'options'		=> $shipping_methods,
 				'desc_tip'      => true,
 			)
- 	   );
+ 	   ));
     }
 
 	/**
