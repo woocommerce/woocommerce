@@ -141,6 +141,25 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			),
 
 			array(
+				'title'   => __( 'Display prices in the shop:', 'woocommerce' ),
+				'id'      => 'woocommerce_tax_display_shop',
+				'default' => 'excl',
+				'type'    => 'select',
+				'options' => array(
+					'incl'   => __( 'Including tax', 'woocommerce' ),
+					'excl'   => __( 'Excluding tax', 'woocommerce' ),
+				)
+			),
+
+			array(
+				'title'   => __( 'Price display suffix:', 'woocommerce' ),
+				'id'      => 'woocommerce_price_display_suffix',
+				'default' => '',
+				'type'    => 'text',
+				'desc' 		=> __( 'Define text to show after your product prices. This could be, for example, "inc. Vat" to explain your pricing. You can also have prices substituted here using one of the following: <code>{price_including_tax}, {price_excluding_tax}</code>.', 'woocommerce' ),
+			),
+
+			array(
 				'title'   => __( 'Display prices during cart/checkout:', 'woocommerce' ),
 				'id'      => 'woocommerce_tax_display_cart',
 				'default' => 'excl',

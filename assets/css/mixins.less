@@ -121,7 +121,7 @@
 	height:1em;
 	width:1em;
 }
-.icon() {
+.icon( @glyph: "\e001" ) {
 	font-family: 'WooCommerce';
 	speak: none;
 	font-weight: normal;
@@ -137,8 +137,9 @@
 	width:100%;
 	height: 100%;
 	text-align: center;
+	content: @glyph;
 }
-.iconbefore() {
+.iconbefore( @glyph: "\e001" ) {
 	font-family: 'WooCommerce';
 	speak: none;
 	font-weight: normal;
@@ -147,8 +148,9 @@
 	line-height: 1;
 	-webkit-font-smoothing: antialiased;
 	margin-right:7px;
+	content: @glyph;
 }
-.iconafter() {
+.iconafter( @glyph: "\e001" ) {
 	font-family: 'WooCommerce';
 	speak: none;
 	font-weight: normal;
@@ -157,4 +159,5 @@
 	line-height: 1;
 	-webkit-font-smoothing: antialiased;
 	margin-left:7px;
+	content: @glyph;
 }

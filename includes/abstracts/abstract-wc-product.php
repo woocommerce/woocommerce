@@ -682,13 +682,16 @@ class WC_Product {
 	 * Returns the price (including tax). Uses customer tax rates. Can work for a specific $qty for more accurate taxes.
 	 *
 	 * @access public
+	 * @param  string $price to calculdate, left blank to just use get_price()
 	 * @return string
 	 */
-	public function get_price_including_tax( $qty = 1 ) {
+	public function get_price_including_tax( $qty = 1, $price = '' ) {
 		global $woocommerce;
 
 		$_tax  = new WC_Tax();
-		$price = $this->get_price();
+
+		if ( ! $price )
+			$price = $this->get_price();
 
 		if ( $this->is_taxable() ) {
 
@@ -704,7 +707,7 @@ class WC_Product {
 				$tax_rates      = $_tax->get_rates( $this->get_tax_class() );
 				$base_tax_rates = $_tax->get_shop_base_rate( $this->tax_class );
 
-				if ( $woocommerce->customer->is_vat_exempt() ) {
+				if ( ! empty( $woocommerce->customer ) && $woocommerce->customer->is_vat_exempt() ) {
 
 					$base_taxes 		= $_tax->calc_tax( $price * $qty, $base_tax_rates, true );
 					$base_tax_amount	= array_sum( $base_taxes );
@@ -736,11 +739,13 @@ class WC_Product {
 	 * Uses store base tax rates. Can work for a specific $qty for more accurate taxes.
 	 *
 	 * @access public
+	 * @param  string $price to calculdate, left blank to just use get_price()
 	 * @return string
 	 */
-	public function get_price_excluding_tax( $qty = 1 ) {
+	public function get_price_excluding_tax( $qty = 1, $price = '' ) {
 
-		$price = $this->get_price();
+		if ( ! $price )
+			$price = $this->get_price();
 
 		if ( $this->is_taxable() && get_option('woocommerce_prices_include_tax') == 'yes' ) {
 
@@ -757,6 +762,32 @@ class WC_Product {
 	}
 
 	/**
+	 * Get the suffix to display after prices > 0
+	 * @return string
+	 */
+	public function get_price_suffix() {
+		$price_display_suffix  = get_option( 'woocommerce_price_display_suffix' );
+
+		if ( $price_display_suffix ) {
+			$price_display_suffix = ' <small class="woocommerce-price-suffix">' . $price_display_suffix . '</small>';
+
+			$find = array(
+				'{price_including_tax}',
+				'{price_excluding_tax}'
+			);
+
+			$replace = array(
+				woocommerce_price( $this->get_price_including_tax() ),
+				woocommerce_price( $this->get_price_excluding_tax() )
+			);
+
+			$price_display_suffix = str_replace( $find, $replace, $price_display_suffix );
+		}
+
+		return apply_filters( 'woocommerce_get_price_suffix', $price_display_suffix, $this );
+	}
+
+	/**
 	 * Returns the price in html format.
 	 *
 	 * @access public
@@ -765,31 +796,36 @@ class WC_Product {
 	 */
 	public function get_price_html( $price = '' ) {
 
-		if ( $this->get_price() === '' ) {
+		$tax_display_mode      = get_option( 'woocommerce_tax_display_shop' );
+		$display_price         = $tax_display_mode == 'incl' ? $this->get_price_including_tax() : $this->get_price_excluding_tax();
+		$display_regular_price = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $this->get_regular_price() ) : $this->get_price_excluding_tax( 1, $this->get_regular_price() );
+		$display_sale_price    = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $this->get_sale_price() ) : $this->get_price_excluding_tax( 1, $this->get_sale_price() );
 
-			$price = apply_filters( 'woocommerce_empty_price_html', '', $this );
-
-		} elseif ( $this->get_price() > 0 ) {
+		if ( $this->get_price() > 0 ) {
 
 			if ( $this->is_on_sale() && $this->get_regular_price() ) {
 
-				$price .= $this->get_price_html_from_to( $this->get_regular_price(), $this->get_price() );
+				$price .= $this->get_price_html_from_to( $display_regular_price, $display_price ) . $this->get_price_suffix();
 
 				$price = apply_filters( 'woocommerce_sale_price_html', $price, $this );
 
 			} else {
 
-				$price .= woocommerce_price( $this->get_price() );
+				$price .= woocommerce_price( $display_price ) . $this->get_price_suffix();
 
 				$price = apply_filters( 'woocommerce_price_html', $price, $this );
 
 			}
 
+		} elseif ( $this->get_price() === '' ) {
+
+			$price = apply_filters( 'woocommerce_empty_price_html', '', $this );
+
 		} elseif ( $this->get_price() == 0 ) {
 
 			if ( $this->is_on_sale() && $this->get_regular_price() ) {
 
-				$price .= $this->get_price_html_from_to( $this->get_regular_price(), __( 'Free!', 'woocommerce' ) );
+				$price .= $this->get_price_html_from_to( $display_regular_price, __( 'Free!', 'woocommerce' ) );
 
 				$price = apply_filters( 'woocommerce_free_sale_price_html', $price, $this );
 

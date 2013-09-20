@@ -51,48 +51,69 @@ class WC_Form_Handler {
 
 		$user_id = get_current_user_id();
 
-		if ( $user_id <= 0 ) return;
+		if ( $user_id <= 0 )
+			return;
 
 		$load_address = isset( $wp->query_vars['edit-address'] ) ? sanitize_key( $wp->query_vars['edit-address'] ) : 'billing';
 
 		$address = $woocommerce->countries->get_address_fields( esc_attr( $_POST[ $load_address . '_country' ] ), $load_address . '_' );
 
-		foreach ($address as $key => $field) :
+		foreach ( $address as $key => $field ) {
 
-			if (!isset($field['type'])) $field['type'] = 'text';
+			if ( ! isset( $field['type'] ) )
+				$field['type'] = 'text';
 
 			// Get Value
-			switch ($field['type']) :
+			switch ( $field['type'] ) {
 				case "checkbox" :
-					$_POST[$key] = isset($_POST[$key]) ? 1 : 0;
+					$_POST[ $key ] = isset( $_POST[ $key ] ) ? 1 : 0;
 				break;
 				default :
-					$_POST[$key] = isset($_POST[$key]) ? woocommerce_clean($_POST[$key]) : '';
+					$_POST[ $key ] = isset( $_POST[ $key ] ) ? woocommerce_clean( $_POST[ $key ] ) : '';
 				break;
-			endswitch;
+			}
 
 			// Hook to allow modification of value
-			$_POST[$key] = apply_filters('woocommerce_process_myaccount_field_' . $key, $_POST[$key]);
+			$_POST[ $key ] = apply_filters( 'woocommerce_process_myaccount_field_' . $key, $_POST[ $key ] );
 
 			// Validation: Required fields
-			if ( isset($field['required']) && $field['required'] && empty($_POST[$key]) ) wc_add_error( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce' ) );
+			if ( ! empty( $field['required'] ) && empty( $_POST[ $key ] ) )
+				wc_add_error( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce' ) );
 
-			// Postcode
-			if ($key=='billing_postcode' || $key=='shipping_postcode') :
-				if ( ! WC_Validation::is_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] ) ) :
-					wc_add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
-				else :
-					$_POST[$key] = wc_format_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] );
-				endif;
-			endif;
+			// Validation rules
+			if ( ! empty( $field['validate'] ) && is_array( $field['validate'] ) ) {
+				foreach ( $field['validate'] as $rule ) {
+					switch ( $rule ) {
+						case 'postcode' :
+							$_POST[ $key ] = strtoupper( str_replace( ' ', '', $_POST[ $key ] ) );
 
-		endforeach;
+							if ( ! WC_Validation::is_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] ) ) :
+								wc_add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
+							else :
+								$_POST[ $key ] = wc_format_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] );
+							endif;
+						break;
+						case 'phone' :
+							$_POST[ $key ] = wc_format_phone_number( $_POST[ $key ] );
+
+							if ( ! WC_Validation::is_phone( $_POST[ $key ] ) )
+								wc_add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid phone number.', 'woocommerce' ) );
+						break;
+						case 'email' :
+							$_POST[ $key ] = strtolower( $_POST[ $key ] );
+
+							if ( ! is_email( $_POST[ $key ] ) )
+								wc_add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ) );
+						break;
+					}
+				}
+			}
+		}
 
 		if ( wc_error_count() == 0 ) {
 
-			foreach ($address as $key => $field) :
-				update_user_meta( $user_id, $key, $_POST[$key] );
-			endforeach;
+			foreach ( $address as $key => $field )
+				update_user_meta( $user_id, $key, $_POST[ $key ] );
 
 			wc_add_message( __( 'Address changed successfully.', 'woocommerce' ) );
 

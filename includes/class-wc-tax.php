@@ -175,7 +175,7 @@ class WC_Tax {
 		$tax_class = sanitize_title( $tax_class );
 
 		/* Checkout uses customer location for the tax rates. Also, if shipping has been calculated, use the customers address. */
-		if ( ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) || $woocommerce->customer->has_calculated_shipping() ) {
+		if ( ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) || ( ! empty( $woocommerce->customer ) && $woocommerce->customer->has_calculated_shipping() ) ) {
 
 			list( $country, $state, $postcode, $city ) = $woocommerce->customer->get_taxable_address();
 
@@ -192,7 +192,7 @@ class WC_Tax {
 			// Prices which include tax should always use the base rate if we don't know where the user is located
 			// Prices excluding tax however should just not add any taxes, as they will be added during checkout.
 			// The woocommerce_default_customer_address option (when set to base) is also used here.
-			$matched_tax_rates = $woocommerce->cart->prices_include_tax || get_option( 'woocommerce_default_customer_address' ) == 'base'
+			$matched_tax_rates = get_option( 'woocommerce_prices_include_tax' ) == 'yes' || get_option( 'woocommerce_default_customer_address' ) == 'base'
 				? $this->get_shop_base_rate( $tax_class )
 				: array();
 
@@ -235,7 +235,7 @@ class WC_Tax {
 			$tax_class = $shipping_tax_class == 'standard' ? '' : $shipping_tax_class;
 		}
 
-		if ( ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) || $woocommerce->customer->has_calculated_shipping() ) {
+		if ( ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) || ( ! empty( $woocommerce->customer ) && $woocommerce->customer->has_calculated_shipping() ) ) {
 
 			list( $country, $state, $postcode, $city ) = $woocommerce->customer->get_taxable_address();
 
@@ -243,7 +243,7 @@ class WC_Tax {
 
 			// Prices which include tax should always use the base rate if we don't know where the user is located
 			// Prices excluding tax however should just not add any taxes, as they will be added during checkout
-			if ( $woocommerce->cart->prices_include_tax || get_option( 'woocommerce_default_customer_address' ) == 'base' ) {
+			if ( get_option( 'woocommerce_prices_include_tax' ) == 'yes' || get_option( 'woocommerce_default_customer_address' ) == 'base' ) {
 				$country 	= $woocommerce->countries->get_base_country();
 				$state 		= $woocommerce->countries->get_base_state();
 				$postcode   = '';

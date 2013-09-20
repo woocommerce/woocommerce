@@ -4,7 +4,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @version     2.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -18,9 +18,9 @@ get_currentuserinfo();
 
 <?php wc_print_messages(); ?>
 
-<?php if (!$load_address) : ?>
+<?php if ( ! $load_address ) : ?>
 
-	<?php woocommerce_get_template('myaccount/my-address.php'); ?>
+	<?php woocommerce_get_template( 'myaccount/my-address.php' ); ?>
 
 <?php else : ?>
 
@@ -28,18 +28,11 @@ get_currentuserinfo();
 
 		<h3><?php echo apply_filters( 'woocommerce_my_account_edit_address_title', $page_title ); ?></h3>
 
-		<?php
-		foreach ($address as $key => $field) :
-			$value = (isset($_POST[$key])) ? $_POST[$key] : get_user_meta( get_current_user_id(), $key, true );
+		<?php foreach ( $address as $key => $field ) : ?>
 
-			// Default values
-			if (!$value && ($key=='billing_email' || $key=='shipping_email')) $value = $current_user->user_email;
-			if (!$value && ($key=='billing_country' || $key=='shipping_country')) $value = $woocommerce->countries->get_base_country();
-			if (!$value && ($key=='billing_state' || $key=='shipping_state')) $value = $woocommerce->countries->get_base_state();
+			<?php woocommerce_form_field( $key, $field, ! empty( $_POST[ $key ] ) ? woocommerce_clean( $_POST[ $key ] ) : $field['value'] ); ?>
 
-			woocommerce_form_field( $key, $field, $value );
-		endforeach;
-		?>
+		<?php endforeach; ?>
 
 		<p>
 			<input type="submit" class="button" name="save_address" value="<?php _e( 'Save Address', 'woocommerce' ); ?>" />
