@@ -164,7 +164,7 @@ class WC_Install {
 			update_option( 'woocommerce_db_version', '2.0.14' );
 		}
 
-		if ( version_compare( $current_db_version, '2.1.0', '<' ) ) {
+		if ( version_compare( $current_db_version, '2.1.0', '<' ) || WOOCOMMERCE_VERSION == '2.1-bleeding' ) {
 			include( 'updates/woocommerce-update-2.1.php' );
 			update_option( 'woocommerce_db_version', '2.1.0' );
 		}

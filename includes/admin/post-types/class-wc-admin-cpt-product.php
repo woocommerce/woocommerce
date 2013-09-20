@@ -956,34 +956,44 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 	 * Grant downloadable file access to any newly added files on any existing
 	 * orders for this product that have previously been granted downloadable file access
 	 *
-	 * @access public
 	 * @param int $product_id product identifier
 	 * @param int $variation_id optional product variation identifier
-	 * @param array $file_paths newly set file paths
+	 * @param array $downloadable_files newly set files
 	 */
-	public function process_product_file_download_paths( $product_id, $variation_id, $file_paths ) {
+	public function process_product_file_download_paths( $product_id, $variation_id, $downloadable_files ) {
 		global $wpdb;
 
 		if ( $variation_id )
 			$product_id = $variation_id;
 
-		// determine whether any new files have been added
-		$existing_file_paths = apply_filters( 'woocommerce_file_download_paths', get_post_meta( $product_id, '_file_paths', true ), $product_id, null, null );
-		if ( ! $existing_file_paths ) $existing_file_paths = array();
+		$product               = get_product( $product_id );
+		$existing_download_ids = array_keys( (array) $product->get_files() );
+		$updated_download_ids  = array_keys( (array) $downloadable_files );
 
-		$new_download_ids = array_diff( array_keys( (array) $file_paths ), array_keys( (array) $existing_file_paths ) );
+		$new_download_ids      = array_filter( array_diff( $updated_download_ids, $existing_download_ids ) );
+		$removed_download_ids  = array_filter( array_diff( $existing_download_ids, $updated_download_ids ) );
 
-		if ( $new_download_ids ) {
-			// determine whether downloadable file access has been granted (either via the typical order completion, or via the admin ajax method)
+		if ( $new_download_ids || $removed_download_ids ) {
+			// determine whether downloadable file access has been granted via the typical order completion, or via the admin ajax method
 			$existing_permissions = $wpdb->get_results( $wpdb->prepare( "SELECT * from {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE product_id = %d GROUP BY order_id", $product_id ) );
+
 			foreach ( $existing_permissions as $existing_permission ) {
 				$order = new WC_Order( $existing_permission->order_id );
 
 				if ( $order->id ) {
-					foreach ( $new_download_ids as $new_download_id ) {
-						// grant permission if it doesn't already exist
-						if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT true FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->id, $product_id, $new_download_id ) ) ) {
-							woocommerce_downloadable_file_permission( $new_download_id, $product_id, $order );
+					// Remove permissions
+					if ( $removed_download_ids ) {
+						foreach ( $removed_download_ids as $download_id ) {
+							$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->id, $product_id, $download_id ) );
+						}
+					}
+					// Add permissions
+					if ( $new_download_ids ) {
+						foreach ( $new_download_ids as $download_id ) {
+							// grant permission if it doesn't already exist
+							if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->id, $product_id, $download_id ) ) ) {
+								woocommerce_downloadable_file_permission( $download_id, $product_id, $order );
+							}
 						}
 					}
 				}

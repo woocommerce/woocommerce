@@ -32,23 +32,18 @@ foreach ( $items as $item ) :
 			// File URLs
 			if ( $show_download_links && $_product->exists() && $_product->is_downloadable() ) {
 
-				$download_file_urls = $order->get_downloadable_file_urls( $item['product_id'], $item['variation_id'], $item );
+				$download_files = $order->get_item_downloads( $item );
+				$i              = 0;
 
-				$i = 0;
-
-				foreach ( $download_file_urls as $file_url => $download_file_url ) {
-					echo '<br/><small>';
-
-					$filename = woocommerce_get_filename_from_url( $file_url );
-
-					if ( count( $download_file_urls ) > 1 ) {
-						echo sprintf( __( 'Download %d:', 'woocommerce' ), $i + 1 );
-					} elseif ( $i == 0 )
-						echo __( 'Download:', 'woocommerce' );
-
-					echo ' <a href="' . $download_file_url . '" target="_blank">' . $filename . '</a></small>';
-
+				foreach ( $download_files as $download_id => $file ) {
 					$i++;
+
+					if ( count( $download_files ) > 1 ) {
+						$prefix = sprintf( __( 'Download %d:', 'woocommerce' ), $i );
+					} elseif ( $i == 1 )
+						$prefix = __( 'Download:', 'woocommerce' );
+
+					echo '<br/><small>' . $prefix . ' <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a></small>';
 				}
 			}
 

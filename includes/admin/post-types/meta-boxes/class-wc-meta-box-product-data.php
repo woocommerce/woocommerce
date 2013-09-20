@@ -181,15 +181,46 @@ class WC_Meta_Box_Product_Data {
 
 				echo '<div class="options_group show_if_downloadable">';
 
-					// File URL
-					$file_paths = get_post_meta( $post->ID, '_file_paths', true );
-					if ( is_array( $file_paths ) )
-						$file_paths = implode( "\n", $file_paths );
+					?>
+					<div class="form-field downloadable_files">
+						<label><?php _e( 'Downloadable Files', 'woocommerce' ); ?>:</label>
+						<table class="widefat">
+							<thead>
+								<tr>
+									<th><?php _e( 'Name', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the name of the download shown to the customer.', 'woocommerce' ); ?>">[?]</span></th>
+									<th colspan="2"><?php _e( 'File URL', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the URL or absolute path to the file which customers will get access to.', 'woocommerce' ); ?>">[?]</span></th>
+									<th>&nbsp;</th>
+								</tr>
+							</thead>
+							<tfoot>
+								<tr>
+									<th colspan="4">
+										<a href="#" class="button insert" data-row="<?php
+											$file = array(
+												'file' => '',
+												'name' => ''
+											);
+											ob_start();
+											include( 'views/html-product-download.php' );
+											echo esc_attr( ob_get_clean() );
+										?>"><?php _e( 'Add File', 'woocommerce' ); ?></a>
+									</th>
+								</tr>
+							</tfoot>
+							<tbody>
+								<?php
+								$downloadable_files = get_post_meta( $post->ID, '_downloadable_files', true );
 
-					echo '<p class="form-field"><label for="_file_paths">' . __( 'File paths (one per line)', 'woocommerce' ) . ':</label>
-						<textarea style="float:left;height:5em;" id="_file_paths" class="short file_paths" cols="20" rows="3" placeholder="' . __( 'File paths/URLs, one per line', 'woocommerce' ) . '" name="_file_paths" wrap="off">' . esc_textarea( $file_paths ) . '</textarea>
-						<input type="button" class="upload_file_button button" data-choose="' . __( 'Choose a file', 'woocommerce' ) . '" data-update="' . __( 'Insert file URL', 'woocommerce' ) . '" value="' . __( 'Choose a file', 'woocommerce' ) . '" />
-					</p>';
+								if ( $downloadable_files ) {
+									foreach ( $downloadable_files as $key => $file ) {
+										include( 'views/html-product-download.php' );
+									}
+								}
+								?>
+							</tbody>
+						</table>
+					</div>
+					<?php
 
 					// Download Limit
 					woocommerce_wp_text_input( array( 'id' => '_download_limit', 'label' => __( 'Download Limit', 'woocommerce' ), 'placeholder' => __( 'Unlimited', 'woocommerce' ), 'description' => __( 'Leave blank for unlimited re-downloads.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
@@ -204,7 +235,7 @@ class WC_Meta_Box_Product_Data {
 					) ) );
 
 					 // Download Type
-					woocommerce_wp_select( array( 'id' => '_download_type', 'label' => __( 'Download Type', 'woocommerce' ), 'options' => array(
+					woocommerce_wp_select( array( 'id' => '_download_type', 'label' => __( 'Download Type', 'woocommerce' ), 'description' => sprintf( __( 'Choose a download type - this controls the <a href="%s">schema</a>.', 'woocommerce' ), 'http://schema.org/' ), 'options' => array(
 						''            => __( 'Standard Product', 'woocommerce' ),
 						'application' => __( 'Application/Software', 'woocommerce' ),
 						'music'       => __( 'Music', 'woocommerce' ),
@@ -746,7 +777,6 @@ class WC_Meta_Box_Product_Data {
 						<option value="variable_length"><?php _e( 'Length', 'woocommerce' ); ?></option>
 						<option value="variable_width"><?php _e( 'Width', 'woocommerce' ); ?></option>
 						<option value="variable_height"><?php _e( 'Height', 'woocommerce' ); ?></option>
-						<option value="variable_file_paths"><?php _e( 'File Path', 'woocommerce' ); ?></option>
 						<option value="variable_download_limit"><?php _e( 'Download limit', 'woocommerce' ); ?></option>
 						<option value="variable_download_expiry"><?php _e( 'Download Expiry', 'woocommerce' ); ?></option>
 						<?php do_action( 'woocommerce_variable_product_bulk_edit_actions' ); ?>
@@ -815,7 +845,7 @@ class WC_Meta_Box_Product_Data {
 							'_height',
 							'_download_limit',
 							'_download_expiry',
-							'_file_paths',
+							'_downloadable_files',
 							'_downloadable',
 							'_virtual',
 							'_thumbnail_id',
@@ -824,7 +854,7 @@ class WC_Meta_Box_Product_Data {
 						);
 
 						foreach ( $variation_fields as $field )
-							$$field = isset( $variation_data[ $field ][0] ) ? $variation_data[ $field ][0] : '';
+							$$field = isset( $variation_data[ $field ][0] ) ? maybe_unserialize( $variation_data[ $field ][0] ) : '';
 
 						// Tax class handling
 						$_tax_class = isset( $variation_data['_tax_class'][0] ) ? $variation_data['_tax_class'][0] : null;
@@ -838,11 +868,6 @@ class WC_Meta_Box_Product_Data {
 						$image_id = absint( $_thumbnail_id );
 						if ( $image_id )
 							$image = wp_get_attachment_thumb_url( $image_id );
-
-						// Format file paths
-						$_file_paths = maybe_unserialize( $_file_paths );
-						if ( is_array( $_file_paths ) )
-							$_file_paths = implode( "\n", $_file_paths );
 
 						include( 'views/html-variation-admin.php' );
 
@@ -1235,23 +1260,25 @@ class WC_Meta_Box_Product_Data {
 				$_download_expiry = ''; // 0 or blank = unlimited
 
 			// file paths will be stored in an array keyed off md5(file path)
-			if ( isset( $_POST['_file_paths'] ) ) {
-				$_file_paths = array();
-				$file_paths = str_replace( "\r\n", "\n", esc_attr( $_POST['_file_paths'] ) );
-				$file_paths = trim( preg_replace( "/\n+/", "\n", $file_paths ) );
-				if ( $file_paths ) {
-					$file_paths = explode( "\n", $file_paths );
+			if ( isset( $_POST['_wc_file_urls'] ) ) {
+				$files = array();
 
-					foreach ( $file_paths as $file_path ) {
-						$file_path = trim( $file_path );
-						$_file_paths[ md5( $file_path ) ] = $file_path;
-					}
+				$file_names    = isset( $_POST['_wc_file_names'] ) ? array_map( 'woocommerce_clean', $_POST['_wc_file_names'] ) : array();
+				$file_urls     = isset( $_POST['_wc_file_urls'] ) ? array_map( 'esc_url_raw', array_map( 'trim', $_POST['_wc_file_urls'] ) ) : array();
+				$file_url_size = sizeof( $file_urls );
+
+				for ( $i = 0; $i < $file_url_size; $i ++ ) {
+					if ( ! empty( $file_urls[ $i ] ) )
+						$files[ md5( $file_urls[ $i ] ) ] = array(
+							'name' => $file_names[ $i ],
+							'file' => $file_urls[ $i ]
+						);
 				}
 
-				// grant permission to any newly added files on any existing orders for this product
-				do_action( 'woocommerce_process_product_file_download_paths', $post_id, 0, $_file_paths );
+				// grant permission to any newly added files on any existing orders for this product prior to saving
+				do_action( 'woocommerce_process_product_file_download_paths', $post_id, 0, $files );
 
-				update_post_meta( $post_id, '_file_paths', $_file_paths );
+				update_post_meta( $post_id, '_downloadable_files', $files );
 			}
 
 			update_post_meta( $post_id, '_download_limit', $_download_limit );
@@ -1294,7 +1321,6 @@ class WC_Meta_Box_Product_Data {
 			$variable_regular_price 			= $_POST['variable_regular_price'];
 			$variable_sale_price				= $_POST['variable_sale_price'];
 			$upload_image_id					= $_POST['upload_image_id'];
-			$variable_file_paths 				= $_POST['variable_file_paths'];
 			$variable_download_limit 			= $_POST['variable_download_limit'];
 			$variable_download_expiry   		= $_POST['variable_download_expiry'];
 			$variable_shipping_class 			= $_POST['variable_shipping_class'];
@@ -1416,26 +1442,27 @@ class WC_Meta_Box_Product_Data {
 					update_post_meta( $variation_id, '_download_limit', woocommerce_clean( $variable_download_limit[ $i ] ) );
 					update_post_meta( $variation_id, '_download_expiry', woocommerce_clean( $variable_download_expiry[ $i ] ) );
 
-					$_file_paths = array();
-					$file_paths = str_replace( "\r\n", "\n", $variable_file_paths[ $i ] );
-					$file_paths = trim( preg_replace( "/\n+/", "\n", $file_paths ) );
-					if ( $file_paths ) {
-						$file_paths = explode( "\n", $file_paths );
+					$files         = array();
+					$file_names    = isset( $_POST['_wc_variation_file_names'][ $variation_id ] ) ? array_map( 'woocommerce_clean', $_POST['_wc_variation_file_names'][ $variation_id ] ) : array();
+					$file_urls     = isset( $_POST['_wc_variation_file_urls'][ $variation_id ] ) ? array_map( 'esc_url_raw', array_map( 'trim', $_POST['_wc_variation_file_urls'][ $variation_id ] ) ) : array();
+					$file_url_size = sizeof( $file_urls );
 
-						foreach ( $file_paths as $file_path ) {
-							$file_path = trim( $file_path );
-							$_file_paths[ md5( $file_path ) ] = $file_path;
-						}
+					for ( $i = 0; $i < $file_url_size; $i ++ ) {
+						if ( ! empty( $file_urls[ $i ] ) )
+							$files[ md5( $file_urls[ $i ] ) ] = array(
+								'name' => $file_names[ $i ],
+								'file' => $file_urls[ $i ]
+							);
 					}
 
-					// grant permission to any newly added files on any existing orders for this product
-					do_action( 'woocommerce_process_product_file_download_paths', $post_id, $variation_id, $_file_paths );
+					// grant permission to any newly added files on any existing orders for this product prior to saving
+					do_action( 'woocommerce_process_product_file_download_paths', $post_id, $variation_id, $files );
 
-					update_post_meta( $variation_id, '_file_paths', $_file_paths );
+					update_post_meta( $variation_id, '_downloadable_files', $files );
 				} else {
 					update_post_meta( $variation_id, '_download_limit', '' );
 					update_post_meta( $variation_id, '_download_expiry', '' );
-					update_post_meta( $variation_id, '_file_paths', '' );
+					update_post_meta( $variation_id, '_downloadable_files', '' );
 				}
 
 				// Save shipping class

@@ -138,21 +138,58 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 							</td>
 						</tr>
 						<tr class="show_if_variation_downloadable">
-							<td rowspan="2">
-								<div class="file_path_field">
-									<label><?php _e( 'File paths:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enter one or more File Paths, one per line, to make this variation a downloadable product, or leave blank.', 'woocommerce' ); ?>" href="#">[?]</a></label>
-									<textarea style="float:left;" class="short file_paths" cols="20" rows="2" placeholder="<?php _e( 'File paths/URLs, one per line', 'woocommerce' ); ?>" name="variable_file_paths[<?php echo $loop; ?>]" wrap="off"><?php if ( isset( $_file_paths ) ) echo esc_textarea( $_file_paths ); ?></textarea>
-									<input type="button" class="upload_file_button button" value="<?php _e( 'Choose a file', 'woocommerce' ); ?>" title="<?php _e( 'Upload', 'woocommerce' ); ?>" data-choose="<?php _e( 'Choose a file', 'woocommerce' ); ?>" data-update="<?php _e( 'Insert file URL', 'woocommerce' ); ?>" value="<?php _e( 'Choose a file', 'woocommerce' ); ?>" />
+							<td colspan="2">
+								<div class="form-field downloadable_files">
+									<label><?php _e( 'Downloadable Files', 'woocommerce' ); ?>:</label>
+									<table class="widefat">
+										<thead>
+											<tr>
+												<th><?php _e( 'Name', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the name of the download shown to the customer.', 'woocommerce' ); ?>">[?]</span></th>
+												<th colspan="2"><?php _e( 'File URL', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the URL or absolute path to the file which customers will get access to.', 'woocommerce' ); ?>">[?]</span></th>
+												<th>&nbsp;</th>
+											</tr>
+										</thead>
+										<tfoot>
+											<tr>
+												<th colspan="4">
+													<a href="#" class="button insert" data-row="<?php
+														$file = array(
+															'file' => '',
+															'name' => ''
+														);
+														ob_start();
+														include( 'html-product-variation-download.php' );
+														echo esc_attr( ob_get_clean() );
+													?>"><?php _e( 'Add File', 'woocommerce' ); ?></a>
+												</th>
+											</tr>
+										</tfoot>
+										<tbody>
+											<?php
+											if ( $_downloadable_files ) {
+												foreach ( $_downloadable_files as $key => $file ) {
+													if ( ! is_array( $file ) ) {
+														$file = array(
+															'file' => $file,
+															'name' => ''
+														);
+													}
+													include( 'html-product-variation-download.php' );
+												}
+											}
+											?>
+										</tbody>
+									</table>
 								</div>
 							</td>
+						</tr>
+						<tr class="show_if_variation_downloadable">
 							<td>
 								<div>
 									<label><?php _e( 'Download Limit:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Leave blank for unlimited re-downloads.', 'woocommerce' ); ?>" href="#">[?]</a></label>
 									<input type="number" size="5" name="variable_download_limit[<?php echo $loop; ?>]" value="<?php if ( isset( $_download_limit ) ) echo esc_attr( $_download_limit ); ?>" placeholder="<?php _e( 'Unlimited', 'woocommerce' ); ?>" step="1" min="0" />
 								</div>
 							</td>
-						</tr>
-						<tr class="show_if_variation_downloadable">
 							<td>
 								<div>
 									<label><?php _e( 'Download Expiry:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enter the number of days before a download link expires, or leave blank.', 'woocommerce' ); ?>" href="#">[?]</a></label>

@@ -806,14 +806,13 @@ function woocommerce_grant_access_to_download() {
 	$file_count = 0;
 	$order 		= new WC_Order( $order_id );
 	$product 	= get_product( $product_id );
+	$files      = $product->get_files();
 
 	if ( ! $order->billing_email )
 		die();
 
-	$file_paths = apply_filters( 'woocommerce_file_download_paths', get_post_meta( $product_id, '_file_paths', true ), $product_id, $order_id, null );
-
-	if ( $file_paths ) {
-		foreach ( $file_paths as $download_id => $file_path ) {
+	if ( $files ) {
+		foreach ( $files as $download_id => $file ) {
 			if ( $inserted_id = woocommerce_downloadable_file_permission( $download_id, $product_id, $order ) ) {
 
 				// insert complete - get inserted data

@@ -252,33 +252,74 @@ class WC_Product {
 	 * @return bool Whether downloadable product has a file attached.
 	 */
 	public function has_file( $download_id = '' ) {
-		return ( $this->is_downloadable() && $this->get_file_download_path( $download_id ) ) ? true : false;
+		return ( $this->is_downloadable() && $this->get_file( $download_id ) ) ? true : false;
+	}
+
+	/**
+	 * Gets an array of downloadable files for this product.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return array
+	 */
+	public function get_files() {
+		$downloadable_files = array_filter( isset( $this->downloadable_files ) ? (array) maybe_unserialize( $this->downloadable_files ) : array() );
+
+		if ( $downloadable_files ) {
+			foreach ( $downloadable_files as $key => $file ) {
+				if ( ! is_array( $file ) ) {
+					$downloadable_files[ $key ] = array(
+						'file' => $file,
+						'name' => ''
+					);
+				}
+
+				// Set default name
+				if ( empty( $file['name'] ) )
+					$downloadable_files[ $key ]['name'] = woocommerce_get_filename_from_url( $file );
+
+				// Filter URL
+				$downloadable_files[ $key ]['file'] = apply_filters( 'woocommerce_file_download_path', $downloadable_files[ $key ]['file'], $this->id, $key );
+			}
+		}
+
+		return apply_filters( 'woocommerce_product_files', $downloadable_files, $this->id );
+	}
+
+	/**
+	 * Get a file by $download_id
+	 *
+	 * @param string $download_id file identifier
+	 * @return array|false if not found
+	 */
+	public function get_file( $download_id ) {
+		$files = $this->get_files();
+
+		if ( isset( $files[ $download_id ] ) )
+			$file = $files[ $download_id ];
+		else
+			$file = false;
+
+		// allow overriding based on the particular file being requested
+		return apply_filters( 'woocommerce_product_file', $file, $this->id, $download_id );
 	}
 
 	/**
 	 * Get file download path identified by $download_id
 	 *
-	 * @access public
 	 * @param string $download_id file identifier
-	 * @return array
+	 * @return string
 	 */
 	public function get_file_download_path( $download_id ) {
+		$files = $this->get_files();
 
-		$file_paths = isset( $this->file_paths ) ? $this->file_paths : '';
-		$file_paths = maybe_unserialize( $file_paths );
-		$file_paths = (array) apply_filters( 'woocommerce_file_download_paths', $file_paths, $this->id, null, null );
-
-		if ( ! $download_id && count( $file_paths ) == 1 ) {
-			// backwards compatibility for old-style download URLs and template files
-			$file_path = array_shift( $file_paths );
-		} elseif ( isset( $file_paths[ $download_id ] ) ) {
-			$file_path = $file_paths[ $download_id ];
-		} else {
+		if ( isset( $files[ $download_id ] ) )
+			$file_path = $files[ $download_id ]['file'];
+		else
 			$file_path = '';
-		}
 
 		// allow overriding based on the particular file being requested
-		return apply_filters( 'woocommerce_file_download_path', $file_path, $this->id, $download_id );
+		return apply_filters( 'woocommerce_product_file_download_path', $file_path, $this->id, $download_id );
 	}
 
 	/**

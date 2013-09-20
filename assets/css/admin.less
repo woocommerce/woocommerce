@@ -2245,7 +2245,61 @@ img.help_tip {
 	margin: 7px 0;
 	width: auto;
 }
+.woocommerce_variations, .woocommerce_options_panel {
+	.downloadable_files {
+		table {
+			width: 100%;
+			padding:0 !important;
+			th {
+				padding: 7px 0 7px 7px;
+			}
+			td {
+				vertical-align: middle !important;
+				padding: 4px 0 4px 7px;
+				position: relative;
+
+				&:last-child {
+					padding-right: 7px;
+				}
+				input.input_text {
+					width: 100%;
+					float: none;
+					margin: 1px 0;
+				}
+				.upload_file_button {
+					float: right;
+					width: auto;
+					cursor: pointer;
+				}
+				.delete {
+					.ir;
+					&:before {
+						.icon;
+						content: "\e013";
+						color: #999;
+					}
+					&:hover {
+						&:before {
+							color: red;
+						}
+					}
+				}
+			}
+		}
+	}
+}
 .woocommerce_options_panel {
+	.downloadable_files {
+		padding: 0 9px 0 162px;
+		position: relative;
+		margin: 9px 0 9px;
+		label {
+			position: absolute;
+			left: 0;
+			margin: 0 0 0 12px;
+			line-height: 24px;
+		}
+	}
 	p {
 		margin: 9px 0 9px;
 	}
@@ -2339,13 +2393,6 @@ img.help_tip {
 				margin-right: 0;
 			}
 		}
-	}
-	.upload_file_button {
-		padding-left: 20px;
-		background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAQ0lEQVQYV3WPUQoAMAhC1+E6tYdrFBgiW185X7biSAGolpkZfN6GJg1CA7ip0CYo+FzxBTqeE/7J1qGAXsTEAdxQfQHJTymZe4oqiAAAAABJRU5ErkJggg==) !important;
-		background-color: #FEFEFE !important;
-		background-repeat: no-repeat !important;
-		background-position: 8px 7px !important;
 	}
 }
 #woocommerce-product-data input.dp-applied {
@@ -2460,11 +2507,6 @@ img.help_tip {
 					font-size: 14px;
 					padding: 4px;
 					color: #555;
-				}
-				.upload_file_button {
-					font-size: 12px;
-					padding: 3px 8px 3px 20px;
-					line-height: 1;
 				}
 				select, .chosen-container  {
 					width: 100% !important;
@@ -2618,18 +2660,6 @@ img.help_tip {
 					}
 					.upload_image_button.remove .overlay {
 						background: #eee url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAWElEQVQYGY2OUQ6AMAxCZdm9jSev65K3YKNm+6EFBlVEHDxJJ3Pi0C72xlBNyTs3jU7wEUTTIB51GCp2CL8HLpHEdaOLb/N2dfuq9NT0zOo/M9q6EaImsd/uViMLVuD4KAAAAABJRU5ErkJggg==) no-repeat center center;
-					}
-				}
-				.file_path_field {
-					.upload_file_button {
-						text-align: center;
-						width: auto;
-						margin: 5px 0 0 0;
-						padding: 3px 8px 3px 20px;
-						background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAQ0lEQVQYV3WPUQoAMAhC1+E6tYdrFBgiW185X7biSAGolpkZfN6GJg1CA7ip0CYo+FzxBTqeE/7J1qGAXsTEAdxQfQHJTymZe4oqiAAAAABJRU5ErkJggg==) !important;
-						background-color: #FEFEFE !important;
-						background-repeat: no-repeat !important;
-						background-position: 8px 7px !important;
 					}
 				}
 			}
