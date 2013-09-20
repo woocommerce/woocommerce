@@ -90,6 +90,7 @@
   width: 100%;
   height: 100%;
   text-align: center;
+  content: "\e001";
   font-size: 2em;
   position: relative;
   width: auto;
