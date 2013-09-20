@@ -1510,7 +1510,7 @@ function woocommerce_get_product_terms( $object_id, $taxonomy, $fields = 'all' )
 
 	if ( ! is_array( $object_terms ) )
 		return array();
-	
+
 	$all_terms 		= array_flip( get_terms( $taxonomy, array( 'menu_order' => 'ASC', 'fields' => 'ids' ) ) );
 
 	switch ( $fields ) {
@@ -2354,6 +2354,9 @@ add_action( 'woocommerce_product_set_stock_status', 'woocommerce_recount_after_s
  * @return void
  */
 function woocommerce_change_term_counts( $terms, $taxonomies, $args ) {
+
+	if ( ! isset( $taxonomies[0] ) || ! is_array( $taxonomies[0] ) )
+		return;
 
 	if ( ! in_array( $taxonomies[0], apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag' ) ) ) )
 		return $terms;
