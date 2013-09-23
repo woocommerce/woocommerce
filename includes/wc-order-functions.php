@@ -106,35 +106,25 @@ add_action('woocommerce_order_status_processing', 'woocommerce_downloadable_prod
  * @return void
  */
 function woocommerce_downloadable_product_permissions( $order_id ) {
-
-	if ( get_post_meta( $order_id, __( 'Download Permissions Granted', 'woocommerce' ), true ) == 1 )
+	if ( get_post_meta( $order_id, '_download_permissions_granted', true ) == 1 )
 		return; // Only do this once
 
 	$order = new WC_Order( $order_id );
 
-	if (sizeof($order->get_items())>0) foreach ($order->get_items() as $item) :
-
-		if ($item['product_id']>0) :
+	if ( sizeof( $order->get_items() ) > 0 ) {
+		foreach ( $order->get_items() as $item ) {
 			$_product = $order->get_product_from_item( $item );
 
-			if ( $_product && $_product->exists() && $_product->is_downloadable() ) :
+			if ( $_product && $_product->exists() && $_product->is_downloadable() ) {
+				$downloads = $order->get_item_downloads( $item );
 
-				$product_id = ($item['variation_id']>0) ? $item['variation_id'] : $item['product_id'];
+				foreach ( $downloads as $download_id => $download )
+					woocommerce_downloadable_file_permission( $download_id, $item['variation_id'] > 0 ? $item['variation_id'] : $item['product_id'], $order );
+			}
+		}
+	}
 
-				$file_download_paths = apply_filters( 'woocommerce_file_download_paths', get_post_meta( $product_id, '_file_paths', true ), $product_id, $order_id, $item );
-				if ( ! empty( $file_download_paths ) ) {
-					foreach ( $file_download_paths as $download_id => $file_path ) {
-						woocommerce_downloadable_file_permission( $download_id, $product_id, $order );
-					}
-				}
-
-			endif;
-
-		endif;
-
-	endforeach;
-
-	update_post_meta( $order_id,  __( 'Download Permissions Granted', 'woocommerce' ), 1);
+	update_post_meta( $order_id, '_download_permissions_granted', 1 );
 
 	do_action( 'woocommerce_grant_product_download_permissions', $order_id );
 

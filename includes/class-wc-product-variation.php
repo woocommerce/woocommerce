@@ -51,6 +51,9 @@ class WC_Product_Variation extends WC_Product {
 	/** @public bool True if the variation has a tax class. */
 	public $variation_has_tax_class = false;
 
+	/** @public bool True if the variation has file paths. */
+	public $variation_has_downloadable_files = false;
+
 	/**
 	 * Loads all product data from custom fields
 	 *
@@ -93,6 +96,11 @@ class WC_Product_Variation extends WC_Product {
 		if ( ! empty( $this->product_custom_fields['_sku'][0] ) ) {
 			$this->variation_has_sku = true;
 			$this->sku               = $this->product_custom_fields['_sku'][0];
+		}
+
+		if ( ! empty( $this->product_custom_fields['_downloadable_files'][0] ) ) {
+			$this->variation_has_downloadable_files = true;
+			$this->downloadable_files               = $this->product_custom_fields['_downloadable_files'][0];
 		}
 
 		if ( isset( $this->product_custom_fields['_stock'][0] ) && $this->product_custom_fields['_stock'][0] !== '' ) {
@@ -411,29 +419,6 @@ class WC_Product_Variation extends WC_Product {
 
 		}
 		return absint( $this->variation_shipping_class_id );
-	}
-
-	/**
-	 * Get file download path identified by $download_id
-	 *
-	 * @access public
-	 * @param string $download_id file identifier
-	 * @return array
-	 */
-	public function get_file_download_path( $download_id ) {
-
-		$file_path = '';
-		$file_paths = (array) apply_filters( 'woocommerce_file_download_paths', get_post_meta( $this->variation_id, '_file_paths', true ), $this->variation_id, null, null );
-
-		if ( ! $download_id && count( $file_paths ) == 1 ) {
-			// backwards compatibility for old-style download URLs and template files
-			$file_path = array_shift( $file_paths );
-		} elseif ( isset( $file_paths[ $download_id ] ) ) {
-			$file_path = $file_paths[ $download_id ];
-		}
-
-		// allow overriding based on the particular file being requested
-		return apply_filters( 'woocommerce_file_download_path', $file_path, $this->variation_id, $download_id );
 	}
 
 	/**

@@ -946,6 +946,16 @@ jQuery( function($){
 		return false;
 	});
 
+	// File inputs
+	$('.downloadable_files').on('click','a.insert',function(){
+		$(this).closest('.downloadable_files').find('tbody').append( $(this).data( 'row' ) );
+		return false;
+	});
+	$('.downloadable_files').on('click','a.delete',function(){
+		$(this).closest('tr').remove();
+		return false;
+	});
+
 
 	// STOCK OPTIONS
 	$('input#_manage_stock').change(function(){
@@ -1222,14 +1232,12 @@ jQuery( function($){
 	// Uploading files
 	var downloadable_file_frame;
 	var file_path_field;
-	var file_paths;
 
 	jQuery(document).on( 'click', '.upload_file_button', function( event ){
 
 		var $el = $(this);
 
-		file_path_field = $el.parent().find('.file_paths');
-		file_paths      = file_path_field.val();
+		file_path_field = $el.closest('tr').find('td.file_url input');
 
 		event.preventDefault();
 
@@ -1267,6 +1275,7 @@ jQuery( function($){
 		// When an image is selected, run a callback.
 		downloadable_file_frame.on( 'select', function() {
 
+			var file_path = '';
 			var selection = downloadable_file_frame.state().get('selection');
 
 			selection.map( function( attachment ) {
@@ -1274,11 +1283,11 @@ jQuery( function($){
 				attachment = attachment.toJSON();
 
 				if ( attachment.url )
-					file_paths = file_paths ? file_paths + "\n" + attachment.url : attachment.url
+					file_path = attachment.url
 
 			} );
 
-			file_path_field.val( file_paths );
+			file_path_field.val( file_path );
 		});
 
 		// Set post to 0 and set our custom type

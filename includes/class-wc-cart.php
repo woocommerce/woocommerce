@@ -1463,11 +1463,9 @@ class WC_Cart {
 						$item_tax_rates = $tax_rates[ $_product->get_tax_class() ];
 
 						/**
-						 * ADJUST TAX - Calculations when customer is OUTSIDE the shop base country/state and prices INCLUDE tax
-						 * 	OR
-						 * ADJUST TAX - Calculations when a tax class is modified
+						 * ADJUST TAX - Calculations when base tax is not equal to the item tax
 						 */
-						if ( $_product->get_tax_class() !== $_product->tax_class || ( $woocommerce->customer->is_customer_outside_base() && ( defined('WOOCOMMERCE_CHECKOUT') || $woocommerce->customer->has_calculated_shipping() ) ) ) {
+						if ( $item_tax_rates !== $base_tax_rates ) {
 
 							// Work out a new base price without the shop's base tax
 							$line_tax              = array_sum( $this->tax->calc_tax( $line_price, $base_tax_rates, true ) );

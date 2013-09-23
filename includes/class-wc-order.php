@@ -1022,7 +1022,7 @@ class WC_Order {
 	/**
 	 * Gets any downloadable product file urls.
 	 *
-	 * @access public
+	 * @deprecated as of 2.1 get_item_downloads is prefered as downloads are more than just file urls
 	 * @param int $product_id product identifier
 	 * @param int $variation_id variation identifier, or null
 	 * @param array $item the item
@@ -1031,6 +1031,8 @@ class WC_Order {
 	public function get_downloadable_file_urls( $product_id, $variation_id, $item ) {
 		global $wpdb;
 
+		_deprecated_function( 'get_downloadable_file_urls', '2.1', 'get_item_downloads' );
+
 	 	$download_file = $variation_id > 0 ? $variation_id : $product_id;
 		$_product = get_product( $download_file );
 
@@ -1038,7 +1040,7 @@ class WC_Order {
 
 		$results = $wpdb->get_results( $wpdb->prepare("
 			SELECT download_id
-			FROM " . $wpdb->prefix . "woocommerce_downloadable_product_permissions
+			FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
 			WHERE user_email = %s
 			AND order_key = %s
 			AND product_id = %s
@@ -1047,13 +1049,56 @@ class WC_Order {
 		$file_urls = array();
 		foreach ( $results as $result ) {
 			if ( $_product->has_file( $result->download_id ) ) {
-
-				$file_urls[ $_product->get_file_download_path( $result->download_id ) ] = add_query_arg( array( 'download_file' => $download_file, 'order' => $this->order_key, 'email' => $user_email, 'key' => $result->download_id ), trailingslashit( home_url() ) );
-
+				$file_urls[ $_product->get_file_download_path( $result->download_id ) ] = $this->get_download_url( $download_file, $result->download_id );
 			}
 		}
 
 		return apply_filters( 'woocommerce_get_downloadable_file_urls', $file_urls, $product_id, $variation_id, $item );
+	}
+
+	/**
+	 * Get the downloadable files for an item in this order
+	 * @param  array $item
+	 * @return array
+	 */
+	public function get_item_downloads( $item ) {
+		global $wpdb;
+
+		$product_id   = $item['variation_id'] > 0 ? $item['variation_id'] : $item['product_id'];
+		$product      = get_product( $product_id );
+		$download_ids = $wpdb->get_col( $wpdb->prepare("
+			SELECT download_id
+			FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
+			WHERE user_email = %s
+			AND order_key = %s
+			AND product_id = %s
+		", $this->billing_email, $this->order_key, $product_id ) );
+
+		$files = array();
+
+		foreach ( $download_ids as $download_id ) {
+			if ( $product->has_file( $download_id ) ) {
+				$files[ $download_id ]                 = $product->get_file( $download_id );
+				$files[ $download_id ]['download_url'] = $this->get_download_url( $product_id, $download_id );
+			}
+		}
+
+		return apply_filters( 'woocommerce_get_item_downloads', $files, $item, $this );
+	}
+
+	/**
+	 * Get the Download URL
+	 * @param  int $product_id
+	 * @param  int $download_id
+	 * @return string
+	 */
+	public function get_download_url( $product_id, $download_id ) {
+		return add_query_arg( array(
+			'download_file' => $product_id,
+			'order'         => $this->order_key,
+			'email'         => $this->billing_email,
+			'key'           => $download_id
+		), trailingslashit( home_url() ) );
 	}
 
 	/**
