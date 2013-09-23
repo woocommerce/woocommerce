@@ -171,6 +171,18 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				'autoload'      => false
 			),
 
+			array(
+				'title'   => __( 'Display tax totals:', 'woocommerce' ),
+				'id'      => 'woocommerce_tax_total_display',
+				'default' => 'itemized',
+				'type'    => 'select',
+				'options' => array(
+					'single'     => __( 'As a single total', 'woocommerce' ),
+					'itemized'   => __( 'Itemized', 'woocommerce' ),
+				),
+				'autoload'      => false
+			),
+
 			array( 'type' => 'sectionend', 'id' => 'tax_options' ),
 
 		)); // End tax settings

@@ -852,10 +852,17 @@ class WC_Order {
 
 		// Tax for tax exclusive prices
 		if ( $tax_display == 'excl' ) {
-			foreach ( $this->get_tax_totals() as $code => $tax ) {
-				$total_rows[ sanitize_title( $code ) ] = array(
-					'label' => $tax->label . ':',
-					'value'	=> $tax->formatted_amount
+			if ( get_option( 'woocommerce_tax_total_display' ) == 'itemized' ) {
+				foreach ( $this->get_tax_totals() as $code => $tax ) {
+					$total_rows[ sanitize_title( $code ) ] = array(
+						'label' => $tax->label . ':',
+						'value'	=> $tax->formatted_amount
+					);
+				}
+			} else {
+				$total_rows['tax'] = array(
+					'label' => WC()->countries->tax_or_vat() . ':',
+					'value'	=> woocommerce_price( $this->get_total_tax() )
 				);
 			}
 		}
@@ -876,8 +883,12 @@ class WC_Order {
 
 			$tax_string_array = array();
 
-			foreach ( $this->get_tax_totals() as $code => $tax ) {
-				$tax_string_array[] = sprintf( '%s %s', $tax->formatted_amount, $tax->label );
+			if ( get_option( 'woocommerce_tax_total_display' ) == 'itemized' ) {
+				foreach ( $this->get_tax_totals() as $code => $tax ) {
+					$tax_string_array[] = sprintf( '%s %s', $tax->formatted_amount, $tax->label );
+				}
+			} else {
+				$tax_string_array[] = sprintf( '%s %s', woocommerce_price( $this->get_total_tax() ), WC()->countries->tax_or_vat() );
 			}
 
 			if ( ! empty( $tax_string_array ) )
