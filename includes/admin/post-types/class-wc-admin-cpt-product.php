@@ -812,6 +812,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 				if ( isset( $new_price ) && $new_price != $old_regular_price ) {
 					$price_changed = true;
+					$new_price = number_format( $new_price, absint( get_option( 'woocommerce_price_num_decimals' ) ), '.', '' );
 					update_post_meta( $post_id, '_regular_price', $new_price );
 					$product->regular_price = $new_price;
 				}
@@ -854,6 +855,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 				if ( isset( $new_price ) && $new_price != $old_sale_price ) {
 					$price_changed = true;
+					$new_price = number_format( $new_price, absint( get_option( 'woocommerce_price_num_decimals' ) ), '.', '' );
 					update_post_meta( $post_id, '_sale_price', $new_price );
 					$product->sale_price = $new_price;
 				}
