@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce v2.1\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2013-09-16 23:40:17+00:00\n"
-"PO-Revision-Date: 2013-09-16 20:47-0300\n"
+"POT-Creation-Date: 2013-09-22 23:32:42+00:00\n"
+"PO-Revision-Date: 2013-09-22 20:45-0300\n"
 "Last-Translator: Renato Covarrubias <rnt@rnt.cl>\n"
 "Language-Team: Renato Covarrubias <rnt@rnt.cl>\n"
 "Language: es\n"
@@ -937,8 +937,8 @@ msgstr "Dirección 2"
 #: includes/admin/class-wc-admin-profile.php:111
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:49
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:96
-#: includes/admin/settings/class-wc-settings-tax.php:223
-#: includes/admin/settings/class-wc-settings-tax.php:350
+#: includes/admin/settings/class-wc-settings-tax.php:242
+#: includes/admin/settings/class-wc-settings-tax.php:369
 msgid "City"
 msgstr "Ciudad"
 
@@ -2777,8 +2777,8 @@ msgstr "Cant."
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:46
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:118
 #: includes/admin/settings/class-wc-settings-tax.php:25
-#: includes/admin/settings/class-wc-settings-tax.php:517
-#: includes/admin/settings/class-wc-settings-tax.php:605
+#: includes/admin/settings/class-wc-settings-tax.php:536
+#: includes/admin/settings/class-wc-settings-tax.php:624
 msgid "Tax"
 msgstr "Impuestos"
 
@@ -2866,8 +2866,8 @@ msgstr "Añadir"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:62
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:94
 #: includes/admin/settings/class-wc-settings-shipping.php:25
-#: includes/admin/settings/class-wc-settings-tax.php:233
-#: includes/admin/settings/class-wc-settings-tax.php:350
+#: includes/admin/settings/class-wc-settings-tax.php:252
+#: includes/admin/settings/class-wc-settings-tax.php:369
 #: includes/admin/views/html-admin-page-addons.php:13
 msgid "Shipping"
 msgstr "Envío"
@@ -3151,7 +3151,7 @@ msgstr "Ninguno"
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:123
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:134
 #: includes/admin/settings/class-wc-settings-tax.php:122
-#: includes/admin/settings/class-wc-settings-tax.php:210
+#: includes/admin/settings/class-wc-settings-tax.php:229
 #: includes/admin/views/html-bulk-edit-product.php:83
 #: includes/admin/views/html-quick-edit-product.php:61
 msgid "Standard"
@@ -3159,7 +3159,7 @@ msgstr "Estándar"
 
 # @ woocommerce
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:235
-#: includes/admin/settings/class-wc-settings-tax.php:350
+#: includes/admin/settings/class-wc-settings-tax.php:369
 #: includes/admin/views/html-bulk-edit-product.php:77
 #: includes/admin/views/html-quick-edit-product.php:56
 msgid "Tax Class"
@@ -3921,7 +3921,7 @@ msgstr "Más descuento"
 #: includes/admin/reports/class-wc-report-sales-by-product.php:326
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:29
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:29
-#: includes/admin/settings/class-wc-settings-tax.php:256
+#: includes/admin/settings/class-wc-settings-tax.php:275
 msgid "Export CSV"
 msgstr "Exportar a CSV"
 
@@ -5611,24 +5611,47 @@ msgstr "Tasa reducida%s"
 
 # @ woocommerce
 #: includes/admin/settings/class-wc-settings-tax.php:144
-msgid "Display prices during cart/checkout:"
-msgstr "Mostrar precios durante carrito/finalizar compra:"
+msgid "Display prices in the shop:"
+msgstr "Mostrar precios en la tienda:"
 
 # @ woocommerce
 #: includes/admin/settings/class-wc-settings-tax.php:149
+#: includes/admin/settings/class-wc-settings-tax.php:168
 msgid "Including tax"
 msgstr "Impuestos incluidos"
 
 # @ woocommerce
 #: includes/admin/settings/class-wc-settings-tax.php:150
+#: includes/admin/settings/class-wc-settings-tax.php:169
 msgid "Excluding tax"
 msgstr "Impuestos no incluidos"
 
-#: includes/admin/settings/class-wc-settings-tax.php:210
+#: includes/admin/settings/class-wc-settings-tax.php:155
+msgid "Price display suffix:"
+msgstr "Prefijo de precio a mostrar:"
+
+#: includes/admin/settings/class-wc-settings-tax.php:159
+msgid ""
+"Define text to show after your product prices. This could be, for example, "
+"\"inc. Vat\" to explain your pricing. You can also have prices substituted "
+"here using one of the following: <code>{price_including_tax}, "
+"{price_excluding_tax}</code>."
+msgstr ""
+"Define el texto a mostrar después del precio de los productos. Este puede "
+"ser, por ejemplo, \"inc. imp.\" para explicar tus precios. También puede "
+"tener precios sustituidos usando uso de los siguientes: "
+"<code>{price_including_tax}, {price_excluding_tax}</code>."
+
+# @ woocommerce
+#: includes/admin/settings/class-wc-settings-tax.php:163
+msgid "Display prices during cart/checkout:"
+msgstr "Mostrar precios durante carrito/finalizar compra:"
+
+#: includes/admin/settings/class-wc-settings-tax.php:229
 msgid "Tax Rates for the \"%s\" Class"
 msgstr "Tipo de impuestos para \"%s\""
 
-#: includes/admin/settings/class-wc-settings-tax.php:211
+#: includes/admin/settings/class-wc-settings-tax.php:230
 msgid ""
 "Define tax rates for countries and states below. <a href=\"%s\">See here</a> "
 "for available alpha-2 country codes."
@@ -5636,35 +5659,35 @@ msgstr ""
 "Defina los impuestos para otros paises y estados abajo. <a href=\"%s\">Ver "
 "aquí</a> códigos de país alpha-2"
 
-#: includes/admin/settings/class-wc-settings-tax.php:217
+#: includes/admin/settings/class-wc-settings-tax.php:236
 msgid "Country&nbsp;Code"
 msgstr "Código de país"
 
 # @ woocommerce
-#: includes/admin/settings/class-wc-settings-tax.php:217
+#: includes/admin/settings/class-wc-settings-tax.php:236
 msgid "A 2 digit country code, e.g. US. Leave blank to apply to all."
 msgstr ""
 "Un código de país de 2 digitos, ejemplo: US. Dejelo en blanco para afectar a "
 "todos."
 
-#: includes/admin/settings/class-wc-settings-tax.php:219
+#: includes/admin/settings/class-wc-settings-tax.php:238
 msgid "State&nbsp;Code"
 msgstr "Código de estado"
 
 # @ woocommerce
-#: includes/admin/settings/class-wc-settings-tax.php:219
+#: includes/admin/settings/class-wc-settings-tax.php:238
 msgid "A 2 digit state code, e.g. AL. Leave blank to apply to all."
 msgstr ""
 "Un código de estado de 2 digitos, ejemplo: AL. Dejelo en blanco para afectar "
 "a todos."
 
 # @ woocommerce
-#: includes/admin/settings/class-wc-settings-tax.php:221
-#: includes/admin/settings/class-wc-settings-tax.php:350
+#: includes/admin/settings/class-wc-settings-tax.php:240
+#: includes/admin/settings/class-wc-settings-tax.php:369
 msgid "ZIP/Postcode"
 msgstr "Código postal"
 
-#: includes/admin/settings/class-wc-settings-tax.php:221
+#: includes/admin/settings/class-wc-settings-tax.php:240
 msgid ""
 "Postcode for this rule. Semi-colon (;) separate multiple values. Leave blank "
 "to apply to all areas. Wildcards (*) can be used. Ranges for numeric "
@@ -5675,7 +5698,7 @@ msgstr ""
 "(*). Rangos numericos (ej. 1234-5678) se autoexpanden en códigos postales "
 "individuales."
 
-#: includes/admin/settings/class-wc-settings-tax.php:223
+#: includes/admin/settings/class-wc-settings-tax.php:242
 msgid ""
 "Cities for this rule. Semi-colon (;) separate multiple values. Leave blank "
 "to apply to all cities."
@@ -5684,31 +5707,31 @@ msgstr ""
 "(;). Dejelo en blanco para afectar a todas."
 
 # @ woocommerce
-#: includes/admin/settings/class-wc-settings-tax.php:225
+#: includes/admin/settings/class-wc-settings-tax.php:244
 msgid "Rate&nbsp;%"
 msgstr "Tarifa"
 
 # @ woocommerce
-#: includes/admin/settings/class-wc-settings-tax.php:225
+#: includes/admin/settings/class-wc-settings-tax.php:244
 msgid "Enter a tax rate (percentage) to 4 decimal places."
 msgstr "Introduzca un porcentaje de 4 decimales."
 
 # @ woocommerce
-#: includes/admin/settings/class-wc-settings-tax.php:227
+#: includes/admin/settings/class-wc-settings-tax.php:246
 msgid "Tax&nbsp;Name"
 msgstr "Nombre&nbsp;impuesto"
 
 # @ woocommerce
-#: includes/admin/settings/class-wc-settings-tax.php:227
+#: includes/admin/settings/class-wc-settings-tax.php:246
 msgid "Enter a name for this tax rate."
 msgstr "Introduzca un nombre para este tipo de impuesto."
 
-#: includes/admin/settings/class-wc-settings-tax.php:229
-#: includes/admin/settings/class-wc-settings-tax.php:350
+#: includes/admin/settings/class-wc-settings-tax.php:248
+#: includes/admin/settings/class-wc-settings-tax.php:369
 msgid "Priority"
 msgstr "Prioridad"
 
-#: includes/admin/settings/class-wc-settings-tax.php:229
+#: includes/admin/settings/class-wc-settings-tax.php:248
 msgid ""
 "Choose a priority for this tax rate. Only 1 matching rate per priority will "
 "be used. To define multiple tax rates for a single area you need to specify "
@@ -5719,13 +5742,13 @@ msgstr ""
 "solo area necesitará especificar las prioridades."
 
 # @ woocommerce
-#: includes/admin/settings/class-wc-settings-tax.php:231
-#: includes/admin/settings/class-wc-settings-tax.php:350
+#: includes/admin/settings/class-wc-settings-tax.php:250
+#: includes/admin/settings/class-wc-settings-tax.php:369
 msgid "Compound"
 msgstr "Compuesto"
 
 # @ woocommerce
-#: includes/admin/settings/class-wc-settings-tax.php:231
+#: includes/admin/settings/class-wc-settings-tax.php:250
 msgid ""
 "Choose whether or not this is a compound rate. Compound tax rates are "
 "applied on top of other tax rates."
@@ -5734,46 +5757,46 @@ msgstr ""
 "compuestos son aplicadas por encima del resto de tasas impositivas."
 
 # @ woocommerce
-#: includes/admin/settings/class-wc-settings-tax.php:233
+#: includes/admin/settings/class-wc-settings-tax.php:252
 msgid "Choose whether or not this tax rate also gets applied to shipping."
 msgstr "Elija si esta tasa de impuesto también se aplica al envío o no."
 
-#: includes/admin/settings/class-wc-settings-tax.php:240
+#: includes/admin/settings/class-wc-settings-tax.php:259
 msgid "Insert row"
 msgstr "Insertar fila"
 
 # @ woocommerce
-#: includes/admin/settings/class-wc-settings-tax.php:241
+#: includes/admin/settings/class-wc-settings-tax.php:260
 msgid "Remove selected row(s)"
 msgstr "Borrar la(s) fila(s) seleccionada(s)"
 
 # @ woocommerce
-#: includes/admin/settings/class-wc-settings-tax.php:257
+#: includes/admin/settings/class-wc-settings-tax.php:276
 msgid "Import CSV"
 msgstr "Importar CSV"
 
 # @ woocommerce
-#: includes/admin/settings/class-wc-settings-tax.php:343
+#: includes/admin/settings/class-wc-settings-tax.php:362
 msgid "No row(s) selected"
 msgstr "No se ha(n) seleccionado fila(s)"
 
 # @ woocommerce
-#: includes/admin/settings/class-wc-settings-tax.php:350
+#: includes/admin/settings/class-wc-settings-tax.php:369
 msgid "Country Code"
 msgstr "Código de país"
 
 # @ woocommerce
-#: includes/admin/settings/class-wc-settings-tax.php:350
+#: includes/admin/settings/class-wc-settings-tax.php:369
 msgid "State Code"
 msgstr "Código del estado"
 
 # @ woocommerce
-#: includes/admin/settings/class-wc-settings-tax.php:350
+#: includes/admin/settings/class-wc-settings-tax.php:369
 msgid "Rate %"
 msgstr "Calificar"
 
 # @ woocommerce
-#: includes/admin/settings/class-wc-settings-tax.php:350
+#: includes/admin/settings/class-wc-settings-tax.php:369
 msgid "Tax Name"
 msgstr "Nombre tarifa"
 

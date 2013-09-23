@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce v2.0.8\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2013-09-16 23:40:16+00:00\n"
-"PO-Revision-Date: 2013-09-16 20:46-0300\n"
+"POT-Creation-Date: 2013-09-22 23:32:41+00:00\n"
+"PO-Revision-Date: 2013-09-22 20:39-0300\n"
 "Last-Translator: Renato Covarrubias <rnt@rnt.cl>\n"
 "Language-Team: \n"
 "Language: Spanish\n"
@@ -2719,36 +2719,36 @@ msgid "Out of stock"
 msgstr "Sin existencia"
 
 # @ woocommerce
-#: includes/abstracts/abstract-wc-product.php:792
-#: includes/abstracts/abstract-wc-product.php:798
+#: includes/abstracts/abstract-wc-product.php:828
+#: includes/abstracts/abstract-wc-product.php:834
 #: includes/class-wc-cart.php:1831 includes/class-wc-order.php:757
-#: includes/class-wc-product-variable.php:233
-#: includes/class-wc-product-variable.php:239
-#: includes/class-wc-product-variation.php:247
+#: includes/class-wc-product-variable.php:237
+#: includes/class-wc-product-variable.php:243
+#: includes/class-wc-product-variation.php:254
 msgid "Free!"
 msgstr "¡Gratis!"
 
 # @ woocommerce
-#: includes/abstracts/abstract-wc-product.php:815
+#: includes/abstracts/abstract-wc-product.php:851
 msgctxt "min_price"
 msgid "From:"
 msgstr "De:"
 
 # @ woocommerce
-#: includes/abstracts/abstract-wc-product.php:923
+#: includes/abstracts/abstract-wc-product.php:959
 #: templates/single-product-reviews.php:28
 msgid "Rated %s out of 5"
 msgstr "Calificación de %s de 5"
 
 # @ woocommerce
-#: includes/abstracts/abstract-wc-product.php:925
+#: includes/abstracts/abstract-wc-product.php:961
 #: templates/single-product/review.php:27
 #: templates/single-product-reviews.php:28
 msgid "out of 5"
 msgstr "de 5"
 
 # @ woocommerce
-#: includes/abstracts/abstract-wc-product.php:1237
+#: includes/abstracts/abstract-wc-product.php:1273
 msgid "%s &ndash; %s"
 msgstr "%s &ndash; %s"
 
@@ -2910,36 +2910,37 @@ msgstr ""
 "inicial &rarr;</a>"
 
 # @ woocommerce
-#: includes/class-wc-checkout.php:481 includes/class-wc-form-handler.php:78
+#: includes/class-wc-checkout.php:481 includes/class-wc-form-handler.php:81
 msgid "is a required field."
 msgstr "es un campo requerido."
 
 # @ woocommerce
-#: includes/class-wc-checkout.php:494
-msgid "(%s) is not a valid postcode/ZIP."
-msgstr "(%s) no es un código postal válido."
+#: includes/class-wc-checkout.php:493 includes/class-wc-form-handler.php:91
+#: includes/shortcodes/class-wc-shortcode-cart.php:52
+msgid "Please enter a valid postcode/ZIP."
+msgstr "Por favor, introduce un código postal válido."
 
 # @ woocommerce
-#: includes/class-wc-checkout.php:515
-msgid "is not valid. Please enter one of the following:"
-msgstr "no es valido. Por favor ingresa uno de los siguientes:"
+#: includes/class-wc-checkout.php:502 includes/class-wc-form-handler.php:100
+msgid "is not a valid phone number."
+msgstr "no es un número telefónico válido."
 
 # @ woocommerce
-#: includes/class-wc-checkout.php:523
-msgid "is not a valid number."
-msgstr "no es un número válido"
-
-# @ woocommerce
-#: includes/class-wc-checkout.php:530
+#: includes/class-wc-checkout.php:508 includes/class-wc-form-handler.php:106
 msgid "is not a valid email address."
 msgstr "no es una dirección de email válida"
 
 # @ woocommerce
-#: includes/class-wc-checkout.php:573
+#: includes/class-wc-checkout.php:523
+msgid "is not valid. Please enter one of the following:"
+msgstr "no es valido. Por favor ingresa uno de los siguientes:"
+
+# @ woocommerce
+#: includes/class-wc-checkout.php:568
 msgid "You must accept our Terms &amp; Conditions."
 msgstr "Tienes que aceptar nuestros Términos &amp; Condiciones."
 
-#: includes/class-wc-checkout.php:578
+#: includes/class-wc-checkout.php:573
 msgid ""
 "Unfortunately <strong>we do not ship to %s</strong>. Please enter an "
 "alternative shipping address."
@@ -2948,12 +2949,12 @@ msgstr ""
 "dirección de entrega alternativa."
 
 # @ woocommerce
-#: includes/class-wc-checkout.php:586
+#: includes/class-wc-checkout.php:581
 msgid "Invalid shipping method."
 msgstr "Método de envío no válido."
 
 # @ woocommerce
-#: includes/class-wc-checkout.php:599
+#: includes/class-wc-checkout.php:594
 msgid "Invalid payment method."
 msgstr "Método de pago no válido."
 
@@ -4275,67 +4276,67 @@ msgid "State / County"
 msgstr "Estado / País"
 
 # @ woocommerce
-#: includes/class-wc-countries.php:744 includes/class-wc-countries.php:745
+#: includes/class-wc-countries.php:745 includes/class-wc-countries.php:746
 #: templates/cart/shipping-calculator.php:80
 msgid "Postcode / Zip"
 msgstr "Código Postal / Zip"
 
 # @ woocommerce
-#: includes/class-wc-countries.php:787 includes/class-wc-countries.php:797
-#: includes/class-wc-countries.php:817 includes/class-wc-countries.php:872
-#: includes/class-wc-countries.php:891 includes/class-wc-countries.php:919
-#: includes/class-wc-countries.php:969 includes/class-wc-countries.php:993
-#: includes/class-wc-countries.php:1034
+#: includes/class-wc-countries.php:789 includes/class-wc-countries.php:799
+#: includes/class-wc-countries.php:819 includes/class-wc-countries.php:874
+#: includes/class-wc-countries.php:893 includes/class-wc-countries.php:921
+#: includes/class-wc-countries.php:971 includes/class-wc-countries.php:995
+#: includes/class-wc-countries.php:1036
 msgid "Province"
 msgstr "Provincia"
 
 # @ woocommerce
-#: includes/class-wc-countries.php:803
+#: includes/class-wc-countries.php:805
 msgid "Canton"
 msgstr "Cantón"
 
 # @ woocommerce
-#: includes/class-wc-countries.php:812 includes/class-wc-countries.php:975
+#: includes/class-wc-countries.php:814 includes/class-wc-countries.php:977
 msgid "Municipality"
 msgstr "Municipio"
 
 # @ woocommerce
-#: includes/class-wc-countries.php:859
+#: includes/class-wc-countries.php:861
 msgid "Town / District"
 msgstr "Pueblo / Distrito"
 
 # @ woocommerce
-#: includes/class-wc-countries.php:862
+#: includes/class-wc-countries.php:864
 msgid "Region"
 msgstr "Región"
 
 # @ woocommerce
-#: includes/class-wc-countries.php:867 includes/class-wc-countries.php:1009
+#: includes/class-wc-countries.php:869 includes/class-wc-countries.php:1011
 msgid "County"
 msgstr "País"
 
 # @ woocommerce
-#: includes/class-wc-countries.php:998
+#: includes/class-wc-countries.php:1000
 msgid "Zip"
 msgstr "Zip"
 
 # @ woocommerce
-#: includes/class-wc-countries.php:1001
+#: includes/class-wc-countries.php:1003
 msgid "State"
 msgstr "Estado / Región"
 
 # @ woocommerce
-#: includes/class-wc-countries.php:1006
+#: includes/class-wc-countries.php:1008
 msgid "Postcode"
 msgstr "Código postal"
 
 # @ woocommerce
-#: includes/class-wc-countries.php:1114
+#: includes/class-wc-countries.php:1116
 msgid "Email Address"
 msgstr "Dirección de Email"
 
 # @ woocommerce
-#: includes/class-wc-countries.php:1120
+#: includes/class-wc-countries.php:1122
 msgid "Phone"
 msgstr "Teléfono"
 
@@ -4475,7 +4476,7 @@ msgstr "El producto ya no existe."
 
 # @ woocommerce
 #: includes/class-wc-download-handler.php:87
-#: includes/class-wc-form-handler.php:422
+#: includes/class-wc-form-handler.php:443
 #: includes/shortcodes/class-wc-shortcode-checkout.php:87
 #: includes/shortcodes/class-wc-shortcode-checkout.php:168
 #: includes/shortcodes/class-wc-shortcode-my-account.php:102
@@ -4552,76 +4553,70 @@ msgid "%s units of %s have been backordered in order %s."
 msgstr "%s unidades de %s han sido pre-ordenadas en el pedido %s."
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:83
-#: includes/shortcodes/class-wc-shortcode-cart.php:52
-msgid "Please enter a valid postcode/ZIP."
-msgstr "Por favor, introduce un código postal válido."
-
-# @ woocommerce
-#: includes/class-wc-form-handler.php:97
+#: includes/class-wc-form-handler.php:118
 msgid "Address changed successfully."
 msgstr "Dirección cambiada correctamente."
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:145
+#: includes/class-wc-form-handler.php:166
 msgid "Please enter your name."
 msgstr "Por favor ingrese su nombre."
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:148
+#: includes/class-wc-form-handler.php:169
 #: includes/wc-customer-functions.php:46
 msgid "Please provide a valid email address."
 msgstr "Por favor ingrese una direccion de correo electrónica válida."
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:151
+#: includes/class-wc-form-handler.php:172
 msgid "This email address is already registered."
 msgstr "Este email ya ha sido registrado."
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:154
+#: includes/class-wc-form-handler.php:175
 msgid "Please re-enter your password."
 msgstr "Por favor reingrese su contraseña."
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:157
-#: includes/class-wc-form-handler.php:695
+#: includes/class-wc-form-handler.php:178
+#: includes/class-wc-form-handler.php:716
 msgid "Passwords do not match."
 msgstr "Las contraseñas no coinciden."
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:170
+#: includes/class-wc-form-handler.php:191
 msgid "Account details changed successfully."
 msgstr "Detalles de la cuenta cambiados correctamente."
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:276
-#: includes/class-wc-form-handler.php:323
+#: includes/class-wc-form-handler.php:297
+#: includes/class-wc-form-handler.php:344
 msgid "Cart updated."
 msgstr "Carrito actualizado."
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:307
+#: includes/class-wc-form-handler.php:328
 msgid "You can only have 1 %s in your cart."
 msgstr "Solo puede tener 1 %s en su carrito."
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:385
+#: includes/class-wc-form-handler.php:406
 msgid "The cart has been filled with the items from your previous order."
 msgstr "El carrito ha sido llenado con artículos de tus pedidos anteriores."
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:409
+#: includes/class-wc-form-handler.php:430
 msgid "Order cancelled by customer."
 msgstr "Pedido cancelado por el cliente."
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:412
+#: includes/class-wc-form-handler.php:433
 msgid "Your order was cancelled."
 msgstr "Su pedido fue cancelado."
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:418
+#: includes/class-wc-form-handler.php:439
 msgid ""
 "Your order is no longer pending and could not be cancelled. Please contact "
 "us if you need assistance."
@@ -4630,13 +4625,13 @@ msgstr ""
 "en contacto con nosotros si necesita ayuda."
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:459
-#: includes/class-wc-form-handler.php:517
+#: includes/class-wc-form-handler.php:480
+#: includes/class-wc-form-handler.php:538
 msgid "Please choose product options&hellip;"
 msgstr "Por favor, elija las opciones del producto&hellip;"
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:550
+#: includes/class-wc-form-handler.php:571
 msgid ""
 "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr ""
@@ -4644,60 +4639,60 @@ msgstr ""
 "carrito&hellip;"
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:557
+#: includes/class-wc-form-handler.php:578
 msgid "Please choose a product to add to your cart&hellip;"
 msgstr "Por favor, elija un producto para agregar a su carrito&hellip;"
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:614
-#: includes/class-wc-form-handler.php:616
-#: includes/class-wc-form-handler.php:624
+#: includes/class-wc-form-handler.php:635
+#: includes/class-wc-form-handler.php:637
+#: includes/class-wc-form-handler.php:645
 msgid "Error"
 msgstr "Error"
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:614
+#: includes/class-wc-form-handler.php:635
 msgid "Username is required."
 msgstr "Nombre de usuario requerido."
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:616
+#: includes/class-wc-form-handler.php:637
 msgid "Password is required."
 msgstr "Se requiere contraseña."
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:624
+#: includes/class-wc-form-handler.php:645
 msgid "A user could not be found with this email address."
 msgstr "No hay ningun usuario registrado con esa dirección de correo."
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:647
+#: includes/class-wc-form-handler.php:668
 msgid "You are now logged in as <strong>%s</strong>"
 msgstr "Está autenticado como <strong>%s</ strong>"
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:690
+#: includes/class-wc-form-handler.php:711
 msgid "Please enter your password."
 msgstr "Por favor, introduce tu contraseña."
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:705
+#: includes/class-wc-form-handler.php:726
 msgid "Your password has been reset."
 msgstr "Su contraseña ha sido reajustada."
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:705
+#: includes/class-wc-form-handler.php:726
 msgid "Log in"
 msgstr "Ingresar"
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:729
+#: includes/class-wc-form-handler.php:750
 #: includes/wc-customer-functions.php:107
 msgid "ERROR"
 msgstr "ERROR"
 
 # @ woocommerce
-#: includes/class-wc-form-handler.php:729
+#: includes/class-wc-form-handler.php:750
 msgid "Anti-spam field was filled in."
 msgstr "El campo Anti-spam fue rellenado."
 
@@ -5301,7 +5296,7 @@ msgid "Buy product"
 msgstr "Comprar producto"
 
 # @ woocommerce
-#: includes/class-wc-product-variation.php:448
+#: includes/class-wc-product-variation.php:456
 msgid "%s &ndash; %s%s"
 msgstr "%s &ndash; %s%s"
 
@@ -5528,10 +5523,9 @@ msgstr "Nuevo pedido"
 
 # @ woocommerce
 #: includes/emails/class-wc-email-new-order.php:27
-msgid "New order emails are sent when an order is received/paid by a customer."
+msgid "New order emails are sent when an order is received."
 msgstr ""
-"Los mensajes de nuevo pedido son enviados cuando un pedido es recivido/"
-"pagado por un cliente."
+"Los mensajes de nuevo pedido son enviados cuando un pedido es recibido."
 
 # @ woocommerce
 #: includes/emails/class-wc-email-new-order.php:29
@@ -6952,7 +6946,7 @@ msgstr ""
 
 # @ woocommerce
 #: includes/shortcodes/class-wc-shortcode-my-account.php:109
-#: includes/shortcodes/class-wc-shortcode-view-order.php:57
+#: templates/myaccount/view-order.php:13
 msgid ""
 "Order <mark class=\"order-number\">%s</mark> made on <mark class=\"order-date"
 "\">%s</mark>"
@@ -6962,53 +6956,51 @@ msgstr ""
 
 # @ woocommerce
 #: includes/shortcodes/class-wc-shortcode-my-account.php:110
-#: includes/shortcodes/class-wc-shortcode-view-order.php:58
+#: templates/myaccount/view-order.php:14
 msgid "Order status: <mark class=\"order-status\">%s</mark>"
 msgstr "Estado del pedido:  <mark class=\"order-status\">%s</mark>"
 
 # @ woocommerce
 #: includes/shortcodes/class-wc-shortcode-my-account.php:115
-#: includes/shortcodes/class-wc-shortcode-view-order.php:64
-#: templates/order/tracking.php:31
+#: templates/myaccount/view-order.php:20 templates/order/tracking.php:31
 msgid "Order Updates"
 msgstr "Actualizaciones del Pedido"
 
 # @ woocommerce
 #: includes/shortcodes/class-wc-shortcode-my-account.php:121
-#: includes/shortcodes/class-wc-shortcode-view-order.php:70
-#: templates/order/tracking.php:37
+#: templates/myaccount/view-order.php:26 templates/order/tracking.php:37
 msgid "l jS \\o\\f F Y, h:ia"
 msgstr "l j \\d\\e F \\d\\e Y, h:ia"
 
 # @ woocommerce
-#: includes/shortcodes/class-wc-shortcode-my-account.php:203
+#: includes/shortcodes/class-wc-shortcode-my-account.php:228
 msgid "Enter a username or e-mail address."
 msgstr "Ingresa un usuario o contraseña."
 
 # @ woocommerce
-#: includes/shortcodes/class-wc-shortcode-my-account.php:210
+#: includes/shortcodes/class-wc-shortcode-my-account.php:235
 msgid "There is no user registered with that email address."
 msgstr "No hay ningun usuario registrado con esa dirección de correo."
 
 # @ woocommerce
-#: includes/shortcodes/class-wc-shortcode-my-account.php:225
+#: includes/shortcodes/class-wc-shortcode-my-account.php:250
 msgid "Invalid username or e-mail."
 msgstr "Email o usuario no válidos."
 
 # @ default
-#: includes/shortcodes/class-wc-shortcode-my-account.php:239
+#: includes/shortcodes/class-wc-shortcode-my-account.php:264
 msgid "Password reset is not allowed for this user"
 msgstr "El reajuste de la contraseña no es permitido por este usuario."
 
 # @ default
-#: includes/shortcodes/class-wc-shortcode-my-account.php:267
+#: includes/shortcodes/class-wc-shortcode-my-account.php:292
 msgid "Check your e-mail for the confirmation link."
 msgstr "Revise su e-mail para el enlace de confirmación."
 
 # @ woocommerce
-#: includes/shortcodes/class-wc-shortcode-my-account.php:287
-#: includes/shortcodes/class-wc-shortcode-my-account.php:292
-#: includes/shortcodes/class-wc-shortcode-my-account.php:299
+#: includes/shortcodes/class-wc-shortcode-my-account.php:312
+#: includes/shortcodes/class-wc-shortcode-my-account.php:317
+#: includes/shortcodes/class-wc-shortcode-my-account.php:324
 msgid "Invalid key"
 msgstr "Llave invalida"
 
@@ -7959,7 +7951,7 @@ msgstr "Facturación &amp; Envíos"
 
 # @ woocommerce
 #: templates/checkout/form-billing.php:21
-#: templates/myaccount/form-edit-address.php:27
+#: templates/myaccount/form-edit-address.php:14
 #: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
 #: templates/order/order-details.php:119
 msgid "Billing Address"
@@ -8471,13 +8463,13 @@ msgid "Save changes"
 msgstr "Guardar los cambios"
 
 # @ woocommerce
-#: templates/myaccount/form-edit-address.php:27
+#: templates/myaccount/form-edit-address.php:14
 #: templates/myaccount/my-address.php:20 templates/order/order-details.php:134
 msgid "Shipping Address"
 msgstr "Dirección de Envío"
 
 # @ woocommerce
-#: templates/myaccount/form-edit-address.php:43
+#: templates/myaccount/form-edit-address.php:38
 msgid "Save Address"
 msgstr "Guardar Dirección"
 
