@@ -296,7 +296,7 @@ class WC_Form_Handler {
 
 			wc_add_message( __( 'Cart updated.', 'woocommerce' ) );
 
-			$referer = ( wp_get_referer() ) ? wp_get_referer() : WC()->cart->get_cart_url();
+			$referer = wp_get_referer() ? wp_get_referer() : WC()->cart->get_cart_url();
 			wp_safe_redirect( $referer );
 			exit;
 

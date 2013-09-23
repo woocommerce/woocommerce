@@ -942,9 +942,9 @@ class WC_Cart {
 
 			if ( $quantity == 0 || $quantity < 0 ) {
 				do_action( 'woocommerce_before_cart_item_quantity_zero', $cart_item_key );
-				unset( $this->cart_contents[$cart_item_key] );
+				unset( $this->cart_contents[ $cart_item_key ] );
 			} else {
-				$this->cart_contents[$cart_item_key]['quantity'] = $quantity;
+				$this->cart_contents[ $cart_item_key ]['quantity'] = $quantity;
 				do_action( 'woocommerce_after_cart_item_quantity_update', $cart_item_key, $quantity );
 			}
 
@@ -1329,8 +1329,10 @@ class WC_Cart {
 
 			do_action( 'woocommerce_before_calculate_totals', $this );
 
-			if ( sizeof( $this->get_cart() ) == 0 )
+			if ( sizeof( $this->get_cart() ) == 0 ) {
+				$this->set_session();
 				return;
+			}
 
 			// Get count of all items + weights + subtotal (we may need this for discounts)
 			$subtotal       = 0;
