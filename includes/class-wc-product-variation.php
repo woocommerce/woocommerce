@@ -182,6 +182,14 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
+	 * Wrapper for get_permalink. Adds this variations attributes to the URL.
+	 * @return string
+	 */
+	public function get_permalink() {
+		return add_query_arg( $this->variation_data, get_permalink( $this->id ) );
+	}
+
+	/**
 	 * Checks if this particular variation is visible (variations with no price, or out of stock, can be hidden)
 	 *
 	 * @return bool

@@ -503,7 +503,7 @@ class WC_Form_Handler {
 	                // Allow if valid
 	                if ( $valid_value == '' || $valid_value == $value ) {
 		                if ( $attribute['is_taxonomy'] )
-		                	$variations[ esc_html( $attribute['name'] ) ] = $value;
+		                	$variations[ $taxonomy ] = $value;
 		                else {
 			                // For custom attributes, get the name from the slug
 			                $options = array_map( 'trim', explode( '|', $attribute['value'] ) );
@@ -513,7 +513,7 @@ class WC_Form_Handler {
 			                		break;
 			                	}
 			                }
-			                 $variations[ esc_html( $attribute['name'] ) ] = $value;
+			                 $variations[ $taxonomy ] = $value;
 		                }
 		                continue;
 		            }

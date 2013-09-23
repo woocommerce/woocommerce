@@ -120,6 +120,14 @@ class WC_Product {
 	}
 
 	/**
+	 * Wrapper for get_permalink
+	 * @return string
+	 */
+	public function get_permalink() {
+		return get_permalink( $this->id );
+	}
+
+	/**
      * Get SKU (Stock-keeping unit) - product unique ID.
      *
      * @return string

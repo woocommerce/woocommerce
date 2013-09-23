@@ -25,10 +25,13 @@ global $woocommerce, $product, $post;
 						<?php
 							if ( is_array( $options ) ) {
 
-								if ( empty( $_POST ) )
-									$selected_value = ( isset( $selected_attributes[ sanitize_title( $name ) ] ) ) ? $selected_attributes[ sanitize_title( $name ) ] : '';
-								else
-									$selected_value = isset( $_POST[ 'attribute_' . sanitize_title( $name ) ] ) ? $_POST[ 'attribute_' . sanitize_title( $name ) ] : '';
+								if ( isset( $_REQUEST[ 'attribute_' . sanitize_title( $name ) ] ) ) {
+									$selected_value = $_REQUEST[ 'attribute_' . sanitize_title( $name ) ];
+								} elseif ( isset( $selected_attributes[ sanitize_title( $name ) ] ) ) {
+									$selected_value = $selected_attributes[ sanitize_title( $name ) ];
+								} else {
+									$selected_value = '';
+								}
 
 								// Get terms if this is a taxonomy - ordered
 								if ( taxonomy_exists( $name ) ) {
@@ -53,7 +56,7 @@ global $woocommerce, $product, $post;
 										if ( ! in_array( $term->slug, $options ) )
 											continue;
 
-										echo '<option value="' . esc_attr( $term->slug ) . '" ' . selected( $selected_value, $term->slug, false ) . '>' . apply_filters( 'woocommerce_variation_option_name', $term->name ) . '</option>';
+										echo '<option value="' . esc_attr( $term->slug ) . '" ' . selected( sanitize_title( $selected_value ), sanitize_title( $term->slug ), false ) . '>' . apply_filters( 'woocommerce_variation_option_name', $term->name ) . '</option>';
 									}
 								} else {
 
