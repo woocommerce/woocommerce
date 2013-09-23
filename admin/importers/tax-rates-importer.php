@@ -129,6 +129,8 @@ if ( class_exists( 'WP_Importer' ) ) {
 							$country = '';
 						if ( $state == '*' )
 							$state = '';
+						if ( $class == 'standard' )
+							$class = '';
 
 						$wpdb->insert(
 							$wpdb->prefix . "woocommerce_tax_rates",
