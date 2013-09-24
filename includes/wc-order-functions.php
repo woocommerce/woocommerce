@@ -77,7 +77,7 @@ function woocommerce_downloadable_file_permission( $download_id, $product_id, $o
 		'%s',
 		'%s',
 		'%d'
-	));
+	), $data);
 
 	if ( ! is_null( $expiry ) ) {
 			$data['access_expires'] = $expiry;
