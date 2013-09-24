@@ -488,6 +488,14 @@ class WC_Product_Variable extends WC_Product {
 			do_action( 'woocommerce_variable_product_sync', $product_id );
 
 			wc_delete_product_transients( $product_id );
+		} elseif ( get_post_status( $product_id ) == 'publish' ) {
+			// No published variations - update parent post status. Use $wpdb to prevent endless loop on save_post hooks.
+			global $wpdb;
+
+			$wpdb->update( $wpdb->posts, array( 'post_status' => 'draft' ), array( 'ID' => $product_id ) );
+
+			if ( is_admin() )
+				WC_Admin_Meta_Boxes::add_error( __( 'This variable product has no active variations and will not be published.', 'woocommerce' ) );
 		}
 	}
 }
