@@ -4955,7 +4955,7 @@ msgstr "Página"
 #: templates/single-product/up-sells.php:39
 #@ woocommerce
 msgid "You may also like&hellip;"
-msgstr "Você vai gosta disso&hellip;"
+msgstr "Você vai gostar disso&hellip;"
 
 #: templates/cart/cross-sells.php:38
 #@ woocommerce
