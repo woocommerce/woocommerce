@@ -722,7 +722,7 @@ class WC_Meta_Box_Product_Data {
 	/**
 	 * Show options for the variable product type
 	 */
-	public function output_variations() {
+	public static function output_variations() {
 		global $post, $woocommerce;
 
 		$attributes = maybe_unserialize( get_post_meta( $post->ID, '_product_attributes', true ) );
@@ -1174,7 +1174,7 @@ class WC_Meta_Box_Product_Data {
 			}
 		}
 
-		// Sold Individuall
+		// Sold Individually
 		if ( ! empty( $_POST['_sold_individually'] ) ) {
 			update_post_meta( $post_id, '_sold_individually', 'yes' );
 		} else {
@@ -1447,11 +1447,11 @@ class WC_Meta_Box_Product_Data {
 					$file_urls     = isset( $_POST['_wc_variation_file_urls'][ $variation_id ] ) ? array_map( 'esc_url_raw', array_map( 'trim', $_POST['_wc_variation_file_urls'][ $variation_id ] ) ) : array();
 					$file_url_size = sizeof( $file_urls );
 
-					for ( $i = 0; $i < $file_url_size; $i ++ ) {
-						if ( ! empty( $file_urls[ $i ] ) )
-							$files[ md5( $file_urls[ $i ] ) ] = array(
-								'name' => $file_names[ $i ],
-								'file' => $file_urls[ $i ]
+					for ( $ii = 0; $ii < $file_url_size; $ii ++ ) {
+						if ( ! empty( $file_urls[ $ii ] ) )
+							$files[ md5( $file_urls[ $ii ] ) ] = array(
+								'name' => $file_names[ $ii ],
+								'file' => $file_urls[ $ii ]
 							);
 					}
 
@@ -1466,7 +1466,7 @@ class WC_Meta_Box_Product_Data {
 				}
 
 				// Save shipping class
-				$variable_shipping_class[ $i ] = $variable_shipping_class[ $i ] > 0 ? (int) $variable_shipping_class[ $i ] : '';
+				$variable_shipping_class[ $i ] = ! empty( $variable_shipping_class[ $i ] ) ? (int) $variable_shipping_class[ $i ] : '';
 				wp_set_object_terms( $variation_id, $variable_shipping_class[ $i ], 'product_shipping_class');
 
 				// Remove old taxonomies attributes so data is kept up to date
@@ -1479,9 +1479,11 @@ class WC_Meta_Box_Product_Data {
 				foreach ( $attributes as $attribute ) {
 
 					if ( $attribute['is_variation'] ) {
-
 						// Don't use woocommerce_clean as it destroys sanitized characters
-						$value = sanitize_title( trim( stripslashes( $_POST[ 'attribute_' . sanitize_title( $attribute['name'] ) ][ $i ] ) ) );
+						if ( isset( $_POST[ 'attribute_' . sanitize_title( $attribute['name'] ) ][ $i ] ) )
+							$value = sanitize_title( trim( stripslashes( $_POST[ 'attribute_' . sanitize_title( $attribute['name'] ) ][ $i ] ) ) );
+						else
+							$value = '';
 
 						update_post_meta( $variation_id, 'attribute_' . sanitize_title( $attribute['name'] ), $value );
 					}
@@ -1489,8 +1491,7 @@ class WC_Meta_Box_Product_Data {
 				}
 
 				do_action( 'woocommerce_save_product_variation', $variation_id );
-			 }
-
+			}
 		}
 
 		// Update parent if variable so price sorting works and stays in sync with the cheapest child
