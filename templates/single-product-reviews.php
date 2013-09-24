@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 			echo '<div class="star-rating" title="'.sprintf(__( 'Rated %s out of 5', 'woocommerce' ), $average ).'"><span style="width:'.( ( $average / 5 ) * 100 ) . '%"><strong itemprop="ratingValue" class="rating">'.$average.'</strong> '.__( 'out of 5', 'woocommerce' ).'</span></div>';
 
-			echo '<h2>'.sprintf( _n('%s review for %s', '%s reviews for %s', $count, 'woocommerce'), '<span itemprop="ratingCount" class="count">'.$count.'</span>', wptexturize($post->post_title) ).'</h2>';
+			echo '<h2>'.sprintf( _n('%s review for %s', '%s reviews for %s', $count, 'woocommerce'), '<span itemprop="ratingCount" class="count">'.$count.'</span>', wptexturize(get_the_title()) ).'</h2>';
 
 			echo '</div>';
 
@@ -66,7 +66,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 	else :
 
-		$title_reply = __( 'Be the first to review', 'woocommerce' ).' &ldquo;'.$post->post_title.'&rdquo;';
+		$title_reply = __( 'Be the first to review', 'woocommerce' ).' &ldquo;'.get_the_title().'&rdquo;';
 
 		echo '<p class="noreviews">' . sprintf( __( 'There are no reviews yet, would you like to %s submit yours%s?', 'woocommerce' ), '<a href="#review_form" class="inline show_review_form" title="' . __( 'Add Your Review', 'woocommerce' ) . '">', '</a>' ) . '</p>';
 
