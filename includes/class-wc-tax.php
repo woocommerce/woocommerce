@@ -209,14 +209,11 @@ class WC_Tax {
 	 * @return  array
 	 */
 	public function get_shop_base_rate( $tax_class = '' ) {
-		global $woocommerce;
-
-		$country 	= $woocommerce->countries->get_base_country();
-		$state 		= $woocommerce->countries->get_base_state();
-
 		return $this->find_rates( array(
-			'country' 	=> $country,
-			'state' 	=> $state,
+			'country' 	=> WC()->countries->get_base_country(),
+			'state' 	=> WC()->countries->get_base_state(),
+			'postcode' 	=> WC()->countries->get_base_postcode(),
+			'city' 		=> WC()->countries->get_base_city(),
 			'tax_class' => $tax_class
 		) );
 	}

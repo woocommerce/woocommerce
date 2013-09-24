@@ -315,9 +315,8 @@ class WC_Countries {
 				if ( ! isset( $states[ $CC ] ) && file_exists( $woocommerce->plugin_path() . '/i18n/states/' . $CC . '.php' ) )
 					include( $woocommerce->plugin_path() . '/i18n/states/' . $CC . '.php' );
 
-		$this->states = apply_filters('woocommerce_states', $states );
+		$this->states = apply_filters( 'woocommerce_states', $states );
 	}
-
 
 	/**
 	 * Get the base country for the store.
@@ -327,23 +326,42 @@ class WC_Countries {
 	 */
 	public function get_base_country() {
 		$default = esc_attr( get_option('woocommerce_default_country') );
-		if ( ( $pos = strpos( $default, ':' ) ) === false )
-			return $default;
-		return substr( $default, 0, $pos );
+		$country = ( ( $pos = strrpos( $default, ':' ) ) === false ) ? '' : substr( $default, 0, $pos );
+
+		return apply_filters( 'woocommerce_countries_base_country', $country );
 	}
 
-
 	/**
-	 * Get the base state for the state.
+	 * Get the base state for the store.
 	 *
 	 * @access public
 	 * @return string
 	 */
 	public function get_base_state() {
-		$default = esc_attr( get_option( 'woocommerce_default_country' ) );
-		if ( ( $pos = strrpos( $default, ':' ) ) === false )
-			return '';
-		return substr( $default, $pos + 1 );
+		$default = woocommerce_clean( get_option( 'woocommerce_default_country' ) );
+		$state   = ( ( $pos = strrpos( $default, ':' ) ) === false ) ? '' : substr( $default, $pos + 1 );
+
+		return apply_filters( 'woocommerce_countries_base_state', $state );
+	}
+
+	/**
+	 * Get the base city for the store.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function get_base_city() {
+		return apply_filters( 'woocommerce_countries_base_city', '' );
+	}
+
+	/**
+	 * Get the base postcode for the store.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function get_base_postcode() {
+		return apply_filters( 'woocommerce_countries_base_postcode', '' );
 	}
 
 	/**
