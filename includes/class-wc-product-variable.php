@@ -299,7 +299,7 @@ class WC_Product_Variable extends WC_Product {
 					foreach ( $post_terms as $term )
 						$values[] = $term->slug;
 				} else {
-					$values = array_map( 'trim', explode( '|', $attribute['value'] ) );
+					$values = array_map( 'trim', explode( WOOCOMMERCE_DELIMITER, $attribute['value'] ) );
 				}
 
 				$values = array_unique( $values );
@@ -307,7 +307,7 @@ class WC_Product_Variable extends WC_Product {
 			// Order custom attributes (non taxonomy) as defined
             } elseif ( ! $attribute['is_taxonomy'] ) {
 
-            	$option_names = array_map( 'trim', explode( '|', $attribute['value'] ) );
+            	$option_names = array_map( 'trim', explode( WOOCOMMERCE_DELIMITER, $attribute['value'] ) );
             	$option_slugs = $values;
             	$values       = array();
 

@@ -454,7 +454,7 @@ function woocommerce_save_attributes() {
 
 				 	// Text based attributes - Posted values are term names - don't change to slugs
 				 	} else {
-				 		$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( '|', $attribute_values[ $i ] ) ) );
+				 		$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WOOCOMMERCE_DELIMITER, $attribute_values[ $i ] ) ) );
 				 	}
 
 				 	// Remove empty items in the array
@@ -483,7 +483,7 @@ function woocommerce_save_attributes() {
 		 	} elseif ( isset( $attribute_values[ $i ] ) ) {
 
 		 		// Text based, separate by pipe
-		 		$values = implode( ' | ', array_map( 'woocommerce_clean', array_map( 'stripslashes', explode( '|', $attribute_values[ $i ] ) ) ) );
+		 		$values = implode( ' ' . WOOCOMMERCE_DELIMITER . ' ', array_map( 'woocommerce_clean', array_map( 'stripslashes', explode( WOOCOMMERCE_DELIMITER, $attribute_values[ $i ] ) ) ) );
 
 		 		// Custom attribute - Add attribute to array and set the values
 			 	$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
@@ -635,7 +635,7 @@ function woocommerce_link_all_variations() {
 				$options[] = $term->slug;
 			}
 		} else {
-			$options = explode( '|', $attribute['value'] );
+			$options = explode( WOOCOMMERCE_DELIMITER, $attribute['value'] );
 		}
 
 		$options = array_map( 'sanitize_title', array_map( 'trim', $options ) );

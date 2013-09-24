@@ -183,6 +183,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Handling for password protected products.
 * Feature - Schema markup selector for downloadables.
 * Feature - woocommerce_get_featured_product_ids function.
+* Feature - WOOCOMMERCE_DELIMITER to customise the pipes for attributes
 * Tweak - Added pagination to tax rate screens.
 * Tweak - Added filter to check the 'Create account' checkbox on checkout by default.
 * Tweak - Update CPT parameters for 'product_variation' and 'shop_coupon' to be no longer public.

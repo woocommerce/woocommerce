@@ -506,7 +506,7 @@ class WC_Form_Handler {
 		                	$variations[ $taxonomy ] = $value;
 		                else {
 			                // For custom attributes, get the name from the slug
-			                $options = array_map( 'trim', explode( '|', $attribute['value'] ) );
+			                $options = array_map( 'trim', explode( WOOCOMMERCE_DELIMITER, $attribute['value'] ) );
 			                foreach ( $options as $option ) {
 			                	if ( sanitize_title( $option ) == $value ) {
 			                		$value = $option;

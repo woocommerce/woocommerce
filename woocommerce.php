@@ -91,6 +91,8 @@ final class WooCommerce {
 		define( 'WOOCOMMERCE_PLUGIN_FILE', __FILE__ );
 		define( 'WOOCOMMERCE_VERSION', $this->version );
 		define( 'WOOCOMMERCE_TEMPLATE_PATH', $this->template_path() );
+		if ( ! defined( 'WOOCOMMERCE_DELIMITER' ) )
+			define( 'WOOCOMMERCE_DELIMITER', '|' );
 
 		// Include required files
 		$this->includes();

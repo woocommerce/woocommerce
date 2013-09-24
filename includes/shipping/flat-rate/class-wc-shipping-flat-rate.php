@@ -246,7 +246,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			// Loop options
 			foreach ( $this->options as $option ) {
 
-				$this_option = array_map( 'trim', explode( '|', $option ) );
+				$this_option = array_map( 'trim', explode( WOOCOMMERCE_DELIMITER, $option ) );
 
 				if ( sizeof( $this_option ) !== 3 ) continue;
 
@@ -275,7 +275,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				switch ( $this_type ) {
 					case 'class' :
 						$this_cost = $this_cost * sizeof( $this->find_shipping_classes( $package ) );
-						
+
 						// Factor $this_cost by the percentage if provided.
 						if ( $this_cost_percents ) {
 							foreach ( $this->find_shipping_classes( $package ) as $shipping_class => $items ){
@@ -292,7 +292,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 					break;
 					case 'item' :
 						$this_cost = $this_cost * $total_quantity;
-						
+
 						// Factor $this_cost by the percentage if provided.
 						if ( $this_cost_percents ) {
 							foreach ( $package['contents'] as $item_id => $values ) {
