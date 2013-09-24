@@ -342,7 +342,7 @@ class WC_Product_Variation extends WC_Product {
 				$parent_product = get_product( $this->id );
 
 				// Only continue if the parent has backorders off
-				if ( ! $parent_product->backorders_allowed() && $parent_product->get_total_stock() <= 0 )
+				if ( ! $parent_product->backorders_allowed() && $parent_product->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) )
 					$this->set_stock_status( 'outofstock' );
 
 			} elseif ( $this->is_in_stock() ) {

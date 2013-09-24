@@ -5,7 +5,7 @@
  * The WooCommerce product class handles individual product data.
  *
  * @class 		WC_Product
- * @version		2.0.0
+ * @version		2.1.0
  * @package		WooCommerce/Abstracts
  * @category	Abstract Class
  * @author 		WooThemes
@@ -175,10 +175,10 @@ class WC_Product {
 			update_post_meta( $this->id, '_stock', $this->stock );
 
 			// Update stock status
-			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= 0 )
+			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) )
 				$this->set_stock_status( 'outofstock' );
 
-			elseif ( $this->backorders_allowed() || $this->get_total_stock() > 0 )
+			elseif ( $this->backorders_allowed() || $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) )
 				$this->set_stock_status( 'instock' );
 
 			// Clear total stock transient
@@ -468,7 +468,7 @@ class WC_Product {
 			if ( $this->backorders_allowed() ) {
 				return true;
 			} else {
-				if ( $this->get_total_stock() <  1 ) {
+				if ( $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 					return false;
 				} else {
 					if ( $this->stock_status == 'instock' )
@@ -543,7 +543,7 @@ class WC_Product {
 		if ( $this->managing_stock() ) {
 			if ( $this->is_in_stock() ) {
 
-				if ( $this->get_total_stock() > 0 ) {
+				if ( $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 
 					$format_option = get_option( 'woocommerce_stock_format' );
 
