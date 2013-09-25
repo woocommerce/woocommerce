@@ -1245,6 +1245,8 @@ class WC_Order {
 	public function payment_complete() {
 		global $woocommerce;
 
+		do_action( 'woocommerce_pre_payment_complete', $this->id );
+
 		if ( ! empty( $woocommerce->session->order_awaiting_payment ) )
 			unset( $woocommerce->session->order_awaiting_payment );
 
@@ -1290,6 +1292,11 @@ class WC_Order {
 				$this->reduce_order_stock(); // Payment is complete so reduce stock levels
 
 			do_action( 'woocommerce_payment_complete', $this->id );
+
+		} else {
+
+			do_action( 'woocommerce_payment_complete_order_status_' . $this->status, $this->id );
+
 		}
 	}
 
