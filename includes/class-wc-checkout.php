@@ -213,7 +213,7 @@ class WC_Checkout {
 		}
 
 		if ( $create_new_order ) {
-			$order_id = wp_insert_post( $order_data );
+			$order_id = wp_insert_post( $order_data, true );
 
 			if ( is_wp_error( $order_id ) )
 				throw new Exception( 'Error: Unable to create order. Please try again.' );
