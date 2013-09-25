@@ -32,6 +32,16 @@ class WC_Product_Grouped extends WC_Product {
 		parent::__construct( $product );
 	}
 
+	/**
+	 * Get the add to cart button text
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function add_to_cart_text() {
+		return apply_filters( 'woocommerce_product_add_to_cart_text', __( 'View products', 'woocommerce' ), $this );
+	}
+
     /**
      * Get total stock.
      *
@@ -160,7 +170,8 @@ class WC_Product_Grouped extends WC_Product {
 	 */
 	public function get_price_html( $price = '' ) {
 
-		$child_prices = array();
+		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
+		$child_prices     = array();
 
 		foreach ( $this->get_children() as $child_id )
 			$child_prices[] = get_post_meta( $child_id, '_price', true );

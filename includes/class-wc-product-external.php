@@ -37,13 +37,43 @@ class WC_Product_External extends WC_Product {
 	}
 
 	/**
+	 * Get the add to url used mainly in loops.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function add_to_cart_url() {
+		return apply_filters( 'woocommerce_product_add_to_cart_url', $this->get_product_url(), $this );
+	}
+
+	/**
+	 * Get the add to cart button text for the single page
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function single_add_to_cart_text() {
+		return apply_filters( 'woocommerce_product_single_add_to_cart_text', $this->get_button_text(), $this );
+	}
+
+	/**
+	 * Get the add to cart button text
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function add_to_cart_text() {
+		return apply_filters( 'woocommerce_product_single_add_to_cart_text', $this->get_button_text(), $this );
+	}
+
+	/**
 	 * get_product_url function.
 	 *
 	 * @access public
 	 * @return void
 	 */
 	public function get_product_url() {
-		return $this->product_url;
+		return esc_url( $this->product_url );
 	}
 
 	/**

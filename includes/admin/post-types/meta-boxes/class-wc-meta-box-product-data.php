@@ -1297,7 +1297,8 @@ class WC_Meta_Box_Product_Data {
 		}
 
 		// Save variations
-		self::save_variations( $post_id, $post );
+		if ( $product_type == 'variable' )
+			self::save_variations( $post_id, $post );
 
 		// Do action for product type
 		do_action( 'woocommerce_process_product_meta_' . $product_type, $post_id );

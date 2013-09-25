@@ -190,6 +190,30 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
+	 * Get the add to url used mainly in loops.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function add_to_cart_url() {
+		$url = $this->is_purchasable() && $this->is_in_stock() ? remove_query_arg( 'added-to-cart', add_query_arg( array_merge( array( 'variation_id' => $this->variation_id, 'add-to-cart' => $this->id ), $this->variation_data ) ) ) : get_permalink( $this->id );
+
+		return apply_filters( 'woocommerce_product_add_to_cart_url', $url, $this );
+	}
+
+	/**
+	 * Get the add to cart button text
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function add_to_cart_text() {
+		$text = $this->is_purchasable() && $this->is_in_stock() ? __( 'Add to cart', 'woocommerce' ) : __( 'Read More', 'woocommerce' );
+
+		return apply_filters( 'woocommerce_product_add_to_cart_text', $text, $this );
+	}
+
+	/**
 	 * Checks if this particular variation is visible (variations with no price, or out of stock, can be hidden)
 	 *
 	 * @return bool

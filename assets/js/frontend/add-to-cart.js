@@ -6,9 +6,10 @@ jQuery(document).ready(function($) {
 		// AJAX add to cart request
 		var $thisbutton = $(this);
 
-		if ($thisbutton.is('.product_type_simple, .product_type_downloadable, .product_type_virtual')) {
+		if ( $thisbutton.is('.product_type_simple') ) {
 
-			if (!$thisbutton.attr('data-product_id')) return true;
+			if (!$thisbutton.attr('data-product_id'))
+				return true;
 
 			$thisbutton.removeClass('added');
 			$thisbutton.addClass('loading');
@@ -98,10 +99,9 @@ jQuery(document).ready(function($) {
 
 			return false;
 
-		} else {
-			return true;
 		}
 
+		return true;
 	});
 
 });

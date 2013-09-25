@@ -437,13 +437,33 @@ class WC_Product {
 	}
 
 	/**
-	 * Get the add to url.
+	 * Get the add to url used mainly in loops.
 	 *
 	 * @access public
 	 * @return string
 	 */
 	public function add_to_cart_url() {
-		return apply_filters( 'woocommerce_add_to_cart_url', remove_query_arg( 'added-to-cart', add_query_arg( 'add-to-cart', $this->id ) ) );
+		return apply_filters( 'woocommerce_product_add_to_cart_url', get_permalink( $this->id ), $this );
+	}
+
+	/**
+	 * Get the add to cart button text for the single page
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function single_add_to_cart_text() {
+		return apply_filters( 'woocommerce_product_single_add_to_cart_text', __( 'Add to cart', 'woocommerce' ), $this );
+	}
+
+	/**
+	 * Get the add to cart button text
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function add_to_cart_text() {
+		return apply_filters( 'woocommerce_product_add_to_cart_text', __( 'Read more', 'woocommerce' ), $this );
 	}
 
 	/**

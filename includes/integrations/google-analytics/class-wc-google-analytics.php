@@ -293,8 +293,7 @@ class WC_Google_Analytics extends WC_Integration {
 		$parameters['category'] = "'" . __( 'Products', 'woocommerce' ) . "'";
 		$parameters['action'] 	= "'" . __( 'Add to cart', 'woocommerce' ) . "'";
 		$parameters['label'] 	= "($(this).data('product_sku')) ? ('SKU: ' + $(this).data('product_sku')) : ('#' + $(this).data('product_id'))"; // Product SKU or ID
-
-		$this->event_tracking_code( $parameters, '.add_to_cart_button:not(.product_type_variable, .product_type_grouped)' );
+		$this->event_tracking_code( $parameters, '.add_to_cart_button.product_type_simple' );
 	}
 
 

@@ -32,6 +32,16 @@ class WC_Product_Variable extends WC_Product {
 		parent::__construct( $product );
 	}
 
+	/**
+	 * Get the add to cart button text
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function add_to_cart_text() {
+		return apply_filters( 'woocommerce_product_add_to_cart_text', __( 'Select options', 'woocommerce' ), $this );
+	}
+
     /**
      * Get total stock.
      *

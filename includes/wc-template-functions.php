@@ -72,7 +72,7 @@ function wc_setup_product_data( $post ) {
 	if ( is_int( $post ) )
 		$post = get_post( $post );
 
-	if ( $post->post_type !== 'product' )
+	if ( $post->post_type !== 'product' && $post->post_type !== 'product_variation' )
 		return;
 
 	$GLOBALS['product'] = get_product( $post );
@@ -747,7 +747,13 @@ if ( ! function_exists( 'woocommerce_grouped_add_to_cart' ) ) {
 	 * @return void
 	 */
 	function woocommerce_grouped_add_to_cart() {
-		woocommerce_get_template( 'single-product/add-to-cart/grouped.php' );
+		global $product;
+
+		woocommerce_get_template( 'single-product/add-to-cart/grouped.php', array(
+			'grouped_product'    => $product,
+			'grouped_products'   => $product->get_children(),
+			'quantites_required' => false
+		) );
 	}
 }
 if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
@@ -790,7 +796,7 @@ if ( ! function_exists( 'woocommerce_external_add_to_cart' ) ) {
 
 		woocommerce_get_template( 'single-product/add-to-cart/external.php', array(
 				'product_url' => $product->get_product_url(),
-				'button_text' => $product->get_button_text()
+				'button_text' => $product->single_add_to_cart_text()
 			) );
 	}
 }
