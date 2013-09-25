@@ -631,7 +631,7 @@ final class WooCommerce {
 	 */
 	public function verify_nonce( $action, $method = '_POST', $error_message = false ) {
 		_deprecated_function( 'Woocommerce->verify_nonce', '2.1', 'WC_Nonce_Helper->verify_nonce' );
-		return wp_verify_nonce( $$_method[ '_wpnonce' ], 'woocommerce-' . $action );
+		return wp_verify_nonce( $$method[ '_wpnonce' ], 'woocommerce-' . $action );
 	}
 
 	/**
