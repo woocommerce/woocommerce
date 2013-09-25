@@ -121,8 +121,8 @@ final class WooCommerce {
 			return $this->$key();
 		else switch( $key ) {
 			case 'template_url':
-				_deprecated_argument( 'Woocommerce->template_url', '2.1', 'WOOCOMMERCE_TEMPLATE_DIR constant' );
-				return WOOCOMMERCE_TEMPLATE_DIR;
+				_deprecated_argument( 'Woocommerce->template_url', '2.1', 'WOOCOMMERCE_TEMPLATE_PATH constant' );
+				return WOOCOMMERCE_TEMPLATE_PATH;
 			case 'messages':
 				_deprecated_argument( 'Woocommerce->messages', '2.1', 'The "messages" field is moved to the messages helper class.' );
 				return $this->session->get( 'wc_messages', array() );
