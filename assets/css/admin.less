@@ -2275,6 +2275,26 @@ img.help_tip {
 					}
 				}
 			}
+			th.sort {
+				width: 17px;
+				padding: 0;
+			}
+			td.sort {
+				padding: 0 0 0 1.5em;
+				cursor: move;
+				position: relative;
+				background: #f9f9f9;
+				&:before {
+					content: "";
+					position: absolute;
+					top: 1em;
+					left: 0.5em;
+					width: 1em;
+					height: 0.125em;
+					border-top: 0.375em double #999;
+					border-bottom: 0.125em solid #999;
+				}
+			}
 		}
 	}
 }

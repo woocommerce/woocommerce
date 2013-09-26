@@ -1301,4 +1301,16 @@ jQuery( function($){
 		downloadable_file_frame.open();
 	});
 
+	// Download ordering
+	jQuery('.downloadable_files tbody').sortable({
+		items:'tr',
+		cursor:'move',
+		axis:'y',
+		handle: 'td.sort',
+		scrollSensitivity:40,
+		forcePlaceholderSize: true,
+		helper: 'clone',
+		opacity: 0.65,
+	});
+
 });
