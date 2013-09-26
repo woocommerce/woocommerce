@@ -235,6 +235,23 @@ if ( ! function_exists( 'wc_product_post_class' ) ) {
 			if ( isset( $product->product_type ) ) {
 				$classes[] = "product-type-" . $product->product_type;
 			}
+
+			// add category slugs
+			$categories = wp_get_post_terms( $product->id, "product_cat" );
+			if ( ! empty( $categories ) ) {
+				foreach ($categories as $key => $value) {
+					$classes[] = "category-" . $value->slug;
+				}
+			}
+
+			// add tag slugs
+			$tags = wp_get_post_terms( $product->id, "product_tag" );
+			if ( ! empty( $tags ) ) {
+				foreach ($tags as $key => $value) {
+					$classes[] = "tag-" . $value->slug;
+				}
+			}
+
 			$classes[] = $product->stock_status;
 		}
 
