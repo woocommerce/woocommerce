@@ -813,7 +813,7 @@ endif;
  * Returns the main instance of WC to prevent the need to use globals.
  *
  * @since  2.1
- * @return  object WooCommerce
+ * @return WooCommerce
  */
 function WC() {
 	return WooCommerce::instance();
