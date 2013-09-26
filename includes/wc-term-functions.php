@@ -134,7 +134,7 @@ function woocommerce_taxonomy_metadata_wpdbfix() {
 	$wpdb->order_itemmeta = $wpdb->prefix . $itemmeta_name;
 
 	$wpdb->tables[] = 'woocommerce_termmeta';
-	$wpdb->tables[] = 'order_itemmeta';
+	$wpdb->tables[] = 'woocommerce_order_itemmeta';
 }
 add_action( 'init', 'woocommerce_taxonomy_metadata_wpdbfix', 0 );
 add_action( 'switch_blog', 'woocommerce_taxonomy_metadata_wpdbfix', 0 );
