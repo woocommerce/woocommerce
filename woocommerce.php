@@ -41,6 +41,41 @@ final class WooCommerce {
 	protected static $_instance = null;
 
 	/**
+	 * @var WC_Session session
+	 */
+	public $session = null;
+
+	/**
+	 * @var WC_Query $query
+	 */
+	public $query = null;
+
+	/**
+	 * @var WC_Product_Factory $product_factory
+	 */
+	public $product_factory = null;
+
+	/**
+	 * @var WC_Countries $countries
+	 */
+	public $countries = null;
+
+	/**
+	 * @var WC_Integrations $integrations
+	 */
+	public $integrations = null;
+
+	/**
+	 * @var WC_Cart $cart
+	 */
+	public $cart = null;
+
+	/**
+	 * @var WC_Customer $customer
+	 */
+	public $customer = null;
+
+	/**
 	 * Main WooCommerce Instance
 	 *
 	 * Ensures only one instance of WooCommerce is loaded or can be loaded.
