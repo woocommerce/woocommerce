@@ -136,10 +136,6 @@ function woocommerce_clear_cart_after_payment() {
 		$order = new WC_Order( $woocommerce->session->order_awaiting_payment );
 
 		if ( $order->id > 0 ) {
-			// If the order has failed, and the customer is logged in, they can try again from their account page
-			if ( $order->status == 'failed' && is_user_logged_in() )
-				$woocommerce->cart->empty_cart();
-
 			// If the order has not failed, or is not pending, the order must have gone through
 			if ( $order->status != 'failed' && $order->status != 'pending' )
 				$woocommerce->cart->empty_cart();

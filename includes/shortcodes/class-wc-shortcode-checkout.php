@@ -83,7 +83,7 @@ class WC_Shortcode_Checkout {
 			$order                = new WC_Order( $order_id );
 			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
 
-			if ( !current_user_can( 'pay_for_order', $order_id ) ) {
+			if ( ! current_user_can( 'pay_for_order', $order_id ) ) {
 				echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . get_permalink( woocommerce_get_page_id( 'myaccount' ) ).'">'. __( 'My Account &rarr;', 'woocommerce' ) .'</a>' . '</div>';
 				return;
 			}
