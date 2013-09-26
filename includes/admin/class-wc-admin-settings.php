@@ -495,17 +495,17 @@ class WC_Admin_Settings {
 
 	            // Single country selects
 	            case 'single_select_country' :
+					$country_setting = (string) self::get_option( $value['id'] );
+					$countries       = WC()->countries->countries;
 
-	            	$country_setting = (string) self::get_option( $value['id'] );
-
-	            	$countries = WC()->countries->countries;
-	            	if (strstr($country_setting, ':')) :
-	            		$country = current(explode(':', $country_setting));
-	            		$state = end(explode(':', $country_setting));
-	            	else :
-	            		$country = $country_setting;
-	            		$state = '*';
-	            	endif;
+	            	if ( strstr( $country_setting, ':' ) ) {
+						$country_setting = explode( ':', $country_setting );
+						$country         = current( $country_setting );
+						$state           = end( $country_setting );
+	            	} else {
+						$country = $country_setting;
+						$state   = '*';
+	            	}
 	            	?><tr valign="top">
 						<th scope="row" class="titledesc">
 							<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
