@@ -436,22 +436,32 @@
 			<td><?php _e( 'Template Overrides', 'woocommerce' ); ?>:</td>
 			<td><?php
 
-				$template_path = $woocommerce->plugin_path() . '/templates/';
-				$found_files   = array();
-				$files         = $this->scan_template_files( $template_path );
+				$template_paths = apply_filters( 'woocommerce_template_overrides_scan_paths', array( 'WooCommerce' => $woocommerce->plugin_path() . '/templates/' ) );
+				$found_files    = array();
 
-				foreach ( $files as $file ) {
-					if ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
-						$found_files[] = '/' . $file;
-					} elseif( file_exists( get_stylesheet_directory() . '/woocommerce/' . $file ) ) {
-						$found_files[] = '/woocommerce/' . $file;
+				foreach ( $template_paths as $plugin_name => $template_path )
+					$scanned_files[ $plugin_name ] = $this->scan_template_files( $template_path );
+
+				foreach ( $scanned_files as $plugin_name => $files ) {
+					foreach ( $files as $file ) {
+						if ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
+							$found_files[ $plugin_name ][] = '/' . $file;
+						} elseif( file_exists( get_stylesheet_directory() . '/woocommerce/' . $file ) ) {
+							$found_files[ $plugin_name ][] = '/woocommerce/' . $file;
+						}
 					}
 				}
 
 				if ( $found_files ) {
-					echo implode( ', <br/>', $found_files );
+					$loop = 0;
+					foreach ( $found_files as $plugin_name => $found_plugin_files ) {
+						echo $loop > 0 ? '<br/><br/>' : '';
+						echo $plugin_name . ': <br/>';
+						echo implode( ', <br/>', $found_plugin_files );
+						$loop++;
+					}
 				} else {
-					_e( 'No core overrides present in theme.', 'woocommerce' );
+					_e( 'No overrides present in theme.', 'woocommerce' );
 				}
 
 			?></td>
