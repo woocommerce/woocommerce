@@ -75,6 +75,7 @@ abstract class WC_Settings_API {
     		return false;
     	} else {
     		update_option( $this->plugin_id . $this->id . '_settings', apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->sanitized_fields ) );
+    		$this->init_settings();
     		return true;
     	}
     }
@@ -103,10 +104,6 @@ abstract class WC_Settings_API {
 	 * @return void
 	 */
     public function init_settings() {
-
-	    if ( ! empty( $this->settings ) )
-	    	return;
-
     	// Load form_field settings
     	$this->settings = get_option( $this->plugin_id . $this->id . '_settings', null );
 
@@ -121,8 +118,8 @@ abstract class WC_Settings_API {
     	}
 
         if ( $this->settings && is_array( $this->settings ) ) {
-    	   $this->settings = array_map( array( $this, 'format_settings' ), $this->settings );
-    	   $this->enabled  = isset( $this->settings['enabled'] ) && $this->settings['enabled'] == 'yes' ? 'yes' : 'no';
+			$this->settings = array_map( array( $this, 'format_settings' ), $this->settings );
+			$this->enabled  = isset( $this->settings['enabled'] ) && $this->settings['enabled'] == 'yes' ? 'yes' : 'no';
         }
     }
 

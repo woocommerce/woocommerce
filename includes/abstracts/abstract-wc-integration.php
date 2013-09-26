@@ -25,7 +25,7 @@ abstract class WC_Integration extends WC_Settings_API {
 	 * @access public
 	 * @return void
 	 */
-	function admin_options() { ?>
+	public function admin_options() { ?>
 
 		<h3><?php echo isset( $this->method_title ) ? $this->method_title : __( 'Settings', 'woocommerce' ) ; ?></h3>
 
@@ -40,5 +40,4 @@ abstract class WC_Integration extends WC_Settings_API {
 
 		<?php
 	}
-
 }
