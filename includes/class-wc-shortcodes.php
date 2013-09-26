@@ -460,7 +460,7 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function product_add_to_cart( $atts ) {
-	  	global $wpdb;
+	  	global $wpdb, $post;
 
 	  	if ( empty( $atts ) )
 	  		return;
@@ -489,7 +489,8 @@ class WC_Shortcodes {
 
 		</p><?php
 
-		wp_reset_postdata();
+		// Restore Product global in case this is shown inside a product post
+		wc_setup_product_data( $post );
 
 		return ob_get_clean();
 	}
