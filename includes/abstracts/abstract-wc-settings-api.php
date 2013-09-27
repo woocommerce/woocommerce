@@ -264,6 +264,22 @@ abstract class WC_Settings_API {
     }
 
     /**
+     * Wrapper for text inputs for prices.
+     *
+     * @access public
+     * @param mixed $key
+     * @param mixed $data
+     * @since 1.0.0
+     * @return string
+     */
+    public function generate_price_html( $key, $data ) {
+    	$data['type']  = 'text';
+    	$data['class'] = isset( $data['class'] ) ? $data['class'] . ' wc_input_price' : 'wc_input_price';
+
+    	return $this->generate_text_html( $key, $data );
+    }
+
+    /**
      * Generate Password Input HTML.
      *
      * @access public

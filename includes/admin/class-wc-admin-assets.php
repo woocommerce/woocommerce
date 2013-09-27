@@ -97,6 +97,12 @@ class WC_Admin_Assets {
 	    	wp_enqueue_script( 'jquery-ui-sortable' );
 	    	wp_enqueue_script( 'jquery-ui-autocomplete' );
 	    	wp_enqueue_script( 'filesaver' );
+
+	    	$params = array(
+	    		'i18n_price_input_error' => __( 'Please enter your prices in decimal format without currency symbols.', 'woocommerce' ),
+	    	);
+
+	    	wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );
 	    }
 
 	    // Edit product category pages
@@ -157,7 +163,7 @@ class WC_Admin_Assets {
 				'currency_format'				=> esc_attr( str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) ), // For accounting JS
 				'product_types'					=> array_map( 'sanitize_title', get_terms( 'product_type', array( 'hide_empty' => false, 'fields' => 'names' ) ) ),
 				'default_attribute_visibility'  => apply_filters( 'default_attribute_visibility', false ),
-				'default_attribute_variation'   => apply_filters( 'default_attribute_variation', false )
+				'default_attribute_variation'   => apply_filters( 'default_attribute_variation', false ),
 			);
 
 			wp_localize_script( 'woocommerce_admin_meta_boxes', 'woocommerce_admin_meta_boxes', $params );

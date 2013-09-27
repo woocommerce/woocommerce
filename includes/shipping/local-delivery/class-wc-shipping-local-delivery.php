@@ -121,11 +121,7 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 			),
 			'fee' => array(
 				'title'			=> __( 'Delivery Fee', 'woocommerce' ),
-				'type'			=> 'number',
-				'custom_attributes' => array(
-					'step'	=> 'any',
-					'min'	=> '0'
-				),
+				'type'			=> 'price',
 				'description'	=> __( 'What fee do you want to charge for local delivery, disregarded if you choose free. Leave blank to disable.', 'woocommerce' ),
 				'default'		=> '',
 				'desc_tip'		=> true,
@@ -202,13 +198,13 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 
 			if ( in_array( $this->clean( $package['destination']['postcode'] ), $codes ) )
 				$found_match = true;
-				
-			
+
+
 			// Pattern match
 			if ( ! $found_match ) {
-				
+
 				$customer_postcode = $this->clean( $package['destination']['postcode'] );
-			
+
 				foreach ($codes as $c) {
 					$pattern = '/^'.str_replace('_', '[0-9a-zA-Z]', $c).'$/i';
 					if(preg_match($pattern, $customer_postcode)) {
@@ -216,9 +212,9 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 						break;
 					}
 				}
-				
+
 			}
-			
+
 
 			// Wildcard search
 			if ( ! $found_match ) {

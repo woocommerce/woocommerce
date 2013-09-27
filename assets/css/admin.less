@@ -2700,7 +2700,7 @@ img.tips {
 	padding: 5px 0 0 0;
 }
 
-/* TipTip CSS - Version 1.2 */
+/* TipTip CSS - Version 1.2 (custom) */
 #tiptip_holder {
 	display: none;
 	position: absolute;
@@ -2708,29 +2708,55 @@ img.tips {
 	left: 0;
 	z-index: 99999;
 }
-#tiptip_holder.tip_top {
-	padding-bottom: 5px;
+#tiptip_holder {
+	&.tip_top {
+		padding-bottom: 5px;
+
+		#tiptip_arrow_inner {
+			margin-top: -7px;
+			margin-left: -6px;
+			border-top-color: #464646;
+		}
+	}
+	&.tip_bottom {
+		padding-top: 5px;
+
+		#tiptip_arrow_inner {
+			margin-top: -5px;
+			margin-left: -6px;
+			border-bottom-color: #464646;
+		}
+	}
+	&.tip_right {
+		padding-left: 5px;
+
+		#tiptip_arrow_inner {
+			margin-top: -6px;
+			margin-left: -5px;
+			border-right-color: #464646;
+		}
+	}
+	&.tip_left {
+		padding-right: 5px;
+
+		#tiptip_arrow_inner {
+			margin-top: -6px;
+			margin-left: -7px;
+			border-left-color: #464646;
+		}
+	}
 }
-#tiptip_holder.tip_bottom {
-	padding-top: 5px;
-}
-#tiptip_holder.tip_right {
-	padding-left: 5px;
-}
-#tiptip_holder.tip_left {
-	padding-right: 5px;
-}
-#tiptip_content, .chart-tooltip  {
+#tiptip_content, .chart-tooltip, .wc_error_tip {
 	font-size: 11px;
 	color: #fff;
 	padding: .75em 1em;
 	background:#464646;
-	border-radius: 3px;
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
-	box-shadow: 1px 1px 3px rgba(0,0,0,0.10);
+	border-radius: 3px;
 	-webkit-box-shadow: 1px 1px 3px rgba(0,0,0,0.10);
 	-moz-box-shadow: 1px 1px 3px rgba(0,0,0,0.10);
+	box-shadow: 1px 1px 3px rgba(0,0,0,0.10);
 	text-align: center;
 	code {
 		background: #888;
@@ -2745,30 +2771,25 @@ img.tips {
 	height: 0;
 	width: 0;
 }
-#tiptip_holder.tip_top #tiptip_arrow_inner {
-	margin-top: -7px;
-	margin-left: -6px;
-	border-top-color: #464646;
+.wc_error_tip {
+	background: #d82223;
+	max-width: 20em;
+	position: absolute;
+	margin: 1.5em 1px 0 -1em;
+	z-index: 9999999;
+	&:after {
+		content: "";
+		display:block;
+		border: 8px solid #d82223;
+		border-right-color: transparent;
+		border-left-color: transparent;
+		border-top-color: transparent;
+		position:absolute;
+		top: -3px;
+		left: 50%;
+		margin: -1em 0 0 -3px;
+	}
 }
-
-#tiptip_holder.tip_bottom #tiptip_arrow_inner {
-	margin-top: -5px;
-	margin-left: -6px;
-	border-bottom-color: #464646;
-}
-
-#tiptip_holder.tip_right #tiptip_arrow_inner {
-	margin-top: -6px;
-	margin-left: -5px;
-	border-right-color: #464646;
-}
-
-#tiptip_holder.tip_left #tiptip_arrow_inner {
-	margin-top: -6px;
-	margin-left: -7px;
-	border-left-color: #464646;
-}
-
 
 /* Datepicker */
 img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: pointer }

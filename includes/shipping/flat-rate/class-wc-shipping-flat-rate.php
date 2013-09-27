@@ -114,11 +114,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 						),
 			'cost_per_order' => array(
 							'title' 		=> __( 'Cost per order', 'woocommerce' ),
-							'type' 			=> 'number',
-							'custom_attributes' => array(
-								'step'	=> 'any',
-								'min'	=> '0'
-							),
+							'type' 			=> 'price',
 							'description'	=> __( 'Enter a cost (excluding tax) per order, e.g. 5.00. Leave blank to disable.', 'woocommerce' ),
 							'default'		=> '',
 							'desc_tip'		=> true,
@@ -152,11 +148,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 						),
 			'minimum_fee' => array(
 							'title' 		=> __( 'Minimum Handling Fee', 'woocommerce' ),
-							'type' 			=> 'number',
-							'custom_attributes' => array(
-								'step'	=> 'any',
-								'min'	=> '0'
-							),
+							'type' 			=> 'price',
 							'description'	=> __( 'Enter a minimum fee amount. Fee\'s less than this will be increased. Leave blank to disable.', 'woocommerce' ),
 							'default'		=> '',
 							'desc_tip'		=> true,
@@ -542,7 +534,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 						<tr>
 							<td></td>
 							<td class="flat_rate_class"><?php _e( 'Any class', 'woocommerce' ); ?></td>
-							<td><input type="number" step="any" min="0" value="<?php echo esc_attr( $this->cost ); ?>" name="default_cost" placeholder="<?php _e( 'N/A', 'woocommerce' ); ?>" size="4" /></td>
+							<td><input type="text" value="<?php echo esc_attr( $this->cost ); ?>" name="default_cost" placeholder="<?php _e( 'N/A', 'woocommerce' ); ?>" size="4" class="wc_input_price" /></td>
 							<td><input type="text" value="<?php echo esc_attr( $this->fee ); ?>" name="default_fee" placeholder="<?php _e( 'N/A', 'woocommerce' ); ?>" size="4" /></td>
 						</tr>
 						<?php
