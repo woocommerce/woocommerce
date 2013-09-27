@@ -125,6 +125,8 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		}
 
 	}
+
+	do_action( 'woocommerce_delete_product_transients', $post_id );
 }
 
 /**
