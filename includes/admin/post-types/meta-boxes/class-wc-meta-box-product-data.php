@@ -418,7 +418,7 @@ class WC_Meta_Box_Product_Data {
 
 						// Taxonomies
 						if ( $attribute_taxonomies ) {
-					    	foreach ( $attribute_taxonomies as $tax ) { $i++;
+					    	foreach ( $attribute_taxonomies as $tax ) {
 
 					    		// Get name of taxonomy we're now outputting (pa_xxx)
 					    		$attribute_taxonomy_name = wc_attribute_taxonomy_name( $tax->attribute_name );
@@ -426,6 +426,8 @@ class WC_Meta_Box_Product_Data {
 					    		// Ensure it exists
 					    		if ( ! taxonomy_exists( $attribute_taxonomy_name ) )
 					    			continue;
+
+					    		$i++;
 
 					    		// Get product data values for current taxonomy - this contains ordering and visibility data
 					    		if ( isset( $attributes[ sanitize_title( $attribute_taxonomy_name ) ] ) )
