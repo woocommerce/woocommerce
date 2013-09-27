@@ -240,7 +240,7 @@ if ( ! function_exists( 'wc_product_post_class' ) ) {
 			$categories = wp_get_post_terms( $product->id, "product_cat" );
 			if ( ! empty( $categories ) ) {
 				foreach ($categories as $key => $value) {
-					$classes[] = "category-" . $value->slug;
+					$classes[] = "product-cat-" . $value->slug;
 				}
 			}
 
@@ -248,7 +248,7 @@ if ( ! function_exists( 'wc_product_post_class' ) ) {
 			$tags = wp_get_post_terms( $product->id, "product_tag" );
 			if ( ! empty( $tags ) ) {
 				foreach ($tags as $key => $value) {
-					$classes[] = "tag-" . $value->slug;
+					$classes[] = "product-tag-" . $value->slug;
 				}
 			}
 
