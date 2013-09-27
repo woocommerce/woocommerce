@@ -326,7 +326,7 @@ class WC_Countries {
 	 */
 	public function get_base_country() {
 		$default = esc_attr( get_option('woocommerce_default_country') );
-		$country = ( ( $pos = strrpos( $default, ':' ) ) === false ) ? '' : substr( $default, 0, $pos );
+		$country = ( ( $pos = strrpos( $default, ':' ) ) === false ) ? $default : substr( $default, 0, $pos );
 
 		return apply_filters( 'woocommerce_countries_base_country', $country );
 	}
