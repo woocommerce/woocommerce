@@ -342,7 +342,7 @@ function woocommerce_product_data_box() {
 
 					// Taxonomies
 					if ( $attribute_taxonomies ) {
-				    	foreach ( $attribute_taxonomies as $tax ) { $i++;
+				    	foreach ( $attribute_taxonomies as $tax ) {
 
 				    		// Get name of taxonomy we're now outputting (pa_xxx)
 				    		$attribute_taxonomy_name = $woocommerce->attribute_taxonomy_name( $tax->attribute_name );
@@ -350,6 +350,8 @@ function woocommerce_product_data_box() {
 				    		// Ensure it exists
 				    		if ( ! taxonomy_exists( $attribute_taxonomy_name ) )
 				    			continue;
+
+				    		$i++;
 
 				    		// Get product data values for current taxonomy - this contains ordering and visibility data
 				    		if ( isset( $attributes[ sanitize_title( $attribute_taxonomy_name ) ] ) )
