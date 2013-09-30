@@ -13,6 +13,8 @@
  */
 exit( 'Locked' );
 
+set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__));
+
 if(isset($_SERVER['SHELL'])){
 	$is_shell = True;
 } else {
@@ -20,7 +22,7 @@ if(isset($_SERVER['SHELL'])){
 }
 
 // Load the makepot generator
-require './makepot.php';
+require 'makepot.php';
 $makepot = new WC_Makepot;
 
 // Regeneration requested

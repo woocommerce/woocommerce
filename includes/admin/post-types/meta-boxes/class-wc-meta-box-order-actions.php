@@ -49,6 +49,7 @@ class WC_Meta_Box_Order_Actions {
 						}
 						?>
 					</optgroup>
+					<option value="regenerate_download_permissions"><?php _e( 'Generate Download Permissions', 'woocommerce' ); ?></option>
 					<?php foreach( apply_filters( 'woocommerce_order_actions', array() ) as $action => $title ) { ?>
 						<option value="<?php echo $action; ?>"><?php echo $title; ?></option>
 					<?php } ?>
@@ -108,6 +109,11 @@ class WC_Meta_Box_Order_Actions {
 				}
 
 				do_action( 'woocommerce_after_resend_order_email', $order, $email_to_send );
+
+			} elseif ( $action == 'regenerate_download_permissions' ) {
+
+				delete_post_meta( $post_id, '_download_permissions_granted' );
+				woocommerce_downloadable_product_permissions( $post_id );
 
 			} else {
 

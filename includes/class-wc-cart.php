@@ -6,7 +6,7 @@
  * The cart class also has a price calculation function which calls upon other classes to calculate totals.
  *
  * @class 		WC_Cart
- * @version		2.0.0
+ * @version		2.1.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
@@ -337,7 +337,7 @@ class WC_Cart {
 				foreach ( $this->applied_coupons as $key => $code ) {
 					$coupon = new WC_Coupon( $code );
 
-					if ( is_wp_error( $coupon->is_valid() ) ) {
+					if ( ! $coupon->is_valid() ) {
 
 						$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_INVALID_REMOVED );
 
@@ -401,7 +401,7 @@ class WC_Cart {
 				foreach ( $this->applied_coupons as $key => $code ) {
 					$coupon = new WC_Coupon( $code );
 
-					if ( ! is_wp_error( $coupon->is_valid() ) && is_array( $coupon->customer_email ) && sizeof( $coupon->customer_email ) > 0 ) {
+					if ( $coupon->is_valid() && is_array( $coupon->customer_email ) && sizeof( $coupon->customer_email ) > 0 ) {
 
 						$coupon->customer_email = array_map( 'sanitize_email', $coupon->customer_email );
 
@@ -590,7 +590,7 @@ class WC_Cart {
 					}
 
 					$item_data[] = array(
-						'key'   => $woocommerce->get_helper( 'attribute' )->attribute_label( str_replace( 'attribute_', '', $name ) ),
+						'key'   => wc_attribute_label( str_replace( 'attribute_', '', $name ) ),
 						'value' => $value
 					);
 				}
@@ -942,9 +942,9 @@ class WC_Cart {
 
 			if ( $quantity == 0 || $quantity < 0 ) {
 				do_action( 'woocommerce_before_cart_item_quantity_zero', $cart_item_key );
-				unset( $this->cart_contents[$cart_item_key] );
+				unset( $this->cart_contents[ $cart_item_key ] );
 			} else {
-				$this->cart_contents[$cart_item_key]['quantity'] = $quantity;
+				$this->cart_contents[ $cart_item_key ]['quantity'] = $quantity;
 				do_action( 'woocommerce_after_cart_item_quantity_update', $cart_item_key, $quantity );
 			}
 
@@ -1329,8 +1329,10 @@ class WC_Cart {
 
 			do_action( 'woocommerce_before_calculate_totals', $this );
 
-			if ( sizeof( $this->get_cart() ) == 0 )
+			if ( sizeof( $this->get_cart() ) == 0 ) {
+				$this->set_session();
 				return;
+			}
 
 			// Get count of all items + weights + subtotal (we may need this for discounts)
 			$subtotal       = 0;
@@ -1463,11 +1465,9 @@ class WC_Cart {
 						$item_tax_rates = $tax_rates[ $_product->get_tax_class() ];
 
 						/**
-						 * ADJUST TAX - Calculations when customer is OUTSIDE the shop base country/state and prices INCLUDE tax
-						 * 	OR
-						 * ADJUST TAX - Calculations when a tax class is modified
+						 * ADJUST TAX - Calculations when base tax is not equal to the item tax
 						 */
-						if ( $_product->get_tax_class() !== $_product->tax_class || ( $woocommerce->customer->is_customer_outside_base() && ( defined('WOOCOMMERCE_CHECKOUT') || $woocommerce->customer->has_calculated_shipping() ) ) ) {
+						if ( $item_tax_rates !== $base_tax_rates ) {
 
 							// Work out a new base price without the shop's base tax
 							$line_tax              = array_sum( $this->tax->calc_tax( $line_price, $base_tax_rates, true ) );

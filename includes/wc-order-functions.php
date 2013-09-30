@@ -55,8 +55,8 @@ function woocommerce_downloadable_file_permission( $download_id, $product_id, $o
 	if ( $expiry )
 		$expiry = date_i18n( "Y-m-d", strtotime( 'NOW + ' . $expiry . ' DAY' ) );
 
-    $data = array(
-    	'download_id'			=> $download_id,
+	$data = apply_filters( 'woocommerce_downloadable_file_permission_data', array(
+		'download_id'			=> $download_id,
 		'product_id' 			=> $product_id,
 		'user_id' 				=> absint( $order->user_id ),
 		'user_email' 			=> $user_email,
@@ -65,10 +65,10 @@ function woocommerce_downloadable_file_permission( $download_id, $product_id, $o
 		'downloads_remaining' 	=> $limit,
 		'access_granted'		=> current_time( 'mysql' ),
 		'download_count'		=> 0
-    );
+	));
 
-    $format = array(
-    	'%s',
+	$format = apply_filters( 'woocommerce_downloadable_file_permission_format', array(
+		'%s',
 		'%s',
 		'%s',
 		'%s',
@@ -77,23 +77,25 @@ function woocommerce_downloadable_file_permission( $download_id, $product_id, $o
 		'%s',
 		'%s',
 		'%d'
-    );
+	), $data);
 
-    if ( ! is_null( $expiry ) ) {
-        $data['access_expires'] = $expiry;
-        $format[] = '%s';
-    }
+	if ( ! is_null( $expiry ) ) {
+			$data['access_expires'] = $expiry;
+			$format[] = '%s';
+	}
 
 	// Downloadable product - give access to the customer
 	$result = $wpdb->insert( $wpdb->prefix . 'woocommerce_downloadable_product_permissions',
-        apply_filters( 'woocommerce_downloadable_file_permission_data', $data ),
-        apply_filters( 'woocommerce_downloadable_file_permission_format', $format )
-    );
+		$data,
+		$format
+	);
 
-    return $result ? $wpdb->insert_id : false;
+	do_action( 'woocommerce_grant_product_download_access', $data );
+
+	return $result ? $wpdb->insert_id : false;
 }
 add_action('woocommerce_order_status_completed', 'woocommerce_downloadable_product_permissions');
-add_action( 'woocommerce_order_status_processing', 'woocommerce_downloadable_product_permissions' );
+add_action('woocommerce_order_status_processing', 'woocommerce_downloadable_product_permissions');
 
 
 /**
@@ -104,35 +106,28 @@ add_action( 'woocommerce_order_status_processing', 'woocommerce_downloadable_pro
  * @return void
  */
 function woocommerce_downloadable_product_permissions( $order_id ) {
-
-	if ( get_post_meta( $order_id, __( 'Download Permissions Granted', 'woocommerce' ), true ) == 1 )
+	if ( get_post_meta( $order_id, '_download_permissions_granted', true ) == 1 )
 		return; // Only do this once
 
 	$order = new WC_Order( $order_id );
 
-	if (sizeof($order->get_items())>0) foreach ($order->get_items() as $item) :
-
-		if ($item['product_id']>0) :
+	if ( sizeof( $order->get_items() ) > 0 ) {
+		foreach ( $order->get_items() as $item ) {
 			$_product = $order->get_product_from_item( $item );
 
-			if ( $_product && $_product->exists() && $_product->is_downloadable() ) :
+			if ( $_product && $_product->exists() && $_product->is_downloadable() ) {
+				$downloads = $order->get_item_downloads( $item );
 
-				$product_id = ($item['variation_id']>0) ? $item['variation_id'] : $item['product_id'];
+				foreach ( $downloads as $download_id => $download )
+					woocommerce_downloadable_file_permission( $download_id, $item['variation_id'] > 0 ? $item['variation_id'] : $item['product_id'], $order );
+			}
+		}
+	}
 
-				$file_download_paths = apply_filters( 'woocommerce_file_download_paths', get_post_meta( $product_id, '_file_paths', true ), $product_id, $order_id, $item );
-				if ( ! empty( $file_download_paths ) ) {
-					foreach ( $file_download_paths as $download_id => $file_path ) {
-						woocommerce_downloadable_file_permission( $download_id, $product_id, $order );
-					}
-				}
+	update_post_meta( $order_id, '_download_permissions_granted', 1 );
 
-			endif;
+	do_action( 'woocommerce_grant_product_download_permissions', $order_id );
 
-		endif;
-
-	endforeach;
-
-	update_post_meta( $order_id,  __( 'Download Permissions Granted', 'woocommerce' ), 1);
 }
 
 /**
@@ -311,14 +306,14 @@ add_action( 'woocommerce_cancel_unpaid_orders', 'woocommerce_cancel_unpaid_order
 function woocommerce_processing_order_count() {
 	if ( false === ( $order_count = get_transient( 'woocommerce_processing_order_count' ) ) ) {
 		$order_statuses = get_terms( 'shop_order_status' );
-	    $order_count = false;
-	    foreach ( $order_statuses as $status ) {
-	        if( $status->slug === 'processing' ) {
-	            $order_count += $status->count;
-	            break;
-	        }
-	    }
-	    $order_count = apply_filters( 'woocommerce_admin_menu_count', intval( $order_count ) );
+			$order_count = false;
+			foreach ( $order_statuses as $status ) {
+					if( $status->slug === 'processing' ) {
+							$order_count += $status->count;
+							break;
+					}
+			}
+			$order_count = apply_filters( 'woocommerce_admin_menu_count', intval( $order_count ) );
 		set_transient( 'woocommerce_processing_order_count', $order_count );
 	}
 

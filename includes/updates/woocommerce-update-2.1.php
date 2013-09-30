@@ -24,3 +24,35 @@ wp_delete_post( get_option('woocommerce_lost_password_page_id'), true );
 $wpdb->hide_errors();
 $wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions DROP PRIMARY KEY" );
 $wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions ADD `permission_id` bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT" );
+
+// Upgrade file paths to support multiple file paths + names etc
+$existing_file_paths = $wpdb->get_results( "SELECT * FROM {$wpdb->postmeta} WHERE meta_key = '_file_paths' AND meta_value != '';" );
+
+if ( $existing_file_paths ) {
+
+	foreach( $existing_file_paths as $existing_file_path ) {
+
+		$needs_update = false;
+		$new_value    = array();
+		$value        = maybe_unserialize( trim( $existing_file_path->meta_value ) );
+
+		if ( $value ) {
+			foreach ( $value as $key => $file ) {
+				if ( ! is_array( $file ) ) {
+					$needs_update      = true;
+					$new_value[ $key ] = array(
+						'file' => $file,
+						'name' => woocommerce_get_filename_from_url( $file )
+					);
+				} else {
+					$new_value[ $key ] = $file;
+				}
+			}
+			if ( $needs_update ) {
+				$new_value = serialize( $new_value );
+
+				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_key = %s, meta_value = %s WHERE meta_id = %d", '_downloadable_files', $new_value, $existing_file_path->meta_id ) );
+			}
+		}
+	}
+}

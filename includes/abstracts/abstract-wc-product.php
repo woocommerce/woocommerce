@@ -5,7 +5,7 @@
  * The WooCommerce product class handles individual product data.
  *
  * @class 		WC_Product
- * @version		2.0.0
+ * @version		2.1.0
  * @package		WooCommerce/Abstracts
  * @category	Abstract Class
  * @author 		WooThemes
@@ -120,6 +120,14 @@ class WC_Product {
 	}
 
 	/**
+	 * Wrapper for get_permalink
+	 * @return string
+	 */
+	public function get_permalink() {
+		return get_permalink( $this->id );
+	}
+
+	/**
      * Get SKU (Stock-keeping unit) - product unique ID.
      *
      * @return string
@@ -167,10 +175,10 @@ class WC_Product {
 			update_post_meta( $this->id, '_stock', $this->stock );
 
 			// Update stock status
-			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= 0 )
+			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) )
 				$this->set_stock_status( 'outofstock' );
 
-			elseif ( $this->backorders_allowed() || $this->get_total_stock() > 0 )
+			elseif ( $this->backorders_allowed() || $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) )
 				$this->set_stock_status( 'instock' );
 
 			// Clear total stock transient
@@ -252,33 +260,74 @@ class WC_Product {
 	 * @return bool Whether downloadable product has a file attached.
 	 */
 	public function has_file( $download_id = '' ) {
-		return ( $this->is_downloadable() && $this->get_file_download_path( $download_id ) ) ? true : false;
+		return ( $this->is_downloadable() && $this->get_file( $download_id ) ) ? true : false;
+	}
+
+	/**
+	 * Gets an array of downloadable files for this product.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return array
+	 */
+	public function get_files() {
+		$downloadable_files = array_filter( isset( $this->downloadable_files ) ? (array) maybe_unserialize( $this->downloadable_files ) : array() );
+
+		if ( $downloadable_files ) {
+			foreach ( $downloadable_files as $key => $file ) {
+				if ( ! is_array( $file ) ) {
+					$downloadable_files[ $key ] = array(
+						'file' => $file,
+						'name' => ''
+					);
+				}
+
+				// Set default name
+				if ( empty( $file['name'] ) )
+					$downloadable_files[ $key ]['name'] = woocommerce_get_filename_from_url( $file );
+
+				// Filter URL
+				$downloadable_files[ $key ]['file'] = apply_filters( 'woocommerce_file_download_path', $downloadable_files[ $key ]['file'], $this->id, $key );
+			}
+		}
+
+		return apply_filters( 'woocommerce_product_files', $downloadable_files, $this->id );
+	}
+
+	/**
+	 * Get a file by $download_id
+	 *
+	 * @param string $download_id file identifier
+	 * @return array|false if not found
+	 */
+	public function get_file( $download_id ) {
+		$files = $this->get_files();
+
+		if ( isset( $files[ $download_id ] ) )
+			$file = $files[ $download_id ];
+		else
+			$file = false;
+
+		// allow overriding based on the particular file being requested
+		return apply_filters( 'woocommerce_product_file', $file, $this->id, $download_id );
 	}
 
 	/**
 	 * Get file download path identified by $download_id
 	 *
-	 * @access public
 	 * @param string $download_id file identifier
-	 * @return array
+	 * @return string
 	 */
 	public function get_file_download_path( $download_id ) {
+		$files = $this->get_files();
 
-		$file_paths = isset( $this->file_paths ) ? $this->file_paths : '';
-		$file_paths = maybe_unserialize( $file_paths );
-		$file_paths = (array) apply_filters( 'woocommerce_file_download_paths', $file_paths, $this->id, null, null );
-
-		if ( ! $download_id && count( $file_paths ) == 1 ) {
-			// backwards compatibility for old-style download URLs and template files
-			$file_path = array_shift( $file_paths );
-		} elseif ( isset( $file_paths[ $download_id ] ) ) {
-			$file_path = $file_paths[ $download_id ];
-		} else {
+		if ( isset( $files[ $download_id ] ) )
+			$file_path = $files[ $download_id ]['file'];
+		else
 			$file_path = '';
-		}
 
 		// allow overriding based on the particular file being requested
-		return apply_filters( 'woocommerce_file_download_path', $file_path, $this->id, $download_id );
+		return apply_filters( 'woocommerce_product_file_download_path', $file_path, $this->id, $download_id );
 	}
 
 	/**
@@ -388,13 +437,33 @@ class WC_Product {
 	}
 
 	/**
-	 * Get the add to url.
+	 * Get the add to url used mainly in loops.
 	 *
 	 * @access public
 	 * @return string
 	 */
 	public function add_to_cart_url() {
-		return apply_filters( 'woocommerce_add_to_cart_url', remove_query_arg( 'added-to-cart', add_query_arg( 'add-to-cart', $this->id ) ) );
+		return apply_filters( 'woocommerce_product_add_to_cart_url', get_permalink( $this->id ), $this );
+	}
+
+	/**
+	 * Get the add to cart button text for the single page
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function single_add_to_cart_text() {
+		return apply_filters( 'woocommerce_product_single_add_to_cart_text', __( 'Add to cart', 'woocommerce' ), $this );
+	}
+
+	/**
+	 * Get the add to cart button text
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function add_to_cart_text() {
+		return apply_filters( 'woocommerce_product_add_to_cart_text', __( 'Read more', 'woocommerce' ), $this );
 	}
 
 	/**
@@ -419,7 +488,7 @@ class WC_Product {
 			if ( $this->backorders_allowed() ) {
 				return true;
 			} else {
-				if ( $this->get_total_stock() <  1 ) {
+				if ( $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 					return false;
 				} else {
 					if ( $this->stock_status == 'instock' )
@@ -494,7 +563,7 @@ class WC_Product {
 		if ( $this->managing_stock() ) {
 			if ( $this->is_in_stock() ) {
 
-				if ( $this->get_total_stock() > 0 ) {
+				if ( $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 
 					$format_option = get_option( 'woocommerce_stock_format' );
 
@@ -682,13 +751,16 @@ class WC_Product {
 	 * Returns the price (including tax). Uses customer tax rates. Can work for a specific $qty for more accurate taxes.
 	 *
 	 * @access public
+	 * @param  string $price to calculdate, left blank to just use get_price()
 	 * @return string
 	 */
-	public function get_price_including_tax( $qty = 1 ) {
+	public function get_price_including_tax( $qty = 1, $price = '' ) {
 		global $woocommerce;
 
 		$_tax  = new WC_Tax();
-		$price = $this->get_price();
+
+		if ( ! $price )
+			$price = $this->get_price();
 
 		if ( $this->is_taxable() ) {
 
@@ -704,7 +776,7 @@ class WC_Product {
 				$tax_rates      = $_tax->get_rates( $this->get_tax_class() );
 				$base_tax_rates = $_tax->get_shop_base_rate( $this->tax_class );
 
-				if ( $woocommerce->customer->is_vat_exempt() ) {
+				if ( ! empty( $woocommerce->customer ) && $woocommerce->customer->is_vat_exempt() ) {
 
 					$base_taxes 		= $_tax->calc_tax( $price * $qty, $base_tax_rates, true );
 					$base_tax_amount	= array_sum( $base_taxes );
@@ -712,9 +784,9 @@ class WC_Product {
 
 				} elseif ( $tax_rates !== $base_tax_rates ) {
 
-					$base_taxes			= $_tax->calc_tax( $price * $qty, $base_tax_rates, true, true );
-					$modded_taxes		= $_tax->calc_tax( $price * $qty - array_sum( $base_taxes ), $tax_rates, false );
-					$price      		= round( $price * $qty - array_sum( $base_taxes ) + array_sum( $modded_taxes ), 2 );
+					$base_taxes			= $_tax->calc_tax( $price * $qty, $base_tax_rates, true );
+					$modded_taxes		= $_tax->calc_tax( ( $price * $qty ) - array_sum( $base_taxes ), $tax_rates, false );
+					$price      		= round( ( $price * $qty ) - array_sum( $base_taxes ) + array_sum( $modded_taxes ), 2 );
 
 				} else {
 
@@ -736,11 +808,13 @@ class WC_Product {
 	 * Uses store base tax rates. Can work for a specific $qty for more accurate taxes.
 	 *
 	 * @access public
+	 * @param  string $price to calculdate, left blank to just use get_price()
 	 * @return string
 	 */
-	public function get_price_excluding_tax( $qty = 1 ) {
+	public function get_price_excluding_tax( $qty = 1, $price = '' ) {
 
-		$price = $this->get_price();
+		if ( ! $price )
+			$price = $this->get_price();
 
 		if ( $this->is_taxable() && get_option('woocommerce_prices_include_tax') == 'yes' ) {
 
@@ -757,6 +831,32 @@ class WC_Product {
 	}
 
 	/**
+	 * Get the suffix to display after prices > 0
+	 * @return string
+	 */
+	public function get_price_suffix() {
+		$price_display_suffix  = get_option( 'woocommerce_price_display_suffix' );
+
+		if ( $price_display_suffix ) {
+			$price_display_suffix = ' <small class="woocommerce-price-suffix">' . $price_display_suffix . '</small>';
+
+			$find = array(
+				'{price_including_tax}',
+				'{price_excluding_tax}'
+			);
+
+			$replace = array(
+				woocommerce_price( $this->get_price_including_tax() ),
+				woocommerce_price( $this->get_price_excluding_tax() )
+			);
+
+			$price_display_suffix = str_replace( $find, $replace, $price_display_suffix );
+		}
+
+		return apply_filters( 'woocommerce_get_price_suffix', $price_display_suffix, $this );
+	}
+
+	/**
 	 * Returns the price in html format.
 	 *
 	 * @access public
@@ -765,31 +865,36 @@ class WC_Product {
 	 */
 	public function get_price_html( $price = '' ) {
 
-		if ( $this->get_price() === '' ) {
+		$tax_display_mode      = get_option( 'woocommerce_tax_display_shop' );
+		$display_price         = $tax_display_mode == 'incl' ? $this->get_price_including_tax() : $this->get_price_excluding_tax();
+		$display_regular_price = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $this->get_regular_price() ) : $this->get_price_excluding_tax( 1, $this->get_regular_price() );
+		$display_sale_price    = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $this->get_sale_price() ) : $this->get_price_excluding_tax( 1, $this->get_sale_price() );
 
-			$price = apply_filters( 'woocommerce_empty_price_html', '', $this );
-
-		} elseif ( $this->get_price() > 0 ) {
+		if ( $this->get_price() > 0 ) {
 
 			if ( $this->is_on_sale() && $this->get_regular_price() ) {
 
-				$price .= $this->get_price_html_from_to( $this->get_regular_price(), $this->get_price() );
+				$price .= $this->get_price_html_from_to( $display_regular_price, $display_price ) . $this->get_price_suffix();
 
 				$price = apply_filters( 'woocommerce_sale_price_html', $price, $this );
 
 			} else {
 
-				$price .= woocommerce_price( $this->get_price() );
+				$price .= woocommerce_price( $display_price ) . $this->get_price_suffix();
 
 				$price = apply_filters( 'woocommerce_price_html', $price, $this );
 
 			}
 
+		} elseif ( $this->get_price() === '' ) {
+
+			$price = apply_filters( 'woocommerce_empty_price_html', '', $this );
+
 		} elseif ( $this->get_price() == 0 ) {
 
 			if ( $this->is_on_sale() && $this->get_regular_price() ) {
 
-				$price .= $this->get_price_html_from_to( $this->get_regular_price(), __( 'Free!', 'woocommerce' ) );
+				$price .= $this->get_price_html_from_to( $display_regular_price, __( 'Free!', 'woocommerce' ) );
 
 				$price = apply_filters( 'woocommerce_free_sale_price_html', $price, $this );
 

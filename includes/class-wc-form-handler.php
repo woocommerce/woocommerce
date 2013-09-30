@@ -49,56 +49,75 @@ class WC_Form_Handler {
 
 		wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-edit_address' );
 
-		$validation = $woocommerce->validation();
-
 		$user_id = get_current_user_id();
 
-		if ( $user_id <= 0 ) return;
+		if ( $user_id <= 0 )
+			return;
 
-		$load_address = ( $wp->query_vars['edit-address'] == 'billing' || $wp->query_vars['edit-address'] == 'shipping' ) ? $wp->query_vars['edit-address'] : 'billing';
+		$load_address = isset( $wp->query_vars['edit-address'] ) ? sanitize_key( $wp->query_vars['edit-address'] ) : 'billing';
 
 		$address = $woocommerce->countries->get_address_fields( esc_attr( $_POST[ $load_address . '_country' ] ), $load_address . '_' );
 
-		foreach ($address as $key => $field) :
+		foreach ( $address as $key => $field ) {
 
-			if (!isset($field['type'])) $field['type'] = 'text';
+			if ( ! isset( $field['type'] ) )
+				$field['type'] = 'text';
 
 			// Get Value
-			switch ($field['type']) :
+			switch ( $field['type'] ) {
 				case "checkbox" :
-					$_POST[$key] = isset($_POST[$key]) ? 1 : 0;
+					$_POST[ $key ] = isset( $_POST[ $key ] ) ? 1 : 0;
 				break;
 				default :
-					$_POST[$key] = isset($_POST[$key]) ? woocommerce_clean($_POST[$key]) : '';
+					$_POST[ $key ] = isset( $_POST[ $key ] ) ? woocommerce_clean( $_POST[ $key ] ) : '';
 				break;
-			endswitch;
+			}
 
 			// Hook to allow modification of value
-			$_POST[$key] = apply_filters('woocommerce_process_myaccount_field_' . $key, $_POST[$key]);
+			$_POST[ $key ] = apply_filters( 'woocommerce_process_myaccount_field_' . $key, $_POST[ $key ] );
 
 			// Validation: Required fields
-			if ( isset($field['required']) && $field['required'] && empty($_POST[$key]) ) wc_add_error( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce' ) );
+			if ( ! empty( $field['required'] ) && empty( $_POST[ $key ] ) )
+				wc_add_error( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce' ) );
 
-			// Postcode
-			if ($key=='billing_postcode' || $key=='shipping_postcode') :
-				if ( ! $validation->is_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] ) ) :
-					wc_add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
-				else :
-					$_POST[$key] = $validation->format_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] );
-				endif;
-			endif;
+			// Validation rules
+			if ( ! empty( $field['validate'] ) && is_array( $field['validate'] ) ) {
+				foreach ( $field['validate'] as $rule ) {
+					switch ( $rule ) {
+						case 'postcode' :
+							$_POST[ $key ] = strtoupper( str_replace( ' ', '', $_POST[ $key ] ) );
 
-		endforeach;
+							if ( ! WC_Validation::is_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] ) ) :
+								wc_add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
+							else :
+								$_POST[ $key ] = wc_format_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] );
+							endif;
+						break;
+						case 'phone' :
+							$_POST[ $key ] = wc_format_phone_number( $_POST[ $key ] );
+
+							if ( ! WC_Validation::is_phone( $_POST[ $key ] ) )
+								wc_add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid phone number.', 'woocommerce' ) );
+						break;
+						case 'email' :
+							$_POST[ $key ] = strtolower( $_POST[ $key ] );
+
+							if ( ! is_email( $_POST[ $key ] ) )
+								wc_add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ) );
+						break;
+					}
+				}
+			}
+		}
 
 		if ( wc_error_count() == 0 ) {
 
-			foreach ($address as $key => $field) :
-				update_user_meta( $user_id, $key, $_POST[$key] );
-			endforeach;
+			foreach ( $address as $key => $field )
+				update_user_meta( $user_id, $key, $_POST[ $key ] );
 
 			wc_add_message( __( 'Address changed successfully.', 'woocommerce' ) );
 
-			do_action( 'woocommerce_customer_save_address', $user_id );
+			do_action( 'woocommerce_customer_save_address', $user_id, $load_address );
 
 			wp_safe_redirect( get_permalink( woocommerce_get_page_id('myaccount') ) );
 			exit;
@@ -277,7 +296,7 @@ class WC_Form_Handler {
 
 			wc_add_message( __( 'Cart updated.', 'woocommerce' ) );
 
-			$referer = ( wp_get_referer() ) ? wp_get_referer() : WC()->cart->get_cart_url();
+			$referer = wp_get_referer() ? wp_get_referer() : WC()->cart->get_cart_url();
 			wp_safe_redirect( $referer );
 			exit;
 
@@ -354,8 +373,9 @@ class WC_Form_Handler {
 		if ( $order->status != 'completed' )
 			return;
 
-		// Make sure the previous order belongs to the current customer
-		if ( $order->user_id != get_current_user_id() )
+		// Make sure the user is allowed to order again. By default it check if the
+		// previous order belonged to the current user.
+		if ( !current_user_can( 'order_again', $order->id ) )
 			return;
 
 		// Copy products from the order to the cart
@@ -402,7 +422,9 @@ class WC_Form_Handler {
 
 			$order = new WC_Order( $order_id );
 
-			if ( $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, array( 'pending', 'failed' ) ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) ) :
+			$can_cancel = current_user_can( 'cancel_order', $order_id );
+
+			if ( $can_cancel && $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, array( 'pending', 'failed' ) ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) ) :
 
 				// Cancel the order + restore stock
 				$order->cancel_order( __('Order cancelled by customer.', 'woocommerce' ) );
@@ -412,7 +434,7 @@ class WC_Form_Handler {
 
 				do_action( 'woocommerce_cancelled_order', $order->id );
 
-			elseif ( $order->status != 'pending' ) :
+			elseif ( $can_cancel && $order->status != 'pending' ) :
 
 				wc_add_error( __( 'Your order is no longer pending and could not be cancelled. Please contact us if you need assistance.', 'woocommerce' ) );
 
@@ -422,7 +444,7 @@ class WC_Form_Handler {
 
 			endif;
 
-			wp_safe_redirect($woocommerce->cart->get_cart_url());
+			wp_safe_redirect( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
 			exit;
 
 		endif;
@@ -481,17 +503,17 @@ class WC_Form_Handler {
 	                // Allow if valid
 	                if ( $valid_value == '' || $valid_value == $value ) {
 		                if ( $attribute['is_taxonomy'] )
-		                	$variations[ esc_html( $attribute['name'] ) ] = $value;
+		                	$variations[ $taxonomy ] = $value;
 		                else {
 			                // For custom attributes, get the name from the slug
-			                $options = array_map( 'trim', explode( '|', $attribute['value'] ) );
+			                $options = array_map( 'trim', explode( WOOCOMMERCE_DELIMITER, $attribute['value'] ) );
 			                foreach ( $options as $option ) {
 			                	if ( sanitize_title( $option ) == $value ) {
 			                		$value = $option;
 			                		break;
 			                	}
 			                }
-			                 $variations[ esc_html( $attribute['name'] ) ] = $value;
+			                 $variations[ $taxonomy ] = $value;
 		                }
 		                continue;
 		            }

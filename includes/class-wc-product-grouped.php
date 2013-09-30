@@ -32,6 +32,16 @@ class WC_Product_Grouped extends WC_Product {
 		parent::__construct( $product );
 	}
 
+	/**
+	 * Get the add to cart button text
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function add_to_cart_text() {
+		return apply_filters( 'woocommerce_product_add_to_cart_text', __( 'View products', 'woocommerce' ), $this );
+	}
+
     /**
      * Get total stock.
      *
@@ -151,7 +161,6 @@ class WC_Product_Grouped extends WC_Product {
 		return apply_filters( 'woocommerce_is_purchasable', false, $this );
 	}
 
-
 	/**
 	 * Returns the price in html format.
 	 *
@@ -161,7 +170,8 @@ class WC_Product_Grouped extends WC_Product {
 	 */
 	public function get_price_html( $price = '' ) {
 
-		$child_prices = array();
+		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
+		$child_prices     = array();
 
 		foreach ( $this->get_children() as $child_id )
 			$child_prices[] = get_post_meta( $child_id, '_price', true );
@@ -174,11 +184,18 @@ class WC_Product_Grouped extends WC_Product {
 			$min_price = '';
 		}
 
-		if ( sizeof( $child_prices ) > 1 ) $price .= $this->get_price_html_from_text();
+		if ( sizeof( $child_prices ) > 1 )
+			$price .= $this->get_price_html_from_text();
 
-		$price .= woocommerce_price( $min_price );
+		if ( $min_price ) {
+			$display_price = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $min_price ) : $this->get_price_excluding_tax( 1, $min_price );
 
-		$price = apply_filters( 'woocommerce_grouped_price_html', $price, $this );
+			$price .= woocommerce_price( $display_price ) . $this->get_price_suffix();
+
+			$price = apply_filters( 'woocommerce_grouped_price_html', $price, $this );
+		} else {
+			$price = apply_filters( 'woocommerce_grouped_empty_price_html', '', $this );
+		}
 
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
 	}

@@ -125,6 +125,8 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		}
 
 	}
+
+	do_action( 'woocommerce_delete_product_transients', $post_id );
 }
 
 /**
@@ -180,7 +182,7 @@ function woocommerce_get_product_ids_on_sale() {
  * @return array
  */
 function woocommerce_get_featured_product_ids() {
-	
+
 	// Load from cache
 	$featured_product_ids = get_transient( 'wc_featured_products' );
 
@@ -239,7 +241,7 @@ function woocommerce_get_product_terms( $object_id, $taxonomy, $fields = 'all' )
 
     $args = array( 'fields' => 'ids' );
 
-	$orderby = WC()->get_helper( 'attribute' )->attribute_orderby( $taxonomy );
+	$orderby = wc_attribute_orderby( $taxonomy );
 
 	switch ( $orderby ) {
 		case 'name' :
@@ -351,9 +353,7 @@ add_filter( 'post_type_link', 'woocommerce_product_post_type_link', 10, 2 );
  * @return string
  */
 function woocommerce_placeholder_img_src() {
-	global $woocommerce;
-
-	return apply_filters( 'woocommerce_placeholder_img_src', $woocommerce->plugin_url() . '/assets/images/placeholder.png' );
+	return apply_filters( 'woocommerce_placeholder_img_src', WC()->plugin_url() . '/assets/images/placeholder.png' );
 }
 
 /**
@@ -363,9 +363,7 @@ function woocommerce_placeholder_img_src() {
  * @return string
  */
 function woocommerce_placeholder_img( $size = 'shop_thumbnail' ) {
-	global $woocommerce;
-
-	$dimensions = $woocommerce->get_image_size( $size );
+	$dimensions = wc_get_image_size( $size );
 
 	return apply_filters('woocommerce_placeholder_img', '<img src="' . woocommerce_placeholder_img_src() . '" alt="Placeholder" width="' . $dimensions['width'] . '" height="' . $dimensions['height'] . '" />' );
 }
@@ -405,9 +403,9 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
             }
 
 			if ( $flat )
-				$variation_list[] = $woocommerce->get_helper( 'attribute' )->attribute_label(str_replace('attribute_', '', $name)).': '.$value;
+				$variation_list[] = wc_attribute_label(str_replace('attribute_', '', $name)).': '.$value;
 			else
-				$variation_list[] = '<dt>'.$woocommerce->get_helper( 'attribute' )->attribute_label(str_replace('attribute_', '', $name)).':</dt><dd>'.$value.'</dd>';
+				$variation_list[] = '<dt>'.wc_attribute_label(str_replace('attribute_', '', $name)).':</dt><dd>'.$value.'</dd>';
 		}
 
 		if ( $flat )

@@ -219,7 +219,6 @@ jQuery( function($){
 			case 'variable_length' :
 			case 'variable_width' :
 			case 'variable_height' :
-			case 'variable_file_paths' :
 			case 'variable_download_limit' :
 			case 'variable_download_expiry' :
 				var value = prompt( woocommerce_admin_meta_boxes_variations.i18n_enter_a_value );

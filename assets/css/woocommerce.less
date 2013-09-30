@@ -380,6 +380,7 @@ p.demo_store {
 				}
 				td {
 					vertical-align: top;
+					padding-bottom: .5em;
 				}
 			}
 		}
@@ -629,7 +630,7 @@ p.demo_store {
 			cursor: not-allowed;
 			&:active {
 				top: 0;
-			}	
+			}
 		}
 	}
 
@@ -1233,6 +1234,9 @@ p.demo_store {
 				transition: opacity 0.5s 0.5s ease;
 				opacity: 0;
 			}
+			label {
+				line-height: 2em;
+			}
 			label.hidden {
 				visibility:hidden;
 			}
@@ -1259,7 +1263,7 @@ p.demo_store {
 				line-height: 1em;
 			}
 			textarea {
-				height: 3.5em;
+				height: 4em;
 				line-height: 1.5em;
 				display:block;
 				-moz-box-shadow:none;
@@ -1272,16 +1276,13 @@ p.demo_store {
 				}
 			}
 			::-webkit-input-placeholder {
-				line-height: 1em;
-				padding-top: 2px;
+				line-height: normal;
 			}
 			:-moz-placeholder {
-				line-height: 1em;
-				padding-top: 2px;
+				line-height: normal;
 			}
 			:-ms-input-placeholder {
-				line-height: 1em;
-				padding-top: 2px;
+				line-height: normal;
 			}
 		}
 	}
@@ -1386,21 +1387,57 @@ p.demo_store {
 			font-size: 0.92em;
 			.border_radius(2px);
 			line-height: 1.5em;
-
 			.vertical_gradient( darken( @secondary, 5 ), darken( @secondary, 10 ) );
 			.box_shadow(0,1px,2px,0,rgba(0,0,0,0.25));
 			color: @secondarytext;
 			.darkorlighttextshadow( @secondarytext );
 
-			p:last-child {
-				margin-bottom: 0;
+			input.input-text, textarea {
+				border-color: darken( @secondary, 15 );
+				border-top-color: darken( @secondary, 20 );
+				.box_shadow( 0, 1px, 0, 0, rgba( 255,255,255,0.4 ) );
 			}
-			#cc-expire-month, #cc-expire-year {
-				width: 48%;
-				float:left;
+			::-webkit-input-placeholder {
+				color: darken( @secondary, 20 );
 			}
-			#cc-expire-year {
-				float: right;
+			:-moz-placeholder {
+				color: darken( @secondary, 20 );
+			}
+			:-ms-input-placeholder {
+				color: darken( @secondary, 20 );
+			}
+			.wc-credit-card-form-card-number,
+			.wc-credit-card-form-card-expiry,
+			.wc-credit-card-form-card-cvc {
+				font-size: 1.5em;
+				padding: 8px;
+				background-repeat: no-repeat;
+				background-position: right;
+
+				&.visa {
+					background-image: url(../images/icons/credit-cards/visa.png);
+				}
+				&.mastercard {
+					background-image: url(../images/icons/credit-cards/mastercard.png);
+				}
+				&.laser {
+					background-image: url(../images/icons/credit-cards/laser.png);
+				}
+				&.dinersclub {
+					background-image: url(../images/icons/credit-cards/diners.png);
+				}
+				&.maestro {
+					background-image: url(../images/icons/credit-cards/maestro.png);
+				}
+				&.jcb {
+					background-image: url(../images/icons/credit-cards/jcb.png);
+				}
+				&.amex {
+					background-image: url(../images/icons/credit-cards/amex.png);
+				}
+				&.discover {
+					background-image: url(../images/icons/credit-cards/discover.png);
+				}
 			}
 			span.help {
 				font-size: 11px;
@@ -1410,15 +1447,9 @@ p.demo_store {
 			}
 			.form-row {
 				margin: 0 0 1em;
-
-				select {
-					width: 48%;
-					float:left;
-					margin-right: 3.8%;
-					&:nth-child(3n) {
-						margin-right: 0;
-					}
-				}
+			}
+			p:last-child {
+				margin-bottom: 0;
 			}
 			&:after {
 				content: "";
@@ -1503,8 +1534,7 @@ p.demo_store {
 			margin-left: 0;
 			padding-left: 0;
 			&:before {
-				.iconbefore;
-				content: "\e00a";
+				.iconbefore( "\e00a" );
 			}
 			.count {
 				float: right;
@@ -1540,8 +1570,7 @@ p.demo_store {
 					color: @tertiarytext;
 					.border_radius(3px);
 					&:before {
-						.iconbefore;
-						content: "\e013";
+						.iconbefore( "\e013" );
 					}
 				}
 			}
@@ -1577,8 +1606,7 @@ p.demo_store {
 					.border_radius(3px);
 					float: left;
 					&:before {
-						.iconbefore;
-						content: "\e013";
+						.iconbefore( "\e013" );
 					}
 				}
 			}

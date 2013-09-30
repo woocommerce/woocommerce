@@ -153,16 +153,10 @@ class WC_Meta_Box_Product_Data {
 				echo '<div class="options_group pricing show_if_simple show_if_external">';
 
 					// Price
-					woocommerce_wp_text_input( array( 'id' => '_regular_price', 'class' => 'wc_input_price short', 'label' => __( 'Regular Price', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')', 'type' => 'number', 'custom_attributes' => array(
-						'step' 	=> 'any',
-						'min'	=> '0'
-					) ) );
+					woocommerce_wp_text_input( array( 'id' => '_regular_price', 'class' => 'wc_input_price short', 'label' => __( 'Regular Price', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')' ) );
 
 					// Special Price
-					woocommerce_wp_text_input( array( 'id' => '_sale_price', 'class' => 'wc_input_price short', 'label' => __( 'Sale Price', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')', 'description' => '<a href="#" class="sale_schedule">' . __( 'Schedule', 'woocommerce' ) . '</a>', 'type' => 'number', 'custom_attributes' => array(
-						'step' 	=> 'any',
-						'min'	=> '0'
-					) ) );
+					woocommerce_wp_text_input( array( 'id' => '_sale_price', 'class' => 'wc_input_price short', 'label' => __( 'Sale Price', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')', 'description' => '<a href="#" class="sale_schedule">' . __( 'Schedule', 'woocommerce' ) . '</a>' ) );
 
 					// Special Price date range
 					$sale_price_dates_from 	= ( $date = get_post_meta( $thepostid, '_sale_price_dates_from', true ) ) ? date_i18n( 'Y-m-d', $date ) : '';
@@ -181,15 +175,47 @@ class WC_Meta_Box_Product_Data {
 
 				echo '<div class="options_group show_if_downloadable">';
 
-					// File URL
-					$file_paths = get_post_meta( $post->ID, '_file_paths', true );
-					if ( is_array( $file_paths ) )
-						$file_paths = implode( "\n", $file_paths );
+					?>
+					<div class="form-field downloadable_files">
+						<label><?php _e( 'Downloadable Files', 'woocommerce' ); ?>:</label>
+						<table class="widefat">
+							<thead>
+								<tr>
+									<th class="sort">&nbsp;</th>
+									<th><?php _e( 'Name', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the name of the download shown to the customer.', 'woocommerce' ); ?>">[?]</span></th>
+									<th colspan="2"><?php _e( 'File URL', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the URL or absolute path to the file which customers will get access to.', 'woocommerce' ); ?>">[?]</span></th>
+									<th>&nbsp;</th>
+								</tr>
+							</thead>
+							<tfoot>
+								<tr>
+									<th colspan="5">
+										<a href="#" class="button insert" data-row="<?php
+											$file = array(
+												'file' => '',
+												'name' => ''
+											);
+											ob_start();
+											include( 'views/html-product-download.php' );
+											echo esc_attr( ob_get_clean() );
+										?>"><?php _e( 'Add File', 'woocommerce' ); ?></a>
+									</th>
+								</tr>
+							</tfoot>
+							<tbody>
+								<?php
+								$downloadable_files = get_post_meta( $post->ID, '_downloadable_files', true );
 
-					echo '<p class="form-field"><label for="_file_paths">' . __( 'File paths (one per line)', 'woocommerce' ) . ':</label>
-						<textarea style="float:left;height:5em;" id="_file_paths" class="short file_paths" cols="20" rows="3" placeholder="' . __( 'File paths/URLs, one per line', 'woocommerce' ) . '" name="_file_paths" wrap="off">' . esc_textarea( $file_paths ) . '</textarea>
-						<input type="button" class="upload_file_button button" data-choose="' . __( 'Choose a file', 'woocommerce' ) . '" data-update="' . __( 'Insert file URL', 'woocommerce' ) . '" value="' . __( 'Choose a file', 'woocommerce' ) . '" />
-					</p>';
+								if ( $downloadable_files ) {
+									foreach ( $downloadable_files as $key => $file ) {
+										include( 'views/html-product-download.php' );
+									}
+								}
+								?>
+							</tbody>
+						</table>
+					</div>
+					<?php
 
 					// Download Limit
 					woocommerce_wp_text_input( array( 'id' => '_download_limit', 'label' => __( 'Download Limit', 'woocommerce' ), 'placeholder' => __( 'Unlimited', 'woocommerce' ), 'description' => __( 'Leave blank for unlimited re-downloads.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
@@ -204,7 +230,7 @@ class WC_Meta_Box_Product_Data {
 					) ) );
 
 					 // Download Type
-					woocommerce_wp_select( array( 'id' => '_download_type', 'label' => __( 'Download Type', 'woocommerce' ), 'options' => array(
+					woocommerce_wp_select( array( 'id' => '_download_type', 'label' => __( 'Download Type', 'woocommerce' ), 'description' => sprintf( __( 'Choose a download type - this controls the <a href="%s">schema</a>.', 'woocommerce' ), 'http://schema.org/' ), 'options' => array(
 						''            => __( 'Standard Product', 'woocommerce' ),
 						'application' => __( 'Application/Software', 'woocommerce' ),
 						'music'       => __( 'Music', 'woocommerce' ),
@@ -377,7 +403,7 @@ class WC_Meta_Box_Product_Data {
 
 					<?php
 						// Array of defined attribute taxonomies
-						$attribute_taxonomies = WC()->get_helper( 'attribute' )->get_attribute_taxonomies();
+						$attribute_taxonomies = wc_get_attribute_taxonomies();
 
 						// Product attributes - taxonomies and custom, ordered, with visibility and variation attributes set
 						$attributes = maybe_unserialize( get_post_meta( $thepostid, '_product_attributes', true ) );
@@ -386,14 +412,16 @@ class WC_Meta_Box_Product_Data {
 
 						// Taxonomies
 						if ( $attribute_taxonomies ) {
-					    	foreach ( $attribute_taxonomies as $tax ) { $i++;
+					    	foreach ( $attribute_taxonomies as $tax ) {
 
 					    		// Get name of taxonomy we're now outputting (pa_xxx)
-					    		$attribute_taxonomy_name = WC()->get_helper( 'attribute' )->attribute_taxonomy_name( $tax->attribute_name );
+					    		$attribute_taxonomy_name = wc_attribute_taxonomy_name( $tax->attribute_name );
 
 					    		// Ensure it exists
 					    		if ( ! taxonomy_exists( $attribute_taxonomy_name ) )
 					    			continue;
+
+					    		$i++;
 
 					    		// Get product data values for current taxonomy - this contains ordering and visibility data
 					    		if ( isset( $attributes[ sanitize_title( $attribute_taxonomy_name ) ] ) )
@@ -451,7 +479,7 @@ class WC_Meta_Box_Product_Data {
 																$values = array();
 																foreach ( $post_terms as $term )
 																	$values[] = $term->name;
-																echo esc_attr( implode( ' | ', $values ) );
+																echo esc_attr( implode( ' ' . WOOCOMMERCE_DELIMITER . ' ', $values ) );
 															}
 
 														?>" placeholder="<?php _e( 'Pipe (|) separate terms', 'woocommerce' ); ?>" />
@@ -548,7 +576,7 @@ class WC_Meta_Box_Product_Data {
 						<?php
 							if ( $attribute_taxonomies ) {
 						    	foreach ( $attribute_taxonomies as $tax ) {
-						    		$attribute_taxonomy_name = WC()->get_helper( 'attribute' )->attribute_taxonomy_name( $tax->attribute_name );
+						    		$attribute_taxonomy_name = wc_attribute_taxonomy_name( $tax->attribute_name );
 						    		$label = $tax->attribute_label ? $tax->attribute_label : $tax->attribute_name;
 						    		echo '<option value="' . esc_attr( $attribute_taxonomy_name ) . '">' . esc_html( $label ) . '</option>';
 						    	}
@@ -691,7 +719,7 @@ class WC_Meta_Box_Product_Data {
 	/**
 	 * Show options for the variable product type
 	 */
-	public function output_variations() {
+	public static function output_variations() {
 		global $post, $woocommerce;
 
 		$attributes = maybe_unserialize( get_post_meta( $post->ID, '_product_attributes', true ) );
@@ -746,7 +774,6 @@ class WC_Meta_Box_Product_Data {
 						<option value="variable_length"><?php _e( 'Length', 'woocommerce' ); ?></option>
 						<option value="variable_width"><?php _e( 'Width', 'woocommerce' ); ?></option>
 						<option value="variable_height"><?php _e( 'Height', 'woocommerce' ); ?></option>
-						<option value="variable_file_paths"><?php _e( 'File Path', 'woocommerce' ); ?></option>
 						<option value="variable_download_limit"><?php _e( 'Download limit', 'woocommerce' ); ?></option>
 						<option value="variable_download_expiry"><?php _e( 'Download Expiry', 'woocommerce' ); ?></option>
 						<?php do_action( 'woocommerce_variable_product_bulk_edit_actions' ); ?>
@@ -815,7 +842,7 @@ class WC_Meta_Box_Product_Data {
 							'_height',
 							'_download_limit',
 							'_download_expiry',
-							'_file_paths',
+							'_downloadable_files',
 							'_downloadable',
 							'_virtual',
 							'_thumbnail_id',
@@ -824,7 +851,7 @@ class WC_Meta_Box_Product_Data {
 						);
 
 						foreach ( $variation_fields as $field )
-							$$field = isset( $variation_data[ $field ][0] ) ? $variation_data[ $field ][0] : '';
+							$$field = isset( $variation_data[ $field ][0] ) ? maybe_unserialize( $variation_data[ $field ][0] ) : '';
 
 						// Tax class handling
 						$_tax_class = isset( $variation_data['_tax_class'][0] ) ? $variation_data['_tax_class'][0] : null;
@@ -838,11 +865,6 @@ class WC_Meta_Box_Product_Data {
 						$image_id = absint( $_thumbnail_id );
 						if ( $image_id )
 							$image = wp_get_attachment_thumb_url( $image_id );
-
-						// Format file paths
-						$_file_paths = maybe_unserialize( $_file_paths );
-						if ( is_array( $_file_paths ) )
-							$_file_paths = implode( "\n", $_file_paths );
 
 						include( 'views/html-variation-admin.php' );
 
@@ -870,7 +892,7 @@ class WC_Meta_Box_Product_Data {
 							$variation_selected_value = isset( $default_attributes[ sanitize_title( $attribute['name'] ) ] ) ? $default_attributes[ sanitize_title( $attribute['name'] ) ] : '';
 
 							// Name will be something like attribute_pa_color
-							echo '<select name="default_attribute_' . sanitize_title( $attribute['name'] ) . '"><option value="">' . __( 'No default', 'woocommerce' ) . ' ' . esc_html( $woocommerce->get_helper( 'attribute' )->attribute_label( $attribute['name'] ) ) . '&hellip;</option>';
+							echo '<select name="default_attribute_' . sanitize_title( $attribute['name'] ) . '"><option value="">' . __( 'No default', 'woocommerce' ) . ' ' . esc_html( wc_attribute_label( $attribute['name'] ) ) . '&hellip;</option>';
 
 							// Get terms for attribute taxonomy or value if its a custom attribute
 							if ( $attribute['is_taxonomy'] ) {
@@ -882,7 +904,7 @@ class WC_Meta_Box_Product_Data {
 
 							} else {
 
-								$options = array_map( 'trim', explode( '|', $attribute['value'] ) );
+								$options = array_map( 'trim', explode( WOOCOMMERCE_DELIMITER, $attribute['value'] ) );
 
 								foreach ( $options as $option )
 									echo '<option ' . selected( sanitize_title( $variation_selected_value ), sanitize_title( $option ), false ) . ' value="' . esc_attr( sanitize_title( $option ) ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) )  . '</option>';
@@ -1009,7 +1031,7 @@ class WC_Meta_Box_Product_Data {
 
 					 	// Text based attributes - Posted values are term names - don't change to slugs
 					 	} else {
-					 		$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( '|', $attribute_values[ $i ] ) ) );
+					 		$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WOOCOMMERCE_DELIMITER, $attribute_values[ $i ] ) ) );
 					 	}
 
 					 	// Remove empty items in the array
@@ -1038,7 +1060,7 @@ class WC_Meta_Box_Product_Data {
 			 	} elseif ( isset( $attribute_values[ $i ] ) ) {
 
 			 		// Text based, separate by pipe
-			 		$values = implode( ' | ', array_map( 'woocommerce_clean', explode( '|', $attribute_values[ $i ] ) ) );
+			 		$values = implode( ' ' . WOOCOMMERCE_DELIMITER . ' ', array_map( 'woocommerce_clean', explode( WOOCOMMERCE_DELIMITER, $attribute_values[ $i ] ) ) );
 
 			 		// Custom attribute - Add attribute to array and set the values
 				 	$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
@@ -1149,7 +1171,7 @@ class WC_Meta_Box_Product_Data {
 			}
 		}
 
-		// Sold Individuall
+		// Sold Individually
 		if ( ! empty( $_POST['_sold_individually'] ) ) {
 			update_post_meta( $post_id, '_sold_individually', 'yes' );
 		} else {
@@ -1235,23 +1257,25 @@ class WC_Meta_Box_Product_Data {
 				$_download_expiry = ''; // 0 or blank = unlimited
 
 			// file paths will be stored in an array keyed off md5(file path)
-			if ( isset( $_POST['_file_paths'] ) ) {
-				$_file_paths = array();
-				$file_paths = str_replace( "\r\n", "\n", esc_attr( $_POST['_file_paths'] ) );
-				$file_paths = trim( preg_replace( "/\n+/", "\n", $file_paths ) );
-				if ( $file_paths ) {
-					$file_paths = explode( "\n", $file_paths );
+			if ( isset( $_POST['_wc_file_urls'] ) ) {
+				$files = array();
 
-					foreach ( $file_paths as $file_path ) {
-						$file_path = trim( $file_path );
-						$_file_paths[ md5( $file_path ) ] = $file_path;
-					}
+				$file_names    = isset( $_POST['_wc_file_names'] ) ? array_map( 'woocommerce_clean', $_POST['_wc_file_names'] ) : array();
+				$file_urls     = isset( $_POST['_wc_file_urls'] ) ? array_map( 'esc_url_raw', array_map( 'trim', $_POST['_wc_file_urls'] ) ) : array();
+				$file_url_size = sizeof( $file_urls );
+
+				for ( $i = 0; $i < $file_url_size; $i ++ ) {
+					if ( ! empty( $file_urls[ $i ] ) )
+						$files[ md5( $file_urls[ $i ] ) ] = array(
+							'name' => $file_names[ $i ],
+							'file' => $file_urls[ $i ]
+						);
 				}
 
-				// grant permission to any newly added files on any existing orders for this product
-				do_action( 'woocommerce_process_product_file_download_paths', $post_id, 0, $_file_paths );
+				// grant permission to any newly added files on any existing orders for this product prior to saving
+				do_action( 'woocommerce_process_product_file_download_paths', $post_id, 0, $files );
 
-				update_post_meta( $post_id, '_file_paths', $_file_paths );
+				update_post_meta( $post_id, '_downloadable_files', $files );
 			}
 
 			update_post_meta( $post_id, '_download_limit', $_download_limit );
@@ -1270,7 +1294,8 @@ class WC_Meta_Box_Product_Data {
 		}
 
 		// Save variations
-		self::save_variations( $post_id, $post );
+		if ( $product_type == 'variable' )
+			self::save_variations( $post_id, $post );
 
 		// Do action for product type
 		do_action( 'woocommerce_process_product_meta_' . $product_type, $post_id );
@@ -1294,7 +1319,6 @@ class WC_Meta_Box_Product_Data {
 			$variable_regular_price 			= $_POST['variable_regular_price'];
 			$variable_sale_price				= $_POST['variable_sale_price'];
 			$upload_image_id					= $_POST['upload_image_id'];
-			$variable_file_paths 				= $_POST['variable_file_paths'];
 			$variable_download_limit 			= $_POST['variable_download_limit'];
 			$variable_download_expiry   		= $_POST['variable_download_expiry'];
 			$variable_shipping_class 			= $_POST['variable_shipping_class'];
@@ -1416,30 +1440,31 @@ class WC_Meta_Box_Product_Data {
 					update_post_meta( $variation_id, '_download_limit', woocommerce_clean( $variable_download_limit[ $i ] ) );
 					update_post_meta( $variation_id, '_download_expiry', woocommerce_clean( $variable_download_expiry[ $i ] ) );
 
-					$_file_paths = array();
-					$file_paths = str_replace( "\r\n", "\n", $variable_file_paths[ $i ] );
-					$file_paths = trim( preg_replace( "/\n+/", "\n", $file_paths ) );
-					if ( $file_paths ) {
-						$file_paths = explode( "\n", $file_paths );
+					$files         = array();
+					$file_names    = isset( $_POST['_wc_variation_file_names'][ $variation_id ] ) ? array_map( 'woocommerce_clean', $_POST['_wc_variation_file_names'][ $variation_id ] ) : array();
+					$file_urls     = isset( $_POST['_wc_variation_file_urls'][ $variation_id ] ) ? array_map( 'esc_url_raw', array_map( 'trim', $_POST['_wc_variation_file_urls'][ $variation_id ] ) ) : array();
+					$file_url_size = sizeof( $file_urls );
 
-						foreach ( $file_paths as $file_path ) {
-							$file_path = trim( $file_path );
-							$_file_paths[ md5( $file_path ) ] = $file_path;
-						}
+					for ( $ii = 0; $ii < $file_url_size; $ii ++ ) {
+						if ( ! empty( $file_urls[ $ii ] ) )
+							$files[ md5( $file_urls[ $ii ] ) ] = array(
+								'name' => $file_names[ $ii ],
+								'file' => $file_urls[ $ii ]
+							);
 					}
 
-					// grant permission to any newly added files on any existing orders for this product
-					do_action( 'woocommerce_process_product_file_download_paths', $post_id, $variation_id, $_file_paths );
+					// grant permission to any newly added files on any existing orders for this product prior to saving
+					do_action( 'woocommerce_process_product_file_download_paths', $post_id, $variation_id, $files );
 
-					update_post_meta( $variation_id, '_file_paths', $_file_paths );
+					update_post_meta( $variation_id, '_downloadable_files', $files );
 				} else {
 					update_post_meta( $variation_id, '_download_limit', '' );
 					update_post_meta( $variation_id, '_download_expiry', '' );
-					update_post_meta( $variation_id, '_file_paths', '' );
+					update_post_meta( $variation_id, '_downloadable_files', '' );
 				}
 
 				// Save shipping class
-				$variable_shipping_class[ $i ] = $variable_shipping_class[ $i ] > 0 ? (int) $variable_shipping_class[ $i ] : '';
+				$variable_shipping_class[ $i ] = ! empty( $variable_shipping_class[ $i ] ) ? (int) $variable_shipping_class[ $i ] : '';
 				wp_set_object_terms( $variation_id, $variable_shipping_class[ $i ], 'product_shipping_class');
 
 				// Remove old taxonomies attributes so data is kept up to date
@@ -1452,9 +1477,11 @@ class WC_Meta_Box_Product_Data {
 				foreach ( $attributes as $attribute ) {
 
 					if ( $attribute['is_variation'] ) {
-
 						// Don't use woocommerce_clean as it destroys sanitized characters
-						$value = sanitize_title( trim( stripslashes( $_POST[ 'attribute_' . sanitize_title( $attribute['name'] ) ][ $i ] ) ) );
+						if ( isset( $_POST[ 'attribute_' . sanitize_title( $attribute['name'] ) ][ $i ] ) )
+							$value = sanitize_title( trim( stripslashes( $_POST[ 'attribute_' . sanitize_title( $attribute['name'] ) ][ $i ] ) ) );
+						else
+							$value = '';
 
 						update_post_meta( $variation_id, 'attribute_' . sanitize_title( $attribute['name'] ), $value );
 					}
@@ -1462,8 +1489,7 @@ class WC_Meta_Box_Product_Data {
 				}
 
 				do_action( 'woocommerce_save_product_variation', $variation_id );
-			 }
-
+			}
 		}
 
 		// Update parent if variable so price sorting works and stays in sync with the cheapest child

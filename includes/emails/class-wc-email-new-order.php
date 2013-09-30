@@ -24,7 +24,7 @@ class WC_Email_New_Order extends WC_Email {
 
 		$this->id 				= 'new_order';
 		$this->title 			= __( 'New order', 'woocommerce' );
-		$this->description		= __( 'New order emails are sent when an order is received/paid by a customer.', 'woocommerce' );
+		$this->description		= __( 'New order emails are sent when an order is received.', 'woocommerce' );
 
 		$this->heading 			= __( 'New customer order', 'woocommerce' );
 		$this->subject      	= __( '[{blogname}] New customer order ({order_number}) - {order_date}', 'woocommerce' );

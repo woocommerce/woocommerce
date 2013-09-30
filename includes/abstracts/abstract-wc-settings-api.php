@@ -75,6 +75,7 @@ abstract class WC_Settings_API {
     		return false;
     	} else {
     		update_option( $this->plugin_id . $this->id . '_settings', apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->sanitized_fields ) );
+    		$this->init_settings();
     		return true;
     	}
     }
@@ -103,10 +104,6 @@ abstract class WC_Settings_API {
 	 * @return void
 	 */
     public function init_settings() {
-
-	    if ( ! empty( $this->settings ) )
-	    	return;
-
     	// Load form_field settings
     	$this->settings = get_option( $this->plugin_id . $this->id . '_settings', null );
 
@@ -121,8 +118,8 @@ abstract class WC_Settings_API {
     	}
 
         if ( $this->settings && is_array( $this->settings ) ) {
-    	   $this->settings = array_map( array( $this, 'format_settings' ), $this->settings );
-    	   $this->enabled  = isset( $this->settings['enabled'] ) && $this->settings['enabled'] == 'yes' ? 'yes' : 'no';
+			$this->settings = array_map( array( $this, 'format_settings' ), $this->settings );
+			$this->enabled  = isset( $this->settings['enabled'] ) && $this->settings['enabled'] == 'yes' ? 'yes' : 'no';
         }
     }
 
@@ -264,6 +261,22 @@ abstract class WC_Settings_API {
 		$html .= '</tr>' . "\n";
 
     	return $html;
+    }
+
+    /**
+     * Wrapper for text inputs for prices.
+     *
+     * @access public
+     * @param mixed $key
+     * @param mixed $data
+     * @since 1.0.0
+     * @return string
+     */
+    public function generate_price_html( $key, $data ) {
+    	$data['type']  = 'text';
+    	$data['class'] = isset( $data['class'] ) ? $data['class'] . ' wc_input_price' : 'wc_input_price';
+
+    	return $this->generate_text_html( $key, $data );
     }
 
     /**

@@ -8,7 +8,6 @@
  * @category	Class
  * @author 		WooThemes
  */
-
 class WC_Shortcodes {
 
 	public function __construct() {
@@ -461,11 +460,13 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public function product_add_to_cart( $atts ) {
-	  	global $wpdb;
+	  	global $wpdb, $post;
 
-	  	if ( empty( $atts ) ) return;
+	  	if ( empty( $atts ) )
+	  		return;
 
-	  	if ( ! isset( $atts['style'] ) ) $atts['style'] = 'border:4px solid #ccc; padding: 12px;';
+	  	if ( ! isset( $atts['style'] ) )
+	  		$atts['style'] = 'border:4px solid #ccc; padding: 12px;';
 
 	  	if ( isset( $atts['id'] ) ) {
 	  		$product_data = get_post( $atts['id'] );
@@ -476,61 +477,22 @@ class WC_Shortcodes {
 			return;
 		}
 
-		if ( 'product' == $product_data->post_type ) {
+		$product = wc_setup_product_data( $product_data );
 
-			$product = WC()->setup_product_data( $product_data );
+		ob_start();
+		?>
+		<p class="product woocommerce" style="<?php echo $atts['style']; ?>">
 
-			ob_start();
-			?>
-			<p class="product woocommerce" style="<?php echo $atts['style']; ?>">
+			<?php echo $product->get_price_html(); ?>
 
-				<?php echo $product->get_price_html(); ?>
+			<?php woocommerce_template_loop_add_to_cart(); ?>
 
-				<?php woocommerce_template_loop_add_to_cart(); ?>
+		</p><?php
 
-			</p><?php
+		// Restore Product global in case this is shown inside a product post
+		wc_setup_product_data( $post );
 
-			wp_reset_postdata();
-
-			return ob_get_clean();
-
-		} elseif ( 'product_variation' == $product_data->post_type ) {
-
-			$product = get_product( $product_data->post_parent );
-
-			$GLOBALS['product'] = $product;
-
-			$variation = get_product( $product_data );
-
-			ob_start();
-			?>
-			<p class="product product-variation" style="<?php echo $atts['style']; ?>">
-
-				<?php echo $product->get_price_html(); ?>
-
-				<?php
-
-				$link 	= $product->add_to_cart_url();
-
-				$label 	= apply_filters('add_to_cart_text', __( 'Add to cart', 'woocommerce' ));
-
-				$link = add_query_arg( 'variation_id', $variation->variation_id, $link );
-
-				foreach ($variation->variation_data as $key => $data) {
-					if ($data) $link = add_query_arg( $key, $data, $link );
-				}
-
-				printf('<a href="%s" rel="nofollow" data-product_id="%s" class="button add_to_cart_button product_type_%s">%s</a>', esc_url( $link ), $product->id, $product->product_type, $label);
-
-				?>
-
-			</p><?php
-
-			wp_reset_postdata();
-
-			return ob_get_clean();
-
-		}
+		return ob_get_clean();
 	}
 
 	/**
@@ -554,7 +516,8 @@ class WC_Shortcodes {
 			return;
 		}
 
-		if ( 'product' !== $product_data->post_type ) return;
+		if ( 'product' !== $product_data->post_type )
+			return;
 
 		$_product = get_product( $product_data );
 
@@ -988,3 +951,5 @@ class WC_Shortcodes {
 		return ob_get_clean();
 	}
 }
+
+new WC_Shortcodes();

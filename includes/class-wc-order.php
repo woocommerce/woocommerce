@@ -852,10 +852,17 @@ class WC_Order {
 
 		// Tax for tax exclusive prices
 		if ( $tax_display == 'excl' ) {
-			foreach ( $this->get_tax_totals() as $code => $tax ) {
-				$total_rows[ sanitize_title( $code ) ] = array(
-					'label' => $tax->label . ':',
-					'value'	=> $tax->formatted_amount
+			if ( get_option( 'woocommerce_tax_total_display' ) == 'itemized' ) {
+				foreach ( $this->get_tax_totals() as $code => $tax ) {
+					$total_rows[ sanitize_title( $code ) ] = array(
+						'label' => $tax->label . ':',
+						'value'	=> $tax->formatted_amount
+					);
+				}
+			} else {
+				$total_rows['tax'] = array(
+					'label' => WC()->countries->tax_or_vat() . ':',
+					'value'	=> woocommerce_price( $this->get_total_tax() )
 				);
 			}
 		}
@@ -876,8 +883,12 @@ class WC_Order {
 
 			$tax_string_array = array();
 
-			foreach ( $this->get_tax_totals() as $code => $tax ) {
-				$tax_string_array[] = sprintf( '%s %s', $tax->formatted_amount, $tax->label );
+			if ( get_option( 'woocommerce_tax_total_display' ) == 'itemized' ) {
+				foreach ( $this->get_tax_totals() as $code => $tax ) {
+					$tax_string_array[] = sprintf( '%s %s', $tax->formatted_amount, $tax->label );
+				}
+			} else {
+				$tax_string_array[] = sprintf( '%s %s', woocommerce_price( $this->get_total_tax() ), WC()->countries->tax_or_vat() );
 			}
 
 			if ( ! empty( $tax_string_array ) )
@@ -1022,7 +1033,7 @@ class WC_Order {
 	/**
 	 * Gets any downloadable product file urls.
 	 *
-	 * @access public
+	 * @deprecated as of 2.1 get_item_downloads is prefered as downloads are more than just file urls
 	 * @param int $product_id product identifier
 	 * @param int $variation_id variation identifier, or null
 	 * @param array $item the item
@@ -1031,6 +1042,8 @@ class WC_Order {
 	public function get_downloadable_file_urls( $product_id, $variation_id, $item ) {
 		global $wpdb;
 
+		_deprecated_function( 'get_downloadable_file_urls', '2.1', 'get_item_downloads' );
+
 	 	$download_file = $variation_id > 0 ? $variation_id : $product_id;
 		$_product = get_product( $download_file );
 
@@ -1038,7 +1051,7 @@ class WC_Order {
 
 		$results = $wpdb->get_results( $wpdb->prepare("
 			SELECT download_id
-			FROM " . $wpdb->prefix . "woocommerce_downloadable_product_permissions
+			FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
 			WHERE user_email = %s
 			AND order_key = %s
 			AND product_id = %s
@@ -1047,13 +1060,56 @@ class WC_Order {
 		$file_urls = array();
 		foreach ( $results as $result ) {
 			if ( $_product->has_file( $result->download_id ) ) {
-
-				$file_urls[ $_product->get_file_download_path( $result->download_id ) ] = add_query_arg( array( 'download_file' => $download_file, 'order' => $this->order_key, 'email' => $user_email, 'key' => $result->download_id ), trailingslashit( home_url() ) );
-
+				$file_urls[ $_product->get_file_download_path( $result->download_id ) ] = $this->get_download_url( $download_file, $result->download_id );
 			}
 		}
 
 		return apply_filters( 'woocommerce_get_downloadable_file_urls', $file_urls, $product_id, $variation_id, $item );
+	}
+
+	/**
+	 * Get the downloadable files for an item in this order
+	 * @param  array $item
+	 * @return array
+	 */
+	public function get_item_downloads( $item ) {
+		global $wpdb;
+
+		$product_id   = $item['variation_id'] > 0 ? $item['variation_id'] : $item['product_id'];
+		$product      = get_product( $product_id );
+		$download_ids = $wpdb->get_col( $wpdb->prepare("
+			SELECT download_id
+			FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
+			WHERE user_email = %s
+			AND order_key = %s
+			AND product_id = %s
+		", $this->billing_email, $this->order_key, $product_id ) );
+
+		$files = array();
+
+		foreach ( $download_ids as $download_id ) {
+			if ( $product->has_file( $download_id ) ) {
+				$files[ $download_id ]                 = $product->get_file( $download_id );
+				$files[ $download_id ]['download_url'] = $this->get_download_url( $product_id, $download_id );
+			}
+		}
+
+		return apply_filters( 'woocommerce_get_item_downloads', $files, $item, $this );
+	}
+
+	/**
+	 * Get the Download URL
+	 * @param  int $product_id
+	 * @param  int $download_id
+	 * @return string
+	 */
+	public function get_download_url( $product_id, $download_id ) {
+		return add_query_arg( array(
+			'download_file' => $product_id,
+			'order'         => $this->order_key,
+			'email'         => $this->billing_email,
+			'key'           => $download_id
+		), trailingslashit( home_url() ) );
 	}
 
 	/**
@@ -1189,6 +1245,8 @@ class WC_Order {
 	public function payment_complete() {
 		global $woocommerce;
 
+		do_action( 'woocommerce_pre_payment_complete', $this->id );
+
 		if ( ! empty( $woocommerce->session->order_awaiting_payment ) )
 			unset( $woocommerce->session->order_awaiting_payment );
 
@@ -1234,6 +1292,11 @@ class WC_Order {
 				$this->reduce_order_stock(); // Payment is complete so reduce stock levels
 
 			do_action( 'woocommerce_payment_complete', $this->id );
+
+		} else {
+
+			do_action( 'woocommerce_payment_complete_order_status_' . $this->status, $this->id );
+
 		}
 	}
 

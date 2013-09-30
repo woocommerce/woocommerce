@@ -32,6 +32,16 @@ class WC_Product_Variable extends WC_Product {
 		parent::__construct( $product );
 	}
 
+	/**
+	 * Get the add to cart button text
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function add_to_cart_text() {
+		return apply_filters( 'woocommerce_product_add_to_cart_text', __( 'Select options', 'woocommerce' ), $this );
+	}
+
     /**
      * Get total stock.
      *
@@ -197,12 +207,12 @@ class WC_Product_Variable extends WC_Product {
 		if ( $this->get_variation_price( 'max' ) === '' || $this->get_price() === '' )
 			$this->variable_product_sync( $this->id );
 
+		$tax_display_mode                = get_option( 'woocommerce_tax_display_shop' );
+		$display_price                   = $tax_display_mode == 'incl' ? $this->get_price_including_tax() : $this->get_price_excluding_tax();
+		$display_min_variation_regular_price = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $this->get_variation_regular_price( 'min' ) ) : $this->get_price_excluding_tax( 1, $this->get_variation_regular_price( 'min' ) );
+
 		// Get the price
-		if ( $this->get_price() === '' ) {
-
-			$price = apply_filters( 'woocommerce_variable_empty_price_html', '', $this );
-
-		} elseif ( $this->get_price() > 0 ) {
+		if ( $this->get_price() > 0 ) {
 
 			// Only show 'from' if the min price varies from the max price
 			if ( $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ) )
@@ -210,17 +220,21 @@ class WC_Product_Variable extends WC_Product {
 
 			if ( $this->is_on_sale() && $this->get_variation_regular_price( 'min' ) !== $this->get_price() ) {
 
-				$price .= $this->get_price_html_from_to( $this->get_variation_regular_price( 'min' ), $this->get_price() );
+				$price .= $this->get_price_html_from_to( $display_min_variation_regular_price, $display_price ) . $this->get_price_suffix();
 
 				$price = apply_filters( 'woocommerce_variable_sale_price_html', $price, $this );
 
 			} else {
 
-				$price .= woocommerce_price( $this->get_price() );
+				$price .= woocommerce_price( $display_price ) . $this->get_price_suffix();
 
 				$price = apply_filters('woocommerce_variable_price_html', $price, $this);
 
 			}
+
+		} elseif ( $this->get_price() === '' ) {
+
+			$price = apply_filters( 'woocommerce_variable_empty_price_html', '', $this );
 
 		} elseif ( $this->get_price() == 0 ) {
 
@@ -230,7 +244,7 @@ class WC_Product_Variable extends WC_Product {
 
 			if ( $this->is_on_sale() && $this->get_variation_regular_price( 'min' ) > 0 ) {
 
-				$price .= $this->get_price_html_from_to( $this->get_variation_regular_price( 'min' ), __( 'Free!', 'woocommerce' ) );
+				$price .= $this->get_price_html_from_to( $display_min_variation_regular_price, __( 'Free!', 'woocommerce' ) );
 
 				$price = apply_filters( 'woocommerce_variable_free_sale_price_html', $price, $this );
 
@@ -295,7 +309,7 @@ class WC_Product_Variable extends WC_Product {
 					foreach ( $post_terms as $term )
 						$values[] = $term->slug;
 				} else {
-					$values = array_map( 'trim', explode( '|', $attribute['value'] ) );
+					$values = array_map( 'trim', explode( WOOCOMMERCE_DELIMITER, $attribute['value'] ) );
 				}
 
 				$values = array_unique( $values );
@@ -303,7 +317,7 @@ class WC_Product_Variable extends WC_Product {
 			// Order custom attributes (non taxonomy) as defined
             } elseif ( ! $attribute['is_taxonomy'] ) {
 
-            	$option_names = array_map( 'trim', explode( '|', $attribute['value'] ) );
+            	$option_names = array_map( 'trim', explode( WOOCOMMERCE_DELIMITER, $attribute['value'] ) );
             	$option_slugs = $values;
             	$values       = array();
 
@@ -484,6 +498,14 @@ class WC_Product_Variable extends WC_Product {
 			do_action( 'woocommerce_variable_product_sync', $product_id );
 
 			wc_delete_product_transients( $product_id );
+		} elseif ( get_post_status( $product_id ) == 'publish' ) {
+			// No published variations - update parent post status. Use $wpdb to prevent endless loop on save_post hooks.
+			global $wpdb;
+
+			$wpdb->update( $wpdb->posts, array( 'post_status' => 'draft' ), array( 'ID' => $product_id ) );
+
+			if ( is_admin() )
+				WC_Admin_Meta_Boxes::add_error( __( 'This variable product has no active variations and will not be published.', 'woocommerce' ) );
 		}
 	}
 }

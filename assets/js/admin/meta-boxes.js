@@ -382,9 +382,13 @@ jQuery( function($){
 						var item_id = $row.find('input.order_item_id').val();
 						$row.find('.edit_order_item').click();
 
-						$row.find('input.line_tax').val( response['item_taxes'][ item_id ]['line_tax'] ).change();
-						$row.find('input.line_subtotal_tax').val( response['item_taxes'][ item_id ]['line_subtotal_tax'] ).change();
-						$('#tax_rows').empty().append( response['tax_row_html'] );
+						if ( response['item_taxes'][ item_id ] ) {
+							$row.find('input.line_tax').val( response['item_taxes'][ item_id ]['line_tax'] ).change();
+							$row.find('input.line_subtotal_tax').val( response['item_taxes'][ item_id ]['line_subtotal_tax'] ).change();
+						}
+
+						if ( response['tax_row_html'] )
+							$('#tax_rows').empty().append( response['tax_row_html'] );
 					} );
 
 					$('#tax_rows').find('input').change();
@@ -942,6 +946,16 @@ jQuery( function($){
 		return false;
 	});
 
+	// File inputs
+	$('.downloadable_files').on('click','a.insert',function(){
+		$(this).closest('.downloadable_files').find('tbody').append( $(this).data( 'row' ) );
+		return false;
+	});
+	$('.downloadable_files').on('click','a.delete',function(){
+		$(this).closest('tr').remove();
+		return false;
+	});
+
 
 	// STOCK OPTIONS
 	$('input#_manage_stock').change(function(){
@@ -1218,14 +1232,12 @@ jQuery( function($){
 	// Uploading files
 	var downloadable_file_frame;
 	var file_path_field;
-	var file_paths;
 
 	jQuery(document).on( 'click', '.upload_file_button', function( event ){
 
 		var $el = $(this);
 
-		file_path_field = $el.parent().find('.file_paths');
-		file_paths      = file_path_field.val();
+		file_path_field = $el.closest('tr').find('td.file_url input');
 
 		event.preventDefault();
 
@@ -1263,6 +1275,7 @@ jQuery( function($){
 		// When an image is selected, run a callback.
 		downloadable_file_frame.on( 'select', function() {
 
+			var file_path = '';
 			var selection = downloadable_file_frame.state().get('selection');
 
 			selection.map( function( attachment ) {
@@ -1270,11 +1283,11 @@ jQuery( function($){
 				attachment = attachment.toJSON();
 
 				if ( attachment.url )
-					file_paths = file_paths ? file_paths + "\n" + attachment.url : attachment.url
+					file_path = attachment.url
 
 			} );
 
-			file_path_field.val( file_paths );
+			file_path_field.val( file_path );
 		});
 
 		// Set post to 0 and set our custom type
@@ -1286,6 +1299,18 @@ jQuery( function($){
 
 		// Finally, open the modal.
 		downloadable_file_frame.open();
+	});
+
+	// Download ordering
+	jQuery('.downloadable_files tbody').sortable({
+		items:'tr',
+		cursor:'move',
+		axis:'y',
+		handle: 'td.sort',
+		scrollSensitivity:40,
+		forcePlaceholderSize: true,
+		helper: 'clone',
+		opacity: 0.65,
 	});
 
 });

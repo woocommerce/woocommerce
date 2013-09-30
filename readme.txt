@@ -166,6 +166,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.1 - x =
+* Feature - Define whether prices should be shown incl. or excl. of tax, and add an optional suffix.
+* Feature - Show grouped or itemized taxes during checkout.
 * Feature - Split frontend styles into separate appearance/layout stylesheets and removed the enable/disable option.
 * Feature - Added woocommerce-smallscreen.css to optimise default layout on handheld devices.
 * Feature - Bulk edit increase / decrease variation prices by fixed or percentage values
@@ -181,6 +183,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Handling for password protected products.
 * Feature - Schema markup selector for downloadables.
 * Feature - woocommerce_get_featured_product_ids function.
+* Feature - WOOCOMMERCE_DELIMITER to customise the pipes for attributes
+* Feature - Standardized, default credit card form for gateways to use if they support 'default_credit_card_form'.
 * Tweak - Added pagination to tax rate screens.
 * Tweak - Added filter to check the 'Create account' checkbox on checkout by default.
 * Tweak - Update CPT parameters for 'product_variation' and 'shop_coupon' to be no longer public.
@@ -198,13 +202,18 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Streamlined account process - username and passwords are optional and can be automatically generated.
 * Tweak - Updated/new dummy data (including .csv files to be used with [Product CSV Import Suite](http://www.woothemes.com/products/product-csv-import-suite/)).
 * Tweak - Product shortcodes columns paramter now affects layout correctly.
-* Tweak - Disabled button styles
+* Tweak - Disabled button styles.
+* Tweak - Hooks for overriding default email inline styles.
+* Tweak - Flat rate shipping support for percentage factor of additional costs.
+* Tweak - local delivery _ pattern matching for postcodes. e.g. NG1___ would match NG1 1AA but not NG10 1AA.
+* Tweak - Improved layered nav OR count logic
 * Fix - Changed MyException to Exception in Checkout class as MyException class does not exist in WooCommerce
 * Fix - Default cart widget styling on non-wc pages.
 * Fix - Rounding for mijireh tax ex. price.
 * Fix - Updated blockui to prevent errors in WP 3.6.
 * Fix - Tweaked popularity sorting to work better when no sales are present.
 * Fix - Quote encoding in email subjects.
+* Fix - Added $wp_error parameter during checkout process to ensure WP_Error object is returned on error and checkout process is properly stopped.
 * Refactor - Taken out Piwik integration, use http://wordpress.org/extend/plugins/woocommerce-piwik-integration/ from now on.
 * Refactor - Taken out ShareYourCart integration, use http://wordpress.org/extend/plugins/shareyourcart/ from now on.
 * Refactor - Moved woocommerce_get_formatted_product_name function into WC_Product class.

@@ -3,6 +3,44 @@
  */
 jQuery(function(){
 
+	// Price input validation - Keep price inputs formatted correctly
+	jQuery(".wc_input_price[type=text]")
+		.bind( 'keyup change', function() {
+			var value    = jQuery(this).val();
+			var newvalue = value.replace(/[^0-9.]+/g, '');
+
+			// Allow 1 decimal point
+			if ( newvalue.indexOf('.') != -1 ) {
+				var splitvalue = newvalue.split( '.' );
+
+       			if ( splitvalue.length > 2 ) {
+       				newvalue = splitvalue[0] + '.' + splitvalue[1];
+       			}
+       		}
+
+   			if ( value !== newvalue ) {
+    			jQuery(this).val( newvalue );
+    			if ( jQuery(this).parent().find('.wc_error_tip').size() == 0 ) {
+    				var offset = jQuery(this).position();
+    				jQuery(this).after( '<div class="wc_error_tip">' + woocommerce_admin.i18n_price_input_error + '</div>' );
+    				jQuery('.wc_error_tip')
+    					.css('left', offset.left + jQuery(this).width() - ( jQuery(this).width() / 2 ) - ( jQuery('.wc_error_tip').width() / 2 ) )
+    					.css('top', offset.top + jQuery(this).height() )
+    					.fadeIn('100');
+    			}
+    		}
+
+    		return this;
+		})
+		.bind( 'blur', function() {
+			jQuery('.wc_error_tip').fadeOut('100', function(){ jQuery(this).remove(); } );
+			return this;
+		});
+
+	jQuery("body").click(function(){
+		jQuery('.wc_error_tip').fadeOut('100', function(){ jQuery(this).remove(); } );
+	});
+
 	// Tooltips
 	jQuery(".tips, .help_tip").tipTip({
     	'attribute' : 'data-tip',

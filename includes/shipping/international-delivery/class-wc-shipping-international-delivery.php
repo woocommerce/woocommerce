@@ -98,11 +98,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 						),
 			'cost' => array(
 							'title'			=> __( 'Cost', 'woocommerce' ),
-							'type'			=> 'number',
-							'custom_attributes' => array(
-								'step'	=> 'any',
-								'min'	=> '0'
-							),
+							'type'			=> 'price',
 							'description'	=> __( 'Cost excluding tax. Enter an amount, e.g. 2.50.', 'woocommerce' ),
 							'default'		=> '',
 							'desc_tip'		=> true,
@@ -118,11 +114,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 						),
 			'minimum_fee' => array(
 							'title'			=> __( 'Minimum Handling Fee', 'woocommerce' ),
-							'type'			=> 'number',
-							'custom_attributes' => array(
-								'step'	=> 'any',
-								'min'	=> '0'
-							),
+							'type'			=> 'price',
 							'description'	=> __( 'Enter a minimum fee amount. Fee\'s less than this will be increased. Leave blank to disable.', 'woocommerce' ),
 							'default'		=> '',
 							'desc_tip'		=> true,

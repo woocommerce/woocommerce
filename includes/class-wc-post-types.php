@@ -170,9 +170,9 @@ class WC_Post_types {
 
 	    $wc_product_attributes = array();
 
-		if ( $attribute_taxonomies = $woocommerce->get_helper( 'attribute' )->get_attribute_taxonomies() ) {
+		if ( $attribute_taxonomies = wc_get_attribute_taxonomies() ) {
 			foreach ( $attribute_taxonomies as $tax ) {
-		    	if ( $name = $woocommerce->get_helper( 'attribute' )->attribute_taxonomy_name( $tax->attribute_name ) ) {
+		    	if ( $name = wc_attribute_taxonomy_name( $tax->attribute_name ) ) {
 
 		    		$label = ! empty( $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
 

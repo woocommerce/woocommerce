@@ -130,7 +130,7 @@ class WC_Comments {
 
 			add_comment_meta( $comment_id, 'rating', (int) esc_attr( $_POST['rating'] ), true );
 
-			woocommerce_clear_comment_rating_transients( $comment_id );
+			$this->clear_transients( $comment_id );
 		}
 	}
 

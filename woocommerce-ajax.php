@@ -454,7 +454,7 @@ function woocommerce_save_attributes() {
 
 				 	// Text based attributes - Posted values are term names - don't change to slugs
 				 	} else {
-				 		$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( '|', $attribute_values[ $i ] ) ) );
+				 		$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WOOCOMMERCE_DELIMITER, $attribute_values[ $i ] ) ) );
 				 	}
 
 				 	// Remove empty items in the array
@@ -483,7 +483,7 @@ function woocommerce_save_attributes() {
 		 	} elseif ( isset( $attribute_values[ $i ] ) ) {
 
 		 		// Text based, separate by pipe
-		 		$values = implode( ' | ', array_map( 'woocommerce_clean', array_map( 'stripslashes', explode( '|', $attribute_values[ $i ] ) ) ) );
+		 		$values = implode( ' ' . WOOCOMMERCE_DELIMITER . ' ', array_map( 'woocommerce_clean', array_map( 'stripslashes', explode( WOOCOMMERCE_DELIMITER, $attribute_values[ $i ] ) ) ) );
 
 		 		// Custom attribute - Add attribute to array and set the values
 			 	$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
@@ -635,7 +635,7 @@ function woocommerce_link_all_variations() {
 				$options[] = $term->slug;
 			}
 		} else {
-			$options = explode( '|', $attribute['value'] );
+			$options = explode( WOOCOMMERCE_DELIMITER, $attribute['value'] );
 		}
 
 		$options = array_map( 'sanitize_title', array_map( 'trim', $options ) );
@@ -778,6 +778,8 @@ function woocommerce_revoke_access_to_download() {
 
 	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %d;", $order_id, $product_id, $download_id ) );
 
+	do_action( 'woocommerce_ajax_revoke_access_to_product_download', $download_id, $product_id, $order_id );
+
 	die();
 }
 
@@ -804,14 +806,13 @@ function woocommerce_grant_access_to_download() {
 	$file_count = 0;
 	$order 		= new WC_Order( $order_id );
 	$product 	= get_product( $product_id );
+	$files      = $product->get_files();
 
 	if ( ! $order->billing_email )
 		die();
 
-	$file_paths = apply_filters( 'woocommerce_file_download_paths', get_post_meta( $product_id, '_file_paths', true ), $product_id, $order_id, null );
-
-	if ( $file_paths ) {
-		foreach ( $file_paths as $download_id => $file_path ) {
+	if ( $files ) {
+		foreach ( $files as $download_id => $file ) {
 			if ( $inserted_id = woocommerce_downloadable_file_permission( $download_id, $product_id, $order ) ) {
 
 				// insert complete - get inserted data
@@ -1175,6 +1176,7 @@ function woocommerce_calc_line_taxes() {
 	$taxes = $tax_rows = $item_taxes = $shipping_taxes = array();
 
 	$order_id 		= absint( $_POST['order_id'] );
+	$order          = new WC_Order( $order_id );
 	$country 		= strtoupper( esc_attr( $_POST['country'] ) );
 	$state 			= strtoupper( esc_attr( $_POST['state'] ) );
 	$postcode 		= strtoupper( esc_attr( $_POST['postcode'] ) );
@@ -1192,13 +1194,14 @@ function woocommerce_calc_line_taxes() {
 			$line_subtotal 	= isset( $item['line_subtotal']  ) ? esc_attr( $item['line_subtotal'] ) : '';
 			$line_total		= esc_attr( $item['line_total'] );
 			$tax_class 		= esc_attr( $item['tax_class'] );
+			$product_id     = $order->get_item_meta( $item_id, '_product_id', true );
 
 			if ( ! $item_id || $tax_class == '0' )
 				continue;
 
 			// Get product details
-			if ( get_post_type( $item_id ) == 'product' ) {
-				$_product			= get_product( $item_id );
+			if ( get_post_type( $product_id ) == 'product' ) {
+				$_product			= get_product( $product_id );
 				$item_tax_status 	= $_product->get_tax_status();
 			} else {
 				$item_tax_status 	= 'taxable';
@@ -1220,9 +1223,6 @@ function woocommerce_calc_line_taxes() {
 
 				$line_subtotal_tax = $tax->round( array_sum( $line_subtotal_taxes ) );
 				$line_tax = $tax->round( array_sum( $line_taxes ) );
-
-				//$line_subtotal_tax = rtrim( rtrim( number_format( array_sum( $line_subtotal_taxes ), 4, '.', '' ), '0' ), '.' );
-				//$line_tax = rtrim( rtrim( number_format( array_sum( $line_taxes ), 4, '.', '' ), '0' ), '.' );
 
 				if ( $line_subtotal_tax < 0 )
 					$line_subtotal_tax = 0;
@@ -1262,7 +1262,6 @@ function woocommerce_calc_line_taxes() {
 				$matched_tax_rates[ $key ] = $rate;
 
 	$shipping_taxes = $tax->calc_shipping_tax( $shipping, $matched_tax_rates );
-	//$shipping_tax = rtrim( rtrim( number_format( array_sum( $shipping_taxes ), 2, '.', '' ), '0' ), '.' );
 	$shipping_tax = $tax->round( array_sum( $shipping_taxes ) );
 
 	// Remove old tax rows

@@ -51,6 +51,9 @@ class WC_Product_Variation extends WC_Product {
 	/** @public bool True if the variation has a tax class. */
 	public $variation_has_tax_class = false;
 
+	/** @public bool True if the variation has file paths. */
+	public $variation_has_downloadable_files = false;
+
 	/**
 	 * Loads all product data from custom fields
 	 *
@@ -93,6 +96,11 @@ class WC_Product_Variation extends WC_Product {
 		if ( ! empty( $this->product_custom_fields['_sku'][0] ) ) {
 			$this->variation_has_sku = true;
 			$this->sku               = $this->product_custom_fields['_sku'][0];
+		}
+
+		if ( ! empty( $this->product_custom_fields['_downloadable_files'][0] ) ) {
+			$this->variation_has_downloadable_files = true;
+			$this->downloadable_files               = $this->product_custom_fields['_downloadable_files'][0];
 		}
 
 		if ( isset( $this->product_custom_fields['_stock'][0] ) && $this->product_custom_fields['_stock'][0] !== '' ) {
@@ -174,6 +182,38 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
+	 * Wrapper for get_permalink. Adds this variations attributes to the URL.
+	 * @return string
+	 */
+	public function get_permalink() {
+		return add_query_arg( $this->variation_data, get_permalink( $this->id ) );
+	}
+
+	/**
+	 * Get the add to url used mainly in loops.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function add_to_cart_url() {
+		$url = $this->is_purchasable() && $this->is_in_stock() ? remove_query_arg( 'added-to-cart', add_query_arg( array_merge( array( 'variation_id' => $this->variation_id, 'add-to-cart' => $this->id ), $this->variation_data ) ) ) : get_permalink( $this->id );
+
+		return apply_filters( 'woocommerce_product_add_to_cart_url', $url, $this );
+	}
+
+	/**
+	 * Get the add to cart button text
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function add_to_cart_text() {
+		$text = $this->is_purchasable() && $this->is_in_stock() ? __( 'Add to cart', 'woocommerce' ) : __( 'Read More', 'woocommerce' );
+
+		return apply_filters( 'woocommerce_product_add_to_cart_text', $text, $this );
+	}
+
+	/**
 	 * Checks if this particular variation is visible (variations with no price, or out of stock, can be hidden)
 	 *
 	 * @return bool
@@ -231,20 +271,28 @@ class WC_Product_Variation extends WC_Product {
      */
 	public function get_price_html( $price = '' ) {
 
+		$tax_display_mode      = get_option( 'woocommerce_tax_display_shop' );
+		$display_price         = $tax_display_mode == 'incl' ? $this->get_price_including_tax() : $this->get_price_excluding_tax();
+		$display_regular_price = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $this->get_regular_price() ) : $this->get_price_excluding_tax( 1, $this->get_regular_price() );
+		$display_sale_price    = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $this->get_sale_price() ) : $this->get_price_excluding_tax( 1, $this->get_sale_price() );
+
 		if ( $this->get_price() !== '' ) {
 			if ( $this->is_on_sale() ) {
 
-				$price = '<del>' . woocommerce_price( $this->get_regular_price() ) . '</del> <ins>' . woocommerce_price( $this->get_sale_price() ) . '</ins>';
+				$price = '<del>' . woocommerce_price( $display_regular_price ) . '</del> <ins>' . woocommerce_price( $display_sale_price ) . '</ins>' . $this->get_price_suffix();
+
 				$price = apply_filters( 'woocommerce_variation_sale_price_html', $price, $this );
 
 			} elseif ( $this->get_price() > 0 ) {
 
-				$price = woocommerce_price( $this->get_price() );
+				$price = woocommerce_price( $display_price ) . $this->get_price_suffix();
+
 				$price = apply_filters( 'woocommerce_variation_price_html', $price, $this );
 
 			} else {
 
 				$price = __( 'Free!', 'woocommerce' );
+
 				$price = apply_filters( 'woocommerce_variation_free_price_html', $price, $this );
 
 			}
@@ -318,7 +366,7 @@ class WC_Product_Variation extends WC_Product {
 				$parent_product = get_product( $this->id );
 
 				// Only continue if the parent has backorders off
-				if ( ! $parent_product->backorders_allowed() && $parent_product->get_total_stock() <= 0 )
+				if ( ! $parent_product->backorders_allowed() && $parent_product->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) )
 					$this->set_stock_status( 'outofstock' );
 
 			} elseif ( $this->is_in_stock() ) {
@@ -403,29 +451,6 @@ class WC_Product_Variation extends WC_Product {
 
 		}
 		return absint( $this->variation_shipping_class_id );
-	}
-
-	/**
-	 * Get file download path identified by $download_id
-	 *
-	 * @access public
-	 * @param string $download_id file identifier
-	 * @return array
-	 */
-	public function get_file_download_path( $download_id ) {
-
-		$file_path = '';
-		$file_paths = (array) apply_filters( 'woocommerce_file_download_paths', get_post_meta( $this->variation_id, '_file_paths', true ), $this->variation_id, null, null );
-
-		if ( ! $download_id && count( $file_paths ) == 1 ) {
-			// backwards compatibility for old-style download URLs and template files
-			$file_path = array_shift( $file_paths );
-		} elseif ( isset( $file_paths[ $download_id ] ) ) {
-			$file_path = $file_paths[ $download_id ];
-		}
-
-		// allow overriding based on the particular file being requested
-		return apply_filters( 'woocommerce_file_download_path', $file_path, $this->variation_id, $download_id );
 	}
 
 	/**

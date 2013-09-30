@@ -49,7 +49,7 @@ if ( empty( $attributes ) && ( ! $product->enable_dimensions_display() || ( ! $p
 		?>
 
 		<tr class="<?php if ( ( $alt = $alt * -1 ) == 1 ) echo 'alt'; ?>">
-			<th><?php echo $woocommerce->get_helper( 'attribute' )->attribute_label( $attribute['name'] ); ?></th>
+			<th><?php echo wc_attribute_label( $attribute['name'] ); ?></th>
 			<td><?php
 				if ( $attribute['is_taxonomy'] ) {
 
@@ -59,7 +59,7 @@ if ( empty( $attributes ) && ( ! $product->enable_dimensions_display() || ( ! $p
 				} else {
 
 					// Convert pipes to commas and display values
-					$values = array_map( 'trim', explode( '|', $attribute['value'] ) );
+					$values = array_map( 'trim', explode( WOOCOMMERCE_DELIMITER, $attribute['value'] ) );
 					echo apply_filters( 'woocommerce_attribute', wpautop( wptexturize( implode( ', ', $values ) ) ), $attribute, $values );
 
 				}

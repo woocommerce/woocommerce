@@ -141,6 +141,25 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			),
 
 			array(
+				'title'   => __( 'Display prices in the shop:', 'woocommerce' ),
+				'id'      => 'woocommerce_tax_display_shop',
+				'default' => 'excl',
+				'type'    => 'select',
+				'options' => array(
+					'incl'   => __( 'Including tax', 'woocommerce' ),
+					'excl'   => __( 'Excluding tax', 'woocommerce' ),
+				)
+			),
+
+			array(
+				'title'   => __( 'Price display suffix:', 'woocommerce' ),
+				'id'      => 'woocommerce_price_display_suffix',
+				'default' => '',
+				'type'    => 'text',
+				'desc' 		=> __( 'Define text to show after your product prices. This could be, for example, "inc. Vat" to explain your pricing. You can also have prices substituted here using one of the following: <code>{price_including_tax}, {price_excluding_tax}</code>.', 'woocommerce' ),
+			),
+
+			array(
 				'title'   => __( 'Display prices during cart/checkout:', 'woocommerce' ),
 				'id'      => 'woocommerce_tax_display_cart',
 				'default' => 'excl',
@@ -148,6 +167,18 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				'options' => array(
 					'incl'   => __( 'Including tax', 'woocommerce' ),
 					'excl'   => __( 'Excluding tax', 'woocommerce' ),
+				),
+				'autoload'      => false
+			),
+
+			array(
+				'title'   => __( 'Display tax totals:', 'woocommerce' ),
+				'id'      => 'woocommerce_tax_total_display',
+				'default' => 'itemized',
+				'type'    => 'select',
+				'options' => array(
+					'single'     => __( 'As a single total', 'woocommerce' ),
+					'itemized'   => __( 'Itemized', 'woocommerce' ),
 				),
 				'autoload'      => false
 			),
@@ -247,7 +278,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 									'type'      => 'plain',
 									'prev_text' => '&laquo;',
 									'next_text' => '&raquo;',
-									'total'     => absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(tax_rate_id) FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_class = %s;", sanitize_title( $current_class ) ) ) ),
+									'total'     => ceil( absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(tax_rate_id) FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_class = %s;", sanitize_title( $current_class ) ) ) ) / $limit ),
 									'current'   => $page
 								) ) );
 							?>

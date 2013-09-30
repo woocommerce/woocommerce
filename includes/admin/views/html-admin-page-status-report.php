@@ -373,15 +373,15 @@
         <?php
         $active_theme = wp_get_theme();
         if ( $active_theme->{'Author URI'} == 'http://www.woothemes.com' ) :
-		
+
 			$theme_dir = strtolower( str_replace( ' ','', $active_theme->Name ) );
-        
+
 			if ( false === ( $theme_version_data = get_transient( $theme_dir . '_version_data' ) ) ) :
-        	
+
         		$theme_changelog = wp_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $theme_dir . '/changelog.txt' );
 				$cl_lines  = explode( "\n", wp_remote_retrieve_body( $theme_changelog ) );
 				if ( ! empty( $cl_lines ) ) :
-			
+
 					foreach ( $cl_lines as $line_num => $cl_line ) {
 						if ( preg_match( '/^[0-9]/', $cl_line ) ) :
 
@@ -391,14 +391,14 @@
 							$theme_version_data = array( 'date' => $theme_date , 'version' => $theme_version , 'update' => $theme_update , 'changelog' => $theme_changelog );
 							set_transient( $theme_dir . '_version_data', $theme_version_data , 60*60*12 );
 							break;
-					
+
 						endif;
 					}
-				
+
 				endif;
-			
+
 			endif;
-			
+
 		endif;
 		?>
 	<tbody>
@@ -412,7 +412,7 @@
                 <td><?php _e( 'Theme Version', 'woocommerce' ); ?>:</td>
                 <td><?php
 					echo $active_theme->Version;
-					
+
 					if ( ! empty( $theme_version_data['version'] ) && version_compare( $theme_version_data['version'], $active_theme->Version, '!=' ) )
 						echo ' &ndash; <strong style="color:red;">' . $theme_version_data['version'] . ' ' . __( 'is available', 'woocommerce' ) . '</strong>';
                 ?></td>
@@ -436,22 +436,32 @@
 			<td><?php _e( 'Template Overrides', 'woocommerce' ); ?>:</td>
 			<td><?php
 
-				$template_path = $woocommerce->plugin_path() . '/templates/';
-				$found_files   = array();
-				$files         = $this->scan_template_files( $template_path );
+				$template_paths = apply_filters( 'woocommerce_template_overrides_scan_paths', array( 'WooCommerce' => $woocommerce->plugin_path() . '/templates/' ) );
+				$found_files    = array();
 
-				foreach ( $files as $file ) {
-					if ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
-						$found_files[] = '/' . $file;
-					} elseif( file_exists( get_stylesheet_directory() . '/woocommerce/' . $file ) ) {
-						$found_files[] = '/woocommerce/' . $file;
+				foreach ( $template_paths as $plugin_name => $template_path )
+					$scanned_files[ $plugin_name ] = $this->scan_template_files( $template_path );
+
+				foreach ( $scanned_files as $plugin_name => $files ) {
+					foreach ( $files as $file ) {
+						if ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
+							$found_files[ $plugin_name ][] = '/' . $file;
+						} elseif( file_exists( get_stylesheet_directory() . '/woocommerce/' . $file ) ) {
+							$found_files[ $plugin_name ][] = '/woocommerce/' . $file;
+						}
 					}
 				}
 
 				if ( $found_files ) {
-					echo implode( ', <br/>', $found_files );
+					$loop = 0;
+					foreach ( $found_files as $plugin_name => $found_plugin_files ) {
+						echo $loop > 0 ? '<br/><br/>' : '';
+						echo $plugin_name . ': <br/>';
+						echo implode( ', <br/>', $found_plugin_files );
+						$loop++;
+					}
 				} else {
-					_e( 'No core overrides present in theme.', 'woocommerce' );
+					_e( 'No overrides present in theme.', 'woocommerce' );
 				}
 
 			?></td>
@@ -461,7 +471,6 @@
 </table>
 
 <script type="text/javascript">
-
 	/*
 	@var i string default
 	@var l how many repeat s
@@ -489,49 +498,44 @@
 
 		jQuery('.wc_status_table thead, .wc_status_table tbody').each(function(){
 
-			$this = jQuery( this );
+			if ( jQuery( this ).is('thead') ) {
 
-			if ( $this.is('thead') ) {
-
-				report = report + "\n### " + jQuery.trim( $this.text() ) + " ###\n\n";
+				report = report + "\n### " + jQuery.trim( jQuery( this ).text() ) + " ###\n\n";
 
 			} else {
 
-				jQuery('tr', $this).each(function(){
+				jQuery('tr', jQuery( this )).each(function(){
 
-					$this = jQuery( this );
+					var the_name    = jQuery.wc_strPad( jQuery.trim( jQuery( this ).find('td:eq(0)').text() ), 25, ' ' );
+					var the_value   = jQuery.trim( jQuery( this ).find('td:eq(1)').text() );
+					var value_array = the_value.split( ', ' );
 
-					name = jQuery.wc_strPad( jQuery.trim( $this.find('td:eq(0)').text() ), 25, ' ' );
-					value = jQuery.trim( $this.find('td:eq(1)').text() );
-
-
-					value_array = value.split( ', ' );
-					if( value_array.length > 1 ){
+					if ( value_array.length > 1 ){
 
 						// if value have a list of plugins ','
 						// split to add new line
-						output = '';
-						temp_line ='';
+						var output = '';
+						var temp_line ='';
 						jQuery.each( value_array, function(key, line){
-
-							tab = ( key == 0 )?0:25;
+							var tab = ( key == 0 )?0:25;
 							temp_line = temp_line + jQuery.wc_strPad( '', tab, ' ', 'f' ) + line +'\n';
 						});
 
-						value = temp_line;
+						the_value = temp_line;
 					}
 
-					report = report +''+ name + value + "\n";
+					report = report +''+ the_name + the_value + "\n";
 				});
 
 			}
 		} );
 
-		var blob = new Blob( [report] );
+		try {
+			var blob = new Blob( [ report ], { type: "text/plain;charset=" + document.characterSet } );
+			saveAs( blob, jQuery(this).attr('download') );
+			return false;
+		} catch(e){ console.log( e ); }
 
-		jQuery(this).attr( 'href', window.URL.createObjectURL( blob ) );
-
-		return true;
+		return false;
 	});
-
 </script>

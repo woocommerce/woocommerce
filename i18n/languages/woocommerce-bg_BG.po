@@ -2452,7 +2452,7 @@ msgstr ""
 #: classes/emails/class-wc-email-customer-reset-password.php:42
 #@ woocommerce
 msgid "Password Reset for {blogname}"
-msgstr ""
+msgstr "Паролата е рестартирана за {blogname}"
 
 #: classes/emails/class-wc-email-customer-reset-password.php:43
 #, fuzzy
@@ -2485,13 +2485,13 @@ msgstr ""
 #: classes/emails/class-wc-email-new-order.php:121
 #@ woocommerce
 msgid "Recipient(s)"
-msgstr ""
+msgstr "Получател(и)"
 
 #: classes/emails/class-wc-email-new-order.php:123
 #, php-format
 #@ woocommerce
 msgid "Enter recipients (comma separated) for this email. Defaults to <code>%s</code>."
-msgstr ""
+msgstr "Въведете получатели (разделени със запетая) за този email. По подразбиране <code>%s</code>."
 
 #: classes/emails/class-wc-email-new-order.php:130
 #, fuzzy, php-format
@@ -3160,7 +3160,7 @@ msgstr "ShareYourCart"
 #: classes/integrations/shareyourcart/class.shareyourcart-wp.php:328
 #@ default
 msgid "Share your cart settings"
-msgstr ""
+msgstr "Споделяне на количката"
 
 #: classes/integrations/shareyourcart/class.shareyourcart-wp.php:342
 #, fuzzy
@@ -3676,7 +3676,7 @@ msgstr "Настройките ви са запазени."
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:95
 #@ woocommerce
 msgid "Log in"
-msgstr ""
+msgstr "Вход"
 
 #: classes/shortcodes/class-wc-shortcode-lost-password.php:116
 #, fuzzy
@@ -3912,13 +3912,13 @@ msgstr "Премахни изображение"
 #, fuzzy
 #@ woocommerce
 msgid "Min"
-msgstr "in"
+msgstr "Мин."
 
 #: classes/widgets/class-wc-widget-layered-nav-filters.php:104
 #, fuzzy
 #@ woocommerce
 msgid "Max"
-msgstr "Такса"
+msgstr "Макс."
 
 #: classes/widgets/class-wc-widget-layered-nav.php:31
 #@ woocommerce
@@ -4179,7 +4179,7 @@ msgstr "WooCommerce продуктово търсене"
 #: classes/widgets/class-wc-widget-product-tag-cloud.php:31
 #@ woocommerce
 msgid "Your most used product tags in cloud format."
-msgstr "Най използваните тагове във формат на облак."
+msgstr "Най използваните етикети под формата на облак."
 
 #: classes/widgets/class-wc-widget-product-tag-cloud.php:33
 #@ woocommerce
@@ -4191,7 +4191,7 @@ msgstr "WooCommerce продуктови етикети"
 #: woocommerce.php:825
 #@ woocommerce
 msgid "Product Tags"
-msgstr "Тагове на продукта"
+msgstr "Етикети на продукта"
 
 #: classes/widgets/class-wc-widget-random-products.php:24
 #@ woocommerce
@@ -6414,7 +6414,7 @@ msgstr "Виж опциите"
 #: templates/loop/result-count.php:28
 #@ woocommerce
 msgid "Showing the single result"
-msgstr ""
+msgstr "Показване на единичен резултат"
 
 #: templates/loop/result-count.php:30
 #, fuzzy, php-format
@@ -6427,7 +6427,7 @@ msgstr "Покажи всички под-типове"
 #@ woocommerce
 msgctxt "%1$d = first, %2$d = last, %3$d = total"
 msgid "Showing %1$d–%2$d of %3$d results"
-msgstr ""
+msgstr "Показване %1$d–%2$d от %3$d резултати"
 
 #: templates/loop/sale-flash.php:16
 #: templates/single-product/sale-flash.php:16
@@ -6508,7 +6508,7 @@ msgstr "Въведи паролата отново"
 #: templates/myaccount/form-lost-password.php:22
 #@ woocommerce
 msgid "Lost your password? Please enter your username or email address. You will receive a link to create a new password via email."
-msgstr ""
+msgstr "Изгубена парола? Въведете вашето потребителско име или email адрес, и ще получите линк за възстановяване на паролата ви чрез email адрес."
 
 #: templates/myaccount/form-lost-password.php:28
 #, fuzzy
@@ -6559,7 +6559,7 @@ msgstr "Следните адреси ще бъдат използвани за 
 #@ default
 #@ woocommerce
 msgid "Edit"
-msgstr "Редактирай"
+msgstr "Редактиране"
 
 #: templates/myaccount/my-address.php:64
 #, fuzzy
@@ -6613,7 +6613,7 @@ msgstr "Отказ"
 #@ default
 #@ woocommerce
 msgid "View"
-msgstr "Виж"
+msgstr "Преглед"
 
 #: templates/order/form-tracking.php:17
 #@ woocommerce
@@ -6644,7 +6644,7 @@ msgstr "Email, използван при поръчката."
 #, fuzzy
 #@ woocommerce
 msgid "Track"
-msgstr "Проследи\""
+msgstr "Проследи"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:59
 #: templates/order/order-details.php:16
@@ -6692,7 +6692,7 @@ msgstr " преди"
 #: templates/shop/breadcrumb.php:66
 #@ woocommerce
 msgid "Products tagged &ldquo;"
-msgstr "Тагнати продукти &ldquo;"
+msgstr "Етикирани продукти &ldquo;"
 
 #: templates/shop/breadcrumb.php:94
 #: templates/shop/breadcrumb.php:196
@@ -6708,7 +6708,7 @@ msgstr "Грешка 404"
 #: templates/shop/breadcrumb.php:200
 #@ woocommerce
 msgid "Posts tagged &ldquo;"
-msgstr "Постове, тагнати &ldquo;"
+msgstr "Постове, етикирани &ldquo;"
 
 #: templates/shop/breadcrumb.php:205
 #@ woocommerce
@@ -6742,8 +6742,8 @@ msgstr[1] "Категория:"
 #@ product_tag
 msgid "Tag:"
 msgid_plural "Tags:"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Етикет:"
+msgstr[1] "Етикети:"
 
 #: admin/post-types/product.php:588
 #: admin/post-types/product.php:837
@@ -6798,7 +6798,7 @@ msgstr "Може също да харесате&hellip;"
 #@ woocommerce
 msgid "%s review for %s"
 msgid_plural "%s reviews for %s"
-msgstr[0] "%s review for %s"
+msgstr[0] "%s ревю за %s"
 msgstr[1] "%s ревюта за %s"
 
 #: templates/single-product-reviews.php:73
@@ -6974,12 +6974,12 @@ msgstr "Клиент"
 #: woocommerce-core-functions.php:1900
 #@ woocommerce
 msgid "Shop Manager"
-msgstr "Мениджър магазин"
+msgstr "Управление на магазин"
 
 #: woocommerce-core-functions.php:2433
 #@ woocommerce
 msgid "Unpaid order cancelled - time limit reached."
-msgstr ""
+msgstr "Неплатената поръчка е отказана, поради изтекла давност."
 
 #: woocommerce-core-functions.php:2485
 #: woocommerce-functions.php:703
@@ -7020,12 +7020,12 @@ msgstr "Моля, изберете продукт&hellip;"
 #, php-format
 #@ woocommerce
 msgid "Added &quot;%s&quot; to your cart."
-msgstr ""
+msgstr "Добавен &quot;%s&quot; към вашата кошница"
 
 #: woocommerce-functions.php:455
 #@ default
 msgid "&quot; and &quot;"
-msgstr ""
+msgstr "&quot; и &quot;"
 
 #: woocommerce-functions.php:458
 #, fuzzy, php-format
@@ -7102,7 +7102,7 @@ msgstr "Вашата поръчка беше канселирана."
 #: woocommerce-functions.php:876
 #@ woocommerce
 msgid "Your order is no longer pending and could not be cancelled. Please contact us if you need assistance."
-msgstr "Вашата поръчка вече не е в статус изчакване и не може да бъде канселирана. Моля, свържете се с нас, ако имате нужда от съдействие."
+msgstr "Вашата поръчка вече не е в статус изчакване и не може да бъде отказана. Моля, свържете се с нас, ако имате нужда от съдействие."
 
 #: woocommerce-functions.php:911
 #@ woocommerce
@@ -7119,7 +7119,7 @@ msgstr "Невалиден email адрес."
 #: woocommerce-functions.php:1099
 #@ woocommerce
 msgid "Go to homepage &rarr;"
-msgstr "Обратно на началната страница  &rarr;"
+msgstr "Обратно към началната страница  &rarr;"
 
 #: woocommerce-functions.php:933
 #@ woocommerce
@@ -7212,7 +7212,7 @@ msgstr "Начало"
 #: woocommerce.php:1175
 #@ woocommerce
 msgid "required"
-msgstr ""
+msgstr "задължително"
 
 #: woocommerce-template.php:1334
 #@ woocommerce
@@ -7227,7 +7227,7 @@ msgstr "Търси за:"
 #: woocommerce-template.php:1490
 #@ woocommerce
 msgid "Search for products"
-msgstr "Търсене"
+msgstr "Търсене на продукти"
 
 #: admin/post-types/product.php:620
 #: admin/post-types/product.php:893
@@ -7275,7 +7275,7 @@ msgstr "Търси в категориите продукти"
 #: woocommerce.php:793
 #@ woocommerce
 msgid "All Product Categories"
-msgstr "Всички"
+msgstr "Всички категории"
 
 #: woocommerce.php:794
 #@ woocommerce
@@ -7346,7 +7346,7 @@ msgstr "Обнови продуктовия етикет"
 #: woocommerce.php:834
 #@ woocommerce
 msgid "Add New Product Tag"
-msgstr "Добави нов продуктов таг"
+msgstr "Добави нов продуктов етикет"
 
 #: woocommerce.php:835
 #@ woocommerce
@@ -7751,17 +7751,17 @@ msgstr ""
 #: admin/importers/tax-rates-importer.php:208
 #@ woocommerce
 msgid "All done!"
-msgstr ""
+msgstr "Всичко приключи успешно!"
 
 #: admin/importers/tax-rates-importer.php:208
 #@ woocommerce
 msgid "View Tax Rates"
-msgstr ""
+msgstr "Преглед на таксите"
 
 #: admin/importers/tax-rates-importer.php:259
 #@ woocommerce
 msgid "Import Tax Rates"
-msgstr ""
+msgstr "Импорт на такси"
 
 #: admin/importers/tax-rates-importer.php:282
 #@ woocommerce
@@ -7782,7 +7782,7 @@ msgstr ""
 #: admin/importers/tax-rates-importer.php:301
 #@ default
 msgid "Choose a file from your computer:"
-msgstr ""
+msgstr "Избор на файл от вашият компютър:"
 
 #: admin/importers/tax-rates-importer.php:307
 #, php-format
@@ -7813,129 +7813,129 @@ msgstr ""
 #: admin/includes/duplicate_product.php:43
 #@ woocommerce
 msgid "Product creation failed, could not find original product:"
-msgstr ""
+msgstr "Създаването на продукта не бе усшешно, не може да се намери оригинален такъв:"
 
 #: admin/includes/duplicate_product.php:89
 #@ woocommerce
 msgid "(Copy)"
-msgstr ""
+msgstr "(Копиране)"
 
 #: admin/includes/notice-install.php:6
 #@ woocommerce
 msgid "<strong>Welcome to WooCommerce</strong> &#8211; You're almost ready to start selling :)"
-msgstr ""
+msgstr "<strong>Добре дошли в WooCommerce</strong> &#8211; Вече сте почти готови да започнете да продавате :)"
 
 #: admin/includes/notice-install.php:7
 #@ woocommerce
 msgid "Install WooCommerce Pages"
-msgstr ""
+msgstr "Създаване на WooCommerce системни страници"
 
 #: admin/includes/notice-install.php:7
 #@ woocommerce
 msgid "Skip setup"
-msgstr ""
+msgstr "Пропусни настройката"
 
 #: admin/includes/notice-theme-support.php:6
 #@ woocommerce
 msgid "<strong>Your theme does not declare WooCommerce support</strong> &#8211; if you encounter layout issues please read our integration guide or choose a WooCommerce theme :)"
-msgstr ""
+msgstr "<strong>Вашата текуща тема не е заявила че поддържа WooCommerce</strong> &#8211; ако имате проблем с визуализацията на продукти, моля прочетете нашите напътствия за интеграция или си изберете подходяща WooCommerce тема :)"
 
 #: admin/includes/notice-theme-support.php:7
 #@ woocommerce
 msgid "Theme Integration Guide"
-msgstr ""
+msgstr "Напътствия за интеграция на теми"
 
 #: admin/includes/notice-theme-support.php:7
 #@ woocommerce
 msgid "Hide this notice"
-msgstr ""
+msgstr "Скриване на това съобщение"
 
 #: admin/includes/notice-update.php:6
 #@ woocommerce
 msgid "<strong>Data Update Required</strong> &#8211; We just need to update your install to the latest version"
-msgstr ""
+msgstr "<strong>Нужно е обновяване</strong> &#8211; Нужно е обновяване на вашата инсталация към последна версия"
 
 #: admin/includes/notice-update.php:7
 #@ woocommerce
 msgid "Run the updater"
-msgstr ""
+msgstr "Стратиране на обновяването"
 
 #: admin/includes/notice-update.php:12
 #@ woocommerce
 msgid "It is strongly recommended that you backup your database before proceeding. Are you sure you wish to run the updater now?"
-msgstr ""
+msgstr "Препоръчително е да направите резервно копие на базата данни преди да продължите. Желаете ли да стартирате обновяването сега?"
 
 #: admin/includes/updates/woocommerce-update-2.0.php:180
 #: admin/woocommerce-admin-install.php:204
 #@ woocommerce
 msgctxt "page_slug"
 msgid "lost-password"
-msgstr ""
+msgstr "izgubena-parola"
 
 #: admin/includes/updates/woocommerce-update-2.0.php:180
 #: admin/woocommerce-admin-install.php:204
 #: admin/woocommerce-admin-status.php:309
 #@ woocommerce
 msgid "Lost Password"
-msgstr ""
+msgstr "Изгубена парола"
 
 #: admin/includes/welcome.php:33
 #@ woocommerce
 msgid "Welcome to WooCommerce"
-msgstr ""
+msgstr "Добре дошли в WooCommerce"
 
 #: admin/includes/welcome.php:128
 #, php-format
 #@ woocommerce
 msgid "Welcome to WooCommerce %s"
-msgstr ""
+msgstr "Добре дошли в WooCommerce %s"
 
 #: admin/includes/welcome.php:133
 #@ woocommerce
 msgid "Thanks, all done!"
-msgstr ""
+msgstr "Добре!"
 
 #: admin/includes/welcome.php:135
 #@ woocommerce
 msgid "Thank you for updating to the latest version!"
-msgstr ""
+msgstr "Благодарим за обновяването!"
 
 #: admin/includes/welcome.php:137
 #@ woocommerce
 msgid "Thanks for installing!"
-msgstr ""
+msgstr "Благодарим за инсталирането!"
 
 #: admin/includes/welcome.php:139
 #, php-format
 #@ woocommerce
 msgid "%s WooCommerce %s is more powerful, stable, and secure than ever before. We hope you enjoy it."
-msgstr ""
+msgstr "%s WooCommerce %s е вече по мощтен, стабилен и сигурен. Надяваме се да му се насладите."
 
 #: admin/includes/welcome.php:143
 #, php-format
 #@ default
 msgid "Version %s"
-msgstr ""
+msgstr "Версия %s"
 
 #: admin/includes/welcome.php:147
 #@ woocommerce
 msgid "Docs"
-msgstr ""
+msgstr "Документация"
 
 #: admin/includes/welcome.php:154
 #@ woocommerce
 msgid "What's New"
-msgstr ""
+msgstr "Какво ново"
 
 #: admin/includes/welcome.php:156
 #@ woocommerce
 msgid "Credits"
-msgstr ""
+msgstr "Кредитиране"
 
 #: admin/includes/welcome.php:179
 #@ woocommerce
 msgid "Security in mind"
-msgstr ""
+msgstr "Сигурност"
 
 #: admin/includes/welcome.php:183
 #@ woocommerce
@@ -8156,23 +8156,23 @@ msgstr ""
 #: admin/post-types/product.php:31
 #@ woocommerce
 msgid "Make a duplicate from this product"
-msgstr ""
+msgstr "Дублицирай този продукт"
 
 #: admin/post-types/product.php:32
 #@ woocommerce
 msgid "Duplicate"
-msgstr ""
+msgstr "Дублициране"
 
 #: admin/post-types/product.php:61
 #@ woocommerce
 msgid "Copy to a new draft"
-msgstr ""
+msgstr "Копиране като нова чернова"
 
 #: admin/post-types/product.php:86
 #: admin/woocommerce-admin-taxonomies.php:297
 #@ woocommerce
 msgid "Image"
-msgstr ""
+msgstr "Изображение"
 
 #: admin/post-types/product.php:91
 #: admin/post-types/product.php:557
@@ -8182,7 +8182,7 @@ msgstr ""
 #: admin/woocommerce-admin-reports.php:2119
 #@ woocommerce
 msgid "SKU"
-msgstr ""
+msgstr "SKU"
 
 #: admin/post-types/product.php:94
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:83
@@ -8190,17 +8190,17 @@ msgstr ""
 #: admin/woocommerce-admin-reports.php:99
 #@ woocommerce
 msgid "Stock"
-msgstr ""
+msgstr "Наличност"
 
 #: admin/post-types/product.php:98
 #@ woocommerce
 msgid "Categories"
-msgstr ""
+msgstr "Категории"
 
 #: admin/post-types/product.php:99
 #@ woocommerce
 msgid "Tags"
-msgstr ""
+msgstr "Етикети"
 
 #: admin/post-types/product.php:100
 #: admin/post-types/product.php:632
@@ -8209,7 +8209,7 @@ msgstr ""
 #: admin/woocommerce-admin-init.php:463
 #@ woocommerce
 msgid "Featured"
-msgstr ""
+msgstr "Избрани"
 
 #: admin/post-types/product.php:101
 #: admin/woocommerce-admin-attributes.php:250
@@ -8217,59 +8217,59 @@ msgstr ""
 #: admin/woocommerce-admin-attributes.php:385
 #@ woocommerce
 msgid "Type"
-msgstr ""
+msgstr "Тип"
 
 #: admin/post-types/product.php:102
 #: admin/post-types/shop_order.php:50
 #: templates/myaccount/my-orders.php:33
 #@ woocommerce
 msgid "Date"
-msgstr ""
+msgstr "Дата"
 
 #: admin/post-types/product.php:151
 #@ default
 msgid "Edit this item"
-msgstr ""
+msgstr "Редакиране на този продукт"
 
 #: admin/post-types/product.php:152
 #@ default
 msgid "Edit this item inline"
-msgstr ""
+msgstr "Бързо редактиране на този продукт"
 
 #: admin/post-types/product.php:152
 #@ default
 msgid "Quick&nbsp;Edit"
-msgstr ""
+msgstr "Бърза&nbsp;редакция"
 
 #: admin/post-types/product.php:156
 #: admin/post-types/shop_coupon.php:65
 #@ default
 msgid "Restore this item from the Trash"
-msgstr ""
+msgstr "Върни този продукт от кошчето"
 
 #: admin/post-types/product.php:156
 #: admin/post-types/shop_coupon.php:65
 #@ default
 msgid "Restore"
-msgstr ""
+msgstr "Връщане"
 
 #: admin/post-types/product.php:158
 #: admin/post-types/shop_coupon.php:67
 #@ default
 msgid "Move this item to the Trash"
-msgstr ""
+msgstr "Премести този продукт в кошчето"
 
 #: admin/post-types/product.php:158
 #: admin/post-types/shop_coupon.php:67
 #@ default
 msgid "Trash"
-msgstr ""
+msgstr "Кошче"
 
 #: admin/post-types/product.php:160
 #: admin/post-types/shop_coupon.php:69
 #@ default
 msgid "Delete this item permanently"
-msgstr ""
+msgstr "Изтриване на този продукт безвъзвратно"
 
 #: admin/post-types/product.php:160
 #: admin/post-types/shop_coupon.php:69
@@ -8277,34 +8277,34 @@ msgstr ""
 #@ default
 #@ woocommerce
 msgid "Delete Permanently"
-msgstr ""
+msgstr "Изтриване безвъзвратно"
 
 #: admin/post-types/product.php:165
 #, php-format
 #@ default
 msgid "Preview &#8220;%s&#8221;"
-msgstr ""
+msgstr "Предварителен преглед &#8220;%s&#8221;"
 
 #: admin/post-types/product.php:165
 #@ default
 msgid "Preview"
-msgstr ""
+msgstr "Предварителен преглед"
 
 #: admin/post-types/product.php:167
 #, php-format
 #@ default
 msgid "View &#8220;%s&#8221;"
-msgstr ""
+msgstr "Преглед &#8220;%s&#8221;"
 
 #: admin/post-types/product.php:214
 #@ woocommerce
 msgid "Grouped"
-msgstr ""
+msgstr "Групирани"
 
 #: admin/post-types/product.php:216
 #@ woocommerce
 msgid "External/Affiliate"
-msgstr ""
+msgstr "Външен/Афилейт"
 
 #: admin/post-types/product.php:220
 #: admin/post-types/product.php:407
@@ -8312,7 +8312,7 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-product_data.php:52
 #@ woocommerce
 msgid "Virtual"
-msgstr ""
+msgstr "Виртуален"
 
 #: admin/post-types/product.php:222
 #: admin/post-types/product.php:403
@@ -8320,73 +8320,73 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-product_data.php:58
 #@ woocommerce
 msgid "Downloadable"
-msgstr ""
+msgstr "За изтегляне"
 
 #: admin/post-types/product.php:224
 #@ woocommerce
 msgid "Simple"
-msgstr ""
+msgstr "Обикновен"
 
 #: admin/post-types/product.php:228
 #: admin/post-types/product.php:387
 #@ woocommerce
 msgid "Variable"
-msgstr ""
+msgstr "Вариация"
 
 #: admin/post-types/product.php:251
 #@ woocommerce
 msgid "Toggle featured"
-msgstr ""
+msgstr "Маркирай като избран"
 
 #: admin/post-types/product.php:253
 #@ woocommerce
 msgid "yes"
-msgstr ""
+msgstr "да"
 
 #: admin/post-types/product.php:255
 #@ woocommerce
 msgid "no"
-msgstr ""
+msgstr "не"
 
 #: admin/post-types/product.php:373
 #@ woocommerce
 msgid "Show all product types"
-msgstr ""
+msgstr "Показване на всички типове"
 
 #: admin/post-types/product.php:381
 #: admin/post-types/writepanels/writepanel-product_data.php:39
 #@ woocommerce
 msgid "Grouped product"
-msgstr ""
+msgstr "Групиран продукт"
 
 #: admin/post-types/product.php:383
 #: admin/post-types/writepanels/writepanel-product_data.php:40
 #@ woocommerce
 msgid "External/Affiliate product"
-msgstr ""
+msgstr "Външен/Афилейт продукт"
 
 #: admin/post-types/product.php:385
 #: admin/post-types/writepanels/writepanel-product_data.php:38
 #@ woocommerce
 msgid "Simple product"
-msgstr ""
+msgstr "Обикновен продукт"
 
 #: admin/post-types/product.php:399
 #@ woocommerce
 msgid "Show all sub-types"
-msgstr ""
+msgstr "Показване на всичко подтипове"
 
 #: admin/post-types/product.php:520
 #, php-format
 #@ woocommerce
 msgid "[%s with SKU of %s]"
-msgstr ""
+msgstr "[%s със SKU на %s]"
 
 #: admin/post-types/product.php:526
 #, php-format
 #@ woocommerce
 msgid "[%s with ID of %d]"
-msgstr ""
+msgstr "[%s с ID на %d]"
 
 #: admin/post-types/product.php:552
 #: admin/post-types/product.php:783
@@ -8394,29 +8394,29 @@ msgstr ""
 #: admin/settings/settings-init.php:518
 #@ woocommerce
 msgid "Product Data"
-msgstr ""
+msgstr "Данни за продукт"
 
 #: admin/post-types/product.php:570
 #@ woocommerce
 msgid "Regular price"
-msgstr ""
+msgstr "Редовна цена"
 
 #: admin/post-types/product.php:575
 #: admin/post-types/product.php:811
 #@ woocommerce
 msgid "Sale"
-msgstr ""
+msgstr "Разпродажба"
 
 #: admin/post-types/product.php:577
 #@ woocommerce
 msgid "Sale price"
-msgstr ""
+msgstr "Цена в разпродажба"
 
 #: admin/post-types/product.php:599
 #: admin/post-types/product.php:861
 #@ woocommerce
 msgid "L/W/H"
-msgstr ""
+msgstr "Д/Ш/В"
 
 #: admin/post-types/product.php:601
 #: admin/post-types/product.php:877
@@ -8424,7 +8424,7 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-product_data.php:286
 #@ woocommerce
 msgid "Length"
-msgstr ""
+msgstr "Дължина"
 
 #: admin/post-types/product.php:602
 #: admin/post-types/product.php:878
@@ -8433,7 +8433,7 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:795
 #@ woocommerce
 msgid "Width"
-msgstr ""
+msgstr "Ширина"
 
 #: admin/post-types/product.php:603
 #: admin/post-types/product.php:879
@@ -8442,19 +8442,19 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:797
 #@ woocommerce
 msgid "Height"
-msgstr ""
+msgstr "Височина"
 
 #: admin/post-types/product.php:613
 #: admin/post-types/product.php:885
 #@ woocommerce
 msgid "Visibility"
-msgstr ""
+msgstr "Видим"
 
 #: admin/post-types/product.php:618
 #: admin/post-types/product.php:891
 #@ woocommerce
 msgid "Catalog &amp; search"
-msgstr ""
+msgstr "Каталог и търсене"
 
 #: admin/post-types/product.php:619
 #: admin/post-types/product.php:892
@@ -8463,27 +8463,27 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:181
 #@ woocommerce
 msgid "Catalog"
-msgstr ""
+msgstr "Каталог"
 
 #: admin/post-types/product.php:621
 #: admin/post-types/product.php:894
 #: admin/post-types/writepanels/writepanel-product_data.php:1031
 #@ woocommerce
 msgid "Hidden"
-msgstr ""
+msgstr "Скрит"
 
 #: admin/post-types/product.php:636
 #: admin/post-types/product.php:922
 #@ woocommerce
 msgid "In stock?"
-msgstr ""
+msgstr "В наличност?"
 
 #: admin/post-types/product.php:657
 #: admin/post-types/product.php:940
 #: admin/post-types/writepanels/writepanel-product_data.php:212
 #@ woocommerce
 msgid "Manage stock?"
-msgstr ""
+msgstr "Подржъка на наличности?"
 
 #: admin/post-types/product.php:661
 #: admin/post-types/product.php:959
@@ -8491,7 +8491,7 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-product_data.php:219
 #@ woocommerce
 msgid "Stock Qty"
-msgstr ""
+msgstr "Брой наличност"
 
 #: admin/post-types/product.php:792
 #: admin/post-types/product.php:816
@@ -8504,7 +8504,7 @@ msgstr ""
 #: admin/post-types/product.php:964
 #@ woocommerce
 msgid "— No Change —"
-msgstr ""
+msgstr "— Без промяна —"
 
 #: admin/post-types/product.php:793
 #: admin/post-types/product.php:817
@@ -8513,30 +8513,30 @@ msgstr ""
 #: admin/post-types/product.php:965
 #@ woocommerce
 msgid "Change to:"
-msgstr ""
+msgstr "Промени на:"
 
 #: admin/post-types/product.php:794
 #: admin/post-types/product.php:818
 #@ woocommerce
 msgid "Increase by (fixed amount or %):"
-msgstr ""
+msgstr "Увеличи с (фиксирана ставка или %):"
 
 #: admin/post-types/product.php:795
 #: admin/post-types/product.php:819
 #@ woocommerce
 msgid "Decrease by (fixed amount or %):"
-msgstr ""
+msgstr "Намали с (фиксирана ставка или %):"
 
 #: admin/post-types/product.php:805
 #: admin/post-types/product.php:830
 #@ woocommerce
 msgid "Enter price"
-msgstr ""
+msgstr "Въвеждане на цена"
 
 #: admin/post-types/product.php:820
 #@ woocommerce
 msgid "Decrease regular price by (fixed amount or %):"
-msgstr ""
+msgstr "Намаляне на редовната цена с (фиксирана ставка или %):"
 
 #: admin/post-types/product.php:910
 #: admin/post-types/product.php:946
@@ -8545,7 +8545,7 @@ msgstr ""
 #: admin/woocommerce-admin-status.php:260
 #@ woocommerce
 msgid "Yes"
-msgstr ""
+msgstr "Да"
 
 #: admin/post-types/product.php:911
 #: admin/post-types/product.php:947
@@ -8554,59 +8554,59 @@ msgstr ""
 #: admin/woocommerce-admin-status.php:260
 #@ woocommerce
 msgid "No"
-msgstr ""
+msgstr "Не"
 
 #: admin/post-types/product.php:1175
 #@ woocommerce
 msgid "Sort Products"
-msgstr ""
+msgstr "Подредба на продукти"
 
 #: admin/post-types/product.php:1214
 #@ woocommerce
 msgid "Insert into product"
-msgstr ""
+msgstr "Вмъкване към продукт"
 
 #: admin/post-types/product.php:1215
 #@ woocommerce
 msgid "Uploaded to this product"
-msgstr ""
+msgstr "Качено към продукт"
 
 #: admin/post-types/shop_coupon.php:25
 #@ woocommerce
 msgid "Code"
-msgstr ""
+msgstr "Код"
 
 #: admin/post-types/shop_coupon.php:26
 #@ woocommerce
 msgid "Coupon type"
-msgstr ""
+msgstr "Тип купон"
 
 #: admin/post-types/shop_coupon.php:27
 #: admin/post-types/writepanels/writepanel-coupon_data.php:45
 #@ woocommerce
 msgid "Coupon amount"
-msgstr ""
+msgstr "Наличност на купони"
 
 #: admin/post-types/shop_coupon.php:29
 #@ woocommerce
 msgid "Product IDs"
-msgstr ""
+msgstr "ID-та на продукти"
 
 #: admin/post-types/shop_coupon.php:30
 #@ woocommerce
 msgid "Usage / Limit"
-msgstr ""
+msgstr "Използване / Лимит"
 
 #: admin/post-types/shop_coupon.php:31
 #: admin/post-types/writepanels/writepanel-coupon_data.php:158
 #@ woocommerce
 msgid "Expiry date"
-msgstr ""
+msgstr "Дата на изтичане"
 
 #: admin/post-types/shop_coupon.php:56
 #@ woocommerce
 msgid "Edit coupon"
-msgstr ""
+msgstr "Редакция купон"
 
 #: admin/post-types/shop_coupon.php:114
 #, php-format
@@ -8624,40 +8624,40 @@ msgstr ""
 #: admin/post-types/shop_order.php:282
 #@ woocommerce
 msgid "Show all statuses"
-msgstr ""
+msgstr "Показване на всички статуси"
 
 #: admin/post-types/shop_order.php:45
 #@ woocommerce
 msgid "Billing"
-msgstr ""
+msgstr "Фактуриране"
 
 #: admin/post-types/shop_order.php:49
 #@ woocommerce
 msgid "Customer Notes"
-msgstr ""
+msgstr "Клиентски бележки"
 
 #: admin/post-types/shop_order.php:51
 #: admin/post-types/writepanels/writepanel-order_data.php:386
 #: admin/post-types/writepanels/writepanel-order_data.php:433
 #@ woocommerce
 msgid "Actions"
-msgstr ""
+msgstr "Действия"
 
 #: admin/post-types/shop_order.php:98
 #@ woocommerce
 msgid "made by"
-msgstr ""
+msgstr "направено от"
 
 #: admin/post-types/shop_order.php:114
 #: admin/post-types/shop_order.php:123
 #@ woocommerce
 msgid "Via"
-msgstr ""
+msgstr "чрез"
 
 #: admin/post-types/shop_order.php:131
 #@ woocommerce
 msgid "Unpublished"
-msgstr ""
+msgstr "Непубликуван"
 
 #: admin/post-types/shop_order.php:133
 #@ woocommerce
@@ -8668,7 +8668,7 @@ msgstr ""
 #, php-format
 #@ woocommerce
 msgid "%s ago"
-msgstr ""
+msgstr "predi %s"
 
 #: admin/post-types/shop_order.php:141
 #@ woocommerce
@@ -8679,23 +8679,23 @@ msgstr ""
 #: admin/woocommerce-admin-dashboard.php:176
 #@ woocommerce
 msgid "Processing"
-msgstr ""
+msgstr "Обработка"
 
 #: admin/post-types/shop_order.php:165
 #@ woocommerce
 msgid "Complete"
-msgstr ""
+msgstr "Завършен"
 
 #: admin/post-types/shop_order.php:301
 #: admin/post-types/shop_order.php:326
 #@ woocommerce
 msgid "Show all customers"
-msgstr ""
+msgstr "Показване на виски клиенти"
 
 #: admin/post-types/writepanels/order-download-permission-html.php:6
 #@ woocommerce
 msgid "Revoke Access"
-msgstr ""
+msgstr "Преустанови достъп"
 
 #: admin/post-types/writepanels/order-download-permission-html.php:7
 #: admin/post-types/writepanels/variation-admin-html.php:7
@@ -8704,26 +8704,26 @@ msgstr ""
 #: admin/woocommerce-admin-init.php:452
 #@ woocommerce
 msgid "Click to toggle"
-msgstr ""
+msgstr "Цъкни за маркиране"
 
 #: admin/post-types/writepanels/order-download-permission-html.php:9
 #, php-format
 #@ woocommerce
 msgid "File %d: %s"
-msgstr ""
+msgstr "Файл %d: %s"
 
 #: admin/post-types/writepanels/order-download-permission-html.php:9
 #, php-format
 #@ woocommerce
 msgid "Downloaded %s time"
 msgid_plural "Downloaded %s times"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Изтеглено %s път"
+msgstr[1] "Изтеглено %s пъти"
 
 #: admin/post-types/writepanels/order-download-permission-html.php:16
 #@ woocommerce
 msgid "Downloads Remaining"
-msgstr ""
+msgstr "Оставащи изтегляния"
 
 #: admin/post-types/writepanels/order-download-permission-html.php:19
 #: admin/post-types/writepanels/variation-admin-html.php:143
@@ -8731,66 +8731,66 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-product_data.php:158
 #@ woocommerce
 msgid "Unlimited"
-msgstr ""
+msgstr "Неограничено"
 
 #: admin/post-types/writepanels/order-download-permission-html.php:22
 #@ woocommerce
 msgid "Access Expires"
-msgstr ""
+msgstr "Достъпът изтича"
 
 #: admin/post-types/writepanels/order-download-permission-html.php:23
 #: admin/post-types/writepanels/writepanel-product_data.php:164
 #@ woocommerce
 msgid "Never"
-msgstr ""
+msgstr "Никога"
 
 #: admin/post-types/writepanels/order-fee-html.php:10
 #@ woocommerce
 msgid "Fee Name"
-msgstr ""
+msgstr "Име на вноска"
 
 #: admin/post-types/writepanels/order-fee-html.php:17
 #: admin/post-types/writepanels/order-item-html.php:84
 #@ woocommerce
 msgid "Tax class"
-msgstr ""
+msgstr "Клас на такса"
 
 #: admin/post-types/writepanels/order-item-html.php:9
 #@ woocommerce
 msgid "Product ID:"
-msgstr ""
+msgstr "Продукт ID:"
 
 #: admin/post-types/writepanels/order-item-html.php:12
 #@ woocommerce
 msgid "Variation ID:"
-msgstr ""
+msgstr "Варияция ID:"
 
 #: admin/post-types/writepanels/order-item-html.php:15
 #@ woocommerce
 msgid "Product SKU:"
-msgstr ""
+msgstr "Продукт SKU:"
 
 #: admin/post-types/writepanels/order-item-html.php:33
 #@ woocommerce
 msgid "Add&nbsp;meta"
-msgstr ""
+msgstr "Добавяне&nbsp;мета"
 
 #: admin/post-types/writepanels/order-tax-html.php:6
 #@ woocommerce
 msgid "Tax Rate:"
-msgstr ""
+msgstr "Такса"
 
 #: admin/post-types/writepanels/order-tax-html.php:16
 #: admin/post-types/writepanels/writepanel-order_data.php:627
 #@ woocommerce
 msgid "Sales Tax:"
-msgstr ""
+msgstr "Такса в разпродажба:"
 
 #: admin/post-types/writepanels/order-tax-html.php:20
 #: admin/post-types/writepanels/writepanel-order_data.php:635
 #@ woocommerce
 msgid "Shipping Tax:"
-msgstr ""
+msgstr "Такса доставка:"
 
 #: admin/post-types/writepanels/variation-admin-html.php:6
 #: admin/post-types/writepanels/writepanel-product_data.php:364
@@ -8798,82 +8798,82 @@ msgstr ""
 #: admin/woocommerce-admin-init.php:451
 #@ woocommerce
 msgid "Remove"
-msgstr ""
+msgstr "Премахване"
 
 #: admin/post-types/writepanels/variation-admin-html.php:20
 #@ woocommerce
 msgid "Any"
-msgstr ""
+msgstr "Всички"
 
 #: admin/post-types/writepanels/variation-admin-html.php:46
 #@ woocommerce
 msgid "Enter a SKU for this variation or leave blank to use the parent product SKU."
-msgstr ""
+msgstr "Въведи SKU на тази варияция или остави празно за да се използва оригиналното."
 
 #: admin/post-types/writepanels/variation-admin-html.php:57
 #@ woocommerce
 msgid "Stock Qty:"
-msgstr ""
+msgstr "Брой наличност:"
 
 #: admin/post-types/writepanels/variation-admin-html.php:57
 #@ woocommerce
 msgid "Enter a quantity to enable stock management at variation level, or leave blank to use the parent product's options."
-msgstr ""
+msgstr "Въведи брой за да се разрши управлението на наличности на ниво варияция, или остави празно за да се използват оригиналните настройки."
 
 #: admin/post-types/writepanels/variation-admin-html.php:66
 #@ woocommerce
 msgid "Regular Price:"
-msgstr ""
+msgstr "Редовна цена:"
 
 #: admin/post-types/writepanels/variation-admin-html.php:67
 #@ woocommerce
 msgid "Variation price (required)"
-msgstr ""
+msgstr "Цена на варияцията (задължително)"
 
 #: admin/post-types/writepanels/variation-admin-html.php:70
 #@ woocommerce
 msgid "Sale Price:"
-msgstr ""
+msgstr "Цена в разпродажба:"
 
 #: admin/post-types/writepanels/variation-admin-html.php:70
 #: admin/post-types/writepanels/writepanel-product_data.php:125
 #@ woocommerce
 msgid "Schedule"
-msgstr ""
+msgstr "Планиране"
 
 #: admin/post-types/writepanels/variation-admin-html.php:70
 #@ woocommerce
 msgid "Cancel schedule"
-msgstr ""
+msgstr "Отмени планираното събитие"
 
 #: admin/post-types/writepanels/variation-admin-html.php:77
 #@ woocommerce
 msgid "Sale start date:"
-msgstr ""
+msgstr "Разпродажбата започва на:"
 
 #: admin/post-types/writepanels/variation-admin-html.php:78
 #: admin/post-types/writepanels/writepanel-product_data.php:136
 #@ woocommerce
 msgctxt "placeholder"
 msgid "From&hellip;"
-msgstr ""
+msgstr "От&hellip;"
 
 #: admin/post-types/writepanels/variation-admin-html.php:81
 #@ woocommerce
 msgid "Sale end date:"
-msgstr ""
+msgstr "Крайна дата на разпродажбата:"
 
 #: admin/post-types/writepanels/variation-admin-html.php:82
 #: admin/post-types/writepanels/writepanel-product_data.php:137
 #@ woocommerce
 msgctxt "placeholder"
 msgid "To&hellip;"
-msgstr ""
+msgstr "За&hellip;"
 
 #: admin/post-types/writepanels/variation-admin-html.php:90
 #@ woocommerce
 msgid "Enter a weight for this variation or leave blank to use the parent product weight."
-msgstr ""
+msgstr "Въведете тежест на тази варияция или оставете празно за да се използва оригиналната."
 
 #: admin/post-types/writepanels/variation-admin-html.php:98
 #@ woocommerce
@@ -8948,7 +8948,7 @@ msgstr ""
 #: admin/post-types/writepanels/variation-admin-html.php:164
 #@ woocommerce
 msgid "Enabled"
-msgstr ""
+msgstr "Разрешен"
 
 #: admin/post-types/writepanels/variation-admin-html.php:166
 #@ woocommerce
@@ -8963,7 +8963,7 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-coupon_data.php:37
 #@ woocommerce
 msgid "Coupon description"
-msgstr ""
+msgstr "Описание на купон"
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:37
 #@ woocommerce
@@ -9135,43 +9135,43 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-coupon_data.php:195
 #@ woocommerce
 msgid "Coupon code already exists - customers will use the latest coupon with this code."
-msgstr ""
+msgstr "Купонът вече съществува - клиентите ще използват обновения купон с този код."
 
 #: admin/post-types/writepanels/writepanel-order_data.php:62
 #@ woocommerce
 msgid "Order number"
-msgstr ""
+msgstr "Номер поръчка"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:67
 #@ woocommerce
 msgid "Customer IP:"
-msgstr ""
+msgstr "IP на клиент:"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:74
 #@ woocommerce
 msgid "General Details"
-msgstr ""
+msgstr "Основна информация"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:76
 #@ woocommerce
 msgid "Order status:"
-msgstr ""
+msgstr "Поръчка статус:"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:86
 #@ woocommerce
 msgid "Order Date:"
-msgstr ""
+msgstr "Поръчка дата"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:87
 #@ woocommerce
 msgid "h"
-msgstr ""
+msgstr "ч"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:87
 #: admin/settings/settings-init.php:577
 #@ woocommerce
 msgid "m"
-msgstr ""
+msgstr "м"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:91
 #@ woocommerce
@@ -9199,7 +9199,7 @@ msgstr ""
 #: admin/woocommerce-admin-users.php:204
 #@ woocommerce
 msgid "Company"
-msgstr ""
+msgstr "Компания"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:156
 #: admin/post-types/writepanels/writepanel-order_data.php:246
@@ -9207,7 +9207,7 @@ msgstr ""
 #: admin/woocommerce-admin-users.php:208
 #@ woocommerce
 msgid "Address 1"
-msgstr ""
+msgstr "Адрес 1"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:160
 #: admin/post-types/writepanels/writepanel-order_data.php:250
@@ -9215,7 +9215,7 @@ msgstr ""
 #: admin/woocommerce-admin-users.php:212
 #@ woocommerce
 msgid "Address 2"
-msgstr ""
+msgstr "Адрес 2"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:164
 #: admin/post-types/writepanels/writepanel-order_data.php:254
@@ -9225,7 +9225,7 @@ msgstr ""
 #: admin/woocommerce-admin-users.php:216
 #@ woocommerce
 msgid "City"
-msgstr ""
+msgstr "Град"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:178
 #: admin/post-types/writepanels/writepanel-order_data.php:268
@@ -9233,49 +9233,49 @@ msgstr ""
 #: admin/woocommerce-admin-users.php:224
 #@ woocommerce
 msgid "State/County"
-msgstr ""
+msgstr "Община/Област"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:195
 #@ woocommerce
 msgid "No billing address set."
-msgstr ""
+msgstr "Няма зададен адрес за фактуриране."
 
 #: admin/post-types/writepanels/writepanel-order_data.php:208
 #@ woocommerce
 msgid "Load billing address"
-msgstr ""
+msgstr "Зареждане на адрес за фактуриране"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:230
 #@ woocommerce
 msgid "Shipping Details"
-msgstr ""
+msgstr "Допълнение към доставката"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:279
 #@ woocommerce
 msgid "No shipping address set."
-msgstr ""
+msgstr "Няма зададен адрес за доставка."
 
 #: admin/post-types/writepanels/writepanel-order_data.php:292
 #@ woocommerce
 msgid "Load shipping address"
-msgstr ""
+msgstr "Зареждане адрес за доставка"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:292
 #@ woocommerce
 msgid "Copy from billing"
-msgstr ""
+msgstr "Копиране от фактурирането"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:339
 #@ woocommerce
 msgid "Item"
-msgstr ""
+msgstr "Артикул"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:344
 #: admin/post-types/writepanels/writepanel-product_data.php:191
 #: admin/settings/settings-tax-rates.php:217
 #@ woocommerce
 msgid "Tax Class"
-msgstr ""
+msgstr "Клас на такса"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:344
 #@ woocommerce
@@ -9311,12 +9311,12 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-order_data.php:456
 #@ woocommerce
 msgid "Apply"
-msgstr ""
+msgstr "Приложи"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:402
 #@ woocommerce
 msgid "Add item(s)"
-msgstr ""
+msgstr "Добавяне на артикул(и)"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:403
 #@ woocommerce
@@ -9326,27 +9326,27 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-order_data.php:434
 #@ woocommerce
 msgid "Resend order emails"
-msgstr ""
+msgstr "Изпрати повторно писмата за поръчките"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:465
 #@ woocommerce
 msgid "Move to Trash"
-msgstr ""
+msgstr "Премести в кошче"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:470
 #@ woocommerce
 msgid "Save Order"
-msgstr ""
+msgstr "Запазване на поръчка"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:470
 #@ woocommerce
 msgid "Save/update the order"
-msgstr ""
+msgstr "Запазване/обновяване на поръчка"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:495
 #@ woocommerce
 msgid "Discounts"
-msgstr ""
+msgstr "Намаления"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:499
 #@ woocommerce
@@ -9361,22 +9361,22 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-order_data.php:540
 #@ woocommerce
 msgid "Label:"
-msgstr ""
+msgstr "Етикет:"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:541
 #@ woocommerce
 msgid "The shipping title the customer sees"
-msgstr ""
+msgstr "Заглавието на доставката което вижда потребителя"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:548
 #@ woocommerce
 msgid "Cost:"
-msgstr ""
+msgstr "Цена:"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:556
 #@ woocommerce
 msgid "Method:"
-msgstr ""
+msgstr "Метод:"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:578
 #: admin/post-types/writepanels/writepanel-order_data.php:580
@@ -9384,7 +9384,7 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-order_data.php:681
 #@ woocommerce
 msgid "Other"
-msgstr ""
+msgstr "Друго"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:594
 #@ woocommerce
@@ -9420,17 +9420,17 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-order_data.php:661
 #@ woocommerce
 msgid "Payment Method:"
-msgstr ""
+msgstr "Начин за плащане:"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:692
 #@ woocommerce
 msgid "Calc taxes"
-msgstr ""
+msgstr "Изчисли таксите"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:694
 #@ woocommerce
 msgid "Calc totals"
-msgstr ""
+msgstr "Изчисли общото"
 
 #: admin/post-types/writepanels/writepanel-order_downloads.php:57
 #@ woocommerce
@@ -9487,12 +9487,12 @@ msgstr "Добавяне"
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:23
 #@ woocommerce
 msgid "Variations for variable products are defined here."
-msgstr ""
+msgstr "Варияциите на продукта са дефинирани тук."
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:65
 #@ woocommerce
 msgid "Before adding variations, add and save some attributes on the <strong>Attributes</strong> tab."
-msgstr ""
+msgstr "Преди да добавите варияция, добавете и запишете някои атрибути от раздела<strong>Атрибути</strong>."
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:67
 #@ woocommerce
@@ -9544,17 +9544,17 @@ msgstr "Цени"
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:82
 #@ woocommerce
 msgid "Sale prices"
-msgstr ""
+msgstr "Цени в разпродажба"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:88
 #@ woocommerce
 msgid "File Path"
-msgstr ""
+msgstr "Път на файл"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:89
 #@ woocommerce
 msgid "Download limit"
-msgstr ""
+msgstr "Лимит изтегляния"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:90
 #: admin/post-types/writepanels/writepanel-product_data.php:164
@@ -9565,12 +9565,12 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:93
 #@ woocommerce
 msgid "Go"
-msgstr ""
+msgstr "Иди"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:195
 #@ woocommerce
 msgid "Link all variations"
-msgstr ""
+msgstr "Свързване на всички варияции"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:197
 #@ woocommerce
@@ -9632,7 +9632,7 @@ msgstr "Избор на изображение"
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:513
 #@ woocommerce
 msgid "Set variation image"
-msgstr ""
+msgstr "Задай изображение на варияцията"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:557
 #@ woocommerce
@@ -9809,7 +9809,7 @@ msgstr "Изберете тази опция, ако желаете само п�
 #: admin/post-types/writepanels/writepanel-product_data.php:273
 #@ woocommerce
 msgid "Weight in decimal form"
-msgstr "Височина в десетичен формат"
+msgstr "Тежест в десетичен формат"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:290
 #@ woocommerce
@@ -10660,7 +10660,7 @@ msgstr ""
 #: admin/settings/settings-init.php:554
 #@ woocommerce
 msgid "Weight Unit"
-msgstr ""
+msgstr "Мерна единица за тежест"
 
 #: admin/settings/settings-init.php:555
 #@ woocommerce
@@ -10670,47 +10670,47 @@ msgstr ""
 #: admin/settings/settings-init.php:561
 #@ woocommerce
 msgid "kg"
-msgstr ""
+msgstr "кг."
 
 #: admin/settings/settings-init.php:562
 #@ woocommerce
 msgid "g"
-msgstr ""
+msgstr "г."
 
 #: admin/settings/settings-init.php:563
 #@ woocommerce
 msgid "lbs"
-msgstr ""
+msgstr "лб."
 
 #: admin/settings/settings-init.php:564
 #@ woocommerce
 msgid "oz"
-msgstr ""
+msgstr "оз."
 
 #: admin/settings/settings-init.php:570
 #@ woocommerce
 msgid "Dimensions Unit"
-msgstr ""
+msgstr "Мерни единици за размер"
 
 #: admin/settings/settings-init.php:571
 #@ woocommerce
 msgid "This controls what unit you will define lengths in."
-msgstr ""
+msgstr "Тази опция контроли какви мерни единици ще се използват."
 
 #: admin/settings/settings-init.php:578
 #@ woocommerce
 msgid "cm"
-msgstr ""
+msgstr "см."
 
 #: admin/settings/settings-init.php:579
 #@ woocommerce
 msgid "mm"
-msgstr ""
+msgstr "мм."
 
 #: admin/settings/settings-init.php:580
 #@ woocommerce
 msgid "in"
-msgstr ""
+msgstr "инч"
 
 #: admin/settings/settings-init.php:581
 #@ woocommerce
@@ -10720,27 +10720,27 @@ msgstr ""
 #: admin/settings/settings-init.php:587
 #@ woocommerce
 msgid "Product Ratings"
-msgstr ""
+msgstr "Рейтинг на продукти"
 
 #: admin/settings/settings-init.php:588
 #@ woocommerce
 msgid "Enable ratings on reviews"
-msgstr ""
+msgstr "Разреши рейтинг в отзивите"
 
 #: admin/settings/settings-init.php:597
 #@ woocommerce
 msgid "Ratings are required to leave a review"
-msgstr ""
+msgstr "Рейтингите са задължителни за да се остави ревю"
 
 #: admin/settings/settings-init.php:606
 #@ woocommerce
 msgid "Show \"verified owner\" label for customer reviews"
-msgstr ""
+msgstr "Покажи \"проверен собственик\" маркер към ревютата"
 
 #: admin/settings/settings-init.php:616
 #@ woocommerce
 msgid "Pricing Options"
-msgstr ""
+msgstr "Настройки на ценообразуването"
 
 #: admin/settings/settings-init.php:616
 #@ woocommerce
@@ -10760,27 +10760,27 @@ msgstr ""
 #: admin/settings/settings-init.php:626
 #@ woocommerce
 msgid "Left"
-msgstr ""
+msgstr "Ляво"
 
 #: admin/settings/settings-init.php:627
 #@ woocommerce
 msgid "Right"
-msgstr ""
+msgstr "Дясно"
 
 #: admin/settings/settings-init.php:628
 #@ woocommerce
 msgid "Left (with space)"
-msgstr ""
+msgstr "Ляво интервал"
 
 #: admin/settings/settings-init.php:629
 #@ woocommerce
 msgid "Right (with space)"
-msgstr ""
+msgstr "Интервал дясно"
 
 #: admin/settings/settings-init.php:635
 #@ woocommerce
 msgid "Thousand Separator"
-msgstr ""
+msgstr "Разделител на хилядите"
 
 #: admin/settings/settings-init.php:636
 #@ woocommerce
@@ -10810,7 +10810,7 @@ msgstr ""
 #: admin/settings/settings-init.php:669
 #@ woocommerce
 msgid "Trailing Zeros"
-msgstr ""
+msgstr "Остатъчни нули"
 
 #: admin/settings/settings-init.php:670
 #@ woocommerce
@@ -10820,7 +10820,7 @@ msgstr ""
 #: admin/settings/settings-init.php:678
 #@ woocommerce
 msgid "Image Options"
-msgstr ""
+msgstr "Настройки на изображенията"
 
 #: admin/settings/settings-init.php:678
 #, php-format
@@ -10831,7 +10831,7 @@ msgstr ""
 #: admin/settings/settings-init.php:681
 #@ woocommerce
 msgid "Catalog Images"
-msgstr ""
+msgstr "Изображения на каталозите"
 
 #: admin/settings/settings-init.php:682
 #@ woocommerce
@@ -10841,7 +10841,7 @@ msgstr ""
 #: admin/settings/settings-init.php:695
 #@ woocommerce
 msgid "Single Product Image"
-msgstr ""
+msgstr "Изображение на единичен продукт"
 
 #: admin/settings/settings-init.php:696
 #@ woocommerce
@@ -11810,8 +11810,8 @@ msgstr[1] "Категории на продукт"
 #@ woocommerce
 msgid "Product Tag"
 msgid_plural "Product Tags"
-msgstr[0] "Таг на продукт"
-msgstr[1] "Тагове на продукт"
+msgstr[0] "Етикет на продукт"
+msgstr[1] "Етикети на продукт"
 
 #: admin/woocommerce-admin-dashboard.php:126
 #@ woocommerce
@@ -12101,12 +12101,12 @@ msgstr ""
 #: admin/woocommerce-admin-init.php:711
 #@ woocommerce
 msgid "Coupon saved."
-msgstr ""
+msgstr "Купонт е записан"
 
 #: admin/woocommerce-admin-init.php:712
 #@ woocommerce
 msgid "Coupon submitted."
-msgstr ""
+msgstr "Купонът е пратен."
 
 #: admin/woocommerce-admin-init.php:713
 #, php-format
@@ -12144,7 +12144,7 @@ msgstr "produkt"
 #: admin/woocommerce-admin-init.php:776
 #@ woocommerce
 msgid "Shop base"
-msgstr ""
+msgstr "Основа на магазина"
 
 #: admin/woocommerce-admin-init.php:780
 #@ woocommerce
@@ -12154,7 +12154,7 @@ msgstr ""
 #: admin/woocommerce-admin-init.php:786
 #@ woocommerce
 msgid "Custom Base"
-msgstr ""
+msgstr "Потребителска основа на магазина"
 
 #: admin/woocommerce-admin-init.php:788
 #@ woocommerce
@@ -12345,12 +12345,12 @@ msgstr ""
 #: admin/woocommerce-admin-reports.php:2326
 #@ woocommerce
 msgid "n/a"
-msgstr ""
+msgstr "няма"
 
 #: admin/woocommerce-admin-reports.php:375
 #@ woocommerce
 msgid "Total orders"
-msgstr ""
+msgstr "Общо продацби"
 
 #: admin/woocommerce-admin-reports.php:377
 #: admin/woocommerce-admin-reports.php:650
@@ -12362,12 +12362,12 @@ msgstr "продукти"
 #: admin/woocommerce-admin-reports.php:381
 #@ woocommerce
 msgid "Average order total"
-msgstr ""
+msgstr "Средно продажби"
 
 #: admin/woocommerce-admin-reports.php:387
 #@ woocommerce
 msgid "Average order items"
-msgstr ""
+msgstr "Средно продадени продукти"
 
 #: admin/woocommerce-admin-reports.php:393
 #@ woocommerce
@@ -12377,12 +12377,12 @@ msgstr "Използвани намаления"
 #: admin/woocommerce-admin-reports.php:399
 #@ woocommerce
 msgid "Total shipping costs"
-msgstr ""
+msgstr "Общо разходи по доставка"
 
 #: admin/woocommerce-admin-reports.php:407
 #@ woocommerce
 msgid "This month's sales"
-msgstr ""
+msgstr "Продажби за този месец"
 
 #: admin/woocommerce-admin-reports.php:636
 #: admin/woocommerce-admin-reports.php:980
@@ -12416,22 +12416,22 @@ msgstr "Показване"
 #: admin/woocommerce-admin-reports.php:642
 #@ woocommerce
 msgid "Total sales in range"
-msgstr ""
+msgstr "Общо продажби в периода"
 
 #: admin/woocommerce-admin-reports.php:648
 #@ woocommerce
 msgid "Total orders in range"
-msgstr ""
+msgstr "Общо поръчки в периода"
 
 #: admin/woocommerce-admin-reports.php:654
 #@ woocommerce
 msgid "Average order total in range"
-msgstr ""
+msgstr "Средно поръчки в периода"
 
 #: admin/woocommerce-admin-reports.php:660
 #@ woocommerce
 msgid "Average order items in range"
-msgstr ""
+msgstr "Средно поръчани продукти в периода"
 
 #: admin/woocommerce-admin-reports.php:668
 #@ woocommerce
@@ -12796,7 +12796,7 @@ msgstr "Избор на държави&hellip;"
 #: admin/woocommerce-admin-status.php:622
 #@ woocommerce
 msgid "Tools"
-msgstr ""
+msgstr "Инструменти"
 
 #: admin/woocommerce-admin-status.php:62
 #@ woocommerce
@@ -12968,7 +12968,7 @@ msgstr "Притурки"
 #: admin/woocommerce-admin-status.php:221
 #@ woocommerce
 msgid "Installed Plugins"
-msgstr ""
+msgstr "Инсталирани притурки"
 
 #: admin/woocommerce-admin-status.php:236
 #@ woocommerce
@@ -12983,17 +12983,17 @@ msgstr "версия"
 #: admin/woocommerce-admin-status.php:259
 #@ woocommerce
 msgid "Force SSL"
-msgstr ""
+msgstr "Задължително използвай SSL"
 
 #: admin/woocommerce-admin-status.php:266
 #@ woocommerce
 msgid "WC Pages"
-msgstr ""
+msgstr "Страници на магазина"
 
 #: admin/woocommerce-admin-status.php:273
 #@ woocommerce
 msgid "Shop Base"
-msgstr ""
+msgstr "Адрес до магазина"
 
 #: admin/woocommerce-admin-status.php:289
 #@ woocommerce

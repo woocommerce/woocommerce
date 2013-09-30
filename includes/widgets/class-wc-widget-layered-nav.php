@@ -17,8 +17,6 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 * Constructor
 	 */
 	public function __construct() {
-		global $woocommerce;
-
 		$this->widget_cssclass    = 'woocommerce widget_layered_nav';
 		$this->widget_description = __( 'Shows a custom attribute in a widget which lets you narrow down the list of products when viewing product categories.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_layered_nav';
@@ -58,13 +56,11 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 * Init settings after post types are registered
 	 */
 	public function init_settings() {
-		global $woocommerce;
-
 		$attribute_array = array();
-		$attribute_taxonomies = $woocommerce->get_helper( 'attribute' )->get_attribute_taxonomies();
+		$attribute_taxonomies = wc_get_attribute_taxonomies();
 			if ( $attribute_taxonomies )
 				foreach ( $attribute_taxonomies as $tax )
-					if ( taxonomy_exists( $woocommerce->get_helper( 'attribute' )->attribute_taxonomy_name( $tax->attribute_name ) ) )
+					if ( taxonomy_exists( wc_attribute_taxonomy_name( $tax->attribute_name ) ) )
 						$attribute_array[ $tax->attribute_name ] = $tax->attribute_name;
 
 		$this->settings           = array(
@@ -110,7 +106,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 * @return void
 	 */
 	public function widget( $args, $instance ) {
-		global $_chosen_attributes, $woocommerce;
+		global $_chosen_attributes;
 
 		extract( $args );
 
@@ -120,7 +116,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$current_term 	= is_tax() ? get_queried_object()->term_id : '';
 		$current_tax 	= is_tax() ? get_queried_object()->taxonomy : '';
 		$title 			= apply_filters('widget_title', $instance['title'], $instance, $this->id_base);
-		$taxonomy 		= $woocommerce->get_helper( 'attribute' )->attribute_taxonomy_name($instance['attribute']);
+		$taxonomy 		= wc_attribute_taxonomy_name($instance['attribute']);
 		$query_type 	= isset( $instance['query_type'] ) ? $instance['query_type'] : 'and';
 		$display_type 	= isset( $instance['display_type'] ) ? $instance['display_type'] : 'list';
 
@@ -129,7 +125,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 	    $get_terms_args = array( 'hide_empty' => '1' );
 
-		$orderby = WC()->get_helper( 'attribute' )->attribute_orderby( $taxonomy );
+		$orderby = wc_attribute_orderby( $taxonomy );
 
 		switch ( $orderby ) {
 			case 'name' :
@@ -175,7 +171,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 					echo '<select id="dropdown_layered_nav_' . $taxonomy_filter . '">';
 
-					echo '<option value="">' . sprintf( __( 'Any %s', 'woocommerce' ), $woocommerce->get_helper( 'attribute' )->attribute_label( $taxonomy ) ) .'</option>';
+					echo '<option value="">' . sprintf( __( 'Any %s', 'woocommerce' ), wc_attribute_label( $taxonomy ) ) .'</option>';
 
 					foreach ( $terms as $term ) {
 
@@ -198,7 +194,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 						// If this is an AND query, only show options with count > 0
 						if ( $query_type == 'and' ) {
 
-							$count = sizeof( array_intersect( $_products_in_term, $woocommerce->query->filtered_product_ids ) );
+							$count = sizeof( array_intersect( $_products_in_term, WC()->query->filtered_product_ids ) );
 
 							if ( $count > 0 )
 								$found = true;
@@ -209,7 +205,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 						// If this is an OR query, show all options so search can be expanded
 						} else {
 
-							$count = sizeof( array_intersect( $_products_in_term, $woocommerce->query->unfiltered_product_ids ) );
+							$count = sizeof( array_intersect( $_products_in_term, WC()->query->unfiltered_product_ids ) );
 
 							if ( $count > 0 )
 								$found = true;
@@ -221,7 +217,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 					echo '</select>';
 
-					$woocommerce->get_helper( 'inline-javascript' )->add_inline_js("
+					wc_enqueue_js("
 
 						jQuery('#dropdown_layered_nav_$taxonomy_filter').change(function(){
 
@@ -252,14 +248,14 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 					$option_is_set = ( isset( $_chosen_attributes[ $taxonomy ] ) && in_array( $term->term_id, $_chosen_attributes[ $taxonomy ]['terms'] ) );
 
+					// skip the term for the current archive
+					if ( $current_term == $term->term_id )
+						continue;
+
 					// If this is an AND query, only show options with count > 0
 					if ( $query_type == 'and' ) {
 
-						$count = sizeof( array_intersect( $_products_in_term, $woocommerce->query->filtered_product_ids ) );
-
-						// skip the term for the current archive
-						if ( $current_term == $term->term_id )
-							continue;
+						$count = sizeof( array_intersect( $_products_in_term, WC()->query->filtered_product_ids ) );
 
 						if ( $count > 0 && $current_term !== $term->term_id )
 							$found = true;
@@ -270,11 +266,12 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 					// If this is an OR query, show all options so search can be expanded
 					} else {
 
-						// skip the term for the current archive
-						if ( $current_term == $term->term_id )
-							continue;
+						$filtered_product_ids_excluding_self = array();
+						foreach ( WC()->query->filtered_product_ids_for_taxonomy as $attribute => $ids )
+							if ( $attribute !== $taxonomy )
+								$filtered_product_ids_excluding_self = array_merge( $filtered_product_ids_excluding_self, $ids );
 
-						$count = sizeof( array_intersect( $_products_in_term, $woocommerce->query->unfiltered_product_ids ) );
+						$count = sizeof( array_intersect( $_products_in_term, $filtered_product_ids_excluding_self ) );
 
 						if ( $count > 0 )
 							$found = true;

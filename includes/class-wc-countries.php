@@ -316,9 +316,8 @@ class WC_Countries {
 				if ( ! isset( $states[ $CC ] ) && file_exists( $woocommerce->plugin_path() . '/i18n/states/' . $CC . '.php' ) )
 					include( $woocommerce->plugin_path() . '/i18n/states/' . $CC . '.php' );
 
-		$this->states = apply_filters('woocommerce_states', $states );
+		$this->states = apply_filters( 'woocommerce_states', $states );
 	}
-
 
 	/**
 	 * Get the base country for the store.
@@ -328,23 +327,42 @@ class WC_Countries {
 	 */
 	public function get_base_country() {
 		$default = esc_attr( get_option('woocommerce_default_country') );
-		if ( ( $pos = strpos( $default, ':' ) ) === false )
-			return $default;
-		return substr( $default, 0, $pos );
+		$country = ( ( $pos = strrpos( $default, ':' ) ) === false ) ? $default : substr( $default, 0, $pos );
+
+		return apply_filters( 'woocommerce_countries_base_country', $country );
 	}
 
-
 	/**
-	 * Get the base state for the state.
+	 * Get the base state for the store.
 	 *
 	 * @access public
 	 * @return string
 	 */
 	public function get_base_state() {
-		$default = esc_attr( get_option( 'woocommerce_default_country' ) );
-		if ( ( $pos = strrpos( $default, ':' ) ) === false )
-			return '';
-		return substr( $default, $pos + 1 );
+		$default = woocommerce_clean( get_option( 'woocommerce_default_country' ) );
+		$state   = ( ( $pos = strrpos( $default, ':' ) ) === false ) ? '' : substr( $default, $pos + 1 );
+
+		return apply_filters( 'woocommerce_countries_base_state', $state );
+	}
+
+	/**
+	 * Get the base city for the store.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function get_base_city() {
+		return apply_filters( 'woocommerce_countries_base_city', '' );
+	}
+
+	/**
+	 * Get the base postcode for the store.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function get_base_postcode() {
+		return apply_filters( 'woocommerce_countries_base_postcode', '' );
 	}
 
 	/**
@@ -698,56 +716,58 @@ class WC_Countries {
 	public function get_default_address_fields() {
 		$fields = array(
 			'country'            => array(
-				'type'              => 'country',
-				'label'             => __( 'Country', 'woocommerce' ),
-				'required'          => true,
-				'class'             => array( 'form-row-wide', 'address-field', 'update_totals_on_change' ),
+				'type'     => 'country',
+				'label'    => __( 'Country', 'woocommerce' ),
+				'required' => true,
+				'class'    => array( 'form-row-wide', 'address-field', 'update_totals_on_change' ),
 			),
 			'first_name'         => array(
-				'label'             => __( 'First Name', 'woocommerce' ),
-				'required'          => true,
-				'class'             => array( 'form-row-first' ),
+				'label'    => __( 'First Name', 'woocommerce' ),
+				'required' => true,
+				'class'    => array( 'form-row-first' ),
 			),
 			'last_name'          => array(
-				'label'             => __( 'Last Name', 'woocommerce' ),
-				'required'          => true,
-				'class'             => array( 'form-row-last' ),
-				'clear'             => true
+				'label'    => __( 'Last Name', 'woocommerce' ),
+				'required' => true,
+				'class'    => array( 'form-row-last' ),
+				'clear'    => true
 			),
 			'company'            => array(
-				'label'             => __( 'Company Name', 'woocommerce' ),
-				'class'             => array( 'form-row-wide' ),
+				'label' => __( 'Company Name', 'woocommerce' ),
+				'class' => array( 'form-row-wide' ),
 			),
 			'address_1'          => array(
-				'label'             => __( 'Address', 'woocommerce' ),
-				'placeholder'       => _x( 'Street address', 'placeholder', 'woocommerce' ),
-				'required'          => true,
-				'class'             => array( 'form-row-wide', 'address-field' )
+				'label'       => __( 'Address', 'woocommerce' ),
+				'placeholder' => _x( 'Street address', 'placeholder', 'woocommerce' ),
+				'required'    => true,
+				'class'       => array( 'form-row-wide', 'address-field' )
 			),
 			'address_2'          => array(
-				'placeholder'       => _x( 'Apartment, suite, unit etc. (optional)', 'placeholder', 'woocommerce' ),
-				'class'             => array( 'form-row-wide', 'address-field' ),
-				'required'          => false
+				'placeholder' => _x( 'Apartment, suite, unit etc. (optional)', 'placeholder', 'woocommerce' ),
+				'class'       => array( 'form-row-wide', 'address-field' ),
+				'required'    => false
 			),
 			'city'               => array(
-				'label'             => __( 'Town / City', 'woocommerce' ),
-				'placeholder'       => __( 'Town / City', 'woocommerce' ),
-				'required'          => true,
-				'class'             => array( 'form-row-wide', 'address-field' )
+				'label'       => __( 'Town / City', 'woocommerce' ),
+				'placeholder' => __( 'Town / City', 'woocommerce' ),
+				'required'    => true,
+				'class'       => array( 'form-row-wide', 'address-field' )
 			),
 			'state'              => array(
-				'type'              => 'state',
-				'label'             => __( 'State / County', 'woocommerce' ),
-				'placeholder'       => __( 'State / County', 'woocommerce' ),
-				'required'          => true,
-				'class'             => array( 'form-row-first', 'address-field' )
+				'type'        => 'state',
+				'label'       => __( 'State / County', 'woocommerce' ),
+				'placeholder' => __( 'State / County', 'woocommerce' ),
+				'required'    => true,
+				'class'       => array( 'form-row-first', 'address-field' ),
+				'validate'    => array( 'state' )
 			),
 			'postcode'           => array(
-				'label'             => __( 'Postcode / Zip', 'woocommerce' ),
-				'placeholder'       => __( 'Postcode / Zip', 'woocommerce' ),
-				'required'          => true,
-				'class'             => array( 'form-row-last', 'address-field' ),
-				'clear'             => true
+				'label'       => __( 'Postcode / Zip', 'woocommerce' ),
+				'placeholder' => __( 'Postcode / Zip', 'woocommerce' ),
+				'required'    => true,
+				'class'       => array( 'form-row-last', 'address-field' ),
+				'clear'       => true,
+				'validate'    => array( 'postcode' )
 			),
 		);
 
@@ -1128,13 +1148,13 @@ class WC_Countries {
 				'label' 		=> __( 'Phone', 'woocommerce' ),
 				'required' 		=> true,
 				'class' 		=> array( 'form-row-last' ),
-				'clear'			=> true
+				'clear'			=> true,
+				'validate'		=> array( 'phone' ),
 			);
 
-			$address_fields = apply_filters( 'woocommerce_billing_fields', $address_fields, $country );
-		} else {
-			$address_fields = apply_filters( 'woocommerce_shipping_fields', $address_fields, $country );
 		}
+
+		$address_fields = apply_filters( 'woocommerce_' . $type . 'fields', $address_fields, $country );
 
 		// Return
 		return $address_fields;

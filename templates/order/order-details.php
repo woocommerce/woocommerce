@@ -4,7 +4,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.0.3
+ * @version     2.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -56,18 +56,14 @@ $order = new WC_Order( $order_id );
 
 							if ( $_product && $_product->exists() && $_product->is_downloadable() && $order->is_download_permitted() ) {
 
-								$download_file_urls = $order->get_downloadable_file_urls( $item['product_id'], $item['variation_id'], $item );
+								$download_files = $order->get_item_downloads( $item );
+								$i              = 0;
+								$links          = array();
 
-								$i     = 0;
-								$links = array();
-
-								foreach ( $download_file_urls as $file_url => $download_file_url ) {
-
-									$filename = woocommerce_get_filename_from_url( $file_url );
-
-									$links[] = '<small><a href="' . $download_file_url . '">' . sprintf( __( 'Download file%s', 'woocommerce' ), ( count( $download_file_urls ) > 1 ? ' ' . ( $i + 1 ) . ': ' : ': ' ) ) . $filename . '</a></small>';
-
+								foreach ( $download_files as $download_id => $file ) {
 									$i++;
+
+									$links[] = '<small><a href="' . esc_url( $file['download_url'] ) . '">' . sprintf( __( 'Download file%s', 'woocommerce' ), ( count( $download_file_urls ) > 1 ? ' ' . $i . ': ' : ': ' ) ) . esc_html( $file['name'] ) . '</a></small>';
 								}
 
 								echo implode( '<br/>', $links );
@@ -107,7 +103,7 @@ $order = new WC_Order( $order_id );
 ?>
 </dl>
 
-<?php if (get_option('woocommerce_ship_to_billing_address_only')=='no') : ?>
+<?php if (get_option('woocommerce_ship_to_billing_address_only')=='no' && get_option('woocommerce_calc_shipping') !== 'no' ) : ?>
 
 <div class="col2-set addresses">
 
@@ -124,7 +120,7 @@ $order = new WC_Order( $order_id );
 			?>
 		</p></address>
 
-<?php if (get_option('woocommerce_ship_to_billing_address_only')=='no') : ?>
+<?php if (get_option('woocommerce_ship_to_billing_address_only')=='no' && get_option('woocommerce_calc_shipping') !== 'no' ) : ?>
 
 	</div><!-- /.col-1 -->
 

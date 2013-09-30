@@ -98,7 +98,7 @@ class WC_Shortcode_My_Account {
 		$user_id      	= get_current_user_id();
 		$order 			= new WC_Order( $order_id );
 
-		if ( $order->user_id != $user_id ) {
+		if ( !current_user_can( 'view_order', $order_id ) ) {
 			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . get_permalink( woocommerce_get_page_id( 'myaccount' ) ).'">'. __( 'My Account &rarr;', 'woocommerce' ) .'</a>' . '</div>';
 			return;
 		}
@@ -151,9 +151,34 @@ class WC_Shortcode_My_Account {
 	private function edit_address( $load_address = 'billing' ) {
 		global $woocommerce;
 
-		$load_address = ( $load_address == 'billing' || $load_address == 'shipping' ) ? $load_address : 'billing';
+		$load_address = sanitize_key( $load_address );
 
 		$address = $woocommerce->countries->get_address_fields( get_user_meta( get_current_user_id(), $load_address . '_country', true ), $load_address . '_' );
+
+		// Prepare values
+		foreach ( $address as $key => $field ) {
+
+			$value = get_user_meta( get_current_user_id(), $key, true );
+
+			if ( ! $value ) {
+				switch( $key ) {
+					case 'billing_email' :
+					case 'shipping_email' :
+						$value = $current_user->user_email;
+					break;
+					case 'billing_country' :
+					case 'shipping_country' :
+						$value = $woocommerce->countries->get_base_country();
+					break;
+					case 'billing_state' :
+					case 'shipping_state' :
+						$value = $woocommerce->countries->get_base_state();
+					break;
+				}
+			}
+
+			$address[ $key ]['value'] = apply_filters( 'woocommerce_my_account_edit_address_field_value', $value, $key, $load_address );
+		}
 
 		woocommerce_get_template( 'myaccount/form-edit-address.php', array(
 			'load_address' 	=> $load_address,

@@ -13,6 +13,34 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
+ * Wrapper for wp_get_post_terms which supports ordering by parent
+ * @return array of terms
+ */
+function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
+	if ( $args['orderby'] == 'parent' ) {
+		unset( $args['orderby'] );
+		$orderby_parent = true;
+	}
+
+	$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
+
+	if ( ! empty( $orderby_parent ) )
+		usort( $terms, '_wc_get_product_terms_parent_usort_callback' );
+
+	return $terms;
+}
+
+/**
+ * Sort by parent
+ * @return array
+ */
+function _wc_get_product_terms_parent_usort_callback( $a, $b ) {
+	if( $a->parent === $b->parent )
+		return 0;
+	return ( $a->parent < $b->parent ) ? 1 : -1;
+}
+
+/**
  * WooCommerce Dropdown categories
  *
  * Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258
@@ -106,7 +134,7 @@ function woocommerce_taxonomy_metadata_wpdbfix() {
 	$wpdb->order_itemmeta = $wpdb->prefix . $itemmeta_name;
 
 	$wpdb->tables[] = 'woocommerce_termmeta';
-	$wpdb->tables[] = 'order_itemmeta';
+	$wpdb->tables[] = 'woocommerce_order_itemmeta';
 }
 add_action( 'init', 'woocommerce_taxonomy_metadata_wpdbfix', 0 );
 add_action( 'switch_blog', 'woocommerce_taxonomy_metadata_wpdbfix', 0 );
@@ -486,6 +514,9 @@ add_action( 'woocommerce_product_set_stock_status', 'woocommerce_recount_after_s
  */
 function woocommerce_change_term_counts( $terms, $taxonomies, $args ) {
 	if ( is_admin() || is_ajax() )
+		return $terms;
+
+	if ( ! isset( $taxonomies[0] ) || ! is_array( $taxonomies[0] ) )
 		return $terms;
 
 	if ( ! in_array( $taxonomies[0], apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag' ) ) ) )

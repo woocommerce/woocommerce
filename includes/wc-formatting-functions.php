@@ -452,3 +452,32 @@ if ( ! function_exists( 'woocommerce_format_hex' ) ) {
 	    if ( $hex ) return '#' . $hex;
 	}
 }
+
+/**
+ * Format the postcode according to the country and length of the postcode
+ *
+ * @param   string	postcode
+ * @param	string	country
+ * @return  string	formatted postcode
+ */
+function wc_format_postcode( $postcode, $country ) {
+	$postcode = strtoupper(trim($postcode));
+	$postcode = trim(preg_replace('/[\s]/', '', $postcode));
+
+	if ( in_array( $country, array('GB', 'CA') ) )
+		$postcode = trim( substr_replace( $postcode, ' ', -3, 0 ) );
+
+	return $postcode;
+}
+
+/**
+ * format_phone function.
+ *
+ * @access public
+ * @param mixed $tel
+ * @return string
+ */
+function wc_format_phone_number( $tel ) {
+	$tel = str_replace( '.', '-', $tel );
+	return $tel;
+}
