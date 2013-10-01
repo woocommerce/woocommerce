@@ -269,7 +269,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section_class->id );
 
-			WC()->shipping()->init();
+//			WC()->shipping()->init();
 		}
 	}
 }
