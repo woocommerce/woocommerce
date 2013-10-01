@@ -1364,7 +1364,12 @@ class WC_Order {
 					continue;
 
 				$coupon = new WC_Coupon( $code );
-				$coupon->inc_usage_count();
+
+				$used_by = $this->user_id;
+				if ( ! $used_by )
+					$used_by = $this->billing_email;
+
+				$coupon->inc_usage_count( $used_by );
 			}
 		}
 
@@ -1390,7 +1395,12 @@ class WC_Order {
 					continue;
 
 				$coupon = new WC_Coupon( $code );
-				$coupon->dcr_usage_count();
+
+				$used_by = $this->user_id;
+				if ( ! $used_by )
+					$used_by = $this->billing_email;
+
+				$coupon->dcr_usage_count( $used_by );
 			}
 		}
 
