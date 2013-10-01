@@ -191,6 +191,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 * @return void
 	 */
 	public function shipping_methods_setting() {
+		$default_shipping_method = esc_attr( get_option('woocommerce_default_shipping_method') );
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc"><?php _e( 'Shipping Methods', 'woocommerce' ) ?></th>
@@ -215,9 +216,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 					<tbody>
 				    	<?php
 				    	foreach ( WC()->shipping->load_shipping_methods() as $key => $method ) {
-
-					    	$default_shipping_method = esc_attr( get_option('woocommerce_default_shipping_method') );
-
 					    	echo '<tr>
 					    		<td width="1%" class="default">
 					    			<input type="radio" name="default_shipping_method" value="' . $method->id . '" ' . checked( $default_shipping_method, $method->id, false ) . ' />
