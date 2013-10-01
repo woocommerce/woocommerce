@@ -160,14 +160,7 @@ function woocommerce_get_product_ids_on_sale() {
 		GROUP BY post.ID;
 	" );
 
-	$product_ids_on_sale = array();
-
-	foreach ( $on_sale_posts as $post ) {
-		$product_ids_on_sale[] = $post->ID;
-		$product_ids_on_sale[] = $post->post_parent;
-	}
-
-	$product_ids_on_sale = array_unique( $product_ids_on_sale );
+	$product_ids_on_sale = array_unique( array_merge( wp_list_pluck( $on_sale_posts, 'ID' ), wp_list_pluck( $on_sale_posts, 'post_parent' ) ) );
 
 	set_transient( 'wc_products_onsale', $product_ids_on_sale );
 

@@ -51,6 +51,9 @@ class WC_Coupon {
 	/** @public int Coupon usage limit. */
 	public $usage_limit;
 
+	/** @public int Coupon usage limit per user. */
+	public $usage_limit_per_user;
+
 	/** @public int Coupon usage count. */
 	public $usage_count;
 
@@ -104,22 +107,23 @@ class WC_Coupon {
 
         if ( $coupon_data ) {
 
-            $this->id                         = absint( $coupon_data['id'] );
-            $this->type                       = esc_html( $coupon_data['type'] );
-            $this->amount                     = esc_html( $coupon_data['amount'] );
-            $this->individual_use             = esc_html( $coupon_data['individual_use'] );
-            $this->product_ids                = is_array( $coupon_data['product_ids'] ) ? $coupon_data['product_ids'] : array();
-            $this->exclude_product_ids        = is_array( $coupon_data['exclude_product_ids'] ) ? $coupon_data['exclude_product_ids'] : array();
-            $this->usage_limit                = absint( $coupon_data['usage_limit'] );
-            $this->usage_count                = absint( $coupon_data['usage_count'] );
-            $this->expiry_date                = esc_html( $coupon_data['expiry_date'] );
-            $this->apply_before_tax           = esc_html( $coupon_data['apply_before_tax'] );
-            $this->free_shipping              = esc_html( $coupon_data['free_shipping'] );
-            $this->product_categories         = is_array( $coupon_data['product_categories'] ) ? $coupon_data['product_categories'] : array();
-            $this->exclude_product_categories = is_array( $coupon_data['exclude_product_categories'] ) ? $coupon_data['exclude_product_categories'] : array();
-            $this->exclude_sale_items         = esc_html( $coupon_data['exclude_sale_items'] );
-            $this->minimum_amount             = esc_html( $coupon_data['minimum_amount'] );
-            $this->customer_email             = esc_html( $coupon_data['customer_email'] );
+			$this->id                         = absint( $coupon_data['id'] );
+			$this->type                       = esc_html( $coupon_data['type'] );
+			$this->amount                     = esc_html( $coupon_data['amount'] );
+			$this->individual_use             = esc_html( $coupon_data['individual_use'] );
+			$this->product_ids                = is_array( $coupon_data['product_ids'] ) ? $coupon_data['product_ids'] : array();
+			$this->exclude_product_ids        = is_array( $coupon_data['exclude_product_ids'] ) ? $coupon_data['exclude_product_ids'] : array();
+			$this->usage_limit                = absint( $coupon_data['usage_limit'] );
+			$this->usage_limit_per_user       = absint( $coupon_data['usage_limit_per_user'] );
+			$this->usage_count                = absint( $coupon_data['usage_count'] );
+			$this->expiry_date                = esc_html( $coupon_data['expiry_date'] );
+			$this->apply_before_tax           = esc_html( $coupon_data['apply_before_tax'] );
+			$this->free_shipping              = esc_html( $coupon_data['free_shipping'] );
+			$this->product_categories         = is_array( $coupon_data['product_categories'] ) ? $coupon_data['product_categories'] : array();
+			$this->exclude_product_categories = is_array( $coupon_data['exclude_product_categories'] ) ? $coupon_data['exclude_product_categories'] : array();
+			$this->exclude_sale_items         = esc_html( $coupon_data['exclude_sale_items'] );
+			$this->minimum_amount             = esc_html( $coupon_data['minimum_amount'] );
+			$this->customer_email             = esc_html( $coupon_data['customer_email'] );
 
         } else {
 
@@ -138,21 +142,22 @@ class WC_Coupon {
             $this->coupon_custom_fields = get_post_meta( $this->id );
 
             $load_data = array(
-            	'discount_type'              => 'fixed_cart',
-            	'coupon_amount'              => 0,
-            	'individual_use'             => 'no',
-            	'product_ids'                => '',
-            	'exclude_product_ids'        => '',
-            	'usage_limit'                => '',
-            	'usage_count'                => '',
-            	'expiry_date'                => '',
-            	'apply_before_tax'           => 'yes',
-            	'free_shipping'              => 'no',
-            	'product_categories'         => array(),
-            	'exclude_product_categories' => array(),
-            	'exclude_sale_items'         => 'no',
-            	'minimum_amount'             => '',
-            	'customer_email'             => array()
+				'discount_type'              => 'fixed_cart',
+				'coupon_amount'              => 0,
+				'individual_use'             => 'no',
+				'product_ids'                => '',
+				'exclude_product_ids'        => '',
+				'usage_limit'                => '',
+				'usage_limit_per_user'       => '',
+				'usage_count'                => '',
+				'expiry_date'                => '',
+				'apply_before_tax'           => 'yes',
+				'free_shipping'              => 'no',
+				'product_categories'         => array(),
+				'exclude_product_categories' => array(),
+				'exclude_sale_items'         => 'no',
+				'minimum_amount'             => '',
+				'customer_email'             => array()
             );
 
             foreach ( $load_data as $key => $default )
@@ -213,11 +218,15 @@ class WC_Coupon {
 	 * Increase usage count fo current coupon.
 	 *
 	 * @access public
+	 * @param  string $used_by Either user ID or billing email
 	 * @return void
 	 */
-	public function inc_usage_count() {
+	public function inc_usage_count( $used_by = '' ) {
 		$this->usage_count++;
 		update_post_meta( $this->id, 'usage_count', $this->usage_count );
+
+		if ( $used_by )
+			add_post_meta( $this->id, '_used_by', strtolower( $used_by ) );
 	}
 
 
@@ -225,11 +234,19 @@ class WC_Coupon {
 	 * Decrease usage count fo current coupon.
 	 *
 	 * @access public
+	 * @param  string $used_by Either user ID or billing email
 	 * @return void
 	 */
-	public function dcr_usage_count() {
+	public function dcr_usage_count( $used_by = '' ) {
+		global $wpdb;
+
 		$this->usage_count--;
 		update_post_meta( $this->id, 'usage_count', $this->usage_count );
+
+		// Delete 1 used by meta
+		$meta_id = $wpdb->get_var( $wpdb->prepare( "SELECT meta_id FROM $wpdb->postmeta WHERE meta_key = '_used_by' AND meta_value = %s AND post_id = %d LIMIT 1;", $used_by, $this->id ) );
+		if ( $meta_id )
+			delete_metadata_by_mid( 'post', $meta_id );
 	}
 
 	/**
@@ -262,6 +279,18 @@ class WC_Coupon {
 			// Usage Limit
 			if ( $this->usage_limit > 0 ) {
 				if ( $this->usage_count >= $this->usage_limit ) {
+					$valid = false;
+					$error_code = self::E_WC_COUPON_USAGE_LIMIT_REACHED;
+				}
+			}
+
+			// Per user usage limit - check here if user is logged in (aginst user IDs)
+			// Checked again for emails later on in WC_Cart::check_customer_coupons()
+			if ( $this->usage_limit_per_user > 0 && is_user_logged_in() ) {
+				$used_by     = get_post_meta( $this->id, '_used_by' );
+				$usage_count = sizeof( array_keys( $used_by, get_current_user_id() ) );
+
+				if ( $usage_count >= $this->usage_limit_per_user ) {
 					$valid = false;
 					$error_code = self::E_WC_COUPON_USAGE_LIMIT_REACHED;
 				}

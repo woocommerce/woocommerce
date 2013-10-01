@@ -337,9 +337,10 @@ if ( class_exists( 'WP_Importer' ) ) {
 
 		/**
 		 * Added to http_request_timeout filter to force timeout at 60 seconds during import
+		 * @param  int $val
 		 * @return int 60
 		 */
-		function bump_request_timeout() {
+		function bump_request_timeout( $val ) {
 			return 60;
 		}
 	}

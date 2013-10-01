@@ -145,6 +145,12 @@ class WC_Meta_Box_Coupon_Data {
 						'min'	=> '0'
 					) ) );
 
+				// Usage limit
+				woocommerce_wp_text_input( array( 'id' => 'usage_limit_per_user', 'label' => __( 'Usage limit per user', 'woocommerce' ), 'placeholder' => _x( 'Unlimited usage', 'placeholder', 'woocommerce' ), 'description' => __( 'How many times this coupon can be used by an invidual user. Uses billing email for guests, and user ID for logged in users.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
+						'step' 	=> '1',
+						'min'	=> '0'
+					) ) );
+
 				// Expiry date
 				woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'label' => __( 'Expiry date', 'woocommerce' ), 'placeholder' => _x('Never expire', 'placeholder', 'woocommerce'), 'description' => __( 'The date this coupon will expire, <code>YYYY-MM-DD</code>.', 'woocommerce' ), 'class' => 'short date-picker', 'custom_attributes' => array( 'pattern' => "[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" ) ) );
 
@@ -180,16 +186,17 @@ class WC_Meta_Box_Coupon_Data {
 			WC_Admin_Meta_Boxes::add_error( __( 'Coupon code already exists - customers will use the latest coupon with this code.', 'woocommerce' ) );
 
 		// Add/Replace data to array
-		$type 				= woocommerce_clean( $_POST['discount_type'] );
-		$amount 			= woocommerce_clean( $_POST['coupon_amount'] );
-		$usage_limit 		= empty( $_POST['usage_limit'] ) ? '' : absint( $_POST['usage_limit'] );
-		$individual_use 	= isset( $_POST['individual_use'] ) ? 'yes' : 'no';
-		$expiry_date 		= woocommerce_clean( $_POST['expiry_date'] );
-		$apply_before_tax 	= isset( $_POST['apply_before_tax'] ) ? 'yes' : 'no';
-		$free_shipping 		= isset( $_POST['free_shipping'] ) ? 'yes' : 'no';
-		$exclude_sale_items	= isset( $_POST['exclude_sale_items'] ) ? 'yes' : 'no';
-		$minimum_amount 	= woocommerce_clean( $_POST['minimum_amount'] );
-		$customer_email 	= array_filter( array_map( 'trim', explode( ',', woocommerce_clean( $_POST['customer_email'] ) ) ) );
+		$type                 = woocommerce_clean( $_POST['discount_type'] );
+		$amount               = woocommerce_clean( $_POST['coupon_amount'] );
+		$usage_limit          = empty( $_POST['usage_limit'] ) ? '' : absint( $_POST['usage_limit'] );
+		$usage_limit_per_user = empty( $_POST['usage_limit_per_user'] ) ? '' : absint( $_POST['usage_limit_per_user'] );
+		$individual_use       = isset( $_POST['individual_use'] ) ? 'yes' : 'no';
+		$expiry_date          = woocommerce_clean( $_POST['expiry_date'] );
+		$apply_before_tax     = isset( $_POST['apply_before_tax'] ) ? 'yes' : 'no';
+		$free_shipping        = isset( $_POST['free_shipping'] ) ? 'yes' : 'no';
+		$exclude_sale_items   = isset( $_POST['exclude_sale_items'] ) ? 'yes' : 'no';
+		$minimum_amount       = woocommerce_clean( $_POST['minimum_amount'] );
+		$customer_email       = array_filter( array_map( 'trim', explode( ',', woocommerce_clean( $_POST['customer_email'] ) ) ) );
 
 		if ( isset( $_POST['product_ids'] ) ) {
 			$product_ids 			= implode( ',', array_filter( array_map( 'intval', (array) $_POST['product_ids'] ) ) );
@@ -213,6 +220,7 @@ class WC_Meta_Box_Coupon_Data {
 		update_post_meta( $post_id, 'product_ids', $product_ids );
 		update_post_meta( $post_id, 'exclude_product_ids', $exclude_product_ids );
 		update_post_meta( $post_id, 'usage_limit', $usage_limit );
+		update_post_meta( $post_id, 'usage_limit_per_user', $usage_limit_per_user );
 		update_post_meta( $post_id, 'expiry_date', $expiry_date );
 		update_post_meta( $post_id, 'apply_before_tax', $apply_before_tax );
 		update_post_meta( $post_id, 'free_shipping', $free_shipping );
