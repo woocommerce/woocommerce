@@ -156,15 +156,28 @@ function woocommerce_trim_zeros( $price ) {
 }
 
 /**
- * Formal decimal numbers - format to 4 dp and remove trailing zeros.
- *
- * @access public
- * @param mixed $number
+ * Formal decimal numbers - format to a defined number of dp and remove trailing zeros.
+ * @param  float $number
+ * @param  mixed $dp number of decimal points to use, blank to use woocommerce_price_num_decimals, or 'auto' to detect from the $number
  * @return string
  */
 function woocommerce_format_decimal( $number, $dp = '' ) {
+	// Get number of DP
 	if ( $dp == '' )
 		$dp = intval( get_option( 'woocommerce_price_num_decimals' ) );
+
+	if ( $dp == 'auto' ) {
+		$dp = 0;
+
+		if ( ! is_int( $number ) ) {
+			$locale        = localeconv();
+			$number_string = (string) $number;
+			$string        = substr( $number_string, max( 0, strpos( $number_string, ',' ), strpos( $number_string, '.' ), strpos( $number_string, $locale["mon_decimal_point"] ? $locale["mon_decimal_point"] : '.' ) ) );
+
+			if ( $string )
+				$dp = strlen( $string ) - 1;
+		}
+	}
 
 	$number = number_format( (float) $number, (int) $dp, '.', '' );
 
@@ -172,6 +185,20 @@ function woocommerce_format_decimal( $number, $dp = '' ) {
 		$number = rtrim( rtrim( $number, '0' ), '.' );
 
 	return $number;
+}
+
+/**
+ * Convert a float to a string without locale specific settings (commas/decimals)
+ * @param  float $floatString
+ * @return string
+ */
+function woocommerce_float_to_string( $float ){
+    $locale = localeconv();
+    $string = strval( $float );
+    $string = str_replace( $locale["mon_thousands_sep"] , "", $string );
+    $string = str_replace( $locale["mon_decimal_point"] , ".", $string );
+
+    return $string;
 }
 
 /**

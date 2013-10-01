@@ -339,8 +339,8 @@ class WC_Checkout {
 		 		woocommerce_add_order_item_meta( $item_id, 'rate_id', $key );
 		 		woocommerce_add_order_item_meta( $item_id, 'label', $woocommerce->cart->tax->get_rate_label( $key ) );
 			 	woocommerce_add_order_item_meta( $item_id, 'compound', absint( $woocommerce->cart->tax->is_compound( $key ) ? 1 : 0 ) );
-			 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', woocommerce_clean( isset( $woocommerce->cart->taxes[ $key ] ) ? $woocommerce->cart->taxes[ $key ] : 0 ) );
-			 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', woocommerce_clean( isset( $woocommerce->cart->shipping_taxes[ $key ] ) ? $woocommerce->cart->shipping_taxes[ $key ] : 0 ) );
+			 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', woocommerce_format_decimal( isset( $woocommerce->cart->taxes[ $key ] ) ? $woocommerce->cart->taxes[ $key ] : 0 ), 'auto' );
+			 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', woocommerce_format_decimal( isset( $woocommerce->cart->shipping_taxes[ $key ] ) ? $woocommerce->cart->shipping_taxes[ $key ] : 0 ), 'auto' );
 			}
 		}
 
