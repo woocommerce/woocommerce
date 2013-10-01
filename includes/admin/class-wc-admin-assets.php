@@ -98,8 +98,11 @@ class WC_Admin_Assets {
 	    	wp_enqueue_script( 'jquery-ui-autocomplete' );
 	    	wp_enqueue_script( 'filesaver' );
 
+	    	$locale = localeconv();
+
 	    	$params = array(
-	    		'i18n_price_input_error' => __( 'Please enter your prices in decimal format without currency symbols.', 'woocommerce' ),
+	    		'i18n_decimal_input_error' => __( 'Please enter in decimal format without thousand separators and currency symbols.', 'woocommerce' ),
+	    		'locale_decimal_point' => isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.'
 	    	);
 
 	    	wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );

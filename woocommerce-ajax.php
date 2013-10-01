@@ -910,9 +910,9 @@ function woocommerce_ajax_add_order_item() {
 	$item['name'] 					= $_product->get_title();
 	$item['tax_class']				= $_product->get_tax_class();
 	$item['qty'] 					= 1;
-	$item['line_subtotal'] 			= number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' );
+	$item['line_subtotal'] 			= woocommerce_format_decimal( $_product->get_price_excluding_tax(), false );
 	$item['line_subtotal_tax'] 		= '';
-	$item['line_total'] 			= number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' );
+	$item['line_total'] 			= woocommerce_format_decimal( $_product->get_price_excluding_tax(), false );
 	$item['line_tax'] 				= '';
 
 	// Add line item

@@ -339,8 +339,8 @@ class WC_Checkout {
 		 		woocommerce_add_order_item_meta( $item_id, 'rate_id', $key );
 		 		woocommerce_add_order_item_meta( $item_id, 'label', $woocommerce->cart->tax->get_rate_label( $key ) );
 			 	woocommerce_add_order_item_meta( $item_id, 'compound', absint( $woocommerce->cart->tax->is_compound( $key ) ? 1 : 0 ) );
-			 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', woocommerce_format_decimal( isset( $woocommerce->cart->taxes[ $key ] ) ? $woocommerce->cart->taxes[ $key ] : 0 ), 'auto' );
-			 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', woocommerce_format_decimal( isset( $woocommerce->cart->shipping_taxes[ $key ] ) ? $woocommerce->cart->shipping_taxes[ $key ] : 0 ), 'auto' );
+			 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', woocommerce_format_decimal( isset( $woocommerce->cart->taxes[ $key ] ) ? $woocommerce->cart->taxes[ $key ] : 0 ), false );
+			 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', woocommerce_format_decimal( isset( $woocommerce->cart->shipping_taxes[ $key ] ) ? $woocommerce->cart->shipping_taxes[ $key ] : 0 ), false );
 			}
 		}
 
@@ -364,12 +364,13 @@ class WC_Checkout {
 			update_post_meta( $order_id, '_payment_method', 		$this->payment_method->id );
 			update_post_meta( $order_id, '_payment_method_title', 	$this->payment_method->get_title() );
 		}
-		update_post_meta( $order_id, '_order_shipping', 		woocommerce_format_total( $woocommerce->cart->shipping_total ) );
-		update_post_meta( $order_id, '_order_discount', 		woocommerce_format_total( $woocommerce->cart->get_order_discount_total() ) );
-		update_post_meta( $order_id, '_cart_discount', 			woocommerce_format_total( $woocommerce->cart->get_cart_discount_total() ) );
-		update_post_meta( $order_id, '_order_tax', 				woocommerce_clean( $woocommerce->cart->tax_total ) );
-		update_post_meta( $order_id, '_order_shipping_tax', 	woocommerce_clean( $woocommerce->cart->shipping_tax_total ) );
-		update_post_meta( $order_id, '_order_total', 			woocommerce_format_total( $woocommerce->cart->total ) );
+		update_post_meta( $order_id, '_order_shipping', 		woocommerce_format_decimal( $woocommerce->cart->shipping_total ) );
+		update_post_meta( $order_id, '_order_discount', 		woocommerce_format_decimal( $woocommerce->cart->get_order_discount_total() ) );
+		update_post_meta( $order_id, '_cart_discount', 			woocommerce_format_decimal( $woocommerce->cart->get_cart_discount_total() ) );
+		update_post_meta( $order_id, '_order_tax', 				woocommerce_format_decimal( $woocommerce->cart->tax_total, false ) );
+		update_post_meta( $order_id, '_order_shipping_tax', 	woocommerce_format_decimal( $woocommerce->cart->shipping_tax_total, false ) );
+		update_post_meta( $order_id, '_order_total', 			woocommerce_format_decimal( $woocommerce->cart->total ) );
+
 		update_post_meta( $order_id, '_order_key', 				apply_filters('woocommerce_generate_order_key', uniqid('order_') ) );
 		update_post_meta( $order_id, '_customer_user', 			absint( $this->customer_id ) );
 		update_post_meta( $order_id, '_order_currency', 		get_woocommerce_currency() );
