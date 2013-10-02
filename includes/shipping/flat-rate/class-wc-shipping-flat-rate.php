@@ -561,7 +561,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 								echo '</select>
 							   		</td>
 									<td><input type="text" value="' . esc_attr( $rate['cost'] ) . '" name="' . esc_attr( $this->id .'_cost[' . $i . ']' ) . '" placeholder="'.__( '0.00', 'woocommerce' ).'" size="4" class="wc_input_decimal" /></td>
-									<td><input type="text" value="' . esc_attr( $rate['fee'] ) . '" name="' . esc_attr( $this->id .'_fee[' . $i . ']' ) . '" placeholder="'.__( '0.00', 'woocommerce' ).'" size="4" /></td>
+									<td><input type="text" value="' . esc_attr( $rate['fee'] ) . '" name="' . esc_attr( $this->id .'_fee[' . $i . ']' ) . '" placeholder="'.__( '0.00', 'woocommerce' ).'" size="4" class="wc_input_decimal" /></td>
 								</tr>';
 							}
 						}
@@ -591,7 +591,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 						   			</select>\
 						   		</td>\
 								<td><input type="text" name="<?php echo $this->id; ?>_cost[' + size + ']" placeholder="0.00" size="4" class="wc_input_decimal" /></td>\
-								<td><input type="text" name="<?php echo $this->id; ?>_fee[' + size + ']" placeholder="0.00" size="4" /></td>\
+								<td><input type="text" name="<?php echo $this->id; ?>_fee[' + size + ']" placeholder="0.00" size="4" class="wc_input_decimal" /></td>\
 							</tr>').appendTo('#<?php echo $this->id; ?>_flat_rates table tbody');
 
 							return false;
@@ -646,6 +646,8 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 				if ( ! strstr( $flat_rate_fee[$i], '%' ) )
 					$flat_rate_fee[ $i ] = woocommerce_format_decimal( $flat_rate_fee[$i], 2 );
+				else
+					$flat_rate_fee[ $i ] = woocommerce_clean( $flat_rate_fee[$i] );
 
 				// Add to flat rates array
 				$flat_rates[ sanitize_title($flat_rate_class[$i]) ] = array(
@@ -672,6 +674,8 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 	 	if ( ! strstr( $_POST['default_fee'], '%' ) )
 	 		$default_fee  = ( $_POST['default_fee'] === '' ) ? '' : woocommerce_format_decimal( $_POST['default_fee'], false );
+	 	else
+	 		$default_fee = woocommerce_clean( $_POST['default_fee'] );
 
 	 	$fields['cost'] = $default_cost;
 	 	$fields['fee']  = $default_fee;

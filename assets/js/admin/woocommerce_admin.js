@@ -13,7 +13,7 @@ jQuery(function(){
 	jQuery(".wc_input_decimal[type=text]")
 		.bind( 'keyup change', function() {
 			var value    = jQuery(this).val();
-			var regex    = new RegExp( "[^0-9.\\" + woocommerce_admin.locale_decimal_point + "]+", "gi" );
+			var regex    = new RegExp( "[^0-9\%.\\" + woocommerce_admin.locale_decimal_point + "]+", "gi" );
 			var newvalue = value.replace( regex, '' );
 
    			if ( value !== newvalue ) {
