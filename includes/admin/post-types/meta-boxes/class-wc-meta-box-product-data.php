@@ -934,7 +934,7 @@ class WC_Meta_Box_Product_Data {
 		if ( isset( $_POST['_regular_price'] ) )
 			update_post_meta( $post_id, '_regular_price', woocommerce_format_decimal( $_POST['_regular_price'], false ) );
 		if ( isset( $_POST['_sale_price'] ) )
-			update_post_meta( $post_id, '_sale_price', woocommerce_format_decimal( $_POST['_sale_price'], false ) );
+			update_post_meta( $post_id, '_sale_price', ( $_POST['_sale_price'] === '' ? '' : woocommerce_format_decimal( $_POST['_sale_price'], false ) ) );
 		if ( isset( $_POST['_tax_status'] ) ) update_post_meta( $post_id, '_tax_status', stripslashes( $_POST['_tax_status'] ) );
 		if ( isset( $_POST['_tax_class'] ) ) update_post_meta( $post_id, '_tax_class', stripslashes( $_POST['_tax_class'] ) );
 		if ( isset( $_POST['_visibility'] ) ) update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
@@ -1401,7 +1401,7 @@ class WC_Meta_Box_Product_Data {
 
 				// Price handling
 				$regular_price 	= woocommerce_format_decimal( $variable_regular_price[ $i ], false );
-				$sale_price 	= woocommerce_format_decimal( $variable_sale_price[ $i ], false );
+				$sale_price 	= ( $variable_sale_price[ $i ] === '' ? '' : woocommerce_format_decimal( $variable_sale_price[ $i ], false ) );
 				$date_from 		= woocommerce_clean( $variable_sale_price_dates_from[ $i ] );
 				$date_to		= woocommerce_clean( $variable_sale_price_dates_to[ $i ] );
 
