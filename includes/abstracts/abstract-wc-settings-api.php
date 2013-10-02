@@ -655,7 +655,7 @@ abstract class WC_Settings_API {
 
     		// Format values
     		if ( isset( $v['class'] ) && strstr( $v['class'], 'wc_input_decimal' ) ) {
-    			$this->sanitized_fields[ $k ] = woocommerce_format_decimal( $this->sanitized_fields[ $k ], false );
+    			$this->sanitized_fields[ $k ] = ( $this->sanitized_fields[ $k ] === '' ) ? '' : woocommerce_format_decimal( $this->sanitized_fields[ $k ], false );
     		}
     	}
     }

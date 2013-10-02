@@ -668,8 +668,10 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 * @return void
 	 */
 	function save_default_costs( $fields ) {
-	 	$default_cost = woocommerce_format_decimal( $_POST['default_cost'], false );
-	 	$default_fee  = woocommerce_format_decimal( $_POST['default_fee'], false );
+	 	$default_cost = ( $_POST['default_cost'] === '' ) ? '' : woocommerce_format_decimal( $_POST['default_cost'], false );
+
+	 	if ( ! strstr( $_POST['default_fee'], '%' ) )
+	 		$default_fee  = ( $_POST['default_fee'] === '' ) ? '' : woocommerce_format_decimal( $_POST['default_fee'], false );
 
 	 	$fields['cost'] = $default_cost;
 	 	$fields['fee']  = $default_fee;

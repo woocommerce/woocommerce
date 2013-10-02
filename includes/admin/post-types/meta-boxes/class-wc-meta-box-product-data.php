@@ -932,7 +932,7 @@ class WC_Meta_Box_Product_Data {
 
 		// Update post meta
 		if ( isset( $_POST['_regular_price'] ) )
-			update_post_meta( $post_id, '_regular_price', woocommerce_format_decimal( $_POST['_regular_price'], false ) );
+			update_post_meta( $post_id, '_regular_price', ( $_POST['_regular_price'] === '' ) ? '' : woocommerce_format_decimal( $_POST['_regular_price'], false ) );
 		if ( isset( $_POST['_sale_price'] ) )
 			update_post_meta( $post_id, '_sale_price', ( $_POST['_sale_price'] === '' ? '' : woocommerce_format_decimal( $_POST['_sale_price'], false ) ) );
 		if ( isset( $_POST['_tax_status'] ) ) update_post_meta( $post_id, '_tax_status', stripslashes( $_POST['_tax_status'] ) );
@@ -945,16 +945,16 @@ class WC_Meta_Box_Product_Data {
 		if ( $is_virtual == 'no' ) {
 
 			if ( isset( $_POST['_weight'] ) )
-				update_post_meta( $post_id, '_weight', woocommerce_format_decimal( $_POST['_weight'], false ) );
+				update_post_meta( $post_id, '_weight', ( $_POST['_weight'] === '' ) ? '' : woocommerce_format_decimal( $_POST['_weight'], false ) );
 
 			if ( isset( $_POST['_length'] ) )
-				update_post_meta( $post_id, '_length', woocommerce_format_decimal( $_POST['_length'], false ) );
+				update_post_meta( $post_id, '_length', ( $_POST['_length'] === '' ) ? '' : woocommerce_format_decimal( $_POST['_length'], false ) );
 
 			if ( isset( $_POST['_width'] ) )
-				update_post_meta( $post_id, '_width', woocommerce_format_decimal( $_POST['_width'], false ) );
+				update_post_meta( $post_id, '_width', ( $_POST['_width'] === '' ) ? '' : woocommerce_format_decimal( $_POST['_width'], false ) );
 
 			if ( isset( $_POST['_height'] ) )
-				update_post_meta( $post_id, '_height', woocommerce_format_decimal( $_POST['_height'], false ) );
+				update_post_meta( $post_id, '_height', ( $_POST['_height'] === '' ) ? '' : woocommerce_format_decimal( $_POST['_height'], false ) );
 
 		} else {
 			update_post_meta( $post_id, '_weight', '' );
@@ -1117,16 +1117,16 @@ class WC_Meta_Box_Product_Data {
 				update_post_meta( $post_id, '_sale_price_dates_from', strtotime( 'NOW', current_time( 'timestamp' ) ) );
 
 			// Update price if on sale
-			if ( $_POST['_sale_price'] != '' && $date_to == '' && $date_from == '' )
+			if ( $_POST['_sale_price'] !== '' && $date_to == '' && $date_from == '' )
 				update_post_meta( $post_id, '_price', woocommerce_format_decimal( $_POST['_sale_price'], false ) );
 			else
-				update_post_meta( $post_id, '_price', woocommerce_format_decimal( $_POST['_regular_price'], false ) );
+				update_post_meta( $post_id, '_price', ( $_POST['_regular_price'] === '' ) ? '' : woocommerce_format_decimal( $_POST['_regular_price'], false ) );
 
-			if ( $_POST['_sale_price'] != '' && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) )
+			if ( $_POST['_sale_price'] !== '' && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) )
 				update_post_meta( $post_id, '_price', woocommerce_format_decimal( $_POST['_sale_price'], false ) );
 
 			if ( $date_to && strtotime( $date_to ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-				update_post_meta( $post_id, '_price', woocommerce_format_decimal( $_POST['_regular_price'], false ) );
+				update_post_meta( $post_id, '_price', ( $_POST['_regular_price'] === '' ) ? '' : woocommerce_format_decimal( $_POST['_regular_price'], false ) );
 				update_post_meta( $post_id, '_sale_price_dates_from', '');
 				update_post_meta( $post_id, '_sale_price_dates_to', '');
 			}
@@ -1388,13 +1388,13 @@ class WC_Meta_Box_Product_Data {
 				update_post_meta( $variation_id, '_downloadable', woocommerce_clean( $is_downloadable ) );
 
 				if ( isset( $variable_weight[ $i ] ) )
-					update_post_meta( $variation_id, '_weight', woocommerce_format_decimal( $variable_weight[ $i ], false ) );
+					update_post_meta( $variation_id, '_weight', ( $variable_weight[ $i ] === '' ) ? '' : woocommerce_format_decimal( $variable_weight[ $i ], false ) );
 				if ( isset( $variable_length[ $i ] ) )
-					update_post_meta( $variation_id, '_length', woocommerce_format_decimal( $variable_length[ $i ], false ) );
+					update_post_meta( $variation_id, '_length', ( $variable_length[ $i ] === '' ) ? '' : woocommerce_format_decimal( $variable_length[ $i ], false ) );
 				if ( isset( $variable_width[ $i ] ) )
-					update_post_meta( $variation_id, '_width', woocommerce_format_decimal( $variable_width[ $i ], false ) );
+					update_post_meta( $variation_id, '_width', ( $variable_width[ $i ] === '' ) ? '' : woocommerce_format_decimal( $variable_width[ $i ], false ) );
 				if ( isset( $variable_height[ $i ] ) )
-					update_post_meta( $variation_id, '_height', woocommerce_format_decimal( $variable_height[ $i ], false ) );
+					update_post_meta( $variation_id, '_height', ( $variable_height[ $i ] === '' ) ? '' : woocommerce_format_decimal( $variable_height[ $i ], false ) );
 
 				// Stock handling
 				wc_update_product_stock( $variation_id, woocommerce_clean( $variable_stock[ $i ] ) );

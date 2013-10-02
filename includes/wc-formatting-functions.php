@@ -165,7 +165,7 @@ function woocommerce_trim_zeros( $price ) {
  * @param  boolean $trim_zeros from end of string
  * @return string
  */
-function woocommerce_format_decimal( $number, $dp = '', $trim_zeros = true ) {
+function woocommerce_format_decimal( $number, $dp = '', $trim_zeros = false ) {
 	$number = floatval( $number );
 
 	// DP is false - don't use number format, just remove locale settings from the number
