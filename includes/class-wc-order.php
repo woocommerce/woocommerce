@@ -348,13 +348,13 @@ class WC_Order {
 	 * @return void
 	 */
 	public function has_shipping_method( $method_id ) {
-		$shipping_methods = $this->get_shipping_methods;
+		$shipping_methods = $this->get_shipping_methods();
 		$has_method = false;
 		
 		if ( !$shipping_methods )
 			return false;
 
-		foreach ( $this->get_shipping_methods as $shipping_method ) {
+		foreach ( $shipping_methods as $shipping_method ) {
 			if ( $shipping_method['method_id'] == $method_id )
 				$has_method = true;
 		}
