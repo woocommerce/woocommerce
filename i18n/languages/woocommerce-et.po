@@ -2,53 +2,62 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.1-X Front-end\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2013-08-25 01:07:10+00:00\n"
+"POT-Creation-Date: 2013-09-22 23:32:41+00:00\n"
+"PO-Revision-Date: 2013-09-30 11:15+0200\n"
+"Last-Translator: Illimar Tambek <illimar.tambek@gmail.com>\n"
+"Language-Team: Divid <info@divid.ee>\n"
+"Language: et\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2013-09-10 14:58+0200\n"
-"Last-Translator: Illimar Tambek <illimar.tambek@gmail.com>\n"
-"Language-Team: Divid <info@divid.ee>\n"
 "X-Generator: Poedit 1.5.7\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"Language: et\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
 #: assets/js/admin/editor_plugin_lang.php:5
+#, fuzzy
 msgid "Insert Shortcode"
-msgstr ""
+msgstr "Lisa pilt"
 
 #: assets/js/admin/editor_plugin_lang.php:6
+#, fuzzy
 msgid "Product price/cart button"
-msgstr ""
+msgstr "Lisa toode korvi"
 
 #: assets/js/admin/editor_plugin_lang.php:7
+#, fuzzy
 msgid "Product by SKU/ID"
-msgstr ""
+msgstr "Selected user by user_id"
 
 #: assets/js/admin/editor_plugin_lang.php:8
+#, fuzzy
 msgid "Products by SKU/ID"
-msgstr ""
+msgstr "Selected user by user_id"
 
 #: assets/js/admin/editor_plugin_lang.php:9
+#, fuzzy
 msgid "Product categories"
-msgstr ""
+msgstr "Tootekategooriad"
 
 #: assets/js/admin/editor_plugin_lang.php:10
+#, fuzzy
 msgid "Products by category slug"
-msgstr ""
+msgstr "Assigning category for feedback by users"
 
 #: assets/js/admin/editor_plugin_lang.php:11
+#, fuzzy
 msgid "Recent products"
-msgstr ""
+msgstr "Otsi toodet"
 
 #: assets/js/admin/editor_plugin_lang.php:12
+#, fuzzy
 msgid "Featured products"
-msgstr ""
+msgstr "Otsi toodet"
 
 #: assets/js/admin/editor_plugin_lang.php:13
+#, fuzzy
 msgid "Shop Messages"
-msgstr ""
+msgstr "Privaatsõnumid"
 
 #: assets/js/admin/editor_plugin_lang.php:14
 msgid "Pages"
@@ -65,25 +74,29 @@ msgid "Checkout"
 msgstr ""
 
 #: assets/js/admin/editor_plugin_lang.php:17
+#, fuzzy
 msgid "Order tracking"
-msgstr ""
+msgstr "Lehe järjekorranr."
 
 #: assets/js/admin/editor_plugin_lang.php:18 includes/class-wc-install.php:224
 #: templates/checkout/thankyou.php:30
+#, fuzzy
 msgid "My Account"
-msgstr ""
+msgstr "Minu konto"
 
 #: assets/js/admin/editor_plugin_lang.php:19
+#, fuzzy
 msgid "Edit Address"
-msgstr ""
+msgstr "Edit billing address"
 
 #: i18n/states/AU.php:13
 msgid "Australian Capital Territory"
 msgstr ""
 
 #: i18n/states/AU.php:14
+#, fuzzy
 msgid "New South Wales"
-msgstr ""
+msgstr "Lisa rubriik"
 
 #: i18n/states/AU.php:15
 msgid "Northern Territory"
@@ -294,8 +307,9 @@ msgid "Piau&iacute;"
 msgstr ""
 
 #: i18n/states/BR.php:31
+#, fuzzy
 msgid "Rio de Janeiro"
-msgstr ""
+msgstr "Märgi valitud kommentaarid mitterämpsuks &raquo;"
 
 #: i18n/states/BR.php:32
 msgid "Rio Grande do Norte"
@@ -342,8 +356,9 @@ msgid "Manitoba"
 msgstr ""
 
 #: i18n/states/CA.php:16
+#, fuzzy
 msgid "New Brunswick"
-msgstr ""
+msgstr "Uus %1$s veebileht: %2$s"
 
 #: i18n/states/CA.php:17
 msgid "Newfoundland"
@@ -574,8 +589,9 @@ msgid "Ceuta"
 msgstr ""
 
 #: i18n/states/ES.php:29
+#, fuzzy
 msgid "Ciudad Real"
-msgstr ""
+msgstr "RealMedia mängija sätted"
 
 #: i18n/states/ES.php:30
 msgid "C&oacute;rdoba"
@@ -726,8 +742,9 @@ msgid "Kowloon"
 msgstr ""
 
 #: i18n/states/HK.php:15
+#, fuzzy
 msgid "New Territories"
-msgstr ""
+msgstr "Uus %1$s veebileht: %2$s"
 
 #: i18n/states/HU.php:13
 msgid "Bács-Kiskun"
@@ -1042,8 +1059,9 @@ msgid "Himachal Pradesh"
 msgstr ""
 
 #: i18n/states/IN.php:22
+#, fuzzy
 msgid "Jammu and Kashmir"
-msgstr ""
+msgstr "Kiida heaks ja vasta"
 
 #: i18n/states/IN.php:23
 msgid "Jharkhand"
@@ -1130,8 +1148,9 @@ msgid "Dadar and Nagar Haveli"
 msgstr ""
 
 #: i18n/states/IN.php:44
+#, fuzzy
 msgid "Daman and Diu"
-msgstr ""
+msgstr "Kiida heaks ja vasta"
 
 #: i18n/states/IN.php:45
 msgid "Delhi"
@@ -1869,20 +1888,24 @@ msgid "Nevada"
 msgstr ""
 
 #: i18n/states/US.php:42
+#, fuzzy
 msgid "New Hampshire"
-msgstr ""
+msgstr "Uus %1$s veebileht: %2$s"
 
 #: i18n/states/US.php:43
+#, fuzzy
 msgid "New Jersey"
-msgstr ""
+msgstr "Uus %1$s veebileht: %2$s"
 
 #: i18n/states/US.php:44
+#, fuzzy
 msgid "New Mexico"
-msgstr ""
+msgstr "Uus %1$s veebileht: %2$s"
 
 #: i18n/states/US.php:45
+#, fuzzy
 msgid "New York"
-msgstr ""
+msgstr "Uus %1$s veebileht: %2$s"
 
 #: i18n/states/US.php:46
 msgid "North Carolina"
@@ -1989,16 +2012,18 @@ msgid "US Minor Outlying Islands"
 msgstr ""
 
 #: i18n/states/US.php:72
+#, fuzzy
 msgid "US Virgin Islands"
-msgstr ""
+msgstr "FOLLOW US ON"
 
 #: i18n/states/ZA.php:13
 msgid "Eastern Cape"
 msgstr ""
 
 #: i18n/states/ZA.php:14
+#, fuzzy
 msgid "Free State"
-msgstr ""
+msgstr "Maakond..."
 
 #: i18n/states/ZA.php:15
 msgid "Gauteng"
@@ -2029,24 +2054,28 @@ msgid "Western Cape"
 msgstr ""
 
 #: i18n/strings.php:16
+#, fuzzy
 msgid "pending"
-msgstr ""
+msgstr "Ootel"
 
 #: i18n/strings.php:17
+#, fuzzy
 msgid "failed"
-msgstr ""
+msgstr "Tuvastus ebaõnnestus"
 
 #: i18n/strings.php:18
+#, fuzzy
 msgid "on-hold"
-msgstr ""
+msgstr "%1$s - kommentaarid %2$s kohta"
 
 #: i18n/strings.php:19
 msgid "processing"
 msgstr ""
 
 #: i18n/strings.php:20
+#, fuzzy
 msgid "completed"
-msgstr ""
+msgstr "VALMIS"
 
 #: i18n/strings.php:21
 msgid "refunded"
@@ -2056,7 +2085,7 @@ msgstr ""
 msgid "cancelled"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:431
+#: includes/abstracts/abstract-wc-email.php:552
 #: includes/emails/class-wc-email-customer-completed-order.php:137
 #: includes/emails/class-wc-email-new-order.php:117
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:66
@@ -2066,22 +2095,25 @@ msgstr ""
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:76
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:75
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:50
+#, fuzzy
 msgid "Enable/Disable"
-msgstr ""
+msgstr "Luba JavaScript"
 
-#: includes/abstracts/abstract-wc-email.php:433
+#: includes/abstracts/abstract-wc-email.php:554
 #: includes/emails/class-wc-email-customer-completed-order.php:139
 #: includes/emails/class-wc-email-new-order.php:119
+#, fuzzy
 msgid "Enable this email notification"
-msgstr ""
+msgstr "This email already registered"
 
-#: includes/abstracts/abstract-wc-email.php:437
+#: includes/abstracts/abstract-wc-email.php:558
 #: includes/emails/class-wc-email-customer-invoice.php:140
+#, fuzzy
 msgid "Email subject"
-msgstr ""
+msgstr "User's Email"
 
-#: includes/abstracts/abstract-wc-email.php:439
-#: includes/abstracts/abstract-wc-email.php:446
+#: includes/abstracts/abstract-wc-email.php:560
+#: includes/abstracts/abstract-wc-email.php:567
 #: includes/emails/class-wc-email-customer-completed-order.php:145
 #: includes/emails/class-wc-email-customer-completed-order.php:152
 #: includes/emails/class-wc-email-customer-completed-order.php:159
@@ -2090,109 +2122,122 @@ msgstr ""
 #: includes/emails/class-wc-email-customer-invoice.php:149
 #: includes/emails/class-wc-email-customer-invoice.php:156
 #: includes/emails/class-wc-email-customer-invoice.php:163
+#, fuzzy
 msgid "Defaults to <code>%s</code>"
-msgstr ""
+msgstr "Korrasta koodi"
 
-#: includes/abstracts/abstract-wc-email.php:444
+#: includes/abstracts/abstract-wc-email.php:565
 #: includes/emails/class-wc-email-customer-invoice.php:147
+#, fuzzy
 msgid "Email heading"
-msgstr ""
+msgstr "Klient"
 
-#: includes/abstracts/abstract-wc-email.php:451
+#: includes/abstracts/abstract-wc-email.php:572
 #: includes/emails/class-wc-email-customer-completed-order.php:171
 #: includes/emails/class-wc-email-customer-invoice.php:168
 #: includes/emails/class-wc-email-new-order.php:144
+#, fuzzy
 msgid "Email type"
-msgstr ""
+msgstr "Type email address"
 
-#: includes/abstracts/abstract-wc-email.php:453
+#: includes/abstracts/abstract-wc-email.php:574
 #: includes/emails/class-wc-email-customer-completed-order.php:173
 #: includes/emails/class-wc-email-customer-invoice.php:170
 #: includes/emails/class-wc-email-new-order.php:146
 msgid "Choose which format of email to send."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:457
+#: includes/abstracts/abstract-wc-email.php:578
 #: includes/emails/class-wc-email-customer-completed-order.php:177
 #: includes/emails/class-wc-email-customer-invoice.php:174
 #: includes/emails/class-wc-email-new-order.php:150
+#, fuzzy
 msgid "Plain text"
-msgstr ""
+msgstr "Kleebi tavatekstina"
 
-#: includes/abstracts/abstract-wc-email.php:458
+#: includes/abstracts/abstract-wc-email.php:579
 #: includes/emails/class-wc-email-customer-completed-order.php:178
 #: includes/emails/class-wc-email-customer-invoice.php:175
 #: includes/emails/class-wc-email-new-order.php:151
+#, fuzzy
 msgid "HTML"
-msgstr ""
+msgstr "HTML"
 
-#: includes/abstracts/abstract-wc-email.php:459
+#: includes/abstracts/abstract-wc-email.php:580
 #: includes/emails/class-wc-email-customer-completed-order.php:179
 #: includes/emails/class-wc-email-customer-invoice.php:176
 #: includes/emails/class-wc-email-new-order.php:152
 msgid "Multipart"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:495
-#: includes/abstracts/abstract-wc-email.php:516
+#: includes/abstracts/abstract-wc-email.php:616
+#: includes/abstracts/abstract-wc-email.php:637
 msgid "Could not write to template file."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:543
+#: includes/abstracts/abstract-wc-email.php:664
 msgid "Template file copied to theme."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:552
+#: includes/abstracts/abstract-wc-email.php:673
 msgid "Template file deleted from theme."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:560
+#: includes/abstracts/abstract-wc-email.php:681
 #: includes/abstracts/abstract-wc-integration.php:30
-#: includes/abstracts/abstract-wc-settings-api.php:39 woocommerce.php:171
+#: includes/abstracts/abstract-wc-settings-api.php:39 woocommerce.php:144
+#, fuzzy
 msgid "Settings"
-msgstr ""
+msgstr "Sätted"
 
-#: includes/abstracts/abstract-wc-email.php:572
+#: includes/abstracts/abstract-wc-email.php:693
+#, fuzzy
 msgid "HTML template"
-msgstr ""
+msgstr "Arve e-maili põhi"
 
-#: includes/abstracts/abstract-wc-email.php:573
+#: includes/abstracts/abstract-wc-email.php:694
+#, fuzzy
 msgid "Plain text template"
-msgstr ""
+msgstr "Kleebi tavatekstina"
 
-#: includes/abstracts/abstract-wc-email.php:592
+#: includes/abstracts/abstract-wc-email.php:713
+#, fuzzy
 msgid "Delete template file"
-msgstr ""
+msgstr "Loo seadetefail"
 
-#: includes/abstracts/abstract-wc-email.php:595
+#: includes/abstracts/abstract-wc-email.php:716
 msgid ""
 "This template has been overridden by your theme and can be found in: <code>"
 "%s</code>."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:610
+#: includes/abstracts/abstract-wc-email.php:731
+#, fuzzy
 msgid "Copy file to theme"
-msgstr ""
+msgstr "Kopeeri tooted ostukorvi"
 
-#: includes/abstracts/abstract-wc-email.php:613
+#: includes/abstracts/abstract-wc-email.php:734
 msgid ""
 "To override and edit this email template copy <code>%s</code> to your theme "
 "folder: <code>%s</code>."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:624
+#: includes/abstracts/abstract-wc-email.php:745
+#, fuzzy
 msgid "File was not found."
-msgstr ""
+msgstr "Faili %1$s (%2$s) ei saa kirjutada"
 
-#: includes/abstracts/abstract-wc-email.php:649
+#: includes/abstracts/abstract-wc-email.php:770
+#, fuzzy
 msgid "View template"
-msgstr ""
+msgstr "Arve e-maili põhi"
 
-#: includes/abstracts/abstract-wc-email.php:650
+#: includes/abstracts/abstract-wc-email.php:771
+#, fuzzy
 msgid "Hide template"
-msgstr ""
+msgstr "Arve e-maili põhi"
 
-#: includes/abstracts/abstract-wc-email.php:661
+#: includes/abstracts/abstract-wc-email.php:782
 msgid "Are you sure you want to delete this template file?"
 msgstr ""
 
@@ -2206,58 +2251,65 @@ msgstr ""
 #: includes/abstracts/abstract-wc-product.php:503
 #: includes/abstracts/abstract-wc-product.php:508
 #: includes/abstracts/abstract-wc-product.php:527
+#, fuzzy
 msgid "In stock"
-msgstr ""
+msgstr "Laos"
 
 #: includes/abstracts/abstract-wc-product.php:508
 msgid "Only %s left in stock"
 msgstr ""
 
 #: includes/abstracts/abstract-wc-product.php:511
+#, fuzzy
 msgid "%s in stock"
-msgstr ""
+msgstr "Laos"
 
 #: includes/abstracts/abstract-wc-product.php:518
+#, fuzzy
 msgid "(backorders allowed)"
-msgstr ""
+msgstr "Lubatud faiilid"
 
 #: includes/abstracts/abstract-wc-product.php:524
 #: includes/abstracts/abstract-wc-product.php:537 templates/cart/cart.php:74
+#, fuzzy
 msgid "Available on backorder"
-msgstr ""
+msgstr "%2$s kommentaar  %1$s kohta"
 
 #: includes/abstracts/abstract-wc-product.php:530
 #: includes/abstracts/abstract-wc-product.php:540
 #: includes/abstracts/abstract-wc-product.php:544
+#, fuzzy
 msgid "Out of stock"
-msgstr ""
+msgstr "Laos"
 
-#: includes/abstracts/abstract-wc-product.php:792
-#: includes/abstracts/abstract-wc-product.php:798
-#: includes/class-wc-cart.php:1829 includes/class-wc-order.php:757
-#: includes/class-wc-product-variable.php:233
-#: includes/class-wc-product-variable.php:239
-#: includes/class-wc-product-variation.php:247
+#: includes/abstracts/abstract-wc-product.php:828
+#: includes/abstracts/abstract-wc-product.php:834
+#: includes/class-wc-cart.php:1831 includes/class-wc-order.php:757
+#: includes/class-wc-product-variable.php:237
+#: includes/class-wc-product-variable.php:243
+#: includes/class-wc-product-variation.php:254
 msgid "Free!"
 msgstr "Tasuta!"
 
-#: includes/abstracts/abstract-wc-product.php:815
+#: includes/abstracts/abstract-wc-product.php:851
 msgctxt "min_price"
 msgid "From:"
 msgstr "Alates:"
 
-#: includes/abstracts/abstract-wc-product.php:923
+#: includes/abstracts/abstract-wc-product.php:959
 #: templates/single-product-reviews.php:28
+#, fuzzy
 msgid "Rated %s out of 5"
-msgstr ""
+msgstr "Logi välja"
 
-#: includes/abstracts/abstract-wc-product.php:925
+#: includes/abstracts/abstract-wc-product.php:961
 #: templates/single-product/review.php:27
 #: templates/single-product-reviews.php:28
+#, fuzzy
 msgid "out of 5"
-msgstr ""
+msgstr "Logi välja"
 
-#: includes/abstracts/abstract-wc-product.php:1237
+#: includes/abstracts/abstract-wc-product.php:1273
 msgid "%s &ndash; %s"
 msgstr ""
 
@@ -2268,153 +2320,176 @@ msgid ""
 "in W3 Total Cache settings <a href=\"%s\">here</a>."
 msgstr ""
 
-#: includes/class-wc-cart.php:446
+#: includes/class-wc-cart.php:442
 msgid "An item which is no longer available was removed from your cart."
 msgstr ""
 
-#: includes/class-wc-cart.php:480 includes/class-wc-cart.php:499
-#: includes/class-wc-cart.php:508
+#: includes/class-wc-cart.php:476 includes/class-wc-cart.php:495
+#: includes/class-wc-cart.php:504
 msgid ""
 "Sorry, we do not have enough \"%s\" in stock to fulfill your order (%s in "
 "stock). Please edit your cart and try again. We apologise for any "
 "inconvenience caused."
 msgstr ""
 
-#: includes/class-wc-cart.php:543
+#: includes/class-wc-cart.php:539
 msgid ""
 "Sorry, we do not have enough \"%s\" in stock to fulfill your order right "
 "now. Please try again in %d minutes or edit your cart and try again. We "
 "apologise for any inconvenience caused."
 msgstr ""
 
-#: includes/class-wc-cart.php:553
+#: includes/class-wc-cart.php:549
 msgid ""
 "Sorry, \"%s\" is not in stock. Please edit your cart and try again. We "
 "apologise for any inconvenience caused."
 msgstr ""
 
-#: includes/class-wc-cart.php:854
+#: includes/class-wc-cart.php:850
 msgid "Sorry, &quot;%s&quot; cannot be purchased."
 msgstr ""
 
-#: includes/class-wc-cart.php:861
+#: includes/class-wc-cart.php:857
 msgid ""
 "You cannot add &quot;%s&quot; to the cart because the product is out of "
 "stock."
 msgstr ""
 
-#: includes/class-wc-cart.php:866
+#: includes/class-wc-cart.php:862
 msgid ""
 "You cannot add that amount of &quot;%s&quot; to the cart because there is "
 "not enough stock (%s remaining)."
 msgstr ""
 
-#: includes/class-wc-cart.php:878 includes/class-wc-cart.php:892
-#: includes/class-wc-cart.php:900 includes/class-wc-frontend-scripts.php:134
+#: includes/class-wc-cart.php:874 includes/class-wc-cart.php:888
+#: includes/class-wc-cart.php:896 includes/class-wc-frontend-scripts.php:134
 #: includes/wc-cart-functions.php:99 templates/cart/mini-cart.php:64
+#, fuzzy
 msgid "View Cart &rarr;"
-msgstr ""
+msgstr "Uuemad kommentaarid &rarr;"
 
-#: includes/class-wc-cart.php:878
+#: includes/class-wc-cart.php:874
 msgid "You already have this item in your cart."
 msgstr ""
 
-#: includes/class-wc-cart.php:892 includes/class-wc-cart.php:900
+#: includes/class-wc-cart.php:888 includes/class-wc-cart.php:896
 msgid ""
 "<a href=\"%s\" class=\"button\">%s</a> You cannot add that amount to the "
 "cart &mdash; we have %s in stock and you already have %s in your cart."
 msgstr ""
 
-#: includes/class-wc-checkout.php:60
-msgid "Account username"
-msgstr ""
+#: includes/class-wc-checkout.php:64 includes/class-wc-checkout.php:73
+#: includes/class-wc-emails.php:67 includes/class-wc-emails.php:76
+#: includes/class-wc-payment-gateways.php:46
+#: includes/class-wc-payment-gateways.php:55 includes/class-wc-shipping.php:64
+#: includes/class-wc-shipping.php:73 woocommerce.php:65 woocommerce.php:74
+msgid "Cheatin&#8217; huh?"
+msgstr "Üritad tõmmata?"
 
-#: includes/class-wc-checkout.php:62
+#: includes/class-wc-checkout.php:99
+#, fuzzy
+msgid "Account username"
+msgstr "Minu konto"
+
+#: includes/class-wc-checkout.php:101
+#, fuzzy
 msgctxt "placeholder"
 msgid "Username"
-msgstr ""
+msgstr "Kasutajanimi"
 
-#: includes/class-wc-checkout.php:69
+#: includes/class-wc-checkout.php:108
+#, fuzzy
 msgid "Account password"
-msgstr ""
+msgstr "Kadunud parool"
 
-#: includes/class-wc-checkout.php:71
+#: includes/class-wc-checkout.php:110
+#, fuzzy
 msgctxt "placeholder"
 msgid "Password"
-msgstr ""
+msgstr "Parool"
 
-#: includes/class-wc-checkout.php:79
+#: includes/class-wc-checkout.php:118
+#, fuzzy
 msgid "Order Notes"
-msgstr ""
+msgstr "Märkused..."
 
-#: includes/class-wc-checkout.php:80
+#: includes/class-wc-checkout.php:119
 msgctxt "placeholder"
 msgid "Notes about your order, e.g. special notes for delivery."
 msgstr ""
 
-#: includes/class-wc-checkout.php:142
+#: includes/class-wc-checkout.php:178
+#, fuzzy
 msgid "Order &ndash; %s"
-msgstr ""
+msgstr "Lehe järjekorranr."
 
-#: includes/class-wc-checkout.php:142
+#: includes/class-wc-checkout.php:178
 msgctxt "Order date parsed by strftime"
 msgid "%b %d, %Y @ %I:%M %p"
 msgstr ""
 
-#: includes/class-wc-checkout.php:250
+#: includes/class-wc-checkout.php:286
 msgid "Backordered"
 msgstr ""
 
-#: includes/class-wc-checkout.php:373
+#: includes/class-wc-checkout.php:409
 msgid ""
 "Sorry, your session has expired. <a href=\"%s\">Return to homepage &rarr;</a>"
 msgstr ""
 
-#: includes/class-wc-checkout.php:448 includes/class-wc-form-handler.php:80
+#: includes/class-wc-checkout.php:481 includes/class-wc-form-handler.php:81
+#, fuzzy
 msgid "is a required field."
-msgstr ""
+msgstr "Vajalik on toimiv e-postiaadress"
 
-#: includes/class-wc-checkout.php:461
-msgid "(%s) is not a valid postcode/ZIP."
-msgstr ""
+#: includes/class-wc-checkout.php:493 includes/class-wc-form-handler.php:91
+#: includes/shortcodes/class-wc-shortcode-cart.php:52
+#, fuzzy
+msgid "Please enter a valid postcode/ZIP."
+msgstr "Please enter a valid email address."
 
-#: includes/class-wc-checkout.php:482
+#: includes/class-wc-checkout.php:502 includes/class-wc-form-handler.php:100
+#, fuzzy
+msgid "is not a valid phone number."
+msgstr "Teema \"%s\" ei ole sobiv ülemteema."
+
+#: includes/class-wc-checkout.php:508 includes/class-wc-form-handler.php:106
+#, fuzzy
+msgid "is not a valid email address."
+msgstr "Vajalik on toimiv e-postiaadress"
+
+#: includes/class-wc-checkout.php:523
 msgid "is not valid. Please enter one of the following:"
 msgstr ""
 
-#: includes/class-wc-checkout.php:490
-msgid "is not a valid number."
-msgstr ""
-
-#: includes/class-wc-checkout.php:497
-msgid "is not a valid email address."
-msgstr ""
-
-#: includes/class-wc-checkout.php:540
+#: includes/class-wc-checkout.php:568
 msgid "You must accept our Terms &amp; Conditions."
 msgstr ""
 
-#: includes/class-wc-checkout.php:545
+#: includes/class-wc-checkout.php:573
 msgid ""
 "Unfortunately <strong>we do not ship to %s</strong>. Please enter an "
 "alternative shipping address."
 msgstr ""
 
-#: includes/class-wc-checkout.php:553
+#: includes/class-wc-checkout.php:581
+#, fuzzy
 msgid "Invalid shipping method."
-msgstr ""
+msgstr "Vaikimisi lähetusviis"
 
-#: includes/class-wc-checkout.php:566
+#: includes/class-wc-checkout.php:594
+#, fuzzy
 msgid "Invalid payment method."
-msgstr ""
+msgstr "Vaikimisi lähetusviis"
 
 #: includes/class-wc-comments.php:111
 msgid "You have taken too long. Please go back and refresh the page."
 msgstr ""
 
 #: includes/class-wc-comments.php:114
+#, fuzzy
 msgid "Please rate the product."
-msgstr ""
+msgstr "Lisa uus toode"
 
 #: includes/class-wc-countries.php:37
 msgid "Afghanistan"
@@ -2449,8 +2524,9 @@ msgid "Antarctica"
 msgstr ""
 
 #: includes/class-wc-countries.php:45
+#, fuzzy
 msgid "Antigua and Barbuda"
-msgstr ""
+msgstr "Kiida heaks ja vasta"
 
 #: includes/class-wc-countries.php:46
 msgid "Argentina"
@@ -2469,8 +2545,9 @@ msgid "Australia"
 msgstr ""
 
 #: includes/class-wc-countries.php:50
+#, fuzzy
 msgid "Austria"
-msgstr ""
+msgstr "Austria"
 
 #: includes/class-wc-countries.php:51
 msgid "Azerbaijan"
@@ -2497,8 +2574,9 @@ msgid "Belarus"
 msgstr ""
 
 #: includes/class-wc-countries.php:57
+#, fuzzy
 msgid "Belgium"
-msgstr ""
+msgstr "Belgia"
 
 #: includes/class-wc-countries.php:58
 msgid "Belau"
@@ -2529,8 +2607,9 @@ msgid "Bonaire, Saint Eustatius and Saba"
 msgstr ""
 
 #: includes/class-wc-countries.php:65
+#, fuzzy
 msgid "Bosnia and Herzegovina"
-msgstr ""
+msgstr "Kiida heaks ja vasta"
 
 #: includes/class-wc-countries.php:66
 msgid "Botswana"
@@ -2557,8 +2636,9 @@ msgid "Brunei"
 msgstr ""
 
 #: includes/class-wc-countries.php:72
+#, fuzzy
 msgid "Bulgaria"
-msgstr ""
+msgstr "Bulgaaria"
 
 #: includes/class-wc-countries.php:73
 msgid "Burkina Faso"
@@ -2649,16 +2729,19 @@ msgid "Cura&Ccedil;ao"
 msgstr ""
 
 #: includes/class-wc-countries.php:95
+#, fuzzy
 msgid "Cyprus"
-msgstr ""
+msgstr "Küpros"
 
 #: includes/class-wc-countries.php:96
+#, fuzzy
 msgid "Czech Republic"
-msgstr ""
+msgstr "Tšehhi Vabariik"
 
 #: includes/class-wc-countries.php:97
+#, fuzzy
 msgid "Denmark"
-msgstr ""
+msgstr "Taani"
 
 #: includes/class-wc-countries.php:98
 msgid "Djibouti"
@@ -2669,8 +2752,9 @@ msgid "Dominica"
 msgstr ""
 
 #: includes/class-wc-countries.php:100
+#, fuzzy
 msgid "Dominican Republic"
-msgstr ""
+msgstr "Tšehhi Vabariik"
 
 #: includes/class-wc-countries.php:101
 msgid "Ecuador"
@@ -2693,8 +2777,9 @@ msgid "Eritrea"
 msgstr ""
 
 #: includes/class-wc-countries.php:106
+#, fuzzy
 msgid "Estonia"
-msgstr ""
+msgstr "Eesti"
 
 #: includes/class-wc-countries.php:107
 msgid "Ethiopia"
@@ -2713,12 +2798,14 @@ msgid "Fiji"
 msgstr ""
 
 #: includes/class-wc-countries.php:111
+#, fuzzy
 msgid "Finland"
-msgstr ""
+msgstr "Soome"
 
 #: includes/class-wc-countries.php:112
+#, fuzzy
 msgid "France"
-msgstr ""
+msgstr "Prantsusmaa"
 
 #: includes/class-wc-countries.php:113
 msgid "French Guiana"
@@ -2741,8 +2828,9 @@ msgid "Gambia"
 msgstr ""
 
 #: includes/class-wc-countries.php:119
+#, fuzzy
 msgid "Germany"
-msgstr ""
+msgstr "Saksamaa"
 
 #: includes/class-wc-countries.php:120
 msgid "Ghana"
@@ -2753,8 +2841,9 @@ msgid "Gibraltar"
 msgstr ""
 
 #: includes/class-wc-countries.php:122
+#, fuzzy
 msgid "Greece"
-msgstr ""
+msgstr "Kreeka"
 
 #: includes/class-wc-countries.php:123
 msgid "Greenland"
@@ -2805,8 +2894,9 @@ msgid "Hong Kong"
 msgstr ""
 
 #: includes/class-wc-countries.php:135
+#, fuzzy
 msgid "Hungary"
-msgstr ""
+msgstr "Ungari"
 
 #: includes/class-wc-countries.php:136
 msgid "Iceland"
@@ -2829,8 +2919,9 @@ msgid "Iraq"
 msgstr ""
 
 #: includes/class-wc-countries.php:141
+#, fuzzy
 msgid "Republic of Ireland"
-msgstr ""
+msgstr "Tšehhi Vabariik"
 
 #: includes/class-wc-countries.php:142
 msgid "Isle of Man"
@@ -2841,8 +2932,9 @@ msgid "Israel"
 msgstr ""
 
 #: includes/class-wc-countries.php:144
+#, fuzzy
 msgid "Italy"
-msgstr ""
+msgstr "Itaalia"
 
 #: includes/class-wc-countries.php:145
 msgid "Ivory Coast"
@@ -2889,8 +2981,9 @@ msgid "Laos"
 msgstr ""
 
 #: includes/class-wc-countries.php:156
+#, fuzzy
 msgid "Latvia"
-msgstr ""
+msgstr "Läti"
 
 #: includes/class-wc-countries.php:157
 msgid "Lebanon"
@@ -2913,8 +3006,9 @@ msgid "Liechtenstein"
 msgstr ""
 
 #: includes/class-wc-countries.php:162
+#, fuzzy
 msgid "Lithuania"
-msgstr ""
+msgstr "Leedu"
 
 #: includes/class-wc-countries.php:163
 msgid "Luxembourg"
@@ -2949,8 +3043,9 @@ msgid "Mali"
 msgstr ""
 
 #: includes/class-wc-countries.php:171
+#, fuzzy
 msgid "Malta"
-msgstr ""
+msgstr "Malta"
 
 #: includes/class-wc-countries.php:172
 msgid "Marshall Islands"
@@ -3025,20 +3120,23 @@ msgid "Nepal"
 msgstr ""
 
 #: includes/class-wc-countries.php:190
+#, fuzzy
 msgid "Netherlands"
-msgstr ""
+msgstr "Holland"
 
 #: includes/class-wc-countries.php:191
 msgid "Netherlands Antilles"
 msgstr ""
 
 #: includes/class-wc-countries.php:192
+#, fuzzy
 msgid "New Caledonia"
-msgstr ""
+msgstr "Uus %1$s veebileht: %2$s"
 
 #: includes/class-wc-countries.php:193
+#, fuzzy
 msgid "New Zealand"
-msgstr ""
+msgstr "Uus %1$s veebileht: %2$s"
 
 #: includes/class-wc-countries.php:194
 msgid "Nicaragua"
@@ -3085,8 +3183,9 @@ msgid "Panama"
 msgstr ""
 
 #: includes/class-wc-countries.php:205
+#, fuzzy
 msgid "Papua New Guinea"
-msgstr ""
+msgstr "Lisa rubriik"
 
 #: includes/class-wc-countries.php:206
 msgid "Paraguay"
@@ -3105,12 +3204,14 @@ msgid "Pitcairn"
 msgstr ""
 
 #: includes/class-wc-countries.php:210
+#, fuzzy
 msgid "Poland"
-msgstr ""
+msgstr "Poola"
 
 #: includes/class-wc-countries.php:211
+#, fuzzy
 msgid "Portugal"
-msgstr ""
+msgstr "Portugal"
 
 #: includes/class-wc-countries.php:212
 msgid "Qatar"
@@ -3121,8 +3222,9 @@ msgid "Reunion"
 msgstr ""
 
 #: includes/class-wc-countries.php:214
+#, fuzzy
 msgid "Romania"
-msgstr ""
+msgstr "Rumeenia"
 
 #: includes/class-wc-countries.php:215
 msgid "Russia"
@@ -3197,12 +3299,14 @@ msgid "Singapore"
 msgstr ""
 
 #: includes/class-wc-countries.php:233
+#, fuzzy
 msgid "Slovakia"
-msgstr ""
+msgstr "Slovakkia"
 
 #: includes/class-wc-countries.php:234
+#, fuzzy
 msgid "Slovenia"
-msgstr ""
+msgstr "Sloveenia"
 
 #: includes/class-wc-countries.php:235
 msgid "Solomon Islands"
@@ -3229,8 +3333,9 @@ msgid "South Sudan"
 msgstr ""
 
 #: includes/class-wc-countries.php:241
+#, fuzzy
 msgid "Spain"
-msgstr ""
+msgstr "Hispaania"
 
 #: includes/class-wc-countries.php:242
 msgid "Sri Lanka"
@@ -3253,8 +3358,9 @@ msgid "Swaziland"
 msgstr ""
 
 #: includes/class-wc-countries.php:247
+#, fuzzy
 msgid "Sweden"
-msgstr ""
+msgstr "Rootsi"
 
 #: includes/class-wc-countries.php:248
 msgid "Switzerland"
@@ -3297,8 +3403,9 @@ msgid "Tonga"
 msgstr ""
 
 #: includes/class-wc-countries.php:258
+#, fuzzy
 msgid "Trinidad and Tobago"
-msgstr ""
+msgstr "Kiida heaks ja vasta"
 
 #: includes/class-wc-countries.php:259
 msgid "Tunisia"
@@ -3337,8 +3444,9 @@ msgid "United Kingdom (UK)"
 msgstr ""
 
 #: includes/class-wc-countries.php:268
+#, fuzzy
 msgid "United States (US)"
-msgstr ""
+msgstr "FOLLOW US ON"
 
 #: includes/class-wc-countries.php:269
 msgid "Uruguay"
@@ -3365,8 +3473,9 @@ msgid "Vietnam"
 msgstr ""
 
 #: includes/class-wc-countries.php:275
+#, fuzzy
 msgid "Wallis and Futuna"
-msgstr ""
+msgstr "Kiida heaks ja vasta"
 
 #: includes/class-wc-countries.php:276
 msgid "Western Sahara"
@@ -3389,65 +3498,79 @@ msgid "Zimbabwe"
 msgstr ""
 
 #: includes/class-wc-countries.php:467
+#, fuzzy
 msgid "to the"
-msgstr ""
+msgstr "Viide: %s"
 
 #: includes/class-wc-countries.php:468
+#, fuzzy
 msgid "to"
-msgstr ""
+msgstr "Viide: %s"
 
 #: includes/class-wc-countries.php:481
 msgid "the"
 msgstr ""
 
 #: includes/class-wc-countries.php:493
+#, fuzzy
 msgid "VAT"
-msgstr ""
+msgstr "KM"
 
 #: includes/class-wc-countries.php:493
+#, fuzzy
 msgid "Tax"
-msgstr ""
+msgstr "Maks"
 
 #: includes/class-wc-countries.php:506
+#, fuzzy
 msgid "(incl. VAT)"
-msgstr ""
+msgstr "Summa käibemaksuga"
 
 #: includes/class-wc-countries.php:506
+#, fuzzy
 msgid "(incl. tax)"
-msgstr ""
+msgstr "Nimetus"
 
 #: includes/class-wc-countries.php:519
+#, fuzzy
 msgid "(ex. VAT)"
-msgstr ""
+msgstr "KMKR nr"
 
 #: includes/class-wc-countries.php:519
+#, fuzzy
 msgid "(ex. tax)"
-msgstr ""
+msgstr "Nimetus"
 
 #: includes/class-wc-countries.php:700
+#, fuzzy
 msgid "Country"
-msgstr ""
+msgstr "Country"
 
 #: includes/class-wc-countries.php:705
+#, fuzzy
 msgid "First Name"
-msgstr ""
+msgstr "Eesnimi"
 
 #: includes/class-wc-countries.php:710
+#, fuzzy
 msgid "Last Name"
-msgstr ""
+msgstr "Perenimi"
 
 #: includes/class-wc-countries.php:716
+#, fuzzy
 msgid "Company Name"
-msgstr ""
+msgstr "Minu firma OÜ"
 
 #: includes/class-wc-countries.php:720
+#, fuzzy
 msgid "Address"
-msgstr ""
+msgstr "Aadress"
 
 #: includes/class-wc-countries.php:721
+#, fuzzy
 msgctxt "placeholder"
 msgid "Street address"
-msgstr ""
+msgstr "change address"
 
 #: includes/class-wc-countries.php:726
 msgctxt "placeholder"
@@ -3455,65 +3578,72 @@ msgid "Apartment, suite, unit etc. (optional)"
 msgstr ""
 
 #: includes/class-wc-countries.php:731 includes/class-wc-countries.php:732
+#, fuzzy
 msgid "Town / City"
-msgstr ""
+msgstr "Linn/Alev/Küla"
 
 #: includes/class-wc-countries.php:738 includes/class-wc-countries.php:739
+#, fuzzy
 msgid "State / County"
-msgstr ""
+msgstr "Maakond..."
 
-#: includes/class-wc-countries.php:744 includes/class-wc-countries.php:745
+#: includes/class-wc-countries.php:745 includes/class-wc-countries.php:746
 #: templates/cart/shipping-calculator.php:80
 msgid "Postcode / Zip"
 msgstr ""
 
-#: includes/class-wc-countries.php:787 includes/class-wc-countries.php:797
-#: includes/class-wc-countries.php:817 includes/class-wc-countries.php:872
-#: includes/class-wc-countries.php:891 includes/class-wc-countries.php:919
-#: includes/class-wc-countries.php:969 includes/class-wc-countries.php:993
-#: includes/class-wc-countries.php:1034
+#: includes/class-wc-countries.php:789 includes/class-wc-countries.php:799
+#: includes/class-wc-countries.php:819 includes/class-wc-countries.php:874
+#: includes/class-wc-countries.php:893 includes/class-wc-countries.php:921
+#: includes/class-wc-countries.php:971 includes/class-wc-countries.php:995
+#: includes/class-wc-countries.php:1036
 msgid "Province"
 msgstr ""
 
-#: includes/class-wc-countries.php:803
+#: includes/class-wc-countries.php:805
 msgid "Canton"
 msgstr ""
 
-#: includes/class-wc-countries.php:812 includes/class-wc-countries.php:975
+#: includes/class-wc-countries.php:814 includes/class-wc-countries.php:977
 msgid "Municipality"
 msgstr ""
 
-#: includes/class-wc-countries.php:859
+#: includes/class-wc-countries.php:861
+#, fuzzy
 msgid "Town / District"
-msgstr ""
+msgstr "Linn/Alev/Küla"
 
-#: includes/class-wc-countries.php:862
+#: includes/class-wc-countries.php:864
 msgid "Region"
 msgstr ""
 
-#: includes/class-wc-countries.php:867 includes/class-wc-countries.php:1009
+#: includes/class-wc-countries.php:869 includes/class-wc-countries.php:1011
+#, fuzzy
 msgid "County"
-msgstr ""
+msgstr "Maakond"
 
-#: includes/class-wc-countries.php:998
+#: includes/class-wc-countries.php:1000
 msgid "Zip"
 msgstr ""
 
-#: includes/class-wc-countries.php:1001
+#: includes/class-wc-countries.php:1003
+#, fuzzy
 msgid "State"
-msgstr ""
+msgstr "Maakond..."
 
-#: includes/class-wc-countries.php:1006
+#: includes/class-wc-countries.php:1008
 msgid "Postcode"
 msgstr ""
 
-#: includes/class-wc-countries.php:1114
+#: includes/class-wc-countries.php:1116
+#, fuzzy
 msgid "Email Address"
-msgstr ""
+msgstr "E-postiaadress:"
 
-#: includes/class-wc-countries.php:1120
+#: includes/class-wc-countries.php:1122
+#, fuzzy
 msgid "Phone"
-msgstr ""
+msgstr "Telefon"
 
 #: includes/class-wc-coupon.php:422
 msgid "Coupon code applied successfully."
@@ -3524,12 +3654,14 @@ msgid "Coupon code removed successfully."
 msgstr ""
 
 #: includes/class-wc-coupon.php:446
+#, fuzzy
 msgid "Coupon is not valid."
-msgstr ""
+msgstr "Teema \"%s\" ei ole sobiv ülemteema."
 
 #: includes/class-wc-coupon.php:449 includes/class-wc-coupon.php:499
+#, fuzzy
 msgid "Coupon does not exist!"
-msgstr ""
+msgstr "ühendust pole"
 
 #: includes/class-wc-coupon.php:452
 msgid ""
@@ -3558,8 +3690,9 @@ msgid "Coupon usage limit has been reached."
 msgstr ""
 
 #: includes/class-wc-coupon.php:467
+#, fuzzy
 msgid "This coupon has expired."
-msgstr ""
+msgstr "Sellel arvel ei ole staatust"
 
 #: includes/class-wc-coupon.php:470
 msgid "The minimum spend for this coupon is %s."
@@ -3574,16 +3707,19 @@ msgid "Sorry, this coupon is not valid for sale items."
 msgstr ""
 
 #: includes/class-wc-coupon.php:502
+#, fuzzy
 msgid "Please enter a coupon code."
-msgstr ""
+msgstr "Palun sisesta veebilehe nimi."
 
-#: includes/class-wc-customer.php:628 includes/class-wc-customer.php:640
+#: includes/class-wc-customer.php:629 includes/class-wc-customer.php:641
+#, fuzzy
 msgid "File %d"
-msgstr ""
+msgstr "Faili laadimine tühistati."
 
 #: includes/class-wc-download-handler.php:37
+#, fuzzy
 msgid "Invalid email address."
-msgstr ""
+msgstr "E-postiaadress:"
 
 #: includes/class-wc-download-handler.php:37
 #: includes/class-wc-download-handler.php:61
@@ -3593,24 +3729,29 @@ msgstr ""
 #: includes/class-wc-download-handler.php:94
 #: includes/class-wc-download-handler.php:137
 #: includes/class-wc-download-handler.php:267
+#, fuzzy
 msgid "Go to homepage &rarr;"
-msgstr ""
+msgstr "Go to design page."
 
 #: includes/class-wc-download-handler.php:61
+#, fuzzy
 msgid "Invalid download."
-msgstr ""
+msgstr "Laadi PDF alla"
 
 #: includes/class-wc-download-handler.php:73
+#, fuzzy
 msgid "You must be logged in to download files."
-msgstr ""
+msgstr "Vabandust, kommenteerimiseks pead sisse logima."
 
 #: includes/class-wc-download-handler.php:73
+#, fuzzy
 msgid "Login &rarr;"
-msgstr ""
+msgstr "Järgmine &rarr;"
 
 #: includes/class-wc-download-handler.php:73
+#, fuzzy
 msgid "Log in to Download Files"
-msgstr ""
+msgstr "Kommenteerimiseks logi sisse"
 
 #: includes/class-wc-download-handler.php:76
 msgid "This is not your download link."
@@ -3621,12 +3762,14 @@ msgid "Product no longer exists."
 msgstr ""
 
 #: includes/class-wc-download-handler.php:87
-#: includes/class-wc-form-handler.php:421
-#: includes/shortcodes/class-wc-shortcode-checkout.php:163
+#: includes/class-wc-form-handler.php:443
+#: includes/shortcodes/class-wc-shortcode-checkout.php:87
+#: includes/shortcodes/class-wc-shortcode-checkout.php:168
 #: includes/shortcodes/class-wc-shortcode-my-account.php:102
 #: includes/shortcodes/class-wc-shortcode-view-order.php:50
+#, fuzzy
 msgid "Invalid order."
-msgstr ""
+msgstr "Lehe järjekorranr."
 
 #: includes/class-wc-download-handler.php:91
 msgid "Sorry, you have reached your download limit for this file"
@@ -3637,178 +3780,197 @@ msgid "Sorry, this download has expired"
 msgstr ""
 
 #: includes/class-wc-download-handler.php:137
+#, fuzzy
 msgid "No file defined"
-msgstr ""
+msgstr "sisendfail on määramata"
 
 #: includes/class-wc-download-handler.php:267
+#, fuzzy
 msgid "File not found"
-msgstr ""
+msgstr "Lehte ei leitud"
 
-#: includes/class-wc-emails.php:249
+#: includes/class-wc-emails.php:289
+#, fuzzy
 msgid "Note"
-msgstr ""
+msgstr "Kustuta märkus"
 
-#: includes/class-wc-emails.php:285
+#: includes/class-wc-emails.php:325
 msgid "Product low in stock"
 msgstr ""
 
-#: includes/class-wc-emails.php:290 includes/class-wc-emails.php:322
-#: includes/class-wc-emails.php:366
+#: includes/class-wc-emails.php:330 includes/class-wc-emails.php:362
+#: includes/class-wc-emails.php:406
 msgid "Variation #%s of %s"
 msgstr ""
 
-#: includes/class-wc-emails.php:292 includes/class-wc-emails.php:324
-#: includes/class-wc-emails.php:368
+#: includes/class-wc-emails.php:332 includes/class-wc-emails.php:364
+#: includes/class-wc-emails.php:408
+#, fuzzy
 msgid "Product #%s - %s"
-msgstr ""
+msgstr "Toode"
 
-#: includes/class-wc-emails.php:294
+#: includes/class-wc-emails.php:334
 msgid "is low in stock."
 msgstr ""
 
-#: includes/class-wc-emails.php:317
+#: includes/class-wc-emails.php:357
+#, fuzzy
 msgid "Product out of stock"
-msgstr ""
+msgstr "Laoseis"
 
-#: includes/class-wc-emails.php:326
+#: includes/class-wc-emails.php:366
+#, fuzzy
 msgid "is out of stock."
-msgstr ""
+msgstr "Laoseis"
 
-#: includes/class-wc-emails.php:361
+#: includes/class-wc-emails.php:401
+#, fuzzy
 msgid "Product Backorder"
-msgstr ""
+msgstr "Muuda toodet"
 
-#: includes/class-wc-emails.php:371
+#: includes/class-wc-emails.php:411
 msgid "%s units of %s have been backordered in order %s."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:85
-#: includes/shortcodes/class-wc-shortcode-cart.php:53
-msgid "Please enter a valid postcode/ZIP."
-msgstr ""
-
-#: includes/class-wc-form-handler.php:99
+#: includes/class-wc-form-handler.php:118
+#, fuzzy
 msgid "Address changed successfully."
-msgstr ""
+msgstr "Account successfully activated"
 
-#: includes/class-wc-form-handler.php:147
+#: includes/class-wc-form-handler.php:166
+#, fuzzy
 msgid "Please enter your name."
-msgstr ""
+msgstr "Sisesta oma panga nimi"
 
-#: includes/class-wc-form-handler.php:150
+#: includes/class-wc-form-handler.php:169
 #: includes/wc-customer-functions.php:46
+#, fuzzy
 msgid "Please provide a valid email address."
-msgstr ""
-
-#: includes/class-wc-form-handler.php:153
-msgid "This email address is already registered."
-msgstr ""
-
-#: includes/class-wc-form-handler.php:156
-msgid "Please re-enter your password."
-msgstr ""
-
-#: includes/class-wc-form-handler.php:159
-#: includes/class-wc-form-handler.php:694
-msgid "Passwords do not match."
-msgstr ""
+msgstr "Please enter a valid email address."
 
 #: includes/class-wc-form-handler.php:172
+#, fuzzy
+msgid "This email address is already registered."
+msgstr "See e-postiaadress on juba olemas."
+
+#: includes/class-wc-form-handler.php:175
+#, fuzzy
+msgid "Please re-enter your password."
+msgstr "Sisesta enda uus parool."
+
+#: includes/class-wc-form-handler.php:178
+#: includes/class-wc-form-handler.php:716
+#, fuzzy
+msgid "Passwords do not match."
+msgstr "Paroolid ei klapi."
+
+#: includes/class-wc-form-handler.php:191
+#, fuzzy
 msgid "Account details changed successfully."
-msgstr ""
+msgstr "Sa oled muutnud oma ettevõtte andmeid"
 
-#: includes/class-wc-form-handler.php:278
-#: includes/class-wc-form-handler.php:325
+#: includes/class-wc-form-handler.php:297
+#: includes/class-wc-form-handler.php:344
+#, fuzzy
 msgid "Cart updated."
-msgstr ""
+msgstr "Viimati uuendatud"
 
-#: includes/class-wc-form-handler.php:309
+#: includes/class-wc-form-handler.php:328
 msgid "You can only have 1 %s in your cart."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:386
+#: includes/class-wc-form-handler.php:406
 msgid "The cart has been filled with the items from your previous order."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:408
+#: includes/class-wc-form-handler.php:430
 msgid "Order cancelled by customer."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:411
+#: includes/class-wc-form-handler.php:433
 msgid "Your order was cancelled."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:417
+#: includes/class-wc-form-handler.php:439
 msgid ""
 "Your order is no longer pending and could not be cancelled. Please contact "
 "us if you need assistance."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:458
-#: includes/class-wc-form-handler.php:516
+#: includes/class-wc-form-handler.php:480
+#: includes/class-wc-form-handler.php:538
 msgid "Please choose product options&hellip;"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:549
+#: includes/class-wc-form-handler.php:571
 msgid ""
 "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:556
+#: includes/class-wc-form-handler.php:578
 msgid "Please choose a product to add to your cart&hellip;"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:613
-#: includes/class-wc-form-handler.php:615
-#: includes/class-wc-form-handler.php:623
+#: includes/class-wc-form-handler.php:635
+#: includes/class-wc-form-handler.php:637
+#: includes/class-wc-form-handler.php:645
+#, fuzzy
 msgid "Error"
-msgstr ""
+msgstr "Viga"
 
-#: includes/class-wc-form-handler.php:613
+#: includes/class-wc-form-handler.php:635
+#, fuzzy
 msgid "Username is required."
-msgstr ""
+msgstr "%s on su uus kasutajanimi."
 
-#: includes/class-wc-form-handler.php:615
+#: includes/class-wc-form-handler.php:637
+#, fuzzy
 msgid "Password is required."
-msgstr ""
+msgstr "Vajalik on toimiv e-postiaadress"
 
-#: includes/class-wc-form-handler.php:623
+#: includes/class-wc-form-handler.php:645
 msgid "A user could not be found with this email address."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:646
+#: includes/class-wc-form-handler.php:668
 msgid "You are now logged in as <strong>%s</strong>"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:689
+#: includes/class-wc-form-handler.php:711
+#, fuzzy
 msgid "Please enter your password."
-msgstr ""
+msgstr "Sisesta enda uus parool."
 
-#: includes/class-wc-form-handler.php:704
+#: includes/class-wc-form-handler.php:726
+#, fuzzy
 msgid "Your password has been reset."
-msgstr ""
+msgstr "Sinu parool on muudetud."
 
-#: includes/class-wc-form-handler.php:704
+#: includes/class-wc-form-handler.php:726
+#, fuzzy
 msgid "Log in"
-msgstr ""
+msgstr "Logi sisse"
 
-#: includes/class-wc-form-handler.php:728
+#: includes/class-wc-form-handler.php:750
 #: includes/wc-customer-functions.php:107
+#, fuzzy
 msgid "ERROR"
-msgstr ""
+msgstr "Viga"
 
-#: includes/class-wc-form-handler.php:728
+#: includes/class-wc-form-handler.php:750
 msgid "Anti-spam field was filled in."
 msgstr ""
 
 #: includes/class-wc-frontend-scripts.php:105
+#, fuzzy
 msgid "Please select a rating"
-msgstr ""
+msgstr "Vali kategooria"
 
 #: includes/class-wc-frontend-scripts.php:112
-#: includes/wc-template-functions.php:1650
+#: includes/wc-template-functions.php:1564
+#, fuzzy
 msgid "required"
-msgstr ""
+msgstr "(nõutav)"
 
 #: includes/class-wc-frontend-scripts.php:140
 msgid ""
@@ -3817,8 +3979,9 @@ msgid ""
 msgstr ""
 
 #: includes/class-wc-frontend-scripts.php:145
+#, fuzzy
 msgid "Select an option&hellip;"
-msgstr ""
+msgstr "Vali viiterubriik:"
 
 #: includes/class-wc-install.php:208
 msgctxt "page_slug"
@@ -3830,9 +3993,10 @@ msgid "Shop"
 msgstr ""
 
 #: includes/class-wc-install.php:213
+#, fuzzy
 msgctxt "page_slug"
 msgid "cart"
-msgstr ""
+msgstr "Ostukorv"
 
 #: includes/class-wc-install.php:218
 msgctxt "page_slug"
@@ -3840,21 +4004,24 @@ msgid "checkout"
 msgstr ""
 
 #: includes/class-wc-install.php:223
+#, fuzzy
 msgctxt "page_slug"
 msgid "my-account"
-msgstr ""
+msgstr "Minu konto"
 
 #: includes/class-wc-install.php:421
+#, fuzzy
 msgid "Customer"
-msgstr ""
+msgstr "Klient"
 
 #: includes/class-wc-install.php:428
 msgid "Shop Manager"
 msgstr ""
 
 #: includes/class-wc-install.php:662
+#, fuzzy
 msgid "What's new:"
-msgstr ""
+msgstr "Uus %1$s veebileht: %2$s"
 
 #: includes/class-wc-order.php:130
 msgctxt "hash before order number"
@@ -3862,43 +4029,51 @@ msgid "#"
 msgstr ""
 
 #: includes/class-wc-order.php:752
+#, fuzzy
 msgid "&nbsp;<small>%svia %s</small>"
-msgstr ""
+msgstr "E-postiaadress:"
 
 #: includes/class-wc-order.php:815
+#, fuzzy
 msgid "Cart Subtotal:"
-msgstr ""
+msgstr "Tühjenda ostukorv"
 
 #: includes/class-wc-order.php:821
+#, fuzzy
 msgid "Cart Discount:"
-msgstr ""
+msgstr "Sisesta allahindluse protsent. Näiteks: 10"
 
 #: includes/class-wc-order.php:827
+#, fuzzy
 msgid "Shipping:"
-msgstr ""
+msgstr "Lähetusviisid"
 
 #: includes/class-wc-order.php:865
+#, fuzzy
 msgid "Order Discount:"
-msgstr ""
+msgstr "Sisesta allahindluse protsent. Näiteks: 10"
 
 #: includes/class-wc-order.php:870
+#, fuzzy
 msgid "Order Total:"
-msgstr ""
+msgstr "Tellimus kokku"
 
-#: includes/class-wc-order.php:884 includes/wc-template-functions.php:1183
+#: includes/class-wc-order.php:884 includes/wc-template-functions.php:1109
 msgid "(Includes %s)"
 msgstr ""
 
 #: includes/class-wc-order.php:1076 includes/class-wc-order.php:1077
+#, fuzzy
 msgid "WooCommerce"
-msgstr ""
+msgstr "WooCommerce"
 
 #: includes/class-wc-order.php:1130
+#, fuzzy
 msgid "Order status changed from %s to %s."
-msgstr ""
+msgstr "Kommentaari olek muudetud: %s"
 
-#: includes/class-wc-order.php:1362 woocommerce-ajax.php:1043
-#: woocommerce-ajax.php:1044
+#: includes/class-wc-order.php:1362 woocommerce-ajax.php:1045
+#: woocommerce-ajax.php:1046
 msgid "Item #%s stock reduced from %s to %s."
 msgstr ""
 
@@ -3908,191 +4083,235 @@ msgstr ""
 
 #: includes/class-wc-post-types.php:60 includes/class-wc-post-types.php:62
 #: includes/widgets/class-wc-widget-product-categories.php:30
+#, fuzzy
 msgid "Product Categories"
-msgstr ""
+msgstr "Tootekategooriad"
 
 #: includes/class-wc-post-types.php:63
+#, fuzzy
 msgid "Product Category"
-msgstr ""
+msgstr "Tootekategooria"
 
 #: includes/class-wc-post-types.php:64
+#, fuzzy
 msgctxt "Admin menu name"
 msgid "Categories"
-msgstr ""
+msgstr "Rubriigid"
 
 #: includes/class-wc-post-types.php:65
+#, fuzzy
 msgid "Search Product Categories"
-msgstr ""
+msgstr "Otsi Tootekategooriaid"
 
 #: includes/class-wc-post-types.php:66
+#, fuzzy
 msgid "All Product Categories"
-msgstr ""
+msgstr "Kõik kategooriad"
 
 #: includes/class-wc-post-types.php:67
+#, fuzzy
 msgid "Parent Product Category"
-msgstr ""
+msgstr "Ülemine kategooria"
 
 #: includes/class-wc-post-types.php:68
+#, fuzzy
 msgid "Parent Product Category:"
-msgstr ""
+msgstr "Ülemine kategooria:"
 
 #: includes/class-wc-post-types.php:69
+#, fuzzy
 msgid "Edit Product Category"
-msgstr ""
+msgstr "Muuda kategooriat"
 
 #: includes/class-wc-post-types.php:70
+#, fuzzy
 msgid "Update Product Category"
-msgstr ""
+msgstr "Uuenda kategooriad"
 
 #: includes/class-wc-post-types.php:71
+#, fuzzy
 msgid "Add New Product Category"
-msgstr ""
+msgstr "Lisa uus kategooria"
 
 #: includes/class-wc-post-types.php:72
+#, fuzzy
 msgid "New Product Category Name"
-msgstr ""
+msgstr "Uue viiterubriigi nimi"
 
 #: includes/class-wc-post-types.php:83
 #: includes/updates/woocommerce-update-2.0.php:49
+#, fuzzy
 msgctxt "slug"
 msgid "product-category"
-msgstr ""
+msgstr "Tootekategooria"
 
 #: includes/class-wc-post-types.php:95 includes/class-wc-post-types.php:97
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:27
+#, fuzzy
 msgid "Product Tags"
-msgstr ""
+msgstr "Kõik sildid"
 
 #: includes/class-wc-post-types.php:98
+#, fuzzy
 msgid "Product Tag"
-msgstr ""
+msgstr "%1$s %2$s %3$s Sildi RSS"
 
 #: includes/class-wc-post-types.php:99
+#, fuzzy
 msgctxt "Admin menu name"
 msgid "Tags"
-msgstr ""
+msgstr "Sildid"
 
 #: includes/class-wc-post-types.php:100
+#, fuzzy
 msgid "Search Product Tags"
-msgstr ""
+msgstr "Otsi Tootekategooriaid"
 
 #: includes/class-wc-post-types.php:101
+#, fuzzy
 msgid "All Product Tags"
-msgstr ""
+msgstr "Kõik kategooriad"
 
 #: includes/class-wc-post-types.php:102
+#, fuzzy
 msgid "Parent Product Tag"
-msgstr ""
+msgstr "Ülemine kategooria"
 
 #: includes/class-wc-post-types.php:103
+#, fuzzy
 msgid "Parent Product Tag:"
-msgstr ""
+msgstr "Ülemine kategooria"
 
 #: includes/class-wc-post-types.php:104
+#, fuzzy
 msgid "Edit Product Tag"
-msgstr ""
+msgstr "Muuda kategooriat"
 
 #: includes/class-wc-post-types.php:105
+#, fuzzy
 msgid "Update Product Tag"
-msgstr ""
+msgstr "Uuenda kategooriad"
 
 #: includes/class-wc-post-types.php:106
+#, fuzzy
 msgid "Add New Product Tag"
-msgstr ""
+msgstr "Lisa uus kategooria"
 
 #: includes/class-wc-post-types.php:107
+#, fuzzy
 msgid "New Product Tag Name"
-msgstr ""
+msgstr "Uue viiterubriigi nimi"
 
 #: includes/class-wc-post-types.php:118
 #: includes/updates/woocommerce-update-2.0.php:50
+#, fuzzy
 msgctxt "slug"
 msgid "product-tag"
-msgstr ""
+msgstr "%1$s %2$s %3$s Sildi RSS"
 
 #: includes/class-wc-post-types.php:129 includes/class-wc-post-types.php:131
+#, fuzzy
 msgid "Shipping Classes"
-msgstr ""
+msgstr "Lähetusviisid"
 
 #: includes/class-wc-post-types.php:132
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:486
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:531
+#, fuzzy
 msgid "Shipping Class"
-msgstr ""
+msgstr "CSS klass"
 
 #: includes/class-wc-post-types.php:133
+#, fuzzy
 msgctxt "Admin menu name"
 msgid "Shipping Classes"
-msgstr ""
+msgstr "Lähetusviisid"
 
 #: includes/class-wc-post-types.php:134
+#, fuzzy
 msgid "Search Shipping Classes"
-msgstr ""
+msgstr "Vaikimisi lähetusviis"
 
 #: includes/class-wc-post-types.php:135
+#, fuzzy
 msgid "All Shipping Classes"
-msgstr ""
+msgstr "Vaikimisi lähetusviis"
 
 #: includes/class-wc-post-types.php:136
+#, fuzzy
 msgid "Parent Shipping Class"
-msgstr ""
+msgstr "<span class=\"%1$s\">Sildid:</span> %2$s"
 
 #: includes/class-wc-post-types.php:137
+#, fuzzy
 msgid "Parent Shipping Class:"
-msgstr ""
+msgstr "<span class=\"%1$s\">Sildid:</span> %2$s"
 
 #: includes/class-wc-post-types.php:138
+#, fuzzy
 msgid "Edit Shipping Class"
-msgstr ""
+msgstr "<span class=\"%1$s\">Sildid:</span> %2$s"
 
 #: includes/class-wc-post-types.php:139
+#, fuzzy
 msgid "Update Shipping Class"
-msgstr ""
+msgstr "<span class=\"%1$s\">Sildid:</span> %2$s"
 
 #: includes/class-wc-post-types.php:140
+#, fuzzy
 msgid "Add New Shipping Class"
-msgstr ""
+msgstr "Lisa viiterubriik"
 
 #: includes/class-wc-post-types.php:141
+#, fuzzy
 msgid "New Shipping Class Name"
-msgstr ""
+msgstr "Uue viiterubriigi nimi"
 
 #: includes/class-wc-post-types.php:189
+#, fuzzy
 msgid "Search %s"
-msgstr ""
+msgstr "Otsi"
 
 #: includes/class-wc-post-types.php:190
+#, fuzzy
 msgid "All %s"
-msgstr ""
+msgstr "Kõik"
 
 #: includes/class-wc-post-types.php:191
+#, fuzzy
 msgid "Parent %s"
-msgstr ""
+msgstr "Ülemrubriik"
 
 #: includes/class-wc-post-types.php:192
+#, fuzzy
 msgid "Parent %s:"
-msgstr ""
+msgstr "Ülemrubriik"
 
 #: includes/class-wc-post-types.php:193
+#, fuzzy
 msgid "Edit %s"
-msgstr ""
+msgstr "(Muuda)"
 
 #: includes/class-wc-post-types.php:194
+#, fuzzy
 msgid "Update %s"
-msgstr ""
+msgstr "Uuenda"
 
 #: includes/class-wc-post-types.php:195
+#, fuzzy
 msgid "Add New %s"
-msgstr ""
+msgstr "Lisa uus"
 
 #: includes/class-wc-post-types.php:196
+#, fuzzy
 msgid "New %s"
-msgstr ""
+msgstr "Uus"
 
 #: includes/class-wc-post-types.php:232
 #: includes/updates/woocommerce-update-2.0.php:58
+#, fuzzy
 msgctxt "slug"
 msgid "product"
-msgstr ""
+msgstr "Toode"
 
 #: includes/class-wc-post-types.php:238
 #: includes/integrations/google-analytics/class-wc-google-analytics.php:273
@@ -4144,20 +4363,24 @@ msgstr "Vaata toodet"
 
 #: includes/class-wc-post-types.php:248
 #: includes/widgets/class-wc-widget-product-search.php:27
+#, fuzzy
 msgid "Search Products"
-msgstr ""
+msgstr "Otsi toodet"
 
 #: includes/class-wc-post-types.php:249
+#, fuzzy
 msgid "No Products found"
-msgstr ""
+msgstr "Tooteid ei leitud"
 
 #: includes/class-wc-post-types.php:250
+#, fuzzy
 msgid "No Products found in trash"
-msgstr ""
+msgstr "Prügikastis ei ole tooteid"
 
 #: includes/class-wc-post-types.php:251
+#, fuzzy
 msgid "Parent Product"
-msgstr ""
+msgstr "Ülemine kategooria"
 
 #: includes/class-wc-post-types.php:253
 msgid "This is where you can add new products to your store."
@@ -4203,20 +4426,24 @@ msgid "View Order"
 msgstr "Vaata tellimust"
 
 #: includes/class-wc-post-types.php:300
+#, fuzzy
 msgid "Search Orders"
-msgstr ""
+msgstr "Tellimusi pole"
 
 #: includes/class-wc-post-types.php:301
+#, fuzzy
 msgid "No Orders found"
-msgstr ""
+msgstr "Ühtki sobivat ei leitud."
 
 #: includes/class-wc-post-types.php:302
+#, fuzzy
 msgid "No Orders found in trash"
-msgstr ""
+msgstr "Prügikastis pole lehti."
 
 #: includes/class-wc-post-types.php:303
+#, fuzzy
 msgid "Parent Orders"
-msgstr ""
+msgstr "Tellimusi pole"
 
 #: includes/class-wc-post-types.php:306
 msgid "This is where store orders are stored."
@@ -4260,20 +4487,24 @@ msgid "View Coupon"
 msgstr "Vaata kupongi"
 
 #: includes/class-wc-post-types.php:339
+#, fuzzy
 msgid "Search Coupons"
-msgstr ""
+msgstr "Vaata kuponge"
 
 #: includes/class-wc-post-types.php:340
+#, fuzzy
 msgid "No Coupons found"
-msgstr ""
+msgstr "Ühtki sobivat ei leitud."
 
 #: includes/class-wc-post-types.php:341
+#, fuzzy
 msgid "No Coupons found in trash"
-msgstr ""
+msgstr "Prügikastis pole lehti."
 
 #: includes/class-wc-post-types.php:342
+#, fuzzy
 msgid "Parent Coupon"
-msgstr ""
+msgstr "Lis akupong"
 
 #: includes/class-wc-post-types.php:344
 msgid ""
@@ -4281,14 +4512,15 @@ msgid ""
 msgstr ""
 
 #: includes/class-wc-product-external.php:56
+#, fuzzy
 msgid "Buy product"
-msgstr ""
+msgstr "Muuda toodet"
 
-#: includes/class-wc-product-variation.php:448
+#: includes/class-wc-product-variation.php:456
 msgid "%s &ndash; %s%s"
 msgstr ""
 
-#: includes/class-wc-shortcodes.php:515
+#: includes/class-wc-shortcodes.php:514
 #: includes/integrations/google-analytics/class-wc-google-analytics.php:274
 #: includes/integrations/google-analytics/class-wc-google-analytics.php:294
 #: templates/loop/add-to-cart.php:46
@@ -4299,15 +4531,16 @@ msgstr ""
 msgid "Add to cart"
 msgstr "Lisa korvi"
 
-#: includes/class-wc-shortcodes.php:979
+#: includes/class-wc-shortcodes.php:978
 msgid ""
 "Use $args[\"posts_per_page\"] instead. Deprecated argument will be removed "
 "in WC 2.2."
 msgstr ""
 
 #: includes/emails/class-wc-email-customer-completed-order.php:26
+#, fuzzy
 msgid "Completed order"
-msgstr ""
+msgstr "Lehe järjekorranr."
 
 #: includes/emails/class-wc-email-customer-completed-order.php:27
 msgid ""
@@ -4316,8 +4549,9 @@ msgid ""
 msgstr ""
 
 #: includes/emails/class-wc-email-customer-completed-order.php:29
+#, fuzzy
 msgid "Your order is complete"
-msgstr ""
+msgstr "%s on su uus kasutajanimi."
 
 #: includes/emails/class-wc-email-customer-completed-order.php:30
 msgid "Your {blogname} order from {order_date} is complete"
@@ -4339,20 +4573,23 @@ msgstr "Teema"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:150
 #: includes/emails/class-wc-email-new-order.php:137
+#, fuzzy
 msgid "Email Heading"
-msgstr ""
+msgstr "Klient"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:157
 msgid "Subject (downloadable)"
 msgstr ""
 
 #: includes/emails/class-wc-email-customer-completed-order.php:164
+#, fuzzy
 msgid "Email Heading (downloadable)"
-msgstr ""
+msgstr "E-postiaadress:"
 
 #: includes/emails/class-wc-email-customer-invoice.php:29
+#, fuzzy
 msgid "Customer invoice"
-msgstr ""
+msgstr "Arve seaded"
 
 #: includes/emails/class-wc-email-customer-invoice.php:30
 msgid ""
@@ -4365,28 +4602,33 @@ msgid "Invoice for order {order_number} from {order_date}"
 msgstr ""
 
 #: includes/emails/class-wc-email-customer-invoice.php:36
+#, fuzzy
 msgid "Invoice for order {order_number}"
-msgstr ""
+msgstr "Invoice with number %s not found."
 
 #: includes/emails/class-wc-email-customer-invoice.php:38
 msgid "Your {blogname} order from {order_date}"
 msgstr ""
 
 #: includes/emails/class-wc-email-customer-invoice.php:39
+#, fuzzy
 msgid "Order {order_number} details"
-msgstr ""
+msgstr "show me details"
 
 #: includes/emails/class-wc-email-customer-invoice.php:154
+#, fuzzy
 msgid "Email subject (paid)"
-msgstr ""
+msgstr "Makstuks märgitud"
 
 #: includes/emails/class-wc-email-customer-invoice.php:161
+#, fuzzy
 msgid "Email heading (paid)"
-msgstr ""
+msgstr "Makstuks märgitud"
 
 #: includes/emails/class-wc-email-customer-new-account.php:33
+#, fuzzy
 msgid "New account"
-msgstr ""
+msgstr "Register new UserEcho account"
 
 #: includes/emails/class-wc-email-customer-new-account.php:34
 msgid ""
@@ -4395,16 +4637,19 @@ msgid ""
 msgstr ""
 
 #: includes/emails/class-wc-email-customer-new-account.php:39
+#, fuzzy
 msgid "Your account on {blogname}"
-msgstr ""
+msgstr "Hosted on your URL"
 
 #: includes/emails/class-wc-email-customer-new-account.php:40
+#, fuzzy
 msgid "Welcome to {blogname}"
-msgstr ""
+msgstr "Tere tulemast!"
 
 #: includes/emails/class-wc-email-customer-note.php:31
+#, fuzzy
 msgid "Customer note"
-msgstr ""
+msgstr "Kustuta märkus"
 
 #: includes/emails/class-wc-email-customer-note.php:32
 msgid "Customer note emails are sent when you add a note to an order."
@@ -4419,8 +4664,9 @@ msgid "A note has been added to your order"
 msgstr ""
 
 #: includes/emails/class-wc-email-customer-processing-order.php:26
+#, fuzzy
 msgid "Processing order"
-msgstr ""
+msgstr "Lehe järjekorranr."
 
 #: includes/emails/class-wc-email-customer-processing-order.php:27
 msgid ""
@@ -4429,16 +4675,18 @@ msgid ""
 msgstr ""
 
 #: includes/emails/class-wc-email-customer-processing-order.php:29
+#, fuzzy
 msgid "Thank you for your order"
-msgstr ""
+msgstr "Thank you for using UserEcho."
 
 #: includes/emails/class-wc-email-customer-processing-order.php:30
 msgid "Your {blogname} order receipt from {order_date}"
 msgstr ""
 
 #: includes/emails/class-wc-email-customer-reset-password.php:38
+#, fuzzy
 msgid "Reset password"
-msgstr ""
+msgstr "Parooli vahetamine"
 
 #: includes/emails/class-wc-email-customer-reset-password.php:39
 msgid ""
@@ -4447,24 +4695,28 @@ msgid ""
 msgstr ""
 
 #: includes/emails/class-wc-email-customer-reset-password.php:44
+#, fuzzy
 msgid "Password Reset for {blogname}"
-msgstr ""
+msgstr "Please enter password for login."
 
 #: includes/emails/class-wc-email-customer-reset-password.php:45
+#, fuzzy
 msgid "Password Reset Instructions"
-msgstr ""
+msgstr "Password reset completed"
 
 #: includes/emails/class-wc-email-new-order.php:26
+#, fuzzy
 msgid "New order"
-msgstr ""
+msgstr "Uus tellimus"
 
 #: includes/emails/class-wc-email-new-order.php:27
-msgid "New order emails are sent when an order is received/paid by a customer."
+msgid "New order emails are sent when an order is received."
 msgstr ""
 
 #: includes/emails/class-wc-email-new-order.php:29
+#, fuzzy
 msgid "New customer order"
-msgstr ""
+msgstr "Lisa uus tellimus"
 
 #: includes/emails/class-wc-email-new-order.php:30
 msgid "[{blogname}] New customer order ({order_number}) - {order_date}"
@@ -4502,8 +4754,9 @@ msgid ""
 msgstr ""
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:68
+#, fuzzy
 msgid "Enable Bank Transfer"
-msgstr ""
+msgstr "Sisesta oma panga nimi"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:72
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:58
@@ -4511,7 +4764,7 @@ msgstr ""
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:143
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:127
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:104
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:84
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:82
 #: includes/widgets/class-wc-widget-cart.php:30
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:28
 #: includes/widgets/class-wc-widget-layered-nav.php:74
@@ -4524,8 +4777,9 @@ msgstr ""
 #: includes/widgets/class-wc-widget-recent-reviews.php:28
 #: includes/widgets/class-wc-widget-recently-viewed.php:28
 #: includes/widgets/class-wc-widget-top-rated-products.php:30
+#, fuzzy
 msgid "Title"
-msgstr ""
+msgstr "Pealkiri"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:74
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:60
@@ -4535,20 +4789,21 @@ msgstr ""
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:83
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:58
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:106
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:86
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:84
 msgid "This controls the title which the user sees during checkout."
 msgstr ""
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:75
+#, fuzzy
 msgid "Direct Bank Transfer"
-msgstr ""
+msgstr "Sisesta oma panga nimi"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:79
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:65
 #: includes/gateways/cod/class-wc-gateway-cod.php:71
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:150
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:134
-#: includes/wc-template-functions.php:960
+#: includes/wc-template-functions.php:879
 msgid "Description"
 msgstr "Kirjeldus"
 
@@ -4577,55 +4832,67 @@ msgid "Instructions that will be added to the thank you page and emails."
 msgstr ""
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:105
+#, fuzzy
 msgid "Account Details"
-msgstr ""
+msgstr "Kliendi andmed"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:111
+#, fuzzy
 msgid "Account Name"
-msgstr ""
+msgstr "Konto nimi"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:112
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:253
+#, fuzzy
 msgid "Account Number"
-msgstr ""
+msgstr "Sisesta oma pangakonto number"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:113
+#, fuzzy
 msgid "Bank Name"
-msgstr ""
+msgstr "Sisesta oma panga nimi"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:114
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:257
+#, fuzzy
 msgid "Sort Code"
-msgstr ""
+msgstr "Koodinäidis"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:115
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:261
+#, fuzzy
 msgid "IBAN"
-msgstr ""
+msgstr "IBAN"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:116
+#, fuzzy
 msgid "BIC / Swift"
-msgstr ""
+msgstr "SWIFT/BIC"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:121
+#, fuzzy
 msgid "+ Add Account"
-msgstr ""
+msgstr "Minu konto"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:121
+#, fuzzy
 msgid "Remove selected account(s)"
-msgstr ""
+msgstr "upgrade your account"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:240
+#, fuzzy
 msgid "Our Bank Details"
-msgstr ""
+msgstr "show me details"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:265
+#, fuzzy
 msgid "BIC"
-msgstr ""
+msgstr "SWIFT/BIC"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:295
+#, fuzzy
 msgid "Awaiting BACS payment"
-msgstr ""
+msgstr "Make new payment:"
 
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:25
 msgid "Cheque"
@@ -4639,12 +4906,14 @@ msgid ""
 msgstr ""
 
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:54
+#, fuzzy
 msgid "Enable Cheque Payment"
-msgstr ""
+msgstr "Make new payment:"
 
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:61
+#, fuzzy
 msgid "Cheque Payment"
-msgstr ""
+msgstr "Payment Number"
 
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:68
 msgid ""
@@ -4653,21 +4922,24 @@ msgid ""
 msgstr ""
 
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:115
+#, fuzzy
 msgid "Awaiting cheque payment"
-msgstr ""
+msgstr "Make new payment:"
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:24
 #: includes/gateways/cod/class-wc-gateway-cod.php:67
+#, fuzzy
 msgid "Cash on Delivery"
-msgstr ""
+msgstr "%2$s kommentaar  %1$s kohta"
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:25
 msgid "Have your customers pay with cash (or by other means) upon delivery."
 msgstr ""
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:57
+#, fuzzy
 msgid "Enable COD"
-msgstr ""
+msgstr "Luba JavaScript"
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:58
 msgid "Enable Cash on Delivery"
@@ -4707,24 +4979,27 @@ msgstr ""
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:108
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:293
+#, fuzzy
 msgid "Mijireh error:"
-msgstr ""
+msgstr "Andmebaasi viga"
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:132
 msgid "Enable Mijireh Checkout"
 msgstr ""
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:136
+#, fuzzy
 msgid "Access Key"
-msgstr ""
+msgstr "Aktiveerimisvõti:"
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:138
 msgid "The Mijireh access key for your store."
 msgstr ""
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:146
+#, fuzzy
 msgid "Credit Card"
-msgstr ""
+msgstr "Kaardi number"
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:152
 msgid "Pay securely with your credit card."
@@ -4748,8 +5023,9 @@ msgid ""
 msgstr ""
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:175
+#, fuzzy
 msgid "Join for free"
-msgstr ""
+msgstr "Maksuvaba käive"
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:175
 msgid "Learn more about WooCommerce and Mijireh"
@@ -4768,8 +5044,9 @@ msgid "PayPal"
 msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:93
+#, fuzzy
 msgid "PayPal standard"
-msgstr ""
+msgstr "standardsisend"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:94
 msgid ""
@@ -4778,16 +5055,18 @@ msgid ""
 msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:106
+#, fuzzy
 msgid "Gateway Disabled"
-msgstr ""
+msgstr "Võrgufunktsioonid on välja lülitatud."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:106
 msgid "PayPal does not support your store currency."
 msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:123
+#, fuzzy
 msgid "Enable PayPal standard"
-msgstr ""
+msgstr "Tavaline käibemaks"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:137
 msgid ""
@@ -4796,8 +5075,9 @@ msgid ""
 msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:140
+#, fuzzy
 msgid "PayPal Email"
-msgstr ""
+msgstr "User's Email"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:142
 msgid ""
@@ -4806,8 +5086,9 @@ msgid ""
 msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:148
+#, fuzzy
 msgid "Receiver Email"
-msgstr ""
+msgstr "User's Email"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:150
 msgid ""
@@ -4816,8 +5097,9 @@ msgid ""
 msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:156
+#, fuzzy
 msgid "PayPal Identity Token"
-msgstr ""
+msgstr "Process of SSO_TOKEN generation"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:158
 msgid ""
@@ -4828,12 +5110,14 @@ msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:161
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:194
+#, fuzzy
 msgid "Optional"
-msgstr ""
+msgstr "API võti (valikuline)"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:164
+#, fuzzy
 msgid "Invoice Prefix"
-msgstr ""
+msgstr "Arve seaded"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:166
 msgid ""
@@ -4843,8 +5127,9 @@ msgid ""
 msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:171
+#, fuzzy
 msgid "Payment Action"
-msgstr ""
+msgstr "Payment Number"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:173
 msgid ""
@@ -4853,16 +5138,18 @@ msgid ""
 msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:177
+#, fuzzy
 msgid "Capture"
-msgstr ""
+msgstr "Capture"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:178
 msgid "Authorize"
 msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:182
+#, fuzzy
 msgid "Submission method"
-msgstr ""
+msgstr "Vaikimisi lähetusviis"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:184
 msgid "Use form submission method."
@@ -4875,8 +5162,9 @@ msgid ""
 msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:189
+#, fuzzy
 msgid "Page Style"
-msgstr ""
+msgstr "Venitusviis"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:191
 msgid ""
@@ -4885,12 +5173,14 @@ msgid ""
 msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:197
+#, fuzzy
 msgid "Shipping options"
-msgstr ""
+msgstr "Flashi sätted"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:202
+#, fuzzy
 msgid "Shipping details"
-msgstr ""
+msgstr "Kliendi andmed"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:204
 msgid "Send shipping details to PayPal instead of billing."
@@ -4903,8 +5193,9 @@ msgid ""
 msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:210
+#, fuzzy
 msgid "Address override"
-msgstr ""
+msgstr "change address"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:212
 msgid ""
@@ -4937,12 +5228,14 @@ msgid ""
 msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:229
+#, fuzzy
 msgid "Debug Log"
-msgstr ""
+msgstr "Logi sisse"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:231
+#, fuzzy
 msgid "Enable logging"
-msgstr ""
+msgstr "Luba JavaScript"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:233
 msgid ""
@@ -4951,13 +5244,15 @@ msgid ""
 msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:342
+#, fuzzy
 msgid "Order %s"
-msgstr ""
+msgstr "Tellimus"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:352
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:406
+#, fuzzy
 msgid "Shipping via"
-msgstr ""
+msgstr "Lähetusviisid"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:446
 msgid ""
@@ -4966,8 +5261,9 @@ msgid ""
 msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:471
+#, fuzzy
 msgid "Pay via PayPal"
-msgstr ""
+msgstr "Pay for Month:"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:471
 msgid "Cancel order &amp; restore cart"
@@ -4989,22 +5285,26 @@ msgid ""
 msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:697
+#, fuzzy
 msgid "IPN payment completed"
-msgstr ""
+msgstr "Authorisation not completed."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:700
+#, fuzzy
 msgid "Payment pending: %s"
-msgstr ""
+msgstr "Läbivaatamise ootel"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:712
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:720
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:737
+#, fuzzy
 msgid "Payment %s via IPN."
-msgstr ""
+msgstr "Make new payment:"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:725
+#, fuzzy
 msgid "Order refunded/reversed"
-msgstr ""
+msgstr "Esita see tellimus"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:726
 msgid "Order %s has been marked as refunded - PayPal reason code: %s"
@@ -5015,8 +5315,9 @@ msgid "Payment for order %s refunded/reversed"
 msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:742
+#, fuzzy
 msgid "Order reversed"
-msgstr ""
+msgstr "Lehe järjekorranr."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:743
 msgid ""
@@ -5024,8 +5325,9 @@ msgid ""
 msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:746
+#, fuzzy
 msgid "Payment for order %s reversed"
-msgstr ""
+msgstr "Thank you for payment"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:754
 msgid "Reversal Cancelled"
@@ -5046,12 +5348,14 @@ msgid "Validation error: PayPal amounts do not match (amt %s)."
 msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:832
+#, fuzzy
 msgid "PDT payment completed"
-msgstr ""
+msgstr "Authorisation not completed."
 
 #: includes/integrations/google-analytics/class-wc-google-analytics.php:26
+#, fuzzy
 msgid "Google Analytics"
-msgstr ""
+msgstr "Google kaart"
 
 #: includes/integrations/google-analytics/class-wc-google-analytics.php:27
 msgid ""
@@ -5060,8 +5364,9 @@ msgid ""
 msgstr ""
 
 #: includes/integrations/google-analytics/class-wc-google-analytics.php:63
+#, fuzzy
 msgid "Google Analytics ID"
-msgstr ""
+msgstr "Vigane manuse ID."
 
 #: includes/integrations/google-analytics/class-wc-google-analytics.php:64
 msgid ""
@@ -5070,8 +5375,9 @@ msgid ""
 msgstr ""
 
 #: includes/integrations/google-analytics/class-wc-google-analytics.php:69
+#, fuzzy
 msgid "Set Domain Name"
-msgstr ""
+msgstr "Uue rubriigi nimi"
 
 #: includes/integrations/google-analytics/class-wc-google-analytics.php:70
 msgid ""
@@ -5080,8 +5386,9 @@ msgid ""
 msgstr ""
 
 #: includes/integrations/google-analytics/class-wc-google-analytics.php:75
+#, fuzzy
 msgid "Tracking code"
-msgstr ""
+msgstr "Koodinäidis"
 
 #: includes/integrations/google-analytics/class-wc-google-analytics.php:76
 msgid ""
@@ -5118,8 +5425,9 @@ msgid "ShareDaddy is a sharing plugin bundled with JetPack."
 msgstr ""
 
 #: includes/integrations/sharedaddy/class-wc-sharedaddy.php:51
+#, fuzzy
 msgid "Output ShareDaddy button?"
-msgstr ""
+msgstr "Tee oma esimene arve &raquo;"
 
 #: includes/integrations/sharedaddy/class-wc-sharedaddy.php:52
 msgid "Enable this option to show the ShareDaddy button on the product page."
@@ -5136,8 +5444,9 @@ msgid ""
 msgstr ""
 
 #: includes/integrations/sharethis/class-wc-sharethis.php:63
+#, fuzzy
 msgid "ShareThis Publisher ID"
-msgstr ""
+msgstr "Vigane manuse ID."
 
 #: includes/integrations/sharethis/class-wc-sharethis.php:64
 msgid ""
@@ -5146,8 +5455,9 @@ msgid ""
 msgstr ""
 
 #: includes/integrations/sharethis/class-wc-sharethis.php:69
+#, fuzzy
 msgid "ShareThis Code"
-msgstr ""
+msgstr "Koodinäidis"
 
 #: includes/integrations/sharethis/class-wc-sharethis.php:70
 msgid "You can tweak the ShareThis code by editing this option."
@@ -5155,8 +5465,9 @@ msgstr ""
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:25
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:85
+#, fuzzy
 msgid "Flat Rate"
-msgstr ""
+msgstr "Maksumäär"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:27
 msgid "Flat rates let you define a standard rate per item, or per order."
@@ -5170,20 +5481,23 @@ msgstr ""
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:82
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:81
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:56
+#, fuzzy
 msgid "Method Title"
-msgstr ""
+msgstr "(pealkiri puudub)"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:89
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:63
+#, fuzzy
 msgid "Availability"
-msgstr ""
+msgstr "Toote saadavus"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:94
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:93
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:148
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:104
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:102
+#, fuzzy
 msgid "All allowed countries"
-msgstr ""
+msgstr "SSO users allowed"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:95
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:99
@@ -5191,15 +5505,16 @@ msgstr ""
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:98
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:149
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:153
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:105
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:109
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:103
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:107
 msgid "Specific Countries"
 msgstr ""
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:107
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:81
+#, fuzzy
 msgid "Tax Status"
-msgstr ""
+msgstr "Pildi olek"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:111
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:85
@@ -5208,12 +5523,14 @@ msgstr ""
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:112
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:86
+#, fuzzy
 msgid "None"
-msgstr ""
+msgstr "Puudub"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:116
+#, fuzzy
 msgid "Cost per order"
-msgstr ""
+msgstr "Esita see tellimus"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:122
 msgid ""
@@ -5221,23 +5538,27 @@ msgid ""
 msgstr ""
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:128
+#, fuzzy
 msgid "Additional Rates"
-msgstr ""
+msgstr "Select additional widget settings:"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:130
 msgid ""
 "Optional extra shipping options with additional costs (one per line): Option "
-"Name | Additional Cost | Per Cost Type (order, class, or item) Example: "
-"<code>Priority Mail | 6.95 | order</code>."
+"Name | Additional Cost [+- Percents] | Per Cost Type (order, class, or item) "
+"Example: <code>Priority Mail | 6.95 [+ 0.2%] | order</code>."
 msgstr ""
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:133
-msgid "Option Name | Additional Cost | Per Cost Type (order, class, or item)"
+msgid ""
+"Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, "
+"or item)"
 msgstr ""
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:136
+#, fuzzy
 msgid "Additional Costs"
-msgstr ""
+msgstr "Select additional widget settings:"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:138
 msgid ""
@@ -5246,8 +5567,9 @@ msgid ""
 msgstr ""
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:141
+#, fuzzy
 msgid "Costs Added..."
-msgstr ""
+msgstr "Admin added."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:145
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:94
@@ -5266,8 +5588,11 @@ msgstr ""
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:154
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:120
+#, fuzzy
 msgid "Minimum Handling Fee"
 msgstr ""
+"Viivis on protsent arve summast, mida küsitakse arve tasumisega viivitamisel "
+"iga viivitatud päeva eest. Tavaliselt jääb see vahemikku 0.05 - 0.5"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:160
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:126
@@ -5276,81 +5601,92 @@ msgid ""
 "blank to disable."
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:480
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:525
 msgid "Costs"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:487
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:532
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:100
 msgid "Cost"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:487
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:532
+#, fuzzy
 msgid "Cost, excluding tax."
-msgstr ""
+msgstr "Käibemaks"
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:488
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:533
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:112
+#, fuzzy
 msgid "Handling Fee"
-msgstr ""
+msgstr "Viivis"
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:488
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:533
 msgid ""
 "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%."
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:493
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:538
+#, fuzzy
 msgid "+ Add Cost"
-msgstr ""
+msgstr "Lisa helifail"
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:493
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:538
+#, fuzzy
 msgid "Delete selected costs"
-msgstr ""
+msgstr "Selected feedback details"
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:499
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:544
+#, fuzzy
 msgid "Any class"
-msgstr ""
+msgstr "CSS klass"
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:500
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:501
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:545
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:546
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:110
 #: templates/order/order-details.php:123 templates/order/order-details.php:138
 msgid "N/A"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:519
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:549
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:564
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:594
+#, fuzzy
 msgid "Select a class&hellip;"
-msgstr ""
+msgstr "<span class=\"%1$s\">Sildid:</span> %2$s"
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:524
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:525
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:569
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:570
 msgid "0.00"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:563
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:608
+#, fuzzy
 msgid "Delete the selected rates?"
-msgstr ""
+msgstr "Selected feedback details"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:25
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:84
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:145
+#, fuzzy
 msgid "Free Shipping"
-msgstr ""
+msgstr "Lähetusviisid"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:77
+#, fuzzy
 msgid "Enable Free Shipping"
-msgstr ""
+msgstr "Vaikimisi lähetusviis"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:88
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:143
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:99
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:97
+#, fuzzy
 msgid "Method availability"
-msgstr ""
+msgstr "Toote saadavus"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:106
+#, fuzzy
 msgid "Free Shipping Requires..."
-msgstr ""
+msgstr "Vaikimisi lähetusviis"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:111
 msgid "A valid free shipping coupon"
@@ -5369,8 +5705,9 @@ msgid "A minimum order amount AND a coupon"
 msgstr ""
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:118
+#, fuzzy
 msgid "Minimum Order Amount"
-msgstr ""
+msgstr "Esita see tellimus"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:124
 msgid ""
@@ -5387,20 +5724,23 @@ msgid "International delivery based on flat rate shipping."
 msgstr ""
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:68
+#, fuzzy
 msgid "Selected countries"
-msgstr ""
+msgstr "Selected feedback details"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:69
+#, fuzzy
 msgid "Excluding selected countries"
-msgstr ""
+msgstr "Selected feedback details"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:73
 msgid "Countries"
 msgstr ""
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:90
+#, fuzzy
 msgid "Cost Added..."
-msgstr ""
+msgstr "Admin added."
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:106
 msgid "Cost excluding tax. Enter an amount, e.g. 2.50."
@@ -5418,37 +5758,43 @@ msgid "Local Delivery"
 msgstr ""
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:98
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:78
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:76
+#, fuzzy
 msgid "Enable"
-msgstr ""
+msgstr "Luba JavaScript"
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:100
 msgid "Enable local delivery"
 msgstr ""
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:111
+#, fuzzy
 msgid "Fee Type"
-msgstr ""
+msgstr "Feedback type"
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:113
 msgid "How to calculate delivery charges"
 msgstr ""
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:116
+#, fuzzy
 msgid "Fixed amount"
-msgstr ""
+msgstr "Vali Fikseeritud hinnastamine"
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:117
+#, fuzzy
 msgid "Percentage of cart total"
-msgstr ""
+msgstr "Lisa ostukorvi"
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:118
+#, fuzzy
 msgid "Fixed amount per product"
-msgstr ""
+msgstr "Setup amount of feedback per page."
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:123
+#, fuzzy
 msgid "Delivery Fee"
-msgstr ""
+msgstr "Viivis"
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:129
 msgid ""
@@ -5457,12 +5803,13 @@ msgid ""
 msgstr ""
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:135
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:91
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:89
+#, fuzzy
 msgid "Zip/Post Codes"
-msgstr ""
+msgstr "Lisa postitus"
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:137
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:93
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:91
 msgid ""
 "What zip/post codes would you like to offer delivery to? Separate codes with "
 "a comma. Accepts wildcards, e.g. P* will match a postcode of PE30."
@@ -5474,138 +5821,144 @@ msgid ""
 msgstr ""
 
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:25
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:87
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:85
 msgid "Local Pickup"
 msgstr ""
 
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:80
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:78
 msgid "Enable local pickup"
 msgstr ""
 
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:117
-msgid "Apply base tax rate"
-msgstr ""
-
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:119
-msgid ""
-"When this shipping method is chosen, apply the base tax rate rather than for "
-"the customer's given address."
-msgstr ""
-
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:134
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:126
 msgid ""
 "Local pickup is a simple method which allows the customer to pick up their "
 "order themselves."
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-cart.php:68
+#: includes/shortcodes/class-wc-shortcode-cart.php:67
+#, fuzzy
 msgid "Shipping costs updated."
-msgstr ""
+msgstr "Vaikimisi lähetusviis"
 
-#: includes/shortcodes/class-wc-shortcode-checkout.php:104
-#: includes/shortcodes/class-wc-shortcode-checkout.php:155
+#: includes/shortcodes/class-wc-shortcode-checkout.php:87
+#: includes/shortcodes/class-wc-shortcode-my-account.php:102
+#: includes/shortcodes/class-wc-shortcode-view-order.php:50
+#, fuzzy
+msgid "My Account &rarr;"
+msgstr "Kustuta mu konto"
+
+#: includes/shortcodes/class-wc-shortcode-checkout.php:109
+#: includes/shortcodes/class-wc-shortcode-checkout.php:160
 msgid ""
 "This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. "
 "Please contact us if you need assistance."
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-checkout.php:108
-#: includes/shortcodes/class-wc-shortcode-checkout.php:159
+#: includes/shortcodes/class-wc-shortcode-checkout.php:113
+#: includes/shortcodes/class-wc-shortcode-checkout.php:164
 msgid "Sorry, this order is invalid and cannot be paid for."
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-checkout.php:125
+#: includes/shortcodes/class-wc-shortcode-checkout.php:130
 #: templates/checkout/thankyou.php:40
 #: templates/emails/customer-completed-order.php:18
 #: templates/emails/customer-invoice.php:22
 #: templates/emails/customer-note.php:22
 #: templates/emails/customer-processing-order.php:18
+#, fuzzy
 msgid "Order:"
-msgstr ""
+msgstr "Tellimus"
 
-#: includes/shortcodes/class-wc-shortcode-checkout.php:129
+#: includes/shortcodes/class-wc-shortcode-checkout.php:134
 #: templates/checkout/thankyou.php:44
+#, fuzzy
 msgid "Date:"
-msgstr ""
-
-#: includes/shortcodes/class-wc-shortcode-checkout.php:133
-#: templates/checkout/thankyou.php:48
-msgid "Total:"
-msgstr ""
+msgstr "Date:"
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:138
-#: templates/checkout/thankyou.php:53
-msgid "Payment method:"
-msgstr ""
+#: templates/checkout/thankyou.php:48
+#, fuzzy
+msgid "Total:"
+msgstr "Kokku"
 
-#: includes/shortcodes/class-wc-shortcode-checkout.php:228
+#: includes/shortcodes/class-wc-shortcode-checkout.php:143
+#: templates/checkout/thankyou.php:53
+#, fuzzy
+msgid "Payment method:"
+msgstr "Payment Number"
+
+#: includes/shortcodes/class-wc-shortcode-checkout.php:233
 msgid ""
 "The order totals have been updated. Please confirm your order by pressing "
 "the Place Order button at the bottom of the page."
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:102
-#: includes/shortcodes/class-wc-shortcode-view-order.php:50
-msgid "My Account &rarr;"
-msgstr ""
-
 #: includes/shortcodes/class-wc-shortcode-my-account.php:109
-#: includes/shortcodes/class-wc-shortcode-view-order.php:57
+#: templates/myaccount/view-order.php:13
 msgid ""
 "Order <mark class=\"order-number\">%s</mark> made on <mark class=\"order-date"
 "\">%s</mark>"
 msgstr ""
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:110
-#: includes/shortcodes/class-wc-shortcode-view-order.php:58
+#: templates/myaccount/view-order.php:14
 msgid "Order status: <mark class=\"order-status\">%s</mark>"
 msgstr ""
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:115
-#: includes/shortcodes/class-wc-shortcode-view-order.php:64
-#: templates/order/tracking.php:31
+#: templates/myaccount/view-order.php:20 templates/order/tracking.php:31
+#, fuzzy
 msgid "Order Updates"
-msgstr ""
+msgstr "Lehe järjekorranr."
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:121
-#: includes/shortcodes/class-wc-shortcode-view-order.php:70
-#: templates/order/tracking.php:37
-msgid "l jS \\of F Y, h:ia"
-msgstr ""
+#: templates/myaccount/view-order.php:26 templates/order/tracking.php:37
+#, fuzzy
+msgid "l jS \\o\\f F Y, h:ia"
+msgstr "JS tagasikutse"
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:203
+#: includes/shortcodes/class-wc-shortcode-my-account.php:228
+#, fuzzy
 msgid "Enter a username or e-mail address."
-msgstr ""
+msgstr "<strong>VIGA</strong>: palun sisesta kasutajanimi või e-postiaadress."
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:210
+#: includes/shortcodes/class-wc-shortcode-my-account.php:235
+#, fuzzy
 msgid "There is no user registered with that email address."
 msgstr ""
+"<strong>VIGA</strong>: Selle e-postiaadressiga kasutajat pole registreeritud."
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:225
+#: includes/shortcodes/class-wc-shortcode-my-account.php:250
+#, fuzzy
 msgid "Invalid username or e-mail."
-msgstr ""
+msgstr "<strong>VIGA</strong>: Vigane kasutajanimi või e-aadress."
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:239
+#: includes/shortcodes/class-wc-shortcode-my-account.php:264
+#, fuzzy
 msgid "Password reset is not allowed for this user"
-msgstr ""
+msgstr "See kasutaja ei saa parooli lähtestada"
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:267
-msgid "Check your e-mail for the confirmation link."
-msgstr ""
-
-#: includes/shortcodes/class-wc-shortcode-my-account.php:287
 #: includes/shortcodes/class-wc-shortcode-my-account.php:292
-#: includes/shortcodes/class-wc-shortcode-my-account.php:299
+#, fuzzy
+msgid "Check your e-mail for the confirmation link."
+msgstr "Kinnitusviide on saadetud sinu e-postiaadressile."
+
+#: includes/shortcodes/class-wc-shortcode-my-account.php:312
+#: includes/shortcodes/class-wc-shortcode-my-account.php:317
+#: includes/shortcodes/class-wc-shortcode-my-account.php:324
+#, fuzzy
 msgid "Invalid key"
-msgstr ""
+msgstr "vigane võti"
 
 #: includes/shortcodes/class-wc-shortcode-order-tracking.php:50
+#, fuzzy
 msgid "Please enter a valid order ID"
-msgstr ""
+msgstr "Please enter a valid email address."
 
 #: includes/shortcodes/class-wc-shortcode-order-tracking.php:54
+#, fuzzy
 msgid "Please enter a valid order email"
-msgstr ""
+msgstr "Please enter a valid email address."
 
 #: includes/shortcodes/class-wc-shortcode-order-tracking.php:73
 msgid "Sorry, we could not find that order id in our database."
@@ -5620,172 +5973,184 @@ msgid "Added &quot;%s&quot; to your cart."
 msgstr ""
 
 #: includes/wc-cart-functions.php:84
+#, fuzzy
 msgid "&quot; and &quot;"
-msgstr ""
+msgstr "and implement"
 
 #: includes/wc-cart-functions.php:87
 msgid "&quot;%s&quot; was successfully added to your cart."
 msgstr ""
 
 #: includes/wc-cart-functions.php:95
+#, fuzzy
 msgid "Continue Shopping &rarr;"
-msgstr ""
+msgstr "Uuemad kommentaarid &rarr;"
 
-#: includes/wc-core-functions.php:62
+#: includes/wc-core-functions.php:148
 msgid "Australian Dollars"
 msgstr ""
 
-#: includes/wc-core-functions.php:63
+#: includes/wc-core-functions.php:149
+#, fuzzy
 msgid "Brazilian Real"
-msgstr ""
+msgstr "RealMedia mängija sätted"
 
-#: includes/wc-core-functions.php:64
+#: includes/wc-core-functions.php:150
 msgid "Bulgarian Lev"
 msgstr ""
 
-#: includes/wc-core-functions.php:65
+#: includes/wc-core-functions.php:151
 msgid "Canadian Dollars"
 msgstr ""
 
-#: includes/wc-core-functions.php:66
+#: includes/wc-core-functions.php:152
 msgid "Chinese Yuan"
 msgstr ""
 
-#: includes/wc-core-functions.php:67
+#: includes/wc-core-functions.php:153
+#, fuzzy
 msgid "Czech Koruna"
-msgstr ""
+msgstr "Tšehhi Vabariik"
 
-#: includes/wc-core-functions.php:68
+#: includes/wc-core-functions.php:154
 msgid "Danish Krone"
 msgstr ""
 
-#: includes/wc-core-functions.php:69
+#: includes/wc-core-functions.php:155
 msgid "Euros"
 msgstr ""
 
-#: includes/wc-core-functions.php:70
+#: includes/wc-core-functions.php:156
 msgid "Hong Kong Dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:71
+#: includes/wc-core-functions.php:157
 msgid "Hungarian Forint"
 msgstr ""
 
-#: includes/wc-core-functions.php:72
+#: includes/wc-core-functions.php:158
 msgid "Indonesia Rupiah"
 msgstr ""
 
-#: includes/wc-core-functions.php:73
+#: includes/wc-core-functions.php:159
 msgid "Indian Rupee"
 msgstr ""
 
-#: includes/wc-core-functions.php:74
+#: includes/wc-core-functions.php:160
 msgid "Israeli Shekel"
 msgstr ""
 
-#: includes/wc-core-functions.php:75
+#: includes/wc-core-functions.php:161
 msgid "Japanese Yen"
 msgstr ""
 
-#: includes/wc-core-functions.php:76
+#: includes/wc-core-functions.php:162
 msgid "South Korean Won"
 msgstr ""
 
-#: includes/wc-core-functions.php:77
+#: includes/wc-core-functions.php:163
 msgid "Malaysian Ringgits"
 msgstr ""
 
-#: includes/wc-core-functions.php:78
+#: includes/wc-core-functions.php:164
 msgid "Mexican Peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:79
+#: includes/wc-core-functions.php:165
 msgid "Norwegian Krone"
 msgstr ""
 
-#: includes/wc-core-functions.php:80
+#: includes/wc-core-functions.php:166
+#, fuzzy
 msgid "New Zealand Dollar"
-msgstr ""
+msgstr "Lisa rubriik"
 
-#: includes/wc-core-functions.php:81
+#: includes/wc-core-functions.php:167
 msgid "Philippine Pesos"
 msgstr ""
 
-#: includes/wc-core-functions.php:82
+#: includes/wc-core-functions.php:168
 msgid "Polish Zloty"
 msgstr ""
 
-#: includes/wc-core-functions.php:83
+#: includes/wc-core-functions.php:169
 msgid "Pounds Sterling"
 msgstr ""
 
-#: includes/wc-core-functions.php:84
+#: includes/wc-core-functions.php:170
 msgid "Romanian Leu"
 msgstr ""
 
-#: includes/wc-core-functions.php:85
+#: includes/wc-core-functions.php:171
 msgid "Russian Ruble"
 msgstr ""
 
-#: includes/wc-core-functions.php:86
+#: includes/wc-core-functions.php:172
 msgid "Singapore Dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:87
+#: includes/wc-core-functions.php:173
 msgid "South African rand"
 msgstr ""
 
-#: includes/wc-core-functions.php:88
+#: includes/wc-core-functions.php:174
 msgid "Swedish Krona"
 msgstr ""
 
-#: includes/wc-core-functions.php:89
+#: includes/wc-core-functions.php:175
 msgid "Swiss Franc"
 msgstr ""
 
-#: includes/wc-core-functions.php:90
+#: includes/wc-core-functions.php:176
+#, fuzzy
 msgid "Taiwan New Dollars"
-msgstr ""
+msgstr "Lisa rubriik"
 
-#: includes/wc-core-functions.php:91
+#: includes/wc-core-functions.php:177
 msgid "Thai Baht"
 msgstr ""
 
-#: includes/wc-core-functions.php:92
+#: includes/wc-core-functions.php:178
 msgid "Turkish Lira"
 msgstr ""
 
-#: includes/wc-core-functions.php:93
+#: includes/wc-core-functions.php:179
+#, fuzzy
 msgid "US Dollars"
-msgstr ""
+msgstr "Email us"
 
-#: includes/wc-core-functions.php:94
+#: includes/wc-core-functions.php:180
 msgid "Vietnamese Dong"
 msgstr ""
 
 #: includes/wc-coupon-functions.php:22
+#, fuzzy
 msgid "Cart Discount"
-msgstr ""
+msgstr "Sisesta allahindluse protsent. Näiteks: 10"
 
 #: includes/wc-coupon-functions.php:23
+#, fuzzy
 msgid "Cart % Discount"
-msgstr ""
+msgstr "Sisesta allahindluse protsent. Näiteks: 10"
 
 #: includes/wc-coupon-functions.php:24
+#, fuzzy
 msgid "Product Discount"
-msgstr ""
+msgstr "Sisesta allahindluse protsent. Näiteks: 10"
 
 #: includes/wc-coupon-functions.php:25
+#, fuzzy
 msgid "Product % Discount"
-msgstr ""
+msgstr "Sisesta allahindluse protsent. Näiteks: 10"
 
 #: includes/wc-customer-functions.php:49
 msgid "An account is already registered with your email address. Please login."
 msgstr ""
 
 #: includes/wc-customer-functions.php:59
+#, fuzzy
 msgid "Please enter a valid account username."
-msgstr ""
+msgstr "<strong>VIGA</strong>: Palun sisesta kasutajanimi."
 
 #: includes/wc-customer-functions.php:62
 msgid ""
@@ -5793,8 +6158,9 @@ msgid ""
 msgstr ""
 
 #: includes/wc-customer-functions.php:82
+#, fuzzy
 msgid "Please enter an account password."
-msgstr ""
+msgstr "Please enter password for login."
 
 #: includes/wc-customer-functions.php:107
 msgid ""
@@ -5802,123 +6168,145 @@ msgid ""
 "have problems."
 msgstr ""
 
-#: includes/wc-order-functions.php:108 includes/wc-order-functions.php:135
+#: includes/wc-order-functions.php:110 includes/wc-order-functions.php:137
+#, fuzzy
 msgid "Download Permissions Granted"
-msgstr ""
+msgstr "Lae alla arve PDF"
 
-#: includes/wc-order-functions.php:295
+#: includes/wc-order-functions.php:300
 msgid "Unpaid order cancelled - time limit reached."
 msgstr ""
 
-#: includes/wc-product-functions.php:264
+#: includes/wc-product-functions.php:307
+#, fuzzy
 msgctxt "slug"
 msgid "uncategorized"
-msgstr ""
+msgstr "Määratlemata"
 
-#: includes/wc-template-functions.php:376
+#: includes/wc-template-functions.php:297
 msgid ""
 "This is a demo store for testing purposes &mdash; no orders shall be "
 "fulfilled."
 msgstr ""
 
-#: includes/wc-template-functions.php:395
+#: includes/wc-template-functions.php:316
+#, fuzzy
 msgid "Search Results: &ldquo;%s&rdquo;"
-msgstr ""
+msgstr "%1$s %2$s Otsingu &#8220;%3$s&#8221; RSS"
 
-#: includes/wc-template-functions.php:398
+#: includes/wc-template-functions.php:319
+#, fuzzy
 msgid "&nbsp;&ndash; Page %s"
-msgstr ""
+msgstr "&laquo; Eelmine lehekülg"
 
-#: includes/wc-template-functions.php:968
+#: includes/wc-template-functions.php:887
 #: templates/checkout/form-shipping.php:57
 #: templates/single-product/tabs/additional-information.php:14
+#, fuzzy
 msgid "Additional Information"
-msgstr ""
+msgstr "Plugina info:"
 
-#: includes/wc-template-functions.php:976
+#: includes/wc-template-functions.php:895
 msgid "Reviews (%d)"
 msgstr ""
 
-#: includes/wc-template-functions.php:1059
+#: includes/wc-template-functions.php:985
 msgid ""
 "Use $args argument as an array instead. Deprecated argument will be removed "
 "in WC 2.2."
 msgstr ""
 
-#: includes/wc-template-functions.php:1164
+#: includes/wc-template-functions.php:1090
+#, fuzzy
 msgid "Free shipping coupon"
-msgstr ""
+msgstr "Lisa uus kupong"
 
-#: includes/wc-template-functions.php:1166
+#: includes/wc-template-functions.php:1092
+#, fuzzy
 msgid "[Remove]"
-msgstr ""
+msgstr "Kustuta"
 
-#: includes/wc-template-functions.php:1216
+#: includes/wc-template-functions.php:1142
+#, fuzzy
 msgid "Free"
-msgstr ""
+msgstr "Tasuta!"
 
-#: includes/wc-template-functions.php:1326
+#: includes/wc-template-functions.php:1250
+#, fuzzy
 msgctxt "breadcrumb"
 msgid "Home"
-msgstr ""
+msgstr "Esileht"
 
-#: includes/wc-template-functions.php:1606
+#: includes/wc-template-functions.php:1522
+#, fuzzy
 msgid "Order Again"
-msgstr ""
+msgstr "password (again)"
 
-#: includes/wc-template-functions.php:1697
+#: includes/wc-template-functions.php:1611
 #: templates/cart/shipping-calculator.php:28
+#, fuzzy
 msgid "Select a country&hellip;"
-msgstr ""
+msgstr "Riik..."
 
-#: includes/wc-template-functions.php:1704
+#: includes/wc-template-functions.php:1618
+#, fuzzy
 msgid "Update country"
-msgstr ""
+msgstr "riigi kood"
 
-#: includes/wc-template-functions.php:1747
+#: includes/wc-template-functions.php:1661
 #: templates/cart/shipping-calculator.php:52
+#, fuzzy
 msgid "Select a state&hellip;"
-msgstr ""
+msgstr "Maakond..."
 
-#: includes/wc-template-functions.php:1859
+#: includes/wc-template-functions.php:1773
+#, fuzzy
 msgid "Search for:"
-msgstr ""
+msgstr "Otsi:"
 
-#: includes/wc-template-functions.php:1860
+#: includes/wc-template-functions.php:1774
+#, fuzzy
 msgid "Search for products"
-msgstr ""
+msgstr "Otsitulemused: %s"
 
-#: includes/wc-template-functions.php:1861
+#: includes/wc-template-functions.php:1775
+#, fuzzy
 msgid "Search"
-msgstr ""
+msgstr "Otsi"
 
-#: includes/wc-template-functions.php:1887
+#: includes/wc-template-functions.php:1801
+#, fuzzy
 msgid "New products"
-msgstr ""
+msgstr "Otsi toodet"
 
-#: includes/wc-template-functions.php:1895
+#: includes/wc-template-functions.php:1809
+#, fuzzy
 msgid "New products added to %s"
-msgstr ""
+msgstr "Tooted lisati ostukorvi"
 
-#: includes/wc-template-functions.php:1903
+#: includes/wc-template-functions.php:1817
+#, fuzzy
 msgid "New products tagged %s"
-msgstr ""
+msgstr "<span class=\"%1$s\">Sildid:</span> %2$s"
 
-#: includes/wc-term-functions.php:60
+#: includes/wc-term-functions.php:88
+#, fuzzy
 msgid "Select a category"
-msgstr ""
+msgstr "Vali rubriik"
 
-#: includes/wc-term-functions.php:64
+#: includes/wc-term-functions.php:92
+#, fuzzy
 msgid "Uncategorized"
-msgstr ""
+msgstr "Määratlemata"
 
 #: includes/widgets/class-wc-widget-cart.php:23
 msgid "Display the user's Cart in the sidebar."
 msgstr ""
 
 #: includes/widgets/class-wc-widget-cart.php:25
+#, fuzzy
 msgid "WooCommerce Cart"
-msgstr ""
+msgstr "Tühjenda ostukorv"
 
 #: includes/widgets/class-wc-widget-cart.php:35
 msgid "Hide if cart is empty"
@@ -5933,18 +6321,21 @@ msgid "WooCommerce Layered Nav Filters"
 msgstr ""
 
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:27
+#, fuzzy
 msgid "Active Filters"
-msgstr ""
+msgstr "Aktiivne: kavandatud"
 
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:84
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:91
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:96
+#, fuzzy
 msgid "Remove filter"
-msgstr ""
+msgstr "Eemalda pilt"
 
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:91
+#, fuzzy
 msgid "Min"
-msgstr ""
+msgstr "%s minut"
 
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:96
 msgid "Max"
@@ -5957,40 +6348,48 @@ msgid ""
 msgstr ""
 
 #: includes/widgets/class-wc-widget-layered-nav.php:25
+#, fuzzy
 msgid "WooCommerce Layered Nav"
-msgstr ""
+msgstr "<span class=\"meta-nav\">&larr;</span> %s"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:73
+#, fuzzy
 msgid "Filter by"
-msgstr ""
+msgstr "%s tehtud postitused"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:79
 msgid "Attribute"
 msgstr ""
 
 #: includes/widgets/class-wc-widget-layered-nav.php:85
+#, fuzzy
 msgid "Display type"
-msgstr ""
+msgstr "Feedback type"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:87
+#, fuzzy
 msgid "List"
-msgstr ""
+msgstr "Nimistu"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:88
+#, fuzzy
 msgid "Dropdown"
-msgstr ""
+msgstr "Näita rippmenüüna"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:94
+#, fuzzy
 msgid "Query type"
-msgstr ""
+msgstr "Feedback type"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:96
+#, fuzzy
 msgid "AND"
-msgstr ""
+msgstr " ja "
 
 #: includes/widgets/class-wc-widget-layered-nav.php:97
+#, fuzzy
 msgid "OR"
-msgstr ""
+msgstr "VÕI"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:178
 msgid "Any %s"
@@ -6003,120 +6402,143 @@ msgid ""
 msgstr ""
 
 #: includes/widgets/class-wc-widget-price-filter.php:25
+#, fuzzy
 msgid "WooCommerce Price Filter"
-msgstr ""
+msgstr "Default feedback filter"
 
 #: includes/widgets/class-wc-widget-price-filter.php:29
+#, fuzzy
 msgid "Filter by price"
-msgstr ""
-
-#: includes/widgets/class-wc-widget-price-filter.php:133
-msgid "Min price"
-msgstr ""
-
-#: includes/widgets/class-wc-widget-price-filter.php:134
-msgid "Max price"
-msgstr ""
+msgstr "Hinnaalandusrühm"
 
 #: includes/widgets/class-wc-widget-price-filter.php:135
-msgid "Filter"
-msgstr ""
+#, fuzzy
+msgid "Min price"
+msgstr "Hinnarühm"
+
+#: includes/widgets/class-wc-widget-price-filter.php:136
+#, fuzzy
+msgid "Max price"
+msgstr "Hinnarühm"
 
 #: includes/widgets/class-wc-widget-price-filter.php:137
+#, fuzzy
+msgid "Filter"
+msgstr "Default feedback filter"
+
+#: includes/widgets/class-wc-widget-price-filter.php:139
+#, fuzzy
 msgid "Price:"
-msgstr ""
+msgstr "Hind"
 
 #: includes/widgets/class-wc-widget-product-categories.php:24
 msgid "A list or dropdown of product categories."
 msgstr ""
 
 #: includes/widgets/class-wc-widget-product-categories.php:26
+#, fuzzy
 msgid "WooCommerce Product Categories"
-msgstr ""
+msgstr "Kõik kategooriad"
 
 #: includes/widgets/class-wc-widget-product-categories.php:38
+#, fuzzy
 msgid "Category Order"
-msgstr ""
+msgstr "Lehe järjekorranr."
 
 #: includes/widgets/class-wc-widget-product-categories.php:39
-#: templates/single-product-reviews.php:85 woocommerce-ajax.php:1125
+#: templates/single-product-reviews.php:85 woocommerce-ajax.php:1127
+#, fuzzy
 msgid "Name"
-msgstr ""
+msgstr "Nimi"
 
 #: includes/widgets/class-wc-widget-product-categories.php:45
+#, fuzzy
 msgid "Show as dropdown"
-msgstr ""
+msgstr "Näita rippmenüüna"
 
 #: includes/widgets/class-wc-widget-product-categories.php:50
+#, fuzzy
 msgid "Show post counts"
-msgstr ""
+msgstr "Näita postituste arvu"
 
 #: includes/widgets/class-wc-widget-product-categories.php:55
+#, fuzzy
 msgid "Show hierarchy"
-msgstr ""
+msgstr "Näita hierarhiat"
 
 #: includes/widgets/class-wc-widget-product-categories.php:60
 msgid "Only show children for the current category"
 msgstr ""
 
 #: includes/widgets/class-wc-widget-product-categories.php:156
+#, fuzzy
 msgid "No product categories exist."
-msgstr ""
+msgstr "Setup personal categories for each product."
 
 #: includes/widgets/class-wc-widget-product-search.php:21
 msgid "A Search box for products only."
 msgstr ""
 
 #: includes/widgets/class-wc-widget-product-search.php:23
+#, fuzzy
 msgid "WooCommerce Product Search"
-msgstr ""
+msgstr "Otsi Tootekategooriaid"
 
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:21
 msgid "Your most used product tags in cloud format."
 msgstr ""
 
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:23
+#, fuzzy
 msgid "WooCommerce Product Tags"
-msgstr ""
+msgstr "Forum tags setup"
 
 #: includes/widgets/class-wc-widget-products.php:21
 msgid "Display a list of your products on your site."
 msgstr ""
 
 #: includes/widgets/class-wc-widget-products.php:23
+#, fuzzy
 msgid "WooCommerce Products"
-msgstr ""
+msgstr "Otsi toodet"
 
 #: includes/widgets/class-wc-widget-products.php:36
 #: includes/widgets/class-wc-widget-recently-viewed.php:36
 #: includes/widgets/class-wc-widget-top-rated-products.php:38
+#, fuzzy
 msgid "Number of products to show"
-msgstr ""
+msgstr "Näidatavate kommentaaride arv:"
 
 #: includes/widgets/class-wc-widget-products.php:41
+#, fuzzy
 msgid "Show"
-msgstr ""
+msgstr "Näita"
 
 #: includes/widgets/class-wc-widget-products.php:43
+#, fuzzy
 msgid "All Products"
-msgstr ""
+msgstr "Otsi toodet"
 
 #: includes/widgets/class-wc-widget-products.php:44
+#, fuzzy
 msgid "Featured Products"
-msgstr ""
+msgstr "Otsi toodet"
 
 #: includes/widgets/class-wc-widget-products.php:45
+#, fuzzy
 msgid "On-sale Products"
-msgstr ""
+msgstr "Tooteid ei leitud"
 
 #: includes/widgets/class-wc-widget-products.php:51
+#, fuzzy
 msgid "Order by"
-msgstr ""
+msgstr "%s tehtud postitused"
 
 #: includes/widgets/class-wc-widget-products.php:53
 #: templates/myaccount/my-orders.php:33
+#, fuzzy
 msgid "Date"
-msgstr ""
+msgstr "Kuupäev"
 
 #: includes/widgets/class-wc-widget-products.php:54 templates/cart/cart.php:28
 #: templates/emails/admin-new-order.php:24
@@ -6124,16 +6546,19 @@ msgstr ""
 #: templates/emails/customer-invoice.php:29
 #: templates/emails/customer-note.php:29
 #: templates/emails/customer-processing-order.php:25
+#, fuzzy
 msgid "Price"
-msgstr ""
+msgstr "Hind"
 
 #: includes/widgets/class-wc-widget-products.php:55
+#, fuzzy
 msgid "Random"
-msgstr ""
+msgstr "Juhuslik"
 
 #: includes/widgets/class-wc-widget-products.php:56
+#, fuzzy
 msgid "Sales"
-msgstr ""
+msgstr "Müügiühik"
 
 #: includes/widgets/class-wc-widget-products.php:64
 msgid "ASC"
@@ -6144,45 +6569,53 @@ msgid "DESC"
 msgstr ""
 
 #: includes/widgets/class-wc-widget-products.php:71
+#, fuzzy
 msgid "Hide free products"
-msgstr ""
+msgstr "Tooteid ei leitud"
 
 #: includes/widgets/class-wc-widget-products.php:76
+#, fuzzy
 msgid "Show hidden products"
-msgstr ""
+msgstr "Tooteid ei leitud"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:21
 msgid "Display a list of your most recent reviews on your site."
 msgstr ""
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:23
+#, fuzzy
 msgid "WooCommerce Recent Reviews"
-msgstr ""
+msgstr "Värsked kommentaarid"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:27
+#, fuzzy
 msgid "Recent Reviews"
-msgstr ""
+msgstr "Värsked kommentaarid"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:36
+#, fuzzy
 msgid "Number of reviews to show"
-msgstr ""
+msgstr "Näidatavate kommentaaride arv:"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:85
+#, fuzzy
 msgctxt "by comment author"
 msgid "by %1$s"
-msgstr ""
+msgstr "Kirjutas %s"
 
 #: includes/widgets/class-wc-widget-recently-viewed.php:21
 msgid "Display a list of recently viewed products."
 msgstr ""
 
 #: includes/widgets/class-wc-widget-recently-viewed.php:23
+#, fuzzy
 msgid "WooCommerce Recently Viewed"
-msgstr ""
+msgstr "http://www.woothemes.com/woocommerce/"
 
 #: includes/widgets/class-wc-widget-recently-viewed.php:27
+#, fuzzy
 msgid "Recently Viewed Products"
-msgstr ""
+msgstr "Tooteid ei leitud"
 
 #: includes/widgets/class-wc-widget-top-rated-products.php:23
 msgid "Display a list of your top rated products on your site."
@@ -6193,24 +6626,27 @@ msgid "WooCommerce Top Rated Products"
 msgstr ""
 
 #: includes/widgets/class-wc-widget-top-rated-products.php:29
+#, fuzzy
 msgid "Top Rated Products"
-msgstr ""
+msgstr "Tooteid ei leitud"
 
-#: templates/cart/cart-empty.php:14
+#: templates/cart/cart-empty.php:16
 msgid "Your cart is currently empty."
 msgstr ""
 
-#: templates/cart/cart-empty.php:18
+#: templates/cart/cart-empty.php:20
 msgid "&larr; Return To Shop"
 msgstr ""
 
 #: templates/cart/cart-shipping.php:16
+#, fuzzy
 msgid "Shipping #%d"
-msgstr ""
+msgstr "Lähetusviisid"
 
 #: templates/cart/cart-shipping.php:18
+#, fuzzy
 msgid "Shipping and Handling"
-msgstr ""
+msgstr "Kiida heaks ja vasta"
 
 #: templates/cart/cart-shipping.php:55
 msgid ""
@@ -6224,8 +6660,9 @@ msgid "Please fill in your details to see available shipping methods."
 msgstr ""
 
 #: templates/cart/cart-shipping.php:69 templates/cart/cart-shipping.php:77
+#, fuzzy
 msgid "Sorry, shipping is unavailable %s."
-msgstr ""
+msgstr "Vabandust, see veebileht on reserveeritud!"
 
 #: templates/cart/cart-shipping.php:69 templates/cart/cart-shipping.php:77
 msgid ""
@@ -6234,24 +6671,29 @@ msgid ""
 msgstr ""
 
 #: templates/cart/cart-shipping.php:93
+#, fuzzy
 msgid "Shipping"
-msgstr ""
+msgstr "Lähetusviisid"
 
 #: templates/cart/cart-totals.php:16
+#, fuzzy
 msgid "Cart Totals"
-msgstr ""
+msgstr "Tühjenda ostukorv"
 
 #: templates/cart/cart-totals.php:21 templates/checkout/review-order.php:25
+#, fuzzy
 msgid "Cart Subtotal"
-msgstr ""
+msgstr "Tühjenda ostukorv"
 
 #: templates/cart/cart-totals.php:68 templates/checkout/review-order.php:72
+#, fuzzy
 msgid "Order Total"
-msgstr ""
+msgstr "Tellimus kokku"
 
 #: templates/cart/cart-totals.php:80
+#, fuzzy
 msgid " (taxes estimated for %s)"
-msgstr ""
+msgstr "Rämpsukontroll"
 
 #: templates/cart/cart-totals.php:83
 msgid ""
@@ -6264,31 +6706,37 @@ msgstr ""
 #: templates/emails/customer-invoice.php:28
 #: templates/emails/customer-note.php:28
 #: templates/emails/customer-processing-order.php:24
+#, fuzzy
 msgid "Quantity"
-msgstr ""
+msgstr "Kogus"
 
 #: templates/cart/cart.php:30 templates/checkout/review-order.php:19
 #: templates/myaccount/my-orders.php:35 templates/order/order-details.php:21
+#, fuzzy
 msgid "Total"
-msgstr ""
+msgstr "Kokku"
 
 #: templates/cart/cart.php:47
+#, fuzzy
 msgid "Remove this item"
-msgstr ""
+msgstr "Kliki rea eemaldamiseks"
 
 #: templates/cart/cart.php:94
 #: templates/single-product/add-to-cart/quantity.php:12
+#, fuzzy
 msgctxt "Product quantity input tooltip"
 msgid "Qty"
-msgstr ""
+msgstr "Kogus"
 
 #: templates/cart/cart.php:119 templates/checkout/form-coupon.php:29
+#, fuzzy
 msgid "Apply Coupon"
-msgstr ""
+msgstr "Lis akupong"
 
 #: templates/cart/cart.php:126
+#, fuzzy
 msgid "Update Cart"
-msgstr ""
+msgstr "Tühjenda ostukorv"
 
 #: templates/cart/cart.php:126
 msgid "Proceed to Checkout &rarr;"
@@ -6299,34 +6747,41 @@ msgid "You may be interested in&hellip;"
 msgstr ""
 
 #: templates/cart/mini-cart.php:51
+#, fuzzy
 msgid "No products in the cart."
-msgstr ""
+msgstr "Prügikastis ei ole tooteid"
 
 #: templates/cart/mini-cart.php:59
+#, fuzzy
 msgid "Subtotal"
-msgstr ""
+msgstr "Vahesumma"
 
 #: templates/cart/mini-cart.php:65
+#, fuzzy
 msgid "Checkout &rarr;"
-msgstr ""
+msgstr "Järgmine &rarr;"
 
 #: templates/cart/shipping-calculator.php:22
+#, fuzzy
 msgid "Calculate Shipping"
-msgstr ""
+msgstr "Lähetusviisid"
 
 #: templates/cart/shipping-calculator.php:45
 #: templates/cart/shipping-calculator.php:51
 #: templates/cart/shipping-calculator.php:63
+#, fuzzy
 msgid "State / county"
-msgstr ""
+msgstr "Maakond..."
 
 #: templates/cart/shipping-calculator.php:72
+#, fuzzy
 msgid "City"
-msgstr ""
+msgstr "City"
 
 #: templates/cart/shipping-calculator.php:85
+#, fuzzy
 msgid "Update Totals"
-msgstr ""
+msgstr "%d pluginauuendus"
 
 #: templates/checkout/cart-errors.php:16
 msgid ""
@@ -6335,23 +6790,27 @@ msgid ""
 msgstr ""
 
 #: templates/checkout/cart-errors.php:20
+#, fuzzy
 msgid "&larr; Return To Cart"
-msgstr ""
+msgstr "Lisa toode korvi"
 
 #: templates/checkout/form-billing.php:17
+#, fuzzy
 msgid "Billing &amp; Shipping"
-msgstr ""
+msgstr "Vaikimisi lähetusviis"
 
 #: templates/checkout/form-billing.php:21
-#: templates/myaccount/form-edit-address.php:27
+#: templates/myaccount/form-edit-address.php:14
 #: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
 #: templates/order/order-details.php:119
+#, fuzzy
 msgid "Billing Address"
-msgstr ""
+msgstr "Edit billing address"
 
 #: templates/checkout/form-billing.php:40
+#, fuzzy
 msgid "Create an account?"
-msgstr ""
+msgstr "Loo konto"
 
 #: templates/checkout/form-billing.php:51
 msgid ""
@@ -6360,32 +6819,39 @@ msgid ""
 msgstr ""
 
 #: templates/checkout/form-checkout.php:20
+#, fuzzy
 msgid "You must be logged in to checkout."
-msgstr ""
+msgstr "Vabandust, kommenteerimiseks pead sisse logima."
 
 #: templates/checkout/form-checkout.php:51
+#, fuzzy
 msgid "Your order"
-msgstr ""
+msgstr "Lehe järjekorranr."
 
 #: templates/checkout/form-coupon.php:17
+#, fuzzy
 msgid "Have a coupon?"
-msgstr ""
+msgstr "Kupong"
 
 #: templates/checkout/form-coupon.php:20
+#, fuzzy
 msgid "Click here to enter your code"
-msgstr ""
+msgstr "Oma konto sulgemiseks <a href=\"%s\">kliki siia</a>"
 
 #: templates/checkout/form-coupon.php:25
+#, fuzzy
 msgid "Coupon code"
-msgstr ""
+msgstr "Koodinäidis"
 
 #: templates/checkout/form-login.php:14
+#, fuzzy
 msgid "Returning customer?"
-msgstr ""
+msgstr "Customer loyalty"
 
 #: templates/checkout/form-login.php:17
+#, fuzzy
 msgid "Click here to login"
-msgstr ""
+msgstr "Vastamisest loobumiseks klõpsa siia."
 
 #: templates/checkout/form-login.php:22
 msgid ""
@@ -6395,8 +6861,9 @@ msgid ""
 msgstr ""
 
 #: templates/checkout/form-pay.php:20
+#, fuzzy
 msgid "Qty"
-msgstr ""
+msgstr "Kogus"
 
 #: templates/checkout/form-pay.php:21
 msgid "Totals"
@@ -6410,8 +6877,9 @@ msgid ""
 msgstr ""
 
 #: templates/checkout/form-pay.php:87
+#, fuzzy
 msgid "Pay for order"
-msgstr ""
+msgstr "Pay for Month:"
 
 #: templates/checkout/form-shipping.php:31
 msgid "Ship to a different address?"
@@ -6437,20 +6905,24 @@ msgid ""
 msgstr ""
 
 #: templates/checkout/review-order.php:154
+#, fuzzy
 msgid "Update totals"
-msgstr ""
+msgstr "%d pluginauuendus"
 
 #: templates/checkout/review-order.php:161
+#, fuzzy
 msgid "Place order"
-msgstr ""
+msgstr "Lehe järjekorranr."
 
 #: templates/checkout/review-order.php:168
+#, fuzzy
 msgid "I have read and accept the"
-msgstr ""
+msgstr "I have read and agree Terms"
 
 #: templates/checkout/review-order.php:168
+#, fuzzy
 msgid "terms &amp; conditions"
-msgstr ""
+msgstr "Salvesta & aktiveeri"
 
 #: templates/checkout/thankyou.php:18
 msgid ""
@@ -6467,8 +6939,9 @@ msgid "Please attempt your purchase again."
 msgstr ""
 
 #: templates/checkout/thankyou.php:28 templates/myaccount/my-orders.php:71
+#, fuzzy
 msgid "Pay"
-msgstr ""
+msgstr "Pay"
 
 #: templates/checkout/thankyou.php:36 templates/checkout/thankyou.php:67
 msgid "Thank you. Your order has been received."
@@ -6480,8 +6953,9 @@ msgid "You have received an order from %s. Their order is as follows:"
 msgstr ""
 
 #: templates/emails/admin-new-order.php:17
+#, fuzzy
 msgid "Order: %s"
-msgstr ""
+msgstr "Tellimus"
 
 #: templates/emails/admin-new-order.php:50
 #: templates/emails/customer-completed-order.php:51
@@ -6489,8 +6963,9 @@ msgstr ""
 #: templates/emails/customer-processing-order.php:51
 #: templates/emails/plain/admin-new-order.php:38
 #: templates/order/order-details.php:101
+#, fuzzy
 msgid "Customer details"
-msgstr ""
+msgstr "Kliendi andmed"
 
 #: templates/emails/admin-new-order.php:53
 #: templates/emails/customer-completed-order.php:54
@@ -6501,8 +6976,9 @@ msgstr ""
 #: templates/emails/plain/customer-note.php:49
 #: templates/emails/plain/customer-processing-order.php:41
 #: templates/order/order-details.php:105
+#, fuzzy
 msgid "Email:"
-msgstr ""
+msgstr "E-post"
 
 #: templates/emails/admin-new-order.php:56
 #: templates/emails/customer-completed-order.php:57
@@ -6530,8 +7006,9 @@ msgid ""
 msgstr ""
 
 #: templates/emails/customer-invoice.php:16
+#, fuzzy
 msgid "pay"
-msgstr ""
+msgstr "Pay"
 
 #: templates/emails/customer-new-account.php:14
 #: templates/emails/plain/customer-new-account.php:13
@@ -6569,79 +7046,97 @@ msgstr ""
 
 #: templates/emails/customer-reset-password.php:14
 #: templates/emails/plain/customer-reset-password.php:13
+#, fuzzy
 msgid "Someone requested that the password be reset for the following account:"
 msgstr ""
+"Keegi palus meil selle ajaveebi juures järgmise kasutaja parooli ära "
+"vahetada:"
 
 #: templates/emails/customer-reset-password.php:15
 #: templates/emails/plain/customer-reset-password.php:15
+#, fuzzy
 msgid "Username: %s"
-msgstr ""
+msgstr "Kasutajanimi: %s"
 
 #: templates/emails/customer-reset-password.php:16
 #: templates/emails/plain/customer-reset-password.php:16
+#, fuzzy
 msgid "If this was a mistake, just ignore this email and nothing will happen."
 msgstr ""
+"Kui see oli viga, siis lihtsalt ignoreeri seda sõnumit ja midagi ei juhtu."
 
 #: templates/emails/customer-reset-password.php:17
 #: templates/emails/plain/customer-reset-password.php:17
+#, fuzzy
 msgid "To reset your password, visit the following address:"
-msgstr ""
+msgstr "Parooli vahetamiseks külasta järgnevat aadressi:"
 
 #: templates/emails/customer-reset-password.php:20
+#, fuzzy
 msgid "Click here to reset your password"
-msgstr ""
+msgstr "Parooli vahetamiseks külasta järgnevat aadressi:"
 
 #: templates/emails/email-addresses.php:18
 #: templates/emails/plain/email-addresses.php:12
+#, fuzzy
 msgid "Billing address"
-msgstr ""
+msgstr "Edit billing address"
 
 #: templates/emails/email-addresses.php:28
 #: templates/emails/plain/email-addresses.php:17
+#, fuzzy
 msgid "Shipping address"
-msgstr ""
+msgstr "change address"
 
 #: templates/emails/email-order-items.php:45
+#, fuzzy
 msgid "Download %d:"
-msgstr ""
+msgstr "Lae alla"
 
 #: templates/emails/email-order-items.php:47
+#, fuzzy
 msgid "Download:"
-msgstr ""
+msgstr "Lae alla"
 
 #: templates/emails/plain/admin-new-order.php:19
 #: templates/emails/plain/customer-completed-order.php:19
 #: templates/emails/plain/customer-invoice.php:20
 #: templates/emails/plain/customer-note.php:27
 #: templates/emails/plain/customer-processing-order.php:19
+#, fuzzy
 msgid "Order number: %s"
-msgstr ""
+msgstr "Arve"
 
 #: templates/emails/plain/admin-new-order.php:20
 #: templates/emails/plain/customer-completed-order.php:20
 #: templates/emails/plain/customer-invoice.php:21
 #: templates/emails/plain/customer-note.php:28
 #: templates/emails/plain/customer-processing-order.php:20
+#, fuzzy
 msgid "Order date: %s"
-msgstr ""
+msgstr "Kuupäevavorming"
 
 #: templates/emails/plain/admin-new-order.php:20
+#, fuzzy
 msgid "jS F Y"
-msgstr ""
+msgstr "j. M Y"
 
 #: templates/emails/plain/customer-completed-order.php:38
 #: templates/emails/plain/customer-note.php:46
 #: templates/emails/plain/customer-processing-order.php:38
+#, fuzzy
 msgid "Your details"
-msgstr ""
+msgstr "Sinu ettevõte andmed"
 
 #: templates/emails/plain/customer-new-account.php:16
+#, fuzzy
 msgid "Your password is <strong>%s</strong>."
-msgstr ""
+msgstr "<strong>VIGA</strong>: parooliväli on tühi"
 
 #: templates/emails/plain/email-order-items.php:29
+#, fuzzy
 msgid "Quantity: %s"
-msgstr ""
+msgstr "Kogus"
 
 #: templates/emails/plain/email-order-items.php:32
 msgid "Cost: %s"
@@ -6649,36 +7144,42 @@ msgstr ""
 
 #: templates/loop/add-to-cart.php:17 templates/loop/add-to-cart.php:41
 #: templates/loop/add-to-cart.php:50
+#, fuzzy
 msgid "Read More"
-msgstr ""
+msgstr "Veel värve"
 
 #: templates/loop/add-to-cart.php:33
+#, fuzzy
 msgid "Select options"
-msgstr ""
+msgstr "Flashi sätted"
 
 #: templates/loop/add-to-cart.php:37
+#, fuzzy
 msgid "View options"
-msgstr ""
+msgstr "Flashi sätted"
 
 #: templates/loop/no-products-found.php:14 templates/loop-shop.php:40
 msgid "No products found which match your selection."
 msgstr ""
 
 #: templates/loop/orderby.php:21
+#, fuzzy
 msgid "Default sorting"
-msgstr ""
+msgstr "Vaikimisi kaader"
 
 #: templates/loop/orderby.php:22
+#, fuzzy
 msgid "Sort by popularity"
-msgstr ""
+msgstr "%1$s %2$s Autori %3$s postituste RSS"
 
 #: templates/loop/orderby.php:23
 msgid "Sort by average rating"
 msgstr ""
 
 #: templates/loop/orderby.php:24
+#, fuzzy
 msgid "Sort by newness"
-msgstr ""
+msgstr "%1$s %2$s Autori %3$s postituste RSS"
 
 #: templates/loop/orderby.php:25
 msgid "Sort by price: low to high"
@@ -6689,17 +7190,20 @@ msgid "Sort by price: high to low"
 msgstr ""
 
 #: templates/loop/result-count.php:28
+#, fuzzy
 msgid "Showing the single result"
-msgstr ""
+msgstr "Single sign-on"
 
 #: templates/loop/result-count.php:30
+#, fuzzy
 msgid "Showing all %d results"
-msgstr ""
+msgstr "Tulemusi pole."
 
 #: templates/loop/result-count.php:32
+#, fuzzy
 msgctxt "%1$d = first, %2$d = last, %3$d = total"
 msgid "Showing %1$d–%2$d of %3$d results"
-msgstr ""
+msgstr "Tulemusi pole."
 
 #: templates/loop/sale-flash.php:16 templates/single-product/sale-flash.php:16
 msgid "Sale!"
@@ -6707,82 +7211,99 @@ msgstr ""
 
 #: templates/myaccount/form-change-password.php:20
 #: templates/myaccount/form-lost-password.php:31
+#, fuzzy
 msgid "New password"
-msgstr ""
+msgstr "Uus parool"
 
 #: templates/myaccount/form-change-password.php:24
 #: templates/myaccount/form-lost-password.php:35
+#, fuzzy
 msgid "Re-enter new password"
-msgstr ""
+msgstr "Sisesta enda uus parool."
 
 #: templates/myaccount/form-change-password.php:29
 #: templates/myaccount/form-lost-password.php:46
+#, fuzzy
 msgid "Save"
-msgstr ""
+msgstr "Salvesta"
 
 #: templates/myaccount/form-edit-account.php:20
+#, fuzzy
 msgid "First name"
-msgstr ""
+msgstr "Eesnimi"
 
 #: templates/myaccount/form-edit-account.php:24
+#, fuzzy
 msgid "Last name"
-msgstr ""
+msgstr "Perenimi"
 
 #: templates/myaccount/form-edit-account.php:28
 #: templates/myaccount/form-login.php:64
+#, fuzzy
 msgid "Email address"
-msgstr ""
+msgstr "E-postiaadress:"
 
 #: templates/myaccount/form-edit-account.php:32
 msgid "Password (leave blank to leave unchanged)"
 msgstr ""
 
 #: templates/myaccount/form-edit-account.php:36
+#, fuzzy
 msgid "Confirm new password"
-msgstr ""
+msgstr "Sisesta enda uus parool veel kord"
 
 #: templates/myaccount/form-edit-account.php:41
+#, fuzzy
 msgid "Save changes"
-msgstr ""
+msgstr "Save changes"
 
-#: templates/myaccount/form-edit-address.php:27
+#: templates/myaccount/form-edit-address.php:14
 #: templates/myaccount/my-address.php:20 templates/order/order-details.php:134
+#, fuzzy
 msgid "Shipping Address"
-msgstr ""
+msgstr "change address"
 
-#: templates/myaccount/form-edit-address.php:43
+#: templates/myaccount/form-edit-address.php:38
+#, fuzzy
 msgid "Save Address"
-msgstr ""
+msgstr "change address"
 
 #: templates/myaccount/form-login.php:26 templates/myaccount/form-login.php:40
 #: templates/shop/form-login.php:31
+#, fuzzy
 msgid "Login"
-msgstr ""
+msgstr "Login"
 
 #: templates/myaccount/form-login.php:30
+#, fuzzy
 msgid "Username or email address"
-msgstr ""
+msgstr "kasutajanimi ja e-post"
 
 #: templates/myaccount/form-login.php:34 templates/myaccount/form-login.php:69
 #: templates/shop/form-login.php:24
+#, fuzzy
 msgid "Password"
-msgstr ""
+msgstr "Parool"
 
 #: templates/myaccount/form-login.php:40 templates/shop/form-login.php:33
+#, fuzzy
 msgid "Lost Password?"
-msgstr ""
+msgstr "Kadunud parool"
 
 #: templates/myaccount/form-login.php:50 templates/myaccount/form-login.php:80
+#, fuzzy
 msgid "Register"
-msgstr ""
+msgstr "Registreeru"
 
 #: templates/myaccount/form-login.php:57
+#, fuzzy
 msgid "Username"
-msgstr ""
+msgstr "Kasutajanimi"
 
 #: templates/myaccount/form-login.php:74
+#, fuzzy
 msgid "Anti-spam"
-msgstr ""
+msgstr "Akismeti rämps"
 
 #: templates/myaccount/form-lost-password.php:22
 msgid ""
@@ -6792,16 +7313,19 @@ msgstr ""
 
 #: templates/myaccount/form-lost-password.php:24
 #: templates/shop/form-login.php:20
+#, fuzzy
 msgid "Username or email"
-msgstr ""
+msgstr "Username or email"
 
 #: templates/myaccount/form-lost-password.php:28
+#, fuzzy
 msgid "Enter a new password below."
-msgstr ""
+msgstr "Sisesta enda uus parool."
 
 #: templates/myaccount/form-lost-password.php:46
+#, fuzzy
 msgid "Reset Password"
-msgstr ""
+msgstr "Muuda parool"
 
 #: templates/myaccount/my-account.php:19
 msgid "Hello <strong>%s</strong> (not %s? <a href=\"%s\">Sign out</a>)."
@@ -6815,12 +7339,14 @@ msgid ""
 msgstr ""
 
 #: templates/myaccount/my-address.php:17
+#, fuzzy
 msgid "My Addresses"
-msgstr ""
+msgstr "Minu konto"
 
 #: templates/myaccount/my-address.php:23
+#, fuzzy
 msgid "My Address"
-msgstr ""
+msgstr "change address"
 
 #: templates/myaccount/my-address.php:35
 msgid "The following addresses will be used on the checkout page by default."
@@ -6831,36 +7357,43 @@ msgid "You have not set up this type of address yet."
 msgstr ""
 
 #: templates/myaccount/my-downloads.php:18
+#, fuzzy
 msgid "Available downloads"
-msgstr ""
+msgstr "Kohe saadaval"
 
 #: templates/myaccount/my-downloads.php:27
+#, fuzzy
 msgid "%s download remaining"
 msgid_plural "%s downloads remaining"
-msgstr[0] ""
+msgstr[0] "Laadi PDF alla"
 msgstr[1] ""
 
 #: templates/myaccount/my-orders.php:26
+#, fuzzy
 msgid "Recent Orders"
-msgstr ""
+msgstr "Tellimusi pole"
 
 #: templates/myaccount/my-orders.php:34
+#, fuzzy
 msgid "Status"
-msgstr ""
+msgstr "Olek"
 
 #: templates/myaccount/my-orders.php:62
+#, fuzzy
 msgid "%s for %s item"
 msgid_plural "%s for %s items"
-msgstr[0] ""
+msgstr[0] "Nimetus"
 msgstr[1] ""
 
 #: templates/myaccount/my-orders.php:77
+#, fuzzy
 msgid "Cancel"
-msgstr ""
+msgstr "Tühista"
 
 #: templates/myaccount/my-orders.php:82
+#, fuzzy
 msgid "View"
-msgstr ""
+msgstr "Vaata"
 
 #: templates/order/form-tracking.php:17
 msgid ""
@@ -6870,16 +7403,18 @@ msgid ""
 msgstr ""
 
 #: templates/order/form-tracking.php:19
+#, fuzzy
 msgid "Order ID"
-msgstr ""
+msgstr "Akna ID"
 
 #: templates/order/form-tracking.php:19
 msgid "Found in your order confirmation email."
 msgstr ""
 
 #: templates/order/form-tracking.php:20
+#, fuzzy
 msgid "Billing Email"
-msgstr ""
+msgstr "User's Email"
 
 #: templates/order/form-tracking.php:20
 msgid "Email you used during checkout."
@@ -6890,12 +7425,14 @@ msgid "Track"
 msgstr ""
 
 #: templates/order/order-details.php:16
+#, fuzzy
 msgid "Order Details"
-msgstr ""
+msgstr "Kliendi andmed"
 
 #: templates/order/order-details.php:68
+#, fuzzy
 msgid "Download file%s"
-msgstr ""
+msgstr "Faili laadimine tühistati."
 
 #: templates/order/order-details.php:106
 msgid "Telephone:"
@@ -6906,101 +7443,121 @@ msgid "Order %s which was made %s has the status &ldquo;%s&rdquo;"
 msgstr ""
 
 #: templates/order/tracking.php:18
+#, fuzzy
 msgid "ago"
-msgstr ""
+msgstr "%s tagasi"
 
 #: templates/order/tracking.php:20
+#, fuzzy
 msgid "and was completed"
-msgstr ""
+msgstr "Authorisation not completed."
 
 #: templates/order/tracking.php:20
+#, fuzzy
 msgid " ago"
-msgstr ""
+msgstr "%s tagasi"
 
 #: templates/shop/breadcrumb.php:63
+#, fuzzy
 msgid "Products tagged &ldquo;"
-msgstr ""
+msgstr "<span class=\"%1$s\">Sildid:</span> %2$s"
 
 #: templates/shop/breadcrumb.php:91 templates/shop/breadcrumb.php:188
+#, fuzzy
 msgid "Search results for &ldquo;"
-msgstr ""
+msgstr "%1$s %2$s Otsingu &#8220;%3$s&#8221; RSS"
 
 #: templates/shop/breadcrumb.php:146
+#, fuzzy
 msgid "Error 404"
-msgstr ""
+msgstr "Andmebaasi viga"
 
 #: templates/shop/breadcrumb.php:192
+#, fuzzy
 msgid "Posts tagged &ldquo;"
-msgstr ""
+msgstr "Postitused märksõnadega: %s"
 
 #: templates/shop/breadcrumb.php:197
+#, fuzzy
 msgid "Author:"
-msgstr ""
+msgstr "Autor"
 
 #: templates/shop/breadcrumb.php:202
+#, fuzzy
 msgid "Page"
-msgstr ""
+msgstr "Leht"
 
 #: templates/single-product/add-to-cart/variable.php:24
+#, fuzzy
 msgid "Choose an option"
-msgstr ""
+msgstr "Vali nimi"
 
 #: templates/single-product/add-to-cart/variable.php:69
+#, fuzzy
 msgid "Clear selection"
-msgstr ""
+msgstr "Clear icon"
 
 #: templates/single-product/meta.php:20
 msgid "n/a"
 msgstr ""
 
 #: templates/single-product/meta.php:24
+#, fuzzy
 msgid "Category:"
 msgid_plural "Categories:"
-msgstr[0] ""
+msgstr[0] "Rubriik"
 msgstr[1] ""
 
 #: templates/single-product/meta.php:26
+#, fuzzy
 msgid "Tag:"
 msgid_plural "Tags:"
-msgstr[0] ""
+msgstr[0] "Silt"
 msgstr[1] ""
 
 #: templates/single-product/product-attributes.php:28
+#, fuzzy
 msgid "Weight"
-msgstr ""
+msgstr "Paksus"
 
 #: templates/single-product/product-attributes.php:37
+#, fuzzy
 msgid "Dimensions"
-msgstr ""
+msgstr "Mõõtmed"
 
 #: templates/single-product/related.php:36
+#, fuzzy
 msgid "Related Products"
-msgstr ""
+msgstr "Otsi toodet"
 
 #: templates/single-product/review.php:26
+#, fuzzy
 msgid "Rated %d out of 5"
-msgstr ""
+msgstr "Logi välja"
 
 #: templates/single-product/review.php:34
+#, fuzzy
 msgid "Your comment is awaiting approval"
-msgstr ""
+msgstr "Sinu kommentaar ootab modereerimist"
 
 #: templates/single-product/review.php:43
 msgid "verified owner"
 msgstr ""
 
 #: templates/single-product/tabs/description.php:14
+#, fuzzy
 msgid "Product Description"
-msgstr ""
+msgstr "Definitsioon"
 
 #: templates/single-product/up-sells.php:39
 msgid "You may also like&hellip;"
 msgstr ""
 
 #: templates/single-product-reviews.php:30
+#, fuzzy
 msgid "%s review for %s"
 msgid_plural "%s reviews for %s"
-msgstr[0] ""
+msgstr[0] "Kommentaarid %s kohta"
 msgstr[1] ""
 
 #: templates/single-product-reviews.php:36
@@ -7009,52 +7566,63 @@ msgid "Reviews"
 msgstr ""
 
 #: templates/single-product-reviews.php:58
+#, fuzzy
 msgid "<span class=\"meta-nav\">&larr;</span> Previous"
-msgstr ""
+msgstr "<span class=\"meta-nav\">&larr;</span> eelmine"
 
 #: templates/single-product-reviews.php:59
+#, fuzzy
 msgid "Next <span class=\"meta-nav\">&rarr;</span>"
-msgstr ""
+msgstr "Järgmine <span class=\"meta-nav\">&rarr;</span>"
 
 #: templates/single-product-reviews.php:63
+#, fuzzy
 msgid "Add Review"
-msgstr ""
+msgstr "Läbivaatamise ootel"
 
 #: templates/single-product-reviews.php:65
+#, fuzzy
 msgid "Add a review"
-msgstr ""
+msgstr "Läbivaatamise ootel"
 
 #: templates/single-product-reviews.php:69
+#, fuzzy
 msgid "Be the first to review"
-msgstr ""
+msgstr "Parool saadetakse sulle e-postiga."
 
 #: templates/single-product-reviews.php:71
 msgid "There are no reviews yet, would you like to %s submit yours%s?"
 msgstr ""
 
 #: templates/single-product-reviews.php:71
+#, fuzzy
 msgid "Add Your Review"
-msgstr ""
+msgstr "Active: Under review"
 
 #: templates/single-product-reviews.php:81
+#, fuzzy
 msgid "Leave a Reply to %s"
-msgstr ""
+msgstr "Vasta %s-le"
 
 #: templates/single-product-reviews.php:87
+#, fuzzy
 msgid "Email"
-msgstr ""
+msgstr "E-post"
 
 #: templates/single-product-reviews.php:90
+#, fuzzy
 msgid "Submit"
-msgstr ""
+msgstr "Sisesta"
 
 #: templates/single-product-reviews.php:97
+#, fuzzy
 msgid "Your Rating"
-msgstr ""
+msgstr "Viite hinnang"
 
 #: templates/single-product-reviews.php:98
+#, fuzzy
 msgid "Rate&hellip;"
-msgstr ""
+msgstr "Tegelen asjaga&hellip;"
 
 #: templates/single-product-reviews.php:99
 msgid "Perfect"
@@ -7069,16 +7637,19 @@ msgid "Average"
 msgstr ""
 
 #: templates/single-product-reviews.php:102
+#, fuzzy
 msgid "Not that bad"
-msgstr ""
+msgstr "See nimi ei ole lubatud."
 
 #: templates/single-product-reviews.php:103
+#, fuzzy
 msgid "Very Poor"
-msgstr ""
+msgstr "Väga nõrk"
 
 #: templates/single-product-reviews.php:108
+#, fuzzy
 msgid "Your Review"
-msgstr ""
+msgstr "Läbivaatamise ootel"
 
 #: woocommerce-ajax.php:122
 msgid "Sorry, your session has expired."
@@ -7097,30 +7668,32 @@ msgid "You have taken too long. Please go back and retry."
 msgstr ""
 
 #: woocommerce-ajax.php:556
+#, fuzzy
 msgid "Same as parent"
-msgstr ""
+msgstr "Ülemine KKK Kategooria"
 
 #: woocommerce-ajax.php:557
+#, fuzzy
 msgid "Standard"
-msgstr ""
+msgstr "Standardne"
 
-#: woocommerce-ajax.php:1052
+#: woocommerce-ajax.php:1054
 msgid ""
 "No products had their stock reduced - they may not have stock management "
 "enabled."
 msgstr ""
 
-#: woocommerce-ajax.php:1096 woocommerce-ajax.php:1097
+#: woocommerce-ajax.php:1098 woocommerce-ajax.php:1099
 msgid "Item #%s stock increased from %s to %s."
 msgstr ""
 
-#: woocommerce-ajax.php:1104
+#: woocommerce-ajax.php:1106
 msgid ""
 "No products had their stock increased - they may not have stock management "
 "enabled."
 msgstr ""
 
-#: woocommerce-ajax.php:1125
+#: woocommerce-ajax.php:1127
 msgid "Value"
 msgstr "Väärtus"
 
@@ -7128,14 +7701,11 @@ msgstr "Väärtus"
 msgid "Delete note"
 msgstr "Kustuta märkus"
 
-#: woocommerce.php:113 woocommerce.php:122
-msgid "Cheatin&#8217; huh?"
-msgstr "Üritad tõmmata?"
-
-#: woocommerce.php:172
+#: woocommerce.php:145
 msgid "Docs"
 msgstr ""
 
-#: woocommerce.php:173
+#: woocommerce.php:146
+#, fuzzy
 msgid "Premium Support"
-msgstr ""
+msgstr "Tugifoorum"

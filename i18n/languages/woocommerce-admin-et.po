@@ -2,16 +2,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.1-X Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2013-08-25 01:07:11+00:00\n"
+"POT-Creation-Date: 2013-09-22 23:32:42+00:00\n"
+"PO-Revision-Date: 2013-09-30 11:14+0200\n"
+"Last-Translator: Illimar Tambek <illimar.tambek@gmail.com>\n"
+"Language-Team: Divid <info@divid.ee>\n"
+"Language: et\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2013-09-10 14:53+0200\n"
-"Last-Translator: Illimar Tambek <illimar.tambek@gmail.com>\n"
-"Language-Team: Divid <info@divid.ee>\n"
 "X-Generator: Poedit 1.5.7\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"Language: et\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
 #: includes/admin/class-wc-admin-assets.php:65
@@ -21,26 +21,29 @@ msgstr ""
 msgid "WooCommerce"
 msgstr "WooCommerce"
 
-#: includes/admin/class-wc-admin-assets.php:117
+#: includes/admin/class-wc-admin-assets.php:121
 msgid ""
 "Are you sure you want to remove the selected items? If you have previously "
 "reduced this item's stock, or this order was submitted by a customer, you "
 "will need to manually restore the item's stock."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:118
+#: includes/admin/class-wc-admin-assets.php:122
+#, fuzzy
 msgid "Please select some items."
-msgstr ""
+msgstr "Palun valid enda ettevõtte"
 
-#: includes/admin/class-wc-admin-assets.php:119
+#: includes/admin/class-wc-admin-assets.php:123
+#, fuzzy
 msgid "Remove this item meta?"
-msgstr ""
+msgstr "Kliki rea eemaldamiseks"
 
-#: includes/admin/class-wc-admin-assets.php:120
+#: includes/admin/class-wc-admin-assets.php:124
+#, fuzzy
 msgid "Remove this attribute?"
-msgstr ""
+msgstr "Kliki rea eemaldamiseks"
 
-#: includes/admin/class-wc-admin-assets.php:121
+#: includes/admin/class-wc-admin-assets.php:125
 #: includes/admin/class-wc-admin-attributes.php:240
 #: includes/admin/class-wc-admin-attributes.php:276
 #: includes/admin/class-wc-admin-attributes.php:309
@@ -50,139 +53,156 @@ msgstr ""
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:194
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:420
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:514
+#: includes/admin/settings/class-wc-settings-shipping.php:202
+#, fuzzy
 msgid "Name"
-msgstr ""
+msgstr "Nimi"
 
-#: includes/admin/class-wc-admin-assets.php:122
+#: includes/admin/class-wc-admin-assets.php:126
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:412
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:506
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:6
+#, fuzzy
 msgid "Remove"
-msgstr ""
+msgstr "Kustuta"
 
-#: includes/admin/class-wc-admin-assets.php:123
+#: includes/admin/class-wc-admin-assets.php:127
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:413
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:507
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:7
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:7
+#, fuzzy
 msgid "Click to toggle"
-msgstr ""
+msgstr "Kliki siia, et lülitada tulpasid sisse või välja."
 
-#: includes/admin/class-wc-admin-assets.php:124
+#: includes/admin/class-wc-admin-assets.php:128
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:428
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:520
 msgid "Value(s)"
 msgstr "Väärtus(ed)"
 
-#: includes/admin/class-wc-admin-assets.php:125
+#: includes/admin/class-wc-admin-assets.php:129
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:521
 msgid "Enter some text, or some attributes by pipe (|) separating values."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:126
+#: includes/admin/class-wc-admin-assets.php:130
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:471
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:526
+#, fuzzy
 msgid "Visible on the product page"
-msgstr ""
+msgstr "limit records on page"
 
-#: includes/admin/class-wc-admin-assets.php:127
+#: includes/admin/class-wc-admin-assets.php:131
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:484
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:532
+#, fuzzy
 msgid "Used for variations"
-msgstr ""
+msgstr "Rämpsukontroll"
 
-#: includes/admin/class-wc-admin-assets.php:128
+#: includes/admin/class-wc-admin-assets.php:132
 msgid "Enter a name for the new attribute term:"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:129
+#: includes/admin/class-wc-admin-assets.php:133
 msgid "Calculate totals based on order items, discounts, and shipping?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:130
+#: includes/admin/class-wc-admin-assets.php:134
 msgid ""
 "Calculate line taxes? This will calculate taxes based on the customers "
 "country. If no billing/shipping is set it will use the store base country."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:131
+#: includes/admin/class-wc-admin-assets.php:135
 msgid ""
 "Copy billing information to shipping information? This will remove any "
 "currently entered shipping information."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:132
+#: includes/admin/class-wc-admin-assets.php:136
 msgid ""
 "Load the customer's billing information? This will remove any currently "
 "entered billing information."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:133
+#: includes/admin/class-wc-admin-assets.php:137
 msgid ""
 "Load the customer's shipping information? This will remove any currently "
 "entered shipping information."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:134
+#: includes/admin/class-wc-admin-assets.php:138
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:115
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:206
 #: includes/admin/views/html-bulk-edit-product.php:170
 #: includes/admin/views/html-quick-edit-product.php:128
+#, fuzzy
 msgid "Featured"
-msgstr ""
+msgstr "Valitud"
 
-#: includes/admin/class-wc-admin-assets.php:137
+#: includes/admin/class-wc-admin-assets.php:141
+#, fuzzy
 msgid "No customer selected"
-msgstr ""
+msgstr "Selected feedback details"
 
-#: includes/admin/class-wc-admin-assets.php:176
+#: includes/admin/class-wc-admin-assets.php:180
 msgid ""
 "Are you sure you want to link all variations? This will create a new "
 "variation for each and every possible combination of variation attributes "
 "(max 50 per run)."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:177
+#: includes/admin/class-wc-admin-assets.php:181
+#, fuzzy
 msgid "Enter a value"
-msgstr ""
+msgstr "16-ndväärtus"
 
-#: includes/admin/class-wc-admin-assets.php:178
+#: includes/admin/class-wc-admin-assets.php:182
+#, fuzzy
 msgid "Enter a value (fixed or %)"
-msgstr ""
+msgstr "Sisesta oma toote või teenuse hind siia..."
 
-#: includes/admin/class-wc-admin-assets.php:179
+#: includes/admin/class-wc-admin-assets.php:183
 msgid "Are you sure you want to delete all variations? This cannot be undone."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:180
-msgid "Last warning, are you sure?"
-msgstr ""
-
-#: includes/admin/class-wc-admin-assets.php:181
-#: includes/admin/class-wc-admin-taxonomies.php:127
-#: includes/admin/class-wc-admin-taxonomies.php:215
-msgid "Choose an image"
-msgstr ""
-
-#: includes/admin/class-wc-admin-assets.php:182
-msgid "Set variation image"
-msgstr ""
-
-#: includes/admin/class-wc-admin-assets.php:183
-msgid "variation added"
-msgstr ""
-
 #: includes/admin/class-wc-admin-assets.php:184
-msgid "variations added"
-msgstr ""
+#, fuzzy
+msgid "Last warning, are you sure?"
+msgstr "Oled kindel, et tahad seda teha?"
 
 #: includes/admin/class-wc-admin-assets.php:185
-msgid "No variations added"
-msgstr ""
+#: includes/admin/class-wc-admin-taxonomies.php:127
+#: includes/admin/class-wc-admin-taxonomies.php:215
+#, fuzzy
+msgid "Choose an image"
+msgstr "Lisa pilt"
 
 #: includes/admin/class-wc-admin-assets.php:186
+#, fuzzy
+msgid "Set variation image"
+msgstr "Täpsemad pildisätted"
+
+#: includes/admin/class-wc-admin-assets.php:187
+#, fuzzy
+msgid "variation added"
+msgstr "Admin added."
+
+#: includes/admin/class-wc-admin-assets.php:188
+#, fuzzy
+msgid "variations added"
+msgstr "Admin added."
+
+#: includes/admin/class-wc-admin-assets.php:189
+#, fuzzy
+msgid "No variations added"
+msgstr "Käibemaks"
+
+#: includes/admin/class-wc-admin-assets.php:190
+#, fuzzy
 msgid "Are you sure you want to remove this variation?"
-msgstr ""
+msgstr "Oled kindel,  et tahad seda pluginat paigaldada?"
 
 #: includes/admin/class-wc-admin-attributes.php:81
 msgid "Please, provide an attribute name, slug and type."
@@ -203,8 +223,9 @@ msgid "Slug “%s” is already in use. Change it, please."
 msgstr ""
 
 #: includes/admin/class-wc-admin-attributes.php:234
+#, fuzzy
 msgid "Edit Attribute"
-msgstr ""
+msgstr "Muuda rubriiki"
 
 #: includes/admin/class-wc-admin-attributes.php:244
 #: includes/admin/class-wc-admin-attributes.php:378
@@ -227,18 +248,21 @@ msgstr ""
 #: includes/admin/class-wc-admin-attributes.php:311
 #: includes/admin/class-wc-admin-attributes.php:388
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:207
+#, fuzzy
 msgid "Type"
-msgstr ""
+msgstr "Tüüp"
 
 #: includes/admin/class-wc-admin-attributes.php:262
 #: includes/admin/class-wc-admin-attributes.php:390
+#, fuzzy
 msgid "Select"
-msgstr ""
+msgstr "- Vali -"
 
 #: includes/admin/class-wc-admin-attributes.php:263
 #: includes/admin/class-wc-admin-attributes.php:391
+#, fuzzy
 msgid "Text"
-msgstr ""
+msgstr "Tekst"
 
 #: includes/admin/class-wc-admin-attributes.php:266
 #: includes/admin/class-wc-admin-attributes.php:394
@@ -251,20 +275,23 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-attributes.php:271
 #: includes/admin/class-wc-admin-attributes.php:398
+#, fuzzy
 msgid "Default sort order"
-msgstr ""
+msgstr "Esita see tellimus"
 
 #: includes/admin/class-wc-admin-attributes.php:275
 #: includes/admin/class-wc-admin-attributes.php:338
 #: includes/admin/class-wc-admin-attributes.php:400
+#, fuzzy
 msgid "Custom ordering"
-msgstr ""
+msgstr "Kohandatud menüü"
 
 #: includes/admin/class-wc-admin-attributes.php:277
 #: includes/admin/class-wc-admin-attributes.php:335
 #: includes/admin/class-wc-admin-attributes.php:402
+#, fuzzy
 msgid "Term ID"
-msgstr ""
+msgstr "Vigane ID"
 
 #: includes/admin/class-wc-admin-attributes.php:279
 #: includes/admin/class-wc-admin-attributes.php:404
@@ -274,22 +301,26 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-attributes.php:284
+#, fuzzy
 msgid "Update"
-msgstr ""
+msgstr "Uuenda"
 
 #: includes/admin/class-wc-admin-attributes.php:301
 #: includes/admin/class-wc-admin-menus.php:49
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:104
+#, fuzzy
 msgid "Attributes"
-msgstr ""
+msgstr "Lisa/muuda omadusi"
 
 #: includes/admin/class-wc-admin-attributes.php:312
+#, fuzzy
 msgid "Order by"
-msgstr ""
+msgstr "%s tehtud postitused"
 
 #: includes/admin/class-wc-admin-attributes.php:313
+#, fuzzy
 msgid "Terms"
-msgstr ""
+msgstr "Terms of service"
 
 #: includes/admin/class-wc-admin-attributes.php:325
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:118
@@ -297,26 +328,30 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:82
 #: includes/admin/reports/class-wc-report-customer-list.php:181
 #: includes/admin/reports/class-wc-report-stock.php:107
+#, fuzzy
 msgid "Edit"
-msgstr ""
+msgstr "Muuda"
 
 #: includes/admin/class-wc-admin-attributes.php:325
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:44
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:104
+#, fuzzy
 msgid "Delete"
-msgstr ""
+msgstr "Kustuta"
 
 #: includes/admin/class-wc-admin-attributes.php:358
+#, fuzzy
 msgid "Configure&nbsp;terms"
-msgstr ""
+msgstr "Terms of Service (TOS)"
 
 #: includes/admin/class-wc-admin-attributes.php:362
 msgid "No attributes currently exist."
 msgstr ""
 
 #: includes/admin/class-wc-admin-attributes.php:372
+#, fuzzy
 msgid "Add New Attribute"
-msgstr ""
+msgstr "Lisa rubriik"
 
 #: includes/admin/class-wc-admin-attributes.php:373
 msgid ""
@@ -326,25 +361,30 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-attributes.php:407
+#, fuzzy
 msgid "Add Attribute"
-msgstr ""
+msgstr "Lisa helifail"
 
 #: includes/admin/class-wc-admin-attributes.php:418
+#, fuzzy
 msgid "Are you sure you want to delete this attribute?"
-msgstr ""
+msgstr "Oled kindel,  et tahad seda pluginat paigaldada?"
 
 #: includes/admin/class-wc-admin-dashboard.php:34
+#, fuzzy
 msgid "WooCommerce Recent Reviews"
-msgstr ""
+msgstr "Värsked kommentaarid"
 
 #: includes/admin/class-wc-admin-dashboard.php:37
 #: includes/admin/class-wc-admin-menus.php:80
+#, fuzzy
 msgid "WooCommerce Status"
-msgstr ""
+msgstr "Pildi olek"
 
 #: includes/admin/class-wc-admin-dashboard.php:131
+#, fuzzy
 msgid "<strong>%s</strong> sales this month"
-msgstr ""
+msgstr "Laadi selle kuu arved PDFina alla"
 
 #: includes/admin/class-wc-admin-dashboard.php:138
 msgid "%s top seller this month (sold %d)"
@@ -375,8 +415,9 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: includes/admin/class-wc-admin-dashboard.php:192
+#, fuzzy
 msgid "out of 5"
-msgstr ""
+msgstr "Logi välja"
 
 #: includes/admin/class-wc-admin-dashboard.php:200
 msgid "There are no product reviews yet."
@@ -387,12 +428,14 @@ msgid "Make a duplicate from this product"
 msgstr ""
 
 #: includes/admin/class-wc-admin-duplicate-product.php:44
+#, fuzzy
 msgid "Duplicate"
-msgstr ""
+msgstr "Duplicate"
 
 #: includes/admin/class-wc-admin-duplicate-product.php:67
+#, fuzzy
 msgid "Copy to a new draft"
-msgstr ""
+msgstr "Kopeeri tooted ostukorvi"
 
 #: includes/admin/class-wc-admin-duplicate-product.php:77
 msgid "No product to duplicate has been supplied!"
@@ -403,12 +446,14 @@ msgid "Product creation failed, could not find original product:"
 msgstr ""
 
 #: includes/admin/class-wc-admin-duplicate-product.php:126
+#, fuzzy
 msgid "(Copy)"
-msgstr ""
+msgstr "Kopeeri"
 
 #: includes/admin/class-wc-admin-help.php:38
+#, fuzzy
 msgid "Documentation"
-msgstr ""
+msgstr "Dokumentatsioon"
 
 #: includes/admin/class-wc-admin-help.php:41
 msgid ""
@@ -421,12 +466,14 @@ msgid "WooCommerce Documentation"
 msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:43
+#, fuzzy
 msgid "Developer API Docs"
-msgstr ""
+msgstr "Akismeti API-võti"
 
 #: includes/admin/class-wc-admin-help.php:49
+#, fuzzy
 msgid "Support"
-msgstr ""
+msgstr "Support"
 
 #: includes/admin/class-wc-admin-help.php:52
 msgid ""
@@ -445,20 +492,24 @@ msgstr ""
 #: includes/admin/class-wc-admin-help.php:67
 #: includes/admin/class-wc-admin-menus.php:80
 #: includes/admin/views/html-admin-page-status.php:5
+#, fuzzy
 msgid "System Status"
-msgstr ""
+msgstr "Pildi olek"
 
 #: includes/admin/class-wc-admin-help.php:56
+#, fuzzy
 msgid "Community Support"
-msgstr ""
+msgstr "Tugifoorum"
 
 #: includes/admin/class-wc-admin-help.php:56
+#, fuzzy
 msgid "Customer Support"
-msgstr ""
+msgstr "Tugifoorum"
 
 #: includes/admin/class-wc-admin-help.php:62
+#, fuzzy
 msgid "Found a bug?"
-msgstr ""
+msgstr "Midagi ei leitud"
 
 #: includes/admin/class-wc-admin-help.php:65
 msgid ""
@@ -473,28 +524,34 @@ msgid "Report a bug"
 msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:73
+#, fuzzy
 msgid "For more information:"
-msgstr ""
+msgstr "Vaata lisaks:"
 
 #: includes/admin/class-wc-admin-help.php:74
+#, fuzzy
 msgid "About WooCommerce"
-msgstr ""
+msgstr "TinyMCE info"
 
 #: includes/admin/class-wc-admin-help.php:75
+#, fuzzy
 msgid "Project on WordPress.org"
-msgstr ""
+msgstr "http://codex.wordpress.org/"
 
 #: includes/admin/class-wc-admin-help.php:76
+#, fuzzy
 msgid "Project on Github"
-msgstr ""
+msgstr "%2$s kommentaar  %1$s kohta"
 
 #: includes/admin/class-wc-admin-help.php:77
+#, fuzzy
 msgid "Official Extensions"
-msgstr ""
+msgstr "Official representatives"
 
 #: includes/admin/class-wc-admin-help.php:78
+#, fuzzy
 msgid "Official Themes"
-msgstr ""
+msgstr "Official representatives"
 
 #: includes/admin/class-wc-admin-importers.php:32
 msgid "WooCommerce Tax Rates (CSV)"
@@ -509,14 +566,18 @@ msgid "Reports"
 msgstr ""
 
 #: includes/admin/class-wc-admin-menus.php:63
+#, fuzzy
 msgid "WooCommerce Settings"
-msgstr ""
+msgstr "Täpsemad sätted"
 
 #: includes/admin/class-wc-admin-menus.php:63
 #: includes/admin/class-wc-admin-welcome.php:153
+#: includes/admin/settings/class-wc-settings-checkout.php:268
+#: includes/admin/settings/class-wc-settings-shipping.php:241
 #: includes/admin/views/html-admin-page-status-report.php:254
+#, fuzzy
 msgid "Settings"
-msgstr ""
+msgstr "Sätted"
 
 #: includes/admin/class-wc-admin-menus.php:87
 #: includes/admin/views/html-admin-page-addons.php:4
@@ -524,40 +585,48 @@ msgid "WooCommerce Add-ons/Extensions"
 msgstr ""
 
 #: includes/admin/class-wc-admin-menus.php:87
+#, fuzzy
 msgid "Add-ons"
-msgstr ""
+msgstr "Lisa helifail"
 
 #: includes/admin/class-wc-admin-menus.php:125
 #: includes/admin/class-wc-admin-menus.php:127
+#, fuzzy
 msgctxt "Admin menu name"
 msgid "Orders"
-msgstr ""
+msgstr "Tellimused"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:33
+#, fuzzy
 msgid "Product permalink base"
-msgstr ""
+msgstr "Base API reference"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:38
+#, fuzzy
 msgid "Product category base"
-msgstr ""
+msgstr "Muuda kategooriat"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:45
+#, fuzzy
 msgid "Product tag base"
-msgstr ""
+msgstr "Base API reference"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:52
+#, fuzzy
 msgid "Product attribute base"
-msgstr ""
+msgstr "Base API reference"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:65
+#, fuzzy
 msgctxt "slug"
 msgid "product-category"
-msgstr ""
+msgstr "Tootekategooria"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:75
+#, fuzzy
 msgctxt "slug"
 msgid "product-tag"
-msgstr ""
+msgstr "%1$s %2$s %3$s Sildi RSS"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:93
 msgid ""
@@ -571,36 +640,41 @@ msgid "shop"
 msgstr ""
 
 #: includes/admin/class-wc-admin-permalink-settings.php:101
+#, fuzzy
 msgctxt "default-slug"
 msgid "product"
-msgstr ""
+msgstr "Toode"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:113
 #: includes/admin/class-wc-admin-taxonomies.php:92
 #: includes/admin/class-wc-admin-taxonomies.php:182
 #: includes/admin/settings/class-wc-settings-checkout.php:217
-#: includes/admin/settings/class-wc-settings-shipping.php:202
+#: includes/admin/settings/class-wc-settings-shipping.php:201
 #: includes/admin/views/html-admin-page-status-report.php:71
+#, fuzzy
 msgid "Default"
-msgstr ""
+msgstr "Vaikimisi"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:117
 #: includes/admin/reports/class-wc-report-stock.php:137
 #: includes/admin/views/html-email-template-preview.php:8
+#, fuzzy
 msgid "Product"
-msgstr ""
+msgstr "Toode"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:122
+#, fuzzy
 msgid "Shop base"
-msgstr ""
+msgstr "Baasaadress"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:126
 msgid "Shop base with category"
 msgstr ""
 
 #: includes/admin/class-wc-admin-permalink-settings.php:132
+#, fuzzy
 msgid "Custom Base"
-msgstr ""
+msgstr "Baasaadress"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:134
 msgid ""
@@ -609,36 +683,42 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:58
+#, fuzzy
 msgid "Product updated. <a href=\"%s\">View Product</a>"
-msgstr ""
+msgstr "Toodet muudeti. <a href=\"%s\">Vaata toodet</a>"
 
 #: includes/admin/class-wc-admin-post-types.php:59
 #: includes/admin/class-wc-admin-post-types.php:74
 #: includes/admin/class-wc-admin-post-types.php:89
+#, fuzzy
 msgid "Custom field updated."
-msgstr ""
+msgstr "Lisa sümbol"
 
 #: includes/admin/class-wc-admin-post-types.php:60
 #: includes/admin/class-wc-admin-post-types.php:75
 #: includes/admin/class-wc-admin-post-types.php:90
+#, fuzzy
 msgid "Custom field deleted."
-msgstr ""
+msgstr "Kogu rämps kustutati."
 
 #: includes/admin/class-wc-admin-post-types.php:61
+#, fuzzy
 msgid "Product updated."
-msgstr ""
+msgstr "Toodet muudeti."
 
 #: includes/admin/class-wc-admin-post-types.php:62
 msgid "Product restored to revision from %s"
 msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:63
+#, fuzzy
 msgid "Product published. <a href=\"%s\">View Product</a>"
-msgstr ""
+msgstr "Toode avaldati. <a href=\"%s\">Vaata toodet</a>"
 
 #: includes/admin/class-wc-admin-post-types.php:64
+#, fuzzy
 msgid "Product saved."
-msgstr ""
+msgstr "Toode salvestatud."
 
 #: includes/admin/class-wc-admin-post-types.php:65
 msgid "Product submitted. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
@@ -664,98 +744,113 @@ msgstr ""
 #: includes/admin/class-wc-admin-post-types.php:73
 #: includes/admin/class-wc-admin-post-types.php:76
 #: includes/admin/class-wc-admin-post-types.php:78
+#, fuzzy
 msgid "Order updated."
-msgstr ""
+msgstr "Viimati uuendatud"
 
 #: includes/admin/class-wc-admin-post-types.php:77
 msgid "Order restored to revision from %s"
 msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:79
+#, fuzzy
 msgid "Order saved."
-msgstr ""
+msgstr "Sätted salvestati."
 
 #: includes/admin/class-wc-admin-post-types.php:80
+#, fuzzy
 msgid "Order submitted."
-msgstr ""
+msgstr "Saadetud:"
 
 #: includes/admin/class-wc-admin-post-types.php:81
 msgid "Order scheduled for: <strong>%1$s</strong>."
 msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:83
+#, fuzzy
 msgid "Order draft updated."
-msgstr ""
+msgstr "Salvestan mustandi..."
 
 #: includes/admin/class-wc-admin-post-types.php:88
 #: includes/admin/class-wc-admin-post-types.php:91
 #: includes/admin/class-wc-admin-post-types.php:93
+#, fuzzy
 msgid "Coupon updated."
-msgstr ""
+msgstr "Viimati uuendatud"
 
 #: includes/admin/class-wc-admin-post-types.php:92
 msgid "Coupon restored to revision from %s"
 msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:94
+#, fuzzy
 msgid "Coupon saved."
-msgstr ""
+msgstr "Sätted salvestati."
 
 #: includes/admin/class-wc-admin-post-types.php:95
+#, fuzzy
 msgid "Coupon submitted."
-msgstr ""
+msgstr "Saadetud:"
 
 #: includes/admin/class-wc-admin-post-types.php:96
 msgid "Coupon scheduled for: <strong>%1$s</strong>."
 msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:98
+#, fuzzy
 msgid "Coupon draft updated."
-msgstr ""
+msgstr "Salvestan mustandi..."
 
 #: includes/admin/class-wc-admin-profile.php:39
+#, fuzzy
 msgid "Customer Billing Address"
-msgstr ""
+msgstr "Edit billing address"
 
 #: includes/admin/class-wc-admin-profile.php:42
 #: includes/admin/class-wc-admin-profile.php:91
+#, fuzzy
 msgid "First name"
-msgstr ""
+msgstr "Eesnimi"
 
 #: includes/admin/class-wc-admin-profile.php:46
 #: includes/admin/class-wc-admin-profile.php:95
+#, fuzzy
 msgid "Last name"
-msgstr ""
+msgstr "Perenimi"
 
 #: includes/admin/class-wc-admin-profile.php:50
 #: includes/admin/class-wc-admin-profile.php:99
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:37
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:84
+#, fuzzy
 msgid "Company"
-msgstr ""
+msgstr "Ettevõte"
 
 #: includes/admin/class-wc-admin-profile.php:54
 #: includes/admin/class-wc-admin-profile.php:103
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:41
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:88
+#, fuzzy
 msgid "Address 1"
-msgstr ""
+msgstr "Aadress"
 
 #: includes/admin/class-wc-admin-profile.php:58
 #: includes/admin/class-wc-admin-profile.php:107
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:45
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:92
+#, fuzzy
 msgid "Address 2"
-msgstr ""
+msgstr "Aadress"
 
 #: includes/admin/class-wc-admin-profile.php:62
 #: includes/admin/class-wc-admin-profile.php:111
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:49
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:96
-#: includes/admin/settings/class-wc-settings-tax.php:223
-#: includes/admin/settings/class-wc-settings-tax.php:350
+#: includes/admin/settings/class-wc-settings-tax.php:242
+#: includes/admin/settings/class-wc-settings-tax.php:369
+#, fuzzy
 msgid "City"
-msgstr ""
+msgstr "City"
 
 #: includes/admin/class-wc-admin-profile.php:66
 #: includes/admin/class-wc-admin-profile.php:115
@@ -768,8 +863,9 @@ msgstr ""
 #: includes/admin/class-wc-admin-profile.php:119
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:63
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:110
+#, fuzzy
 msgid "State/County"
-msgstr ""
+msgstr "Maakond..."
 
 #: includes/admin/class-wc-admin-profile.php:71
 msgid "Country or state code"
@@ -779,13 +875,15 @@ msgstr ""
 #: includes/admin/class-wc-admin-profile.php:123
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:57
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:104
+#, fuzzy
 msgid "Country"
-msgstr ""
+msgstr "Country"
 
 #: includes/admin/class-wc-admin-profile.php:75
 #: includes/admin/class-wc-admin-profile.php:124
+#, fuzzy
 msgid "2 letter Country code"
-msgstr ""
+msgstr "Korrasta koodi"
 
 #: includes/admin/class-wc-admin-profile.php:78
 msgid "Telephone"
@@ -794,12 +892,14 @@ msgstr ""
 #: includes/admin/class-wc-admin-profile.php:82
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:67
 #: includes/admin/reports/class-wc-report-customer-list.php:239
+#, fuzzy
 msgid "Email"
-msgstr ""
+msgstr "E-post"
 
 #: includes/admin/class-wc-admin-profile.php:88
+#, fuzzy
 msgid "Customer Shipping Address"
-msgstr ""
+msgstr "E-postiaadress:"
 
 #: includes/admin/class-wc-admin-profile.php:120
 msgid "State/County or state code"
@@ -807,129 +907,155 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-reports.php:46
 #: includes/admin/reports/class-wc-report-customer-list.php:241
+#, fuzzy
 msgid "Orders"
-msgstr ""
+msgstr "Tellimused"
 
 #: includes/admin/class-wc-admin-reports.php:49
+#, fuzzy
 msgid "Sales by date"
-msgstr ""
+msgstr "Kas näidata kuupäeva?"
 
 #: includes/admin/class-wc-admin-reports.php:55
+#, fuzzy
 msgid "Sales by product"
-msgstr ""
+msgstr "Lisa uus toode"
 
 #: includes/admin/class-wc-admin-reports.php:61
+#, fuzzy
 msgid "Sales by category"
-msgstr ""
+msgstr "Lisa rubriik"
 
 #: includes/admin/class-wc-admin-reports.php:67
+#, fuzzy
 msgid "Coupons by date"
-msgstr ""
+msgstr "Kas näidata kuupäeva?"
 
 #: includes/admin/class-wc-admin-reports.php:75
 #: includes/admin/reports/class-wc-report-customer-list.php:23
+#, fuzzy
 msgid "Customers"
-msgstr ""
+msgstr "Customers Ideas"
 
 #: includes/admin/class-wc-admin-reports.php:78
+#, fuzzy
 msgid "Customers vs. Guests"
-msgstr ""
+msgstr "Capture Customers Ideas"
 
 #: includes/admin/class-wc-admin-reports.php:84
+#, fuzzy
 msgid "Customer List"
-msgstr ""
+msgstr "Pildiloend"
 
 #: includes/admin/class-wc-admin-reports.php:92
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:200
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:744
 #: includes/admin/reports/class-wc-report-stock.php:20
 #: includes/admin/reports/class-wc-report-stock.php:21
+#, fuzzy
 msgid "Stock"
-msgstr ""
+msgstr "Laos"
 
 #: includes/admin/class-wc-admin-reports.php:95
+#, fuzzy
 msgid "Low in stock"
-msgstr ""
+msgstr "Laoseis"
 
 #: includes/admin/class-wc-admin-reports.php:101
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:366
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:367
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:276
 #: includes/admin/reports/class-wc-report-stock.php:93
 #: includes/admin/views/html-bulk-edit-product.php:195
 #: includes/admin/views/html-quick-edit-product.php:138
+#, fuzzy
 msgid "Out of stock"
-msgstr ""
+msgstr "Laos"
 
 #: includes/admin/class-wc-admin-reports.php:107
+#, fuzzy
 msgid "Most Stocked"
-msgstr ""
+msgstr "Most popular"
 
 #: includes/admin/class-wc-admin-reports.php:118
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:75
+#, fuzzy
 msgid "Taxes"
-msgstr ""
+msgstr "Muuda makse"
 
 #: includes/admin/class-wc-admin-reports.php:121
+#, fuzzy
 msgid "Taxes by code"
-msgstr ""
+msgstr "Korrasta koodi"
 
 #: includes/admin/class-wc-admin-reports.php:127
+#, fuzzy
 msgid "Taxes by date"
-msgstr ""
+msgstr "Kas näidata kuupäeva?"
 
 #: includes/admin/class-wc-admin-settings.php:52
 msgid "Action failed. Please refresh the page and retry."
 msgstr ""
 
 #: includes/admin/class-wc-admin-settings.php:63
+#, fuzzy
 msgid "Your settings have been saved."
-msgstr ""
+msgstr "Teie sõnum on edukalt salvestatud."
 
-#: includes/admin/class-wc-admin-settings.php:114
+#: includes/admin/class-wc-admin-settings.php:119
+#, fuzzy
 msgid "The changes you made will be lost if you navigate away from this page."
-msgstr ""
+msgstr "Kui lahkud sellelt lehelt, lähevad tehtud muudatused kaduma."
 
-#: includes/admin/class-wc-admin-settings.php:461
+#: includes/admin/class-wc-admin-settings.php:466
 msgid "Hard Crop?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-settings.php:486
+#: includes/admin/class-wc-admin-settings.php:491
+#, fuzzy
 msgid "Select a page&hellip;"
-msgstr ""
+msgstr "&laquo; Eelmine lehekülg"
 
-#: includes/admin/class-wc-admin-settings.php:509
+#: includes/admin/class-wc-admin-settings.php:514
+#, fuzzy
 msgid "Choose a country&hellip;"
-msgstr ""
+msgstr "Riik..."
 
-#: includes/admin/class-wc-admin-settings.php:533
+#: includes/admin/class-wc-admin-settings.php:538
+#, fuzzy
 msgid "Choose countries&hellip;"
-msgstr ""
+msgstr "Choose target language"
 
-#: includes/admin/class-wc-admin-settings.php:539
+#: includes/admin/class-wc-admin-settings.php:544
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:442
+#, fuzzy
 msgid "Select all"
-msgstr ""
+msgstr "Vali kõik"
 
-#: includes/admin/class-wc-admin-settings.php:539
+#: includes/admin/class-wc-admin-settings.php:544
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:442
+#, fuzzy
 msgid "Select none"
-msgstr ""
+msgstr "- Vali -"
 
 #: includes/admin/class-wc-admin-status.php:52
+#, fuzzy
 msgid "Product Transients Cleared"
-msgstr ""
+msgstr "Akismeti poolt kontrollitud"
 
 #: includes/admin/class-wc-admin-status.php:93
+#, fuzzy
 msgid "%d Transients Rows Cleared"
-msgstr ""
+msgstr "Akismeti poolt kontrollitud"
 
 #: includes/admin/class-wc-admin-status.php:102
+#, fuzzy
 msgid "Roles successfully reset"
-msgstr ""
+msgstr "Password reset completed"
 
 #: includes/admin/class-wc-admin-status.php:114
+#, fuzzy
 msgid "Terms successfully recounted"
-msgstr ""
+msgstr "Account successfully activated"
 
 #: includes/admin/class-wc-admin-status.php:133
 msgid "There was an error calling %s::%s"
@@ -944,32 +1070,37 @@ msgid "WC Transients"
 msgstr ""
 
 #: includes/admin/class-wc-admin-status.php:156
+#, fuzzy
 msgid "Clear transients"
-msgstr ""
+msgstr "Clear icon"
 
 #: includes/admin/class-wc-admin-status.php:157
 msgid "This tool will clear the product/shop transients cache."
 msgstr ""
 
 #: includes/admin/class-wc-admin-status.php:160
+#, fuzzy
 msgid "Expired Transients"
-msgstr ""
+msgstr "UserEcho: Paid period expired"
 
 #: includes/admin/class-wc-admin-status.php:161
+#, fuzzy
 msgid "Clear expired transients"
-msgstr ""
+msgstr "Or clear icon"
 
 #: includes/admin/class-wc-admin-status.php:162
 msgid "This tool will clear ALL expired transients from Wordpress."
 msgstr ""
 
 #: includes/admin/class-wc-admin-status.php:165
+#, fuzzy
 msgid "Term counts"
-msgstr ""
+msgstr "Definitsioon"
 
 #: includes/admin/class-wc-admin-status.php:166
+#, fuzzy
 msgid "Recount terms"
-msgstr ""
+msgstr "Terms of service"
 
 #: includes/admin/class-wc-admin-status.php:167
 msgid ""
@@ -978,12 +1109,14 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-status.php:170
+#, fuzzy
 msgid "Capabilities"
-msgstr ""
+msgstr "Developing the necessary capabilities"
 
 #: includes/admin/class-wc-admin-status.php:171
+#, fuzzy
 msgid "Reset capabilities"
-msgstr ""
+msgstr "Parooli vahetamine"
 
 #: includes/admin/class-wc-admin-status.php:172
 msgid ""
@@ -992,12 +1125,14 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-status.php:175
+#, fuzzy
 msgid "Customer Sessions"
-msgstr ""
+msgstr "Customer loyalty"
 
 #: includes/admin/class-wc-admin-status.php:176
+#, fuzzy
 msgid "Clear all sessions"
-msgstr ""
+msgstr "Kõik viiterubriigid"
 
 #: includes/admin/class-wc-admin-status.php:177
 msgid ""
@@ -1007,46 +1142,54 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-taxonomies.php:90
 #: includes/admin/class-wc-admin-taxonomies.php:179
+#, fuzzy
 msgid "Display type"
-msgstr ""
+msgstr "Feedback type"
 
 #: includes/admin/class-wc-admin-taxonomies.php:93
 #: includes/admin/class-wc-admin-taxonomies.php:183
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:73
 #: includes/admin/settings/class-wc-settings-products.php:25
 #: includes/admin/views/html-admin-page-addons.php:15
+#, fuzzy
 msgid "Products"
-msgstr ""
+msgstr "Tooted"
 
 #: includes/admin/class-wc-admin-taxonomies.php:94
 #: includes/admin/class-wc-admin-taxonomies.php:184
+#, fuzzy
 msgid "Subcategories"
-msgstr ""
+msgstr "Näita alamkategooriaid"
 
 #: includes/admin/class-wc-admin-taxonomies.php:95
 #: includes/admin/class-wc-admin-taxonomies.php:185
+#, fuzzy
 msgid "Both"
-msgstr ""
+msgstr "Näita mõlemaid"
 
 #: includes/admin/class-wc-admin-taxonomies.php:99
 #: includes/admin/class-wc-admin-taxonomies.php:190
+#, fuzzy
 msgid "Thumbnail"
-msgstr ""
+msgstr "Ikoon"
 
 #: includes/admin/class-wc-admin-taxonomies.php:103
 #: includes/admin/class-wc-admin-taxonomies.php:195
+#, fuzzy
 msgid "Upload/Add image"
-msgstr ""
+msgstr "Upload background image"
 
 #: includes/admin/class-wc-admin-taxonomies.php:104
 #: includes/admin/class-wc-admin-taxonomies.php:196
+#, fuzzy
 msgid "Remove image"
-msgstr ""
+msgstr "Eemalda pilt"
 
 #: includes/admin/class-wc-admin-taxonomies.php:129
 #: includes/admin/class-wc-admin-taxonomies.php:217
+#, fuzzy
 msgid "Use image"
-msgstr ""
+msgstr "Vali tunnuspildiks"
 
 #: includes/admin/class-wc-admin-taxonomies.php:275
 msgid ""
@@ -1065,28 +1208,33 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-taxonomies.php:298
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:192
+#, fuzzy
 msgid "Image"
-msgstr ""
+msgstr "Pilt"
 
 #: includes/admin/class-wc-admin-welcome.php:48
+#, fuzzy
 msgid "Welcome to WooCommerce"
-msgstr ""
+msgstr "Tere tulemast!"
 
 #: includes/admin/class-wc-admin-welcome.php:135
+#, fuzzy
 msgid "Welcome to WooCommerce %s"
-msgstr ""
+msgstr "Tere tulemast!"
 
 #: includes/admin/class-wc-admin-welcome.php:140
+#, fuzzy
 msgid "Thanks, all done!"
-msgstr ""
+msgstr "Super! Aitab lugemisest!"
 
 #: includes/admin/class-wc-admin-welcome.php:142
 msgid "Thank you for updating to the latest version!"
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:144
+#, fuzzy
 msgid "Thanks for installing!"
-msgstr ""
+msgstr "Aitäh, et proovisid Sliptree järele!"
 
 #: includes/admin/class-wc-admin-welcome.php:146
 msgid ""
@@ -1095,28 +1243,33 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:150
+#, fuzzy
 msgid "Version %s"
-msgstr ""
+msgstr "Versioon"
 
 #: includes/admin/class-wc-admin-welcome.php:154
 msgid "Docs"
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:161
+#, fuzzy
 msgid "What's New"
-msgstr ""
+msgstr "Uus %1$s veebileht: %2$s"
 
 #: includes/admin/class-wc-admin-welcome.php:163
+#, fuzzy
 msgid "Credits"
-msgstr ""
+msgstr "Selle arve loomiseks kasutati veebipõhist tarkvara"
 
 #: includes/admin/class-wc-admin-welcome.php:186
+#, fuzzy
 msgid "Security in mind"
-msgstr ""
+msgstr "Palun logi sisse"
 
 #: includes/admin/class-wc-admin-welcome.php:190
+#, fuzzy
 msgid "Sucuri Safe Plugin"
-msgstr ""
+msgstr "Sulle meeldib see plugin?"
 
 #: includes/admin/class-wc-admin-welcome.php:191
 msgid ""
@@ -1128,12 +1281,14 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:194
+#, fuzzy
 msgid "A Smoother Admin Experience"
-msgstr ""
+msgstr "Add Project Admin"
 
 #: includes/admin/class-wc-admin-welcome.php:200
+#, fuzzy
 msgid "New Product Panel"
-msgstr ""
+msgstr "Lisa uus toode"
 
 #: includes/admin/class-wc-admin-welcome.php:201
 msgid ""
@@ -1142,8 +1297,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:206
+#, fuzzy
 msgid "Nicer Order Screens"
-msgstr ""
+msgstr "Esita see tellimus"
 
 #: includes/admin/class-wc-admin-welcome.php:207
 msgid ""
@@ -1152,8 +1308,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:212
+#, fuzzy
 msgid "Multi-Download Support"
-msgstr ""
+msgstr "Lae alla arve PDF"
 
 #: includes/admin/class-wc-admin-welcome.php:213
 msgid ""
@@ -1162,8 +1319,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:218
+#, fuzzy
 msgid "Less Taxing Taxes"
-msgstr ""
+msgstr "Salvesta muudatused maksudes"
 
 #: includes/admin/class-wc-admin-welcome.php:224
 msgid "New Tax Input Panel"
@@ -1177,8 +1335,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:229
+#, fuzzy
 msgid "Improved Tax Options"
-msgstr ""
+msgstr "Flashi videosätted"
 
 #: includes/admin/class-wc-admin-welcome.php:230
 msgid ""
@@ -1192,8 +1351,9 @@ msgid "Product Listing Improvements Customers Will Love"
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:241
+#, fuzzy
 msgid "New Sorting Options"
-msgstr ""
+msgstr "Flashi videosätted"
 
 #: includes/admin/class-wc-admin-welcome.php:242
 msgid "Customers can now sort products by popularity and ratings."
@@ -1219,12 +1379,14 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:262
+#, fuzzy
 msgid "Under the Hood"
-msgstr ""
+msgstr "ÜLEVAATAMISEL"
 
 #: includes/admin/class-wc-admin-welcome.php:266
+#, fuzzy
 msgid "New product classes"
-msgstr ""
+msgstr "Lisa uus toode"
 
 #: includes/admin/class-wc-admin-welcome.php:267
 msgid ""
@@ -1244,8 +1406,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:276
+#, fuzzy
 msgid "API Improvements"
-msgstr ""
+msgstr "API consumer:"
 
 #: includes/admin/class-wc-admin-welcome.php:277
 msgid ""
@@ -1275,16 +1438,18 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:293
+#, fuzzy
 msgid "Retina Ready"
-msgstr ""
+msgstr "Super, olen valmis! &raquo;"
 
 #: includes/admin/class-wc-admin-welcome.php:294
 msgid "All graphics within WC have been optimised for HiDPI displays."
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:301
+#, fuzzy
 msgid "Better stock handling"
-msgstr ""
+msgstr "Laoseis"
 
 #: includes/admin/class-wc-admin-welcome.php:302
 msgid ""
@@ -1315,8 +1480,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:319
+#, fuzzy
 msgid "Go to WooCommerce Settings"
-msgstr ""
+msgstr "Go to design page."
 
 #: includes/admin/class-wc-admin-welcome.php:337
 msgid ""
@@ -1327,13 +1493,15 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:363
+#, fuzzy
 msgid "View %s"
-msgstr ""
+msgstr "Vaata"
 
-#: includes/admin/class-wc-admin.php:108
+#: includes/admin/class-wc-admin.php:109
 #: includes/admin/settings/class-wc-settings-checkout.php:159
+#, fuzzy
 msgid "Order Received"
-msgstr ""
+msgstr "Lehe järjekorranr."
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:103
 #: includes/admin/importers/class-wc-tax-rate-importer.php:188
@@ -1343,12 +1511,14 @@ msgid "Sorry, there has been an error."
 msgstr ""
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:104
+#, fuzzy
 msgid "The file does not exist, please try again."
-msgstr ""
+msgstr "Sellist veebilehte ei ole olemas.  Proovi <a href=\"%s\">%s</a>."
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:189
+#, fuzzy
 msgid "The CSV is invalid."
-msgstr ""
+msgstr "Lehemall on vigane."
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:200
 msgid ""
@@ -1357,16 +1527,19 @@ msgid ""
 msgstr ""
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:210
+#, fuzzy
 msgid "All done!"
-msgstr ""
+msgstr "Kõik rubriigid"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:210
+#, fuzzy
 msgid "View Tax Rates"
-msgstr ""
+msgstr "Käibemaks"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:261
+#, fuzzy
 msgid "Import Tax Rates"
-msgstr ""
+msgstr "Käibemaks"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:284
 msgid ""
@@ -1392,8 +1565,9 @@ msgid "Choose a file from your computer:"
 msgstr ""
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:309
+#, fuzzy
 msgid "Maximum size: %s"
-msgstr ""
+msgstr "Tähesuurus"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:314
 msgid "OR enter path to file:"
@@ -1404,16 +1578,19 @@ msgid "Delimiter"
 msgstr ""
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:327
+#, fuzzy
 msgid "Upload file and import"
-msgstr ""
+msgstr "Sa saad üles laadida üksnes 1 faili."
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:83
+#, fuzzy
 msgid "Product name"
-msgstr ""
+msgstr "Viiteankru nimi"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:104
+#, fuzzy
 msgid "Catalog/search"
-msgstr ""
+msgstr "Otsi rubriikidest"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:105
 #: includes/admin/views/html-bulk-edit-product.php:158
@@ -1424,14 +1601,16 @@ msgstr ""
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:106
 #: includes/admin/views/html-bulk-edit-product.php:159
 #: includes/admin/views/html-quick-edit-product.php:116
+#, fuzzy
 msgid "Search"
-msgstr ""
+msgstr "Otsi"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:107
 #: includes/admin/views/html-bulk-edit-product.php:160
 #: includes/admin/views/html-quick-edit-product.php:117
+#, fuzzy
 msgid "Hidden"
-msgstr ""
+msgstr "Peidetud"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:111
 msgid "Catalog visibility:"
@@ -1448,17 +1627,20 @@ msgid "Enable this option to feature this product."
 msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:134
+#, fuzzy
 msgid "Featured Product"
-msgstr ""
+msgstr "Muuda toodet"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:137
+#, fuzzy
 msgid "OK"
-msgstr ""
+msgstr "Olgu"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:138
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:175
+#, fuzzy
 msgid "Cancel"
-msgstr ""
+msgstr "Tühista"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:197
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:135
@@ -1471,17 +1653,20 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:10
 #: includes/admin/views/html-email-template-preview.php:10
 #: includes/admin/views/html-quick-edit-product.php:22
+#, fuzzy
 msgid "Price"
-msgstr ""
+msgstr "Hind"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:204
 #: includes/admin/reports/class-wc-report-sales-by-category.php:138
+#, fuzzy
 msgid "Categories"
-msgstr ""
+msgstr "Rubriigid"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:205
+#, fuzzy
 msgid "Tags"
-msgstr ""
+msgstr "Sildid"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:208
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:93
@@ -1490,20 +1675,24 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-sales-by-category.php:210
 #: includes/admin/reports/class-wc-report-sales-by-date.php:158
 #: includes/admin/reports/class-wc-report-sales-by-product.php:323
+#, fuzzy
 msgid "Date"
-msgstr ""
+msgstr "Kuupäev"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:251
+#, fuzzy
 msgid "Edit this item"
-msgstr ""
+msgstr "Vaata või muuda seda arvet"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:252
+#, fuzzy
 msgid "Edit this item inline"
-msgstr ""
+msgstr "Vaata või muuda seda arvet"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:252
+#, fuzzy
 msgid "Quick&nbsp;Edit"
-msgstr ""
+msgstr "Muuda CSS-stiili"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:256
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:98
@@ -1512,8 +1701,9 @@ msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:256
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:98
+#, fuzzy
 msgid "Restore"
-msgstr ""
+msgstr "Taasta"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:258
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:100
@@ -1522,8 +1712,9 @@ msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:258
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:100
+#, fuzzy
 msgid "Trash"
-msgstr ""
+msgstr "Prügi"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:260
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:102
@@ -1533,62 +1724,70 @@ msgstr ""
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:260
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:102
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:64
+#, fuzzy
 msgid "Delete Permanently"
-msgstr ""
+msgstr "Kustuta galerii"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:265
+#, fuzzy
 msgid "Preview &#8220;%s&#8221;"
-msgstr ""
+msgstr "Preview feedback in new window"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:265
+#, fuzzy
 msgid "Preview"
-msgstr ""
+msgstr "Eelvaade"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:267
+#, fuzzy
 msgid "View &#8220;%s&#8221;"
-msgstr ""
+msgstr "Vaata kommentaaride ajalugu"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:267
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:298
 #: includes/admin/reports/class-wc-report-stock.php:114
+#, fuzzy
 msgid "View"
-msgstr ""
+msgstr "Vaata"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:316
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:317
 msgid "Grouped"
 msgstr ""
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:318
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:319
+#, fuzzy
 msgid "External/Affiliate"
-msgstr ""
+msgstr "Partneri kood"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:322
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:513
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:323
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:514
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:51
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:176
 msgid "Virtual"
 msgstr ""
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:324
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:506
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:325
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:507
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:58
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:174
 msgid "Downloadable"
 msgstr ""
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:326
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:327
+#, fuzzy
 msgid "Simple"
-msgstr ""
+msgstr "Simple moderation"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:330
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:331
 msgid "Variable"
 msgstr ""
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:353
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:354
+#, fuzzy
 msgid "Toggle featured"
-msgstr ""
+msgstr "Esilehepostitus"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:355
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:356
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:135
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:200
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:202
@@ -1598,93 +1797,110 @@ msgstr ""
 #: includes/admin/views/html-admin-page-status-report.php:261
 #: includes/admin/views/html-bulk-edit-product.php:176
 #: includes/admin/views/html-bulk-edit-product.php:213
+#, fuzzy
 msgid "Yes"
-msgstr ""
+msgstr "Jah"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:357
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:358
 #: includes/admin/views/html-admin-page-status-report.php:39
 #: includes/admin/views/html-admin-page-status-report.php:67
 #: includes/admin/views/html-admin-page-status-report.php:92
 #: includes/admin/views/html-admin-page-status-report.php:261
 #: includes/admin/views/html-bulk-edit-product.php:177
 #: includes/admin/views/html-bulk-edit-product.php:214
+#, fuzzy
 msgid "No"
-msgstr ""
+msgstr "Ei"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:364
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:365
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:275
 #: includes/admin/reports/class-wc-report-stock.php:91
 #: includes/admin/views/html-bulk-edit-product.php:194
 #: includes/admin/views/html-quick-edit-product.php:137
+#, fuzzy
 msgid "In stock"
-msgstr ""
+msgstr "Laos"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:448
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:449
+#, fuzzy
 msgid "Sort Products"
-msgstr ""
+msgstr "Otsi toodet"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:468
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:469
 msgid "Show all product types"
 msgstr ""
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:480
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:481
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:37
+#, fuzzy
 msgid "Grouped product"
-msgstr ""
+msgstr "Muuda toodet"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:483
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:484
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:38
+#, fuzzy
 msgid "External/Affiliate product"
-msgstr ""
+msgstr "Lisa uus toode"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:486
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:487
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:39
+#, fuzzy
 msgid "Variable product"
-msgstr ""
+msgstr "Muuda toodet"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:489
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:490
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:36
+#, fuzzy
 msgid "Simple product"
-msgstr ""
+msgstr "Muuda toodet"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:52
+#, fuzzy
 msgid "Coupon code"
-msgstr ""
+msgstr "Koodinäidis"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:64
+#, fuzzy
 msgid "Code"
-msgstr ""
+msgstr "Koodiredaktor"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:65
+#, fuzzy
 msgid "Coupon type"
-msgstr ""
+msgstr "Feedback type"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:66
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:44
 #: includes/admin/reports/class-wc-report-sales-by-date.php:320
+#, fuzzy
 msgid "Coupon amount"
-msgstr ""
+msgstr "Lis akupong"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:67
+#, fuzzy
 msgid "Description"
-msgstr ""
+msgstr "Description"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:68
+#, fuzzy
 msgid "Product IDs"
-msgstr ""
+msgstr "Muuda toodet"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:69
+#, fuzzy
 msgid "Usage / Limit"
-msgstr ""
+msgstr "Allalaadimiste limiit"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:70
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:155
+#, fuzzy
 msgid "Expiry date"
-msgstr ""
+msgstr "Aegumiskuupäev on vigane"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:89
+#, fuzzy
 msgid "Edit coupon"
-msgstr ""
+msgstr "Muuda kupongi"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:147
 msgid "%s / %s"
@@ -1695,51 +1911,59 @@ msgid "%s / &infin;"
 msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:195
+#, fuzzy
 msgid "Show all types"
-msgstr ""
+msgstr "Feedback types setup"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:86
-#: includes/admin/settings/class-wc-settings-checkout.php:219
+#: includes/admin/settings/class-wc-settings-checkout.php:220
 #: includes/admin/settings/class-wc-settings-shipping.php:204
+#, fuzzy
 msgid "Status"
-msgstr ""
+msgstr "Olek"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:87
+#, fuzzy
 msgid "Order"
-msgstr ""
+msgstr "Tellimus"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:88
 msgid "Purchased"
 msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:89
+#, fuzzy
 msgid "Ship to"
-msgstr ""
+msgstr "Viide: %s"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:91
+#, fuzzy
 msgid "Customer Message"
-msgstr ""
+msgstr "%d tõlgitud teade"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:92
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:97
+#, fuzzy
 msgid "Order Notes"
-msgstr ""
+msgstr "Märkused..."
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:94
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:43
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:62
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:129
+#, fuzzy
 msgid "Total"
-msgstr ""
+msgstr "Kokku"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:95
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:34
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:81
 #: includes/admin/reports/class-wc-report-customer-list.php:244
 #: includes/admin/reports/class-wc-report-stock.php:141
+#, fuzzy
 msgid "Actions"
-msgstr ""
+msgstr "Toimingud"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:119
 msgid "Unpublished"
@@ -1750,8 +1974,9 @@ msgid "Y/m/d g:i:s A"
 msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:126
+#, fuzzy
 msgid "Y/m/d"
-msgstr ""
+msgstr "d.m.Y"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:147
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:185
@@ -1760,9 +1985,10 @@ msgid "Via"
 msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:151
+#, fuzzy
 msgid "%d item"
 msgid_plural "%d items"
-msgstr[0] ""
+msgstr[0] "Nimetus"
 msgstr[1] ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:202
@@ -1772,8 +1998,9 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:220
+#, fuzzy
 msgid "Billing:"
-msgstr ""
+msgstr "Arveldus"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:223
 msgid "Tel:"
@@ -1786,8 +2013,9 @@ msgid "Guest"
 msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:266
+#, fuzzy
 msgid "%s by %s"
-msgstr ""
+msgstr "Kirjutas %s"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:285
 msgid "Processing"
@@ -1798,77 +2026,92 @@ msgid "Complete"
 msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:384
+#, fuzzy
 msgid "Show all statuses"
-msgstr ""
+msgstr "Kõik viiterubriigid"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:403
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:428
+#, fuzzy
 msgid "Show all customers"
-msgstr ""
+msgstr "Capture Customers Ideas"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:645
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:646
+#, fuzzy
 msgid "Mark processing"
-msgstr ""
+msgstr "Märgi makstuks"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:648
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:649
+#, fuzzy
 msgid "Mark on-hold"
-msgstr ""
+msgstr "%2$s kommentaar  %1$s kohta"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:651
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:652
+#, fuzzy
 msgid "Mark completed"
-msgstr ""
+msgstr "Closed: Completed"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:693
 msgid "Order status changed by bulk edit:"
 msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:715
+#, fuzzy
 msgid "Order status changed."
 msgid_plural "%s order statuses changed."
-msgstr[0] ""
+msgstr[0] "Feedback status changed"
 msgstr[1] ""
 
 #: includes/admin/post-types/class-wc-admin-cpt.php:44
+#, fuzzy
 msgid "Insert into %s"
-msgstr ""
+msgstr "Sisesta postitusse"
 
 #: includes/admin/post-types/class-wc-admin-cpt.php:45
+#, fuzzy
 msgid "Uploaded to this %s"
-msgstr ""
+msgstr "Kliki rea eemaldamiseks"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:89
+#, fuzzy
 msgid "Product Short Description"
-msgstr ""
+msgstr "Short description of Your feedback"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:90
 #: includes/admin/settings/class-wc-settings-products.php:283
 #: includes/admin/views/html-bulk-edit-product.php:4
 #: includes/admin/views/html-quick-edit-product.php:4
+#, fuzzy
 msgid "Product Data"
-msgstr ""
+msgstr "Data Storage"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:91
+#, fuzzy
 msgid "Product Gallery"
-msgstr ""
+msgstr "Kustuta galerii"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:94
+#, fuzzy
 msgid "Order Data"
-msgstr ""
+msgstr "Data Storage"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:95
+#, fuzzy
 msgid "Order Items"
-msgstr ""
+msgstr "Lehe järjekorranr."
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:96
+#, fuzzy
 msgid "Order Totals"
-msgstr ""
+msgstr "Lehe järjekorranr."
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:98
+#, fuzzy
 msgid "Downloadable Product Permissions"
-msgstr ""
+msgstr "Lisa uus toode"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:98
 msgid ""
@@ -1877,36 +2120,42 @@ msgid ""
 msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:99
+#, fuzzy
 msgid "Order Actions"
-msgstr ""
+msgstr "Admin actions:"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:102
+#, fuzzy
 msgid "Coupon Data"
-msgstr ""
+msgstr "Data Storage"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:133
 msgid "Reviews"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:36
+#, fuzzy
 msgid "Coupon description"
-msgstr ""
+msgstr "Definitsioon"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:36
 msgid "Optionally enter a description for this coupon for your reference."
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:41
+#, fuzzy
 msgid "Discount type"
-msgstr ""
+msgstr "Feedback type"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:44
+#, fuzzy
 msgid "Value of the coupon."
-msgstr ""
+msgstr "Lis akupong"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:50
+#, fuzzy
 msgid "Enable free shipping"
-msgstr ""
+msgstr "Vaikimisi lähetusviis"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:50
 msgid ""
@@ -1916,8 +2165,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:53
+#, fuzzy
 msgid "Individual use"
-msgstr ""
+msgstr "vastuoluline #~ kasutamine"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:53
 msgid ""
@@ -1926,8 +2176,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:56
+#, fuzzy
 msgid "Apply before tax"
-msgstr ""
+msgstr "Käibemaks"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:56
 msgid ""
@@ -1935,8 +2186,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:59
+#, fuzzy
 msgid "Exclude sale items"
-msgstr ""
+msgstr "Menüüelemendid"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:59
 msgid ""
@@ -1950,8 +2202,9 @@ msgid "Minimum amount"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:64
+#, fuzzy
 msgid "No minimum"
-msgstr ""
+msgstr "(pealkiri puudub)"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:64
 msgid ""
@@ -1963,8 +2216,9 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:567
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:584
 #: includes/admin/reports/class-wc-report-sales-by-product.php:177
+#, fuzzy
 msgid "Search for a product&hellip;"
-msgstr ""
+msgstr "Otsing sellelt veebilehelt"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:87
 msgid ""
@@ -1973,12 +2227,14 @@ msgid ""
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:92
+#, fuzzy
 msgid "Exclude products"
-msgstr ""
+msgstr "Otsi toodet"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:93
+#, fuzzy
 msgid "Search for a product…"
-msgstr ""
+msgstr "Otsitulemused: %s"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:106
 msgid ""
@@ -1987,12 +2243,14 @@ msgid ""
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:113
+#, fuzzy
 msgid "Product categories"
-msgstr ""
+msgstr "Tootekategooriad"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:114
+#, fuzzy
 msgid "Any category"
-msgstr ""
+msgstr "%1$s %2$s %3$s Rubriigi RSS"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:122
 msgid ""
@@ -2001,12 +2259,14 @@ msgid ""
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:127
+#, fuzzy
 msgid "Exclude categories"
-msgstr ""
+msgstr "Kõik rubriigid"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:128
+#, fuzzy
 msgid "No categories"
-msgstr ""
+msgstr "Rubriike pole"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:136
 msgid ""
@@ -2015,12 +2275,14 @@ msgid ""
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:142
+#, fuzzy
 msgid "Email restrictions"
-msgstr ""
+msgstr "User's Email"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:142
+#, fuzzy
 msgid "No restrictions"
-msgstr ""
+msgstr "(pealkiri puudub)"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:142
 msgid ""
@@ -2029,13 +2291,15 @@ msgid ""
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:149
+#, fuzzy
 msgid "Usage limit"
-msgstr ""
+msgstr "Allalaadimiste limiit"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:149
+#, fuzzy
 msgctxt "placeholder"
 msgid "Unlimited usage"
-msgstr ""
+msgstr "Üldine kasutus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:149
 msgid "How many times this coupon can be used before it is void."
@@ -2057,64 +2321,78 @@ msgid ""
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:35
+#, fuzzy
 msgid "Resend order emails"
-msgstr ""
+msgstr "Enter user emails"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:57
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:91
+#, fuzzy
 msgid "Apply"
-msgstr ""
+msgstr "Rakenda"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:66
+#, fuzzy
 msgid "Move to Trash"
-msgstr ""
+msgstr "saadetud prügikasti."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:71
+#, fuzzy
 msgid "Save Order"
-msgstr ""
+msgstr "Lehe järjekorranr."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:71
+#, fuzzy
 msgid "Save/update the order"
-msgstr ""
+msgstr "Esita see tellimus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:29
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:76
+#, fuzzy
 msgid "First Name"
-msgstr ""
+msgstr "Eesnimi"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:33
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:80
+#, fuzzy
 msgid "Last Name"
-msgstr ""
+msgstr "Perenimi"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:60
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:107
+#, fuzzy
 msgid "Select a country&hellip;"
-msgstr ""
+msgstr "Riik..."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:70
+#, fuzzy
 msgid "Phone"
-msgstr ""
+msgstr "Telefon"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:139
+#, fuzzy
 msgid "Order Details"
-msgstr ""
+msgstr "Kliendi andmed"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:142
+#, fuzzy
 msgid "Order number"
-msgstr ""
+msgstr "Arve"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:145
+#, fuzzy
 msgid "Customer IP:"
-msgstr ""
+msgstr "Autor: %1$s (IP: %2$s , %3$s)"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:150
+#, fuzzy
 msgid "General Details"
-msgstr ""
+msgstr "Kliendi andmed"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:152
+#, fuzzy
 msgid "Order date:"
-msgstr ""
+msgstr "Kuupäevavorming"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:153
 msgid "h"
@@ -2126,16 +2404,19 @@ msgid "m"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:156
+#, fuzzy
 msgid "Order status:"
-msgstr ""
+msgstr "Pildi olek"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:167
+#, fuzzy
 msgid "Customer:"
-msgstr ""
+msgstr "Klient"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:182
+#, fuzzy
 msgid "Billing Details"
-msgstr ""
+msgstr "Kliendi andmed"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:188
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:190
@@ -2145,20 +2426,24 @@ msgid "Address"
 msgstr "Aadress"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:190
+#, fuzzy
 msgid "No billing address set."
-msgstr ""
+msgstr "enter your billing address"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:208
+#, fuzzy
 msgid "Payment Method"
-msgstr ""
+msgstr "Payment Number"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:213
+#, fuzzy
 msgid "Load billing address"
-msgstr ""
+msgstr "Edit billing address"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:230
+#, fuzzy
 msgid "Payment Method:"
-msgstr ""
+msgstr "Payment Number"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:232
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:33
@@ -2171,32 +2456,39 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:247
 #: includes/admin/post-types/meta-boxes/views/html-order-shipping.php:30
 #: includes/admin/post-types/meta-boxes/views/html-order-shipping.php:32
+#, fuzzy
 msgid "Other"
-msgstr ""
+msgstr "Muud seaded"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:261
+#, fuzzy
 msgid "Shipping Details"
-msgstr ""
+msgstr "Kliendi andmed"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:269
+#, fuzzy
 msgid "No shipping address set."
-msgstr ""
+msgstr "Aadressile %s ei leitud tuelmusi"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:282
+#, fuzzy
 msgid "Customer Note"
-msgstr ""
+msgstr "Kustuta märkus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:287
+#, fuzzy
 msgid "Load shipping address"
-msgstr ""
+msgstr "E-postiaadress:"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:287
+#, fuzzy
 msgid "Copy from billing"
-msgstr ""
+msgstr "Edit billing address"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:304
+#, fuzzy
 msgid "Customer Note:"
-msgstr ""
+msgstr "Kustuta märkus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:305
 msgid "Customer's notes about the order"
@@ -2207,8 +2499,9 @@ msgid "Choose a downloadable product&hellip;"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-downloads.php:85
+#, fuzzy
 msgid "Grant Access"
-msgstr ""
+msgstr "Ligipääs keelatud."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-downloads.php:123
 msgid ""
@@ -2222,68 +2515,82 @@ msgid "Are you sure you want to revoke access to this download?"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:33
+#, fuzzy
 msgid "Item"
-msgstr ""
+msgstr "Nimetus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:38
+#, fuzzy
 msgid "Tax&nbsp;Class"
-msgstr ""
+msgstr "<span class=\"%1$s\">Sildid:</span> %2$s"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:41
+#, fuzzy
 msgid "Qty"
-msgstr ""
+msgstr "Kogus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:46
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:118
 #: includes/admin/settings/class-wc-settings-tax.php:25
-#: includes/admin/settings/class-wc-settings-tax.php:517
-#: includes/admin/settings/class-wc-settings-tax.php:605
+#: includes/admin/settings/class-wc-settings-tax.php:536
+#: includes/admin/settings/class-wc-settings-tax.php:624
+#, fuzzy
 msgid "Tax"
-msgstr ""
+msgstr "Maks"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:83
+#, fuzzy
 msgid "Delete Lines"
-msgstr ""
+msgstr "Kustuta galerii"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:85
+#, fuzzy
 msgid "Stock Actions"
-msgstr ""
+msgstr "Admin actions:"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:86
+#, fuzzy
 msgid "Reduce Line Stock"
-msgstr ""
+msgstr "Laoseis"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:87
+#, fuzzy
 msgid "Increase Line Stock"
-msgstr ""
+msgstr "Laoseis"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:97
+#, fuzzy
 msgid "Add item(s)"
-msgstr ""
+msgstr "Lisa uus toode: \"%s\""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:98
+#, fuzzy
 msgid "Add fee"
-msgstr ""
+msgstr "Viivis"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:44
+#, fuzzy
 msgid "added %s ago"
-msgstr ""
+msgstr "1 hour ago"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:45
+#, fuzzy
 msgid "by %s"
-msgstr ""
+msgstr "Kirjutas %s"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:46
+#, fuzzy
 msgid "Delete note"
-msgstr ""
+msgstr "Kustuta märkus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:52
 msgid "There are no notes for this order yet."
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:58
+#, fuzzy
 msgid "Add note"
-msgstr ""
+msgstr "Kustuta märkus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:58
 msgid ""
@@ -2292,39 +2599,45 @@ msgid ""
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:64
+#, fuzzy
 msgid "Customer note"
-msgstr ""
+msgstr "Kustuta märkus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:65
+#, fuzzy
 msgid "Private note"
-msgstr ""
+msgstr "Kustuta märkus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:67
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:545
+#, fuzzy
 msgid "Add"
-msgstr ""
+msgstr "Lisa"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:31
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:62
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:94
 #: includes/admin/settings/class-wc-settings-shipping.php:25
-#: includes/admin/settings/class-wc-settings-tax.php:233
-#: includes/admin/settings/class-wc-settings-tax.php:350
+#: includes/admin/settings/class-wc-settings-tax.php:252
+#: includes/admin/settings/class-wc-settings-tax.php:369
 #: includes/admin/views/html-admin-page-addons.php:13
+#, fuzzy
 msgid "Shipping"
-msgstr ""
+msgstr "Lähetusviisid"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:66
+#, fuzzy
 msgid "+ Add shipping cost"
-msgstr ""
+msgstr "Vaikimisi lähetusviis"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:66
 msgid "These are the shipping and handling costs for the order."
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:106
+#, fuzzy
 msgid "+ Add tax row"
-msgstr ""
+msgstr "Lisa uus rida selle rea järele"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:106
 msgid ""
@@ -2333,24 +2646,29 @@ msgid ""
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:113
+#, fuzzy
 msgid "Order Discount"
-msgstr ""
+msgstr "Sisesta allahindluse protsent. Näiteks: 10"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:120
+#, fuzzy
 msgid "Order Total"
-msgstr ""
+msgstr "Tellimus kokku"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:148
+#, fuzzy
 msgid "Calculate Tax"
-msgstr ""
+msgstr "Nimetus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:150
+#, fuzzy
 msgid "Calculate Total"
-msgstr ""
+msgstr "Tellimus kokku"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:42
+#, fuzzy
 msgid "Product Type"
-msgstr ""
+msgstr "Feedback type"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:52
 msgid "Virtual products are intangible and aren't shipped."
@@ -2362,8 +2680,9 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:84
 #: includes/admin/settings/class-wc-settings-general.php:25
+#, fuzzy
 msgid "General"
-msgstr ""
+msgstr "Üldine"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:89
 #: includes/admin/settings/class-wc-settings-products.php:41
@@ -2371,20 +2690,24 @@ msgid "Inventory"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:99
+#, fuzzy
 msgid "Linked Products"
-msgstr ""
+msgstr "Otsi toodet"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:109
+#, fuzzy
 msgid "Variations"
-msgstr ""
+msgstr "Variatsioonid"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:114
+#, fuzzy
 msgid "Advanced"
-msgstr ""
+msgstr "Täpsemad sätted"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:135
+#, fuzzy
 msgid "Stock Keeping Unit"
-msgstr ""
+msgstr "Laoseis"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:135
 msgid ""
@@ -2393,54 +2716,63 @@ msgid ""
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:146
+#, fuzzy
 msgid "Product URL"
-msgstr ""
+msgstr "Baasaadress"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:146
 msgid "Enter the external URL to the product."
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:149
+#, fuzzy
 msgid "Button text"
-msgstr ""
+msgstr "Alternatiivtekst"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:149
+#, fuzzy
 msgctxt "placeholder"
 msgid "Buy product"
-msgstr ""
+msgstr "Muuda toodet"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:149
 msgid "This text will be shown on the button linking to the external product."
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:156
+#, fuzzy
 msgid "Regular Price"
-msgstr ""
+msgstr "Hinnarühm"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:162
+#, fuzzy
 msgid "Sale Price"
-msgstr ""
+msgstr "Hinnarühm"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:162
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:76
+#, fuzzy
 msgid "Schedule"
-msgstr ""
+msgstr "Järjekord"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:172
+#, fuzzy
 msgid "Sale Price Dates"
-msgstr ""
+msgstr "Hinnaalandusrühm"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:173
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:84
+#, fuzzy
 msgctxt "placeholder"
 msgid "From&hellip;"
-msgstr ""
+msgstr "Tegelen asjaga&hellip;"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:174
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:88
+#, fuzzy
 msgctxt "placeholder"
 msgid "To&hellip;"
-msgstr ""
+msgstr "Tegelen asjaga&hellip;"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:189
 msgid "File paths (one per line)"
@@ -2514,8 +2846,9 @@ msgstr "Muusika"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:222
 #: includes/admin/views/html-bulk-edit-product.php:58
 #: includes/admin/views/html-quick-edit-product.php:38
+#, fuzzy
 msgid "Tax Status"
-msgstr ""
+msgstr "Pildi olek"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:223
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:34
@@ -2527,15 +2860,17 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:224
 #: includes/admin/views/html-bulk-edit-product.php:65
 #: includes/admin/views/html-quick-edit-product.php:44
+#, fuzzy
 msgid "Shipping only"
-msgstr ""
+msgstr "Lähetusviisid"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:225
 #: includes/admin/reports/class-wc-report-sales-by-category.php:167
 #: includes/admin/views/html-bulk-edit-product.php:66
 #: includes/admin/views/html-quick-edit-product.php:45
+#, fuzzy
 msgid "None"
-msgstr ""
+msgstr "Puudub"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:230
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:711
@@ -2544,24 +2879,27 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:123
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:134
 #: includes/admin/settings/class-wc-settings-tax.php:122
-#: includes/admin/settings/class-wc-settings-tax.php:210
+#: includes/admin/settings/class-wc-settings-tax.php:229
 #: includes/admin/views/html-bulk-edit-product.php:83
 #: includes/admin/views/html-quick-edit-product.php:61
+#, fuzzy
 msgid "Standard"
-msgstr ""
+msgstr "Standardne"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:235
-#: includes/admin/settings/class-wc-settings-tax.php:350
+#: includes/admin/settings/class-wc-settings-tax.php:369
 #: includes/admin/views/html-bulk-edit-product.php:77
 #: includes/admin/views/html-quick-edit-product.php:56
+#, fuzzy
 msgid "Tax Class"
-msgstr ""
+msgstr "CSS klass"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:256
 #: includes/admin/views/html-bulk-edit-product.php:207
 #: includes/admin/views/html-quick-edit-product.php:153
+#, fuzzy
 msgid "Manage stock?"
-msgstr ""
+msgstr "Laos"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:256
 msgid ""
@@ -2573,8 +2911,9 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:226
 #: includes/admin/views/html-bulk-edit-product.php:242
 #: includes/admin/views/html-quick-edit-product.php:157
+#, fuzzy
 msgid "Stock Qty"
-msgstr ""
+msgstr "Kogus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:263
 msgid ""
@@ -2584,8 +2923,9 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:274
 #: includes/admin/reports/class-wc-report-stock.php:140
+#, fuzzy
 msgid "Stock status"
-msgstr ""
+msgstr "Pildi olek"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:277
 msgid ""
@@ -2594,20 +2934,29 @@ msgid ""
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:284
+#, fuzzy
 msgid "Allow Backorders?"
-msgstr ""
+msgstr "Allow anonymous feedback"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:285
+#: includes/admin/views/html-bulk-edit-product.php:253
+#: includes/admin/views/html-quick-edit-product.php:172
+#, fuzzy
 msgid "Do not allow"
-msgstr ""
+msgstr "Paroolid ei klapi."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:286
+#: includes/admin/views/html-bulk-edit-product.php:254
+#: includes/admin/views/html-quick-edit-product.php:173
 msgid "Allow, but notify customer"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:287
+#: includes/admin/views/html-bulk-edit-product.php:255
+#: includes/admin/views/html-quick-edit-product.php:174
+#, fuzzy
 msgid "Allow"
-msgstr ""
+msgstr "Allow"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:288
 msgid ""
@@ -2629,16 +2978,18 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:96
 #: includes/admin/views/html-bulk-edit-product.php:103
 #: includes/admin/views/html-quick-edit-product.php:84
+#, fuzzy
 msgid "Weight"
-msgstr ""
+msgstr "Paksus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:317
 msgid "Weight in decimal form"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:328
+#, fuzzy
 msgid "Dimensions"
-msgstr ""
+msgstr "Mõõtmed"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:330
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:746
@@ -2651,27 +3002,31 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:747
 #: includes/admin/views/html-bulk-edit-product.php:144
 #: includes/admin/views/html-quick-edit-product.php:98
+#, fuzzy
 msgid "Width"
-msgstr ""
+msgstr "Laius"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:332
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:748
 #: includes/admin/views/html-bulk-edit-product.php:145
 #: includes/admin/views/html-quick-edit-product.php:99
+#, fuzzy
 msgid "Height"
-msgstr ""
+msgstr "Kõrgus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:334
 msgid "LxWxH in decimal form"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:355
+#, fuzzy
 msgid "No shipping class"
-msgstr ""
+msgstr "<span class=\"%1$s\">Sildid:</span> %2$s"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:361
+#, fuzzy
 msgid "Shipping class"
-msgstr ""
+msgstr "CSS klass"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:361
 msgid ""
@@ -2681,37 +3036,45 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:373
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:731
+#, fuzzy
 msgid "Close all"
-msgstr ""
+msgstr "Sulge kõik avatud märgendid"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:373
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:731
+#, fuzzy
 msgid "Expand all"
-msgstr ""
+msgstr "Kõik rubriigid"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:430
+#, fuzzy
 msgid "Select terms"
-msgstr ""
+msgstr "Terms of service"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:444
+#, fuzzy
 msgid "Add new"
-msgstr ""
+msgstr "Lisa uus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:457
+#, fuzzy
 msgid "Pipe (|) separate terms"
-msgstr ""
+msgstr "Terms of Service (TOS)"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:547
+#, fuzzy
 msgid "Custom product attribute"
-msgstr ""
+msgstr "Lisa uus toode"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:559
+#, fuzzy
 msgid "Save attributes"
-msgstr ""
+msgstr "Salvesta mustandina"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:566
+#, fuzzy
 msgid "Up-Sells"
-msgstr ""
+msgstr "SIGN UP"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:581
 msgid ""
@@ -2743,24 +3106,28 @@ msgid "Set this option to make this product part of a grouped product."
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:654
+#, fuzzy
 msgid "Purchase Note"
-msgstr ""
+msgstr "Kustuta märkus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:654
 msgid "Enter an optional note to send the customer after purchase."
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:661
+#, fuzzy
 msgid "Menu order"
-msgstr ""
+msgstr "Lehe järjekorranr."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:661
+#, fuzzy
 msgid "Custom ordering position."
-msgstr ""
+msgstr "Name of the staff position"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:669
+#, fuzzy
 msgid "Enable reviews"
-msgstr ""
+msgstr "Luba JavaScript"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:722
 msgid ""
@@ -2769,32 +3136,39 @@ msgid ""
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:724
+#, fuzzy
 msgid "Learn more"
-msgstr ""
+msgstr "Veel värve"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:732
+#, fuzzy
 msgid "Bulk edit:"
-msgstr ""
+msgstr "Eemalda massmuutmisest"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:734
+#, fuzzy
 msgid "Toggle &quot;Enabled&quot;"
-msgstr ""
+msgstr "User enabled moderation"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:735
+#, fuzzy
 msgid "Toggle &quot;Downloadable&quot;"
-msgstr ""
+msgstr "Lülita absoluutmäärangud sisse-välja"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:736
+#, fuzzy
 msgid "Toggle &quot;Virtual&quot;"
-msgstr ""
+msgstr "Lülita absoluutmäärangud sisse-välja"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:737
+#, fuzzy
 msgid "Delete all variations"
-msgstr ""
+msgstr "You cannot delete all admins."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:738
+#, fuzzy
 msgid "Prices"
-msgstr ""
+msgstr "Hinnad"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:739
 msgid "Prices increase by (fixed amount or %)"
@@ -2805,8 +3179,9 @@ msgid "Prices decrease by (fixed amount or %)"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:741
+#, fuzzy
 msgid "Sale prices"
-msgstr ""
+msgstr "3. Hindade sisestamine"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:742
 msgid "Sale prices increase by (fixed amount or %)"
@@ -2817,33 +3192,41 @@ msgid "Sale prices decrease by (fixed amount or %)"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:749
+#, fuzzy
 msgid "File Path"
-msgstr ""
+msgstr "Faili laadimine tühistati."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:750
+#, fuzzy
 msgid "Download limit"
-msgstr ""
+msgstr "Allalaadimiste limiit"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:754
 #: includes/admin/views/html-report-by-date.php:31
+#, fuzzy
 msgid "Go"
-msgstr ""
+msgstr "Sobib!"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:856
+#, fuzzy
 msgid "Add Variation"
-msgstr ""
+msgstr "Lisa helifail"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:858
+#, fuzzy
 msgid "Link all variations"
-msgstr ""
+msgstr "Kõik viiterubriigid"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:860
+#, fuzzy
 msgid "Default selections:"
-msgstr ""
+msgstr "Vaikimisi kaader"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:873
+#: includes/admin/settings/class-wc-settings-shipping.php:212
+#, fuzzy
 msgid "No default"
-msgstr ""
+msgstr "Vaikimisi kaader"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:966
 msgid "Product SKU must be unique."
@@ -2855,33 +3238,39 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:44
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:104
+#, fuzzy
 msgid "Delete image"
-msgstr ""
+msgstr "Kustuta pilt"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:55
+#, fuzzy
 msgid "Add product gallery images"
-msgstr ""
+msgstr "Lisa uus kategooria"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:81
 msgid "Add Images to Product Gallery"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:83
+#, fuzzy
 msgid "Add to gallery"
-msgstr ""
+msgstr "Lisa ostukorvi"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:6
+#, fuzzy
 msgid "Revoke Access"
-msgstr ""
+msgstr "Ligipääs keelatud."
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:9
+#, fuzzy
 msgid "File %d: %s"
-msgstr ""
+msgstr "Faili laadimine tühistati."
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:9
+#, fuzzy
 msgid "Downloaded %s time"
 msgid_plural "Downloaded %s times"
-msgstr[0] ""
+msgstr[0] "Lõppaeg"
 msgstr[1] ""
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:16
@@ -2889,41 +3278,50 @@ msgid "Downloads Remaining"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:22
+#, fuzzy
 msgid "Access Expires"
-msgstr ""
+msgstr "Ligipääs keelatud."
 
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:12
+#, fuzzy
 msgid "Fee"
-msgstr ""
+msgstr "Viivis"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:16
+#, fuzzy
 msgid "Fee Name"
-msgstr ""
+msgstr "Viiteankru nimi"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:31
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:127
+#, fuzzy
 msgid "Tax class"
-msgstr ""
+msgstr "CSS klass"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:10
+#, fuzzy
 msgid "Product ID:"
-msgstr ""
+msgstr "Akna ID"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:13
+#, fuzzy
 msgid "Variation ID:"
-msgstr ""
+msgstr "Akna ID"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:16
+#, fuzzy
 msgid "Product SKU:"
-msgstr ""
+msgstr "Muuda toodet"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:74
+#, fuzzy
 msgid "Add&nbsp;meta"
-msgstr ""
+msgstr "E-postiaadress:"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
+#, fuzzy
 msgid "Subtotal"
-msgstr ""
+msgstr "Vahesumma"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
 msgid "Before pre-tax discounts."
@@ -2938,25 +3336,28 @@ msgid "Label"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/views/html-order-shipping.php:11
-#: includes/admin/settings/class-wc-settings-shipping.php:203
+#, fuzzy
 msgid "Shipping Method"
-msgstr ""
+msgstr "Vaikimisi lähetusviis"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-shipping.php:39
 msgid "0.00"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/views/html-order-tax.php:7
+#, fuzzy
 msgid "Tax Rate"
-msgstr ""
+msgstr "Maksumäär"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-tax.php:17
+#, fuzzy
 msgid "Sales Tax"
-msgstr ""
+msgstr "Nimetus"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-tax.php:21
+#, fuzzy
 msgid "Shipping Tax"
-msgstr ""
+msgstr "Nimetus"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:20
 msgid "Any"
@@ -2968,8 +3369,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:63
+#, fuzzy
 msgid "Stock Qty:"
-msgstr ""
+msgstr "Kogus"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:63
 msgid ""
@@ -2978,28 +3380,34 @@ msgid ""
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:72
+#, fuzzy
 msgid "Regular Price:"
-msgstr ""
+msgstr "Hinnarühm"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:73
+#, fuzzy
 msgid "Variation price (required)"
-msgstr ""
+msgstr "Vaja on aktiveerimisvõtit"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:76
+#, fuzzy
 msgid "Sale Price:"
-msgstr ""
+msgstr "Hinnarühm"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:76
+#, fuzzy
 msgid "Cancel schedule"
-msgstr ""
+msgstr "Avalda:"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:83
+#, fuzzy
 msgid "Sale start date:"
-msgstr ""
+msgstr "Kas näidata kuupäeva?"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:87
+#, fuzzy
 msgid "Sale end date:"
-msgstr ""
+msgstr "Kas näidata kuupäeva?"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:96
 msgid ""
@@ -3012,21 +3420,25 @@ msgid "Dimensions (L&times;W&times;H)"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:115
+#, fuzzy
 msgid "Shipping class:"
-msgstr ""
+msgstr "CSS klass"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:119
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:132
+#, fuzzy
 msgid "Same as parent"
-msgstr ""
+msgstr "Ülemine KKK Kategooria"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:130
+#, fuzzy
 msgid "Tax class:"
-msgstr ""
+msgstr "CSS klass"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:143
+#, fuzzy
 msgid "File paths:"
-msgstr ""
+msgstr "Faili laadimine tühistati."
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:143
 msgid ""
@@ -3035,22 +3447,26 @@ msgid ""
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:145
+#, fuzzy
 msgid "Upload"
-msgstr ""
+msgstr "Laadi üles"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:150
+#, fuzzy
 msgid "Download Limit:"
-msgstr ""
+msgstr "Allalaadimiste limiit"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:158
+#, fuzzy
 msgid "Download Expiry:"
-msgstr ""
+msgstr "Allalaadimise lõppemine"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:172
-#: includes/admin/settings/class-wc-settings-checkout.php:254
-#: includes/admin/settings/class-wc-settings-shipping.php:224
+#: includes/admin/settings/class-wc-settings-checkout.php:260
+#: includes/admin/settings/class-wc-settings-shipping.php:235
+#, fuzzy
 msgid "Enabled"
-msgstr ""
+msgstr "Lubatud"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:174
 msgid ""
@@ -3074,8 +3490,9 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:69
+#, fuzzy
 msgid "%s discounts in total"
-msgstr ""
+msgstr "Palun logi sisse"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:75
 msgid "%s coupons used in total"
@@ -3088,8 +3505,9 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-sales-by-product.php:107
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:41
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:41
+#, fuzzy
 msgid "Year"
-msgstr ""
+msgstr "year"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:91
 #: includes/admin/reports/class-wc-report-customers.php:139
@@ -3098,8 +3516,9 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-sales-by-product.php:108
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:42
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:42
+#, fuzzy
 msgid "Last Month"
-msgstr ""
+msgstr "Vali kuu"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:92
 #: includes/admin/reports/class-wc-report-customers.php:140
@@ -3108,51 +3527,61 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-sales-by-product.php:109
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:43
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:43
+#, fuzzy
 msgid "This Month"
-msgstr ""
+msgstr "Vali kuu"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:93
 #: includes/admin/reports/class-wc-report-customers.php:141
 #: includes/admin/reports/class-wc-report-sales-by-category.php:68
 #: includes/admin/reports/class-wc-report-sales-by-date.php:125
 #: includes/admin/reports/class-wc-report-sales-by-product.php:110
+#, fuzzy
 msgid "Last 7 Days"
-msgstr ""
+msgstr "Viimane postitus"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:133
+#, fuzzy
 msgid "Filter by coupon"
-msgstr ""
+msgstr "Lisa uus kupong"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:137
+#, fuzzy
 msgid "Choose coupons&hellip;"
-msgstr ""
+msgstr "Choose target language"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:161
+#, fuzzy
 msgid "All coupons"
-msgstr ""
+msgstr "Vaata kuponge"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:166
+#, fuzzy
 msgid "No used coupons found"
-msgstr ""
+msgstr "Rohkem kommentaare pole."
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:169
 #: includes/admin/reports/class-wc-report-sales-by-category.php:169
 #: includes/admin/reports/class-wc-report-sales-by-product.php:178
+#, fuzzy
 msgid "Show"
-msgstr ""
+msgstr "Näita"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:184
+#, fuzzy
 msgid "Most Popular"
-msgstr ""
+msgstr "Most popular"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:226
 #: includes/admin/reports/class-wc-report-coupon-usage.php:273
+#, fuzzy
 msgid "No coupons found in range"
-msgstr ""
+msgstr "Prügikastis pole lehti."
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:231
+#, fuzzy
 msgid "Most Discount"
-msgstr ""
+msgstr "Sisesta allahindluse protsent. Näiteks: 10"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:316
 #: includes/admin/reports/class-wc-report-customers.php:202
@@ -3161,242 +3590,293 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-sales-by-product.php:326
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:29
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:29
-#: includes/admin/settings/class-wc-settings-tax.php:256
+#: includes/admin/settings/class-wc-settings-tax.php:275
+#, fuzzy
 msgid "Export CSV"
-msgstr ""
+msgstr "Eksport"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:407
+#, fuzzy
 msgid "Number of coupons used"
-msgstr ""
+msgstr "Vali enimkasutatud siltide seast"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:415
+#, fuzzy
 msgid "Discount amount"
-msgstr ""
+msgstr "Sisesta allahindluse protsent. Näiteks: 10"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:22
+#, fuzzy
 msgid "Customer"
-msgstr ""
+msgstr "Klient"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:32
+#, fuzzy
 msgid "No customers found."
-msgstr ""
+msgstr "Ühtki sobivat ei leitud."
 
 #: includes/admin/reports/class-wc-report-customer-list.php:46
+#, fuzzy
 msgid "%s previous order linked"
 msgid_plural "%s previous orders linked"
-msgstr[0] ""
+msgstr[0] "Esita see tellimus"
 msgstr[1] ""
 
 #: includes/admin/reports/class-wc-report-customer-list.php:51
+#, fuzzy
 msgid "Search customers"
-msgstr ""
+msgstr "Customers Ideas"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:187
+#, fuzzy
 msgid "View orders"
-msgstr ""
+msgstr "Tellimusi pole"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:211
+#, fuzzy
 msgid "Link previous orders"
-msgstr ""
+msgstr "&laquo; Eelmine lehekülg"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:237
+#, fuzzy
 msgid "Name (Last, First)"
-msgstr ""
+msgstr "Ava esimene POI"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:238
+#, fuzzy
 msgid "Username"
-msgstr ""
+msgstr "Kasutajanimi"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:240
+#, fuzzy
 msgid "Location"
-msgstr ""
+msgstr "Asukoht"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:242
 msgid "Spent"
 msgstr ""
 
 #: includes/admin/reports/class-wc-report-customer-list.php:243
+#, fuzzy
 msgid "Last order"
-msgstr ""
+msgstr "Lehe järjekorranr."
 
 #: includes/admin/reports/class-wc-report-customers.php:15
+#, fuzzy
 msgid "%s signups in this period"
-msgstr ""
+msgstr "UserEcho: Trial period expires in 3 days"
 
 #: includes/admin/reports/class-wc-report-customers.php:83
+#, fuzzy
 msgid "Customer Sales"
-msgstr ""
+msgstr "Müügiühik"
 
 #: includes/admin/reports/class-wc-report-customers.php:84
+#, fuzzy
 msgid "Guest Sales"
-msgstr ""
+msgstr "Müügiühik"
 
 #: includes/admin/reports/class-wc-report-customers.php:93
 #: includes/admin/reports/class-wc-report-customers.php:289
+#, fuzzy
 msgid "Customer Orders"
-msgstr ""
+msgstr "Tellimusi pole"
 
 #: includes/admin/reports/class-wc-report-customers.php:98
 #: includes/admin/reports/class-wc-report-customers.php:299
+#, fuzzy
 msgid "Guest Orders"
-msgstr ""
+msgstr "Tellimusi pole"
 
 #: includes/admin/reports/class-wc-report-customers.php:117
+#, fuzzy
 msgid "orders"
-msgstr ""
+msgstr "Tellimused"
 
 #: includes/admin/reports/class-wc-report-customers.php:295
+#, fuzzy
 msgid "customer orders"
-msgstr ""
+msgstr "Tellimusi pole"
 
 #: includes/admin/reports/class-wc-report-customers.php:305
+#, fuzzy
 msgid "guest orders"
-msgstr ""
+msgstr "Tellimusi pole"
 
 #: includes/admin/reports/class-wc-report-customers.php:309
 msgid "Signups"
 msgstr ""
 
 #: includes/admin/reports/class-wc-report-customers.php:316
+#, fuzzy
 msgid "new users"
-msgstr ""
+msgstr "Uus %1$s veebileht: %2$s"
 
 #: includes/admin/reports/class-wc-report-low-in-stock.php:19
 msgid "No low in stock products found."
 msgstr ""
 
 #: includes/admin/reports/class-wc-report-out-of-stock.php:19
+#, fuzzy
 msgid "No out of stock products found."
-msgstr ""
+msgstr "Prügikastis ei ole tooteid"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:47
+#, fuzzy
 msgid "%s sales in %s"
-msgstr ""
+msgstr "Logi sisse"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:168
+#, fuzzy
 msgid "All"
-msgstr ""
+msgstr "Kõik"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:228
 msgid "&larr; Choose a category to view stats"
 msgstr ""
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:74
+#, fuzzy
 msgid "%s average daily sales"
-msgstr ""
+msgstr "Arhiiv kuupäevade lõikes: <span>%s</span>"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:77
+#, fuzzy
 msgid "%s average monthly sales"
-msgstr ""
+msgstr "Arhiiv kuude lõikes: <span>%s</span>"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:82
+#, fuzzy
 msgid "%s sales in this period"
-msgstr ""
+msgstr "UserEcho: Trial period expires in 3 days"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:92
+#, fuzzy
 msgid "%s orders placed"
-msgstr ""
+msgstr "Tellimusi pole"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:97
+#, fuzzy
 msgid "%s items purchased"
-msgstr ""
+msgstr "Menüüelemendid"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:102
+#, fuzzy
 msgid "%s charged for shipping"
-msgstr ""
+msgstr "Vaikimisi lähetusviis"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:107
+#, fuzzy
 msgid "%s worth of coupons used"
-msgstr ""
+msgstr "Vali enimkasutatud siltide seast"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:294
 #: includes/admin/reports/class-wc-report-sales-by-product.php:440
+#, fuzzy
 msgid "Number of items sold"
-msgstr ""
+msgstr "Menüüelemendid"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:302
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:120
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:109
+#, fuzzy
 msgid "Number of orders"
-msgstr ""
+msgstr "Tellimusi pole"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:310
+#, fuzzy
 msgid "Average sales amount"
-msgstr ""
+msgstr "Kogus müügitellimustel"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:330
+#, fuzzy
 msgid "Shipping amount"
-msgstr ""
+msgstr "Lähetusviisid"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:340
 #: includes/admin/reports/class-wc-report-sales-by-product.php:448
+#, fuzzy
 msgid "Sales amount"
-msgstr ""
+msgstr "Müügiühik"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:87
+#, fuzzy
 msgid "%s sales for the selected items"
-msgstr ""
+msgstr "Original text for selected input"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:92
+#, fuzzy
 msgid "%s purchases for the selected items"
-msgstr ""
+msgstr "Original text for selected input"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:138
+#, fuzzy
 msgid "Showing reports for:"
-msgstr ""
+msgstr "Rämpsukontroll"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:164
+#, fuzzy
 msgid "Reset"
-msgstr ""
+msgstr "Reset"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:173
+#, fuzzy
 msgid "Product Search"
-msgstr ""
+msgstr "Otsi Tootekategooriaid"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:210
+#, fuzzy
 msgid "Top Sellers"
-msgstr ""
+msgstr "Teksti ülajoondus"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:245
 #: includes/admin/reports/class-wc-report-sales-by-product.php:285
+#, fuzzy
 msgid "No products found in range"
-msgstr ""
+msgstr "Prügikastis ei ole tooteid"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:250
+#, fuzzy
 msgid "Top Earners"
-msgstr ""
+msgstr "Teksti ülajoondus"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:341
 msgid "&larr; Choose a product to view stats"
 msgstr ""
 
 #: includes/admin/reports/class-wc-report-stock.php:30
+#, fuzzy
 msgid "No products found."
-msgstr ""
+msgstr "Tooteid ei leitud"
 
 #: includes/admin/reports/class-wc-report-stock.php:138
+#, fuzzy
 msgid "Parent"
-msgstr ""
+msgstr "Ülemrubriik"
 
 #: includes/admin/reports/class-wc-report-stock.php:139
+#, fuzzy
 msgid "Units in stock"
-msgstr ""
+msgstr "Laoseis"
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:119
+#, fuzzy
 msgid "Rate"
-msgstr ""
+msgstr "Väärtus"
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:121
+#, fuzzy
 msgid "Tax Amount"
-msgstr ""
+msgstr "Nimetus"
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:121
 msgid "This is the sum of the \"Tax Rows\" tax amount within your orders."
 msgstr ""
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:122
+#, fuzzy
 msgid "Shipping Tax Amount"
-msgstr ""
+msgstr "Käibemaks"
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:122
 msgid ""
@@ -3405,8 +3885,9 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:123
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:112
+#, fuzzy
 msgid "Total Tax"
-msgstr ""
+msgstr "Nimetus"
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:123
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:112
@@ -3423,16 +3904,18 @@ msgid "Period"
 msgstr ""
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:110
+#, fuzzy
 msgid "Total Sales"
-msgstr ""
+msgstr "Müügiühik"
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:110
 msgid "This is the sum of the 'Order Total' field within your orders."
 msgstr ""
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:111
+#, fuzzy
 msgid "Total Shipping"
-msgstr ""
+msgstr "Lähetusviisid"
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:111
 msgid "This is the sum of the 'Shipping Total' field within your orders."
@@ -3455,8 +3938,9 @@ msgid "Accounts"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:41
+#, fuzzy
 msgid "Account Pages"
-msgstr ""
+msgstr "Kõik lehed"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:41
 msgid ""
@@ -3465,16 +3949,18 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:44
+#, fuzzy
 msgid "My Account Page"
-msgstr ""
+msgstr "Kustuta mu konto"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:45
 msgid "Page contents: [woocommerce_my_account]"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:56
+#, fuzzy
 msgid "My Account Endpoints"
-msgstr ""
+msgstr "Kustuta mu konto"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:56
 msgid ""
@@ -3483,40 +3969,45 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:59
+#, fuzzy
 msgid "View Order"
-msgstr ""
+msgstr "Vaata tellimust"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:60
 msgid "Endpoint for the My Account &rarr; View Order page"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:68
+#, fuzzy
 msgid "Edit Account"
-msgstr ""
+msgstr "Minu konto"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:69
 msgid "Endpoint for the My Account &rarr; Edit Account page"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:77
+#, fuzzy
 msgid "Edit Address"
-msgstr ""
+msgstr "Edit billing address"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:78
 msgid "Endpoint for the My Account &rarr; Edit Address page"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:86
+#, fuzzy
 msgid "Lost Password"
-msgstr ""
+msgstr "Kadunud parool"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:87
 msgid "Endpoint for the My Account &rarr; Lost Password page"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:95
+#, fuzzy
 msgid "Logout"
-msgstr ""
+msgstr "Logi välja"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:96
 msgid ""
@@ -3525,12 +4016,14 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:105
+#, fuzzy
 msgid "Registration Options"
-msgstr ""
+msgstr "Flashi sätted"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:108
+#, fuzzy
 msgid "Enable Registration"
-msgstr ""
+msgstr "Registreerimisvorm"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:109
 msgid "Enable registration on the \"Checkout\" page"
@@ -3541,8 +4034,9 @@ msgid "Enable registration on the \"My Account\" page"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:127
+#, fuzzy
 msgid "Account Creation"
-msgstr ""
+msgstr "Minu konto"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:128
 msgid "Automatically generate username from customer email"
@@ -3559,20 +4053,24 @@ msgid "Checkout"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:41
+#, fuzzy
 msgid "Checkout Options"
-msgstr ""
+msgstr "Flashi sätted"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:65
+#, fuzzy
 msgid "Checkout Process"
-msgstr ""
+msgstr "Process of SSO_TOKEN generation"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:68
+#, fuzzy
 msgid "Coupons"
-msgstr ""
+msgstr "Kupongid"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:69
+#, fuzzy
 msgid "Enable the use of coupons"
-msgstr ""
+msgstr "Kasuta vaikimis ikooni"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:73
 msgid "Coupons can be applied from the cart and checkout pages."
@@ -3600,8 +4098,9 @@ msgid "Un-force HTTPS when leaving the checkout"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:109
+#, fuzzy
 msgid "Checkout Pages"
-msgstr ""
+msgstr "Kõik lehed"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:109
 msgid ""
@@ -3610,24 +4109,27 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:112
+#, fuzzy
 msgid "Cart Page"
-msgstr ""
+msgstr "Staatiline leht"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:113
 msgid "Page contents: [woocommerce_cart]"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:123
+#, fuzzy
 msgid "Checkout Page"
-msgstr ""
+msgstr "Staatiline leht"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:124
 msgid "Page contents: [woocommerce_checkout]"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:134
+#, fuzzy
 msgid "Terms and Conditions"
-msgstr ""
+msgstr "I have read and agree Terms"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:135
 msgid ""
@@ -3646,8 +4148,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:150
+#, fuzzy
 msgid "Pay"
-msgstr ""
+msgstr "Pay"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:151
 #: includes/admin/settings/class-wc-settings-checkout.php:160
@@ -3655,8 +4158,9 @@ msgid "Endpoint for the Checkout &rarr; Pay page"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:169
+#, fuzzy
 msgid "Payment Gateways"
-msgstr ""
+msgstr "Payment Number"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:169
 msgid ""
@@ -3665,28 +4169,33 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:210
+#, fuzzy
 msgid "Gateway Display"
-msgstr ""
+msgstr "Display first:"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:218
 msgid "Gateway"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:247
+#: includes/admin/settings/class-wc-settings-checkout.php:219
+#, fuzzy
 msgid "Gateway ID"
-msgstr ""
+msgstr "Akna ID"
 
 #: includes/admin/settings/class-wc-settings-emails.php:25
+#, fuzzy
 msgid "Emails"
-msgstr ""
+msgstr "Enter user emails"
 
 #: includes/admin/settings/class-wc-settings-emails.php:40
+#, fuzzy
 msgid "Email Options"
-msgstr ""
+msgstr "Flashi sätted"
 
 #: includes/admin/settings/class-wc-settings-emails.php:66
+#, fuzzy
 msgid "Email Sender Options"
-msgstr ""
+msgstr "Flashi videosätted"
 
 #: includes/admin/settings/class-wc-settings-emails.php:66
 msgid ""
@@ -3695,16 +4204,19 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-emails.php:69
+#, fuzzy
 msgid "\"From\" Name"
-msgstr ""
+msgstr "Viiteankru nimi"
 
 #: includes/admin/settings/class-wc-settings-emails.php:79
+#, fuzzy
 msgid "\"From\" Email Address"
-msgstr ""
+msgstr "E-postiaadress:"
 
 #: includes/admin/settings/class-wc-settings-emails.php:93
+#, fuzzy
 msgid "Email Template"
-msgstr ""
+msgstr "Arve e-maili põhi"
 
 #: includes/admin/settings/class-wc-settings-emails.php:93
 msgid ""
@@ -3715,8 +4227,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-emails.php:96
+#, fuzzy
 msgid "Header Image"
-msgstr ""
+msgstr "Päisepilt"
 
 #: includes/admin/settings/class-wc-settings-emails.php:97
 msgid ""
@@ -3725,20 +4238,23 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-emails.php:106
+#, fuzzy
 msgid "Email Footer Text"
-msgstr ""
+msgstr "Näita päiseteksti"
 
 #: includes/admin/settings/class-wc-settings-emails.php:107
 msgid "The text to appear in the footer of WooCommerce emails."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-emails.php:111
+#, fuzzy
 msgid "Powered by WooCommerce"
-msgstr ""
+msgstr "Kasutame WordPressi"
 
 #: includes/admin/settings/class-wc-settings-emails.php:116
+#, fuzzy
 msgid "Base Colour"
-msgstr ""
+msgstr "Baasaadress"
 
 #: includes/admin/settings/class-wc-settings-emails.php:117
 msgid ""
@@ -3747,8 +4263,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-emails.php:126
+#, fuzzy
 msgid "Background Colour"
-msgstr ""
+msgstr "Taustamanus"
 
 #: includes/admin/settings/class-wc-settings-emails.php:127
 msgid ""
@@ -3773,12 +4290,14 @@ msgid "The main body text colour. Default <code>#505050</code>."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:48
+#, fuzzy
 msgid "General Options"
-msgstr ""
+msgstr "Flashi sätted"
 
 #: includes/admin/settings/class-wc-settings-general.php:51
+#, fuzzy
 msgid "Base Location"
-msgstr ""
+msgstr "Valuuta asukoht"
 
 #: includes/admin/settings/class-wc-settings-general.php:52
 msgid ""
@@ -3787,8 +4306,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:61
+#, fuzzy
 msgid "Selling Location(s)"
-msgstr ""
+msgstr "Valuuta asukoht"
 
 #: includes/admin/settings/class-wc-settings-general.php:62
 msgid "This option lets you limit which countries you are willing to sell to."
@@ -3808,16 +4328,18 @@ msgid "Specific Countries"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:85
+#, fuzzy
 msgid "Store Notice"
-msgstr ""
+msgstr "WordPressi veateade"
 
 #: includes/admin/settings/class-wc-settings-general.php:86
 msgid "Enable site-wide store notice text"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:93
+#, fuzzy
 msgid "Store Notice Text"
-msgstr ""
+msgstr "Näita päiseteksti"
 
 #: includes/admin/settings/class-wc-settings-general.php:96
 msgid ""
@@ -3826,16 +4348,18 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:104
+#, fuzzy
 msgid "Currency Options"
-msgstr ""
+msgstr "Flashi sätted"
 
 #: includes/admin/settings/class-wc-settings-general.php:104
 msgid "The following options affect how prices are displayed on the frontend."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:107
+#, fuzzy
 msgid "Currency"
-msgstr ""
+msgstr "Valuuta"
 
 #: includes/admin/settings/class-wc-settings-general.php:108
 msgid ""
@@ -3844,28 +4368,33 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:119
+#, fuzzy
 msgid "Currency Position"
-msgstr ""
+msgstr "Tausta asukoht"
 
 #: includes/admin/settings/class-wc-settings-general.php:120
 msgid "This controls the position of the currency symbol."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:127
+#, fuzzy
 msgid "Left"
-msgstr ""
+msgstr "Vasakul"
 
 #: includes/admin/settings/class-wc-settings-general.php:128
+#, fuzzy
 msgid "Right"
-msgstr ""
+msgstr "Paremal"
 
 #: includes/admin/settings/class-wc-settings-general.php:129
+#, fuzzy
 msgid "Left with space"
-msgstr ""
+msgstr "Summa käibemaksuga"
 
 #: includes/admin/settings/class-wc-settings-general.php:130
+#, fuzzy
 msgid "Right with space"
-msgstr ""
+msgstr "Summa käibemaksuga"
 
 #: includes/admin/settings/class-wc-settings-general.php:136
 msgid "Thousand Separator"
@@ -3876,32 +4405,36 @@ msgid "This sets the thousand separator of displayed prices."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:146
+#, fuzzy
 msgid "Decimal Separator"
-msgstr ""
+msgstr ","
 
 #: includes/admin/settings/class-wc-settings-general.php:147
 msgid "This sets the decimal separator of displayed prices."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:156
+#, fuzzy
 msgid "Number of Decimals"
-msgstr ""
+msgstr "Arve"
 
 #: includes/admin/settings/class-wc-settings-general.php:157
 msgid "This sets the number of decimal points shown in displayed prices."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:171
+#, fuzzy
 msgid "Styles and Scripts"
-msgstr ""
+msgstr "Kiida heaks ja vasta"
 
 #: includes/admin/settings/class-wc-settings-general.php:176
 msgid "Scripts"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:177
+#, fuzzy
 msgid "Enable Lightbox"
-msgstr ""
+msgstr "Luba JavaScript"
 
 #: includes/admin/settings/class-wc-settings-general.php:180
 msgid ""
@@ -3922,20 +4455,23 @@ msgid "Frontend Styles"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:229
+#, fuzzy
 msgid "Primary"
-msgstr ""
+msgstr "Peamenüü"
 
 #: includes/admin/settings/class-wc-settings-general.php:229
 msgid "Call to action buttons/price slider/layered nav UI"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:230
+#, fuzzy
 msgid "Secondary"
-msgstr ""
+msgstr "Teisene mooduliala"
 
 #: includes/admin/settings/class-wc-settings-general.php:230
+#, fuzzy
 msgid "Buttons and tabs"
-msgstr ""
+msgstr "Kiida heaks ja vasta"
 
 #: includes/admin/settings/class-wc-settings-general.php:231
 msgid "Highlight"
@@ -3946,8 +4482,9 @@ msgid "Price labels and Sale Flashes"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:232
+#, fuzzy
 msgid "Content"
-msgstr ""
+msgstr "Sisu"
 
 #: includes/admin/settings/class-wc-settings-general.php:232
 msgid "Your themes page background - used for tab active states"
@@ -3970,28 +4507,34 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-integrations.php:25
+#, fuzzy
 msgid "Integration"
-msgstr ""
+msgstr "Facebook integration"
 
 #: includes/admin/settings/class-wc-settings-products.php:40
+#, fuzzy
 msgid "Product Options"
-msgstr ""
+msgstr "Flashi sätted"
 
 #: includes/admin/settings/class-wc-settings-products.php:79
+#, fuzzy
 msgid "Inventory Options"
-msgstr ""
+msgstr "Flashi sätted"
 
 #: includes/admin/settings/class-wc-settings-products.php:82
+#, fuzzy
 msgid "Manage Stock"
-msgstr ""
+msgstr "Laos"
 
 #: includes/admin/settings/class-wc-settings-products.php:83
+#, fuzzy
 msgid "Enable stock management"
-msgstr ""
+msgstr "Laoseis"
 
 #: includes/admin/settings/class-wc-settings-products.php:90
+#, fuzzy
 msgid "Hold Stock (minutes)"
-msgstr ""
+msgstr "Laoseis"
 
 #: includes/admin/settings/class-wc-settings-products.php:91
 msgid ""
@@ -4012,28 +4555,33 @@ msgid "Enable out of stock notifications"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:123
+#, fuzzy
 msgid "Notification Recipient"
-msgstr ""
+msgstr "Notification preferences"
 
 #: includes/admin/settings/class-wc-settings-products.php:132
+#, fuzzy
 msgid "Low Stock Threshold"
-msgstr ""
+msgstr "Laoseis"
 
 #: includes/admin/settings/class-wc-settings-products.php:146
+#, fuzzy
 msgid "Out Of Stock Threshold"
-msgstr ""
+msgstr "Laoseis"
 
 #: includes/admin/settings/class-wc-settings-products.php:160
+#, fuzzy
 msgid "Out Of Stock Visibility"
-msgstr ""
+msgstr "Laoseis"
 
 #: includes/admin/settings/class-wc-settings-products.php:161
 msgid "Hide out of stock items from the catalog"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:168
+#, fuzzy
 msgid "Stock Display Format"
-msgstr ""
+msgstr "Vale postitusevorming."
 
 #: includes/admin/settings/class-wc-settings-products.php:169
 msgid "This controls how stock is displayed on the frontend."
@@ -4058,8 +4606,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:200
+#, fuzzy
 msgid "Product Listings"
-msgstr ""
+msgstr "Muuda toodet"
 
 #: includes/admin/settings/class-wc-settings-products.php:203
 msgid "Product Archive / Shop Page"
@@ -4077,8 +4626,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:214
+#, fuzzy
 msgid "Shop Page Display"
-msgstr ""
+msgstr "Näita päiseteksti"
 
 #: includes/admin/settings/class-wc-settings-products.php:215
 msgid "This controls what is shown on the product archive."
@@ -4100,16 +4650,18 @@ msgid "Show both"
 msgstr "Näita mõlemaid"
 
 #: includes/admin/settings/class-wc-settings-products.php:230
+#, fuzzy
 msgid "Default Category Display"
-msgstr ""
+msgstr "Näita päiseteksti"
 
 #: includes/admin/settings/class-wc-settings-products.php:231
 msgid "This controls what is shown on category archives."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:246
+#, fuzzy
 msgid "Default Product Sorting"
-msgstr ""
+msgstr "Lisa uus toode"
 
 #: includes/admin/settings/class-wc-settings-products.php:247
 msgid "This controls the default sort order of the catalog."
@@ -4120,16 +4672,19 @@ msgid "Default sorting (custom ordering + name)"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:255
+#, fuzzy
 msgid "Popularity (sales)"
-msgstr ""
+msgstr "Müügiühik"
 
 #: includes/admin/settings/class-wc-settings-products.php:256
+#, fuzzy
 msgid "Average Rating"
-msgstr ""
+msgstr "Viite hinnang"
 
 #: includes/admin/settings/class-wc-settings-products.php:257
+#, fuzzy
 msgid "Sort by most recent"
-msgstr ""
+msgstr "Värskeimad postitused veebilehel"
 
 #: includes/admin/settings/class-wc-settings-products.php:258
 msgid "Sort by price (asc)"
@@ -4140,8 +4695,9 @@ msgid "Sort by price (desc)"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:265
+#, fuzzy
 msgid "Add to cart"
-msgstr ""
+msgstr "Lisa korvi"
 
 #: includes/admin/settings/class-wc-settings-products.php:266
 msgid "Redirect to the cart page after successful addition"
@@ -4152,8 +4708,9 @@ msgid "Enable AJAX add to cart buttons on archives"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:286
+#, fuzzy
 msgid "Weight Unit"
-msgstr ""
+msgstr "Vaikimisi ühik"
 
 #: includes/admin/settings/class-wc-settings-products.php:287
 msgid "This controls what unit you will define weights in."
@@ -4176,8 +4733,9 @@ msgid "oz"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:303
+#, fuzzy
 msgid "Dimensions Unit"
-msgstr ""
+msgstr "Vaikimisi ühik"
 
 #: includes/admin/settings/class-wc-settings-products.php:304
 msgid "This controls what unit you will define lengths in."
@@ -4192,16 +4750,18 @@ msgid "mm"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:314
+#, fuzzy
 msgid "in"
-msgstr ""
+msgstr "in"
 
 #: includes/admin/settings/class-wc-settings-products.php:315
 msgid "yd"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:321
+#, fuzzy
 msgid "Product Ratings"
-msgstr ""
+msgstr "Muuda toodet"
 
 #: includes/admin/settings/class-wc-settings-products.php:322
 msgid "Enable ratings on reviews"
@@ -4216,8 +4776,9 @@ msgid "Show \"verified owner\" label for customer reviews"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:353
+#, fuzzy
 msgid "Product Image Sizes"
-msgstr ""
+msgstr "Täpsemad pildisätted"
 
 #: includes/admin/settings/class-wc-settings-products.php:353
 msgid ""
@@ -4228,24 +4789,27 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:356
+#, fuzzy
 msgid "Catalog Images"
-msgstr ""
+msgstr "Pildid ja manused"
 
 #: includes/admin/settings/class-wc-settings-products.php:357
 msgid "This size is usually used in product listings"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:370
+#, fuzzy
 msgid "Single Product Image"
-msgstr ""
+msgstr "Täpsemad pildisätted"
 
 #: includes/admin/settings/class-wc-settings-products.php:371
 msgid "This is the size used by the main image on the product page."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:384
+#, fuzzy
 msgid "Product Thumbnails"
-msgstr ""
+msgstr "Muuda toodet"
 
 #: includes/admin/settings/class-wc-settings-products.php:385
 msgid ""
@@ -4253,12 +4817,14 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:399
+#, fuzzy
 msgid "Downloadable Products"
-msgstr ""
+msgstr "Otsi toodet"
 
 #: includes/admin/settings/class-wc-settings-products.php:402
+#, fuzzy
 msgid "File Download Method"
-msgstr ""
+msgstr "Vaikimisi lähetusviis"
 
 #: includes/admin/settings/class-wc-settings-products.php:403
 msgid ""
@@ -4277,16 +4843,19 @@ msgid "X-Accel-Redirect/X-Sendfile"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:413
+#, fuzzy
 msgid "Redirect only"
-msgstr ""
+msgstr "Visible only for admins"
 
 #: includes/admin/settings/class-wc-settings-products.php:419
+#, fuzzy
 msgid "Access Restriction"
-msgstr ""
+msgstr "Ligipääs keelatud."
 
 #: includes/admin/settings/class-wc-settings-products.php:420
+#, fuzzy
 msgid "Downloads require login"
-msgstr ""
+msgstr "Kasutajanimi ja parool ei klapi."
 
 #: includes/admin/settings/class-wc-settings-products.php:424
 msgid "This setting does not apply to guest purchases."
@@ -4304,16 +4873,19 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-shipping.php:41
 #: includes/admin/settings/class-wc-settings-shipping.php:67
+#, fuzzy
 msgid "Shipping Options"
-msgstr ""
+msgstr "Flashi sätted"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:70
+#, fuzzy
 msgid "Shipping Calculations"
-msgstr ""
+msgstr "Lähetusviisid"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:71
+#, fuzzy
 msgid "Enable shipping"
-msgstr ""
+msgstr "Lähetusviisid"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:79
 msgid "Enable the shipping calculator on the cart page"
@@ -4324,8 +4896,9 @@ msgid "Hide shipping costs until an address is entered"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-shipping.php:97
+#, fuzzy
 msgid "Shipping Display Mode"
-msgstr ""
+msgstr "Lülita üleekraanirežiim sisse-välja"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:98
 msgid ""
@@ -4341,8 +4914,9 @@ msgid "Display shipping methods in a dropdown"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-shipping.php:111
+#, fuzzy
 msgid "Shipping Destination"
-msgstr ""
+msgstr "Lähetusviisid"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:112
 msgid "Ship to billing address by default"
@@ -4353,8 +4927,9 @@ msgid "Only ship to the users billing address"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-shipping.php:132
+#, fuzzy
 msgid "Restrict shipping to Location(s)"
-msgstr ""
+msgstr "SInu asukohta ei suudetud tuvastada"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:133
 msgid ""
@@ -4375,33 +4950,39 @@ msgid "Ship to specific countries only"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-shipping.php:196
+#, fuzzy
 msgid "Shipping Methods"
-msgstr ""
+msgstr "Lähetusviisid"
 
-#: includes/admin/settings/class-wc-settings-shipping.php:198
-msgid "Drag and drop methods to control their display order."
-msgstr ""
+#: includes/admin/settings/class-wc-settings-shipping.php:203
+#, fuzzy
+msgid "ID"
+msgstr "ID"
 
-#: includes/admin/settings/class-wc-settings-shipping.php:219
-msgid "Method ID"
+#: includes/admin/settings/class-wc-settings-shipping.php:213
+msgid ""
+"Drag and drop the above shipping methods to control their display order."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:40
 #: includes/admin/settings/class-wc-settings-tax.php:68
+#, fuzzy
 msgid "Tax Options"
-msgstr ""
+msgstr "Flashi sätted"
 
 #: includes/admin/settings/class-wc-settings-tax.php:41
+#, fuzzy
 msgid "Standard Rates"
-msgstr ""
+msgstr "standardsisend"
 
 #: includes/admin/settings/class-wc-settings-tax.php:49
 msgid "%s Rates"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:71
+#, fuzzy
 msgid "Enable Taxes"
-msgstr ""
+msgstr "Muuda makse"
 
 #: includes/admin/settings/class-wc-settings-tax.php:72
 msgid "Enable taxes and tax calculations"
@@ -4434,21 +5015,25 @@ msgid "This option determines which address is used to calculate tax."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:97
+#, fuzzy
 msgid "Customer shipping address"
-msgstr ""
+msgstr "E-postiaadress:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:98
+#, fuzzy
 msgid "Customer billing address"
-msgstr ""
+msgstr "Edit billing address"
 
 #: includes/admin/settings/class-wc-settings-tax.php:99
 #: includes/admin/settings/class-wc-settings-tax.php:111
+#, fuzzy
 msgid "Shop base address"
-msgstr ""
+msgstr "E-postiaadress:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:104
+#, fuzzy
 msgid "Default Customer Address:"
-msgstr ""
+msgstr "Pärnu mnt 602-156"
 
 #: includes/admin/settings/class-wc-settings-tax.php:106
 msgid ""
@@ -4457,12 +5042,14 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:110
+#, fuzzy
 msgid "No address"
-msgstr ""
+msgstr "Aadressile %s ei leitud tuelmusi"
 
 #: includes/admin/settings/class-wc-settings-tax.php:116
+#, fuzzy
 msgid "Shipping Tax Class:"
-msgstr ""
+msgstr "<span class=\"%1$s\">Sildid:</span> %2$s"
 
 #: includes/admin/settings/class-wc-settings-tax.php:117
 msgid ""
@@ -4475,16 +5062,18 @@ msgid "Shipping tax class based on cart items"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:127
+#, fuzzy
 msgid "Rounding"
-msgstr ""
+msgstr "Ümardus"
 
 #: includes/admin/settings/class-wc-settings-tax.php:128
 msgid "Round tax at subtotal level, instead of rounding per line"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:135
+#, fuzzy
 msgid "Additional Tax Classes"
-msgstr ""
+msgstr "Käibemaks"
 
 #: includes/admin/settings/class-wc-settings-tax.php:136
 msgid ""
@@ -4493,167 +5082,204 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:140
+#, fuzzy
 msgid "Reduced Rate%sZero Rate"
-msgstr ""
+msgstr "Alandatud käibemaks"
 
 #: includes/admin/settings/class-wc-settings-tax.php:144
-msgid "Display prices during cart/checkout:"
+msgid "Display prices in the shop:"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:149
+#: includes/admin/settings/class-wc-settings-tax.php:168
+#, fuzzy
 msgid "Including tax"
-msgstr ""
+msgstr "Nimetus"
 
 #: includes/admin/settings/class-wc-settings-tax.php:150
+#: includes/admin/settings/class-wc-settings-tax.php:169
+#, fuzzy
 msgid "Excluding tax"
+msgstr "Nimetus"
+
+#: includes/admin/settings/class-wc-settings-tax.php:155
+#, fuzzy
+msgid "Price display suffix:"
+msgstr "Näita päiseteksti"
+
+#: includes/admin/settings/class-wc-settings-tax.php:159
+msgid ""
+"Define text to show after your product prices. This could be, for example, "
+"\"inc. Vat\" to explain your pricing. You can also have prices substituted "
+"here using one of the following: <code>{price_including_tax}, "
+"{price_excluding_tax}</code>."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:210
+#: includes/admin/settings/class-wc-settings-tax.php:163
+msgid "Display prices during cart/checkout:"
+msgstr ""
+
+#: includes/admin/settings/class-wc-settings-tax.php:229
 msgid "Tax Rates for the \"%s\" Class"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:211
+#: includes/admin/settings/class-wc-settings-tax.php:230
 msgid ""
 "Define tax rates for countries and states below. <a href=\"%s\">See here</a> "
 "for available alpha-2 country codes."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:217
+#: includes/admin/settings/class-wc-settings-tax.php:236
+#, fuzzy
 msgid "Country&nbsp;Code"
-msgstr ""
+msgstr "Korrasta koodi"
 
-#: includes/admin/settings/class-wc-settings-tax.php:217
+#: includes/admin/settings/class-wc-settings-tax.php:236
 msgid "A 2 digit country code, e.g. US. Leave blank to apply to all."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:219
+#: includes/admin/settings/class-wc-settings-tax.php:238
+#, fuzzy
 msgid "State&nbsp;Code"
-msgstr ""
+msgstr "Korrasta koodi"
 
-#: includes/admin/settings/class-wc-settings-tax.php:219
+#: includes/admin/settings/class-wc-settings-tax.php:238
 msgid "A 2 digit state code, e.g. AL. Leave blank to apply to all."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:221
-#: includes/admin/settings/class-wc-settings-tax.php:350
+#: includes/admin/settings/class-wc-settings-tax.php:240
+#: includes/admin/settings/class-wc-settings-tax.php:369
 msgid "ZIP/Postcode"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:221
+#: includes/admin/settings/class-wc-settings-tax.php:240
 msgid ""
 "Postcode for this rule. Semi-colon (;) separate multiple values. Leave blank "
 "to apply to all areas. Wildcards (*) can be used. Ranges for numeric "
 "postcodes (e.g. 12345-12350) will be expanded into individual postcodes."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:223
+#: includes/admin/settings/class-wc-settings-tax.php:242
 msgid ""
 "Cities for this rule. Semi-colon (;) separate multiple values. Leave blank "
 "to apply to all cities."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:225
+#: includes/admin/settings/class-wc-settings-tax.php:244
+#, fuzzy
 msgid "Rate&nbsp;%"
-msgstr ""
+msgstr "Maksumäär"
 
-#: includes/admin/settings/class-wc-settings-tax.php:225
+#: includes/admin/settings/class-wc-settings-tax.php:244
 msgid "Enter a tax rate (percentage) to 4 decimal places."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:227
+#: includes/admin/settings/class-wc-settings-tax.php:246
+#, fuzzy
 msgid "Tax&nbsp;Name"
-msgstr ""
+msgstr "Nt: Käibemaks või KM20"
 
-#: includes/admin/settings/class-wc-settings-tax.php:227
+#: includes/admin/settings/class-wc-settings-tax.php:246
 msgid "Enter a name for this tax rate."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:229
-#: includes/admin/settings/class-wc-settings-tax.php:350
+#: includes/admin/settings/class-wc-settings-tax.php:248
+#: includes/admin/settings/class-wc-settings-tax.php:369
 msgid "Priority"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:229
+#: includes/admin/settings/class-wc-settings-tax.php:248
 msgid ""
 "Choose a priority for this tax rate. Only 1 matching rate per priority will "
 "be used. To define multiple tax rates for a single area you need to specify "
 "a different priority per rate."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:231
-#: includes/admin/settings/class-wc-settings-tax.php:350
+#: includes/admin/settings/class-wc-settings-tax.php:250
+#: includes/admin/settings/class-wc-settings-tax.php:369
 msgid "Compound"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:231
+#: includes/admin/settings/class-wc-settings-tax.php:250
 msgid ""
 "Choose whether or not this is a compound rate. Compound tax rates are "
 "applied on top of other tax rates."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:233
+#: includes/admin/settings/class-wc-settings-tax.php:252
 msgid "Choose whether or not this tax rate also gets applied to shipping."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:240
+#: includes/admin/settings/class-wc-settings-tax.php:259
+#, fuzzy
 msgid "Insert row"
-msgstr ""
+msgstr "Lisa rida järele"
 
-#: includes/admin/settings/class-wc-settings-tax.php:241
+#: includes/admin/settings/class-wc-settings-tax.php:260
+#, fuzzy
 msgid "Remove selected row(s)"
-msgstr ""
+msgstr "Kliki rea eemaldamiseks"
 
-#: includes/admin/settings/class-wc-settings-tax.php:257
+#: includes/admin/settings/class-wc-settings-tax.php:276
 msgid "Import CSV"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:343
+#: includes/admin/settings/class-wc-settings-tax.php:362
+#, fuzzy
 msgid "No row(s) selected"
-msgstr ""
+msgstr "Selected feedback details"
 
-#: includes/admin/settings/class-wc-settings-tax.php:350
+#: includes/admin/settings/class-wc-settings-tax.php:369
+#, fuzzy
 msgid "Country Code"
-msgstr ""
+msgstr "riigi kood"
 
-#: includes/admin/settings/class-wc-settings-tax.php:350
+#: includes/admin/settings/class-wc-settings-tax.php:369
+#, fuzzy
 msgid "State Code"
-msgstr ""
+msgstr "Koodinäidis"
 
-#: includes/admin/settings/class-wc-settings-tax.php:350
+#: includes/admin/settings/class-wc-settings-tax.php:369
+#, fuzzy
 msgid "Rate %"
-msgstr ""
+msgstr "Väärtus"
 
-#: includes/admin/settings/class-wc-settings-tax.php:350
+#: includes/admin/settings/class-wc-settings-tax.php:369
+#, fuzzy
 msgid "Tax Name"
-msgstr ""
+msgstr "Nimetus"
 
 #: includes/admin/views/html-admin-page-addons.php:5
+#, fuzzy
 msgid "Browse all extensions"
-msgstr ""
+msgstr "Kõik viiterubriigid"
 
 #: includes/admin/views/html-admin-page-addons.php:6
 msgid "Browse themes"
 msgstr ""
 
 #: includes/admin/views/html-admin-page-addons.php:11
+#, fuzzy
 msgid "Popular"
-msgstr ""
+msgstr "Levinumad sildid"
 
 #: includes/admin/views/html-admin-page-addons.php:12
 msgid "Gateways"
 msgstr ""
 
 #: includes/admin/views/html-admin-page-addons.php:14
+#, fuzzy
 msgid "Import/export"
-msgstr ""
+msgstr "Eksport"
 
 #: includes/admin/views/html-admin-page-addons.php:16
 msgid "Marketing"
 msgstr ""
 
 #: includes/admin/views/html-admin-page-addons.php:17
+#, fuzzy
 msgid "Free"
-msgstr ""
+msgstr "Tasuta!"
 
 #: includes/admin/views/html-admin-page-status-report.php:3
 msgid "Please include this information when requesting support:"
@@ -4668,44 +5294,54 @@ msgid "Environment"
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:18
+#, fuzzy
 msgid "Home URL"
-msgstr ""
+msgstr "Baasaadress"
 
 #: includes/admin/views/html-admin-page-status-report.php:22
+#, fuzzy
 msgid "Site URL"
-msgstr ""
+msgstr "Veebilehe aadress"
 
 #: includes/admin/views/html-admin-page-status-report.php:26
+#, fuzzy
 msgid "WC Version"
-msgstr ""
+msgstr "Tarkvara versioon"
 
 #: includes/admin/views/html-admin-page-status-report.php:30
+#, fuzzy
 msgid "WC Database Version"
-msgstr ""
+msgstr "Andmebaasitabeleid ei leita."
 
 #: includes/admin/views/html-admin-page-status-report.php:34
+#, fuzzy
 msgid "WP Version"
-msgstr ""
+msgstr "Tarkvara versioon"
 
 #: includes/admin/views/html-admin-page-status-report.php:38
+#, fuzzy
 msgid "WP Multisite Enabled"
-msgstr ""
+msgstr "User enabled moderation"
 
 #: includes/admin/views/html-admin-page-status-report.php:42
+#, fuzzy
 msgid "Web Server Info"
-msgstr ""
+msgstr "Serveri päis puudub"
 
 #: includes/admin/views/html-admin-page-status-report.php:46
+#, fuzzy
 msgid "PHP Version"
-msgstr ""
+msgstr "Tarkvara versioon"
 
 #: includes/admin/views/html-admin-page-status-report.php:50
+#, fuzzy
 msgid "MySQL Version"
-msgstr ""
+msgstr "Tarkvara versioon"
 
 #: includes/admin/views/html-admin-page-status-report.php:54
+#, fuzzy
 msgid "WP Memory Limit"
-msgstr ""
+msgstr "limit records on page"
 
 #: includes/admin/views/html-admin-page-status-report.php:59
 msgid ""
@@ -4714,24 +5350,28 @@ msgid ""
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:66
+#, fuzzy
 msgid "WP Debug Mode"
-msgstr ""
+msgstr "Lülita üleekraanirežiim sisse-välja"
 
 #: includes/admin/views/html-admin-page-status-report.php:70
+#, fuzzy
 msgid "WP Language"
-msgstr ""
+msgstr "Default language"
 
 #: includes/admin/views/html-admin-page-status-report.php:74
+#, fuzzy
 msgid "WP Max Upload Size"
-msgstr ""
+msgstr "Upload image, max 512kb"
 
 #: includes/admin/views/html-admin-page-status-report.php:79
 msgid "PHP Post Max Size"
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:83
+#, fuzzy
 msgid "PHP Time Limit"
-msgstr ""
+msgstr "esitamise kuupäev/kellaaeg"
 
 #: includes/admin/views/html-admin-page-status-report.php:87
 msgid "PHP Max Input Vars"
@@ -4756,16 +5396,18 @@ msgid ""
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:105
+#, fuzzy
 msgid "Default Timezone"
-msgstr ""
+msgstr "Vaikimisi kaader"
 
 #: includes/admin/views/html-admin-page-status-report.php:109
 msgid "Default timezone is %s - it should be UTC"
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:111
+#, fuzzy
 msgid "Default timezone is %s"
-msgstr ""
+msgstr "Stiilileht puudub."
 
 #: includes/admin/views/html-admin-page-status-report.php:119
 msgid "fsockopen/cURL"
@@ -4791,8 +5433,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:135
+#, fuzzy
 msgid "SOAP Client"
-msgstr ""
+msgstr "Kliendikood"
 
 #: includes/admin/views/html-admin-page-status-report.php:137
 msgid "Your server has the SOAP Client class enabled."
@@ -4805,8 +5448,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:145
+#, fuzzy
 msgid "WP Remote Post"
-msgstr ""
+msgstr "Lisa postitus"
 
 #: includes/admin/views/html-admin-page-status-report.php:156
 msgid "wp_remote_post() was successful - PayPal IPN is working."
@@ -4823,56 +5467,69 @@ msgid "wp_remote_post() failed. PayPal IPN may not work with your server."
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:185
+#, fuzzy
 msgid "Plugins"
-msgstr ""
+msgstr "Pluginad"
 
 #: includes/admin/views/html-admin-page-status-report.php:191
+#, fuzzy
 msgid "Installed Plugins"
-msgstr ""
+msgstr "Käivitatud pluginad"
 
 #: includes/admin/views/html-admin-page-status-report.php:211
+#, fuzzy
 msgid "Visit plugin homepage"
-msgstr ""
+msgstr "Mine autori kodulehele"
 
 #: includes/admin/views/html-admin-page-status-report.php:235
+#: includes/admin/views/html-admin-page-status-report.php:417
+#, fuzzy
 msgid "is available"
-msgstr ""
+msgstr "Kohe saadaval"
 
 #: includes/admin/views/html-admin-page-status-report.php:238
+#, fuzzy
 msgid "by"
-msgstr ""
+msgstr "Kirjutas %s"
 
 #: includes/admin/views/html-admin-page-status-report.php:238
+#, fuzzy
 msgid "version"
-msgstr ""
+msgstr "Versioon"
 
 #: includes/admin/views/html-admin-page-status-report.php:260
 msgid "Force SSL"
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:267
+#, fuzzy
 msgid "WC Pages"
-msgstr ""
+msgstr "Kõik lehed"
 
 #: includes/admin/views/html-admin-page-status-report.php:274
+#, fuzzy
 msgid "Shop Base"
-msgstr ""
+msgstr "Baasaadress"
 
 #: includes/admin/views/html-admin-page-status-report.php:278
+#, fuzzy
 msgid "Cart"
-msgstr ""
+msgstr "Ostukorv"
 
 #: includes/admin/views/html-admin-page-status-report.php:286
+#, fuzzy
 msgid "My Account"
-msgstr ""
+msgstr "Minu konto"
 
 #: includes/admin/views/html-admin-page-status-report.php:306
+#, fuzzy
 msgid "Page not set"
-msgstr ""
+msgstr "Lehte ei leitud"
 
 #: includes/admin/views/html-admin-page-status-report.php:316
+#, fuzzy
 msgid "Page does not exist"
-msgstr ""
+msgstr "ühendust pole"
 
 #: includes/admin/views/html-admin-page-status-report.php:321
 msgid "Page does not contain the shortcode: %s"
@@ -4883,38 +5540,45 @@ msgid "WC Taxonomies"
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:346
+#, fuzzy
 msgid "Order Statuses"
-msgstr ""
+msgstr "Lehe järjekorranr."
 
 #: includes/admin/views/html-admin-page-status-report.php:356
+#, fuzzy
 msgid "Product Types"
-msgstr ""
+msgstr "Feedback types"
 
 #: includes/admin/views/html-admin-page-status-report.php:369
+#, fuzzy
 msgid "Theme"
-msgstr ""
+msgstr "%d teemauuendus"
 
-#: includes/admin/views/html-admin-page-status-report.php:375
+#: includes/admin/views/html-admin-page-status-report.php:406
+#, fuzzy
 msgid "Theme Name"
-msgstr ""
+msgstr "Viiteankru nimi"
 
-#: includes/admin/views/html-admin-page-status-report.php:382
+#: includes/admin/views/html-admin-page-status-report.php:412
+#, fuzzy
 msgid "Theme Version"
-msgstr ""
+msgstr "Tarkvara versioon"
 
-#: includes/admin/views/html-admin-page-status-report.php:388
+#: includes/admin/views/html-admin-page-status-report.php:421
+#, fuzzy
 msgid "Author URL"
-msgstr ""
+msgstr "Baasaadress"
 
-#: includes/admin/views/html-admin-page-status-report.php:397
+#: includes/admin/views/html-admin-page-status-report.php:430
 msgid "Templates"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:403
+#: includes/admin/views/html-admin-page-status-report.php:436
+#, fuzzy
 msgid "Template Overrides"
-msgstr ""
+msgstr "Arve e-maili põhi"
 
-#: includes/admin/views/html-admin-page-status-report.php:421
+#: includes/admin/views/html-admin-page-status-report.php:454
 msgid "No core overrides present in theme."
 msgstr ""
 
@@ -4924,8 +5588,9 @@ msgid "Tools"
 msgstr ""
 
 #: includes/admin/views/html-admin-settings.php:20
+#, fuzzy
 msgid "Save changes"
-msgstr ""
+msgstr "Save changes"
 
 #: includes/admin/views/html-bulk-edit-product.php:15
 #: includes/admin/views/html-bulk-edit-product.php:39
@@ -4938,16 +5603,19 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:193
 #: includes/admin/views/html-bulk-edit-product.php:212
 #: includes/admin/views/html-bulk-edit-product.php:231
+#: includes/admin/views/html-bulk-edit-product.php:252
+#, fuzzy
 msgid "— No Change —"
-msgstr ""
+msgstr "change icon"
 
 #: includes/admin/views/html-bulk-edit-product.php:16
 #: includes/admin/views/html-bulk-edit-product.php:40
 #: includes/admin/views/html-bulk-edit-product.php:109
 #: includes/admin/views/html-bulk-edit-product.php:133
 #: includes/admin/views/html-bulk-edit-product.php:232
+#, fuzzy
 msgid "Change to:"
-msgstr ""
+msgstr "Kliki muutmiseks"
 
 #: includes/admin/views/html-bulk-edit-product.php:17
 #: includes/admin/views/html-bulk-edit-product.php:41
@@ -4961,8 +5629,9 @@ msgstr ""
 
 #: includes/admin/views/html-bulk-edit-product.php:28
 #: includes/admin/views/html-bulk-edit-product.php:53
+#, fuzzy
 msgid "Enter price"
-msgstr ""
+msgstr "Hinnarühm"
 
 #: includes/admin/views/html-bulk-edit-product.php:34
 #: includes/admin/views/html-quick-edit-product.php:29
@@ -4980,17 +5649,25 @@ msgstr ""
 
 #: includes/admin/views/html-bulk-edit-product.php:151
 #: includes/admin/views/html-quick-edit-product.php:109
+#, fuzzy
 msgid "Visibility"
-msgstr ""
+msgstr "Nähtavus"
 
 #: includes/admin/views/html-bulk-edit-product.php:157
 #: includes/admin/views/html-quick-edit-product.php:114
+#, fuzzy
 msgid "Catalog &amp; search"
-msgstr ""
+msgstr "Otsi viiterubriikidest"
 
 #: includes/admin/views/html-bulk-edit-product.php:188
 #: includes/admin/views/html-quick-edit-product.php:132
+#, fuzzy
 msgid "In stock?"
+msgstr "Laos"
+
+#: includes/admin/views/html-bulk-edit-product.php:247
+#: includes/admin/views/html-quick-edit-product.php:167
+msgid "Backorders?"
 msgstr ""
 
 #: includes/admin/views/html-email-template-preview.php:1
@@ -4999,28 +5676,34 @@ msgid ""
 msgstr ""
 
 #: includes/admin/views/html-email-template-preview.php:3
+#, fuzzy
 msgid "Order:"
-msgstr ""
+msgstr "Tellimus"
 
 #: includes/admin/views/html-email-template-preview.php:9
+#, fuzzy
 msgid "Quantity"
-msgstr ""
+msgstr "Kogus"
 
 #: includes/admin/views/html-email-template-preview.php:22
+#, fuzzy
 msgid "Order total:"
-msgstr ""
+msgstr "Tellimus kokku"
 
 #: includes/admin/views/html-email-template-preview.php:28
+#, fuzzy
 msgid "Customer details"
-msgstr ""
+msgstr "Kliendi andmed"
 
 #: includes/admin/views/html-email-template-preview.php:33
+#, fuzzy
 msgid "Billing address"
-msgstr ""
+msgstr "Edit billing address"
 
 #: includes/admin/views/html-email-template-preview.php:40
+#, fuzzy
 msgid "Shipping address"
-msgstr ""
+msgstr "change address"
 
 #: includes/admin/views/html-notice-install.php:6
 msgid ""
@@ -5029,12 +5712,14 @@ msgid ""
 msgstr ""
 
 #: includes/admin/views/html-notice-install.php:7
+#, fuzzy
 msgid "Install WooCommerce Pages"
-msgstr ""
+msgstr "Lehti pole."
 
 #: includes/admin/views/html-notice-install.php:7
+#, fuzzy
 msgid "Skip setup"
-msgstr ""
+msgstr "Forums setup"
 
 #: includes/admin/views/html-notice-theme-support.php:6
 msgid ""
@@ -5044,12 +5729,14 @@ msgid ""
 msgstr ""
 
 #: includes/admin/views/html-notice-theme-support.php:7
+#, fuzzy
 msgid "Theme Integration Guide"
-msgstr ""
+msgstr "Teema \"%s\" ei ole sobiv ülemteema."
 
 #: includes/admin/views/html-notice-theme-support.php:7
+#, fuzzy
 msgid "Hide this notice"
-msgstr ""
+msgstr "WordPressi veateade"
 
 #: includes/admin/views/html-notice-update.php:6
 msgid ""
@@ -5058,8 +5745,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/views/html-notice-update.php:7
+#, fuzzy
 msgid "Run the updater"
-msgstr ""
+msgstr "Kontrolli õigekirja"
 
 #: includes/admin/views/html-notice-update.php:12
 msgid ""
@@ -5068,16 +5756,19 @@ msgid ""
 msgstr ""
 
 #: includes/admin/views/html-quick-edit-product.php:24
+#, fuzzy
 msgid "Regular price"
-msgstr ""
+msgstr "Hinnarühm"
 
 #: includes/admin/views/html-quick-edit-product.php:31
+#, fuzzy
 msgid "Sale price"
-msgstr ""
+msgstr "Hinnarühm"
 
 #: includes/admin/views/html-report-by-date.php:16
+#, fuzzy
 msgid "Custom:"
-msgstr ""
+msgstr "Kohandatud"
 
 #: includes/admin/wc-admin-functions.php:197
 msgid "Could not compile woocommerce.less:"
