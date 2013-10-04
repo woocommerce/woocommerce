@@ -59,7 +59,8 @@ class WC_Admin_Attributes {
 			// Auto-generate the label or slug if only one of both was provided
 			if ( ! $attribute_label ) {
 				$attribute_label = ucwords( $attribute_name );
-			} elseif ( ! $attribute_name ) {
+			}
+			if ( ! $attribute_name ) {
 				$attribute_name = woocommerce_sanitize_taxonomy_name( stripslashes( $attribute_label ) );
 			}
 
@@ -198,11 +199,9 @@ class WC_Admin_Attributes {
 			}
 		}
 
-		// If an attribute was added, edited or deleted: clear cache and redirect
+		// If an attribute was added, edited or deleted: clear cache
 		if ( ! empty( $action_completed ) ) {
 			delete_transient( 'wc_attribute_taxonomies' );
-			wp_safe_redirect( get_admin_url() . 'edit.php?post_type=product&page=woocommerce_attributes' );
-			exit;
 		}
 
 		// Show admin interface
