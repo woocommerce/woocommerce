@@ -904,7 +904,7 @@ class WC_Cart {
 
 				// If its greater than 0, its already in the cart
 				if ( $in_cart_quantity > 0 ) {
-					wc_add_error( sprintf('<a href="%s" class="button">%s</a> %s', get_permalink(woocommerce_get_page_id('cart')), __( 'View Cart &rarr;', 'woocommerce' ), __( 'You already have this item in your cart.', 'woocommerce' ) ) );
+					wc_add_error( sprintf( '<a href="%s" class="button">%s</a> %s', get_permalink( woocommerce_get_page_id( 'cart' ) ), __( 'View Cart &rarr;', 'woocommerce' ), sprintf( __( 'You cannot add another &quot;%s&quot; to your cart.', 'woocommerce' ), $product_data->get_title() ) ) );
 					return false;
 				}
 			}
