@@ -547,9 +547,9 @@ class WC_Query {
 
 	/**
 	 * Appends meta queries to an array.
-	 *
 	 * @access public
-	 * @return void
+	 * @param array $meta_query
+	 * @return array
 	 */
 	public function get_meta_query( $meta_query = array() ) {
 		if ( ! is_array( $meta_query ) )
