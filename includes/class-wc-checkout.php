@@ -226,7 +226,7 @@ class WC_Checkout {
 			foreach ( $this->checkout_fields['billing'] as $key => $field ) {
 				update_post_meta( $order_id, '_' . $key, $this->posted[ $key ] );
 
-				if ( $this->customer_id )
+				if ( $this->customer_id && apply_filters( 'woocommerce_checkout_update_customer_meta', true, $this ) )
 					update_user_meta( $this->customer_id, $key, $this->posted[ $key ] );
 			}
 
@@ -245,7 +245,7 @@ class WC_Checkout {
 				}
 
 				// User
-				if ( $postvalue && $this->customer_id )
+				if ( $postvalue && $this->customer_id && apply_filters( 'woocommerce_checkout_update_customer_meta', true, $this ) )
 					update_user_meta( $this->customer_id, $key, $postvalue );
 			}
 		}
