@@ -343,6 +343,26 @@ class WC_Order {
 	}
 
 	/**
+	 * Check whether this order has a specific shipping method or not
+	 *
+	 * @return void
+	 */
+	public function has_shipping_method( $method_id ) {
+		$shipping_methods = $this->get_shipping_methods();
+		$has_method = false;
+		
+		if ( !$shipping_methods )
+			return false;
+
+		foreach ( $shipping_methods as $shipping_method ) {
+			if ( $shipping_method['method_id'] == $method_id )
+				$has_method = true;
+		}
+
+		return $has_method;
+	}
+
+	/**
 	 * Get taxes, merged by code, formatted ready for output.
 	 *
 	 * @access public
