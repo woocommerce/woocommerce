@@ -468,6 +468,9 @@ class WC_Checkout {
 					case "multiselect" :
 						$this->posted[ $key ] = isset( $_POST[ $key ] ) ? implode( ', ', array_map( 'woocommerce_clean', $_POST[ $key ] ) ) : '';
 					break;
+					case "textarea" :
+						$this->posted[ $key ] = isset( $_POST[ $key ] ) ? wp_strip_all_tags( wp_check_invalid_utf8( stripslashes( $_POST[ $key ] ) ) ) : '';
+					break;
 					default :
 						$this->posted[ $key ] = isset( $_POST[ $key ] ) ? woocommerce_clean( $_POST[ $key ] ) : '';
 					break;
