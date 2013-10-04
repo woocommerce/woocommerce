@@ -226,7 +226,7 @@ class WC_Checkout {
 			foreach ( $this->checkout_fields['billing'] as $key => $field ) {
 				update_post_meta( $order_id, '_' . $key, $this->posted[ $key ] );
 
-				if ( $this->customer_id && apply_filters( 'woocommerce_checkout_update_customer_meta', true, $this ) )
+				if ( $this->customer_id && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) )
 					update_user_meta( $this->customer_id, $key, $this->posted[ $key ] );
 			}
 
@@ -245,7 +245,7 @@ class WC_Checkout {
 				}
 
 				// User
-				if ( $postvalue && $this->customer_id && apply_filters( 'woocommerce_checkout_update_customer_meta', true, $this ) )
+				if ( $postvalue && $this->customer_id && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) )
 					update_user_meta( $this->customer_id, $key, $postvalue );
 			}
 		}
@@ -629,10 +629,10 @@ class WC_Checkout {
                 	WC()->session->set( 'reload_checkout', true );
 
                 	// Add customer info from other billing fields
-                	if ( $this->posted['billing_first_name'] )
+                	if ( $this->posted['billing_first_name'] && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) )
                 		wp_update_user( array ( 'ID' => $this->customer_id, 'first_name' => $this->posted['billing_first_name'], 'display_name' => $this->posted['billing_first_name'] ) );
 
-                	if ( $this->posted['billing_last_name'] )
+                	if ( $this->posted['billing_last_name'] && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) )
                 		wp_update_user( array ( 'ID' => $this->customer_id, 'last_name' => $this->posted['billing_last_name'] ) ) ;
 				}
 
