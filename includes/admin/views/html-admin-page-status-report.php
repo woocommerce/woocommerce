@@ -1,6 +1,7 @@
 <div class="woocommerce-message">
 	<div class="squeezer">
 		<h4><?php _e( 'Please include this information when requesting support:', 'woocommerce' ); ?> </h4>
+		<p class="submit"><a href="#" class="button-primary debug-report"><?php _e( 'Copy the System Report', 'woocommerce' ); ?></a></p>
 		<p class="submit"><a href="#" download="wc_report.txt" class="button-primary debug-report"><?php _e( 'Download System Report File', 'woocommerce' ); ?></a></p>
 	</div>
 </div>
