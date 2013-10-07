@@ -153,10 +153,10 @@ class WC_Meta_Box_Product_Data {
 				echo '<div class="options_group pricing show_if_simple show_if_external">';
 
 					// Price
-					woocommerce_wp_text_input( array( 'id' => '_regular_price', 'class' => 'wc_input_price short', 'label' => __( 'Regular Price', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')' ) );
+					woocommerce_wp_text_input( array( 'id' => '_regular_price', 'class' => 'wc_input_decimal short', 'label' => __( 'Regular Price', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')' ) );
 
 					// Special Price
-					woocommerce_wp_text_input( array( 'id' => '_sale_price', 'class' => 'wc_input_price short', 'label' => __( 'Sale Price', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')', 'description' => '<a href="#" class="sale_schedule">' . __( 'Schedule', 'woocommerce' ) . '</a>' ) );
+					woocommerce_wp_text_input( array( 'id' => '_sale_price', 'class' => 'wc_input_decimal short', 'label' => __( 'Sale Price', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')', 'description' => '<a href="#" class="sale_schedule">' . __( 'Schedule', 'woocommerce' ) . '</a>' ) );
 
 					// Special Price date range
 					$sale_price_dates_from 	= ( $date = get_post_meta( $thepostid, '_sale_price_dates_from', true ) ) ? date_i18n( 'Y-m-d', $date ) : '';
@@ -339,31 +339,21 @@ class WC_Meta_Box_Product_Data {
 				echo '<div class="options_group">';
 
 					// Weight
-					if ( wc_product_weight_enabled() ) :
-						woocommerce_wp_text_input( array( 'id' => '_weight', 'label' => __( 'Weight', 'woocommerce' ) . ' ('.get_option('woocommerce_weight_unit').')', 'placeholder' => '0.00', 'description' => __( 'Weight in decimal form', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
-						'step' 	=> 'any',
-						'min'	=> '0'
-					) ) );
-					else:
-						echo '<input type="hidden" name="_weight" value="' . esc_attr( get_post_meta( $thepostid, '_weight', true ) ) . '" />';
-					endif;
+					if ( wc_product_weight_enabled() )
+						woocommerce_wp_text_input( array( 'id' => '_weight', 'label' => __( 'Weight', 'woocommerce' ) . ' ('.get_option('woocommerce_weight_unit').')', 'placeholder' => '0.00', 'description' => __( 'Weight in decimal form', 'woocommerce' ), 'type' => 'text', 'class' => 'wc_input_decimal short' ) );
 
 					// Size fields
-					if ( wc_product_dimensions_enabled() ) :
+					if ( wc_product_dimensions_enabled() ) {
 						?><p class="form-field dimensions_field">
 							<label for="product_length"><?php echo __( 'Dimensions', 'woocommerce' ) . ' (' . get_option( 'woocommerce_dimension_unit' ) . ')'; ?></label>
 							<span class="wrap">
-								<input id="product_length" placeholder="<?php _e( 'Length', 'woocommerce' ); ?>" class="input-text" size="6" type="number" name="_length" value="<?php echo esc_attr( get_post_meta( $thepostid, '_length', true ) ); ?>" step="any" min="0" />
-								<input placeholder="<?php _e( 'Width', 'woocommerce' ); ?>" class="input-text" size="6" type="number" name="_width" value="<?php echo esc_attr( get_post_meta( $thepostid, '_width', true ) ); ?>"  step="any" min="0" />
-								<input placeholder="<?php _e( 'Height', 'woocommerce' ); ?>" class="input-text last" size="6" type="number" name="_height" value="<?php echo esc_attr( get_post_meta( $thepostid, '_height', true ) ); ?>"  step="any" min="0" />
+								<input id="product_length" placeholder="<?php _e( 'Length', 'woocommerce' ); ?>" class="input-text wc_input_decimal" size="6" type="text" name="_length" value="<?php echo esc_attr( get_post_meta( $thepostid, '_length', true ) ); ?>" />
+								<input placeholder="<?php _e( 'Width', 'woocommerce' ); ?>" class="input-text wc_input_decimal" size="6" type="text" name="_width" value="<?php echo esc_attr( get_post_meta( $thepostid, '_width', true ) ); ?>" />
+								<input placeholder="<?php _e( 'Height', 'woocommerce' ); ?>" class="input-text wc_input_decimal last" size="6" type="text" name="_height" value="<?php echo esc_attr( get_post_meta( $thepostid, '_height', true ) ); ?>" />
 							</span>
 							<span class="description"><?php _e( 'LxWxH in decimal form', 'woocommerce' ); ?></span>
 						</p><?php
-					else:
-						echo '<input type="hidden" name="_length" value="' . esc_attr( get_post_meta( $thepostid, '_length', true ) ) . '" />';
-						echo '<input type="hidden" name="_width" value="' . esc_attr( get_post_meta( $thepostid, '_width', true ) ) . '" />';
-						echo '<input type="hidden" name="_height" value="' . esc_attr( get_post_meta( $thepostid, '_height', true ) ) . '" />';
-					endif;
+					}
 
 					do_action( 'woocommerce_product_options_dimensions' );
 
@@ -941,8 +931,10 @@ class WC_Meta_Box_Product_Data {
 		update_post_meta( $post_id, '_virtual', $is_virtual );
 
 		// Update post meta
-		if ( isset( $_POST['_regular_price'] ) ) update_post_meta( $post_id, '_regular_price', stripslashes( $_POST['_regular_price'] ) );
-		if ( isset( $_POST['_sale_price'] ) ) update_post_meta( $post_id, '_sale_price', stripslashes( $_POST['_sale_price'] ) );
+		if ( isset( $_POST['_regular_price'] ) )
+			update_post_meta( $post_id, '_regular_price', ( $_POST['_regular_price'] === '' ) ? '' : woocommerce_format_decimal( $_POST['_regular_price'], false ) );
+		if ( isset( $_POST['_sale_price'] ) )
+			update_post_meta( $post_id, '_sale_price', ( $_POST['_sale_price'] === '' ? '' : woocommerce_format_decimal( $_POST['_sale_price'], false ) ) );
 		if ( isset( $_POST['_tax_status'] ) ) update_post_meta( $post_id, '_tax_status', stripslashes( $_POST['_tax_status'] ) );
 		if ( isset( $_POST['_tax_class'] ) ) update_post_meta( $post_id, '_tax_class', stripslashes( $_POST['_tax_class'] ) );
 		if ( isset( $_POST['_visibility'] ) ) update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
@@ -951,10 +943,19 @@ class WC_Meta_Box_Product_Data {
 
 		// Dimensions
 		if ( $is_virtual == 'no' ) {
-			update_post_meta( $post_id, '_weight', stripslashes( $_POST['_weight'] ) );
-			update_post_meta( $post_id, '_length', stripslashes( $_POST['_length'] ) );
-			update_post_meta( $post_id, '_width', stripslashes( $_POST['_width'] ) );
-			update_post_meta( $post_id, '_height', stripslashes( $_POST['_height'] ) );
+
+			if ( isset( $_POST['_weight'] ) )
+				update_post_meta( $post_id, '_weight', ( $_POST['_weight'] === '' ) ? '' : woocommerce_format_decimal( $_POST['_weight'], false ) );
+
+			if ( isset( $_POST['_length'] ) )
+				update_post_meta( $post_id, '_length', ( $_POST['_length'] === '' ) ? '' : woocommerce_format_decimal( $_POST['_length'], false ) );
+
+			if ( isset( $_POST['_width'] ) )
+				update_post_meta( $post_id, '_width', ( $_POST['_width'] === '' ) ? '' : woocommerce_format_decimal( $_POST['_width'], false ) );
+
+			if ( isset( $_POST['_height'] ) )
+				update_post_meta( $post_id, '_height', ( $_POST['_height'] === '' ) ? '' : woocommerce_format_decimal( $_POST['_height'], false ) );
+
 		} else {
 			update_post_meta( $post_id, '_weight', '' );
 			update_post_meta( $post_id, '_length', '' );
@@ -1116,16 +1117,16 @@ class WC_Meta_Box_Product_Data {
 				update_post_meta( $post_id, '_sale_price_dates_from', strtotime( 'NOW', current_time( 'timestamp' ) ) );
 
 			// Update price if on sale
-			if ( $_POST['_sale_price'] != '' && $date_to == '' && $date_from == '' )
-				update_post_meta( $post_id, '_price', stripslashes( $_POST['_sale_price'] ) );
+			if ( $_POST['_sale_price'] !== '' && $date_to == '' && $date_from == '' )
+				update_post_meta( $post_id, '_price', woocommerce_format_decimal( $_POST['_sale_price'], false ) );
 			else
-				update_post_meta( $post_id, '_price', stripslashes( $_POST['_regular_price'] ) );
+				update_post_meta( $post_id, '_price', ( $_POST['_regular_price'] === '' ) ? '' : woocommerce_format_decimal( $_POST['_regular_price'], false ) );
 
-			if ( $_POST['_sale_price'] != '' && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) )
-				update_post_meta( $post_id, '_price', stripslashes($_POST['_sale_price']) );
+			if ( $_POST['_sale_price'] !== '' && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) )
+				update_post_meta( $post_id, '_price', woocommerce_format_decimal( $_POST['_sale_price'], false ) );
 
 			if ( $date_to && strtotime( $date_to ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-				update_post_meta( $post_id, '_price', stripslashes($_POST['_regular_price']) );
+				update_post_meta( $post_id, '_price', ( $_POST['_regular_price'] === '' ) ? '' : woocommerce_format_decimal( $_POST['_regular_price'], false ) );
 				update_post_meta( $post_id, '_sale_price_dates_from', '');
 				update_post_meta( $post_id, '_sale_price_dates_to', '');
 			}
@@ -1382,20 +1383,25 @@ class WC_Meta_Box_Product_Data {
 
 				// Update post meta
 				update_post_meta( $variation_id, '_sku', woocommerce_clean( $variable_sku[ $i ] ) );
-				update_post_meta( $variation_id, '_weight', woocommerce_clean( $variable_weight[ $i ] ) );
-				update_post_meta( $variation_id, '_length', woocommerce_clean( $variable_length[ $i ] ) );
-				update_post_meta( $variation_id, '_width', woocommerce_clean( $variable_width[ $i ] ) );
-				update_post_meta( $variation_id, '_height', woocommerce_clean( $variable_height[ $i ] ) );
 				update_post_meta( $variation_id, '_thumbnail_id', absint( $upload_image_id[ $i ] ) );
 				update_post_meta( $variation_id, '_virtual', woocommerce_clean( $is_virtual ) );
 				update_post_meta( $variation_id, '_downloadable', woocommerce_clean( $is_downloadable ) );
+
+				if ( isset( $variable_weight[ $i ] ) )
+					update_post_meta( $variation_id, '_weight', ( $variable_weight[ $i ] === '' ) ? '' : woocommerce_format_decimal( $variable_weight[ $i ], false ) );
+				if ( isset( $variable_length[ $i ] ) )
+					update_post_meta( $variation_id, '_length', ( $variable_length[ $i ] === '' ) ? '' : woocommerce_format_decimal( $variable_length[ $i ], false ) );
+				if ( isset( $variable_width[ $i ] ) )
+					update_post_meta( $variation_id, '_width', ( $variable_width[ $i ] === '' ) ? '' : woocommerce_format_decimal( $variable_width[ $i ], false ) );
+				if ( isset( $variable_height[ $i ] ) )
+					update_post_meta( $variation_id, '_height', ( $variable_height[ $i ] === '' ) ? '' : woocommerce_format_decimal( $variable_height[ $i ], false ) );
 
 				// Stock handling
 				wc_update_product_stock( $variation_id, woocommerce_clean( $variable_stock[ $i ] ) );
 
 				// Price handling
-				$regular_price 	= woocommerce_clean( $variable_regular_price[ $i ] );
-				$sale_price 	= woocommerce_clean( $variable_sale_price[ $i ] );
+				$regular_price 	= woocommerce_format_decimal( $variable_regular_price[ $i ], false );
+				$sale_price 	= ( $variable_sale_price[ $i ] === '' ? '' : woocommerce_format_decimal( $variable_sale_price[ $i ], false ) );
 				$date_from 		= woocommerce_clean( $variable_sale_price_dates_from[ $i ] );
 				$date_to		= woocommerce_clean( $variable_sale_price_dates_to[ $i ] );
 

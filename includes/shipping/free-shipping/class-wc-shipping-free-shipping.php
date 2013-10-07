@@ -116,7 +116,8 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 						),
 			'min_amount' => array(
 							'title' 		=> __( 'Minimum Order Amount', 'woocommerce' ),
-							'type' 			=> 'price',
+							'type' 			=> 'text',
+							'class'         => 'wc_input_decimal',
 							'description' 	=> __( 'Users will need to spend this amount to get free shipping (if enabled above).', 'woocommerce' ),
 							'default' 		=> '0',
 							'desc_tip'		=> true,

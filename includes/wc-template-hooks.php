@@ -186,7 +186,7 @@ add_action( 'wp_head', 'wc_generator_tag' );
  * @see wc_print_js()
  */
 add_action( 'wp_footer', 'woocommerce_demo_store' );
-add_action( 'wp_footer', 'wc_print_js' );
+add_action( 'wp_footer', 'wc_print_js', 25 );
 
 /**
  * Order details

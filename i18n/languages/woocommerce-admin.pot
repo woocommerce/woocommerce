@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.1-bleeding Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2013-09-22 23:32:42+00:00\n"
+"POT-Creation-Date: 2013-10-03 01:54:37+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -17,23 +17,27 @@ msgstr ""
 msgid "WooCommerce"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:121
+#: includes/admin/class-wc-admin-assets.php:104
+msgid "Please enter in decimal format without thousand separators and currency symbols."
+msgstr ""
+
+#: includes/admin/class-wc-admin-assets.php:130
 msgid "Are you sure you want to remove the selected items? If you have previously reduced this item's stock, or this order was submitted by a customer, you will need to manually restore the item's stock."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:122
+#: includes/admin/class-wc-admin-assets.php:131
 msgid "Please select some items."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:123
+#: includes/admin/class-wc-admin-assets.php:132
 msgid "Remove this item meta?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:124
+#: includes/admin/class-wc-admin-assets.php:133
 msgid "Remove this attribute?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:125
+#: includes/admin/class-wc-admin-assets.php:134
 #: includes/admin/class-wc-admin-attributes.php:240
 #: includes/admin/class-wc-admin-attributes.php:276
 #: includes/admin/class-wc-admin-attributes.php:309
@@ -41,75 +45,77 @@ msgstr ""
 #: includes/admin/class-wc-admin-attributes.php:376
 #: includes/admin/class-wc-admin-attributes.php:401
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:194
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:420
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:514
-#: includes/admin/settings/class-wc-settings-shipping.php:202
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:185
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:438
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:532
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:147
+#: includes/admin/settings/class-wc-settings-shipping.php:203
 msgid "Name"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:126
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:412
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:506
+#: includes/admin/class-wc-admin-assets.php:135
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:430
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:524
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:6
 msgid "Remove"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:127
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:413
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:507
+#: includes/admin/class-wc-admin-assets.php:136
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:431
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:525
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:7
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:7
 msgid "Click to toggle"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:128
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:428
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:520
+#: includes/admin/class-wc-admin-assets.php:137
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:446
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:538
 msgid "Value(s)"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:129
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:521
+#: includes/admin/class-wc-admin-assets.php:138
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:539
 msgid "Enter some text, or some attributes by pipe (|) separating values."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:130
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:471
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:526
+#: includes/admin/class-wc-admin-assets.php:139
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:489
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:544
 msgid "Visible on the product page"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:131
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:484
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:532
+#: includes/admin/class-wc-admin-assets.php:140
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:502
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:550
 msgid "Used for variations"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:132
+#: includes/admin/class-wc-admin-assets.php:141
 msgid "Enter a name for the new attribute term:"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:133
+#: includes/admin/class-wc-admin-assets.php:142
 msgid "Calculate totals based on order items, discounts, and shipping?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:134
+#: includes/admin/class-wc-admin-assets.php:143
 msgid "Calculate line taxes? This will calculate taxes based on the customers country. If no billing/shipping is set it will use the store base country."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:135
+#: includes/admin/class-wc-admin-assets.php:144
 msgid "Copy billing information to shipping information? This will remove any currently entered shipping information."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:136
+#: includes/admin/class-wc-admin-assets.php:145
 msgid "Load the customer's billing information? This will remove any currently entered billing information."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:137
+#: includes/admin/class-wc-admin-assets.php:146
 msgid "Load the customer's shipping information? This will remove any currently entered shipping information."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:138
+#: includes/admin/class-wc-admin-assets.php:147
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:115
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:206
 #: includes/admin/views/html-bulk-edit-product.php:170
@@ -117,53 +123,53 @@ msgstr ""
 msgid "Featured"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:141
+#: includes/admin/class-wc-admin-assets.php:150
 msgid "No customer selected"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:180
+#: includes/admin/class-wc-admin-assets.php:189
 msgid "Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes (max 50 per run)."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:181
+#: includes/admin/class-wc-admin-assets.php:190
 msgid "Enter a value"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:182
+#: includes/admin/class-wc-admin-assets.php:191
 msgid "Enter a value (fixed or %)"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:183
+#: includes/admin/class-wc-admin-assets.php:192
 msgid "Are you sure you want to delete all variations? This cannot be undone."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:184
+#: includes/admin/class-wc-admin-assets.php:193
 msgid "Last warning, are you sure?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:185
+#: includes/admin/class-wc-admin-assets.php:194
 #: includes/admin/class-wc-admin-taxonomies.php:127
 #: includes/admin/class-wc-admin-taxonomies.php:215
 msgid "Choose an image"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:186
+#: includes/admin/class-wc-admin-assets.php:195
 msgid "Set variation image"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:187
+#: includes/admin/class-wc-admin-assets.php:196
 msgid "variation added"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:188
+#: includes/admin/class-wc-admin-assets.php:197
 msgid "variations added"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:189
+#: includes/admin/class-wc-admin-assets.php:198
 msgid "No variations added"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:190
+#: includes/admin/class-wc-admin-assets.php:199
 msgid "Are you sure you want to remove this variation?"
 msgstr ""
 
@@ -278,6 +284,8 @@ msgstr ""
 #: includes/admin/class-wc-admin-attributes.php:325
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:44
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:104
+#: includes/admin/post-types/meta-boxes/views/html-product-download.php:6
+#: includes/admin/post-types/meta-boxes/views/html-product-variation-download.php:5
 msgid "Delete"
 msgstr ""
 
@@ -477,7 +485,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-welcome.php:153
 #: includes/admin/settings/class-wc-settings-checkout.php:268
 #: includes/admin/settings/class-wc-settings-shipping.php:241
-#: includes/admin/views/html-admin-page-status-report.php:254
+#: includes/admin/views/html-admin-page-status-report.php:263
 msgid "Settings"
 msgstr ""
 
@@ -540,8 +548,8 @@ msgstr ""
 #: includes/admin/class-wc-admin-taxonomies.php:92
 #: includes/admin/class-wc-admin-taxonomies.php:182
 #: includes/admin/settings/class-wc-settings-checkout.php:217
-#: includes/admin/settings/class-wc-settings-shipping.php:201
-#: includes/admin/views/html-admin-page-status-report.php:71
+#: includes/admin/settings/class-wc-settings-shipping.php:202
+#: includes/admin/views/html-admin-page-status-report.php:80
 msgid "Default"
 msgstr ""
 
@@ -708,8 +716,8 @@ msgstr ""
 #: includes/admin/class-wc-admin-profile.php:111
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:49
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:96
-#: includes/admin/settings/class-wc-settings-tax.php:242
-#: includes/admin/settings/class-wc-settings-tax.php:369
+#: includes/admin/settings/class-wc-settings-tax.php:254
+#: includes/admin/settings/class-wc-settings-tax.php:381
 msgid "City"
 msgstr ""
 
@@ -797,7 +805,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-reports.php:92
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:200
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:744
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:762
 #: includes/admin/reports/class-wc-report-stock.php:20
 #: includes/admin/reports/class-wc-report-stock.php:21
 msgid "Stock"
@@ -809,7 +817,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-reports.php:101
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:367
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:276
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:302
 #: includes/admin/reports/class-wc-report-stock.php:93
 #: includes/admin/views/html-bulk-edit-product.php:195
 #: includes/admin/views/html-quick-edit-product.php:138
@@ -862,12 +870,12 @@ msgid "Choose countries&hellip;"
 msgstr ""
 
 #: includes/admin/class-wc-admin-settings.php:544
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:442
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:460
 msgid "Select all"
 msgstr ""
 
 #: includes/admin/class-wc-admin-settings.php:544
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:442
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:460
 msgid "Select none"
 msgstr ""
 
@@ -962,7 +970,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-taxonomies.php:93
 #: includes/admin/class-wc-admin-taxonomies.php:183
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:73
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:67
 #: includes/admin/settings/class-wc-settings-products.php:25
 #: includes/admin/views/html-admin-page-addons.php:15
 msgid "Products"
@@ -1233,9 +1241,9 @@ msgid "Order Received"
 msgstr ""
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:103
-#: includes/admin/importers/class-wc-tax-rate-importer.php:188
-#: includes/admin/importers/class-wc-tax-rate-importer.php:228
-#: includes/admin/importers/class-wc-tax-rate-importer.php:243
+#: includes/admin/importers/class-wc-tax-rate-importer.php:190
+#: includes/admin/importers/class-wc-tax-rate-importer.php:230
+#: includes/admin/importers/class-wc-tax-rate-importer.php:245
 msgid "Sorry, there has been an error."
 msgstr ""
 
@@ -1243,55 +1251,55 @@ msgstr ""
 msgid "The file does not exist, please try again."
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:189
+#: includes/admin/importers/class-wc-tax-rate-importer.php:191
 msgid "The CSV is invalid."
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:200
+#: includes/admin/importers/class-wc-tax-rate-importer.php:202
 msgid "Import complete - imported <strong>%s</strong> tax rates and skipped <strong>%s</strong>."
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:210
+#: includes/admin/importers/class-wc-tax-rate-importer.php:212
 msgid "All done!"
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:210
+#: includes/admin/importers/class-wc-tax-rate-importer.php:212
 msgid "View Tax Rates"
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:261
+#: includes/admin/importers/class-wc-tax-rate-importer.php:263
 msgid "Import Tax Rates"
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:284
+#: includes/admin/importers/class-wc-tax-rate-importer.php:286
 msgid "Hi there! Upload a CSV file containing tax rates to import the contents into your shop. Choose a .csv file to upload, then click \"Upload file and import\"."
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:286
+#: includes/admin/importers/class-wc-tax-rate-importer.php:288
 msgid "Tax rates need to be defined with columns in a specific order (10 columns). <a href=\"%s\">Click here to download a sample</a>."
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:294
+#: includes/admin/importers/class-wc-tax-rate-importer.php:296
 msgid "Before you can upload your import file, you will need to fix the following error:"
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:303
+#: includes/admin/importers/class-wc-tax-rate-importer.php:305
 msgid "Choose a file from your computer:"
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:309
+#: includes/admin/importers/class-wc-tax-rate-importer.php:311
 msgid "Maximum size: %s"
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:314
+#: includes/admin/importers/class-wc-tax-rate-importer.php:316
 msgid "OR enter path to file:"
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:321
+#: includes/admin/importers/class-wc-tax-rate-importer.php:323
 msgid "Delimiter"
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:327
+#: includes/admin/importers/class-wc-tax-rate-importer.php:329
 msgid "Upload file and import"
 msgstr ""
 
@@ -1342,7 +1350,7 @@ msgid "OK"
 msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:138
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:175
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:169
 msgid "Cancel"
 msgstr ""
 
@@ -1418,7 +1426,7 @@ msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:260
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:102
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:64
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:65
 msgid "Delete Permanently"
 msgstr ""
 
@@ -1451,14 +1459,14 @@ msgstr ""
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:323
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:514
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:51
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:176
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:213
 msgid "Virtual"
 msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:325
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:507
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:58
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:174
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:211
 msgid "Downloadable"
 msgstr ""
 
@@ -1479,9 +1487,9 @@ msgstr ""
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:200
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:202
 #: includes/admin/views/html-admin-page-status-report.php:39
-#: includes/admin/views/html-admin-page-status-report.php:67
-#: includes/admin/views/html-admin-page-status-report.php:92
-#: includes/admin/views/html-admin-page-status-report.php:261
+#: includes/admin/views/html-admin-page-status-report.php:76
+#: includes/admin/views/html-admin-page-status-report.php:101
+#: includes/admin/views/html-admin-page-status-report.php:270
 #: includes/admin/views/html-bulk-edit-product.php:176
 #: includes/admin/views/html-bulk-edit-product.php:213
 msgid "Yes"
@@ -1489,16 +1497,16 @@ msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:358
 #: includes/admin/views/html-admin-page-status-report.php:39
-#: includes/admin/views/html-admin-page-status-report.php:67
-#: includes/admin/views/html-admin-page-status-report.php:92
-#: includes/admin/views/html-admin-page-status-report.php:261
+#: includes/admin/views/html-admin-page-status-report.php:76
+#: includes/admin/views/html-admin-page-status-report.php:101
+#: includes/admin/views/html-admin-page-status-report.php:270
 #: includes/admin/views/html-bulk-edit-product.php:177
 #: includes/admin/views/html-bulk-edit-product.php:214
 msgid "No"
 msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:365
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:275
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
 #: includes/admin/reports/class-wc-report-stock.php:91
 #: includes/admin/views/html-bulk-edit-product.php:194
 #: includes/admin/views/html-quick-edit-product.php:137
@@ -1586,7 +1594,7 @@ msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:86
 #: includes/admin/settings/class-wc-settings-checkout.php:220
-#: includes/admin/settings/class-wc-settings-shipping.php:204
+#: includes/admin/settings/class-wc-settings-shipping.php:205
 msgid "Status"
 msgstr ""
 
@@ -1788,121 +1796,130 @@ msgstr ""
 msgid "Value of the coupon."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:50
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:47
 msgid "Enable free shipping"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:50
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:47
 msgid "Check this box if the coupon grants free shipping. The <a href=\"%s\">free shipping method</a> must be enabled with the \"must use coupon\" setting checked."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:53
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:50
 msgid "Individual use"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:53
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:50
 msgid "Check this box if the coupon cannot be used in conjunction with other coupons."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:56
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:53
 msgid "Apply before tax"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:56
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:53
 msgid "Check this box if the coupon should be applied before calculating cart tax."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:59
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:56
 msgid "Exclude sale items"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:59
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:56
 msgid "Check this box if the coupon should not apply to items on sale. Per-item coupons will only work if the item is not on sale. Per-cart coupons will only work if there are no sale items in the cart."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:64
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:61
 msgid "Minimum amount"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:64
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:61
 msgid "No minimum"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:64
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:61
 msgid "This field allows you to set the minimum subtotal needed to use the coupon."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:74
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:68
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:95
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:567
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:584
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:585
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:602
 #: includes/admin/reports/class-wc-report-sales-by-product.php:177
 msgid "Search for a product&hellip;"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:87
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:81
 msgid "Products which need to be in the cart to use this coupon or, for \"Product Discounts\", which products are discounted."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:92
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:86
 msgid "Exclude products"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:93
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:87
 msgid "Search for a product…"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:106
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:100
 msgid "Products which must not be in the cart to use this coupon or, for \"Product Discounts\", which products are not discounted."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:113
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:107
 msgid "Product categories"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:114
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:108
 msgid "Any category"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:122
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:116
 msgid "A product must be in this category for the coupon to remain valid or, for \"Product Discounts\", products in these categories will be discounted."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:127
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:121
 msgid "Exclude categories"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:128
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:122
 msgid "No categories"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:136
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:130
 msgid "Product must not be in this category for the coupon to remain valid or, for \"Product Discounts\", products in these categories will not be discounted."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:142
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:136
 msgid "Email restrictions"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:142
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:136
 msgid "No restrictions"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:142
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:136
 msgid "List of emails to check against the customer's billing email when an order is placed."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:149
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:143
 msgid "Usage limit"
 msgstr ""
 
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:143
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:149
 msgctxt "placeholder"
 msgid "Unlimited usage"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:149
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:143
 msgid "How many times this coupon can be used before it is void."
+msgstr ""
+
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:149
+msgid "Usage limit per user"
+msgstr ""
+
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:149
+msgid "How many times this coupon can be used by an invidual user. Uses billing email for guests, and user ID for logged in users."
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:155
@@ -1922,20 +1939,24 @@ msgstr ""
 msgid "Resend order emails"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:57
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:52
+msgid "Generate Download Permissions"
+msgstr ""
+
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:58
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:91
 msgid "Apply"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:66
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:67
 msgid "Move to Trash"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:71
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:72
 msgid "Save Order"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:71
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:72
 msgid "Save/update the order"
 msgstr ""
 
@@ -2095,8 +2116,8 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:46
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:118
 #: includes/admin/settings/class-wc-settings-tax.php:25
-#: includes/admin/settings/class-wc-settings-tax.php:536
-#: includes/admin/settings/class-wc-settings-tax.php:624
+#: includes/admin/settings/class-wc-settings-tax.php:548
+#: includes/admin/settings/class-wc-settings-tax.php:636
 msgid "Tax"
 msgstr ""
 
@@ -2157,7 +2178,7 @@ msgid "Private note"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:67
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:545
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:563
 msgid "Add"
 msgstr ""
 
@@ -2165,8 +2186,8 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:62
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:94
 #: includes/admin/settings/class-wc-settings-shipping.php:25
-#: includes/admin/settings/class-wc-settings-tax.php:252
-#: includes/admin/settings/class-wc-settings-tax.php:369
+#: includes/admin/settings/class-wc-settings-tax.php:264
+#: includes/admin/settings/class-wc-settings-tax.php:381
 #: includes/admin/views/html-admin-page-addons.php:13
 msgid "Shipping"
 msgstr ""
@@ -2270,425 +2291,431 @@ msgstr ""
 msgid "Regular Price"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:162
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:159
 msgid "Sale Price"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:162
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:159
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:76
 msgid "Schedule"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:172
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:166
 msgid "Sale Price Dates"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:173
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:167
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:84
 msgctxt "placeholder"
 msgid "From&hellip;"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:174
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:168
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:88
 msgctxt "placeholder"
 msgid "To&hellip;"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:189
-msgid "File paths (one per line)"
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:180
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:143
+msgid "Downloadable Files"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:190
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:144
-msgid "File paths/URLs, one per line"
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:185
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:147
+msgid "This is the name of the download shown to the customer."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:191
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:145
-msgid "Choose a file"
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:186
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:148
+msgid "File URL"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:191
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:145
-msgid "Insert file URL"
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:186
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:148
+msgid "This is the URL or absolute path to the file which customers will get access to."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:195
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:201
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:163
+msgid "Add File"
+msgstr ""
+
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:221
 msgid "Download Limit"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:195
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:221
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:19
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:151
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:159
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:190
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:196
 msgid "Unlimited"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:195
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:150
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:221
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:189
 msgid "Leave blank for unlimited re-downloads."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:201
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:751
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:227
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:768
 msgid "Download Expiry"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:201
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:227
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:23
 msgid "Never"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:201
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:158
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:227
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:195
 msgid "Enter the number of days before a download link expires, or leave blank."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:207
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:233
 msgid "Download Type"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:208
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:233
+msgid "Choose a download type - this controls the <a href=\"%s\">schema</a>."
+msgstr ""
+
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:234
 msgid "Standard Product"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:209
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:235
 msgid "Application/Software"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:210
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:236
 msgid "Music"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:222
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:248
 #: includes/admin/views/html-bulk-edit-product.php:58
 #: includes/admin/views/html-quick-edit-product.php:38
 msgid "Tax Status"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:223
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:249
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:34
 #: includes/admin/views/html-bulk-edit-product.php:64
 #: includes/admin/views/html-quick-edit-product.php:43
 msgid "Taxable"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:224
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:250
 #: includes/admin/views/html-bulk-edit-product.php:65
 #: includes/admin/views/html-quick-edit-product.php:44
 msgid "Shipping only"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:225
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:251
 #: includes/admin/reports/class-wc-report-sales-by-category.php:167
 #: includes/admin/views/html-bulk-edit-product.php:66
 #: includes/admin/views/html-quick-edit-product.php:45
 msgid "None"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:230
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:711
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:256
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:729
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:27
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:39
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:123
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:134
 #: includes/admin/settings/class-wc-settings-tax.php:122
-#: includes/admin/settings/class-wc-settings-tax.php:229
+#: includes/admin/settings/class-wc-settings-tax.php:241
 #: includes/admin/views/html-bulk-edit-product.php:83
 #: includes/admin/views/html-quick-edit-product.php:61
 msgid "Standard"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:235
-#: includes/admin/settings/class-wc-settings-tax.php:369
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:261
+#: includes/admin/settings/class-wc-settings-tax.php:381
 #: includes/admin/views/html-bulk-edit-product.php:77
 #: includes/admin/views/html-quick-edit-product.php:56
 msgid "Tax Class"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:256
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:282
 #: includes/admin/views/html-bulk-edit-product.php:207
 #: includes/admin/views/html-quick-edit-product.php:153
 msgid "Manage stock?"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:256
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:282
 msgid "Enable stock management at product level (not needed if managing stock at variation level)"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:263
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:289
 #: includes/admin/views/html-bulk-edit-product.php:226
 #: includes/admin/views/html-bulk-edit-product.php:242
 #: includes/admin/views/html-quick-edit-product.php:157
 msgid "Stock Qty"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:263
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:289
 msgid "Stock quantity. If this is a variable product this value will be used to control stock for all variations, unless you define stock at variation level."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:274
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:300
 #: includes/admin/reports/class-wc-report-stock.php:140
 msgid "Stock status"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:277
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:303
 msgid "Controls whether or not the product is listed as \"in stock\" or \"out of stock\" on the frontend."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:284
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:310
 msgid "Allow Backorders?"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:285
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:311
 #: includes/admin/views/html-bulk-edit-product.php:253
 #: includes/admin/views/html-quick-edit-product.php:172
 msgid "Do not allow"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:286
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:312
 #: includes/admin/views/html-bulk-edit-product.php:254
 #: includes/admin/views/html-quick-edit-product.php:173
 msgid "Allow, but notify customer"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:287
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:313
 #: includes/admin/views/html-bulk-edit-product.php:255
 #: includes/admin/views/html-quick-edit-product.php:174
 msgid "Allow"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:288
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:314
 msgid "If managing stock, this controls whether or not backorders are allowed for this product and variations. If enabled, stock quantity can go below 0."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:299
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:325
 msgid "Sold Individually"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:299
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:325
 msgid "Enable this to only allow one of this item to be bought in a single order"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:317
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:745
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:343
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:763
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:96
 #: includes/admin/views/html-bulk-edit-product.php:103
 #: includes/admin/views/html-quick-edit-product.php:84
 msgid "Weight"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:317
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:343
 msgid "Weight in decimal form"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:328
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:348
 msgid "Dimensions"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:330
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:746
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:350
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:764
 #: includes/admin/views/html-bulk-edit-product.php:143
 #: includes/admin/views/html-quick-edit-product.php:97
 msgid "Length"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:331
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:747
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:351
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:765
 #: includes/admin/views/html-bulk-edit-product.php:144
 #: includes/admin/views/html-quick-edit-product.php:98
 msgid "Width"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:332
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:748
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:352
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:766
 #: includes/admin/views/html-bulk-edit-product.php:145
 #: includes/admin/views/html-quick-edit-product.php:99
 msgid "Height"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:334
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:354
 msgid "LxWxH in decimal form"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:355
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:371
 msgid "No shipping class"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:361
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:377
 msgid "Shipping class"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:361
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:377
 msgid "Shipping classes are used by certain shipping methods to group similar products."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:373
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:731
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:389
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:749
 msgid "Close all"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:373
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:731
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:389
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:749
 msgid "Expand all"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:430
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:448
 msgid "Select terms"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:444
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:462
 msgid "Add new"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:457
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:475
 msgid "Pipe (|) separate terms"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:547
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:565
 msgid "Custom product attribute"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:559
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:577
 msgid "Save attributes"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:566
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:584
 msgid "Up-Sells"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:581
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:599
 msgid "Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:583
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:601
 msgid "Cross-Sells"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:598
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:616
 msgid "Cross-sells are products which you promote in the cart, based on the current product."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:608
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:626
 msgid "Choose a grouped product&hellip;"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:634
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:652
 msgid "Grouping"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:634
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:652
 msgid "Set this option to make this product part of a grouped product."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:654
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:672
 msgid "Purchase Note"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:654
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:672
 msgid "Enter an optional note to send the customer after purchase."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:661
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:679
 msgid "Menu order"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:661
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:679
 msgid "Custom ordering position."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:669
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:687
 msgid "Enable reviews"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:722
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:740
 msgid "Before adding variations, add and save some attributes on the <strong>Attributes</strong> tab."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:724
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:742
 msgid "Learn more"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:732
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:750
 msgid "Bulk edit:"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:734
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:752
 msgid "Toggle &quot;Enabled&quot;"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:735
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:753
 msgid "Toggle &quot;Downloadable&quot;"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:736
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:754
 msgid "Toggle &quot;Virtual&quot;"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:737
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:755
 msgid "Delete all variations"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:738
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:756
 msgid "Prices"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:739
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:757
 msgid "Prices increase by (fixed amount or %)"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:740
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:758
 msgid "Prices decrease by (fixed amount or %)"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:741
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:759
 msgid "Sale prices"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:742
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:760
 msgid "Sale prices increase by (fixed amount or %)"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:743
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:761
 msgid "Sale prices decrease by (fixed amount or %)"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:749
-msgid "File Path"
-msgstr ""
-
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:750
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:767
 msgid "Download limit"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:754
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:771
 #: includes/admin/views/html-report-by-date.php:31
 msgid "Go"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:856
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:868
 msgid "Add Variation"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:858
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:870
 msgid "Link all variations"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:860
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:872
 msgid "Default selections:"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:873
-#: includes/admin/settings/class-wc-settings-shipping.php:212
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:885
+#: includes/admin/settings/class-wc-settings-shipping.php:214
 msgid "No default"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:966
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:989
 msgid "Product SKU must be unique."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1332
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1357
 msgid "Variation #%s of %s"
 msgstr ""
 
@@ -2796,6 +2823,26 @@ msgstr ""
 msgid "Shipping Tax"
 msgstr ""
 
+#: includes/admin/post-types/meta-boxes/views/html-product-download.php:3
+#: includes/admin/post-types/meta-boxes/views/html-product-variation-download.php:2
+msgid "File Name"
+msgstr ""
+
+#: includes/admin/post-types/meta-boxes/views/html-product-download.php:4
+#: includes/admin/post-types/meta-boxes/views/html-product-variation-download.php:3
+msgid "http://"
+msgstr ""
+
+#: includes/admin/post-types/meta-boxes/views/html-product-download.php:5
+#: includes/admin/post-types/meta-boxes/views/html-product-variation-download.php:4
+msgid "Choose file"
+msgstr ""
+
+#: includes/admin/post-types/meta-boxes/views/html-product-download.php:5
+#: includes/admin/post-types/meta-boxes/views/html-product-variation-download.php:4
+msgid "Insert file URL"
+msgstr ""
+
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:20
 msgid "Any"
 msgstr ""
@@ -2857,37 +2904,25 @@ msgstr ""
 msgid "Tax class:"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:143
-msgid "File paths:"
-msgstr ""
-
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:143
-msgid "Enter one or more File Paths, one per line, to make this variation a downloadable product, or leave blank."
-msgstr ""
-
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:145
-msgid "Upload"
-msgstr ""
-
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:150
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:189
 msgid "Download Limit:"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:158
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:195
 msgid "Download Expiry:"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:172
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:209
 #: includes/admin/settings/class-wc-settings-checkout.php:260
 #: includes/admin/settings/class-wc-settings-shipping.php:235
 msgid "Enabled"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:174
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:211
 msgid "Enable this option if access is given to a downloadable file upon purchase of a product"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:176
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:213
 msgid "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr ""
 
@@ -2989,7 +3024,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-sales-by-product.php:326
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:29
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:29
-#: includes/admin/settings/class-wc-settings-tax.php:275
+#: includes/admin/settings/class-wc-settings-tax.php:287
 msgid "Export CSV"
 msgstr ""
 
@@ -3375,7 +3410,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:25
 #: includes/admin/settings/class-wc-settings-checkout.php:78
-#: includes/admin/views/html-admin-page-status-report.php:282
+#: includes/admin/views/html-admin-page-status-report.php:291
 msgid "Checkout"
 msgstr ""
 
@@ -4141,15 +4176,15 @@ msgstr ""
 msgid "Ship to specific countries only"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:196
+#: includes/admin/settings/class-wc-settings-shipping.php:197
 msgid "Shipping Methods"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:203
+#: includes/admin/settings/class-wc-settings-shipping.php:204
 msgid "ID"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:213
+#: includes/admin/settings/class-wc-settings-shipping.php:215
 msgid "Drag and drop the above shipping methods to control their display order."
 msgstr ""
 
@@ -4281,110 +4316,122 @@ msgstr ""
 msgid "Display prices during cart/checkout:"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:229
+#: includes/admin/settings/class-wc-settings-tax.php:175
+msgid "Display tax totals:"
+msgstr ""
+
+#: includes/admin/settings/class-wc-settings-tax.php:180
+msgid "As a single total"
+msgstr ""
+
+#: includes/admin/settings/class-wc-settings-tax.php:181
+msgid "Itemized"
+msgstr ""
+
+#: includes/admin/settings/class-wc-settings-tax.php:241
 msgid "Tax Rates for the \"%s\" Class"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:230
+#: includes/admin/settings/class-wc-settings-tax.php:242
 msgid "Define tax rates for countries and states below. <a href=\"%s\">See here</a> for available alpha-2 country codes."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:236
+#: includes/admin/settings/class-wc-settings-tax.php:248
 msgid "Country&nbsp;Code"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:236
+#: includes/admin/settings/class-wc-settings-tax.php:248
 msgid "A 2 digit country code, e.g. US. Leave blank to apply to all."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:238
+#: includes/admin/settings/class-wc-settings-tax.php:250
 msgid "State&nbsp;Code"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:238
+#: includes/admin/settings/class-wc-settings-tax.php:250
 msgid "A 2 digit state code, e.g. AL. Leave blank to apply to all."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:240
-#: includes/admin/settings/class-wc-settings-tax.php:369
+#: includes/admin/settings/class-wc-settings-tax.php:252
+#: includes/admin/settings/class-wc-settings-tax.php:381
 msgid "ZIP/Postcode"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:240
+#: includes/admin/settings/class-wc-settings-tax.php:252
 msgid "Postcode for this rule. Semi-colon (;) separate multiple values. Leave blank to apply to all areas. Wildcards (*) can be used. Ranges for numeric postcodes (e.g. 12345-12350) will be expanded into individual postcodes."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:242
+#: includes/admin/settings/class-wc-settings-tax.php:254
 msgid "Cities for this rule. Semi-colon (;) separate multiple values. Leave blank to apply to all cities."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:244
+#: includes/admin/settings/class-wc-settings-tax.php:256
 msgid "Rate&nbsp;%"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:244
+#: includes/admin/settings/class-wc-settings-tax.php:256
 msgid "Enter a tax rate (percentage) to 4 decimal places."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:246
+#: includes/admin/settings/class-wc-settings-tax.php:258
 msgid "Tax&nbsp;Name"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:246
+#: includes/admin/settings/class-wc-settings-tax.php:258
 msgid "Enter a name for this tax rate."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:248
-#: includes/admin/settings/class-wc-settings-tax.php:369
+#: includes/admin/settings/class-wc-settings-tax.php:260
+#: includes/admin/settings/class-wc-settings-tax.php:381
 msgid "Priority"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:248
+#: includes/admin/settings/class-wc-settings-tax.php:260
 msgid "Choose a priority for this tax rate. Only 1 matching rate per priority will be used. To define multiple tax rates for a single area you need to specify a different priority per rate."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:250
-#: includes/admin/settings/class-wc-settings-tax.php:369
+#: includes/admin/settings/class-wc-settings-tax.php:262
+#: includes/admin/settings/class-wc-settings-tax.php:381
 msgid "Compound"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:250
+#: includes/admin/settings/class-wc-settings-tax.php:262
 msgid "Choose whether or not this is a compound rate. Compound tax rates are applied on top of other tax rates."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:252
+#: includes/admin/settings/class-wc-settings-tax.php:264
 msgid "Choose whether or not this tax rate also gets applied to shipping."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:259
+#: includes/admin/settings/class-wc-settings-tax.php:271
 msgid "Insert row"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:260
+#: includes/admin/settings/class-wc-settings-tax.php:272
 msgid "Remove selected row(s)"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:276
+#: includes/admin/settings/class-wc-settings-tax.php:288
 msgid "Import CSV"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:362
+#: includes/admin/settings/class-wc-settings-tax.php:374
 msgid "No row(s) selected"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:369
+#: includes/admin/settings/class-wc-settings-tax.php:381
 msgid "Country Code"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:369
+#: includes/admin/settings/class-wc-settings-tax.php:381
 msgid "State Code"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:369
+#: includes/admin/settings/class-wc-settings-tax.php:381
 msgid "Rate %"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:369
+#: includes/admin/settings/class-wc-settings-tax.php:381
 msgid "Tax Name"
 msgstr ""
 
@@ -4465,208 +4512,212 @@ msgid "MySQL Version"
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:54
+msgid "PHP Locale"
+msgstr ""
+
+#: includes/admin/views/html-admin-page-status-report.php:63
 msgid "WP Memory Limit"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:59
+#: includes/admin/views/html-admin-page-status-report.php:68
 msgid "%s - We recommend setting memory to at least 64MB. See: <a href=\"%s\">Increasing memory allocated to PHP</a>"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:66
+#: includes/admin/views/html-admin-page-status-report.php:75
 msgid "WP Debug Mode"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:70
+#: includes/admin/views/html-admin-page-status-report.php:79
 msgid "WP Language"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:74
+#: includes/admin/views/html-admin-page-status-report.php:83
 msgid "WP Max Upload Size"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:79
+#: includes/admin/views/html-admin-page-status-report.php:88
 msgid "PHP Post Max Size"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:83
+#: includes/admin/views/html-admin-page-status-report.php:92
 msgid "PHP Time Limit"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:87
+#: includes/admin/views/html-admin-page-status-report.php:96
 msgid "PHP Max Input Vars"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:91
+#: includes/admin/views/html-admin-page-status-report.php:100
 msgid "SUHOSIN Installed"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:96
+#: includes/admin/views/html-admin-page-status-report.php:105
 msgid "WC Logging"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:99
+#: includes/admin/views/html-admin-page-status-report.php:108
 msgid "Log directory is writable."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:101
+#: includes/admin/views/html-admin-page-status-report.php:110
 msgid "Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will not be possible."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:105
+#: includes/admin/views/html-admin-page-status-report.php:114
 msgid "Default Timezone"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:109
+#: includes/admin/views/html-admin-page-status-report.php:118
 msgid "Default timezone is %s - it should be UTC"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:111
+#: includes/admin/views/html-admin-page-status-report.php:120
 msgid "Default timezone is %s"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:119
+#: includes/admin/views/html-admin-page-status-report.php:128
 msgid "fsockopen/cURL"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:122
+#: includes/admin/views/html-admin-page-status-report.php:131
 msgid "Your server has fsockopen and cURL enabled."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:124
+#: includes/admin/views/html-admin-page-status-report.php:133
 msgid "Your server has fsockopen enabled, cURL is disabled."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:126
+#: includes/admin/views/html-admin-page-status-report.php:135
 msgid "Your server has cURL enabled, fsockopen is disabled."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:130
+#: includes/admin/views/html-admin-page-status-report.php:139
 msgid "Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:135
+#: includes/admin/views/html-admin-page-status-report.php:144
 msgid "SOAP Client"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:137
+#: includes/admin/views/html-admin-page-status-report.php:146
 msgid "Your server has the SOAP Client class enabled."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:140
+#: includes/admin/views/html-admin-page-status-report.php:149
 msgid "Your server does not have the <a href=\"%s\">SOAP Client</a> class enabled - some gateway plugins which use SOAP may not work as expected."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:145
+#: includes/admin/views/html-admin-page-status-report.php:154
 msgid "WP Remote Post"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:156
+#: includes/admin/views/html-admin-page-status-report.php:165
 msgid "wp_remote_post() was successful - PayPal IPN is working."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:159
+#: includes/admin/views/html-admin-page-status-report.php:168
 msgid "wp_remote_post() failed. PayPal IPN won't work with your server. Contact your hosting provider. Error:"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:162
+#: includes/admin/views/html-admin-page-status-report.php:171
 msgid "wp_remote_post() failed. PayPal IPN may not work with your server."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:185
+#: includes/admin/views/html-admin-page-status-report.php:194
 msgid "Plugins"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:191
+#: includes/admin/views/html-admin-page-status-report.php:200
 msgid "Installed Plugins"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:211
+#: includes/admin/views/html-admin-page-status-report.php:220
 msgid "Visit plugin homepage"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:235
-#: includes/admin/views/html-admin-page-status-report.php:417
+#: includes/admin/views/html-admin-page-status-report.php:244
+#: includes/admin/views/html-admin-page-status-report.php:426
 msgid "is available"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:238
+#: includes/admin/views/html-admin-page-status-report.php:247
 msgid "by"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:238
+#: includes/admin/views/html-admin-page-status-report.php:247
 msgid "version"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:260
+#: includes/admin/views/html-admin-page-status-report.php:269
 msgid "Force SSL"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:267
+#: includes/admin/views/html-admin-page-status-report.php:276
 msgid "WC Pages"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:274
+#: includes/admin/views/html-admin-page-status-report.php:283
 msgid "Shop Base"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:278
+#: includes/admin/views/html-admin-page-status-report.php:287
 msgid "Cart"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:286
+#: includes/admin/views/html-admin-page-status-report.php:295
 msgid "My Account"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:306
+#: includes/admin/views/html-admin-page-status-report.php:315
 msgid "Page not set"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:316
+#: includes/admin/views/html-admin-page-status-report.php:325
 msgid "Page does not exist"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:321
+#: includes/admin/views/html-admin-page-status-report.php:330
 msgid "Page does not contain the shortcode: %s"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:340
+#: includes/admin/views/html-admin-page-status-report.php:349
 msgid "WC Taxonomies"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:346
+#: includes/admin/views/html-admin-page-status-report.php:355
 msgid "Order Statuses"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:356
+#: includes/admin/views/html-admin-page-status-report.php:365
 msgid "Product Types"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:369
+#: includes/admin/views/html-admin-page-status-report.php:378
 msgid "Theme"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:406
+#: includes/admin/views/html-admin-page-status-report.php:415
 msgid "Theme Name"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:412
+#: includes/admin/views/html-admin-page-status-report.php:421
 msgid "Theme Version"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:421
+#: includes/admin/views/html-admin-page-status-report.php:430
 msgid "Author URL"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:430
+#: includes/admin/views/html-admin-page-status-report.php:439
 msgid "Templates"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:436
+#: includes/admin/views/html-admin-page-status-report.php:445
 msgid "Template Overrides"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:454
-msgid "No core overrides present in theme."
+#: includes/admin/views/html-admin-page-status-report.php:473
+msgid "No overrides present in theme."
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-tools.php:4

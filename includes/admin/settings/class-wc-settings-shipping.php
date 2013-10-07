@@ -191,6 +191,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 * @return void
 	 */
 	public function shipping_methods_setting() {
+		$default_shipping_method = esc_attr( get_option('woocommerce_default_shipping_method') );
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc"><?php _e( 'Shipping Methods', 'woocommerce' ) ?></th>
@@ -206,18 +207,17 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 						</tr>
 					</thead>
 					<tfoot>
-						<th width="1%" class="default">
-							<input type="radio" name="default_shipping_method" value="" <?php checked( $default_shipping_method, '' ); ?> />
-						</th>
-						<th><?php _e( 'No default', 'woocommerce' ); ?></th>
-						<th colspan="3"><span class="description"><?php _e( 'Drag and drop the above shipping methods to control their display order.', 'woocommerce' ); ?></span></th>
-					</foot>
+						<tr>
+							<th width="1%" class="default">
+								<input type="radio" name="default_shipping_method" value="" <?php checked( $default_shipping_method, '' ); ?> />
+							</th>
+							<th><?php _e( 'No default', 'woocommerce' ); ?></th>
+							<th colspan="3"><span class="description"><?php _e( 'Drag and drop the above shipping methods to control their display order.', 'woocommerce' ); ?></span></th>
+						</tr>
+					</tfoot>
 					<tbody>
 				    	<?php
 				    	foreach ( WC()->shipping->load_shipping_methods() as $key => $method ) {
-
-					    	$default_shipping_method = esc_attr( get_option('woocommerce_default_shipping_method') );
-
 					    	echo '<tr>
 					    		<td width="1%" class="default">
 					    			<input type="radio" name="default_shipping_method" value="' . $method->id . '" ' . checked( $default_shipping_method, $method->id, false ) . ' />
@@ -268,8 +268,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			$current_section_class = new $current_section();
 
 			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section_class->id );
-
-			WC()->shipping()->init();
 		}
 	}
 }

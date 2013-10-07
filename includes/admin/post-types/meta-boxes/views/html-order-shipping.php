@@ -36,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 		</select>
 	</p>
 	<p class="last">
-		<input type="number" step="any" min="0" class="shipping_cost" name="shipping_cost[<?php echo $item_id ? $item_id : 'new][]'; ?>]" placeholder="<?php _e( '0.00', 'woocommerce' ); ?>" value="<?php echo esc_attr( $shipping_cost ); ?>" class="first" />
+		<input type="text" class="shipping_cost wc_input_decimal" name="shipping_cost[<?php echo $item_id ? $item_id : 'new][]'; ?>]" placeholder="<?php _e( '0.00', 'woocommerce' ); ?>" value="<?php echo esc_attr( $shipping_cost ); ?>" />
 	</p>
 	<a href="#" class="delete_total_row">&times;</a>
 	<div class="clear"></div>

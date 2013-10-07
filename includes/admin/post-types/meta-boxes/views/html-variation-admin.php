@@ -70,11 +70,11 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 						<tr class="variable_pricing">
 							<td>
 								<label><?php echo __( 'Regular Price:', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')'; ?></label>
-								<input type="text" size="5" name="variable_regular_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_regular_price ) ) echo esc_attr( $_regular_price ); ?>" class="wc_input_price" placeholder="<?php _e( 'Variation price (required)', 'woocommerce' ); ?>" />
+								<input type="text" size="5" name="variable_regular_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_regular_price ) ) echo esc_attr( $_regular_price ); ?>" class="wc_input_decimal" placeholder="<?php _e( 'Variation price (required)', 'woocommerce' ); ?>" />
 							</td>
 							<td>
 								<label><?php echo __( 'Sale Price:', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')'; ?> <a href="#" class="sale_schedule"><?php _e( 'Schedule', 'woocommerce' ); ?></a><a href="#" class="cancel_sale_schedule" style="display:none"><?php _e( 'Cancel schedule', 'woocommerce' ); ?></a></label>
-								<input type="text" size="5" name="variable_sale_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_sale_price ) ) echo esc_attr( $_sale_price ); ?>" class="wc_input_price" />
+								<input type="text" size="5" name="variable_sale_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_sale_price ) ) echo esc_attr( $_sale_price ); ?>" class="wc_input_decimal" />
 							</td>
 						</tr>
 
@@ -94,7 +94,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 								<?php if ( wc_product_weight_enabled() ) : ?>
 									<td class="hide_if_variation_virtual">
 										<label><?php _e( 'Weight', 'woocommerce' ) . ' (' . esc_html( get_option( 'woocommerce_weight_unit' ) ) . '):'; ?> <a class="tips" data-tip="<?php _e( 'Enter a weight for this variation or leave blank to use the parent product weight.', 'woocommerce' ); ?>" href="#">[?]</a></label>
-										<input type="number" size="5" name="variable_weight[<?php echo $loop; ?>]" value="<?php if ( isset( $_weight ) ) echo esc_attr( $_weight ); ?>" placeholder="<?php echo esc_attr( $parent_data['weight'] ); ?>" step="any" min="0" />
+										<input type="text" size="5" name="variable_weight[<?php echo $loop; ?>]" value="<?php if ( isset( $_weight ) ) echo esc_attr( $_weight ); ?>" placeholder="<?php echo esc_attr( $parent_data['weight'] ); ?>" class="wc_input_decimal" />
 									</td>
 								<?php else : ?>
 									<td>&nbsp;</td>
@@ -102,9 +102,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 								<?php if ( wc_product_dimensions_enabled() ) : ?>
 									<td class="dimensions_field hide_if_variation_virtual">
 										<label for"product_length"><?php echo __( 'Dimensions (L&times;W&times;H)', 'woocommerce' ); ?></label>
-										<input id="product_length" class="input-text" size="6" type="number" step="any" min="0" name="variable_length[<?php echo $loop; ?>]" value="<?php if ( isset( $_length ) ) echo esc_attr( $_length ); ?>" placeholder="<?php echo esc_attr( $parent_data['length'] ); ?>" />
-										<input class="input-text" size="6" type="number" step="any" min="0" name="variable_width[<?php echo $loop; ?>]" value="<?php if ( isset( $_width ) ) echo esc_attr( $_width ); ?>" placeholder="<?php echo esc_attr( $parent_data['width'] ); ?>" />
-										<input class="input-text last" size="6" type="number" step="any" min="0" name="variable_height[<?php echo $loop; ?>]" value="<?php if ( isset( $_height ) ) echo esc_attr( $_height ); ?>" placeholder="<?php echo esc_attr( $parent_data['height'] ); ?>" />
+										<input id="product_length" class="input-text wc_input_decimal" size="6" type="text" name="variable_length[<?php echo $loop; ?>]" value="<?php if ( isset( $_length ) ) echo esc_attr( $_length ); ?>" placeholder="<?php echo esc_attr( $parent_data['length'] ); ?>" />
+										<input class="input-text wc_input_decimal" size="6" type="text" name="variable_width[<?php echo $loop; ?>]" value="<?php if ( isset( $_width ) ) echo esc_attr( $_width ); ?>" placeholder="<?php echo esc_attr( $parent_data['width'] ); ?>" />
+										<input class="input-text wc_input_decimal last" size="6" type="text" name="variable_height[<?php echo $loop; ?>]" value="<?php if ( isset( $_height ) ) echo esc_attr( $_height ); ?>" placeholder="<?php echo esc_attr( $parent_data['height'] ); ?>" />
 									</td>
 								<?php else : ?>
 									<td>&nbsp;</td>

@@ -114,37 +114,35 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 	<?php do_action( 'woocommerce_admin_order_item_values', $_product, $item, absint( $item_id ) ); ?>
 
-	<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
+	<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) :
+		$tax_classes         = array_filter( array_map( 'trim', explode( "\n", get_option('woocommerce_tax_classes' ) ) ) );
+		$classes_options     = array();
+		$classes_options[''] = __( 'Standard', 'woocommerce' );
 
-	<td class="tax_class" width="1%">
-		<div class="view">
-			<?php
-				$item_value = isset( $item['tax_class'] ) ? sanitize_title( $item['tax_class'] ) : '';
-				echo $item_value ? $item_value : __( 'Standard', 'woocommerce' );
-			?>
-		</div>
-		<div class="edit" style="display:none">
-			<select class="tax_class" name="order_item_tax_class[<?php echo absint( $item_id ); ?>]" title="<?php _e( 'Tax class', 'woocommerce' ); ?>">
+		if ( $tax_classes )
+			foreach ( $tax_classes as $class )
+				$classes_options[ sanitize_title( $class ) ] = $class;
+		?>
+		<td class="tax_class" width="1%">
+			<div class="view">
 				<?php
-				$item_value = isset( $item['tax_class'] ) ? sanitize_title( $item['tax_class'] ) : '';
-
-				$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option('woocommerce_tax_classes' ) ) ) );
-
-				$classes_options = array();
-				$classes_options[''] = __( 'Standard', 'woocommerce' );
-
-				if ( $tax_classes )
-					foreach ( $tax_classes as $class )
-						$classes_options[ sanitize_title( $class ) ] = $class;
-
-				foreach ( $classes_options as $value => $name )
-					echo '<option value="' . esc_attr( $value ) . '" ' . selected( $value, $item_value, false ) . '>' . esc_html( $name ) . '</option>';
+					$item_value = isset( $item['tax_class'] ) ? sanitize_title( $item['tax_class'] ) : '';
+					echo $classes_options[ $item_value ];
 				?>
-			</select>
-		</div>
-	</td>
+			</div>
+			<div class="edit" style="display:none">
+				<select class="tax_class" name="order_item_tax_class[<?php echo absint( $item_id ); ?>]" title="<?php _e( 'Tax class', 'woocommerce' ); ?>">
+					<?php
+					$item_value  = isset( $item['tax_class'] ) ? sanitize_title( $item['tax_class'] ) : '';
 
-	<?php endif; ?>
+					foreach ( $classes_options as $value => $name )
+						echo '<option value="' . esc_attr( $value ) . '" ' . selected( $value, $item_value, false ) . '>' . esc_html( $name ) . '</option>';
+					?>
+				</select>
+			</div>
+		</td>
+		<?php
+	endif; ?>
 
 	<td class="quantity" width="1%">
 		<div class="view">
@@ -166,9 +164,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			?>
 		</div>
 		<div class="edit" style="display:none">
-			<span class="subtotal"><label><?php _e( 'Subtotal', 'woocommerce' ); ?>: <a class="tips" data-tip="<?php _e( 'Before pre-tax discounts.', 'woocommerce' ); ?>" href="#">[?]</a> <input type="number" step="any" min="0" name="line_subtotal[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_subtotal'] ) ) echo esc_attr( $item['line_subtotal'] ); ?>" class="line_subtotal" /></label></span>
+			<span class="subtotal"><label><?php _e( 'Subtotal', 'woocommerce' ); ?>: <a class="tips" data-tip="<?php _e( 'Before pre-tax discounts.', 'woocommerce' ); ?>" href="#">[?]</a> <input type="text" name="line_subtotal[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_subtotal'] ) ) echo esc_attr( $item['line_subtotal'] ); ?>" class="line_subtotal wc_input_decimal" /></label></span>
 
-			<label><?php _e( 'Total', 'woocommerce' ); ?>: <a class="tips" data-tip="<?php _e( 'After pre-tax discounts.', 'woocommerce' ); ?>" href="#">[?]</a> <input type="number" step="any" min="0" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_total'] ) ) echo esc_attr( $item['line_total'] ); ?>" class="line_total" /></label>
+			<label><?php _e( 'Total', 'woocommerce' ); ?>: <a class="tips" data-tip="<?php _e( 'After pre-tax discounts.', 'woocommerce' ); ?>" href="#">[?]</a> <input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_total'] ) ) echo esc_attr( $item['line_total'] ); ?>" class="line_total wc_input_decimal" /></label>
 		</div>
 	</td>
 
@@ -185,9 +183,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			?>
 		</div>
 		<div class="edit" style="display:none">
-			<span class="subtotal"><input type="number" step="any" min="0" name="line_subtotal_tax[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_subtotal_tax'] ) ) echo esc_attr( $item['line_subtotal_tax'] ); ?>" class="line_subtotal_tax" /></span>
+			<span class="subtotal"><input type="text" name="line_subtotal_tax[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_subtotal_tax'] ) ) echo esc_attr( $item['line_subtotal_tax'] ); ?>" class="line_subtotal_tax wc_input_decimal" /></span>
 
-			<input type="number" step="any" min="0" name="line_tax[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_tax'] ) ) echo esc_attr( $item['line_tax'] ); ?>" class="line_tax" />
+			<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_tax'] ) ) echo esc_attr( $item['line_tax'] ); ?>" class="line_tax wc_input_decimal" />
 		</div>
 	</td>
 

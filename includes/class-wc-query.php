@@ -547,9 +547,9 @@ class WC_Query {
 
 	/**
 	 * Appends meta queries to an array.
-	 *
 	 * @access public
-	 * @return void
+	 * @param array $meta_query
+	 * @return array
 	 */
 	public function get_meta_query( $meta_query = array() ) {
 		if ( ! is_array( $meta_query ) )
@@ -757,7 +757,7 @@ class WC_Query {
 	 * @param array $filtered_posts
 	 * @return array
 	 */
-	public function price_filter($filtered_posts) {
+	public function price_filter( $filtered_posts ) {
 	    global $wpdb;
 
 	    if ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) {
@@ -766,11 +766,11 @@ class WC_Query {
 	        $min 	= floatval( $_GET['min_price'] );
 	        $max 	= floatval( $_GET['max_price'] );
 
-	        $matched_products_query = $wpdb->get_results( $wpdb->prepare("
+	        $matched_products_query = apply_filters( 'woocommerce_price_filter_results', $wpdb->get_results( $wpdb->prepare("
 	        	SELECT DISTINCT ID, post_parent, post_type FROM $wpdb->posts
 				INNER JOIN $wpdb->postmeta ON ID = post_id
 				WHERE post_type IN ( 'product', 'product_variation' ) AND post_status = 'publish' AND meta_key = %s AND meta_value BETWEEN %d AND %d
-			", '_price', $min, $max ), OBJECT_K );
+			", '_price', $min, $max ), OBJECT_K ), $min, $max );
 
 	        if ( $matched_products_query ) {
 	            foreach ( $matched_products_query as $product ) {

@@ -22,12 +22,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @return void
  */
 function woocommerce_sanitize_taxonomy_name( $taxonomy ) {
-	$taxonomy = strtolower( stripslashes( strip_tags( $taxonomy ) ) );
-	$taxonomy = preg_replace( '/&.+?;/', '', $taxonomy ); // Kill entities
-	$taxonomy = str_replace( array( '.', '\'', '"' ), '', $taxonomy ); // Kill quotes and full stops.
-	$taxonomy = str_replace( array( ' ', '_' ), '-', $taxonomy ); // Replace spaces and underscores.
+	$filtered = strtolower( remove_accents( stripslashes( strip_tags( $taxonomy ) ) ) );
+	$filtered = preg_replace( '/&.+?;/', '', $filtered ); // Kill entities
+	$filtered = str_replace( array( '.', '\'', '"' ), '', $filtered ); // Kill quotes and full stops.
+	$filtered = str_replace( array( ' ', '_' ), '-', $filtered ); // Replace spaces and underscores.
 
-	return $taxonomy;
+	return apply_filters( 'sanitize_taxonomy_name', $filtered, $taxonomy );
 }
 
 /**
@@ -156,19 +156,37 @@ function woocommerce_trim_zeros( $price ) {
 }
 
 /**
- * Formal decimal numbers - format to 4 dp and remove trailing zeros.
+ * Format decimal numbers - format to a defined number of dp and remove trailing zeros.
  *
- * @access public
- * @param mixed $number
+ * Remove's user locale settings, converting to a string which uses '.' for decimals, with no thousand separators.
+ *
+ * @param  float|string $number
+ * @param  mixed $dp number of decimal points to use, blank to use woocommerce_price_num_decimals, or false to avoid all rounding.
+ * @param  boolean $trim_zeros from end of string
  * @return string
  */
-function woocommerce_format_decimal( $number, $dp = '' ) {
-	if ( $dp == '' )
-		$dp = intval( get_option( 'woocommerce_price_num_decimals' ) );
+function woocommerce_format_decimal( $number, $dp = '', $trim_zeros = false ) {
+	$number = floatval( $number );
 
-	$number = number_format( (float) $number, (int) $dp, '.', '' );
+	// DP is false - don't use number format, just remove locale settings from the number
+	if ( $dp === false ) {
+		$locale  = localeconv();
+		$decimal = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
 
-	if ( strstr( $number, '.' ) )
+		// Only allow numbers and the decimal point
+		if ( strstr( $number, $decimal ) )
+			$number = preg_replace( "/[^0-9\\" . $decimal . "]/", "", strval( $number ) );
+		else
+			$number = preg_replace( "/[^0-9.]/", "", strval( $number ) );
+
+		// Replace decimal point with .
+		$number = str_replace( $decimal, '.', $number );
+	} else {
+		$dp     = ( $dp == "" ) ? intval( get_option( 'woocommerce_price_num_decimals' ) ) : intval( $dp );
+		$number = number_format( $number, $dp, '.', '' );
+	}
+
+	if ( $trim_zeros && strstr( $number, '.' ) )
 		$number = rtrim( rtrim( $number, '0' ), '.' );
 
 	return $number;
@@ -179,10 +197,10 @@ function woocommerce_format_decimal( $number, $dp = '' ) {
  *
  * @access public
  * @param mixed $number
- * @return float
+ * @return string
  */
 function woocommerce_format_total( $number ) {
-	return number_format( (float) $number, (int) get_option( 'woocommerce_price_num_decimals' ), '.', '' );
+	return woocommerce_format_decimal( $number, '', false );
 }
 
 /**
