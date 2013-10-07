@@ -53,6 +53,9 @@ global $woocommerce; ?>
 
 		<h2><?php _e( 'Register', 'woocommerce' ); ?></h2>
 
+		<?php do_action( 'woocommerce_registration_message' ); ?>
+		<?php do_action( 'woocommerce_registration_enqueue_scripts' ); ?>
+
 		<form method="post" class="register">
 
 			<?php if ( get_option( 'woocommerce_registration_generate_username' ) == 'no' ) : ?>

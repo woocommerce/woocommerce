@@ -746,6 +746,11 @@ class WC_Form_Handler {
 
 			WC()->verify_nonce( 'register' );
 
+			$result = apply_filters( 'woocommerce_process_registration_before_error', '', $_POST['username'], $_POST['password'], $_POST['email'] );
+
+			if ( ! empty( $result ) )
+				wc_add_error( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . $result );
+
 			$username   = ! empty( $_POST['username'] ) ? woocommerce_clean( $_POST['username'] ) : '';
 			$email      = ! empty( $_POST['email'] ) ? woocommerce_clean( $_POST['email'] ) : '';
 			$password   = ! empty( $_POST['password'] ) ? woocommerce_clean( $_POST['password'] ) : '';
