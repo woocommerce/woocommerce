@@ -616,6 +616,8 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	public function delete_order_items( $postid ) {
 		global $wpdb;
 
+		do_action( 'woocommerce_before_delete_order_items', $postid );
+
 		if ( get_post_type( $postid ) == 'shop_order' )
 		{
 			$wpdb->query( "
@@ -625,6 +627,8 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 				WHERE {$wpdb->prefix}woocommerce_order_items.order_id = '{$postid}';
 				" );
 		}
+
+		do_action( 'woocommerce_after_delete_order_items', $postid );
 	}
 
 	/**

@@ -631,6 +631,11 @@ class WC_Form_Handler {
 			try {
 				$creds = array();
 
+				$result = apply_filters( 'woocommerce_process_login_before_error', '', $_POST['username'], $_POST['password'] );
+
+				if ( ! empty( $result ) )
+					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . $result );
+
 				if ( empty( $_POST['username'] ) )
 					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'Username is required.', 'woocommerce' ) );
 				if ( empty( $_POST['password'] ) )
