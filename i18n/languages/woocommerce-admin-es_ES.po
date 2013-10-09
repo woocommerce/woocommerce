@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce v2.1\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2013-10-03 01:54:37+00:00\n"
-"PO-Revision-Date: 2013-10-02 23:07-0300\n"
+"POT-Creation-Date: 2013-10-09 01:11:38+00:00\n"
+"PO-Revision-Date: 2013-10-08 22:14-0300\n"
 "Last-Translator: Renato Covarrubias <rnt@rnt.cl>\n"
 "Language-Team: Renato Covarrubias <rnt@rnt.cl>\n"
 "Language: es\n"
@@ -63,12 +63,12 @@ msgstr "¿Quitar este atributo?"
 
 # @ woocommerce
 #: includes/admin/class-wc-admin-assets.php:134
-#: includes/admin/class-wc-admin-attributes.php:240
-#: includes/admin/class-wc-admin-attributes.php:276
-#: includes/admin/class-wc-admin-attributes.php:309
-#: includes/admin/class-wc-admin-attributes.php:332
-#: includes/admin/class-wc-admin-attributes.php:376
-#: includes/admin/class-wc-admin-attributes.php:401
+#: includes/admin/class-wc-admin-attributes.php:239
+#: includes/admin/class-wc-admin-attributes.php:275
+#: includes/admin/class-wc-admin-attributes.php:308
+#: includes/admin/class-wc-admin-attributes.php:331
+#: includes/admin/class-wc-admin-attributes.php:375
+#: includes/admin/class-wc-admin-attributes.php:400
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:194
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:185
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:438
@@ -247,76 +247,76 @@ msgstr "No se añadieron variaciones"
 msgid "Are you sure you want to remove this variation?"
 msgstr "¿Seguro que desea eliminar esta variación?"
 
-#: includes/admin/class-wc-admin-attributes.php:81
+#: includes/admin/class-wc-admin-attributes.php:82
 msgid "Please, provide an attribute name, slug and type."
 msgstr "Por favor, provea un nombre de atributo, slug y tipo."
 
-#: includes/admin/class-wc-admin-attributes.php:83
+#: includes/admin/class-wc-admin-attributes.php:84
 msgid "Slug “%s” is too long (28 characters max). Shorten it, please."
 msgstr ""
 "Slug \"%s\" es demasiado largo (28 caracteres max.). Acortelo por favor."
 
-#: includes/admin/class-wc-admin-attributes.php:85
+#: includes/admin/class-wc-admin-attributes.php:86
 msgid ""
 "Slug “%s” is not allowed because it is a reserved term. Change it, please."
 msgstr ""
 "Slug \"%s\" no esta permitido porque es un término reservado. Cambielo por "
 "favor."
 
-#: includes/admin/class-wc-admin-attributes.php:90
-#: includes/admin/class-wc-admin-attributes.php:95
+#: includes/admin/class-wc-admin-attributes.php:91
+#: includes/admin/class-wc-admin-attributes.php:96
 msgid "Slug “%s” is already in use. Change it, please."
 msgstr "Slug \"%s\" está en uso. Cambielo por favor."
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:234
+#: includes/admin/class-wc-admin-attributes.php:233
 msgid "Edit Attribute"
 msgstr "Editar atributo"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:244
-#: includes/admin/class-wc-admin-attributes.php:378
+#: includes/admin/class-wc-admin-attributes.php:243
+#: includes/admin/class-wc-admin-attributes.php:377
 msgid "Name for the attribute (shown on the front-end)."
 msgstr "Nombre para el atributo (se mostrará en la parte pública)."
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:249
-#: includes/admin/class-wc-admin-attributes.php:310
-#: includes/admin/class-wc-admin-attributes.php:382
+#: includes/admin/class-wc-admin-attributes.php:248
+#: includes/admin/class-wc-admin-attributes.php:309
+#: includes/admin/class-wc-admin-attributes.php:381
 msgid "Slug"
 msgstr "Slug"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:253
-#: includes/admin/class-wc-admin-attributes.php:384
+#: includes/admin/class-wc-admin-attributes.php:252
+#: includes/admin/class-wc-admin-attributes.php:383
 msgid ""
 "Unique slug/reference for the attribute; must be shorter than 28 characters."
 msgstr ""
 "Slug/referencia única para el atributo; debe contener menos de 28 caracteres."
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:258
-#: includes/admin/class-wc-admin-attributes.php:311
-#: includes/admin/class-wc-admin-attributes.php:388
+#: includes/admin/class-wc-admin-attributes.php:257
+#: includes/admin/class-wc-admin-attributes.php:310
+#: includes/admin/class-wc-admin-attributes.php:387
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:207
 msgid "Type"
 msgstr "Tipo"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:262
-#: includes/admin/class-wc-admin-attributes.php:390
+#: includes/admin/class-wc-admin-attributes.php:261
+#: includes/admin/class-wc-admin-attributes.php:389
 msgid "Select"
 msgstr "Seleccionar"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:263
-#: includes/admin/class-wc-admin-attributes.php:391
+#: includes/admin/class-wc-admin-attributes.php:262
+#: includes/admin/class-wc-admin-attributes.php:390
 msgid "Text"
 msgstr "Texto"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:266
-#: includes/admin/class-wc-admin-attributes.php:394
+#: includes/admin/class-wc-admin-attributes.php:265
+#: includes/admin/class-wc-admin-attributes.php:393
 msgid ""
 "Determines how you select attributes for products. <strong>Text</strong> "
 "allows manual entry via the product page, whereas <strong>select</strong> "
@@ -330,27 +330,27 @@ msgstr ""
 "variaciones utilice <strong>seleccionar</strong>."
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:271
-#: includes/admin/class-wc-admin-attributes.php:398
+#: includes/admin/class-wc-admin-attributes.php:270
+#: includes/admin/class-wc-admin-attributes.php:397
 msgid "Default sort order"
 msgstr "Orden predeterminado"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:275
-#: includes/admin/class-wc-admin-attributes.php:338
-#: includes/admin/class-wc-admin-attributes.php:400
+#: includes/admin/class-wc-admin-attributes.php:274
+#: includes/admin/class-wc-admin-attributes.php:337
+#: includes/admin/class-wc-admin-attributes.php:399
 msgid "Custom ordering"
 msgstr "Orden personalizado"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:277
-#: includes/admin/class-wc-admin-attributes.php:335
-#: includes/admin/class-wc-admin-attributes.php:402
+#: includes/admin/class-wc-admin-attributes.php:276
+#: includes/admin/class-wc-admin-attributes.php:334
+#: includes/admin/class-wc-admin-attributes.php:401
 msgid "Term ID"
 msgstr "ID página términos"
 
-#: includes/admin/class-wc-admin-attributes.php:279
-#: includes/admin/class-wc-admin-attributes.php:404
+#: includes/admin/class-wc-admin-attributes.php:278
+#: includes/admin/class-wc-admin-attributes.php:403
 msgid ""
 "Determines the sort order on the frontend for this attribute. If using "
 "custom ordering, you can drag and drop the terms in this attribute"
@@ -359,30 +359,30 @@ msgstr ""
 "personalizado puede arrastrar y soltar los términos en este atributo."
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:284
+#: includes/admin/class-wc-admin-attributes.php:283
 msgid "Update"
 msgstr "Actualizar"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:301
+#: includes/admin/class-wc-admin-attributes.php:300
 #: includes/admin/class-wc-admin-menus.php:49
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:104
 msgid "Attributes"
 msgstr "Atributos"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:312
+#: includes/admin/class-wc-admin-attributes.php:311
 msgid "Order by"
 msgstr "Ordenar por:"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:313
+#: includes/admin/class-wc-admin-attributes.php:312
 msgid "Terms"
 msgstr "Términos"
 
 # @ woocommerce
 # @ default
-#: includes/admin/class-wc-admin-attributes.php:325
+#: includes/admin/class-wc-admin-attributes.php:324
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:118
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:251
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:82
@@ -392,7 +392,7 @@ msgid "Edit"
 msgstr "Editar"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:325
+#: includes/admin/class-wc-admin-attributes.php:324
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:44
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:104
 #: includes/admin/post-types/meta-boxes/views/html-product-download.php:6
@@ -401,22 +401,22 @@ msgid "Delete"
 msgstr "Eliminar"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:358
+#: includes/admin/class-wc-admin-attributes.php:357
 msgid "Configure&nbsp;terms"
 msgstr "Configurar términos"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:362
+#: includes/admin/class-wc-admin-attributes.php:361
 msgid "No attributes currently exist."
 msgstr "No existen atributos actualmente."
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:372
+#: includes/admin/class-wc-admin-attributes.php:371
 msgid "Add New Attribute"
 msgstr "Añadir nuevo atributo"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:373
+#: includes/admin/class-wc-admin-attributes.php:372
 msgid ""
 "Attributes let you define extra product data, such as size or colour. You "
 "can use these attributes in the shop sidebar using the \"layered nav\" "
@@ -428,12 +428,12 @@ msgstr ""
 "tenga en cuenta que luego no podrá renombrar un atributo."
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:407
+#: includes/admin/class-wc-admin-attributes.php:406
 msgid "Add Attribute"
 msgstr "Añadir atributo"
 
 # @ woocommerce
-#: includes/admin/class-wc-admin-attributes.php:418
+#: includes/admin/class-wc-admin-attributes.php:417
 msgid "Are you sure you want to delete this attribute?"
 msgstr "¿Seguro que quiere borrar este atributo?"
 
@@ -2147,7 +2147,7 @@ msgstr "Notas de pedido"
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:94
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:43
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:62
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:129
 msgid "Total"
 msgstr "Total"
@@ -3198,8 +3198,7 @@ msgstr "Ninguno"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:729
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:27
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:39
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:123
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:134
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:120
 #: includes/admin/settings/class-wc-settings-tax.php:122
 #: includes/admin/settings/class-wc-settings-tax.php:241
 #: includes/admin/views/html-bulk-edit-product.php:83
@@ -3652,7 +3651,7 @@ msgstr "Nombre de cargo"
 
 # @ woocommerce
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:31
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:127
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:134
 msgid "Tax class"
 msgstr "Clase de impuesto"
 
@@ -3677,15 +3676,15 @@ msgid "Add&nbsp;meta"
 msgstr "Añadir&nbsp;meta"
 
 # @ woocommerce
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:167
 msgid "Subtotal"
 msgstr "Subtotal"
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:167
 msgid "Before pre-tax discounts."
 msgstr "Antes de descuentos antes de impuestos"
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
 msgid "After pre-tax discounts."
 msgstr "Después de descuentos antes de impuestos"
 
