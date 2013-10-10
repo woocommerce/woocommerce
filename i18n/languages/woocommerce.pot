@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.1-bleeding Front-end\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2013-10-03 01:54:35+00:00\n"
+"POT-Creation-Date: 2013-10-09 01:11:36+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -2200,7 +2200,7 @@ msgstr ""
 
 #: includes/abstracts/abstract-wc-product.php:897
 #: includes/abstracts/abstract-wc-product.php:903
-#: includes/class-wc-cart.php:1864 includes/class-wc-order.php:757
+#: includes/class-wc-cart.php:1866 includes/class-wc-order.php:777
 #: includes/class-wc-product-variable.php:247
 #: includes/class-wc-product-variable.php:253
 #: includes/class-wc-product-variation.php:294
@@ -2248,29 +2248,29 @@ msgstr ""
 msgid "Sorry, \"%s\" is not in stock. Please edit your cart and try again. We apologise for any inconvenience caused."
 msgstr ""
 
-#: includes/class-wc-cart.php:883
+#: includes/class-wc-cart.php:885
 msgid "Sorry, &quot;%s&quot; cannot be purchased."
 msgstr ""
 
-#: includes/class-wc-cart.php:890
+#: includes/class-wc-cart.php:892
 msgid "You cannot add &quot;%s&quot; to the cart because the product is out of stock."
 msgstr ""
 
-#: includes/class-wc-cart.php:895
+#: includes/class-wc-cart.php:897
 msgid "You cannot add that amount of &quot;%s&quot; to the cart because there is not enough stock (%s remaining)."
 msgstr ""
 
-#: includes/class-wc-cart.php:907 includes/class-wc-cart.php:921
-#: includes/class-wc-cart.php:929 includes/class-wc-frontend-scripts.php:136
+#: includes/class-wc-cart.php:909 includes/class-wc-cart.php:923
+#: includes/class-wc-cart.php:931 includes/class-wc-frontend-scripts.php:136
 #: includes/wc-cart-functions.php:99 templates/cart/mini-cart.php:64
 msgid "View Cart &rarr;"
 msgstr ""
 
-#: includes/class-wc-cart.php:907
-msgid "You already have this item in your cart."
+#: includes/class-wc-cart.php:909
+msgid "You cannot add another &quot;%s&quot; to your cart."
 msgstr ""
 
-#: includes/class-wc-cart.php:921 includes/class-wc-cart.php:929
+#: includes/class-wc-cart.php:923 includes/class-wc-cart.php:931
 msgid "<a href=\"%s\" class=\"button\">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart."
 msgstr ""
 
@@ -2326,40 +2326,40 @@ msgstr ""
 msgid "Sorry, your session has expired. <a href=\"%s\">Return to homepage &rarr;</a>"
 msgstr ""
 
-#: includes/class-wc-checkout.php:482 includes/class-wc-form-handler.php:81
+#: includes/class-wc-checkout.php:485 includes/class-wc-form-handler.php:81
 msgid "is a required field."
 msgstr ""
 
-#: includes/class-wc-checkout.php:494 includes/class-wc-form-handler.php:91
+#: includes/class-wc-checkout.php:497 includes/class-wc-form-handler.php:91
 #: includes/shortcodes/class-wc-shortcode-cart.php:52
 msgid "Please enter a valid postcode/ZIP."
 msgstr ""
 
-#: includes/class-wc-checkout.php:503 includes/class-wc-form-handler.php:100
+#: includes/class-wc-checkout.php:506 includes/class-wc-form-handler.php:100
 msgid "is not a valid phone number."
 msgstr ""
 
-#: includes/class-wc-checkout.php:509 includes/class-wc-form-handler.php:106
+#: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:106
 msgid "is not a valid email address."
 msgstr ""
 
-#: includes/class-wc-checkout.php:524
+#: includes/class-wc-checkout.php:527
 msgid "is not valid. Please enter one of the following:"
 msgstr ""
 
-#: includes/class-wc-checkout.php:569
+#: includes/class-wc-checkout.php:572
 msgid "You must accept our Terms &amp; Conditions."
 msgstr ""
 
-#: includes/class-wc-checkout.php:574
+#: includes/class-wc-checkout.php:577
 msgid "Unfortunately <strong>we do not ship to %s</strong>. Please enter an alternative shipping address."
 msgstr ""
 
-#: includes/class-wc-checkout.php:582
+#: includes/class-wc-checkout.php:585
 msgid "Invalid shipping method."
 msgstr ""
 
-#: includes/class-wc-checkout.php:595
+#: includes/class-wc-checkout.php:598
 msgid "Invalid payment method."
 msgstr ""
 
@@ -3751,11 +3751,11 @@ msgstr ""
 msgid "required"
 msgstr ""
 
-#: includes/class-wc-frontend-scripts.php:142
+#: includes/class-wc-frontend-scripts.php:143
 msgid "Sorry, no products matched your selection. Please choose a different combination."
 msgstr ""
 
-#: includes/class-wc-frontend-scripts.php:147
+#: includes/class-wc-frontend-scripts.php:148
 msgid "Select an option&hellip;"
 msgstr ""
 
@@ -3800,48 +3800,48 @@ msgctxt "hash before order number"
 msgid "#"
 msgstr ""
 
-#: includes/class-wc-order.php:752
+#: includes/class-wc-order.php:772
 msgid "&nbsp;<small>%svia %s</small>"
 msgstr ""
 
-#: includes/class-wc-order.php:815
+#: includes/class-wc-order.php:835
 msgid "Cart Subtotal:"
 msgstr ""
 
-#: includes/class-wc-order.php:821
+#: includes/class-wc-order.php:841
 msgid "Cart Discount:"
 msgstr ""
 
-#: includes/class-wc-order.php:827
+#: includes/class-wc-order.php:847
 msgid "Shipping:"
 msgstr ""
 
-#: includes/class-wc-order.php:872
+#: includes/class-wc-order.php:892
 msgid "Order Discount:"
 msgstr ""
 
-#: includes/class-wc-order.php:877
+#: includes/class-wc-order.php:897
 msgid "Order Total:"
 msgstr ""
 
-#: includes/class-wc-order.php:895 includes/wc-template-functions.php:1136
+#: includes/class-wc-order.php:915 includes/wc-template-functions.php:1136
 msgid "(Includes %s)"
 msgstr ""
 
-#: includes/class-wc-order.php:1132 includes/class-wc-order.php:1133
+#: includes/class-wc-order.php:1152 includes/class-wc-order.php:1153
 msgid "WooCommerce"
 msgstr ""
 
-#: includes/class-wc-order.php:1186
+#: includes/class-wc-order.php:1206
 msgid "Order status changed from %s to %s."
 msgstr ""
 
-#: includes/class-wc-order.php:1435 woocommerce-ajax.php:1044
+#: includes/class-wc-order.php:1455 woocommerce-ajax.php:1044
 #: woocommerce-ajax.php:1045
 msgid "Item #%s stock reduced from %s to %s."
 msgstr ""
 
-#: includes/class-wc-order.php:1447
+#: includes/class-wc-order.php:1467
 msgid "Order item stock reduced successfully."
 msgstr ""
 
