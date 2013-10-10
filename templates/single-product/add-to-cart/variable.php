@@ -80,6 +80,7 @@ global $woocommerce, $product, $post;
 		<?php do_action('woocommerce_before_add_to_cart_button'); ?>
 
 		<div class="single_variation_wrap" style="display:none;">
+			<?php do_action('woocommerce_before_single_variation_price'); ?>
 			<div class="single_variation"></div>
 			<div class="variations_button">
 				<input type="hidden" name="variation_id" value="" />
