@@ -386,6 +386,11 @@
 				        $variation_form.find('.variations_button').hide();
 			        }
 
+			        if ( ! variation.variation_is_visible ) {
+			        	$variation_form.find('.variations_button').hide();
+			        	$variation_form.find('.single_variation').html( '<p>' + wc_add_to_cart_variation_params.i18n_unavailable_text + '</p>' );
+			        }
+
 			        if ( variation.min_qty )
 			        	$single_variation_wrap.find('input[name=quantity]').attr( 'min', variation.min_qty ).val( variation.min_qty );
 			        else
