@@ -27,7 +27,7 @@ class WC_Checkout {
 	/** @var object The shipping method being used. */
 	private $shipping_method;
 
-	/** @var array The payment gateway being used. */
+	/** @var WC_Payment_Gateway The payment gateway being used. */
 	private $payment_method;
 
 	/** @var int ID of customer. */
@@ -159,9 +159,9 @@ class WC_Checkout {
 
 	/**
 	 * create_order function.
-	 *
 	 * @access public
-	 * @return void
+	 * @throws Exception
+	 * @return int
 	 */
 	public function create_order() {
 		global $woocommerce, $wpdb;
