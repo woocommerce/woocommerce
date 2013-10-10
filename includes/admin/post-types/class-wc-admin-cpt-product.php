@@ -557,7 +557,8 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 	/**
 	 * Search by SKU or ID for products.
-	 * @param  object $wp
+	 * @param string $where
+	 * @return string
 	 */
 	public function product_search( $where ) {
 	    global $pagenow, $wpdb, $wp;
@@ -571,13 +572,12 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		foreach ( $terms as $term ) {
 			if ( is_numeric( $term ) ) {
 				$search_ids[] = $term;
-			} else {
-				// Attempt to get a SKU
-				$sku_to_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='_sku' AND meta_value LIKE '%%%s%%' LIMIT 1;", woocommerce_clean( $term ) ) );
-
-				if ( $sku_to_id )
-					$search_ids[] = $sku_to_id;
 			}
+			// Attempt to get a SKU
+			$sku_to_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='_sku' AND meta_value LIKE '%%%s%%' LIMIT 1;", woocommerce_clean( $term ) ) );
+
+			if ( $sku_to_id )
+				$search_ids[] = $sku_to_id;
 		}
 
 		$search_ids = array_filter( array_map( 'absint', $search_ids ) );
