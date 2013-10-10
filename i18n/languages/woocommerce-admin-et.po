@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce 2.1-X Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-10-03 01:54:37+00:00\n"
-"PO-Revision-Date: 2013-10-10 15:46+0200\n"
+"PO-Revision-Date: 2013-10-11 01:47+0200\n"
 "Last-Translator: Illimar Tambek <illimar.tambek@gmail.com>\n"
 "Language-Team: Divid <info@divid.ee>\n"
 "Language: et\n"
@@ -35,9 +35,9 @@ msgid ""
 "reduced this item's stock, or this order was submitted by a customer, you "
 "will need to manually restore the item's stock."
 msgstr ""
-"Oled sa kindel, et soovid valitud tooted eemaldada? Kui sa oled eelnevalt "
-"selle toote laoseisu vähendanud või kui see tellimus esitati kliendi poolt, "
-"pead sa laoseisu taastama käsitsi."
+"Oled sa kindel, et soovid valitud read eemaldada? Kui sa oled eelnevalt "
+"sellel real oleva toote laoseisu vähendanud või kui see tellimus esitati "
+"kliendi poolt, pead sa laoseisu taastama käsitsi."
 
 #: includes/admin/class-wc-admin-assets.php:131
 msgid "Please select some items."
@@ -551,7 +551,7 @@ msgstr "Projekt Githubis"
 
 #: includes/admin/class-wc-admin-help.php:77
 msgid "Official Extensions"
-msgstr "Ametlikud lisad"
+msgstr "Ametlikud laiendused"
 
 #: includes/admin/class-wc-admin-help.php:78
 msgid "Official Themes"
@@ -920,7 +920,7 @@ msgstr "Ladu"
 
 #: includes/admin/class-wc-admin-reports.php:95
 msgid "Low in stock"
-msgstr "Vähese laoseisuga"
+msgstr "Vähe laos"
 
 #: includes/admin/class-wc-admin-reports.php:101
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:367
@@ -929,11 +929,11 @@ msgstr "Vähese laoseisuga"
 #: includes/admin/views/html-bulk-edit-product.php:195
 #: includes/admin/views/html-quick-edit-product.php:138
 msgid "Out of stock"
-msgstr "Laost otsasa"
+msgstr "Laost otsas"
 
 #: includes/admin/class-wc-admin-reports.php:107
 msgid "Most Stocked"
-msgstr "Kõige rohkem laos"
+msgstr "Enim laos"
 
 #: includes/admin/class-wc-admin-reports.php:118
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:75
@@ -962,7 +962,7 @@ msgstr "Kui lahkud sellelt lehelt, lähevad tehtud muudatused kaduma."
 
 #: includes/admin/class-wc-admin-settings.php:466
 msgid "Hard Crop?"
-msgstr "Lõika julmalt?"
+msgstr "Lõika täpselt mõõtu?"
 
 #: includes/admin/class-wc-admin-settings.php:491
 msgid "Select a page&hellip;"
@@ -1624,7 +1624,7 @@ msgstr "Hind"
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:204
 #: includes/admin/reports/class-wc-report-sales-by-category.php:138
 msgid "Categories"
-msgstr "Rubriigid"
+msgstr "Kategooriad"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:205
 msgid "Tags"
@@ -1768,7 +1768,7 @@ msgstr "Laos"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:449
 msgid "Sort Products"
-msgstr "Jäjresta tooteid"
+msgstr "Järjesta tooteid"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:469
 msgid "Show all product types"
@@ -1861,7 +1861,7 @@ msgstr "Ostetud"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:89
 msgid "Ship to"
-msgstr "Saada"
+msgstr "Tarne"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:91
 msgid "Customer Message"
@@ -1870,7 +1870,7 @@ msgstr "Teade kliendile"
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:92
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:97
 msgid "Order Notes"
-msgstr "Tellimuse märkused"
+msgstr "Märkused tellimuse kohta"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:94
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:43
@@ -1956,7 +1956,7 @@ msgstr "Näita kõiki kliente"
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:645
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:646
 msgid "Mark processing"
-msgstr "Märgi töötlusel olevaks"
+msgstr "Pane töötlusse"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:648
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:649
@@ -2043,7 +2043,7 @@ msgstr "Kupongi kirjeldus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:36
 msgid "Optionally enter a description for this coupon for your reference."
-msgstr "Valikuliselt võid sisestada sellele kupongile kirjelduse."
+msgstr "Soovi korral võid enda jaoks sisetada sellele kupongile kirjelduse."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:41
 msgid "Discount type"
@@ -2055,7 +2055,7 @@ msgstr "Kupongi väärtus."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:47
 msgid "Enable free shipping"
-msgstr "Luba tasuta transport"
+msgstr "Tasuta transport"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:47
 msgid ""
@@ -2063,13 +2063,13 @@ msgid ""
 "shipping method</a> must be enabled with the \"must use coupon\" setting "
 "checked."
 msgstr ""
-"Tee siia linnuke, kui see kupong annab tausta transpordi. <a href=\"%s"
+"Tee siia linnuke, kui see kupong annab tasuta transpordi. <a href=\"%s"
 "\">Tasuta transport</a> peab olema sisse lülitatud ja samuti valik \"peab "
-"kasutama kupongit\"."
+"kasutama kupongi\"."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:50
 msgid "Individual use"
-msgstr "Individuaalne kasutamine"
+msgstr "Üksikuna kasutamiseks"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:50
 msgid ""
@@ -2086,7 +2086,7 @@ msgstr "Rakenda enne makse"
 msgid ""
 "Check this box if the coupon should be applied before calculating cart tax."
 msgstr ""
-"Tee siia linnuke kui see kupong peaks rakenduma enne ostukorvi maksude "
+"Tee siia linnuke, kui see kupong peaks rakenduma enne ostukorvi maksude "
 "arvutamist."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:56
@@ -2101,7 +2101,7 @@ msgid ""
 msgstr ""
 "Tee siia linnuke, kui see kupong ei kehti allahindlusega toodetele. "
 "Tootepõhised kupongid kehtivaid ainult siis, kui toode ei ole "
-"allahindlusega. Ostukorvipõhised kupongi kehtivad ainult siis, kui "
+"allahindlusega. Ostukorvipõhised kupongid kehtivad ainult siis, kui "
 "ostukorvis ei ole ühtegi allahindlusega toodet."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:61
@@ -2116,8 +2116,8 @@ msgstr "Miinimumi ei ole"
 msgid ""
 "This field allows you to set the minimum subtotal needed to use the coupon."
 msgstr ""
-"See väli võimaldab sul määrata minimaalse vahesumma, mis on vajalik selle "
-"kupongi kasutamiseks."
+"See väli võimaldab sul määrata minimaalse summa (ilma maksudeta), mis on "
+"vajalik selle kupongi kasutamiseks."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:68
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:95
@@ -2132,8 +2132,8 @@ msgid ""
 "Products which need to be in the cart to use this coupon or, for \"Product "
 "Discounts\", which products are discounted."
 msgstr ""
-"Tooted, mis peavad selle kupongi kasutamiseks olema ostukorvis, või "
-"\"Toodete allahindluste\" jaoks tooted, millele tehakse allahindlus."
+"Tooted, mis peavad selle kupongi kasutamiseks olema ostukorvis, või \"Toote "
+"allahindluse\" puhul tooted, millele tehakse allahindlus."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:86
 msgid "Exclude products"
@@ -2149,7 +2149,7 @@ msgid ""
 "Discounts\", which products are not discounted."
 msgstr ""
 "Tooted, mida selle selle kupongi kasutamiseks ostukorvis olla ei tohi, või "
-"\"Toodete allahindluste\" jaoks tooted, millele allahindlust ei tehta."
+"\"Toote allahindluse\" puhul tooted, millele allahindlust ei tehta."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:107
 msgid "Product categories"
@@ -2164,8 +2164,8 @@ msgid ""
 "A product must be in this category for the coupon to remain valid or, for "
 "\"Product Discounts\", products in these categories will be discounted."
 msgstr ""
-"Toode peab olema kupongi kehtimiseks selles kategoorias, või \"Toodete "
-"allahindluste\" puhul tehakse toodetele nendes kategooriates allahindlus."
+"Toode peab olema kupongi kehtimiseks selles kategoorias, või \"Toote "
+"allahindluse\" puhul tehakse toodetele nendes kategooriates allahindlus."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:121
 msgid "Exclude categories"
@@ -2180,34 +2180,34 @@ msgid ""
 "Product must not be in this category for the coupon to remain valid or, for "
 "\"Product Discounts\", products in these categories will not be discounted."
 msgstr ""
-"Toode ei tohi kupongi kehtimiseks selles kategoorias olla, või \"Toodete "
-"allahindluste\" puhul ei tehta toodetele nendes kategooriates allahindlust."
+"Toode ei tohi kupongi kehtimiseks selles kategoorias olla, või \"Toore "
+"allahindluse\" puhul ei tehta toodetele nendes kategooriates allahindlust."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:136
 msgid "Email restrictions"
-msgstr "E-posti kitsendused"
+msgstr "E-posti piirangud"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:136
 msgid "No restrictions"
-msgstr "Mitte ühtegi kitsendust"
+msgstr "Piiranguid pole"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:136
 msgid ""
 "List of emails to check against the customer's billing email when an order "
 "is placed."
 msgstr ""
-"Nimekiri e-posti aadressidest, mille hulgast kliendi arvelduse e-posti "
-"aadressi tellimuse esitamisel kontrollitakse."
+"Nimekiri e-posti aadressidest, millele kliendi arvelduse e-posti aadress "
+"peab vastama."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:143
 msgid "Usage limit"
-msgstr "Kasutamise limiit"
+msgstr "Kasutamise piirmäär"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:143
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:149
 msgctxt "placeholder"
 msgid "Unlimited usage"
-msgstr "Piiramatud kasutusega"
+msgstr "Piiramatu kasutusega"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:143
 msgid "How many times this coupon can be used before it is void."
@@ -2216,21 +2216,21 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:149
 msgid "Usage limit per user"
-msgstr "Limiit kasutaja kohta"
+msgstr "Piirmäär kasutaja kohta"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:149
 msgid ""
 "How many times this coupon can be used by an invidual user. Uses billing "
 "email for guests, and user ID for logged in users."
 msgstr ""
-"Kui mitu korda üks klient seda kupongi saab kasutada. Klienti kontrollitakse "
-"arvelduse e-posti aadressi alusel (külaliste puhul), või kasutaja ID alusel "
-"(registreeritud kasutajad)."
+"Kui mitu korda üks ja seesama klient seda kupongi saab kasutada. Klienti "
+"kontrollitakse arvelduse e-posti aadressi alusel (külaliste puhul), või "
+"kasutaja ID alusel (registreeritud kasutajad)."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:155
 msgctxt "placeholder"
 msgid "Never expire"
-msgstr "Ei kaota kunagi kehtivust"
+msgstr "Ei aegu kunagi"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:155
 msgid "The date this coupon will expire, <code>YYYY-MM-DD</code>."
@@ -2302,7 +2302,7 @@ msgstr "Kliendi IP:"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:150
 msgid "General Details"
-msgstr "Üldised andmed"
+msgstr "Üldandmed"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:152
 msgid "Order date:"
@@ -2346,7 +2346,7 @@ msgstr "Makseviis"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:213
 msgid "Load billing address"
-msgstr "Lae arveldamise aadress"
+msgstr "Laadi arvelduse aadress"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:230
 msgid "Payment Method:"
@@ -2357,7 +2357,7 @@ msgstr "Makseviis:"
 #: includes/admin/post-types/meta-boxes/views/html-order-shipping.php:12
 #: includes/admin/post-types/meta-boxes/views/html-order-tax.php:8
 msgid "N/A"
-msgstr "pole saadaval"
+msgstr "-"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:245
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:247
@@ -2380,15 +2380,15 @@ msgstr "Märkus kliendile"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:287
 msgid "Load shipping address"
-msgstr "Lae kohaletoimetamise aadress"
+msgstr "Laadi tarneaadress"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:287
 msgid "Copy from billing"
-msgstr "Kopeeri arveldusest"
+msgstr "Kopeeri arvelduse aadress"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:304
 msgid "Customer Note:"
-msgstr "Märkus kliendile:"
+msgstr "Kliendi märkused:"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:305
 msgid "Customer's notes about the order"
@@ -2414,7 +2414,8 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-downloads.php:146
 msgid "Are you sure you want to revoke access to this download?"
-msgstr "Oled kindel, et soovid keelata ligipääsu selle faili allalaadmisele?"
+msgstr ""
+"Oled kindel, et soovid ligipääsu selle faili allalaadimisele eemaldada?"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:33
 msgid "Item"
@@ -2517,7 +2518,7 @@ msgstr "+ Lisa tarnekulu"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:66
 msgid "These are the shipping and handling costs for the order."
-msgstr "Need on tellimuse transpordi ja käsitlemise kulud."
+msgstr "Need on tellimuse transpordi- ja käsitluskulud."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:106
 msgid "+ Add tax row"
@@ -2529,7 +2530,8 @@ msgid ""
 "or compound taxes rather than a single total."
 msgstr ""
 "Need read sisaldavad makse selle tellimuse kohta. See võimaldab sul näidata "
-"mitut või liidetavaid makse ühe summa asemel."
+"mitut või liidetavaid makse eraldi (nt. käibemaksueristuse jaoks) ühe "
+"kogusumma asemel."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:113
 msgid "Order Discount"
@@ -2567,7 +2569,7 @@ msgstr "Üldine"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:89
 #: includes/admin/settings/class-wc-settings-products.php:41
 msgid "Inventory"
-msgstr "Ladu"
+msgstr "Laohaldus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:99
 msgid "Linked Products"
@@ -2679,7 +2681,7 @@ msgstr "Allalaadimiste limiit"
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:190
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:196
 msgid "Unlimited"
-msgstr "Piiramatu"
+msgstr "Piiramatult"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:221
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:189
@@ -2748,7 +2750,7 @@ msgstr "Ainult transport"
 #: includes/admin/views/html-bulk-edit-product.php:66
 #: includes/admin/views/html-quick-edit-product.php:45
 msgid "None"
-msgstr "Ei maksustata"
+msgstr "Ei"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:256
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:729
@@ -2774,7 +2776,7 @@ msgstr "Maksuklass"
 #: includes/admin/views/html-bulk-edit-product.php:207
 #: includes/admin/views/html-quick-edit-product.php:153
 msgid "Manage stock?"
-msgstr "Halda laoseise?"
+msgstr "Halda laoseisu?"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:282
 msgid ""
@@ -2803,7 +2805,7 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:300
 #: includes/admin/reports/class-wc-report-stock.php:140
 msgid "Stock status"
-msgstr "Laoseisu olek"
+msgstr "Laoseis"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:303
 msgid ""
@@ -2846,14 +2848,12 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:325
 msgid "Sold Individually"
-msgstr "Müüakse eraldi"
+msgstr "Müüakse üksikuna"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:325
 msgid ""
 "Enable this to only allow one of this item to be bought in a single order"
-msgstr ""
-"Lülite sisse, kui soovid, et seda toodet saaks ühes tellimuses osta ainult "
-"ühekaupa."
+msgstr "Lülita sisse, kui soovid, et seda toodet saaks osta ainult ühekaupa."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:343
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:763
@@ -2935,7 +2935,7 @@ msgstr "Püstkriips (|) eraldab termineid"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:565
 msgid "Custom product attribute"
-msgstr "Kohandatud omadus tootele"
+msgstr "Vabalt määratud omadus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:577
 msgid "Save attributes"
@@ -2977,7 +2977,7 @@ msgstr "Rühmitamine"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:652
 msgid "Set this option to make this product part of a grouped product."
-msgstr "Määra see valik, et teha see toode osa rühmitatud tootest."
+msgstr "Määra see valik, et teha see toode osaks mõnest rühmitatud tootest."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:672
 msgid "Purchase Note"
@@ -3080,7 +3080,7 @@ msgstr "Vaikimisi valikud:"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:885
 #: includes/admin/settings/class-wc-settings-shipping.php:214
 msgid "No default"
-msgstr "Vaikimis valikuid ei ole"
+msgstr "Vaikevalikut ei ole"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:989
 msgid "Product SKU must be unique."
@@ -3123,7 +3123,7 @@ msgstr[1] "Alla laadidtud %d korda"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:16
 msgid "Downloads Remaining"
-msgstr "%s allalaadimist alles"
+msgstr "Allalaadimisi alles"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:22
 msgid "Access Expires"
@@ -3188,11 +3188,11 @@ msgstr "Maksumäär"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-tax.php:17
 msgid "Sales Tax"
-msgstr "Müügimaks"
+msgstr "Toodete pealt"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-tax.php:21
 msgid "Shipping Tax"
-msgstr "Maksud tarnele"
+msgstr "Transpordi pealt"
 
 #: includes/admin/post-types/meta-boxes/views/html-product-download.php:3
 #: includes/admin/post-types/meta-boxes/views/html-product-variation-download.php:2
@@ -3326,11 +3326,11 @@ msgstr[1] "Müüdud %s tk viimase %d päeva jooksul"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:69
 msgid "%s discounts in total"
-msgstr "%s allahindlust kokku"
+msgstr "%s väärtuses allahindlust kokku"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:75
 msgid "%s coupons used in total"
-msgstr "%s kupongi kasutatud kokku"
+msgstr "%s kupongi kokku kasutatud"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:90
 #: includes/admin/reports/class-wc-report-customers.php:138
@@ -3522,7 +3522,7 @@ msgstr "Laost otsas olevaid tooteid ei leitud."
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:47
 msgid "%s sales in %s"
-msgstr "%s müüki / %s"
+msgstr "%s väärtuses müüdud kategoorias %s"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:168
 msgid "All"
@@ -3534,19 +3534,19 @@ msgstr "&larr; Vali kategooria, et näha statistikat"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:74
 msgid "%s average daily sales"
-msgstr "%s müüki kesmiselt päevas"
+msgstr "%s väärtuses müüdud kesmiselt päevas"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:77
 msgid "%s average monthly sales"
-msgstr "%s müüki keskmiselt kuus"
+msgstr "%s väärtuses müüdud keskmiselt kuus"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:82
 msgid "%s sales in this period"
-msgstr "%s müüki selles ajavahemikus"
+msgstr "%s väärtuses müüdud selles ajavahemikus"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:92
 msgid "%s orders placed"
-msgstr "%s tellimust esitatud"
+msgstr "%s esitatud tellimust"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:97
 msgid "%s items purchased"
@@ -3554,7 +3554,7 @@ msgstr "%s toodet ostetud"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:102
 msgid "%s charged for shipping"
-msgstr "%s võetud transpordi eest"
+msgstr "%s transpordi eest võetud"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:107
 msgid "%s worth of coupons used"
@@ -3586,11 +3586,11 @@ msgstr "Müügisumma"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:87
 msgid "%s sales for the selected items"
-msgstr "%s müüki valitud toodetele"
+msgstr "%s väärtuses valitud tooteid müüdud"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:92
 msgid "%s purchases for the selected items"
-msgstr "%s ostu valitud toodetele"
+msgstr "%s valitud tooteid ostetud"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:138
 msgid "Showing reports for:"
@@ -3631,7 +3631,7 @@ msgstr "Ülem"
 
 #: includes/admin/reports/class-wc-report-stock.php:139
 msgid "Units in stock"
-msgstr "tk laos"
+msgstr "Ühikuid laos"
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:119
 msgid "Rate"
@@ -3643,7 +3643,8 @@ msgstr "Maksusumma"
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:121
 msgid "This is the sum of the \"Tax Rows\" tax amount within your orders."
-msgstr "See on \"Maksuridade\" maksusumma sinu tellimustel."
+msgstr ""
+"See on tellimuste \"Maksuridade\" toodete pealt arvestatud maksude summa."
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:122
 msgid "Shipping Tax Amount"
@@ -3652,7 +3653,8 @@ msgstr "Transpordi maksusumma"
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:122
 msgid ""
 "This is the sum of the \"Tax Rows\" shipping tax amount within your orders."
-msgstr "See on \"maksuridade\" transpordi maksusumma sinu tellimustel."
+msgstr ""
+"See on tellimuste \"Maksuridade\" transpordi pealt arvestatud maksude summa."
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:123
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:112
@@ -3715,8 +3717,8 @@ msgid ""
 "These pages need to be set so that WooCommerce knows where to send users to "
 "access account related functionality."
 msgstr ""
-"Need lehed tuleb seadistada selleks, et WooCommerce teaks kuhu saata "
-"kasutajad oma kontoga seotud tegevuste tegemiseks."
+"Need lehed tuleb seadistada selleks, et WooCommerce teaks, kuhu kasutajad "
+"oma kontoga seotud tegevuste tegemiseks saata."
 
 #: includes/admin/settings/class-wc-settings-accounts.php:44
 msgid "My Account Page"
@@ -3804,7 +3806,7 @@ msgstr "Konto loomine"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:128
 msgid "Automatically generate username from customer email"
-msgstr "Loo kasutajanimi kliendi e-posti aadressi põhjal automaatselt"
+msgstr "Loo kasutajanimi automaatselt kliendi e-posti aadressi põhjal"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:137
 msgid "Automatically generate customer password"
@@ -3818,11 +3820,11 @@ msgstr "Kassa"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:41
 msgid "Checkout Options"
-msgstr "Kassa valikud"
+msgstr "Kassa seaded"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:65
 msgid "Checkout Process"
-msgstr "Kassa toiming"
+msgstr "Kassa maksmise protsess"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:68
 msgid "Coupons"
@@ -3868,7 +3870,7 @@ msgid ""
 "These pages need to be set so that WooCommerce knows where to send users to "
 "checkout."
 msgstr ""
-"Need lehed tuleb seadistada selleks, et WooCommerce teaks kuhu kasutajad "
+"Need lehed tuleb seadistada selleks, et WooCommerce teaks, kuhu kasutajad "
 "kassasse saata."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:112
@@ -3950,11 +3952,11 @@ msgstr "E-kirjad"
 
 #: includes/admin/settings/class-wc-settings-emails.php:40
 msgid "Email Options"
-msgstr "E-kirja valikud"
+msgstr "E-kirjade seaded"
 
 #: includes/admin/settings/class-wc-settings-emails.php:66
 msgid "Email Sender Options"
-msgstr "E-kirja saatja valikud"
+msgstr "E-kirjade saatja seaded"
 
 #: includes/admin/settings/class-wc-settings-emails.php:66
 msgid ""
@@ -4050,7 +4052,7 @@ msgstr "E-kirja sisuteksti värv"
 
 #: includes/admin/settings/class-wc-settings-emails.php:147
 msgid "The main body text colour. Default <code>#505050</code>."
-msgstr "Põhiteksti värv. Vaikimis <code>#505050</code>."
+msgstr "Põhiteksti värv. Vaikimisi <code>#505050</code>."
 
 #: includes/admin/settings/class-wc-settings-general.php:48
 msgid "General Options"
@@ -4058,13 +4060,13 @@ msgstr "Üldised seaded"
 
 #: includes/admin/settings/class-wc-settings-general.php:51
 msgid "Base Location"
-msgstr "Põhiasukoht"
+msgstr "Peamine asukoht"
 
 #: includes/admin/settings/class-wc-settings-general.php:52
 msgid ""
 "This is the base location for your business. Tax rates will be based on this "
 "country."
-msgstr "See on sinu äri põhiline asukoht. Maksumäärad põhinevad sellel riigil."
+msgstr "See on sinu äri peamine asukoht. Maksud põhinevad sellel riigil."
 
 #: includes/admin/settings/class-wc-settings-general.php:61
 msgid "Selling Location(s)"
@@ -4072,7 +4074,9 @@ msgstr "Müügikoht/kohad"
 
 #: includes/admin/settings/class-wc-settings-general.php:62
 msgid "This option lets you limit which countries you are willing to sell to."
-msgstr "See valik võimaldab sul piirata, millistesse riikidesse sa müüa tahad."
+msgstr ""
+"See valik võimaldab sul piirata millistesse riikidesse sa oma kaupa müüa "
+"tahad."
 
 #: includes/admin/settings/class-wc-settings-general.php:70
 msgid "Sell to all countries"
@@ -4085,7 +4089,7 @@ msgstr "Müü valitud riikidesse"
 #: includes/admin/settings/class-wc-settings-general.php:76
 #: includes/admin/settings/class-wc-settings-shipping.php:147
 msgid "Specific Countries"
-msgstr "Konkreetsed riigid"
+msgstr "Valitud riigid"
 
 #: includes/admin/settings/class-wc-settings-general.php:85
 msgid "Store Notice"
@@ -4093,7 +4097,7 @@ msgstr "Poe teade"
 
 #: includes/admin/settings/class-wc-settings-general.php:86
 msgid "Enable site-wide store notice text"
-msgstr "Lülita kogu lehel näidatav teadaane sisse"
+msgstr "Lülita sisse kogu lehel näidatav teade"
 
 #: includes/admin/settings/class-wc-settings-general.php:93
 msgid "Store Notice Text"
@@ -4107,7 +4111,7 @@ msgstr "See on näidispood testimise jaoks &mdash; ühtegi tellimust ei täideta
 
 #: includes/admin/settings/class-wc-settings-general.php:104
 msgid "Currency Options"
-msgstr "Valuuta valikud"
+msgstr "Valuuta seaded"
 
 #: includes/admin/settings/class-wc-settings-general.php:104
 msgid "The following options affect how prices are displayed on the frontend."
@@ -4122,12 +4126,12 @@ msgid ""
 "This controls what currency prices are listed at in the catalog and which "
 "currency gateways will take payments in."
 msgstr ""
-"See määrab, millises valuutas on poes hinnad ning millises valuutas "
-"makseviisid makseid vastu võtavad."
+"See määrab millises valuutas on poes hinnad ning millises valuutas makseid "
+"vastu võetakse."
 
 #: includes/admin/settings/class-wc-settings-general.php:119
 msgid "Currency Position"
-msgstr "Valuuta sümboli asukohta"
+msgstr "Valuuta sümboli asukoht"
 
 #: includes/admin/settings/class-wc-settings-general.php:120
 msgid "This controls the position of the currency symbol."
@@ -4212,7 +4216,8 @@ msgstr "Primaarne"
 #: includes/admin/settings/class-wc-settings-general.php:229
 msgid "Call to action buttons/price slider/layered nav UI"
 msgstr ""
-"Üleskutse nupud/hinnaliugur/kihtidega navigatsiooni UI (kasutajaliides)"
+"Peamise tegevuse nupud/hinnaliugur/kihtidega navigatsiooni UI "
+"(kasutajaliides)"
 
 #: includes/admin/settings/class-wc-settings-general.php:230
 msgid "Secondary"
@@ -4220,11 +4225,11 @@ msgstr "Sekundaarne"
 
 #: includes/admin/settings/class-wc-settings-general.php:230
 msgid "Buttons and tabs"
-msgstr "Nuput ja sildid"
+msgstr "Nupud ja sildid"
 
 #: includes/admin/settings/class-wc-settings-general.php:231
 msgid "Highlight"
-msgstr "Tõsta esile"
+msgstr "Esiletõstmine"
 
 #: includes/admin/settings/class-wc-settings-general.php:231
 msgid "Price labels and Sale Flashes"
@@ -4266,11 +4271,11 @@ msgstr "Liidestus"
 
 #: includes/admin/settings/class-wc-settings-products.php:40
 msgid "Product Options"
-msgstr "Toote valikud"
+msgstr "Toodete seaded"
 
 #: includes/admin/settings/class-wc-settings-products.php:79
 msgid "Inventory Options"
-msgstr "Laoseisu valikud"
+msgstr "Laohalduse seaded"
 
 #: includes/admin/settings/class-wc-settings-products.php:82
 msgid "Manage Stock"
@@ -4278,7 +4283,7 @@ msgstr "Halda laoseisu"
 
 #: includes/admin/settings/class-wc-settings-products.php:83
 msgid "Enable stock management"
-msgstr "Lülita laoseisu haldamine sisse"
+msgstr "Lülita laoseisu haldus sisse"
 
 #: includes/admin/settings/class-wc-settings-products.php:90
 msgid "Hold Stock (minutes)"
@@ -4295,19 +4300,19 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:104
 msgid "Notifications"
-msgstr "Teated"
+msgstr "Teavitused"
 
 #: includes/admin/settings/class-wc-settings-products.php:105
 msgid "Enable low stock notifications"
-msgstr "Lülita madala laoseisu tevaitused sisse"
+msgstr "Lülita madala laoseisu teavitused sisse"
 
 #: includes/admin/settings/class-wc-settings-products.php:114
 msgid "Enable out of stock notifications"
-msgstr "Lülita laost otsas olevate toodete teavitused sisse"
+msgstr "Lülita laost otsasaanud toodete teavitused sisse"
 
 #: includes/admin/settings/class-wc-settings-products.php:123
 msgid "Notification Recipient"
-msgstr "Teavituse saaja"
+msgstr "Teavituste saaja"
 
 #: includes/admin/settings/class-wc-settings-products.php:132
 msgid "Low Stock Threshold"
@@ -4315,19 +4320,19 @@ msgstr "Madala laoseisu piirmäär"
 
 #: includes/admin/settings/class-wc-settings-products.php:146
 msgid "Out Of Stock Threshold"
-msgstr "Tühja laoseisu piirmäär"
+msgstr "Laost otsasaamise piirmäär"
 
 #: includes/admin/settings/class-wc-settings-products.php:160
 msgid "Out Of Stock Visibility"
-msgstr "Otsas olevate toodete nähtavus"
+msgstr "Laost otsasaanud toodete nähtavus"
 
 #: includes/admin/settings/class-wc-settings-products.php:161
 msgid "Hide out of stock items from the catalog"
-msgstr "Peida laost otsas olevad tooted kataloogist"
+msgstr "Peida laost otsasaanud tooted"
 
 #: includes/admin/settings/class-wc-settings-products.php:168
 msgid "Stock Display Format"
-msgstr "Laoseisu kuvamise formaat"
+msgstr "Laoseisu kuvamise vorming"
 
 #: includes/admin/settings/class-wc-settings-products.php:169
 msgid "This controls how stock is displayed on the frontend."
@@ -4357,7 +4362,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:200
 msgid "Product Listings"
-msgstr "Toodete nimekirjas"
+msgstr "Toodete nimekirjad"
 
 #: includes/admin/settings/class-wc-settings-products.php:203
 msgid "Product Archive / Shop Page"
@@ -4366,8 +4371,7 @@ msgstr "Toodete arhiiv / Poe leht"
 #: includes/admin/settings/class-wc-settings-products.php:204
 msgid ""
 "The base page can also be used in your <a href=\"%s\">product permalinks</a>."
-msgstr ""
-"Põhilehte saab kasutada ka sinu <a href=\"%s\">toodete püsiviidetes</a>."
+msgstr "Põhilehte saad kasutada ka <a href=\"%s\">toodete püsiviidetes</a>."
 
 #: includes/admin/settings/class-wc-settings-products.php:210
 msgid ""
@@ -4378,7 +4382,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:214
 msgid "Shop Page Display"
-msgstr "Poe lehe kuvamine"
+msgstr "Poe lehe sisu"
 
 #: includes/admin/settings/class-wc-settings-products.php:215
 msgid "This controls what is shown on the product archive."
@@ -4401,7 +4405,7 @@ msgstr "Näita mõlemaid"
 
 #: includes/admin/settings/class-wc-settings-products.php:230
 msgid "Default Category Display"
-msgstr "Vaikimisi kategooria kuvamine"
+msgstr "Kategoorialehtede sisu"
 
 #: includes/admin/settings/class-wc-settings-products.php:231
 msgid "This controls what is shown on category archives."
@@ -4413,11 +4417,11 @@ msgstr "Vaikimisi toodete järjestuse kuvamine"
 
 #: includes/admin/settings/class-wc-settings-products.php:247
 msgid "This controls the default sort order of the catalog."
-msgstr "See määrab kataloogi vaikimisi järestuse suuna."
+msgstr "See määrab kataloogi järjestuse vaikesuuna."
 
 #: includes/admin/settings/class-wc-settings-products.php:254
 msgid "Default sorting (custom ordering + name)"
-msgstr "Vaikimis järjestus (kohandatud järjestus + nimi)"
+msgstr "Vaikejärjestus (kohandatud järjestus + nimi)"
 
 #: includes/admin/settings/class-wc-settings-products.php:255
 msgid "Popularity (sales)"
@@ -4429,7 +4433,7 @@ msgstr "Keskmine hinnang"
 
 #: includes/admin/settings/class-wc-settings-products.php:257
 msgid "Sort by most recent"
-msgstr "Järjesta uusimate alusel"
+msgstr "Järjesta uudsuse alusel"
 
 #: includes/admin/settings/class-wc-settings-products.php:258
 msgid "Sort by price (asc)"
@@ -4441,15 +4445,15 @@ msgstr "Järjesta hinna alusel (kahanev)"
 
 #: includes/admin/settings/class-wc-settings-products.php:265
 msgid "Add to cart"
-msgstr "Lisa korvi"
+msgstr "Ostukorvi lisamine"
 
 #: includes/admin/settings/class-wc-settings-products.php:266
 msgid "Redirect to the cart page after successful addition"
-msgstr "Peale edukat lisamis sunna tagasi ostukorvi"
+msgstr "Peale edukat toote korvi lisamist sunna kasutaja tagasi ostukorvi"
 
 #: includes/admin/settings/class-wc-settings-products.php:274
 msgid "Enable AJAX add to cart buttons on archives"
-msgstr "Lülita arhiivides Lisa ostukorvi nuppudel AJAX sisse"
+msgstr "Lülita arhiivilehtedel ostukorvi lisamise nuppudel AJAX sisse"
 
 #: includes/admin/settings/class-wc-settings-products.php:286
 msgid "Weight Unit"
@@ -4481,7 +4485,7 @@ msgstr "Mõõtude ühik"
 
 #: includes/admin/settings/class-wc-settings-products.php:304
 msgid "This controls what unit you will define lengths in."
-msgstr "See määrab, millistes ühikutes sa suurused sisestad."
+msgstr "See määrab millistes ühikutes sa suurused sisestad."
 
 #: includes/admin/settings/class-wc-settings-products.php:312
 msgid "cm"
@@ -4501,20 +4505,21 @@ msgstr "jard"
 
 #: includes/admin/settings/class-wc-settings-products.php:321
 msgid "Product Ratings"
-msgstr "Toote hinnagud"
+msgstr "Toodete hindamine"
 
 #: includes/admin/settings/class-wc-settings-products.php:322
 msgid "Enable ratings on reviews"
-msgstr "Lülita ülevaadetel hinnangute andmine"
+msgstr "Luba ülevaadete kirjutamisel hinnangute andmine sisse"
 
 #: includes/admin/settings/class-wc-settings-products.php:332
 msgid "Ratings are required to leave a review"
-msgstr "Ülevaate esitamiseks on vajalik hinnangut."
+msgstr "Nõua ülevaate esitamiseks tootele hinnangu andmist"
 
 #: includes/admin/settings/class-wc-settings-products.php:342
 msgid "Show \"verified owner\" label for customer reviews"
 msgstr ""
-"Näita \"toote omaniku\" silti klientide poolt esitatud ülevaadete juures"
+"Kui hinnangu andis keegi, kes on toote ostnud, näita seda avalikult ülevaate "
+"juures"
 
 #: includes/admin/settings/class-wc-settings-products.php:353
 msgid "Product Image Sizes"
@@ -4555,7 +4560,7 @@ msgstr "Toote pisipildid"
 #: includes/admin/settings/class-wc-settings-products.php:385
 msgid ""
 "This size is usually used for the gallery of images on the product page."
-msgstr "Seda suurust kasutatakse tootelehl pildigaleriis."
+msgstr "Seda suurust kasutatakse tootelehel pildigaleriis."
 
 #: includes/admin/settings/class-wc-settings-products.php:399
 msgid "Downloadable Products"
@@ -4572,15 +4577,15 @@ msgid ""
 "Sendfile</code> can be used to serve downloads instead (server requires "
 "<code>mod_xsendfile</code>)."
 msgstr ""
-"Sunnitud allalaadimiste kasutamine hoiab failide URLid peidetuna, aga "
+"Sunnitud allalaadimiste kasutamine hoiab failide URLid peidetuna, ent "
 "mõningatel serveritel võib esineda probleeme suurte failide edastamisega. "
 "Kui serveril on vastav tugi olemas, siis võib allalaadimisi serveerida "
 "hoopis <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> abil (serveril "
-"peab olema <code>mod_xsendfile</code> lubatud)."
+"peab olema <code>mod_xsendfile</code> sisse lülitatud)."
 
 #: includes/admin/settings/class-wc-settings-products.php:411
 msgid "Force Downloads"
-msgstr "Sunni allalaadimisi"
+msgstr "Sunnitud allalaadimised"
 
 #: includes/admin/settings/class-wc-settings-products.php:412
 msgid "X-Accel-Redirect/X-Sendfile"
@@ -4588,7 +4593,7 @@ msgstr "X-Accel-Redirect/X-Sendfile"
 
 #: includes/admin/settings/class-wc-settings-products.php:413
 msgid "Redirect only"
-msgstr "Ainult ümbersuunamisega"
+msgstr "Ainult ümbersuunamine"
 
 #: includes/admin/settings/class-wc-settings-products.php:419
 msgid "Access Restriction"
@@ -4604,20 +4609,21 @@ msgstr "See seade ei mõjuta külaliste poolt tehtud oste."
 
 #: includes/admin/settings/class-wc-settings-products.php:430
 msgid "Grant access to downloadable products after payment"
-msgstr "Luba ligipääs allalaaditavatele failidele koheselt peale maksmist."
+msgstr "Anna ligipääs allalaaditavatele failidele kohe peale maksmist."
 
 #: includes/admin/settings/class-wc-settings-products.php:434
 msgid ""
 "Enable this option to grant access to downloads when orders are \"processing"
 "\", rather than \"completed\"."
 msgstr ""
-"Lülite see valik sisse, kui soovid anda ligipääsu allalaaditavatele "
-"failidele kui tellimused on \"töötluses\", mitte \"täidetud\"."
+"Lülita see valik sisse, kui soovid anda allalaaditavatele failidele "
+"ligipääsu juba siis, kui tellimused on \"töötluses\", mitte alles siis, kui "
+"nad on \"täidetud\"."
 
 #: includes/admin/settings/class-wc-settings-shipping.php:41
 #: includes/admin/settings/class-wc-settings-shipping.php:67
 msgid "Shipping Options"
-msgstr "Transpordi valikud"
+msgstr "Transpordi seaded"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:70
 msgid "Shipping Calculations"
@@ -4678,7 +4684,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-shipping.php:140
 msgid "Ship to all countries you sell to"
-msgstr "Luba transport kõikidesse riikidesse, kuhu müüd"
+msgstr "Paku transporti kõikidesse riikidesse, kuhu müüd"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:141
 msgid "Ship to all countries"
@@ -4686,7 +4692,7 @@ msgstr "Paku transporti kõikidesse riikidesse"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:142
 msgid "Ship to specific countries only"
-msgstr "Luba transport valitud riikidesse"
+msgstr "Paku transport valitud riikidesse"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:197
 msgid "Shipping Methods"
@@ -4704,7 +4710,7 @@ msgstr "Lohista ülalolevad tarneviisid sobivasse järjekorda."
 #: includes/admin/settings/class-wc-settings-tax.php:40
 #: includes/admin/settings/class-wc-settings-tax.php:68
 msgid "Tax Options"
-msgstr "Maksude valikud"
+msgstr "Maksude seaded"
 
 #: includes/admin/settings/class-wc-settings-tax.php:41
 msgid "Standard Rates"
@@ -4744,7 +4750,7 @@ msgstr "Ei, ma sisestan hinnad ilma maksudeta"
 
 #: includes/admin/settings/class-wc-settings-tax.php:91
 msgid "Calculate Tax Based On:"
-msgstr "Maksude arvutamiseks kasuta:"
+msgstr "Kasuta maksude arvutamiseks:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:93
 msgid "This option determines which address is used to calculate tax."
@@ -4752,20 +4758,20 @@ msgstr "See valik määrab millist aadressi kasutatakse maksude arvutamiseks."
 
 #: includes/admin/settings/class-wc-settings-tax.php:97
 msgid "Customer shipping address"
-msgstr "Kliendi kohaletoimetamise aadress"
+msgstr "Kliendi tarneaadressi"
 
 #: includes/admin/settings/class-wc-settings-tax.php:98
 msgid "Customer billing address"
-msgstr "Kliendi arvelduse aadress"
+msgstr "Kliendi arveaadressi"
 
 #: includes/admin/settings/class-wc-settings-tax.php:99
 #: includes/admin/settings/class-wc-settings-tax.php:111
 msgid "Shop base address"
-msgstr "Poe aadress"
+msgstr "Poe aadressi"
 
 #: includes/admin/settings/class-wc-settings-tax.php:104
 msgid "Default Customer Address:"
-msgstr "Vaikimis kliendi aadress:"
+msgstr "Kliendi vaikimisi aadress:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:106
 msgid ""
@@ -4806,7 +4812,7 @@ msgstr "Ümarda maksusummat vahesumma juures, mitte iga tellimuse rea juures"
 
 #: includes/admin/settings/class-wc-settings-tax.php:135
 msgid "Additional Tax Classes"
-msgstr "Lisa maksuklassid"
+msgstr "Täiendavad maksuklassid"
 
 #: includes/admin/settings/class-wc-settings-tax.php:136
 msgid ""
@@ -4814,8 +4820,8 @@ msgid ""
 "default <code>Standard Rate</code>. Tax classes can be assigned to products."
 msgstr ""
 "Määra siin nimekirjas täiendavad maksuklassid (1 rea kohta). Need "
-"maksuklassid on lisaks vaikimisi <code>Standardmäärale</code>. Maksuklasse "
-"saab toodetele määrata."
+"maksuklassid on lisaks vaikimisi <code>Standard</code>-määrale. Maksuklasse "
+"saab määrata toodetele."
 
 #: includes/admin/settings/class-wc-settings-tax.php:140
 msgid "Reduced Rate%sZero Rate"
@@ -4886,7 +4892,7 @@ msgstr "Riigi&nbsp;kood"
 #: includes/admin/settings/class-wc-settings-tax.php:248
 msgid "A 2 digit country code, e.g. US. Leave blank to apply to all."
 msgstr ""
-"2-tähemärgiga riigikood, näiteks EE. Jäta tühjaks, kui soovid, et maksumäär "
+"2-tähemärgiga riigi kood, näiteks EE. Jäta tühjaks, kui soovid, et maksumäär "
 "kehtiks kõikidele riikidele."
 
 #: includes/admin/settings/class-wc-settings-tax.php:250
@@ -4912,8 +4918,8 @@ msgid ""
 msgstr ""
 "Postiindeks selle reegli jaoks. Semikoolon (;) eraldab erinevaid väärtusi. "
 "Jäta tühjaks, kui soovid, et kehtiks kõikidele piirkondadele. Tärne (*) saab "
-"ka kasutada. Vahemikke (12345-12350) saab samuti üksikute postiindeksite "
-"asemel kasutada."
+"ka kasutada. Vahemikke (12345-12350) saab saab kasutada üksikute "
+"postiindeksite asemel."
 
 #: includes/admin/settings/class-wc-settings-tax.php:254
 msgid ""
@@ -4950,14 +4956,14 @@ msgid ""
 "be used. To define multiple tax rates for a single area you need to specify "
 "a different priority per rate."
 msgstr ""
-"Määra selle maksumäära olulisus. Ainult ühte vastet olulisuse taseme kohta "
-"kasutatakse. Ühe piirkonna jaoks mitme maksumäära kasutamiseks pead igale "
+"Määra selle maksumäära olulisus. Olulisuse taseme kohta kasutatakse ainult "
+"ühte vastet. Ühe piirkonna jaoks mitme maksumäära kasutamiseks pead igale "
 "maksumäärale määrama erineva olulisuse taseme."
 
 #: includes/admin/settings/class-wc-settings-tax.php:262
 #: includes/admin/settings/class-wc-settings-tax.php:381
 msgid "Compound"
-msgstr "Liituv"
+msgstr "Liidetav"
 
 #: includes/admin/settings/class-wc-settings-tax.php:262
 msgid ""
@@ -5033,7 +5039,7 @@ msgstr "Tasuta"
 
 #: includes/admin/views/html-admin-page-status-report.php:3
 msgid "Please include this information when requesting support:"
-msgstr "Palun pane kaasa järgne informatsioon, kui palud abi:"
+msgstr "Abi paludes pane palun kaasa alljärgnev info:"
 
 #: includes/admin/views/html-admin-page-status-report.php:4
 msgid "Download System Report File"
@@ -5141,7 +5147,7 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:114
 msgid "Default Timezone"
-msgstr "Vaikimis ajatsoon"
+msgstr "Vaikimisi ajatsoon"
 
 #: includes/admin/views/html-admin-page-status-report.php:118
 msgid "Default timezone is %s - it should be UTC"
@@ -5333,7 +5339,7 @@ msgstr "Salvesta muudatused"
 #: includes/admin/views/html-bulk-edit-product.php:231
 #: includes/admin/views/html-bulk-edit-product.php:252
 msgid "— No Change —"
-msgstr "— Ära muuda —"
+msgstr "— Muutmata—"
 
 #: includes/admin/views/html-bulk-edit-product.php:16
 #: includes/admin/views/html-bulk-edit-product.php:40

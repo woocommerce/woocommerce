@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce 2.1-X Front-end\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-10-03 01:54:35+00:00\n"
-"PO-Revision-Date: 2013-10-09 14:13+0200\n"
+"PO-Revision-Date: 2013-10-11 01:36+0200\n"
 "Last-Translator: Illimar Tambek <illimar.tambek@gmail.com>\n"
 "Language-Team: Divid <info@divid.ee>\n"
 "Language: et\n"
@@ -2091,7 +2091,7 @@ msgstr "E-kirja teema"
 #: includes/emails/class-wc-email-customer-invoice.php:159
 #: includes/emails/class-wc-email-customer-invoice.php:166
 msgid "Defaults to <code>%s</code>"
-msgstr "Vaikimis <code>%s</code>"
+msgstr "Vaikimisi <code>%s</code>"
 
 #: includes/abstracts/abstract-wc-email.php:565
 #: includes/emails/class-wc-email-customer-invoice.php:150
@@ -2181,7 +2181,7 @@ msgid ""
 "To override and edit this email template copy <code>%s</code> to your theme "
 "folder: <code>%s</code>."
 msgstr ""
-"Selle e-kirja malli üle kirjutamiseks kopeeri <code>%s</code> oma teema "
+"Selle e-kirja malli ülekirjutamiseks kopeeri <code>%s</code> oma teema "
 "kausta: <code>%s</code>."
 
 #: includes/abstracts/abstract-wc-email.php:745
@@ -2406,7 +2406,7 @@ msgstr "Tellimuse märkused"
 #: includes/class-wc-checkout.php:119
 msgctxt "placeholder"
 msgid "Notes about your order, e.g. special notes for delivery."
-msgstr "Märkmed sinu tellmuse kohta, näiteks märkmed kohaletoimetamise kohta."
+msgstr "Märkused sinu tellmuse kohta, näiteks juhised kohaletoimetamise kohta."
 
 #: includes/class-wc-checkout.php:178
 msgid "Order &ndash; %s"
@@ -4304,7 +4304,7 @@ msgstr "Kupongid"
 
 #: includes/class-wc-post-types.php:332
 msgid "Add Coupon"
-msgstr "Lis akupong"
+msgstr "Lisa kupong"
 
 #: includes/class-wc-post-types.php:333
 msgid "Add New Coupon"
@@ -4354,7 +4354,7 @@ msgstr "Osta toode"
 
 #: includes/class-wc-product-grouped.php:42
 msgid "View products"
-msgstr "vaata tooteid"
+msgstr "Vaata tooteid"
 
 #: includes/class-wc-product-simple.php:48
 #: includes/class-wc-product-variation.php:211
@@ -4386,7 +4386,7 @@ msgstr ""
 
 #: includes/emails/class-wc-email-customer-completed-order.php:26
 msgid "Completed order"
-msgstr "Täidetud tellimus"
+msgstr "Tellimus täidetud"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:27
 msgid ""
@@ -4427,7 +4427,7 @@ msgstr "E-kirja pealkiri"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:157
 msgid "Subject (downloadable)"
-msgstr "Teema (alla laaditav)"
+msgstr "Teema (allalaaditav)"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:164
 msgid "Email Heading (downloadable)"
@@ -4442,7 +4442,7 @@ msgid ""
 "Customer invoice emails can be sent to the user containing order info and "
 "payment links."
 msgstr ""
-"Kliendile saab saata e-posti teel arve, mis sisaldab tellmuse infot ja "
+"Kliendile saab saata e-posti teel arve, mis sisaldab tellimuse infot ja "
 "maksevõimalusi."
 
 #: includes/emails/class-wc-email-customer-invoice.php:35
@@ -4500,11 +4500,11 @@ msgstr ""
 
 #: includes/emails/class-wc-email-customer-note.php:37
 msgid "Note added to your {blogname} order from {order_date}"
-msgstr "Sinu {blogname} tellimusele kuupäevaga {order_date} on lisatud märge"
+msgstr "Sinu {blogname} tellimusele kuupäevaga {order_date} on lisatud märkus"
 
 #: includes/emails/class-wc-email-customer-note.php:38
 msgid "A note has been added to your order"
-msgstr "Sinu tellimusele on lisatud märge"
+msgstr "Sinu tellimusele on lisatud märkus"
 
 #: includes/emails/class-wc-email-customer-processing-order.php:26
 msgid "Processing order"
@@ -4524,7 +4524,7 @@ msgstr "Täname tellimuse eest"
 
 #: includes/emails/class-wc-email-customer-processing-order.php:30
 msgid "Your {blogname} order receipt from {order_date}"
-msgstr "Sinu {blogname} tellimuse tšekk kuupäevaga {order_date}"
+msgstr "Sinu {blogname} tellimuse kviitung kuupäevaga {order_date}"
 
 #: includes/emails/class-wc-email-customer-reset-password.php:38
 msgid "Reset password"
@@ -4550,7 +4550,7 @@ msgstr "Uus tellimus"
 
 #: includes/emails/class-wc-email-new-order.php:27
 msgid "New order emails are sent when an order is received."
-msgstr "Uue tellimuse saamisel saadetakse tellimus ekohta välja e-kiri."
+msgstr "Uue tellimuse saamisel saadetakse tellimuse kohta välja e-kiri."
 
 #: includes/emails/class-wc-email-new-order.php:29
 msgid "New customer order"
@@ -4577,7 +4577,7 @@ msgid ""
 "This controls the email subject line. Leave blank to use the default "
 "subject: <code>%s</code>."
 msgstr ""
-"E-kirja teema. Jäta tühjaks, kui soovid kasutada vaikimisi väärtus: <code>"
+"E-kirja teema. Jäta tühjaks, kui soovid kasutada vaikimisi väärtust: <code>"
 "%s</code>."
 
 #: includes/emails/class-wc-email-new-order.php:139
@@ -4660,7 +4660,7 @@ msgid ""
 "as the payment reference. Your order won't be shipped until the funds have "
 "cleared in our account."
 msgstr ""
-"Tee ülekanne meie pangakontole. Palun kasuta selgistuses tellimuse numbrit. "
+"Tee ülekanne meie pangakontole. Palun kasuta selgituses tellimuse numbrit. "
 "Sinu tellimust ei lähetata enne, kui raha on jõudnud meie kontole."
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:86
@@ -4745,13 +4745,13 @@ msgstr "Luba tšekiga maksmine"
 
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:61
 msgid "Cheque Payment"
-msgstr "Tšekiga maksmine"
+msgstr "Tšekk"
 
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:68
 msgid ""
 "Please send your cheque to Store Name, Store Street, Store Town, Store "
 "State / County, Store Postcode."
-msgstr "Palun saada tšekk aadressile: Poe Nimi, aadress, riik, postiindeks."
+msgstr "Palun saada tšekk aadressile: Poe nimi, aadress, riik, postiindeks."
 
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:115
 msgid "Awaiting cheque payment"
@@ -4764,7 +4764,7 @@ msgstr "Tasumine kohaletoimetamisel"
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:25
 msgid "Have your customers pay with cash (or by other means) upon delivery."
-msgstr "Luba klientidel tasuda sularahas (või muul moel) kättesaamisel."
+msgstr "Luba klientidel tasuda sularahas (või muul moel) kauba kättesaamisel."
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:57
 msgid "Enable COD"
@@ -4781,7 +4781,7 @@ msgstr "Makseviisi kirjeldus, mida klient sinu kodulehel näeb."
 #: includes/gateways/cod/class-wc-gateway-cod.php:74
 #: includes/gateways/cod/class-wc-gateway-cod.php:81
 msgid "Pay with cash upon delivery."
-msgstr "Maksa kättesaamisel."
+msgstr "Maksa sularahas, kui saad kauba kätte."
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:80
 msgid "Instructions that will be added to the thank you page."
@@ -4888,7 +4888,7 @@ msgid ""
 "PayPal standard works by sending the user to PayPal to enter their payment "
 "information."
 msgstr ""
-"PayPal Standard töötab nii, et klient saadetakse maksmiseks PayPali lehele."
+"PayPal stanardi kasutamisel saadetakse klient maksmiseks PayPali lehele."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:106
 msgid "Gateway Disabled"
@@ -4907,7 +4907,7 @@ msgid ""
 "Pay via PayPal; you can pay with your credit card if you don't have a PayPal "
 "account"
 msgstr ""
-"Maksa PayPal'i abil. Kui sul ei ole PayPali kontot, saad maksta oma "
+"Maksa PayPali abil. Kui sul ei ole PayPali kontot, saad maksta oma "
 "krediitkaardiga."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:140
@@ -4932,7 +4932,7 @@ msgid ""
 "for your PayPal account. This is used to validate IPN requests."
 msgstr ""
 "Kui see erineb ülalpool sisestatud e-posti aadressist, sisesta oma PayPali "
-"konto peamine saaja e-posti aadress. Seda kasutatakse IPN-päringute "
+"konto peamise saaja e-posti aadress. Seda kasutatakse IPN-päringute "
 "valideerimiseks."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:156
@@ -4946,7 +4946,7 @@ msgid ""
 "payments to be verified without the need for PayPal IPN."
 msgstr ""
 "Valikuliselt võid lubada \"Payment Data Transfer\" (Profile > Website "
-"Payment Preferences) ja siis kopeerida oma identifitseerimise sümbol siia. "
+"Payment Preferences) ja siis kopeerida oma identifitseerimistunnuse siia. "
 "See võimaldab maksete kinnitamist ilma, et peaks kasutama PayPal IPNi."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:161
@@ -5017,7 +5017,7 @@ msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:197
 msgid "Shipping options"
-msgstr "Transpordi valikud"
+msgstr "Transpordi seaded"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:202
 msgid "Shipping details"
@@ -5032,9 +5032,9 @@ msgid ""
 "PayPal allows us to send 1 address. If you are using PayPal for shipping "
 "labels you may prefer to send the shipping address rather than billing."
 msgstr ""
-"PayPal võimaldab saata ainult 1 aadressi. Kui sa kasutad PayPali "
-"tarnekleepsude jaoks, siis ilmselt tahad sa neile saata tarbneaadressi, "
-"mitte arveaadressi."
+"PayPali on võimalik saata vaid 1 aadress. Kui sa kasutad PayPali "
+"tarnekleepsude jaoks, siis ilmselt tahad sa neile saata tarneaadressi, mitte "
+"arveaadressi."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:210
 msgid "Address override"
@@ -5044,7 +5044,8 @@ msgstr "Aadressi ülekirjutamine"
 msgid ""
 "Enable \"address_override\" to prevent address information from being "
 "changed."
-msgstr "Luba \"address_override\", et kaitsta aadressi infot muutmise eest."
+msgstr ""
+"Lülita \"address_override\" sisse, et kaitsta aadressi infot muutmise eest."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:213
 msgid ""
@@ -5064,7 +5065,7 @@ msgstr "PayPali liivakast"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:224
 msgid "Enable PayPal sandbox"
-msgstr "Luba PayPali liivakast"
+msgstr "Lülita PayPali liivakast sisse"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:226
 msgid ""
@@ -5080,14 +5081,14 @@ msgstr "Vealogi"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:231
 msgid "Enable logging"
-msgstr "Luba logimine"
+msgstr "Lülita logimine sisse"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:233
 msgid ""
 "Log PayPal events, such as IPN requests, inside <code>woocommerce/logs/"
 "paypal-%s.txt</code>"
 msgstr ""
-"Logi PayPali sündmused, näiteks IPN-päringud, failis <code>woocommerce/logs/"
+"Logi PayPali sündmused, näiteks IPN-päringud, faili <code>woocommerce/logs/"
 "paypal-%s.txt</code>"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:342
@@ -5240,7 +5241,7 @@ msgid ""
 "Add tracking code to your site's footer. You don't need to enable this if "
 "using a 3rd party analytics plugin."
 msgstr ""
-"Lisa jälgimise kood oma lehe jalusesse. Sa ei pea seda kasutama, kui kasutad "
+"Lisa jälgimiskood oma lehe jalusesse. Sa ei pea seda kasutama, kui kasutad "
 "juba mõne kolmanda osapoole analüütika pluginat."
 
 #: includes/integrations/google-analytics/class-wc-google-analytics.php:82
@@ -5301,7 +5302,7 @@ msgid ""
 "product pages."
 msgstr ""
 "Sisesta oma %1$sShareThis kirjastaja ID%2$s, et näidata sotsiaalse jagamise "
-"nuppe tootdete lehtedel."
+"nuppe toodete lehtedel."
 
 #: includes/integrations/sharethis/class-wc-sharethis.php:69
 msgid "ShareThis Code"
@@ -5314,18 +5315,18 @@ msgstr "Seda valikut muutes saad ShareThis koodi mudida."
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:25
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:85
 msgid "Flat Rate"
-msgstr "Fikseeritud tasu"
+msgstr "Fikseeritud maksumus"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:27
 msgid "Flat rates let you define a standard rate per item, or per order."
 msgstr ""
-"Kindlad määrad lasevad sul määrata standartseid määrasid toote või tellimuse "
-"kohta."
+"Fikseeritud maksumused lasevad sul määrata standartseid transpordikulusid "
+"toote või tellimuse kohta."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:78
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:52
 msgid "Enable this shipping method"
-msgstr "Kasuta seda makseviisi"
+msgstr "Kasuta seda tarneviisi"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:82
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:81
@@ -5354,7 +5355,7 @@ msgstr "Kõik lubatud riigid"
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:103
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:107
 msgid "Specific Countries"
-msgstr "Konkreetsed riigid"
+msgstr "Valitud riigid"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:107
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:81
@@ -5373,7 +5374,7 @@ msgstr "Ei"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:116
 msgid "Cost per order"
-msgstr "Kulu tellimuse kohta"
+msgstr "Maksumus tellimuse kohta"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:119
 msgid ""
@@ -5393,15 +5394,16 @@ msgid ""
 "Example: <code>Priority Mail | 6.95 [+ 0.2%] | order</code>."
 msgstr ""
 "Valikuline - lisavõimalused tarneviisidele koos lisatasudega (üks rea "
-"kohta): Valiku Nimetus | Lisatasu [+- protsenti] | Kulutüüp (order, class "
-"või item) Näide: <code>Lennupost | 6.95 [+ 0.2%] | order</code>."
+"kohta): Lisavaliku nimetus | Lisatasu [+- protsenti] | Kulutüüp (order, "
+"class või item) Näide: <code>Lennupost | 6.95 [+ 0.2%] | order</code>."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:130
 msgid ""
 "Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, "
 "or item)"
 msgstr ""
-"Valiku Nimetus | Lisatasu [+- protsenti] | Kulutüüp (order, class või item)"
+"Lisavaliku nimetus | Lisatasu [+- protsenti] | Kulutüüp (order, class või "
+"item)"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:133
 msgid "Additional Costs"
@@ -5417,17 +5419,17 @@ msgstr ""
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:138
 msgid "Costs Added..."
-msgstr "Rakendatud lisatasud…"
+msgstr "Lisatasusid rakendatakse…"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:142
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:94
 msgid "Per Order - charge shipping for the entire order as a whole"
-msgstr "Tellimuse kohta - tasu võetakse arvestatakse terve tellimuse kohta"
+msgstr "Tellimuse kohta - tasu arvestatakse terve tellimuse kohta"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:143
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:95
 msgid "Per Item - charge shipping for each item individually"
-msgstr "Toote kohta - iga toote eest võetaks eraldi transporditasu"
+msgstr "Toote kohta - iga toote eest võetakse eraldi transporditasu"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:144
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:96
@@ -5471,7 +5473,7 @@ msgstr "Käsitlustasu"
 msgid ""
 "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%."
 msgstr ""
-"Tas ilma maksudeta. Sisesta summa, näiteks 2.50, või protsent, näiteks 5%."
+"Tasu ilma maksudeta. Sisesta summa, näiteks 2.50, või protsent, näiteks 5%."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:532
 msgid "+ Add Cost"
@@ -5483,7 +5485,7 @@ msgstr "Kustuta valitud tasud"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:538
 msgid "Any class"
-msgstr "Iga klass"
+msgstr "Ükskõik milline"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:539
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:540
@@ -5524,7 +5526,7 @@ msgstr "Tarneviisi saadavus"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:106
 msgid "Free Shipping Requires..."
-msgstr "Tasuta transpordi jaoks on tarvis..."
+msgstr "Tasuta transpordi jaoks on vajalik…"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:111
 msgid "A valid free shipping coupon"
@@ -5551,7 +5553,7 @@ msgid ""
 "Users will need to spend this amount to get free shipping (if enabled above)."
 msgstr ""
 "Kasutajad peavad ostma vähemalt selle summa eest, et saada tasuta transporti "
-"(kui see on lubatud ülalpool)."
+"(kui see on ülalpool sisse lülitatud)."
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:29
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:59
@@ -5560,8 +5562,7 @@ msgstr "Rahvusvaheline transport"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:30
 msgid "International delivery based on flat rate shipping."
-msgstr ""
-"Rahvusvaheline transport põhineb kindlal finkseeritud transpordihinnal."
+msgstr "Rahvusvaheline transport põhineb fikseeritud maksumusega transpordil."
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:68
 msgid "Selected countries"
@@ -5569,7 +5570,7 @@ msgstr "Valitud riigid"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:69
 msgid "Excluding selected countries"
-msgstr "Välja arvatud valitud riigid"
+msgstr "Kõik, välja arvatud valitud riigid"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:73
 msgid "Countries"
@@ -5577,7 +5578,7 @@ msgstr "Riigid"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:90
 msgid "Cost Added..."
-msgstr "Tasu lisatud..."
+msgstr "Tasu lisatakse…"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:103
 msgid "Cost excluding tax. Enter an amount, e.g. 2.50."
@@ -5627,7 +5628,7 @@ msgstr "Kindel summa toote kohta"
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:123
 msgid "Delivery Fee"
-msgstr "Kohaletoimetamiuse tasu"
+msgstr "Kohaletoimetamise tasu"
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:126
 msgid ""
@@ -5649,7 +5650,7 @@ msgid ""
 "What zip/post codes would you like to offer delivery to? Separate codes with "
 "a comma. Accepts wildcards, e.g. P* will match a postcode of PE30."
 msgstr ""
-"Millistelke postiindeksitele soovid transporti pakkuda? Eraldi indeksid "
+"Millistele postiindeksitele soovid transporti pakkuda? Eralda indeksid "
 "komaga. Võid kasutada ka tärne, näiteks P* lubab kasutada postiindeksit PE30."
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:169
@@ -5953,7 +5954,7 @@ msgstr "Ostukorvi allahindlus"
 
 #: includes/wc-coupon-functions.php:23
 msgid "Cart % Discount"
-msgstr "Allahindluse % ostukorvis"
+msgstr "Ostukorvi allahindluse %"
 
 #: includes/wc-coupon-functions.php:24
 msgid "Product Discount"
@@ -5961,7 +5962,7 @@ msgstr "Toote allahindlus"
 
 #: includes/wc-coupon-functions.php:25
 msgid "Product % Discount"
-msgstr "Allahindluse % toote kohta"
+msgstr "Toote allahindluse %"
 
 #: includes/wc-customer-functions.php:49
 msgid "An account is already registered with your email address. Please login."
@@ -6391,7 +6392,7 @@ msgstr "Kõrgeimalt hinnantud tooted"
 
 #: templates/cart/cart-empty.php:16
 msgid "Your cart is currently empty."
-msgstr "Sinu osykorv on hetkel tühi."
+msgstr "Sinu ostukorv on hetkel tühi."
 
 #: templates/cart/cart-empty.php:20
 msgid "&larr; Return To Shop"
@@ -6490,7 +6491,7 @@ msgstr "Uuenda ostukorvi"
 
 #: templates/cart/cart.php:126
 msgid "Proceed to Checkout &rarr;"
-msgstr "Edasi kassasse %arr;"
+msgstr "Edasi kassasse &rarr;"
 
 #: templates/cart/cross-sells.php:38
 msgid "You may be interested in&hellip;"
@@ -6952,7 +6953,7 @@ msgstr "E-posti aadress:"
 
 #: templates/myaccount/form-edit-account.php:32
 msgid "Password (leave blank to leave unchanged)"
-msgstr "Parool (jäta tühjaks, kui sa ei soovi seda muuta)"
+msgstr "Parool (jäta tühjaks, kui ei soovi muuta)"
 
 #: templates/myaccount/form-edit-account.php:36
 msgid "Confirm new password"
@@ -7092,7 +7093,7 @@ msgid ""
 "you should have received."
 msgstr ""
 "Oma tellimuse jälgimiseks sisesta palun oma tellimuse ID allolevasse kasti "
-"ja vajuta sisestusklahvi. Tellimuse ID leiad oma tšekilt, mille said "
+"ja vajuta sisestusklahvi. Tellimuse ID leiad oma kviitungilt, mille said "
 "tellimuse kinnitusega e-posti teel. "
 
 #: templates/order/form-tracking.php:19
@@ -7341,8 +7342,8 @@ msgid ""
 "No products had their stock reduced - they may not have stock management "
 "enabled."
 msgstr ""
-"Ühelgi tooteil ei vähandatud laoseisu - võibolla ei ole neil laoseisu haldus "
-"sisse lülitatud."
+"Laoseisu ei vähendatud ühelgi tootel - võibolla ei ole neil toodetel "
+"laoseisu haldus sisse lülitatud."
 
 #: woocommerce-ajax.php:1097 woocommerce-ajax.php:1098
 msgid "Item #%s stock increased from %s to %s."
@@ -7353,8 +7354,8 @@ msgid ""
 "No products had their stock increased - they may not have stock management "
 "enabled."
 msgstr ""
-"Ühelgi tooteil ei suurendatud laoseisu - võibolla ei ole neil laoseisu "
-"haldus sisse lülitatud."
+"Laoseisu ei suurendatud ühelgi tootel - võibolla ei ole neil toodetel "
+"laoseisu haldus sisse lülitatud."
 
 #: woocommerce-ajax.php:1126
 msgid "Value"
