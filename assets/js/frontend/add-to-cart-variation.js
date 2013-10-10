@@ -137,7 +137,7 @@
 
 			        if ( all_set ) {
 
-			        	var variation = matching_variations.pop();
+			        	var variation = matching_variations.shift();
 
 			        	if ( variation ) {
 
