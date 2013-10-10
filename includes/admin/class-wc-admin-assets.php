@@ -84,9 +84,6 @@ class WC_Admin_Assets {
 
 		wp_register_script( 'chosen', $woocommerce->plugin_url() . '/assets/js/chosen/chosen.jquery' . $suffix . '.js', array('jquery'), $woocommerce->version );
 
-		wp_register_script( 'blob', $woocommerce->plugin_url() . '/assets/js/admin/Blob.js', array('jquery'), $woocommerce->version );
-		wp_register_script( 'filesaver', $woocommerce->plugin_url() . '/assets/js/admin/FileSaver.js', array('jquery', 'blob'), $woocommerce->version );
-
 		 // WooCommerce admin pages
 	    if ( in_array( $screen->id, wc_get_screen_ids() ) ) {
 
@@ -96,7 +93,6 @@ class WC_Admin_Assets {
 	    	wp_enqueue_script( 'chosen' );
 	    	wp_enqueue_script( 'jquery-ui-sortable' );
 	    	wp_enqueue_script( 'jquery-ui-autocomplete' );
-	    	wp_enqueue_script( 'filesaver' );
 
 	    	$locale = localeconv();
 

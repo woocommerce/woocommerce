@@ -1,10 +1,10 @@
 <div class="woocommerce-message">
 	<div class="squeezer">
 		<h4><?php _e( 'Please include this information when requesting support:', 'woocommerce' ); ?> </h4>
-		<p class="submit"><a href="#" class="button-primary debug-report"><?php _e( 'Copy the System Report', 'woocommerce' ); ?></a></p>
+		<p class="submit"><a href="#" class="button-primary debug-report"><?php _e( 'Get System Report', 'woocommerce' ); ?></a></p>
 	</div>
+	<div id="debug-report"><textarea readonly="readonly"></textarea></div>
 </div>
-<textarea id="debug-report" readonly="readonly"></textarea>
 <br/>
 <table class="wc_status_table widefat" cellspacing="0">
 
@@ -541,7 +541,9 @@
 		} );
 
 		try {
-			jQuery("#debug-report").val( report ).show().focus().select();
+			jQuery("#debug-report").slideDown();
+			jQuery("#debug-report textarea").val( report ).focus().select();
+			jQuery(this).fadeOut();
 			return false;
 		} catch(e){ console.log( e ); }
 
