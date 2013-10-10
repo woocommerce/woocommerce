@@ -1,9 +1,10 @@
 <div class="woocommerce-message">
 	<div class="squeezer">
 		<h4><?php _e( 'Please include this information when requesting support:', 'woocommerce' ); ?> </h4>
-		<p class="submit"><a href="#" download="wc_report.txt" class="button-primary debug-report"><?php _e( 'Download System Report File', 'woocommerce' ); ?></a></p>
+		<p class="submit"><a href="#" class="button-primary debug-report"><?php _e( 'Copy the System Report', 'woocommerce' ); ?></a></p>
 	</div>
 </div>
+<textarea id="debug-report" readonly="readonly"></textarea>
 <br/>
 <table class="wc_status_table widefat" cellspacing="0">
 
@@ -540,8 +541,7 @@
 		} );
 
 		try {
-			var blob = new Blob( [ report ], { type: "text/plain;charset=" + document.characterSet } );
-			saveAs( blob, jQuery(this).attr('download') );
+			jQuery("#debug-report").val( report ).show().focus().select();
 			return false;
 		} catch(e){ console.log( e ); }
 
