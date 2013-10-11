@@ -92,10 +92,9 @@ class WC_Product_Grouped extends WC_Product {
 
         	if ( false === ( $this->children = get_transient( $transient_name ) ) ) {
 
-		        $this->children = get_posts( 'post_parent=' . $this->id . '&post_type=product&orderby=menu_order&order=ASC&fields=ids&post_status=any&numberposts=-1' );
+		        $this->children = get_posts( 'post_parent=' . $this->id . '&post_type=product&orderby=menu_order&order=ASC&fields=ids&post_status=publish&numberposts=-1' );
 
 				set_transient( $transient_name, $this->children );
-
 			}
 		}
 
