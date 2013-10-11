@@ -115,7 +115,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	public function get_icon() {
 		global $woocommerce;
 
-		$icon = $this->icon ? '<img src="' . WC_HTTPS::force_https_url( $this->icon ) . '" alt="' . $this->title . '" />' : '';
+		$icon = $this->icon ? '<img src="' . WC_HTTPS::force_https_url( $this->icon ) . '" alt="' . $this->get_title() . '" />' : '';
 
 		return apply_filters( 'woocommerce_gateway_icon', $icon, $this->id );
 	}
