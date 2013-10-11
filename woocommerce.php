@@ -403,7 +403,7 @@ final class WooCommerce {
 		// Admin Locale
 		if ( is_admin() ) {
 			load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-admin-$locale.mo" );
-			load_textdomain( 'woocommerce', "i18n/languages/woocommerce-admin-$locale.mo" );
+			load_textdomain( 'woocommerce', dirname( __FILE__ ) . "/i18n/languages/woocommerce-admin-$locale.mo" );
 		}
 
 		// Frontend Locale
