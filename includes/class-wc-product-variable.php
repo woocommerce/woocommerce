@@ -414,11 +414,20 @@ class WC_Product_Variable extends WC_Product {
 	 * Sync variable product prices with the children lowest/highest prices.
 	 */
 	public function variable_product_sync( $product_id = '' ) {
-
 		if ( empty( $product_id ) )
 			$product_id = $this->id;
 
+		// Sync prices with children
 		self::sync( $product_id );
+
+		// Re-load prices
+		$this->price                       = get_post_meta( $product_id, '_price', true );
+		$this->min_variation_price         = get_post_meta( $product_id, '_min_variation_price', true );
+		$this->max_variation_price         = get_post_meta( $product_id, '_max_variation_price', true );
+		$this->min_variation_regular_price = get_post_meta( $product_id, '_min_variation_regular_price', true );
+		$this->max_variation_regular_price = get_post_meta( $product_id, '_max_variation_regular_price', true );
+		$this->min_variation_sale_price    = get_post_meta( $product_id, '_min_variation_sale_price', true );
+		$this->max_variation_sale_price    = get_post_meta( $product_id, '_max_variation_sale_price', true );
 	}
 
 
@@ -483,17 +492,6 @@ class WC_Product_Variable extends WC_Product {
 			update_post_meta( $product_id, '_max_variation_regular_price', $max_variation_regular_price );
 			update_post_meta( $product_id, '_min_variation_sale_price', $min_variation_sale_price );
 			update_post_meta( $product_id, '_max_variation_sale_price', $max_variation_sale_price );
-
-			// Update object if exists
-			if ( isset( $this ) ) {
-				$this->price                       = $min_variation_price;
-				$this->min_variation_price         = $min_variation_price;
-				$this->max_variation_price         = $max_variation_price;
-				$this->min_variation_regular_price = $min_variation_regular_price;
-				$this->max_variation_regular_price = $max_variation_regular_price;
-				$this->min_variation_sale_price    = $min_variation_sale_price;
-				$this->max_variation_sale_price    = $max_variation_sale_price;
-			}
 
 			do_action( 'woocommerce_variable_product_sync', $product_id );
 
