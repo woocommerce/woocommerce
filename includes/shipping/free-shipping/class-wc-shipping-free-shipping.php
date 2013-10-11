@@ -100,7 +100,10 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 							'class'			=> 'chosen_select',
 							'css'			=> 'width: 450px;',
 							'default' 		=> '',
-							'options'		=> $woocommerce->countries->get_shipping_countries()
+							'options'		=> $woocommerce->countries->get_shipping_countries(),
+							'custom_attributes' => array(
+								'data-placeholder' => __( 'Select some counties', 'woocommerce' )
+							)
 						),
 			'requires' => array(
 							'title' 		=> __( 'Free Shipping Requires...', 'woocommerce' ),

@@ -109,7 +109,10 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 				'class'			=> 'chosen_select',
 				'css'			=> 'width: 450px;',
 				'default'		=> '',
-				'options'		=> $woocommerce->countries->get_shipping_countries()
+				'options'		=> $woocommerce->countries->get_shipping_countries(),
+				'custom_attributes' => array(
+					'data-placeholder' => __( 'Select some counties', 'woocommerce' )
+				)
 			)
 		);
 	}
