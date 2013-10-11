@@ -111,7 +111,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 				'default'		=> '',
 				'options'		=> $woocommerce->countries->get_shipping_countries(),
 				'custom_attributes' => array(
-					'data-placeholder' => __( 'Select some counties', 'woocommerce' )
+					'data-placeholder' => __( 'Select some countries', 'woocommerce' )
 				)
 			)
 		);

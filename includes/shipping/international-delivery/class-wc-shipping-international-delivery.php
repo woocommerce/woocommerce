@@ -77,7 +77,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 							'default'		=> '',
 							'options'		=> $woocommerce->countries->get_shipping_countries(),
 							'custom_attributes' => array(
-								'data-placeholder' => __( 'Select some counties', 'woocommerce' )
+								'data-placeholder' => __( 'Select some countries', 'woocommerce' )
 							)
 						),
 			'tax_status' => array(
