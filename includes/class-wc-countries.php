@@ -289,6 +289,7 @@ class WC_Countries {
 			'CZ' => array(),
 			'DE' => array(),
 			'DK' => array(),
+			'EE' => array(),
 			'FI' => array(),
 			'FR' => array(),
 			'IS' => array(),
@@ -609,6 +610,7 @@ class WC_Countries {
 				'CN' => "{country} {postcode}\n{state}, {city}, {address_2}, {address_1}\n{company}\n{name}",
 				'CZ' => $postcode_before_city,
 				'DE' => $postcode_before_city,
+				'EE' => $postcode_before_city,
 				'FI' => $postcode_before_city,
 				'DK' => $postcode_before_city,
 				'FR' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city_upper}\n{country}",
@@ -854,6 +856,12 @@ class WC_Countries {
 					)
 				),
 				'DK' => array(
+					'postcode_before_city' => true,
+					'state'		=> array(
+						'required' => false
+					)
+				),
+				'EE' => array(
 					'postcode_before_city' => true,
 					'state'		=> array(
 						'required' => false
