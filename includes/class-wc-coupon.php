@@ -114,7 +114,7 @@ class WC_Coupon {
 			$this->product_ids                = is_array( $coupon_data['product_ids'] ) ? $coupon_data['product_ids'] : array();
 			$this->exclude_product_ids        = is_array( $coupon_data['exclude_product_ids'] ) ? $coupon_data['exclude_product_ids'] : array();
 			$this->usage_limit                = absint( $coupon_data['usage_limit'] );
-			$this->usage_limit_per_user       = absint( $coupon_data['usage_limit_per_user'] );
+			$this->usage_limit_per_user       = isset( $coupon_data['usage_limit_per_user'] ) ? absint( $coupon_data['usage_limit_per_user'] ) : 0;
 			$this->usage_count                = absint( $coupon_data['usage_count'] );
 			$this->expiry_date                = esc_html( $coupon_data['expiry_date'] );
 			$this->apply_before_tax           = esc_html( $coupon_data['apply_before_tax'] );

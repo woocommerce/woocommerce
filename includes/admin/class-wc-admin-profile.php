@@ -168,9 +168,6 @@ class WC_Admin_Profile {
 	 * @param mixed $user_id User ID of the user being saved
 	 */
 	public function save_customer_meta_fields( $user_id ) {
-		if ( ! current_user_can( 'manage_woocommerce' ) )
-			return $columns;
-
 	 	$save_fields = $this->get_customer_meta_fields();
 
 	 	foreach( $save_fields as $fieldset )
