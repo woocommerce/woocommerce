@@ -516,10 +516,7 @@ function woocommerce_change_term_counts( $terms, $taxonomies, $args ) {
 	if ( is_admin() || is_ajax() )
 		return $terms;
 
-	if ( ! isset( $taxonomies[0] ) || ! is_array( $taxonomies[0] ) )
-		return $terms;
-
-	if ( ! in_array( $taxonomies[0], apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag' ) ) ) )
+	if ( ! isset( $taxonomies[0] ) || ! in_array( $taxonomies[0], apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag' ) ) ) )
 		return $terms;
 
 	$term_counts = $o_term_counts = get_transient( 'wc_term_counts' );
