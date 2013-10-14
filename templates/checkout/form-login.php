@@ -9,7 +9,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-if ( is_user_logged_in()  || ! $checkout->enable_signup ) return;
+if ( is_user_logged_in() ) return;
 
 $info_message = apply_filters( 'woocommerce_checkout_login_message', __( 'Returning customer?', 'woocommerce' ) );
 ?>
