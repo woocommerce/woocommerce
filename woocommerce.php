@@ -924,8 +924,9 @@ class Woocommerce {
 	        ) )
 	    );
 
-	    $attribute_taxonomies = $this->get_attribute_taxonomies();
-		if ( $attribute_taxonomies ) {
+	    global $wc_product_attributes;
+
+		if ( $attribute_taxonomies = $this->get_attribute_taxonomies() ) {
 			foreach ($attribute_taxonomies as $tax) {
 
 		    	$name = $this->attribute_taxonomy_name( $tax->attribute_name );
@@ -933,6 +934,8 @@ class Woocommerce {
 		    	if ($name) {
 
 		    		$label = ( isset( $tax->attribute_label ) && $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
+
+		    		$wc_product_attributes[ $name ] = $tax;
 
 					$show_in_nav_menus = apply_filters( 'woocommerce_attribute_show_in_nav_menus', false, $name );
 

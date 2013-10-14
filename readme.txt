@@ -167,6 +167,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 2.0.16 - 14/10/2013 =
 * Fix - woocommerce_change_term_counts needs to always return terms. Fixes category display.
+* Fix - Attribute label display.
 
 = 2.0.15 - 14/10/2013 =
 * Fix - Added missing line break in plain text email.
