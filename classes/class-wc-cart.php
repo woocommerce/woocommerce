@@ -743,6 +743,7 @@ class WC_Cart {
 					$tax_totals[ $code ]->amount = 0;
 				}
 
+				$tax_totals[ $code ]->tax_rate_id       = $key;
 				$tax_totals[ $code ]->is_compound       = $this->tax->is_compound( $key );
 				$tax_totals[ $code ]->label             = $this->tax->get_rate_label( $key );
 				$tax_totals[ $code ]->amount           += $tax;
