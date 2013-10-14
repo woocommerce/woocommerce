@@ -161,8 +161,12 @@ function woocommerce_nav_menu_item_classes( $menu_items, $args ) {
 		// Unset active class for blog page
 		if ( $page_for_posts == $menu_item->object_id ) {
 			$menu_items[$key]->current = false;
-			unset( $classes[ array_search('current_page_parent', $classes) ] );
-			unset( $classes[ array_search('current-menu-item', $classes) ] );
+
+			if ( in_array( 'current_page_parent', $classes ) )
+				unset( $classes[ array_search('current_page_parent', $classes) ] );
+
+			if ( in_array( 'current-menu-item', $classes ) )
+				unset( $classes[ array_search('current-menu-item', $classes) ] );
 
 		// Set active state if this is the shop page link
 		} elseif ( is_shop() && $shop_page == $menu_item->object_id ) {

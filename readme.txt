@@ -174,6 +174,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Correct state code for Canadian state Newfoundland
 * Fix - Tweaked popularity sorting to work better when no sales are present.
 * Fix - Removed action from single add to cart templates to resolve issues with other plugins.
+* Fix - Unsetting active classes #3896
 
 = 2.0.14 - 05/09/2013 =
 * Tweak - Update cart performance improvements
