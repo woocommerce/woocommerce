@@ -178,6 +178,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - update_status checks if the order id exists #3904
 * Fix - the first matching variation should be used (replaced pop() with shift()) @eef86ab
 * Fix - get_children should get published products only for grouped products #3880
+* Fix - Clean the SKU, prevents variations breaking when &quot; was saved @dc6574b
 
 = 2.0.14 - 05/09/2013 =
 * Tweak - Update cart performance improvements
