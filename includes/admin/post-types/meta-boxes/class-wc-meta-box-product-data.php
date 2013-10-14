@@ -968,8 +968,8 @@ class WC_Meta_Box_Product_Data {
 		wp_set_object_terms( $post_id, $product_shipping_class, 'product_shipping_class');
 
 		// Unique SKU
-		$sku				= get_post_meta($post_id, '_sku', true);
-		$new_sku 			= esc_html( trim( stripslashes( $_POST['_sku'] ) ) );
+		$sku				= get_post_meta( $post_id, '_sku', true );
+		$new_sku 			= woocommerce_clean( stripslashes( $_POST['_sku'] ) );
 
 		if ( $new_sku == '' ) {
 			update_post_meta( $post_id, '_sku', '' );
