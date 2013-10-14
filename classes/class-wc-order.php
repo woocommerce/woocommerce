@@ -1210,7 +1210,7 @@ class WC_Order {
 
 			wp_set_object_terms( $this->id, array( $new_status->slug ), 'shop_order_status', false );
 
-			if ( $this->status != $new_status->slug ) {
+			if ( $this->id && $this->status != $new_status->slug ) {
 
 				// Status was changed
 				do_action( 'woocommerce_order_status_' . $new_status->slug, $this->id );
