@@ -1401,7 +1401,8 @@ class WC_Meta_Box_Product_Data {
 					update_post_meta( $variation_id, '_height', ( $variable_height[ $i ] === '' ) ? '' : woocommerce_format_decimal( $variable_height[ $i ], false ) );
 
 				// Stock handling
-				wc_update_product_stock( $variation_id, woocommerce_clean( $variable_stock[ $i ] ) );
+				if ( isset($variable_stock[$i]) )
+					wc_update_product_stock( $variation_id, woocommerce_clean( $variable_stock[ $i ] ) );
 
 				// Price handling
 				$regular_price 	= woocommerce_format_decimal( $variable_regular_price[ $i ], false );
