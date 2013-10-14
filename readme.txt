@@ -165,7 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.0.15 - 17/09/2013 =
+= 2.0.15 - 14/10/2013 =
 * Fix - Added missing line break in plain text email.
 * Fix - Strict standards warnings in category walkers
 * Fix - Remember which attributes get registered to minimize conflicts
@@ -184,6 +184,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Add tax_rate_id to objects returned from cart->tax_totals @40c85ec
 * Fix - find_product_in_cart check if cart is array #3863
 * Fix - bump_request_timeout strict standards @4798cb8
+* Tweak - Always show returning customer login box.
 
 = 2.0.14 - 05/09/2013 =
 * Tweak - Update cart performance improvements
