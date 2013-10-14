@@ -2346,6 +2346,7 @@ add_action( 'woocommerce_product_set_stock_status', 'woocommerce_recount_after_s
 
 /**
  * woocommerce_change_term_counts function.
+ *
  * Overrides the original term count for product categories and tags with the product count
  * that takes catalog visibility into account.
  *
@@ -2357,17 +2358,15 @@ add_action( 'woocommerce_product_set_stock_status', 'woocommerce_recount_after_s
  */
 function woocommerce_change_term_counts( $terms, $taxonomies, $args ) {
 
-	if ( ! isset( $taxonomies[0] ) || ! is_array( $taxonomies[0] ) )
-		return;
-
-	if ( ! in_array( $taxonomies[0], apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag' ) ) ) )
+	if ( ! isset( $taxonomies[0] ) || ! in_array( $taxonomies[0], apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag' ) ) ) )
 		return $terms;
 
 	$term_counts = $o_term_counts = get_transient( 'wc_term_counts' );
 
 	foreach ( $terms as &$term ) {
 		// If the original term count is zero, there's no way the product count could be higher.
-		if ( empty( $term->count ) ) continue;
+		if ( empty( $term->count ) )
+			continue;
 
 		$term_counts[ $term->term_id ] = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : get_woocommerce_term_meta( $term->term_id, 'product_count_' . $taxonomies[0] , true );
 
