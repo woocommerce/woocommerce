@@ -55,7 +55,8 @@ function woocommerce_attributes() {
 		// Auto-generate the label or slug if only one of both was provided
 		if ( ! $attribute_label ) {
 			$attribute_label = ucwords( $attribute_name );
-		} elseif ( ! $attribute_name ) {
+		}
+		if ( ! $attribute_name ) {
 			$attribute_name = woocommerce_sanitize_taxonomy_name( stripslashes( $attribute_label ) );
 		}
 

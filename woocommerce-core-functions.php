@@ -95,12 +95,12 @@ function woocommerce_get_product_ids_on_sale() {
  * @return void
  */
 function woocommerce_sanitize_taxonomy_name( $taxonomy ) {
-	$taxonomy = strtolower( stripslashes( strip_tags( $taxonomy ) ) );
-	$taxonomy = preg_replace( '/&.+?;/', '', $taxonomy ); // Kill entities
-	$taxonomy = str_replace( array( '.', '\'', '"' ), '', $taxonomy ); // Kill quotes and full stops.
-	$taxonomy = str_replace( array( ' ', '_' ), '-', $taxonomy ); // Replace spaces and underscores.
+	$filtered = strtolower( remove_accents( stripslashes( strip_tags( $taxonomy ) ) ) );
+	$filtered = preg_replace( '/&.+?;/', '', $filtered ); // Kill entities
+	$filtered = str_replace( array( '.', '\'', '"' ), '', $filtered ); // Kill quotes and full stops.
+	$filtered = str_replace( array( ' ', '_' ), '-', $filtered ); // Replace spaces and underscores.
 
-	return $taxonomy;
+	return apply_filters( 'sanitize_taxonomy_name', $filtered, $taxonomy );
 }
 
 /**
