@@ -184,6 +184,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Add tax_rate_id to objects returned from cart->tax_totals @40c85ec
 * Fix - find_product_in_cart check if cart is array #3863
 * Fix - bump_request_timeout strict standards @4798cb8
+* Fix - Fix upload dir #3812
 * Tweak - Always show returning customer login box.
 
 = 2.0.14 - 05/09/2013 =

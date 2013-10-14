@@ -276,15 +276,19 @@ function woocommerce_prevent_admin_access() {
  * @return void
  */
 function woocommerce_downloads_upload_dir( $pathdata ) {
-
-	// Change upload dir
+	// Change upload dir for downloadable files
 	if ( isset( $_POST['type'] ) && $_POST['type'] == 'downloadable_product' ) {
-		// Uploading a downloadable file
-		$subdir = '/woocommerce_uploads'.$pathdata['subdir'];
-	 	$pathdata['path'] = str_replace($pathdata['subdir'], $subdir, $pathdata['path']);
-	 	$pathdata['url'] = str_replace($pathdata['subdir'], $subdir, $pathdata['url']);
-		$pathdata['subdir'] = str_replace($pathdata['subdir'], $subdir, $pathdata['subdir']);
-		return $pathdata;
+		if ( empty( $pathdata['subdir'] ) ) {
+			$pathdata['path']   = $pathdata['path'] . '/woocommerce_uploads';
+			$pathdata['url']    = $pathdata['url']. '/woocommerce_uploads';
+			$pathdata['subdir'] = '/woocommerce_uploads';
+		} else {
+			$new_subdir = '/woocommerce_uploads' . $pathdata['subdir'];
+
+			$pathdata['path']   = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['path'] );
+			$pathdata['url']    = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['url'] );
+			$pathdata['subdir'] = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['subdir'] );
+		}
 	}
 
 	return $pathdata;
