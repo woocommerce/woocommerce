@@ -105,7 +105,7 @@ class WC_Validation {
 		// Check the string against the six types of postcodes
 		foreach ($pcexp as $regexp) {
 
-			if (ereg($regexp,$postcode, $matches)) {
+			if ( preg_match( $regexp, $postcode, $matches ) ) {
 
 				// Load new postcode back into the form element
 				$toCheck = strtoupper ($matches[1] . ' ' . $matches [2]);
