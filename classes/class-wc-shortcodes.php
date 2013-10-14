@@ -547,7 +547,7 @@ class WC_Shortcodes {
 			</p><?php
 
 			// Restore Product global in case this is shown inside a product post
-			wc_setup_product_data( $post );
+			$woocommerce->setup_product_data( $post );
 
 			return ob_get_clean();
 
