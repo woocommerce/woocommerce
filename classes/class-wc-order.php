@@ -1538,4 +1538,21 @@ class WC_Order {
 
 	}
 
+	/**
+	 * Checks if an order needs payment, based on status and order total
+	 *
+	 * @access public
+	 * @return bool
+	 */
+	public function needs_payment() {
+
+		$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $this );
+
+		if ( in_array( $this->status, $valid_order_statuses ) && $this->get_total() > 0 )
+			$needs_payment = true;
+		else
+			$needs_payment = false;
+
+		return apply_filters( 'woocommerce_order_needs_payment', $needs_payment, $this, $valid_order_statuses );
+	}
 }
