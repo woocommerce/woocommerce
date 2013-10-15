@@ -165,6 +165,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.0.17 =
+* Fix - Add missing doctype for email header #3921
+
 = 2.0.16 - 14/10/2013 =
 * Fix - woocommerce_change_term_counts needs to always return terms. Fixes category display.
 * Fix - Attribute label display.
