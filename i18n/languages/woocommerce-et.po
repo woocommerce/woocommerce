@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce 2.1-X Front-end\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-10-03 01:54:35+00:00\n"
-"PO-Revision-Date: 2013-10-11 10:00+0200\n"
+"PO-Revision-Date: 2013-10-15 15:50+0200\n"
 "Last-Translator: Illimar Tambek <illimar.tambek@gmail.com>\n"
 "Language-Team: Divid <info@divid.ee>\n"
 "Language: et\n"
@@ -2030,11 +2030,11 @@ msgstr "Western Cape"
 
 #: i18n/strings.php:16
 msgid "pending"
-msgstr "ootel"
+msgstr "maksmata"
 
 #: i18n/strings.php:17
 msgid "failed"
-msgstr "ebaõnnestunud"
+msgstr "makse ebaõnnestunud"
 
 #: i18n/strings.php:18
 msgid "on-hold"
@@ -3806,8 +3806,8 @@ msgid ""
 "Your order is no longer pending and could not be cancelled. Please contact "
 "us if you need assistance."
 msgstr ""
-"Sinu tellimus ei ole enam ootel ja seda ei saa tühistada. Palun võta meiega "
-"ühendust, kui vajad veel abi."
+"Sinu tellimus ei ole enam maksmise ootel ja seda ei saa tühistada. Palun "
+"võta meiega ühendust, kui vajad veel abi."
 
 #: includes/class-wc-form-handler.php:480
 #: includes/class-wc-form-handler.php:538
@@ -7371,7 +7371,7 @@ msgstr "Dokumentatsioon"
 
 #: woocommerce.php:182
 msgid "Premium Support"
-msgstr "Tugifoorum"
+msgstr "Preemium-tugi"
 
 #, fuzzy
 #~ msgid "Download Permissions Granted"
