@@ -195,18 +195,11 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 			}
 		}
 
-		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ) ) ) {
+		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ) ) && isset( $woocommerce->cart->subtotal ) ) {
+			$total = $woocommerce->cart->prices_include_tax ? $woocommerce->cart->subtotal : $woocommerce->cart->subtotal_ex_tax;
 
-			if ( isset( $woocommerce->cart->cart_contents_total ) ) {
-
-				if ( $woocommerce->cart->prices_include_tax )
-					$total = $woocommerce->cart->tax_total + $woocommerce->cart->cart_contents_total;
-				else
-					$total = $woocommerce->cart->cart_contents_total;
-
-				if ( $total >= $this->min_amount )
-					$has_met_min_amount = true;
-			}
+			if ( $total >= $this->min_amount )
+				$has_met_min_amount = true;
 		}
 
 		switch ( $this->requires ) {

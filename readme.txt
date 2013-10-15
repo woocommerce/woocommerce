@@ -168,6 +168,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.0.17 =
 * Fix - Add missing doctype for email header #3921
 * Fix - 2 notices on the cart/checkout related to tax #3922
+* Tweak - Min amount check now uses subtotal #3924
 
 = 2.0.16 - 14/10/2013 =
 * Fix - woocommerce_change_term_counts needs to always return terms. Fixes category display.
