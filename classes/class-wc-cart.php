@@ -1411,14 +1411,13 @@ class WC_Cart {
 
 							// Get rates
 							$tax_rates			 	= $this->tax->get_rates( $_product->get_tax_class() );
+							$base_tax_rates 		= $this->tax->get_shop_base_rate( $_product->tax_class );
 
 							/**
 							 * ADJUST TAX - Calculations when base tax is not equal to the item tax
 							 */
-							if ( $item_tax_rates !== $base_tax_rates ) {
+							if ( $tax_rates !== $base_tax_rates ) {
 
-								// Get tax rate for the store base, ensuring we use the unmodified tax_class for the product
-								$base_tax_rates 		= $this->tax->get_shop_base_rate( $_product->tax_class );
 								$row_base_price 		= $base_price * $values['quantity'];
 
 								// Work out a new base price without the shop's base tax
@@ -1429,7 +1428,7 @@ class WC_Cart {
 
 								// Now add taxes for the users location
 								$line_subtotal_tax     = array_sum( $this->tax->calc_tax( $line_subtotal, $tax_rates, false ) );
-								$line_subtotal_tax     = $this->round_at_subtotal ? $line_subtotal_tax : $this->tax->round( $line_subtotal_tax );
+								$line_subtotal_tax     = get_option('woocommerce_tax_round_at_subtotal') == 'yes' ? $line_subtotal_tax : $this->tax->round( $line_subtotal_tax );
 
 								// Adjusted price (this is the price including the new tax rate)
 								$adjusted_price        = ( $line_subtotal + $line_subtotal_tax ) / $values['quantity'];
