@@ -60,16 +60,6 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	function init_form_fields() {
 		global $woocommerce;
 
-		// Backwards compat
-		if ( $this->get_option( 'requires_coupon' ) && $this->min_amount )
-			$default_requires = 'either';
-		elseif ( $this->get_option( 'requires_coupon' ) )
-			$default_requires = 'coupon';
-		elseif ( $this->min_amount )
-			$default_requires = 'min_amount';
-		else
-			$default_requires = '';
-
 		$this->form_fields = array(
 			'enabled' => array(
 							'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
@@ -108,7 +98,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 			'requires' => array(
 							'title' 		=> __( 'Free Shipping Requires...', 'woocommerce' ),
 							'type' 			=> 'select',
-							'default' 		=> $default_requires,
+							'default' 		=> '',
 							'options'		=> array(
 								'' 				=> __( 'N/A', 'woocommerce' ),
 								'coupon'		=> __( 'A valid free shipping coupon', 'woocommerce' ),
@@ -193,18 +183,11 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 			}
 		}
 
-		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ) ) ) {
+		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ) ) && isset( $woocommerce->cart->subtotal ) ) {
+			$total = $woocommerce->cart->prices_include_tax ? WC()->cart->subtotal : WC()->cart->subtotal_ex_tax;
 
-			if ( isset( $woocommerce->cart->cart_contents_total ) ) {
-
-				if ( $woocommerce->cart->prices_include_tax )
-					$total = $woocommerce->cart->tax_total + $woocommerce->cart->cart_contents_total;
-				else
-					$total = $woocommerce->cart->cart_contents_total;
-
-				if ( $total >= $this->min_amount )
-					$has_met_min_amount = true;
-			}
+			if ( $total >= $this->min_amount )
+				$has_met_min_amount = true;
 		}
 
 		switch ( $this->requires ) {

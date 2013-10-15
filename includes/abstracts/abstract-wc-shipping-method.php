@@ -42,9 +42,6 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	/** @var float Minimum fee for the method */
 	var $minimum_fee		= null;
 
-	/** @var float Min amount (if set) for the cart to use this method */
-	var $min_amount			= null;
-
 	/** @var bool Enabled for disabled */
 	var $enabled			= false;
 
@@ -170,9 +167,6 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
     	if ( $this->enabled == "no" )
     		return false;
-
-		if ( isset( $woocommerce->cart->cart_contents_total ) && isset( $this->min_amount ) && $this->min_amount && $this->min_amount > $woocommerce->cart->cart_contents_total )
-			return false;
 
 		// Country availability
 		switch ( $this->availability ) {
