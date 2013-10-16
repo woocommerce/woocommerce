@@ -171,6 +171,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Allowed more tags to be saved in sharethis code
 * Tweak - Min amount check now uses subtotal #3924
 * Tweak - Added validate_ID_field method check to settings API for special validation rules
+* Tweak - Added needs_payment() method. Checks if an order needs payment, based on status and order total.
 
 = 2.0.16 - 14/10/2013 =
 * Fix - woocommerce_change_term_counts needs to always return terms. Fixes category display.
