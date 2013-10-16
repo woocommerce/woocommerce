@@ -49,6 +49,20 @@ class WC_ShareThis extends WC_Integration {
 		add_action( 'woocommerce_share', array( $this, 'sharethis_code' ) );
     }
 
+    /**
+     * Validate share this code to allow tags/attributes used by sharethis
+     * @param  string $key
+     * @return string
+     */
+    public function validate_sharethis_code_field( $key ) {
+    	$text = $this->get_option( $key );
+
+    	if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
+    		$text = trim( stripslashes( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) );
+    	}
+
+    	return $text;
+    }
 
     /**
      * Initialise Settings Form Fields

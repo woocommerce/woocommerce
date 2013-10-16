@@ -648,9 +648,17 @@ abstract class WC_Settings_API {
     		if ( empty( $v['type'] ) )
     			$v['type'] = 'text'; // Default to "text" field type.
 
-    		if ( method_exists( $this, 'validate_' . $v['type'] . '_field' ) ) {
+    		// Look for a validate_FIELDID_field method for special handling
+    		if ( method_exists( $this, 'validate_' . $k . '_field' ) ) {
+    			$field = $this->{'validate_' . $k . '_field'}( $k );
+    			$this->sanitized_fields[ $k ] = $field;
+
+    		// Look for a validate_FIELDTYPE_field method
+    		} elseif ( method_exists( $this, 'validate_' . $v['type'] . '_field' ) ) {
     			$field = $this->{'validate_' . $v['type'] . '_field'}( $k );
     			$this->sanitized_fields[ $k ] = $field;
+    		
+    		// Default to text
     		} else {
     			$field = $this->{'validate_text_field'}( $k );
     			$this->sanitized_fields[ $k ] = $field;
