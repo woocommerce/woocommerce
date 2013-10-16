@@ -50,7 +50,7 @@ global $woocommerce;
 	</table>
 
 	<div id="payment">
-		<?php if ($order->order_total > 0) : ?>
+		<?php if ( $order->needs_payment() ) : ?>
 		<ul class="payment_methods methods">
 			<?php
 				if ( $available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways() ) {
