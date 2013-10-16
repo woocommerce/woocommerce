@@ -2228,7 +2228,7 @@ class WC_Cart {
 		/**
 		 * Get the product row price per item.
 		 *
-		 * @params object product
+		 * @param WC_Product $_product
 		 * @return string formatted price
 		 */
 		public function get_product_price( $_product ) {
