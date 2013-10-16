@@ -55,6 +55,14 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	var $rates 				= array();
 
 	/**
+	 * Whether or not we need to calculate tax on top of the shipping rate
+	 * @return boolean
+	 */
+	public function is_taxable() {
+		return ( get_option( 'woocommerce_calc_taxes' ) == 'yes' && $this->tax_status == 'taxable' && ! WC()->customer->is_vat_exempt() );
+	}
+
+	/**
 	 * Add a rate
 	 *
 	 * Add a shipping rate. If taxes are not set they will be calculated based on cost.
@@ -86,7 +94,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 		// Taxes - if not an array and not set to false, calc tax based on cost and passed calc_tax variable
 		// This saves shipping methods having to do complex tax calculations
-		if ( ! is_array( $taxes ) && $taxes !== false && $total_cost > 0 && get_option( 'woocommerce_calc_taxes' ) == 'yes' && $this->tax_status == 'taxable' ) {
+		if ( ! is_array( $taxes ) && $taxes !== false && $total_cost > 0 && $this->is_taxable() ) {
 
 			$_tax 	= new WC_Tax();
 			$taxes 	= array();
