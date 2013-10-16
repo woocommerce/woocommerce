@@ -244,7 +244,7 @@ class WC_Form_Handler {
 					WC()->customer->set_city( $order->billing_city );
 
 				// Update payment method
-				if ( $order->order_total > 0 ) {
+				if ( $order->needs_payment() ) {
 					$payment_method = woocommerce_clean( $_POST['payment_method'] );
 
 					$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
