@@ -624,29 +624,33 @@ class WC_Meta_Box_Product_Data {
 					// List Grouped products
 					$post_parents = array();
 					$post_parents[''] = __( 'Choose a grouped product&hellip;', 'woocommerce' );
+					
+					if ( $grouped_term = get_term_by( 'slug', 'grouped', 'product_type' ) ) {
+					
+						$posts_in = array_unique( (array) get_objects_in_term( $grouped_term->term_id, 'product_type' ) );
+						if ( sizeof( $posts_in ) > 0 ) {
+							$args = array(
+								'post_type'		=> 'product',
+								'post_status' 	=> 'any',
+								'numberposts' 	=> -1,
+								'orderby' 		=> 'title',
+								'order' 		=> 'asc',
+								'post_parent' 	=> 0,
+								'include' 		=> $posts_in,
+							);
+							$grouped_products = get_posts( $args );
 
-					$posts_in = array_unique( (array) get_objects_in_term( get_term_by( 'slug', 'grouped', 'product_type' )->term_id, 'product_type' ) );
-					if ( sizeof( $posts_in ) > 0 ) {
-						$args = array(
-							'post_type'		=> 'product',
-							'post_status' 	=> 'any',
-							'numberposts' 	=> -1,
-							'orderby' 		=> 'title',
-							'order' 		=> 'asc',
-							'post_parent' 	=> 0,
-							'include' 		=> $posts_in,
-						);
-						$grouped_products = get_posts( $args );
+							if ( $grouped_products ) {
+								foreach ( $grouped_products as $product ) {
 
-						if ( $grouped_products ) {
-							foreach ( $grouped_products as $product ) {
+									if ( $product->ID == $post->ID )
+										continue;
 
-								if ( $product->ID == $post->ID )
-									continue;
-
-								$post_parents[ $product->ID ] = $product->post_title;
+									$post_parents[ $product->ID ] = $product->post_title;
+								}
 							}
 						}
+					
 					}
 
 					woocommerce_wp_select( array( 'id' => 'parent_id', 'label' => __( 'Grouping', 'woocommerce' ), 'value' => absint( $post->post_parent ), 'options' => $post_parents, 'desc_tip' => true, 'description' => __( 'Set this option to make this product part of a grouped product.', 'woocommerce' ) ) );
@@ -1397,7 +1401,8 @@ class WC_Meta_Box_Product_Data {
 					update_post_meta( $variation_id, '_height', ( $variable_height[ $i ] === '' ) ? '' : woocommerce_format_decimal( $variable_height[ $i ], false ) );
 
 				// Stock handling
-				wc_update_product_stock( $variation_id, woocommerce_clean( $variable_stock[ $i ] ) );
+				if ( isset($variable_stock[$i]) )
+					wc_update_product_stock( $variation_id, woocommerce_clean( $variable_stock[ $i ] ) );
 
 				// Price handling
 				$regular_price 	= woocommerce_format_decimal( $variable_regular_price[ $i ], false );
