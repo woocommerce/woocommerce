@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.5
 Tested up to: 3.6
-Stable tag: 2.0.16
+Stable tag: 2.0.17
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -175,7 +175,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.0.16 - 14/10/2013 =
 * Fix - woocommerce_change_term_counts needs to always return terms. Fixes category display.
 * Fix - Attribute label display.
-* Fix - add_to_cart shorcode correct use of setup_product_data
+* Fix - add_to_cart shortcode correct use of setup_product_data
 
 = 2.0.15 - 14/10/2013 =
 * Fix - Added missing line break in plain text email.
@@ -264,14 +264,14 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Replace deprecated wp_convert_bytes_to_hr() with size_format()
 
 = 2.0.9 - 02/05/2013 =
-* Feature - Added is_product_taxonomy() conditonal.
+* Feature - Added is_product_taxonomy() conditional.
 * Tweak - Notices during checkout for admin users if the checkout is mis-configured.
 * Tweak - Named charts on report page to make modifications easier.
 * Tweak - woocommerce_before_delete_order_item hook.
 * Fix - Disable autocomplete for checkout fields which refresh totals - no events get fired on autocomplete.
 * Fix - Clear rating transients when editing comments.
 * Fix - Screen ids when plugin name localised.
-* Fix - Brazillian state code BH -> BA. Data update required to update old values in orders.
+* Fix - Brazilian state code BH -> BA. Data update required to update old values in orders.
 * Fix - Fix incorrect CSS class being output in product image gallery.
 * Fix - Mijireh page slurp.
 * Fix - woocommerce_downloadable_product_name filter fixes.
@@ -308,11 +308,11 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Allow extra flat rate options even if main rate is 0.
 * Fix - Fix email subject lines if options not set.
 * Fix - Prevent over-sanitization of attribute terms when editing products.
-* Fix - Santize terms when linking all variations.
+* Fix - Sanitize terms when linking all variations.
 * Fix - Sanitize coupon code names before checking/applying.
 
 = 2.0.6 - 10/04/2013 =
-* Tweak/Fix - Merge taxes by CODE so totals are displayed clearer. Also added additonal function for getting merged tax totals, and to keep compatibility with themes.
+* Tweak/Fix - Merge taxes by CODE so totals are displayed clearer. Also added additional function for getting merged tax totals, and to keep compatibility with themes.
 * Tweak/Fix - Recent reviews show actual review stars, and allowed get_rating_html() to be passed a rating. Also removed unused $location var.
 * Fix - Saving of meta values from paypal after payment.
 * Fix - woocommerce_nav_menu_items - only hide pages, not other objects.
@@ -320,7 +320,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Find_rates now works with both postcode and city together.
 * Fix - PrettyPhoto content clearfixed.
 * Fix - Fix the download method when force SSL is on.
-* Fix - Put back sandbox pending fix. Aparently still needed for some accounts.
+* Fix - Put back sandbox pending fix. Apparently still needed for some accounts.
 * Fix - Do not sanitize old attribute name to not mess up comparing
 * Fix - Settings API empty value only used if set. In turn fixes blank values in flat rate shipping.
 * Fix - Ensure API Request URL scheme is not relative to the current page.
@@ -392,7 +392,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Removed Sidebar Login Widget. Use http://wordpress.org/extend/plugins/sidebar-login/ instead. A potential security issue was found regarding logging of passwords (since GET was used instead of POST). Sidebar Login 2.5 resolves this and the widget has been removed from WC to prevent needing to maintain two (virtually identical) codebases.
 * Localization - Added indian rupees
 * Localization - Updated French translation by absoluteweb
-* Localization - Updated Brazilian translaction by Claudio Sanches
+* Localization - Updated Brazilian translation by Claudio Sanches
 * Localization - Updated Hungarian translation by béla.
 
 = 2.0.3 - 11/03/2013 =
