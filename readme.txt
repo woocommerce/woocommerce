@@ -169,6 +169,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Add missing doctype for email header #3921
 * Fix - 2 notices on the cart/checkout related to tax #3922
 * Fix - Allowed more tags to be saved in sharethis code
+* Fix - If no products on sale, don't show results in sale shortcode
 * Tweak - Min amount check takes taxes in consideration #3924
 * Tweak - Added validate_ID_field method check to settings API for special validation rules
 * Tweak - Added needs_payment() method. Checks if an order needs payment, based on status and order total.

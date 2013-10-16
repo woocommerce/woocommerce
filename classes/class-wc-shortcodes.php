@@ -652,7 +652,7 @@ class WC_Shortcodes {
 			'post_status' 	=> 'publish',
 			'post_type' 	=> 'product',
 			'meta_query' 	=> $meta_query,
-			'post__in'		=> $product_ids_on_sale
+			'post__in'		=> array_merge( array( 0 ), $product_ids_on_sale )
 		);
 
 	  	ob_start();
