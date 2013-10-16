@@ -2247,8 +2247,8 @@ class WC_Cart {
 		 *
 		 * When on the checkout (review order), this will get the subtotal based on the customer's tax rate rather than the base rate
 		 *
-		 * @params object product
-		 * @params int quantity
+		 * @param WC_Product $_product
+		 * @param int quantity
 		 * @return string formatted price
 		 */
 		public function get_product_subtotal( $_product, $quantity ) {
