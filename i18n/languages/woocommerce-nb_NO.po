@@ -8049,7 +8049,7 @@ msgid ""
 "<a href=\"%s\">Click here to download a sample</a>."
 msgstr ""
 "Skattesatser må defineres med kolonner i en bestemt rekkefølge (10 "
-"kolonner). <a href=\"%s\">Klikk her for å laste ned et eksempel</ a>."
+"kolonner). <a href=\"%s\">Klikk her for å laste ned et eksempel</a>."
 
 # @ default
 #: admin/importers/tax-rates-importer.php:292
@@ -11402,7 +11402,7 @@ msgstr ""
 "Disse innstillingene påvirker de faktiske dimensjonene på bilder i katalogen "
 "- displayet på front-end vil fortsatt bli påvirket av CSS-stiler. Etter å ha "
 "endret disse innstillingene må du kanskje <a href=\"%s\">regenerere "
-"miniatyrbildene</ a>."
+"miniatyrbildene</a>."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:681
@@ -11813,7 +11813,7 @@ msgid ""
 "image using the <a href=\"%s\">media uploader</a>."
 msgstr ""
 "Tast inn en URL til et bilde du vil vise i epostens overskrift. Last opp "
-"bildet ditt ved hjelp av <a href=\"%s\">mediaopplaster</ a>."
+"bildet ditt ved hjelp av <a href=\"%s\">mediaopplaster</a>."
 
 # @ woocommerce
 #: admin/settings/settings-init.php:1059
@@ -13527,7 +13527,7 @@ msgid ""
 "\"_blank\">WC official extensions</a>."
 msgstr ""
 "Mer funksjonalitet og gatewayvalg tilgjengelig via <a href=\"%s\" target="
-"\"_blank\">WC offisielle utvidelser</ a>."
+"\"_blank\">WC offisielle utvidelser</a>."
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:226
