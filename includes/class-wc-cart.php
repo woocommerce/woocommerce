@@ -2256,8 +2256,6 @@ class WC_Cart {
 
 			$price 			= $_product->get_price();
 			$taxable 		= $_product->is_taxable();
-			$base_tax_rates = $this->tax->get_shop_base_rate( $_product->tax_class );
-			$tax_rates 		= $this->tax->get_rates( $_product->get_tax_class() ); // This will get the base rate unless we're on the checkout page
 
 			// Taxable
 			if ( $taxable ) {
