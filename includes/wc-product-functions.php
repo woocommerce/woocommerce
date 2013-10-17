@@ -150,7 +150,7 @@ function woocommerce_get_product_ids_on_sale() {
 		SELECT post.ID, post.post_parent FROM `$wpdb->posts` AS post
 		LEFT JOIN `$wpdb->postmeta` AS meta ON post.ID = meta.post_id
 		LEFT JOIN `$wpdb->postmeta` AS meta2 ON post.ID = meta2.post_id
-		WHERE post.post_type IN ( 'product1', 'product_variation' )
+		WHERE post.post_type IN ( 'product', 'product_variation' )
 			AND post.post_status = 'publish'
 			AND meta.meta_key = '_sale_price'
 			AND meta2.meta_key = '_price'
