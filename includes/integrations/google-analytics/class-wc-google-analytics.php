@@ -201,7 +201,7 @@ class WC_Google_Analytics extends WC_Integration {
 				'" . esc_js( get_bloginfo( 'name' ) ) . "',  	// affiliation or store name
 				'" . esc_js( $order->get_total() ) . "',   	    // total - required
 				'" . esc_js( $order->get_total_tax() ) . "',    // tax
-				'" . esc_js( $order->get_shipping() ) . "',	    // shipping
+				'" . esc_js( $order->get_total_shipping() ) . "',	    // shipping
 				'" . esc_js( $order->billing_city ) . "',       // city
 				'" . esc_js( $order->billing_state ) . "',      // state or province
 				'" . esc_js( $order->billing_country ) . "'     // country

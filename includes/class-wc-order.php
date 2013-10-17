@@ -417,19 +417,7 @@ class WC_Order {
 		return get_metadata( 'order_item', $order_item_id, $key, $single );
 	}
 
-
 	/** Total Getters *******************************************************/
-
-	/**
-	 * Gets shipping and product tax.
-	 *
-	 * @access public
-	 * @return float
-	 */
-	public function get_total_tax() {
-		return apply_filters( 'woocommerce_order_amount_total_tax', number_format( (double) $this->order_tax + (double) $this->order_shipping_tax, 2, '.', '' ), $this );
-	}
-
 
 	/**
 	 * Gets the total (product) discount amount - these are applied before tax.
@@ -438,9 +426,8 @@ class WC_Order {
 	 * @return float
 	 */
 	public function get_cart_discount() {
-		return apply_filters( 'woocommerce_order_amount_cart_discount', number_format( (double) $this->cart_discount, 2, '.', '' ), $this );
+		return apply_filters( 'woocommerce_order_amount_cart_discount', (double) $this->cart_discount, $this );
 	}
-
 
 	/**
 	 * Gets the total (product) discount amount - these are applied before tax.
@@ -449,9 +436,8 @@ class WC_Order {
 	 * @return float
 	 */
 	public function get_order_discount() {
-		return apply_filters( 'woocommerce_order_amount_order_discount', number_format( (double) $this->order_discount, 2, '.', '' ), $this );
+		return apply_filters( 'woocommerce_order_amount_order_discount', (double) $this->order_discount, $this );
 	}
-
 
 	/**
 	 * Gets the total discount amount - both kinds
@@ -460,21 +446,18 @@ class WC_Order {
 	 * @return float
 	 */
 	public function get_total_discount() {
-		if ( $this->order_discount || $this->cart_discount )
-			return apply_filters( 'woocommerce_order_amount_total_discount', number_format( (double) $this->order_discount + (double) $this->cart_discount, 2, '.', '' ), $this );
+		return apply_filters( 'woocommerce_order_amount_total_discount', $this->get_cart_discount() + $this->get_order_discount(), $this );
 	}
 
-
 	/**
-	 * Gets shipping total.
+	 * Gets shipping tax amount.
 	 *
 	 * @access public
 	 * @return float
 	 */
-	public function get_shipping() {
-		return apply_filters( 'woocommerce_order_amount_shipping', number_format( (double) $this->order_shipping, 2, '.', '' ), $this );
+	public function get_cart_tax() {
+		return apply_filters( 'woocommerce_order_amount_cart_tax', (double) $this->order_tax, $this );
 	}
-
 
 	/**
 	 * Gets shipping tax amount.
@@ -483,9 +466,28 @@ class WC_Order {
 	 * @return float
 	 */
 	public function get_shipping_tax() {
-		return apply_filters( 'woocommerce_order_amount_shipping_tax', number_format( (double) $this->order_shipping_tax, 2, '.', '' ), $this );
+		return apply_filters( 'woocommerce_order_amount_shipping_tax', (double) $this->order_shipping_tax, $this );
 	}
 
+	/**
+	 * Gets shipping and product tax.
+	 *
+	 * @access public
+	 * @return float
+	 */
+	public function get_total_tax() {
+		return apply_filters( 'woocommerce_order_amount_total_tax', $this->get_cart_tax() + $this->get_shipping_tax(), $this );
+	}	
+
+	/**
+	 * Gets shipping total.
+	 *
+	 * @access public
+	 * @return float
+	 */
+	public function get_total_shipping() {
+		return apply_filters( 'woocommerce_order_amount_total_shipping', (double) $this->order_shipping, $this );
+	}
 
 	/**
 	 * Gets order total.
@@ -494,19 +496,132 @@ class WC_Order {
 	 * @return float
 	 */
 	public function get_total() {
-		return apply_filters( 'woocommerce_order_amount_total', number_format( (double) $this->order_total, 2, '.', '' ), $this );
+		return apply_filters( 'woocommerce_order_amount_total', (double) $this->order_total, $this );
 	}
 
+	/**
+	 * Get item subtotal - this is the cost before discount.
+	 *
+	 * @access public
+	 * @param mixed $item
+	 * @param bool $inc_tax (default: false)
+	 * @param bool $round (default: true)
+	 * @return float
+	 */
+	public function get_item_subtotal( $item, $inc_tax = false, $round = true ) {
+		if ( $inc_tax )
+			$price = ( $item['line_subtotal'] + $item['line_subtotal_tax'] / $item['qty'] );
+		else
+			$price = ( $item['line_subtotal'] / $item['qty'] );
+
+		$price = $round ? number_format( $price, 2, '.', '' ) : $price;
+
+		return apply_filters( 'woocommerce_order_amount_item_subtotal', $price, $this );
+	}
+
+	/**
+	 * Get line subtotal - this is the cost before discount.
+	 *
+	 * @access public
+	 * @param mixed $item
+	 * @param bool $inc_tax (default: false)
+	 * @param bool $round (default: true)
+	 * @return float
+	 */
+	public function get_line_subtotal( $item, $inc_tax = false, $round = true ) {
+		if ( $inc_tax )
+			$price = $item['line_subtotal'] + $item['line_subtotal_tax'];
+		else
+			$price = $item['line_subtotal'];
+
+		$price = $round ? number_format( $price, 2, '.', '' ) : $price;
+
+		return apply_filters( 'woocommerce_order_amount_line_subtotal', $price, $this );
+	}
+
+	/**
+	 * Calculate item cost - useful for gateways.
+	 *
+	 * @access public
+	 * @param mixed $item
+	 * @param bool $inc_tax (default: false)
+	 * @param bool $round (default: true)
+	 * @return float
+	 */
+	public function get_item_total( $item, $inc_tax = false, $round = true ) {
+		if ( $inc_tax )
+			$price = ( ( $item['line_total'] + $item['line_tax'] ) / $item['qty'] );
+		else
+			$price = $item['line_total'] / $item['qty'];
+
+		$price = $round ? number_format( $price, 2, '.', '' ) : $price;
+
+		return apply_filters( 'woocommerce_order_amount_item_total', $price, $this );
+	}
+
+	/**
+	 * Calculate line total - useful for gateways.
+	 *
+	 * @access public
+	 * @param mixed $item
+	 * @param bool $inc_tax (default: false)
+	 * @return float
+	 */
+	public function get_line_total( $item, $inc_tax = false ) {
+		$line_total = $inc_tax ? number_format( $item['line_total'] + $item['line_tax'] , 2, '.', '' ) : number_format( $item['line_total'] , 2, '.', '' );
+		return apply_filters( 'woocommerce_order_amount_line_total', $line_total, $this );
+	}
+
+	/**
+	 * Calculate item tax - useful for gateways.
+	 *
+	 * @access public
+	 * @param mixed $item
+	 * @param bool $round (default: true)
+	 * @return float
+	 */
+	public function get_item_tax( $item, $round = true ) {
+		$price = $item['line_tax'] / $item['qty'];
+		$price = $round ? number_format( $price, 2, '.', '' ) : $price;
+		return apply_filters( 'woocommerce_order_amount_item_tax', $price, $this );
+	}
+
+	/**
+	 * Calculate line tax - useful for gateways.
+	 *
+	 * @access public
+	 * @param mixed $item
+	 * @return float
+	 */
+	public function get_line_tax( $item ) {
+		return apply_filters( 'woocommerce_order_amount_line_tax', number_format( $item['line_tax'], 2, '.', ''), $this );
+	}
+
+	/**
+	 * Gets shipping total.
+	 *
+	 * @deprecated As of 2.1, use of get_total_shipping() is preferred
+	 * @access public
+	 * @return float
+	 */
+	public function get_shipping() {
+		_deprecated_function( 'get_shipping', '2.1', 'get_total_shipping' );
+		return $this->get_total_shipping();
+	}
 
 	/**
 	 * get_order_total function. Alias for get_total()
 	 *
+	 * @deprecated As of 2.1, use of get_total() is preferred
 	 * @access public
 	 * @return void
 	 */
 	public function get_order_total() {
+		_deprecated_function( 'get_order_total', '2.1', 'get_total' );
 		return $this->get_total();
 	}
+
+	/** End Total Getters *******************************************************/
 
 	/**
 	 * Gets formatted shipping method title.
@@ -528,103 +643,6 @@ class WC_Order {
 
 		return apply_filters( 'woocommerce_order_shipping_method', implode( ', ', $labels ), $this );
 	}
-
-	/**
-	 * Get item subtotal - this is the cost before discount.
-	 *
-	 * @access public
-	 * @param mixed $item
-	 * @param bool $inc_tax (default: false)
-	 * @param bool $round (default: true)
-	 * @return float
-	 */
-	public function get_item_subtotal( $item, $inc_tax = false, $round = true ) {
-		if ( $inc_tax )
-			$price = ( $item['line_subtotal'] + $item['line_subtotal_tax'] / $item['qty'] );
-		else
-			$price = ( $item['line_subtotal'] / $item['qty'] );
-		return apply_filters( 'woocommerce_order_amount_item_subtotal', (($round) ? number_format( $price, 2, '.', '') : $price ), $this );
-	}
-
-
-	/**
-	 * Get line subtotal - this is the cost before discount.
-	 *
-	 * @access public
-	 * @param mixed $item
-	 * @param bool $inc_tax (default: false)
-	 * @param bool $round (default: true)
-	 * @return float
-	 */
-	public function get_line_subtotal( $item, $inc_tax = false, $round = true ) {
-		if ( $inc_tax )
-			$price = $item['line_subtotal'] + $item['line_subtotal_tax'];
-		else
-			$price = $item['line_subtotal'];
-		return apply_filters( 'woocommerce_order_amount_line_subtotal', ( ($round) ? number_format( $price, 2, '.', '') : $price ), $this );
-	}
-
-
-	/**
-	 * Calculate item cost - useful for gateways.
-	 *
-	 * @access public
-	 * @param mixed $item
-	 * @param bool $inc_tax (default: false)
-	 * @param bool $round (default: true)
-	 * @return float
-	 */
-	public function get_item_total( $item, $inc_tax = false, $round = true ) {
-		if ( $inc_tax )
-			$price = ( ( $item['line_total'] + $item['line_tax'] ) / $item['qty'] );
-		else
-			$price = $item['line_total'] / $item['qty'];
-		return apply_filters( 'woocommerce_order_amount_item_total', ( ($round) ? number_format( $price, 2, '.', '') : $price ), $this );
-	}
-
-
-	/**
-	 * Calculate item tax - useful for gateways.
-	 *
-	 * @access public
-	 * @param mixed $item
-	 * @param bool $round (default: true)
-	 * @return float
-	 */
-	public function get_item_tax( $item, $round = true ) {
-		$price = $item['line_tax'] / $item['qty'];
-		return apply_filters( 'woocommerce_order_amount_item_tax', ( ($round) ? number_format( $price, 2, '.', '') : $price ), $this );
-	}
-
-
-	/**
-	 * Calculate line total - useful for gateways.
-	 *
-	 * @access public
-	 * @param mixed $item
-	 * @param bool $inc_tax (default: false)
-	 * @return float
-	 */
-	public function get_line_total( $item, $inc_tax = false ) {
-		if ( $inc_tax )
-			return apply_filters( 'woocommerce_order_amount_line_total', number_format( $item['line_total'] + $item['line_tax'] , 2, '.', ''), $this );
-		else
-			return apply_filters( 'woocommerce_order_amount_line_total', number_format( $item['line_total'] , 2, '.', ''), $this );
-	}
-
-
-	/**
-	 * Calculate line tax - useful for gateways.
-	 *
-	 * @access public
-	 * @param mixed $item
-	 * @return float
-	 */
-	public function get_line_tax( $item ) {
-		return apply_filters( 'woocommerce_order_amount_line_tax', number_format( $item['line_tax'], 2, '.', ''), $this );
-	}
-
-	/** End Total Getters *******************************************************/
 
 	/**
 	 * Gets line subtotal - formatted for display.
@@ -713,7 +731,7 @@ class WC_Order {
 			}
 
 			// Add Shipping Costs
-			$subtotal += $this->get_shipping();
+			$subtotal += $this->get_total_shipping();
 
 			// Remove non-compound taxes
 			foreach ( $this->get_taxes() as $tax ) {

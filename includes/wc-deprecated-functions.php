@@ -74,13 +74,14 @@ add_action( 'init', 'woocommerce_legacy_paypal_ipn' );
 global $wc_map_deprecated_filters;
 
 $wc_map_deprecated_filters = array(
-	'woocommerce_cart_item_class'        => 'woocommerce_cart_table_item_class',
-	'woocommerce_cart_item_product_id'   => 'hook_woocommerce_in_cart_product_id',
-	'woocommerce_cart_item_thumbnail'    => 'hook_woocommerce_in_cart_product_thumbnail',
-	'woocommerce_cart_item_price'        => 'woocommerce_cart_item_price_html',
-	'woocommerce_cart_item_name'         => 'woocommerce_in_cart_product_title',
-	'woocommerce_order_item_class'       => 'woocommerce_order_table_item_class',
-	'woocommerce_order_item_name' => 'woocommerce_order_table_product_title'
+	'woocommerce_cart_item_class'       => 'woocommerce_cart_table_item_class',
+	'woocommerce_cart_item_product_id'  => 'hook_woocommerce_in_cart_product_id',
+	'woocommerce_cart_item_thumbnail'   => 'hook_woocommerce_in_cart_product_thumbnail',
+	'woocommerce_cart_item_price'       => 'woocommerce_cart_item_price_html',
+	'woocommerce_cart_item_name'        => 'woocommerce_in_cart_product_title',
+	'woocommerce_order_item_class'      => 'woocommerce_order_table_item_class',
+	'woocommerce_order_item_name'       => 'woocommerce_order_table_product_title',
+	'woocommerce_order_amount_shipping' => 'woocommerce_order_amount_total_shipping'
 );
 
 foreach ( $wc_map_deprecated_filters as $new => $old )
