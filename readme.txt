@@ -173,6 +173,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Min amount check takes taxes in consideration #3924
 * Tweak - Added validate_ID_field method check to settings API for special validation rules
 * Tweak - Added needs_payment() method. Checks if an order needs payment, based on status and order total.
+* Tweak - Key value pairs for order_meta (woocommerce_email_order_meta_keys)
 
 = 2.0.16 - 14/10/2013 =
 * Fix - woocommerce_change_term_counts needs to always return terms. Fixes category display.
