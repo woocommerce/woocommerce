@@ -37,7 +37,7 @@
         this.find('.variations select').unbind( 'change focusin' );
 
         // Bind events
-        return this
+        $form = this
 
 				// On clicking the reset variation button
 				.on( 'click', '.reset_variations', function( event ) {
@@ -404,6 +404,9 @@
 			        $single_variation_wrap.slideDown('200').trigger( 'show_variation', [ variation ] );
 
 				});
+		
+		$form.trigger('wc_variation_form');
+		return $form;
     };
 
     $(function() {

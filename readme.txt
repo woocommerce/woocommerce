@@ -165,7 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.0.17 - 16/10/2013 =
+= 2.0.17 - 17/10/2013 =
 * Fix - Add missing doctype for email header #3921
 * Fix - 2 notices on the cart/checkout related to tax #3922
 * Fix - Allowed more tags to be saved in sharethis code
@@ -174,6 +174,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Added validate_ID_field method check to settings API for special validation rules
 * Tweak - Added needs_payment() method. Checks if an order needs payment, based on status and order total.
 * Tweak - Key value pairs for order_meta (woocommerce_email_order_meta_keys)
+* Tweak - Added wc_variation_form trigger to variations javascript for 3rd party plugins
 
 = 2.0.16 - 14/10/2013 =
 * Fix - woocommerce_change_term_counts needs to always return terms. Fixes category display.
