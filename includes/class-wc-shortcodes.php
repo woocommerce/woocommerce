@@ -831,7 +831,7 @@ class WC_Shortcodes {
 
 		wc_print_messages();
 
-		return ob_get_clean();
+		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
 
 	/**
