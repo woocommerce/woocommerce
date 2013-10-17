@@ -35,7 +35,7 @@ class WC_Session_Handler extends WC_Session {
 	 * @return void
 	 */
 	public function __construct() {
-		$this->_cookie = 'wc_session_cookie_' . COOKIEHASH;
+		$this->_cookie = 'wp_woocommerce_session_' . COOKIEHASH;
 
 		if ( $cookie = $this->get_session_cookie() ) {
 			$this->_customer_id        = $cookie[0];
@@ -55,16 +55,29 @@ class WC_Session_Handler extends WC_Session {
 
 		$this->_data = $this->get_session_data();
 
-    	// Set/renew our cookie
-    	$to_hash      = $this->_customer_id . $this->_session_expiration;
-    	$cookie_hash  = hash_hmac( 'md5', $to_hash, wp_hash( $to_hash ) );
-    	$cookie_value = $this->_customer_id . '||' . $this->_session_expiration . '||' . $this->_session_expiring . '||' . $cookie_hash;
-
-    	setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, COOKIEPATH, COOKIE_DOMAIN, false, true );
-
     	// Actions
+    	add_action( 'woocommerce_set_cart_cookies', array( $this, 'set_customer_session_cookie' ), 10 );
     	add_action( 'woocommerce_cleanup_sessions', array( $this, 'cleanup_sessions' ), 10 );
     	add_action( 'shutdown', array( $this, 'save_data' ), 20 );
+    }
+
+    /**
+     * Sets the session cookie on-demand (usually after adding an item to the cart).
+     *
+     * Since the cookie name (as of 2.1) is prepended with wp, cache systems like batcache will not cache pages when set.
+     *
+     * Warning: Cookies will only be set if this is called before the headers are sent.
+     */
+    public function set_customer_session_cookie( $set ) {
+    	if ( $set ) {
+	    	// Set/renew our cookie
+	    	$to_hash      = $this->_customer_id . $this->_session_expiration;
+	    	$cookie_hash  = hash_hmac( 'md5', $to_hash, wp_hash( $to_hash ) );
+	    	$cookie_value = $this->_customer_id . '||' . $this->_session_expiration . '||' . $this->_session_expiring . '||' . $cookie_hash;
+
+	    	// Set the cookie
+	    	wc_setcookie( $this->_cookie, $cookie_value, $this->_session_expiration );
+	    }
     }
 
     /**

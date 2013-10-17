@@ -320,3 +320,18 @@ function wc_print_js() {
 		unset( $wc_queued_js );
 	}
 }
+
+/**
+ * Set a cookie - wrapper for setcookie using WP constants
+ * 
+ * @param  string  $name   Name of the cookie being set
+ * @param  string  $value  Value of the cookie
+ * @param  integer $expire Expiry of the cookie
+ */
+function wc_setcookie( $name, $value, $expire = 0 ) {
+	if ( ! headers_sent() ) {
+		setcookie( $name, $value, $expire, COOKIEPATH, COOKIE_DOMAIN, false );
+	} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		trigger_error( "Cookie cannot be set - headers already sent", E_USER_NOTICE );
+	}
+}

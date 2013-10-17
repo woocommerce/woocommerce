@@ -568,7 +568,7 @@ function woocommerce_track_product_view() {
 		array_shift( $viewed_products );
 
 	// Store for session only
-	setcookie( "woocommerce_recently_viewed", implode( '|', $viewed_products ), 0, COOKIEPATH, COOKIE_DOMAIN, false, true );
+	wc_setcookie( 'woocommerce_recently_viewed', implode( '|', $viewed_products ) );
 }
 
 add_action( 'template_redirect', 'woocommerce_track_product_view', 20 );

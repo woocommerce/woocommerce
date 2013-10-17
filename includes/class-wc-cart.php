@@ -995,15 +995,15 @@ class WC_Cart {
 		 * @return void
 		 */
 		private function set_cart_cookies( $set = true ) {
-			if ( ! headers_sent() ) {
-				if ( $set ) {
-					setcookie( "woocommerce_items_in_cart", "1", 0, COOKIEPATH, COOKIE_DOMAIN, false );
-					setcookie( "woocommerce_cart_hash", md5( json_encode( $this->get_cart() ) ), 0, COOKIEPATH, COOKIE_DOMAIN, false );
-				} else {
-					setcookie( "woocommerce_items_in_cart", "0", time() - 3600, COOKIEPATH, COOKIE_DOMAIN, false );
-					setcookie( "woocommerce_cart_hash", "0", time() - 3600, COOKIEPATH, COOKIE_DOMAIN, false );
-				}
+			if ( $set ) {
+				wc_setcookie( 'woocommerce_items_in_cart', 1 );
+				wc_setcookie( 'woocommerce_cart_hash', md5( json_encode( $this->get_cart() ) ) );
+			} else {
+				wc_setcookie( 'woocommerce_items_in_cart', 0, time() - 3600 );
+				wc_setcookie( 'woocommerce_cart_hash', '', time() - 3600 );
 			}
+
+			do_action( 'woocommerce_set_cart_cookies', $set );
 		}
 
     /*-----------------------------------------------------------------------------------*/
