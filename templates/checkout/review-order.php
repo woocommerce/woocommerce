@@ -26,10 +26,10 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 				<td><?php wc_cart_totals_subtotal_html(); ?></td>
 			</tr>
 
-			<?php foreach ( WC()->cart->get_applied_coupons( 'cart' ) as $code ) : ?>
+			<?php foreach ( WC()->cart->get_coupons( 'cart' ) as $code => $coupon ) : ?>
 				<tr class="cart-discount coupon-<?php echo esc_attr( $code ); ?>">
 					<th><?php echo esc_html( $code ); ?></th>
-					<td><?php wc_cart_totals_coupon_html( $code ); ?></td>
+					<td><?php wc_cart_totals_coupon_html( $coupon ); ?></td>
 				</tr>
 			<?php endforeach; ?>
 
@@ -66,10 +66,10 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 				<?php endif; ?>
 			<?php endif; ?>
 
-			<?php foreach ( WC()->cart->get_applied_coupons( 'order' ) as $code ) : ?>
+			<?php foreach ( WC()->cart->get_coupons( 'order' ) as $code => $coupon ) : ?>
 				<tr class="order-discount coupon-<?php echo esc_attr( $code ); ?>">
 					<th><?php echo esc_html( $code ); ?></th>
-					<td><?php wc_cart_totals_coupon_html( $code ); ?></td>
+					<td><?php wc_cart_totals_coupon_html( $coupon ); ?></td>
 				</tr>
 			<?php endforeach; ?>
 

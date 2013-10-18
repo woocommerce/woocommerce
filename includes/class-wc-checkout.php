@@ -345,8 +345,8 @@ class WC_Checkout {
 		}
 
 		// Store coupons
-		if ( $applied_coupons = $woocommerce->cart->get_applied_coupons() ) {
-			foreach ( $applied_coupons as $code ) {
+		if ( $applied_coupons = $woocommerce->cart->get_coupons() ) {
+			foreach ( $applied_coupons as $code => $coupon ) {
 
 				$item_id = woocommerce_add_order_item( $order_id, array(
 			 		'order_item_name' 		=> $code,

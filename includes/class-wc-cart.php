@@ -14,13 +14,19 @@
 class WC_Cart {
 
 	/** @var array Contains an array of cart items. */
-	public $cart_contents;
+	public $cart_contents = array();
 
 	/** @var array Contains an array of coupon codes applied to the cart. */
-	public $applied_coupons;
+	public $applied_coupons = array();
+
+	/** @var array Contains an array of coupon objects applied to the cart. */
+	public $coupons = array();
 
 	/** @var array Contains an array of coupon code discounts after they have been applied. */
-	public $coupon_discount_amounts;
+	public $coupon_discount_amounts = array();
+
+	/** @var array Contains an array of coupon usage counts after they have been applied. */
+	public $coupon_applied_count = array();
 
 	/** @var float The total cost of the cart items. */
 	public $cart_contents_total;
@@ -92,6 +98,21 @@ class WC_Cart {
 		add_action( 'init', array( $this, 'init' ), 5 ); // Get cart on init
 	}
 
+	/**
+	 * Get undefined vars
+	 *
+	 * @param mixed $key
+	 * @return mixed
+	 */
+	public function __get( $key ) {
+		switch( $key ) {
+			case 'applied_coupons':
+				_deprecated_argument( 'WC_Cart->applied_coupons', '2.1', 'WC_Cart->get_coupons()' );
+				return array_keys( $this->coupons );
+			default:
+				return false;
+		}
+	}
 
     /**
 	 * Loads the cart data from the PHP session during WordPress init and hooks in other methods.
@@ -118,16 +139,18 @@ class WC_Cart {
 		 * @return void
 		 */
 		public function get_cart_from_session() {
-			global $woocommerce;
 
-			// Load the coupons
-			$this->applied_coupons         = ( empty( $woocommerce->session->coupon_codes ) ) ? array() : array_filter( (array) $woocommerce->session->coupon_codes );
-			$this->coupon_discount_amounts = ( empty( $woocommerce->session->coupon_amounts ) ) ? array() : array_filter( (array) $woocommerce->session->coupon_amounts );
+			// Load the coupons from the session
+			$this->coupon_discount_amounts = array_filter( WC()->session->get( 'coupon_amounts', array() ) );
+			
+			if ( $coupons = array_filter( WC()->session->get( 'coupon_codes', array() ) ) )
+				foreach ( $coupons as $code )
+					$this->coupons[ $code ] = new WC_Coupon( $code );
 
 			// Load the cart
-			if ( isset( $woocommerce->session->cart ) && is_array( $woocommerce->session->cart ) ) {
-				$cart = $woocommerce->session->cart;
+			$cart = WC()->session->get( 'cart', array() );
 
+			if ( is_array( $cart ) ) {
 				foreach ( $cart as $key => $values ) {
 
 					$_product = get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'] );
@@ -146,9 +169,6 @@ class WC_Cart {
 				}
 			}
 
-			if ( empty( $this->cart_contents ) || ! is_array( $this->cart_contents ) )
-				$this->cart_contents = array();
-
 			if ( sizeof( $this->cart_contents ) > 0 )
 				$this->set_cart_cookies();
 			else
@@ -158,42 +178,35 @@ class WC_Cart {
 			do_action( 'woocommerce_cart_loaded_from_session', $this );
 
 			// Load totals
-			$this->cart_contents_total 	= isset( $woocommerce->session->cart_contents_total ) ? $woocommerce->session->cart_contents_total : 0;
-			$this->cart_contents_weight = isset( $woocommerce->session->cart_contents_weight ) ? $woocommerce->session->cart_contents_weight : 0;
-			$this->cart_contents_count 	= isset( $woocommerce->session->cart_contents_count ) ? $woocommerce->session->cart_contents_count : 0;
-			$this->cart_contents_tax 	= isset( $woocommerce->session->cart_contents_tax ) ? $woocommerce->session->cart_contents_tax : 0;
-			$this->total 				= isset( $woocommerce->session->total ) ? $woocommerce->session->total : 0;
-			$this->subtotal 			= isset( $woocommerce->session->subtotal ) ? $woocommerce->session->subtotal : 0;
-			$this->subtotal_ex_tax 		= isset( $woocommerce->session->subtotal_ex_tax ) ? $woocommerce->session->subtotal_ex_tax : 0;
-			$this->tax_total 			= isset( $woocommerce->session->tax_total ) ? $woocommerce->session->tax_total : 0;
-			$this->taxes 				= isset( $woocommerce->session->taxes ) ? $woocommerce->session->taxes : array();
-			$this->shipping_taxes		= isset( $woocommerce->session->shipping_taxes ) ? $woocommerce->session->shipping_taxes : array();
-			$this->discount_cart 		= isset( $woocommerce->session->discount_cart ) ? $woocommerce->session->discount_cart : 0;
-			$this->discount_total 		= isset( $woocommerce->session->discount_total ) ? $woocommerce->session->discount_total : 0;
-			$this->shipping_total 		= isset( $woocommerce->session->shipping_total ) ? $woocommerce->session->shipping_total : 0;
-			$this->shipping_tax_total 	= isset( $woocommerce->session->shipping_tax_total ) ? $woocommerce->session->shipping_tax_total : 0;
+			$this->cart_contents_total  = WC()->session->get( 'cart_contents_total', 0 );
+			$this->cart_contents_weight = WC()->session->get( 'cart_contents_weight', 0 );
+			$this->cart_contents_count  = WC()->session->get( 'cart_contents_count', 0 );
+			$this->cart_contents_tax    = WC()->session->get( 'cart_contents_tax', 0 );
+			$this->total                = WC()->session->get( 'total', 0 );
+			$this->subtotal             = WC()->session->get( 'subtotal', 0 );
+			$this->subtotal_ex_tax      = WC()->session->get( 'subtotal_ex_tax', 0 );
+			$this->tax_total            = WC()->session->get( 'tax_total', 0 );
+			$this->taxes                = WC()->session->get( 'taxes', array() );
+			$this->shipping_taxes       = WC()->session->get( 'shipping_taxes', array() );
+			$this->discount_cart        = WC()->session->get( 'discount_cart', 0 );
+			$this->discount_total       = WC()->session->get( 'discount_total', 0 );
+			$this->shipping_total       = WC()->session->get( 'shipping_total', 0 );
+			$this->shipping_tax_total   = WC()->session->get( 'shipping_tax_total', 0 );
 
 			// Queue re-calc if subtotal is not set
 			if ( ! $this->subtotal && sizeof( $this->cart_contents ) > 0 )
 				$this->calculate_totals();
 		}
 
-
 		/**
 		 * Sets the php session data for the cart and coupons.
-		 *
-		 * @access public
-		 * @return void
 		 */
 		public function set_session() {
-			global $woocommerce;
-
 			// Set cart and coupon session data
 			$cart_session = array();
 
 			if ( $this->cart_contents ) {
 				foreach ( $this->cart_contents as $key => $values ) {
-
 					$cart_session[ $key ] = $values;
 
 					// Unset product object
@@ -201,25 +214,24 @@ class WC_Cart {
 				}
 			}
 
-			$woocommerce->session->cart           = $cart_session;
-			$woocommerce->session->coupon_codes   = $this->applied_coupons;
-			$woocommerce->session->coupon_amounts = $this->coupon_discount_amounts;
-
-			// Store totals to avoid re-calc on page load
-			$woocommerce->session->cart_contents_total  = $this->cart_contents_total;
-			$woocommerce->session->cart_contents_weight = $this->cart_contents_weight;
-			$woocommerce->session->cart_contents_count  = $this->cart_contents_count;
-			$woocommerce->session->cart_contents_tax    = $this->cart_contents_tax;
-			$woocommerce->session->total                = $this->total;
-			$woocommerce->session->subtotal             = $this->subtotal;
-			$woocommerce->session->subtotal_ex_tax      = $this->subtotal_ex_tax;
-			$woocommerce->session->tax_total            = $this->tax_total;
-			$woocommerce->session->shipping_taxes       = $this->shipping_taxes;
-			$woocommerce->session->taxes                = $this->taxes;
-			$woocommerce->session->discount_cart        = $this->discount_cart;
-			$woocommerce->session->discount_total       = $this->discount_total;
-			$woocommerce->session->shipping_total       = $this->shipping_total;
-			$woocommerce->session->shipping_tax_total   = $this->shipping_tax_total;
+			WC()->session->set( 'cart', $cart_session );
+			WC()->session->set( 'coupon_codes', array_keys( $this->coupons ) );
+			WC()->session->set( 'coupon_amounts', $this->coupon_discount_amounts );
+			WC()->session->set( 'cart_contents_total', $this->cart_contents_total );
+			WC()->session->set( 'cart_contents_total', $this->cart_contents_total );
+			WC()->session->set( 'cart_contents_weight', $this->cart_contents_weight );
+			WC()->session->set( 'cart_contents_count', $this->cart_contents_count );
+			WC()->session->set( 'cart_contents_tax', $this->cart_contents_tax );
+			WC()->session->set( 'total', $this->total );
+			WC()->session->set( 'subtotal', $this->subtotal );
+			WC()->session->set( 'subtotal_ex_tax', $this->subtotal_ex_tax );
+			WC()->session->set( 'tax_total', $this->tax_total );
+			WC()->session->set( 'shipping_taxes', $this->shipping_taxes );
+			WC()->session->set( 'taxes', $this->taxes );
+			WC()->session->set( 'discount_cart', $this->discount_cart );
+			WC()->session->set( 'discount_total', $this->discount_total );
+			WC()->session->set( 'shipping_total', $this->shipping_total );
+			WC()->session->set( 'shipping_tax_total', $this->shipping_tax_total );
 
 			if ( get_current_user_id() )
 				$this->persistent_cart_update();
@@ -235,12 +247,10 @@ class WC_Cart {
 		 * @return void
 		 */
 		public function empty_cart( $clear_persistent_cart = true ) {
-			global $woocommerce;
-
 			$this->cart_contents = array();
 			$this->reset();
 
-			unset( $woocommerce->session->order_awaiting_payment, $woocommerce->session->coupon_codes, $woocommerce->session->coupon_amounts, $woocommerce->session->cart );
+			unset( WC()->session->order_awaiting_payment, WC()->session->coupon_codes, WC()->session->coupon_amounts, WC()->session->cart );
 
 			if ( $clear_persistent_cart && get_current_user_id() )
 				$this->persistent_cart_destroy();
@@ -259,10 +269,8 @@ class WC_Cart {
 		 * @return void
 		 */
 		public function persistent_cart_update() {
-			global $woocommerce;
-
 			update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart', array(
-				'cart' => $woocommerce->session->cart,
+				'cart' => WC()->session->cart,
 			) );
 		}
 
@@ -311,8 +319,6 @@ class WC_Cart {
 		 * @return void
 		 */
 		public function check_cart_items() {
-			global $woocommerce;
-
 			$result = $this->check_cart_item_validity();
 
 			if ( is_wp_error( $result ) )
@@ -333,20 +339,16 @@ class WC_Cart {
 		 * @return void
 		 */
 		public function check_cart_coupons() {
-			if ( ! empty( $this->applied_coupons ) ) {
-				foreach ( $this->applied_coupons as $key => $code ) {
-					$coupon = new WC_Coupon( $code );
+			foreach ( $this->coupons as $code => $coupon ) {
+				if ( ! $coupon->is_valid() ) {
+					// Error message
+					$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_INVALID_REMOVED );
 
-					if ( ! $coupon->is_valid() ) {
+					// Remove the coupon
+					$this->remove_coupon( $code );
 
-						$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_INVALID_REMOVED );
-
-						// Remove the coupon
-						unset( $this->applied_coupons[ $key ] );
-
-						WC()->session->set( 'coupon_codes', $this->applied_coupons );
-						WC()->session->set( 'refresh_totals', true );
-					}
+					// Flag totals for refresh
+					WC()->session->set( 'refresh_totals', true );
 				}
 			}
 		}
@@ -388,76 +390,6 @@ class WC_Cart {
 
 			}
 			return $quantities;
-		}
-
-		/**
-		 * Check for user coupons (now that we have billing email). If a coupon is invalid, add an error.
-		 *
-		 * Checks two types of coupons:
-		 *  1. Where a list of customer emails are set (limits coupon usage to those defined)
-		 *  2. Where a usage_limit_per_user is set (limits coupon usage to a number based on user ID and email)
-		 *
-		 * @access public
-		 * @param array $posted
-		 */
-		public function check_customer_coupons( $posted ) {
-			if ( ! empty( $this->applied_coupons ) ) {
-				foreach ( $this->applied_coupons as $key => $code ) {
-					$coupon = new WC_Coupon( $code );
-
-					if ( $coupon->is_valid() ) {
-
-						// Limit to defined email addresses
-						if ( is_array( $coupon->customer_email ) && sizeof( $coupon->customer_email ) > 0 ) {
-							$coupon->customer_email = array_map( 'sanitize_email', $coupon->customer_email );
-
-							if ( is_user_logged_in() ) {
-								$current_user   = wp_get_current_user();
-								$check_emails[] = $current_user->user_email;
-							}
-							$check_emails[] = $posted['billing_email'];
-							$check_emails   = array_map( 'sanitize_email', array_map( 'strtolower', $check_emails ) );
-
-							if ( 0 == sizeof( array_intersect( $check_emails, $coupon->customer_email ) ) ) {
-								$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED );
-
-								// Remove the coupon
-								unset( $this->applied_coupons[ $key ] );
-
-								WC()->session->set( 'coupon_codes', $this->applied_coupons );
-								WC()->session->set( 'refresh_totals', true );
-							}
-						}
-
-						// Usage limits per user - check against billing and user email and user ID
-						if ( $coupon->usage_limit_per_user > 0 ) {
-							$used_by = get_post_meta( $this->id, '_used_by' );
-
-							if ( is_user_logged_in() ) {
-								$current_user   = wp_get_current_user();
-								$check_emails[] = $current_user->user_email;
-							}
-							$check_emails[] = $posted['billing_email'];
-							$check_emails   = array_map( 'sanitize_email', array_map( 'strtolower', $check_emails ) );
-
-							$usage_count    = sizeof( array_keys( $used_by, get_current_user_id() ) );
-
-							foreach ( $check_emails as $check_email )
-								$usage_count    = $usage_count + sizeof( array_keys( $used_by, $check_email ) );
-
-							if ( $usage_count >= $coupon->usage_limit_per_user ) {
-								$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED );
-
-								// Remove the coupon
-								unset( $this->applied_coupons[ $key ] );
-
-								WC()->session->set( 'coupon_codes', $this->applied_coupons );
-								WC()->session->set( 'refresh_totals', true );
-							}
-						}
-					}
-				}
-			}
 		}
 
 		/**
@@ -597,8 +529,6 @@ class WC_Cart {
 		 * @return string
 		 */
 		public function get_item_data( $cart_item, $flat = false ) {
-			global $woocommerce;
-
 			$item_data = array();
 
 			// Variation data
@@ -717,7 +647,6 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_remove_url( $cart_item_key ) {
-			global $woocommerce;
 			$cart_page_id = woocommerce_get_page_id('cart');
 			if ($cart_page_id)
 				return apply_filters( 'woocommerce_get_remove_url', wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, get_permalink( $cart_page_id ) ), 'woocommerce-cart' ) );
@@ -858,7 +787,6 @@ class WC_Cart {
 		 * @return bool
 		 */
 		public function add_to_cart( $product_id, $quantity = 1, $variation_id = '', $variation = '', $cart_item_data = array() ) {
-			global $woocommerce;
 
 			if ( $quantity <= 0 ) return false;
 
@@ -1017,339 +945,10 @@ class WC_Cart {
 		 * @return void
 		 */
 		private function reset() {
-			global $woocommerce;
-
 			$this->total = $this->cart_contents_total = $this->cart_contents_weight = $this->cart_contents_count = $this->cart_contents_tax = $this->tax_total = $this->shipping_tax_total = $this->subtotal = $this->subtotal_ex_tax = $this->discount_total = $this->discount_cart = $this->shipping_total = $this->fee_total = 0;
-			$this->shipping_taxes = $this->taxes = $this->coupon_discount_amounts = array();
+			$this->shipping_taxes = $this->taxes = $this->coupon_discount_amounts = $this->coupon_applied_count = array();
 
-			unset( $woocommerce->session->cart_contents_total, $woocommerce->session->cart_contents_weight, $woocommerce->session->cart_contents_count, $woocommerce->session->cart_contents_tax, $woocommerce->session->total, $woocommerce->session->subtotal, $woocommerce->session->subtotal_ex_tax, $woocommerce->session->tax_total, $woocommerce->session->taxes, $woocommerce->session->shipping_taxes, $woocommerce->session->discount_cart, $woocommerce->session->discount_total, $woocommerce->session->shipping_total, $woocommerce->session->shipping_tax_total );
-		}
-
-		/**
-		 * Function to apply discounts to a product and get the discounted price (before tax is applied).
-		 *
-		 * @access public
-		 * @param mixed $values
-		 * @param mixed $price
-		 * @param bool $add_totals (default: false)
-		 * @return float price
-		 */
-		public function get_discounted_price( $values, $price, $add_totals = false ) {
-
-			if ( ! $price ) return $price;
-
-			if ( ! empty( $this->applied_coupons ) ) {
-				foreach ( $this->applied_coupons as $code ) {
-					$coupon = new WC_Coupon( $code );
-
-					if ( $coupon->apply_before_tax() && $coupon->is_valid() ) {
-
-						switch ( $coupon->type ) {
-
-							case "fixed_product" :
-							case "percent_product" :
-
-								$this_item_is_discounted = false;
-
-								$product_cats = wp_get_post_terms( $values['product_id'], 'product_cat', array("fields" => "ids") );
-								$product_ids_on_sale = woocommerce_get_product_ids_on_sale();
-
-								// Specific products get the discount
-								if ( sizeof( $coupon->product_ids ) > 0 ) {
-
-									if ( in_array( $values['product_id'], $coupon->product_ids ) || in_array( $values['variation_id'], $coupon->product_ids ) || in_array( $values['data']->get_parent(), $coupon->product_ids ) )
-										$this_item_is_discounted = true;
-
-								// Category discounts
-								} elseif ( sizeof($coupon->product_categories ) > 0 ) {
-
-									if ( sizeof( array_intersect( $product_cats, $coupon->product_categories ) ) > 0 )
-										$this_item_is_discounted = true;
-
-								} else {
-
-									// No product ids - all items discounted
-									$this_item_is_discounted = true;
-
-								}
-
-								// Specific product ID's excluded from the discount
-								if ( sizeof( $coupon->exclude_product_ids ) > 0 )
-									if ( in_array( $values['product_id'], $coupon->exclude_product_ids ) || in_array( $values['variation_id'], $coupon->exclude_product_ids ) || in_array( $values['data']->get_parent(), $coupon->exclude_product_ids ) )
-										$this_item_is_discounted = false;
-
-								// Specific categories excluded from the discount
-								if ( sizeof( $coupon->exclude_product_categories ) > 0 )
-									if ( sizeof( array_intersect( $product_cats, $coupon->exclude_product_categories ) ) > 0 )
-										$this_item_is_discounted = false;
-
-								// Sale Items excluded from discount
-								if ( $coupon->exclude_sale_items == 'yes' )
-									if ( in_array( $values['product_id'], $product_ids_on_sale, true ) || in_array( $values['variation_id'], $product_ids_on_sale, true ) || in_array( $values['data']->get_parent(), $product_ids_on_sale, true ) )
-										$this_item_is_discounted = false;
-
-								// Apply filter
-								$this_item_is_discounted = apply_filters( 'woocommerce_item_is_discounted', $this_item_is_discounted, $values, $before_tax = true, $coupon );
-
-								// Apply the discount
-								if ( $this_item_is_discounted ) {
-									if ( $coupon->type=='fixed_product' ) {
-
-										if ( $price < $coupon->amount ) {
-											$discount_amount = $price;
-										} else {
-											$discount_amount = $coupon->amount;
-										}
-
-										$price = $price - $coupon->amount;
-
-										if ( $price < 0 ) $price = 0;
-
-										if ( $add_totals ) {
-											$this->discount_cart = $this->discount_cart + ( $discount_amount * $values['quantity'] );
-											$this->increase_coupon_discount_amount( $code, $discount_amount * $values['quantity'] );
-										}
-
-									} elseif ( $coupon->type == 'percent_product' ) {
-
-										$percent_discount = ( $values['data']->get_price() / 100 ) * $coupon->amount;
-
-										if ( $add_totals ) {
-											$this->discount_cart = $this->discount_cart + ( $percent_discount * $values['quantity'] );
-											$this->increase_coupon_discount_amount( $code, $percent_discount * $values['quantity'] );
-										}
-
-										$price = $price - $percent_discount;
-
-									}
-								}
-
-							break;
-
-							case "fixed_cart" :
-
-								/**
-								 * This is the most complex discount - we need to divide the discount between rows based on their price in
-								 * proportion to the subtotal. This is so rows with different tax rates get a fair discount, and so rows
-								 * with no price (free) don't get discount too.
-								 */
-
-								// Get item discount by dividing item cost by subtotal to get a %
-								if ( $this->subtotal_ex_tax )
-									$discount_percent = ( $values['data']->get_price_excluding_tax() * $values['quantity'] ) / $this->subtotal_ex_tax;
-								else
-									$discount_percent = 0;
-
-								// Use pence to help prevent rounding errors
-								$coupon_amount_pence = $coupon->amount * 100;
-
-								// Work out the discount for the row
-								$item_discount = $coupon_amount_pence * $discount_percent;
-
-								// Work out discount per item
-								$item_discount = $item_discount / $values['quantity'];
-
-								// Pence
-								$price = $price * 100;
-
-								// Check if discount is more than price
-								if ( $price < $item_discount )
-									$discount_amount = $price;
-								else
-									$discount_amount = $item_discount;
-
-								// Take discount off of price (in pence)
-								$price = $price - $discount_amount;
-
-								// Back to pounds
-								$price = $price / 100;
-
-								// Cannot be below 0
-								if ( $price < 0 )
-									$price = 0;
-
-								// Add coupon to discount total (once, since this is a fixed cart discount and we don't want rounding issues)
-								if ( $add_totals ) {
-									$this->discount_cart = $this->discount_cart + ( ( $discount_amount * $values['quantity'] ) / 100 );
-									$this->increase_coupon_discount_amount( $code, ( $discount_amount * $values['quantity'] ) / 100 );
-								}
-
-							break;
-
-							case "percent" :
-
-								$percent_discount = ( $values['data']->get_price() / 100 ) * $coupon->amount;
-
-								if ( $add_totals ) {
-									$this->discount_cart = $this->discount_cart + ( $percent_discount * $values['quantity'] );
-									$this->increase_coupon_discount_amount( $code, $percent_discount * $values['quantity'] );
-								}
-
-								$price = $price - $percent_discount;
-
-							break;
-
-						}
-					}
-				}
-			}
-
-			return apply_filters( 'woocommerce_get_discounted_price', $price, $values, $this );
-		}
-
-		/**
-		 * Function to apply product discounts after tax.
-		 *
-		 * @access public
-		 * @param mixed $values
-		 * @param mixed $price
-		 */
-		public function apply_product_discounts_after_tax( $values, $price ) {
-
-			if ( ! empty( $this->applied_coupons) ) {
-				foreach ( $this->applied_coupons as $code ) {
-					$coupon = new WC_Coupon( $code );
-
-					do_action( 'woocommerce_product_discount_after_tax_' . $coupon->type, $coupon, $values, $price );
-
-					if ( ! $coupon->is_valid() ) continue;
-
-					if ( $coupon->type != 'fixed_product' && $coupon->type != 'percent_product' ) continue;
-
-					if ( ! $coupon->apply_before_tax() ) {
-
-						$product_cats = wp_get_post_terms( $values['product_id'], 'product_cat', array("fields" => "ids") );
-						$product_ids_on_sale = woocommerce_get_product_ids_on_sale();
-
-						$this_item_is_discounted = false;
-
-						// Specific products get the discount
-						if ( sizeof( $coupon->product_ids ) > 0 ) {
-
-							if (in_array($values['product_id'], $coupon->product_ids) || in_array($values['variation_id'], $coupon->product_ids) || in_array($values['data']->get_parent(), $coupon->product_ids))
-								$this_item_is_discounted = true;
-
-						// Category discounts
-						} elseif ( sizeof( $coupon->product_categories ) > 0 ) {
-
-							if ( sizeof( array_intersect( $product_cats, $coupon->product_categories ) ) > 0 )
-								$this_item_is_discounted = true;
-
-						} else {
-
-							// No product ids - all items discounted
-							$this_item_is_discounted = true;
-
-						}
-
-						// Specific product ID's excluded from the discount
-						if ( sizeof( $coupon->exclude_product_ids ) > 0 )
-							if ( in_array( $values['product_id'], $coupon->exclude_product_ids ) || in_array( $values['variation_id'], $coupon->exclude_product_ids ) || in_array( $values['data']->get_parent(), $coupon->exclude_product_ids ) )
-								$this_item_is_discounted = false;
-
-						// Specific categories excluded from the discount
-						if ( sizeof( $coupon->exclude_product_categories ) > 0 )
-							if ( sizeof( array_intersect( $product_cats, $coupon->exclude_product_categories ) ) > 0 )
-								$this_item_is_discounted = false;
-
-						// Sale Items excluded from discount
-						if ( $coupon->exclude_sale_items == 'yes' )
-							if ( in_array( $values['product_id'], $product_ids_on_sale, true ) || in_array( $values['variation_id'], $product_ids_on_sale, true ) || in_array( $values['data']->get_parent(), $product_ids_on_sale, true ) )
-								$this_item_is_discounted = false;
-
-						// Apply filter
-						$this_item_is_discounted = apply_filters( 'woocommerce_item_is_discounted', $this_item_is_discounted, $values, $before_tax = false, $coupon );
-
-						// Apply the discount
-						if ( $this_item_is_discounted ) {
-							if ( $coupon->type == 'fixed_product' ) {
-
-								if ( $price < $coupon->amount )
-									$discount_amount = $price;
-								else
-									$discount_amount = $coupon->amount;
-
-								$this->discount_total = $this->discount_total + ( $discount_amount * $values['quantity'] );
-								$this->increase_coupon_discount_amount( $code, $discount_amount * $values['quantity'] );
-
-							} elseif ( $coupon->type == 'percent_product' ) {
-								$this->discount_total = $this->discount_total + round( ( $price / 100 ) * $coupon->amount, $this->dp );
-								$this->increase_coupon_discount_amount( $code, round( ( $price / 100 ) * $coupon->amount, $this->dp ) );
-							}
-						}
-					}
-				}
-			}
-
-		}
-
-		/**
-		 * Function to apply cart discounts after tax.
-		 *
-		 * @access public
-		 */
-		public function apply_cart_discounts_after_tax() {
-
-			$pre_discount_total = number_format( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total + $this->fee_total, $this->dp, '.', '' );
-
-			if ( $this->applied_coupons ) {
-				foreach ( $this->applied_coupons as $code ) {
-					$coupon = new WC_Coupon( $code );
-
-					do_action( 'woocommerce_cart_discount_after_tax_' . $coupon->type, $coupon );
-
-					if ( ! $coupon->apply_before_tax() && $coupon->is_valid() ) {
-
-						switch ( $coupon->type ) {
-
-							case "fixed_cart" :
-
-								if ( $coupon->amount > $pre_discount_total )
-									$coupon->amount = $pre_discount_total;
-
-								$pre_discount_total = $pre_discount_total - $coupon->amount;
-
-								$this->discount_total = $this->discount_total + $coupon->amount;
-
-								$this->increase_coupon_discount_amount( $code, $coupon->amount );
-
-							break;
-
-							case "percent" :
-
-								$percent_discount = round( ( round( $this->cart_contents_total + $this->tax_total + $this->fee_total, $this->dp ) / 100 ) * $coupon->amount, $this->dp );
-
-								if ( $coupon->amount > $percent_discount )
-									$coupon->amount = $percent_discount;
-
-								$pre_discount_total = $pre_discount_total - $percent_discount;
-
-								$this->discount_total = $this->discount_total + $percent_discount;
-
-								$this->increase_coupon_discount_amount( $code, $percent_discount );
-
-							break;
-
-						}
-
-					}
-				}
-			}
-		}
-
-		/**
-		 * Store how much discount each coupon grants.
-		 *
-		 * @access private
-		 * @param mixed $code
-		 * @param mixed $amount
-		 * @return void
-		 */
-		private function increase_coupon_discount_amount( $code, $amount ) {
-			if ( empty( $this->coupon_discount_amounts[ $code ] ) )
-				$this->coupon_discount_amounts[ $code ] = 0;
-
-			$this->coupon_discount_amounts[ $code ] += $amount;
+			unset( WC()->session->cart_contents_total, WC()->session->cart_contents_weight, WC()->session->cart_contents_count, WC()->session->cart_contents_tax, WC()->session->total, WC()->session->subtotal, WC()->session->subtotal_ex_tax, WC()->session->tax_total, WC()->session->taxes, WC()->session->shipping_taxes, WC()->session->discount_cart, WC()->session->discount_total, WC()->session->shipping_total, WC()->session->shipping_tax_total );
 		}
 
 		/**
@@ -1358,7 +957,6 @@ class WC_Cart {
 		 * @access public
 		 */
 		public function calculate_totals() {
-			global $woocommerce;
 
 			$this->reset();
 
@@ -1651,7 +1249,7 @@ class WC_Cart {
 				}
 
 				// VAT exemption done at this point - so all totals are correct before exemption
-				if ( $woocommerce->customer->is_vat_exempt() )
+				if ( WC()->customer->is_vat_exempt() )
 					$this->remove_taxes();
 
 				// Cart Discounts (after tax)
@@ -1669,7 +1267,7 @@ class WC_Cart {
 				$this->tax_total = $this->tax->get_tax_total( $this->taxes );
 
 				// VAT exemption done at this point - so all totals are correct before exemption
-				if ( $woocommerce->customer->is_vat_exempt() )
+				if ( WC()->customer->is_vat_exempt() )
 					$this->remove_taxes();
 
 				// Cart Discounts (after tax)
@@ -1721,17 +1319,15 @@ class WC_Cart {
 		 * @return void
 		 */
 		public function calculate_shipping() {
-			global $woocommerce;
-
 			if ( $this->needs_shipping() && $this->show_shipping() ) {
-				$woocommerce->shipping->calculate_shipping( $this->get_shipping_packages() );
+				WC()->shipping->calculate_shipping( $this->get_shipping_packages() );
 			} else {
-				$woocommerce->shipping->reset_shipping();
+				WC()->shipping->reset_shipping();
 			}
 
 			// Get totals for the chosen shipping method
-			$this->shipping_total 		= $woocommerce->shipping->shipping_total;	// Shipping Total
-			$this->shipping_taxes		= $woocommerce->shipping->shipping_taxes;	// Shipping Taxes
+			$this->shipping_total 		= WC()->shipping->shipping_total;	// Shipping Total
+			$this->shipping_taxes		= WC()->shipping->shipping_taxes;	// Shipping Taxes
 		}
 
 		/**
@@ -1749,20 +1345,18 @@ class WC_Cart {
 		 * @return array of cart items
 		 */
 		public function get_shipping_packages() {
-			global $woocommerce;
-
 			// Packages array for storing 'carts'
 			$packages = array();
 
 			$packages[0]['contents']                 = $this->get_cart();		// Items in the package
 			$packages[0]['contents_cost']            = 0;						// Cost of items in the package, set below
-			$packages[0]['applied_coupons']          = $this->applied_coupons; 	// Applied coupons - some, like free shipping, affect costs
-			$packages[0]['destination']['country']   = $woocommerce->customer->get_shipping_country();
-			$packages[0]['destination']['state']     = $woocommerce->customer->get_shipping_state();
-			$packages[0]['destination']['postcode']  = $woocommerce->customer->get_shipping_postcode();
-			$packages[0]['destination']['city']      = $woocommerce->customer->get_shipping_city();
-			$packages[0]['destination']['address']   = $woocommerce->customer->get_shipping_address();
-			$packages[0]['destination']['address_2'] = $woocommerce->customer->get_shipping_address_2();
+			$packages[0]['applied_coupons']          = array_keys( $this->coupons ); 	// Applied coupons - some, like free shipping, affect costs
+			$packages[0]['destination']['country']   = WC()->customer->get_shipping_country();
+			$packages[0]['destination']['state']     = WC()->customer->get_shipping_state();
+			$packages[0]['destination']['postcode']  = WC()->customer->get_shipping_postcode();
+			$packages[0]['destination']['city']      = WC()->customer->get_shipping_city();
+			$packages[0]['destination']['address']   = WC()->customer->get_shipping_address();
+			$packages[0]['destination']['address_2'] = WC()->customer->get_shipping_address_2();
 
 			foreach ( $this->get_cart() as $item )
 				if ( $item['data']->needs_shipping() )
@@ -1801,14 +1395,12 @@ class WC_Cart {
 		 * @return bool
 		 */
 		public function show_shipping() {
-			global $woocommerce;
-
 			if ( get_option('woocommerce_calc_shipping') == 'no' || ! is_array( $this->cart_contents ) )
 				return false;
 
 			if ( get_option( 'woocommerce_shipping_cost_requires_address' ) == 'yes' ) {
-				if ( ! $woocommerce->customer->has_calculated_shipping() ) {
-					if ( ! $woocommerce->customer->get_shipping_country() || ( ! $woocommerce->customer->get_shipping_state() && ! $woocommerce->customer->get_shipping_postcode() ) )
+				if ( ! WC()->customer->has_calculated_shipping() ) {
+					if ( ! WC()->customer->get_shipping_country() || ( ! WC()->customer->get_shipping_state() && ! WC()->customer->get_shipping_postcode() ) )
 						return false;
 				}
 			}
@@ -1834,8 +1426,6 @@ class WC_Cart {
 		 * @return mixed price or string for the shipping total
 		 */
 		public function get_cart_shipping_total() {
-			global $woocommerce;
-
 			if ( isset( $this->shipping_total ) ) {
 				if ( $this->shipping_total > 0 ) {
 
@@ -1845,7 +1435,7 @@ class WC_Cart {
 						$return = woocommerce_price( $this->shipping_total );
 
 						if ( $this->shipping_tax_total > 0 && $this->prices_include_tax ) {
-							$return .= ' <small>' . $woocommerce->countries->ex_tax_or_vat() . '</small>';
+							$return .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
 						}
 
 						return $return;
@@ -1855,7 +1445,7 @@ class WC_Cart {
 						$return = woocommerce_price( $this->shipping_total + $this->shipping_tax_total );
 
 						if ( $this->shipping_tax_total > 0 && ! $this->prices_include_tax ) {
-							$return .= ' <small>' . $woocommerce->countries->inc_tax_or_vat() . '</small>';
+							$return .= ' <small>' . WC()->countries->inc_tax_or_vat() . '</small>';
 						}
 
 						return $return;
@@ -1873,6 +1463,74 @@ class WC_Cart {
 	/*-----------------------------------------------------------------------------------*/
 
 		/**
+		 * Check for user coupons (now that we have billing email). If a coupon is invalid, add an error.
+		 *
+		 * Checks two types of coupons:
+		 *  1. Where a list of customer emails are set (limits coupon usage to those defined)
+		 *  2. Where a usage_limit_per_user is set (limits coupon usage to a number based on user ID and email)
+		 *
+		 * @access public
+		 * @param array $posted
+		 */
+		public function check_customer_coupons( $posted ) {
+			if ( ! empty( $this->coupons ) ) {
+				foreach ( $this->coupons as $code => $coupon ) {
+					if ( $coupon->is_valid() ) {
+
+						// Limit to defined email addresses
+						if ( is_array( $coupon->customer_email ) && sizeof( $coupon->customer_email ) > 0 ) {
+							$coupon->customer_email = array_map( 'sanitize_email', $coupon->customer_email );
+
+							if ( is_user_logged_in() ) {
+								$current_user   = wp_get_current_user();
+								$check_emails[] = $current_user->user_email;
+							}
+							$check_emails[] = $posted['billing_email'];
+							$check_emails   = array_map( 'sanitize_email', array_map( 'strtolower', $check_emails ) );
+
+							if ( 0 == sizeof( array_intersect( $check_emails, $coupon->customer_email ) ) ) {
+								$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED );
+
+								// Remove the coupon
+								$this->remove_coupon( $code );
+
+								// Flag totals for refresh
+								WC()->session->set( 'refresh_totals', true );
+							}
+						}
+
+						// Usage limits per user - check against billing and user email and user ID
+						if ( $coupon->usage_limit_per_user > 0 ) {
+							$used_by = get_post_meta( $this->id, '_used_by' );
+
+							if ( is_user_logged_in() ) {
+								$current_user   = wp_get_current_user();
+								$check_emails[] = $current_user->user_email;
+							}
+							$check_emails[] = $posted['billing_email'];
+							$check_emails   = array_map( 'sanitize_email', array_map( 'strtolower', $check_emails ) );
+
+							$usage_count    = sizeof( array_keys( $used_by, get_current_user_id() ) );
+
+							foreach ( $check_emails as $check_email )
+								$usage_count    = $usage_count + sizeof( array_keys( $used_by, $check_email ) );
+
+							if ( $usage_count >= $coupon->usage_limit_per_user ) {
+								$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED );
+
+								// Remove the coupon
+								$this->remove_coupon( $code );
+
+								// Flag totals for refresh
+								WC()->session->set( 'refresh_totals', true );
+							}
+						}
+					}
+				}
+			}
+		}
+
+		/**
 		 * Returns whether or not a discount has been applied.
 		 *
 		 * @return bool
@@ -1883,7 +1541,7 @@ class WC_Cart {
 			$coupon_code = apply_filters( 'woocommerce_coupon_code', $coupon_code );
 
 			// Check if its set
-			return in_array( $coupon_code, $this->applied_coupons );
+			return in_array( $coupon_code, array_keys( $this->coupons ) );
 		}
 
 		/**
@@ -1893,8 +1551,6 @@ class WC_Cart {
 		 * @return bool	True if the coupon is applied, false if it does not exist or cannot be applied
 		 */
 		public function add_discount( $coupon_code ) {
-			global $woocommerce;
-
 			// Coupons are globally disabled
 			if ( ! $this->coupons_enabled() )
 				return false;
@@ -1921,25 +1577,22 @@ class WC_Cart {
 
 				// If its individual use then remove other coupons
 				if ( $the_coupon->individual_use == 'yes' ) {
-					$this->applied_coupons = apply_filters( 'woocommerce_apply_individual_use_coupon', array(), $the_coupon, $this->applied_coupons );
+					$this->coupons = apply_filters( 'woocommerce_apply_individual_use_coupon', array(), $the_coupon, $this->coupons );
 				}
 
-				if ( $this->applied_coupons ) {
-					foreach ( $this->applied_coupons as $code ) {
-
-						$existing_coupon = new WC_Coupon( $code );
-
-						if ( $existing_coupon->individual_use == 'yes' && false === apply_filters( 'woocommerce_apply_with_individual_use_coupon', false, $the_coupon, $existing_coupon, $this->applied_coupons ) ) {
+				if ( $this->coupons ) {
+					foreach ( $this->coupons as $code => $coupon ) {
+						if ( $coupon->individual_use == 'yes' && false === apply_filters( 'woocommerce_apply_with_individual_use_coupon', false, $the_coupon, $coupon, $this->coupons ) ) {
 
 							// Reject new coupon
-							$existing_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY );
+							$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY );
 
 							return false;
 						}
 					}
 				}
 
-				$this->applied_coupons[] = $coupon_code;
+				$this->coupons[ $coupon_code ] = $the_coupon;
 
 				// Choose free shipping
 				if ( $the_coupon->enable_free_shipping() ) {
@@ -1969,35 +1622,44 @@ class WC_Cart {
 		}
 
 		/**
+		 * Get array of applied coupon objects and codes.
+		 * @param  Type Type of coupons to get. Can be 'cart' or 'order' which are before and after tax respectively.
+		 * @return array of applied coupons
+		 */
+		public function get_coupons( $type ) {
+			$coupons = array();
+
+			if ( 'cart' == $type ) {
+				if ( $this->coupons ) {
+					foreach ( $this->coupons as $code => $coupon ) {
+						if ( $coupon->apply_before_tax() )
+							$coupons[ $code ] = $coupon;
+					}
+				}
+			} elseif ( 'order' == $type ) {
+				if ( $this->coupons ) {
+					foreach ( $this->coupons as $code => $coupon ) {
+						if ( ! $coupon->apply_before_tax() )
+							$coupons[ $code ] = $coupon;
+					}
+				}
+			} else {
+				$coupons = $this->coupons;
+			}
+
+			return $coupons;
+		}
+
+		/**
 		 * Gets the array of applied coupon codes.
 		 *
+		 * @deprecated In 2.1, use get_coupons() to get an array of coupon objects instead of just the codes.
 		 * @param  Type Type of coupons to get. Can be 'cart' or 'order' which are before and after tax respectively.
 		 * @return array of applied coupons
 		 */
 		public function get_applied_coupons( $type = '' ) {
-			$coupons = array();
-
-			if ( 'cart' == $type ) {
-				if ( $this->applied_coupons ) {
-					foreach ( $this->applied_coupons as $index => $code ) {
-						$coupon = new WC_Coupon( $code );
-						if ( $coupon->is_valid() && $coupon->apply_before_tax() )
-							$coupons[] = $code;
-					}
-				}
-			} elseif ( 'order' == $type ) {
-				if ( $this->applied_coupons ) {
-					foreach ( $this->applied_coupons as $index => $code ) {
-						$coupon = new WC_Coupon( $code );
-						if ( $coupon->is_valid() && ! $coupon->apply_before_tax() )
-							$coupons[] = $code;
-					}
-				}
-			} else {
-				$coupons = array_filter( (array) $this->applied_coupons );
-			}
-
-			return $coupons;
+			_deprecated_function( 'WC_Cart->get_applied_coupons', '2.1', 'WC_Cart->get_coupons()' );
+			return array_keys( $this->get_coupons( $type ) );
 		}
 
 		/**
@@ -2006,31 +1668,24 @@ class WC_Cart {
 		 * @params int type - 0 for all, 1 for before tax, 2 for after tax
 		 */
 		public function remove_coupons( $type = 0 ) {
-			global $woocommerce;
-
 			if ( 1 == $type ) {
-				if ( $this->applied_coupons ) {
-					foreach ( $this->applied_coupons as $index => $code ) {
-						$coupon = new WC_Coupon( $code );
-						if ( $coupon->is_valid() && $coupon->apply_before_tax() ) unset( $this->applied_coupons[ $index ] );
+				if ( $this->coupons ) {
+					foreach ( $this->coupons as $code => $coupon ) {
+						if ( $coupon->apply_before_tax() ) 
+							$this->remove_coupon( $code );
 					}
 				}
-
-				WC()->session->set( 'coupon_codes', $this->applied_coupons );
-
 			} elseif ( $type == 2 ) {
-				if ( $this->applied_coupons ) {
-					foreach ( $this->applied_coupons as $index => $code ) {
-						$coupon = new WC_Coupon( $code );
-						if ( $coupon->is_valid() && ! $coupon->apply_before_tax() ) unset( $this->applied_coupons[ $index ] );
+				if ( $this->coupons ) {
+					foreach ( $this->coupons as $code => $coupon ) {
+						if ( ! $coupon->apply_before_tax() )
+							$this->remove_coupon( $code );
 					}
 				}
-
-				WC()->session->set( 'coupon_codes', $this->applied_coupons );
-
 			} else {
-				unset( $woocommerce->session->coupon_codes, $woocommerce->session->coupon_amounts );
-				$this->applied_coupons = array();
+				$this->coupons = $this->coupon_discount_amounts = $this->coupon_applied_count = array();
+				WC()->session->set( 'coupon_codes', array() );
+				WC()->session->set( 'coupon_amounts', array() );
 			}
 		}
 
@@ -2038,26 +1693,127 @@ class WC_Cart {
 		 * Remove a single coupon by code
 		 */
 		public function remove_coupon( $coupon_code ) {
-
 			// Coupons are globally disabled
 			if ( ! $this->coupons_enabled() )
 				return false;
 
-			// Sanitize coupon code
-			$coupon_code = apply_filters( 'woocommerce_coupon_code', $coupon_code );
-
 			// Get the coupon
-			$the_coupon = new WC_Coupon( $coupon_code );
+			$coupon_code  = apply_filters( 'woocommerce_coupon_code', $coupon_code );
 
-			$coupon_index = array_search( $coupon_code, $this->applied_coupons );
-
-			if ( $coupon_index >= 0 ) {
-				unset( $this->applied_coupons[ $coupon_index ] );
-
-				$the_coupon->add_coupon_message( WC_Coupon::WC_COUPON_REMOVED );
+			if ( isset( $this->coupons[ $coupon_code ] ) ) {
+				$this->coupons[ $coupon_code ]->add_coupon_message( WC_Coupon::WC_COUPON_REMOVED );
+				unset( $this->coupons[ $coupon_code ], $this->coupon_discount_amounts[ $coupon_code ], $this->coupon_applied_count[ $coupon_code ] );
 			}
 
-			WC()->session->set( 'coupon_codes', $this->applied_coupons );
+			WC()->session->set( 'coupon_codes', array_keys( $this->coupons ) );
+			WC()->session->set( 'coupon_amounts', $this->coupon_discount_amounts );
+		}
+
+		/**
+		 * Function to apply discounts to a product and get the discounted price (before tax is applied).
+		 *
+		 * @access public
+		 * @param mixed $values
+		 * @param mixed $price
+		 * @param bool $add_totals (default: false)
+		 * @return float price
+		 */
+		public function get_discounted_price( $values, $price, $add_totals = false ) {
+			if ( ! $price ) 
+				return $price;
+
+			if ( ! empty( $this->coupons ) ) {
+				foreach ( $this->coupons as $code => $coupon ) {
+					if ( $coupon->apply_before_tax() && $coupon->is_valid() ) {
+						if ( $coupon->is_valid_for_product( $values['data'] ) || $coupon->is_valid_for_cart() ) {
+							
+							$discount_amount       = $coupon->get_discount_amount( $price, $values, $single = true );
+							$price                 = max( $price - $discount_amount, 0 );
+							
+							if ( $add_totals ) {
+								$this->discount_cart += $discount_amount * $values['quantity'];
+								$this->increase_coupon_discount_amount( $code, $discount_amount * $values['quantity'] );
+								$this->increase_coupon_applied_count( $code, $values['quantity'] );
+							}
+						}
+					}
+				}
+			}
+
+			return apply_filters( 'woocommerce_get_discounted_price', $price, $values, $this );
+		}
+
+		/**
+		 * Function to apply cart discounts after tax.
+		 *
+		 * @access public
+		 */
+		public function apply_cart_discounts_after_tax() {
+			$pre_discount_total = number_format( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total + $this->fee_total, $this->dp, '.', '' );
+
+			if ( $this->coupons ) {
+				foreach ( $this->coupons as $code => $coupon ) {
+					do_action( 'woocommerce_cart_discount_after_tax_' . $coupon->type, $coupon );
+
+					if ( $coupon->is_valid() && ! $coupon->apply_before_tax() && $coupon->is_valid_for_cart() ) {
+						$discount_amount       = $coupon->get_discount_amount( $pre_discount_total );
+						$pre_discount_total    = $pre_discount_total - $discount_amount;
+						$this->discount_total += $discount_amount;
+						$this->increase_coupon_discount_amount( $code, $discount_amount );
+						$this->increase_coupon_applied_count( $code );
+					}
+				}
+			}
+		}
+
+		/**
+		 * Function to apply product discounts after tax.
+		 *
+		 * @access public
+		 * @param mixed $values
+		 * @param mixed $price
+		 */
+		public function apply_product_discounts_after_tax( $values, $price ) {
+			if ( ! empty( $this->coupons ) ) {
+				foreach ( $this->coupons as $code => $coupon ) {
+					do_action( 'woocommerce_product_discount_after_tax_' . $coupon->type, $coupon, $values, $price );
+
+					if ( $coupon->is_valid() && ! $coupon->apply_before_tax() && $coupon->is_valid_for_product( $values['data'] ) ) {
+						$discount_amount       = $coupon->get_discount_amount( $price, $values );
+						$this->discount_total += $discount_amount;
+						$this->increase_coupon_discount_amount( $code, $discount_amount );
+						$this->increase_coupon_applied_count( $code, $values['quantity'] );
+					}
+				}
+			}
+		}
+
+		/**
+		 * Store how much discount each coupon grants.
+		 *
+		 * @access private
+		 * @param mixed $code
+		 * @param mixed $amount
+		 */
+		private function increase_coupon_discount_amount( $code, $amount ) {
+			if ( empty( $this->coupon_discount_amounts[ $code ] ) )
+				$this->coupon_discount_amounts[ $code ] = 0;
+
+			$this->coupon_discount_amounts[ $code ] += $amount;
+		}
+
+		/**
+		 * Store how many times each coupon is applied to cart/items
+		 *
+		 * @access private
+		 * @param mixed $code
+		 * @param mixed $amount
+		 */
+		private function increase_coupon_applied_count( $code, $count = 1 ) {
+			if ( empty( $this->coupon_applied_count[ $code ] ) )
+				$this->coupon_applied_count[ $code ] = 0;
+
+			$this->coupon_applied_count[ $code ] += $count;
 		}
 
  	/*-----------------------------------------------------------------------------------*/
@@ -2191,7 +1947,6 @@ class WC_Cart {
 		 * @return string formatted price
 		 */
 		public function get_cart_subtotal( $compound = false ) {
-			global $woocommerce;
 
 			// If the cart has compound tax, we want to show the subtotal as
 			// cart + shipping + non-compound taxes (after discount)
@@ -2208,7 +1963,7 @@ class WC_Cart {
 					$cart_subtotal = woocommerce_price( $this->subtotal_ex_tax );
 
 					if ( $this->tax_total > 0 && $this->prices_include_tax ) {
-						$cart_subtotal .= ' <small>' . $woocommerce->countries->ex_tax_or_vat() . '</small>';
+						$cart_subtotal .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
 					}
 
 				} else {
@@ -2216,7 +1971,7 @@ class WC_Cart {
 					$cart_subtotal = woocommerce_price( $this->subtotal );
 
 					if ( $this->tax_total > 0 && !$this->prices_include_tax ) {
-						$cart_subtotal .= ' <small>' . $woocommerce->countries->inc_tax_or_vat() . '</small>';
+						$cart_subtotal .= ' <small>' . WC()->countries->inc_tax_or_vat() . '</small>';
 					}
 
 				}
@@ -2252,7 +2007,6 @@ class WC_Cart {
 		 * @return string formatted price
 		 */
 		public function get_product_subtotal( $_product, $quantity ) {
-			global $woocommerce;
 
 			$price 			= $_product->get_price();
 			$taxable 		= $_product->is_taxable();
@@ -2266,7 +2020,7 @@ class WC_Cart {
 					$product_subtotal = woocommerce_price( $row_price );
 
 					if ( $this->prices_include_tax && $this->tax_total > 0 )
-						$product_subtotal .= ' <small class="tax_label">' . $woocommerce->countries->ex_tax_or_vat() . '</small>';
+						$product_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 
 				} else {
 
@@ -2274,7 +2028,7 @@ class WC_Cart {
 					$product_subtotal = woocommerce_price( $row_price );
 
 					if ( ! $this->prices_include_tax && $this->tax_total > 0 )
-						$product_subtotal .= ' <small class="tax_label">' . $woocommerce->countries->inc_tax_or_vat() . '</small>';
+						$product_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 
 				}
 

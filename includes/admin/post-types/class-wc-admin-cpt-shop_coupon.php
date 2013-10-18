@@ -28,13 +28,14 @@ class WC_Admin_CPT_Shop_Coupon extends WC_Admin_CPT {
 
 		// Post title fields
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
+		add_action( 'edit_form_after_title', array( $this, 'coupon_description_field' ) );
 
 		// Admin Columns
 		add_filter( 'manage_edit-shop_coupon_columns', array( $this, 'edit_columns' ) );
 		add_action( 'manage_shop_coupon_posts_custom_column', array( $this, 'custom_columns' ), 2 );
 		add_filter( 'request', array( $this, 'coupons_by_type_query' ) );
 
-		// Prouct filtering
+		// Product filtering
 		add_action( 'restrict_manage_posts', array( $this, 'coupon_filters' ) );
 
 		// Call WC_Admin_CPT constructor
@@ -52,6 +53,14 @@ class WC_Admin_CPT_Shop_Coupon extends WC_Admin_CPT {
 			return __( 'Coupon code', 'woocommerce' );
 
 		return $text;
+	}
+
+	public function coupon_description_field( $post ) {
+		if ( $post->post_type != 'shop_coupon' )
+			return;
+		?>
+		<textarea id="woocommerce-coupon-description" name="excerpt" cols="5" rows="2" placeholder="<?php esc_attr_e( 'Description (optional)', 'woocommerce' ); ?>"><?php echo esc_textarea( $post->post_excerpt ); ?></textarea>
+		<?php
 	}
 
 	/**

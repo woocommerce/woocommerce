@@ -1,5 +1,30 @@
 jQuery( function($){
 
+	// Allow tabbing
+	$('#titlediv #title').keyup(function( event ) {
+		var code = event.keyCode || event.which;
+
+    	if ( code == '9' && $('#woocommerce-coupon-description').size() > 0 ) {
+    		event.stopPropagation();
+    		$('#woocommerce-coupon-description').focus();
+    		return false;
+    	}
+	});
+
+	// Coupon type options
+	$('select#discount_type').change(function(){
+
+		// Get value
+		var select_val = $(this).val();
+
+		if ( select_val == 'fixed_product' || select_val == 'percent_product' ) {
+			$('.limit_usage_to_x_items_field').show();
+		} else {
+			$('.limit_usage_to_x_items_field').hide();
+		}
+
+	}).change();
+
 	// Scroll to first checked category - https://github.com/scribu/wp-category-checklist-tree/blob/d1c3c1f449e1144542efa17dde84a9f52ade1739/category-checklist-tree.php
 	$(function(){
 		$('[id$="-all"] > ul.categorychecklist').each(function() {
@@ -847,13 +872,15 @@ jQuery( function($){
 			$('input#_virtual').removeAttr('checked');
 		}
 
-
 		show_and_hide_panels();
 
 		$('ul.wc-tabs li:visible').eq(0).find('a').click();
 
 		$('body').trigger('woocommerce-product-type-change', select_val, $(this) );
+
 	}).change();
+
+	$('ul.wc-tabs li:visible').eq(0).find('a').click();
 
 	$('input#_downloadable, input#_virtual').change(function(){
 		show_and_hide_panels();

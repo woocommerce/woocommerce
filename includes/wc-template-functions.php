@@ -1102,17 +1102,19 @@ function wc_cart_totals_subtotal_html() {
  * Get a coupon value
  * @param  string $code
  */
-function wc_cart_totals_coupon_html( $code ) {
-	$coupon = new WC_Coupon( $code );
+function wc_cart_totals_coupon_html( $coupon ) {
+	if ( is_string( $coupon ) )
+		$coupon = new WC_Coupon( $coupon );
+
 	$value  = array();
 
-	if ( ! empty( WC()->cart->coupon_discount_amounts[ $code ] ) )
-		$value[] = '-' . woocommerce_price( WC()->cart->coupon_discount_amounts[ $code ] );
+	if ( ! empty( WC()->cart->coupon_discount_amounts[ $coupon->code ] ) )
+		$value[] = '-' . woocommerce_price( WC()->cart->coupon_discount_amounts[ $coupon->code ] );
 
 	if ( $coupon->enable_free_shipping() )
 		$value[] = __( 'Free shipping coupon', 'woocommerce' );
 
-	echo implode( ', ', $value ) . ' <a href="' . add_query_arg( 'remove_coupon', $code, WC()->cart->get_cart_url() ) . '" class="woocommerce-remove-coupon">' . __( '[Remove]', 'woocommerce' ) . '</a>';
+	echo implode( ', ', $value ) . ' <a href="' . add_query_arg( 'remove_coupon', $coupon->code, WC()->cart->get_cart_url() ) . '" class="woocommerce-remove-coupon">' . __( '[Remove]', 'woocommerce' ) . '</a>';
 }
 
 /**
