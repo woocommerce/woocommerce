@@ -56,7 +56,7 @@ class WC_Widget_Price_Filter extends WP_Widget {
 
 		global $_chosen_attributes, $wpdb, $woocommerce, $wp_query, $wp;
 
-		if (!is_tax( 'product_cat' ) && !is_post_type_archive('product') && !is_tax( 'product_tag' )) return; // Not on product page - return
+		if ( ! is_post_type_archive('product') && ! is_tax( get_object_taxonomies( 'product' ) ) ) return; // Not on product page - return
 
 		if ( sizeof( $woocommerce->query->unfiltered_product_ids ) == 0 ) return; // None shown - return
 
