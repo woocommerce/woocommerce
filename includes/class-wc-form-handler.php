@@ -717,7 +717,13 @@ class WC_Form_Handler {
 					$args['form'] = 'reset_password';
 				}
 
-				if( 0 == wc_error_count() && ( $_POST['password_1'] == $_POST['password_2'] ) ) {
+				$errors = new WP_Error();
+				do_action( 'validate_password_reset', $errors, $user );
+				if ( $errors->get_error_messages() )
+					foreach( $errors->get_error_messages() as $error )
+						wc_add_error($error);
+
+				if( 0 == wc_error_count() ) {
 
 					WC_Shortcode_My_Account::reset_password( $user, woocommerce_clean( $_POST['password_1'] ) );
 
