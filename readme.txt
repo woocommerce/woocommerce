@@ -165,6 +165,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.0.18 =
+* Fix - Escaped the "hide-wc-extensions-message" link in admin.
+
 = 2.0.17 - 17/10/2013 =
 * Fix - Add missing doctype for email header #3921
 * Fix - 2 notices on the cart/checkout related to tax #3922
