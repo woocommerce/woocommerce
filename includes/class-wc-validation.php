@@ -58,7 +58,7 @@ class WC_Validation {
 				 else
 				 	return false;
 			case "BR" :
-				if ( preg_match( "/^[0-9]{5,5}([-]?[0-9]{3,3})?$/", $postcode ) )
+				if ( preg_match( "/^[0-9]{5,5}([-]?)([0-9]{3,3})$/", $postcode ) )
 					return true;
 				else
 					return false;
