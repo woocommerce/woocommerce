@@ -52,6 +52,11 @@ class WC_Validation {
 				 	return true;
 				 else
 				 	return false;
+			case "CH" :
+				 if ( preg_match( "/^([0-9]{4})$/i", $postcode ) )
+				 	return true;
+				 else
+				 	return false;
 		}
 
 		return true;
