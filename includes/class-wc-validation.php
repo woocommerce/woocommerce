@@ -34,7 +34,7 @@ class WC_Validation {
 	}
 
 	/**
-	 * Checks for a valid postcode (UK)
+	 * Checks for a valid postcode
 	 *
 	 * @param   string	postcode
 	 * @param	string	country
