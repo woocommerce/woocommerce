@@ -39,6 +39,8 @@ $wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->base_prefix . "shareyourcart_toke
 $wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->base_prefix . "shareyourcart_coupons" );
 $wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->prefix . "woocommerce_tax_rates" );
 $wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->prefix . "woocommerce_tax_rate_locations" );
+$wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->prefix . "woocommerce_order_items" );
+$wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->prefix . "woocommerce_order_itemmeta" );
 
 // Delete options
 $wpdb->query("DELETE FROM $wpdb->options WHERE option_name LIKE 'woocommerce_%';");
