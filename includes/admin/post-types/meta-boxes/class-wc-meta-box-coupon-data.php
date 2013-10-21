@@ -51,7 +51,7 @@ class WC_Meta_Box_Coupon_Data {
 					) );
 
 					foreach ( $coupon_data_tabs as $key => $tab ) {
-						?><li class="<?php echo $key; ?>_options <?php echo $key; ?>_tab <?php echo implode( ' ' , $tab['class'] ); ?>">
+						?><li class="<?php echo $key; ?>_options <?php echo $key; ?>_tab <?php echo implode( ' ' , (array) $tab['class'] ); ?>">
 							<a href="#<?php echo $tab['target']; ?>"><?php echo esc_html( $tab['label'] ); ?></a>
 						</li><?php
 					}
