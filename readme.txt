@@ -171,6 +171,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Remove sorting args after main query #3969
 * Tweak - Pass index to woocommerce_save_product_variation. #3962
 * Tweak - woocommerce_variable_product_sync hooks
+* Tweak - CH postcode validation
+* Tweak - Show layered nav widgets on any product taxonomy page
+* Localisation - Various corrections
 
 = 2.0.17 - 17/10/2013 =
 * Fix - Add missing doctype for email header #3921
