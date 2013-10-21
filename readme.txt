@@ -168,6 +168,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.0.18 =
 * Fix - Escaped the "hide-wc-extensions-message" link in admin.
 * Fix - CSS -mox- prefix. #3953
+* Tweak - Pass index to woocommerce_save_product_variation. #3962
 
 = 2.0.17 - 17/10/2013 =
 * Fix - Add missing doctype for email header #3921

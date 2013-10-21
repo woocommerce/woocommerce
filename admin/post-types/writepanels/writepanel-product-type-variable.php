@@ -760,7 +760,7 @@ function process_product_meta_variable( $post_id ) {
 
 			}
 
-			do_action( 'woocommerce_save_product_variation', $variation_id );
+			do_action( 'woocommerce_save_product_variation', $variation_id, $i );
 
 		 }
 
