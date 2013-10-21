@@ -508,6 +508,7 @@ class WC_Product_Variable extends WC_Product {
 			update_post_meta( $this->id, '_min_variation_sale_price', $this->min_variation_sale_price );
 			update_post_meta( $this->id, '_max_variation_sale_price', $this->max_variation_sale_price );
 
+			do_action( 'woocommerce_variable_product_sync', $this->id );
 			$woocommerce->clear_product_transients( $this->id );
 		}
 	}
