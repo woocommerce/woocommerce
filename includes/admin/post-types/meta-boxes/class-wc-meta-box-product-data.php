@@ -1499,7 +1499,7 @@ class WC_Meta_Box_Product_Data {
 
 				}
 
-				do_action( 'woocommerce_save_product_variation', $variation_id );
+				do_action( 'woocommerce_save_product_variation', $variation_id, $i );
 			}
 		}
 
