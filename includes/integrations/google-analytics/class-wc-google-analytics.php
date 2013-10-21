@@ -36,6 +36,7 @@ class WC_Google_Analytics extends WC_Integration {
 		$this->ga_standard_tracking_enabled 	= $this->get_option( 'ga_standard_tracking_enabled' );
 		$this->ga_ecommerce_tracking_enabled 	= $this->get_option( 'ga_ecommerce_tracking_enabled' );
 		$this->ga_event_tracking_enabled		= $this->get_option( 'ga_event_tracking_enabled' );
+		$this->ga_doubleclick_cookie_enabled	= $this->get_option( 'ga_doubleclick_cookie_enabled' );
 
 		// Actions
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options') );
@@ -89,6 +90,13 @@ class WC_Google_Analytics extends WC_Integration {
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> 'end',
 				'default' 			=> 'no'
+			),
+			'ga_doubleclick_cookie_enabled' => array(
+				'label' 			=> __( 'Use Doubleclick third-party cookie for Google Adwords Remarketing', 'woocommerce' ),
+				'description' 		=> __( 'You must have a remarketing campaign created in Google Adwords for this to function properly', 'woocommerce' ),
+				'type' 				=> 'checkbox',
+				'checkboxgroup'		=> 'end',
+				'default' 			=> 'no'
 			)
 		);
 
@@ -138,7 +146,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 			(function() {
 				var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-				ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+				".($this->ga_doubleclick_cookie_enabled == "no" ? "ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';" : "ga.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js';")."
 				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 			})();
 
@@ -244,7 +252,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 			(function() {
 				var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-				ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+				".($this->ga_doubleclick_cookie_enabled == "no" ? "ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';" : "ga.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js';")."
 				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 			})();
 		";
