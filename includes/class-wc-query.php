@@ -59,7 +59,8 @@ class WC_Query {
 			add_action( 'parse_request', array( $this, 'parse_request'), 0 );
 			add_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 			add_filter( 'the_posts', array( $this, 'the_posts' ), 11, 2 );
-			add_filter( 'wp', array( $this, 'remove_product_query' ) );
+			add_action( 'wp', array( $this, 'remove_product_query' ) );
+			add_action( 'wp', array( $this, 'remove_ordering_args' ) );
 		}
 
 		$this->init_query_vars();
@@ -373,6 +374,14 @@ class WC_Query {
 	 */
 	public function remove_product_query() {
 		remove_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
+		remove_filter( 'posts_clauses', array( $this, 'order_by_popularity_post_clauses' ) );
+		remove_filter( 'posts_clauses', array( $this, 'order_by_rating_post_clauses' ) );
+	}
+
+	/**
+	 * Remove ordering queries
+	 */
+	public function remove_ordering_args() {
 		remove_filter( 'posts_clauses', array( $this, 'order_by_popularity_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'order_by_rating_post_clauses' ) );
 	}
