@@ -817,6 +817,8 @@ function process_product_meta_variable( $post_id ) {
 	update_post_meta( $post_parent, '_max_variation_regular_price', $highest_regular_price );
 	update_post_meta( $post_parent, '_min_variation_sale_price', $lowest_sale_price );
 	update_post_meta( $post_parent, '_max_variation_sale_price', $highest_sale_price );
+	
+	do_action( 'woocommerce_variable_product_sync', $post_parent );
 
 	// Update default attribute options setting
 	$default_attributes = array();
