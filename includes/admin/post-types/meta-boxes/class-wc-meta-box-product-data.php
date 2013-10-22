@@ -102,7 +102,7 @@ class WC_Meta_Box_Product_Data {
 						),
 						'attribute' => array(
 							'label'  => __( 'Attributes', 'woocommerce' ),
-							'target' => 'woocommerce_attributes',
+							'target' => 'product_attributes',
 							'class'  => array(),
 						),
 						'variations' => array(
@@ -383,13 +383,13 @@ class WC_Meta_Box_Product_Data {
 
 			</div>
 
-			<div id="woocommerce_attributes" class="panel wc-metaboxes-wrapper">
+			<div id="product_attributes" class="panel wc-metaboxes-wrapper">
 
 				<p class="toolbar">
 					<a href="#" class="close_all"><?php _e( 'Close all', 'woocommerce' ); ?></a><a href="#" class="expand_all"><?php _e( 'Expand all', 'woocommerce' ); ?></a>
 				</p>
 
-				<div class="woocommerce_attributes wc-metaboxes">
+				<div class="product_attributes wc-metaboxes">
 
 					<?php
 						// Array of defined attribute taxonomies

@@ -29,7 +29,7 @@ function wc_get_screen_ids() {
     	'toplevel_page_woocommerce',
     	'woocommerce_page_woocommerce_settings',
     	'woocommerce_page_wc_status',
-    	'product_page_woocommerce_attributes',
+    	'product_page_product_attributes',
     	'edit-shop_order',
     	'shop_order',
     	'edit-product',

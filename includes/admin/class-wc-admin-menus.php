@@ -46,7 +46,7 @@ class WC_Admin_Menus {
 
 	    $main_page = add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce' , array( $this, 'settings_page' ), null, '55.5' );
 
-	    add_submenu_page( 'edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'woocommerce_attributes', array( $this, 'attributes_page' ) );
+	    add_submenu_page( 'edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'product_attributes', array( $this, 'attributes_page' ) );
 	}
 
 	/**
@@ -108,7 +108,7 @@ class WC_Admin_Menus {
 				$screen = get_current_screen();
 
 				if ( $screen->base == 'edit-tags' && taxonomy_is_product_attribute( $taxonomy ) ) {
-					$submenu_file = 'woocommerce_attributes';
+					$submenu_file = 'product_attributes';
 					$parent_file  = 'edit.php?post_type=' . esc_attr( $post_type );
 				}
 			}
