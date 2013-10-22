@@ -345,7 +345,6 @@ function woocommerce_terms_clauses( $clauses, $taxonomies, $args ) {
 }
 add_filter( 'terms_clauses', 'woocommerce_terms_clauses', 10, 3 );
 
-
 /**
  * Function for recounting product terms, ignoring hidden products.
  *
@@ -365,110 +364,64 @@ function _woocommerce_term_recount( $terms, $taxonomy, $callback = true, $terms_
 	if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' ) {
 		$stock_join  = "LEFT JOIN {$wpdb->postmeta} AS meta_stock ON posts.ID = meta_stock.post_id";
 		$stock_query = "
-		AND (
-			meta_stock.meta_key = '_stock_status'
-			AND
-			meta_stock.meta_value = 'instock'
-		)";
+		AND meta_stock.meta_key = '_stock_status'
+		AND meta_stock.meta_value = 'instock'
+		";
 	} else {
 		$stock_query = $stock_join = '';
 	}
 
 	// Main query
-	$count_query = $wpdb->prepare( "
+	$count_query = "
 		SELECT COUNT( DISTINCT posts.ID ) FROM {$wpdb->posts} as posts
-
 		LEFT JOIN {$wpdb->postmeta} AS meta_visibility ON posts.ID = meta_visibility.post_id
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
-		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
-		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 		$stock_join
-
-		WHERE 	posts.post_status 	= 'publish'
-		AND 	posts.post_type 	= 'product'
-		AND 	(
-			meta_visibility.meta_key = '_visibility'
-			AND
-			meta_visibility.meta_value IN ( 'visible', 'catalog' )
-		)
-		AND 	tax.taxonomy	= %s
+		WHERE 	post_status = 'publish'
+		AND 	post_type 	= 'product'
+		AND 	meta_visibility.meta_key = '_visibility'
+		AND 	meta_visibility.meta_value IN ( 'visible', 'catalog' )
 		$stock_query
-	", $taxonomy->name );
-
-	// Store terms + counts here
-	$term_counts = array();
-	$counted_terms = array();
-	$maybe_count_parents = array();
+	";
 
 	// Pre-process term taxonomy ids
-	if ( $terms_are_term_taxonomy_ids ) {
-		$term_ids = array();
+	if ( ! $terms_are_term_taxonomy_ids )
+		$terms = (array) array_keys( $terms );
 
-		foreach ( (array) $terms as $term ) {
-			$the_term = $wpdb->get_row("SELECT term_id, parent FROM $wpdb->term_taxonomy WHERE term_taxonomy_id = $term AND taxonomy = '$taxonomy->name'");
-			$term_ids[ $the_term->term_id ] = $the_term->parent;
+	$terms = array_filter( (array) $terms );
+
+	// Ancestors need counting
+	if ( $terms ) {
+		foreach ( $terms as $term_id ) {
+			if ( is_taxonomy_hierarchical( $taxonomy->name ) ) {
+				$terms = array_merge( $terms, get_ancestors( $term_id, $taxonomy->name ) );
+			}
 		}
-
-		$terms = $term_ids;
 	}
 
-	// Count those terms!
-	foreach ( (array) $terms as $term_id => $parent_id ) {
+	// Unique terms
+	$terms = array_unique( $terms );
 
-		$term_ids 		= array();
+	// Count the terms
+	if ( $terms ) {
+		foreach ( $terms as $term_id ) {
+			$terms_to_count = array( absint( $term_id ) );
 
-		if ( is_taxonomy_hierarchical( $taxonomy->name ) ) {
-
-			// Grab the parents to count later
-			$parent = $parent_id;
-
-			while ( ! empty( $parent ) && $parent > 0 ) {
-				$maybe_count_parents[] = $parent;
-
-				$parent_term = get_term_by( 'id', $parent, $taxonomy->name );
-
-				if ( $parent_term )
-					$parent = $parent_term->parent;
-				else
-					$parent = 0;
+			if ( is_taxonomy_hierarchical( $taxonomy->name ) ) {
+				// We need to get the $term's hierarchy so we can count its children too
+				if ( ( $children = get_term_children( $term_id, $taxonomy->name ) ) && ! is_wp_error( $children  ) )
+					$terms_to_count = array_unique( array_map( 'absint', array_merge( $terms_to_count, $children ) ) );
 			}
 
-			// We need to get the $term's hierarchy so we can count its children too
-			$term_ids   = get_term_children( $term_id, $taxonomy->name );
-		}
-
-		$term_ids[] = absint( $term_id );
-
-		// Generate term query
-		$term_query = 'AND term.term_id IN ( ' . implode( ',', $term_ids ) . ' )';
-
-		// Get the count
-		$count = $wpdb->get_var( $count_query . $term_query );
-
-		update_woocommerce_term_meta( $term_id, 'product_count_' . $taxonomy->name, absint( $count ) );
-
-		$counted_terms[] = $term_id;
-	}
-
-	// Re-count parents
-	if ( is_taxonomy_hierarchical( $taxonomy->name ) ) {
-
-		$terms = array_diff( $maybe_count_parents, $counted_terms );
-
-		foreach ( (array) $terms as $term ) {
-
-			$term_ids   = get_term_children( $term, $taxonomy->name );
-			$term_ids[] = $term;
-
 			// Generate term query
-			$term_query = 'AND term.term_id IN ( ' . implode( ',', $term_ids ) . ' )';
+			$term_query = 'AND term_taxonomy_id IN ( ' . implode( ',', $terms_to_count ) . ' )';
 
 			// Get the count
 			$count = $wpdb->get_var( $count_query . $term_query );
 
-			update_woocommerce_term_meta( $term, 'product_count_' . $taxonomy->name, absint( $count ) );
+			// Update the count
+			update_woocommerce_term_meta( $term_id, 'product_count_' . $taxonomy->name, absint( $count ) );
 		}
-
 	}
 }
 
@@ -479,6 +432,8 @@ function _woocommerce_term_recount( $terms, $taxonomy, $callback = true, $terms_
  * @return void
  */
 function woocommerce_recount_after_stock_change( $product_id ) {
+	if ( get_option( 'woocommerce_hide_out_of_stock_items' ) != 'yes' ) 
+		return;
 
 	$product_terms = get_the_terms( $product_id, 'product_cat' );
 
@@ -487,7 +442,6 @@ function woocommerce_recount_after_stock_change( $product_id ) {
 			$product_cats[ $term->term_id ] = $term->parent;
 
 		_woocommerce_term_recount( $product_cats, get_taxonomy( 'product_cat' ), false, false );
-
 	}
 
 	$product_terms = get_the_terms( $product_id, 'product_tag' );
@@ -497,7 +451,6 @@ function woocommerce_recount_after_stock_change( $product_id ) {
 			$product_tags[ $term->term_id ] = $term->parent;
 
 		_woocommerce_term_recount( $product_tags, get_taxonomy( 'product_tag' ), false, false );
-
 	}
 }
 add_action( 'woocommerce_product_set_stock_status', 'woocommerce_recount_after_stock_change' );
