@@ -353,7 +353,8 @@ class WC_Post_types {
 						'rewrite' 				=> false,
 						'query_var' 			=> false,
 						'supports' 				=> array( 'title' ),
-						'show_in_nav_menus'		=> false
+						'show_in_nav_menus'		=> false,
+						'show_in_admin_bar'     => true
 					)
 				)
 			);
