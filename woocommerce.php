@@ -177,7 +177,7 @@ final class WooCommerce {
 	 */
 	public function action_links( $links ) {
 		return array_merge( array(
-			'<a href="' . admin_url( 'admin.php?page=woocommerce_settings' ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
+			'<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
 			'<a href="http://docs.woothemes.com/documentation/plugins/woocommerce/">' . __( 'Docs', 'woocommerce' ) . '</a>',
 			'<a href="http://support.woothemes.com/">' . __( 'Premium Support', 'woocommerce' ) . '</a>',
 		), $links );

@@ -265,7 +265,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 									break;
 									case 'settings' :
 										echo '<td class="settings">
-					        				<a class="button" href="' . admin_url( 'admin.php?page=woocommerce_settings&tab=checkout&section=' . strtolower( get_class( $gateway ) ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>
+					        				<a class="button" href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( get_class( $gateway ) ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>
 					        			</td>';
 									break;
 									default :

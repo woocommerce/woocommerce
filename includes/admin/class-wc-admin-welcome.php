@@ -150,7 +150,7 @@ class WC_Admin_Welcome {
 		<div class="wc-badge"><?php printf( __( 'Version %s', 'woocommerce' ), $woocommerce->version ); ?></div>
 
 		<p class="woocommerce-actions">
-			<a href="<?php echo admin_url('admin.php?page=woocommerce_settings'); ?>" class="button button-primary"><?php _e( 'Settings', 'woocommerce' ); ?></a>
+			<a href="<?php echo admin_url('admin.php?page=wc-settings'); ?>" class="button button-primary"><?php _e( 'Settings', 'woocommerce' ); ?></a>
 			<a class="docs button button-primary" href="http://docs.woothemes.com/documentation/plugins/woocommerce/"><?php _e( 'Docs', 'woocommerce' ); ?></a>
 			<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="A open-source (free) #ecommerce plugin for #WordPress that helps you sell anything. Beautifully." data-via="WooThemes" data-size="large" data-hashtags="WooCommerce">Tweet</a>
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
@@ -316,7 +316,7 @@ class WC_Admin_Welcome {
 			</div>
 
 			<div class="return-to-dashboard">
-				<a href="<?php echo esc_url( admin_url( add_query_arg( array( 'page' => 'woocommerce_settings' ), 'admin.php' ) ) ); ?>"><?php _e( 'Go to WooCommerce Settings', 'woocommerce' ); ?></a>
+				<a href="<?php echo esc_url( admin_url( add_query_arg( array( 'page' => 'wc-settings' ), 'admin.php' ) ) ); ?>"><?php _e( 'Go to WooCommerce Settings', 'woocommerce' ); ?></a>
 			</div>
 		</div>
 		<?php
