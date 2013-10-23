@@ -35,7 +35,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 		$this->subject        = __( 'Invoice for order {order_number} from {order_date}', 'woocommerce');
 		$this->heading        = __( 'Invoice for order {order_number}', 'woocommerce');
 
-		$this->subject_paid   = __( 'Your {blogname} order from {order_date}', 'woocommerce');
+		$this->subject_paid   = __( 'Your {site_title} order from {order_date}', 'woocommerce');
 		$this->heading_paid   = __( 'Order {order_number} details', 'woocommerce');
 
 		// Call parent constructor

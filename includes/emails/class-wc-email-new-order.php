@@ -27,7 +27,7 @@ class WC_Email_New_Order extends WC_Email {
 		$this->description		= __( 'New order emails are sent when an order is received.', 'woocommerce' );
 
 		$this->heading 			= __( 'New customer order', 'woocommerce' );
-		$this->subject      	= __( '[{blogname}] New customer order ({order_number}) - {order_date}', 'woocommerce' );
+		$this->subject      	= __( '[{site_title}] New customer order ({order_number}) - {order_date}', 'woocommerce' );
 
 		$this->template_html 	= 'emails/admin-new-order.php';
 		$this->template_plain 	= 'emails/plain/admin-new-order.php';

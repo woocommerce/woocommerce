@@ -34,7 +34,7 @@ class WC_Email_Customer_Note extends WC_Email {
 		$this->template_html 	= 'emails/customer-note.php';
 		$this->template_plain 	= 'emails/plain/customer-note.php';
 
-		$this->subject 			= __( 'Note added to your {blogname} order from {order_date}', 'woocommerce');
+		$this->subject 			= __( 'Note added to your {site_title} order from {order_date}', 'woocommerce');
 		$this->heading      	= __( 'A note has been added to your order', 'woocommerce');
 
 		// Triggers
