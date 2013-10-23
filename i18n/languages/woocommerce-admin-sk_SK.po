@@ -1,0 +1,4861 @@
+# Translation of 2.0.x in Slovak
+# This file is distributed under the same license as the 2.0.x package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2013-10-21 13:30:55+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: GlotPress/0.1\n"
+"Project-Id-Version: 2.0.x\n"
+
+#: admin/settings/settings-init.php:520
+msgid "Enable the <strong>weight</strong> field for products (some shipping methods may require this)"
+msgstr "Povoliť <strong>váhu</strong> produktu (niektoré metódy prepravy ho môžu vyžadovať)"
+
+#: admin/settings/settings-init.php:528
+msgid "Enable the <strong>dimension</strong> fields for products (some shipping methods may require this)"
+msgstr "Povoliť <strong>rozmery</strong> produktu (niektoré metódy prepravy ho môžu vyžadovať)"
+
+#: admin/settings/settings-init.php:536
+msgid "Show <strong>weight and dimension</strong> values on the <strong>Additional Information</strong> tab"
+msgstr "Zobraziť hodnoty <strong>váhy a rozmerov</strong> v záložke <strong>Ďaľšie informácie</strong>"
+
+#: admin/settings/settings-init.php:544
+msgid "Weight Unit"
+msgstr "Jednotka hmotnosti"
+
+#: admin/settings/settings-init.php:545
+msgid "This controls what unit you will define weights in."
+msgstr "Tu zadajte jednotky hmotnosti."
+
+#: admin/settings/settings-init.php:551
+msgid "kg"
+msgstr "kg"
+
+#: admin/settings/settings-init.php:552
+msgid "g"
+msgstr "g"
+
+#: admin/settings/settings-init.php:553
+msgid "lbs"
+msgstr "lbs"
+
+#: admin/settings/settings-init.php:554
+msgid "oz"
+msgstr "oz"
+
+#: admin/settings/settings-init.php:560
+msgid "Dimensions Unit"
+msgstr "Jednotka rozmerov"
+
+#: admin/settings/settings-init.php:561
+msgid "This controls what unit you will define lengths in."
+msgstr "Tu zadajte jednotky dĺžkových rozmerov."
+
+#: admin/settings/settings-init.php:568
+msgid "cm"
+msgstr "cm"
+
+#: admin/settings/settings-init.php:569
+msgid "mm"
+msgstr "mm"
+
+#: admin/settings/settings-init.php:570
+msgid "in"
+msgstr "v"
+
+#: admin/settings/settings-init.php:571
+msgid "yd"
+msgstr "yd"
+
+#: admin/settings/settings-init.php:577
+msgid "Product Ratings"
+msgstr "Hodnotenia produktu"
+
+#: admin/settings/settings-init.php:578
+msgid "Enable ratings on reviews"
+msgstr "Povoliť hodnotenia v recenziách"
+
+#: admin/settings/settings-init.php:587
+msgid "Ratings are required to leave a review"
+msgstr "Hodnotenia sú vyžadované pri recenziách."
+
+#: admin/settings/settings-init.php:596
+msgid "Show \"verified owner\" label for customer reviews"
+msgstr "Zobraziť označenie \"overený majiteľ\" pri recenziách zákazníka"
+
+#: admin/settings/settings-init.php:606
+msgid "Pricing Options"
+msgstr "Cenové možnosti"
+
+#: admin/settings/settings-init.php:606
+msgid "The following options affect how prices are displayed on the frontend."
+msgstr "Nasledujúce nastavenia určujú ako sú zobrazované ceny na stránke."
+
+#: admin/settings/settings-init.php:609
+msgid "Currency Position"
+msgstr "Umiestnenie meny"
+
+#: admin/settings/settings-init.php:610
+msgid "This controls the position of the currency symbol."
+msgstr "Zadajte pozíciu symbolu meny."
+
+#: admin/settings/settings-init.php:616
+msgid "Left"
+msgstr "Vľavo"
+
+#: admin/settings/settings-init.php:617
+msgid "Right"
+msgstr "Vpravo"
+
+#: admin/settings/settings-init.php:618
+msgid "Left (with space)"
+msgstr "Vľavo (s medzerou)"
+
+#: admin/settings/settings-init.php:619
+msgid "Right (with space)"
+msgstr "Vpravo (s medzerou)"
+
+#: admin/settings/settings-init.php:625
+msgid "Thousand Separator"
+msgstr "Oddeľovač tisícov"
+
+#: admin/settings/settings-init.php:626
+msgid "This sets the thousand separator of displayed prices."
+msgstr "Nastavenie oddeľovača tisícov zobrazených cien."
+
+#: admin/settings/settings-init.php:635
+msgid "Decimal Separator"
+msgstr "Oddeľovač desatinných miest"
+
+#: admin/settings/settings-init.php:636
+msgid "This sets the decimal separator of displayed prices."
+msgstr "Nastavenie oddeľovača desatinných miest zobrazených cien."
+
+#: admin/settings/settings-init.php:645
+msgid "Number of Decimals"
+msgstr "Počet desatinných čísel"
+
+#: admin/settings/settings-init.php:646
+msgid "This sets the number of decimal points shown in displayed prices."
+msgstr "Tým sa nastaví počet desatinných miest zobrazených v uvedených cenách."
+
+#: admin/settings/settings-init.php:659
+msgid "Trailing Zeros"
+msgstr "Koncové nuly"
+
+#: admin/settings/settings-init.php:660
+msgid "Remove zeros after the decimal point. e.g. <code>$10.00</code> becomes <code>$10</code>"
+msgstr "Odstráni koncové nuly. Napr z<code>10.00€</code> sa stane <code>10€</code>"
+
+#: admin/settings/settings-init.php:668
+msgid "Image Options"
+msgstr "Voľby obrázka"
+
+#: admin/settings/settings-init.php:668
+msgid "These settings affect the actual dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a href=\"%s\">regenerate your thumbnails</a>."
+msgstr "Tieto nastavenia ovplyvňujú skutočné rozmery obrázkov v katalóogu - displej na prednej strane bude aj naďalej ovplyvnený štýlmi CSS.  Po zmeme tohto nastavenia bude potrebné znovu vygenerovať náhľady - požite plugin <a href=\"%s\">Regenerate thumbnails</a>."
+
+#: admin/settings/settings-init.php:671
+msgid "Catalog Images"
+msgstr "Katalóg obrázkov"
+
+#: admin/settings/settings-init.php:672
+msgid "This size is usually used in product listings"
+msgstr "Táto veľkosť sa obvykle používa pri výpisoch produktov"
+
+#: admin/settings/settings-init.php:685
+msgid "Single Product Image"
+msgstr "Obrázok konkrétneho produktu"
+
+#: admin/settings/settings-init.php:686
+msgid "This is the size used by the main image on the product page."
+msgstr "Toto je veľkosť používaná pre základný obraz na stránke produktu."
+
+#: admin/settings/settings-init.php:699
+msgid "Product Thumbnails"
+msgstr "Katalóg Náhľady"
+
+#: admin/settings/settings-init.php:700
+msgid "This size is usually used for the gallery of images on the product page."
+msgstr "Táto veľkosť sa obvykle používa pre Galériu obrázkov na stránke produktu."
+
+#: admin/settings/settings-init.php:719
+msgid "Inventory Options"
+msgstr "Možnosti skladu"
+
+#: admin/settings/settings-init.php:722
+msgid "Manage Stock"
+msgstr "Spravovať sklad"
+
+#: admin/settings/settings-init.php:723
+msgid "Enable stock management"
+msgstr "Povoliť riadenie skladových zásob"
+
+#: admin/settings/settings-init.php:730
+msgid "Hold Stock (minutes)"
+msgstr "Držať sklad (v minútach)"
+
+#: admin/settings/settings-init.php:731
+msgid "Hold stock (for unpaid orders) for x minutes. When this limit is reached, the pending order will be cancelled. Leave blank to disable."
+msgstr "Držať sklad (pre nezaplatené objednávky) x minút. Keď sa dosiahne limit, objednávka bude zrušená. Nechajte prázdne pre vypnutie funkcie."
+
+#: admin/settings/settings-init.php:743
+msgid "Notifications"
+msgstr "Upozornenie"
+
+#: admin/settings/settings-init.php:744
+msgid "Enable low stock notifications"
+msgstr "Povoliť upozorňovanie na nízky stav skladových zásob"
+
+#: admin/settings/settings-init.php:752
+msgid "Enable out of stock notifications"
+msgstr "Povoliť upozorňovanie na vyčerpanie skladových zásob"
+
+#: admin/settings/settings-init.php:760
+msgid "Notification Recipient"
+msgstr "Doručiteľ oznámenia"
+
+#: admin/settings/settings-init.php:768
+msgid "Low Stock Threshold"
+msgstr "Prah nízkeho skladu"
+
+#: admin/settings/settings-init.php:781
+msgid "Out Of Stock Threshold"
+msgstr "Prah nie je skladom"
+
+#: admin/settings/settings-init.php:794
+msgid "Out Of Stock Visibility"
+msgstr "Vidieteľnosť nie je skladom"
+
+#: admin/settings/settings-init.php:795
+msgid "Hide out of stock items from the catalog"
+msgstr "Položky, ktoré nie sú na sklade ukryť v katalógu"
+
+#: admin/settings/settings-init.php:802
+msgid "Stock Display Format"
+msgstr "Formát zobrazenia skladu"
+
+#: admin/settings/settings-init.php:803
+msgid "This controls how stock is displayed on the frontend."
+msgstr "Toto kontroluje ako je zobrazený sklad na stránke."
+
+#: admin/settings/settings-init.php:809
+msgid "Always show stock e.g. \"12 in stock\""
+msgstr "Vždy zobraziť napríklad \"12 skladom\""
+
+#: admin/settings/settings-init.php:810
+msgid "Only show stock when low e.g. \"Only 2 left in stock\" vs. \"In Stock\""
+msgstr "Zobraziť ak je skladom málo kusov, napríklad \"Skladom len 2 kusy a nie Skladom\""
+
+#: admin/settings/settings-init.php:811
+msgid "Never show stock amount"
+msgstr "Nezobrazovať počet na sklade"
+
+#: admin/settings/settings-init.php:823
+#: admin/woocommerce-admin-settings.php:292
+msgid "Shipping Options"
+msgstr "Možnosti dopravy"
+
+#: admin/settings/settings-init.php:826
+msgid "Shipping Calculations"
+msgstr "Kalkulácie poštovného"
+
+#: admin/settings/settings-init.php:827
+msgid "Enable shipping"
+msgstr "Povoliť dopravu"
+
+#: admin/settings/settings-init.php:835
+msgid "Enable the shipping calculator on the cart page"
+msgstr "Povoliť výpočet ceny dopravy na stránke košíka"
+
+#: admin/settings/settings-init.php:843
+msgid "Hide shipping costs until an address is entered"
+msgstr "Schovať náklady na prepravu kým nie je zadaná adresa"
+
+#: admin/settings/settings-init.php:851
+msgid "Shipping Method Display"
+msgstr "Zobrazenie spôsobu prepravy"
+
+#: admin/settings/settings-init.php:852
+msgid "This controls how multiple shipping methods are displayed on the frontend."
+msgstr "Toto kontroluje ako sú zobrazené na stránke rôzne spôsoby prepravy."
+
+#: admin/settings/settings-init.php:858
+msgid "Radio buttons"
+msgstr "Prepínače"
+
+#: admin/settings/settings-init.php:859
+msgid "Select box"
+msgstr "Výberové pole"
+
+#: admin/settings/settings-init.php:865
+msgid "Shipping Destination"
+msgstr "Doručovacia adresa"
+
+#: admin/settings/settings-init.php:866
+msgid "Only ship to the users billing address"
+msgstr "Doručovať len na fakturačnú adresu zákazníka"
+
+#: admin/settings/settings-init.php:874
+msgid "Ship to billing address by default"
+msgstr "Predvolená preprava na fakturačnú adresu"
+
+#: admin/settings/settings-init.php:882
+msgid "Collect shipping address even when not required"
+msgstr "Zbierať adresu doručenia aj keď nieje potrebná"
+
+#: admin/settings/settings-init.php:900
+#: admin/woocommerce-admin-settings.php:188
+#: admin/woocommerce-admin-settings.php:329
+msgid "Payment Gateways"
+msgstr "Spôsoby platenia"
+
+#: admin/settings/settings-init.php:900
+msgid "Installed payment gateways are displayed below. Drag and drop payment gateways to control their display order on the checkout."
+msgstr "Nainštalované platobné brány sú zobrazené nižšie. Pomocou funkcie ťahaj a pusť nastavte ich poradie pri platbe objednávky."
+
+#: admin/settings/settings-init.php:918
+#: admin/woocommerce-admin-settings.php:222
+msgid "Tax Options"
+msgstr "Nastavenie DPH"
+
+#: admin/settings/settings-init.php:921
+msgid "Enable Taxes"
+msgstr "Povoliť dane"
+
+#: admin/settings/settings-init.php:922
+msgid "Enable taxes and tax calculations"
+msgstr "Povoliť DPH a výpočet DPH"
+
+#: admin/settings/settings-init.php:929
+msgid "Prices Entered With Tax"
+msgstr "Ceny zadávané s daňou"
+
+#: admin/settings/settings-init.php:933
+msgid "This option is important as it will affect how you input prices. Changing it will not update existing products."
+msgstr "Toto nastavenie je dôležité a ovplyvňuje vstupné ceny. Zmena nastavenia neaktualizuje u existujúce produkty."
+
+#: admin/settings/settings-init.php:935
+msgid "Yes, I will enter prices inclusive of tax"
+msgstr "Áno, budem zadávať ceny s daňou"
+
+#: admin/settings/settings-init.php:936
+msgid "No, I will enter prices exclusive of tax"
+msgstr "Nie, budem zadávať ceny bez dane"
+
+#: admin/settings/settings-init.php:941
+msgid "Calculate Tax Based On:"
+msgstr "Rátať daň na základe:"
+
+#: admin/settings/settings-init.php:943
+msgid "This option determines which address is used to calculate tax."
+msgstr "Toto nastavenie určuje ktorá adresa bude použitá na výpočet dane."
+
+#: admin/settings/settings-init.php:947
+msgid "Customer shipping address"
+msgstr "Doručovacia adresa zákazníka"
+
+#: admin/settings/settings-init.php:948
+msgid "Customer billing address"
+msgstr "Fakturačná adresa zákazníka"
+
+#: admin/settings/settings-init.php:949 admin/settings/settings-init.php:961
+msgid "Shop base address"
+msgstr "Základná adresa obchodu"
+
+#: admin/settings/settings-init.php:954
+msgid "Default Customer Address:"
+msgstr "Základná adresa zákazníka:"
+
+#: admin/settings/settings-init.php:956
+msgid "This option determines the customers default address (before they input their own)."
+msgstr "Toto nastavenie určuje základnú adresu zákazníkov (predtým než ju zadajú)."
+
+#: admin/settings/settings-init.php:960
+msgid "No address"
+msgstr "Žiadna adresa"
+
+#: admin/settings/settings-init.php:966
+msgid "Shipping Tax Class:"
+msgstr "Trieda prepravnej dane:"
+
+#: admin/settings/settings-init.php:967
+msgid "Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves."
+msgstr "Umožňuje kontrolu nad tým, ktorú daňovú triedu použije na prepravu. Nechajte prázdne pre použitie daňovej sadzby prepravy podľa samotných položiek košíka."
+
+#: admin/settings/settings-init.php:972
+msgid "Shipping tax class based on cart items"
+msgstr "Daňová sadzba prepravy podľa položiek košíka."
+
+#: admin/settings/settings-init.php:977
+msgid "Rounding"
+msgstr "Zaokrúhľovanie"
+
+#: admin/settings/settings-init.php:978
+msgid "Round tax at subtotal level, instead of rounding per line"
+msgstr "Zaokrúhliť daň pri medzisúčte namiesto pri zaokrúhľovaní po položkách"
+
+#: admin/settings/settings-init.php:985
+msgid "Additional Tax Classes"
+msgstr "Doplnkové daňové triedy"
+
+#: admin/settings/settings-init.php:986
+msgid "List additonal tax classes below (1 per line). This is in addition to the default <code>Standard Rate</code>. Tax classes can be assigned to products."
+msgstr "Zoznam doplnkových daňových tried(1 na riadok).  Toto je doplnok ku <code>Štandardným sadzbám</code>.  Daňové triedy môžu byť priradené k produktom."
+
+#: admin/settings/settings-init.php:990
+msgid "Reduced Rate%sZero Rate"
+msgstr "Znížená sadzba %s nulová sadzba"
+
+#: admin/settings/settings-init.php:994
+msgid "Display prices during cart/checkout:"
+msgstr "Zobraziť ceny v košíku/pokladni:"
+
+#: admin/settings/settings-init.php:999
+msgid "Including tax"
+msgstr "Vrátane dane"
+
+#: admin/settings/settings-init.php:1000
+msgid "Excluding tax"
+msgstr "Bez dane"
+
+#: admin/settings/settings-init.php:1012
+msgid "Email Sender Options"
+msgstr "Nastavenie odosielateľa e-mailu"
+
+#: admin/settings/settings-init.php:1012
+msgid "The following options affect the sender (email address and name) used in WooCommerce emails."
+msgstr "Nasledujúce nastavenia (adresa a meno) sa zameriavajú na odosielanie emailov používaných vo WooCommerce."
+
+#: admin/settings/settings-init.php:1015
+msgid "\"From\" Name"
+msgstr "Meno \"Od\""
+
+#: admin/settings/settings-init.php:1024
+msgid "\"From\" Email Address"
+msgstr "Email \"Od\""
+
+#: admin/settings/settings-init.php:1037
+msgid "Email Template"
+msgstr "Šablóna emailu"
+
+#: admin/settings/settings-init.php:1037
+msgid "This section lets you customise the WooCommerce emails. <a href=\"%s\" target=\"_blank\">Click here to preview your email template</a>. For more advanced control copy <code>woocommerce/templates/emails/</code> to <code>yourtheme/woocommerce/emails/</code>."
+msgstr "Táto sekcia vám umožňuje upraviť vzhľad WooCommerce emailov. <a href=\"%s\" target=\"_blank\">Kliknite sem pre náhľad šablóny</a>. Pre pokročilé nastavenia skopírujte <code>woocommerce/templates/emails/</code> do <code>yourtheme/woocommerce/emails/</code>."
+
+#: admin/settings/settings-init.php:1040
+msgid "Header Image"
+msgstr "Obrázok hlavičky"
+
+#: admin/settings/settings-init.php:1041
+msgid "Enter a URL to an image you want to show in the email's header. Upload your image using the <a href=\"%s\">media uploader</a>."
+msgstr "Zadajte URL adresu obrázku, ktorý chcete zobraziť v záhlaví e-mailu. Nahrajte svoj obrázok pomocou <a href=\"%s\">nahrávača médií</a>."
+
+#: admin/settings/settings-init.php:1049
+msgid "Email Footer Text"
+msgstr "Text v pätičke emailu."
+
+#: admin/settings/settings-init.php:1050
+msgid "The text to appear in the footer of WooCommerce emails."
+msgstr "Text se objaví v zápätí e-mailov (napr. podpis, kontaktné údaje apod.)"
+
+#: admin/settings/settings-init.php:1054
+msgid "Powered by WooCommerce"
+msgstr "Využíva riešenia WooCommerce"
+
+#: admin/settings/settings-init.php:1058
+msgid "Base Colour"
+msgstr "Základná farba"
+
+#: admin/settings/settings-init.php:1059
+msgid "The base colour for WooCommerce email templates. Default <code>#557da1</code>."
+msgstr "Základná farba pre e-mailové šablóny e-shopu. Predvolená je <code>#557da1</code> ."
+
+#: admin/settings/settings-init.php:1067
+msgid "Background Colour"
+msgstr "Farba pozadia"
+
+#: admin/settings/settings-init.php:1068
+msgid "The background colour for WooCommerce email templates. Default <code>#f5f5f5</code>."
+msgstr "Farba pozadia v šablóne emailov pre WooCommerce. Štandardne <code>#f5f5f5</code>."
+
+#: admin/settings/settings-init.php:1076
+msgid "Email Body Background Colour"
+msgstr "Farba pozadia v tele emailu"
+
+#: admin/settings/settings-init.php:1077
+msgid "The main body background colour. Default <code>#fdfdfd</code>."
+msgstr "Farba pozadia hlavnej časti e-malu. Predvolená je <code>#fdfdfd</code> ."
+
+#: admin/settings/settings-init.php:1085
+msgid "Email Body Text Colour"
+msgstr "Farba textu v tele emailu"
+
+#: admin/settings/settings-init.php:1086
+msgid "The main body text colour. Default <code>#505050</code>."
+msgstr "Farba textu hlavnej časti e-mailu. Predvolená je <code>#505050</code> ."
+
+#: admin/settings/settings-payment-gateways.php:27
+#: admin/settings/settings-shipping-methods.php:29
+#: admin/woocommerce-admin-init.php:757
+#: admin/woocommerce-admin-taxonomies.php:27
+#: admin/woocommerce-admin-taxonomies.php:121
+msgid "Default"
+msgstr "Predvolené"
+
+#: admin/settings/settings-payment-gateways.php:28
+msgid "Gateway"
+msgstr "Spôsob"
+
+#: admin/settings/settings-payment-gateways.php:45
+msgid "Gateway ID"
+msgstr "ID spôsobu platby"
+
+#: admin/settings/settings-shipping-methods.php:23
+msgid "Shipping Methods"
+msgstr "Spôsoby dodania"
+
+#: admin/settings/settings-shipping-methods.php:25
+msgid "Drag and drop methods to control their display order."
+msgstr "Nastavte poradie spôsobov prepravy pomocou funkcie ťahaj a pusť."
+
+#: admin/settings/settings-shipping-methods.php:30
+msgid "Shipping Method"
+msgstr "spôsob prepravy"
+
+#: admin/settings/settings-shipping-methods.php:46
+msgid "Method ID"
+msgstr "Metóda ID"
+
+#: admin/settings/settings-tax-rates.php:29
+msgid "Tax Rates for the \"%s\" Class"
+msgstr "Sadzby dane pre triedu \"%s\""
+
+#: admin/settings/settings-tax-rates.php:30
+msgid "Define tax rates for countries and states below. <a href=\"%s\">See here</a> for available alpha-2 country codes."
+msgstr "Definuje sadzby daní pre rôzne krajiny a štáty.<a href=\"%s\">Pozrite sa sem</a> pre dostupné kódy krajín."
+
+#: admin/settings/settings-tax-rates.php:36
+msgid "Country&nbsp;Code"
+msgstr "Krajina&nbsp;Kód"
+
+#: admin/settings/settings-tax-rates.php:36
+msgid "A 2 digit country code, e.g. US. Leave blank to apply to all."
+msgstr "Kód krajiny dlhý 2 znaky, napr. US"
+
+#: admin/settings/settings-tax-rates.php:38
+msgid "State&nbsp;Code"
+msgstr "Štát&nbsp;Kód"
+
+#: admin/settings/settings-tax-rates.php:38
+msgid "A 2 digit state code, e.g. AL. Leave blank to apply to all."
+msgstr "Kód štátu dlhý 2 znaky, napr. AL. Nechajte prázdne pre všetky"
+
+#: admin/settings/settings-tax-rates.php:40
+#: admin/settings/settings-tax-rates.php:217
+msgid "ZIP/Postcode"
+msgstr "PSČ/Poštový kód"
+
+#: admin/settings/settings-tax-rates.php:40
+msgid "Postcode for this rule. Semi-colon (;) separate multiple values. Leave blank to apply to all areas. Wildcards (*) can be used. Ranges for numeric postcodes (e.g. 12345-12350) will be expanded into individual postcodes."
+msgstr "Poštový kód pre toto pravidlo. Bodkočiarka(;) oddeľuje viaceré hodnoty. Nechajte prázdne pre použitie vo všetky oblasti. Zástupné znaky môžu byť použité(*) Rozsah číselných poštových kódov(napr. 12345 - 12350) bude rozšírený na jednotlivé kódy."
+
+#: admin/settings/settings-tax-rates.php:42
+msgid "Cities for this rule. Semi-colon (;) separate multiple values. Leave blank to apply to all cities."
+msgstr "Mestá pre toto pravidlo. Bodkočiarka(;) oddeľuje viaceré hodnoty. Nechajte prázdne pre použitie vo všetkých mestách."
+
+#: admin/settings/settings-tax-rates.php:44
+msgid "Rate&nbsp;%"
+msgstr "Sadzba&nbsp;%"
+
+#: admin/settings/settings-tax-rates.php:44
+msgid "Enter a tax rate (percentage) to 4 decimal places."
+msgstr "Zadajte sadzbu dane (v percentách) na 4 desatinné miesta"
+
+#: admin/settings/settings-tax-rates.php:46
+msgid "Tax&nbsp;Name"
+msgstr "Daň&nbsp;Názov"
+
+#: admin/settings/settings-tax-rates.php:46
+msgid "Enter a name for this tax rate."
+msgstr "Zadajte názov dane."
+
+#: admin/settings/settings-tax-rates.php:48
+#: admin/settings/settings-tax-rates.php:217
+msgid "Priority"
+msgstr "Priorita"
+
+#: admin/settings/settings-tax-rates.php:48
+msgid "Choose a priority for this tax rate. Only 1 matching rate per priority will be used. To define multiple tax rates for a single area you need to specify a different priority per rate."
+msgstr "Vyberte prioritu pre t´to daň. Iba jedna sadzba na prioritu bude použitá. Pre určenie viacerých daňových sadzieb v jednom území potrebujete špecifikovať rozličnú prioritu."
+
+#: admin/settings/settings-tax-rates.php:50
+#: admin/settings/settings-tax-rates.php:217
+msgid "Compound"
+msgstr "Zloženie"
+
+#: admin/settings/settings-tax-rates.php:50
+msgid "Choose whether or not this is a compound rate. Compound tax rates are applied on top of other tax rates."
+msgstr "Je toto zložená sadzba? Zložená sadzba sa aplikuje navrch všetkých ostatných sadzieb."
+
+#: admin/settings/settings-tax-rates.php:52
+msgid "Choose whether or not this tax rate also gets applied to shipping."
+msgstr "Vyberte, či má byť táto daňová sadzba použitá aj na poštovné."
+
+#: admin/settings/settings-tax-rates.php:59
+msgid "Insert row"
+msgstr "Vložiť riadok"
+
+#: admin/settings/settings-tax-rates.php:60
+msgid "Remove selected row(s)"
+msgstr "Odstrániť vybraný riadok(riadky)"
+
+#: admin/settings/settings-tax-rates.php:62
+msgid "Export CSV"
+msgstr "Export CSV"
+
+#: admin/settings/settings-tax-rates.php:63
+msgid "Import CSV"
+msgstr "Import CSV"
+
+#: admin/settings/settings-tax-rates.php:163
+msgid "No row(s) selected"
+msgstr "Nevybrali ste žiadny riadok."
+
+#: admin/settings/settings-tax-rates.php:217
+msgid "Country Code"
+msgstr "Kód krajiny"
+
+#: admin/settings/settings-tax-rates.php:217
+msgid "State Code"
+msgstr "Kód štátu"
+
+#: admin/settings/settings-tax-rates.php:217
+msgid "Rate %"
+msgstr "Sadzba %"
+
+#: admin/settings/settings-tax-rates.php:217
+msgid "Tax Name"
+msgstr "Názov dane "
+
+#: admin/woocommerce-admin-attributes.php:77
+msgid "Please, provide an attribute name, slug and type."
+msgstr "Prosím, napíšte meno vlastnosti, slug a typ."
+
+#: admin/woocommerce-admin-attributes.php:79
+msgid "Slug “%s” is too long (28 characters max). Shorten it, please."
+msgstr "Slug “%s” je príliš dlhý(maixmiálne 28 znoakov). Prosím, skráťte ho."
+
+#: admin/woocommerce-admin-attributes.php:81
+msgid "Slug “%s” is not allowed because it is a reserved term. Change it, please."
+msgstr "Slug “%s” nie je povolený, pretože je vyhradený. Prosím, zmeňte ho."
+
+#: admin/woocommerce-admin-attributes.php:86
+#: admin/woocommerce-admin-attributes.php:91
+msgid "Slug “%s” is already in use. Change it, please."
+msgstr "Slug “%s” sa už používa. Prosím, zmeňte ho."
+
+#: admin/woocommerce-admin-attributes.php:227
+msgid "Edit Attribute"
+msgstr "Upraviť vlastnosť"
+
+#: admin/woocommerce-admin-attributes.php:237
+#: admin/woocommerce-admin-attributes.php:376
+msgid "Name for the attribute (shown on the front-end)."
+msgstr "Názov atribútu (zobrazené na front-end)."
+
+#: admin/woocommerce-admin-attributes.php:242
+#: admin/woocommerce-admin-attributes.php:308
+#: admin/woocommerce-admin-attributes.php:380
+msgid "Slug"
+msgstr "Slug"
+
+#: admin/woocommerce-admin-attributes.php:246
+#: admin/woocommerce-admin-attributes.php:382
+msgid "Unique slug/reference for the attribute; must be shorter than 28 characters."
+msgstr "Unikátny slug / referencia vlastnosti, musí byť kratší ako 28 znakov."
+
+#: admin/woocommerce-admin-attributes.php:255
+#: admin/woocommerce-admin-attributes.php:388
+msgid "Select"
+msgstr "Vybrať"
+
+#: admin/woocommerce-admin-attributes.php:256
+#: admin/woocommerce-admin-attributes.php:389
+msgid "Text"
+msgstr "Text"
+
+#: admin/woocommerce-admin-attributes.php:259
+#: admin/woocommerce-admin-attributes.php:392
+msgid "Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>."
+msgstr "Tu zadajte spôsob výberu vlastností produktov. <strong>Text</strong> umožňuje ručné zadanie na stránke produktu, pričom voľba <strong>vybrať</strong> vlastnosť ponúkne iba voľby určené v tejto časti. Ak plánujete používať vlastnosti pre varianty použite voľbu <strong>vybrať</strong>"
+
+#: admin/woocommerce-admin-attributes.php:264
+#: admin/woocommerce-admin-attributes.php:396
+msgid "Default sort order"
+msgstr "Základné radenie"
+
+#: admin/woocommerce-admin-attributes.php:268
+#: admin/woocommerce-admin-attributes.php:336
+#: admin/woocommerce-admin-attributes.php:398
+msgid "Custom ordering"
+msgstr "Vlastné radenie"
+
+#: admin/woocommerce-admin-attributes.php:270
+#: admin/woocommerce-admin-attributes.php:333
+#: admin/woocommerce-admin-attributes.php:400
+msgid "Term ID"
+msgstr "ID vlastnosti"
+
+#: admin/woocommerce-admin-attributes.php:272
+#: admin/woocommerce-admin-attributes.php:402
+msgid "Determines the sort order on the frontend for this attribute. If using custom ordering, you can drag and drop the terms in this attribute"
+msgstr "Určuje radenie na stránke pre túto vlastnosť. Ak použijete vlastné radenie, môžete použiť funkciu ťahaj a pusť."
+
+#: admin/woocommerce-admin-attributes.php:277
+msgid "Update"
+msgstr "Aktualizovať"
+
+#: admin/woocommerce-admin-attributes.php:310
+msgid "Order by"
+msgstr "Objednal"
+
+#: admin/woocommerce-admin-attributes.php:311
+msgid "Terms"
+msgstr "Vlastnosti"
+
+#: admin/woocommerce-admin-attributes.php:356
+msgid "Configure&nbsp;terms"
+msgstr "Nastavenie&nbsp;vlastností"
+
+#: admin/woocommerce-admin-attributes.php:360
+msgid "No attributes currently exist."
+msgstr "V súčasnej dobe neexistujú žiadne vlastnosti."
+
+#: admin/woocommerce-admin-attributes.php:370
+msgid "Add New Attribute"
+msgstr "Pridať novú vlastnosť"
+
+#: admin/woocommerce-admin-attributes.php:371
+msgid "Attributes let you define extra product data, such as size or colour. You can use these attributes in the shop sidebar using the \"layered nav\" widgets. Please note: you cannot rename an attribute later on."
+msgstr "Vlastnosti umožňujú definovať ďalšie údaje o produkte, ako je napríklad veľkosť alebo farba. Tieto vlastnosti môžete použiť v obchode na vedľajšom paneli pomocou widgetu \"layered nav\" . Upozornenie: vlastnosť nemožno neskôr premenovať."
+
+#: admin/woocommerce-admin-attributes.php:405
+msgid "Add Attribute"
+msgstr "Pridať vlastnosť"
+
+#: admin/woocommerce-admin-attributes.php:416
+msgid "Are you sure you want to delete this attribute?"
+msgstr "Ste si istí, že chcete zmazať túto vlastnosť?"
+
+#: admin/woocommerce-admin-content.php:26
+#: admin/woocommerce-admin-reports.php:26
+#: admin/woocommerce-admin-reports.php:66
+#: admin/woocommerce-admin-reports.php:82
+#: admin/woocommerce-admin-reports.php:93
+msgid "Overview"
+msgstr "Prehľad"
+
+#: admin/woocommerce-admin-content.php:29
+msgid "Thank you for using WooCommerce :) Should you need help using or extending WooCommerce please <a href=\"%s\">read the documentation</a>. For further assistance you can use the <a href=\"%s\">community forum</a> or if you have access, <a href=\"%s\">our support desk</a>."
+msgstr "Vďaka za používanie WooCommerce :) Ak potrebujete pomoc pri rozširovaní WooCommerce  <a href=\"%s\">prečítajte si dokumentáciu</a>. Pre bližšiu pomoc navštívte <a href=\"%s\">komunitu na fóre</a> alebo ak máte prístup, <a href=\"%s\">naše centrum podpry</a>."
+
+#: admin/woocommerce-admin-content.php:31
+msgid "If you are having problems, or to assist us with support, please check the status page to identify any problems with your configuration:"
+msgstr "Ak máte problémy, alebo nám chcete pomôcť s podporou, prosím skontroluje stránku stavu systému pre určenie problému vo vašej konfigurácii."
+
+#: admin/woocommerce-admin-content.php:33 admin/woocommerce-admin-init.php:89
+#: admin/woocommerce-admin-status.php:26
+msgid "System Status"
+msgstr "Stav systému"
+
+#: admin/woocommerce-admin-content.php:35
+msgid "If you come across a bug, or wish to contribute to the project you can also <a href=\"%s\">get involved on GitHub</a>."
+msgstr "Ak nájdete chybu alebo sa chcete pripojiť k projektu, navštívte <a href=\"%s\">GitHub</a>."
+
+#: admin/woocommerce-admin-content.php:43
+msgid "Here you can set up your store and customise it to fit your needs. The sections available from the settings page include:"
+msgstr "Tu môžete nastaviť obchod a upraviť si ho podľa vlastných požiadaviek. Sekcie dostupné na stránke nastavení zahŕňajú:"
+
+#: admin/woocommerce-admin-content.php:44
+msgid "General settings such as your shop base, currency, and script/styling options which affect features used in your store."
+msgstr "Všeobecné nastavenia ako základná stránka obchodu, mena, možnosti vzhľadu a skripty ovplyvňujúce možnosti dostupné v obchode."
+
+#: admin/woocommerce-admin-content.php:45
+#: admin/woocommerce-admin-settings.php:184
+msgid "Pages"
+msgstr "Stránky"
+
+#: admin/woocommerce-admin-content.php:45
+msgid "This is where important store page are defined. You can also set up other pages (such as a Terms page) here."
+msgstr "Tu si nastavíte dôležité stránky vášho obchodu. Tiež si tu môžete zadefinovať aj ostatné stránky ako napr. stránku Obchodné podmienky."
+
+#: admin/woocommerce-admin-content.php:46
+msgid "Options for how things like price, images and weights appear in your product catalog."
+msgstr "Nastavenia vecí ako ceny, obrázky, váhy ktoré sa zobrazujú v katalógu produktov."
+
+#: admin/woocommerce-admin-content.php:47
+msgid "Options concerning stock and stock notices."
+msgstr "Nastavenia kontroly skladu a skladových oznámení."
+
+#: admin/woocommerce-admin-content.php:48
+msgid "Options concerning tax, including international and local tax rates."
+msgstr "Nastavenia daní vrátane medzinárodných a domácich daní."
+
+#: admin/woocommerce-admin-content.php:49
+msgid "This is where shipping options are defined, and shipping methods are set up."
+msgstr "Tu sa nastavujú možnosti doručenia a vyberajú metódy prepravy."
+
+#: admin/woocommerce-admin-content.php:50
+msgid "Payment Methods"
+msgstr "Spôsoby platby"
+
+#: admin/woocommerce-admin-content.php:50
+msgid "This is where payment gateway options are defined, and individual payment gateways are set up."
+msgstr "Tu sa definujú nastavenia platobných brán a môžu tu byť nastavené individuálne platobné brány."
+
+#: admin/woocommerce-admin-content.php:51
+#: admin/woocommerce-admin-settings.php:189
+msgid "Emails"
+msgstr "E-maily"
+
+#: admin/woocommerce-admin-content.php:51
+msgid "Here you can customise the way WooCommerce emails appear."
+msgstr "Tu si môžete nastaviť vzhľad emailov posialaných z WooCommerce."
+
+#: admin/woocommerce-admin-content.php:52
+#: admin/woocommerce-admin-settings.php:190
+msgid "Integration"
+msgstr "Integrácia"
+
+#: admin/woocommerce-admin-content.php:52
+msgid "The integration section contains options for third party services which integrate with WooCommerce."
+msgstr "Integračná sekcie zahŕňa nastavenia služieb tretích strán ktoré sú integrované do WooCommerce."
+
+#: admin/woocommerce-admin-content.php:57 admin/woocommerce-admin-init.php:64
+msgid "Reports"
+msgstr "Zostavy"
+
+#: admin/woocommerce-admin-content.php:59
+msgid "The reports section can be accessed from the left-hand navigation menu. Here you can generate reports for sales and customers."
+msgstr "Sekcia zostáv je prístupná v navigačnom menu vľavo. Tu môžete generovať zostavy predajov a zákazníkov."
+
+#: admin/woocommerce-admin-content.php:60
+#: admin/woocommerce-admin-reports.php:23
+#: admin/woocommerce-admin-reports.php:997
+#: admin/woocommerce-admin-reports.php:1095
+#: admin/woocommerce-admin-reports.php:1214
+msgid "Sales"
+msgstr "Tržby"
+
+#: admin/woocommerce-admin-content.php:60
+msgid "Reports for sales based on date, top sellers and top earners."
+msgstr "Zostavy predajov podľa dátumu, najlepších predajov a najviac zarábajúcich produktov."
+
+#: admin/woocommerce-admin-content.php:61
+msgid "Coupon usage reports."
+msgstr "Zostavy použitia kupónov."
+
+#: admin/woocommerce-admin-content.php:62
+#: admin/woocommerce-admin-reports.php:79
+msgid "Customers"
+msgstr "Zákazníci"
+
+#: admin/woocommerce-admin-content.php:62
+msgid "Customer reports, such as signups per day."
+msgstr "Zákaznícky report, ako napríklad počet prihlásení denne."
+
+#: admin/woocommerce-admin-content.php:63
+msgid "Stock reports for low stock and out of stock items."
+msgstr "Sklad hlási položky s nízkym skladom, a vypredané položky"
+
+#: admin/woocommerce-admin-content.php:68
+#: admin/woocommerce-admin-dashboard.php:142
+msgid "Orders"
+msgstr "Objednávky"
+
+#: admin/woocommerce-admin-content.php:70
+msgid "The orders section can be accessed from the left-hand navigation menu. Here you can view and manage customer orders."
+msgstr "Sekcia objednávok je prístupná v navigačnom menu vľavo. Tu môžete zobraziť a spravovať objednávky zákazníkov."
+
+#: admin/woocommerce-admin-content.php:71
+msgid "Orders can also be added from this section if you want to set them up for a customer manually."
+msgstr "Objednávky v tejto sekcii môžu byť pridané aj manuálne ak si to zákazník želá."
+
+#: admin/woocommerce-admin-content.php:78
+msgid "Coupons can be managed from this section. Once added, customers will be able to enter coupon codes on the cart/checkout page. If a customer uses a coupon code they will be viewable when viewing orders."
+msgstr "Tu sa spravujú kupóny. Keď zadáte kupón od tohto momentu môžu zákazníci ho zadať na stránke košíka/pokladne. Použitie kupónu je viditeľné pri zobrazení objednávky."
+
+#: admin/woocommerce-admin-content.php:82
+msgid "For more information:"
+msgstr "Viac informácií:"
+
+msgid "WooCommerce"
+msgstr "E-shop"
+
+#: admin/woocommerce-admin-content.php:84
+msgid "Project on WordPress.org"
+msgstr "Projekt na WordPress.org"
+
+#: admin/woocommerce-admin-content.php:85
+msgid "Project on Github"
+msgstr "Projekt na Github"
+
+#: admin/woocommerce-admin-content.php:86
+msgid "WooCommerce Docs"
+msgstr "Dokumenty Woocommerce"
+
+#: admin/woocommerce-admin-content.php:87
+msgid "Official Extensions"
+msgstr "Oficiálne rožšírenia"
+
+#: admin/woocommerce-admin-content.php:88
+msgid "Official Themes"
+msgstr "Oficiálne témy"
+
+#: admin/woocommerce-admin-dashboard.php:40
+msgid "Monthly Sales"
+msgstr "Mesačné tržby"
+
+#: admin/woocommerce-admin-dashboard.php:43
+msgid "WooCommerce Right Now"
+msgstr "WooCommerce Teraz"
+
+#: admin/woocommerce-admin-dashboard.php:44
+msgid "WooCommerce Recent Orders"
+msgstr "WooCommerce nedávne objednávky"
+
+#: admin/woocommerce-admin-dashboard.php:45
+msgid "WooCommerce Recent Reviews"
+msgstr "E-shop - posledné recenzie"
+
+#: admin/woocommerce-admin-dashboard.php:78
+msgid "Shop Content"
+msgstr "Obsah obchodu"
+
+#: admin/woocommerce-admin-dashboard.php:84
+#: admin/woocommerce-admin-functions.php:200
+#: admin/woocommerce-admin-init.php:761 admin/woocommerce-admin-reports.php:996
+#: admin/woocommerce-admin-reports.php:1094
+msgid "Product"
+msgid_plural "Products"
+msgstr[0] "Produkt"
+msgstr[1] "Produkty"
+msgstr[2] "Produktov"
+
+#: admin/woocommerce-admin-dashboard.php:98
+msgid "Product Category"
+msgid_plural "Product Categories"
+msgstr[0] "Kategória produktu"
+msgstr[1] "Kategórie produktov"
+msgstr[2] "Kategórii produktov"
+
+#: admin/woocommerce-admin-dashboard.php:112
+msgid "Product Tag"
+msgid_plural "Product Tags"
+msgstr[0] "Značka produktu"
+msgstr[1] "Značky produktu"
+msgstr[2] "Značiek produktov"
+
+#: admin/woocommerce-admin-dashboard.php:126
+msgid "Attribute"
+msgid_plural "Attributes"
+msgstr[0] "Vlastnosť"
+msgstr[1] "Vlastnosti"
+msgstr[2] "Vlastností"
+
+#: admin/woocommerce-admin-dashboard.php:148
+msgid "Pending"
+msgstr "Čaká na vybavenie"
+
+#: admin/woocommerce-admin-dashboard.php:162
+msgid "On-Hold"
+msgstr "Pozastavená"
+
+#: admin/woocommerce-admin-dashboard.php:190
+msgid "Completed"
+msgstr "Vybavená"
+
+#: admin/woocommerce-admin-dashboard.php:207
+msgid "You are using <strong>WooCommerce %s</strong>."
+msgstr "Používate <strong>WooCommerce %s</strong>."
+
+#: admin/woocommerce-admin-dashboard.php:238
+msgid "l jS \\of F Y h:i:s A"
+msgstr "G:i:s l j F, Y "
+
+#: admin/woocommerce-admin-dashboard.php:239
+msgid "item"
+msgid_plural "items"
+msgstr[0] "kus"
+msgstr[1] "kusů"
+msgstr[2] ""
+
+#: admin/woocommerce-admin-dashboard.php:239
+msgid "Total:"
+msgstr "Cena spolu:"
+
+#: admin/woocommerce-admin-dashboard.php:245
+msgid "There are no product orders yet."
+msgstr "Ešte nemáte objednávky."
+
+#: admin/woocommerce-admin-dashboard.php:279
+msgid "out of 5"
+msgstr "z 5"
+
+#: admin/woocommerce-admin-dashboard.php:287
+msgid "There are no product reviews yet."
+msgstr "Zatiaľ žiadne recenzie na tento produkt."
+
+#: admin/woocommerce-admin-dashboard.php:428
+msgid "Sold"
+msgstr "Predaných"
+
+#: admin/woocommerce-admin-dashboard.php:429
+msgid "Earned"
+msgstr "Zarobené"
+
+#: admin/woocommerce-admin-functions.php:190
+#: admin/woocommerce-admin-install.php:225
+msgid "Order Received"
+msgstr "Objednávka prijatá"
+
+#: admin/woocommerce-admin-functions.php:192
+msgid "Thank you, we are now processing your order. Your order's details are below."
+msgstr "Ďakujeme Vám. Vaša objednávka sa práve spracováva. Nižšie nájdete údaje o objednávke:"
+
+#: admin/woocommerce-admin-functions.php:194
+msgid "Order:"
+msgstr "Objednávka:"
+
+#: admin/woocommerce-admin-functions.php:201
+msgid "Quantity"
+msgstr "Množstvo"
+
+#: admin/woocommerce-admin-functions.php:214
+msgid "Order total:"
+msgstr "Objednávka celkom:"
+
+#: admin/woocommerce-admin-functions.php:220
+msgid "Customer details"
+msgstr "Informácie o zákazníkovi"
+
+#: admin/woocommerce-admin-functions.php:226
+msgid "Billing address"
+msgstr "Fakturačná adresa"
+
+#: admin/woocommerce-admin-functions.php:233
+msgid "Shipping address"
+msgstr "Dodacia adresa"
+
+#: admin/woocommerce-admin-functions.php:465
+msgid "Could not compile woocommerce.less:"
+msgstr "Nemožno skompilovať woocommerce.less:"
+
+#: admin/woocommerce-admin-functions.php:486
+#: admin/woocommerce-admin-functions.php:487
+msgid "Mark processing"
+msgstr "Označiť ako \"spracováva sa\""
+
+#: admin/woocommerce-admin-functions.php:489
+#: admin/woocommerce-admin-functions.php:490
+msgid "Mark completed"
+msgstr "Označiť ako \"vybavená\""
+
+#: admin/woocommerce-admin-functions.php:527
+msgid "Order status changed by bulk edit:"
+msgstr "Stav objednávky zmenený hromadne, upraviť:"
+
+#: admin/woocommerce-admin-functions.php:550
+msgid "Order status changed."
+msgid_plural "%s order statuses changed."
+msgstr[0] "Zmenil sa stav objednávky"
+msgstr[1] "Zmenil sa stav %s objednávok"
+msgstr[2] "Zmenil sa stav %s objednávok"
+
+#: admin/woocommerce-admin-init.php:88
+msgid "WooCommerce Settings"
+msgstr "Nastavenie e-shopu"
+
+#: admin/woocommerce-admin-init.php:89
+msgid "WooCommerce Status"
+msgstr "Stav WooCommerce"
+
+#: admin/woocommerce-admin-init.php:142 admin/woocommerce-admin-init.php:144
+msgctxt "Admin menu name"
+msgid "Orders"
+msgstr "Objednávky"
+
+#: admin/woocommerce-admin-init.php:433
+msgid "Are you sure you want to remove the selected items? If you have previously reduced this item's stock, or this order was submitted by a customer, you will need to manually restore the item's stock."
+msgstr "Ste si istý, že chcete odstrániť vybrané položky? Ak ste predtým znížili počet položiek na sklade, alebo táto objednávka bola odoslaná zákazníkom, budete musieť manuálne navýšiť počet kusov skladom."
+
+#: admin/woocommerce-admin-init.php:434
+msgid "Please select some items."
+msgstr "Prosím vyberte nejaké položky"
+
+#: admin/woocommerce-admin-init.php:435
+msgid "Remove this item meta?"
+msgstr "Odstrániťť meta tejto položky?"
+
+#: admin/woocommerce-admin-init.php:436
+msgid "Remove this attribute?"
+msgstr "Odstrániť túto vlastnosť?"
+
+#: admin/woocommerce-admin-init.php:444
+msgid "Enter a name for the new attribute term:"
+msgstr "Zadajte meno pre novú vlastnosť."
+
+#: admin/woocommerce-admin-init.php:445
+msgid "Calculate totals based on order items, discounts, and shipping?"
+msgstr "Rátať súčty podľa objednaných položiek, zliav a poštovného?"
+
+#: admin/woocommerce-admin-init.php:446
+msgid "Calculate line taxes? This will calculate taxes based on the customers country. If no billing/shipping is set it will use the store base country."
+msgstr "Rátať dane v riadku? Toto bude rátať dane podľa krajiny zákazníka. Ak nie je zadaná fakturačná/doručovacia adresa, použije sa adresa krajiny kde sa obchod nachádza."
+
+#: admin/woocommerce-admin-init.php:447
+msgid "Copy billing information to shipping information? This will remove any currently entered shipping information."
+msgstr "Kopírovať fakturačné údaje do dodacích údajov? Tým sa prepíšu aktuálne zapísané dodacie údaje."
+
+#: admin/woocommerce-admin-init.php:448
+msgid "Load the customer's billing information? This will remove any currently entered billing information."
+msgstr "Kopírovať dodacie údaje do fakturačných údajov ? Tým sa prepíšu aktuálne zapísané fakturačné údaje."
+
+#: admin/woocommerce-admin-init.php:449
+msgid "Load the customer's shipping information? This will remove any currently entered shipping information."
+msgstr "Kopírovať fakturačné údaje do dodacích údajov? Tým sa prepíšu aktuálne zapísané dodacie údaje."
+
+#: admin/woocommerce-admin-init.php:453
+msgid "No customer selected"
+msgstr "Nie je vybratý žiadny zákazník"
+
+#: admin/woocommerce-admin-init.php:665
+msgid "Product updated. <a href=\"%s\">View Product</a>"
+msgstr "Produkt aktualizovaný.  <a href=\"%s\">Zobraziť produkt</a>"
+
+#: admin/woocommerce-admin-init.php:666 admin/woocommerce-admin-init.php:681
+#: admin/woocommerce-admin-init.php:696
+msgid "Custom field updated."
+msgstr "Vlastné pole aktualizované."
+
+#: admin/woocommerce-admin-init.php:667 admin/woocommerce-admin-init.php:682
+#: admin/woocommerce-admin-init.php:697
+msgid "Custom field deleted."
+msgstr "Vlastné pole vymazané."
+
+#: admin/woocommerce-admin-init.php:668
+msgid "Product updated."
+msgstr "Produkt aktualizovaný."
+
+#: admin/woocommerce-admin-init.php:669
+msgid "Product restored to revision from %s"
+msgstr "Produkt obnovený na verziu z %s"
+
+#: admin/woocommerce-admin-init.php:670
+msgid "Product published. <a href=\"%s\">View Product</a>"
+msgstr "Produkt publikovaný. <a href=\"%s\">Zobraziť produkt</a>"
+
+#: admin/woocommerce-admin-init.php:671
+msgid "Product saved."
+msgstr "Produkt uložený."
+
+#: admin/woocommerce-admin-init.php:672
+msgid "Product submitted. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
+msgstr "Produkt odoslaný. <a target=\"_blank\" href=\"%s\">Náhľad produktu</a>"
+
+#: admin/woocommerce-admin-init.php:673
+msgid "Product scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" href=\"%2$s\">Preview Product</a>"
+msgstr "Produkt naplánovaný na <strong>%1$s</strong>. <a target=\"_blank\" href=\"%2$s\">Náhľad produktu</a>"
+
+#: admin/woocommerce-admin-init.php:674 admin/woocommerce-admin-init.php:689
+#: admin/woocommerce-admin-init.php:704
+msgid "M j, Y @ G:i"
+msgstr "G:i, j. n. Y"
+
+#: admin/woocommerce-admin-init.php:675
+msgid "Product draft updated. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
+msgstr "Koncept produktu uložený. <a target=\"_blank\" href=\"%s\">Náhľad produktu</a>"
+
+#: admin/woocommerce-admin-init.php:680 admin/woocommerce-admin-init.php:683
+#: admin/woocommerce-admin-init.php:685
+msgid "Order updated."
+msgstr "Objednávka aktualizovaná"
+
+#: admin/woocommerce-admin-init.php:684
+msgid "Order restored to revision from %s"
+msgstr "Objednávka obnovená na verziu z %s"
+
+#: admin/woocommerce-admin-init.php:686
+msgid "Order saved."
+msgstr "Objednávka uložená."
+
+#: admin/woocommerce-admin-init.php:687
+msgid "Order submitted."
+msgstr "Objednávka odoslaná"
+
+#: admin/woocommerce-admin-init.php:688
+msgid "Order scheduled for: <strong>%1$s</strong>."
+msgstr "Objednávka naplánovaná na:<strong>%1$s</strong>."
+
+#: admin/woocommerce-admin-init.php:690
+msgid "Order draft updated."
+msgstr "Koncept objednávky aktualizovaný."
+
+#: admin/woocommerce-admin-init.php:695 admin/woocommerce-admin-init.php:698
+#: admin/woocommerce-admin-init.php:700
+msgid "Coupon updated."
+msgstr "Kupón aktualizovaný."
+
+#: admin/woocommerce-admin-init.php:699
+msgid "Coupon restored to revision from %s"
+msgstr "Kupón obnovný na verziu z %s"
+
+#: admin/woocommerce-admin-init.php:701
+msgid "Coupon saved."
+msgstr "Kupón uložený."
+
+#: admin/woocommerce-admin-init.php:702
+msgid "Coupon submitted."
+msgstr "Kupón odoslaný."
+
+#: admin/woocommerce-admin-init.php:703
+msgid "Coupon scheduled for: <strong>%1$s</strong>."
+msgstr "Kupón plánovaný na: <strong>%1$s</strong>."
+
+#: admin/woocommerce-admin-init.php:705
+msgid "Coupon draft updated."
+msgstr "Koncept kupónu uložený."
+
+#: admin/woocommerce-admin-init.php:722
+msgid "Order notes"
+msgstr "Poznámky k objednávke"
+
+#: admin/woocommerce-admin-init.php:737
+msgid "These settings control the permalinks used for products. These settings only apply when <strong>not using \"default\" permalinks above</strong>."
+msgstr "Tieto nastavenia kontorlujú trvalé odkazy k produktom. Tieto nastavenia sa použijú iba ak nepoužívate <strong>\"štandardné\" trvalé odkazy</strong>. "
+
+#: admin/woocommerce-admin-init.php:744
+msgctxt "default-slug"
+msgid "shop"
+msgstr "obchod"
+
+#: admin/woocommerce-admin-init.php:745
+msgctxt "default-slug"
+msgid "product"
+msgstr "produkt"
+
+#: admin/woocommerce-admin-init.php:766
+msgid "Shop base"
+msgstr "Slug pre obchod"
+
+#: admin/woocommerce-admin-init.php:770
+msgid "Shop base with category"
+msgstr "Slug pre obchod a kategóriu"
+
+#: admin/woocommerce-admin-init.php:776
+msgid "Custom Base"
+msgstr "Vlastný slug"
+
+#: admin/woocommerce-admin-init.php:778
+msgid "Enter a custom base to use. A base <strong>must</strong> be set or WordPress will use default instead."
+msgstr "Zadajte vlastný slug. Slug<strong>musí</strong> byť nastavený, inak WordPress použije základný."
+
+#: admin/woocommerce-admin-init.php:806
+msgid "Product permalink base"
+msgstr "Slug pre trvalý odkaz produktu"
+
+#: admin/woocommerce-admin-init.php:811
+msgid "Product category base"
+msgstr "Slug pre kategóriu produktu"
+
+#: admin/woocommerce-admin-init.php:818
+msgid "Product tag base"
+msgstr "Slug pre značku produktu"
+
+#: admin/woocommerce-admin-init.php:825
+msgid "Product attribute base"
+msgstr "Slug pre vlastnosť produktu"
+
+#: admin/woocommerce-admin-install.php:195
+msgctxt "page_slug"
+msgid "shop"
+msgstr "obchod"
+
+#: admin/woocommerce-admin-install.php:195
+msgid "Shop"
+msgstr "Obchod"
+
+#: admin/woocommerce-admin-install.php:198
+msgctxt "page_slug"
+msgid "cart"
+msgstr "košík"
+
+#: admin/woocommerce-admin-install.php:198
+#: admin/woocommerce-admin-status.php:303
+msgid "Cart"
+msgstr "Košík"
+
+#: admin/woocommerce-admin-install.php:201
+msgctxt "page_slug"
+msgid "checkout"
+msgstr "pokladňa"
+
+#: admin/woocommerce-admin-install.php:204
+msgctxt "page_slug"
+msgid "my-account"
+msgstr "môj-účet"
+
+#: admin/woocommerce-admin-install.php:204
+#: admin/woocommerce-admin-status.php:319
+msgid "My Account"
+msgstr "Môj účet"
+
+#: admin/woocommerce-admin-install.php:210
+msgctxt "page_slug"
+msgid "edit-address"
+msgstr "upraviť-adresu"
+
+#: admin/woocommerce-admin-install.php:210
+msgid "Edit My Address"
+msgstr "Upraviť moju adresu"
+
+#: admin/woocommerce-admin-install.php:213
+msgctxt "page_slug"
+msgid "view-order"
+msgstr "zobraziť-objednávku"
+
+#: admin/woocommerce-admin-install.php:213
+#: admin/woocommerce-admin-status.php:327
+msgid "View Order"
+msgstr "Zobraziť objednávku"
+
+#: admin/woocommerce-admin-install.php:216
+msgctxt "page_slug"
+msgid "change-password"
+msgstr "zmena-hesla"
+
+#: admin/woocommerce-admin-install.php:216
+#: admin/woocommerce-admin-status.php:331
+msgid "Change Password"
+msgstr "Zmena hesla"
+
+#: admin/woocommerce-admin-install.php:219
+msgctxt "page_slug"
+msgid "logout"
+msgstr "odhlásenie"
+
+#: admin/woocommerce-admin-install.php:219
+msgid "Logout"
+msgstr "Odhlásenie"
+
+#: admin/woocommerce-admin-install.php:222
+msgctxt "page_slug"
+msgid "pay"
+msgstr "zaplatiť"
+
+#: admin/woocommerce-admin-install.php:222
+msgid "Checkout &rarr; Pay"
+msgstr "Pokladňa &rarr; zaplatiť"
+
+#: admin/woocommerce-admin-install.php:225
+msgctxt "page_slug"
+msgid "order-received"
+msgstr "prijaté-objednávky"
+
+#: admin/woocommerce-admin-reports.php:32
+msgid "Sales by day"
+msgstr "Denné tržby"
+
+#: admin/woocommerce-admin-reports.php:37
+msgid "Sales by month"
+msgstr "Mesačné tržby"
+
+#: admin/woocommerce-admin-reports.php:42
+msgid "Product Sales"
+msgstr "Predaj produktov"
+
+#: admin/woocommerce-admin-reports.php:47
+msgid "Top sellers"
+msgstr "Najpredávanejšie"
+
+#: admin/woocommerce-admin-reports.php:52
+msgid "Top earners"
+msgstr "Najviac zarábajúce"
+
+#: admin/woocommerce-admin-reports.php:57
+msgid "Sales by category"
+msgstr "Tržby podľa kategórií"
+
+#: admin/woocommerce-admin-reports.php:72
+msgid "Discounts by coupon"
+msgstr "Zľavy podľa kupónu"
+
+#: admin/woocommerce-admin-reports.php:104
+msgid "Taxes by month"
+msgstr "Dane za mesiac"
+
+#: admin/woocommerce-admin-reports.php:243
+#: admin/woocommerce-admin-reports.php:508
+#: admin/woocommerce-admin-reports.php:713
+#: admin/woocommerce-admin-reports.php:894
+msgid "Sales amount"
+msgstr "Objem predaja"
+
+#: admin/woocommerce-admin-reports.php:248
+#: admin/woocommerce-admin-reports.php:508
+#: admin/woocommerce-admin-reports.php:713
+#: admin/woocommerce-admin-reports.php:894
+msgid "Number of sales"
+msgstr "Počet predajov"
+
+#: admin/woocommerce-admin-reports.php:380
+msgid "Total sales"
+msgstr "Tržby spolu"
+
+#: admin/woocommerce-admin-reports.php:382
+#: admin/woocommerce-admin-reports.php:388
+#: admin/woocommerce-admin-reports.php:394
+#: admin/woocommerce-admin-reports.php:400
+#: admin/woocommerce-admin-reports.php:406
+#: admin/woocommerce-admin-reports.php:412
+#: admin/woocommerce-admin-reports.php:655
+#: admin/woocommerce-admin-reports.php:661
+#: admin/woocommerce-admin-reports.php:667
+#: admin/woocommerce-admin-reports.php:673
+#: admin/woocommerce-admin-reports.php:839
+#: admin/woocommerce-admin-reports.php:845
+#: admin/woocommerce-admin-reports.php:851
+#: admin/woocommerce-admin-reports.php:857
+#: admin/woocommerce-admin-reports.php:1380
+#: admin/woocommerce-admin-reports.php:1386
+#: admin/woocommerce-admin-reports.php:1392
+#: admin/woocommerce-admin-reports.php:1826
+#: admin/woocommerce-admin-reports.php:1832
+#: admin/woocommerce-admin-reports.php:1838
+#: admin/woocommerce-admin-reports.php:1844
+#: admin/woocommerce-admin-reports.php:1850
+#: admin/woocommerce-admin-reports.php:1856
+#: admin/woocommerce-admin-reports.php:2320
+#: admin/woocommerce-admin-reports.php:2331
+#: admin/woocommerce-admin-reports.php:2342
+msgid "n/a"
+msgstr "-"
+
+#: admin/woocommerce-admin-reports.php:386
+msgid "Total orders"
+msgstr "Celkový počet objednávok"
+
+#: admin/woocommerce-admin-reports.php:388
+#: admin/woocommerce-admin-reports.php:661
+#: admin/woocommerce-admin-reports.php:845
+msgid "items"
+msgstr "položky"
+
+#: admin/woocommerce-admin-reports.php:392
+msgid "Average order total"
+msgstr "Priemerná cena spolu"
+
+#: admin/woocommerce-admin-reports.php:398
+msgid "Average order items"
+msgstr "Priemerný počet položiek objednávky"
+
+#: admin/woocommerce-admin-reports.php:404
+msgid "Discounts used"
+msgstr "Zľavy použité"
+
+#: admin/woocommerce-admin-reports.php:410
+msgid "Total shipping costs"
+msgstr "Celkové prepravné náklady"
+
+#: admin/woocommerce-admin-reports.php:418
+msgid "This month's sales"
+msgstr "Celkové mesačné náklady"
+
+#: admin/woocommerce-admin-reports.php:647
+#: admin/woocommerce-admin-reports.php:991
+#: admin/woocommerce-admin-reports.php:1089
+#: admin/woocommerce-admin-reports.php:1372
+msgid "From:"
+msgstr "Od:"
+
+#: admin/woocommerce-admin-reports.php:647
+#: admin/woocommerce-admin-reports.php:991
+#: admin/woocommerce-admin-reports.php:1089
+#: admin/woocommerce-admin-reports.php:1372
+msgid "To:"
+msgstr "Do:"
+
+#: admin/woocommerce-admin-reports.php:647
+#: admin/woocommerce-admin-reports.php:832
+#: admin/woocommerce-admin-reports.php:991
+#: admin/woocommerce-admin-reports.php:1089
+#: admin/woocommerce-admin-reports.php:1245
+#: admin/woocommerce-admin-reports.php:1372
+#: admin/woocommerce-admin-reports.php:1505
+#: admin/woocommerce-admin-reports.php:2309
+#: admin/woocommerce-admin-reports.php:2492
+msgid "Show"
+msgstr "Zobraziť"
+
+#: admin/woocommerce-admin-reports.php:653
+msgid "Total sales in range"
+msgstr "Celkové tržby v rozpätí"
+
+#: admin/woocommerce-admin-reports.php:659
+msgid "Total orders in range"
+msgstr "Celkový počet objednávok v rozpätí"
+
+#: admin/woocommerce-admin-reports.php:665
+msgid "Average order total in range"
+msgstr "Priemerná celková cena objednávky v rozpätí"
+
+#: admin/woocommerce-admin-reports.php:671
+msgid "Average order items in range"
+msgstr "Priemerná cena položky v rozpätí"
+
+#: admin/woocommerce-admin-reports.php:679
+msgid "Sales in range"
+msgstr "Tržby v rozpätí"
+
+#: admin/woocommerce-admin-reports.php:826
+#: admin/woocommerce-admin-reports.php:2303
+msgid "Year:"
+msgstr "Rok:"
+
+#: admin/woocommerce-admin-reports.php:837
+msgid "Total sales for year"
+msgstr "Celkové tržby za rok"
+
+#: admin/woocommerce-admin-reports.php:843
+msgid "Total orders for year"
+msgstr "Celkový počet objednávok za rok"
+
+#: admin/woocommerce-admin-reports.php:849
+msgid "Average order total for year"
+msgstr "Priemerná celková cena objednávky za rok"
+
+#: admin/woocommerce-admin-reports.php:855
+msgid "Average order items for year"
+msgstr "Priemerná cena položky za rok"
+
+#: admin/woocommerce-admin-reports.php:863
+msgid "Monthly sales for year"
+msgstr "Mesačné tržby za rok"
+
+#: admin/woocommerce-admin-reports.php:1011
+msgid "Product does not exist"
+msgstr "Produkt neexistuje"
+
+#: admin/woocommerce-admin-reports.php:1110
+msgid "Product no longer exists"
+msgstr "Produkt neexistuje"
+
+#: admin/woocommerce-admin-reports.php:1209
+msgid "Sales for %s:"
+msgstr "Tržby za %s:"
+
+#: admin/woocommerce-admin-reports.php:1213
+#: admin/woocommerce-admin-reports.php:2351
+msgid "Month"
+msgstr "Mesiac"
+
+#: admin/woocommerce-admin-reports.php:1235
+msgid "No sales :("
+msgstr "Žiadne tržby"
+
+#: admin/woocommerce-admin-reports.php:1378
+msgid "Total orders containing coupons"
+msgstr "Celkové objednávky obsahujúce kupóny"
+
+#: admin/woocommerce-admin-reports.php:1384
+msgid "Percent of orders containing coupons"
+msgstr "Percento objednávok obsahujúce kupóny"
+
+#: admin/woocommerce-admin-reports.php:1390
+msgid "Total coupon discount"
+msgstr "Celková zľava kupónu"
+
+#: admin/woocommerce-admin-reports.php:1399
+msgid "Most popular coupons"
+msgstr "Najpopulárnejšie kupóny"
+
+#: admin/woocommerce-admin-reports.php:1409
+msgid "Used 1 time"
+msgid_plural "Used %d times"
+msgstr[0] "Použitý 1 krát"
+msgstr[1] "Použitý %d krát"
+msgstr[2] "Použitý %d krát"
+
+#: admin/woocommerce-admin-reports.php:1412
+#: admin/woocommerce-admin-reports.php:1434
+msgid "No coupons found"
+msgstr "Nenašli sa žiadne kupóny"
+
+#: admin/woocommerce-admin-reports.php:1421
+msgid "Greatest discount amount"
+msgstr "Najväčšia zľava"
+
+#: admin/woocommerce-admin-reports.php:1431
+msgid "Discounted %s"
+msgstr "Zlacnené %s"
+
+#: admin/woocommerce-admin-reports.php:1490
+#: admin/woocommerce-admin-reports.php:2469
+msgid "Show:"
+msgstr "Zobraziť:"
+
+#: admin/woocommerce-admin-reports.php:1547
+msgid "Coupon"
+msgstr "Zľavový kupón"
+
+#: admin/woocommerce-admin-reports.php:1630
+msgid "Top coupon"
+msgstr "Top kupón"
+
+#: admin/woocommerce-admin-reports.php:1638
+msgid "Worst coupon"
+msgstr "Najhorší kupón"
+
+#: admin/woocommerce-admin-reports.php:1646
+msgid "Discount average"
+msgstr "Priemerná zľava"
+
+#: admin/woocommerce-admin-reports.php:1654
+msgid "Discount median"
+msgstr "Medián zľavy"
+
+#: admin/woocommerce-admin-reports.php:1674
+msgid "Monthly discounts by coupon"
+msgstr "Mesačné zľavy podľa kupónov"
+
+#: admin/woocommerce-admin-reports.php:1824
+msgid "Total customers"
+msgstr "Celkový počet zákazníkov"
+
+#: admin/woocommerce-admin-reports.php:1830
+msgid "Total customer sales"
+msgstr "Celkové tržby registrovaných zákazníkov"
+
+#: admin/woocommerce-admin-reports.php:1836
+msgid "Total guest sales"
+msgstr "Celkové tržby neregistrovaných"
+
+#: admin/woocommerce-admin-reports.php:1842
+msgid "Total customer orders"
+msgstr "Celkový počet objednávok registrovaných zákazníkov"
+
+#: admin/woocommerce-admin-reports.php:1848
+msgid "Total guest orders"
+msgstr "Celkový počet objednávok neregistrovaných"
+
+#: admin/woocommerce-admin-reports.php:1854
+msgid "Average orders per customer"
+msgstr "Priemerný počet objednávok na zákazníka"
+
+#: admin/woocommerce-admin-reports.php:1862
+msgid "Signups per day"
+msgstr "Počet prihlásení za deň"
+
+#: admin/woocommerce-admin-reports.php:2083
+msgid "Low stock"
+msgstr "Nízky stav skladu"
+
+#: admin/woocommerce-admin-reports.php:2106
+#: admin/woocommerce-admin-reports.php:2145
+msgid "%d in stock"
+msgid_plural "%d in stock"
+msgstr[0] "%d skladom"
+msgstr[1] "%d skladom"
+msgstr[2] "%d skladom"
+
+#: admin/woocommerce-admin-reports.php:2111
+msgid "No products are low in stock."
+msgstr "Žiadny produkt nie je skoro vypredaný."
+
+#: admin/woocommerce-admin-reports.php:2143
+msgid "Marked out of stock"
+msgstr "Označené - nie je skladom"
+
+#: admin/woocommerce-admin-reports.php:2150
+msgid "No products are out in stock."
+msgstr "Všetky produkty sú na sklade."
+
+#: admin/woocommerce-admin-reports.php:2314
+msgid "Total taxes for year"
+msgstr "Celkové dane za rok"
+
+#: admin/woocommerce-admin-reports.php:2325
+msgid "Total product taxes for year"
+msgstr "Celkové dane produktov za rok"
+
+#: admin/woocommerce-admin-reports.php:2336
+msgid "Total shipping tax for year"
+msgstr "Celkové dane prepravy za rok"
+
+#: admin/woocommerce-admin-reports.php:2352
+msgid "Total Sales"
+msgstr "Predaj celkom"
+
+#: admin/woocommerce-admin-reports.php:2352
+msgid "This is the sum of the 'Order Total' field within your orders."
+msgstr "Toto je sumár všetkých polí \"Objednávka celkom\" vo vašich objednávkach."
+
+#: admin/woocommerce-admin-reports.php:2353
+msgid "Total Shipping"
+msgstr "Preprava celkom"
+
+#: admin/woocommerce-admin-reports.php:2353
+msgid "This is the sum of the 'Shipping Total' field within your orders."
+msgstr "Toto je sumár všetkých polí \"Preprava celkom\" vo vašich objednávkach."
+
+#: admin/woocommerce-admin-reports.php:2354
+msgid "Total Product Taxes"
+msgstr "Celkové dane produktov"
+
+#: admin/woocommerce-admin-reports.php:2354
+msgid "This is the sum of the 'Cart Tax' field within your orders."
+msgstr "Toto je sumár všetkých polí \"Daň košíka\" vo vašich objednávkach."
+
+#: admin/woocommerce-admin-reports.php:2355
+msgid "Total Shipping Taxes"
+msgstr "Celkové dane prepravy"
+
+#: admin/woocommerce-admin-reports.php:2355
+msgid "This is the sum of the 'Shipping Tax' field within your orders."
+msgstr "Toto je sumár všetkých polí \"Celkové dane prepravy\" vo vašich objednávkach."
+
+#: admin/woocommerce-admin-reports.php:2356
+msgid "Total Taxes"
+msgstr "Dane celkom"
+
+#: admin/woocommerce-admin-reports.php:2356
+msgid "This is the sum of the 'Cart Tax' and 'Shipping Tax' fields within your orders."
+msgstr "Toto je sumár všetkých polí \"Daň košíka\" a \"Celkové dane prepravy\" vo vašich objednávkach."
+
+#: admin/woocommerce-admin-reports.php:2357
+msgid "Net profit"
+msgstr "Čistý zisk"
+
+#: admin/woocommerce-admin-reports.php:2357
+msgid "Total sales minus shipping and tax."
+msgstr "Celkové predaje mínus preprava a dane."
+
+#: admin/woocommerce-admin-reports.php:2402
+msgid "Toggle tax rows"
+msgstr "Prepnúť daňové riadky"
+
+#: admin/woocommerce-admin-reports.php:2545
+msgid "Category"
+msgstr "Kategória"
+
+#: admin/woocommerce-admin-reports.php:2648
+msgid "Top category"
+msgstr "Top kategória"
+
+#: admin/woocommerce-admin-reports.php:2657
+msgid "Worst category"
+msgstr "Najhoršia kategória"
+
+#: admin/woocommerce-admin-reports.php:2665
+msgid "Category sales average"
+msgstr "Priemerný predaj v kategóriách"
+
+#: admin/woocommerce-admin-reports.php:2676
+msgid "Category sales median"
+msgstr "Medián predaja v kategóriách"
+
+#: admin/woocommerce-admin-reports.php:2696
+msgid "Monthly sales by category"
+msgstr "Mesačné predaje podľa kategórií"
+
+#: admin/woocommerce-admin-settings.php:45
+msgid "Action failed. Please refresh the page and retry."
+msgstr "Akcia sa nepodarila. Prosím obnovte stránku a skúste to znova."
+
+#: admin/woocommerce-admin-settings.php:164
+msgid "Your settings have been saved."
+msgstr "Vaše nastavenie bolo uložené."
+
+#: admin/woocommerce-admin-settings.php:210
+msgid "More functionality and gateway options available via <a href=\"%s\" target=\"_blank\">WC official extensions</a>."
+msgstr "Lepšia funkcionalita a nastavena platobných brán sú dostupné  <a href=\"%s\" target=\"_blank\">v oficiálnych rozšíreniach WC</a>."
+
+#: admin/woocommerce-admin-settings.php:228
+msgid "Tax Rates"
+msgstr "Daňové sadzby"
+
+#: admin/woocommerce-admin-settings.php:255
+msgid "Email Options"
+msgstr "Nastavenia e-mailu"
+
+#: admin/woocommerce-admin-settings.php:388
+msgid "Save changes"
+msgstr "Uložiť zmeny"
+
+#: admin/woocommerce-admin-settings.php:429
+msgid "The changes you made will be lost if you navigate away from this page."
+msgstr "Uskutočnené zmeny sa stratia, ak odídete z tejto stránky."
+
+#: admin/woocommerce-admin-settings.php:801
+msgid "Hard Crop"
+msgstr "Pevný výnos"
+
+#: admin/woocommerce-admin-settings.php:826
+msgid "Select a page&hellip;"
+msgstr "Vyberte stránku&hellip;"
+
+#: admin/woocommerce-admin-settings.php:849
+msgid "Choose a country&hellip;"
+msgstr "Vyberte krajinu&hellip;"
+
+#: admin/woocommerce-admin-settings.php:869
+msgid "Choose countries&hellip;"
+msgstr "Vyberte krajiny&hellip;"
+
+#: admin/woocommerce-admin-status.php:27 admin/woocommerce-admin-status.php:664
+msgid "Tools"
+msgstr "Nástroje"
+
+#: admin/woocommerce-admin-status.php:62
+msgid "Please include this information when requesting support:"
+msgstr "Prosím zahrňte tieto informácie pri vyžadovaní podpory:"
+
+#: admin/woocommerce-admin-status.php:63
+msgid "Download System Report File"
+msgstr "Stiahnuť súbor správa o systéme"
+
+#: admin/woocommerce-admin-status.php:71
+msgid "Environment"
+msgstr "Prostredie"
+
+#: admin/woocommerce-admin-status.php:77
+msgid "Home URL"
+msgstr "Domáca URL adresa"
+
+#: admin/woocommerce-admin-status.php:81
+msgid "Site URL"
+msgstr "URL adresa stránky"
+
+#: admin/woocommerce-admin-status.php:85
+msgid "WC Version"
+msgstr "Verzia WC"
+
+#: admin/woocommerce-admin-status.php:89
+msgid "WC Database Version"
+msgstr "Verzia databázy WC"
+
+#: admin/woocommerce-admin-status.php:93
+msgid "WP Version"
+msgstr "Verzia WP"
+
+#: admin/woocommerce-admin-status.php:97
+msgid "Web Server Info"
+msgstr "Informácie o Web serveri"
+
+#: admin/woocommerce-admin-status.php:101
+msgid "PHP Version"
+msgstr "Verzia PHP"
+
+#: admin/woocommerce-admin-status.php:105
+msgid "MySQL Version"
+msgstr "Verzia MySQL"
+
+#: admin/woocommerce-admin-status.php:109
+msgid "WP Memory Limit"
+msgstr "Limit pamäte WP"
+
+#: admin/woocommerce-admin-status.php:114
+msgid "%s - We recommend setting memory to at least 64MB. See: <a href=\"%s\">Increasing memory allocated to PHP</a>"
+msgstr "%s - Odporúčame nastaviť pamäť najmenej na 64MB. Pozrite si <a href=\"%s\">zvýšenie pamäti určenej pre PHP</a>"
+
+#: admin/woocommerce-admin-status.php:121
+msgid "WP Debug Mode"
+msgstr "Mód ladenia chýb WP"
+
+#: admin/woocommerce-admin-status.php:125
+msgid "WP Max Upload Size"
+msgstr "WP maximálna veľkosť nahrávaného súboru"
+
+#: admin/woocommerce-admin-status.php:129
+msgid "PHP Post Max Size"
+msgstr "PHP maximálna veľkosť príspevku"
+
+#: admin/woocommerce-admin-status.php:133
+msgid "PHP Time Limit"
+msgstr "Časový limit PHP"
+
+#: admin/woocommerce-admin-status.php:137
+msgid "WC Logging"
+msgstr "WC zaznamenávanie"
+
+#: admin/woocommerce-admin-status.php:140
+msgid "Log directory is writable."
+msgstr "Adresa zaznamenávania je zapisovateľná"
+
+#: admin/woocommerce-admin-status.php:142
+msgid "Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will not be possible."
+msgstr "Adresa zaznamenávania (<code>woocommerce/logs/</code>) nie je zapisovateľná. Zaznamenávanie nie je možné."
+
+#: admin/woocommerce-admin-status.php:149
+msgid "fsockopen/cURL"
+msgstr "fsockopen/cURL"
+
+#: admin/woocommerce-admin-status.php:152
+msgid "Your server has fsockopen and cURL enabled."
+msgstr "Váš server má povolené fsockopen a cURL."
+
+#: admin/woocommerce-admin-status.php:154
+msgid "Your server has fsockopen enabled, cURL is disabled."
+msgstr "Váš server má povolené fsockopen ale cURL je vypnuté."
+
+#: admin/woocommerce-admin-status.php:156
+msgid "Your server has cURL enabled, fsockopen is disabled."
+msgstr "Váš server má povolené cURL ale fsockopen je vypnuté."
+
+#: admin/woocommerce-admin-status.php:160
+msgid "Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider."
+msgstr "Váš server nemá povolené fsockopen alebo cURL. PayPal IPN a ostatné skripty ktoré komunikujú s ostatnými servermi nebudú pracovať. Kontaktuje poskytovateľa hostingu prosím."
+
+#: admin/woocommerce-admin-status.php:165
+msgid "SOAP Client"
+msgstr "Klient SOAP"
+
+#: admin/woocommerce-admin-status.php:167
+msgid "Your server has the SOAP Client class enabled."
+msgstr "Váš server má povolenú triedu SOAP Klienta."
+
+#: admin/woocommerce-admin-status.php:170
+msgid "Your server does not have the <a href=\"%s\">SOAP Client</a> class enabled - some gateway plugins which use SOAP may not work as expected."
+msgstr "Váš server nemá povolenú triedu <a href=\"%s\">SOAP Klienta</a> - niektoré moduly platobných brán ktoré používajú SOAP možno nebudú pracovať správne."
+
+#: admin/woocommerce-admin-status.php:175
+msgid "WP Remote Post"
+msgstr "WP vzdialený príspevok"
+
+#: admin/woocommerce-admin-status.php:186
+msgid "wp_remote_post() was successful - PayPal IPN is working."
+msgstr "wp_remote_post() bol úspešný - PayPal IPN pracuje."
+
+#: admin/woocommerce-admin-status.php:189
+msgid "wp_remote_post() failed. PayPal IPN won't work with your server. Contact your hosting provider. Error:"
+msgstr "wp_remote_post() nebol úspešný - PayPal IPN nepracuje s vaším serverom. Kontaktujte poskytovateľa hostingu. Chyba:"
+
+#: admin/woocommerce-admin-status.php:192
+msgid "wp_remote_post() failed. PayPal IPN may not work with your server."
+msgstr "wp_remote_post() nebol úspešný - PayPal IPN pravdepodobne nepracuje s vaším serverom."
+
+#: admin/woocommerce-admin-status.php:215
+msgid "Plugins"
+msgstr "Moduly"
+
+#: admin/woocommerce-admin-status.php:221
+msgid "Installed Plugins"
+msgstr "Nainštalované moduly"
+
+#: admin/woocommerce-admin-status.php:259
+msgid "is available"
+msgstr "je dostupný"
+
+#: admin/woocommerce-admin-status.php:262
+msgid "by"
+msgstr "od"
+
+#: admin/woocommerce-admin-status.php:262
+msgid "version"
+msgstr "verzia"
+
+#: admin/woocommerce-admin-status.php:285
+msgid "Force SSL"
+msgstr "Použiť SSL"
+
+#: admin/woocommerce-admin-status.php:292
+msgid "WC Pages"
+msgstr "WC stránky"
+
+#: admin/woocommerce-admin-status.php:299
+msgid "Shop Base"
+msgstr "Slug pre obchod"
+
+#: admin/woocommerce-admin-status.php:311
+msgid "Pay"
+msgstr "Zaplatiť"
+
+#: admin/woocommerce-admin-status.php:315
+msgid "Thanks"
+msgstr "Ďakujeme"
+
+#: admin/woocommerce-admin-status.php:323
+msgid "Edit Address"
+msgstr "Upraviť adresu"
+
+#: admin/woocommerce-admin-status.php:355
+msgid "Page not set"
+msgstr "Stránka nenastavená"
+
+#: admin/woocommerce-admin-status.php:365
+msgid "Page does not exist"
+msgstr "Stránka neexistuje"
+
+#: admin/woocommerce-admin-status.php:370
+msgid "Page does not contain the shortcode: %s"
+msgstr "Stránka neobsahuje krátky kód: %s"
+
+#: admin/woocommerce-admin-status.php:389
+msgid "WC Taxonomies"
+msgstr "WC taxonómia"
+
+#: admin/woocommerce-admin-status.php:395
+msgid "Order Statuses"
+msgstr "Stavy objednávky"
+
+#: admin/woocommerce-admin-status.php:405
+msgid "Product Types"
+msgstr "Typy produktov"
+
+#: admin/woocommerce-admin-status.php:418
+msgid "Templates"
+msgstr "Šablóny"
+
+#: admin/woocommerce-admin-status.php:424
+msgid "Template Overrides"
+msgstr "Prepisuje šablónu"
+
+#: admin/woocommerce-admin-status.php:442
+msgid "No core overrides present in theme."
+msgstr "Žiadne prepisovanie jadra v súčasnej téme."
+
+#: admin/woocommerce-admin-status.php:537
+msgid "WC Transients"
+msgstr "WC Transienty"
+
+#: admin/woocommerce-admin-status.php:538
+msgid "Clear transients"
+msgstr "Vyčistiť transienty"
+
+#: admin/woocommerce-admin-status.php:539
+msgid "This tool will clear the product/shop transients cache."
+msgstr "Tento nástroj vymaže transienty medzipamäte produktu/obchodu."
+
+#: admin/woocommerce-admin-status.php:542
+msgid "Expired Transients"
+msgstr "Vypršané transienty"
+
+#: admin/woocommerce-admin-status.php:543
+msgid "Clear expired transients"
+msgstr "Vyčistiť vypršané transienty"
+
+#: admin/woocommerce-admin-status.php:544
+msgid "This tool will clear ALL expired transients from Wordpress."
+msgstr "Tento nástroj vymaže všetky transienty z WordPressu."
+
+#: admin/woocommerce-admin-status.php:547
+msgid "Term counts"
+msgstr "Počty vlastností"
+
+#: admin/woocommerce-admin-status.php:548
+msgid "Recount terms"
+msgstr "Vysvetliť vlastnosti"
+
+#: admin/woocommerce-admin-status.php:549
+msgid "This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog."
+msgstr "Tento nástroj vysvetľuje vlastnosti - užitočný pri zmene vašich nastavení ktoré schovávajú produkty z katalógu."
+
+#: admin/woocommerce-admin-status.php:552
+msgid "Capabilities"
+msgstr "Možnosti"
+
+#: admin/woocommerce-admin-status.php:553
+msgid "Reset capabilities"
+msgstr "Obnoviť možnosti"
+
+#: admin/woocommerce-admin-status.php:554
+msgid "This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages."
+msgstr "Tento nástroj obnoví role administrátorov, zákazníkov a shop_manager na základné. Použite toto nastavenie ak nemáte prístup ku všetkých administrátorským stránkam WooCommerce."
+
+#: admin/woocommerce-admin-status.php:557
+msgid "Customer Sessions"
+msgstr "Zákaznícke relácie"
+
+#: admin/woocommerce-admin-status.php:558
+msgid "Clear all sessions"
+msgstr "Vyčistiť všetky relácie"
+
+#: admin/woocommerce-admin-status.php:559
+msgid "<strong class=\"red\">Warning</strong> This tool will delete all customer session data from the database, including any current live carts."
+msgstr "<strong class=\"red\">Varovanie</strong> Tento nástroj vymaže všetky relačné dáta zákazníkov z databázy vrátane aktívnych košíkov. ."
+
+#: admin/woocommerce-admin-status.php:569
+msgid "Product Transients Cleared"
+msgstr "Vyčistené transienty produktu"
+
+#: admin/woocommerce-admin-status.php:610
+msgid "%d Transients Rows Cleared"
+msgstr "Počet vyčistených riadkov transientov: %d"
+
+#: admin/woocommerce-admin-status.php:618
+msgid "Roles successfully reset"
+msgstr "Role úspešne obnovené"
+
+#: admin/woocommerce-admin-status.php:630
+msgid "Terms successfully recounted"
+msgstr "Vlastnosti úspešne vysvetlené"
+
+#: admin/woocommerce-admin-status.php:649
+msgid "There was an error calling %s::%s"
+msgstr "Nastala chyba s názvom %s::%s"
+
+#: admin/woocommerce-admin-status.php:652
+msgid "There was an error calling %s"
+msgstr "Nastala chyba s názvom %s"
+
+#: admin/woocommerce-admin-taxonomies.php:25
+#: admin/woocommerce-admin-taxonomies.php:118
+msgid "Display type"
+msgstr "Typ zobrazenia"
+
+#: admin/woocommerce-admin-taxonomies.php:29
+#: admin/woocommerce-admin-taxonomies.php:123
+msgid "Subcategories"
+msgstr "Podkategórie"
+
+#: admin/woocommerce-admin-taxonomies.php:30
+#: admin/woocommerce-admin-taxonomies.php:124
+msgid "Both"
+msgstr "Obe"
+
+#: admin/woocommerce-admin-taxonomies.php:34
+#: admin/woocommerce-admin-taxonomies.php:129
+msgid "Thumbnail"
+msgstr "Náhľad"
+
+#: admin/woocommerce-admin-taxonomies.php:38
+#: admin/woocommerce-admin-taxonomies.php:134
+msgid "Upload/Add image"
+msgstr "Pridať / Pridať obrázok"
+
+#: admin/woocommerce-admin-taxonomies.php:39
+#: admin/woocommerce-admin-taxonomies.php:135
+msgid "Remove image"
+msgstr "Odstrániť obrázok"
+
+#: admin/woocommerce-admin-taxonomies.php:64
+#: admin/woocommerce-admin-taxonomies.php:156
+msgid "Use image"
+msgstr "Použiť obrázok"
+
+#: admin/woocommerce-admin-taxonomies.php:222
+msgid "Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. To see more categories listed click the \"screen options\" link at the top of the page."
+msgstr "Kategórie produktov sa spravujú tu. Pre zmenu poradia na stránke použite funkciu ťahaj a pusť. Pre zobrazenie viacerých kategórií zvoľte odkaz \"nastavenia obrazovky\" na vrchu stránky."
+
+#: admin/woocommerce-admin-taxonomies.php:237
+msgid "Shipping classes can be used to group products of similar type. These groups can then be used by certain shipping methods to provide different rates to different products."
+msgstr "Prepravné triedy môžu byť používané na spájanie podobných produktov. Tieto skupiny potom môžu byť použité konkrétnymi metódami prepravy a poskytovať rozličné sadzby pre rozličné produkty."
+
+#: admin/woocommerce-admin-taxonomies.php:365
+msgid "Edit Class"
+msgstr "Upraviť triedu"
+
+#: admin/woocommerce-admin-users.php:26
+msgid "Billing Address"
+msgstr "Fakturačná adresa"
+
+#: admin/woocommerce-admin-users.php:27
+msgid "Shipping Address"
+msgstr "Adresa pre zaslanie"
+
+#: admin/woocommerce-admin-users.php:28
+msgid "Paying Customer?"
+msgstr "Platiaci zákazník?"
+
+#: admin/woocommerce-admin-users.php:29
+msgid "Completed Orders"
+msgstr "Vybavené objednávky"
+
+#: admin/woocommerce-admin-users.php:144
+msgid "Customer Billing Address"
+msgstr "Fakturačná adresa zákazníka"
+
+#: admin/woocommerce-admin-users.php:147 admin/woocommerce-admin-users.php:196
+msgid "First name"
+msgstr "Krstné meno"
+
+#: admin/woocommerce-admin-users.php:151 admin/woocommerce-admin-users.php:200
+msgid "Last name"
+msgstr "Priezvisko"
+
+#: admin/woocommerce-admin-users.php:176
+msgid "Country or state code"
+msgstr "Krajina alebo kód okresu"
+
+#: admin/woocommerce-admin-users.php:180 admin/woocommerce-admin-users.php:229
+msgid "2 letter Country code"
+msgstr "2 znaky dlhý kód krajiny"
+
+#: admin/woocommerce-admin-users.php:183
+msgid "Telephone"
+msgstr "Telefón"
+
+#: admin/woocommerce-admin-users.php:193
+msgid "Customer Shipping Address"
+msgstr "Dodacia adresa zákazníka"
+
+#: admin/woocommerce-admin-users.php:225
+msgid "State/County or state code"
+msgstr "Štát / kraj alebo kód štátu"
+
+msgid "http://www.woothemes.com/woocommerce/"
+msgstr "http://www.woothemes.com/woocommerce/"
+
+msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
+msgstr "E-commerce sada nástrojov, ktorá vám pomôže predať čokoľvek. A prekrásne."
+
+msgid "WooThemes"
+msgstr "WooThemes"
+
+msgid "http://woothemes.com"
+msgstr "http://woothemes.com"
+
+#: admin/importers/importers-init.php:13
+msgid "WooCommerce Tax Rates (CSV)"
+msgstr "Sadzby daní WooCommerce (CSV)"
+
+#: admin/importers/importers-init.php:13
+msgid "Import <strong>tax rates</strong> to your store via a csv file."
+msgstr "Importuje <strong>sadzby daní</strong> do vašeho obchodu pomocou súboru csv."
+
+#: admin/importers/tax-rates-importer.php:103
+#: admin/importers/tax-rates-importer.php:186
+#: admin/importers/tax-rates-importer.php:226
+#: admin/importers/tax-rates-importer.php:241
+msgid "Sorry, there has been an error."
+msgstr "Ľutujeme, nastala chyba."
+
+#: admin/importers/tax-rates-importer.php:104
+msgid "The file does not exist, please try again."
+msgstr "Súbor neexistuje, prosím skúste znova."
+
+#: admin/importers/tax-rates-importer.php:187
+msgid "The CSV is invalid."
+msgstr "CSV súbor je chybný"
+
+#: admin/importers/tax-rates-importer.php:198
+msgid "Import complete - imported <strong>%s</strong> tax rates and skipped <strong>%s</strong>."
+msgstr "Import kompletný - importovaných <strong>%s</strong>sadzieb daní a vynechaných <strong>%s</strong>."
+
+#: admin/importers/tax-rates-importer.php:208
+msgid "All done!"
+msgstr "Hotovo!"
+
+#: admin/importers/tax-rates-importer.php:208
+msgid "View Tax Rates"
+msgstr "Zobraziť sadzby daní"
+
+#: admin/importers/tax-rates-importer.php:259
+msgid "Import Tax Rates"
+msgstr "Importovať sadzby daní"
+
+#: admin/importers/tax-rates-importer.php:282
+msgid "Hi there! Upload a CSV file containing tax rates to import the contents into your shop. Choose a .csv file to upload, then click \"Upload file and import\"."
+msgstr "Vitajte! Nahrajte CSV súbor obsahujúci sadzby daní do vašeho obchodu. Vyberte .csv súbor pre nahranie a kliknite na \"Nahrať súbor a importovať\""
+
+#: admin/importers/tax-rates-importer.php:284
+msgid "Tax rates need to be defined with columns in a specific order (10 columns). <a href=\"%s\">Click here to download a sample</a>."
+msgstr "Sadzby daní musia byť presne definované v špecifickom poradí (10 stĺpcov).<a href=\"%s\">Kliknite sem pre stiahnutie vzoru</a>."
+
+#: admin/importers/tax-rates-importer.php:292
+msgid "Before you can upload your import file, you will need to fix the following error:"
+msgstr "Predtým než nahrajete váš súbor, potrebujete odstrániť nasledujúcu chybu:"
+
+#: admin/importers/tax-rates-importer.php:301
+msgid "Choose a file from your computer:"
+msgstr "Vyberte súbor z vášho počítača:"
+
+#: admin/importers/tax-rates-importer.php:307
+msgid "Maximum size: %s"
+msgstr "Maximálna veľkosť: %s"
+
+#: admin/importers/tax-rates-importer.php:312
+msgid "OR enter path to file:"
+msgstr "alebo zadajte cestu k súboru:"
+
+#: admin/importers/tax-rates-importer.php:319
+msgid "Delimiter"
+msgstr "Oddeľovač"
+
+#: admin/importers/tax-rates-importer.php:325
+msgid "Upload file and import"
+msgstr "Nahrať súbor a importovať"
+
+#: admin/includes/duplicate_product.php:23
+msgid "No product to duplicate has been supplied!"
+msgstr "Nijaký produkt nebol dodaný duplicitne."
+
+#: admin/includes/duplicate_product.php:43
+msgid "Product creation failed, could not find original product:"
+msgstr "Vytvorenie produktu zlyhalo, pôvodný produkt nenájdený: "
+
+#: admin/includes/duplicate_product.php:90
+msgid "(Copy)"
+msgstr "(Copy)"
+
+#: admin/includes/notice-install.php:6
+msgid "<strong>Welcome to WooCommerce</strong> &#8211; You're almost ready to start selling :)"
+msgstr "<strong>Vitajte vo Woocommerce</strong> už ste skoro pripravení predávať:)"
+
+#: admin/includes/notice-install.php:7
+msgid "Install WooCommerce Pages"
+msgstr "Nainštalovať stránky WooCommerce"
+
+#: admin/includes/notice-install.php:7
+msgid "Skip setup"
+msgstr "Preskočiť nastavenia"
+
+#: admin/includes/notice-theme-support.php:6
+msgid "<strong>Your theme does not declare WooCommerce support</strong> &#8211; if you encounter layout issues please read our integration guide or choose a WooCommerce theme :)"
+msgstr "<strong>Vaša téma nezaručuje podporu WooCommerce</strong>, ak máte problémy prečítajte si integračný manuál alebo si vyberte WooCommerce tému:)"
+
+#: admin/includes/notice-theme-support.php:7
+msgid "Theme Integration Guide"
+msgstr "Manuál integrácie témy"
+
+#: admin/includes/notice-theme-support.php:7
+msgid "Hide this notice"
+msgstr "Schovať upozornenie"
+
+#: admin/includes/notice-update.php:6
+msgid "<strong>Data Update Required</strong> &#8211; We just need to update your install to the latest version"
+msgstr "<strong>Vyžaduje sa aktualizácia dát.</strong> Potrebujeme aktualizovať vašu inštaláciu na najnovšiu verziu."
+
+#: admin/includes/notice-update.php:7
+msgid "Run the updater"
+msgstr "Spustiť aktualizácie"
+
+#: admin/includes/notice-update.php:12
+msgid "It is strongly recommended that you backup your database before proceeding. Are you sure you wish to run the updater now?"
+msgstr "Je odporúčané zálohovať databázu pred pokračovaním. Ste si istý, že chcete spustiť aktualizácie teraz?"
+
+#: admin/includes/updates/woocommerce-update-2.0.php:49
+#: admin/woocommerce-admin-init.php:885
+msgctxt "slug"
+msgid "product-category"
+msgstr "kategoria-produktu"
+
+#: admin/includes/updates/woocommerce-update-2.0.php:50
+#: admin/woocommerce-admin-init.php:898
+msgctxt "slug"
+msgid "product-tag"
+msgstr "značka-produktu"
+
+#: admin/includes/updates/woocommerce-update-2.0.php:58
+msgctxt "slug"
+msgid "product"
+msgstr "produkt"
+
+#: admin/includes/updates/woocommerce-update-2.0.php:179
+#: admin/woocommerce-admin-install.php:207
+msgctxt "page_slug"
+msgid "lost-password"
+msgstr "stratené-heslo"
+
+#: admin/includes/updates/woocommerce-update-2.0.php:179
+#: admin/woocommerce-admin-install.php:207
+#: admin/woocommerce-admin-status.php:335
+msgid "Lost Password"
+msgstr "Stratené heslo"
+
+#: admin/includes/welcome.php:48
+msgid "Welcome to WooCommerce"
+msgstr "Vitajte vo Woocommerce"
+
+#: admin/includes/welcome.php:135
+msgid "Welcome to WooCommerce %s"
+msgstr "Vitajte vo Woocommerce %s"
+
+#: admin/includes/welcome.php:140
+msgid "Thanks, all done!"
+msgstr "Ďakujeme, všetko je hotové!"
+
+#: admin/includes/welcome.php:142
+msgid "Thank you for updating to the latest version!"
+msgstr "Ďakujeme vám za aktualizáciu na najnovšiu verziu!"
+
+#: admin/includes/welcome.php:144
+msgid "Thanks for installing!"
+msgstr "Vďaka za inštaláciu!"
+
+#: admin/includes/welcome.php:146
+msgid "%s WooCommerce %s is more powerful, stable, and secure than ever before. We hope you enjoy it."
+msgstr "%s WooCommerce %s je silnejšie, stabilnejšie a bezpečnejšie ako kedykoľvek predtým. Dúfame, že si ho užijete."
+
+#: admin/includes/welcome.php:150
+msgid "Version %s"
+msgstr "Verzia %s"
+
+#: admin/includes/welcome.php:153 admin/woocommerce-admin-content.php:41
+#: admin/woocommerce-admin-init.php:88 admin/woocommerce-admin-status.php:278
+msgid "Settings"
+msgstr "Nastavenia"
+
+#: admin/includes/welcome.php:154
+msgid "Docs"
+msgstr "Dokumenty"
+
+#: admin/includes/welcome.php:161
+msgid "What's New"
+msgstr "Čo je nové"
+
+#: admin/includes/welcome.php:163
+msgid "Credits"
+msgstr "Kredity"
+
+#: admin/includes/welcome.php:186
+msgid "Security in mind"
+msgstr "Zaujíma vás bezpečnosť?"
+
+#: admin/includes/welcome.php:190
+msgid "Sucuri Safe Plugin"
+msgstr "Modul Sucuri Safe"
+
+#: admin/includes/welcome.php:191
+msgid "You will be happy to learn that WooCommerce has been audited and certified by the Sucuri Security team. Whilst there is not much to be seen visually to understand the amount of work that went into this audit, rest assured that your website is powered by one of the most powerful and stable eCommerce plugins available."
+msgstr "Určite radi počujete, že WooCommerce bol certifikovaný Sucuri Security tímom. Na prvý pohľad nie je vidieť koľko úsilia sa dalo do tohto auditu, vaša stránka je poháňaná jedným z najschopnejších a najstabilnejších dostupných modulov online obchodov."
+
+#: admin/includes/welcome.php:194
+msgid "A Smoother Admin Experience"
+msgstr "Hladhejšiu administrátorskú skúsenosť"
+
+#: admin/includes/welcome.php:200
+msgid "New Product Panel"
+msgstr "Nový panel produktov"
+
+#: admin/includes/welcome.php:201
+msgid "We have revised the product data panel making it cleaner, more streamlined, and more logical. Adding products is a breeze!"
+msgstr "Zmenili sme panel dát produktov. Momentálne je čistejší, efektívnejší a logickejší. Pridávanie produktov je jednoduché!"
+
+#: admin/includes/welcome.php:206
+msgid "Nicer Order Screens"
+msgstr "Krajšie obrazovky objednávok"
+
+#: admin/includes/welcome.php:207
+msgid "Order pages have had a cleanup, with a more easily scannable interface. We particularly like the new status icons!"
+msgstr "Stránky objednávok sme vyčistili, sú prehľadnejšie. Najviac sa nám páčia nové ikony stavu."
+
+#: admin/includes/welcome.php:212
+msgid "Multi-Download Support"
+msgstr "Podpora viacnásobného sťahovania"
+
+#: admin/includes/welcome.php:213
+msgid "Products can have multiple downloadable files - purchasers will get access to all the files added."
+msgstr "Výrobky môžu mať viac súborov na prevzatie - kupujúci budú mať prístup ku všetkým pridaným súborom."
+
+#: admin/includes/welcome.php:218
+msgid "Less Taxing Taxes"
+msgstr "Menej zatažujúce dane"
+
+#: admin/includes/welcome.php:224
+msgid "New Tax Input Panel"
+msgstr "Panel zadávania novej dane"
+
+#: admin/includes/welcome.php:225
+msgid "The tax input pages have been streamlined to make inputting taxes simpler - adding multiple taxes for a single jurisdiction is now much easier using the priority system. There is also CSV import/export support."
+msgstr "Stránky zadávania daní boli modifikované aby zadávanie bolo efektívnejšie a jednoduchšie - pridávanie viacerých daní pre jednu jurisdikciu je jednoduchšie pomocou systému priorít. Tiež môžete použiť import/export CSV súborov."
+
+#: admin/includes/welcome.php:229
+msgid "Improved Tax Options"
+msgstr "Vylepšené nastavenia daní"
+
+#: admin/includes/welcome.php:230
+msgid "As requested by some users, we now support taxing the billing address instead of shipping (optional), and we allow you to choose which tax class applies to shipping."
+msgstr "Ako to vyžadovali niektorí zákazníci, teraz podporujeme daňovú sadzbu podľa fakturačnej adresy a nie adresy doručenia.(voliteľne) Taktiež vám umožňujeme zvoliť si daňovú sadzbu na prepravu."
+
+#: admin/includes/welcome.php:235
+msgid "Product Listing Improvements Customers Will Love"
+msgstr "Radenie produktov ktoré zákazníci budú zbožnovať"
+
+#: admin/includes/welcome.php:241
+msgid "New Sorting Options"
+msgstr "Nové možnosti triedenia"
+
+#: admin/includes/welcome.php:242
+msgid "Customers can now sort products by popularity and ratings."
+msgstr "Zákazníci teraz môžu triediť podľa obľúbenosti a hodnotení."
+
+#: admin/includes/welcome.php:247
+msgid "Better Pagination and Result Counts"
+msgstr "Lepšia správa strán a počty výsledkov"
+
+#: admin/includes/welcome.php:248
+msgid "Numbered pagination has been added to core, and we show the number of results found above the listings."
+msgstr "Číslovanie strán bolo zahrnuté do jadra, momentálne zobrazujeme počet nájdených výsledkov nad položkami."
+
+#: admin/includes/welcome.php:253
+msgid "Inline Star Rating Display"
+msgstr "Zobraziť hodnotenie hviezdičkami v riadku"
+
+#: admin/includes/welcome.php:254
+msgid "We have added star ratings to the catalog which are pulled from reviews."
+msgstr "Pridali sme hodnotenie hviezdičkami do katalógu ktoré pochádza z recenzií."
+
+#: admin/includes/welcome.php:262
+msgid "Under the Hood"
+msgstr "Pod kapotou"
+
+#: admin/includes/welcome.php:266
+msgid "New product classes"
+msgstr "Nové triedy produktu"
+
+#: admin/includes/welcome.php:267
+msgid "The product classes have been rewritten and are now factory based. Much more extendable, and easier to query products using the new <code>get_product()</code> function."
+msgstr "Triedy produktov boli prepísané na základné. Nová funkcia<code>get_product()</code> pre dotazovanie produktov je oveľa viac rozšíriteľná a jednoduchšia na používanie."
+
+#: admin/includes/welcome.php:271
+msgid "Capability overhaul"
+msgstr "Opravy funkcií"
+
+#: admin/includes/welcome.php:272
+msgid "More granular capabilities for admin/shop manager roles covering products, orders and coupons."
+msgstr "Presnejšie funkcie pre role administrátora/manažéra obchodu týkajúce sa výrobkov, objednávok a kupónov."
+
+#: admin/includes/welcome.php:276
+msgid "API Improvements"
+msgstr "Vylepšenia API"
+
+#: admin/includes/welcome.php:277
+msgid "<code>WC-API</code> now has real endpoints, and we've optimised the gateways API significantly by only loading gateways when needed."
+msgstr "<code>WC-API</code> ma teraz koncové body. Optimalizovali sme brány API pomocou systému nahrávania len keď sú potrebné."
+
+#: admin/includes/welcome.php:283
+msgid "Cache-friendly cart widgets"
+msgstr "Widgety košíka spolupracujúce s medzipamäťou "
+
+#: admin/includes/welcome.php:284
+msgid "Cart widgets and other \"fragments\" are now pulled in via AJAX - this works wonders with static page caching."
+msgstr "Widgety košíka a iné \"fragmenty\"sú používané pomocou AJAX - toto úžasne pracuje s medzipamäťou statických stránok."
+
+#: admin/includes/welcome.php:288
+msgid "Session handling"
+msgstr "Správa relácie"
+
+#: admin/includes/welcome.php:289
+msgid "PHP SESSIONS have been a problem for many users in the past, so we've developed our own handler using cookies and options to make these more reliable."
+msgstr "PHP relácie boli v minulosti problémové, preto sme vyvinuli vlastnú správu cookies a nastavení pre vylepšenie spoľahlivosti."
+
+#: admin/includes/welcome.php:293
+msgid "Retina Ready"
+msgstr "Pripravené pre Retinu"
+
+#: admin/includes/welcome.php:294
+msgid "All graphics within WC have been optimised for HiDPI displays."
+msgstr "Všetky grafické prvky vo WC sú optimalizované pre použitie s HiDPI obrazovkami."
+
+#: admin/includes/welcome.php:301
+msgid "Better stock handling"
+msgstr "Lepšia správa skladu"
+
+#: admin/includes/welcome.php:302
+msgid "We have added an option to hold stock for unpaid orders (defaults to 60mins). When this time limit is reached, and the order is not paid for, stock is released and the order is cancelled."
+msgstr "Pridali sme možnosť držať rezervovaný tovar pre nezaplatené objednávky(štandardne 60 minút). Keď je časový limit dosiahnutý a objednávka nezaplatená, tovar sa vráti na sklad a objednávka automaticky zruší."
+
+#: admin/includes/welcome.php:306
+msgid "Improved Line-item storage"
+msgstr "Vylepšené umiestnenie položiek v riadku"
+
+#: admin/includes/welcome.php:307
+msgid "We have changed how order items get stored making them easier (and faster) to access for reporting. Order items are no longer serialised within an order - they are stored within their own table."
+msgstr "Zmenili sme ako sa ukladajú položky objednávky pre jednoduchší a rýchlejší prístup k nim. Položky objednávky nie sú teraz radené vrámci objednávky, ale sú ukladané do vlastnej tabuľky."
+
+#: admin/includes/welcome.php:311
+msgid "Autoload"
+msgstr "Automatické nahrávanie"
+
+#: admin/includes/welcome.php:312
+msgid "We have setup autoloading for classes - this has dramatically reduced memory usage in 2.0."
+msgstr "Máme nastavenia pre automatické nahrávanie tried. Toto dramaticky znížilo využitie pamäte vo verzii 2.0."
+
+#: admin/includes/welcome.php:319
+msgid "Go to WooCommerce Settings"
+msgstr "Ísť na nastavenia WooCommerce"
+
+#: admin/includes/welcome.php:337
+msgid "WooCommerce is developed and maintained by a worldwide team of passionate individuals and backed by an awesome developer community. Want to see your name? <a href=\"https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md\">Contribute to WooCommerce</a>."
+msgstr "WooCommerce je vyvíjaný a udržiavaný celosvetovým tímom zapalených osobností a úžasnou komunitou vývojárov. Chceli by ste tu vidieť svoje meno? <a href=\"https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md\">Zapojte sa do tímu WooCommerce</a>."
+
+#: admin/includes/welcome.php:363
+msgid "View %s"
+msgstr "Zobraziť %s"
+
+#: admin/post-types/product.php:31
+msgid "Make a duplicate from this product"
+msgstr "Urobiť duplikát tohto produktu"
+
+#: admin/post-types/product.php:32
+msgid "Duplicate"
+msgstr "Duplikát"
+
+#: admin/post-types/product.php:61
+msgid "Copy to a new draft"
+msgstr "Nový návrh kopírovaním"
+
+#: admin/post-types/product.php:86 admin/woocommerce-admin-taxonomies.php:297
+msgid "Image"
+msgstr "Obrázok"
+
+#: admin/post-types/product.php:88
+#: admin/post-types/writepanels/writepanel-product_data.php:376
+#: admin/post-types/writepanels/writepanel-product_data.php:470
+#: admin/woocommerce-admin-attributes.php:233
+#: admin/woocommerce-admin-attributes.php:269
+#: admin/woocommerce-admin-attributes.php:307
+#: admin/woocommerce-admin-attributes.php:330
+#: admin/woocommerce-admin-attributes.php:374
+#: admin/woocommerce-admin-attributes.php:399
+#: admin/woocommerce-admin-init.php:437
+msgid "Name"
+msgstr "Meno"
+
+#: admin/post-types/product.php:91 admin/post-types/product.php:557
+#: admin/post-types/writepanels/variation-admin-html.php:52
+#: admin/post-types/writepanels/writepanel-product_data.php:98
+#: admin/woocommerce-admin-reports.php:2099
+#: admin/woocommerce-admin-reports.php:2135
+msgid "SKU"
+msgstr "Katalógové číslo"
+
+#: admin/post-types/product.php:94
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:83
+#: admin/woocommerce-admin-content.php:63
+#: admin/woocommerce-admin-reports.php:90
+msgid "Stock"
+msgstr "Sklad"
+
+#: admin/post-types/product.php:96 admin/post-types/product.php:568
+#: admin/post-types/product.php:789 admin/woocommerce-admin-functions.php:202
+msgid "Price"
+msgstr "Cena"
+
+#: admin/post-types/product.php:98
+msgid "Categories"
+msgstr "Kategórie"
+
+#: admin/post-types/product.php:99
+msgid "Tags"
+msgstr "Značky"
+
+#: admin/post-types/product.php:100 admin/post-types/product.php:632
+#: admin/post-types/product.php:906
+#: admin/post-types/writepanels/writepanel-product_data.php:1058
+#: admin/woocommerce-admin-init.php:450
+msgid "Featured"
+msgstr "Špeciálna ponuka"
+
+#: admin/post-types/product.php:101 admin/woocommerce-admin-attributes.php:251
+#: admin/woocommerce-admin-attributes.php:309
+#: admin/woocommerce-admin-attributes.php:386
+msgid "Type"
+msgstr "Typ"
+
+#: admin/post-types/product.php:102 admin/post-types/shop_order.php:50
+msgid "Date"
+msgstr "Dátum"
+
+#: admin/post-types/product.php:151
+msgid "Edit this item"
+msgstr "Upraviť túto položku"
+
+#: admin/post-types/product.php:151
+#: admin/post-types/writepanels/writepanel-order_data.php:140
+#: admin/post-types/writepanels/writepanel-order_data.php:230
+#: admin/post-types/writepanels/writepanel-order_data.php:387
+#: admin/post-types/writepanels/writepanel-product_data.php:1061
+#: admin/woocommerce-admin-attributes.php:323
+msgid "Edit"
+msgstr "Upraviť"
+
+#: admin/post-types/product.php:152
+msgid "Edit this item inline"
+msgstr "Upraviť túto položku v riadku"
+
+#: admin/post-types/product.php:152
+msgid "Quick&nbsp;Edit"
+msgstr "Rýchla&nbsp;úprava"
+
+#: admin/post-types/product.php:156 admin/post-types/shop_coupon.php:65
+msgid "Restore this item from the Trash"
+msgstr "Obnoviť túto položku z koša"
+
+#: admin/post-types/product.php:156 admin/post-types/shop_coupon.php:65
+msgid "Restore"
+msgstr "Obnoviť"
+
+#: admin/post-types/product.php:158 admin/post-types/shop_coupon.php:67
+msgid "Move this item to the Trash"
+msgstr "Presunúť do koša"
+
+#: admin/post-types/product.php:158 admin/post-types/shop_coupon.php:67
+msgid "Trash"
+msgstr "Kôš"
+
+#: admin/post-types/product.php:160 admin/post-types/shop_coupon.php:69
+msgid "Delete this item permanently"
+msgstr "Vymazať túto položky natrvalo"
+
+#: admin/post-types/product.php:160 admin/post-types/shop_coupon.php:69
+#: admin/post-types/writepanels/writepanel-order_data.php:463
+msgid "Delete Permanently"
+msgstr "Zmazať natrvalo"
+
+#: admin/post-types/product.php:165
+msgid "Preview &#8220;%s&#8221;"
+msgstr "Náhľad &#8220;%s&#8221;"
+
+#: admin/post-types/product.php:165
+msgid "Preview"
+msgstr "Náhľad"
+
+#: admin/post-types/product.php:167
+msgid "View &#8220;%s&#8221;"
+msgstr "Zobraziť &#8220;%s&#8221;"
+
+#: admin/post-types/product.php:167 admin/post-types/shop_order.php:171
+msgid "View"
+msgstr "Zobraziť"
+
+#: admin/post-types/product.php:214
+msgid "Grouped"
+msgstr "Zoskupené"
+
+#: admin/post-types/product.php:216
+msgid "External/Affiliate"
+msgstr "Externé/Príbuzné"
+
+#: admin/post-types/product.php:220 admin/post-types/product.php:407
+#: admin/post-types/writepanels/variation-admin-html.php:174
+#: admin/post-types/writepanels/writepanel-product_data.php:52
+msgid "Virtual"
+msgstr "Virtuálne"
+
+#: admin/post-types/product.php:222 admin/post-types/product.php:403
+#: admin/post-types/writepanels/variation-admin-html.php:172
+#: admin/post-types/writepanels/writepanel-product_data.php:58
+msgid "Downloadable"
+msgstr "Na stiahnutie"
+
+#: admin/post-types/product.php:224
+msgid "Simple"
+msgstr "Jednoduchý"
+
+#: admin/post-types/product.php:228 admin/post-types/product.php:387
+msgid "Variable"
+msgstr "Variabilný"
+
+#: admin/post-types/product.php:251
+msgid "Toggle featured"
+msgstr "Prepnúť odporúčania"
+
+#: admin/post-types/product.php:253
+msgid "yes"
+msgstr "áno"
+
+#: admin/post-types/product.php:255
+msgid "no"
+msgstr "nie"
+
+#: admin/post-types/product.php:262 admin/post-types/product.php:641
+#: admin/post-types/product.php:930
+#: admin/post-types/writepanels/writepanel-product_data.php:231
+msgid "In stock"
+msgstr "Na sklade"
+
+#: admin/post-types/product.php:264 admin/post-types/product.php:642
+#: admin/post-types/product.php:931
+#: admin/post-types/writepanels/writepanel-product_data.php:232
+#: admin/woocommerce-admin-reports.php:2119
+msgid "Out of stock"
+msgstr "Nie je na sklade"
+
+#: admin/post-types/product.php:373
+msgid "Show all product types"
+msgstr "Zobraziť všetky typy produktov"
+
+#: admin/post-types/product.php:381
+#: admin/post-types/writepanels/writepanel-product_data.php:39
+msgid "Grouped product"
+msgstr "Zoskupený produkt"
+
+#: admin/post-types/product.php:383
+#: admin/post-types/writepanels/writepanel-product_data.php:40
+msgid "External/Affiliate product"
+msgstr "Externý/príbuzný produkt"
+
+#: admin/post-types/product.php:385
+#: admin/post-types/writepanels/writepanel-product_data.php:38
+msgid "Simple product"
+msgstr "Jednoduchý produkt"
+
+#: admin/post-types/product.php:399
+msgid "Show all sub-types"
+msgstr "Zobraziť všetky podtypy"
+
+#: admin/post-types/product.php:520
+msgid "[%s with SKU of %s]"
+msgstr "[%s s katalógovým číslom %s]"
+
+#: admin/post-types/product.php:526
+msgid "[%s with ID of %d]"
+msgstr "[%s s číslom ID %d]"
+
+#: admin/post-types/product.php:552 admin/post-types/product.php:783
+#: admin/post-types/writepanels/writepanels-init.php:46
+#: admin/settings/settings-init.php:508
+msgid "Product Data"
+msgstr "Údaje o produkte"
+
+#: admin/post-types/product.php:570
+msgid "Regular price"
+msgstr "Normálna cena"
+
+#: admin/post-types/product.php:575 admin/post-types/product.php:813
+msgid "Sale"
+msgstr "Zľava"
+
+#: admin/post-types/product.php:577
+msgid "Sale price"
+msgstr "Zľavnená cena"
+
+#: admin/post-types/product.php:588 admin/post-types/product.php:839
+#: admin/post-types/writepanels/variation-admin-html.php:96
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:84
+#: admin/post-types/writepanels/writepanel-product_data.php:273
+msgid "Weight"
+msgstr "Hmotnosť"
+
+#: admin/post-types/product.php:599 admin/post-types/product.php:863
+msgid "L/W/H"
+msgstr "D/Š/V"
+
+#: admin/post-types/product.php:601 admin/post-types/product.php:879
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:85
+#: admin/post-types/writepanels/writepanel-product_data.php:286
+msgid "Length"
+msgstr "Dĺžka"
+
+#: admin/post-types/product.php:602 admin/post-types/product.php:880
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:86
+#: admin/post-types/writepanels/writepanel-product_data.php:287
+#: admin/woocommerce-admin-settings.php:797
+msgid "Width"
+msgstr "Šírka"
+
+#: admin/post-types/product.php:603 admin/post-types/product.php:881
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:87
+#: admin/post-types/writepanels/writepanel-product_data.php:288
+#: admin/woocommerce-admin-settings.php:799
+msgid "Height"
+msgstr "Výška"
+
+#: admin/post-types/product.php:613 admin/post-types/product.php:887
+msgid "Visibility"
+msgstr "Viditeľnosť"
+
+#: admin/post-types/product.php:618 admin/post-types/product.php:893
+msgid "Catalog &amp; search"
+msgstr "Katalóg &amp; Hľadanie"
+
+#: admin/post-types/product.php:619 admin/post-types/product.php:894
+#: admin/post-types/writepanels/writepanel-product_data.php:1047
+#: admin/woocommerce-admin-content.php:46
+#: admin/woocommerce-admin-settings.php:183
+msgid "Catalog"
+msgstr "Katalóg"
+
+#: admin/post-types/product.php:620 admin/post-types/product.php:895
+#: admin/post-types/writepanels/writepanel-product_data.php:1048
+msgid "Search"
+msgstr "Hľadanie"
+
+#: admin/post-types/product.php:621 admin/post-types/product.php:896
+#: admin/post-types/writepanels/writepanel-product_data.php:1049
+msgid "Hidden"
+msgstr "Skrytý"
+
+#: admin/post-types/product.php:636 admin/post-types/product.php:924
+msgid "In stock?"
+msgstr "Skladom?"
+
+#: admin/post-types/product.php:657 admin/post-types/product.php:942
+#: admin/post-types/writepanels/writepanel-product_data.php:212
+msgid "Manage stock?"
+msgstr "Správa skladu?"
+
+#: admin/post-types/product.php:661 admin/post-types/product.php:961
+#: admin/post-types/product.php:977
+#: admin/post-types/writepanels/writepanel-product_data.php:219
+msgid "Stock Qty"
+msgstr "Na sklade"
+
+#: admin/post-types/product.php:794 admin/post-types/product.php:818
+#: admin/post-types/product.php:844 admin/post-types/product.php:868
+#: admin/post-types/product.php:892 admin/post-types/product.php:911
+#: admin/post-types/product.php:929 admin/post-types/product.php:947
+#: admin/post-types/product.php:966
+msgid "— No Change —"
+msgstr "— Bez zmeny —"
+
+#: admin/post-types/product.php:795 admin/post-types/product.php:819
+#: admin/post-types/product.php:845 admin/post-types/product.php:869
+#: admin/post-types/product.php:967
+msgid "Change to:"
+msgstr "Zmeniť na:"
+
+#: admin/post-types/product.php:796 admin/post-types/product.php:820
+msgid "Increase by (fixed amount or %):"
+msgstr "Zvýšiť o (fixná cena alebo %):"
+
+#: admin/post-types/product.php:797 admin/post-types/product.php:821
+msgid "Decrease by (fixed amount or %):"
+msgstr "Znížiť o (fixná cena alebo %):"
+
+#: admin/post-types/product.php:807 admin/post-types/product.php:832
+msgid "Enter price"
+msgstr "Zadajte cenu"
+
+#: admin/post-types/product.php:822
+msgid "Decrease regular price by (fixed amount or %):"
+msgstr "Znížiť normálnu cenu o (fixná cena alebo %):"
+
+#: admin/post-types/product.php:912 admin/post-types/product.php:948
+#: admin/post-types/shop_order.php:190 admin/woocommerce-admin-status.php:122
+#: admin/woocommerce-admin-status.php:286
+msgid "Yes"
+msgstr "Áno"
+
+#: admin/post-types/product.php:913 admin/post-types/product.php:949
+#: admin/post-types/shop_order.php:192 admin/woocommerce-admin-status.php:122
+#: admin/woocommerce-admin-status.php:286
+msgid "No"
+msgstr "Nie"
+
+#: admin/post-types/product.php:1183
+msgid "Sort Products"
+msgstr "Triedenie produktov"
+
+#: admin/post-types/product.php:1222
+msgid "Insert into product"
+msgstr "Vložiť tento produkt"
+
+#: admin/post-types/product.php:1223
+msgid "Uploaded to this product"
+msgstr "Nahrané k tomuto produktu"
+
+#: admin/post-types/shop_coupon.php:25
+msgid "Code"
+msgstr "Kód"
+
+#: admin/post-types/shop_coupon.php:26
+msgid "Coupon type"
+msgstr "Typ kupónu"
+
+#: admin/post-types/shop_coupon.php:27
+#: admin/post-types/writepanels/writepanel-coupon_data.php:45
+msgid "Coupon amount"
+msgstr "Hodnota kupónu"
+
+#: admin/post-types/shop_coupon.php:28
+msgid "Description"
+msgstr "Popis"
+
+#: admin/post-types/shop_coupon.php:29
+msgid "Product IDs"
+msgstr "Číslo ID produktu"
+
+#: admin/post-types/shop_coupon.php:30
+msgid "Usage / Limit"
+msgstr "Použté/limit"
+
+#: admin/post-types/shop_coupon.php:31
+#: admin/post-types/writepanels/writepanel-coupon_data.php:158
+msgid "Expiry date"
+msgstr "Dátum platnosti"
+
+#: admin/post-types/shop_coupon.php:56
+msgid "Edit coupon"
+msgstr "Upraviť kupón"
+
+#: admin/post-types/shop_coupon.php:114
+msgid "%s / %s"
+msgstr "%s / %s"
+
+#: admin/post-types/shop_coupon.php:116
+msgid "%s / &infin;"
+msgstr "%s / &infin;"
+
+#: admin/post-types/shop_coupon.php:149
+msgid "Show all types"
+msgstr "Zobraziť všetky typy"
+
+#: admin/post-types/shop_order.php:43
+#: admin/settings/settings-payment-gateways.php:29
+#: admin/settings/settings-shipping-methods.php:31
+msgid "Status"
+msgstr "Stav"
+
+#: admin/post-types/shop_order.php:44
+msgid "Order"
+msgstr "Objednávka"
+
+#: admin/post-types/shop_order.php:45
+msgid "Billing"
+msgstr "Fakturácia"
+
+#: admin/post-types/shop_order.php:46
+#: admin/post-types/writepanels/writepanel-order_data.php:539
+#: admin/post-types/writepanels/writepanel-product_data.php:81
+#: admin/settings/settings-tax-rates.php:52
+#: admin/settings/settings-tax-rates.php:217
+#: admin/woocommerce-admin-content.php:49
+#: admin/woocommerce-admin-settings.php:187
+msgid "Shipping"
+msgstr "Doprava"
+
+#: admin/post-types/shop_order.php:47
+msgid "Order Total"
+msgstr "Cena spolu"
+
+#: admin/post-types/shop_order.php:48
+#: admin/post-types/writepanels/writepanels-init.php:71
+msgid "Order Notes"
+msgstr "Poznámky k objednávke"
+
+#: admin/post-types/shop_order.php:49
+msgid "Customer Notes"
+msgstr "Poznámka od zákazníka"
+
+#: admin/post-types/shop_order.php:51
+#: admin/post-types/writepanels/writepanel-order_data.php:386
+#: admin/post-types/writepanels/writepanel-order_data.php:433
+msgid "Actions"
+msgstr "Akcia objednávky"
+
+#: admin/post-types/shop_order.php:95
+#: admin/post-types/writepanels/writepanel-order_data.php:93
+msgid "Guest"
+msgstr "Neregistrovaný"
+
+#: admin/post-types/shop_order.php:98
+msgid "Order %s"
+msgstr "Objednávka %s"
+
+#: admin/post-types/shop_order.php:98
+msgid "made by"
+msgstr "od"
+
+#: admin/post-types/shop_order.php:101
+msgid "Email:"
+msgstr "E-mail:"
+
+#: admin/post-types/shop_order.php:104
+msgid "Tel:"
+msgstr "Tel:"
+
+#: admin/post-types/shop_order.php:114 admin/post-types/shop_order.php:123
+msgid "Via"
+msgstr "cez"
+
+#: admin/post-types/shop_order.php:131
+msgid "Unpublished"
+msgstr "Nevydané"
+
+#: admin/post-types/shop_order.php:133
+msgid "Y/m/d g:i:s A"
+msgstr "d. m. y g:i:s A"
+
+#: admin/post-types/shop_order.php:139
+msgid "%s ago"
+msgstr "pred %s"
+
+#: admin/post-types/shop_order.php:141
+msgid "Y/m/d"
+msgstr "d. m. y"
+
+#: admin/post-types/shop_order.php:158
+#: admin/woocommerce-admin-dashboard.php:176
+msgid "Processing"
+msgstr "Spracováva sa"
+
+#: admin/post-types/shop_order.php:165
+msgid "Complete"
+msgstr "Dokončiť"
+
+#: admin/post-types/shop_order.php:282
+msgid "Show all statuses"
+msgstr "Zobraziť všetky stavy"
+
+#: admin/post-types/shop_order.php:301 admin/post-types/shop_order.php:326
+msgid "Show all customers"
+msgstr "Zobraziť všetkých zákazníkov"
+
+#: admin/post-types/writepanels/order-download-permission-html.php:6
+msgid "Revoke Access"
+msgstr "Odvolať prístup"
+
+#: admin/post-types/writepanels/order-download-permission-html.php:7
+#: admin/post-types/writepanels/variation-admin-html.php:7
+#: admin/post-types/writepanels/writepanel-product_data.php:369
+#: admin/post-types/writepanels/writepanel-product_data.php:463
+#: admin/woocommerce-admin-init.php:439
+msgid "Click to toggle"
+msgstr "Kliknúť pre prepnutie"
+
+#: admin/post-types/writepanels/order-download-permission-html.php:9
+msgid "File %d: %s"
+msgstr "Súbor %d: %s"
+
+#: admin/post-types/writepanels/order-download-permission-html.php:9
+msgid "Downloaded %s time"
+msgid_plural "Downloaded %s times"
+msgstr[0] "Stiahnuté %s raz"
+msgstr[1] "Stiahnuté %s krát"
+msgstr[2] "Stiahnuté %s krát"
+
+#: admin/post-types/writepanels/order-download-permission-html.php:16
+msgid "Downloads Remaining"
+msgstr "Zostáva stiahnutí"
+
+#: admin/post-types/writepanels/order-download-permission-html.php:19
+#: admin/post-types/writepanels/variation-admin-html.php:149
+#: admin/post-types/writepanels/variation-admin-html.php:157
+#: admin/post-types/writepanels/writepanel-product_data.php:158
+msgid "Unlimited"
+msgstr "Neobmedzene"
+
+#: admin/post-types/writepanels/order-download-permission-html.php:22
+msgid "Access Expires"
+msgstr "Prístup vyprší"
+
+#: admin/post-types/writepanels/order-download-permission-html.php:23
+#: admin/post-types/writepanels/writepanel-product_data.php:164
+msgid "Never"
+msgstr "Nikdy"
+
+#: admin/post-types/writepanels/order-fee-html.php:10
+msgid "Fee Name"
+msgstr "Názov poplatku"
+
+#: admin/post-types/writepanels/order-fee-html.php:17
+#: admin/post-types/writepanels/order-item-html.php:89
+msgid "Tax class"
+msgstr "Sadzba dane"
+
+#: admin/post-types/writepanels/order-fee-html.php:19
+#: admin/post-types/writepanels/order-tax-html.php:8
+#: admin/post-types/writepanels/writepanel-order_data.php:561
+#: admin/post-types/writepanels/writepanel-order_data.php:666
+#: admin/woocommerce-admin-reports.php:1658
+#: admin/woocommerce-admin-reports.php:2671
+#: admin/woocommerce-admin-reports.php:2680
+#: admin/woocommerce-admin-users.php:90 admin/woocommerce-admin-users.php:112
+msgid "N/A"
+msgstr "-"
+
+#: admin/post-types/writepanels/order-fee-html.php:20
+#: admin/post-types/writepanels/writepanel-product_data.php:179
+msgid "Taxable"
+msgstr "Zdaniteľný"
+
+#: admin/post-types/writepanels/order-fee-html.php:25
+#: admin/post-types/writepanels/order-item-html.php:96
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:54
+#: admin/post-types/writepanels/writepanel-product_data.php:186
+#: admin/settings/settings-init.php:972
+#: admin/settings/settings-tax-rates.php:29
+#: admin/woocommerce-admin-settings.php:228
+msgid "Standard"
+msgstr "Štandardné"
+
+#: admin/post-types/writepanels/order-fee-html.php:43
+#: admin/post-types/writepanels/order-item-html.php:115
+#: admin/woocommerce-admin-reports.php:1562
+#: admin/woocommerce-admin-reports.php:1615
+#: admin/woocommerce-admin-reports.php:2386
+#: admin/woocommerce-admin-reports.php:2555
+#: admin/woocommerce-admin-reports.php:2633
+msgid "Total"
+msgstr "Cena spolu"
+
+#: admin/post-types/writepanels/order-item-html.php:10
+msgid "Product ID:"
+msgstr "Produkt ID:"
+
+#: admin/post-types/writepanels/order-item-html.php:13
+msgid "Variation ID:"
+msgstr "Číslo ID variantu:"
+
+#: admin/post-types/writepanels/order-item-html.php:16
+msgid "Product SKU:"
+msgstr "Katalógové číslo produktu:"
+
+#: admin/post-types/writepanels/order-item-html.php:44
+msgid "Add&nbsp;meta"
+msgstr "Pridať&nbsp;meta"
+
+#: admin/post-types/writepanels/order-item-html.php:117
+msgid "Subtotal"
+msgstr "Medzisúčet"
+
+#: admin/post-types/writepanels/order-tax-html.php:6
+msgid "Tax Rate:"
+msgstr "Sadzba dane:"
+
+#: admin/post-types/writepanels/order-tax-html.php:16
+#: admin/post-types/writepanels/writepanel-order_data.php:630
+msgid "Sales Tax:"
+msgstr "Dane z predaja:"
+
+#: admin/post-types/writepanels/order-tax-html.php:20
+#: admin/post-types/writepanels/writepanel-order_data.php:638
+msgid "Shipping Tax:"
+msgstr "Prepravná daň:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:6
+#: admin/post-types/writepanels/writepanel-product_data.php:368
+#: admin/post-types/writepanels/writepanel-product_data.php:462
+#: admin/woocommerce-admin-init.php:438
+msgid "Remove"
+msgstr "Odstrániť"
+
+#: admin/post-types/writepanels/variation-admin-html.php:20
+msgid "Any"
+msgstr "Všetky"
+
+#: admin/post-types/writepanels/variation-admin-html.php:52
+msgid "Enter a SKU for this variation or leave blank to use the parent product SKU."
+msgstr "Zadajte katalógové číslo produktu tohto variantu alebo ho nechajte prázdne a použije sa katalógové číslo nadradeného produktu."
+
+#: admin/post-types/writepanels/variation-admin-html.php:63
+msgid "Stock Qty:"
+msgstr "Na sklade:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:63
+msgid "Enter a quantity to enable stock management at variation level, or leave blank to use the parent product's options."
+msgstr "Zadajte počet pre zapnutie spravovania skladu pre variantu, alebo nechajte prázdne pre použite nastavení nadradeného produktu."
+
+#: admin/post-types/writepanels/variation-admin-html.php:72
+msgid "Regular Price:"
+msgstr "Normálna cena:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:73
+msgid "Variation price (required)"
+msgstr "Cena variantu(vyžadovaná)"
+
+#: admin/post-types/writepanels/variation-admin-html.php:76
+msgid "Sale Price:"
+msgstr "Cena po zľave:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:76
+#: admin/post-types/writepanels/writepanel-product_data.php:125
+msgid "Schedule"
+msgstr "Plán"
+
+#: admin/post-types/writepanels/variation-admin-html.php:76
+msgid "Cancel schedule"
+msgstr "Zrušiť plán"
+
+#: admin/post-types/writepanels/variation-admin-html.php:83
+msgid "Sale start date:"
+msgstr "Dátum začiatku výpredaja:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:84
+#: admin/post-types/writepanels/writepanel-product_data.php:136
+msgctxt "placeholder"
+msgid "From&hellip;"
+msgstr "Od&hellip;"
+
+#: admin/post-types/writepanels/variation-admin-html.php:87
+msgid "Sale end date:"
+msgstr "Dátum konca výpredaja:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:88
+#: admin/post-types/writepanels/writepanel-product_data.php:137
+msgctxt "placeholder"
+msgid "To&hellip;"
+msgstr "Do&hellip;"
+
+#: admin/post-types/writepanels/variation-admin-html.php:96
+msgid "Enter a weight for this variation or leave blank to use the parent product weight."
+msgstr "Zadajte hmotnosť tohto variantu alebo ju nechajte nevyplnenú a použije sa hmotnosť nadradeného produktu."
+
+#: admin/post-types/writepanels/variation-admin-html.php:104
+msgid "Dimensions (L&times;W&times;H)"
+msgstr "Rozmery (dĺžka &times; šírka &times; výška)"
+
+#: admin/post-types/writepanels/variation-admin-html.php:115
+msgid "Shipping class:"
+msgstr "Prepravná trieda:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:119
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:53
+msgid "Same as parent"
+msgstr "Rovnaká ako nadradená"
+
+#: admin/post-types/writepanels/variation-admin-html.php:130
+msgid "Tax class:"
+msgstr "Sadzba dane:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:141
+msgid "File paths:"
+msgstr "Cesty k súboru:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:141
+msgid "Enter one or more File Paths, one per line, to make this variation a downloadable product, or leave blank."
+msgstr "Zadajte jednu alebo viac ciest k súboru, jednu na riadok, pre urobenie variantu sťahovateľným produktom, alebo nechajte prázdne"
+
+#: admin/post-types/writepanels/variation-admin-html.php:142
+#: admin/post-types/writepanels/writepanel-product_data.php:153
+msgid "File paths/URLs, one per line"
+msgstr "Cesty k súborom/URL adresy, jedna na riadok"
+
+#: admin/post-types/writepanels/variation-admin-html.php:143
+#: admin/post-types/writepanels/writepanel-product_data.php:154
+msgid "Choose a file"
+msgstr "Vybrať súbor"
+
+#: admin/post-types/writepanels/variation-admin-html.php:143
+msgid "Upload"
+msgstr "Nahrať"
+
+#: admin/post-types/writepanels/variation-admin-html.php:143
+#: admin/post-types/writepanels/writepanel-product_data.php:154
+msgid "Insert file URL"
+msgstr "Vložiť URL adresu"
+
+#: admin/post-types/writepanels/variation-admin-html.php:148
+msgid "Download Limit:"
+msgstr "Limit na sťahovanie:"
+
+#: admin/post-types/writepanels/variation-admin-html.php:148
+#: admin/post-types/writepanels/writepanel-product_data.php:158
+msgid "Leave blank for unlimited re-downloads."
+msgstr "Nechajte prázdne pre neobmedzené sťahovanie."
+
+#: admin/post-types/writepanels/variation-admin-html.php:156
+msgid "Download Expiry:"
+msgstr "Sťahovanie vyprší"
+
+#: admin/post-types/writepanels/variation-admin-html.php:156
+#: admin/post-types/writepanels/writepanel-product_data.php:164
+msgid "Enter the number of days before a download link expires, or leave blank."
+msgstr "Zadajte počet dní po ktorých sťahovanie vyprší, alebo nechajte prázdne."
+
+#: admin/post-types/writepanels/variation-admin-html.php:170
+msgid "Enabled"
+msgstr "Povolené"
+
+#: admin/post-types/writepanels/variation-admin-html.php:172
+msgid "Enable this option if access is given to a downloadable file upon purchase of a product"
+msgstr "Povoľte túto možnosť ak chcete pridať súbor na stiahnutie dostupný po nákupe produktu"
+
+#: admin/post-types/writepanels/variation-admin-html.php:174
+msgid "Enable this option if a product is not shipped or there is no shipping cost"
+msgstr "Povoľte túto možnosť ak produkt nemôže byť dodaný alebo je jeho dodanie zdarma."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:37
+msgid "Coupon description"
+msgstr "Popis kupónu"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:37
+msgid "Optionally enter a description for this coupon for your reference."
+msgstr "Voliteľne zadajte popis kupónu pre vašu referenciu."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:42
+msgid "Discount type"
+msgstr "Typ zľavy"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:45
+msgid "Value of the coupon."
+msgstr "Hodnota kupónu"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:51
+msgid "Enable free shipping"
+msgstr "Povoliť dopravu zdarma"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:51
+msgid "Check this box if the coupon grants free shipping. The <a href=\"%s\">free shipping method</a> must be enabled with the \"must use coupon\" setting checked."
+msgstr "Zaškrtnite toto pole ak kupón obsahuje prepravu zdarma. <a href=\"%s\">Preprava zdarma</a> a nastavenie musíte použiť kupón musia byť povolené."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:54
+msgid "Individual use"
+msgstr "Individuálne použitie"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:54
+msgid "Check this box if the coupon cannot be used in conjunction with other coupons."
+msgstr "Zaškrtnite toto pole ak chcete aby kupón nebolo možné použiť s inými kupónmi."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:57
+msgid "Apply before tax"
+msgstr "Použíť pred zdanením"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:57
+msgid "Check this box if the coupon should be applied before calculating cart tax."
+msgstr "Zaškrtnite toto pole ak chcete aby kupón bol použitý pred vypočítaním dane košíka."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:60
+msgid "Exclude sale items"
+msgstr "Vyňať položky v zľave"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:60
+msgid "Check this box if the coupon should not apply to items on sale. Per-item coupons will only work if the item is not on sale. Per-cart coupons will only work if there are no sale items in the cart."
+msgstr "Zaškrtnite toto pole ak nechcete aby kupón bol použitý na položky v zľave. Kupón na položku bude fungovať iba na konkrétnu položku. Kupón na košík bude fungovať iba ak v košíku nebude žiadna položka v zľave."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:65
+msgid "Minimum amount"
+msgstr "Minimálna suma"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:65
+msgid "No minimum"
+msgstr "Bez minimálnej sumy"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:65
+msgid "This field allows you to set the minimum subtotal needed to use the coupon."
+msgstr "Toto pole vám dovoľuje nastaviť minimálnu sumu pre použitie kupónu."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:74
+#: admin/woocommerce-admin-taxonomies.php:28
+#: admin/woocommerce-admin-taxonomies.php:122
+msgid "Products"
+msgstr "Produkty"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:75
+#: admin/post-types/writepanels/writepanel-order_data.php:400
+#: admin/post-types/writepanels/writepanel-product_data.php:523
+#: admin/post-types/writepanels/writepanel-product_data.php:540
+#: admin/woocommerce-admin-reports.php:1245
+msgid "Search for a product&hellip;"
+msgstr "Hľadať produkt&hellip;"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:89
+msgid "Products which need to be in the cart to use this coupon or, for \"Product Discounts\", which products are discounted."
+msgstr "Produkty ktoré sa musia nachádzať v košíku pre použitie kupónu, alebo pre \"Zľavy produktov\" ktorých produkty sú zlacnené."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:94
+msgid "Exclude products"
+msgstr "Vyňať produkty"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:95
+msgid "Search for a product…"
+msgstr "Hľadať produkt..."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:109
+msgid "Products which must not be in the cart to use this coupon or, for \"Product Discounts\", which products are not discounted."
+msgstr "Produkty ktoré sa nesmú nachádzať v košíku pre použitie kupónu, alebo pre \"Zľavy produktov\" ktorých produkty nie sú zlacnené."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:116
+msgid "Product categories"
+msgstr "Kategórie produktu"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:117
+msgid "Any category"
+msgstr "Ľubovoľná kategória"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:125
+msgid "A product must be in this category for the coupon to remain valid or, for \"Product Discounts\", products in these categories will be discounted."
+msgstr "Produkt musí byť v tejto kategórii aby kupón zostal platný, alebo pre \"Zľavy produktov\" ktorých produkty v týchto kategóriách budú zlacnené."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:130
+msgid "Exclude categories"
+msgstr "Vyňať kategórie"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:131
+msgid "No categories"
+msgstr "Žiadne kategórie"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:139
+msgid "Product must not be in this category for the coupon to remain valid or, for \"Product Discounts\", products in these categories will not be discounted."
+msgstr "Produkt musí byť v kategórii aby kupón zostal platný, alebo produkty z kategórie\"Zľavnené produkty\" nesmú byť zľavnené."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:145
+msgid "Email restrictions"
+msgstr "Obmedzenia emailu"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:145
+msgid "No restrictions"
+msgstr "Žiadne obmedzenia"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:145
+msgid "List of emails to check against the customer's billing email when an order is placed."
+msgstr "Zoznam emailov na kontrolu emailu zákazníka pri zadávaní objednávky."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:152
+msgid "Usage limit"
+msgstr "Limit využitia"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:152
+msgctxt "placeholder"
+msgid "Unlimited usage"
+msgstr "Neobmedzené použitie"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:152
+msgid "How many times this coupon can be used before it is void."
+msgstr "Koľko krát môže byť kupón použitý než vyprší jeho platnosť."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:158
+msgctxt "placeholder"
+msgid "Never expire"
+msgstr "Nikdy nevyprší"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:158
+msgid "The date this coupon will expire, <code>YYYY-MM-DD</code>."
+msgstr "Kupón vyprší dňa <code>DD-MM-YYYY</code>."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:195
+msgid "Coupon code already exists - customers will use the latest coupon with this code."
+msgstr "Kupón už existuje - zákazníci budú využívať poslednú verziu tohto kupónu."
+
+#: admin/post-types/writepanels/writepanel-order_data.php:59
+msgid "Order Details"
+msgstr "Podrobnosti o objednávke"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:62
+msgid "Order number"
+msgstr "Číslo objednávky"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:67
+msgid "Customer IP:"
+msgstr "IP zákazníka:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:74
+msgid "General Details"
+msgstr "Hlavné detaily"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:76
+msgid "Order status:"
+msgstr "Stav objednávky:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:86
+msgid "Order Date:"
+msgstr "Dátum objednávky"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:87
+msgid "h"
+msgstr "h"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:87
+#: admin/settings/settings-init.php:567
+msgid "m"
+msgstr "m"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:91
+msgid "Customer:"
+msgstr "Zákazník:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:131
+msgid "Customer Note:"
+msgstr "Poznámka zákazníka:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:132
+msgid "Customer's notes about the order"
+msgstr "Poznámka zákazníka k objednávke:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:140
+msgid "Billing Details"
+msgstr "Fakturačné údaje"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:144
+#: admin/post-types/writepanels/writepanel-order_data.php:234
+msgid "First Name"
+msgstr "Krstné meno"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:148
+#: admin/post-types/writepanels/writepanel-order_data.php:238
+msgid "Last Name"
+msgstr "Priezvisko"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:152
+#: admin/post-types/writepanels/writepanel-order_data.php:242
+#: admin/woocommerce-admin-users.php:155 admin/woocommerce-admin-users.php:204
+msgid "Company"
+msgstr "Spoločnosť"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:156
+#: admin/post-types/writepanels/writepanel-order_data.php:246
+#: admin/woocommerce-admin-users.php:159 admin/woocommerce-admin-users.php:208
+msgid "Address 1"
+msgstr "Adresa 1"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:160
+#: admin/post-types/writepanels/writepanel-order_data.php:250
+#: admin/woocommerce-admin-users.php:163 admin/woocommerce-admin-users.php:212
+msgid "Address 2"
+msgstr "Adresa 2"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:164
+#: admin/post-types/writepanels/writepanel-order_data.php:254
+#: admin/settings/settings-tax-rates.php:42
+#: admin/settings/settings-tax-rates.php:217
+#: admin/woocommerce-admin-users.php:167 admin/woocommerce-admin-users.php:216
+msgid "City"
+msgstr "Mesto"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:168
+#: admin/post-types/writepanels/writepanel-order_data.php:258
+#: admin/woocommerce-admin-users.php:171 admin/woocommerce-admin-users.php:220
+msgid "Postcode"
+msgstr "PSČ"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:172
+#: admin/post-types/writepanels/writepanel-order_data.php:262
+#: admin/woocommerce-admin-users.php:179 admin/woocommerce-admin-users.php:228
+msgid "Country"
+msgstr "Krajina"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:175
+#: admin/post-types/writepanels/writepanel-order_data.php:265
+msgid "Select a country&hellip;"
+msgstr "Vyberte krajinu&hellip;"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:178
+#: admin/post-types/writepanels/writepanel-order_data.php:268
+#: admin/woocommerce-admin-users.php:175 admin/woocommerce-admin-users.php:224
+msgid "State/County"
+msgstr "Štát / kraj"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:182
+#: admin/woocommerce-admin-users.php:187
+msgid "Email"
+msgstr "E-mail"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:185
+msgid "Phone"
+msgstr "Telefón"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:193
+#: admin/post-types/writepanels/writepanel-order_data.php:195
+#: admin/post-types/writepanels/writepanel-order_data.php:277
+#: admin/post-types/writepanels/writepanel-order_data.php:279
+msgid "Address"
+msgstr "Adresa"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:195
+msgid "No billing address set."
+msgstr "Nebola nastavená žiadna fakturačná adresa."
+
+#: admin/post-types/writepanels/writepanel-order_data.php:208
+msgid "Load billing address"
+msgstr "Nahrať fakturačnú adresu"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:230
+msgid "Shipping Details"
+msgstr "Údaje pre doručenie"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:279
+msgid "No shipping address set."
+msgstr "Nebola nastavená žiadna adresa doručenia."
+
+#: admin/post-types/writepanels/writepanel-order_data.php:292
+msgid "Load shipping address"
+msgstr "Nahrať adresu doručenia"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:292
+msgid "Copy from billing"
+msgstr "Skopírovať z fakturačnej"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:339
+msgid "Item"
+msgstr "položka"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:344
+#: admin/post-types/writepanels/writepanel-product_data.php:191
+#: admin/settings/settings-tax-rates.php:217
+msgid "Tax Class"
+msgstr "Sadzba dane"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:344
+msgid "Tax class for the line item"
+msgstr "Sadzba dane pre položku v riadku"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:347
+msgid "Qty"
+msgstr "Počet ks"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:349
+msgid "Cost"
+msgstr "Náklady"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:349
+msgid "Line subtotals are before pre-tax discounts, totals are after."
+msgstr "Medzisúčet v riadku je bez zľavy pred daňou, celkový súčet je po zľave "
+
+#: admin/post-types/writepanels/writepanel-order_data.php:352
+#: admin/settings/settings-tax-rates.php:387
+#: admin/settings/settings-tax-rates.php:475
+#: admin/woocommerce-admin-content.php:48
+#: admin/woocommerce-admin-settings.php:186
+msgid "Tax"
+msgstr "DPH"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:388
+msgid "Delete Lines"
+msgstr "Vymazať riadky"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:390
+msgid "Stock Actions"
+msgstr "Funkcie skladu"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:391
+msgid "Reduce Line Stock"
+msgstr "Znížiť sklad riadku"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:392
+msgid "Increase Line Stock"
+msgstr "Zvýšiť sklad riadku"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:396
+#: admin/post-types/writepanels/writepanel-order_data.php:456
+msgid "Apply"
+msgstr "Použiť"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:402
+msgid "Add item(s)"
+msgstr "Pridať položku/položky"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:403
+msgid "Add fee"
+msgstr "Pridať poplatok"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:434
+msgid "Resend order emails"
+msgstr "Znova odoslať emaily objednávky"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:465
+msgid "Move to Trash"
+msgstr "Presunúť do koša"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:470
+msgid "Save Order"
+msgstr "Uložiť objednávku"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:470
+msgid "Save/update the order"
+msgstr "Uložiť / aktualizovať objednávku"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:498
+msgid "Discounts"
+msgstr "zľavy"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:502
+msgid "Cart Discount:"
+msgstr "Zľava:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:502
+msgid "Discounts before tax - calculated by comparing subtotals to totals."
+msgstr "Zľavy pred daňou - rátané porovnávaním medzisúčtu a súčtu."
+
+#: admin/post-types/writepanels/writepanel-order_data.php:510
+msgid "Order Discount:"
+msgstr "Zľava k objednávke:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:510
+msgid "Discounts after tax - user defined."
+msgstr "Zľavy po dani - určené užívateľom."
+
+#: admin/post-types/writepanels/writepanel-order_data.php:543
+msgid "Label:"
+msgstr "Označenie"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:544
+msgid "The shipping title the customer sees"
+msgstr "Nadpis prepravy ktorý vidí zákazník"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:551
+msgid "Cost:"
+msgstr "Cena:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:552
+msgid "(ex. tax)"
+msgstr "(bez DPH)"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:559
+msgid "Method:"
+msgstr "Metóda:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:581
+#: admin/post-types/writepanels/writepanel-order_data.php:583
+#: admin/post-types/writepanels/writepanel-order_data.php:682
+#: admin/post-types/writepanels/writepanel-order_data.php:684
+msgid "Other"
+msgstr "Iné"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:597
+msgid "Tax Rows"
+msgstr "Riadky dane"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:622
+msgid "+ Add tax row"
+msgstr "+ Pridať daňový priadok"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:622
+msgid "These rows contain taxes for this order. This allows you to display multiple or compound taxes rather than a single total."
+msgstr "Tieto riadky obsahujú dane pre túto objednávku. Toto uprednostní zobrazenie viacerých alebo zložených daní radšej ako iba celkový súčet."
+
+#: admin/post-types/writepanels/writepanel-order_data.php:626
+msgid "Tax Totals"
+msgstr "Daň celkom"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:630
+msgid "Total tax for line items + fees."
+msgstr "Daň celkom pre položky v riadku + poplatky."
+
+#: admin/post-types/writepanels/writepanel-order_data.php:652
+#: admin/post-types/writepanels/writepanels-init.php:70
+msgid "Order Totals"
+msgstr "Celková čiastka objednávky"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:656
+msgid "Order Total:"
+msgstr "Cena spolu:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:664
+msgid "Payment Method:"
+msgstr "Spôsob platby:"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:695
+msgid "Calc taxes"
+msgstr "Vyrátať dane"
+
+#: admin/post-types/writepanels/writepanel-order_data.php:697
+msgid "Calc totals"
+msgstr "Vyrátať celkom"
+
+#: admin/post-types/writepanels/writepanel-order_downloads.php:57
+msgid "Choose a downloadable product&hellip;"
+msgstr "Vyberte produkt na stiahnutie&hellip;"
+
+#: admin/post-types/writepanels/writepanel-order_downloads.php:87
+msgid "Grant Access"
+msgstr "Udeliť prístup"
+
+#: admin/post-types/writepanels/writepanel-order_downloads.php:125
+msgid "Could not grant access - the user may already have permission for this file or billing email is not set. Ensure the billing email is set, and the order has been saved."
+msgstr "Nemožno prideliť prístup - užívateľ už možno má prístup k súboru alebo nenastavil platobný email. Uistite sa, že zadal platobný email a objednávka bola uložená."
+
+#: admin/post-types/writepanels/writepanel-order_downloads.php:148
+msgid "Are you sure you want to revoke access to this download?"
+msgstr "Ste si istý, že chcete odvolať prístup k tomuto súboru na stiahnutie?"
+
+#: admin/post-types/writepanels/writepanel-order_notes.php:44
+msgid "added %s ago"
+msgstr "pridané pred %s"
+
+#: admin/post-types/writepanels/writepanel-order_notes.php:44
+msgid "Delete note"
+msgstr "Vymazať poznámku"
+
+#: admin/post-types/writepanels/writepanel-order_notes.php:50
+msgid "There are no notes for this order yet."
+msgstr "K tejto objednávke nie sú k dispozícii zatiaľ žiadne poznámky."
+
+#: admin/post-types/writepanels/writepanel-order_notes.php:56
+msgid "Add note"
+msgstr "Pridať poznámku"
+
+#: admin/post-types/writepanels/writepanel-order_notes.php:56
+msgid "Add a note for your reference, or add a customer note (the user will be notified)."
+msgstr "Napíšte si vlastnú poznámku, alebo pridajte poznámku zákazníka, ktorú uvidí vo svojej objednávke a na stránke, kde ju sleduje."
+
+#: admin/post-types/writepanels/writepanel-order_notes.php:62
+msgid "Customer note"
+msgstr "Poznámky zákazníka"
+
+#: admin/post-types/writepanels/writepanel-order_notes.php:63
+msgid "Private note"
+msgstr "Súkromné poznámky"
+
+#: admin/post-types/writepanels/writepanel-order_notes.php:65
+#: admin/post-types/writepanels/writepanel-product_data.php:501
+msgid "Add"
+msgstr "Pridať"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:23
+msgid "Variations for variable products are defined here."
+msgstr "Variácie variabilných tovarov sú definované tu."
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:23
+msgid "Variations"
+msgstr "Varianty"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:65
+msgid "Before adding variations, add and save some attributes on the <strong>Attributes</strong> tab."
+msgstr "Skôr než pridáte varianty, pridajte a uložte nejaké vlastnosti v záložke<strong>Vlastnosti</strong> "
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:67
+msgid "Learn more"
+msgstr "Zistite viac"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:74
+#: admin/post-types/writepanels/writepanel-product_data.php:329
+msgid "Close all"
+msgstr "Zavrieť všetko"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:74
+#: admin/post-types/writepanels/writepanel-product_data.php:329
+msgid "Expand all"
+msgstr "Rozbaliť všetko"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:75
+msgid "Bulk edit:"
+msgstr "Hromadné úpravy:"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:77
+msgid "Toggle &quot;Enabled&quot;"
+msgstr "Zapnúť &quot;Povolené&quot;"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:78
+msgid "Toggle &quot;Downloadable&quot;"
+msgstr "Prepnúť &quot;Stiahnuteľné&quot;"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:79
+msgid "Toggle &quot;Virtual&quot;"
+msgstr "Prepnúť &quot;Virtuálne&quot;"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:80
+msgid "Delete all variations"
+msgstr "Vymazať všetky variácie"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:81
+msgid "Prices"
+msgstr "Ceny"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:82
+msgid "Sale prices"
+msgstr "Ceny po zľave"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:88
+msgid "File Path"
+msgstr "Cesta k súboru"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:89
+msgid "Download limit"
+msgstr "Limit sťahovania"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:90
+#: admin/post-types/writepanels/writepanel-product_data.php:164
+msgid "Download Expiry"
+msgstr "Sťahovanie expiruje"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:93
+msgid "Go"
+msgstr "Ísť"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:193
+msgid "Add Variation"
+msgstr "Pridať variant"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:195
+msgid "Link all variations"
+msgstr "Prepojiť všetky varianty"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:197
+msgid "Default selections:"
+msgstr "Základné výbery:"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:210
+msgid "No default"
+msgstr "Bez predvoľby"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:299
+msgid "Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes (max 50 per run)."
+msgstr "Ste si istý, že chcete prepojiť všetky varianty? Tým vytvoríte nový variant pre každú možnú kombináciu vlastností variantov  (maximálne 50 naraz)."
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:316
+msgid "variation added"
+msgstr "variant pridaný"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:318
+msgid "variations added"
+msgstr "varianty pridané"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:320
+msgid "No variations added"
+msgstr "Neboli pridané žiadne varianty"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:343
+msgid "Are you sure you want to remove this variation?"
+msgstr "Ste si istý, že chcete odstrániť tento variant?"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:399
+msgid "Are you sure you want to delete all variations? This cannot be undone."
+msgstr "Ste si istý, že chcete odstrániť všetky varianty? Tento krok nie je možné vrátiť späť."
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:402
+msgid "Last warning, are you sure?"
+msgstr "Posledné varovanie! Ste si naozaj istý?"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:439
+msgid "Enter a value"
+msgstr "Zadajte hodnotu"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:517
+#: admin/woocommerce-admin-taxonomies.php:62
+#: admin/woocommerce-admin-taxonomies.php:154
+msgid "Choose an image"
+msgstr "Vyberte obrázok"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:519
+msgid "Set variation image"
+msgstr "Nastavte obrázok variácie"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:563
+msgid "Variable product"
+msgstr "Variabilný produkt"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:629
+msgid "Variation #%s of %s"
+msgstr "Variácia #%s z %s"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:43
+msgid "Product Type"
+msgstr "Typ produktu"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:53
+msgid "Virtual products are intangible and aren't shipped."
+msgstr "Virtuálne produkty sú nehmotné a nemôžu byť zaslané."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:59
+msgid "Downloadable products give access to a file upon purchase."
+msgstr "Prístup k stiahnuteľným produktom dostanete po zaplatení."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:77
+#: admin/woocommerce-admin-content.php:44
+#: admin/woocommerce-admin-settings.php:182
+msgid "General"
+msgstr "Všeobecné"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:79
+#: admin/woocommerce-admin-content.php:47
+#: admin/woocommerce-admin-settings.php:185
+msgid "Inventory"
+msgstr "Sklad"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:83
+msgid "Linked Products"
+msgstr "Spojené produkty"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:85
+#: admin/woocommerce-admin-attributes.php:299
+#: admin/woocommerce-admin-init.php:66
+msgid "Attributes"
+msgstr "Vlastnosti"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:87
+msgid "Advanced"
+msgstr "Pokročilé"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:98
+msgid "Stock Keeping Unit"
+msgstr "Jednotka držania skladu"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:98
+msgid "SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased."
+msgstr "SKU predstavuje Jednotku držania skladu, unikátny identifikátor ktorý rozlišuje každý ponúkaný produkt alebo službu."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:109
+msgid "Product URL"
+msgstr "URL adresa produktu:"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:109
+msgid "Enter the external URL to the product."
+msgstr "Zadajte externú URL adresu produktu."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:112
+msgid "Button text"
+msgstr "Text tlačítka"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:112
+msgctxt "placeholder"
+msgid "Buy product"
+msgstr "Kúpiť"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:112
+msgid "This text will be shown on the button linking to the external product."
+msgstr "Text sa zobrazí na tlačidle odkazujúcom na externý produkt."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:119
+msgid "Regular Price"
+msgstr "Bežná cena"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:125
+msgid "Sale Price"
+msgstr "Cena po zľave"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:135
+msgid "Sale Price Dates"
+msgstr "Platnosť ceny po zľave"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:138
+#: admin/post-types/writepanels/writepanel-product_data.php:1082
+msgid "Cancel"
+msgstr "Zrušiť"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:152
+msgid "File paths (one per line)"
+msgstr "Cesty k súboru (jedna na riadok)"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:158
+msgid "Download Limit"
+msgstr "Limit sťahovania"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:178
+msgid "Tax Status"
+msgstr "Stav zdaniteľnosti"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:180
+msgid "Shipping only"
+msgstr "Poštovné len"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:181
+msgid "None"
+msgstr "Žiadny"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:212
+msgid "Enable stock management at product level"
+msgstr "Povoliť manažment skladu na úrovni produktu."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:219
+msgid "Stock quantity. If this is a variable product this value will be used to control stock for all variations, unless you define stock at variation level."
+msgstr "Počet skladom. Ak je tento produkt variabilný, táto hodnota bude používaná pre kontrolu skladu všetkých varián, pokiaľ sklad nenastavíte na úrovni variácie."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:230
+msgid "Stock status"
+msgstr "Stav skladu"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:233
+msgid "Controls whether or not the product is listed as \"in stock\" or \"out of stock\" on the frontend."
+msgstr "Kontroluje ako produkt označený na stránke (skladom/nie je skladom)"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:240
+msgid "Allow Backorders?"
+msgstr "Povoliť nákup na objednávku? (Tovar nie je na sklade, musí sa objednať od dodávateľa)"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:241
+msgid "Do not allow"
+msgstr "Nepovoliť"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:242
+msgid "Allow, but notify customer"
+msgstr "Povoliť, ale informovať zákazníka"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:243
+msgid "Allow"
+msgstr "Povoliť"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:244
+msgid "If managing stock, this controls whether or not backorders are allowed for this product and variations. If enabled, stock quantity can go below 0."
+msgstr "Ak spravujete sklad, toto kontroluje nákup na objednávku od dodávateľa. Ak je povolené sklad môže byť nižší ako 0"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:255
+msgid "Sold Individually"
+msgstr "Predávané individuálne"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:255
+msgid "Enable this to only allow one of this item to be bought in a single order"
+msgstr "Povoľte toto ak má jedna objednávka obsahovať iba jednu túto položku"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:273
+msgid "Weight in decimal form"
+msgstr "Váha v desatinnom tvare"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:284
+msgid "Dimensions"
+msgstr "Rozmery"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:290
+msgid "LxWxH in decimal form"
+msgstr "DxŠxV v desatinnom tvare"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:311
+msgid "No shipping class"
+msgstr "Bez prepravnej triedy"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:317
+msgid "Shipping class"
+msgstr "Prepravné triedy"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:317
+msgid "Shipping classes are used by certain shipping methods to group similar products."
+msgstr "Prepravné triedy sa používajú pri metódach prepravy spájajúcich podobné produkty."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:384
+#: admin/post-types/writepanels/writepanel-product_data.php:476
+#: admin/woocommerce-admin-init.php:440
+msgid "Value(s)"
+msgstr "Hodnota(y)"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:386
+msgid "Select terms"
+msgstr "Vyberte požiadavky"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:398
+msgid "Select all"
+msgstr "Vybrať všetky"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:398
+msgid "Select none"
+msgstr "Nevybrať žiadny"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:400
+msgid "Add new"
+msgstr "Pridať novú"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:413
+msgid "Pipe (|) separate terms"
+msgstr "Zvislá čiara (|) oddeľuje výrazy"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:427
+#: admin/post-types/writepanels/writepanel-product_data.php:482
+#: admin/woocommerce-admin-init.php:442
+msgid "Visible on the product page"
+msgstr "Viditeľné na stránke produktu"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:440
+#: admin/post-types/writepanels/writepanel-product_data.php:488
+#: admin/woocommerce-admin-init.php:443
+msgid "Used for variations"
+msgstr "Používa sa pri variantoch"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:477
+#: admin/woocommerce-admin-init.php:441
+msgid "Enter some text, or some attributes by pipe (|) separating values."
+msgstr "Pridajte text alebo nejaké vlastnosti oddelené zvislou čiarou (|)."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:503
+msgid "Custom product attribute"
+msgstr "Užívateľom zadaná vlastnosť produktu"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:515
+msgid "Save attributes"
+msgstr "Uložiť vlastnosti"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:522
+msgid "Up-Sells"
+msgstr "Navýšenie predaja"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:537
+msgid "Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive."
+msgstr "Navýšenie predaja označuje snahu predať drahšie riešenie zákazníkovho problému, napr. vyšší model výrobku či pokročilejšiu verziu služby"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:539
+msgid "Cross-Sells"
+msgstr "Doplnkový predaj"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:554
+msgid "Cross-sells are products which you promote in the cart, based on the current product."
+msgstr "Doplnkovým predajom sa označujú aktivity, ktorých účelom je navýšiť celkovú objednávku zákazníka odporúčaním súvisiaceho tovaru. Za cross-selling teda napríklad môže byť považované správanie záhradníka, ktorý vám k živým kvetom ponúkne i hnojivo."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:564
+msgid "Choose a grouped product&hellip;"
+msgstr "Vyberte seskupené produkty&hellip;"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:590
+msgid "Grouping"
+msgstr "Zoskupovanie"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:590
+msgid "Set this option to make this product part of a grouped product."
+msgstr "Nastavte túto možnosť ak si želáte spraviť tento produkt časťou spojeného produktu."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:610
+msgid "Purchase Note"
+msgstr "Poznámka k objednávke"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:610
+msgid "Enter an optional note to send the customer after purchase."
+msgstr "Zadajte po nákupe poznámku pre zákazníka.(nepovinné)"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:617
+msgid "Menu order"
+msgstr "Menu objednávky"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:617
+msgid "Custom ordering position."
+msgstr "Vlastná pozícia objednávania"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:625
+msgid "Enable reviews"
+msgstr "Povoliť recenzie"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:714
+msgid "Product SKU must be unique."
+msgstr "Katalogóvé číslo produktu musí byť unikátne."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:1046
+msgid "Catalog/search"
+msgstr "Katalóg/hľadať"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:1053
+msgid "Catalog visibility:"
+msgstr "Viditeľnosť katalógu:"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:1069
+msgid "Define the loops this product should be visible in. The product will still be accessible directly."
+msgstr "Definuje kruh v ktorom by mal byť produkt viditeľný. Produkt bude stále priamo dostupný."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:1075
+msgid "Enable this option to feature this product."
+msgstr "Povoliť túto možnosti pre odporúčanie tohto produktu"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:1077
+msgid "Featured Product"
+msgstr "Odporúčaný produkt"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:1081
+msgid "OK"
+msgstr "OK"
+
+#: admin/post-types/writepanels/writepanel-product_images.php:42
+#: admin/post-types/writepanels/writepanel-product_images.php:102
+msgid "Delete image"
+msgstr "Vymazať obrázok"
+
+#: admin/post-types/writepanels/writepanel-product_images.php:42
+#: admin/post-types/writepanels/writepanel-product_images.php:102
+#: admin/woocommerce-admin-attributes.php:323
+msgid "Delete"
+msgstr "Vymazať"
+
+#: admin/post-types/writepanels/writepanel-product_images.php:53
+msgid "Add product gallery images"
+msgstr "Pridať obrázky galérie produktu"
+
+#: admin/post-types/writepanels/writepanel-product_images.php:79
+msgid "Add Images to Product Gallery"
+msgstr "Pridať obrázky do galérie produktu"
+
+#: admin/post-types/writepanels/writepanel-product_images.php:81
+msgid "Add to gallery"
+msgstr "Pridať do galérie"
+
+#: admin/post-types/writepanels/writepanels-init.php:47
+msgid "Product Gallery"
+msgstr "Galéria produktu"
+
+#: admin/post-types/writepanels/writepanels-init.php:55
+msgid "Product Short Description"
+msgstr "Krátky popis produktu"
+
+#: admin/post-types/writepanels/writepanels-init.php:64
+msgid "Reviews"
+msgstr "Recenzie"
+
+#: admin/post-types/writepanels/writepanels-init.php:68
+msgid "Order Data"
+msgstr "Doplňujúce informácie"
+
+#: admin/post-types/writepanels/writepanels-init.php:69
+msgid "Order Items"
+msgstr "Položky objednávky"
+
+#: admin/post-types/writepanels/writepanels-init.php:69
+msgid "Note: if you edit quantities or remove items from the order you will need to manually update stock levels."
+msgstr "Poznámka: Ak upravíte množstvo alebo odstránite položky z objednávky, budete musieť manuálne aktualizovať sklad."
+
+#: admin/post-types/writepanels/writepanels-init.php:72
+msgid "Downloadable Product Permissions"
+msgstr "Povolenia produktov na stiahnutie"
+
+#: admin/post-types/writepanels/writepanels-init.php:72
+msgid "Note: Permissions for order items will automatically be granted when the order status changes to processing/completed."
+msgstr "Poznámka: Povolenia pre položky objednávky budú automaticky udelené keď sa zmení stav objednávky(spracúva sa/vybavená)"
+
+#: admin/post-types/writepanels/writepanels-init.php:73
+msgid "Order Actions"
+msgstr "Akcie objednávky"
+
+#: admin/post-types/writepanels/writepanels-init.php:81
+msgid "Coupon Data"
+msgstr "Údaje kupónu"
+
+#: admin/post-types/writepanels/writepanels-init.php:100
+msgid "Coupon code"
+msgstr "Kód kupónu"
+
+#: admin/post-types/writepanels/writepanels-init.php:101
+msgid "Product name"
+msgstr "Názov produktu"
+
+#: admin/post-types/writepanels/writepanels-init.php:185
+msgid "Allow reviews."
+msgstr "Povoliť recenzie"
+
+#: admin/post-types/writepanels/writepanels-init.php:186
+msgid "Allow <a href=\"%s\" target=\"_blank\">trackbacks and pingbacks</a> on this page."
+msgstr "Povoliť <a href=\"%s\" target=\"_blank\">spätné odkazy a spätné upozornenia</a> on this page."
+
+#: admin/post-types/writepanels/writepanels-init.php:186
+msgid "http://codex.wordpress.org/Introduction_to_Blogging#Managing_Comments"
+msgstr "http://codex.wordpress.org/Introduction_to_Blogging#Managing_Comments"
+
+#: admin/settings/settings-frontend-styles.php:23
+msgid "Styles"
+msgstr "Štýly"
+
+#: admin/settings/settings-frontend-styles.php:43
+msgid "Primary"
+msgstr "Primárny"
+
+#: admin/settings/settings-frontend-styles.php:43
+msgid "Call to action buttons/price slider/layered nav UI"
+msgstr "Tlačidlá akcií/slider ceny/UI vrstvenej navigácie"
+
+#: admin/settings/settings-frontend-styles.php:44
+msgid "Secondary"
+msgstr "Sekundárny"
+
+#: admin/settings/settings-frontend-styles.php:44
+msgid "Buttons and tabs"
+msgstr "Tlačidlá a záložky"
+
+#: admin/settings/settings-frontend-styles.php:45
+msgid "Highlight"
+msgstr "Zvyrazniť"
+
+#: admin/settings/settings-frontend-styles.php:45
+msgid "Price labels and Sale Flashes"
+msgstr "Cenovky a Výpredaje"
+
+#: admin/settings/settings-frontend-styles.php:46
+msgid "Content"
+msgstr "Obsah"
+
+#: admin/settings/settings-frontend-styles.php:46
+msgid "Your themes page background - used for tab active states"
+msgstr "Pozadie vašej témy - používa sa pri stave aktívnej záložky"
+
+#: admin/settings/settings-frontend-styles.php:47
+msgid "Subtext"
+msgstr "Podtext"
+
+#: admin/settings/settings-frontend-styles.php:47
+msgid "Used for certain text and asides - breadcrumbs, small text etc."
+msgstr "Používa sa pri istých textoch a krajoch - mininavigácia, malý text atď."
+
+#: admin/settings/settings-frontend-styles.php:51
+msgid "To edit colours <code>woocommerce/assets/css/woocommerce-base.less</code> and <code>woocommerce.css</code> need to be writable. See <a href=\"http://codex.wordpress.org/Changing_File_Permissions\">the Codex</a> for more information."
+msgstr "Pre úpravu farieb  musí byť<code>woocommerce/assets/css/woocommerce-base.less</code> a <code>woocommerce.css</code>zapisovateľné. Pozrite si prosím<a href=\"http://codex.wordpress.org/Changing_File_Permissions\">Kódex</a> pre viac informácií."
+
+#: admin/settings/settings-init.php:18
+msgid "Localisation"
+msgstr "Lokalizácia"
+
+#: admin/settings/settings-init.php:19
+msgid "Use informal localisation for %s"
+msgstr "Použiť neformálnu lokalizáciu pre%s"
+
+#: admin/settings/settings-init.php:33
+msgid "General Options"
+msgstr "Všeobecné možnosti"
+
+#: admin/settings/settings-init.php:36
+msgid "Base Location"
+msgstr "Základná poloha"
+
+#: admin/settings/settings-init.php:37
+msgid "This is the base location for your business. Tax rates will be based on this country."
+msgstr "Základná poloha určuje umiestnenie firmy. Daňové sadzby sú založené na daňových sadzbách v tejto krajine."
+
+#: admin/settings/settings-init.php:46
+msgid "Currency"
+msgstr "Mena"
+
+#: admin/settings/settings-init.php:47
+msgid "This controls what currency prices are listed at in the catalog and which currency gateways will take payments in."
+msgstr "Ovplyvňuje v akej mene sú zobrazované ceny v katalógu a ktorú menu budú používať platobné brány."
+
+#: admin/settings/settings-init.php:58
+msgid "Allowed Countries"
+msgstr "Povolené krajiny"
+
+#: admin/settings/settings-init.php:59
+msgid "These are countries that you are willing to ship to."
+msgstr "Krajiny, do ktorých budete doručovať."
+
+#: admin/settings/settings-init.php:67
+msgid "All Countries"
+msgstr "Všetky krajiny"
+
+#: admin/settings/settings-init.php:68 admin/settings/settings-init.php:73
+msgid "Specific Countries"
+msgstr "Špecifické krajiny"
+
+#: admin/settings/settings-init.php:84
+msgid "Store Notice"
+msgstr "Oznámenia obchodu"
+
+#: admin/settings/settings-init.php:85
+msgid "Enable site-wide store notice text"
+msgstr "Povoliť oznámenia obchodu na celú šírku stránky"
+
+#: admin/settings/settings-init.php:92
+msgid "Store Notice Text"
+msgstr "Text oznámenia obchodu"
+
+#: admin/settings/settings-init.php:95
+msgid "This is a demo store for testing purposes &mdash; no orders shall be fulfilled."
+msgstr "Toto je ukážkový obchod na testovacie účely. Objednávky nebudú vybavené."
+
+#: admin/settings/settings-init.php:102
+msgid "Cart, Checkout and Accounts"
+msgstr "Košík, pokladňa a účty"
+
+#: admin/settings/settings-init.php:105 admin/woocommerce-admin-content.php:61
+#: admin/woocommerce-admin-content.php:76
+#: admin/woocommerce-admin-reports.php:63
+msgid "Coupons"
+msgstr "Zľavové kupóny"
+
+#: admin/settings/settings-init.php:106
+msgid "Enable the use of coupons"
+msgstr "Povoliť použitie kupónov"
+
+#: admin/settings/settings-init.php:110
+msgid "Coupons can be applied from the cart and checkout pages."
+msgstr "Kupóny môžu byť použité na stránkach košíka a pokladne."
+
+#: admin/settings/settings-init.php:114 admin/woocommerce-admin-install.php:201
+#: admin/woocommerce-admin-status.php:307
+msgid "Checkout"
+msgstr "Pokladňa"
+
+#: admin/settings/settings-init.php:115
+msgid "Enable guest checkout (no account required)"
+msgstr "Povoliť pokladňu pre neregistrovaných užívateľov"
+
+#: admin/settings/settings-init.php:123
+msgid "Enable customer note field on checkout"
+msgstr "Povoliť pozámku k objednávke pri platbe v pokladni"
+
+#: admin/settings/settings-init.php:131
+msgid "Force secure checkout"
+msgstr "Použiť bezpečnú pokladňu"
+
+#: admin/settings/settings-init.php:137
+msgid "Force SSL (HTTPS) on the checkout pages (an SSL Certificate is required)."
+msgstr "Použiť SSL (HTTPS) na stránkach pokladne.(Vyžaduje sa SSL certifikát)."
+
+#: admin/settings/settings-init.php:141
+msgid "Un-force HTTPS when leaving the checkout"
+msgstr "Vypnúť HTTPS pri odchode z pokladne"
+
+#: admin/settings/settings-init.php:150
+msgid "Registration"
+msgstr "Registrácia"
+
+#: admin/settings/settings-init.php:151
+msgid "Allow registration on the checkout page"
+msgstr "Povoliť registráciu na stránke pokladne"
+
+#: admin/settings/settings-init.php:159
+msgid "Allow registration on the \"My Account\" page"
+msgstr "Povoliť registráciu na stránke \"Môj účet\""
+
+#: admin/settings/settings-init.php:167
+msgid "Register using the email address for the username"
+msgstr "Registrovať pomocou emailovej adresy miesto používateľského mena"
+
+#: admin/settings/settings-init.php:175
+msgid "Customer Accounts"
+msgstr "Účty zákazníkov"
+
+#: admin/settings/settings-init.php:176
+msgid "Prevent customers from accessing WordPress admin"
+msgstr "Zamedziť zákazníkom prístup do administrácie WordPressu"
+
+#: admin/settings/settings-init.php:184
+msgid "Clear cart when logging out"
+msgstr "Vyprázdniť košík pri odhlásení sa"
+
+#: admin/settings/settings-init.php:192
+msgid "Allow customers to repurchase orders from their account page"
+msgstr "Povoliť zákazníkom znova si kúpiť objednávke na stránke ich účtu"
+
+#: admin/settings/settings-init.php:201
+msgid "Styles and Scripts"
+msgstr "Štýly a skripty"
+
+#: admin/settings/settings-init.php:204
+msgid "Styling"
+msgstr "Štýl obchodu"
+
+#: admin/settings/settings-init.php:205
+msgid "Enable WooCommerce CSS"
+msgstr "Povoliť CSS WooCommerce"
+
+#: admin/settings/settings-init.php:216
+msgid "Scripts"
+msgstr "Skripty"
+
+#: admin/settings/settings-init.php:217
+msgid "Enable Lightbox"
+msgstr "Povoliť Lightbox"
+
+#: admin/settings/settings-init.php:220
+msgid "Include WooCommerce's lightbox. Product gallery images and the add review form will open in a lightbox."
+msgstr "WooCommerce lightbox. Galéria obrázkov produktu a pridanie recenzie sa objaví v lightboxe."
+
+#: admin/settings/settings-init.php:226
+msgid "Enable enhanced country select boxes"
+msgstr "Povoliť rozšírené výberové polia krajín"
+
+#: admin/settings/settings-init.php:231
+msgid "This will enable a script allowing the country fields to be searchable."
+msgstr "Toto povolí skript ktorý umožní vyhľadávať medzi krajinami"
+
+#: admin/settings/settings-init.php:236
+msgid "Downloadable Products"
+msgstr "Produkty na stiahnutie"
+
+#: admin/settings/settings-init.php:239
+msgid "File Download Method"
+msgstr "Metóda stiahnutia súboru"
+
+#: admin/settings/settings-init.php:240
+msgid "Forcing downloads will keep URLs hidden, but some servers may serve large files unreliably. If supported, <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> can be used to serve downloads instead (server requires <code>mod_xsendfile</code>)."
+msgstr "Nútené sťahovanie ukryje URL sťahovaného súboru, ale sťahovanie väčších súborov môže byť na niektorých serveroch problematické. Namiesto toho použite <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code>, ak je podporované (server vyžaduje PHP funkcu <code>mod_xsendfile</code>)."
+
+#: admin/settings/settings-init.php:248
+msgid "Force Downloads"
+msgstr "Vynútiť stiahnutie"
+
+#: admin/settings/settings-init.php:249
+msgid "X-Accel-Redirect/X-Sendfile"
+msgstr "X-Accel-Redirect/X-Sendfile"
+
+#: admin/settings/settings-init.php:250
+msgid "Redirect only"
+msgstr "Iba presmerovanie"
+
+#: admin/settings/settings-init.php:255
+msgid "Access Restriction"
+msgstr "Obmedzenie prístupu"
+
+#: admin/settings/settings-init.php:256
+msgid "Downloads require login"
+msgstr "Sťahovanie súborov vyžaduje prihlásenie"
+
+#: admin/settings/settings-init.php:260
+msgid "This setting does not apply to guest purchases."
+msgstr "Toto nastavenie sa nevzťahuje na nákupy neregistrovaných zákazníkov."
+
+#: admin/settings/settings-init.php:265
+msgid "Grant access to downloadable products after payment"
+msgstr "Udeliť prístup k produktom na stiahnutie po platbe."
+
+#: admin/settings/settings-init.php:269
+msgid "Enable this option to grant access to downloads when orders are \"processing\", rather than \"completed\"."
+msgstr "Povolte udelenie prístupu keď sa stav objednávky zmení na \"spracúva sa\" nie na \"´vybavená\"."
+
+#: admin/settings/settings-init.php:285
+msgid "Note: The shop page has children - child pages will not work if you enable this option."
+msgstr "Poznámka: Stránka obchodu má odvodené stránky - tie nebudú fungovať pokým nepovolíte toto nastavenie."
+
+#: admin/settings/settings-init.php:290
+msgid "Page Setup"
+msgstr "Nastavenie stránky"
+
+#: admin/settings/settings-init.php:292
+msgid "Set up core WooCommerce pages here, for example the base page. The base page can also be used in your %sproduct permalinks%s."
+msgstr "Nastavte tu stránky jadra WooCommerce, napríklad základnú stránku. Základná stránka tiež môže byť použitá v %trvalých odkazoch produktov%s."
+
+#: admin/settings/settings-init.php:297
+msgid "Shop Base Page"
+msgstr "Základná stránka obchodu"
+
+#: admin/settings/settings-init.php:298
+msgid "This sets the base page of your shop - this is where your product archive will be."
+msgstr "Toto nastavuje základnú stránku obchodu - tu bude archív produktov."
+
+#: admin/settings/settings-init.php:308
+msgid "Terms Page ID"
+msgstr "ID stránky obchodných podmienok"
+
+#: admin/settings/settings-init.php:309
+msgid "If you define a \"Terms\" page the customer will be asked if they accept them when checking out."
+msgstr "Ak máte nastavenú stránku s \"Obchodnými podmienkami\", zákazník bude pri prechode k pokladni vyzvaný, aby s nimi súhlasil."
+
+#: admin/settings/settings-init.php:320
+msgid "Shop Pages"
+msgstr "Stránky obchodu"
+
+#: admin/settings/settings-init.php:320
+msgid "The following pages need selecting so that WooCommerce knows where they are. These pages should have been created upon installation of the plugin, if not you will need to create them."
+msgstr "Nasledujúce stráknky musia byť vybrané aby WooCommerce vedel kde sa nachádzajú. Tieto stránky sa mali vytvoriť pri inštalácii modulu obchodu, ak nie budete ich musieť vytvoriť."
+
+#: admin/settings/settings-init.php:323
+msgid "Cart Page"
+msgstr "Stránka košíka"
+
+#: admin/settings/settings-init.php:324
+msgid "Page contents: [woocommerce_cart]"
+msgstr "Obsah strany: [woocommerce_cart]"
+
+#: admin/settings/settings-init.php:334
+msgid "Checkout Page"
+msgstr "Stránka pokladne"
+
+#: admin/settings/settings-init.php:335
+msgid "Page contents: [woocommerce_checkout]"
+msgstr "Obsah strany: [woocommerce_checkout]"
+
+#: admin/settings/settings-init.php:345
+msgid "Pay Page"
+msgstr "Stránka platby"
+
+#: admin/settings/settings-init.php:346
+msgid "Page contents: [woocommerce_pay] Parent: \"Checkout\""
+msgstr "Obsah strany: [woocommerce_pay], nadradený: \"Pokladňa\""
+
+#: admin/settings/settings-init.php:356
+msgid "Thanks Page"
+msgstr "Stránka s poďakovaním"
+
+#: admin/settings/settings-init.php:357
+msgid "Page contents: [woocommerce_thankyou] Parent: \"Checkout\""
+msgstr "Obsah strany: [woocommerce_thankyou], nadradený: \"Pokladňa\""
+
+#: admin/settings/settings-init.php:367
+msgid "My Account Page"
+msgstr "Môj účet"
+
+#: admin/settings/settings-init.php:368
+msgid "Page contents: [woocommerce_my_account]"
+msgstr "Obsah strany: [woocommerce_my_account]"
+
+#: admin/settings/settings-init.php:378
+msgid "Edit Address Page"
+msgstr "Stránka úpravy adresy"
+
+#: admin/settings/settings-init.php:379
+msgid "Page contents: [woocommerce_edit_address] Parent: \"My Account\""
+msgstr "Obsah strany: [woocommerce_edit_address], nadradený:  \"Môj účet\""
+
+#: admin/settings/settings-init.php:389
+msgid "View Order Page"
+msgstr "Zobrazenie stránky s objednávkou"
+
+#: admin/settings/settings-init.php:390
+msgid "Page contents: [woocommerce_view_order] Parent: \"My Account\""
+msgstr "Obsah strany: [woocommerce_view_order], nadradený:  \"Môj účet\""
+
+#: admin/settings/settings-init.php:400
+msgid "Change Password Page"
+msgstr "Stránka zmeny hesla"
+
+#: admin/settings/settings-init.php:401
+msgid "Page contents: [woocommerce_change_password] Parent: \"My Account\""
+msgstr "Obsah strany: [woocommerce_change_password], nadradený: \"Môj účet\""
+
+#: admin/settings/settings-init.php:411
+msgid "Logout Page"
+msgstr "Stránka odhlásenia"
+
+#: admin/settings/settings-init.php:412
+msgid "Parent: \"My Account\""
+msgstr "Nadradená: \"Môj účet\""
+
+#: admin/settings/settings-init.php:422
+msgid "Lost Password Page"
+msgstr "Stránka strateného hesla"
+
+#: admin/settings/settings-init.php:423
+msgid "Page contents: [woocommerce_lost_password] Parent: \"My Account\""
+msgstr "Obsah stránky: [woocommerce_lost_password] Nadradená: \"Môj účet\""
+
+#: admin/settings/settings-init.php:439
+msgid "Catalog Options"
+msgstr "Možnosti katalógu"
+
+#: admin/settings/settings-init.php:442
+msgid "Default Product Sorting"
+msgstr "Základne radenie produktov"
+
+#: admin/settings/settings-init.php:443
+msgid "This controls the default sort order of the catalog."
+msgstr "Toto kontroluje základné triedenie poradia katalógu."
+
+#: admin/settings/settings-init.php:449
+msgid "Default sorting (custom ordering + name)"
+msgstr "Základné radenie (vlastné radenie + názov)"
+
+#: admin/settings/settings-init.php:450
+msgid "Popularity (sales)"
+msgstr "Popularita (predaje)"
+
+#: admin/settings/settings-init.php:451
+msgid "Average Rating"
+msgstr "Priemerné hodnotenie"
+
+#: admin/settings/settings-init.php:452
+msgid "Sort by most recent"
+msgstr "Zoradiť - najnovšie navrchu"
+
+#: admin/settings/settings-init.php:453
+msgid "Sort by price (asc)"
+msgstr "Zoradiť - podľa ceny (od najnižšej)"
+
+#: admin/settings/settings-init.php:454
+msgid "Sort by price (desc)"
+msgstr "Zoradiť - podľa ceny (od najvyššej)"
+
+#: admin/settings/settings-init.php:460
+msgid "Shop Page Display"
+msgstr "Zobrazená stránka obchodu"
+
+#: admin/settings/settings-init.php:461
+msgid "This controls what is shown on the product archive."
+msgstr "Toto kontroluje čo sa zobrazuje v archíve produktu."
+
+#: admin/settings/settings-init.php:467 admin/settings/settings-init.php:482
+msgid "Show products"
+msgstr "Zobraziť produkty"
+
+#: admin/settings/settings-init.php:468 admin/settings/settings-init.php:483
+msgid "Show subcategories"
+msgstr "Zobraziť podkategórie"
+
+#: admin/settings/settings-init.php:469 admin/settings/settings-init.php:484
+msgid "Show both"
+msgstr "Zobraziť obe"
+
+#: admin/settings/settings-init.php:475
+msgid "Default Category Display"
+msgstr "Zobraziť základnú kategóriu"
+
+#: admin/settings/settings-init.php:476
+msgid "This controls what is shown on category archives."
+msgstr "Toto kontroluje, čo sa zobrazuje v archívoch"
+
+#: admin/settings/settings-init.php:490
+msgid "Add to cart"
+msgstr "Kúpiť"
+
+#: admin/settings/settings-init.php:491
+msgid "Redirect to the cart page after successful addition"
+msgstr "Presmerovanie na stránku kočíka po úspešnom pridaní položky"
+
+#: admin/settings/settings-init.php:499
+msgid "Enable AJAX add to cart buttons on archives"
+msgstr "Povoliť AJAX tlačislo pridať do košíka v archívoch"
+
+#: admin/settings/settings-init.php:508
+msgid "The following options affect the fields available on the edit product page."
+msgstr "Nasledujúce nastavenia ovplyvňujú polia dostupné na stránke úpravy produktu."
+
+#: admin/settings/settings-init.php:511
+msgid "Product Fields"
+msgstr "Polia produkty"
+
+#: admin/settings/settings-init.php:512
+msgid "Enable the <strong>SKU</strong> field for products"
+msgstr "Povoliť <strong>SKU</strong> pole produktu"

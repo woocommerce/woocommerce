@@ -166,7 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.0.19 =
-* Localisation - Updated Portuguese
+* Localisation - Updated Portuguese, Slovak, French, Lithuanian
 
 = 2.0.18 - 21/10/2013 =
 * Fix - Escaped the "hide-wc-extensions-message" link in admin.
