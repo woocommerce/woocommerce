@@ -62,8 +62,9 @@ class WC_Template_Loader {
 		}
 
 		if ( $file ) {
-			$template = locate_template( $find );
-			if ( ! $template || ( get_option( 'woocommerce_status_options' ) && current_user_can( 'manage_options' ) ) )
+			$template       = locate_template( $find );
+			$status_options = get_option( 'woocommerce_status_options', array() );
+			if ( ! $template || ( ! empty( $status_options['template_debug_mode'] ) && current_user_can( 'manage_options' ) ) )
 				$template = WC()->plugin_path() . '/templates/' . $file;
 		}
 
