@@ -63,7 +63,7 @@ class WC_Template_Loader {
 
 		if ( $file ) {
 			$template = locate_template( $find );
-			if ( ! $template ) $template = WC()->plugin_path() . '/templates/' . $file;
+			if ( ! $template || get_option( 'woocommerce_status_options' ) ) $template = WC()->plugin_path() . '/templates/' . $file;
 		}
 
 		return $template;

@@ -78,6 +78,7 @@ class WC_Admin_Menus {
 	 */
 	public function status_menu() {
 		add_submenu_page( 'woocommerce', __( 'WooCommerce Status', 'woocommerce' ),  __( 'System Status', 'woocommerce' ) , 'manage_woocommerce', 'wc_status', array( $this, 'status_page' ) );
+		register_setting( 'woocommerce_status_settings_fields', 'woocommerce_status_options' );
 	}
 
 	/**
