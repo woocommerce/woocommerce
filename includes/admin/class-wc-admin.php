@@ -38,7 +38,6 @@ class WC_Admin {
 		include( 'wc-meta-box-functions.php' );
 
 		// Classes
-		include( 'class-wc-admin-help.php' );
 		include( 'class-wc-admin-menus.php' );
 		include( 'class-wc-admin-welcome.php' );
 		include( 'class-wc-admin-notices.php' );
@@ -47,6 +46,10 @@ class WC_Admin {
 		include( 'class-wc-admin-post-types.php' );
 		include( 'class-wc-admin-taxonomies.php' );
 		include( 'class-wc-admin-editor.php' );
+
+		// Help
+		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) )
+			include( 'class-wc-admin-help.php' );
 
 		// Importers
 		if ( defined( 'WP_LOAD_IMPORTERS' ) )

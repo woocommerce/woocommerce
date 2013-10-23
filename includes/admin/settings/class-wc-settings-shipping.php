@@ -130,7 +130,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 			array(
 				'title' => __( 'Restrict shipping to Location(s)', 'woocommerce' ),
-				'desc' 		=> sprintf( __( 'Choose which countries you want to ship to, or choose to ship to all <a href="%s">locations you sell to</a>.', 'woocommerce' ), admin_url( 'admin.php?page=woocommerce_settings&tab=general' ) ),
+				'desc' 		=> sprintf( __( 'Choose which countries you want to ship to, or choose to ship to all <a href="%s">locations you sell to</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=general' ) ),
 				'id' 		=> 'woocommerce_ship_to_countries',
 				'default'	=> '',
 				'type' 		=> 'select',
@@ -238,7 +238,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 				    		echo '</td>
 				    			<td class="settings">
-				    				<a class="button" href="' . admin_url( 'admin.php?page=woocommerce_settings&tab=shipping&section=' . strtolower( get_class( $method ) ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>
+				    				<a class="button" href="' . admin_url( 'admin.php?page=wc-settings&tab=shipping&section=' . strtolower( get_class( $method ) ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>
 				    			</td>
 				    		</tr>';
 				    	}

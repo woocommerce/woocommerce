@@ -10,7 +10,7 @@
 			<td><?php echo esc_html( $tool['name'] ); ?></td>
 			<td>
 				<p>
-					<a href="<?php echo wp_nonce_url( admin_url('admin.php?page=wc_status&tab=tools&action=' . $action ), 'debug_action' ); ?>" class="button"><?php echo esc_html( $tool['button'] ); ?></a>
+					<a href="<?php echo wp_nonce_url( admin_url('admin.php?page=wc-status&tab=tools&action=' . $action ), 'debug_action' ); ?>" class="button"><?php echo esc_html( $tool['button'] ); ?></a>
 					<span class="description"><?php echo wp_kses_post( $tool['desc'] ); ?></span>
 				</p>
 			</td>

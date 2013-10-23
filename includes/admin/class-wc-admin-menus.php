@@ -46,21 +46,21 @@ class WC_Admin_Menus {
 
 	    $main_page = add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce' , array( $this, 'settings_page' ), null, '55.5' );
 
-	    add_submenu_page( 'edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'woocommerce_attributes', array( $this, 'attributes_page' ) );
+	    add_submenu_page( 'edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'product_attributes', array( $this, 'attributes_page' ) );
 	}
 
 	/**
 	 * Add menu item
 	 */
 	public function reports_menu() {
-		add_submenu_page( 'woocommerce', __( 'Reports', 'woocommerce' ),  __( 'Reports', 'woocommerce' ) , 'view_woocommerce_reports', 'wc_reports', array( $this, 'reports_page' ) );
+		add_submenu_page( 'woocommerce', __( 'Reports', 'woocommerce' ),  __( 'Reports', 'woocommerce' ) , 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ) );
 	}
 
 	/**
 	 * Add menu item
 	 */
 	public function settings_menu() {
-		$settings_page = add_submenu_page( 'woocommerce', __( 'WooCommerce Settings', 'woocommerce' ),  __( 'Settings', 'woocommerce' ) , 'manage_woocommerce', 'woocommerce_settings', array( $this, 'settings_page' ) );
+		$settings_page = add_submenu_page( 'woocommerce', __( 'WooCommerce Settings', 'woocommerce' ),  __( 'Settings', 'woocommerce' ) , 'manage_woocommerce', 'wc-settings', array( $this, 'settings_page' ) );
 
 		add_action( 'load-' . $settings_page, array( $this, 'settings_page_init' ) );
 	}
@@ -77,14 +77,14 @@ class WC_Admin_Menus {
 	 * Add menu item
 	 */
 	public function status_menu() {
-		add_submenu_page( 'woocommerce', __( 'WooCommerce Status', 'woocommerce' ),  __( 'System Status', 'woocommerce' ) , 'manage_woocommerce', 'wc_status', array( $this, 'status_page' ) );
+		add_submenu_page( 'woocommerce', __( 'WooCommerce Status', 'woocommerce' ),  __( 'System Status', 'woocommerce' ) , 'manage_woocommerce', 'wc-status', array( $this, 'status_page' ) );
 	}
 
 	/**
 	 * Addons menu item
 	 */
 	public function addons_menu() {
-		add_submenu_page( 'woocommerce', __( 'WooCommerce Add-ons/Extensions', 'woocommerce' ),  __( 'Add-ons', 'woocommerce' ) , 'manage_woocommerce', 'wc_addons', array( $this, 'addons_page' ) );
+		add_submenu_page( 'woocommerce', __( 'WooCommerce Add-ons/Extensions', 'woocommerce' ),  __( 'Add-ons', 'woocommerce' ) , 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
 	}
 
 	/**
@@ -108,7 +108,7 @@ class WC_Admin_Menus {
 				$screen = get_current_screen();
 
 				if ( $screen->base == 'edit-tags' && taxonomy_is_product_attribute( $taxonomy ) ) {
-					$submenu_file = 'woocommerce_attributes';
+					$submenu_file = 'product_attributes';
 					$parent_file  = 'edit.php?post_type=' . esc_attr( $post_type );
 				}
 			}

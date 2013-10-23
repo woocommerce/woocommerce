@@ -2,7 +2,7 @@
 	<div class="icon32 icon32-woocommerce-reports" id="icon-woocommerce"><br /></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
 		<?php
 			foreach ( $reports as $key => $report_group ) {
-				echo '<a href="'.admin_url( 'admin.php?page=wc_reports&tab=' . urlencode( $key ) ).'" class="nav-tab ';
+				echo '<a href="'.admin_url( 'admin.php?page=wc-reports&tab=' . urlencode( $key ) ).'" class="nav-tab ';
 				if ( $current_tab == $key ) echo 'nav-tab-active';
 				echo '">' . esc_html( $report_group[ 'title' ] ) . '</a>';
 			}
@@ -19,7 +19,7 @@
 
 				foreach ( $reports[ $current_tab ]['reports'] as $key => $report ) {
 
-					$link = '<a href="admin.php?page=wc_reports&tab=' . urlencode( $current_tab ) . '&amp;report=' . urlencode( $key ) . '" class="';
+					$link = '<a href="admin.php?page=wc-reports&tab=' . urlencode( $current_tab ) . '&amp;report=' . urlencode( $key ) . '" class="';
 
 					if ( $key == $current_report ) $link .= 'current';
 

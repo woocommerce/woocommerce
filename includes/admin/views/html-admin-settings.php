@@ -3,7 +3,7 @@
 		<div class="icon32 icon32-woocommerce-settings" id="icon-woocommerce"><br /></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
 			<?php
 				foreach ( $tabs as $name => $label )
-					echo '<a href="' . admin_url( 'admin.php?page=woocommerce_settings&tab=' . $name ) . '" class="nav-tab ' . ( $current_tab == $name ? 'nav-tab-active' : '' ) . '">' . $label . '</a>';
+					echo '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=' . $name ) . '" class="nav-tab ' . ( $current_tab == $name ? 'nav-tab-active' : '' ) . '">' . $label . '</a>';
 
 				do_action( 'woocommerce_settings_tabs' );
 			?>

@@ -213,17 +213,17 @@ class WC_Install {
 			'cart' => array(
 				'name'    => _x( 'cart', 'page_slug', 'woocommerce' ),
 				'title'   => __( 'Cart', 'woocommerce' ),
-				'content' => '[woocommerce_cart]'
+				'content' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']'
 			),
 			'checkout' => array(
 				'name'    => _x( 'checkout', 'page_slug', 'woocommerce' ),
 				'title'   => __( 'Checkout', 'woocommerce' ),
-				'content' => '[woocommerce_checkout]'
+				'content' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']'
 			),
 			'myaccount' => array(
 				'name'    => _x( 'my-account', 'page_slug', 'woocommerce' ),
 				'title'   => __( 'My Account', 'woocommerce' ),
-				'content' => '[woocommerce_my_account]'
+				'content' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']'
 			)
 		) );
 

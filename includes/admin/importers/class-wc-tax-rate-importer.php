@@ -209,7 +209,7 @@ if ( class_exists( 'WP_Importer' ) ) {
 		 * Performs post-import cleanup of files and the cache
 		 */
 		function import_end() {
-			echo '<p>' . __( 'All done!', 'woocommerce' ) . ' <a href="' . admin_url('admin.php?page=woocommerce_settings&tab=tax') . '">' . __( 'View Tax Rates', 'woocommerce' ) . '</a>' . '</p>';
+			echo '<p>' . __( 'All done!', 'woocommerce' ) . ' <a href="' . admin_url('admin.php?page=wc-settings&tab=tax') . '">' . __( 'View Tax Rates', 'woocommerce' ) . '</a>' . '</p>';
 
 			do_action( 'import_end' );
 		}
