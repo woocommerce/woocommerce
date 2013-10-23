@@ -122,7 +122,7 @@ function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 			if ( $paying_customer )
 				$value = '<img src="' . $woocommerce->plugin_url() . '/assets/images/success@2x.png" alt="yes" width="16px" />';
 			else
-				$value = '<img src="' . $woocommerce->plugin_url() . '/assets/images/success-off@2x.png" alt="no" width="16px" />';
+				$value = '-';
 
 		break;
 	endswitch;
