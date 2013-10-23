@@ -210,6 +210,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Improved layered nav OR count logic
 * Tweak - Make shipping methods check if taxable, so when customer is VAT excempt taxes are not included in price.
 * Tweak - Coupon in admin bar new menu #3974
+* Tweak - Shortcode tag filters + updated menu names to make white labelling easier.
 * Fix - Changed MyException to Exception in Checkout class as MyException class does not exist in WooCommerce
 * Fix - Default cart widget styling on non-wc pages.
 * Fix - Rounding for mijireh tax ex. price.
