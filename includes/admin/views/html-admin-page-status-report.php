@@ -287,15 +287,15 @@
 					),
 				__( 'Cart', 'woocommerce' ) => array(
 						'option' => 'woocommerce_cart_page_id',
-						'shortcode' => '[woocommerce_cart]'
+						'shortcode' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']'
 					),
 				__( 'Checkout', 'woocommerce' ) => array(
 						'option' => 'woocommerce_checkout_page_id',
-						'shortcode' => '[woocommerce_checkout]'
+						'shortcode' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']'
 					),
 				__( 'My Account', 'woocommerce' ) => array(
 						'option' => 'woocommerce_myaccount_page_id',
-						'shortcode' => '[woocommerce_my_account]'
+						'shortcode' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']'
 					)
 			);
 
