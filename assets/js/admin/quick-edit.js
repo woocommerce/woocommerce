@@ -87,12 +87,13 @@ jQuery(document).ready(function(){
 
     jQuery('#wpbody').on('click', '#doaction, #doaction2', function(){
 
-		jQuery('select, input.text', '.inline-edit-row').val('');
-		jQuery('#woocommerce-fields-bulk .inline-edit-group .alignright').hide();
+        jQuery('input.text', '.inline-edit-row').val('');
+        jQuery('#woocommerce-fields select').prop('selectedIndex',0);
+        jQuery('#woocommerce-fields-bulk .inline-edit-group .alignright').hide();
 
 	});
 
-	 jQuery('#wpbody').on('change', '#woocommerce-fields-bulk .inline-edit-group .change_to', function(){
+	jQuery('#wpbody').on('change', '#woocommerce-fields-bulk .inline-edit-group .change_to', function(){
 
     	if (jQuery(this).val() > 0) {
     		jQuery(this).closest('div').find('.alignright').show();
