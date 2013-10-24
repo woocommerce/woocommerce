@@ -156,6 +156,18 @@ function woocommerce_trim_zeros( $price ) {
 }
 
 /**
+ * Round a tax amount
+ *
+ * @access public
+ * @param mixed $price
+ * @return string
+ */
+function woocommerce_round_tax_total( $tax ) {
+	$dp                   = (int) get_option( 'woocommerce_price_num_decimals' );
+	return round( $tax, $dp, WOOCOMMERCE_TAX_ROUNDING_MODE );
+}
+
+/**
  * Format decimal numbers - format to a defined number of dp and remove trailing zeros.
  *
  * Remove's user locale settings, converting to a string which uses '.' for decimals, with no thousand separators.

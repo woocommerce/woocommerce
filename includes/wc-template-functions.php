@@ -1131,7 +1131,7 @@ function wc_cart_totals_order_total_html() {
 			foreach ( WC()->cart->get_tax_totals() as $code => $tax )
 				$tax_string_array[] = sprintf( '%s %s', $tax->formatted_amount, $tax->label );
 		} else {
-			$tax_string_array[] = sprintf( '%s %s', woocommerce_price( WC()->cart->get_taxes_total() ), WC()->countries->tax_or_vat() );
+			$tax_string_array[] = sprintf( '%s %s', woocommerce_price( WC()->cart->get_taxes_total( true, true ) ), WC()->countries->tax_or_vat() );
 		}
 
 		if ( ! empty( $tax_string_array ) )

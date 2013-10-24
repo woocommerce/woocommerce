@@ -384,7 +384,7 @@ class WC_Order {
 			$tax_totals[ $code ]->is_compound       = $tax[ 'compound' ];
 			$tax_totals[ $code ]->label             = isset( $tax[ 'label' ] ) ? $tax[ 'label' ] : $tax[ 'name' ];
 			$tax_totals[ $code ]->amount           += $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ];
-			$tax_totals[ $code ]->formatted_amount  = woocommerce_price( $tax_totals[ $code ]->amount );
+			$tax_totals[ $code ]->formatted_amount  = woocommerce_price( woocommerce_round_tax_total( $tax_totals[ $code ]->amount ) );
 		}
 
 		return apply_filters( 'woocommerce_order_tax_totals', $tax_totals, $this );
@@ -476,7 +476,7 @@ class WC_Order {
 	 * @return float
 	 */
 	public function get_total_tax() {
-		return apply_filters( 'woocommerce_order_amount_total_tax', $this->get_cart_tax() + $this->get_shipping_tax(), $this );
+		return apply_filters( 'woocommerce_order_amount_total_tax', woocommerce_round_tax_total( $this->get_cart_tax() + $this->get_shipping_tax() ), $this );
 	}	
 
 	/**

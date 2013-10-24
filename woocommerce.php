@@ -125,6 +125,8 @@ final class WooCommerce {
 		define( 'WOOCOMMERCE_PLUGIN_FILE', __FILE__ );
 		define( 'WOOCOMMERCE_VERSION', $this->version );
 		define( 'WOOCOMMERCE_TEMPLATE_PATH', $this->template_path() );
+		define( 'WOOCOMMERCE_ROUNDING_PRECISION', 4 );
+		define( 'WOOCOMMERCE_TAX_ROUNDING_MODE', PHP_ROUND_HALF_DOWN );
 		if ( ! defined( 'WOOCOMMERCE_DELIMITER' ) )
 			define( 'WOOCOMMERCE_DELIMITER', '|' );
 

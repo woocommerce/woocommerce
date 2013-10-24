@@ -13,6 +13,9 @@ class WC_Tax {
 	/** @var array */
 	public $matched_rates;
 
+
+	var $log = array();
+
 	/**
 	 * __construct function.
 	 *
@@ -20,9 +23,202 @@ class WC_Tax {
 	 * @return void
 	 */
 	public function __construct() {
+		$this->debug             = true;
+		$this->precision         = WOOCOMMERCE_ROUNDING_PRECISION;
 		$this->dp                = (int) get_option( 'woocommerce_price_num_decimals' );
 		$this->round_at_subtotal = get_option('woocommerce_tax_round_at_subtotal') == 'yes';
 	}
+
+	/**
+	 * Simple logging function for logging tax calcs/debugging
+	 * @param  string $item  Message to log
+	 * @param  string $value Value to log
+	 */
+	public function log( $item, $value = null ) {
+		if ( $this->debug ) {
+			if ( is_array( $value ) )
+				$this->log[] = $item . ': <code style="padding-left: 2em; display:block;">' . print_r( $value, true ) . '</code>';
+			elseif ( ! is_null( $value ) )
+				$this->log[] = $item . ': ' . $value;
+			else
+				$this->log[] = $item;
+		}
+	}
+
+	/**
+	 * Dump the log to the screen in a pre element for review
+	 */
+	public function dump_log() {
+		if ( $this->debug && ! is_ajax() ) {
+			ob_start();
+			echo '<pre style="border: 1px solid #ccc; padding: 2em;"><strong>Tax Debug:</strong></br>' . implode( '<br/>', $this->log ) . '</pre>';
+			$this->log = array();
+		}
+	}
+
+	public function calculate_tax( $price, $rates, $price_includes_tax = false, $suppress_rounding = false ) {
+		$this->log( 'Item Price', $price );
+		$this->log( 'Precision', $this->precision );
+
+		// Work in pence to X precision
+		$price = $this->precision( $price );
+
+		if ( $price_includes_tax )
+			$taxes = $this->calculate_inclusive_tax( $price, $rates, $suppress_rounding );
+		else
+			$taxes = $this->calculate_exclusive_tax( $price, $rates, $suppress_rounding );
+
+		// Round
+		if ( ! $this->round_at_subtotal && ! $suppress_rounding ) {
+			$this->log( 'Rounding Taxes' );
+			$taxes = array_map( 'round', $taxes ); // Round to precision
+		}
+
+		// Remove precision
+		$price     = $this->remove_precision( $price );
+		$taxes     = array_map( array( $this, 'remove_precision' ), $taxes );
+
+		// return values
+		$result = array(
+			'taxes'          => $taxes,
+			'tax_total'      => array_sum( $taxes ),
+			'price_excl_tax' => $this->round( $price_includes_tax ? $price - array_sum( $taxes ) : $price ),
+			'price_incl_tax' => $this->round( $price_includes_tax ? $price : $price + array_sum( $taxes ) )
+		);
+
+		$this->log( 'Result', $result );
+		$this->dump_log();
+
+		return apply_filters( 'woocommerce_calculate_tax', $result, $price, $rates, $price_includes_tax, $suppress_rounding );
+	}
+
+	private function precision( $price ) {
+		return $price * ( pow( 10, $this->precision ) );
+	}
+
+	private function remove_precision( $price ) {
+		return $price / ( pow( 10, $this->precision ) );
+	}
+
+	/**
+	 * Round to precision.
+	 *
+	 * Filter example: to return rounding to .5 cents you'd use:
+	 *
+	 * public function euro_5cent_rounding( $in ) {
+	 *      return round( $in / 5, 2 ) * 5;
+	 * }
+	 * add_filter( 'woocommerce_tax_round', 'euro_5cent_rounding' );
+	 *
+	 */
+	public function round( $in ) {
+		return apply_filters( 'woocommerce_tax_round', round( $in * pow( 10, $this->precision ) ) / pow( 10, $this->precision ), $in );
+	}
+
+	private function calculate_inclusive_tax( $price, $rates, $suppress_rounding ) {
+		$taxes = array();
+
+		$regular_tax_rates = $compound_tax_rates = 0;
+
+		foreach ( $rates as $key => $rate )
+			if ( $rate['compound'] == 'yes' )
+				$compound_tax_rates = $compound_tax_rates + $rate['rate'];
+			else
+				$regular_tax_rates  = $regular_tax_rates + $rate['rate'];
+
+		$regular_tax_rate 	= 1 + ( $regular_tax_rates / 100 );
+		$compound_tax_rate 	= 1 + ( $compound_tax_rates / 100 );
+		$non_compound_price = $price / $compound_tax_rate;
+
+		foreach ( $rates as $key => $rate ) {
+			if ( ! isset( $taxes[ $key ] ) )
+				$taxes[ $key ] = 0;
+
+			$the_rate      = $rate['rate'] / 100;
+
+			if ( $rate['compound'] == 'yes' ) {
+				$the_price = $price;
+				$the_rate  = $the_rate / $compound_tax_rate;
+			} else {
+				$the_price = $non_compound_price;
+				$the_rate  = $the_rate / $regular_tax_rate;
+			}
+
+			$net_price       = $price - ( $the_rate * $the_price );
+			//$net_price       = ( $this->round_at_subtotal || $suppress_rounding ) ? $net_price : round( $net_price, $this->dp );
+			$tax_amount      = $price - $net_price;
+
+			$this->log( 'Tax.inc calculation @Rate', $the_rate );
+			$this->log( 'Price', $the_price );
+			$this->log( 'Net price', $net_price );
+			$this->log( 'Tax amount', $tax_amount );
+
+			$taxes[ $key ]   += apply_filters( 'woocommerce_price_inc_tax_amount', $tax_amount, $key, $rate, $price );
+		}
+
+		return $taxes;
+	}
+
+	private function calculate_exclusive_tax( $price, $rates, $suppress_rounding ) {
+		$taxes = array();
+
+		// Multiple taxes
+		foreach ( $rates as $key => $rate ) {
+
+			if ( $rate['compound'] == 'yes' )
+				continue;
+
+			$tax_amount = $price * ( $rate['rate'] / 100 );
+
+			// ADVANCED: Allow third parties to modify this rate
+			$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price );
+
+			// Add rate
+			if ( ! isset( $taxes[ $key ] ) )
+				$taxes[ $key ] = $tax_amount;
+			else
+				$taxes[ $key ] += $tax_amount;
+		}
+
+		$pre_compound_total = array_sum( $taxes );
+
+		// Compound taxes
+		if ( $rates ) {
+			foreach ( $rates as $key => $rate ) {
+
+				if ( $rate['compound'] == 'no' )
+					continue;
+
+				$the_price_inc_tax = $price + ( $pre_compound_total * 100 );
+
+				$tax_amount = $the_price_inc_tax * ( $rate['rate'] / 100 );
+
+				// ADVANCED: Allow third parties to modifiy this rate
+				$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price, $the_price_inc_tax, $pre_compound_total );
+
+				// Add rate
+				if ( ! isset( $taxes[ $key ] ) )
+					$taxes[ $key ] = $tax_amount;
+				else
+					$taxes[ $key ] += $tax_amount;
+			}
+		}
+
+		return $taxes;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	/**
 	 * Searches for all matching country/state/postcode tax rates.
@@ -361,6 +557,19 @@ class WC_Tax {
 		return array(); // return false
 	}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 	/**
 	 * Calculate the tax using a passed array of rates.
 	 *
@@ -586,20 +795,4 @@ class WC_Tax {
 	public function get_tax_total( $taxes ) {
 		return array_sum( array_map( array( $this, 'round' ), $taxes ) );
 	}
-
-	/**
-	 * Round to currency DP. Wrapper for PHP round.
-	 *
-	 * Filter example: to return rounding to .5 cents you'd use:
-	 *
-	 * public function euro_5cent_rounding( $in ) {
-	 *      return round( $in / 5, 2 ) * 5;
-	 * }
-	 * add_filter( 'woocommerce_tax_round', 'euro_5cent_rounding' );
-	 *
-	 */
-	public function round( $in ) {
-		return apply_filters( 'woocommerce_tax_round', round( $in, $this->dp ), $in );
-	}
-
 }
