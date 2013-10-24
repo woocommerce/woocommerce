@@ -1131,7 +1131,7 @@ class WC_Cart {
 						$line_tax         = $tax_result['tax_total'];
 						$line_total       = $tax_result['price_excl_tax'];
 					}
-					
+
 					// Tax rows - merge the totals we just got
 					foreach ( array_keys( $this->taxes + $discounted_taxes ) as $key ) {
 					    $this->taxes[ $key ] = ( isset( $discounted_taxes[ $key ] ) ? $discounted_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
@@ -1207,17 +1207,6 @@ class WC_Cart {
 
 				// Allow plugins to hook and alter totals before final total is calculated
 				do_action( 'woocommerce_calculate_totals', $this );
-
-				echo '<pre>';
-				echo 'cart_contents_total: ' . $this->cart_contents_total . '<br/>';
-				echo 'shipping_total: ' . $this->shipping_total . '<br/>';
-				echo 'discount_total: ' . $this->discount_total . '<br/>';
-				echo 'tax_total: ' . $this->tax_total . '<br/>';
-				echo 'shipping_tax_total: ' . $this->shipping_tax_total . '<br/>';
-				echo 'shipping_total: ' . $this->shipping_total . '<br/>';
-				echo 'discount_total: ' . $this->discount_total . '<br/>';
-				echo 'fee_total: ' . $this->fee_total . '<br/>';
-				echo '</pre>';
 
 				// Grand Total - Discounted product prices, discounted tax, shipping cost + tax, and any discounts to be added after tax (e.g. store credit)
 				$this->total = max( 0, apply_filters( 'woocommerce_calculated_total', number_format( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total - $this->discount_total + $this->fee_total, $this->dp, '.', '' ), $this ) );
