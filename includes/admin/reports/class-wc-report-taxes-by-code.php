@@ -127,9 +127,9 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 				<tfoot>
 					<tr>
 						<th scope="row" colspan="3"><?php _e( 'Total', 'woocommerce' ); ?></th>
-						<th class="total_row"><?php echo woocommerce_price( array_sum( wp_list_pluck( (array) $tax_rows, 'tax_amount' ) ) ); ?></th>
-						<th class="total_row"><?php echo woocommerce_price( array_sum( wp_list_pluck( (array) $tax_rows, 'shipping_tax_amount' ) ) ); ?></th>
-						<th class="total_row"><strong><?php echo woocommerce_price( array_sum( wp_list_pluck( (array) $tax_rows, 'tax_amount' ) ) + array_sum( wp_list_pluck( (array) $tax_rows, 'shipping_tax_amount' ) ) ); ?></strong></th>
+						<th class="total_row"><?php echo woocommerce_price( woocommerce_round_tax_total( array_sum( wp_list_pluck( (array) $tax_rows, 'tax_amount' ) ) ) ); ?></th>
+						<th class="total_row"><?php echo woocommerce_price( woocommerce_round_tax_total( array_sum( wp_list_pluck( (array) $tax_rows, 'shipping_tax_amount' ) ) ) ); ?></th>
+						<th class="total_row"><strong><?php echo woocommerce_price( woocommerce_round_tax_total( array_sum( wp_list_pluck( (array) $tax_rows, 'tax_amount' ) ) + array_sum( wp_list_pluck( (array) $tax_rows, 'shipping_tax_amount' ) ) ) ); ?></strong></th>
 					</tr>
 				</tfoot>
 				<tbody>
@@ -141,9 +141,9 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 							<th scope="row"><?php echo $tax_row->tax_rate; ?></th>
 							<td><?php echo $rate; ?>%</td>
 							<td class="total_row"><?php echo $tax_row->total_orders; ?></td>
-							<td class="total_row"><?php echo woocommerce_price( $tax_row->tax_amount ); ?></td>
-							<td class="total_row"><?php echo woocommerce_price( $tax_row->shipping_tax_amount ); ?></td>
-							<td class="total_row"><?php echo woocommerce_price( $tax_row->tax_amount + $tax_row->shipping_tax_amount ); ?></td>
+							<td class="total_row"><?php echo woocommerce_price( woocommerce_round_tax_total( $tax_row->tax_amount ) ); ?></td>
+							<td class="total_row"><?php echo woocommerce_price( woocommerce_round_tax_total( $tax_row->shipping_tax_amount ) ); ?></td>
+							<td class="total_row"><?php echo woocommerce_price( woocommerce_round_tax_total( $tax_row->tax_amount + $tax_row->shipping_tax_amount ) ); ?></td>
 						</tr>
 						<?php
 					}

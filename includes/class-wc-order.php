@@ -582,8 +582,8 @@ class WC_Order {
 	 */
 	public function get_item_tax( $item, $round = true ) {
 		$price = $item['line_tax'] / $item['qty'];
-		$price = $round ? number_format( $price, 2, '.', '' ) : $price;
-		return apply_filters( 'woocommerce_order_amount_item_tax', $price, $this );
+		$price = $round ? woocommerce_round_tax_total( $price ) : $price;
+		return apply_filters( 'woocommerce_order_amount_item_tax', $price, $item, $round, $this );
 	}
 
 	/**
@@ -594,7 +594,7 @@ class WC_Order {
 	 * @return float
 	 */
 	public function get_line_tax( $item ) {
-		return apply_filters( 'woocommerce_order_amount_line_tax', number_format( $item['line_tax'], 2, '.', ''), $this );
+		return apply_filters( 'woocommerce_order_amount_line_tax', woocommerce_round_tax_total( $item['line_tax'] ), $item, $this );
 	}
 
 	/**
