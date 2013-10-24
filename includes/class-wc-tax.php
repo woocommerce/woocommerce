@@ -68,7 +68,7 @@ class WC_Tax {
 		else
 			$taxes = $this->calculate_exclusive_tax( $price, $rates, $suppress_rounding );
 
-		// Round
+		// Round to precision
 		if ( ! $this->round_at_subtotal && ! $suppress_rounding ) {
 			$this->log( 'Rounding Taxes' );
 			$taxes = array_map( 'round', $taxes ); // Round to precision
@@ -112,7 +112,7 @@ class WC_Tax {
 	 *
 	 */
 	public function round( $in ) {
-		return apply_filters( 'woocommerce_tax_round', round( $in * pow( 10, $this->precision ) ) / pow( 10, $this->precision ), $in );
+		return apply_filters( 'woocommerce_tax_round', round( $in, $this->precision ), $in );
 	}
 
 	private function calculate_inclusive_tax( $price, $rates, $suppress_rounding ) {

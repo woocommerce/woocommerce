@@ -1018,10 +1018,6 @@ class WC_Cart {
 						// Now add modifed taxes
 						$tax_result            = $this->tax->calculate_tax( $line_subtotal, $item_tax_rates );
 						$line_subtotal_tax     = $tax_result['tax_total'];
-						
-						// Add to main subtotal
-						$this->subtotal        += $line_subtotal + $line_subtotal_tax;
-						$this->subtotal_ex_tax += $line_subtotal;
 
 					/**
 					 * Regular tax calculation (customer inside base and the tax class is unmodified
@@ -1032,10 +1028,6 @@ class WC_Cart {
 						$tax_result            = $this->tax->calculate_tax( $line_price, $item_tax_rates, true );
 						$line_subtotal_tax     = $tax_result['tax_total'];
 						$line_subtotal         = $tax_result['price_excl_tax'];
-						
-						// Add to main subtotal
-						$this->subtotal        += $line_subtotal + $line_subtotal_tax;
-						$this->subtotal_ex_tax += $line_subtotal;
 					}
 
 				/**
@@ -1055,11 +1047,11 @@ class WC_Cart {
 					$tax_result            = $this->tax->calculate_tax( $line_price, $item_tax_rates );
 					$line_subtotal_tax     = $tax_result['tax_total'];
 					$line_subtotal         = $line_price;
-
-					// Add to main subtotal
-					$this->subtotal        += $line_subtotal + $line_subtotal_tax;
-					$this->subtotal_ex_tax += $line_subtotal;
 				}
+
+				// Add to main subtotal
+				$this->subtotal        += $line_subtotal + $line_subtotal_tax;
+				$this->subtotal_ex_tax += $line_subtotal;
 			}
 
 			/**
@@ -1125,6 +1117,13 @@ class WC_Cart {
 					 */
 					} else {
 
+						// Work out a new base price without the shop's base tax
+						$tax_result        = $this->tax->calculate_tax( $line_price, $item_tax_rates, true );
+						
+						// Now we have a new item price (excluding TAX)
+						$line_subtotal     = $tax_result['price_excl_tax'];
+						$line_subtotal_tax = $tax_result['tax_total'];
+
 						// Calc prices and tax (discounted)
 						$discounted_price = $this->get_discounted_price( $values, $base_price, true );
 						$tax_result       = $this->tax->calculate_tax( $discounted_price * $values['quantity'], $item_tax_rates, true );
@@ -1132,12 +1131,8 @@ class WC_Cart {
 						$line_tax         = $tax_result['tax_total'];
 						$line_total       = $tax_result['price_excl_tax'];
 					}
-
+					
 					// Tax rows - merge the totals we just got
-					if ( ! $this->round_at_subtotal ) {
-						$discounted_taxes = array_map( 'woocommerce_round_tax_total', $discounted_taxes );
-					}
-
 					foreach ( array_keys( $this->taxes + $discounted_taxes ) as $key ) {
 					    $this->taxes[ $key ] = ( isset( $discounted_taxes[ $key ] ) ? $discounted_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
 					}
@@ -1148,7 +1143,14 @@ class WC_Cart {
 				} else {
 					
 					$item_tax_rates        = $tax_rates[ $_product->get_tax_class() ];
-
+					
+					// Work out a new base price without the shop's base tax
+					$tax_result            = $this->tax->calculate_tax( $line_price, $item_tax_rates );
+					
+					// Now we have a new item price (excluding TAX)
+					$line_subtotal         = $tax_result['price_excl_tax'];
+					$line_subtotal_tax     = $tax_result['tax_total'];
+					
 					// Now calc product rates
 					$discounted_price      = $this->get_discounted_price( $values, $base_price, true );
 					$tax_result            = $this->tax->calculate_tax( $discounted_price * $values['quantity'], $item_tax_rates );
@@ -1158,10 +1160,6 @@ class WC_Cart {
 					$line_total            = $tax_result['price_excl_tax'];
 
 					// Tax rows - merge the totals we just got
-					if ( ! $this->round_at_subtotal ) {
-						$discounted_taxes = array_map( 'woocommerce_round_tax_total', $discounted_taxes );
-					}
-					
 					foreach ( array_keys( $this->taxes + $discounted_taxes ) as $key ) {
 					    $this->taxes[ $key ] = ( isset( $discounted_taxes[ $key ] ) ? $discounted_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
 					}
@@ -1171,7 +1169,7 @@ class WC_Cart {
 				$this->apply_product_discounts_after_tax( $values, $line_total + $line_tax );
 
 				// Cart contents total is based on discounted prices and is used for the final total calculation
-				$this->cart_contents_total 	= $this->cart_contents_total + $line_total;
+				$this->cart_contents_total += $line_total;
 
 				// Store costs + taxes for lines
 				$this->cart_contents[ $cart_item_key ]['line_total'] 		= $line_total;
@@ -1209,6 +1207,17 @@ class WC_Cart {
 
 				// Allow plugins to hook and alter totals before final total is calculated
 				do_action( 'woocommerce_calculate_totals', $this );
+
+				echo '<pre>';
+				echo 'cart_contents_total: ' . $this->cart_contents_total . '<br/>';
+				echo 'shipping_total: ' . $this->shipping_total . '<br/>';
+				echo 'discount_total: ' . $this->discount_total . '<br/>';
+				echo 'tax_total: ' . $this->tax_total . '<br/>';
+				echo 'shipping_tax_total: ' . $this->shipping_tax_total . '<br/>';
+				echo 'shipping_total: ' . $this->shipping_total . '<br/>';
+				echo 'discount_total: ' . $this->discount_total . '<br/>';
+				echo 'fee_total: ' . $this->fee_total . '<br/>';
+				echo '</pre>';
 
 				// Grand Total - Discounted product prices, discounted tax, shipping cost + tax, and any discounts to be added after tax (e.g. store credit)
 				$this->total = max( 0, apply_filters( 'woocommerce_calculated_total', number_format( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total - $this->discount_total + $this->fee_total, $this->dp, '.', '' ), $this ) );
