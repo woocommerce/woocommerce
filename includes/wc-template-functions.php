@@ -87,7 +87,7 @@ function wc_setup_product_data( $post ) {
  * @return void
  */
 function wc_generator_tag() {
-	echo "\n\n" . '<!-- WooCommerce Version -->' . "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( WOOCOMMERCE_VERSION ) . '" />' . "\n\n";
+	echo "\n\n" . '<!-- WooCommerce Version -->' . "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( WC_VERSION ) . '" />' . "\n\n";
 }
 
 /**

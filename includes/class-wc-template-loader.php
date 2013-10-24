@@ -41,7 +41,7 @@ class WC_Template_Loader {
 
 			$file 	= 'single-product.php';
 			$find[] = $file;
-			$find[] = WOOCOMMERCE_TEMPLATE_PATH . $file;
+			$find[] = WC_TEMPLATE_PATH . $file;
 
 		} elseif ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
 
@@ -49,15 +49,15 @@ class WC_Template_Loader {
 
 			$file 		= 'taxonomy-' . $term->taxonomy . '.php';
 			$find[] 	= 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
-			$find[] 	= WOOCOMMERCE_TEMPLATE_PATH . 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
+			$find[] 	= WC_TEMPLATE_PATH . 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
 			$find[] 	= $file;
-			$find[] 	= WOOCOMMERCE_TEMPLATE_PATH . $file;
+			$find[] 	= WC_TEMPLATE_PATH . $file;
 
 		} elseif ( is_post_type_archive( 'product' ) || is_page( woocommerce_get_page_id( 'shop' ) ) ) {
 
 			$file 	= 'archive-product.php';
 			$find[] = $file;
-			$find[] = WOOCOMMERCE_TEMPLATE_PATH . $file;
+			$find[] = WC_TEMPLATE_PATH . $file;
 
 		}
 
@@ -81,10 +81,10 @@ class WC_Template_Loader {
 		if ( get_post_type() !== 'product' )
 			return $template;
 
-		if ( file_exists( STYLESHEETPATH . '/' . WOOCOMMERCE_TEMPLATE_PATH . 'single-product-reviews.php' ))
-			return STYLESHEETPATH . '/' . WOOCOMMERCE_TEMPLATE_PATH . 'single-product-reviews.php';
-		elseif ( file_exists( TEMPLATEPATH . '/' . WOOCOMMERCE_TEMPLATE_PATH . 'single-product-reviews.php' ))
-			return TEMPLATEPATH . '/' . WOOCOMMERCE_TEMPLATE_PATH . 'single-product-reviews.php';
+		if ( file_exists( STYLESHEETPATH . '/' . WC_TEMPLATE_PATH . 'single-product-reviews.php' ))
+			return STYLESHEETPATH . '/' . WC_TEMPLATE_PATH . 'single-product-reviews.php';
+		elseif ( file_exists( TEMPLATEPATH . '/' . WC_TEMPLATE_PATH . 'single-product-reviews.php' ))
+			return TEMPLATEPATH . '/' . WC_TEMPLATE_PATH . 'single-product-reviews.php';
 		elseif ( file_exists( STYLESHEETPATH . '/' . 'single-product-reviews.php' ))
 			return STYLESHEETPATH . '/' . 'single-product-reviews.php';
 		elseif ( file_exists( TEMPLATEPATH . '/' . 'single-product-reviews.php' ))

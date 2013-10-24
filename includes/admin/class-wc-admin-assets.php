@@ -162,8 +162,8 @@ class WC_Admin_Assets {
 				'currency_format_decimal_sep'	=> esc_attr( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ) ),
 				'currency_format_thousand_sep'	=> esc_attr( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ) ),
 				'currency_format'				=> esc_attr( str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) ), // For accounting JS
-				'rounding_precision'            => WOOCOMMERCE_ROUNDING_PRECISION,
-				'tax_rounding_mode'             => WOOCOMMERCE_TAX_ROUNDING_MODE,
+				'rounding_precision'            => WC_ROUNDING_PRECISION,
+				'tax_rounding_mode'             => WC_TAX_ROUNDING_MODE,
 				'product_types'					=> array_map( 'sanitize_title', get_terms( 'product_type', array( 'hide_empty' => false, 'fields' => 'names' ) ) ),
 				'default_attribute_visibility'  => apply_filters( 'default_attribute_visibility', false ),
 				'default_attribute_variation'   => apply_filters( 'default_attribute_variation', false ),

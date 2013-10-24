@@ -22,19 +22,19 @@ class WC_Frontend_Scripts {
 			'woocommerce-layout' => array(
 				'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce-layout.css',
 				'deps'    => '',
-				'version' => WOOCOMMERCE_VERSION,
+				'version' => WC_VERSION,
 				'media'   => ''
 			),
 			'woocommerce-smallscreen' => array(
 				'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce-smallscreen.css',
 				'deps'    => 'woocommerce-layout',
-				'version' => WOOCOMMERCE_VERSION,
+				'version' => WC_VERSION,
 				'media'   => 'only screen and (max-width: ' . apply_filters( 'woocommerce_style_smallscreen_breakpoint', $breakpoint = '768px' ) . ')'
 			),
 			'woocommerce-general' => array(
 				'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce.css',
 				'deps'    => '',
-				'version' => WOOCOMMERCE_VERSION,
+				'version' => WC_VERSION,
 				'media'   => ''
 			),
 		) );
@@ -58,35 +58,35 @@ class WC_Frontend_Scripts {
 		// Register any scripts for later use, or used as dependencies
 		wp_register_script( 'chosen', $assets_path . 'js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), '0.9.14', true );
 		wp_register_script( 'jquery-blockui', $assets_path . 'js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.60', true );
-		wp_register_script( 'jquery-placeholder', $assets_path . 'js/jquery-placeholder/jquery.placeholder' . $suffix . '.js', array( 'jquery' ), WOOCOMMERCE_VERSION, true );
+		wp_register_script( 'jquery-placeholder', $assets_path . 'js/jquery-placeholder/jquery.placeholder' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
 		wp_register_script( 'jquery-payment', $assets_path . 'js/jquery-payment/jquery.payment' . $suffix . '.js', array( 'jquery' ), '1.0.2', true );
-		wp_register_script( 'wc-credit-card-form', $assets_path . 'js/frontend/credit-card-form' . $suffix . '.js', array( 'jquery', 'jquery-payment' ), WOOCOMMERCE_VERSION, true );
+		wp_register_script( 'wc-credit-card-form', $assets_path . 'js/frontend/credit-card-form' . $suffix . '.js', array( 'jquery', 'jquery-payment' ), WC_VERSION, true );
 
-		wp_register_script( 'wc-add-to-cart-variation', $frontend_script_path . 'add-to-cart-variation' . $suffix . '.js', array( 'jquery' ), WOOCOMMERCE_VERSION, true );
-		wp_register_script( 'wc-single-product', $frontend_script_path . 'single-product' . $suffix . '.js', array( 'jquery' ), WOOCOMMERCE_VERSION, true );
-		wp_register_script( 'wc-country-select', $frontend_script_path . 'country-select' . $suffix . '.js', array( 'jquery' ), WOOCOMMERCE_VERSION, true );
+		wp_register_script( 'wc-add-to-cart-variation', $frontend_script_path . 'add-to-cart-variation' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
+		wp_register_script( 'wc-single-product', $frontend_script_path . 'single-product' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
+		wp_register_script( 'wc-country-select', $frontend_script_path . 'country-select' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
 		wp_register_script( 'jquery-cookie', $assets_path . 'js/jquery-cookie/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '1.3.1', true );
 
 		// Queue frontend scripts conditionally
 		if ( $ajax_cart_en )
-			wp_enqueue_script( 'wc-add-to-cart', $frontend_script_path . 'add-to-cart' . $suffix . '.js', array( 'jquery' ), WOOCOMMERCE_VERSION, true );
+			wp_enqueue_script( 'wc-add-to-cart', $frontend_script_path . 'add-to-cart' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
 
 		if ( is_cart() )
-			wp_enqueue_script( 'wc-cart', $frontend_script_path . 'cart' . $suffix . '.js', array( 'jquery', 'wc-country-select' ), WOOCOMMERCE_VERSION, true );
+			wp_enqueue_script( 'wc-cart', $frontend_script_path . 'cart' . $suffix . '.js', array( 'jquery', 'wc-country-select' ), WC_VERSION, true );
 
 		if ( is_checkout() ) {
 
 			if ( get_option( 'woocommerce_enable_chosen' ) == 'yes' ) {
-				wp_enqueue_script( 'wc-chosen', $frontend_script_path . 'chosen-frontend' . $suffix . '.js', array( 'chosen' ), WOOCOMMERCE_VERSION, true );
+				wp_enqueue_script( 'wc-chosen', $frontend_script_path . 'chosen-frontend' . $suffix . '.js', array( 'chosen' ), WC_VERSION, true );
 				wp_enqueue_style( 'woocommerce_chosen_styles', $assets_path . 'css/chosen.css' );
 			}
 
-			wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce', 'wc-country-select' ), WOOCOMMERCE_VERSION, true );
+			wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce', 'wc-country-select' ), WC_VERSION, true );
 		}
 
 		if ( $lightbox_en && ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) ) {
 			wp_enqueue_script( 'prettyPhoto', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js', array( 'jquery' ), '3.1.5', true );
-			wp_enqueue_script( 'prettyPhoto-init', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js', array( 'jquery' ), WOOCOMMERCE_VERSION, true );
+			wp_enqueue_script( 'prettyPhoto-init', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
 			wp_enqueue_style( 'woocommerce_prettyPhoto_css', $assets_path . 'css/prettyPhoto.css' );
 		}
 
@@ -94,8 +94,8 @@ class WC_Frontend_Scripts {
 			wp_enqueue_script( 'wc-single-product' );
 
 		// Global frontend scripts
-		wp_enqueue_script( 'woocommerce', $frontend_script_path . 'woocommerce' . $suffix . '.js', array( 'jquery', 'jquery-blockui', 'jquery-placeholder' ), WOOCOMMERCE_VERSION, true );
-		wp_enqueue_script( 'wc-cart-fragments', $frontend_script_path . 'cart-fragments' . $suffix . '.js', array( 'jquery', 'jquery-cookie' ), WOOCOMMERCE_VERSION, true );
+		wp_enqueue_script( 'woocommerce', $frontend_script_path . 'woocommerce' . $suffix . '.js', array( 'jquery', 'jquery-blockui', 'jquery-placeholder' ), WC_VERSION, true );
+		wp_enqueue_script( 'wc-cart-fragments', $frontend_script_path . 'cart-fragments' . $suffix . '.js', array( 'jquery', 'jquery-cookie' ), WC_VERSION, true );
 
 		// Variables for JS scripts
 		wp_localize_script( 'woocommerce', 'woocommerce_params', apply_filters( 'woocommerce_params', array(

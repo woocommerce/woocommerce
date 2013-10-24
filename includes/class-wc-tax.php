@@ -23,7 +23,7 @@ class WC_Tax {
 	 * @return void
 	 */
 	public function __construct() {
-		$this->precision         = WOOCOMMERCE_ROUNDING_PRECISION;
+		$this->precision         = WC_ROUNDING_PRECISION;
 		$this->dp                = (int) get_option( 'woocommerce_price_num_decimals' );
 		$this->round_at_subtotal = get_option('woocommerce_tax_round_at_subtotal') == 'yes';
 	}

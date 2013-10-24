@@ -803,7 +803,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			        	'sslverify' 	=> false,
 			        	'timeout' 		=> 60,
 			        	'httpversion'   => '1.1',
-        				'user-agent'	=> 'WooCommerce/' . WOOCOMMERCE_VERSION
+        				'user-agent'	=> 'WooCommerce/' . WC_VERSION
 			        );
 
 					// Post back to get a response

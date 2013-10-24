@@ -168,7 +168,7 @@ function woocommerce_round_tax_total( $tax ) {
 	if ( version_compare( phpversion(), '5.3', '<' ) ) {
 		$tax = round( $tax, $dp );
 	} else {
-		$tax = round( $tax, $dp, WOOCOMMERCE_TAX_ROUNDING_MODE );
+		$tax = round( $tax, $dp, WC_TAX_ROUNDING_MODE );
 	}
 	return $tax;
 }

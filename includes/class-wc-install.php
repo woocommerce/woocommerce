@@ -21,7 +21,7 @@ class WC_Install {
 	 * Hook in tabs.
 	 */
 	public function __construct() {
-		register_activation_hook( WOOCOMMERCE_PLUGIN_FILE, array( $this, 'install' ) );
+		register_activation_hook( WC_PLUGIN_FILE, array( $this, 'install' ) );
 
 		add_action( 'admin_init', array( $this, 'install_actions' ) );
 		add_action( 'admin_init', array( $this, 'check_version' ), 5 );
@@ -165,7 +165,7 @@ class WC_Install {
 			update_option( 'woocommerce_db_version', '2.0.14' );
 		}
 
-		if ( version_compare( $current_db_version, '2.1.0', '<' ) || WOOCOMMERCE_VERSION == '2.1-bleeding' ) {
+		if ( version_compare( $current_db_version, '2.1.0', '<' ) || WC_VERSION == '2.1-bleeding' ) {
 			include( 'updates/woocommerce-update-2.1.php' );
 			update_option( 'woocommerce_db_version', '2.1.0' );
 		}
@@ -639,7 +639,7 @@ class WC_Install {
 
            	// Output Upgrade Notice
             $matches = null;
-            $regexp = '~==\s*Upgrade Notice\s*==\s*=\s*[0-9.]+\s*=(.*)(=\s*' . preg_quote( WOOCOMMERCE_VERSION ) . '\s*=|$)~Uis';
+            $regexp = '~==\s*Upgrade Notice\s*==\s*=\s*[0-9.]+\s*=(.*)(=\s*' . preg_quote( WC_VERSION ) . '\s*=|$)~Uis';
 
             if ( preg_match( $regexp, $response['body'], $matches ) ) {
                 $notices = (array) preg_split('~[\r\n]+~', trim( $matches[1] ) );
@@ -655,7 +655,7 @@ class WC_Install {
 
         	// Output Changelog
             $matches = null;
-            $regexp = '~==\s*Changelog\s*==\s*=\s*[0-9.]+\s*-(.*)=(.*)(=\s*' . preg_quote( WOOCOMMERCE_VERSION ) . '\s*-(.*)=|$)~Uis';
+            $regexp = '~==\s*Changelog\s*==\s*=\s*[0-9.]+\s*-(.*)=(.*)(=\s*' . preg_quote( WC_VERSION ) . '\s*-(.*)=|$)~Uis';
 
             if ( preg_match( $regexp, $response['body'], $matches ) ) {
                 $changelog = (array) preg_split('~[\r\n]+~', trim( $matches[2] ) );

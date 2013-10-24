@@ -183,7 +183,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Handling for password protected products.
 * Feature - Schema markup selector for downloadables.
 * Feature - woocommerce_get_featured_product_ids function.
-* Feature - WOOCOMMERCE_DELIMITER to customise the pipes for attributes
+* Feature - WC_DELIMITER to customise the pipes for attributes
 * Feature - Standardized, default credit card form for gateways to use if they support 'default_credit_card_form'.
 * Feature - Coupon usage limits per user (using email + ID).
 * Tweak - Added pagination to tax rate screens.
