@@ -1219,10 +1219,9 @@ function woocommerce_calc_line_taxes() {
 				) );
 
 				$line_subtotal_taxes = $tax->calc_tax( $line_subtotal, $tax_rates, false );
-				$line_taxes = $tax->calc_tax( $line_total, $tax_rates, false );
-
-				$line_subtotal_tax = $tax->round( array_sum( $line_subtotal_taxes ) );
-				$line_tax = $tax->round( array_sum( $line_taxes ) );
+				$line_taxes          = $tax->calc_tax( $line_total, $tax_rates, false );
+				$line_subtotal_tax   = array_sum( $line_subtotal_taxes );
+				$line_tax            = array_sum( $line_taxes );
 
 				if ( $line_subtotal_tax < 0 )
 					$line_subtotal_tax = 0;
@@ -1295,8 +1294,8 @@ function woocommerce_calc_line_taxes() {
 		$item['name'] 					= $tax_codes[ $key ];
 		$item['label'] 					= $tax->get_rate_label( $key );
 		$item['compound'] 				= $tax->is_compound( $key ) ? 1 : 0;
-		$item['tax_amount'] 			= woocommerce_format_decimal( woocommerce_round_tax_total( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 ), false );
-		$item['shipping_tax_amount'] 	= woocommerce_format_decimal( woocommerce_round_tax_total( isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0 ), false );
+		$item['tax_amount'] 			= woocommerce_format_decimal( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0, false );
+		$item['shipping_tax_amount'] 	= woocommerce_format_decimal( isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0, false );
 
 		if ( ! $item['label'] )
 			$item['label'] = $woocommerce->countries->tax_or_vat();
