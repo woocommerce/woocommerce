@@ -456,7 +456,11 @@
 					foreach ( $files as $file ) {
 						if ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
 							$found_files[ $plugin_name ][] = '/' . $file;
-						} elseif( file_exists( get_stylesheet_directory() . '/woocommerce/' . $file ) ) {
+						} elseif ( file_exists( get_stylesheet_directory() . '/woocommerce/' . $file ) ) {
+							$found_files[ $plugin_name ][] = '/woocommerce/' . $file;
+						} elseif ( file_exists( get_template_directory() . '/' . $file ) ) {
+							$found_files[ $plugin_name ][] = '/' . $file;
+						} elseif( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
 							$found_files[ $plugin_name ][] = '/woocommerce/' . $file;
 						}
 					}
