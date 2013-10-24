@@ -163,8 +163,14 @@ function woocommerce_trim_zeros( $price ) {
  * @return string
  */
 function woocommerce_round_tax_total( $tax ) {
-	$dp                   = (int) get_option( 'woocommerce_price_num_decimals' );
-	return round( $tax, $dp, WOOCOMMERCE_TAX_ROUNDING_MODE );
+	$dp = (int) get_option( 'woocommerce_price_num_decimals' );
+
+	if ( version_compare( phpversion(), '5.3', '<' ) ) {
+		$tax = round( $tax, $dp );
+	} else {
+		$tax = round( $tax, $dp, WOOCOMMERCE_TAX_ROUNDING_MODE );
+	}
+	return $tax;
 }
 
 /**

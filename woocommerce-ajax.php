@@ -1295,8 +1295,8 @@ function woocommerce_calc_line_taxes() {
 		$item['name'] 					= $tax_codes[ $key ];
 		$item['label'] 					= $tax->get_rate_label( $key );
 		$item['compound'] 				= $tax->is_compound( $key ) ? 1 : 0;
-		$item['tax_amount'] 			= $tax->round( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
-		$item['shipping_tax_amount'] 	= $tax->round( isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0 );
+		$item['tax_amount'] 			= woocommerce_format_decimal( woocommerce_round_tax_total( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 ), false );
+		$item['shipping_tax_amount'] 	= woocommerce_format_decimal( woocommerce_round_tax_total( isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0 ), false );
 
 		if ( ! $item['label'] )
 			$item['label'] = $woocommerce->countries->tax_or_vat();

@@ -471,7 +471,7 @@ jQuery( function($){
 				tax = parseFloat( accounting.toFixed( tax, woocommerce_admin_meta_boxes.rounding_precision ) );
 
 			// Set Total
-			$('#_order_total').val( parseFloat( accounting.toFixed( line_totals + tax + shipping - order_discount, woocommerce_admin_meta_boxes.rounding_precision ) ) ).change();
+			$('#_order_total').val( parseFloat( accounting.toFixed( line_totals + tax + shipping - order_discount, woocommerce_admin_meta_boxes.currency_format_num_decimals ) ) ).change();
 		}
 
 		$('#woocommerce-order-totals').unblock();

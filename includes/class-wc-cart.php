@@ -1134,6 +1134,10 @@ class WC_Cart {
 					}
 
 					// Tax rows - merge the totals we just got
+					if ( ! $this->round_at_subtotal ) {
+						$discounted_taxes = array_map( 'woocommerce_round_tax_total', $discounted_taxes );
+					}
+
 					foreach ( array_keys( $this->taxes + $discounted_taxes ) as $key ) {
 					    $this->taxes[ $key ] = ( isset( $discounted_taxes[ $key ] ) ? $discounted_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
 					}
@@ -1154,6 +1158,10 @@ class WC_Cart {
 					$line_total            = $tax_result['price_excl_tax'];
 
 					// Tax rows - merge the totals we just got
+					if ( ! $this->round_at_subtotal ) {
+						$discounted_taxes = array_map( 'woocommerce_round_tax_total', $discounted_taxes );
+					}
+					
 					foreach ( array_keys( $this->taxes + $discounted_taxes ) as $key ) {
 					    $this->taxes[ $key ] = ( isset( $discounted_taxes[ $key ] ) ? $discounted_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
 					}
