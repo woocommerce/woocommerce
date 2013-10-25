@@ -510,7 +510,7 @@ class WC_Order {
 	 */
 	public function get_item_subtotal( $item, $inc_tax = false, $round = true ) {
 		if ( $inc_tax )
-			$price = ( $item['line_subtotal'] + $item['line_subtotal_tax'] / $item['qty'] );
+			$price = ( $item['line_subtotal'] + $item['line_subtotal_tax'] ) / $item['qty'];
 		else
 			$price = ( $item['line_subtotal'] / $item['qty'] );
 
@@ -550,7 +550,7 @@ class WC_Order {
 	 */
 	public function get_item_total( $item, $inc_tax = false, $round = true ) {
 		if ( $inc_tax )
-			$price = ( ( $item['line_total'] + $item['line_tax'] ) / $item['qty'] );
+			$price = ( $item['line_total'] + $item['line_tax'] ) / $item['qty'];
 		else
 			$price = $item['line_total'] / $item['qty'];
 
