@@ -1053,7 +1053,7 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 				case 2 :
 					if ( strstr( $regular_price, '%' ) ) {
 						$percent = str_replace( '%', '', $regular_price ) / 100;
-						$new_price = $old_regular_price + ( $old_regular_price * $percent );
+						$new_price = $old_regular_price + ( round( $old_regular_price * $percent, absint( get_option( 'woocommerce_price_num_decimals' ) ) ) );
 					} else {
 						$new_price = $old_regular_price + $regular_price;
 					}
@@ -1061,7 +1061,7 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 				case 3 :
 					if ( strstr( $regular_price, '%' ) ) {
 						$percent = str_replace( '%', '', $regular_price ) / 100;
-						$new_price = $old_regular_price - ( $old_regular_price * $percent );
+						$new_price = $old_regular_price - ( round ( $old_regular_price * $percent, absint( get_option( 'woocommerce_price_num_decimals' ) ) ) );
 					} else {
 						$new_price = $old_regular_price - $regular_price;
 					}
