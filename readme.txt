@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.0.19 =
+* Fix - get_item_subtotal() logic
 * Tweak - For paying customer column, use a dash #3971
 * Localisation - Updated Portuguese, Slovak, French, Lithuanian
 

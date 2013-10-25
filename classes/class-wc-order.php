@@ -654,7 +654,7 @@ class WC_Order {
 	 */
 	public function get_item_subtotal( $item, $inc_tax = false, $round = true ) {
 		if ( $inc_tax )
-			$price = ( $item['line_subtotal'] + $item['line_subtotal_tax'] / $item['qty'] );
+			$price = ( $item['line_subtotal'] + $item['line_subtotal_tax'] ) / $item['qty'];
 		else
 			$price = ( $item['line_subtotal'] / $item['qty'] );
 		return apply_filters( 'woocommerce_order_amount_item_subtotal', (($round) ? number_format( $price, 2, '.', '') : $price ), $this );
@@ -690,7 +690,7 @@ class WC_Order {
 	 */
 	public function get_item_total( $item, $inc_tax = false, $round = true ) {
 		if ( $inc_tax )
-			$price = ( ( $item['line_total'] + $item['line_tax'] ) / $item['qty'] );
+			$price = ( $item['line_total'] + $item['line_tax'] ) / $item['qty'];
 		else
 			$price = $item['line_total'] / $item['qty'];
 		return apply_filters( 'woocommerce_order_amount_item_total', ( ($round) ? number_format( $price, 2, '.', '') : $price ), $this );
