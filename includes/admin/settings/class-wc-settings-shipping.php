@@ -48,7 +48,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 			if ( ! $method->has_settings() ) continue;
 
-			$title = empty( $method->method_title ) ? ucwords( $method->id ) : ucwords( $method->method_title );
+			$title = empty( $method->method_title ) ? ucfirst( $method->id ) : $method->method_title;
 
 			$sections[ strtolower( get_class( $method ) ) ] = esc_html( $title );
 		}

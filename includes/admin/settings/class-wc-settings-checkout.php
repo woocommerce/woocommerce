@@ -46,7 +46,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 		foreach ( $payment_gateways as $gateway ) {
 
-			$title = empty( $gateway->method_title ) ? ucwords( $gateway->id ) : ucwords( $gateway->method_title );
+			$title = empty( $gateway->method_title ) ? ucfirst( $gateway->id ) : $gateway->method_title;
 
 			$sections[ strtolower( get_class( $gateway ) ) ] = esc_html( $title );
 		}
