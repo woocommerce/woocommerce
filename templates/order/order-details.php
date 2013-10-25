@@ -63,10 +63,10 @@ $order = new WC_Order( $order_id );
 								foreach ( $download_files as $download_id => $file ) {
 									$i++;
 
-									$links[] = '<small><a href="' . esc_url( $file['download_url'] ) . '">' . sprintf( __( 'Download file%s', 'woocommerce' ), ( count( $download_file_urls ) > 1 ? ' ' . $i . ': ' : ': ' ) ) . esc_html( $file['name'] ) . '</a></small>';
+									$links[] = '<small><a href="' . esc_url( $file['download_url'] ) . '">' . sprintf( __( 'Download file%s', 'woocommerce' ), ( count( $download_files ) > 1 ? ' ' . $i . ': ' : ': ' ) ) . esc_html( $file['name'] ) . '</a></small>';
 								}
 
-								echo implode( '<br/>', $links );
+								echo '<br/>' . implode( '<br/>', $links );
 							}
 						?>
 					</td>

@@ -39,7 +39,8 @@ function woocommerce_sanitize_taxonomy_name( $taxonomy ) {
  */
 function woocommerce_get_filename_from_url( $file_url ) {
 	$parts = parse_url( $file_url );
-	return basename( $parts['path'] );
+	if ( isset( $parts['path'] ) )
+		return basename( $parts['path'] );
 }
 
 /**

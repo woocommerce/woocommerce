@@ -35,8 +35,8 @@ class WC_Meta_Box_Order_Downloads {
 					if ( $download_permissions && sizeof( $download_permissions ) > 0 ) foreach ( $download_permissions as $download ) {
 
 						if ( ! $product || $product->id != $download->product_id ) {
-							$product = get_product( absint( $download->product_id ) );
-							$file_count = 0;
+							$product    = get_product( absint( $download->product_id ) );
+							$file_count = 1;
 						}
 
 						// don't show permissions to files that have since been removed
@@ -207,11 +207,13 @@ class WC_Meta_Box_Order_Downloads {
 			$product_ids_count 		= sizeof( $product_ids );
 
 			for ( $i = 0; $i < $product_ids_count; $i ++ ) {
+				if ( ! isset( $product_ids[ $i ] ) )
+					continue;
 
 	            $data = array(
 					'user_id'				=> absint( $customer_user ),
 					'user_email' 			=> woocommerce_clean( $customer_email ),
-					'downloads_remaining'	=> woocommerce_clean( $downloads_remaining[$i] )
+					'downloads_remaining'	=> woocommerce_clean( $downloads_remaining[ $i ] )
 	            );
 
 	            $format = array( '%d', '%s', '%s' );
@@ -219,16 +221,16 @@ class WC_Meta_Box_Order_Downloads {
 	            $expiry  = ( array_key_exists( $i, $access_expires ) && $access_expires[ $i ] != '' ) ? date_i18n( 'Y-m-d', strtotime( $access_expires[ $i ] ) ) : null;
 
 	            if ( ! is_null( $expiry ) ) {
-	                $data['access_expires'] = $expiry;
-	                $format[] = '%s';
+					$data['access_expires'] = $expiry;
+					$format[]               = '%s';
 	            }
 
 	            $wpdb->update( $wpdb->prefix . "woocommerce_downloadable_product_permissions",
 				    $data,
 	                array(
 						'order_id' 		=> $post_id,
-						'product_id' 	=> absint( $product_ids[$i] ),
-						'download_id'	=> woocommerce_clean( $download_ids[$i] )
+						'product_id' 	=> absint( $product_ids[ $i ] ),
+						'download_id'	=> woocommerce_clean( $download_ids[ $i ] )
 						),
 					$format, array( '%d', '%d', '%s' )
 				);

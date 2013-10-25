@@ -138,7 +138,6 @@ class WC_Order {
 	 */
 	public function get_formatted_billing_address() {
 		if ( ! $this->formatted_billing_address ) {
-			global $woocommerce;
 
 			// Formatted Addresses
 			$address = apply_filters( 'woocommerce_order_formatted_billing_address', array(
@@ -153,7 +152,7 @@ class WC_Order {
 				'country'		=> $this->billing_country
 			), $this );
 
-			$this->formatted_billing_address = $woocommerce->countries->get_formatted_address( $address );
+			$this->formatted_billing_address = WC()->countries->get_formatted_address( $address );
 		}
 		return $this->formatted_billing_address;
 	}
@@ -191,7 +190,6 @@ class WC_Order {
 	public function get_formatted_shipping_address() {
 		if ( ! $this->formatted_shipping_address ) {
 			if ( $this->shipping_address_1 ) {
-				global $woocommerce;
 
 				// Formatted Addresses
 				$address = apply_filters( 'woocommerce_order_formatted_shipping_address', array(
@@ -206,7 +204,7 @@ class WC_Order {
 					'country'		=> $this->shipping_country
 				), $this );
 
-				$this->formatted_shipping_address = $woocommerce->countries->get_formatted_address( $address );
+				$this->formatted_shipping_address = WC()->countries->get_formatted_address( $address );
 			}
 		}
 		return $this->formatted_shipping_address;
@@ -247,7 +245,7 @@ class WC_Order {
 	 * @return void
 	 */
 	public function get_items( $type = '' ) {
-		global $wpdb, $woocommerce;
+		global $wpdb;
 
 		if ( empty( $type ) )
 			$type = array( 'line_item' );
@@ -291,7 +289,7 @@ class WC_Order {
 	 * @return string
 	 */
 	public function get_item_count( $type = '' ) {
-		global $wpdb, $woocommerce;
+		global $wpdb;
 
 		if ( empty( $type ) )
 			$type = array( 'line_item' );
@@ -652,16 +650,17 @@ class WC_Order {
 	 * @return string
 	 */
 	public function get_formatted_line_subtotal( $item, $tax_display = '' ) {
-
 		if ( ! $tax_display )
 			$tax_display = $this->tax_display_cart;
 
 		$subtotal = 0;
 
-		if (!isset($item['line_subtotal']) || !isset($item['line_subtotal_tax'])) return;
+		if ( ! isset( $item['line_subtotal'] ) || ! isset( $item['line_subtotal_tax'] ) ) 
+			return;
 
 		if ( $tax_display == 'excl' ) {
-			if ( $this->prices_include_tax ) $ex_tax_label = 1; else $ex_tax_label = 0;
+			$ex_tax_label = $this->prices_include_tax ? 1 : 0;
+
 			$subtotal = woocommerce_price( $this->get_line_subtotal( $item ), array( 'ex_tax_label' => $ex_tax_label ) );
 		} else {
 			$subtotal = woocommerce_price( $this->get_line_subtotal( $item, true ) );
@@ -693,31 +692,28 @@ class WC_Order {
 	 * @return string
 	 */
 	public function get_subtotal_to_display( $compound = false, $tax_display = '' ) {
-		global $woocommerce;
-
 		if ( ! $tax_display )
 			$tax_display = $this->tax_display_cart;
 
 		$subtotal = 0;
 
 		if ( ! $compound ) {
-
 			foreach ( $this->get_items() as $item ) {
 
-				if ( ! isset( $item['line_subtotal'] ) || ! isset( $item['line_subtotal_tax'] ) ) return;
+				if ( ! isset( $item['line_subtotal'] ) || ! isset( $item['line_subtotal_tax'] ) ) 
+					return;
 
-				$subtotal += $this->get_line_subtotal( $item );
+				$subtotal += $item['line_subtotal'];
 
 				if ( $tax_display == 'incl' ) {
 					$subtotal += $item['line_subtotal_tax'];
 				}
-
 			}
 
 			$subtotal = woocommerce_price( $subtotal );
 
 			if ( $tax_display == 'excl' && $this->prices_include_tax )
-				$subtotal .= ' <small>' . $woocommerce->countries->ex_tax_or_vat() . '</small>';
+				$subtotal .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
 
 		} else {
 
@@ -746,7 +742,6 @@ class WC_Order {
 			$subtotal = $subtotal - $this->get_cart_discount();
 
 			$subtotal = woocommerce_price( $subtotal );
-
 		}
 
 		return apply_filters( 'woocommerce_order_subtotal_to_display', $subtotal, $compound, $this );
@@ -760,8 +755,6 @@ class WC_Order {
 	 * @return string
 	 */
 	public function get_shipping_to_display( $tax_display = '' ) {
-		global $woocommerce;
-
 		if ( ! $tax_display )
 			$tax_display = $this->tax_display_cart;
 
@@ -775,7 +768,7 @@ class WC_Order {
 				$shipping = woocommerce_price( $this->order_shipping );
 
 				if ( $this->order_shipping_tax > 0 && $this->prices_include_tax )
-					$tax_text = $woocommerce->countries->ex_tax_or_vat() . ' ';
+					$tax_text = WC()->countries->ex_tax_or_vat() . ' ';
 
 			} else {
 
@@ -783,7 +776,7 @@ class WC_Order {
 				$shipping = woocommerce_price( $this->order_shipping + $this->order_shipping_tax );
 
 				if ( $this->order_shipping_tax > 0 && ! $this->prices_include_tax )
-					$tax_text = $woocommerce->countries->inc_tax_or_vat() . ' ';
+					$tax_text = WC()->countries->inc_tax_or_vat() . ' ';
 
 			}
 
@@ -841,8 +834,6 @@ class WC_Order {
 	 * @return array
 	 */
 	public function get_order_item_totals( $tax_display = '' ) {
-		global $woocommerce;
-
 		if ( ! $tax_display )
 			$tax_display = $this->tax_display_cart;
 
@@ -1053,7 +1044,6 @@ class WC_Order {
 	 * @return string
 	 */
 	public function get_cancel_order_url() {
-		global $woocommerce;
 		return apply_filters('woocommerce_get_cancel_order_url', wp_nonce_url( add_query_arg( array( 'cancel_order' => 'true', 'order' => $this->order_key, 'order_id' => $this->id ), trailingslashit( home_url() ) ), 'woocommerce-cancel_order' ) );
 	}
 
@@ -1121,6 +1111,7 @@ class WC_Order {
 			WHERE user_email = %s
 			AND order_key = %s
 			AND product_id = %s
+			ORDER BY permission_id
 		", $this->billing_email, $this->order_key, $product_id ) );
 
 		$files = array();
@@ -1260,9 +1251,7 @@ class WC_Order {
 	 * @return void
 	 */
 	public function cancel_order( $note = '' ) {
-		global $woocommerce;
-
-		unset( $woocommerce->session->order_awaiting_payment );
+		unset( WC()->session->order_awaiting_payment );
 
 		$this->update_status('cancelled', $note);
 
@@ -1281,12 +1270,11 @@ class WC_Order {
 	 * @return void
 	 */
 	public function payment_complete() {
-		global $woocommerce;
 
 		do_action( 'woocommerce_pre_payment_complete', $this->id );
 
-		if ( ! empty( $woocommerce->session->order_awaiting_payment ) )
-			unset( $woocommerce->session->order_awaiting_payment );
+		if ( ! empty( WC()->session->order_awaiting_payment ) )
+			unset( WC()->session->order_awaiting_payment );
 
 		if ( $this->id && ( $this->status == 'on-hold' || $this->status == 'pending' || $this->status == 'failed' ) ) {
 
@@ -1391,7 +1379,6 @@ class WC_Order {
 	 * @return void
 	 */
 	public function increase_coupon_usage_counts() {
-		global $woocommerce;
 
 		if ( get_post_meta( $this->id, '_recorded_coupon_usage_counts', true ) == 'yes' )
 			return;
@@ -1422,7 +1409,6 @@ class WC_Order {
 	 * @return void
 	 */
 	public function decrease_coupon_usage_counts() {
-		global $woocommerce;
 
 		if ( get_post_meta( $this->id, '_recorded_coupon_usage_counts', true ) != 'yes' )
 			return;
