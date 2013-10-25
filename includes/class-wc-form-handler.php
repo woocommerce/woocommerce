@@ -631,6 +631,11 @@ class WC_Form_Handler {
 			try {
 				$creds = array();
 
+				$result = apply_filters( 'woocommerce_process_login_before_error', '', $_POST['username'], $_POST['password'] );
+
+				if ( ! empty( $result ) )
+					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . $result );
+
 				if ( empty( $_POST['username'] ) )
 					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'Username is required.', 'woocommerce' ) );
 				if ( empty( $_POST['password'] ) )
@@ -746,6 +751,11 @@ class WC_Form_Handler {
 		if ( ! empty( $_POST['register'] ) ) {
 
 			WC()->verify_nonce( 'register' );
+
+			$result = apply_filters( 'woocommerce_process_registration_before_error', '', $_POST['username'], $_POST['password'], $_POST['email'] );
+
+			if ( ! empty( $result ) )
+				wc_add_error( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . $result );
 
 			$username   = ! empty( $_POST['username'] ) ? woocommerce_clean( $_POST['username'] ) : '';
 			$email      = ! empty( $_POST['email'] ) ? woocommerce_clean( $_POST['email'] ) : '';
