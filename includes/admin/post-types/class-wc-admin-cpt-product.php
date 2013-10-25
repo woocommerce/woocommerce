@@ -795,7 +795,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 					case 2 :
 						if ( strstr( $regular_price, '%' ) ) {
 							$percent = str_replace( '%', '', $regular_price ) / 100;
-							$new_price = $old_regular_price + ( $old_regular_price * $percent );
+							$new_price = $old_regular_price + ( round( $old_regular_price * $percent ) );
 						} else {
 							$new_price = $old_regular_price + $regular_price;
 						}
@@ -803,7 +803,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 					case 3 :
 						if ( strstr( $regular_price, '%' ) ) {
 							$percent = str_replace( '%', '', $regular_price ) / 100;
-							$new_price = $old_regular_price - ( $old_regular_price * $percent );
+							$new_price = $old_regular_price - ( round ( $old_regular_price * $percent ) );
 						} else {
 							$new_price = $old_regular_price - $regular_price;
 						}
