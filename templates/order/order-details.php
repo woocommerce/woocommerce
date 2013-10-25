@@ -100,6 +100,9 @@ $order = new WC_Order( $order_id );
 <?php
 	if ($order->billing_email) echo '<dt>'.__( 'Email:', 'woocommerce' ).'</dt><dd>'.$order->billing_email.'</dd>';
 	if ($order->billing_phone) echo '<dt>'.__( 'Telephone:', 'woocommerce' ).'</dt><dd>'.$order->billing_phone.'</dd>';
+
+	// Additional customer details hook
+	do_action( 'woocommerce_order_details_after_customer_details', $order );
 ?>
 </dl>
 
