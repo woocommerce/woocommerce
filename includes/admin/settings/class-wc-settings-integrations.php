@@ -48,7 +48,7 @@ class WC_Settings_Integrations extends WC_Settings_Page {
 			$current_section = current( $integrations )->id;
 
 		foreach ( $integrations as $integration ) {
-			$title = empty( $integration->method_title ) ? ucfirst( $integration->id ) : ucfirst( $integration->method_title );
+			$title = empty( $integration->method_title ) ? ucfirst( $integration->id ) : $integration->method_title;
 
 			$sections[ strtolower( $integration->id ) ] = esc_html( $title );
 		}
