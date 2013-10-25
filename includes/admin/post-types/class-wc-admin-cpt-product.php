@@ -331,7 +331,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 					echo '<span class="product-type tips variable" data-tip="' . __( 'Variable', 'woocommerce' ) . '"></span>';
 				else:
 					// Assuming that we have other types in future
-					echo '<span class="product-type tips ' . $the_product->product_type . '" data-tip="' . ucwords( $the_product->product_type ) . '"></span>';
+					echo '<span class="product-type tips ' . $the_product->product_type . '" data-tip="' . ucfirst( $the_product->product_type ) . '"></span>';
 				endif;
 			break;
 			case "price":
@@ -491,7 +491,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 					break;
 				default :
 					// Assuming that we have other types in future
-					$output .= ucwords( $term->name );
+					$output .= ucfirst( $term->name );
 					break;
 			}
 
