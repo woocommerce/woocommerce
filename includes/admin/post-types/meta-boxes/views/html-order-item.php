@@ -176,9 +176,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 		<div class="view">
 			<?php
 				if ( isset( $item['line_tax'] ) ) {
-					if ( isset( $item['line_subtotal_tax'] ) && $item['line_subtotal_tax'] != $item['line_tax'] ) echo '<del>' . woocommerce_price( $item['line_subtotal_tax'] ) . '</del> ';
+					if ( isset( $item['line_subtotal_tax'] ) && $item['line_subtotal_tax'] != $item['line_tax'] ) echo '<del>' . woocommerce_price( woocommerce_round_tax_total( $item['line_subtotal_tax'] ) ) . '</del> ';
 
-					echo woocommerce_price( $item['line_tax'] );
+					echo woocommerce_price( woocommerce_round_tax_total( $item['line_tax'] ) );
 				}
 			?>
 		</div>

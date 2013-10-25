@@ -454,7 +454,7 @@ function woocommerce_save_attributes() {
 
 				 	// Text based attributes - Posted values are term names - don't change to slugs
 				 	} else {
-				 		$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WOOCOMMERCE_DELIMITER, $attribute_values[ $i ] ) ) );
+				 		$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) );
 				 	}
 
 				 	// Remove empty items in the array
@@ -483,7 +483,7 @@ function woocommerce_save_attributes() {
 		 	} elseif ( isset( $attribute_values[ $i ] ) ) {
 
 		 		// Text based, separate by pipe
-		 		$values = implode( ' ' . WOOCOMMERCE_DELIMITER . ' ', array_map( 'woocommerce_clean', array_map( 'stripslashes', explode( WOOCOMMERCE_DELIMITER, $attribute_values[ $i ] ) ) ) );
+		 		$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'woocommerce_clean', array_map( 'stripslashes', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) ) );
 
 		 		// Custom attribute - Add attribute to array and set the values
 			 	$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
@@ -635,7 +635,7 @@ function woocommerce_link_all_variations() {
 				$options[] = $term->slug;
 			}
 		} else {
-			$options = explode( WOOCOMMERCE_DELIMITER, $attribute['value'] );
+			$options = explode( WC_DELIMITER, $attribute['value'] );
 		}
 
 		$options = array_map( 'sanitize_title', array_map( 'trim', $options ) );
@@ -1219,10 +1219,9 @@ function woocommerce_calc_line_taxes() {
 				) );
 
 				$line_subtotal_taxes = $tax->calc_tax( $line_subtotal, $tax_rates, false );
-				$line_taxes = $tax->calc_tax( $line_total, $tax_rates, false );
-
-				$line_subtotal_tax = $tax->round( array_sum( $line_subtotal_taxes ) );
-				$line_tax = $tax->round( array_sum( $line_taxes ) );
+				$line_taxes          = $tax->calc_tax( $line_total, $tax_rates, false );
+				$line_subtotal_tax   = array_sum( $line_subtotal_taxes );
+				$line_tax            = array_sum( $line_taxes );
 
 				if ( $line_subtotal_tax < 0 )
 					$line_subtotal_tax = 0;
@@ -1295,8 +1294,8 @@ function woocommerce_calc_line_taxes() {
 		$item['name'] 					= $tax_codes[ $key ];
 		$item['label'] 					= $tax->get_rate_label( $key );
 		$item['compound'] 				= $tax->is_compound( $key ) ? 1 : 0;
-		$item['tax_amount'] 			= $tax->round( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
-		$item['shipping_tax_amount'] 	= $tax->round( isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0 );
+		$item['tax_amount'] 			= woocommerce_format_decimal( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0, false );
+		$item['shipping_tax_amount'] 	= woocommerce_format_decimal( isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0, false );
 
 		if ( ! $item['label'] )
 			$item['label'] = $woocommerce->countries->tax_or_vat();

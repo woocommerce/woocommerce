@@ -59,7 +59,7 @@ if ( empty( $attributes ) && ( ! $product->enable_dimensions_display() || ( ! $p
 				} else {
 
 					// Convert pipes to commas and display values
-					$values = array_map( 'trim', explode( WOOCOMMERCE_DELIMITER, $attribute['value'] ) );
+					$values = array_map( 'trim', explode( WC_DELIMITER, $attribute['value'] ) );
 					echo apply_filters( 'woocommerce_attribute', wpautop( wptexturize( implode( ', ', $values ) ) ), $attribute, $values );
 
 				}

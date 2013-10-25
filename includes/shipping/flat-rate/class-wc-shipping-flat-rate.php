@@ -243,7 +243,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			// Loop options
 			foreach ( $this->options as $option ) {
 
-				$this_option = array_map( 'trim', explode( WOOCOMMERCE_DELIMITER, $option ) );
+				$this_option = array_map( 'trim', explode( WC_DELIMITER, $option ) );
 
 				if ( sizeof( $this_option ) !== 3 ) continue;
 

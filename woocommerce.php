@@ -122,11 +122,7 @@ final class WooCommerce {
 		spl_autoload_register( array( $this, 'autoload' ) );
 
 		// Define constants
-		define( 'WOOCOMMERCE_PLUGIN_FILE', __FILE__ );
-		define( 'WOOCOMMERCE_VERSION', $this->version );
-		define( 'WOOCOMMERCE_TEMPLATE_PATH', $this->template_path() );
-		if ( ! defined( 'WOOCOMMERCE_DELIMITER' ) )
-			define( 'WOOCOMMERCE_DELIMITER', '|' );
+		$this->define_constants();
 
 		// Include required files
 		$this->includes();
@@ -157,8 +153,8 @@ final class WooCommerce {
 			return $this->$key();
 		else switch( $key ) {
 			case 'template_url':
-				_deprecated_argument( 'Woocommerce->template_url', '2.1', 'WOOCOMMERCE_TEMPLATE_PATH constant' );
-				return WOOCOMMERCE_TEMPLATE_PATH;
+				_deprecated_argument( 'Woocommerce->template_url', '2.1', 'WC_TEMPLATE_PATH constant' );
+				return WC_TEMPLATE_PATH;
 			case 'messages':
 				_deprecated_argument( 'Woocommerce->messages', '2.1', 'The "messages" field is moved to the messages helper class.' );
 				return $this->session->get( 'wc_messages', array() );
@@ -248,9 +244,31 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Define WC Constants
+	 */
+	private function define_constants() {
+		define( 'WC_PLUGIN_FILE', __FILE__ );
+		define( 'WC_VERSION', $this->version );
+		define( 'WOOCOMMERCE_VERSION', WC_VERSION ); // Backwards compat
+
+		if ( ! defined( 'WC_TEMPLATE_PATH' ) )
+			define( 'WC_TEMPLATE_PATH', $this->template_path() );
+		
+		if ( ! defined( 'WC_ROUNDING_PRECISION' ) )
+			define( 'WC_ROUNDING_PRECISION', 4 );
+
+		// 1 = PHP_ROUND_HALF_UP, 2 = PHP_ROUND_HALF_DOWN
+		if ( ! defined( 'WC_TAX_ROUNDING_MODE' ) )
+			define( 'WC_TAX_ROUNDING_MODE', get_option( 'woocommerce_prices_include_tax' ) == 'yes' ? 2 : 1 ); 
+
+		if ( ! defined( 'WC_DELIMITER' ) )
+			define( 'WC_DELIMITER', '|' );
+	}
+
+	/**
 	 * Include required core files used in admin and on the frontend.
 	 */
-	public function includes() {
+	private function includes() {
 		include( 'includes/wc-core-functions.php' );
 		include( 'includes/class-wc-install.php' );
 		include( 'includes/class-wc-download-handler.php' );
@@ -483,7 +501,7 @@ final class WooCommerce {
 	 * @return string
 	 */
 	public function template_path() {
-		return apply_filters( 'woocommerce_template_path', 'woocommerce/' );
+		return apply_filters( 'WC_TEMPLATE_PATH', 'woocommerce/' );
 	}
 
 	/**

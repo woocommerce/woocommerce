@@ -269,8 +269,8 @@ class WC_Meta_Box_Order_Totals {
 		}
 
 		// Update totals
-		update_post_meta( $post_id, '_order_tax', woocommerce_format_decimal( $total_tax, false ) );
-		update_post_meta( $post_id, '_order_shipping_tax', woocommerce_format_decimal( $total_shipping_tax, false ) );
+		update_post_meta( $post_id, '_order_tax', woocommerce_format_decimal( woocommerce_round_tax_total( $total_tax ), false ) );
+		update_post_meta( $post_id, '_order_shipping_tax', woocommerce_format_decimal( woocommerce_round_tax_total( $total_shipping_tax ), false ) );
 		update_post_meta( $post_id, '_order_discount', woocommerce_format_decimal( $_POST['_order_discount'], false ) );
 		update_post_meta( $post_id, '_order_total', woocommerce_format_decimal( $_POST['_order_total'], false ) );
 

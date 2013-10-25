@@ -76,7 +76,9 @@ class WC_Admin_Assets {
 
 		wp_register_script( 'accounting', $woocommerce->plugin_url() . '/assets/js/admin/accounting' . $suffix . '.js', array( 'jquery' ), '1.3.2' );
 
-		wp_register_script( 'woocommerce_admin_meta_boxes', $woocommerce->plugin_url() . '/assets/js/admin/meta-boxes' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'accounting' ), $woocommerce->version );
+		wp_register_script( 'round', $woocommerce->plugin_url() . '/assets/js/admin/round' . $suffix . '.js', array( 'jquery' ), '1.0.0' );
+
+		wp_register_script( 'woocommerce_admin_meta_boxes', $woocommerce->plugin_url() . '/assets/js/admin/meta-boxes' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'accounting', 'round' ), $woocommerce->version );
 
 		wp_register_script( 'woocommerce_admin_meta_boxes_variations', $woocommerce->plugin_url() . '/assets/js/admin/meta-boxes-variations' . $suffix . '.js', array( 'jquery', 'jquery-ui-sortable' ), $woocommerce->version );
 
@@ -160,6 +162,8 @@ class WC_Admin_Assets {
 				'currency_format_decimal_sep'	=> esc_attr( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ) ),
 				'currency_format_thousand_sep'	=> esc_attr( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ) ),
 				'currency_format'				=> esc_attr( str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) ), // For accounting JS
+				'rounding_precision'            => WC_ROUNDING_PRECISION,
+				'tax_rounding_mode'             => WC_TAX_ROUNDING_MODE,
 				'product_types'					=> array_map( 'sanitize_title', get_terms( 'product_type', array( 'hide_empty' => false, 'fields' => 'names' ) ) ),
 				'default_attribute_visibility'  => apply_filters( 'default_attribute_visibility', false ),
 				'default_attribute_variation'   => apply_filters( 'default_attribute_variation', false ),

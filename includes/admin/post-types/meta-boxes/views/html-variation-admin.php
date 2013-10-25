@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 				} else {
 
-					$options = array_map( 'trim', explode( WOOCOMMERCE_DELIMITER, $attribute['value'] ) );
+					$options = array_map( 'trim', explode( WC_DELIMITER, $attribute['value'] ) );
 
 					foreach ( $options as $option ) {
 						echo '<option ' . selected( sanitize_title( $variation_selected_value ), sanitize_title( $option ), false ) . ' value="' . esc_attr( sanitize_title( $option ) ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
