@@ -34,7 +34,10 @@ global $woocommerce; ?>
 				<label for="password"><?php _e( 'Password', 'woocommerce' ); ?> <span class="required">*</span></label>
 				<input class="input-text" type="password" name="password" id="password" />
 			</p>
-
+			<p class="form-row">
+				<label for="remember">
+				<input name="rememberme" type="checkbox" id="rememberme" value="forever" /> <?php _e( 'Remember Me', 'woocommerce' ); ?></label>
+			</p>
 			<p class="form-row">
 				<?php wp_nonce_field( 'woocommerce-login' ) ?>
 				<input type="submit" class="button" name="login" value="<?php _e( 'Login', 'woocommerce' ); ?>" /> <a class="lost_password" href="<?php echo esc_url( woocommerce_get_endpoint_url( 'lost-password', '', get_permalink( woocommerce_get_page_id( 'myaccount' ) ) ) ); ?>"><?php _e( 'Lost Password?', 'woocommerce' ); ?></a>
