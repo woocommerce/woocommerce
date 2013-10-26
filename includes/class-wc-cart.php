@@ -913,6 +913,9 @@ class WC_Cart {
 				// Prices
 				$base_price = $_product->get_price();
 				$line_price = $_product->get_price() * $values['quantity'];
+				
+				$line_subtotal = 0;
+				$line_subtotal_tax = 0;
 
 				/**
 				 * No tax to calculate
