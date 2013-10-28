@@ -60,15 +60,13 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			</div>
 		<?php endif;
 
-		echo '<p class="add_review"><a href="#review_form" class="inline show_review_form button">' . __( 'Add Review', 'woocommerce' ) . '</a></p>';
-
 		$title_reply = __( 'Add a review', 'woocommerce' );
 
 	else :
 
 		$title_reply = __( 'Be the first to review', 'woocommerce' ).' &ldquo;' . get_the_title() . '&rdquo;';
 
-		echo '<p class="noreviews">' . sprintf( __( 'There are no reviews yet, would you like to %s submit yours%s?', 'woocommerce' ), '<a href="#review_form" class="inline show_review_form" title="' . __( 'Add Your Review', 'woocommerce' ) . '">', '</a>' ) . '</p>';
+		echo '<p class="noreviews">' . __( 'There are no reviews yet.', 'woocommerce' ) . '</p>';
 
 	endif;
 
