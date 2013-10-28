@@ -119,7 +119,7 @@ function woocommerce_ajax_update_order_review() {
 		define( 'WOOCOMMERCE_CHECKOUT', true );
 
 	if ( sizeof( WC()->cart->get_cart() ) == 0 ) {
-		echo '<div class="woocommerce-error">' . __( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . home_url() . '">' . __( 'Return to homepage &rarr;', 'woocommerce' ) . '</a></div>';
+		echo '<div class="woocommerce-error">' . __( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . home_url() . '" class="wc-backward">' . __( 'Return to homepage', 'woocommerce' ) . '</a></div>';
 		die();
 	}
 

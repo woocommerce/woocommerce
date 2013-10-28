@@ -55,8 +55,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 		if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) : ?>
 			<div class="navigation">
-				<div class="nav-previous"><?php previous_comments_link( __( '<span class="meta-nav">&larr;</span> Previous', 'woocommerce' ) ); ?></div>
-				<div class="nav-next"><?php next_comments_link( __( 'Next <span class="meta-nav">&rarr;</span>', 'woocommerce' ) ); ?></div>
+				<div class="nav-previous wc-backward"><?php previous_comments_link( __( 'Previous', 'woocommerce' ) ); ?></div>
+				<div class="nav-next wc-forward"><?php next_comments_link( __( 'Next', 'woocommerce' ) ); ?></div>
 			</div>
 		<?php endif;
 

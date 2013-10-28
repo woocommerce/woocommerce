@@ -132,7 +132,7 @@ class WC_Frontend_Scripts {
 		wp_localize_script( 'wc-add-to-cart', 'wc_add_to_cart_params', apply_filters( 'wc_add_to_cart_params', array(
 			'ajax_url'                => WC()->ajax_url(),
 			'ajax_loader_url'         => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
-			'i18n_view_cart'          => esc_attr__( 'View Cart &rarr;', 'woocommerce' ),
+			'i18n_view_cart'          => esc_attr__( 'View Cart', 'woocommerce' ),
 			'cart_url'                => get_permalink( woocommerce_get_page_id( 'cart' ) ),
 			'is_cart'                 => is_cart(),
 			'cart_redirect_after_add' => get_option( 'woocommerce_cart_redirect_after_add' )

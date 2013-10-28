@@ -405,7 +405,7 @@ class WC_Checkout {
 		do_action( 'woocommerce_before_checkout_process' );
 
 		if ( sizeof( WC()->cart->get_cart() ) == 0 )
-			wc_add_error( sprintf( __( 'Sorry, your session has expired. <a href="%s">Return to homepage &rarr;</a>', 'woocommerce' ), home_url() ) );
+			wc_add_error( sprintf( __( 'Sorry, your session has expired. <a href="%s" class="wc-backward">Return to homepage</a>', 'woocommerce' ), home_url() ) );
 
 		do_action( 'woocommerce_checkout_process' );
 
