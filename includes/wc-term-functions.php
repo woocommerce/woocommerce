@@ -391,11 +391,9 @@ function _woocommerce_term_recount( $terms, $taxonomy, $callback = true, $terms_
 	$terms = array_filter( (array) $terms );
 
 	// Ancestors need counting
-	if ( $terms ) {
+	if ( is_taxonomy_hierarchical( $taxonomy->name ) && $terms ) {
 		foreach ( $terms as $term_id ) {
-			if ( is_taxonomy_hierarchical( $taxonomy->name ) ) {
-				$terms = array_merge( $terms, get_ancestors( $term_id, $taxonomy->name ) );
-			}
+			$terms = array_merge( $terms, get_ancestors( $term_id, $taxonomy->name ) );
 		}
 	}
 
