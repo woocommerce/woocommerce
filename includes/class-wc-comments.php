@@ -40,7 +40,7 @@ class WC_Comments {
 	 * and are not filtered, however, the code current_user_can( 'read_post', $comment->comment_post_ID ) should keep them safe since only admin and
 	 * shop managers can view orders anyway.
 	 *
-	 * The frontend view order pages get around this filter by using remove_filter('comments_clauses', 'woocommerce_exclude_order_comments');
+	 * The frontend view order pages get around this filter by using remove_filter('comments_clauses', array( 'WC_Comments' ,'exclude_order_comments') );
 	 *
 	 * @param array $clauses
 	 * @return array

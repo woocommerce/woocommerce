@@ -389,7 +389,7 @@ class WC_Meta_Box_Product_Data {
 					<a href="#" class="close_all"><?php _e( 'Close all', 'woocommerce' ); ?></a><a href="#" class="expand_all"><?php _e( 'Expand all', 'woocommerce' ); ?></a>
 				</p>
 
-				<div class="product_attributes wc-metaboxes">
+				<div class="woocommerce_attributes wc-metaboxes">
 
 					<?php
 						// Array of defined attribute taxonomies
