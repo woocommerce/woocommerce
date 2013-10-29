@@ -150,6 +150,10 @@ class WC_Shortcode_My_Account {
 	 */
 	private function edit_address( $load_address = 'billing' ) {
 		global $woocommerce;
+		
+		// Current user
+		global $current_user;
+		get_currentuserinfo();
 
 		$load_address = sanitize_key( $load_address );
 

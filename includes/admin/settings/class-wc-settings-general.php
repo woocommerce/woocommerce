@@ -177,7 +177,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'desc' 	=> __( 'Enable Lightbox', 'woocommerce' ),
 				'id' 		=> 'woocommerce_enable_lightbox',
 				'default'	=> 'yes',
-				'desc_tip'	=> __( 'Include WooCommerce\'s lightbox. Product gallery images and the add review form will open in a lightbox.', 'woocommerce' ),
+				'desc_tip'	=> __( 'Include WooCommerce\'s lightbox. Product gallery images will open in a lightbox.', 'woocommerce' ),
 				'type' 		=> 'checkbox',
 				'checkboxgroup'		=> 'start'
 			),

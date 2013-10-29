@@ -58,7 +58,6 @@ class WC_Frontend_Scripts {
 		// Register any scripts for later use, or used as dependencies
 		wp_register_script( 'chosen', $assets_path . 'js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), '0.9.14', true );
 		wp_register_script( 'jquery-blockui', $assets_path . 'js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.60', true );
-		wp_register_script( 'jquery-placeholder', $assets_path . 'js/jquery-placeholder/jquery.placeholder' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
 		wp_register_script( 'jquery-payment', $assets_path . 'js/jquery-payment/jquery.payment' . $suffix . '.js', array( 'jquery' ), '1.0.2', true );
 		wp_register_script( 'wc-credit-card-form', $assets_path . 'js/frontend/credit-card-form' . $suffix . '.js', array( 'jquery', 'jquery-payment' ), WC_VERSION, true );
 
@@ -94,7 +93,7 @@ class WC_Frontend_Scripts {
 			wp_enqueue_script( 'wc-single-product' );
 
 		// Global frontend scripts
-		wp_enqueue_script( 'woocommerce', $frontend_script_path . 'woocommerce' . $suffix . '.js', array( 'jquery', 'jquery-blockui', 'jquery-placeholder' ), WC_VERSION, true );
+		wp_enqueue_script( 'woocommerce', $frontend_script_path . 'woocommerce' . $suffix . '.js', array( 'jquery', 'jquery-blockui' ), WC_VERSION, true );
 		wp_enqueue_script( 'wc-cart-fragments', $frontend_script_path . 'cart-fragments' . $suffix . '.js', array( 'jquery', 'jquery-cookie' ), WC_VERSION, true );
 
 		// Variables for JS scripts
@@ -133,7 +132,7 @@ class WC_Frontend_Scripts {
 		wp_localize_script( 'wc-add-to-cart', 'wc_add_to_cart_params', apply_filters( 'wc_add_to_cart_params', array(
 			'ajax_url'                => WC()->ajax_url(),
 			'ajax_loader_url'         => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
-			'i18n_view_cart'          => esc_attr__( 'View Cart &rarr;', 'woocommerce' ),
+			'i18n_view_cart'          => esc_attr__( 'View Cart', 'woocommerce' ),
 			'cart_url'                => get_permalink( woocommerce_get_page_id( 'cart' ) ),
 			'is_cart'                 => is_cart(),
 			'cart_redirect_after_add' => get_option( 'woocommerce_cart_redirect_after_add' )

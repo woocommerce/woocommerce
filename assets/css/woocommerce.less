@@ -54,7 +54,24 @@ p.demo_store {
 	}
 }
 
-.woocommerce, .woocommerce-page { // namespace to avoid conflict with common global class names
+/* =Utilities
+-------------------------------------------------------------- */
+.wc-forward, .wc-forward a {
+	&:after {
+		.iconafter( "\e029" );
+		font-size:.75em;
+	}
+}
+.wc-backward, .wc-backward a {
+	&:before {
+		.iconbefore( "\e02f" );
+		font-size:.75em;
+	}
+}
+
+/* =Main Styles (namespace to avoid conflict with common global class names)
+-------------------------------------------------------------- */
+.woocommerce, .woocommerce-page {
 
 	.woocommerce-message, .woocommerce-error, .woocommerce-info {
 		padding: 1em 1em 1em 3.5em !important;

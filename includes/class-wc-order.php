@@ -1520,7 +1520,7 @@ class WC_Order {
 			'type' => ''
 		);
 
-		remove_filter('comments_clauses', 'woocommerce_exclude_order_comments');
+		remove_filter('comments_clauses', array( 'WC_Comments' ,'exclude_order_comments') );
 
 		$comments = get_comments( $args );
 
@@ -1531,7 +1531,7 @@ class WC_Order {
 				$notes[] = $comment;
 		endforeach;
 
-		add_filter('comments_clauses', 'woocommerce_exclude_order_comments');
+		add_filter('comments_clauses', array( 'WC_Comments' ,'exclude_order_comments') );
 
 		return (array) $notes;
 

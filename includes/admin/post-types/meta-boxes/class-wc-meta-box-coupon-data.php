@@ -36,7 +36,7 @@ class WC_Meta_Box_Coupon_Data {
 						'general' => array(
 							'label'  => __( 'General', 'woocommerce' ),
 							'target' => 'general_coupon_data',
-							'class'  => '',
+							'class'  => 'general_coupon_data',
 						),
 						'usage_restriction' => array(
 							'label'  => __( 'Usage Restriction', 'woocommerce' ),

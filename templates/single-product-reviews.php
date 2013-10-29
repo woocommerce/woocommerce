@@ -55,12 +55,10 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 		if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) : ?>
 			<div class="navigation">
-				<div class="nav-previous"><?php previous_comments_link( __( '<span class="meta-nav">&larr;</span> Previous', 'woocommerce' ) ); ?></div>
-				<div class="nav-next"><?php next_comments_link( __( 'Next <span class="meta-nav">&rarr;</span>', 'woocommerce' ) ); ?></div>
+				<div class="nav-previous wc-backward"><?php previous_comments_link( __( 'Previous', 'woocommerce' ) ); ?></div>
+				<div class="nav-next wc-forward"><?php next_comments_link( __( 'Next', 'woocommerce' ) ); ?></div>
 			</div>
 		<?php endif;
-
-		echo '<p class="add_review"><a href="#review_form" class="inline show_review_form button">' . __( 'Add Review', 'woocommerce' ) . '</a></p>';
 
 		$title_reply = __( 'Add a review', 'woocommerce' );
 
@@ -68,7 +66,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 		$title_reply = __( 'Be the first to review', 'woocommerce' ).' &ldquo;' . get_the_title() . '&rdquo;';
 
-		echo '<p class="noreviews">' . sprintf( __( 'There are no reviews yet, would you like to %s submit yours%s?', 'woocommerce' ), '<a href="#review_form" class="inline show_review_form" title="' . __( 'Add Your Review', 'woocommerce' ) . '">', '</a>' ) . '</p>';
+		echo '<p class="noreviews">' . __( 'There are no reviews yet.', 'woocommerce' ) . '</p>';
 
 	endif;
 
