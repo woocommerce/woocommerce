@@ -191,7 +191,7 @@ function woocommerce_ajax_add_to_cart() {
 	global $woocommerce;
 
 	$product_id        = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_POST['product_id'] ) );
-	$quantity          = empty( $_POST['quantity'] ) ? 1 : apply_filters( 'woocommerce_stock_amount', $_POST['quantity'] );
+	$quantity          = empty( $_POST['quantity'] ) ? 1 : apply_filters( 'woocommerce_stock_amount', $_POST['quantity'], $product_id );
 	$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
 	if ( $passed_validation && $woocommerce->cart->add_to_cart( $product_id, $quantity ) ) {
