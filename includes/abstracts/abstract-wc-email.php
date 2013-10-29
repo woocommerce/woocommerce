@@ -661,7 +661,9 @@ abstract class WC_Email extends WC_Settings_API {
 				if ( ! empty( $this->$template ) ) {
 					if (  wp_mkdir_p( dirname( get_stylesheet_directory() . '/woocommerce/' . $this->$template ) ) && ! file_exists( get_stylesheet_directory() . '/woocommerce/' . $this->$template ) ) {
 						// Locate template file
-						$template_file	= woocommerce_locate_template( $this->$template, $this->template_base, $this->template_base . $this->$template );
+						$core_file		= $this->template_base . $this->$template;
+						$template_file	= apply_filters( 'woocommerce_locate_core_template', $core_file, $this->$template, $this->template_base );
+
 						// Copy template file
 						copy( $template_file, get_stylesheet_directory() . '/woocommerce/' . $this->$template );
 						echo '<div class="updated fade"><p>' . __( 'Template file copied to theme.', 'woocommerce' ) . '</p></div>';
@@ -702,7 +704,7 @@ abstract class WC_Email extends WC_Settings_API {
 
 					$local_file		= get_stylesheet_directory() . '/woocommerce/' . $this->$template;
 					$core_file		= $this->template_base . $this->$template;
-					$template_file	= woocommerce_locate_template( $this->$template, $this->template_base, $core_file );
+					$template_file	= apply_filters( 'woocommerce_locate_core_template', $core_file, $this->$template, $this->template_base );
 					?>
 					<div class="template <?php echo $template; ?>">
 
