@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce 2.1-X Front-end\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-10-03 01:54:35+00:00\n"
-"PO-Revision-Date: 2013-10-15 15:50+0200\n"
+"PO-Revision-Date: 2013-10-30 16:04+0200\n"
 "Last-Translator: Illimar Tambek <illimar.tambek@gmail.com>\n"
 "Language-Team: Divid <info@divid.ee>\n"
 "Language: et\n"
@@ -24,11 +24,11 @@ msgstr "Toote hinna/ostukorvi nupp"
 
 #: assets/js/admin/editor_plugin_lang.php:7
 msgid "Product by SKU/ID"
-msgstr "Toode tunnuse (SKU) alusel"
+msgstr "Toode tootekoodi alusel"
 
 #: assets/js/admin/editor_plugin_lang.php:8
 msgid "Products by SKU/ID"
-msgstr "Tooted tunnuse alusel (SKU)"
+msgstr "Tooted tootekoodi alusel"
 
 #: assets/js/admin/editor_plugin_lang.php:9
 msgid "Product categories"
@@ -3899,7 +3899,7 @@ msgstr "Pood"
 #: includes/class-wc-install.php:213
 msgctxt "page_slug"
 msgid "cart"
-msgstr "osukorv"
+msgstr "ostukorv"
 
 #: includes/class-wc-install.php:218
 msgctxt "page_slug"
@@ -5262,7 +5262,7 @@ msgstr "Külaline"
 #: includes/integrations/google-analytics/class-wc-google-analytics.php:275
 #: templates/single-product/meta.php:20
 msgid "SKU:"
-msgstr "Tunnus (SKU):"
+msgstr "Tootekood:"
 
 #: includes/integrations/sharedaddy/class-wc-sharedaddy.php:26
 msgid "ShareDaddy"
