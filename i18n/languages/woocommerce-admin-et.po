@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce 2.1-X Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-10-03 01:54:37+00:00\n"
-"PO-Revision-Date: 2013-10-15 16:02+0200\n"
+"PO-Revision-Date: 2013-10-30 16:05+0200\n"
 "Last-Translator: Illimar Tambek <illimar.tambek@gmail.com>\n"
 "Language-Team: Divid <info@divid.ee>\n"
 "Language: et\n"
@@ -1570,7 +1570,7 @@ msgstr "Kataloog"
 #: includes/admin/views/html-bulk-edit-product.php:159
 #: includes/admin/views/html-quick-edit-product.php:116
 msgid "Search"
-msgstr "Otsi"
+msgstr "Otsing"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:107
 #: includes/admin/views/html-bulk-edit-product.php:160
@@ -1612,7 +1612,7 @@ msgstr "Tühista"
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:52
 #: includes/admin/views/html-quick-edit-product.php:11
 msgid "SKU"
-msgstr "Tunnus (SKU)"
+msgstr "Tootekood"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:202
 #: includes/admin/views/html-bulk-edit-product.php:10
@@ -2585,13 +2585,13 @@ msgstr "Täpsemad seaded"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:135
 msgid "Stock Keeping Unit"
-msgstr "Toote tunnus"
+msgstr "Toote tunnuskood"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:135
 msgid ""
 "SKU refers to a Stock-keeping unit, a unique identifier for each distinct "
 "product and service that can be purchased."
-msgstr "Tunnus (SKU) on unikaalne kood toote või teenuse tuvastamiseks."
+msgstr "Tootekood on unikaalne kood toote või teenuse tuvastamiseks."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:146
 msgid "Product URL"
@@ -3084,7 +3084,7 @@ msgstr "Vaikevalikut ei ole"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:989
 msgid "Product SKU must be unique."
-msgstr "Toote tunnus (SKU) peab olema unikaalne."
+msgstr "Tootekood peab olema unikaalne."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1357
 msgid "Variation #%s of %s"
@@ -3152,7 +3152,7 @@ msgstr "Variatsiooni ID:"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:16
 msgid "Product SKU:"
-msgstr "Toote tunnus (SKU):"
+msgstr "Tootekood:"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:74
 msgid "Add&nbsp;meta"
@@ -3222,8 +3222,8 @@ msgstr "Ükskõik milline"
 msgid ""
 "Enter a SKU for this variation or leave blank to use the parent product SKU."
 msgstr ""
-"Sisesta selle variatsiooni tunnus (SKU) või jäta tühjaks, et kasutada "
-"põhitoote tunnust."
+"Sisesta selle variatsiooni tootekood või jäta tühjaks, et kasutada põhitoote "
+"koodi."
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:63
 msgid "Stock Qty:"
@@ -4767,7 +4767,7 @@ msgstr "Kliendi arveaadressi"
 #: includes/admin/settings/class-wc-settings-tax.php:99
 #: includes/admin/settings/class-wc-settings-tax.php:111
 msgid "Shop base address"
-msgstr "Poe aadressi"
+msgstr "Poe aadress"
 
 #: includes/admin/settings/class-wc-settings-tax.php:104
 msgid "Default Customer Address:"
@@ -4783,7 +4783,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:110
 msgid "No address"
-msgstr "Aadressi pole"
+msgstr "Puudub"
 
 #: includes/admin/settings/class-wc-settings-tax.php:116
 msgid "Shipping Tax Class:"
