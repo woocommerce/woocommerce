@@ -72,7 +72,7 @@ class WC_Product_Variable extends WC_Product {
 				set_transient( $transient_name, $this->total_stock );
 			}
 		}
-		return apply_filters( 'woocommerce_stock_amount', $this->total_stock );
+		return apply_filters( 'woocommerce_stock_amount', $this->total_stock, $this->id );
     }
 
 	/**

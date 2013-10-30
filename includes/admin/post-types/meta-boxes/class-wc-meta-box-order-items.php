@@ -132,7 +132,7 @@ class WC_Meta_Box_Order_Items {
 					);
 
 				if ( isset( $order_item_qty[ $item_id ] ) )
-			 		woocommerce_update_order_item_meta( $item_id, '_qty', apply_filters( 'woocommerce_stock_amount', $order_item_qty[ $item_id ] ) );
+			 		woocommerce_update_order_item_meta( $item_id, '_qty', apply_filters( 'woocommerce_stock_amount', $order_item_qty[ $item_id ], $item_id ) );
 
 			 	if ( isset( $order_item_tax_class[ $item_id ] ) )
 			 		woocommerce_update_order_item_meta( $item_id, '_tax_class', woocommerce_clean( $order_item_tax_class[ $item_id ] ) );

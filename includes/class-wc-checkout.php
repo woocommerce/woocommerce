@@ -265,7 +265,7 @@ class WC_Checkout {
 
 		 	// Add line item meta
 		 	if ( $item_id ) {
-			 	woocommerce_add_order_item_meta( $item_id, '_qty', apply_filters( 'woocommerce_stock_amount', $values['quantity'] ) );
+			 	woocommerce_add_order_item_meta( $item_id, '_qty', apply_filters( 'woocommerce_stock_amount', $values['quantity'], $item_id ) );
 			 	woocommerce_add_order_item_meta( $item_id, '_tax_class', $_product->get_tax_class() );
 			 	woocommerce_add_order_item_meta( $item_id, '_product_id', $values['product_id'] );
 			 	woocommerce_add_order_item_meta( $item_id, '_variation_id', $values['variation_id'] );

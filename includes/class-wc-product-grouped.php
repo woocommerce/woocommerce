@@ -73,7 +73,7 @@ class WC_Product_Grouped extends WC_Product {
 			}
 		}
 
-		return apply_filters( 'woocommerce_stock_amount', $this->total_stock );
+		return apply_filters( 'woocommerce_stock_amount', $this->total_stock, $this->id );
     }
 
 	/**
