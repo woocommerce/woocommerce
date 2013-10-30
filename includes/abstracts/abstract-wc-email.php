@@ -660,7 +660,12 @@ abstract class WC_Email extends WC_Settings_API {
 			if ( ! empty( $_GET['move_template'] ) && ( $template = esc_attr( basename( $_GET['move_template'] ) ) ) ) {
 				if ( ! empty( $this->$template ) ) {
 					if (  wp_mkdir_p( dirname( get_stylesheet_directory() . '/woocommerce/' . $this->$template ) ) && ! file_exists( get_stylesheet_directory() . '/woocommerce/' . $this->$template ) ) {
-						copy( $this->template_base . $this->$template, get_stylesheet_directory() . '/woocommerce/' . $this->$template );
+						// Locate template file
+						$core_file		= $this->template_base . $this->$template;
+						$template_file	= apply_filters( 'woocommerce_locate_core_template', $core_file, $this->$template, $this->template_base );
+
+						// Copy template file
+						copy( $template_file, get_stylesheet_directory() . '/woocommerce/' . $this->$template );
 						echo '<div class="updated fade"><p>' . __( 'Template file copied to theme.', 'woocommerce' ) . '</p></div>';
 					}
 				}
@@ -697,8 +702,9 @@ abstract class WC_Email extends WC_Settings_API {
 					if ( empty( $this->$template ) )
 						continue;
 
-					$local_file = get_stylesheet_directory() . '/woocommerce/' . $this->$template;
-					$core_file 	= $this->template_base . $this->$template;
+					$local_file		= get_stylesheet_directory() . '/woocommerce/' . $this->$template;
+					$core_file		= $this->template_base . $this->$template;
+					$template_file	= apply_filters( 'woocommerce_locate_core_template', $core_file, $this->$template, $this->template_base );
 					?>
 					<div class="template <?php echo $template; ?>">
 
@@ -722,7 +728,7 @@ abstract class WC_Email extends WC_Settings_API {
 
 							</div>
 
-						<?php elseif ( file_exists( $core_file ) ) : ?>
+						<?php elseif ( file_exists( $template_file ) ) : ?>
 
 							<p>
 								<a href="#" class="button toggle_editor"></a>
@@ -731,12 +737,12 @@ abstract class WC_Email extends WC_Settings_API {
 									<a href="<?php echo remove_query_arg( array( 'delete_template', 'saved' ), add_query_arg( 'move_template', $template ) ); ?>" class="button"><?php _e( 'Copy file to theme', 'woocommerce' ); ?></a>
 								<?php endif; ?>
 
-								<?php printf( __( 'To override and edit this email template copy <code>%s</code> to your theme folder: <code>%s</code>.', 'woocommerce' ), plugin_basename( $core_file ) , 'yourtheme/woocommerce/' . $this->$template ); ?>
+								<?php printf( __( 'To override and edit this email template copy <code>%s</code> to your theme folder: <code>%s</code>.', 'woocommerce' ), plugin_basename( $template_file ) , 'yourtheme/woocommerce/' . $this->$template ); ?>
 							</p>
 
 							<div class="editor" style="display:none">
 
-								<textarea class="code" readonly="readonly" disabled="disabled" cols="25" rows="20"><?php echo file_get_contents( $core_file ); ?></textarea>
+								<textarea class="code" readonly="readonly" disabled="disabled" cols="25" rows="20"><?php echo file_get_contents( $template_file ); ?></textarea>
 
 							</div>
 
