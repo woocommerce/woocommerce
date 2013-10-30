@@ -6433,9 +6433,8 @@ msgstr "http://www.woothemes.com/woocommerce/"
 
 #. Description of the plugin/theme
 msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
-msgstr ""
-"Una herramienta de e-commerce que te ayudará a vender cualquier cosa. "
-"Realmente bello."
+msgstr "Una herramienta e-commerce que te ayudará a vender cualquier cosa. Elegantemente."
+
 
 #. Author of the plugin/theme
 msgid "WooThemes"
@@ -6484,7 +6483,7 @@ msgstr "http://woothemes.com"
 # @ woocommerce
 #~ msgctxt "page_slug"
 #~ msgid "lost-password"
-#~ msgstr "contrasena-perdida"
+#~ msgstr "contrasena-olvidada"
 
 # @ woocommerce
 #~ msgid "yes"
@@ -6520,7 +6519,7 @@ msgstr "http://woothemes.com"
 # @ woocommerce
 #, fuzzy
 #~ msgid "Enter an amount or percentage e.g. 2.99 or 15%"
-#~ msgstr "Introduzca un importe o un %, p. ej. 2,99 o 15%"
+#~ msgstr "Introduzca un importe o un porcentaje, p. ej. 2,99 o 15%"
 
 # @ woocommerce
 #~ msgid "Any customer"
