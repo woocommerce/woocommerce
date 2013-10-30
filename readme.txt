@@ -167,6 +167,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 2.0.19 =
 * Fix - get_item_subtotal() logic
+* Fix - Pass number of products variable to get_related for more then 5 related products
 * Tweak - For paying customer column, use a dash #3971
 * Tweak - Added wordwrap to order notes
 * Localisation - Updated Portuguese, Slovak, French, Lithuanian, Finnish
