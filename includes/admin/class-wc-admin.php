@@ -109,7 +109,7 @@ class WC_Admin {
 
 			$mailer        = WC()->mailer();
 			$message       = ob_get_clean();
-			$email_heading = __( 'Order Received', 'woocommerce' );
+			$email_heading = __( 'HTML Email Template', 'woocommerce' );
 
 			echo $mailer->wrap_message( $email_heading, $message );
 			exit;
