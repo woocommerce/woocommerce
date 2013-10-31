@@ -15,27 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 	echo '<div id="comments">';
 
-	if ( get_option('woocommerce_enable_review_rating') == 'yes' ) {
+	if ( get_option('woocommerce_enable_review_rating') == 'yes' && ( $count = $product->get_rating_count() ) ) {
 
-		$count = $product->get_rating_count();
-
-		if ( $count > 0 ) {
-
-			$average = $product->get_average_rating();
-
-			echo '<div itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">';
-
-			echo '<div class="star-rating" title="'.sprintf(__( 'Rated %s out of 5', 'woocommerce' ), $average ).'"><span style="width:'.( ( $average / 5 ) * 100 ) . '%"><strong itemprop="ratingValue" class="rating">'.$average.'</strong> '.__( 'out of 5', 'woocommerce' ).'</span></div>';
-
-			echo '<h2>'.sprintf( _n('%s review for %s', '%s reviews for %s', $count, 'woocommerce'), '<span itemprop="ratingCount" class="count">'.$count.'</span>', get_the_title() ).'</h2>';
-
-			echo '</div>';
-
-		} else {
-
-			echo '<h2>'.__( 'Reviews', 'woocommerce' ).'</h2>';
-
-		}
+		echo '<h2>' . sprintf( _n('%s review for %s', '%s reviews for %s', $count, 'woocommerce'), $count, get_the_title() ) . '</h2>';
 
 	} else {
 

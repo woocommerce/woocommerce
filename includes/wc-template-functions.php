@@ -661,6 +661,19 @@ if ( ! function_exists( 'woocommerce_template_single_title' ) ) {
 		woocommerce_get_template( 'single-product/title.php' );
 	}
 }
+if ( ! function_exists( 'woocommerce_template_single_rating' ) ) {
+
+	/**
+	 * Output the product rating.
+	 *
+	 * @access public
+	 * @subpackage	Product
+	 * @return void
+	 */
+	function woocommerce_template_single_rating() {
+		woocommerce_get_template( 'single-product/rating.php' );
+	}
+}
 if ( ! function_exists( 'woocommerce_template_single_price' ) ) {
 
 	/**
