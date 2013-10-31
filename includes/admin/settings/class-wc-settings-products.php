@@ -343,6 +343,16 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'id' 		=> 'woocommerce_review_rating_verification_label',
 					'default'	=> 'yes',
 					'type' 		=> 'checkbox',
+					'checkboxgroup'		=> '',
+					'show_if_checked' => 'yes',
+					'autoload'      => false
+				),
+
+				array(
+					'desc' 		=> __( 'Only allow reviews from "verified owners"', 'woocommerce' ),
+					'id' 		=> 'woocommerce_review_rating_verification_required',
+					'default'	=> 'no',
+					'type' 		=> 'checkbox',
 					'checkboxgroup'		=> 'end',
 					'show_if_checked' => 'yes',
 					'autoload'      => false
