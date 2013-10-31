@@ -262,7 +262,7 @@ class WC_Admin_Attributes {
 									<option value="text" <?php selected( $att_type, 'text' ); ?>><?php _e( 'Text', 'woocommerce' ) ?></option>
 									<?php do_action('woocommerce_admin_attribute_types'); ?>
 								</select>
-								<p class="description"><?php _e( 'Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>.', 'woocommerce' ); ?></p>
+								<p class="description"><?php _e( 'Determines how you select attributes for products. Under admin panel -> products -> product data -> attributes -> values, <strong>Text</strong> allows manual entry whereas <strong>select</strong> allows pre-configured terms in a drop-down list.', 'woocommerce' ); ?></p>
 							</td>
 						</tr>
 						<tr class="form-field form-required">
@@ -275,7 +275,7 @@ class WC_Admin_Attributes {
 									<option value="name" <?php selected( $att_orderby, 'name' ); ?>><?php _e( 'Name', 'woocommerce' ) ?></option>
 									<option value="id" <?php selected( $att_orderby, 'id' ); ?>><?php _e( 'Term ID', 'woocommerce' ) ?></option>
 								</select>
-								<p class="description"><?php _e( 'Determines the sort order on the frontend for this attribute. If using custom ordering, you can drag and drop the terms in this attribute', 'woocommerce' ); ?></p>
+								<p class="description"><?php _e( 'Determines the sort order of the terms on the frontend shop product pages. If using custom ordering, you can drag and drop the terms in this attribute.', 'woocommerce' ); ?></p>
 							</td>
 						</tr>
 					</tbody>
@@ -390,7 +390,7 @@ class WC_Admin_Attributes {
 										<option value="text"><?php _e( 'Text', 'woocommerce' ) ?></option>
 										<?php do_action('woocommerce_admin_attribute_types'); ?>
 									</select>
-									<p class="description"><?php _e( 'Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>.', 'woocommerce' ); ?></p>
+									<p class="description"><?php _e( 'Determines how you select attributes for products. Under admin panel -> products -> product data -> attributes -> values, <strong>Text</strong> allows manual entry whereas <strong>select</strong> allows pre-configured terms in a drop-down list.', 'woocommerce' ); ?></p>
 								</div>
 
 								<div class="form-field">
@@ -400,7 +400,7 @@ class WC_Admin_Attributes {
 										<option value="name"><?php _e( 'Name', 'woocommerce' ) ?></option>
 										<option value="id"><?php _e( 'Term ID', 'woocommerce' ) ?></option>
 									</select>
-									<p class="description"><?php _e( 'Determines the sort order on the frontend for this attribute. If using custom ordering, you can drag and drop the terms in this attribute', 'woocommerce' ); ?></p>
+									<p class="description"><?php _e( 'Determines the sort order of the terms on the frontend shop product pages. If using custom ordering, you can drag and drop the terms in this attribute.', 'woocommerce' ); ?></p>
 								</div>
 
 								<p class="submit"><input type="submit" name="add_new_attribute" id="submit" class="button" value="<?php _e( 'Add Attribute', 'woocommerce' ); ?>"></p>

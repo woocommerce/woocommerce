@@ -690,7 +690,7 @@ msgstr "Text"
 
 #: admin/woocommerce-admin-attributes.php:259
 #: admin/woocommerce-admin-attributes.php:392
-msgid "Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>."
+msgid "Determines how you select attributes for products. Under admin panel -> products -> product data -> attributes -> values, <strong>Text</strong> allows manual entry whereas <strong>select</strong> allows pre-configured terms in a drop-down list."
 msgstr "Tu zadajte spôsob výberu vlastností produktov. <strong>Text</strong> umožňuje ručné zadanie na stránke produktu, pričom voľba <strong>vybrať</strong> vlastnosť ponúkne iba voľby určené v tejto časti. Ak plánujete používať vlastnosti pre varianty použite voľbu <strong>vybrať</strong>"
 
 #: admin/woocommerce-admin-attributes.php:264
@@ -712,7 +712,7 @@ msgstr "ID vlastnosti"
 
 #: admin/woocommerce-admin-attributes.php:272
 #: admin/woocommerce-admin-attributes.php:402
-msgid "Determines the sort order on the frontend for this attribute. If using custom ordering, you can drag and drop the terms in this attribute"
+msgid "Determines the sort order of the terms on the frontend shop product pages. If using custom ordering, you can drag and drop the terms in this attribute."
 msgstr "Určuje radenie na stránke pre túto vlastnosť. Ak použijete vlastné radenie, môžete použiť funkciu ťahaj a pusť."
 
 #: admin/woocommerce-admin-attributes.php:277

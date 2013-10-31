@@ -3409,7 +3409,7 @@ msgstr "حقل نص"
 
 #: admin/woocommerce-admin-attributes.php:259
 #: admin/woocommerce-admin-attributes.php:392
-msgid "Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>."
+msgid "Determines how you select attributes for products. Under admin panel -> products -> product data -> attributes -> values, <strong>Text</strong> allows manual entry whereas <strong>select</strong> allows pre-configured terms in a drop-down list."
 msgstr "هذا يحدد كيف تختار قيمة الصفة للمنتج. <strong>حقل نص</strong> لتختار القيم في صفحة المنتج، بينما <strong>قائمة منسدلة</strong> تمكنك من إضافة قيم محددة، لتستخدمها هي فقط في صفحة المنتج. إذا كانت الصفة لمنتج متغير أختر  <strong>قائمة منسدلة</strong>."
 
 #: admin/woocommerce-admin-attributes.php:264
@@ -3431,7 +3431,7 @@ msgstr "معرف القيمة"
 
 #: admin/woocommerce-admin-attributes.php:272
 #: admin/woocommerce-admin-attributes.php:402
-msgid "Determines the sort order on the frontend for this attribute. If using custom ordering, you can drag and drop the terms in this attribute"
+msgid "Determines the sort order of the terms on the frontend shop product pages. If using custom ordering, you can drag and drop the terms in this attribute."
 msgstr "هذا يحدد ترتيب القيم في والواجهة. إذا أخترت ترتيب مخصص، يمكنك سحب وإفلات القيم لترتيبها في صفحة القيم."
 
 #: admin/woocommerce-admin-attributes.php:277
