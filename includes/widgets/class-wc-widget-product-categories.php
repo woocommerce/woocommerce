@@ -33,7 +33,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			'orderby' => array(
 				'type'  => 'select',
 				'std'   => 'name',
-				'label' => __( 'Title', 'woocommerce' ),
+				'label' => __( 'Order by', 'woocommerce' ),
 				'options' => array(
 					'order' => __( 'Category Order', 'woocommerce' ),
 					'name'  => __( 'Name', 'woocommerce' )
