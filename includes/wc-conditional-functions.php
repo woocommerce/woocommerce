@@ -158,6 +158,21 @@ if ( ! function_exists( 'is_order_received_page' ) ) {
     }
 }
 
+if ( ! function_exists( 'is_add_payment_method_page' ) ) {
+
+    /**
+    * is_add_payment_method_page - Returns true when viewing the add payment method page.
+    *
+    * @access public
+    * @return bool
+    */
+    function is_add_payment_method_page() {
+        global $wp;
+
+        return ( is_page( woocommerce_get_page_id( 'checkout' ) ) && isset( $wp->query_vars['add-payment-method'] ) ) ? true : false;
+    }
+}
+
 if ( ! function_exists( 'is_ajax' ) ) {
 
 	/**

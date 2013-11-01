@@ -73,8 +73,9 @@ class WC_Query {
 		// Query vars to add to WP
 		$this->query_vars = array(
 			// Checkout actions
-			'order-pay'       => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
-			'order-received'  => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
+			'order-pay'          => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
+			'order-received'     => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
+			'add-payment-method' => get_option( 'woocommerce_checkout_add_payment_method_endpoint', 'add-payment-method' ),
 
 			// My account actions
 			'view-order'      => get_option( 'woocommerce_myaccount_view_order_endpoint', 'view-order' ),

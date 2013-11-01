@@ -164,6 +164,15 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 				'desc_tip'	=> true,
 			),
 
+			array(
+				'title'    => __( 'Add Payment Method', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the Checkout &rarr; Add Payment Method page', 'woocommerce' ),
+				'id'       => 'woocommerce_checkout_add_payment_method_endpoint',
+				'type'     => 'text',
+				'default'  => 'add-payment-method',
+				'desc_tip' => true,
+			),
+
 			array( 'type' => 'sectionend', 'id' => 'checkout_endpoint_options' ),
 
 			array( 'title' => __( 'Payment Gateways', 'woocommerce' ),  'desc' => __( 'Installed gateways are listed below. Drag and drop gateways to control their display order on the frontend.', 'woocommerce' ), 'type' => 'title', 'id' => 'payment_gateways_options' ),
