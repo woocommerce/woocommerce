@@ -493,7 +493,7 @@ class WC_Product_Variable extends WC_Product {
 			update_post_meta( $product_id, '_min_variation_sale_price', $min_variation_sale_price );
 			update_post_meta( $product_id, '_max_variation_sale_price', $max_variation_sale_price );
 
-			do_action( 'woocommerce_variable_product_sync', $product_id );
+			do_action( 'woocommerce_variable_product_sync', $product_id, $children );
 
 			wc_delete_product_transients( $product_id );
 		} elseif ( get_post_status( $product_id ) == 'publish' ) {
