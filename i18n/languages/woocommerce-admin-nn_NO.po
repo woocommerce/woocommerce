@@ -3404,7 +3404,7 @@ msgstr "Tekst"
 
 #: admin/woocommerce-admin-attributes.php:258
 #: admin/woocommerce-admin-attributes.php:391
-msgid "Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>."
+msgid "Determines how you select attributes for products. Under admin panel -> products -> product data -> attributes -> values, <strong>Text</strong> allows manual entry whereas <strong>select</strong> allows pre-configured terms in a drop-down list."
 msgstr "Avgjer korleis du vel vareeigenskapar. <strong>Tekst</strong> gjev høve til å skriva inn direkte på varesida, medan du kan laga utval med <strong>vel</strong>-eigenskapar. Viss du planlegg å bruka ein eigenskap for variantar, bør du bruka <strong>vel</strong>."
 
 #: admin/woocommerce-admin-attributes.php:263
@@ -3426,7 +3426,7 @@ msgstr "Vilkår-ID"
 
 #: admin/woocommerce-admin-attributes.php:271
 #: admin/woocommerce-admin-attributes.php:401
-msgid "Determines the sort order on the frontend for this attribute. If using custom ordering, you can drag and drop the terms in this attribute"
+msgid "Determines the sort order of the terms on the frontend shop product pages. If using custom ordering, you can drag and drop the terms in this attribute."
 msgstr "Avgjer kva sortering som blir brukt på framsida av nettbutikken for denne eigenskapen. Viss du bruker eiga  sortering, kan du dra og sleppa termane i denne eigenskapen"
 
 #: admin/woocommerce-admin-attributes.php:276
