@@ -306,11 +306,6 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-cache-helper.php' );					// Cache Helper
 		include_once( 'includes/class-wc-https.php' );							// https Helper
 
-		// Include Core Integrations - these are included sitewide
-		include_once( 'includes/integrations/google-analytics/class-wc-google-analytics.php' );
-		include_once( 'includes/integrations/sharethis/class-wc-sharethis.php' );
-		include_once( 'includes/integrations/sharedaddy/class-wc-sharedaddy.php' );
-
 		// Include template hooks in time for themes to remove/modify them
 		include_once( 'includes/wc-template-hooks.php' );
 	}
