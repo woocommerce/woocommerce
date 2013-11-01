@@ -209,18 +209,28 @@ class WC_Shortcode_Checkout {
 	private static function add_payment_method() {
 		global $woocommerce;
 
-		do_action( 'before_woocommerce_add_payment_method' );
+		if ( ! is_user_logged_in() ) {
 
-		wc_add_message( __( 'Add a new payment method.', 'woocommerce' ) );
+			wp_safe_redirect( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
+			exit();
 
-		wc_print_messages();
+		} else {
 
-		// Add payment method form
-		woocommerce_get_template( 'checkout/form-add-payment-method.php' );
+			do_action( 'before_woocommerce_add_payment_method' );
 
-		wc_print_messages();
+			wc_add_message( __( 'Add a new payment method.', 'woocommerce' ) );
 
-		do_action( 'after_woocommerce_add_payment_method' );
+			wc_print_messages();
+
+			// Add payment method form
+			woocommerce_get_template( 'checkout/form-add-payment-method.php' );
+
+			wc_print_messages();
+
+			do_action( 'after_woocommerce_add_payment_method' );
+
+		}
+
 	}
 
 	/**
