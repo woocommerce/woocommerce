@@ -32,6 +32,7 @@ class WC_Form_Handler {
 		add_action( 'init', array( $this, 'add_to_cart_action' ) );
 
 		add_action( 'wp', array( $this, 'pay_action' ), 20 );
+		add_action( 'wp', array( $this, 'add_payment_method_action' ), 20 );
 	}
 
 	/**
