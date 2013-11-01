@@ -19,12 +19,12 @@
 function woocommerce_get_page_id( $page ) {
 
 	if ( $page == 'pay' || $page == 'thanks' ) {
-		_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.1', 'The "pay" and "thanks" pages are no-longer used - an endpoint is added to the checkout instead. To get a valid link use the WC_Order::get_checkout_payment_url() or WC_Order::get_checkout_order_received_url() methods instead.' );
+		_deprecated_argument( __FUNCTION__, '2.1', 'The "pay" and "thanks" pages are no-longer used - an endpoint is added to the checkout instead. To get a valid link use the WC_Order::get_checkout_payment_url() or WC_Order::get_checkout_order_received_url() methods instead.' );
 
 		$page = 'checkout';
 	}
 	if ( $page == 'change_password' || $page == 'edit_address' || $page == 'lost_password' ) {
-		_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.1', 'The "change_password", "edit_address" and "lost_password" pages are no-longer used - an endpoint is added to the my-account instead. To get a valid link use the woocommerce_customer_edit_account_url() function instead.' );
+		_deprecated_argument( __FUNCTION__, '2.1', 'The "change_password", "edit_address" and "lost_password" pages are no-longer used - an endpoint is added to the my-account instead. To get a valid link use the woocommerce_customer_edit_account_url() function instead.' );
 
 		$page = 'myaccount';
 	}
