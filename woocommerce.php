@@ -297,6 +297,7 @@ final class WooCommerce {
 		include_once( 'includes/abstracts/abstract-wc-settings-api.php' );		// Settings API (for gateways, shipping, and integrations)
 		include_once( 'includes/abstracts/abstract-wc-shipping-method.php' );	// A Shipping method
 		include_once( 'includes/abstracts/abstract-wc-payment-gateway.php' ); 	// A Payment gateway
+		include_once( 'includes/abstracts/abstract-wc-integration.php' );		// An integration with a service
 
 		// Classes (used on all pages)
 		include_once( 'includes/class-wc-product-factory.php' );				// Product factory
