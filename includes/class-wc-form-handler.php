@@ -305,13 +305,12 @@ class WC_Form_Handler {
 
 			// Process
 			if ( wc_error_count() == 0 ) {
-
 				$result = $available_gateways[ $payment_method ]->add_payment_method();
 
 				// Redirect to success/confirmation/payment page
 				if ( $result['result'] == 'success' ) {
-					wp_redirect( $result['redirect'] );
-					exit;
+					wp_safe_redirect( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
+					exit();
 				}
 
 			}
