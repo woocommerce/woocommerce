@@ -22,8 +22,8 @@ global $woocommerce;
 
 					foreach ( $available_gateways as $gateway ) {
 						?>
-						<li id="payment_method_<?php echo $gateway->id; ?>" >
-							<input type="radio" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php if ($gateway->chosen) echo 'checked="checked"'; ?> />
+						<li class="payment_method_<?php echo $gateway->id; ?>">
+							<input id="payment_method_<?php echo $gateway->id; ?>" type="radio" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php if ($gateway->chosen) echo 'checked="checked"'; ?> />
 							<label for="payment_method_<?php echo $gateway->id; ?>"><?php echo $gateway->get_title(); ?> <?php echo $gateway->get_icon(); ?></label>
 							<?php
 								if ( $gateway->has_fields() || $gateway->get_description() ) {
