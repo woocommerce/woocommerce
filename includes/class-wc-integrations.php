@@ -27,6 +27,11 @@ class WC_Integrations {
 
 		$load_integrations = apply_filters( 'woocommerce_integrations', array() );
 
+		if ( ! empty( $load_integrations ) ) {
+			global $woocommerce;
+			include_once( $woocommerce->plugin_path .  '/includes/abstracts/abstract-wc-integration.php' );
+		}
+
 		// Load integration classes
 		foreach ( $load_integrations as $integration ) {
 
