@@ -225,6 +225,10 @@ jQuery( function($){
 
 				jQuery( ':input[name^="' + bulk_edit + '["]').val( value ).change();
 			break;
+			default:
+				jQuery('select#field_to_edit').trigger(bulk_edit);
+			break;
+
 		}
 	});
 
