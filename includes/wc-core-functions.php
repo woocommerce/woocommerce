@@ -323,7 +323,7 @@ function wc_print_js() {
 
 /**
  * Set a cookie - wrapper for setcookie using WP constants
- * 
+ *
  * @param  string  $name   Name of the cookie being set
  * @param  string  $value  Value of the cookie
  * @param  integer $expire Expiry of the cookie
@@ -334,4 +334,34 @@ function wc_setcookie( $name, $value, $expire = 0 ) {
 	} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 		trigger_error( "Cookie cannot be set - headers already sent", E_USER_NOTICE );
 	}
+}
+
+// TODO: not sure if these should be moved to wp-json-server class and made WC-specific or not
+/**
+ * Get URL to a JSON endpoint on a site
+ *
+ * @todo Check if this is even necessary
+ * @param int $blog_id Blog ID
+ * @param string $path JSON route
+ * @param string $scheme Sanitization scheme (usually 'json')
+ * @return string Full URL to the endpoint
+ */
+function get_json_url( $blog_id = null, $path = '', $scheme = 'json' ) {
+	$url = get_home_url( $blog_id, 'wc-api/v1/', $scheme );
+
+	if ( !empty( $path ) && is_string( $path ) && strpos( $path, '..' ) === false )
+		$url .= '/' . ltrim( $path, '/' );
+
+	return apply_filters( 'json_url', $url, $path, $blog_id );
+}
+
+/**
+ * Get URL to a JSON endpoint
+ *
+ * @param string $path JSON route
+ * @param string $scheme Sanitization scheme (usually 'json')
+ * @return string Full URL to the endpoint
+ */
+function json_url( $path = '', $scheme = 'json' ) {
+	return get_json_url( null, $path, $scheme );
 }
