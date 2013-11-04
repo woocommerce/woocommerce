@@ -22,7 +22,7 @@ abstract class WC_Email extends WC_Settings_API {
 	/** @var string Payment method title. */
 	var $title;
 
-	/** @var bool True if the method is enabled. */
+	/** @var string 'yes' if the method is enabled. */
 	var $enabled;
 
 	/** @var string Description for the gateway. */

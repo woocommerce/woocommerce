@@ -34,7 +34,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/** @var string Available for all counties or specific. */
 	var $availability;
 
-	/** @var bool True if the method is enabled. */
+	/** @var string 'yes' if the method is enabled. */
 	var $enabled;
 
 	/** @var string Icon for the gateway. */
