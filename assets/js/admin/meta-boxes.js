@@ -1056,28 +1056,28 @@ jQuery( function($){
 	// ATTRIBUTE TABLES
 
 		// Multiselect attributes
-		$(".woocommerce_attributes select.multiselect").chosen();
+		$(".product_attributes select.multiselect").chosen();
 
 		// Initial order
-		var woocommerce_attribute_items = $('.woocommerce_attributes').find('.woocommerce_attribute').get();
+		var woocommerce_attribute_items = $('.product_attributes').find('.woocommerce_attribute').get();
 
 		woocommerce_attribute_items.sort(function(a, b) {
 		   var compA = parseInt($(a).attr('rel'));
 		   var compB = parseInt($(b).attr('rel'));
 		   return (compA < compB) ? -1 : (compA > compB) ? 1 : 0;
 		})
-		$(woocommerce_attribute_items).each( function(idx, itm) { $('.woocommerce_attributes').append(itm); } );
+		$(woocommerce_attribute_items).each( function(idx, itm) { $('.product_attributes').append(itm); } );
 
 		function attribute_row_indexes() {
-			$('.woocommerce_attributes .woocommerce_attribute').each(function(index, el){
-				$('.attribute_position', el).val( parseInt( $(el).index('.woocommerce_attributes .woocommerce_attribute') ) );
+			$('.product_attributes .woocommerce_attribute').each(function(index, el){
+				$('.attribute_position', el).val( parseInt( $(el).index('.product_attributes .woocommerce_attribute') ) );
 			});
 		};
 
 		// Add rows
 		$('button.add_attribute').on('click', function(){
 
-			var size = $('.woocommerce_attributes .woocommerce_attribute').size();
+			var size = $('.product_attributes .woocommerce_attribute').size();
 
 			var attribute_type = $('select.attribute_taxonomy').val();
 
@@ -1087,7 +1087,7 @@ jQuery( function($){
 				if (product_type!='variable') enable_variation = 'style="display:none;"'; else enable_variation = '';
 
 				// Add custom attribute row
-				$('.woocommerce_attributes').append('<div class="woocommerce_attribute wc-metabox">\
+				$('.product_attributes').append('<div class="woocommerce_attribute wc-metabox">\
 						<h3>\
 							<button type="button" class="remove_row button">' + woocommerce_admin_meta_boxes.remove_label + '</button>\
 							<div class="handlediv" title="' + woocommerce_admin_meta_boxes.click_to_toggle + '"></div>\
@@ -1126,8 +1126,8 @@ jQuery( function($){
 			} else {
 
 				// Reveal taxonomy row
-				var thisrow = $('.woocommerce_attributes .woocommerce_attribute.' + attribute_type);
-				$('.woocommerce_attributes').append( $(thisrow) );
+				var thisrow = $('.product_attributes .woocommerce_attribute.' + attribute_type);
+				$('.product_attributes').append( $(thisrow) );
 				$(thisrow).show().find('.woocommerce_attribute_data').show();
 				attribute_row_indexes();
 
@@ -1136,23 +1136,23 @@ jQuery( function($){
 			$('select.attribute_taxonomy').val('');
 		});
 
-		$('.woocommerce_attributes').on('blur', 'input.attribute_name', function(){
+		$('.product_attributes').on('blur', 'input.attribute_name', function(){
 			$(this).closest('.woocommerce_attribute').find('strong.attribute_name').text( $(this).val() );
 		});
 
-		$('.woocommerce_attributes').on('click', 'button.select_all_attributes', function(){
+		$('.product_attributes').on('click', 'button.select_all_attributes', function(){
 			$(this).closest('td').find('select option').attr("selected","selected");
 			$(this).closest('td').find('select').trigger("chosen:updated");
 			return false;
 		});
 
-		$('.woocommerce_attributes').on('click', 'button.select_no_attributes', function(){
+		$('.product_attributes').on('click', 'button.select_no_attributes', function(){
 			$(this).closest('td').find('select option').removeAttr("selected");
 			$(this).closest('td').find('select').trigger("chosen:updated");
 			return false;
 		});
 
-		$('.woocommerce_attributes').on('click', 'button.remove_row', function() {
+		$('.product_attributes').on('click', 'button.remove_row', function() {
 			var answer = confirm(woocommerce_admin_meta_boxes.remove_attribute);
 			if (answer){
 				var $parent = $(this).parent().parent();
@@ -1170,7 +1170,7 @@ jQuery( function($){
 		});
 
 		// Attribute ordering
-		$('.woocommerce_attributes').sortable({
+		$('.product_attributes').sortable({
 			items:'.woocommerce_attribute',
 			cursor:'move',
 			axis:'y',
@@ -1190,9 +1190,9 @@ jQuery( function($){
 		});
 
 		// Add a new attribute (via ajax)
-		$('.woocommerce_attributes').on('click', 'button.add_new_attribute', function() {
+		$('.product_attributes').on('click', 'button.add_new_attribute', function() {
 
-			$('.woocommerce_attributes').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+			$('.product_attributes').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 
 			var attribute = $(this).attr('data-attribute');
 			var $wrapper = $(this).closest('.woocommerce_attribute_data');
@@ -1218,12 +1218,12 @@ jQuery( function($){
 						$wrapper.find('select.attribute_values').trigger("chosen:updated");
 					}
 
-					$('.woocommerce_attributes').unblock();
+					$('.product_attributes').unblock();
 
 				});
 
 			} else {
-				$('.woocommerce_attributes').unblock();
+				$('.product_attributes').unblock();
 			}
 
 			return false;
@@ -1233,11 +1233,11 @@ jQuery( function($){
 		// Save attributes and update variations
 		$('.save_attributes').on('click', function(){
 
-			$('.woocommerce_attributes').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+			$('.product_attributes').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 
 			var data = {
 				post_id: 		woocommerce_admin_meta_boxes.post_id,
-				data:			$('.woocommerce_attributes').find('input, select, textarea').serialize(),
+				data:			$('.product_attributes').find('input, select, textarea').serialize(),
 				action: 		'woocommerce_save_attributes',
 				security: 		woocommerce_admin_meta_boxes.save_attributes_nonce
 			};
@@ -1254,7 +1254,7 @@ jQuery( function($){
 					$('#variable_product_options').unblock();
 				} );
 
-				$('.woocommerce_attributes').unblock();
+				$('.product_attributes').unblock();
 
 			});
 
