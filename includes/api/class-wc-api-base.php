@@ -35,7 +35,12 @@ class WC_API_Base {
 		add_filter( 'json_endpoints', array( $this, 'registerRoutes' ) );
 
 		// remove fields from responses when requests specify certain fields
-		add_filter( 'woocommerce_api_coupon_response', array( $this, 'filterFields' ), 0, 3 );
+		// note these are hooked at a later priority so data added via filters (e.g. customer data to the order response)
+		// still has the fields filtered properly
+		add_filter( 'woocommerce_api_order_response',    array( $this, 'filterFields' ), 20, 3 );
+		add_filter( 'woocommerce_api_coupon_response',   array( $this, 'filterFields' ), 20, 3 );
+		add_filter( 'woocommerce_api_customer_response', array( $this, 'filterFields' ), 20, 3 );
+		add_filter( 'woocommerce_api_product_response',  array( $this, 'filterFields' ), 20, 3 );
 	}
 
 
@@ -51,7 +56,7 @@ class WC_API_Base {
 
 		$args = array();
 
-		// TODO: modified_at_min, modified_at_max, date formatting
+		// TODO: updated_at_min, updated_at_max,s date formatting
 		// TODO: WP 3.7 is required to support date args
 		if ( ! empty( $request_args['created_at_min'] ) || ! empty( $request_args['created_at_max'] ) ) {
 
@@ -83,10 +88,10 @@ class WC_API_Base {
 		return array_merge( $base_args, $args );
 	}
 
-
-	// TODO: this should also work with sub-resources, like product.id
 	/**
 	 * Restrict the fields included in the response if the request specified certain only certain fields should be returned
+	 *
+	 * @TODO this should also work with sub-fields, like billing_address.country
 	 *
 	 * @since 2.1
 	 * @param array $data the response data
@@ -96,10 +101,10 @@ class WC_API_Base {
 	 */
 	public function filterFields( $data, $resource, $fields ) {
 
-		$fields = explode( ',', $fields );
-
 		if ( empty( $fields ) )
 			return $data;
+
+		$fields = explode( ',', $fields );
 
 		foreach ( $data as $data_field => $data_value ) {
 
@@ -121,7 +126,7 @@ class WC_API_Base {
 	 * @param bool $force true to permanently delete resource, false to move to trash (not supported for `customer`)
 	 * @return array|WP_Error
 	 */
-	protected function deleteResource( $id, $type, $force ) {
+	protected function deleteResource( $id, $type, $force = false ) {
 
 		$id = absint( $id );
 
@@ -142,6 +147,8 @@ class WC_API_Base {
 			// delete order/coupon/product
 
 			$post = get_post( $id, ARRAY_A );
+
+			// TODO: check if provided $type is the same as $post['post_type']
 
 			if ( empty( $post['ID'] ) )
 				return new WP_Error( 'woocommerce_api_invalid_id', sprintf( __( 'Invalid % ID', 'woocommerce' ), $type ), array( 'status' => 404 ) );
