@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.5
 Tested up to: 3.6
-Stable tag: 2.0.18
+Stable tag: 2.0.19
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -165,7 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.0.19 =
+= 2.0.19 - 04/11/2013 =
 * Fix - get_item_subtotal() logic
 * Fix - Pass number of products variable to get_related for more then 5 related products
 * Fix - Email fatal error for orders with missing products
