@@ -151,7 +151,7 @@ class WC_API_Base {
 			if ( ! current_user_can( $post_type->cap->delete_post, $id ) )
 				return new WP_Error( "woocommerce_api_user_cannot_delete_{$type}", sprintf( __( 'You do not have permission to delete this %s', 'woocommerce' ), $type ), array( 'status' => 401 ) );
 
-			$result = wp_delete_post( $id, $force );
+			$result = ( $force ) ? wp_delete_post( $id, true ) : wp_trash_post( $id );
 
 			if ( ! $result )
 				return new WP_Error( "woocommerce_api_cannot_delete_{$type}", sprintf( __( 'The %s cannot be deleted', 'woocommerce' ), $type ), array( 'status' => 500 ) );
