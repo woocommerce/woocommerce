@@ -161,7 +161,7 @@ class WC_Order {
 	 * Get the billing address in an array.
 	 *
 	 * @access public
-	 * @return array
+	 * @return string
 	 */
 	public function get_billing_address() {
 		if ( ! $this->billing_address ) {
