@@ -165,6 +165,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.0.20 =
+* Tweaked paypal request
+
 = 2.0.19 - 04/11/2013 =
 * Fix - get_item_subtotal() logic
 * Fix - Pass number of products variable to get_related for more then 5 related products

@@ -262,6 +262,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				'return' 				=> add_query_arg( 'utm_nooverride', '1', $this->get_return_url( $order ) ),
 				'cancel_return'			=> $order->get_cancel_order_url(),
 				'page_style'			=> $this->page_style,
+				'BUTTONSOURCE'          => 'WooThemes_Cart',
 
 				// Order key + ID
 				'invoice'				=> $this->invoice_prefix . ltrim( $order->get_order_number(), '#' ),
