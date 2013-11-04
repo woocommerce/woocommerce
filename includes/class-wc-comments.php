@@ -28,7 +28,7 @@ class WC_Comments {
 		add_action( 'edit_comment', array( $this, 'clear_transients' ) );
 
 		// Secure order notes
-		add_filter( 'comments_clauses', array( $this, 'exclude_order_comments' ), 10, 1);
+		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_order_comments', 10, 1 ) );
 		add_action( 'comment_feed_join', array( $this, 'exclude_order_comments_from_feed_join' ) );
 		add_action( 'comment_feed_where', array( $this, 'exclude_order_comments_from_feed_where' ) );
 	}
@@ -40,12 +40,12 @@ class WC_Comments {
 	 * and are not filtered, however, the code current_user_can( 'read_post', $comment->comment_post_ID ) should keep them safe since only admin and
 	 * shop managers can view orders anyway.
 	 *
-	 * The frontend view order pages get around this filter by using remove_filter('comments_clauses', array( 'WC_Comments' ,'exclude_order_comments') );
+	 * The frontend view order pages get around this filter by using remove_filter('comments_clauses', array( 'WC_Comments' ,'exclude_order_comments'), 10, 1 );
 	 *
 	 * @param array $clauses
 	 * @return array
 	 */
-	public function exclude_order_comments( $clauses ) {
+	public static function exclude_order_comments( $clauses ) {
 		global $wpdb, $typenow, $pagenow;
 
 		if ( is_admin() && $typenow == 'shop_order' && current_user_can( 'manage_woocommerce' ) )
