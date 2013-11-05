@@ -169,7 +169,7 @@ if ( ! function_exists( 'is_add_payment_method_page' ) ) {
     function is_add_payment_method_page() {
         global $wp;
 
-        return ( is_page( woocommerce_get_page_id( 'checkout' ) ) && isset( $wp->query_vars['add-payment-method'] ) ) ? true : false;
+        return ( is_page( woocommerce_get_page_id( 'myaccount' ) ) && isset( $wp->query_vars['add-payment-method'] ) ) ? true : false;
     }
 }
 

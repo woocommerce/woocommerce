@@ -73,7 +73,7 @@ class WC_Frontend_Scripts {
 		if ( is_cart() )
 			wp_enqueue_script( 'wc-cart', $frontend_script_path . 'cart' . $suffix . '.js', array( 'jquery', 'wc-country-select' ), WC_VERSION, true );
 
-		if ( is_checkout() ) {
+		if ( is_checkout() || is_add_payment_method_page() ) {
 
 			if ( get_option( 'woocommerce_enable_chosen' ) == 'yes' ) {
 				wp_enqueue_script( 'wc-chosen', $frontend_script_path . 'chosen-frontend' . $suffix . '.js', array( 'chosen' ), WC_VERSION, true );

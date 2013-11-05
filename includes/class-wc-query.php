@@ -75,14 +75,14 @@ class WC_Query {
 			// Checkout actions
 			'order-pay'          => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
 			'order-received'     => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
-			'add-payment-method' => get_option( 'woocommerce_checkout_add_payment_method_endpoint', 'add-payment-method' ),
 
 			// My account actions
-			'view-order'      => get_option( 'woocommerce_myaccount_view_order_endpoint', 'view-order' ),
-			'edit-account'    => get_option( 'woocommerce_myaccount_edit_account_endpoint', 'edit-account' ),
-			'edit-address'    => get_option( 'woocommerce_myaccount_edit_address_endpoint', 'edit-address' ),
-			'lost-password'   => get_option( 'woocommerce_myaccount_lost_password_endpoint', 'lost-password' ),
-			'customer-logout' => get_option( 'woocommerce_logout_endpoint', 'customer-logout' )
+			'view-order'         => get_option( 'woocommerce_myaccount_view_order_endpoint', 'view-order' ),
+			'edit-account'       => get_option( 'woocommerce_myaccount_edit_account_endpoint', 'edit-account' ),
+			'edit-address'       => get_option( 'woocommerce_myaccount_edit_address_endpoint', 'edit-address' ),
+			'lost-password'      => get_option( 'woocommerce_myaccount_lost_password_endpoint', 'lost-password' ),
+			'customer-logout'    => get_option( 'woocommerce_logout_endpoint', 'customer-logout' ),
+			'add-payment-method' => get_option( 'woocommerce_myaccount_add_payment_method_endpoint', 'add-payment-method' ),
 		);
 	}
 

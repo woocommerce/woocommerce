@@ -56,10 +56,6 @@ class WC_Shortcode_Checkout {
 
 			self::order_received( $wp->query_vars['order-received'] );
 
-		} elseif ( isset( $wp->query_vars['add-payment-method'] ) ) {
-
-			self::add_payment_method( $wp->query_vars['add-payment-method'] );
-
 		} else {
 
 			self::checkout();
@@ -201,36 +197,6 @@ class WC_Shortcode_Checkout {
 		unset( $woocommerce->session->order_awaiting_payment );
 
 		woocommerce_get_template( 'checkout/thankyou.php', array( 'order' => $order ) );
-	}
-
-	/**
-	 * Show the add payment method page
-	 */
-	private static function add_payment_method() {
-		global $woocommerce;
-
-		if ( ! is_user_logged_in() ) {
-
-			wp_safe_redirect( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
-			exit();
-
-		} else {
-
-			do_action( 'before_woocommerce_add_payment_method' );
-
-			wc_add_message( __( 'Add a new payment method.', 'woocommerce' ) );
-
-			wc_print_messages();
-
-			// Add payment method form
-			woocommerce_get_template( 'checkout/form-add-payment-method.php' );
-
-			wc_print_messages();
-
-			do_action( 'after_woocommerce_add_payment_method' );
-
-		}
-
 	}
 
 	/**

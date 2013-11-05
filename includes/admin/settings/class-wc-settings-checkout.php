@@ -167,7 +167,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			array(
 				'title'    => __( 'Add Payment Method', 'woocommerce' ),
 				'desc'     => __( 'Endpoint for the Checkout &rarr; Add Payment Method page', 'woocommerce' ),
-				'id'       => 'woocommerce_checkout_add_payment_method_endpoint',
+				'id'       => 'woocommerce_myaccount_add_payment_method_endpoint',
 				'type'     => 'text',
 				'default'  => 'add-payment-method',
 				'desc_tip' => true,

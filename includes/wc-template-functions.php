@@ -28,7 +28,7 @@ function woocommerce_template_redirect() {
 	}
 
 	// When on the checkout with an empty cart, redirect to cart page
-	elseif ( is_page( woocommerce_get_page_id( 'checkout' ) ) && sizeof( WC()->cart->get_cart() ) == 0 && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) && ! isset( $wp->query_vars['add-payment-method'] ) ) {
+	elseif ( is_page( woocommerce_get_page_id( 'checkout' ) ) && sizeof( WC()->cart->get_cart() ) == 0 && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ) {
 		wp_redirect( get_permalink( woocommerce_get_page_id( 'cart' ) ) );
 		exit;
 	}
@@ -47,6 +47,13 @@ function woocommerce_template_redirect() {
 			wp_safe_redirect( get_permalink( $product->id ), 302 );
 			exit;
 		}
+	}
+
+	// Ensure payment gateways are loaded early
+	elseif ( is_add_payment_method_page() ) {
+
+		WC()->payment_gateways();
+
 	}
 
 	// Checkout pages handling
