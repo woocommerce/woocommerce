@@ -310,7 +310,7 @@ class WC_Form_Handler {
 				// Redirect to success/confirmation/payment page
 				if ( $result['result'] == 'success' ) {
 					wc_add_message( __( 'Payment method added.', 'woocommerce' ) );
-					wp_safe_redirect( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
+					wp_redirect( $result['redirect'] );
 					exit();
 				}
 
