@@ -73,7 +73,7 @@ class WC_Frontend_Scripts {
 		if ( is_cart() )
 			wp_enqueue_script( 'wc-cart', $frontend_script_path . 'cart' . $suffix . '.js', array( 'jquery', 'wc-country-select' ), WC_VERSION, true );
 
-		if ( is_checkout() || is_add_payment_method_page() ) {
+		if ( is_checkout() ) {
 
 			if ( get_option( 'woocommerce_enable_chosen' ) == 'yes' ) {
 				wp_enqueue_script( 'wc-chosen', $frontend_script_path . 'chosen-frontend' . $suffix . '.js', array( 'chosen' ), WC_VERSION, true );
@@ -82,6 +82,9 @@ class WC_Frontend_Scripts {
 
 			wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce', 'wc-country-select' ), WC_VERSION, true );
 		}
+
+		if ( is_add_payment_method_page() )
+			wp_enqueue_script( 'wc-add-payment-method', $frontend_script_path . 'add-payment-method' . $suffix . '.js', array( 'jquery', 'woocommerce' ), WC_VERSION, true );
 
 		if ( $lightbox_en && ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) ) {
 			wp_enqueue_script( 'prettyPhoto', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js', array( 'jquery' ), '3.1.5', true );
@@ -115,7 +118,7 @@ class WC_Frontend_Scripts {
 			'apply_coupon_nonce'               => wp_create_nonce( "apply-coupon" ),
 			'option_guest_checkout'            => get_option( 'woocommerce_enable_guest_checkout' ),
 			'checkout_url'                     => add_query_arg( 'action', 'woocommerce-checkout', WC()->ajax_url() ),
-			'is_checkout'                      => is_page( woocommerce_get_page_id( 'checkout' ) ) && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) && ! isset( $wp->query_vars['add-payment-method'] ) ? 1 : 0,
+			'is_checkout'                      => is_page( woocommerce_get_page_id( 'checkout' ) ) && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ? 1 : 0,
 			'locale'                           => json_encode( WC()->countries->get_country_locale() )
 		) ) );
 
