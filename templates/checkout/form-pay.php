@@ -51,6 +51,7 @@ global $woocommerce;
 
 	<div id="payment">
 		<?php if ( $order->needs_payment() ) : ?>
+		<h3><?php _e( 'Payment', 'woocommerce' ); ?></h3>
 		<ul class="payment_methods methods">
 			<?php
 				if ( $available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways() ) {
