@@ -29,6 +29,14 @@ function wc_message_count() {
 }
 
 /**
+ * Get the count of messages added.
+ * @return int
+ */
+function wc_notice_count() {
+	return absint( sizeof( WC()->session->get( 'wc_notices', array() ) ) );
+}
+
+/**
  * Add and store an error
  *
  * @param  string $error
@@ -53,6 +61,18 @@ function wc_add_message( $message ) {
 }
 
 /**
+ * Add and store a message
+ *
+ * @param  string $message
+ */
+function wc_add_notice( $notice ) {
+	$notices   = WC()->session->get( 'wc_notices', array() );
+	$notices[] = apply_filters( 'woocommerce_add_notice', $notice );
+
+	WC()->session->set( 'wc_notices', $notices );
+}
+
+/**
  * Unset all errors
  */
 function wc_clear_errors() {
@@ -67,6 +87,13 @@ function wc_clear_messages() {
 }
 
 /**
+ * Unset all messages
+ */
+function wc_clear_notices() {
+	WC()->session->set( 'wc_notices', null );
+}
+
+/**
  * Prints messages and errors which are stored in the session, then clears them.
  */
 function wc_print_messages() {
@@ -75,14 +102,19 @@ function wc_print_messages() {
 			'errors' => WC()->session->get( 'wc_errors', array() )
 		) );
 
-
 	if ( wc_message_count() > 0  )
 		woocommerce_get_template( 'shop/messages.php', array(
 			'messages' => WC()->session->get( 'wc_messages', array() )
 		) );
 
+	if ( wc_notice_count() > 0  )
+		woocommerce_get_template( 'shop/notices.php', array(
+			'notices' => WC()->session->get( 'wc_notices', array() )
+		) );
+
 	wc_clear_errors();
 	wc_clear_messages();
+	wc_clear_notices();
 }
 add_action( 'woocommerce_before_shop_loop', 'wc_print_messages', 10 );
 add_action( 'woocommerce_before_single_product', 'wc_print_messages', 10 );
