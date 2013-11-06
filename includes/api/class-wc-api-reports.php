@@ -32,12 +32,12 @@ class WC_API_Reports extends WC_API_Base {
 
 		# GET /reports
 		$routes[ $this->base ] = array(
-			array( array( $this, 'getReports' ),     WP_JSON_Server::READABLE ),
+			array( array( $this, 'getReports' ),     WC_API_Server::READABLE ),
 		);
 
 		# GET /reports/sales
 		$routes[ $this->base . '/sales'] = array(
-			array( array( $this, 'getSalesReport' ), WP_JSON_SERVER::READABLE ),
+			array( array( $this, 'getSalesReport' ), WC_API_Server::READABLE ),
 		);
 
 		return $routes;

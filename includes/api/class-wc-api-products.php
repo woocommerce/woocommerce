@@ -33,25 +33,25 @@ class WC_API_Products extends WC_API_Base {
 
 		# GET|POST /products
 		$routes[ $this->base ] = array(
-			array( array( $this, 'getProducts' ),     WP_JSON_Server::READABLE ),
-			array( array( $this, 'createProduct' ),   WP_JSON_Server::CREATABLE | WP_JSON_Server::ACCEPT_JSON ),
+			array( array( $this, 'getProducts' ),     WC_API_Server::READABLE ),
+			array( array( $this, 'createProduct' ),   WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET /products/count
 		$routes[ $this->base . '/count'] = array(
-			array( array( $this, 'getProductsCount' ), WP_JSON_SERVER::READABLE ),
+			array( array( $this, 'getProductsCount' ), WC_API_Server::READABLE ),
 		);
 
 		# GET|PUT|DELETE /products/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
-			array( array( $this, 'getProduct' ),  WP_JSON_Server::READABLE ),
-			array( array( $this, 'editProduct' ), WP_JSON_Server::EDITABLE | WP_JSON_Server::ACCEPT_JSON ),
-			array( array( $this, 'deleteProduct' ), WP_JSON_Server::DELETABLE ),
+			array( array( $this, 'getProduct' ),  WC_API_Server::READABLE ),
+			array( array( $this, 'editProduct' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'deleteProduct' ), WC_API_Server::DELETABLE ),
 		);
 
 		# GET /products/<id>/reviews
 		$routes[ $this->base . '/(?P<id>\d+)/reviews' ] = array(
-			array( array( $this, 'getProductReviews' ), WP_JSON_Server::READABLE ),
+			array( array( $this, 'getProductReviews' ), WC_API_Server::READABLE ),
 		);
 
 		return $routes;

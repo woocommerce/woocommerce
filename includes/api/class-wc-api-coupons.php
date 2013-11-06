@@ -33,20 +33,20 @@ class WC_API_Coupons extends WC_API_Base {
 
 		# GET|POST /coupons
 		$routes[ $this->base ] = array(
-			array( array( $this, 'getCoupons' ),     WP_JSON_Server::READABLE ),
-			array( array( $this, 'createCoupon' ),   WP_JSON_Server::CREATABLE | WP_JSON_Server::ACCEPT_JSON ),
+			array( array( $this, 'getCoupons' ),     WC_API_Server::READABLE ),
+			array( array( $this, 'createCoupon' ),   WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET /coupons/count
 		$routes[ $this->base . '/count'] = array(
-			array( array( $this, 'getCouponsCount' ), WP_JSON_SERVER::READABLE ),
+			array( array( $this, 'getCouponsCount' ), WC_API_Server::READABLE ),
 		);
 
 		# GET|PUT|DELETE /coupons/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
-			array( array( $this, 'getCoupon' ),  WP_JSON_Server::READABLE ),
-			array( array( $this, 'editCoupon' ), WP_JSON_Server::EDITABLE | WP_JSON_Server::ACCEPT_JSON ),
-			array( array( $this, 'deleteCoupon' ), WP_JSON_Server::DELETABLE ),
+			array( array( $this, 'getCoupon' ),  WC_API_Server::READABLE ),
+			array( array( $this, 'editCoupon' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'deleteCoupon' ), WC_API_Server::DELETABLE ),
 		);
 
 		return $routes;

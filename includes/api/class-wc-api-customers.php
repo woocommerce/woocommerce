@@ -22,10 +22,10 @@ class WC_API_Customers extends WC_API_Base {
 	 * Setup class, overridden to provide customer data to order response
 	 *
 	 * @since 2.1
-	 * @param WP_JSON_Server $server
+	 * @param WC_API_Server $server
 	 * @return WC_API_Customers
 	 */
-	public function __construct( WP_JSON_Server $server ) {
+	public function __construct( WC_API_Server $server ) {
 
 		parent::__construct( $server );
 
@@ -49,25 +49,25 @@ class WC_API_Customers extends WC_API_Base {
 
 		# GET|POST /customers
 		$routes[ $this->base ] = array(
-			array( array( $this, 'getCustomers' ),     WP_JSON_Server::READABLE ),
-			array( array( $this, 'createCustomer' ),   WP_JSON_Server::CREATABLE | WP_JSON_Server::ACCEPT_JSON ),
+			array( array( $this, 'getCustomers' ),     WC_API_SERVER::READABLE ),
+			array( array( $this, 'createCustomer' ),   WC_API_SERVER::CREATABLE | WC_API_SERVER::ACCEPT_DATA ),
 		);
 
 		# GET /customers/count
 		$routes[ $this->base . '/count'] = array(
-			array( array( $this, 'getCustomersCount' ), WP_JSON_SERVER::READABLE ),
+			array( array( $this, 'getCustomersCount' ), WC_API_SERVER::READABLE ),
 		);
 
 		# GET|PUT|DELETE /customers/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
-			array( array( $this, 'getCustomer' ),  WP_JSON_Server::READABLE ),
-			array( array( $this, 'editCustomer' ), WP_JSON_Server::EDITABLE | WP_JSON_Server::ACCEPT_JSON ),
-			array( array( $this, 'deleteCustomer' ), WP_JSON_Server::DELETABLE ),
+			array( array( $this, 'getCustomer' ),  WC_API_SERVER::READABLE ),
+			array( array( $this, 'editCustomer' ), WC_API_SERVER::EDITABLE | WC_API_SERVER::ACCEPT_DATA ),
+			array( array( $this, 'deleteCustomer' ), WC_API_SERVER::DELETABLE ),
 		);
 
 		# GET /customers/<id>/orders
 		$routes[ $this->base . '/(?P<id>\d+)/orders' ] = array(
-			array( array( $this, 'getCustomerOrders' ), WP_JSON_Server::READABLE ),
+			array( array( $this, 'getCustomerOrders' ), WC_API_SERVER::READABLE ),
 		);
 
 		return $routes;
@@ -151,7 +151,7 @@ class WC_API_Customers extends WC_API_Base {
 			'last_order_date'  => is_object( $last_order ) ? $last_order->post_date : null,
 			'orders_count'     => $customer->_order_count,
 			'total_spent'      => $customer->_money_spent,
-			'avatar_url'       => $this->server->get_avatar( $customer->customer_email ),
+			'avatar_url'       => $this->get_avatar_url( $customer->customer_email ),
 			'billing_address'  => array(
 				'first_name' => $customer->billing_first_name,
 				'last_name'  => $customer->billing_last_name,
@@ -316,7 +316,6 @@ class WC_API_Customers extends WC_API_Base {
 		return new WP_User_Query( $query_args );
 	}
 
-
 	/**
 	 * Add customer data to orders
 	 *
@@ -339,6 +338,24 @@ class WC_API_Customers extends WC_API_Base {
 		}
 
 		return $order_data;
+	}
+
+	/**
+	 * Wrapper for @see get_avatar() which doesn't simply return
+	 * the URL so we need to pluck it from the HTML img tag
+	 *
+	 * @param string $email the customer's email
+	 * @return string the URL to the customer's avatar
+	 */
+	private function get_avatar_url( $email ) {
+
+		$dom = new DOMDocument();
+
+		$dom->loadHTML( get_avatar( $email ) );
+
+		$url = $dom->getElementsByTagName('img')->item(0)->getAttribute('src');
+
+		return ( ! empty( $url ) ) ? $url : null;
 	}
 
 }

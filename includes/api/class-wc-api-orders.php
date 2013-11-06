@@ -33,25 +33,25 @@ class WC_API_Orders extends WC_API_Base {
 
 		# GET|POST /orders
 		$routes[ $this->base ] = array(
-			array( array( $this, 'getOrders' ),     WP_JSON_Server::READABLE ),
-			array( array( $this, 'createOrder' ),   WP_JSON_Server::CREATABLE | WP_JSON_Server::ACCEPT_JSON ),
+			array( array( $this, 'getOrders' ),     WC_API_Server::READABLE ),
+			array( array( $this, 'createOrder' ),   WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET /orders/count
 		$routes[ $this->base . '/count'] = array(
-			array( array( $this, 'getOrdersCount' ), WP_JSON_SERVER::READABLE ),
+			array( array( $this, 'getOrdersCount' ), WC_API_Server::READABLE ),
 		);
 
 		# GET|PUT|DELETE /orders/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
-			array( array( $this, 'getOrder' ),  WP_JSON_Server::READABLE ),
-			array( array( $this, 'editOrder' ), WP_JSON_Server::EDITABLE | WP_JSON_Server::ACCEPT_JSON ),
-			array( array( $this, 'deleteOrder' ), WP_JSON_Server::DELETABLE ),
+			array( array( $this, 'getOrder' ),  WC_API_Server::READABLE ),
+			array( array( $this, 'editOrder' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'deleteOrder' ), WC_API_Server::DELETABLE ),
 		);
 
 		# GET /orders/<id>/notes
 		$routes[ $this->base . '/(?P<id>\d+)/notes' ] = array(
-			array( array( $this, 'getOrderNotes' ), WP_JSON_Server::READABLE ),
+			array( array( $this, 'getOrderNotes' ), WC_API_Server::READABLE ),
 		);
 
 		return $routes;

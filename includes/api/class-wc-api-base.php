@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 class WC_API_Base {
 
-	/** @var \WP_JSON_Server the API server */
+	/** @var WC_API_Server the API server */
 	protected $server;
 
 	/** @var string sub-classes override this to set a resource-specific base route */
@@ -24,15 +24,15 @@ class WC_API_Base {
 	 * Setup class
 	 *
 	 * @since 2.1
-	 * @param WP_JSON_Server $server
+	 * @param WC_API_Server $server
 	 * @return WC_API_Base
 	 */
-	public function __construct( WP_JSON_Server $server ) {
+	public function __construct( WC_API_Server $server ) {
 
 		$this->server = $server;
 
 		// automatically register routes for sub-classes
-		add_filter( 'json_endpoints', array( $this, 'registerRoutes' ) );
+		add_filter( 'woocommerce_api_endpoints', array( $this, 'registerRoutes' ) );
 
 		// remove fields from responses when requests specify certain fields
 		// note these are hooked at a later priority so data added via filters (e.g. customer data to the order response)

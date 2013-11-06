@@ -21,26 +21,10 @@ class WC_API_Authentication {
 	public function __construct() {
 
 		// this filter can be removed in order to provide unauthenticated access to the API for testing, etc
-		add_filter( 'json_check_authentication', array( $this, 'authenticate' ) );
-
-		add_filter( 'json_index', array( $this, 'maybe_declare_ssl_support' ) );
+		add_filter( 'woocommerce_api_check_authentication', array( $this, 'authenticate' ) );
 
 		// TODO: provide API key based permissions check using $args = apply_filters( 'json_dispatch_args', $args, $callback );
 		// TODO: allow unauthenticated access to /products endpoint
-	}
-
-	/**
-	 * Add "supports_ssl" capabilities to API index so consumers can determine the proper authentication method
-	 *
-	 * @since 2.1
-	 * @param array $capabilities
-	 * @return array
-	 */
-	public function maybe_declare_ssl_support( $capabilities ) {
-
-		$capabilities['supports_ssl'] = ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) );
-
-		return $capabilities;
 	}
 
 	/**
@@ -54,7 +38,7 @@ class WC_API_Authentication {
 
 		// allow access to the index by default
 		if ( '/' === WC()->api->server->path )
-			return null;
+			return new WP_User(0);
 
 		try {
 
@@ -65,7 +49,7 @@ class WC_API_Authentication {
 
 		} catch ( Exception $e ) {
 
-			$user = new WP_Error( 'wc_api_authentication_error', $e->getMessage(), array( 'status' => $e->getCode() ) );
+			$user = new WP_Error( 'woocommerce_api_authentication_error', $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 
 		return $user;
@@ -214,9 +198,9 @@ class WC_API_Authentication {
 		$query_params = array();
 		foreach ( $params as $param_key => $param_value ) {
 
-			$query_params[] = $param_key . '%3D' . $param_value;
+			$query_params[] = $param_key . '%3D' . $param_value; // join with equals sign
 		}
-		$query_string = implode( '%26', $query_params );
+		$query_string = implode( '%26', $query_params ); // join with ampersand
 
 		$string_to_sign = $http_method . '&' . $base_request_uri . '&' . $query_string;
 
