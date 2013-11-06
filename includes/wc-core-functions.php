@@ -336,32 +336,19 @@ function wc_setcookie( $name, $value, $expire = 0 ) {
 	}
 }
 
-// TODO: not sure if these should be moved to wp-json-server class and made WC-specific or not
 /**
- * Get URL to a JSON endpoint on a site
+ * Get the URL to the WooCommerce REST API
  *
- * @todo Check if this is even necessary
- * @param int $blog_id Blog ID
- * @param string $path JSON route
- * @param string $scheme Sanitization scheme (usually 'json')
- * @return string Full URL to the endpoint
+ * @since 2.1
+ * @param string $path an endpoint to include in the URL
+ * @return string the URL
  */
-function get_json_url( $blog_id = null, $path = '', $scheme = 'json' ) {
-	$url = get_home_url( $blog_id, 'wc-api/v1/', $scheme );
+function get_woocommerce_api_url( $path ) {
 
-	if ( !empty( $path ) && is_string( $path ) && strpos( $path, '..' ) === false )
-		$url .= '/' . ltrim( $path, '/' );
+	$url = get_home_url( null, 'wc-api/v' . WC_API::VERSION . '/', ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) ? 'https' : 'http' );
 
-	return apply_filters( 'json_url', $url, $path, $blog_id );
-}
+	if ( ! empty( $path ) && is_string( $path ) )
+		$url .= ltrim( $path, '/' );
 
-/**
- * Get URL to a JSON endpoint
- *
- * @param string $path JSON route
- * @param string $scheme Sanitization scheme (usually 'json')
- * @return string Full URL to the endpoint
- */
-function json_url( $path = '', $scheme = 'json' ) {
-	return get_json_url( null, $path, $scheme );
+	return $url;
 }
