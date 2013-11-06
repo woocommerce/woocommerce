@@ -50,20 +50,20 @@ if ( empty( $attributes ) && ( ! $product->enable_dimensions_display() || ( ! $p
 
 		<tr class="<?php if ( ( $alt = $alt * -1 ) == 1 ) echo 'alt'; ?>">
 			<th><?php echo wc_attribute_label( $attribute['name'] ); ?></th>
-			<td><?php
+			<td>
+				<?php
 				if ( $attribute['is_taxonomy'] ) {
-
-					$values = woocommerce_get_product_terms( $product->id, $attribute['name'], 'names' );
-					echo apply_filters( 'woocommerce_attribute', wpautop( wptexturize( implode( ', ', $values ) ) ), $attribute, $values );
-
-				} else {
-
+					$values = implode( ', ', woocommerce_get_product_terms( $product->id, $attribute['name'], 'names' ) );
+				} 
+				else {
 					// Convert pipes to commas and display values
 					$values = array_map( 'trim', explode( WC_DELIMITER, $attribute['value'] ) );
-					echo apply_filters( 'woocommerce_attribute', wpautop( wptexturize( implode( ', ', $values ) ) ), $attribute, $values );
-
 				}
-			?></td>
+
+				$content = '<div class="attribute_values">' . $values . '</div><div class="attribute_description">' . $attribute['is_visible_text'] . '</div>';
+				echo apply_filters( 'woocommerce_attribute', wpautop( wptexturize( $content ) ), $attribute, $content );
+				?>
+			</td>
 		</tr>
 
 	<?php endforeach; ?>

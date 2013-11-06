@@ -419,14 +419,16 @@ function woocommerce_save_attributes() {
 
 	// Save Attributes
 	$attributes = array();
-
 	if ( isset( $data['attribute_names'] ) ) {
 
 		$attribute_names  = array_map( 'stripslashes', $data['attribute_names'] );
 		$attribute_values = $data['attribute_values'];
 
-		if ( isset( $data['attribute_visibility'] ) )
+		if ( isset( $data['attribute_visibility'] ) ) 
 			$attribute_visibility = $data['attribute_visibility'];
+
+		if ( isset( $data['attribute_visibility_text'] ) ) 
+			$attribute_visibility_text = $data['attribute_visibility_text'];
 
 		if ( isset( $data['attribute_variation'] ) )
 			$attribute_variation = $data['attribute_variation'];
@@ -435,12 +437,12 @@ function woocommerce_save_attributes() {
 		$attribute_position = $data['attribute_position'];
 
 		$attribute_names_count = sizeof( $attribute_names );
-
 		for ( $i=0; $i < $attribute_names_count; $i++ ) {
 			if ( ! $attribute_names[ $i ] )
 				continue;
 
 			$is_visible 	= isset( $attribute_visibility[ $i ] ) ? 1 : 0;
+			$is_visible_text 	= isset( $attribute_visibility_text[ $i ] ) ? $attribute_visibility_text[ $i ] : '';
 			$is_variation 	= isset( $attribute_variation[ $i ] ) ? 1 : 0;
 			$is_taxonomy 	= $attribute_is_taxonomy[ $i ] ? 1 : 0;
 
@@ -475,6 +477,7 @@ function woocommerce_save_attributes() {
 				 		'value' 		=> '',
 				 		'position' 		=> $attribute_position[ $i ],
 				 		'is_visible' 	=> $is_visible,
+				 		'is_visible_text'	=> $is_visible_text,
 				 		'is_variation' 	=> $is_variation,
 				 		'is_taxonomy' 	=> $is_taxonomy
 				 	);
@@ -491,6 +494,7 @@ function woocommerce_save_attributes() {
 			 		'value' 		=> $values,
 			 		'position' 		=> $attribute_position[ $i ],
 			 		'is_visible' 	=> $is_visible,
+			 		'is_visible_text'	=> $is_visible_text,
 			 		'is_variation' 	=> $is_variation,
 			 		'is_taxonomy' 	=> $is_taxonomy
 			 	);

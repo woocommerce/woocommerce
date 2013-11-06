@@ -474,33 +474,31 @@ class WC_Meta_Box_Product_Data {
 
 														?>" placeholder="<?php _e( 'Pipe (|) separate terms', 'woocommerce' ); ?>" />
 													<?php endif; ?>
-													<?php do_action( 'woocommerce_product_option_terms', $tax, $i ); ?>
-												</td>
-											</tr>
-											<tr>
-												<td>
-													<label><input type="checkbox" class="checkbox" <?php
-
-														if ( isset( $attribute['is_visible'] ) )
-															checked( $attribute['is_visible'], 1 );
-														else
-															checked( apply_filters( 'default_attribute_visibility', false, $tax ), true );
-
-													?> name="attribute_visibility[<?php echo $i; ?>]" value="1" /> <?php _e( 'Visible on the product page', 'woocommerce' ); ?></label>
-												</td>
-											</tr>
-											<tr>
-												<td>
 													<div class="enable_variation show_if_variable">
-													<label><input type="checkbox" class="checkbox" <?php
-
+														<label><input type="checkbox" class="checkbox" 
+														<?php
 														if ( isset( $attribute['is_variation'] ) )
 															checked( $attribute['is_variation'], 1 );
 														else
 															checked( apply_filters( 'default_attribute_variation', false, $tax ), true );
-
-													?> name="attribute_variation[<?php echo $i; ?>]" value="1" /> <?php _e( 'Used for variations', 'woocommerce' ); ?></label>
+														?> 
+														name="attribute_variation[<?php echo $i; ?>]" value="1" /> <?php _e( 'Used for variations', 'woocommerce' ); ?>
+														</label>
 													</div>
+													<label><input type="checkbox" class="checkbox" 
+														<?php
+														if ( isset( $attribute['is_visible'] ) )
+															checked( $attribute['is_visible'], 1 );
+														else
+															checked( apply_filters( 'default_attribute_visibility', false, $tax ), true );
+														?> 
+														name="attribute_visibility[<?php echo $i; ?>]" value="1" /> <?php _e( 'Visible on the product page', 'woocommerce' ); ?>
+													</label>
+													<?php
+														$is_visible_text = ( isset( $attribute['is_visible_text'] ) ) ? $attribute['is_visible_text'] : '';
+														woocommerce_wp_textarea_input(  array( 'id' => "attribute_visibility_text[$i]", 'label' => __( 'Attribute Note', 'woocommerce' ), 'description' => __( 'Optional notes that can be added under the "Additional Information" tab in the product pages.', 'woocommerce' ), 'value' => $is_visible_text) );
+													?>
+													<?php do_action( 'woocommerce_product_option_terms', $tax, $i ); ?>
 												</td>
 											</tr>
 										</tbody>
@@ -538,18 +536,14 @@ class WC_Meta_Box_Product_Data {
 												<label><?php _e( 'Value(s)', 'woocommerce' ); ?>:</label>
 												<textarea name="attribute_values[<?php echo $i; ?>]" cols="5" rows="5" placeholder="<?php _e( 'Enter some text, or some attributes by pipe (|) separating values.', 'woocommerce' ); ?>"><?php echo esc_textarea( $attribute['value'] ); ?></textarea>
 											</td>
-										</tr>
-										<tr>
-											<td>
-												<label><input type="checkbox" class="checkbox" <?php checked( $attribute['is_visible'], 1 ); ?> name="attribute_visibility[<?php echo $i; ?>]" value="1" /> <?php _e( 'Visible on the product page', 'woocommerce' ); ?></label>
-											</td>
-										</tr>
-										<tr>
-											<td>
-												<div class="enable_variation show_if_variable">
+											<div class="enable_variation show_if_variable">
 												<label><input type="checkbox" class="checkbox" <?php checked( $attribute['is_variation'], 1 ); ?> name="attribute_variation[<?php echo $i; ?>]" value="1" /> <?php _e( 'Used for variations', 'woocommerce' ); ?></label>
-												</div>
-											</td>
+											</div>
+											<label><input type="checkbox" class="checkbox" <?php checked( $attribute['is_visible'], 1 ); ?> name="attribute_visibility[<?php echo $i; ?>]" value="1" /> <?php _e( 'Visible on the product page', 'woocommerce' ); ?></label>
+											<?php
+												$is_visible_text = ( isset( $attribute['is_visible_text'] ) ) ? $attribute['is_visible_text'] : '';
+												woocommerce_wp_textarea_input(  array( 'id' => "attribute_visibility_text[$i]", 'label' => __( 'Attribute Note', 'woocommerce' ), 'description' => __( 'Optional notes that can be added under the "Additional Information" tab in the product pages.', 'woocommerce' ), 'value' => $is_visible_text) );
+											?>
 										</tr>
 									</tbody>
 								</table>
