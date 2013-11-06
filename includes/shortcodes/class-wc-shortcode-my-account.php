@@ -367,7 +367,7 @@ class WC_Shortcode_My_Account {
 
 			do_action( 'before_woocommerce_add_payment_method' );
 
-			wc_add_message( __( 'Add a new payment method.', 'woocommerce' ) );
+			wc_add_notice( __( 'Add a new payment method.', 'woocommerce' ) );
 
 			wc_print_messages();
 
