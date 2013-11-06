@@ -31,9 +31,6 @@ class WC_API {
 
 		// handle REST/legacy API request
 		add_action( 'parse_request', array( $this, 'handle_api_requests'), 0 );
-
-		// TODO: should this be done via this filter or in wp-json-server class?
-		add_filter( 'json_endpoints', array( $this, 'remove_users_endpoint' ), 0 );
 	}
 
 	/**
@@ -87,24 +84,18 @@ class WC_API {
 		// REST API request
 		if ( ! empty( $wp->query_vars['wc-api-route'] ) ) {
 
+			define( 'WC_API_REQUEST', true );
+
 			// load required files
 			$this->includes();
 
-			define('XMLRPC_REQUEST', true);
+			$this->server = new WC_API_Server( $wp->query_vars['wc-api-route'] );
 
-			define('JSON_REQUEST', true);
-
-			// TODO: should these filters/actions be renamed?
-			$wp_json_server_class = apply_filters('wp_json_server_class', 'WP_JSON_Server');
-
-			$this->server = new $wp_json_server_class;
-
-			do_action('wp_json_server_before_serve', $this->server );
-
+			// load API resource classes
 			$this->register_resources( $this->server );
 
 			// Fire off the request
-			$this->server->serve_request( $wp->query_vars['wc-api-route'] );
+			$this->server->serve_request();
 
 			exit;
 		}
@@ -143,8 +134,10 @@ class WC_API {
 		include_once( ABSPATH . WPINC . '/class-IXR.php' );
 		include_once( ABSPATH . WPINC . '/class-wp-xmlrpc-server.php' );
 
-		include_once( 'libraries/wp-api/class-wp-json-responsehandler.php' );
-		include_once( 'libraries/wp-api/class-wp-json-server.php' );
+		include_once( 'api/class-wc-api-server.php' );
+		include_once( 'api/interface-wc-api-handler.php' );
+		include_once( 'api/class-wc-api-json-handler.php' );
+		include_once( 'api/class-wc-api-xml-handler.php' );
 
 		include_once( 'api/class-wc-api-authentication.php' );
 		$this->authentication = new WC_API_Authentication();
@@ -155,6 +148,8 @@ class WC_API {
 		include_once( 'api/class-wc-api-coupons.php' );
 		include_once( 'api/class-wc-api-customers.php' );
 		include_once( 'api/class-wc-api-reports.php' );
+
+		// TODO: some action to allow actors to load additional resource types or handlers
 	}
 
 	/**
@@ -176,25 +171,6 @@ class WC_API {
 		foreach ( $api_classes as $api_class ) {
 			$this->$api_class = new $api_class( $server );
 		}
-	}
-
-
-	/**
-	 * Remove the users endpoints added by the JSON server
-	 *
-	 * @since 2.1
-	 * @param $endpoints
-	 * @return array
-	 */
-	public function remove_users_endpoint( $endpoints ) {
-
-		foreach ( $endpoints as $path => $endpoint ) {
-
-			if ( ! strncmp( $path, '/user', 5 ) )
-				unset( $endpoints[ $path ] );
-		}
-
-		return $endpoints;
 	}
 
 }
