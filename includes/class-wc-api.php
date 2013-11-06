@@ -14,6 +14,14 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 class WC_API {
 
+	/** This is the major version for the REST API and takes
+	 * first-order position in endpoint URLs
+	 */
+	const VERSION = 1;
+
+	/** @var WC_API_Server the REST API server */
+	public $server;
+
 	/**
 	 * Setup class
 	 *
@@ -57,8 +65,8 @@ class WC_API {
 	public function add_endpoint() {
 
 		// REST API
-		add_rewrite_rule( '^wc-api\/v1/?$', 'index.php?wc-api-route=/', 'top' );
-		add_rewrite_rule( '^wc-api\/v1(.*)?', 'index.php?wc-api-route=$matches[1]', 'top' );
+		add_rewrite_rule( '^wc-api\/v' . self::VERSION . '/?$', 'index.php?wc-api-route=/', 'top' );
+		add_rewrite_rule( '^wc-api\/v' . self::VERSION .'(.*)?', 'index.php?wc-api-route=$matches[1]', 'top' );
 
 		// legacy API for payment gateway IPNs
 		add_rewrite_endpoint( 'wc-api', EP_ALL );
