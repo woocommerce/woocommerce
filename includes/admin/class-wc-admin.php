@@ -21,8 +21,8 @@ class WC_Admin {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_filter( 'init', array( $this, 'includes' ) );
-		add_filter( 'current_screen', array( $this, 'conditonal_includes' ) );
+		add_action( 'init', array( $this, 'includes' ) );
+		add_action( 'current_screen', array( $this, 'conditonal_includes' ) );
 		add_action( 'admin_init', array( $this, 'prevent_admin_access' ) );
 		add_action( 'wp_ajax_page_slurp', array( 'WC_Gateway_Mijireh', 'page_slurp' ) );
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
