@@ -1717,14 +1717,25 @@ table.wc_tax_rates, table.wc_input_table {
 		position: relative;
 		background: #f9f9f9;
 		&:before {
-			content: "";
+			content: "\e032";
+			font-family: 'WooCommerce';
+			text-align: center;
+			line-height: 2;
 			position: absolute;
-			top: 0.75em;
-			left: 0.5em;
-			width: 1em;
-			height: 0.125em;
-			border-top: 0.375em double #777;
-			border-bottom: 0.125em solid #777;
+			color: #999;
+			top:0;
+			right:0;
+			bottom:0;
+			left:0;
+			display: block;
+			width:100%;
+			height: 100%;
+			outline: 1px solid red;
+		}
+		&:hover {
+			&:before {
+				color: #333;
+			}
 		}
 	}
 	.button {
@@ -1748,6 +1759,12 @@ table.wc_tax_rates, table.wc_input_table {
 		.current {
 			background: #bbb;
 			text-shadow: none;
+		}
+	}
+	tfoot {
+		th {
+			padding-left:20px;
+			padding-right:20px;
 		}
 	}
 }
