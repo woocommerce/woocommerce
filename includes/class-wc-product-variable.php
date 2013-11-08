@@ -231,7 +231,7 @@ class WC_Product_Variable extends WC_Product {
 	public function get_price_html( $price = '' ) {
 
 		// Ensure variation prices are synced with variations
-		//if ( $this->get_variation_price( 'min' ) === '' || $this->get_price() === '' )
+		if ( $this->get_variation_price( 'min' ) === '' || $this->get_price() === '' )
 			$this->variable_product_sync( $this->id );
 
 		// Get the price
