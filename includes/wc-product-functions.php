@@ -453,8 +453,8 @@ function woocommerce_scheduled_sales() {
 
 			// Sync parent
 			if ( $parent ) {
-				// We can force varaible product price to sync up by removing their min price meta
-				delete_post_meta( $parent, '_min_variation_price' );
+				// We can force variable product prices to sync up by removing their min price meta
+				delete_post_meta( $parent, '_min_price_variation_id' );
 
 				// Grouped products need syncing via a function
 				$this_product = get_product( $product_id );
