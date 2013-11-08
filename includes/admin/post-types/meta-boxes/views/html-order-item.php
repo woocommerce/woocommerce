@@ -100,8 +100,10 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 							$meta['meta_id']    = absint( $meta['meta_id'] );
 
 							echo '<tr data-meta_id="' . $meta['meta_id'] . '">
-								<td><input type="text" name="meta_key[' . $meta['meta_id'] . ']" value="' . $meta['meta_key'] . '" /></td>
-								<td><input type="text" name="meta_value[' . $meta['meta_id'] . ']" value="' . $meta['meta_value'] . '" /></td>
+								<td>
+									<input type="text" name="meta_key[' . $meta['meta_id'] . ']" value="' . $meta['meta_key'] . '" />
+									<textarea name="meta_value[' . $meta['meta_id'] . ']">' . $meta['meta_value'] . '</textarea>
+								</td>
 								<td width="1%"><button class="remove_order_item_meta button">&times;</button></td>
 							</tr>';
 						}
