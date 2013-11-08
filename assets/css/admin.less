@@ -297,13 +297,13 @@ table.wc_status_table {
 			background: transparent none;
 		}
 		mark.yes {
-			color: green;
+			color: @green;
 		}
 		mark.no {
 			color: #999;
 		}
 		mark.error {
-			color: red;
+			color: @red;
 		}
 		ul {
 			margin: 0;
@@ -1226,11 +1226,11 @@ ul.wc_coupon_list_block {
 		}
 		mark.pending:after {
 			content: "\e012";
-			color: #de9e0c;
+			color: @orange;
 		}
 		mark.completed:after {
 			content: "\e015";
-			color: #21759b;
+			color: @blue;
 		}
 		mark.on-hold:after {
 			content: "\e033";
@@ -1325,7 +1325,7 @@ ul.order_notes {
 			}
 		}
 		a.delete_note {
-			color: red
+			color: @red
 		}
 		.note_content:after {
 		  content: "";
@@ -1460,7 +1460,7 @@ table.wp-list-table {
 	}
 	mark.instock {
 		font-weight: bold;
-		color: green;
+		color: @green;
 		background: transparent none;
 		line-height: 1;
 	}
@@ -1600,13 +1600,13 @@ ul.woocommerce_stats {
 	white-space: nowrap;
 }
 #woocommerce_dashboard_right_now .on-hold a {
-	color: red;
+	color: @red;
 }
 #woocommerce_dashboard_right_now .pending a {
 	color: #e66f00;
 }
 #woocommerce_dashboard_right_now .completed a {
-	color: green;
+	color: @green;
 }
 #woocommerce_dashboard_right_now .versions {
 	padding: 6px 10px 12px;
@@ -1639,13 +1639,13 @@ ul.recent-orders, ul.stock_list {
 			margin-left: 8px;
 		}
 		.completed {
-			color: green;
+			color: @green;
 		}
 		.on-hold {
-			color: red;
+			color: @red;
 		}
 		.processing {
-			color: #21759B;
+			color: @blue;
 		}
 		.pending {
 			color: #E66F00;
@@ -1667,7 +1667,7 @@ ul.recent-orders, ul.stock_list {
 /* Settings */
 mark.notice {
 	background: #fff;
-	color: red;
+	color: @red;
 	margin: 0 0 0 10px;
 }
 a.export_rates, a.import_rates {
@@ -1737,7 +1737,6 @@ table.wc_tax_rates, table.wc_input_table {
 			display: block;
 			width:100%;
 			height: 100%;
-			outline: 1px solid red;
 		}
 		&:hover {
 			&:before {
@@ -1867,7 +1866,7 @@ img.help_tip {
 		}
 		span.help_tip {
 			cursor: help;
-			color: #21759B;
+			color: @blue;
 		}
 		th {
 			position: relative;
@@ -2376,7 +2375,7 @@ img.help_tip {
 					}
 					&:hover {
 						&:before {
-							color: red;
+							color: @red;
 						}
 					}
 				}
@@ -2427,7 +2426,7 @@ img.help_tip {
 		.req {
 			font-weight: bold;
 			font-style: normal;
-			color: red;
+			color: @red;
 		}
 	}
 	.description {
@@ -3037,7 +3036,7 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 					border-right-width: 0;
 					padding: 10px;
 					margin:0;
-					color: #21759b;
+					color: @blue;
 					border-top-width:0;
 					background-image: -webkit-gradient(linear,left bottom,left top,from(#ececec),to(#f9f9f9));
 					background-image: -webkit-linear-gradient(bottom,#ececec,#f9f9f9);
