@@ -584,6 +584,7 @@ function woocommerce_add_variation() {
 			$parent_data['height'] = '0';
 
 		$_tax_class = '';
+		$_downloadable_files = '';
 		$image_id = 0;
 		$variation = get_post( $variation_id ); // Get the variation object
 
