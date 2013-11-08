@@ -276,6 +276,13 @@ mark.amount {
 /* Status page */
 table.wc_status_table {
 	font-family: monospace;
+	tr {
+		&:nth-child(2n) {
+			th, td {
+				background: #fcfcfc;
+			}
+		}
+	}
 	th {
 		font-weight: bold;
 	}
