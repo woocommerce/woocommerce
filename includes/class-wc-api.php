@@ -150,7 +150,7 @@ class WC_API {
 		include_once( 'api/class-wc-api-authentication.php' );
 		$this->authentication = new WC_API_Authentication();
 
-		include_once( 'api/class-wc-api-base.php' );
+		include_once( 'api/class-wc-api-resource.php' );
 		include_once( 'api/class-wc-api-orders.php' );
 		include_once( 'api/class-wc-api-products.php' );
 		include_once( 'api/class-wc-api-coupons.php' );

@@ -12,7 +12,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class WC_API_Products extends WC_API_Base {
+class WC_API_Products extends WC_API_Resource {
 
 	/** @var string $base the route base */
 	protected $base = '/products';

@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce API Base class
+ * WooCommerce API Resource class
  *
  * Provides shared functionality for resource-specific API classes
  *
@@ -12,7 +12,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class WC_API_Base {
+class WC_API_Resource {
 
 	/** @var WC_API_Server the API server */
 	protected $server;
@@ -25,7 +25,7 @@ class WC_API_Base {
 	 *
 	 * @since 2.1
 	 * @param WC_API_Server $server
-	 * @return WC_API_Base
+	 * @return WC_API_Resource
 	 */
 	public function __construct( WC_API_Server $server ) {
 
