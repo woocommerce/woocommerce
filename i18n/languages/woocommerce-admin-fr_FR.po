@@ -4,7 +4,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2013-04-29 16:02:07+00:00\n"
 "PO-Revision-Date: \n"
-"Last-Translator: ABSOLUTE Web <woocommerce@absoluteweb.net>\n"
+"Last-Translator: Nicolas Sitbon <nicolas.sitbon@gmail.com>\n"
 "Language-Team: ABSOLUTE Web et prédécesseurs <woocommerce@absoluteweb.net>\n"
 "Language: fr_FR\n"
 "MIME-Version: 1.0\n"
@@ -4794,7 +4794,7 @@ msgstr "En attente"
 # @ woocommerce
 #: admin/woocommerce-admin-dashboard.php:190
 msgid "Completed"
-msgstr "Expédiée"
+msgstr "Terminée"
 
 #: admin/woocommerce-admin-dashboard.php:207
 msgid "You are using <strong>WooCommerce %s</strong>."
@@ -10452,7 +10452,7 @@ msgstr "http://woothemes.com"
 
 # @ woocommerce
 #~ msgid "Awaiting BACS payment"
-#~ msgstr "En attente de paiement BACS"
+#~ msgstr "En attente de paiement par virement bancaire"
 
 # @ woocommerce
 #~ msgid "Cheque"
@@ -12107,7 +12107,7 @@ msgstr "http://woothemes.com"
 
 # @ woocommerce
 #~ msgid "and was completed"
-#~ msgstr "et a été expédiée il y a "
+#~ msgstr "et a été traitée il y a "
 
 # "il y a" déplacé dans la chaine parente car "ago" est placé après la durée en anglais.
 #~ msgid " ago"
@@ -12679,7 +12679,7 @@ msgstr "http://woothemes.com"
 
 # @ woocommerce
 #~ msgid "State / County"
-#~ msgstr "État / Pays"
+#~ msgstr "État / Comté"
 
 # @ woocommerce
 #~ msgctxt "placeholder"
@@ -13559,7 +13559,7 @@ msgstr "http://woothemes.com"
 
 # @ woocommerce
 #~ msgid "State / county"
-#~ msgstr "État / Pays"
+#~ msgstr "État / Comté"
 
 # @ woocommerce
 #~ msgid "Free"
@@ -13914,11 +13914,11 @@ msgstr "http://woothemes.com"
 
 # @ woocommerce
 #~ msgid "[%s] Order Complete"
-#~ msgstr "[%s] Commande expédiée"
+#~ msgstr "[%s] Commande terminée"
 
 # @ woocommerce
 #~ msgid "Order Complete"
-#~ msgstr "Commande expédiée"
+#~ msgstr "Commande terminée"
 
 # @ woocommerce
 #~ msgid "Your order on %s"
