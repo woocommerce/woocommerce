@@ -28,7 +28,7 @@ class WC_Comments {
 		add_action( 'edit_comment', array( $this, 'clear_transients' ) );
 
 		// Secure order notes
-		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_order_comments', 10, 1 ) );
+		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_order_comments' ), 10, 1 );
 		add_action( 'comment_feed_join', array( $this, 'exclude_order_comments_from_feed_join' ) );
 		add_action( 'comment_feed_where', array( $this, 'exclude_order_comments_from_feed_where' ) );
 	}
