@@ -17,6 +17,11 @@ class WC_API_Customers extends WC_API_Resource {
 	/** @var string $base the route base */
 	protected $base = '/customers';
 
+	/** @var string $created_at_min for date filtering */
+	private $created_at_min = null;
+
+	/** @var string $created_at_max for date filtering */
+	private $created_at_max = null;
 
 	/**
 	 * Setup class, overridden to provide customer data to order response
@@ -31,6 +36,8 @@ class WC_API_Customers extends WC_API_Resource {
 
 		// add customer data to order responses
 		add_filter( 'woocommerce_api_order_response', array( $this, 'addCustomerData' ), 10, 2 );
+		// modify WP_User_Query to support created_at date filtering
+		add_action( 'pre_user_query', array( $this, 'modify_user_query' ) );
 	}
 
 	/**
@@ -312,6 +319,13 @@ class WC_API_Customers extends WC_API_Resource {
 			$query_args['offset'] = $args['offset'];
 
 		// TODO: navigation/total count headers for pagination
+		if ( ! empty( $args['created_at_min'] ) )
+			$this->created_at_min = $args['created_at_min'];
+
+		if ( ! empty( $args['created_at_max'] ) )
+			$this->created_at_max = $args['created_at_max'];
+
+		// TODO: support page argument - requires custom implementation as WP_User_Query has no built-in pagination like WP_Query
 
 		return new WP_User_Query( $query_args );
 	}
@@ -338,6 +352,21 @@ class WC_API_Customers extends WC_API_Resource {
 		}
 
 		return $order_data;
+	}
+
+	/**
+	 * Modify the WP_User_Query to support filtering on the date the customer was created
+	 *
+	 * @since 2.1
+	 * @param WP_User_Query $query
+	 */
+	public function modify_user_query( $query ) {
+
+		if ( $this->created_at_min )
+			$query->query_where .= sprintf( " AND DATE(user_registered) >= '%s'", date( 'Y-m-d H:i:s', strtotime( $this->created_at_min ) ) ); // TODO: date formatting
+
+		if ( $this->created_at_max )
+			$query->query_where .= sprintf( " AND DATE(user_registered) <= '%s'", date( 'Y-m-d H:i:s', strtotime( $this->created_at_max ) ) ); // TODO: date formatting
 	}
 
 	/**
