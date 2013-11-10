@@ -394,7 +394,8 @@ class WC_API_Server {
 		foreach ( $wanted as $param ) {
 			if ( isset( $provided[ $param->getName() ] ) ) {
 				// We have this parameters in the list to choose from
-				$ordered_parameters[] = $provided[ $param->getName() ];
+
+				$ordered_parameters[] = is_array( $provided[ $param->getName() ] ) ? array_map( 'urldecode', $provided[ $param->getName() ] ) : urldecode( $provided[ $param->getName() ] );
 			}
 			elseif ( $param->isDefaultValueAvailable() ) {
 				// We don't have this parameter, but it's optional
