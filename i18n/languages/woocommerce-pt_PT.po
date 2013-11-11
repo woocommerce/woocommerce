@@ -1,14 +1,16 @@
-"Project-Id-Version: WooCommerce v2.0.18\n"
+msgid ""
+msgstr ""
+"Project-Id-Version: WooCommerce v2.0.14\n"
 "Report-Msgid-Bugs-To: jp.jp@sapo.pt\n"
-"POT-Creation-Date: 2013-05-01 10:44\n"
-"PO-Revision-Date: 2013-10-21 14:34:26+0000\n"
-"Last-Translator: jpBenfica <jp.jp@sapo.pt>\n"
-"Language-Team: jpBenfica <jp.jp@sapo.pt>\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2013-09-14 04:34:44+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Easy Po 0.9.4\n"
+"X-Generator: CSL v1.x\n"
 "X-Poedit-Language: \n"
 "X-Poedit-Country: \n"
 "X-Poedit-SourceCharset: utf-8\n"
@@ -17,6 +19,13 @@
 "X-Poedit-Bookmarks: \n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Textdomain-Support: yes"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:85
+#: admin/woocommerce-admin-attributes.php:306
+#: admin/woocommerce-admin-init.php:66
+#@ woocommerce
+msgid "Attributes"
+msgstr "Atributos"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:85
 #: admin/woocommerce-admin-attributes.php:307
@@ -1488,7 +1497,7 @@ msgstr "País"
 #: admin/woocommerce-admin-users.php:224
 #@ woocommerce
 msgid "State/County"
-msgstr "Estado/Distrito"
+msgstr "Estado/País"
 
 #: classes/class-wc-countries.php:1074
 #@ woocommerce
@@ -2039,7 +2048,7 @@ msgstr "Selecione o país"
 #: woocommerce-template.php:1386
 #@ woocommerce
 msgid "Select a state&hellip;"
-msgstr "Selecione o distrito"
+msgstr "Selecione o estado"
 
 #: classes/class-wc-checkout.php:388
 #, php-format
@@ -4097,7 +4106,7 @@ msgstr "O endereço a seguir será usado na página de pagamento como endereço 
 #: classes/class-wc-countries.php:965
 #@ woocommerce
 msgid "State"
-msgstr "Distrito"
+msgstr "Estado"
 
 #: templates/myaccount/form-edit-address.php:43
 #@ woocommerce
@@ -5721,7 +5730,7 @@ msgstr "Telefone"
 #: admin/woocommerce-admin-users.php:225
 #@ woocommerce
 msgid "State/County or state code"
-msgstr "Distrito"
+msgstr "Estado/País ou código do estado"
 
 #: admin/woocommerce-admin-users.php:180
 #: admin/woocommerce-admin-users.php:229
@@ -7199,7 +7208,7 @@ msgstr "Cheque"
 #: classes/gateways/cheque/class-wc-gateway-cheque.php:73
 #@ woocommerce
 msgid "Please send your cheque to Store Name, Store Street, Store Town, Store State / County, Store Postcode."
-msgstr "Por favor, envie o seu cheque para Nome da Loja, Rua da Loja, Cidade da Loja, Distrito / País da Loja, CódigoPostal da Loja."
+msgstr "Por favor, envie o seu cheque para Nome da Loja, Rua da Loja, Cidade da Loja, Distrito / País da Loja, Código Postal da Loja."
 
 #: classes/gateways/cod/class-wc-gateway-cod.php:27
 #: classes/gateways/cod/class-wc-gateway-cod.php:54
@@ -11504,7 +11513,7 @@ msgstr "Cidade"
 #: classes/class-wc-countries.php:726
 #@ woocommerce
 msgid "State / County"
-msgstr "País"
+msgstr "Estado / País"
 
 #: classes/class-wc-countries.php:699
 #@ woocommerce
