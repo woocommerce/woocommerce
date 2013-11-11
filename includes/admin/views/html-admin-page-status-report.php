@@ -52,15 +52,6 @@
 			<td><?php if ( function_exists( 'mysql_get_server_info' ) ) echo esc_html( mysql_get_server_info() ); ?></td>
 		</tr>
 		<tr>
-			<td><?php _e( 'PHP Locale','woocommerce' ); ?>:</td>
-			<td><?php
-				$locale = localeconv();
-				foreach ( $locale as $key => $val )
-					if ( is_string( $val ) )
-						echo $key . ': ' . $val . '</br>';
-			?></td>
-		</tr>
-		<tr>
 			<td><?php _e( 'WP Memory Limit','woocommerce' ); ?>:</td>
 			<td><?php
 				$memory = woocommerce_let_to_num( WP_MEMORY_LIMIT );
@@ -187,6 +178,22 @@
 				</tr>
 				<?php
 			}
+		?>
+	</tbody>
+
+	<thead>
+		<tr>
+			<th colspan="2"><?php _e( 'Locale', 'woocommerce' ); ?></th>
+		</tr>
+	</thead>
+
+	<tbody>
+		<?php
+			$locale = localeconv();
+
+			foreach ( $locale as $key => $val ) 
+				if ( in_array( $key, array( 'decimal_point', 'mon_decimal_point', 'thousands_sep', 'mon_thousands_sep' ) ) )
+					echo '<tr><td>' . $key . ':</td><td>' . $val . '</td></tr>';
 		?>
 	</tbody>
 
