@@ -28,16 +28,16 @@ class WC_API_Reports extends WC_API_Resource {
 	 * @param array $routes
 	 * @return array
 	 */
-	public function registerRoutes( $routes ) {
+	public function register_routes( $routes ) {
 
 		# GET /reports
 		$routes[ $this->base ] = array(
-			array( array( $this, 'getReports' ),     WC_API_Server::READABLE ),
+			array( array( $this, 'get_reports' ),     WC_API_Server::READABLE ),
 		);
 
 		# GET /reports/sales
 		$routes[ $this->base . '/sales'] = array(
-			array( array( $this, 'getSalesReport' ), WC_API_Server::READABLE ),
+			array( array( $this, 'get_sales_report' ), WC_API_Server::READABLE ),
 		);
 
 		return $routes;
@@ -50,7 +50,7 @@ class WC_API_Reports extends WC_API_Resource {
 	 * @since 2.1
 	 * @return array
 	 */
-	public function getReports() {
+	public function get_reports() {
 
 		return array( 'reports' => array( 'sales' ) );
 	}
@@ -62,7 +62,7 @@ class WC_API_Reports extends WC_API_Resource {
 	 * @since 2.1
 	 * @return array
 	 */
-	public function getSalesReport() {
+	public function get_sales_report() {
 
 		// TODO: implement - DRY by abstracting the report classes?
 

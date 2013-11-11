@@ -20,7 +20,7 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Register the routes for this class
 	 *
-	 * GET|POST /products
+	 * GET /products
 	 * GET /products/count
 	 * GET|PUT|DELETE /products/<id>
 	 * GET /products/<id>/reviews
@@ -29,29 +29,28 @@ class WC_API_Products extends WC_API_Resource {
 	 * @param array $routes
 	 * @return array
 	 */
-	public function registerRoutes( $routes ) {
+	public function register_routes( $routes ) {
 
-		# GET|POST /products
+		# GET /products
 		$routes[ $this->base ] = array(
-			array( array( $this, 'getProducts' ),     WC_API_Server::READABLE ),
-			array( array( $this, 'createProduct' ),   WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'get_products' ),     WC_API_Server::READABLE ),
 		);
 
 		# GET /products/count
 		$routes[ $this->base . '/count'] = array(
-			array( array( $this, 'getProductsCount' ), WC_API_Server::READABLE ),
+			array( array( $this, 'get_products_count' ), WC_API_Server::READABLE ),
 		);
 
 		# GET|PUT|DELETE /products/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
-			array( array( $this, 'getProduct' ),  WC_API_Server::READABLE ),
-			array( array( $this, 'editProduct' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
-			array( array( $this, 'deleteProduct' ), WC_API_Server::DELETABLE ),
+			array( array( $this, 'get_product' ),  WC_API_Server::READABLE ),
+			array( array( $this, 'edit_product' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'delete_product' ), WC_API_Server::DELETABLE ),
 		);
 
 		# GET /products/<id>/reviews
 		$routes[ $this->base . '/(?P<id>\d+)/reviews' ] = array(
-			array( array( $this, 'getProductReviews' ), WC_API_Server::READABLE ),
+			array( array( $this, 'get_product_reviews' ), WC_API_Server::READABLE ),
 		);
 
 		return $routes;
@@ -61,34 +60,29 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get all products
 	 *
 	 * @since 2.1
-	 * @param array $fields
+	 * @param string $fields
 	 * @param string $type
-	 * @param string $created_at_min
-	 * @param string $created_at_max
-	 * @param string $q search terms
-	 * @param int $limit coupons per response
-	 * @param int $offset
+	 * @param array $filter
 	 * @return array
 	 */
-	public function getProducts( $fields = null, $type = null, $created_at_min = null, $created_at_max = null, $q = null, $limit = null, $offset = null ) {
+	public function get_products( $fields = null, $type = null, $filter = array() ) {
 
-		$request_args = array(
-			'type'           => $type,
-			'created_at_min' => $created_at_min,
-			'created_at_max' => $created_at_max,
-			'q'              => $q,
-			'limit'          => $limit,
-			'offset'         => $offset,
-		);
+		if ( ! empty( $type ) )
+			$filter['type'] = $type;
 
-		$query = $this->queryProducts( $request_args );
+		$query = $this->query_products( $filter );
 
 		$products = array();
 
 		foreach( $query->posts as $product_id ) {
 
-			$products[] = $this->getProduct( $product_id, $fields );
+			if ( ! $this->is_readable( $product_id ) )
+				continue;
+
+			$products[] = $this->get_product( $product_id, $fields );
 		}
+
+		$this->server->query_navigation_headers( $query );
 
 		return array( 'products' => $products );
 	}
@@ -101,17 +95,14 @@ class WC_API_Products extends WC_API_Resource {
 	 * @param string $fields
 	 * @return array
 	 */
-	public function getProduct( $id, $fields = null ) {
+	public function get_product( $id, $fields = null ) {
 
-		$id = absint( $id );
+		$id = $this->validate_request( $id, 'product', 'read' );
 
-		if ( empty( $id ) )
-			return new WP_Error( 'woocommerce_api_invalid_id', __( 'Invalid product ID', 'woocommerce' ), array( 'status' => 404 ) );
+		if ( is_wp_error( $id ) )
+			return $id;
 
 		$product = get_product( $id );
-
-		if ( 'product' !== $product->get_post_data()->post_type )
-			return new WP_Error( 'woocommerce_api_invalid_product', __( 'Invalid product', 'woocommerce' ), array( 'status' => 404 ) );
 
 		$product_data = array(
 			'id' => $product->id
@@ -125,36 +116,19 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @since 2.1
 	 * @param string $type
-	 * @param string $created_at_min
-	 * @param string $created_at_max
+	 * @param array $filter
 	 * @return array
 	 */
-	public function getProductsCount( $type = null, $created_at_min = null, $created_at_max = null ) {
+	public function get_products_count( $type = null, $filter = array() ) {
 
-		$request_args = array(
-			'type'           => $type,
-			'created_at_min' => $created_at_min,
-			'created_at_max' => $created_at_max,
-		);
+		if ( ! empty( $type ) )
+			$filter['type'] = $type;
 
-		$query = $this->queryProducts( $request_args );
+		// TODO: permissions?
+
+		$query = $this->query_products( $filter );
 
 		return array( 'count' => $query->found_posts );
-	}
-
-
-	/**
-	 * Create a product
-	 *
-	 * @since 2.1
-	 * @param array $data
-	 * @return array
-	 */
-	public function createProduct( $data ) {
-
-		// TODO: implement - what's the minimum set of data required? woocommerce_create_product() would be nice
-
-		return array();
 	}
 
 	/**
@@ -165,11 +139,16 @@ class WC_API_Products extends WC_API_Resource {
 	 * @param array $data
 	 * @return array
 	 */
-	public function editProduct( $id, $data ) {
+	public function edit_product( $id, $data ) {
+
+		$id = $this->validate_request( $id, 'product', 'edit' );
+
+		if ( is_wp_error( $id ) )
+			return $id;
 
 		// TODO: implement
 
-		return $this->getProduct( $id );
+		return $this->get_product( $id );
 	}
 
 	/**
@@ -180,9 +159,14 @@ class WC_API_Products extends WC_API_Resource {
 	 * @param bool $force true to permanently delete order, false to move to trash
 	 * @return array
 	 */
-	public function deleteProduct( $id, $force = false ) {
+	public function delete_product( $id, $force = false ) {
 
-		return $this->deleteResource( $id, 'product', ( 'true' === $force ) );
+		$id = $this->validate_request( $id, 'product', 'delete' );
+
+		if ( is_wp_error( $id ) )
+			return $id;
+
+		return $this->delete( $id, 'product', ( 'true' === $force ) );
 	}
 
 	/**
@@ -190,7 +174,14 @@ class WC_API_Products extends WC_API_Resource {
 	 * @param $id
 	 * @return mixed
 	 */
-	public function getProductReviews( $id ) {
+	public function get_product_reviews( $id ) {
+
+		$id = $this->validate_request( $id, 'product', 'read' );
+
+		if ( is_wp_error( $id ) )
+			return $id;
+
+		// TODO: implement
 
 		return array();
 	}
@@ -200,9 +191,9 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @since 2.1
 	 * @param array $args request arguments for filtering query
-	 * @return array
+	 * @return WP_Query
 	 */
-	private function queryProducts( $args ) {
+	private function query_products( $args ) {
 
 		// set base query arguments
 		$query_args = array(
@@ -213,12 +204,23 @@ class WC_API_Products extends WC_API_Resource {
 			'meta_query' => array(),
 		);
 
+		if ( ! empty( $args['type'] ) ) {
+
+			$query_args['tax_query'] = array(
+				array(
+					'taxonomy' => 'product_type',
+					'field'    => 'slug',
+					'terms'    => $args['type'],
+				),
+			);
+
+			unset( $args['type'] );
+		}
+
 		// TODO: some param to show hidden products, but hide by default
 		$query_args['meta_query'][] = WC()->query->visibility_meta_query();
 
-		$query_args = $this->mergeQueryArgs( $query_args, $args );
-
-		// TODO: navigation/total count headers for pagination
+		$query_args = $this->merge_query_args( $query_args, $args );
 
 		return new WP_Query( $query_args );
 	}

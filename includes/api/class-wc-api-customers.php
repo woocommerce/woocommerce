@@ -35,7 +35,8 @@ class WC_API_Customers extends WC_API_Resource {
 		parent::__construct( $server );
 
 		// add customer data to order responses
-		add_filter( 'woocommerce_api_order_response', array( $this, 'addCustomerData' ), 10, 2 );
+		add_filter( 'woocommerce_api_order_response', array( $this, 'add_customer_data' ), 10, 2 );
+
 		// modify WP_User_Query to support created_at date filtering
 		add_action( 'pre_user_query', array( $this, 'modify_user_query' ) );
 	}
@@ -52,29 +53,29 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @param array $routes
 	 * @return array
 	 */
-	public function registerRoutes( $routes ) {
+	public function register_routes( $routes ) {
 
 		# GET|POST /customers
 		$routes[ $this->base ] = array(
-			array( array( $this, 'getCustomers' ),     WC_API_SERVER::READABLE ),
-			array( array( $this, 'createCustomer' ),   WC_API_SERVER::CREATABLE | WC_API_SERVER::ACCEPT_DATA ),
+			array( array( $this, 'get_customers' ),     WC_API_SERVER::READABLE ),
+			array( array( $this, 'create_customer' ),   WC_API_SERVER::CREATABLE | WC_API_SERVER::ACCEPT_DATA ),
 		);
 
 		# GET /customers/count
 		$routes[ $this->base . '/count'] = array(
-			array( array( $this, 'getCustomersCount' ), WC_API_SERVER::READABLE ),
+			array( array( $this, 'get_customers_count' ), WC_API_SERVER::READABLE ),
 		);
 
 		# GET|PUT|DELETE /customers/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
-			array( array( $this, 'getCustomer' ),  WC_API_SERVER::READABLE ),
-			array( array( $this, 'editCustomer' ), WC_API_SERVER::EDITABLE | WC_API_SERVER::ACCEPT_DATA ),
-			array( array( $this, 'deleteCustomer' ), WC_API_SERVER::DELETABLE ),
+			array( array( $this, 'get_customer' ),  WC_API_SERVER::READABLE ),
+			array( array( $this, 'edit_customer' ), WC_API_SERVER::EDITABLE | WC_API_SERVER::ACCEPT_DATA ),
+			array( array( $this, 'delete_customer' ), WC_API_SERVER::DELETABLE ),
 		);
 
 		# GET /customers/<id>/orders
 		$routes[ $this->base . '/(?P<id>\d+)/orders' ] = array(
-			array( array( $this, 'getCustomerOrders' ), WC_API_SERVER::READABLE ),
+			array( array( $this, 'get_customer_orders' ), WC_API_SERVER::READABLE ),
 		);
 
 		return $routes;
@@ -83,59 +84,47 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Get all customers
 	 *
-	 * @TODO support created_at_min/created_at_max with pre_user_query filter
-	 *
 	 * @since 2.1
 	 * @param array $fields
-	 * @param string $q search terms
-	 * @param int $limit coupons per response
-	 * @param int $offset
+	 * @param array $filter
 	 * @return array
 	 */
-	public function getCustomers( $fields = null, $q = null, $limit = null, $offset = null ) {
+	public function get_customers( $fields = null, $filter = array() ) {
 
-		$request_args = array(
-			'q'              => $q,
-			'limit'          => $limit,
-			'offset'         => $offset,
-		);
-
-		$query = $this->queryCustomers( $request_args );
+		$query = $this->query_customers( $filter );
 
 		$customers = array();
 
 		foreach( $query->results as $user_id ) {
 
-			$customers[] = $this->getCustomer( $user_id, $fields );
+			if ( ! $this->is_readable( $user_id ) )
+				continue;
+
+			$customers[] = $this->get_customer( $user_id, $fields );
 		}
+
+		// TODO:  add navigation/total count headers for pagination
 
 		return array( 'customers' => $customers );
 	}
 
-
 	/**
 	 * Get the customer for the given ID
-	 *
-	 * @TODO: implement customer meta
 	 *
 	 * @since 2.1
 	 * @param int $id the customer ID
 	 * @param string $fields
 	 * @return array
 	 */
-	public function getCustomer( $id, $fields = null ) {
+	public function get_customer( $id, $fields = null ) {
 		global $wpdb;
 
-		$id = absint( $id );
+		$id = $this->validate_request( $id, 'customer', 'read' );
 
-		if ( empty( $id ) )
-			return new WP_Error( 'woocommerce_api_invalid_id', __( 'Invalid customer ID', 'woocommerce' ), array( 'status' => 404 ) );
+		if ( is_wp_error( $id ) )
+			return $id;
 
-		// non-existent IDs return a valid WP_User object with the user ID = 0
 		$customer = new WP_User( $id );
-
-		if ( 0 === $customer->ID )
-			return new WP_Error( 'woocommerce_api_invalid_customer', __( 'Invalid customer', 'woocommerce' ), array( 'status' => 404 ) );
 
 		// get info about user's last order
 		$last_order = $wpdb->get_row( "SELECT id, post_date
@@ -157,7 +146,7 @@ class WC_API_Customers extends WC_API_Resource {
 			'last_order_id'    => is_object( $last_order ) ? $last_order->id : null,
 			'last_order_date'  => is_object( $last_order ) ? $last_order->post_date : null,
 			'orders_count'     => $customer->_order_count,
-			'total_spent'      => $customer->_money_spent,
+			'total_spent'      => (string) number_format( $customer->_money_spent, 2 ),
 			'avatar_url'       => $this->get_avatar_url( $customer->customer_email ),
 			'billing_address'  => array(
 				'first_name' => $customer->billing_first_name,
@@ -191,14 +180,15 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Get the total number of customers
 	 *
-	 * @TODO support created_at_min/created_at_max with pre_user_query filter
-	 *
 	 * @since 2.1
+	 * @param array $filter
 	 * @return array
 	 */
-	public function getCustomersCount() {
+	public function get_customers_count( $filter = array() ) {
 
-		$query = $this->queryCustomers();
+		$query = $this->query_customers( $filter );
+
+		// TODO: permissions?
 
 		return array( 'count' => $query->get_total() );
 	}
@@ -211,10 +201,12 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @param array $data
 	 * @return array
 	 */
-	public function createCustomer( $data ) {
+	public function create_customer( $data ) {
 
-		// TODO: implement - what's the minimum set of data required?
-		// woocommerce_create_new_customer()
+		if ( ! current_user_can( 'create_users' ) )
+			return new WP_Error( 'woocommerce_api_user_cannot_create_customer', __( 'You do not have permission to create this customer', 'woocommerce' ), array( 'status' => 401 ) );
+
+		// TODO: implement - woocommerce_create_new_customer()
 
 		return array();
 	}
@@ -227,10 +219,16 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @param array $data
 	 * @return array
 	 */
-	public function editCustomer( $id, $data ) {
+	public function edit_customer( $id, $data ) {
+
+		$id = $this->validate_request( $id, 'customer', 'edit' );
+
+		if ( ! is_wp_error( $id ) )
+			return $id;
 
 		// TODO: implement
-		return $this->getCustomer( $id );
+
+		return $this->get_customer( $id );
 	}
 
 	/**
@@ -240,43 +238,40 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @param int $id the customer ID
 	 * @return array
 	 */
-	public function deleteCustomer( $id ) {
+	public function delete_customer( $id ) {
 
-		return $this->deleteResource( $id, 'customer' );
+		$id = $this->validate_request( $id, 'customer', 'delete' );
+
+		if ( ! is_wp_error( $id ) )
+			return $id;
+
+		return $this->delete( $id, 'customer' );
 	}
 
 	/**
 	 * Get the orders for a customer
 	 *
-	 * @TODO should this support the same parameters as getOrders call? e.g. fields, created_at, pagination, etc
-	 *
 	 * @since 2.1
 	 * @param int $id the customer ID
+	 * @param string $fields fields to include in response
 	 * @return array
 	 */
-	public function getCustomerOrders( $id ) {
+	public function get_customer_orders( $id, $fields = null ) {
 		global $wpdb;
 
-		// TODO: DRY this along with duplicate code in getCustomer()
-		$id = absint( $id );
+		$id = $this->validate_request( $id, 'customer', 'read' );
 
-		if ( empty( $id ) )
-			return new WP_Error( 'woocommerce_api_invalid_id', __( 'Invalid customer ID', 'woocommerce' ), array( 'status' => 404 ) );
+		if ( is_wp_error( $id ) )
+			return $id;
 
-		// non-existent IDs return a valid WP_User object with the user ID = 0
-		$customer = new WP_User( $id );
-
-		if ( 0 === $customer->ID )
-			return new WP_Error( 'woocommerce_api_invalid_customer', __( 'Invalid customer', 'woocommerce' ), array( 'status' => 404 ) );
-
-		$order_ids = $wpdb->get_col( "SELECT id
+		$order_ids = $wpdb->get_col( $wpdb->prepare( "SELECT id
 						FROM $wpdb->posts AS posts
 						LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
 						WHERE meta.meta_key = '_customer_user'
-						AND   meta.meta_value = {$id}
+						AND   meta.meta_value = '%s'
 						AND   posts.post_type = 'shop_order'
 						AND   posts.post_status = 'publish'
-					" );
+					", $id ) );
 
 		if ( empty( $order_ids ) )
 			return array( 'orders' => array() );
@@ -284,7 +279,7 @@ class WC_API_Customers extends WC_API_Resource {
 		$orders = array();
 
 		foreach ( $order_ids as $order_id ) {
-			$orders[] = WC()->api->WC_API_Orders->getOrder( $order_id );
+			$orders[] = WC()->api->WC_API_Orders->get_order( $order_id, $fields );
 		}
 
 		return array( 'orders' => $orders );
@@ -297,17 +292,14 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @param array $args request arguments for filtering query
 	 * @return array
 	 */
-	private function queryCustomers( $args = array() ) {
+	private function query_customers( $args = array() ) {
 
 		// set base query arguments
 		$query_args = array(
 			'fields'  => 'ID',
 			'role'    => 'customer',
 			'orderby' => 'registered',
-			'order'   => 'DESC',
 		);
-
-		// TODO: refactor WP_API_Base::mergeQueryVars to support user query args
 
 		if ( ! empty( $args['q'] ) )
 			$query_args['search'] = $args['q'];
@@ -318,7 +310,6 @@ class WC_API_Customers extends WC_API_Resource {
 		if ( ! empty( $args['offset'] ) )
 			$query_args['offset'] = $args['offset'];
 
-		// TODO: navigation/total count headers for pagination
 		if ( ! empty( $args['created_at_min'] ) )
 			$this->created_at_min = $args['created_at_min'];
 
@@ -333,14 +324,12 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Add customer data to orders
 	 *
-	 * @TODO should guest orders return more than 'guest'?
-	 *
 	 * @since 2.1
 	 * @param $order_data
 	 * @param $order
-	 *
+	 * @return array
 	 */
-	public function addCustomerData( $order_data, $order ) {
+	public function add_customer_data( $order_data, $order ) {
 
 		if ( 0 == $order->customer_user ) {
 
@@ -348,7 +337,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 		} else {
 
-			$order_data['customer'] = $this->getCustomer( $order->customer_user );
+			$order_data['customer'] = $this->get_customer( $order->customer_user );
 		}
 
 		return $order_data;
@@ -373,6 +362,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 * Wrapper for @see get_avatar() which doesn't simply return
 	 * the URL so we need to pluck it from the HTML img tag
 	 *
+	 * @since 2.1
 	 * @param string $email the customer's email
 	 * @return string the URL to the customer's avatar
 	 */
@@ -382,9 +372,72 @@ class WC_API_Customers extends WC_API_Resource {
 
 		$dom->loadHTML( get_avatar( $email ) );
 
-		$url = $dom->getElementsByTagName('img')->item(0)->getAttribute('src');
+		$url = $dom->getElementsByTagName( 'img' )->item( 0 )->getAttribute( 'src' );
 
 		return ( ! empty( $url ) ) ? $url : null;
+	}
+
+	/**
+	 * Validate the request by checking:
+	 *
+	 * 1) the ID is a valid integer
+	 * 2) the ID returns a valid WP_User
+	 * 3) the current user has the proper permissions
+	 *
+	 * @since 2.1
+	 * @see WC_API_Resource::validate_request()
+	 * @param string|int $id the customer ID
+	 * @param string $type the request type, unused because this method overrides the parent class
+	 * @param string $context the context of the request, either `read`, `edit` or `delete`
+	 * @return int|WP_Error valid user ID or WP_Error if any of the checks fails
+	 */
+	protected function validate_request( $id, $type, $context ) {
+
+		$id = absint( $id );
+
+		// validate ID
+		if ( empty( $id ) )
+			return new WP_Error( 'woocommerce_api_invalid_customer_id', __( 'Invalid customer ID', 'woocommerce' ), array( 'status' => 404 ) );
+
+		// non-existent IDs return a valid WP_User object with the user ID = 0
+		$customer = new WP_User( $id );
+
+		if ( 0 === $customer->ID )
+			return new WP_Error( 'woocommerce_api_invalid_customer', __( 'Invalid customer', 'woocommerce' ), array( 'status' => 404 ) );
+
+		// validate permissions
+		switch ( $context ) {
+
+			case 'read':
+				if ( ! current_user_can( 'list_users' ) )
+					return new WP_Error( 'woocommerce_api_user_cannot_read_customer', __( 'You do not have permission to read this customer', 'woocommerce' ), array( 'status' => 401 ) );
+				break;
+
+			case 'edit':
+				if ( ! current_user_can( 'edit_users' ) )
+					return new WP_Error( 'woocommerce_api_user_cannot_edit_customer', __( 'You do not have permission to edit this customer', 'woocommerce' ), array( 'status' => 401 ) );
+				break;
+
+			case 'delete':
+				if ( ! current_user_can( 'delete_users' ) )
+					return new WP_Error( 'woocommerce_api_user_cannot_delete_customer', __( 'You do not have permission to delete this customer', 'woocommerce' ), array( 'status' => 401 ) );
+				break;
+		}
+
+		return $id;
+	}
+
+	/**
+	 * Check if the current user can read users
+	 *
+	 * @since 2.1
+	 * @see WC_API_Resource::is_readable()
+	 * @param int|WP_Post $post unused
+	 * @return bool true if the current user can read users, false otherwise
+	 */
+	protected function is_readable( $post ) {
+
+		return current_user_can( 'list_users' );
 	}
 
 }

@@ -29,24 +29,29 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * @param array $routes
 	 * @return array
 	 */
-	public function registerRoutes( $routes ) {
+	public function register_routes( $routes ) {
 
 		# GET|POST /coupons
 		$routes[ $this->base ] = array(
-			array( array( $this, 'getCoupons' ),     WC_API_Server::READABLE ),
-			array( array( $this, 'createCoupon' ),   WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'get_coupons' ),     WC_API_Server::READABLE ),
+			array( array( $this, 'create_coupon' ),   WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET /coupons/count
 		$routes[ $this->base . '/count'] = array(
-			array( array( $this, 'getCouponsCount' ), WC_API_Server::READABLE ),
+			array( array( $this, 'get_coupons_count' ), WC_API_Server::READABLE ),
 		);
 
 		# GET|PUT|DELETE /coupons/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
-			array( array( $this, 'getCoupon' ),  WC_API_Server::READABLE ),
-			array( array( $this, 'editCoupon' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
-			array( array( $this, 'deleteCoupon' ), WC_API_Server::DELETABLE ),
+			array( array( $this, 'get_coupon' ),  WC_API_Server::READABLE ),
+			array( array( $this, 'edit_coupon' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'delete_coupon' ), WC_API_Server::DELETABLE ),
+		);
+
+		# GET /coupons/<code> TODO: should looking up coupon codes containing spaces or dashes be supported? OR all-digit coupon codes
+		$routes[ $this->base . '/(?P<code>\w+)' ] = array(
+			array( array( $this, 'get_coupon_by_code' ), WC_API_Server::READABLE ),
 		);
 
 		return $routes;
@@ -55,35 +60,26 @@ class WC_API_Coupons extends WC_API_Resource {
 	/**
 	 * Get all coupons
 	 *
-	 * @TODO should we support an extra "code" param for lookup instead of "q" which searches both title & description?
-	 *
 	 * @since 2.1
 	 * @param string $fields
-	 * @param string $created_at_min
-	 * @param string $created_at_max
-	 * @param string $q search terms
-	 * @param int $limit coupons per response
-	 * @param int $offset
+	 * @param array $filter
 	 * @return array
 	 */
-	public function getCoupons( $fields = null, $created_at_min = null, $created_at_max = null, $q = null, $limit = null, $offset = null ) {
+	public function get_coupons( $fields = null, $filter = array() ) {
 
-		$request_args = array(
-			'created_at_min' => $created_at_min,
-			'created_at_max' => $created_at_max,
-			'q'              => $q,
-			'limit'          => $limit,
-			'offset'         => $offset,
-		);
-
-		$query = $this->queryCoupons( $request_args );
+		$query = $this->query_coupons( $filter );
 
 		$coupons = array();
 
 		foreach( $query->posts as $coupon_id ) {
 
-			$coupons[] = $this->getCoupon( $coupon_id, $fields );
+			if ( ! $this->is_readable( $coupon_id ) )
+				continue;
+
+			$coupons[] = $this->get_coupon( $coupon_id, $fields );
 		}
+
+		$this->server->query_navigation_headers( $query );
 
 		return array( 'coupons' => $coupons );
 	}
@@ -94,25 +90,29 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * @since 2.1
 	 * @param int $id the coupon ID
 	 * @param string $fields fields to include in response
-	 * @return array
+	 * @return array|WP_Error
 	 */
-	public function getCoupon( $id, $fields = null ) {
+	public function get_coupon( $id, $fields = null ) {
 		global $wpdb;
+
+		$id = $this->validate_request( $id, 'shop_coupon', 'read' );
+
+		if ( is_wp_error( $id ) )
+			return $id;
 
 		// get the coupon code
 		$code = $wpdb->get_var( $wpdb->prepare( "SELECT post_title FROM $wpdb->posts WHERE id = %s AND post_type = 'shop_coupon' AND post_status = 'publish'", $id ) );
 
-		if ( ! $code )
-			return new WP_Error( 'wc_api_invalid_coupon_id', __( 'Invalid coupon ID', 'woocommerce' ), array( 'status' => 404 ) );
+		if ( is_null( $code ) )
+			return new WP_Error( 'woocommerce_api_invalid_coupon_id', __( 'Invalid coupon ID', 'woocommerce' ), array( 'status' => 404 ) );
 
 		$coupon = new WC_Coupon( $code );
 
-		// TODO: how to implement coupon meta?
 		$coupon_data = array(
 			'id'                         => $coupon->id,
 			'code'                       => $coupon->code,
 			'type'                       => $coupon->type,
-			'amount'                     => $coupon->amount, // TODO: should this be formatted?
+			'amount'                     => (string) number_format( $coupon->amount, 2 ),
 			'individual_use'             => $coupon->individual_use,
 			'product_ids'                => $coupon->product_ids,
 			'exclude_product_ids'        => $coupon->exclude_product_ids,
@@ -137,15 +137,34 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * Get the total number of coupons
 	 *
 	 * @since 2.1
-	 * @param string $created_at_min
-	 * @param string $created_at_max
+	 * @param array $filter
 	 * @return array
 	 */
-	public function getCouponsCount( $created_at_min = null, $created_at_max = null ) {
+	public function get_coupons_count( $filter = array() ) {
 
-		$query = $this->queryCoupons( array( 'created_at_min' => $created_at_min, 'created_at_max' => $created_at_max ) );
+		$query = $this->query_coupons( $filter );
+
+		// TODO: permissions?
 
 		return array( 'count' => $query->found_posts );
+	}
+
+	/**
+	 * Get the coupon for the given code
+	 *
+	 * @param string $code the coupon code
+	 * @param string $fields fields to include in response
+	 * @return int|WP_Error
+	 */
+	public function get_coupon_by_code( $code, $fields = null ) {
+		global $wpdb;
+
+		$id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish'", $code ) );
+
+		if ( is_null( $id ) )
+			return new WP_Error( 'woocommerce_api_invalid_coupon_code', __( 'Invalid coupon code', 'woocommerce' ), array( 'status' => 404 ) );
+
+		return $this->get_coupon( $id, $fields );
 	}
 
 	/**
@@ -155,7 +174,9 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * @param array $data
 	 * @return array
 	 */
-	public function createCoupon( $data ) {
+	public function create_coupon( $data ) {
+
+		// TODO: permissions check
 
 		// TODO: implement - what's the minimum set of data required?
 
@@ -170,10 +191,15 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * @param array $data
 	 * @return array
 	 */
-	public function editCoupon( $id, $data ) {
+	public function edit_coupon( $id, $data ) {
+
+		$id = $this->validate_request( $id, 'shop_coupon', 'edit' );
+
+		if ( is_wp_error( $id ) )
+			return $id;
 
 		// TODO: implement
-		return $this->getCoupon( $id );
+		return $this->get_coupon( $id );
 	}
 
 	/**
@@ -184,9 +210,14 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * @param bool $force true to permanently delete coupon, false to move to trash
 	 * @return array
 	 */
-	public function deleteCoupon( $id, $force = false ) {
+	public function delete_coupon( $id, $force = false ) {
 
-		return $this->deleteResource( $id, 'coupon', ( 'true' === $force ) );
+		$id = $this->validate_request( $id, 'shop_coupon', 'delete' );
+
+		if ( is_wp_error( $id ) )
+			return $id;
+
+		return $this->delete( $id, 'shop_coupon', ( 'true' === $force ) );
 	}
 
 	/**
@@ -194,21 +225,18 @@ class WC_API_Coupons extends WC_API_Resource {
 	 *
 	 * @since 2.1
 	 * @param array $args request arguments for filtering query
-	 * @return array
+	 * @return WP_Query
 	 */
-	private function queryCoupons( $args ) {
+	private function query_coupons( $args ) {
 
 		// set base query arguments
 		$query_args = array(
 			'fields'      => 'ids',
 			'post_type'   => 'shop_coupon',
 			'post_status' => 'publish',
-			'orderby'     => 'title',
 		);
 
-		$query_args = $this->mergeQueryArgs( $query_args, $args );
-
-		// TODO: navigation/total count headers for pagination
+		$query_args = $this->merge_query_args( $query_args, $args );
 
 		return new WP_Query( $query_args );
 	}

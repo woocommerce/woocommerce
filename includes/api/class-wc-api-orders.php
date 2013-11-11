@@ -20,7 +20,7 @@ class WC_API_Orders extends WC_API_Resource {
 	/**
 	 * Register the routes for this class
 	 *
-	 * GET|POST /orders
+	 * GET /orders
 	 * GET /orders/count
 	 * GET|PUT|DELETE /orders/<id>
 	 * GET /orders/<id>/notes
@@ -29,29 +29,28 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param array $routes
 	 * @return array
 	 */
-	public function registerRoutes( $routes ) {
+	public function register_routes( $routes ) {
 
-		# GET|POST /orders
+		# GET /orders
 		$routes[ $this->base ] = array(
-			array( array( $this, 'getOrders' ),     WC_API_Server::READABLE ),
-			array( array( $this, 'createOrder' ),   WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'get_orders' ),     WC_API_Server::READABLE ),
 		);
 
 		# GET /orders/count
 		$routes[ $this->base . '/count'] = array(
-			array( array( $this, 'getOrdersCount' ), WC_API_Server::READABLE ),
+			array( array( $this, 'get_orders_count' ), WC_API_Server::READABLE ),
 		);
 
 		# GET|PUT|DELETE /orders/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
-			array( array( $this, 'getOrder' ),  WC_API_Server::READABLE ),
-			array( array( $this, 'editOrder' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
-			array( array( $this, 'deleteOrder' ), WC_API_Server::DELETABLE ),
+			array( array( $this, 'get_order' ),  WC_API_Server::READABLE ),
+			array( array( $this, 'edit_order' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'delete_order' ), WC_API_Server::DELETABLE ),
 		);
 
 		# GET /orders/<id>/notes
 		$routes[ $this->base . '/(?P<id>\d+)/notes' ] = array(
-			array( array( $this, 'getOrderNotes' ), WC_API_Server::READABLE ),
+			array( array( $this, 'get_order_notes' ), WC_API_Server::READABLE ),
 		);
 
 		return $routes;
@@ -61,38 +60,26 @@ class WC_API_Orders extends WC_API_Resource {
 	 * Get all orders
 	 *
 	 * @since 2.1
-	 * @param array $fields
+	 * @param string $fields
+	 * @param array $filter
 	 * @param string $status
-	 * @param string $created_at_min
-	 * @param string $created_at_max
-	 * @param string $updated_at_min
-	 * @param string $updated_at_max
-	 * @param string $q search terms
-	 * @param int $limit coupons per response
-	 * @param int $offset
 	 * @return array
 	 */
-	public function getOrders( $fields = array(), $status = null, $created_at_min = null, $created_at_max = null, $updated_at_min = null, $updated_at_max = null, $q = null, $limit = null, $offset = null ) {
+	public function get_orders( $fields = null, $filter = array(), $status = null ) {
 
-		$request_args = array(
-			'status' => $status,
-			'created_at_min' => $created_at_min,
-			'created_at_max' => $created_at_max,
-			'updated_at_min' => $updated_at_min,
-			'updated_at_max' => $updated_at_max,
-			'q'              => $q,
-			'limit'          => $limit,
-			'offset'         => $offset,
-		);
+		if ( ! empty( $status ) )
+			$filter['status'] = $status;
 
-		$query = $this->queryOrders( $request_args );
+		$query = $this->query_orders( $filter );
 
 		$orders = array();
 
 		foreach( $query->posts as $order_id ) {
 
-			$orders[] = $this->getOrder( $order_id, $fields );
+			$orders[] = $this->get_order( $order_id, $fields );
 		}
+
+		$this->server->query_navigation_headers( $query );
 
 		return array( 'orders' => $orders );
 	}
@@ -106,19 +93,15 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param array $fields
 	 * @return array
 	 */
-	public function getOrder( $id, $fields = null ) {
+	public function get_order( $id, $fields = null ) {
 
-		$id = absint( $id );
+		// ensure order ID is valid & user has permission to read
+		$id = $this->validate_request( $id, 'shop_order', 'read' );
 
-		if ( empty( $id ) )
-			return new WP_Error( 'woocommerce_api_invalid_id', __( 'Invalid order ID', 'woocommerce' ), array( 'status' => 404 ) );
+		if ( is_wp_error( $id ) )
+			return $id;
 
-		// invalid IDs return a valid WC_Order object with customer_user equal to a blank string
 		$order = new WC_Order( $id );
-
-		// TODO: check post type instead or abstract into generic object/permissions check in base class @see self::getOrderNotes()
-		if ( '' === $order->customer_user )
-			return new WP_Error( 'woocommerce_api_invalid_order', __( 'Invalid order', 'woocommerce' ), array( 'status' => 404 ) );
 
 		$order_data = array(
 			'id'                        => $order->id,
@@ -128,15 +111,15 @@ class WC_API_Orders extends WC_API_Resource {
 			'completed_at'              => $order->completed_date,
 			'status'                    => $order->status,
 			'currency'                  => $order->order_currency,
-			'total'                     => $order->get_total(),
-			'total_line_items_quantity' => $order->get_item_count(),
-			'total_tax'                 => $order->get_total_tax(),
-			'total_shipping'            => $order->get_total_shipping(),
-			'cart_tax'                  => $order->get_cart_tax(),
-			'shipping_tax'              => $order->get_shipping_tax(),
-			'total_discount'            => $order->get_total_discount(),
-			'cart_discount'             => $order->get_cart_discount(),
-			'order_discount'            => $order->get_order_discount(),
+			'total'                     => (string) $order->get_total(),
+			'total_line_items_quantity' => (string) $order->get_item_count(),
+			'total_tax'                 => (string) $order->get_total_tax(),
+			'total_shipping'            => (string) $order->get_total_shipping(),
+			'cart_tax'                  => (string) $order->get_cart_tax(),
+			'shipping_tax'              => (string) $order->get_shipping_tax(),
+			'total_discount'            => (string) $order->get_total_discount(),
+			'cart_discount'             => (string) $order->get_cart_discount(),
+			'order_discount'            => (string) $order->get_order_discount(),
 			'shipping_methods'          => $order->get_shipping_method(),
 			'payment_details' => array(
 				'method_id'    => $order->payment_method,
@@ -181,10 +164,10 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$order_data['line_items'][] = array(
 				'id'         => $item_id,
-				'subtotal'   => $order->get_line_subtotal( $item ),
-				'total'      => $order->get_line_total( $item ),
-				'total_tax'  => $order->get_line_tax( $item ),
-				'quantity'   => $item['qty'],
+				'subtotal'   => (string) $order->get_line_subtotal( $item ),
+				'total'      => (string) $order->get_line_total( $item ),
+				'total_tax'  => (string) $order->get_line_tax( $item ),
+				'quantity'   => (string) $item['qty'],
 				'tax_class'  => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
 				'name'       => $item['name'],
 				'product_id' => ( isset( $product->variation_id ) ) ? $product->variation_id : $product->id,
@@ -199,7 +182,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'id'           => $shipping_item_id,
 				'method_id'    => $shipping_item['method_id'],
 				'method_title' => $shipping_item['name'],
-				'total'        => $shipping_item['cost'],
+				'total'        => (string) number_format( $shipping_item['cost'], 2 )
 			);
 		}
 
@@ -209,7 +192,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_data['tax_lines'][] = array(
 				'code'     => $tax_code,
 				'title'    => $tax->label,
-				'total'    => $tax->amount,
+				'total'    => (string) $tax->amount,
 				'compound' => (bool) $tax->is_compound,
 			);
 		}
@@ -221,8 +204,8 @@ class WC_API_Orders extends WC_API_Resource {
 				'id'        => $fee_item_id,
 				'title'     => $fee_item['name'],
 				'tax_class' => ( ! empty( $fee_item['tax_class'] ) ) ? $fee_item['tax_class'] : null,
-				'total'     => $order->get_line_total( $fee_item ),
-				'total_tax' => $order->get_line_tax( $fee_item ),
+				'total'     => (string) $order->get_line_total( $fee_item ),
+				'total_tax' => (string) $order->get_line_tax( $fee_item ),
 			);
 		}
 
@@ -232,7 +215,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_data['coupon_lines'] = array(
 				'id'     => $coupon_item_id,
 				'code'   => $coupon_item['name'],
-				'amount' => $coupon_item['discount_amount'],
+				'amount' => (string) number_format( $coupon_item['discount_amount'], 2),
 			);
 		}
 
@@ -251,40 +234,21 @@ class WC_API_Orders extends WC_API_Resource {
 	 *
 	 * @since 2.1
 	 * @param string $status
-	 * @param string $created_at_min
-	 * @param string $created_at_max
-	 * @param string $updated_at_min
-	 * @param string $updated_at_max
+	 * @param array $filter
 	 * @return array
 	 */
-	public function getOrdersCount( $status = null, $created_at_min = null, $created_at_max = null, $updated_at_min = null, $updated_at_max = null ) {
+	public function get_orders_count( $status = null, $filter = array() ) {
 
-		$request_args = array(
-			'status' => $status,
-			'created_at_min' => $created_at_min,
-			'created_at_max' => $created_at_max,
-			'updated_at_min' => $updated_at_min,
-			'updated_at_max' => $updated_at_max,
-		);
+		if ( ! empty( $status ) )
+			$filter['status'] = $status;
 
-		$query = $this->queryOrders( $request_args );
+		$query = $this->query_orders( $filter );
+
+		// TODO: permissions?
 
 		return array( 'count' => $query->found_posts );
 	}
 
-	/**
-	 * Create an order
-	 *
-	 * @since 2.1
-	 * @param array $data
-	 * @return array
-	 */
-	public function createOrder( $data ) {
-
-		// TODO: implement - a woocommerce_create_new_order() function would be great
-
-		return array();
-	}
 
 	/**
 	 * Edit an order
@@ -294,11 +258,16 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param array $data
 	 * @return array
 	 */
-	public function editOrder( $id, $data ) {
+	public function edit_order( $id, $data ) {
+
+		$id = $this->validate_request( $id, 'shop_order', 'write' );
+
+		if ( is_wp_error( $id ) )
+			return $id;
 
 		// TODO: implement
 
-		return $this->getOrder( $id );
+		return $this->get_order( $id );
 	}
 
 	/**
@@ -309,9 +278,11 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param bool $force true to permanently delete order, false to move to trash
 	 * @return array
 	 */
-	public function deleteOrder( $id, $force = false ) {
+	public function delete_order( $id, $force = false ) {
 
-		return $this->deleteResource( $id, 'order',  ( 'true' === $force ) );
+		$id = $this->validate_request( $id, 'shop_order', 'delete' );
+
+		return $this->delete( $id, 'order',  ( 'true' === $force ) );
 	}
 
 	/**
@@ -319,24 +290,19 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param $id
 	 * @return mixed
 	 */
-	public function getOrderNotes( $id ) {
+	public function get_order_notes( $id ) {
 
-		$id = absint( $id );
+		// ensure ID is valid order ID
+		$id = $this->validate_request( $id, 'order', 'read' );
 
-		if ( empty( $id ) )
-			return new WP_Error( 'woocommerce_api_invalid_id', __( 'Invalid order ID', 'woocommerce' ), array( 'status' => 404 ) );
-
-		$post = get_post( $id, ARRAY_A );
-
-		if ( 'shop_order' !== $post['post_type'] )
-			return new WP_Error( 'woocommerce_api_invalid_order', __( 'Invalid order', 'woocommerce' ), array( 'status' => 404 ) );
+		if ( is_wp_error( $id ) )
+			return $id;
 
 		$args = array(
 			'post_id' => $id,
 			'approve' => 'approve',
 			'type'    => 'order_note'
 		);
-
 
 		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments', 10, 1 ) );
 
@@ -349,7 +315,7 @@ class WC_API_Orders extends WC_API_Resource {
 		foreach ( $notes as $note ) {
 
 			$order_notes[] = array(
-				'created_at'    => $note->comment_date,
+				'created_at'    => $note->comment_date_gmt, // TODO: date formatting
 				'note'          => $note->comment_content,
 				'customer_note' => get_comment_meta( $note->comment_ID, 'is_customer_note', true ) ? true : false,
 			);
@@ -363,9 +329,9 @@ class WC_API_Orders extends WC_API_Resource {
 	 *
 	 * @since 2.1
 	 * @param array $args request arguments for filtering query
-	 * @return array
+	 * @return WP_Query
 	 */
-	private function queryOrders( $args ) {
+	private function query_orders( $args ) {
 
 		// set base query arguments
 		$query_args = array(
@@ -382,15 +348,15 @@ class WC_API_Orders extends WC_API_Resource {
 			$query_args['tax_query'] = array(
 				array(
 					'taxonomy' => 'shop_order_status',
-					'field' => 'slug',
-					'terms' => $statuses,
+					'field'    => 'slug',
+					'terms'    => $statuses,
 				),
 			);
+
+			unset( $args['status'] );
 		}
 
-		$query_args = $this->mergeQueryArgs( $query_args, $args );
-
-		// TODO: navigation/total count headers for pagination
+		$query_args = $this->merge_query_args( $query_args, $args );
 
 		return new WP_Query( $query_args );
 	}
