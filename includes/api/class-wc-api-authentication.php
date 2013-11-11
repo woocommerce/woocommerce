@@ -165,7 +165,6 @@ class WC_API_Authentication {
 	 */
 	private function is_secret_key_valid( WP_User $user, $secret_key ) {
 
-		// TODO: consider hashing secret key prior to storing it using wp_hash_password(), but this would prevent user from seeing it more than once
 		return $user->woocommerce_api_secret_key === $secret_key;
 	}
 

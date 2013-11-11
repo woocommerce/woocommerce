@@ -426,6 +426,7 @@ class WC_API_Server {
 			'URL'         => get_option( 'siteurl' ),
 			'routes'      => array(),
 			'meta'        => array(
+				'timezone' => $this->get_timezone(),
 				'currency'       => get_woocommerce_currency(),
 				'weight_unit'    => get_option( 'woocommerce_weight_unit' ),
 				'dimension_unit' => get_option( 'woocommerce_dimension_unit' ),
@@ -527,7 +528,7 @@ class WC_API_Server {
 			$paged = 1;
 
 		$nextpage = intval($paged) + 1;
-
+		// TODO: change from `page` query arg to filter[page] arg
 		if ( ! $query->is_single() ) {
 			if ( $paged > 1 ) {
 				$request = remove_query_arg( 'page' );
@@ -586,7 +587,7 @@ class WC_API_Server {
 		if ( strpos( $date, '.' ) !== false ) {
 			$date = preg_replace( '/\.\d+/', '', $date );
 		}
-		$datetime = DateTime::createFromFormat( DateTime::RFC3339, $date );
+		$datetime = DateTime::createFromFormat( DateTime::RFC3339, $date ); // TODO: rewrite, PHP 5.3+ required for this
 
 		return $datetime;
 	}
