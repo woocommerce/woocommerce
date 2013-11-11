@@ -61,7 +61,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 						if ( is_serialized( $meta['meta_value'] ) )
 							continue;
 
-						echo '<tr><th>' . wp_kses_post( $meta['meta_key'] ) . ':</th><td>' . wp_kses_post( esc_textarea( urldecode( $meta['meta_value'] ) ) ) . '</td></tr>';
+						echo '<tr><th>' . wp_kses_post( $meta['meta_key'] ) . ':</th><td>' . wp_kses_post( wpautop( urldecode( $meta['meta_value'] ) ) ) . '</td></tr>';
 					}
 					echo '</table>';
 				}

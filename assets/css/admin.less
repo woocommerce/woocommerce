@@ -1116,14 +1116,18 @@ ul.wc_coupon_list_block {
 			width: 100%;
 		}
 		table.meta, table.display_meta {
+			margin: .5em 0 0 0;
 			tr {
 				th {
 					border: 0;
-					padding: 1px 4px 1px 0;
+					padding: 0 4px .5em 0;
+					line-height: 1.5em;
+					width: 20%;
 				}
 				td {
-					padding: 2px 4px 1px 0;
+					padding: 0 4px .5em 0;
 					border: 0;
+					line-height: 1.5em;
 					input {
 						width: 100%;
 						margin: 0;
@@ -1139,6 +1143,13 @@ ul.wc_coupon_list_block {
 					}
 					input:focus + textarea {
 						border-top-color: #999;
+					}
+					p {
+						margin: 0 0 .5em;
+						line-height: 1.5em;
+					}
+					p:last-child {
+						margin: 0;
 					}
 				}
 			}
