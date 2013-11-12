@@ -15,12 +15,50 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 class WC_Post_Data {
 
+	private $editing_term = null;
+
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
+		add_action( 'edit_term', array( $this, 'edit_term' ), 10, 3 );
+		add_action( 'edited_term', array( $this, 'edited_term' ), 10, 3 );
 		add_filter( 'update_order_item_metadata', array( $this, 'update_order_item_metadata' ), 10, 5 );
 		add_filter( 'update_post_metadata', array( $this, 'update_post_metadata' ), 10, 5 );
+	}
+
+	/**
+	 * When editing a term, check for product attributes
+	 * @param  id $term_id
+	 * @param  id $tt_id
+	 * @param  string $taxonomy
+	 */
+	public function edit_term( $term_id, $tt_id, $taxonomy ) {
+		if ( strpos( $taxonomy, 'pa_' ) === 0 ) {
+			$this->editing_term = get_term_by( 'id', $term_id, $taxonomy );
+		} else {
+			$this->editing_term = null;
+		}
+	}
+
+	/**
+	 * When a term is edited, check for product attributes and update variations
+	 * @param  id $term_id
+	 * @param  id $tt_id
+	 * @param  string $taxonomy
+	 */
+	public function edited_term( $term_id, $tt_id, $taxonomy ) {
+		if ( ! is_null( $this->editing_term ) && strpos( $taxonomy, 'pa_' ) === 0 ) {
+			$edited_term = get_term_by( 'id', $term_id, $taxonomy );
+
+			if ( $edited_term->slug !== $this->editing_term->slug ) {
+				global $wpdb;
+
+				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE meta_key = %s AND meta_value = %s;", $edited_term->slug, 'attribute_' . sanitize_title( $taxonomy ), $this->editing_term->slug ) );
+			}
+		} else {
+			$this->editing_term = null;
+		}
 	}
 
 	/**
