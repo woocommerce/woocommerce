@@ -2144,7 +2144,7 @@ img.help_tip {
 			vertical-align: middle;
 		}
 	}
-	.handlediv {
+	> .handlediv {
 		margin-top:4px;
 	}
 }
@@ -2579,8 +2579,8 @@ img.help_tip {
 		border-style:dashed;
 	}
 	.wc-metabox {
-		background: #ececec;
-		border: 1px solid #ececec;
+		background: #fff;
+		border: 1px solid #dfdfdf;
 		margin: 9px 0 !important;
 		-moz-border-radius-topleft: 3px;
 		-moz-border-radius-topright: 3px;
@@ -2588,10 +2588,18 @@ img.help_tip {
 		-webkit-border-top-right-radius: 3px;
 		border-top-left-radius: 3px;
 		border-top-right-radius: 3px;
+		.handlediv {
+			&:before {
+				line-height: .5 !important;
+			}
+		}
 		&.closed {
 			-moz-border-radius: 3px;
 			-webkit-border-radius: 3px;
 			border-radius: 3px;
+			h3 {
+				border:0;
+			}
 		}
 		h3 {
 			margin: 0 !important;
