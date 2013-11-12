@@ -63,6 +63,12 @@ jQuery( function($){
 		});
 	});
 
+	$(function(){
+		jQuery('.wc-metabox > h3').click( function(event){
+			$( this ).parent( '.wc-metabox' ).toggleClass( 'closed' ).toggleClass( 'open' );
+		});
+	});
+
 	// Order emails
 	$('#order-emails a.show-order-emails').click(function () {
 		if ($('#order-emails-select').is(":hidden")) {

@@ -26,14 +26,13 @@
 			padding: 0;
 			vertical-align: top;
 			width: 300px;
-			min-height: 220px;
 
 			a {
 				text-decoration: none;
 				color: inherit;
 				border: 1px solid #ddd;
 				display: block;
-				min-height: 162px;
+				min-height: 220px;
 				overflow: hidden;
 				-webkit-box-shadow:
 					inset 0 1px 0 rgba(255,255,255,0.2),
@@ -44,8 +43,8 @@
 
 				img {
 					max-width: 258px;
-					max-height: 30px;
-					padding: 20px;
+					max-height: 24px;
+					padding: 17px 20px;
 					display: block;
 					margin: 0;
 					background: #fff;
@@ -1416,6 +1415,9 @@ table.wp-list-table {
 	img {
 		margin: 1px 2px;
 	}
+	.row-actions {
+		color: #999;
+	}
 	td.column-thumb img {
 		margin: 0;
 		vertical-align: middle;
@@ -2142,7 +2144,7 @@ img.help_tip {
 			vertical-align: middle;
 		}
 	}
-	.handlediv {
+	> .handlediv {
 		margin-top:4px;
 	}
 }
@@ -2577,8 +2579,8 @@ img.help_tip {
 		border-style:dashed;
 	}
 	.wc-metabox {
-		background: #ececec;
-		border: 1px solid #ececec;
+		background: #fff;
+		border: 1px solid #dfdfdf;
 		margin: 9px 0 !important;
 		-moz-border-radius-topleft: 3px;
 		-moz-border-radius-topright: 3px;
@@ -2586,10 +2588,23 @@ img.help_tip {
 		-webkit-border-top-right-radius: 3px;
 		border-top-left-radius: 3px;
 		border-top-right-radius: 3px;
+		.handlediv {
+			&:before {
+				line-height: .5 !important;
+			}
+		}
 		&.closed {
 			-moz-border-radius: 3px;
 			-webkit-border-radius: 3px;
 			border-radius: 3px;
+			h3 {
+				border:0;
+			}
+			.handlediv {
+				&:before {
+					content: '\f140' !important;
+				}
+			}
 		}
 		h3 {
 			margin: 0 !important;
@@ -2654,10 +2669,10 @@ img.help_tip {
 					width: 200px;
 				}
 				input.checkbox {
-					width: auto;
+					width: 16px;
 					min-width: inherit;
-					vertical-align: middle;
-					display: inline;
+					vertical-align: text-bottom;
+					display: inline-block;
 					float: none;
 				}
 			}
@@ -2697,7 +2712,8 @@ img.help_tip {
 #variable_product_options {
 	.woocommerce_variation {
 		table {
-			background: #f5f5f5;
+			background: #fafafa;
+			border-top:1px solid #eee;
 			padding: 6px;
 			td {
 				input {
@@ -2756,8 +2772,8 @@ img.help_tip {
 						top: 34px;
 						left: 0;
 						margin: 0 0 0 -1px;
-						border: 6px solid #f5f5f5;
-						border-color: transparent transparent transparent #f5f5f5;
+						border: 6px solid #fafafa;
+						border-color: transparent transparent transparent #fafafa;
 					}
 				}
 				&.upload_image {
