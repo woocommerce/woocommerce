@@ -121,7 +121,8 @@ class WC_Admin_Status {
 					" );
 
 					wp_cache_flush();
-
+					
+					echo '<div class="updated"><p>' . __( 'Sessions successfully cleared', 'woocommerce' ) . '</p></div>';
 				break;
 				default:
 					$action = esc_attr( $_GET['action'] );
