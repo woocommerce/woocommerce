@@ -137,7 +137,7 @@ if ( class_exists( 'WP_Importer' ) ) {
 							array(
 								'tax_rate_country'  => $country,
 								'tax_rate_state'    => $state,
-								'tax_rate'          => number_format( $rate, 4, '.', '' ),
+								'tax_rate'          => woocommerce_format_decimal( $rate, 4 ),
 								'tax_rate_name'     => trim( $name ),
 								'tax_rate_priority' => absint( $priority ),
 								'tax_rate_compound' => $compound ? 1 : 0,

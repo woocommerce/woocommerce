@@ -111,16 +111,16 @@ class WC_Meta_Box_Order_Totals {
 
 		<div class="totals_group">
 			<h4><label for="_order_total"><?php _e( 'Order Discount', 'woocommerce' ); ?></label></h4>
-			<input type="text" class="wc_input_decimal" id="_order_discount" name="_order_discount" placeholder="0.00" value="<?php
+			<input type="text" class="wc_input_price" id="_order_discount" name="_order_discount" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php
 				if ( isset( $data['_order_discount'][0] ) )
-					echo esc_attr( $data['_order_discount'][0] );
+					echo esc_attr( wc_format_localized_price( $data['_order_discount'][0] ) );
 			?>" />
 		</div>
 		<div class="totals_group">
 			<h4><label for="_order_total"><?php _e( 'Order Total', 'woocommerce' ); ?></label></h4>
-			<input type="text" class="wc_input_decimal" id="_order_total" name="_order_total" placeholder="0.00" value="<?php
+			<input type="text" class="wc_input_price" id="_order_total" name="_order_total" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php
 						if ( isset( $data['_order_total'][0] ) )
-							echo esc_attr( $data['_order_total'][0] );
+							echo esc_attr( wc_format_localized_price( $data['_order_total'][0] ) );
 			?>" />
 		</div>
 		<?php
@@ -206,15 +206,15 @@ class WC_Meta_Box_Order_Totals {
 							woocommerce_update_order_item_meta( $new_id, 'compound', $compound );
 
 							if ( isset( $order_taxes_amount[ $item_id ][ $new_key ] ) ) {
-						 		woocommerce_update_order_item_meta( $new_id, 'tax_amount', woocommerce_format_decimal( $order_taxes_amount[ $item_id ][ $new_key ], false ) );
+						 		woocommerce_update_order_item_meta( $new_id, 'tax_amount', woocommerce_format_decimal( $order_taxes_amount[ $item_id ][ $new_key ] ) );
 
-						 		$total_tax          += woocommerce_format_decimal( $order_taxes_amount[ $item_id ][ $new_key ], false );
+						 		$total_tax          += woocommerce_format_decimal( $order_taxes_amount[ $item_id ][ $new_key ] );
 						 	}
 
 						 	if ( isset( $order_taxes_shipping_amount[ $item_id ][ $new_key ] ) ) {
-						 		woocommerce_update_order_item_meta( $new_id, 'shipping_tax_amount', woocommerce_format_decimal( $order_taxes_shipping_amount[ $item_id ][ $new_key ], false ) );
+						 		woocommerce_update_order_item_meta( $new_id, 'shipping_tax_amount', woocommerce_format_decimal( $order_taxes_shipping_amount[ $item_id ][ $new_key ] ) );
 
-						 		$total_shipping_tax += woocommerce_format_decimal( $order_taxes_shipping_amount[ $item_id ][ $new_key ], false );
+						 		$total_shipping_tax += woocommerce_format_decimal( $order_taxes_shipping_amount[ $item_id ][ $new_key ] );
 						 	}
 					 	}
 					}
@@ -254,25 +254,25 @@ class WC_Meta_Box_Order_Totals {
 					woocommerce_update_order_item_meta( $item_id, 'compound', $compound );
 
 					if ( isset( $order_taxes_amount[ $item_id ] ) ) {
-				 		woocommerce_update_order_item_meta( $item_id, 'tax_amount', woocommerce_format_decimal( $order_taxes_amount[ $item_id ], false ) );
+				 		woocommerce_update_order_item_meta( $item_id, 'tax_amount', woocommerce_format_decimal( $order_taxes_amount[ $item_id ] ) );
 
-				 		$total_tax          += woocommerce_format_decimal( $order_taxes_amount[ $item_id ], false );
+				 		$total_tax += woocommerce_format_decimal( $order_taxes_amount[ $item_id ] );
 				 	}
 
 				 	if ( isset( $order_taxes_shipping_amount[ $item_id ] ) ) {
-				 		woocommerce_update_order_item_meta( $item_id, 'shipping_tax_amount', woocommerce_format_decimal( $order_taxes_shipping_amount[ $item_id ], false ) );
+				 		woocommerce_update_order_item_meta( $item_id, 'shipping_tax_amount', woocommerce_format_decimal( $order_taxes_shipping_amount[ $item_id ] ) );
 
-				 		$total_shipping_tax += woocommerce_format_decimal( $order_taxes_shipping_amount[ $item_id ], false );
+				 		$total_shipping_tax += woocommerce_format_decimal( $order_taxes_shipping_amount[ $item_id ] );
 				 	}
 				}
 			}
 		}
 
 		// Update totals
-		update_post_meta( $post_id, '_order_tax', woocommerce_format_decimal( woocommerce_round_tax_total( $total_tax ), false ) );
-		update_post_meta( $post_id, '_order_shipping_tax', woocommerce_format_decimal( woocommerce_round_tax_total( $total_shipping_tax ), false ) );
-		update_post_meta( $post_id, '_order_discount', woocommerce_format_decimal( $_POST['_order_discount'], false ) );
-		update_post_meta( $post_id, '_order_total', woocommerce_format_decimal( $_POST['_order_total'], false ) );
+		update_post_meta( $post_id, '_order_tax', woocommerce_round_tax_total( $total_tax ) );
+		update_post_meta( $post_id, '_order_shipping_tax', woocommerce_round_tax_total( $total_shipping_tax ) );
+		update_post_meta( $post_id, '_order_discount', woocommerce_format_decimal( $_POST['_order_discount'] ) );
+		update_post_meta( $post_id, '_order_total', woocommerce_format_decimal( $_POST['_order_total'] ) );
 
 		// Shipping Rows
 		$order_shipping = 0;
@@ -291,7 +291,7 @@ class WC_Meta_Box_Order_Totals {
 					foreach ( $value as $new_key => $new_value ) {
 						$method_id    = woocommerce_clean( $shipping_method[ $item_id ][ $new_key ] );
 						$method_title = woocommerce_clean( $shipping_method_title[ $item_id ][ $new_key ] );
-						$cost         = woocommerce_format_decimal( $shipping_cost[ $item_id ][ $new_key ], false );
+						$cost         = woocommerce_format_decimal( $shipping_cost[ $item_id ][ $new_key ] );
 
 						$new_id = woocommerce_add_order_item( $post_id, array(
 					 		'order_item_name' 		=> $method_title,
@@ -311,7 +311,7 @@ class WC_Meta_Box_Order_Totals {
 					$item_id      = absint( $item_id );
 					$method_id    = woocommerce_clean( $shipping_method[ $item_id ] );
 					$method_title = woocommerce_clean( $shipping_method_title[ $item_id ] );
-					$cost         = woocommerce_format_decimal( $shipping_cost[ $item_id ], false );
+					$cost         = woocommerce_format_decimal( $shipping_cost[ $item_id ] );
 
 					$wpdb->update(
 						$wpdb->prefix . "woocommerce_order_items",
@@ -339,6 +339,6 @@ class WC_Meta_Box_Order_Totals {
 
 		delete_post_meta( $post_id, '_shipping_method' );
 		delete_post_meta( $post_id, '_shipping_method_title' );
-		update_post_meta( $post_id, '_order_shipping', woocommerce_format_decimal( $order_shipping, false ) );
+		update_post_meta( $post_id, '_order_shipping', $order_shipping );
 	}
 }

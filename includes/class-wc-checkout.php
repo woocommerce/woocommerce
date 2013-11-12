@@ -269,10 +269,10 @@ class WC_Checkout {
 			 	woocommerce_add_order_item_meta( $item_id, '_tax_class', $_product->get_tax_class() );
 			 	woocommerce_add_order_item_meta( $item_id, '_product_id', $values['product_id'] );
 			 	woocommerce_add_order_item_meta( $item_id, '_variation_id', $values['variation_id'] );
-			 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal', woocommerce_format_decimal( $values['line_subtotal'], false ) );
-			 	woocommerce_add_order_item_meta( $item_id, '_line_total', woocommerce_format_decimal( $values['line_total'], false ) );
-			 	woocommerce_add_order_item_meta( $item_id, '_line_tax', woocommerce_format_decimal( $values['line_tax'], false ) );
-			 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal_tax', woocommerce_format_decimal( $values['line_subtotal_tax'], false ) );
+			 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal', woocommerce_format_decimal( $values['line_subtotal'] ) );
+			 	woocommerce_add_order_item_meta( $item_id, '_line_total', woocommerce_format_decimal( $values['line_total'] ) );
+			 	woocommerce_add_order_item_meta( $item_id, '_line_tax', woocommerce_format_decimal( $values['line_tax'] ) );
+			 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal_tax', woocommerce_format_decimal( $values['line_subtotal_tax'] ) );
 
 			 	// Store variation data in meta so admin can view it
 				if ( $values['variation'] && is_array( $values['variation'] ) )
@@ -300,8 +300,8 @@ class WC_Checkout {
 		 	else
 		 		woocommerce_add_order_item_meta( $item_id, '_tax_class', '0' );
 
-		 	woocommerce_add_order_item_meta( $item_id, '_line_total', woocommerce_format_decimal( $fee->amount, false ) );
-			woocommerce_add_order_item_meta( $item_id, '_line_tax', woocommerce_format_decimal( $fee->tax, false ) );
+		 	woocommerce_add_order_item_meta( $item_id, '_line_total', woocommerce_format_decimal( $fee->amount ) );
+			woocommerce_add_order_item_meta( $item_id, '_line_tax', woocommerce_format_decimal( $fee->tax ) );
 		}
 
 		// Store shipping for all packages
@@ -319,7 +319,7 @@ class WC_Checkout {
 
 				if ( $item_id ) {
 			 		woocommerce_add_order_item_meta( $item_id, 'method_id', $method->id );
-		 			woocommerce_add_order_item_meta( $item_id, 'cost', woocommerce_format_decimal( $method->cost, false ) );
+		 			woocommerce_add_order_item_meta( $item_id, 'cost', woocommerce_format_decimal( $method->cost ) );
 		 		}
 			}
 		}
@@ -337,8 +337,8 @@ class WC_Checkout {
 		 		woocommerce_add_order_item_meta( $item_id, 'rate_id', $key );
 		 		woocommerce_add_order_item_meta( $item_id, 'label', WC()->cart->tax->get_rate_label( $key ) );
 			 	woocommerce_add_order_item_meta( $item_id, 'compound', absint( WC()->cart->tax->is_compound( $key ) ? 1 : 0 ) );
-			 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', woocommerce_format_decimal( isset( WC()->cart->taxes[ $key ] ) ? WC()->cart->taxes[ $key ] : 0, false ) );
-			 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', woocommerce_format_decimal( isset( WC()->cart->shipping_taxes[ $key ] ) ? WC()->cart->shipping_taxes[ $key ] : 0, false ) );
+			 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', woocommerce_format_decimal( isset( WC()->cart->taxes[ $key ] ) ? WC()->cart->taxes[ $key ] : 0 ) );
+			 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', woocommerce_format_decimal( isset( WC()->cart->shipping_taxes[ $key ] ) ? WC()->cart->shipping_taxes[ $key ] : 0 ) );
 			}
 		}
 
@@ -362,12 +362,12 @@ class WC_Checkout {
 			update_post_meta( $order_id, '_payment_method', 		$this->payment_method->id );
 			update_post_meta( $order_id, '_payment_method_title', 	$this->payment_method->get_title() );
 		}
-		update_post_meta( $order_id, '_order_shipping', 		woocommerce_format_decimal( WC()->cart->shipping_total, false ) );
-		update_post_meta( $order_id, '_order_discount', 		woocommerce_format_decimal( WC()->cart->get_order_discount_total(), false ) );
-		update_post_meta( $order_id, '_cart_discount', 			woocommerce_format_decimal( WC()->cart->get_cart_discount_total(), false ) );
-		update_post_meta( $order_id, '_order_tax', 				woocommerce_format_decimal( woocommerce_round_tax_total( WC()->cart->tax_total ), false ) );
-		update_post_meta( $order_id, '_order_shipping_tax', 	woocommerce_format_decimal( woocommerce_round_tax_total( WC()->cart->shipping_tax_total ), false ) );
-		update_post_meta( $order_id, '_order_total', 			woocommerce_format_decimal( WC()->cart->total ) );
+		update_post_meta( $order_id, '_order_shipping', 		woocommerce_format_decimal( WC()->cart->shipping_total ) );
+		update_post_meta( $order_id, '_order_discount', 		woocommerce_format_decimal( WC()->cart->get_order_discount_total() ) );
+		update_post_meta( $order_id, '_cart_discount', 			woocommerce_format_decimal( WC()->cart->get_cart_discount_total() ) );
+		update_post_meta( $order_id, '_order_tax', 				woocommerce_format_decimal( woocommerce_round_tax_total( WC()->cart->tax_total ) ) );
+		update_post_meta( $order_id, '_order_shipping_tax', 	woocommerce_format_decimal( woocommerce_round_tax_total( WC()->cart->shipping_tax_total ) ) );
+		update_post_meta( $order_id, '_order_total', 			woocommerce_format_decimal( WC()->cart->total, get_option( 'woocommerce_price_num_decimals' ) ) );
 
 		update_post_meta( $order_id, '_order_key', 				apply_filters('woocommerce_generate_order_key', uniqid('order_') ) );
 		update_post_meta( $order_id, '_customer_user', 			absint( $this->customer_id ) );

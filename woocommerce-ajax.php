@@ -911,9 +911,9 @@ function woocommerce_ajax_add_order_item() {
 	$item['name'] 					= $_product->get_title();
 	$item['tax_class']				= $_product->get_tax_class();
 	$item['qty'] 					= 1;
-	$item['line_subtotal'] 			= woocommerce_format_decimal( $_product->get_price_excluding_tax(), false );
+	$item['line_subtotal'] 			= woocommerce_format_decimal( $_product->get_price_excluding_tax() );
 	$item['line_subtotal_tax'] 		= '';
-	$item['line_total'] 			= woocommerce_format_decimal( $_product->get_price_excluding_tax(), false );
+	$item['line_total'] 			= woocommerce_format_decimal( $_product->get_price_excluding_tax() );
 	$item['line_tax'] 				= '';
 
 	// Add line item
@@ -1192,9 +1192,9 @@ function woocommerce_calc_line_taxes() {
 		foreach( $items as $item_id => $item ) {
 
 			$item_id		= absint( $item_id );
-			$line_subtotal 	= isset( $item['line_subtotal']  ) ? esc_attr( $item['line_subtotal'] ) : '';
-			$line_total		= esc_attr( $item['line_total'] );
-			$tax_class 		= esc_attr( $item['tax_class'] );
+			$line_subtotal 	= isset( $item['line_subtotal'] ) ? woocommerce_format_decimal( $item['line_subtotal'] ) : 0;
+			$line_total		= woocommerce_format_decimal( $item['line_total'] );
+			$tax_class 		= sanitize_text_field( $item['tax_class'] );
 			$product_id     = $order->get_item_meta( $item_id, '_product_id', true );
 
 			if ( ! $item_id || $tax_class == '0' )
@@ -1231,8 +1231,8 @@ function woocommerce_calc_line_taxes() {
 					$line_tax = 0;
 
 				$item_taxes[ $item_id ] = array(
-					'line_subtotal_tax' => $line_subtotal_tax,
-					'line_tax' 			=> $line_tax
+					'line_subtotal_tax' => wc_format_localized_price( $line_subtotal_tax ),
+					'line_tax' 			=> wc_format_localized_price( $line_tax )
 				);
 
 				$item_tax += $line_tax;
@@ -1295,8 +1295,8 @@ function woocommerce_calc_line_taxes() {
 		$item['name'] 					= $tax_codes[ $key ];
 		$item['label'] 					= $tax->get_rate_label( $key );
 		$item['compound'] 				= $tax->is_compound( $key ) ? 1 : 0;
-		$item['tax_amount'] 			= woocommerce_format_decimal( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0, false );
-		$item['shipping_tax_amount'] 	= woocommerce_format_decimal( isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0, false );
+		$item['tax_amount'] 			= woocommerce_format_decimal( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
+		$item['shipping_tax_amount'] 	= woocommerce_format_decimal( isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0 );
 
 		if ( ! $item['label'] )
 			$item['label'] = $woocommerce->countries->tax_or_vat();

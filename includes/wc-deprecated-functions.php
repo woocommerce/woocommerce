@@ -38,6 +38,19 @@ function woocommerce_readfile_chunked( $file, $retbytes = true ) {
 }
 
 /**
+ * Formal total costs - format to the number of decimal places for the base currency.
+ *
+ * @access public
+ * @param mixed $number
+ * @deprecated 2.1
+ * @return string
+ */
+function woocommerce_format_total( $number ) {
+	_deprecated_function( __FUNCTION__, '2.1', 'woocommerce_format_decimal()' );
+	return woocommerce_format_decimal( $number, get_option( 'woocommerce_price_num_decimals' ), false );
+}
+
+/**
  * Get product name with extra details such as SKU price and attributes. Used within admin.
  *
  * @access public

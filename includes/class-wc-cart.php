@@ -1153,7 +1153,7 @@ class WC_Cart {
 				do_action( 'woocommerce_calculate_totals', $this );
 
 				// Grand Total - Discounted product prices, discounted tax, shipping cost + tax, and any discounts to be added after tax (e.g. store credit)
-				$this->total = max( 0, apply_filters( 'woocommerce_calculated_total', number_format( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total - $this->discount_total + $this->fee_total, $this->dp, '.', '' ), $this ) );
+				$this->total = max( 0, apply_filters( 'woocommerce_calculated_total', round( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total - $this->discount_total + $this->fee_total, $this->dp ), $this ) );
 
 			} else {
 
@@ -1648,7 +1648,7 @@ class WC_Cart {
 		 * @access public
 		 */
 		public function apply_cart_discounts_after_tax() {
-			$pre_discount_total = number_format( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total + $this->fee_total, $this->dp, '.', '' );
+			$pre_discount_total = round( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total + $this->fee_total, $this->dp );
 
 			if ( $this->applied_coupons ) {
 				foreach ( $this->applied_coupons as $code ) {

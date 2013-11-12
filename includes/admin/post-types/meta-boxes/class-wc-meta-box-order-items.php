@@ -138,27 +138,27 @@ class WC_Meta_Box_Order_Items {
 			 		woocommerce_update_order_item_meta( $item_id, '_tax_class', woocommerce_clean( $order_item_tax_class[ $item_id ] ) );
 
 			 	if ( isset( $line_subtotal[ $item_id ] ) ) {
-			 		woocommerce_update_order_item_meta( $item_id, '_line_subtotal', woocommerce_format_decimal( $line_subtotal[ $item_id ], false ) );
+			 		woocommerce_update_order_item_meta( $item_id, '_line_subtotal', woocommerce_format_decimal( $line_subtotal[ $item_id ] ) );
 
-			 		$subtotal += woocommerce_clean( $line_subtotal[ $item_id ] );
+			 		$subtotal += woocommerce_format_decimal( $line_subtotal[ $item_id ] );
 			 	}
 
 			 	if ( isset(  $line_subtotal_tax[ $item_id ] ) ) {
-			 		woocommerce_update_order_item_meta( $item_id, '_line_subtotal_tax', woocommerce_format_decimal( $line_subtotal_tax[ $item_id ], false ) );
+			 		woocommerce_update_order_item_meta( $item_id, '_line_subtotal_tax', woocommerce_format_decimal( $line_subtotal_tax[ $item_id ] ) );
 
-			 		$subtotal += woocommerce_clean( $line_subtotal_tax[ $item_id ] );
+			 		$subtotal += woocommerce_format_decimal( $line_subtotal_tax[ $item_id ] );
 			 	}
 
 			 	if ( isset( $line_total[ $item_id ] ) ) {
-			 		woocommerce_update_order_item_meta( $item_id, '_line_total', woocommerce_format_decimal( $line_total[ $item_id ], false ) );
+			 		woocommerce_update_order_item_meta( $item_id, '_line_total', woocommerce_format_decimal( $line_total[ $item_id ] ) );
 
-			 		$total += woocommerce_clean( $line_total[ $item_id ] );
+			 		$total += woocommerce_format_decimal( $line_total[ $item_id ] );
 			 	}
 
 			 	if ( isset( $line_tax[ $item_id ] ) ) {
-			 		woocommerce_update_order_item_meta( $item_id, '_line_tax', woocommerce_format_decimal( $line_tax[ $item_id ], false ) );
+			 		woocommerce_update_order_item_meta( $item_id, '_line_tax', woocommerce_format_decimal( $line_tax[ $item_id ] ) );
 
-			 		$total += woocommerce_clean( $line_tax[ $item_id ] );
+			 		$total += woocommerce_format_decimal( $line_tax[ $item_id ] );
 			 	}
 
 			 	// Clear meta cache
@@ -186,6 +186,6 @@ class WC_Meta_Box_Order_Items {
 		}
 
 		// Update cart discount from item totals
-		update_post_meta( $post_id, '_cart_discount', woocommerce_format_decimal( $subtotal - $total, false ) );
+		update_post_meta( $post_id, '_cart_discount', $subtotal - $total );
 	}
 }

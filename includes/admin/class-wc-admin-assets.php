@@ -84,7 +84,14 @@ class WC_Admin_Assets {
 
 		wp_register_script( 'chosen', $woocommerce->plugin_url() . '/assets/js/chosen/chosen.jquery' . $suffix . '.js', array('jquery'), $woocommerce->version );
 
-		 // WooCommerce admin pages
+		// Accounting
+    	$params = array(
+			'mon_decimal_point' => get_option( 'woocommerce_price_decimal_sep' )
+    	);
+
+    	wp_localize_script( 'accounting', 'accounting_params', $params );
+
+		// WooCommerce admin pages
 	    if ( in_array( $screen->id, wc_get_screen_ids() ) ) {
 
 	    	wp_enqueue_script( 'woocommerce_admin' );
@@ -94,11 +101,14 @@ class WC_Admin_Assets {
 	    	wp_enqueue_script( 'jquery-ui-sortable' );
 	    	wp_enqueue_script( 'jquery-ui-autocomplete' );
 
-	    	$locale = localeconv();
+	    	$locale  = localeconv();
+	    	$decimal = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
 
 	    	$params = array(
-	    		'i18n_decimal_input_error' => __( 'Please enter in decimal format without thousand separators and currency symbols.', 'woocommerce' ),
-	    		'locale_decimal_point' => isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.'
+				'i18n_decimal_error'     => sprintf( __( 'Please enter in decimal (%s) format without thousand separators.', 'woocommerce' ), $decimal ),
+				'i18n_mon_decimal_error' => sprintf( __( 'Please enter in monitary decimal (%s) format without thousand separators and currency symbols.', 'woocommerce' ), get_option( 'woocommerce_price_decimal_sep' ) ),
+				'decimal_point'          => $decimal,
+				'mon_decimal_point'      => get_option( 'woocommerce_price_decimal_sep' )
 	    	);
 
 	    	wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );

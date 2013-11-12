@@ -175,34 +175,27 @@ function woocommerce_round_tax_total( $tax ) {
 }
 
 /**
- * Format decimal numbers - format to a defined number of dp and remove trailing zeros.
+ * Format decimal numbers ready for DB storage
  *
- * Remove's user locale settings, converting to a string which uses '.' for decimals, with no thousand separators.
+ * Sanitize, remove locale formatting, and optionally round + trim off zeros
  *
- * @param  float|string $number
+ * @param  float|string $number Expects either a float or a string with a decimal separator only (no thousands)
  * @param  mixed $dp number of decimal points to use, blank to use woocommerce_price_num_decimals, or false to avoid all rounding.
  * @param  boolean $trim_zeros from end of string
  * @return string
  */
-function woocommerce_format_decimal( $number, $dp = '', $trim_zeros = false ) {
-	$number = floatval( $number );
+function woocommerce_format_decimal( $number, $dp = false, $trim_zeros = false ) {
+	// Remove locale from string
+	if ( ! is_float( $number ) ) {
+		$locale   = localeconv();
+		$decimals = array( get_option( 'woocommerce_price_decimal_sep' ), $locale['decimal_point'], $locale['mon_decimal_point'] );
+		$number   = woocommerce_clean( str_replace( $decimals, '.', $number ) );
+	}
 
-	// DP is false - don't use number format, just remove locale settings from the number
-	if ( $dp === false ) {
-		$locale  = localeconv();
-		$decimal = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
-
-		// Only allow numbers and the decimal point
-		if ( strstr( $number, $decimal ) )
-			$number = preg_replace( "/[^0-9\\" . $decimal . "]/", "", strval( $number ) );
-		else
-			$number = preg_replace( "/[^0-9.]/", "", strval( $number ) );
-
-		// Replace decimal point with .
-		$number = str_replace( $decimal, '.', $number );
-	} else {
-		$dp     = ( $dp == "" ) ? intval( get_option( 'woocommerce_price_num_decimals' ) ) : intval( $dp );
-		$number = number_format( $number, $dp, '.', '' );
+	// DP is false - don't use number format, just return a string in our format
+	if ( $dp !== false ) {
+		$dp     = intval( $dp == "" ? get_option( 'woocommerce_price_num_decimals' ) : $dp );
+		$number = number_format( floatval( $number ), $dp, '.', '' );
 	}
 
 	if ( $trim_zeros && strstr( $number, '.' ) )
@@ -212,14 +205,38 @@ function woocommerce_format_decimal( $number, $dp = '', $trim_zeros = false ) {
 }
 
 /**
- * Formal total costs - format to the number of decimal places for the base currency.
- *
- * @access public
- * @param mixed $number
+ * Convert a float to a string without locale formatting which PHP adds when changing floats to strings
+ * @param  float $float
  * @return string
  */
-function woocommerce_format_total( $number ) {
-	return woocommerce_format_decimal( $number, '', false );
+function wc_float_to_string( $float ) {
+	if ( ! is_float( $float ) )
+		return $float;
+
+	$locale = localeconv();
+	$string = strval( $float );
+	$string = str_replace( $locale['decimal_point'], '.', $string );
+
+	return $string;
+}
+
+/**
+ * Format a price with WC Currency Locale settings
+ * @param  string $value
+ * @return string
+ */
+function wc_format_localized_price( $value ) {
+	return str_replace( '.', get_option( 'woocommerce_price_decimal_sep' ), strval( $value ) );
+}
+
+/**
+ * Format a decimal with PHP Locale settings
+ * @param  string $value
+ * @return string
+ */
+function wc_format_localized_decimal( $value ) {
+	$locale = localeconv();
+	return str_replace( '.', $locale['decimal_point'], strval( $value ) );
 }
 
 /**
@@ -296,13 +313,13 @@ function woocommerce_price( $price, $args = array() ) {
 	), $args ) );
 
 	$return          = '';
-	$num_decimals    = (int) get_option( 'woocommerce_price_num_decimals' );
+	$num_decimals    = absint( get_option( 'woocommerce_price_num_decimals' ) );
 	$currency_pos    = get_option( 'woocommerce_currency_pos' );
 	$currency_symbol = get_woocommerce_currency_symbol();
 	$decimal_sep     = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ), ENT_QUOTES );
 	$thousands_sep   = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ), ENT_QUOTES );
 
-	$price           = apply_filters( 'raw_woocommerce_price', (double) $price );
+	$price           = apply_filters( 'raw_woocommerce_price', floatval( $price ) );
 	$price           = number_format( $price, $num_decimals, $decimal_sep, $thousands_sep );
 
 	if ( apply_filters( 'woocommerce_price_trim_zeros', true ) && $num_decimals > 0 )

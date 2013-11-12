@@ -309,12 +309,12 @@ jQuery( function($){
 	$('#woocommerce-order-totals').on( 'change input', '.order_taxes_amount, .order_taxes_shipping_amount, .shipping_cost, #_order_discount', function() {
 
 		var $this  =  $(this);
-		var fields = $this.closest('.totals_group').find('input[type=number], .wc_input_decimal');
+		var fields = $this.closest('.totals_group').find('input[type=number], .wc_input_price');
 		var total  = 0;
 
 		fields.each(function(){
 			if ( $(this).val() )
-				total = total + parseFloat( $(this).val() );
+				total = total + accounting.unformat( $(this).val(), woocommerce_admin.mon_decimal_point );
 		});
 
 		if ( $this.is('.order_taxes_amount') || $this.is('.order_taxes_shipping_amount') ) {
@@ -385,9 +385,9 @@ jQuery( function($){
 
 			order_shipping = 0;
 
-			$('#shipping_rows').find('input[type=number], .wc_input_decimal').each(function(){
+			$('#shipping_rows').find('input[type=number], .wc_input_price').each(function(){
 				cost = $(this).val() || '0';
-				cost = accounting.unformat( cost.replace(',', '.') );
+				cost = accounting.unformat( cost, woocommerce_admin.mon_decimal_point );
 				order_shipping = order_shipping + parseFloat( cost );
 			});
 
@@ -449,15 +449,15 @@ jQuery( function($){
 
 			order_discount = accounting.unformat( order_discount.replace(',', '.') );
 
-			$('#shipping_rows').find('input[type=number], .wc_input_decimal').each(function(){
+			$('#shipping_rows').find('input[type=number], .wc_input_price').each(function(){
 				cost = $(this).val() || '0';
-				cost = accounting.unformat( cost.replace(',', '.') );
+				cost = accounting.unformat( cost, woocommerce_admin.mon_decimal_point );
 				shipping = shipping + parseFloat( cost );
 			});
 
-			$('#tax_rows').find('input[type=number], .wc_input_decimal').each(function(){
+			$('#tax_rows').find('input[type=number], .wc_input_price').each(function(){
 				cost = $(this).val() || '0';
-				cost = accounting.unformat( cost.replace(',', '.') );
+				cost = accounting.unformat( cost, woocommerce_admin.mon_decimal_point );
 				tax = tax + parseFloat( cost );
 			});
 
@@ -471,7 +471,7 @@ jQuery( function($){
 				tax = parseFloat( accounting.toFixed( tax, woocommerce_admin_meta_boxes.rounding_precision ) );
 
 			// Set Total
-			$('#_order_total').val( parseFloat( accounting.toFixed( line_totals + tax + shipping - order_discount, woocommerce_admin_meta_boxes.currency_format_num_decimals ) ) ).change();
+			$('#_order_total').val( accounting.formatNumber( line_totals + tax + shipping - order_discount, woocommerce_admin_meta_boxes.currency_format_num_decimals, '', woocommerce_admin.mon_decimal_point ) ).change();
 		}
 
 		$('#woocommerce-order-totals').unblock();

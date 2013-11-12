@@ -20,13 +20,25 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 function woocommerce_wp_text_input( $field ) {
 	global $thepostid, $post, $woocommerce;
 
-	$thepostid 				= empty( $thepostid ) ? $post->ID : $thepostid;
-	$field['placeholder'] 	= isset( $field['placeholder'] ) ? $field['placeholder'] : '';
-	$field['class'] 		= isset( $field['class'] ) ? $field['class'] : 'short';
+	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
+	$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
+	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'short';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
-	$field['value'] 		= isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
-	$field['name'] 			= isset( $field['name'] ) ? $field['name'] : $field['id'];
-	$field['type'] 			= isset( $field['type'] ) ? $field['type'] : 'text';
+	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
+	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
+	$field['type']          = isset( $field['type'] ) ? $field['type'] : 'text';
+	$data_type              = empty( $field['data_type'] ) ? '' : $field['data_type'];
+
+	switch ( $data_type ) {
+		case 'price' :
+			$field['class'] .= ' wc_input_price';
+			$field['value']  = wc_format_localized_price( $field['value'] );
+		break;
+		case 'decimal' :
+			$field['class'] .= ' wc_input_decimal';
+			$field['value']  = wc_format_localized_decimal( $field['value'] );
+		break;
+	}
 
 	// Custom attribute handling
 	$custom_attributes = array();

@@ -63,7 +63,7 @@ class WC_Meta_Box_Coupon_Data {
 	    		woocommerce_wp_select( array( 'id' => 'discount_type', 'label' => __( 'Discount type', 'woocommerce' ), 'options' => wc_get_coupon_types() ) );
 
 				// Amount
-				woocommerce_wp_text_input( array( 'id' => 'coupon_amount', 'label' => __( 'Coupon amount', 'woocommerce' ), 'placeholder' => '0.00', 'description' => __( 'Value of the coupon.', 'woocommerce' ), 'class' => 'wc_input_decimal', 'desc_tip' => true ) );
+				woocommerce_wp_text_input( array( 'id' => 'coupon_amount', 'label' => __( 'Coupon amount', 'woocommerce' ), 'placeholder' => wc_format_localized_price( 0 ), 'description' => __( 'Value of the coupon.', 'woocommerce' ), 'data_type' => 'price', 'desc_tip' => true ) );
 
 				// Free Shipping
 				woocommerce_wp_checkbox( array( 'id' => 'free_shipping', 'label' => __( 'Allow free shipping', 'woocommerce' ), 'description' => sprintf(__( 'Check this box if the coupon grants free shipping. The <a href="%s">free shipping method</a> must be enabled with the "must use coupon" setting.', 'woocommerce' ), admin_url('admin.php?page=wc-settings&tab=shipping&section=WC_Shipping_Free_Shipping')) ) );
@@ -82,7 +82,7 @@ class WC_Meta_Box_Coupon_Data {
 				echo '<div class="options_group">';
 
 				// minimum spend
-				woocommerce_wp_text_input( array( 'id' => 'minimum_amount', 'label' => __( 'Minimum spend', 'woocommerce' ), 'placeholder' => __( 'No minimum', 'woocommerce' ), 'description' => __( 'This field allows you to set the minimum subtotal needed to use the coupon.', 'woocommerce' ), 'class' => 'wc_input_decimal', 'desc_tip' => true ) );
+				woocommerce_wp_text_input( array( 'id' => 'minimum_amount', 'label' => __( 'Minimum spend', 'woocommerce' ), 'placeholder' => __( 'No minimum', 'woocommerce' ), 'description' => __( 'This field allows you to set the minimum subtotal needed to use the coupon.', 'woocommerce' ), 'data_type' => 'price', 'desc_tip' => true ) );
 
 				// Individual use
 				woocommerce_wp_checkbox( array( 'id' => 'individual_use', 'label' => __( 'Individual use only', 'woocommerce' ), 'description' => __( 'Check this box if the coupon cannot be used in conjunction with other coupons.', 'woocommerce' ) ) );
@@ -225,7 +225,7 @@ class WC_Meta_Box_Coupon_Data {
 
 		// Add/Replace data to array
 		$type                 = woocommerce_clean( $_POST['discount_type'] );
-		$amount               = woocommerce_format_decimal( $_POST['coupon_amount'], false );
+		$amount               = woocommerce_format_decimal( $_POST['coupon_amount'] );
 		$usage_limit          = empty( $_POST['usage_limit'] ) ? '' : absint( $_POST['usage_limit'] );
 		$usage_limit_per_user = empty( $_POST['usage_limit_per_user'] ) ? '' : absint( $_POST['usage_limit_per_user'] );
 		$limit_usage_to_x_items = empty( $_POST['limit_usage_to_x_items'] ) ? '' : absint( $_POST['limit_usage_to_x_items'] );
@@ -234,7 +234,7 @@ class WC_Meta_Box_Coupon_Data {
 		$apply_before_tax     = isset( $_POST['apply_before_tax'] ) ? 'yes' : 'no';
 		$free_shipping        = isset( $_POST['free_shipping'] ) ? 'yes' : 'no';
 		$exclude_sale_items   = isset( $_POST['exclude_sale_items'] ) ? 'yes' : 'no';
-		$minimum_amount       = woocommerce_format_decimal( $_POST['minimum_amount'], false );
+		$minimum_amount       = woocommerce_format_decimal( $_POST['minimum_amount'] );
 		$customer_email       = array_filter( array_map( 'trim', explode( ',', woocommerce_clean( $_POST['customer_email'] ) ) ) );
 
 		if ( isset( $_POST['product_ids'] ) ) {

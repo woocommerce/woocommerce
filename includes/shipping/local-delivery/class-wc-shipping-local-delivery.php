@@ -121,12 +121,11 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 			),
 			'fee' => array(
 				'title'			=> __( 'Delivery Fee', 'woocommerce' ),
-				'type' 			=> 'text',
-				'class'         => 'wc_input_decimal',
+				'type' 			=> 'price',
 				'description'	=> __( 'What fee do you want to charge for local delivery, disregarded if you choose free. Leave blank to disable.', 'woocommerce' ),
 				'default'		=> '',
 				'desc_tip'		=> true,
-				'placeholder'	=> '0.00'
+				'placeholder'	=> wc_format_localized_price( 0 )
 			),
 			'codes' => array(
 				'title'			=> __( 'Zip/Post Codes', 'woocommerce' ),

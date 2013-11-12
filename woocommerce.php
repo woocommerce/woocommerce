@@ -273,6 +273,7 @@ final class WooCommerce {
 		include( 'includes/class-wc-install.php' );
 		include( 'includes/class-wc-download-handler.php' );
 		include( 'includes/class-wc-comments.php' );
+		include( 'includes/class-wc-post-data.php' );
 
 		if ( is_admin() )
 			include_once( 'includes/admin/class-wc-admin.php' );
