@@ -230,7 +230,7 @@ class WC_Product_Variation extends WC_Product {
 			$visible = false;
 
 		// Price not set
-		elseif ( $this->get_price() == "" )
+		elseif ( $this->get_price() === "" )
 			$visible = false;
 
 		return apply_filters( 'woocommerce_variation_is_visible', $visible, $this->variation_id, $this->id );
