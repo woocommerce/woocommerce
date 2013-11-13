@@ -630,6 +630,11 @@ function woocommerce_status_tools() {
 			'button'	=> __('Clear all sessions','woocommerce'),
 			'desc'		=> __( '<strong class="red">Warning</strong> This tool will delete all customer session data from the database, including any current live carts.', 'woocommerce' ),
 		),
+		'install_pages' => array(
+			'name'		=> __( 'Install WooCommerce Pages', 'woocommerce' ),
+			'button'	=> __( 'Install pages', 'woocommerce' ),
+			'desc'		=> __( '<strong class="red">Note</strong> This tool will install all the missing WooCommerce pages. Pages already defined and set up will not be replaced.', 'woocommerce' ),
+		),
 	) );
 
 	if ( ! empty( $_GET['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
@@ -710,6 +715,11 @@ function woocommerce_status_tools() {
 
 				wp_cache_flush();
 
+			break;
+			case "install_pages" :
+				require_once( 'woocommerce-admin-install.php' );
+				woocommerce_create_pages();
+				echo '<div class="updated"><p>' . __( 'All missing WooCommerce pages was installed successfully.', 'woocommerce' ) . '</p></div>';
 			break;
 			default:
 				$action = esc_attr( $_GET['action'] );
