@@ -1123,6 +1123,8 @@ class WC_Product {
 	 * @return array Array of post IDs
 	 */
 	public function get_related( $limit = 5 ) {
+		global $wpdb;
+
 		// Related products are found from category and tag
 		$tags_array = array(0);
 		$cats_array = array(0);
@@ -1136,37 +1138,48 @@ class WC_Product {
 		foreach ( $terms as $term ) $cats_array[] = $term->term_id;
 
 		// Don't bother if none are set
-		if ( sizeof($cats_array)==1 && sizeof($tags_array)==1 ) return array();
+		if ( sizeof( $cats_array ) == 1 && sizeof( $tags_array ) == 1 ) 
+			return array();
 
-		// Meta query
-		$meta_query = array();
-		$meta_query[] = WC()->query->visibility_meta_query();
-	    $meta_query[] = WC()->query->stock_status_meta_query();
-	    $meta_query   = array_filter( $meta_query );
+		// Sanitize
+		$cats_array  = array_map( 'absint', $cats_array );
+		$tags_array  = array_map( 'absint', $tags_array );
+		$exclude_ids = array_map( 'absint', array_merge( array( 0, $this->id ), $this->get_upsells() ) );
+
+		// Generate query
+	    $query['select'] = "SELECT ID FROM {$wpdb->posts} p ";
+		$query['join']   = "INNER JOIN {$wpdb->postmeta} pm ON ( pm.post_id = p.ID AND pm.meta_key='_visibility' ) ";
+		$query['join']  .= "INNER JOIN {$wpdb->term_relationships} tr ON (p.ID = tr.object_id) ";
+		$query['join']  .= "INNER JOIN {$wpdb->term_taxonomy} tt ON (tr.term_taxonomy_id = tt.term_taxonomy_id) ";
+		$query['join']  .= "INNER JOIN {$wpdb->terms} t ON (t.term_id = tt.term_id) ";
+
+		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' )
+			$query['join'] .= "INNER JOIN {$wpdb->postmeta} pm2 ON ( pm2.post_id = p.ID AND pm2.meta_key='_stock_status' ) ";
+
+		$query['where']  = "WHERE 1=1 ";
+		$query['where'] .= "AND p.post_status = 'publish' ";
+		$query['where'] .= "AND p.post_type = 'product' ";
+		$query['where'] .= "AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " ) ";
+		$query['where'] .= "AND pm.meta_value IN ( 'visible', 'catalog' ) ";
+
+		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' )
+			$query['where'] .= "AND pm2.meta_value = 'instock' ";
+
+		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_category', true ) ) {
+			$query['where'] .= "AND ( tt.taxonomy = 'product_cat' AND t.term_id IN ( " . implode( ',', $cats_array ) . " ) ) ";
+			$andor = 'OR';
+		} else {
+			$andor = 'AND';
+		}
+
+		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true ) )
+			$query['where'] .= $andor . " ( tt.taxonomy = 'product_tag' AND t.term_id IN ( " . implode( ',', $tags_array ) . " ) ) ";
+
+		$query['order']  = "ORDER BY RAND() ";
+		$query['limit']  = "LIMIT " . absint( $limit ) . " ";
 
 		// Get the posts
-		$related_posts = get_posts( apply_filters('woocommerce_product_related_posts', array(
-			'orderby'        => 'rand',
-			'posts_per_page' => $limit,
-			'post_type'      => 'product',
-			'fields'         => 'ids',
-			'meta_query'     => $meta_query,
-			'tax_query'      => array(
-				'relation'      => 'OR',
-				array(
-					'taxonomy'     => 'product_cat',
-					'field'        => 'id',
-					'terms'        => $cats_array
-				),
-				array(
-					'taxonomy'     => 'product_tag',
-					'field'        => 'id',
-					'terms'        => $tags_array
-				)
-			)
-		) ) );
-
-		$related_posts = array_diff( $related_posts, array( $this->id ), $this->get_upsells() );
+		$related_posts = $wpdb->get_col( implode( ' ', apply_filters('woocommerce_product_related_posts_query', $query ) ) );
 
 		return $related_posts;
 	}
