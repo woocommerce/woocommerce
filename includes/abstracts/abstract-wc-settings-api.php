@@ -561,7 +561,7 @@ abstract class WC_Settings_API {
 					<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
 					<select multiple="multiple" class="multiselect <?php echo esc_attr( $data['class'] ); ?>" name="<?php echo esc_attr( $field ); ?>[]" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?>>
 						<?php foreach ( (array) $data['options'] as $option_key => $option_value ) : ?>
-							<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( $option_key, esc_attr( $this->get_option( $key ) ) ); ?>><?php echo esc_attr( $option_value ); ?></option>
+							<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( in_array( $option_key, $this->get_option( $key, array() ) ), true ); ?>><?php echo esc_attr( $option_value ); ?></option>
 						<?php endforeach; ?>
 					</select>
 					<?php echo $this->get_description_html( $data ); ?>
