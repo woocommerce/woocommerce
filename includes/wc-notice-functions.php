@@ -13,21 +13,27 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
- * Get the count of notices added, either for all notices or for one particular notice type.
+ * Get the count of notices added, either for all notices (default) or for one particular notice type specified
+ * by $notice_type.
  *
- * @param  string $notice_type The internal name of the notice type - either wc_errors, wc_messages or wc_notices. [optional]
+ * @param  string $notice_type The name of the notice type - either error, success or notice. [optional]
  * @return int
  */
 function wc_notice_count( $notice_type = '' ) {
 
 	$notice_count = 0;
+	$all_notices  = WC()->session->get( 'wc_notices', array() );
 
-	if ( ! empty( $notice_type ) ) {
-		$notice_count += absint( sizeof( WC()->session->get( $notice_type, array() ) ) );
-	} else {
-		foreach ( array( 'wc_errors', 'wc_messages', 'wc_notices' ) as $notice_type ) {
-			$notice_count += absint( sizeof( WC()->session->get( $notice_type, array() ) ) );
+	if ( isset( $all_notices[$notice_type] ) ) {
+
+		$notice_count = absint( sizeof( $all_notices[$notice_type] ) );
+
+	} elseif ( empty( $notice_type ) ) {
+
+		foreach ( $all_notices as $notices ) {
+			$notice_count += absint( sizeof( $all_notices ) );
 		}
+
 	}
 
 	return $notice_count;
@@ -37,40 +43,44 @@ function wc_notice_count( $notice_type = '' ) {
  * Add and store a notice
  *
  * @param  string $message The text to display in the notice.
- * @param  string $notice_type The singular name of the notice type - either error, message or notice. [optional]
+ * @param  string $notice_type The singular name of the notice type - either error, success or notice. [optional]
  */
-function wc_add_notice( $message, $notice_type = 'message' ) {
+function wc_add_notice( $message, $notice_type = 'success' ) {
 
-	$notices   = WC()->session->get( "wc_{$notice_type}s", array() );
-	$notices[] = apply_filters( 'woocommerce_add_' . $notice_type, $message );
+	$notices = WC()->session->get( 'wc_notices', array() );
 
-	WC()->session->set( "wc_{$notice_type}s", $notices );
+	// Backward compatibility
+	if ( 'success' === $notice_type )
+		$message = apply_filters( 'woocommerce_add_message', $message );
+
+	$notices[$notice_type][] = apply_filters( 'woocommerce_add_' . $notice_type, $message );
+
+	WC()->session->set( 'wc_notices', $notices );
 }
 
 /**
  * Unset all notices
+ *
+ * @since 2.1
  */
 function wc_clear_notices() {
-	foreach ( array( 'wc_errors', 'wc_messages', 'wc_notices' ) as $notice_type ) {
-		WC()->session->set( $notice_type, null );
-	}
+	WC()->session->set( 'wc_notices', null );
 }
 
 /**
  * Prints messages and errors which are stored in the session, then clears them.
+ *
+ * @since 2.1
  */
 function wc_print_notices() {
 
-	$notice_types = array(
-		'wc_errors'   => 'error',
-		'wc_messages' => 'message',
-		'wc_notices'  => 'notice'
-	);
+	$all_notices  = WC()->session->get( 'wc_notices', array() );
+	$notice_types = apply_filters( 'woocommerce_notice_types', array( 'error', 'message', 'notice' ) );
 
-	foreach ( $notice_types as $notice_key => $notice_type ) {
-		if ( wc_notice_count( $notice_key ) > 0 ) {
+	foreach ( $notice_types as $notice_type ) {
+		if ( wc_notice_count( $notice_type ) > 0 ) {
 			woocommerce_get_template( "notices/{$notice_type}.php", array(
-				"{$notice_type}s" => WC()->session->get( $notice_key, array() )
+				"{$notice_type}s" => $all_notices[$notice_type]
 			) );
 		}
 	}
