@@ -714,7 +714,7 @@ class WC_Checkout {
 		if ( is_ajax() ) {
 
 			ob_start();
-			wc_print_messages();
+			wc_print_notices();
 			$messages = ob_get_clean();
 
 			echo '<!--WC_START-->' . json_encode(

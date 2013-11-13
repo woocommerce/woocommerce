@@ -9,7 +9,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-wc_print_messages();
+wc_print_notices();
 
 ?>
 

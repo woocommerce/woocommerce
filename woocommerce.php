@@ -845,8 +845,8 @@ final class WooCommerce {
 	 * @deprecated 2.1.0 Access via the WC_Messages_Helper helper
 	 */
 	public function show_messages() {
-		_deprecated_function( 'Woocommerce->show_messages', '2.1', 'wc_print_messages()' );
-		wc_print_messages();
+		_deprecated_function( 'Woocommerce->show_messages', '2.1', 'wc_print_notices()' );
+		wc_print_notices();
 	}
 
 	/**

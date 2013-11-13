@@ -13,8 +13,8 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 function woocommerce_show_messages() {
-	_deprecated_function( 'woocommerce_show_messages', '2.1', 'wc_print_messages' );
-	wc_show_messages();
+	_deprecated_function( 'woocommerce_show_messages', '2.1', 'wc_print_notices' );
+	wc_print_notices();
 }
 function woocommerce_weekend_area_js() {
 	_deprecated_function( 'woocommerce_weekend_area_js', '2.1', '' );

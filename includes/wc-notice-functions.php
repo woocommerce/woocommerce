@@ -61,10 +61,16 @@ function wc_clear_notices() {
  */
 function wc_print_notices() {
 
-	foreach ( array( 'errors', 'messages', 'notices' ) as $notice_type ) {
-		if ( wc_notice_count( $notice_type ) > 0 ) {
+	$notice_types = array(
+		'wc_errors'   => 'errors',
+		'wc_messages' => 'messages',
+		'wc_notices'  => 'notices'
+	);
+
+	foreach ( $notice_types as $notice_key => $notice_type ) {
+		if ( wc_notice_count( $notice_key ) > 0 ) {
 			woocommerce_get_template( "shop/{$notice_type}.php", array(
-				$notice_type => WC()->session->get( "wc_{$notice_type}", array() )
+				$notice_type => WC()->session->get( $notice_key, array() )
 			) );
 		}
 	}

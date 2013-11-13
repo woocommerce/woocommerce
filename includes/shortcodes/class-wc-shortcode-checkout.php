@@ -71,7 +71,7 @@ class WC_Shortcode_Checkout {
 
 		do_action( 'before_woocommerce_pay' );
 
-		wc_print_messages();
+		wc_print_notices();
 
 		$order_id = absint( $order_id );
 
@@ -168,7 +168,7 @@ class WC_Shortcode_Checkout {
 			wc_add_notice( __( 'Invalid order.', 'woocommerce' ), 'error' );
 		}
 
-		wc_print_messages();
+		wc_print_notices();
 
 		do_action( 'after_woocommerce_pay' );
 	}
@@ -179,7 +179,7 @@ class WC_Shortcode_Checkout {
 	private static function order_received( $order_id = 0 ) {
 		global $woocommerce;
 
-		wc_print_messages();
+		wc_print_notices();
 
 		$order = false;
 
@@ -206,7 +206,7 @@ class WC_Shortcode_Checkout {
 		global $woocommerce;
 
 		// Show non-cart errors
-		wc_print_messages();
+		wc_print_notices();
 
 		// Check cart has contents
 		if ( sizeof( $woocommerce->cart->get_cart() ) == 0 )
