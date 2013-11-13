@@ -819,8 +819,8 @@ final class WooCommerce {
 	 * @return int
 	 */
 	public function message_count() {
-		_deprecated_function( 'Woocommerce->message_count', '2.1', 'wc_message_count' );
-		return wc_message_count();
+		_deprecated_function( 'Woocommerce->message_count', '2.1', 'wc_notice_count' );
+		return wc_notice_count( 'wc_messages' );
 	}
 
 	/**
