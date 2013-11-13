@@ -221,8 +221,8 @@ function woocommerce_ajax_add_to_cart() {
 	die();
 }
 
-add_action('wp_ajax_woocommerce_add_to_cart', 'woocommerce_ajax_add_to_cart');
-add_action('wp_ajax_nopriv_woocommerce_add_to_cart', 'woocommerce_ajax_add_to_cart');
+add_action( 'wp_ajax_woocommerce_add_to_cart', 'woocommerce_ajax_add_to_cart' );
+add_action( 'wp_ajax_nopriv_woocommerce_add_to_cart', 'woocommerce_ajax_add_to_cart' );
 
 
 /**
@@ -232,18 +232,17 @@ add_action('wp_ajax_nopriv_woocommerce_add_to_cart', 'woocommerce_ajax_add_to_ca
  * @return void
  */
 function woocommerce_process_checkout() {
-	global $woocommerce;
+	if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) 
+		define( 'WOOCOMMERCE_CHECKOUT', true );
 
-	if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
-
-	$woocommerce_checkout = $woocommerce->checkout();
+	$woocommerce_checkout = WC()->checkout();
 	$woocommerce_checkout->process_checkout();
 
 	die(0);
 }
 
-add_action('wp_ajax_woocommerce-checkout', 'woocommerce_process_checkout');
-add_action('wp_ajax_nopriv_woocommerce-checkout', 'woocommerce_process_checkout');
+add_action( 'wp_ajax_woocommerce-checkout', 'woocommerce_process_checkout' );
+add_action( 'wp_ajax_nopriv_woocommerce-checkout', 'woocommerce_process_checkout' );
 
 
 
