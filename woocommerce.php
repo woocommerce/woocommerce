@@ -793,8 +793,8 @@ final class WooCommerce {
 	 * @param $message
 	 */
 	public function add_message( $message ) {
-		_deprecated_function( 'Woocommerce->add_message', '2.1', 'wc_add_message' );
-		wc_add_message( $message );
+		_deprecated_function( 'Woocommerce->add_message', '2.1', 'wc_add_notice' );
+		wc_add_notice( $message );
 	}
 
 	/**

@@ -115,7 +115,7 @@ class WC_Form_Handler {
 			foreach ( $address as $key => $field )
 				update_user_meta( $user_id, $key, $_POST[ $key ] );
 
-			wc_add_message( __( 'Address changed successfully.', 'woocommerce' ) );
+			wc_add_notice( __( 'Address changed successfully.', 'woocommerce' ) );
 
 			do_action( 'woocommerce_customer_save_address', $user_id, $load_address );
 
@@ -188,7 +188,7 @@ class WC_Form_Handler {
 
 			wp_update_user( $user ) ;
 
-			wc_add_message( __( 'Account details changed successfully.', 'woocommerce' ) );
+			wc_add_notice( __( 'Account details changed successfully.', 'woocommerce' ) );
 
 			do_action( 'woocommerce_save_account_details', $user->ID );
 
@@ -294,7 +294,7 @@ class WC_Form_Handler {
 
 			WC()->cart->set_quantity( $_GET['remove_item'], 0 );
 
-			wc_add_message( __( 'Cart updated.', 'woocommerce' ) );
+			wc_add_notice( __( 'Cart updated.', 'woocommerce' ) );
 
 			$referer = wp_get_referer() ? wp_get_referer() : WC()->cart->get_cart_url();
 			wp_safe_redirect( $referer );
@@ -341,7 +341,7 @@ class WC_Form_Handler {
 				wp_safe_redirect( WC()->cart->get_checkout_url() );
 				exit;
 			} else {
-				wc_add_message( __( 'Cart updated.', 'woocommerce' ) );
+				wc_add_notice( __( 'Cart updated.', 'woocommerce' ) );
 
 				$referer = ( wp_get_referer() ) ? wp_get_referer() : WC()->cart->get_cart_url();
 				$referer = remove_query_arg( 'remove_coupon', $referer );
@@ -403,7 +403,7 @@ class WC_Form_Handler {
 		do_action( 'woocommerce_ordered_again', $order->id );
 
 		// Redirect to cart
-		wc_add_message( __( 'The cart has been filled with the items from your previous order.', 'woocommerce' ) );
+		wc_add_notice( __( 'The cart has been filled with the items from your previous order.', 'woocommerce' ) );
 		wp_safe_redirect( $woocommerce->cart->get_cart_url() );
 		exit;
 	}
@@ -430,7 +430,7 @@ class WC_Form_Handler {
 				$order->cancel_order( __('Order cancelled by customer.', 'woocommerce' ) );
 
 				// Message
-				wc_add_message( __( 'Your order was cancelled.', 'woocommerce' ) );
+				wc_add_notice( __( 'Your order was cancelled.', 'woocommerce' ) );
 
 				do_action( 'woocommerce_cancelled_order', $order->id );
 
@@ -665,7 +665,7 @@ class WC_Form_Handler {
 					}
 
 					// Feedback
-					wc_add_message( sprintf( __( 'You are now logged in as <strong>%s</strong>', 'woocommerce' ), $user->display_name ) );
+					wc_add_notice( sprintf( __( 'You are now logged in as <strong>%s</strong>', 'woocommerce' ), $user->display_name ) );
 
 					wp_redirect( apply_filters( 'woocommerce_login_redirect', $redirect, $user ) );
 					exit;
@@ -729,7 +729,7 @@ class WC_Form_Handler {
 
 					do_action( 'woocommerce_customer_reset_password', $user );
 
-					wc_add_message( __( 'Your password has been reset.', 'woocommerce' ) . ' <a href="' . get_permalink( woocommerce_get_page_id( 'myaccount' ) ) . '">' . __( 'Log in', 'woocommerce' ) . '</a>' );
+					wc_add_notice( __( 'Your password has been reset.', 'woocommerce' ) . ' <a href="' . get_permalink( woocommerce_get_page_id( 'myaccount' ) ) . '">' . __( 'Log in', 'woocommerce' ) . '</a>' );
 
 					wp_redirect( remove_query_arg( array( 'key', 'login' ) ) );
 					exit;

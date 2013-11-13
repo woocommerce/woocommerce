@@ -100,7 +100,7 @@ function woocommerce_add_to_cart_message( $product_id ) {
 
 	endif;
 
-	wc_add_message( apply_filters('woocommerce_add_to_cart_message', $message) );
+	wc_add_notice( apply_filters( 'woocommerce_add_to_cart_message', $message ) );
 }
 
 /**

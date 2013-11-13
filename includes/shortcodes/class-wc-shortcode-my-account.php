@@ -37,7 +37,8 @@ class WC_Shortcode_My_Account {
 			$message = apply_filters( 'login_message', '' );
 
 			if ( ! empty( $message ) )
-				wc_add_message( $message );
+
+				wc_add_notice( $message );
 
 			if ( isset( $wp->query_vars['lost-password'] ) ) {
 
@@ -293,7 +294,7 @@ class WC_Shortcode_My_Account {
 		$mailer = $woocommerce->mailer();
 		do_action( 'woocommerce_reset_password_notification', $user_login, $key );
 
-		wc_add_message( __( 'Check your e-mail for the confirmation link.' ) );
+		wc_add_notice( __( 'Check your e-mail for the confirmation link.' ) );
 		return true;
 	}
 

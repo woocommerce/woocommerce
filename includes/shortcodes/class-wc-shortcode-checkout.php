@@ -230,7 +230,7 @@ class WC_Shortcode_Checkout {
 			$non_js_checkout = ! empty( $_POST['woocommerce_checkout_update_totals'] ) ? true : false;
 
 			if ( wc_error_count() == 0 && $non_js_checkout )
-				wc_add_message( __( 'The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page.', 'woocommerce' ) );
+				wc_add_notice( __( 'The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page.', 'woocommerce' ) );
 
 			woocommerce_get_template( 'checkout/form-checkout.php', array( 'checkout' => $checkout ) );
 
