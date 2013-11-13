@@ -810,8 +810,8 @@ final class WooCommerce {
 	 * @return int
 	 */
 	public function error_count() {
-		_deprecated_function( 'Woocommerce->error_count', '2.1', 'wc_error_count' );
-		return wc_error_count();
+		_deprecated_function( 'Woocommerce->error_count', '2.1', 'wc_notice_count' );
+		return wc_notice_count( 'wc_errors' );
 	}
 
 	/**
