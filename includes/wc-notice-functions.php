@@ -34,27 +34,17 @@ function wc_notice_count( $notice_type = '' ) {
 }
 
 /**
- * Add and store an error
+ * Add and store a notice
  *
- * @param  string $error
+ * @param  string $message The text to display in the notice.
+ * @param  string $notice_type The singular name of the notice type - either error, message or notice. [optional]
  */
-function wc_add_error( $error ) {
-	$errors   = WC()->session->get( 'wc_errors', array() );
-	$errors[] = apply_filters( 'woocommerce_add_error', $error );
+function wc_add_notice( $message, $notice_type = 'message' ) {
 
-	WC()->session->set( 'wc_errors', $errors );
-}
+	$notices   = WC()->session->get( "wc_{$notice_type}s", array() );
+	$notices[] = apply_filters( 'woocommerce_add_' . $notice_type, $message );
 
-/**
- * Add and store a message
- *
- * @param  string $message
- */
-function wc_add_message( $message ) {
-	$messages   = WC()->session->get( 'wc_messages', array() );
-	$messages[] = apply_filters( 'woocommerce_add_message', $message );
-
-	WC()->session->set( 'wc_messages', $messages );
+	WC()->session->set( "wc_{$notice_type}s", $notices );
 }
 
 /**
