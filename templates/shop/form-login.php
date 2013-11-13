@@ -16,6 +16,8 @@ if (is_user_logged_in()) return;
 <form method="post" class="login" <?php if ( $hidden ) echo 'style="display:none;"'; ?>>
 	<?php if ( $message ) echo wpautop( wptexturize( $message ) ); ?>
 
+	<?php do_action( 'woocommerce_after_message_shop_login_form' ); ?>
+
 	<p class="form-row form-row-first">
 		<label for="username"><?php _e( 'Username or email', 'woocommerce' ); ?> <span class="required">*</span></label>
 		<input type="text" class="input-text" name="username" id="username" />
@@ -24,6 +26,9 @@ if (is_user_logged_in()) return;
 		<label for="password"><?php _e( 'Password', 'woocommerce' ); ?> <span class="required">*</span></label>
 		<input class="input-text" type="password" name="password" id="password" />
 	</p>
+
+	<?php do_action('woocommerce_shop_login_form'); ?>
+
 	<div class="clear"></div>
 
 	<p class="form-row">

@@ -25,6 +25,8 @@ global $woocommerce; ?>
 
 		<h2><?php _e( 'Login', 'woocommerce' ); ?></h2>
 
+		<?php do_action( 'woocommerce_after_heading_login_form' ); ?>
+
 		<form method="post" class="login">
 			<p class="form-row form-row-wide">
 				<label for="username"><?php _e( 'Username or email address', 'woocommerce' ); ?> <span class="required">*</span></label>
@@ -34,9 +36,12 @@ global $woocommerce; ?>
 				<label for="password"><?php _e( 'Password', 'woocommerce' ); ?> <span class="required">*</span></label>
 				<input class="input-text" type="password" name="password" id="password" />
 			</p>
+
+			<?php do_action('woocommerce_login_form'); ?>
+
 			<p class="form-row">
 				<?php wp_nonce_field( 'woocommerce-login' ) ?>
-				<input type="submit" class="button" name="login" value="<?php _e( 'Login', 'woocommerce' ); ?>" /> 
+				<input type="submit" class="button" name="login" value="<?php _e( 'Login', 'woocommerce' ); ?>" />
 				<label for="rememberme" class="inline">
 					<input name="rememberme" type="checkbox" id="rememberme" value="forever" /> <?php _e( 'Remember me', 'woocommerce' ); ?>
 				</label>
@@ -53,6 +58,8 @@ global $woocommerce; ?>
 	<div class="col-2">
 
 		<h2><?php _e( 'Register', 'woocommerce' ); ?></h2>
+
+		<?php do_action( 'woocommerce_after_heading_register_form' ); ?>
 
 		<form method="post" class="register">
 
@@ -75,10 +82,10 @@ global $woocommerce; ?>
 				<input type="password" class="input-text" name="password" id="reg_password" value="<?php if ( ! empty( $_POST['password'] ) ) esc_attr_e( $_POST['password'] ); ?>" />
 			</p>
 
+			<?php do_action( 'woocommerce_register_form' ); ?>
+
 			<!-- Spam Trap -->
 			<div style="left:-999em; position:absolute;"><label for="trap"><?php _e( 'Anti-spam', 'woocommerce' ); ?></label><input type="text" name="email_2" id="trap" tabindex="-1" /></div>
-
-			<?php do_action( 'register_form' ); ?>
 
 			<p class="form-row">
 				<?php wp_nonce_field( 'woocommerce-register', 'register') ?>
