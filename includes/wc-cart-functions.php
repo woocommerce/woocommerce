@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 function woocommerce_protected_product_add_to_cart( $passed, $product_id ) {
 	if ( post_password_required( $product_id ) ) {
 		$passed = false;
-		wc_add_error( __( 'This product is protected and cannot be purchased.', 'woocommerce' ) );
+		wc_add_notice( __( 'This product is protected and cannot be purchased.', 'woocommerce' ), 'error' );
 	}
 	return $passed;
 }

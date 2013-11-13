@@ -106,11 +106,11 @@ class WC_Shortcode_Checkout {
 
 					$status = get_term_by('slug', $order->status, 'shop_order_status');
 
-					wc_add_error( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), $status->name ) );
+					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), $status->name ), 'error' );
 				}
 
 			} else {
-				wc_add_error( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ) );
+				wc_add_notice( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ), 'error' );
 			}
 
 		} elseif ( $order_id ) {
@@ -157,15 +157,15 @@ class WC_Shortcode_Checkout {
 
 					$status = get_term_by('slug', $order->status, 'shop_order_status');
 
-					wc_add_error( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), $status->name ) );
+					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), $status->name ), 'error' );
 				}
 
 			} else {
-				wc_add_error( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ) );
+				wc_add_notice( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ), 'error' );
 			}
 
 		} else {
-			wc_add_error( __( 'Invalid order.', 'woocommerce' ) );
+			wc_add_notice( __( 'Invalid order.', 'woocommerce' ), 'error' );
 		}
 
 		wc_print_messages();

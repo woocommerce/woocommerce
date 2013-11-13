@@ -229,14 +229,14 @@ class WC_Shortcode_My_Account {
 
 		if ( empty( $_POST['user_login'] ) ) {
 
-			wc_add_error( __( 'Enter a username or e-mail address.', 'woocommerce' ) );
+			wc_add_notice( __( 'Enter a username or e-mail address.', 'woocommerce' ), 'error' );
 
 		} elseif ( strpos( $_POST['user_login'], '@' ) ) {
 
 			$user_data = get_user_by( 'email', trim( $_POST['user_login'] ) );
 
 			if ( empty( $user_data ) )
-				wc_add_error( __( 'There is no user registered with that email address.', 'woocommerce' ) );
+				wc_add_notice( __( 'There is no user registered with that email address.', 'woocommerce' ), 'error' );
 
 		} else {
 
@@ -251,7 +251,7 @@ class WC_Shortcode_My_Account {
 			return false;
 
 		if ( ! $user_data ) {
-			wc_add_error( __( 'Invalid username or e-mail.', 'woocommerce' ) );
+			wc_add_notice( __( 'Invalid username or e-mail.', 'woocommerce' ), 'error' );
 			return false;
 		}
 
@@ -265,13 +265,13 @@ class WC_Shortcode_My_Account {
 
 		if ( ! $allow ) {
 
-			wc_add_error( __( 'Password reset is not allowed for this user' ) );
+			wc_add_notice( __( 'Password reset is not allowed for this user' ), 'error' );
 
 			return false;
 
 		} elseif ( is_wp_error( $allow ) ) {
 
-			wc_add_error( $allow->get_error_message );
+			wc_add_notice( $allow->get_error_message, 'error' );
 
 			return false;
 		}
@@ -313,19 +313,19 @@ class WC_Shortcode_My_Account {
 		$key = preg_replace( '/[^a-z0-9]/i', '', $key );
 
 		if ( empty( $key ) || ! is_string( $key ) ) {
-			wc_add_error( __( 'Invalid key', 'woocommerce' ) );
+			wc_add_notice( __( 'Invalid key', 'woocommerce' ), 'error' );
 			return false;
 		}
 
 		if ( empty( $login ) || ! is_string( $login ) ) {
-			wc_add_error( __( 'Invalid key', 'woocommerce' ) );
+			wc_add_notice( __( 'Invalid key', 'woocommerce' ), 'error' );
 			return false;
 		}
 
 		$user = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->users WHERE user_activation_key = %s AND user_login = %s", $key, $login ) );
 
 		if ( empty( $user ) ) {
-			wc_add_error( __( 'Invalid key', 'woocommerce' ) );
+			wc_add_notice( __( 'Invalid key', 'woocommerce' ), 'error' );
 			return false;
 		}
 

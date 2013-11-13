@@ -78,7 +78,7 @@ class WC_Form_Handler {
 
 			// Validation: Required fields
 			if ( ! empty( $field['required'] ) && empty( $_POST[ $key ] ) )
-				wc_add_error( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce' ) );
+				wc_add_notice( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce' ), 'error' );
 
 			// Validation rules
 			if ( ! empty( $field['validate'] ) && is_array( $field['validate'] ) ) {
@@ -88,7 +88,7 @@ class WC_Form_Handler {
 							$_POST[ $key ] = strtoupper( str_replace( ' ', '', $_POST[ $key ] ) );
 
 							if ( ! WC_Validation::is_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] ) ) :
-								wc_add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
+								wc_add_notice( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ), 'error' );
 							else :
 								$_POST[ $key ] = wc_format_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] );
 							endif;
@@ -97,13 +97,13 @@ class WC_Form_Handler {
 							$_POST[ $key ] = wc_format_phone_number( $_POST[ $key ] );
 
 							if ( ! WC_Validation::is_phone( $_POST[ $key ] ) )
-								wc_add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid phone number.', 'woocommerce' ) );
+								wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid phone number.', 'woocommerce' ), 'error' );
 						break;
 						case 'email' :
 							$_POST[ $key ] = strtolower( $_POST[ $key ] );
 
 							if ( ! is_email( $_POST[ $key ] ) )
-								wc_add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ) );
+								wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ), 'error' );
 						break;
 					}
 				}
@@ -163,26 +163,26 @@ class WC_Form_Handler {
 			$user->user_pass    = $pass1;
 
 		if ( empty( $account_first_name ) || empty( $account_last_name ) )
-			wc_add_error( __( 'Please enter your name.', 'woocommerce' ) );
+			wc_add_notice( __( 'Please enter your name.', 'woocommerce' ), 'error' );
 
 		if ( empty( $account_email ) || ! is_email( $account_email ) )
-			wc_add_error( __( 'Please provide a valid email address.', 'woocommerce' ) );
+			wc_add_notice( __( 'Please provide a valid email address.', 'woocommerce' ), 'error' );
 
 		elseif ( email_exists( $account_email ) && $account_email !== $current_user->user_email )
-			wc_add_error( __( 'This email address is already registered.', 'woocommerce' ) );
+			wc_add_notice( __( 'This email address is already registered.', 'woocommerce' ), 'error' );
 
 		if ( ! empty( $pass1 ) && empty( $pass2 ) )
-			wc_add_error( __( 'Please re-enter your password.', 'woocommerce' ) );
+			wc_add_notice( __( 'Please re-enter your password.', 'woocommerce' ), 'error' );
 
 		elseif ( ! empty( $pass1 ) && $pass1 !== $pass2 )
-			wc_add_error( __( 'Passwords do not match.', 'woocommerce' ) );
+			wc_add_notice( __( 'Passwords do not match.', 'woocommerce' ), 'error' );
 
 		// Allow plugins to return their own errors.
 		do_action_ref_array( 'user_profile_update_errors', array ( &$errors, $update, &$user ) );
 
 		if ( $errors->get_error_messages() )
 			foreach( $errors->get_error_messages() as $error )
-				wc_add_error( $error );
+				wc_add_notice( $error, 'error' );
 
 		if ( wc_error_count() == 0 ) {
 
@@ -325,7 +325,7 @@ class WC_Form_Handler {
 
 		    		// is_sold_individually
 					if ( $_product->is_sold_individually() && $quantity > 1 ) {
-						wc_add_error( sprintf( __( 'You can only have 1 %s in your cart.', 'woocommerce' ), $_product->get_title() ) );
+						wc_add_notice( sprintf( __( 'You can only have 1 %s in your cart.', 'woocommerce' ), $_product->get_title() ), 'error' );
 						$passed_validation = false;
 					}
 
@@ -436,11 +436,11 @@ class WC_Form_Handler {
 
 			elseif ( $can_cancel && $order->status != 'pending' ) :
 
-				wc_add_error( __( 'Your order is no longer pending and could not be cancelled. Please contact us if you need assistance.', 'woocommerce' ) );
+				wc_add_notice( __( 'Your order is no longer pending and could not be cancelled. Please contact us if you need assistance.', 'woocommerce' ), 'error' );
 
 			else :
 
-				wc_add_error( __( 'Invalid order.', 'woocommerce' ) );
+				wc_add_notice( __( 'Invalid order.', 'woocommerce' ), 'error' );
 
 			endif;
 
@@ -477,7 +477,7 @@ class WC_Form_Handler {
 
 			// Only allow integer variation ID - if its not set, redirect to the product page
 			if ( empty( $variation_id ) ) {
-				wc_add_error( __( 'Please choose product options&hellip;', 'woocommerce' ) );
+				wc_add_notice( __( 'Please choose product options&hellip;', 'woocommerce' ), 'error' );
 				return;
 			}
 
@@ -535,7 +535,7 @@ class WC_Form_Handler {
 					}
 				}
 	        } else {
-	            wc_add_error( __( 'Please choose product options&hellip;', 'woocommerce' ) );
+	            wc_add_notice( __( 'Please choose product options&hellip;', 'woocommerce' ), 'error' );
 	            return;
 	       }
 
@@ -568,14 +568,14 @@ class WC_Form_Handler {
 				}
 
 				if ( ! $was_added_to_cart && ! $quantity_set ) {
-					wc_add_error( __( 'Please choose the quantity of items you wish to add to your cart&hellip;', 'woocommerce' ) );
+					wc_add_notice( __( 'Please choose the quantity of items you wish to add to your cart&hellip;', 'woocommerce' ), 'error' );
 					return;
 				}
 
 			} elseif ( $product_id ) {
 
 				/* Link on product archives */
-				wc_add_error( __( 'Please choose a product to add to your cart&hellip;', 'woocommerce' ) );
+				wc_add_notice( __( 'Please choose a product to add to your cart&hellip;', 'woocommerce' ), 'error' );
 				return;
 
 			}
@@ -672,7 +672,7 @@ class WC_Form_Handler {
 				}
 			} catch (Exception $e) {
 
-				wc_add_error( apply_filters('login_errors', $e->getMessage() ) );
+				wc_add_notice( apply_filters('login_errors', $e->getMessage() ), 'error' );
 
 			}
 		}
@@ -708,12 +708,12 @@ class WC_Form_Handler {
 				wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-reset_password' );
 
 				if( empty( $_POST['password_1'] ) || empty( $_POST['password_2'] ) ) {
-					wc_add_error( __( 'Please enter your password.', 'woocommerce' ) );
+					wc_add_notice( __( 'Please enter your password.', 'woocommerce' ), 'error' );
 					$args['form'] = 'reset_password';
 				}
 
 				if( $_POST[ 'password_1' ] !== $_POST[ 'password_2' ] ) {
-					wc_add_error( __( 'Passwords do not match.', 'woocommerce' ) );
+					wc_add_notice( __( 'Passwords do not match.', 'woocommerce' ), 'error' );
 					$args['form'] = 'reset_password';
 				}
 
@@ -721,7 +721,7 @@ class WC_Form_Handler {
 				do_action( 'validate_password_reset', $errors, $user );
 				if ( $errors->get_error_messages() )
 					foreach( $errors->get_error_messages() as $error )
-						wc_add_error($error);
+						wc_add_notice( $error, 'error');
 
 				if( 0 == wc_error_count() ) {
 
@@ -753,14 +753,14 @@ class WC_Form_Handler {
 
 			// Anti-spam trap
 			if ( ! empty( $_POST['email_2'] ) ) {
-				wc_add_error( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Anti-spam field was filled in.', 'woocommerce' ) );
+				wc_add_notice( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Anti-spam field was filled in.', 'woocommerce' ), 'error' );
 				return;
 			}
 
 			$new_customer = woocommerce_create_new_customer( $email, $username, $password );
 
 			if ( is_wp_error( $new_customer ) ) {
-				wc_add_error( $new_customer->get_error_message() );
+				wc_add_notice( $new_customer->get_error_message(), 'error' );
 				return;
 			}
 

@@ -29,7 +29,7 @@ class WC_Shortcode_Cart {
 			if ( ! empty( $_POST['coupon_code'] ) ) {
 				$woocommerce->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
 			} else {
-				wc_add_error( WC_Coupon::get_generic_coupon_error( WC_Coupon::E_WC_COUPON_PLEASE_ENTER ) );
+				wc_add_notice( WC_Coupon::get_generic_coupon_error( WC_Coupon::E_WC_COUPON_PLEASE_ENTER ), 'error' );
 			}
 
 		// Remove Coupon Codes
@@ -71,7 +71,7 @@ class WC_Shortcode_Cart {
 			} catch ( Exception $e ) {
 
 				if ( ! empty( $e ) )
-					wc_add_error( $e );
+					wc_add_notice( $e, 'error' );
 			}
 		}
 

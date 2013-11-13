@@ -784,8 +784,8 @@ final class WooCommerce {
 	 * @param $error
 	 */
 	public function add_error( $error ) {
-		_deprecated_function( 'Woocommerce->add_error', '2.1', 'wc_add_error' );
-		wc_add_error( $error );
+		_deprecated_function( 'Woocommerce->add_error', '2.1', 'wc_add_notice' );
+		wc_add_notice( $error, 'error' );
 	}
 
 	/**
