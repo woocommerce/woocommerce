@@ -13,19 +13,24 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
- * Get the count of errors added.
+ * Get the count of notices added, either for all notices or for one particular notice type.
+ *
+ * @param  string $notice_type The internal name of the notice type - either wc_errors, wc_messages or wc_notices. [optional]
  * @return int
  */
-function wc_error_count() {
-	return absint( sizeof( WC()->session->get( 'wc_errors', array() ) ) );
-}
+function wc_notice_count( $notice_type = '' ) {
 
-/**
- * Get the count of messages added.
- * @return int
- */
-function wc_message_count() {
-	return absint( sizeof( WC()->session->get( 'wc_messages', array() ) ) );
+	$notice_count = 0;
+
+	if ( ! empty( $notice_type ) ) {
+		$notice_count += absint( sizeof( WC()->session->get( $notice_type, array() ) ) );
+	} else {
+		foreach ( array( 'wc_errors', 'wc_messages', 'wc_notices' ) as $notice_type ) {
+			$notice_count += absint( sizeof( WC()->session->get( $notice_type, array() ) ) );
+		}
+	}
+
+	return $notice_count;
 }
 
 /**
