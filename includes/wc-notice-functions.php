@@ -48,19 +48,13 @@ function wc_add_notice( $message, $notice_type = 'message' ) {
 }
 
 /**
- * Unset all errors
+ * Unset all notices
  */
-function wc_clear_errors() {
-	WC()->session->set( 'wc_errors', null );
+function wc_clear_notices() {
+	foreach ( array( 'wc_errors', 'wc_messages', 'wc_notices' ) as $notice_type ) {
+		WC()->session->set( $notice_type, null );
+	}
 }
-
-/**
- * Unset all messages
- */
-function wc_clear_messages() {
-	WC()->session->set( 'wc_messages', null );
-}
-
 /**
  * Prints messages and errors which are stored in the session, then clears them.
  */
