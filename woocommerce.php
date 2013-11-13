@@ -828,8 +828,8 @@ final class WooCommerce {
 	 * @return mixed
 	 */
 	public function get_errors() {
-		_deprecated_function( 'Woocommerce->get_errors', '2.1', 'WC_Messages_Helper->get_errors' );
-		return $this->session->get( 'wc_errors', array() );
+		_deprecated_function( 'Woocommerce->get_errors', '2.1', 'wc_get_notices( "error" )' );
+		return wc_get_notices( 'error' );
 	}
 
 	/**
@@ -837,8 +837,8 @@ final class WooCommerce {
 	 * @return mixed
 	 */
 	public function get_messages() {
-		_deprecated_function( 'Woocommerce->get_messages', '2.1', 'WC_Messages_Helper->get_messages' );
-		return $this->session->get( 'wc_messages', array() );
+		_deprecated_function( 'Woocommerce->get_messages', '2.1', 'wc_get_notices( "success" )' );
+		return wc_get_notices( 'success' );
 	}
 
 	/**

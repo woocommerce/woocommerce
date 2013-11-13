@@ -89,3 +89,23 @@ function wc_print_notices() {
 }
 add_action( 'woocommerce_before_shop_loop', 'wc_print_notices', 10 );
 add_action( 'woocommerce_before_single_product', 'wc_print_notices', 10 );
+
+/**
+ * Returns all queued notices, optionally filtered by a notice type.
+ *
+ * @param  string $notice_type The singular name of the notice type - either error, success or notice. [optional]
+ */
+function wc_get_notices( $notice_type = '' ) {
+
+	$all_notices = WC()->session->get( 'wc_notices', array() );
+
+	if ( empty ( $notice_type ) ) {
+		$notices = $all_notices;
+	} elseif ( isset( $all_notices[$notice_type] ) ) {
+		$notices = $all_notices[$notice_type];
+	} else {
+		$notices = array();
+	}
+
+	return $notices;
+}
