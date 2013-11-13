@@ -22,7 +22,12 @@ if ( ! $checkout->enable_signup && ! $checkout->enable_guest_checkout && ! is_us
 }
 
 // filter hook for include new pages inside the payment method
-$get_checkout_url = apply_filters( 'woocommerce_get_checkout_url', $woocommerce->cart->get_checkout_url() ); ?>
+$get_checkout_url = apply_filters( 'woocommerce_get_checkout_url', $woocommerce->cart->get_checkout_url() ); 
+$checkout_form_enctype = apply_filters( 'woocommerce_checkout_form_enctype', '');
+$checkout_form_class = apply_filters( 'woocommerce_checkout_form_class', ' class="checkout"');
+?>
+
+<form name="checkout"<?php echo $checkout_form_class; ?> method="post" action="<?php echo esc_url( $get_checkout_url ); ?>"<?php echo $checkout_form_enctype; ?>>
 
 <form name="checkout" method="post" class="checkout" action="<?php echo esc_url( $get_checkout_url ); ?>">
 
