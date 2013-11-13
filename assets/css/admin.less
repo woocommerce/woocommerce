@@ -2597,14 +2597,6 @@ img.help_tip {
 			-moz-border-radius: 3px;
 			-webkit-border-radius: 3px;
 			border-radius: 3px;
-			h3 {
-				border:0;
-			}
-			.handlediv {
-				&:before {
-					content: '\f140' !important;
-				}
-			}
 		}
 		h3 {
 			margin: 0 !important;
@@ -2704,6 +2696,23 @@ img.help_tip {
 	.expand_all {
 		&:before {
 			content: "\e035";
+		}
+	}
+}
+
+.mp6 {
+	.wc-metaboxes-wrapper {
+		.wc-metabox.closed {
+			.handlediv:before {
+				content: "\f140" !important;
+			}
+		}
+		.wc-metabox {
+			&.closed {
+				h3 {
+					border:0;
+				}
+			}
 		}
 	}
 }
