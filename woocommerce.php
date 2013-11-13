@@ -801,8 +801,8 @@ final class WooCommerce {
 	 * @deprecated 2.1.0
 	 */
 	public function clear_messages() {
-		_deprecated_function( 'Woocommerce->clear_messages', '2.1', 'wc_clear_messages' );
-		wc_clear_messages();
+		_deprecated_function( 'Woocommerce->clear_messages', '2.1', 'wc_clear_notices' );
+		wc_clear_notices();
 	}
 
 	/**
