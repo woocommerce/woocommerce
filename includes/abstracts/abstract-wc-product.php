@@ -755,8 +755,6 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_price_including_tax( $qty = 1, $price = '' ) {
-		global $woocommerce;
-
 		$_tax  = new WC_Tax();
 
 		if ( ! $price )
@@ -776,7 +774,7 @@ class WC_Product {
 				$tax_rates      = $_tax->get_rates( $this->get_tax_class() );
 				$base_tax_rates = $_tax->get_shop_base_rate( $this->tax_class );
 
-				if ( ! empty( $woocommerce->customer ) && $woocommerce->customer->is_vat_exempt() ) {
+				if ( ! empty( WC()->customer ) && WC()->customer->is_vat_exempt() ) {
 
 					$base_taxes 		= $_tax->calc_tax( $price * $qty, $base_tax_rates, true );
 					$base_tax_amount	= array_sum( $base_taxes );
@@ -1125,8 +1123,6 @@ class WC_Product {
 	 * @return array Array of post IDs
 	 */
 	public function get_related( $limit = 5 ) {
-		global $woocommerce;
-
 		// Related products are found from category and tag
 		$tags_array = array(0);
 		$cats_array = array(0);
@@ -1144,8 +1140,8 @@ class WC_Product {
 
 		// Meta query
 		$meta_query = array();
-		$meta_query[] = $woocommerce->query->visibility_meta_query();
-	    $meta_query[] = $woocommerce->query->stock_status_meta_query();
+		$meta_query[] = WC()->query->visibility_meta_query();
+	    $meta_query[] = WC()->query->stock_status_meta_query();
 	    $meta_query   = array_filter( $meta_query );
 
 		// Get the posts
@@ -1310,8 +1306,6 @@ class WC_Product {
      * @return string
      */
     public function get_image( $size = 'shop_thumbnail', $attr = array() ) {
-    	global $woocommerce;
-
     	$image = '';
 
 		if ( has_post_thumbnail( $this->id ) ) {
