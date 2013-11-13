@@ -1092,16 +1092,16 @@ class WC_Cart {
 					// Work out a new base price without the shop's base tax
 					$taxes                 = $this->tax->calc_tax( $line_price, $item_tax_rates );
 
-					// Now we have a new item price (excluding TAX)
-					$line_subtotal         = $line_price - array_sum( $taxes );
+					// Now we have the item price (excluding TAX)
+					$line_subtotal         = $line_price;
 					$line_subtotal_tax     = array_sum( $taxes );
 
 					// Now calc product rates
-					$discounted_price      = $this->get_discounted_price( $values, $base_price, true );
+					$discounted_price      = $this->get_discounted_price( $values, $base_price );
 					$discounted_taxes      = $this->tax->calc_tax( $discounted_price * $values['quantity'], $item_tax_rates );
 					$discounted_tax_amount = array_sum( $discounted_taxes );
 					$line_tax              = $discounted_tax_amount;
-					$line_total            = ( $discounted_price * $values['quantity'] ) - $line_tax;
+					$line_total            = $discounted_price * $values['quantity'];
 
 					// Tax rows - merge the totals we just got
 					foreach ( array_keys( $this->taxes + $discounted_taxes ) as $key ) {
