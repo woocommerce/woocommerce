@@ -629,10 +629,17 @@ class WC_Form_Handler {
 			wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-login' );
 
 			try {
-				$creds = array();
+				$creds  = array();
+				
+				$validation_error = new WP_Error();
+				$validation_error = apply_filters( 'woocommerce_process_login_errors', $validation_error, $_POST['username'], $_POST['password'] );
+
+				if ( $validation_error->get_error_code() )
+					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . $validation_error->get_error_message() );
 
 				if ( empty( $_POST['username'] ) )
 					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'Username is required.', 'woocommerce' ) );
+
 				if ( empty( $_POST['password'] ) )
 					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'Password is required.', 'woocommerce' ) );
 
@@ -687,7 +694,6 @@ class WC_Form_Handler {
 
 		// process lost password form
 		if ( isset( $_POST['user_login'] ) ) {
-
 			wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-lost_password' );
 
 			WC_Shortcode_My_Account::retrieve_password();
@@ -750,7 +756,7 @@ class WC_Form_Handler {
 			$username   = ! empty( $_POST['username'] ) ? woocommerce_clean( $_POST['username'] ) : '';
 			$email      = ! empty( $_POST['email'] ) ? woocommerce_clean( $_POST['email'] ) : '';
 			$password   = ! empty( $_POST['password'] ) ? woocommerce_clean( $_POST['password'] ) : '';
-
+			
 			// Anti-spam trap
 			if ( ! empty( $_POST['email_2'] ) ) {
 				wc_add_error( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Anti-spam field was filled in.', 'woocommerce' ) );
