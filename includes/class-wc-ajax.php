@@ -401,7 +401,7 @@ class WC_AJAX {
 		if ( isset( $data['attribute_names'] ) ) {
 
 			$attribute_names  = array_map( 'stripslashes', $data['attribute_names'] );
-			$attribute_values = $data['attribute_values'];
+			$attribute_values = isset( $data['attribute_values'] ) ? $data['attribute_values'] : array();
 
 			if ( isset( $data['attribute_visibility'] ) )
 				$attribute_visibility = $data['attribute_visibility'];
@@ -1081,7 +1081,7 @@ class WC_AJAX {
 		$postcode 		= strtoupper( esc_attr( $_POST['postcode'] ) );
 		$city 			= sanitize_title( esc_attr( $_POST['city'] ) );
 
-		$items			= $_POST['items'];
+		$items			= isset( $_POST['items'] ) ? $_POST['items'] : array();
 		$shipping		= $_POST['shipping'];
 		$item_tax		= 0;
 
