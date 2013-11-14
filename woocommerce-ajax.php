@@ -1182,7 +1182,7 @@ function woocommerce_calc_line_taxes() {
 	$postcode 		= strtoupper( esc_attr( $_POST['postcode'] ) );
 	$city 			= sanitize_title( esc_attr( $_POST['city'] ) );
 
-	$items			= $_POST['items'];
+	$items			= isset( $_POST['items'] ) ? $_POST['items'] : array();
 	$shipping		= $_POST['shipping'];
 	$item_tax		= 0;
 
