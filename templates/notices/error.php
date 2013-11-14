@@ -9,10 +9,10 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-if ( ! $errors ) return;
+if ( ! $messages ) return;
 ?>
 <ul class="woocommerce-error">
-	<?php foreach ( $errors as $error ) : ?>
-		<li><?php echo wp_kses_post( $error ); ?></li>
+	<?php foreach ( $messages as $message ) : ?>
+		<li><?php echo wp_kses_post( $message ); ?></li>
 	<?php endforeach; ?>
 </ul>

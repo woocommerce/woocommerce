@@ -13,7 +13,7 @@ global $woocommerce, $post;
 
 ?>
 
-<?php wc_print_messages(); ?>
+<?php wc_print_notices(); ?>
 
 <form method="post" class="lost_reset_password">
 

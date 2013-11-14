@@ -784,8 +784,8 @@ final class WooCommerce {
 	 * @param $error
 	 */
 	public function add_error( $error ) {
-		_deprecated_function( 'Woocommerce->add_error', '2.1', 'wc_add_error' );
-		wc_add_error( $error );
+		_deprecated_function( 'Woocommerce->add_error', '2.1', 'wc_add_notice' );
+		wc_add_notice( $error, 'error' );
 	}
 
 	/**
@@ -793,16 +793,16 @@ final class WooCommerce {
 	 * @param $message
 	 */
 	public function add_message( $message ) {
-		_deprecated_function( 'Woocommerce->add_message', '2.1', 'wc_add_message' );
-		wc_add_message( $message );
+		_deprecated_function( 'Woocommerce->add_message', '2.1', 'wc_add_notice' );
+		wc_add_notice( $message );
 	}
 
 	/**
 	 * @deprecated 2.1.0
 	 */
 	public function clear_messages() {
-		_deprecated_function( 'Woocommerce->clear_messages', '2.1', 'wc_clear_messages' );
-		wc_clear_messages();
+		_deprecated_function( 'Woocommerce->clear_messages', '2.1', 'wc_clear_notices' );
+		wc_clear_notices();
 	}
 
 	/**
@@ -810,8 +810,8 @@ final class WooCommerce {
 	 * @return int
 	 */
 	public function error_count() {
-		_deprecated_function( 'Woocommerce->error_count', '2.1', 'wc_error_count' );
-		return wc_error_count();
+		_deprecated_function( 'Woocommerce->error_count', '2.1', 'wc_notice_count' );
+		return wc_notice_count( 'wc_errors' );
 	}
 
 	/**
@@ -819,8 +819,8 @@ final class WooCommerce {
 	 * @return int
 	 */
 	public function message_count() {
-		_deprecated_function( 'Woocommerce->message_count', '2.1', 'wc_message_count' );
-		return wc_message_count();
+		_deprecated_function( 'Woocommerce->message_count', '2.1', 'wc_notice_count' );
+		return wc_notice_count( 'wc_messages' );
 	}
 
 	/**
@@ -828,8 +828,8 @@ final class WooCommerce {
 	 * @return mixed
 	 */
 	public function get_errors() {
-		_deprecated_function( 'Woocommerce->get_errors', '2.1', 'WC_Messages_Helper->get_errors' );
-		return $this->session->get( 'wc_errors', array() );
+		_deprecated_function( 'Woocommerce->get_errors', '2.1', 'wc_get_notices( "error" )' );
+		return wc_get_notices( 'error' );
 	}
 
 	/**
@@ -837,16 +837,16 @@ final class WooCommerce {
 	 * @return mixed
 	 */
 	public function get_messages() {
-		_deprecated_function( 'Woocommerce->get_messages', '2.1', 'WC_Messages_Helper->get_messages' );
-		return $this->session->get( 'wc_messages', array() );
+		_deprecated_function( 'Woocommerce->get_messages', '2.1', 'wc_get_notices( "success" )' );
+		return wc_get_notices( 'success' );
 	}
 
 	/**
 	 * @deprecated 2.1.0 Access via the WC_Messages_Helper helper
 	 */
 	public function show_messages() {
-		_deprecated_function( 'Woocommerce->show_messages', '2.1', 'wc_print_messages()' );
-		wc_print_messages();
+		_deprecated_function( 'Woocommerce->show_messages', '2.1', 'wc_print_notices()' );
+		wc_print_notices();
 	}
 
 	/**

@@ -71,7 +71,7 @@ class WC_Shortcode_Checkout {
 
 		do_action( 'before_woocommerce_pay' );
 
-		wc_print_messages();
+		wc_print_notices();
 
 		$order_id = absint( $order_id );
 
@@ -106,11 +106,11 @@ class WC_Shortcode_Checkout {
 
 					$status = get_term_by('slug', $order->status, 'shop_order_status');
 
-					wc_add_error( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), $status->name ) );
+					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), $status->name ), 'error' );
 				}
 
 			} else {
-				wc_add_error( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ) );
+				wc_add_notice( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ), 'error' );
 			}
 
 		} elseif ( $order_id ) {
@@ -157,18 +157,18 @@ class WC_Shortcode_Checkout {
 
 					$status = get_term_by('slug', $order->status, 'shop_order_status');
 
-					wc_add_error( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), $status->name ) );
+					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), $status->name ), 'error' );
 				}
 
 			} else {
-				wc_add_error( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ) );
+				wc_add_notice( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ), 'error' );
 			}
 
 		} else {
-			wc_add_error( __( 'Invalid order.', 'woocommerce' ) );
+			wc_add_notice( __( 'Invalid order.', 'woocommerce' ), 'error' );
 		}
 
-		wc_print_messages();
+		wc_print_notices();
 
 		do_action( 'after_woocommerce_pay' );
 	}
@@ -179,7 +179,7 @@ class WC_Shortcode_Checkout {
 	private static function order_received( $order_id = 0 ) {
 		global $woocommerce;
 
-		wc_print_messages();
+		wc_print_notices();
 
 		$order = false;
 
@@ -206,7 +206,7 @@ class WC_Shortcode_Checkout {
 		global $woocommerce;
 
 		// Show non-cart errors
-		wc_print_messages();
+		wc_print_notices();
 
 		// Check cart has contents
 		if ( sizeof( $woocommerce->cart->get_cart() ) == 0 )
@@ -221,7 +221,7 @@ class WC_Shortcode_Checkout {
 		// Get checkout object
 		$checkout = $woocommerce->checkout();
 
-		if ( empty( $_POST ) && wc_error_count() > 0 ) {
+		if ( empty( $_POST ) && wc_notice_count( 'wc_errors' ) > 0 ) {
 
 			woocommerce_get_template( 'checkout/cart-errors.php', array( 'checkout' => $checkout ) );
 
@@ -229,8 +229,8 @@ class WC_Shortcode_Checkout {
 
 			$non_js_checkout = ! empty( $_POST['woocommerce_checkout_update_totals'] ) ? true : false;
 
-			if ( wc_error_count() == 0 && $non_js_checkout )
-				wc_add_message( __( 'The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page.', 'woocommerce' ) );
+			if ( wc_notice_count( 'wc_errors' ) == 0 && $non_js_checkout )
+				wc_add_notice( __( 'The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page.', 'woocommerce' ) );
 
 			woocommerce_get_template( 'checkout/form-checkout.php', array( 'checkout' => $checkout ) );
 

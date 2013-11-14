@@ -90,7 +90,7 @@ class WC_Query {
 	 */
 	public function get_errors() {
 		if ( isset( $_GET['wc_error'] ) )
-			wc_add_error( esc_attr( $_GET['wc_error'] ) );
+			wc_add_notice( esc_attr( $_GET['wc_error'] ), 'error' );
 	}
 
 	/**
