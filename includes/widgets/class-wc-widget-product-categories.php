@@ -76,10 +76,10 @@ class WC_Widget_Product_Categories extends WC_Widget {
 		extract( $args );
 
 		$title = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
-		$c     = $instance['count'] ? '1' : '0';
+		$c     = ( isset( $instance['count'] ) && $instance['count'] ) ? '1' : '0';
 		$h     = $instance['hierarchical'] ? true : false;
-		$s     = $instance['show_children_only'] ? '1' : '0';
-		$d     = $instance['dropdown'] ? '1' : '0';
+		$s     = ( isset( $instance['show_children_only'] ) && $instance['show_children_only'] ) ? '1' : '0';
+		$d     = ( isset( $instance['dropdown'] ) && $instance['dropdown'] ) ? '1' : '0';
 		$o     = $instance['orderby'] ? $instance['orderby'] : 'order';
 
 		echo $before_widget;

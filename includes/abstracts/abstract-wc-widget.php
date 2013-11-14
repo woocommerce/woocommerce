@@ -82,7 +82,9 @@ abstract class WC_Widget extends WP_Widget {
 			return $instance;
 
 		foreach ( $this->settings as $key => $setting ) {
-			$instance[ $key ] = sanitize_text_field( $new_instance[ $key ] );
+			if ( isset( $new_instance[$key] ) ) {
+				$instance[ $key ] = sanitize_text_field( $new_instance[ $key ] );
+			}
 		}
 
 		$this->flush_widget_cache();

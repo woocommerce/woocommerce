@@ -116,7 +116,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$current_term 	= is_tax() ? get_queried_object()->term_id : '';
 		$current_tax 	= is_tax() ? get_queried_object()->taxonomy : '';
 		$title 			= apply_filters('widget_title', $instance['title'], $instance, $this->id_base);
-		$taxonomy 		= wc_attribute_taxonomy_name($instance['attribute']);
+		$taxonomy 		= isset( $instance['attribute'] ) ? wc_attribute_taxonomy_name($instance['attribute']) : '';
 		$query_type 	= isset( $instance['query_type'] ) ? $instance['query_type'] : 'and';
 		$display_type 	= isset( $instance['display_type'] ) ? $instance['display_type'] : 'list';
 
