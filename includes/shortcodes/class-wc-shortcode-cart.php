@@ -64,7 +64,7 @@ class WC_Shortcode_Cart {
 
 				$woocommerce->customer->calculated_shipping( true );
 
-				wc_add_notice(  __( 'Shipping costs updated.', 'woocommerce' ) );
+				wc_add_notice(  __( 'Shipping costs updated.', 'woocommerce' ), 'notice' );
 
 				do_action( 'woocommerce_calculated_shipping' );
 
