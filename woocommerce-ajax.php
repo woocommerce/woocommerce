@@ -422,7 +422,7 @@ function woocommerce_save_attributes() {
 	if ( isset( $data['attribute_names'] ) ) {
 
 		$attribute_names  = array_map( 'stripslashes', $data['attribute_names'] );
-		$attribute_values = $data['attribute_values'];
+		$attribute_values = isset( $data['attribute_values'] ) ? $data['attribute_values'] : array();
 
 		if ( isset( $data['attribute_visibility'] ) )
 			$attribute_visibility = $data['attribute_visibility'];
