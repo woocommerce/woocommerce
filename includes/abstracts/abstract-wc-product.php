@@ -110,13 +110,24 @@ class WC_Product {
 	 */
 	public function get_gallery_attachment_ids() {
 		if ( ! isset( $this->product_image_gallery ) ) {
+			$args = apply_filters( 'woocommerce_product_gallery_attachment_args', array(
+				'post_parent' => $this->id,
+				'numberposts' => '-1',
+				'post_type' => 'attachment',
+				'orderby' => 'menu_order',
+				'order' => 'ASC',
+				'post_mime_type' => 'image',
+				'fields' => 'ids',
+				'meta_key' => '_woocommerce_exclude_image',
+				'meta_value' => 0,
+			) );
+			$attachment_ids = get_posts( $args );
 			// Backwards compat
-			$attachment_ids = get_posts( 'post_parent=' . $this->id . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image&fields=ids&meta_key=_woocommerce_exclude_image&meta_value=0' );
 			$attachment_ids = array_diff( $attachment_ids, array( get_post_thumbnail_id() ) );
 			$this->product_image_gallery = implode( ',', $attachment_ids );
 		}
 
-		return array_filter( (array) explode( ',', $this->product_image_gallery ) );
+		return apply_filters( 'woocommerce_product_gallery_attachment_ids', array_filter( (array) explode( ',', $this->product_image_gallery ) ) );
 	}
 
 	/**

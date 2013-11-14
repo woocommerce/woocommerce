@@ -28,13 +28,25 @@ class WC_Meta_Box_Product_Images {
 					if ( metadata_exists( 'post', $post->ID, '_product_image_gallery' ) ) {
 						$product_image_gallery = get_post_meta( $post->ID, '_product_image_gallery', true );
 					} else {
+						$args = apply_filters( 'woocommerce_product_gallery_attachment_args', array(
+							'post_parent' => $post->ID,
+							'numberposts' => '-1',
+							'post_type' => 'attachment',
+							'orderby' => 'menu_order',
+							'order' => 'ASC',
+							'post_mime_type' => 'image',
+							'fields' => 'ids',
+							'meta_key' => '_woocommerce_exclude_image',
+							'meta_value' => 0,
+						) );
+						$attachment_ids = get_posts( $args );
 						// Backwards compat
 						$attachment_ids = get_posts( 'post_parent=' . $post->ID . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image&fields=ids&meta_key=_woocommerce_exclude_image&meta_value=0' );
 						$attachment_ids = array_diff( $attachment_ids, array( get_post_thumbnail_id() ) );
 						$product_image_gallery = implode( ',', $attachment_ids );
 					}
 
-					$attachments = array_filter( explode( ',', $product_image_gallery ) );
+					$attachments = apply_filters( 'woocommerce_product_gallery_attachment_ids', array_filter( explode( ',', $product_image_gallery ) ) );
 
 					if ( $attachments )
 						foreach ( $attachments as $attachment_id ) {
