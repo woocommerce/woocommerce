@@ -91,6 +91,22 @@ add_action( 'woocommerce_before_shop_loop', 'wc_print_notices', 10 );
 add_action( 'woocommerce_before_single_product', 'wc_print_notices', 10 );
 
 /**
+ * Print a single notice immediately
+ *
+ * @param  string $message The text to display in the notice.
+ * @param  string $notice_type The singular name of the notice type - either error, success or notice. [optional]
+ */
+function wc_print_notice( $message, $notice_type = 'success' ) {
+
+	if ( 'success' === $notice_type )
+		$message = apply_filters( 'woocommerce_add_message', $message );
+
+	woocommerce_get_template( "notices/{$notice_type}.php", array(
+		"{$notice_type}s" => array( apply_filters( 'woocommerce_add_' . $notice_type, $message ) )
+	) );
+}
+
+/**
  * Returns all queued notices, optionally filtered by a notice type.
  *
  * @param  string $notice_type The singular name of the notice type - either error, success or notice. [optional]
