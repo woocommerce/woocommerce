@@ -384,6 +384,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	function class_shipping( $package ) {
 		$cost 	= null;
 		$fee 	= null;
+		$matched = false;
 
 		if ( sizeof( $this->flat_rates ) > 0 || $this->cost !== '' ) {
 
@@ -401,8 +402,6 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 					$found_shipping_classes_values[ $shipping_class ] += $product['data']->get_price() * $product['quantity'];
 				}
 			}
-
-			$matched = false;
 
 			// For each found class, add up the costs and fees
 			foreach ( $found_shipping_classes_values as $shipping_class => $class_price ) {
