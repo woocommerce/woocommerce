@@ -155,6 +155,11 @@ class WC_API_Orders extends WC_API_Resource {
 			'customer_user_agent'       => $order->customer_user_agent,
 			'customer_id'               => $order->customer_user,
 			'view_order_url'            => $order->get_view_order_url(),
+			'line_items'                => array(),
+			'shipping_lines'            => array(),
+			'tax_lines'                 => array(),
+			'fee_lines'                 => array(),
+			'coupon_lines'              => array(),
 		);
 
 		// add line items
@@ -217,13 +222,6 @@ class WC_API_Orders extends WC_API_Resource {
 				'code'   => $coupon_item['name'],
 				'amount' => (string) number_format( $coupon_item['discount_amount'], 2),
 			);
-		}
-
-		// ensure line properties exist in response
-		foreach ( array( 'line_items', 'shipping_lines', 'tax_lines', 'fee_lines', 'coupon_lines' ) as $line ) {
-
-			if ( ! isset( $order_data[ $line ] ) )
-				$order_data[ $line ] = array();
 		}
 
 		return apply_filters( 'woocommerce_api_order_response', $order_data, $order, $fields );
@@ -315,6 +313,7 @@ class WC_API_Orders extends WC_API_Resource {
 		foreach ( $notes as $note ) {
 
 			$order_notes[] = array(
+				'id'            => $note->comment_ID,
 				'created_at'    => $note->comment_date_gmt, // TODO: date formatting
 				'note'          => $note->comment_content,
 				'customer_note' => get_comment_meta( $note->comment_ID, 'is_customer_note', true ) ? true : false,
