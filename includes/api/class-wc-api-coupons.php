@@ -130,7 +130,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			'customer_email'             => $coupon->customer_email,
 		);
 
-		return apply_filters( 'woocommerce_api_coupon_response', $coupon_data, $coupon, $fields );
+		return apply_filters( 'woocommerce_api_coupon_response', $coupon_data, $coupon, $fields, $this->server );
 	}
 
 	/**

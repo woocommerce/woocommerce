@@ -174,7 +174,7 @@ class WC_API_Customers extends WC_API_Resource {
 			),
 		);
 
-		return apply_filters( 'woocommerce_api_customer_response', $customer_data, $customer, $fields );
+		return apply_filters( 'woocommerce_api_customer_response', $customer_data, $customer, $fields, $this->server );
 	}
 
 	/**
@@ -282,7 +282,7 @@ class WC_API_Customers extends WC_API_Resource {
 			$orders[] = WC()->api->WC_API_Orders->get_order( $order_id, $fields );
 		}
 
-		return array( 'orders' => $orders );
+		return apply_filters( 'woocommerce_api_customer_orders_response', array( 'orders' => $orders ), $id, $fields, $order_ids, $this->server );
 	}
 
 	/**

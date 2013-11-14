@@ -285,10 +285,13 @@ class WC_API_Orders extends WC_API_Resource {
 
 	/**
 	 * Get the admin order notes for an order
-	 * @param $id
-	 * @return mixed
+	 *
+	 * @since 2.1
+	 * @param int $id the order ID
+	 * @param string $fields fields to include in response
+	 * @return array
 	 */
-	public function get_order_notes( $id ) {
+	public function get_order_notes( $id, $fields = null ) {
 
 		// ensure ID is valid order ID
 		$id = $this->validate_request( $id, 'order', 'read' );
@@ -320,7 +323,7 @@ class WC_API_Orders extends WC_API_Resource {
 			);
 		}
 
-		return array( 'order_notes' => $order_notes );
+		return apply_filters( 'woocommerce_api_order_notes_response', array( 'order_notes' => $order_notes ), $id, $fields, $notes, $this->server );
 	}
 
 	/**
