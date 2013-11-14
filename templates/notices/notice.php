@@ -9,9 +9,9 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-if ( ! $notices ) return;
+if ( ! $messages ) return;
 ?>
 
-<?php foreach ( $notices as $notice ) : ?>
-	<div class="woocommerce-info"><?php echo wp_kses_post( $notice ); ?></div>
+<?php foreach ( $messages as $message ) : ?>
+	<div class="woocommerce-info"><?php echo wp_kses_post( $message ); ?></div>
 <?php endforeach; ?>
