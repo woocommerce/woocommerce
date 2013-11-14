@@ -350,7 +350,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 				}
 			break;
 			case 'featured':
-				$url = wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce-feature-product&product_id=' . $post->ID ), 'woocommerce-feature-product' );
+				$url = wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_feature_product&product_id=' . $post->ID ), 'woocommerce-feature-product' );
 				echo '<a href="' . $url . '" title="'. __( 'Toggle featured', 'woocommerce' ) . '">';
 				if ( $the_product->is_featured() ) {
 					echo '<span class="wc-featured tips" data-tip="' . __( 'Yes', 'woocommerce' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
