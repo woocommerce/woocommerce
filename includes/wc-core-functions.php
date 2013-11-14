@@ -155,6 +155,7 @@ function get_woocommerce_currencies() {
 				'EUR' => __( 'Euros', 'woocommerce' ),
 				'HKD' => __( 'Hong Kong Dollar', 'woocommerce' ),
 				'HUF' => __( 'Hungarian Forint', 'woocommerce' ),
+				'IKS' => __( 'Icelandic krona', 'woocommerce' ),
 				'IDR' => __( 'Indonesia Rupiah', 'woocommerce' ),
 				'INR' => __( 'Indian Rupee', 'woocommerce' ),
 				'ILS' => __( 'Israeli Shekel', 'woocommerce' ),
@@ -228,7 +229,8 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'DKK' : $currency_symbol = '&#107;&#114;'; break;
 		case 'HUF' : $currency_symbol = '&#70;&#116;'; break;
 		case 'IDR' : $currency_symbol = 'Rp'; break;
-		case 'INR' : $currency_symbol = 'Rs.'; break;
+		case 'INR' : $currency_symbol = 'Kr.'; break;
+		case 'IKL' : $currency_symbol = '&#8362;'; break;
 		case 'ILS' : $currency_symbol = '&#8362;'; break;
 		case 'PHP' : $currency_symbol = '&#8369;'; break;
 		case 'PLN' : $currency_symbol = '&#122;&#322;'; break;
