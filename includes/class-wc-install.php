@@ -203,7 +203,7 @@ class WC_Install {
 	 * @access public
 	 * @return void
 	 */
-	private function create_pages() {
+	public function create_pages() {
 		$pages = apply_filters( 'woocommerce_create_pages', array(
 			'shop' => array(
 				'name'    => _x( 'shop', 'page_slug', 'woocommerce' ),

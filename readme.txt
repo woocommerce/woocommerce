@@ -187,6 +187,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Standardized, default credit card form for gateways to use if they support 'default_credit_card_form'.
 * Feature - Coupon usage limits per user (using email + ID).
 * Feature - Option to limit reviews to purchasers.
+* Feature - Option to install missing WooCommerce pages from tools page.
 * Tweak - Added pagination to tax rate screens.
 * Tweak - Added filter to check the 'Create account' checkbox on checkout by default.
 * Tweak - Update CPT parameters for 'product_variation' and 'shop_coupon' to be no longer public.
