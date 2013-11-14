@@ -49,8 +49,8 @@ class WC_API_Coupons extends WC_API_Resource {
 			array( array( $this, 'delete_coupon' ), WC_API_Server::DELETABLE ),
 		);
 
-		# GET /coupons/<code> TODO: should looking up coupon codes containing spaces or dashes be supported? OR all-digit coupon codes
-		$routes[ $this->base . '/(?P<code>\w+)' ] = array(
+		# GET /coupons/code/<code>
+		$routes[ $this->base . '/code/(?P<code>\w[\w\s\-]*)' ] = array( // note that coupon codes can contain spaces, dashes and underscores
 			array( array( $this, 'get_coupon_by_code' ), WC_API_Server::READABLE ),
 		);
 
@@ -152,6 +152,7 @@ class WC_API_Coupons extends WC_API_Resource {
 	/**
 	 * Get the coupon for the given code
 	 *
+	 * @since 2.1
 	 * @param string $code the coupon code
 	 * @param string $fields fields to include in response
 	 * @return int|WP_Error

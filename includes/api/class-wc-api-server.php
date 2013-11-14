@@ -326,7 +326,7 @@ class WC_API_Server {
 				if ( !( $supported & $method ) )
 					continue;
 
-				$match = preg_match( '@^' . $route . '$@i', $this->path, $args );
+				$match = preg_match( '@^' . $route . '$@i', urldecode( $this->path ), $args );
 
 				if ( !$match )
 					continue;
