@@ -315,7 +315,7 @@ final class WooCommerce {
 	 * Include required ajax files.
 	 */
 	public function ajax_includes() {
-		include_once( 'woocommerce-ajax.php' );	// Ajax functions for admin and the front-end
+		include_once( 'includes/class-wc-ajax.php' );					// Ajax functions for admin and the front-end
 	}
 
 	/**

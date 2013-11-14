@@ -114,7 +114,7 @@ class WC_Frontend_Scripts {
 			'update_order_review_nonce'        => wp_create_nonce( "update-order-review" ),
 			'apply_coupon_nonce'               => wp_create_nonce( "apply-coupon" ),
 			'option_guest_checkout'            => get_option( 'woocommerce_enable_guest_checkout' ),
-			'checkout_url'                     => add_query_arg( 'action', 'woocommerce-checkout', WC()->ajax_url() ),
+			'checkout_url'                     => add_query_arg( 'action', 'woocommerce_checkout', WC()->ajax_url() ),
 			'is_checkout'                      => is_page( woocommerce_get_page_id( 'checkout' ) ) && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ? 1 : 0,
 			'locale'                           => json_encode( WC()->countries->get_country_locale() )
 		) ) );

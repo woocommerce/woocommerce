@@ -226,7 +226,7 @@ class WC_Download_Handler {
 		if ( strstr( $file_name, '?' ) )
 			$file_name = current( explode( '?', $file_name ) );
 
-		header( "Robots: none" );
+		header( "X-Robots-Tag: noindex, nofollow", true );
 		header( "Content-Type: " . $ctype );
 		header( "Content-Description: File Transfer" );
 		header( "Content-Disposition: attachment; filename=\"" . $file_name . "\";" );
