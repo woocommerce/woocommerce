@@ -75,8 +75,11 @@ class WC_API_Resource {
 
 			$post = get_post( $id, ARRAY_A );
 
+			// TODO: redo this check, it's a bit janky
+			$post_type = ( 'product_variation' === $post['post_type'] ) ? 'product' : $post['post_type'];
+
 			// validate post type
-			if ( $type !== $post['post_type'] )
+			if ( $type !== $post_type )
 				return new WP_Error( "woocommerce_api_invalid_{$resource_name}", sprintf( __( 'Invalid %s', 'woocommerce' ), $resource_name ), array( 'status' => 404 ) );
 
 			// validate permissions

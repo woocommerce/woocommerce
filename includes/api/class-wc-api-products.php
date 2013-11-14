@@ -104,9 +104,20 @@ class WC_API_Products extends WC_API_Resource {
 
 		$product = get_product( $id );
 
-		$product_data = array(
-			'id' => $product->id
-		);
+		// add data that applies to every product type
+		$product_data = $this->get_product_data( $product );
+
+		// add variations to variable products
+		if ( $product->is_type( 'variable' ) && $product->has_child() ) {
+
+			$product_data['variations'] = $this->get_variation_data( $product );
+		}
+
+		// add the parent product data to an individual variation
+		if ( $product->is_type( 'variation' ) ) {
+
+			$product_data['parent'] = $this->get_product_data( $product->parent );
+		}
 
 		return apply_filters( 'woocommerce_api_product_response', $product_data, $product, $fields );
 	}
@@ -171,19 +182,42 @@ class WC_API_Products extends WC_API_Resource {
 
 	/**
 	 * Get the reviews for a product
-	 * @param $id
-	 * @return mixed
+	 *
+	 * @since 2.1
+	 * @param int $id the product ID to get reviews for
+	 * @param string $fields fields to include in response
+	 * @return array
 	 */
-	public function get_product_reviews( $id ) {
+	public function get_product_reviews( $id, $fields = null ) {
 
 		$id = $this->validate_request( $id, 'product', 'read' );
 
 		if ( is_wp_error( $id ) )
 			return $id;
 
-		// TODO: implement
+		$args = array(
+			'post_id' => $id,
+			'approve' => 'approve',
+		);
 
-		return array();
+		$comments = get_comments( $args );
+
+		$reviews = array();
+
+		foreach ( $comments as $comment ) {
+
+			$reviews[] = array(
+				'id'             => $comment->comment_ID,
+				'created_at'     => $comment->comment_date_gmt, // TODO: date formatting
+				'review'         => $comment->comment_content,
+				'rating'         => get_comment_meta( $comment->comment_ID, 'rating', true ),
+				'reviewer_name'  => $comment->comment_author,
+				'reviewer_email' => $comment->comment_author_email,
+				'verified'       => (bool) woocommerce_customer_bought_product( $comment->comment_author_email, $comment->user_id, $id ),
+			);
+		}
+
+		return apply_filters( 'woocommerce_api_product_reviews_response', array( 'product_reviews' => $reviews ), $id, $fields, $comments, $this->server );
 	}
 
 	/**
@@ -223,6 +257,281 @@ class WC_API_Products extends WC_API_Resource {
 		$query_args = $this->merge_query_args( $query_args, $args );
 
 		return new WP_Query( $query_args );
+	}
+
+	/**
+	 * Get standard product data that applies to every product type
+	 *
+	 * @since 2.1
+	 * @param WC_Product $product
+	 * @return array
+	 */
+	private function get_product_data( $product ) {
+
+		return array(
+			'title'              => $product->get_title(),
+			'id'                 => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->id,
+			'created_at'         => $product->get_post_data()->post_date_gmt, // TODO: date formatting
+			'updated_at'         => $product->get_post_data()->post_modified_gmt, // TODO: date formatting
+			'type'               => $product->product_type,
+			'status'             => $product->get_post_data()->post_status,
+			'downloadable'       => $product->is_downloadable(),
+			'virtual'            => $product->is_virtual(),
+			'permalink'          => $product->get_permalink(),
+			'sku'                => $product->get_sku(),
+			'price'              => (string) $product->get_price(),
+			'regular_price'      => (string) $product->get_regular_price(),
+			'sale_price'         => (string) $product->get_sale_price(),
+			'price_html'         => $product->get_price_html(),
+			'taxable'            => $product->is_taxable(),
+			'tax_status'         => $product->get_tax_status(),
+			'tax_class'          => $product->get_tax_class(),
+			'managing_stock'     => $product->managing_stock(),
+			'stock_quantity'     => (string) $product->get_stock_quantity(),
+			'in_stock'           => $product->is_in_stock(),
+			'backorders_allowed' => $product->backorders_allowed(),
+			'backordered'        => $product->is_on_backorder(),
+			'sold_individually'  => $product->is_sold_individually(),
+			'purchaseable'       => $product->is_purchasable(),
+			'featured'           => $product->is_featured(),
+			'visible'            => $product->is_visible(),
+			'catalog_visibility' => $product->visibility,
+			'on_sale'            => $product->is_on_sale(),
+			'weight'             => $product->get_weight(),
+			'dimensions'         => array(
+				'length' => $product->length,
+				'width'  => $product->width,
+				'height' => $product->height,
+				'unit'   => get_option( 'woocommerce_dimension_unit' ),
+			),
+			'shipping_required'  => $product->needs_shipping(),
+			'shipping_taxable'   => $product->is_shipping_taxable(),
+			'shipping_class'     => $product->get_shipping_class(),
+			'shipping_class_id'  => ( 0 !== $product->get_shipping_class_id() ) ? $product->get_shipping_class_id() : null,
+			'description'        => apply_filters( 'the_content', $product->get_post_data()->post_content ),
+			'short_description'  => apply_filters( 'woocommerce_short_description', $product->get_post_data()->post_excerpt ),
+			'reviews_allowed'    => ( 'open' === $product->get_post_data()->comment_status ),
+			'average_rating'     => $product->get_average_rating(),
+			'rating_count'       => $product->get_rating_count(),
+			'related_ids'        => array_values( $product->get_related() ),
+			'upsell_ids'         => $product->get_upsells(),
+			'cross_sell_ids'     => $product->get_cross_sells(),
+			'categories'         => wp_get_post_terms( $product->id, 'product_cat', array( 'fields' => 'names' ) ),
+			'tags'               => wp_get_post_terms( $product->id, 'product_tag', array( 'fields' => 'names' ) ),
+			'images'             => $this->get_images( $product ),
+			'attributes'         => $this->get_attributes( $product ),
+			'downloads'          => $this->get_downloads( $product ),
+			'download_limit'     => $product->download_limit,
+			'download_expiry'    => $product->download_expiry,
+			'download_type'      => $product->download_type,
+			'purchase_note'      => apply_filters( 'the_content', $product->purchase_note ),
+			'variations'         => array(),
+			'parent'             => array(),
+		);
+	}
+
+	/**
+	 * Get an individual variation's data
+	 *
+	 * @since 2.1
+	 * @param WC_Product $product
+	 * @return array
+	 */
+	private function get_variation_data( $product ) {
+
+		$variations = array();
+
+		foreach ( $product->get_children() as $child_id ) {
+
+			$variation = $product->get_child( $child_id );
+
+			if ( ! $variation->exists() )
+				continue;
+
+			$variations[] = array(
+				'id'                => $variation->get_variation_id(),
+				'created_at'        => $variation->get_post_data()->post_date_gmt, // TODO: date formatting
+				'updated_at'        => $variation->get_post_data()->post_modified_gmt, // TODO: date formatting
+				'downloadable'      => $variation->is_downloadable(),
+				'virtual'           => $variation->is_virtual(),
+				'permalink'         => $variation->get_permalink(),
+				'sku'               => $variation->get_sku(),
+				'price'             => (string) $variation->get_price(),
+				'regular_price'     => (string) $variation->get_regular_price(),
+				'sale_price'        => (string) $variation->get_sale_price(),
+				'taxable'           => $variation->is_taxable(),
+				'tax_status'        => $variation->get_tax_status(),
+				'tax_class'         => $variation->get_tax_class(),
+				'stock_quantity'    => (string) $variation->get_stock_quantity(),
+				'in_stock'          => $variation->is_in_stock(),
+				'backordered'       => $variation->is_on_backorder(),
+				'purchaseable'      => $variation->is_purchasable(),
+				'visible'           => $variation->variation_is_visible(),
+				'on_sale'           => $variation->is_on_sale(),
+				'weight'            => $variation->get_weight(),
+				'dimensions'        => array(
+					'length' => $variation->length,
+					'width'  => $variation->width,
+					'height' => $variation->height,
+					'unit'   => get_option( 'woocommerce_dimension_unit' ),
+				),
+				'shipping_class'    => $variation->get_shipping_class(),
+				'shipping_class_id' => ( 0 !== $variation->get_shipping_class_id() ) ? $variation->get_shipping_class_id() : null,
+				'image'             => $this->get_images( $variation ),
+				'attributes'        => $this->get_attributes( $variation ),
+				'downloads'         => $this->get_downloads( $variation ),
+				'download_limit'    => $product->download_limit,
+				'download_expiry'   => $product->download_expiry,
+			);
+		}
+
+		return $variations;
+	}
+
+	/**
+	 * Get the images for a product or product variation
+	 *
+	 * @since 2.1
+	 * @param WC_Product|WC_Product_Variation $product
+	 * @return array
+	 */
+	private function get_images( $product ) {
+
+		$images = $attachment_ids = array();
+
+		if ( $product->is_type( 'variation' ) ) {
+
+			if ( has_post_thumbnail( $product->get_variation_id() ) ) {
+
+				// add variation image if set
+				$attachment_ids[] = get_post_thumbnail_id( $product->get_variation_id() );
+
+			} elseif ( has_post_thumbnail( $product->id ) ) {
+
+				// otherwise use the parent product featured image if set
+				$attachment_ids[] = get_post_thumbnail_id( $product->id );
+			}
+
+		} else {
+
+			// add featured image
+			if ( has_post_thumbnail( $product->id ) ) {
+				$attachment_ids[] = get_post_thumbnail_id( $product->id );
+			}
+
+			// add gallery images
+			$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_attachment_ids() );
+		}
+
+		// build image data
+		foreach ( $attachment_ids as $position => $attachment_id ) {
+
+			$attachment_post = get_post( $attachment_id );
+
+			if ( is_null( $attachment_post ) )
+				continue;
+
+			$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
+
+			if ( ! is_array( $attachment ) )
+				continue;
+
+			$images[] = array(
+				'id'         => (int) $attachment_id,
+				'created_at' => $attachment_post->post_date_gmt, // TODO: date formatting
+				'src'        => current( $attachment ),
+				'title'      => get_the_title( $attachment_id ),
+				'alt'        => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
+				'position'   => $position,
+			);
+		}
+
+		// set a placeholder image if the product has no images set
+		if ( empty( $images ) ) {
+
+			$images[] = array(
+				'id'         => 0,
+				'created_at' => gmdate( 'Y-m-d H:i:s' ), // TODO: date formatting
+				'src'        => woocommerce_placeholder_img_src(),
+				'title'      => __( 'Placeholder', 'woocommerce' ),
+				'alt'        => __( 'Placeholder', 'woocommerce' ),
+				'position'   => 0,
+			);
+		}
+
+		return $images;
+	}
+
+	/**
+	 * Get the attributes for a product or product variation
+	 *
+	 * @since 2.1
+	 * @param WC_Product|WC_Product_Variation $product
+	 * @return array
+	 */
+	private function get_attributes( $product ) {
+
+		$attributes = array();
+
+		if ( $product->is_type( 'variation' ) ) {
+
+			// variation attributes
+			foreach ( $product->get_variation_attributes() as $attribute_name => $attribute ) {
+
+				// taxonomy-based attributes are prefixed with `pa_`, otherwise simply `attribute_`
+				$attributes[] = array(
+					'name'   => ucwords( str_replace( 'attribute_', '', str_replace( 'pa_', '', $attribute_name ) ) ),
+					'option' => $attribute,
+				);
+			}
+
+		} else {
+
+			foreach ( $product->get_attributes() as $attribute ) {
+
+				// taxonomy-based attributes are comma-separated, others are pipe (|) separated
+				if ( $attribute['is_taxonomy'] )
+					$options = explode( ',', $product->get_attribute( $attribute['name'] ) );
+				else
+					$options = explode( '|', $product->get_attribute( $attribute['name'] ) );
+
+				$attributes[] = array(
+					'name'      => ucwords( str_replace( 'pa_', '', $attribute['name'] ) ),
+					'position'  => $attribute['position'],
+					'visible'   => (bool) $attribute['is_visible'],
+					'variation' => (bool) $attribute['is_variation'],
+					'options'   => array_map( 'trim', $options ),
+				);
+			}
+		}
+
+		return $attributes;
+	}
+
+	/**
+	 * Get the downloads for a product or product variation
+	 *
+	 * @since 2.1
+	 * @param WC_Product|WC_Product_Variation $product
+	 * @return array
+	 */
+	private function get_downloads( $product ) {
+
+		$downloads = array();
+
+		if ( $product->is_downloadable() ) {
+
+			foreach ( $product->get_files() as $file_id => $file ) {
+
+				$downloads[] = array(
+					'id'   => $file_id, // do not cast as int as this is a hash
+					'name' => $file['name'],
+					'file' => $file['file'],
+				);
+			}
+		}
+
+		return $downloads;
 	}
 
 }
