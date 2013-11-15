@@ -491,7 +491,11 @@ class WC_Shortcodes {
 		?>
 		<p class="product woocommerce" style="<?php echo $atts['style']; ?>">
 
-			<?php echo $product->get_price_html(); ?>
+			<?php 
+				if(isset($atts['show_price']) && $atts['show_price'] == 'yes'){
+					echo $product->get_price_html();
+				} 
+			?>
 
 			<?php woocommerce_template_loop_add_to_cart(); ?>
 
