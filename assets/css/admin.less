@@ -2486,7 +2486,7 @@ img.help_tip {
 		float: left;
 	}
 	.short {
-		width: 20%;
+		width: 25%;
 	}
 	.sized {
 		width: auto !important;
@@ -2531,24 +2531,10 @@ img.help_tip {
 		.wrap {
 			input {
 				margin-right: .2%;
-				width: 6.6%;
+				width: 8.2%;
 			}
 			.last {
 				margin-right: 0;
-			}
-		}
-	}
-}
-.mp6 {
-	.short {
-		width:25%;
-	}
-	.woocommerce_options_panel {
-		.dimensions_field {
-			.wrap {
-				input {
-					width: 8.2%;
-				}
 			}
 		}
 	}
@@ -2614,6 +2600,14 @@ img.help_tip {
 			-moz-border-radius: 3px;
 			-webkit-border-radius: 3px;
 			border-radius: 3px;
+			.handlediv {
+				&:before {
+					content: "\f140" !important;
+				}
+			}
+			h3 {
+				border:0;
+			}
 		}
 		h3 {
 			margin: 0 !important;
@@ -2713,23 +2707,6 @@ img.help_tip {
 	.expand_all {
 		&:before {
 			content: "\e035";
-		}
-	}
-}
-
-.mp6 {
-	.wc-metaboxes-wrapper {
-		.wc-metabox.closed {
-			.handlediv:before {
-				content: "\f140" !important;
-			}
-		}
-		.wc-metabox {
-			&.closed {
-				h3 {
-					border:0;
-				}
-			}
 		}
 	}
 }
@@ -3387,11 +3364,12 @@ table.bar_chart {
 /* Chosen multiselect enhancement
 ----------------------------------*/
 .chosen-container-single .chosen-single {
-	height: 24px;
-  	line-height: 25px;
+	height: 26px;
+  	line-height: 26px;
+  	margin-top:1px;
 }
 .chosen-container-single .chosen-single div b {
-	background: url('../images/chosen-sprite.png') no-repeat 0 2px !important;
+	background: url('../images/chosen-sprite.png') no-repeat 0 4px !important;
 }
 .chosen-container-active .chosen-single-with-drop div b {
   background-position: -18px 2px !important;
@@ -3422,16 +3400,7 @@ table.bar_chart {
 		}
 	}
 }
-.mp6 {
-	.chosen-container-single .chosen-single {
-		height: 26px;
-	  	line-height: 26px;
-	  	margin-top:1px;
-	}
-	.chosen-container-single .chosen-single div b {
-		background-position: 0 4px !important;
-	}
-}
+
 // Small screen optimisation
 @media only screen and (max-width: 1280px) {
 	#order_data {
