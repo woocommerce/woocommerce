@@ -156,7 +156,7 @@ function woocommerce_add_order_item( $order_id, $item ) {
 	$wpdb->insert(
 		$wpdb->prefix . "woocommerce_order_items",
 		array(
-			'order_item_name' 		=> $item['order_item_name'],
+			'order_item_name' 		=> html_entity_decode( $item['order_item_name'], ENT_COMPAT, 'UTF-8' ),
 			'order_item_type' 		=> $item['order_item_type'],
 			'order_id'				=> $order_id
 		),
