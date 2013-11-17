@@ -151,7 +151,6 @@ class WC_Heartbeat {
 					$('.wc_status_list .on-hold-orders a').html( data['wc_stats']['on_hold'] );
 					$('.wc_status_list .low-in-stock a').html( data['wc_stats']['low_stock'] );
 					$('.wc_status_list .out-of-stock a').html( data['wc_stats']['no_stock'] );
-					console.log( data );
 				});
 			");
 		}
