@@ -64,7 +64,7 @@ class WC_Product_Simple extends WC_Product {
 			$title = get_the_title( $this->get_parent() ) . ' &rarr; ' . $title;
 		}
 
-		return apply_filters( 'woocommerce_product_title', apply_filters( 'the_title', $title, $this->id ), $this );
+		return apply_filters( 'woocommerce_product_title', $title, $this );
 	}
 
 	/**
