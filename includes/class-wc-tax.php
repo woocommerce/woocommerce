@@ -345,14 +345,13 @@ class WC_Tax {
 	 * @return  array
 	 */
 	public function get_rates( $tax_class = '' ) {
-		global $woocommerce;
 
 		$tax_class = sanitize_title( $tax_class );
 
 		/* Checkout uses customer location for the tax rates. Also, if shipping has been calculated, use the customers address. */
-		if ( ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) || ( ! empty( $woocommerce->customer ) && $woocommerce->customer->has_calculated_shipping() ) ) {
+		if ( ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) || ( ! empty( WC()->customer ) && WC()->customer->has_calculated_shipping() ) ) {
 
-			list( $country, $state, $postcode, $city ) = $woocommerce->customer->get_taxable_address();
+			list( $country, $state, $postcode, $city ) = WC()->customer->get_taxable_address();
 
 			$matched_tax_rates = $this->find_rates( array(
 				'country' 	=> $country,
@@ -399,24 +398,23 @@ class WC_Tax {
 	 * @return  mixed
 	 */
 	public function get_shipping_tax_rates( $tax_class = null ) {
-		global $woocommerce;
 
 		// See if we have an explicitly set shipping tax class
 		if ( $shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' ) ) {
 			$tax_class = $shipping_tax_class == 'standard' ? '' : $shipping_tax_class;
 		}
 
-		if ( ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) || ( ! empty( $woocommerce->customer ) && $woocommerce->customer->has_calculated_shipping() ) ) {
+		if ( ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) || ( ! empty( WC()->customer ) && WC()->customer->has_calculated_shipping() ) ) {
 
-			list( $country, $state, $postcode, $city ) = $woocommerce->customer->get_taxable_address();
+			list( $country, $state, $postcode, $city ) = WC()->customer->get_taxable_address();
 
 		} else {
 
 			// Prices which include tax should always use the base rate if we don't know where the user is located
 			// Prices excluding tax however should just not add any taxes, as they will be added during checkout
 			if ( get_option( 'woocommerce_prices_include_tax' ) == 'yes' || get_option( 'woocommerce_default_customer_address' ) == 'base' ) {
-				$country 	= $woocommerce->countries->get_base_country();
-				$state 		= $woocommerce->countries->get_base_state();
+				$country 	= WC()->countries->get_base_country();
+				$state 		= WC()->countries->get_base_state();
 				$postcode   = '';
 				$city		= '';
 			} else {
@@ -469,8 +467,8 @@ class WC_Tax {
 			$rates = false;
 
 			// Loop cart and find the highest tax band
-			if ( sizeof( $woocommerce->cart->get_cart() ) > 0 )
-				foreach ( $woocommerce->cart->get_cart() as $item )
+			if ( sizeof( WC()->cart->get_cart() ) > 0 )
+				foreach ( WC()->cart->get_cart() as $item )
 					$found_tax_classes[] = $item['data']->get_tax_class();
 
 			$found_tax_classes = array_unique( $found_tax_classes );
@@ -553,12 +551,12 @@ class WC_Tax {
 	 * @return  string
 	 */
 	public function get_rate_label( $key ) {
-		global $wpdb, $woocommerce;
+		global $wpdb;
 
 		$rate_name = $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_name FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
 
 		if ( ! $rate_name )
-			$rate_name = $woocommerce->countries->tax_or_vat();
+			$rate_name = WC()->countries->tax_or_vat();
 
 		return apply_filters( 'woocommerce_rate_label', $rate_name, $key, $this );
 	}
