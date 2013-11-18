@@ -1511,7 +1511,10 @@ class WC_Meta_Box_Product_Data {
 			if ( $attribute['is_variation'] ) {
 
 				// Don't use woocommerce_clean as it destroys sanitized characters
-				$value = sanitize_title( trim( stripslashes( $_POST[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] ) ) );
+				if ( isset( $_POST[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] ) )
+					$value = sanitize_title( trim( stripslashes( $_POST[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] ) ) );
+				else 
+					$value = '';
 
 				if ( $value )
 					$default_attributes[ sanitize_title( $attribute['name'] ) ] = $value;

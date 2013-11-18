@@ -13,7 +13,7 @@ class WC_Shortcodes {
 	/**
 	 * Init shortcodes
 	 */
-	public function init() {
+	public static function init() {
 		// Define shortcodes
 		$shortcodes = array(
 			'product'                    => __CLASS__ . '::product',
@@ -473,13 +473,17 @@ class WC_Shortcodes {
 	  	if ( empty( $atts ) )
 	  		return;
 
-	  	if ( ! isset( $atts['style'] ) )
-	  		$atts['style'] = 'border:4px solid #ccc; padding: 12px;';
+	  	extract( shortcode_atts( array(
+			'id'         => '',
+			'sku'        => '',
+			'style'      => 'border:4px solid #ccc; padding: 12px;',
+			'show_price' => 'true'
+		), $atts ) );
 
-	  	if ( isset( $atts['id'] ) ) {
-	  		$product_data = get_post( $atts['id'] );
-		} elseif ( isset( $atts['sku'] ) ) {
-			$product_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $atts['sku'] ) );
+	  	if ( ! empty( $id ) ) {
+	  		$product_data = get_post( $id );
+		} elseif ( ! empty( $sku ) ) {
+			$product_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $sku ) );
 			$product_data = get_post( $product_id );
 		} else {
 			return;
@@ -489,9 +493,11 @@ class WC_Shortcodes {
 
 		ob_start();
 		?>
-		<p class="product woocommerce" style="<?php echo $atts['style']; ?>">
+		<p class="product woocommerce" style="<?php echo $style; ?>">
 
-			<?php echo $product->get_price_html(); ?>
+			<?php if ( $show_price == 'true' ) : ?>
+				<?php echo $product->get_price_html(); ?>
+			<?php endif; ?>
 
 			<?php woocommerce_template_loop_add_to_cart(); ?>
 
@@ -836,7 +842,7 @@ class WC_Shortcodes {
 	public static function shop_messages() {
 		ob_start();
 
-		wc_print_messages();
+		wc_print_notices();
 
 		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}

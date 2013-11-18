@@ -111,10 +111,10 @@ class WC_AJAX {
 		if ( ! empty( $_POST['coupon_code'] ) ) {
 			WC()->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
 		} else {
-			wc_add_error( WC_Coupon::get_generic_coupon_error( WC_Coupon::E_WC_COUPON_PLEASE_ENTER ) );
+			wc_add_notice( WC_Coupon::get_generic_coupon_error( WC_Coupon::E_WC_COUPON_PLEASE_ENTER ), 'error' );
 		}
 
-		wc_print_messages();
+		wc_print_notices();
 
 		die();
 	}

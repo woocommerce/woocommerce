@@ -73,15 +73,16 @@ class WC_Query {
 		// Query vars to add to WP
 		$this->query_vars = array(
 			// Checkout actions
-			'order-pay'       => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
-			'order-received'  => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
+			'order-pay'          => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
+			'order-received'     => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
 
 			// My account actions
-			'view-order'      => get_option( 'woocommerce_myaccount_view_order_endpoint', 'view-order' ),
-			'edit-account'    => get_option( 'woocommerce_myaccount_edit_account_endpoint', 'edit-account' ),
-			'edit-address'    => get_option( 'woocommerce_myaccount_edit_address_endpoint', 'edit-address' ),
-			'lost-password'   => get_option( 'woocommerce_myaccount_lost_password_endpoint', 'lost-password' ),
-			'customer-logout' => get_option( 'woocommerce_logout_endpoint', 'customer-logout' )
+			'view-order'         => get_option( 'woocommerce_myaccount_view_order_endpoint', 'view-order' ),
+			'edit-account'       => get_option( 'woocommerce_myaccount_edit_account_endpoint', 'edit-account' ),
+			'edit-address'       => get_option( 'woocommerce_myaccount_edit_address_endpoint', 'edit-address' ),
+			'lost-password'      => get_option( 'woocommerce_myaccount_lost_password_endpoint', 'lost-password' ),
+			'customer-logout'    => get_option( 'woocommerce_logout_endpoint', 'customer-logout' ),
+			'add-payment-method' => get_option( 'woocommerce_myaccount_add_payment_method_endpoint', 'add-payment-method' ),
 		);
 	}
 
@@ -90,7 +91,7 @@ class WC_Query {
 	 */
 	public function get_errors() {
 		if ( isset( $_GET['wc_error'] ) )
-			wc_add_error( esc_attr( $_GET['wc_error'] ) );
+			wc_add_notice( esc_attr( $_GET['wc_error'] ), 'error' );
 	}
 
 	/**
@@ -628,10 +629,10 @@ class WC_Query {
 			if ( $attribute_taxonomies ) {
 				foreach ( $attribute_taxonomies as $tax ) {
 
-			    	$attribute = sanitize_title( $tax->attribute_name );
-			    	$taxonomy = wc_attribute_taxonomy_name( $attribute );
-			    	$name = 'filter_' . $attribute;
-			    	$query_type_name = 'query_type_' . $attribute;
+					$attribute       = woocommerce_sanitize_taxonomy_name( $tax->attribute_name );
+					$taxonomy        = wc_attribute_taxonomy_name( $attribute );
+					$name            = 'filter_' . $attribute;
+					$query_type_name = 'query_type_' . $attribute;
 
 			    	if ( ! empty( $_GET[ $name ] ) && taxonomy_exists( $taxonomy ) ) {
 

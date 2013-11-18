@@ -49,6 +49,13 @@ function woocommerce_template_redirect() {
 		}
 	}
 
+	// Ensure payment gateways are loaded early
+	elseif ( is_add_payment_method_page() ) {
+
+		WC()->payment_gateways();
+
+	}
+
 	// Checkout pages handling
 	elseif ( is_checkout() ) {
 		// Buffer the checkout page
@@ -421,9 +428,11 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 	function woocommerce_product_archive_description() {
 		if ( is_post_type_archive( 'product' ) && get_query_var( 'paged' ) == 0 ) {
 			$shop_page   = get_post( woocommerce_get_page_id( 'shop' ) );
-			$description = apply_filters( 'the_content', $shop_page->post_content );
-			if ( $description ) {
-				echo '<div class="page-description">' . $description . '</div>';
+			if ( $shop_page ) {
+				$description = apply_filters( 'the_content', $shop_page->post_content );
+				if ( $description ) {
+					echo '<div class="page-description">' . $description . '</div>';
+				}
 			}
 		}
 	}
@@ -1285,7 +1294,7 @@ if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 
 		$defaults = apply_filters( 'woocommerce_breadcrumb_defaults', array(
 			'delimiter'   => ' &#47; ',
-			'wrap_before' => '<nav class="woocommerce-breadcrumb" itemprop="breadcrumb">',
+			'wrap_before' => '<nav class="woocommerce-breadcrumb" ' . ( is_single() ? 'itemprop="breadcrumb"' : '' ) . '>',
 			'wrap_after'  => '</nav>',
 			'before'      => '',
 			'after'       => '',

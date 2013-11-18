@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 	/**
 	 * woocommerce_before_single_product hook
 	 *
-	 * @hooked wc_print_messages - 10
+	 * @hooked wc_print_notices - 10
 	 */
 	 do_action( 'woocommerce_before_single_product' );
 

@@ -23,7 +23,7 @@ class WC_Frontend_Scripts {
 				'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce-layout.css',
 				'deps'    => '',
 				'version' => WC_VERSION,
-				'media'   => ''
+				'media'   => 'all'
 			),
 			'woocommerce-smallscreen' => array(
 				'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce-smallscreen.css',
@@ -35,7 +35,7 @@ class WC_Frontend_Scripts {
 				'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce.css',
 				'deps'    => '',
 				'version' => WC_VERSION,
-				'media'   => ''
+				'media'   => 'all'
 			),
 		) );
 	}
@@ -82,6 +82,9 @@ class WC_Frontend_Scripts {
 
 			wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce', 'wc-country-select' ), WC_VERSION, true );
 		}
+
+		if ( is_add_payment_method_page() )
+			wp_enqueue_script( 'wc-add-payment-method', $frontend_script_path . 'add-payment-method' . $suffix . '.js', array( 'jquery', 'woocommerce' ), WC_VERSION, true );
 
 		if ( $lightbox_en && ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) ) {
 			wp_enqueue_script( 'prettyPhoto', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js', array( 'jquery' ), '3.1.5', true );

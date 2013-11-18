@@ -283,13 +283,13 @@ class WC_Cart {
 			$result = $this->check_cart_item_validity();
 
 			if ( is_wp_error( $result ) )
-				wc_add_error( $result->get_error_message() );
+				wc_add_notice( $result->get_error_message(), 'error' );
 
 			// Check item stock
 			$result = $this->check_cart_item_stock();
 
 			if ( is_wp_error( $result ) )
-				wc_add_error( $result->get_error_message() );
+				wc_add_notice( $result->get_error_message(), 'error' );
 		}
 
 		/**
@@ -485,19 +485,24 @@ class WC_Cart {
 					if ( ! $value )
 						continue;
 
+					$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
+
 					// If this is a term slug, get the term's nice name
-		            if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $name ) ) ) ) {
-		            	$term = get_term_by( 'slug', $value, esc_attr( str_replace( 'attribute_', '', $name ) ) );
-		            	if ( ! is_wp_error( $term ) && $term->name )
+		            if ( taxonomy_exists( $taxonomy ) ) {
+		            	$term = get_term_by( 'slug', $value, $taxonomy );
+		            	if ( ! is_wp_error( $term ) && $term->name ) {
 		            		$value = $term->name;
+		            	}
+		            	$label = wc_attribute_label( $taxonomy );
 
 		            // If this is a custom option slug, get the options name
 		            } else {
 		            	$value = apply_filters( 'woocommerce_variation_option_name', $value );
+		            	$label = wc_attribute_label( urldecode( $name ) );
 					}
 
 					$item_data[] = array(
-						'key'   => wc_attribute_label( str_replace( 'attribute_', '', $name ) ),
+						'key'   => $label,
 						'value' => $value
 					);
 				}
@@ -740,19 +745,19 @@ class WC_Cart {
 
 			// Check product is_purchasable
 			if ( ! $product_data->is_purchasable() ) {
-				wc_add_error( sprintf( __( 'Sorry, &quot;%s&quot; cannot be purchased.', 'woocommerce' ), $product_data->get_title() ) );
+				wc_add_notice( sprintf( __( 'Sorry, &quot;%s&quot; cannot be purchased.', 'woocommerce' ), $product_data->get_title() ), 'error' );
 				return false;
 			}
 
 			// Stock check - only check if we're managing stock and backorders are not allowed
 			if ( ! $product_data->is_in_stock() ) {
 
-				wc_add_error( sprintf( __( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woocommerce' ), $product_data->get_title() ) );
+				wc_add_notice( sprintf( __( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woocommerce' ), $product_data->get_title() ), 'error' );
 
 				return false;
 			} elseif ( ! $product_data->has_enough_stock( $quantity ) ) {
 
-				wc_add_error( sprintf(__( 'You cannot add that amount of &quot;%s&quot; to the cart because there is not enough stock (%s remaining).', 'woocommerce' ), $product_data->get_title(), $product_data->get_stock_quantity() ));
+				wc_add_notice( sprintf(__( 'You cannot add that amount of &quot;%s&quot; to the cart because there is not enough stock (%s remaining).', 'woocommerce' ), $product_data->get_title(), $product_data->get_stock_quantity() ), 'error' );
 
 				return false;
 			}
@@ -763,7 +768,7 @@ class WC_Cart {
 
 				// If its greater than 0, its already in the cart
 				if ( $in_cart_quantity > 0 ) {
-					wc_add_error( sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', get_permalink( woocommerce_get_page_id( 'cart' ) ), __( 'View Cart', 'woocommerce' ), sprintf( __( 'You cannot add another &quot;%s&quot; to your cart.', 'woocommerce' ), $product_data->get_title() ) ) );
+					wc_add_notice( sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', get_permalink( woocommerce_get_page_id( 'cart' ) ), __( 'View Cart', 'woocommerce' ), sprintf( __( 'You cannot add another &quot;%s&quot; to your cart.', 'woocommerce' ), $product_data->get_title() ) ), 'error' );
 					return false;
 				}
 			}
@@ -777,7 +782,7 @@ class WC_Cart {
 				if ( $variation_id && $product_data->variation_has_stock ) {
 
 					if ( isset( $product_qty_in_cart[ $variation_id ] ) && ! $product_data->has_enough_stock( $product_qty_in_cart[ $variation_id ] + $quantity ) ) {
-						wc_add_error( sprintf(__( '<a href="%s" class="button wc-forward">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), get_permalink( woocommerce_get_page_id( 'cart' ) ), __( 'View Cart', 'woocommerce' ), $product_data->get_stock_quantity(), $product_qty_in_cart[ $variation_id ] ));
+						wc_add_notice( sprintf(__( '<a href="%s" class="button wc-forward">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), get_permalink( woocommerce_get_page_id( 'cart' ) ), __( 'View Cart', 'woocommerce' ), $product_data->get_stock_quantity(), $product_qty_in_cart[ $variation_id ] ), 'error' );
 						return false;
 					}
 
@@ -785,7 +790,7 @@ class WC_Cart {
 				} else {
 
 					if ( isset( $product_qty_in_cart[ $product_id ] ) && ! $product_data->has_enough_stock( $product_qty_in_cart[ $product_id ] + $quantity ) ) {
-						wc_add_error( sprintf(__( '<a href="%s" class="button wc-forward">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), get_permalink( woocommerce_get_page_id( 'cart' ) ), __( 'View Cart', 'woocommerce' ), $product_data->get_stock_quantity(), $product_qty_in_cart[ $product_id ] ));
+						wc_add_notice( sprintf(__( '<a href="%s" class="button wc-forward">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), get_permalink( woocommerce_get_page_id( 'cart' ) ), __( 'View Cart', 'woocommerce' ), $product_data->get_stock_quantity(), $product_qty_in_cart[ $product_id ] ), 'error' );
 						return false;
 					}
 
@@ -1455,7 +1460,7 @@ class WC_Cart {
 
 				// Check it can be used with cart
 				if ( ! $the_coupon->is_valid() ) {
-					wc_add_error( $the_coupon->get_error_message() );
+					wc_add_notice( $the_coupon->get_error_message(), 'error' );
 					return false;
 				}
 
