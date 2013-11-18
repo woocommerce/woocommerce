@@ -547,9 +547,9 @@ class WC_Coupon {
 		global $woocommerce;
 
 		if ( $msg_code < 200 )
-			wc_add_error( $this->get_coupon_error( $msg_code ) );
+			wc_add_notice( $this->get_coupon_error( $msg_code ), 'error' );
 		else
-			wc_add_message( $this->get_coupon_message( $msg_code ) );
+			wc_add_notice( $this->get_coupon_message( $msg_code ) );
 	}
 
 	/**
