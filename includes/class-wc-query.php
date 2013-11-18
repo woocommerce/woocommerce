@@ -629,10 +629,10 @@ class WC_Query {
 			if ( $attribute_taxonomies ) {
 				foreach ( $attribute_taxonomies as $tax ) {
 
-			    	$attribute = sanitize_title( $tax->attribute_name );
-			    	$taxonomy = wc_attribute_taxonomy_name( $attribute );
-			    	$name = 'filter_' . $attribute;
-			    	$query_type_name = 'query_type_' . $attribute;
+					$attribute       = woocommerce_sanitize_taxonomy_name( $tax->attribute_name );
+					$taxonomy        = wc_attribute_taxonomy_name( $attribute );
+					$name            = 'filter_' . $attribute;
+					$query_type_name = 'query_type_' . $attribute;
 
 			    	if ( ! empty( $_GET[ $name ] ) && taxonomy_exists( $taxonomy ) ) {
 
