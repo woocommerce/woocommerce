@@ -13,7 +13,7 @@ class WC_Shortcodes {
 	/**
 	 * Init shortcodes
 	 */
-	public function init() {
+	public static function init() {
 		// Define shortcodes
 		$shortcodes = array(
 			'product'                    => __CLASS__ . '::product',

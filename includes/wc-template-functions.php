@@ -49,6 +49,13 @@ function woocommerce_template_redirect() {
 		}
 	}
 
+	// Ensure payment gateways are loaded early
+	elseif ( is_add_payment_method_page() ) {
+
+		WC()->payment_gateways();
+
+	}
+
 	// Checkout pages handling
 	elseif ( is_checkout() ) {
 		// Buffer the checkout page

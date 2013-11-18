@@ -32,6 +32,7 @@ class WC_Form_Handler {
 		add_action( 'init', array( $this, 'add_to_cart_action' ) );
 
 		add_action( 'wp', array( $this, 'pay_action' ), 20 );
+		add_action( 'wp', array( $this, 'add_payment_method_action' ), 20 );
 	}
 
 	/**
@@ -283,6 +284,40 @@ class WC_Form_Handler {
 			}
 
 		}
+	}
+
+	/**
+	 * Process the add payment method form.
+	 */
+	public function add_payment_method_action() {
+		global $wp;
+
+		if ( isset( $_POST['woocommerce_add_payment_method'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-add-payment-method' ) ) {
+
+			ob_start();
+
+			$payment_method = woocommerce_clean( $_POST['payment_method'] );
+
+			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+
+			// Validate
+			$available_gateways[ $payment_method ]->validate_fields();
+
+			// Process
+			if ( wc_error_count() == 0 ) {
+				$result = $available_gateways[ $payment_method ]->add_payment_method();
+
+				// Redirect to success/confirmation/payment page
+				if ( $result['result'] == 'success' ) {
+					wc_add_message( __( 'Payment method added.', 'woocommerce' ) );
+					wp_redirect( $result['redirect'] );
+					exit();
+				}
+
+			}
+
+		}
+
 	}
 
 	/**
