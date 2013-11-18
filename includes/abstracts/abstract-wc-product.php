@@ -115,8 +115,7 @@ class WC_Product {
 			$attachment_ids = array_diff( $attachment_ids, array( get_post_thumbnail_id() ) );
 			$this->product_image_gallery = implode( ',', $attachment_ids );
 		}
-
-		return array_filter( (array) explode( ',', $this->product_image_gallery ) );
+		return apply_filters( 'woocommerce_product_gallery_attachment_ids', array_filter( (array) explode( ',', $this->product_image_gallery ) ), $this );
 	}
 
 	/**
