@@ -63,6 +63,10 @@ class WC_Shortcode_My_Account {
 
 				self::edit_address( sanitize_title( $wp->query_vars['edit-address'] ) );
 
+			} elseif ( isset( $wp->query_vars['add-payment-method'] ) ) {
+
+				self::add_payment_method( $wp->query_vars['add-payment-method'] );
+
 			} else {
 
 				self::my_account( $atts );
@@ -346,5 +350,35 @@ class WC_Shortcode_My_Account {
 		wp_set_password( $new_pass, $user->ID );
 
 		wp_password_change_notification( $user );
+	}
+
+	/**
+	 * Show the add payment method page
+	 */
+	private static function add_payment_method() {
+		global $woocommerce;
+
+		if ( ! is_user_logged_in() ) {
+
+			wp_safe_redirect( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
+			exit();
+
+		} else {
+
+			do_action( 'before_woocommerce_add_payment_method' );
+
+			wc_add_notice( __( 'Add a new payment method.', 'woocommerce' ) );
+
+			wc_print_messages();
+
+			// Add payment method form
+			woocommerce_get_template( 'myaccount/form-add-payment-method.php' );
+
+			wc_print_messages();
+
+			do_action( 'after_woocommerce_add_payment_method' );
+
+		}
+
 	}
 }

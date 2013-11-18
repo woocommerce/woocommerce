@@ -135,7 +135,12 @@ class WC_Payment_Gateways {
 
 		foreach ( $this->payment_gateways as $gateway ) :
 
-			if ($gateway->is_available()) $_available_gateways[$gateway->id] = $gateway;
+			if ( $gateway->is_available() ) {
+				if ( ! is_add_payment_method_page() )
+					$_available_gateways[$gateway->id] = $gateway;
+				elseif( $gateway->supports( 'add_payment_method' ) )
+					$_available_gateways[$gateway->id] = $gateway;
+			}
 
 		endforeach;
 
