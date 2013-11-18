@@ -46,7 +46,7 @@ class WC_Install {
 		// Install - Add pages button
 		if ( ! empty( $_GET['install_woocommerce_pages'] ) ) {
 
-			$this->create_pages();
+			self::create_pages();
 
 			// We no longer need to install pages
 			delete_option( '_wc_needs_pages' );
