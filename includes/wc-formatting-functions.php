@@ -74,7 +74,7 @@ function woocommerce_get_dimension( $dim, $to_unit ) {
 				$dim *= 0.1;
 			break;
 			case 'yd':
-				$dim *= 0.010936133;
+				$dim *= 91.44;
 			break;
 		}
 
@@ -90,7 +90,7 @@ function woocommerce_get_dimension( $dim, $to_unit ) {
 				$dim *= 10;
 			break;
 			case 'yd':
-				$dim *= 91.44;
+				$dim *= 0.010936133;
 			break;
 		}
 	}
