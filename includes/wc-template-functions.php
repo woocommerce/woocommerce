@@ -428,9 +428,11 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 	function woocommerce_product_archive_description() {
 		if ( is_post_type_archive( 'product' ) && get_query_var( 'paged' ) == 0 ) {
 			$shop_page   = get_post( woocommerce_get_page_id( 'shop' ) );
-			$description = apply_filters( 'the_content', $shop_page->post_content );
-			if ( $description ) {
-				echo '<div class="page-description">' . $description . '</div>';
+			if ( $shop_page ) {
+				$description = apply_filters( 'the_content', $shop_page->post_content );
+				if ( $description ) {
+					echo '<div class="page-description">' . $description . '</div>';
+				}
 			}
 		}
 	}

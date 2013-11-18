@@ -485,19 +485,24 @@ class WC_Cart {
 					if ( ! $value )
 						continue;
 
+					$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
+
 					// If this is a term slug, get the term's nice name
-		            if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $name ) ) ) ) {
-		            	$term = get_term_by( 'slug', $value, esc_attr( str_replace( 'attribute_', '', $name ) ) );
-		            	if ( ! is_wp_error( $term ) && $term->name )
+		            if ( taxonomy_exists( $taxonomy ) ) {
+		            	$term = get_term_by( 'slug', $value, $taxonomy );
+		            	if ( ! is_wp_error( $term ) && $term->name ) {
 		            		$value = $term->name;
+		            	}
+		            	$label = wc_attribute_label( $taxonomy );
 
 		            // If this is a custom option slug, get the options name
 		            } else {
 		            	$value = apply_filters( 'woocommerce_variation_option_name', $value );
+		            	$label = wc_attribute_label( urldecode( $name ) );
 					}
 
 					$item_data[] = array(
-						'key'   => wc_attribute_label( str_replace( 'attribute_', '', $name ) ),
+						'key'   => $label,
 						'value' => $value
 					);
 				}
