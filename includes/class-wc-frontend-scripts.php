@@ -23,7 +23,7 @@ class WC_Frontend_Scripts {
 				'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce-layout.css',
 				'deps'    => '',
 				'version' => WC_VERSION,
-				'media'   => ''
+				'media'   => 'all'
 			),
 			'woocommerce-smallscreen' => array(
 				'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce-smallscreen.css',
@@ -35,7 +35,7 @@ class WC_Frontend_Scripts {
 				'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce.css',
 				'deps'    => '',
 				'version' => WC_VERSION,
-				'media'   => ''
+				'media'   => 'all'
 			),
 		) );
 	}
