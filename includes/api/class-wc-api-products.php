@@ -208,7 +208,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			$reviews[] = array(
 				'id'             => $comment->comment_ID,
-				'created_at'     => $comment->comment_date_gmt, // TODO: date formatting
+				'created_at'     => $this->server->format_datetime( $comment->comment_date_gmt ),
 				'review'         => $comment->comment_content,
 				'rating'         => get_comment_meta( $comment->comment_ID, 'rating', true ),
 				'reviewer_name'  => $comment->comment_author,
@@ -240,19 +240,18 @@ class WC_API_Products extends WC_API_Resource {
 
 		if ( ! empty( $args['type'] ) ) {
 
+			$types = explode( ',', $args['type'] );
+
 			$query_args['tax_query'] = array(
 				array(
 					'taxonomy' => 'product_type',
 					'field'    => 'slug',
-					'terms'    => $args['type'],
+					'terms'    => $types,
 				),
 			);
 
 			unset( $args['type'] );
 		}
-
-		// TODO: some param to show hidden products, but hide by default
-		$query_args['meta_query'][] = WC()->query->visibility_meta_query();
 
 		$query_args = $this->merge_query_args( $query_args, $args );
 
@@ -271,23 +270,23 @@ class WC_API_Products extends WC_API_Resource {
 		return array(
 			'title'              => $product->get_title(),
 			'id'                 => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->id,
-			'created_at'         => $product->get_post_data()->post_date_gmt, // TODO: date formatting
-			'updated_at'         => $product->get_post_data()->post_modified_gmt, // TODO: date formatting
+			'created_at'         => $this->server->format_datetime( $product->get_post_data()->post_date_gmt ),
+			'updated_at'         => $this->server->format_datetime( $product->get_post_data()->post_modified_gmt ),
 			'type'               => $product->product_type,
 			'status'             => $product->get_post_data()->post_status,
 			'downloadable'       => $product->is_downloadable(),
 			'virtual'            => $product->is_virtual(),
 			'permalink'          => $product->get_permalink(),
 			'sku'                => $product->get_sku(),
-			'price'              => (string) $product->get_price(),
-			'regular_price'      => (string) $product->get_regular_price(),
-			'sale_price'         => (string) $product->get_sale_price(),
+			'price'              => woocommerce_format_decimal( $product->get_price() ),
+			'regular_price'      => woocommerce_format_decimal( $product->get_regular_price() ),
+			'sale_price'         => $product->get_sale_price() ? woocommerce_format_decimal( $product->get_sale_price() ) : null,
 			'price_html'         => $product->get_price_html(),
 			'taxable'            => $product->is_taxable(),
 			'tax_status'         => $product->get_tax_status(),
 			'tax_class'          => $product->get_tax_class(),
 			'managing_stock'     => $product->managing_stock(),
-			'stock_quantity'     => (string) $product->get_stock_quantity(),
+			'stock_quantity'     => (int) $product->get_stock_quantity(),
 			'in_stock'           => $product->is_in_stock(),
 			'backorders_allowed' => $product->backorders_allowed(),
 			'backordered'        => $product->is_on_backorder(),
@@ -297,7 +296,7 @@ class WC_API_Products extends WC_API_Resource {
 			'visible'            => $product->is_visible(),
 			'catalog_visibility' => $product->visibility,
 			'on_sale'            => $product->is_on_sale(),
-			'weight'             => $product->get_weight(),
+			'weight'             => $product->get_weight() ? woocommerce_format_decimal( $product->get_weight() ) : null,
 			'dimensions'         => array(
 				'length' => $product->length,
 				'width'  => $product->width,
@@ -311,18 +310,18 @@ class WC_API_Products extends WC_API_Resource {
 			'description'        => apply_filters( 'the_content', $product->get_post_data()->post_content ),
 			'short_description'  => apply_filters( 'woocommerce_short_description', $product->get_post_data()->post_excerpt ),
 			'reviews_allowed'    => ( 'open' === $product->get_post_data()->comment_status ),
-			'average_rating'     => $product->get_average_rating(),
-			'rating_count'       => $product->get_rating_count(),
-			'related_ids'        => array_values( $product->get_related() ),
-			'upsell_ids'         => $product->get_upsells(),
-			'cross_sell_ids'     => $product->get_cross_sells(),
+			'average_rating'     => woocommerce_format_decimal( $product->get_average_rating() ),
+			'rating_count'       => (int) $product->get_rating_count(),
+			'related_ids'        => array_map( 'absint', array_values( $product->get_related() ) ),
+			'upsell_ids'         => array_map( 'absint', $product->get_upsells() ),
+			'cross_sell_ids'     => array_map( 'absint', $product->get_cross_sells() ),
 			'categories'         => wp_get_post_terms( $product->id, 'product_cat', array( 'fields' => 'names' ) ),
 			'tags'               => wp_get_post_terms( $product->id, 'product_tag', array( 'fields' => 'names' ) ),
 			'images'             => $this->get_images( $product ),
 			'attributes'         => $this->get_attributes( $product ),
 			'downloads'          => $this->get_downloads( $product ),
-			'download_limit'     => $product->download_limit,
-			'download_expiry'    => $product->download_expiry,
+			'download_limit'     => (int) $product->download_limit,
+			'download_expiry'    => (int) $product->download_expiry,
 			'download_type'      => $product->download_type,
 			'purchase_note'      => apply_filters( 'the_content', $product->purchase_note ),
 			'variations'         => array(),
@@ -350,25 +349,25 @@ class WC_API_Products extends WC_API_Resource {
 
 			$variations[] = array(
 				'id'                => $variation->get_variation_id(),
-				'created_at'        => $variation->get_post_data()->post_date_gmt, // TODO: date formatting
-				'updated_at'        => $variation->get_post_data()->post_modified_gmt, // TODO: date formatting
+				'created_at'        => $this->server->format_datetime( $variation->get_post_data()->post_date_gmt ),
+				'updated_at'        => $this->server->format_datetime( $variation->get_post_data()->post_modified_gmt ),
 				'downloadable'      => $variation->is_downloadable(),
 				'virtual'           => $variation->is_virtual(),
 				'permalink'         => $variation->get_permalink(),
 				'sku'               => $variation->get_sku(),
-				'price'             => (string) $variation->get_price(),
-				'regular_price'     => (string) $variation->get_regular_price(),
-				'sale_price'        => (string) $variation->get_sale_price(),
+				'price'             => woocommerce_format_decimal( $variation->get_price() ),
+				'regular_price'     => woocommerce_format_decimal( $variation->get_regular_price() ),
+				'sale_price'        => $variation->get_sale_price() ? woocommerce_format_decimal( $variation->get_sale_price() ) : null,
 				'taxable'           => $variation->is_taxable(),
 				'tax_status'        => $variation->get_tax_status(),
 				'tax_class'         => $variation->get_tax_class(),
-				'stock_quantity'    => (string) $variation->get_stock_quantity(),
+				'stock_quantity'    => (int) $variation->get_stock_quantity(),
 				'in_stock'          => $variation->is_in_stock(),
 				'backordered'       => $variation->is_on_backorder(),
 				'purchaseable'      => $variation->is_purchasable(),
 				'visible'           => $variation->variation_is_visible(),
 				'on_sale'           => $variation->is_on_sale(),
-				'weight'            => $variation->get_weight(),
+				'weight'            => $variation->get_weight() ? woocommerce_format_decimal( $variation->get_weight() ) : null,
 				'dimensions'        => array(
 					'length' => $variation->length,
 					'width'  => $variation->width,
@@ -380,8 +379,8 @@ class WC_API_Products extends WC_API_Resource {
 				'image'             => $this->get_images( $variation ),
 				'attributes'        => $this->get_attributes( $variation ),
 				'downloads'         => $this->get_downloads( $variation ),
-				'download_limit'    => $product->download_limit,
-				'download_expiry'   => $product->download_expiry,
+				'download_limit'    => (int) $product->download_limit,
+				'download_expiry'   => (int) $product->download_expiry,
 			);
 		}
 
@@ -438,7 +437,8 @@ class WC_API_Products extends WC_API_Resource {
 
 			$images[] = array(
 				'id'         => (int) $attachment_id,
-				'created_at' => $attachment_post->post_date_gmt, // TODO: date formatting
+				'created_at' => $this->server->format_datetime( $attachment_post->post_date_gmt ),
+				'updated_at' => $this->server->format_datetime( $attachment_post->post_modified_gmt ),
 				'src'        => current( $attachment ),
 				'title'      => get_the_title( $attachment_id ),
 				'alt'        => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
@@ -451,7 +451,8 @@ class WC_API_Products extends WC_API_Resource {
 
 			$images[] = array(
 				'id'         => 0,
-				'created_at' => gmdate( 'Y-m-d H:i:s' ), // TODO: date formatting
+				'created_at' => $this->server->format_datetime( time() ), // default to now
+				'updated_at' => $this->server->format_datetime( time() ),
 				'src'        => woocommerce_placeholder_img_src(),
 				'title'      => __( 'Placeholder', 'woocommerce' ),
 				'alt'        => __( 'Placeholder', 'woocommerce' ),

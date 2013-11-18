@@ -571,71 +571,72 @@ class WC_API_Server {
 	}
 
 	/**
-	 * Parse an RFC3339 timestamp into a DateTime
+	 * Parse an RFC3339 datetime into a MySQl datetime
 	 *
-	 * @param string $date RFC3339 timestamp
-	 * @param boolean $force_utc Force UTC timezone instead of using the timestamp's TZ?
-	 * @return DateTime
+	 * Invalid dates default to unix epoch
+	 *
+	 * @since 2.1
+	 * @param string $datetime RFC3339 datetime
+	 * @return string MySQl datetime (YYYY-MM-DD HH:MM:SS)
 	 */
-	public function parse_date( $date, $force_utc = false ) {
-		// Default timezone to the server's current one
-		$timezone = self::get_timezone();
-		if ( $force_utc ) {
-			$date = preg_replace( '/[+-]\d+:?\d+$/', '+00:00', $date );
+	public function parse_datetime( $datetime ) {
+
+		// Strip millisecond precision (a full stop followed by one or more digits)
+		if ( strpos( $datetime, '.' ) !== false ) {
+			$datetime = preg_replace( '/\.\d+/', '', $datetime );
+		}
+
+		// default timezone to UTC
+		$datetime = preg_replace( '/[+-]\d+:+\d+$/', '+00:00', $datetime );
+
+		try {
+
+			$datetime = new DateTime( $datetime, new DateTimeZone( 'UTC' ) );
+
+		} catch ( Exception $e ) {
+
+			$datetime = new DateTime( '@0' );
+
+		}
+
+		return $datetime->format( 'Y-m-d H:i:s' );
+	}
+
+	/**
+	 * Format a unix timestamp or MySQL datetime into an RFC3339 datetime
+	 *
+	 * @since 2.1
+	 * @param int|string $timestamp unix timestamp or MySQL datetime
+	 * @param bool $convert_to_utc
+	 * @return string RFC3339 datetime
+	 */
+	public function format_datetime( $timestamp, $convert_to_utc = false ) {
+
+		if ( $convert_to_utc ) {
+			$timezone = new DateTimeZone( woocommerce_timezone_string() );
+		} else {
 			$timezone = new DateTimeZone( 'UTC' );
 		}
 
-		// Strip millisecond precision (a full stop followed by one or more digits)
-		if ( strpos( $date, '.' ) !== false ) {
-			$date = preg_replace( '/\.\d+/', '', $date );
+		try {
+
+			if ( is_numeric( $timestamp ) ) {
+				$date = new DateTime( "@{$timestamp}" );
+			} else {
+				$date = new DateTime( $timestamp, $timezone );
+			}
+
+			// convert to UTC by adjusting the time based on the offset of the site's timezone
+			if ( $convert_to_utc ) {
+				$date->modify( -1 * $date->getOffset() . ' seconds' );
+			}
+
+		} catch ( Exception $e ) {
+
+			$date = new DateTime( '@0' );
 		}
-		$datetime = DateTime::createFromFormat( DateTime::RFC3339, $date ); // TODO: rewrite, PHP 5.3+ required for this
 
-		return $datetime;
-	}
-
-	/**
-	 * Get a local date with its GMT equivalent, in MySQL datetime format
-	 *
-	 * @param string $date RFC3339 timestamp
-	 * @param boolean $force_utc Should we force UTC timestamp?
-	 * @return array Local and UTC datetime strings, in MySQL datetime format (Y-m-d H:i:s)
-	 */
-	public function get_date_with_gmt( $date, $force_utc = false ) {
-		$datetime = $this->parse_date( $date, $force_utc );
-
-		$datetime->setTimezone( self::get_timezone() );
-		$local = $datetime->format( 'Y-m-d H:i:s' );
-
-		$datetime->setTimezone( new DateTimeZone( 'UTC' ) );
-		$utc = $datetime->format('Y-m-d H:i:s');
-
-		return array( $local, $utc );
-	}
-
-	/**
-	 * Get the timezone object for the site
-	 *
-	 * @return DateTimeZone
-	 */
-	public function get_timezone() {
-		static $zone = null;
-		if ($zone !== null)
-			return $zone;
-
-		$tzstring = get_option( 'timezone_string' );
-		if ( ! $tzstring ) {
-			// Create a UTC+- zone if no timezone string exists
-			$current_offset = get_option( 'gmt_offset' );
-			if ( 0 == $current_offset )
-				$tzstring = 'UTC';
-			elseif ($current_offset < 0)
-				$tzstring = 'Etc/GMT' . $current_offset;
-			else
-				$tzstring = 'Etc/GMT+' . $current_offset;
-		}
-		$zone = new DateTimeZone( $tzstring );
-		return $zone;
+		return $date->format( 'Y-m-d\TH:i:s\Z' );
 	}
 
 	/**

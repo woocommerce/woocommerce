@@ -76,6 +76,9 @@ class WC_API_Orders extends WC_API_Resource {
 
 		foreach( $query->posts as $order_id ) {
 
+			if ( ! $this->is_readable( $order_id ) )
+				continue;
+
 			$orders[] = $this->get_order( $order_id, $fields );
 		}
 
@@ -103,23 +106,25 @@ class WC_API_Orders extends WC_API_Resource {
 
 		$order = new WC_Order( $id );
 
+		$order_post = get_post( $id );
+
 		$order_data = array(
 			'id'                        => $order->id,
 			'order_number'              => $order->get_order_number(),
-			'created_at'                => $order->order_date,
-			'updated_at'                => $order->modified_date,
-			'completed_at'              => $order->completed_date,
+			'created_at'                => $this->server->format_datetime( $order_post->post_date_gmt ),
+			'updated_at'                => $this->server->format_datetime( $order_post->post_modified_gmt ),
+			'completed_at'              => $this->server->format_datetime( $order->completed_date, true ),
 			'status'                    => $order->status,
 			'currency'                  => $order->order_currency,
-			'total'                     => (string) $order->get_total(),
-			'total_line_items_quantity' => (string) $order->get_item_count(),
-			'total_tax'                 => (string) $order->get_total_tax(),
-			'total_shipping'            => (string) $order->get_total_shipping(),
-			'cart_tax'                  => (string) $order->get_cart_tax(),
-			'shipping_tax'              => (string) $order->get_shipping_tax(),
-			'total_discount'            => (string) $order->get_total_discount(),
-			'cart_discount'             => (string) $order->get_cart_discount(),
-			'order_discount'            => (string) $order->get_order_discount(),
+			'total'                     => woocommerce_format_decimal( $order->get_total() ),
+			'total_line_items_quantity' => $order->get_item_count(),
+			'total_tax'                 => woocommerce_format_decimal( $order->get_total_tax() ),
+			'total_shipping'            => woocommerce_format_decimal( $order->get_total_shipping() ),
+			'cart_tax'                  => woocommerce_format_decimal( $order->get_cart_tax() ),
+			'shipping_tax'              => woocommerce_format_decimal( $order->get_shipping_tax() ),
+			'total_discount'            => woocommerce_format_decimal( $order->get_total_discount() ),
+			'cart_discount'             => woocommerce_format_decimal( $order->get_cart_discount() ),
+			'order_discount'            => woocommerce_format_decimal( $order->get_order_discount() ),
 			'shipping_methods'          => $order->get_shipping_method(),
 			'payment_details' => array(
 				'method_id'    => $order->payment_method,
@@ -169,10 +174,10 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$order_data['line_items'][] = array(
 				'id'         => $item_id,
-				'subtotal'   => (string) $order->get_line_subtotal( $item ),
-				'total'      => (string) $order->get_line_total( $item ),
-				'total_tax'  => (string) $order->get_line_tax( $item ),
-				'quantity'   => (string) $item['qty'],
+				'subtotal'   => woocommerce_format_decimal( $order->get_line_subtotal( $item ) ),
+				'total'      => woocommerce_format_decimal( $order->get_line_total( $item ) ),
+				'total_tax'  => woocommerce_format_decimal( $order->get_line_tax( $item ) ),
+				'quantity'   => (int) $item['qty'],
 				'tax_class'  => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
 				'name'       => $item['name'],
 				'product_id' => ( isset( $product->variation_id ) ) ? $product->variation_id : $product->id,
@@ -187,7 +192,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'id'           => $shipping_item_id,
 				'method_id'    => $shipping_item['method_id'],
 				'method_title' => $shipping_item['name'],
-				'total'        => (string) number_format( $shipping_item['cost'], 2 )
+				'total'        => woocommerce_format_decimal( $shipping_item['cost'] ),
 			);
 		}
 
@@ -197,7 +202,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_data['tax_lines'][] = array(
 				'code'     => $tax_code,
 				'title'    => $tax->label,
-				'total'    => (string) $tax->amount,
+				'total'    => woocommerce_format_decimal( $tax->amount ),
 				'compound' => (bool) $tax->is_compound,
 			);
 		}
@@ -209,8 +214,8 @@ class WC_API_Orders extends WC_API_Resource {
 				'id'        => $fee_item_id,
 				'title'     => $fee_item['name'],
 				'tax_class' => ( ! empty( $fee_item['tax_class'] ) ) ? $fee_item['tax_class'] : null,
-				'total'     => (string) $order->get_line_total( $fee_item ),
-				'total_tax' => (string) $order->get_line_tax( $fee_item ),
+				'total'     => woocommerce_format_decimal( $order->get_line_total( $fee_item ) ),
+				'total_tax' => woocommerce_format_decimal( $order->get_line_tax( $fee_item ) ),
 			);
 		}
 
@@ -220,7 +225,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_data['coupon_lines'] = array(
 				'id'     => $coupon_item_id,
 				'code'   => $coupon_item['name'],
-				'amount' => (string) number_format( $coupon_item['discount_amount'], 2),
+				'amount' => woocommerce_format_decimal( $coupon_item['discount_amount'] ),
 			);
 		}
 
@@ -263,7 +268,7 @@ class WC_API_Orders extends WC_API_Resource {
 		if ( is_wp_error( $id ) )
 			return $id;
 
-		// TODO: implement
+		// TODO: implement, especially for status change
 
 		return $this->get_order( $id );
 	}
@@ -317,7 +322,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$order_notes[] = array(
 				'id'            => $note->comment_ID,
-				'created_at'    => $note->comment_date_gmt, // TODO: date formatting
+				'created_at'    => $this->server->format_datetime( $note->comment_date_gmt ),
 				'note'          => $note->comment_content,
 				'customer_note' => get_comment_meta( $note->comment_ID, 'is_customer_note', true ) ? true : false,
 			);

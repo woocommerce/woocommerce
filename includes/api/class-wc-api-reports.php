@@ -156,6 +156,16 @@ class WC_API_Reports extends WC_API_Resource {
 					'function' => 'SUM',
 					'name'     => 'total_shipping'
 				),
+				'_order_tax' => array(
+					'type'     => 'meta',
+					'function' => 'SUM',
+					'name'     => 'total_tax'
+				),
+				'_order_shipping_tax' => array(
+					'type'     => 'meta',
+					'function' => 'SUM',
+					'name'     => 'total_shipping_tax'
+				),
 				'ID' => array(
 					'type'     => 'post_data',
 					'function' => 'COUNT',
@@ -245,61 +255,61 @@ class WC_API_Reports extends WC_API_Resource {
 			}
 
 			$period_totals[ $time ] = array(
-				'sales'    => 0,
+				'sales'    => woocommerce_format_decimal( 0.00 ),
 				'orders'   => 0,
 				'items'    => 0,
-				'tax'      => 0,
-				'shipping' => 0,
-				'discount' => 0,
+				'tax'      => woocommerce_format_decimal( 0.00 ),
+				'shipping' => woocommerce_format_decimal( 0.00 ),
+				'discount' => woocommerce_format_decimal( 0.00 ),
 			);
 		}
 
 		// add total sales, total order count, total tax and total shipping for each period
 		foreach ( $orders as $order ) {
 
-			$time = ( 'day' === $this->report->chart_groupby ) ? date( 'Y-m-d', strtotime( $order->post_date) ) : date( 'Y-m', strtotime( $order->post_date ) );
+			$time = ( 'day' === $this->report->chart_groupby ) ? date( 'Y-m-d', strtotime( $order->post_date ) ) : date( 'Y-m', strtotime( $order->post_date ) );
 
 			if ( ! isset( $period_totals[ $time ] ) )
 				continue;
 
-			$period_totals[ $time ]['sales'] = $order->total_sales;
-			$period_totals[ $time ]['orders'] = $order->total_orders;
-			$period_totals[ $time ]['tax'] = 1;
-			$period_totals[ $time ]['shipping'] = $order->total_shipping;
+			$period_totals[ $time ]['sales']    = woocommerce_format_decimal( $order->total_sales );
+			$period_totals[ $time ]['orders']   = (int) $order->total_orders;
+			$period_totals[ $time ]['tax']      = woocommerce_format_decimal( $order->total_tax + $order->total_shipping_tax );
+			$period_totals[ $time ]['shipping'] = woocommerce_format_decimal( $order->total_shipping );
 		}
 
 		// add total order items for each period
 		foreach ( $order_items as $order_item ) {
 
-			$time = ( 'day' === $this->report->chart_groupby ) ? date( 'Y-m-d', strtotime( $order_item->post_date) ) : date( 'Y-m', strtotime( $order_item->post_date ) );
+			$time = ( 'day' === $this->report->chart_groupby ) ? date( 'Y-m-d', strtotime( $order_item->post_date ) ) : date( 'Y-m', strtotime( $order_item->post_date ) );
 
 			if ( ! isset( $period_totals[ $time ] ) )
 				continue;
 
-			$period_totals[ $time ]['items'] = $order_item->order_item_count;
+			$period_totals[ $time ]['items'] = (int) $order_item->order_item_count;
 		}
 
 		// add total discount for each period
 		foreach ( $discounts as $discount ) {
 
-			$time = ( 'day' === $this->report->chart_groupby ) ? date( 'Y-m-d', strtotime( $discount->post_date) ) : date( 'Y-m', strtotime( $discount->post_date ) );
+			$time = ( 'day' === $this->report->chart_groupby ) ? date( 'Y-m-d', strtotime( $discount->post_date ) ) : date( 'Y-m', strtotime( $discount->post_date ) );
 
 			if ( ! isset( $period_totals[ $time ] ) )
 				continue;
 
-			$period_totals[ $time ]['discount'] = $discount->discount_amount;
+			$period_totals[ $time ]['discount'] = woocommerce_format_decimal( $discount->discount_amount );
 		}
 
 		$sales_data = array(
-			'sales'             => $totals->sales,
-			'average'           => (string) number_format( $totals->sales / ( $this->report->chart_interval + 1 ), 2 ),
-			'orders'            => absint( $totals->order_count ),
+			'sales'             => woocommerce_format_decimal( $totals->sales ),
+			'average'           => woocommerce_format_decimal( $totals->sales / ( $this->report->chart_interval + 1 ) ),
+			'orders'            => (int) $totals->order_count,
 			'items'             => $total_items,
-			'tax'               => (string) number_format( $totals->tax + $totals->shipping_tax, 2 ),
-			'shipping'          => $totals->shipping,
-			'discount'          => is_null( $total_discount ) ? 0 : $total_discount,
-			'totals'            => $period_totals,
+			'tax'               => woocommerce_format_decimal( $totals->tax + $totals->shipping_tax ),
+			'shipping'          => woocommerce_format_decimal( $totals->shipping ),
+			'discount'          => is_null( $total_discount ) ? woocommerce_format_decimal( 0.00 ) : woocommerce_format_decimal( $total_discount ),
 			'totals_grouped_by' => $this->report->chart_groupby,
+			'totals'            => $period_totals,
 		);
 
 		return apply_filters( 'woocommerce_api_sales_report_response', array( 'sales' => $sales_data ), 'sales', $fields, $this->report, $this->server );
@@ -325,17 +335,28 @@ class WC_API_Reports extends WC_API_Resource {
 			if ( ! empty( $filter['date_min'] ) || ! empty( $filter['date_max'] ) ) {
 
 				// overwrite _GET to make use of WC_Admin_Report::calculate_current_range() for custom date ranges
-				$_GET['start_date'] = $filter['date_min']; // TODO: date formatting?
-				$_GET['end_date'] = $filter['date_max']; // TODO: date formatting
+				$_GET['start_date'] = $this->server->parse_datetime( $filter['date_min'] );
+				$_GET['end_date'] = isset( $filter['date_max'] ) ? $this->server->parse_datetime( $filter['date_max'] ) : null;
 
 			} else {
 
 				// default custom range to today
 				$_GET['start_date'] = $_GET['end_date'] = date( 'Y-m-d', current_time( 'timestamp' ) );
 			}
-		}
 
-		// TODO: handle invalid periods (e.g. `decade`)
+		} else {
+
+			// ensure period is valid
+			if ( ! in_array( $filter['period'], array( 'week', 'month', 'last_month', 'year' ) ) ) {
+				$filter['period'] = 'week';
+			}
+
+			// TODO: change WC_Admin_Report class to use "week" instead, as it's more consistent with other periods
+			// allow "week" for period instead of "7day"
+			if ( 'week' === $filter['period'] ) {
+				$filter['period'] = '7day';
+			}
+		}
 
 		$this->report->calculate_current_range( $filter['period'] );
 	}

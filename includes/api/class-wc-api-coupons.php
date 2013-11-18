@@ -49,8 +49,8 @@ class WC_API_Coupons extends WC_API_Resource {
 			array( array( $this, 'delete_coupon' ), WC_API_Server::DELETABLE ),
 		);
 
-		# GET /coupons/code/<code>
-		$routes[ $this->base . '/code/(?P<code>\w[\w\s\-]*)' ] = array( // note that coupon codes can contain spaces, dashes and underscores
+		# GET /coupons/code/<code>, note that coupon codes can contain spaces, dashes and underscores
+		$routes[ $this->base . '/code/(?P<code>\w[\w\s\-]*)' ] = array(
 			array( array( $this, 'get_coupon_by_code' ), WC_API_Server::READABLE ),
 		);
 
@@ -108,11 +108,15 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		$coupon = new WC_Coupon( $code );
 
+		$coupon_post = get_post( $coupon->id );
+
 		$coupon_data = array(
 			'id'                         => $coupon->id,
 			'code'                       => $coupon->code,
 			'type'                       => $coupon->type,
-			'amount'                     => (string) number_format( $coupon->amount, 2 ),
+			'created_at'                 => $this->server->format_datetime( $coupon_post->post_date_gmt ),
+			'updated_at'                 => $this->server->format_datetime( $coupon_post->post_modified_gmt ),
+			'amount'                     => woocommerce_format_decimal( $coupon->amount ),
 			'individual_use'             => $coupon->individual_use,
 			'product_ids'                => $coupon->product_ids,
 			'exclude_product_ids'        => $coupon->exclude_product_ids,
@@ -120,7 +124,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			'usage_limit_per_user'       => $coupon->usage_limit_per_user,
 			'limit_usage_to_x_items'     => $coupon->limit_usage_to_x_items,
 			'usage_count'                => $coupon->usage_count,
-			'expiry_date'                => $coupon->expiry_date,
+			'expiry_date'                => $this->server->format_datetime( $coupon->expiry_date ),
 			'apply_before_tax'           => $coupon->apply_before_tax(),
 			'enable_free_shipping'       => $coupon->enable_free_shipping(),
 			'product_categories'         => $coupon->product_categories,
@@ -200,6 +204,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			return $id;
 
 		// TODO: implement
+
 		return $this->get_coupon( $id );
 	}
 

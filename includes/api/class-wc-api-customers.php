@@ -103,7 +103,7 @@ class WC_API_Customers extends WC_API_Resource {
 			$customers[] = $this->get_customer( $user_id, $fields );
 		}
 
-		// TODO:  add navigation/total count headers for pagination
+		// TODO: add navigation/total count headers for pagination
 
 		return array( 'customers' => $customers );
 	}
@@ -127,7 +127,7 @@ class WC_API_Customers extends WC_API_Resource {
 		$customer = new WP_User( $id );
 
 		// get info about user's last order
-		$last_order = $wpdb->get_row( "SELECT id, post_date
+		$last_order = $wpdb->get_row( "SELECT id, post_date_gmt
 						FROM $wpdb->posts AS posts
 						LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
 						WHERE meta.meta_key = '_customer_user'
@@ -138,15 +138,15 @@ class WC_API_Customers extends WC_API_Resource {
 
 		$customer_data = array(
 			'id'               => $customer->ID,
-			'created_at'       => $customer->user_registered,
+			'created_at'       => $this->server->format_datetime( $customer->user_registered ),
 			'email'            => $customer->user_email,
 			'first_name'       => $customer->first_name,
 			'last_name'        => $customer->last_name,
 			'username'         => $customer->user_login,
 			'last_order_id'    => is_object( $last_order ) ? $last_order->id : null,
-			'last_order_date'  => is_object( $last_order ) ? $last_order->post_date : null,
-			'orders_count'     => $customer->_order_count,
-			'total_spent'      => (string) number_format( $customer->_money_spent, 2 ),
+			'last_order_date'  => is_object( $last_order ) ? $this->server->format_datetime( $last_order->post_date_gmt ) : null,
+			'orders_count'     => (int) $customer->_order_count,
+			'total_spent'      => woocommerce_format_decimal( $customer->_money_spent ),
 			'avatar_url'       => $this->get_avatar_url( $customer->customer_email ),
 			'billing_address'  => array(
 				'first_name' => $customer->billing_first_name,
@@ -188,7 +188,8 @@ class WC_API_Customers extends WC_API_Resource {
 
 		$query = $this->query_customers( $filter );
 
-		// TODO: permissions?
+		if ( ! current_user_can( 'list_users' ) )
+			return new WP_Error( 'woocommerce_api_user_cannot_read_customer', __( 'You do not have permission to read customers', 'woocommerce' ), array( 'status' => 401 ) );
 
 		return array( 'count' => $query->get_total() );
 	}
@@ -311,10 +312,10 @@ class WC_API_Customers extends WC_API_Resource {
 			$query_args['offset'] = $args['offset'];
 
 		if ( ! empty( $args['created_at_min'] ) )
-			$this->created_at_min = $args['created_at_min'];
+			$this->created_at_min = $this->server->parse_datetime( $args['created_at_min'] );
 
 		if ( ! empty( $args['created_at_max'] ) )
-			$this->created_at_max = $args['created_at_max'];
+			$this->created_at_max = $this->server->parse_datetime( $args['created_at_max'] );
 
 		// TODO: support page argument - requires custom implementation as WP_User_Query has no built-in pagination like WP_Query
 
@@ -352,10 +353,10 @@ class WC_API_Customers extends WC_API_Resource {
 	public function modify_user_query( $query ) {
 
 		if ( $this->created_at_min )
-			$query->query_where .= sprintf( " AND DATE(user_registered) >= '%s'", date( 'Y-m-d H:i:s', strtotime( $this->created_at_min ) ) ); // TODO: date formatting
+			$query->query_where .= sprintf( " AND user_registered >= STR_TO_DATE( '%s', '%%Y-%%m-%%d %%h:%%i:%%s' )", esc_sql( $this->created_at_min ) );
 
 		if ( $this->created_at_max )
-			$query->query_where .= sprintf( " AND DATE(user_registered) <= '%s'", date( 'Y-m-d H:i:s', strtotime( $this->created_at_max ) ) ); // TODO: date formatting
+			$query->query_where .= sprintf( " AND user_registered <= STR_TO_DATE( '%s', '%%Y-%%m-%%d %%h:%%i:%%s' )", esc_sql( $this->created_at_max ) );
 	}
 
 	/**

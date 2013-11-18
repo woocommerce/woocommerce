@@ -75,7 +75,7 @@ class WC_API_Resource {
 
 			$post = get_post( $id, ARRAY_A );
 
-			// TODO: redo this check, it's a bit janky
+			// for checking permissions, product variations are the same as the product post type
 			$post_type = ( 'product_variation' === $post['post_type'] ) ? 'product' : $post['post_type'];
 
 			// validate post type
@@ -117,8 +117,6 @@ class WC_API_Resource {
 
 		$args = array();
 
-		// TODO: convert all dates from provided timezone into UTC
-		// TODO: return all dates in provided timezone, else UTC
 		// date
 		if ( ! empty( $request_args['created_at_min'] ) || ! empty( $request_args['created_at_max'] ) || ! empty( $request_args['updated_at_min'] ) || ! empty( $request_args['updated_at_max'] ) ) {
 
@@ -126,19 +124,19 @@ class WC_API_Resource {
 
 			// resources created after specified date
 			if ( ! empty( $request_args['created_at_min'] ) )
-				$args['date_query'][] = array( 'column' => 'post_date_gmt', 'after' => $request_args['created_at_min'], 'inclusive' => true );
+				$args['date_query'][] = array( 'column' => 'post_date_gmt', 'after' => $this->server->parse_datetime( $request_args['created_at_min'] ), 'inclusive' => true );
 
 			// resources created before specified date
 			if ( ! empty( $request_args['created_at_max'] ) )
-				$args['date_query'][] = array( 'column' => 'post_date_gmt', 'before' => $request_args['created_at_max'], 'inclusive' => true );
+				$args['date_query'][] = array( 'column' => 'post_date_gmt', 'before' => $this->server->parse_datetime( $request_args['created_at_max'] ), 'inclusive' => true );
 
 			// resources updated after specified date
 			if ( ! empty( $request_args['updated_at_min'] ) )
-				$args['date_query'][] = array( 'column' => 'post_modified_gmt', 'after' => $request_args['updated_at_min'], 'inclusive' => true );
+				$args['date_query'][] = array( 'column' => 'post_modified_gmt', 'after' => $this->server->parse_datetime( $request_args['updated_at_min'] ), 'inclusive' => true );
 
 			// resources updated before specified date
 			if ( ! empty( $request_args['updated_at_max'] ) )
-				$args['date_query'][] = array( 'column' => 'post_modified_gmt', 'before' => $request_args['updated_at_max'], 'inclusive' => true );
+				$args['date_query'][] = array( 'column' => 'post_modified_gmt', 'before' => $this->server->parse_datetime( $request_args['updated_at_max'] ), 'inclusive' => true );
 		}
 
 		// search
