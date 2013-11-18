@@ -306,6 +306,7 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-integrations.php' );					// Loads integrations
 		include_once( 'includes/class-wc-cache-helper.php' );					// Cache Helper
 		include_once( 'includes/class-wc-https.php' );							// https Helper
+		include_once( 'includes/class-wc-heartbeat.php');						// Heartbeat API
 
 		// Include template hooks in time for themes to remove/modify them
 		include_once( 'includes/wc-template-hooks.php' );
