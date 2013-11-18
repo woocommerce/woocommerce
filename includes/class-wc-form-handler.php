@@ -526,7 +526,7 @@ class WC_Form_Handler {
 
 	            $taxonomy = 'attribute_' . sanitize_title( $attribute['name'] );
 
-	            if ( ! empty( $_REQUEST[ $taxonomy ] ) ) {
+	            if ( isset( $_REQUEST[ $taxonomy ] ) ) {
 
 	                // Get value from post data
 	                // Don't use woocommerce_clean as it destroys sanitized characters
@@ -572,7 +572,7 @@ class WC_Form_Handler {
 	        } else {
 	            wc_add_notice( __( 'Please choose product options&hellip;', 'woocommerce' ), 'error' );
 	            return;
-	       }
+			}
 
 	    // Grouped Products
 	    } elseif ( 'grouped' === $add_to_cart_handler ) {
