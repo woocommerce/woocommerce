@@ -239,7 +239,7 @@ class WC_Download_Handler {
 
 			// Path fix - kudos to Jason Judge
          	if ( getcwd() )
-         		$file_path = trim( preg_replace( '`^' . getcwd() . '`' , '', $file_path ), '/' );
+         		$file_path = trim( preg_replace( '`^' . str_replace( '\\', '/', getcwd() ) . '`' , '', $file_path ), '/' );
 
             header( "Content-Disposition: attachment; filename=\"" . $file_name . "\";" );
 
