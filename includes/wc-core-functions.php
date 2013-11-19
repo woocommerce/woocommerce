@@ -323,7 +323,7 @@ function wc_print_js() {
 
 /**
  * Set a cookie - wrapper for setcookie using WP constants
- * 
+ *
  * @param  string  $name   Name of the cookie being set
  * @param  string  $value  Value of the cookie
  * @param  integer $expire Expiry of the cookie
@@ -334,4 +334,21 @@ function wc_setcookie( $name, $value, $expire = 0 ) {
 	} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 		trigger_error( "Cookie cannot be set - headers already sent", E_USER_NOTICE );
 	}
+}
+
+/**
+ * Get the URL to the WooCommerce REST API
+ *
+ * @since 2.1
+ * @param string $path an endpoint to include in the URL
+ * @return string the URL
+ */
+function get_woocommerce_api_url( $path ) {
+
+	$url = get_home_url( null, 'wc-api/v' . WC_API::VERSION . '/', ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) ? 'https' : 'http' );
+
+	if ( ! empty( $path ) && is_string( $path ) )
+		$url .= ltrim( $path, '/' );
+
+	return $url;
 }
