@@ -44,6 +44,9 @@ class WC_API_Authentication {
 			else
 				$user = $this->perform_oauth_authentication();
 
+			// check API key-specific permission
+			$this->check_api_key_permissions( $user );
+
 		} catch ( Exception $e ) {
 
 			$user = new WP_Error( 'woocommerce_api_authentication_error', $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -263,4 +266,33 @@ class WC_API_Authentication {
 		update_user_meta( $user->ID, 'woocommerce_api_nonces', $used_nonces );
 	}
 
+	/**
+	 * Check that the API keys provided have the proper key-specific permissions to either read or write API resources
+	 *
+	 * @param WP_User $user
+	 * @throws Exception if the permission check fails
+	 */
+	public function check_api_key_permissions( $user ) {
+
+		$key_permissions = $user->woocommerce_api_key_permissions;
+
+		switch ( WC()->api->server->method ) {
+
+			case 'HEAD':
+			case 'GET':
+				if ( 'read' !== $key_permissions && 'read_write' !== $key_permissions ) {
+					throw new Exception( __( 'The API key provided does not have read permissions', 'woocommerce' ), 401 );
+				}
+				break;
+
+			case 'POST':
+			case 'PUT':
+			case 'PATCH':
+			case 'DELETE':
+				if ( 'write' !== $key_permissions && 'read_write' !== $key_permissions ) {
+					throw new Exception( __( 'The API key provided does not have write permissions', 'woocommerce' ), 401 );
+				}
+				break;
+		}
+	}
 }
