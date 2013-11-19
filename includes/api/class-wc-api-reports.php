@@ -312,7 +312,7 @@ class WC_API_Reports extends WC_API_Resource {
 			'totals'            => $period_totals,
 		);
 
-		return apply_filters( 'woocommerce_api_sales_report_response', array( 'sales' => $sales_data ), 'sales', $fields, $this->report, $this->server );
+		return array( 'sales' => apply_filters( 'woocommerce_api_report_response', $sales_data, 'sales', $fields, $this->report, $this->server ) );
 	}
 
 	/**
@@ -376,6 +376,7 @@ class WC_API_Reports extends WC_API_Resource {
 		if ( ! current_user_can( 'view_woocommerce_reports' ) ) {
 
 			return new WP_Error( 'woocommerce_api_user_cannot_read_report', __( 'You do not have permission to read this report', 'woocommerce' ), array( 'status' => 401 ) );
+
 		} else {
 
 			return true;

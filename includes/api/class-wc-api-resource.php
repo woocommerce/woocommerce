@@ -180,13 +180,11 @@ class WC_API_Resource {
 	/**
 	 * Restrict the fields included in the response if the request specified certain only certain fields should be returned
 	 *
-	 * @TODO this should also work with sub-fields, like billing_address.country
-	 *
 	 * @since 2.1
 	 * @param array $data the response data
 	 * @param object $resource the object that provided the response data, e.g. WC_Coupon or WC_Order
 	 * @param array|string the requested list of fields to include in the response
-	 * @return mixed
+	 * @return array response data
 	 */
 	public function filter_response_fields( $data, $resource, $fields ) {
 
@@ -194,11 +192,41 @@ class WC_API_Resource {
 			return $data;
 
 		$fields = explode( ',', $fields );
+		$sub_fields = array();
 
+		// get sub fields
+		foreach ( $fields as $field ) {
+
+			if ( false !== strpos( $field, '.' ) ) {
+
+				list( $name, $value ) = explode( '.', $field );
+
+				$sub_fields[ $name ] = $value;
+			}
+		}
+
+		// iterate through top-level fields
 		foreach ( $data as $data_field => $data_value ) {
 
-			if ( ! in_array( $data_field, $fields ) )
-				unset( $data[ $data_field ] );
+			// if a field has sub-fields and the top-level field has sub-fields to filter
+			if ( is_array( $data_value ) && in_array( $data_field, array_keys( $sub_fields ) ) ) {
+
+				// iterate through each sub-field
+				foreach ( $data_value as $sub_field => $sub_field_value ) {
+
+					// remove non-matching sub-fields
+					if ( ! in_array( $sub_field, $sub_fields ) ) {
+						unset( $data[ $data_field ][ $sub_field ] );
+					}
+				}
+
+			} else {
+
+				// remove non-matching top-level fields
+				if ( ! in_array( $data_field, $fields ) ) {
+					unset( $data[ $data_field ] );
+				}
+			}
 		}
 
 		return $data;

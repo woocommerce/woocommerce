@@ -331,7 +331,7 @@ class WC_API_Orders extends WC_API_Resource {
 			);
 		}
 
-		return apply_filters( 'woocommerce_api_order_notes_response', array( 'order_notes' => $order_notes ), $id, $fields, $notes, $this->server );
+		return array( 'order_notes' => apply_filters( 'woocommerce_api_order_notes_response', $order_notes, $id, $fields, $notes, $this->server ) );
 	}
 
 	/**

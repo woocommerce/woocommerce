@@ -220,7 +220,7 @@ class WC_API_Products extends WC_API_Resource {
 			);
 		}
 
-		return apply_filters( 'woocommerce_api_product_reviews_response', array( 'product_reviews' => $reviews ), $id, $fields, $comments, $this->server );
+		return array( 'product_reviews' => apply_filters( 'woocommerce_api_product_reviews_response', $reviews, $id, $fields, $comments, $this->server ) );
 	}
 
 	/**
