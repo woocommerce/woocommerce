@@ -591,7 +591,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	    if ( $typenow != 'shop_order' ) return $query;
 		if ( ! get_query_var( 'shop_order_search' ) ) return $query;
 
-		return $_GET['s'];
+		return wp_unslash( $_GET['s'] );
 	}
 
 	/**
