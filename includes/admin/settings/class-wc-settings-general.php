@@ -99,6 +99,14 @@ class WC_Settings_General extends WC_Settings_Page {
 				'autoload'  => false
 			),
 
+			array(
+				'title'   => __( 'API', 'woocommerce' ),
+				'desc'    => __( 'Enable the REST API', 'woocommerce' ),
+				'id'      => 'woocommerce_api_enabled',
+				'type'    => 'checkbox',
+				'default' => 'yes',
+			),
+
 			array( 'type' => 'sectionend', 'id' => 'general_options'),
 
 			array(	'title' => __( 'Currency Options', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following options affect how prices are displayed on the frontend.', 'woocommerce' ), 'id' => 'pricing_options' ),

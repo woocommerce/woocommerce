@@ -203,10 +203,8 @@ class WC_API_Server {
 
 		$this->header( 'Content-Type', $this->handler->get_content_type(), true );
 
-		// TODO: can we prevent wc_cookie from being sent for API requests?
-
-		// the API is enabled by default TODO: implement check for enabled setting here
-		if ( ! apply_filters( 'woocommerce_api_enabled', true, $this ) ) {
+		// the API is enabled by default
+		if ( ! apply_filters( 'woocommerce_api_enabled', true, $this ) || ( 'no' === get_option( 'woocommerce_api_enabled' ) ) ) {
 
 			$this->send_status( 404 );
 
