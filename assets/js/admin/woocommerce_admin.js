@@ -192,4 +192,7 @@ jQuery(function(){
 		}
 	}).change();
 
+	// Attribute term table
+	jQuery( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
+
 });

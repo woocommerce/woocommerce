@@ -302,7 +302,7 @@ class WC_Admin_Attributes {
 		    <div id="col-container">
 		    	<div id="col-right">
 		    		<div class="col-wrap">
-			    		<table class="widefat fixed" style="width:100%">
+			    		<table class="widefat attributes-table wp-list-table ui-sortable" style="width:100%">
 					        <thead>
 					            <tr>
 					                <th scope="col"><?php _e( 'Name', 'woocommerce' ) ?></th>
@@ -338,7 +338,7 @@ class WC_Admin_Attributes {
 							        					break;
 						        					}
 					        					?></td>
-					        					<td><?php
+					        					<td class="attribute-terms"><?php
 					        						if (taxonomy_exists(wc_attribute_taxonomy_name($tax->attribute_name))) :
 						        						$terms_array = array();
 						        						$terms = get_terms( wc_attribute_taxonomy_name($tax->attribute_name), 'orderby=name&hide_empty=0' );
@@ -354,7 +354,7 @@ class WC_Admin_Attributes {
 														echo '<span class="na">&ndash;</span>';
 													endif;
 					        					?></td>
-					        					<td><a href="edit-tags.php?taxonomy=<?php echo esc_html(wc_attribute_taxonomy_name($tax->attribute_name)); ?>&amp;post_type=product" class="button alignright"><?php _e( 'Configure&nbsp;terms', 'woocommerce' ); ?></a></td>
+					        					<td class="attribute-actions"><a href="edit-tags.php?taxonomy=<?php echo esc_html(wc_attribute_taxonomy_name($tax->attribute_name)); ?>&amp;post_type=product" class="button alignright tips configure-terms" data-tip="<?php _e( 'Configure terms', 'woocommerce' ); ?>"><?php _e( 'Configure terms', 'woocommerce' ); ?></a></td>
 					        				</tr><?php
 					        			endforeach;
 					        		else :
