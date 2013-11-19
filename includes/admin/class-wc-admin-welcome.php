@@ -9,15 +9,13 @@
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce/Admin
- * @version     2.0.0
+ * @version     2.1.0
 */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
  * WC_Admin_Welcome class.
- *
- * @since 2.0
  */
 class WC_Admin_Welcome {
 
@@ -84,32 +82,92 @@ class WC_Admin_Welcome {
 		?>
 		<style type="text/css">
 			/*<![CDATA[*/
+			.wc-badge:before {
+				font-family: WooCommerce !important;
+				content: "\e03d";
+				color: #fff;
+				-webkit-font-smoothing: antialiased;
+				-moz-osx-font-smoothing: grayscale;
+				font-size: 80px;
+				font-weight: normal;
+				width: 165px;
+				height: 165px;
+				line-height: 165px;
+				text-align: center;
+				position: absolute;
+				top: 0;
+				left: 0;
+				margin: 0;
+				vertical-align: middle;
+			}
 			.wc-badge {
+				position: relative;;
+				background: #9c5d90;
+				text-rendering: optimizeLegibility;
 				padding-top: 150px;
 				height: 52px;
-				width: 185px;
-				color: #9c5d90;
-				font-weight: bold;
+				width: 165px;
+				font-weight: 600;
 				font-size: 14px;
 				text-align: center;
-				text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
-				margin: 0 -5px;
-				background: url('<?php echo $woocommerce->plugin_url() . '/assets/images/welcome/wc-welcome.png'; ?>') no-repeat center center;
+				color: #ddc8d9;
+				margin: 5px 0 0 0;
+				-webkit-box-shadow: 0 1px 3px rgba(0,0,0,.2);
+				box-shadow: 0 1px 3px rgba(0,0,0,.2);
 			}
-
-			@media
-			(-webkit-min-device-pixel-ratio: 2),
-			(min-resolution: 192dpi) {
-				.wc-badge {
-					background-image:url('<?php echo $woocommerce->plugin_url() . '/assets/images/welcome/wc-welcome@2x.png'; ?>');
-					background-size: 173px 194px;
-				}
-			}
-
 			.about-wrap .wc-badge {
 				position: absolute;
 				top: 0;
 				right: 0;
+			}
+			.about-wrap .wc-feature {
+				overflow: visible !important;
+				*zoom:1;
+			}
+			.about-wrap .wc-feature:before,
+			.about-wrap .wc-feature:after {
+				content: " ";
+				display: table;
+			}
+			.about-wrap .wc-feature:after {
+				clear: both;
+			}
+			.about-wrap .feature-rest div {
+				width: 50% !important;
+				padding-right: 100px;
+				-moz-box-sizing: border-box;
+				box-sizing: border-box;
+				margin: 0 !important;
+			}
+			.about-wrap .feature-rest div.last-feature {
+				padding-left: 100px;
+				padding-right: 0;
+			}
+			.about-wrap div.icon {
+				width: 0 !important;
+				padding: 0;
+				margin: 0;
+			}
+			.about-wrap .feature-rest div.icon:before { 
+				font-family: WooCommerce !important;
+				font-weight: normal;
+				width: 100%;
+				font-size: 170px;
+				line-height: 125px;
+				color: #9c5d90;
+				display: inline-block;
+				position: relative;
+				text-align: center;
+				speak: none;
+				margin: 0 0 0 -100px;
+				content: "\e01d";
+				-webkit-font-smoothing: antialiased;
+				-moz-osx-font-smoothing: grayscale;
+			}
+			.about-integrations {
+				background: #fff;
+				margin: 20px 0;
+				padding: 1px 20px 10px;
 			}
 			/*]]>*/
 		</style>
@@ -182,134 +240,124 @@ class WC_Admin_Welcome {
 			<!--<div class="changelog point-releases"></div>-->
 
 			<div class="changelog">
-
-				<h3><?php _e( 'Security in mind', 'woocommerce' ); ?></h3>
-
-				<div class="feature-section images-stagger-right">
-					<img src="<?php echo $woocommerce->plugin_url() . '/assets/images/welcome/badge-sucuri.png'; ?>" alt="Sucuri Safe Plugin" style="padding: 1em" />
-					<h4><?php _e( 'Sucuri Safe Plugin', 'woocommerce' ); ?></h4>
-					<p><?php _e( 'You will be happy to learn that WooCommerce has been audited and certified by the Sucuri Security team. Whilst there is not much to be seen visually to understand the amount of work that went into this audit, rest assured that your website is powered by one of the most powerful and stable eCommerce plugins available.', 'woocommerce' ); ?></p>
-				</div>
-
-				<h3><?php _e( 'A Smoother Admin Experience', 'woocommerce' ); ?></h3>
-
-				<div class="feature-section col three-col">
-
+				<h3><?php _e( 'A new RESTful API developers will &#10084;', 'woocommerce' ); ?></h3>
+				<div class="wc-feature feature-rest feature-section col three-col">
 					<div>
-						<img src="<?php echo $woocommerce->plugin_url() . '/assets/images/welcome/product.png'; ?>" alt="Product panel screenshot" style="width: 99%; margin: 0 0 1em;" />
-						<h4><?php _e( 'New Product Panel', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'We have revised the product data panel making it cleaner, more streamlined, and more logical. Adding products is a breeze!', 'woocommerce' ); ?></p>
+						<h4><?php _e( 'Access your data from 3rd party applications', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'Built on top of the WooCommerce API, and targetted directly at developers, the new REST API allows you to get data for <strong>Orders</strong>, <strong>Coupons</strong>, <strong>Customers</strong>, <strong>Products</strong> and <strong>Reports</strong> in both <code>XML</code> and <code>JSON</code> formats.', 'woocommerce' ); ?></p>
 					</div>
-
-					<div>
-						<img src="<?php echo $woocommerce->plugin_url() . '/assets/images/welcome/orders.png'; ?>" alt="Order panel screenshot" style="width: 99%; margin: 0 0 1em;" />
-						<h4><?php _e( 'Nicer Order Screens', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'Order pages have had a cleanup, with a more easily scannable interface. We particularly like the new status icons!', 'woocommerce' ); ?></p>
-					</div>
-
+					<div class="icon"></div>
 					<div class="last-feature">
-						<img src="<?php echo $woocommerce->plugin_url() . '/assets/images/welcome/downloads.png'; ?>" alt="Download panel screenshot" style="width: 99%; margin: 0 0 1em;" />
-						<h4><?php _e( 'Multi-Download Support', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'Products can have multiple downloadable files - purchasers will get access to all the files added.', 'woocommerce' ); ?></p>
+						<h4><?php _e( 'Authentication to keep data secure', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'Authentication for the REST API is performed using HTTP Basic Auth if you have SSL enabled, or signed according to the <a href="http://tools.ietf.org/html/rfc5849">OAuth 1.0a</a> specification if you don\'t have SSL. Data is only available to authenticated users.', 'woocommerce' ); ?></p>
 					</div>
-
 				</div>
-
-				<h3><?php _e( 'Less Taxing Taxes', 'woocommerce' ); ?></h3>
-
-				<div class="feature-section col two-col">
-
-					<img src="<?php echo $woocommerce->plugin_url() . '/assets/images/welcome/taxes.png'; ?>" alt="Tax Options" style="width:99%; margin: 0 0 1em 0;" />
-					<div>
-						<h4><?php _e( 'New Tax Input Panel', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'The tax input pages have been streamlined to make inputting taxes simpler - adding multiple taxes for a single jurisdiction is now much easier using the priority system. There is also CSV import/export support.', 'woocommerce' ); ?></p>
-					</div>
-
-					<div class="last-feature">
-						<h4><?php _e( 'Improved Tax Options', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'As requested by some users, we now support taxing the billing address instead of shipping (optional), and we allow you to choose which tax class applies to shipping.', 'woocommerce' ); ?></p>
-					</div>
-
-				</div>
-
-				<h3><?php _e( 'Product Listing Improvements Customers Will Love', 'woocommerce' ); ?></h3>
-
-				<div class="feature-section col three-col">
-
-					<div>
-						<img src="<?php echo $woocommerce->plugin_url() . '/assets/images/welcome/sorting.png'; ?>" alt="Sorting" style="width: 99%; margin: 0 0 1em;" />
-						<h4><?php _e( 'New Sorting Options', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'Customers can now sort products by popularity and ratings.', 'woocommerce' ); ?></p>
-					</div>
-
-					<div>
-						<img src="<?php echo $woocommerce->plugin_url() . '/assets/images/welcome/pagination.png'; ?>" alt="Pagination" style="width: 99%; margin: 0 0 1em;" />
-						<h4><?php _e( 'Better Pagination and Result Counts', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'Numbered pagination has been added to core, and we show the number of results found above the listings.', 'woocommerce' ); ?></p>
-					</div>
-
-					<div class="last-feature">
-						<img src="<?php echo $woocommerce->plugin_url() . '/assets/images/welcome/rating.png'; ?>" alt="Ratings" style="width: 99%; margin: 0 0 1em;" />
-						<h4><?php _e( 'Inline Star Rating Display', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'We have added star ratings to the catalog which are pulled from reviews.', 'woocommerce' ); ?></p>
-					</div>
-
-				</div>
-
 			</div>
-
+			<div class="changelog">
+				<h3><?php _e( 'UI and reporting improvements', 'woocommerce' ); ?></h3>
+				<div class="wc-feature feature-section col three-col">
+					<div>
+						<h4><?php _e( 'WordPress 3.8 UI (MP6) compatibility', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'WooCommerce 2.1 has had its UI restyled to work with the new MP6 design in WordPress. All bitmap icons have been replaced with a custom, lightweight icon font for razor sharp clarity on retina devices as well as improved performance.', 'woocommerce' ); ?></p>
+					</div>
+					<div>
+						<h4><?php _e( 'Simplified order UI', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'The orders panel has seen significant improvement to both the totals panel, and line item display making editing new and existing orders a breeze.', 'woocommerce' ); ?></p>
+						<p><?php _e( 'Item meta has also been optimised and can now be viewed as HTML rather than stuck in a text input.', 'woocommerce' ); ?></p>
+					</div>
+					<div class="last-feature">
+						<h4><?php _e( 'Improved Reporting', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'Reports have been redesigned with new <strong>filtering</strong> capabilities, a new <strong>customer report</strong> showing orders/spending, and the ability to <strong>export CSVs</strong>.', 'woocommerce' ); ?></p>
+						<p><?php _e( 'The dashboard also has a new widget showing you an overview of current orders complete with sparklines for quick at-a-glance stats.', 'woocommerce' ); ?></p>
+					</div>
+				</div>
+			</div>
+			<div class="changelog about-integrations">
+				<h3><?php _e( 'Separated integrations', 'woocommerce' ); ?></h3>
+				<div class="wc-feature feature-section col three-col">
+					<div>
+						<h4><?php _e( 'New separate plugins', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'To make core more lean, some integrations have been removed and turned into dedicated plugins which you can install as and when you need them.', 'woocommerce' ); ?></p>
+					</div>
+					<div>
+						<h4><?php _e( 'Google Analytics', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'Add Google Analytics eCommerce tracking to your WooCommerce store.', 'woocommerce' ); ?></p>
+						<p><a href="http://wordpress.org/plugins/woocommerce-google-analytics-integration" class="button"><?php _e( 'Download', 'woocommerce' ); ?></a></p>
+					</div>
+					<div class="last-feature">
+						<h4><?php _e( 'Piwik', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'Integrate WooCommerce with Piwik and the WP-Piwik plugin.', 'woocommerce' ); ?></p>
+						<p><a href="http://wordpress.org/plugins/woocommerce-piwik-integration/" class="button"><?php _e( 'Download', 'woocommerce' ); ?></a></p>
+					</div>
+					<div>
+						<h4><?php _e( 'ShareThis', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'Add social network sharing buttons to products using ShareThis.', 'woocommerce' ); ?></p>
+						<p><a href="http://wordpress.org/plugins/woocommerce-sharethis-integration/" class="button"><?php _e( 'Download', 'woocommerce' ); ?></a></p>
+					</div>
+					<div>
+						<h4><?php _e( 'Sharedaddy', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'Add social network sharing buttons to products using Sharedaddy.', 'woocommerce' ); ?></p>
+						<p><a href="http://wordpress.org/plugins/woocommerce-sharedaddy-integration/" class="button"><?php _e( 'Download', 'woocommerce' ); ?></a></p>
+					</div>
+					<div class="last-feature">
+						<h4><?php _e( 'ShareYourCart', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'Let users share their carts for a discount using the ShareYourCart service.', 'woocommerce' ); ?></p>
+						<p><a href="http://wordpress.org/plugins/shareyourcart/" class="button"><?php _e( 'Download', 'woocommerce' ); ?></a></p>
+					</div>
+				</div>
+			</div>
 			<div class="changelog">
 				<h3><?php _e( 'Under the Hood', 'woocommerce' ); ?></h3>
 
 				<div class="feature-section col three-col">
 					<div>
-						<h4><?php _e( 'New product classes', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'The product classes have been rewritten and are now factory based. Much more extendable, and easier to query products using the new <code>get_product()</code> function.', 'woocommerce' ); ?></p>
+						<h4><?php _e( 'PayPal PDT support', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'PayPal Data Transfer (PDT) is an alterntative for PayPal IPN which sends back the status of an order when a customer returns from PayPal.', 'woocommerce' ); ?></p>
 					</div>
 
 					<div>
-						<h4><?php _e( 'Capability overhaul', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'More granular capabilities for admin/shop manager roles covering products, orders and coupons.', 'woocommerce' ); ?></p>
+						<h4><?php _e( 'Stylesheet separation', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'Frontend styles have been split into separate appearance/layout/smallscreen stylesheets to help with selective customisation.', 'woocommerce' ); ?></p>
 					</div>
 
 					<div class="last-feature">
-						<h4><?php _e( 'API Improvements', 'woocommerce' ); ?></h4>
-						<p><?php _e( '<code>WC-API</code> now has real endpoints, and we\'ve optimised the gateways API significantly by only loading gateways when needed.', 'woocommerce' ); ?></p>
+						<h4><?php _e( 'New endpoints', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'Certain pages such as "Pay", "Order Recieved" and some account pages are now endpoints rather than pages to make checkout more reliable.', 'woocommerce' ); ?></p>
 					</div>
 				</div>
 				<div class="feature-section col three-col">
 
 					<div>
-						<h4><?php _e( 'Cache-friendly cart widgets', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'Cart widgets and other "fragments" are now pulled in via AJAX - this works wonders with static page caching.', 'woocommerce' ); ?></p>
+						<h4><?php _e( 'Default credit card form for gateways', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'We\'ve added a standardized, default credit card form for gateways to use if they support <code>default_credit_card_form</code>.', 'woocommerce' ); ?></p>
 					</div>
 
 					<div>
-						<h4><?php _e( 'Session handling', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'PHP SESSIONS have been a problem for many users in the past, so we\'ve developed our own handler using cookies and options to make these more reliable.', 'woocommerce' ); ?></p>
+						<h4><?php _e( 'Coupon limits per customer', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'Coupon usage limits can now be set per user (using email + ID) rather than global.', 'woocommerce' ); ?></p>
 					</div>
 
 					<div class="last-feature">
-						<h4><?php _e( 'Retina Ready', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'All graphics within WC have been optimised for HiDPI displays.', 'woocommerce' ); ?></p>
+						<h4><?php _e( 'Streamlined new-account process', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'During checkout, username and passwords are optional and can be automatically generated by WooCommerce.', 'woocommerce' ); ?></p>
 					</div>
 
 				</div>
 				<div class="feature-section col three-col">
 
 					<div>
-						<h4><?php _e( 'Better stock handling', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'We have added an option to hold stock for unpaid orders (defaults to 60mins). When this time limit is reached, and the order is not paid for, stock is released and the order is cancelled.', 'woocommerce' ); ?></p>
+						<h4><?php _e( 'Additional price display options', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'Define whether prices should be shown incl. or excl. of tax on the frontend, and add an optional suffix.', 'woocommerce' ); ?></p>
 					</div>
 
 					<div>
-						<h4><?php _e( 'Improved Line-item storage', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'We have changed how order items get stored making them easier (and faster) to access for reporting. Order items are no longer serialised within an order - they are stored within their own table.', 'woocommerce' ); ?></p>
+						<h4><?php _e( 'Past order linking', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'Admins now have the ability to link past orders to a customer (before they registered) by email address.', 'woocommerce' ); ?></p>
 					</div>
 
 					<div class="last-feature">
-						<h4><?php _e( 'Autoload', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'We have setup autoloading for classes - this has dramatically reduced memory usage in 2.0.', 'woocommerce' ); ?></p>
+						<h4><?php _e( 'Review improvements', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'We\'ve added a new option to restrict reviews to logged in purchasers, and made ratings editable from the backend.', 'woocommerce' ); ?></p>
 					</div>
 
 				</div>
