@@ -46,7 +46,7 @@ class WC_Install {
 		// Install - Add pages button
 		if ( ! empty( $_GET['install_woocommerce_pages'] ) ) {
 
-			$this->create_pages();
+			self::create_pages();
 
 			// We no longer need to install pages
 			delete_option( '_wc_needs_pages' );
@@ -203,7 +203,7 @@ class WC_Install {
 	 * @access public
 	 * @return void
 	 */
-	private function create_pages() {
+	public static function create_pages() {
 		$pages = apply_filters( 'woocommerce_create_pages', array(
 			'shop' => array(
 				'name'    => _x( 'shop', 'page_slug', 'woocommerce' ),

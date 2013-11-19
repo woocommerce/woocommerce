@@ -121,9 +121,13 @@ class WC_Admin_Status {
 					" );
 
 					wp_cache_flush();
-					
+
 					echo '<div class="updated"><p>' . __( 'Sessions successfully cleared', 'woocommerce' ) . '</p></div>';
 				break;
+				case "install_pages" :
+					WC_Install::create_pages();
+					echo '<div class="updated"><p>' . __( 'All missing WooCommerce pages was installed successfully.', 'woocommerce' ) . '</p></div>';
+                break;
 				default:
 					$action = esc_attr( $_GET['action'] );
 					if( isset( $tools[ $action ]['callback'] ) ) {
@@ -181,6 +185,11 @@ class WC_Admin_Status {
 				'name'		=> __('Customer Sessions','woocommerce'),
 				'button'	=> __('Clear all sessions','woocommerce'),
 				'desc'		=> __( '<strong class="red">Warning</strong> This tool will delete all customer session data from the database, including any current live carts.', 'woocommerce' ),
+			),
+			'install_pages' => array(
+				'name'    => __( 'Install WooCommerce Pages', 'woocommerce' ),
+				'button'  => __( 'Install pages', 'woocommerce' ),
+				'desc'    => __( '<strong class="red">Note</strong> This tool will install all the missing WooCommerce pages. Pages already defined and set up will not be replaced.', 'woocommerce' ),
 			),
 		) );
 	}
