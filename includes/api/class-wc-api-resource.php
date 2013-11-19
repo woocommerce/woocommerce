@@ -157,10 +157,9 @@ class WC_API_Resource {
 		return array_merge( $base_args, $args );
 	}
 
-
 	/**
 	 * Add meta to resources when requested by the client. Meta is added as a top-level
-	 * `<resource_name>_meta` attribute (e.g. `order_meta`) as a list of key/value pairs.
+	 * `<resource_name>_meta` attribute (e.g. `order_meta`) as a list of key/value pairs
 	 *
 	 * @since 2.1
 	 * @param array $data the resource data
@@ -169,9 +168,56 @@ class WC_API_Resource {
 	 */
 	public function maybe_add_meta( $data, $resource ) {
 
-		if ( isset( $this->server->params['GET']['filter']['meta'] ) && 'true' === $this->server->params['GET']['filter']['meta'] ) {
+		if ( isset( $this->server->params['GET']['filter']['meta'] ) && 'true' === $this->server->params['GET']['filter']['meta'] && is_object( $resource ) ) {
 
-			// TODO: implement
+			// don't attempt to add meta more than once
+			if ( preg_grep( '/[a-z]+_meta/', array_keys( $data ) ) )
+				return $data;
+
+			// define the top-level property name for the meta
+			switch ( get_class( $resource ) ) {
+
+				case 'WC_Order':
+					$meta_name = 'order_meta';
+					break;
+
+				case 'WC_Coupon':
+					$meta_name = 'coupon_meta';
+					break;
+
+				case 'WP_User':
+					$meta_name = 'customer_meta';
+					break;
+
+				default:
+					$meta_name = 'product_meta';
+					break;
+			}
+
+			if ( is_a( $resource, 'WP_User' ) ) {
+
+				// customer meta
+				$meta = (array) get_user_meta( $resource->ID );
+
+			} elseif ( is_a( $resource, 'WC_Product_Variation' ) ) {
+
+				// product variation meta
+				$meta = (array) get_post_meta( $resource->get_variation_id() );
+
+			} else {
+
+				// coupon/order/product meta
+				$meta = (array) get_post_meta( $resource->id );
+			}
+
+			foreach( $meta as $meta_key => $meta_value ) {
+
+				// don't add hidden meta by default
+				if ( ! is_protected_meta( $meta_key ) ) {
+					$data[ $meta_name ][ $meta_key ] = maybe_unserialize( $meta_value[0] );
+				}
+			}
+
 		}
 
 		return $data;

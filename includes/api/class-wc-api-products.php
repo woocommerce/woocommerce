@@ -122,7 +122,7 @@ class WC_API_Products extends WC_API_Resource {
 			$product_data['parent'] = $this->get_product_data( $product->parent );
 		}
 
-		return apply_filters( 'woocommerce_api_product_response', $product_data, $product, $fields );
+		return apply_filters( 'woocommerce_api_product_response', $product_data, $product, $fields, $this->server );
 	}
 
 	/**
