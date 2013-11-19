@@ -229,7 +229,7 @@ class WC_AJAX {
 			}
 
 			// Return fragments
-			woocommerce_get_refreshed_fragments();
+			$this->get_refreshed_fragments();
 
 		} else {
 
