@@ -1380,7 +1380,7 @@ class WC_AJAX {
 	 * @see WC_AJAX::json_search_products()
 	 */
 	public function json_search_products_and_variations() {
-		woocommerce_json_search_products( '', array('product', 'product_variation') );
+		$this->json_search_products( '', array('product', 'product_variation') );
 	}
 
 	/**
