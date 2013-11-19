@@ -22,9 +22,6 @@ class WC_API_Authentication {
 
 		// this filter can be removed in order to provide unauthenticated access to the API for testing, etc
 		add_filter( 'woocommerce_api_check_authentication', array( $this, 'authenticate' ) );
-
-		// TODO: provide API key based permissions check using $args = apply_filters( 'json_dispatch_args', $args, $callback );
-		// TODO: allow unauthenticated access to /products endpoint
 	}
 
 	/**
@@ -57,10 +54,10 @@ class WC_API_Authentication {
 
 	/**
 	 * SSL-encrypted requests are not subject to sniffing or man-in-the-middle attacks, so the request can be authenticated
-	 * by simply looking up the user associated with the given consumer key and confirming the secret key provided is valid
+	 * by simply looking up the user associated with the given consumer key and confirming the consumer secret provided is valid
 	 *
 	 * @since 2.1
-	 * @return mixed
+	 * @return WP_User
 	 * @throws Exception
 	 */
 	private function perform_ssl_authentication() {
@@ -69,15 +66,15 @@ class WC_API_Authentication {
 			throw new Exception( __( 'Consumer Key is missing', 'woocommerce' ), 404 );
 
 		if ( empty( $_SERVER['PHP_AUTH_PW'] ) )
-			throw new Exception( __( 'Secret Key is missing', 'woocommerce' ), 404 );
+			throw new Exception( __( 'Consumer Secret is missing', 'woocommerce' ), 404 );
 
-		$consumer_key = $_SERVER['PHP_AUTH_USER'];
-		$secret_key   = $_SERVER['PHP_AUTH_PW'];
+		$consumer_key    = $_SERVER['PHP_AUTH_USER'];
+		$consumer_secret = $_SERVER['PHP_AUTH_PW'];
 
 		$user = $this->get_user_by_consumer_key( $consumer_key );
 
-		if ( ! $this->is_secret_key_valid( $user, $secret_key ) )
-			throw new Exception( __( 'Secret Key is invalid', 'woocommerce'), 401 );
+		if ( ! $this->is_consumer_secret_valid( $user, $consumer_secret ) )
+			throw new Exception( __( 'Consumer Secret is invalid', 'woocommerce'), 401 );
 
 		return $user;
 	}
@@ -89,12 +86,10 @@ class WC_API_Authentication {
 	 *
 	 * This follows the spec for simple OAuth 1.0a authentication (RFC 5849) as closely as possible, with two exceptions:
 	 *
-	 * 1) There is no token associated with request/responses, only consumer/secret keys are used
+	 * 1) There is no token associated with request/responses, only consumer keys/secrets are used
 	 *
 	 * 2) The OAuth parameters are included as part of the request query string instead of part of the Authorization header,
 	 *    This is because there is no cross-OS function within PHP to get the raw Authorization header
-	 *
-	 * @TODO create consumer documentation for generating nonce/signatures for requests
 	 *
 	 * @link http://tools.ietf.org/html/rfc5849 for the full spec
 	 * @since 2.1
@@ -156,21 +151,21 @@ class WC_API_Authentication {
 	}
 
 	/**
-	 * Check if the secret key provided for the given user is valid
+	 * Check if the consumer secret provided for the given user is valid
 	 *
 	 * @since 2.1
 	 * @param WP_User $user
-	 * @param $secret_key
+	 * @param string $consumer_secret
 	 * @return bool
 	 */
-	private function is_secret_key_valid( WP_User $user, $secret_key ) {
+	private function is_consumer_secret_valid( WP_User $user, $consumer_secret ) {
 
-		return $user->woocommerce_api_secret_key === $secret_key;
+		return $user->woocommerce_api_consumer_secret === $consumer_secret;
 	}
 
 	/**
 	 * Verify that the consumer-provided request signature matches our generated signature, this ensures the consumer
-	 * has a valid key/secret key
+	 * has a valid key/secret
 	 *
 	 * @param WP_User $user
 	 * @param array $params the request parameters
@@ -208,7 +203,7 @@ class WC_API_Authentication {
 
 		$hash_algorithm = strtolower( str_replace( 'HMAC-', '', $params['oauth_signature_method'] ) );
 
-		$signature = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $user->woocommerce_api_secret_key, true ) );
+		$signature = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $user->woocommerce_api_consumer_secret, true ) );
 
 		if ( $signature !== $consumer_signature )
 			throw new Exception( __( 'Invalid Signature - provided signature does not match', 'woocommerce' ), 401 );
@@ -220,8 +215,8 @@ class WC_API_Authentication {
 	 *
 	 * @since 2.1
 	 * @see rawurlencode()
-	 * @param $key
-	 * @param $value
+	 * @param string $key
+	 * @param string $value
 	 */
 	private function normalize_parameters( &$key, &$value ) {
 
@@ -254,7 +249,7 @@ class WC_API_Authentication {
 			$used_nonces = array();
 
 		if ( in_array( $nonce, $used_nonces ) )
-			throw new Exception( __( 'Invalid nonce - nonce has already been used', 'woocommerce' ) );
+			throw new Exception( __( 'Invalid nonce - nonce has already been used', 'woocommerce' ), 401 );
 
 		$used_nonces[ $timestamp ] = $nonce;
 
