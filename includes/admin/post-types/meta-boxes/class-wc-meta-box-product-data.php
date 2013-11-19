@@ -624,9 +624,9 @@ class WC_Meta_Box_Product_Data {
 					// List Grouped products
 					$post_parents = array();
 					$post_parents[''] = __( 'Choose a grouped product&hellip;', 'woocommerce' );
-					
+
 					if ( $grouped_term = get_term_by( 'slug', 'grouped', 'product_type' ) ) {
-					
+
 						$posts_in = array_unique( (array) get_objects_in_term( $grouped_term->term_id, 'product_type' ) );
 						if ( sizeof( $posts_in ) > 0 ) {
 							$args = array(
@@ -650,7 +650,7 @@ class WC_Meta_Box_Product_Data {
 								}
 							}
 						}
-					
+
 					}
 
 					woocommerce_wp_select( array( 'id' => 'parent_id', 'label' => __( 'Grouping', 'woocommerce' ), 'value' => absint( $post->post_parent ), 'options' => $post_parents, 'desc_tip' => true, 'description' => __( 'Set this option to make this product part of a grouped product.', 'woocommerce' ) ) );
@@ -740,11 +740,9 @@ class WC_Meta_Box_Product_Data {
 			<?php if ( ! $variation_attribute_found ) : ?>
 
 				<div id="message" class="inline woocommerce-message">
-					<div class="squeezer">
-						<h4><?php _e( 'Before adding variations, add and save some attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ); ?></h4>
+					<p><?php _e( 'Before adding variations, add and save some attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ); ?></p>
 
-						<p class="submit"><a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/document/product-variations', 'product-variations' ) ); ?>" target="_blank"><?php _e( 'Learn more', 'woocommerce' ); ?></a></p>
-					</div>
+					<p class="submit"><a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/document/product-variations', 'product-variations' ) ); ?>" target="_blank"><?php _e( 'Learn more', 'woocommerce' ); ?></a></p>
 				</div>
 
 			<?php else : ?>
@@ -849,7 +847,7 @@ class WC_Meta_Box_Product_Data {
 						$_tax_class = isset( $variation_data['_tax_class'][0] ) ? $variation_data['_tax_class'][0] : null;
 						$image_id   = absint( $_thumbnail_id );
 						$image      = $image_id ? wp_get_attachment_thumb_url( $image_id ) : '';
-						
+
 						// Locale formatting
 						$_regular_price = wc_format_localized_price( $_regular_price );
 						$_sale_price    = wc_format_localized_price( $_sale_price );
@@ -1513,7 +1511,7 @@ class WC_Meta_Box_Product_Data {
 				// Don't use woocommerce_clean as it destroys sanitized characters
 				if ( isset( $_POST[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] ) )
 					$value = sanitize_title( trim( stripslashes( $_POST[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] ) ) );
-				else 
+				else
 					$value = '';
 
 				if ( $value )

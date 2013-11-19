@@ -1,8 +1,6 @@
 <div class="woocommerce-message">
-	<div class="squeezer">
-		<h4><?php _e( 'Please include this information when requesting support:', 'woocommerce' ); ?> </h4>
-		<p class="submit"><a href="#" class="button-primary debug-report"><?php _e( 'Get System Report', 'woocommerce' ); ?></a></p>
-	</div>
+	<p><?php _e( 'Please include this information when requesting support:', 'woocommerce' ); ?> </p>
+	<p class="submit"><a href="#" class="button-primary debug-report"><?php _e( 'Get System Report', 'woocommerce' ); ?></a></p>
 	<div id="debug-report"><textarea readonly="readonly"></textarea></div>
 </div>
 <br/>
@@ -191,7 +189,7 @@
 		<?php
 			$locale = localeconv();
 
-			foreach ( $locale as $key => $val ) 
+			foreach ( $locale as $key => $val )
 				if ( in_array( $key, array( 'decimal_point', 'mon_decimal_point', 'thousands_sep', 'mon_thousands_sep' ) ) )
 					echo '<tr><td>' . $key . ':</td><td>' . $val . '</td></tr>';
 		?>
