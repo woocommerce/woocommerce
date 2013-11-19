@@ -63,12 +63,15 @@ class WC_API_Products extends WC_API_Resource {
 	 * @param string $fields
 	 * @param string $type
 	 * @param array $filter
+	 * @param int $page
 	 * @return array
 	 */
-	public function get_products( $fields = null, $type = null, $filter = array() ) {
+	public function get_products( $fields = null, $type = null, $filter = array(), $page = 1 ) {
 
 		if ( ! empty( $type ) )
 			$filter['type'] = $type;
+
+		$filter['page'] = $page;
 
 		$query = $this->query_products( $filter );
 
@@ -82,7 +85,7 @@ class WC_API_Products extends WC_API_Resource {
 			$products[] = $this->get_product( $product_id, $fields );
 		}
 
-		$this->server->query_navigation_headers( $query );
+		$this->server->add_pagination_headers( $query );
 
 		return array( 'products' => $products );
 	}

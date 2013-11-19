@@ -517,40 +517,77 @@ class WC_API_Server {
 	}
 
 	/**
-	 * Send navigation-related headers for post collections
+	 * Send pagination headers for resources
 	 *
 	 * @since 2.1
-	 * @param WP_Query $query
+	 * @param WP_Query|WP_User_Query $query
 	 */
-	public function query_navigation_headers( $query ) {
-		$max_page = $query->max_num_pages;
-		$paged = $query->get('paged');
+	public function add_pagination_headers( $query ) {
 
-		if ( !$paged )
-			$paged = 1;
+		// WP_User_Query
+		if ( is_a( $query, 'WP_User_Query' ) ) {
 
-		$nextpage = intval($paged) + 1;
-		// TODO: change from `page` query arg to filter[page] arg
-		if ( ! $query->is_single() ) {
-			if ( $paged > 1 ) {
-				$request = remove_query_arg( 'page' );
-				$request = add_query_arg( 'page', $paged - 1, $request );
-				$this->link_header( 'prev', $request );
-			}
+			$page        = $query->page;
+			$single      = count( $query->get_results() ) > 1;
+			$total       = $query->get_total();
+			$total_pages = $query->total_pages;
 
-			if ( $nextpage <= $max_page ) {
-				$request = remove_query_arg( 'page' );
-				$request = add_query_arg( 'page', $nextpage, $request );
-				$this->link_header( 'next', $request );
-			}
+		// WP_Query
+		} else {
+
+			$page        = $query->get( 'paged' );
+			$single      = $query->is_single();
+			$total       = $query->found_posts * $query->max_num_pages;
+			$total_pages = $query->max_num_pages;
 		}
 
-		$this->header( 'X-WP-Total', $query->found_posts );
-		$this->header( 'X-WP-TotalPages', $max_page );
+		if ( ! $page )
+			$page = 1;
 
-		do_action('woocommerce_api_query_navigation_headers', $this, $query);
+		$next_page = absint( $page ) + 1;
+
+		if ( ! $single ) {
+
+			// first/prev
+			if ( $page > 1 ) {
+				$this->link_header( 'first', $this->get_paginated_url( 1 ) );
+				$this->link_header( 'prev', $this->get_paginated_url( $page -1 ) );
+			}
+
+			// next
+			if ( $next_page <= $total_pages ) {
+				$this->link_header( 'next', $this->get_paginated_url( $next_page ) );
+			}
+
+			// last
+			if ( $page != $total_pages )
+				$this->link_header( 'last', $this->get_paginated_url( $total_pages ) );
+		}
+
+		$this->header( 'X-WC-Total', $total );
+		$this->header( 'X-WC-TotalPages', $total_pages );
+
+		do_action( 'woocommerce_api_pagination_headers', $this, $query );
 	}
 
+	/**
+	 * Returns the request URL with the page query parmeter set to the specified page
+	 *
+	 * @since 2.1
+	 * @param int $page
+	 * @return string
+	 */
+	private function get_paginated_url( $page ) {
+
+		// remove existing page query param
+		$request = remove_query_arg( 'page' );
+
+		// add provided page query param
+		$request = urldecode( add_query_arg( 'page', $page, $request ) );
+
+		// return full URL
+		return get_woocommerce_api_url( str_replace( '/wc-api/v1/', '', $request ) );
+	}
 
 	/**
 	 * Retrieve the raw request entity (body)

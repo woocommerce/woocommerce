@@ -63,12 +63,15 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param string $fields
 	 * @param array $filter
 	 * @param string $status
+	 * @param int $page
 	 * @return array
 	 */
-	public function get_orders( $fields = null, $filter = array(), $status = null ) {
+	public function get_orders( $fields = null, $filter = array(), $status = null, $page = 1 ) {
 
 		if ( ! empty( $status ) )
 			$filter['status'] = $status;
+
+		$filter['page'] = $page;
 
 		$query = $this->query_orders( $filter );
 
@@ -82,7 +85,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$orders[] = $this->get_order( $order_id, $fields );
 		}
 
-		$this->server->query_navigation_headers( $query );
+		$this->server->add_pagination_headers( $query );
 
 		return array( 'orders' => $orders );
 	}

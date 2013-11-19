@@ -152,10 +152,7 @@ class WC_API_Resource {
 			$args['offset'] = $request_args['offset'];
 
 		// resource page
-		if ( empty( $request_args['page'] ) )
-			$args['paged'] = 1;
-		else
-			$args['paged'] = absint( $request_args['page'] );
+		$args['paged'] = absint( $request_args['page'] );
 
 		return array_merge( $base_args, $args );
 	}

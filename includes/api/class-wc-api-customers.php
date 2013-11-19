@@ -87,15 +87,18 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @since 2.1
 	 * @param array $fields
 	 * @param array $filter
+	 * @param int $page
 	 * @return array
 	 */
-	public function get_customers( $fields = null, $filter = array() ) {
+	public function get_customers( $fields = null, $filter = array(), $page = 1 ) {
+
+		$filter['page'] = $page;
 
 		$query = $this->query_customers( $filter );
 
 		$customers = array();
 
-		foreach( $query->results as $user_id ) {
+		foreach( $query->get_results() as $user_id ) {
 
 			if ( ! $this->is_readable( $user_id ) )
 				continue;
@@ -103,7 +106,7 @@ class WC_API_Customers extends WC_API_Resource {
 			$customers[] = $this->get_customer( $user_id, $fields );
 		}
 
-		// TODO: add navigation/total count headers for pagination
+		$this->server->add_pagination_headers( $query );
 
 		return array( 'customers' => $customers );
 	}
@@ -191,7 +194,7 @@ class WC_API_Customers extends WC_API_Resource {
 		if ( ! current_user_can( 'list_users' ) )
 			return new WP_Error( 'woocommerce_api_user_cannot_read_customer', __( 'You do not have permission to read customers', 'woocommerce' ), array( 'status' => 401 ) );
 
-		return array( 'count' => $query->get_total() );
+		return array( 'count' => count( $query->get_results() ) );
 	}
 
 
@@ -289,37 +292,65 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Helper method to get customer user objects
 	 *
+	 * Note that WP_User_Query does not have built-in pagination so limit & offset are used to provide limited
+	 * pagination support
+	 *
 	 * @since 2.1
 	 * @param array $args request arguments for filtering query
 	 * @return array
 	 */
 	private function query_customers( $args = array() ) {
 
+		// default users per page
+		$users_per_page = get_option( 'posts_per_page' );
+
 		// set base query arguments
 		$query_args = array(
 			'fields'  => 'ID',
 			'role'    => 'customer',
 			'orderby' => 'registered',
+			'number'  => $users_per_page,
 		);
 
-		if ( ! empty( $args['q'] ) )
+		// search
+		if ( ! empty( $args['q'] ) ) {
 			$query_args['search'] = $args['q'];
+		}
 
-		if ( ! empty( $args['limit'] ) )
-			$query_args['number'] = $args['limit'];
+		// limit number of users returned
+		if ( ! empty( $args['limit'] ) ) {
 
-		if ( ! empty( $args['offset'] ) )
-			$query_args['offset'] = $args['offset'];
+			$query_args['number'] = absint( $args['limit'] );
 
-		if ( ! empty( $args['created_at_min'] ) )
+			$users_per_page = absint( $args['limit'] );
+		}
+
+		// page
+		$page = absint( $args['page'] );
+
+		// offset
+		if ( ! empty( $args['offset'] ) ) {
+			$query_args['offset'] = absint( $args['offset'] );
+		} else {
+			$query_args['offset'] = $users_per_page * ( $page - 1 );
+		}
+
+		// created date
+		if ( ! empty( $args['created_at_min'] ) ) {
 			$this->created_at_min = $this->server->parse_datetime( $args['created_at_min'] );
+		}
 
-		if ( ! empty( $args['created_at_max'] ) )
+		if ( ! empty( $args['created_at_max'] ) ) {
 			$this->created_at_max = $this->server->parse_datetime( $args['created_at_max'] );
+		}
 
-		// TODO: support page argument - requires custom implementation as WP_User_Query has no built-in pagination like WP_Query
+		$query = new WP_User_Query( $query_args );
 
-		return new WP_User_Query( $query_args );
+		// helper members for pagination headers
+		$query->total_pages = ceil( $query->get_total() / $users_per_page );
+		$query->page = $page;
+
+		return $query;
 	}
 
 	/**
