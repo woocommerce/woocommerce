@@ -35,7 +35,6 @@ class WC_Admin_Settings {
 		$settings[] = include( 'settings/class-wc-settings-shipping.php' );
 		$settings[] = include( 'settings/class-wc-settings-tax.php' );
 		$settings[] = include( 'settings/class-wc-settings-emails.php' );
-		$settings[] = include( 'settings/class-wc-settings-rest-api.php' );
 		$settings[] = include( 'settings/class-wc-settings-integrations.php' );
 
 		$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
