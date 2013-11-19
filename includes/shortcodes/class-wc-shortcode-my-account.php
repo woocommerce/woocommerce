@@ -81,7 +81,7 @@ class WC_Shortcode_My_Account {
 	 *
 	 * @param  array $atts
 	 */
-	private function my_account( $atts ) {
+	private static function my_account( $atts ) {
 		extract( shortcode_atts( array(
 	    	'order_count' => 15
 		), $atts ) );
@@ -97,7 +97,7 @@ class WC_Shortcode_My_Account {
 	 *
 	 * @param  int $order_id
 	 */
-	private function view_order( $order_id ) {
+	private static function view_order( $order_id ) {
 		global $woocommerce;
 
 		$user_id      	= get_current_user_id();
@@ -143,7 +143,7 @@ class WC_Shortcode_My_Account {
 	/**
 	 * Edit account details page
 	 */
-	private function edit_account() {
+	private static function edit_account() {
 		woocommerce_get_template( 'myaccount/form-edit-account.php', array( 'user' => get_user_by( 'id', get_current_user_id() ) ) );
 	}
 
@@ -153,9 +153,9 @@ class WC_Shortcode_My_Account {
 	 * @access public
 	 * @param string $load_address
 	 */
-	private function edit_address( $load_address = 'billing' ) {
+	private static function edit_address( $load_address = 'billing' ) {
 		global $woocommerce;
-		
+
 		// Current user
 		global $current_user;
 		get_currentuserinfo();
