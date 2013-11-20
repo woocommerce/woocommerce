@@ -6,8 +6,8 @@
  * Version: 2.1-bleeding
  * Author: WooThemes
  * Author URI: http://woothemes.com
- * Requires at least: 3.5
- * Tested up to: 3.5
+ * Requires at least: 3.8
+ * Tested up to: 3.8
  *
  * Text Domain: woocommerce
  * Domain Path: /i18n/languages/
