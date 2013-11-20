@@ -167,6 +167,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 2.0.20 =
 * Tweaked paypal request
+* Tweak - formatted_woocommerce_price filter
 
 = 2.0.19 - 04/11/2013 =
 * Fix - get_item_subtotal() logic
