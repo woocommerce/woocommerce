@@ -483,7 +483,6 @@ class WC_API_Server {
 			$tzstring = '';
 
 		if ( empty( $tzstring ) ) { // Create a UTC+- zone if no timezone string exists
-			$check_zone_info = false;
 			if ( 0 == $current_offset )
 				$tzstring = 'UTC+0';
 			elseif ($current_offset < 0)
