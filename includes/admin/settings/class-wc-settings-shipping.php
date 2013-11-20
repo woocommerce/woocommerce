@@ -220,8 +220,8 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				    	foreach ( WC()->shipping->load_shipping_methods() as $key => $method ) {
 					    	echo '<tr>
 					    		<td width="1%" class="default">
-					    			<input type="radio" name="default_shipping_method" value="' . $method->id . '" ' . checked( $default_shipping_method, $method->id, false ) . ' />
-					    			<input type="hidden" name="method_order[]" value="' . $method->id . '" />
+					    			<input type="radio" name="default_shipping_method" value="' . esc_attr( $method->id ) . '" ' . checked( $default_shipping_method, $method->id, false ) . ' />
+					    			<input type="hidden" name="method_order[]" value="' . esc_attr( $method->id ) . '" />
 					    		</td>
 				    			<td class="name">
 				    				' . $method->get_title() . '

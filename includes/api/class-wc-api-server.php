@@ -505,7 +505,7 @@ class WC_API_Server {
 	 * @param array $other Other parameters to send, as an assocative array
 	 */
 	public function link_header( $rel, $link, $other = array() ) {
-		$header = 'Link: <' . $link . '>; rel="' . $rel . '"';
+		$header = 'Link: <' . $link . '>; rel="' . esc_attr( $rel ) . '"';
 		foreach ( $other as $key => $value ) {
 			if ( 'title' == $key )
 				$value = '"' . $value . '"';

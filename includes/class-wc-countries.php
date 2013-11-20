@@ -569,9 +569,9 @@ class WC_Countries {
 
 		if ( $this->countries ) foreach ( $this->countries as $key=>$value) :
 			if ( $states =  $this->get_states($key) ) :
-				echo '<optgroup label="'.$value.'">';
+				echo '<optgroup label="' . esc_attr( $value ) . '">';
     				foreach ($states as $state_key=>$state_value) :
-    					echo '<option value="'.$key.':'.$state_key.'"';
+    					echo '<option value="' . esc_attr( $key ) . ':'.$state_key.'"';
 
     					if ($selected_country==$key && $selected_state==$state_key) echo ' selected="selected"';
 
@@ -581,7 +581,7 @@ class WC_Countries {
 			else :
     			echo '<option';
     			if ($selected_country==$key && $selected_state=='*') echo ' selected="selected"';
-    			echo ' value="'.$key.'">'. ($escape ? esc_js( $value ) : $value) .'</option>';
+    			echo ' value="' . esc_attr( $key ) . '">'. ($escape ? esc_js( $value ) : $value) .'</option>';
 			endif;
 		endforeach;
 	}

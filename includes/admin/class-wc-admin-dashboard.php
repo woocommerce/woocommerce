@@ -188,7 +188,7 @@ class WC_Admin_Dashboard {
 
 				$rating = get_comment_meta( $comment->comment_ID, 'rating', true );
 
-				echo '<div class="star-rating" title="' . $rating . '">
+				echo '<div class="star-rating" title="' . esc_attr( $rating ) . '">
 					<span style="width:'. ( $rating * 20 ) . '%">' . $rating . ' ' . __( 'out of 5', 'woocommerce' ) . '</span></div>';
 
 				echo '<h4 class="meta"><a href="' . get_permalink( $comment->ID ) . '#comment-' . absint( $comment->comment_ID ) .'">' . esc_html__( $comment->post_title ) . '</a> reviewed by ' . esc_html( $comment->comment_author ) .'</h4>';

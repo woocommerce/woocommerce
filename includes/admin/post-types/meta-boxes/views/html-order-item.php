@@ -99,9 +99,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 							$meta['meta_value'] = esc_textarea( urldecode( $meta['meta_value'] ) ); // using a <textarea />
 							$meta['meta_id']    = absint( $meta['meta_id'] );
 
-							echo '<tr data-meta_id="' . $meta['meta_id'] . '">
+							echo '<tr data-meta_id="' . esc_attr( $meta['meta_id'] ) . '">
 								<td>
-									<input type="text" name="meta_key[' . $meta['meta_id'] . ']" value="' . $meta['meta_key'] . '" />
+									<input type="text" name="meta_key[' . $meta['meta_id'] . ']" value="' . esc_attr( $meta['meta_key'] ) . '" />
 									<textarea name="meta_value[' . $meta['meta_id'] . ']">' . $meta['meta_value'] . '</textarea>
 								</td>
 								<td width="1%"><button class="remove_order_item_meta button">&times;</button></td>

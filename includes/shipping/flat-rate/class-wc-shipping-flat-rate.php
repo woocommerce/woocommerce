@@ -552,7 +552,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 								if ( $woocommerce->shipping->get_shipping_classes() ) {
 									foreach ( $woocommerce->shipping->get_shipping_classes() as $shipping_class ) {
-										echo '<option value="'.$shipping_class->slug.'" '.selected($shipping_class->slug, $class, false).'>'.$shipping_class->name.'</option>';
+										echo '<option value="' . esc_attr( $shipping_class->slug ) . '" '.selected($shipping_class->slug, $class, false).'>'.$shipping_class->name.'</option>';
 									}
 								} else {
 									echo '<option value="">'.__( 'Select a class&hellip;', 'woocommerce' ).'</option>';

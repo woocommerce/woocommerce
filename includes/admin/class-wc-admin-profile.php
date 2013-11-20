@@ -213,7 +213,7 @@ class WC_Admin_Profile {
 									<strong><?php _e( 'Consumer Key:', 'woocommerce' ); ?>&nbsp;</strong><code id="woocommerce_api_consumer_key"><?php echo $user->woocommerce_api_consumer_key ?></code><br/>
 									<strong><?php _e( 'Consumer Secret:', 'woocommerce' ); ?>&nbsp;</strong><code id="woocommerce_api_consumer_secret"><?php echo $user->woocommerce_api_consumer_secret; ?></code><br/>
 									<strong><?php _e( 'Permissions:', 'woocommerce' ); ?>&nbsp;</strong><span id="woocommerce_api_key_permissions"><select name="woocommerce_api_key_permissions" id="woocommerce_api_key_permissions"><?php
-										foreach ( $permissions as $permission_key => $permission_name ) { echo '<option value="'.$permission_key.'" '.selected($permission_key, $user->woocommerce_api_key_permissions, false).'>'.esc_html( $permission_name ) . '</option>';} ?>
+										foreach ( $permissions as $permission_key => $permission_name ) { echo '<option value="' . esc_attr( $permission_key ) . '" '.selected($permission_key, $user->woocommerce_api_key_permissions, false).'>'.esc_html( $permission_name ) . '</option>';} ?>
 									</select></span><br/>
 									<input name="woocommerce_generate_api_key" type="checkbox" id="woocommerce_generate_api_key" value="0" />
 									<span class="description"><?php _e( 'Revoke API Key', 'woocommerce' ); ?></span>

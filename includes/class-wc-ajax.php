@@ -1038,7 +1038,7 @@ class WC_AJAX {
 
 		if ( $meta_id ) {
 
-			echo '<tr data-meta_id="' . $meta_id . '"><td><input type="text" name="meta_key[' . $meta_id . ']" /><textarea name="meta_value[' . $meta_id . ']"></textarea></td><td width="1%"><button class="remove_order_item_meta button">&times;</button></td></tr>';
+			echo '<tr data-meta_id="' . esc_attr( $meta_id ) . '"><td><input type="text" name="meta_key[' . $meta_id . ']" /><textarea name="meta_value[' . $meta_id . ']"></textarea></td><td width="1%"><button class="remove_order_item_meta button">&times;</button></td></tr>';
 
 		}
 
@@ -1248,7 +1248,7 @@ class WC_AJAX {
 			$order = new WC_Order( $post_id );
 			$comment_id = $order->add_order_note( $note, $is_customer_note );
 
-			echo '<li rel="' . $comment_id . '" class="note ';
+			echo '<li rel="' . esc_attr( $comment_id ) . '" class="note ';
 			if ( $is_customer_note ) echo 'customer-note';
 			echo '"><div class="note_content">';
 			echo wpautop( wptexturize( $note ) );
