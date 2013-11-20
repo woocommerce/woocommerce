@@ -424,7 +424,7 @@ class WC_API_Server {
 			'URL'         => get_option( 'siteurl' ),
 			'routes'      => array(),
 			'meta'        => array(
-				'timezone'       => $this->get_timezone(),
+				'timezone'       => woocommerce_timezone_string(),
 				'currency'       => get_woocommerce_currency(),
 				'money_format'   => get_woocommerce_currency_symbol(),
 				'tax_included'   => ( 'yes' === get_option( 'woocommerce_prices_include_tax' ) ),
