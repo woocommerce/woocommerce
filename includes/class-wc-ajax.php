@@ -1289,7 +1289,7 @@ class WC_AJAX {
 
 		$this->json_headers();
 
-		$term = (string) urldecode(stripslashes(strip_tags($_GET['term'])));
+		$term = (string) woocommerce_clean( urldecode( stripslashes( $_GET['term'] ) ) );
 
 		if (empty($term)) die();
 
@@ -1392,7 +1392,7 @@ class WC_AJAX {
 
 		$this->json_headers();
 
-		$term = urldecode( stripslashes( strip_tags( $_GET['term'] ) ) );
+		$term = woocommerce_clean( urldecode( stripslashes( $_GET['term'] ) ) );
 
 		if ( empty( $term ) )
 			die();
@@ -1401,7 +1401,7 @@ class WC_AJAX {
 
 		$found_customers = array( '' => $default );
 
-		add_action( 'pre_user_query', 'woocommerce_json_search_customer_name' );
+		add_action( 'pre_user_query', array( $this, 'json_search_customer_name' ) );
 
 		$customers_query = new WP_User_Query( array(
 			'fields'			=> 'all',
@@ -1410,7 +1410,7 @@ class WC_AJAX {
 			'search_columns'	=> array( 'ID', 'user_login', 'user_email', 'user_nicename' )
 		) );
 
-		remove_action( 'pre_user_query', 'woocommerce_json_search_customer_name' );
+		remove_action( 'pre_user_query', array( $this, 'json_search_customer_name' ) );
 
 		$customers = $customers_query->get_results();
 
@@ -1432,7 +1432,7 @@ class WC_AJAX {
 	public function json_search_customer_name( $query ) {
 		global $wpdb;
 
-		$term = urldecode( stripslashes( strip_tags( $_GET['term'] ) ) );
+		$term = woocommerce_clean( urldecode( stripslashes( $_GET['term'] ) ) );
 
 		$query->query_from  .= " LEFT JOIN {$wpdb->usermeta} as meta2 ON ({$wpdb->users}.ID = meta2.user_id) ";
 		$query->query_from  .= " LEFT JOIN {$wpdb->usermeta} as meta3 ON ({$wpdb->users}.ID = meta3.user_id) ";
