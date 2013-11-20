@@ -117,7 +117,8 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 				foreach ( $ancestors as $ancestor ) {
 					$ancestor = get_term( $ancestor, 'product_cat' );
 
-					echo $before . '<a href="' . get_term_link( $ancestor->slug, 'product_cat' ) . '">' . $ancestor->name . '</a>' . $after . $delimiter;
+					if ( ! is_wp_error( $ancestor ) && $ancestor )
+						echo $before . '<a href="' . get_term_link( $ancestor->slug, 'product_cat' ) . '">' . $ancestor->name . '</a>' . $after . $delimiter;
 				}
 
 				echo $before . '<a href="' . get_term_link( $main_term->slug, 'product_cat' ) . '">' . $main_term->name . '</a>' . $after . $delimiter;
