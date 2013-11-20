@@ -375,8 +375,6 @@ class WC_Query {
 	 */
 	public function remove_product_query() {
 		remove_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
-		remove_filter( 'posts_clauses', array( $this, 'order_by_popularity_post_clauses' ) );
-		remove_filter( 'posts_clauses', array( $this, 'order_by_rating_post_clauses' ) );
 	}
 
 	/**
