@@ -677,7 +677,7 @@ class WC_Order {
 	 */
 	public function get_order_currency() {
 
-		$currency = $this->order_custom_fields['_order_currency'][0];
+		$currency = $this->order_currency;
 		
 		return apply_filters( 'woocommerce_get_order_currency', $currency, $this );
 	}
