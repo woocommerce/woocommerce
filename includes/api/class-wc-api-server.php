@@ -424,7 +424,7 @@ class WC_API_Server {
 			'URL'         => get_option( 'siteurl' ),
 			'routes'      => array(),
 			'meta'        => array(
-				'timezone'       => $this->get_timezone(),
+				'timezone'       => woocommerce_timezone_string(),
 				'currency'       => get_woocommerce_currency(),
 				'money_format'   => get_woocommerce_currency_symbol(),
 				'tax_included'   => ( 'yes' === get_option( 'woocommerce_prices_include_tax' ) ),
@@ -467,30 +467,6 @@ class WC_API_Server {
 			$available['routes'][$route] = apply_filters( 'woocommerce_api_endpoints_description', $data );
 		}
 		return apply_filters( 'woocommerce_api_index', $available );
-	}
-
-	/**
-	 * Retrieve the timezone from the db
-	 * @since  2.1
-	 * @return string timezone
-	 */
-	public function get_timezone() {
-		$current_offset = get_option('gmt_offset');
-		$tzstring = get_option('timezone_string');
-
-		// Remove old Etc mappings. Fallback to gmt_offset.
-		if ( false !== strpos( $tzstring,'Etc/GMT' ) )
-			$tzstring = '';
-
-		if ( empty( $tzstring ) ) { // Create a UTC+- zone if no timezone string exists
-			if ( 0 == $current_offset )
-				$tzstring = 'UTC+0';
-			elseif ($current_offset < 0)
-				$tzstring = 'UTC' . $current_offset;
-			else
-				$tzstring = 'UTC+' . $current_offset;
-		}
-		return $tzstring;
 	}
 
 	/**
