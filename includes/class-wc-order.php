@@ -669,6 +669,18 @@ class WC_Order {
 		return apply_filters( 'woocommerce_order_formatted_line_subtotal', $subtotal, $item, $this );
 	}
 
+    /**
+     * Gets order currency
+     *
+     * @access public
+     * @return string
+     */
+    public function get_order_currency() {
+ 
+        $currency = $this->order_custom_fields['_order_currency'][0];
+
+        return apply_filters( 'woocommerce_get_order_currency', $currency, $this );
+    }
 
 	/**
 	 * Gets order total - formatted for display.
@@ -678,7 +690,7 @@ class WC_Order {
 	 */
 	public function get_formatted_order_total() {
 
-		$formatted_total = woocommerce_price( $this->order_total );
+		$formatted_total = woocommerce_price( $this->order_total , array('currency' => $this->get_order_currency()));
 
 		return apply_filters( 'woocommerce_get_formatted_order_total', $formatted_total, $this );
 	}
