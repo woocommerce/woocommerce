@@ -217,6 +217,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Replaced all instances of &rarr; and &larr; in frontent using wc icon font plus .wc-forward and .wc-backward utility classes.
 * Tweak - Add review form no longer opens in lightbox.
 * Tweak - Move average rating outside of hidden tab for google #3867.
+* Tweak - Add formatted_woocommerce_price filter.
 * Fix - Changed MyException to Exception in Checkout class as MyException class does not exist in WooCommerce
 * Fix - Default cart widget styling on non-wc pages.
 * Fix - Rounding for mijireh tax ex. price.
