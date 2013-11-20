@@ -1535,7 +1535,7 @@ function woocommerce_json_search_products( $x = '', $post_types = array('product
 
 	header( 'Content-Type: application/json; charset=utf-8' );
 
-	$term = (string) urldecode(stripslashes(strip_tags($_GET['term'])));
+	$term = (string) woocommerce_clean( urldecode( stripslashes( $_GET['term'] ) ) );
 
 	if (empty($term)) die();
 
@@ -1646,7 +1646,7 @@ function woocommerce_json_search_customers() {
 
 	header( 'Content-Type: application/json; charset=utf-8' );
 
-	$term = urldecode( stripslashes( strip_tags( $_GET['term'] ) ) );
+	$term = woocommerce_clean( urldecode( stripslashes( $_GET['term'] ) ) );
 
 	if ( empty( $term ) )
 		die();
