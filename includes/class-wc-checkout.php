@@ -369,7 +369,7 @@ class WC_Checkout {
 		update_post_meta( $order_id, '_order_shipping_tax', 	woocommerce_format_decimal( woocommerce_round_tax_total( WC()->cart->shipping_tax_total ) ) );
 		update_post_meta( $order_id, '_order_total', 			woocommerce_format_decimal( WC()->cart->total, get_option( 'woocommerce_price_num_decimals' ) ) );
 
-		update_post_meta( $order_id, '_order_key', 				apply_filters('woocommerce_generate_order_key', uniqid('order_') ) );
+		update_post_meta( $order_id, '_order_key', 				'wc_' . apply_filters('woocommerce_generate_order_key', uniqid('order_') ) );
 		update_post_meta( $order_id, '_customer_user', 			absint( $this->customer_id ) );
 		update_post_meta( $order_id, '_order_currency', 		get_woocommerce_currency() );
 		update_post_meta( $order_id, '_prices_include_tax', 	get_option( 'woocommerce_prices_include_tax' ) );
