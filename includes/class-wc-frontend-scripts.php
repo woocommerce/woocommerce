@@ -101,35 +101,36 @@ class WC_Frontend_Scripts {
 
 		// Variables for JS scripts
 		wp_localize_script( 'woocommerce', 'woocommerce_params', apply_filters( 'woocommerce_params', array(
-			'ajax_url'                         => WC()->ajax_url(),
-			'ajax_loader_url'                  => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
+			'ajax_url'        => WC()->ajax_url(),
+			'ajax_loader_url' => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
 		) ) );
 
 		wp_localize_script( 'wc-single-product', 'wc_single_product_params', apply_filters( 'wc_single_product_params', array(
-			'i18n_required_rating_text'        => esc_attr__( 'Please select a rating', 'woocommerce' ),
-			'review_rating_required'           => get_option( 'woocommerce_review_rating_required' ),
+			'i18n_required_rating_text' => esc_attr__( 'Please select a rating', 'woocommerce' ),
+			'review_rating_required'    => get_option( 'woocommerce_review_rating_required' ),
 		) ) );
 
 		wp_localize_script( 'wc-checkout', 'wc_checkout_params', apply_filters( 'wc_checkout_params', array(
-			'ajax_url'                         => WC()->ajax_url(),
-			'ajax_loader_url'                  => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
-			'i18n_required_text'               => esc_attr__( 'required', 'woocommerce' ),
-			'update_order_review_nonce'        => wp_create_nonce( "update-order-review" ),
-			'apply_coupon_nonce'               => wp_create_nonce( "apply-coupon" ),
-			'option_guest_checkout'            => get_option( 'woocommerce_enable_guest_checkout' ),
-			'checkout_url'                     => add_query_arg( 'action', 'woocommerce_checkout', WC()->ajax_url() ),
-			'is_checkout'                      => is_page( woocommerce_get_page_id( 'checkout' ) ) && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ? 1 : 0,
-			'locale'                           => json_encode( WC()->countries->get_country_locale() )
+			'ajax_url'                  => WC()->ajax_url(),
+			'ajax_loader_url'           => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
+			'i18n_required_text'        => esc_attr__( 'required', 'woocommerce' ),
+			'update_order_review_nonce' => wp_create_nonce( "update-order-review" ),
+			'apply_coupon_nonce'        => wp_create_nonce( "apply-coupon" ),
+			'option_guest_checkout'     => get_option( 'woocommerce_enable_guest_checkout' ),
+			'checkout_url'              => add_query_arg( 'action', 'woocommerce_checkout', WC()->ajax_url() ),
+			'is_checkout'               => is_page( woocommerce_get_page_id( 'checkout' ) ) && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ? 1 : 0,
+			'locale'                    => json_encode( WC()->countries->get_country_locale() )
 		) ) );
 
 		wp_localize_script( 'wc-cart', 'wc_cart_params', apply_filters( 'wc_cart_params', array(
-			'ajax_url'                         => WC()->ajax_url(),
-			'ajax_loader_url'                  => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
-			'update_shipping_method_nonce'     => wp_create_nonce( "update-shipping-method" ),
+			'ajax_url'                     => WC()->ajax_url(),
+			'ajax_loader_url'              => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
+			'update_shipping_method_nonce' => wp_create_nonce( "update-shipping-method" ),
 		) ) );
 
 		wp_localize_script( 'wc-cart-fragments', 'wc_cart_fragments_params', apply_filters( 'wc_cart_fragments_params', array(
-			'ajax_url'                         => WC()->ajax_url()
+			'ajax_url'      => WC()->ajax_url(),
+			'fragment_name' => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments' )
 		) ) );
 
 		wp_localize_script( 'wc-add-to-cart', 'wc_add_to_cart_params', apply_filters( 'wc_add_to_cart_params', array(
@@ -143,12 +144,12 @@ class WC_Frontend_Scripts {
 
 		wp_localize_script( 'wc-add-to-cart-variation', 'wc_add_to_cart_variation_params', apply_filters( 'wc_add_to_cart_variation_params', array(
 			'i18n_no_matching_variations_text' => esc_attr__( 'Sorry, no products matched your selection. Please choose a different combination.', 'woocommerce' ),
-			'i18n_unavailable_text' => esc_attr__( 'Sorry, this product is unavailable. Please choose a different combination.', 'woocommerce' ),
+			'i18n_unavailable_text'            => esc_attr__( 'Sorry, this product is unavailable. Please choose a different combination.', 'woocommerce' ),
 		) ) );
 
 		wp_localize_script( 'wc-country-select', 'wc_country_select_params', apply_filters( 'wc_country_select_params', array(
-			'countries'                        => json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
-			'i18n_select_state_text'           => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
+			'countries'              => json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
+			'i18n_select_state_text' => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
 		) ) );
 
 		// CSS Styles

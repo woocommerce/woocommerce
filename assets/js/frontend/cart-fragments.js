@@ -15,7 +15,7 @@ jQuery(document).ready(function($) {
 				});
 
 				if ( $supports_html5_storage ) {
-					sessionStorage.setItem( "wc_fragments", JSON.stringify( data.fragments ) );
+					sessionStorage.setItem( wc_cart_fragments_params.fragment_name, JSON.stringify( data.fragments ) );
 					sessionStorage.setItem( "wc_cart_hash", data.cart_hash );
 				}
 
@@ -27,12 +27,12 @@ jQuery(document).ready(function($) {
 	if ( $supports_html5_storage ) {
 
 		$('body').bind( 'added_to_cart', function( event, fragments, cart_hash ) {
-			sessionStorage.setItem( "wc_fragments", JSON.stringify( fragments ) );
+			sessionStorage.setItem( wc_cart_fragments_params.fragment_name, JSON.stringify( fragments ) );
 			sessionStorage.setItem( "wc_cart_hash", cart_hash );
 		});
 
 		try {
-			var wc_fragments = $.parseJSON( sessionStorage.getItem( "wc_fragments" ) );
+			var wc_fragments = $.parseJSON( sessionStorage.getItem( wc_cart_fragments_params.fragment_name ) );
 			var cart_hash    = sessionStorage.getItem( "wc_cart_hash" );
 			var cookie_hash  = $.cookie( "woocommerce_cart_hash" );
 
