@@ -136,17 +136,30 @@ class WC_Cart {
 
 					if ( ! empty( $_product ) && $_product->exists() && $values['quantity'] > 0 ) {
 
-						// Put session data into array. Run through filter so other plugins can load their own session data
-						$this->cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', array(
-							'product_id'	=> $values['product_id'],
-							'variation_id'	=> $values['variation_id'],
-							'variation' 	=> $values['variation'],
-							'quantity' 		=> $values['quantity'],
-							'data'			=> $_product
-						), $values, $key );
+						if ( ! $_product->is_purchasable() ) {
+
+							// Flag to indicate the stored cart should be update
+							$update_cart_session = true;
+							$woocommerce->add_error( sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $_product->get_title() ) );
+
+						} else {
+
+							// Put session data into array. Run through filter so other plugins can load their own session data
+							$this->cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', array(
+								'product_id'	=> $values['product_id'],
+								'variation_id'	=> $values['variation_id'],
+								'variation' 	=> $values['variation'],
+								'quantity' 		=> $values['quantity'],
+								'data'			=> $_product
+							), $values, $key );
+
+						}
 					}
 				}
 			}
+
+			if ( isset( $update_cart_session ) && $update_cart_session )
+				$woocommerce->session->cart = $this->cart_contents;
 
 			if ( empty( $this->cart_contents ) || ! is_array( $this->cart_contents ) )
 				$this->cart_contents = array();
@@ -177,7 +190,7 @@ class WC_Cart {
 			$this->shipping_label		= isset( $woocommerce->session->shipping_label ) ? $woocommerce->session->shipping_label : '';
 
 			// Queue re-calc if subtotal is not set
-			if ( ! $this->subtotal && sizeof( $this->cart_contents ) > 0 )
+			if ( ( ! $this->subtotal && sizeof( $this->cart_contents ) > 0 ) || ( isset( $update_cart_session ) && $update_cart_session ) )
 				$this->calculate_totals();
 		}
 
