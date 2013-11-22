@@ -79,7 +79,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			if ( ! $this->is_readable( $coupon_id ) )
 				continue;
 
-			$coupons[] = $this->get_coupon( $coupon_id, $fields );
+			$coupons[] = current( $this->get_coupon( $coupon_id, $fields ) );
 		}
 
 		$this->server->add_pagination_headers( $query );
@@ -137,7 +137,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			'customer_email'             => $coupon->customer_email,
 		);
 
-		return apply_filters( 'woocommerce_api_coupon_response', $coupon_data, $coupon, $fields, $this->server );
+		return array( 'coupon' => apply_filters( 'woocommerce_api_coupon_response', $coupon_data, $coupon, $fields, $this->server ) );
 	}
 
 	/**

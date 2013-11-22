@@ -103,7 +103,7 @@ class WC_API_Customers extends WC_API_Resource {
 			if ( ! $this->is_readable( $user_id ) )
 				continue;
 
-			$customers[] = $this->get_customer( $user_id, $fields );
+			$customers[] = current( $this->get_customer( $user_id, $fields ) );
 		}
 
 		$this->server->add_pagination_headers( $query );
@@ -177,7 +177,7 @@ class WC_API_Customers extends WC_API_Resource {
 			),
 		);
 
-		return apply_filters( 'woocommerce_api_customer_response', $customer_data, $customer, $fields, $this->server );
+		return array( 'customer' => apply_filters( 'woocommerce_api_customer_response', $customer_data, $customer, $fields, $this->server ) );
 	}
 
 	/**
@@ -283,7 +283,7 @@ class WC_API_Customers extends WC_API_Resource {
 		$orders = array();
 
 		foreach ( $order_ids as $order_id ) {
-			$orders[] = WC()->api->WC_API_Orders->get_order( $order_id, $fields );
+			$orders[] = current( WC()->api->WC_API_Orders->get_order( $order_id, $fields ) );
 		}
 
 		return array( 'orders' => apply_filters( 'woocommerce_api_customer_orders_response', $orders, $id, $fields, $order_ids, $this->server ) );
@@ -326,7 +326,7 @@ class WC_API_Customers extends WC_API_Resource {
 		}
 
 		// page
-		$page = absint( $args['page'] );
+		$page = ( isset( $args['page'] ) ) ? absint( $args['page'] ) : 1;
 
 		// offset
 		if ( ! empty( $args['offset'] ) ) {
@@ -369,7 +369,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 		} else {
 
-			$order_data['customer'] = $this->get_customer( $order->customer_user );
+			$order_data['customer'] = current( $this->get_customer( $order->customer_user ) );
 		}
 
 		return $order_data;
