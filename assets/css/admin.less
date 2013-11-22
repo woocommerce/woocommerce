@@ -776,7 +776,7 @@ ul.wc_coupon_list_block {
 	.totals_group {
 		border-top: 1px solid white;
 		border-bottom: 1px solid #DDD;
-		padding: 10px 10px 0 10px;
+		padding: 10px 12px 0 12px;
 		&:first-child {
 			border-top:0;
 		}
@@ -860,12 +860,19 @@ ul.wc_coupon_list_block {
 	}
 	.total_rows {
 		margin: 6px 0 0;
+		.total_row:first-child {
+			border-top:1px solid #dfdfdf;
+		}
+		.total_row:last-child {
+			margin-bottom:9px;
+		}
 	}
 	.total_row {
-		margin:0 0 9px;
-		border:1px solid #DFDFDF;
+		margin:0 -12px;
+		border-bottom:1px solid #DFDFDF;
 		background: #fff;
-		padding: 9px 9px 0;
+		padding: 12px 12px 3px 12px;
+		background:#f8f8f8;
 		position: relative;
 		p {
 			margin:0 0 9px;
