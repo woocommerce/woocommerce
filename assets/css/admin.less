@@ -781,16 +781,11 @@ ul.wc_coupon_list_block {
 			border-top:0;
 		}
 		input, select {
-			font-size: 1.4em;
 			width: 100%;
 			vertical-align: top;
 			margin: 0;
 			font-weight: normal;
-			color: #999;
 			line-height: 1em;
-			&:focus {
-				color: #555;
-			}
 		}
 		select {
 			height: 30px !important;
@@ -869,8 +864,6 @@ ul.wc_coupon_list_block {
 	.total_row {
 		margin:0 0 9px;
 		border:1px solid #DFDFDF;
-		border-right-width: 2px;
-		border-bottom-width: 2px;
 		background: #fff;
 		padding: 9px 9px 0;
 		position: relative;
@@ -905,30 +898,22 @@ ul.wc_coupon_list_block {
 			}
 		}
 		a.delete_tax_row, a.delete_total_row {
-			padding:0;
-			text-decoration: none;
-			font-size: 12px;
-			line-height: 18px;
-			width: 18px;
-			height: 18px;
-			text-align: center;
-			color:#fff;
-			float: right;
-			background-color: @red;
-			-webkit-border-radius:100%;
-			-moz-border-radius:100%;
-			-o-border-radius:100%;
-			border-radius:100%;
+			.ir;
+			display:none;
 			position: absolute;
-			top: 0;
-			right: 0;
-			margin: -9px -9px 0 0;
-			display: none;
-			font-weight: bold;
-			border:2px solid #fff;
-			.box_shadow(0,1px,2px,0,rgba(0,0,0,0.4));
-			&:hover {
-				background-color: @red - #222;
+			top:-.5em;
+			right:-.5em;
+			font-size:1.4em;
+			&:before {
+				.icon( "\e013" );
+				color:white;
+				background-color: #000;
+				-webkit-border-radius:100%;
+				border-radius:100%;
+				box-shadow:0 1px 2px rgba(0,0,0,0.2);
+			}
+			&:hover:before {
+				background-color: @red;
 			}
 		}
 		&:hover, &:focus {
