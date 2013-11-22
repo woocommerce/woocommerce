@@ -3026,17 +3026,25 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 					cursor: pointer;
 					span {
 						display: block;
-						background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAFCAYAAACXU8ZrAAAAMElEQVQIW2OcOXPmfwYgSE9PZwTRyAAmB5bAphBZDK4bWRBdE4oVMEl067G6A919AJAYHtDVRR5EAAAAAElFTkSuQmCC) no-repeat right;
+						&:after {
+							.iconafter( "\e035" );
+							float: right;
+							font-size:.9em;
+							line-height: 1.618;
+						}
 					}
 					&.open {
 						color: #333;
-						span {
-							background-image: none;
+						span:after {
+							display: none;
 						}
 					}
 				}
 				.section {
 					border-bottom:1px solid #dfdfdf;
+					.chosen-container {
+						width:100% !important;
+					}
 					&:last-of-type {
 						border-radius:0 0 3px 3px;
 					}
