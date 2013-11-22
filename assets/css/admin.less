@@ -1636,13 +1636,17 @@ a.export_rates, a.import_rates {
 }
 table.wc_tax_rates, table.wc_input_table {
 	width: 100%;
+	span.tips {
+		color: @blue;
+	}
 	td {
 		padding: 0;
 		border-right: 1px solid #DFDFDF;
 		border-bottom: 1px solid #DFDFDF;
 		border-top: 0;
 		background: #fff;
-		input {
+		input[type="text"],
+		input[type="number"] {
 			width: 100%;
 			padding: 5px 7px;
 			margin: 0;
@@ -1729,6 +1733,13 @@ table.wc_tax_rates, table.wc_input_table {
 		th {
 			padding-left:20px;
 			padding-right:20px;
+		}
+	}
+	tr {
+		&:last-child {
+			td {
+				border-bottom:0;
+			}
 		}
 	}
 }
