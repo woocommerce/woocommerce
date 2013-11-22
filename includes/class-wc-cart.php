@@ -179,7 +179,7 @@ class WC_Cart {
 			}
 
 			if ( $update_cart_session )
-				WC()->session->cart = $this->cart_contents;
+				WC()->session->cart = $this->get_cart_for_session();
 
 			$this->set_cart_cookies( sizeof( $this->cart_contents ) > 0 );
 
@@ -196,15 +196,7 @@ class WC_Cart {
 		 */
 		public function set_session() {
 			// Set cart and coupon session data
-			$cart_session = array();
-
-			if ( $this->cart_contents ) {
-				foreach ( $this->cart_contents as $key => $values ) {
-					$cart_session[ $key ] = $values;
-
-					unset( $cart_session[ $key ]['data'] ); // Unset product object
-				}
-			}
+			$cart_session = $this->get_cart_for_session();
 
 			WC()->session->set( 'cart', $cart_session );
 			WC()->session->set( 'applied_coupons', $this->applied_coupons );
@@ -624,6 +616,25 @@ class WC_Cart {
 		 */
 		public function get_cart() {
 			return array_filter( (array) $this->cart_contents );
+		}
+
+		/**
+		 * Returns the contents of the cart in an array without the 'data' element.
+		 *
+		 * @return array contents of the cart
+		 */
+		private function get_cart_for_session() {
+
+			$cart_session = array();
+
+			if ( $this->get_cart() ) {
+				foreach ( $this->get_cart() as $key => $values ) {
+					$cart_session[ $key ] = $values;
+					unset( $cart_session[ $key ]['data'] ); // Unset product object
+				}
+			}
+
+			return $cart_session;
 		}
 
 		/**
