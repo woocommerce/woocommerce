@@ -1029,7 +1029,7 @@ class WC_AJAX {
 	/**
 	 * Add some meta to a line item
 	 */
-	public function ajax_add_order_item_meta() {
+	public function add_order_item_meta() {
 		global $wpdb;
 
 		check_ajax_referer( 'order-item', 'security' );
@@ -1048,7 +1048,7 @@ class WC_AJAX {
 	/**
 	 * Remove meta from a line item
 	 */
-	public function ajax_remove_order_item_meta() {
+	public function remove_order_item_meta() {
 		global $wpdb;
 
 		check_ajax_referer( 'order-item', 'security' );
