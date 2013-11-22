@@ -312,7 +312,7 @@ class WC_API_Reports extends WC_API_Resource {
 			'totals'            => $period_totals,
 		);
 
-		return array( 'sales' => apply_filters( 'woocommerce_api_report_response', $sales_data, 'sales', $fields, $this->report, $this->server ) );
+		return array( 'sales' => apply_filters( 'woocommerce_api_report_response', $sales_data, $this->report, $fields, $this->server ) );
 	}
 
 	/**

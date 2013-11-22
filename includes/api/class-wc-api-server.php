@@ -185,7 +185,7 @@ class WC_API_Server {
 				$errors[] = array( 'code' => $code, 'message' => $message );
 			}
 		}
-		return $errors;
+		return array( 'errors' => $errors );
 	}
 
 	/**
@@ -208,7 +208,7 @@ class WC_API_Server {
 
 			$this->send_status( 404 );
 
-			echo $this->handler->generate_response( array( array( 'code' => 'woocommerce_api_disabled', 'message' => 'The WooCommerce API is disabled on this site' ) ) );
+			echo $this->handler->generate_response( array( 'errors' => array( 'code' => 'woocommerce_api_disabled', 'message' => 'The WooCommerce API is disabled on this site' ) ) );
 
 			return;
 		}
@@ -418,7 +418,7 @@ class WC_API_Server {
 	public function get_index() {
 
 		// General site data
-		$available = array(
+		$available = array( 'store' => array(
 			'name'        => get_option( 'blogname' ),
 			'description' => get_option( 'blogdescription' ),
 			'URL'         => get_option( 'siteurl' ),
@@ -436,7 +436,7 @@ class WC_API_Server {
 					'profile' => 'https://raw.github.com/rmccue/WP-API/master/docs/schema.json', // TODO: update this
 				),
 			),
-		);
+		) );
 
 		// Find the available routes
 		foreach ( $this->get_routes() as $route => $callbacks ) {
@@ -464,7 +464,7 @@ class WC_API_Server {
 					}
 				}
 			}
-			$available['routes'][$route] = apply_filters( 'woocommerce_api_endpoints_description', $data );
+			$available['store']['routes'][ $route ] = apply_filters( 'woocommerce_api_endpoints_description', $data );
 		}
 		return apply_filters( 'woocommerce_api_index', $available );
 	}

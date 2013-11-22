@@ -152,7 +152,7 @@ class WC_API_Resource {
 			$args['offset'] = $request_args['offset'];
 
 		// resource page
-		$args['paged'] = absint( $request_args['page'] );
+		$args['paged'] = ( isset( $request_args['page'] ) ) ? absint( $request_args['page'] ) : 1;
 
 		return array_merge( $base_args, $args );
 	}
@@ -234,7 +234,7 @@ class WC_API_Resource {
 	 */
 	public function filter_response_fields( $data, $resource, $fields ) {
 
-		if ( empty( $fields ) )
+		if ( ! is_array( $data ) || empty( $fields ) )
 			return $data;
 
 		$fields = explode( ',', $fields );

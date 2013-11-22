@@ -82,7 +82,7 @@ class WC_API_Orders extends WC_API_Resource {
 			if ( ! $this->is_readable( $order_id ) )
 				continue;
 
-			$orders[] = $this->get_order( $order_id, $fields );
+			$orders[] = current( $this->get_order( $order_id, $fields ) );
 		}
 
 		$this->server->add_pagination_headers( $query );
@@ -232,7 +232,7 @@ class WC_API_Orders extends WC_API_Resource {
 			);
 		}
 
-		return apply_filters( 'woocommerce_api_order_response', $order_data, $order, $fields, $this->server );
+		return array( 'order' => apply_filters( 'woocommerce_api_order_response', $order_data, $order, $fields, $this->server ) );
 	}
 
 	/**
@@ -302,7 +302,7 @@ class WC_API_Orders extends WC_API_Resource {
 	public function get_order_notes( $id, $fields = null ) {
 
 		// ensure ID is valid order ID
-		$id = $this->validate_request( $id, 'order', 'read' );
+		$id = $this->validate_request( $id, 'shop_order', 'read' );
 
 		if ( is_wp_error( $id ) )
 			return $id;
