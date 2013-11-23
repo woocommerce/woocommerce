@@ -143,6 +143,23 @@ class WC_API_Reports extends WC_API_Resource {
 			'filter_range' => true,
 		) );
 
+		// new customers
+		$users_query = new WP_User_Query(
+			array(
+				'fields'  => array( 'user_registered' ),
+				'role'    => 'customer',
+			)
+		);
+
+		$customers = $users_query->get_results();
+
+		foreach ( $customers as $key => $customer ) {
+			if ( strtotime( $customer->user_registered ) < $this->report->start_date || strtotime( $customer->user_registered ) > $this->report->end_date )
+				unset( $customers[ $key ] );
+		}
+
+		$total_customers = count( $customers );
+
 		// get order totals grouped by period
 		$orders = $this->report->get_order_report_data( array(
 			'data' => array(
@@ -301,15 +318,16 @@ class WC_API_Reports extends WC_API_Resource {
 		}
 
 		$sales_data = array(
-			'sales'             => woocommerce_format_decimal( $totals->sales, 2 ),
-			'average'           => woocommerce_format_decimal( $totals->sales / ( $this->report->chart_interval + 1 ), 2 ),
-			'orders'            => (int) $totals->order_count,
-			'items'             => $total_items,
-			'tax'               => woocommerce_format_decimal( $totals->tax + $totals->shipping_tax, 2 ),
-			'shipping'          => woocommerce_format_decimal( $totals->shipping, 2 ),
-			'discount'          => is_null( $total_discount ) ? woocommerce_format_decimal( 0.00, 2 ) : woocommerce_format_decimal( $total_discount, 2 ),
+			'total_sales'       => woocommerce_format_decimal( $totals->sales, 2 ),
+			'average_sales'     => woocommerce_format_decimal( $totals->sales / ( $this->report->chart_interval + 1 ), 2 ),
+			'total_orders'      => (int) $totals->order_count,
+			'total_items'       => $total_items,
+			'total_tax'         => woocommerce_format_decimal( $totals->tax + $totals->shipping_tax, 2 ),
+			'total_shipping'    => woocommerce_format_decimal( $totals->shipping, 2 ),
+			'total_discount'    => is_null( $total_discount ) ? woocommerce_format_decimal( 0.00, 2 ) : woocommerce_format_decimal( $total_discount, 2 ),
 			'totals_grouped_by' => $this->report->chart_groupby,
 			'totals'            => $period_totals,
+			'total_customers'   => $total_customers,
 		);
 
 		return array( 'sales' => apply_filters( 'woocommerce_api_report_response', $sales_data, $this->report, $fields, $this->server ) );
