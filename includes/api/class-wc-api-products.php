@@ -323,6 +323,7 @@ class WC_API_Products extends WC_API_Resource {
 			'download_expiry'    => (int) $product->download_expiry,
 			'download_type'      => $product->download_type,
 			'purchase_note'      => apply_filters( 'the_content', $product->purchase_note ),
+			'total_sales'        => metadata_exists( 'post', $product->id, 'total_sales' ) ? (int) get_post_meta( $product->id, 'total_sales', true ) : 0,
 			'variations'         => array(),
 			'parent'             => array(),
 		);
