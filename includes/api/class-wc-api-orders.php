@@ -266,7 +266,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 */
 	public function edit_order( $id, $data ) {
 
-		$id = $this->validate_request( $id, 'shop_order', 'write' );
+		$id = $this->validate_request( $id, 'shop_order', 'edit' );
 
 		if ( is_wp_error( $id ) )
 			return $id;
