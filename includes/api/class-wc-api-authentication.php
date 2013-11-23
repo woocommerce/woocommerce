@@ -20,8 +20,8 @@ class WC_API_Authentication {
 	 */
 	public function __construct() {
 
-		// this filter can be removed in order to provide unauthenticated access to the API for testing, etc
-		add_filter( 'woocommerce_api_check_authentication', array( $this, 'authenticate' ) );
+		// to disable authentication, hook into this filter at a later priority and return a valid WP_User
+		add_filter( 'woocommerce_api_check_authentication', array( $this, 'authenticate' ), 0 );
 	}
 
 	/**
@@ -109,7 +109,7 @@ class WC_API_Authentication {
 		foreach ( $param_names as $param_name ) {
 
 			if ( empty( $params ) )
-				throw new Exception( sprintf( __( '%s parameter is missing', 'woocommerce' ), $param_name ) );
+				throw new Exception( sprintf( __( '%s parameter is missing', 'woocommerce' ), $param_name ), 404 );
 		}
 
 		// fetch WP user by consumer key
