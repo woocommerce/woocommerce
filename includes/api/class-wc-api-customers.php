@@ -149,7 +149,7 @@ class WC_API_Customers extends WC_API_Resource {
 			'last_order_id'    => is_object( $last_order ) ? $last_order->id : null,
 			'last_order_date'  => is_object( $last_order ) ? $this->server->format_datetime( $last_order->post_date_gmt ) : null,
 			'orders_count'     => (int) $customer->_order_count,
-			'total_spent'      => woocommerce_format_decimal( $customer->_money_spent ),
+			'total_spent'      => woocommerce_format_decimal( $customer->_money_spent, 2 ),
 			'avatar_url'       => $this->get_avatar_url( $customer->customer_email ),
 			'billing_address'  => array(
 				'first_name' => $customer->billing_first_name,
