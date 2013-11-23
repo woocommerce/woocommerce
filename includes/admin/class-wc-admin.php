@@ -69,6 +69,7 @@ class WC_Admin {
 			case 'users' :
 			case 'user' :
 			case 'profile' :
+			case 'user-edit' :
 				include( 'class-wc-admin-profile.php' );
 			break;
 		}
