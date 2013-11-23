@@ -111,27 +111,27 @@ class WC_API_Coupons extends WC_API_Resource {
 		$coupon_post = get_post( $coupon->id );
 
 		$coupon_data = array(
-			'id'                         => $coupon->id,
-			'code'                       => $coupon->code,
-			'type'                       => $coupon->type,
-			'created_at'                 => $this->server->format_datetime( $coupon_post->post_date_gmt ),
-			'updated_at'                 => $this->server->format_datetime( $coupon_post->post_modified_gmt ),
-			'amount'                     => woocommerce_format_decimal( $coupon->amount, 2 ),
-			'individual_use'             => $coupon->individual_use,
-			'product_ids'                => $coupon->product_ids,
-			'exclude_product_ids'        => $coupon->exclude_product_ids,
-			'usage_limit'                => $coupon->usage_limit,
-			'usage_limit_per_user'       => $coupon->usage_limit_per_user,
-			'limit_usage_to_x_items'     => $coupon->limit_usage_to_x_items,
-			'usage_count'                => $coupon->usage_count,
-			'expiry_date'                => $this->server->format_datetime( $coupon->expiry_date ),
-			'apply_before_tax'           => $coupon->apply_before_tax(),
-			'enable_free_shipping'       => $coupon->enable_free_shipping(),
-			'product_categories'         => $coupon->product_categories,
-			'exclude_product_categories' => $coupon->exclude_product_categories,
-			'exclude_sale_items'         => $coupon->exclude_sale_items(),
-			'minimum_amount'             => $coupon->minimum_amount,
-			'customer_email'             => $coupon->customer_email,
+			'id'                           => $coupon->id,
+			'code'                         => $coupon->code,
+			'type'                         => $coupon->type,
+			'created_at'                   => $this->server->format_datetime( $coupon_post->post_date_gmt ),
+			'updated_at'                   => $this->server->format_datetime( $coupon_post->post_modified_gmt ),
+			'amount'                       => woocommerce_format_decimal( $coupon->amount, 2 ),
+			'individual_use'               => ( 'yes' === $coupon->individual_use ),
+			'product_ids'                  => array_map( 'absint', $coupon->product_ids ),
+			'exclude_product_ids'          => array_map( 'absint', $coupon->exclude_product_ids ),
+			'usage_limit'                  => ( ! empty( $coupon->usage_limit ) ) ? $coupon->usage_limit : null,
+			'usage_limit_per_user'         => ( ! empty( $coupon->usage_limit_per_user ) ) ? $coupon->usage_limit_per_user : null,
+			'limit_usage_to_x_items'       => (int) $coupon->limit_usage_to_x_items,
+			'usage_count'                  => (int) $coupon->usage_count,
+			'expiry_date'                  => $this->server->format_datetime( $coupon->expiry_date ),
+			'apply_before_tax'             => $coupon->apply_before_tax(),
+			'enable_free_shipping'         => $coupon->enable_free_shipping(),
+			'product_category_ids'         => array_map( 'absint', $coupon->product_categories ),
+			'exclude_product_category_ids' => array_map( 'absint', $coupon->exclude_product_categories ),
+			'exclude_sale_items'           => $coupon->exclude_sale_items(),
+			'minimum_amount'               => woocommerce_format_decimal( $coupon->minimum_amount, 2 ),
+			'customer_emails'              => $coupon->customer_email,
 		);
 
 		return array( 'coupon' => apply_filters( 'woocommerce_api_coupon_response', $coupon_data, $coupon, $fields, $this->server ) );
@@ -150,7 +150,7 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		// TODO: permissions?
 
-		return array( 'count' => $query->found_posts );
+		return array( 'count' => (int) $query->found_posts );
 	}
 
 	/**

@@ -140,7 +140,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		$query = $this->query_products( $filter );
 
-		return array( 'count' => $query->found_posts );
+		return array( 'count' => (int) $query->found_posts );
 	}
 
 	/**

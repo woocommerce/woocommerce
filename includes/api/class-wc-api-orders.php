@@ -251,7 +251,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 		// TODO: permissions?
 
-		return array( 'count' => $query->found_posts );
+		return array( 'count' => (int) $query->found_posts );
 	}
 
 	/**
