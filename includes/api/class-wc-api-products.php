@@ -22,7 +22,7 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * GET /products
 	 * GET /products/count
-	 * GET|PUT|DELETE /products/<id>
+	 * GET /products/<id>
 	 * GET /products/<id>/reviews
 	 *
 	 * @since 2.1
@@ -41,11 +41,9 @@ class WC_API_Products extends WC_API_Resource {
 			array( array( $this, 'get_products_count' ), WC_API_Server::READABLE ),
 		);
 
-		# GET|PUT|DELETE /products/<id>
+		# GET /products/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_product' ),  WC_API_Server::READABLE ),
-			array( array( $this, 'edit_product' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
-			array( array( $this, 'delete_product' ), WC_API_Server::DELETABLE ),
 		);
 
 		# GET /products/<id>/reviews
@@ -148,7 +146,7 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Edit a product
 	 *
-	 * @since 2.1
+	 * @TODO implement in 2.2
 	 * @param int $id the product ID
 	 * @param array $data
 	 * @return array
@@ -160,15 +158,13 @@ class WC_API_Products extends WC_API_Resource {
 		if ( is_wp_error( $id ) )
 			return $id;
 
-		// TODO: implement
-
 		return $this->get_product( $id );
 	}
 
 	/**
 	 * Delete a product
 	 *
-	 * @since 2.1
+	 * @TODO enable along with PUT/POST in 2.2
 	 * @param int $id the product ID
 	 * @param bool $force true to permanently delete order, false to move to trash
 	 * @return array

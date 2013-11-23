@@ -21,9 +21,9 @@ class WC_API_Coupons extends WC_API_Resource {
 	/**
 	 * Register the routes for this class
 	 *
-	 * GET|POST /coupons
+	 * GET /coupons
 	 * GET /coupons/count
-	 * GET|PUT|DELETE /coupons/<id>
+	 * GET /coupons/<id>
 	 *
 	 * @since 2.1
 	 * @param array $routes
@@ -31,10 +31,9 @@ class WC_API_Coupons extends WC_API_Resource {
 	 */
 	public function register_routes( $routes ) {
 
-		# GET|POST /coupons
+		# GET /coupons
 		$routes[ $this->base ] = array(
 			array( array( $this, 'get_coupons' ),     WC_API_Server::READABLE ),
-			array( array( $this, 'create_coupon' ),   WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET /coupons/count
@@ -42,11 +41,9 @@ class WC_API_Coupons extends WC_API_Resource {
 			array( array( $this, 'get_coupons_count' ), WC_API_Server::READABLE ),
 		);
 
-		# GET|PUT|DELETE /coupons/<id>
+		# GET /coupons/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_coupon' ),  WC_API_Server::READABLE ),
-			array( array( $this, 'edit_coupon' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
-			array( array( $this, 'delete_coupon' ), WC_API_Server::DELETABLE ),
 		);
 
 		# GET /coupons/code/<code>, note that coupon codes can contain spaces, dashes and underscores
@@ -178,15 +175,11 @@ class WC_API_Coupons extends WC_API_Resource {
 	/**
 	 * Create a coupon
 	 *
-	 * @since 2.1
+	 * @TODO implement in 2.2
 	 * @param array $data
 	 * @return array
 	 */
 	public function create_coupon( $data ) {
-
-		// TODO: permissions check
-
-		// TODO: implement - what's the minimum set of data required?
 
 		return array();
 	}
@@ -194,7 +187,7 @@ class WC_API_Coupons extends WC_API_Resource {
 	/**
 	 * Edit a coupon
 	 *
-	 * @since 2.1
+	 * @TODO implement in 2.2
 	 * @param int $id the coupon ID
 	 * @param array $data
 	 * @return array
@@ -206,15 +199,13 @@ class WC_API_Coupons extends WC_API_Resource {
 		if ( is_wp_error( $id ) )
 			return $id;
 
-		// TODO: implement
-
 		return $this->get_coupon( $id );
 	}
 
 	/**
 	 * Delete a coupon
 	 *
-	 * @since 2.1
+	 * @TODO enable along with PUT/POST in 2.2
 	 * @param int $id the coupon ID
 	 * @param bool $force true to permanently delete coupon, false to move to trash
 	 * @return array

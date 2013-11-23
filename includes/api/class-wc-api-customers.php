@@ -44,9 +44,9 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Register the routes for this class
 	 *
-	 * GET|POST /customers
+	 * GET /customers
 	 * GET /customers/count
-	 * GET|PUT|DELETE /customers/<id>
+	 * GET /customers/<id>
 	 * GET /customers/<id>/orders
 	 *
 	 * @since 2.1
@@ -55,10 +55,9 @@ class WC_API_Customers extends WC_API_Resource {
 	 */
 	public function register_routes( $routes ) {
 
-		# GET|POST /customers
+		# GET /customers
 		$routes[ $this->base ] = array(
 			array( array( $this, 'get_customers' ),     WC_API_SERVER::READABLE ),
-			array( array( $this, 'create_customer' ),   WC_API_SERVER::CREATABLE | WC_API_SERVER::ACCEPT_DATA ),
 		);
 
 		# GET /customers/count
@@ -66,11 +65,9 @@ class WC_API_Customers extends WC_API_Resource {
 			array( array( $this, 'get_customers_count' ), WC_API_SERVER::READABLE ),
 		);
 
-		# GET|PUT|DELETE /customers/<id>
+		# GET /customers/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_customer' ),  WC_API_SERVER::READABLE ),
-			array( array( $this, 'edit_customer' ), WC_API_SERVER::EDITABLE | WC_API_SERVER::ACCEPT_DATA ),
-			array( array( $this, 'delete_customer' ), WC_API_SERVER::DELETABLE ),
 		);
 
 		# GET /customers/<id>/orders
@@ -201,7 +198,7 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Create a customer
 	 *
-	 * @since 2.1
+	 * @TODO implement in 2.2 with woocommerce_create_new_customer()
 	 * @param array $data
 	 * @return array
 	 */
@@ -210,15 +207,13 @@ class WC_API_Customers extends WC_API_Resource {
 		if ( ! current_user_can( 'create_users' ) )
 			return new WP_Error( 'woocommerce_api_user_cannot_create_customer', __( 'You do not have permission to create this customer', 'woocommerce' ), array( 'status' => 401 ) );
 
-		// TODO: implement - woocommerce_create_new_customer()
-
 		return array();
 	}
 
 	/**
 	 * Edit a customer
 	 *
-	 * @since 2.1
+	 * @TODO implement in 2.2
 	 * @param int $id the customer ID
 	 * @param array $data
 	 * @return array
@@ -230,15 +225,13 @@ class WC_API_Customers extends WC_API_Resource {
 		if ( ! is_wp_error( $id ) )
 			return $id;
 
-		// TODO: implement
-
 		return $this->get_customer( $id );
 	}
 
 	/**
 	 * Delete a customer
 	 *
-	 * @since 2.1
+	 * @TODO enable along with PUT/POST in 2.2
 	 * @param int $id the customer ID
 	 * @return array
 	 */
