@@ -136,7 +136,8 @@ class WC_API_Products extends WC_API_Resource {
 		if ( ! empty( $type ) )
 			$filter['type'] = $type;
 
-		// TODO: permissions?
+		if ( ! current_user_can( 'read_private_products' ) )
+			return new WP_Error( 'woocommerce_api_user_cannot_read_products_count', __( 'You do not have permission to read the products count', 'woocommerce' ), array( 'status' => 401 ) );
 
 		$query = $this->query_products( $filter );
 

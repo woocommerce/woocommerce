@@ -189,7 +189,7 @@ class WC_API_Customers extends WC_API_Resource {
 		$query = $this->query_customers( $filter );
 
 		if ( ! current_user_can( 'list_users' ) )
-			return new WP_Error( 'woocommerce_api_user_cannot_read_customer', __( 'You do not have permission to read customers', 'woocommerce' ), array( 'status' => 401 ) );
+			return new WP_Error( 'woocommerce_api_user_cannot_read_customers_count', __( 'You do not have permission to read the customers count', 'woocommerce' ), array( 'status' => 401 ) );
 
 		return array( 'count' => count( $query->get_results() ) );
 	}

@@ -249,7 +249,8 @@ class WC_API_Orders extends WC_API_Resource {
 
 		$query = $this->query_orders( $filter );
 
-		// TODO: permissions?
+		if ( ! current_user_can( 'read_private_shop_orders' ) )
+			return new WP_Error( 'woocommerce_api_user_cannot_read_orders_count', __( 'You do not have permission to read the orders count', 'woocommerce' ), array( 'status' => 401 ) );
 
 		return array( 'count' => (int) $query->found_posts );
 	}
