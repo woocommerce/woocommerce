@@ -534,7 +534,7 @@ class WC_API_Server {
 
 			$page        = $query->get( 'paged' );
 			$single      = $query->is_single();
-			$total       = $query->found_posts * $query->max_num_pages;
+			$total       = $query->found_posts;
 			$total_pages = $query->max_num_pages;
 		}
 
