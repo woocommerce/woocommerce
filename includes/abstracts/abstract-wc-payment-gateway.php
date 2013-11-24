@@ -54,13 +54,15 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_return_url( $order = '' ) {
-		if ( $order )
+		if ( $order ) {
 			$return_url = $order->get_checkout_order_received_url();
-		else
+		} else {
 			$return_url = woocommerce_get_endpoint_url( 'order-received', '', get_permalink( woocommerce_get_page_id( 'checkout' ) ) );
+		}
 
-		if ( is_ssl() || get_option('woocommerce_force_ssl_checkout') == 'yes' )
+		if ( is_ssl() || get_option('woocommerce_force_ssl_checkout') == 'yes' ) {
 			$return_url = str_replace( 'http:', 'https:', $return_url );
+		}
 
 		return apply_filters( 'woocommerce_get_return_url', $return_url );
 	}
@@ -72,8 +74,9 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return bool
 	 */
 	public function is_available() {
-		if ( $this->enabled == "yes" )
+		if ( $this->enabled == "yes" ) {
 			return true;
+		}
 	}
 
 	/**
@@ -161,10 +164,13 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
      * @return void
      */
     public function payment_fields() {
-        if ( $description = $this->get_description() )
+        if ( $description = $this->get_description() ) {
         	echo wpautop( wptexturize( $description ) );
-        if ( $this->supports( 'default_credit_card_form' ) )
+        }
+
+        if ( $this->supports( 'default_credit_card_form' ) ) {
         	$this->credit_card_form();
+        }
     }
 
 	/**

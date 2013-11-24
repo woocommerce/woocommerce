@@ -68,26 +68,27 @@ class WC_Product {
 	public function __get( $key ) {
 
 		// Get values or default if not set
-		if ( in_array( $key, array( 'downloadable', 'virtual', 'backorders', 'manage_stock', 'featured', 'sold_individually' ) ) )
+		if ( in_array( $key, array( 'downloadable', 'virtual', 'backorders', 'manage_stock', 'featured', 'sold_individually' ) ) ) {
 			$value = ( $value = get_post_meta( $this->id, '_' . $key, true ) ) ? $value : 'no';
 
-		elseif( in_array( $key, array( 'product_attributes', 'crosssell_ids', 'upsell_ids' ) ) )
+		} elseif ( in_array( $key, array( 'product_attributes', 'crosssell_ids', 'upsell_ids' ) ) ) {
 			$value = ( $value = get_post_meta( $this->id, '_' . $key, true ) ) ? $value : array();
 
-		elseif ( 'visibility' == $key )
+		} elseif ( 'visibility' == $key ) {
 			$value = ( $value = get_post_meta( $this->id, '_visibility', true ) ) ? $value : 'hidden';
 
-		elseif ( 'stock' == $key )
+		} elseif ( 'stock' == $key ) {
 			$value = ( $value = get_post_meta( $this->id, '_stock', true ) ) ? $value : 0;
 
-		elseif ( 'stock_status' == $key )
+		} elseif ( 'stock_status' == $key ) {
 			$value = ( $value = get_post_meta( $this->id, '_stock_status', true ) ) ? $value : 'instock';
 
-		elseif ( 'tax_status' == $key )
+		} elseif ( 'tax_status' == $key ) {
 			$value = ( $value = get_post_meta( $this->id, '_tax_status', true ) ) ? $value : 'taxable';
 
-		else
+		} else {
 			$value = get_post_meta( $this->id, '_' . $key, true );
+		}
 
 		return $value;
 	}
@@ -162,8 +163,9 @@ class WC_Product {
 	 * @return int Stock
 	 */
 	public function set_stock( $amount = null ) {
-		if ( is_null( $amount ) )
+		if ( is_null( $amount ) ) {
 			return;
+		}
 
 		if ( $this->managing_stock() ) {
 
@@ -174,11 +176,12 @@ class WC_Product {
 			update_post_meta( $this->id, '_stock', $this->stock );
 
 			// Update stock status
-			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) )
+			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 				$this->set_stock_status( 'outofstock' );
 
-			elseif ( $this->backorders_allowed() || $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) )
+			} elseif ( $this->backorders_allowed() || $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 				$this->set_stock_status( 'instock' );
+			}
 
 			// Clear total stock transient
 			delete_transient( 'wc_product_total_stock_' . $this->id );
@@ -282,8 +285,9 @@ class WC_Product {
 				}
 
 				// Set default name
-				if ( empty( $file['name'] ) )
+				if ( empty( $file['name'] ) ) {
 					$downloadable_files[ $key ]['name'] = woocommerce_get_filename_from_url( $file );
+				}
 
 				// Filter URL
 				$downloadable_files[ $key ]['file'] = apply_filters( 'woocommerce_file_download_path', $downloadable_files[ $key ]['file'], $this->id, $key );
@@ -302,10 +306,11 @@ class WC_Product {
 	public function get_file( $download_id ) {
 		$files = $this->get_files();
 
-		if ( isset( $files[ $download_id ] ) )
+		if ( isset( $files[ $download_id ] ) ) {
 			$file = $files[ $download_id ];
-		else
+		} else {
 			$file = false;
+		}
 
 		// allow overriding based on the particular file being requested
 		return apply_filters( 'woocommerce_product_file', $file, $this->id, $download_id );
@@ -320,10 +325,11 @@ class WC_Product {
 	public function get_file_download_path( $download_id ) {
 		$files = $this->get_files();
 
-		if ( isset( $files[ $download_id ] ) )
+		if ( isset( $files[ $download_id ] ) ) {
 			$file_path = $files[ $download_id ]['file'];
-		else
+		} else {
 			$file_path = '';
+		}
 
 		// allow overriding based on the particular file being requested
 		return apply_filters( 'woocommerce_product_file_download_path', $file_path, $this->id, $download_id );
@@ -490,19 +496,21 @@ class WC_Product {
 				if ( $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 					return false;
 				} else {
-					if ( $this->stock_status == 'instock' )
+					if ( $this->stock_status == 'instock' ) {
 						return true;
-					else
+					} else {
 						return false;
+					}
 				}
 			}
 
 		} else {
 
-			if ( $this->stock_status == 'instock' )
+			if ( $this->stock_status == 'instock' ) {
 				return true;
-			else
+			} else {
 				return false;
+			}
 
 		}
 	}
@@ -582,8 +590,9 @@ class WC_Product {
 
 					$availability = sprintf( $format, $this->stock );
 
-					if ( $this->backorders_allowed() && $this->backorders_require_notification() )
+					if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
 						$availability .= ' ' . __( '(backorders allowed)', 'woocommerce' );
+					}
 
 				} else {
 
@@ -637,17 +646,25 @@ class WC_Product {
 		$visible = true;
 
 		// Out of stock visibility
-		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' && ! $this->is_in_stock() ) $visible = false;
+		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' && ! $this->is_in_stock() ) {
+			$visible = false;
 
 		// visibility setting
-		elseif ( $this->visibility == 'hidden' ) $visible = false;
-		elseif ( $this->visibility == 'visible' ) $visible = true;
+		} elseif ( $this->visibility == 'hidden' ) {
+			$visible = false;
+		} elseif ( $this->visibility == 'visible' ) {
+			$visible = true;
 
 		// Visibility in loop
-		elseif ( $this->visibility == 'search' && is_search() ) $visible = true;
-		elseif ( $this->visibility == 'search' && ! is_search() ) $visible = false;
-		elseif ( $this->visibility == 'catalog' && is_search() ) $visible = false;
-		elseif ( $this->visibility == 'catalog' && ! is_search() ) $visible = true;
+		} elseif ( $this->visibility == 'search' && is_search() ) {
+			$visible = true;
+		} elseif ( $this->visibility == 'search' && ! is_search() ) {
+			$visible = false;
+		} elseif ( $this->visibility == 'catalog' && is_search() ) {
+			$visible = false;
+		} elseif ( $this->visibility == 'catalog' && ! is_search() ) {
+			$visible = true;
+		}
 
 		return apply_filters( 'woocommerce_product_is_visible', $visible, $this->id );
 	}
@@ -683,16 +700,17 @@ class WC_Product {
 		$purchasable = true;
 
 		// Products must exist of course
-		if ( ! $this->exists() )
+		if ( ! $this->exists() ) {
 			$purchasable = false;
 
 		// Other products types need a price to be set
-		elseif ( $this->get_price() === '' )
+		} elseif ( $this->get_price() === '' ) {
 			$purchasable = false;
 
 		// Check the product is published
-		elseif ( $this->post->post_status !== 'publish' && ! current_user_can( 'edit_post', $this->id ) )
+		} elseif ( $this->post->post_status !== 'publish' && ! current_user_can( 'edit_post', $this->id ) ) {
 			$purchasable = false;
+		}
 
 		return apply_filters( 'woocommerce_is_purchasable', $purchasable, $this );
 	}
@@ -756,8 +774,9 @@ class WC_Product {
 	public function get_price_including_tax( $qty = 1, $price = '' ) {
 		$_tax  = new WC_Tax();
 
-		if ( ! $price )
+		if ( ! $price ) {
 			$price = $this->get_price();
+		}
 
 		if ( $this->is_taxable() ) {
 
@@ -810,8 +829,9 @@ class WC_Product {
 	 */
 	public function get_price_excluding_tax( $qty = 1, $price = '' ) {
 
-		if ( ! $price )
+		if ( ! $price ) {
 			$price = $this->get_price();
+		}
 
 		if ( $this->is_taxable() && get_option('woocommerce_prices_include_tax') == 'yes' ) {
 
@@ -1017,8 +1037,9 @@ class WC_Product {
 	 */
 	public function get_rating_html( $rating = null ) {
 
-		if ( ! is_numeric( $rating ) )
+		if ( ! is_numeric( $rating ) ) {
 			$rating = $this->get_average_rating();
+		}
 
 		if ( $rating > 0 ) {
 
@@ -1089,10 +1110,13 @@ class WC_Product {
 	public function get_shipping_class() {
 		if ( ! $this->shipping_class ) {
 			$classes = get_the_terms( $this->id, 'product_shipping_class' );
-			if ( $classes && ! is_wp_error( $classes ) )
+
+			if ( $classes && ! is_wp_error( $classes ) ) {
 				$this->shipping_class = current( $classes )->slug;
-			else
+			} else {
 				$this->shipping_class = '';
+			}
+
 		}
 		return $this->shipping_class;
 	}
@@ -1106,10 +1130,12 @@ class WC_Product {
 	public function get_shipping_class_id() {
 		if ( ! $this->shipping_class_id ) {
 			$classes = get_the_terms( $this->id, 'product_shipping_class' );
-			if ( $classes && ! is_wp_error( $classes ) )
+
+			if ( $classes && ! is_wp_error( $classes ) ) {
 				$this->shipping_class_id = current( $classes )->term_id;
-			else
+			} else {
 				$this->shipping_class_id = 0;
+			}
 		}
 		return absint( $this->shipping_class_id );
 	}
@@ -1137,8 +1163,9 @@ class WC_Product {
 		foreach ( $terms as $term ) $cats_array[] = $term->term_id;
 
 		// Don't bother if none are set
-		if ( sizeof( $cats_array ) == 1 && sizeof( $tags_array ) == 1 ) 
+		if ( sizeof( $cats_array ) == 1 && sizeof( $tags_array ) == 1 ) {
 			return array();
+		}
 
 		// Sanitize
 		$cats_array  = array_map( 'absint', $cats_array );
@@ -1152,8 +1179,9 @@ class WC_Product {
 		$query['join']  .= " INNER JOIN {$wpdb->term_taxonomy} tt ON (tr.term_taxonomy_id = tt.term_taxonomy_id)";
 		$query['join']  .= " INNER JOIN {$wpdb->terms} t ON (t.term_id = tt.term_id)";
 
-		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' )
+		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' ) {
 			$query['join'] .= " INNER JOIN {$wpdb->postmeta} pm2 ON ( pm2.post_id = p.ID AND pm2.meta_key='_stock_status' )";
+		}
 
 		$query['where']  = " WHERE 1=1";
 		$query['where'] .= " AND p.post_status = 'publish'";
@@ -1161,8 +1189,9 @@ class WC_Product {
 		$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " )";
 		$query['where'] .= " AND pm.meta_value IN ( 'visible', 'catalog' )";
 
-		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' )
+		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' ) {
 			$query['where'] .= " AND pm2.meta_value = 'instock'";
+		}
 
 		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_category', true ) ) {
 			$query['where'] .= " AND ( tt.taxonomy = 'product_cat' AND t.term_id IN ( " . implode( ',', $cats_array ) . " ) )";
@@ -1171,8 +1200,9 @@ class WC_Product {
 			$andor = 'AND';
 		}
 
-		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true ) )
+		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true ) ) {
 			$query['where'] .= " {$andor} ( tt.taxonomy = 'product_tag' AND t.term_id IN ( " . implode( ',', $tags_array ) . " ) )";
+		}
 
 		$query['orderby']  = " ORDER BY RAND()";
 		$query['limits']   = " LIMIT " . absint( $limit ) . " ";
@@ -1280,19 +1310,23 @@ class WC_Product {
 		if ( ! $this->dimensions ) {
 			$dimensions = array();
 
-			if ( $this->length )
+			if ( $this->length ) {
 				$dimensions[] = $this->length;
+			}
 
-			if ( $this->width )
+			if ( $this->width ) {
 				$dimensions[] = $this->width;
+			}
 
-			if ( $this->height )
+			if ( $this->height ){
 				$dimensions[] = $this->height;
+			}
 
 			$this->dimensions = implode( ' x ', $dimensions );
 
-			if ( ! empty( $this->dimensions ) )
+			if ( ! empty( $this->dimensions ) ) {
 				$this->dimensions .= ' ' . get_option( 'woocommerce_dimension_unit' );
+			}
 
 		}
 		return $this->dimensions;
@@ -1340,10 +1374,11 @@ class WC_Product {
 	 */
 	public function get_formatted_name() {
 
-		if ( $this->get_sku() )
+		if ( $this->get_sku() ) {
 			$identifier = $this->get_sku();
-		else
+		} else {
 			$identifier = '#' . $this->id;
+		}
 
 		return sprintf( __( '%s &ndash; %s', 'woocommerce' ), $identifier, $this->get_title() );
 	}
