@@ -259,6 +259,8 @@ class WC_API_Orders extends WC_API_Resource {
 	/**
 	 * Edit an order
 	 *
+	 * API v1 only allows updating the status of an order
+	 *
 	 * @since 2.1
 	 * @param int $id the order ID
 	 * @param array $data
@@ -271,7 +273,12 @@ class WC_API_Orders extends WC_API_Resource {
 		if ( is_wp_error( $id ) )
 			return $id;
 
-		// TODO: implement, especially for status change
+		$order = new WC_Order( $id );
+
+		if ( ! empty( $data['status'] ) ) {
+
+			$order->update_status( $data['status'], isset( $data['note'] ) ? $data['note'] : '' );
+		}
 
 		return $this->get_order( $id );
 	}

@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  *
  * @access public
  * @param mixed $taxonomy
- * @return void
+ * @return string
  */
 function woocommerce_sanitize_taxonomy_name( $taxonomy ) {
 	$filtered = strtolower( remove_accents( stripslashes( strip_tags( $taxonomy ) ) ) );
@@ -316,7 +316,7 @@ function woocommerce_price( $price, $args = array() ) {
 	$num_decimals    = absint( get_option( 'woocommerce_price_num_decimals' ) );
 	$currency_pos    = get_option( 'woocommerce_currency_pos' );
 	$currency        = isset( $args['currency'] ) ? $args['currency'] : '';
-	$currency_symbol = get_woocommerce_currency_symbol($currency);    
+	$currency_symbol = get_woocommerce_currency_symbol($currency);
 	$decimal_sep     = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ), ENT_QUOTES );
 	$thousands_sep   = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ), ENT_QUOTES );
 
