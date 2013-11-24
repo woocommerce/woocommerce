@@ -25,21 +25,24 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	 */
 	function __construct() {
 
-		$this->id 				= 'customer_invoice';
-		$this->title 			= __( 'Customer invoice', 'woocommerce' );
-		$this->description		= __( 'Customer invoice emails can be sent to the user containing order info and payment links.', 'woocommerce' );
+		$this->id             = 'customer_invoice';
+		$this->title          = __( 'Customer invoice', 'woocommerce' );
+		$this->description    = __( 'Customer invoice emails can be sent to the user containing order info and payment links.', 'woocommerce' );
 
-		$this->template_html 	= 'emails/customer-invoice.php';
-		$this->template_plain 	= 'emails/plain/customer-invoice.php';
+		$this->template_html  = 'emails/customer-invoice.php';
+		$this->template_plain = 'emails/plain/customer-invoice.php';
 
-		$this->subject 			= __( 'Invoice for order {order_number} from {order_date}', 'woocommerce');
-		$this->heading      	= __( 'Invoice for order {order_number}', 'woocommerce');
+		$this->subject        = __( 'Invoice for order {order_number} from {order_date}', 'woocommerce');
+		$this->heading        = __( 'Invoice for order {order_number}', 'woocommerce');
 
-		$this->subject_paid 	= __( 'Your {blogname} order from {order_date}', 'woocommerce');
-		$this->heading_paid     = __( 'Order {order_number} details', 'woocommerce');
+		$this->subject_paid   = __( 'Your {site_title} order from {order_date}', 'woocommerce');
+		$this->heading_paid   = __( 'Order {order_number} details', 'woocommerce');
 
 		// Call parent constructor
 		parent::__construct();
+
+		$this->heading_paid   = $this->get_option( 'heading_paid', $this->heading_paid );
+		$this->subject_paid   = $this->get_option( 'subject_paid', $this->subject_paid );
 	}
 
 	/**

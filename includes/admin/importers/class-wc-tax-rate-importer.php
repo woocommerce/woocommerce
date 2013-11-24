@@ -137,7 +137,7 @@ if ( class_exists( 'WP_Importer' ) ) {
 							array(
 								'tax_rate_country'  => $country,
 								'tax_rate_state'    => $state,
-								'tax_rate'          => number_format( $rate, 4, '.', '' ),
+								'tax_rate'          => woocommerce_format_decimal( $rate, 4 ),
 								'tax_rate_name'     => trim( $name ),
 								'tax_rate_priority' => absint( $priority ),
 								'tax_rate_compound' => $compound ? 1 : 0,
@@ -209,7 +209,7 @@ if ( class_exists( 'WP_Importer' ) ) {
 		 * Performs post-import cleanup of files and the cache
 		 */
 		function import_end() {
-			echo '<p>' . __( 'All done!', 'woocommerce' ) . ' <a href="' . admin_url('admin.php?page=woocommerce_settings&tab=tax') . '">' . __( 'View Tax Rates', 'woocommerce' ) . '</a>' . '</p>';
+			echo '<p>' . __( 'All done!', 'woocommerce' ) . ' <a href="' . admin_url('admin.php?page=wc-settings&tab=tax') . '">' . __( 'View Tax Rates', 'woocommerce' ) . '</a>' . '</p>';
 
 			do_action( 'import_end' );
 		}
@@ -337,9 +337,10 @@ if ( class_exists( 'WP_Importer' ) ) {
 
 		/**
 		 * Added to http_request_timeout filter to force timeout at 60 seconds during import
+		 * @param  int $val
 		 * @return int 60
 		 */
-		function bump_request_timeout() {
+		function bump_request_timeout( $val ) {
 			return 60;
 		}
 	}

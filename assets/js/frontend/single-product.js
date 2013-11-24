@@ -10,7 +10,7 @@ jQuery(document).ready(function($) {
 
 		$('ul.tabs li', $tabs_wrapper).removeClass('active');
 		$('div.panel', $tabs_wrapper).hide();
-		$('div' + $tab.attr('href')).show();
+		$('div' + $tab.attr('href'), $tabs_wrapper).show();
 		$tab.parent().addClass('active');
 
 		return false;
@@ -23,6 +23,11 @@ jQuery(document).ready(function($) {
 		} else {
 			$('ul.tabs li:first a', $(this)).click();
 		}
+	});
+
+	$('a.woocommerce-review-link').click(function() {
+		$('.reviews_tab a').click();
+		return true;
 	});
 
 	// Star ratings for comments

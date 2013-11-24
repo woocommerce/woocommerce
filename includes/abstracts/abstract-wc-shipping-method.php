@@ -42,9 +42,6 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	/** @var float Minimum fee for the method */
 	var $minimum_fee		= null;
 
-	/** @var float Min amount (if set) for the cart to use this method */
-	var $min_amount			= null;
-
 	/** @var bool Enabled for disabled */
 	var $enabled			= false;
 
@@ -56,6 +53,14 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 	/** @var array This is an array of rates - methods must populate this array to register shipping costs */
 	var $rates 				= array();
+
+	/**
+	 * Whether or not we need to calculate tax on top of the shipping rate
+	 * @return boolean
+	 */
+	public function is_taxable() {
+		return ( get_option( 'woocommerce_calc_taxes' ) == 'yes' && $this->tax_status == 'taxable' && ! WC()->customer->is_vat_exempt() );
+	}
 
 	/**
 	 * Add a rate
@@ -89,7 +94,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 		// Taxes - if not an array and not set to false, calc tax based on cost and passed calc_tax variable
 		// This saves shipping methods having to do complex tax calculations
-		if ( ! is_array( $taxes ) && $taxes !== false && $total_cost > 0 && get_option( 'woocommerce_calc_taxes' ) == 'yes' && $this->tax_status == 'taxable' ) {
+		if ( ! is_array( $taxes ) && $taxes !== false && $total_cost > 0 && $this->is_taxable() ) {
 
 			$_tax 	= new WC_Tax();
 			$taxes 	= array();
@@ -170,9 +175,6 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
     	if ( $this->enabled == "no" )
     		return false;
-
-		if ( isset( $woocommerce->cart->cart_contents_total ) && isset( $this->min_amount ) && $this->min_amount && $this->min_amount > $woocommerce->cart->cart_contents_total )
-			return false;
 
 		// Country availability
 		switch ( $this->availability ) {

@@ -45,7 +45,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		$email_templates 	= $mailer->get_emails();
 
 		foreach ( $email_templates as $email ) {
-			$title = empty( $email->title ) ? ucwords( $email->id ) : ucwords( $email->title );
+			$title = empty( $email->title ) ? ucfirst( $email->id ) : ucfirst( $email->title );
 
 			$sections[ strtolower( get_class( $email ) ) ] = esc_html( $title );
 		}

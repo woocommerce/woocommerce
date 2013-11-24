@@ -279,7 +279,7 @@ class WC_Meta_Box_Order_Data {
 								}
 
 								if ( apply_filters( 'woocommerce_enable_order_notes_field', get_option( 'woocommerce_enable_order_comments', 'yes' ) == 'yes' ) && $post->post_excerpt )
-									echo '<p><strong>' . __( 'Customer Note', 'woocommerce' ) . ':</strong> ' . esc_html( $post->post_excerpt ) . '</p>';
+									echo '<p><strong>' . __( 'Customer Note', 'woocommerce' ) . ':</strong> ' . nl2br( esc_html( $post->post_excerpt ) ) . '</p>';
 
 							echo '</div>';
 

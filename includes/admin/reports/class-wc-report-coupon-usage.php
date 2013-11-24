@@ -160,7 +160,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 							if ( $used_coupons ) {
 								echo '<option value="">' . __( 'All coupons', 'woocommerce' ) . '</option>';
 								foreach ( $used_coupons as $coupon ) {
-									echo '<option value="' . $coupon . '" ' . selected( in_array( $coupon, $this->coupon_codes ), true, false ) . '>' . $coupon . '</option>';
+									echo '<option value="' . esc_attr( $coupon ) . '" ' . selected( in_array( $coupon, $this->coupon_codes ), true, false ) . '>' . $coupon . '</option>';
 								}
 							} else
 								echo '<option value="">' . __( 'No used coupons found', 'woocommerce' ) . '</option>';

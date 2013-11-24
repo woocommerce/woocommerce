@@ -54,7 +54,24 @@ p.demo_store {
 	}
 }
 
-.woocommerce, .woocommerce-page { // namespace to avoid conflict with common global class names
+/* =Utilities
+-------------------------------------------------------------- */
+.wc-forward, .wc-forward a {
+	&:after {
+		.iconafter( "\e029" );
+		font-size:.75em;
+	}
+}
+.wc-backward, .wc-backward a {
+	&:before {
+		.iconbefore( "\e02f" );
+		font-size:.75em;
+	}
+}
+
+/* =Main Styles (namespace to avoid conflict with common global class names)
+-------------------------------------------------------------- */
+.woocommerce, .woocommerce-page {
 
 	.woocommerce-message, .woocommerce-error, .woocommerce-info {
 		padding: 1em 1em 1em 3.5em !important;
@@ -294,7 +311,7 @@ p.demo_store {
 					&:before {
 						left: -6px;
 						-webkit-border-bottom-right-radius: 4px;
-						-mox-border-bottom-right-radius: 4px;
+						-moz-border-bottom-right-radius: 4px;
 						border-bottom-right-radius: 4px;
 						border-width: 0 1px 1px 0;
 						box-shadow: 2px 2px 0 darken( @secondary, 10 );
@@ -302,7 +319,7 @@ p.demo_store {
 					&:after {
 						right: -6px;
 						-webkit-border-bottom-left-radius: 4px;
-						-mox-border-bottom-left-radius: 4px;
+						-moz-border-bottom-left-radius: 4px;
 						border-bottom-left-radius: 4px;
 						border-width: 0 0 1px 1px;
 						box-shadow: -2px 2px 0 darken( @secondary, 10 );
@@ -826,7 +843,6 @@ p.demo_store {
 	}
 
 	/* Star rating */
-
 	.star-rating {
 		float: right;
 		overflow: hidden;
@@ -857,6 +873,16 @@ p.demo_store {
 			top: 0;
 			position: absolute;
 			left: 0;
+		}
+	}
+
+	.woocommerce-product-rating {
+		line-height: 2em;
+		display: block;
+
+		.star-rating {
+			margin: .5em 4px 0 0;
+			float: left;
 		}
 	}
 
@@ -1012,21 +1038,24 @@ p.demo_store {
 	td.product-name {
 		dl.variation {
 			margin: .25em 0;
-			font-size: 0.8751em;
+			.clearfix;
+
 			dt, dd {
-				display: inline;
-			}
-			dd:after {
-				content: '\A';
-				white-space: pre;
+				display: inline-block;
+				float: left;
+				margin-bottom:1em;
 			}
 			dt {
 				font-weight:bold;
 				padding: 0 0 .25em 0;
 				margin: 0 4px 0 0;
+				clear:left;
 			}
 			dd {
 				padding: 0 0 .25em 0;
+				p:last-child {
+					margin-bottom:0;
+				}
 			}
 		}
 		p.backorder_notification {
@@ -1118,24 +1147,26 @@ p.demo_store {
 			}
 			dl {
 				margin: 0;
-				font-size: 0.8751em;
 				padding-left: 1em;
 				border-left: 2px solid rgba(0,0,0,0.1);
+				.clearfix;
 
 				dt, dd {
-					display: inline;
-				}
-				dd:after {
-					content: '\A';
-					white-space: pre;
+					display: inline-block;
+					float: left;
+					margin-botom:1em;
 				}
 				dt {
 					font-weight:bold;
 					padding: 0 0 .25em 0;
 					margin: 0 4px 0 0;
+					clear:left;
 				}
 				dd {
 					padding: 0 0 .25em 0;
+					p:last-child {
+						margin-bottom:0;
+					}
 				}
 			}
 			.star-rating {
@@ -1234,8 +1265,14 @@ p.demo_store {
 				transition: opacity 0.5s 0.5s ease;
 				opacity: 0;
 			}
+			label {
+				line-height: 2em;
+			}
 			label.hidden {
 				visibility:hidden;
+			}
+			label.inline {
+				display: inline;
 			}
 			select {
 				cursor: pointer;
@@ -1260,7 +1297,7 @@ p.demo_store {
 				line-height: 1em;
 			}
 			textarea {
-				height: 3.5em;
+				height: 4em;
 				line-height: 1.5em;
 				display:block;
 				-moz-box-shadow:none;
@@ -1273,16 +1310,13 @@ p.demo_store {
 				}
 			}
 			::-webkit-input-placeholder {
-				line-height: 1em;
-				padding-top: 2px;
+				line-height: normal;
 			}
 			:-moz-placeholder {
-				line-height: 1em;
-				padding-top: 2px;
+				line-height: normal;
 			}
 			:-ms-input-placeholder {
-				line-height: 1em;
-				padding-top: 2px;
+				line-height: normal;
 			}
 		}
 	}
@@ -1387,21 +1421,57 @@ p.demo_store {
 			font-size: 0.92em;
 			.border_radius(2px);
 			line-height: 1.5em;
-
 			.vertical_gradient( darken( @secondary, 5 ), darken( @secondary, 10 ) );
 			.box_shadow(0,1px,2px,0,rgba(0,0,0,0.25));
 			color: @secondarytext;
 			.darkorlighttextshadow( @secondarytext );
 
-			p:last-child {
-				margin-bottom: 0;
+			input.input-text, textarea {
+				border-color: darken( @secondary, 15 );
+				border-top-color: darken( @secondary, 20 );
+				.box_shadow( 0, 1px, 0, 0, rgba( 255,255,255,0.4 ) );
 			}
-			#cc-expire-month, #cc-expire-year {
-				width: 48%;
-				float:left;
+			::-webkit-input-placeholder {
+				color: darken( @secondary, 20 );
 			}
-			#cc-expire-year {
-				float: right;
+			:-moz-placeholder {
+				color: darken( @secondary, 20 );
+			}
+			:-ms-input-placeholder {
+				color: darken( @secondary, 20 );
+			}
+			.wc-credit-card-form-card-number,
+			.wc-credit-card-form-card-expiry,
+			.wc-credit-card-form-card-cvc {
+				font-size: 1.5em;
+				padding: 8px;
+				background-repeat: no-repeat;
+				background-position: right;
+
+				&.visa {
+					background-image: url(../images/icons/credit-cards/visa.png);
+				}
+				&.mastercard {
+					background-image: url(../images/icons/credit-cards/mastercard.png);
+				}
+				&.laser {
+					background-image: url(../images/icons/credit-cards/laser.png);
+				}
+				&.dinersclub {
+					background-image: url(../images/icons/credit-cards/diners.png);
+				}
+				&.maestro {
+					background-image: url(../images/icons/credit-cards/maestro.png);
+				}
+				&.jcb {
+					background-image: url(../images/icons/credit-cards/jcb.png);
+				}
+				&.amex {
+					background-image: url(../images/icons/credit-cards/amex.png);
+				}
+				&.discover {
+					background-image: url(../images/icons/credit-cards/discover.png);
+				}
 			}
 			span.help {
 				font-size: 11px;
@@ -1411,15 +1481,9 @@ p.demo_store {
 			}
 			.form-row {
 				margin: 0 0 1em;
-
-				select {
-					width: 48%;
-					float:left;
-					margin-right: 3.8%;
-					&:nth-child(3n) {
-						margin-right: 0;
-					}
-				}
+			}
+			p:last-child {
+				margin-bottom: 0;
 			}
 			&:after {
 				content: "";

@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 function woocommerce_protected_product_add_to_cart( $passed, $product_id ) {
 	if ( post_password_required( $product_id ) ) {
 		$passed = false;
-		wc_add_error( __( 'This product is protected and cannot be purchased.', 'woocommerce' ) );
+		wc_add_notice( __( 'This product is protected and cannot be purchased.', 'woocommerce' ), 'error' );
 	}
 	return $passed;
 }
@@ -100,7 +100,7 @@ function woocommerce_add_to_cart_message( $product_id ) {
 
 	endif;
 
-	wc_add_message( apply_filters('woocommerce_add_to_cart_message', $message) );
+	wc_add_notice( apply_filters( 'woocommerce_add_to_cart_message', $message ) );
 }
 
 /**
@@ -136,10 +136,6 @@ function woocommerce_clear_cart_after_payment() {
 		$order = new WC_Order( $woocommerce->session->order_awaiting_payment );
 
 		if ( $order->id > 0 ) {
-			// If the order has failed, and the customer is logged in, they can try again from their account page
-			if ( $order->status == 'failed' && is_user_logged_in() )
-				$woocommerce->cart->empty_cart();
-
 			// If the order has not failed, or is not pending, the order must have gone through
 			if ( $order->status != 'failed' && $order->status != 'pending' )
 				$woocommerce->cart->empty_cart();

@@ -32,8 +32,7 @@ class WC_Integrations {
 
 			$load_integration = new $integration();
 
-			$this->integrations[$load_integration->id] = $load_integration;
-
+			$this->integrations[ $load_integration->id ] = $load_integration;
 		}
 
 	}

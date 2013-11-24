@@ -1,8 +1,7 @@
 <div class="woocommerce-message">
-	<div class="squeezer">
-		<h4><?php _e( 'Please include this information when requesting support:', 'woocommerce' ); ?> </h4>
-		<p class="submit"><a href="#" download="wc_report.txt" class="button-primary debug-report"><?php _e( 'Download System Report File', 'woocommerce' ); ?></a></p>
-	</div>
+	<p><?php _e( 'Please include this information when requesting support:', 'woocommerce' ); ?> </p>
+	<p class="submit"><a href="#" class="button-primary debug-report"><?php _e( 'Get System Report', 'woocommerce' ); ?></a></p>
+	<div id="debug-report"><textarea readonly="readonly"></textarea></div>
 </div>
 <br/>
 <table class="wc_status_table widefat" cellspacing="0">
@@ -182,6 +181,22 @@
 
 	<thead>
 		<tr>
+			<th colspan="2"><?php _e( 'Locale', 'woocommerce' ); ?></th>
+		</tr>
+	</thead>
+
+	<tbody>
+		<?php
+			$locale = localeconv();
+
+			foreach ( $locale as $key => $val )
+				if ( in_array( $key, array( 'decimal_point', 'mon_decimal_point', 'thousands_sep', 'mon_thousands_sep' ) ) )
+					echo '<tr><td>' . $key . ':</td><td>' . $val . '</td></tr>';
+		?>
+	</tbody>
+
+	<thead>
+		<tr>
 			<th colspan="2"><?php _e( 'Plugins', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
@@ -208,7 +223,7 @@
 						// link the plugin name to the plugin url if available
 						$plugin_name = $plugin_data['Name'];
 						if ( ! empty( $plugin_data['PluginURI'] ) ) {
-							$plugin_name = '<a href="' . $plugin_data['PluginURI'] . '" title="' . __( 'Visit plugin homepage' , 'woocommerce' ) . '">' . $plugin_name . '</a>';
+							$plugin_name = '<a href="' . esc_url( $plugin_data['PluginURI'] ) . '" title="' . __( 'Visit plugin homepage' , 'woocommerce' ) . '">' . $plugin_name . '</a>';
 						}
 
 						if ( strstr( $dirname, 'woocommerce' ) ) {
@@ -277,15 +292,15 @@
 					),
 				__( 'Cart', 'woocommerce' ) => array(
 						'option' => 'woocommerce_cart_page_id',
-						'shortcode' => '[woocommerce_cart]'
+						'shortcode' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']'
 					),
 				__( 'Checkout', 'woocommerce' ) => array(
 						'option' => 'woocommerce_checkout_page_id',
-						'shortcode' => '[woocommerce_checkout]'
+						'shortcode' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']'
 					),
 				__( 'My Account', 'woocommerce' ) => array(
 						'option' => 'woocommerce_myaccount_page_id',
-						'shortcode' => '[woocommerce_my_account]'
+						'shortcode' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']'
 					)
 			);
 
@@ -446,7 +461,11 @@
 					foreach ( $files as $file ) {
 						if ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
 							$found_files[ $plugin_name ][] = '/' . $file;
-						} elseif( file_exists( get_stylesheet_directory() . '/woocommerce/' . $file ) ) {
+						} elseif ( file_exists( get_stylesheet_directory() . '/woocommerce/' . $file ) ) {
+							$found_files[ $plugin_name ][] = '/woocommerce/' . $file;
+						} elseif ( file_exists( get_template_directory() . '/' . $file ) ) {
+							$found_files[ $plugin_name ][] = '/' . $file;
+						} elseif( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
 							$found_files[ $plugin_name ][] = '/woocommerce/' . $file;
 						}
 					}
@@ -531,8 +550,9 @@
 		} );
 
 		try {
-			var blob = new Blob( [ report ], { type: "text/plain;charset=" + document.characterSet } );
-			saveAs( blob, jQuery(this).attr('download') );
+			jQuery("#debug-report").slideDown();
+			jQuery("#debug-report textarea").val( report ).focus().select();
+			jQuery(this).fadeOut();
 			return false;
 		} catch(e){ console.log( e ); }
 

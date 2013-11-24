@@ -230,7 +230,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 				$post_type_object = get_post_type_object( $post->post_type );
 				$can_edit_post = current_user_can( $post_type_object->cap->edit_post, $post->ID );
 
-				echo '<strong><a class="row-title" href="'.$edit_link.'">' . $title.'</a>';
+				echo '<strong><a class="row-title" href="' . esc_url( $edit_link ) .'">' . $title.'</a>';
 
 				_post_states( $post );
 
@@ -331,7 +331,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 					echo '<span class="product-type tips variable" data-tip="' . __( 'Variable', 'woocommerce' ) . '"></span>';
 				else:
 					// Assuming that we have other types in future
-					echo '<span class="product-type tips ' . $the_product->product_type . '" data-tip="' . ucwords( $the_product->product_type ) . '"></span>';
+					echo '<span class="product-type tips ' . $the_product->product_type . '" data-tip="' . ucfirst( $the_product->product_type ) . '"></span>';
 				endif;
 			break;
 			case "price":
@@ -350,8 +350,8 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 				}
 			break;
 			case 'featured':
-				$url = wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce-feature-product&product_id=' . $post->ID ), 'woocommerce-feature-product' );
-				echo '<a href="' . $url . '" title="'. __( 'Toggle featured', 'woocommerce' ) . '">';
+				$url = wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_feature_product&product_id=' . $post->ID ), 'woocommerce-feature-product' );
+				echo '<a href="' . esc_url( $url ) . '" title="'. __( 'Toggle featured', 'woocommerce' ) . '">';
 				if ( $the_product->is_featured() ) {
 					echo '<span class="wc-featured tips" data-tip="' . __( 'Yes', 'woocommerce' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 				} else {
@@ -446,7 +446,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		$query_string = remove_query_arg(array( 'orderby', 'order' ));
 		$query_string = add_query_arg( 'orderby', urlencode('menu_order title'), $query_string );
 		$query_string = add_query_arg( 'order', urlencode('ASC'), $query_string );
-		$views['byorder'] = '<a href="'. $query_string . '" class="' . $class . '">' . __( 'Sort Products', 'woocommerce' ) . '</a>';
+		$views['byorder'] = '<a href="'. $query_string . '" class="' . esc_attr( $class ) . '">' . __( 'Sort Products', 'woocommerce' ) . '</a>';
 
 		return $views;
 	}
@@ -491,7 +491,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 					break;
 				default :
 					// Assuming that we have other types in future
-					$output .= ucwords( $term->name );
+					$output .= ucfirst( $term->name );
 					break;
 			}
 
@@ -557,7 +557,8 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 	/**
 	 * Search by SKU or ID for products.
-	 * @param  object $wp
+	 * @param string $where
+	 * @return string
 	 */
 	public function product_search( $where ) {
 	    global $pagenow, $wpdb, $wp;
@@ -571,13 +572,12 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		foreach ( $terms as $term ) {
 			if ( is_numeric( $term ) ) {
 				$search_ids[] = $term;
-			} else {
-				// Attempt to get a SKU
-				$sku_to_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='_sku' AND meta_value LIKE '%%%s%%' LIMIT 1;", woocommerce_clean( $term ) ) );
-
-				if ( $sku_to_id )
-					$search_ids[] = $sku_to_id;
 			}
+			// Attempt to get a SKU
+			$sku_to_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='_sku' AND meta_value LIKE '%%%s%%' LIMIT 1;", woocommerce_clean( $term ) ) );
+
+			if ( $sku_to_id )
+				$search_ids[] = $sku_to_id;
 		}
 
 		$search_ids = array_filter( array_map( 'absint', $search_ids ) );
@@ -795,7 +795,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 					case 2 :
 						if ( strstr( $regular_price, '%' ) ) {
 							$percent = str_replace( '%', '', $regular_price ) / 100;
-							$new_price = $old_regular_price + ( $old_regular_price * $percent );
+							$new_price = $old_regular_price + ( round( $old_regular_price * $percent, absint( get_option( 'woocommerce_price_num_decimals' ) ) ) );
 						} else {
 							$new_price = $old_regular_price + $regular_price;
 						}
@@ -803,7 +803,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 					case 3 :
 						if ( strstr( $regular_price, '%' ) ) {
 							$percent = str_replace( '%', '', $regular_price ) / 100;
-							$new_price = $old_regular_price - ( $old_regular_price * $percent );
+							$new_price = $old_regular_price - ( round ( $old_regular_price * $percent, absint( get_option( 'woocommerce_price_num_decimals' ) ) ) );
 						} else {
 							$new_price = $old_regular_price - $regular_price;
 						}
@@ -812,7 +812,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 				if ( isset( $new_price ) && $new_price != $old_regular_price ) {
 					$price_changed = true;
-					$new_price = number_format( $new_price, absint( get_option( 'woocommerce_price_num_decimals' ) ), '.', '' );
+					$new_price = round( $new_price, absint( get_option( 'woocommerce_price_num_decimals' ) ) );
 					update_post_meta( $post_id, '_regular_price', $new_price );
 					$product->regular_price = $new_price;
 				}
@@ -855,7 +855,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 				if ( isset( $new_price ) && $new_price != $old_sale_price ) {
 					$price_changed = true;
-					$new_price = number_format( $new_price, absint( get_option( 'woocommerce_price_num_decimals' ) ), '.', '' );
+					$new_price = round( $new_price, absint( get_option( 'woocommerce_price_num_decimals' ) ) );
 					update_post_meta( $post_id, '_sale_price', $new_price );
 					$product->sale_price = $new_price;
 				}
@@ -912,14 +912,19 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 	 * @return array
 	 */
 	public function upload_dir( $pathdata ) {
-		// Change upload dir
+		// Change upload dir for downloadable files
 		if ( isset( $_POST['type'] ) && $_POST['type'] == 'downloadable_product' ) {
-			// Uploading a downloadable file
-			$subdir = '/woocommerce_uploads'.$pathdata['subdir'];
-		 	$pathdata['path'] = str_replace($pathdata['subdir'], $subdir, $pathdata['path']);
-		 	$pathdata['url'] = str_replace($pathdata['subdir'], $subdir, $pathdata['url']);
-			$pathdata['subdir'] = str_replace($pathdata['subdir'], $subdir, $pathdata['subdir']);
-			return $pathdata;
+			if ( empty( $pathdata['subdir'] ) ) {
+				$pathdata['path']   = $pathdata['path'] . '/woocommerce_uploads';
+				$pathdata['url']    = $pathdata['url']. '/woocommerce_uploads';
+				$pathdata['subdir'] = '/woocommerce_uploads';
+			} else {
+				$new_subdir = '/woocommerce_uploads' . $pathdata['subdir'];
+
+				$pathdata['path']   = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['path'] );
+				$pathdata['url']    = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['url'] );
+				$pathdata['subdir'] = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['subdir'] );
+			}
 		}
 
 		return $pathdata;

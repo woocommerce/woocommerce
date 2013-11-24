@@ -49,6 +49,13 @@ function woocommerce_template_redirect() {
 		}
 	}
 
+	// Ensure payment gateways are loaded early
+	elseif ( is_add_payment_method_page() ) {
+
+		WC()->payment_gateways();
+
+	}
+
 	// Checkout pages handling
 	elseif ( is_checkout() ) {
 		// Buffer the checkout page
@@ -87,7 +94,7 @@ function wc_setup_product_data( $post ) {
  * @return void
  */
 function wc_generator_tag() {
-	echo "\n\n" . '<!-- WooCommerce Version -->' . "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( WOOCOMMERCE_VERSION ) . '" />' . "\n\n";
+	echo "\n\n" . '<!-- WooCommerce Version -->' . "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( WC_VERSION ) . '" />' . "\n\n";
 }
 
 /**
@@ -240,7 +247,7 @@ if ( ! function_exists( 'wc_product_post_class' ) ) {
 			$categories = wp_get_post_terms( $product->id, "product_cat" );
 			if ( ! empty( $categories ) ) {
 				foreach ($categories as $key => $value) {
-					$classes[] = "category-" . $value->slug;
+					$classes[] = "product-cat-" . $value->slug;
 				}
 			}
 
@@ -248,7 +255,7 @@ if ( ! function_exists( 'wc_product_post_class' ) ) {
 			$tags = wp_get_post_terms( $product->id, "product_tag" );
 			if ( ! empty( $tags ) ) {
 				foreach ($tags as $key => $value) {
-					$classes[] = "tag-" . $value->slug;
+					$classes[] = "product-tag-" . $value->slug;
 				}
 			}
 
@@ -421,9 +428,11 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 	function woocommerce_product_archive_description() {
 		if ( is_post_type_archive( 'product' ) && get_query_var( 'paged' ) == 0 ) {
 			$shop_page   = get_post( woocommerce_get_page_id( 'shop' ) );
-			$description = apply_filters( 'the_content', $shop_page->post_content );
-			if ( $description ) {
-				echo '<div class="page-description">' . $description . '</div>';
+			if ( $shop_page ) {
+				$description = apply_filters( 'the_content', $shop_page->post_content );
+				if ( $description ) {
+					echo '<div class="page-description">' . $description . '</div>';
+				}
 			}
 		}
 	}
@@ -659,6 +668,19 @@ if ( ! function_exists( 'woocommerce_template_single_title' ) ) {
 	 */
 	function woocommerce_template_single_title() {
 		woocommerce_get_template( 'single-product/title.php' );
+	}
+}
+if ( ! function_exists( 'woocommerce_template_single_rating' ) ) {
+
+	/**
+	 * Output the product rating.
+	 *
+	 * @access public
+	 * @subpackage	Product
+	 * @return void
+	 */
+	function woocommerce_template_single_rating() {
+		woocommerce_get_template( 'single-product/rating.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_template_single_price' ) ) {
@@ -1005,7 +1027,7 @@ if ( ! function_exists( 'woocommerce_related_products' ) ) {
 	 */
 	function woocommerce_related_products( $args = array(), $columns = false, $orderby = false ) {
 		if ( ! is_array( $args ) ) {
-			_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.1', __( 'Use $args argument as an array instead. Deprecated argument will be removed in WC 2.2.', 'woocommerce' ) );
+			_deprecated_argument( __FUNCTION__, '2.1', __( 'Use $args argument as an array instead. Deprecated argument will be removed in WC 2.2.', 'woocommerce' ) );
 
 			$argsvalue = $args;
 
@@ -1102,17 +1124,19 @@ function wc_cart_totals_subtotal_html() {
  * Get a coupon value
  * @param  string $code
  */
-function wc_cart_totals_coupon_html( $code ) {
-	$coupon = new WC_Coupon( $code );
+function wc_cart_totals_coupon_html( $coupon ) {
+	if ( is_string( $coupon ) )
+		$coupon = new WC_Coupon( $coupon );
+
 	$value  = array();
 
-	if ( ! empty( WC()->cart->coupon_discount_amounts[ $code ] ) )
-		$value[] = '-' . woocommerce_price( WC()->cart->coupon_discount_amounts[ $code ] );
+	if ( ! empty( WC()->cart->coupon_discount_amounts[ $coupon->code ] ) )
+		$value[] = '-' . woocommerce_price( WC()->cart->coupon_discount_amounts[ $coupon->code ] );
 
 	if ( $coupon->enable_free_shipping() )
 		$value[] = __( 'Free shipping coupon', 'woocommerce' );
 
-	echo implode( ', ', $value ) . ' <a href="' . add_query_arg( 'remove_coupon', $code, WC()->cart->get_cart_url() ) . '" class="woocommerce-remove-coupon">' . __( '[Remove]', 'woocommerce' ) . '</a>';
+	echo implode( ', ', $value ) . ' <a href="' . add_query_arg( 'remove_coupon', $coupon->code, WC()->cart->get_cart_url() ) . '" class="woocommerce-remove-coupon">' . __( '[Remove]', 'woocommerce' ) . '</a>';
 }
 
 /**
@@ -1129,7 +1153,7 @@ function wc_cart_totals_order_total_html() {
 			foreach ( WC()->cart->get_tax_totals() as $code => $tax )
 				$tax_string_array[] = sprintf( '%s %s', $tax->formatted_amount, $tax->label );
 		} else {
-			$tax_string_array[] = sprintf( '%s %s', woocommerce_price( WC()->cart->get_taxes_total() ), WC()->countries->tax_or_vat() );
+			$tax_string_array[] = sprintf( '%s %s', woocommerce_price( WC()->cart->get_taxes_total( true, true ) ), WC()->countries->tax_or_vat() );
 		}
 
 		if ( ! empty( $tax_string_array ) )
@@ -1270,7 +1294,7 @@ if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 
 		$defaults = apply_filters( 'woocommerce_breadcrumb_defaults', array(
 			'delimiter'   => ' &#47; ',
-			'wrap_before' => '<nav class="woocommerce-breadcrumb" itemprop="breadcrumb">',
+			'wrap_before' => '<nav class="woocommerce-breadcrumb" ' . ( is_single() ? 'itemprop="breadcrumb"' : '' ) . '>',
 			'wrap_after'  => '</nav>',
 			'before'      => '',
 			'after'       => '',
@@ -1506,7 +1530,7 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 		}
 
 		if ( $image )
-			echo '<img src="' . $image . '" alt="' . $category->name . '" width="' . $dimensions['width'] . '" height="' . $dimensions['height'] . '" />';
+			echo '<img src="' . esc_url( $image ) . '" alt="' . esc_attr( $category->name ) . '" width="' . esc_attr( $dimensions['width'] ) . '" height="' . esc_url( $dimensions['height'] ) . '" />';
 	}
 }
 
@@ -1575,6 +1599,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			'required'          => false,
 			'class'             => array(),
 			'label_class'       => array(),
+			'input_class'       => array(),
 			'return'            => false,
 			'options'           => array(),
 			'custom_attributes' => array(),
@@ -1638,7 +1663,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 						. '<option value="">'.__( 'Select a country&hellip;', 'woocommerce' ) .'</option>';
 
 				foreach ( $countries as $ckey => $cvalue )
-					$field .= '<option value="' . $ckey . '" '.selected( $value, $ckey, false ) .'>'.__( $cvalue, 'woocommerce' ) .'</option>';
+					$field .= '<option value="' . esc_attr( $ckey ) . '" '.selected( $value, $ckey, false ) .'>'.__( $cvalue, 'woocommerce' ) .'</option>';
 
 				$field .= '</select>';
 
@@ -1675,7 +1700,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				if ( $args['label'] )
 					$field .= '<label for="' . esc_attr( $key ) . '" class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label'] . $required . '</label>';
-				$field .= '<input type="hidden" class="hidden" name="' . esc_attr( $key )  . '" id="' . esc_attr( $key ) . '" value="" ' . implode( ' ', $custom_attributes ) . ' placeholder="' . $args['placeholder'] . '" />';
+				$field .= '<input type="hidden" class="hidden" name="' . esc_attr( $key )  . '" id="' . esc_attr( $key ) . '" value="" ' . implode( ' ', $custom_attributes ) . ' placeholder="' . esc_attr( $args['placeholder'] ) . '" />';
 				$field .= '</p>' . $after;
 
 			} elseif ( is_array( $states ) ) {
@@ -1684,11 +1709,11 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				if ( $args['label'] )
 					$field .= '<label for="' . esc_attr( $key ) . '" class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label']. $required . '</label>';
-				$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" class="state_select" ' . implode( ' ', $custom_attributes ) . ' placeholder="' . $args['placeholder'] . '">
+				$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" class="state_select" ' . implode( ' ', $custom_attributes ) . ' placeholder="' . esc_attr( $args['placeholder'] ) . '">
 					<option value="">'.__( 'Select a state&hellip;', 'woocommerce' ) .'</option>';
 
 				foreach ( $states as $ckey => $cvalue )
-					$field .= '<option value="' . $ckey . '" '.selected( $value, $ckey, false ) .'>'.__( $cvalue, 'woocommerce' ) .'</option>';
+					$field .= '<option value="' . esc_attr( $ckey ) . '" '.selected( $value, $ckey, false ) .'>'.__( $cvalue, 'woocommerce' ) .'</option>';
 
 				$field .= '</select>';
 				$field .= '</p>' . $after;
@@ -1699,7 +1724,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				if ( $args['label'] )
 					$field .= '<label for="' . esc_attr( $key ) . '" class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label']. $required . '</label>';
-				$field .= '<input type="text" class="input-text" value="' . $value . '"  placeholder="' . $args['placeholder'] . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
+				$field .= '<input type="text" class="input-text ' . implode( ' ', $args['input_class'] ) .'" value="' . esc_attr( $value ) . '"  placeholder="' . esc_attr( $args['placeholder'] ) . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
 				$field .= '</p>' . $after;
 
 			}
@@ -1712,14 +1737,14 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			if ( $args['label'] )
 				$field .= '<label for="' . esc_attr( $key ) . '" class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label']. $required  . '</label>';
 
-			$field .= '<textarea name="' . esc_attr( $key ) . '" class="input-text" id="' . esc_attr( $key ) . '" placeholder="' . $args['placeholder'] . '"' . ( empty( $args['custom_attributes']['rows'] ) ? ' rows="2"' : '' ) . ( empty( $args['custom_attributes']['cols'] ) ? ' cols="5"' : '' ) . implode( ' ', $custom_attributes ) . '>'. esc_textarea( $value  ) .'</textarea>
+			$field .= '<textarea name="' . esc_attr( $key ) . '" class="input-text ' . implode( ' ', $args['input_class'] ) .'" id="' . esc_attr( $key ) . '" placeholder="' . esc_url( $args['placeholder'] ) . '"' . ( empty( $args['custom_attributes']['rows'] ) ? ' rows="2"' : '' ) . ( empty( $args['custom_attributes']['cols'] ) ? ' cols="5"' : '' ) . implode( ' ', $custom_attributes ) . '>'. esc_textarea( $value  ) .'</textarea>
 				</p>' . $after;
 
 			break;
 		case "checkbox" :
 
 			$field = '<p class="form-row ' . esc_attr( implode( ' ', $args['class'] ) ) .'" id="' . esc_attr( $key ) . '_field">
-					<input type="' . $args['type'] . '" class="input-checkbox" name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" value="1" '.checked( $value, 1, false ) .' />
+					<input type="' . esc_attr( $args['type'] ) . '" class="input-checkbox" name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" value="1" '.checked( $value, 1, false ) .' />
 					<label for="' . esc_attr( $key ) . '" class="checkbox ' . implode( ' ', $args['label_class'] ) .'" ' . implode( ' ', $custom_attributes ) . '>' . $args['label'] . $required . '</label>
 				</p>' . $after;
 
@@ -1731,7 +1756,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			if ( $args['label'] )
 				$field .= '<label for="' . esc_attr( $key ) . '" class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label']. $required . '</label>';
 
-			$field .= '<input type="password" class="input-text" name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" placeholder="' . $args['placeholder'] . '" value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes ) . ' />
+			$field .= '<input type="password" class="input-text ' . implode( ' ', $args['input_class'] ) .'" name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" placeholder="' . esc_attr( $args['placeholder'] ) . '" value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes ) . ' />
 				</p>' . $after;
 
 			break;
@@ -1742,7 +1767,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			if ( $args['label'] )
 				$field .= '<label for="' . esc_attr( $key ) . '" class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label'] . $required . '</label>';
 
-			$field .= '<input type="text" class="input-text" name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" placeholder="' . $args['placeholder'] . '" '.$args['maxlength'].' value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes ) . ' />
+			$field .= '<input type="text" class="input-text ' . implode( ' ', $args['input_class'] ) .'" name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" placeholder="' . esc_attr( $args['placeholder'] ) . '" '.$args['maxlength'].' value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes ) . ' />
 				</p>' . $after;
 
 			break;

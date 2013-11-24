@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $woocommerce;
 
-wc_print_messages();
+wc_print_notices();
 
 do_action( 'woocommerce_before_cart' ); ?>
 
@@ -64,7 +64,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 							if ( ! $_product->is_visible() )
 								echo apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key );
 							else
-								echo apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s</a>', ( $cart_item['variation'] ? add_query_arg( $cart_item['variation'], $_product->get_permalink() ) : $_product->get_permalink() ), $_product->get_title() ), $cart_item, $cart_item_key );
+								echo apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s</a>', ( is_array( $cart_item['variation'] ) ? add_query_arg( $cart_item['variation'], $_product->get_permalink() ) : $_product->get_permalink() ), $_product->get_title() ), $cart_item, $cart_item_key );
 
 							// Meta data
 							echo $woocommerce->cart->get_item_data( $cart_item );
@@ -123,7 +123,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 					</div>
 				<?php } ?>
 
-				<input type="submit" class="button" name="update_cart" value="<?php _e( 'Update Cart', 'woocommerce' ); ?>" /> <input type="submit" class="checkout-button button alt" name="proceed" value="<?php _e( 'Proceed to Checkout &rarr;', 'woocommerce' ); ?>" />
+				<input type="submit" class="button" name="update_cart" value="<?php _e( 'Update Cart', 'woocommerce' ); ?>" /> <input type="submit" class="checkout-button button alt wc-forward" name="proceed" value="<?php _e( 'Proceed to Checkout', 'woocommerce' ); ?>" />
 
 				<?php do_action('woocommerce_proceed_to_checkout'); ?>
 

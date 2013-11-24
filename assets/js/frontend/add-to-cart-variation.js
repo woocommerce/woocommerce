@@ -137,7 +137,7 @@
 
 			        if ( all_set ) {
 
-			        	var variation = matching_variations.pop();
+			        	var variation = matching_variations.shift();
 
 			        	if ( variation ) {
 
@@ -384,6 +384,11 @@
 
 			        if ( ! variation.is_in_stock && ! variation.backorders_allowed ) {
 				        $variation_form.find('.variations_button').hide();
+			        }
+
+			        if ( ! variation.variation_is_visible ) {
+			        	$variation_form.find('.variations_button').hide();
+			        	$variation_form.find('.single_variation').html( '<p>' + wc_add_to_cart_variation_params.i18n_unavailable_text + '</p>' );
 			        }
 
 			        if ( variation.min_qty )

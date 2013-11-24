@@ -27,6 +27,9 @@ class WC_Query {
 	/** @public array Filtered product ids (after layered nav) */
 	public $filtered_product_ids 	= array();
 
+	/** @public array Filtered product ids (after layered nav, per taxonomy) */
+	public $filtered_product_ids_for_taxonomy 	= array();
+
 	/** @public array Product IDs that match the layered nav + price filter */
 	public $post__in 		= array();
 
@@ -56,7 +59,8 @@ class WC_Query {
 			add_action( 'parse_request', array( $this, 'parse_request'), 0 );
 			add_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 			add_filter( 'the_posts', array( $this, 'the_posts' ), 11, 2 );
-			add_filter( 'wp', array( $this, 'remove_product_query' ) );
+			add_action( 'wp', array( $this, 'remove_product_query' ) );
+			add_action( 'wp', array( $this, 'remove_ordering_args' ) );
 		}
 
 		$this->init_query_vars();
@@ -69,15 +73,16 @@ class WC_Query {
 		// Query vars to add to WP
 		$this->query_vars = array(
 			// Checkout actions
-			'order-pay'       => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
-			'order-received'  => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
+			'order-pay'          => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
+			'order-received'     => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
 
 			// My account actions
-			'view-order'      => get_option( 'woocommerce_myaccount_view_order_endpoint', 'view-order' ),
-			'edit-account'    => get_option( 'woocommerce_myaccount_edit_account_endpoint', 'edit-account' ),
-			'edit-address'    => get_option( 'woocommerce_myaccount_edit_address_endpoint', 'edit-address' ),
-			'lost-password'   => get_option( 'woocommerce_myaccount_lost_password_endpoint', 'lost-password' ),
-			'customer-logout' => get_option( 'woocommerce_logout_endpoint', 'customer-logout' )
+			'view-order'         => get_option( 'woocommerce_myaccount_view_order_endpoint', 'view-order' ),
+			'edit-account'       => get_option( 'woocommerce_myaccount_edit_account_endpoint', 'edit-account' ),
+			'edit-address'       => get_option( 'woocommerce_myaccount_edit_address_endpoint', 'edit-address' ),
+			'lost-password'      => get_option( 'woocommerce_myaccount_lost_password_endpoint', 'lost-password' ),
+			'customer-logout'    => get_option( 'woocommerce_logout_endpoint', 'customer-logout' ),
+			'add-payment-method' => get_option( 'woocommerce_myaccount_add_payment_method_endpoint', 'add-payment-method' ),
 		);
 	}
 
@@ -86,7 +91,7 @@ class WC_Query {
 	 */
 	public function get_errors() {
 		if ( isset( $_GET['wc_error'] ) )
-			wc_add_error( esc_attr( $_GET['wc_error'] ) );
+			wc_add_notice( esc_attr( $_GET['wc_error'] ), 'error' );
 	}
 
 	/**
@@ -373,6 +378,14 @@ class WC_Query {
 	}
 
 	/**
+	 * Remove ordering queries
+	 */
+	public function remove_ordering_args() {
+		remove_filter( 'posts_clauses', array( $this, 'order_by_popularity_post_clauses' ) );
+		remove_filter( 'posts_clauses', array( $this, 'order_by_rating_post_clauses' ) );
+	}
+
+	/**
 	 * Remove the posts_where filter
 	 *
 	 * @access public
@@ -544,9 +557,9 @@ class WC_Query {
 
 	/**
 	 * Appends meta queries to an array.
-	 *
 	 * @access public
-	 * @return void
+	 * @param array $meta_query
+	 * @return array
 	 */
 	public function get_meta_query( $meta_query = array() ) {
 		if ( ! is_array( $meta_query ) )
@@ -614,10 +627,10 @@ class WC_Query {
 			if ( $attribute_taxonomies ) {
 				foreach ( $attribute_taxonomies as $tax ) {
 
-			    	$attribute = sanitize_title( $tax->attribute_name );
-			    	$taxonomy = wc_attribute_taxonomy_name( $attribute );
-			    	$name = 'filter_' . $attribute;
-			    	$query_type_name = 'query_type_' . $attribute;
+					$attribute       = woocommerce_sanitize_taxonomy_name( $tax->attribute_name );
+					$taxonomy        = wc_attribute_taxonomy_name( $attribute );
+					$name            = 'filter_' . $attribute;
+					$query_type_name = 'query_type_' . $attribute;
 
 			    	if ( ! empty( $_GET[ $name ] ) && taxonomy_exists( $taxonomy ) ) {
 
@@ -647,11 +660,16 @@ class WC_Query {
 
 		if ( sizeof( $_chosen_attributes ) > 0 ) {
 
-			$matched_products = array();
-			$filtered_attribute = false;
+			$matched_products   = array(
+				'and' => array(),
+				'or'  => array()
+			);
+			$filtered_attribute = array(
+				'and' => false,
+				'or'  => false
+			);
 
 			foreach ( $_chosen_attributes as $attribute => $data ) {
-
 				$matched_products_from_attribute = array();
 				$filtered = false;
 
@@ -675,46 +693,45 @@ class WC_Query {
 							)
 						);
 
-						// AND or OR
-						if ( $data['query_type'] == 'or' ) {
+						if ( ! is_wp_error( $posts ) ) {
 
-							if ( ! is_wp_error( $posts ) && ( sizeof( $matched_products_from_attribute ) > 0 || $filtered ) )
-								$matched_products_from_attribute = array_merge($posts, $matched_products_from_attribute);
-							elseif ( ! is_wp_error( $posts ) )
+							if ( sizeof( $matched_products_from_attribute ) > 0 || $filtered )
+								$matched_products_from_attribute = $data['query_type'] == 'or' ? array_merge( $posts, $matched_products_from_attribute ) : array_intersect( $posts, $matched_products_from_attribute );
+							else
 								$matched_products_from_attribute = $posts;
 
-						} else {
-
-							if ( ! is_wp_error( $posts ) && ( sizeof( $matched_products_from_attribute ) > 0 || $filtered ) )
-								$matched_products_from_attribute = array_intersect($posts, $matched_products_from_attribute);
-							elseif ( ! is_wp_error( $posts ) )
-								$matched_products_from_attribute = $posts;
+							$filtered = true;
 						}
-
-						$filtered = true;
-
 					}
 				}
 
-				if ( sizeof( $matched_products ) > 0 || $filtered_attribute )
-					$matched_products = array_intersect( $matched_products_from_attribute, $matched_products );
-				else
-					$matched_products = $matched_products_from_attribute;
+				if ( sizeof( $matched_products[ $data['query_type'] ] ) > 0 || $filtered_attribute[ $data['query_type'] ] === true ) {
+					$matched_products[ $data['query_type'] ] = ( $data['query_type'] == 'or' ) ? array_merge( $matched_products_from_attribute, $matched_products[ $data['query_type'] ] ) : array_intersect( $matched_products_from_attribute, $matched_products[ $data['query_type'] ] );
+				} else {
+					$matched_products[ $data['query_type'] ] = $matched_products_from_attribute;
+				}
 
-				$filtered_attribute = true;
+				$filtered_attribute[ $data['query_type'] ] = true;
 
+				$this->filtered_product_ids_for_taxonomy[ $attribute ] = $matched_products_from_attribute;
 			}
+
+			// Combine our AND and OR result sets
+			if ( $filtered_attribute['and'] && $filtered_attribute['or'] )
+				$results = array_intersect( $matched_products[ 'and' ], $matched_products[ 'or' ] );
+			else
+				$results = array_merge( $matched_products[ 'and' ], $matched_products[ 'or' ] );
 
 			if ( $filtered ) {
 
-				WC()->query->layered_nav_post__in = $matched_products;
+				WC()->query->layered_nav_post__in   = $results;
 				WC()->query->layered_nav_post__in[] = 0;
 
 				if ( sizeof( $filtered_posts ) == 0 ) {
-					$filtered_posts = $matched_products;
+					$filtered_posts   = $results;
 					$filtered_posts[] = 0;
 				} else {
-					$filtered_posts = array_intersect( $filtered_posts, $matched_products );
+					$filtered_posts   = array_intersect( $filtered_posts, $results );
 					$filtered_posts[] = 0;
 				}
 
@@ -750,7 +767,7 @@ class WC_Query {
 	 * @param array $filtered_posts
 	 * @return array
 	 */
-	public function price_filter($filtered_posts) {
+	public function price_filter( $filtered_posts ) {
 	    global $wpdb;
 
 	    if ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) {
@@ -759,11 +776,11 @@ class WC_Query {
 	        $min 	= floatval( $_GET['min_price'] );
 	        $max 	= floatval( $_GET['max_price'] );
 
-	        $matched_products_query = $wpdb->get_results( $wpdb->prepare("
+	        $matched_products_query = apply_filters( 'woocommerce_price_filter_results', $wpdb->get_results( $wpdb->prepare("
 	        	SELECT DISTINCT ID, post_parent, post_type FROM $wpdb->posts
 				INNER JOIN $wpdb->postmeta ON ID = post_id
 				WHERE post_type IN ( 'product', 'product_variation' ) AND post_status = 'publish' AND meta_key = %s AND meta_value BETWEEN %d AND %d
-			", '_price', $min, $max ), OBJECT_K );
+			", '_price', $min, $max ), OBJECT_K ), $min, $max );
 
 	        if ( $matched_products_query ) {
 	            foreach ( $matched_products_query as $product ) {

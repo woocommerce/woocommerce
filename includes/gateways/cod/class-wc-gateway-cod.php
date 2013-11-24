@@ -82,14 +82,17 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 				'desc_tip'    => true,
 			),
 			'enable_for_methods' => array(
-				'title' 		=> __( 'Enable for shipping methods', 'woocommerce' ),
-				'type' 			=> 'multiselect',
-				'class'			=> 'chosen_select',
-				'css'			=> 'width: 450px;',
-				'default' 		=> '',
-				'description' 	=> __( 'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'woocommerce' ),
-				'options'		=> $shipping_methods,
-				'desc_tip'      => true,
+				'title'             => __( 'Enable for shipping methods', 'woocommerce' ),
+				'type'              => 'multiselect',
+				'class'             => 'chosen_select',
+				'css'               => 'width: 450px;',
+				'default'           => '',
+				'description'       => __( 'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'woocommerce' ),
+				'options'           => $shipping_methods,
+				'desc_tip'          => true,
+				'custom_attributes' => array(
+					'data-placeholder' => __( 'Select shipping methods', 'woocommerce' )
+				)
 			)
  	   );
     }

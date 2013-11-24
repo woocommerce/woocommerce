@@ -50,7 +50,8 @@ global $woocommerce;
 	</table>
 
 	<div id="payment">
-		<?php if ($order->order_total > 0) : ?>
+		<?php if ( $order->needs_payment() ) : ?>
+		<h3><?php _e( 'Payment', 'woocommerce' ); ?></h3>
 		<ul class="payment_methods methods">
 			<?php
 				if ( $available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways() ) {
@@ -60,8 +61,8 @@ global $woocommerce;
 
 					foreach ( $available_gateways as $gateway ) {
 						?>
-						<li>
-							<input type="radio" id="payment_method_<?php echo $gateway->id; ?>" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php if ($gateway->chosen) echo 'checked="checked"'; ?> />
+						<li class="payment_method_<?php echo $gateway->id; ?>">
+							<input id="payment_method_<?php echo $gateway->id; ?>" type="radio" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php if ($gateway->chosen) echo 'checked="checked"'; ?> />
 							<label for="payment_method_<?php echo $gateway->id; ?>"><?php echo $gateway->get_title(); ?> <?php echo $gateway->get_icon(); ?></label>
 							<?php
 								if ( $gateway->has_fields() || $gateway->get_description() ) {

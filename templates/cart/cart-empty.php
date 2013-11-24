@@ -9,7 +9,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-wc_print_messages();
+wc_print_notices();
 
 ?>
 
@@ -17,4 +17,4 @@ wc_print_messages();
 
 <?php do_action('woocommerce_cart_is_empty'); ?>
 
-<p class="return-to-shop"><a class="button" href="<?php echo get_permalink(woocommerce_get_page_id('shop')); ?>"><?php _e( '&larr; Return To Shop', 'woocommerce' ) ?></a></p>
+<p class="return-to-shop"><a class="button wc-backward" href="<?php echo get_permalink( woocommerce_get_page_id( 'shop' ) ); ?>"><?php _e( 'Return To Shop', 'woocommerce' ) ?></a></p>

@@ -11270,7 +11270,7 @@ msgstr ""
 # @ woocommerce
 #: admin/woocommerce-admin-attributes.php:258
 #: admin/woocommerce-admin-attributes.php:391
-msgid "Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>."
+msgid "Determines how you select attributes for products. Under admin panel -> products -> product data -> attributes -> values, <strong>Text</strong> allows manual entry whereas <strong>select</strong> allows pre-configured terms in a drop-down list."
 msgstr ""
 
 # @ woocommerce
@@ -11296,7 +11296,7 @@ msgstr ""
 # @ woocommerce
 #: admin/woocommerce-admin-attributes.php:271
 #: admin/woocommerce-admin-attributes.php:401
-msgid "Determines the sort order on the frontend for this attribute. If using custom ordering, you can drag and drop the terms in this attribute"
+msgid "Determines the sort order of the terms on the frontend shop product pages. If using custom ordering, you can drag and drop the terms in this attribute."
 msgstr ""
 
 # @ woocommerce

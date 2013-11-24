@@ -60,16 +60,6 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	function init_form_fields() {
 		global $woocommerce;
 
-		// Backwards compat
-		if ( $this->get_option( 'requires_coupon' ) && $this->min_amount )
-			$default_requires = 'either';
-		elseif ( $this->get_option( 'requires_coupon' ) )
-			$default_requires = 'coupon';
-		elseif ( $this->min_amount )
-			$default_requires = 'min_amount';
-		else
-			$default_requires = '';
-
 		$this->form_fields = array(
 			'enabled' => array(
 							'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
@@ -100,12 +90,15 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 							'class'			=> 'chosen_select',
 							'css'			=> 'width: 450px;',
 							'default' 		=> '',
-							'options'		=> $woocommerce->countries->get_shipping_countries()
+							'options'		=> $woocommerce->countries->get_shipping_countries(),
+							'custom_attributes' => array(
+								'data-placeholder' => __( 'Select some countries', 'woocommerce' )
+							)
 						),
 			'requires' => array(
 							'title' 		=> __( 'Free Shipping Requires...', 'woocommerce' ),
 							'type' 			=> 'select',
-							'default' 		=> $default_requires,
+							'default' 		=> '',
 							'options'		=> array(
 								'' 				=> __( 'N/A', 'woocommerce' ),
 								'coupon'		=> __( 'A valid free shipping coupon', 'woocommerce' ),
@@ -116,15 +109,11 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 						),
 			'min_amount' => array(
 							'title' 		=> __( 'Minimum Order Amount', 'woocommerce' ),
-							'type' 			=> 'number',
-							'custom_attributes' => array(
-								'step'	=> 'any',
-								'min'	=> '0'
-							),
+							'type' 			=> 'price',
+							'placeholder'	=> wc_format_localized_price( 0 ),
 							'description' 	=> __( 'Users will need to spend this amount to get free shipping (if enabled above).', 'woocommerce' ),
 							'default' 		=> '0',
-							'desc_tip'		=> true,
-							'placeholder'	=> '0.00'
+							'desc_tip'		=> true
 						)
 			);
 
@@ -183,28 +172,23 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 
 		if ( in_array( $this->requires, array( 'coupon', 'either', 'both' ) ) ) {
 
-			if ( $woocommerce->cart->applied_coupons ) {
-				foreach ($woocommerce->cart->applied_coupons as $code) {
-					$coupon = new WC_Coupon( $code );
-
+			if ( $coupons = $woocommerce->cart->get_coupons() ) {
+				foreach ( $coupons as $code => $coupon ) {
 					if ( $coupon->is_valid() && $coupon->enable_free_shipping() )
 						$has_coupon = true;
 				}
 			}
 		}
 
-		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ) ) ) {
+		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ) ) && isset( WC()->cart->cart_contents_total ) ) {	
 
-			if ( isset( $woocommerce->cart->cart_contents_total ) ) {
+			if ( WC()->cart->prices_include_tax )
+				$total = WC()->cart->cart_contents_total + array_sum( WC()->cart->taxes );
+			else
+				$total = WC()->cart->cart_contents_total;
 
-				if ( $woocommerce->cart->prices_include_tax )
-					$total = $woocommerce->cart->tax_total + $woocommerce->cart->cart_contents_total;
-				else
-					$total = $woocommerce->cart->cart_contents_total;
-
-				if ( $total >= $this->min_amount )
-					$has_met_min_amount = true;
-			}
+			if ( $total >= $this->min_amount )
+				$has_met_min_amount = true;
 		}
 
 		switch ( $this->requires ) {

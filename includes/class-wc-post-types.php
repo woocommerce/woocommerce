@@ -13,6 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @category	Class
  * @author 		WooThemes
  */
+if ( ! class_exists( 'WC_Post_types' ) ) :
+
 class WC_Post_types {
 
 	private $permalinks;
@@ -35,7 +37,7 @@ class WC_Post_types {
 	 */
 	public function register_taxonomies() {
 
-		if ( post_type_exists( 'product' ) )
+		if ( taxonomy_exists( 'product_type' ) )
 			return;
 
 		do_action( 'woocommerce_register_taxonomy' );
@@ -353,11 +355,14 @@ class WC_Post_types {
 						'rewrite' 				=> false,
 						'query_var' 			=> false,
 						'supports' 				=> array( 'title' ),
-						'show_in_nav_menus'		=> false
+						'show_in_nav_menus'		=> false,
+						'show_in_admin_bar'     => true
 					)
 				)
 			);
 	}
 }
 
-new WC_Post_types();
+endif;
+
+return new WC_Post_types();

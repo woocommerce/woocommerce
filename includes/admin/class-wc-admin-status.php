@@ -109,7 +109,7 @@ class WC_Admin_Status {
 
 					$product_tags = get_terms( 'product_tag', array( 'hide_empty' => false, 'fields' => 'id=>parent' ) );
 
-					_woocommerce_term_recount( $product_cats, get_taxonomy( 'product_tag' ), false, false );
+					_woocommerce_term_recount( $product_tags, get_taxonomy( 'product_tag' ), false, false );
 
 					echo '<div class="updated"><p>' . __( 'Terms successfully recounted', 'woocommerce' ) . '</p></div>';
 				break;
@@ -122,7 +122,12 @@ class WC_Admin_Status {
 
 					wp_cache_flush();
 
+					echo '<div class="updated"><p>' . __( 'Sessions successfully cleared', 'woocommerce' ) . '</p></div>';
 				break;
+				case "install_pages" :
+					WC_Install::create_pages();
+					echo '<div class="updated"><p>' . __( 'All missing WooCommerce pages was installed successfully.', 'woocommerce' ) . '</p></div>';
+                break;
 				default:
 					$action = esc_attr( $_GET['action'] );
 					if( isset( $tools[ $action ]['callback'] ) ) {
@@ -139,6 +144,11 @@ class WC_Admin_Status {
 					}
 				break;
 			}
+		}
+		
+	    // Display message if settings settings have been saved
+	    if ( isset( $_REQUEST['settings-updated'] ) ) {
+			echo '<div class="updated"><p>' . __( 'Your changes have been saved.', 'woocommerce' ) . '</p></div>';
 		}
 
 		include_once( 'views/html-admin-page-status-tools.php' );
@@ -175,6 +185,11 @@ class WC_Admin_Status {
 				'name'		=> __('Customer Sessions','woocommerce'),
 				'button'	=> __('Clear all sessions','woocommerce'),
 				'desc'		=> __( '<strong class="red">Warning</strong> This tool will delete all customer session data from the database, including any current live carts.', 'woocommerce' ),
+			),
+			'install_pages' => array(
+				'name'    => __( 'Install WooCommerce Pages', 'woocommerce' ),
+				'button'  => __( 'Install pages', 'woocommerce' ),
+				'desc'    => __( '<strong class="red">Note</strong> This tool will install all the missing WooCommerce pages. Pages already defined and set up will not be replaced.', 'woocommerce' ),
 			),
 		) );
 	}

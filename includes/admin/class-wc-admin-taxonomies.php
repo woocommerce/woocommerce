@@ -324,7 +324,7 @@ class WC_Admin_Taxonomies {
 			else
 				$image = woocommerce_placeholder_img_src();
 
-			$columns .= '<img src="' . $image . '" alt="Thumbnail" class="wp-post-image" height="48" width="48" />';
+			$columns .= '<img src="' . esc_url( $image ) . '" alt="Thumbnail" class="wp-post-image" height="48" width="48" />';
 
 		}
 

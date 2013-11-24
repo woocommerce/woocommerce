@@ -7,11 +7,14 @@
  * @author 		WooThemes
  * @category 	Core
  * @package 	WooCommerce/Uninstaller
- * @version     1.6.4
+ * @version     2.1.0
  */
-if( !defined('WP_UNINSTALL_PLUGIN') ) exit();
+if( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) 
+	exit();
 
 global $wpdb, $wp_roles;
+
+$status_options = get_option( 'woocommerce_status_options', array() );
 
 // Roles + caps
 $installer = include( 'includes/class-wc-install.php' );
@@ -42,3 +45,11 @@ $wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->prefix . "woocommerce_tax_rate_lo
 
 // Delete options
 $wpdb->query("DELETE FROM $wpdb->options WHERE option_name LIKE 'woocommerce_%';");
+
+if ( ! empty( $status_options['uninstall_data'] ) ) {
+	// Delete posts + data
+	$wpdb->query( "DELETE FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation', 'shop_coupon', 'shop_order' );" );
+	$wpdb->query( "DELETE FROM {$wpdb->postmeta} meta LEFT JOIN {$wpdb->posts} posts ON posts.ID = meta.post_id WHERE wp.ID IS NULL;" );
+	$wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->prefix . "woocommerce_order_items" );
+	$wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->prefix . "woocommerce_order_itemmeta" );
+}

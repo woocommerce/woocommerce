@@ -2430,7 +2430,7 @@ msgstr "Takk for ordren din"
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-processing-order.php:28
 msgid "Your {blogname} order receipt from {order_date}"
-msgstr "{blogname}-ordrekvitteringen din fra {ORDER_DATE}"
+msgstr "{blogname}-ordrekvitteringen din fra {order_date}"
 
 # @ woocommerce
 #: classes/emails/class-wc-email-customer-reset-password.php:36

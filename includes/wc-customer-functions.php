@@ -233,7 +233,8 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
 	if ( sizeof( $emails ) == 0 )
 		return false;
 
-	$completed = get_term_by( 'slug', 'completed', 'shop_order_status' );
+	$completed  = get_term_by( 'slug', 'completed', 'shop_order_status' );
+	$processing = get_term_by( 'slug', 'processing', 'shop_order_status' );
 
 	return $wpdb->get_var(
 		$wpdb->prepare( "
@@ -243,18 +244,18 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
 			LEFT JOIN {$wpdb->postmeta} AS postmeta ON order_items.order_id = postmeta.post_id
 			LEFT JOIN {$wpdb->term_relationships} AS rel ON order_items.order_id = rel.object_ID
 			WHERE
-				rel.term_taxonomy_id = %d AND
+				rel.term_taxonomy_id IN ( %d, %d ) AND
 				itemmeta.meta_value  = %s AND
 				itemmeta.meta_key    IN ( '_variation_id', '_product_id' ) AND
 				postmeta.meta_key    IN ( '_billing_email', '_customer_user' ) AND
 				(
 					postmeta.meta_value  IN ( '" . implode( "','", array_unique( $emails ) ) . "' ) OR
 					(
-						postmeta.meta_value = %d AND
+						postmeta.meta_value = %s AND
 						postmeta.meta_value > 0
 					)
 				)
-			", $completed->term_taxonomy_id, $product_id, $user_id
+			", $completed->term_taxonomy_id, $processing->term_taxonomy_id, $product_id, $user_id
 		)
 	);
 }

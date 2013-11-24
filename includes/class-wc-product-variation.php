@@ -221,7 +221,7 @@ class WC_Product_Variation extends WC_Product {
 	public function variation_is_visible() {
 		$visible = true;
 
-		// Published
+		// Published == enabled checkbox
 		if ( get_post_status( $this->variation_id ) != 'publish' )
 			$visible = false;
 
@@ -230,10 +230,28 @@ class WC_Product_Variation extends WC_Product {
 			$visible = false;
 
 		// Price not set
-		elseif ( $this->get_price() == "" )
+		elseif ( $this->get_price() === "" )
 			$visible = false;
 
 		return apply_filters( 'woocommerce_variation_is_visible', $visible, $this->variation_id, $this->id );
+	}
+
+	/**
+	 * Returns false if the product cannot be bought.
+	 *
+	 * @access public
+	 * @return cool
+	 */
+	public function is_purchasable() {
+
+		// Published == enabled checkbox
+		if ( get_post_status( $this->variation_id ) != 'publish' )
+			$purchasable = false;
+
+		else
+			$purchasable = parent::is_purchasable();
+
+		return $purchasable;
 	}
 
 	/**

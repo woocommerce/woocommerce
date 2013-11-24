@@ -13,8 +13,8 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 function woocommerce_show_messages() {
-	_deprecated_function( 'woocommerce_show_messages', '2.1', 'wc_print_messages' );
-	wc_show_messages();
+	_deprecated_function( 'woocommerce_show_messages', '2.1', 'wc_print_notices' );
+	wc_print_notices();
 }
 function woocommerce_weekend_area_js() {
 	_deprecated_function( 'woocommerce_weekend_area_js', '2.1', '' );
@@ -35,6 +35,19 @@ function woocommerce_create_page( $slug, $option = '', $page_title = '', $page_c
 function woocommerce_readfile_chunked( $file, $retbytes = true ) {
 	_deprecated_function( 'woocommerce_readfile_chunked', '2.1', 'WC_Download_Handler::readfile_chunked()' );
 	return WC_Download_Handler::readfile_chunked( $file, $retbytes );
+}
+
+/**
+ * Formal total costs - format to the number of decimal places for the base currency.
+ *
+ * @access public
+ * @param mixed $number
+ * @deprecated 2.1
+ * @return string
+ */
+function woocommerce_format_total( $number ) {
+	_deprecated_function( __FUNCTION__, '2.1', 'woocommerce_format_decimal()' );
+	return woocommerce_format_decimal( $number, get_option( 'woocommerce_price_num_decimals' ), false );
 }
 
 /**
@@ -74,13 +87,14 @@ add_action( 'init', 'woocommerce_legacy_paypal_ipn' );
 global $wc_map_deprecated_filters;
 
 $wc_map_deprecated_filters = array(
-	'woocommerce_cart_item_class'        => 'woocommerce_cart_table_item_class',
-	'woocommerce_cart_item_product_id'   => 'hook_woocommerce_in_cart_product_id',
-	'woocommerce_cart_item_thumbnail'    => 'hook_woocommerce_in_cart_product_thumbnail',
-	'woocommerce_cart_item_price'        => 'woocommerce_cart_item_price_html',
-	'woocommerce_cart_item_name'         => 'woocommerce_in_cart_product_title',
-	'woocommerce_order_item_class'       => 'woocommerce_order_table_item_class',
-	'woocommerce_order_item_name' => 'woocommerce_order_table_product_title'
+	'woocommerce_cart_item_class'       => 'woocommerce_cart_table_item_class',
+	'woocommerce_cart_item_product_id'  => 'hook_woocommerce_in_cart_product_id',
+	'woocommerce_cart_item_thumbnail'   => 'hook_woocommerce_in_cart_product_thumbnail',
+	'woocommerce_cart_item_price'       => 'woocommerce_cart_item_price_html',
+	'woocommerce_cart_item_name'        => 'woocommerce_in_cart_product_title',
+	'woocommerce_order_item_class'      => 'woocommerce_order_table_item_class',
+	'woocommerce_order_item_name'       => 'woocommerce_order_table_product_title',
+	'woocommerce_order_amount_shipping' => 'woocommerce_order_amount_total_shipping'
 );
 
 foreach ( $wc_map_deprecated_filters as $new => $old )

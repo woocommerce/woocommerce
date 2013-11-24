@@ -63,10 +63,10 @@ $order = new WC_Order( $order_id );
 								foreach ( $download_files as $download_id => $file ) {
 									$i++;
 
-									$links[] = '<small><a href="' . esc_url( $file['download_url'] ) . '">' . sprintf( __( 'Download file%s', 'woocommerce' ), ( count( $download_file_urls ) > 1 ? ' ' . $i . ': ' : ': ' ) ) . esc_html( $file['name'] ) . '</a></small>';
+									$links[] = '<small><a href="' . esc_url( $file['download_url'] ) . '">' . sprintf( __( 'Download file%s', 'woocommerce' ), ( count( $download_files ) > 1 ? ' ' . $i . ': ' : ': ' ) ) . esc_html( $file['name'] ) . '</a></small>';
 								}
 
-								echo implode( '<br/>', $links );
+								echo '<br/>' . implode( '<br/>', $links );
 							}
 						?>
 					</td>
@@ -100,6 +100,9 @@ $order = new WC_Order( $order_id );
 <?php
 	if ($order->billing_email) echo '<dt>'.__( 'Email:', 'woocommerce' ).'</dt><dd>'.$order->billing_email.'</dd>';
 	if ($order->billing_phone) echo '<dt>'.__( 'Telephone:', 'woocommerce' ).'</dt><dd>'.$order->billing_phone.'</dd>';
+
+	// Additional customer details hook
+	do_action( 'woocommerce_order_details_after_customer_details', $order );
 ?>
 </dl>
 

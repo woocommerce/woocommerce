@@ -13,6 +13,9 @@ class WC_Tax {
 	/** @var array */
 	public $matched_rates;
 
+
+	var $log = array();
+
 	/**
 	 * __construct function.
 	 *
@@ -20,8 +23,180 @@ class WC_Tax {
 	 * @return void
 	 */
 	public function __construct() {
+		$this->precision         = WC_ROUNDING_PRECISION;
 		$this->dp                = (int) get_option( 'woocommerce_price_num_decimals' );
 		$this->round_at_subtotal = get_option('woocommerce_tax_round_at_subtotal') == 'yes';
+	}
+
+	/**
+	 * Calculate tax for a line
+	 * @param  float  $price              Price to calc tax on
+	 * @param  array  $rates              Rates to apply
+	 * @param  boolean $price_includes_tax Whether the passed price has taxes included
+	 * @param  boolean $suppress_rounding  Whether to supress any rounding from taking place
+	 * @return array                      Array of rates + prices after tax
+	 */
+	public function calc_tax( $price, $rates, $price_includes_tax = false, $suppress_rounding = false ) {
+		// Work in pence to X precision
+		$price = $this->precision( $price );
+
+		if ( $price_includes_tax )
+			$taxes = $this->calc_inclusive_tax( $price, $rates );
+		else
+			$taxes = $this->calc_exclusive_tax( $price, $rates );
+
+		// Round to precision
+		if ( ! $this->round_at_subtotal && ! $suppress_rounding ) {
+			$taxes = array_map( 'round', $taxes ); // Round to precision
+		}
+
+		// Remove precision
+		$price     = $this->remove_precision( $price );
+		$taxes     = array_map( array( $this, 'remove_precision' ), $taxes );
+
+		return apply_filters( 'woocommerce_calc_tax', $taxes, $price, $rates, $price_includes_tax, $suppress_rounding );
+	}
+
+	/**
+	 * Calculate the shipping tax using a passed array of rates.
+	 *
+	 * @param   float		Price
+	 * @param	array		Taxation Rate
+	 * @return  array
+	 */
+	public function calc_shipping_tax( $price, $rates ) {
+		return $this->calc_exclusive_tax( $price, $rates );
+	}
+
+	/**
+	 * Multiply cost by pow precision
+	 * @param  float $price
+	 * @return float
+	 */
+	private function precision( $price ) {
+		return $price * ( pow( 10, $this->precision ) );
+	}
+
+	/**
+	 * Divide cost by pow precision
+	 * @param  float $price
+	 * @return float
+	 */
+	private function remove_precision( $price ) {
+		return $price / ( pow( 10, $this->precision ) );
+	}
+
+	/**
+	 * Round to precision.
+	 *
+	 * Filter example: to return rounding to .5 cents you'd use:
+	 *
+	 * public function euro_5cent_rounding( $in ) {
+	 *      return round( $in / 5, 2 ) * 5;
+	 * }
+	 * add_filter( 'woocommerce_tax_round', 'euro_5cent_rounding' );
+	 */
+	public function round( $in ) {
+		return apply_filters( 'woocommerce_tax_round', round( $in, $this->precision ), $in );
+	}
+
+	/**
+	 * Calc tax from inclusive price
+	 *
+	 * @param  float $price
+	 * @param  array $rates
+	 * @return array
+	 */
+	private function calc_inclusive_tax( $price, $rates ) {
+		$taxes = array();
+
+		$regular_tax_rates = $compound_tax_rates = 0;
+
+		foreach ( $rates as $key => $rate )
+			if ( $rate['compound'] == 'yes' )
+				$compound_tax_rates = $compound_tax_rates + $rate['rate'];
+			else
+				$regular_tax_rates  = $regular_tax_rates + $rate['rate'];
+
+		$regular_tax_rate 	= 1 + ( $regular_tax_rates / 100 );
+		$compound_tax_rate 	= 1 + ( $compound_tax_rates / 100 );
+		$non_compound_price = $price / $compound_tax_rate;
+
+		foreach ( $rates as $key => $rate ) {
+			if ( ! isset( $taxes[ $key ] ) )
+				$taxes[ $key ] = 0;
+
+			$the_rate      = $rate['rate'] / 100;
+
+			if ( $rate['compound'] == 'yes' ) {
+				$the_price = $price;
+				$the_rate  = $the_rate / $compound_tax_rate;
+			} else {
+				$the_price = $non_compound_price;
+				$the_rate  = $the_rate / $regular_tax_rate;
+			}
+
+			$net_price       = $price - ( $the_rate * $the_price );
+			$tax_amount      = $price - $net_price;
+			$taxes[ $key ]   += apply_filters( 'woocommerce_price_inc_tax_amount', $tax_amount, $key, $rate, $price );
+		}
+
+		return $taxes;
+	}
+
+	/**
+	 * Calc tax from exclusive price
+	 *
+	 * @param  float $price
+	 * @param  array $rates
+	 * @return array
+	 */
+	private function calc_exclusive_tax( $price, $rates ) {
+		$taxes = array();
+
+		// Multiple taxes
+		foreach ( $rates as $key => $rate ) {
+
+			if ( $rate['compound'] == 'yes' )
+				continue;
+
+			$tax_amount = $price * ( $rate['rate'] / 100 );
+
+			// ADVANCED: Allow third parties to modify this rate
+			$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price );
+
+			// Add rate
+			if ( ! isset( $taxes[ $key ] ) )
+				$taxes[ $key ] = $tax_amount;
+			else
+				$taxes[ $key ] += $tax_amount;
+		}
+
+		$pre_compound_total = array_sum( $taxes );
+
+		// Compound taxes
+		if ( $rates ) {
+			foreach ( $rates as $key => $rate ) {
+
+				if ( $rate['compound'] == 'no' )
+					continue;
+
+				$the_price_inc_tax = $price + ( $pre_compound_total * 100 );
+
+				$tax_amount = $the_price_inc_tax * ( $rate['rate'] / 100 );
+
+				// ADVANCED: Allow third parties to modifiy this rate
+				$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price, $the_price_inc_tax, $pre_compound_total );
+
+				// Add rate
+				if ( ! isset( $taxes[ $key ] ) )
+					$taxes[ $key ] = $tax_amount;
+				else
+					$taxes[ $key ] += $tax_amount;
+			}
+		}
+
+		return $taxes;
 	}
 
 	/**
@@ -170,14 +345,13 @@ class WC_Tax {
 	 * @return  array
 	 */
 	public function get_rates( $tax_class = '' ) {
-		global $woocommerce;
 
 		$tax_class = sanitize_title( $tax_class );
 
 		/* Checkout uses customer location for the tax rates. Also, if shipping has been calculated, use the customers address. */
-		if ( ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) || ( ! empty( $woocommerce->customer ) && $woocommerce->customer->has_calculated_shipping() ) ) {
+		if ( ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) || ( ! empty( WC()->customer ) && WC()->customer->has_calculated_shipping() ) ) {
 
-			list( $country, $state, $postcode, $city ) = $woocommerce->customer->get_taxable_address();
+			list( $country, $state, $postcode, $city ) = WC()->customer->get_taxable_address();
 
 			$matched_tax_rates = $this->find_rates( array(
 				'country' 	=> $country,
@@ -199,7 +373,6 @@ class WC_Tax {
 		}
 
 		return apply_filters('woocommerce_matched_rates', $matched_tax_rates, $tax_class);
-
 	}
 
 	/**
@@ -225,24 +398,23 @@ class WC_Tax {
 	 * @return  mixed
 	 */
 	public function get_shipping_tax_rates( $tax_class = null ) {
-		global $woocommerce;
 
 		// See if we have an explicitly set shipping tax class
 		if ( $shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' ) ) {
 			$tax_class = $shipping_tax_class == 'standard' ? '' : $shipping_tax_class;
 		}
 
-		if ( ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) || ( ! empty( $woocommerce->customer ) && $woocommerce->customer->has_calculated_shipping() ) ) {
+		if ( ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) || ( ! empty( WC()->customer ) && WC()->customer->has_calculated_shipping() ) ) {
 
-			list( $country, $state, $postcode, $city ) = $woocommerce->customer->get_taxable_address();
+			list( $country, $state, $postcode, $city ) = WC()->customer->get_taxable_address();
 
 		} else {
 
 			// Prices which include tax should always use the base rate if we don't know where the user is located
 			// Prices excluding tax however should just not add any taxes, as they will be added during checkout
 			if ( get_option( 'woocommerce_prices_include_tax' ) == 'yes' || get_option( 'woocommerce_default_customer_address' ) == 'base' ) {
-				$country 	= $woocommerce->countries->get_base_country();
-				$state 		= $woocommerce->countries->get_base_state();
+				$country 	= WC()->countries->get_base_country();
+				$state 		= WC()->countries->get_base_state();
 				$postcode   = '';
 				$city		= '';
 			} else {
@@ -295,8 +467,8 @@ class WC_Tax {
 			$rates = false;
 
 			// Loop cart and find the highest tax band
-			if ( sizeof( $woocommerce->cart->get_cart() ) > 0 )
-				foreach ( $woocommerce->cart->get_cart() as $item )
+			if ( sizeof( WC()->cart->get_cart() ) > 0 )
+				foreach ( WC()->cart->get_cart() as $item )
 					$found_tax_classes[] = $item['data']->get_tax_class();
 
 			$found_tax_classes = array_unique( $found_tax_classes );
@@ -362,172 +534,6 @@ class WC_Tax {
 	}
 
 	/**
-	 * Calculate the tax using a passed array of rates.
-	 *
-	 * @param   float	price
-	 * @param   array	rates
-	 * @param	bool	passed price includes tax
-	 * @return  array	array of rates/amounts
-	 */
-	public function calc_tax( $price, $rates, $price_includes_tax = true ) {
-		if ( $price_includes_tax )
-			$taxes = $this->calc_inclusive_tax( $price, $rates );
-		else
-			$taxes = $this->calc_exclusive_tax( $price, $rates );
-
-		return apply_filters( 'woocommerce_calc_tax', $taxes, $price, $rates, $price_includes_tax );
-	}
-
-	/**
-	 * Calc tax from inclusive price
-	 *
-	 * @param  float $price
-	 * @param  array $rates
-	 * @return array
-	 */
-	private function calc_inclusive_tax( $price, $rates ) {
-		$taxes = array();
-
-		$regular_tax_rates = $compound_tax_rates = 0;
-
-		foreach ( $rates as $key => $rate )
-			if ( $rate['compound'] == 'yes' )
-				$compound_tax_rates = $compound_tax_rates + $rate['rate'];
-			else
-				$regular_tax_rates  = $regular_tax_rates + $rate['rate'];
-
-		$regular_tax_rate 	= 1 + ( $regular_tax_rates / 100 );
-		$compound_tax_rate 	= 1 + ( $compound_tax_rates / 100 );
-		$non_compound_price = $price / $compound_tax_rate;
-
-		foreach ( $rates as $key => $rate ) {
-			if ( ! isset( $taxes[ $key ] ) )
-				$taxes[ $key ] = 0;
-
-			$the_rate      = $rate['rate'] / 100;
-
-			if ( $rate['compound'] == 'yes' ) {
-				$the_price = $price;
-				$the_rate  = $the_rate / $compound_tax_rate;
-			} else {
-				$the_price = $non_compound_price;
-				$the_rate  = $the_rate / $regular_tax_rate;
-			}
-
-			$net_price     = $price - ( $the_rate * $the_price );
-			$net_price     = $this->round_at_subtotal ? $net_price : $this->round( $net_price );
-			$tax_amount    = apply_filters( 'woocommerce_price_inc_tax_amount', $price - $net_price, $key, $rate, $price );
-			$taxes[ $key ] += $tax_amount;
-		}
-		return $taxes;
-	}
-
-	/**
-	 * Calc tax from exclusive price
-	 *
-	 * @param  float $price
-	 * @param  array $rates
-	 * @return array
-	 */
-	private function calc_exclusive_tax( $price, $rates ) {
-		$taxes = array();
-		$price = $price * 100;	// To avoid float rounding errors, work with integers (pence)
-
-		// Multiple taxes
-		foreach ( $rates as $key => $rate ) {
-
-			if ( $rate['compound'] == 'yes' )
-				continue;
-
-			$tax_amount = $price * ( $rate['rate'] / 100 );
-
-			// ADVANCED: Allow third parties to modify this rate
-			$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price );
-
-			// Back to pounds
-			$tax_amount = ( $tax_amount / 100 );
-
-			// Add rate
-			if ( ! isset( $taxes[ $key ] ) )
-				$taxes[ $key ] = $tax_amount;
-			else
-				$taxes[ $key ] += $tax_amount;
-
-		}
-
-		$pre_compound_total = array_sum( $taxes );
-
-		// Compound taxes
-		if ( $rates ) {
-			foreach ( $rates as $key => $rate ) {
-
-				if ( $rate['compound'] == 'no' )
-					continue;
-
-				$the_price_inc_tax = $price + ( $pre_compound_total * 100 );
-
-				$tax_amount = $the_price_inc_tax * ( $rate['rate'] / 100 );
-
-				// ADVANCED: Allow third parties to modifiy this rate
-				$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price, $the_price_inc_tax, $pre_compound_total );
-
-				// Back to pounds
-				$tax_amount = ( $tax_amount / 100 );
-
-				// Add rate
-				if ( ! isset( $taxes[ $key ] ) )
-					$taxes[ $key ] = $tax_amount;
-				else
-					$taxes[ $key ] += $tax_amount;
-
-			}
-		}
-
-		return $taxes;
-	}
-
-	/**
-	 * Calculate the shipping tax using a passed array of rates.
-	 *
-	 * @param   int		Price
-	 * @param	int		Taxation Rate
-	 * @return  int
-	 */
-	public function calc_shipping_tax( $price, $rates ) {
-
-		// Taxes array
-		$taxes = array();
-
-		// Multiple taxes
-		foreach ($rates as $key => $rate) :
-			if ($rate['compound']=='yes') continue;
-
-			$tax_amount = $price * ($rate['rate']/100);
-
-			// Add rate
-			if (!isset($taxes[$key])) $taxes[$key] = $tax_amount; else $taxes[$key] += $tax_amount;
-
-		endforeach;
-
-		$pre_compound_total = array_sum($taxes);
-
-		// Compound taxes
-		foreach ($rates as $key => $rate) :
-			if ($rate['compound']=='no') continue;
-
-			$the_price_inc_tax = $price + $pre_compound_total;
-
-			$tax_amount = $the_price_inc_tax * ($rate['rate']/100);
-
-			// Add rate
-			if (!isset($taxes[$key])) $taxes[$key] = $tax_amount; else $taxes[$key] += $tax_amount;
-
-		endforeach;
-
-		return $taxes;
-	}
-
-	/**
 	 * Return true/false depending on if a rate is a compound rate.
 	 *
 	 * @param   int		key
@@ -545,12 +551,12 @@ class WC_Tax {
 	 * @return  string
 	 */
 	public function get_rate_label( $key ) {
-		global $wpdb, $woocommerce;
+		global $wpdb;
 
 		$rate_name = $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_name FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
 
 		if ( ! $rate_name )
-			$rate_name = $woocommerce->countries->tax_or_vat();
+			$rate_name = WC()->countries->tax_or_vat();
 
 		return apply_filters( 'woocommerce_rate_label', $rate_name, $key, $this );
 	}
@@ -586,20 +592,4 @@ class WC_Tax {
 	public function get_tax_total( $taxes ) {
 		return array_sum( array_map( array( $this, 'round' ), $taxes ) );
 	}
-
-	/**
-	 * Round to currency DP. Wrapper for PHP round.
-	 *
-	 * Filter example: to return rounding to .5 cents you'd use:
-	 *
-	 * public function euro_5cent_rounding( $in ) {
-	 *      return round( $in / 5, 2 ) * 5;
-	 * }
-	 * add_filter( 'woocommerce_tax_round', 'euro_5cent_rounding' );
-	 *
-	 */
-	public function round( $in ) {
-		return apply_filters( 'woocommerce_tax_round', round( $in, $this->dp ), $in );
-	}
-
 }

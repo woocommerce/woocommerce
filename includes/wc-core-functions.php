@@ -19,7 +19,7 @@ include( 'wc-coupon-functions.php' );
 include( 'wc-customer-functions.php' );
 include( 'wc-deprecated-functions.php' );
 include( 'wc-formatting-functions.php' );
-include( 'wc-message-functions.php' );
+include( 'wc-notice-functions.php' );
 include( 'wc-order-functions.php' );
 include( 'wc-page-functions.php' );
 include( 'wc-product-functions.php' );
@@ -155,6 +155,7 @@ function get_woocommerce_currencies() {
 				'EUR' => __( 'Euros', 'woocommerce' ),
 				'HKD' => __( 'Hong Kong Dollar', 'woocommerce' ),
 				'HUF' => __( 'Hungarian Forint', 'woocommerce' ),
+				'ISK' => __( 'Icelandic krona', 'woocommerce' ),
 				'IDR' => __( 'Indonesia Rupiah', 'woocommerce' ),
 				'INR' => __( 'Indian Rupee', 'woocommerce' ),
 				'ILS' => __( 'Israeli Shekel', 'woocommerce' ),
@@ -229,6 +230,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'HUF' : $currency_symbol = '&#70;&#116;'; break;
 		case 'IDR' : $currency_symbol = 'Rp'; break;
 		case 'INR' : $currency_symbol = 'Rs.'; break;
+		case 'ISK' : $currency_symbol = 'Kr.'; break;
 		case 'ILS' : $currency_symbol = '&#8362;'; break;
 		case 'PHP' : $currency_symbol = '&#8369;'; break;
 		case 'PLN' : $currency_symbol = '&#122;&#322;'; break;
@@ -319,4 +321,36 @@ function wc_print_js() {
 
 		unset( $wc_queued_js );
 	}
+}
+
+/**
+ * Set a cookie - wrapper for setcookie using WP constants
+ *
+ * @param  string  $name   Name of the cookie being set
+ * @param  string  $value  Value of the cookie
+ * @param  integer $expire Expiry of the cookie
+ */
+function wc_setcookie( $name, $value, $expire = 0 ) {
+	if ( ! headers_sent() ) {
+		setcookie( $name, $value, $expire, COOKIEPATH, COOKIE_DOMAIN, false );
+	} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		trigger_error( "Cookie cannot be set - headers already sent", E_USER_NOTICE );
+	}
+}
+
+/**
+ * Get the URL to the WooCommerce REST API
+ *
+ * @since 2.1
+ * @param string $path an endpoint to include in the URL
+ * @return string the URL
+ */
+function get_woocommerce_api_url( $path ) {
+
+	$url = get_home_url( null, 'wc-api/v' . WC_API::VERSION . '/', ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) ? 'https' : 'http' );
+
+	if ( ! empty( $path ) && is_string( $path ) )
+		$url .= ltrim( $path, '/' );
+
+	return $url;
 }

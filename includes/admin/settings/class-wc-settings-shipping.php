@@ -48,7 +48,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 			if ( ! $method->has_settings() ) continue;
 
-			$title = empty( $method->method_title ) ? ucwords( $method->id ) : ucwords( $method->method_title );
+			$title = empty( $method->method_title ) ? ucfirst( $method->id ) : $method->method_title;
 
 			$sections[ strtolower( get_class( $method ) ) ] = esc_html( $title );
 		}
@@ -130,7 +130,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 			array(
 				'title' => __( 'Restrict shipping to Location(s)', 'woocommerce' ),
-				'desc' 		=> sprintf( __( 'Choose which countries you want to ship to, or choose to ship to all <a href="%s">locations you sell to</a>.', 'woocommerce' ), admin_url( 'admin.php?page=woocommerce_settings&tab=general' ) ),
+				'desc' 		=> sprintf( __( 'Choose which countries you want to ship to, or choose to ship to all <a href="%s">locations you sell to</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=general' ) ),
 				'id' 		=> 'woocommerce_ship_to_countries',
 				'default'	=> '',
 				'type' 		=> 'select',
@@ -191,6 +191,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 * @return void
 	 */
 	public function shipping_methods_setting() {
+		$default_shipping_method = esc_attr( get_option('woocommerce_default_shipping_method') );
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc"><?php _e( 'Shipping Methods', 'woocommerce' ) ?></th>
@@ -206,22 +207,21 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 						</tr>
 					</thead>
 					<tfoot>
-						<th width="1%" class="default">
-							<input type="radio" name="default_shipping_method" value="" <?php checked( $default_shipping_method, '' ); ?> />
-						</th>
-						<th><?php _e( 'No default', 'woocommerce' ); ?></th>
-						<th colspan="3"><span class="description"><?php _e( 'Drag and drop the above shipping methods to control their display order.', 'woocommerce' ); ?></span></th>
-					</foot>
+						<tr>
+							<th width="1%" class="default">
+								<input type="radio" name="default_shipping_method" value="" <?php checked( $default_shipping_method, '' ); ?> />
+							</th>
+							<th><?php _e( 'No default', 'woocommerce' ); ?></th>
+							<th colspan="3"><span class="description"><?php _e( 'Drag and drop the above shipping methods to control their display order.', 'woocommerce' ); ?></span></th>
+						</tr>
+					</tfoot>
 					<tbody>
 				    	<?php
 				    	foreach ( WC()->shipping->load_shipping_methods() as $key => $method ) {
-
-					    	$default_shipping_method = esc_attr( get_option('woocommerce_default_shipping_method') );
-
 					    	echo '<tr>
 					    		<td width="1%" class="default">
-					    			<input type="radio" name="default_shipping_method" value="' . $method->id . '" ' . checked( $default_shipping_method, $method->id, false ) . ' />
-					    			<input type="hidden" name="method_order[]" value="' . $method->id . '" />
+					    			<input type="radio" name="default_shipping_method" value="' . esc_attr( $method->id ) . '" ' . checked( $default_shipping_method, $method->id, false ) . ' />
+					    			<input type="hidden" name="method_order[]" value="' . esc_attr( $method->id ) . '" />
 					    		</td>
 				    			<td class="name">
 				    				' . $method->get_title() . '
@@ -238,7 +238,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 				    		echo '</td>
 				    			<td class="settings">
-				    				<a class="button" href="' . admin_url( 'admin.php?page=woocommerce_settings&tab=shipping&section=' . strtolower( get_class( $method ) ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>
+				    				<a class="button" href="' . admin_url( 'admin.php?page=wc-settings&tab=shipping&section=' . strtolower( get_class( $method ) ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>
 				    			</td>
 				    		</tr>';
 				    	}
@@ -268,8 +268,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			$current_section_class = new $current_section();
 
 			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section_class->id );
-
-			WC()->shipping()->init();
 		}
 	}
 }

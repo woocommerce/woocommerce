@@ -16,7 +16,7 @@ $page_title = ( $load_address == 'billing' ) ? __( 'Billing Address', 'woocommer
 get_currentuserinfo();
 ?>
 
-<?php wc_print_messages(); ?>
+<?php wc_print_notices(); ?>
 
 <?php if ( ! $load_address ) : ?>
 

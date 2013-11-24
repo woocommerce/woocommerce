@@ -281,14 +281,14 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 
 						if ( in_array( $the_order->status, array( 'pending', 'on-hold' ) ) )
 							$actions['processing'] = array(
-								'url' 		=> wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce-mark-order-processing&order_id=' . $post->ID ), 'woocommerce-mark-order-processing' ),
+								'url' 		=> wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_processing&order_id=' . $post->ID ), 'woocommerce-mark-order-processing' ),
 								'name' 		=> __( 'Processing', 'woocommerce' ),
 								'action' 	=> "processing"
 							);
 
 						if ( in_array( $the_order->status, array( 'pending', 'on-hold', 'processing' ) ) )
 							$actions['complete'] = array(
-								'url' 		=> wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce-mark-order-complete&order_id=' . $post->ID ), 'woocommerce-mark-order-complete' ),
+								'url' 		=> wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_complete&order_id=' . $post->ID ), 'woocommerce-mark-order-complete' ),
 								'name' 		=> __( 'Complete', 'woocommerce' ),
 								'action' 	=> "complete"
 							);
@@ -591,7 +591,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	    if ( $typenow != 'shop_order' ) return $query;
 		if ( ! get_query_var( 'shop_order_search' ) ) return $query;
 
-		return $_GET['s'];
+		return wp_unslash( $_GET['s'] );
 	}
 
 	/**
@@ -616,14 +616,17 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	public function delete_order_items( $postid ) {
 		global $wpdb;
 
-		if ( get_post_type( $postid ) == 'shop_order' )
-		{
+		if ( get_post_type( $postid ) == 'shop_order' ) {
+			do_action( 'woocommerce_delete_order_items', $postid );
+
 			$wpdb->query( "
 				DELETE {$wpdb->prefix}woocommerce_order_items, {$wpdb->prefix}woocommerce_order_itemmeta
 				FROM {$wpdb->prefix}woocommerce_order_items
 				JOIN {$wpdb->prefix}woocommerce_order_itemmeta ON {$wpdb->prefix}woocommerce_order_items.order_item_id = {$wpdb->prefix}woocommerce_order_itemmeta.order_item_id
 				WHERE {$wpdb->prefix}woocommerce_order_items.order_id = '{$postid}';
 				" );
+
+			do_action( 'woocommerce_deleted_order_items', $postid );
 		}
 	}
 

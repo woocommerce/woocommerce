@@ -42,7 +42,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array(
 				'title' => __( 'My Account Page', 'woocommerce' ),
-				'desc' 		=> __( 'Page contents: [woocommerce_my_account]', 'woocommerce' ),
+				'desc' 		=> __( 'Page contents:', 'woocommerce' ) . ' [' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']',
 				'id' 		=> 'woocommerce_myaccount_page_id',
 				'type' 		=> 'single_select_page',
 				'default'	=> '',

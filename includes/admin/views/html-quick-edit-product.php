@@ -45,7 +45,7 @@
 						'none'     => __( 'None', 'woocommerce' )
 					);
 					foreach ($options as $key => $value) {
-						echo '<option value="' . $key . '">' . $value . '</option>';
+						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 					}
 				?>
 				</select>
@@ -68,7 +68,7 @@
 		    				$options[ sanitize_title( $class ) ] = esc_html( $class );
 
 					foreach ($options as $key => $value) {
-						echo '<option value="' . $key . '">' . $value . '</option>';
+						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 					}
 				?>
 				</select>
@@ -117,7 +117,7 @@
 						'hidden' => __( 'Hidden', 'woocommerce' )
 					);
 					foreach ($options as $key => $value) {
-						echo '<option value="'.$key.'">'. $value .'</option>';
+						echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
 					}
 				?>
 				</select>
@@ -138,7 +138,7 @@
 						'outofstock' => __( 'Out of stock', 'woocommerce' )
 					);
 					foreach ($options as $key => $value) {
-						echo '<option value="'.$key.'">'. $value .'</option>';
+						echo '<option value="' . esc_attr( $key ) .'">'. $value .'</option>';
 					}
 				?>
 				</select>
@@ -174,7 +174,7 @@
 						'yes'    => __( 'Allow', 'woocommerce' )
 					);
 					foreach ($options as $key => $value) {
-						echo '<option value="'.$key.'">'. $value .'</option>';
+						echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
 					}
 				?>
 				</select>

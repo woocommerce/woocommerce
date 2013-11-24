@@ -116,9 +116,9 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 			$_product = $order->get_product_from_item( $item );
 
 			if ( $_product && $_product->exists() && $_product->is_downloadable() ) {
-				$downloads = $order->get_item_downloads( $item );
+				$downloads = get_post_meta( $_product->id, '_downloadable_files' ) ;
 
-				foreach ( $downloads as $download_id => $download )
+				foreach ( $downloads[0] as $download_id => $download )
 					woocommerce_downloadable_file_permission( $download_id, $item['variation_id'] > 0 ? $item['variation_id'] : $item['product_id'], $order );
 			}
 		}

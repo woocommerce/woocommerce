@@ -3,6 +3,57 @@
  */
 jQuery(function(){
 
+	// Price input validation
+	jQuery(".wc_input_decimal[type=text], .wc_input_price[type=text]")
+		.bind( 'blur', function() {
+			jQuery('.wc_error_tip').fadeOut('100', function(){ jQuery(this).remove(); } );
+			return this;
+		});
+
+	jQuery(".wc_input_price[type=text]")
+		.bind( 'keyup change', function() {
+			var value    = jQuery(this).val();
+			var regex    = new RegExp( "[^0-9\%.\\" + woocommerce_admin.mon_decimal_point + "]+", "gi" );
+			var newvalue = value.replace( regex, '' );
+
+   			if ( value !== newvalue ) {
+    			jQuery(this).val( newvalue );
+    			if ( jQuery(this).parent().find('.wc_error_tip').size() == 0 ) {
+    				var offset = jQuery(this).position();
+    				jQuery(this).after( '<div class="wc_error_tip">' + woocommerce_admin.i18n_mon_decimal_error + '</div>' );
+    				jQuery('.wc_error_tip')
+    					.css('left', offset.left + jQuery(this).width() - ( jQuery(this).width() / 2 ) - ( jQuery('.wc_error_tip').width() / 2 ) )
+    					.css('top', offset.top + jQuery(this).height() )
+    					.fadeIn('100');
+    			}
+    		}
+    		return this;
+		});
+
+	jQuery(".wc_input_decimal[type=text]")
+		.bind( 'keyup change', function() {
+			var value    = jQuery(this).val();
+			var regex    = new RegExp( "[^0-9\%.\\" + woocommerce_admin.decimal_point + "]+", "gi" );
+			var newvalue = value.replace( regex, '' );
+
+   			if ( value !== newvalue ) {
+    			jQuery(this).val( newvalue );
+    			if ( jQuery(this).parent().find('.wc_error_tip').size() == 0 ) {
+    				var offset = jQuery(this).position();
+    				jQuery(this).after( '<div class="wc_error_tip">' + woocommerce_admin.i18n_decimal_error + '</div>' );
+    				jQuery('.wc_error_tip')
+    					.css('left', offset.left + jQuery(this).width() - ( jQuery(this).width() / 2 ) - ( jQuery('.wc_error_tip').width() / 2 ) )
+    					.css('top', offset.top + jQuery(this).height() )
+    					.fadeIn('100');
+    			}
+    		}
+    		return this;
+		});
+
+	jQuery("body").click(function(){
+		jQuery('.wc_error_tip').fadeOut('100', function(){ jQuery(this).remove(); } );
+	});
+
 	// Tooltips
 	jQuery(".tips, .help_tip").tipTip({
     	'attribute' : 'data-tip',
@@ -140,5 +191,8 @@ jQuery(function(){
 			jQuery('#woocommerce_demo_store_notice').closest('tr').hide();
 		}
 	}).change();
+
+	// Attribute term table
+	jQuery( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
 
 });

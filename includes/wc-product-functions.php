@@ -125,6 +125,8 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		}
 
 	}
+
+	do_action( 'woocommerce_delete_product_transients', $post_id );
 }
 
 /**
@@ -148,7 +150,7 @@ function woocommerce_get_product_ids_on_sale() {
 		SELECT post.ID, post.post_parent FROM `$wpdb->posts` AS post
 		LEFT JOIN `$wpdb->postmeta` AS meta ON post.ID = meta.post_id
 		LEFT JOIN `$wpdb->postmeta` AS meta2 ON post.ID = meta2.post_id
-		WHERE post.post_type IN ( 'product1', 'product_variation' )
+		WHERE post.post_type IN ( 'product', 'product_variation' )
 			AND post.post_status = 'publish'
 			AND meta.meta_key = '_sale_price'
 			AND meta2.meta_key = '_price'
@@ -158,14 +160,7 @@ function woocommerce_get_product_ids_on_sale() {
 		GROUP BY post.ID;
 	" );
 
-	$product_ids_on_sale = array();
-
-	foreach ( $on_sale_posts as $post ) {
-		$product_ids_on_sale[] = $post->ID;
-		$product_ids_on_sale[] = $post->post_parent;
-	}
-
-	$product_ids_on_sale = array_unique( $product_ids_on_sale );
+	$product_ids_on_sale = array_unique( array_merge( wp_list_pluck( $on_sale_posts, 'ID' ), wp_list_pluck( $on_sale_posts, 'post_parent' ) ) );
 
 	set_transient( 'wc_products_onsale', $product_ids_on_sale );
 
@@ -363,7 +358,7 @@ function woocommerce_placeholder_img_src() {
 function woocommerce_placeholder_img( $size = 'shop_thumbnail' ) {
 	$dimensions = wc_get_image_size( $size );
 
-	return apply_filters('woocommerce_placeholder_img', '<img src="' . woocommerce_placeholder_img_src() . '" alt="Placeholder" width="' . $dimensions['width'] . '" height="' . $dimensions['height'] . '" />' );
+	return apply_filters('woocommerce_placeholder_img', '<img src="' . woocommerce_placeholder_img_src() . '" alt="Placeholder" width="' . esc_attr( $dimensions['width'] ) . '" height="' . esc_attr( $dimensions['height'] ) . '" />' );
 }
 
 /**
@@ -458,8 +453,8 @@ function woocommerce_scheduled_sales() {
 
 			// Sync parent
 			if ( $parent ) {
-				// We can force varaible product price to sync up by removing their min price meta
-				delete_post_meta( $parent, '_min_variation_price' );
+				// We can force variable product prices to sync up by removing their min price meta
+				delete_post_meta( $parent, '_min_price_variation_id' );
 
 				// Grouped products need syncing via a function
 				$this_product = get_product( $product_id );
@@ -573,7 +568,7 @@ function woocommerce_track_product_view() {
 		array_shift( $viewed_products );
 
 	// Store for session only
-	setcookie( "woocommerce_recently_viewed", implode( '|', $viewed_products ), 0, COOKIEPATH, COOKIE_DOMAIN, false, true );
+	wc_setcookie( 'woocommerce_recently_viewed', implode( '|', $viewed_products ) );
 }
 
 add_action( 'template_redirect', 'woocommerce_track_product_view', 20 );

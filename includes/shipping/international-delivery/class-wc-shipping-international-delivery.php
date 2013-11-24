@@ -75,7 +75,10 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 							'class'			=> 'chosen_select',
 							'css'			=> 'width: 450px;',
 							'default'		=> '',
-							'options'		=> $woocommerce->countries->get_shipping_countries()
+							'options'		=> $woocommerce->countries->get_shipping_countries(),
+							'custom_attributes' => array(
+								'data-placeholder' => __( 'Select some countries', 'woocommerce' )
+							)
 						),
 			'tax_status' => array(
 							'title'			=> __( 'Tax Status', 'woocommerce' ),
@@ -98,15 +101,11 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 						),
 			'cost' => array(
 							'title'			=> __( 'Cost', 'woocommerce' ),
-							'type'			=> 'number',
-							'custom_attributes' => array(
-								'step'	=> 'any',
-								'min'	=> '0'
-							),
+							'type' 			=> 'price',
+							'placeholder'	=> wc_format_localized_price( 0 ),
 							'description'	=> __( 'Cost excluding tax. Enter an amount, e.g. 2.50.', 'woocommerce' ),
 							'default'		=> '',
-							'desc_tip'		=> true,
-							'placeholder'	=> '0.00'
+							'desc_tip'		=> true
 						),
 			'fee' => array(
 							'title'			=> __( 'Handling Fee', 'woocommerce' ),
@@ -114,19 +113,15 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 							'description'	=> __( 'Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable.', 'woocommerce' ),
 							'default'		=> '',
 							'desc_tip'		=> true,
-							'placeholder'	=> '0.00'
+							'placeholder'	=> wc_format_localized_price( 0 ),
 						),
 			'minimum_fee' => array(
 							'title'			=> __( 'Minimum Handling Fee', 'woocommerce' ),
-							'type'			=> 'number',
-							'custom_attributes' => array(
-								'step'	=> 'any',
-								'min'	=> '0'
-							),
+							'type' 			=> 'decimal',
 							'description'	=> __( 'Enter a minimum fee amount. Fee\'s less than this will be increased. Leave blank to disable.', 'woocommerce' ),
 							'default'		=> '',
 							'desc_tip'		=> true,
-							'placeholder'	=> '0.00'
+							'placeholder'	=> wc_format_localized_decimal( '0' )
 						),
 			);
 

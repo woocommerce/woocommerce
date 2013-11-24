@@ -26,10 +26,10 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 				<td><?php wc_cart_totals_subtotal_html(); ?></td>
 			</tr>
 
-			<?php foreach ( WC()->cart->get_applied_coupons( 'cart' ) as $code ) : ?>
+			<?php foreach ( WC()->cart->get_coupons( 'cart' ) as $code => $coupon ) : ?>
 				<tr class="cart-discount coupon-<?php echo esc_attr( $code ); ?>">
 					<th><?php echo esc_html( $code ); ?></th>
-					<td><?php wc_cart_totals_coupon_html( $code ); ?></td>
+					<td><?php wc_cart_totals_coupon_html( $coupon ); ?></td>
 				</tr>
 			<?php endforeach; ?>
 
@@ -66,10 +66,10 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 				<?php endif; ?>
 			<?php endif; ?>
 
-			<?php foreach ( WC()->cart->get_applied_coupons( 'order' ) as $code ) : ?>
+			<?php foreach ( WC()->cart->get_coupons( 'order' ) as $code => $coupon ) : ?>
 				<tr class="order-discount coupon-<?php echo esc_attr( $code ); ?>">
 					<th><?php echo esc_html( $code ); ?></th>
-					<td><?php wc_cart_totals_coupon_html( $code ); ?></td>
+					<td><?php wc_cart_totals_coupon_html( $coupon ); ?></td>
 				</tr>
 			<?php endforeach; ?>
 
@@ -131,8 +131,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 					foreach ( $available_gateways as $gateway ) {
 						?>
-						<li>
-							<input type="radio" id="payment_method_<?php echo $gateway->id; ?>" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php checked( $gateway->chosen, true ); ?> />
+						<li class="payment_method_<?php echo $gateway->id; ?>">
+							<input id="payment_method_<?php echo $gateway->id; ?>" type="radio" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php checked( $gateway->chosen, true ); ?> />
 							<label for="payment_method_<?php echo $gateway->id; ?>"><?php echo $gateway->get_title(); ?> <?php echo $gateway->get_icon(); ?></label>
 							<?php
 								if ( $gateway->has_fields() || $gateway->get_description() ) :
@@ -167,7 +167,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			<?php
 			$order_button_text = apply_filters('woocommerce_order_button_text', __( 'Place order', 'woocommerce' ));
 
-			echo apply_filters('woocommerce_order_button_html', '<input type="submit" class="button alt" name="woocommerce_checkout_place_order" id="place_order" value="' . $order_button_text . '" />' );
+			echo apply_filters('woocommerce_order_button_html', '<input type="submit" class="button alt" name="woocommerce_checkout_place_order" id="place_order" value="' . esc_attr( $order_button_text ) . '" />' );
 			?>
 
 			<?php if ( woocommerce_get_page_id( 'terms' ) > 0 && apply_filters( 'woocommerce_checkout_show_terms', true ) ) { ?>

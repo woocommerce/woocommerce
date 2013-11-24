@@ -582,8 +582,13 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 								if ( is_numeric( $postcode_parts[0] ) && is_numeric( $postcode_parts[1] ) && $postcode_parts[1] > $postcode_parts[0] ) {
 									for ( $i = $postcode_parts[0]; $i <= $postcode_parts[1]; $i ++ ) {
-										if ( $i )
-											$postcode_query[] = "( '" . esc_sql( $i ) . "', $tax_rate_id, 'postcode' )";
+										if ( ! $i )
+											continue;
+
+										if ( strlen( $i ) < strlen( $postcode_parts[0] ) )
+											$i = str_pad( $i, strlen( $postcode_parts[0] ), "0", STR_PAD_LEFT );
+										
+										$postcode_query[] = "( '" . esc_sql( $i ) . "', $tax_rate_id, 'postcode' )";
 									}
 								}
 							} else {
@@ -676,8 +681,13 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 							if ( is_numeric( $postcode_parts[0] ) && is_numeric( $postcode_parts[1] ) && $postcode_parts[1] > $postcode_parts[0] ) {
 								for ( $i = $postcode_parts[0]; $i <= $postcode_parts[1]; $i ++ ) {
-									if ( $i )
-										$postcode_query[] = "( '" . esc_sql( $i ) . "', $tax_rate_id, 'postcode' )";
+									if ( ! $i )
+										continue;
+
+									if ( strlen( $i ) < strlen( $postcode_parts[0] ) )
+										$i = str_pad( $i, strlen( $postcode_parts[0] ), "0", STR_PAD_LEFT );
+									
+									$postcode_query[] = "( '" . esc_sql( $i ) . "', $tax_rate_id, 'postcode' )";
 								}
 							}
 						} else {

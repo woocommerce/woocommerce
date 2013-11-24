@@ -53,7 +53,7 @@ class WC_Admin_Help {
 
 		    	'<p>' . __( 'Before asking for help we recommend checking the status page to identify any problems with your configuration.', 'woocommerce' ) . '</p>' .
 
-		    	'<p><a href="' . admin_url('admin.php?page=wc_status') . '" class="button button-primary">' . __( 'System Status', 'woocommerce' ) . '</a> <a href="' . 'http://wordpress.org/support/plugin/woocommerce' . '" class="button">' . __( 'Community Support', 'woocommerce' ) . '</a> <a href="' . 'http://support.woothemes.com' . '" class="button">' . __( 'Customer Support', 'woocommerce' ) . '</a></p>'
+		    	'<p><a href="' . admin_url('admin.php?page=wc-status') . '" class="button button-primary">' . __( 'System Status', 'woocommerce' ) . '</a> <a href="' . 'http://wordpress.org/support/plugin/woocommerce' . '" class="button">' . __( 'Community Support', 'woocommerce' ) . '</a> <a href="' . 'http://support.woothemes.com' . '" class="button">' . __( 'Customer Support', 'woocommerce' ) . '</a></p>'
 
 		) );
 
@@ -62,9 +62,9 @@ class WC_Admin_Help {
 		    'title'	=> __( 'Found a bug?', 'woocommerce' ),
 		    'content'	=>
 
-		    	'<p>' . sprintf(__( 'If you find a bug within WooCommerce core you can create a ticket via <a href="%s">Github issues</a>. Ensure you read the <a href="%s">contribution guide</a> prior to submitting your report. Be as descriptive as possible and please include your <a href="%s">system status report</a>.', 'woocommerce' ), 'https://github.com/woothemes/woocommerce/issues?state=open', 'https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md', admin_url( 'admin.php?page=wc_status' ) ) . '</p>' .
+		    	'<p>' . sprintf(__( 'If you find a bug within WooCommerce core you can create a ticket via <a href="%s">Github issues</a>. Ensure you read the <a href="%s">contribution guide</a> prior to submitting your report. Be as descriptive as possible and please include your <a href="%s">system status report</a>.', 'woocommerce' ), 'https://github.com/woothemes/woocommerce/issues?state=open', 'https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md', admin_url( 'admin.php?page=wc-status' ) ) . '</p>' .
 
-		    	'<p><a href="https://github.com/woothemes/woocommerce/issues?state=open" class="button button-primary">' . __( 'Report a bug', 'woocommerce' ) . '</a> <a href="' . admin_url('admin.php?page=wc_status') . '" class="button">' . __( 'System Status', 'woocommerce' ) . '</a></p>'
+		    	'<p><a href="https://github.com/woothemes/woocommerce/issues?state=open" class="button button-primary">' . __( 'Report a bug', 'woocommerce' ) . '</a> <a href="' . admin_url('admin.php?page=wc-status') . '" class="button">' . __( 'System Status', 'woocommerce' ) . '</a></p>'
 
 		) );
 

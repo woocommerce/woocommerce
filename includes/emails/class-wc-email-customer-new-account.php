@@ -36,8 +36,8 @@ class WC_Email_Customer_New_Account extends WC_Email {
 		$this->template_html 	= 'emails/customer-new-account.php';
 		$this->template_plain 	= 'emails/plain/customer-new-account.php';
 
-		$this->subject 			= __( 'Your account on {blogname}', 'woocommerce');
-		$this->heading      	= __( 'Welcome to {blogname}', 'woocommerce');
+		$this->subject 			= __( 'Your account on {site_title}', 'woocommerce');
+		$this->heading      	= __( 'Welcome to {site_title}', 'woocommerce');
 
 		// Call parent constuctor
 		parent::__construct();

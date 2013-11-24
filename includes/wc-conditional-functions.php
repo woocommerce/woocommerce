@@ -152,7 +152,24 @@ if ( ! function_exists( 'is_order_received_page' ) ) {
     * @return bool
     */
     function is_order_received_page() {
+        global $wp;
+
         return ( is_page( woocommerce_get_page_id( 'checkout' ) ) && isset( $wp->query_vars['order-received'] ) ) ? true : false;
+    }
+}
+
+if ( ! function_exists( 'is_add_payment_method_page' ) ) {
+
+    /**
+    * is_add_payment_method_page - Returns true when viewing the add payment method page.
+    *
+    * @access public
+    * @return bool
+    */
+    function is_add_payment_method_page() {
+        global $wp;
+
+        return ( is_page( woocommerce_get_page_id( 'myaccount' ) ) && isset( $wp->query_vars['add-payment-method'] ) ) ? true : false;
     }
 }
 
@@ -183,7 +200,7 @@ if ( ! function_exists( 'is_filtered' ) ) {
 	function is_filtered() {
 		global $_chosen_attributes;
 
-		return ( sizeof( $_chosen_attributes ) > 0 || ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) ) ? true : false;
+		return apply_filters( 'woocommerce_is_filtered', ( sizeof( $_chosen_attributes ) > 0 || ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) ) );
 	}
 }
 

@@ -289,6 +289,7 @@ class WC_Countries {
 			'CZ' => array(),
 			'DE' => array(),
 			'DK' => array(),
+			'EE' => array(),
 			'FI' => array(),
 			'FR' => array(),
 			'IS' => array(),
@@ -326,7 +327,7 @@ class WC_Countries {
 	 */
 	public function get_base_country() {
 		$default = esc_attr( get_option('woocommerce_default_country') );
-		$country = ( ( $pos = strrpos( $default, ':' ) ) === false ) ? '' : substr( $default, 0, $pos );
+		$country = ( ( $pos = strrpos( $default, ':' ) ) === false ) ? $default : substr( $default, 0, $pos );
 
 		return apply_filters( 'woocommerce_countries_base_country', $country );
 	}
@@ -568,9 +569,9 @@ class WC_Countries {
 
 		if ( $this->countries ) foreach ( $this->countries as $key=>$value) :
 			if ( $states =  $this->get_states($key) ) :
-				echo '<optgroup label="'.$value.'">';
+				echo '<optgroup label="' . esc_attr( $value ) . '">';
     				foreach ($states as $state_key=>$state_value) :
-    					echo '<option value="'.$key.':'.$state_key.'"';
+    					echo '<option value="' . esc_attr( $key ) . ':'.$state_key.'"';
 
     					if ($selected_country==$key && $selected_state==$state_key) echo ' selected="selected"';
 
@@ -580,7 +581,7 @@ class WC_Countries {
 			else :
     			echo '<option';
     			if ($selected_country==$key && $selected_state=='*') echo ' selected="selected"';
-    			echo ' value="'.$key.'">'. ($escape ? esc_js( $value ) : $value) .'</option>';
+    			echo ' value="' . esc_attr( $key ) . '">'. ($escape ? esc_js( $value ) : $value) .'</option>';
 			endif;
 		endforeach;
 	}
@@ -609,6 +610,7 @@ class WC_Countries {
 				'CN' => "{country} {postcode}\n{state}, {city}, {address_2}, {address_1}\n{company}\n{name}",
 				'CZ' => $postcode_before_city,
 				'DE' => $postcode_before_city,
+				'EE' => $postcode_before_city,
 				'FI' => $postcode_before_city,
 				'DK' => $postcode_before_city,
 				'FR' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city_upper}\n{country}",
@@ -854,6 +856,12 @@ class WC_Countries {
 					)
 				),
 				'DK' => array(
+					'postcode_before_city' => true,
+					'state'		=> array(
+						'required' => false
+					)
+				),
+				'EE' => array(
 					'postcode_before_city' => true,
 					'state'		=> array(
 						'required' => false

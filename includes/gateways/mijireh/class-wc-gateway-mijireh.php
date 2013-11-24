@@ -105,7 +105,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 
   		} catch (Mijireh_Exception $e) {
 
-  			wc_add_error( __( 'Mijireh error:', 'woocommerce' ) . $e->getMessage() );
+			wc_add_notice( __( 'Mijireh error:', 'woocommerce' ) . $e->getMessage(), 'error' );
 
   		}
     }
@@ -262,14 +262,14 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 		$mj_order->email 			= $wc_order->billing_email;
 
 		// set order totals
-		$mj_order->total 			= $wc_order->get_order_total();
+		$mj_order->total 			= $wc_order->get_total();
 		$mj_order->discount 		= $wc_order->get_total_discount();
 
 		if ( get_option( 'woocommerce_prices_include_tax' ) == 'yes' ) {
-			$mj_order->shipping 		= $wc_order->get_shipping() + $wc_order->get_shipping_tax();
+			$mj_order->shipping 		= $wc_order->get_total_shipping() + $wc_order->get_shipping_tax();
 			$mj_order->show_tax			= false;
 		} else {
-			$mj_order->shipping 		= $wc_order->get_shipping();
+			$mj_order->shipping 		= $wc_order->get_total_shipping();
 			$mj_order->tax 				= $wc_order->get_total_tax();
 		}
 
@@ -290,7 +290,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 			);
 			return $result;
 		} catch (Mijireh_Exception $e) {
-			wc_add_error( __('Mijireh error:', 'woocommerce' ) . $e->getMessage() );
+			wc_add_notice( __( 'Mijireh error:', 'woocommerce' ) . $e->getMessage(), 'error' );
 		}
     }
 

@@ -21,7 +21,7 @@ class WC_Install {
 	 * Hook in tabs.
 	 */
 	public function __construct() {
-		register_activation_hook( WOOCOMMERCE_PLUGIN_FILE, array( $this, 'install' ) );
+		register_activation_hook( WC_PLUGIN_FILE, array( $this, 'install' ) );
 
 		add_action( 'admin_init', array( $this, 'install_actions' ) );
 		add_action( 'admin_init', array( $this, 'check_version' ), 5 );
@@ -46,7 +46,7 @@ class WC_Install {
 		// Install - Add pages button
 		if ( ! empty( $_GET['install_woocommerce_pages'] ) ) {
 
-			$this->create_pages();
+			self::create_pages();
 
 			// We no longer need to install pages
 			delete_option( '_wc_needs_pages' );
@@ -96,7 +96,8 @@ class WC_Install {
 		$this->create_roles();
 
 		// Register post types
-		include_once( 'class-wc-post-types.php' );
+		$post_types = include( 'class-wc-post-types.php' );
+		$post_types->register_taxonomies();
 
 		$this->create_terms();
 		$this->create_cron_jobs();
@@ -164,7 +165,7 @@ class WC_Install {
 			update_option( 'woocommerce_db_version', '2.0.14' );
 		}
 
-		if ( version_compare( $current_db_version, '2.1.0', '<' ) || WOOCOMMERCE_VERSION == '2.1-bleeding' ) {
+		if ( version_compare( $current_db_version, '2.1.0', '<' ) || WC_VERSION == '2.1-bleeding' ) {
 			include( 'updates/woocommerce-update-2.1.php' );
 			update_option( 'woocommerce_db_version', '2.1.0' );
 		}
@@ -202,7 +203,7 @@ class WC_Install {
 	 * @access public
 	 * @return void
 	 */
-	private function create_pages() {
+	public static function create_pages() {
 		$pages = apply_filters( 'woocommerce_create_pages', array(
 			'shop' => array(
 				'name'    => _x( 'shop', 'page_slug', 'woocommerce' ),
@@ -212,17 +213,17 @@ class WC_Install {
 			'cart' => array(
 				'name'    => _x( 'cart', 'page_slug', 'woocommerce' ),
 				'title'   => __( 'Cart', 'woocommerce' ),
-				'content' => '[woocommerce_cart]'
+				'content' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']'
 			),
 			'checkout' => array(
 				'name'    => _x( 'checkout', 'page_slug', 'woocommerce' ),
 				'title'   => __( 'Checkout', 'woocommerce' ),
-				'content' => '[woocommerce_checkout]'
+				'content' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']'
 			),
 			'myaccount' => array(
 				'name'    => _x( 'my-account', 'page_slug', 'woocommerce' ),
 				'title'   => __( 'My Account', 'woocommerce' ),
-				'content' => '[woocommerce_my_account]'
+				'content' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']'
 			)
 		) );
 
@@ -638,7 +639,7 @@ class WC_Install {
 
            	// Output Upgrade Notice
             $matches = null;
-            $regexp = '~==\s*Upgrade Notice\s*==\s*=\s*[0-9.]+\s*=(.*)(=\s*' . preg_quote( WOOCOMMERCE_VERSION ) . '\s*=|$)~Uis';
+            $regexp = '~==\s*Upgrade Notice\s*==\s*=\s*[0-9.]+\s*=(.*)(=\s*' . preg_quote( WC_VERSION ) . '\s*=|$)~Uis';
 
             if ( preg_match( $regexp, $response['body'], $matches ) ) {
                 $notices = (array) preg_split('~[\r\n]+~', trim( $matches[1] ) );
@@ -654,7 +655,7 @@ class WC_Install {
 
         	// Output Changelog
             $matches = null;
-            $regexp = '~==\s*Changelog\s*==\s*=\s*[0-9.]+\s*-(.*)=(.*)(=\s*' . preg_quote( WOOCOMMERCE_VERSION ) . '\s*-(.*)=|$)~Uis';
+            $regexp = '~==\s*Changelog\s*==\s*=\s*[0-9.]+\s*-(.*)=(.*)(=\s*' . preg_quote( WC_VERSION ) . '\s*-(.*)=|$)~Uis';
 
             if ( preg_match( $regexp, $response['body'], $matches ) ) {
                 $changelog = (array) preg_split('~[\r\n]+~', trim( $matches[2] ) );

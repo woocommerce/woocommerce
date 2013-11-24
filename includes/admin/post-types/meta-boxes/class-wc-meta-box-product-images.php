@@ -38,7 +38,7 @@ class WC_Meta_Box_Product_Images {
 
 					if ( $attachments )
 						foreach ( $attachments as $attachment_id ) {
-							echo '<li class="image" data-attachment_id="' . $attachment_id . '">
+							echo '<li class="image" data-attachment_id="' . esc_attr( $attachment_id ) . '">
 								' . wp_get_attachment_image( $attachment_id, 'thumbnail' ) . '
 								<ul class="actions">
 									<li><a href="#" class="delete tips" data-tip="' . __( 'Delete image', 'woocommerce' ) . '">' . __( 'Delete', 'woocommerce' ) . '</a></li>

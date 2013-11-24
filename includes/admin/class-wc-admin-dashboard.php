@@ -126,14 +126,14 @@ class WC_Admin_Dashboard {
 		?>
 		<ul class="wc_status_list">
 			<li class="sales-this-month">
-				<a href="<?php echo admin_url( 'admin.php?page=wc_reports&tab=orders&range=month' ); ?>">
+				<a href="<?php echo admin_url( 'admin.php?page=wc-reports&tab=orders&range=month' ); ?>">
 					<?php echo $reports->sales_sparkline( '', max( 7, date( 'd', current_time('timestamp') ) ) ); ?>
 					<?php printf( __( "<strong>%s</strong> sales this month", 'woocommerce' ), woocommerce_price( $sales ) ); ?>
 				</a>
 			</li>
 			<?php if ( $top_seller && $top_seller->qty ) : ?>
 				<li class="best-seller-this-month">
-					<a href="<?php echo admin_url( 'admin.php?page=wc_reports&tab=orders&report=sales_by_product&range=month&product_ids=' . $top_seller->product_id ); ?>">
+					<a href="<?php echo admin_url( 'admin.php?page=wc-reports&tab=orders&report=sales_by_product&range=month&product_ids=' . $top_seller->product_id ); ?>">
 						<?php echo $reports->sales_sparkline( $top_seller->product_id, max( 7, date( 'd', current_time('timestamp') ) ), 'count' ); ?>
 						<?php printf( __( "%s top seller this month (sold %d)", 'woocommerce' ), "<strong>" . get_the_title( $top_seller->product_id ) . "</strong>", $top_seller->qty ); ?>
 					</a>
@@ -150,12 +150,12 @@ class WC_Admin_Dashboard {
 				</a>
 			</li>
 			<li class="low-in-stock">
-				<a href="<?php echo admin_url( 'admin.php?page=wc_reports&tab=stock&report=low_in_stock' ); ?>">
+				<a href="<?php echo admin_url( 'admin.php?page=wc-reports&tab=stock&report=low_in_stock' ); ?>">
 					<?php printf( _n( "<strong>%s product</strong> low in stock", "<strong>%s products</strong> are low in stock", $lowinstock_count, 'woocommerce' ), $lowinstock_count ); ?>
 				</a>
 			</li>
 			<li class="out-of-stock">
-				<a href="<?php echo admin_url( 'admin.php?page=wc_reports&tab=stock&report=out_of_stock' ); ?>">
+				<a href="<?php echo admin_url( 'admin.php?page=wc-reports&tab=stock&report=out_of_stock' ); ?>">
 					<?php printf( _n( "<strong>%s product</strong> out of stock", "<strong>%s products</strong> are out of stock", $outofstock_count, 'woocommerce' ), $outofstock_count ); ?>
 				</a>
 			</li>
@@ -188,7 +188,7 @@ class WC_Admin_Dashboard {
 
 				$rating = get_comment_meta( $comment->comment_ID, 'rating', true );
 
-				echo '<div class="star-rating" title="' . $rating . '">
+				echo '<div class="star-rating" title="' . esc_attr( $rating ) . '">
 					<span style="width:'. ( $rating * 20 ) . '%">' . $rating . ' ' . __( 'out of 5', 'woocommerce' ) . '</span></div>';
 
 				echo '<h4 class="meta"><a href="' . get_permalink( $comment->ID ) . '#comment-' . absint( $comment->comment_ID ) .'">' . esc_html__( $comment->post_title ) . '</a> reviewed by ' . esc_html( $comment->comment_author ) .'</h4>';

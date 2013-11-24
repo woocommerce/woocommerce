@@ -21,8 +21,8 @@ class WC_Admin {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_filter( 'init', array( $this, 'includes' ) );
-		add_filter( 'current_screen', array( $this, 'conditonal_includes' ) );
+		add_action( 'init', array( $this, 'includes' ) );
+		add_action( 'current_screen', array( $this, 'conditonal_includes' ) );
 		add_action( 'admin_init', array( $this, 'prevent_admin_access' ) );
 		add_action( 'wp_ajax_page_slurp', array( 'WC_Gateway_Mijireh', 'page_slurp' ) );
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
@@ -38,7 +38,6 @@ class WC_Admin {
 		include( 'wc-meta-box-functions.php' );
 
 		// Classes
-		include( 'class-wc-admin-help.php' );
 		include( 'class-wc-admin-menus.php' );
 		include( 'class-wc-admin-welcome.php' );
 		include( 'class-wc-admin-notices.php' );
@@ -47,6 +46,10 @@ class WC_Admin {
 		include( 'class-wc-admin-post-types.php' );
 		include( 'class-wc-admin-taxonomies.php' );
 		include( 'class-wc-admin-editor.php' );
+
+		// Help
+		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) )
+			include( 'class-wc-admin-help.php' );
 
 		// Importers
 		if ( defined( 'WP_LOAD_IMPORTERS' ) )
@@ -106,7 +109,7 @@ class WC_Admin {
 
 			$mailer        = WC()->mailer();
 			$message       = ob_get_clean();
-			$email_heading = __( 'Order Received', 'woocommerce' );
+			$email_heading = __( 'HTML Email Template', 'woocommerce' );
 
 			echo $mailer->wrap_message( $email_heading, $message );
 			exit;

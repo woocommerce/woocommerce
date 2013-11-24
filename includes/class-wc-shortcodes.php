@@ -3,36 +3,45 @@
  * WC_Shortcodes class.
  *
  * @class 		WC_Shortcodes
- * @version		2.0.0
+ * @version		2.1.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
  */
 class WC_Shortcodes {
 
-	public function __construct() {
-		// Regular shortcodes
-		add_shortcode( 'product', array( $this, 'product' ) );
-		add_shortcode( 'product_page', array( $this, 'product_page_shortcode' ) );
-		add_shortcode( 'product_category', array( $this, 'product_category' ) );
-		add_shortcode( 'product_categories', array( $this, 'product_categories' ) );
-		add_shortcode( 'add_to_cart', array( $this, 'product_add_to_cart' ) );
-		add_shortcode( 'add_to_cart_url', array( $this, 'product_add_to_cart_url' ) );
-		add_shortcode( 'products', array( $this, 'products' ) );
-		add_shortcode( 'recent_products', array( $this, 'recent_products' ) );
-		add_shortcode( 'sale_products', array( $this, 'sale_products' ) );
-		add_shortcode( 'best_selling_products', array( $this, 'best_selling_products' ) );
-		add_shortcode( 'top_rated_products', array( $this, 'top_rated_products' ) );
-		add_shortcode( 'featured_products', array( $this, 'featured_products' ) );
-		add_shortcode( 'woocommerce_messages', array( $this, 'messages_shortcode' ) );
-		add_shortcode( 'product_attribute', array( $this, 'product_attribute' ) );
-		add_shortcode( 'related_products', array( $this, 'related_products_shortcode' ) );
+	/**
+	 * Init shortcodes
+	 */
+	public static function init() {
+		// Define shortcodes
+		$shortcodes = array(
+			'product'                    => __CLASS__ . '::product',
+			'product_page'               => __CLASS__ . '::product_page',
+			'product_category'           => __CLASS__ . '::product_category',
+			'product_categories'         => __CLASS__ . '::product_categories',
+			'add_to_cart'                => __CLASS__ . '::product_add_to_cart',
+			'add_to_cart_url'            => __CLASS__ . '::product_add_to_cart_url',
+			'products'                   => __CLASS__ . '::products',
+			'recent_products'            => __CLASS__ . '::recent_products',
+			'sale_products'              => __CLASS__ . '::sale_products',
+			'best_selling_products'      => __CLASS__ . '::best_selling_products',
+			'top_rated_products'         => __CLASS__ . '::top_rated_products',
+			'featured_products'          => __CLASS__ . '::featured_products',
+			'product_attribute'          => __CLASS__ . '::product_attribute',
+			'related_products'           => __CLASS__ . '::related_products',
+			'shop_messages'              => __CLASS__ . '::shop_messages',
+			'woocommerce_order_tracking' => __CLASS__ . '::order_tracking',
+			'woocommerce_cart'           => __CLASS__ . '::cart',
+			'woocommerce_checkout'       => __CLASS__ . '::checkout',
+			'woocommerce_my_account'     => __CLASS__ . '::my_account',
+		);
 
-		// Pages
-		add_shortcode( 'woocommerce_cart', array( $this, 'cart' ) );
-		add_shortcode( 'woocommerce_checkout', array( $this, 'checkout' ) );
-		add_shortcode( 'woocommerce_order_tracking', array( $this, 'order_tracking' ) );
-		add_shortcode( 'woocommerce_my_account', array( $this, 'my_account' ) );
+		foreach ( $shortcodes as $shortcode => $function )
+			add_shortcode( apply_filters( "{$shortcode}_shortcode_tag", $shortcode ), $function );
+
+		// Alias for pre 2.1 compatibility
+		add_shortcode( 'woocommerce_messages', __CLASS__ . '::shop_messages' );
 	}
 
 	/**
@@ -50,10 +59,10 @@ class WC_Shortcodes {
 			'before' => null,
 			'after' => null
 		)
-	){
+	) {
 		ob_start();
 
-		$before 	= empty( $wrapper['before'] ) ? '<div class="' . $wrapper['class'] . '">' : $wrapper['before'];
+		$before 	= empty( $wrapper['before'] ) ? '<div class="' . esc_attr( $wrapper['class'] ) . '">' : $wrapper['before'];
 		$after 		= empty( $wrapper['after'] ) ? '</div>' : $wrapper['after'];
 
 		echo $before;
@@ -70,8 +79,8 @@ class WC_Shortcodes {
 	 * @param mixed $atts
 	 * @return string
 	 */
-	public function cart( $atts ) {
-		return $this->shortcode_wrapper( array( 'WC_Shortcode_Cart', 'output' ), $atts );
+	public static function cart( $atts ) {
+		return self::shortcode_wrapper( array( 'WC_Shortcode_Cart', 'output' ), $atts );
 	}
 
 	/**
@@ -81,8 +90,8 @@ class WC_Shortcodes {
 	 * @param mixed $atts
 	 * @return string
 	 */
-	public function checkout( $atts ) {
-		return $this->shortcode_wrapper( array( 'WC_Shortcode_Checkout', 'output' ), $atts );
+	public static function checkout( $atts ) {
+		return self::shortcode_wrapper( array( 'WC_Shortcode_Checkout', 'output' ), $atts );
 	}
 
 	/**
@@ -92,8 +101,8 @@ class WC_Shortcodes {
 	 * @param mixed $atts
 	 * @return string
 	 */
-	public function order_tracking( $atts ) {
-		return $this->shortcode_wrapper( array( 'WC_Shortcode_Order_Tracking', 'output' ), $atts );
+	public static function order_tracking( $atts ) {
+		return self::shortcode_wrapper( array( 'WC_Shortcode_Order_Tracking', 'output' ), $atts );
 	}
 
 	/**
@@ -103,8 +112,8 @@ class WC_Shortcodes {
 	 * @param mixed $atts
 	 * @return string
 	 */
-	public function my_account( $atts ) {
-		return $this->shortcode_wrapper( array( 'WC_Shortcode_My_Account', 'output' ), $atts );
+	public static function my_account( $atts ) {
+		return self::shortcode_wrapper( array( 'WC_Shortcode_My_Account', 'output' ), $atts );
 	}
 
 	/**
@@ -114,7 +123,7 @@ class WC_Shortcodes {
 	 * @param array $atts
 	 * @return string
 	 */
-	public function product_category( $atts ){
+	public static function product_category( $atts ){
 		global $woocommerce_loop;
 
 	  	if ( empty( $atts ) ) return;
@@ -194,7 +203,7 @@ class WC_Shortcodes {
 	 * @param array $atts
 	 * @return string
 	 */
-	public function product_categories( $atts ) {
+	public static function product_categories( $atts ) {
 		global $woocommerce_loop;
 
 		extract( shortcode_atts( array (
@@ -268,8 +277,7 @@ class WC_Shortcodes {
 	 * @param array $atts
 	 * @return string
 	 */
-	public function recent_products( $atts ) {
-
+	public static function recent_products( $atts ) {
 		global $woocommerce_loop;
 
 		extract(shortcode_atts(array(
@@ -324,7 +332,7 @@ class WC_Shortcodes {
 	 * @param array $atts
 	 * @return string
 	 */
-	public function products( $atts ) {
+	public static function products( $atts ) {
 		global $woocommerce_loop;
 
 	  	if (empty($atts)) return;
@@ -400,7 +408,7 @@ class WC_Shortcodes {
 	 * @param array $atts
 	 * @return string
 	 */
-	public function product( $atts ) {
+	public static function product( $atts ) {
 	  	if (empty($atts)) return;
 
 	  	$args = array(
@@ -459,19 +467,23 @@ class WC_Shortcodes {
 	 * @param array $atts
 	 * @return string
 	 */
-	public function product_add_to_cart( $atts ) {
-	  	global $wpdb;
+	public static function product_add_to_cart( $atts ) {
+	  	global $wpdb, $post;
 
 	  	if ( empty( $atts ) )
 	  		return;
 
-	  	if ( ! isset( $atts['style'] ) )
-	  		$atts['style'] = 'border:4px solid #ccc; padding: 12px;';
+	  	extract( shortcode_atts( array(
+			'id'         => '',
+			'sku'        => '',
+			'style'      => 'border:4px solid #ccc; padding: 12px;',
+			'show_price' => 'true'
+		), $atts ) );
 
-	  	if ( isset( $atts['id'] ) ) {
-	  		$product_data = get_post( $atts['id'] );
-		} elseif ( isset( $atts['sku'] ) ) {
-			$product_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $atts['sku'] ) );
+	  	if ( ! empty( $id ) ) {
+	  		$product_data = get_post( $id );
+		} elseif ( ! empty( $sku ) ) {
+			$product_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $sku ) );
 			$product_data = get_post( $product_id );
 		} else {
 			return;
@@ -481,15 +493,18 @@ class WC_Shortcodes {
 
 		ob_start();
 		?>
-		<p class="product woocommerce" style="<?php echo $atts['style']; ?>">
+		<p class="product woocommerce" style="<?php echo $style; ?>">
 
-			<?php echo $product->get_price_html(); ?>
+			<?php if ( $show_price == 'true' ) : ?>
+				<?php echo $product->get_price_html(); ?>
+			<?php endif; ?>
 
 			<?php woocommerce_template_loop_add_to_cart(); ?>
 
 		</p><?php
 
-		wp_reset_postdata();
+		// Restore Product global in case this is shown inside a product post
+		wc_setup_product_data( $post );
 
 		return ob_get_clean();
 	}
@@ -501,7 +516,7 @@ class WC_Shortcodes {
 	 * @param array $atts
 	 * @return string
 	 */
-	public function product_add_to_cart_url( $atts ) {
+	public static function product_add_to_cart_url( $atts ) {
 	  	global $wpdb;
 
 	  	if ( empty( $atts ) ) return;
@@ -530,7 +545,7 @@ class WC_Shortcodes {
 	 * @param array $atts
 	 * @return string
 	 */
-	public function sale_products( $atts ){
+	public static function sale_products( $atts ){
 	    global $woocommerce_loop;
 
 	    extract( shortcode_atts( array(
@@ -556,7 +571,7 @@ class WC_Shortcodes {
 			'post_status' 	=> 'publish',
 			'post_type' 	=> 'product',
 			'meta_query' 	=> $meta_query,
-			'post__in'		=> $product_ids_on_sale
+			'post__in'		=> array_merge( array( 0 ), $product_ids_on_sale )
 		);
 
 	  	ob_start();
@@ -591,7 +606,7 @@ class WC_Shortcodes {
 	 * @param array $atts
 	 * @return string
 	 */
-	public function best_selling_products( $atts ){
+	public static function best_selling_products( $atts ){
 	    global $woocommerce_loop;
 
 	    extract( shortcode_atts( array(
@@ -647,7 +662,7 @@ class WC_Shortcodes {
 	 * @param array $atts
 	 * @return string
 	 */
-	public function top_rated_products( $atts ){
+	public static function top_rated_products( $atts ){
 	    global $woocommerce_loop;
 
 	    extract( shortcode_atts( array(
@@ -709,8 +724,7 @@ class WC_Shortcodes {
 	 * @param array $atts
 	 * @return string
 	 */
-	public function featured_products( $atts ) {
-
+	public static function featured_products( $atts ) {
 		global $woocommerce_loop;
 
 		extract(shortcode_atts(array(
@@ -773,7 +787,7 @@ class WC_Shortcodes {
 	 * @param array $atts
 	 * @return string
 	 */
-	public function product_page_shortcode( $atts ) {
+	public static function product_page( $atts ) {
 	  	if ( empty( $atts ) ) return;
 
 		if ( ! isset( $atts['id'] ) && ! isset( $atts['sku'] ) ) return;
@@ -825,12 +839,12 @@ class WC_Shortcodes {
 	 * @param array $atts
 	 * @return string
 	 */
-	public function messages_shortcode() {
+	public static function shop_messages() {
 		ob_start();
 
-		wc_print_messages();
+		wc_print_notices();
 
-		return ob_get_clean();
+		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
 
 	/**
@@ -840,8 +854,7 @@ class WC_Shortcodes {
 	 * @param mixed $args
 	 * @return void
 	 */
-	public function order_by_rating_post_clauses( $args ) {
-
+	public static function order_by_rating_post_clauses( $args ) {
 		global $wpdb;
 
 		$args['where'] .= " AND $wpdb->commentmeta.meta_key = 'rating' ";
@@ -867,7 +880,7 @@ class WC_Shortcodes {
 	 * @param array $atts
 	 * @return string
 	 */
-	function product_attribute( $atts ) {
+	public static function product_attribute( $atts ) {
 		global $woocommerce_loop;
 
 		extract( shortcode_atts( array(
@@ -929,7 +942,7 @@ class WC_Shortcodes {
 		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
 
-	function related_products_shortcode( $atts ) {
+	public static function related_products( $atts ) {
 
 		$atts = shortcode_atts( array(
 			'posts_per_page' => '2',
@@ -950,5 +963,3 @@ class WC_Shortcodes {
 		return ob_get_clean();
 	}
 }
-
-new WC_Shortcodes();

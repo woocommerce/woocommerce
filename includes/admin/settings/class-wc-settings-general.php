@@ -99,6 +99,14 @@ class WC_Settings_General extends WC_Settings_Page {
 				'autoload'  => false
 			),
 
+			array(
+				'title'   => __( 'API', 'woocommerce' ),
+				'desc'    => __( 'Enable the REST API', 'woocommerce' ),
+				'id'      => 'woocommerce_api_enabled',
+				'type'    => 'checkbox',
+				'default' => 'yes',
+			),
+
 			array( 'type' => 'sectionend', 'id' => 'general_options'),
 
 			array(	'title' => __( 'Currency Options', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following options affect how prices are displayed on the frontend.', 'woocommerce' ), 'id' => 'pricing_options' ),
@@ -177,7 +185,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'desc' 	=> __( 'Enable Lightbox', 'woocommerce' ),
 				'id' 		=> 'woocommerce_enable_lightbox',
 				'default'	=> 'yes',
-				'desc_tip'	=> __( 'Include WooCommerce\'s lightbox. Product gallery images and the add review form will open in a lightbox.', 'woocommerce' ),
+				'desc_tip'	=> __( 'Include WooCommerce\'s lightbox. Product gallery images will open in a lightbox.', 'woocommerce' ),
 				'type' 		=> 'checkbox',
 				'checkboxgroup'		=> 'start'
 			),
