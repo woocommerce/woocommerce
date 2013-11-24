@@ -22,7 +22,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 *
 	 * GET /orders
 	 * GET /orders/count
-	 * GET|PUT|DELETE /orders/<id>
+	 * GET|PUT /orders/<id>
 	 * GET /orders/<id>/notes
 	 *
 	 * @since 2.1
@@ -41,11 +41,10 @@ class WC_API_Orders extends WC_API_Resource {
 			array( array( $this, 'get_orders_count' ), WC_API_Server::READABLE ),
 		);
 
-		# GET|PUT|DELETE /orders/<id>
+		# GET|PUT /orders/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_order' ),  WC_API_Server::READABLE ),
 			array( array( $this, 'edit_order' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
-			array( array( $this, 'delete_order' ), WC_API_Server::DELETABLE ),
 		);
 
 		# GET /orders/<id>/notes
@@ -119,15 +118,15 @@ class WC_API_Orders extends WC_API_Resource {
 			'completed_at'              => $this->server->format_datetime( $order->completed_date, true ),
 			'status'                    => $order->status,
 			'currency'                  => $order->order_currency,
-			'total'                     => woocommerce_format_decimal( $order->get_total() ),
+			'total'                     => woocommerce_format_decimal( $order->get_total(), 2 ),
 			'total_line_items_quantity' => $order->get_item_count(),
-			'total_tax'                 => woocommerce_format_decimal( $order->get_total_tax() ),
-			'total_shipping'            => woocommerce_format_decimal( $order->get_total_shipping() ),
-			'cart_tax'                  => woocommerce_format_decimal( $order->get_cart_tax() ),
-			'shipping_tax'              => woocommerce_format_decimal( $order->get_shipping_tax() ),
-			'total_discount'            => woocommerce_format_decimal( $order->get_total_discount() ),
-			'cart_discount'             => woocommerce_format_decimal( $order->get_cart_discount() ),
-			'order_discount'            => woocommerce_format_decimal( $order->get_order_discount() ),
+			'total_tax'                 => woocommerce_format_decimal( $order->get_total_tax(), 2 ),
+			'total_shipping'            => woocommerce_format_decimal( $order->get_total_shipping(), 2 ),
+			'cart_tax'                  => woocommerce_format_decimal( $order->get_cart_tax(), 2 ),
+			'shipping_tax'              => woocommerce_format_decimal( $order->get_shipping_tax(), 2 ),
+			'total_discount'            => woocommerce_format_decimal( $order->get_total_discount(), 2 ),
+			'cart_discount'             => woocommerce_format_decimal( $order->get_cart_discount(), 2 ),
+			'order_discount'            => woocommerce_format_decimal( $order->get_order_discount(), 2 ),
 			'shipping_methods'          => $order->get_shipping_method(),
 			'payment_details' => array(
 				'method_id'    => $order->payment_method,
@@ -177,9 +176,9 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$order_data['line_items'][] = array(
 				'id'         => $item_id,
-				'subtotal'   => woocommerce_format_decimal( $order->get_line_subtotal( $item ) ),
-				'total'      => woocommerce_format_decimal( $order->get_line_total( $item ) ),
-				'total_tax'  => woocommerce_format_decimal( $order->get_line_tax( $item ) ),
+				'subtotal'   => woocommerce_format_decimal( $order->get_line_subtotal( $item ), 2 ),
+				'total'      => woocommerce_format_decimal( $order->get_line_total( $item ), 2 ),
+				'total_tax'  => woocommerce_format_decimal( $order->get_line_tax( $item ), 2 ),
 				'quantity'   => (int) $item['qty'],
 				'tax_class'  => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
 				'name'       => $item['name'],
@@ -195,7 +194,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'id'           => $shipping_item_id,
 				'method_id'    => $shipping_item['method_id'],
 				'method_title' => $shipping_item['name'],
-				'total'        => woocommerce_format_decimal( $shipping_item['cost'] ),
+				'total'        => woocommerce_format_decimal( $shipping_item['cost'], 2 ),
 			);
 		}
 
@@ -205,7 +204,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_data['tax_lines'][] = array(
 				'code'     => $tax_code,
 				'title'    => $tax->label,
-				'total'    => woocommerce_format_decimal( $tax->amount ),
+				'total'    => woocommerce_format_decimal( $tax->amount, 2 ),
 				'compound' => (bool) $tax->is_compound,
 			);
 		}
@@ -217,8 +216,8 @@ class WC_API_Orders extends WC_API_Resource {
 				'id'        => $fee_item_id,
 				'title'     => $fee_item['name'],
 				'tax_class' => ( ! empty( $fee_item['tax_class'] ) ) ? $fee_item['tax_class'] : null,
-				'total'     => woocommerce_format_decimal( $order->get_line_total( $fee_item ) ),
-				'total_tax' => woocommerce_format_decimal( $order->get_line_tax( $fee_item ) ),
+				'total'     => woocommerce_format_decimal( $order->get_line_total( $fee_item ), 2 ),
+				'total_tax' => woocommerce_format_decimal( $order->get_line_tax( $fee_item ), 2 ),
 			);
 		}
 
@@ -228,7 +227,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_data['coupon_lines'] = array(
 				'id'     => $coupon_item_id,
 				'code'   => $coupon_item['name'],
-				'amount' => woocommerce_format_decimal( $coupon_item['discount_amount'] ),
+				'amount' => woocommerce_format_decimal( $coupon_item['discount_amount'], 2 ),
 			);
 		}
 
@@ -250,11 +249,11 @@ class WC_API_Orders extends WC_API_Resource {
 
 		$query = $this->query_orders( $filter );
 
-		// TODO: permissions?
+		if ( ! current_user_can( 'read_private_shop_orders' ) )
+			return new WP_Error( 'woocommerce_api_user_cannot_read_orders_count', __( 'You do not have permission to read the orders count', 'woocommerce' ), array( 'status' => 401 ) );
 
-		return array( 'count' => $query->found_posts );
+		return array( 'count' => (int) $query->found_posts );
 	}
-
 
 	/**
 	 * Edit an order
@@ -268,7 +267,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 */
 	public function edit_order( $id, $data ) {
 
-		$id = $this->validate_request( $id, 'shop_order', 'write' );
+		$id = $this->validate_request( $id, 'shop_order', 'edit' );
 
 		if ( is_wp_error( $id ) )
 			return $id;
@@ -286,7 +285,7 @@ class WC_API_Orders extends WC_API_Resource {
 	/**
 	 * Delete an order
 	 *
-	 * @since 2.1
+	 * @TODO enable along with POST in 2.2
 	 * @param int $id the order ID
 	 * @param bool $force true to permanently delete order, false to move to trash
 	 * @return array

@@ -138,15 +138,13 @@ class WC_API {
 	 */
 	private function includes() {
 
-		// TODO: are all these required?
-		include_once( ABSPATH . WPINC . '/class-IXR.php' );
-		include_once( ABSPATH . WPINC . '/class-wp-xmlrpc-server.php' );
-
+		// API server / response handlers
 		include_once( 'api/class-wc-api-server.php' );
 		include_once( 'api/interface-wc-api-handler.php' );
 		include_once( 'api/class-wc-api-json-handler.php' );
 		include_once( 'api/class-wc-api-xml-handler.php' );
 
+		// authentication
 		include_once( 'api/class-wc-api-authentication.php' );
 		$this->authentication = new WC_API_Authentication();
 
@@ -157,24 +155,27 @@ class WC_API {
 		include_once( 'api/class-wc-api-customers.php' );
 		include_once( 'api/class-wc-api-reports.php' );
 
-		// TODO: some action to allow actors to load additional resource types or handlers
+		// allow plugins to load other response handlers or resource classes
+		do_action( 'woocommerce_api_loaded' );
 	}
 
 	/**
-	 * Register API resources available
+	 * Register available API resources
 	 *
 	 * @since 2.1
 	 * @param object $server the REST server
 	 */
 	public function register_resources( $server ) {
 
-		$api_classes = apply_filters( 'woocommerce_api_classes', array(
-			'WC_API_Customers',
-			'WC_API_Orders',
-			'WC_API_Products',
-			'WC_API_Coupons',
-			'WC_API_Reports',
-		) );
+		$api_classes = apply_filters( 'woocommerce_api_classes',
+			array(
+				'WC_API_Customers',
+				'WC_API_Orders',
+				'WC_API_Products',
+				'WC_API_Coupons',
+				'WC_API_Reports',
+			)
+		);
 
 		foreach ( $api_classes as $api_class ) {
 			$this->$api_class = new $api_class( $server );

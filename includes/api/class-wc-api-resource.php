@@ -73,10 +73,10 @@ class WC_API_Resource {
 		// only custom post types have per-post type/permission checks
 		if ( 'customer' !== $type ) {
 
-			$post = get_post( $id, ARRAY_A );
+			$post = get_post( $id );
 
 			// for checking permissions, product variations are the same as the product post type
-			$post_type = ( 'product_variation' === $post['post_type'] ) ? 'product' : $post['post_type'];
+			$post_type = ( 'product_variation' === $post->post_type ) ? 'product' : $post->post_type;
 
 			// validate post type
 			if ( $type !== $post_type )
@@ -376,21 +376,21 @@ class WC_API_Resource {
 	private function check_permission( $post, $context ) {
 
 		if ( ! is_a( $post, 'WP_Post' ) )
-			$post = get_post( $post, ARRAY_A );
+			$post = get_post( $post );
 
 		if ( is_null( $post ) )
 			return false;
 
-		$post_type = get_post_type_object( $post['post_type'] );
+		$post_type = get_post_type_object( $post->post_type );
 
 		if ( 'read' === $context )
-			return current_user_can( $post_type->cap->read_post, $post['ID'] );
+			return current_user_can( $post_type->cap->read_private_posts, $post->ID );
 
 		elseif ( 'edit' === $context )
-			return current_user_can( $post_type->cap->edit_post, $post['ID'] );
+			return current_user_can( $post_type->cap->edit_post, $post->ID );
 
 		elseif ( 'delete' === $context )
-			return current_user_can( $post_type->cap->delete_post, $post['ID'] );
+			return current_user_can( $post_type->cap->delete_post, $post->ID );
 
 		else
 			return false;

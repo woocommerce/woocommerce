@@ -433,7 +433,6 @@ class WC_API_Server {
 				'ssl_enabled'    => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ),
 				'links'          => array(
 					'help'    => 'http://docs.woothemes.com/document/woocommerce-rest-api/',
-					'profile' => 'https://raw.github.com/rmccue/WP-API/master/docs/schema.json', // TODO: update this
 				),
 			),
 		) );
@@ -535,7 +534,7 @@ class WC_API_Server {
 
 			$page        = $query->get( 'paged' );
 			$single      = $query->is_single();
-			$total       = $query->found_posts * $query->max_num_pages;
+			$total       = $query->found_posts;
 			$total_pages = $query->max_num_pages;
 		}
 

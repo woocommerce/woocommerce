@@ -21,9 +21,9 @@ class WC_API_Coupons extends WC_API_Resource {
 	/**
 	 * Register the routes for this class
 	 *
-	 * GET|POST /coupons
+	 * GET /coupons
 	 * GET /coupons/count
-	 * GET|PUT|DELETE /coupons/<id>
+	 * GET /coupons/<id>
 	 *
 	 * @since 2.1
 	 * @param array $routes
@@ -31,10 +31,9 @@ class WC_API_Coupons extends WC_API_Resource {
 	 */
 	public function register_routes( $routes ) {
 
-		# GET|POST /coupons
+		# GET /coupons
 		$routes[ $this->base ] = array(
 			array( array( $this, 'get_coupons' ),     WC_API_Server::READABLE ),
-			array( array( $this, 'create_coupon' ),   WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET /coupons/count
@@ -42,11 +41,9 @@ class WC_API_Coupons extends WC_API_Resource {
 			array( array( $this, 'get_coupons_count' ), WC_API_Server::READABLE ),
 		);
 
-		# GET|PUT|DELETE /coupons/<id>
+		# GET /coupons/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_coupon' ),  WC_API_Server::READABLE ),
-			array( array( $this, 'edit_coupon' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
-			array( array( $this, 'delete_coupon' ), WC_API_Server::DELETABLE ),
 		);
 
 		# GET /coupons/code/<code>, note that coupon codes can contain spaces, dashes and underscores
@@ -114,27 +111,27 @@ class WC_API_Coupons extends WC_API_Resource {
 		$coupon_post = get_post( $coupon->id );
 
 		$coupon_data = array(
-			'id'                         => $coupon->id,
-			'code'                       => $coupon->code,
-			'type'                       => $coupon->type,
-			'created_at'                 => $this->server->format_datetime( $coupon_post->post_date_gmt ),
-			'updated_at'                 => $this->server->format_datetime( $coupon_post->post_modified_gmt ),
-			'amount'                     => woocommerce_format_decimal( $coupon->amount ),
-			'individual_use'             => $coupon->individual_use,
-			'product_ids'                => $coupon->product_ids,
-			'exclude_product_ids'        => $coupon->exclude_product_ids,
-			'usage_limit'                => $coupon->usage_limit,
-			'usage_limit_per_user'       => $coupon->usage_limit_per_user,
-			'limit_usage_to_x_items'     => $coupon->limit_usage_to_x_items,
-			'usage_count'                => $coupon->usage_count,
-			'expiry_date'                => $this->server->format_datetime( $coupon->expiry_date ),
-			'apply_before_tax'           => $coupon->apply_before_tax(),
-			'enable_free_shipping'       => $coupon->enable_free_shipping(),
-			'product_categories'         => $coupon->product_categories,
-			'exclude_product_categories' => $coupon->exclude_product_categories,
-			'exclude_sale_items'         => $coupon->exclude_sale_items(),
-			'minimum_amount'             => $coupon->minimum_amount,
-			'customer_email'             => $coupon->customer_email,
+			'id'                           => $coupon->id,
+			'code'                         => $coupon->code,
+			'type'                         => $coupon->type,
+			'created_at'                   => $this->server->format_datetime( $coupon_post->post_date_gmt ),
+			'updated_at'                   => $this->server->format_datetime( $coupon_post->post_modified_gmt ),
+			'amount'                       => woocommerce_format_decimal( $coupon->amount, 2 ),
+			'individual_use'               => ( 'yes' === $coupon->individual_use ),
+			'product_ids'                  => array_map( 'absint', $coupon->product_ids ),
+			'exclude_product_ids'          => array_map( 'absint', $coupon->exclude_product_ids ),
+			'usage_limit'                  => ( ! empty( $coupon->usage_limit ) ) ? $coupon->usage_limit : null,
+			'usage_limit_per_user'         => ( ! empty( $coupon->usage_limit_per_user ) ) ? $coupon->usage_limit_per_user : null,
+			'limit_usage_to_x_items'       => (int) $coupon->limit_usage_to_x_items,
+			'usage_count'                  => (int) $coupon->usage_count,
+			'expiry_date'                  => $this->server->format_datetime( $coupon->expiry_date ),
+			'apply_before_tax'             => $coupon->apply_before_tax(),
+			'enable_free_shipping'         => $coupon->enable_free_shipping(),
+			'product_category_ids'         => array_map( 'absint', $coupon->product_categories ),
+			'exclude_product_category_ids' => array_map( 'absint', $coupon->exclude_product_categories ),
+			'exclude_sale_items'           => $coupon->exclude_sale_items(),
+			'minimum_amount'               => woocommerce_format_decimal( $coupon->minimum_amount, 2 ),
+			'customer_emails'              => $coupon->customer_email,
 		);
 
 		return array( 'coupon' => apply_filters( 'woocommerce_api_coupon_response', $coupon_data, $coupon, $fields, $this->server ) );
@@ -151,9 +148,10 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		$query = $this->query_coupons( $filter );
 
-		// TODO: permissions?
+		if ( ! current_user_can( 'read_private_shop_coupons' ) )
+			return new WP_Error( 'woocommerce_api_user_cannot_read_coupons_count', __( 'You do not have permission to read the coupons count', 'woocommerce' ), array( 'status' => 401 ) );
 
-		return array( 'count' => $query->found_posts );
+		return array( 'count' => (int) $query->found_posts );
 	}
 
 	/**
@@ -178,15 +176,11 @@ class WC_API_Coupons extends WC_API_Resource {
 	/**
 	 * Create a coupon
 	 *
-	 * @since 2.1
+	 * @TODO implement in 2.2
 	 * @param array $data
 	 * @return array
 	 */
 	public function create_coupon( $data ) {
-
-		// TODO: permissions check
-
-		// TODO: implement - what's the minimum set of data required?
 
 		return array();
 	}
@@ -194,7 +188,7 @@ class WC_API_Coupons extends WC_API_Resource {
 	/**
 	 * Edit a coupon
 	 *
-	 * @since 2.1
+	 * @TODO implement in 2.2
 	 * @param int $id the coupon ID
 	 * @param array $data
 	 * @return array
@@ -206,15 +200,13 @@ class WC_API_Coupons extends WC_API_Resource {
 		if ( is_wp_error( $id ) )
 			return $id;
 
-		// TODO: implement
-
 		return $this->get_coupon( $id );
 	}
 
 	/**
 	 * Delete a coupon
 	 *
-	 * @since 2.1
+	 * @TODO enable along with PUT/POST in 2.2
 	 * @param int $id the coupon ID
 	 * @param bool $force true to permanently delete coupon, false to move to trash
 	 * @return array

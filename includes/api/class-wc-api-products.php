@@ -22,7 +22,7 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * GET /products
 	 * GET /products/count
-	 * GET|PUT|DELETE /products/<id>
+	 * GET /products/<id>
 	 * GET /products/<id>/reviews
 	 *
 	 * @since 2.1
@@ -41,11 +41,9 @@ class WC_API_Products extends WC_API_Resource {
 			array( array( $this, 'get_products_count' ), WC_API_Server::READABLE ),
 		);
 
-		# GET|PUT|DELETE /products/<id>
+		# GET /products/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_product' ),  WC_API_Server::READABLE ),
-			array( array( $this, 'edit_product' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
-			array( array( $this, 'delete_product' ), WC_API_Server::DELETABLE ),
 		);
 
 		# GET /products/<id>/reviews
@@ -138,17 +136,18 @@ class WC_API_Products extends WC_API_Resource {
 		if ( ! empty( $type ) )
 			$filter['type'] = $type;
 
-		// TODO: permissions?
+		if ( ! current_user_can( 'read_private_products' ) )
+			return new WP_Error( 'woocommerce_api_user_cannot_read_products_count', __( 'You do not have permission to read the products count', 'woocommerce' ), array( 'status' => 401 ) );
 
 		$query = $this->query_products( $filter );
 
-		return array( 'count' => $query->found_posts );
+		return array( 'count' => (int) $query->found_posts );
 	}
 
 	/**
 	 * Edit a product
 	 *
-	 * @since 2.1
+	 * @TODO implement in 2.2
 	 * @param int $id the product ID
 	 * @param array $data
 	 * @return array
@@ -160,15 +159,13 @@ class WC_API_Products extends WC_API_Resource {
 		if ( is_wp_error( $id ) )
 			return $id;
 
-		// TODO: implement
-
 		return $this->get_product( $id );
 	}
 
 	/**
 	 * Delete a product
 	 *
-	 * @since 2.1
+	 * @TODO enable along with PUT/POST in 2.2
 	 * @param int $id the product ID
 	 * @param bool $force true to permanently delete order, false to move to trash
 	 * @return array
@@ -281,9 +278,9 @@ class WC_API_Products extends WC_API_Resource {
 			'virtual'            => $product->is_virtual(),
 			'permalink'          => $product->get_permalink(),
 			'sku'                => $product->get_sku(),
-			'price'              => woocommerce_format_decimal( $product->get_price() ),
-			'regular_price'      => woocommerce_format_decimal( $product->get_regular_price() ),
-			'sale_price'         => $product->get_sale_price() ? woocommerce_format_decimal( $product->get_sale_price() ) : null,
+			'price'              => woocommerce_format_decimal( $product->get_price(), 2 ),
+			'regular_price'      => woocommerce_format_decimal( $product->get_regular_price(), 2 ),
+			'sale_price'         => $product->get_sale_price() ? woocommerce_format_decimal( $product->get_sale_price(), 2 ) : null,
 			'price_html'         => $product->get_price_html(),
 			'taxable'            => $product->is_taxable(),
 			'tax_status'         => $product->get_tax_status(),
@@ -299,7 +296,7 @@ class WC_API_Products extends WC_API_Resource {
 			'visible'            => $product->is_visible(),
 			'catalog_visibility' => $product->visibility,
 			'on_sale'            => $product->is_on_sale(),
-			'weight'             => $product->get_weight() ? woocommerce_format_decimal( $product->get_weight() ) : null,
+			'weight'             => $product->get_weight() ? woocommerce_format_decimal( $product->get_weight(), 2 ) : null,
 			'dimensions'         => array(
 				'length' => $product->length,
 				'width'  => $product->width,
@@ -313,7 +310,7 @@ class WC_API_Products extends WC_API_Resource {
 			'description'        => apply_filters( 'the_content', $product->get_post_data()->post_content ),
 			'short_description'  => apply_filters( 'woocommerce_short_description', $product->get_post_data()->post_excerpt ),
 			'reviews_allowed'    => ( 'open' === $product->get_post_data()->comment_status ),
-			'average_rating'     => woocommerce_format_decimal( $product->get_average_rating() ),
+			'average_rating'     => woocommerce_format_decimal( $product->get_average_rating(), 2 ),
 			'rating_count'       => (int) $product->get_rating_count(),
 			'related_ids'        => array_map( 'absint', array_values( $product->get_related() ) ),
 			'upsell_ids'         => array_map( 'absint', $product->get_upsells() ),
@@ -327,6 +324,7 @@ class WC_API_Products extends WC_API_Resource {
 			'download_expiry'    => (int) $product->download_expiry,
 			'download_type'      => $product->download_type,
 			'purchase_note'      => apply_filters( 'the_content', $product->purchase_note ),
+			'total_sales'        => metadata_exists( 'post', $product->id, 'total_sales' ) ? (int) get_post_meta( $product->id, 'total_sales', true ) : 0,
 			'variations'         => array(),
 			'parent'             => array(),
 		);
@@ -358,9 +356,9 @@ class WC_API_Products extends WC_API_Resource {
 				'virtual'           => $variation->is_virtual(),
 				'permalink'         => $variation->get_permalink(),
 				'sku'               => $variation->get_sku(),
-				'price'             => woocommerce_format_decimal( $variation->get_price() ),
-				'regular_price'     => woocommerce_format_decimal( $variation->get_regular_price() ),
-				'sale_price'        => $variation->get_sale_price() ? woocommerce_format_decimal( $variation->get_sale_price() ) : null,
+				'price'             => woocommerce_format_decimal( $variation->get_price(), 2 ),
+				'regular_price'     => woocommerce_format_decimal( $variation->get_regular_price(), 2 ),
+				'sale_price'        => $variation->get_sale_price() ? woocommerce_format_decimal( $variation->get_sale_price(), 2 ) : null,
 				'taxable'           => $variation->is_taxable(),
 				'tax_status'        => $variation->get_tax_status(),
 				'tax_class'         => $variation->get_tax_class(),
@@ -370,7 +368,7 @@ class WC_API_Products extends WC_API_Resource {
 				'purchaseable'      => $variation->is_purchasable(),
 				'visible'           => $variation->variation_is_visible(),
 				'on_sale'           => $variation->is_on_sale(),
-				'weight'            => $variation->get_weight() ? woocommerce_format_decimal( $variation->get_weight() ) : null,
+				'weight'            => $variation->get_weight() ? woocommerce_format_decimal( $variation->get_weight(), 2 ) : null,
 				'dimensions'        => array(
 					'length' => $variation->length,
 					'width'  => $variation->width,
