@@ -44,10 +44,10 @@ global $woocommerce, $product, $post;
 												$args = array( 'orderby' => 'name', 'hide_empty' => false, 'menu_order' => false );
 											break;
 											case 'id' :
-												$args = array( 'orderby' => 'id', 'order' => 'ASC', 'menu_order' => false );
+												$args = array( 'orderby' => 'id', 'order' => 'ASC', 'menu_order' => false, 'hide_empty' => false );
 											break;
 											case 'menu_order' :
-												$args = array( 'menu_order' => 'ASC' );
+												$args = array( 'menu_order' => 'ASC', 'hide_empty' => false );
 											break;
 										}
 
