@@ -138,8 +138,9 @@ abstract class WC_Email extends WC_Settings_API {
 		add_action( 'woocommerce_update_options_email_' . $this->id, array( $this, 'process_admin_options' ) );
 
 		// Default template base if not declared in child constructor
-		if ( is_null( $this->template_base ) )
+		if ( is_null( $this->template_base ) ) {
 			$this->template_base = $woocommerce->plugin_path() . '/templates/';
+		}
 
 		// Settings
 		$this->heading 			= $this->get_option( 'heading', $this->heading );
@@ -459,8 +460,9 @@ abstract class WC_Email extends WC_Settings_API {
 	 * @return void
 	 */
 	function style_inline( $content ) {
-		if ( ! class_exists( 'DOMDocument' ) )
+		if ( ! class_exists( 'DOMDocument' ) ) {
 			return $content;
+		}
 
 		$dom = new DOMDocument();
 		libxml_use_internal_errors( true );
@@ -471,8 +473,9 @@ abstract class WC_Email extends WC_Settings_API {
 			$nodes = $dom->getElementsByTagName($tag);
 
 			foreach( $nodes as $node ) {
-				if ( ! $node->hasAttribute( 'style' ) )
+				if ( ! $node->hasAttribute( 'style' ) ) {
 					$node->setAttribute( 'style', $this->get_style_inline_for_tag($tag) );
+				}
 			}
 		}
 
@@ -699,8 +702,9 @@ abstract class WC_Email extends WC_Settings_API {
 					'template_plain' 	=> __( 'Plain text template', 'woocommerce' )
 				);
 				foreach ( $templates as $template => $title ) :
-					if ( empty( $this->$template ) )
+					if ( empty( $this->$template ) ) {
 						continue;
+					}
 
 					$local_file		= get_stylesheet_directory() . '/woocommerce/' . $this->$template;
 					$core_file		= $this->template_base . $this->$template;
@@ -710,7 +714,7 @@ abstract class WC_Email extends WC_Settings_API {
 
 						<h4><?php echo wp_kses_post( $title ); ?></h4>
 
-						<?php if ( file_exists( $local_file ) ) : ?>
+						<?php if ( file_exists( $local_file ) ) { ?>
 
 							<p>
 								<a href="#" class="button toggle_editor"></a>
@@ -728,14 +732,14 @@ abstract class WC_Email extends WC_Settings_API {
 
 							</div>
 
-						<?php elseif ( file_exists( $template_file ) ) : ?>
+						<?php } elseif ( file_exists( $template_file ) ) { ?>
 
 							<p>
 								<a href="#" class="button toggle_editor"></a>
 
-								<?php if ( ( is_dir( get_stylesheet_directory() . '/woocommerce/emails/' ) && is_writable( get_stylesheet_directory() . '/woocommerce/emails/' ) ) || is_writable( get_stylesheet_directory() ) ) : ?>
+								<?php if ( ( is_dir( get_stylesheet_directory() . '/woocommerce/emails/' ) && is_writable( get_stylesheet_directory() . '/woocommerce/emails/' ) ) || is_writable( get_stylesheet_directory() ) ) { ?>
 									<a href="<?php echo remove_query_arg( array( 'delete_template', 'saved' ), add_query_arg( 'move_template', $template ) ); ?>" class="button"><?php _e( 'Copy file to theme', 'woocommerce' ); ?></a>
-								<?php endif; ?>
+								<?php } ?>
 
 								<?php printf( __( 'To override and edit this email template copy <code>%s</code> to your theme folder: <code>%s</code>.', 'woocommerce' ), plugin_basename( $template_file ) , 'yourtheme/woocommerce/' . $this->$template ); ?>
 							</p>
@@ -746,11 +750,11 @@ abstract class WC_Email extends WC_Settings_API {
 
 							</div>
 
-						<?php else : ?>
+						<?php } else { ?>
 
 							<p><?php _e( 'File was not found.', 'woocommerce' ); ?></p>
 
-						<?php endif; ?>
+						<?php } ?>
 
 					</div>
 					<?php
