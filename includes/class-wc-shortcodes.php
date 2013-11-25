@@ -178,7 +178,7 @@ class WC_Shortcodes {
 
 		if ( $products->have_posts() ) : ?>
 
-			<?php woocommerce_product_loop_start(); ?>
+			<?php wc_product_loop_start(); ?>
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
@@ -186,7 +186,7 @@ class WC_Shortcodes {
 
 				<?php endwhile; // end of the loop. ?>
 
-			<?php woocommerce_product_loop_end(); ?>
+			<?php wc_product_loop_end(); ?>
 
 		<?php endif;
 
@@ -251,7 +251,7 @@ class WC_Shortcodes {
 
 	  	if ( $product_categories ) {
 
-	  		woocommerce_product_loop_start();
+	  		wc_product_loop_start();
 
 			foreach ( $product_categories as $category ) {
 
@@ -261,11 +261,11 @@ class WC_Shortcodes {
 
 			}
 
-			woocommerce_product_loop_end();
+			wc_product_loop_end();
 
 		}
 
-		woocommerce_reset_loop();
+		wc_reset_loop();
 
 		return '<div class="woocommerce columns-' . $columns . '">' . ob_get_clean() . '</div>';
 	}
@@ -307,7 +307,7 @@ class WC_Shortcodes {
 
 		if ( $products->have_posts() ) : ?>
 
-			<?php woocommerce_product_loop_start(); ?>
+			<?php wc_product_loop_start(); ?>
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
@@ -315,7 +315,7 @@ class WC_Shortcodes {
 
 				<?php endwhile; // end of the loop. ?>
 
-			<?php woocommerce_product_loop_end(); ?>
+			<?php wc_product_loop_end(); ?>
 
 		<?php endif;
 
@@ -383,7 +383,7 @@ class WC_Shortcodes {
 
 		if ( $products->have_posts() ) : ?>
 
-			<?php woocommerce_product_loop_start(); ?>
+			<?php wc_product_loop_start(); ?>
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
@@ -391,7 +391,7 @@ class WC_Shortcodes {
 
 				<?php endwhile; // end of the loop. ?>
 
-			<?php woocommerce_product_loop_end(); ?>
+			<?php wc_product_loop_end(); ?>
 
 		<?php endif;
 
@@ -443,7 +443,7 @@ class WC_Shortcodes {
 
 		if ( $products->have_posts() ) : ?>
 
-			<?php woocommerce_product_loop_start(); ?>
+			<?php wc_product_loop_start(); ?>
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
@@ -451,7 +451,7 @@ class WC_Shortcodes {
 
 				<?php endwhile; // end of the loop. ?>
 
-			<?php woocommerce_product_loop_end(); ?>
+			<?php wc_product_loop_end(); ?>
 
 		<?php endif;
 
@@ -499,7 +499,7 @@ class WC_Shortcodes {
 				<?php echo $product->get_price_html(); ?>
 			<?php endif; ?>
 
-			<?php woocommerce_template_loop_add_to_cart(); ?>
+			<?php wc_template_loop_add_to_cart(); ?>
 
 		</p><?php
 
@@ -582,7 +582,7 @@ class WC_Shortcodes {
 
 		if ( $products->have_posts() ) : ?>
 
-			<?php woocommerce_product_loop_start(); ?>
+			<?php wc_product_loop_start(); ?>
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
@@ -590,7 +590,7 @@ class WC_Shortcodes {
 
 				<?php endwhile; // end of the loop. ?>
 
-			<?php woocommerce_product_loop_end(); ?>
+			<?php wc_product_loop_end(); ?>
 
 		<?php endif;
 
@@ -638,7 +638,7 @@ class WC_Shortcodes {
 
 		if ( $products->have_posts() ) : ?>
 
-			<?php woocommerce_product_loop_start(); ?>
+			<?php wc_product_loop_start(); ?>
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
@@ -646,7 +646,7 @@ class WC_Shortcodes {
 
 				<?php endwhile; // end of the loop. ?>
 
-			<?php woocommerce_product_loop_end(); ?>
+			<?php wc_product_loop_end(); ?>
 
 		<?php endif;
 
@@ -700,7 +700,7 @@ class WC_Shortcodes {
 
 		if ( $products->have_posts() ) : ?>
 
-			<?php woocommerce_product_loop_start(); ?>
+			<?php wc_product_loop_start(); ?>
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
@@ -708,7 +708,7 @@ class WC_Shortcodes {
 
 				<?php endwhile; // end of the loop. ?>
 
-			<?php woocommerce_product_loop_end(); ?>
+			<?php wc_product_loop_end(); ?>
 
 		<?php endif;
 
@@ -762,7 +762,7 @@ class WC_Shortcodes {
 
 		if ( $products->have_posts() ) : ?>
 
-			<?php woocommerce_product_loop_start(); ?>
+			<?php wc_product_loop_start(); ?>
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
@@ -770,7 +770,7 @@ class WC_Shortcodes {
 
 				<?php endwhile; // end of the loop. ?>
 
-			<?php woocommerce_product_loop_end(); ?>
+			<?php wc_product_loop_end(); ?>
 
 		<?php endif;
 
@@ -925,7 +925,7 @@ class WC_Shortcodes {
 
 		if ( $products->have_posts() ) : ?>
 
-			<?php woocommerce_product_loop_start(); ?>
+			<?php wc_product_loop_start(); ?>
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
@@ -933,7 +933,7 @@ class WC_Shortcodes {
 
 				<?php endwhile; // end of the loop. ?>
 
-			<?php woocommerce_product_loop_end(); ?>
+			<?php wc_product_loop_end(); ?>
 
 		<?php endif;
 
@@ -958,7 +958,7 @@ class WC_Shortcodes {
 
 		ob_start();
 
-		woocommerce_related_products( $atts );
+		wc_related_products( $atts );
 
 		return ob_get_clean();
 	}

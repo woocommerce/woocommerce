@@ -26,7 +26,7 @@ global $woocommerce;
 
 <?php foreach ($checkout->checkout_fields['billing'] as $key => $field) : ?>
 
-	<?php woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
+	<?php wc_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
 
 <?php endforeach; ?>
 
@@ -52,7 +52,7 @@ global $woocommerce;
 
 			<?php foreach ( $checkout->checkout_fields['account'] as $key => $field ) : ?>
 
-				<?php woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
+				<?php wc_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
 
 			<?php endforeach; ?>
 

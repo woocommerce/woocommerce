@@ -31,7 +31,7 @@ if ( ! $product->is_purchasable() ) return;
 
 	 	<?php
 	 		if ( ! $product->is_sold_individually() )
-	 			woocommerce_quantity_input( array(
+	 			wc_quantity_input( array(
 	 				'min_value' => apply_filters( 'woocommerce_quantity_input_min', 1, $product ),
 	 				'max_value' => apply_filters( 'woocommerce_quantity_input_max', $product->backorders_allowed() ? '' : $product->get_stock_quantity(), $product )
 	 			) );

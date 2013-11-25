@@ -45,8 +45,8 @@ if ( 0 == $woocommerce_loop['loop'] % $woocommerce_loop['columns'] )
 			/**
 			 * woocommerce_before_shop_loop_item_title hook
 			 *
-			 * @hooked woocommerce_show_product_loop_sale_flash - 10
-			 * @hooked woocommerce_template_loop_product_thumbnail - 10
+			 * @hooked wc_show_product_loop_sale_flash - 10
+			 * @hooked wc_template_loop_product_thumbnail - 10
 			 */
 			do_action( 'woocommerce_before_shop_loop_item_title' );
 		?>
@@ -57,8 +57,8 @@ if ( 0 == $woocommerce_loop['loop'] % $woocommerce_loop['columns'] )
 			/**
 			 * woocommerce_after_shop_loop_item_title hook
 			 *
-			 * @hooked woocommerce_template_loop_rating - 5
-			 * @hooked woocommerce_template_loop_price - 10
+			 * @hooked wc_template_loop_rating - 5
+			 * @hooked wc_template_loop_price - 10
 			 */
 			do_action( 'woocommerce_after_shop_loop_item_title' );
 		?>
