@@ -129,8 +129,8 @@ function woocommerce_set_customer_auth_cookie( $customer_id ) {
 function woocommerce_update_new_customer_past_orders( $customer_id ) {
 	wc_update_new_customer_past_orders( $customer_id );
 }
-function wc_paying_customer( $order_id ) {
-	woocommerce_paying_customer( $order_id );
+function woocommerce_paying_customer( $order_id ) {
+	wc_paying_customer( $order_id );
 }
 function woocommerce_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	wc_customer_bought_product( $customer_email, $user_id, $product_id );
