@@ -858,7 +858,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		if ( ! isset( $order->id ) ) {
 			// We have an invalid $order_id, probably because invoice_prefix has changed
-			$order_id 	= woocommerce_get_order_id_by_order_key( $order_key );
+			$order_id 	= wc_get_order_id_by_order_key( $order_key );
 			$order 		= new WC_Order( $order_id );
 		}
 

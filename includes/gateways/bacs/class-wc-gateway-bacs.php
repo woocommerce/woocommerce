@@ -176,12 +176,12 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
     	if ( isset( $_POST['bacs_account_name'] ) ) {
 
-			$account_names   = array_map( 'woocommerce_clean', $_POST['bacs_account_name'] );
-			$account_numbers = array_map( 'woocommerce_clean', $_POST['bacs_account_number'] );
-			$bank_names      = array_map( 'woocommerce_clean', $_POST['bacs_bank_name'] );
-			$sort_codes      = array_map( 'woocommerce_clean', $_POST['bacs_sort_code'] );
-			$ibans           = array_map( 'woocommerce_clean', $_POST['bacs_iban'] );
-			$bics            = array_map( 'woocommerce_clean', $_POST['bacs_bic'] );
+			$account_names   = array_map( 'wc_clean', $_POST['bacs_account_name'] );
+			$account_numbers = array_map( 'wc_clean', $_POST['bacs_account_number'] );
+			$bank_names      = array_map( 'wc_clean', $_POST['bacs_bank_name'] );
+			$sort_codes      = array_map( 'wc_clean', $_POST['bacs_sort_code'] );
+			$ibans           = array_map( 'wc_clean', $_POST['bacs_iban'] );
+			$bics            = array_map( 'wc_clean', $_POST['bacs_bic'] );
 
 			foreach ( $account_names as $i => $name ) {
 				if ( ! isset( $account_names[ $i ] ) )

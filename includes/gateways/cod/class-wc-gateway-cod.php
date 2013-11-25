@@ -110,7 +110,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 			$chosen_shipping_methods = array_unique( WC()->session->get( 'chosen_shipping_methods' ) );
 			$check_method = false;
 
-			if ( is_page( woocommerce_get_page_id( 'checkout' ) ) && ! empty( $wp->query_vars['order-pay'] ) ) {
+			if ( is_page( wc_get_page_id( 'checkout' ) ) && ! empty( $wp->query_vars['order-pay'] ) ) {
 
 				$order_id = absint( $wp->query_vars['order-pay'] );
 				$order    = new WC_Order( $order_id );

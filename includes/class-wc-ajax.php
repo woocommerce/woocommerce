@@ -132,7 +132,7 @@ class WC_AJAX {
 
 		if ( isset( $_POST['shipping_method'] ) && is_array( $_POST['shipping_method'] ) )
 			foreach ( $_POST['shipping_method'] as $i => $value )
-				$chosen_shipping_methods[ $i ] = woocommerce_clean( $value );
+				$chosen_shipping_methods[ $i ] = wc_clean( $value );
 
 		WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
 
@@ -164,7 +164,7 @@ class WC_AJAX {
 
 		if ( isset( $_POST['shipping_method'] ) && is_array( $_POST['shipping_method'] ) )
 			foreach ( $_POST['shipping_method'] as $i => $value )
-				$chosen_shipping_methods[ $i ] = woocommerce_clean( $value );
+				$chosen_shipping_methods[ $i ] = wc_clean( $value );
 
 		WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
 		WC()->session->set( 'chosen_payment_method', empty( $_POST['payment_method'] ) ? '' : $_POST['payment_method'] );
@@ -225,7 +225,7 @@ class WC_AJAX {
 			do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
 			if ( get_option( 'woocommerce_cart_redirect_after_add' ) == 'yes' ) {
-				woocommerce_add_to_cart_message( $product_id );
+				wc_add_to_cart_message( $product_id );
 			}
 
 			// Return fragments
@@ -449,7 +449,7 @@ class WC_AJAX {
 			 		if ( $values ) {
 				 		// Add attribute to array, but don't set values
 				 		$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
-					 		'name' 			=> woocommerce_clean( $attribute_names[ $i ] ),
+					 		'name' 			=> wc_clean( $attribute_names[ $i ] ),
 					 		'value' 		=> '',
 					 		'position' 		=> $attribute_position[ $i ],
 					 		'is_visible' 	=> $is_visible,
@@ -461,11 +461,11 @@ class WC_AJAX {
 			 	} elseif ( isset( $attribute_values[ $i ] ) ) {
 
 			 		// Text based, separate by pipe
-			 		$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'woocommerce_clean', array_map( 'stripslashes', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) ) );
+			 		$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', array_map( 'stripslashes', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) ) );
 
 			 		// Custom attribute - Add attribute to array and set the values
 				 	$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
-				 		'name' 			=> woocommerce_clean( $attribute_names[ $i ] ),
+				 		'name' 			=> wc_clean( $attribute_names[ $i ] ),
 				 		'value' 		=> $values,
 				 		'position' 		=> $attribute_position[ $i ],
 				 		'is_visible' 	=> $is_visible,
@@ -767,7 +767,7 @@ class WC_AJAX {
 
 		if ( $files ) {
 			foreach ( $files as $download_id => $file ) {
-				if ( $inserted_id = woocommerce_downloadable_file_permission( $download_id, $product_id, $order ) ) {
+				if ( $inserted_id = wc_downloadable_file_permission( $download_id, $product_id, $order ) ) {
 
 					// insert complete - get inserted data
 					$download = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE permission_id = %d", $inserted_id ) );
@@ -850,27 +850,27 @@ class WC_AJAX {
 		$item['name'] 					= $_product->get_title();
 		$item['tax_class']				= $_product->get_tax_class();
 		$item['qty'] 					= 1;
-		$item['line_subtotal'] 			= woocommerce_format_decimal( $_product->get_price_excluding_tax() );
+		$item['line_subtotal'] 			= wc_format_decimal( $_product->get_price_excluding_tax() );
 		$item['line_subtotal_tax'] 		= '';
-		$item['line_total'] 			= woocommerce_format_decimal( $_product->get_price_excluding_tax() );
+		$item['line_total'] 			= wc_format_decimal( $_product->get_price_excluding_tax() );
 		$item['line_tax'] 				= '';
 
 		// Add line item
-	   	$item_id = woocommerce_add_order_item( $order_id, array(
+	   	$item_id = wc_add_order_item( $order_id, array(
 	 		'order_item_name' 		=> $item['name'],
 	 		'order_item_type' 		=> 'line_item'
 	 	) );
 
 	 	// Add line item meta
 	 	if ( $item_id ) {
-		 	woocommerce_add_order_item_meta( $item_id, '_qty', $item['qty'] );
-		 	woocommerce_add_order_item_meta( $item_id, '_tax_class', $item['tax_class'] );
-		 	woocommerce_add_order_item_meta( $item_id, '_product_id', $item['product_id'] );
-		 	woocommerce_add_order_item_meta( $item_id, '_variation_id', $item['variation_id'] );
-		 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal', $item['line_subtotal'] );
-		 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal_tax', $item['line_subtotal_tax'] );
-		 	woocommerce_add_order_item_meta( $item_id, '_line_total', $item['line_total'] );
-		 	woocommerce_add_order_item_meta( $item_id, '_line_tax', $item['line_tax'] );
+		 	wc_add_order_item_meta( $item_id, '_qty', $item['qty'] );
+		 	wc_add_order_item_meta( $item_id, '_tax_class', $item['tax_class'] );
+		 	wc_add_order_item_meta( $item_id, '_product_id', $item['product_id'] );
+		 	wc_add_order_item_meta( $item_id, '_variation_id', $item['variation_id'] );
+		 	wc_add_order_item_meta( $item_id, '_line_subtotal', $item['line_subtotal'] );
+		 	wc_add_order_item_meta( $item_id, '_line_subtotal_tax', $item['line_subtotal_tax'] );
+		 	wc_add_order_item_meta( $item_id, '_line_total', $item['line_total'] );
+		 	wc_add_order_item_meta( $item_id, '_line_tax', $item['line_tax'] );
 	 	}
 
 		do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
@@ -894,16 +894,16 @@ class WC_AJAX {
 		$order 		= new WC_Order( $order_id );
 
 		// Add line item
-	   	$item_id = woocommerce_add_order_item( $order_id, array(
+	   	$item_id = wc_add_order_item( $order_id, array(
 	 		'order_item_name' 		=> '',
 	 		'order_item_type' 		=> 'fee'
 	 	) );
 
 	 	// Add line item meta
 	 	if ( $item_id ) {
-		 	woocommerce_add_order_item_meta( $item_id, '_tax_class', '' );
-		 	woocommerce_add_order_item_meta( $item_id, '_line_total', '' );
-		 	woocommerce_add_order_item_meta( $item_id, '_line_tax', '' );
+		 	wc_add_order_item_meta( $item_id, '_tax_class', '' );
+		 	wc_add_order_item_meta( $item_id, '_line_total', '' );
+		 	wc_add_order_item_meta( $item_id, '_line_tax', '' );
 	 	}
 
 		include( 'includes/admin/post-types/meta-boxes/views/html-order-fee.php' );
@@ -924,7 +924,7 @@ class WC_AJAX {
 
 		if ( sizeof( $order_item_ids ) > 0 ) {
 			foreach( $order_item_ids as $id ) {
-				woocommerce_delete_order_item( absint( $id ) );
+				wc_delete_order_item( absint( $id ) );
 			}
 		}
 
@@ -1034,7 +1034,7 @@ class WC_AJAX {
 
 		check_ajax_referer( 'order-item', 'security' );
 
-		$meta_id = woocommerce_add_order_item_meta( absint( $_POST['order_item_id'] ), __( 'Name', 'woocommerce' ), __( 'Value', 'woocommerce' ) );
+		$meta_id = wc_add_order_item_meta( absint( $_POST['order_item_id'] ), __( 'Name', 'woocommerce' ), __( 'Value', 'woocommerce' ) );
 
 		if ( $meta_id ) {
 
@@ -1090,8 +1090,8 @@ class WC_AJAX {
 			foreach( $items as $item_id => $item ) {
 
 				$item_id		= absint( $item_id );
-				$line_subtotal 	= isset( $item['line_subtotal'] ) ? woocommerce_format_decimal( $item['line_subtotal'] ) : 0;
-				$line_total		= woocommerce_format_decimal( $item['line_total'] );
+				$line_subtotal 	= isset( $item['line_subtotal'] ) ? wc_format_decimal( $item['line_subtotal'] ) : 0;
+				$line_total		= wc_format_decimal( $item['line_total'] );
 				$tax_class 		= sanitize_text_field( $item['tax_class'] );
 				$product_id     = $order->get_item_meta( $item_id, '_product_id', true );
 
@@ -1193,25 +1193,25 @@ class WC_AJAX {
 			$item['name'] 					= $tax_codes[ $key ];
 			$item['label'] 					= $tax->get_rate_label( $key );
 			$item['compound'] 				= $tax->is_compound( $key ) ? 1 : 0;
-			$item['tax_amount'] 			= woocommerce_format_decimal( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
-			$item['shipping_tax_amount'] 	= woocommerce_format_decimal( isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0 );
+			$item['tax_amount'] 			= wc_format_decimal( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
+			$item['shipping_tax_amount'] 	= wc_format_decimal( isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0 );
 
 			if ( ! $item['label'] )
 				$item['label'] = WC()->countries->tax_or_vat();
 
 			// Add line item
-		   	$item_id = woocommerce_add_order_item( $order_id, array(
+		   	$item_id = wc_add_order_item( $order_id, array(
 		 		'order_item_name' 		=> $item['name'],
 		 		'order_item_type' 		=> 'tax'
 		 	) );
 
 		 	// Add line item meta
 		 	if ( $item_id ) {
-		 		woocommerce_add_order_item_meta( $item_id, 'rate_id', $item['rate_id'] );
-		 		woocommerce_add_order_item_meta( $item_id, 'label', $item['label'] );
-			 	woocommerce_add_order_item_meta( $item_id, 'compound', $item['compound'] );
-			 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', $item['tax_amount'] );
-			 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', $item['shipping_tax_amount'] );
+		 		wc_add_order_item_meta( $item_id, 'rate_id', $item['rate_id'] );
+		 		wc_add_order_item_meta( $item_id, 'label', $item['label'] );
+			 	wc_add_order_item_meta( $item_id, 'compound', $item['compound'] );
+			 	wc_add_order_item_meta( $item_id, 'tax_amount', $item['tax_amount'] );
+			 	wc_add_order_item_meta( $item_id, 'shipping_tax_amount', $item['shipping_tax_amount'] );
 		 	}
 
 			include( 'includes/admin/post-types/meta-boxes/views/html-order-tax.php' );
@@ -1289,7 +1289,7 @@ class WC_AJAX {
 
 		$this->json_headers();
 
-		$term = (string) woocommerce_clean( urldecode( stripslashes( $_GET['term'] ) ) );
+		$term = (string) wc_clean( urldecode( stripslashes( $_GET['term'] ) ) );
 
 		if (empty($term)) die();
 
@@ -1392,7 +1392,7 @@ class WC_AJAX {
 
 		$this->json_headers();
 
-		$term = woocommerce_clean( urldecode( stripslashes( $_GET['term'] ) ) );
+		$term = wc_clean( urldecode( stripslashes( $_GET['term'] ) ) );
 
 		if ( empty( $term ) )
 			die();
@@ -1432,7 +1432,7 @@ class WC_AJAX {
 	public function json_search_customer_name( $query ) {
 		global $wpdb;
 
-		$term = woocommerce_clean( urldecode( stripslashes( $_GET['term'] ) ) );
+		$term = wc_clean( urldecode( stripslashes( $_GET['term'] ) ) );
 
 		$query->query_from  .= " LEFT JOIN {$wpdb->usermeta} as meta2 ON ({$wpdb->users}.ID = meta2.user_id) ";
 		$query->query_from  .= " LEFT JOIN {$wpdb->usermeta} as meta3 ON ({$wpdb->users}.ID = meta3.user_id) ";

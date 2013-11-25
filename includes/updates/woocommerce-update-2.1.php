@@ -42,7 +42,7 @@ if ( $existing_file_paths ) {
 					$needs_update      = true;
 					$new_value[ $key ] = array(
 						'file' => $file,
-						'name' => woocommerce_get_filename_from_url( $file )
+						'name' => wc_get_filename_from_url( $file )
 					);
 				} else {
 					$new_value[ $key ] = $file;

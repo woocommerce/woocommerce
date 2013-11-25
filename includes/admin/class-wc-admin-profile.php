@@ -179,7 +179,7 @@ class WC_Admin_Profile {
 	 	foreach( $save_fields as $fieldset )
 	 		foreach( $fieldset['fields'] as $key => $field )
 	 			if ( isset( $_POST[ $key ] ) )
-	 				update_user_meta( $user_id, $key, woocommerce_clean( $_POST[ $key ] ) );
+	 				update_user_meta( $user_id, $key, wc_clean( $_POST[ $key ] ) );
 	}
 
 	/**

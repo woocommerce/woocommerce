@@ -684,7 +684,7 @@ abstract class WC_Settings_API {
 
     	if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
     		if ( $_POST[ $this->plugin_id . $this->id . '_' . $key ] !== '' )
-    			$text = woocommerce_format_decimal( trim( stripslashes( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) );
+    			$text = wc_format_decimal( trim( stripslashes( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) );
     		else
     			$text = '';
     	}
@@ -703,7 +703,7 @@ abstract class WC_Settings_API {
 
     	if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
     		if ( $_POST[ $this->plugin_id . $this->id . '_' . $key ] !== '' )
-    			$text = woocommerce_format_decimal( trim( stripslashes( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) );
+    			$text = wc_format_decimal( trim( stripslashes( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) );
     		else
     			$text = '';
     	}
@@ -725,7 +725,7 @@ abstract class WC_Settings_API {
     	$text = $this->get_option( $key );
 
     	if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
-    		$text = woocommerce_clean( stripslashes( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) );
+    		$text = wc_clean( stripslashes( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) );
     	}
 
     	return $text;
@@ -772,7 +772,7 @@ abstract class WC_Settings_API {
     	$value = $this->get_option( $key );
 
     	if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
-    		$value = woocommerce_clean( stripslashes( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) );
+    		$value = wc_clean( stripslashes( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) );
     	}
 
     	return $value;
@@ -792,7 +792,7 @@ abstract class WC_Settings_API {
     	$value = $this->get_option( $key );
 
     	if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
-    		$value = array_map( 'woocommerce_clean', array_map( 'stripslashes', (array) $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) );
+    		$value = array_map( 'wc_clean', array_map( 'stripslashes', (array) $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) );
     	} else {
 	    	$value = '';
     	}

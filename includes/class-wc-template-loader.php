@@ -53,7 +53,7 @@ class WC_Template_Loader {
 			$find[] 	= $file;
 			$find[] 	= WC_TEMPLATE_PATH . $file;
 
-		} elseif ( is_post_type_archive( 'product' ) || is_page( woocommerce_get_page_id( 'shop' ) ) ) {
+		} elseif ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) {
 
 			$file 	= 'archive-product.php';
 			$find[] = $file;

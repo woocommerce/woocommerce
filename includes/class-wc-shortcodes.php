@@ -182,7 +182,7 @@ class WC_Shortcodes {
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
-					<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+					<?php wc_get_template_part( 'content', 'product' ); ?>
 
 				<?php endwhile; // end of the loop. ?>
 
@@ -255,7 +255,7 @@ class WC_Shortcodes {
 
 			foreach ( $product_categories as $category ) {
 
-				woocommerce_get_template( 'content-product_cat.php', array(
+				wc_get_template( 'content-product_cat.php', array(
 					'category' => $category
 				) );
 
@@ -311,7 +311,7 @@ class WC_Shortcodes {
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
-					<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+					<?php wc_get_template_part( 'content', 'product' ); ?>
 
 				<?php endwhile; // end of the loop. ?>
 
@@ -387,7 +387,7 @@ class WC_Shortcodes {
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
-					<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+					<?php wc_get_template_part( 'content', 'product' ); ?>
 
 				<?php endwhile; // end of the loop. ?>
 
@@ -447,7 +447,7 @@ class WC_Shortcodes {
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
-					<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+					<?php wc_get_template_part( 'content', 'product' ); ?>
 
 				<?php endwhile; // end of the loop. ?>
 
@@ -586,7 +586,7 @@ class WC_Shortcodes {
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
-					<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+					<?php wc_get_template_part( 'content', 'product' ); ?>
 
 				<?php endwhile; // end of the loop. ?>
 
@@ -642,7 +642,7 @@ class WC_Shortcodes {
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
-					<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+					<?php wc_get_template_part( 'content', 'product' ); ?>
 
 				<?php endwhile; // end of the loop. ?>
 
@@ -704,7 +704,7 @@ class WC_Shortcodes {
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
-					<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+					<?php wc_get_template_part( 'content', 'product' ); ?>
 
 				<?php endwhile; // end of the loop. ?>
 
@@ -766,7 +766,7 @@ class WC_Shortcodes {
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
-					<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+					<?php wc_get_template_part( 'content', 'product' ); ?>
 
 				<?php endwhile; // end of the loop. ?>
 
@@ -820,7 +820,7 @@ class WC_Shortcodes {
 
 			<div class="single-product">
 
-				<?php woocommerce_get_template_part( 'content', 'single-product' ); ?>
+				<?php wc_get_template_part( 'content', 'single-product' ); ?>
 
 			</div>
 
@@ -929,7 +929,7 @@ class WC_Shortcodes {
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
-					<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+					<?php wc_get_template_part( 'content', 'product' ); ?>
 
 				<?php endwhile; // end of the loop. ?>
 

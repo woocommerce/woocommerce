@@ -14,7 +14,7 @@ global $woocommerce;
 
 <?php wc_print_notices(); ?>
 
-<form action="<?php echo esc_url( get_permalink(woocommerce_get_page_id('change_password')) ); ?>" method="post">
+<form action="<?php echo esc_url( get_permalink(wc_get_page_id('change_password')) ); ?>" method="post">
 
 	<p class="form-row form-row-first">
 		<label for="password_1"><?php _e( 'New password', 'woocommerce' ); ?> <span class="required">*</span></label>

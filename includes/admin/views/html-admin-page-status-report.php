@@ -52,7 +52,7 @@
 		<tr>
 			<td><?php _e( 'WP Memory Limit','woocommerce' ); ?>:</td>
 			<td><?php
-				$memory = woocommerce_let_to_num( WP_MEMORY_LIMIT );
+				$memory = wc_let_to_num( WP_MEMORY_LIMIT );
 
 				if ( $memory < 67108864 ) {
 					echo '<mark class="error">' . sprintf( __( '%s - We recommend setting memory to at least 64MB. See: <a href="%s">Increasing memory allocated to PHP</a>', 'woocommerce' ), size_format( $memory ), 'http://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP' ) . '</mark>';
@@ -76,7 +76,7 @@
 		<?php if ( function_exists( 'ini_get' ) ) : ?>
 			<tr>
 				<td><?php _e('PHP Post Max Size','woocommerce' ); ?>:</td>
-				<td><?php echo size_format( woocommerce_let_to_num( ini_get('post_max_size') ) ); ?></td>
+				<td><?php echo size_format( wc_let_to_num( ini_get('post_max_size') ) ); ?></td>
 			</tr>
 			<tr>
 				<td><?php _e('PHP Time Limit','woocommerce' ); ?>:</td>

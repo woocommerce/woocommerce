@@ -19,21 +19,21 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @param  int $product_id
  * @return bool
  */
-function woocommerce_protected_product_add_to_cart( $passed, $product_id ) {
+function wc_protected_product_add_to_cart( $passed, $product_id ) {
 	if ( post_password_required( $product_id ) ) {
 		$passed = false;
 		wc_add_notice( __( 'This product is protected and cannot be purchased.', 'woocommerce' ), 'error' );
 	}
 	return $passed;
 }
-add_filter( 'woocommerce_add_to_cart_validation', 'woocommerce_protected_product_add_to_cart', 10, 2 );
+add_filter( 'woocommerce_add_to_cart_validation', 'wc_protected_product_add_to_cart', 10, 2 );
 
 /**
- * WooCommerce clear cart
- *
  * Clears the cart session when called
+ *
+ * @return void
  */
-function woocommerce_empty_cart() {
+function wc_empty_cart() {
 	global $woocommerce;
 
 	if ( ! isset( WC()->cart ) || WC()->cart == '' )
@@ -41,15 +41,17 @@ function woocommerce_empty_cart() {
 
 	WC()->cart->empty_cart( false );
 }
-add_action( 'wp_logout', 'woocommerce_empty_cart' );
+add_action( 'wp_logout', 'wc_empty_cart' );
 
 
 /**
  * Load the cart upon login
+ *
  * @param mixed $user_login
  * @param mixed $user
+ * @return void
  */
-function woocommerce_load_persistent_cart( $user_login, $user = 0 ) {
+function wc_load_persistent_cart( $user_login, $user = 0 ) {
 	global $woocommerce;
 
 	if ( ! $user )
@@ -61,16 +63,17 @@ function woocommerce_load_persistent_cart( $user_login, $user = 0 ) {
 		if ( empty( WC()->session->cart ) || ! is_array( WC()->session->cart ) || sizeof( WC()->session->cart ) == 0 )
 			WC()->session->cart = $saved_cart['cart'];
 }
-add_action( 'wp_login', 'woocommerce_load_persistent_cart', 1, 2 );
+add_action( 'wp_login', 'wc_load_persistent_cart', 1, 2 );
 
 
 /**
  * Add to cart messages.
  *
  * @access public
+ * @param int $product_id
  * @return void
  */
-function woocommerce_add_to_cart_message( $product_id ) {
+function wc_add_to_cart_message( $product_id ) {
 	global $woocommerce;
 
 	if ( is_array( $product_id ) ) {
@@ -96,11 +99,11 @@ function woocommerce_add_to_cart_message( $product_id ) {
 
 	else :
 
-		$message 	= sprintf('<a href="%s" class="button">%s</a> %s', get_permalink( woocommerce_get_page_id( 'cart' ) ), __( 'View Cart &rarr;', 'woocommerce' ), $added_text );
+		$message 	= sprintf('<a href="%s" class="button">%s</a> %s', get_permalink( wc_get_page_id( 'cart' ) ), __( 'View Cart &rarr;', 'woocommerce' ), $added_text );
 
 	endif;
 
-	wc_add_notice( apply_filters( 'woocommerce_add_to_cart_message', $message ) );
+	wc_add_notice( apply_filters( 'wc_add_to_cart_message', $message ) );
 }
 
 /**
@@ -109,7 +112,7 @@ function woocommerce_add_to_cart_message( $product_id ) {
  * @access public
  * @return void
  */
-function woocommerce_clear_cart_after_payment() {
+function wc_clear_cart_after_payment() {
 	global $woocommerce, $wp;
 
 	if ( ! empty( $wp->query_vars['order-received'] ) ) {
@@ -142,5 +145,5 @@ function woocommerce_clear_cart_after_payment() {
 		}
 	}
 }
-add_action( 'get_header', 'woocommerce_clear_cart_after_payment' );
+add_action( 'get_header', 'wc_clear_cart_after_payment' );
 

@@ -173,7 +173,7 @@ class WC_Widget_Products extends WC_Widget {
 
 			while ( $r->have_posts()) {
 				$r->the_post();
-				woocommerce_get_template( 'content-widget-product.php', array( 'show_rating' => $show_rating ) );
+				wc_get_template( 'content-widget-product.php', array( 'show_rating' => $show_rating ) );
 			}
 
 			echo '</ul>';

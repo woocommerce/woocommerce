@@ -31,6 +31,6 @@ class WC_Shortcode_Change_Password {
 
 		if ( ! is_user_logged_in() ) return;
 
-		woocommerce_get_template( 'myaccount/form-change-password.php' );
+		wc_get_template( 'myaccount/form-change-password.php' );
 	}
 }

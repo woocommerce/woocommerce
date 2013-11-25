@@ -263,7 +263,7 @@ class WC_Post_types {
 					'rewrite' 				=> $product_permalink ? array( 'slug' => untrailingslashit( $product_permalink ), 'with_front' => false, 'feeds' => true ) : false,
 					'query_var' 			=> true,
 					'supports' 				=> array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields', 'page-attributes' ),
-					'has_archive' 			=> ( $shop_page_id = woocommerce_get_page_id( 'shop' ) ) && get_page( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop',
+					'has_archive' 			=> ( $shop_page_id = wc_get_page_id( 'shop' ) ) && get_page( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop',
 					'show_in_nav_menus' 	=> true
 				)
 			)
@@ -282,7 +282,7 @@ class WC_Post_types {
 
 		$menu_name = _x('Orders', 'Admin menu name', 'woocommerce' );
 
-		if ( $order_count = woocommerce_processing_order_count() ) {
+		if ( $order_count = wc_processing_order_count() ) {
 			$menu_name .= " <span class='awaiting-mod update-plugins count-$order_count'><span class='processing-count'>" . number_format_i18n( $order_count ) . "</span></span>" ;
 		}
 

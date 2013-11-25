@@ -249,7 +249,7 @@ class WC_Product_Variable extends WC_Product {
 
 			} else {
 
-				$price .= woocommerce_price( $this->get_variation_price( 'min', true ) ) . $this->get_price_suffix();
+				$price .= wc_price( $this->get_variation_price( 'min', true ) ) . $this->get_price_suffix();
 
 				$price = apply_filters('woocommerce_variable_price_html', $price, $this);
 

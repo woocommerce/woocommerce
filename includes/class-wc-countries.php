@@ -339,7 +339,7 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function get_base_state() {
-		$default = woocommerce_clean( get_option( 'woocommerce_default_country' ) );
+		$default = wc_clean( get_option( 'woocommerce_default_country' ) );
 		$state   = ( ( $pos = strrpos( $default, ':' ) ) === false ) ? '' : substr( $default, $pos + 1 );
 
 		return apply_filters( 'woocommerce_countries_base_state', $state );
@@ -1104,7 +1104,7 @@ class WC_Countries {
 
 		if ( isset( $locale[ $country ] ) ) {
 
-			$fields = woocommerce_array_overlay( $fields, $locale[ $country ] );
+			$fields = wc_array_overlay( $fields, $locale[ $country ] );
 
 			// If default country has postcode_before_city switch the fields round.
 			// This is only done at this point, not if country changes on checkout.

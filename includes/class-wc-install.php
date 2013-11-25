@@ -121,7 +121,7 @@ class WC_Install {
 		update_option( 'woocommerce_version', WC()->version );
 
 		// Check if pages are needed
-		if ( woocommerce_get_page_id( 'shop' ) < 1 )
+		if ( wc_get_page_id( 'shop' ) < 1 )
 			update_option( '_wc_needs_pages', 1 );
 
 		// Flush rewrite rules
@@ -228,7 +228,7 @@ class WC_Install {
 		) );
 
 		foreach ( $pages as $key => $page )
-			wc_create_page( esc_sql( $page['name'] ), 'woocommerce_' . $key . '_page_id', $page['title'], $page['content'], ! empty( $page['parent'] ) ? woocommerce_get_page_id( $page['parent'] ) : '' );
+			wc_create_page( esc_sql( $page['name'] ), 'woocommerce_' . $key . '_page_id', $page['title'], $page['content'], ! empty( $page['parent'] ) ? wc_get_page_id( $page['parent'] ) : '' );
 	}
 
 	/**

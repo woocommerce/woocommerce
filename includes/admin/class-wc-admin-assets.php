@@ -216,7 +216,7 @@ class WC_Admin_Assets {
 			wp_register_script( 'woocommerce_term_ordering', WC()->plugin_url() . '/assets/js/admin/term-ordering.js', array('jquery-ui-sortable'), WC()->version );
 			wp_enqueue_script( 'woocommerce_term_ordering' );
 
-			$taxonomy = isset( $_GET['taxonomy'] ) ? woocommerce_clean( $_GET['taxonomy'] ) : '';
+			$taxonomy = isset( $_GET['taxonomy'] ) ? wc_clean( $_GET['taxonomy'] ) : '';
 
 			$woocommerce_term_order_params = array(
 				'taxonomy' 			=>  $taxonomy

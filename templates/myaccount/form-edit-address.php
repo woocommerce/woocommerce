@@ -20,7 +20,7 @@ get_currentuserinfo();
 
 <?php if ( ! $load_address ) : ?>
 
-	<?php woocommerce_get_template( 'myaccount/my-address.php' ); ?>
+	<?php wc_get_template( 'myaccount/my-address.php' ); ?>
 
 <?php else : ?>
 
@@ -30,7 +30,7 @@ get_currentuserinfo();
 
 		<?php foreach ( $address as $key => $field ) : ?>
 
-			<?php woocommerce_form_field( $key, $field, ! empty( $_POST[ $key ] ) ? woocommerce_clean( $_POST[ $key ] ) : $field['value'] ); ?>
+			<?php woocommerce_form_field( $key, $field, ! empty( $_POST[ $key ] ) ? wc_clean( $_POST[ $key ] ) : $field['value'] ); ?>
 
 		<?php endforeach; ?>
 

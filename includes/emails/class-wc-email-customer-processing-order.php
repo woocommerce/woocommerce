@@ -53,7 +53,7 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 			$this->recipient	= $this->object->billing_email;
 
 			$this->find[] = '{order_date}';
-			$this->replace[] = date_i18n( woocommerce_date_format(), strtotime( $this->object->order_date ) );
+			$this->replace[] = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );
 
 			$this->find[] = '{order_number}';
 			$this->replace[] = $this->object->get_order_number();
@@ -73,7 +73,7 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 	 */
 	function get_content_html() {
 		ob_start();
-		woocommerce_get_template( $this->template_html, array(
+		wc_get_template( $this->template_html, array(
 			'order' 		=> $this->object,
 			'email_heading' => $this->get_heading()
 		) );
@@ -88,7 +88,7 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 	 */
 	function get_content_plain() {
 		ob_start();
-		woocommerce_get_template( $this->template_plain, array(
+		wc_get_template( $this->template_plain, array(
 			'order' 		=> $this->object,
 			'email_heading' => $this->get_heading()
 		) );

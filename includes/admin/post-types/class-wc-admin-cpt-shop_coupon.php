@@ -182,7 +182,7 @@ class WC_Admin_CPT_Shop_Coupon extends WC_Admin_CPT {
 	    if ( $typenow == 'shop_coupon' && ! empty( $_GET['coupon_type'] ) ) {
 
 			$vars['meta_key'] = 'discount_type';
-			$vars['meta_value'] = woocommerce_clean( $_GET['coupon_type'] );
+			$vars['meta_value'] = wc_clean( $_GET['coupon_type'] );
 
 		}
 

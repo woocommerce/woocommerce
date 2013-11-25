@@ -297,13 +297,13 @@ class WC_Product_Variation extends WC_Product {
 		if ( $this->get_price() !== '' ) {
 			if ( $this->is_on_sale() ) {
 
-				$price = '<del>' . woocommerce_price( $display_regular_price ) . '</del> <ins>' . woocommerce_price( $display_sale_price ) . '</ins>' . $this->get_price_suffix();
+				$price = '<del>' . wc_price( $display_regular_price ) . '</del> <ins>' . wc_price( $display_sale_price ) . '</ins>' . $this->get_price_suffix();
 
 				$price = apply_filters( 'woocommerce_variation_sale_price_html', $price, $this );
 
 			} elseif ( $this->get_price() > 0 ) {
 
-				$price = woocommerce_price( $display_price ) . $this->get_price_suffix();
+				$price = wc_price( $display_price ) . $this->get_price_suffix();
 
 				$price = apply_filters( 'woocommerce_variation_price_html', $price, $this );
 
@@ -486,7 +486,7 @@ class WC_Product_Variation extends WC_Product {
 			$identifier = '#' . $this->variation_id;
 
 		$attributes = $this->get_variation_attributes();
-		$extra_data = ' &ndash; ' . implode( ', ', $attributes ) . ' &ndash; ' . woocommerce_price( $this->get_price() );
+		$extra_data = ' &ndash; ' . implode( ', ', $attributes ) . ' &ndash; ' . wc_price( $this->get_price() );
 
 		return sprintf( __( '%s &ndash; %s%s', 'woocommerce' ), $identifier, $this->get_title(), $extra_data );
 	}

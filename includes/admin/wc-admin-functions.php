@@ -165,13 +165,13 @@ function woocommerce_compile_less_styles() {
             // Write new color to base file
             $color_rules = "
 @primary:       " . $colors['primary'] . ";
-@primarytext:   " . woocommerce_light_or_dark( $colors['primary'], 'desaturate(darken(@primary,50%),18%)', 'desaturate(lighten(@primary,50%),18%)' ) . ";
+@primarytext:   " . wc_light_or_dark( $colors['primary'], 'desaturate(darken(@primary,50%),18%)', 'desaturate(lighten(@primary,50%),18%)' ) . ";
 
 @secondary:     " . $colors['secondary'] . ";
-@secondarytext: " . woocommerce_light_or_dark( $colors['secondary'], 'desaturate(darken(@secondary,60%),18%)', 'desaturate(lighten(@secondary,60%),18%)' ) . ";
+@secondarytext: " . wc_light_or_dark( $colors['secondary'], 'desaturate(darken(@secondary,60%),18%)', 'desaturate(lighten(@secondary,60%),18%)' ) . ";
 
 @highlight:     " . $colors['highlight'] . ";
-@highlightext:  " . woocommerce_light_or_dark( $colors['highlight'], 'desaturate(darken(@highlight,60%),18%)', 'desaturate(lighten(@highlight,60%),18%)' ) . ";
+@highlightext:  " . wc_light_or_dark( $colors['highlight'], 'desaturate(darken(@highlight,60%),18%)', 'desaturate(lighten(@highlight,60%),18%)' ) . ";
 
 @contentbg:     " . $colors['content_bg'] . ";
 

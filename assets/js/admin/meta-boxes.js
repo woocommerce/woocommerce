@@ -499,7 +499,7 @@ jQuery( function($){
 			$.each( add_item_ids, function( index, value ) {
 
 				var data = {
-					action: 		'woocommerce_add_order_item',
+					action: 		'wc_add_order_item',
 					item_to_add: 	value,
 					order_id:		woocommerce_admin_meta_boxes.post_id,
 					security: 		woocommerce_admin_meta_boxes.order_item_nonce
@@ -558,7 +558,7 @@ jQuery( function($){
 
 		var data = {
 			order_item_id: 	$item.attr( 'data-order_item_id' ),
-			action: 	'woocommerce_add_order_item_meta',
+			action: 	'wc_add_order_item_meta',
 			security: 	woocommerce_admin_meta_boxes.order_item_nonce
 		};
 

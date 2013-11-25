@@ -279,7 +279,7 @@ class WC_Product {
 
 				// Set default name
 				if ( empty( $file['name'] ) ) {
-					$downloadable_files[ $key ]['name'] = woocommerce_get_filename_from_url( $file );
+					$downloadable_files[ $key ]['name'] = wc_get_filename_from_url( $file );
 				}
 
 				// Filter URL
@@ -856,8 +856,8 @@ class WC_Product {
 			);
 
 			$replace = array(
-				woocommerce_price( $this->get_price_including_tax() ),
-				woocommerce_price( $this->get_price_excluding_tax() )
+				wc_price( $this->get_price_including_tax() ),
+				wc_price( $this->get_price_excluding_tax() )
 			);
 
 			$price_display_suffix = str_replace( $find, $replace, $price_display_suffix );
@@ -890,7 +890,7 @@ class WC_Product {
 
 			} else {
 
-				$price .= woocommerce_price( $display_price ) . $this->get_price_suffix();
+				$price .= wc_price( $display_price ) . $this->get_price_suffix();
 
 				$price = apply_filters( 'woocommerce_price_html', $price, $this );
 
@@ -937,7 +937,7 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_price_html_from_to( $from, $to ) {
-		return '<del>' . ( ( is_numeric( $from ) ) ? woocommerce_price( $from ) : $from ) . '</del> <ins>' . ( ( is_numeric( $to ) ) ? woocommerce_price( $to ) : $to ) . '</ins>';
+		return '<del>' . ( ( is_numeric( $from ) ) ? wc_price( $from ) : $from ) . '</del> <ins>' . ( ( is_numeric( $to ) ) ? wc_price( $to ) : $to ) . '</ins>';
 	}
 
 	/**
@@ -1332,7 +1332,7 @@ class WC_Product {
 	 * @return void
 	 */
 	public function list_attributes() {
-		woocommerce_get_template( 'single-product/product-attributes.php', array(
+		wc_get_template( 'single-product/product-attributes.php', array(
 			'product'    => $this
 		) );
 	}

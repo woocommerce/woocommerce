@@ -609,7 +609,7 @@ class WC_Coupon {
 				$err = __( 'This coupon has expired.', 'woocommerce' );
 			break;
 			case self::E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET:
-				$err = sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), woocommerce_price( $this->minimum_amount ) );
+				$err = sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), wc_price( $this->minimum_amount ) );
 			break;
 			case self::E_WC_COUPON_NOT_APPLICABLE:
 				$err = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );

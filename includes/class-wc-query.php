@@ -146,7 +146,7 @@ class WC_Query {
 			return;
 
 		// When orderby is set, WordPress shows posts. Get around that here.
-		if ( $q->is_home() && 'page' == get_option('show_on_front') && get_option('page_on_front') == woocommerce_get_page_id('shop') ) {
+		if ( $q->is_home() && 'page' == get_option('show_on_front') && get_option('page_on_front') == wc_get_page_id('shop') ) {
 			$_query = wp_parse_args( $q->query );
 			if ( empty( $_query ) || ! array_diff( array_keys( $_query ), array( 'preview', 'page', 'paged', 'cpage', 'orderby' ) ) ) {
 				$q->is_page = true;
@@ -157,7 +157,7 @@ class WC_Query {
 		}
 
 		// Special check for shops with the product archive on front
-		if ( $q->is_page() && 'page' == get_option( 'show_on_front' ) && $q->get('page_id') == woocommerce_get_page_id('shop') ) {
+		if ( $q->is_page() && 'page' == get_option( 'show_on_front' ) && $q->get('page_id') == wc_get_page_id('shop') ) {
 
 			// This is a front-page shop
 			$q->set( 'post_type', 'product' );
@@ -172,7 +172,7 @@ class WC_Query {
 			// This is hacky but works. Awaiting http://core.trac.wordpress.org/ticket/21096
 			global $wp_post_types;
 
-			$shop_page 	= get_post( woocommerce_get_page_id('shop') );
+			$shop_page 	= get_post( wc_get_page_id('shop') );
 			$q->is_page = true;
 
 			$wp_post_types['product']->ID 			= $shop_page->ID;
@@ -254,7 +254,7 @@ class WC_Query {
 	 * @return void
 	 */
 	public function wpseo_metadesc() {
-		return wpseo_get_value( 'metadesc', woocommerce_get_page_id('shop') );
+		return wpseo_get_value( 'metadesc', wc_get_page_id('shop') );
 	}
 
 
@@ -265,7 +265,7 @@ class WC_Query {
 	 * @return void
 	 */
 	public function wpseo_metakey() {
-		return wpseo_get_value( 'metakey', woocommerce_get_page_id('shop') );
+		return wpseo_get_value( 'metakey', wc_get_page_id('shop') );
 	}
 
 
@@ -465,7 +465,7 @@ class WC_Query {
 	public function get_catalog_ordering_args( $orderby = '', $order = '' ) {
 		// Get ordering from query string unless defined
 		if ( ! $orderby ) {
-			$orderby_value = isset( $_GET['orderby'] ) ? woocommerce_clean( $_GET['orderby'] ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+			$orderby_value = isset( $_GET['orderby'] ) ? wc_clean( $_GET['orderby'] ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
 
 			// Get order + orderby args from string
 			$orderby_value = explode( '-', $orderby_value );
@@ -627,7 +627,7 @@ class WC_Query {
 			if ( $attribute_taxonomies ) {
 				foreach ( $attribute_taxonomies as $tax ) {
 
-					$attribute       = woocommerce_sanitize_taxonomy_name( $tax->attribute_name );
+					$attribute       = wc_sanitize_taxonomy_name( $tax->attribute_name );
 					$taxonomy        = wc_attribute_taxonomy_name( $attribute );
 					$name            = 'filter_' . $attribute;
 					$query_type_name = 'query_type_' . $attribute;

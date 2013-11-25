@@ -225,11 +225,11 @@ class WC_Tax {
 			return array();
 
 		// Handle postcodes
-		$valid_postcodes 	= array( '*', strtoupper( woocommerce_clean( $postcode ) ) );
+		$valid_postcodes 	= array( '*', strtoupper( wc_clean( $postcode ) ) );
 
 		// Work out possible valid wildcard postcodes
 		$postcode_length	= strlen( $postcode );
-		$wildcard_postcode	= strtoupper( woocommerce_clean( $postcode ) );
+		$wildcard_postcode	= strtoupper( wc_clean( $postcode ) );
 
 		for ( $i = 0; $i < $postcode_length; $i ++ ) {
 

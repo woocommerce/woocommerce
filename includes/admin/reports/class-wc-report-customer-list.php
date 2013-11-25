@@ -41,7 +41,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 		echo '<div id="poststuff" class="woocommerce-reports-wide">';
 
         if ( ! empty( $_GET['link_orders'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'link_orders' ) ) {
-			$linked = woocommerce_update_new_customer_past_orders( absint( $_GET['link_orders'] ) );
+			$linked = wc_update_new_customer_past_orders( absint( $_GET['link_orders'] ) );
 
 			echo '<div class="updated"><p>' . sprintf( _n( '%s previous order linked', '%s previous orders linked', $linked, 'woocommerce' ), $linked ) . '</p></div>';
 		}
@@ -120,7 +120,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 					update_user_meta( $user->ID, '_money_spent', $spent );
 				}
 
-				return woocommerce_price( $spent );
+				return wc_price( $spent );
 			break;
 			case 'orders' :
 				if ( ! $count = get_user_meta( $user->ID, '_order_count', true ) ) {

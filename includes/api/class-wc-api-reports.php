@@ -272,12 +272,12 @@ class WC_API_Reports extends WC_API_Resource {
 			}
 
 			$period_totals[ $time ] = array(
-				'sales'    => woocommerce_format_decimal( 0.00, 2 ),
+				'sales'    => wc_format_decimal( 0.00, 2 ),
 				'orders'   => 0,
 				'items'    => 0,
-				'tax'      => woocommerce_format_decimal( 0.00, 2 ),
-				'shipping' => woocommerce_format_decimal( 0.00, 2 ),
-				'discount' => woocommerce_format_decimal( 0.00, 2 ),
+				'tax'      => wc_format_decimal( 0.00, 2 ),
+				'shipping' => wc_format_decimal( 0.00, 2 ),
+				'discount' => wc_format_decimal( 0.00, 2 ),
 			);
 		}
 
@@ -289,10 +289,10 @@ class WC_API_Reports extends WC_API_Resource {
 			if ( ! isset( $period_totals[ $time ] ) )
 				continue;
 
-			$period_totals[ $time ]['sales']    = woocommerce_format_decimal( $order->total_sales, 2 );
+			$period_totals[ $time ]['sales']    = wc_format_decimal( $order->total_sales, 2 );
 			$period_totals[ $time ]['orders']   = (int) $order->total_orders;
-			$period_totals[ $time ]['tax']      = woocommerce_format_decimal( $order->total_tax + $order->total_shipping_tax, 2 );
-			$period_totals[ $time ]['shipping'] = woocommerce_format_decimal( $order->total_shipping, 2 );
+			$period_totals[ $time ]['tax']      = wc_format_decimal( $order->total_tax + $order->total_shipping_tax, 2 );
+			$period_totals[ $time ]['shipping'] = wc_format_decimal( $order->total_shipping, 2 );
 		}
 
 		// add total order items for each period
@@ -314,17 +314,17 @@ class WC_API_Reports extends WC_API_Resource {
 			if ( ! isset( $period_totals[ $time ] ) )
 				continue;
 
-			$period_totals[ $time ]['discount'] = woocommerce_format_decimal( $discount->discount_amount, 2 );
+			$period_totals[ $time ]['discount'] = wc_format_decimal( $discount->discount_amount, 2 );
 		}
 
 		$sales_data = array(
-			'total_sales'       => woocommerce_format_decimal( $totals->sales, 2 ),
-			'average_sales'     => woocommerce_format_decimal( $totals->sales / ( $this->report->chart_interval + 1 ), 2 ),
+			'total_sales'       => wc_format_decimal( $totals->sales, 2 ),
+			'average_sales'     => wc_format_decimal( $totals->sales / ( $this->report->chart_interval + 1 ), 2 ),
 			'total_orders'      => (int) $totals->order_count,
 			'total_items'       => $total_items,
-			'total_tax'         => woocommerce_format_decimal( $totals->tax + $totals->shipping_tax, 2 ),
-			'total_shipping'    => woocommerce_format_decimal( $totals->shipping, 2 ),
-			'total_discount'    => is_null( $total_discount ) ? woocommerce_format_decimal( 0.00, 2 ) : woocommerce_format_decimal( $total_discount, 2 ),
+			'total_tax'         => wc_format_decimal( $totals->tax + $totals->shipping_tax, 2 ),
+			'total_shipping'    => wc_format_decimal( $totals->shipping, 2 ),
+			'total_discount'    => is_null( $total_discount ) ? wc_format_decimal( 0.00, 2 ) : wc_format_decimal( $total_discount, 2 ),
 			'totals_grouped_by' => $this->report->chart_groupby,
 			'totals'            => $period_totals,
 			'total_customers'   => $total_customers,

@@ -151,7 +151,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		if ( isset( $_POST['_visibility'] ) )
 			update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
 		if ( isset( $_POST['_stock_status'] ) )
-			wc_update_product_stock_status( $post_id, woocommerce_clean( $_POST['_stock_status'] ) );
+			wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
 	}
 
 	/**
@@ -573,7 +573,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 				$search_ids[] = $term;
 			}
 			// Attempt to get a SKU
-			$sku_to_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='_sku' AND meta_value LIKE '%%%s%%' LIMIT 1;", woocommerce_clean( $term ) ) );
+			$sku_to_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='_sku' AND meta_value LIKE '%%%s%%' LIMIT 1;", wc_clean( $term ) ) );
 
 			if ( $sku_to_id )
 				$search_ids[] = $sku_to_id;
@@ -678,46 +678,46 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		$old_sale_price    = $product->sale_price;
 
 		// Save fields
-		if ( isset( $_REQUEST['_sku'] ) ) update_post_meta( $post_id, '_sku', woocommerce_clean( $_REQUEST['_sku'] ) );
-		if ( isset( $_REQUEST['_weight'] ) ) update_post_meta( $post_id, '_weight', woocommerce_clean( $_REQUEST['_weight'] ) );
-		if ( isset( $_REQUEST['_length'] ) ) update_post_meta( $post_id, '_length', woocommerce_clean( $_REQUEST['_length'] ) );
-		if ( isset( $_REQUEST['_width'] ) ) update_post_meta( $post_id, '_width', woocommerce_clean( $_REQUEST['_width'] ) );
-		if ( isset( $_REQUEST['_height'] ) ) update_post_meta( $post_id, '_height', woocommerce_clean( $_REQUEST['_height'] ) );
-		if ( isset( $_REQUEST['_visibility'] ) ) update_post_meta( $post_id, '_visibility', woocommerce_clean( $_REQUEST['_visibility'] ) );
+		if ( isset( $_REQUEST['_sku'] ) ) update_post_meta( $post_id, '_sku', wc_clean( $_REQUEST['_sku'] ) );
+		if ( isset( $_REQUEST['_weight'] ) ) update_post_meta( $post_id, '_weight', wc_clean( $_REQUEST['_weight'] ) );
+		if ( isset( $_REQUEST['_length'] ) ) update_post_meta( $post_id, '_length', wc_clean( $_REQUEST['_length'] ) );
+		if ( isset( $_REQUEST['_width'] ) ) update_post_meta( $post_id, '_width', wc_clean( $_REQUEST['_width'] ) );
+		if ( isset( $_REQUEST['_height'] ) ) update_post_meta( $post_id, '_height', wc_clean( $_REQUEST['_height'] ) );
+		if ( isset( $_REQUEST['_visibility'] ) ) update_post_meta( $post_id, '_visibility', wc_clean( $_REQUEST['_visibility'] ) );
 		if ( isset( $_REQUEST['_featured'] ) ) update_post_meta( $post_id, '_featured', 'yes' ); else update_post_meta( $post_id, '_featured', 'no' );
 
 		if ( isset( $_REQUEST['_tax_status'] ) )
-			update_post_meta( $post_id, '_tax_status', woocommerce_clean( $_REQUEST['_tax_status'] ) );
+			update_post_meta( $post_id, '_tax_status', wc_clean( $_REQUEST['_tax_status'] ) );
 
 		if ( isset( $_REQUEST['_tax_class'] ) )
-			update_post_meta( $post_id, '_tax_class', woocommerce_clean( $_REQUEST['_tax_class'] ) );
+			update_post_meta( $post_id, '_tax_class', wc_clean( $_REQUEST['_tax_class'] ) );
 
 		if ( $product->is_type('simple') || $product->is_type('external') ) {
 
-			if ( isset( $_REQUEST['_regular_price'] ) ) update_post_meta( $post_id, '_regular_price', woocommerce_clean( $_REQUEST['_regular_price'] ) );
-			if ( isset( $_REQUEST['_sale_price'] ) ) update_post_meta( $post_id, '_sale_price', woocommerce_clean( $_REQUEST['_sale_price'] ) );
+			if ( isset( $_REQUEST['_regular_price'] ) ) update_post_meta( $post_id, '_regular_price', wc_clean( $_REQUEST['_regular_price'] ) );
+			if ( isset( $_REQUEST['_sale_price'] ) ) update_post_meta( $post_id, '_sale_price', wc_clean( $_REQUEST['_sale_price'] ) );
 
 			// Handle price - remove dates and set to lowest
 			$price_changed = false;
 
-			if ( isset( $_REQUEST['_regular_price'] ) && woocommerce_clean( $_REQUEST['_regular_price'] ) != $old_regular_price ) $price_changed = true;
-			if ( isset( $_REQUEST['_sale_price'] ) && woocommerce_clean( $_REQUEST['_sale_price'] ) != $old_sale_price ) $price_changed = true;
+			if ( isset( $_REQUEST['_regular_price'] ) && wc_clean( $_REQUEST['_regular_price'] ) != $old_regular_price ) $price_changed = true;
+			if ( isset( $_REQUEST['_sale_price'] ) && wc_clean( $_REQUEST['_sale_price'] ) != $old_sale_price ) $price_changed = true;
 
 			if ( $price_changed ) {
 				update_post_meta( $post_id, '_sale_price_dates_from', '' );
 				update_post_meta( $post_id, '_sale_price_dates_to', '' );
 
 				if ( isset( $_REQUEST['_sale_price'] ) && $_REQUEST['_sale_price'] != '' ) {
-					update_post_meta( $post_id, '_price', woocommerce_clean( $_REQUEST['_sale_price'] ) );
+					update_post_meta( $post_id, '_price', wc_clean( $_REQUEST['_sale_price'] ) );
 				} else {
-					update_post_meta( $post_id, '_price', woocommerce_clean( $_REQUEST['_regular_price'] ) );
+					update_post_meta( $post_id, '_price', wc_clean( $_REQUEST['_regular_price'] ) );
 				}
 			}
 		}
 
 		// Handle stock status
 		if ( isset( $_REQUEST['_stock_status'] ) )
-			wc_update_product_stock_status( $post_id, woocommerce_clean( $_REQUEST['_stock_status'] ) );
+			wc_update_product_stock_status( $post_id, wc_clean( $_REQUEST['_stock_status'] ) );
 
 		// Handle stock
 		if ( ! $product->is_type('grouped') ) {
@@ -730,7 +730,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 			}
 
 			if ( ! empty( $_REQUEST['_backorders'] ) ) {
-				update_post_meta( $post_id, '_backorders', woocommerce_clean( $_REQUEST['_backorders'] ) );
+				update_post_meta( $post_id, '_backorders', wc_clean( $_REQUEST['_backorders'] ) );
 			}
 		}
 
@@ -747,29 +747,29 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 		// Save fields
 		if ( ! empty( $_REQUEST['change_weight'] ) && isset( $_REQUEST['_weight'] ) )
-			update_post_meta( $post_id, '_weight', woocommerce_clean( stripslashes( $_REQUEST['_weight'] ) ) );
+			update_post_meta( $post_id, '_weight', wc_clean( stripslashes( $_REQUEST['_weight'] ) ) );
 
 		if ( ! empty( $_REQUEST['change_dimensions'] ) ) {
 			if ( isset( $_REQUEST['_length'] ) )
-				update_post_meta( $post_id, '_length', woocommerce_clean( stripslashes( $_REQUEST['_length'] ) ) );
+				update_post_meta( $post_id, '_length', wc_clean( stripslashes( $_REQUEST['_length'] ) ) );
 			if ( isset( $_REQUEST['_width'] ) )
-				update_post_meta( $post_id, '_width', woocommerce_clean( stripslashes( $_REQUEST['_width'] ) ) );
+				update_post_meta( $post_id, '_width', wc_clean( stripslashes( $_REQUEST['_width'] ) ) );
 			if ( isset( $_REQUEST['_height'] ) )
-				update_post_meta( $post_id, '_height', woocommerce_clean( stripslashes( $_REQUEST['_height'] ) ) );
+				update_post_meta( $post_id, '_height', wc_clean( stripslashes( $_REQUEST['_height'] ) ) );
 		}
 
 		if ( ! empty( $_REQUEST['_tax_status'] ) )
-			update_post_meta( $post_id, '_tax_status', woocommerce_clean( $_REQUEST['_tax_status'] ) );
+			update_post_meta( $post_id, '_tax_status', wc_clean( $_REQUEST['_tax_status'] ) );
 
 		if ( ! empty( $_REQUEST['_tax_class'] ) ) {
-			$tax_class = woocommerce_clean( $_REQUEST['_tax_class'] );
+			$tax_class = wc_clean( $_REQUEST['_tax_class'] );
 			if ( $tax_class == 'standard' )
 				$tax_class = '';
 			update_post_meta( $post_id, '_tax_class', $tax_class );
 		}
 
 		if ( ! empty( $_REQUEST['_stock_status'] ) )
-			wc_update_product_stock_status( $post_id, woocommerce_clean( $_REQUEST['_stock_status'] ) );
+			wc_update_product_stock_status( $post_id, wc_clean( $_REQUEST['_stock_status'] ) );
 
 		if ( ! empty( $_REQUEST['_visibility'] ) )
 			update_post_meta( $post_id, '_visibility', stripslashes( $_REQUEST['_visibility'] ) );
@@ -896,7 +896,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 			}
 
 			if ( ! empty( $_REQUEST['_backorders'] ) ) {
-				update_post_meta( $post_id, '_backorders', woocommerce_clean( $_REQUEST['_backorders'] ) );
+				update_post_meta( $post_id, '_backorders', wc_clean( $_REQUEST['_backorders'] ) );
 			}
 
 		}
@@ -998,7 +998,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 						foreach ( $new_download_ids as $download_id ) {
 							// grant permission if it doesn't already exist
 							if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->id, $product_id, $download_id ) ) ) {
-								woocommerce_downloadable_file_permission( $download_id, $product_id, $order );
+								wc_downloadable_file_permission( $download_id, $product_id, $order );
 							}
 						}
 					}

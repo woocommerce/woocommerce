@@ -43,7 +43,7 @@ if ( ! comments_open() )
 		<?php endif; ?>
 	</div>
 
-	<?php if ( get_option( 'woocommerce_review_rating_verification_required' ) == 'no' || woocommerce_customer_bought_product( '', get_current_user_id(), $product->id ) ) : ?>
+	<?php if ( get_option( 'woocommerce_review_rating_verification_required' ) == 'no' || wc_customer_bought_product( '', get_current_user_id(), $product->id ) ) : ?>
 
 		<div id="review_form_wrapper">
 			<div id="review_form">

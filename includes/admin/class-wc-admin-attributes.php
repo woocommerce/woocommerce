@@ -52,7 +52,7 @@ class WC_Admin_Attributes {
 
 			// Grab the submitted data
 			$attribute_label   = ( isset( $_POST['attribute_label'] ) )   ? (string) stripslashes( $_POST['attribute_label'] ) : '';
-			$attribute_name    = ( isset( $_POST['attribute_name'] ) )    ? woocommerce_sanitize_taxonomy_name( stripslashes( (string) $_POST['attribute_name'] ) ) : '';
+			$attribute_name    = ( isset( $_POST['attribute_name'] ) )    ? wc_sanitize_taxonomy_name( stripslashes( (string) $_POST['attribute_name'] ) ) : '';
 			$attribute_type    = ( isset( $_POST['attribute_type'] ) )    ? (string) stripslashes( $_POST['attribute_type'] ) : '';
 			$attribute_orderby = ( isset( $_POST['attribute_orderby'] ) ) ? (string) stripslashes( $_POST['attribute_orderby'] ) : '';
 
@@ -61,7 +61,7 @@ class WC_Admin_Attributes {
 				$attribute_label = ucfirst( $attribute_name );
 			}
 			if ( ! $attribute_name ) {
-				$attribute_name = woocommerce_sanitize_taxonomy_name( stripslashes( $attribute_label ) );
+				$attribute_name = wc_sanitize_taxonomy_name( stripslashes( $attribute_label ) );
 			}
 
 			// Forbidden attribute names
@@ -92,7 +92,7 @@ class WC_Admin_Attributes {
 				}
 				if ( 'edit' === $action ) {
 					$old_attribute_name = $wpdb->get_var( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" );
-					if ( $old_attribute_name != $attribute_name && woocommerce_sanitize_taxonomy_name( $old_attribute_name ) != $attribute_name && $taxonomy_exists ) {
+					if ( $old_attribute_name != $attribute_name && wc_sanitize_taxonomy_name( $old_attribute_name ) != $attribute_name && $taxonomy_exists ) {
 						$error = sprintf( __( 'Slug “%s” is already in use. Change it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) );
 					}
 				}

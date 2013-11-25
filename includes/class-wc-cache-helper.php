@@ -33,20 +33,20 @@ class WC_Cache_Helper {
 	public function init() {
 		if ( false === ( $wc_page_uris = get_transient( 'woocommerce_cache_excluded_uris' ) ) ) {
 
-			if ( woocommerce_get_page_id( 'cart' ) < 1 || woocommerce_get_page_id( 'checkout' ) < 1 || woocommerce_get_page_id( 'myaccount' ) < 1 )
+			if ( wc_get_page_id( 'cart' ) < 1 || wc_get_page_id( 'checkout' ) < 1 || wc_get_page_id( 'myaccount' ) < 1 )
 				return;
 
 			$wc_page_uris   = array();
 
 			// Exclude querystring when using page ID
-			$wc_page_uris[] = 'p=' . woocommerce_get_page_id( 'cart' );
-	    	$wc_page_uris[] = 'p=' . woocommerce_get_page_id( 'checkout' );
-	    	$wc_page_uris[] = 'p=' . woocommerce_get_page_id( 'myaccount' );
+			$wc_page_uris[] = 'p=' . wc_get_page_id( 'cart' );
+	    	$wc_page_uris[] = 'p=' . wc_get_page_id( 'checkout' );
+	    	$wc_page_uris[] = 'p=' . wc_get_page_id( 'myaccount' );
 
 	    	// Exclude permalinks
-			$cart_page      = get_post( woocommerce_get_page_id( 'cart' ) );
-			$checkout_page  = get_post( woocommerce_get_page_id( 'checkout' ) );
-			$account_page   = get_post( woocommerce_get_page_id( 'myaccount' ) );
+			$cart_page      = get_post( wc_get_page_id( 'cart' ) );
+			$checkout_page  = get_post( wc_get_page_id( 'checkout' ) );
+			$account_page   = get_post( wc_get_page_id( 'myaccount' ) );
 
 			if ( ! is_null( $cart_page ) )
 				$wc_page_uris[] = '/' . $cart_page->post_name;

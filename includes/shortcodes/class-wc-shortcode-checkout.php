@@ -83,7 +83,7 @@ class WC_Shortcode_Checkout {
 			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
 
 			if ( ! current_user_can( 'pay_for_order', $order_id ) ) {
-				echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . get_permalink( woocommerce_get_page_id( 'myaccount' ) ) . '" class="wc-forward">' . __( 'My Account', 'woocommerce' ) . '</a>' . '</div>';
+				echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . get_permalink( wc_get_page_id( 'myaccount' ) ) . '" class="wc-forward">' . __( 'My Account', 'woocommerce' ) . '</a>' . '</div>';
 				return;
 			}
 
@@ -99,7 +99,7 @@ class WC_Shortcode_Checkout {
 					if ( $order->billing_postcode )
 						WC()->customer->set_postcode( $order->billing_postcode );
 
-					woocommerce_get_template( 'checkout/form-pay.php', array( 'order' => $order ) );
+					wc_get_template( 'checkout/form-pay.php', array( 'order' => $order ) );
 
 				} else {
 
@@ -115,7 +115,7 @@ class WC_Shortcode_Checkout {
 		} elseif ( $order_id ) {
 
 			// Pay for order after checkout step
-			$order_key            = isset( $_GET['key'] ) ? woocommerce_clean( $_GET['key'] ) : '';
+			$order_key            = isset( $_GET['key'] ) ? wc_clean( $_GET['key'] ) : '';
 			$order                = new WC_Order( $order_id );
 			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
 
@@ -183,7 +183,7 @@ class WC_Shortcode_Checkout {
 
 		// Get the order
 		$order_id  = apply_filters( 'woocommerce_thankyou_order_id', absint( $order_id ) );
-		$order_key = apply_filters( 'woocommerce_thankyou_order_key', empty( $_GET['key'] ) ? '' : woocommerce_clean( $_GET['key'] ) );
+		$order_key = apply_filters( 'woocommerce_thankyou_order_key', empty( $_GET['key'] ) ? '' : wc_clean( $_GET['key'] ) );
 
 		if ( $order_id > 0 ) {
 			$order = new WC_Order( $order_id );
@@ -194,7 +194,7 @@ class WC_Shortcode_Checkout {
 		// Empty awaiting payment session
 		unset( WC()->session->order_awaiting_payment );
 
-		woocommerce_get_template( 'checkout/thankyou.php', array( 'order' => $order ) );
+		wc_get_template( 'checkout/thankyou.php', array( 'order' => $order ) );
 	}
 
 	/**
@@ -220,7 +220,7 @@ class WC_Shortcode_Checkout {
 
 		if ( empty( $_POST ) && wc_notice_count( 'wc_errors' ) > 0 ) {
 
-			woocommerce_get_template( 'checkout/cart-errors.php', array( 'checkout' => $checkout ) );
+			wc_get_template( 'checkout/cart-errors.php', array( 'checkout' => $checkout ) );
 
 		} else {
 
@@ -229,7 +229,7 @@ class WC_Shortcode_Checkout {
 			if ( wc_notice_count( 'wc_errors' ) == 0 && $non_js_checkout )
 				wc_add_notice( __( 'The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page.', 'woocommerce' ) );
 
-			woocommerce_get_template( 'checkout/form-checkout.php', array( 'checkout' => $checkout ) );
+			wc_get_template( 'checkout/form-checkout.php', array( 'checkout' => $checkout ) );
 
 		}
 	}

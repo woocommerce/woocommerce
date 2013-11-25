@@ -116,7 +116,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			'type'                         => $coupon->type,
 			'created_at'                   => $this->server->format_datetime( $coupon_post->post_date_gmt ),
 			'updated_at'                   => $this->server->format_datetime( $coupon_post->post_modified_gmt ),
-			'amount'                       => woocommerce_format_decimal( $coupon->amount, 2 ),
+			'amount'                       => wc_format_decimal( $coupon->amount, 2 ),
 			'individual_use'               => ( 'yes' === $coupon->individual_use ),
 			'product_ids'                  => array_map( 'absint', $coupon->product_ids ),
 			'exclude_product_ids'          => array_map( 'absint', $coupon->exclude_product_ids ),
@@ -130,7 +130,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			'product_category_ids'         => array_map( 'absint', $coupon->product_categories ),
 			'exclude_product_category_ids' => array_map( 'absint', $coupon->exclude_product_categories ),
 			'exclude_sale_items'           => $coupon->exclude_sale_items(),
-			'minimum_amount'               => woocommerce_format_decimal( $coupon->minimum_amount, 2 ),
+			'minimum_amount'               => wc_format_decimal( $coupon->minimum_amount, 2 ),
 			'customer_emails'              => $coupon->customer_email,
 		);
 

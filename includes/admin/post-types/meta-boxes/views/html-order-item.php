@@ -159,9 +159,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 		<div class="view">
 			<?php
 				if ( isset( $item['line_total'] ) ) {
-					if ( isset( $item['line_subtotal'] ) && $item['line_subtotal'] != $item['line_total'] ) echo '<del>' . woocommerce_price( $item['line_subtotal'] ) . '</del> ';
+					if ( isset( $item['line_subtotal'] ) && $item['line_subtotal'] != $item['line_total'] ) echo '<del>' . wc_price( $item['line_subtotal'] ) . '</del> ';
 
-					echo woocommerce_price( $item['line_total'] );
+					echo wc_price( $item['line_total'] );
 				}
 			?>
 		</div>
@@ -178,9 +178,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 		<div class="view">
 			<?php
 				if ( isset( $item['line_tax'] ) ) {
-					if ( isset( $item['line_subtotal_tax'] ) && $item['line_subtotal_tax'] != $item['line_tax'] ) echo '<del>' . woocommerce_price( woocommerce_round_tax_total( $item['line_subtotal_tax'] ) ) . '</del> ';
+					if ( isset( $item['line_subtotal_tax'] ) && $item['line_subtotal_tax'] != $item['line_tax'] ) echo '<del>' . wc_price( wc_round_tax_total( $item['line_subtotal_tax'] ) ) . '</del> ';
 
-					echo woocommerce_price( woocommerce_round_tax_total( $item['line_tax'] ) );
+					echo wc_price( wc_round_tax_total( $item['line_tax'] ) );
 				}
 			?>
 		</div>

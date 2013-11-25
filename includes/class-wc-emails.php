@@ -173,7 +173,7 @@ class WC_Emails {
 	 * @return void
 	 */
 	function email_header( $email_heading ) {
-		woocommerce_get_template( 'emails/email-header.php', array( 'email_heading' => $email_heading ) );
+		wc_get_template( 'emails/email-header.php', array( 'email_heading' => $email_heading ) );
 	}
 
 	/**
@@ -183,7 +183,7 @@ class WC_Emails {
 	 * @return void
 	 */
 	function email_footer() {
-		woocommerce_get_template( 'emails/email-footer.php' );
+		wc_get_template( 'emails/email-footer.php' );
 	}
 
 	/**

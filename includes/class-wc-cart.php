@@ -543,7 +543,7 @@ class WC_Cart {
 						echo esc_html( $data['key'] ) . ': ' . wp_kses_post( $data['value'] ) . "\n";
 
 				} else {
-					woocommerce_get_template( 'cart/cart-item-data.php', array( 'item_data' => $item_data ) );
+					wc_get_template( 'cart/cart-item-data.php', array( 'item_data' => $item_data ) );
 				}
 
 				return ob_get_clean();
@@ -576,7 +576,7 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_cart_url() {
-			$cart_page_id = woocommerce_get_page_id('cart');
+			$cart_page_id = wc_get_page_id('cart');
 			if ( $cart_page_id )
 				return apply_filters( 'woocommerce_get_cart_url', get_permalink( $cart_page_id ) );
 		}
@@ -587,7 +587,7 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_checkout_url() {
-			$checkout_page_id = woocommerce_get_page_id('checkout');
+			$checkout_page_id = wc_get_page_id('checkout');
 			$checkout_url     = '';
 			if ( $checkout_page_id ) {
 				if ( is_ssl() || get_option('woocommerce_force_ssl_checkout') == 'yes' )
@@ -604,7 +604,7 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_remove_url( $cart_item_key ) {
-			$cart_page_id = woocommerce_get_page_id('cart');
+			$cart_page_id = wc_get_page_id('cart');
 			if ( $cart_page_id )
 				return apply_filters( 'woocommerce_get_remove_url', wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, get_permalink( $cart_page_id ) ), 'woocommerce-cart' ) );
 		}
@@ -675,8 +675,8 @@ class WC_Cart {
                 $tax_totals[ $code ]->tax_rate_id       = $key;
 				$tax_totals[ $code ]->is_compound       = $this->tax->is_compound( $key );
 				$tax_totals[ $code ]->label             = $this->tax->get_rate_label( $key );
-				$tax_totals[ $code ]->amount           += woocommerce_round_tax_total( $tax );
-				$tax_totals[ $code ]->formatted_amount  = woocommerce_price( woocommerce_round_tax_total( $tax_totals[ $code ]->amount ) );
+				$tax_totals[ $code ]->amount           += wc_round_tax_total( $tax );
+				$tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ) );
 			}
 
 			return apply_filters( 'woocommerce_cart_tax_totals', $tax_totals, $this );
@@ -794,7 +794,7 @@ class WC_Cart {
 
 				// If its greater than 0, its already in the cart
 				if ( $in_cart_quantity > 0 ) {
-					wc_add_notice( sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', get_permalink( woocommerce_get_page_id( 'cart' ) ), __( 'View Cart', 'woocommerce' ), sprintf( __( 'You cannot add another &quot;%s&quot; to your cart.', 'woocommerce' ), $product_data->get_title() ) ), 'error' );
+					wc_add_notice( sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', get_permalink( wc_get_page_id( 'cart' ) ), __( 'View Cart', 'woocommerce' ), sprintf( __( 'You cannot add another &quot;%s&quot; to your cart.', 'woocommerce' ), $product_data->get_title() ) ), 'error' );
 					return false;
 				}
 			}
@@ -808,7 +808,7 @@ class WC_Cart {
 				if ( $variation_id && $product_data->variation_has_stock ) {
 
 					if ( isset( $product_qty_in_cart[ $variation_id ] ) && ! $product_data->has_enough_stock( $product_qty_in_cart[ $variation_id ] + $quantity ) ) {
-						wc_add_notice( sprintf(__( '<a href="%s" class="button wc-forward">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), get_permalink( woocommerce_get_page_id( 'cart' ) ), __( 'View Cart', 'woocommerce' ), $product_data->get_stock_quantity(), $product_qty_in_cart[ $variation_id ] ), 'error' );
+						wc_add_notice( sprintf(__( '<a href="%s" class="button wc-forward">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), get_permalink( wc_get_page_id( 'cart' ) ), __( 'View Cart', 'woocommerce' ), $product_data->get_stock_quantity(), $product_qty_in_cart[ $variation_id ] ), 'error' );
 						return false;
 					}
 
@@ -816,7 +816,7 @@ class WC_Cart {
 				} else {
 
 					if ( isset( $product_qty_in_cart[ $product_id ] ) && ! $product_data->has_enough_stock( $product_qty_in_cart[ $product_id ] + $quantity ) ) {
-						wc_add_notice( sprintf(__( '<a href="%s" class="button wc-forward">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), get_permalink( woocommerce_get_page_id( 'cart' ) ), __( 'View Cart', 'woocommerce' ), $product_data->get_stock_quantity(), $product_qty_in_cart[ $product_id ] ), 'error' );
+						wc_add_notice( sprintf(__( '<a href="%s" class="button wc-forward">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), get_permalink( wc_get_page_id( 'cart' ) ), __( 'View Cart', 'woocommerce' ), $product_data->get_stock_quantity(), $product_qty_in_cart[ $product_id ] ), 'error' );
 						return false;
 					}
 
@@ -1356,7 +1356,7 @@ class WC_Cart {
 					// Display varies depending on settings
 					if ( $this->tax_display_cart == 'excl' ) {
 
-						$return = woocommerce_price( $this->shipping_total );
+						$return = wc_price( $this->shipping_total );
 
 						if ( $this->shipping_tax_total > 0 && $this->prices_include_tax ) {
 							$return .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
@@ -1366,7 +1366,7 @@ class WC_Cart {
 
 					} else {
 
-						$return = woocommerce_price( $this->shipping_total + $this->shipping_tax_total );
+						$return = wc_price( $this->shipping_total + $this->shipping_tax_total );
 
 						if ( $this->shipping_tax_total > 0 && ! $this->prices_include_tax ) {
 							$return .= ' <small>' . WC()->countries->inc_tax_or_vat() . '</small>';
@@ -1839,7 +1839,7 @@ class WC_Cart {
 		 * @return string formatted price
 		 */
 		public function get_total() {
-			return apply_filters( 'woocommerce_cart_total', woocommerce_price( $this->total ) );
+			return apply_filters( 'woocommerce_cart_total', wc_price( $this->total ) );
 		}
 
 		/**
@@ -1851,7 +1851,7 @@ class WC_Cart {
 			$total = $this->total - $this->tax_total - $this->shipping_tax_total;
 			if ( $total < 0 )
 				$total = 0;
-			return apply_filters( 'woocommerce_cart_total_ex_tax', woocommerce_price( $total ) );
+			return apply_filters( 'woocommerce_cart_total_ex_tax', wc_price( $total ) );
 		}
 
 		/**
@@ -1861,9 +1861,9 @@ class WC_Cart {
 		 */
 		public function get_cart_total() {
 			if ( ! $this->prices_include_tax ) {
-				$cart_contents_total = woocommerce_price( $this->cart_contents_total );
+				$cart_contents_total = wc_price( $this->cart_contents_total );
 			} else {
-				$cart_contents_total = woocommerce_price( $this->cart_contents_total + $this->tax_total );
+				$cart_contents_total = wc_price( $this->cart_contents_total + $this->tax_total );
 			}
 
 			return apply_filters( 'woocommerce_cart_contents_total', $cart_contents_total );
@@ -1881,7 +1881,7 @@ class WC_Cart {
 			// cart + shipping + non-compound taxes (after discount)
 			if ( $compound ) {
 
-				$cart_subtotal = woocommerce_price( $this->cart_contents_total + $this->shipping_total + $this->get_taxes_total( false, false ) );
+				$cart_subtotal = wc_price( $this->cart_contents_total + $this->shipping_total + $this->get_taxes_total( false, false ) );
 
 			// Otherwise we show cart items totals only (before discount)
 			} else {
@@ -1889,7 +1889,7 @@ class WC_Cart {
 				// Display varies depending on settings
 				if ( $this->tax_display_cart == 'excl' ) {
 
-					$cart_subtotal = woocommerce_price( $this->subtotal_ex_tax );
+					$cart_subtotal = wc_price( $this->subtotal_ex_tax );
 
 					if ( $this->tax_total > 0 && $this->prices_include_tax ) {
 						$cart_subtotal .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
@@ -1897,7 +1897,7 @@ class WC_Cart {
 
 				} else {
 
-					$cart_subtotal = woocommerce_price( $this->subtotal );
+					$cart_subtotal = wc_price( $this->subtotal );
 
 					if ( $this->tax_total > 0 && !$this->prices_include_tax ) {
 						$cart_subtotal .= ' <small>' . WC()->countries->inc_tax_or_vat() . '</small>';
@@ -1921,7 +1921,7 @@ class WC_Cart {
 			else
 				$product_price = $_product->get_price_including_tax();
 
-			return apply_filters( 'woocommerce_cart_product_price', woocommerce_price( $product_price ), $_product );
+			return apply_filters( 'woocommerce_cart_product_price', wc_price( $product_price ), $_product );
 		}
 
 		/**
@@ -1946,7 +1946,7 @@ class WC_Cart {
 				if ( $this->tax_display_cart == 'excl' ) {
 
 					$row_price        = $_product->get_price_excluding_tax( $quantity );
-					$product_subtotal = woocommerce_price( $row_price );
+					$product_subtotal = wc_price( $row_price );
 
 					if ( $this->prices_include_tax && $this->tax_total > 0 )
 						$product_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
@@ -1954,7 +1954,7 @@ class WC_Cart {
 				} else {
 
 					$row_price        = $_product->get_price_including_tax( $quantity );
-					$product_subtotal = woocommerce_price( $row_price );
+					$product_subtotal = wc_price( $row_price );
 
 					if ( ! $this->prices_include_tax && $this->tax_total > 0 )
 						$product_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
@@ -1965,7 +1965,7 @@ class WC_Cart {
 			} else {
 
 				$row_price        = $price * $quantity;
-				$product_subtotal = woocommerce_price( $row_price );
+				$product_subtotal = wc_price( $row_price );
 
 			}
 
@@ -1978,9 +1978,9 @@ class WC_Cart {
 		 * @return string formatted price
 		 */
 		public function get_cart_tax() {
-			$cart_total_tax = woocommerce_round_tax_total( $this->tax_total + $this->shipping_tax_total );
+			$cart_total_tax = wc_round_tax_total( $this->tax_total + $this->shipping_tax_total );
 
-			return apply_filters( 'woocommerce_get_cart_tax', $cart_total_tax ? woocommerce_price( $cart_total_tax ) : '' );
+			return apply_filters( 'woocommerce_get_cart_tax', $cart_total_tax ? wc_price( $cart_total_tax ) : '' );
 		}
 
 		/**
@@ -2000,7 +2000,7 @@ class WC_Cart {
 				$total += $tax;
 			}
 			if ( $display )
-				return woocommerce_round_tax_total( $total );
+				return wc_round_tax_total( $total );
 			else
 				return $total;
 		}
@@ -2012,7 +2012,7 @@ class WC_Cart {
 		 */
 		public function get_discounts_before_tax() {
 			if ( $this->discount_cart ) {
-				$discounts_before_tax = woocommerce_price( $this->discount_cart );
+				$discounts_before_tax = wc_price( $this->discount_cart );
 			} else {
 				$discounts_before_tax = false;
 			}
@@ -2026,7 +2026,7 @@ class WC_Cart {
 		 */
 		public function get_discounts_after_tax() {
 			if ( $this->discount_total ) {
-				$discounts_after_tax = woocommerce_price( $this->discount_total );
+				$discounts_after_tax = wc_price( $this->discount_total );
 			} else {
 				$discounts_after_tax = false;
 			}
@@ -2040,7 +2040,7 @@ class WC_Cart {
 		 */
 		public function get_total_discount() {
 			if ( $this->discount_total || $this->discount_cart ) {
-				$total_discount = woocommerce_price( $this->discount_total + $this->discount_cart );
+				$total_discount = wc_price( $this->discount_total + $this->discount_cart );
 			} else {
 				$total_discount = false;
 			}

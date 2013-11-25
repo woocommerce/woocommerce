@@ -582,7 +582,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Display tax/discount total for reference on orders
 * Tweak - Humanised order email subjects/headings
 * Tweak - Cleaned up the tax settings.
-* Tweak - If a PayPal prefix is changed, IPN requests break for all existing orders - fixed. new woocommerce_get_order_id_by_order_key() function added. Thanks Brent.
+* Tweak - If a PayPal prefix is changed, IPN requests break for all existing orders - fixed. new wc_get_order_id_by_order_key() function added. Thanks Brent.
 * Tweak - On add to cart success, redirect back.
 * Tweak - Prefix jquery plugins JS.
 * Tweak - Made paypal use wc-api for IPN.
