@@ -116,7 +116,7 @@ class WC_Shortcode_Checkout {
 		} elseif ( $order_id ) {
 
 			// Pay for order after checkout step
-			$order_key            = isset( $_GET['key'] ) ? woocommerce_clean( $_GET['key'] ) : '';
+			$order_key            = isset( $_GET['key'] ) ? wc_clean( $_GET['key'] ) : '';
 			$order                = new WC_Order( $order_id );
 			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
 
@@ -185,7 +185,7 @@ class WC_Shortcode_Checkout {
 
 		// Get the order
 		$order_id  = apply_filters( 'woocommerce_thankyou_order_id', absint( $order_id ) );
-		$order_key = apply_filters( 'woocommerce_thankyou_order_key', empty( $_GET['key'] ) ? '' : woocommerce_clean( $_GET['key'] ) );
+		$order_key = apply_filters( 'woocommerce_thankyou_order_key', empty( $_GET['key'] ) ? '' : wc_clean( $_GET['key'] ) );
 
 		if ( $order_id > 0 ) {
 			$order = new WC_Order( $order_id );

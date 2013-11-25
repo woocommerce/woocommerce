@@ -17,7 +17,7 @@ echo "****************************************************\n\n";
 do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin = false, $plain_text = true );
 
 echo sprintf( __( 'Order number: %s', 'woocommerce'), $order->get_order_number() ) . "\n";
-echo sprintf( __( 'Order date: %s', 'woocommerce'), date_i18n( woocommerce_date_format(), strtotime( $order->order_date ) ) ) . "\n";
+echo sprintf( __( 'Order date: %s', 'woocommerce'), date_i18n( wc_date_format(), strtotime( $order->order_date ) ) ) . "\n";
 
 do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin = false, $plain_text = true );
 

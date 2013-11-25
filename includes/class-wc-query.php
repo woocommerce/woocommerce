@@ -465,7 +465,7 @@ class WC_Query {
 	public function get_catalog_ordering_args( $orderby = '', $order = '' ) {
 		// Get ordering from query string unless defined
 		if ( ! $orderby ) {
-			$orderby_value = isset( $_GET['orderby'] ) ? woocommerce_clean( $_GET['orderby'] ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+			$orderby_value = isset( $_GET['orderby'] ) ? wc_clean( $_GET['orderby'] ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
 
 			// Get order + orderby args from string
 			$orderby_value = explode( '-', $orderby_value );
@@ -627,7 +627,7 @@ class WC_Query {
 			if ( $attribute_taxonomies ) {
 				foreach ( $attribute_taxonomies as $tax ) {
 
-					$attribute       = woocommerce_sanitize_taxonomy_name( $tax->attribute_name );
+					$attribute       = wc_sanitize_taxonomy_name( $tax->attribute_name );
 					$taxonomy        = wc_attribute_taxonomy_name( $attribute );
 					$name            = 'filter_' . $attribute;
 					$query_type_name = 'query_type_' . $attribute;

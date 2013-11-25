@@ -88,7 +88,7 @@ class WC_Meta_Box_Order_Actions {
 		// Handle button actions
 		if ( ! empty( $_POST['wc_order_action'] ) ) {
 
-			$action = woocommerce_clean( $_POST['wc_order_action'] );
+			$action = wc_clean( $_POST['wc_order_action'] );
 
 			if ( strstr( $action, 'send_email_' ) ) {
 

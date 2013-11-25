@@ -84,7 +84,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 		) ) );
 
 		$legend[] = array(
-			'title' => sprintf( __( '%s sales for the selected items', 'woocommerce' ), '<strong>' . woocommerce_price( $total_sales ) . '</strong>' ),
+			'title' => sprintf( __( '%s sales for the selected items', 'woocommerce' ), '<strong>' . wc_price( $total_sales ) . '</strong>' ),
 			'color' => $this->chart_colours['sales_amount'],
 			'highlight_series' => 1
 		);
@@ -276,7 +276,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 				if ( $top_earners ) {
 					foreach ( $top_earners as $product ) {
 						echo '<tr class="' . ( in_array( $product->product_id, $this->product_ids ) ? 'active' : '' ) . '">
-							<td class="count">' . woocommerce_price( $product->order_item_total ) . '</td>
+							<td class="count">' . wc_price( $product->order_item_total ) . '</td>
 							<td class="name"><a href="' . add_query_arg( 'product_ids', $product->product_id ) . '">' . get_the_title( $product->product_id ) . '</a></td>
 							<td class="sparkline">' . $this->sales_sparkline( $product->product_id, 7, 'sales' ) . '</td>
 						</tr>';

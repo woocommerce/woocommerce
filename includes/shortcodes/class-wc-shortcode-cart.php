@@ -35,7 +35,7 @@ class WC_Shortcode_Cart {
 		// Remove Coupon Codes
 		} elseif ( isset( $_GET['remove_coupon'] ) ) {
 
-			$woocommerce->cart->remove_coupon( woocommerce_clean( $_GET['remove_coupon'] ) );
+			$woocommerce->cart->remove_coupon( wc_clean( $_GET['remove_coupon'] ) );
 
 		// Update Shipping
 		} elseif ( ! empty( $_POST['calc_shipping'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-cart' ) ) {
@@ -43,10 +43,10 @@ class WC_Shortcode_Cart {
 			try {
 				$woocommerce->shipping->reset_shipping();
 
-				$country 	= woocommerce_clean( $_POST['calc_shipping_country'] );
-				$state 		= woocommerce_clean( $_POST['calc_shipping_state'] );
-				$postcode   = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true ) ? woocommerce_clean( $_POST['calc_shipping_postcode'] ) : '';
-				$city       = apply_filters( 'woocommerce_shipping_calculator_enable_city', false ) ? woocommerce_clean( $_POST['calc_shipping_city'] ) : '';
+				$country 	= wc_clean( $_POST['calc_shipping_country'] );
+				$state 		= wc_clean( $_POST['calc_shipping_state'] );
+				$postcode   = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true ) ? wc_clean( $_POST['calc_shipping_postcode'] ) : '';
+				$city       = apply_filters( 'woocommerce_shipping_calculator_enable_city', false ) ? wc_clean( $_POST['calc_shipping_city'] ) : '';
 
 				if ( $postcode && ! WC_Validation::is_postcode( $postcode, $country ) ) {
 					throw new Exception( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );

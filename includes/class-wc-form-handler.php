@@ -70,7 +70,7 @@ class WC_Form_Handler {
 					$_POST[ $key ] = isset( $_POST[ $key ] ) ? 1 : 0;
 				break;
 				default :
-					$_POST[ $key ] = isset( $_POST[ $key ] ) ? woocommerce_clean( $_POST[ $key ] ) : '';
+					$_POST[ $key ] = isset( $_POST[ $key ] ) ? wc_clean( $_POST[ $key ] ) : '';
 				break;
 			}
 
@@ -149,11 +149,11 @@ class WC_Form_Handler {
 		if ( $user->ID <= 0 )
 			return;
 
-		$account_first_name = ! empty( $_POST[ 'account_first_name' ] ) ? woocommerce_clean( $_POST[ 'account_first_name' ] ) : '';
-		$account_last_name  = ! empty( $_POST[ 'account_last_name' ] ) ? woocommerce_clean( $_POST[ 'account_last_name' ] ) : '';
-		$account_email      = ! empty( $_POST[ 'account_email' ] ) ? woocommerce_clean( $_POST[ 'account_email' ] ) : '';
-		$pass1              = ! empty( $_POST[ 'password_1' ] ) ? woocommerce_clean( $_POST[ 'password_1' ] ) : '';
-		$pass2              = ! empty( $_POST[ 'password_2' ] ) ? woocommerce_clean( $_POST[ 'password_2' ] ) : '';
+		$account_first_name = ! empty( $_POST[ 'account_first_name' ] ) ? wc_clean( $_POST[ 'account_first_name' ] ) : '';
+		$account_last_name  = ! empty( $_POST[ 'account_last_name' ] ) ? wc_clean( $_POST[ 'account_last_name' ] ) : '';
+		$account_email      = ! empty( $_POST[ 'account_email' ] ) ? wc_clean( $_POST[ 'account_email' ] ) : '';
+		$pass1              = ! empty( $_POST[ 'password_1' ] ) ? wc_clean( $_POST[ 'password_1' ] ) : '';
+		$pass2              = ! empty( $_POST[ 'password_2' ] ) ? wc_clean( $_POST[ 'password_2' ] ) : '';
 
 		$user->first_name   = $account_first_name;
 		$user->last_name    = $account_last_name;
@@ -246,7 +246,7 @@ class WC_Form_Handler {
 
 				// Update payment method
 				if ( $order->needs_payment() ) {
-					$payment_method = woocommerce_clean( $_POST['payment_method'] );
+					$payment_method = wc_clean( $_POST['payment_method'] );
 
 					$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
@@ -296,7 +296,7 @@ class WC_Form_Handler {
 
 			ob_start();
 
-			$payment_method = woocommerce_clean( $_POST['payment_method'] );
+			$payment_method = wc_clean( $_POST['payment_method'] );
 
 			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
@@ -529,7 +529,7 @@ class WC_Form_Handler {
 	            if ( isset( $_REQUEST[ $taxonomy ] ) ) {
 
 	                // Get value from post data
-	                // Don't use woocommerce_clean as it destroys sanitized characters
+	                // Don't use wc_clean as it destroys sanitized characters
 	                $value = sanitize_title( trim( stripslashes( $_REQUEST[ $taxonomy ] ) ) );
 
 	                // Get valid value from variation
@@ -743,8 +743,8 @@ class WC_Form_Handler {
 			if ( is_object( $user ) ) {
 
 				// save these values into the form again in case of errors
-				$args['key']   = woocommerce_clean( $_POST['reset_key'] );
-				$args['login'] = woocommerce_clean( $_POST['reset_login'] );
+				$args['key']   = wc_clean( $_POST['reset_key'] );
+				$args['login'] = wc_clean( $_POST['reset_login'] );
 
 				wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-reset_password' );
 
@@ -766,7 +766,7 @@ class WC_Form_Handler {
 
 				if( 0 == wc_notice_count( 'wc_errors' ) ) {
 
-					WC_Shortcode_My_Account::reset_password( $user, woocommerce_clean( $_POST['password_1'] ) );
+					WC_Shortcode_My_Account::reset_password( $user, wc_clean( $_POST['password_1'] ) );
 
 					do_action( 'woocommerce_customer_reset_password', $user );
 
@@ -788,9 +788,9 @@ class WC_Form_Handler {
 
 			WC()->verify_nonce( 'register' );
 
-			$username   = ! empty( $_POST['username'] ) ? woocommerce_clean( $_POST['username'] ) : '';
-			$email      = ! empty( $_POST['email'] ) ? woocommerce_clean( $_POST['email'] ) : '';
-			$password   = ! empty( $_POST['password'] ) ? woocommerce_clean( $_POST['password'] ) : '';
+			$username   = ! empty( $_POST['username'] ) ? wc_clean( $_POST['username'] ) : '';
+			$email      = ! empty( $_POST['email'] ) ? wc_clean( $_POST['email'] ) : '';
+			$password   = ! empty( $_POST['password'] ) ? wc_clean( $_POST['password'] ) : '';
 			
 			// Anti-spam trap
 			if ( ! empty( $_POST['email_2'] ) ) {

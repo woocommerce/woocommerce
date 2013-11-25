@@ -629,7 +629,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$flat_rate_fee = array();
 		$flat_rates = array();
 
-		if ( isset( $_POST[ $this->id . '_class'] ) ) $flat_rate_class = array_map( 'woocommerce_clean', $_POST[ $this->id . '_class'] );
+		if ( isset( $_POST[ $this->id . '_class'] ) ) $flat_rate_class = array_map( 'wc_clean', $_POST[ $this->id . '_class'] );
 		if ( isset( $_POST[ $this->id . '_cost'] ) )  $flat_rate_cost  = array_map( 'stripslashes', $_POST[ $this->id . '_cost'] );
 		if ( isset( $_POST[ $this->id . '_fee'] ) )   $flat_rate_fee   = array_map( 'stripslashes', $_POST[ $this->id . '_fee'] );
 
@@ -642,12 +642,12 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		for ( $i = 0; $i <= $key; $i++ ) {
 			if ( ! empty( $flat_rate_class[ $i ] ) && isset( $flat_rate_cost[ $i ] ) && isset( $flat_rate_fee[ $i ] ) ) {
 
-				$flat_rate_cost[ $i ] = woocommerce_format_decimal( $flat_rate_cost[$i] );
+				$flat_rate_cost[ $i ] = wc_format_decimal( $flat_rate_cost[$i] );
 
 				if ( ! strstr( $flat_rate_fee[$i], '%' ) )
-					$flat_rate_fee[ $i ] = woocommerce_format_decimal( $flat_rate_fee[$i] );
+					$flat_rate_fee[ $i ] = wc_format_decimal( $flat_rate_fee[$i] );
 				else
-					$flat_rate_fee[ $i ] = woocommerce_clean( $flat_rate_fee[$i] );
+					$flat_rate_fee[ $i ] = wc_clean( $flat_rate_fee[$i] );
 
 				// Add to flat rates array
 				$flat_rates[ sanitize_title($flat_rate_class[$i]) ] = array(
@@ -670,12 +670,12 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 * @return void
 	 */
 	function save_default_costs( $fields ) {
-	 	$default_cost = ( $_POST['default_cost'] === '' ) ? '' : woocommerce_format_decimal( $_POST['default_cost'] );
+	 	$default_cost = ( $_POST['default_cost'] === '' ) ? '' : wc_format_decimal( $_POST['default_cost'] );
 
 	 	if ( ! strstr( $_POST['default_fee'], '%' ) )
-	 		$default_fee  = ( $_POST['default_fee'] === '' ) ? '' : woocommerce_format_decimal( $_POST['default_fee'] );
+	 		$default_fee  = ( $_POST['default_fee'] === '' ) ? '' : wc_format_decimal( $_POST['default_fee'] );
 	 	else
-	 		$default_fee = woocommerce_clean( $_POST['default_fee'] );
+	 		$default_fee = wc_clean( $_POST['default_fee'] );
 
 	 	$fields['cost'] = $default_cost;
 	 	$fields['fee']  = $default_fee;

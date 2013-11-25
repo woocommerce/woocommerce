@@ -424,7 +424,7 @@ class WC_API_Server {
 			'URL'         => get_option( 'siteurl' ),
 			'routes'      => array(),
 			'meta'        => array(
-				'timezone'       => woocommerce_timezone_string(),
+				'timezone'       => wc_timezone_string(),
 				'currency'       => get_woocommerce_currency(),
 				'money_format'   => get_woocommerce_currency_symbol(),
 				'tax_included'   => ( 'yes' === get_option( 'woocommerce_prices_include_tax' ) ),
@@ -647,7 +647,7 @@ class WC_API_Server {
 	public function format_datetime( $timestamp, $convert_to_utc = false ) {
 
 		if ( $convert_to_utc ) {
-			$timezone = new DateTimeZone( woocommerce_timezone_string() );
+			$timezone = new DateTimeZone( wc_timezone_string() );
 		} else {
 			$timezone = new DateTimeZone( 'UTC' );
 		}

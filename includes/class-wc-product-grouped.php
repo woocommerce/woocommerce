@@ -189,7 +189,7 @@ class WC_Product_Grouped extends WC_Product {
 		if ( $min_price ) {
 			$display_price = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $min_price ) : $this->get_price_excluding_tax( 1, $min_price );
 
-			$price .= woocommerce_price( $display_price ) . $this->get_price_suffix();
+			$price .= wc_price( $display_price ) . $this->get_price_suffix();
 
 			$price = apply_filters( 'woocommerce_grouped_price_html', $price, $this );
 		} else {

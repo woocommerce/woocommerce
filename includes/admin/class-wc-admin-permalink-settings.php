@@ -160,9 +160,9 @@ class WC_Admin_Permalink_Settings {
 		// We need to save the options ourselves; settings api does not trigger save for the permalinks page
 		if ( isset( $_POST['permalink_structure'] ) || isset( $_POST['category_base'] ) && isset( $_POST['product_permalink'] ) ) {
 			// Cat and tag bases
-			$woocommerce_product_category_slug = woocommerce_clean( $_POST['woocommerce_product_category_slug'] );
-			$woocommerce_product_tag_slug = woocommerce_clean( $_POST['woocommerce_product_tag_slug'] );
-			$woocommerce_product_attribute_slug = woocommerce_clean( $_POST['woocommerce_product_attribute_slug'] );
+			$woocommerce_product_category_slug = wc_clean( $_POST['woocommerce_product_category_slug'] );
+			$woocommerce_product_tag_slug = wc_clean( $_POST['woocommerce_product_tag_slug'] );
+			$woocommerce_product_attribute_slug = wc_clean( $_POST['woocommerce_product_attribute_slug'] );
 
 			$permalinks = get_option( 'woocommerce_permalinks' );
 			if ( ! $permalinks )
@@ -173,10 +173,10 @@ class WC_Admin_Permalink_Settings {
 			$permalinks['attribute_base'] 	= untrailingslashit( $woocommerce_product_attribute_slug );
 
 			// Product base
-			$product_permalink = woocommerce_clean( $_POST['product_permalink'] );
+			$product_permalink = wc_clean( $_POST['product_permalink'] );
 
 			if ( $product_permalink == 'custom' ) {
-				$product_permalink = woocommerce_clean( $_POST['product_permalink_structure'] );
+				$product_permalink = wc_clean( $_POST['product_permalink_structure'] );
 			} elseif ( empty( $product_permalink ) ) {
 				$product_permalink = false;
 			}

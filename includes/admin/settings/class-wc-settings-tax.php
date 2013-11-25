@@ -534,13 +534,13 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				foreach ( $value as $new_key => $new_value ) {
 
 					// Sanitize + format
-					$country  = strtoupper( woocommerce_clean( $tax_rate_country[ $key ][ $new_key ] ) );
-					$state    = strtoupper( woocommerce_clean( $tax_rate_state[ $key ][ $new_key ] ) );
-					$postcode = woocommerce_clean( $tax_rate_postcode[ $key ][ $new_key ] );
-					$city     = woocommerce_clean( $tax_rate_city[ $key ][ $new_key ] );
-					$rate     = number_format( woocommerce_clean( $tax_rate[ $key ][ $new_key ] ), 4, '.', '' );
-					$name     = woocommerce_clean( $tax_rate_name[ $key ][ $new_key ] );
-					$priority = absint( woocommerce_clean( $tax_rate_priority[ $key ][ $new_key ] ) );
+					$country  = strtoupper( wc_clean( $tax_rate_country[ $key ][ $new_key ] ) );
+					$state    = strtoupper( wc_clean( $tax_rate_state[ $key ][ $new_key ] ) );
+					$postcode = wc_clean( $tax_rate_postcode[ $key ][ $new_key ] );
+					$city     = wc_clean( $tax_rate_city[ $key ][ $new_key ] );
+					$rate     = number_format( wc_clean( $tax_rate[ $key ][ $new_key ] ), 4, '.', '' );
+					$name     = wc_clean( $tax_rate_name[ $key ][ $new_key ] );
+					$priority = absint( wc_clean( $tax_rate_priority[ $key ][ $new_key ] ) );
 					$compound = isset( $tax_rate_compound[ $key ][ $new_key ] ) ? 1 : 0;
 					$shipping = isset( $tax_rate_shipping[ $key ][ $new_key ] ) ? 1 : 0;
 
@@ -572,7 +572,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 					if ( ! empty( $postcode ) ) {
 						$postcodes = explode( ';', $postcode );
-						$postcodes = array_map( 'strtoupper', array_map( 'woocommerce_clean', $postcodes ) );
+						$postcodes = array_map( 'strtoupper', array_map( 'wc_clean', $postcodes ) );
 
 						$postcode_query = array();
 
@@ -601,7 +601,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 					if ( ! empty( $city ) ) {
 						$cities = explode( ';', $city );
-						$cities = array_map( 'strtoupper', array_map( 'woocommerce_clean', $cities ) );
+						$cities = array_map( 'strtoupper', array_map( 'wc_clean', $cities ) );
 						foreach( $cities as $city ) {
 							$wpdb->insert(
 							$wpdb->prefix . "woocommerce_tax_rate_locations",
@@ -629,11 +629,11 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				}
 
 				// Sanitize + format
-				$country  = strtoupper( woocommerce_clean( $tax_rate_country[ $key ] ) );
-				$state    = strtoupper( woocommerce_clean( $tax_rate_state[ $key ] ) );
-				$rate     = number_format( woocommerce_clean( $tax_rate[ $key ] ), 4, '.', '' );
-				$name     = woocommerce_clean( $tax_rate_name[ $key ] );
-				$priority = absint( woocommerce_clean( $tax_rate_priority[ $key ] ) );
+				$country  = strtoupper( wc_clean( $tax_rate_country[ $key ] ) );
+				$state    = strtoupper( wc_clean( $tax_rate_state[ $key ] ) );
+				$rate     = number_format( wc_clean( $tax_rate[ $key ] ), 4, '.', '' );
+				$name     = wc_clean( $tax_rate_name[ $key ] );
+				$priority = absint( wc_clean( $tax_rate_priority[ $key ] ) );
 				$compound = isset( $tax_rate_compound[ $key ] ) ? 1 : 0;
 				$shipping = isset( $tax_rate_shipping[ $key ] ) ? 1 : 0;
 
@@ -669,9 +669,9 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d AND location_type = 'postcode';", $tax_rate_id ) );
 
 					// Add changed
-					$postcode  = woocommerce_clean( $tax_rate_postcode[ $key ] );
+					$postcode  = wc_clean( $tax_rate_postcode[ $key ] );
 					$postcodes = explode( ';', $postcode );
-					$postcodes = array_map( 'strtoupper', array_map( 'woocommerce_clean', $postcodes ) );
+					$postcodes = array_map( 'strtoupper', array_map( 'wc_clean', $postcodes ) );
 
 					$postcode_query = array();
 
@@ -704,9 +704,9 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d AND location_type = 'city';", $tax_rate_id ) );
 
 					// Add changed
-					$city   = woocommerce_clean( $tax_rate_city[ $key ] );
+					$city   = wc_clean( $tax_rate_city[ $key ] );
 					$cities = explode( ';', $city );
-					$cities = array_map( 'strtoupper', array_map( 'woocommerce_clean', $cities ) );
+					$cities = array_map( 'strtoupper', array_map( 'wc_clean', $cities ) );
 					foreach( $cities as $city ) {
 						if ( $city ) {
 							$wpdb->insert(

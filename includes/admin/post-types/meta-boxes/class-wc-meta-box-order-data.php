@@ -358,17 +358,17 @@ class WC_Meta_Box_Order_Data {
 
 		if ( self::$billing_fields )
 			foreach ( self::$shipping_fields as $key => $field )
-				update_post_meta( $post_id, '_billing_' . $key, woocommerce_clean( $_POST[ '_billing_' . $key ] ) );
+				update_post_meta( $post_id, '_billing_' . $key, wc_clean( $_POST[ '_billing_' . $key ] ) );
 
 		if ( self::$shipping_fields )
 			foreach ( self::$shipping_fields as $key => $field )
-				update_post_meta( $post_id, '_shipping_' . $key, woocommerce_clean( $_POST[ '_shipping_' . $key ] ) );
+				update_post_meta( $post_id, '_shipping_' . $key, wc_clean( $_POST[ '_shipping_' . $key ] ) );
 
 		// Payment method handling
 		if ( get_post_meta( $post_id, '_payment_method', true ) !== stripslashes( $_POST['_payment_method'] ) ) {
 
 			$methods 				= $woocommerce->payment_gateways->payment_gateways();
-			$payment_method 		= woocommerce_clean( $_POST['_payment_method'] );
+			$payment_method 		= wc_clean( $_POST['_payment_method'] );
 			$payment_method_title 	= $payment_method;
 
 			if ( isset( $methods) && isset( $methods[ $payment_method ] ) )

@@ -212,10 +212,10 @@ foreach ( $order_item_rows as $order_item_row ) {
 		 	woocommerce_add_order_item_meta( $item_id, '_tax_class', $order_item['tax_class'] );
 		 	woocommerce_add_order_item_meta( $item_id, '_product_id', $order_item['id'] );
 		 	woocommerce_add_order_item_meta( $item_id, '_variation_id', $order_item['variation_id'] );
-		 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal', woocommerce_format_decimal( $order_item['line_subtotal'] ) );
-		 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal_tax', woocommerce_format_decimal( $order_item['line_subtotal_tax'] ) );
-		 	woocommerce_add_order_item_meta( $item_id, '_line_total', woocommerce_format_decimal( $order_item['line_total'] ) );
-		 	woocommerce_add_order_item_meta( $item_id, '_line_tax', woocommerce_format_decimal( $order_item['line_tax'] ) );
+		 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( $order_item['line_subtotal'] ) );
+		 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( $order_item['line_subtotal_tax'] ) );
+		 	woocommerce_add_order_item_meta( $item_id, '_line_total', wc_format_decimal( $order_item['line_total'] ) );
+		 	woocommerce_add_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $order_item['line_tax'] ) );
 
 		 	$meta_rows = array();
 
@@ -277,8 +277,8 @@ foreach ( $order_tax_rows as $order_tax_row ) {
 		 	// Add line item meta
 		 	if ( $item_id ) {
 			 	woocommerce_add_order_item_meta( $item_id, 'compound', absint( isset( $order_tax['compound'] ) ? $order_tax['compound'] : 0 ) );
-			 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', woocommerce_clean( $order_tax['cart_tax'] ) );
-			 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', woocommerce_clean( $order_tax['shipping_tax'] ) );
+			 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', wc_clean( $order_tax['cart_tax'] ) );
+			 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', wc_clean( $order_tax['shipping_tax'] ) );
 			}
 
 			// Delete from DB (rename)

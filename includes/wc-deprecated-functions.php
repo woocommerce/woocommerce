@@ -46,8 +46,8 @@ function woocommerce_readfile_chunked( $file, $retbytes = true ) {
  * @return string
  */
 function woocommerce_format_total( $number ) {
-	_deprecated_function( __FUNCTION__, '2.1', 'woocommerce_format_decimal()' );
-	return woocommerce_format_decimal( $number, get_option( 'woocommerce_price_num_decimals' ), false );
+	_deprecated_function( __FUNCTION__, '2.1', 'wc_format_decimal()' );
+	return wc_format_decimal( $number, get_option( 'woocommerce_price_num_decimals' ), false );
 }
 
 /**
@@ -138,6 +138,77 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
 }
 function woocommerce_customer_has_capability( $allcaps, $caps, $args ) {
 	wc_customer_has_capability( $allcaps, $caps, $args );
+}
+
+/**
+ * Formatting functions (soft deprecated)
+ */
+function woocommerce_sanitize_taxonomy_name( $taxonomy ) {
+	wc_sanitize_taxonomy_name( $taxonomy );
+}
+function woocommerce_get_filename_from_url( $file_url ) {
+	wc_get_filename_from_url( $file_url );
+}
+function woocommerce_get_dimension( $dim, $to_unit ) {
+	wc_get_dimension( $dim, $to_unit );
+}
+function woocommerce_get_weight( $weight, $to_unit ) {
+	wc_get_weight( $weight, $to_unit );
+}
+function woocommerce_trim_zeros( $price ) {
+	wc_trim_zeros( $price );
+}
+function woocommerce_round_tax_total( $tax ) {
+	wc_round_tax_total( $tax );
+}
+function woocommerce_format_decimal( $number, $dp = false, $trim_zeros = false ) {
+	wc_format_decimal( $number, $dp, $trim_zeros );
+}
+function woocommerce_clean( $var ) {
+	wc_clean( $var );
+}
+function woocommerce_array_overlay( $a1, $a2 ) {
+	wc_array_overlay( $a1, $a2 );
+}
+function woocommerce_price( $price, $args = array() ) {
+	wc_price( $price, $args );
+}
+function woocommerce_let_to_num( $size ) {
+	wc_let_to_num( $size );
+}
+function woocommerce_date_format() {
+	wc_date_format();
+}
+function woocommerce_time_format() {
+	wc_time_format();
+}
+function woocommerce_timezone_string() {
+	wc_timezone_string();
+}
+if ( ! function_exists( 'woocommerce_rgb_from_hex' ) ) {
+	function woocommerce_rgb_from_hex( $color ) {
+		wc_rgb_from_hex( $color );
+	}
+}
+if ( ! function_exists( 'woocommerce_hex_darker' ) ) {
+	function woocommerce_hex_darker( $color, $factor = 30 ) {
+		wc_hex_darker( $color, $factor );
+	}
+}
+if ( ! function_exists( 'woocommerce_hex_lighter' ) ) {
+	function woocommerce_hex_lighter( $color, $factor = 30 ) {
+		wc_hex_lighter( $color, $factor );
+	}
+}
+if ( ! function_exists( 'woocommerce_light_or_dark' ) ) {
+	function woocommerce_light_or_dark( $color, $dark = '#000000', $light = '#FFFFFF' ) {
+		wc_light_or_dark( $color, $dark, $light );
+	}
+}
+if ( ! function_exists( 'woocommerce_format_hex' ) ) {
+	function woocommerce_format_hex( $hex ) {
+		wc_format_hex( $hex );
+	}
 }
 
 /**

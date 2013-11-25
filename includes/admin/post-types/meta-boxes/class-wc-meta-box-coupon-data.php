@@ -224,18 +224,18 @@ class WC_Meta_Box_Coupon_Data {
 			WC_Admin_Meta_Boxes::add_error( __( 'Coupon code already exists - customers will use the latest coupon with this code.', 'woocommerce' ) );
 
 		// Add/Replace data to array
-		$type                 = woocommerce_clean( $_POST['discount_type'] );
-		$amount               = woocommerce_format_decimal( $_POST['coupon_amount'] );
+		$type                 = wc_clean( $_POST['discount_type'] );
+		$amount               = wc_format_decimal( $_POST['coupon_amount'] );
 		$usage_limit          = empty( $_POST['usage_limit'] ) ? '' : absint( $_POST['usage_limit'] );
 		$usage_limit_per_user = empty( $_POST['usage_limit_per_user'] ) ? '' : absint( $_POST['usage_limit_per_user'] );
 		$limit_usage_to_x_items = empty( $_POST['limit_usage_to_x_items'] ) ? '' : absint( $_POST['limit_usage_to_x_items'] );
 		$individual_use       = isset( $_POST['individual_use'] ) ? 'yes' : 'no';
-		$expiry_date          = woocommerce_clean( $_POST['expiry_date'] );
+		$expiry_date          = wc_clean( $_POST['expiry_date'] );
 		$apply_before_tax     = isset( $_POST['apply_before_tax'] ) ? 'yes' : 'no';
 		$free_shipping        = isset( $_POST['free_shipping'] ) ? 'yes' : 'no';
 		$exclude_sale_items   = isset( $_POST['exclude_sale_items'] ) ? 'yes' : 'no';
-		$minimum_amount       = woocommerce_format_decimal( $_POST['minimum_amount'] );
-		$customer_email       = array_filter( array_map( 'trim', explode( ',', woocommerce_clean( $_POST['customer_email'] ) ) ) );
+		$minimum_amount       = wc_format_decimal( $_POST['minimum_amount'] );
+		$customer_email       = array_filter( array_map( 'trim', explode( ',', wc_clean( $_POST['customer_email'] ) ) ) );
 
 		if ( isset( $_POST['product_ids'] ) ) {
 			$product_ids 			= implode( ',', array_filter( array_map( 'intval', (array) $_POST['product_ids'] ) ) );

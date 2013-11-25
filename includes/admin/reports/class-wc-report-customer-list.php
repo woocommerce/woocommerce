@@ -120,7 +120,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 					update_user_meta( $user->ID, '_money_spent', $spent );
 				}
 
-				return woocommerce_price( $spent );
+				return wc_price( $spent );
 			break;
 			case 'orders' :
 				if ( ! $count = get_user_meta( $user->ID, '_order_count', true ) ) {

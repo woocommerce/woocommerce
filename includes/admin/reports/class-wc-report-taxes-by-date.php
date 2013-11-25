@@ -121,10 +121,10 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 					<tr>
 						<th scope="row"><?php _e( 'Totals', 'woocommerce' ); ?></th>
 						<th class="total_row"><?php echo array_sum( wp_list_pluck( (array) $tax_rows, 'total_orders' ) ); ?></th>
-						<th class="total_row"><?php echo woocommerce_price( $gross ); ?></th>
-						<th class="total_row"><?php echo woocommerce_price( array_sum( wp_list_pluck( (array) $tax_rows, 'total_shipping' ) ) ); ?></th>
-						<th class="total_row"><?php echo woocommerce_price( $total_tax ); ?></th>
-						<th class="total_row"><?php echo woocommerce_price( $gross - $total_tax ); ?></th>
+						<th class="total_row"><?php echo wc_price( $gross ); ?></th>
+						<th class="total_row"><?php echo wc_price( array_sum( wp_list_pluck( (array) $tax_rows, 'total_shipping' ) ) ); ?></th>
+						<th class="total_row"><?php echo wc_price( $total_tax ); ?></th>
+						<th class="total_row"><?php echo wc_price( $gross - $total_tax ); ?></th>
 					</tr>
 				</tfoot>
 				<tbody>
@@ -141,10 +141,10 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 									echo date_i18n( get_option( 'date_format' ), strtotime( $tax_row->post_date ) );
 							?></th>
 							<td class="total_row"><?php echo $tax_row->total_orders; ?></td>
-							<td class="total_row"><?php echo woocommerce_price( $gross ); ?></td>
-							<td class="total_row"><?php echo woocommerce_price( $tax_row->total_shipping ); ?></td>
-							<td class="total_row"><?php echo woocommerce_price( $total_tax ); ?></td>
-							<td class="total_row"><?php echo woocommerce_price( $gross - $total_tax ); ?></td>
+							<td class="total_row"><?php echo wc_price( $gross ); ?></td>
+							<td class="total_row"><?php echo wc_price( $tax_row->total_shipping ); ?></td>
+							<td class="total_row"><?php echo wc_price( $total_tax ); ?></td>
+							<td class="total_row"><?php echo wc_price( $gross - $total_tax ); ?></td>
 						</tr>
 						<?php
 					}

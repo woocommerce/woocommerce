@@ -44,7 +44,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			//	continue;
 
 			$legend[] = array(
-				'title' => sprintf( __( '%s sales in %s', 'woocommerce' ), '<strong>' . woocommerce_price( $total ) . '</strong>', $category->name ),
+				'title' => sprintf( __( '%s sales in %s', 'woocommerce' ), '<strong>' . wc_price( $total ) . '</strong>', $category->name ),
 				'color' => isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[ 0 ],
 				'highlight_series' => $index
 			);

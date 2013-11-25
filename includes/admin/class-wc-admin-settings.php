@@ -648,7 +648,7 @@ class WC_Admin_Settings {
 			        } else {
 
 				       if ( isset( $_POST[$value['id']] ) ) {
-			            	$option_value = woocommerce_clean( stripslashes( $_POST[ $value['id'] ] ) );
+			            	$option_value = wc_clean( stripslashes( $_POST[ $value['id'] ] ) );
 			            } else {
 			                $option_value = '';
 			            }
@@ -663,7 +663,7 @@ class WC_Admin_Settings {
 
 		    		// Get countries array
 					if ( isset( $_POST[ $value['id'] ] ) )
-						$selected_countries = array_map( 'woocommerce_clean', array_map( 'stripslashes', (array) $_POST[ $value['id'] ] ) );
+						$selected_countries = array_map( 'wc_clean', array_map( 'stripslashes', (array) $_POST[ $value['id'] ] ) );
 					else
 						$selected_countries = array();
 
@@ -675,8 +675,8 @@ class WC_Admin_Settings {
 
 			    	if ( isset( $_POST[$value['id'] ]['width'] ) ) {
 
-		              	$update_options[ $value['id'] ]['width']  = woocommerce_clean( stripslashes( $_POST[ $value['id'] ]['width'] ) );
-		              	$update_options[ $value['id'] ]['height'] = woocommerce_clean( stripslashes( $_POST[ $value['id'] ]['height'] ) );
+		              	$update_options[ $value['id'] ]['width']  = wc_clean( stripslashes( $_POST[ $value['id'] ]['width'] ) );
+		              	$update_options[ $value['id'] ]['height'] = wc_clean( stripslashes( $_POST[ $value['id'] ]['height'] ) );
 
 						if ( isset( $_POST[ $value['id'] ]['crop'] ) )
 							$update_options[ $value['id'] ]['crop'] = 1;

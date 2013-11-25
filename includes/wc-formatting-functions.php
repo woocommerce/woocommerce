@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @param mixed $taxonomy
  * @return string
  */
-function woocommerce_sanitize_taxonomy_name( $taxonomy ) {
+function wc_sanitize_taxonomy_name( $taxonomy ) {
 	$filtered = strtolower( remove_accents( stripslashes( strip_tags( $taxonomy ) ) ) );
 	$filtered = preg_replace( '/&.+?;/', '', $filtered ); // Kill entities
 	$filtered = str_replace( array( '.', '\'', '"' ), '', $filtered ); // Kill quotes and full stops.
@@ -37,25 +37,23 @@ function woocommerce_sanitize_taxonomy_name( $taxonomy ) {
  * @param string $file_url
  * @return string
  */
-function woocommerce_get_filename_from_url( $file_url ) {
+function wc_get_filename_from_url( $file_url ) {
 	$parts = parse_url( $file_url );
 	if ( isset( $parts['path'] ) )
 		return basename( $parts['path'] );
 }
 
 /**
- * woocommerce_get_dimension function.
- *
  * Normalise dimensions, unify to cm then convert to wanted unit value
  *
- * Usage: woocommerce_get_dimension(55, 'in');
+ * Usage: wc_get_dimension(55, 'in');
  *
  * @access public
  * @param mixed $dim
  * @param mixed $to_unit 'in', 'm', 'cm', 'm'
  * @return float
  */
-function woocommerce_get_dimension( $dim, $to_unit ) {
+function wc_get_dimension( $dim, $to_unit ) {
 
 	$from_unit 	= strtolower( get_option( 'woocommerce_dimension_unit' ) );
 	$to_unit	= strtolower( $to_unit );
@@ -98,18 +96,16 @@ function woocommerce_get_dimension( $dim, $to_unit ) {
 }
 
 /**
- * woocommerce_get_weight function.
- *
  * Normalise weights, unify to cm then convert to wanted unit value
  *
- * Usage: woocommerce_get_weight(55, 'kg');
+ * Usage: wc_get_weight(55, 'kg');
  *
  * @access public
  * @param mixed $weight
  * @param mixed $to_unit 'g', 'kg', 'lbs'
  * @return float
  */
-function woocommerce_get_weight( $weight, $to_unit ) {
+function wc_get_weight( $weight, $to_unit ) {
 
 	$from_unit 	= strtolower( get_option('woocommerce_weight_unit') );
 	$to_unit	= strtolower( $to_unit );
@@ -152,7 +148,7 @@ function woocommerce_get_weight( $weight, $to_unit ) {
  * @param mixed $price
  * @return string
  */
-function woocommerce_trim_zeros( $price ) {
+function wc_trim_zeros( $price ) {
 	return preg_replace( '/' . preg_quote( get_option( 'woocommerce_price_decimal_sep' ), '/' ) . '0++$/', '', $price );
 }
 
@@ -163,7 +159,7 @@ function woocommerce_trim_zeros( $price ) {
  * @param mixed $price
  * @return string
  */
-function woocommerce_round_tax_total( $tax ) {
+function wc_round_tax_total( $tax ) {
 	$dp = (int) get_option( 'woocommerce_price_num_decimals' );
 
 	if ( version_compare( phpversion(), '5.3', '<' ) ) {
@@ -184,12 +180,12 @@ function woocommerce_round_tax_total( $tax ) {
  * @param  boolean $trim_zeros from end of string
  * @return string
  */
-function woocommerce_format_decimal( $number, $dp = false, $trim_zeros = false ) {
+function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	// Remove locale from string
 	if ( ! is_float( $number ) ) {
 		$locale   = localeconv();
 		$decimals = array( get_option( 'woocommerce_price_decimal_sep' ), $locale['decimal_point'], $locale['mon_decimal_point'] );
-		$number   = woocommerce_clean( str_replace( $decimals, '.', $number ) );
+		$number   = wc_clean( str_replace( $decimals, '.', $number ) );
 	}
 
 	// DP is false - don't use number format, just return a string in our format
@@ -246,7 +242,7 @@ function wc_format_localized_decimal( $value ) {
  * @param string $var
  * @return string
  */
-function woocommerce_clean( $var ) {
+function wc_clean( $var ) {
 	return sanitize_text_field( $var );
 }
 
@@ -258,12 +254,12 @@ function woocommerce_clean( $var ) {
  * @param array $a2
  * @return array
  */
-function woocommerce_array_overlay( $a1, $a2 ) {
+function wc_array_overlay( $a1, $a2 ) {
     foreach( $a1 as $k => $v ) {
         if ( ! array_key_exists( $k, $a2 ) )
         	continue;
         if ( is_array( $v ) && is_array( $a2[ $k ] ) ) {
-            $a1[ $k ] = woocommerce_array_overlay( $v, $a2[ $k ] );
+            $a1[ $k ] = wc_array_overlay( $v, $a2[ $k ] );
         } else {
             $a1[ $k ] = $a2[ $k ];
         }
@@ -305,7 +301,7 @@ function get_woocommerce_price_format() {
  * @param array $args (default: array())
  * @return string
  */
-function woocommerce_price( $price, $args = array() ) {
+function wc_price( $price, $args = array() ) {
 	global $woocommerce;
 
 	extract( shortcode_atts( array(
@@ -324,7 +320,7 @@ function woocommerce_price( $price, $args = array() ) {
 	$price           = apply_filters( 'formatted_woocommerce_price', number_format( $price, $num_decimals, $decimal_sep, $thousands_sep ), $price, $num_decimals, $decimal_sep, $thousands_sep );
 
 	if ( apply_filters( 'woocommerce_price_trim_zeros', true ) && $num_decimals > 0 )
-		$price = woocommerce_trim_zeros( $price );
+		$price = wc_trim_zeros( $price );
 
 	$return = '<span class="amount">' . sprintf( get_woocommerce_price_format(), $currency_symbol, $price ) . '</span>';
 
@@ -343,7 +339,7 @@ function woocommerce_price( $price, $args = array() ) {
  * @param $size
  * @return int
  */
-function woocommerce_let_to_num( $size ) {
+function wc_let_to_num( $size ) {
     $l 		= substr( $size, -1 );
     $ret 	= substr( $size, 0, -1 );
     switch( strtoupper( $l ) ) {
@@ -367,7 +363,7 @@ function woocommerce_let_to_num( $size ) {
  * @access public
  * @return string
  */
-function woocommerce_date_format() {
+function wc_date_format() {
 	return apply_filters( 'woocommerce_date_format', get_option( 'date_format' ) );
 }
 
@@ -377,7 +373,7 @@ function woocommerce_date_format() {
  * @access public
  * @return string
  */
-function woocommerce_time_format() {
+function wc_time_format() {
 	return apply_filters( 'woocommerce_time_format', get_option( 'time_format' ) );
 }
 
@@ -391,7 +387,7 @@ function woocommerce_time_format() {
  * @access public
  * @return string a valid PHP timezone string for the site
  */
-function woocommerce_timezone_string() {
+function wc_timezone_string() {
 
 	// if site timezone string exists, return it
 	if ( $timezone = get_option( 'timezone_string' ) )
@@ -426,7 +422,7 @@ function woocommerce_timezone_string() {
 	return 'UTC';
 }
 
-if ( ! function_exists( 'woocommerce_rgb_from_hex' ) ) {
+if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
 
 	/**
 	 * Hex darker/lighter/contrast functions for colours
@@ -435,7 +431,7 @@ if ( ! function_exists( 'woocommerce_rgb_from_hex' ) ) {
 	 * @param mixed $color
 	 * @return string
 	 */
-	function woocommerce_rgb_from_hex( $color ) {
+	function wc_rgb_from_hex( $color ) {
 		$color = str_replace( '#', '', $color );
 		// Convert shorthand colors to full format, e.g. "FFF" -> "FFFFFF"
 		$color = preg_replace( '~^(.)(.)(.)$~', '$1$1$2$2$3$3', $color );
@@ -447,7 +443,7 @@ if ( ! function_exists( 'woocommerce_rgb_from_hex' ) ) {
 	}
 }
 
-if ( ! function_exists( 'woocommerce_hex_darker' ) ) {
+if ( ! function_exists( 'wc_hex_darker' ) ) {
 
 	/**
 	 * Hex darker/lighter/contrast functions for colours
@@ -457,8 +453,8 @@ if ( ! function_exists( 'woocommerce_hex_darker' ) ) {
 	 * @param int $factor (default: 30)
 	 * @return string
 	 */
-	function woocommerce_hex_darker( $color, $factor = 30 ) {
-		$base = woocommerce_rgb_from_hex( $color );
+	function wc_hex_darker( $color, $factor = 30 ) {
+		$base = wc_rgb_from_hex( $color );
 		$color = '#';
 
 		foreach ($base as $k => $v) :
@@ -477,7 +473,7 @@ if ( ! function_exists( 'woocommerce_hex_darker' ) ) {
 	}
 }
 
-if ( ! function_exists( 'woocommerce_hex_lighter' ) ) {
+if ( ! function_exists( 'wc_hex_lighter' ) ) {
 
 	/**
 	 * Hex darker/lighter/contrast functions for colours
@@ -487,8 +483,8 @@ if ( ! function_exists( 'woocommerce_hex_lighter' ) ) {
 	 * @param int $factor (default: 30)
 	 * @return string
 	 */
-	function woocommerce_hex_lighter( $color, $factor = 30 ) {
-		$base = woocommerce_rgb_from_hex( $color );
+	function wc_hex_lighter( $color, $factor = 30 ) {
+		$base = wc_rgb_from_hex( $color );
 		$color = '#';
 
 	    foreach ($base as $k => $v) :
@@ -508,7 +504,7 @@ if ( ! function_exists( 'woocommerce_hex_lighter' ) ) {
 	}
 }
 
-if ( ! function_exists( 'woocommerce_light_or_dark' ) ) {
+if ( ! function_exists( 'wc_light_or_dark' ) ) {
 
 	/**
 	 * Detect if we should use a light or dark colour on a background colour
@@ -519,7 +515,7 @@ if ( ! function_exists( 'woocommerce_light_or_dark' ) ) {
 	 * @param string $light (default: '#FFFFFF')
 	 * @return string
 	 */
-	function woocommerce_light_or_dark( $color, $dark = '#000000', $light = '#FFFFFF' ) {
+	function wc_light_or_dark( $color, $dark = '#000000', $light = '#FFFFFF' ) {
 	    //return ( hexdec( $color ) > 0xffffff / 2 ) ? $dark : $light;
 	    $hex = str_replace( '#', '', $color );
 
@@ -532,7 +528,7 @@ if ( ! function_exists( 'woocommerce_light_or_dark' ) ) {
 	}
 }
 
-if ( ! function_exists( 'woocommerce_format_hex' ) ) {
+if ( ! function_exists( 'wc_format_hex' ) ) {
 
 	/**
 	 * Format string as hex
@@ -541,7 +537,7 @@ if ( ! function_exists( 'woocommerce_format_hex' ) ) {
 	 * @param string $hex
 	 * @return string
 	 */
-	function woocommerce_format_hex( $hex ) {
+	function wc_format_hex( $hex ) {
 
 	    $hex = trim( str_replace( '#', '', $hex ) );
 

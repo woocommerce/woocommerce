@@ -275,11 +275,11 @@ class WC_Settings_General extends WC_Settings_Page {
 		if ( isset( $_POST['woocommerce_frontend_css_primary'] ) ) {
 
 			// Save settings
-			$primary 		= ( ! empty( $_POST['woocommerce_frontend_css_primary'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_primary'] ) : '';
-			$secondary 		= ( ! empty( $_POST['woocommerce_frontend_css_secondary'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_secondary'] ) : '';
-			$highlight 		= ( ! empty( $_POST['woocommerce_frontend_css_highlight'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_highlight'] ) : '';
-			$content_bg 	= ( ! empty( $_POST['woocommerce_frontend_css_content_bg'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_content_bg'] ) : '';
-			$subtext 		= ( ! empty( $_POST['woocommerce_frontend_css_subtext'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_subtext'] ) : '';
+			$primary 		= ( ! empty( $_POST['woocommerce_frontend_css_primary'] ) ) ? wc_format_hex( $_POST['woocommerce_frontend_css_primary'] ) : '';
+			$secondary 		= ( ! empty( $_POST['woocommerce_frontend_css_secondary'] ) ) ? wc_format_hex( $_POST['woocommerce_frontend_css_secondary'] ) : '';
+			$highlight 		= ( ! empty( $_POST['woocommerce_frontend_css_highlight'] ) ) ? wc_format_hex( $_POST['woocommerce_frontend_css_highlight'] ) : '';
+			$content_bg 	= ( ! empty( $_POST['woocommerce_frontend_css_content_bg'] ) ) ? wc_format_hex( $_POST['woocommerce_frontend_css_content_bg'] ) : '';
+			$subtext 		= ( ! empty( $_POST['woocommerce_frontend_css_subtext'] ) ) ? wc_format_hex( $_POST['woocommerce_frontend_css_subtext'] ) : '';
 
 			$colors = array(
 				'primary' 		=> $primary,

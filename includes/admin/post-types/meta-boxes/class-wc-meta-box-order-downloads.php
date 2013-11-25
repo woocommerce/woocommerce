@@ -212,8 +212,8 @@ class WC_Meta_Box_Order_Downloads {
 
 	            $data = array(
 					'user_id'				=> absint( $customer_user ),
-					'user_email' 			=> woocommerce_clean( $customer_email ),
-					'downloads_remaining'	=> woocommerce_clean( $downloads_remaining[ $i ] )
+					'user_email' 			=> wc_clean( $customer_email ),
+					'downloads_remaining'	=> wc_clean( $downloads_remaining[ $i ] )
 	            );
 
 	            $format = array( '%d', '%s', '%s' );
@@ -230,7 +230,7 @@ class WC_Meta_Box_Order_Downloads {
 	                array(
 						'order_id' 		=> $post_id,
 						'product_id' 	=> absint( $product_ids[ $i ] ),
-						'download_id'	=> woocommerce_clean( $download_ids[ $i ] )
+						'download_id'	=> wc_clean( $download_ids[ $i ] )
 						),
 					$format, array( '%d', '%d', '%s' )
 				);

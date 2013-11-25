@@ -386,7 +386,7 @@ class WC_Admin_Report {
 			$total += $d->sparkline_value;
 
 		if ( $type == 'sales' ) {
-			$tooltip = sprintf( __( 'Sold %s worth in the last %d days', 'woocommerce' ), strip_tags( woocommerce_price( $total ) ), $days );
+			$tooltip = sprintf( __( 'Sold %s worth in the last %d days', 'woocommerce' ), strip_tags( wc_price( $total ) ), $days );
 		} else {
 			$tooltip = sprintf( _n( 'Sold 1 item in the last %d days', 'Sold %d items in the last %d days', $total, 'woocommerce' ), $total, $days );
 		}

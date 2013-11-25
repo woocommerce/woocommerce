@@ -137,7 +137,7 @@ if ( class_exists( 'WP_Importer' ) ) {
 							array(
 								'tax_rate_country'  => $country,
 								'tax_rate_state'    => $state,
-								'tax_rate'          => woocommerce_format_decimal( $rate, 4 ),
+								'tax_rate'          => wc_format_decimal( $rate, 4 ),
 								'tax_rate_name'     => trim( $name ),
 								'tax_rate_priority' => absint( $priority ),
 								'tax_rate_compound' => $compound ? 1 : 0,
@@ -149,9 +149,9 @@ if ( class_exists( 'WP_Importer' ) ) {
 
 						$tax_rate_id = $wpdb->insert_id;
 
-						$postcode  = woocommerce_clean( $postcode );
+						$postcode  = wc_clean( $postcode );
 						$postcodes = explode( ';', $postcode );
-						$postcodes = array_map( 'strtoupper', array_map( 'woocommerce_clean', $postcodes ) );
+						$postcodes = array_map( 'strtoupper', array_map( 'wc_clean', $postcodes ) );
 						foreach( $postcodes as $postcode ) {
 							if ( ! empty( $postcode ) && $postcode != '*' ) {
 								$wpdb->insert(
@@ -165,9 +165,9 @@ if ( class_exists( 'WP_Importer' ) ) {
 							}
 						}
 
-						$city   = woocommerce_clean( $city );
+						$city   = wc_clean( $city );
 						$cities = explode( ';', $city );
-						$cities = array_map( 'strtoupper', array_map( 'woocommerce_clean', $cities ) );
+						$cities = array_map( 'strtoupper', array_map( 'wc_clean', $cities ) );
 						foreach( $cities as $city ) {
 							if ( ! empty( $city ) && $city != '*' ) {
 								$wpdb->insert(

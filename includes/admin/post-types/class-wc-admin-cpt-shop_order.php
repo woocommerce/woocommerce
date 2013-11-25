@@ -517,7 +517,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 		if ( 'edit.php' != $pagenow || empty( $wp->query_vars['s'] ) || $wp->query_vars['post_type'] != 'shop_order' )
 			return $wp;
 
-		$search_fields = array_map( 'woocommerce_clean', apply_filters( 'woocommerce_shop_order_search_fields', array(
+		$search_fields = array_map( 'wc_clean', apply_filters( 'woocommerce_shop_order_search_fields', array(
 			'_order_key',
 			'_billing_first_name',
 			'_billing_last_name',

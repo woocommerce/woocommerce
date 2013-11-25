@@ -596,7 +596,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 	 * @return void
 	 */
 	function woocommerce_catalog_ordering() {
-		$orderby = isset( $_GET['orderby'] ) ? woocommerce_clean( $_GET['orderby'] ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+		$orderby = isset( $_GET['orderby'] ) ? wc_clean( $_GET['orderby'] ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
 
 		wc_get_template( 'loop/orderby.php', array( 'orderby' => $orderby ) );
 	}
@@ -1131,7 +1131,7 @@ function wc_cart_totals_coupon_html( $coupon ) {
 	$value  = array();
 
 	if ( ! empty( WC()->cart->coupon_discount_amounts[ $coupon->code ] ) )
-		$value[] = '-' . woocommerce_price( WC()->cart->coupon_discount_amounts[ $coupon->code ] );
+		$value[] = '-' . wc_price( WC()->cart->coupon_discount_amounts[ $coupon->code ] );
 
 	if ( $coupon->enable_free_shipping() )
 		$value[] = __( 'Free shipping coupon', 'woocommerce' );
@@ -1153,7 +1153,7 @@ function wc_cart_totals_order_total_html() {
 			foreach ( WC()->cart->get_tax_totals() as $code => $tax )
 				$tax_string_array[] = sprintf( '%s %s', $tax->formatted_amount, $tax->label );
 		} else {
-			$tax_string_array[] = sprintf( '%s %s', woocommerce_price( WC()->cart->get_taxes_total( true, true ) ), WC()->countries->tax_or_vat() );
+			$tax_string_array[] = sprintf( '%s %s', wc_price( WC()->cart->get_taxes_total( true, true ) ), WC()->countries->tax_or_vat() );
 		}
 
 		if ( ! empty( $tax_string_array ) )
@@ -1166,7 +1166,7 @@ function wc_cart_totals_order_total_html() {
  * @param  object $fee
  */
 function wc_cart_totals_fee_html( $fee ) {
-	echo WC()->cart->tax_display_cart == 'excl' ? woocommerce_price( $fee->amount ) : woocommerce_price( $fee->amount + $fee->tax );
+	echo WC()->cart->tax_display_cart == 'excl' ? wc_price( $fee->amount ) : wc_price( $fee->amount + $fee->tax );
 }
 
 /**
@@ -1179,12 +1179,12 @@ function wc_cart_totals_shipping_method_label( $method ) {
 
 	if ( $method->cost > 0 ) {
 		if ( WC()->cart->tax_display_cart == 'excl' ) {
-			$label .= ': ' . woocommerce_price( $method->cost );
+			$label .= ': ' . wc_price( $method->cost );
 			if ( $method->get_shipping_tax() > 0 && WC()->cart->prices_include_tax ) {
 				$label .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
 			}
 		} else {
-			$label .= ': ' . woocommerce_price( $method->cost + $method->get_shipping_tax() );
+			$label .= ': ' . wc_price( $method->cost + $method->get_shipping_tax() );
 			if ( $method->get_shipping_tax() > 0 && ! WC()->cart->prices_include_tax ) {
 				$label .= ' <small>' . WC()->countries->inc_tax_or_vat() . '</small>';
 			}
@@ -1680,7 +1680,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			$country_key = $key == 'billing_state'? 'billing_country' : 'shipping_country';
 
 			if ( isset( $_POST[ $country_key ] ) ) {
-				$current_cc = woocommerce_clean( $_POST[ $country_key ] );
+				$current_cc = wc_clean( $_POST[ $country_key ] );
 			} elseif ( is_user_logged_in() ) {
 				$current_cc = get_user_meta( get_current_user_id() , $country_key, true );
 				if ( ! $current_cc) {
