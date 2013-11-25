@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.1 - x =
+* Feature - New REST API
 * Feature - Define whether prices should be shown incl. or excl. of tax, and add an optional suffix.
 * Feature - Show grouped or itemized taxes during checkout.
 * Feature - Split frontend styles into separate appearance/layout stylesheets and removed the enable/disable option.
@@ -188,6 +189,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Coupon usage limits per user (using email + ID).
 * Feature - Option to limit reviews to purchasers.
 * Feature - Option to install missing WooCommerce pages from tools page.
+* Feature - New notices API for adding errors/notices
 * Tweak - Added pagination to tax rate screens.
 * Tweak - Added filter to check the 'Create account' checkbox on checkout by default.
 * Tweak - Update CPT parameters for 'product_variation' and 'shop_coupon' to be no longer public.
