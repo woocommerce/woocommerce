@@ -98,7 +98,6 @@ class WC_Coupon {
 	 *
 	 * @access public
 	 * @param mixed $code code of the coupon to load
-	 * @return void
 	 */
 	public function __construct( $code ) {
 		global $wpdb;
@@ -200,7 +199,7 @@ class WC_Coupon {
 	 * Check if a coupon enables free shipping.
 	 *
 	 * @access public
-	 * @return void
+	 * @return bool
 	 */
 	public function enable_free_shipping() {
 		return $this->free_shipping == 'yes' ? true : false;
@@ -211,7 +210,7 @@ class WC_Coupon {
 	 * Check if a coupon excludes sale items.
 	 *
 	 * @access public
-	 * @return void
+	 * @return bool
 	 */
 	public function exclude_sale_items() {
 		return $this->exclude_sale_items == 'yes' ? true : false;
@@ -424,6 +423,11 @@ class WC_Coupon {
 		return false;
 	}
 
+	/**
+	 * Check if a coupon is valid
+	 *
+	 * @return bool
+	 */
 	public function is_valid_for_cart() {
 		if ( $this->type != 'fixed_cart' && $this->type != 'percent' )
 			return false;
