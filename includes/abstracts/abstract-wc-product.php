@@ -1224,7 +1224,7 @@ class WC_Product {
 
 			if ( $attribute['is_taxonomy'] ) {
 
-				return implode( ', ', woocommerce_get_product_terms( $this->id, $attribute['name'], 'names' ) );
+				return implode( ', ', wc_get_product_terms( $this->id, $attribute['name'], array( 'fields' => 'names' ) ) );
 
 			} else {
 

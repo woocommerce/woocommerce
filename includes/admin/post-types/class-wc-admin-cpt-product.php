@@ -461,7 +461,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 	    	return;
 
 	    // Category Filtering
-	    woocommerce_product_dropdown_categories();
+	    wc_product_dropdown_categories();
 
 	    // Type filtering
 		$terms   = get_terms( 'product_type' );

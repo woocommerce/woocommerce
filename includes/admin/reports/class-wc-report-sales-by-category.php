@@ -161,7 +161,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
 						include_once( WC()->plugin_path() . '/includes/walkers/class-product-cat-dropdown-walker.php' );
 
-						echo woocommerce_walk_category_dropdown_tree( $categories, 0, $r );
+						echo wc_walk_category_dropdown_tree( $categories, 0, $r );
 					?>
 				</select>
 				<a href="#" class="select_none"><?php _e( 'None', 'woocommerce' ); ?></a>

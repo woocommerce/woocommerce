@@ -53,7 +53,7 @@ if ( empty( $attributes ) && ( ! $product->enable_dimensions_display() || ( ! $p
 			<td><?php
 				if ( $attribute['is_taxonomy'] ) {
 
-					$values = woocommerce_get_product_terms( $product->id, $attribute['name'], 'names' );
+					$values = wc_get_product_terms( $product->id, $attribute['name'], array( 'fields' => 'names' ) );
 					echo apply_filters( 'woocommerce_attribute', wpautop( wptexturize( implode( ', ', $values ) ) ), $attribute, $values );
 
 				} else {
