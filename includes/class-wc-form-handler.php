@@ -564,7 +564,7 @@ class WC_Form_Handler {
 
 	        	if ( $passed_validation ) {
 					if ( WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) ) {
-						woocommerce_add_to_cart_message( $product_id );
+						wc_add_to_cart_message( $product_id );
 						$was_added_to_cart = true;
 						$added_to_cart[] = $product_id;
 					}
@@ -599,7 +599,7 @@ class WC_Form_Handler {
 				}
 
 				if ( $was_added_to_cart ) {
-					woocommerce_add_to_cart_message( $added_to_cart );
+					wc_add_to_cart_message( $added_to_cart );
 				}
 
 				if ( ! $was_added_to_cart && ! $quantity_set ) {
@@ -626,7 +626,7 @@ class WC_Form_Handler {
 			if ( $passed_validation ) {
 	    		// Add the product to the cart
 	    		if ( WC()->cart->add_to_cart( $product_id, $quantity ) ) {
-	    			woocommerce_add_to_cart_message( $product_id );
+	    			wc_add_to_cart_message( $product_id );
 	    			$was_added_to_cart = true;
 	    			$added_to_cart[] = $product_id;
 	    		}
