@@ -47,7 +47,7 @@ function woocommerce_check_download_folder_protection() {
 
 
 /**
- * Protect downlodas from ms-files.php in multisite
+ * Protect downloads from ms-files.php in multisite
  *
  * @access public
  * @param mixed $rewrite
