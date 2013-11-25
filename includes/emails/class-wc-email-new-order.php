@@ -57,7 +57,6 @@ class WC_Email_New_Order extends WC_Email {
 	 * @return void
 	 */
 	function trigger( $order_id ) {
-		global $woocommerce;
 
 		if ( $order_id ) {
 			$this->object 		= new WC_Order( $order_id );

@@ -273,7 +273,6 @@ class WC_Coupon {
 	 * @return bool|WP_Error validity or a WP_Error if not valid
 	 */
 	public function is_valid() {
-		global $woocommerce;
 
 		$error_code = null;
 		$valid      = true;
@@ -311,7 +310,7 @@ class WC_Coupon {
 
 			// Minimum spend
 			if ( $this->minimum_amount > 0 ) {
-				if ( $this->minimum_amount > $woocommerce->cart->subtotal ) {
+				if ( $this->minimum_amount > WC()->cart->subtotal ) {
 					$valid = false;
 					$error_code = self::E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET;
 				}
@@ -320,8 +319,8 @@ class WC_Coupon {
 			// Product ids - If a product included is found in the cart then its valid
 			if ( sizeof( $this->product_ids ) > 0 ) {
 				$valid_for_cart = false;
-				if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
-					foreach( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
+				if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+					foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 
 						if ( in_array( $cart_item['product_id'], $this->product_ids ) || in_array( $cart_item['variation_id'], $this->product_ids ) || in_array( $cart_item['data']->get_parent(), $this->product_ids ) )
 							$valid_for_cart = true;
@@ -336,8 +335,8 @@ class WC_Coupon {
 			// Category ids - If a product included is found in the cart then its valid
 			if ( sizeof( $this->product_categories ) > 0 ) {
 				$valid_for_cart = false;
-				if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
-					foreach( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
+				if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+					foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 
 						$product_cats = wp_get_post_terms($cart_item['product_id'], 'product_cat', array("fields" => "ids"));
 
@@ -357,8 +356,8 @@ class WC_Coupon {
 				// Exclude Products
 				if ( sizeof( $this->exclude_product_ids ) > 0 ) {
 					$valid_for_cart = true;
-					if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
-						foreach( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
+					if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+						foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 							if ( in_array( $cart_item['product_id'], $this->exclude_product_ids ) || in_array( $cart_item['variation_id'], $this->exclude_product_ids ) || in_array( $cart_item['data']->get_parent(), $this->exclude_product_ids ) ) {
 								$valid_for_cart = false;
 							}
@@ -374,8 +373,8 @@ class WC_Coupon {
 				if ( $this->exclude_sale_items == 'yes' ) {
 					$valid_for_cart = true;
 					$product_ids_on_sale = wc_get_product_ids_on_sale();
-					if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
-						foreach( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
+					if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+						foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 							if ( in_array( $cart_item['product_id'], $product_ids_on_sale, true ) || in_array( $cart_item['variation_id'], $product_ids_on_sale, true ) || in_array( $cart_item['data']->get_parent(), $product_ids_on_sale, true ) ) {
 								$valid_for_cart = false;
 							}
@@ -390,8 +389,8 @@ class WC_Coupon {
 				// Exclude Categories
 				if ( sizeof( $this->exclude_product_categories ) > 0 ) {
 					$valid_for_cart = true;
-					if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
-						foreach( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
+					if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+						foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 
 							$product_cats = wp_get_post_terms( $cart_item['product_id'], 'product_cat', array( "fields" => "ids" ) );
 
@@ -544,7 +543,6 @@ class WC_Coupon {
 	 * @return void
 	 */
 	public function add_coupon_message( $msg_code ) {
-		global $woocommerce;
 
 		if ( $msg_code < 200 )
 			wc_add_notice( $this->get_coupon_error( $msg_code ), 'error' );

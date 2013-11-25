@@ -178,7 +178,7 @@ class WC_Meta_Box_Order_Totals {
 
 						if ( $rate_id ) {
 							$rate     = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $rate_id ) );
-							$label    = $rate->tax_rate_name ? $rate->tax_rate_name : $woocommerce->countries->tax_or_vat();
+							$label    = $rate->tax_rate_name ? $rate->tax_rate_name : WC()->countries->tax_or_vat();
 							$compound = $rate->tax_rate_compound ? 1 : 0;
 
 							$code = array();
@@ -226,7 +226,7 @@ class WC_Meta_Box_Order_Totals {
 
 					if ( $rate_id ) {
 						$rate     = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $rate_id ) );
-						$label    = $rate->tax_rate_name ? $rate->tax_rate_name : $woocommerce->countries->tax_or_vat();
+						$label    = $rate->tax_rate_name ? $rate->tax_rate_name : WC()->countries->tax_or_vat();
 						$compound = $rate->tax_rate_compound ? 1 : 0;
 
 						$code = array();

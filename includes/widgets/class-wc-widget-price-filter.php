@@ -50,7 +50,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		if ( ! is_post_type_archive( 'product' ) && ! is_tax( get_object_taxonomies( 'product' ) ) )
 			return;
 
-		if ( sizeof( $woocommerce->query->unfiltered_product_ids ) == 0 )
+		if ( sizeof( WC()->query->unfiltered_product_ids ) == 0 )
 			return; // None shown - return
 
 		$min_price = isset( $_GET['min_price'] ) ? esc_attr( $_GET['min_price'] ) : '';
@@ -91,7 +91,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		$min = $max = 0;
 		$post_min = $post_max = '';
 
-		if ( sizeof( $woocommerce->query->layered_nav_product_ids ) === 0 ) {
+		if ( sizeof( WC()->query->layered_nav_product_ids ) === 0 ) {
 			$max = ceil( $wpdb->get_var(
 				$wpdb->prepare('
 					SELECT max(meta_value + 0)
@@ -114,7 +114,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 							AND %1$s.post_parent != 0
 						)
 					)
-				', $wpdb->posts, $wpdb->postmeta, '_price', implode( ',', $woocommerce->query->layered_nav_product_ids )
+				', $wpdb->posts, $wpdb->postmeta, '_price', implode( ',', WC()->query->layered_nav_product_ids )
 			) ) );
 		}
 

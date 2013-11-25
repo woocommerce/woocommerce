@@ -72,13 +72,12 @@ class WC_Admin_Welcome {
 	 * @return void
 	 */
 	public function admin_head() {
-		global $woocommerce;
 
 		remove_submenu_page( 'index.php', 'wc-about' );
 		remove_submenu_page( 'index.php', 'wc-credits' );
 
 		// Badge for welcome page
-		$badge_url = $woocommerce->plugin_url() . '/assets/images/welcome/wc-badge.png';
+		$badge_url = WC()->plugin_url() . '/assets/images/welcome/wc-badge.png';
 		?>
 		<style type="text/css">
 			/*<![CDATA[*/
@@ -181,14 +180,13 @@ class WC_Admin_Welcome {
 	 * @return void
 	 */
 	private function intro() {
-		global $woocommerce;
 
 		// Flush after upgrades
 		if ( ! empty( $_GET['wc-updated'] ) || ! empty( $_GET['wc-installed'] ) )
 			flush_rewrite_rules();
 
 		// Drop minor version if 0
-		$major_version = substr( $woocommerce->version, 0, 3 );
+		$major_version = substr( WC()->version, 0, 3 );
 		?>
 		<h1><?php printf( __( 'Welcome to WooCommerce %s', 'woocommerce' ), $major_version ); ?></h1>
 
@@ -205,7 +203,7 @@ class WC_Admin_Welcome {
 			?>
 		</div>
 
-		<div class="wc-badge"><?php printf( __( 'Version %s', 'woocommerce' ), $woocommerce->version ); ?></div>
+		<div class="wc-badge"><?php printf( __( 'Version %s', 'woocommerce' ), WC()->version ); ?></div>
 
 		<p class="woocommerce-actions">
 			<a href="<?php echo admin_url('admin.php?page=wc-settings'); ?>" class="button button-primary"><?php _e( 'Settings', 'woocommerce' ); ?></a>
@@ -231,7 +229,6 @@ class WC_Admin_Welcome {
 	 * @return void
 	 */
 	public function about_screen() {
-		global $woocommerce;
 		?>
 		<div class="wrap about-wrap">
 

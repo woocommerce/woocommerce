@@ -67,7 +67,6 @@ class WC_Shortcode_Checkout {
 	 * Show the pay page
 	 */
 	private static function order_pay( $order_id ) {
-		global $woocommerce;
 
 		do_action( 'before_woocommerce_pay' );
 
@@ -94,11 +93,11 @@ class WC_Shortcode_Checkout {
 
 					// Set customer location to order location
 					if ( $order->billing_country )
-						$woocommerce->customer->set_country( $order->billing_country );
+						WC()->customer->set_country( $order->billing_country );
 					if ( $order->billing_state )
-						$woocommerce->customer->set_state( $order->billing_state );
+						WC()->customer->set_state( $order->billing_state );
 					if ( $order->billing_postcode )
-						$woocommerce->customer->set_postcode( $order->billing_postcode );
+						WC()->customer->set_postcode( $order->billing_postcode );
 
 					woocommerce_get_template( 'checkout/form-pay.php', array( 'order' => $order ) );
 
@@ -177,7 +176,6 @@ class WC_Shortcode_Checkout {
 	 * Show the thanks page
 	 */
 	private static function order_received( $order_id = 0 ) {
-		global $woocommerce;
 
 		wc_print_notices();
 
@@ -194,7 +192,7 @@ class WC_Shortcode_Checkout {
 		}
 
 		// Empty awaiting payment session
-		unset( $woocommerce->session->order_awaiting_payment );
+		unset( WC()->session->order_awaiting_payment );
 
 		woocommerce_get_template( 'checkout/thankyou.php', array( 'order' => $order ) );
 	}
@@ -203,23 +201,22 @@ class WC_Shortcode_Checkout {
 	 * Show the checkout
 	 */
 	private static function checkout() {
-		global $woocommerce;
 
 		// Show non-cart errors
 		wc_print_notices();
 
 		// Check cart has contents
-		if ( sizeof( $woocommerce->cart->get_cart() ) == 0 )
+		if ( sizeof( WC()->cart->get_cart() ) == 0 )
 			return;
 
 		// Calc totals
-		$woocommerce->cart->calculate_totals();
+		WC()->cart->calculate_totals();
 
 		// Check cart contents for errors
 		do_action('woocommerce_check_cart_items');
 
 		// Get checkout object
-		$checkout = $woocommerce->checkout();
+		$checkout = WC()->checkout();
 
 		if ( empty( $_POST ) && wc_notice_count( 'wc_errors' ) > 0 ) {
 

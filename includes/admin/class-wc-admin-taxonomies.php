@@ -84,7 +84,6 @@ class WC_Admin_Taxonomies {
 	 * @return void
 	 */
 	public function add_category_fields() {
-		global $woocommerce;
 		?>
 		<div class="form-field">
 			<label for="display_type"><?php _e( 'Display type', 'woocommerce' ); ?></label>
@@ -165,7 +164,6 @@ class WC_Admin_Taxonomies {
 	 * @param mixed $taxonomy Taxonomy of the term being edited
 	 */
 	public function edit_category_fields( $term, $taxonomy ) {
-		global $woocommerce;
 
 		$display_type	= get_woocommerce_term_meta( $term->term_id, 'display_type', true );
 		$image 			= '';
@@ -312,7 +310,6 @@ class WC_Admin_Taxonomies {
 	 * @return array
 	 */
 	public function product_cat_column( $columns, $column, $id ) {
-		global $woocommerce;
 
 		if ( $column == 'thumb' ) {
 

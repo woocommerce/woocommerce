@@ -51,7 +51,6 @@ class WC_Email_Customer_Note extends WC_Email {
 	 * @return void
 	 */
 	function trigger( $args ) {
-		global $woocommerce;
 
 		if ( $args ) {
 

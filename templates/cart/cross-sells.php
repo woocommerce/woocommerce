@@ -11,11 +11,11 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $product, $woocommerce, $woocommerce_loop;
 
-$crosssells = $woocommerce->cart->get_cross_sells();
+$crosssells = WC()->cart->get_cross_sells();
 
 if ( sizeof( $crosssells ) == 0 ) return;
 
-$meta_query = $woocommerce->query->get_meta_query();
+$meta_query = WC()->query->get_meta_query();
 
 $args = array(
 	'post_type'           => 'product',

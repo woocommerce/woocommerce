@@ -293,7 +293,6 @@ class WC_Admin_Attributes {
 	 * Shows the interface for adding new attributes
 	 */
 	public function add_attribute() {
-		global $woocommerce;
 		?>
 		<div class="wrap woocommerce">
 			<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>

@@ -259,7 +259,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "" ) {
 	global $woocommerce;
 
-	$mailer = $woocommerce->mailer();
+	$mailer = WC()->mailer();
 
 	$mailer->send( $to, $subject, $message, $headers, $attachments );
 }

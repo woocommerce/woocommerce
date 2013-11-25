@@ -471,14 +471,14 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 				var availableCountries = [<?php
 					$countries = array();
-					foreach ( $woocommerce->countries->get_allowed_countries() as $value => $label )
+					foreach ( WC()->countries->get_allowed_countries() as $value => $label )
 						$countries[] = '{ label: "' . $label . '", value: "' . $value . '" }';
 					echo implode( ', ', $countries );
 				?>];
 
 				var availableStates = [<?php
 					$countries = array();
-					foreach ( $woocommerce->countries->get_allowed_country_states() as $value => $label )
+					foreach ( WC()->countries->get_allowed_country_states() as $value => $label )
 						foreach ( $label as $code => $state )
 							$countries[] = '{ label: "' . $state . '", value: "' . $code . '" }';
 					echo implode( ', ', $countries );

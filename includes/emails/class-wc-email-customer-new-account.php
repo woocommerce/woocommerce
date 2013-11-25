@@ -50,7 +50,6 @@ class WC_Email_Customer_New_Account extends WC_Email {
 	 * @return void
 	 */
 	function trigger( $user_id, $user_pass = '', $password_generated = false ) {
-		global $woocommerce;
 
 		if ( $user_id ) {
 			$this->object 		= new WP_User( $user_id );

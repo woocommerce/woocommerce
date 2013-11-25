@@ -69,7 +69,6 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 * @return void
 	 */
 	function init_form_fields() {
-		global $woocommerce;
 
 		$this->form_fields = array(
 			'enabled' => array(
@@ -101,7 +100,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 							'class'			=> 'chosen_select',
 							'css'			=> 'width: 450px;',
 							'default' 		=> '',
-							'options'		=> $woocommerce->countries->get_shipping_countries(),
+							'options'		=> WC()->countries->get_shipping_countries(),
 							'custom_attributes' => array(
 								'data-placeholder' => __( 'Select some countries', 'woocommerce' )
 							)
@@ -170,7 +169,6 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 * @return void
 	 */
 	function calculate_shipping( $package = array() ) {
-		global $woocommerce;
 
 		$this->rates 		= array();
 		$cost_per_order 	= ( isset( $this->cost_per_order ) && ! empty( $this->cost_per_order ) ) ? $this->cost_per_order : 0;
@@ -512,7 +510,6 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 * @return void
 	 */
 	function generate_additional_costs_table_html() {
-		global $woocommerce;
 		ob_start();
 		?>
 		<tr valign="top">
@@ -550,8 +547,8 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 									<td class="flat_rate_class">
 											<select name="' . esc_attr( $this->id . '_class[' . $i . ']' ) . '" class="select">';
 
-								if ( $woocommerce->shipping->get_shipping_classes() ) {
-									foreach ( $woocommerce->shipping->get_shipping_classes() as $shipping_class ) {
+								if ( WC()->shipping->get_shipping_classes() ) {
+									foreach ( WC()->shipping->get_shipping_classes() as $shipping_class ) {
 										echo '<option value="' . esc_attr( $shipping_class->slug ) . '" '.selected($shipping_class->slug, $class, false).'>'.$shipping_class->name.'</option>';
 									}
 								} else {
@@ -580,8 +577,8 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 								<td class="flat_rate_class">\
 									<select name="<?php echo $this->id; ?>_class[' + size + ']" class="select">\
 						   				<?php
-						   				if ($woocommerce->shipping->get_shipping_classes()) :
-											foreach ($woocommerce->shipping->get_shipping_classes() as $class) :
+						   				if (WC()->shipping->get_shipping_classes()) :
+											foreach (WC()->shipping->get_shipping_classes() as $class) :
 												echo '<option value="' . esc_attr( $class->slug ) . '">' . esc_js( $class->name ) . '</option>';
 											endforeach;
 										else :

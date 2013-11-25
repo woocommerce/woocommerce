@@ -48,7 +48,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
     	$shipping_methods = array();
 
     	if ( is_admin() )
-	    	foreach ( $woocommerce->shipping->load_shipping_methods() as $method ) {
+	    	foreach ( WC()->shipping->load_shipping_methods() as $method ) {
 		    	$shipping_methods[ $method->id ] = $method->get_title();
 	    	}
 
@@ -103,7 +103,6 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function is_available() {
-		global $woocommerce;
 
 		if ( ! empty( $this->enable_for_methods ) ) {
 

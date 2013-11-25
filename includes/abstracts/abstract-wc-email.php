@@ -128,7 +128,6 @@ abstract class WC_Email extends WC_Settings_API {
 	 * @return void
 	 */
 	function __construct() {
-		global $woocommerce;
 
 		// Init settings
 		$this->init_form_fields();
@@ -139,7 +138,7 @@ abstract class WC_Email extends WC_Settings_API {
 
 		// Default template base if not declared in child constructor
 		if ( is_null( $this->template_base ) ) {
-			$this->template_base = $woocommerce->plugin_path() . '/templates/';
+			$this->template_base = WC()->plugin_path() . '/templates/';
 		}
 
 		// Settings
@@ -655,7 +654,6 @@ abstract class WC_Email extends WC_Settings_API {
 	 * @return void
 	 */
 	function admin_options() {
-		global $woocommerce;
 
 		// Handle any actions
 		if ( ! empty( $this->template_html ) || ! empty( $this->template_plain ) ) {

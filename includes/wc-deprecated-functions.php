@@ -71,9 +71,8 @@ function woocommerce_get_formatted_product_name( $product ) {
  */
 function woocommerce_legacy_paypal_ipn() {
 	if ( ! empty( $_GET['paypalListener'] ) && $_GET['paypalListener'] == 'paypal_standard_IPN' ) {
-		global $woocommerce;
 
-		$woocommerce->payment_gateways();
+		WC()->payment_gateways();
 
 		do_action( 'woocommerce_api_wc_gateway_paypal' );
 	}

@@ -34,8 +34,7 @@ class WC_Meta_Box_Order_Actions {
 					<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
 					<optgroup label="<?php _e( 'Resend order emails', 'woocommerce' ); ?>">
 						<?php
-						global $woocommerce;
-						$mailer = $woocommerce->mailer();
+										$mailer = WC()->mailer();
 
 						$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice' ) );
 						$mails = $mailer->get_emails();

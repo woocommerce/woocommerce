@@ -28,7 +28,6 @@ class WC_Shortcode_Change_Password {
 	 * @return void
 	 */
 	public static function output( $atts ) {
-		global $woocommerce;
 
 		if ( ! is_user_logged_in() ) return;
 

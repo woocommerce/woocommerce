@@ -24,10 +24,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
      * @return void
      */
 	public function __construct() {
-		global $woocommerce;
 
         $this->id           = 'paypal';
-        $this->icon         = apply_filters( 'woocommerce_paypal_icon', $woocommerce->plugin_url() . '/assets/images/icons/paypal.png' );
+        $this->icon         = apply_filters( 'woocommerce_paypal_icon', WC()->plugin_url() . '/assets/images/icons/paypal.png' );
         $this->has_fields   = false;
         $this->liveurl      = 'https://www.paypal.com/cgi-bin/webscr';
 		$this->testurl      = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
@@ -243,7 +242,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	function get_paypal_args( $order ) {
-		global $woocommerce;
 
 		$order_id = $order->id;
 
@@ -422,7 +420,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
      * @return string
      */
     function generate_paypal_form( $order_id ) {
-		global $woocommerce;
 
 		$order = new WC_Order( $order_id );
 
@@ -532,7 +529,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * Check PayPal IPN validity
 	 **/
 	function check_ipn_request_is_valid() {
-		global $woocommerce;
 
 		// Get url
        	if ( $this->testmode == 'yes' )
@@ -553,7 +549,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
         	'sslverify' 	=> false,
         	'timeout' 		=> 60,
         	'httpversion'   => '1.1',
-        	'user-agent'	=> 'WooCommerce/' . $woocommerce->version
+        	'user-agent'	=> 'WooCommerce/' . WC()->version
         );
 
         if ( 'yes' == $this->debug )
@@ -614,7 +610,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return void
 	 */
 	function successful_request( $posted ) {
-		global $woocommerce;
 
 		$posted = stripslashes_deep( $posted );
 
@@ -718,7 +713,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		            	// Mark order as refunded
 		            	$order->update_status( 'refunded', sprintf( __( 'Payment %s via IPN.', 'woocommerce' ), strtolower( $posted['payment_status'] ) ) );
 
-		            	$mailer = $woocommerce->mailer();
+		            	$mailer = WC()->mailer();
 
 		            	$message = $mailer->wrap_message(
 		            		__( 'Order refunded/reversed', 'woocommerce' ),
@@ -735,7 +730,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	            	// Mark order as refunded
 	            	$order->update_status( 'on-hold', sprintf( __( 'Payment %s via IPN.', 'woocommerce' ), strtolower( $posted['payment_status'] ) ) );
 
-	            	$mailer = $woocommerce->mailer();
+	            	$mailer = WC()->mailer();
 
 	            	$message = $mailer->wrap_message(
 	            		__( 'Order reversed', 'woocommerce' ),
@@ -747,7 +742,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	            break;
 	            case "canceled_reversal" :
 
-	            	$mailer = $woocommerce->mailer();
+	            	$mailer = WC()->mailer();
 
 	            	$message = $mailer->wrap_message(
 	            		__( 'Reversal Cancelled', 'woocommerce' ),

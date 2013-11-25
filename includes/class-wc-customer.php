@@ -25,9 +25,8 @@ class WC_Customer {
 	 * @return void
 	 */
 	public function __construct() {
-		global $woocommerce;
 
-		if ( empty( $woocommerce->session->customer ) ) {
+		if ( empty( WC()->session->customer ) ) {
 
 			$default = apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) );
 
@@ -57,7 +56,7 @@ class WC_Customer {
 
 		} else {
 
-			$this->_data = $woocommerce->session->customer;
+			$this->_data = WC()->session->customer;
 
 		}
 
@@ -130,7 +129,6 @@ class WC_Customer {
 	 * @return void
 	 */
 	public function set_to_base() {
-		global $woocommerce;
 		$default = apply_filters( 'woocommerce_customer_default_location', get_option('woocommerce_default_country') );
     	if ( strstr( $default, ':' ) ) {
     		list( $country, $state ) = explode( ':', $default );
@@ -152,7 +150,6 @@ class WC_Customer {
 	 * @return void
 	 */
 	public function set_shipping_to_base() {
-		global $woocommerce;
 		$default = get_option('woocommerce_default_country');
     	if ( strstr( $default, ':' ) ) {
     		list( $country, $state ) = explode( ':', $default );

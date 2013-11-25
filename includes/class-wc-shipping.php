@@ -429,8 +429,7 @@ class WC_Shipping {
 	 * @return void
 	 */
 	function reset_shipping() {
-		global $woocommerce;
-		unset( $woocommerce->session->chosen_shipping_methods );
+		unset( WC()->session->chosen_shipping_methods );
 		$this->shipping_total = null;
 		$this->shipping_taxes = array();
 		$this->packages = array();

@@ -15,7 +15,7 @@ global $woocommerce;
 	<div id="payment">
 		<ul class="payment_methods methods">
 			<?php
-				if ( $available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways() ) {
+				if ( $available_gateways = WC()->payment_gateways->get_available_payment_gateways() ) {
 					// Chosen Method
 					if ( sizeof( $available_gateways ) )
 						current( $available_gateways )->set_current();

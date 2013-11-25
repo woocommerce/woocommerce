@@ -180,7 +180,6 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 	 * Change the columns shown in admin.
 	 */
 	public function edit_columns( $existing_columns ) {
-		global $woocommerce;
 
 		if ( empty( $existing_columns ) && ! is_array( $existing_columns ) )
 			$existing_columns = array();

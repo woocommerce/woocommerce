@@ -36,10 +36,10 @@ add_filter( 'woocommerce_add_to_cart_validation', 'woocommerce_protected_product
 function woocommerce_empty_cart() {
 	global $woocommerce;
 
-	if ( ! isset( $woocommerce->cart ) || $woocommerce->cart == '' )
-		$woocommerce->cart = new WC_Cart();
+	if ( ! isset( WC()->cart ) || WC()->cart == '' )
+		WC()->cart = new WC_Cart();
 
-	$woocommerce->cart->empty_cart( false );
+	WC()->cart->empty_cart( false );
 }
 add_action( 'wp_logout', 'woocommerce_empty_cart' );
 
@@ -58,8 +58,8 @@ function woocommerce_load_persistent_cart( $user_login, $user = 0 ) {
 	$saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart', true );
 
 	if ( $saved_cart )
-		if ( empty( $woocommerce->session->cart ) || ! is_array( $woocommerce->session->cart ) || sizeof( $woocommerce->session->cart ) == 0 )
-			$woocommerce->session->cart = $saved_cart['cart'];
+		if ( empty( WC()->session->cart ) || ! is_array( WC()->session->cart ) || sizeof( WC()->session->cart ) == 0 )
+			WC()->session->cart = $saved_cart['cart'];
 }
 add_action( 'wp_login', 'woocommerce_load_persistent_cart', 1, 2 );
 
@@ -125,20 +125,20 @@ function woocommerce_clear_cart_after_payment() {
 			$order = new WC_Order( $order_id );
 
 			if ( $order->order_key == $order_key ) {
-				$woocommerce->cart->empty_cart();
+				WC()->cart->empty_cart();
 			}
 		}
 
 	}
 
-	if ( $woocommerce->session->order_awaiting_payment > 0 ) {
+	if ( WC()->session->order_awaiting_payment > 0 ) {
 
-		$order = new WC_Order( $woocommerce->session->order_awaiting_payment );
+		$order = new WC_Order( WC()->session->order_awaiting_payment );
 
 		if ( $order->id > 0 ) {
 			// If the order has not failed, or is not pending, the order must have gone through
 			if ( $order->status != 'failed' && $order->status != 'pending' )
-				$woocommerce->cart->empty_cart();
+				WC()->cart->empty_cart();
 		}
 	}
 }

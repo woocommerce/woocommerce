@@ -52,7 +52,6 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	 * @return void
 	 */
 	function trigger( $order ) {
-		global $woocommerce;
 
 		if ( ! is_object( $order ) ) {
 			$order = new WC_Order( absint( $order ) );

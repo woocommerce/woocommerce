@@ -98,7 +98,6 @@ class WC_Shortcode_My_Account {
 	 * @param  int $order_id
 	 */
 	private static function view_order( $order_id ) {
-		global $woocommerce;
 
 		$user_id      	= get_current_user_id();
 		$order 			= new WC_Order( $order_id );
@@ -154,7 +153,6 @@ class WC_Shortcode_My_Account {
 	 * @param string $load_address
 	 */
 	private static function edit_address( $load_address = 'billing' ) {
-		global $woocommerce;
 
 		// Current user
 		global $current_user;
@@ -162,7 +160,7 @@ class WC_Shortcode_My_Account {
 
 		$load_address = sanitize_key( $load_address );
 
-		$address = $woocommerce->countries->get_address_fields( get_user_meta( get_current_user_id(), $load_address . '_country', true ), $load_address . '_' );
+		$address = WC()->countries->get_address_fields( get_user_meta( get_current_user_id(), $load_address . '_country', true ), $load_address . '_' );
 
 		// Prepare values
 		foreach ( $address as $key => $field ) {
@@ -177,11 +175,11 @@ class WC_Shortcode_My_Account {
 					break;
 					case 'billing_country' :
 					case 'shipping_country' :
-						$value = $woocommerce->countries->get_base_country();
+						$value = WC()->countries->get_base_country();
 					break;
 					case 'billing_state' :
 					case 'shipping_state' :
-						$value = $woocommerce->countries->get_base_state();
+						$value = WC()->countries->get_base_state();
 					break;
 				}
 			}
@@ -199,7 +197,6 @@ class WC_Shortcode_My_Account {
 	 * Lost password page
 	 */
 	public static function lost_password() {
-		global $woocommerce;
 
 		global $post;
 
@@ -295,7 +292,7 @@ class WC_Shortcode_My_Account {
 		}
 
 		// Send email notification
-		$mailer = $woocommerce->mailer();
+		$mailer = WC()->mailer();
 		do_action( 'woocommerce_reset_password_notification', $user_login, $key );
 
 		wc_add_notice( __( 'Check your e-mail for the confirmation link.' ) );
@@ -357,7 +354,6 @@ class WC_Shortcode_My_Account {
 	 * Show the add payment method page
 	 */
 	private static function add_payment_method() {
-		global $woocommerce;
 
 		if ( ! is_user_logged_in() ) {
 

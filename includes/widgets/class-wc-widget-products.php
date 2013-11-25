@@ -89,7 +89,6 @@ class WC_Widget_Products extends WC_Widget {
 	 * @return void
 	 */
 	public function widget( $args, $instance ) {
-		global $woocommerce;
 
 		if ( $this->get_cached_widget( $args ) )
 			return;
@@ -115,7 +114,7 @@ class WC_Widget_Products extends WC_Widget {
     	$query_args['meta_query'] = array();
 
     	if ( empty( $instance['show_hidden'] ) ) {
-			$query_args['meta_query'][] = $woocommerce->query->visibility_meta_query();
+			$query_args['meta_query'][] = WC()->query->visibility_meta_query();
 			$query_args['post_parent']  = 0;
 		}
 
@@ -128,7 +127,7 @@ class WC_Widget_Products extends WC_Widget {
 			);
     	}
 
-	    $query_args['meta_query'][] = $woocommerce->query->stock_status_meta_query();
+	    $query_args['meta_query'][] = WC()->query->stock_status_meta_query();
 	    $query_args['meta_query']   = array_filter( $query_args['meta_query'] );
 
     	switch ( $show ) {

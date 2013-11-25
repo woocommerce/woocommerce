@@ -19,7 +19,6 @@ class WC_Shortcode_Cart {
 	 * @return void
 	 */
 	public static function output( $atts ) {
-		global $woocommerce;
 
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) define( 'WOOCOMMERCE_CART', true );
 
@@ -27,7 +26,7 @@ class WC_Shortcode_Cart {
 		if ( ! empty( $_POST['apply_coupon'] ) ) {
 
 			if ( ! empty( $_POST['coupon_code'] ) ) {
-				$woocommerce->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
+				WC()->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
 			} else {
 				wc_add_notice( WC_Coupon::get_generic_coupon_error( WC_Coupon::E_WC_COUPON_PLEASE_ENTER ), 'error' );
 			}
@@ -35,13 +34,13 @@ class WC_Shortcode_Cart {
 		// Remove Coupon Codes
 		} elseif ( isset( $_GET['remove_coupon'] ) ) {
 
-			$woocommerce->cart->remove_coupon( woocommerce_clean( $_GET['remove_coupon'] ) );
+			WC()->cart->remove_coupon( woocommerce_clean( $_GET['remove_coupon'] ) );
 
 		// Update Shipping
 		} elseif ( ! empty( $_POST['calc_shipping'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-cart' ) ) {
 
 			try {
-				$woocommerce->shipping->reset_shipping();
+				WC()->shipping->reset_shipping();
 
 				$country 	= woocommerce_clean( $_POST['calc_shipping_country'] );
 				$state 		= woocommerce_clean( $_POST['calc_shipping_state'] );
@@ -55,14 +54,14 @@ class WC_Shortcode_Cart {
 				}
 
 				if ( $country ) {
-					$woocommerce->customer->set_location( $country, $state, $postcode, $city );
-					$woocommerce->customer->set_shipping_location( $country, $state, $postcode, $city );
+					WC()->customer->set_location( $country, $state, $postcode, $city );
+					WC()->customer->set_shipping_location( $country, $state, $postcode, $city );
 				} else {
-					$woocommerce->customer->set_to_base();
-					$woocommerce->customer->set_shipping_to_base();
+					WC()->customer->set_to_base();
+					WC()->customer->set_shipping_to_base();
 				}
 
-				$woocommerce->customer->calculated_shipping( true );
+				WC()->customer->calculated_shipping( true );
 
 				wc_add_notice(  __( 'Shipping costs updated.', 'woocommerce' ), 'notice' );
 
@@ -79,9 +78,9 @@ class WC_Shortcode_Cart {
 		do_action('woocommerce_check_cart_items');
 
 		// Calc totals
-		$woocommerce->cart->calculate_totals();
+		WC()->cart->calculate_totals();
 
-		if ( sizeof( $woocommerce->cart->get_cart() ) == 0 )
+		if ( sizeof( WC()->cart->get_cart() ) == 0 )
 			woocommerce_get_template( 'cart/cart-empty.php' );
 		else
 			woocommerce_get_template( 'cart/cart.php' );

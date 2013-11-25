@@ -104,7 +104,6 @@ class WC_Comments {
 	 * @return array
 	 */
 	public function check_comment_rating( $comment_data ) {
-		global $woocommerce;
 
 		// If posting a comment (not trackback etc) and not logged in
 		if ( isset( $_POST['rating'] ) && ! wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-comment_rating' ) )

@@ -57,7 +57,7 @@ class WC_Form_Handler {
 
 		$load_address = isset( $wp->query_vars['edit-address'] ) ? sanitize_key( $wp->query_vars['edit-address'] ) : 'billing';
 
-		$address = $woocommerce->countries->get_address_fields( esc_attr( $_POST[ $load_address . '_country' ] ), $load_address . '_' );
+		$address = WC()->countries->get_address_fields( esc_attr( $_POST[ $load_address . '_country' ] ), $load_address . '_' );
 
 		foreach ( $address as $key => $field ) {
 
@@ -129,7 +129,6 @@ class WC_Form_Handler {
 	 * Save the password/account details and redirect back to the my account page.
 	 */
 	public function save_account_details() {
-		global $woocommerce;
 
 		if ( 'POST' !== strtoupper( $_SERVER[ 'REQUEST_METHOD' ] ) )
 			return;
@@ -390,14 +389,13 @@ class WC_Form_Handler {
 	 * Place a previous order again.
 	 */
 	public function order_again() {
-		global $woocommerce;
 
 		// Nothing to do
-		if ( ! isset( $_GET['order_again'] ) || ! is_user_logged_in() || ! $woocommerce->verify_nonce( 'order_again', '_GET' ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-order_again' ) )
+		if ( ! isset( $_GET['order_again'] ) || ! is_user_logged_in() || ! WC()->verify_nonce( 'order_again', '_GET' ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-order_again' ) )
 			return;
 
 		// Clear current cart
-		$woocommerce->cart->empty_cart();
+		WC()->cart->empty_cart();
 
 		// Load the previous order - Stop if the order does not exist
 		$order = new WC_Order( absint( $_GET['order_again'] ) );
@@ -432,14 +430,14 @@ class WC_Form_Handler {
 			// Add to cart validation
 			if ( ! apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations, $cart_item_data ) ) continue;
 
-			$woocommerce->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations, $cart_item_data );
+			WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations, $cart_item_data );
 		}
 
 		do_action( 'woocommerce_ordered_again', $order->id );
 
 		// Redirect to cart
 		wc_add_notice( __( 'The cart has been filled with the items from your previous order.', 'woocommerce' ) );
-		wp_safe_redirect( $woocommerce->cart->get_cart_url() );
+		wp_safe_redirect( WC()->cart->get_cart_url() );
 		exit;
 	}
 
@@ -448,7 +446,6 @@ class WC_Form_Handler {
 	 */
 	public function cancel_order() {
 
-		global $woocommerce;
 
 		if ( isset($_GET['cancel_order']) && isset($_GET['order']) && isset($_GET['order_id']) ) :
 

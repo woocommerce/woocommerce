@@ -313,8 +313,8 @@ class WC_Countries {
 
 		if ( $allowed )
 			foreach ( $allowed as $CC => $country )
-				if ( ! isset( $states[ $CC ] ) && file_exists( $woocommerce->plugin_path() . '/i18n/states/' . $CC . '.php' ) )
-					include( $woocommerce->plugin_path() . '/i18n/states/' . $CC . '.php' );
+				if ( ! isset( $states[ $CC ] ) && file_exists( WC()->plugin_path() . '/i18n/states/' . $CC . '.php' ) )
+					include( WC()->plugin_path() . '/i18n/states/' . $CC . '.php' );
 
 		$this->states = apply_filters( 'woocommerce_states', $states );
 	}
@@ -481,11 +481,10 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function shipping_to_prefix() {
-		global $woocommerce;
 		$return = '';
-		if (in_array($woocommerce->customer->get_shipping_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __( 'to the', 'woocommerce' );
+		if (in_array(WC()->customer->get_shipping_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __( 'to the', 'woocommerce' );
 		else $return = __( 'to', 'woocommerce' );
-		return apply_filters('woocommerce_countries_shipping_to_prefix', $return, $woocommerce->customer->get_shipping_country());
+		return apply_filters('woocommerce_countries_shipping_to_prefix', $return, WC()->customer->get_shipping_country());
 	}
 
 

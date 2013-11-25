@@ -58,7 +58,7 @@ $col = 1;
 					'country'		=> get_user_meta( $customer_id, $name . '_country', true )
 				), $customer_id, $name );
 
-				$formatted_address = $woocommerce->countries->get_formatted_address( $address );
+				$formatted_address = WC()->countries->get_formatted_address( $address );
 
 				if ( ! $formatted_address )
 					_e( 'You have not set up this type of address yet.', 'woocommerce' );

@@ -367,7 +367,7 @@ class WC_Meta_Box_Order_Data {
 		// Payment method handling
 		if ( get_post_meta( $post_id, '_payment_method', true ) !== stripslashes( $_POST['_payment_method'] ) ) {
 
-			$methods 				= $woocommerce->payment_gateways->payment_gateways();
+			$methods 				= WC()->payment_gateways->payment_gateways();
 			$payment_method 		= woocommerce_clean( $_POST['_payment_method'] );
 			$payment_method_title 	= $payment_method;
 

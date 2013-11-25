@@ -23,7 +23,7 @@
 		</tr>
 		<tr>
 			<td><?php _e( 'WC Version','woocommerce' ); ?>:</td>
-			<td><?php echo esc_html( $woocommerce->version ); ?></td>
+			<td><?php echo esc_html( WC()->version ); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WC Database Version','woocommerce' ); ?>:</td>
@@ -94,7 +94,7 @@
 		<tr>
 			<td><?php _e( 'WC Logging','woocommerce' ); ?>:</td>
 			<td><?php
-				if ( @fopen( $woocommerce->plugin_path() . '/logs/paypal.txt', 'a' ) )
+				if ( @fopen( WC()->plugin_path() . '/logs/paypal.txt', 'a' ) )
 					echo '<mark class="yes">' . __( 'Log directory is writable.', 'woocommerce' ) . '</mark>';
 				else
 					echo '<mark class="error">' . __( 'Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will not be possible.', 'woocommerce' ) . '</mark>';
@@ -146,7 +146,7 @@
 			$params = array(
 				'sslverify' 	=> false,
 				'timeout' 		=> 60,
-				'user-agent'	=> 'WooCommerce/' . $woocommerce->version,
+				'user-agent'	=> 'WooCommerce/' . WC()->version,
 				'body'			=> $request
 			);
 			$response = wp_remote_post( 'https://www.paypal.com/cgi-bin/webscr', $params );
@@ -451,7 +451,7 @@
 			<td><?php _e( 'Template Overrides', 'woocommerce' ); ?>:</td>
 			<td><?php
 
-				$template_paths = apply_filters( 'woocommerce_template_overrides_scan_paths', array( 'WooCommerce' => $woocommerce->plugin_path() . '/templates/' ) );
+				$template_paths = apply_filters( 'woocommerce_template_overrides_scan_paths', array( 'WooCommerce' => WC()->plugin_path() . '/templates/' ) );
 				$found_files    = array();
 
 				foreach ( $template_paths as $plugin_name => $template_path )

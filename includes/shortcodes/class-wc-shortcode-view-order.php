@@ -29,7 +29,6 @@ class WC_Shortcode_View_Order {
 	 * @return void
 	 */
 	public static function output( $atts ) {
-		global $woocommerce;
 
 		if ( ! is_user_logged_in() ) return;
 

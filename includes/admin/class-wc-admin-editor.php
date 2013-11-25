@@ -46,8 +46,7 @@ class WC_Admin_Editor {
 	 * @return array
 	 */
 	public function add_tinymce_lang( $arr ) {
-		global $woocommerce;
-	    $arr['WooCommerceShortcodes'] = $woocommerce->plugin_path() . '/assets/js/admin/editor_plugin_lang.php';
+	    $arr['WooCommerceShortcodes'] = WC()->plugin_path() . '/assets/js/admin/editor_plugin_lang.php';
 	    return $arr;
 	}
 
@@ -69,8 +68,7 @@ class WC_Admin_Editor {
 	 * @return array
 	 */
 	public function add_shortcode_tinymce_plugin( $plugin_array ) {
-		global $woocommerce;
-		$plugin_array['WooCommerceShortcodes'] = $woocommerce->plugin_url() . '/assets/js/admin/editor_plugin.js';
+		$plugin_array['WooCommerceShortcodes'] = WC()->plugin_url() . '/assets/js/admin/editor_plugin.js';
 		return $plugin_array;
 	}
 

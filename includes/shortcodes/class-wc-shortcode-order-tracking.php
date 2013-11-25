@@ -31,7 +31,6 @@ class WC_Shortcode_Order_Tracking {
 	 * @return void
 	 */
 	public static function output( $atts ) {
-		global $woocommerce;
 
 		extract(shortcode_atts(array(
 		), $atts));

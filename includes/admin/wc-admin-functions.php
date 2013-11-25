@@ -141,9 +141,9 @@ function woocommerce_compile_less_styles() {
     global $woocommerce;
 
     $colors         = array_map( 'esc_attr', (array) get_option( 'woocommerce_frontend_css_colors' ) );
-    $base_file      = $woocommerce->plugin_path() . '/assets/css/woocommerce-base.less';
-    $less_file      = $woocommerce->plugin_path() . '/assets/css/woocommerce.less';
-    $css_file       = $woocommerce->plugin_path() . '/assets/css/woocommerce.css';
+    $base_file      = WC()->plugin_path() . '/assets/css/woocommerce-base.less';
+    $less_file      = WC()->plugin_path() . '/assets/css/woocommerce.less';
+    $css_file       = WC()->plugin_path() . '/assets/css/woocommerce.css';
 
     // Write less file
     if ( is_writable( $base_file ) && is_writable( $css_file ) ) {

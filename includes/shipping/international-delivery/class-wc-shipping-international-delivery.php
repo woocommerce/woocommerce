@@ -43,7 +43,6 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 	 * @return void
 	 */
 	function init_form_fields() {
-		global $woocommerce;
 
 		$this->form_fields = array(
 			'enabled' => array(
@@ -75,7 +74,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 							'class'			=> 'chosen_select',
 							'css'			=> 'width: 450px;',
 							'default'		=> '',
-							'options'		=> $woocommerce->countries->get_shipping_countries(),
+							'options'		=> WC()->countries->get_shipping_countries(),
 							'custom_attributes' => array(
 								'data-placeholder' => __( 'Select some countries', 'woocommerce' )
 							)
@@ -136,7 +135,6 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 	 * @return bool
 	 */
 	function is_available( $package ) {
-		global $woocommerce;
 
 		if ($this->enabled=="no") return false;
 

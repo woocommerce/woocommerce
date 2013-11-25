@@ -102,7 +102,7 @@ class WC_Meta_Box_Order_Downloads {
 
 				if (!product) return;
 
-				jQuery('.order_download_permissions').block({ message: null, overlayCSS: { background: '#fff url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+				jQuery('.order_download_permissions').block({ message: null, overlayCSS: { background: '#fff url(<?php echo WC()->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 
 				var data = {
 					action: 		'woocommerce_grant_access_to_download',
@@ -153,7 +153,7 @@ class WC_Meta_Box_Order_Downloads {
 
 					if (product>0) {
 
-						jQuery(el).block({ message: null, overlayCSS: { background: '#fff url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+						jQuery(el).block({ message: null, overlayCSS: { background: '#fff url(<?php echo WC()->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 
 						var data = {
 							action: 		'woocommerce_revoke_access_to_download',

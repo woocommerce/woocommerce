@@ -58,7 +58,6 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 	 * @return void
 	 */
 	function trigger( $user_login = '', $reset_key = '' ) {
-		global $woocommerce;
 		if ( $user_login && $reset_key ) {
 			$this->object 		= get_user_by( 'login', $user_login );
 

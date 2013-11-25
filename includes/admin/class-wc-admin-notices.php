@@ -53,7 +53,6 @@ class WC_Admin_Notices {
 	 * Show the install notices
 	 */
 	function install_notice() {
-		global $woocommerce;
 
 		// If we need to update, include a message with the update button
 		if ( get_option( '_wc_needs_update' ) == 1 ) {

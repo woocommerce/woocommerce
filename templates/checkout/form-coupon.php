@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $woocommerce;
 
-if ( ! $woocommerce->cart->coupons_enabled() )
+if ( ! WC()->cart->coupons_enabled() )
 	return;
 
 $info_message = apply_filters('woocommerce_checkout_coupon_message', __( 'Have a coupon?', 'woocommerce' ));

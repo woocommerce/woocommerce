@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $woocommerce;
 
-if ( $downloads = $woocommerce->customer->get_downloadable_products() ) : ?>
+if ( $downloads = WC()->customer->get_downloadable_products() ) : ?>
 
 	<h2><?php echo apply_filters( 'woocommerce_my_account_my_downloads_title', __( 'Available downloads', 'woocommerce' ) ); ?></h2>
 

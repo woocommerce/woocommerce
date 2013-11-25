@@ -79,8 +79,8 @@ class WC_Report_Customer_List extends WP_List_Table {
 				$state_code   = get_user_meta( $user->ID, 'billing_state', true );
 				$country_code = get_user_meta( $user->ID, 'billing_country', true );
 
-				$state = isset( $woocommerce->countries->states[$country_code][ $state_code ] ) ? $woocommerce->countries->states[ $country_code ][ $state_code ] : $state_code;
-				$country = isset( $woocommerce->countries->countries[ $country_code ] ) ? $woocommerce->countries->countries[ $country_code ] : $country_code;
+				$state = isset( WC()->countries->states[$country_code][ $state_code ] ) ? WC()->countries->states[ $country_code ][ $state_code ] : $state_code;
+				$country = isset( WC()->countries->countries[ $country_code ] ) ? WC()->countries->countries[ $country_code ] : $country_code;
 
 				$value = '';
 
@@ -216,7 +216,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 						$actions = apply_filters( 'woocommerce_admin_user_actions', $actions, $user );
 
 						foreach ( $actions as $action ) {
-							$image = ( isset( $action['image_url'] ) ) ? $action['image_url'] : $woocommerce->plugin_url() . '/assets/images/icons/' . $action['action'] . '.png';
+							$image = ( isset( $action['image_url'] ) ) ? $action['image_url'] : WC()->plugin_url() . '/assets/images/icons/' . $action['action'] . '.png';
 							printf( '<a class="button tips" href="%s" data-tip="%s"><img src="%s" alt="%s" width="14" /></a>', esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $image ), esc_attr( $action['name'] ) );
 						}
 

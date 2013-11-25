@@ -55,7 +55,7 @@ class WC_Meta_Box_Order_Notes {
 		echo '</ul>';
 		?>
 		<div class="add_note">
-			<h4><?php _e( 'Add note', 'woocommerce' ); ?> <img class="help_tip" data-tip='<?php esc_attr_e( 'Add a note for your reference, or add a customer note (the user will be notified).', 'woocommerce' ); ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></h4>
+			<h4><?php _e( 'Add note', 'woocommerce' ); ?> <img class="help_tip" data-tip='<?php esc_attr_e( 'Add a note for your reference, or add a customer note (the user will be notified).', 'woocommerce' ); ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></h4>
 			<p>
 				<textarea type="text" name="order_note" id="add_order_note" class="input-text" cols="20" rows="5"></textarea>
 			</p>
@@ -75,7 +75,7 @@ class WC_Meta_Box_Order_Notes {
 
 				if (!jQuery('textarea#add_order_note').val()) return;
 
-				jQuery('#woocommerce-order-notes').block({ message: null, overlayCSS: { background: '#fff url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+				jQuery('#woocommerce-order-notes').block({ message: null, overlayCSS: { background: '#fff url(<?php echo WC()->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 
 				var data = {
 					action: 		'woocommerce_add_order_note',
@@ -101,7 +101,7 @@ class WC_Meta_Box_Order_Notes {
 
 				var note = jQuery(this).closest('li.note');
 
-				jQuery(note).block({ message: null, overlayCSS: { background: '#fff url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+				jQuery(note).block({ message: null, overlayCSS: { background: '#fff url(<?php echo WC()->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 
 				var data = {
 					action: 		'woocommerce_delete_order_note',

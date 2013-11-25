@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 global $woocommerce;
 ?>
 
-<?php if ( $woocommerce->cart->needs_shipping() && ! $woocommerce->cart->ship_to_billing_address_only() ) : ?>
+<?php if ( WC()->cart->needs_shipping() && ! WC()->cart->ship_to_billing_address_only() ) : ?>
 
 	<?php
 		if ( empty( $_POST ) ) {
@@ -52,7 +52,7 @@ global $woocommerce;
 
 <?php if ( apply_filters( 'woocommerce_enable_order_notes_field', get_option( 'woocommerce_enable_order_comments', 'yes' ) == 'yes' ) ) : ?>
 
-	<?php if ( ! $woocommerce->cart->needs_shipping() || $woocommerce->cart->ship_to_billing_address_only() ) : ?>
+	<?php if ( ! WC()->cart->needs_shipping() || WC()->cart->ship_to_billing_address_only() ) : ?>
 
 		<h3><?php _e( 'Additional Information', 'woocommerce' ); ?></h3>
 

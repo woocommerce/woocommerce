@@ -34,7 +34,6 @@ class WC_Order_Item_Meta {
 	 * @return void
 	 */
 	public function display( $flat = false, $return = false, $hideprefix = '_' ) {
-		global $woocommerce;
 
 		if ( ! empty( $this->meta ) ) {
 

@@ -47,12 +47,11 @@ class WC_Logger {
 	 * @return bool success
 	 */
 	private function open( $handle ) {
-		global $woocommerce;
 
 		if ( isset( $this->_handles[ $handle ] ) )
 			return true;
 
-		if ( $this->_handles[ $handle ] = @fopen( $woocommerce->plugin_path() . '/logs/' . $this->file_name( $handle ) . '.txt', 'a' ) )
+		if ( $this->_handles[ $handle ] = @fopen( WC()->plugin_path() . '/logs/' . $this->file_name( $handle ) . '.txt', 'a' ) )
 			return true;
 
 		return false;
