@@ -264,7 +264,7 @@ class WC_Cart {
 		 * Coupons enabled function. Filterable.
 		 *
 		 * @access public
-		 * @return void
+		 * @return bool
 		 */
 		public function coupons_enabled() {
 			return apply_filters( 'woocommerce_coupons_enabled', get_option( 'woocommerce_enable_coupons' ) == 'yes' );
@@ -345,7 +345,7 @@ class WC_Cart {
 
 		/**
 		 * Looks through cart items and checks the posts are not trashed or deleted.
-		 * @return bool or WP_ERROR
+		 * @return bool|WP_Error
 		 */
 		public function check_cart_item_validity() {
 			foreach ( $this->get_cart() as $cart_item_key => $values ) {
@@ -366,7 +366,7 @@ class WC_Cart {
 		 * Looks through the cart to check each item is in stock. If not, add an error.
 		 *
 		 * @access public
-		 * @return bool or WP_ERROR
+		 * @return bool|WP_Error
 		 */
 		public function check_cart_item_stock() {
 			global $wpdb;
@@ -657,7 +657,7 @@ class WC_Cart {
 		 * Get taxes, merged by code, formatted ready for output.
 		 *
 		 * @access public
-		 * @return void
+		 * @return array
 		 */
 		public function get_tax_totals() {
 			$taxes      = $this->get_taxes();
@@ -1777,7 +1777,7 @@ class WC_Cart {
 		 * get_fees function.
 		 *
 		 * @access public
-		 * @return void
+		 * @return array
 		 */
 		public function get_fees() {
 			return array_filter( (array) $this->fees );
