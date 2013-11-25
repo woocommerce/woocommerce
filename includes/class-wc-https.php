@@ -75,7 +75,7 @@ class WC_HTTPS {
 				wp_safe_redirect( preg_replace( '|^http://|', 'https://', $_SERVER['REQUEST_URI'] ) );
 				exit;
 			} else {
-				wp_safe_redirect( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+				wp_safe_redirect( 'https://' . ! empty( $_SERVER['HTTP_X_FORWARDED_HOST'] ) ? $_SERVER['HTTP_X_FORWARDED_HOST'] : $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
 				exit;
 			}
 		}
@@ -91,7 +91,7 @@ class WC_HTTPS {
 				wp_safe_redirect( preg_replace( '|^https://|', 'http://', $_SERVER['REQUEST_URI'] ) );
 				exit;
 			} else {
-				wp_safe_redirect( 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+				wp_safe_redirect( 'http://' . ! empty( $_SERVER['HTTP_X_FORWARDED_HOST'] ) ? $_SERVER['HTTP_X_FORWARDED_HOST'] : $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
 				exit;
 			}
 		}
