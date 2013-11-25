@@ -85,7 +85,7 @@ global $woocommerce, $product, $post;
 			<div class="single_variation"></div>
 
 			<div class="variations_button">
-				<?php wc_quantity_input(); ?>
+				<?php woocommerce_quantity_input(); ?>
 				<button type="submit" class="single_add_to_cart_button button alt"><?php echo $product->single_add_to_cart_text(); ?></button>
 			</div>
 

@@ -83,7 +83,7 @@ class WC_AJAX {
 		// Get mini cart
 		ob_start();
 
-		wc_mini_cart();
+		woocommerce_mini_cart();
 
 		$mini_cart = ob_get_clean();
 
@@ -138,7 +138,7 @@ class WC_AJAX {
 
 		WC()->cart->calculate_totals();
 
-		wc_cart_totals();
+		woocommerce_cart_totals();
 
 		die();
 	}

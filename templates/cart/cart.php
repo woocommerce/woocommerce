@@ -143,9 +143,9 @@ do_action( 'woocommerce_before_cart' ); ?>
 
 	<?php do_action('woocommerce_cart_collaterals'); ?>
 
-	<?php wc_cart_totals(); ?>
+	<?php woocommerce_cart_totals(); ?>
 
-	<?php wc_shipping_calculator(); ?>
+	<?php woocommerce_shipping_calculator(); ?>
 
 </div>
 

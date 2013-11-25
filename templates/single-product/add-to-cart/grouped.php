@@ -25,11 +25,11 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 					<tr>
 						<td>
 							<?php if ( $product->is_sold_individually() || ! $product->is_purchasable() ) : ?>
-								<?php wc_template_loop_add_to_cart(); ?>
+								<?php woocommerce_template_loop_add_to_cart(); ?>
 							<?php else : ?>
 								<?php
 									$quantites_required = true;
-									wc_quantity_input( array( 'input_name' => 'quantity[' . $product_id . ']', 'input_value' => '0' ) );
+									woocommerce_quantity_input( array( 'input_name' => 'quantity[' . $product_id . ']', 'input_value' => '0' ) );
 								?>
 							<?php endif; ?>
 						</td>

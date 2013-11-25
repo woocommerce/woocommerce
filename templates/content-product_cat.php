@@ -39,7 +39,7 @@ $woocommerce_loop['loop']++;
 			/**
 			 * woocommerce_before_subcategory_title hook
 			 *
-			 * @hooked wc_subcategory_thumbnail - 10
+			 * @hooked woocommerce_subcategory_thumbnail - 10
 			 */
 			do_action( 'woocommerce_before_subcategory_title', $category );
 		?>
