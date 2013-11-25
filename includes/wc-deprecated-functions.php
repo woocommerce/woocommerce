@@ -97,6 +97,24 @@ function woocommerce_add_to_cart_message( $product_id ) {
 function woocommerce_clear_cart_after_payment() {
 	wc_clear_cart_after_payment();
 }
+function woocommerce_cart_totals_subtotal_html() {
+	wc_cart_totals_subtotal_html();
+}
+function woocommerce_cart_totals_shipping_html() {
+	wc_cart_totals_shipping_html();
+}
+function woocommerce_cart_totals_coupon_html( $coupon ) {
+	wc_cart_totals_coupon_html( $coupon );
+}
+function woocommerce_cart_totals_order_total_html() {
+	wc_cart_totals_order_total_html();
+}
+function woocommerce_cart_totals_fee_html( $fee ) {
+	wc_cart_totals_fee_html( $fee );
+}
+function woocommerce_cart_totals_shipping_method_label( $method ) {
+	wc_cart_totals_shipping_method_label( $method );
+}
 
 /**
  * Core functions (soft deprecated)
