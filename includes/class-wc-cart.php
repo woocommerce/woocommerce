@@ -148,23 +148,38 @@ class WC_Cart {
 			// Load the cart
 			$cart = WC()->session->get( 'cart', array() );
 
+			$update_cart_session = false;
+
 			if ( is_array( $cart ) ) {
 				foreach ( $cart as $key => $values ) {
 					$_product = get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'] );
 
 					if ( ! empty( $_product ) && $_product->exists() && $values['quantity'] > 0 ) {
 
-						// Put session data into array. Run through filter so other plugins can load their own session data
-						$this->cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', array(
-							'product_id'	=> $values['product_id'],
-							'variation_id'	=> $values['variation_id'],
-							'variation' 	=> $values['variation'],
-							'quantity' 		=> $values['quantity'],
-							'data'			=> $_product
-						), $values, $key );
+						if ( ! $_product->is_purchasable() ) {
+
+							// Flag to indicate the stored cart should be update
+							$update_cart_session = true;
+							wc_add_notice( sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $_product->get_title() ), 'error' );
+
+						} else {
+
+							// Put session data into array. Run through filter so other plugins can load their own session data
+							$this->cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', array(
+								'product_id'	=> $values['product_id'],
+								'variation_id'	=> $values['variation_id'],
+								'variation' 	=> $values['variation'],
+								'quantity' 		=> $values['quantity'],
+								'data'			=> $_product
+							), $values, $key );
+
+						}
 					}
 				}
 			}
+
+			if ( $update_cart_session )
+				WC()->session->cart = $this->get_cart_for_session();
 
 			$this->set_cart_cookies( sizeof( $this->cart_contents ) > 0 );
 
@@ -172,7 +187,7 @@ class WC_Cart {
 			do_action( 'woocommerce_cart_loaded_from_session', $this );
 
 			// Queue re-calc if subtotal is not set
-			if ( ! $this->subtotal && sizeof( $this->cart_contents ) > 0 )
+			if ( ( ! $this->subtotal && sizeof( $this->cart_contents ) > 0 ) || $update_cart_session )
 				$this->calculate_totals();
 		}
 
@@ -181,15 +196,7 @@ class WC_Cart {
 		 */
 		public function set_session() {
 			// Set cart and coupon session data
-			$cart_session = array();
-
-			if ( $this->cart_contents ) {
-				foreach ( $this->cart_contents as $key => $values ) {
-					$cart_session[ $key ] = $values;
-
-					unset( $cart_session[ $key ]['data'] ); // Unset product object
-				}
-			}
+			$cart_session = $this->get_cart_for_session();
 
 			WC()->session->set( 'cart', $cart_session );
 			WC()->session->set( 'applied_coupons', $this->applied_coupons );
@@ -609,6 +616,25 @@ class WC_Cart {
 		 */
 		public function get_cart() {
 			return array_filter( (array) $this->cart_contents );
+		}
+
+		/**
+		 * Returns the contents of the cart in an array without the 'data' element.
+		 *
+		 * @return array contents of the cart
+		 */
+		private function get_cart_for_session() {
+
+			$cart_session = array();
+
+			if ( $this->get_cart() ) {
+				foreach ( $this->get_cart() as $key => $values ) {
+					$cart_session[ $key ] = $values;
+					unset( $cart_session[ $key ]['data'] ); // Unset product object
+				}
+			}
+
+			return $cart_session;
 		}
 
 		/**
