@@ -141,22 +141,22 @@ class WC_Admin_Dashboard {
 			<?php endif; ?>
 			<li class="processing-orders">
 				<a href="<?php echo admin_url( 'edit.php?s&post_status=all&post_type=shop_order&shop_order_status=processing' ); ?>">
-					<?php printf( _n( "<strong>%s order</strong> awaiting processing", "<strong>%s orders</strong> are awaiting processing", $processing_count, 'woocommerce' ), $processing_count ); ?>
+					<?php printf( _n( "<strong>%s order</strong> awaiting processing", "<strong>%s orders</strong> awaiting processing", $processing_count, 'woocommerce' ), $processing_count ); ?>
 				</a>
 			</li>
 			<li class="on-hold-orders">
 				<a href="<?php echo admin_url( 'edit.php?s&post_status=all&post_type=shop_order&shop_order_status=on-hold' ); ?>">
-					<?php printf( _n( "<strong>%s order</strong> are on-hold", "<strong>%s orders</strong> are currently on-hold", $on_hold_count, 'woocommerce' ), $on_hold_count ); ?>
+					<?php printf( _n( "<strong>%s order</strong> on-hold", "<strong>%s orders</strong> on-hold", $on_hold_count, 'woocommerce' ), $on_hold_count ); ?>
 				</a>
 			</li>
 			<li class="low-in-stock">
 				<a href="<?php echo admin_url( 'admin.php?page=wc-reports&tab=stock&report=low_in_stock' ); ?>">
-					<?php printf( _n( "<strong>%s product</strong> low in stock", "<strong>%s products</strong> are low in stock", $lowinstock_count, 'woocommerce' ), $lowinstock_count ); ?>
+					<?php printf( _n( "<strong>%s product</strong> low in stock", "<strong>%s products</strong> low in stock", $lowinstock_count, 'woocommerce' ), $lowinstock_count ); ?>
 				</a>
 			</li>
 			<li class="out-of-stock">
 				<a href="<?php echo admin_url( 'admin.php?page=wc-reports&tab=stock&report=out_of_stock' ); ?>">
-					<?php printf( _n( "<strong>%s product</strong> out of stock", "<strong>%s products</strong> are out of stock", $outofstock_count, 'woocommerce' ), $outofstock_count ); ?>
+					<?php printf( _n( "<strong>%s product</strong> out of stock", "<strong>%s products</strong> out of stock", $outofstock_count, 'woocommerce' ), $outofstock_count ); ?>
 				</a>
 			</li>
 		</ul>
