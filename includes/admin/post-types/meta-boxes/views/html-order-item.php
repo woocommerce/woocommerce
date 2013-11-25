@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 			?>"><?php echo $_product->get_image( 'shop_thumbnail', array( 'title' => '' ) ); ?></a>
 		<?php else : ?>
-			<?php echo woocommerce_placeholder_img( 'shop_thumbnail' ); ?>
+			<?php echo wc_placeholder_img( 'shop_thumbnail' ); ?>
 		<?php endif; ?>
 	</td>
 	<td class="name">
@@ -36,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 		<?php
 			if ( $_product && isset( $_product->variation_data ) )
-				echo '<br/>' . woocommerce_get_formatted_variation( $_product->variation_data, true );
+				echo '<br/>' . wc_get_formatted_variation( $_product->variation_data, true );
 		?>
 
 		<div class="view">

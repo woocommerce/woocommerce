@@ -556,7 +556,7 @@ class WC_Shortcodes {
 	        ), $atts ) );
 
 		// Get products on sale
-		$product_ids_on_sale = woocommerce_get_product_ids_on_sale();
+		$product_ids_on_sale = wc_get_product_ids_on_sale();
 
 		$meta_query = array();
 		$meta_query[] = WC()->query->visibility_meta_query();

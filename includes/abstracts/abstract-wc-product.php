@@ -1352,7 +1352,7 @@ class WC_Product {
 		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->id ) ) && has_post_thumbnail( $parent_id ) ) {
 			$image = get_the_post_thumbnail( $parent_id, $size, $attr );
 		} else {
-			$image = woocommerce_placeholder_img( $size );
+			$image = wc_placeholder_img( $size );
 		}
 
 		return $image;

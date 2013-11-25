@@ -373,7 +373,7 @@ class WC_Coupon {
 				// Exclude Sale Items
 				if ( $this->exclude_sale_items == 'yes' ) {
 					$valid_for_cart = true;
-					$product_ids_on_sale = woocommerce_get_product_ids_on_sale();
+					$product_ids_on_sale = wc_get_product_ids_on_sale();
 					if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 						foreach( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
 							if ( in_array( $cart_item['product_id'], $product_ids_on_sale, true ) || in_array( $cart_item['variation_id'], $product_ids_on_sale, true ) || in_array( $cart_item['data']->get_parent(), $product_ids_on_sale, true ) ) {
@@ -474,7 +474,7 @@ class WC_Coupon {
 
 		// Sale Items excluded from discount
 		if ( $this->exclude_sale_items == 'yes' ) {
-			$product_ids_on_sale = woocommerce_get_product_ids_on_sale();
+			$product_ids_on_sale = wc_get_product_ids_on_sale();
 
 			if ( in_array( $product->id, $product_ids_on_sale, true ) || ( isset( $product->variation_id ) && in_array( $product->variation_id, $product_ids_on_sale, true ) ) || in_array( $product->get_parent(), $product_ids_on_sale, true ) )
 				$valid = false;

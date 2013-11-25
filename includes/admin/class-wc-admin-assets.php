@@ -189,7 +189,7 @@ class WC_Admin_Assets {
 				'post_id'                             => isset( $post->ID ) ? $post->ID : '',
 				'plugin_url'                          => $woocommerce->plugin_url(),
 				'ajax_url'                            => admin_url('admin-ajax.php'),
-				'woocommerce_placeholder_img_src'     => woocommerce_placeholder_img_src(),
+				'woocommerce_placeholder_img_src'     => wc_placeholder_img_src(),
 				'add_variation_nonce'                 => wp_create_nonce("add-variation"),
 				'link_variation_nonce'                => wp_create_nonce("link-variations"),
 				'delete_variation_nonce'              => wp_create_nonce("delete-variation"),

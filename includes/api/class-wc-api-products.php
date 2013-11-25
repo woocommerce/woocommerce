@@ -454,7 +454,7 @@ class WC_API_Products extends WC_API_Resource {
 				'id'         => 0,
 				'created_at' => $this->server->format_datetime( time() ), // default to now
 				'updated_at' => $this->server->format_datetime( time() ),
-				'src'        => woocommerce_placeholder_img_src(),
+				'src'        => wc_placeholder_img_src(),
 				'title'      => __( 'Placeholder', 'woocommerce' ),
 				'alt'        => __( 'Placeholder', 'woocommerce' ),
 				'position'   => 0,

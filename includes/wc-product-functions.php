@@ -291,7 +291,7 @@ function wc_placeholder_img_src() {
 function wc_placeholder_img( $size = 'shop_thumbnail' ) {
 	$dimensions = wc_get_image_size( $size );
 
-	return apply_filters('woocommerce_placeholder_img', '<img src="' . woocommerce_placeholder_img_src() . '" alt="Placeholder" width="' . esc_attr( $dimensions['width'] ) . '" height="' . esc_attr( $dimensions['height'] ) . '" />' );
+	return apply_filters('woocommerce_placeholder_img', '<img src="' . wc_placeholder_img_src() . '" alt="Placeholder" width="' . esc_attr( $dimensions['width'] ) . '" height="' . esc_attr( $dimensions['height'] ) . '" />' );
 }
 
 /**
@@ -443,7 +443,7 @@ function wc_scheduled_sales() {
 add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
 
 /**
- * woocommerce_get_attachment_image_attributes function.
+ * wc_get_attachment_image_attributes function.
  *
  * @access public
  * @param mixed $attr
@@ -451,7 +451,7 @@ add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
  */
 function wc_get_attachment_image_attributes( $attr ) {
 	if ( strstr( $attr['src'], 'woocommerce_uploads/' ) )
-		$attr['src'] = woocommerce_placeholder_img_src();
+		$attr['src'] = wc_placeholder_img_src();
 
 	return $attr;
 }
@@ -459,7 +459,7 @@ add_filter( 'wp_get_attachment_image_attributes', 'wc_get_attachment_image_attri
 
 
 /**
- * woocommerce_prepare_attachment_for_js function.
+ * wc_prepare_attachment_for_js function.
  *
  * @access public
  * @param mixed $response
@@ -468,10 +468,10 @@ add_filter( 'wp_get_attachment_image_attributes', 'wc_get_attachment_image_attri
 function wc_prepare_attachment_for_js( $response ) {
 
 	if ( isset( $response['url'] ) && strstr( $response['url'], 'woocommerce_uploads/' ) ) {
-		$response['full']['url'] = woocommerce_placeholder_img_src();
+		$response['full']['url'] = wc_placeholder_img_src();
 		if ( isset( $response['sizes'] ) ) {
 			foreach( $response['sizes'] as $size => $value ) {
-				$response['sizes'][ $size ]['url'] = woocommerce_placeholder_img_src();
+				$response['sizes'][ $size ]['url'] = wc_placeholder_img_src();
 			}
 		}
 	}

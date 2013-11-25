@@ -139,7 +139,7 @@ class WC_Widget_Products extends WC_Widget {
 				);
     			break;
     		case 'onsale' :
-    			$product_ids_on_sale = woocommerce_get_product_ids_on_sale();
+    			$product_ids_on_sale = wc_get_product_ids_on_sale();
 				$product_ids_on_sale[] = 0;
 				$query_args['post__in'] = $product_ids_on_sale;
     			break;

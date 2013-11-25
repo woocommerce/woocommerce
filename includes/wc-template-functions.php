@@ -566,8 +566,8 @@ if ( ! function_exists( 'wc_get_product_thumbnail' ) ) {
 
 		if ( has_post_thumbnail() )
 			return get_the_post_thumbnail( $post->ID, $size );
-		elseif ( woocommerce_placeholder_img_src() )
-			return woocommerce_placeholder_img( $size );
+		elseif ( wc_placeholder_img_src() )
+			return wc_placeholder_img( $size );
 	}
 }
 
@@ -1518,7 +1518,7 @@ if ( ! function_exists( 'wc_subcategory_thumbnail' ) ) {
 			$image = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size  );
 			$image = $image[0];
 		} else {
-			$image = woocommerce_placeholder_img_src();
+			$image = wc_placeholder_img_src();
 		}
 
 		if ( $image )
