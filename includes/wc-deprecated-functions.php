@@ -80,6 +80,24 @@ function woocommerce_legacy_paypal_ipn() {
 }
 add_action( 'init', 'woocommerce_legacy_paypal_ipn' );
 
+/**
+ * Cart functions (soft deprecated)
+ */
+function woocommerce_protected_product_add_to_cart( $passed, $product_id ) {
+	wc_protected_product_add_to_cart( $passed, $product_id );
+}
+function woocommerce_empty_cart() {
+	wc_empty_cart();
+}
+function woocommerce_load_persistent_cart( $user_login, $user = 0 ) {
+	wc_load_persistent_cart( $user_login, $user );
+}
+function woocommerce_add_to_cart_message( $product_id ) {
+	wc_add_to_cart_message( $product_id );
+}
+function woocommerce_clear_cart_after_payment() {
+	wc_clear_cart_after_payment();
+}
 
 /**
  * Handle renamed filters
