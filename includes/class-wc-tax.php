@@ -209,31 +209,6 @@ class WC_Tax {
 	public function find_rates( $args = array(), $deprecated_state = null, $deprecated_postcode = null, $deprecated_class = null ) {
 		global $wpdb;
 
-		// Make sure the arguments match the WC 2.0 structure
-		if ( is_string( $args ) ) {
-			_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.0', 'Use $args["country"] instead. Deprecated argument will be removed in WC 2.1.' );
-			$args = array(
-				'country' => $args
-			);
-		}
-
-		if ( func_num_args() > 1 ) {
-			if ( null !== $deprecated_state ) {
-				_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.0', 'Use $args["state"] instead. Deprecated argument will be removed in WC 2.1.' );
-				$args['state'] = $deprecated_state;
-			}
-
-			if ( null !== $deprecated_postcode ) {
-				_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.0', 'Use $args["postcode"] instead. Deprecated argument will be removed in WC 2.1.' );
-				$args['postcode'] = $deprecated_postcode;
-			}
-
-			if ( null !== $deprecated_class ) {
-				_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.0', 'Use $args["tax_class"] instead. Deprecated argument will be removed in WC 2.1.' );
-				$args['tax_class'] = $deprecated_class;
-			}
-		}
-
 		$defaults = array(
 			'country' 	=> '',
 			'state' 	=> '',
