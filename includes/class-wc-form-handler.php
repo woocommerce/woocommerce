@@ -120,7 +120,7 @@ class WC_Form_Handler {
 
 			do_action( 'woocommerce_customer_save_address', $user_id, $load_address );
 
-			wp_safe_redirect( get_permalink( woocommerce_get_page_id('myaccount') ) );
+			wp_safe_redirect( get_permalink( wc_get_page_id('myaccount') ) );
 			exit;
 		}
 	}
@@ -193,7 +193,7 @@ class WC_Form_Handler {
 
 			do_action( 'woocommerce_save_account_details', $user->ID );
 
-			wp_safe_redirect( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
+			wp_safe_redirect( get_permalink( wc_get_page_id( 'myaccount' ) ) );
 			exit;
 		}
 	}
@@ -205,7 +205,7 @@ class WC_Form_Handler {
 		if ( isset( $_POST['woocommerce_checkout_place_order'] ) || isset( $_POST['woocommerce_checkout_update_totals'] ) ) {
 
 			if ( sizeof( WC()->cart->get_cart() ) == 0 ) {
-				wp_redirect( get_permalink( woocommerce_get_page_id( 'cart' ) ) );
+				wp_redirect( get_permalink( wc_get_page_id( 'cart' ) ) );
 				exit;
 			}
 
@@ -479,7 +479,7 @@ class WC_Form_Handler {
 
 			endif;
 
-			wp_safe_redirect( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
+			wp_safe_redirect( get_permalink( wc_get_page_id( 'myaccount' ) ) );
 			exit;
 
 		endif;
@@ -703,7 +703,7 @@ class WC_Form_Handler {
 					} elseif ( wp_get_referer() ) {
 						$redirect = esc_url( wp_get_referer() );
 					} else {
-						$redirect = esc_url( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
+						$redirect = esc_url( get_permalink( wc_get_page_id( 'myaccount' ) ) );
 					}
 
 					// Feedback
@@ -770,7 +770,7 @@ class WC_Form_Handler {
 
 					do_action( 'woocommerce_customer_reset_password', $user );
 
-					wc_add_notice( __( 'Your password has been reset.', 'woocommerce' ) . ' <a href="' . get_permalink( woocommerce_get_page_id( 'myaccount' ) ) . '">' . __( 'Log in', 'woocommerce' ) . '</a>' );
+					wc_add_notice( __( 'Your password has been reset.', 'woocommerce' ) . ' <a href="' . get_permalink( wc_get_page_id( 'myaccount' ) ) . '">' . __( 'Log in', 'woocommerce' ) . '</a>' );
 
 					wp_redirect( remove_query_arg( array( 'key', 'login' ) ) );
 					exit;
@@ -811,7 +811,7 @@ class WC_Form_Handler {
 			if ( wp_get_referer() ) {
 				$redirect = esc_url( wp_get_referer() );
 			} else {
-				$redirect = esc_url( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
+				$redirect = esc_url( get_permalink( wc_get_page_id( 'myaccount' ) ) );
 			}
 
 			wp_redirect( apply_filters( 'woocommerce_registration_redirect', $redirect ) );

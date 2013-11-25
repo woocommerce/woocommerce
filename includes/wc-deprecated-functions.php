@@ -249,6 +249,31 @@ function woocommerce_processing_order_count() {
 }
 
 /**
+ * Page functions (soft deprecated)
+ */
+function woocommerce_get_page_id( $page ) {
+	wc_get_page_id( $page );
+}
+function woocommerce_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
+	wc_get_endpoint_url( $endpoint, $value, $permalink );
+}
+function woocommerce_lostpassword_url( $url ) {
+	wc_lostpassword_url( $url );
+}
+function woocommerce_customer_edit_account_url() {
+	wc_customer_edit_account_url();
+}
+function woocommerce_nav_menu_items( $items, $args ) {
+	wc_nav_menu_items( $items, $args );
+}
+function woocommerce_nav_menu_item_classes( $menu_items, $args ) {
+	wc_nav_menu_item_classes( $menu_items, $args );
+}
+function woocommerce_list_pages( $pages ) {
+	wc_list_pages( $pages );
+}
+
+/**
  * Handle renamed filters
  */
 global $wc_map_deprecated_filters;

@@ -23,7 +23,7 @@ wc_print_notices(); ?>
 	);
 
 	printf( __( 'From your account dashboard you can view your recent orders, manage your shipping and billing addresses and <a href="%s">edit your password and account details</a>.', 'woocommerce' ),
-		woocommerce_customer_edit_account_url()
+		wc_customer_edit_account_url()
 	);
 	?>
 </p>

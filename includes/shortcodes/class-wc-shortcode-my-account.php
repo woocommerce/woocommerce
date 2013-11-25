@@ -104,7 +104,7 @@ class WC_Shortcode_My_Account {
 		$order 			= new WC_Order( $order_id );
 
 		if ( !current_user_can( 'view_order', $order_id ) ) {
-			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . get_permalink( woocommerce_get_page_id( 'myaccount' ) ).'">'. __( 'My Account &rarr;', 'woocommerce' ) .'</a>' . '</div>';
+			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . get_permalink( wc_get_page_id( 'myaccount' ) ).'">'. __( 'My Account &rarr;', 'woocommerce' ) .'</a>' . '</div>';
 			return;
 		}
 
@@ -361,7 +361,7 @@ class WC_Shortcode_My_Account {
 
 		if ( ! is_user_logged_in() ) {
 
-			wp_safe_redirect( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) );
+			wp_safe_redirect( get_permalink( wc_get_page_id( 'myaccount' ) ) );
 			exit();
 
 		} else {

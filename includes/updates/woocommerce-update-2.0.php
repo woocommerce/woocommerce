@@ -39,7 +39,7 @@ $wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permi
 
 // Setup default permalinks if shop page is defined
 $permalinks 	= get_option( 'woocommerce_permalinks' );
-$shop_page_id 	= woocommerce_get_page_id( 'shop' );
+$shop_page_id 	= wc_get_page_id( 'shop' );
 
 if ( empty( $permalinks ) && $shop_page_id > 0 ) {
 

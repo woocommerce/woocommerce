@@ -566,7 +566,7 @@ class WC_Checkout {
 		WC()->cart->calculate_totals();
 
 		// Terms
-		if ( ! isset( $_POST['woocommerce_checkout_update_totals'] ) && empty( $this->posted['terms'] ) && woocommerce_get_page_id( 'terms' ) > 0 )
+		if ( ! isset( $_POST['woocommerce_checkout_update_totals'] ) && empty( $this->posted['terms'] ) && wc_get_page_id( 'terms' ) > 0 )
 			wc_add_notice( __( 'You must accept our Terms &amp; Conditions.', 'woocommerce' ), 'error' );
 
 		if ( WC()->cart->needs_shipping() ) {

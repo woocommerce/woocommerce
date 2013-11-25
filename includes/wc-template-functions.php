@@ -22,20 +22,20 @@ function woocommerce_template_redirect() {
 	global $wp_query, $wp;
 
 	// When default permalinks are enabled, redirect shop page to post type archive url
-	if ( ! empty( $_GET['page_id'] ) && get_option( 'permalink_structure' ) == "" && $_GET['page_id'] == woocommerce_get_page_id( 'shop' ) ) {
+	if ( ! empty( $_GET['page_id'] ) && get_option( 'permalink_structure' ) == "" && $_GET['page_id'] == wc_get_page_id( 'shop' ) ) {
 		wp_safe_redirect( get_post_type_archive_link('product') );
 		exit;
 	}
 
 	// When on the checkout with an empty cart, redirect to cart page
-	elseif ( is_page( woocommerce_get_page_id( 'checkout' ) ) && sizeof( WC()->cart->get_cart() ) == 0 && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ) {
-		wp_redirect( get_permalink( woocommerce_get_page_id( 'cart' ) ) );
+	elseif ( is_page( wc_get_page_id( 'checkout' ) ) && sizeof( WC()->cart->get_cart() ) == 0 && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ) {
+		wp_redirect( get_permalink( wc_get_page_id( 'cart' ) ) );
 		exit;
 	}
 
 	// Logout
 	elseif ( isset( $wp->query_vars['customer-logout'] ) ) {
-		wp_redirect( str_replace( '&amp;', '&', wp_logout_url( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) ) ) );
+		wp_redirect( str_replace( '&amp;', '&', wp_logout_url( get_permalink( wc_get_page_id( 'myaccount' ) ) ) ) );
 		exit;
 	}
 
@@ -348,7 +348,7 @@ if ( ! function_exists( 'woocommerce_page_title' ) ) {
 
 		} else {
 
-			$shop_page_id = woocommerce_get_page_id( 'shop' );
+			$shop_page_id = wc_get_page_id( 'shop' );
 			$page_title   = get_the_title( $shop_page_id );
 
 		}
@@ -427,7 +427,7 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 	 */
 	function woocommerce_product_archive_description() {
 		if ( is_post_type_archive( 'product' ) && get_query_var( 'paged' ) == 0 ) {
-			$shop_page   = get_post( woocommerce_get_page_id( 'shop' ) );
+			$shop_page   = get_post( wc_get_page_id( 'shop' ) );
 			if ( $shop_page ) {
 				$description = apply_filters( 'the_content', $shop_page->post_content );
 				if ( $description ) {

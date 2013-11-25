@@ -96,7 +96,7 @@ class WC_Admin_Permalink_Settings {
 		$product_permalink = $permalinks['product_base'];
 
 		// Get shop page
-		$shop_page_id 	= woocommerce_get_page_id( 'shop' );
+		$shop_page_id 	= wc_get_page_id( 'shop' );
 		$base_slug 		= ( $shop_page_id > 0 && get_page( $shop_page_id ) ) ? get_page_uri( $shop_page_id ) : _x( 'shop', 'default-slug', 'woocommerce' );
 		$product_base 	= _x( 'product', 'default-slug', 'woocommerce' );
 
