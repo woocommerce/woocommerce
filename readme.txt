@@ -241,6 +241,43 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - Spanish translation by Luis Giménez.
 * Localization - French, Spanish, Romanian, Danish, Korean, Czech, Arabic, Hungarian updates.
 
+= 2.0.20 - 21/11/2013 =
+* Tweaked paypal request
+* Check for WP Error when getting terms in breadcrumb file
+* Sanitize when searching in admin
+* Fix yard to cm conversion
+
+= 2.0.19 - 04/11/2013 =
+* Fix - get_item_subtotal() logic
+* Fix - Pass number of products variable to get_related for more then 5 related products
+* Fix - Email fatal error for orders with missing products
+* Fix - Local pickup base tax option on first calculation
+* Tweak - For paying customer column, use a dash #3971
+* Tweak - Added wordwrap to order notes
+* Localisation - Updated Portuguese, Slovak, French, Lithuanian, Finnish
+
+= 2.0.18 - 21/10/2013 =
+* Fix - Escaped the "hide-wc-extensions-message" link in admin.
+* Fix - CSS -mox- prefix. #3953
+* Fix - Remove sorting args after main query #3969
+* Tweak - Pass index to woocommerce_save_product_variation. #3962
+* Tweak - woocommerce_variable_product_sync hooks
+* Tweak - CH postcode validation
+* Tweak - Show layered nav widgets on any product taxonomy page
+* Localisation - Various corrections
+
+= 2.0.17 - 17/10/2013 =
+* Fix - Add missing doctype for email header #3921
+* Fix - 2 notices on the cart/checkout related to tax #3922
+* Fix - Allowed more tags to be saved in sharethis code
+* Fix - If no products on sale, don't show results in sale shortcode
+* Fix - During remove_product_query, remove ordering filters to prevent affecting other queries
+* Tweak - Min amount check takes taxes in consideration #3924
+* Tweak - Added validate_ID_field method check to settings API for special validation rules
+* Tweak - Added needs_payment() method. Checks if an order needs payment, based on status and order total.
+* Tweak - Key value pairs for order_meta (woocommerce_email_order_meta_keys)
+* Tweak - Added wc_variation_form trigger to variations javascript for 3rd party plugins
+
 = 2.0.16 - 14/10/2013 =
 * Fix - woocommerce_change_term_counts needs to always return terms. Fixes category display.
 * Fix - Attribute label display.
