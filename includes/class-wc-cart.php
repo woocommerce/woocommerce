@@ -601,6 +601,7 @@ class WC_Cart {
 		/**
 		 * Gets the url to remove an item from the cart.
 		 *
+		 * @param string	cart_item_key	contains the id of the cart item
 		 * @return string url to page
 		 */
 		public function get_remove_url( $cart_item_key ) {
