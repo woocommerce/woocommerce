@@ -122,10 +122,10 @@ jQuery(document).ready(function($) {
         exclude_series     = exclude_series.split(',');
         var xaxes_label    = $(this).data('xaxes');
         var groupby        = $(this).data('groupby');
-        var export         = $(this).data('export');
+        var export_format  = $(this).data('export');
         var csv_data       = "data:application/csv;charset=utf-8,"
 
-        if ( export == 'table' ) {
+        if ( export_format == 'table' ) {
 
             $(this).closest('div').find('thead tr,tbody tr').each(function() {
                 $(this).find('th,td').each(function() {
