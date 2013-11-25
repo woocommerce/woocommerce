@@ -21,14 +21,14 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @param bool $show_admin_bar
  * @return bool
  */
-function woocommerce_disable_admin_bar( $show_admin_bar ) {
+function wc_disable_admin_bar( $show_admin_bar ) {
 	if ( apply_filters( 'woocommerce_disable_admin_bar', get_option( 'woocommerce_lock_down_admin', "yes" ) == "yes" ) && ! ( current_user_can('edit_posts') || current_user_can('manage_woocommerce') ) ) {
 		$show_admin_bar = false;
 	}
 
 	return $show_admin_bar;
 }
-add_filter( 'show_admin_bar', 'woocommerce_disable_admin_bar', 10, 1 );
+add_filter( 'show_admin_bar', 'wc_disable_admin_bar', 10, 1 );
 
 
 /**
@@ -39,7 +39,7 @@ add_filter( 'show_admin_bar', 'woocommerce_disable_admin_bar', 10, 1 );
  * @param  string $password
  * @return WP_Error on failure, Int (user ID) on success
  */
-function woocommerce_create_new_customer( $email, $username = '', $password = '' ) {
+function wc_create_new_customer( $email, $username = '', $password = '' ) {
 
 	// Check the e-mail address
 	if ( empty( $email ) || ! is_email( $email ) )
@@ -117,7 +117,7 @@ function woocommerce_create_new_customer( $email, $username = '', $password = ''
  * @param  int $customer_id
  * @return void
  */
-function woocommerce_set_customer_auth_cookie( $customer_id ) {
+function wc_set_customer_auth_cookie( $customer_id ) {
 	global $current_user;
 
 	$current_user = get_user_by( 'id', $customer_id );
@@ -131,7 +131,7 @@ function woocommerce_set_customer_auth_cookie( $customer_id ) {
  * @param  int $customer_id
  * @return void
  */
-function woocommerce_update_new_customer_past_orders( $customer_id ) {
+function wc_update_new_customer_past_orders( $customer_id ) {
 
     $customer = get_user_by( 'id', absint( $customer_id ) );
 
@@ -189,7 +189,7 @@ function woocommerce_update_new_customer_past_orders( $customer_id ) {
  * @param int $order_id
  * @return void
  */
-function woocommerce_paying_customer( $order_id ) {
+function wc_paying_customer( $order_id ) {
 
 	$order = new WC_Order( $order_id );
 
@@ -203,12 +203,10 @@ function woocommerce_paying_customer( $order_id ) {
 		update_user_meta( $order->user_id, '_order_count', $old_count + 1 );
 	}
 }
-add_action( 'woocommerce_order_status_completed', 'woocommerce_paying_customer' );
+add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 
 
 /**
- * woocommerce_customer_bought_product
- *
  * Checks if a user (by email) has bought an item
  *
  * @access public
@@ -217,7 +215,7 @@ add_action( 'woocommerce_order_status_completed', 'woocommerce_paying_customer' 
  * @param int $product_id
  * @return bool
  */
-function woocommerce_customer_bought_product( $customer_email, $user_id, $product_id ) {
+function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	global $wpdb;
 
 	$emails = array();
@@ -261,8 +259,6 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
 }
 
 /**
- * woocommerce_customer_has_capability
- *
  * Checks if a user has a certain capability 
  *
  * @access public
@@ -271,7 +267,7 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
  * @param array $args
  * @return bool
  */
-function woocommerce_customer_has_capability( $allcaps, $caps, $args ) {
+function wc_customer_has_capability( $allcaps, $caps, $args ) {
   if ( isset( $caps[0] ) ) {
     switch ( $caps[0] ) {
 
@@ -323,4 +319,4 @@ function woocommerce_customer_has_capability( $allcaps, $caps, $args ) {
   }
   return $allcaps;
 }
-add_filter( 'user_has_cap', 'woocommerce_customer_has_capability', 10, 3);
+add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3);

@@ -798,14 +798,14 @@ class WC_Form_Handler {
 				return;
 			}
 
-			$new_customer = woocommerce_create_new_customer( $email, $username, $password );
+			$new_customer = wc_create_new_customer( $email, $username, $password );
 
 			if ( is_wp_error( $new_customer ) ) {
 				wc_add_notice( $new_customer->get_error_message(), 'error' );
 				return;
 			}
 
-			woocommerce_set_customer_auth_cookie( $new_customer );
+			wc_set_customer_auth_cookie( $new_customer );
 
 			// Redirect
 			if ( wp_get_referer() ) {

@@ -614,14 +614,14 @@ class WC_Checkout {
 
 					$username     = ! empty( $this->posted['account_username'] ) ? $this->posted['account_username'] : '';
 					$password     = ! empty( $this->posted['account_password'] ) ? $this->posted['account_password'] : '';
-					$new_customer = woocommerce_create_new_customer( $this->posted['billing_email'], $username, $password );
+					$new_customer = wc_create_new_customer( $this->posted['billing_email'], $username, $password );
 
                 	if ( is_wp_error( $new_customer ) )
                 		throw new Exception( $new_customer->get_error_message() );
 
                 	$this->customer_id = $new_customer;
 
-                	woocommerce_set_customer_auth_cookie( $this->customer_id );
+                	wc_set_customer_auth_cookie( $this->customer_id );
 
                 	// As we are now logged in, checkout will need to refresh to show logged in data
                 	WC()->session->set( 'reload_checkout', true );

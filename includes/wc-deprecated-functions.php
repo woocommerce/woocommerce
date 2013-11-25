@@ -116,6 +116,31 @@ function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: te
 }
 
 /**
+ * Customer functions (soft deprecated)
+ */
+function woocommerce_disable_admin_bar( $show_admin_bar ) {
+	wc_disable_admin_bar( $show_admin_bar );
+}
+function woocommerce_create_new_customer( $email, $username = '', $password = '' ) {
+	wc_create_new_customer( $email, $username, $password );
+}
+function woocommerce_set_customer_auth_cookie( $customer_id ) {
+	wc_set_customer_auth_cookie( $customer_id );
+}
+function woocommerce_update_new_customer_past_orders( $customer_id ) {
+	wc_update_new_customer_past_orders( $customer_id );
+}
+function wc_paying_customer( $order_id ) {
+	woocommerce_paying_customer( $order_id );
+}
+function woocommerce_customer_bought_product( $customer_email, $user_id, $product_id ) {
+	wc_customer_bought_product( $customer_email, $user_id, $product_id );
+}
+function woocommerce_customer_has_capability( $allcaps, $caps, $args ) {
+	wc_customer_has_capability( $allcaps, $caps, $args );
+}
+
+/**
  * Handle renamed filters
  */
 global $wc_map_deprecated_filters;
