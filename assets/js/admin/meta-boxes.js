@@ -558,7 +558,7 @@ jQuery( function($){
 
 		var data = {
 			order_item_id: 	$item.attr( 'data-order_item_id' ),
-			action: 	'wc_add_order_item_meta',
+			action: 	'woocommerce_add_order_item_meta',
 			security: 	woocommerce_admin_meta_boxes.order_item_nonce
 		};
 
