@@ -24,7 +24,10 @@ class WC_Meta_Box_Product_Short_Description {
 		$settings = array(
 			'textarea_name'	=> 'excerpt',
 			'quicktags' 	=> array( 'buttons' => 'em,strong,link' ),
-			'tinymce' 	=> array( 'theme_advanced_buttons1' => 'bold,italic,link,unlink' ),
+			'tinymce' 	=> array(
+				'theme_advanced_buttons1' => 'bold,italic,link,unlink',
+				'theme_advanced_buttons2' => '',
+			),
 			'editor_css'	=> '<style>#wp-excerpt-editor-container .wp-editor-area{height:175px; width:100%;}</style>'
 		);
 
