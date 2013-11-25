@@ -103,7 +103,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 	 */
 	function get_content_html() {
 		ob_start();
-		woocommerce_get_template( $this->template_html, array(
+		wc_get_template( $this->template_html, array(
 			'order' 		=> $this->object,
 			'email_heading' => $this->get_heading()
 		) );
@@ -118,7 +118,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 	 */
 	function get_content_plain() {
 		ob_start();
-		woocommerce_get_template( $this->template_plain, array(
+		wc_get_template( $this->template_plain, array(
 			'order' 		=> $this->object,
 			'email_heading' => $this->get_heading()
 		) );

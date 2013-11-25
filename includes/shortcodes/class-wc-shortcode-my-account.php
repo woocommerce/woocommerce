@@ -46,7 +46,7 @@ class WC_Shortcode_My_Account {
 
 			} else {
 
-				woocommerce_get_template( 'myaccount/form-login.php' );
+				wc_get_template( 'myaccount/form-login.php' );
 
 			}
 
@@ -86,7 +86,7 @@ class WC_Shortcode_My_Account {
 	    	'order_count' => 15
 		), $atts ) );
 
-		woocommerce_get_template( 'myaccount/my-account.php', array(
+		wc_get_template( 'myaccount/my-account.php', array(
 			'current_user' 	=> get_user_by( 'id', get_current_user_id() ),
 			'order_count' 	=> 'all' == $order_count ? -1 : $order_count
 		) );
@@ -144,7 +144,7 @@ class WC_Shortcode_My_Account {
 	 * Edit account details page
 	 */
 	private static function edit_account() {
-		woocommerce_get_template( 'myaccount/form-edit-account.php', array( 'user' => get_user_by( 'id', get_current_user_id() ) ) );
+		wc_get_template( 'myaccount/form-edit-account.php', array( 'user' => get_user_by( 'id', get_current_user_id() ) ) );
 	}
 
 	/**
@@ -189,7 +189,7 @@ class WC_Shortcode_My_Account {
 			$address[ $key ]['value'] = apply_filters( 'woocommerce_my_account_edit_address_field_value', $value, $key, $load_address );
 		}
 
-		woocommerce_get_template( 'myaccount/form-edit-address.php', array(
+		wc_get_template( 'myaccount/form-edit-address.php', array(
 			'load_address' 	=> $load_address,
 			'address'		=> apply_filters( 'woocommerce_address_to_edit', $address )
 		) );
@@ -219,7 +219,7 @@ class WC_Shortcode_My_Account {
 			}
 		}
 
-		woocommerce_get_template( 'myaccount/form-lost-password.php', $args );
+		wc_get_template( 'myaccount/form-lost-password.php', $args );
 	}
 
 	/**
@@ -373,7 +373,7 @@ class WC_Shortcode_My_Account {
 			wc_print_messages();
 
 			// Add payment method form
-			woocommerce_get_template( 'myaccount/form-add-payment-method.php' );
+			wc_get_template( 'myaccount/form-add-payment-method.php' );
 
 			wc_print_messages();
 

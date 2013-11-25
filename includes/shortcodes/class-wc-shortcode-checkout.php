@@ -100,7 +100,7 @@ class WC_Shortcode_Checkout {
 					if ( $order->billing_postcode )
 						$woocommerce->customer->set_postcode( $order->billing_postcode );
 
-					woocommerce_get_template( 'checkout/form-pay.php', array( 'order' => $order ) );
+					wc_get_template( 'checkout/form-pay.php', array( 'order' => $order ) );
 
 				} else {
 
@@ -196,7 +196,7 @@ class WC_Shortcode_Checkout {
 		// Empty awaiting payment session
 		unset( $woocommerce->session->order_awaiting_payment );
 
-		woocommerce_get_template( 'checkout/thankyou.php', array( 'order' => $order ) );
+		wc_get_template( 'checkout/thankyou.php', array( 'order' => $order ) );
 	}
 
 	/**
@@ -223,7 +223,7 @@ class WC_Shortcode_Checkout {
 
 		if ( empty( $_POST ) && wc_notice_count( 'wc_errors' ) > 0 ) {
 
-			woocommerce_get_template( 'checkout/cart-errors.php', array( 'checkout' => $checkout ) );
+			wc_get_template( 'checkout/cart-errors.php', array( 'checkout' => $checkout ) );
 
 		} else {
 
@@ -232,7 +232,7 @@ class WC_Shortcode_Checkout {
 			if ( wc_notice_count( 'wc_errors' ) == 0 && $non_js_checkout )
 				wc_add_notice( __( 'The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page.', 'woocommerce' ) );
 
-			woocommerce_get_template( 'checkout/form-checkout.php', array( 'checkout' => $checkout ) );
+			wc_get_template( 'checkout/form-checkout.php', array( 'checkout' => $checkout ) );
 
 		}
 	}

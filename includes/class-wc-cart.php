@@ -543,7 +543,7 @@ class WC_Cart {
 						echo esc_html( $data['key'] ) . ': ' . wp_kses_post( $data['value'] ) . "\n";
 
 				} else {
-					woocommerce_get_template( 'cart/cart-item-data.php', array( 'item_data' => $item_data ) );
+					wc_get_template( 'cart/cart-item-data.php', array( 'item_data' => $item_data ) );
 				}
 
 				return ob_get_clean();

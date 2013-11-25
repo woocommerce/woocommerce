@@ -958,7 +958,7 @@ class WC_Order {
 
 		$template = $plain_text ? 'emails/plain/email-order-items.php' : 'emails/email-order-items.php';
 
-		woocommerce_get_template( $template, array(
+		wc_get_template( $template, array(
 			'order'					=> $this,
 			'items' 				=> $this->get_items(),
 			'show_download_links'	=> $show_download_links,

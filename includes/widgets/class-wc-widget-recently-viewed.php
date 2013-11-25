@@ -82,7 +82,7 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 
 			while ( $r->have_posts()) {
 				$r->the_post();
-				woocommerce_get_template( 'content-widget-product.php' );
+				wc_get_template( 'content-widget-product.php' );
 			}
 
 			echo '</ul>';

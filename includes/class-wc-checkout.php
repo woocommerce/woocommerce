@@ -140,7 +140,7 @@ class WC_Checkout {
 	 * @return void
 	 */
 	public function checkout_form_billing() {
-		woocommerce_get_template( 'checkout/form-billing.php', array( 'checkout' => $this ) );
+		wc_get_template( 'checkout/form-billing.php', array( 'checkout' => $this ) );
 	}
 
 
@@ -151,7 +151,7 @@ class WC_Checkout {
 	 * @return void
 	 */
 	public function checkout_form_shipping() {
-		woocommerce_get_template( 'checkout/form-shipping.php', array( 'checkout' => $this ) );
+		wc_get_template( 'checkout/form-shipping.php', array( 'checkout' => $this ) );
 	}
 
 

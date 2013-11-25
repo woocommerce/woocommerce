@@ -43,7 +43,7 @@ if ( $order->billing_email )
 if ( $order->billing_phone )
 	echo __( 'Tel:', 'woocommerce' ); ?> <?php echo $order->billing_phone. "\n";
 
-woocommerce_get_template( 'emails/plain/email-addresses.php', array( 'order' => $order ) );
+wc_get_template( 'emails/plain/email-addresses.php', array( 'order' => $order ) );
 
 echo "\n****************************************************\n\n";
 

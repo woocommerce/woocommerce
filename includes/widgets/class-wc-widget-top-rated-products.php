@@ -81,7 +81,7 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 
 			while ( $r->have_posts() ) {
 				$r->the_post();
-				woocommerce_get_template( 'content-widget-product.php', array( 'show_rating' => true ) );
+				wc_get_template( 'content-widget-product.php', array( 'show_rating' => true ) );
 			}
 
 			echo '</ul>';

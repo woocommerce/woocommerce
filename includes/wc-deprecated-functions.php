@@ -100,6 +100,22 @@ function woocommerce_clear_cart_after_payment() {
 }
 
 /**
+ * Core functions (soft deprecated)
+ */
+function woocommerce_get_template_part( $slug, $name = '' ) {
+	wc_get_template_part( $slug, $name );
+}
+function woocommerce_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
+	wc_get_template( $template_name, $args, $template_path, $default_path );
+}
+function woocommerce_locate_template( $template_name, $template_path = '', $default_path = '' ) {
+	wc_locate_template( $template_name, $template_path, $default_path );
+}
+function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "" ) {
+	wc_mail( $to, $subject, $message, $headers, $attachments );
+}
+
+/**
  * Handle renamed filters
  */
 global $wc_map_deprecated_filters;

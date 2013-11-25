@@ -20,7 +20,7 @@ get_currentuserinfo();
 
 <?php if ( ! $load_address ) : ?>
 
-	<?php woocommerce_get_template( 'myaccount/my-address.php' ); ?>
+	<?php wc_get_template( 'myaccount/my-address.php' ); ?>
 
 <?php else : ?>
 

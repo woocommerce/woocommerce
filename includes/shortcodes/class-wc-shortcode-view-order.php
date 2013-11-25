@@ -42,7 +42,7 @@ class WC_Shortcode_View_Order {
 		$order 			= new WC_Order( $order_id );
 
 		if ( $order_id == 0 ) {
-			woocommerce_get_template( 'myaccount/my-orders.php', array( 'order_count' => 'all' == $order_count ? -1 : $order_count ) );
+			wc_get_template( 'myaccount/my-orders.php', array( 'order_count' => 'all' == $order_count ? -1 : $order_count ) );
 			return;
 		}
 
@@ -53,7 +53,7 @@ class WC_Shortcode_View_Order {
 
 		$status = get_term_by('slug', $order->status, 'shop_order_status');
 
-		woocommerce_get_template( 'myaccount/view-order.php', array(
+		wc_get_template( 'myaccount/view-order.php', array(
 			'order_id'	=> $order_id,
 			'order'		=> $order,
 			'status'	=> $status

@@ -83,7 +83,7 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 	 */
 	function get_content_html() {
 		ob_start();
-		woocommerce_get_template( $this->template_html, array(
+		wc_get_template( $this->template_html, array(
 			'email_heading' => $this->get_heading(),
 			'user_login' 	=> $this->user_login,
 			'reset_key'		=> $this->reset_key,
@@ -100,7 +100,7 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 	 */
 	function get_content_plain() {
 		ob_start();
-		woocommerce_get_template( $this->template_plain, array(
+		wc_get_template( $this->template_plain, array(
 			'email_heading' => $this->get_heading(),
 			'user_login' 	=> $this->user_login,
 			'reset_key'		=> $this->reset_key,

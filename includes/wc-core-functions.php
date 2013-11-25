@@ -52,7 +52,7 @@ add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpau
  * @param string $name (default: '')
  * @return void
  */
-function woocommerce_get_template_part( $slug, $name = '' ) {
+function wc_get_template_part( $slug, $name = '' ) {
 	$template = '';
 
 	// Look in yourtheme/slug-name.php and yourtheme/woocommerce/slug-name.php
@@ -81,11 +81,11 @@ function woocommerce_get_template_part( $slug, $name = '' ) {
  * @param string $default_path (default: '')
  * @return void
  */
-function woocommerce_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
+function wc_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
 	if ( $args && is_array($args) )
 		extract( $args );
 
-	$located = woocommerce_locate_template( $template_name, $template_path, $default_path );
+	$located = wc_locate_template( $template_name, $template_path, $default_path );
 
 	do_action( 'woocommerce_before_template_part', $template_name, $template_path, $located, $args );
 
@@ -109,7 +109,7 @@ function woocommerce_get_template( $template_name, $args = array(), $template_pa
  * @param string $default_path (default: '')
  * @return string
  */
-function woocommerce_locate_template( $template_name, $template_path = '', $default_path = '' ) {
+function wc_locate_template( $template_name, $template_path = '', $default_path = '' ) {
 	if ( ! $template_path ) $template_path = WC()->template_path();
 	if ( ! $default_path ) $default_path = WC()->plugin_path() . '/templates/';
 
@@ -256,7 +256,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
  * @param string $headers (default: "Content-Type: text/html\r\n")
  * @param string $attachments (default: "")
  */
-function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "" ) {
+function wc_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "" ) {
 	global $woocommerce;
 
 	$mailer = $woocommerce->mailer();

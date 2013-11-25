@@ -1332,7 +1332,7 @@ class WC_Product {
 	 * @return void
 	 */
 	public function list_attributes() {
-		woocommerce_get_template( 'single-product/product-attributes.php', array(
+		wc_get_template( 'single-product/product-attributes.php', array(
 			'product'    => $this
 		) );
 	}
