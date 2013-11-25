@@ -7,7 +7,7 @@ msgstr ""
 "POT-Creation-Date: 2013-04-29 16:02:06+00:00\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.5.7\n"
-"Last-Translator: Shohei Tanaka <shohei.tanaka@artisanworkshop.biz>\n"
+"Last-Translator: ideodora <ideodora@gmail.com>\n"
 "Language-Team: JAPANESE <shohei.tanaka@artisanworkshop.biz>\n"
 "Language: ja\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
@@ -5003,6 +5003,194 @@ msgstr "北西部"
 #: i18n/states/ZA.php:21
 msgid "Western Cape"
 msgstr "西ケープ州"
+
+#: i18n/states/JP.php:13
+msgid "Hokkaido"
+msgstr "北海道"
+
+#: i18n/states/JP.php:14
+msgid "Aomori"
+msgstr "青森"
+
+#: i18n/states/JP.php:15
+msgid "Iwate"
+msgstr "岩手"
+
+#: i18n/states/JP.php:16
+msgid "Miyagi"
+msgstr "宮城"
+
+#: i18n/states/JP.php:17
+msgid "Akita"
+msgstr "秋田"
+
+#: i18n/states/JP.php:18
+msgid "Yamagata"
+msgstr "山形"
+
+#: i18n/states/JP.php:19
+msgid "Fukushima"
+msgstr "福島"
+
+#: i18n/states/JP.php:20
+msgid "Ibaraki"
+msgstr "茨城"
+
+#: i18n/states/JP.php:21
+msgid "Tochigi"
+msgstr "栃木"
+
+#: i18n/states/JP.php:22
+msgid "Gunma"
+msgstr "群馬"
+
+#: i18n/states/JP.php:23
+msgid "Saitama"
+msgstr "埼玉"
+
+#: i18n/states/JP.php:24
+msgid "Chiba"
+msgstr "千葉"
+
+#: i18n/states/JP.php:25
+msgid "Tokyo"
+msgstr "東京"
+
+#: i18n/states/JP.php:26
+msgid "Kanagawa"
+msgstr "神奈川"
+
+#: i18n/states/JP.php:27
+msgid "Niigata"
+msgstr "新潟"
+
+#: i18n/states/JP.php:28
+msgid "Toyama"
+msgstr "富山"
+
+#: i18n/states/JP.php:29
+msgid "Ishikawa"
+msgstr "石川"
+
+#: i18n/states/JP.php:30
+msgid "Fukui"
+msgstr "福井"
+
+#: i18n/states/JP.php:31
+msgid "Yamanashi"
+msgstr "山梨"
+
+#: i18n/states/JP.php:32
+msgid "Nagano"
+msgstr "長野"
+
+#: i18n/states/JP.php:33
+msgid "Gifu"
+msgstr "岐阜"
+
+#: i18n/states/JP.php:34
+msgid "Shizuoka"
+msgstr "静岡"
+
+#: i18n/states/JP.php:35
+msgid "Aichi"
+msgstr "愛知"
+
+#: i18n/states/JP.php:36
+msgid "Mie"
+msgstr "三重"
+
+#: i18n/states/JP.php:37
+msgid "Shiga"
+msgstr "滋賀"
+
+#: i18n/states/JP.php:38
+msgid "Kyouto"
+msgstr "京都"
+
+#: i18n/states/JP.php:39
+msgid "Osaka"
+msgstr "大坂"
+
+#: i18n/states/JP.php:40
+msgid "Hyougo"
+msgstr "兵庫"
+
+#: i18n/states/JP.php:41
+msgid "Nara"
+msgstr "奈良"
+
+#: i18n/states/JP.php:42
+msgid "Wakayama"
+msgstr "和歌山"
+
+#: i18n/states/JP.php:43
+msgid "Tottori"
+msgstr "鳥取"
+
+#: i18n/states/JP.php:44
+msgid "Shimane"
+msgstr "島根"
+
+#: i18n/states/JP.php:45
+msgid "Okayama"
+msgstr "岡山"
+
+#: i18n/states/JP.php:46
+msgid "Hiroshima"
+msgstr "広島"
+
+#: i18n/states/JP.php:47
+msgid "Yamaguchi"
+msgstr "山口"
+
+#: i18n/states/JP.php:48
+msgid "Tokushima"
+msgstr "徳島"
+
+#: i18n/states/JP.php:49
+msgid "Kagawa"
+msgstr "香川"
+
+#: i18n/states/JP.php:50
+msgid "Ehime"
+msgstr "愛媛"
+
+#: i18n/states/JP.php:51
+msgid "Kochi"
+msgstr "高知"
+
+#: i18n/states/JP.php:52
+msgid "Fukuoka"
+msgstr "福岡"
+
+#: i18n/states/JP.php:53
+msgid "Saga"
+msgstr "佐賀"
+
+#: i18n/states/JP.php:54
+msgid "Nagasaki"
+msgstr "長崎"
+
+#: i18n/states/JP.php:55
+msgid "Kumamoto"
+msgstr "熊本"
+
+#: i18n/states/JP.php:56
+msgid "Oita"
+msgstr "大分"
+
+#: i18n/states/JP.php:57
+msgid "Miyazaki"
+msgstr "宮崎"
+
+#: i18n/states/JP.php:58
+msgid "Kagoshima"
+msgstr "鹿児島"
+
+#: i18n/states/JP.php:59
+msgid "Okinawa"
+msgstr "沖縄"
 
 #: i18n/strings.php:16
 msgid "pending"
