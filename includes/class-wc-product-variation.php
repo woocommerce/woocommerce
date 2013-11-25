@@ -150,7 +150,7 @@ class WC_Product_Variation extends WC_Product {
 			$this->sale_price_dates_from = $this->product_custom_fields['_sale_price_dates_from'][0];
 
 		if ( isset( $this->product_custom_fields['_sale_price_dates_to'][0] ) )
-			$this->sale_price_dates_from = $this->product_custom_fields['_sale_price_dates_to'][0];
+			$this->sale_price_dates_to = $this->product_custom_fields['_sale_price_dates_to'][0];
 
 		// Prices
 		$this->price         = isset( $this->product_custom_fields['_price'][0] ) ? $this->product_custom_fields['_price'][0] : '';
