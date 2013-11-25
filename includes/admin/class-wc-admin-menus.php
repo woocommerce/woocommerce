@@ -127,7 +127,7 @@ class WC_Admin_Menus {
 
 					$menu_name = _x('Orders', 'Admin menu name', 'woocommerce');
 					$menu_name_count = '';
-					if ( $order_count = woocommerce_processing_order_count() ) {
+					if ( $order_count = wc_processing_order_count() ) {
 						$menu_name_count = " <span class='awaiting-mod update-plugins count-$order_count'><span class='processing-count'>" . number_format_i18n( $order_count ) . "</span></span>" ;
 					}
 

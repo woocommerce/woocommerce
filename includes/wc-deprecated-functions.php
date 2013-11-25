@@ -212,6 +212,43 @@ if ( ! function_exists( 'woocommerce_format_hex' ) ) {
 }
 
 /**
+ * Order functions (soft deprecated)
+ */
+function woocommerce_get_order_id_by_order_key( $order_key ) {
+	wc_get_order_id_by_order_key( $order_key );
+}
+function woocommerce_downloadable_file_permission( $download_id, $product_id, $order ) {
+	wc_downloadable_file_permission( $download_id, $product_id, $order );
+}
+function woocommerce_downloadable_product_permissions( $order_id ) {
+	wc_downloadable_product_permissions( $order_id );
+}
+function woocommerce_add_order_item( $order_id, $item ) {
+	wc_add_order_item( $order_id, $item );
+}
+function woocommerce_delete_order_item( $item_id ) {
+	wc_delete_order_item( $item_id );
+}
+function woocommerce_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_value = '' ) {
+	wc_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_value );
+}
+function woocommerce_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = false ) {
+	wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique );
+}
+function woocommerce_delete_order_item_meta( $item_id, $meta_key, $meta_value = '', $delete_all = false ) {
+	wc_delete_order_item_meta( $item_id, $meta_key, $meta_value, $delete_all );
+}
+function woocommerce_get_order_item_meta( $item_id, $key, $single = true ) {
+	wc_get_order_item_meta( $item_id, $key, $single );
+}
+function woocommerce_cancel_unpaid_orders() {
+	wc_cancel_unpaid_orders();
+}
+function woocommerce_processing_order_count() {
+	wc_processing_order_count();
+}
+
+/**
  * Handle renamed filters
  */
 global $wc_map_deprecated_filters;

@@ -258,30 +258,30 @@ class WC_Checkout {
 			$_product = $values['data'];
 
            	// Add line item
-           	$item_id = woocommerce_add_order_item( $order_id, array(
+           	$item_id = wc_add_order_item( $order_id, array(
 		 		'order_item_name' 		=> $_product->get_title(),
 		 		'order_item_type' 		=> 'line_item'
 		 	) );
 
 		 	// Add line item meta
 		 	if ( $item_id ) {
-			 	woocommerce_add_order_item_meta( $item_id, '_qty', apply_filters( 'woocommerce_stock_amount', $values['quantity'] ) );
-			 	woocommerce_add_order_item_meta( $item_id, '_tax_class', $_product->get_tax_class() );
-			 	woocommerce_add_order_item_meta( $item_id, '_product_id', $values['product_id'] );
-			 	woocommerce_add_order_item_meta( $item_id, '_variation_id', $values['variation_id'] );
-			 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( $values['line_subtotal'] ) );
-			 	woocommerce_add_order_item_meta( $item_id, '_line_total', wc_format_decimal( $values['line_total'] ) );
-			 	woocommerce_add_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $values['line_tax'] ) );
-			 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( $values['line_subtotal_tax'] ) );
+			 	wc_add_order_item_meta( $item_id, '_qty', apply_filters( 'woocommerce_stock_amount', $values['quantity'] ) );
+			 	wc_add_order_item_meta( $item_id, '_tax_class', $_product->get_tax_class() );
+			 	wc_add_order_item_meta( $item_id, '_product_id', $values['product_id'] );
+			 	wc_add_order_item_meta( $item_id, '_variation_id', $values['variation_id'] );
+			 	wc_add_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( $values['line_subtotal'] ) );
+			 	wc_add_order_item_meta( $item_id, '_line_total', wc_format_decimal( $values['line_total'] ) );
+			 	wc_add_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $values['line_tax'] ) );
+			 	wc_add_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( $values['line_subtotal_tax'] ) );
 
 			 	// Store variation data in meta so admin can view it
 				if ( $values['variation'] && is_array( $values['variation'] ) )
 					foreach ( $values['variation'] as $key => $value )
-						woocommerce_add_order_item_meta( $item_id, esc_attr( str_replace( 'attribute_', '', $key ) ), $value );
+						wc_add_order_item_meta( $item_id, esc_attr( str_replace( 'attribute_', '', $key ) ), $value );
 
 			 	// Add line item meta for backorder status
 			 	if ( $_product->backorders_require_notification() && $_product->is_on_backorder( $values['quantity'] ) )
-			 		woocommerce_add_order_item_meta( $item_id, apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ), $cart_item_key, $order_id ), $values['quantity'] - max( 0, $_product->get_total_stock() ) );
+			 		wc_add_order_item_meta( $item_id, apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ), $cart_item_key, $order_id ), $values['quantity'] - max( 0, $_product->get_total_stock() ) );
 
 			 	// Allow plugins to add order item meta
 			 	do_action( 'woocommerce_add_order_item_meta', $item_id, $values, $cart_item_key );
@@ -290,18 +290,18 @@ class WC_Checkout {
 
 		// Store fees
 		foreach ( WC()->cart->get_fees() as $fee ) {
-			$item_id = woocommerce_add_order_item( $order_id, array(
+			$item_id = wc_add_order_item( $order_id, array(
 		 		'order_item_name' 		=> $fee->name,
 		 		'order_item_type' 		=> 'fee'
 		 	) );
 
 		 	if ( $fee->taxable )
-		 		woocommerce_add_order_item_meta( $item_id, '_tax_class', $fee->tax_class );
+		 		wc_add_order_item_meta( $item_id, '_tax_class', $fee->tax_class );
 		 	else
-		 		woocommerce_add_order_item_meta( $item_id, '_tax_class', '0' );
+		 		wc_add_order_item_meta( $item_id, '_tax_class', '0' );
 
-		 	woocommerce_add_order_item_meta( $item_id, '_line_total', wc_format_decimal( $fee->amount ) );
-			woocommerce_add_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $fee->tax ) );
+		 	wc_add_order_item_meta( $item_id, '_line_total', wc_format_decimal( $fee->amount ) );
+			wc_add_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $fee->tax ) );
 		}
 
 		// Store shipping for all packages
@@ -312,14 +312,14 @@ class WC_Checkout {
 
 				$method = $package['rates'][ $this->shipping_methods[ $i ] ];
 
-				$item_id = woocommerce_add_order_item( $order_id, array(
+				$item_id = wc_add_order_item( $order_id, array(
 			 		'order_item_name' 		=> $method->label,
 			 		'order_item_type' 		=> 'shipping'
 			 	) );
 
 				if ( $item_id ) {
-			 		woocommerce_add_order_item_meta( $item_id, 'method_id', $method->id );
-		 			woocommerce_add_order_item_meta( $item_id, 'cost', wc_format_decimal( $method->cost ) );
+			 		wc_add_order_item_meta( $item_id, 'method_id', $method->id );
+		 			wc_add_order_item_meta( $item_id, 'cost', wc_format_decimal( $method->cost ) );
 		 		}
 			}
 		}
@@ -327,18 +327,18 @@ class WC_Checkout {
 		// Store tax rows
 		foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $key ) {
 
-			$item_id = woocommerce_add_order_item( $order_id, array(
+			$item_id = wc_add_order_item( $order_id, array(
 		 		'order_item_name' 		=> WC()->cart->tax->get_rate_code( $key ),
 		 		'order_item_type' 		=> 'tax'
 		 	) );
 
 		 	// Add line item meta
 		 	if ( $item_id ) {
-		 		woocommerce_add_order_item_meta( $item_id, 'rate_id', $key );
-		 		woocommerce_add_order_item_meta( $item_id, 'label', WC()->cart->tax->get_rate_label( $key ) );
-			 	woocommerce_add_order_item_meta( $item_id, 'compound', absint( WC()->cart->tax->is_compound( $key ) ? 1 : 0 ) );
-			 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', wc_format_decimal( isset( WC()->cart->taxes[ $key ] ) ? WC()->cart->taxes[ $key ] : 0 ) );
-			 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', wc_format_decimal( isset( WC()->cart->shipping_taxes[ $key ] ) ? WC()->cart->shipping_taxes[ $key ] : 0 ) );
+		 		wc_add_order_item_meta( $item_id, 'rate_id', $key );
+		 		wc_add_order_item_meta( $item_id, 'label', WC()->cart->tax->get_rate_label( $key ) );
+			 	wc_add_order_item_meta( $item_id, 'compound', absint( WC()->cart->tax->is_compound( $key ) ? 1 : 0 ) );
+			 	wc_add_order_item_meta( $item_id, 'tax_amount', wc_format_decimal( isset( WC()->cart->taxes[ $key ] ) ? WC()->cart->taxes[ $key ] : 0 ) );
+			 	wc_add_order_item_meta( $item_id, 'shipping_tax_amount', wc_format_decimal( isset( WC()->cart->shipping_taxes[ $key ] ) ? WC()->cart->shipping_taxes[ $key ] : 0 ) );
 			}
 		}
 
@@ -346,14 +346,14 @@ class WC_Checkout {
 		if ( $applied_coupons = WC()->cart->get_coupons() ) {
 			foreach ( $applied_coupons as $code => $coupon ) {
 
-				$item_id = woocommerce_add_order_item( $order_id, array(
+				$item_id = wc_add_order_item( $order_id, array(
 			 		'order_item_name' 		=> $code,
 			 		'order_item_type' 		=> 'coupon'
 			 	) );
 
 			 	// Add line item meta
 			 	if ( $item_id ) {
-			 		woocommerce_add_order_item_meta( $item_id, 'discount_amount', isset( WC()->cart->coupon_discount_amounts[ $code ] ) ? WC()->cart->coupon_discount_amounts[ $code ] : 0 );
+			 		wc_add_order_item_meta( $item_id, 'discount_amount', isset( WC()->cart->coupon_discount_amounts[ $code ] ) ? WC()->cart->coupon_discount_amounts[ $code ] : 0 );
 				}
 			}
 		}

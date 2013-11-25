@@ -999,7 +999,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 						foreach ( $new_download_ids as $download_id ) {
 							// grant permission if it doesn't already exist
 							if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->id, $product_id, $download_id ) ) ) {
-								woocommerce_downloadable_file_permission( $download_id, $product_id, $order );
+								wc_downloadable_file_permission( $download_id, $product_id, $order );
 							}
 						}
 					}

@@ -113,7 +113,7 @@ class WC_Meta_Box_Order_Actions {
 			} elseif ( $action == 'regenerate_download_permissions' ) {
 
 				delete_post_meta( $post_id, '_download_permissions_granted' );
-				woocommerce_downloadable_product_permissions( $post_id );
+				wc_downloadable_product_permissions( $post_id );
 
 			} else {
 

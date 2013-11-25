@@ -201,21 +201,21 @@ foreach ( $order_item_rows as $order_item_row ) {
 		$order_item['line_subtotal_tax'] 	= isset( $order_item['line_subtotal_tax'] ) ? $order_item['line_subtotal_tax'] : 0;
 		$order_item['line_subtotal'] 		= isset( $order_item['line_subtotal'] ) ? $order_item['line_subtotal'] : 0;
 
-		$item_id = woocommerce_add_order_item( $order_item_row->post_id, array(
+		$item_id = wc_add_order_item( $order_item_row->post_id, array(
 	 		'order_item_name' 		=> $order_item['name'],
 	 		'order_item_type' 		=> 'line_item'
 	 	) );
 
 	 	// Add line item meta
 	 	if ( $item_id ) {
-		 	woocommerce_add_order_item_meta( $item_id, '_qty', absint( $order_item['qty'] ) );
-		 	woocommerce_add_order_item_meta( $item_id, '_tax_class', $order_item['tax_class'] );
-		 	woocommerce_add_order_item_meta( $item_id, '_product_id', $order_item['id'] );
-		 	woocommerce_add_order_item_meta( $item_id, '_variation_id', $order_item['variation_id'] );
-		 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( $order_item['line_subtotal'] ) );
-		 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( $order_item['line_subtotal_tax'] ) );
-		 	woocommerce_add_order_item_meta( $item_id, '_line_total', wc_format_decimal( $order_item['line_total'] ) );
-		 	woocommerce_add_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $order_item['line_tax'] ) );
+		 	wc_add_order_item_meta( $item_id, '_qty', absint( $order_item['qty'] ) );
+		 	wc_add_order_item_meta( $item_id, '_tax_class', $order_item['tax_class'] );
+		 	wc_add_order_item_meta( $item_id, '_product_id', $order_item['id'] );
+		 	wc_add_order_item_meta( $item_id, '_variation_id', $order_item['variation_id'] );
+		 	wc_add_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( $order_item['line_subtotal'] ) );
+		 	wc_add_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( $order_item['line_subtotal_tax'] ) );
+		 	wc_add_order_item_meta( $item_id, '_line_total', wc_format_decimal( $order_item['line_total'] ) );
+		 	wc_add_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $order_item['line_tax'] ) );
 
 		 	$meta_rows = array();
 
@@ -269,16 +269,16 @@ foreach ( $order_tax_rows as $order_tax_row ) {
 			if ( ! isset( $order_tax['label'] ) || ! isset( $order_tax['cart_tax'] ) || ! isset( $order_tax['shipping_tax'] ) )
 				continue;
 
-			$item_id = woocommerce_add_order_item( $order_tax_row->post_id, array(
+			$item_id = wc_add_order_item( $order_tax_row->post_id, array(
 		 		'order_item_name' 		=> $order_tax['label'],
 		 		'order_item_type' 		=> 'tax'
 		 	) );
 
 		 	// Add line item meta
 		 	if ( $item_id ) {
-			 	woocommerce_add_order_item_meta( $item_id, 'compound', absint( isset( $order_tax['compound'] ) ? $order_tax['compound'] : 0 ) );
-			 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', wc_clean( $order_tax['cart_tax'] ) );
-			 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', wc_clean( $order_tax['shipping_tax'] ) );
+			 	wc_add_order_item_meta( $item_id, 'compound', absint( isset( $order_tax['compound'] ) ? $order_tax['compound'] : 0 ) );
+			 	wc_add_order_item_meta( $item_id, 'tax_amount', wc_clean( $order_tax['cart_tax'] ) );
+			 	wc_add_order_item_meta( $item_id, 'shipping_tax_amount', wc_clean( $order_tax['shipping_tax'] ) );
 			}
 
 			// Delete from DB (rename)
