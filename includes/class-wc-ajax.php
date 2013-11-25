@@ -560,7 +560,7 @@ class WC_AJAX {
 			$image_id = 0;
 			$variation = get_post( $variation_id ); // Get the variation object
 
-			include( 'includes/admin/post-types/meta-boxes/views/html-variation-admin.php' );
+			include( 'admin/post-types/meta-boxes/views/html-variation-admin.php' );
 		}
 
 		die();
@@ -775,7 +775,7 @@ class WC_AJAX {
 					$loop ++;
 					$file_count ++;
 
-					include( 'includes/admin/post-types/meta-boxes/views/html-order-download-permission.php' );
+					include( 'admin/post-types/meta-boxes/views/html-order-download-permission.php' );
 				}
 			}
 		}
@@ -877,7 +877,7 @@ class WC_AJAX {
 
 		$item = apply_filters( 'woocommerce_ajax_order_item', $item, $item_id );
 
-		include( 'includes/admin/post-types/meta-boxes/views/html-order-item.php' );
+		include( 'admin/post-types/meta-boxes/views/html-order-item.php' );
 
 		// Quit out
 		die();
@@ -906,7 +906,7 @@ class WC_AJAX {
 		 	wc_add_order_item_meta( $item_id, '_line_tax', '' );
 	 	}
 
-		include( 'includes/admin/post-types/meta-boxes/views/html-order-fee.php' );
+		include( 'admin/post-types/meta-boxes/views/html-order-fee.php' );
 
 		// Quit out
 		die();
@@ -1023,6 +1023,71 @@ class WC_AJAX {
 			echo implode( ', ', $return );
 		}
 
+		die();
+	}
+
+	/**
+	 * Add some meta to a line item
+	 */
+	public function add_order_item() {
+		global $wpdb;
+
+		check_ajax_referer( 'order-item', 'security' );
+
+		$item_to_add = sanitize_text_field( $_POST['item_to_add'] );
+		$order_id    = absint( $_POST['order_id'] );
+
+		// Find the item
+		if ( ! is_numeric( $item_to_add ) )
+			die();
+
+		$post = get_post( $item_to_add );
+
+		if ( ! $post || ( $post->post_type !== 'product' && $post->post_type !== 'product_variation' ) )
+			die();
+
+		$_product                  = get_product( $post->ID );
+		$order                     = new WC_Order( $order_id );
+		$class                     = 'new_row';
+
+		// Set values
+		$item                      = array();
+
+		$item['product_id']        = $_product->id;
+		$item['variation_id']      = isset( $_product->variation_id ) ? $_product->variation_id : '';
+		$item['name']              = $_product->get_title();
+		$item['tax_class']         = $_product->get_tax_class();
+		$item['qty']               = 1;
+		$item['line_subtotal']     = number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' );
+		$item['line_subtotal_tax'] = '';
+		$item['line_total']        = number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' );
+		$item['line_tax']          = '';
+
+		// Add line item
+		$item_id = wc_add_order_item( $order_id, array(
+		'order_item_name' => $item['name'],
+		'order_item_type' => 'line_item'
+		) );
+
+		// Add line item meta
+		if ( $item_id ) {
+			wc_add_order_item_meta( $item_id, '_qty', $item['qty'] );
+			wc_add_order_item_meta( $item_id, '_tax_class', $item['tax_class'] );
+			wc_add_order_item_meta( $item_id, '_product_id', $item['product_id'] );
+			wc_add_order_item_meta( $item_id, '_variation_id', $item['variation_id'] );
+			wc_add_order_item_meta( $item_id, '_line_subtotal', $item['line_subtotal'] );
+			wc_add_order_item_meta( $item_id, '_line_subtotal_tax', $item['line_subtotal_tax'] );
+			wc_add_order_item_meta( $item_id, '_line_total', $item['line_total'] );
+			wc_add_order_item_meta( $item_id, '_line_tax', $item['line_tax'] );
+		}
+
+		do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
+
+		$item = apply_filters( 'woocommerce_ajax_order_item', $item, $item_id );
+
+		include( 'admin/post-types/meta-boxes/views/html-order-item.php' );
+
+		// Quit out
 		die();
 	}
 
@@ -1214,7 +1279,7 @@ class WC_AJAX {
 			 	wc_add_order_item_meta( $item_id, 'shipping_tax_amount', $item['shipping_tax_amount'] );
 		 	}
 
-			include( 'includes/admin/post-types/meta-boxes/views/html-order-tax.php' );
+			include( 'admin/post-types/meta-boxes/views/html-order-tax.php' );
 		}
 
 		$tax_row_html = ob_get_clean();
