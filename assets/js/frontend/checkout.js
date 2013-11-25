@@ -1,5 +1,9 @@
 jQuery(document).ready(function($) {
 
+	// woocommerce_params is required to continue, ensure the object exists
+	if (typeof woocommerce_params === "undefined")
+		return false;
+
 	var updateTimer;
 	var dirtyInput = false;
 	var xhr;

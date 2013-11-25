@@ -1,5 +1,9 @@
 jQuery(document).ready(function($) {
 
+	// woocommerce_params is required to continue, ensure the object exists
+	if (typeof woocommerce_params === "undefined")
+		return false;
+
 	// Placeholder
 	$('.woocommerce textarea[placeholder], .woocommerce-page textarea[placeholder], .woocommerce input[placeholder], .woocommerce-page input[placeholder]').placeholder();
 
