@@ -938,7 +938,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 	}
 
 	/**
-	 * Protect downlodas from ms-files.php in multisite
+	 * Protect downloads from ms-files.php in multisite
 	 *
 	 * @param mixed $rewrite
 	 * @return string
