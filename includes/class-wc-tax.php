@@ -206,7 +206,7 @@ class WC_Tax {
 	 * @param string $args (default: '')
 	 * @return array
 	 */
-	public function find_rates( $args = array(), $deprecated_state = null, $deprecated_postcode = null, $deprecated_class = null ) {
+	public function find_rates( $args = array() ) {
 		global $wpdb;
 
 		$defaults = array(
