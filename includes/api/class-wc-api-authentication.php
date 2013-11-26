@@ -108,7 +108,7 @@ class WC_API_Authentication {
 		// check for required OAuth parameters
 		foreach ( $param_names as $param_name ) {
 
-			if ( empty( $params ) )
+			if ( empty( $params[ $param_name ] ) )
 				throw new Exception( sprintf( __( '%s parameter is missing', 'woocommerce' ), $param_name ), 404 );
 		}
 
