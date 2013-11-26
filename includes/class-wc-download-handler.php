@@ -160,7 +160,7 @@ class WC_Download_Handler {
 				$site_url = is_ssl() ? str_replace( 'https:', 'http:', site_url() ) : site_url();
 			}
 
-			$file_path   = str_replace( trailingslashit( esc_url( $site_url ) ), ABSPATH, $file_path );
+			$file_path   = str_replace( trailingslashit( $site_url ), ABSPATH, $file_path );
 
 		} else {
 
@@ -168,7 +168,7 @@ class WC_Download_Handler {
 			$upload_dir  = wp_upload_dir();
 
 			// Try to replace network url
-			$file_path   = str_replace( trailingslashit( esc_url( $network_url ) ), ABSPATH, $file_path );
+			$file_path   = str_replace( trailingslashit( $network_url ), ABSPATH, $file_path );
 
 			// Now try to replace upload URL
 			$file_path   = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $file_path );
@@ -264,7 +264,7 @@ class WC_Download_Handler {
         if ( $remote_file )
         	$this->readfile_chunked( $file_path ) or header( 'Location: ' . $file_path );
         else
-        	$this->readfile_chunked( $file_path ) or wp_die( __( 'File not found', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '">' . __( 'Go to homepage &rarr;', 'woocommerce' ) . '</a>' );
+        	$this->readfile_chunked( $file_path ) or wp_die( __( 'File not found', 'woocommerce' ) . ' <a href="' . esc_url_raw( home_url() ) . '">' . __( 'Go to homepage &rarr;', 'woocommerce' ) . '</a>' );
 
         exit;
 	}
