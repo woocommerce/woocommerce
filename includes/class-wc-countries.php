@@ -813,6 +813,12 @@ class WC_Countries {
 						'required' => false,
 					),
 				),
+				'BO' => array(
+					'postcode' => array(
+						'required' 	=> false,
+						'hidden'	=> true
+					),
+				),
 				'CA' => array(
 					'state'	=> array(
 						'label'			=> __( 'Province', 'woocommerce' ),
