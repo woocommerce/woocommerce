@@ -93,7 +93,7 @@ class WC_Logger {
 	 *
 	 * @access private
 	 * @param mixed $handle
-	 * @return void
+	 * @return string
 	 */
 	private function file_name( $handle ) {
 		return $handle . '-' . sanitize_file_name( wp_hash( $handle ) );

@@ -20,7 +20,6 @@ class WC_Tax {
 	 * __construct function.
 	 *
 	 * @access public
-	 * @return void
 	 */
 	public function __construct() {
 		$this->precision         = WC_ROUNDING_PRECISION;
@@ -33,7 +32,7 @@ class WC_Tax {
 	 * @param  float  $price              Price to calc tax on
 	 * @param  array  $rates              Rates to apply
 	 * @param  boolean $price_includes_tax Whether the passed price has taxes included
-	 * @param  boolean $suppress_rounding  Whether to supress any rounding from taking place
+	 * @param  boolean $suppress_rounding  Whether to suppress any rounding from taking place
 	 * @return array                      Array of rates + prices after tax
 	 */
 	public function calc_tax( $price, $rates, $price_includes_tax = false, $suppress_rounding = false ) {
@@ -185,7 +184,7 @@ class WC_Tax {
 
 				$tax_amount = $the_price_inc_tax * ( $rate['rate'] / 100 );
 
-				// ADVANCED: Allow third parties to modifiy this rate
+				// ADVANCED: Allow third parties to modify this rate
 				$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price, $the_price_inc_tax, $pre_compound_total );
 
 				// Add rate
@@ -203,7 +202,7 @@ class WC_Tax {
 	 * Searches for all matching country/state/postcode tax rates.
 	 *
 	 * @access public
-	 * @param string $args (default: '')
+	 * @param array $args
 	 * @return array
 	 */
 	public function find_rates( $args = array() ) {
@@ -315,8 +314,7 @@ class WC_Tax {
 
 	/**
 	 * Get's an array of matching rates for a tax class.
-	 *
-	 * @param   object	Tax Class
+	 * @param string $tax_class
 	 * @return  array
 	 */
 	public function get_rates( $tax_class = '' ) {
@@ -541,7 +539,7 @@ class WC_Tax {
 	 *
 	 * @access public
 	 * @param mixed $key
-	 * @return void
+	 * @return string
 	 */
 	public function get_rate_code( $key ) {
 		global $wpdb;

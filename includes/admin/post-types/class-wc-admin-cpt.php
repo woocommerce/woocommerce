@@ -29,11 +29,9 @@ class WC_Admin_CPT {
 
 	/**
 	 * Change label for insert buttons.
-	 *
-	 * @access public
-	 * @param mixed $translation
-	 * @param mixed $original
-	 * @return void
+	 * @access   public
+	 * @param array $strings
+	 * @return array
 	 */
 	function change_insert_into_post( $strings ) {
 		global $post_type;

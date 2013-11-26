@@ -49,7 +49,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 */
 	public function form( $instance ) {
 		$this->init_settings();
-		return parent::form( $instance );
+		parent::form( $instance );
 	}
 
 	/**

@@ -107,7 +107,7 @@ class WC_Admin_Duplicate_Product {
 	 * @param mixed $post
 	 * @param int $parent (default: 0)
 	 * @param string $post_status (default: '')
-	 * @return void
+	 * @return int
 	 */
 	public function duplicate_product( $post, $parent = 0, $post_status = '' ) {
 		global $wpdb;
@@ -163,10 +163,12 @@ class WC_Admin_Duplicate_Product {
 
 	/**
 	 * Get a product from the database to duplicate
-	 *
+
 	 * @access public
 	 * @param mixed $id
-	 * @return void
+	 * @return WP_Post|bool
+	 * @todo Returning false? Need to check for it in...
+	 * @see duplicate_product
 	 */
 	private function get_product_to_duplicate( $id ) {
 		global $wpdb;

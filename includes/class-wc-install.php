@@ -483,7 +483,7 @@ class WC_Install {
 	 * Get capabilities for WooCommerce - these are assigned to admin/shop manager during installation or reset
 	 *
 	 * @access public
-	 * @return void
+	 * @return array
 	 */
 	public function get_core_capabilities() {
 		$capabilities = array();

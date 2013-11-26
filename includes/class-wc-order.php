@@ -185,7 +185,7 @@ class WC_Order {
 	 * Get a formatted shipping address for the order.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_formatted_shipping_address() {
 		if ( ! $this->formatted_shipping_address ) {
