@@ -231,6 +231,11 @@ if ( ! function_exists( 'meta_is_product_attribute' ) ) {
 	 */
 	function meta_is_product_attribute( $name, $value, $product_id ) {
 		$product    = get_product( $product_id );
+		
+		if ( $product->product_type != 'variation' ) {
+			return false;
+		}
+		
 		$attributes = $product->get_variation_attributes();
 
 		var_dump($attributes[ $name ]);
