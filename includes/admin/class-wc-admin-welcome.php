@@ -420,10 +420,10 @@ class WC_Admin_Welcome {
 	}
 
 	/**
-	 * Retreive list of contributors from GitHub.
+	 * Retrieve list of contributors from GitHub.
 	 *
 	 * @access public
-	 * @return void
+	 * @return mixed
 	 */
 	public function get_contributors() {
 		$contributors = get_transient( 'woocommerce_contributors' );

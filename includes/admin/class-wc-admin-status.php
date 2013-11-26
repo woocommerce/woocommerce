@@ -198,8 +198,8 @@ class WC_Admin_Status {
 	 * Scan the template files
 	 *
 	 * @access public
- 	 * @param mixed $template_path
- 	 * @return void
+ 	 * @param string $template_path
+ 	 * @return array
 	 */
 	public function scan_template_files( $template_path ) {
 		$files         = scandir( $template_path );

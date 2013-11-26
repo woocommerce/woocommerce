@@ -31,7 +31,8 @@ class WC_Order_Item_Meta {
 	 * @param bool $flat (default: false)
 	 * @param bool $return (default: false)
 	 * @param string $hideprefix (default: _)
-	 * @return void
+	 * @return string
+	 * @todo Must not return [nothing] if not sizeof( $meta_list )
 	 */
 	public function display( $flat = false, $return = false, $hideprefix = '_' ) {
 

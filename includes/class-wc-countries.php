@@ -710,7 +710,7 @@ class WC_Countries {
 	 * Returns the fields we show by default. This can be filtered later on.
 	 *
 	 * @access public
-	 * @return void
+	 * @return array
 	 */
 	public function get_default_address_fields() {
 		$fields = array(
@@ -1092,7 +1092,7 @@ class WC_Countries {
 	 * @access public
 	 * @param mixed $country
 	 * @param string $type (default: 'billing_')
-	 * @return void
+	 * @return array
 	 */
 	public function get_address_fields( $country, $type = 'billing_' ) {
 

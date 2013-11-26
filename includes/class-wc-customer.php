@@ -75,14 +75,12 @@ class WC_Customer {
 			$GLOBALS['woocommerce']->session->customer = $this->_data;
 	}
 
-    /**
-     * __set function.
-     *
-     * @access public
-     * @param mixed $property
-     * @param mixed $value
-     * @return void
-     */
+	/**
+	 * __set function.
+	 * @access   public
+	 * @param mixed $property
+	 * @return bool
+	 */
     public function __isset( $property ) {
         return isset( $this->_data[ $property ] );
     }
@@ -92,7 +90,7 @@ class WC_Customer {
      *
      * @access public
      * @param mixed $property
-     * @return mixed
+     * @return mixed|null
      */
     public function __get( $property ) {
         return isset( $this->_data[ $property ] ) ? $this->_data[ $property ] : null;
@@ -241,7 +239,7 @@ class WC_Customer {
 	 * Get the city from the current session.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_city() {
 		if ( isset( $this->city ) ) return $this->city;
@@ -251,7 +249,7 @@ class WC_Customer {
 	 * Gets the address from the current session.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_address() {
 		if ( isset( $this->address ) ) return $this->address;
@@ -261,7 +259,7 @@ class WC_Customer {
 	 * Gets the address_2 from the current session.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_address_2() {
 		if ( isset( $this->address_2 ) ) return $this->address_2;
@@ -305,7 +303,7 @@ class WC_Customer {
 	 * Gets the city from the current session.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_shipping_city() {
 		if ( isset( $this->shipping_city ) ) return $this->shipping_city;
@@ -315,7 +313,7 @@ class WC_Customer {
 	 * Gets the address from the current session.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_shipping_address() {
 		if ( isset( $this->shipping_address ) ) return $this->shipping_address;
@@ -325,7 +323,7 @@ class WC_Customer {
 	 * Gets the address_2 from the current session.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_shipping_address_2() {
 		if ( isset( $this->shipping_address_2 ) ) return $this->shipping_address_2;
@@ -335,7 +333,7 @@ class WC_Customer {
 	 * get_taxable_address function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return array
 	 */
 	public function get_taxable_address() {
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
