@@ -53,35 +53,7 @@ class WC_Meta_Box_Order_Downloads {
 
 			<div class="toolbar">
 				<p class="buttons">
-					<select name="grant_access_id" class="grant_access_id chosen_select_nostd" data-placeholder="<?php _e( 'Choose a downloadable product&hellip;', 'woocommerce' ) ?>">
-						<?php
-							echo '<option value=""></option>';
-
-							$args = array(
-								'post_type' 		=> array( 'product', 'product_variation' ),
-								'posts_per_page' 	=> -1,
-								'post_status'		=> 'publish',
-								'order'				=> 'ASC',
-								'orderby'			=> 'parent title',
-								'meta_query'		=> array(
-									array(
-										'key' 	=> '_downloadable',
-										'value' => 'yes'
-									)
-								)
-							);
-							$products = get_posts( $args );
-
-							if ( $products ) foreach ( $products as $product ) {
-
-								$product_object = get_product( $product->ID );
-
-								echo '<option value="' . esc_attr( $product->ID ) . '">' . esc_html( $product_object->get_formatted_name() ) . '</option>';
-
-							}
-						?>
-					</select>
-
+					<select name="grant_access_id" id="grant_access_id" class="ajax_chosen_select_downloadable_products_and_variations" multiple="multiple" data-placeholder="<?php _e( 'Search for a downloadable product&hellip;', 'woocommerce' ) ?>" style="width: 400px"></select>
 					<button type="button" class="button grant_access"><?php _e( 'Grant Access', 'woocommerce' ); ?></button>
 				</p>
 				<div class="clear"></div>
@@ -98,15 +70,15 @@ class WC_Meta_Box_Order_Downloads {
 
 			jQuery('.order_download_permissions').on('click', 'button.grant_access', function(){
 
-				var product = jQuery('select.grant_access_id').val();
+				var products = jQuery('select#grant_access_id').val();
 
-				if (!product) return;
+				if (!products) return;
 
 				jQuery('.order_download_permissions').block({ message: null, overlayCSS: { background: '#fff url(<?php echo WC()->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 
 				var data = {
 					action: 		'woocommerce_grant_access_to_download',
-					product_id: 	product,
+					product_ids: 	products,
 					loop:			jQuery('.order_download_permissions .wc-metabox').size(),
 					order_id: 		'<?php echo $post->ID; ?>',
 					security: 		'<?php echo wp_create_nonce("grant-access"); ?>'

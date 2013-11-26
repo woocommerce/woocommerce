@@ -196,6 +196,26 @@ jQuery( function($){
 	    return terms;
 	});
 
+	jQuery("select.ajax_chosen_select_downloadable_products_and_variations").ajaxChosen({
+	    method: 	'GET',
+	    url: 		woocommerce_admin_meta_boxes.ajax_url,
+	    dataType: 	'json',
+	    afterTypeDelay: 100,
+	    data:		{
+	    	action: 		'woocommerce_json_search_downloadable_products_and_variations',
+			security: 		woocommerce_admin_meta_boxes.search_products_nonce
+	    }
+	}, function (data) {
+
+		var terms = {};
+
+	    $.each(data, function (i, val) {
+	        terms[i] = val;
+	    });
+
+	    return terms;
+	});
+
 	// ORDERS
 	jQuery('#woocommerce-order-actions input, #woocommerce-order-actions a').click(function(){
 		window.onbeforeunload = '';
