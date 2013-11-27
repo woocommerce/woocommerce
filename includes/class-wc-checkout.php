@@ -603,7 +603,7 @@ class WC_Checkout {
 		// Action after validation
 		do_action( 'woocommerce_after_checkout_validation', $this->posted );
 
-		if ( ! isset( $_POST['woocommerce_checkout_update_totals'] ) && wc_notice_count( 'wc_errors' ) == 0 ) {
+		if ( ! isset( $_POST['woocommerce_checkout_update_totals'] ) && wc_notice_count( 'error' ) == 0 ) {
 
 			try {
 
@@ -638,7 +638,7 @@ class WC_Checkout {
 				$this->check_cart_items();
 
 				// Abort if errors are present
-				if ( wc_notice_count( 'wc_errors' ) > 0 )
+				if ( wc_notice_count( 'error' ) > 0 )
 					throw new Exception();
 
 				$order_id = $this->create_order();

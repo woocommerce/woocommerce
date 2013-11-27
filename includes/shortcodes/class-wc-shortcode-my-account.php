@@ -246,7 +246,7 @@ class WC_Shortcode_My_Account {
 
 		do_action('lostpassword_post');
 
-		if( wc_notice_count( 'wc_errors' ) > 0 )
+		if( wc_notice_count( 'error' ) > 0 )
 			return false;
 
 		if ( ! $user_data ) {

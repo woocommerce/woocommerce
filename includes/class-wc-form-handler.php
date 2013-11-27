@@ -111,7 +111,7 @@ class WC_Form_Handler {
 			}
 		}
 
-		if ( wc_notice_count( 'wc_errors' ) == 0 ) {
+		if ( wc_notice_count( 'error' ) == 0 ) {
 
 			foreach ( $address as $key => $field )
 				update_user_meta( $user_id, $key, $_POST[ $key ] );
@@ -184,7 +184,7 @@ class WC_Form_Handler {
 			foreach( $errors->get_error_messages() as $error )
 				wc_add_notice( $error, 'error' );
 
-		if ( wc_notice_count( 'wc_errors' ) == 0 ) {
+		if ( wc_notice_count( 'error' ) == 0 ) {
 
 			wp_update_user( $user ) ;
 
@@ -261,7 +261,7 @@ class WC_Form_Handler {
 					$available_gateways[ $payment_method ]->validate_fields();
 
 					// Process
-					if ( wc_notice_count( 'wc_errors' ) == 0 ) {
+					if ( wc_notice_count( 'error' ) == 0 ) {
 
 						$result = $available_gateways[ $payment_method ]->process_payment( $order_id );
 
@@ -632,7 +632,7 @@ class WC_Form_Handler {
 	    }
 
 	    // If we added the product to the cart we can now optionally do a redirect.
-	    if ( $was_added_to_cart && wc_notice_count( 'wc_errors' ) == 0 ) {
+	    if ( $was_added_to_cart && wc_notice_count( 'error' ) == 0 ) {
 
 			$url = apply_filters( 'add_to_cart_redirect', $url );
 
@@ -761,7 +761,7 @@ class WC_Form_Handler {
 					foreach( $errors->get_error_messages() as $error )
 						wc_add_notice( $error, 'error');
 
-				if( 0 == wc_notice_count( 'wc_errors' ) ) {
+				if( 0 == wc_notice_count( 'error' ) ) {
 
 					WC_Shortcode_My_Account::reset_password( $user, wc_clean( $_POST['password_1'] ) );
 

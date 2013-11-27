@@ -811,7 +811,7 @@ final class WooCommerce {
 	 */
 	public function error_count() {
 		_deprecated_function( 'Woocommerce->error_count', '2.1', 'wc_notice_count' );
-		return wc_notice_count( 'wc_errors' );
+		return wc_notice_count( 'error' );
 	}
 
 	/**
@@ -820,7 +820,7 @@ final class WooCommerce {
 	 */
 	public function message_count() {
 		_deprecated_function( 'Woocommerce->message_count', '2.1', 'wc_notice_count' );
-		return wc_notice_count( 'wc_messages' );
+		return wc_notice_count( 'message' );
 	}
 
 	/**

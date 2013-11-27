@@ -218,7 +218,7 @@ class WC_Shortcode_Checkout {
 		// Get checkout object
 		$checkout = WC()->checkout();
 
-		if ( empty( $_POST ) && wc_notice_count( 'wc_errors' ) > 0 ) {
+		if ( empty( $_POST ) && wc_notice_count( 'error' ) > 0 ) {
 
 			wc_get_template( 'checkout/cart-errors.php', array( 'checkout' => $checkout ) );
 
@@ -226,7 +226,7 @@ class WC_Shortcode_Checkout {
 
 			$non_js_checkout = ! empty( $_POST['woocommerce_checkout_update_totals'] ) ? true : false;
 
-			if ( wc_notice_count( 'wc_errors' ) == 0 && $non_js_checkout )
+			if ( wc_notice_count( 'error' ) == 0 && $non_js_checkout )
 				wc_add_notice( __( 'The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page.', 'woocommerce' ) );
 
 			wc_get_template( 'checkout/form-checkout.php', array( 'checkout' => $checkout ) );
