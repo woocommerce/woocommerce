@@ -851,8 +851,8 @@ class WC_Shortcodes {
 	 * woocommerce_order_by_rating_post_clauses function.
 	 *
 	 * @access public
-	 * @param mixed $args
-	 * @return void
+	 * @param array $args
+	 * @return array
 	 */
 	public static function order_by_rating_post_clauses( $args ) {
 		global $wpdb;

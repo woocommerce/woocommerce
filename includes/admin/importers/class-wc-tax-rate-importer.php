@@ -80,8 +80,8 @@ if ( class_exists( 'WP_Importer' ) ) {
 		 *
 		 * @access public
 		 * @param mixed $data
-		 * @param mixed $enc
-		 * @return void
+		 * @param string $enc
+		 * @return string
 		 */
 		function format_data_from_csv( $data, $enc ) {
 			return ( $enc == 'UTF-8' ) ? $data : utf8_encode( $data );

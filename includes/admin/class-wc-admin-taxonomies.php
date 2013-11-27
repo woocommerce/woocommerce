@@ -288,7 +288,7 @@ class WC_Admin_Taxonomies {
 	 *
 	 * @access public
 	 * @param mixed $columns
-	 * @return void
+	 * @return array
 	 */
 	public function product_cat_columns( $columns ) {
 		$new_columns          = array();
