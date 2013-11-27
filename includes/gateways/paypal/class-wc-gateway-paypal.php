@@ -464,7 +464,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				' . implode( '', $paypal_args_array) . '
 				<!-- Button Fallback -->
 				<div class="payment_buttons">
-					<input type="submit" class="button alt" id="submit_paypal_payment_form" value="' . __( 'Pay via PayPal', 'woocommerce' ) . '" /> <a class="button cancel" href="'.esc_url( $order->get_cancel_order_url() ).'">'.__( 'Cancel order &amp; restore cart', 'woocommerce' ).'</a>
+					<input type="submit" class="button alt" id="submit_paypal_payment_form" value="' . __( 'Pay via PayPal', 'woocommerce' ) . '" /> <a class="button cancel" href="' . esc_url( $order->get_cancel_order_url() ) . '">'.__( 'Cancel order &amp; restore cart', 'woocommerce' ).'</a>
 				</div>
 				<script type="text/javascript">
 					jQuery(".payment_buttons").hide();

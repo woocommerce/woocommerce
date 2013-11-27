@@ -491,6 +491,9 @@ class WC_Shortcodes {
 
 		$product = wc_setup_product_data( $product_data );
 
+		if ( ! $product )
+			return;
+
 		ob_start();
 		?>
 		<p class="product woocommerce" style="<?php echo $style; ?>">

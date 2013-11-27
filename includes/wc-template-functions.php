@@ -78,7 +78,7 @@ function wc_setup_product_data( $post ) {
 	if ( is_int( $post ) )
 		$post = get_post( $post );
 
-	if ( $post->post_type !== 'product' && $post->post_type !== 'product_variation' )
+	if ( empty( $post->post_type ) || ! in_array( $post->post_type, array( 'product', 'product_variation' ) ) )
 		return;
 
 	$GLOBALS['product'] = get_product( $post );
