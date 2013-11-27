@@ -104,7 +104,7 @@ class WC_Meta_Box_Order_Downloads {
 						buttonImage: woocommerce_admin_meta_boxes.calendar_image,
 						buttonImageOnly: true
 					});
-
+					jQuery('#grant_access_id').val('').trigger('chosen:updated');
 					jQuery('.order_download_permissions').unblock();
 
 				});
