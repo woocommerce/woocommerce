@@ -162,6 +162,8 @@ class WC_Admin_Assets {
 				'calc_totals_nonce' 			=> wp_create_nonce("calc-totals"),
 				'get_customer_details_nonce' 	=> wp_create_nonce("get-customer-details"),
 				'search_products_nonce' 		=> wp_create_nonce("search-products"),
+				'grant_access_nonce'			=> wp_create_nonce("grant-access"),
+				'revoke_access_nonce'			=> wp_create_nonce("revoke-access"),
 				'calendar_image'				=> WC()->plugin_url().'/assets/images/calendar.png',
 				'post_id'						=> isset( $post->ID ) ? $post->ID : '',
 				'base_country'					=> WC()->countries->get_base_country(),
@@ -175,6 +177,8 @@ class WC_Admin_Assets {
 				'product_types'					=> array_map( 'sanitize_title', get_terms( 'product_type', array( 'hide_empty' => false, 'fields' => 'names' ) ) ),
 				'default_attribute_visibility'  => apply_filters( 'default_attribute_visibility', false ),
 				'default_attribute_variation'   => apply_filters( 'default_attribute_variation', false ),
+				'i18n_download_permission_fail' => __( 'Could not grant access - the user may already have permission for this file or billing email is not set. Ensure the billing email is set, and the order has been saved.', 'woocommerce' ),
+				'i18n_permission_revoke'		=> __( 'Are you sure you want to revoke access to this download?', 'woocommerce' ),
 			);
 
 			wp_localize_script( 'woocommerce_admin_meta_boxes', 'woocommerce_admin_meta_boxes', $params );

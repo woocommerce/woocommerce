@@ -746,6 +746,80 @@ jQuery( function($){
 		return false;
 	} );
 
+	// Download permissions
+	$('.order_download_permissions').on('click', 'button.grant_access', function(){
+		var products = $('select#grant_access_id').val();
+			if (!products) return;
+
+		$('.order_download_permissions').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+
+		var data = {
+			action: 		'woocommerce_grant_access_to_download',
+			product_ids: 	products,
+			loop:			$('.order_download_permissions .wc-metabox').size(),
+			order_id: 		woocommerce_admin_meta_boxes.post_id,
+			security: 		woocommerce_admin_meta_boxes.grant_access_nonce,
+		};
+
+		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
+
+			if ( response ) {
+				$('.order_download_permissions .wc-metaboxes').append( response );
+			} else {
+				alert( woocommerce_admin_meta_boxes.i18n_download_permission_fail );
+			}
+
+			$( ".date-picker" ).datepicker({
+				dateFormat: "yy-mm-dd",
+				numberOfMonths: 1,
+				showButtonPanel: true,
+				showOn: "button",
+				buttonImage: woocommerce_admin_meta_boxes.calendar_image,
+				buttonImageOnly: true
+			});
+			$('#grant_access_id').val('').trigger('chosen:updated');
+			$('.order_download_permissions').unblock();
+
+		});
+
+		return false;
+	});
+
+	$('.order_download_permissions').on('click', 'button.revoke_access', function(e){
+		e.preventDefault();
+		var answer = confirm( woocommerce_admin_meta_boxes.i18n_permission_revoke );
+		if ( answer ) {
+			var el = $(this).parent().parent();
+			var product = $(this).attr('rel').split(",")[0];
+			var file = $(this).attr('rel').split(",")[1];
+
+			if ( product > 0 ) {
+				$(el).block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+
+				var data = {
+					action: 		'woocommerce_revoke_access_to_download',
+					product_id: 	product,
+					download_id:	file,
+					order_id: 		woocommerce_admin_meta_boxes.post_id,
+					security: 		woocommerce_admin_meta_boxes.revoke_access_nonce,
+				};
+
+				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function(response) {
+					// Success
+					$(el).fadeOut('300', function(){
+						$(el).remove();
+					});
+				});
+
+			} else {
+				$(el).fadeOut('300', function(){
+					$(el).remove();
+				});
+			}
+		}
+		return false;
+	});
+
 
 	$('button.load_customer_billing').click(function(){
 
