@@ -520,8 +520,6 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 
 		$search_fields = array_map( 'wc_clean', apply_filters( 'woocommerce_shop_order_search_fields', array(
 			'_order_key',
-			'_billing_first_name',
-			'_billing_last_name',
 			'_billing_company',
 			'_billing_address_1',
 			'_billing_address_2',
@@ -531,8 +529,6 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 			'_billing_state',
 			'_billing_email',
 			'_billing_phone',
-			'_shipping_first_name',
-			'_shipping_last_name',
 			'_shipping_address_1',
 			'_shipping_address_2',
 			'_shipping_city',
@@ -551,9 +547,21 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 				$wpdb->prepare( "
 					SELECT post_id
 					FROM {$wpdb->postmeta}
-					WHERE meta_key IN ('" . implode( "','", $search_fields ) . "')
-					AND meta_value LIKE '%%%s%%'",
+					WHERE meta_key IN ('" . implode( "','", $search_fields ) . "') AND meta_value LIKE '%%%s%%'
+					",
 					esc_attr( $_GET['s'] )
+				)
+			),
+			$wpdb->get_col(
+				$wpdb->prepare( "
+					SELECT p1.post_id
+					FROM {$wpdb->postmeta} p1, {$wpdb->postmeta} p2
+					WHERE 
+						( p1.meta_key = '_billing_first_name' AND p2.meta_key = '_billing_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
+					OR 
+						( p1.meta_key = '_shipping_first_name' AND p2.meta_key = '_shipping_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
+					",
+					esc_attr( $_GET['s'] ), esc_attr( $_GET['s'] )
 				)
 			),
 			$wpdb->get_col(
