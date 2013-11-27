@@ -5878,7 +5878,7 @@ msgstr "Side"
 #: templates/single-product/add-to-cart/variable.php:25
 #@ woocommerce
 msgid "Choose an option"
-msgstr "Velg en&hellip"
+msgstr "Velg en&hellip;"
 
 #: templates/single-product/add-to-cart/variable.php:73
 #@ woocommerce
