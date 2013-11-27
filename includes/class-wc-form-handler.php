@@ -391,7 +391,7 @@ class WC_Form_Handler {
 	public function order_again() {
 
 		// Nothing to do
-		if ( ! isset( $_GET['order_again'] ) || ! is_user_logged_in() || ! WC()->verify_nonce( 'order_again', '_GET' ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-order_again' ) )
+		if ( ! isset( $_GET['order_again'] ) || ! is_user_logged_in() || ! wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-order_again' ) )
 			return;
 
 		// Clear current cart
