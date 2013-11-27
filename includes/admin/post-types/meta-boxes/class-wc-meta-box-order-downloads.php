@@ -53,35 +53,7 @@ class WC_Meta_Box_Order_Downloads {
 
 			<div class="toolbar">
 				<p class="buttons">
-					<select name="grant_access_id" class="grant_access_id chosen_select_nostd" data-placeholder="<?php _e( 'Choose a downloadable product&hellip;', 'woocommerce' ) ?>">
-						<?php
-							echo '<option value=""></option>';
-
-							$args = array(
-								'post_type' 		=> array( 'product', 'product_variation' ),
-								'posts_per_page' 	=> -1,
-								'post_status'		=> 'publish',
-								'order'				=> 'ASC',
-								'orderby'			=> 'parent title',
-								'meta_query'		=> array(
-									array(
-										'key' 	=> '_downloadable',
-										'value' => 'yes'
-									)
-								)
-							);
-							$products = get_posts( $args );
-
-							if ( $products ) foreach ( $products as $product ) {
-
-								$product_object = get_product( $product->ID );
-
-								echo '<option value="' . esc_attr( $product->ID ) . '">' . esc_html( $product_object->get_formatted_name() ) . '</option>';
-
-							}
-						?>
-					</select>
-
+					<select name="grant_access_id" id="grant_access_id" class="ajax_chosen_select_downloadable_products_and_variations" multiple="multiple" data-placeholder="<?php _e( 'Search for a downloadable product&hellip;', 'woocommerce' ) ?>" style="width: 400px"></select>
 					<button type="button" class="button grant_access"><?php _e( 'Grant Access', 'woocommerce' ); ?></button>
 				</p>
 				<div class="clear"></div>
@@ -89,101 +61,6 @@ class WC_Meta_Box_Order_Downloads {
 
 		</div>
 		<?php
-		/**
-		 * Javascript
-		 */
-		ob_start();
-		?>
-		jQuery(function(){
-
-			jQuery('.order_download_permissions').on('click', 'button.grant_access', function(){
-
-				var product = jQuery('select.grant_access_id').val();
-
-				if (!product) return;
-
-				jQuery('.order_download_permissions').block({ message: null, overlayCSS: { background: '#fff url(<?php echo WC()->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
-
-				var data = {
-					action: 		'woocommerce_grant_access_to_download',
-					product_id: 	product,
-					loop:			jQuery('.order_download_permissions .wc-metabox').size(),
-					order_id: 		'<?php echo $post->ID; ?>',
-					security: 		'<?php echo wp_create_nonce("grant-access"); ?>'
-				};
-
-				jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', data, function( response ) {
-
-					if ( response ) {
-
-					    jQuery('.order_download_permissions .wc-metaboxes').append( response );
-
-					} else {
-
-						alert('<?php echo esc_js( __( 'Could not grant access - the user may already have permission for this file or billing email is not set. Ensure the billing email is set, and the order has been saved.', 'woocommerce' ) ); ?>');
-
-					}
-
-					jQuery( ".date-picker" ).datepicker({
-						dateFormat: "yy-mm-dd",
-						numberOfMonths: 1,
-						showButtonPanel: true,
-						showOn: "button",
-						buttonImage: woocommerce_admin_meta_boxes.calendar_image,
-						buttonImageOnly: true
-					});
-
-					jQuery('.order_download_permissions').unblock();
-
-				});
-
-				return false;
-
-			});
-
-			jQuery('.order_download_permissions').on('click', 'button.revoke_access', function(e){
-				e.preventDefault();
-				var answer = confirm('<?php echo esc_js( __( 'Are you sure you want to revoke access to this download?', 'woocommerce' ) ); ?>');
-				if (answer){
-
-					var el = jQuery(this).parent().parent();
-
-					var product = jQuery(this).attr('rel').split(",")[0];
-					var file = jQuery(this).attr('rel').split(",")[1];
-
-					if (product>0) {
-
-						jQuery(el).block({ message: null, overlayCSS: { background: '#fff url(<?php echo WC()->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
-
-						var data = {
-							action: 		'woocommerce_revoke_access_to_download',
-							product_id: 	product,
-							download_id:	file,
-							order_id: 		'<?php echo $post->ID; ?>',
-							security: 		'<?php echo wp_create_nonce("revoke-access"); ?>'
-						};
-
-						jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', data, function(response) {
-							// Success
-							jQuery(el).fadeOut('300', function(){
-								jQuery(el).remove();
-							});
-						});
-
-					} else {
-						jQuery(el).fadeOut('300', function(){
-							jQuery(el).remove();
-						});
-					}
-
-				}
-				return false;
-			});
-
-		});
-		<?php
-		$javascript = ob_get_clean();
-		wc_enqueue_js( $javascript );
 	}
 
 	/**

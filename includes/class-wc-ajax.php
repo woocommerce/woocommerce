@@ -22,39 +22,40 @@ class WC_AJAX {
 
 		// woocommerce_EVENT => nopriv
 		$ajax_events = array(
-			'get_refreshed_fragments'             => true,
-			'apply_coupon'                        => true,
-			'update_shipping_method'              => true,
-			'update_order_review'                 => true,
-			'add_to_cart'                         => true,
-			'checkout'                            => true,
-			'feature_product'                     => false,
-			'mark_order_complete'                 => false,
-			'mark_order_processing'               => false,
-			'add_new_attribute'                   => false,
-			'remove_variation'                    => false,
-			'remove_variations'                   => false,
-			'save_attributes'                     => false,
-			'add_variation'                       => false,
-			'link_all_variations'                 => false,
-			'revoke_access_to_download'           => false,
-			'grant_access_to_download'            => false,
-			'get_customer_details'                => false,
-			'add_order_item'                      => false,
-			'add_order_fee'                       => false,
-			'remove_order_item'                   => false,
-			'reduce_order_item_stock'             => false,
-			'increase_order_item_stock'           => false,
-			'add_order_item_meta'                 => false,
-			'remove_order_item_meta'              => false,
-			'calc_line_taxes'                     => false,
-			'add_order_note'                      => false,
-			'delete_order_note'                   => false,
-			'json_search_products'                => false,
-			'json_search_products_and_variations' => false,
-			'json_search_customers'               => false,
-			'term_ordering'                       => false,
-			'product_ordering'                    => false
+			'get_refreshed_fragments'             				=> true,
+			'apply_coupon'                        				=> true,
+			'update_shipping_method'              				=> true,
+			'update_order_review'                 				=> true,
+			'add_to_cart'                         				=> true,
+			'checkout'                            				=> true,
+			'feature_product'                     				=> false,
+			'mark_order_complete'                 				=> false,
+			'mark_order_processing'               				=> false,
+			'add_new_attribute'                   				=> false,
+			'remove_variation'                    				=> false,
+			'remove_variations'                   				=> false,
+			'save_attributes'                     				=> false,
+			'add_variation'                       				=> false,
+			'link_all_variations'                 				=> false,
+			'revoke_access_to_download'           				=> false,
+			'grant_access_to_download'            				=> false,
+			'get_customer_details'                				=> false,
+			'add_order_item'                      				=> false,
+			'add_order_fee'                       				=> false,
+			'remove_order_item'                   				=> false,
+			'reduce_order_item_stock'             				=> false,
+			'increase_order_item_stock'           				=> false,
+			'add_order_item_meta'                 				=> false,
+			'remove_order_item_meta'              				=> false,
+			'calc_line_taxes'                     				=> false,
+			'add_order_note'                      				=> false,
+			'delete_order_note'                  			 	=> false,
+			'json_search_products'                				=> false,
+			'json_search_products_and_variations' 				=> false,
+			'json_search_downloadable_products_and_variations' 	=> false,
+			'json_search_customers'               				=> false,
+			'term_ordering'                       				=> false,
+			'product_ordering'                    				=> false
 		);
 		
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
@@ -754,28 +755,40 @@ class WC_AJAX {
 
 		$wpdb->hide_errors();
 
-		$order_id 	= intval( $_POST['order_id'] );
-		$product_id = intval( $_POST['product_id'] );
-		$loop 		= intval( $_POST['loop'] );
-		$file_count = 0;
-		$order 		= new WC_Order( $order_id );
-		$product 	= get_product( $product_id );
-		$files      = $product->get_files();
+		$order_id 	  	= intval( $_POST['order_id'] );
+		$product_ids    = $_POST['product_ids'];
+		$loop 		    = intval( $_POST['loop'] );
+		$file_counter   = 0;
+		$order 		    = new WC_Order( $order_id );
 
-		if ( ! $order->billing_email )
-			die();
+		if ( ! is_array( $product_ids ) ) {
+			$product_ids = array( $product_ids );
+		}
 
-		if ( $files ) {
-			foreach ( $files as $download_id => $file ) {
-				if ( $inserted_id = wc_downloadable_file_permission( $download_id, $product_id, $order ) ) {
+		foreach ( $product_ids as $product_id ) {
+			$product 	= get_product( $product_id );
+			$files      = $product->get_files();
 
-					// insert complete - get inserted data
-					$download = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE permission_id = %d", $inserted_id ) );
+			if ( ! $order->billing_email )
+				die();
 
-					$loop ++;
-					$file_count ++;
+			if ( $files ) {
+				foreach ( $files as $download_id => $file ) {
+					if ( $inserted_id = wc_downloadable_file_permission( $download_id, $product_id, $order ) ) {
 
-					include( 'admin/post-types/meta-boxes/views/html-order-download-permission.php' );
+						// insert complete - get inserted data
+						$download = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE permission_id = %d", $inserted_id ) );
+
+						$loop ++;
+						$file_counter ++;
+
+						if ( isset( $file['name'] ) ) {
+							$file_count = $file['name'];
+						} else {
+							$file_count = sprintf( __( 'File %d', 'woocommerce' ), $file_counter );
+						}
+						include( 'admin/post-types/meta-boxes/views/html-order-download-permission.php' );
+					}
 				}
 			}
 		}
@@ -1486,6 +1499,41 @@ class WC_AJAX {
 		}
 
 		echo json_encode( $found_customers );
+		die();
+	}
+
+	/**
+	 * Search for downloadable product variations and return json
+	 *
+	 * @access public
+	 * @return void
+	 * @see WC_AJAX::json_search_products()
+	 */
+	public function json_search_downloadable_products_and_variations() {
+		$term = (string) wc_clean( urldecode( stripslashes( $_GET['term'] ) ) );
+
+		$args = array(
+			'post_type' 		=> array( 'product', 'product_variation' ),
+			'posts_per_page' 	=> -1,
+			'post_status'		=> 'publish',
+			'order'				=> 'ASC',
+			'orderby'			=> 'parent title',
+			'meta_query'		=> array(
+				array(
+					'key' 	=> '_downloadable',
+					'value' => 'yes'
+				)
+			),
+			's'					=> $term
+		);
+		$posts = get_posts( $args );
+		$found_products = array();
+		if ( $posts ) foreach ( $posts as $post ) {
+			$product = get_product( $post->ID );
+			$found_products[ $post->ID ] = $product->get_formatted_name();
+		}
+
+		echo json_encode( $found_products );
 		die();
 	}
 
