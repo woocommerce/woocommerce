@@ -397,7 +397,7 @@ if ( ! function_exists( 'woocommerce_product_loop_start' ) ) {
 	 * Output the start of a product loop. By default this is a UL
 	 *
 	 * @access public
-	 * @param bool @echo
+	 * @param bool $echo
 	 * @return string
 	 */
 	function woocommerce_product_loop_start( $echo = true ) {
