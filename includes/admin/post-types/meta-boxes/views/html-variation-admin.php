@@ -137,7 +137,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 								<?php endif; ?>
 							</td>
 						</tr>
-						<tr class="show_if_variation_downloadable">
+						<tr class="show_if_variation_downloadable" style="display:none">
 							<td colspan="2">
 								<div class="form-field downloadable_files">
 									<label><?php _e( 'Downloadable Files', 'woocommerce' ); ?>:</label>
