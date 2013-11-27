@@ -241,8 +241,8 @@ class WC_Order {
 	 * Return an array of items/products within this order.
 	 *
 	 * @access public
-	 * @param string $type Types of line items to get (array or string)
-	 * @return void
+	 * @param string|array $type Types of line items to get (array or string)
+	 * @return array
 	 */
 	public function get_items( $type = '' ) {
 		global $wpdb;
@@ -325,7 +325,7 @@ class WC_Order {
 	 * Return an array of taxes within this order.
 	 *
 	 * @access public
-	 * @return void
+	 * @return array
 	 */
 	public function get_taxes() {
 		return $this->get_items( 'tax' );
@@ -334,7 +334,7 @@ class WC_Order {
 	/**
 	 * Return an array of shipping costs within this order.
 	 *
-	 * @return void
+	 * @return array
 	 */
 	public function get_shipping_methods() {
 		return $this->get_items( 'shipping' );
@@ -342,8 +342,8 @@ class WC_Order {
 
 	/**
 	 * Check whether this order has a specific shipping method or not
-	 *
-	 * @return void
+	 * @param string $method_id
+	 * @return bool
 	 */
 	public function has_shipping_method( $method_id ) {
 		$shipping_methods = $this->get_shipping_methods();
@@ -364,7 +364,7 @@ class WC_Order {
 	 * Get taxes, merged by code, formatted ready for output.
 	 *
 	 * @access public
-	 * @return void
+	 * @return array
 	 */
 	public function get_tax_totals() {
 		$taxes      = $this->get_items( 'tax' );
@@ -390,8 +390,8 @@ class WC_Order {
 
 	/**
 	 * has_meta function for order items.
-	 *
 	 * @access public
+	 * @param string $order_item_id
 	 * @return array of meta data
 	 */
 	public function has_meta( $order_item_id ) {
@@ -406,10 +406,10 @@ class WC_Order {
 	 * Get order item meta.
 	 *
 	 * @access public
-	 * @param mixed $item_id
+	 * @param mixed $order_item_id
 	 * @param string $key (default: '')
 	 * @param bool $single (default: false)
-	 * @return void
+	 * @return array|string
 	 */
 	public function get_item_meta( $order_item_id, $key = '', $single = false ) {
 		return get_metadata( 'order_item', $order_item_id, $key, $single );

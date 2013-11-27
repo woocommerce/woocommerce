@@ -193,6 +193,10 @@ function woocommerce_price( $price, $args = array() ) {
 function woocommerce_let_to_num( $size ) {
 	wc_let_to_num( $size );
 }
+
+/**
+ * @return string
+ */
 function woocommerce_date_format() {
 	wc_date_format();
 }

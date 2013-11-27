@@ -964,7 +964,7 @@ class WC_Product {
 	 * get_average_rating function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_average_rating() {
 		if ( false === ( $average_rating = get_transient( 'wc_average_rating_' . $this->id ) ) ) {
@@ -999,7 +999,7 @@ class WC_Product {
 	 * get_rating_count function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return int
 	 */
 	public function get_rating_count() {
 		if ( false === ( $count = get_transient( 'wc_rating_count_' . $this->id ) ) ) {
