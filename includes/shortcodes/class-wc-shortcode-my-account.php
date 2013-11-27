@@ -109,10 +109,7 @@ class WC_Shortcode_My_Account {
 
 		$status = get_term_by( 'slug', $order->status, 'shop_order_status' );
 
-		echo '<p class="order-info">'
-		. sprintf( __( 'Order <mark class="order-number">%s</mark> made on <mark class="order-date">%s</mark>', 'woocommerce'), $order->get_order_number(), date_i18n( get_option( 'date_format' ), strtotime( $order->order_date ) ) )
-		. '. ' . sprintf( __( 'Order status: <mark class="order-status">%s</mark>', 'woocommerce' ), __( $status->name, 'woocommerce' ) )
-		. '.</p>';
+		echo '<p class="order-info">' . sprintf( __( 'Order <mark class="order-number">%s</mark> was placed on <mark class="order-date">%s</mark> and is currently <mark class="order-status">%s</mark>.', 'woocommerce' ), $order->get_order_number(), date_i18n( get_option( 'date_format' ), strtotime( $order->order_date ) ), __( $status->name, 'woocommerce' ) ) . '</p>';
 
 		if ( $notes = $order->get_customer_order_notes() ) :
 			?>
