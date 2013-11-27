@@ -264,7 +264,7 @@ class WC_Download_Handler {
         if ( $remote_file )
         	$this->readfile_chunked( $file_path ) or header( 'Location: ' . $file_path );
         else
-        	$this->readfile_chunked( $file_path ) or wp_die( __( 'File not found', 'woocommerce' ) . ' <a href="' . esc_url_raw( home_url() ) . '">' . __( 'Go to homepage &rarr;', 'woocommerce' ) . '</a>' );
+        	$this->readfile_chunked( $file_path ) or wp_die( __( 'File not found', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '">' . __( 'Go to homepage &rarr;', 'woocommerce' ) . '</a>' );
 
         exit;
 	}
