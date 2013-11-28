@@ -954,6 +954,46 @@ jQuery( function($){
 		return false;
 	});
 
+	// Order notes
+	$('#woocommerce-order-notes').on( 'click', 'a.add_note', function() {
+		if ( ! $('textarea#add_order_note').val() ) return;
+
+		$('#woocommerce-order-notes').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+		var data = {
+			action: 		'woocommerce_add_order_note',
+			post_id:		woocommerce_admin_meta_boxes.post_id,
+			note: 			$('textarea#add_order_note').val(),
+			note_type:		$('select#order_note_type').val(),
+			security: 		woocommerce_admin_meta_boxes.add_order_note_nonce,
+		};
+
+		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function(response) {
+			$('ul.order_notes').prepend( response );
+			$('#woocommerce-order-notes').unblock();
+			$('#add_order_note').val('');
+		});
+
+		return false;
+
+	});
+
+	$('#woocommerce-order-notes').on( 'click', 'a.delete_note', function() {
+		var note = $(this).closest('li.note');
+		$(note).block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+
+		var data = {
+			action: 		'woocommerce_delete_order_note',
+			note_id:		$(note).attr('rel'),
+			security: 		woocommerce_admin_meta_boxes.delete_order_note_nonce,
+		};
+
+		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function(response) {
+			$(note).remove();
+		});
+
+		return false;
+	});
+
 	// PRODUCT TYPE SPECIFIC OPTIONS
 	$('select#product-type').change(function(){
 
@@ -1444,4 +1484,104 @@ jQuery( function($){
 		opacity: 0.65,
 	});
 
+	// Product gallery file uploads
+	var product_gallery_frame;
+	var $image_gallery_ids = $('#product_image_gallery');
+	var $product_images = $('#product_images_container ul.product_images');
+
+	jQuery('.add_product_images').on( 'click', 'a', function( event ) {
+		var $el = $(this);
+		var attachment_ids = $image_gallery_ids.val();
+
+		event.preventDefault();
+
+		// If the media frame already exists, reopen it.
+		if ( product_gallery_frame ) {
+			product_gallery_frame.open();
+			return;
+		}
+
+		// Create the media frame.
+		product_gallery_frame = wp.media.frames.downloadable_file = wp.media({
+			// Set the title of the modal.
+			title: $el.data('choose'),
+			button: {
+				text: $el.data('update'),
+			},
+			multiple: true
+		});
+
+		// When an image is selected, run a callback.
+		product_gallery_frame.on( 'select', function() {
+
+			var selection = product_gallery_frame.state().get('selection');
+
+			selection.map( function( attachment ) {
+
+				attachment = attachment.toJSON();
+
+				if ( attachment.id ) {
+					attachment_ids = attachment_ids ? attachment_ids + "," + attachment.id : attachment.id;
+
+					$product_images.append('\
+						<li class="image" data-attachment_id="' + attachment.id + '">\
+							<img src="' + attachment.url + '" />\
+							<ul class="actions">\
+								<li><a href="#" class="delete" title="' + $el.data('delete') + '">' + $el.data('text') + '</a></li>\
+							</ul>\
+						</li>');
+					}
+
+				});
+
+				$image_gallery_ids.val( attachment_ids );
+			});
+
+			// Finally, open the modal.
+			product_gallery_frame.open();
+		});
+
+		// Image ordering
+		$product_images.sortable({
+			items: 'li.image',
+			cursor: 'move',
+			scrollSensitivity:40,
+			forcePlaceholderSize: true,
+			forceHelperSize: false,
+			helper: 'clone',
+			opacity: 0.65,
+			placeholder: 'wc-metabox-sortable-placeholder',
+			start:function(event,ui){
+				ui.item.css('background-color','#f6f6f6');
+			},
+			stop:function(event,ui){
+				ui.item.removeAttr('style');
+			},
+			update: function(event, ui) {
+				var attachment_ids = '';
+
+				$('#product_images_container ul li.image').css('cursor','default').each(function() {
+					var attachment_id = jQuery(this).attr( 'data-attachment_id' );
+					attachment_ids = attachment_ids + attachment_id + ',';
+				});
+
+				$image_gallery_ids.val( attachment_ids );
+			}
+		});
+
+		// Remove images
+		$('#product_images_container').on( 'click', 'a.delete', function() {
+			$(this).closest('li.image').remove();
+
+			var attachment_ids = '';
+
+			$('#product_images_container ul li.image').css('cursor','default').each(function() {
+				var attachment_id = jQuery(this).attr( 'data-attachment_id' );
+				attachment_ids = attachment_ids + attachment_id + ',';
+			});
+
+			$image_gallery_ids.val( attachment_ids );
+
+			return false;
+		});
 });
