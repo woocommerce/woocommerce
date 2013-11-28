@@ -307,7 +307,8 @@ $wc_map_deprecated_filters = array(
 	'woocommerce_cart_item_name'        => 'woocommerce_in_cart_product_title',
 	'woocommerce_order_item_class'      => 'woocommerce_order_table_item_class',
 	'woocommerce_order_item_name'       => 'woocommerce_order_table_product_title',
-	'woocommerce_order_amount_shipping' => 'woocommerce_order_amount_total_shipping'
+	'woocommerce_order_amount_shipping' => 'woocommerce_order_amount_total_shipping',
+	'woocommerce_package_rates'         => 'woocommerce_available_shipping_methods'
 );
 
 foreach ( $wc_map_deprecated_filters as $new => $old )
@@ -320,7 +321,7 @@ function woocommerce_deprecated_filter_mapping( $data, $arg_1 = '', $arg_2 = '',
 
 	if ( isset( $wc_map_deprecated_filters[ $filter ] ) )
 		if ( has_filter( $wc_map_deprecated_filters[ $filter ] ) ) {
-			$data = apply_filters( $wc_map_deprecated_filters[ $filter ], $arg_1, $arg_2, $arg_3 );
+			$data = apply_filters( $wc_map_deprecated_filters[ $filter ], $data, $arg_1, $arg_2, $arg_3 );
 			_deprecated_function( 'The ' . $wc_map_deprecated_filters[ $filter ] . ' filter', '2.1', $filter );
 		}
 

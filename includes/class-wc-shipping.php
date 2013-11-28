@@ -88,7 +88,7 @@ class WC_Shipping {
      *
      * @access public
      */
-    function init() {
+    public function init() {
 		do_action( 'woocommerce_shipping_init' );
 
 		$this->enabled = ( get_option('woocommerce_calc_shipping') == 'no' ) ? false : true;
@@ -104,7 +104,7 @@ class WC_Shipping {
 	 * @access public
 	 * @return array
 	 */
-	function load_shipping_methods( $package = false ) {
+	public function load_shipping_methods( $package = false ) {
 
 		$this->unregister_shipping_methods();
 
@@ -134,7 +134,7 @@ class WC_Shipping {
 	 * @access public
 	 * @return void
 	 */
-	function register_shipping_method( $method ) {
+	public function register_shipping_method( $method ) {
 
 		if ( ! is_object( $method ) )
 			$method = new $method();
@@ -150,7 +150,7 @@ class WC_Shipping {
 	 * @access public
 	 * @return void
 	 */
-	function unregister_shipping_methods() {
+	public function unregister_shipping_methods() {
 		unset( $this->shipping_methods );
 	}
 
@@ -162,7 +162,7 @@ class WC_Shipping {
 	 * @access public
 	 * @return array
 	 */
-	function sort_shipping_methods() {
+	public function sort_shipping_methods() {
 
 		$sorted_shipping_methods = array();
 
@@ -204,7 +204,7 @@ class WC_Shipping {
 	 * @param mixed $package
 	 * @return void
 	 */
-	function get_shipping_methods() {
+	public function get_shipping_methods() {
 		return $this->shipping_methods;
 	}
 
@@ -216,7 +216,7 @@ class WC_Shipping {
 	 * @access public
 	 * @return array
 	 */
-	function get_shipping_classes() {
+	public function get_shipping_classes() {
 		if ( empty( $this->shipping_classes ) )
 			$this->shipping_classes = ( $classes = get_terms( 'product_shipping_class', array( 'hide_empty' => '0' ) ) ) ? $classes : array();
 
@@ -231,7 +231,7 @@ class WC_Shipping {
 	 * @access public
 	 * @param array $packages multi-dimensional array of cart items to calc shipping for
 	 */
-	function calculate_shipping( $packages = array() ) {
+	public function calculate_shipping( $packages = array() ) {
 		if ( ! $this->enabled || empty( $packages ) )
 			return;
 
@@ -330,7 +330,7 @@ class WC_Shipping {
 	 * @access public
 	 * @param array $package cart items
 	 */
-	function calculate_shipping_for_package( $package = array() ) {
+	public function calculate_shipping_for_package( $package = array() ) {
 		if ( ! $this->enabled ) return false;
 		if ( ! $package ) return false;
 
@@ -375,47 +375,10 @@ class WC_Shipping {
 	}
 
 	/**
-	 * get_available_shipping_methods function.
-	 *
-	 * Gets all available shipping methods which have rates.
-	 *
-	 * @todo Currently we support 1 shipping method per order so this function merges rates - in the future we should offer
-	 * 1 rate per package and list them accordingly for user selection
-	 *
-	 * @access public
+	 * Get packages
 	 * @return array
 	 */
-	function get_available_shipping_methods() {
-		if ( ! $this->enabled ) return;
-		if ( empty( $this->packages ) ) return;
-
-		// Loop packages and merge rates to get a total for each shipping method
-		$available_methods = array();
-
-		foreach ( $this->packages as $package ) {
-			if ( ! $package['rates'] ) continue;
-
-			foreach ( $package['rates'] as $id => $rate ) {
-
-				if ( isset( $available_methods[$id] ) ) {
-					// Merge cost and taxes - label and ID will be the same
-					$available_methods[$id]->cost += $rate->cost;
-
-					foreach ( array_keys( $available_methods[$id]->taxes + $rate->taxes ) as $key ) {
-					    $available_methods[$id]->taxes[$key] = ( isset( $rate->taxes[$key] ) ? $rate->taxes[$key] : 0 ) + ( isset( $available_methods[$id]->taxes[$key] ) ? $available_methods[$id]->taxes[$key] : 0 );
-					}
-				} else {
-					$available_methods[$id] = $rate;
-				}
-
-			}
-
-		}
-
-		return apply_filters( 'woocommerce_available_shipping_methods', $available_methods );
-	}
-
-	function get_packages() {
+	public  function get_packages() {
 		return $this->packages;
 	}
 
@@ -428,7 +391,7 @@ class WC_Shipping {
 	 * @access public
 	 * @return void
 	 */
-	function reset_shipping() {
+	public function reset_shipping() {
 		unset( WC()->session->chosen_shipping_methods );
 		$this->shipping_total = null;
 		$this->shipping_taxes = array();
@@ -444,7 +407,7 @@ class WC_Shipping {
 	 * @access public
 	 * @return void
 	 */
-	function process_admin_options() {
+	public function process_admin_options() {
 
 		$default_shipping_method = ( isset( $_POST['default_shipping_method'] ) ) ? esc_attr( $_POST['default_shipping_method'] ) : '';
 		$method_order = ( isset( $_POST['method_order'] ) ) ? $_POST['method_order'] : '';
