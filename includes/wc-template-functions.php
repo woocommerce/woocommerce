@@ -304,7 +304,7 @@ if ( ! function_exists( 'woocommerce_output_content_wrapper' ) ) {
 	 * @return void
 	 */
 	function woocommerce_output_content_wrapper() {
-		wc_get_template( 'shop/wrapper-start.php' );
+		wc_get_template( 'global/wrapper-start.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_output_content_wrapper_end' ) ) {
@@ -316,7 +316,7 @@ if ( ! function_exists( 'woocommerce_output_content_wrapper_end' ) ) {
 	 * @return void
 	 */
 	function woocommerce_output_content_wrapper_end() {
-		wc_get_template( 'shop/wrapper-end.php' );
+		wc_get_template( 'global/wrapper-end.php' );
 	}
 }
 
@@ -329,7 +329,7 @@ if ( ! function_exists( 'woocommerce_get_sidebar' ) ) {
 	 * @return void
 	 */
 	function woocommerce_get_sidebar() {
-		wc_get_template( 'shop/sidebar.php' );
+		wc_get_template( 'global/sidebar.php' );
 	}
 }
 
@@ -875,13 +875,15 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 
 	/**
 	 * Output the quantity input for add to cart forms.
-	 *
-	 * @access public
-	 * @subpackage	Product
-	 * @return void
+	 * 
+	 * @param  array $args Args for the input
+	 * @param  WC_Product|null $product 
+	 * @param  boolean $echo Whether to return or echo
+	 * @return void|string
 	 */
-	function woocommerce_quantity_input( $args = array() ) {
-		global $product;
+	function woocommerce_quantity_input( $args = array(), $product = null, $echo = true ) {
+		if ( is_null( $product ) )
+			$product = $GLOBALS['product'];
 
 		$defaults = array(
 			'input_name'  	=> 'quantity',
@@ -893,7 +895,15 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 
 		$args = apply_filters( 'woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ), $product );
 
-		wc_get_template( 'single-product/add-to-cart/quantity.php', $args );
+		ob_start();
+
+		wc_get_template( 'global/quantity-input.php', $args );
+
+		if ( $echo ) {
+			echo ob_get_clean();
+		} else {
+			return ob_get_clean();
+		}
 	}
 }
 
@@ -1192,7 +1202,7 @@ if ( ! function_exists( 'woocommerce_login_form' ) ) {
 
 		$args = wp_parse_args( $args, $defaults  );
 
-		wc_get_template( 'shop/form-login.php', $args );
+		wc_get_template( 'global/form-login.php', $args );
 	}
 }
 
@@ -1231,7 +1241,7 @@ if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 
 		$args = wp_parse_args( $args, $defaults );
 
-		wc_get_template( 'shop/breadcrumb.php', $args );
+		wc_get_template( 'global/breadcrumb.php', $args );
 	}
 }
 
