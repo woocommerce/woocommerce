@@ -262,8 +262,7 @@ class WC_Admin_Assets {
 	 */
 	public function product_taxonomy_styles() {
 
-		/** @todo This should be just 'return', without false */
-		if ( ! current_user_can( 'manage_woocommerce' ) ) return false;
+		if ( ! current_user_can( 'manage_woocommerce' ) ) return;
 		?>
 		<style type="text/css">
 			<?php if ( isset($_GET['taxonomy']) && $_GET['taxonomy']=='product_cat' ) : ?>

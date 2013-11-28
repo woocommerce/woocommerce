@@ -49,8 +49,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 */
 	public function form( $instance ) {
 		$this->init_settings();
-		/** @todo This must be only call to parent, with no return. It's a void function */
-		return parent::form( $instance );
+		parent::form( $instance );
 	}
 
 	/**
