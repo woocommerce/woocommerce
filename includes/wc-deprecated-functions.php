@@ -335,66 +335,66 @@ function woocommerce_deprecated_filter_mapping( $data, $arg_1 = '', $arg_2 = '',
  * Attribute functions - soft deprecated
  */
 function woocommerce_product_dropdown_categories( $args = array(), $deprecated_hierarchical = 1, $deprecated_show_uncategorized = 1, $deprecated_orderby = '' ) {
-	wc_product_dropdown_categories( $args, $deprecated_hierarchical, $deprecated_show_uncategorized, $deprecated_orderby );
+	return wc_product_dropdown_categories( $args, $deprecated_hierarchical, $deprecated_show_uncategorized, $deprecated_orderby );
 }
 function woocommerce_walk_category_dropdown_tree() {
-	wc_walk_category_dropdown_tree();
+	return wc_walk_category_dropdown_tree();
 }
 function woocommerce_taxonomy_metadata_wpdbfix() {
-	wc_taxonomy_metadata_wpdbfix();
+	return wc_taxonomy_metadata_wpdbfix();
 }
 function woocommerce_order_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = null ) {
-	wc_reorder_terms( $the_term, $next_id, $taxonomy, $index, $terms );
+	return wc_reorder_terms( $the_term, $next_id, $taxonomy, $index, $terms );
 }
 function woocommerce_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
-	wc_set_term_order( $term_id, $index, $taxonomy, $recursive );
+	return wc_set_term_order( $term_id, $index, $taxonomy, $recursive );
 }
 function woocommerce_terms_clauses( $clauses, $taxonomies, $args ) {
-	wc_terms_clauses( $clauses, $taxonomies, $args );
+	return wc_terms_clauses( $clauses, $taxonomies, $args );
 }
 function _woocommerce_term_recount( $terms, $taxonomy, $callback, $terms_are_term_taxonomy_ids ) {
-	_wc_term_recount( $terms, $taxonomy, $callback, $terms_are_term_taxonomy_ids );
+	return _wc_term_recount( $terms, $taxonomy, $callback, $terms_are_term_taxonomy_ids );
 }
 function woocommerce_recount_after_stock_change( $product_id ) {
-	wc_recount_after_stock_change( $product_id );
+	return wc_recount_after_stock_change( $product_id );
 }
 function woocommerce_change_term_counts( $terms, $taxonomies, $args ) {
-	wc_change_term_counts( $terms, $taxonomies, $args );
+	return wc_change_term_counts( $terms, $taxonomies, $args );
 }
 
 /**
  * Product functions - soft deprecated
  */
 function woocommerce_get_product_ids_on_sale() {
-	wc_get_product_ids_on_sale();
+	return wc_get_product_ids_on_sale();
 }
 function woocommerce_get_featured_product_ids() {
-	wc_get_featured_product_ids();
+	return wc_get_featured_product_ids();
 }
 function woocommerce_get_product_terms( $object_id, $taxonomy, $fields = 'all' ) {
-	wc_get_product_terms( $object_id, $taxonomy, array( 'fields' => $fields ) );
+	return wc_get_product_terms( $object_id, $taxonomy, array( 'fields' => $fields ) );
 }
 function woocommerce_product_post_type_link( $permalink, $post ) {
-	wc_product_post_type_link( $permalink, $post );
+	return wc_product_post_type_link( $permalink, $post );
 }
 function woocommerce_placeholder_img_src() {
-	wc_placeholder_img_src();
+	return wc_placeholder_img_src();
 }
 function woocommerce_placeholder_img() {
-	wc_placeholder_img();
+	return wc_placeholder_img();
 }
 function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
-	wc_get_formatted_variation( $variation, $flat );
+	return wc_get_formatted_variation( $variation, $flat );
 }
 function woocommerce_scheduled_sales() {
-	wc_scheduled_sales();
+	return wc_scheduled_sales();
 }
 function woocommerce_get_attachment_image_attributes( $attr ) {
-	wc_get_attachment_image_attributes( $attr );
+	return wc_get_attachment_image_attributes( $attr );
 }
 function woocommerce_prepare_attachment_for_js( $response ) {
-	wc_prepare_attachment_for_js( $response );
+	return wc_prepare_attachment_for_js( $response );
 }
 function woocommerce_track_product_view() {
-	wc_track_product_view();
+	return wc_track_product_view();
 }
