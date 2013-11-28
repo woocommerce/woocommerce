@@ -164,6 +164,8 @@ class WC_Admin_Assets {
 				'search_products_nonce' 		=> wp_create_nonce("search-products"),
 				'grant_access_nonce'			=> wp_create_nonce("grant-access"),
 				'revoke_access_nonce'			=> wp_create_nonce("revoke-access"),
+				'add_order_note_nonce'			=> wp_create_nonce("add-order-note"),
+				'delete_order_note_nonce'		=> wp_create_nonce("delete-order-note"),
 				'calendar_image'				=> WC()->plugin_url().'/assets/images/calendar.png',
 				'post_id'						=> isset( $post->ID ) ? $post->ID : '',
 				'base_country'					=> WC()->countries->get_base_country(),

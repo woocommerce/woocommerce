@@ -954,6 +954,46 @@ jQuery( function($){
 		return false;
 	});
 
+	// Order notes
+	$('#woocommerce-order-notes').on( 'click', 'a.add_note', function() {
+		if ( ! $('textarea#add_order_note').val() ) return;
+
+		$('#woocommerce-order-notes').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+		var data = {
+			action: 		'woocommerce_add_order_note',
+			post_id:		woocommerce_admin_meta_boxes.post_id,
+			note: 			$('textarea#add_order_note').val(),
+			note_type:		$('select#order_note_type').val(),
+			security: 		woocommerce_admin_meta_boxes.add_order_note_nonce,
+		};
+
+		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function(response) {
+			$('ul.order_notes').prepend( response );
+			$('#woocommerce-order-notes').unblock();
+			$('#add_order_note').val('');
+		});
+
+		return false;
+
+	});
+
+	$('#woocommerce-order-notes').on( 'click', 'a.delete_note', function() {
+		var note = $(this).closest('li.note');
+		$(note).block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+
+		var data = {
+			action: 		'woocommerce_delete_order_note',
+			note_id:		$(note).attr('rel'),
+			security: 		woocommerce_admin_meta_boxes.delete_order_note_nonce,
+		};
+
+		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function(response) {
+			$(note).remove();
+		});
+
+		return false;
+	});
+
 	// PRODUCT TYPE SPECIFIC OPTIONS
 	$('select#product-type').change(function(){
 
