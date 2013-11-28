@@ -282,7 +282,16 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 
       case 'pay_for_order':
         $user_id = $args[1];
-        $order = new WC_Order( $args[2] );
+        $order_id = isset($args[2]) ? $args[2] : null;
+
+        // When no order ID, we assume it's a new order
+        // and thus, customer can pay for it
+        if (!$order_id) {
+          $allcaps['pay_for_order'] = true;
+          break;
+        }
+
+        $order = new WC_Order( $order_id );
 
         if ( $user_id == $order->user_id )
           $allcaps['pay_for_order'] = true;
