@@ -108,8 +108,8 @@ function wc_print_notice( $message, $notice_type = 'success' ) {
 
 /**
  * Returns all queued notices, optionally filtered by a notice type.
- *
  * @param  string $notice_type The singular name of the notice type - either error, success or notice. [optional]
+ * @return array|mixed
  */
 function wc_get_notices( $notice_type = '' ) {
 

@@ -561,6 +561,7 @@ class WC_Admin_Settings {
 	 *
 	 * @access public
 	 * @param array $options Opens array to output
+	 * @return bool
 	 */
 	public static function save_fields( $options ) {
 	    if ( empty( $_POST ) )
