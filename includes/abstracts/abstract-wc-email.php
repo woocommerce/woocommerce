@@ -295,7 +295,7 @@ abstract class WC_Email extends WC_Settings_API {
 	 * get_blogname function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	function get_blogname() {
 		return wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
@@ -456,7 +456,7 @@ abstract class WC_Email extends WC_Settings_API {
 	 *
 	 * @access public
 	 * @param mixed $content
-	 * @return void
+	 * @return string
 	 */
 	function style_inline( $content ) {
 		if ( ! class_exists( 'DOMDocument' ) ) {
@@ -487,7 +487,7 @@ abstract class WC_Email extends WC_Settings_API {
 	 * get_content_plain function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	function get_content_plain() {}
 
@@ -495,7 +495,7 @@ abstract class WC_Email extends WC_Settings_API {
 	 * get_content_html function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	function get_content_html() {}
 

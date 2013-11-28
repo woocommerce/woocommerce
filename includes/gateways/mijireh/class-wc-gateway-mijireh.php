@@ -366,7 +366,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
      * is_slurp_page function.
      *
      * @access public
-     * @return void
+     * @return bool
      */
     public static function is_slurp_page() {
 		global $post;

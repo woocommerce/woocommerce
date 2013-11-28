@@ -397,7 +397,8 @@ if ( ! function_exists( 'woocommerce_product_loop_start' ) ) {
 	 * Output the start of a product loop. By default this is a UL
 	 *
 	 * @access public
-	 * @return void
+	 * @param bool $echo
+	 * @return string
 	 */
 	function woocommerce_product_loop_start( $echo = true ) {
 		ob_start();
@@ -414,7 +415,8 @@ if ( ! function_exists( 'woocommerce_product_loop_end' ) ) {
 	 * Output the end of a product loop. By default this is a UL
 	 *
 	 * @access public
-	 * @return void
+	 * @param bool $echo
+	 * @return string
 	 */
 	function woocommerce_product_loop_end( $echo = true ) {
 		ob_start();
@@ -1268,7 +1270,7 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 	 *
 	 * @access public
 	 * @subpackage	Loop
-	 * @return void
+	 * @return bool
 	 */
 	function woocommerce_products_will_display() {
 		global $wpdb;
@@ -1327,7 +1329,8 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 	 *
 	 * @access public
 	 * @subpackage	Loop
-	 * @return void
+	 * @param array $args
+	 * @return bool
 	 */
 	function woocommerce_product_subcategories( $args = array() ) {
 		global $wp_query;

@@ -171,7 +171,7 @@ class WC_Makepot {
 	 * @access public
 	 * @param mixed $filename
 	 * @param int $lines (default: 30)
-	 * @return void
+	 * @return string|bool
 	 */
 	public static function get_first_lines($filename, $lines = 30) {
 		$extf = fopen($filename, 'r');
@@ -194,7 +194,7 @@ class WC_Makepot {
 	 * @access public
 	 * @param mixed $header
 	 * @param mixed &$source
-	 * @return void
+	 * @return string|bool
 	 */
 	public static function get_addon_header($header, &$source) {
 		if (preg_match('|'.$header.':(.*)$|mi', $source, $matches))

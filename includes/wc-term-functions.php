@@ -124,7 +124,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 /**
  * Walk the Product Categories.
  *
- * @return void
+ * @return mixed
  */
 function wc_walk_category_dropdown_tree() {
 	global $woocommerce;
