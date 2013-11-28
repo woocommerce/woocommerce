@@ -271,11 +271,11 @@ class WC_Download_Handler {
 
 	/**
 	 * readfile_chunked
-	 *
 	 * Reads file in chunks so big downloads are possible without changing PHP.INI - http://codeigniter.com/wiki/Download_helper_for_large_files/
-	 *
-	 * @param    string    file
-	 * @param    boolean    return bytes of file
+	 * @param    string $file
+	 * @param    bool   $retbytes return bytes of file
+	 * @return bool|int
+	 * @todo Meaning of the return value? Last return is status of fclose?
 	 */
 	public static function readfile_chunked( $file, $retbytes = true ) {
 

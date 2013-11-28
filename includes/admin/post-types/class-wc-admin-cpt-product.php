@@ -631,8 +631,9 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 	 * Quick and bulk edit saving
 	 *
 	 * @access public
-	 * @param mixed $post_id
-	 * @param mixed $post
+	 * @param int $post_id
+	 * @param WP_Post $post
+	 * @return int
 	 */
 	public function bulk_and_quick_edit_save_post( $post_id, $post ) {
 
@@ -656,6 +657,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		if ( ! current_user_can( 'edit_post', $post_id ) )
 			return $post_id;
 
+		/** @todo remove */
 		global $woocommerce, $wpdb;
 
 		$product           = get_product( $post );
@@ -667,6 +669,8 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 		// Clear transient
 		wc_delete_product_transients( $post_id );
+
+		/** @todo return $post_id here? */
 	}
 
 	/**

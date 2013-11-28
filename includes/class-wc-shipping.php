@@ -329,6 +329,8 @@ class WC_Shipping {
 	 *
 	 * @access public
 	 * @param array $package cart items
+	 * @return array
+	 * @todo Return array() instead of false for consistent return type?
 	 */
 	public function calculate_shipping_for_package( $package = array() ) {
 		if ( ! $this->enabled ) return false;

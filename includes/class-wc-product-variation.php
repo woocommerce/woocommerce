@@ -348,9 +348,10 @@ class WC_Product_Variation extends WC_Product {
 
 	/**
 	 * Set stock level of the product variation.
-	 *
-	 * @param int $amount
-	 * @param boolean $force_variation_stock If true, the variation's stock will be updated and not the parents.
+	 * @param int  $amount
+	 * @param bool $force_variation_stock If true, the variation's stock will be updated and not the parents.
+	 * @return int
+	 * @todo Need to return 0 if is_null? Or something. Should not be just return.
 	 */
 	function set_stock( $amount = null, $force_variation_stock = false ) {
 		if ( is_null( $amount ) )

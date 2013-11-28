@@ -55,13 +55,13 @@ class WC_Report_Customer_List extends WP_List_Table {
 		echo '</div>';
 	}
 
-    /**
-     * column_default function.
-     *
-     * @access public
-     * @param mixed $user
-     * @param mixed $column_name
-     */
+	/**
+	 * column_default function.
+	 * @access public
+	 * @param mixed  $user
+	 * @param string $column_name
+	 * @return int|string
+	 */
     function column_default( $user, $column_name ) {
     	global $woocommerce, $wpdb;
 
