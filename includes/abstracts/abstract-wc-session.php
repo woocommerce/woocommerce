@@ -10,13 +10,13 @@
  */
 abstract class WC_Session {
 
-	/** customer_id */
+	/** @var int $_customer_id */
 	protected $_customer_id;
 
-    /** _data  */
+    /** @var array $_data  */
     protected $_data = array();
 
-    /** When something changes */
+    /** @var bool $_dirty When something changes */
     protected $_dirty = false;
 
     /**
@@ -94,7 +94,7 @@ abstract class WC_Session {
 	 * get_customer_id function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return int
 	 */
 	public function get_customer_id() {
 		return $this->_customer_id;

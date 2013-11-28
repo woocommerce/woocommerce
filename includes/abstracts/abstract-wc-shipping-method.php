@@ -156,7 +156,8 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * has_settings function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return bool
+	 * @todo Must return false if does not
 	 */
 	function has_settings() {
 		if ( $this->has_settings )
@@ -170,6 +171,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
      * @return bool
      */
     public function is_available( $package ) {
+		/** @todo Delete this */
     	global $woocommerce;
 
     	if ( $this->enabled == "no" )

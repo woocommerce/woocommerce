@@ -167,8 +167,8 @@ abstract class WC_Email extends WC_Settings_API {
 	 * handle_multipart function.
 	 *
 	 * @access public
-	 * @param mixed $mailer
-	 * @return void
+	 * @param PHPMailer $mailer
+	 * @return PHPMailer
 	 */
 	function handle_multipart( $mailer )  {
 
@@ -256,7 +256,7 @@ abstract class WC_Email extends WC_Settings_API {
 	 * get_content_type function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	function get_content_type() {
 		switch ( $this->get_email_type() ) {

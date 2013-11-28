@@ -54,9 +54,9 @@ function woocommerce_format_total( $number ) {
  * Get product name with extra details such as SKU price and attributes. Used within admin.
  *
  * @access public
- * @param mixed $product
+ * @param WC_Product $product
  * @deprecated 2.1
- * @return void
+ * @return string
  */
 function woocommerce_get_formatted_product_name( $product ) {
 	_deprecated_function( __FUNCTION__, '2.1', 'WC_Product::get_formatted_name()' );
