@@ -497,7 +497,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 *
 	 * @access public
 	 * @param mixed $key
-	 * @return void
+	 * @return bool
 	 */
 	function validate_additional_costs_table_field( $key ) {
 		return false;
@@ -507,7 +507,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 * generate_additional_costs_html function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	function generate_additional_costs_table_html() {
 		ob_start();
@@ -663,8 +663,8 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 * save_default_costs function.
 	 *
 	 * @access public
-	 * @param mixed $values
-	 * @return void
+	 * @param array $fields
+	 * @return array
 	 */
 	function save_default_costs( $fields ) {
 	 	$default_cost = ( $_POST['default_cost'] === '' ) ? '' : wc_format_decimal( $_POST['default_cost'] );

@@ -262,6 +262,7 @@ class WC_Admin_Assets {
 	 */
 	public function product_taxonomy_styles() {
 
+		/** @todo This should be just 'return', without false */
 		if ( ! current_user_can( 'manage_woocommerce' ) ) return false;
 		?>
 		<style type="text/css">
