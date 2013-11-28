@@ -774,6 +774,24 @@ class WC_Countries {
 	}
 
 	/**
+	 * Get locale fields
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function get_locale_fields() {
+		$locale_fields = array (
+			'address_1'	=> '#billing_address_1_field, #shipping_address_1_field',
+			'address_2'	=> '#billing_address_2_field, #shipping_address_2_field',
+			'state'		=> '#billing_state_field, #shipping_state_field',
+			'postcode'	=> '#billing_postcode_field, #shipping_postcode_field',
+			'city'		=> '#billing_city_field, #shipping_city_field'
+		);
+		
+		return apply_filters( 'woocommerce_locale_fields', $locale_fields );
+	}
+
+	/**
 	 * Get country locale settings
 	 *
 	 * @access public
