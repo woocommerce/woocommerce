@@ -122,6 +122,7 @@ class WC_Shortcodes {
 	 * @access public
 	 * @param array $atts
 	 * @return string
+	 * @todo Must not return void. Need return '';
 	 */
 	public static function product_category( $atts ){
 		global $woocommerce_loop;
@@ -331,6 +332,7 @@ class WC_Shortcodes {
 	 * @access public
 	 * @param array $atts
 	 * @return string
+	 * @todo Must not return void. Need return '';
 	 */
 	public static function products( $atts ) {
 		global $woocommerce_loop;
@@ -407,6 +409,7 @@ class WC_Shortcodes {
 	 * @access public
 	 * @param array $atts
 	 * @return string
+	 * @todo Must not return void. Need return '';
 	 */
 	public static function product( $atts ) {
 	  	if (empty($atts)) return;
@@ -466,6 +469,7 @@ class WC_Shortcodes {
 	 * @access public
 	 * @param array $atts
 	 * @return string
+	 * @todo Must not return void. Need return '';
 	 */
 	public static function product_add_to_cart( $atts ) {
 	  	global $wpdb, $post;
@@ -518,6 +522,7 @@ class WC_Shortcodes {
 	 * @access public
 	 * @param array $atts
 	 * @return string
+	 * @todo Must not return void. Need return '';
 	 */
 	public static function product_add_to_cart_url( $atts ) {
 	  	global $wpdb;
@@ -789,6 +794,7 @@ class WC_Shortcodes {
 	 * @access public
 	 * @param array $atts
 	 * @return string
+	 * @todo Must not return void. Need return '';
 	 */
 	public static function product_page( $atts ) {
 	  	if ( empty( $atts ) ) return;
@@ -839,7 +845,6 @@ class WC_Shortcodes {
 	 * Show messages
 	 *
 	 * @access public
-	 * @param array $atts
 	 * @return string
 	 */
 	public static function shop_messages() {
@@ -945,6 +950,10 @@ class WC_Shortcodes {
 		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
 
+	/**
+	 * @param array $atts
+	 * @return string
+	 */
 	public static function related_products( $atts ) {
 
 		$atts = shortcode_atts( array(

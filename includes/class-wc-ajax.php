@@ -636,6 +636,10 @@ class WC_AJAX {
 
 		// Now find all combinations and create posts
 		if ( ! function_exists( 'array_cartesian' ) ) {
+			/**
+			 * @param array $input
+			 * @return array
+			 */
 			function array_cartesian( $input ) {
 			    $result = array();
 

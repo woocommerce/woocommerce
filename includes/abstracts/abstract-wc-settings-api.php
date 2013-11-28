@@ -125,7 +125,7 @@ abstract class WC_Settings_API {
      * Gets and option from the settings API, using defaults if necessary to prevent undefined notices.
      *
      * @access public
-     * @param mixed $key
+     * @param string $key
      * @param mixed $empty_value
      * @return string The value specified for the option or a default value for the option
      */

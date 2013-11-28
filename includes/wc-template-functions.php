@@ -993,8 +993,8 @@ if ( ! function_exists( 'woocommerce_sort_product_tabs' ) ) {
 	 * Sort tabs by priority
 	 *
 	 * @access public
-	 * @param mixed $tabs
-	 * @return void
+	 * @param array $tabs
+	 * @return array
 	 */
 	function woocommerce_sort_product_tabs( $tabs = array() ) {
 		
