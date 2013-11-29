@@ -154,13 +154,17 @@ class Mijireh_Order extends Mijireh_Model {
     return $data;
   }
 
-  /**
-   * Add the specified item and price to the order.
-   *
-   * Return the total number of items in the order (including the one that was just added)
-   *
-   * @return int
-   */
+	/**
+	 * Add the specified item and price to the order.
+	 * Return the total number of items in the order (including the one that was just added)
+	 *
+	 * @param Mijireh_Item|string $name
+	 * @param int                 $price
+	 * @param int                 $quantity
+	 * @param string              $sku
+	 * @throws Mijireh_Exception
+	 * @return int
+	 */
   public function add_item($name, $price=0, $quantity=1, $sku='') {
     $item = '';
     if(is_object($name) && get_class($name) == 'Mijireh_Item') {

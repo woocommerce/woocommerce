@@ -23,7 +23,11 @@ class Mijireh_Address extends Mijireh_Model {
     );
   }
 
-  public function validate() {
+	/**
+	 * Check required fields
+	 * @return bool
+	 */
+	public function validate() {
     $is_valid = $this->_check_required_fields();
     return $is_valid;
   }

@@ -125,7 +125,6 @@ abstract class WC_Email extends WC_Settings_API {
 	 * Constructor
 	 *
 	 * @access public
-	 * @return void
 	 */
 	function __construct() {
 
@@ -270,11 +269,12 @@ abstract class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	* Proxy to parent's get_option and attempt to localize the result using gettext.
-	*
-	* @access public
-	* @return string
-	*/
+	 * Proxy to parent's get_option and attempt to localize the result using gettext.
+	 * @access public
+	 * @param string $key
+	 * @param mixed  $empty_value
+	 * @return string
+	 */
 	function get_option( $key, $empty_value = null ) {
 		return __( parent::get_option( $key, $empty_value ) );
 	}
@@ -324,6 +324,7 @@ abstract class WC_Email extends WC_Settings_API {
 	 * style_inline_tags function.
 	 *
 	 * @access public
+	 * @param array $tags
 	 * @return array
 	 */
 	function style_inline_tags($tags) {
@@ -332,8 +333,8 @@ abstract class WC_Email extends WC_Settings_API {
 
 	/**
 	 * style_inline_h1_tag function.
-	 *
 	 * @access public
+	 * @param array $styles
 	 * @return array
 	 */
 	function style_inline_h1_tag($styles) {
@@ -354,8 +355,8 @@ abstract class WC_Email extends WC_Settings_API {
 
 	/**
 	 * style_inline_h2_tag function.
-	 *
 	 * @access public
+	 * @param array $styles
 	 * @return array
 	 */
 	function style_inline_h2_tag($styles) {
@@ -378,6 +379,7 @@ abstract class WC_Email extends WC_Settings_API {
 	 * style_inline_h3_tag function.
 	 *
 	 * @access public
+	 * @param array $styles
 	 * @return array
 	 */
 	function style_inline_h3_tag($styles) {
@@ -396,6 +398,10 @@ abstract class WC_Email extends WC_Settings_API {
 		return $styles;
 	}
 
+	/**
+	 * @param array $styles
+	 * @return array
+	 */
 	function style_inline_a_tag($styles) {
 		$styles['color'] = get_option( 'woocommerce_email_text_color' );
 		$styles['font-weight'] = 'normal';
@@ -408,6 +414,7 @@ abstract class WC_Email extends WC_Settings_API {
 	 * style_inline_img_tag function.
 	 *
 	 * @access public
+	 * @param array $styles
 	 * @return array
 	 */
 	function style_inline_img_tag($styles) {
@@ -438,6 +445,7 @@ abstract class WC_Email extends WC_Settings_API {
 	 * get_style_inline_for_tag function.
 	 *
 	 * @access public
+	 * @param string $tag
 	 * @return string
 	 */
 	function get_style_inline_for_tag($tag) {

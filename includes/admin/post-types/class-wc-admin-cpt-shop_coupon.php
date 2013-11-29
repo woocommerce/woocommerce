@@ -55,6 +55,10 @@ class WC_Admin_CPT_Shop_Coupon extends WC_Admin_CPT {
 		return $text;
 	}
 
+	/**
+	 * Print coupon description textarea field
+	 * @param WP_Post $post
+	 */
 	public function coupon_description_field( $post ) {
 		if ( $post->post_type != 'shop_coupon' )
 			return;
