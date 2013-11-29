@@ -1623,7 +1623,6 @@ class WC_Cart {
 		 * Remove a single coupon by code
 		 * @param  string $coupon_code Code of the coupon to remove
 		 * @return bool
-		 * @todo Should either be void or return true at the end of the function
 		 */
 		public function remove_coupon( $coupon_code ) {
 			// Coupons are globally disabled
@@ -1638,6 +1637,8 @@ class WC_Cart {
 				unset( $this->applied_coupons[ $position ] );
 
 			WC()->session->set( 'applied_coupons', $this->applied_coupons );
+
+			return true;
 		}
 
 		/**

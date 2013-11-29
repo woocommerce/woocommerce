@@ -122,12 +122,11 @@ class WC_Shortcodes {
 	 * @access public
 	 * @param array $atts
 	 * @return string
-	 * @todo Must not return void. Need return '';
 	 */
 	public static function product_category( $atts ){
 		global $woocommerce_loop;
 
-	  	if ( empty( $atts ) ) return;
+	  	if ( empty( $atts ) ) return '';
 
 		extract( shortcode_atts( array(
 			'per_page' 		=> '12',
@@ -138,7 +137,7 @@ class WC_Shortcodes {
 		  	'operator'      => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
 			), $atts ) );
 
-		if ( ! $category ) return;
+		if ( ! $category ) return '';
 
 		// Default ordering args
 		$ordering_args = WC()->query->get_catalog_ordering_args( $orderby, $order );
@@ -332,12 +331,11 @@ class WC_Shortcodes {
 	 * @access public
 	 * @param array $atts
 	 * @return string
-	 * @todo Must not return void. Need return '';
 	 */
 	public static function products( $atts ) {
 		global $woocommerce_loop;
 
-	  	if (empty($atts)) return;
+	  	if (empty($atts)) return '';
 
 		extract(shortcode_atts(array(
 			'columns' 	=> '4',
@@ -409,10 +407,9 @@ class WC_Shortcodes {
 	 * @access public
 	 * @param array $atts
 	 * @return string
-	 * @todo Must not return void. Need return '';
 	 */
 	public static function product( $atts ) {
-	  	if (empty($atts)) return;
+	  	if (empty($atts)) return '';
 
 	  	$args = array(
 	    	'post_type' => 'product',
@@ -469,13 +466,11 @@ class WC_Shortcodes {
 	 * @access public
 	 * @param array $atts
 	 * @return string
-	 * @todo Must not return void. Need return '';
 	 */
 	public static function product_add_to_cart( $atts ) {
 	  	global $wpdb, $post;
 
-	  	if ( empty( $atts ) )
-	  		return;
+	  	if ( empty( $atts ) ) return '';
 
 	  	extract( shortcode_atts( array(
 			'id'         => '',
@@ -490,13 +485,13 @@ class WC_Shortcodes {
 			$product_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $sku ) );
 			$product_data = get_post( $product_id );
 		} else {
-			return;
+			return '';
 		}
 
 		$product = wc_setup_product_data( $product_data );
 
 		if ( ! $product )
-			return;
+			return '';
 
 		ob_start();
 		?>
@@ -522,12 +517,11 @@ class WC_Shortcodes {
 	 * @access public
 	 * @param array $atts
 	 * @return string
-	 * @todo Must not return void. Need return '';
 	 */
 	public static function product_add_to_cart_url( $atts ) {
 	  	global $wpdb;
 
-	  	if ( empty( $atts ) ) return;
+	  	if ( empty( $atts ) ) return '';
 
 	  	if ( isset( $atts['id'] ) ) {
 	  		$product_data = get_post( $atts['id'] );
@@ -535,11 +529,11 @@ class WC_Shortcodes {
 			$product_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $atts['sku'] ) );
 			$product_data = get_post( $product_id );
 		} else {
-			return;
+			return '';
 		}
 
 		if ( 'product' !== $product_data->post_type )
-			return;
+			return '';
 
 		$_product = get_product( $product_data );
 
@@ -794,12 +788,11 @@ class WC_Shortcodes {
 	 * @access public
 	 * @param array $atts
 	 * @return string
-	 * @todo Must not return void. Need return '';
 	 */
 	public static function product_page( $atts ) {
-	  	if ( empty( $atts ) ) return;
+	  	if ( empty( $atts ) ) return '';
 
-		if ( ! isset( $atts['id'] ) && ! isset( $atts['sku'] ) ) return;
+		if ( ! isset( $atts['id'] ) && ! isset( $atts['sku'] ) ) return '';
 
 	  	$args = array(
 	    	'posts_per_page' 	=> 1,
