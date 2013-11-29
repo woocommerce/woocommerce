@@ -12,9 +12,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 if ( ! class_exists( 'WC_Admin' ) ) :
 
-/**
- * @todo Load all pages conditonally when needed from this class
- */
 class WC_Admin {
 
 	/**

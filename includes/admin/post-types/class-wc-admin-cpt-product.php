@@ -657,9 +657,6 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		if ( ! current_user_can( 'edit_post', $post_id ) )
 			return $post_id;
 
-		/** @todo remove */
-		global $woocommerce, $wpdb;
-
 		$product           = get_product( $post );
 
 		if ( ! empty( $_REQUEST['woocommerce_quick_edit'] ) )
@@ -670,7 +667,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		// Clear transient
 		wc_delete_product_transients( $post_id );
 
-		/** @todo return $post_id here? */
+		return $post_id;
 	}
 
 	/**
