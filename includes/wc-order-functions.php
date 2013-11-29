@@ -35,11 +35,12 @@ function wc_get_order_id_by_order_key( $order_key ) {
  * @param string $download_id file identifier
  * @param int $product_id product identifier
  * @param WC_Order $order the order
- * @return int insert id | bool false on failure
+ * @return int|bool insert id or false on failure
  */
 function wc_downloadable_file_permission( $download_id, $product_id, $order ) {
 	global $wpdb;
 
+	/** @todo [tivnet] return false; */
 	if ( $order->status == 'processing' && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' )
 		return;
 

@@ -61,8 +61,9 @@ function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
  * Returns the url to the lost password endpoint url
  *
  * @access public
- * @param mixed $url
- * @return void
+ * @param string $url
+ * @return string
+ * @todo [tivnet] $url is unused. Remove it and add ...10, 0); to the add_filter
  */
 function wc_lostpassword_url( $url ) {
     return wc_get_endpoint_url( 'lost-password', '', get_permalink( wc_get_page_id( 'myaccount' ) ) );

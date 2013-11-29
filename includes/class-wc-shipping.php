@@ -201,8 +201,7 @@ class WC_Shipping {
 	 * Returns all registered shipping methods for usage.
 	 *
 	 * @access public
-	 * @param mixed $package
-	 * @return void
+	 * @return array
 	 */
 	public function get_shipping_methods() {
 		return $this->shipping_methods;

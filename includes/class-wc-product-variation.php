@@ -76,6 +76,7 @@ class WC_Product_Variation extends WC_Product {
 		$this->id   = ! empty( $args['parent_id'] ) ? intval( $args['parent_id'] ) : wp_get_post_parent_id( $this->variation_id );
 
 		// The post doesn't have a parent id, therefore its invalid.
+		/** @todo [tivnet] This is a void function. Just return; */
 		if ( empty( $this->id ) )
 			return false;
 

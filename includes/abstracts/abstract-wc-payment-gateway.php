@@ -77,6 +77,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		if ( $this->enabled == "yes" ) {
 			return true;
 		}
+		/** @todo [tivnet] Rewrite as return( $this->enabled === 'yes' ) */
 	}
 
 	/**

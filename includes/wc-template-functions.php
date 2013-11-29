@@ -953,8 +953,8 @@ if ( ! function_exists( 'woocommerce_default_product_tabs' ) ) {
 	 * Add default product tabs to product pages.
 	 *
 	 * @access public
-	 * @param mixed $tabs
-	 * @return void
+	 * @param array $tabs
+	 * @return array
 	 */
 	function woocommerce_default_product_tabs( $tabs = array() ) {
 		global $product, $post;
@@ -1528,6 +1528,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 	 * @param mixed $args
 	 * @param string $value (default: null)
 	 * @return void
+	 * @todo [tivnet] Set ob_start at the beginning and return ob_get_clean at the end if $args['return'] or echo if not
 	 */
 	function woocommerce_form_field( $key, $args, $value = null ) {
 		$defaults = array(
@@ -1748,7 +1749,8 @@ if ( ! function_exists( 'get_product_search_form' ) ) {
 	 * @access public
 	 * @subpackage	Forms
 	 * @param bool $echo (default: true)
-	 * @return void
+	 * @return string
+	 * @todo [tivnet] Return '' for consistency, or always echo
 	 */
 	function get_product_search_form( $echo = true  ) {
 		do_action( 'get_product_search_form'  );
