@@ -74,7 +74,7 @@ class WC_Admin_Profile {
 						),
 					'billing_state' => array(
 							'label' => __( 'State/County', 'woocommerce' ),
-							'description' => __( 'Country or state code', 'woocommerce' ),
+							'description' => __( 'State/County or state code', 'woocommerce' ),
 						),
 					'billing_country' => array(
 							'label' => __( 'Country', 'woocommerce' ),
