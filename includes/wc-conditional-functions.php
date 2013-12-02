@@ -238,8 +238,6 @@ if ( ! function_exists( 'meta_is_product_attribute' ) ) {
 		
 		$attributes = $product->get_variation_attributes();
 
-		var_dump($attributes[ $name ]);
-
 		return ( in_array( $name, array_keys( $attributes ) ) && in_array( $value, $attributes[ $name ] ) );
 	}
 }
