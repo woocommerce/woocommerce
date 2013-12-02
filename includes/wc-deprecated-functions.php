@@ -86,31 +86,31 @@ function woocommerce_protected_product_add_to_cart( $passed, $product_id ) {
 	return wc_protected_product_add_to_cart( $passed, $product_id );
 }
 function woocommerce_empty_cart() {
-	return wc_empty_cart();
+	wc_empty_cart();
 }
 function woocommerce_load_persistent_cart( $user_login, $user = 0 ) {
 	return wc_load_persistent_cart( $user_login, $user );
 }
 function woocommerce_add_to_cart_message( $product_id ) {
-	return wc_add_to_cart_message( $product_id );
+	wc_add_to_cart_message( $product_id );
 }
 function woocommerce_clear_cart_after_payment() {
-	return wc_clear_cart_after_payment();
+	wc_clear_cart_after_payment();
 }
 function woocommerce_cart_totals_subtotal_html() {
-	return wc_cart_totals_subtotal_html();
+	wc_cart_totals_subtotal_html();
 }
 function woocommerce_cart_totals_shipping_html() {
-	return wc_cart_totals_shipping_html();
+	wc_cart_totals_shipping_html();
 }
 function woocommerce_cart_totals_coupon_html( $coupon ) {
-	return wc_cart_totals_coupon_html( $coupon );
+	wc_cart_totals_coupon_html( $coupon );
 }
 function woocommerce_cart_totals_order_total_html() {
-	return wc_cart_totals_order_total_html();
+	wc_cart_totals_order_total_html();
 }
 function woocommerce_cart_totals_fee_html( $fee ) {
-	return wc_cart_totals_fee_html( $fee );
+	wc_cart_totals_fee_html( $fee );
 }
 function woocommerce_cart_totals_shipping_method_label( $method ) {
 	return wc_cart_totals_shipping_method_label( $method );
@@ -120,16 +120,16 @@ function woocommerce_cart_totals_shipping_method_label( $method ) {
  * Core functions (soft deprecated)
  */
 function woocommerce_get_template_part( $slug, $name = '' ) {
-	return wc_get_template_part( $slug, $name );
+	wc_get_template_part( $slug, $name );
 }
 function woocommerce_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
-	return wc_get_template( $template_name, $args, $template_path, $default_path );
+	wc_get_template( $template_name, $args, $template_path, $default_path );
 }
 function woocommerce_locate_template( $template_name, $template_path = '', $default_path = '' ) {
 	return wc_locate_template( $template_name, $template_path, $default_path );
 }
 function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "" ) {
-	return wc_mail( $to, $subject, $message, $headers, $attachments );
+	wc_mail( $to, $subject, $message, $headers, $attachments );
 }
 
 /**
@@ -142,13 +142,13 @@ function woocommerce_create_new_customer( $email, $username = '', $password = ''
 	return wc_create_new_customer( $email, $username, $password );
 }
 function woocommerce_set_customer_auth_cookie( $customer_id ) {
-	return wc_set_customer_auth_cookie( $customer_id );
+	wc_set_customer_auth_cookie( $customer_id );
 }
 function woocommerce_update_new_customer_past_orders( $customer_id ) {
 	return wc_update_new_customer_past_orders( $customer_id );
 }
 function woocommerce_paying_customer( $order_id ) {
-	return wc_paying_customer( $order_id );
+	wc_paying_customer( $order_id );
 }
 function woocommerce_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	return wc_customer_bought_product( $customer_email, $user_id, $product_id );
@@ -242,7 +242,7 @@ function woocommerce_downloadable_file_permission( $download_id, $product_id, $o
 	return wc_downloadable_file_permission( $download_id, $product_id, $order );
 }
 function woocommerce_downloadable_product_permissions( $order_id ) {
-	return wc_downloadable_product_permissions( $order_id );
+	wc_downloadable_product_permissions( $order_id );
 }
 function woocommerce_add_order_item( $order_id, $item ) {
 	return wc_add_order_item( $order_id, $item );
@@ -263,7 +263,7 @@ function woocommerce_get_order_item_meta( $item_id, $key, $single = true ) {
 	return wc_get_order_item_meta( $item_id, $key, $single );
 }
 function woocommerce_cancel_unpaid_orders() {
-	return wc_cancel_unpaid_orders();
+	wc_cancel_unpaid_orders();
 }
 function woocommerce_processing_order_count() {
 	return wc_processing_order_count();
