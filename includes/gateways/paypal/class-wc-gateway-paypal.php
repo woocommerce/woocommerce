@@ -775,7 +775,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	    	$order = $this->get_paypal_order( $posted['cm'] );
 
 	    	if ( $order->status != 'pending' )
-	    		return;
+				/** @todo [tivnet] return a boolean */
+				return;
 
 	    	$posted['st'] = strtolower( $posted['st'] );
 
@@ -831,7 +832,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	            break;
 	        }
         }
-    }
+		/** @todo [tivnet] return a boolean */
+	}
 
 	/**
 	 * get_paypal_order function.
