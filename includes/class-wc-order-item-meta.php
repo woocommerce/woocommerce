@@ -32,7 +32,6 @@ class WC_Order_Item_Meta {
 	 * @param bool $return (default: false)
 	 * @param string $hideprefix (default: _)
 	 * @return string
-	 * @todo Must not return [nothing] if not sizeof( $meta_list )
 	 */
 	public function display( $flat = false, $return = false, $hideprefix = '_' ) {
 
@@ -45,6 +44,7 @@ class WC_Order_Item_Meta {
 				if ( empty( $meta_values ) || ( ! empty( $hideprefix ) && substr( $meta_key, 0, 1 ) == $hideprefix ) )
 					continue;
 
+				/** @todo [tivnet] Unused var */
 				$found_meta = true;
 
 				foreach( $meta_values as $meta_value ) {
@@ -69,6 +69,7 @@ class WC_Order_Item_Meta {
 			}
 
 			if ( ! sizeof( $meta_list ) )
+				/** @todo [tivnet] return ''; */
 				return;
 
 			$output = $flat ? '' : '<dl class="variation">';
@@ -86,5 +87,6 @@ class WC_Order_Item_Meta {
 			else
 				echo $output;
 		}
+	/** @todo [tivnet] return ''; */
 	}
 }
