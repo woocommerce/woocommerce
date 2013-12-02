@@ -61,8 +61,10 @@ class WC_Report_Customer_List extends WP_List_Table {
 	 * @param mixed  $user
 	 * @param string $column_name
 	 * @return int|string
+	 * @todo [tivnet] Inconsistent return types, and void return at the end
 	 */
     function column_default( $user, $column_name ) {
+		/** @todo [tivnet] Remove $woocommerce */
     	global $woocommerce, $wpdb;
 
         switch( $column_name ) {

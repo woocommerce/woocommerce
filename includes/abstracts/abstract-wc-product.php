@@ -157,6 +157,7 @@ class WC_Product {
 	 */
 	public function set_stock( $amount = null ) {
 		if ( is_null( $amount ) ) {
+			/** @todo [tivnet] return 0; */
 			return;
 		}
 
@@ -184,6 +185,8 @@ class WC_Product {
 
 			return $this->get_stock_quantity();
 		}
+
+		/** @todo [tivnet] return 0; */
 	}
 
 	/**
@@ -1044,6 +1047,7 @@ class WC_Product {
 
 			return $rating_html;
 		}
+	/** @todo [tivnet] return ''; */
 	}
 
 

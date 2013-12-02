@@ -48,6 +48,7 @@ class WC_Admin_Duplicate_Product {
 
 	/**
 	 * Show the dupe product link in admin
+	 * @todo [tivnet] $actions is undefined.
 	 */
 	public function dupe_button() {
 		global $post;

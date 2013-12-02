@@ -509,12 +509,12 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	 *
 	 * @access public
 	 * @param WP_Query $wp
-	 * @return WP_Query
-	 * @todo Note: this is called via do_action_ref_array, so return $wp is probably wrong.
+	 * @return void
 	 */
 	public function shop_order_search_custom_fields( $wp ) {
 		global $pagenow, $wpdb;
 
+		/** @todo [tivnet] Note: this is called via do_action_ref_array, so return $wp is wrong. */
 		if ( 'edit.php' != $pagenow || empty( $wp->query_vars['s'] ) || $wp->query_vars['post_type'] != 'shop_order' )
 			return $wp;
 

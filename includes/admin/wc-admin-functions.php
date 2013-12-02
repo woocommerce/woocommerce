@@ -47,6 +47,7 @@ function wc_get_screen_ids() {
  * @param string $page_content (default: '') Content for the new page
  * @param int $post_parent (default: 0) Parent for the new page
  * @return int page ID
+ * @todo [tivnet] return; is wrong here. int expected. return 0; instead ?
  */
 function wc_create_page( $slug, $option = '', $page_title = '', $page_content = '', $post_parent = 0 ) {
     global $wpdb;

@@ -612,7 +612,7 @@ class WC_Order {
 	 *
 	 * @deprecated As of 2.1, use of get_total() is preferred
 	 * @access public
-	 * @return void
+	 * @return float
 	 */
 	public function get_order_total() {
 		_deprecated_function( 'get_order_total', '2.1', 'get_total' );

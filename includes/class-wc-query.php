@@ -46,7 +46,6 @@ class WC_Query {
 	 * Constructor for the query class. Hooks in methods.
 	 *
 	 * @access public
-	 * @return void
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'add_endpoints' ) );
@@ -106,7 +105,8 @@ class WC_Query {
 	 * add_query_vars function.
 	 *
 	 * @access public
-	 * @return void
+	 * @param array $vars
+	 * @return array
 	 */
 	public function add_query_vars( $vars ) {
 		foreach ( $this->query_vars as $key => $var )
@@ -250,8 +250,8 @@ class WC_Query {
 	 * wpseo_metadesc function.
 	 *
 	 * @access public
-	 * @param mixed $meta
-	 * @return void
+	 * @return string
+	 * @todo [tivnet] Need to check if ( function_exists( 'wpseo_get_value' ) ), and if not then return ''
 	 */
 	public function wpseo_metadesc() {
 		return wpseo_get_value( 'metadesc', wc_get_page_id('shop') );
@@ -262,7 +262,8 @@ class WC_Query {
 	 * wpseo_metakey function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
+	 * @todo [tivnet] Need to check if ( function_exists( 'wpseo_get_value' ) ), and if not then return ''
 	 */
 	public function wpseo_metakey() {
 		return wpseo_get_value( 'metakey', wc_get_page_id('shop') );
@@ -273,9 +274,9 @@ class WC_Query {
 	 * Hook into the_posts to do the main product query if needed - relevanssi compatibility
 	 *
 	 * @access public
-	 * @param mixed $posts
-	 * @param bool $query (default: false)
-	 * @return void
+	 * @param array $posts
+	 * @param WP_Query|bool $query (default: false)
+	 * @return array
 	 */
 	public function the_posts( $posts, $query = false ) {
 		// Abort if there's no query
