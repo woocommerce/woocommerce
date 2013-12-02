@@ -74,10 +74,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return bool
 	 */
 	public function is_available() {
-		if ( $this->enabled == "yes" ) {
-			return true;
-		}
-		/** @todo [tivnet] Rewrite as return( $this->enabled === 'yes' ) */
+		return ( $this->enabled === "yes" );
 	}
 
 	/**

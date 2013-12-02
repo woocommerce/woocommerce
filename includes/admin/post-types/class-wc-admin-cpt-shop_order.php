@@ -41,9 +41,9 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 		add_filter( 'request', array( $this, 'orders_by_customer_query' ) );
 		add_filter( "manage_edit-shop_order_sortable_columns", array( $this, 'custom_shop_order_sort' ) );
 		add_filter( 'request', array( $this, 'custom_shop_order_orderby' ) );
-		add_filter( 'parse_query', array( $this, 'shop_order_search_custom_fields' ) );
 		add_filter( 'get_search_query', array( $this, 'shop_order_search_label' ) );
 		add_filter( 'query_vars', array( $this, 'add_custom_query_var' ) );
+		add_action( 'parse_query', array( $this, 'shop_order_search_custom_fields' ) );
 		add_action( 'before_delete_post', array( $this, 'delete_order_items' ) );
 
 		// Bulk edit
@@ -514,9 +514,8 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	public function shop_order_search_custom_fields( $wp ) {
 		global $pagenow, $wpdb;
 
-		/** @todo [tivnet] Note: this is called via do_action_ref_array, so return $wp is wrong. */
 		if ( 'edit.php' != $pagenow || empty( $wp->query_vars['s'] ) || $wp->query_vars['post_type'] != 'shop_order' )
-			return $wp;
+			return;
 
 		$search_fields = array_map( 'wc_clean', apply_filters( 'woocommerce_shop_order_search_fields', array(
 			'_order_key',

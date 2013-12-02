@@ -1528,7 +1528,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 	 * @param mixed $args
 	 * @param string $value (default: null)
 	 * @return void
-	 * @todo [tivnet] Set ob_start at the beginning and return ob_get_clean at the end if $args['return'] or echo if not
+	 * @todo This function needs to be broken up in smaller pieces 
 	 */
 	function woocommerce_form_field( $key, $args, $value = null ) {
 		$defaults = array(
@@ -1750,7 +1750,7 @@ if ( ! function_exists( 'get_product_search_form' ) ) {
 	 * @subpackage	Forms
 	 * @param bool $echo (default: true)
 	 * @return string
-	 * @todo [tivnet] Return '' for consistency, or always echo
+	 * @todo This function needs to be broken up in smaller pieces 
 	 */
 	function get_product_search_form( $echo = true  ) {
 		do_action( 'get_product_search_form'  );

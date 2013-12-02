@@ -248,10 +248,10 @@ class WC_Query {
 
 	/**
 	 * wpseo_metadesc function.
+	 * Hooked into wpseo_ hook already, so no need for function_exist
 	 *
 	 * @access public
 	 * @return string
-	 * @todo [tivnet] Need to check if ( function_exists( 'wpseo_get_value' ) ), and if not then return ''
 	 */
 	public function wpseo_metadesc() {
 		return wpseo_get_value( 'metadesc', wc_get_page_id('shop') );
@@ -260,10 +260,10 @@ class WC_Query {
 
 	/**
 	 * wpseo_metakey function.
+	 * Hooked into wpseo_ hook already, so no need for function_exist
 	 *
 	 * @access public
 	 * @return string
-	 * @todo [tivnet] Need to check if ( function_exists( 'wpseo_get_value' ) ), and if not then return ''
 	 */
 	public function wpseo_metakey() {
 		return wpseo_get_value( 'metakey', wc_get_page_id('shop') );

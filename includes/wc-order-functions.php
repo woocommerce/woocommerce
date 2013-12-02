@@ -40,9 +40,8 @@ function wc_get_order_id_by_order_key( $order_key ) {
 function wc_downloadable_file_permission( $download_id, $product_id, $order ) {
 	global $wpdb;
 
-	/** @todo [tivnet] return false; */
 	if ( $order->status == 'processing' && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' )
-		return;
+		return false;
 
 	$user_email = sanitize_email( $order->billing_email );
 	$limit      = trim( get_post_meta( $product_id, '_download_limit', true ) );

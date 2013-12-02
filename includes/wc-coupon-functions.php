@@ -31,10 +31,11 @@ function wc_get_coupon_types() {
  *
  * @param string $type (default: '')
  * @return string
- * @todo [tivnet] Return empty string at the end of function
  */
 function wc_get_coupon_type( $type = '' ) {
 	$types = wc_get_coupon_types();
 	if ( isset( $types[ $type ] ) )
 		return $types[ $type ];
+
+	return '';
 }
