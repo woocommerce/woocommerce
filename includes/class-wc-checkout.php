@@ -628,10 +628,13 @@ class WC_Checkout {
 
                 	// Add customer info from other billing fields
                 	if ( $this->posted['billing_first_name'] && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) )
-                		wp_update_user( array ( 'ID' => $this->customer_id, 'first_name' => $this->posted['billing_first_name'], 'display_name' => $this->posted['billing_first_name'] ) );
+                		wp_update_user( array ( 'ID' => $this->customer_id, 'first_name' => $this->posted['billing_first_name'] ) );
 
                 	if ( $this->posted['billing_last_name'] && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) )
                 		wp_update_user( array ( 'ID' => $this->customer_id, 'last_name' => $this->posted['billing_last_name'] ) ) ;
+
+                	if ( $this->posted['billing_first_name'] && $this->posted['billing_last_name'] && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ))
+                		wp_update_user( array ( 'ID' => $this->customer_id, 'display_name' => sprintf( _x( '%1$s', 'Display name based on first name(%1$s) and last name(%2$s)', 'woocommerce' ), $this->posted['billing_first_name'], $this->posted['billing_last_name'] ) ) );
 				}
 
 				// Do a final stock check at this point
