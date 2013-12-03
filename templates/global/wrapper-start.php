@@ -21,6 +21,9 @@ switch( $template ) {
 	case 'twentythirteen' :
 		echo '<div id="primary" class="site-content"><div id="content" role="main" class="entry-content twentythirteen">';
 		break;
+	case 'twentyfourteen' :
+		echo '<div id="primary" class="content-area"><div id="content" role="main" class="site-content twentyfourteen"><div class="tfwc">';
+		break;
 	default :
 		echo '<div id="container"><div id="content" role="main">';
 		break;

@@ -284,7 +284,7 @@ if ( class_exists( 'WP_Importer' ) ) {
 			echo '<div class="narrow">';
 			echo '<p>' . __( 'Hi there! Upload a CSV file containing tax rates to import the contents into your shop. Choose a .csv file to upload, then click "Upload file and import".', 'woocommerce' ).'</p>';
 
-			echo '<p>' . sprintf( __( 'Tax rates need to be defined with columns in a specific order (10 columns). <a href="%s">Click here to download a sample</a>.', 'woocommerce' ), WC()->plugin_url() . '/includes/admin/importers/samples/sample_tax_rates.csv' ) . '</p>';
+			echo '<p>' . sprintf( __( 'Tax rates need to be defined with columns in a specific order (10 columns). <a href="%s">Click here to download a sample</a>.', 'woocommerce' ), WC()->plugin_url() . '/dummy-data/sample_tax_rates.csv' ) . '</p>';
 
 			$action = 'admin.php?import=woocommerce_tax_rate_csv&step=1';
 

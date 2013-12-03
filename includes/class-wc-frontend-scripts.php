@@ -119,7 +119,8 @@ class WC_Frontend_Scripts {
 			'option_guest_checkout'     => get_option( 'woocommerce_enable_guest_checkout' ),
 			'checkout_url'              => add_query_arg( 'action', 'woocommerce_checkout', WC()->ajax_url() ),
 			'is_checkout'               => is_page( wc_get_page_id( 'checkout' ) ) && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ? 1 : 0,
-			'locale'                    => json_encode( WC()->countries->get_country_locale() )
+			'locale'                    => json_encode( WC()->countries->get_country_locale() ),
+			'locale_fields'             => json_encode( WC()->countries->get_country_locale_field_selectors() )
 		) ) );
 
 		wp_localize_script( 'wc-cart', 'wc_cart_params', apply_filters( 'wc_cart_params', array(

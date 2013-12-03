@@ -366,13 +366,7 @@ jQuery(document).ready(function($) {
 		}
 
 		// Handle locale fields
-		var locale_fields = {
-			'address_1'	: 	'#billing_address_1_field, #shipping_address_1_field',
-			'address_2'	: 	'#billing_address_2_field, #shipping_address_2_field',
-			'state'		: 	'#billing_state_field, #shipping_state_field',
-			'postcode'	:	'#billing_postcode_field, #shipping_postcode_field',
-			'city'		: 	'#billing_city_field, #shipping_city_field'
-		};
+		var locale_fields = $.parseJSON( wc_checkout_params.locale_fields );
 
 		$.each( locale_fields, function( key, value ) {
 
@@ -408,8 +402,12 @@ jQuery(document).ready(function($) {
 				if ( locale['default'][key]['required'] == true ) {
 					if (field.find('label abbr').size()==0) field.find('label').append( required );
 				}
-				if ( key !== 'state' && (typeof locale['default'][key]['hidden'] == 'undefined' || locale['default'][key]['hidden'] == false) ) {
-					field.show();
+				if ( key !== 'state' ) {
+					if ( typeof locale['default'][key]['hidden'] == 'undefined' || locale['default'][key]['hidden'] == false ) {
+						field.show();
+					} else if ( locale['default'][key]['hidden'] == true ) {
+						field.hide().find('input').val('');
+					}
 				}
 			}
 

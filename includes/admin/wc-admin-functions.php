@@ -69,8 +69,8 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
     if ( $page_found ) {
         if ( ! $option_value )
             update_option( $option, $page_found );
-		/** @todo [tivnet] return some int value here */
-		return;
+		
+		return $page_found;
     }
 
     $page_data = array(

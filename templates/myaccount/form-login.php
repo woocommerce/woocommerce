@@ -47,7 +47,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 				</label>
 			</p>
 			<p class="lost_password">
-				<a href="<?php echo esc_url( wc_get_endpoint_url( 'lost-password', '', get_permalink( wc_get_page_id( 'myaccount' ) ) ) ); ?>"><?php _e( 'Lost your password?', 'woocommerce' ); ?></a>
+				<a href="<?php echo esc_url( wc_lostpassword_url() ); ?>"><?php _e( 'Lost your password?', 'woocommerce' ); ?></a>
 			</p>
 
 			<?php do_action( 'woocommerce_login_form_end' ); ?>

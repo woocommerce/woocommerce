@@ -212,8 +212,13 @@ class WC_Product_Variable extends WC_Product {
 		
 		if ( $display ) {
 			$variation        = $this->get_child( $variation_id );
-			$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
-			$price            = $tax_display_mode == 'incl' ? $variation->get_price_including_tax() : $variation->get_price_excluding_tax();
+
+			if ( $variation ) {
+				$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
+				$price            = $tax_display_mode == 'incl' ? $variation->get_price_including_tax() : $variation->get_price_excluding_tax();
+			} else {
+				$price = '';
+			}
 		} else {
 			$price = get_post_meta( $variation_id, '_price', true );
 		}

@@ -5,8 +5,8 @@ jQuery(document).ready(function($) {
 	$('.price_slider, .price_label').show();
 
 	// Price slider uses jquery ui
-	var min_price = $('.price_slider_amount #min_price').attr('data-min');
-	var max_price = $('.price_slider_amount #max_price').attr('data-max');
+	var min_price = $('.price_slider_amount #min_price').data('min');
+	var max_price = $('.price_slider_amount #max_price').data('max');
 
 	current_min_price = parseInt(min_price);
 	current_max_price = parseInt(max_price);

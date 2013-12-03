@@ -85,7 +85,10 @@ global $woocommerce;
 
 		<div class="form-row">
 			<?php wp_nonce_field( 'woocommerce-pay')?>
-			<input type="submit" class="button alt" id="place_order" value="<?php _e( 'Pay for order', 'woocommerce' ); ?>" />
+			<?php
+				$pay_order_button_text = apply_filters('woocommerce_pay_order_button_text', __( 'Pay for order', 'woocommerce' ));
+				echo apply_filters('woocommerce_pay_order_button_html', '<input type="submit" class="button alt" id="place_order" value="' . esc_attr( $pay_order_button_text ) . '" />' );
+			?>			
 			<input type="hidden" name="woocommerce_pay" value="1" />
 		</div>
 

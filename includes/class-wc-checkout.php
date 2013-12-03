@@ -627,11 +627,15 @@ class WC_Checkout {
                 	WC()->session->set( 'reload_checkout', true );
 
                 	// Add customer info from other billing fields
-                	if ( $this->posted['billing_first_name'] && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) )
-                		wp_update_user( array ( 'ID' => $this->customer_id, 'first_name' => $this->posted['billing_first_name'], 'display_name' => $this->posted['billing_first_name'] ) );
-
-                	if ( $this->posted['billing_last_name'] && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) )
-                		wp_update_user( array ( 'ID' => $this->customer_id, 'last_name' => $this->posted['billing_last_name'] ) ) ;
+                	if ( $this->posted['billing_first_name'] && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) ) {
+                		$userdata = array( 
+							'ID'           => $this->customer_id, 
+							'first_name'   => $this->posted['billing_first_name'] ? $this->posted['billing_first_name'] : '', 
+							'last_name'    => $this->posted['billing_last_name'] ? $this->posted['billing_last_name'] : '',
+							'display_name' => $this->posted['billing_first_name'] ? $this->posted['billing_first_name'] : ''
+                		);
+                		wp_update_user( apply_filters( 'woocommerce_checkout_customer_userdata', $userdata, $this ) );
+                	}
 				}
 
 				// Do a final stock check at this point
@@ -657,7 +661,7 @@ class WC_Checkout {
 					// Redirect to success/confirmation/payment page
 					if ( $result['result'] == 'success' ) {
 
-						$result = apply_filters('woocommerce_payment_successful_result', $result );
+						$result = apply_filters( 'woocommerce_payment_successful_result', $result );
 
 						if ( is_ajax() ) {
 							echo '<!--WC_START-->' . json_encode( $result ) . '<!--WC_END-->';

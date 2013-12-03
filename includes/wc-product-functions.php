@@ -305,9 +305,6 @@ function wc_placeholder_img( $size = 'shop_thumbnail' ) {
  * @return string
  */
 function wc_get_formatted_variation( $variation = '', $flat = false ) {
-	/** @todo [tivnet] Remove */
-	global $woocommerce;
-
 	if ( is_array( $variation ) ) {
 
 		if ( ! $flat )
@@ -345,7 +342,8 @@ function wc_get_formatted_variation( $variation = '', $flat = false ) {
 
 		return $return;
 	}
-	/** @todo [tivnet] return ''; */
+	
+	return '';
 }
 
 /**
@@ -355,8 +353,7 @@ function wc_get_formatted_variation( $variation = '', $flat = false ) {
  * @return void
  */
 function wc_scheduled_sales() {
-	/** @todo [tivnet] Remove $woocommerce */
-	global $woocommerce, $wpdb;
+	global $wpdb;
 
 	// Sales which are due to start
 	$product_ids = $wpdb->get_col( $wpdb->prepare( "
@@ -453,7 +450,6 @@ add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
  * @return array
  */
 function wc_get_attachment_image_attributes( $attr ) {
-	/** @todo [tivnet] if(empty($attr['src'])) should cause the same. Even if that's impossible  */
 	if ( strstr( $attr['src'], 'woocommerce_uploads/' ) )
 		$attr['src'] = wc_placeholder_img_src();
 
