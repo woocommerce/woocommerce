@@ -548,7 +548,8 @@ class WC_Cart {
 
 				return ob_get_clean();
 			}
-			/** @todo [tivnet] return ''; */
+
+			return '';
 		}
 
 		/**
@@ -581,7 +582,7 @@ class WC_Cart {
 			if ( $cart_page_id )
 				return apply_filters( 'woocommerce_get_cart_url', get_permalink( $cart_page_id ) );
 
-			/** @todo [tivnet] return ''; Meaning of this: no cart page ? */
+			return '';
 		}
 
 		/**
@@ -700,12 +701,12 @@ class WC_Cart {
 	     */
 	    public function find_product_in_cart( $cart_id = false ) {
 	        if ( $cart_id !== false )
-	        	if( is_array( $this->cart_contents ) )
+	        	if ( is_array( $this->cart_contents ) )
 	        		foreach ( $this->cart_contents as $cart_item_key => $cart_item )
 	        			if ( $cart_item_key == $cart_id )
 	        				return $cart_item_key;
 
-			/** @todo [tivnet] return ''; Meaning of this? Depends on which "if" fired. */
+			return '';
 		}
 
 		/**
@@ -716,15 +717,14 @@ class WC_Cart {
 	     * @param array $variation data for the cart item
 	     * @param array $cart_item_data other cart item data passed which affects this items uniqueness in the cart
 	     * @return string cart item key
-		 * @todo [tivnet] Default values have wrong types. Consider $variation_id = 0, $variation = array()
 	     */
-	    public function generate_cart_id( $product_id, $variation_id = '', $variation = '', $cart_item_data = array() ) {
+	    public function generate_cart_id( $product_id, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
 	        $id_parts = array( $product_id );
 
-	        if ( $variation_id )
+	        if ( $variation_id && 0 != $variation_id )
 	        	$id_parts[] = $variation_id;
 
-	        if ( is_array( $variation ) ) {
+	        if ( is_array( $variation ) && ! empty( $variation ) ) {
 	            $variation_key = '';
 	            foreach ( $variation as $key => $value ) {
 	                $variation_key .= trim( $key ) . trim( $value );
@@ -1366,7 +1366,6 @@ class WC_Cart {
 						$return = wc_price( $this->shipping_total );
 
 						if ( $this->shipping_tax_total > 0 && $this->prices_include_tax ) {
-							/** @todo [tivnet] Small or not is for theme. Consider <span class="..."> ? */
 							$return .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
 						}
 
@@ -1377,7 +1376,6 @@ class WC_Cart {
 						$return = wc_price( $this->shipping_total + $this->shipping_tax_total );
 
 						if ( $this->shipping_tax_total > 0 && ! $this->prices_include_tax ) {
-							/** @todo [tivnet] Small or not is for theme. Consider <span class="..."> ? */
 							$return .= ' <small>' . WC()->countries->inc_tax_or_vat() . '</small>';
 						}
 
@@ -1390,7 +1388,7 @@ class WC_Cart {
 				}
 			}
 
-			/** @todo [tivnet] return ''; Meaning of this? */
+			return '';
 		}
 
     /*-----------------------------------------------------------------------------------*/

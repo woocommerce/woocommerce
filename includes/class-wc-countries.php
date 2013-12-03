@@ -548,9 +548,7 @@ class WC_Countries {
 	 * @return array of states
 	 */
 	public function get_states( $cc ) {
-		if (isset( $this->states[$cc] )) return $this->states[$cc];
-
-		/** @todo [tivnet] Else return array(); ??? */
+		return ( isset( $this->states[ $cc ] ) ) ? $this->states[ $cc ] : array();
 	}
 
 
