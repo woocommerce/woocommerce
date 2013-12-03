@@ -32,8 +32,21 @@ foreach ( $items as $item ) :
 	echo "\n" . sprintf( __( 'Cost: %s', 'woocommerce' ), $order->get_formatted_line_subtotal( $item ) );
 
 	// Download URLs
-	if ( $show_download_links && $_product->exists() && $_product->is_downloadable() )
-		echo "\n" . implode( "\n", $order->get_downloadable_file_urls( $item['product_id'], $item['variation_id'], $item ) );
+	if ( $show_download_links && $_product->exists() && $_product->is_downloadable() ) { 
+		$download_files = $order->get_item_downloads( $item );
+		$i              = 0;
+
+		foreach ( $download_files as $download_id => $file ) {
+			$i++;
+
+			if ( count( $download_files ) > 1 ) {
+				$prefix = sprintf( __( 'Download %d', 'woocommerce' ), $i );
+			} elseif ( $i == 1 )
+				$prefix = __( 'Download', 'woocommerce' );
+
+			echo "\n" . $prefix . '(' . esc_html( $file['name'] ) . '): ' . esc_url( $file['download_url'] );
+		}
+	}
 
 	// Note
 	if ( $show_purchase_note && $purchase_note = get_post_meta( $_product->id, '_purchase_note', true ) )

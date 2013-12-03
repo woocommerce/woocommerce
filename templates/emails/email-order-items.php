@@ -39,11 +39,11 @@ foreach ( $items as $item ) :
 					$i++;
 
 					if ( count( $download_files ) > 1 ) {
-						$prefix = sprintf( __( 'Download %d:', 'woocommerce' ), $i );
+						$prefix = sprintf( __( 'Download %d', 'woocommerce' ), $i );
 					} elseif ( $i == 1 )
-						$prefix = __( 'Download:', 'woocommerce' );
+						$prefix = __( 'Download', 'woocommerce' );
 
-					echo '<br/><small>' . $prefix . ' <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a></small>';
+					echo '<br/><small>' . $prefix . ': <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a></small>';
 				}
 			}
 
