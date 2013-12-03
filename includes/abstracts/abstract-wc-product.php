@@ -682,6 +682,7 @@ class WC_Product {
 	 */
 	public function get_weight() {
 		if ( $this->weight ) return $this->weight;
+		/** @todo [tivnet] else return ''; ? */
 	}
 
 	/**

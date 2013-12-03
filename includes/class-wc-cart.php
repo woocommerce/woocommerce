@@ -548,6 +548,7 @@ class WC_Cart {
 
 				return ob_get_clean();
 			}
+			/** @todo [tivnet] return ''; */
 		}
 
 		/**
@@ -579,6 +580,8 @@ class WC_Cart {
 			$cart_page_id = wc_get_page_id('cart');
 			if ( $cart_page_id )
 				return apply_filters( 'woocommerce_get_cart_url', get_permalink( $cart_page_id ) );
+
+			/** @todo [tivnet] return ''; Meaning of this: no cart page ? */
 		}
 
 		/**
@@ -701,7 +704,9 @@ class WC_Cart {
 	        		foreach ( $this->cart_contents as $cart_item_key => $cart_item )
 	        			if ( $cart_item_key == $cart_id )
 	        				return $cart_item_key;
-	    }
+
+			/** @todo [tivnet] return ''; Meaning of this? Depends on which "if" fired. */
+		}
 
 		/**
 	     * Generate a unique ID for the cart item being added.
@@ -711,6 +716,7 @@ class WC_Cart {
 	     * @param array $variation data for the cart item
 	     * @param array $cart_item_data other cart item data passed which affects this items uniqueness in the cart
 	     * @return string cart item key
+		 * @todo [tivnet] Default values have wrong types. Consider $variation_id = 0, $variation = array()
 	     */
 	    public function generate_cart_id( $product_id, $variation_id = '', $variation = '', $cart_item_data = array() ) {
 	        $id_parts = array( $product_id );
@@ -1348,7 +1354,7 @@ class WC_Cart {
 		/**
 		 * Gets the shipping total (after calculation).
 		 *
-		 * @return mixed price or string for the shipping total
+		 * @return string price or string for the shipping total
 		 */
 		public function get_cart_shipping_total() {
 			if ( isset( $this->shipping_total ) ) {
@@ -1360,6 +1366,7 @@ class WC_Cart {
 						$return = wc_price( $this->shipping_total );
 
 						if ( $this->shipping_tax_total > 0 && $this->prices_include_tax ) {
+							/** @todo [tivnet] Small or not is for theme. Consider <span class="..."> ? */
 							$return .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
 						}
 
@@ -1370,6 +1377,7 @@ class WC_Cart {
 						$return = wc_price( $this->shipping_total + $this->shipping_tax_total );
 
 						if ( $this->shipping_tax_total > 0 && ! $this->prices_include_tax ) {
+							/** @todo [tivnet] Small or not is for theme. Consider <span class="..."> ? */
 							$return .= ' <small>' . WC()->countries->inc_tax_or_vat() . '</small>';
 						}
 
@@ -1381,6 +1389,8 @@ class WC_Cart {
 					return __( 'Free!', 'woocommerce' );
 				}
 			}
+
+			/** @todo [tivnet] return ''; Meaning of this? */
 		}
 
     /*-----------------------------------------------------------------------------------*/

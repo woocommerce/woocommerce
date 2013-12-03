@@ -544,11 +544,13 @@ class WC_Countries {
 	 * Get the states for a country.
 	 *
 	 * @access public
-	 * @param mixed $cc country code
+	 * @param string $cc country code
 	 * @return array of states
 	 */
 	public function get_states( $cc ) {
 		if (isset( $this->states[$cc] )) return $this->states[$cc];
+
+		/** @todo [tivnet] Else return array(); ??? */
 	}
 
 
