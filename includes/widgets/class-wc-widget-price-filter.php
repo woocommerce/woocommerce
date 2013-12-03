@@ -92,6 +92,15 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		$post_min = $post_max = '';
 
 		if ( sizeof( WC()->query->layered_nav_product_ids ) === 0 ) {
+			$min = floor( $wpdb->get_var(
+				$wpdb->prepare('
+					SELECT min(meta_value + 0)
+					FROM %1$s
+					LEFT JOIN %2$s ON %1$s.ID = %2$s.post_id
+					WHERE ( meta_key = \'%3$s\' OR meta_key = \'%4$s\' ) 
+					AND meta_value != ""
+				', $wpdb->posts, $wpdb->postmeta, '_price', '_min_variation_price' )
+			) );
 			$max = ceil( $wpdb->get_var(
 				$wpdb->prepare('
 					SELECT max(meta_value + 0)
@@ -101,6 +110,22 @@ class WC_Widget_Price_Filter extends WC_Widget {
 				', $wpdb->posts, $wpdb->postmeta, '_price' )
 			) );
 		} else {
+			$min = floor( $wpdb->get_var(
+				$wpdb->prepare('
+					SELECT min(meta_value + 0)
+					FROM %1$s
+					LEFT JOIN %2$s ON %1$s.ID = %2$s.post_id
+					WHERE ( meta_key =\'%3$s\' OR meta_key =\'%4$s\' ) 
+					AND meta_value != ""
+					AND (
+						%1$s.ID IN (' . implode( ',', array_map( 'absint', WC()->query->layered_nav_product_ids ) ) . ')
+						OR (
+							%1$s.post_parent IN (' . implode( ',', array_map( 'absint', WC()->query->layered_nav_product_ids ) ) . ')
+							AND %1$s.post_parent != 0
+						)
+					)
+				', $wpdb->posts, $wpdb->postmeta, '_price', '_min_variation_price'
+			) ) );
 			$max = ceil( $wpdb->get_var(
 				$wpdb->prepare('
 					SELECT max(meta_value + 0)
@@ -108,13 +133,13 @@ class WC_Widget_Price_Filter extends WC_Widget {
 					LEFT JOIN %2$s ON %1$s.ID = %2$s.post_id
 					WHERE meta_key =\'%3$s\'
 					AND (
-						%1$s.ID IN (%4$s)
+						%1$s.ID IN (' . implode( ',', array_map( 'absint', WC()->query->layered_nav_product_ids ) ) . ')
 						OR (
-							%1$s.post_parent IN (%4$s)
+							%1$s.post_parent IN (' . implode( ',', array_map( 'absint', WC()->query->layered_nav_product_ids ) ) . ')
 							AND %1$s.post_parent != 0
 						)
 					)
-				', $wpdb->posts, $wpdb->postmeta, '_price', implode( ',', WC()->query->layered_nav_product_ids )
+				', $wpdb->posts, $wpdb->postmeta, '_price'
 			) ) );
 		}
 
@@ -132,8 +157,8 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			<div class="price_slider_wrapper">
 				<div class="price_slider" style="display:none;"></div>
 				<div class="price_slider_amount">
-					<input type="text" id="min_price" name="min_price" value="'.esc_attr( $min_price ).'" data-min="'.esc_attr( $min ).'" placeholder="'.__('Min price', 'woocommerce' ).'" />
-					<input type="text" id="max_price" name="max_price" value="'.esc_attr( $max_price ).'" data-max="'.esc_attr( $max ).'" placeholder="'.__( 'Max price', 'woocommerce' ).'" />
+					<input type="text" id="min_price" name="min_price" value="' . esc_attr( $min_price ) . '" data-min="'.esc_attr( $min ).'" placeholder="'.__('Min price', 'woocommerce' ).'" />
+					<input type="text" id="max_price" name="max_price" value="' . esc_attr( $max_price ) . '" data-max="'.esc_attr( $max ).'" placeholder="'.__( 'Max price', 'woocommerce' ).'" />
 					<button type="submit" class="button">'.__( 'Filter', 'woocommerce' ).'</button>
 					<div class="price_label" style="display:none;">
 						'.__( 'Price:', 'woocommerce' ).' <span class="from"></span> &mdash; <span class="to"></span>
