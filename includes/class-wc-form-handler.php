@@ -446,18 +446,15 @@ class WC_Form_Handler {
 	 * Cancel a pending order.
 	 */
 	public function cancel_order() {
+		if ( isset( $_GET['cancel_order'] ) && isset( $_GET['order'] ) && isset( $_GET['order_id'] ) ) {
 
+			$order_key        = urldecode( $_GET['order'] );
+			$order_id         = absint( $_GET['order_id'] );
+			$order            = new WC_Order( $order_id );
+			$user_can_cancel  = current_user_can( 'cancel_order', $order_id );
+			$order_can_cancel = in_array( $order->status, apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ) ) );
 
-		if ( isset($_GET['cancel_order']) && isset($_GET['order']) && isset($_GET['order_id']) ) :
-
-			$order_key = urldecode( $_GET['order'] );
-			$order_id = (int) $_GET['order_id'];
-
-			$order = new WC_Order( $order_id );
-
-			$can_cancel = current_user_can( 'cancel_order', $order_id );
-
-			if ( $can_cancel && $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, array( 'pending', 'failed' ) ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) ) :
+			if ( $user_can_cancel && $order_can_cancel && $order->id == $order_id && $order->order_key == $order_key && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) ) {
 
 				// Cancel the order + restore stock
 				$order->cancel_order( __('Order cancelled by customer.', 'woocommerce' ) );
@@ -467,20 +464,15 @@ class WC_Form_Handler {
 
 				do_action( 'woocommerce_cancelled_order', $order->id );
 
-			elseif ( $can_cancel && $order->status != 'pending' ) :
-
-				wc_add_notice( __( 'Your order is no longer pending and could not be cancelled. Please contact us if you need assistance.', 'woocommerce' ), 'error' );
-
-			else :
-
+			} elseif ( $user_can_cancel && ! $order_can_cancel ) {
+				wc_add_notice( __( 'Your order can no longer be cancelled. Please contact us if you need assistance.', 'woocommerce' ), 'error' );
+			} else {
 				wc_add_notice( __( 'Invalid order.', 'woocommerce' ), 'error' );
-
-			endif;
+			}
 
 			wp_safe_redirect( get_permalink( wc_get_page_id( 'myaccount' ) ) );
 			exit;
-
-		endif;
+		}
 	}
 
 	/**
