@@ -104,6 +104,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'highlight_series' => 4
 		);
 		$legend[] = array(
+			/** @todo [tivnet] $total_coupons is array. wc_price expects float */
 			'title' => sprintf( __( '%s worth of coupons used', 'woocommerce' ), '<strong>' . wc_price( $total_coupons ) . '</strong>' ),
 			'color' => $this->chart_colours['coupon_amount'],
 			'highlight_series' => 3

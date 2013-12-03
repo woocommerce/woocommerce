@@ -34,12 +34,14 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 		unset( $args['orderby'] );
 		unset( $args['fields'] );
 	}
+	/** @todo [tivnet] Here $fields can be undefined, but it's used later in switch */
 
 	$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
 
 	if ( ! empty( $orderby_parent ) ) {
 		usort( $terms, '_wc_get_product_terms_parent_usort_callback' );
 
+		/** @todo [tivnet] cases should have breaks */
 		switch ( $fields ) {
 			case 'names' :
 				$terms = wp_list_pluck( $terms, 'name' );

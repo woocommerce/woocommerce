@@ -129,6 +129,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 
 			$found = false;
 
+			/** @todo [tivnet] if $this->enable_for_methods is an array then $this->get_option should return arrays. Can it return arrays? If yes, need to fix @return there  */
 			foreach ( $this->enable_for_methods as $method_id ) {
 				if ( strpos( $check_method, $method_id ) === 0 ) {
 					$found = true;

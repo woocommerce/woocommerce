@@ -79,6 +79,7 @@ function wc_setup_product_data( $post ) {
 		$post = get_post( $post );
 
 	if ( empty( $post->post_type ) || ! in_array( $post->post_type, array( 'product', 'product_variation' ) ) )
+		/** @todo [tivnet] void return is inconsistent */
 		return;
 
 	$GLOBALS['product'] = get_product( $post );
@@ -386,6 +387,7 @@ if ( ! function_exists( 'woocommerce_page_title' ) ) {
 
 		if ( $echo )
 	    	echo $page_title;
+		/** @todo [tivnet] Do not need "else" in these if(echo) constructions. Return anyway, but echo only if requested */
 	    else
 	    	return $page_title;
 	}
@@ -600,6 +602,7 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 			return get_the_post_thumbnail( $post->ID, $size );
 		elseif ( wc_placeholder_img_src() )
 			return wc_placeholder_img( $size );
+		/** @todo [tivnet] else return ''; ??? */
 	}
 }
 
@@ -1341,6 +1344,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 	 * @subpackage	Loop
 	 * @param array $args
 	 * @return bool
+	 * @todo [tivnet] Mix of bool|void returns. Needs refactoring.
 	 */
 	function woocommerce_product_subcategories( $args = array() ) {
 		global $wp_query;

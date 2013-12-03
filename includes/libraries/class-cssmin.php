@@ -2386,7 +2386,8 @@ class CssImportImportsMinifierFilter extends aCssMinifierFilter
 									{
 									$import[$ii]->MediaTypes = $tokens[$i]->MediaTypes;
 									}
-								// @import at-rule defineds one or more media types; filter out media types not matching with the  parent @import at-rule
+								// @import at-rule defines one or more media types; filter out media types not matching with the  parent @import at-rule
+								/** @todo [tivnet] > 0 is inside brackets !!! */
 								elseif (count($import[$ii]->MediaTypes > 0))
 									{
 									foreach ($import[$ii]->MediaTypes as $index => $mediaType)

@@ -370,7 +370,7 @@ class WC_Product {
 	 * get_children function.
 	 *
 	 * @access public
-	 * @return bool
+	 * @return array
 	 */
 	public function get_children() {
 		return array();
@@ -780,6 +780,7 @@ class WC_Product {
 				$tax_rates  = $_tax->get_rates( $this->get_tax_class() );
 				$taxes      = $_tax->calc_tax( $price * $qty, $tax_rates, false );
 				$tax_amount = $_tax->get_tax_total( $taxes );
+				/** @todo [tivnet] Dangerous mix of string, int and float vars in expression */
 				$price      = round( $price * $qty + $tax_amount, absint( get_option( 'woocommerce_price_num_decimals' ) ) );
 
 			} else {
@@ -797,6 +798,7 @@ class WC_Product {
 
 					$base_taxes			= $_tax->calc_tax( $price * $qty, $base_tax_rates, true );
 					$modded_taxes		= $_tax->calc_tax( ( $price * $qty ) - array_sum( $base_taxes ), $tax_rates, false );
+					/** @todo [tivnet] $price is a string. Should cast to float here and in other similar places ??? */
 					$price      		= round( ( $price * $qty ) - array_sum( $base_taxes ) + array_sum( $modded_taxes ), absint( get_option( 'woocommerce_price_num_decimals' ) ) );
 
 				} else {

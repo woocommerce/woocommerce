@@ -89,6 +89,7 @@ function woocommerce_empty_cart() {
 	wc_empty_cart();
 }
 function woocommerce_load_persistent_cart( $user_login, $user = 0 ) {
+	/** @todo [tivnet] returning void */
 	return wc_load_persistent_cart( $user_login, $user );
 }
 function woocommerce_add_to_cart_message( $product_id ) {
@@ -342,6 +343,7 @@ function woocommerce_walk_category_dropdown_tree() {
 	return wc_walk_category_dropdown_tree();
 }
 function woocommerce_taxonomy_metadata_wpdbfix() {
+	/** @todo [tivnet] returning void */
 	return wc_taxonomy_metadata_wpdbfix();
 }
 function woocommerce_order_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = null ) {
@@ -354,9 +356,11 @@ function woocommerce_terms_clauses( $clauses, $taxonomies, $args ) {
 	return wc_terms_clauses( $clauses, $taxonomies, $args );
 }
 function _woocommerce_term_recount( $terms, $taxonomy, $callback, $terms_are_term_taxonomy_ids ) {
+	/** @todo [tivnet] returning void */
 	return _wc_term_recount( $terms, $taxonomy, $callback, $terms_are_term_taxonomy_ids );
 }
 function woocommerce_recount_after_stock_change( $product_id ) {
+	/** @todo [tivnet] returning void */
 	return wc_recount_after_stock_change( $product_id );
 }
 function woocommerce_change_term_counts( $terms, $taxonomies, $args ) {
@@ -388,6 +392,7 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
 	return wc_get_formatted_variation( $variation, $flat );
 }
 function woocommerce_scheduled_sales() {
+	/** @todo [tivnet] returning void */
 	return wc_scheduled_sales();
 }
 function woocommerce_get_attachment_image_attributes( $attr ) {
@@ -397,5 +402,6 @@ function woocommerce_prepare_attachment_for_js( $response ) {
 	return wc_prepare_attachment_for_js( $response );
 }
 function woocommerce_track_product_view() {
+	/** @todo [tivnet] returning void */
 	return wc_track_product_view();
 }

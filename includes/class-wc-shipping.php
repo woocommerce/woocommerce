@@ -96,12 +96,11 @@ class WC_Shipping {
 
 	/**
 	 * load_shipping_methods function.
-	 *
 	 * Loads all shipping methods which are hooked in. If a $package is passed some methods may add themselves conditionally.
-	 *
 	 * Methods are sorted into their user-defined order after being loaded.
-	 *
 	 * @access public
+	 * @todo [tivnet] Is $package array? Then default should not be boolean false.
+	 * @param array|bool $package
 	 * @return array
 	 */
 	public function load_shipping_methods( $package = false ) {
