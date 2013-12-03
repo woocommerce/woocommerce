@@ -36,9 +36,7 @@ abstract class WC_Settings_API {
 
   /** Allow getting private variables **/
   public function __get($name) {
-    // For now, only return form_fields
-    if ($name == 'form_fields')
-      return $this->{$name};
+    return $this->{$name};
   }
 
 	/**
