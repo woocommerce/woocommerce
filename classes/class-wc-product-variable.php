@@ -210,9 +210,10 @@ class WC_Product_Variable extends WC_Product {
 		if ( $this->has_child() ) {
 
 			foreach ( $this->get_children() as $child_id ) {
-				$sale_price = get_post_meta( $child_id, '_sale_price', true );
-				if ( $sale_price !== "" && $sale_price >= 0 )
-					return true;
+				$price      = get_post_meta( $child_id, '_price', true );
+                $sale_price = get_post_meta( $child_id, '_sale_price', true );
+                if ( $sale_price !== "" && $sale_price >= 0 && $sale_price == $price )
+                        return true;
 			}
 
 		} else {
