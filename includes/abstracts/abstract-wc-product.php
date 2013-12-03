@@ -681,7 +681,7 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_weight() {
-		return ( $this->weight ) ? return $this->weight : '';
+		return ( $this->weight ) ? $this->weight : '';
 	}
 
 	/**
