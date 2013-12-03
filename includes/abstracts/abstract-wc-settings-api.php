@@ -17,13 +17,29 @@ abstract class WC_Settings_API {
 	public $settings = array();
 
 	/** @var array Array of form option fields. */
-	public $form_fields = array();
+	private $form_fields = array();
 
 	/** @var array Array of validation errors. */
 	public $errors = array();
 
 	/** @var array Sanitized fields after validation. */
 	public $sanitized_fields = array();
+
+  /** Private property setting override **/
+  public function __set($name, $value) {
+    // Allow filtering form_fields being set
+    if ($name == 'form_fields') {
+      $value = apply_filters( $this->plugin_id . $this->id . '_form_fields', $value );
+    }
+    $this->{$name} = $value;
+  }
+
+  /** Allow getting private variables **/
+  public function __get($name) {
+    // For now, only return form_fields
+    if ($name == 'form_fields')
+      return $this->{$name};
+  }
 
 	/**
 	 * Admin Options
