@@ -774,12 +774,12 @@ class WC_Countries {
 	}
 
 	/**
-	 * Get locale fields
+	 * Get JS selectors for fields which are shown/hidden depending on the locale.
 	 *
 	 * @access public
 	 * @return array
 	 */
-	public function get_locale_fields() {
+	public function get_country_locale_field_selectors() {
 		$locale_fields = array (
 			'address_1'	=> '#billing_address_1_field, #shipping_address_1_field',
 			'address_2'	=> '#billing_address_2_field, #shipping_address_2_field',
@@ -788,7 +788,7 @@ class WC_Countries {
 			'city'		=> '#billing_city_field, #shipping_city_field'
 		);
 		
-		return apply_filters( 'woocommerce_locale_fields', $locale_fields );
+		return apply_filters( 'woocommerce_country_locale_field_selectors', $locale_fields );
 	}
 
 	/**
