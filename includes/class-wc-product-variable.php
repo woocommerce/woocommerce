@@ -240,48 +240,24 @@ class WC_Product_Variable extends WC_Product {
 			$this->variable_product_sync( $this->id );
 
 		// Get the price
-		if ( $this->get_price() > 0 ) {
-
-			// Only show 'from' if the min price varies from the max price
-			if ( $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ) )
-				$price .= $this->get_price_html_from_text();
-
-			if ( $this->get_variation_regular_price( 'min' ) !== $this->get_variation_price( 'min' ) ) {
-
-				$price .= $this->get_price_html_from_to( $this->get_variation_regular_price( 'min', true ), $this->get_variation_price( 'min', true ) ) . $this->get_price_suffix();
-
-				$price = apply_filters( 'woocommerce_variable_sale_price_html', $price, $this );
-
-			} else {
-
-				$price .= wc_price( $this->get_variation_price( 'min', true ) ) . $this->get_price_suffix();
-
-				$price = apply_filters('woocommerce_variable_price_html', $price, $this);
-
-			}
-
-		} elseif ( $this->get_price() === '' ) {
+		if ( $this->get_price() === '' ) {
 
 			$price = apply_filters( 'woocommerce_variable_empty_price_html', '', $this );
 
-		} elseif ( $this->get_price() == 0 ) {
+		} else {
 
-			// Only show 'from' if the min price varies from the max price
-			if ( $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ) )
-				$price .= $this->get_price_html_from_text();
+			$from  = wc_price( $this->get_variation_price( 'min', true ) );
+			$to    = wc_price( $this->get_variation_price( 'max', true ) );
+			$price = $from !== $to ? sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), $from, $to ) : $from;
 
-			if ( $this->get_variation_regular_price( 'min' ) > 0 ) {
+			$from  = wc_price( $this->get_variation_regular_price( 'min', true ) );
+			$to    = wc_price( $this->get_variation_regular_price( 'max', true ) );
+			$saleprice = $from !== $to ? sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), $from, $to ) : $from;
 
-				$price .= $this->get_price_html_from_to( $this->get_variation_regular_price( 'min', true ), __( 'Free!', 'woocommerce' ) );
-
-				$price = apply_filters( 'woocommerce_variable_free_sale_price_html', $price, $this );
-
+			if ( $price !== $saleprice ) {
+				$price = apply_filters( 'woocommerce_variable_sale_price_html', $this->get_price_html_from_to( $saleprice, $price ) . $this->get_price_suffix(), $this );
 			} else {
-
-				$price .= __( 'Free!', 'woocommerce' );
-
-				$price = apply_filters( 'woocommerce_variable_free_price_html', $price, $this );
-
+				$price = apply_filters( 'woocommerce_variable_price_html', $price . $this->get_price_suffix(), $this );
 			}
 
 		}
