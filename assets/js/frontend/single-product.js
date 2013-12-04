@@ -1,5 +1,9 @@
 jQuery(document).ready(function($) {
 
+	// wc_single_product_params is required to continue, ensure the object exists
+	if (typeof wc_single_product_params === "undefined")
+		return false;
+
 	// Tabs
 	$('.woocommerce-tabs .panel').hide();
 

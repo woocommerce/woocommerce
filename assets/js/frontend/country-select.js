@@ -1,5 +1,9 @@
 jQuery(document).ready(function($) {
 
+	// wc_country_select_params is required to continue, ensure the object exists
+	if (typeof wc_country_select_params === "undefined")
+		return false;
+
 	/* State/Country select boxes */
 	var states_json = wc_country_select_params.countries.replace(/&quot;/g, '"');
 	var states = $.parseJSON( states_json );

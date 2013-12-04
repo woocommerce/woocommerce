@@ -1,5 +1,9 @@
 jQuery(document).ready(function($) {
 
+	// woocommerce_price_slider_params is required to continue, ensure the object exists
+	if (typeof woocommerce_price_slider_params === "undefined")
+		return false;
+
 	// Get markup ready for slider
 	$('input#min_price, input#max_price').hide();
 	$('.price_slider, .price_label').show();

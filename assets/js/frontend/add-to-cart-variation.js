@@ -415,6 +415,11 @@
     };
 
     $(function() {
+
+		// wc_add_to_cart_variation_params is required to continue, ensure the object exists
+		if (typeof wc_add_to_cart_variation_params === "undefined")
+			return false;
+
     	$('.variations_form').wc_variation_form();
    		$('.variations_form .variations select').change();
     });
