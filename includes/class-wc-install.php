@@ -53,7 +53,7 @@ class WC_Install {
 			delete_transient( '_wc_activation_redirect' );
 
 			// What's new redirect
-			wp_safe_redirect( admin_url( 'index.php?page=wc-about&wc-installed=true' ) );
+			wp_redirect( admin_url( 'index.php?page=wc-about&wc-installed=true' ) );
 			exit;
 
 		// Skip button
@@ -67,7 +67,7 @@ class WC_Install {
 			flush_rewrite_rules();
 
 			// What's new redirect
-			wp_safe_redirect( admin_url( 'index.php?page=wc-about' ) );
+			wp_redirect( admin_url( 'index.php?page=wc-about' ) );
 			exit;
 
 		// Update button
@@ -81,7 +81,7 @@ class WC_Install {
 			delete_transient( '_wc_activation_redirect' );
 
 			// What's new redirect
-			wp_safe_redirect( admin_url( 'index.php?page=wc-about&wc-updated=true' ) );
+			wp_redirect( admin_url( 'index.php?page=wc-about&wc-updated=true' ) );
 			exit;
 		}
 	}
