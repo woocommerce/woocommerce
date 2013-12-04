@@ -32,6 +32,9 @@ include( 'wc-attribute-functions.php' );
 add_filter( 'woocommerce_coupon_code', 'sanitize_text_field' );
 add_filter( 'woocommerce_coupon_code', 'strtolower' ); // Coupons case-insensitive by default
 add_filter( 'woocommerce_stock_amount', 'intval' ); // Stock amounts are integers by default
+add_filter( 'the_title', 'capital_WC_dangit', 11 );
+add_filter( 'the_content', 'capital_WC_dangit', 11 );
+add_filter( 'comment_text', 'capital_WC_dangit', 31 );
 
 /**
  * Short Description (excerpt)
@@ -43,6 +46,8 @@ add_filter( 'woocommerce_short_description', 'wpautop' );
 add_filter( 'woocommerce_short_description', 'shortcode_unautop' );
 add_filter( 'woocommerce_short_description', 'prepend_attachment' );
 add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpautop()
+add_filter( 'woocommerce_short_description', 'capital_WC_dangit', 11 ); // AFTER wpautop()
+
 
 /**
  * Get template part (for templates like the shop-loop).
@@ -354,3 +359,13 @@ function get_woocommerce_api_url( $path ) {
 
 	return $url;
 }
+
+function capital_WC_dangit( $text ) {
+	return str_replace(
+		array( 'Woocommerce', 'woocommerce', 'wooCommerce' ),
+		'WooCommerce',
+		$text
+	);
+}
+
+
