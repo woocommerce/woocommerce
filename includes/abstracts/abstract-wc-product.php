@@ -924,18 +924,19 @@ class WC_Product {
 
 	/**
 	 * Functions for getting parts of a price, in html, used by get_price_html.
-	 *
-	 * @access public
+	 * 
+	 * @param  mixed $from String or float to wrap with 'from' text
 	 * @return string
 	 */
-	public function get_price_html_from_text() {
+	public function get_price_html_from_text( $from ) {
 		return '<span class="from">' . _x( 'From:', 'min_price', 'woocommerce' ) . ' </span>';
 	}
 
 	/**
 	 * Functions for getting parts of a price, in html, used by get_price_html.
 	 *
-	 * @access public
+	 * @param  mixed $from String or float to wrap with 'from' text
+	 * @param  mixed $to String or float to wrap with 'to' text
 	 * @return string
 	 */
 	public function get_price_html_from_to( $from, $to ) {
