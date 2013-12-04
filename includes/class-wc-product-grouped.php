@@ -168,28 +168,33 @@ class WC_Product_Grouped extends WC_Product {
 	 * @return string
 	 */
 	public function get_price_html( $price = '' ) {
-
 		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
 		$child_prices     = array();
 
 		foreach ( $this->get_children() as $child_id )
 			$child_prices[] = get_post_meta( $child_id, '_price', true );
 
-		$child_prices = array_unique( $child_prices );
+		$child_prices     = array_unique( $child_prices );
+		$get_price_method = 'get_price_' . $tax_display_mode . 'uding_tax';
 
 		if ( ! empty( $child_prices ) ) {
 			$min_price = min( $child_prices );
+			$max_price = max( $child_prices );
 		} else {
 			$min_price = '';
+			$max_price = '';
 		}
 
-		if ( sizeof( $child_prices ) > 1 )
-			$price .= $this->get_price_html_from_text();
-
 		if ( $min_price ) {
-			$display_price = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $min_price ) : $this->get_price_excluding_tax( 1, $min_price );
+			if ( $min_price == $max_price ) {
+				$display_price = wc_price( $this->$get_price_method( 1, $min_price ) );
+			} else {
+				$from          = wc_price( $this->$get_price_method( 1, $min_price ) )
+				$to            = wc_price( $this->$get_price_method( 1, $max_price ) )
+				$display_price = sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), $from, $to );
+			}
 
-			$price .= wc_price( $display_price ) . $this->get_price_suffix();
+			$price .= $display_price . $this->get_price_suffix();
 
 			$price = apply_filters( 'woocommerce_grouped_price_html', $price, $this );
 		} else {
