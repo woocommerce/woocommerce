@@ -1,5 +1,9 @@
 jQuery(document).ready(function($) {
 
+	// wc_cart_fragments_params is required to continue, ensure the object exists
+	if (typeof wc_cart_fragments_params === "undefined")
+		return false;
+
 	/** Cart Handling */
 	$supports_html5_storage = ( 'sessionStorage' in window && window['sessionStorage'] !== null );
 

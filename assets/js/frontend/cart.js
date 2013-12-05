@@ -1,5 +1,9 @@
 jQuery(document).ready(function($) {
 
+	// wc_cart_params is required to continue, ensure the object exists
+	if (typeof wc_cart_params === "undefined")
+		return false;
+
 	// Shipping calculator
 	$(document).on( 'click', '.shipping-calculator-button', function() {
 		$('.shipping-calculator-form').slideToggle('slow');

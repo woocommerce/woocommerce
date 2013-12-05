@@ -1,5 +1,9 @@
 jQuery(document).ready(function($) {
 
+	// wc_add_to_cart_params is required to continue, ensure the object exists
+	if (typeof wc_add_to_cart_params === "undefined")
+		return false;
+
 	// Ajax add to cart
 	$(document).on( 'click', '.add_to_cart_button', function() {
 
