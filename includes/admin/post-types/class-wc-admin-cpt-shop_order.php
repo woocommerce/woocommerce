@@ -118,12 +118,10 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 				if ( '0000-00-00 00:00:00' == $post->post_date ) {
 					$t_time = $h_time = __( 'Unpublished', 'woocommerce' );
 				} else {
-					$t_time = get_the_time( __( 'Y/m/d g:i:s A', 'woocommerce' ), $post );
-
-					$gmt_time = strtotime( $post->post_date_gmt . ' UTC' );
-					$time_diff = current_time('timestamp', 1) - $gmt_time;
-
-					$h_time = get_the_time( __( 'Y/m/d', 'woocommerce' ), $post );
+					$t_time    = get_the_time( __( 'Y/m/d g:i:s A', 'woocommerce' ), $post );
+					$gmt_time  = strtotime( $post->post_date_gmt . ' UTC' );
+					$time_diff = current_time( 'timestamp', 1 ) - $gmt_time;
+					$h_time    = get_the_time( __( 'Y/m/d', 'woocommerce' ), $post );
 				}
 
 				echo '<abbr title="' . esc_attr( $t_time ) . '">' . esc_html( apply_filters( 'post_date_column_time', $h_time, $post ) ) . '</abbr>';
