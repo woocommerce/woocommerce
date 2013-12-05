@@ -102,7 +102,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 							'title'			=> __( 'Cost', 'woocommerce' ),
 							'type' 			=> 'price',
 							'placeholder'	=> wc_format_localized_price( 0 ),
-							'description'	=> __( 'Cost excluding tax. Enter an amount, e.g. 2.50.', 'woocommerce' ),
+							'description'	=> __( 'Cost excluding tax. Enter an amount, e.g. 2.50. Default is 0', 'woocommerce' ),
 							'default'		=> '',
 							'desc_tip'		=> true
 						),

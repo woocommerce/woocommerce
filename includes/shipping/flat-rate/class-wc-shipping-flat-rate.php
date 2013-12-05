@@ -118,7 +118,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 							'title' 		=> __( 'Cost per order', 'woocommerce' ),
 							'type' 			=> 'price',
 							'placeholder'	=> wc_format_localized_price( 0 ),
-							'description'	=> __( 'Enter a cost (excluding tax) per order, e.g. 5.00. Leave blank to disable.', 'woocommerce' ),
+							'description'	=> __( 'Enter a cost (excluding tax) per order, e.g. 5.00. Default is 0.', 'woocommerce' ),
 							'default'		=> '',
 							'desc_tip'		=> true
 						),
