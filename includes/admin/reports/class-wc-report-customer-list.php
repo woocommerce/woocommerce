@@ -217,8 +217,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 						$actions = apply_filters( 'woocommerce_admin_user_actions', $actions, $user );
 
 						foreach ( $actions as $action ) {
-							$image = ( isset( $action['image_url'] ) ) ? $action['image_url'] : WC()->plugin_url() . '/assets/images/icons/' . $action['action'] . '.png';
-							printf( '<a class="button tips" href="%s" data-tip="%s"><img src="%s" alt="%s" width="14" /></a>', esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $image ), esc_attr( $action['name'] ) );
+							printf( '<a class="button tips %s" href="%s" data-tip="%s">%s</a>', esc_attr( $action['action'] ), esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $action['name'] ) );
 						}
 
 						do_action( 'woocommerce_admin_user_actions_end', $user );

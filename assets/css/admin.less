@@ -1198,6 +1198,27 @@ ul.wc_coupon_list_block {
 		content: "\e010";
 	}
 }
+.user_actions {
+	.edit, .link, .view {
+		.ir;
+		padding:0 !important;
+		height: 2em !important;
+		width:2em;
+		&:after {
+			.icon;
+			line-height: 1.85;
+		}
+	}
+	.edit:after {
+		content: "\e00d";
+	}
+	.link:after {
+		content: "\e00d";
+	}
+	.view:after {
+		content: "\e010";
+	}
+}
 
 .attributes-table {
 	td, th {
