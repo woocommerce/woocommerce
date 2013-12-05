@@ -58,6 +58,15 @@ abstract class WC_Settings_API {
 	public function init_form_fields() {}
 
 	/**
+	 * Get the form fields after they are initialized
+	 * 
+	 * @return array of options
+	 */
+	public function get_form_fields() {
+		return apply_filters( 'woocommerce_settings_api_form_fields_' . $this->id, $this->form_fields );
+	}
+
+	/**
 	 * Admin Panel Options Processing
 	 * - Saves the options to the DB
 	 *
@@ -108,8 +117,8 @@ abstract class WC_Settings_API {
 	    	$this->settings = array();
 
     		// If there are no settings defined, load defaults
-    		if ( $this->form_fields )
-	    		foreach ( $this->form_fields as $k => $v )
+    		if ( $form_fields = $this->get_form_fields() )
+	    		foreach ( $form_fields as $k => $v )
 	    			$this->settings[ $k ] = isset( $v['default'] ) ? $v['default'] : '';
     	}
 
@@ -135,7 +144,8 @@ abstract class WC_Settings_API {
 
     	// Get option default if unset
 	    if ( ! isset( $this->settings[ $key ] ) ) {
-		    $this->settings[ $key ] = isset( $this->form_fields[ $key ]['default'] ) ? $this->form_fields[ $key ]['default'] : '';
+			$form_fields            = $this->get_form_fields();
+			$this->settings[ $key ] = isset( $form_fields[ $key ]['default'] ) ? $form_fields[ $key ]['default'] : '';
 	    }
 
 	    if ( ! is_null( $empty_value ) && empty( $this->settings[ $key ] ) )
@@ -169,7 +179,7 @@ abstract class WC_Settings_API {
      */
     public function generate_settings_html( $form_fields = false ) {
     	if ( ! $form_fields )
-    		$form_fields = $this->form_fields;
+    		$form_fields = $this->get_form_fields();
 
     	$html = '';
     	foreach ( $form_fields as $k => $v ) {
@@ -613,7 +623,7 @@ abstract class WC_Settings_API {
      */
     public function validate_settings_fields( $form_fields = false ) {
     	if ( ! $form_fields )
-    		$form_fields = $this->form_fields;
+    		$form_fields = $this->get_form_fields();
 
     	$this->sanitized_fields = array();
 
