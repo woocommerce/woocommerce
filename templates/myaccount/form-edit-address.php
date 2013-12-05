@@ -28,11 +28,15 @@ get_currentuserinfo();
 
 		<h3><?php echo apply_filters( 'woocommerce_my_account_edit_address_title', $page_title ); ?></h3>
 
+		<?php do_action( 'woocommerce_my_account_before_edit_address_form' ); ?>
+
 		<?php foreach ( $address as $key => $field ) : ?>
 
 			<?php woocommerce_form_field( $key, $field, ! empty( $_POST[ $key ] ) ? wc_clean( $_POST[ $key ] ) : $field['value'] ); ?>
 
 		<?php endforeach; ?>
+
+		<?php do_action( 'woocommerce_my_account_after_edit_address_form' ); ?>
 
 		<p>
 			<input type="submit" class="button" name="save_address" value="<?php _e( 'Save Address', 'woocommerce' ); ?>" />
