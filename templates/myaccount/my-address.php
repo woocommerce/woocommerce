@@ -43,6 +43,7 @@ $col = 1;
 		<header class="title">
 			<h3><?php echo $title; ?></h3>
 			<a href="<?php echo wc_get_endpoint_url( 'edit-address', $name ); ?>" class="edit"><?php _e( 'Edit', 'woocommerce' ); ?></a>
+			<?php do_action('woocommerce_my_account_my_address_header'); ?>
 		</header>
 		<address>
 			<?php
@@ -66,6 +67,7 @@ $col = 1;
 					echo $formatted_address;
 			?>
 		</address>
+		<?php do_action('woocommerce_my_account_my_address'); ?>
 	</div>
 
 <?php endforeach; ?>
