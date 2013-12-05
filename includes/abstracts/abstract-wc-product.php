@@ -928,7 +928,7 @@ class WC_Product {
 	 * @param  mixed $from String or float to wrap with 'from' text
 	 * @return string
 	 */
-	public function get_price_html_from_text( $from ) {
+	public function get_price_html_from_text() {
 		return '<span class="from">' . _x( 'From:', 'min_price', 'woocommerce' ) . ' </span>';
 	}
 
