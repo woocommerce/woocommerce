@@ -124,6 +124,15 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 
 			array(
+				'desc'          => __( 'Display returning customer login reminder on the "Checkout" page', 'woocommerce' ),
+				'id'            => 'woocommerce_enable_checkout_login_reminder',
+				'default'       => 'yes',
+				'type'          => 'checkbox',
+				'checkboxgroup' => 'start',
+				'autoload'      => false
+			),
+
+			array(
 				'title'         => __( 'Account Creation', 'woocommerce' ),
 				'desc'          => __( 'Automatically generate username from customer email', 'woocommerce' ),
 				'id'            => 'woocommerce_registration_generate_username',
