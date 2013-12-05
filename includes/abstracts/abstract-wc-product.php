@@ -925,7 +925,6 @@ class WC_Product {
 	/**
 	 * Functions for getting parts of a price, in html, used by get_price_html.
 	 * 
-	 * @param  mixed $from String or float to wrap with 'from' text
 	 * @return string
 	 */
 	public function get_price_html_from_text() {
