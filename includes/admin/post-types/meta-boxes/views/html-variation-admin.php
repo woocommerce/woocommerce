@@ -93,6 +93,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 							<tr>
 								<?php if ( wc_product_weight_enabled() ) : ?>
 									<td class="hide_if_variation_virtual">
+										<?php /** @todo [tivnet] _e() is void. Cannot append string to it. */ ?>
 										<label><?php _e( 'Weight', 'woocommerce' ) . ' (' . esc_html( get_option( 'woocommerce_weight_unit' ) ) . '):'; ?> <a class="tips" data-tip="<?php _e( 'Enter a weight for this variation or leave blank to use the parent product weight.', 'woocommerce' ); ?>" href="#">[?]</a></label>
 										<input type="text" size="5" name="variable_weight[<?php echo $loop; ?>]" value="<?php if ( isset( $_weight ) ) echo esc_attr( $_weight ); ?>" placeholder="<?php echo esc_attr( $parent_data['weight'] ); ?>" class="wc_input_decimal" />
 									</td>
@@ -101,6 +102,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 								<?php endif; ?>
 								<?php if ( wc_product_dimensions_enabled() ) : ?>
 									<td class="dimensions_field hide_if_variation_virtual">
+										<?php /** @todo [tivnet] Missing = after label for */ ?>
 										<label for"product_length"><?php echo __( 'Dimensions (L&times;W&times;H)', 'woocommerce' ); ?></label>
 										<input id="product_length" class="input-text wc_input_decimal" size="6" type="text" name="variable_length[<?php echo $loop; ?>]" value="<?php if ( isset( $_length ) ) echo esc_attr( $_length ); ?>" placeholder="<?php echo esc_attr( $parent_data['length'] ); ?>" />
 										<input class="input-text wc_input_decimal" size="6" type="text" name="variable_width[<?php echo $loop; ?>]" value="<?php if ( isset( $_width ) ) echo esc_attr( $_width ); ?>" placeholder="<?php echo esc_attr( $parent_data['width'] ); ?>" />

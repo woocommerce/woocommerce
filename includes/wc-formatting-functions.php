@@ -41,6 +41,8 @@ function wc_get_filename_from_url( $file_url ) {
 	$parts = parse_url( $file_url );
 	if ( isset( $parts['path'] ) )
 		return basename( $parts['path'] );
+
+	/** @todo [tivnet] return ''; */
 }
 
 /**
@@ -302,14 +304,17 @@ function get_woocommerce_price_format() {
  * @return string
  */
 function wc_price( $price, $args = array() ) {
+	/** @todo [tivnet] Remove $woocommerce */
 	global $woocommerce;
 
 	extract( shortcode_atts( array(
 		'ex_tax_label' 	=> '0'
 	), $args ) );
 
+	/** @todo [tivnet] Unused var */
 	$return          = '';
 	$num_decimals    = absint( get_option( 'woocommerce_price_num_decimals' ) );
+	/** @todo [tivnet] Unused var */
 	$currency_pos    = get_option( 'woocommerce_currency_pos' );
 	$currency        = isset( $args['currency'] ) ? $args['currency'] : '';
 	$currency_symbol = get_woocommerce_currency_symbol($currency);
@@ -338,6 +343,7 @@ function wc_price( $price, $args = array() ) {
  * @access public
  * @param $size
  * @return int
+ * @todo [tivnet] cases should have break statement
  */
 function wc_let_to_num( $size ) {
     $l 		= substr( $size, -1 );
@@ -428,8 +434,8 @@ if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
 	 * Hex darker/lighter/contrast functions for colours
 	 *
 	 * @access public
-	 * @param mixed $color
-	 * @return string
+	 * @param string $color
+	 * @return array
 	 */
 	function wc_rgb_from_hex( $color ) {
 		$color = str_replace( '#', '', $color );
@@ -546,6 +552,8 @@ if ( ! function_exists( 'wc_format_hex' ) ) {
 	    }
 
 	    if ( $hex ) return '#' . $hex;
+
+		/** @todo [tivnet] return ''; */
 	}
 }
 

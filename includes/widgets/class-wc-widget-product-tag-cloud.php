@@ -37,6 +37,7 @@ class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 	 * @see WP_Widget
 	 * @access public
 	 * @param array $args
+	 * @todo [tivnet] $instance - is it array? object? _get_current_taxonomy expects object. Which type?
 	 * @param array $instance
 	 * @return void
 	 */

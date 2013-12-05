@@ -612,6 +612,8 @@ class WC_Cart {
 			$cart_page_id = wc_get_page_id('cart');
 			if ( $cart_page_id )
 				return apply_filters( 'woocommerce_get_remove_url', wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, get_permalink( $cart_page_id ) ), 'woocommerce-cart' ) );
+
+			/** @todo [tivnet] else return ''; or WP_Error ??? */
 		}
 
 		/**

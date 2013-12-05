@@ -402,6 +402,7 @@ class WC_Product_Variation extends WC_Product {
 			return parent::set_stock( $amount );
 
 		}
+		/** @todo [tivnet] return something here */
 	}
 
 	/**

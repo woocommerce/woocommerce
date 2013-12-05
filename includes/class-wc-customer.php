@@ -209,6 +209,8 @@ class WC_Customer {
 	 */
 	public function get_state() {
 		if ( isset( $this->state ) ) return $this->state;
+
+		/** @todo [tivnet] return ''; */
 	}
 
 
@@ -220,6 +222,8 @@ class WC_Customer {
 	 */
 	public function get_country() {
 		if ( isset( $this->country ) ) return $this->country;
+
+		/** @todo [tivnet] return ''; */
 	}
 
 
@@ -232,6 +236,8 @@ class WC_Customer {
 	public function get_postcode() {
 		if ( isset( $this->postcode ) && $this->postcode !== false )
 			return wc_format_postcode( $this->postcode, $this->get_country() );
+
+		/** @todo [tivnet] return ''; */
 	}
 
 
@@ -243,6 +249,8 @@ class WC_Customer {
 	 */
 	public function get_city() {
 		if ( isset( $this->city ) ) return $this->city;
+
+		/** @todo [tivnet] return ''; */
 	}
 
 	/**
@@ -253,6 +261,8 @@ class WC_Customer {
 	 */
 	public function get_address() {
 		if ( isset( $this->address ) ) return $this->address;
+
+		/** @todo [tivnet] return ''; */
 	}
 
 	/**
@@ -263,6 +273,8 @@ class WC_Customer {
 	 */
 	public function get_address_2() {
 		if ( isset( $this->address_2 ) ) return $this->address_2;
+
+		/** @todo [tivnet] return ''; */
 	}
 
 	/**
@@ -273,6 +285,8 @@ class WC_Customer {
 	 */
 	public function get_shipping_state() {
 		if ( isset( $this->shipping_state ) ) return $this->shipping_state;
+
+		/** @todo [tivnet] return ''; */
 	}
 
 
@@ -284,6 +298,8 @@ class WC_Customer {
 	 */
 	public function get_shipping_country() {
 		if ( isset( $this->shipping_country ) ) return $this->shipping_country;
+
+		/** @todo [tivnet] return ''; */
 	}
 
 
@@ -296,6 +312,8 @@ class WC_Customer {
 	public function get_shipping_postcode() {
 		if ( isset( $this->shipping_postcode ) )
 			return wc_format_postcode( $this->shipping_postcode, $this->get_shipping_country() );
+
+		/** @todo [tivnet] return ''; */
 	}
 
 
@@ -307,6 +325,8 @@ class WC_Customer {
 	 */
 	public function get_shipping_city() {
 		if ( isset( $this->shipping_city ) ) return $this->shipping_city;
+
+		/** @todo [tivnet] return ''; */
 	}
 
 	/**
@@ -317,6 +337,8 @@ class WC_Customer {
 	 */
 	public function get_shipping_address() {
 		if ( isset( $this->shipping_address ) ) return $this->shipping_address;
+
+		/** @todo [tivnet] return ''; */
 	}
 
 	/**
@@ -327,6 +349,8 @@ class WC_Customer {
 	 */
 	public function get_shipping_address_2() {
 		if ( isset( $this->shipping_address_2 ) ) return $this->shipping_address_2;
+
+		/** @todo [tivnet] return ''; */
 	}
 
 	/**

@@ -70,10 +70,11 @@ add_action( 'wp_login', 'wc_load_persistent_cart', 1, 2 );
  * Add to cart messages.
  *
  * @access public
- * @param int $product_id
+ * @param int|array $product_id
  * @return void
  */
 function wc_add_to_cart_message( $product_id ) {
+	/** @todo [tivnet] Remove $woocommerce */
 	global $woocommerce;
 
 	if ( is_array( $product_id ) ) {

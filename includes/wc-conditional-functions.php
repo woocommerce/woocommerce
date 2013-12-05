@@ -210,7 +210,7 @@ if ( ! function_exists( 'taxonomy_is_product_attribute' ) ) {
 	 * Returns true when the passed taxonomy name is a product attribute.
 	 *
 	 * @uses  $wc_product_attributes global which stores taxonomy names upon registration
-	 * @param $name of the attribute
+	 * @param int|string $name of the attribute
 	 * @return bool
 	 */
 	function taxonomy_is_product_attribute( $name ) {
@@ -224,9 +224,9 @@ if ( ! function_exists( 'meta_is_product_attribute' ) ) {
 
 	/**
 	 * Returns true when the passed meta name is a product attribute.
-	 *
-	 * @param $name of the attribute
-	 * @param $product_id
+	 * @param string $name of the attribute
+	 * @param mixed $value
+	 * @param int $product_id
 	 * @return bool
 	 */
 	function meta_is_product_attribute( $name, $value, $product_id ) {

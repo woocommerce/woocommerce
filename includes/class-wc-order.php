@@ -644,18 +644,20 @@ class WC_Order {
 
 	/**
 	 * Gets line subtotal - formatted for display.
-	 *
 	 * @access public
-	 * @param mixed $item
+	 * @param array  $item
+	 * @param string $tax_display
 	 * @return string
 	 */
 	public function get_formatted_line_subtotal( $item, $tax_display = '' ) {
 		if ( ! $tax_display )
 			$tax_display = $this->tax_display_cart;
 
+		/** @todo [tivnet] Unused var */
 		$subtotal = 0;
 
-		if ( ! isset( $item['line_subtotal'] ) || ! isset( $item['line_subtotal_tax'] ) ) 
+		if ( ! isset( $item['line_subtotal'] ) || ! isset( $item['line_subtotal_tax'] ) )
+			/** @todo [tivnet] return ''; */
 			return;
 
 		if ( $tax_display == 'excl' ) {
@@ -698,9 +700,9 @@ class WC_Order {
 
 	/**
 	 * Gets subtotal - subtotal is shown before discounts, but with localised taxes.
-	 *
 	 * @access public
-	 * @param bool $compound (default: false)
+	 * @param bool   $compound (default: false)
+	 * @param string $tax_display
 	 * @return string
 	 */
 	public function get_subtotal_to_display( $compound = false, $tax_display = '' ) {
@@ -712,7 +714,8 @@ class WC_Order {
 		if ( ! $compound ) {
 			foreach ( $this->get_items() as $item ) {
 
-				if ( ! isset( $item['line_subtotal'] ) || ! isset( $item['line_subtotal_tax'] ) ) 
+				if ( ! isset( $item['line_subtotal'] ) || ! isset( $item['line_subtotal_tax'] ) )
+					/** @todo [tivnet] return ''; */
 					return;
 
 				$subtotal += $item['line_subtotal'];
@@ -730,6 +733,7 @@ class WC_Order {
 		} else {
 
 			if ( $tax_display == 'incl' )
+				/** @todo [tivnet] return ''; */
 				return;
 
 			foreach ( $this->get_items() as $item ) {

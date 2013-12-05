@@ -66,7 +66,9 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 		) ) );
 
 		$legend[] = array(
+			/** @todo [tivnet] $total_discount is array. wc_price expects float */
 			'title' => sprintf( __( '%s discounts in total', 'woocommerce' ), '<strong>' . wc_price( $total_discount ) . '</strong>' ),
+			/** @todo [tivnet] chart_colours should be declared as a class var ??? */
 			'color' => $this->chart_colours['discount_amount'],
 			'highlight_series' => 1
 		);
@@ -84,8 +86,12 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 	 * Output the report
 	 */
 	public function output_report() {
+		/** @todo [tivnet] Remove $woocommerce */
+		/** @todo [tivnet] Unused $wpdb */
+		/** @todo [tivnet] Unused $wp_locale */
 		global $woocommerce, $wpdb, $wp_locale;
 
+		/** @todo [tivnet] Unused var */
 		$ranges = array(
 			'year'         => __( 'Year', 'woocommerce' ),
 			'last_month'   => __( 'Last Month', 'woocommerce' ),
