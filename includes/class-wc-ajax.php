@@ -1571,7 +1571,7 @@ class WC_AJAX {
 
 		if ( !$id || !$term || !$taxonomy ) die(0);
 
-		wc_order_terms( $term, $next_id, $taxonomy );
+		wc_reorder_terms( $term, $next_id, $taxonomy );
 
 		$children = get_terms($taxonomy, "child_of=$id&menu_order=ASC&hide_empty=0");
 

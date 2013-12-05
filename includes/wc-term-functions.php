@@ -251,7 +251,7 @@ function wc_reorder_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = 
 		// if that term has children we walk through them
 		$children = get_terms($taxonomy, "parent={$term->term_id}&menu_order=ASC&hide_empty=0");
 		if( !empty($children) ) {
-			$index = wc_order_terms( $the_term, $next_id, $taxonomy, $index, $children );
+			$index = wc_reorder_terms( $the_term, $next_id, $taxonomy, $index, $children );
 		}
 	}
 
