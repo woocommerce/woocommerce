@@ -485,6 +485,9 @@ class WC_Query {
 		$args['meta_key'] = '';
 
 		switch ( $orderby ) {
+			case 'rand' :
+				$args['orderby']  = 'rand';
+			break;
 			case 'date' :
 				$args['orderby']  = 'date';
 				$args['order']    = $order == 'ASC' ? 'ASC' : 'DESC';
