@@ -178,7 +178,7 @@ class WC_API_Authentication {
 
 		$http_method = strtoupper( WC()->api->server->method );
 
-		$base_request_uri = rawurlencode( get_home_url( null, '/wc-api/v1' . WC()->api->server->path, 'http' ) );
+		$base_request_uri = rawurlencode( untrailingslashit( get_woocommerce_api_url( '' ) ) . WC()->api->server->path );
 
 		// get the signature provided by the consumer and remove it from the parameters prior to checking the signature
 		$consumer_signature = rawurldecode( $params['oauth_signature'] );
