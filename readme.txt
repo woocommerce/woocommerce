@@ -34,7 +34,7 @@ If you're looking for a tailored WordPress eCommerce theme designed specifically
 = FEATURES =
 Whether you're operating a superstore selling thousands of products, or a just a sole trader selling hand made arts and crafts WooCommerce has you covered. You can read all about WooCommerce' features on the [WooCommerce website](http://www.woothemes.com/woocommerce/ "WooCommerce: An open-source eCommerce plugin for WordPress").
 
-Payment Gateways, Shipping Methods and Integrations are important to any store - WooCommerce comes bundled with the following:
+Payment Gateways and Shipping Methods are important to any store - WooCommerce comes bundled with the following:
 
 * __PayPal Standard Gateway__ - Accept credit cards and PayPal payments
 * __Mijireh Checkout__ - Accept credit cards via Stripe, Authorize.net, PayPal, eWay, SagePay, Braintree, PayLeap, and more.
