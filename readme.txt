@@ -42,9 +42,6 @@ Payment Gateways, Shipping Methods and Integrations are important to any store -
 * __Flat rate shipping__ - Ship your items using a flat cost
 * __Free shipping__ - Ship for free, or require a coupon to enable
 * __International delivery__, __Local delivery and local Pickup__
-* __Google Analytics__ - Powerful analytics, including eCommerce tracking
-* __Sharedaddy__ and __ShareThis__ - Let your customers share your products with their friends
-* __ShareYourCart__ - Encourage your customers to share their purchases in return for a coupon
 
 Need a specific payment gateway? Perhaps additional shipping methods? WooCommerce has a plethora of eCommerce extensions available to provide just that.
 
