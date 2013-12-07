@@ -40,6 +40,6 @@ global $woocommerce;
 
 	<p><input type="submit" class="button" name="save_account_details" value="<?php _e( 'Save changes', 'woocommerce' ); ?>" /></p>
 
-	<?php wp_nonce_field('save_account_details')?>
+	<?php wp_nonce_field( 'save_account_details' ); ?>
 	<input type="hidden" name="action" value="save_account_details" />
 </form>

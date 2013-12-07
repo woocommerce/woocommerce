@@ -21,6 +21,6 @@ global $woocommerce, $post;
 	<div class="clear"></div>
 
 	<p class="form-row"><input type="submit" class="button" name="track" value="<?php _e( 'Track', 'woocommerce' ); ?>" /></p>
-	<?php wp_nonce_field( 'woocommerce-order_tracking') ?>
+	<?php wp_nonce_field( 'woocommerce-order_tracking' ); ?>
 
 </form>
