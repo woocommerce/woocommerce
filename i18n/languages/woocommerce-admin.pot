@@ -22,7 +22,7 @@ msgid "Please enter in decimal (%s) format without thousand separators."
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:109
-msgid "Please enter in monitary decimal (%s) format without thousand separators and currency symbols."
+msgid "Please enter in monetary decimal (%s) format without thousand separators and currency symbols."
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:136
