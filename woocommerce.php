@@ -275,14 +275,17 @@ final class WooCommerce {
 		include( 'includes/class-wc-comments.php' );
 		include( 'includes/class-wc-post-data.php' );
 
-		if ( is_admin() )
+		if ( is_admin() ) {
 			include_once( 'includes/admin/class-wc-admin.php' );
+		}
 
-		if ( defined('DOING_AJAX') )
+		if ( defined('DOING_AJAX') ) {
 			$this->ajax_includes();
+		}
 
-		if ( ! is_admin() || defined('DOING_AJAX') )
+		if ( ! is_admin() || defined('DOING_AJAX') ) {
 			$this->frontend_includes();
+		}
 
 		// Query class
 		$this->query = include( 'includes/class-wc-query.php' );				// The main query class
