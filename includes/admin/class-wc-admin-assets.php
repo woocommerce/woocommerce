@@ -106,7 +106,7 @@ class WC_Admin_Assets {
 
 	    	$params = array(
 				'i18n_decimal_error'     => sprintf( __( 'Please enter in decimal (%s) format without thousand separators.', 'woocommerce' ), $decimal ),
-				'i18n_mon_decimal_error' => sprintf( __( 'Please enter in monitary decimal (%s) format without thousand separators and currency symbols.', 'woocommerce' ), get_option( 'woocommerce_price_decimal_sep' ) ),
+				'i18n_mon_decimal_error' => sprintf( __( 'Please enter in monetary decimal (%s) format without thousand separators and currency symbols.', 'woocommerce' ), get_option( 'woocommerce_price_decimal_sep' ) ),
 				'decimal_point'          => $decimal,
 				'mon_decimal_point'      => get_option( 'woocommerce_price_decimal_sep' )
 	    	);
