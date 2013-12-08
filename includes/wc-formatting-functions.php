@@ -39,8 +39,9 @@ function wc_sanitize_taxonomy_name( $taxonomy ) {
  */
 function wc_get_filename_from_url( $file_url ) {
 	$parts = parse_url( $file_url );
-	if ( isset( $parts['path'] ) )
+	if ( isset( $parts['path'] ) ) {
 		return basename( $parts['path'] );
+	}
 }
 
 /**
@@ -194,8 +195,9 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 		$number = number_format( floatval( $number ), $dp, '.', '' );
 	}
 
-	if ( $trim_zeros && strstr( $number, '.' ) )
+	if ( $trim_zeros && strstr( $number, '.' ) ) {
 		$number = rtrim( rtrim( $number, '0' ), '.' );
+	}
 
 	return $number;
 }
@@ -206,8 +208,9 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
  * @return string
  */
 function wc_float_to_string( $float ) {
-	if ( ! is_float( $float ) )
+	if ( ! is_float( $float ) ) {
 		return $float;
+	}
 
 	$locale = localeconv();
 	$string = strval( $float );
@@ -256,8 +259,9 @@ function wc_clean( $var ) {
  */
 function wc_array_overlay( $a1, $a2 ) {
     foreach( $a1 as $k => $v ) {
-        if ( ! array_key_exists( $k, $a2 ) )
+        if ( ! array_key_exists( $k, $a2 ) ) {
         	continue;
+        }
         if ( is_array( $v ) && is_array( $a2[ $k ] ) ) {
             $a1[ $k ] = wc_array_overlay( $v, $a2[ $k ] );
         } else {
@@ -319,13 +323,15 @@ function wc_price( $price, $args = array() ) {
 	$price           = apply_filters( 'raw_woocommerce_price', floatval( $price ) );
 	$price           = apply_filters( 'formatted_woocommerce_price', number_format( $price, $num_decimals, $decimal_sep, $thousands_sep ), $price, $num_decimals, $decimal_sep, $thousands_sep );
 
-	if ( apply_filters( 'woocommerce_price_trim_zeros', true ) && $num_decimals > 0 )
+	if ( apply_filters( 'woocommerce_price_trim_zeros', true ) && $num_decimals > 0 ) {
 		$price = wc_trim_zeros( $price );
+	}
 
 	$return = '<span class="amount">' . sprintf( get_woocommerce_price_format(), $currency_symbol, $price ) . '</span>';
 
-	if ( $ex_tax_label && get_option( 'woocommerce_calc_taxes' ) == 'yes' )
+	if ( $ex_tax_label && get_option( 'woocommerce_calc_taxes' ) == 'yes' ) {
 		$return .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
+	}
 
 	return $return;
 }
@@ -390,12 +396,14 @@ function wc_time_format() {
 function wc_timezone_string() {
 
 	// if site timezone string exists, return it
-	if ( $timezone = get_option( 'timezone_string' ) )
+	if ( $timezone = get_option( 'timezone_string' ) ) {
 		return $timezone;
+	}
 
 	// get UTC offset, if it isn't set then return UTC
-	if ( 0 === ( $utc_offset = get_option( 'gmt_offset', 0 ) ) )
+	if ( 0 === ( $utc_offset = get_option( 'gmt_offset', 0 ) ) ) {
 		return 'UTC';
+	}
 
 	// adjust UTC offset from hours to seconds
 	$utc_offset *= 3600;
@@ -560,8 +568,9 @@ function wc_format_postcode( $postcode, $country ) {
 	$postcode = strtoupper(trim($postcode));
 	$postcode = trim(preg_replace('/[\s]/', '', $postcode));
 
-	if ( in_array( $country, array('GB', 'CA') ) )
+	if ( in_array( $country, array('GB', 'CA') ) ) {
 		$postcode = trim( substr_replace( $postcode, ' ', -3, 0 ) );
+	}
 
 	return $postcode;
 }
