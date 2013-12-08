@@ -162,7 +162,7 @@ class WC_API_Server {
 
 		// WP_Errors are handled in serve_request()
 		elseif ( ! is_wp_error( $user ) )
-			$user = new WP_Error( 'woocommerce_api_authentication_error', __( 'Invalid authentication method', 'woocommerce' ), array( 'code' => '500' ) );
+			$user = new WP_Error( 'woocommerce_api_authentication_error', __( 'Invalid authentication method', 'woocommerce' ), array( 'code' => 500 ) );
 
 		return $user;
 	}
