@@ -501,15 +501,22 @@ class WC_API_Server {
 	 * @since 2.1
 	 * @param string $rel Link relation. Either a registered type, or an absolute URL
 	 * @param string $link Target IRI for the link
-	 * @param array $other Other parameters to send, as an assocative array
+	 * @param array $other Other parameters to send, as an associative array
 	 */
 	public function link_header( $rel, $link, $other = array() ) {
-		$header = 'Link: <' . $link . '>; rel="' . esc_attr( $rel ) . '"';
+
+		$header = sprintf( '<%s>; rel="%s"', $link, esc_attr( $rel ) );
+
 		foreach ( $other as $key => $value ) {
-			if ( 'title' == $key )
+
+			if ( 'title' == $key ) {
+
 				$value = '"' . $value . '"';
+			}
+
 			$header .= '; ' . $key . '=' . $value;
 		}
+
 		$this->header( 'Link', $header, false );
 	}
 
