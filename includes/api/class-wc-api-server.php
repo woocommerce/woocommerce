@@ -426,7 +426,7 @@ class WC_API_Server {
 			'meta'        => array(
 				'timezone'       => wc_timezone_string(),
 				'currency'       => get_woocommerce_currency(),
-				'money_format'   => get_woocommerce_currency_symbol(),
+				'currency_format'   => get_woocommerce_currency_symbol(),
 				'tax_included'   => ( 'yes' === get_option( 'woocommerce_prices_include_tax' ) ),
 				'weight_unit'    => get_option( 'woocommerce_weight_unit' ),
 				'dimension_unit' => get_option( 'woocommerce_dimension_unit' ),
