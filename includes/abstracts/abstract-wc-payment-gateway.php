@@ -44,7 +44,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	var $description;
 
 	/** @var array Array of supported features such as 'default_credit_card_form' */
-	var $supports		= array( 'products' );
+	var $supports = array( 'products' );
 
 	/**
 	 * Get the return url (thank you page)
@@ -60,7 +60,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			$return_url = wc_get_endpoint_url( 'order-received', '', get_permalink( wc_get_page_id( 'checkout' ) ) );
 		}
 
-		if ( is_ssl() || get_option('woocommerce_force_ssl_checkout') == 'yes' ) {
+		if ( is_ssl() || 'yes' == get_option( 'woocommerce_force_ssl_checkout' ) ) {
 			$return_url = str_replace( 'http:', 'https:', $return_url );
 		}
 
