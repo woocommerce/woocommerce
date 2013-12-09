@@ -35,7 +35,7 @@ class WC_Admin_Notices {
 
 		$template = get_option( 'template' );
 
-		if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $template, array( 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
+		if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $template, array( 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
 
 			if ( ! empty( $_GET['hide_woocommerce_theme_support_check'] ) ) {
 				update_option( 'woocommerce_theme_support_check', $template );
