@@ -59,7 +59,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return boolean
 	 */
 	public function is_taxable() {
-		return ( get_option( 'woocommerce_calc_taxes' ) == 'yes' && $this->tax_status == 'taxable' && ! WC()->customer->is_vat_exempt() );
+		return ( 'yes' == get_option( 'woocommerce_calc_taxes' ) && 'taxable' == $this->tax_status && ! WC()->customer->is_vat_exempt() );
 	}
 
 	/**
@@ -86,7 +86,9 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		extract( $args );
 
 		// Id and label are required
-		if ( ! $id || ! $label ) return;
+		if ( ! $id || ! $label ) {
+			return;
+		}
 
 		// Handle cost
 		$total_cost = ( is_array( $cost ) ) ? array_sum( $cost ) : $cost;
@@ -109,8 +111,9 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 						foreach ( $cost as $cost_key => $amount ) {
 
-							if ( ! isset( $cart[ $cost_key ] ) )
+							if ( ! isset( $cart[ $cost_key ] ) ) {
 								continue;
+							}
 
 							$_product = $cart[	$cost_key ]['data'];
 
@@ -118,8 +121,9 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 							$item_taxes = $_tax->calc_shipping_tax( $amount, $rates );
 
 							// Sum the item taxes
-							foreach ( array_keys( $taxes + $item_taxes ) as $key )
+							foreach ( array_keys( $taxes + $item_taxes ) as $key ) {
 								$taxes[ $key ] = ( isset( $item_taxes[ $key ] ) ? $item_taxes[ $key ] : 0 ) + ( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
+							}
 
 						}
 
@@ -130,8 +134,9 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 							$item_taxes = $_tax->calc_shipping_tax( $cost['order'], $rates );
 
 							// Sum the item taxes
-							foreach ( array_keys( $taxes + $item_taxes ) as $key )
+							foreach ( array_keys( $taxes + $item_taxes ) as $key ) {
 								$taxes[ $key ] = ( isset( $item_taxes[ $key ] ) ? $item_taxes[ $key ] : 0 ) + ( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
+							}
 						}
 
 					}
@@ -162,15 +167,15 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		return ( $this->has_settings );
 	}
 
-    /**
-     * is_available function.
-     *
-     * @param array $package
-     * @return bool
-     */
-    public function is_available( $package ) {
-    	if ( $this->enabled == "no" )
-    		return false;
+	/**
+	 * is_available function.
+	 *
+	 * @param array $package
+	 * @return bool
+	 */
+	public function is_available( $package ) {
+		if ( 'no' == $this->enabled )
+			return false;
 
 		// Country availability
 		switch ( $this->availability ) {
@@ -186,11 +191,12 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			break;
 		}
 
-		if ( ! in_array( $package['destination']['country'], $ship_to_countries ) )
+		if ( ! in_array( $package['destination']['country'], $ship_to_countries ) ) {
 			return false;
+		}
 
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true, $package );
-    }
+	}
 
 	/**
 	 * Return the gateways title
@@ -201,15 +207,15 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		return apply_filters( 'woocommerce_shipping_method_title', $this->title, $this->id );
 	}
 
-    /**
-     * get_fee function.
-     *
-     * @access public
-     * @param mixed $fee
-     * @param mixed $total
-     * @return float
-     */
-    function get_fee( $fee, $total ) {
+	/**
+	 * get_fee function.
+	 *
+	 * @access public
+	 * @param mixed $fee
+	 * @param mixed $total
+	 * @return float
+	 */
+	function get_fee( $fee, $total ) {
 		if ( strstr( $fee, '%' ) ) :
 			$fee = ( $total / 100 ) * str_replace( '%', '', $fee );
 		endif;
