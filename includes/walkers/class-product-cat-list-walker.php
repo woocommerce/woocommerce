@@ -24,7 +24,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @param int $depth Depth of category. Used for tab indentation.
 	 * @param array $args Will only append content if style argument value is 'list'.
 	 */
-	function start_lvl( &$output, $depth, $args ) {
+	function start_lvl( &$output, $depth = 0, $args = array() ) {
 		if ( 'list' != $args['style'] )
 			return;
 
@@ -40,7 +40,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @param int $depth Depth of category. Used for tab indentation.
 	 * @param array $args Will only append content if style argument value is 'list'.
 	 */
-	function end_lvl( &$output, $depth, $args ) {
+	function end_lvl( &$output, $depth = 0, $args = array() ) {
 		if ( 'list' != $args['style'] )
 			return;
 
@@ -86,7 +86,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @param int $depth Depth of category. Not used.
 	 * @param array $args Only uses 'list' for whether should append to output.
 	 */
-	function end_el( &$output, $cat, $depth, $args ) {
+	function end_el( &$output, $cat, $depth = 0, $args = array() ) {
 
 		$output .= "</li>\n";
 
