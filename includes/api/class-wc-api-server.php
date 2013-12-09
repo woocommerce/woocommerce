@@ -162,7 +162,7 @@ class WC_API_Server {
 
 		// WP_Errors are handled in serve_request()
 		elseif ( ! is_wp_error( $user ) )
-			$user = new WP_Error( 'woocommerce_api_authentication_error', __( 'Invalid authentication method', 'woocommerce' ), array( 'code' => '500' ) );
+			$user = new WP_Error( 'woocommerce_api_authentication_error', __( 'Invalid authentication method', 'woocommerce' ), array( 'code' => 500 ) );
 
 		return $user;
 	}
@@ -426,7 +426,7 @@ class WC_API_Server {
 			'meta'        => array(
 				'timezone'       => wc_timezone_string(),
 				'currency'       => get_woocommerce_currency(),
-				'money_format'   => get_woocommerce_currency_symbol(),
+				'currency_format'   => get_woocommerce_currency_symbol(),
 				'tax_included'   => ( 'yes' === get_option( 'woocommerce_prices_include_tax' ) ),
 				'weight_unit'    => get_option( 'woocommerce_weight_unit' ),
 				'dimension_unit' => get_option( 'woocommerce_dimension_unit' ),
@@ -501,15 +501,22 @@ class WC_API_Server {
 	 * @since 2.1
 	 * @param string $rel Link relation. Either a registered type, or an absolute URL
 	 * @param string $link Target IRI for the link
-	 * @param array $other Other parameters to send, as an assocative array
+	 * @param array $other Other parameters to send, as an associative array
 	 */
 	public function link_header( $rel, $link, $other = array() ) {
-		$header = 'Link: <' . $link . '>; rel="' . esc_attr( $rel ) . '"';
+
+		$header = sprintf( '<%s>; rel="%s"', $link, esc_attr( $rel ) );
+
 		foreach ( $other as $key => $value ) {
-			if ( 'title' == $key )
+
+			if ( 'title' == $key ) {
+
 				$value = '"' . $value . '"';
+			}
+
 			$header .= '; ' . $key . '=' . $value;
 		}
+
 		$this->header( 'Link', $header, false );
 	}
 
