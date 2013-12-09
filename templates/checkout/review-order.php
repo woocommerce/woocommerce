@@ -160,7 +160,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 			<noscript><?php _e( 'Since your browser does not support JavaScript, or it is disabled, please ensure you click the <em>Update Totals</em> button before placing your order. You may be charged more than the amount stated above if you fail to do so.', 'woocommerce' ); ?><br/><input type="submit" class="button alt" name="woocommerce_checkout_update_totals" value="<?php _e( 'Update totals', 'woocommerce' ); ?>" /></noscript>
 
-			<?php wp_nonce_field( 'woocommerce-process_checkout')?>
+			<?php wp_nonce_field( 'woocommerce-process_checkout' ); ?>
 
 			<?php do_action( 'woocommerce_review_order_before_submit' ); ?>
 

@@ -84,7 +84,7 @@ if ( get_option('woocommerce_enable_shipping_calc')=='no' || ! WC()->cart->needs
 
 		<p><button type="submit" name="calc_shipping" value="1" class="button"><?php _e( 'Update Totals', 'woocommerce' ); ?></button></p>
 
-		<?php wp_nonce_field( 'woocommerce-cart') ?>
+		<?php wp_nonce_field( 'woocommerce-cart' ); ?>
 	</section>
 </form>
 

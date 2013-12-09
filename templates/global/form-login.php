@@ -31,7 +31,7 @@ if ( is_user_logged_in() )
 	<?php do_action( 'woocommerce_login_form' ); ?>
 
 	<p class="form-row">
-		<?php wp_nonce_field( 'woocommerce-login' ) ?>
+		<?php wp_nonce_field( 'woocommerce-login' ); ?>
 		<input type="submit" class="button" name="login" value="<?php _e( 'Login', 'woocommerce' ); ?>" />
 		<input type="hidden" name="redirect" value="<?php echo esc_url( $redirect ) ?>" />
 		<label for="rememberme" class="inline">
