@@ -36,7 +36,7 @@ class WC_Meta_Box_Order_Downloads {
 
 						if ( ! $product || $product->id != $download->product_id ) {
 							$product    = get_product( absint( $download->product_id ) );
-							$file_count = 1;
+							$file_counter = 1;
 						}
 
 						// don't show permissions to files that have since been removed
@@ -54,7 +54,7 @@ class WC_Meta_Box_Order_Downloads {
 						include( 'views/html-order-download-permission.php' );
 
 						$loop++;
-						$file_count++;
+						$file_counter++;
 					}
 				?>
 			</div>
