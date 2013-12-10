@@ -189,8 +189,8 @@ class WC_Product_Grouped extends WC_Product {
 			if ( $min_price == $max_price ) {
 				$display_price = wc_price( $this->$get_price_method( 1, $min_price ) );
 			} else {
-				$from          = wc_price( $this->$get_price_method( 1, $min_price ) )
-				$to            = wc_price( $this->$get_price_method( 1, $max_price ) )
+				$from          = wc_price( $this->$get_price_method( 1, $min_price ) );
+				$to            = wc_price( $this->$get_price_method( 1, $max_price ) );
 				$display_price = sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), $from, $to );
 			}
 
