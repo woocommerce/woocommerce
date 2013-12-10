@@ -43,6 +43,14 @@ class WC_Meta_Box_Order_Downloads {
 						if ( ! $product || ! $product->exists() || ! $product->has_file( $download->download_id ) )
 							continue;
 
+						// Show file title instead of count if set
+						$file = $product->get_file( $download->download_id );
+						if ( isset( $file['name'] ) ) {
+							$file_count = $file['name'];
+						} else {
+							$file_count = sprintf( __( 'File %d', 'woocommerce' ), $file_counter );
+						}
+
 						include( 'views/html-order-download-permission.php' );
 
 						$loop++;
