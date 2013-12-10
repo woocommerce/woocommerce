@@ -45,6 +45,7 @@ class WC_API_Orders extends WC_API_Resource {
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_order' ),  WC_API_Server::READABLE ),
 			array( array( $this, 'edit_order' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'delete_order' ), WC_API_Server::DELETABLE ),
 		);
 
 		# GET /orders/<id>/notes
