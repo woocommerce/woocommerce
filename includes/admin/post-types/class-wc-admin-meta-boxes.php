@@ -105,8 +105,11 @@ class WC_Admin_Meta_Boxes {
 		add_meta_box( 'woocommerce-coupon-data', __( 'Coupon Data', 'woocommerce' ), 'WC_Meta_Box_Coupon_Data::output', 'shop_coupon', 'normal', 'high' );
 
 		// Reviews
-		if ( 'comment' == get_current_screen()->id && isset( $_GET['c'] ) && 'product' == get_post_type( intval( $_GET['c'] ) ) )
-			add_meta_box( 'woocommerce-rating', __( 'Rating', 'woocommerce' ), 'WC_Meta_Box_Order_Reviews::output', 'comment', 'normal', 'high' );
+		if ( 'comment' == get_current_screen()->id && isset( $_GET['c'] ) ) {
+			if ( get_comment_meta( intval( $_GET['c'] ), 'rating', true ) ) {
+				add_meta_box( 'woocommerce-rating', __( 'Rating', 'woocommerce' ), 'WC_Meta_Box_Order_Reviews::output', 'comment', 'normal', 'high' );
+			}
+		}
 	}
 
 	/**
