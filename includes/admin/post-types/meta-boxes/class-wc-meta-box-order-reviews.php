@@ -21,9 +21,6 @@ class WC_Meta_Box_Order_Reviews {
 	 * Output the metabox
 	 */
 	public static function output( $comment ) {
-		global $post_type;
-
-		echo $post_type;
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 
 		$current = get_comment_meta( $comment->comment_ID, 'rating', true );
