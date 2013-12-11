@@ -10,8 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			foreach ( $parent_data['attributes'] as $attribute ) {
 
 				// Only deal with attributes that are variations
-				if ( ! $attribute['is_variation'] )
+				if ( ! $attribute['is_variation'] ) {
 					continue;
+				}
 
 				// Get current value for variation (if set)
 				$variation_selected_value = isset( $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ][0] ) ? $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ][0] : '';
