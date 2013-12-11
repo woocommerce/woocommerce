@@ -72,16 +72,17 @@ class WC_Admin_Meta_Boxes {
 	public function output_errors() {
 		$errors = maybe_unserialize( get_option( 'woocommerce_meta_box_errors' ) );
 
-	    if ( ! empty( $errors ) ) {
+		if ( ! empty( $errors ) ) {
 
-	    	echo '<div id="woocommerce_errors" class="error fade">';
-	    	foreach ( $errors as $error )
-	    		echo '<p>' . esc_html( $error ) . '</p>';
-	    	echo '</div>';
+			echo '<div id="woocommerce_errors" class="error fade">';
+			foreach ( $errors as $error ) {
+				echo '<p>' . esc_html( $error ) . '</p>';
+			}
+			echo '</div>';
 
-	    	// Clear
-	    	delete_option( 'woocommerce_meta_box_errors' );
-	    }
+			// Clear
+			delete_option( 'woocommerce_meta_box_errors' );
+		}
 	}
 
 	/**
