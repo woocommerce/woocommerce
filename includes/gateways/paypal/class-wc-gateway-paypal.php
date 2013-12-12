@@ -201,7 +201,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				'title'       => __( 'Shipping details', 'woocommerce' ),
 				'type'        => 'checkbox',
 				'label'       => __( 'Send shipping details to PayPal instead of billing.', 'woocommerce' ),
-				'description' => '',
 				'description' => __( 'PayPal allows us to send 1 address. If you are using PayPal for shipping labels you may prefer to send the shipping address rather than billing.', 'woocommerce' ),
 				'default'     => 'no'
 			),
