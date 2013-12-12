@@ -36,7 +36,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		$this->enable_for_methods = $this->get_option( 'enable_for_methods', array() );
 
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_action( 'woocommerce_thankyou_cod', array( $this, 'thankyou' ) );
+		add_action( 'woocommerce_thankyou_cod', array( $this, 'thankyou_page' ) );
 	}
 
     /**
