@@ -254,8 +254,8 @@ class WC_Admin_Welcome {
 				<h3><?php _e( 'UI and reporting improvements', 'woocommerce' ); ?></h3>
 				<div class="wc-feature feature-section col three-col">
 					<div>
-						<h4><?php _e( 'WordPress 3.8 UI (MP6) compatibility', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'WooCommerce 2.1 has had its UI restyled to work with the new MP6 design in WordPress. All bitmap icons have been replaced with a custom, lightweight icon font for razor sharp clarity on retina devices as well as improved performance.', 'woocommerce' ); ?></p>
+						<h4><?php _e( 'WordPress 3.8 admin UI compatibility', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'WooCommerce 2.1 has had its UI restyled to work with the new admin design in WordPress 3.8. All bitmap icons have been replaced with a custom, lightweight icon font for razor sharp clarity on retina devices as well as improved performance.', 'woocommerce' ); ?></p>
 					</div>
 					<div>
 						<h4><?php _e( 'Simplified order UI', 'woocommerce' ); ?></h4>
