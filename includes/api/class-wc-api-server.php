@@ -422,6 +422,7 @@ class WC_API_Server {
 			'name'        => get_option( 'blogname' ),
 			'description' => get_option( 'blogdescription' ),
 			'URL'         => get_option( 'siteurl' ),
+			'wc_version'  => WC()->version,
 			'routes'      => array(),
 			'meta'        => array(
 				'timezone'       => wc_timezone_string(),
