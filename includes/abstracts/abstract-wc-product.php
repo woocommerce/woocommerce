@@ -413,7 +413,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_shipping_taxable() {
-		return $this->tax_status=='taxable' || $this->tax_status=='shipping' ? true : false;
+		return $this->tax_status == 'taxable' || $this->tax_status == 'shipping' ? true : false;
 	}
 
 	/**
@@ -491,7 +491,7 @@ class WC_Product {
 				if ( $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 					return false;
 				} else {
-					if ( $this->stock_status == 'instock' ) {
+					if ( 'instock' == $this->stock_status ) {
 						return true;
 					} else {
 						return false;
@@ -501,7 +501,7 @@ class WC_Product {
 
 		} else {
 
-			if ( $this->stock_status == 'instock' ) {
+			if ( 'instock' == $this->stock_status ) {
 				return true;
 			} else {
 				return false;
@@ -517,7 +517,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function backorders_allowed() {
-		return $this->backorders == 'yes' || $this->backorders == 'notify' ? true : false;
+		return ( $this->backorders == 'yes' || $this->backorders == 'notify' ) ? true : false;
 	}
 
 	/**
@@ -527,7 +527,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function backorders_require_notification() {
-		return $this->managing_stock() && $this->backorders == 'notify' ? true : false;
+		return ( $this->managing_stock() && $this->backorders == 'notify' ) ? true : false;
 	}
 
 	/**
@@ -538,7 +538,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_on_backorder( $qty_in_cart = 0 ) {
-		return $this->managing_stock() && $this->backorders_allowed() && ( $this->get_total_stock() - $qty_in_cart ) < 0 ? true : false;
+		return ( $this->managing_stock() && $this->backorders_allowed() && ( $this->get_total_stock() - $qty_in_cart ) < 0 ) ? true : false;
 	}
 
 	/**
@@ -549,7 +549,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function has_enough_stock( $quantity ) {
-		return ! $this->managing_stock() || $this->backorders_allowed() || $this->stock >= $quantity ? true : false;
+		return ( ! $this->managing_stock() || $this->backorders_allowed() || $this->stock >= $quantity ) ? true : false;
 	}
 
 	/**
@@ -627,7 +627,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_featured() {
-		return $this->featured == 'yes' ? true : false;
+		return ( $this->featured == 'yes' ) ? true : false;
 	}
 
 	/**
@@ -641,7 +641,7 @@ class WC_Product {
 		$visible = true;
 
 		// Out of stock visibility
-		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' && ! $this->is_in_stock() ) {
+		if ( 'yes' == get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $this->is_in_stock() ) {
 			$visible = false;
 
 		// visibility setting
@@ -699,11 +699,11 @@ class WC_Product {
 			$purchasable = false;
 
 		// Other products types need a price to be set
-		} elseif ( $this->get_price() === '' ) {
+		} elseif ( '' === $this->get_price()  ) {
 			$purchasable = false;
 
 		// Check the product is published
-		} elseif ( $this->post->post_status !== 'publish' && ! current_user_can( 'edit_post', $this->id ) ) {
+		} elseif ( 'publish' !== $this->post->post_status && ! current_user_can( 'edit_post', $this->id ) ) {
 			$purchasable = false;
 		}
 
@@ -775,7 +775,7 @@ class WC_Product {
 
 		if ( $this->is_taxable() ) {
 
-			if ( get_option('woocommerce_prices_include_tax') == 'no' ) {
+			if ( 'no' == get_option('woocommerce_prices_include_tax') ) {
 
 				$tax_rates  = $_tax->get_rates( $this->get_tax_class() );
 				$taxes      = $_tax->calc_tax( $price * $qty, $tax_rates, false );
@@ -828,7 +828,7 @@ class WC_Product {
 			$price = $this->get_price();
 		}
 
-		if ( $this->is_taxable() && get_option('woocommerce_prices_include_tax') == 'yes' ) {
+		if ( $this->is_taxable() && 'yes' == get_option( 'woocommerce_prices_include_tax' )  ) {
 
 			$_tax       = new WC_Tax();
 			$tax_rates  = $_tax->get_shop_base_rate( $this->tax_class );
@@ -847,7 +847,7 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_price_suffix() {
-		$price_display_suffix  = get_option( 'woocommerce_price_display_suffix' );
+		$price_display_suffix = get_option( 'woocommerce_price_display_suffix' );
 
 		if ( $price_display_suffix ) {
 			$price_display_suffix = ' <small class="woocommerce-price-suffix">' . $price_display_suffix . '</small>';
@@ -898,7 +898,7 @@ class WC_Product {
 
 			}
 
-		} elseif ( $this->get_price() === '' ) {
+		} elseif ( '' === $this->get_price() ) {
 
 			$price = apply_filters( 'woocommerce_empty_price_html', '', $this );
 
@@ -1008,7 +1008,7 @@ class WC_Product {
 
 			global $wpdb;
 
-			$count = $wpdb->get_var( $wpdb->prepare("
+			$count = $wpdb->get_var( $wpdb->prepare( "
 				SELECT COUNT(meta_value) FROM $wpdb->commentmeta
 				LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
 				WHERE meta_key = 'rating'
@@ -1152,11 +1152,11 @@ class WC_Product {
 		$cats_array = array(0);
 
 		// Get tags
-		$terms = wp_get_post_terms($this->id, 'product_tag');
+		$terms = wp_get_post_terms( $this->id, 'product_tag' );
 		foreach ( $terms as $term ) $tags_array[] = $term->term_id;
 
 		// Get categories
-		$terms = wp_get_post_terms($this->id, 'product_cat');
+		$terms = wp_get_post_terms( $this->id, 'product_cat' );
 		foreach ( $terms as $term ) $cats_array[] = $term->term_id;
 
 		// Don't bother if none are set
@@ -1176,7 +1176,7 @@ class WC_Product {
 		$query['join']  .= " INNER JOIN {$wpdb->term_taxonomy} tt ON (tr.term_taxonomy_id = tt.term_taxonomy_id)";
 		$query['join']  .= " INNER JOIN {$wpdb->terms} t ON (t.term_id = tt.term_id)";
 
-		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' ) {
+		if ( 'yes' == get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 			$query['join'] .= " INNER JOIN {$wpdb->postmeta} pm2 ON ( pm2.post_id = p.ID AND pm2.meta_key='_stock_status' )";
 		}
 
@@ -1186,7 +1186,7 @@ class WC_Product {
 		$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " )";
 		$query['where'] .= " AND pm.meta_value IN ( 'visible', 'catalog' )";
 
-		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' ) {
+		if ( 'yes' == get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 			$query['where'] .= " AND pm2.meta_value = 'instock'";
 		}
 
@@ -1260,8 +1260,9 @@ class WC_Product {
 	public function has_attributes() {
 		if ( sizeof( $this->get_attributes() ) > 0 ) {
 			foreach ( $this->get_attributes() as $attribute ) {
-				if ( isset( $attribute['is_visible'] ) && $attribute['is_visible'] )
+				if ( isset( $attribute['is_visible'] ) && $attribute['is_visible'] ) {
 					return true;
+				}
 			}
 		}
 		return false;

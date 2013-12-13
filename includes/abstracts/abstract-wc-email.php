@@ -327,7 +327,7 @@ abstract class WC_Email extends WC_Settings_API {
 	 * @param array $tags
 	 * @return array
 	 */
-	function style_inline_tags($tags) {
+	function style_inline_tags( $tags ) {
 		return array_unique( array_merge( $tags, array( 'h1', 'h2', 'h3', 'a', 'img' ) ) );
 	}
 
@@ -337,7 +337,7 @@ abstract class WC_Email extends WC_Settings_API {
 	 * @param array $styles
 	 * @return array
 	 */
-	function style_inline_h1_tag($styles) {
+	function style_inline_h1_tag( $styles ) {
 		$styles['color'] = get_option( 'woocommerce_email_text_color' );
 		$styles['display'] = 'block';
 		$styles['font-family'] = 'Arial';
@@ -359,7 +359,7 @@ abstract class WC_Email extends WC_Settings_API {
 	 * @param array $styles
 	 * @return array
 	 */
-	function style_inline_h2_tag($styles) {
+	function style_inline_h2_tag( $styles ) {
 		$styles['color'] = get_option( 'woocommerce_email_text_color' );
 		$styles['display'] = 'block';
 		$styles['font-family'] = 'Arial';
@@ -382,7 +382,7 @@ abstract class WC_Email extends WC_Settings_API {
 	 * @param array $styles
 	 * @return array
 	 */
-	function style_inline_h3_tag($styles) {
+	function style_inline_h3_tag( $styles ) {
 		$styles['color'] = get_option( 'woocommerce_email_text_color' );
 		$styles['display'] = 'block';
 		$styles['font-family'] = 'Arial';
@@ -402,7 +402,7 @@ abstract class WC_Email extends WC_Settings_API {
 	 * @param array $styles
 	 * @return array
 	 */
-	function style_inline_a_tag($styles) {
+	function style_inline_a_tag( $styles ) {
 		$styles['color'] = get_option( 'woocommerce_email_text_color' );
 		$styles['font-weight'] = 'normal';
 		$styles['text-decoration'] = 'underline';
@@ -417,7 +417,7 @@ abstract class WC_Email extends WC_Settings_API {
 	 * @param array $styles
 	 * @return array
 	 */
-	function style_inline_img_tag($styles) {
+	function style_inline_img_tag( $styles ) {
 		$styles['display'] = 'inline';
 		$styles['border'] = 'none';
 		$styles['font-size'] = '14px';
@@ -448,15 +448,15 @@ abstract class WC_Email extends WC_Settings_API {
 	 * @param string $tag
 	 * @return string
 	 */
-	function get_style_inline_for_tag($tag) {
+	function get_style_inline_for_tag( $tag ) {
 		$styles = apply_filters( 'woocommerce_email_style_inline_' . $tag . '_tag',  array() );
 		$css = array();
 
-		foreach( $styles as $property => $value ) {
+		foreach ( $styles as $property => $value ) {
 			$css[] = $property . ':' . $value;
 		}
 
-		return implode('; ', $css);
+		return implode( '; ', $css );
 	}
 
 	/**
@@ -473,11 +473,11 @@ abstract class WC_Email extends WC_Settings_API {
 
 		$dom = new DOMDocument();
 		libxml_use_internal_errors( true );
-    		@$dom->loadHTML( $content );
-    		libxml_clear_errors();
+    	@$dom->loadHTML( $content );
+    	libxml_clear_errors();
 
-		foreach( $this->get_style_inline_tags() as $tag ) {
-			$nodes = $dom->getElementsByTagName($tag);
+		foreach ( $this->get_style_inline_tags() as $tag ) {
+			$nodes = $dom->getElementsByTagName( $tag );
 
 			foreach( $nodes as $node ) {
 				if ( ! $node->hasAttribute( 'style' ) ) {
@@ -768,7 +768,7 @@ abstract class WC_Email extends WC_Settings_API {
 			?>
 			</div>
 			<?php
-			wc_enqueue_js("
+			wc_enqueue_js( "
 				jQuery('select.email_type').change(function(){
 
 					var val = jQuery( this ).val();
@@ -809,7 +809,7 @@ abstract class WC_Email extends WC_Settings_API {
 					if ( name )
 						jQuery(this).attr( 'name', name );
 				});
-			");
+			" );
 		}
 	}
 }

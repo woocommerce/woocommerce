@@ -38,8 +38,9 @@ abstract class WC_Widget extends WP_Widget {
 	function get_cached_widget( $args ) {
 		$cache = wp_cache_get( $this->widget_id, 'widget' );
 
-		if ( ! is_array( $cache ) )
+		if ( ! is_array( $cache ) ) {
 			$cache = array();
+		}
 
 		if ( isset( $cache[ $args['widget_id'] ] ) ) {
 			echo $cache[ $args['widget_id'] ];
@@ -78,8 +79,9 @@ abstract class WC_Widget extends WP_Widget {
 	function update( $new_instance, $old_instance ) {
 		$instance = $old_instance;
 
-		if ( ! $this->settings )
+		if ( ! $this->settings ) {
 			return $instance;
+		}
 
 		foreach ( $this->settings as $key => $setting ) {
 			if ( isset( $new_instance[$key] ) ) {
