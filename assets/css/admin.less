@@ -2097,7 +2097,7 @@ img.help_tip {
 }
 #woocommerce-product-data, #woocommerce-coupon-data {
 	.panel-wrap {
-		background: #f8f8f8;
+		background: #fff;
 		padding-left: 153px;
 	}
 	.woocommerce_options_panel, .wc-metaboxes-wrapper {
@@ -2114,14 +2114,14 @@ img.help_tip {
 		top: 0;
 		left: 0;
 		bottom: 0;
-		background: #f1f1f1;
+		background: #f5f5f5;
 		width: 145px;
 		border-right: 1px solid #DFDFDF;
 	}
 }
 #woocommerce-product-data, #woocommerce-coupon-data, .woocommerce {
 	ul.wc-tabs {
-		background: #f1f1f1;
+		background: #f5f5f5;
 		line-height: 1em;
 		float: left;
 		width: 145px;
@@ -2136,15 +2136,14 @@ img.help_tip {
 			margin: 0;
 
 			a {
-				padding: 5px;
+				padding: 10px;
 				line-height: 18px !important;
 				margin: 0;
 				display: block;
-				background: #f1f1f1;
+				background: #f5f5f5;
 				text-decoration: none;
-				border-bottom: 1px solid #f1f1f1;
-				border-top: 1px solid #f1f1f1;
-				padding-left:10px;
+				border-bottom: 1px solid #f5f5f5;
+				border-top: 1px solid #eaeaea;
 				&:before {
 					.iconbefore( "\e028" );
 				}
@@ -2215,7 +2214,7 @@ img.help_tip {
 				a {
 					border-color: #DFDFDF;
 					position: relative;
-					background-color: #f8f8f8;
+					background-color: #fff;
 					color: #555;
 					margin: 0 -1px 0 0;
 				}
@@ -2235,7 +2234,6 @@ img.help_tip {
 			top: 0;
 			left: 0;
 			bottom: 0;
-			background: #f1f1f1;
 			width: 28px;
 			border-right: 1px solid #DFDFDF;
 		}
@@ -3339,6 +3337,44 @@ table.bar_chart {
 			}
 		}
 	}
+	.woocommerce_options_panel .description {
+		display: block;
+		clear: both;
+		margin-left: 150px;
+	}
+}
+
+@media only screen and (max-width: 900px) {
+
+	#woocommerce-product-data ul.product_data_tabs,
+	#woocommerce-product-data .wc-tabs-back {
+		width:40px;
+	}
+
+	#woocommerce-product-data .woocommerce_options_panel,
+	#woocommerce-coupon-data .woocommerce_options_panel,
+	#woocommerce-product-data .wc-metaboxes-wrapper,
+	#woocommerce-coupon-data .wc-metaboxes-wrapper {
+		width: 98%;
+	}
+
+	#woocommerce-product-data ul.product_data_tabs li a {
+		position: relative;
+		text-indent: -999px;
+		padding: 10px;
+		&:before {
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			text-indent: 0;
+			text-align: center;
+			line-height: 40px;
+			width: 40px;
+			height: 40px;
+		}
+	}
 }
 
 @media only screen and (max-width: 782px) {
@@ -3357,7 +3393,7 @@ table.bar_chart {
 	}
 
 	#woocommerce-product-data .checkbox {
-	        width: 25px;
+	    width: 25px;
 	}
 }
 
