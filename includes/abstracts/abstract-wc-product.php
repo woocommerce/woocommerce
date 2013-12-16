@@ -285,11 +285,11 @@ class WC_Product {
 				}
 
 				// Filter URL
-				$downloadable_files[ $key ]['file'] = apply_filters( 'woocommerce_file_download_path', $downloadable_files[ $key ]['file'], $this->id, $key );
+				$downloadable_files[ $key ]['file'] = apply_filters( 'woocommerce_file_download_path', $downloadable_files[ $key ]['file'], $this, $key );
 			}
 		}
 
-		return apply_filters( 'woocommerce_product_files', $downloadable_files, $this->id );
+		return apply_filters( 'woocommerce_product_files', $downloadable_files, $this );
 	}
 
 	/**
@@ -308,7 +308,7 @@ class WC_Product {
 		}
 
 		// allow overriding based on the particular file being requested
-		return apply_filters( 'woocommerce_product_file', $file, $this->id, $download_id );
+		return apply_filters( 'woocommerce_product_file', $file, $this, $download_id );
 	}
 
 	/**
@@ -327,7 +327,7 @@ class WC_Product {
 		}
 
 		// allow overriding based on the particular file being requested
-		return apply_filters( 'woocommerce_product_file_download_path', $file_path, $this->id, $download_id );
+		return apply_filters( 'woocommerce_product_file_download_path', $file_path, $this, $download_id );
 	}
 
 	/**

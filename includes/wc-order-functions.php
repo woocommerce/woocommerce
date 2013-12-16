@@ -94,8 +94,9 @@ function wc_downloadable_file_permission( $download_id, $product_id, $order ) {
 
 	return $result ? $wpdb->insert_id : false;
 }
-add_action('woocommerce_order_status_completed', 'woocommerce_downloadable_product_permissions');
-add_action('woocommerce_order_status_processing', 'woocommerce_downloadable_product_permissions');
+
+add_action('woocommerce_order_status_completed', 'wc_downloadable_product_permissions');
+add_action('woocommerce_order_status_processing', 'wc_downloadable_product_permissions');
 
 
 /**
@@ -116,10 +117,11 @@ function wc_downloadable_product_permissions( $order_id ) {
 			$_product = $order->get_product_from_item( $item );
 
 			if ( $_product && $_product->exists() && $_product->is_downloadable() ) {
-				$downloads = get_post_meta( $_product->id, '_downloadable_files' ) ;
+				$downloads = $_product->get_files();
 
-				foreach ( $downloads[0] as $download_id => $download )
+				foreach ( array_keys( $downloads ) as $download_id ) {
 					wc_downloadable_file_permission( $download_id, $item['variation_id'] > 0 ? $item['variation_id'] : $item['product_id'], $order );
+				}
 			}
 		}
 	}
