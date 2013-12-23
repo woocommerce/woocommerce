@@ -661,7 +661,7 @@ class WC_Checkout {
 					// Redirect to success/confirmation/payment page
 					if ( $result['result'] == 'success' ) {
 
-						$result = apply_filters( 'woocommerce_payment_successful_result', $result );
+						$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
 
 						if ( is_ajax() ) {
 							echo '<!--WC_START-->' . json_encode( $result ) . '<!--WC_END-->';
