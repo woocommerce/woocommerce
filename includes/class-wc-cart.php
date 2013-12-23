@@ -1775,8 +1775,18 @@ class WC_Cart {
 		 * @param string $tax_class (default: '')
 		 */
 		public function add_fee( $name, $amount, $taxable = false, $tax_class = '' ) {
+
+			$new_fee_id = sanitize_title( $name );
+
+			// Only add each fee once
+			foreach ( $this->fees as $fee ) {
+				if ( $fee->id == $new_fee_id ) {
+					return;
+				}
+			}
+
 			$new_fee 			= new stdClass();
-			$new_fee->id 		= sanitize_title( $name );
+			$new_fee->id 		= $new_fee_id;
 			$new_fee->name 		= esc_attr( $name );
 			$new_fee->amount	= (float) esc_attr( $amount );
 			$new_fee->tax_class	= $tax_class;
