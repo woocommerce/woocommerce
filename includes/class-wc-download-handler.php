@@ -211,7 +211,14 @@ class WC_Download_Handler {
 		@session_write_close();
 		@ini_set( 'zlib.output_compression', 'Off' );
 
-		@ob_clean(); // Clear the output buffer
+		/**
+		 * Prevents errors, for example: transfer closed with 3 bytes remaining to read
+		 */
+		@ob_end_clean(); // Clear the output buffer
+
+		if ( ob_get_level() ) {
+			@ob_end_clean(); // Zip corruption fix
+		}
 
 		if ( $is_IE && is_ssl() ) {
 			// IE bug prevents download via SSL when Cache Control and Pragma no-cache headers set.
