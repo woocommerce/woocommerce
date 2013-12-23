@@ -179,7 +179,7 @@ class WC_Product_Variable extends WC_Product {
 			$price            = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $price ) : $variation->get_price_excluding_tax( 1, $price );
 		}
 
-		return apply_filters( 'woocommerce_get_variation_regular_price', $price, $this );
+		return apply_filters( 'woocommerce_get_variation_regular_price', $price, $this, $min_or_max, $display );
 	}
 
 	/**
@@ -198,7 +198,7 @@ class WC_Product_Variable extends WC_Product {
 			$price            = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $price ) : $variation->get_price_excluding_tax( 1, $price );
 		}
 
-		return apply_filters( 'woocommerce_get_variation_sale_price', $price, $this );
+		return apply_filters( 'woocommerce_get_variation_sale_price', $price, $this, $min_or_max, $display );
 	}
 
 	/**
@@ -223,7 +223,7 @@ class WC_Product_Variable extends WC_Product {
 			$price = get_post_meta( $variation_id, '_price', true );
 		}
 
-		return apply_filters( 'woocommerce_get_variation_price', $price, $this );
+		return apply_filters( 'woocommerce_get_variation_price', $price, $this, $min_or_max, $display );
 	}
 
 	/**
