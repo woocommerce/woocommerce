@@ -750,20 +750,20 @@ class WC_Checkout {
 
 		} else {
 
-			$value = apply_filters( 'woocommerce_checkout_get_value', null, $input );
-
-			if ( $value )
-				return $value;
-
 			if ( is_user_logged_in() ) {
+				
+				$value = '';
 
 				$current_user = wp_get_current_user();
 
 				if ( $meta = get_user_meta( $current_user->ID, $input, true ) )
-					return $meta;
+					$value = $meta;
 
 				if ( $input == "billing_email" )
-					return $current_user->user_email;
+					$value = $current_user->user_email;
+				
+				return apply_filters( 'woocommerce_checkout_get_value', $value, $input );
+	
 			}
 
 			switch ( $input ) {
@@ -782,6 +782,7 @@ class WC_Checkout {
 				default :
 					return apply_filters( 'default_checkout_' . $input, '', $input );
 			}
+
 		}
 	}
 }
