@@ -12,7 +12,7 @@ jQuery(document).ready(function($) {
 
 		var shipping_methods = [];
 
-		$('select#shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]').each( function( index, input ) {
+		$('select[name^=shipping_method], input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]').each( function( index, input ) {
 			shipping_methods[ $(this).data( 'index' ) ] = $(this).val();
 		} );
 
