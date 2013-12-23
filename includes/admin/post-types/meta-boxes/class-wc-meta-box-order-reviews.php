@@ -21,9 +21,6 @@ class WC_Meta_Box_Order_Reviews {
 	 * Output the metabox
 	 */
 	public static function output( $comment ) {
-		global $post_type;
-
-		echo $post_type;
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 
 		$current = get_comment_meta( $comment->comment_ID, 'rating', true );
@@ -41,8 +38,9 @@ class WC_Meta_Box_Order_Reviews {
 	 */
 	public static function save( $location, $comment_id ) {
 		// Not allowed, return regular value without updating meta
-		if ( ! wp_verify_nonce( $_POST['woocommerce_meta_nonce'], 'woocommerce_save_data' ) && ! isset( $_POST['rating'] ) )
+		if ( ! wp_verify_nonce( $_POST['woocommerce_meta_nonce'], 'woocommerce_save_data' ) && ! isset( $_POST['rating'] ) ) {
 			return $location;
+		}
 
 		// Update meta
 		update_comment_meta(

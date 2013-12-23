@@ -72,16 +72,17 @@ class WC_Admin_Meta_Boxes {
 	public function output_errors() {
 		$errors = maybe_unserialize( get_option( 'woocommerce_meta_box_errors' ) );
 
-	    if ( ! empty( $errors ) ) {
+		if ( ! empty( $errors ) ) {
 
-	    	echo '<div id="woocommerce_errors" class="error fade">';
-	    	foreach ( $errors as $error )
-	    		echo '<p>' . esc_html( $error ) . '</p>';
-	    	echo '</div>';
+			echo '<div id="woocommerce_errors" class="error fade">';
+			foreach ( $errors as $error ) {
+				echo '<p>' . esc_html( $error ) . '</p>';
+			}
+			echo '</div>';
 
-	    	// Clear
-	    	delete_option( 'woocommerce_meta_box_errors' );
-	    }
+			// Clear
+			delete_option( 'woocommerce_meta_box_errors' );
+		}
 	}
 
 	/**
@@ -105,8 +106,11 @@ class WC_Admin_Meta_Boxes {
 		add_meta_box( 'woocommerce-coupon-data', __( 'Coupon Data', 'woocommerce' ), 'WC_Meta_Box_Coupon_Data::output', 'shop_coupon', 'normal', 'high' );
 
 		// Reviews
-		if ( 'comment' == get_current_screen()->id && isset( $_GET['c'] ) && 'product' == get_post_type( intval( $_GET['c'] ) ) )
-			add_meta_box( 'woocommerce-rating', __( 'Rating', 'woocommerce' ), 'WC_Meta_Box_Order_Reviews::output', 'comment', 'normal', 'high' );
+		if ( 'comment' == get_current_screen()->id && isset( $_GET['c'] ) ) {
+			if ( get_comment_meta( intval( $_GET['c'] ), 'rating', true ) ) {
+				add_meta_box( 'woocommerce-rating', __( 'Rating', 'woocommerce' ), 'WC_Meta_Box_Order_Reviews::output', 'comment', 'normal', 'high' );
+			}
+		}
 	}
 
 	/**
@@ -134,7 +138,7 @@ class WC_Admin_Meta_Boxes {
 		global $post;
 
 		// Comments/Reviews
-		if ( ( 'publish' == $post->post_status || 'private' == $post->post_status ) ) {
+		if ( isset( $post ) && ( 'publish' == $post->post_status || 'private' == $post->post_status ) ) {
 			remove_meta_box( 'commentsdiv', 'product', 'normal' );
 
 			add_meta_box( 'commentsdiv', __( 'Reviews', 'woocommerce' ), 'post_comment_meta_box', 'product', 'normal' );
