@@ -52,8 +52,10 @@ function wc_downloadable_file_permission( $download_id, $product_id, $order ) {
 	// Default value is NULL in the table schema
 	$expiry     = empty( $expiry ) ? null : absint( $expiry );
 
-	if ( $expiry )
-		$expiry = date_i18n( "Y-m-d", strtotime( 'NOW + ' . $expiry . ' DAY' ) );
+	if ( $expiry ) {
+		$order_completed_date = date_i18n( "Y-m-d", strtotime( $order->completed_date ) );
+		$expiry = date_i18n( "Y-m-d", strtotime( $order_completed_date . ' + ' . $expiry . ' DAY' ) );
+	}
 
 	$data = apply_filters( 'woocommerce_downloadable_file_permission_data', array(
 		'download_id'			=> $download_id,
