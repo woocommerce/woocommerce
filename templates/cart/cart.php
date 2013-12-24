@@ -55,7 +55,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 							if ( ! $_product->is_visible() )
 								echo $thumbnail;
 							else
-								printf( '<a href="%s">%s</a>', add_query_arg( $cart_item['variation'], $_product->get_permalink() ), $thumbnail );
+								printf( '<a href="%s">%s</a>', $_product->get_permalink(), $thumbnail );
 						?>
 					</td>
 
@@ -64,7 +64,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 							if ( ! $_product->is_visible() )
 								echo apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key );
 							else
-								echo apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s</a>', ( is_array( $cart_item['variation'] ) ? add_query_arg( $cart_item['variation'], $_product->get_permalink() ) : $_product->get_permalink() ), $_product->get_title() ), $cart_item, $cart_item_key );
+								echo apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s</a>', $_product->get_permalink(), $_product->get_title() ), $cart_item, $cart_item_key );
 
 							// Meta data
 							echo WC()->cart->get_item_data( $cart_item );
