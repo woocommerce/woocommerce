@@ -504,8 +504,9 @@ class WC_Cart {
 
 		            // If this is a custom option slug, get the options name
 		            } else {
-		            	$value = apply_filters( 'woocommerce_variation_option_name', $value );
-		            	$label = wc_attribute_label( urldecode( $name ) );
+						$value              = apply_filters( 'woocommerce_variation_option_name', $value );
+						$product_attributes = $cart_item['data']->get_attributes();
+						$label              = wc_attribute_label( $product_attributes[ str_replace( 'attribute_', '', urldecode( $name ) ) ]['name'] );
 					}
 
 					$item_data[] = array(
