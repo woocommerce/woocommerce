@@ -159,6 +159,9 @@ class WC_Shortcode_My_Account {
 
 		$address = WC()->countries->get_address_fields( get_user_meta( get_current_user_id(), $load_address . '_country', true ), $load_address . '_' );
 
+		// Enqueue scripts
+		wp_enqueue_script( 'wc-country-select' );
+
 		// Prepare values
 		foreach ( $address as $key => $field ) {
 
