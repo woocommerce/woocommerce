@@ -2104,9 +2104,22 @@ img.help_tip {
 		float: right;
 		width: 100%;
 
-		p, .wc-metaboxes, p.toolbar {
+		p, .wc-metaboxes, p.toolbar, fieldset.form-field {
 			padding-left: 12px !important;
 			padding-right: 20px !important;
+		}
+
+		.wc-radios {
+			display: block;
+			float: left;
+			margin: 0;
+			li {
+				display: block;
+				padding: 0 0 10px 0;
+				input {
+					width: auto;
+				}
+			}
 		}
 	}
 	.wc-tabs-back {
@@ -2269,7 +2282,7 @@ img.help_tip {
 	padding: 9px;
 	margin: 0;
 }
-.woocommerce_options_panel p, #woocommerce-product-type-options .panel p {
+.woocommerce_options_panel p, #woocommerce-product-type-options .panel p, .woocommerce_options_panel fieldset.form-field {
 	margin: 0 0 9px;
 	font-size: 12px;
 	padding: 5px 9px;

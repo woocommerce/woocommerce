@@ -183,11 +183,7 @@ function woocommerce_wp_radio( $field ) {
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
 	$field['value'] 		= isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 
-	echo '<fieldset class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><legend>' . wp_kses_post( $field['label'] ) . '</legend><ul>';
-
-	if ( ! empty( $field['description'] ) ) {
-		echo '<li class="description">' . wp_kses_post( $field['description'] ) . '</li>';
-	}
+	echo '<fieldset class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><legend>' . wp_kses_post( $field['label'] ) . '</legend><ul class="wc-radios">';
 
     foreach ( $field['options'] as $key => $value ) {
 
@@ -200,5 +196,17 @@ function woocommerce_wp_radio( $field ) {
         		/> ' . esc_html( $value ) . '</label>
     	</li>';
 	}
-    echo '</ul></fieldset>';
+    echo '</ul>';
+
+    if ( ! empty( $field['description'] ) ) {
+
+		if ( isset( $field['desc_tip'] ) && false !== $field['desc_tip'] ) {
+			echo '<img class="help_tip" data-tip="' . esc_attr( $field['description'] ) . '" src="' . esc_url( WC()->plugin_url() ) . '/assets/images/help.png" height="16" width="16" />';
+		} else {
+			echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
+		}
+
+	}
+
+    echo '</fieldset>';
 }
