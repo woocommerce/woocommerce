@@ -752,7 +752,7 @@ class WC_Checkout {
 
 			$value = apply_filters( 'woocommerce_checkout_get_value', null, $input );
 
-			if ( $value )
+			if ( $value !== null )
 				return $value;
 
 			if ( is_user_logged_in() ) {
