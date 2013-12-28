@@ -319,7 +319,7 @@ class WC_Admin_Welcome {
 
 					<div class="last-feature">
 						<h4><?php _e( 'New endpoints', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'Certain pages such as "Pay", "Order Recieved" and some account pages are now endpoints rather than pages to make checkout more reliable.', 'woocommerce' ); ?></p>
+						<p><?php _e( 'Certain pages such as "Pay", "Order Received" and some account pages are now endpoints rather than pages to make checkout more reliable.', 'woocommerce' ); ?></p>
 					</div>
 				</div>
 				<div class="feature-section col three-col">
