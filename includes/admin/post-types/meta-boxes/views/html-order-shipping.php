@@ -38,6 +38,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 	<p class="last">
 		<input type="text" class="shipping_cost wc_input_price" name="shipping_cost[<?php echo $item_id ? $item_id : 'new][]'; ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $shipping_cost ) ); ?>" />
 	</p>
+	<?php do_action( 'woocommerce_admin_order_totals_after_shipping_item', $item_id ); ?>
 	<a href="#" class="delete_total_row">&times;</a>
 	<div class="clear"></div>
 </div>
