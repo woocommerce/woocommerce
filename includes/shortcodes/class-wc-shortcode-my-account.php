@@ -366,12 +366,12 @@ class WC_Shortcode_My_Account {
 
 			wc_add_notice( __( 'Add a new payment method.', 'woocommerce' ), 'notice'  );
 
-			wc_print_messages();
+			wc_print_notices();
 
 			// Add payment method form
 			wc_get_template( 'myaccount/form-add-payment-method.php' );
 
-			wc_print_messages();
+			wc_print_notices();
 
 			do_action( 'after_woocommerce_add_payment_method' );
 
