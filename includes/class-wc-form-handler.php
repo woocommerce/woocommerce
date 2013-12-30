@@ -453,6 +453,7 @@ class WC_Form_Handler {
 			$order            = new WC_Order( $order_id );
 			$user_can_cancel  = current_user_can( 'cancel_order', $order_id );
 			$order_can_cancel = in_array( $order->status, apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ) ) );
+			$redirect         = urldecode( $_GET['redirect'] );
 
 			if ( $user_can_cancel && $order_can_cancel && $order->id == $order_id && $order->order_key == $order_key && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) ) {
 
@@ -470,8 +471,10 @@ class WC_Form_Handler {
 				wc_add_notice( __( 'Invalid order.', 'woocommerce' ), 'error' );
 			}
 
-			wp_safe_redirect( get_permalink( wc_get_page_id( 'myaccount' ) ) );
-			exit;
+			if ( $redirect ) {
+				wp_safe_redirect( $redirect );
+				exit;
+			}
 		}
 	}
 

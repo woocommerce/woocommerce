@@ -1055,8 +1055,11 @@ class WC_Order {
 	 * @access public
 	 * @return string
 	 */
-	public function get_cancel_order_url() {
-		return apply_filters('woocommerce_get_cancel_order_url', wp_nonce_url( add_query_arg( array( 'cancel_order' => 'true', 'order' => $this->order_key, 'order_id' => $this->id ), trailingslashit( home_url() ) ), 'woocommerce-cancel_order' ) );
+	public function get_cancel_order_url( $redirect = '' ) {
+		$cancel_endpoint = get_permalink( wc_get_page_id( 'cart' ) );
+		$cancel_endpoint = trailingslashit( $cancel_endpoint ? $cancel_endpoint : home_url() );
+
+		return apply_filters('woocommerce_get_cancel_order_url', wp_nonce_url( add_query_arg( array( 'cancel_order' => 'true', 'order' => $this->order_key, 'order_id' => $this->id, 'redirect' => $redirect ), $cancel_endpoint ), 'woocommerce-cancel_order' ) );
 	}
 
 	/**

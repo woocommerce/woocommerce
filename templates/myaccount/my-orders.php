@@ -73,7 +73,7 @@ if ( $customer_orders ) : ?>
 
 							if ( in_array( $order->status, apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ), $order ) ) )
 								$actions['cancel'] = array(
-									'url'  => $order->get_cancel_order_url(),
+									'url'  => $order->get_cancel_order_url( get_permalink( wc_get_page_id( 'myaccount' ) ) ),
 									'name' => __( 'Cancel', 'woocommerce' )
 								);
 
