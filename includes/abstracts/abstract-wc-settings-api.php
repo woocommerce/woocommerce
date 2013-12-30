@@ -549,6 +549,7 @@ abstract class WC_Settings_API {
 			'title'             => '',
 			'disabled'          => false,
 			'class'             => '',
+			'css'               => '',
 			'placeholder'       => '',
 			'type'              => 'text',
 			'desc_tip'          => false,
