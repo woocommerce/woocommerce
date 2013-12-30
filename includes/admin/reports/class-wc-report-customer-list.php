@@ -1,9 +1,11 @@
 <?php
-if ( ! defined( 'ABSPATH' ) )
+if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
+}
 
-if ( ! class_exists( 'WP_List_Table' ) )
+if ( ! class_exists( 'WP_List_Table' ) ) {
 	require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
+}
 
 /**
  * WC_Report_Customer_List class
@@ -68,10 +70,11 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 		switch( $column_name ) {
 			case 'customer_name' :
-				if ( $user->last_name && $user->first_name )
+				if ( $user->last_name && $user->first_name ) {
 					return $user->last_name . ', ' . $user->first_name;
-				else
+				} else {
 					return '-';
+				}
 			case 'username' :
 				return $user->user_login;
 			break;
@@ -80,20 +83,22 @@ class WC_Report_Customer_List extends WP_List_Table {
 				$state_code   = get_user_meta( $user->ID, 'billing_state', true );
 				$country_code = get_user_meta( $user->ID, 'billing_country', true );
 
-				$state = isset( WC()->countries->states[$country_code][ $state_code ] ) ? WC()->countries->states[ $country_code ][ $state_code ] : $state_code;
+				$state = isset( WC()->countries->states[ $country_code ][ $state_code ] ) ? WC()->countries->states[ $country_code ][ $state_code ] : $state_code;
 				$country = isset( WC()->countries->countries[ $country_code ] ) ? WC()->countries->countries[ $country_code ] : $country_code;
 
 				$value = '';
 
-				if ( $state )
+				if ( $state ) {
 					$value .= $state . ', ';
+				}
 
 				$value .= $country;
 
-				if ( $value )
+				if ( $value ) {
 					return $value;
-				else
+				} else {
 					return '-';
+				}
 			break;
 			case 'email' :
 				return '<a href="mailto:' . $user->user_email . '">' . $user->user_email . '</a>';
