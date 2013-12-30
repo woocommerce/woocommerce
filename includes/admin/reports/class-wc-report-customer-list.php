@@ -261,7 +261,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 
         if ( $s ) {
         	$query->query_from    .= " LEFT JOIN {$wpdb->usermeta} as meta3 ON ({$wpdb->users}.ID = meta3.user_id)";
-	        $query->query_where   .= " AND ( user_login LIKE '%" . $wpdb->escape( str_replace( '*', '', $s ) ) . "%' OR user_nicename LIKE '%" . $wpdb->escape( str_replace( '*', '', $s ) ) . "%' OR meta3.meta_value LIKE '%" . $wpdb->escape( str_replace( '*', '', $s ) ) . "%' ) ";
+	        $query->query_where   .= " AND ( user_login LIKE '%" . esc_sql( str_replace( '*', '', $s ) ) . "%' OR user_nicename LIKE '%" . esc_sql( str_replace( '*', '', $s ) ) . "%' OR meta3.meta_value LIKE '%" . esc_sql( str_replace( '*', '', $s ) ) . "%' ) ";
 	        $query->query_orderby  = " GROUP BY ID " . $query->query_orderby;
 	    }
 
