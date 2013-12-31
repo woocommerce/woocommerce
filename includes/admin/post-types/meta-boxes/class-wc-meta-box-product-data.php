@@ -340,7 +340,7 @@ class WC_Meta_Box_Product_Data {
 
 					// Weight
 					if ( wc_product_weight_enabled() )
-						woocommerce_wp_text_input( array( 'id' => '_weight', 'label' => __( 'Weight', 'woocommerce' ) . ' (' . get_option('woocommerce_weight_unit') . ')', 'placeholder' => wc_format_localized_decimal( 0 ), 'description' => __( 'Weight in decimal form', 'woocommerce' ), 'type' => 'text', 'data_type' => 'decimal' ) );
+						woocommerce_wp_text_input( array( 'id' => '_weight', 'label' => __( 'Weight', 'woocommerce' ) . ' (' . get_option('woocommerce_weight_unit') . ')', 'placeholder' => wc_format_localized_decimal( 0 ), 'desc_tip' => 'true', 'description' => __( 'Weight in decimal form', 'woocommerce' ), 'type' => 'text', 'data_type' => 'decimal' ) );
 
 					// Size fields
 					if ( wc_product_dimensions_enabled() ) {
@@ -351,7 +351,7 @@ class WC_Meta_Box_Product_Data {
 								<input placeholder="<?php _e( 'Width', 'woocommerce' ); ?>" class="input-text wc_input_decimal" size="6" type="text" name="_width" value="<?php echo esc_attr( wc_format_localized_decimal( get_post_meta( $thepostid, '_width', true ) ) ); ?>" />
 								<input placeholder="<?php _e( 'Height', 'woocommerce' ); ?>" class="input-text wc_input_decimal last" size="6" type="text" name="_height" value="<?php echo esc_attr( wc_format_localized_decimal( get_post_meta( $thepostid, '_height', true ) ) ); ?>" />
 							</span>
-							<span class="description"><?php _e( 'LxWxH in decimal form', 'woocommerce' ); ?></span>
+							<img class="help_tip" data-tip="<?php esc_attr_e( 'LxWxH in decimal form', 'woocommerce' ); ?>" src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/help.png" height="16" width="16" />
 						</p><?php
 					}
 
@@ -374,7 +374,7 @@ class WC_Meta_Box_Product_Data {
 						'selected'			=> $current_shipping_class,
 						'class'				=> 'select short'
 					);
-					?><p class="form-field dimensions_field"><label for="product_shipping_class"><?php _e( 'Shipping class', 'woocommerce' ); ?></label> <?php wp_dropdown_categories( $args ); ?> <span class="description"><?php _e( 'Shipping classes are used by certain shipping methods to group similar products.', 'woocommerce' ); ?></span></p><?php
+					?><p class="form-field dimensions_field"><label for="product_shipping_class"><?php _e( 'Shipping class', 'woocommerce' ); ?></label> <?php wp_dropdown_categories( $args ); ?> <img class="help_tip" data-tip="<?php esc_attr_e( 'Shipping classes are used by certain shipping methods to group similar products.', 'woocommerce' ); ?>" src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/help.png" height="16" width="16" /></p><?php
 
 					do_action( 'woocommerce_product_options_shipping' );
 
@@ -673,14 +673,14 @@ class WC_Meta_Box_Product_Data {
 				echo '<div class="options_group hide_if_external">';
 
 					// Purchase note
-					woocommerce_wp_textarea_input(  array( 'id' => '_purchase_note', 'label' => __( 'Purchase Note', 'woocommerce' ), 'description' => __( 'Enter an optional note to send the customer after purchase.', 'woocommerce' ) ) );
+					woocommerce_wp_textarea_input(  array( 'id' => '_purchase_note', 'label' => __( 'Purchase Note', 'woocommerce' ), 'desc_tip' => 'true', 'description' => __( 'Enter an optional note to send the customer after purchase.', 'woocommerce' ) ) );
 
 				echo '</div>';
 
 				echo '<div class="options_group">';
 
 					// menu_order
-					woocommerce_wp_text_input(  array( 'id' => 'menu_order', 'label' => __( 'Menu order', 'woocommerce' ), 'description' => __( 'Custom ordering position.', 'woocommerce' ), 'value' => intval( $post->menu_order ), 'type' => 'number', 'custom_attributes' => array(
+					woocommerce_wp_text_input(  array( 'id' => 'menu_order', 'label' => __( 'Menu order', 'woocommerce' ), 'desc_tip' => 'true', 'description' => __( 'Custom ordering position.', 'woocommerce' ), 'value' => intval( $post->menu_order ), 'type' => 'number', 'custom_attributes' => array(
 						'step' 	=> '1'
 					)  ) );
 
