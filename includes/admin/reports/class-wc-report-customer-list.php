@@ -1,36 +1,38 @@
 <?php
-if ( ! defined( 'ABSPATH' ) )
+if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
+}
 
-if ( ! class_exists( 'WP_List_Table' ) )
+if ( ! class_exists( 'WP_List_Table' ) ) {
 	require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
+}
 
 /**
  * WC_Report_Customer_List class
  */
 class WC_Report_Customer_List extends WP_List_Table {
 
-    /**
-     * __construct function.
-     *
-     * @access public
-     */
-    function __construct(){
-        global $status, $page;
+	/**
+	 * __construct function.
+	 *
+	 * @access public
+	 */
+	function __construct(){
+		global $status, $page;
 
-        parent::__construct( array(
-            'singular'  => __( 'Customer', 'woocommerce' ),
-            'plural'    => __( 'Customers', 'woocommerce' ),
-            'ajax'      => false
-        ) );
-    }
+		parent::__construct( array(
+			'singular'  => __( 'Customer', 'woocommerce' ),
+			'plural'    => __( 'Customers', 'woocommerce' ),
+			'ajax'      => false
+		) );
+	}
 
-    /**
-     * No items found text
-     */
-    public function no_items() {
-        _e( 'No customers found.', 'woocommerce' );
-    }
+	/**
+	 * No items found text
+	 */
+	public function no_items() {
+		_e( 'No customers found.', 'woocommerce' );
+	}
 
 	/**
 	 * Output the report
@@ -40,16 +42,16 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 		echo '<div id="poststuff" class="woocommerce-reports-wide">';
 
-        if ( ! empty( $_GET['link_orders'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'link_orders' ) ) {
+		if ( ! empty( $_GET['link_orders'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'link_orders' ) ) {
 			$linked = wc_update_new_customer_past_orders( absint( $_GET['link_orders'] ) );
 
 			echo '<div class="updated"><p>' . sprintf( _n( '%s previous order linked', '%s previous orders linked', $linked, 'woocommerce' ), $linked ) . '</p></div>';
 		}
 
-        echo '<form method="post" id="woocommerce_customers">';
+		echo '<form method="post" id="woocommerce_customers">';
 
 		$this->search_box( __( 'Search customers', 'woocommerce' ), 'customer_search' );
- 		$this->display();
+		$this->display();
 
 		echo '</form>';
 		echo '</div>';
@@ -63,40 +65,43 @@ class WC_Report_Customer_List extends WP_List_Table {
 	 * @return int|string
 	 * @todo Inconsistent return types, and void return at the end. Needs a rewrite.
 	 */
-    function column_default( $user, $column_name ) {
-    	global $wpdb;
+	function column_default( $user, $column_name ) {
+		global $wpdb;
 
-        switch( $column_name ) {
-        	case 'customer_name' :
-        		if ( $user->last_name && $user->first_name )
-        			return $user->last_name . ', ' . $user->first_name;
-        		else
-        			return '-';
-        	case 'username' :
-        		return $user->user_login;
-        	break;
-        	case 'location' :
+		switch( $column_name ) {
+			case 'customer_name' :
+				if ( $user->last_name && $user->first_name ) {
+					return $user->last_name . ', ' . $user->first_name;
+				} else {
+					return '-';
+				}
+			case 'username' :
+				return $user->user_login;
+			break;
+			case 'location' :
 
 				$state_code   = get_user_meta( $user->ID, 'billing_state', true );
 				$country_code = get_user_meta( $user->ID, 'billing_country', true );
 
-				$state = isset( WC()->countries->states[$country_code][ $state_code ] ) ? WC()->countries->states[ $country_code ][ $state_code ] : $state_code;
+				$state = isset( WC()->countries->states[ $country_code ][ $state_code ] ) ? WC()->countries->states[ $country_code ][ $state_code ] : $state_code;
 				$country = isset( WC()->countries->countries[ $country_code ] ) ? WC()->countries->countries[ $country_code ] : $country_code;
 
 				$value = '';
 
-				if ( $state )
+				if ( $state ) {
 					$value .= $state . ', ';
+				}
 
 				$value .= $country;
 
-				if ( $value )
+				if ( $value ) {
 					return $value;
-				else
-        			return '-';
-        	break;
-        	case 'email' :
-        		return '<a href="mailto:' . $user->user_email . '">' . $user->user_email . '</a>';
+				} else {
+					return '-';
+				}
+			break;
+			case 'email' :
+				return '<a href="mailto:' . $user->user_email . '">' . $user->user_email . '</a>';
 			case 'spent' :
 				if ( ! $spent = get_user_meta( $user->ID, '_money_spent', true ) ) {
 
@@ -224,16 +229,16 @@ class WC_Report_Customer_List extends WP_List_Table {
 					?>
 				</p><?php
 			break;
-        }
+		}
 	}
 
-    /**
-     * get_columns function.
-     *
-     * @access public
-     */
-    function get_columns(){
-        $columns = array(
+	/**
+	 * get_columns function.
+	 *
+	 * @access public
+	 */
+	function get_columns(){
+		$columns = array(
 			'customer_name'   => __( 'Name (Last, First)', 'woocommerce' ),
 			'username'        => __( 'Username', 'woocommerce' ),
 			'email'           => __( 'Email', 'woocommerce' ),
@@ -242,54 +247,54 @@ class WC_Report_Customer_List extends WP_List_Table {
 			'spent'           => __( 'Spent', 'woocommerce' ),
 			'last_order'      => __( 'Last order', 'woocommerce' ),
 			'user_actions'    => __( 'Actions', 'woocommerce' )
-        );
+		);
 
-        return $columns;
-    }
-
-    /**
-     * Order users by name
-     */
-	public function order_by_last_name( $query ) {
-	    global $wpdb;
-
-	    $s = ! empty( $_REQUEST['s'] ) ? stripslashes( $_REQUEST['s'] ) : '';
-
-	    $query->query_from    .= " LEFT JOIN {$wpdb->usermeta} as meta2 ON ({$wpdb->users}.ID = meta2.user_id) ";
-        $query->query_where   .= " AND meta2.meta_key = 'last_name' ";
-        $query->query_orderby  = " ORDER BY meta2.meta_value, user_login ASC ";
-
-        if ( $s ) {
-        	$query->query_from    .= " LEFT JOIN {$wpdb->usermeta} as meta3 ON ({$wpdb->users}.ID = meta3.user_id)";
-	        $query->query_where   .= " AND ( user_login LIKE '%" . $wpdb->escape( str_replace( '*', '', $s ) ) . "%' OR user_nicename LIKE '%" . $wpdb->escape( str_replace( '*', '', $s ) ) . "%' OR meta3.meta_value LIKE '%" . $wpdb->escape( str_replace( '*', '', $s ) ) . "%' ) ";
-	        $query->query_orderby  = " GROUP BY ID " . $query->query_orderby;
-	    }
-
-	    return $query;
+		return $columns;
 	}
 
-    /**
-     * prepare_items function.
-     *
-     * @access public
-     */
-    public function prepare_items() {
-        global $wpdb;
+	/**
+	 * Order users by name
+	 */
+	public function order_by_last_name( $query ) {
+		global $wpdb;
+
+		$s = ! empty( $_REQUEST['s'] ) ? stripslashes( $_REQUEST['s'] ) : '';
+
+		$query->query_from    .= " LEFT JOIN {$wpdb->usermeta} as meta2 ON ({$wpdb->users}.ID = meta2.user_id) ";
+		$query->query_where   .= " AND meta2.meta_key = 'last_name' ";
+		$query->query_orderby  = " ORDER BY meta2.meta_value, user_login ASC ";
+
+		if ( $s ) {
+			$query->query_from    .= " LEFT JOIN {$wpdb->usermeta} as meta3 ON ({$wpdb->users}.ID = meta3.user_id)";
+			$query->query_where   .= " AND ( user_login LIKE '%" . esc_sql( str_replace( '*', '', $s ) ) . "%' OR user_nicename LIKE '%" . esc_sql( str_replace( '*', '', $s ) ) . "%' OR meta3.meta_value LIKE '%" . esc_sql( str_replace( '*', '', $s ) ) . "%' ) ";
+			$query->query_orderby  = " GROUP BY ID " . $query->query_orderby;
+		}
+
+		return $query;
+	}
+
+	/**
+	 * prepare_items function.
+	 *
+	 * @access public
+	 */
+	public function prepare_items() {
+		global $wpdb;
 
 		$current_page = absint( $this->get_pagenum() );
 		$per_page     = 20;
 
-        /**
-         * Init column headers
-         */
-        $this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns() );
+		/**
+		 * Init column headers
+		 */
+		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns() );
 
-        add_action( 'pre_user_query', array( $this, 'order_by_last_name' ) );
+		add_action( 'pre_user_query', array( $this, 'order_by_last_name' ) );
 
-        /**
-         * Get users
-         */
-        $admin_users = new WP_User_Query(
+		/**
+		 * Get users
+		 */
+		$admin_users = new WP_User_Query(
 			array(
 				'role'   => 'administrator',
 				'fields' => 'ID'
@@ -313,13 +318,13 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 		remove_action( 'pre_user_query', array( $this, 'order_by_last_name' ) );
 
-        /**
-         * Pagination
-         */
-        $this->set_pagination_args( array(
-            'total_items' => $query->total_users,
-            'per_page'    => $per_page,
-            'total_pages' => ceil( $query->total_users / $per_page )
-        ) );
-    }
+		/**
+		 * Pagination
+		 */
+		$this->set_pagination_args( array(
+			'total_items' => $query->total_users,
+			'per_page'    => $per_page,
+			'total_pages' => ceil( $query->total_users / $per_page )
+		) );
+	}
 }
