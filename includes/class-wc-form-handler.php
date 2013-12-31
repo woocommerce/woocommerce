@@ -658,7 +658,7 @@ class WC_Form_Handler {
 
 			try {
 				$creds  = array();
-				
+
 				$validation_error = new WP_Error();
 				$validation_error = apply_filters( 'woocommerce_process_login_errors', $validation_error, $_POST['username'], $_POST['password'] );
 
@@ -781,10 +781,17 @@ class WC_Form_Handler {
 
 			WC()->verify_nonce( 'register' );
 
+			$validation_error = new WP_Error();
+			$validation_error = apply_filters( 'woocommerce_process_registration_errors', $validation_error, $_POST['username'], $_POST['password'], $_POST['email'] );
+
+			if ( $validation_error->get_error_code() ) {
+				throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . $validation_error->get_error_message() );
+			}
+
 			$username   = ! empty( $_POST['username'] ) ? wc_clean( $_POST['username'] ) : '';
 			$email      = ! empty( $_POST['email'] ) ? wc_clean( $_POST['email'] ) : '';
 			$password   = ! empty( $_POST['password'] ) ? wc_clean( $_POST['password'] ) : '';
-			
+
 			// Anti-spam trap
 			if ( ! empty( $_POST['email_2'] ) ) {
 				wc_add_notice( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Anti-spam field was filled in.', 'woocommerce' ), 'error' );
