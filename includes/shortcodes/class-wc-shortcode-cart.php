@@ -14,30 +14,16 @@ class WC_Shortcode_Cart {
 	/**
 	 * Output the cart shortcode.
 	 *
-	 * @access public
 	 * @param array $atts
-	 * @return void
 	 */
 	public static function output( $atts ) {
 
-		if ( ! defined( 'WOOCOMMERCE_CART' ) ) define( 'WOOCOMMERCE_CART', true );
-
-		// Add Discount
-		if ( ! empty( $_POST['apply_coupon'] ) ) {
-
-			if ( ! empty( $_POST['coupon_code'] ) ) {
-				WC()->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
-			} else {
-				wc_add_notice( WC_Coupon::get_generic_coupon_error( WC_Coupon::E_WC_COUPON_PLEASE_ENTER ), 'error' );
-			}
-
-		// Remove Coupon Codes
-		} elseif ( isset( $_GET['remove_coupon'] ) ) {
-
-			WC()->cart->remove_coupon( wc_clean( $_GET['remove_coupon'] ) );
+		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+			define( 'WOOCOMMERCE_CART', true );
+		}
 
 		// Update Shipping
-		} elseif ( ! empty( $_POST['calc_shipping'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-cart' ) ) {
+		if ( ! empty( $_POST['calc_shipping'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-cart' ) ) {
 
 			try {
 				WC()->shipping->reset_shipping();

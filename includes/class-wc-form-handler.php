@@ -323,8 +323,21 @@ class WC_Form_Handler {
 	 * Remove from cart/update.
 	 */
 	public function update_cart_action() {
+
+		// Add Discount
+		if ( ! empty( $_POST['apply_coupon'] ) && ! empty( $_POST['coupon_code'] ) ) {
+			WC()->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
+		}
+
+		// Remove Coupon Codes
+		elseif ( isset( $_GET['remove_coupon'] ) ) {
+
+			WC()->cart->remove_coupon( wc_clean( $_GET['remove_coupon'] ) );
+
+		}
+
 		// Remove from cart
-		if ( ! empty( $_GET['remove_item'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
+		elseif ( ! empty( $_GET['remove_item'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
 
 			WC()->cart->set_quantity( $_GET['remove_item'], 0 );
 
@@ -334,10 +347,13 @@ class WC_Form_Handler {
 			wp_safe_redirect( $referer );
 			exit;
 
-		// Update Cart
-		} elseif ( ( ! empty( $_POST['update_cart'] ) || ! empty( $_POST['proceed'] ) ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-cart' ) ) {
+		}
 
-			$cart_totals = isset( $_POST['cart'] ) ? $_POST['cart'] : '';
+		// Update Cart - checks apply_coupon too because they are in the same form
+		if ( ( ! empty( $_POST['apply_coupon'] ) || ! empty( $_POST['update_cart'] ) || ! empty( $_POST['proceed'] ) ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-cart' ) ) {
+
+			$cart_updated = false;
+			$cart_totals  = isset( $_POST['cart'] ) ? $_POST['cart'] : '';
 
 			if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
 				foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
@@ -366,6 +382,7 @@ class WC_Form_Handler {
 		    		if ( $passed_validation )
 			    		WC()->cart->set_quantity( $cart_item_key, $quantity, false );
 
+			    	$cart_updated = true;
 				}
 
 				WC()->cart->calculate_totals();
@@ -374,7 +391,7 @@ class WC_Form_Handler {
 			if ( ! empty( $_POST['proceed'] ) ) {
 				wp_safe_redirect( WC()->cart->get_checkout_url() );
 				exit;
-			} else {
+			} elseif ( $cart_updated ) {
 				wc_add_notice( __( 'Cart updated.', 'woocommerce' ) );
 
 				$referer = ( wp_get_referer() ) ? wp_get_referer() : WC()->cart->get_cart_url();
