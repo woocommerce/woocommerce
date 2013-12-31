@@ -53,8 +53,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->identity_token   = $this->get_option( 'identity_token', '' );
 
 		// Logs
-		if ( 'yes' == $this->debug )
+		if ( 'yes' == $this->debug ) {
 			$this->log = new WC_Logger();
+		}
 
 		// Actions
 		add_action( 'valid-paypal-standard-ipn-request', array( $this, 'successful_request' ) );
@@ -65,7 +66,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		// Payment listener/API hook
 		add_action( 'woocommerce_api_wc_gateway_paypal', array( $this, 'check_ipn_response' ) );
 
-		if ( !$this->is_valid_for_use() ) $this->enabled = false;
+		if ( ! $this->is_valid_for_use() ) {
+			$this->enabled = false;
+		}
 	}
 
 	/**
@@ -75,7 +78,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	function is_valid_for_use() {
-		if ( ! in_array( get_woocommerce_currency(), apply_filters( 'woocommerce_paypal_supported_currencies', array( 'AUD', 'BRL', 'CAD', 'MXN', 'NZD', 'HKD', 'SGD', 'USD', 'EUR', 'JPY', 'TRY', 'NOK', 'CZK', 'DKK', 'HUF', 'ILS', 'MYR', 'PHP', 'PLN', 'SEK', 'CHF', 'TWD', 'THB', 'GBP', 'RMB', 'RUB' ) ) ) ) return false;
+		if ( ! in_array( get_woocommerce_currency(), apply_filters( 'woocommerce_paypal_supported_currencies', array( 'AUD', 'BRL', 'CAD', 'MXN', 'NZD', 'HKD', 'SGD', 'USD', 'EUR', 'JPY', 'TRY', 'NOK', 'CZK', 'DKK', 'HUF', 'ILS', 'MYR', 'PHP', 'PLN', 'SEK', 'CHF', 'TWD', 'THB', 'GBP', 'RMB', 'RUB' ) ) ) ) {
+			return false;
+		}
 
 		return true;
 	}
@@ -244,8 +249,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		$order_id = $order->id;
 
-		if ( 'yes' == $this->debug )
+		if ( 'yes' == $this->debug ) {
 			$this->log->add( 'paypal', 'Generating payment form for order ' . $order->get_order_number() . '. Notify URL: ' . $this->notify_url );
+		}
 
 		if ( in_array( $order->billing_country, array( 'US','CA' ) ) ) {
 			$order->billing_phone = str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->billing_phone );
@@ -303,7 +309,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		);
 
 		// Shipping
-		if ( $this->send_shipping=='yes' ) {
+		if ( 'yes' == $this->send_shipping ) {
 			$paypal_args['address_override'] = ( $this->address_override == 'yes' ) ? 1 : 0;
 
 			$paypal_args['no_shipping'] = 0;
@@ -331,10 +337,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			// Don't pass items - paypal borks tax due to prices including tax. PayPal has no option for tax inclusive pricing sadly. Pass 1 item for the order items overall
 			$item_names = array();
 
-			if ( sizeof( $order->get_items() ) > 0 )
-				foreach ( $order->get_items() as $item )
-					if ( $item['qty'] )
+			if ( sizeof( $order->get_items() ) > 0 ) {
+				foreach ( $order->get_items() as $item ) {
+					if ( $item['qty'] ) {
 						$item_names[] = $item['name'] . ' x ' . $item['qty'];
+					}
+				}
+			}
 
 			$paypal_args['item_name_1'] 	= sprintf( __( 'Order %s' , 'woocommerce'), $order->get_order_number() ) . " - " . implode( ', ', $item_names );
 			$paypal_args['quantity_1'] 		= 1;
@@ -368,22 +377,25 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 						$item_name 	= $item['name'];
 
 						$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
-						if ( $meta = $item_meta->display( true, true ) )
+						if ( $meta = $item_meta->display( true, true ) ) {
 							$item_name .= ' ( ' . $meta . ' )';
+						}
 
 						$paypal_args[ 'item_name_' . $item_loop ] 	= html_entity_decode( $item_name, ENT_NOQUOTES, 'UTF-8' );
 						$paypal_args[ 'quantity_' . $item_loop ] 	= $item['qty'];
 						$paypal_args[ 'amount_' . $item_loop ] 		= $order->get_item_subtotal( $item, false );
 
-						if ( $product->get_sku() )
+						if ( $product->get_sku() ) {
 							$paypal_args[ 'item_number_' . $item_loop ] = $product->get_sku();
+						}
 					}
 				}
 			}
 
 			// Discount
-			if ( $order->get_cart_discount() > 0 )
+			if ( $order->get_cart_discount() > 0 ) {
 				$paypal_args['discount_amount_cart'] = round( $order->get_cart_discount(), 2 );
+			}
 
 			// Fees
 			if ( sizeof( $order->get_fees() ) > 0 ) {
@@ -422,18 +434,18 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		$order = new WC_Order( $order_id );
 
-		if ( $this->testmode == 'yes' ):
+		if ( 'yes' == $this->testmode ) {
 			$paypal_adr = $this->testurl . '?test_ipn=1&';
-		else :
+		} else {
 			$paypal_adr = $this->liveurl . '?';
-		endif;
+		}
 
 		$paypal_args = $this->get_paypal_args( $order );
 
 		$paypal_args_array = array();
 
-		foreach ($paypal_args as $key => $value) {
-			$paypal_args_array[] = '<input type="hidden" name="'.esc_attr( $key ).'" value="'.esc_attr( $value ).'" />';
+		foreach ( $paypal_args as $key => $value ) {
+			$paypal_args_array[] = '<input type="hidden" name="'.esc_attr( $key ) . '" value="' . esc_attr( $value ) . '" />';
 		}
 
 		wc_enqueue_js( '
@@ -459,11 +471,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			jQuery("#submit_paypal_payment_form").click();
 		' );
 
-		return '<form action="'.esc_url( $paypal_adr ).'" method="post" id="paypal_payment_form" target="_top">
-				' . implode( '', $paypal_args_array) . '
+		return '<form action="' . esc_url( $paypal_adr ) . '" method="post" id="paypal_payment_form" target="_top">
+				' . implode( '', $paypal_args_array ) . '
 				<!-- Button Fallback -->
 				<div class="payment_buttons">
-					<input type="submit" class="button alt" id="submit_paypal_payment_form" value="' . __( 'Pay via PayPal', 'woocommerce' ) . '" /> <a class="button cancel" href="' . esc_url( $order->get_cancel_order_url() ) . '">'.__( 'Cancel order &amp; restore cart', 'woocommerce' ).'</a>
+					<input type="submit" class="button alt" id="submit_paypal_payment_form" value="' . __( 'Pay via PayPal', 'woocommerce' ) . '" /> <a class="button cancel" href="' . esc_url( $order->get_cancel_order_url() ) . '">' . __( 'Cancel order &amp; restore cart', 'woocommerce' ) . '</a>
 				</div>
 				<script type="text/javascript">
 					jQuery(".payment_buttons").hide();
@@ -489,11 +501,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			$paypal_args = http_build_query( $paypal_args, '', '&' );
 
-			if ( $this->testmode == 'yes' ):
+			if ( 'yes' == $this->testmode ) {
 				$paypal_adr = $this->testurl . '?test_ipn=1&';
-			else :
+			} else {
 				$paypal_adr = $this->liveurl . '?';
-			endif;
+			}
 
 			return array(
 				'result' 	=> 'success',
@@ -519,7 +531,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	function receipt_page( $order ) {
 
-		echo '<p>'.__( 'Thank you - your order is now pending payment. You should be automatically redirected to PayPal to make payment.', 'woocommerce' ).'</p>';
+		echo '<p>' . __( 'Thank you - your order is now pending payment. You should be automatically redirected to PayPal to make payment.', 'woocommerce' ) . '</p>';
 
 		echo $this->generate_paypal_form( $order );
 	}
@@ -530,13 +542,15 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	function check_ipn_request_is_valid() {
 
 		// Get url
-		if ( $this->testmode == 'yes' )
+		if ( 'yes' == $this->testmode ) {
 			$paypal_adr = $this->testurl;
-		else
+		} else {
 			$paypal_adr = $this->liveurl;
+		}
 
-		if ( 'yes' == $this->debug )
+		if ( 'yes' == $this->debug ) {
 			$this->log->add( 'paypal', 'Checking IPN response is valid via ' . $paypal_adr . '...' );
+		}
 
 		// Get recieved values from post data
 		$received_values = array( 'cmd' => '_notify-validate' );
@@ -551,27 +565,31 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			'user-agent'	=> 'WooCommerce/' . WC()->version
 		);
 
-		if ( 'yes' == $this->debug )
+		if ( 'yes' == $this->debug ) {
 			$this->log->add( 'paypal', 'IPN Request: ' . print_r( $params, true ) );
+		}
 
 		// Post back to get a response
 		$response = wp_remote_post( $paypal_adr, $params );
 
-		if ( 'yes' == $this->debug )
+		if ( 'yes' == $this->debug ) {
 			$this->log->add( 'paypal', 'IPN Response: ' . print_r( $response, true ) );
+		}
 
 		// check to see if the request was valid
 		if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 && ( strcmp( $response['body'], "VERIFIED" ) == 0 ) ) {
-			if ( 'yes' == $this->debug )
+			if ( 'yes' == $this->debug ) {
 				$this->log->add( 'paypal', 'Received valid response from PayPal' );
+			}
 
 			return true;
 		}
 
 		if ( 'yes' == $this->debug ) {
 			$this->log->add( 'paypal', 'Received invalid response from PayPal' );
-			if ( is_wp_error( $response ) )
+			if ( is_wp_error( $response ) ) {
 				$this->log->add( 'paypal', 'Error response: ' . $response->get_error_message() );
+			}
 		}
 
 		return false;
@@ -617,19 +635,22 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			$order = $this->get_paypal_order( $posted['custom'], $posted['invoice'] );
 
-			if ( 'yes' == $this->debug )
+			if ( 'yes' == $this->debug ) {
 				$this->log->add( 'paypal', 'Found order #' . $order->id );
+			}
 
 			// Lowercase returned variables
 			$posted['payment_status'] 	= strtolower( $posted['payment_status'] );
 			$posted['txn_type'] 		= strtolower( $posted['txn_type'] );
 
 			// Sandbox fix
-			if ( $posted['test_ipn'] == 1 && $posted['payment_status'] == 'pending' )
+			if ( 1 == $posted['test_ipn'] && 'pending' == $posted['payment_status'] ) {
 				$posted['payment_status'] = 'completed';
+			}
 
-			if ( 'yes' == $this->debug )
+			if ( 'yes' == $this->debug ) {
 				$this->log->add( 'paypal', 'Payment status: ' . $posted['payment_status'] );
+			}
 
 			// We are here so lets check status and do actions
 			switch ( $posted['payment_status'] ) {
@@ -638,24 +659,27 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 					// Check order not already completed
 					if ( $order->status == 'completed' ) {
-						 if ( 'yes' == $this->debug )
+						if ( 'yes' == $this->debug ) {
 							$this->log->add( 'paypal', 'Aborting, Order #' . $order->id . ' is already complete.' );
-						 exit;
+						}
+						exit;
 					}
 
 					// Check valid txn_type
 					$accepted_types = array( 'cart', 'instant', 'express_checkout', 'web_accept', 'masspay', 'send_money' );
 					if ( ! in_array( $posted['txn_type'], $accepted_types ) ) {
-						if ( 'yes' == $this->debug )
+						if ( 'yes' == $this->debug ) {
 							$this->log->add( 'paypal', 'Aborting, Invalid type:' . $posted['txn_type'] );
+						}
 						exit;
 					}
 
 					// Validate Amount
 					if ( $order->get_total() != $posted['mc_gross'] ) {
 
-						if ( 'yes' == $this->debug )
+						if ( 'yes' == $this->debug ) {
 							$this->log->add( 'paypal', 'Payment error: Amounts do not match (gross ' . $posted['mc_gross'] . ')' );
+						}
 
 						// Put this order on-hold for manual checking
 						$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal amounts do not match (gross %s).', 'woocommerce' ), $posted['mc_gross'] ) );
@@ -665,8 +689,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 					// Validate Email Address
 					if ( strcasecmp( trim( $posted['receiver_email'] ), trim( $this->receiver_email ) ) != 0 ) {
-						if ( 'yes' == $this->debug )
+						if ( 'yes' == $this->debug ) {
 							$this->log->add( 'paypal', "IPN Response is for another one: {$posted['receiver_email']} our email is {$this->receiver_email}" );
+						}
 
 						// Put this order on-hold for manual checking
 						$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal IPN response from a different email address (%s).', 'woocommerce' ), $posted['receiver_email'] ) );
@@ -675,16 +700,21 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					}
 
 					 // Store PP Details
-					if ( ! empty( $posted['payer_email'] ) )
+					if ( ! empty( $posted['payer_email'] ) ) {
 						update_post_meta( $order->id, 'Payer PayPal address', $posted['payer_email'] );
-					if ( ! empty( $posted['txn_id'] ) )
+					}
+					if ( ! empty( $posted['txn_id'] ) ) {
 						update_post_meta( $order->id, 'Transaction ID', $posted['txn_id'] );
-					if ( ! empty( $posted['first_name'] ) )
+					}
+					if ( ! empty( $posted['first_name'] ) ) {
 						update_post_meta( $order->id, 'Payer first name', $posted['first_name'] );
-					if ( ! empty( $posted['last_name'] ) )
+					}
+					if ( ! empty( $posted['last_name'] ) ) {
 						update_post_meta( $order->id, 'Payer last name', $posted['last_name'] );
-					if ( ! empty( $posted['payment_type'] ) )
+					}
+					if ( ! empty( $posted['payment_type'] ) ) {
 						update_post_meta( $order->id, 'Payment type', $posted['payment_type'] );
+					}
 
 					if ( $posted['payment_status'] == 'completed' ) {
 						$order->add_order_note( __( 'IPN payment completed', 'woocommerce' ) );
@@ -693,8 +723,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 						$order->update_status( 'on-hold', sprintf( __( 'Payment pending: %s', 'woocommerce' ), $posted['pending_reason'] ) );
 					}
 
-					if ( 'yes' == $this->debug )
+					if ( 'yes' == $this->debug ) {
 						$this->log->add( 'paypal', 'Payment complete.' );
+					}
 
 				break;
 				case 'denied' :
@@ -704,7 +735,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					// Order failed
 					$order->update_status( 'failed', sprintf( __( 'Payment %s via IPN.', 'woocommerce' ), strtolower( $posted['payment_status'] ) ) );
 				break;
-				case "refunded" :
+				case 'refunded' :
 
 					// Only handle full refunds, not partial
 					if ( $order->get_total() == ( $posted['mc_gross'] * -1 ) ) {
@@ -724,7 +755,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					}
 
 				break;
-				case "reversed" :
+				case 'reversed' :
 
 					// Mark order as refunded
 					$order->update_status( 'on-hold', sprintf( __( 'Payment %s via IPN.', 'woocommerce' ), strtolower( $posted['payment_status'] ) ) );
@@ -739,7 +770,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					$mailer->send( get_option( 'admin_email' ), sprintf( __( 'Payment for order %s reversed', 'woocommerce' ), $order->get_order_number() ), $message );
 
 				break;
-				case "canceled_reversal" :
+				case 'canceled_reversal' :
 
 					$mailer = WC()->mailer();
 
@@ -773,8 +804,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			$order = $this->get_paypal_order( $posted['cm'] );
 
-			if ( $order->status != 'pending' )
+			if ( 'pending' != $order->status ) {
 				return false;
+			}
 
 			$posted['st'] = strtolower( $posted['st'] );
 
@@ -782,10 +814,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				case 'completed' :
 
 					// Validate transaction
-					if ( $this->testmode == 'yes' )
+					if ( 'yes' == $this->testmode ) {
 						$paypal_adr = $this->testurl;
-					else
+					} else {
 						$paypal_adr = $this->liveurl;
+					}
 
 					$pdt = array(
 						'body' 			=> array(
@@ -802,17 +835,20 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					// Post back to get a response
 					$response = wp_remote_post( $paypal_adr, $pdt );
 
-					if ( is_wp_error( $response ) )
+					if ( is_wp_error( $response ) ) {
 						return false;
+					}
 
-					if ( ! strpos( $response['body'], "SUCCESS" ) === 0 )
+					if ( ! strpos( $response['body'], "SUCCESS" ) === 0 ) {
 						return false;
+					}
 
 					// Validate Amount
 					if ( $order->get_total() != $posted['amt'] ) {
 
-						if ( 'yes' == $this->debug )
+						if ( 'yes' == $this->debug ) {
 							$this->log->add( 'paypal', 'Payment error: Amounts do not match (amt ' . $posted['amt'] . ')' );
+						}
 
 						// Put this order on-hold for manual checking
 						$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal amounts do not match (amt %s).', 'woocommerce' ), $posted['amt'] ) );
@@ -866,8 +902,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		// Validate key
 		if ( $order->order_key !== $order_key ) {
-			if ( $this->debug=='yes' )
+			if ( 'yes' == $this->debug ) {
 				$this->log->add( 'paypal', 'Error: Order Key does not match invoice.' );
+			}
 			exit;
 		}
 
