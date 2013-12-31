@@ -87,6 +87,12 @@ jQuery( function($){
 					$('#variable_product_options').load( this_page + ' #variable_product_options_inner', function() {
 						$('#variable_product_options').unblock();
 						jQuery('#variable_product_options').trigger('woocommerce_variations_added');
+						
+						jQuery(".tips").tipTip({
+					    	'attribute' : 'data-tip',
+					    	'fadeIn' : 50,
+					    	'fadeOut' : 50
+					    });
 					} );
 				} else {
 					$('#variable_product_options').unblock();
