@@ -294,7 +294,6 @@ class WC_Countries {
 			'FR' => array(),
 			'IS' => array(),
 			'IL' => array(),
-			'JP' => array(),
 			'KR' => array(),
 			'NL' => array(),
 			'NO' => array(),
@@ -945,20 +944,21 @@ class WC_Countries {
 				'JP' => array(
 					'last_name'          => array(
 						'class'             => array( 'form-row-first' ),
+						'clear'             => false
 					),
 					'first_name'         => array(
 						'class'             => array( 'form-row-last' ),
 						'clear'             => true
 					),
-					'postcode'          => array(
+					'postcode'	=> array(
 						'class'             => array( 'form-row-first' ),
+						'clear'             => false
 					),
-					'state'         => array(
-						'class'             => array( 'form-row-last' ),
-						'clear'             => true
+					'state'				=> array(
+						'label'    => __( 'Province', 'woocommerce' ),
+						'class'             => array( 'form-row-last' )
 					)
-				),
-				'KR' => array(
+				),				'KR' => array(
 					'state'		=> array(
 						'required' => false
 					)
@@ -1148,6 +1148,20 @@ class WC_Countries {
 
 					$fields = $switch_fields;
 				}
+			}
+			// Address fields sort for Japanese pattern.
+			if( $country =='JP'){
+				$switch_fields = array();
+				$switch_fields['country'] = $fields['country'];
+				$switch_fields['last_name'] = $fields['last_name'];				
+				$switch_fields['first_name'] = $fields['first_name'];
+				$switch_fields['company'] = $fields['company'];
+				$switch_fields['postcode'] = $fields['postcode'];
+				$switch_fields['state'] = $fields['state'];
+				$switch_fields['city'] = $fields['city'];
+				$switch_fields['address_1'] = $fields['address_1'];
+				$switch_fields['address_2'] = $fields['address_2'];
+				$fields = $switch_fields;
 			}
 		}
 
