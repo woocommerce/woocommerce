@@ -320,6 +320,7 @@ class WC_Checkout {
 				if ( $item_id ) {
 			 		wc_add_order_item_meta( $item_id, 'method_id', $method->id );
 		 			wc_add_order_item_meta( $item_id, 'cost', wc_format_decimal( $method->cost ) );
+					do_action( 'woocommerce_add_shipping_order_item', $order_id, $item_id, $i );
 		 		}
 			}
 		}
