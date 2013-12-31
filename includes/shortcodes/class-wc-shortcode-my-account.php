@@ -34,7 +34,7 @@ class WC_Shortcode_My_Account {
 
 		if ( ! is_user_logged_in() ) {
 
-			$message = apply_filters( 'my_account_message', '' );
+			$message = apply_filters( 'woocommerce_my_account_message', '' );
 
 			if ( ! empty( $message ) )
 
