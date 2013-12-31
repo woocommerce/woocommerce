@@ -215,10 +215,10 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	        	$customer_tip = '';
 
 	        	if ( $address = $the_order->get_formatted_billing_address() )
-	        		$customer_tip .= __( 'Billing:' ) . ' ' . $address . '<br/><br/>';
+	        		$customer_tip .= __( 'Billing:', 'woocommerce' ) . ' ' . $address . '<br/><br/>';
 
 	        	if ( $the_order->billing_phone )
-        			$customer_tip .= __( 'Tel:' ) . ' ' . $the_order->billing_phone;
+        			$customer_tip .= __( 'Tel:', 'woocommerce' ) . ' ' . $the_order->billing_phone;
 
 				echo '<div class="tips" data-tip="' . esc_attr( $customer_tip ) . '">';
 
@@ -553,9 +553,9 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 				$wpdb->prepare( "
 					SELECT p1.post_id
 					FROM {$wpdb->postmeta} p1, {$wpdb->postmeta} p2
-					WHERE 
+					WHERE
 						( p1.meta_key = '_billing_first_name' AND p2.meta_key = '_billing_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
-					OR 
+					OR
 						( p1.meta_key = '_shipping_first_name' AND p2.meta_key = '_shipping_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
 					",
 					esc_attr( $_GET['s'] ), esc_attr( $_GET['s'] )
