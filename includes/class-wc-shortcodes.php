@@ -126,6 +126,8 @@ class WC_Shortcodes {
 	 */
 	public static function product_category( $atts ) {
 		global $woocommerce_loop;
+		
+		$existing_loop = $woocommerce_loop;
 
 		if ( empty( $atts ) ) return '';
 
@@ -192,6 +194,9 @@ class WC_Shortcodes {
 		<?php endif;
 
 		wp_reset_postdata();
+		
+		//using woocommerce_reset_loop() here doesn't work.
+		$woocommerce_loop = $existing_loop;
 
 		return '<div class="woocommerce columns-' . $columns . '">' . ob_get_clean() . '</div>';
 	}
