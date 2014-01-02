@@ -1148,6 +1148,26 @@ class WC_Countries {
 					$fields = $switch_fields;
 				}
 			}
+
+			// Address fields sort for Japanese pattern.
+			if( $country =='JP'){
+				$switch_fields = array();
+
+				foreach ( $fields as $key => $value ) {
+					if ( $key == 'first_name' ) {
+						// Place last_name before first_name
+						$switch_fields['last_name'] = '';
+					}elseif( $key == 'address_1' ){
+						// Place these fields before address_1
+						$switch_fields['postcode'] = '';
+						$switch_fields['state'] = '';
+						$switch_fields['city'] = '';
+					}
+					$switch_fields[$key] = $value;
+				}
+
+				$fields = $switch_fields;	
+			}
 		}
 
 		// Prepend field keys
