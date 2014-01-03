@@ -17,6 +17,7 @@ if ( ! class_exists( 'WC_Admin_Settings' ) ) :
  */
 class WC_Admin_Settings {
 
+	private static $settings = array();
 	private static $errors   = array();
 	private static $messages = array();
 
@@ -24,22 +25,23 @@ class WC_Admin_Settings {
 	 * Include the settings page classes
 	 */
 	public static function get_settings_pages() {
-		$settings = array();
+		if ( empty( self::$settings ) ) {
+			$settings = array();
 
-		include_once( 'settings/class-wc-settings-page.php' );
+			include_once( 'settings/class-wc-settings-page.php' );
 
-		$settings[] = include( 'settings/class-wc-settings-general.php' );
-		$settings[] = include( 'settings/class-wc-settings-products.php' );
-		$settings[] = include( 'settings/class-wc-settings-tax.php' );
-		$settings[] = include( 'settings/class-wc-settings-checkout.php' );
-		$settings[] = include( 'settings/class-wc-settings-shipping.php' );
-		$settings[] = include( 'settings/class-wc-settings-accounts.php' );
-		$settings[] = include( 'settings/class-wc-settings-emails.php' );
-		$settings[] = include( 'settings/class-wc-settings-integrations.php' );
+			$settings[] = include( 'settings/class-wc-settings-general.php' );
+			$settings[] = include( 'settings/class-wc-settings-products.php' );
+			$settings[] = include( 'settings/class-wc-settings-tax.php' );
+			$settings[] = include( 'settings/class-wc-settings-checkout.php' );
+			$settings[] = include( 'settings/class-wc-settings-shipping.php' );
+			$settings[] = include( 'settings/class-wc-settings-accounts.php' );
+			$settings[] = include( 'settings/class-wc-settings-emails.php' );
+			$settings[] = include( 'settings/class-wc-settings-integrations.php' );
 
-		$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
-
-		return $settings;
+			self::$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
+		}
+		return self::$settings;
 	}
 
 	/**
