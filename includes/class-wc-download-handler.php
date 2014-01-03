@@ -217,7 +217,13 @@ class WC_Download_Handler {
 		@ob_end_clean(); // Clear the output buffer
 
 		if ( ob_get_level() ) {
-			@ob_end_clean(); // Zip corruption fix
+
+			$levels = ob_get_level();
+
+			for ( $i = 0; $i < $levels; $i++ ) {
+				@ob_end_clean(); // Zip corruption fix
+			}
+
 		}
 
 		if ( $is_IE && is_ssl() ) {
