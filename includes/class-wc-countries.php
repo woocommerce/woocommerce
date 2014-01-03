@@ -942,19 +942,8 @@ class WC_Countries {
 					)
 				),
 				'JP' => array(
-					'last_name'          => array(
-						'class'             => array( 'form-row-first' ),
-					),
-					'first_name'         => array(
-						'class'             => array( 'form-row-last' ),
-						'clear'             => true
-					),
-					'postcode'          => array(
-						'class'             => array( 'form-row-first' ),
-					),
-					'state'         => array(
-						'class'             => array( 'form-row-last' ),
-						'clear'             => true
+					'state'		=> array(
+						'label'    => __( 'Province', 'woocommerce' )
 					)
 				),
 				'KR' => array(
