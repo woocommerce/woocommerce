@@ -659,22 +659,27 @@ class WC_Form_Handler {
 				$validation_error = new WP_Error();
 				$validation_error = apply_filters( 'woocommerce_process_login_errors', $validation_error, $_POST['username'], $_POST['password'] );
 
-				if ( $validation_error->get_error_code() )
+				if ( $validation_error->get_error_code() ) {
 					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . $validation_error->get_error_message() );
+				}
 
-				if ( empty( $_POST['username'] ) )
+				if ( empty( $_POST['username'] ) ) {
 					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'Username is required.', 'woocommerce' ) );
+				}
 
-				if ( empty( $_POST['password'] ) )
+				if ( empty( $_POST['password'] ) ) {
 					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'Password is required.', 'woocommerce' ) );
+				}
 
 				if ( is_email( $_POST['username'] ) ) {
 					$user = get_user_by( 'email', $_POST['username'] );
 
-					if ( isset( $user->user_login ) )
+					if ( isset( $user->user_login ) ) {
 						$creds['user_login'] 	= $user->user_login;
-					else
+					} else {
 						throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'A user could not be found with this email address.', 'woocommerce' ) );
+					}
+
 				} else {
 					$creds['user_login'] 	= $_POST['username'];
 				}
@@ -702,6 +707,7 @@ class WC_Form_Handler {
 					wp_redirect( apply_filters( 'woocommerce_login_redirect', $redirect, $user ) );
 					exit;
 				}
+
 			} catch (Exception $e) {
 
 				wc_add_notice( apply_filters('login_errors', $e->getMessage() ), 'error' );
@@ -776,13 +782,22 @@ class WC_Form_Handler {
 	public function process_registration() {
 		if ( ! empty( $_POST['register'] ) ) {
 
-			WC()->verify_nonce( 'register' );
+			wp_verify_nonce( $_POST['register'], 'woocommerce-register' );
 
-			$validation_error = new WP_Error();
-			$validation_error = apply_filters( 'woocommerce_process_registration_errors', $validation_error, $_POST['username'], $_POST['password'], $_POST['email'] );
+			try {
 
-			if ( $validation_error->get_error_code() ) {
-				throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . $validation_error->get_error_message() );
+				$validation_error = new WP_Error();
+				$validation_error = apply_filters( 'woocommerce_process_registration_errors', $validation_error, $_POST['username'], $_POST['password'], $_POST['email'] );
+
+				if ( $validation_error->get_error_code() ) {
+					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . $validation_error->get_error_message() );
+				}
+
+			} catch ( Exception $e ) {
+
+				wc_add_notice( $e->getMessage(), 'error' );
+				return;
+
 			}
 
 			$username   = ! empty( $_POST['username'] ) ? wc_clean( $_POST['username'] ) : '';
