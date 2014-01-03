@@ -317,7 +317,7 @@ abstract class WC_Email extends WC_Settings_API {
 			$email_content = $this->style_inline( $this->get_content_html() );
 		}
 
-		return $email_content;
+		return wordwrap( $email_content, 70 );
 	}
 
 	/**
