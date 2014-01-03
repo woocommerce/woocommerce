@@ -32,7 +32,7 @@ final class WooCommerce {
 	/**
 	 * @var string
 	 */
-	public $version = '2.1-beta-2';
+	public $version = '2.1.0';
 
 	/**
 	 * @var WooCommerce The single instance of the class
