@@ -14,11 +14,11 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 global $woocommerce;
 
 $customer_orders = get_posts( apply_filters( 'woocommerce_my_account_my_orders_query', array(
-    'numberposts' => $order_count,
-    'meta_key'    => '_customer_user',
-    'meta_value'  => get_current_user_id(),
-    'post_type'   => 'shop_order',
-    'post_status' => 'publish'
+	'numberposts' => $order_count,
+	'meta_key'    => '_customer_user',
+	'meta_value'  => get_current_user_id(),
+	'post_type'   => 'shop_order',
+	'post_status' => 'publish'
 ) ) );
 
 if ( $customer_orders ) : ?>
