@@ -399,7 +399,7 @@ class WC_Order {
 
 		return $wpdb->get_results( $wpdb->prepare("SELECT meta_key, meta_value, meta_id, order_item_id
 			FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d
-			ORDER BY meta_key,meta_id", absint( $order_item_id ) ), ARRAY_A );
+			ORDER BY meta_id", absint( $order_item_id ) ), ARRAY_A );
 	}
 
 	/**
