@@ -20,7 +20,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @return int
  */
 function wc_notice_count( $notice_type = '' ) {
-
 	$notice_count = 0;
 	$all_notices  = WC()->session->get( 'wc_notices', array() );
 
@@ -37,6 +36,19 @@ function wc_notice_count( $notice_type = '' ) {
 	}
 
 	return $notice_count;
+}
+
+/**
+ * See if a notice has already been added
+ *
+ * @param  string $message The text to display in the notice.
+ * @param  string $notice_type The singular name of the notice type - either error, success or notice. [optional]
+ * @return bool
+ */
+function wc_has_notice( $message, $notice_type = 'success' ) {
+	$notices = WC()->session->get( 'wc_notices', array() );
+	$notices = isset( $notices[ $notice_type ] ) ? $notices[ $notice_type ] : array();
+	return array_search( $message, $notices ) !== false;
 }
 
 /**
