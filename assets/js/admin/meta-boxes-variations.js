@@ -312,7 +312,13 @@ jQuery( function($){
 				title: woocommerce_admin_meta_boxes_variations.i18n_choose_image,
 				button: {
 					text: woocommerce_admin_meta_boxes_variations.i18n_set_image
-				}
+				},
+				states : [
+					new wp.media.controller.Library({
+						title: woocommerce_admin_meta_boxes_variations.i18n_choose_image,
+						filterable :	'all'
+					})
+				]
 			});
 
 			// When an image is selected, run a callback.
