@@ -465,7 +465,8 @@ class WC_Install {
 			    'unfiltered_html'        => true,
 			    'upload_files'           => true,
 			   	'export'                 => true,
-				'import'                 => true
+				'import'                 => true,
+				'list_users'             => true
 			) );
 
 			$capabilities = $this->get_core_capabilities();
