@@ -163,7 +163,7 @@ class WC_Product {
 		if ( $this->managing_stock() ) {
 
 			// Update stock amount
-			$this->stock = intval( $amount );
+			$this->stock = apply_filters( 'woocommerce_stock_amount', $amount );
 
 			// Update meta
 			update_post_meta( $this->id, '_stock', $this->stock );
@@ -924,7 +924,7 @@ class WC_Product {
 
 	/**
 	 * Functions for getting parts of a price, in html, used by get_price_html.
-	 * 
+	 *
 	 * @return string
 	 */
 	public function get_price_html_from_text() {

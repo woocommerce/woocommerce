@@ -90,6 +90,7 @@ abstract class WC_Email extends WC_Settings_API {
         '/&(bull|#149|#8226);/i',                // Bullet
         '/&(pound|#163);/i',                     // Pound sign
         '/&(euro|#8364);/i',                     // Euro sign
+        '/&#36;/',                               // Dollar sign
         '/&[^&;]+;/i',                           // Unknown/unhandled entities
         '/[ ]{2,}/'                              // Runs of spaces, post-handling
     );
@@ -117,6 +118,7 @@ abstract class WC_Email extends WC_Settings_API {
         '*',
         '£',
         'EUR',                                  // Euro sign. € ?
+        '$',                                    // Dollar sign
         '',                                     // Unknown/unhandled entities
         ' '                                     // Runs of spaces, post-handling
     );

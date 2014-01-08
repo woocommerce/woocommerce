@@ -579,7 +579,7 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_cart_url() {
-			$cart_page_id = wc_get_page_id('cart');
+			$cart_page_id = wc_get_page_id( 'cart' );
 			if ( $cart_page_id )
 				return apply_filters( 'woocommerce_get_cart_url', get_permalink( $cart_page_id ) );
 
@@ -592,7 +592,7 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_checkout_url() {
-			$checkout_page_id = wc_get_page_id('checkout');
+			$checkout_page_id = wc_get_page_id( 'checkout' );
 			$checkout_url     = '';
 			if ( $checkout_page_id ) {
 				if ( is_ssl() || get_option('woocommerce_force_ssl_checkout') == 'yes' )
@@ -800,9 +800,14 @@ class WC_Cart {
 			if ( $product_data->is_sold_individually() ) {
 				$in_cart_quantity = $cart_item_key ? $this->cart_contents[$cart_item_key]['quantity'] : 0;
 
-				// If its greater than 0, its already in the cart
+				// If it's greater than 0, it's already in the cart
 				if ( $in_cart_quantity > 0 ) {
-					wc_add_notice( sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', get_permalink( wc_get_page_id( 'cart' ) ), __( 'View Cart', 'woocommerce' ), sprintf( __( 'You cannot add another &quot;%s&quot; to your cart.', 'woocommerce' ), $product_data->get_title() ) ), 'error' );
+					wc_add_notice( sprintf(
+						'<a href="%s" class="button wc-forward">%s</a> %s',
+						$this->get_cart_url(),
+						__( 'View Cart', 'woocommerce' ),
+						sprintf( __( 'You cannot add another &quot;%s&quot; to your cart.', 'woocommerce' ), $product_data->get_title() )
+					), 'error' );
 					return false;
 				}
 			}
@@ -816,7 +821,12 @@ class WC_Cart {
 				if ( $variation_id && $product_data->variation_has_stock ) {
 
 					if ( isset( $product_qty_in_cart[ $variation_id ] ) && ! $product_data->has_enough_stock( $product_qty_in_cart[ $variation_id ] + $quantity ) ) {
-						wc_add_notice( sprintf(__( '<a href="%s" class="button wc-forward">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), get_permalink( wc_get_page_id( 'cart' ) ), __( 'View Cart', 'woocommerce' ), $product_data->get_stock_quantity(), $product_qty_in_cart[ $variation_id ] ), 'error' );
+						wc_add_notice( sprintf(
+							'<a href="%s" class="button wc-forward">%s</a> %s',
+							$this->get_cart_url(),
+							__( 'View Cart', 'woocommerce' ),
+							sprintf( __( 'You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), $product_data->get_stock_quantity(), $product_qty_in_cart[ $variation_id ] )
+						), 'error' );
 						return false;
 					}
 
@@ -824,7 +834,12 @@ class WC_Cart {
 				} else {
 
 					if ( isset( $product_qty_in_cart[ $product_id ] ) && ! $product_data->has_enough_stock( $product_qty_in_cart[ $product_id ] + $quantity ) ) {
-						wc_add_notice( sprintf(__( '<a href="%s" class="button wc-forward">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), get_permalink( wc_get_page_id( 'cart' ) ), __( 'View Cart', 'woocommerce' ), $product_data->get_stock_quantity(), $product_qty_in_cart[ $product_id ] ), 'error' );
+						wc_add_notice( sprintf(
+							'<a href="%s" class="button wc-forward">%s</a> %s',
+							$this->get_cart_url(),
+							__( 'View Cart', 'woocommerce' ),
+							sprintf( __( 'You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), $product_data->get_stock_quantity(), $product_qty_in_cart[ $product_id ] )
+						), 'error' );
 						return false;
 					}
 

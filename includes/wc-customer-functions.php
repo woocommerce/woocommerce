@@ -48,7 +48,7 @@ function wc_create_new_customer( $email, $username = '', $password = '' ) {
 	if ( email_exists( $email ) )
 		return new WP_Error( "registration-error", __( "An account is already registered with your email address. Please login.", "woocommerce" ) );
 
-	wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-register' );
+	wp_verify_nonce( $_POST['register'], 'woocommerce-register' );
 
 	// Handle username creation
 	if ( get_option( 'woocommerce_registration_generate_username' ) == 'no' || ! empty( $username ) ) {
@@ -259,7 +259,7 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 }
 
 /**
- * Checks if a user has a certain capability 
+ * Checks if a user has a certain capability
  *
  * @access public
  * @param array $allcaps

@@ -128,6 +128,14 @@ class WC_Admin_Status {
 					WC_Install::create_pages();
 					echo '<div class="updated"><p>' . __( 'All missing WooCommerce pages was installed successfully.', 'woocommerce' ) . '</p></div>';
                 break;
+                case "delete_taxes" :
+
+					$wpdb->query( "TRUNCATE " . $wpdb->prefix . "woocommerce_tax_rates" );
+
+					$wpdb->query( "TRUNCATE " . $wpdb->prefix . "woocommerce_tax_rate_locations" );
+
+					echo '<div class="updated"><p>' . __( 'Tax rates successfully deleted', 'woocommerce' ) . '</p></div>';
+				break;
 				default:
 					$action = esc_attr( $_GET['action'] );
 					if( isset( $tools[ $action ]['callback'] ) ) {
@@ -190,6 +198,11 @@ class WC_Admin_Status {
 				'name'    => __( 'Install WooCommerce Pages', 'woocommerce' ),
 				'button'  => __( 'Install pages', 'woocommerce' ),
 				'desc'    => __( '<strong class="red">Note</strong> This tool will install all the missing WooCommerce pages. Pages already defined and set up will not be replaced.', 'woocommerce' ),
+			),
+			'delete_taxes' => array(
+				'name'    => __( 'Delete all WooCommerce tax rates', 'woocommerce' ),
+				'button'  => __( 'Delete ALL tax rates', 'woocommerce' ),
+				'desc'    => __( '<strong class="red">Note</strong> This option will delete ALL of your tax rates, use with caution.', 'woocommerce' ),
 			),
 		) );
 	}
