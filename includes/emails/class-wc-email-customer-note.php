@@ -91,7 +91,9 @@ class WC_Email_Customer_Note extends WC_Email {
 		wc_get_template( $this->template_html, array(
 			'order' 		=> $this->object,
 			'email_heading' => $this->get_heading(),
-			'customer_note' => $this->customer_note
+			'customer_note' => $this->customer_note,
+			'sent_to_admin' => false,
+			'plain_text'    => false
 		) );
 		return ob_get_clean();
 	}
@@ -107,7 +109,9 @@ class WC_Email_Customer_Note extends WC_Email {
 		wc_get_template( $this->template_plain, array(
 			'order' 		=> $this->object,
 			'email_heading' => $this->get_heading(),
-			'customer_note' => $this->customer_note
+			'customer_note' => $this->customer_note,
+			'sent_to_admin' => false,
+			'plain_text'    => true
 		) );
 		return ob_get_clean();
 	}

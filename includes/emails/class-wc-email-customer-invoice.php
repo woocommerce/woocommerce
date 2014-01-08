@@ -110,7 +110,9 @@ class WC_Email_Customer_Invoice extends WC_Email {
 		ob_start();
 		wc_get_template( $this->template_html, array(
 			'order' 		=> $this->object,
-			'email_heading' => $this->get_heading()
+			'email_heading' => $this->get_heading(),
+			'sent_to_admin' => false,
+			'plain_text'    => false
 		) );
 		return ob_get_clean();
 	}
@@ -125,7 +127,9 @@ class WC_Email_Customer_Invoice extends WC_Email {
 		ob_start();
 		wc_get_template( $this->template_plain, array(
 			'order' 		=> $this->object,
-			'email_heading' => $this->get_heading()
+			'email_heading' => $this->get_heading(),
+			'sent_to_admin' => false,
+			'plain_text'    => true
 		) );
 		return ob_get_clean();
 	}
