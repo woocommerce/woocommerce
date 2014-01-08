@@ -64,6 +64,7 @@ class WC_Frontend_Scripts {
 		wp_register_script( 'wc-add-to-cart-variation', $frontend_script_path . 'add-to-cart-variation' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
 		wp_register_script( 'wc-single-product', $frontend_script_path . 'single-product' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
 		wp_register_script( 'wc-country-select', $frontend_script_path . 'country-select' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
+		wp_register_script( 'wc-address-i18n', $frontend_script_path . 'address-i18n' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
 		wp_register_script( 'jquery-cookie', $assets_path . 'js/jquery-cookie/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '1.3.1', true );
 
 		// Queue frontend scripts conditionally
@@ -80,7 +81,7 @@ class WC_Frontend_Scripts {
 				wp_enqueue_style( 'woocommerce_chosen_styles', $assets_path . 'css/chosen.css' );
 			}
 
-			wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce', 'wc-country-select' ), WC_VERSION, true );
+			wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ), WC_VERSION, true );
 		}
 
 		if ( is_add_payment_method_page() )
@@ -113,14 +114,17 @@ class WC_Frontend_Scripts {
 		wp_localize_script( 'wc-checkout', 'wc_checkout_params', apply_filters( 'wc_checkout_params', array(
 			'ajax_url'                  => WC()->ajax_url(),
 			'ajax_loader_url'           => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
-			'i18n_required_text'        => esc_attr__( 'required', 'woocommerce' ),
 			'update_order_review_nonce' => wp_create_nonce( "update-order-review" ),
 			'apply_coupon_nonce'        => wp_create_nonce( "apply-coupon" ),
 			'option_guest_checkout'     => get_option( 'woocommerce_enable_guest_checkout' ),
 			'checkout_url'              => add_query_arg( 'action', 'woocommerce_checkout', WC()->ajax_url() ),
-			'is_checkout'               => is_page( wc_get_page_id( 'checkout' ) ) && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ? 1 : 0,
+			'is_checkout'               => is_page( wc_get_page_id( 'checkout' ) ) && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ? 1 : 0
+		) ) );
+
+		wp_localize_script( 'wc-address-i18n', 'wc_address_i18n_params', apply_filters( 'wc_address_i18n_params', array(
 			'locale'                    => json_encode( WC()->countries->get_country_locale() ),
-			'locale_fields'             => json_encode( WC()->countries->get_country_locale_field_selectors() )
+			'locale_fields'             => json_encode( WC()->countries->get_country_locale_field_selectors() ),
+			'i18n_required_text'        => esc_attr__( 'required', 'woocommerce' ),
 		) ) );
 
 		wp_localize_script( 'wc-cart', 'wc_cart_params', apply_filters( 'wc_cart_params', array(
