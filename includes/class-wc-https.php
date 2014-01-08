@@ -18,7 +18,7 @@ class WC_HTTPS {
 	 */
 	public function __construct() {
 		if ( 'yes' == get_option( 'woocommerce_force_ssl_checkout' ) ) {
-			if ( ! is_admin() || ( defined( 'DOING_AJAX' ) && in_array( $_REQUEST['action'], array( 'woocommerce_get_refreshed_fragments' ) ) ) ) {
+			if ( ! is_admin() || ( defined( 'DOING_AJAX' ) && in_array( $_REQUEST['action'], array( 'woocommerce_get_refreshed_fragments', 'woocommerce_checkout', 'woocommerce_update_order_review', 'woocommerce_update_shipping_method', 'woocommerce_apply_coupon' ) ) ) ) {
 				// HTTPS urls with SSL on
 				$filters = array( 'post_thumbnail_html', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
 
