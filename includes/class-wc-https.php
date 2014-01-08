@@ -17,19 +17,21 @@ class WC_HTTPS {
 	 * Hook in our HTTPS functions if we're on the frontend. This will ensure any links output to a page (when viewing via HTTPS) are also served over HTTPS.
 	 */
 	public function __construct() {
-		if ( ! is_admin() && 'yes' == get_option( 'woocommerce_force_ssl_checkout' ) ) {
-			// HTTPS urls with SSL on
-			$filters = array( 'post_thumbnail_html', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
+		if ( 'yes' == get_option( 'woocommerce_force_ssl_checkout' ) ) {
+			if ( ! is_admin() || ( defined( 'DOING_AJAX' ) && in_array( $_REQUEST['action'], array( 'woocommerce_get_refreshed_fragments' ) ) ) ) {
+				// HTTPS urls with SSL on
+				$filters = array( 'post_thumbnail_html', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
 
-			foreach ( $filters as $filter ) {
-				add_filter( $filter, 'WC_HTTPS::force_https_url' );
+				foreach ( $filters as $filter ) {
+					add_filter( $filter, 'WC_HTTPS::force_https_url' );
+				}
+				
+				add_filter( 'page_link', array( $this, 'force_https_page_link' ), 10, 2 );
+				add_action( 'template_redirect', array( $this, 'force_https_template_redirect' ) );
+
+				if ( get_option('woocommerce_unforce_ssl_checkout') == 'yes' )
+					add_action( 'template_redirect', array( $this, 'unforce_https_template_redirect' ) );
 			}
-			
-			add_filter( 'page_link', array( $this, 'force_https_page_link' ), 10, 2 );
-			add_action( 'template_redirect', array( $this, 'force_https_template_redirect' ) );
-
-			if ( get_option('woocommerce_unforce_ssl_checkout') == 'yes' )
-				add_action( 'template_redirect', array( $this, 'unforce_https_template_redirect' ) );
 		}
 	}
 
