@@ -216,7 +216,9 @@ class WC_Admin_Report {
 					$query['where'] .= " AND {$value['key']} {$where_value}";
 			}
 		}
-
+        
+        $query = apply_filters('woocommerce_admin_report_query', $query);
+        
 		if ( $group_by ) {
 			$query['group_by'] = "GROUP BY {$group_by}";
 		}
