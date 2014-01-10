@@ -547,7 +547,7 @@ if ( ! function_exists( 'woocommerce_reset_loop' ) ) {
 	function woocommerce_reset_loop() {
 		global $woocommerce_loop;
 		// Reset loop/columns globals when starting a new loop
-		$woocommerce_loop['loop'] = $woocommerce_loop['column'] = '';
+		$woocommerce_loop['loop'] = $woocommerce_loop['columns'] = '';
 	}
 }
 

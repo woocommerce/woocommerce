@@ -309,7 +309,7 @@ class WC_Admin_Welcome {
 				<div class="feature-section col three-col">
 					<div>
 						<h4><?php _e( 'PayPal PDT support', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'PayPal Data Transfer (PDT) is an alterntative for PayPal IPN which sends back the status of an order when a customer returns from PayPal.', 'woocommerce' ); ?></p>
+						<p><?php _e( 'PayPal Data Transfer (PDT) is an alternative for PayPal IPN which sends back the status of an order when a customer returns from PayPal.', 'woocommerce' ); ?></p>
 					</div>
 
 					<div>

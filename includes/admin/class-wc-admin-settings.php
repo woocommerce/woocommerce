@@ -246,17 +246,27 @@ class WC_Admin_Settings {
 
 	        	// Section Titles
 	            case 'title':
-	            	if ( ! empty( $value['title'] ) ) echo '<h3>' . esc_html( $value['title'] ) . '</h3>';
-	            	if ( ! empty( $value['desc'] ) ) echo wpautop( wptexturize( wp_kses_post( $value['desc'] ) ) );
+	            	if ( ! empty( $value['title'] ) ) {
+	            		echo '<h3>' . esc_html( $value['title'] ) . '</h3>';
+	            	}
+	            	if ( ! empty( $value['desc'] ) ) {
+	            		echo wpautop( wptexturize( wp_kses_post( $value['desc'] ) ) );
+	            	}
 	            	echo '<table class="form-table">'. "\n\n";
-	            	if ( ! empty( $value['id'] ) ) do_action( 'woocommerce_settings_' . sanitize_title( $value['id'] ) );
+	            	if ( ! empty( $value['id'] ) ) {
+	            		do_action( 'woocommerce_settings_' . sanitize_title( $value['id'] ) );
+	            	}
 	            break;
 
 	            // Section Ends
 	            case 'sectionend':
-	            	if ( ! empty( $value['id'] ) ) do_action( 'woocommerce_settings_' . sanitize_title( $value['id'] ) . '_end' );
+	            	if ( ! empty( $value['id'] ) ) {
+	            		do_action( 'woocommerce_settings_' . sanitize_title( $value['id'] ) . '_end' );
+	            	}
 	            	echo '</table>';
-	            	if ( ! empty( $value['id'] ) ) do_action( 'woocommerce_settings_' . sanitize_title( $value['id'] ) . '_after' );
+	            	if ( ! empty( $value['id'] ) ) {
+	            		do_action( 'woocommerce_settings_' . sanitize_title( $value['id'] ) . '_after' );
+	            	}
 	            break;
 
 	            // Standard text inputs and subtypes like 'number'

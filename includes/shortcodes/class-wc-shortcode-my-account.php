@@ -161,6 +161,7 @@ class WC_Shortcode_My_Account {
 
 		// Enqueue scripts
 		wp_enqueue_script( 'wc-country-select' );
+		wp_enqueue_script( 'wc-address-i18n' );
 
 		// Prepare values
 		foreach ( $address as $key => $field ) {

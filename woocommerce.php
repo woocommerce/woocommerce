@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 2.1-beta-2
+ * Version: 2.1-beta-3
  * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 3.8
@@ -16,8 +16,9 @@
  * @category Core
  * @author WooThemes
  */
-if ( ! defined( 'ABSPATH' ) )
+if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
+}
 
 if ( ! class_exists( 'WooCommerce' ) ) :
 

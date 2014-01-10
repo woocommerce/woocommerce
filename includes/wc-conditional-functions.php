@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @return bool
  */
 function is_woocommerce() {
-	return ( is_shop() || is_product_taxonomy() || is_product() ) ? true : false;
+	return apply_filters( 'is_woocommerce', ( is_shop() || is_product_taxonomy() || is_product() ) ? true : false );
 }
 
 if ( ! function_exists( 'is_shop' ) ) {

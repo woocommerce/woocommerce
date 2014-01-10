@@ -229,6 +229,7 @@ class WC_Admin_Report {
 			$query['limit'] = "LIMIT {$limit}";
 		}
 
+		$query      = apply_filters( 'woocommerce_reports_get_order_report_query', $query );
 		$query      = implode( ' ', $query );
 		$query_hash = md5( $query_type . $query );
 

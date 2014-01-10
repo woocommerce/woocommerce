@@ -191,6 +191,7 @@ class WC_Shortcodes {
 
 		<?php endif;
 
+		woocommerce_reset_loop();
 		wp_reset_postdata();
 
 		return '<div class="woocommerce columns-' . $columns . '">' . ob_get_clean() . '</div>';

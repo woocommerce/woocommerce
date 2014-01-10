@@ -192,17 +192,17 @@ class WC_Admin_Status {
 			'clear_sessions' => array(
 				'name'		=> __('Customer Sessions','woocommerce'),
 				'button'	=> __('Clear all sessions','woocommerce'),
-				'desc'		=> __( '<strong class="red">Warning</strong> This tool will delete all customer session data from the database, including any current live carts.', 'woocommerce' ),
+				'desc'		=> __( '<strong class="red">Warning:</strong> This tool will delete all customer session data from the database, including any current live carts.', 'woocommerce' ),
 			),
 			'install_pages' => array(
 				'name'    => __( 'Install WooCommerce Pages', 'woocommerce' ),
 				'button'  => __( 'Install pages', 'woocommerce' ),
-				'desc'    => __( '<strong class="red">Note</strong> This tool will install all the missing WooCommerce pages. Pages already defined and set up will not be replaced.', 'woocommerce' ),
+				'desc'    => __( '<strong class="red">Note:</strong> This tool will install all the missing WooCommerce pages. Pages already defined and set up will not be replaced.', 'woocommerce' ),
 			),
 			'delete_taxes' => array(
 				'name'    => __( 'Delete all WooCommerce tax rates', 'woocommerce' ),
 				'button'  => __( 'Delete ALL tax rates', 'woocommerce' ),
-				'desc'    => __( '<strong class="red">Note</strong> This option will delete ALL of your tax rates, use with caution.', 'woocommerce' ),
+				'desc'    => __( '<strong class="red">Note:</strong> This option will delete ALL of your tax rates, use with caution.', 'woocommerce' ),
 			),
 		) );
 	}

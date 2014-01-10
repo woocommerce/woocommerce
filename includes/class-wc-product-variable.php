@@ -451,8 +451,9 @@ class WC_Product_Variable extends WC_Product {
 		if ( ! $children && get_post_status( $product_id ) == 'publish' ) {
 			$wpdb->update( $wpdb->posts, array( 'post_status' => 'draft' ), array( 'ID' => $product_id ) );
 
-			if ( is_admin() )
-				WC_Admin_Meta_Boxes::add_error( __( 'This variable product has no active variations and will not be published.', 'woocommerce' ) );
+			if ( is_admin() ) {
+				WC_Admin_Meta_Boxes::add_error( __( 'This variable product has no active variations so cannot be published. Changing status to draft.', 'woocommerce' ) );
+			}
 		
 		// Loop the variations
 		} else {
