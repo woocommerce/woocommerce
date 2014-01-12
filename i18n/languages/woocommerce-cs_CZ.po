@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v2.0.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2011-12-23 10:01+0100\n"
-"PO-Revision-Date: 2013-06-15 17:28+0100\n"
+"PO-Revision-Date: 2014-01-12 20:58+0100\n"
 "Last-Translator: Marek Rabas <rabas.marek@gmail.com>\n"
 "Language-Team: Marek Rabas <rabas.marek@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -8177,12 +8177,12 @@ msgstr "Přidat nový"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:598
 msgid "Menu order"
-msgstr "Menu objednávek"
+msgstr "Nabídka pořadí"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:598
 msgid "Custom ordering position."
-msgstr "Umístění vlastního objednání."
+msgstr "Vlastní uspořádání pozice."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:606
