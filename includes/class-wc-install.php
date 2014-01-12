@@ -35,8 +35,9 @@ class WC_Install {
 	 * @return void
 	 */
 	public function check_version() {
-		if ( ! defined( 'IFRAME_REQUEST' ) && ( get_option( 'woocommerce_version' ) != WC()->version || get_option( 'woocommerce_db_version' ) != WC()->version ) )
+		if ( ! defined( 'IFRAME_REQUEST' ) && ( get_option( 'woocommerce_version' ) != WC()->version || get_option( 'woocommerce_db_version' ) != WC()->version ) ) {
 			$this->install();
+		}
 	}
 
 	/**
@@ -121,8 +122,9 @@ class WC_Install {
 		update_option( 'woocommerce_version', WC()->version );
 
 		// Check if pages are needed
-		if ( wc_get_page_id( 'shop' ) < 1 )
+		if ( wc_get_page_id( 'shop' ) < 1 ) {
 			update_option( '_wc_needs_pages', 1 );
+		}
 
 		// Flush rewrite rules
 		flush_rewrite_rules();
@@ -159,8 +161,9 @@ class WC_Install {
 		}
 
 		if ( version_compare( $current_db_version, '2.0.14', '<' ) ) {
-			if ( 'HU' == get_option( 'woocommerce_default_country' ) )
+			if ( 'HU' == get_option( 'woocommerce_default_country' ) ) {
 				update_option( 'woocommerce_default_country', 'HU:BU' );
+			}
 
 			update_option( 'woocommerce_db_version', '2.0.14' );
 		}
@@ -182,17 +185,19 @@ class WC_Install {
 		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
 		wp_clear_scheduled_hook( 'woocommerce_cleanup_sessions' );
 
-		$ve = get_option('gmt_offset') > 0 ? '+' : '-';
+		$ve = get_option( 'gmt_offset' ) > 0 ? '+' : '-';
 
-		wp_schedule_event( strtotime( '00:00 tomorrow ' . $ve . get_option('gmt_offset') . ' HOURS' ), 'daily', 'woocommerce_scheduled_sales');
+		wp_schedule_event( strtotime( '00:00 tomorrow ' . $ve . get_option( 'gmt_offset' ) . ' HOURS' ), 'daily', 'woocommerce_scheduled_sales' );
 
 		$held_duration = get_option( 'woocommerce_hold_stock_minutes', null );
 
-		if ( is_null( $held_duration ) )
+		if ( is_null( $held_duration ) ) {
 			$held_duration = '60';
+		}
 
-		if ( $held_duration != '' )
+		if ( $held_duration != '' ) {
 			wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+		}
 
 		wp_schedule_event( time(), 'twicedaily', 'woocommerce_cleanup_sessions' );
 	}
@@ -227,8 +232,9 @@ class WC_Install {
 			)
 		) );
 
-		foreach ( $pages as $key => $page )
+		foreach ( $pages as $key => $page ) {
 			wc_create_page( esc_sql( $page['name'] ), 'woocommerce_' . $key . '_page_id', $page['title'], $page['content'], ! empty( $page['parent'] ) ? wc_get_page_id( $page['parent'] ) : '' );
+		}
 	}
 
 	/**
@@ -323,10 +329,12 @@ class WC_Install {
 		$collate = '';
 
 		if ( $wpdb->has_cap( 'collation' ) ) {
-			if( ! empty($wpdb->charset ) )
+			if ( ! empty($wpdb->charset ) ) {
 				$collate .= "DEFAULT CHARACTER SET $wpdb->charset";
-			if( ! empty($wpdb->collate ) )
+			}
+			if ( ! empty($wpdb->collate ) ) {
 				$collate .= " COLLATE $wpdb->collate";
+			}
 		}
 
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
@@ -421,9 +429,11 @@ class WC_Install {
 	public function create_roles() {
 		global $wp_roles;
 
-		if ( class_exists('WP_Roles') )
-			if ( ! isset( $wp_roles ) )
+		if ( class_exists( 'WP_Roles' ) ) {
+			if ( ! isset( $wp_roles ) ) {
 				$wp_roles = new WP_Roles();
+			}
+		}
 
 		if ( is_object( $wp_roles ) ) {
 
@@ -480,8 +490,8 @@ class WC_Install {
 
 			$capabilities = $this->get_core_capabilities();
 
-			foreach( $capabilities as $cap_group ) {
-				foreach( $cap_group as $cap ) {
+			foreach ( $capabilities as $cap_group ) {
+				foreach ( $cap_group as $cap ) {
 					$wp_roles->add_cap( 'shop_manager', $cap );
 					$wp_roles->add_cap( 'administrator', $cap );
 				}
@@ -499,13 +509,13 @@ class WC_Install {
 		$capabilities = array();
 
 		$capabilities['core'] = array(
-			"manage_woocommerce",
-			"view_woocommerce_reports"
+			'manage_woocommerce',
+			'view_woocommerce_reports'
 		);
 
 		$capability_types = array( 'product', 'shop_order', 'shop_coupon' );
 
-		foreach( $capability_types as $capability_type ) {
+		foreach ( $capability_types as $capability_type ) {
 
 			$capabilities[ $capability_type ] = array(
 				// Post type
@@ -543,16 +553,18 @@ class WC_Install {
 	public function remove_roles() {
 		global $wp_roles;
 
-		if ( class_exists('WP_Roles') )
-			if ( ! isset( $wp_roles ) )
+		if ( class_exists( 'WP_Roles' ) ) {
+			if ( ! isset( $wp_roles ) ) {
 				$wp_roles = new WP_Roles();
+			}
+		}
 
 		if ( is_object( $wp_roles ) ) {
 
 			$capabilities = $this->get_core_capabilities();
 
-			foreach( $capabilities as $cap_group ) {
-				foreach( $cap_group as $cap ) {
+			foreach ( $capabilities as $cap_group ) {
+				foreach ( $cap_group as $cap ) {
 					$wp_roles->remove_cap( 'shop_manager', $cap );
 					$wp_roles->remove_cap( 'administrator', $cap );
 				}
@@ -612,8 +624,9 @@ class WC_Install {
 
 			$colors = get_option( 'woocommerce_frontend_css_colors' );
 
-			if ( ( ! empty( $colors['primary'] ) && ! empty( $colors['secondary'] ) && ! empty( $colors['highlight'] ) && ! empty( $colors['content_bg'] ) && ! empty( $colors['subtext'] ) ) && ( $colors['primary'] != '#ad74a2' || $colors['secondary'] != '#f7f6f7' || $colors['highlight'] != '#85ad74' || $colors['content_bg'] != '#ffffff' || $colors['subtext'] != '#777777' ) )
+			if ( ( ! empty( $colors['primary'] ) && ! empty( $colors['secondary'] ) && ! empty( $colors['highlight'] ) && ! empty( $colors['content_bg'] ) && ! empty( $colors['subtext'] ) ) && ( $colors['primary'] != '#ad74a2' || $colors['secondary'] != '#f7f6f7' || $colors['highlight'] != '#85ad74' || $colors['content_bg'] != '#ffffff' || $colors['subtext'] != '#777777' ) ) {
 				woocommerce_compile_less_styles();
+			}
 
 		}
 	}
@@ -624,14 +637,14 @@ class WC_Install {
 	 * @param string $new_value
 	 * @return string
 	 */
-	function pre_update_option_active_plugins($new_value) {
-		$old_value = (array) get_option('active_plugins');
+	function pre_update_option_active_plugins( $new_value ) {
+		$old_value = (array) get_option( 'active_plugins' );
 
-		if ($new_value !== $old_value && in_array(W3TC_FILE, (array) $new_value) && in_array(W3TC_FILE, (array) $old_value)) {
-				$this->_config->set('notes.plugins_updated', true);
-				try {
-					$this->_config->save();
-				} catch(Exception $ex) {}
+		if ( $new_value !== $old_value && in_array( W3TC_FILE, (array) $new_value ) && in_array( W3TC_FILE, (array) $old_value ) ) {
+			$this->_config->set( 'notes.plugins_updated', true );
+			try {
+				$this->_config->save();
+			} catch( Exception $ex ) {}
 		}
 
 		return $new_value;
@@ -656,7 +669,7 @@ class WC_Install {
 
 				echo '<div style="font-weight: normal; background: #cc99c2; color: #fff !important; border: 1px solid #b76ca9; padding: 9px; margin: 9px 0;">';
 
-				foreach  ( $notices as $index => $line ) {
+				foreach ( $notices as $index => $line ) {
 					echo '<p style="margin: 0; font-size: 1.1em; color: #fff; text-shadow: 0 1px 1px #b574a8;">' . preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line ) . '</p>';
 				}
 
@@ -668,13 +681,13 @@ class WC_Install {
 			$regexp = '~==\s*Changelog\s*==\s*=\s*[0-9.]+\s*-(.*)=(.*)(=\s*' . preg_quote( WC_VERSION ) . '\s*-(.*)=|$)~Uis';
 
 			if ( preg_match( $regexp, $response['body'], $matches ) ) {
-				$changelog = (array) preg_split('~[\r\n]+~', trim( $matches[2] ) );
+				$changelog = (array) preg_split( '~[\r\n]+~', trim( $matches[2] ) );
 
 				echo ' ' . __( 'What\'s new:', 'woocommerce' ) . '<div style="font-weight: normal;">';
 
 				$ul = false;
 
-				foreach  ( $changelog as $index => $line ) {
+				foreach ( $changelog as $index => $line ) {
 					if ( preg_match('~^\s*\*\s*~', $line ) ) {
 						if ( ! $ul ) {
 							echo '<ul style="list-style: disc inside; margin: 9px 0 9px 20px; overflow:hidden; zoom: 1;">';
@@ -691,8 +704,9 @@ class WC_Install {
 					}
 				}
 
-				if ($ul)
+				if ( $ul ) {
 					echo '</ul>';
+				}
 
 				echo '</div>';
 			}
