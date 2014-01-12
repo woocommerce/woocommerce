@@ -293,7 +293,7 @@ class WC_Install {
 				}
 			}
 
-			// Special case to install the inventory settings..
+			// Special case to install the inventory settings.
 			if ( $section instanceof WC_Settings_Products ) {
 				foreach ( $section->get_settings( 'inventory' ) as $value ) {
 					if ( isset( $value['default'] ) && isset( $value['id'] ) ) {
