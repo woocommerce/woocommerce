@@ -167,6 +167,8 @@ class WC_Meta_Box_Coupon_Data {
 
 				echo '</div>';
 
+				do_action( 'woocommerce_coupon_options_usage_restriction' );
+
 			?></div>
 			<div id="usage_limit_coupon_data" class="panel woocommerce_options_panel"><?php
 
@@ -191,6 +193,8 @@ class WC_Meta_Box_Coupon_Data {
 					) ) );
 
 				echo '</div>';
+
+				do_action( 'woocommerce_coupon_options_usage_limit' );
 
 			?></div>
 			<div class="clear"></div>
