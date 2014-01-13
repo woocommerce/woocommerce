@@ -189,6 +189,19 @@ if ( ! function_exists( 'is_ajax' ) ) {
 	}
 }
 
+if ( ! function_exists( 'is_store_notice_showing' ) ) {
+
+	/**
+	 * is_store_notice_showing - Returns true when store notice is active.
+	 *
+	 * @access public
+	 * @return bool
+	 */
+	function is_store_notice_showing() {
+		return get_option( 'woocommerce_demo_store' ) !== 'no' ? true : false;
+	}
+}
+
 if ( ! function_exists( 'is_filtered' ) ) {
 
 	/**

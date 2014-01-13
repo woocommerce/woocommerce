@@ -158,7 +158,7 @@ function wc_body_class( $classes ) {
 		$classes[] = 'woocommerce-page';
 	}
 
-	if ( get_option( 'woocommerce_demo_store' ) != 'no' ) {
+	if ( is_store_notice_showing() ) {
 		$classes[] = 'woocommerce-demo-store';
 	}
 
@@ -342,7 +342,7 @@ if ( ! function_exists( 'woocommerce_demo_store' ) ) {
 	 * @return void
 	 */
 	function woocommerce_demo_store() {
-		if ( get_option( 'woocommerce_demo_store' ) == 'no' )
+		if ( !is_store_notice_showing() )
 			return;
 
 		$notice = get_option( 'woocommerce_demo_store_notice' );
