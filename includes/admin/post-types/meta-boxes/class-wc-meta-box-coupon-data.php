@@ -163,9 +163,7 @@ class WC_Meta_Box_Coupon_Data {
 				echo '</div><div class="options_group">';
 
 				// Customers
-				woocommerce_wp_text_input( array( 'id' => 'customer_email', 'label' => __( 'Email restrictions', 'woocommerce' ), 'placeholder' => __( 'No restrictions', 'woocommerce' ), 'description' => __( 'List of emails to check against the customer\'s billing email when an order is placed.', 'woocommerce' ), 'value' => implode(', ', (array) get_post_meta( $post->ID, 'customer_email', true ) ), 'desc_tip' => true, 'type' => 'email', 'class' => '', 'custom_attributes' => array(
-						'multiple' 	=> 'multiple'
-					) ) );
+				woocommerce_wp_text_input( array( 'id' => 'customer_email', 'label' => __( 'Email restrictions', 'woocommerce' ), 'placeholder' => __( 'No restrictions', 'woocommerce' ), 'description' => __( 'List of emails to check against the customer\'s billing email when an order is placed.', 'woocommerce' ), 'value' => implode(', ', (array) get_post_meta( $post->ID, 'customer_email', true ) ), 'desc_tip' => true, 'type' => 'email', 'class' => '' ) );
 
 				echo '</div>';
 
@@ -175,19 +173,19 @@ class WC_Meta_Box_Coupon_Data {
 				echo '<div class="options_group">';
 
 				// Usage limit per coupons
-				woocommerce_wp_text_input( array( 'id' => 'usage_limit', 'label' => __( 'Usage limit per coupon', 'woocommerce' ), 'placeholder' => _x('Unlimited usage', 'placeholder', 'woocommerce'), 'description' => __( 'How many times this coupon can be used before it is void.', 'woocommerce' ), 'type' => 'number', 'desc_tip' => true, 'class' => '', 'custom_attributes' => array(
+				woocommerce_wp_text_input( array( 'id' => 'usage_limit', 'label' => __( 'Usage limit per coupon', 'woocommerce' ), 'placeholder' => _x('Unlimited usage', 'placeholder', 'woocommerce'), 'description' => __( 'How many times this coupon can be used before it is void.', 'woocommerce' ), 'type' => 'number', 'desc_tip' => true, 'class' => 'short', 'custom_attributes' => array(
 						'step' 	=> '1',
 						'min'	=> '0'
 					) ) );
 
 				// Usage limit per product
-				woocommerce_wp_text_input( array( 'id' => 'limit_usage_to_x_items', 'label' => __( 'Limit usage to X items', 'woocommerce' ), 'placeholder' => _x( 'Apply to all qualifying items in cart', 'placeholder', 'woocommerce' ), 'description' => __( 'The maximum number of individual items this coupon can apply to when using product discounts. Leave blank to apply to all qualifying items in cart.', 'woocommerce' ), 'desc_tip' => true, 'class' => '', 'type' => 'number', 'custom_attributes' => array(
+				woocommerce_wp_text_input( array( 'id' => 'limit_usage_to_x_items', 'label' => __( 'Limit usage to X items', 'woocommerce' ), 'placeholder' => _x( 'Apply to all qualifying items in cart', 'placeholder', 'woocommerce' ), 'description' => __( 'The maximum number of individual items this coupon can apply to when using product discounts. Leave blank to apply to all qualifying items in cart.', 'woocommerce' ), 'desc_tip' => true, 'class' => 'short', 'type' => 'number', 'custom_attributes' => array(
 						'step' 	=> '1',
 						'min'	=> '0'
 					) ) );
 
 				// Usage limit per users
-				woocommerce_wp_text_input( array( 'id' => 'usage_limit_per_user', 'label' => __( 'Usage limit per user', 'woocommerce' ), 'placeholder' => _x( 'Unlimited usage', 'placeholder', 'woocommerce' ), 'description' => __( 'How many times this coupon can be used by an invidual user. Uses billing email for guests, and user ID for logged in users.', 'woocommerce' ), 'desc_tip' => true, 'class' => '', 'type' => 'number', 'custom_attributes' => array(
+				woocommerce_wp_text_input( array( 'id' => 'usage_limit_per_user', 'label' => __( 'Usage limit per user', 'woocommerce' ), 'placeholder' => _x( 'Unlimited usage', 'placeholder', 'woocommerce' ), 'description' => __( 'How many times this coupon can be used by an invidual user. Uses billing email for guests, and user ID for logged in users.', 'woocommerce' ), 'desc_tip' => true, 'class' => 'short', 'type' => 'number', 'custom_attributes' => array(
 						'step' 	=> '1',
 						'min'	=> '0'
 					) ) );
