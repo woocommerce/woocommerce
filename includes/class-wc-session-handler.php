@@ -167,38 +167,23 @@ class WC_Session_Handler extends WC_Session {
 	public function cleanup_sessions() {
 		global $wpdb;
 
-		$now = time();
+		if ( ! defined( 'WP_SETUP_CONFIG' ) && ! defined( 'WP_INSTALLING' ) ) {
+			$now                = time();
+			$expired_sessions   = array();
+			$wc_session_expires = $wpdb->get_results( "SELECT option_name, option_value FROM $wpdb->options WHERE option_name LIKE '_wc_session_expires_%'" );
 
-		$session_names = $wpdb->get_col( $wpdb->prepare( "
-			SELECT
-				a.option_name
-			FROM
-				{$wpdb->options} a
-			WHERE
-				a.option_name LIKE '_wc_session_expires_%%'
-				AND a.option_value < %s
-		", $now ) );
+			foreach ( $wc_session_expires as $wc_session_expire ) {
+				if ( $now > intval( $wc_session_expire->option_value ) ) {
+					$session_id         = substr( $wc_session_expire->option_name, 20 );
+					$expired_sessions[] = $wc_session_expire->option_name;  // Expires key
+					$expired_sessions[] = "_wc_session_$session_id"; // Session key
+				}
+			}
 
-		// Clear cache
-		foreach ( $session_names as $session_name )
-			wp_cache_delete( substr( $session_name, 10 ), 'options' );
-
-		// Delete rows
-		$wpdb->query( $wpdb->prepare( "
-			DELETE
-				a, b
-			FROM
-				{$wpdb->options} a, {$wpdb->options} b
-			WHERE
-				a.option_name LIKE '_wc_session_%%' AND
-				b.option_name = CONCAT(
-					'_wc_session_expires_',
-					SUBSTRING(
-						a.option_name,
-						CHAR_LENGTH('_wc_session_') + 1
-					)
-				)
-				AND b.option_value < %s
-		", $now ) );
+			if ( ! empty( $expired_sessions ) ) {
+				$option_names = implode( "','", $expired_sessions );
+				$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name IN ('$option_names')" );
+			}
+		}
 	}
 }
