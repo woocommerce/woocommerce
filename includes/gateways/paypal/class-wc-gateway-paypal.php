@@ -562,6 +562,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			'sslverify' 	=> false,
 			'timeout' 		=> 60,
 			'httpversion'   => '1.1',
+			'compress'      => false,
+			'decompress'    => false,
 			'user-agent'	=> 'WooCommerce/' . WC()->version
 		);
 
