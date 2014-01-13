@@ -1,4 +1,4 @@
-<div class="woocommerce-message">
+<div class="updated woocommerce-message">
 	<p><?php _e( 'Please include this information when requesting support:', 'woocommerce' ); ?> </p>
 	<p class="submit"><a href="#" class="button-primary debug-report"><?php _e( 'Get System Report', 'woocommerce' ); ?></a></p>
 	<div id="debug-report"><textarea readonly="readonly"></textarea></div>
