@@ -300,7 +300,6 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 					break;
 					case  'order' :
 						// Factor $this_cost by the percentage if provided.
-						var_dump($this_cost_percents);
 						if ( $this_cost_percents ) {
 							if ($this_cost_mathop == '+') {
 								$this_cost += $this_cost_percents * $package['contents_cost'];
