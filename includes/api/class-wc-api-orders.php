@@ -319,7 +319,7 @@ class WC_API_Orders extends WC_API_Resource {
 			'type'    => 'order_note'
 		);
 
-		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments', 10, 1 ) );
+		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
 
 		$notes = get_comments( $args );
 
