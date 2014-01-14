@@ -186,8 +186,13 @@ function wc_cart_totals_coupon_html( $coupon ) {
 
 	$value  = array();
 
-	if ( ! empty( WC()->cart->coupon_discount_amounts[ $coupon->code ] ) )
-		$value[] = '-' . wc_price( WC()->cart->coupon_discount_amounts[ $coupon->code ] );
+	if ( ! empty( WC()->cart->coupon_discount_amounts[ $coupon->code ] ) ) {
+		$discount_html = '-' . wc_price( WC()->cart->coupon_discount_amounts[ $coupon->code ] );
+	} else {
+		$discount_html = '';
+	}
+
+	$value[] = apply_filters( 'woocommerce_coupon_discount_amount_html', $discount_html, $coupon );
 
 	if ( $coupon->enable_free_shipping() )
 		$value[] = __( 'Free shipping coupon', 'woocommerce' );
