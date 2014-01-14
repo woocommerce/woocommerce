@@ -197,7 +197,9 @@ function wc_cart_totals_coupon_html( $coupon ) {
 	if ( $coupon->enable_free_shipping() )
 		$value[] = __( 'Free shipping coupon', 'woocommerce' );
 
-	echo implode( ', ', $value ) . ' <a href="' . add_query_arg( 'remove_coupon', $coupon->code, WC()->cart->get_cart_url() ) . '" class="woocommerce-remove-coupon">' . __( '[Remove]', 'woocommerce' ) . '</a>';
+	$value = implode( ', ', $value ) . ' <a href="' . add_query_arg( 'remove_coupon', $coupon->code, WC()->cart->get_cart_url() ) . '" class="woocommerce-remove-coupon">' . __( '[Remove]', 'woocommerce' ) . '</a>';
+
+	echo apply_filters( 'woocommerce_cart_totals_coupon_html', $value, $coupon );
 }
 
 /**
