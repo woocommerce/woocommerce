@@ -119,6 +119,7 @@ class WC_API_Orders extends WC_API_Resource {
 			'status'                    => $order->status,
 			'currency'                  => $order->order_currency,
 			'total'                     => wc_format_decimal( $order->get_total(), 2 ),
+			'subtotal'                  => wc_format_decimal( $this->get_order_subtotal( $order ), 2 ),
 			'total_line_items_quantity' => $order->get_item_count(),
 			'total_tax'                 => wc_format_decimal( $order->get_total_tax(), 2 ),
 			'total_shipping'            => wc_format_decimal( $order->get_total_shipping(), 2 ),
@@ -179,6 +180,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'subtotal'   => wc_format_decimal( $order->get_line_subtotal( $item ), 2 ),
 				'total'      => wc_format_decimal( $order->get_line_total( $item ), 2 ),
 				'total_tax'  => wc_format_decimal( $order->get_line_tax( $item ), 2 ),
+				'price'      => wc_format_decimal( $order->get_item_total( $item ), 2 ),
 				'quantity'   => (int) $item['qty'],
 				'tax_class'  => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
 				'name'       => $item['name'],
@@ -319,7 +321,7 @@ class WC_API_Orders extends WC_API_Resource {
 			'type'    => 'order_note'
 		);
 
-		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments', 10, 1 ) );
+		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
 
 		$notes = get_comments( $args );
 
@@ -375,6 +377,26 @@ class WC_API_Orders extends WC_API_Resource {
 		$query_args = $this->merge_query_args( $query_args, $args );
 
 		return new WP_Query( $query_args );
+	}
+
+	/**
+	 * Helper method to get the order subtotal
+	 *
+	 * @since 2.1
+	 * @param WC_Order $order
+	 * @return float
+	 */
+	private function get_order_subtotal( $order ) {
+
+		$subtotal = 0;
+
+		// subtotal
+		foreach ( $order->get_items() as $item ) {
+
+			$subtotal += ( isset( $item['line_subtotal'] ) ) ? $item['line_subtotal'] : 0;
+		}
+
+		return $subtotal;
 	}
 
 }
