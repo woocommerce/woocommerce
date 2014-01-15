@@ -123,7 +123,7 @@ class WC_Meta_Box_Coupon_Data {
 
 								$product = get_product( $product_id );
 
-								echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $product->get_formatted_name() ) . '</option>';
+								echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . wp_kses_post( $product->get_formatted_name() ) . '</option>';
 							}
 						}
 					?>
