@@ -39,8 +39,8 @@ if ( 1 == $wp_query->found_posts || ! woocommerce_products_will_display() )
 			if ( 'orderby' == $key )
 				continue;
 			
-			if (is_array($val)) {
-				foreach($val as $innerVal) {
+			if ( is_array( $val ) ) {
+				foreach( $val as $innerVal ) {
 					echo '<input type="hidden" name="' . esc_attr( $key ) . '[]" value="' . esc_attr( $innerVal ) . '" />';
 				}
 			

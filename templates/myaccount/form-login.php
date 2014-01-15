@@ -12,9 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 <?php wc_print_notices(); ?>
 
-<?php do_action('woocommerce_before_customer_login_form'); ?>
+<?php do_action( 'woocommerce_before_customer_login_form' ); ?>
 
-<?php if (get_option('woocommerce_enable_myaccount_registration')=='yes') : ?>
+<?php if ( get_option( 'woocommerce_enable_myaccount_registration' ) === 'yes' ) : ?>
 
 <div class="col2-set" id="customer_login">
 
@@ -54,7 +54,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 		</form>
 
-<?php if (get_option('woocommerce_enable_myaccount_registration')=='yes') : ?>
+<?php if ( get_option( 'woocommerce_enable_myaccount_registration' ) === 'yes' ) : ?>
 
 	</div>
 
@@ -66,18 +66,18 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 			<?php do_action( 'woocommerce_register_form_start' ); ?>
 
-			<?php if ( get_option( 'woocommerce_registration_generate_username' ) == 'no' ) : ?>
+			<?php if ( get_option( 'woocommerce_registration_generate_username' ) === 'no' ) : ?>
 
 				<p class="form-row form-row-wide">
 					<label for="reg_username"><?php _e( 'Username', 'woocommerce' ); ?> <span class="required">*</span></label>
-					<input type="text" class="input-text" name="username" id="reg_username" value="<?php if ( ! empty( $_POST['username'] ) ) esc_attr_e($_POST['username']); ?>" />
+					<input type="text" class="input-text" name="username" id="reg_username" value="<?php if ( ! empty( $_POST['username'] ) ) esc_attr_e( $_POST['username'] ); ?>" />
 				</p>
 
 			<?php endif; ?>
 
 			<p class="form-row form-row-wide">
 				<label for="reg_email"><?php _e( 'Email address', 'woocommerce' ); ?> <span class="required">*</span></label>
-				<input type="email" class="input-text" name="email" id="reg_email" value="<?php if ( ! empty( $_POST['email'] ) ) esc_attr_e($_POST['email']); ?>" />
+				<input type="email" class="input-text" name="email" id="reg_email" value="<?php if ( ! empty( $_POST['email'] ) ) esc_attr_e( $_POST['email'] ); ?>" />
 			</p>
 
 			<p class="form-row form-row-wide">
@@ -105,4 +105,4 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 </div>
 <?php endif; ?>
 
-<?php do_action('woocommerce_after_customer_login_form'); ?>
+<?php do_action( 'woocommerce_after_customer_login_form' ); ?>
