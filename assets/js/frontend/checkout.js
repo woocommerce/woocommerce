@@ -14,7 +14,7 @@ jQuery(document).ready(function($) {
 
 		var shipping_methods = [];
 
-		$('select#shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]').each( function( index, input ) {
+		$('select.shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]').each( function( index, input ) {
 			shipping_methods[ $(this).data( 'index' ) ] = $(this).val();
 		} );
 
@@ -170,7 +170,7 @@ jQuery(document).ready(function($) {
 	/* Update totals/taxes/shipping */
 
 	// Inputs/selects which update totals instantly
-	.on( 'input change', 'select#shipping_method, input[name^=shipping_method], #ship-to-different-address input, .update_totals_on_change select', function(){
+	.on( 'input change', 'select.shipping_method, input[name^=shipping_method], #ship-to-different-address input, .update_totals_on_change select', function(){
 		clearTimeout( updateTimer );
 		dirtyInput = false;
 		$('body').trigger('update_checkout');

@@ -21,9 +21,9 @@ $rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 
 		<div class="comment-text">
 
-			<?php if ( $rating && get_option('woocommerce_enable_review_rating') == 'yes' ) : ?>
+			<?php if ( $rating && get_option( 'woocommerce_enable_review_rating' ) == 'yes' ) : ?>
 
-				<div itemprop="reviewRating" itemscope itemtype="http://schema.org/Rating" class="star-rating" title="<?php echo sprintf(__( 'Rated %d out of 5', 'woocommerce' ), $rating) ?>">
+				<div itemprop="reviewRating" itemscope itemtype="http://schema.org/Rating" class="star-rating" title="<?php echo sprintf( __( 'Rated %d out of 5', 'woocommerce' ), $rating ) ?>">
 					<span style="width:<?php echo ( $rating / 5 ) * 100; ?>%"><strong itemprop="ratingValue"><?php echo $rating; ?></strong> <?php _e( 'out of 5', 'woocommerce' ); ?></span>
 				</div>
 
@@ -42,7 +42,7 @@ $rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 							if ( wc_customer_bought_product( $comment->comment_author_email, $comment->user_id, $comment->comment_post_ID ) )
 								echo '<em class="verified">(' . __( 'verified owner', 'woocommerce' ) . ')</em> ';
 
-					?>&ndash; <time itemprop="datePublished" datetime="<?php echo get_comment_date('c'); ?>"><?php echo get_comment_date(__( get_option('date_format'), 'woocommerce' )); ?></time>:
+					?>&ndash; <time itemprop="datePublished" datetime="<?php echo get_comment_date( 'c' ); ?>"><?php echo get_comment_date( __( get_option( 'date_format' ), 'woocommerce' ) ); ?></time>:
 				</p>
 
 			<?php endif; ?>

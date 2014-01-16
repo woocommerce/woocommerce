@@ -39,10 +39,10 @@ do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain
 echo __( 'Customer details', 'woocommerce' ) . "\n";
 
 if ( $order->billing_email )
-	echo __( 'Email:', 'woocommerce' ); echo $order->billing_email. "\n";
+	echo __( 'Email:', 'woocommerce' ); echo $order->billing_email . "\n";
 
 if ( $order->billing_phone )
-	echo __( 'Tel:', 'woocommerce' ); ?> <?php echo $order->billing_phone. "\n";
+	echo __( 'Tel:', 'woocommerce' ); ?> <?php echo $order->billing_phone . "\n";
 
 wc_get_template( 'emails/plain/email-addresses.php', array( 'order' => $order ) );
 

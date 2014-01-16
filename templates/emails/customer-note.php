@@ -9,15 +9,15 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 
-<?php do_action('woocommerce_email_header', $email_heading); ?>
+<?php do_action( 'woocommerce_email_header', $email_heading ); ?>
 
-<p><?php _e("Hello, a note has just been added to your order:", 'woocommerce'); ?></p>
+<p><?php _e( "Hello, a note has just been added to your order:", 'woocommerce' ); ?></p>
 
-<blockquote><?php echo wpautop(wptexturize( $customer_note )) ?></blockquote>
+<blockquote><?php echo wpautop( wptexturize( $customer_note ) ) ?></blockquote>
 
-<p><?php _e("For your reference, your order details are shown below.", 'woocommerce'); ?></p>
+<p><?php _e( "For your reference, your order details are shown below.", 'woocommerce' ); ?></p>
 
-<?php do_action('woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text ); ?>
+<?php do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text ); ?>
 
 <h2><?php echo __( 'Order:', 'woocommerce' ) . ' ' . $order->get_order_number(); ?></h2>
 
@@ -48,7 +48,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 	</tfoot>
 </table>
 
-<?php do_action('woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text ); ?>
+<?php do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text ); ?>
 
 <?php do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text ); ?>
 
@@ -61,6 +61,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 	<p><strong><?php _e( 'Tel:', 'woocommerce' ); ?></strong> <?php echo $order->billing_phone; ?></p>
 <?php endif; ?>
 
-<?php wc_get_template('emails/email-addresses.php', array( 'order' => $order )); ?>
+<?php wc_get_template( 'emails/email-addresses.php', array( 'order' => $order ) ); ?>
 
-<?php do_action('woocommerce_email_footer'); ?>
+<?php do_action( 'woocommerce_email_footer' ); ?>
