@@ -67,6 +67,9 @@ function wc_get_template_part( $slug, $name = '' ) {
 	if ( !$template )
 		$template = locate_template( array ( "{$slug}.php", WC()->template_path() . "{$slug}.php" ) );
 
+	// Allow 3rd party plugin filter template file from their plugin
+	$template = apply_filters( 'wc_get_template_part', $template, $slug, $name );
+	
 	if ( $template )
 		load_template( $template, false );
 }
