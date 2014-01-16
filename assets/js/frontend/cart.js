@@ -8,7 +8,7 @@ jQuery(document).ready(function($) {
 	$(document).on( 'click', '.shipping-calculator-button', function() {
 		$('.shipping-calculator-form').slideToggle('slow');
 		return false;
-	}).on( 'change', 'select.shipping_method', function() {
+	}).on( 'change', 'select.shipping_method, input[name^=shipping_method]', function() {
 
 		var shipping_methods = [];
 
