@@ -8,11 +8,11 @@ jQuery(document).ready(function($) {
 	$(document).on( 'click', '.shipping-calculator-button', function() {
 		$('.shipping-calculator-form').slideToggle('slow');
 		return false;
-	}).on( 'change', 'select#shipping_method, input[name^=shipping_method]', function() {
+	}).on( 'change', 'select.shipping_method', function() {
 
 		var shipping_methods = [];
 
-		$('select[name^=shipping_method], input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]').each( function( index, input ) {
+		$('select.shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]').each( function( index, input ) {
 			shipping_methods[ $(this).data( 'index' ) ] = $(this).val();
 		} );
 
