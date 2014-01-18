@@ -152,14 +152,22 @@ jQuery(document).ready(function($) {
 	/* Payment option selection */
 
 	.on( 'click', '.payment_methods input.input-radio', function() {
+
 		if ( $('.payment_methods input.input-radio').length > 1 ) {
-			$('div.payment_box').filter(':visible').slideUp(250);
-			if ($(this).is(':checked')) {
-				$('div.payment_box.' + $(this).attr('ID')).slideDown(250);
-			}
-		} else {
-			$('div.payment_box').show();
+			
+            if ($(this).is(':checked') && $('div.payment_box.' + $(this).attr('ID')).is(':visible')) {
+            	
+            	return false;
+            	
+	    } else {
+	    	
+            	$('div.payment_box').filter(':visible').slideUp(250);
+            	$('div.payment_box.' + $(this).attr('ID')).slideDown(250);
+	    	$('div.payment_box').show();
+	    	
 		}
+            
+	    }
 	})
 
 	// Trigger initial click
