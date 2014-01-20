@@ -281,7 +281,7 @@ class WC_Product {
 
 				// Set default name
 				if ( empty( $file['name'] ) ) {
-					$downloadable_files[ $key ]['name'] = wc_get_filename_from_url( $file );
+					$downloadable_files[ $key ]['name'] = wc_get_filename_from_url( $file['file'] );
 				}
 
 				// Filter URL
