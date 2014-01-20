@@ -160,11 +160,11 @@ final class WooCommerce {
 				_deprecated_argument( 'Woocommerce->template_url', '2.1', 'WC_TEMPLATE_PATH constant' );
 				return WC_TEMPLATE_PATH;
 			case 'messages':
-				_deprecated_argument( 'Woocommerce->messages', '2.1', 'The "messages" field is moved to the messages helper class.' );
-				return $this->session->get( 'wc_messages', array() );
+				_deprecated_argument( 'Woocommerce->messages', '2.1', 'Use wc_get_notices' );
+				return wc_get_notices( 'success' );
 			case 'errors':
-				_deprecated_argument( 'Woocommerce->errors', '2.1', 'The "errors" field is moved to the messages helper class.' );
-				return $this->session->get( 'wc_errors', array() );
+				_deprecated_argument( 'Woocommerce->errors', '2.1', 'Use wc_get_notices' );
+				return wc_get_notices( 'error' );
 			default:
 				return false;
 		}
@@ -637,7 +637,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Transient_Helper helper
+	 * @deprecated 2.1.0
 	 * @param $content
 	 * @return string
 	 */
@@ -647,7 +647,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Transient_Helper helper
+	 * @deprecated 2.1.0
 	 * @param int $post_id
 	 */
 	public function clear_product_transients( $post_id = 0 ) {
@@ -688,7 +688,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Nonce_Helper helper
+	 * @deprecated 2.1.0
 	 * @param        $action
 	 * @param string $method
 	 * @param bool   $error_message
@@ -700,7 +700,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Shortcode_Helper helper
+	 * @deprecated 2.1.0
 	 * @param       $function
 	 * @param array $atts
 	 * @param array $wrapper
@@ -712,7 +712,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Attribute_Helper helper
+	 * @deprecated 2.1.0
 	 * @return object
 	 */
 	public function get_attribute_taxonomies() {
@@ -721,7 +721,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Attribute_Helper helper
+	 * @deprecated 2.1.0
 	 * @param $name
 	 * @return string
 	 */
@@ -731,7 +731,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Attribute_Helper helper
+	 * @deprecated 2.1.0
 	 * @param $name
 	 * @return string
 	 */
@@ -741,7 +741,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Attribute_Helper helper
+	 * @deprecated 2.1.0
 	 * @param $name
 	 * @return string
 	 */
@@ -751,7 +751,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Attribute_Helper helper
+	 * @deprecated 2.1.0
 	 * @return array
 	 */
 	public function get_attribute_taxonomy_names() {
@@ -779,7 +779,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Body_Class_Helper helper
+	 * @deprecated 2.1.0
 	 * @param $class
 	 */
 	public function add_body_class( $class ) {
@@ -787,7 +787,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Body_Class_Helper helper
+	 * @deprecated 2.1.0
 	 * @param $classes
 	 */
 	public function output_body_class( $classes ) {
@@ -839,7 +839,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	 * @deprecated 2.1.0
 	 * @return mixed
 	 */
 	public function get_errors() {
@@ -848,7 +848,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	 * @deprecated 2.1.0
 	 * @return mixed
 	 */
 	public function get_messages() {
@@ -857,7 +857,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	 * @deprecated 2.1.0
 	 */
 	public function show_messages() {
 		_deprecated_function( 'Woocommerce->show_messages', '2.1', 'wc_print_notices()' );
@@ -865,7 +865,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	 * @deprecated 2.1.0
 	 */
 	public function set_messages() {
 		_deprecated_function( 'Woocommerce->set_messages', '2.1' );
