@@ -13,7 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @category	Class
  * @author 		WooThemes
  */
-if ( ! class_exists( 'WC_Post_types' ) ) :
 
 class WC_Post_types {
 
@@ -362,7 +361,5 @@ class WC_Post_types {
 			);
 	}
 }
-
-endif;
 
 return new WC_Post_types();
