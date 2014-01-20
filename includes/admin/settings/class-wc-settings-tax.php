@@ -209,7 +209,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * Save settings
 	 */
 	public function save() {
-		global $current_section;
+		global $current_section, $wpdb;
 
 		if ( ! $current_section ) {
 
@@ -221,6 +221,8 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			$this->save_tax_rates();
 
 		}
+
+		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_tax_rates_%') OR `option_name` LIKE ('_transient_timeout_wc_tax_rates_%')" );
 	}
 
 	/**
