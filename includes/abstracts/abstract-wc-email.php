@@ -237,10 +237,10 @@ abstract class WC_Email extends WC_Settings_API {
 	 * get_attachments function.
 	 *
 	 * @access public
-	 * @return string
+	 * @return array
 	 */
 	function get_attachments() {
-		return apply_filters( 'woocommerce_email_attachments', '', $this->id, $this->object );
+		return apply_filters( 'woocommerce_email_attachments', array(), $this->id, $this->object );
 	}
 
 	/**
