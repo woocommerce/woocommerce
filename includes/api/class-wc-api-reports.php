@@ -281,12 +281,12 @@ class WC_API_Reports extends WC_API_Resource {
  			}
 
 			$period_totals[ $time ] = array(
-				'sales'    => wc_format_decimal( 0.00, 2 ),
-				'orders'   => 0,
-				'items'    => 0,
-				'tax'      => wc_format_decimal( 0.00, 2 ),
-				'shipping' => wc_format_decimal( 0.00, 2 ),
-				'discount' => wc_format_decimal( 0.00, 2 ),
+				'sales'     => wc_format_decimal( 0.00, 2 ),
+				'orders'    => 0,
+				'items'     => 0,
+				'tax'       => wc_format_decimal( 0.00, 2 ),
+				'shipping'  => wc_format_decimal( 0.00, 2 ),
+				'discount'  => wc_format_decimal( 0.00, 2 ),
 				'customers' => $customer_count,
 			);
 		}
