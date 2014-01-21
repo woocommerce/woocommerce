@@ -271,6 +271,15 @@ class WC_API_Reports extends WC_API_Resource {
 					break;
 			}
 
+			// set the customer signups for each period
+			$customer_count = 0;
+			foreach ( $customers as $customer ) {
+
+				if ( date( ( 'day' == $this->report->chart_groupby ) ? 'Y-m-d' : 'Y-m', strtotime( $customer->user_registered ) ) == $time ) {
+					$customer_count++;
+				}
+ 			}
+
 			$period_totals[ $time ] = array(
 				'sales'    => wc_format_decimal( 0.00, 2 ),
 				'orders'   => 0,
@@ -278,6 +287,7 @@ class WC_API_Reports extends WC_API_Resource {
 				'tax'      => wc_format_decimal( 0.00, 2 ),
 				'shipping' => wc_format_decimal( 0.00, 2 ),
 				'discount' => wc_format_decimal( 0.00, 2 ),
+				'customers' => $customer_count,
 			);
 		}
 
