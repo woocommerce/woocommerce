@@ -325,17 +325,17 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 								legend: {
 									show: false
 								},
-							    grid: {
-							        color: '#aaa',
-							        borderColor: 'transparent',
-							        borderWidth: 0,
-							        hoverable: true
-							    },
-							    xaxes: [ {
-							    	color: '#aaa',
-							    	reserveSpace: true,
-							    	position: "bottom",
-							    	tickColor: 'transparent',
+								grid: {
+									color: '#aaa',
+									borderColor: 'transparent',
+									borderWidth: 0,
+									hoverable: true
+								},
+								xaxes: [ {
+									color: '#aaa',
+									reserveSpace: true,
+									position: "bottom",
+									tickColor: 'transparent',
 									mode: "time",
 									timeformat: "<?php if ( $this->chart_groupby == 'day' ) echo '%d %b'; else echo '%b'; ?>",
 									monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
@@ -343,23 +343,23 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 									minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],
 									tickSize: [1, "<?php echo $this->chart_groupby; ?>"],
 									font: {
-							    		color: "#aaa"
-							    	}
+										color: "#aaa"
+									}
 								} ],
-							    yaxes: [
-							    	{
-							    		min: 0,
-							    		tickDecimals: 2,
-							    		color: 'transparent',
-							    		font: { color: "#aaa" }
-							    	}
-							    ],
-					 		}
-					 	);
+								yaxes: [
+									{
+										min: 0,
+										tickDecimals: 2,
+										color: 'transparent',
+										font: { color: "#aaa" }
+									}
+								],
+							}
+						);
 
-					 	jQuery('.chart-placeholder').resize();
+						jQuery('.chart-placeholder').resize();
 
-				 	}
+					}
 
 					drawGraph();
 
