@@ -137,12 +137,12 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 			break;
 			case "billing_address" :
 				if ( $the_order->get_formatted_billing_address() )
-	        		echo '<a target="_blank" href="' . esc_url( 'http://maps.google.com/maps?&q=' . urlencode( $the_order->get_billing_address() ) . '&z=16' ) . '">' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $the_order->get_formatted_billing_address() ) ) .'</a>';
-	        	else
-	        		echo '&ndash;';
+					echo '<a target="_blank" href="' . esc_url( 'http://maps.google.com/maps?&q=' . urlencode( $the_order->get_billing_address() ) . '&z=16' ) . '">' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $the_order->get_formatted_billing_address() ) ) .'</a>';
+				else
+					echo '&ndash;';
 
-	        	if ( $the_order->payment_method_title )
-	        		echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->payment_method_title ) . '</small>';
+				if ( $the_order->payment_method_title )
+					echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->payment_method_title ) . '</small>';
 			break;
 			case "order_items" :
 
@@ -175,12 +175,12 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 			break;
 			case "shipping_address" :
 				if ( $the_order->get_formatted_shipping_address() )
-	            	echo '<a target="_blank" href="' . esc_url( 'http://maps.google.com/maps?&q=' . urlencode( $the_order->get_shipping_address() ) . '&z=16' ) . '">'. esc_html( preg_replace( '#<br\s*/?>#i', ', ', $the_order->get_formatted_shipping_address() ) ) .'</a>';
-	        	else
-	        		echo '&ndash;';
+					echo '<a target="_blank" href="' . esc_url( 'http://maps.google.com/maps?&q=' . urlencode( $the_order->get_shipping_address() ) . '&z=16' ) . '">'. esc_html( preg_replace( '#<br\s*/?>#i', ', ', $the_order->get_formatted_shipping_address() ) ) .'</a>';
+				else
+					echo '&ndash;';
 
-	        	if ( $the_order->get_shipping_method() )
-	        		echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->get_shipping_method() ) . '</small>';
+				if ( $the_order->get_shipping_method() )
+					echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->get_shipping_method() ) . '</small>';
 
 			break;
 			case "order_notes" :
@@ -211,17 +211,17 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 				echo esc_html( strip_tags( $the_order->get_formatted_order_total() ) );
 
 				if ( $the_order->payment_method_title )
-	        		echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->payment_method_title ) . '</small>';
+					echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->payment_method_title ) . '</small>';
 			break;
 			case "order_title" :
 
-	        	$customer_tip = '';
+				$customer_tip = '';
 
-	        	if ( $address = $the_order->get_formatted_billing_address() )
-	        		$customer_tip .= __( 'Billing:', 'woocommerce' ) . ' ' . $address . '<br/><br/>';
+				if ( $address = $the_order->get_formatted_billing_address() )
+					$customer_tip .= __( 'Billing:', 'woocommerce' ) . ' ' . $address . '<br/><br/>';
 
-	        	if ( $the_order->billing_phone )
-        			$customer_tip .= __( 'Tel:', 'woocommerce' ) . ' ' . $the_order->billing_phone;
+				if ( $the_order->billing_phone )
+					$customer_tip .= __( 'Tel:', 'woocommerce' ) . ' ' . $the_order->billing_phone;
 
 				echo '<div class="tips" data-tip="' . esc_attr( $customer_tip ) . '">';
 
@@ -230,46 +230,46 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 
 				if ( ! empty( $user_info ) ) {
 
-	            	$user = '<a href="user-edit.php?user_id=' . absint( $user_info->ID ) . '">';
+					$user = '<a href="user-edit.php?user_id=' . absint( $user_info->ID ) . '">';
 
-	            	if ( $user_info->first_name || $user_info->last_name )
-	            		$user .= esc_html( $user_info->first_name . ' ' . $user_info->last_name );
-	            	else
-	            		$user .= esc_html( $user_info->display_name );
+					if ( $user_info->first_name || $user_info->last_name )
+						$user .= esc_html( $user_info->first_name . ' ' . $user_info->last_name );
+					else
+						$user .= esc_html( $user_info->display_name );
 
-	            	$user .= '</a>';
+					$user .= '</a>';
 
-	           	} else {
-	           		$user = __( 'Guest', 'woocommerce' );
-	           	}
+				} else {
+					$user = __( 'Guest', 'woocommerce' );
+				}
 
-	           	if ( $the_order->user_id )
+				if ( $the_order->user_id )
 					$user_info = get_userdata( $the_order->user_id );
 
 				if ( ! empty( $user_info ) ) {
 
-	            	$username = '<a href="user-edit.php?user_id=' . absint( $user_info->ID ) . '">';
+					$username = '<a href="user-edit.php?user_id=' . absint( $user_info->ID ) . '">';
 
-	            	if ( $user_info->first_name || $user_info->last_name )
-	            		$username .= esc_html( ucfirst( $user_info->first_name ) . ' ' . ucfirst( $user_info->last_name ) );
-	            	else
-	            		$username .= esc_html( ucfirst( $user_info->display_name ) );
+					if ( $user_info->first_name || $user_info->last_name )
+						$username .= esc_html( ucfirst( $user_info->first_name ) . ' ' . ucfirst( $user_info->last_name ) );
+					else
+						$username .= esc_html( ucfirst( $user_info->display_name ) );
 
-	            	$username .= '</a>';
+					$username .= '</a>';
 
-	           	} else {
-	           		if ( $the_order->billing_first_name || $the_order->billing_last_name )
-	           			$username = trim( $the_order->billing_first_name . ' ' . $the_order->billing_last_name );
-	           		else
-	           			$username = __( 'Guest', 'woocommerce' );
-	           	}
+				} else {
+					if ( $the_order->billing_first_name || $the_order->billing_last_name )
+						$username = trim( $the_order->billing_first_name . ' ' . $the_order->billing_last_name );
+					else
+						$username = __( 'Guest', 'woocommerce' );
+				}
 
-	           	printf( __( '%s by %s', 'woocommerce' ), '<a href="' . admin_url( 'post.php?post=' . absint( $post->ID ) . '&action=edit' ) . '"><strong>' . esc_attr( $the_order->get_order_number() ) . '</strong></a>', $username );
+				printf( __( '%s by %s', 'woocommerce' ), '<a href="' . admin_url( 'post.php?post=' . absint( $post->ID ) . '&action=edit' ) . '"><strong>' . esc_attr( $the_order->get_order_number() ) . '</strong></a>', $username );
 
-           		if ( $the_order->billing_email )
-        			echo '<small class="meta email"><a href="' . esc_url( 'mailto:' . $the_order->billing_email ) . '">' . esc_html( $the_order->billing_email ) . '</a></small>';
+				if ( $the_order->billing_email )
+					echo '<small class="meta email"><a href="' . esc_url( 'mailto:' . $the_order->billing_email ) . '">' . esc_html( $the_order->billing_email ) . '</a></small>';
 
-        		echo '</div>';
+				echo '</div>';
 
 			break;
 			case "order_actions" :
@@ -360,11 +360,11 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	 * @return array
 	 */
 	public function remove_row_actions( $actions ) {
-	    if( get_post_type() === 'shop_order' ) {
-	        unset( $actions['view'] );
-	        unset( $actions['inline hide-if-no-js'] );
-	    }
-	    return $actions;
+		if( get_post_type() === 'shop_order' ) {
+			unset( $actions['view'] );
+			unset( $actions['inline hide-if-no-js'] );
+		}
+		return $actions;
 	}
 
 	/**
@@ -418,25 +418,25 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 			jQuery('select#dropdown_shop_order_status, select[name=m]').css('width', '150px').chosen();
 
 			jQuery('select#dropdown_customers').css('width', '250px').ajaxChosen({
-			    method: 		'GET',
-			    url: 			'" . admin_url('admin-ajax.php') . "',
-			    dataType: 		'json',
-			    afterTypeDelay: 100,
-			    minTermLength: 	1,
-			    data:		{
-			    	action: 	'woocommerce_json_search_customers',
+				method: 		'GET',
+				url: 			'" . admin_url('admin-ajax.php') . "',
+				dataType: 		'json',
+				afterTypeDelay: 100,
+				minTermLength: 	1,
+				data:		{
+					action: 	'woocommerce_json_search_customers',
 					security: 	'" . wp_create_nonce("search-customers") . "',
 					default:	'" . __( 'Show all customers', 'woocommerce' ) . "'
-			    }
+				}
 			}, function (data) {
 
 				var terms = {};
 
-			    $.each(data, function (i, val) {
-			        terms[i] = val;
-			    });
+				$.each(data, function (i, val) {
+					terms[i] = val;
+				});
 
-			    return terms;
+				return terms;
 			});
 		" );
 	}
@@ -450,7 +450,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	 */
 	public function orders_by_customer_query( $vars ) {
 		global $typenow, $wp_query;
-	    if ( $typenow == 'shop_order' && isset( $_GET['_customer_user'] ) && $_GET['_customer_user'] > 0 ) {
+		if ( $typenow == 'shop_order' && isset( $_GET['_customer_user'] ) && $_GET['_customer_user'] > 0 ) {
 
 			$vars['meta_key'] = '_customer_user';
 			$vars['meta_value'] = (int) $_GET['_customer_user'];
@@ -489,10 +489,10 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	 */
 	public function custom_shop_order_orderby( $vars ) {
 		global $typenow, $wp_query;
-	    if ( $typenow != 'shop_order' )
-	    	return $vars;
+		if ( $typenow != 'shop_order' )
+			return $vars;
 
-	    // Sorting
+		// Sorting
 		if ( isset( $vars['orderby'] ) ) {
 			if ( 'order_total' == $vars['orderby'] ) {
 				$vars = array_merge( $vars, array(
@@ -596,8 +596,8 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	public function shop_order_search_label($query) {
 		global $pagenow, $typenow;
 
-	    if ( 'edit.php' != $pagenow ) return $query;
-	    if ( $typenow != 'shop_order' ) return $query;
+		if ( 'edit.php' != $pagenow ) return $query;
+		if ( $typenow != 'shop_order' ) return $query;
 		if ( ! get_query_var( 'shop_order_search' ) ) return $query;
 
 		return wp_unslash( $_GET['s'] );
