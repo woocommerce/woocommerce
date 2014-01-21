@@ -150,7 +150,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 		?>
 		<form method="GET">
 			<div>
-				<select multiple="multiple" class="chosen_select" id="show_categories" name="show_categories[]" style="width: 205px;">
+				<select multiple="multiple" data-placeholder="<?php _e( 'Select categories&hellip;', 'woocommerce' ); ?>" class="chosen_select" id="show_categories" name="show_categories[]" style="width: 205px;">
 					<?php
 						$r = array();
 						$r['pad_counts'] 	= 1;
