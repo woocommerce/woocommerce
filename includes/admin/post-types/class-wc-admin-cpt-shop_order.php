@@ -194,10 +194,13 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 
 					$latest_note = current( $latest_notes );
 
-					if ( $post->comment_count == 1 )
+					if ( $post->comment_count == 1 ) {
 						echo '<span class="note-on tips" data-tip="' . esc_attr( $latest_note->comment_content ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
-					else
-						echo '<span class="note-on tips" data-tip="' . esc_attr( $latest_note->comment_content . '<small style="display:block">' . sprintf( _n( 'plus %d other note', 'plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), ( $post->comment_count - 1 ) ) . '</small>' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+					} else {
+						$note_tip = isset( $latest_note->comment_content ) ? esc_attr( $latest_note->comment_content . '<small style="display:block">' . sprintf( _n( 'plus %d other note', 'plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), ( $post->comment_count - 1 ) ) . '</small>' ) : sprintf( _n( '%d note', '%d notes', $post->comment_count, 'woocommerce' ), $post->comment_count );
+
+						echo '<span class="note-on tips" data-tip="' . $note_tip . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+					}
 
 				} else {
 					echo '<span class="na">&ndash;</span>';
