@@ -56,7 +56,7 @@ class WC_Shortcode_Cart {
 			} catch ( Exception $e ) {
 
 				if ( ! empty( $e ) )
-					wc_add_notice( $e, 'error' );
+					wc_add_notice( $e->getMessage(), 'error' );
 			}
 		}
 
