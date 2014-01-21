@@ -68,6 +68,6 @@ jQuery(document).ready(function($) {
 
 		$('body').trigger('country_to_state_changing', [country, $(this).closest('div')]);
 
-	});
+	}).change();
 
 });
