@@ -10,10 +10,11 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 	 * Constructor
 	 */
 	public function __construct() {
-		if ( isset( $_GET['coupon_codes'] ) && is_array( $_GET['coupon_codes'] ) )
+		if ( isset( $_GET['coupon_codes'] ) && is_array( $_GET['coupon_codes'] ) ) {
 			$this->coupon_codes = array_filter( array_map( 'sanitize_text_field', $_GET['coupon_codes'] ) );
-		elseif ( isset( $_GET['coupon_codes'] ) )
+		} elseif ( isset( $_GET['coupon_codes'] ) ) {
 			$this->coupon_codes = array_filter( array( sanitize_text_field( $_GET['coupon_codes'] ) ) );
+		}
 	}
 
 	/**
@@ -100,8 +101,9 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
 		$current_range = ! empty( $_GET['range'] ) ? $_GET['range'] : '7day';
 
-		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) )
+		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) ) {
 			$current_range = '7day';
+		}
 
 		$this->calculate_current_range( $current_range );
 
@@ -114,7 +116,6 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 	 */
 	public function get_chart_widgets() {
 		$widgets = array();
-
 
 		$widgets[] = array(
 			'title'    => '',
@@ -174,8 +175,8 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 						<input type="hidden" name="tab" value="<?php if ( ! empty( $_GET['tab'] ) ) echo esc_attr( $_GET['tab'] ) ?>" />
 						<input type="hidden" name="report" value="<?php if ( ! empty( $_GET['report'] ) ) echo esc_attr( $_GET['report'] ) ?>" />
 						<script type="text/javascript">
-							jQuery(function(){
-								jQuery("select.chosen_select").chosen();
+							jQuery(function() {
+								jQuery('select.chosen_select').chosen();
 							});
 						</script>
 					<?php else : ?>
