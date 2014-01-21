@@ -134,51 +134,54 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 		<div class="section">
 			<form method="GET">
 				<div>
-					<select id="coupon_codes" name="coupon_codes" class="chosen_select" data-placeholder="<?php _e( 'Choose coupons&hellip;', 'woocommerce' ); ?>" style="width:100%;">
-						<?php
-							$used_coupons = $this->get_order_report_data( array(
-								'data' => array(
-									'order_item_name' => array(
-										'type'            => 'order_item',
-										'order_item_type' => 'coupon',
-										'function'        => '',
-										'distinct'        => true,
-										'name'            => 'order_item_name'
-									)
-								),
-								'where' => array(
-									array(
-										'key'      => 'order_item_type',
-										'value'    => 'coupon',
-										'operator' => '='
-									)
-								),
-								'query_type'   => 'get_col',
-								'filter_range' => false
-							) );
+					<?php
+						$used_coupons = $this->get_order_report_data( array(
+							'data' => array(
+								'order_item_name' => array(
+									'type'            => 'order_item',
+									'order_item_type' => 'coupon',
+									'function'        => '',
+									'distinct'        => true,
+									'name'            => 'order_item_name'
+								)
+							),
+							'where' => array(
+								array(
+									'key'      => 'order_item_type',
+									'value'    => 'coupon',
+									'operator' => '='
+								)
+							),
+							'query_type'   => 'get_col',
+							'filter_range' => false
+						) );
 
-							if ( $used_coupons ) {
-								echo '<option value="">' . __( 'All coupons', 'woocommerce' ) . '</option>';
+						if ( $used_coupons ) :
+					?>
+						<select id="coupon_codes" name="coupon_codes" class="chosen_select" data-placeholder="<?php _e( 'Choose coupons&hellip;', 'woocommerce' ); ?>" style="width:100%;">
+							<option value=""><?php _e( 'All coupons', 'woocommerce' ); ?></option>
+							<?php
 								foreach ( $used_coupons as $coupon ) {
 									echo '<option value="' . esc_attr( $coupon ) . '" ' . selected( in_array( $coupon, $this->coupon_codes ), true, false ) . '>' . $coupon . '</option>';
 								}
-							} else
-								echo '<option value="">' . __( 'No used coupons found', 'woocommerce' ) . '</option>';
-						?>
-					</select>
-					<input type="submit" class="submit button" value="<?php _e( 'Show', 'woocommerce' ); ?>" />
-					<input type="hidden" name="range" value="<?php if ( ! empty( $_GET['range'] ) ) echo esc_attr( $_GET['range'] ) ?>" />
-					<input type="hidden" name="start_date" value="<?php if ( ! empty( $_GET['start_date'] ) ) echo esc_attr( $_GET['start_date'] ) ?>" />
-					<input type="hidden" name="end_date" value="<?php if ( ! empty( $_GET['end_date'] ) ) echo esc_attr( $_GET['end_date'] ) ?>" />
-					<input type="hidden" name="page" value="<?php if ( ! empty( $_GET['page'] ) ) echo esc_attr( $_GET['page'] ) ?>" />
-					<input type="hidden" name="tab" value="<?php if ( ! empty( $_GET['tab'] ) ) echo esc_attr( $_GET['tab'] ) ?>" />
-					<input type="hidden" name="report" value="<?php if ( ! empty( $_GET['report'] ) ) echo esc_attr( $_GET['report'] ) ?>" />
+							 ?>
+						</select>
+						<input type="submit" class="submit button" value="<?php _e( 'Show', 'woocommerce' ); ?>" />
+						<input type="hidden" name="range" value="<?php if ( ! empty( $_GET['range'] ) ) echo esc_attr( $_GET['range'] ) ?>" />
+						<input type="hidden" name="start_date" value="<?php if ( ! empty( $_GET['start_date'] ) ) echo esc_attr( $_GET['start_date'] ) ?>" />
+						<input type="hidden" name="end_date" value="<?php if ( ! empty( $_GET['end_date'] ) ) echo esc_attr( $_GET['end_date'] ) ?>" />
+						<input type="hidden" name="page" value="<?php if ( ! empty( $_GET['page'] ) ) echo esc_attr( $_GET['page'] ) ?>" />
+						<input type="hidden" name="tab" value="<?php if ( ! empty( $_GET['tab'] ) ) echo esc_attr( $_GET['tab'] ) ?>" />
+						<input type="hidden" name="report" value="<?php if ( ! empty( $_GET['report'] ) ) echo esc_attr( $_GET['report'] ) ?>" />
+						<script type="text/javascript">
+							jQuery(function(){
+								jQuery("select.chosen_select").chosen();
+							});
+						</script>
+					<?php else : ?>
+						<span><?php _e( 'No used coupons found', 'woocommerce' ); ?></span>
+					<?php endif; ?>
 				</div>
-				<script type="text/javascript">
-					jQuery(function(){
-						jQuery("select.chosen_select").chosen();
-					});
-				</script>
 			</form>
 		</div>
 		<h4 class="section_title"><span><?php _e( 'Most Popular', 'woocommerce' ); ?></span></h4>
