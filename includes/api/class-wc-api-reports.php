@@ -43,6 +43,11 @@ class WC_API_Reports extends WC_API_Resource {
 			array( array( $this, 'get_sales_report' ), WC_API_Server::READABLE ),
 		);
 
+		# GET /reports/sales/top_sellers
+		$routes[ $this->base . '/sales/top_sellers' ] = array(
+			array( array( $this, 'get_top_sellers_report' ), WC_API_Server::READABLE ),
+		);
+
 		return $routes;
 	}
 
@@ -54,7 +59,7 @@ class WC_API_Reports extends WC_API_Resource {
 	 */
 	public function get_reports() {
 
-		return array( 'reports' => array( 'sales' ) );
+		return array( 'reports' => array( 'sales', 'sales/top_sellers' ) );
 	}
 
 	/**
@@ -341,6 +346,64 @@ class WC_API_Reports extends WC_API_Resource {
 		);
 
 		return array( 'sales' => apply_filters( 'woocommerce_api_report_response', $sales_data, $this->report, $fields, $this->server ) );
+	}
+
+	/**
+	 * Get the top sellers report
+	 *
+	 * @since 2.1
+	 * @param string $fields fields to include in response
+	 * @param array $filter date filtering
+	 * @return array
+	 */
+	public function get_top_sellers_report( $fields = null, $filter = array() ) {
+
+		// check user permissions
+		$check = $this->validate_request();
+
+		if ( is_wp_error( $check ) ) {
+			return $check;
+		}
+
+		// set date filtering
+		$this->setup_report( $filter );
+
+		$top_sellers = $this->report->get_order_report_data( array(
+			'data' => array(
+				'_product_id' => array(
+					'type'            => 'order_item_meta',
+					'order_item_type' => 'line_item',
+					'function'        => '',
+					'name'            => 'product_id'
+				),
+				'_qty' => array(
+					'type'            => 'order_item_meta',
+					'order_item_type' => 'line_item',
+					'function'        => 'SUM',
+					'name'            => 'order_item_qty'
+				)
+			),
+			'order_by'     => 'order_item_qty DESC',
+			'group_by'     => 'product_id',
+			'limit'        => isset( $filter['limit'] ) ? absint( $filter['limit'] ) : 12,
+			'query_type'   => 'get_results',
+			'filter_range' => true,
+		) );
+
+		$top_sellers_data = array();
+
+		foreach ( $top_sellers as $top_seller ) {
+
+			$product = get_product( $top_seller->product_id );
+
+			$top_sellers_data[] = array(
+				'title'      => $product->get_title(),
+				'product_id' => $top_seller->product_id,
+				'quantity'   => $top_seller->order_item_qty,
+			);
+		}
+
+		return array( 'top_sellers' => apply_filters( 'woocommerce_api_report_response', $top_sellers_data, $this->report, $fields, $this->server ) );
 	}
 
 	/**
