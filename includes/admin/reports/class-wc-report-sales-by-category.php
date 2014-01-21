@@ -10,10 +10,11 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	 * Constructor
 	 */
 	public function __construct() {
-		if ( isset( $_GET['show_categories'] ) && is_array( $_GET['show_categories'] ) )
+		if ( isset( $_GET['show_categories'] ) && is_array( $_GET['show_categories'] ) ) {
 			$this->show_categories = array_map( 'absint', $_GET['show_categories'] );
-		elseif ( isset( $_GET['show_categories'] ) )
+		} elseif ( isset( $_GET['show_categories'] ) ) {
 			$this->show_categories = array( absint( $_GET['show_categories'] ) );
+		}
 	}
 
 	/**
@@ -21,13 +22,14 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	 * @return array
 	 */
 	public function get_chart_legend() {
-		if ( ! $this->show_categories )
+		if ( ! $this->show_categories ) {
 			return array();
+		}
 
 		$legend    = array();
 		$index     = 0;
 
-		foreach( $this->show_categories as $category ) {
+		foreach ( $this->show_categories as $category ) {
 			$category       = get_term( $category, 'product_cat' );
 			$term_ids 		= get_term_children( $category->term_id, 'product_cat' );
 			$term_ids[] 	= $category->term_id;
@@ -72,8 +74,9 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
 		$current_range = ! empty( $_GET['range'] ) ? $_GET['range'] : '7day';
 
-		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) )
+		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) ) {
 			$current_range = '7day';
+		}
 
 		$this->calculate_current_range( $current_range );
 
@@ -125,7 +128,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			}
 		}
 
-		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php');
+		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php' );
 	}
 
 	/**
@@ -338,7 +341,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 									tickColor: 'transparent',
 									mode: "time",
 									timeformat: "<?php if ( $this->chart_groupby == 'day' ) echo '%d %b'; else echo '%b'; ?>",
-									monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
+									monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ); ?>,
 									tickLength: 1,
 									minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],
 									tickSize: [1, "<?php echo $this->chart_groupby; ?>"],
