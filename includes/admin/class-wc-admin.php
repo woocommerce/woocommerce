@@ -31,8 +31,8 @@ class WC_Admin {
 	 */
 	public function includes() {
 		// Functions
-		include( 'wc-admin-functions.php' );
-		include( 'wc-meta-box-functions.php' );
+		include_once( 'wc-admin-functions.php' );
+		include_once( 'wc-meta-box-functions.php' );
 
 		// Classes
 		include( 'class-wc-admin-post-types.php' );
