@@ -445,7 +445,7 @@ class WC_Admin_Settings {
 							value="1"
 							<?php checked( $option_value, 'yes'); ?>
 							<?php echo implode( ' ', $custom_attributes ); ?>
-						/> <?php echo wp_kses_post( $value['desc'] ) ?></label> <?php echo $tip; ?>
+						/> <?php echo $description ?></label> <?php echo $tip; ?>
 					<?php
 
 					if ( ! isset( $value['checkboxgroup'] ) || ( isset( $value['checkboxgroup'] ) && $value['checkboxgroup'] == 'end' ) ) {
