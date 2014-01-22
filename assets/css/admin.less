@@ -2345,19 +2345,26 @@ img.help_tip {
 				padding: 0;
 			}
 			td.sort {
-				padding: 0 0 0 1.5em;
+				padding: 0 8px;
 				cursor: move;
-				position: relative;
 				background: #f9f9f9;
+				text-align: center;
+				vertical-align: middle;
 				&:before {
-					content: "";
-					position: absolute;
-					top: 1em;
-					left: 0.5em;
-					width: 1em;
-					height: 0.125em;
-					border-top: 0.375em double #999;
-					border-bottom: 0.125em solid #999;
+					content: "\e032";
+					font-family: 'WooCommerce';
+					text-align: center;
+					line-height: 1;
+					color: #999;
+					display: block;
+					width: 17px;
+					float: left;
+					height: 100%;
+				}
+				&:hover {
+					&:before {
+						color: #333;
+					}
 				}
 			}
 		}
