@@ -1838,11 +1838,14 @@ class WC_Cart {
 						// Get tax rates
 						$tax_rates = $this->tax->get_rates( $fee->tax_class );
 						$fee_taxes = $this->tax->calc_tax( $fee->amount, $tax_rates, false );
-						$fee->tax  = $fee_taxes['total_tax'];
+						
+						if ( ! empty( $fee_taxes ) ) {
+							$fee->tax = array_sum( $fee_taxes );
 
-						// Tax rows - merge the totals we just got
-						foreach ( array_keys( $this->taxes + $fee_taxes['taxes'] ) as $key ) {
-						    $this->taxes[ $key ] = ( isset( $fee_taxes['taxes'][ $key ] ) ? $fee_taxes['taxes'][ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
+							// Tax rows - merge the totals we just got
+							foreach ( array_keys( $this->taxes ) as $key ) {
+							    $this->taxes[ $key ] = ( isset( $fee_taxes['taxes'][ $key ] ) ? $fee_taxes['taxes'][ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
+							}
 						}
 					}
 				}
