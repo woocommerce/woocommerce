@@ -193,7 +193,7 @@ class WC_Frontend_Scripts {
 	public function backwards_compat( $styles ) {
 		if ( defined( 'WOOCOMMERCE_USE_CSS' ) ) {
 
-			_deprecated_function( 'WOOCOMMERCE_USE_CSS', '2.1', 'Styles should be removed using wp_deregister_style or the woocommerce_enqueue_frontend_styles filter rather than the WOOCOMMERCE_USE_CSS constant.' );
+			_deprecated_function( 'WOOCOMMERCE_USE_CSS', '2.1', 'Styles should be removed using wp_deregister_style or the woocommerce_enqueue_styles filter rather than the WOOCOMMERCE_USE_CSS constant.' );
 
 			if ( ! WOOCOMMERCE_USE_CSS )
 				return false;
