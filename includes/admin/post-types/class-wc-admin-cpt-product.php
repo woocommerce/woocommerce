@@ -695,23 +695,36 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 		if ( $product->is_type('simple') || $product->is_type('external') ) {
 
-			if ( isset( $_REQUEST['_regular_price'] ) ) update_post_meta( $post_id, '_regular_price', wc_clean( $_REQUEST['_regular_price'] ) );
-			if ( isset( $_REQUEST['_sale_price'] ) ) update_post_meta( $post_id, '_sale_price', wc_clean( $_REQUEST['_sale_price'] ) );
+			if ( isset( $_REQUEST['_regular_price'] ) ) {
+				$new_regular_price = $_REQUEST['_regular_price'] === '' ? '' : wc_format_decimal( $_REQUEST['_regular_price'] );
+				update_post_meta( $post_id, '_regular_price', $new_regular_price );
+			} else {
+				$new_regular_price = null;
+			}
+			if ( isset( $_REQUEST['_sale_price'] ) ) {
+				$new_sale_price = $_REQUEST['_sale_price'] === '' ? '' : wc_format_decimal( $_REQUEST['_sale_price'] );
+				update_post_meta( $post_id, '_sale_price', $new_sale_price );
+			} else {
+				$new_sale_price = null;
+			}
 
 			// Handle price - remove dates and set to lowest
 			$price_changed = false;
 
-			if ( isset( $_REQUEST['_regular_price'] ) && wc_clean( $_REQUEST['_regular_price'] ) != $old_regular_price ) $price_changed = true;
-			if ( isset( $_REQUEST['_sale_price'] ) && wc_clean( $_REQUEST['_sale_price'] ) != $old_sale_price ) $price_changed = true;
+			if ( ! is_null( $new_regular_price ) && $new_regular_price != $old_regular_price ) {
+				$price_changed = true;
+			} elseif ( ! is_null( $new_sale_price ) && $new_sale_price != $old_sale_price ) {
+				$price_changed = true;
+			}
 
 			if ( $price_changed ) {
 				update_post_meta( $post_id, '_sale_price_dates_from', '' );
 				update_post_meta( $post_id, '_sale_price_dates_to', '' );
 
-				if ( isset( $_REQUEST['_sale_price'] ) && $_REQUEST['_sale_price'] != '' ) {
-					update_post_meta( $post_id, '_price', wc_clean( $_REQUEST['_sale_price'] ) );
+				if ( ! is_null( $new_sale_price ) && $new_sale_price !== '' ) {
+					update_post_meta( $post_id, '_price', $new_sale_price );
 				} else {
-					update_post_meta( $post_id, '_price', wc_clean( $_REQUEST['_regular_price'] ) );
+					update_post_meta( $post_id, '_price', $new_regular_price );
 				}
 			}
 		}
