@@ -227,6 +227,8 @@ class WC_Admin_Settings {
 
 			if ( $description && in_array( $value['type'], array( 'textarea', 'radio' ) ) ) {
 				$description = '<p style="margin-top:0">' . wp_kses_post( $description ) . '</p>';
+			} elseif ( $description && in_array( $value['type'], array( 'checkbox' ) ) ) {
+				$description =  wp_kses_post( $description );
 			} elseif ( $description ) {
 				$description = '<span class="description">' . wp_kses_post( $description ) . '</span>';
 			}
