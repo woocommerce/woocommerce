@@ -408,58 +408,68 @@ class WC_Admin_Settings {
 	            // Checkbox input
 	            case 'checkbox' :
 
-	            	$option_value 	= self::get_option( $value['id'], $value['default'] );
+					$option_value    = self::get_option( $value['id'], $value['default'] );
+					$visbility_class = array();
 
-	            	if ( ! isset( $value['hide_if_checked'] ) ) $value['hide_if_checked'] = false;
-	            	if ( ! isset( $value['show_if_checked'] ) ) $value['show_if_checked'] = false;
+	            	if ( ! isset( $value['hide_if_checked'] ) ) {
+	            		$value['hide_if_checked'] = false;
+	            	}
+	            	if ( ! isset( $value['show_if_checked'] ) ) {
+	            		$value['show_if_checked'] = false;
+	            	}
+	            	if ( $value['hide_if_checked'] == 'yes' || $value['show_if_checked'] == 'yes' ) {
+	            		$visbility_class[] = 'hidden_option';
+	            	}
+	            	if ( $value['hide_if_checked'] == 'option' ) {
+	            		$visbility_class[] = 'hide_options_if_checked';
+	            	}
+	            	if ( $value['show_if_checked'] == 'option' ) {
+	            		$visbility_class[] = 'show_options_if_checked';
+	            	}
 
-	            	if ( ! isset( $value['checkboxgroup'] ) || ( isset( $value['checkboxgroup'] ) && $value['checkboxgroup'] == 'start' ) ) {
+	            	if ( ! isset( $value['checkboxgroup'] ) || 'start' == $value['checkboxgroup'] ) {
 	            		?>
-	            		<tr valign="top" class="<?php
-	            			if ( $value['hide_if_checked'] == 'yes' || $value['show_if_checked']=='yes') echo 'hidden_option';
-	            			if ( $value['hide_if_checked'] == 'option' ) echo 'hide_options_if_checked';
-	            			if ( $value['show_if_checked'] == 'option' ) echo 'show_options_if_checked';
-	            		?>">
-						<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?></th>
-						<td class="forminp forminp-checkbox">
-							<fieldset>
+		            		<tr valign="top" class="<?php echo esc_attr( implode( ' ', $visbility_class ) ); ?>">
+								<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?></th>
+								<td class="forminp forminp-checkbox">
+									<fieldset>
 						<?php
 	            	} else {
 	            		?>
-	            		<fieldset class="<?php
-	            			if ( $value['hide_if_checked'] == 'yes' || $value['show_if_checked'] == 'yes') echo 'hidden_option';
-	            			if ( $value['hide_if_checked'] == 'option') echo 'hide_options_if_checked';
-	            			if ( $value['show_if_checked'] == 'option') echo 'show_options_if_checked';
-	            		?>">
+		            		<fieldset class="<?php echo esc_attr( implode( ' ', $visbility_class ) ); ?>">
+	            		<?php
+	            	}
+
+	            	if ( ! empty( $value['title'] ) ) {
+	            		?>
+	            			<legend class="screen-reader-text"><span><?php echo esc_html( $value['title'] ) ?></span></legend>
 	            		<?php
 	            	}
 
 	            	?>
-			            <legend class="screen-reader-text"><span><?php echo esc_html( $value['title'] ) ?></span></legend>
-
 						<label for="<?php echo $value['id'] ?>">
-						<input
-							name="<?php echo esc_attr( $value['id'] ); ?>"
-							id="<?php echo esc_attr( $value['id'] ); ?>"
-							type="checkbox"
-							value="1"
-							<?php checked( $option_value, 'yes'); ?>
-							<?php echo implode( ' ', $custom_attributes ); ?>
-						/> <?php echo $description ?></label> <?php echo $tip; ?>
+							<input
+								name="<?php echo esc_attr( $value['id'] ); ?>"
+								id="<?php echo esc_attr( $value['id'] ); ?>"
+								type="checkbox"
+								value="1"
+								<?php checked( $option_value, 'yes'); ?>
+								<?php echo implode( ' ', $custom_attributes ); ?>
+							/> <?php echo $description ?>
+						</label> <?php echo $tip; ?>
 					<?php
 
-					if ( ! isset( $value['checkboxgroup'] ) || ( isset( $value['checkboxgroup'] ) && $value['checkboxgroup'] == 'end' ) ) {
-						?>
-							</fieldset>
-						</td>
-						</tr>
+					if ( ! isset( $value['checkboxgroup'] ) || 'end' == $value['checkboxgroup'] ) {
+									?>
+									</fieldset>
+								</td>
+							</tr>
 						<?php
 					} else {
 						?>
-						</fieldset>
+							</fieldset>
 						<?php
 					}
-
 	            break;
 
 	            // Image width settings
