@@ -212,7 +212,7 @@ function wc_cart_totals_order_total_html() {
 	echo '<strong>' . WC()->cart->get_total() . '</strong> ';
 
 	// If prices are tax inclusive, show taxes here
-	if (  WC()->cart->tax_display_cart == 'incl' ) {
+	if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' && WC()->cart->tax_display_cart == 'incl' ) {
 		$tax_string_array = array();
 
 		if ( get_option( 'woocommerce_tax_total_display' ) == 'itemized' ) {

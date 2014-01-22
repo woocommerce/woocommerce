@@ -920,7 +920,7 @@ class WC_Order {
 		);
 
 		// Tax for inclusive prices
-		if ( $tax_display == 'incl' ) {
+		if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' && $tax_display == 'incl' ) {
 
 			$tax_string_array = array();
 
