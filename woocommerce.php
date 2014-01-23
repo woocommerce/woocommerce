@@ -265,7 +265,7 @@ final class WooCommerce {
 
 		// 1 = PHP_ROUND_HALF_UP, 2 = PHP_ROUND_HALF_DOWN
 		if ( ! defined( 'WC_TAX_ROUNDING_MODE' ) ) {
-			define( 'WC_TAX_ROUNDING_MODE', get_option( 'woocommerce_prices_include_tax' ) == 'yes' ? 2 : 1 ); 
+			define( 'WC_TAX_ROUNDING_MODE', get_option( 'woocommerce_prices_include_tax' ) === 'yes' ? 2 : 1 ); 
 		}
 
 		if ( ! defined( 'WC_DELIMITER' ) ) {
@@ -287,11 +287,11 @@ final class WooCommerce {
 			include_once( 'includes/admin/class-wc-admin.php' );
 		}
 
-		if ( defined('DOING_AJAX') ) {
+		if ( defined( 'DOING_AJAX' ) ) {
 			$this->ajax_includes();
 		}
 
-		if ( ! is_admin() || defined('DOING_AJAX') ) {
+		if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
 			$this->frontend_includes();
 		}
 
@@ -385,7 +385,7 @@ final class WooCommerce {
 		$this->integrations			= new WC_Integrations();		// Integrations class
 
 		// Classes/actions loaded for the frontend and for ajax requests
-		if ( ! is_admin() || defined('DOING_AJAX') ) {
+		if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
 
 			// Session class, handles session data for customers - can be overwritten if custom handler is needed
 			$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );

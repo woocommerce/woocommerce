@@ -26,7 +26,7 @@ if ( 1 == $wp_query->found_posts || ! woocommerce_products_will_display() )
 				'price-desc' => __( 'Sort by price: high to low', 'woocommerce' )
 			) );
 
-			if ( get_option( 'woocommerce_enable_review_rating' ) == 'no' )
+			if ( get_option( 'woocommerce_enable_review_rating' ) === 'no' )
 				unset( $catalog_orderby['rating'] );
 
 			foreach ( $catalog_orderby as $id => $name )

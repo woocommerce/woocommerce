@@ -41,7 +41,7 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 		echo $before . single_cat_title( '', false ) . $after;
 
-	} elseif ( is_tax('product_cat') ) {
+	} elseif ( is_tax( 'product_cat' ) ) {
 
 		echo $prepend;
 

@@ -37,7 +37,7 @@ global $woocommerce;
 					}
 				} else {
 
-					echo '<p>'.__( 'Sorry, it seems that there are no payment methods which support adding a new payment method. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce' ).'</p>';
+					echo '<p>' . __( 'Sorry, it seems that there are no payment methods which support adding a new payment method. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce' ) . '</p>';
 
 				}
 			?>
