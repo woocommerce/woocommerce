@@ -2,13 +2,13 @@
 host = https://www.transifex.com
 
 [woocommerce-core.woocommerce-admin-pot]
-file_filter = po/<lang>.po
-source_file = po/woocommerce-admin.pot
+file_filter = languages/woocommerce-admin-<lang>.po
+source_file = languages/woocommerce-admin.pot
 source_lang = en
 type = PO
 
 [woocommerce-core.woocommerce-pot]
-file_filter = languages/<lang>.po
+file_filter = languages/woocommerce-<lang>.po
 source_file = languages/woocommerce.pot
 source_lang = en
 type = PO
