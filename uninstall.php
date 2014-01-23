@@ -21,14 +21,14 @@ $installer = include( 'includes/class-wc-install.php' );
 $installer->remove_roles();
 
 // Pages
-wp_delete_post( get_option('woocommerce_shop_page_id'), true );
-wp_delete_post( get_option('woocommerce_cart_page_id'), true );
-wp_delete_post( get_option('woocommerce_checkout_page_id'), true );
-wp_delete_post( get_option('woocommerce_myaccount_page_id'), true );
-wp_delete_post( get_option('woocommerce_edit_address_page_id'), true );
-wp_delete_post( get_option('woocommerce_view_order_page_id'), true );
-wp_delete_post( get_option('woocommerce_change_password_page_id'), true );
-wp_delete_post( get_option('woocommerce_logout_page_id'), true );
+wp_delete_post( get_option( 'woocommerce_shop_page_id' ), true );
+wp_delete_post( get_option( 'woocommerce_cart_page_id' ), true );
+wp_delete_post( get_option( 'woocommerce_checkout_page_id' ), true );
+wp_delete_post( get_option( 'woocommerce_myaccount_page_id' ), true );
+wp_delete_post( get_option( 'woocommerce_edit_address_page_id' ), true );
+wp_delete_post( get_option( 'woocommerce_view_order_page_id' ), true );
+wp_delete_post( get_option( 'woocommerce_change_password_page_id' ), true );
+wp_delete_post( get_option( 'woocommerce_logout_page_id' ), true );
 
 // mijireh checkout page
 if ( $mijireh_page = get_page_by_path( 'mijireh-secure-checkout' ) )

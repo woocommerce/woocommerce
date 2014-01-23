@@ -50,8 +50,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 				</tr>
 			<?php endforeach; ?>
 
-			<?php if ( WC()->cart->tax_display_cart == 'excl' ) : ?>
-				<?php if ( get_option( 'woocommerce_tax_total_display' ) == 'itemized' ) : ?>
+			<?php if ( WC()->cart->tax_display_cart === 'excl' ) : ?>
+				<?php if ( get_option( 'woocommerce_tax_total_display' ) === 'itemized' ) : ?>
 					<?php foreach ( WC()->cart->get_tax_totals() as $code => $tax ) : ?>
 						<tr class="tax-rate tax-rate-<?php echo sanitize_title( $code ); ?>">
 							<th><?php echo esc_html( $tax->label ); ?></th>
