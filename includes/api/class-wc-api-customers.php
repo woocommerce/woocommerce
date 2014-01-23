@@ -358,7 +358,37 @@ class WC_API_Customers extends WC_API_Resource {
 
 		if ( 0 == $order->customer_user ) {
 
-			$order_data['customer'] = 'guest';
+			// add customer data from order
+			$order_data['customer'] = array(
+				'id'               => 0,
+				'email'            => $order->billing_email,
+				'first_name'       => $order->billing_first_name,
+				'last_name'        => $order->billing_last_name,
+				'billing_address'  => array(
+					'first_name' => $order->billing_first_name,
+					'last_name'  => $order->billing_last_name,
+					'company'    => $order->billing_company,
+					'address_1'  => $order->billing_address_1,
+					'address_2'  => $order->billing_address_2,
+					'city'       => $order->billing_city,
+					'state'      => $order->billing_state,
+					'postcode'   => $order->billing_postcode,
+					'country'    => $order->billing_country,
+					'email'      => $order->billing_email,
+					'phone'      => $order->billing_phone,
+				),
+				'shipping_address' => array(
+					'first_name' => $order->shipping_first_name,
+					'last_name'  => $order->shipping_last_name,
+					'company'    => $order->shipping_company,
+					'address_1'  => $order->shipping_address_1,
+					'address_2'  => $order->shipping_address_2,
+					'city'       => $order->shipping_city,
+					'state'      => $order->shipping_state,
+					'postcode'   => $order->shipping_postcode,
+					'country'    => $order->shipping_country,
+				),
+			);
 
 		} else {
 
