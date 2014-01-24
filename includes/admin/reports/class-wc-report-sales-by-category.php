@@ -182,13 +182,13 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 					jQuery("select.chosen_select").chosen();
 
 					// Select all/none
-					jQuery('.select_all').live('click', function() {
+					jQuery( '.chart-widget' ).on( 'click', '.select_all', function() {
 						jQuery(this).closest( 'div' ).find( 'select option' ).attr( "selected", "selected" );
 						jQuery(this).closest( 'div' ).find('select').trigger( 'chosen:updated' );
 						return false;
 					});
 
-					jQuery('.select_none').live('click', function() {
+					jQuery( '.chart-widget').on( 'click', '.select_none', function() {
 						jQuery(this).closest( 'div' ).find( 'select option' ).removeAttr( "selected" );
 						jQuery(this).closest( 'div' ).find('select').trigger( 'chosen:updated' );
 						return false;
