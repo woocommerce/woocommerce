@@ -57,7 +57,7 @@ class WC_AJAX {
 			'term_ordering'                       				=> false,
 			'product_ordering'                    				=> false
 		);
-		
+
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
 			add_action( 'wp_ajax_woocommerce_' . $ajax_event, array( $this, $ajax_event ) );
 
@@ -78,7 +78,7 @@ class WC_AJAX {
 	 * Get a refreshed cart fragment
 	 */
 	public function get_refreshed_fragments() {
-		
+
 		$this->json_headers();
 
 		// Get mini cart
@@ -252,7 +252,7 @@ class WC_AJAX {
 	 * Process ajax checkout form
 	 */
 	public function checkout() {
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) 
+		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) )
 			define( 'WOOCOMMERCE_CHECKOUT', true );
 
 		$woocommerce_checkout = WC()->checkout();
@@ -265,10 +265,10 @@ class WC_AJAX {
 	 * Feature a product from admin
 	 */
 	public function feature_product() {
-		if ( ! current_user_can('edit_products') ) 
+		if ( ! current_user_can('edit_products') )
 			wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
 
-		if ( ! check_admin_referer('woocommerce-feature-product')) 
+		if ( ! check_admin_referer('woocommerce-feature-product'))
 			wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ) );
 
 		$post_id = isset( $_GET['product_id'] ) && (int) $_GET['product_id'] ? (int) $_GET['product_id'] : '';
@@ -1306,7 +1306,7 @@ class WC_AJAX {
 
 		$this->json_headers();
 
-		$term = (string) wc_clean( urldecode( stripslashes( $_GET['term'] ) ) );
+		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
 
 		if (empty($term)) die();
 
@@ -1409,7 +1409,7 @@ class WC_AJAX {
 
 		$this->json_headers();
 
-		$term = wc_clean( urldecode( stripslashes( $_GET['term'] ) ) );
+		$term = wc_clean( stripslashes( $_GET['term'] ) );
 
 		if ( empty( $term ) )
 			die();
@@ -1449,7 +1449,7 @@ class WC_AJAX {
 	 * @see WC_AJAX::json_search_products()
 	 */
 	public function json_search_downloadable_products_and_variations() {
-		$term = (string) wc_clean( urldecode( stripslashes( $_GET['term'] ) ) );
+		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
 
 		$args = array(
 			'post_type' 		=> array( 'product', 'product_variation' ),
@@ -1484,7 +1484,7 @@ class WC_AJAX {
 	public function json_search_customer_name( $query ) {
 		global $wpdb;
 
-		$term = wc_clean( urldecode( stripslashes( $_GET['term'] ) ) );
+		$term = wc_clean( stripslashes( $_GET['term'] ) );
 
 		$query->query_from  .= " LEFT JOIN {$wpdb->usermeta} as meta2 ON ({$wpdb->users}.ID = meta2.user_id) ";
 		$query->query_from  .= " LEFT JOIN {$wpdb->usermeta} as meta3 ON ({$wpdb->users}.ID = meta3.user_id) ";

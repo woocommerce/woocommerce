@@ -78,7 +78,7 @@ class WC_Shortcode_Checkout {
 		if ( isset( $_GET['pay_for_order'] ) && isset( $_GET['key'] ) && $order_id ) {
 
 			// Pay for existing order
-			$order_key            = urldecode( $_GET[ 'key' ] );
+			$order_key            = $_GET[ 'key' ];
 			$order                = new WC_Order( $order_id );
 			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
 
