@@ -38,7 +38,7 @@ $rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 				<p class="meta">
 					<strong itemprop="author"><?php comment_author(); ?></strong> <?php
 
-						if ( get_option('woocommerce_review_rating_verification_label') == 'yes' )
+						if ( get_option( 'woocommerce_review_rating_verification_label' ) === 'yes' )
 							if ( wc_customer_bought_product( $comment->comment_author_email, $comment->user_id, $comment->comment_post_ID ) )
 								echo '<em class="verified">(' . __( 'verified owner', 'woocommerce' ) . ')</em> ';
 

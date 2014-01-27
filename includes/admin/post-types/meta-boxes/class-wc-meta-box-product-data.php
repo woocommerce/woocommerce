@@ -64,8 +64,9 @@ class WC_Meta_Box_Product_Data {
 		foreach ( $product_type_options as $key => $option ) {
 			$selected_value = get_post_meta( $post->ID, '_' . $key, true );
 
-			if ( $selected_value == '' )
+			if ( $selected_value == '' && isset( $option['default'] ) ) {
 				$selected_value = $option['default'];
+			}
 
 			$type_box .= '<label for="' . esc_attr( $option['id'] ) . '" class="'. esc_attr( $option['wrapper_class'] ) . ' tips" data-tip="' . esc_attr( $option['description'] ) . '">' . esc_html( $option['label'] ) . ': <input type="checkbox" name="' . esc_attr( $option['id'] ) . '" id="' . esc_attr( $option['id'] ) . '" ' . checked( $selected_value, 'yes', false ) .' /></label>';
 		}

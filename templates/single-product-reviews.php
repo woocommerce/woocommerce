@@ -17,7 +17,7 @@ if ( ! comments_open() )
 <div id="reviews">
 	<div id="comments">
 		<h2><?php 
-			if ( get_option( 'woocommerce_enable_review_rating' ) == 'yes' && ( $count = $product->get_rating_count() ) )
+			if ( get_option( 'woocommerce_enable_review_rating' ) === 'yes' && ( $count = $product->get_rating_count() ) )
 				printf( _n('%s review for %s', '%s reviews for %s', $count, 'woocommerce'), $count, get_the_title() );
 			else
 				_e( 'Reviews', 'woocommerce' ); 
@@ -43,7 +43,7 @@ if ( ! comments_open() )
 		<?php endif; ?>
 	</div>
 
-	<?php if ( get_option( 'woocommerce_review_rating_verification_required' ) == 'no' || wc_customer_bought_product( '', get_current_user_id(), $product->id ) ) : ?>
+	<?php if ( get_option( 'woocommerce_review_rating_verification_required' ) === 'no' || wc_customer_bought_product( '', get_current_user_id(), $product->id ) ) : ?>
 
 		<div id="review_form_wrapper">
 			<div id="review_form">
@@ -51,7 +51,7 @@ if ( ! comments_open() )
 					$commenter = wp_get_current_commenter();
 
 					$comment_form = array(
-						'title_reply'          => have_comments() ? __( 'Add a review', 'woocommerce' ) : __( 'Be the first to review', 'woocommerce' ).' &ldquo;' . get_the_title() . '&rdquo;',
+						'title_reply'          => have_comments() ? __( 'Add a review', 'woocommerce' ) : __( 'Be the first to review', 'woocommerce' ) . ' &ldquo;' . get_the_title() . '&rdquo;',
 						'title_reply_to'       => __( 'Leave a Reply to %s', 'woocommerce' ),
 						'comment_notes_before' => '',
 						'comment_notes_after'  => '',
@@ -66,14 +66,14 @@ if ( ! comments_open() )
 						'comment_field' => ''
 					);
 
-					if ( get_option('woocommerce_enable_review_rating') == 'yes' ) {
+					if ( get_option( 'woocommerce_enable_review_rating' ) === 'yes' ) {
 						$comment_form['comment_field'] = '<p class="comment-form-rating"><label for="rating">' . __( 'Your Rating', 'woocommerce' ) .'</label><select name="rating" id="rating">
-							<option value="">'.__( 'Rate&hellip;', 'woocommerce' ).'</option>
-							<option value="5">'.__( 'Perfect', 'woocommerce' ).'</option>
-							<option value="4">'.__( 'Good', 'woocommerce' ).'</option>
-							<option value="3">'.__( 'Average', 'woocommerce' ).'</option>
-							<option value="2">'.__( 'Not that bad', 'woocommerce' ).'</option>
-							<option value="1">'.__( 'Very Poor', 'woocommerce' ).'</option>
+							<option value="">' . __( 'Rate&hellip;', 'woocommerce' ) . '</option>
+							<option value="5">' . __( 'Perfect', 'woocommerce' ) . '</option>
+							<option value="4">' . __( 'Good', 'woocommerce' ) . '</option>
+							<option value="3">' . __( 'Average', 'woocommerce' ) . '</option>
+							<option value="2">' . __( 'Not that bad', 'woocommerce' ) . '</option>
+							<option value="1">' . __( 'Very Poor', 'woocommerce' ) . '</option>
 						</select></p>';
 					}
 
