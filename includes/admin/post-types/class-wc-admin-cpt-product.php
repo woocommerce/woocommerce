@@ -569,7 +569,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 		$output .= "</select>";
 
-		echo $output;
+		echo apply_filters( 'woocommerce_product_filters', $output );
 	}
 
 	/**
