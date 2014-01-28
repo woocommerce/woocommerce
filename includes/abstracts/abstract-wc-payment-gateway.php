@@ -19,6 +19,9 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/** @var string Payment method ID. */
 	var $id;
 
+	/** @var string Set if the place order button should be renamed on selection. */
+	var $order_button_text;
+
 	/** @var string Payment method title. */
 	var $title;
 

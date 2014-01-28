@@ -25,13 +25,14 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function __construct() {
 
-		$this->id           = 'paypal';
-		$this->icon         = apply_filters( 'woocommerce_paypal_icon', WC()->plugin_url() . '/assets/images/icons/paypal.png' );
-		$this->has_fields   = false;
-		$this->liveurl      = 'https://www.paypal.com/cgi-bin/webscr';
-		$this->testurl      = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
-		$this->method_title = __( 'PayPal', 'woocommerce' );
-		$this->notify_url   = str_replace( 'https:', 'http:', add_query_arg( 'wc-api', 'WC_Gateway_Paypal', home_url( '/' ) ) );
+		$this->id                = 'paypal';
+		$this->icon              = apply_filters( 'woocommerce_paypal_icon', WC()->plugin_url() . '/assets/images/icons/paypal.png' );
+		$this->has_fields        = false;
+		$this->order_button_text = __( 'Proceed to PayPal', 'woocommerce' );
+		$this->liveurl           = 'https://www.paypal.com/cgi-bin/webscr';
+		$this->testurl           = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
+		$this->method_title      = __( 'PayPal', 'woocommerce' );
+		$this->notify_url        = str_replace( 'https:', 'http:', add_query_arg( 'wc-api', 'WC_Gateway_Paypal', home_url( '/' ) ) );
 
 		// Load the settings.
 		$this->init_form_fields();

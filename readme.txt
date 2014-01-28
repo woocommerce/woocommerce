@@ -189,6 +189,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - New notices API for adding errors/notices
 * Feature - Compatible with WordPress 3.8 default theme 'TwentyFourteen'.
 * Feature - Added is_store_notice_showing conditional.
+* Feature - Allow gateways to change the checkout place order button text on selection.
 * Tweak - Added pagination to tax rate screens.
 * Tweak - Added filter to check the 'Create account' checkbox on checkout by default.
 * Tweak - Update CPT parameters for 'product_variation' and 'shop_coupon' to be no longer public.
