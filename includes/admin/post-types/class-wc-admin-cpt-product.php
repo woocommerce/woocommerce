@@ -29,6 +29,10 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		// Post title fields
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
 
+		// Featured image text
+		add_filter( 'gettext', array( $this, 'featured_image_gettext' ) );
+		add_filter( 'media_view_strings', array( $this, 'media_view_strings' ), 10, 2 );
+
 		// Visibility option
 		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ) );
 
@@ -70,6 +74,55 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 		// Call WC_Admin_CPT constructor
 		parent::__construct();
+	}
+
+	/**
+	 * Check if we're editing or adding a product
+	 * @return boolean
+	 */
+	private function is_editing_product() {
+		if ( ! empty( $_GET['post_type'] ) && 'product' == $_GET['post_type'] ) {
+			return true;
+		}
+		if ( ! empty( $_GET['post'] ) && 'product' == get_post_type( $_GET['post'] ) ) {
+			return true;
+		}
+		if ( ! empty( $_REQUEST['post_id'] ) && 'product' == get_post_type( $_REQUEST['post_id'] ) ) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Replace 'Featured' when editing a product. Adapted from https://gist.github.com/tw2113/c7fd8da782232ce90176
+	 * @param  string $string string being translated
+	 * @return string after manipulation
+	 */
+	public function featured_image_gettext( $string = '' ) {
+		if ( 'Featured Image' == $string && $this->is_editing_product() ) {
+			$string = __( 'Product Image', 'woocommerce' );
+		} elseif ( 'Remove featured image' == $string && $this->is_editing_product() ) {
+			$string = __( 'Remove product image', 'woocommerce' );
+		} elseif ( 'Set featured image' == $string && $this->is_editing_product() ) {
+			$string = __( 'Set product image', 'woocommerce' );
+		}
+		return $string;
+	}
+
+	/**
+	 * Change "Featured Image" to "Product Image" throughout media modals.
+	 * @param  array  $strings Array of strings to translate.
+	 * @param  object $post
+	 * @return array
+	 */
+	public function media_view_strings( $strings = array(), $post = null ) {
+		if ( is_object( $post ) ) {
+			if ( 'product' == $post->post_type ) {
+				$strings['setFeaturedImageTitle'] = __( 'Set product image', 'woocommerce' );
+				$strings['setFeaturedImage']      = __( 'Set product image', 'woocommerce' );
+			}
+		}
+		return $strings;
 	}
 
 	/**
