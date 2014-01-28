@@ -69,7 +69,7 @@ function wc_get_template_part( $slug, $name = '' ) {
 
 	// Allow 3rd party plugin filter template file from their plugin
 	$template = apply_filters( 'wc_get_template_part', $template, $slug, $name );
-	
+
 	if ( $template )
 		load_template( $template, false );
 }
@@ -315,7 +315,7 @@ function wc_print_js() {
 
 	if ( ! empty( $wc_queued_js ) ) {
 
-		echo "<!-- WooCommerce JavaScript-->\n<script type=\"text/javascript\">\njQuery(document).ready(function($) {";
+		echo "<!-- WooCommerce JavaScript -->\n<script type=\"text/javascript\">\njQuery(function($) {";
 
 		// Sanitize
 		$wc_queued_js = wp_check_invalid_utf8( $wc_queued_js );
