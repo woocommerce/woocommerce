@@ -489,7 +489,7 @@ class WC_Cart {
 
 				foreach ( $cart_item['variation'] as $name => $value ) {
 
-					if ( ! $value )
+					if ( '' === $value )
 						continue;
 
 					$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
@@ -497,7 +497,7 @@ class WC_Cart {
 					// If this is a term slug, get the term's nice name
 		            if ( taxonomy_exists( $taxonomy ) ) {
 		            	$term = get_term_by( 'slug', $value, $taxonomy );
-		            	if ( ! is_wp_error( $term ) && $term->name ) {
+		            	if ( ! is_wp_error( $term ) && $term && $term->name ) {
 		            		$value = $term->name;
 		            	}
 		            	$label = wc_attribute_label( $taxonomy );
