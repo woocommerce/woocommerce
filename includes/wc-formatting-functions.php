@@ -154,17 +154,6 @@ function wc_trim_zeros( $price ) {
 }
 
 /**
- * Alias of wc_round_tax_total()
- *
- * @access public
- * @param  mixed $price
- * @return string
- */
-function woocommerce_round_tax_total( $tax ) {
-	return wc_round_tax_total( $tax );
-}
-
-/**
  * Round a tax amount
  *
  * @access public
