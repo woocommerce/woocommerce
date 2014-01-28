@@ -89,7 +89,7 @@ class WC_Query {
 	 * Get any errors from querystring
 	 */
 	public function get_errors() {
-		if ( ! empty( $_GET['wc_error'] ) && ( $error = sanitize_text_field( urldecode( $_GET['wc_error'] ) ) ) && ! wc_has_notice( $error, 'error' ) )
+		if ( ! empty( $_GET['wc_error'] ) && ( $error = sanitize_text_field( $_GET['wc_error'] ) ) && ! wc_has_notice( $error, 'error' ) )
 			wc_add_notice( $error, 'error' );
 	}
 

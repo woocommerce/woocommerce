@@ -27,10 +27,10 @@ class WC_Download_Handler {
 
 			global $wpdb;
 
-			$product_id           = (int) urldecode($_GET['download_file']);
-			$order_key            = urldecode( $_GET['order'] );
-			$email                = sanitize_email( str_replace( ' ', '+', urldecode( $_GET['email'] ) ) );
-			$download_id          = isset( $_GET['key'] ) ? preg_replace( '/\s+/', ' ', urldecode( $_GET['key'] ) ) : '';
+			$product_id           = (int) $_GET['download_file'];
+			$order_key            = $_GET['order'];
+			$email                = sanitize_email( str_replace( ' ', '+', $_GET['email'] ) );
+			$download_id          = isset( $_GET['key'] ) ? preg_replace( '/\s+/', ' ', $_GET['key'] ) : '';
 			$_product             = get_product( $product_id );
 
 			if ( ! is_email( $email) )

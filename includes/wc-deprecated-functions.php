@@ -175,9 +175,6 @@ function woocommerce_get_weight( $weight, $to_unit ) {
 function woocommerce_trim_zeros( $price ) {
 	return wc_trim_zeros( $price );
 }
-function woocommerce_round_tax_total( $tax ) {
-	return wc_round_tax_total( $tax );
-}
 function woocommerce_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	return wc_format_decimal( $number, $dp, $trim_zeros );
 }
