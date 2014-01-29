@@ -76,6 +76,12 @@ class WC_Cache_Helper {
 		if ( ! defined( 'DONOTCACHEPAGE' ) )
 			define( "DONOTCACHEPAGE", "true" );
 
+		if ( ! defined( 'DONOTCACHEOBJECT' ) )
+			define( "DONOTCACHEOBJECT", "true" );
+
+		if ( ! defined( 'DONOTCACHEDB' ) )
+			define( "DONOTCACHEDB", "true" );
+
 		nocache_headers();
 	}
 
