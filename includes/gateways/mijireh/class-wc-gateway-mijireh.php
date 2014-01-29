@@ -167,8 +167,8 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 		<h3><?php _e( 'Mijireh Checkout', 'woocommerce' );?></h3>
 
 		<?php if ( empty( $this->access_key ) ) : ?>
-			<div id="wc_get_started" class="mijireh">
-				<span class="main"><?php _e( 'Get started with Mijireh Checkout', 'woocommerce' ); ?></span>
+			<div class="mijireh updated">
+				<p class="main"><strong><?php _e( 'Get started with Mijireh Checkout', 'woocommerce' ); ?></strong></p>
 				<span><a href="http://www.mijireh.com/integrations/woocommerce/">Mijireh Checkout</a> <?php _e( 'provides a fully PCI Compliant, secure way to collect and transmit credit card data to your payment gateway while keeping you in control of the design of your site. Mijireh supports a wide variety of payment gateways: Stripe, Authorize.net, PayPal, eWay, SagePay, Braintree, PayLeap, and more.', 'woocommerce' ); ?></span>
 
 				<p><a href="http://secure.mijireh.com/signup" target="_blank" class="button button-primary"><?php _e( 'Join for free', 'woocommerce' ); ?></a> <a href="http://www.mijireh.com/integrations/woocommerce/" target="_blank" class="button"><?php _e( 'Learn more about WooCommerce and Mijireh', 'woocommerce' ); ?></a></p>
