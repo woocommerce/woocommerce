@@ -927,34 +927,104 @@ p.demo_store {
 	}
 
 	p.stars {
-		.clearfix();
-		span {
-			width: 80px;
-			height: 16px;
+		position: relative;
+		height: 1em;
+		font-size: 1em;
+
+		a {
+			display: inline-block;
+			font-weight: 700;
+			margin-right: 1em;
+			text-indent: -9999px;
 			position: relative;
-			float:left;
-			background: url(../images/star.png) repeat-x left 0;
-			a {
-				float:left;
-				position:absolute;
-				left: 0;
-				top: 0;
-				width: 16px;
-				height: 0;
-				padding-top: 16px;
-				overflow:hidden;
+
+			&:last-child {
+				border-right:0;
 			}
-			a:hover, a:focus {
-				background: url(../images/star.png) repeat-x left -16px;
+
+			&.star-1,
+			&.star-2,
+			&.star-3,
+			&.star-4,
+			&.star-5 {
+				border-right:1px solid #ccc;
+
+				&:after {
+					font-family: "WooCommerce";
+					text-indent: 0;
+					position: absolute;
+					top: 0;
+					left: 0;
+					padding-right: 1em;
+				}
+
 			}
-			a.active {
-				background: url(../images/star.png) repeat-x left -32px;
+
+			&.star-1 {
+				width: 2em;
+
+				&:after {
+					content: "\e021";
+				}
+
+				&:hover:after,
+				&.active:after {
+					content: "\e020"
+				}
 			}
-			a.star-1 { width: 16px; z-index: 10; }
-			a.star-2 { width: 32px; z-index: 9; }
-			a.star-3 { width: 48px; z-index: 8; }
-			a.star-4 { width: 64px; z-index: 7; }
-			a.star-5 { width: 80px; z-index: 6; }
+
+			&.star-2 {
+				width: 3em;
+
+				&:after {
+					content: "\e021\e021";
+				}
+
+				&:hover:after,
+				&.active:after {
+					content: "\e020\e020"
+				}
+			}
+
+			&.star-3 {
+				width: 4em;
+
+				&:after {
+					content: "\e021\e021\e021";
+				}
+
+				&:hover:after,
+				&.active:after {
+					content: "\e020\e020\e020"
+				}
+			}
+
+			&.star-4 {
+				width: 5em;
+
+				&:after {
+					content: "\e021\e021\e021\e021";
+				}
+
+				&:hover:after,
+				&.active:after {
+					content: "\e020\e020\e020\e020"
+				}
+			}
+
+			&.star-5 {
+				width: 6em;
+				border: 0;
+
+				&:after {
+					content: "\e021\e021\e021\e021\e021";
+				}
+
+				&:hover:after,
+				&.active:after {
+					content: "\e020\e020\e020\e020\e020"
+				}
+			}
 		}
 	}
 
@@ -1759,20 +1829,6 @@ p.demo_store {
 				&:before {
 					background-image: url(../images/ajax-loader@2x.gif);
 					background-size: 16px 16px;
-				}
-			}
-		}
-		p.stars {
-			span {
-				background-image: url(../images/star@2x.png);
-				background-size: 16px 48px;
-				a:hover, a:focus {
-					background-image: url(../images/star@2x.png);
-					background-size: 16px 48px;
-				}
-				a.active {
-					background-image: url(../images/star@2x.png);
-					background-size: 16px 48px;
 				}
 			}
 		}
