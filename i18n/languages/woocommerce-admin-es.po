@@ -1,6 +1,7 @@
 # 
 # Translators:
 # Closemarketing <david@closemarketing.es>, 2013
+# Gabriel Gil <gabriel@gabrielgil.es>, 2014
 # Luis <zreedee@gmail.com>, 2013
 # Oscar Gonzalez <inactive+eldragon87@transifex.com>, 2013
 # rcovarru <rnt@rnt.cl>, 2013
@@ -8,9 +9,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-01-08 15:41:50+00:00\n"
-"PO-Revision-Date: 2014-01-09 08:32+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"POT-Creation-Date: 2014-01-23 12:27:56+00:00\n"
+"PO-Revision-Date: 2014-01-26 21:56+0000\n"
+"Last-Translator: Gabriel Gil <gabriel@gabrielgil.es>\n"
 "Language-Team: Spanish (http://www.transifex.com/projects/p/woocommerce-core/language/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -338,7 +339,7 @@ msgstr "Eliminar"
 
 #: includes/admin/class-wc-admin-attributes.php:356
 msgid "Configure terms"
-msgstr ""
+msgstr "Configurar términos"
 
 #: includes/admin/class-wc-admin-attributes.php:360
 msgid "No attributes currently exist."
@@ -783,8 +784,8 @@ msgstr "Dirección 2"
 #: includes/admin/class-wc-admin-profile.php:117
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:49
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:96
-#: includes/admin/settings/class-wc-settings-tax.php:254
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:256
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "City"
 msgstr "Ciudad"
 
@@ -835,39 +836,39 @@ msgstr "Dirección de Envío de Cliente"
 
 #: includes/admin/class-wc-admin-profile.php:197
 msgid "Read"
-msgstr ""
+msgstr "Leer"
 
 #: includes/admin/class-wc-admin-profile.php:198
 msgid "Write"
-msgstr ""
+msgstr "Escribir"
 
 #: includes/admin/class-wc-admin-profile.php:199
 msgid "Read/Write"
-msgstr ""
+msgstr "Leer/Escribir"
 
 #: includes/admin/class-wc-admin-profile.php:207
 msgid "WooCommerce API Keys"
-msgstr ""
+msgstr "Claves de la API de WooCommerce"
 
 #: includes/admin/class-wc-admin-profile.php:211
 msgid "Generate API Key"
-msgstr ""
+msgstr "Generar clave para la API"
 
 #: includes/admin/class-wc-admin-profile.php:213
 msgid "Consumer Key:"
-msgstr ""
+msgstr "Clave de cliente:"
 
 #: includes/admin/class-wc-admin-profile.php:214
 msgid "Consumer Secret:"
-msgstr ""
+msgstr "Clave secreta:"
 
 #: includes/admin/class-wc-admin-profile.php:215
 msgid "Permissions:"
-msgstr ""
+msgstr "Permisos:"
 
 #: includes/admin/class-wc-admin-profile.php:219
 msgid "Revoke API Key"
-msgstr ""
+msgstr "Eliminar la clave de la API"
 
 #: includes/admin/class-wc-admin-reports.php:46
 #: includes/admin/reports/class-wc-report-customer-list.php:246
@@ -953,28 +954,28 @@ msgstr "Su configuración ha sido guardada."
 msgid "The changes you made will be lost if you navigate away from this page."
 msgstr "Los cambios realizados se perderán si se navega fuera de esta página."
 
-#: includes/admin/class-wc-admin-settings.php:478
+#: includes/admin/class-wc-admin-settings.php:490
 msgid "Hard Crop?"
 msgstr "Recortar a la fuerza"
 
-#: includes/admin/class-wc-admin-settings.php:503
+#: includes/admin/class-wc-admin-settings.php:515
 msgid "Select a page&hellip;"
 msgstr "Seleccione una página&hellip;"
 
-#: includes/admin/class-wc-admin-settings.php:526
+#: includes/admin/class-wc-admin-settings.php:538
 msgid "Choose a country&hellip;"
 msgstr "Seleccione un país&hellip;"
 
-#: includes/admin/class-wc-admin-settings.php:550
+#: includes/admin/class-wc-admin-settings.php:562
 msgid "Choose countries&hellip;"
 msgstr "Seleccione los paises&hellip;"
 
-#: includes/admin/class-wc-admin-settings.php:556
+#: includes/admin/class-wc-admin-settings.php:568
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:460
 msgid "Select all"
 msgstr "Seleccionar todos"
 
-#: includes/admin/class-wc-admin-settings.php:556
+#: includes/admin/class-wc-admin-settings.php:568
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:460
 msgid "Select none"
 msgstr "No seleccionar"
@@ -997,103 +998,121 @@ msgstr "Términos correctamente recontados"
 
 #: includes/admin/class-wc-admin-status.php:125
 msgid "Sessions successfully cleared"
-msgstr ""
+msgstr "Sesiones limpiadas correctamente"
 
 #: includes/admin/class-wc-admin-status.php:129
 msgid "All missing WooCommerce pages was installed successfully."
+msgstr "Todas las páginas de WooCommerce se han instalado correctamente."
+
+#: includes/admin/class-wc-admin-status.php:137
+msgid "Tax rates successfully deleted"
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:138
+#: includes/admin/class-wc-admin-status.php:146
 msgid "There was an error calling %s::%s"
 msgstr "Se produjo un error al llamar %s::%s"
 
-#: includes/admin/class-wc-admin-status.php:141
+#: includes/admin/class-wc-admin-status.php:149
 msgid "There was an error calling %s"
 msgstr "Hubo un error al llamar %s"
 
-#: includes/admin/class-wc-admin-status.php:151
+#: includes/admin/class-wc-admin-status.php:159
 msgid "Your changes have been saved."
 msgstr "Los cambios han sido guardados."
 
-#: includes/admin/class-wc-admin-status.php:165
+#: includes/admin/class-wc-admin-status.php:173
 msgid "WC Transients"
 msgstr "Temporales WC"
 
-#: includes/admin/class-wc-admin-status.php:166
+#: includes/admin/class-wc-admin-status.php:174
 msgid "Clear transients"
 msgstr "Limpiar Temporales"
 
-#: includes/admin/class-wc-admin-status.php:167
+#: includes/admin/class-wc-admin-status.php:175
 msgid "This tool will clear the product/shop transients cache."
 msgstr "Esta herramienta limpiará el caché transiente de productos/compras."
 
-#: includes/admin/class-wc-admin-status.php:170
+#: includes/admin/class-wc-admin-status.php:178
 msgid "Expired Transients"
 msgstr "Temporales expirados"
 
-#: includes/admin/class-wc-admin-status.php:171
+#: includes/admin/class-wc-admin-status.php:179
 msgid "Clear expired transients"
 msgstr "Borrar temporales expirados"
 
-#: includes/admin/class-wc-admin-status.php:172
+#: includes/admin/class-wc-admin-status.php:180
 msgid "This tool will clear ALL expired transients from Wordpress."
 msgstr "Esta herramienta limpiará TODOS los temporales expirados de WordPress."
 
-#: includes/admin/class-wc-admin-status.php:175
+#: includes/admin/class-wc-admin-status.php:183
 msgid "Term counts"
 msgstr "Cuenta de términos"
 
-#: includes/admin/class-wc-admin-status.php:176
+#: includes/admin/class-wc-admin-status.php:184
 msgid "Recount terms"
 msgstr "Recontar términos"
 
-#: includes/admin/class-wc-admin-status.php:177
+#: includes/admin/class-wc-admin-status.php:185
 msgid ""
 "This tool will recount product terms - useful when changing your settings in"
 " a way which hides products from the catalog."
 msgstr "Esta herramienta referirá los terminos de producto - útil cuamdo se cambia la configuración de manera que oculta productos del catálogo."
 
-#: includes/admin/class-wc-admin-status.php:180
+#: includes/admin/class-wc-admin-status.php:188
 msgid "Capabilities"
 msgstr "Capacidades"
 
-#: includes/admin/class-wc-admin-status.php:181
+#: includes/admin/class-wc-admin-status.php:189
 msgid "Reset capabilities"
 msgstr "Restablecer capacidades"
 
-#: includes/admin/class-wc-admin-status.php:182
+#: includes/admin/class-wc-admin-status.php:190
 msgid ""
 "This tool will reset the admin, customer and shop_manager roles to default. "
 "Use this if your users cannot access all of the WooCommerce admin pages."
 msgstr "Esta herramienta reiniciará los roles de admin y shop_manager a su estádo original. Utilice esto si los usuarios experimentan problemas en la zona de administración de WooCommerce."
 
-#: includes/admin/class-wc-admin-status.php:185
+#: includes/admin/class-wc-admin-status.php:193
 msgid "Customer Sessions"
 msgstr "Sesiones de cliente"
 
-#: includes/admin/class-wc-admin-status.php:186
+#: includes/admin/class-wc-admin-status.php:194
 msgid "Clear all sessions"
 msgstr "Limpiar todas las sesiones"
 
-#: includes/admin/class-wc-admin-status.php:187
+#: includes/admin/class-wc-admin-status.php:195
 msgid ""
 "<strong class=\"red\">Warning</strong> This tool will delete all customer "
 "session data from the database, including any current live carts."
 msgstr "<strong class=\"red\">Advertencia</strong> Esta herramienta borrará todas las sesiones de usuarios de la base de datos, incluyendo los carros de compra en curso."
 
-#: includes/admin/class-wc-admin-status.php:190
+#: includes/admin/class-wc-admin-status.php:198
 #: includes/admin/views/html-notice-install.php:6
 msgid "Install WooCommerce Pages"
 msgstr "Instalar páginas de WooCommerce"
 
-#: includes/admin/class-wc-admin-status.php:191
+#: includes/admin/class-wc-admin-status.php:199
 msgid "Install pages"
 msgstr "Instalar páginas"
 
-#: includes/admin/class-wc-admin-status.php:192
+#: includes/admin/class-wc-admin-status.php:200
 msgid ""
 "<strong class=\"red\">Note</strong> This tool will install all the missing "
 "WooCommerce pages. Pages already defined and set up will not be replaced."
+msgstr "<strong class=\"red\">Nota</strong> Esta herramienta instalará todas las páginas de WooCommerce que falten. Las páginas que ya existan y estén configuradas no se reemplazarán."
+
+#: includes/admin/class-wc-admin-status.php:203
+msgid "Delete all WooCommerce tax rates"
+msgstr ""
+
+#: includes/admin/class-wc-admin-status.php:204
+msgid "Delete ALL tax rates"
+msgstr "Eliminar TODOS los impuestos."
+
+#: includes/admin/class-wc-admin-status.php:205
+msgid ""
+"<strong class=\"red\">Note</strong> This option will delete ALL of your tax "
+"rates, use with caution."
 msgstr ""
 
 #: includes/admin/class-wc-admin-taxonomies.php:89
@@ -1203,11 +1222,11 @@ msgstr "Créditos"
 
 #: includes/admin/class-wc-admin-welcome.php:240
 msgid "A new RESTful API developers will &#10084;"
-msgstr ""
+msgstr "Una nueva API REST para desarrolladores &#10084;"
 
 #: includes/admin/class-wc-admin-welcome.php:243
 msgid "Access your data from 3rd party applications"
-msgstr ""
+msgstr "Accede a tus datos desde aplicaciones de terceros"
 
 #: includes/admin/class-wc-admin-welcome.php:244
 msgid ""
@@ -1220,7 +1239,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:248
 msgid "Authentication to keep data secure"
-msgstr ""
+msgstr "Autenticación para mantener tus datos seguros"
 
 #: includes/admin/class-wc-admin-welcome.php:249
 msgid ""
@@ -1232,11 +1251,11 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:254
 msgid "UI and reporting improvements"
-msgstr ""
+msgstr "Mejoras en la interfaz de usuario e informes"
 
 #: includes/admin/class-wc-admin-welcome.php:257
 msgid "WordPress 3.8 admin UI compatibility"
-msgstr ""
+msgstr "Compatibilidad con la interfaz de administración de Worpdress 3.8"
 
 #: includes/admin/class-wc-admin-welcome.php:258
 msgid ""
@@ -1248,7 +1267,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:261
 msgid "Simplified order UI"
-msgstr ""
+msgstr "Interfaz de usuario de pedidos simplificada"
 
 #: includes/admin/class-wc-admin-welcome.php:262
 msgid ""
@@ -1285,7 +1304,7 @@ msgstr "Integraciones separadas"
 
 #: includes/admin/class-wc-admin-welcome.php:276
 msgid "New separate plugins"
-msgstr ""
+msgstr "Nuevos plugins independientes"
 
 #: includes/admin/class-wc-admin-welcome.php:277
 msgid ""
@@ -1348,17 +1367,17 @@ msgstr "Bajo el capó"
 
 #: includes/admin/class-wc-admin-welcome.php:311
 msgid "PayPal PDT support"
-msgstr ""
+msgstr "Soporte de PayPal en el huso horario del Pacífico"
 
 #: includes/admin/class-wc-admin-welcome.php:312
 msgid ""
-"PayPal Data Transfer (PDT) is an alterntative for PayPal IPN which sends "
-"back the status of an order when a customer returns from PayPal."
+"PayPal Data Transfer (PDT) is an alternative for PayPal IPN which sends back"
+" the status of an order when a customer returns from PayPal."
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:316
 msgid "Stylesheet separation"
-msgstr ""
+msgstr "Separación de hojas de estilos"
 
 #: includes/admin/class-wc-admin-welcome.php:317
 msgid ""
@@ -1368,7 +1387,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:321
 msgid "New endpoints"
-msgstr ""
+msgstr "Nuevos endpoints"
 
 #: includes/admin/class-wc-admin-welcome.php:322
 msgid ""
@@ -1378,7 +1397,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:328
 msgid "Default credit card form for gateways"
-msgstr ""
+msgstr "Formulario de tarjeta de crédito por defecto para la pasarela de pago"
 
 #: includes/admin/class-wc-admin-welcome.php:329
 msgid ""
@@ -1388,7 +1407,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:333
 msgid "Coupon limits per customer"
-msgstr ""
+msgstr "Límite de cupones por cliente"
 
 #: includes/admin/class-wc-admin-welcome.php:334
 msgid ""
@@ -1408,7 +1427,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:346
 msgid "Additional price display options"
-msgstr ""
+msgstr "Opciones adicionales para mostrando el precio"
 
 #: includes/admin/class-wc-admin-welcome.php:347
 msgid ""
@@ -1428,7 +1447,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:356
 msgid "Review improvements"
-msgstr ""
+msgstr "Mejoras en las reseñas"
 
 #: includes/admin/class-wc-admin-welcome.php:357
 msgid ""
@@ -2209,7 +2228,7 @@ msgid ""
 "email for guests, and user ID for logged in users."
 msgstr "Cuantas veces este cupón puede ser utilizado por un usuario único. Use correo electrónico de facturación para invitados e ID de usuarios para autenticados."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:224
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:226
 msgid ""
 "Coupon code already exists - customers will use the latest coupon with this "
 "code."
@@ -2392,8 +2411,8 @@ msgstr "Cant."
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:46
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:111
 #: includes/admin/settings/class-wc-settings-tax.php:25
-#: includes/admin/settings/class-wc-settings-tax.php:548
-#: includes/admin/settings/class-wc-settings-tax.php:641
+#: includes/admin/settings/class-wc-settings-tax.php:550
+#: includes/admin/settings/class-wc-settings-tax.php:643
 msgid "Tax"
 msgstr "Impuestos"
 
@@ -2464,8 +2483,8 @@ msgstr "Añadir"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:62
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:94
 #: includes/admin/settings/class-wc-settings-shipping.php:25
-#: includes/admin/settings/class-wc-settings-tax.php:264
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:266
+#: includes/admin/settings/class-wc-settings-tax.php:383
 #: includes/admin/views/html-admin-page-addons.php:13
 msgid "Shipping"
 msgstr "Envío"
@@ -2704,14 +2723,14 @@ msgstr "Ninguno"
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:39
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:122
 #: includes/admin/settings/class-wc-settings-tax.php:122
-#: includes/admin/settings/class-wc-settings-tax.php:241
+#: includes/admin/settings/class-wc-settings-tax.php:243
 #: includes/admin/views/html-bulk-edit-product.php:83
 #: includes/admin/views/html-quick-edit-product.php:61
 msgid "Standard"
 msgstr "Estándar"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:261
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:383
 #: includes/admin/views/html-bulk-edit-product.php:77
 #: includes/admin/views/html-quick-edit-product.php:56
 msgid "Tax Class"
@@ -3230,11 +3249,11 @@ msgid ""
 "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr "Habilite esta opción si el producto no se envía o no existe coste de envío"
 
-#: includes/admin/reports/class-wc-admin-report.php:389
+#: includes/admin/reports/class-wc-admin-report.php:390
 msgid "Sold %s worth in the last %d days"
 msgstr "Vendidos %s en los últimos %d días"
 
-#: includes/admin/reports/class-wc-admin-report.php:391
+#: includes/admin/reports/class-wc-admin-report.php:392
 msgid "Sold 1 item in the last %d days"
 msgid_plural "Sold %d items in the last %d days"
 msgstr[0] "Vendido 1 artículo en los últimos %d días"
@@ -3328,7 +3347,7 @@ msgstr "Más descuento"
 #: includes/admin/reports/class-wc-report-sales-by-product.php:326
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:29
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:29
-#: includes/admin/settings/class-wc-settings-tax.php:287
+#: includes/admin/settings/class-wc-settings-tax.php:289
 msgid "Export CSV"
 msgstr "Exportar a CSV"
 
@@ -3825,7 +3844,7 @@ msgstr "Pedido recibido"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:168
 msgid "Add Payment Method"
-msgstr ""
+msgstr "Añadir forma de pago"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:169
 msgid "Endpoint for the Checkout &rarr; Add Payment Method page"
@@ -4004,11 +4023,11 @@ msgstr "Esta es una tienda de demostración para propósitos de prueba &mdash; N
 
 #: includes/admin/settings/class-wc-settings-general.php:103
 msgid "API"
-msgstr ""
+msgstr "API"
 
 #: includes/admin/settings/class-wc-settings-general.php:104
 msgid "Enable the REST API"
-msgstr ""
+msgstr "Activar la API REST"
 
 #: includes/admin/settings/class-wc-settings-general.php:112
 msgid "Currency Options"
@@ -4092,7 +4111,7 @@ msgstr "Habilitar Lightbox"
 msgid ""
 "Include WooCommerce's lightbox. Product gallery images will open in a "
 "lightbox."
-msgstr ""
+msgstr "Incluir el Lightbox de WooCommerce. Las galerías de imágenes de los productos se abrirán en un lightbox."
 
 #: includes/admin/settings/class-wc-settings-general.php:194
 msgid "Enable enhanced country select boxes"
@@ -4404,7 +4423,7 @@ msgstr "Mostrar etiqueta \"Comprador verificado\" para las calificaciones de cli
 
 #: includes/admin/settings/class-wc-settings-products.php:352
 msgid "Only allow reviews from \"verified owners\""
-msgstr ""
+msgstr "Solo aceptar reseñas de \"compradores verificados\""
 
 #: includes/admin/settings/class-wc-settings-products.php:363
 msgid "Product Image Sizes"
@@ -4730,122 +4749,122 @@ msgstr "Como un total simple"
 msgid "Itemized"
 msgstr "Detallado"
 
-#: includes/admin/settings/class-wc-settings-tax.php:241
+#: includes/admin/settings/class-wc-settings-tax.php:243
 msgid "Tax Rates for the \"%s\" Class"
 msgstr "Tipo de impuestos para \"%s\""
 
-#: includes/admin/settings/class-wc-settings-tax.php:242
+#: includes/admin/settings/class-wc-settings-tax.php:244
 msgid ""
 "Define tax rates for countries and states below. <a href=\"%s\">See here</a>"
 " for available alpha-2 country codes."
 msgstr "Defina los impuestos para otros paises y estados abajo. <a href=\"%s\">Ver aquí</a> códigos de país alpha-2"
 
-#: includes/admin/settings/class-wc-settings-tax.php:248
+#: includes/admin/settings/class-wc-settings-tax.php:250
 msgid "Country&nbsp;Code"
 msgstr "Código de país"
 
-#: includes/admin/settings/class-wc-settings-tax.php:248
+#: includes/admin/settings/class-wc-settings-tax.php:250
 msgid "A 2 digit country code, e.g. US. Leave blank to apply to all."
 msgstr "Un código de país de 2 digitos, ejemplo: US. Dejelo en blanco para afectar a todos."
 
-#: includes/admin/settings/class-wc-settings-tax.php:250
+#: includes/admin/settings/class-wc-settings-tax.php:252
 msgid "State&nbsp;Code"
 msgstr "Código de estado"
 
-#: includes/admin/settings/class-wc-settings-tax.php:250
+#: includes/admin/settings/class-wc-settings-tax.php:252
 msgid "A 2 digit state code, e.g. AL. Leave blank to apply to all."
 msgstr "Un código de estado de 2 digitos, ejemplo: AL. Dejelo en blanco para afectar a todos."
 
-#: includes/admin/settings/class-wc-settings-tax.php:252
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:254
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "ZIP/Postcode"
 msgstr "Código postal"
 
-#: includes/admin/settings/class-wc-settings-tax.php:252
+#: includes/admin/settings/class-wc-settings-tax.php:254
 msgid ""
 "Postcode for this rule. Semi-colon (;) separate multiple values. Leave blank"
 " to apply to all areas. Wildcards (*) can be used. Ranges for numeric "
 "postcodes (e.g. 12345-12350) will be expanded into individual postcodes."
 msgstr "Código postal para esta regla. Separe los diferentes valores con punto y coma (;). Dejelo en blanco para afectar a todos. Se pueden usar comodines (*). Rangos numericos (ej. 1234-5678) se autoexpanden en códigos postales individuales."
 
-#: includes/admin/settings/class-wc-settings-tax.php:254
+#: includes/admin/settings/class-wc-settings-tax.php:256
 msgid ""
 "Cities for this rule. Semi-colon (;) separate multiple values. Leave blank "
 "to apply to all cities."
 msgstr "Ciudades para esta regla. Separe los diferentes valores con punto y coma (;). Dejelo en blanco para afectar a todas."
 
-#: includes/admin/settings/class-wc-settings-tax.php:256
+#: includes/admin/settings/class-wc-settings-tax.php:258
 msgid "Rate&nbsp;%"
 msgstr "Tarifa"
 
-#: includes/admin/settings/class-wc-settings-tax.php:256
+#: includes/admin/settings/class-wc-settings-tax.php:258
 msgid "Enter a tax rate (percentage) to 4 decimal places."
 msgstr "Introduzca un porcentaje de 4 decimales."
 
-#: includes/admin/settings/class-wc-settings-tax.php:258
+#: includes/admin/settings/class-wc-settings-tax.php:260
 msgid "Tax&nbsp;Name"
 msgstr "Nombre&nbsp;impuesto"
 
-#: includes/admin/settings/class-wc-settings-tax.php:258
+#: includes/admin/settings/class-wc-settings-tax.php:260
 msgid "Enter a name for this tax rate."
 msgstr "Introduzca un nombre para este tipo de impuesto."
 
-#: includes/admin/settings/class-wc-settings-tax.php:260
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:262
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Priority"
 msgstr "Prioridad"
 
-#: includes/admin/settings/class-wc-settings-tax.php:260
+#: includes/admin/settings/class-wc-settings-tax.php:262
 msgid ""
 "Choose a priority for this tax rate. Only 1 matching rate per priority will "
 "be used. To define multiple tax rates for a single area you need to specify "
 "a different priority per rate."
 msgstr "Seleccione una prioridad para este tipo de impuesto. Solo se utilizará una coincidencia por prioridad. Para definir multiples tipos de impuesto para un solo area necesitará especificar las prioridades."
 
-#: includes/admin/settings/class-wc-settings-tax.php:262
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:264
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Compound"
 msgstr "Compuesto"
 
-#: includes/admin/settings/class-wc-settings-tax.php:262
+#: includes/admin/settings/class-wc-settings-tax.php:264
 msgid ""
 "Choose whether or not this is a compound rate. Compound tax rates are "
 "applied on top of other tax rates."
 msgstr "Seleccione si esta es o no una tasa compuesta. Los tipos de impuesto compuestos son aplicadas por encima del resto de tasas impositivas."
 
-#: includes/admin/settings/class-wc-settings-tax.php:264
+#: includes/admin/settings/class-wc-settings-tax.php:266
 msgid "Choose whether or not this tax rate also gets applied to shipping."
 msgstr "Elija si esta tasa de impuesto también se aplica al envío o no."
 
-#: includes/admin/settings/class-wc-settings-tax.php:271
+#: includes/admin/settings/class-wc-settings-tax.php:273
 msgid "Insert row"
 msgstr "Insertar fila"
 
-#: includes/admin/settings/class-wc-settings-tax.php:272
+#: includes/admin/settings/class-wc-settings-tax.php:274
 msgid "Remove selected row(s)"
 msgstr "Borrar la(s) fila(s) seleccionada(s)"
 
-#: includes/admin/settings/class-wc-settings-tax.php:288
+#: includes/admin/settings/class-wc-settings-tax.php:290
 msgid "Import CSV"
 msgstr "Importar CSV"
 
-#: includes/admin/settings/class-wc-settings-tax.php:374
+#: includes/admin/settings/class-wc-settings-tax.php:376
 msgid "No row(s) selected"
 msgstr "No se ha(n) seleccionado fila(s)"
 
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Country Code"
 msgstr "Código de país"
 
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "State Code"
 msgstr "Código del estado"
 
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Rate %"
 msgstr "Calificar"
 
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Tax Name"
 msgstr "Nombre tarifa"
 
@@ -4883,7 +4902,7 @@ msgstr "Por favor incluya está información cuando solicite soporte:"
 
 #: includes/admin/views/html-admin-page-status-report.php:3
 msgid "Get System Report"
-msgstr ""
+msgstr "Generar informe del sistema"
 
 #: includes/admin/views/html-admin-page-status-report.php:11
 msgid "Environment"
@@ -5046,7 +5065,7 @@ msgstr "wp_remote_post() falló. PayPal IPN puede que no funcionen con su servid
 
 #: includes/admin/views/html-admin-page-status-report.php:184
 msgid "Locale"
-msgstr ""
+msgstr "Localización"
 
 #: includes/admin/views/html-admin-page-status-report.php:200
 msgid "Plugins"
@@ -5152,27 +5171,27 @@ msgstr "Herramientas"
 
 #: includes/admin/views/html-admin-page-status-tools.php:23
 msgid "Template Debug Mode"
-msgstr ""
+msgstr "Modo debug del tema"
 
 #: includes/admin/views/html-admin-page-status-tools.php:29
 msgid ""
 "This tool will disable template overrides for logged-in administrators for "
 "debugging purposes."
-msgstr ""
+msgstr "Esta herramienta desactiva la sobreescritura del tema a los administradores para propósitos de depuración de errores."
 
 #: includes/admin/views/html-admin-page-status-tools.php:34
 msgid "Remove post types on uninstall"
-msgstr ""
+msgstr "Eliminar los tipos de post al desinstalar"
 
 #: includes/admin/views/html-admin-page-status-tools.php:40
 msgid ""
 "This tool will delete all product and order post data when uninstalling via "
 "Plugins > Delete."
-msgstr ""
+msgstr "Esta herramienta elimina todos los productos y pedidos cuando se borre el plugin desde Plugins > Borrar"
 
 #: includes/admin/views/html-admin-page-status-tools.php:47
 msgid "Save Changes"
-msgstr ""
+msgstr "Guardar cambios"
 
 #: includes/admin/views/html-admin-settings.php:20
 msgid "Save changes"

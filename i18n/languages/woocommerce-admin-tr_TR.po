@@ -1,12 +1,13 @@
 # 
 # Translators:
 # TRFlavourart <vaporsbazar@gmail.com>, 2013-2014
+# TRFlavourart <vaporsbazar@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-01-08 15:41:50+00:00\n"
-"PO-Revision-Date: 2014-01-09 16:40+0000\n"
+"POT-Creation-Date: 2014-01-23 12:27:56+00:00\n"
+"PO-Revision-Date: 2014-01-24 11:26+0000\n"
 "Last-Translator: TRFlavourart <vaporsbazar@gmail.com>\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/projects/p/woocommerce-core/language/tr_TR/)\n"
 "MIME-Version: 1.0\n"
@@ -776,8 +777,8 @@ msgstr "Adres 2"
 #: includes/admin/class-wc-admin-profile.php:117
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:49
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:96
-#: includes/admin/settings/class-wc-settings-tax.php:254
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:256
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "City"
 msgstr "Şehir"
 
@@ -946,28 +947,28 @@ msgstr "Ayarlarınız kaydedildi."
 msgid "The changes you made will be lost if you navigate away from this page."
 msgstr "Bu sayfadan giderseniz yaptığınız değişiklikler kaybolacak."
 
-#: includes/admin/class-wc-admin-settings.php:478
+#: includes/admin/class-wc-admin-settings.php:490
 msgid "Hard Crop?"
 msgstr "Kırp?"
 
-#: includes/admin/class-wc-admin-settings.php:503
+#: includes/admin/class-wc-admin-settings.php:515
 msgid "Select a page&hellip;"
 msgstr "Bir sayfa seçin&hellip;"
 
-#: includes/admin/class-wc-admin-settings.php:526
+#: includes/admin/class-wc-admin-settings.php:538
 msgid "Choose a country&hellip;"
 msgstr "Bir ülke seçin&hellip;"
 
-#: includes/admin/class-wc-admin-settings.php:550
+#: includes/admin/class-wc-admin-settings.php:562
 msgid "Choose countries&hellip;"
 msgstr "Birden fazla ülke seçin&hellip;"
 
-#: includes/admin/class-wc-admin-settings.php:556
+#: includes/admin/class-wc-admin-settings.php:568
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:460
 msgid "Select all"
 msgstr "Tümünü seç"
 
-#: includes/admin/class-wc-admin-settings.php:556
+#: includes/admin/class-wc-admin-settings.php:568
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:460
 msgid "Select none"
 msgstr "Hiçbirini seçme"
@@ -996,98 +997,116 @@ msgstr "Oturumlar başarıyla temizlendi"
 msgid "All missing WooCommerce pages was installed successfully."
 msgstr "Eksik tüm WooCommerce sayfaları başarıyla yüklendi."
 
-#: includes/admin/class-wc-admin-status.php:138
+#: includes/admin/class-wc-admin-status.php:137
+msgid "Tax rates successfully deleted"
+msgstr "Vergi oranı başarıyla silindi"
+
+#: includes/admin/class-wc-admin-status.php:146
 msgid "There was an error calling %s::%s"
 msgstr "Aramada bir hata var: %s::%s"
 
-#: includes/admin/class-wc-admin-status.php:141
+#: includes/admin/class-wc-admin-status.php:149
 msgid "There was an error calling %s"
 msgstr "Aramada bir hata var: %s"
 
-#: includes/admin/class-wc-admin-status.php:151
+#: includes/admin/class-wc-admin-status.php:159
 msgid "Your changes have been saved."
 msgstr "Değişiklikleriniz kaydedildi."
 
-#: includes/admin/class-wc-admin-status.php:165
+#: includes/admin/class-wc-admin-status.php:173
 msgid "WC Transients"
 msgstr "WooCommerce Çerezler"
 
-#: includes/admin/class-wc-admin-status.php:166
+#: includes/admin/class-wc-admin-status.php:174
 msgid "Clear transients"
 msgstr "Çerezleri temizle"
 
-#: includes/admin/class-wc-admin-status.php:167
+#: includes/admin/class-wc-admin-status.php:175
 msgid "This tool will clear the product/shop transients cache."
 msgstr "Bu araç ile ürünün/dükkanın geçici çerezleri temizlenir"
 
-#: includes/admin/class-wc-admin-status.php:170
+#: includes/admin/class-wc-admin-status.php:178
 msgid "Expired Transients"
 msgstr "Süresi Biten Çerezler"
 
-#: includes/admin/class-wc-admin-status.php:171
+#: includes/admin/class-wc-admin-status.php:179
 msgid "Clear expired transients"
 msgstr "Süresi Biten Çerezleri temizle"
 
-#: includes/admin/class-wc-admin-status.php:172
+#: includes/admin/class-wc-admin-status.php:180
 msgid "This tool will clear ALL expired transients from Wordpress."
 msgstr "Bu araç ile Wordpress'ten süresi biten çerezler temizlenir."
 
-#: includes/admin/class-wc-admin-status.php:175
+#: includes/admin/class-wc-admin-status.php:183
 msgid "Term counts"
 msgstr "Koşul Sayımları"
 
-#: includes/admin/class-wc-admin-status.php:176
+#: includes/admin/class-wc-admin-status.php:184
 msgid "Recount terms"
 msgstr "Koşulları tekrar say"
 
-#: includes/admin/class-wc-admin-status.php:177
+#: includes/admin/class-wc-admin-status.php:185
 msgid ""
 "This tool will recount product terms - useful when changing your settings in"
 " a way which hides products from the catalog."
 msgstr "Bu araç, ürün koşullarını yeniden hesaplayacaktır - ürünleri katalogtan gizleme ayarlarınızı değiştirdiğiniz zaman bir bakıma kullanışlıdır."
 
-#: includes/admin/class-wc-admin-status.php:180
+#: includes/admin/class-wc-admin-status.php:188
 msgid "Capabilities"
 msgstr "Özellikler"
 
-#: includes/admin/class-wc-admin-status.php:181
+#: includes/admin/class-wc-admin-status.php:189
 msgid "Reset capabilities"
 msgstr "Özellikleri sıfırla"
 
-#: includes/admin/class-wc-admin-status.php:182
+#: includes/admin/class-wc-admin-status.php:190
 msgid ""
 "This tool will reset the admin, customer and shop_manager roles to default. "
 "Use this if your users cannot access all of the WooCommerce admin pages."
 msgstr "Bu araç, müşteri, yönetici ve shop_manager rollerini varsayılana sıfırlar. Kullanıcılar WooCommerce yönetici sayfalarına erişemiyorsa bunu kullanın."
 
-#: includes/admin/class-wc-admin-status.php:185
+#: includes/admin/class-wc-admin-status.php:193
 msgid "Customer Sessions"
 msgstr "Müşteri Oturumları"
 
-#: includes/admin/class-wc-admin-status.php:186
+#: includes/admin/class-wc-admin-status.php:194
 msgid "Clear all sessions"
 msgstr "Tüm oturumları temizle"
 
-#: includes/admin/class-wc-admin-status.php:187
+#: includes/admin/class-wc-admin-status.php:195
 msgid ""
 "<strong class=\"red\">Warning</strong> This tool will delete all customer "
 "session data from the database, including any current live carts."
 msgstr "<strong class=\\\"red\\\">Uyarı:</strong> Bu araç, mevcut güncel sepetler de dahil olmak üzere tüm müşteri oturum bilgilerini siler."
 
-#: includes/admin/class-wc-admin-status.php:190
+#: includes/admin/class-wc-admin-status.php:198
 #: includes/admin/views/html-notice-install.php:6
 msgid "Install WooCommerce Pages"
 msgstr "WooCommerce Sayfalarını Yükle"
 
-#: includes/admin/class-wc-admin-status.php:191
+#: includes/admin/class-wc-admin-status.php:199
 msgid "Install pages"
 msgstr "Sayfaları yükle"
 
-#: includes/admin/class-wc-admin-status.php:192
+#: includes/admin/class-wc-admin-status.php:200
 msgid ""
 "<strong class=\"red\">Note</strong> This tool will install all the missing "
 "WooCommerce pages. Pages already defined and set up will not be replaced."
 msgstr "<strong class=\"red\">Not:</strong> Bu araç, eksik tüm WooCommerce sayfalarını yükleyecektir. Yükleme esnasında daha önce tanımlanmış olan sayfalar değiştirilmeyecektir."
+
+#: includes/admin/class-wc-admin-status.php:203
+msgid "Delete all WooCommerce tax rates"
+msgstr "Tüm WooCommerce vergi oranlarını sil"
+
+#: includes/admin/class-wc-admin-status.php:204
+msgid "Delete ALL tax rates"
+msgstr "Vergi oranlarının tümünü sil"
+
+#: includes/admin/class-wc-admin-status.php:205
+msgid ""
+"<strong class=\"red\">Note</strong> This option will delete ALL of your tax "
+"rates, use with caution."
+msgstr "<strong class=\"red\">Not</strong> Bu seçenek TÜM vergi oranlarınızı silecek, lütfen dikkatli bir şekilde kullanın."
 
 #: includes/admin/class-wc-admin-taxonomies.php:89
 #: includes/admin/class-wc-admin-taxonomies.php:177
@@ -1345,8 +1364,8 @@ msgstr "PayPal PDT desteği"
 
 #: includes/admin/class-wc-admin-welcome.php:312
 msgid ""
-"PayPal Data Transfer (PDT) is an alterntative for PayPal IPN which sends "
-"back the status of an order when a customer returns from PayPal."
+"PayPal Data Transfer (PDT) is an alternative for PayPal IPN which sends back"
+" the status of an order when a customer returns from PayPal."
 msgstr "PayPal Veri Transferi (PDT), bir müşteri PayPal'dan geri döndüğü zaman sipariş durumunu geri gönderen PayPal IPN için bir alternatiftir."
 
 #: includes/admin/class-wc-admin-welcome.php:316
@@ -2199,7 +2218,7 @@ msgid ""
 "email for guests, and user ID for logged in users."
 msgstr "Bu kupon tek bir kullanıcı tarafından kaç kez kullanılabilir? Misafirler için fatura e-postasını, kullanıcılar için kullanıcı kimliğini kullanın."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:224
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:226
 msgid ""
 "Coupon code already exists - customers will use the latest coupon with this "
 "code."
@@ -2382,8 +2401,8 @@ msgstr "Miktar"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:46
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:111
 #: includes/admin/settings/class-wc-settings-tax.php:25
-#: includes/admin/settings/class-wc-settings-tax.php:548
-#: includes/admin/settings/class-wc-settings-tax.php:641
+#: includes/admin/settings/class-wc-settings-tax.php:550
+#: includes/admin/settings/class-wc-settings-tax.php:643
 msgid "Tax"
 msgstr "Vergi"
 
@@ -2454,8 +2473,8 @@ msgstr "Ekle"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:62
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:94
 #: includes/admin/settings/class-wc-settings-shipping.php:25
-#: includes/admin/settings/class-wc-settings-tax.php:264
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:266
+#: includes/admin/settings/class-wc-settings-tax.php:383
 #: includes/admin/views/html-admin-page-addons.php:13
 msgid "Shipping"
 msgstr "Kargo"
@@ -2694,14 +2713,14 @@ msgstr "Yok"
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:39
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:122
 #: includes/admin/settings/class-wc-settings-tax.php:122
-#: includes/admin/settings/class-wc-settings-tax.php:241
+#: includes/admin/settings/class-wc-settings-tax.php:243
 #: includes/admin/views/html-bulk-edit-product.php:83
 #: includes/admin/views/html-quick-edit-product.php:61
 msgid "Standard"
 msgstr "Standart"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:261
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:383
 #: includes/admin/views/html-bulk-edit-product.php:77
 #: includes/admin/views/html-quick-edit-product.php:56
 msgid "Tax Class"
@@ -3219,11 +3238,11 @@ msgid ""
 "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr "Eğer bir ürün kargolanmıyacaksa veya kargo maliyeti yoksa bu seçeneği etkinleştirin."
 
-#: includes/admin/reports/class-wc-admin-report.php:389
+#: includes/admin/reports/class-wc-admin-report.php:390
 msgid "Sold %s worth in the last %d days"
 msgstr "Son %d gün içinde %s değerinde satış yapıldı"
 
-#: includes/admin/reports/class-wc-admin-report.php:391
+#: includes/admin/reports/class-wc-admin-report.php:392
 msgid "Sold 1 item in the last %d days"
 msgid_plural "Sold %d items in the last %d days"
 msgstr[0] "Son %d gün içinde %s öğe satıldı"
@@ -3316,7 +3335,7 @@ msgstr "En Yüksek İndirim"
 #: includes/admin/reports/class-wc-report-sales-by-product.php:326
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:29
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:29
-#: includes/admin/settings/class-wc-settings-tax.php:287
+#: includes/admin/settings/class-wc-settings-tax.php:289
 msgid "Export CSV"
 msgstr "CSV Dışa Aktar"
 
@@ -4717,122 +4736,122 @@ msgstr "Tek bir toplam olarak"
 msgid "Itemized"
 msgstr "Ayrıntılı"
 
-#: includes/admin/settings/class-wc-settings-tax.php:241
+#: includes/admin/settings/class-wc-settings-tax.php:243
 msgid "Tax Rates for the \"%s\" Class"
 msgstr "\"%s\" türü için vergi oranları"
 
-#: includes/admin/settings/class-wc-settings-tax.php:242
+#: includes/admin/settings/class-wc-settings-tax.php:244
 msgid ""
 "Define tax rates for countries and states below. <a href=\"%s\">See here</a>"
 " for available alpha-2 country codes."
 msgstr "Aşağıdaki ülkeler için vergi oranları tanımlayın. Kullanılabilir alpha-2 ülke kodları için <a href=\"%s\">buraya bakın</a>."
 
-#: includes/admin/settings/class-wc-settings-tax.php:248
+#: includes/admin/settings/class-wc-settings-tax.php:250
 msgid "Country&nbsp;Code"
 msgstr "Ülke&nbsp;Kodu"
 
-#: includes/admin/settings/class-wc-settings-tax.php:248
+#: includes/admin/settings/class-wc-settings-tax.php:250
 msgid "A 2 digit country code, e.g. US. Leave blank to apply to all."
 msgstr "2 Haneli ülke kodu girin, örn. TR. Tamamınıda boş bırakabilirsiniz."
 
-#: includes/admin/settings/class-wc-settings-tax.php:250
+#: includes/admin/settings/class-wc-settings-tax.php:252
 msgid "State&nbsp;Code"
 msgstr "Eyalet&nbsp;Kodu"
 
-#: includes/admin/settings/class-wc-settings-tax.php:250
+#: includes/admin/settings/class-wc-settings-tax.php:252
 msgid "A 2 digit state code, e.g. AL. Leave blank to apply to all."
 msgstr "2 Haneli eyalet kodu girin, örn. AZ. Tamamınıda boş bırakabilirsiniz."
 
-#: includes/admin/settings/class-wc-settings-tax.php:252
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:254
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "ZIP/Postcode"
 msgstr "ZIP/Posta Kodu"
 
-#: includes/admin/settings/class-wc-settings-tax.php:252
+#: includes/admin/settings/class-wc-settings-tax.php:254
 msgid ""
 "Postcode for this rule. Semi-colon (;) separate multiple values. Leave blank"
 " to apply to all areas. Wildcards (*) can be used. Ranges for numeric "
 "postcodes (e.g. 12345-12350) will be expanded into individual postcodes."
 msgstr "Bu kural için birden çok posta kodu belirleyebilirsiniz. Bu değerleri noktalı virgülle (;) ayırabilirsiniz. bunun yerine boşta bırakabilirsiniz. Özel semboller (*) kullanılabilir. Aralıkları ayrı posta kodları (örn. 12.345-12.350) içinde genişletilebilirsiniz."
 
-#: includes/admin/settings/class-wc-settings-tax.php:254
+#: includes/admin/settings/class-wc-settings-tax.php:256
 msgid ""
 "Cities for this rule. Semi-colon (;) separate multiple values. Leave blank "
 "to apply to all cities."
 msgstr "Bu kural için birden çok şehir belirleyebilirsiniz. Bu değerleri noktalı virgülle (;) ayırabilirsiniz. Tüm şehirleri boşta bırakabilirsiniz."
 
-#: includes/admin/settings/class-wc-settings-tax.php:256
+#: includes/admin/settings/class-wc-settings-tax.php:258
 msgid "Rate&nbsp;%"
 msgstr "Oran&nbsp;%"
 
-#: includes/admin/settings/class-wc-settings-tax.php:256
+#: includes/admin/settings/class-wc-settings-tax.php:258
 msgid "Enter a tax rate (percentage) to 4 decimal places."
 msgstr "Ondalık (örn. 18) bir vergi oranı girin."
 
-#: includes/admin/settings/class-wc-settings-tax.php:258
+#: includes/admin/settings/class-wc-settings-tax.php:260
 msgid "Tax&nbsp;Name"
 msgstr "Vergi&nbsp;Adı"
 
-#: includes/admin/settings/class-wc-settings-tax.php:258
+#: includes/admin/settings/class-wc-settings-tax.php:260
 msgid "Enter a name for this tax rate."
 msgstr "Bu vergi oranı için bir isim verin."
 
-#: includes/admin/settings/class-wc-settings-tax.php:260
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:262
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Priority"
 msgstr "Öncelik"
 
-#: includes/admin/settings/class-wc-settings-tax.php:260
+#: includes/admin/settings/class-wc-settings-tax.php:262
 msgid ""
 "Choose a priority for this tax rate. Only 1 matching rate per priority will "
 "be used. To define multiple tax rates for a single area you need to specify "
 "a different priority per rate."
 msgstr "Öncelik başına sadece 1 eşleştirme oranı kullanılacaktır. Tek bir alan için birden fazla vergi oranı tanımlamak için puan başına farklı öncelik belirtmeniz gerekir."
 
-#: includes/admin/settings/class-wc-settings-tax.php:262
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:264
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Compound"
 msgstr "Bileşik"
 
-#: includes/admin/settings/class-wc-settings-tax.php:262
+#: includes/admin/settings/class-wc-settings-tax.php:264
 msgid ""
 "Choose whether or not this is a compound rate. Compound tax rates are "
 "applied on top of other tax rates."
 msgstr "Bu bir bileşik faiz olup olmadığını seçin. Bileşik vergi oranları diğer vergi oranları üzerine uygulanır."
 
-#: includes/admin/settings/class-wc-settings-tax.php:264
+#: includes/admin/settings/class-wc-settings-tax.php:266
 msgid "Choose whether or not this tax rate also gets applied to shipping."
 msgstr "Bu vergi türünün kargo için uygulanıp uygulanmayacağını seçin."
 
-#: includes/admin/settings/class-wc-settings-tax.php:271
+#: includes/admin/settings/class-wc-settings-tax.php:273
 msgid "Insert row"
 msgstr "Satır Ekle"
 
-#: includes/admin/settings/class-wc-settings-tax.php:272
+#: includes/admin/settings/class-wc-settings-tax.php:274
 msgid "Remove selected row(s)"
 msgstr "Seçili Satırları Sil"
 
-#: includes/admin/settings/class-wc-settings-tax.php:288
+#: includes/admin/settings/class-wc-settings-tax.php:290
 msgid "Import CSV"
 msgstr "CSV İçe Aktar"
 
-#: includes/admin/settings/class-wc-settings-tax.php:374
+#: includes/admin/settings/class-wc-settings-tax.php:376
 msgid "No row(s) selected"
 msgstr "Hiç bir satır(lar) seçilmedi"
 
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Country Code"
 msgstr "Ülke Kodu"
 
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "State Code"
 msgstr "Eyalet Kodu"
 
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Rate %"
 msgstr "Oran %"
 
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Tax Name"
 msgstr "Vergi Adı"
 

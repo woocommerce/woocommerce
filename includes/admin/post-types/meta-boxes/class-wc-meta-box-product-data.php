@@ -1398,8 +1398,9 @@ class WC_Meta_Box_Product_Data {
 					update_post_meta( $variation_id, '_height', ( $variable_height[ $i ] === '' ) ? '' : wc_format_decimal( $variable_height[ $i ] ) );
 
 				// Stock handling
-				if ( isset($variable_stock[$i]) )
+				if ( isset( $variable_stock[$i] ) ) {
 					wc_update_product_stock( $variation_id, wc_clean( $variable_stock[ $i ] ) );
+				}
 
 				// Price handling
 				$regular_price 	= wc_format_decimal( $variable_regular_price[ $i ] );

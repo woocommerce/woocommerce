@@ -163,6 +163,11 @@ jQuery(document).ready(function($) {
 		} else {
 			$('div.payment_box').show();
 		}
+		if ( $(this).data('order_button_text') ) {
+			$('#place_order').val( $(this).data('order_button_text') );
+		} else {
+			$('#place_order').val( $('#place_order').data( 'value' ) );
+		}
 	})
 
 	// Trigger initial click

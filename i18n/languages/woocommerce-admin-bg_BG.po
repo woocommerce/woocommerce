@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-01-08 15:41:50+00:00\n"
-"PO-Revision-Date: 2014-01-10 10:01+0000\n"
+"POT-Creation-Date: 2014-01-23 12:27:56+00:00\n"
+"PO-Revision-Date: 2014-01-26 21:02+0000\n"
 "Last-Translator: Adrian Dimitrov\n"
 "Language-Team: Bulgarian (Bulgaria) (http://www.transifex.com/projects/p/woocommerce-core/language/bg_BG/)\n"
 "MIME-Version: 1.0\n"
@@ -781,8 +781,8 @@ msgstr "Адрес 2"
 #: includes/admin/class-wc-admin-profile.php:117
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:49
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:96
-#: includes/admin/settings/class-wc-settings-tax.php:254
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:256
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "City"
 msgstr "Град"
 
@@ -951,28 +951,28 @@ msgstr "Настройките ви са записани."
 msgid "The changes you made will be lost if you navigate away from this page."
 msgstr "Промените които правите ще бъдат изгубени ако излезете от текущата страница."
 
-#: includes/admin/class-wc-admin-settings.php:478
+#: includes/admin/class-wc-admin-settings.php:490
 msgid "Hard Crop?"
 msgstr "Изрязване?"
 
-#: includes/admin/class-wc-admin-settings.php:503
+#: includes/admin/class-wc-admin-settings.php:515
 msgid "Select a page&hellip;"
 msgstr "Избор страница&hellip;"
 
-#: includes/admin/class-wc-admin-settings.php:526
+#: includes/admin/class-wc-admin-settings.php:538
 msgid "Choose a country&hellip;"
 msgstr "Избор на държава&hellip;"
 
-#: includes/admin/class-wc-admin-settings.php:550
+#: includes/admin/class-wc-admin-settings.php:562
 msgid "Choose countries&hellip;"
 msgstr "Избор на държави&hellip;"
 
-#: includes/admin/class-wc-admin-settings.php:556
+#: includes/admin/class-wc-admin-settings.php:568
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:460
 msgid "Select all"
 msgstr "Избори всичко"
 
-#: includes/admin/class-wc-admin-settings.php:556
+#: includes/admin/class-wc-admin-settings.php:568
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:460
 msgid "Select none"
 msgstr "Никой"
@@ -1001,98 +1001,116 @@ msgstr "Сесиите са изчистени успешно"
 msgid "All missing WooCommerce pages was installed successfully."
 msgstr "Липсващите страници за WooCommerce бяха създадени успешно."
 
-#: includes/admin/class-wc-admin-status.php:138
+#: includes/admin/class-wc-admin-status.php:137
+msgid "Tax rates successfully deleted"
+msgstr "Таксите са изтрити успешно"
+
+#: includes/admin/class-wc-admin-status.php:146
 msgid "There was an error calling %s::%s"
 msgstr "Възникна грешка при извикването на %s::%s"
 
-#: includes/admin/class-wc-admin-status.php:141
+#: includes/admin/class-wc-admin-status.php:149
 msgid "There was an error calling %s"
 msgstr "Възникна грешка при извикването на %s"
 
-#: includes/admin/class-wc-admin-status.php:151
+#: includes/admin/class-wc-admin-status.php:159
 msgid "Your changes have been saved."
 msgstr "Вашите промени бяха записани."
 
-#: includes/admin/class-wc-admin-status.php:165
+#: includes/admin/class-wc-admin-status.php:173
 msgid "WC Transients"
 msgstr "WC временен кеш"
 
-#: includes/admin/class-wc-admin-status.php:166
+#: includes/admin/class-wc-admin-status.php:174
 msgid "Clear transients"
 msgstr "Изчистване на временния кеш"
 
-#: includes/admin/class-wc-admin-status.php:167
+#: includes/admin/class-wc-admin-status.php:175
 msgid "This tool will clear the product/shop transients cache."
 msgstr "Изтриване на продуктовия временен кеш."
 
-#: includes/admin/class-wc-admin-status.php:170
+#: includes/admin/class-wc-admin-status.php:178
 msgid "Expired Transients"
 msgstr "Изтекли кеширани обекти"
 
-#: includes/admin/class-wc-admin-status.php:171
+#: includes/admin/class-wc-admin-status.php:179
 msgid "Clear expired transients"
 msgstr "Изчистване на изтеклия временен кеш"
 
-#: includes/admin/class-wc-admin-status.php:172
+#: includes/admin/class-wc-admin-status.php:180
 msgid "This tool will clear ALL expired transients from Wordpress."
 msgstr "Този инструмент ще изчисти всички неактуални временно кеширани ресурси от Wordpress."
 
-#: includes/admin/class-wc-admin-status.php:175
+#: includes/admin/class-wc-admin-status.php:183
 msgid "Term counts"
 msgstr "Преброяване на търмовете"
 
-#: includes/admin/class-wc-admin-status.php:176
+#: includes/admin/class-wc-admin-status.php:184
 msgid "Recount terms"
 msgstr "Преброяване на термините"
 
-#: includes/admin/class-wc-admin-status.php:177
+#: includes/admin/class-wc-admin-status.php:185
 msgid ""
 "This tool will recount product terms - useful when changing your settings in"
 " a way which hides products from the catalog."
 msgstr "Този инструмент е полезен в случаите в които съответната категоризация не показва верен брой продукти под себе си, и след промяна на видимостта на продукти."
 
-#: includes/admin/class-wc-admin-status.php:180
+#: includes/admin/class-wc-admin-status.php:188
 msgid "Capabilities"
 msgstr "Позволения"
 
-#: includes/admin/class-wc-admin-status.php:181
+#: includes/admin/class-wc-admin-status.php:189
 msgid "Reset capabilities"
 msgstr "Нулиране на позволенията"
 
-#: includes/admin/class-wc-admin-status.php:182
+#: includes/admin/class-wc-admin-status.php:190
 msgid ""
 "This tool will reset the admin, customer and shop_manager roles to default. "
 "Use this if your users cannot access all of the WooCommerce admin pages."
 msgstr "Нулиране на администраторската, клиентската и мениджърската роли с настройки по подразбиране. Използвайте при проблем с достъпа до администраторската част на WooCommerce."
 
-#: includes/admin/class-wc-admin-status.php:185
+#: includes/admin/class-wc-admin-status.php:193
 msgid "Customer Sessions"
 msgstr "Сесии на клиенти"
 
-#: includes/admin/class-wc-admin-status.php:186
+#: includes/admin/class-wc-admin-status.php:194
 msgid "Clear all sessions"
 msgstr "Изтриване на всички сесии"
 
-#: includes/admin/class-wc-admin-status.php:187
+#: includes/admin/class-wc-admin-status.php:195
 msgid ""
 "<strong class=\"red\">Warning</strong> This tool will delete all customer "
 "session data from the database, including any current live carts."
 msgstr "<strong class=\"red\">Предупреждение</strong> Този инструмент ще изтрие всички клиентски сесии и колички от базата данни, включително тези на текуюите клиенти."
 
-#: includes/admin/class-wc-admin-status.php:190
+#: includes/admin/class-wc-admin-status.php:198
 #: includes/admin/views/html-notice-install.php:6
 msgid "Install WooCommerce Pages"
 msgstr "Създаване на WooCommerce системни страници"
 
-#: includes/admin/class-wc-admin-status.php:191
+#: includes/admin/class-wc-admin-status.php:199
 msgid "Install pages"
 msgstr "Инсталиране на страниците"
 
-#: includes/admin/class-wc-admin-status.php:192
+#: includes/admin/class-wc-admin-status.php:200
 msgid ""
 "<strong class=\"red\">Note</strong> This tool will install all the missing "
 "WooCommerce pages. Pages already defined and set up will not be replaced."
 msgstr "<strong class=\"red\">Важно</strong> Този инструмент ще създаде всички липсващи на WooCommerce страници. Страниците които вече съществуват и се използват, няма да бъдат презаписани."
+
+#: includes/admin/class-wc-admin-status.php:203
+msgid "Delete all WooCommerce tax rates"
+msgstr "Изтриване на всички WooCommerce такси"
+
+#: includes/admin/class-wc-admin-status.php:204
+msgid "Delete ALL tax rates"
+msgstr "Изтриване на ВСИЧКИ такси"
+
+#: includes/admin/class-wc-admin-status.php:205
+msgid ""
+"<strong class=\"red\">Note</strong> This option will delete ALL of your tax "
+"rates, use with caution."
+msgstr "<strong class=\"red\">Важно</strong> използвайте с повишено внимание. Тази опция ще изтрие ВСИЧКИ такси."
 
 #: includes/admin/class-wc-admin-taxonomies.php:89
 #: includes/admin/class-wc-admin-taxonomies.php:177
@@ -1350,8 +1368,8 @@ msgstr "PayPal PDT поддръжка"
 
 #: includes/admin/class-wc-admin-welcome.php:312
 msgid ""
-"PayPal Data Transfer (PDT) is an alterntative for PayPal IPN which sends "
-"back the status of an order when a customer returns from PayPal."
+"PayPal Data Transfer (PDT) is an alternative for PayPal IPN which sends back"
+" the status of an order when a customer returns from PayPal."
 msgstr "PayPal Data Transfer (PDT) е алтернатива на PayPal IPN, но с възможност за обратен отговор когато клиенът напусне страницата на PayPal и се върне отново в магазина."
 
 #: includes/admin/class-wc-admin-welcome.php:316
@@ -2207,7 +2225,7 @@ msgid ""
 "email for guests, and user ID for logged in users."
 msgstr "Колко пъти да се използва този купон за всеки индивидуален потребител. Използвайте email от данните за фактура и ID на потребител за логнатите."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:224
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:226
 msgid ""
 "Coupon code already exists - customers will use the latest coupon with this "
 "code."
@@ -2390,8 +2408,8 @@ msgstr "Кол."
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:46
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:111
 #: includes/admin/settings/class-wc-settings-tax.php:25
-#: includes/admin/settings/class-wc-settings-tax.php:548
-#: includes/admin/settings/class-wc-settings-tax.php:641
+#: includes/admin/settings/class-wc-settings-tax.php:550
+#: includes/admin/settings/class-wc-settings-tax.php:643
 msgid "Tax"
 msgstr "Такса"
 
@@ -2462,8 +2480,8 @@ msgstr "Добавяне"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:62
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:94
 #: includes/admin/settings/class-wc-settings-shipping.php:25
-#: includes/admin/settings/class-wc-settings-tax.php:264
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:266
+#: includes/admin/settings/class-wc-settings-tax.php:383
 #: includes/admin/views/html-admin-page-addons.php:13
 msgid "Shipping"
 msgstr "Доставка"
@@ -2702,14 +2720,14 @@ msgstr "Нищо"
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:39
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:122
 #: includes/admin/settings/class-wc-settings-tax.php:122
-#: includes/admin/settings/class-wc-settings-tax.php:241
+#: includes/admin/settings/class-wc-settings-tax.php:243
 #: includes/admin/views/html-bulk-edit-product.php:83
 #: includes/admin/views/html-quick-edit-product.php:61
 msgid "Standard"
 msgstr "Стандарт"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:261
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:383
 #: includes/admin/views/html-bulk-edit-product.php:77
 #: includes/admin/views/html-quick-edit-product.php:56
 msgid "Tax Class"
@@ -3228,11 +3246,11 @@ msgid ""
 "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr "Задайте тази опция ако продуктът не е доставен или няма такса за доставка."
 
-#: includes/admin/reports/class-wc-admin-report.php:389
+#: includes/admin/reports/class-wc-admin-report.php:390
 msgid "Sold %s worth in the last %d days"
 msgstr "Продажби на стойност %s за последните %d дни"
 
-#: includes/admin/reports/class-wc-admin-report.php:391
+#: includes/admin/reports/class-wc-admin-report.php:392
 msgid "Sold 1 item in the last %d days"
 msgid_plural "Sold %d items in the last %d days"
 msgstr[0] "Продаден е 1 продукт за последните %d дни"
@@ -3326,7 +3344,7 @@ msgstr "Най-намаляни"
 #: includes/admin/reports/class-wc-report-sales-by-product.php:326
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:29
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:29
-#: includes/admin/settings/class-wc-settings-tax.php:287
+#: includes/admin/settings/class-wc-settings-tax.php:289
 msgid "Export CSV"
 msgstr "Експорт към CSV"
 
@@ -4728,122 +4746,122 @@ msgstr "Представяне на общо"
 msgid "Itemized"
 msgstr "По продукти"
 
-#: includes/admin/settings/class-wc-settings-tax.php:241
+#: includes/admin/settings/class-wc-settings-tax.php:243
 msgid "Tax Rates for the \"%s\" Class"
 msgstr "Ставка на таксата за клас \"%s\""
 
-#: includes/admin/settings/class-wc-settings-tax.php:242
+#: includes/admin/settings/class-wc-settings-tax.php:244
 msgid ""
 "Define tax rates for countries and states below. <a href=\"%s\">See here</a>"
 " for available alpha-2 country codes."
 msgstr "Задаване на ставки за таксите за страни и държави. <a href=\"%s\">Вижте тук</a> дали е наличен двусимволен символен държавен код."
 
-#: includes/admin/settings/class-wc-settings-tax.php:248
+#: includes/admin/settings/class-wc-settings-tax.php:250
 msgid "Country&nbsp;Code"
 msgstr "Държава&nbsp;Код"
 
-#: includes/admin/settings/class-wc-settings-tax.php:248
+#: includes/admin/settings/class-wc-settings-tax.php:250
 msgid "A 2 digit country code, e.g. US. Leave blank to apply to all."
 msgstr "2-символен държавен код, пример. BG Оставете празно за прилагане към всички."
 
-#: includes/admin/settings/class-wc-settings-tax.php:250
+#: includes/admin/settings/class-wc-settings-tax.php:252
 msgid "State&nbsp;Code"
 msgstr "Област&nbsp;Код"
 
-#: includes/admin/settings/class-wc-settings-tax.php:250
+#: includes/admin/settings/class-wc-settings-tax.php:252
 msgid "A 2 digit state code, e.g. AL. Leave blank to apply to all."
 msgstr "2-символен код на областта, пример. 01 Оставете празно за прилагане към всички."
 
-#: includes/admin/settings/class-wc-settings-tax.php:252
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:254
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "ZIP/Postcode"
 msgstr "Пощенски код/ZIP"
 
-#: includes/admin/settings/class-wc-settings-tax.php:252
+#: includes/admin/settings/class-wc-settings-tax.php:254
 msgid ""
 "Postcode for this rule. Semi-colon (;) separate multiple values. Leave blank"
 " to apply to all areas. Wildcards (*) can be used. Ranges for numeric "
 "postcodes (e.g. 12345-12350) will be expanded into individual postcodes."
 msgstr "Пощенски код за това правило. За разделител се използва точка и запетая (;). Оставете празно за прилагане към всички зони. Позволени са и шаблоните. Граници от типа (12345-12350) ще бъдат преобразувани в индивидуални пощенски кодове."
 
-#: includes/admin/settings/class-wc-settings-tax.php:254
+#: includes/admin/settings/class-wc-settings-tax.php:256
 msgid ""
 "Cities for this rule. Semi-colon (;) separate multiple values. Leave blank "
 "to apply to all cities."
 msgstr "Градове за това правило. За разделител се използва точка и запетая (;). Оставете празно за прилагане към всички градове."
 
-#: includes/admin/settings/class-wc-settings-tax.php:256
+#: includes/admin/settings/class-wc-settings-tax.php:258
 msgid "Rate&nbsp;%"
 msgstr "Оценка&nbsp;%"
 
-#: includes/admin/settings/class-wc-settings-tax.php:256
+#: includes/admin/settings/class-wc-settings-tax.php:258
 msgid "Enter a tax rate (percentage) to 4 decimal places."
 msgstr "Въведете ставка за таксата (процентно изражение) до 4 знака след десетичната точка."
 
-#: includes/admin/settings/class-wc-settings-tax.php:258
+#: includes/admin/settings/class-wc-settings-tax.php:260
 msgid "Tax&nbsp;Name"
 msgstr "Такса&nbsp;Име"
 
-#: includes/admin/settings/class-wc-settings-tax.php:258
+#: includes/admin/settings/class-wc-settings-tax.php:260
 msgid "Enter a name for this tax rate."
 msgstr "Въведете име на тази такса."
 
-#: includes/admin/settings/class-wc-settings-tax.php:260
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:262
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Priority"
 msgstr "Приоритет"
 
-#: includes/admin/settings/class-wc-settings-tax.php:260
+#: includes/admin/settings/class-wc-settings-tax.php:262
 msgid ""
 "Choose a priority for this tax rate. Only 1 matching rate per priority will "
 "be used. To define multiple tax rates for a single area you need to specify "
 "a different priority per rate."
 msgstr "Изберете приоритет за тази такса. Само 1 съвпадение за приоритет ще бъде използвано. За да зададете повече от една такса за една зона е нужно да определите различни приоритети за ставките."
 
-#: includes/admin/settings/class-wc-settings-tax.php:262
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:264
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Compound"
 msgstr "Обединяване"
 
-#: includes/admin/settings/class-wc-settings-tax.php:262
+#: includes/admin/settings/class-wc-settings-tax.php:264
 msgid ""
 "Choose whether or not this is a compound rate. Compound tax rates are "
 "applied on top of other tax rates."
 msgstr "Избор дали ставката да бъде обединена. Обединените ставки на таксите се прилагат преди всички други такси."
 
-#: includes/admin/settings/class-wc-settings-tax.php:264
+#: includes/admin/settings/class-wc-settings-tax.php:266
 msgid "Choose whether or not this tax rate also gets applied to shipping."
 msgstr "Избор дали да се използва и прилага ставка за такса към доставката."
 
-#: includes/admin/settings/class-wc-settings-tax.php:271
+#: includes/admin/settings/class-wc-settings-tax.php:273
 msgid "Insert row"
 msgstr "Вмъкване на ред"
 
-#: includes/admin/settings/class-wc-settings-tax.php:272
+#: includes/admin/settings/class-wc-settings-tax.php:274
 msgid "Remove selected row(s)"
 msgstr "Отмяна на избраните редове"
 
-#: includes/admin/settings/class-wc-settings-tax.php:288
+#: includes/admin/settings/class-wc-settings-tax.php:290
 msgid "Import CSV"
 msgstr "Вмъкване от CSV"
 
-#: includes/admin/settings/class-wc-settings-tax.php:374
+#: includes/admin/settings/class-wc-settings-tax.php:376
 msgid "No row(s) selected"
 msgstr "Няма избрани редове"
 
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Country Code"
 msgstr "Държавен код"
 
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "State Code"
 msgstr "Код на област"
 
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Rate %"
 msgstr "Оценка %"
 
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Tax Name"
 msgstr "Име на таксономия"
 

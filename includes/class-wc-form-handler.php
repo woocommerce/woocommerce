@@ -227,7 +227,7 @@ class WC_Form_Handler {
 			ob_start();
 
 			// Pay for existing order
-			$order_key 	= urldecode( $_GET['key'] );
+			$order_key 	= $_GET['key'];
 			$order_id 	= absint( $wp->query_vars['order-pay'] );
 			$order 		= new WC_Order( $order_id );
 
@@ -465,12 +465,12 @@ class WC_Form_Handler {
 	public function cancel_order() {
 		if ( isset( $_GET['cancel_order'] ) && isset( $_GET['order'] ) && isset( $_GET['order_id'] ) ) {
 
-			$order_key        = urldecode( $_GET['order'] );
+			$order_key        = $_GET['order'];
 			$order_id         = absint( $_GET['order_id'] );
 			$order            = new WC_Order( $order_id );
 			$user_can_cancel  = current_user_can( 'cancel_order', $order_id );
 			$order_can_cancel = in_array( $order->status, apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ) ) );
-			$redirect         = urldecode( $_GET['redirect'] );
+			$redirect         = $_GET['redirect'];
 
 			if ( $user_can_cancel && $order_can_cancel && $order->id == $order_id && $order->order_key == $order_key && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) ) {
 

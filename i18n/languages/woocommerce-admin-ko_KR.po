@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-01-08 15:41:50+00:00\n"
-"PO-Revision-Date: 2014-01-10 13:30+0000\n"
+"POT-Creation-Date: 2014-01-23 12:27:56+00:00\n"
+"PO-Revision-Date: 2014-01-26 03:17+0000\n"
 "Last-Translator: martian36 <martian36@naver.com>\n"
 "Language-Team: Korean (Korea) (http://www.transifex.com/projects/p/woocommerce-core/language/ko_KR/)\n"
 "MIME-Version: 1.0\n"
@@ -779,8 +779,8 @@ msgstr "주소 2"
 #: includes/admin/class-wc-admin-profile.php:117
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:49
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:96
-#: includes/admin/settings/class-wc-settings-tax.php:254
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:256
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "City"
 msgstr "도시"
 
@@ -949,28 +949,28 @@ msgstr "설정이 저장됐습니다."
 msgid "The changes you made will be lost if you navigate away from this page."
 msgstr "이 페이지를 떠나면 변경사항을 잃게 됩니다."
 
-#: includes/admin/class-wc-admin-settings.php:478
+#: includes/admin/class-wc-admin-settings.php:490
 msgid "Hard Crop?"
 msgstr "원본 비율 무시"
 
-#: includes/admin/class-wc-admin-settings.php:503
+#: includes/admin/class-wc-admin-settings.php:515
 msgid "Select a page&hellip;"
 msgstr "페이지를 선택하세요&hellip;"
 
-#: includes/admin/class-wc-admin-settings.php:526
+#: includes/admin/class-wc-admin-settings.php:538
 msgid "Choose a country&hellip;"
 msgstr "국가를 선택하세요&hellip;"
 
-#: includes/admin/class-wc-admin-settings.php:550
+#: includes/admin/class-wc-admin-settings.php:562
 msgid "Choose countries&hellip;"
 msgstr "국가를 선택하세요&hellip;"
 
-#: includes/admin/class-wc-admin-settings.php:556
+#: includes/admin/class-wc-admin-settings.php:568
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:460
 msgid "Select all"
 msgstr "모두 선택"
 
-#: includes/admin/class-wc-admin-settings.php:556
+#: includes/admin/class-wc-admin-settings.php:568
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:460
 msgid "Select none"
 msgstr "아무것도 선택하지 않음"
@@ -999,98 +999,116 @@ msgstr "세션이 성공적으로 제거됐습니다"
 msgid "All missing WooCommerce pages was installed successfully."
 msgstr "모든 사라진 우커머스 페이지가 성공적으로 설치됐습니다."
 
-#: includes/admin/class-wc-admin-status.php:138
+#: includes/admin/class-wc-admin-status.php:137
+msgid "Tax rates successfully deleted"
+msgstr "세율 삭제 성공"
+
+#: includes/admin/class-wc-admin-status.php:146
 msgid "There was an error calling %s::%s"
 msgstr "%s를 부르는데 에러가 발생했습니다: %s"
 
-#: includes/admin/class-wc-admin-status.php:141
+#: includes/admin/class-wc-admin-status.php:149
 msgid "There was an error calling %s"
 msgstr "%s를 부르는데 에러가 발생했습니다"
 
-#: includes/admin/class-wc-admin-status.php:151
+#: includes/admin/class-wc-admin-status.php:159
 msgid "Your changes have been saved."
 msgstr "변경 사항이 저장됐습니다."
 
-#: includes/admin/class-wc-admin-status.php:165
+#: includes/admin/class-wc-admin-status.php:173
 msgid "WC Transients"
 msgstr "우커머스 과도 상태"
 
-#: includes/admin/class-wc-admin-status.php:166
+#: includes/admin/class-wc-admin-status.php:174
 msgid "Clear transients"
 msgstr "과도 상태 제거하기"
 
-#: includes/admin/class-wc-admin-status.php:167
+#: includes/admin/class-wc-admin-status.php:175
 msgid "This tool will clear the product/shop transients cache."
 msgstr "이 도구는 상품/상점 과도 상태 캐시를 제거합니다."
 
-#: includes/admin/class-wc-admin-status.php:170
+#: includes/admin/class-wc-admin-status.php:178
 msgid "Expired Transients"
 msgstr "만료된 과도 상태"
 
-#: includes/admin/class-wc-admin-status.php:171
+#: includes/admin/class-wc-admin-status.php:179
 msgid "Clear expired transients"
 msgstr "만료된 과도 상태 제거하기"
 
-#: includes/admin/class-wc-admin-status.php:172
+#: includes/admin/class-wc-admin-status.php:180
 msgid "This tool will clear ALL expired transients from Wordpress."
 msgstr "이 도구는 모든 만료된 과도 상태를 워드프레스에서 제거합니다."
 
-#: includes/admin/class-wc-admin-status.php:175
+#: includes/admin/class-wc-admin-status.php:183
 msgid "Term counts"
 msgstr "용어 계산"
 
-#: includes/admin/class-wc-admin-status.php:176
+#: includes/admin/class-wc-admin-status.php:184
 msgid "Recount terms"
 msgstr "용어 재계산"
 
-#: includes/admin/class-wc-admin-status.php:177
+#: includes/admin/class-wc-admin-status.php:185
 msgid ""
 "This tool will recount product terms - useful when changing your settings in"
 " a way which hides products from the catalog."
 msgstr "이 도구는 상품 용어를 재계산합니다 - 카탈로그에서 상품을 감추는 식으로 설정을 변경할 때 유용합니다."
 
-#: includes/admin/class-wc-admin-status.php:180
+#: includes/admin/class-wc-admin-status.php:188
 msgid "Capabilities"
 msgstr "권한"
 
-#: includes/admin/class-wc-admin-status.php:181
+#: includes/admin/class-wc-admin-status.php:189
 msgid "Reset capabilities"
 msgstr "권한 초기화"
 
-#: includes/admin/class-wc-admin-status.php:182
+#: includes/admin/class-wc-admin-status.php:190
 msgid ""
 "This tool will reset the admin, customer and shop_manager roles to default. "
 "Use this if your users cannot access all of the WooCommerce admin pages."
 msgstr "이 툴은 관리자, 고객, 상점 관리자 역할을 기본으로 초기화합니다. 사용자가 우커머스 관리자 페이지의 모든 것에 접근이 안될 경우 이것을 사용하세요."
 
-#: includes/admin/class-wc-admin-status.php:185
+#: includes/admin/class-wc-admin-status.php:193
 msgid "Customer Sessions"
 msgstr "고객 세션"
 
-#: includes/admin/class-wc-admin-status.php:186
+#: includes/admin/class-wc-admin-status.php:194
 msgid "Clear all sessions"
 msgstr "모든 세션 제거하기"
 
-#: includes/admin/class-wc-admin-status.php:187
+#: includes/admin/class-wc-admin-status.php:195
 msgid ""
 "<strong class=\"red\">Warning</strong> This tool will delete all customer "
 "session data from the database, including any current live carts."
 msgstr "<strong class=\"red\">경고</strong> 이 도구는 현재 남아있는 카트를 포함하여 데이터베이스에서 고객의 모든 세션 데이터를 제거합니다."
 
-#: includes/admin/class-wc-admin-status.php:190
+#: includes/admin/class-wc-admin-status.php:198
 #: includes/admin/views/html-notice-install.php:6
 msgid "Install WooCommerce Pages"
 msgstr "우커머스 페이지 설치하기"
 
-#: includes/admin/class-wc-admin-status.php:191
+#: includes/admin/class-wc-admin-status.php:199
 msgid "Install pages"
 msgstr "페이지 설치"
 
-#: includes/admin/class-wc-admin-status.php:192
+#: includes/admin/class-wc-admin-status.php:200
 msgid ""
 "<strong class=\"red\">Note</strong> This tool will install all the missing "
 "WooCommerce pages. Pages already defined and set up will not be replaced."
 msgstr "<strong class=\"red\">주의</strong> 이 도구는 모든 사라진 우커머스 페이지를 설치합니다. 페이지는 이미 정의돼있고 설정은 교체되지 않습니다."
+
+#: includes/admin/class-wc-admin-status.php:203
+msgid "Delete all WooCommerce tax rates"
+msgstr "모든 우커머스 세율 삭제하기"
+
+#: includes/admin/class-wc-admin-status.php:204
+msgid "Delete ALL tax rates"
+msgstr "모든 세율 삭제하기"
+
+#: includes/admin/class-wc-admin-status.php:205
+msgid ""
+"<strong class=\"red\">Note</strong> This option will delete ALL of your tax "
+"rates, use with caution."
+msgstr "<strong class=\"red\">주의</strong> 이 옵션은 모든 세율을 삭제하니 주의하세요."
 
 #: includes/admin/class-wc-admin-taxonomies.php:89
 #: includes/admin/class-wc-admin-taxonomies.php:177
@@ -1348,9 +1366,9 @@ msgstr "PayPal PDT 지원"
 
 #: includes/admin/class-wc-admin-welcome.php:312
 msgid ""
-"PayPal Data Transfer (PDT) is an alterntative for PayPal IPN which sends "
-"back the status of an order when a customer returns from PayPal."
-msgstr "PayPal Data Transfer (PDT)는 PayPal IPN의 대체 수단이며 고객이 페이팔로부터 돌아왔을 때 주문 상태를 다시 돌려보냅니다. "
+"PayPal Data Transfer (PDT) is an alternative for PayPal IPN which sends back"
+" the status of an order when a customer returns from PayPal."
+msgstr "PayPal Data Transfer (PDT)는 PayPal IPN의 대체 수단으로 고객이 PayPal에서 되돌아올 때 주문 상태를 돌려보냅니다."
 
 #: includes/admin/class-wc-admin-welcome.php:316
 msgid "Stylesheet separation"
@@ -2202,7 +2220,7 @@ msgid ""
 "email for guests, and user ID for logged in users."
 msgstr "이 쿠폰이 개별 사용자에게 사용될 수 있는 횟수. 비회원에 대해서는 청주 이메일을 사용하고 로그인 사용자에게는 사용자 ID를 사용합니다."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:224
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:226
 msgid ""
 "Coupon code already exists - customers will use the latest coupon with this "
 "code."
@@ -2385,8 +2403,8 @@ msgstr "수량"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:46
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:111
 #: includes/admin/settings/class-wc-settings-tax.php:25
-#: includes/admin/settings/class-wc-settings-tax.php:548
-#: includes/admin/settings/class-wc-settings-tax.php:641
+#: includes/admin/settings/class-wc-settings-tax.php:550
+#: includes/admin/settings/class-wc-settings-tax.php:643
 msgid "Tax"
 msgstr "세금"
 
@@ -2457,8 +2475,8 @@ msgstr "추가하기"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:62
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:94
 #: includes/admin/settings/class-wc-settings-shipping.php:25
-#: includes/admin/settings/class-wc-settings-tax.php:264
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:266
+#: includes/admin/settings/class-wc-settings-tax.php:383
 #: includes/admin/views/html-admin-page-addons.php:13
 msgid "Shipping"
 msgstr "배송"
@@ -2697,14 +2715,14 @@ msgstr "없음"
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:39
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:122
 #: includes/admin/settings/class-wc-settings-tax.php:122
-#: includes/admin/settings/class-wc-settings-tax.php:241
+#: includes/admin/settings/class-wc-settings-tax.php:243
 #: includes/admin/views/html-bulk-edit-product.php:83
 #: includes/admin/views/html-quick-edit-product.php:61
 msgid "Standard"
 msgstr "표준"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:261
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:383
 #: includes/admin/views/html-bulk-edit-product.php:77
 #: includes/admin/views/html-quick-edit-product.php:56
 msgid "Tax Class"
@@ -3222,11 +3240,11 @@ msgid ""
 "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr "상품이 배송되지 않거나 배송 비용이 없는 경우 이 옵션을 활성화하세요."
 
-#: includes/admin/reports/class-wc-admin-report.php:389
+#: includes/admin/reports/class-wc-admin-report.php:390
 msgid "Sold %s worth in the last %d days"
 msgstr "최근 %d 일 %s 만큼 판매됨"
 
-#: includes/admin/reports/class-wc-admin-report.php:391
+#: includes/admin/reports/class-wc-admin-report.php:392
 msgid "Sold 1 item in the last %d days"
 msgid_plural "Sold %d items in the last %d days"
 msgstr[0] "최근 %d 일 %s 아이템 판매됨"
@@ -3319,7 +3337,7 @@ msgstr "가장 많은 할인"
 #: includes/admin/reports/class-wc-report-sales-by-product.php:326
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:29
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:29
-#: includes/admin/settings/class-wc-settings-tax.php:287
+#: includes/admin/settings/class-wc-settings-tax.php:289
 msgid "Export CSV"
 msgstr "CSV 내보내기"
 
@@ -4720,122 +4738,122 @@ msgstr "단일 총계로"
 msgid "Itemized"
 msgstr "아이템화"
 
-#: includes/admin/settings/class-wc-settings-tax.php:241
+#: includes/admin/settings/class-wc-settings-tax.php:243
 msgid "Tax Rates for the \"%s\" Class"
 msgstr "\"%s\" 클래스에 대한 세율"
 
-#: includes/admin/settings/class-wc-settings-tax.php:242
+#: includes/admin/settings/class-wc-settings-tax.php:244
 msgid ""
 "Define tax rates for countries and states below. <a href=\"%s\">See here</a>"
 " for available alpha-2 country codes."
 msgstr "아래에서 국가와 주에 대한 세율을 정의하세요. 가능한 알파-2 국가 코드는 <a href=\"%s\">여기를 보세요</a>."
 
-#: includes/admin/settings/class-wc-settings-tax.php:248
+#: includes/admin/settings/class-wc-settings-tax.php:250
 msgid "Country&nbsp;Code"
 msgstr "국가&nbsp;코드"
 
-#: includes/admin/settings/class-wc-settings-tax.php:248
+#: includes/admin/settings/class-wc-settings-tax.php:250
 msgid "A 2 digit country code, e.g. US. Leave blank to apply to all."
 msgstr "두자리 숫자의 국가 코드, 예: US. 모두에 적용하려면 비워두세요."
 
-#: includes/admin/settings/class-wc-settings-tax.php:250
+#: includes/admin/settings/class-wc-settings-tax.php:252
 msgid "State&nbsp;Code"
 msgstr "주&nbsp;코드"
 
-#: includes/admin/settings/class-wc-settings-tax.php:250
+#: includes/admin/settings/class-wc-settings-tax.php:252
 msgid "A 2 digit state code, e.g. AL. Leave blank to apply to all."
 msgstr "두자리의 주 코드. 예: AL. 모두에 적용하려면 비워두세요."
 
-#: includes/admin/settings/class-wc-settings-tax.php:252
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:254
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "ZIP/Postcode"
 msgstr "우편 번호"
 
-#: includes/admin/settings/class-wc-settings-tax.php:252
+#: includes/admin/settings/class-wc-settings-tax.php:254
 msgid ""
 "Postcode for this rule. Semi-colon (;) separate multiple values. Leave blank"
 " to apply to all areas. Wildcards (*) can be used. Ranges for numeric "
 "postcodes (e.g. 12345-12350) will be expanded into individual postcodes."
 msgstr "이 규칙에 대한 우편 코드. 다중 값은 세미콜론(;)으로 분리. 모든 지역에 적용하려면 비워두세요. 와일드카드(*)를 사용할 수 있습니다. 숫자 우편 코드 범위 (예 12345-12350)는 개별 우편 코드로 확장됩니다."
 
-#: includes/admin/settings/class-wc-settings-tax.php:254
+#: includes/admin/settings/class-wc-settings-tax.php:256
 msgid ""
 "Cities for this rule. Semi-colon (;) separate multiple values. Leave blank "
 "to apply to all cities."
 msgstr "이 규칙에 대한 도시. 다중 값은 세미콜론(;)으로 분리. 모든 도시에 적용하려면 비워두세요."
 
-#: includes/admin/settings/class-wc-settings-tax.php:256
+#: includes/admin/settings/class-wc-settings-tax.php:258
 msgid "Rate&nbsp;%"
 msgstr "비율&nbsp;%"
 
-#: includes/admin/settings/class-wc-settings-tax.php:256
+#: includes/admin/settings/class-wc-settings-tax.php:258
 msgid "Enter a tax rate (percentage) to 4 decimal places."
 msgstr "세율(퍼센트)을 입력하세요. (소숫점 4자리까지 가능)"
 
-#: includes/admin/settings/class-wc-settings-tax.php:258
+#: includes/admin/settings/class-wc-settings-tax.php:260
 msgid "Tax&nbsp;Name"
 msgstr "세금&nbsp;이름"
 
-#: includes/admin/settings/class-wc-settings-tax.php:258
+#: includes/admin/settings/class-wc-settings-tax.php:260
 msgid "Enter a name for this tax rate."
 msgstr "이 세율의 이름을 입력하세요."
 
-#: includes/admin/settings/class-wc-settings-tax.php:260
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:262
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Priority"
 msgstr "우선순위"
 
-#: includes/admin/settings/class-wc-settings-tax.php:260
+#: includes/admin/settings/class-wc-settings-tax.php:262
 msgid ""
 "Choose a priority for this tax rate. Only 1 matching rate per priority will "
 "be used. To define multiple tax rates for a single area you need to specify "
 "a different priority per rate."
 msgstr "이 세율에 대해 우선 순위를 선택하세요. 우선 순위당 하나의 일치하는 세율만 사용됩니다. 단일 영역에 대해 다중 세율을 정의하려면 세율당 다른 우선 순위를 특정해야합니다."
 
-#: includes/admin/settings/class-wc-settings-tax.php:262
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:264
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Compound"
 msgstr "복합"
 
-#: includes/admin/settings/class-wc-settings-tax.php:262
+#: includes/admin/settings/class-wc-settings-tax.php:264
 msgid ""
 "Choose whether or not this is a compound rate. Compound tax rates are "
 "applied on top of other tax rates."
 msgstr "이것이 복합 세율인지 선택하세요. 복합 세율은 다른 세율의 상위에 적용됩니다."
 
-#: includes/admin/settings/class-wc-settings-tax.php:264
+#: includes/admin/settings/class-wc-settings-tax.php:266
 msgid "Choose whether or not this tax rate also gets applied to shipping."
 msgstr "이 세율이 배송에도 적용되는지 선택하세요."
 
-#: includes/admin/settings/class-wc-settings-tax.php:271
+#: includes/admin/settings/class-wc-settings-tax.php:273
 msgid "Insert row"
 msgstr "행 추가하기"
 
-#: includes/admin/settings/class-wc-settings-tax.php:272
+#: includes/admin/settings/class-wc-settings-tax.php:274
 msgid "Remove selected row(s)"
 msgstr "선택한 행 제거하기"
 
-#: includes/admin/settings/class-wc-settings-tax.php:288
+#: includes/admin/settings/class-wc-settings-tax.php:290
 msgid "Import CSV"
 msgstr "CSV 가져오기"
 
-#: includes/admin/settings/class-wc-settings-tax.php:374
+#: includes/admin/settings/class-wc-settings-tax.php:376
 msgid "No row(s) selected"
 msgstr "행이 선택되지 않았습니다"
 
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Country Code"
 msgstr "국가 코드"
 
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "State Code"
 msgstr "주 코드"
 
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Rate %"
 msgstr "비율 %"
 
-#: includes/admin/settings/class-wc-settings-tax.php:381
+#: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Tax Name"
 msgstr "세금 이름"
 

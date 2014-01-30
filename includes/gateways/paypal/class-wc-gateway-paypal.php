@@ -25,13 +25,14 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function __construct() {
 
-		$this->id           = 'paypal';
-		$this->icon         = apply_filters( 'woocommerce_paypal_icon', WC()->plugin_url() . '/assets/images/icons/paypal.png' );
-		$this->has_fields   = false;
-		$this->liveurl      = 'https://www.paypal.com/cgi-bin/webscr';
-		$this->testurl      = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
-		$this->method_title = __( 'PayPal', 'woocommerce' );
-		$this->notify_url   = str_replace( 'https:', 'http:', add_query_arg( 'wc-api', 'WC_Gateway_Paypal', home_url( '/' ) ) );
+		$this->id                = 'paypal';
+		$this->icon              = apply_filters( 'woocommerce_paypal_icon', WC()->plugin_url() . '/assets/images/icons/paypal.png' );
+		$this->has_fields        = false;
+		$this->order_button_text = __( 'Proceed to PayPal', 'woocommerce' );
+		$this->liveurl           = 'https://www.paypal.com/cgi-bin/webscr';
+		$this->testurl           = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
+		$this->method_title      = __( 'PayPal', 'woocommerce' );
+		$this->notify_url        = str_replace( 'https:', 'http:', add_query_arg( 'wc-api', 'WC_Gateway_Paypal', home_url( '/' ) ) );
 
 		// Load the settings.
 		$this->init_form_fields();
@@ -530,7 +531,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return void
 	 */
 	function receipt_page( $order ) {
-
 		echo '<p>' . __( 'Thank you - your order is now pending payment. You should be automatically redirected to PayPal to make payment.', 'woocommerce' ) . '</p>';
 
 		echo $this->generate_paypal_form( $order );
@@ -539,7 +539,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Check PayPal IPN validity
 	 **/
-	function check_ipn_request_is_valid() {
+	function check_ipn_request_is_valid( $ipn_response ) {
 
 		// Get url
 		if ( 'yes' == $this->testmode ) {
@@ -553,12 +553,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		// Get recieved values from post data
-		$received_values = array( 'cmd' => '_notify-validate' );
-		$received_values += stripslashes_deep( $_POST );
+		$validate_ipn = array( 'cmd' => '_notify-validate' );
+		$validate_ipn += stripslashes_deep( $ipn_response );
 
 		// Send back post vars to paypal
 		$params = array(
-			'body' 			=> $received_values,
+			'body' 			=> $validate_ipn,
 			'sslverify' 	=> false,
 			'timeout' 		=> 60,
 			'httpversion'   => '1.1',
@@ -607,11 +607,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		@ob_clean();
 
-		if ( ! empty( $_POST ) && $this->check_ipn_request_is_valid() ) {
+		$ipn_response = ! empty( $_POST ) ? $_POST : false;
+
+		if ( $ipn_response && $this->check_ipn_request_is_valid( $ipn_response ) ) {
 
 			header( 'HTTP/1.1 200 OK' );
 
-			do_action( "valid-paypal-standard-ipn-request", $_POST );
+			do_action( "valid-paypal-standard-ipn-request", $ipn_response );
 
 		} else {
 
@@ -669,6 +671,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 					// Check valid txn_type
 					$accepted_types = array( 'cart', 'instant', 'express_checkout', 'web_accept', 'masspay', 'send_money' );
+
 					if ( ! in_array( $posted['txn_type'], $accepted_types ) ) {
 						if ( 'yes' == $this->debug ) {
 							$this->log->add( 'paypal', 'Aborting, Invalid type:' . $posted['txn_type'] );
@@ -676,16 +679,25 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 						exit;
 					}
 
-					// Validate Amount
-					if ( $order->get_total() != $posted['mc_gross'] ) {
+					// Validate currency
+					if ( $order->get_order_currency() != $posted['mc_currency'] ) {
+						if ( 'yes' == $this->debug ) {
+							$this->log->add( 'paypal', 'Payment error: Currencies do not match (code ' . $posted['mc_currency'] . ')' );
+						}
 
+						// Put this order on-hold for manual checking
+						$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal currencies do not match (code %s).', 'woocommerce' ), $posted['mc_currency'] ) );
+						exit;
+					}
+
+					// Validate amount
+					if ( $order->get_total() != $posted['mc_gross'] ) {
 						if ( 'yes' == $this->debug ) {
 							$this->log->add( 'paypal', 'Payment error: Amounts do not match (gross ' . $posted['mc_gross'] . ')' );
 						}
 
 						// Put this order on-hold for manual checking
 						$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal amounts do not match (gross %s).', 'woocommerce' ), $posted['mc_gross'] ) );
-
 						exit;
 					}
 
@@ -703,19 +715,19 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 					 // Store PP Details
 					if ( ! empty( $posted['payer_email'] ) ) {
-						update_post_meta( $order->id, 'Payer PayPal address', $posted['payer_email'] );
+						update_post_meta( $order->id, 'Payer PayPal address', wc_clean( $posted['payer_email'] ) );
 					}
 					if ( ! empty( $posted['txn_id'] ) ) {
-						update_post_meta( $order->id, 'Transaction ID', $posted['txn_id'] );
+						update_post_meta( $order->id, 'Transaction ID', wc_clean( $posted['txn_id'] ) );
 					}
 					if ( ! empty( $posted['first_name'] ) ) {
-						update_post_meta( $order->id, 'Payer first name', $posted['first_name'] );
+						update_post_meta( $order->id, 'Payer first name', wc_clean( $posted['first_name'] ) );
 					}
 					if ( ! empty( $posted['last_name'] ) ) {
-						update_post_meta( $order->id, 'Payer last name', $posted['last_name'] );
+						update_post_meta( $order->id, 'Payer last name', wc_clean( $posted['last_name'] ) );
 					}
 					if ( ! empty( $posted['payment_type'] ) ) {
-						update_post_meta( $order->id, 'Payment type', $posted['payment_type'] );
+						update_post_meta( $order->id, 'Payment type', wc_clean( $posted['payment_type'] ) );
 					}
 
 					if ( $posted['payment_status'] == 'completed' ) {
@@ -859,7 +871,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					} else {
 
 						// Store PP Details
-						update_post_meta( $order->id, 'Transaction ID', $posted['tx'] );
+						update_post_meta( $order->id, 'Transaction ID', wc_clean( $posted['tx'] ) );
 
 						$order->add_order_note( __( 'PDT payment completed', 'woocommerce' ) );
 						$order->payment_complete();

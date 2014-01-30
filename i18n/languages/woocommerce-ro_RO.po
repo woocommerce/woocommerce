@@ -5,9 +5,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-01-08 15:41:47+00:00\n"
-"PO-Revision-Date: 2014-01-22 15:00+0000\n"
-"Last-Translator: AIRoman <aur3l.roman@gmail.com>\n"
+"POT-Creation-Date: 2014-01-23 12:27:55+00:00\n"
+"PO-Revision-Date: 2014-01-24 08:31+0000\n"
+"Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: Romanian (Romania) (http://www.transifex.com/projects/p/woocommerce-core/language/ro_RO/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -55,7 +55,7 @@ msgstr "Mesajele Magazinului"
 msgid "Order tracking"
 msgstr "Umărește Comanda"
 
-#: assets/js/admin/editor_plugin_lang.php:15 includes/class-wc-install.php:225
+#: assets/js/admin/editor_plugin_lang.php:15 includes/class-wc-install.php:230
 #: includes/shortcodes/class-wc-shortcode-checkout.php:86
 #: includes/shortcodes/class-wc-shortcode-my-account.php:106
 #: includes/shortcodes/class-wc-shortcode-view-order.php:49
@@ -2904,7 +2904,7 @@ msgstr "rambursată"
 msgid "cancelled"
 msgstr "anulată"
 
-#: includes/abstracts/abstract-wc-email.php:562
+#: includes/abstracts/abstract-wc-email.php:564
 #: includes/emails/class-wc-email-customer-completed-order.php:140
 #: includes/emails/class-wc-email-new-order.php:120
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:66
@@ -2917,19 +2917,19 @@ msgstr "anulată"
 msgid "Enable/Disable"
 msgstr "Activează / Dezactivează"
 
-#: includes/abstracts/abstract-wc-email.php:564
+#: includes/abstracts/abstract-wc-email.php:566
 #: includes/emails/class-wc-email-customer-completed-order.php:142
 #: includes/emails/class-wc-email-new-order.php:122
 msgid "Enable this email notification"
 msgstr "Activează această notificare de e-mail"
 
-#: includes/abstracts/abstract-wc-email.php:568
+#: includes/abstracts/abstract-wc-email.php:570
 #: includes/emails/class-wc-email-customer-invoice.php:146
 msgid "Email subject"
 msgstr "Subiect Email"
 
-#: includes/abstracts/abstract-wc-email.php:570
-#: includes/abstracts/abstract-wc-email.php:577
+#: includes/abstracts/abstract-wc-email.php:572
+#: includes/abstracts/abstract-wc-email.php:579
 #: includes/emails/class-wc-email-customer-completed-order.php:148
 #: includes/emails/class-wc-email-customer-completed-order.php:155
 #: includes/emails/class-wc-email-customer-completed-order.php:162
@@ -2941,106 +2941,106 @@ msgstr "Subiect Email"
 msgid "Defaults to <code>%s</code>"
 msgstr "Implicit la <code>%s</code>"
 
-#: includes/abstracts/abstract-wc-email.php:575
+#: includes/abstracts/abstract-wc-email.php:577
 #: includes/emails/class-wc-email-customer-invoice.php:153
 msgid "Email heading"
 msgstr "Antet Email"
 
-#: includes/abstracts/abstract-wc-email.php:582
+#: includes/abstracts/abstract-wc-email.php:584
 #: includes/emails/class-wc-email-customer-completed-order.php:174
 #: includes/emails/class-wc-email-customer-invoice.php:174
 #: includes/emails/class-wc-email-new-order.php:147
 msgid "Email type"
 msgstr "Tip email"
 
-#: includes/abstracts/abstract-wc-email.php:584
+#: includes/abstracts/abstract-wc-email.php:586
 #: includes/emails/class-wc-email-customer-completed-order.php:176
 #: includes/emails/class-wc-email-customer-invoice.php:176
 #: includes/emails/class-wc-email-new-order.php:149
 msgid "Choose which format of email to send."
 msgstr "Alege formatul de e-mail care va fi trimis."
 
-#: includes/abstracts/abstract-wc-email.php:588
+#: includes/abstracts/abstract-wc-email.php:590
 #: includes/emails/class-wc-email-customer-completed-order.php:180
 #: includes/emails/class-wc-email-customer-invoice.php:180
 #: includes/emails/class-wc-email-new-order.php:153
 msgid "Plain text"
 msgstr "Text Simplu"
 
-#: includes/abstracts/abstract-wc-email.php:589
+#: includes/abstracts/abstract-wc-email.php:591
 #: includes/emails/class-wc-email-customer-completed-order.php:181
 #: includes/emails/class-wc-email-customer-invoice.php:181
 #: includes/emails/class-wc-email-new-order.php:154
 msgid "HTML"
 msgstr "HTML"
 
-#: includes/abstracts/abstract-wc-email.php:590
+#: includes/abstracts/abstract-wc-email.php:592
 #: includes/emails/class-wc-email-customer-completed-order.php:182
 #: includes/emails/class-wc-email-customer-invoice.php:182
 #: includes/emails/class-wc-email-new-order.php:155
 msgid "Multipart"
 msgstr "Mai multe părţi"
 
-#: includes/abstracts/abstract-wc-email.php:626
-#: includes/abstracts/abstract-wc-email.php:647
+#: includes/abstracts/abstract-wc-email.php:628
+#: includes/abstracts/abstract-wc-email.php:649
 msgid "Could not write to template file."
 msgstr "Nu am putut scrie în fișierul șablon."
 
-#: includes/abstracts/abstract-wc-email.php:678
+#: includes/abstracts/abstract-wc-email.php:680
 msgid "Template file copied to theme."
 msgstr "Fișier șablon copiat în directorul temei."
 
-#: includes/abstracts/abstract-wc-email.php:687
+#: includes/abstracts/abstract-wc-email.php:689
 msgid "Template file deleted from theme."
 msgstr "Fișier șablon șters din temă."
 
-#: includes/abstracts/abstract-wc-email.php:695
+#: includes/abstracts/abstract-wc-email.php:697
 #: includes/abstracts/abstract-wc-integration.php:30
 #: includes/abstracts/abstract-wc-settings-api.php:39 woocommerce.php:181
 msgid "Settings"
 msgstr "Setări"
 
-#: includes/abstracts/abstract-wc-email.php:707
+#: includes/abstracts/abstract-wc-email.php:709
 msgid "HTML template"
 msgstr "Șablon - format HTML"
 
-#: includes/abstracts/abstract-wc-email.php:708
+#: includes/abstracts/abstract-wc-email.php:710
 msgid "Plain text template"
 msgstr "Șablon - format text simplu"
 
-#: includes/abstracts/abstract-wc-email.php:729
+#: includes/abstracts/abstract-wc-email.php:731
 msgid "Delete template file"
 msgstr "Șterge fișierul șablon"
 
-#: includes/abstracts/abstract-wc-email.php:732
+#: includes/abstracts/abstract-wc-email.php:734
 msgid ""
 "This template has been overridden by your theme and can be found in: "
 "<code>%s</code>."
 msgstr "Acest șablon a fost înlocuit de tema dvs. și poate fi găsit la în: <code>%s</code>."
 
-#: includes/abstracts/abstract-wc-email.php:747
+#: includes/abstracts/abstract-wc-email.php:749
 msgid "Copy file to theme"
 msgstr "Copiază fișierul în directorul temei curente"
 
-#: includes/abstracts/abstract-wc-email.php:750
+#: includes/abstracts/abstract-wc-email.php:752
 msgid ""
 "To override and edit this email template copy <code>%s</code> to your theme "
 "folder: <code>%s</code>."
 msgstr "Pentru a înlocui şi edita acest şablon de e-mail, copiază <code>%s</code> în directorul: <code>%s</code> din interiorul temei active."
 
-#: includes/abstracts/abstract-wc-email.php:761
+#: includes/abstracts/abstract-wc-email.php:763
 msgid "File was not found."
 msgstr "Fișierul nu a fost găsit."
 
-#: includes/abstracts/abstract-wc-email.php:786
+#: includes/abstracts/abstract-wc-email.php:788
 msgid "View template"
 msgstr "Vizualizează șablon"
 
-#: includes/abstracts/abstract-wc-email.php:787
+#: includes/abstracts/abstract-wc-email.php:789
 msgid "Hide template"
 msgstr "Ascunde șablon"
 
-#: includes/abstracts/abstract-wc-email.php:798
+#: includes/abstracts/abstract-wc-email.php:800
 msgid "Are you sure you want to delete this template file?"
 msgstr "Ești sigur că vrei să ștergi acest șablon?"
 
@@ -3097,7 +3097,7 @@ msgstr "Stoc epuizat"
 
 #: includes/abstracts/abstract-wc-product.php:909
 #: includes/abstracts/abstract-wc-product.php:915
-#: includes/class-wc-cart.php:1388 includes/class-wc-order.php:800
+#: includes/class-wc-cart.php:1403 includes/class-wc-order.php:800
 #: includes/class-wc-product-variation.php:312
 msgid "Free!"
 msgstr "Gratis!"
@@ -3419,21 +3419,20 @@ msgid ""
 "not enough stock (%s remaining)."
 msgstr "Numărul de &quot;%s&quot; introdus nu poate fi adăugat în Coș, deoarce mai avem doar %s produse în stoc."
 
-#: includes/class-wc-cart.php:805 includes/class-wc-cart.php:819
-#: includes/class-wc-cart.php:827 includes/class-wc-frontend-scripts.php:144
+#: includes/class-wc-cart.php:808 includes/class-wc-cart.php:827
+#: includes/class-wc-cart.php:840 includes/class-wc-frontend-scripts.php:144
 #: includes/wc-cart-functions.php:102 templates/cart/mini-cart.php:64
 msgid "View Cart"
 msgstr "Vezi Coș"
 
-#: includes/class-wc-cart.php:805
+#: includes/class-wc-cart.php:809
 msgid "You cannot add another &quot;%s&quot; to your cart."
 msgstr "Nu puteți adăuga un alt &quot;%s&quot; în Coșul dvs."
 
-#: includes/class-wc-cart.php:819 includes/class-wc-cart.php:827
+#: includes/class-wc-cart.php:828 includes/class-wc-cart.php:841
 msgid ""
-"<a href=\"%s\" class=\"button wc-forward\">%s</a> You cannot add that amount"
-" to the cart &mdash; we have %s in stock and you already have %s in your "
-"cart."
+"You cannot add that amount to the cart &mdash; we have %s in stock and you "
+"already have %s in your cart."
 msgstr ""
 
 #: includes/class-wc-checkout.php:64 includes/class-wc-checkout.php:73
@@ -4509,130 +4508,130 @@ msgstr "Zambia"
 msgid "Zimbabwe"
 msgstr "Zimbabwe"
 
-#: includes/class-wc-countries.php:485
+#: includes/class-wc-countries.php:484
 msgid "to the"
 msgstr "către (?)"
 
-#: includes/class-wc-countries.php:486
+#: includes/class-wc-countries.php:485
 msgid "to"
 msgstr "la"
 
-#: includes/class-wc-countries.php:499
+#: includes/class-wc-countries.php:498
 msgid "the"
 msgstr ""
 
-#: includes/class-wc-countries.php:511
+#: includes/class-wc-countries.php:510
 msgid "VAT"
 msgstr "TVA"
 
-#: includes/class-wc-countries.php:511
+#: includes/class-wc-countries.php:510
 msgid "Tax"
 msgstr "Taxă"
 
-#: includes/class-wc-countries.php:524
+#: includes/class-wc-countries.php:523
 msgid "(incl. VAT)"
 msgstr "(include TVA)"
 
-#: includes/class-wc-countries.php:524
+#: includes/class-wc-countries.php:523
 msgid "(incl. tax)"
 msgstr "(include Taxe)"
 
-#: includes/class-wc-countries.php:537
+#: includes/class-wc-countries.php:536
 msgid "(ex. VAT)"
 msgstr "(exclude TVA)"
 
-#: includes/class-wc-countries.php:537
+#: includes/class-wc-countries.php:536
 msgid "(ex. tax)"
 msgstr "(exclude taxe)"
 
-#: includes/class-wc-countries.php:719
+#: includes/class-wc-countries.php:718
 msgid "Country"
 msgstr "Țară"
 
-#: includes/class-wc-countries.php:724
+#: includes/class-wc-countries.php:723
 msgid "First Name"
 msgstr "Prenume"
 
-#: includes/class-wc-countries.php:729
+#: includes/class-wc-countries.php:728
 msgid "Last Name"
 msgstr "Nume"
 
-#: includes/class-wc-countries.php:735
+#: includes/class-wc-countries.php:734
 msgid "Company Name"
 msgstr "Nume Companie"
 
-#: includes/class-wc-countries.php:739
+#: includes/class-wc-countries.php:738
 msgid "Address"
 msgstr "Adresă"
 
-#: includes/class-wc-countries.php:740
+#: includes/class-wc-countries.php:739
 msgctxt "placeholder"
 msgid "Street address"
 msgstr "Stradă"
 
-#: includes/class-wc-countries.php:745
+#: includes/class-wc-countries.php:744
 msgctxt "placeholder"
 msgid "Apartment, suite, unit etc. (optional)"
 msgstr "Bloc, Etaj, Numar Aparatament (dacă este cazul)"
 
-#: includes/class-wc-countries.php:750 includes/class-wc-countries.php:751
+#: includes/class-wc-countries.php:749 includes/class-wc-countries.php:750
 msgid "Town / City"
 msgstr "Oraș"
 
-#: includes/class-wc-countries.php:757 includes/class-wc-countries.php:758
+#: includes/class-wc-countries.php:756 includes/class-wc-countries.php:757
 msgid "State / County"
 msgstr "Stat / Județ"
 
-#: includes/class-wc-countries.php:764 includes/class-wc-countries.php:765
+#: includes/class-wc-countries.php:763 includes/class-wc-countries.php:764
 #: templates/cart/shipping-calculator.php:80
 msgid "Postcode / Zip"
 msgstr "Cod Poștal"
 
-#: includes/class-wc-countries.php:826 includes/class-wc-countries.php:842
-#: includes/class-wc-countries.php:862 includes/class-wc-countries.php:923
-#: includes/class-wc-countries.php:942 includes/class-wc-countries.php:970
-#: includes/class-wc-countries.php:1020 includes/class-wc-countries.php:1044
-#: includes/class-wc-countries.php:1085
+#: includes/class-wc-countries.php:825 includes/class-wc-countries.php:841
+#: includes/class-wc-countries.php:861 includes/class-wc-countries.php:922
+#: includes/class-wc-countries.php:941 includes/class-wc-countries.php:946
+#: includes/class-wc-countries.php:958 includes/class-wc-countries.php:1008
+#: includes/class-wc-countries.php:1032 includes/class-wc-countries.php:1073
 msgid "Province"
 msgstr "Provincie"
 
-#: includes/class-wc-countries.php:848
+#: includes/class-wc-countries.php:847
 msgid "Canton"
 msgstr "Canton"
 
-#: includes/class-wc-countries.php:857 includes/class-wc-countries.php:1026
+#: includes/class-wc-countries.php:856 includes/class-wc-countries.php:1014
 msgid "Municipality"
 msgstr "Municipalitate"
 
-#: includes/class-wc-countries.php:910
+#: includes/class-wc-countries.php:909
 msgid "Town / District"
 msgstr "Oraș / Sector"
 
-#: includes/class-wc-countries.php:913
+#: includes/class-wc-countries.php:912
 msgid "Region"
 msgstr "Regiune"
 
-#: includes/class-wc-countries.php:918 includes/class-wc-countries.php:1060
+#: includes/class-wc-countries.php:917 includes/class-wc-countries.php:1048
 msgid "County"
 msgstr "Județ"
 
-#: includes/class-wc-countries.php:1049
+#: includes/class-wc-countries.php:1037
 msgid "Zip"
 msgstr "Cod Poștal"
 
-#: includes/class-wc-countries.php:1052
+#: includes/class-wc-countries.php:1040
 msgid "State"
 msgstr "Stat"
 
-#: includes/class-wc-countries.php:1057
+#: includes/class-wc-countries.php:1045
 msgid "Postcode"
 msgstr "Cod poștal"
 
-#: includes/class-wc-countries.php:1165
+#: includes/class-wc-countries.php:1153
 msgid "Email Address"
 msgstr "Adresă email"
 
-#: includes/class-wc-countries.php:1171
+#: includes/class-wc-countries.php:1159
 msgid "Phone"
 msgstr "Telefon"
 
@@ -4709,7 +4708,7 @@ msgstr "Adresă de email invalidă."
 #: includes/class-wc-download-handler.php:91
 #: includes/class-wc-download-handler.php:94
 #: includes/class-wc-download-handler.php:137
-#: includes/class-wc-download-handler.php:274
+#: includes/class-wc-download-handler.php:280
 msgid "Go to homepage"
 msgstr "Mergi la prima pagină"
 
@@ -4760,7 +4759,7 @@ msgstr "Ne pare rău acest fișier descărcabil nu mai este disponibil"
 msgid "No file defined"
 msgstr "Nici un fișier definit"
 
-#: includes/class-wc-download-handler.php:274
+#: includes/class-wc-download-handler.php:280
 msgid "File not found"
 msgstr "Fișierul nu a fost găsit"
 
@@ -4824,7 +4823,7 @@ msgid "Please re-enter your password."
 msgstr "Vă rugăm să reintroduceți parola dvs."
 
 #: includes/class-wc-form-handler.php:178
-#: includes/class-wc-form-handler.php:767
+#: includes/class-wc-form-handler.php:773
 msgid "Passwords do not match."
 msgstr "Parolele nu se potrivesc."
 
@@ -4878,47 +4877,47 @@ msgid "Please choose a product to add to your cart&hellip;"
 msgstr "Vă rugăm selectați un produs pentru a-l adăuga în coș &hellip;"
 
 #: includes/class-wc-form-handler.php:683
-#: includes/class-wc-form-handler.php:686
-#: includes/class-wc-form-handler.php:689
-#: includes/class-wc-form-handler.php:697
-#: includes/class-wc-form-handler.php:805
+#: includes/class-wc-form-handler.php:687
+#: includes/class-wc-form-handler.php:691
+#: includes/class-wc-form-handler.php:700
+#: includes/class-wc-form-handler.php:813
 msgid "Error"
 msgstr "Eroare"
 
-#: includes/class-wc-form-handler.php:686
+#: includes/class-wc-form-handler.php:687
 msgid "Username is required."
 msgstr "Numele de utilizator este necesar."
 
-#: includes/class-wc-form-handler.php:689
+#: includes/class-wc-form-handler.php:691
 msgid "Password is required."
 msgstr "Parola este necesară."
 
-#: includes/class-wc-form-handler.php:697
+#: includes/class-wc-form-handler.php:700
 msgid "A user could not be found with this email address."
 msgstr "Nu a fost găsit nici un cont de utilizator înregistrat cu această adresă de e-mail."
 
-#: includes/class-wc-form-handler.php:720
+#: includes/class-wc-form-handler.php:725
 msgid "You are now logged in as <strong>%s</strong>"
 msgstr "Acum sunteți autentificat ca <strong>%s</strong>"
 
-#: includes/class-wc-form-handler.php:762
+#: includes/class-wc-form-handler.php:768
 msgid "Please enter your password."
 msgstr "Vă rugăm introduceți parola."
 
-#: includes/class-wc-form-handler.php:783
+#: includes/class-wc-form-handler.php:789
 msgid "Your password has been reset."
 msgstr "Parola dvs. a fost resetată"
 
-#: includes/class-wc-form-handler.php:783
+#: includes/class-wc-form-handler.php:789
 msgid "Log in"
 msgstr "Autentificare"
 
-#: includes/class-wc-form-handler.php:814
+#: includes/class-wc-form-handler.php:829
 #: includes/wc-customer-functions.php:107
 msgid "ERROR"
 msgstr "EROARE"
 
-#: includes/class-wc-form-handler.php:814
+#: includes/class-wc-form-handler.php:829
 msgid "Anti-spam field was filled in."
 msgstr "Câmpul anti-spam a fost completat."
 
@@ -4927,7 +4926,7 @@ msgid "Please select a rating"
 msgstr "Vă rugăm selectați o notă"
 
 #: includes/class-wc-frontend-scripts.php:127
-#: includes/wc-template-functions.php:1556
+#: includes/wc-template-functions.php:1559
 msgid "required"
 msgstr "obligatoriu"
 
@@ -4946,49 +4945,49 @@ msgstr ""
 msgid "Select an option&hellip;"
 msgstr "Selectează o opțiune&hellip;"
 
-#: includes/class-wc-install.php:209
+#: includes/class-wc-install.php:214
 msgctxt "page_slug"
 msgid "shop"
 msgstr "magazin"
 
-#: includes/class-wc-install.php:210
+#: includes/class-wc-install.php:215
 msgid "Shop"
 msgstr "Magazin"
 
-#: includes/class-wc-install.php:214
+#: includes/class-wc-install.php:219
 msgctxt "page_slug"
 msgid "cart"
 msgstr "cos"
 
-#: includes/class-wc-install.php:215
+#: includes/class-wc-install.php:220
 #: includes/widgets/class-wc-widget-cart.php:29
 #: includes/widgets/class-wc-widget-cart.php:56
 msgid "Cart"
 msgstr "Coș"
 
-#: includes/class-wc-install.php:219
+#: includes/class-wc-install.php:224
 msgctxt "page_slug"
 msgid "checkout"
 msgstr ""
 
-#: includes/class-wc-install.php:220 templates/cart/mini-cart.php:65
+#: includes/class-wc-install.php:225 templates/cart/mini-cart.php:65
 msgid "Checkout"
 msgstr "Plasează Comanda"
 
-#: includes/class-wc-install.php:224
+#: includes/class-wc-install.php:229
 msgctxt "page_slug"
 msgid "my-account"
 msgstr "contul-meu"
 
-#: includes/class-wc-install.php:422
+#: includes/class-wc-install.php:441
 msgid "Customer"
 msgstr "Client"
 
-#: includes/class-wc-install.php:429
+#: includes/class-wc-install.php:448
 msgid "Shop Manager"
 msgstr "Manager Magazin"
 
-#: includes/class-wc-install.php:664
+#: includes/class-wc-install.php:689
 msgid "What's new:"
 msgstr "Ce este nou:"
 
@@ -5021,7 +5020,7 @@ msgstr "Reducere Comandă:"
 msgid "Order Total:"
 msgstr "Total Comandă:"
 
-#: includes/class-wc-order.php:936 includes/wc-cart-functions.php:219
+#: includes/class-wc-order.php:936 includes/wc-cart-functions.php:226
 msgid "(Includes %s)"
 msgstr "(Include %s)"
 
@@ -5852,7 +5851,7 @@ msgid "Mijireh Checkout"
 msgstr "Procesatorul de plăți Mijireh"
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:107
-#: includes/gateways/mijireh/class-wc-gateway-mijireh.php:291
+#: includes/gateways/mijireh/class-wc-gateway-mijireh.php:293
 msgid "Mijireh error:"
 msgstr "Eroare Mijireh:"
 
@@ -6125,73 +6124,73 @@ msgid ""
 "redirected to PayPal to make payment."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:685
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:687
 msgid "Validation error: PayPal amounts do not match (gross %s)."
 msgstr "Eroare în timpul Validării: Sumele PayPal nu se potrivesc (brut %s )."
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:697
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:699
 msgid ""
 "Validation error: PayPal IPN response from a different email address (%s)."
 msgstr "Eroare în timpul Validării: Răspunul PayPal IPN este de la o adresă de email diferită (%s)."
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:720
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:722
 msgid "IPN payment completed"
 msgstr "Plată IPN finalizată"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:723
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:725
 msgid "Payment pending: %s"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:736
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:744
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:761
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:738
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:746
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:763
 msgid "Payment %s via IPN."
 msgstr "Plata %s prin IPN"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:749
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:751
 msgid "Order refunded/reversed"
 msgstr "Comandă rambursată / inversată"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:750
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:752
 msgid "Order %s has been marked as refunded - PayPal reason code: %s"
 msgstr "Comanda %s a fost marcată ca rambursată - Codul motivului invocat de PayPal: %s"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:753
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:755
 msgid "Payment for order %s refunded/reversed"
 msgstr "Plata pentru comanda %s a fost rambursată / inversată"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:766
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:768
 msgid "Order reversed"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:767
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:769
 msgid ""
 "Order %s has been marked on-hold due to a reversal - PayPal reason code: %s"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:770
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:772
 msgid "Payment for order %s reversed"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:778
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:780
 msgid "Reversal Cancelled"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:779
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:781
 msgid ""
 "Order %s has had a reversal cancelled. Please check the status of payment "
 "and update the order status accordingly."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:782
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:784
 msgid "Reversal cancelled for order %s"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:854
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:856
 msgid "Validation error: PayPal amounts do not match (amt %s)."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:862
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:864
 msgid "PDT payment completed"
 msgstr ""
 
@@ -6666,15 +6665,15 @@ msgstr "Produsul &quot;%s&quot;  a fost adăugat cu succes în Coșul dvs."
 msgid "Continue Shopping"
 msgstr "Continuați Cumpărăturile"
 
-#: includes/wc-cart-functions.php:193
+#: includes/wc-cart-functions.php:198
 msgid "Free shipping coupon"
 msgstr "Cupon Livrare Gratuită"
 
-#: includes/wc-cart-functions.php:195
+#: includes/wc-cart-functions.php:200
 msgid "[Remove]"
 msgstr "[Șterge]"
 
-#: includes/wc-cart-functions.php:254
+#: includes/wc-cart-functions.php:261
 msgid "Free"
 msgstr "Gratis!"
 
@@ -6889,54 +6888,54 @@ msgstr "Rezultatele Căutării &ldquo;%s&rdquo;"
 msgid "&nbsp;&ndash; Page %s"
 msgstr "&nbsp;&ndash; Pagina %s"
 
-#: includes/wc-template-functions.php:973
+#: includes/wc-template-functions.php:974
 #: templates/checkout/form-shipping.php:57
 #: templates/single-product/tabs/additional-information.php:14
 msgid "Additional Information"
 msgstr "Informații adiționale"
 
-#: includes/wc-template-functions.php:981
+#: includes/wc-template-functions.php:983
 msgid "Reviews (%d)"
 msgstr "Recenzii (%d)"
 
-#: includes/wc-template-functions.php:1071
+#: includes/wc-template-functions.php:1074
 msgid ""
 "Use $args argument as an array instead. Deprecated argument will be removed "
 "in WC 2.2."
 msgstr ""
 
-#: includes/wc-template-functions.php:1239
+#: includes/wc-template-functions.php:1242
 msgctxt "breadcrumb"
 msgid "Home"
 msgstr "Acasă"
 
-#: includes/wc-template-functions.php:1512
+#: includes/wc-template-functions.php:1515
 msgid "Order Again"
 msgstr "Comandă din Nou"
 
-#: includes/wc-template-functions.php:1603
+#: includes/wc-template-functions.php:1606
 #: templates/cart/shipping-calculator.php:28
 msgid "Select a country&hellip;"
 msgstr "Selectează țara&hellip;"
 
-#: includes/wc-template-functions.php:1610
+#: includes/wc-template-functions.php:1613
 msgid "Update country"
 msgstr "Actualizează țara"
 
-#: includes/wc-template-functions.php:1653
+#: includes/wc-template-functions.php:1656
 #: templates/cart/shipping-calculator.php:52
 msgid "Select a state&hellip;"
 msgstr "Selectează Stat&hellip;"
 
-#: includes/wc-template-functions.php:1766
+#: includes/wc-template-functions.php:1769
 msgid "Search for:"
 msgstr "Caută:"
 
-#: includes/wc-template-functions.php:1767
+#: includes/wc-template-functions.php:1770
 msgid "Search for products"
 msgstr "Caută produse:"
 
-#: includes/wc-template-functions.php:1768
+#: includes/wc-template-functions.php:1771
 msgid "Search"
 msgstr "Caută"
 

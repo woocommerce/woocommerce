@@ -7,12 +7,12 @@ msgstr ""
 "POT-Creation-Date: 2014-01-23 12:27:56+00:00\n"
 "PO-Revision-Date: 2014-01-24 08:31+0000\n"
 "Last-Translator: mikejolley <mike.jolley@me.com>\n"
-"Language-Team: Ukrainian (Ukraine) (http://www.transifex.com/projects/p/woocommerce-core/language/uk_UA/)\n"
+"Language-Team: Swedish (Sweden) (http://www.transifex.com/projects/p/woocommerce-core/language/sv_SE/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: uk_UA\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Language: sv_SE\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: includes/admin/class-wc-admin-assets.php:65
 #: includes/admin/class-wc-admin-menus.php:47
@@ -36,19 +36,19 @@ msgid ""
 "Are you sure you want to remove the selected items? If you have previously "
 "reduced this item's stock, or this order was submitted by a customer, you "
 "will need to manually restore the item's stock."
-msgstr ""
+msgstr "Är du säker att du vill radera denna produkt? Om du nyligen minskat produktens lagersaldo eller om ordern lades av en kund, behöver du manuellt återställa antal produkter i lager."
 
 #: includes/admin/class-wc-admin-assets.php:137
 msgid "Please select some items."
-msgstr "Будь ласка, оберіть позиції."
+msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:138
 msgid "Remove this item meta?"
-msgstr "Видалити цю позначку позиції?"
+msgstr "Ta bort detta meta för produkten"
 
 #: includes/admin/class-wc-admin-assets.php:139
 msgid "Remove this attribute?"
-msgstr "Прибрати цей атрибут?"
+msgstr "Radera detta attribut?"
 
 #: includes/admin/class-wc-admin-assets.php:140
 #: includes/admin/class-wc-admin-attributes.php:239
@@ -64,14 +64,14 @@ msgstr "Прибрати цей атрибут?"
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:148
 #: includes/admin/settings/class-wc-settings-shipping.php:203
 msgid "Name"
-msgstr "Назва"
+msgstr "Namn"
 
 #: includes/admin/class-wc-admin-assets.php:141
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:430
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:524
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:6
 msgid "Remove"
-msgstr "Прибрати"
+msgstr "Ta bort"
 
 #: includes/admin/class-wc-admin-assets.php:142
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:431
@@ -79,62 +79,62 @@ msgstr "Прибрати"
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:7
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:7
 msgid "Click to toggle"
-msgstr "Клацніть для перемикання"
+msgstr "Klicka för att akttivera/avaktivera"
 
 #: includes/admin/class-wc-admin-assets.php:143
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:446
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:538
 msgid "Value(s)"
-msgstr "Значення"
+msgstr "Värde(n)"
 
 #: includes/admin/class-wc-admin-assets.php:144
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:539
 msgid "Enter some text, or some attributes by pipe (|) separating values."
-msgstr ""
+msgstr "Mata in text eller attribut avskilda med pipe (|)."
 
 #: includes/admin/class-wc-admin-assets.php:145
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:489
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:544
 msgid "Visible on the product page"
-msgstr "Відображається на сторінці товару"
+msgstr "Synlig på produktsidan"
 
 #: includes/admin/class-wc-admin-assets.php:146
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:502
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:550
 msgid "Used for variations"
-msgstr "Використовується для варіантів"
+msgstr "Använd variationer"
 
 #: includes/admin/class-wc-admin-assets.php:147
 msgid "Enter a name for the new attribute term:"
-msgstr "Введіть ім'я для нового атрибуту:"
+msgstr "Ange ett namn för den nya attributtermen:"
 
 #: includes/admin/class-wc-admin-assets.php:148
 msgid "Calculate totals based on order items, discounts, and shipping?"
-msgstr "Розрахувати підсумки беручи за основу замовлення товарів, знижки і доставку?"
+msgstr "Beräkna summa baserat på beställda artiklar, rabatt och frakt?"
 
 #: includes/admin/class-wc-admin-assets.php:149
 msgid ""
 "Calculate line taxes? This will calculate taxes based on the customers "
 "country. If no billing/shipping is set it will use the store base country."
-msgstr "Розрахувати податки порядково? Податки будуть розраховані беручи за основу країну клієнта. Якщо адреси рахунків/доставки не вказані, то за осноу буде братися базова країна магазину."
+msgstr "Beräkna radens moms? Detta kommer att beräkna moms/skatt baserat på kundernas hemland. Om ingen faktura/leverans-adress angetts används butikens landsinställning."
 
 #: includes/admin/class-wc-admin-assets.php:150
 msgid ""
 "Copy billing information to shipping information? This will remove any "
 "currently entered shipping information."
-msgstr ""
+msgstr "Kopiera fakturauppgifterna till leveransuppgifter? Detta raderar befintliga leveransuppgifter."
 
 #: includes/admin/class-wc-admin-assets.php:151
 msgid ""
 "Load the customer's billing information? This will remove any currently "
 "entered billing information."
-msgstr ""
+msgstr "Ladda kundens debiteringsinformation? Detta kommer ersätta nuvarande angiven information."
 
 #: includes/admin/class-wc-admin-assets.php:152
 msgid ""
 "Load the customer's shipping information? This will remove any currently "
 "entered shipping information."
-msgstr ""
+msgstr "Ladda kundens leveransinformation? Detta kommer ersätta all nuvarande angiven leveransinformation."
 
 #: includes/admin/class-wc-admin-assets.php:153
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:115
@@ -142,11 +142,11 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:170
 #: includes/admin/views/html-quick-edit-product.php:128
 msgid "Featured"
-msgstr "Популярні"
+msgstr "Rekommenderad"
 
 #: includes/admin/class-wc-admin-assets.php:156
 msgid "No customer selected"
-msgstr "Не обрано жодного клієнта"
+msgstr "Ingen kund vald"
 
 #: includes/admin/class-wc-admin-assets.php:182
 msgid ""
@@ -157,18 +157,18 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:183
 msgid "Are you sure you want to revoke access to this download?"
-msgstr "Ви впевнені, що хочете скасувати доступ до цього завантаження?"
+msgstr "Är du säker att du vill ta bort tillgången till denna nedladdning?"
 
 #: includes/admin/class-wc-admin-assets.php:203
 msgid ""
 "Are you sure you want to link all variations? This will create a new "
 "variation for each and every possible combination of variation attributes "
 "(max 50 per run)."
-msgstr "Ви впевнені, що хочете зв'язати всі варіанти? Це створить новий варіант для кожної можливої ​​комбінації атрибутів варіантів (не більше 50 за один цикл)."
+msgstr "Är du säker på att du vill länka alla variationer? Detta kommer skapa en ny variation för varje möjlig kombination av alla attribut (max 50 per omgång)."
 
 #: includes/admin/class-wc-admin-assets.php:204
 msgid "Enter a value"
-msgstr "Введіть значеня"
+msgstr "Ange värde"
 
 #: includes/admin/class-wc-admin-assets.php:205
 msgid "Enter a value (fixed or %)"
@@ -176,93 +176,93 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:206
 msgid "Are you sure you want to delete all variations? This cannot be undone."
-msgstr "Ви впевнені, що хочете видалити всі варіанти? Ці дію неможливо скасувати."
+msgstr "Är du säker på att du vill radera alla variationer? Detta kan inte ångras."
 
 #: includes/admin/class-wc-admin-assets.php:207
 msgid "Last warning, are you sure?"
-msgstr "Останнє попереджання, ви впевнені?"
+msgstr "Sista varningen, är du säker?"
 
 #: includes/admin/class-wc-admin-assets.php:208
 #: includes/admin/class-wc-admin-taxonomies.php:126
 #: includes/admin/class-wc-admin-taxonomies.php:213
 msgid "Choose an image"
-msgstr "Обрати зображення"
+msgstr "Välj ett bild"
 
 #: includes/admin/class-wc-admin-assets.php:209
 msgid "Set variation image"
-msgstr "Встановити зображення для варіанту"
+msgstr "Välj bild för variation"
 
 #: includes/admin/class-wc-admin-assets.php:210
 msgid "variation added"
-msgstr "варіант доданий"
+msgstr "variation tillagd"
 
 #: includes/admin/class-wc-admin-assets.php:211
 msgid "variations added"
-msgstr "варіанти додані"
+msgstr "variationer tillagda"
 
 #: includes/admin/class-wc-admin-assets.php:212
 msgid "No variations added"
-msgstr "Жодного варіанту не додано"
+msgstr "Inga variationer tillagda"
 
 #: includes/admin/class-wc-admin-assets.php:213
 msgid "Are you sure you want to remove this variation?"
-msgstr "Ви впевнені, що хочете видалити цей варіант?"
+msgstr "Är du säker på att du vill ta bort den här varianten?"
 
 #: includes/admin/class-wc-admin-attributes.php:82
 msgid "Please, provide an attribute name, slug and type."
-msgstr ""
+msgstr "Vänligen ange attributets namn, länk och typ."
 
 #: includes/admin/class-wc-admin-attributes.php:84
 msgid "Slug “%s” is too long (28 characters max). Shorten it, please."
-msgstr ""
+msgstr "Länken \"%s\" är för lång (maximalt 28 tecken). Vänligen välj en kortare."
 
 #: includes/admin/class-wc-admin-attributes.php:86
 msgid ""
 "Slug “%s” is not allowed because it is a reserved term. Change it, please."
-msgstr ""
+msgstr "Länken \"%s\" är inte tillåten då det är ett reserverat ord. Vänligen ändra det."
 
 #: includes/admin/class-wc-admin-attributes.php:91
 #: includes/admin/class-wc-admin-attributes.php:96
 msgid "Slug “%s” is already in use. Change it, please."
-msgstr ""
+msgstr "Länken \"%s\" används redan. Vänligen ändra det."
 
 #: includes/admin/class-wc-admin-attributes.php:233
 msgid "Edit Attribute"
-msgstr "Редагувати Атрибут"
+msgstr "Redigera attribut"
 
 #: includes/admin/class-wc-admin-attributes.php:243
 #: includes/admin/class-wc-admin-attributes.php:376
 msgid "Name for the attribute (shown on the front-end)."
-msgstr "Назва атрибута (відображатиметься у користувацікій частині сайту)."
+msgstr "Namn för attributen (som det visas för kunderna)."
 
 #: includes/admin/class-wc-admin-attributes.php:248
 #: includes/admin/class-wc-admin-attributes.php:308
 #: includes/admin/class-wc-admin-attributes.php:380
 msgid "Slug"
-msgstr ""
+msgstr "Permalänk"
 
 #: includes/admin/class-wc-admin-attributes.php:252
 #: includes/admin/class-wc-admin-attributes.php:382
 msgid ""
 "Unique slug/reference for the attribute; must be shorter than 28 characters."
-msgstr "Унікальні пули/посилання для атрибута; має бути коротшим ніж 28 символів."
+msgstr "Unik url-kod för att referera till attributen; måste vara kortare än 28 tecken."
 
 #: includes/admin/class-wc-admin-attributes.php:257
 #: includes/admin/class-wc-admin-attributes.php:309
 #: includes/admin/class-wc-admin-attributes.php:386
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:206
 msgid "Type"
-msgstr "Тип"
+msgstr "Typ"
 
 #: includes/admin/class-wc-admin-attributes.php:261
 #: includes/admin/class-wc-admin-attributes.php:388
 msgid "Select"
-msgstr "Вибір"
+msgstr "Rullgardingsmeny"
 
 #: includes/admin/class-wc-admin-attributes.php:262
 #: includes/admin/class-wc-admin-attributes.php:389
 msgid "Text"
-msgstr "Текст"
+msgstr "Text"
 
 #: includes/admin/class-wc-admin-attributes.php:265
 #: includes/admin/class-wc-admin-attributes.php:392
@@ -276,19 +276,19 @@ msgstr ""
 #: includes/admin/class-wc-admin-attributes.php:270
 #: includes/admin/class-wc-admin-attributes.php:396
 msgid "Default sort order"
-msgstr "Порядок сортування за замовчуванням"
+msgstr "Standardsortering"
 
 #: includes/admin/class-wc-admin-attributes.php:274
 #: includes/admin/class-wc-admin-attributes.php:336
 #: includes/admin/class-wc-admin-attributes.php:398
 msgid "Custom ordering"
-msgstr "Настроюване розташування"
+msgstr "Skräddarsydd order"
 
 #: includes/admin/class-wc-admin-attributes.php:276
 #: includes/admin/class-wc-admin-attributes.php:333
 #: includes/admin/class-wc-admin-attributes.php:400
 msgid "Term ID"
-msgstr ""
+msgstr "ID för sida med villkor"
 
 #: includes/admin/class-wc-admin-attributes.php:278
 #: includes/admin/class-wc-admin-attributes.php:402
@@ -299,21 +299,21 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-attributes.php:283
 msgid "Update"
-msgstr "Оновити"
+msgstr "Uppdatera"
 
 #: includes/admin/class-wc-admin-attributes.php:299
 #: includes/admin/class-wc-admin-menus.php:49
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:104
 msgid "Attributes"
-msgstr "Атрибути"
+msgstr "Attribut"
 
 #: includes/admin/class-wc-admin-attributes.php:310
 msgid "Order by"
-msgstr "Сортування по"
+msgstr "Sortera efter"
 
 #: includes/admin/class-wc-admin-attributes.php:311
 msgid "Terms"
-msgstr "Умови"
+msgstr "Villkor"
 
 #: includes/admin/class-wc-admin-attributes.php:323
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:118
@@ -322,7 +322,7 @@ msgstr "Умови"
 #: includes/admin/reports/class-wc-report-customer-list.php:187
 #: includes/admin/reports/class-wc-report-stock.php:107
 msgid "Edit"
-msgstr "Редагувати"
+msgstr "Redigera"
 
 #: includes/admin/class-wc-admin-attributes.php:323
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:44
@@ -330,7 +330,7 @@ msgstr "Редагувати"
 #: includes/admin/post-types/meta-boxes/views/html-product-download.php:6
 #: includes/admin/post-types/meta-boxes/views/html-product-variation-download.php:5
 msgid "Delete"
-msgstr "Видалити"
+msgstr "Radera"
 
 #: includes/admin/class-wc-admin-attributes.php:356
 msgid "Configure terms"
@@ -338,35 +338,35 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-attributes.php:360
 msgid "No attributes currently exist."
-msgstr "На даний момент атрибутів не існує."
+msgstr "Det existerar inga attribut"
 
 #: includes/admin/class-wc-admin-attributes.php:370
 msgid "Add New Attribute"
-msgstr "Додати Атрибут"
+msgstr "Lägg till nytt attribut"
 
 #: includes/admin/class-wc-admin-attributes.php:371
 msgid ""
 "Attributes let you define extra product data, such as size or colour. You "
 "can use these attributes in the shop sidebar using the \"layered nav\" "
 "widgets. Please note: you cannot rename an attribute later on."
-msgstr "Атрибути дозволяють Вам визначати додаткову інформацію про товар, таку як розмір чи колір. Ви можете використовувати атрибути в боковій панелі магазину за допомогою віджету  \"layered nav\". Зауважте: у майбутньому ви не зможете перейменувати атрибут."
+msgstr "Attribut låter dig deffiniera extra produktdata, som storlek eller färg. Du kan använda dessa attribut i butikens sidebar genom att använda \"layered nav\" widgets. Observera: du kan inte byta namn på ett attribut senare."
 
 #: includes/admin/class-wc-admin-attributes.php:405
 msgid "Add Attribute"
-msgstr "Додати Атрибут"
+msgstr "Lägg till attribut"
 
 #: includes/admin/class-wc-admin-attributes.php:416
 msgid "Are you sure you want to delete this attribute?"
-msgstr "Ви впевнені, що хочете видалити цей атрибут?"
+msgstr "Är du säker på att du vill radera det här attributet?"
 
 #: includes/admin/class-wc-admin-dashboard.php:34
 msgid "WooCommerce Recent Reviews"
-msgstr "WooCommerce останні відгуки"
+msgstr "WooCommerce senaste recensioner"
 
 #: includes/admin/class-wc-admin-dashboard.php:37
 #: includes/admin/class-wc-admin-menus.php:80
 msgid "WooCommerce Status"
-msgstr "Стан WooCommerce"
+msgstr "WooCommerce Status"
 
 #: includes/admin/class-wc-admin-dashboard.php:131
 msgid "<strong>%s</strong> sales this month"
@@ -381,60 +381,56 @@ msgid "<strong>%s order</strong> awaiting processing"
 msgid_plural "<strong>%s orders</strong> awaiting processing"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: includes/admin/class-wc-admin-dashboard.php:149
 msgid "<strong>%s order</strong> on-hold"
 msgid_plural "<strong>%s orders</strong> on-hold"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: includes/admin/class-wc-admin-dashboard.php:154
 msgid "<strong>%s product</strong> low in stock"
 msgid_plural "<strong>%s products</strong> low in stock"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: includes/admin/class-wc-admin-dashboard.php:159
 msgid "<strong>%s product</strong> out of stock"
 msgid_plural "<strong>%s products</strong> out of stock"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: includes/admin/class-wc-admin-dashboard.php:192
 msgid "out of 5"
-msgstr ""
+msgstr "av 5"
 
 #: includes/admin/class-wc-admin-dashboard.php:200
 msgid "There are no product reviews yet."
-msgstr "У цього товару ще немає відгуків."
+msgstr "Det finns inga produktrecensioner ännu."
 
 #: includes/admin/class-wc-admin-duplicate-product.php:43
 msgid "Make a duplicate from this product"
-msgstr "Зробити дублікат цього товару"
+msgstr "Skapa en dublett av den här produkten"
 
 #: includes/admin/class-wc-admin-duplicate-product.php:44
 msgid "Duplicate"
-msgstr "Дублікат"
+msgstr "Duplicera"
 
 #: includes/admin/class-wc-admin-duplicate-product.php:67
 msgid "Copy to a new draft"
-msgstr "Копіювати до нової чернетки"
+msgstr "Kopiera till nytt utkast"
 
 #: includes/admin/class-wc-admin-duplicate-product.php:77
 msgid "No product to duplicate has been supplied!"
-msgstr "Жоден товар не був обраний для дублювання!"
+msgstr "Ingen produkt att duplicera har valts!"
 
 #: includes/admin/class-wc-admin-duplicate-product.php:99
 msgid "Product creation failed, could not find original product:"
-msgstr "Створення товару, пройшло не вдало, не вдалося знайти вихідний товар:"
+msgstr "Skapande av produkt misslyckades, kunde inte hitta originalprodukten:"
 
 #: includes/admin/class-wc-admin-duplicate-product.php:126
 msgid "(Copy)"
-msgstr "(Копія)"
+msgstr "(Kopia)"
 
 #: includes/admin/class-wc-admin-help.php:38
 msgid "Documentation"
@@ -476,7 +472,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-menus.php:80
 #: includes/admin/views/html-admin-page-status.php:5
 msgid "System Status"
-msgstr "Стан системи"
+msgstr "Systemstatus"
 
 #: includes/admin/class-wc-admin-help.php:56
 msgid "Community Support"
@@ -505,7 +501,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:73
 msgid "For more information:"
-msgstr "Для отримання додаткової інформації:"
+msgstr "För mer information:"
 
 #: includes/admin/class-wc-admin-help.php:74
 msgid "About WooCommerce"
@@ -513,35 +509,35 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:75
 msgid "Project on WordPress.org"
-msgstr "Проект на WordPress.org"
+msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:76
 msgid "Project on Github"
-msgstr "Проект на Github"
+msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:77
 msgid "Official Extensions"
-msgstr "Офіційні орширення"
+msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:78
 msgid "Official Themes"
-msgstr "Офіційні теми"
+msgstr ""
 
 #: includes/admin/class-wc-admin-importers.php:32
 msgid "WooCommerce Tax Rates (CSV)"
-msgstr "WooCommerce ставки оподаткування (CSV)"
+msgstr "WooCommerce momssatser (CSV)"
 
 #: includes/admin/class-wc-admin-importers.php:32
 msgid "Import <strong>tax rates</strong> to your store via a csv file."
-msgstr "Імпортувати <strong>податкові ставки</strong> в магазин за допомогою csv файлу."
+msgstr "Importera <strong>momssatser</strong> till din butik via en CSV-fil."
 
 #: includes/admin/class-wc-admin-menus.php:56
 msgid "Reports"
-msgstr "Звіти"
+msgstr "Rapporter"
 
 #: includes/admin/class-wc-admin-menus.php:63
 msgid "WooCommerce Settings"
-msgstr "Налаштування WooCommerce"
+msgstr "WooCommerce Inställningar"
 
 #: includes/admin/class-wc-admin-menus.php:63
 #: includes/admin/class-wc-admin-welcome.php:209
@@ -549,7 +545,7 @@ msgstr "Налаштування WooCommerce"
 #: includes/admin/settings/class-wc-settings-shipping.php:241
 #: includes/admin/views/html-admin-page-status-report.php:269
 msgid "Settings"
-msgstr "Налаштування"
+msgstr "Inställningar"
 
 #: includes/admin/class-wc-admin-menus.php:88
 #: includes/admin/views/html-admin-page-addons.php:4
@@ -564,49 +560,49 @@ msgstr ""
 #: includes/admin/class-wc-admin-menus.php:128
 msgctxt "Admin menu name"
 msgid "Orders"
-msgstr "Замовлення"
+msgstr "Ordrar"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:33
 msgid "Product permalink base"
-msgstr ""
+msgstr "Bassökväg för produktpermalänkar"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:38
 msgid "Product category base"
-msgstr ""
+msgstr "Bassökväg för produktkategorier"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:45
 msgid "Product tag base"
-msgstr ""
+msgstr "Bassökväg för produktetiketter"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:52
 msgid "Product attribute base"
-msgstr ""
+msgstr "Bassökväg för produktattribut"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:65
 msgctxt "slug"
 msgid "product-category"
-msgstr "категорія-товарів"
+msgstr "produkt-kategori"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:75
 msgctxt "slug"
 msgid "product-tag"
-msgstr "мітка-товару"
+msgstr "produkt-etikett"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:93
 msgid ""
 "These settings control the permalinks used for products. These settings only"
 " apply when <strong>not using \"default\" permalinks above</strong>."
-msgstr "Ці налаштування керуються постійними посиланнями для товарів. Ці налаштування застосовуються лише коли <strong>не використовуються постійні посилання \"за промовчуванням\" вище</strong>."
+msgstr "Dessa inställningar styr permalänkarna för produkter. Dock används dessa <strong>endast när standardformatet inte används ovan</strong>."
 
 #: includes/admin/class-wc-admin-permalink-settings.php:100
 msgctxt "default-slug"
 msgid "shop"
-msgstr "магазин"
+msgstr "butik"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:101
 msgctxt "default-slug"
 msgid "product"
-msgstr "товар"
+msgstr "produkt"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:113
 #: includes/admin/class-wc-admin-taxonomies.php:91
@@ -615,169 +611,169 @@ msgstr "товар"
 #: includes/admin/settings/class-wc-settings-shipping.php:202
 #: includes/admin/views/html-admin-page-status-report.php:70
 msgid "Default"
-msgstr "За замовчуванням"
+msgstr "Standard"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:117
 #: includes/admin/reports/class-wc-report-stock.php:137
 msgid "Product"
-msgstr "Товар"
+msgstr "Product"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:122
 msgid "Shop base"
-msgstr "База магазину"
+msgstr "Bassökväg för butiken"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:126
 msgid "Shop base with category"
-msgstr "База магазину з категоріями"
+msgstr "Bassökväg för butik med kategori"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:132
 msgid "Custom Base"
-msgstr "Бласна база."
+msgstr "Valbar bassökväg"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:134
 msgid ""
 "Enter a custom base to use. A base <strong>must</strong> be set or WordPress"
 " will use default instead."
-msgstr ""
+msgstr "Ange en anpassad länk att använda. Detta <strong>måste</strong> anges, annars använder WordPress standardformatet."
 
 #: includes/admin/class-wc-admin-post-types.php:58
 msgid "Product updated. <a href=\"%s\">View Product</a>"
-msgstr "Товар оновлено. <a href=\"%s\">Переглянути товар</a>"
+msgstr "Produkten uppdaterades. <a href=\"%s\">Visa produkt</a>"
 
 #: includes/admin/class-wc-admin-post-types.php:59
 #: includes/admin/class-wc-admin-post-types.php:74
 #: includes/admin/class-wc-admin-post-types.php:89
 msgid "Custom field updated."
-msgstr "Власне поле оновлено."
+msgstr "Eget fält uppdaterades."
 
 #: includes/admin/class-wc-admin-post-types.php:60
 #: includes/admin/class-wc-admin-post-types.php:75
 #: includes/admin/class-wc-admin-post-types.php:90
 msgid "Custom field deleted."
-msgstr "Власне поле видалене."
+msgstr "Eget fält raderades."
 
 #: includes/admin/class-wc-admin-post-types.php:61
 msgid "Product updated."
-msgstr "Товар оновлено."
+msgstr "Produkt uppdaterad."
 
 #: includes/admin/class-wc-admin-post-types.php:62
 msgid "Product restored to revision from %s"
-msgstr ""
+msgstr "Produkt återställdes till revision från %s"
 
 #: includes/admin/class-wc-admin-post-types.php:63
 msgid "Product published. <a href=\"%s\">View Product</a>"
-msgstr "Товар опубліковано на сайті. <a href=\"%s\">Переглянути товар</a>"
+msgstr "Produkten publicerades. <a href=\"%s\">Visa produkt</a>"
 
 #: includes/admin/class-wc-admin-post-types.php:64
 msgid "Product saved."
-msgstr ""
+msgstr "Produkten sparades."
 
 #: includes/admin/class-wc-admin-post-types.php:65
 msgid "Product submitted. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
-msgstr ""
+msgstr "Produkt sparades. <a target=\"_blank\" href=\"%s\">Förhandsvisa produkt</a>"
 
 #: includes/admin/class-wc-admin-post-types.php:66
 msgid ""
 "Product scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" "
 "href=\"%2$s\">Preview Product</a>"
-msgstr ""
+msgstr "Produkt schemalagd till: <strong>%1$s</strong>. <a target=\"_blank\" href=\"%2$s\">Förhandsgranska produkt</a>"
 
 #: includes/admin/class-wc-admin-post-types.php:67
 #: includes/admin/class-wc-admin-post-types.php:82
 #: includes/admin/class-wc-admin-post-types.php:97
 msgid "M j, Y @ G:i"
-msgstr ""
+msgstr "j M Y @ G:i"
 
 #: includes/admin/class-wc-admin-post-types.php:68
 msgid "Product draft updated. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
-msgstr ""
+msgstr "Produktutkast uppdaterades. <a target=\"_blank\" href=\"%s\">Förhandsgranska produkt</a>"
 
 #: includes/admin/class-wc-admin-post-types.php:73
 #: includes/admin/class-wc-admin-post-types.php:76
 #: includes/admin/class-wc-admin-post-types.php:78
 msgid "Order updated."
-msgstr "Замовлення оновлене."
+msgstr "Ordern uppdaterades."
 
 #: includes/admin/class-wc-admin-post-types.php:77
 msgid "Order restored to revision from %s"
-msgstr "Замовлення відновлене до версії від %s"
+msgstr "Ordern återställdes till revision från %s"
 
 #: includes/admin/class-wc-admin-post-types.php:79
 msgid "Order saved."
-msgstr "Замовлення забережене."
+msgstr "Order sparad."
 
 #: includes/admin/class-wc-admin-post-types.php:80
 msgid "Order submitted."
-msgstr "Замовлення підтверджене."
+msgstr "Ordern skickades."
 
 #: includes/admin/class-wc-admin-post-types.php:81
 msgid "Order scheduled for: <strong>%1$s</strong>."
-msgstr "Замовити запланована на: <strong>%1$s</strong>."
+msgstr "Ordern är schemalagd till: <strong>%1$s</strong>."
 
 #: includes/admin/class-wc-admin-post-types.php:83
 msgid "Order draft updated."
-msgstr "Чернетка замовлення оновлена."
+msgstr "Utkast av ordern uppdaterades."
 
 #: includes/admin/class-wc-admin-post-types.php:88
 #: includes/admin/class-wc-admin-post-types.php:91
 #: includes/admin/class-wc-admin-post-types.php:93
 msgid "Coupon updated."
-msgstr "Купон оновлено."
+msgstr "Rabattkoden uppdaterades."
 
 #: includes/admin/class-wc-admin-post-types.php:92
 msgid "Coupon restored to revision from %s"
-msgstr ""
+msgstr "Rabattkoden återställdes till revision från %s"
 
 #: includes/admin/class-wc-admin-post-types.php:94
 msgid "Coupon saved."
-msgstr ""
+msgstr "Rabattkoden sparades."
 
 #: includes/admin/class-wc-admin-post-types.php:95
 msgid "Coupon submitted."
-msgstr ""
+msgstr "Rabattkoden skickad."
 
 #: includes/admin/class-wc-admin-post-types.php:96
 msgid "Coupon scheduled for: <strong>%1$s</strong>."
-msgstr ""
+msgstr "Rabattkoden är schemalagd till: <strong>%1$s</strong>."
 
 #: includes/admin/class-wc-admin-post-types.php:98
 msgid "Coupon draft updated."
-msgstr ""
+msgstr "Utkast av rabattkod uppdaterades."
 
 #: includes/admin/class-wc-admin-profile.php:45
 msgid "Customer Billing Address"
-msgstr "Клієнтьска адерса для рахунків"
+msgstr "Fakturaadress för kund"
 
 #: includes/admin/class-wc-admin-profile.php:48
 #: includes/admin/class-wc-admin-profile.php:97
 msgid "First name"
-msgstr "Ім'я"
+msgstr "Förnamn"
 
 #: includes/admin/class-wc-admin-profile.php:52
 #: includes/admin/class-wc-admin-profile.php:101
 msgid "Last name"
-msgstr "Прізвище"
+msgstr "Efternamn"
 
 #: includes/admin/class-wc-admin-profile.php:56
 #: includes/admin/class-wc-admin-profile.php:105
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:37
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:84
 msgid "Company"
-msgstr "Компанія"
+msgstr "Företag"
 
 #: includes/admin/class-wc-admin-profile.php:60
 #: includes/admin/class-wc-admin-profile.php:109
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:41
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:88
 msgid "Address 1"
-msgstr "Адреса 1"
+msgstr "Adress 1"
 
 #: includes/admin/class-wc-admin-profile.php:64
 #: includes/admin/class-wc-admin-profile.php:113
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:45
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:92
 msgid "Address 2"
-msgstr "Адреса 2"
+msgstr "Adress 2"
 
 #: includes/admin/class-wc-admin-profile.php:68
 #: includes/admin/class-wc-admin-profile.php:117
@@ -786,52 +782,52 @@ msgstr "Адреса 2"
 #: includes/admin/settings/class-wc-settings-tax.php:256
 #: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "City"
-msgstr "Місто"
+msgstr "Stad"
 
 #: includes/admin/class-wc-admin-profile.php:72
 #: includes/admin/class-wc-admin-profile.php:121
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:53
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:100
 msgid "Postcode"
-msgstr "Поштовий індекс"
+msgstr "Postnummer"
 
 #: includes/admin/class-wc-admin-profile.php:76
 #: includes/admin/class-wc-admin-profile.php:125
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:63
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:110
 msgid "State/County"
-msgstr "Країна/штат"
+msgstr "Län"
 
 #: includes/admin/class-wc-admin-profile.php:77
 #: includes/admin/class-wc-admin-profile.php:126
 msgid "State/County or state code"
-msgstr ""
+msgstr "Landskod (eller stat)"
 
 #: includes/admin/class-wc-admin-profile.php:80
 #: includes/admin/class-wc-admin-profile.php:129
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:57
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:104
 msgid "Country"
-msgstr "Країна"
+msgstr "Land"
 
 #: includes/admin/class-wc-admin-profile.php:81
 #: includes/admin/class-wc-admin-profile.php:130
 msgid "2 letter Country code"
-msgstr "2-буквенний код країни"
+msgstr "Landskod (2 bokstäver)"
 
 #: includes/admin/class-wc-admin-profile.php:84
 msgid "Telephone"
-msgstr "Телефон"
+msgstr "Telefon"
 
 #: includes/admin/class-wc-admin-profile.php:88
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:67
 #: includes/admin/reports/class-wc-report-customer-list.php:244
 msgid "Email"
-msgstr "Email"
+msgstr "E-post"
 
 #: includes/admin/class-wc-admin-profile.php:94
 msgid "Customer Shipping Address"
-msgstr "Клієнтська адреса доставки"
+msgstr "Leveransadress för kund"
 
 #: includes/admin/class-wc-admin-profile.php:197
 msgid "Read"
@@ -872,7 +868,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-reports.php:46
 #: includes/admin/reports/class-wc-report-customer-list.php:246
 msgid "Orders"
-msgstr "Замовлення"
+msgstr "Ordrar"
 
 #: includes/admin/class-wc-admin-reports.php:49
 msgid "Sales by date"
@@ -884,7 +880,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-reports.php:61
 msgid "Sales by category"
-msgstr "Продажі по категоріях"
+msgstr "Försäljning efter kategori"
 
 #: includes/admin/class-wc-admin-reports.php:67
 msgid "Coupons by date"
@@ -893,7 +889,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-reports.php:75
 #: includes/admin/reports/class-wc-report-customer-list.php:25
 msgid "Customers"
-msgstr "Клієнти"
+msgstr "Kunder"
 
 #: includes/admin/class-wc-admin-reports.php:78
 msgid "Customers vs. Guests"
@@ -909,7 +905,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-stock.php:20
 #: includes/admin/reports/class-wc-report-stock.php:21
 msgid "Stock"
-msgstr "Склад"
+msgstr "Lager"
 
 #: includes/admin/class-wc-admin-reports.php:95
 msgid "Low in stock"
@@ -922,7 +918,7 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:195
 #: includes/admin/views/html-quick-edit-product.php:138
 msgid "Out of stock"
-msgstr "Немає в наявності"
+msgstr "Slut i lager"
 
 #: includes/admin/class-wc-admin-reports.php:107
 msgid "Most Stocked"
@@ -943,15 +939,15 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-settings.php:54
 msgid "Action failed. Please refresh the page and retry."
-msgstr "Не вдалося виконати цю дію. Оновлення сторінку і повторіть спробу."
+msgstr "Processen misslyckades. Uppdatera sidan och försök igen."
 
 #: includes/admin/class-wc-admin-settings.php:65
 msgid "Your settings have been saved."
-msgstr "Ваші налаштування були збережені."
+msgstr "Dina inställningar har sparats."
 
 #: includes/admin/class-wc-admin-settings.php:121
 msgid "The changes you made will be lost if you navigate away from this page."
-msgstr ""
+msgstr "Ändringar som du genomfört förloras om du lämnar denna sida."
 
 #: includes/admin/class-wc-admin-settings.php:490
 msgid "Hard Crop?"
@@ -959,41 +955,41 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-settings.php:515
 msgid "Select a page&hellip;"
-msgstr ""
+msgstr "Välj sida&hellip;"
 
 #: includes/admin/class-wc-admin-settings.php:538
 msgid "Choose a country&hellip;"
-msgstr "Оберіть країну&hellip;"
+msgstr "Välj land&hellip;"
 
 #: includes/admin/class-wc-admin-settings.php:562
 msgid "Choose countries&hellip;"
-msgstr "Оберіть країни&hellip;"
+msgstr "Välj länder&hellip;"
 
 #: includes/admin/class-wc-admin-settings.php:568
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:460
 msgid "Select all"
-msgstr "Обрати все"
+msgstr "Välj alla"
 
 #: includes/admin/class-wc-admin-settings.php:568
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:460
 msgid "Select none"
-msgstr "Нічого не обирати"
+msgstr "Välj ingen"
 
 #: includes/admin/class-wc-admin-status.php:52
 msgid "Product Transients Cleared"
-msgstr ""
+msgstr "Produkttransienter tömdes"
 
 #: includes/admin/class-wc-admin-status.php:93
 msgid "%d Transients Rows Cleared"
-msgstr ""
+msgstr "%d produkttransienter tömdes"
 
 #: includes/admin/class-wc-admin-status.php:102
 msgid "Roles successfully reset"
-msgstr ""
+msgstr "Roller återställdes"
 
 #: includes/admin/class-wc-admin-status.php:114
 msgid "Terms successfully recounted"
-msgstr ""
+msgstr "Termer beräknades på nytt"
 
 #: includes/admin/class-wc-admin-status.php:125
 msgid "Sessions successfully cleared"
@@ -1009,11 +1005,11 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-status.php:146
 msgid "There was an error calling %s::%s"
-msgstr "Виникла помилка %s::%s"
+msgstr "Ett fel uppstod när följande skulle anropas %s::%s"
 
 #: includes/admin/class-wc-admin-status.php:149
 msgid "There was an error calling %s"
-msgstr "Виникла помилка %s"
+msgstr "Ett fel uppstod när följande skulle anropas %s"
 
 #: includes/admin/class-wc-admin-status.php:159
 msgid "Your changes have been saved."
@@ -1021,59 +1017,59 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-status.php:173
 msgid "WC Transients"
-msgstr ""
+msgstr "WC-transienter"
 
 #: includes/admin/class-wc-admin-status.php:174
 msgid "Clear transients"
-msgstr ""
+msgstr "Töm transienter"
 
 #: includes/admin/class-wc-admin-status.php:175
 msgid "This tool will clear the product/shop transients cache."
-msgstr ""
+msgstr "Detta verktyg tömmer transientcache för produkter/butik."
 
 #: includes/admin/class-wc-admin-status.php:178
 msgid "Expired Transients"
-msgstr ""
+msgstr "Förfallna transienter"
 
 #: includes/admin/class-wc-admin-status.php:179
 msgid "Clear expired transients"
-msgstr ""
+msgstr "Töm förfallna transienter"
 
 #: includes/admin/class-wc-admin-status.php:180
 msgid "This tool will clear ALL expired transients from Wordpress."
-msgstr ""
+msgstr "Detta verktyg tömmer samtliga förfallna transienter i WordPress."
 
 #: includes/admin/class-wc-admin-status.php:183
 msgid "Term counts"
-msgstr ""
+msgstr "Antal termer"
 
 #: includes/admin/class-wc-admin-status.php:184
 msgid "Recount terms"
-msgstr ""
+msgstr "Räkna om termer"
 
 #: includes/admin/class-wc-admin-status.php:185
 msgid ""
 "This tool will recount product terms - useful when changing your settings in"
 " a way which hides products from the catalog."
-msgstr ""
+msgstr "Detta verktyg räknar alla produkttermer på nytt, något som är användbart om du ändrar inställningar som döljer produkter i din katalog."
 
 #: includes/admin/class-wc-admin-status.php:188
 msgid "Capabilities"
-msgstr ""
+msgstr "Behörigheter"
 
 #: includes/admin/class-wc-admin-status.php:189
 msgid "Reset capabilities"
-msgstr ""
+msgstr "Återställ behörigheter"
 
 #: includes/admin/class-wc-admin-status.php:190
 msgid ""
 "This tool will reset the admin, customer and shop_manager roles to default. "
 "Use this if your users cannot access all of the WooCommerce admin pages."
-msgstr ""
+msgstr "Detta verktyg återställer rollerna för administratörer, kunder och butiksansvariga. Använd detta om användare upplever problem att nå samtliga WooCommerce administrationssidor."
 
 #: includes/admin/class-wc-admin-status.php:193
 msgid "Customer Sessions"
-msgstr "Клієнтські сесії"
+msgstr ""
 
 #: includes/admin/class-wc-admin-status.php:194
 msgid "Clear all sessions"
@@ -1083,12 +1079,12 @@ msgstr ""
 msgid ""
 "<strong class=\"red\">Warning</strong> This tool will delete all customer "
 "session data from the database, including any current live carts."
-msgstr "<strong class=\"red\">Увага</strong> Цей інструмент видалить з бази данних всю інформацію користувачів, включаючи кошики, що оформляються в цею секунду."
+msgstr ""
 
 #: includes/admin/class-wc-admin-status.php:198
 #: includes/admin/views/html-notice-install.php:6
 msgid "Install WooCommerce Pages"
-msgstr "Встановлення сторінок WooCommerce"
+msgstr "Installera sidor för WooCommerce"
 
 #: includes/admin/class-wc-admin-status.php:199
 msgid "Install pages"
@@ -1117,7 +1113,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-taxonomies.php:89
 #: includes/admin/class-wc-admin-taxonomies.php:177
 msgid "Display type"
-msgstr ""
+msgstr "Visningstyp"
 
 #: includes/admin/class-wc-admin-taxonomies.php:92
 #: includes/admin/class-wc-admin-taxonomies.php:181
@@ -1125,37 +1121,37 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-products.php:25
 #: includes/admin/views/html-admin-page-addons.php:15
 msgid "Products"
-msgstr "Товари"
+msgstr "Produkter"
 
 #: includes/admin/class-wc-admin-taxonomies.php:93
 #: includes/admin/class-wc-admin-taxonomies.php:182
 msgid "Subcategories"
-msgstr ""
+msgstr "Underkategorier"
 
 #: includes/admin/class-wc-admin-taxonomies.php:94
 #: includes/admin/class-wc-admin-taxonomies.php:183
 msgid "Both"
-msgstr ""
+msgstr "Båda"
 
 #: includes/admin/class-wc-admin-taxonomies.php:98
 #: includes/admin/class-wc-admin-taxonomies.php:188
 msgid "Thumbnail"
-msgstr "Мініатюра"
+msgstr "Tumnagel"
 
 #: includes/admin/class-wc-admin-taxonomies.php:102
 #: includes/admin/class-wc-admin-taxonomies.php:193
 msgid "Upload/Add image"
-msgstr "Завантажити/Додати зображення"
+msgstr "Ladda upp/lägg till bild"
 
 #: includes/admin/class-wc-admin-taxonomies.php:103
 #: includes/admin/class-wc-admin-taxonomies.php:194
 msgid "Remove image"
-msgstr "Прибрати зображення"
+msgstr "Ta bort bild"
 
 #: includes/admin/class-wc-admin-taxonomies.php:128
 #: includes/admin/class-wc-admin-taxonomies.php:215
 msgid "Use image"
-msgstr "Використання зображення"
+msgstr "Använd bild"
 
 #: includes/admin/class-wc-admin-taxonomies.php:273
 msgid ""
@@ -1163,57 +1159,57 @@ msgid ""
 "of categories on the front-end you can drag and drop to sort them. To see "
 "more categories listed click the \"screen options\" link at the top of the "
 "page."
-msgstr "Тут можна керувати категоріями продуктів для вашого магазину. Ви можете змінити порядок відображення категорій на сайті просто перетягнувший їх. Щоб відобразити більше категорій натисніть \"Налаштування екрану\" зверху сторінки."
+msgstr "Produktkategorier för din webbutik kan hanteras här. För att ändra ordning av visningen av kategorierna för kunden kan du dra och släppa för att sortera. För att se fler kategorier klicka på \"skärminställningar\" längst upp på sidan."
 
 #: includes/admin/class-wc-admin-taxonomies.php:283
 msgid ""
 "Shipping classes can be used to group products of similar type. These groups"
 " can then be used by certain shipping methods to provide different rates to "
 "different products."
-msgstr "Класи доставки можуть використовуватись для групування товарів подібного типу. В подальшому ці групи можна використовувати у різних методах доставки для встановлення різних ставок для різних товарів."
+msgstr "Fraktklasser kan användas för att gruppera liknande produkter. Dessa grupper kan sen användas av olika fraktmetoder för att ge olika lösningar/prisförlsag för frakt."
 
 #: includes/admin/class-wc-admin-taxonomies.php:296
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:191
 msgid "Image"
-msgstr "Зображення"
+msgstr "Bild"
 
 #: includes/admin/class-wc-admin-welcome.php:46
 msgid "Welcome to WooCommerce"
-msgstr "Вітаємо у WooCommerce"
+msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:191
 msgid "Welcome to WooCommerce %s"
-msgstr "Вітаємо у WooCommerce %s"
+msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:196
 msgid "Thanks, all done!"
-msgstr "Дякуємо, все готово!"
+msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:198
 msgid "Thank you for updating to the latest version!"
-msgstr "Дякуємо за оновлення до останньої версії!"
+msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:200
 msgid "Thanks for installing!"
-msgstr "Дякуємо за встановлення!"
+msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:202
 msgid ""
 "%s WooCommerce %s is more powerful, stable, and secure than ever before. We "
 "hope you enjoy it."
-msgstr "%s WooCommerce %s потужніший, стабільніший, та захищеніший ніж коли небуть. Ми сподіваємося він вам сподобається."
+msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:206
 msgid "Version %s"
-msgstr "Версія %s"
+msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:210
 msgid "Docs"
-msgstr "Документи"
+msgstr "Dokumentation"
 
 #: includes/admin/class-wc-admin-welcome.php:217
 msgid "What's New"
-msgstr "Що нового"
+msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:219
 msgid "Credits"
@@ -1362,7 +1358,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:307
 msgid "Under the Hood"
-msgstr "Під капотом"
+msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:311
 msgid "PayPal PDT support"
@@ -1456,7 +1452,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:364
 msgid "Go to WooCommerce Settings"
-msgstr "Перейти до налаштувань WooCommerce"
+msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:382
 msgid ""
@@ -1469,7 +1465,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:408
 msgid "View %s"
-msgstr "Перегляд %s"
+msgstr ""
 
 #: includes/admin/class-wc-admin.php:114
 msgid "HTML Email Template"
@@ -1480,147 +1476,147 @@ msgstr ""
 #: includes/admin/importers/class-wc-tax-rate-importer.php:230
 #: includes/admin/importers/class-wc-tax-rate-importer.php:245
 msgid "Sorry, there has been an error."
-msgstr "Вибачте, виникла помилка."
+msgstr "Ett fel har tyvärr uppstått."
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:104
 msgid "The file does not exist, please try again."
-msgstr "Такого файлу не існує, спробуйте знову."
+msgstr "Filen existerar inte. Vänligen försök igen."
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:191
 msgid "The CSV is invalid."
-msgstr "Неприпустимий файл CSV."
+msgstr "Ogiltig CSV-fil."
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:202
 msgid ""
 "Import complete - imported <strong>%s</strong> tax rates and skipped "
 "<strong>%s</strong>."
-msgstr "Імпорт завершено - імпортовано <strong>%s</strong> податкових ставок і пропущено <strong>%s</strong>."
+msgstr "Import genomförd! Importerade <strong>%s</strong> momssatser och hoppade över <strong>%s</strong>."
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:212
 msgid "All done!"
-msgstr "Все готово!"
+msgstr "Genomfört!"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:212
 msgid "View Tax Rates"
-msgstr "Переглянути ставки оподаткування"
+msgstr "Visa momssatser"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:263
 msgid "Import Tax Rates"
-msgstr "Іпорт ставок оподаткування"
+msgstr "Importera momssatser"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:285
 msgid ""
 "Hi there! Upload a CSV file containing tax rates to import the contents into"
 " your shop. Choose a .csv file to upload, then click \"Upload file and "
 "import\"."
-msgstr "Вітаємо! Завантажте файл CSV, що містить податкові ставки, щоб імпортувати його вміст у ваш магазин. Оберіть .CSV-файл для завантаження, а потім натисніть кнопку \"Завантаження та імпорт\"."
+msgstr "Hej! Ladda upp en CSV-fil med momssatser för att lägga till dessa i butiken. Välj en fil med ändelsen .csv och klicka sedan \"Ladda upp fil och importera\"."
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:287
 msgid ""
 "Tax rates need to be defined with columns in a specific order (10 columns). "
 "<a href=\"%s\">Click here to download a sample</a>."
-msgstr "Податкові ставки повинні бути рознесені у стовпці у певному порядку (10 стовпців). <a href=\\\"%s\\\">Натисніть тут, щоб завантажити зразок</a>."
+msgstr "Momssatser måste definieras med kolumnerna i en specifik ordning (10 kolumner). <a href=\"%s\">Klicka här för att ladda ner ett exempel</a>."
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:295
 msgid ""
 "Before you can upload your import file, you will need to fix the following "
 "error:"
-msgstr ""
+msgstr "Du måste åtgärda följande fel innan du kan ladda upp din fil:"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:304
 msgid "Choose a file from your computer:"
-msgstr ""
+msgstr "Välj en fil från din hårddisk:"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:310
 msgid "Maximum size: %s"
-msgstr ""
+msgstr "Maximal filstorlek: %s"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:315
 msgid "OR enter path to file:"
-msgstr "АБО введіть шлях до файлу:"
+msgstr "ELLER ange sökvägen till filen:"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:322
 msgid "Delimiter"
-msgstr "Деламітер (символ розділення)"
+msgstr "Avdelare"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:328
 msgid "Upload file and import"
-msgstr "Завантажити файл та імпортувати"
+msgstr "Ladda upp fil och importera"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:83
 msgid "Product name"
-msgstr "Назва товару"
+msgstr "Produktnamn"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:104
 msgid "Catalog/search"
-msgstr "Каталог/пошук"
+msgstr "Katalog/Sök"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:105
 #: includes/admin/views/html-bulk-edit-product.php:158
 #: includes/admin/views/html-quick-edit-product.php:115
 msgid "Catalog"
-msgstr "Каталог"
+msgstr "Produktkatalog"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:106
 #: includes/admin/views/html-bulk-edit-product.php:159
 #: includes/admin/views/html-quick-edit-product.php:116
 msgid "Search"
-msgstr "Пошук"
+msgstr "Sök"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:107
 #: includes/admin/views/html-bulk-edit-product.php:160
 #: includes/admin/views/html-quick-edit-product.php:117
 msgid "Hidden"
-msgstr "Прихований"
+msgstr "Dold"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:111
 msgid "Catalog visibility:"
-msgstr "Відображення у каталозі:"
+msgstr "Synlighet i katalog:"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:126
 msgid ""
 "Define the loops this product should be visible in. The product will still "
 "be accessible directly."
-msgstr ""
+msgstr "Definiera vilka loopar denna produkt ska vara synlig i. Produkten kommer fortfarande vara direkt nåbar."
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:132
 msgid "Enable this option to feature this product."
-msgstr "Включити цю опцію щоб зробити товар спеціальним."
+msgstr "Välj detta för att markera som utvald produkt"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:134
 msgid "Featured Product"
-msgstr ""
+msgstr "Utvald produkt"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:137
 msgid "OK"
-msgstr "ОК"
+msgstr "OK"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:138
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:169
 msgid "Cancel"
-msgstr "Відмінити"
+msgstr "Avbryt"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:196
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:135
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:53
 #: includes/admin/views/html-quick-edit-product.php:11
 msgid "SKU"
-msgstr "Артикул"
+msgstr "Art. nr."
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:201
 #: includes/admin/views/html-bulk-edit-product.php:10
 #: includes/admin/views/html-quick-edit-product.php:22
 msgid "Price"
-msgstr "Ціна"
+msgstr "Pris"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:203
 #: includes/admin/reports/class-wc-report-sales-by-category.php:138
 msgid "Categories"
-msgstr "Категорії"
+msgstr "Kategorier"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:204
 msgid "Tags"
-msgstr "Мітки"
+msgstr "Etiketter"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:207
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:93
@@ -1630,102 +1626,102 @@ msgstr "Мітки"
 #: includes/admin/reports/class-wc-report-sales-by-date.php:158
 #: includes/admin/reports/class-wc-report-sales-by-product.php:323
 msgid "Date"
-msgstr "Дата"
+msgstr "Datum"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:250
 msgid "Edit this item"
-msgstr ""
+msgstr "Redigera denna artikel"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:251
 msgid "Edit this item inline"
-msgstr ""
+msgstr "Redigera artikel direkt"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:251
 msgid "Quick&nbsp;Edit"
-msgstr ""
+msgstr "Snabbredigering"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:255
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:111
 msgid "Restore this item from the Trash"
-msgstr ""
+msgstr "Återställ artikel från Papperskorgen"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:255
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:111
 msgid "Restore"
-msgstr ""
+msgstr "Återställ"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:257
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:113
 msgid "Move this item to the Trash"
-msgstr "Перемістити це в Кошик"
+msgstr "Flytta artikel till Papperskorgen"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:257
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:113
 msgid "Trash"
-msgstr ""
+msgstr "Papperskorg"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:259
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:115
 msgid "Delete this item permanently"
-msgstr ""
+msgstr "Radera artikel permanent"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:259
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:115
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:64
 msgid "Delete Permanently"
-msgstr "Видалити назавжди"
+msgstr "Radera permanent"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:264
 msgid "Preview &#8220;%s&#8221;"
-msgstr ""
+msgstr "Förhandsgranska &#8220;%s&#8221;"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:264
 msgid "Preview"
-msgstr ""
+msgstr "Förhandsgranska"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:266
 msgid "View &#8220;%s&#8221;"
-msgstr "Перегляд &#8220;%s&#8221;"
+msgstr "Visa &#8220;%s&#8221;"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:266
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:296
 #: includes/admin/reports/class-wc-report-stock.php:114
 msgid "View"
-msgstr "Перегляд"
+msgstr "Visa"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:316
 msgid "Grouped"
-msgstr "Згрупований"
+msgstr "Grupperad"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:318
 msgid "External/Affiliate"
-msgstr "Зовнішній/Приєднаний"
+msgstr "Extern/Återförsäljare"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:322
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:513
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:51
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:214
 msgid "Virtual"
-msgstr "Віртуальний"
+msgstr "Virtuell"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:324
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:506
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:58
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:212
 msgid "Downloadable"
-msgstr "Скачуваний"
+msgstr "Nedladdningsbar"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:326
 msgid "Simple"
-msgstr "Звичайний"
+msgstr "Enkel"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:330
 msgid "Variable"
-msgstr "Варіативний"
+msgstr "Variabel"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:353
 msgid "Toggle featured"
-msgstr ""
+msgstr "Aktivera rekommenderad"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:355
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:133
@@ -1738,7 +1734,7 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:176
 #: includes/admin/views/html-bulk-edit-product.php:213
 msgid "Yes"
-msgstr "Так"
+msgstr "Ja"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:357
 #: includes/admin/views/html-admin-page-status-report.php:38
@@ -1748,7 +1744,7 @@ msgstr "Так"
 #: includes/admin/views/html-bulk-edit-product.php:177
 #: includes/admin/views/html-bulk-edit-product.php:214
 msgid "No"
-msgstr "Ні"
+msgstr "Nej"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:364
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
@@ -1756,39 +1752,39 @@ msgstr "Ні"
 #: includes/admin/views/html-bulk-edit-product.php:194
 #: includes/admin/views/html-quick-edit-product.php:137
 msgid "In stock"
-msgstr "На складі"
+msgstr "I lager"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:448
 msgid "Sort Products"
-msgstr "Сортування товарів"
+msgstr "Sortera produkter"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:468
 msgid "Show all product types"
-msgstr "Показати всі типи товарів"
+msgstr "Visa alla produkttyper"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:480
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:37
 msgid "Grouped product"
-msgstr "Згрупований товар"
+msgstr "Grupperad produkt"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:483
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:38
 msgid "External/Affiliate product"
-msgstr "Зовнішній/Приєднаний товар"
+msgstr "Extern/Affiliateprodukt"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:486
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:39
 msgid "Variable product"
-msgstr "Варіативний продукт"
+msgstr "Variabel produkt"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:489
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:36
 msgid "Simple product"
-msgstr "Звичайний товар"
+msgstr "Enkel produkt"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:53
 msgid "Coupon code"
-msgstr "Код купона"
+msgstr "Rabattkod"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:66
 msgid "Description (optional)"
@@ -1796,37 +1792,37 @@ msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:77
 msgid "Code"
-msgstr "Код"
+msgstr "Kod"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:78
 msgid "Coupon type"
-msgstr "Тип купону"
+msgstr "Rabattkodstyp"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:79
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:66
 #: includes/admin/reports/class-wc-report-sales-by-date.php:320
 msgid "Coupon amount"
-msgstr "Розмір купону"
+msgstr "Rabattkodsbelopp"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:80
 msgid "Description"
-msgstr "Опис"
+msgstr "Beskrivning"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:81
 msgid "Product IDs"
-msgstr "ID товару"
+msgstr "Produkt IDn"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:82
 msgid "Usage / Limit"
-msgstr "Використання / Обмеження"
+msgstr "Användningsgräns"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:83
 msgid "Expiry date"
-msgstr "Дата закінчення"
+msgstr "Gäller till"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:102
 msgid "Edit coupon"
-msgstr "Редагувати купон"
+msgstr "Redigera rabattkod"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:160
 msgid "%s / %s"
@@ -1838,17 +1834,17 @@ msgstr "%s / &infin;"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:208
 msgid "Show all types"
-msgstr "Показати всі типи"
+msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:86
 #: includes/admin/settings/class-wc-settings-checkout.php:229
 #: includes/admin/settings/class-wc-settings-shipping.php:205
 msgid "Status"
-msgstr "Стан"
+msgstr "Status"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:87
 msgid "Order"
-msgstr "Замовлення"
+msgstr "Order"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:88
 msgid "Purchased"
@@ -1860,12 +1856,12 @@ msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:91
 msgid "Customer Message"
-msgstr "Повідомлення клієнта"
+msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:92
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:101
 msgid "Order Notes"
-msgstr "Нотатки до замовлення"
+msgstr "Ordernoteringar"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:94
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:43
@@ -1873,7 +1869,7 @@ msgstr "Нотатки до замовлення"
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:122
 msgid "Total"
-msgstr "Всього"
+msgstr "Total"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:95
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:34
@@ -1881,39 +1877,37 @@ msgstr "Всього"
 #: includes/admin/reports/class-wc-report-customer-list.php:249
 #: includes/admin/reports/class-wc-report-stock.php:141
 msgid "Actions"
-msgstr "Дії"
+msgstr "Händelser"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:119
 msgid "Unpublished"
-msgstr "Неопубліковане"
+msgstr "Ej publicerad"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:121
 msgid "Y/m/d g:i:s A"
-msgstr ""
+msgstr "Y/m/d H:i:s"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:124
 msgid "Y/m/d"
-msgstr "Р/м/д"
+msgstr "Y/m/d"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:145
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:183
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:211
 msgid "Via"
-msgstr "через"
+msgstr "Via"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:149
 msgid "%d item"
 msgid_plural "%d items"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:200
 msgid "plus %d other note"
 msgid_plural "plus %d other notes"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:218
 msgid "Billing:"
@@ -1921,13 +1915,13 @@ msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:221
 msgid "Tel:"
-msgstr "Тел:"
+msgstr "Tfn:"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:240
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:261
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:169
 msgid "Guest"
-msgstr "Гість"
+msgstr "Gäst"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:264
 msgid "%s by %s"
@@ -1935,25 +1929,25 @@ msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:283
 msgid "Processing"
-msgstr "Виконується"
+msgstr "Pågående"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:290
 msgid "Complete"
-msgstr "Завершено"
+msgstr "Genomförd"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:382
 msgid "Show all statuses"
-msgstr "Показати всі статуси"
+msgstr "Visa alla statusar"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:401
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:426
 msgid "Show all customers"
-msgstr "Показати всіх клієнтів"
+msgstr "Visa alla kunder"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:654
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:655
 msgid "Mark processing"
-msgstr "Помітити, що виконується"
+msgstr "Markera som behandlas"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:657
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:658
@@ -1963,18 +1957,17 @@ msgstr ""
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:660
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:661
 msgid "Mark completed"
-msgstr "Помітити як виконане"
+msgstr "Markera som genomförd"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:702
 msgid "Order status changed by bulk edit:"
-msgstr "Статус замолвення змінено масовою зміною:"
+msgstr "Orderstatus ändrades för flera ordrar:"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:724
 msgid "Order status changed."
 msgid_plural "%s order statuses changed."
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "Order status changed."
+msgstr[1] "%s orderstatus ändrades."
 
 #: includes/admin/post-types/class-wc-admin-cpt.php:42
 msgid "Insert into %s"
@@ -1986,62 +1979,62 @@ msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:93
 msgid "Product Short Description"
-msgstr "Короткий опис товару"
+msgstr "Kort beskrivning av produkt"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:94
 #: includes/admin/settings/class-wc-settings-products.php:283
 #: includes/admin/views/html-bulk-edit-product.php:4
 #: includes/admin/views/html-quick-edit-product.php:4
 msgid "Product Data"
-msgstr "Інформація про товар"
+msgstr "Produktdata"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:95
 msgid "Product Gallery"
-msgstr "Галерея товару"
+msgstr "Produktgalleri"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:98
 msgid "Order Data"
-msgstr "Дані замовлення"
+msgstr "Orderdata"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:99
 msgid "Order Items"
-msgstr ""
+msgstr "Orderrader"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:100
 msgid "Order Totals"
-msgstr "Підсумок замовлення"
+msgstr "Ordertotal"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:102
 msgid "Downloadable Product Permissions"
-msgstr "Дозволи по Цифрових товарах"
+msgstr "Behörighet för nedladdningsbar produkt"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:102
 msgid ""
 "Note: Permissions for order items will automatically be granted when the "
 "order status changes to processing/completed."
-msgstr "Примітка: Дозволи для позицій замовлення будуть надаватися автоматично при зміні статусу замовлення на виконується/виконано."
+msgstr "Notera att behörigheten för artiklar kommer att tillåtas automatiskt när orderns status ändras till behandlas/slutförd."
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:103
 msgid "Order Actions"
-msgstr ""
+msgstr "Orderhändelser"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:106
 msgid "Coupon Data"
-msgstr "Дані купона"
+msgstr "Rabattkodsdata"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:111
 msgid "Rating"
-msgstr "Рейтинг"
+msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:144
 msgid "Reviews"
-msgstr "Відгуки"
+msgstr "Recensioner"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:37
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:84
 #: includes/admin/settings/class-wc-settings-general.php:25
 msgid "General"
-msgstr "Загальні"
+msgstr "Generellt"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:42
 msgid "Usage Restriction"
@@ -2053,11 +2046,11 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:63
 msgid "Discount type"
-msgstr "Тип знижки"
+msgstr "Rabattyp"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:66
 msgid "Value of the coupon."
-msgstr "Значення купону"
+msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:69
 msgid "Allow free shipping"
@@ -2071,12 +2064,12 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:72
 msgid "Apply before tax"
-msgstr "Застосувати до оподаткування"
+msgstr "Applicera innan skatt"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:72
 msgid ""
 "Check this box if the coupon should be applied before calculating cart tax."
-msgstr "Виберіть цю опцію, якщо купон повинен бути введений до того як розраховується податок на кошик."
+msgstr "Kryssa i rutan om rabattkodsvärdet ska dras av innan momsen läggs på."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:75
 msgid "Coupon expiry date"
@@ -2093,12 +2086,12 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:85
 msgid "No minimum"
-msgstr "Без мінімуму"
+msgstr "Inget minimum"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:85
 msgid ""
 "This field allows you to set the minimum subtotal needed to use the coupon."
-msgstr "Це поле дозволяє Вам встановити мінімальну суму необхідну для вікористання цього купону."
+msgstr "Detta fält låter dig ange en lägsta totalsumma för att denna rabattkod ska kunna användas."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:88
 msgid "Individual use only"
@@ -2108,18 +2101,18 @@ msgstr ""
 msgid ""
 "Check this box if the coupon cannot be used in conjunction with other "
 "coupons."
-msgstr "Поставте відмітку тут якщо цей купон не може використовуватись у поєднанні з іншими купонами."
+msgstr "Kryssa i den här rutan om rabattkoden inte ska kunna användas tillsammans med andra rabattkoder."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:91
 msgid "Exclude sale items"
-msgstr "Виключити акційні товари"
+msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:91
 msgid ""
 "Check this box if the coupon should not apply to items on sale. Per-item "
 "coupons will only work if the item is not on sale. Per-cart coupons will "
 "only work if there are no sale items in the cart."
-msgstr "Виберіть цю опцію, якщо купон не застосовується для акційних товарів. Купони, які діють на товари будуть працювати тільки в тому випадку, якщо товар не акційний. Купони, що діють на весь кошик будуть діяти, якщо в кошику немає акційних товарів."
+msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:98
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:95
@@ -2127,55 +2120,55 @@ msgstr "Виберіть цю опцію, якщо купон не застос�
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:602
 #: includes/admin/reports/class-wc-report-sales-by-product.php:177
 msgid "Search for a product&hellip;"
-msgstr "Пошук товару&hellip;"
+msgstr "Sök efter en produkt&hellip;"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:111
 msgid ""
 "Products which need to be in the cart to use this coupon or, for \"Product "
 "Discounts\", which products are discounted."
-msgstr "Продукти, які повинні бути у кошику, щоб використовувати цей купон або, \"Знижки на продукти\", які продукти зі знижкою."
+msgstr "Produkter som måste finnas i varukorgen för att denna rabattkod ska kunna användas eller för att \"Produktrabatter\" ska rabatteras."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:116
 msgid "Exclude products"
-msgstr "Виключити товари"
+msgstr "Exkludera produkter"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:117
 msgid "Search for a product…"
-msgstr "Пошук товарів..."
+msgstr "Sök efter en produkt..."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:130
 msgid ""
 "Products which must not be in the cart to use this coupon or, for \"Product "
 "Discounts\", which products are not discounted."
-msgstr "Продукти, які повинні бути у кошику, щоб використовувати цей купон або, \"Знижки на продукти\", які продукти без знижки."
+msgstr "Produkter som inte får finnas i varukorgen för att denna rabattkod ska kunna användas, eller för att \"Produktrabatter\" ska rabatteras."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:137
 msgid "Product categories"
-msgstr "Категорії товарів"
+msgstr "Produktkategorier"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:138
 msgid "Any category"
-msgstr "Всі категорії"
+msgstr "Alla kategorier"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:146
 msgid ""
 "A product must be in this category for the coupon to remain valid or, for "
 "\"Product Discounts\", products in these categories will be discounted."
-msgstr "Товар повинен бути в цій категорії для того щоб можна було скористатися купоном або, для \"Продукт Купони\", продукти в цій категорії будуть зі знижкою."
+msgstr "En produkt från denna kategori måste finnas i varukorgen för att rabattkoden ska vara giltig, eller för att \"Produktrabatter\" ska rabatteras."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:151
 msgid "Exclude categories"
-msgstr "Виключити категоії"
+msgstr "Exkludera kategorier"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:152
 msgid "No categories"
-msgstr "Без категорій"
+msgstr "Inga kategorier"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:160
 msgid ""
 "Product must not be in this category for the coupon to remain valid or, for "
 "\"Product Discounts\", products in these categories will not be discounted."
-msgstr ""
+msgstr "Produkter från denna kategori får inte finnas i varukorgen för att rabattkoden ska vara giltig, eller för att \"Produktrabatter\" inte ska rabatteras."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:166
 msgid "Email restrictions"
@@ -2183,7 +2176,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:166
 msgid "No restrictions"
-msgstr "Немає обмежень"
+msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:166
 msgid ""
@@ -2199,11 +2192,11 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:190
 msgctxt "placeholder"
 msgid "Unlimited usage"
-msgstr "Необмежене користування"
+msgstr "Obegränsad användning"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:178
 msgid "How many times this coupon can be used before it is void."
-msgstr "Скільки разів цей купон може бути використаний?"
+msgstr "Hur många gånger kan denna rabattkod användas?"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:184
 msgid "Limit usage to X items"
@@ -2234,11 +2227,11 @@ msgstr ""
 msgid ""
 "Coupon code already exists - customers will use the latest coupon with this "
 "code."
-msgstr "Купон вже існує - клієнти будуть використовувати останній купон з цим кодом."
+msgstr "Rabattkoden finns redan - kunder kommer att använda den senaste rabattkoden med denna kod."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:35
 msgid "Resend order emails"
-msgstr "Пошти останніх замовлень"
+msgstr "Sänd ordermail igen"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:51
 msgid "Generate Download Permissions"
@@ -2247,54 +2240,54 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:57
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:91
 msgid "Apply"
-msgstr "Застосувати"
+msgstr "Genomför"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:66
 msgid "Move to Trash"
-msgstr "Перемістити в кошик"
+msgstr "Flytta till papperskorgen"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:71
 msgid "Save Order"
-msgstr "Зберегти замовлення"
+msgstr "Spara order"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:71
 msgid "Save/update the order"
-msgstr "Зберегти/оновити замовлення"
+msgstr "Spara/uppdatera ordern"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:29
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:76
 msgid "First Name"
-msgstr "Ім'я"
+msgstr "Förnamn"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:33
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:80
 msgid "Last Name"
-msgstr "Прізвище"
+msgstr "Efternamn"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:60
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:107
 msgid "Select a country&hellip;"
-msgstr "Обреіть країну&hellip;"
+msgstr "Välj land&hellip;"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:70
 msgid "Phone"
-msgstr "Телефон"
+msgstr "Telefon"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:139
 msgid "Order Details"
-msgstr "Деталі замовлення"
+msgstr "Orderdetaljer"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:142
 msgid "Order number"
-msgstr "Номер замовлення"
+msgstr "Ordernummer"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:145
 msgid "Customer IP:"
-msgstr "IP клієнта:"
+msgstr "Kundens IP-nummer:"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:150
 msgid "General Details"
-msgstr "Загальні деталі"
+msgstr "Generell information"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:152
 msgid "Order date:"
@@ -2302,35 +2295,35 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:153
 msgid "h"
-msgstr "г"
+msgstr "h"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:153
 #: includes/admin/settings/class-wc-settings-products.php:311
 msgid "m"
-msgstr "хв"
+msgstr "m"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:156
 msgid "Order status:"
-msgstr "Статус замовлення:"
+msgstr "Orderstatus:"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:167
 msgid "Customer:"
-msgstr "Клієнт:"
+msgstr "Kund:"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:182
 msgid "Billing Details"
-msgstr "Деталі рахунку"
+msgstr "Debiteringsinformation"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:188
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:190
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:267
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:269
 msgid "Address"
-msgstr "Адреса"
+msgstr "Adress"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:190
 msgid "No billing address set."
-msgstr "Не було вказано адреси для виставлення рахунків."
+msgstr "Ingen debiteringsadress angiven."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:208
 msgid "Payment Method"
@@ -2338,33 +2331,33 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:213
 msgid "Load billing address"
-msgstr "Завантажити адресу для рахунків."
+msgstr "Ladda kundens fakturaadress"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:230
 msgid "Payment Method:"
-msgstr "Спосіб оплати:"
+msgstr "Betalningsmetod:"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:232
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:33
 #: includes/admin/post-types/meta-boxes/views/html-order-shipping.php:12
 #: includes/admin/post-types/meta-boxes/views/html-order-tax.php:8
 msgid "N/A"
-msgstr "Н/Д"
+msgstr "Inte tillgänglig"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:245
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:247
 #: includes/admin/post-types/meta-boxes/views/html-order-shipping.php:30
 #: includes/admin/post-types/meta-boxes/views/html-order-shipping.php:32
 msgid "Other"
-msgstr "Інше"
+msgstr "Övrigt"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:261
 msgid "Shipping Details"
-msgstr "Деталі доставки"
+msgstr "Leveransinformation"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:269
 msgid "No shipping address set."
-msgstr "Не задана адреси доставки."
+msgstr "Ingen leveransadress angiven."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:282
 msgid "Customer Note"
@@ -2372,23 +2365,23 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:287
 msgid "Load shipping address"
-msgstr "Завантажити адресу доставки."
+msgstr "Ladda kundens leveransadress"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:287
 msgid "Copy from billing"
-msgstr "Копіювати з рахунків"
+msgstr "Kopiera från fakturering"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:304
 msgid "Customer Note:"
-msgstr "Нотатки клієнта:"
+msgstr "Kundnotering:"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:305
 msgid "Customer's notes about the order"
-msgstr "Нотатки клієнта про замовлення"
+msgstr "Kundens notering gällande ordern"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-downloads.php:51
 msgid "File %d"
-msgstr ""
+msgstr "Fil %d"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-downloads.php:64
 msgid "Search for a downloadable product&hellip;"
@@ -2396,11 +2389,11 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-downloads.php:65
 msgid "Grant Access"
-msgstr "Надати доступ"
+msgstr "Ge tillgång"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:33
 msgid "Item"
-msgstr ""
+msgstr "Artikel"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:38
 msgid "Tax&nbsp;Class"
@@ -2408,7 +2401,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:41
 msgid "Qty"
-msgstr "К-ть"
+msgstr "Antal"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:46
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:111
@@ -2416,35 +2409,35 @@ msgstr "К-ть"
 #: includes/admin/settings/class-wc-settings-tax.php:550
 #: includes/admin/settings/class-wc-settings-tax.php:643
 msgid "Tax"
-msgstr "Податок"
+msgstr "Moms"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:83
 msgid "Delete Lines"
-msgstr "Видалити лінії"
+msgstr "Radera notering"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:85
 msgid "Stock Actions"
-msgstr ""
+msgstr "Lagerhändelser"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:86
 msgid "Reduce Line Stock"
-msgstr ""
+msgstr "Minska lagersaldo"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:87
 msgid "Increase Line Stock"
-msgstr ""
+msgstr "Öka lagersaldo"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:97
 msgid "Add item(s)"
-msgstr "Додати товар(и)"
+msgstr "Lägg till artiklar"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:98
 msgid "Add fee"
-msgstr "Додати плату"
+msgstr "Lägg till avgift"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:44
 msgid "added %s ago"
-msgstr "додано %s тому"
+msgstr "tillagd för %s timmar sedan"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:45
 msgid "by %s"
@@ -2452,34 +2445,34 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:46
 msgid "Delete note"
-msgstr "Видалити замітку"
+msgstr "Radera notering"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:52
 msgid "There are no notes for this order yet."
-msgstr "Немає заміток для цього замовлення."
+msgstr "Det finns inga noteringar för denna order ännu."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:58
 msgid "Add note"
-msgstr "Додати замітку"
+msgstr "Lägg till notering"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:58
 msgid ""
 "Add a note for your reference, or add a customer note (the user will be "
 "notified)."
-msgstr "Додати примітку для власного використання, або додати примітку для клієнта (користувач буде повідомлений)."
+msgstr "Lägg till en egen notis eller lägg till ett kundmeddelande (användaren kommer att notifieras)."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:64
 msgid "Customer note"
-msgstr "Примітка клієнта"
+msgstr "Kundnotering"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:65
 msgid "Private note"
-msgstr "Персональна замітка"
+msgstr "Egen notering"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:67
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:563
 msgid "Add"
-msgstr "Додати"
+msgstr "Lägg till"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:31
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:62
@@ -2489,7 +2482,7 @@ msgstr "Додати"
 #: includes/admin/settings/class-wc-settings-tax.php:383
 #: includes/admin/views/html-admin-page-addons.php:13
 msgid "Shipping"
-msgstr "Доставка"
+msgstr "Frakt"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:66
 msgid "+ Add shipping cost"
@@ -2501,21 +2494,21 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:106
 msgid "+ Add tax row"
-msgstr "+ Додати рядок податку"
+msgstr "+ Lägg till momsrad"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:106
 msgid ""
 "These rows contain taxes for this order. This allows you to display multiple"
 " or compound taxes rather than a single total."
-msgstr ""
+msgstr "Dessa rader innehåller moms/skatt för denna order. Detta låter dig visa flera eller sammanräknad skatt istället för en totalsumma."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:113
 msgid "Order Discount"
-msgstr "Знижка на замовлення"
+msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:120
 msgid "Order Total"
-msgstr "Підсумок замовлення"
+msgstr "Order totalt"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:148
 msgid "Calculate Tax"
@@ -2527,92 +2520,92 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:42
 msgid "Product Type"
-msgstr "Тип товару"
+msgstr "Produkttyp"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:52
 msgid "Virtual products are intangible and aren't shipped."
-msgstr "Віртуальні продукти є нематеріальними і не мають доставки."
+msgstr "Virtuella produkter är immateriella och skickas inte."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:59
 msgid "Downloadable products give access to a file upon purchase."
-msgstr "Завантажувані товари надають доступ до файлів після покупки."
+msgstr "Nedladdningsbara produkter ger tillgång till fil efter köp."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:89
 #: includes/admin/settings/class-wc-settings-products.php:41
 msgid "Inventory"
-msgstr "Запаси"
+msgstr "Lagersaldo"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:99
 msgid "Linked Products"
-msgstr "Пов'язані товари"
+msgstr "Länkade produkter"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:109
 msgid "Variations"
-msgstr "Варіанти"
+msgstr "Varianter"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:114
 msgid "Advanced"
-msgstr "Розширені"
+msgstr "Avancerat"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:135
 msgid "Stock Keeping Unit"
-msgstr "Одиниці зберігання на складі"
+msgstr "Artikelnummer"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:135
 msgid ""
 "SKU refers to a Stock-keeping unit, a unique identifier for each distinct "
 "product and service that can be purchased."
-msgstr "Артикул це унікальний ідентифікатор для кожного окремого продукту або послуги, які можуть бути придбані."
+msgstr "SKU är Stock-Keeping Unit, ett unikt artikelnummer för varje produkt och tjänst som kan köpas."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:146
 msgid "Product URL"
-msgstr "URL товару"
+msgstr "URL till produkt"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:146
 msgid "Enter the external URL to the product."
-msgstr "Введіть зовнішнє посилання для цього товару"
+msgstr "Uppge en extern URL till produkten."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:149
 msgid "Button text"
-msgstr "Текст кнопки"
+msgstr "Knapptext"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:149
 msgctxt "placeholder"
 msgid "Buy product"
-msgstr "Купити товар"
+msgstr "Köp produkt"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:149
 msgid "This text will be shown on the button linking to the external product."
-msgstr "Цей текст буде відображатися на кнопці, що веде до зовнішнього товару."
+msgstr "Denna text visas på knappen som länkar till den externa produkten."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:156
 msgid "Regular Price"
-msgstr "Звичайна ціна"
+msgstr "Ordinarie pris"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:159
 msgid "Sale Price"
-msgstr "Акціна ціна"
+msgstr "Reapris"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:159
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:77
 msgid "Schedule"
-msgstr "Розклад"
+msgstr "Schemalägg"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:166
 msgid "Sale Price Dates"
-msgstr "Дати акційної ціни"
+msgstr "Reaprisdatum"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:167
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:85
 msgctxt "placeholder"
 msgid "From&hellip;"
-msgstr "З&hellip;"
+msgstr "Från&hellip;"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:168
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:89
 msgctxt "placeholder"
 msgid "To&hellip;"
-msgstr "До&hellip;"
+msgstr "Till&hellip;"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:180
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:144
@@ -2643,35 +2636,35 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:221
 msgid "Download Limit"
-msgstr "Ліміт завантажень"
+msgstr "Gräns för nedladdning"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:221
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:19
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:191
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:197
 msgid "Unlimited"
-msgstr "Необмежено"
+msgstr "Obegränsad"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:221
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:190
 msgid "Leave blank for unlimited re-downloads."
-msgstr "Залиште порожнім, щоб не обмежувати кількість перезавантажень"
+msgstr "Lämna blankt för obegränsad åternedladdning"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:227
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:770
 msgid "Download Expiry"
-msgstr "Термін завантаження"
+msgstr "Nerladdning upphör"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:227
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:23
 msgid "Never"
-msgstr "Ніколи"
+msgstr "Aldrig"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:227
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:196
 msgid ""
 "Enter the number of days before a download link expires, or leave blank."
-msgstr "Введіть кількість днів до того як посилання перестане працювати, або залиште порожнім."
+msgstr "Ange giltighetstiden för nedladdningslänken (antal dagar), eller lämna tomt."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:233
 msgid "Download Type"
@@ -2697,27 +2690,27 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:58
 #: includes/admin/views/html-quick-edit-product.php:38
 msgid "Tax Status"
-msgstr "Стан податків"
+msgstr "Momsstatus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:249
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:34
 #: includes/admin/views/html-bulk-edit-product.php:64
 #: includes/admin/views/html-quick-edit-product.php:43
 msgid "Taxable"
-msgstr "Неоподатковуваний"
+msgstr "Momsbelagd"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:250
 #: includes/admin/views/html-bulk-edit-product.php:65
 #: includes/admin/views/html-quick-edit-product.php:44
 msgid "Shipping only"
-msgstr "Лише доставка"
+msgstr "Endast frakt"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:251
 #: includes/admin/reports/class-wc-report-sales-by-category.php:167
 #: includes/admin/views/html-bulk-edit-product.php:66
 #: includes/admin/views/html-quick-edit-product.php:45
 msgid "None"
-msgstr "Немає"
+msgstr "Ingen"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:256
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:733
@@ -2729,20 +2722,20 @@ msgstr "Немає"
 #: includes/admin/views/html-bulk-edit-product.php:83
 #: includes/admin/views/html-quick-edit-product.php:61
 msgid "Standard"
-msgstr "Стандарт"
+msgstr "Standard"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:261
 #: includes/admin/settings/class-wc-settings-tax.php:383
 #: includes/admin/views/html-bulk-edit-product.php:77
 #: includes/admin/views/html-quick-edit-product.php:56
 msgid "Tax Class"
-msgstr "Податковий клас"
+msgstr "Momsgrupp"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:282
 #: includes/admin/views/html-bulk-edit-product.php:207
 #: includes/admin/views/html-quick-edit-product.php:153
 msgid "Manage stock?"
-msgstr "Управляти складом?"
+msgstr "Hantera lager?"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:282
 msgid ""
@@ -2755,62 +2748,62 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:242
 #: includes/admin/views/html-quick-edit-product.php:157
 msgid "Stock Qty"
-msgstr "К-ть на сладі"
+msgstr "Lagersaldo"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:289
 msgid ""
 "Stock quantity. If this is a variable product this value will be used to "
 "control stock for all variations, unless you define stock at variation "
 "level."
-msgstr "Кількість на складі. Якщо це продукт з варіантами, то це значення буде використовуватися для всіх варіантів, якщо ви не задасте кількість на рівні варіантів."
+msgstr "Lagersaldo. Om denna produkt är en variabel produkt kontrollerar detta värde lagersaldot för samtliga variationer om du inte definierar lagersaldo för varje variation."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:300
 #: includes/admin/reports/class-wc-report-stock.php:140
 msgid "Stock status"
-msgstr "Стан складу"
+msgstr "Lagerstatus"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:303
 msgid ""
 "Controls whether or not the product is listed as \"in stock\" or \"out of "
 "stock\" on the frontend."
-msgstr "Тут налаштовується відображення на вітрині магазину значень \"на складі\" або \"немає в наявності\"."
+msgstr "Styr om produkten visas som \"i lager\" eller \"slut i lager\" i butiken."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:310
 msgid "Allow Backorders?"
-msgstr ""
+msgstr "Tillåt bokning av produkter?"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:311
 #: includes/admin/views/html-bulk-edit-product.php:253
 #: includes/admin/views/html-quick-edit-product.php:172
 msgid "Do not allow"
-msgstr "Не дозволено"
+msgstr "Tillåt inte"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:312
 #: includes/admin/views/html-bulk-edit-product.php:254
 #: includes/admin/views/html-quick-edit-product.php:173
 msgid "Allow, but notify customer"
-msgstr "Дозволено, але повідомляти клієнта"
+msgstr "Tillåt men meddela kund"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:313
 #: includes/admin/views/html-bulk-edit-product.php:255
 #: includes/admin/views/html-quick-edit-product.php:174
 msgid "Allow"
-msgstr "Дозволено"
+msgstr "Tillåt"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:314
 msgid ""
 "If managing stock, this controls whether or not backorders are allowed for "
 "this product and variations. If enabled, stock quantity can go below 0."
-msgstr "Для управління складом. Тут контролюється можливість замовлення товару і його варіантів не залежно від кількості на сладі. Якщо включена ця опція, то кількість товарів на складі може опускатися нижче 0."
+msgstr "Om lagersaldo hanteras, kommer detta att bestämma om restnotering är tillåtet för den här produkten och dess varianter. Om aktiverat finns det risk för att lagersaldo kan understiga noll."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:325
 msgid "Sold Individually"
-msgstr "Продавати індивідуально"
+msgstr "Säljs individuellt"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:325
 msgid ""
 "Enable this to only allow one of this item to be bought in a single order"
-msgstr "Включити це щоб дозволити купували лише одну з цих одиниць в одному замовлені"
+msgstr "Aktivera detta för att endast tillåta att ett exemplar av denna artikel kan köpas i samma order"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:343
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:765
@@ -2818,72 +2811,72 @@ msgstr "Включити це щоб дозволити купували лиш�
 #: includes/admin/views/html-bulk-edit-product.php:103
 #: includes/admin/views/html-quick-edit-product.php:84
 msgid "Weight"
-msgstr "Вага"
+msgstr "Vikt"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:343
 msgid "Weight in decimal form"
-msgstr ""
+msgstr "Vikt i decimalform"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:348
 msgid "Dimensions"
-msgstr "Розміри упаковки"
+msgstr "Dimensioner"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:350
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:766
 #: includes/admin/views/html-bulk-edit-product.php:143
 #: includes/admin/views/html-quick-edit-product.php:97
 msgid "Length"
-msgstr "Довжина"
+msgstr "Längd"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:351
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:767
 #: includes/admin/views/html-bulk-edit-product.php:144
 #: includes/admin/views/html-quick-edit-product.php:98
 msgid "Width"
-msgstr "Ширина"
+msgstr "Bredd"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:352
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:768
 #: includes/admin/views/html-bulk-edit-product.php:145
 #: includes/admin/views/html-quick-edit-product.php:99
 msgid "Height"
-msgstr "Висота"
+msgstr "Höjd"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:354
 msgid "LxWxH in decimal form"
-msgstr ""
+msgstr "LxBxH i decimalform"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:371
 msgid "No shipping class"
-msgstr "Немає класів доставки"
+msgstr "Ingen fraktklass"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:377
 msgid "Shipping class"
-msgstr "Клас доставки"
+msgstr "Fraktklass"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:377
 msgid ""
 "Shipping classes are used by certain shipping methods to group similar "
 "products."
-msgstr "Класи доставка використовуються певні методи доставки для групування аналогічних продуктів."
+msgstr "Fraktklasser används av vissa fraktmetoder för att gruppera liknande produkter."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:389
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:751
 msgid "Close all"
-msgstr "Закрити все"
+msgstr "Stäng alla"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:389
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:751
 msgid "Expand all"
-msgstr "Розгорнути все"
+msgstr "Expandera alla"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:448
 msgid "Select terms"
-msgstr ""
+msgstr "Välj villkor"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:462
 msgid "Add new"
-msgstr "Додати нове"
+msgstr "Lägg till ny"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:475
 msgid "Pipe (|) separate terms"
@@ -2891,98 +2884,98 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:565
 msgid "Custom product attribute"
-msgstr "Власний атрибут товару"
+msgstr "Eget produktattribut"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:577
 msgid "Save attributes"
-msgstr "Зберегти атрибути"
+msgstr "Spara attribut"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:584
 msgid "Up-Sells"
-msgstr "Ап-Сайл"
+msgstr "Uppförsäljning"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:599
 msgid ""
 "Up-sells are products which you recommend instead of the currently viewed "
 "product, for example, products that are more profitable or better quality or"
 " more expensive."
-msgstr "Ап-Сайл товарів, які ви рекомендували замість товару, що переглядавася, наприклад, продукти, які є більш вигідними або більш високої якості або більш дорогими."
+msgstr "Uppförsäljning är produkter som du rekommenderar istället för visad produkt, t.ex. produkter som är mer prisvärda eller har en högre kvalitet eller är dyrare."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:601
 msgid "Cross-Sells"
-msgstr "Кросс-продажі"
+msgstr "Korsförsäljning"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:616
 msgid ""
 "Cross-sells are products which you promote in the cart, based on the current"
 " product."
-msgstr "Кросс-продажі продуктів які ви рекламуєте в кошику, відштовухючись від даного продукту."
+msgstr "Korsförsäljning är produkter som du vill marknadsföra i varukorgen, baserad på existerande produkt."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:626
 msgid "Choose a grouped product&hellip;"
-msgstr "Обрати згруповані товари&hellip;"
+msgstr "Välj en grupperad produkt&hellip;"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:656
 msgid "Grouping"
-msgstr "Групування"
+msgstr "Gruppering"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:656
 msgid "Set this option to make this product part of a grouped product."
-msgstr "Оберіть цю опцію, щоб зробити товар частиною згрупованого товару."
+msgstr "Markera detta för att göra denna produkt till del av en grupperad produkt."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:676
 msgid "Purchase Note"
-msgstr "Коментар до покупки"
+msgstr "Köpnotering"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:676
 msgid "Enter an optional note to send the customer after purchase."
-msgstr "Введіть додаткове повідомлення для покупця, яке буде відправлене йому після покупки."
+msgstr "Skriv in valfri notering att skicka till kund efter köp."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:683
 msgid "Menu order"
-msgstr "Порядок меню"
+msgstr "Menyordning"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:683
 msgid "Custom ordering position."
-msgstr "Власне розташування."
+msgstr "Anpassad position."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:691
 msgid "Enable reviews"
-msgstr "Включити відгуки"
+msgstr "Tillåt recensioner"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:743
 msgid ""
 "Before adding variations, add and save some attributes on the "
 "<strong>Attributes</strong> tab."
-msgstr "Перед додаванням варіантів, додайте і збережіть декілька атрибутів у вкладці <strong>Атрибути</strong>."
+msgstr "Innan du lägger till variationer måste du lägga till och spara ett eller flera attribut under <strong>Attribut</strong>-fliken."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:745
 msgid "Learn more"
-msgstr "Докладніше"
+msgstr "Läs mer"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:752
 msgid "Bulk edit:"
-msgstr "Масове редагування:"
+msgstr "Redigera fler"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:754
 msgid "Toggle &quot;Enabled&quot;"
-msgstr ""
+msgstr "Aktiverad"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:755
 msgid "Toggle &quot;Downloadable&quot;"
-msgstr ""
+msgstr "Aktivera/avaktivera nedladdningsbar"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:756
 msgid "Toggle &quot;Virtual&quot;"
-msgstr ""
+msgstr "Aktivera/avaktivera virtuell"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:757
 msgid "Delete all variations"
-msgstr "Видалити всі варіанти"
+msgstr "Ta bort alla variationer"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:758
 msgid "Prices"
-msgstr "Ціни"
+msgstr "Priser"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:759
 msgid "Prices increase by (fixed amount or %)"
@@ -2994,7 +2987,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:761
 msgid "Sale prices"
-msgstr "Акційні ціни"
+msgstr "Reapriser"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:762
 msgid "Sale prices increase by (fixed amount or %)"
@@ -3006,58 +2999,58 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:769
 msgid "Download limit"
-msgstr "Ліміт завантажень"
+msgstr "Nedladdningsgräns"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:773
 #: includes/admin/views/html-report-by-date.php:31
 msgid "Go"
-msgstr "Так"
+msgstr "Kör"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:868
 msgid "Add Variation"
-msgstr "Додати варіант"
+msgstr "Lägg till variant"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:870
 msgid "Link all variations"
-msgstr ""
+msgstr "Länka alla varianter"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:872
 msgid "Default selections:"
-msgstr "Вибір за умовчанням:"
+msgstr "Standardval:"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:885
 #: includes/admin/settings/class-wc-settings-shipping.php:214
 msgid "No default"
-msgstr "Немає"
+msgstr "Inte standard"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:989
 msgid "Product SKU must be unique."
-msgstr "Артикул товару має бути унікальним."
+msgstr "Produktens artikelnummer måste vara unikt."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1357
 msgid "Variation #%s of %s"
-msgstr "Варіант #%s з %s"
+msgstr "Variation %s of %s"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:44
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:55
 msgid "Delete image"
-msgstr "Видалити зображення"
+msgstr "Radera bild"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:55
 msgid "Add Images to Product Gallery"
-msgstr "Додати картинку в Галерею товару"
+msgstr "Lägg till bilder i produktgalleri"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:55
 msgid "Add to gallery"
-msgstr "Додати галерею"
+msgstr "Lägg till i galleri"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:55
 msgid "Add product gallery images"
-msgstr "Додати зображення до галереї товару"
+msgstr "Lägg till bilder i produktgalleri"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:6
 msgid "Revoke Access"
-msgstr "Заборонити доступ"
+msgstr "Återkalla åtkomst"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:9
 msgid "%s: %s"
@@ -3066,17 +3059,16 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:9
 msgid "Downloaded %s time"
 msgid_plural "Downloaded %s times"
-msgstr[0] "Скачано %s раз"
-msgstr[1] "Скачано %s раз"
-msgstr[2] "Скачано %s раз"
+msgstr[0] "Nerladdad %s gång"
+msgstr[1] "Nerladdad %s gånger"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:16
 msgid "Downloads Remaining"
-msgstr "Залишилось завантажень"
+msgstr "Återstående nerladdningar"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:22
 msgid "Access Expires"
-msgstr "Час доступу закінчується"
+msgstr "Åtkomst upphör"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:12
 msgid "Fee"
@@ -3084,32 +3076,32 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:16
 msgid "Fee Name"
-msgstr "Назва для оплати"
+msgstr "Avgiftsnamn"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:31
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:136
 msgid "Tax class"
-msgstr "Клас податку"
+msgstr "Momsgrupp"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:10
 msgid "Product ID:"
-msgstr "ID товару:"
+msgstr "Produkt-ID:"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:13
 msgid "Variation ID:"
-msgstr "ID Варіанту:"
+msgstr "Variant-ID:"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:16
 msgid "Product SKU:"
-msgstr "Артикул товара:"
+msgstr "Artikelnummer:"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:74
 msgid "Add&nbsp;meta"
-msgstr "Додати&nbsp;meta"
+msgstr "Lägg till meta"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
 msgid "Subtotal"
-msgstr "Попередній підсумок"
+msgstr "Delsumma"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
 msgid "Before pre-tax discounts."
@@ -3125,7 +3117,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/views/html-order-shipping.php:11
 msgid "Shipping Method"
-msgstr "Спосіб доставки"
+msgstr "Fraktmetoder"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-tax.php:7
 msgid "Tax Rate"
@@ -3157,81 +3149,81 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/views/html-product-download.php:5
 #: includes/admin/post-types/meta-boxes/views/html-product-variation-download.php:4
 msgid "Insert file URL"
-msgstr "Вставити URL адресу"
+msgstr "Ange URL till fil"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:21
 msgid "Any"
-msgstr "Будь-який"
+msgstr "Vilken som helst"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:53
 msgid ""
 "Enter a SKU for this variation or leave blank to use the parent product SKU."
-msgstr "Введіть артикул для цього варіанту або залиште порожнім, щоб використовувати артикул батьківського продукту."
+msgstr "Uppge ett artikelnummer för den här varianten eller lämna blankt för att använda förälderns artikelnummer."
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:64
 msgid "Stock Qty:"
-msgstr "К-ть на складі:"
+msgstr "Lagersaldo:"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:64
 msgid ""
 "Enter a quantity to enable stock management at variation level, or leave "
 "blank to use the parent product's options."
-msgstr "Введіть кількість щоб включити управління на рівні варіантів, або залиште порожнім, щоб використовувати налаштування батьківського товару."
+msgstr ""
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:73
 msgid "Regular Price:"
-msgstr "Звичайна ціна:"
+msgstr ""
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:74
 msgid "Variation price (required)"
-msgstr "Варіативна ціна (обов'язково)"
+msgstr ""
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:77
 msgid "Sale Price:"
-msgstr "Акційна ціна:"
+msgstr "Reapris:"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:77
 msgid "Cancel schedule"
-msgstr "Відмінити розклад"
+msgstr "Avaktivera schema"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:84
 msgid "Sale start date:"
-msgstr "Дата початку акції:"
+msgstr "Datum för reastart:"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:88
 msgid "Sale end date:"
-msgstr "Дата закінчення акції:"
+msgstr "Datum för reaslut:"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:97
 msgid ""
 "Enter a weight for this variation or leave blank to use the parent product "
 "weight."
-msgstr "Введіть вагу для цього варіанту товару, або залиште порожнім, щоб використовувати вагу батьківського товару."
+msgstr "Uppge en vikt för den här varianten eller lämna blankt för att använda förälderns vikt."
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:105
 msgid "Dimensions (L&times;W&times;H)"
-msgstr "Розміри (Д&times;Ш&times;В)"
+msgstr "Dimensioner (L&times;B&times;H)"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:116
 msgid "Shipping class:"
-msgstr "Клас доставки:"
+msgstr "Fraktklass:"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:120
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:133
 msgid "Same as parent"
-msgstr "Як у батьківського"
+msgstr "Samma som förälder"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:131
 msgid "Tax class:"
-msgstr "Клас оподаткування:"
+msgstr "Momssats:"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:190
 msgid "Download Limit:"
-msgstr "Обмеження завантажень:"
+msgstr "Gräns för nedladdning:"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:196
 msgid "Download Expiry:"
-msgstr "Час закінчення завантаження:"
+msgstr "Nerladdning upphör:"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:210
 #: includes/admin/settings/class-wc-settings-checkout.php:269
@@ -3239,18 +3231,18 @@ msgstr "Час закінчення завантаження:"
 #: includes/admin/views/html-admin-page-status-tools.php:26
 #: includes/admin/views/html-admin-page-status-tools.php:37
 msgid "Enabled"
-msgstr "Включено"
+msgstr "Aktiverad"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:212
 msgid ""
 "Enable this option if access is given to a downloadable file upon purchase "
 "of a product"
-msgstr "Включити цю опцію якщо доступ надано до завантажуваного файлу після того як товар буде куплено."
+msgstr "Aktivera det här alternativet om tillgång till nedladdningsbar fil ges vid köp av produkt"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:214
 msgid ""
 "Enable this option if a product is not shipped or there is no shipping cost"
-msgstr "Включіть цю опцію якщо товар не відправляється або доставка безкоштовна"
+msgstr "Aktivera det här alternativet om en produkt inte kan skickas eller om det inte finns någon fraktkostnad"
 
 #: includes/admin/reports/class-wc-admin-report.php:390
 msgid "Sold %s worth in the last %d days"
@@ -3261,7 +3253,6 @@ msgid "Sold 1 item in the last %d days"
 msgid_plural "Sold %d items in the last %d days"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:69
 msgid "%s discounts in total"
@@ -3329,7 +3320,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-sales-by-category.php:169
 #: includes/admin/reports/class-wc-report-sales-by-product.php:178
 msgid "Show"
-msgstr "Показати"
+msgstr "Visa"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:184
 msgid "Most Popular"
@@ -3353,7 +3344,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:29
 #: includes/admin/settings/class-wc-settings-tax.php:289
 msgid "Export CSV"
-msgstr "Експорт CSV"
+msgstr "Exportera CSV"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:407
 msgid "Number of coupons used"
@@ -3365,7 +3356,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-customer-list.php:24
 msgid "Customer"
-msgstr "Клієнт"
+msgstr "Kund"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:34
 msgid "No customers found."
@@ -3376,7 +3367,6 @@ msgid "%s previous order linked"
 msgid_plural "%s previous orders linked"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: includes/admin/reports/class-wc-report-customer-list.php:53
 msgid "Search customers"
@@ -3396,7 +3386,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-customer-list.php:243
 msgid "Username"
-msgstr "Ім'я користувача"
+msgstr "Användarnamn"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:245
 msgid "Location"
@@ -3466,7 +3456,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:168
 msgid "All"
-msgstr "Всі"
+msgstr ""
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:228
 msgid "&larr; Choose a category to view stats"
@@ -3522,7 +3512,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-sales-by-date.php:340
 #: includes/admin/reports/class-wc-report-sales-by-product.php:448
 msgid "Sales amount"
-msgstr "Об'єм продаж"
+msgstr "Total försäljning"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:87
 msgid "%s sales for the selected items"
@@ -3567,7 +3557,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-stock.php:138
 msgid "Parent"
-msgstr "Батьківський"
+msgstr ""
 
 #: includes/admin/reports/class-wc-report-stock.php:139
 msgid "Units in stock"
@@ -3615,31 +3605,31 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:110
 msgid "Total Sales"
-msgstr "Загальний обсяг продажів"
+msgstr "Summa försäljning"
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:110
 msgid "This is the sum of the 'Order Total' field within your orders."
-msgstr ""
+msgstr "Detta är summan av fältet \"Totalsumma\" i dina ordrar."
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:111
 msgid "Total Shipping"
-msgstr ""
+msgstr "Summa frakt"
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:111
 msgid "This is the sum of the 'Shipping Total' field within your orders."
-msgstr ""
+msgstr "Detta är summan från fältet \"Frakt\" i dina ordrar."
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:113
 msgid "Net profit"
-msgstr "Чистий прибуток"
+msgstr "Vinst, netto"
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:113
 msgid "Total sales minus shipping and tax."
-msgstr ""
+msgstr "Summa minus frakt och moms."
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:122
 msgid "Totals"
-msgstr "Підсумок"
+msgstr "Totalt"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:25
 msgid "Accounts"
@@ -3657,7 +3647,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:44
 msgid "My Account Page"
-msgstr "Сторінка облікового запису"
+msgstr "Mitt konto"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:45
 #: includes/admin/settings/class-wc-settings-checkout.php:113
@@ -3677,7 +3667,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:59
 msgid "View Order"
-msgstr "Переглянути замовлення"
+msgstr "Visa order"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:60
 msgid "Endpoint for the My Account &rarr; View Order page"
@@ -3693,7 +3683,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:77
 msgid "Edit Address"
-msgstr "Редагувати адресу"
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:78
 msgid "Endpoint for the My Account &rarr; Edit Address page"
@@ -3701,7 +3691,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:86
 msgid "Lost Password"
-msgstr "Загубили пароль"
+msgstr "Glömt lösenordet?"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:87
 msgid "Endpoint for the My Account &rarr; Lost Password page"
@@ -3753,7 +3743,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-checkout.php:78
 #: includes/admin/views/html-admin-page-status-report.php:297
 msgid "Checkout"
-msgstr "Оформлення"
+msgstr "Till kassan"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:41
 msgid "Checkout Options"
@@ -3765,15 +3755,15 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:68
 msgid "Coupons"
-msgstr "Купони"
+msgstr "Rabattkoder"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:69
 msgid "Enable the use of coupons"
-msgstr "Дозволити використання купонів"
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:73
 msgid "Coupons can be applied from the cart and checkout pages."
-msgstr "Купони можуть бути застосовані з кошуку, або зі сторінки оформлення замовлення."
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:79
 msgid "Enable guest checkout"
@@ -3785,16 +3775,16 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:89
 msgid "Force secure checkout"
-msgstr "Включити безпечне оформлення"
+msgstr "Tvinga säker anslutning"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:95
 msgid ""
 "Force SSL (HTTPS) on the checkout pages (an SSL Certificate is required)."
-msgstr "Включити SSL (HTTPS) на сторінці оформлення (потрібен SSL Сертифікат)."
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:99
 msgid "Un-force HTTPS when leaving the checkout"
-msgstr "Відключити HTTPS після виходу зі сторінки оформлення"
+msgstr "Tvinga användaren att lämna HTTPS när kassan lämnas"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:109
 msgid "Checkout Pages"
@@ -3808,11 +3798,11 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:112
 msgid "Cart Page"
-msgstr "Сторінка кошику"
+msgstr "Sida för Varukorg"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:123
 msgid "Checkout Page"
-msgstr "Сторінка оформлення замовлення"
+msgstr "Kassasida"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:134
 msgid "Terms and Conditions"
@@ -3822,7 +3812,7 @@ msgstr ""
 msgid ""
 "If you define a \"Terms\" page the customer will be asked if they accept "
 "them when checking out."
-msgstr ""
+msgstr "Om du definierar en sida för \"Villkor\" så måste kunden acceptera dessa för att kunna gå vidare med ordern."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:147
 msgid "Checkout Endpoints"
@@ -3836,7 +3826,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:150
 msgid "Pay"
-msgstr "Оплата"
+msgstr "Betala"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:151
 #: includes/admin/settings/class-wc-settings-checkout.php:160
@@ -3845,7 +3835,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:159
 msgid "Order Received"
-msgstr "Замовлення отримане"
+msgstr "Order mottagen"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:168
 msgid "Add Payment Method"
@@ -3857,7 +3847,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:178
 msgid "Payment Gateways"
-msgstr "Методи оплати"
+msgstr "Betalningsalternativ"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:178
 msgid ""
@@ -3871,41 +3861,41 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:227
 msgid "Gateway"
-msgstr "Шлюз"
+msgstr "Tjänst"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:228
 msgid "Gateway ID"
-msgstr "ID шлюзу"
+msgstr "Tjänst ID"
 
 #: includes/admin/settings/class-wc-settings-emails.php:25
 msgid "Emails"
-msgstr "Електронні пошти"
+msgstr "E-post"
 
 #: includes/admin/settings/class-wc-settings-emails.php:40
 msgid "Email Options"
-msgstr ""
+msgstr "Inställningar för e-post"
 
 #: includes/admin/settings/class-wc-settings-emails.php:66
 msgid "Email Sender Options"
-msgstr "Налаштування відправника пошти"
+msgstr "Avsändare för e-post"
 
 #: includes/admin/settings/class-wc-settings-emails.php:66
 msgid ""
 "The following options affect the sender (email address and name) used in "
 "WooCommerce emails."
-msgstr ""
+msgstr "Följande inställningar påverkar vilken avsändare (namn och e-postadress) som används i e-post från WooCommerce."
 
 #: includes/admin/settings/class-wc-settings-emails.php:69
 msgid "\"From\" Name"
-msgstr "\"Від\" Ім'я"
+msgstr "\"Från\" namn"
 
 #: includes/admin/settings/class-wc-settings-emails.php:79
 msgid "\"From\" Email Address"
-msgstr "\"Від\" Електронна пошта"
+msgstr "\"Från\" e-postadress"
 
 #: includes/admin/settings/class-wc-settings-emails.php:93
 msgid "Email Template"
-msgstr "Шаблон електронного листа"
+msgstr "Mall för e-post"
 
 #: includes/admin/settings/class-wc-settings-emails.php:93
 msgid ""
@@ -3913,79 +3903,79 @@ msgid ""
 "target=\"_blank\">Click here to preview your email template</a>. For more "
 "advanced control copy <code>woocommerce/templates/emails/</code> to "
 "<code>yourtheme/woocommerce/emails/</code>."
-msgstr "У цьому розділі можна налаштувати електронну пошту WooCommerce. <a href=\"%s\" target=\"_blank\">Натисніть тут, щоб переглянути шаблон електронного листа</a>. Для більш розширеного керування скопіюйте <code>woocommerce/templates/emails/</code> в <code>yourtheme/woocommerce/emails/</code>."
+msgstr "Denna del låter dig anpassa e-post från WooCommerce. <a href=\"%s\" target=\"_blank\">Klicka här för att förhandsgranska dina e-postmallar</a>. För mer avancerade förändringar kopiera <code>woocommerce/templates/emails/</code> till <code>ditt-tema/woocommerce/emails/</code>."
 
 #: includes/admin/settings/class-wc-settings-emails.php:96
 msgid "Header Image"
-msgstr "Верхнє зображення"
+msgstr "Sidhuvuvdsbild"
 
 #: includes/admin/settings/class-wc-settings-emails.php:97
 msgid ""
 "Enter a URL to an image you want to show in the email's header. Upload your "
 "image using the <a href=\"%s\">media uploader</a>."
-msgstr "Введіть посилання на зображення, яке ви хочете показати в шапці електронної пошти. Завантажте ваше зображення за допомогою <a href=\"%s\">завантаження медіафайлів</a>."
+msgstr "Skriv in sökvägen till bilden du vill använda i sidhuvudet. Ladda upp din bild genom att använda <a href=\"%s\">mediauppladdaren</a>."
 
 #: includes/admin/settings/class-wc-settings-emails.php:106
 msgid "Email Footer Text"
-msgstr "Текст в нижній частині електронного листа"
+msgstr "Sidfotstext i e-post"
 
 #: includes/admin/settings/class-wc-settings-emails.php:107
 msgid "The text to appear in the footer of WooCommerce emails."
-msgstr "Текст розташований в нижній частині електронного листа WooCommerce"
+msgstr "Texten visas i sidfoten för e-post från WooCommerce."
 
 #: includes/admin/settings/class-wc-settings-emails.php:111
 msgid "Powered by WooCommerce"
-msgstr "Створено WooCommerce"
+msgstr "Drivs med WooCommerce"
 
 #: includes/admin/settings/class-wc-settings-emails.php:116
 msgid "Base Colour"
-msgstr "Основний колір"
+msgstr "Basfärg"
 
 #: includes/admin/settings/class-wc-settings-emails.php:117
 msgid ""
 "The base colour for WooCommerce email templates. Default "
 "<code>#557da1</code>."
-msgstr "Основний колір для шаблону електронного листа WooCommerce. За промовчанням <code>#557da1</code>."
+msgstr "Det här är basfärgen för e-postamallarna i WooCommerce. Standard <code>#557da1</code>."
 
 #: includes/admin/settings/class-wc-settings-emails.php:126
 msgid "Background Colour"
-msgstr "Колір фону"
+msgstr "Bakgrundsfärg"
 
 #: includes/admin/settings/class-wc-settings-emails.php:127
 msgid ""
 "The background colour for WooCommerce email templates. Default "
 "<code>#f5f5f5</code>."
-msgstr "Колір фону для WooCommerce шаблону електронног листа. За промовчанням <code>#f5f5f5</code>."
+msgstr "Bakgrundsfärgen för e-postmallarna i WooCommerce. Standard <code>#f5f5f5</code>."
 
 #: includes/admin/settings/class-wc-settings-emails.php:136
 msgid "Email Body Background Colour"
-msgstr "Фоновий колір електронного листа"
+msgstr "Bakgrundsfärg för innehållet i e-post"
 
 #: includes/admin/settings/class-wc-settings-emails.php:137
 msgid "The main body background colour. Default <code>#fdfdfd</code>."
-msgstr "Основний фоновий колір. За промовчанням code>#fdfdfd</code>."
+msgstr "Bakgrundsfärgen för innehållet. Standard <code>#fdfdfd</code>."
 
 #: includes/admin/settings/class-wc-settings-emails.php:146
 msgid "Email Body Text Colour"
-msgstr "Колір основного тексту"
+msgstr "Textfärg för e-post"
 
 #: includes/admin/settings/class-wc-settings-emails.php:147
 msgid "The main body text colour. Default <code>#505050</code>."
-msgstr "Колір основного тексту тіла. За промовчанням <code>#505050</code>."
+msgstr "Textfärgen för innhållstexten. Standard <code>#505050</code>."
 
 #: includes/admin/settings/class-wc-settings-general.php:48
 msgid "General Options"
-msgstr "Загальні налаштування"
+msgstr "Generella alternativ"
 
 #: includes/admin/settings/class-wc-settings-general.php:51
 msgid "Base Location"
-msgstr "Базове розташування"
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:52
 msgid ""
 "This is the base location for your business. Tax rates will be based on this"
 " country."
-msgstr "Це місце розташування вашого бізнесу. Податкові ставки будуть взяті виходячи з країни, що вказана в цьому полі."
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:61
 msgid "Selling Location(s)"
@@ -4006,25 +3996,25 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-general.php:76
 #: includes/admin/settings/class-wc-settings-shipping.php:147
 msgid "Specific Countries"
-msgstr "Визначені країни"
+msgstr "Specifika länder"
 
 #: includes/admin/settings/class-wc-settings-general.php:85
 msgid "Store Notice"
-msgstr "Повідомлення магазину"
+msgstr "Butiksmeddelande"
 
 #: includes/admin/settings/class-wc-settings-general.php:86
 msgid "Enable site-wide store notice text"
-msgstr "Включення текстового повідомлення на всю ширину сторінки"
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:93
 msgid "Store Notice Text"
-msgstr "Текст повідомлення"
+msgstr "Text i butiksnotifiering"
 
 #: includes/admin/settings/class-wc-settings-general.php:96
 msgid ""
 "This is a demo store for testing purposes &mdash; no orders shall be "
 "fulfilled."
-msgstr "Це демо версія магазину. Лише для тестування можливостей &mdash; замовлення не будуть виконуватись."
+msgstr "Det här är en demobutik för testning &mdash; Inga beställningar kan göras."
 
 #: includes/admin/settings/class-wc-settings-general.php:103
 msgid "API"
@@ -4040,33 +4030,33 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:112
 msgid "The following options affect how prices are displayed on the frontend."
-msgstr "Ця опція впливає на відображення цін на вітрині магазину."
+msgstr "Följande inställningar påverkar hur priset visas i butiken."
 
 #: includes/admin/settings/class-wc-settings-general.php:115
 msgid "Currency"
-msgstr "Валюта"
+msgstr "Valuta"
 
 #: includes/admin/settings/class-wc-settings-general.php:116
 msgid ""
 "This controls what currency prices are listed at in the catalog and which "
 "currency gateways will take payments in."
-msgstr "Тут вказується валюта, у якій будуть відображатися ціни на сайті, а токож у якій буде проходити оплата через платіжні системи."
+msgstr "Det här kontrollerar vilken valuta som priser är listade med i produktkatalogen och vilken betalningsmetod som kommer att användas."
 
 #: includes/admin/settings/class-wc-settings-general.php:127
 msgid "Currency Position"
-msgstr "Розташування символу валюти"
+msgstr "Valutaposition"
 
 #: includes/admin/settings/class-wc-settings-general.php:128
 msgid "This controls the position of the currency symbol."
-msgstr "Налаштування позиції символу валюти."
+msgstr "Det här kontrollerar positionen för valutasymbolen."
 
 #: includes/admin/settings/class-wc-settings-general.php:135
 msgid "Left"
-msgstr "Ліворуч"
+msgstr "Vänster"
 
 #: includes/admin/settings/class-wc-settings-general.php:136
 msgid "Right"
-msgstr "Праворуч"
+msgstr "Höger"
 
 #: includes/admin/settings/class-wc-settings-general.php:137
 msgid "Left with space"
@@ -4078,39 +4068,39 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:144
 msgid "Thousand Separator"
-msgstr "Відділяти тисячі"
+msgstr "Tusentalsavgränsare"
 
 #: includes/admin/settings/class-wc-settings-general.php:145
 msgid "This sets the thousand separator of displayed prices."
-msgstr "Це "
+msgstr "Det här bestämmer tusentalsavgränsare för visade priser."
 
 #: includes/admin/settings/class-wc-settings-general.php:154
 msgid "Decimal Separator"
-msgstr "Відокремлення десятих"
+msgstr "Decimalavgränsare"
 
 #: includes/admin/settings/class-wc-settings-general.php:155
 msgid "This sets the decimal separator of displayed prices."
-msgstr "Це налаштування відокремлення десятих для відображення цін."
+msgstr "Det här bestämmer vilken decimalavgränsare som används för visade priser."
 
 #: includes/admin/settings/class-wc-settings-general.php:164
 msgid "Number of Decimals"
-msgstr "Кількість знаків після коми"
+msgstr "Antal decimaler"
 
 #: includes/admin/settings/class-wc-settings-general.php:165
 msgid "This sets the number of decimal points shown in displayed prices."
-msgstr "Це налаштування кількості знаків після коми у відображенні ціни."
+msgstr "Det här bestämmer antalet decimalpunkter för visade priser."
 
 #: includes/admin/settings/class-wc-settings-general.php:179
 msgid "Styles and Scripts"
-msgstr "Стилі і Скрипти"
+msgstr "Stilmallar och skript"
 
 #: includes/admin/settings/class-wc-settings-general.php:184
 msgid "Scripts"
-msgstr "Скрипти"
+msgstr "Script"
 
 #: includes/admin/settings/class-wc-settings-general.php:185
 msgid "Enable Lightbox"
-msgstr "Включити Lightbox"
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:188
 msgid ""
@@ -4120,7 +4110,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:194
 msgid "Enable enhanced country select boxes"
-msgstr ""
+msgstr "Använd förbättrad dropdown för val av land"
 
 #: includes/admin/settings/class-wc-settings-general.php:199
 msgid ""
@@ -4133,43 +4123,43 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:237
 msgid "Primary"
-msgstr "Головний"
+msgstr "Primär"
 
 #: includes/admin/settings/class-wc-settings-general.php:237
 msgid "Call to action buttons/price slider/layered nav UI"
-msgstr ""
+msgstr "Handlingsknappar/pris-slider/navigering"
 
 #: includes/admin/settings/class-wc-settings-general.php:238
 msgid "Secondary"
-msgstr "Другорядне"
+msgstr "Sekundär"
 
 #: includes/admin/settings/class-wc-settings-general.php:238
 msgid "Buttons and tabs"
-msgstr "Кнопки і вкладки"
+msgstr "Knappar och flikar"
 
 #: includes/admin/settings/class-wc-settings-general.php:239
 msgid "Highlight"
-msgstr "Виділення"
+msgstr "Markering"
 
 #: includes/admin/settings/class-wc-settings-general.php:239
 msgid "Price labels and Sale Flashes"
-msgstr "Цінники і Акіцйні стікери"
+msgstr "Prislappar och rea-lappar"
 
 #: includes/admin/settings/class-wc-settings-general.php:240
 msgid "Content"
-msgstr "Вміст"
+msgstr "Innehåll"
 
 #: includes/admin/settings/class-wc-settings-general.php:240
 msgid "Your themes page background - used for tab active states"
-msgstr ""
+msgstr "Ditt temas bakgrund - används för aktiva flikar"
 
 #: includes/admin/settings/class-wc-settings-general.php:241
 msgid "Subtext"
-msgstr "Підтекст"
+msgstr "Undertext"
 
 #: includes/admin/settings/class-wc-settings-general.php:241
 msgid "Used for certain text and asides - breadcrumbs, small text etc."
-msgstr "Використовується для певного тексту і відступів - хлібних крихт, дрібного тексту тощо."
+msgstr "Används för vissa texter och asides - brödsmulor, finstilt osv."
 
 #: includes/admin/settings/class-wc-settings-general.php:244
 msgid ""
@@ -4177,11 +4167,11 @@ msgid ""
 "and <code>woocommerce.css</code> need to be writable. See <a "
 "href=\"http://codex.wordpress.org/Changing_File_Permissions\">the Codex</a> "
 "for more information."
-msgstr "Щоб редагувати кольори <code>woocommerce/assets/css/woocommerce-base.less</code> і <code>woocommerce.css</code> повинні бути перезаписуваними. Див <a href=\"http://codex.wordpress.org/Changing_File_Permissions\">Кодекс</a> для отримання додаткової інформації."
+msgstr "För att redigera färger måste filerna <code>woocommerce/assets/css/woocommerce-base.less</code> och <code>woocommerce.css</code> vara skrivbara. Se <a href=\"http://codex.wordpress.org/Changing_File_Permissions\">artikel i Codex</a> för mer information."
 
 #: includes/admin/settings/class-wc-settings-integrations.php:25
 msgid "Integration"
-msgstr "Інтреграція"
+msgstr "Integrering"
 
 #: includes/admin/settings/class-wc-settings-products.php:40
 msgid "Product Options"
@@ -4189,83 +4179,83 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:79
 msgid "Inventory Options"
-msgstr "Опції запасів"
+msgstr "Lagersaldo inställningar"
 
 #: includes/admin/settings/class-wc-settings-products.php:82
 msgid "Manage Stock"
-msgstr "Керування складом"
+msgstr "Hantera lager"
 
 #: includes/admin/settings/class-wc-settings-products.php:83
 msgid "Enable stock management"
-msgstr "Включити керування складом"
+msgstr "Aktivera lagerhantering"
 
 #: includes/admin/settings/class-wc-settings-products.php:90
 msgid "Hold Stock (minutes)"
-msgstr "Відкладування на складі (хвилин)"
+msgstr "Reservera artiklar (minuter)"
 
 #: includes/admin/settings/class-wc-settings-products.php:91
 msgid ""
 "Hold stock (for unpaid orders) for x minutes. When this limit is reached, "
 "the pending order will be cancelled. Leave blank to disable."
-msgstr "Утримувати на складі (неоплачений товар) протягом х-хвилин. Коли цей ліміт вичерпано, замовлення буде відмінене автоматично. Щоб відключити, залишете це поле порожнім."
+msgstr "Reservera artiklar (i obetalda ordrar) i x minuter. När denna gräns nås avbryts obetalda ordrar. Lämna tomt för att avaktivera."
 
 #: includes/admin/settings/class-wc-settings-products.php:104
 msgid "Notifications"
-msgstr "Повідомлення"
+msgstr "Meddelanden"
 
 #: includes/admin/settings/class-wc-settings-products.php:105
 msgid "Enable low stock notifications"
-msgstr "Включити повідомлення про маленьку кількість на складі"
+msgstr "Aktivera meddelanden för lågt lagersaldo"
 
 #: includes/admin/settings/class-wc-settings-products.php:114
 msgid "Enable out of stock notifications"
-msgstr "Включити повідомлення про закінчення товару"
+msgstr "Aktivera meddelanden för slut i lager"
 
 #: includes/admin/settings/class-wc-settings-products.php:123
 msgid "Notification Recipient"
-msgstr "Отримувач повідомлень"
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:132
 msgid "Low Stock Threshold"
-msgstr "Вкрай низький залишок"
+msgstr "Gränsvärde för lågt lagersaldo"
 
 #: includes/admin/settings/class-wc-settings-products.php:146
 msgid "Out Of Stock Threshold"
-msgstr "Немає на складі"
+msgstr "Gränsvärde för slut i lager"
 
 #: includes/admin/settings/class-wc-settings-products.php:160
 msgid "Out Of Stock Visibility"
-msgstr "Видимість відсутніх на складі товарі"
+msgstr "Synlighet för slut i lager"
 
 #: includes/admin/settings/class-wc-settings-products.php:161
 msgid "Hide out of stock items from the catalog"
-msgstr "Приховувати відсутні на складі товари з каталогу"
+msgstr "Dölj produkter i katalogen som är slut i lager"
 
 #: includes/admin/settings/class-wc-settings-products.php:168
 msgid "Stock Display Format"
-msgstr "Формат відображення складу"
+msgstr "Visningsformat för lager"
 
 #: includes/admin/settings/class-wc-settings-products.php:169
 msgid "This controls how stock is displayed on the frontend."
-msgstr "Налаштування відображення складу на сторінці магазину."
+msgstr "Detta kontrollerar hur lagersaldo visas i butiken."
 
 #: includes/admin/settings/class-wc-settings-products.php:175
 msgid "Always show stock e.g. \"12 in stock\""
-msgstr "Завжди показувати склад напр. \"12 на слкаді\""
+msgstr "Visa alltid lagersaldo, t.ex. \"12 i lager\""
 
 #: includes/admin/settings/class-wc-settings-products.php:176
 msgid "Only show stock when low e.g. \"Only 2 left in stock\" vs. \"In Stock\""
-msgstr "Показувати склад при маленьких запасах \"Лише 2 залишилось на складі \" замість \"На складі\""
+msgstr "Visa bara vid lågt lagersaldo, t.ex. \"Bara 2 i lager\" istället för \"I lager\""
 
 #: includes/admin/settings/class-wc-settings-products.php:177
 msgid "Never show stock amount"
-msgstr "Ніколи не відображати кількість на складі"
+msgstr "Visa aldrig lagersaldo"
 
 #: includes/admin/settings/class-wc-settings-products.php:196
 msgid ""
 "Note: The shop page has children - child pages will not work if you enable "
 "this option."
-msgstr ""
+msgstr "Notera att butikssidan har undersidor. Undersidorna kommer inte att fungera om du aktiverar denna inställning."
 
 #: includes/admin/settings/class-wc-settings-products.php:200
 msgid "Product Listings"
@@ -4285,146 +4275,146 @@ msgstr ""
 msgid ""
 "This sets the base page of your shop - this is where your product archive "
 "will be."
-msgstr ""
+msgstr "Detta anger grundsidan för din butik. Det är här ditt produktarkiv kommer att visas."
 
 #: includes/admin/settings/class-wc-settings-products.php:214
 msgid "Shop Page Display"
-msgstr "Відображення сторінки магазину"
+msgstr "Butikssidor"
 
 #: includes/admin/settings/class-wc-settings-products.php:215
 msgid "This controls what is shown on the product archive."
-msgstr "Що відображати в архіві товарів?"
+msgstr "Detta styr vad som visas i produktarkivet."
 
 #: includes/admin/settings/class-wc-settings-products.php:222
 #: includes/admin/settings/class-wc-settings-products.php:238
 msgid "Show products"
-msgstr "Показати товари"
+msgstr "Visa produkter"
 
 #: includes/admin/settings/class-wc-settings-products.php:223
 #: includes/admin/settings/class-wc-settings-products.php:239
 msgid "Show subcategories"
-msgstr "Показати підкатегорії"
+msgstr "Visa underkategorier"
 
 #: includes/admin/settings/class-wc-settings-products.php:224
 #: includes/admin/settings/class-wc-settings-products.php:240
 msgid "Show both"
-msgstr "Показати обі"
+msgstr "Visa båda"
 
 #: includes/admin/settings/class-wc-settings-products.php:230
 msgid "Default Category Display"
-msgstr ""
+msgstr "Visning av standardkategori"
 
 #: includes/admin/settings/class-wc-settings-products.php:231
 msgid "This controls what is shown on category archives."
-msgstr ""
+msgstr "Detta styr vad som visas i kategoriarkiv."
 
 #: includes/admin/settings/class-wc-settings-products.php:246
 msgid "Default Product Sorting"
-msgstr "Сортування товарів за замовчуванням"
+msgstr "Standardsortering"
 
 #: includes/admin/settings/class-wc-settings-products.php:247
 msgid "This controls the default sort order of the catalog."
-msgstr "Керування соруванням каталогу за замовчуванням."
+msgstr "Dessa styr standardsorteringen i katalogen."
 
 #: includes/admin/settings/class-wc-settings-products.php:254
 msgid "Default sorting (custom ordering + name)"
-msgstr "Сортування за замовчуванням (налаштований порядок + ім'я)"
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:255
 msgid "Popularity (sales)"
-msgstr "Популярність (продажі)"
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:256
 msgid "Average Rating"
-msgstr "Середній рейтинг"
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:257
 msgid "Sort by most recent"
-msgstr "Сортувати за найновішими"
+msgstr "Sortera efter senaste"
 
 #: includes/admin/settings/class-wc-settings-products.php:258
 msgid "Sort by price (asc)"
-msgstr "Сортувати за ціною (ріст)"
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:259
 msgid "Sort by price (desc)"
-msgstr "Сортувати за ціною (спад)"
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:265
 msgid "Add to cart"
-msgstr "Додати в кошик"
+msgstr "Lägg i varukorg"
 
 #: includes/admin/settings/class-wc-settings-products.php:266
 msgid "Redirect to the cart page after successful addition"
-msgstr "Перейти на сторінку кошика після успішного додавання"
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:274
 msgid "Enable AJAX add to cart buttons on archives"
-msgstr "Включити AJAX кнопки додати в кошик у архіві"
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:286
 msgid "Weight Unit"
-msgstr "Одиниці ваги"
+msgstr "Viktenhet"
 
 #: includes/admin/settings/class-wc-settings-products.php:287
 msgid "This controls what unit you will define weights in."
-msgstr "Цей блок керує налаштуваннями одиниць виміру ваги."
+msgstr "Det här kontrollerar vilken viktenhet som används för produkter."
 
 #: includes/admin/settings/class-wc-settings-products.php:294
 msgid "kg"
-msgstr "кг"
+msgstr "kg"
 
 #: includes/admin/settings/class-wc-settings-products.php:295
 msgid "g"
-msgstr "г"
+msgstr "g"
 
 #: includes/admin/settings/class-wc-settings-products.php:296
 msgid "lbs"
-msgstr "фунтів"
+msgstr "lbs"
 
 #: includes/admin/settings/class-wc-settings-products.php:297
 msgid "oz"
-msgstr "унцій"
+msgstr "oz"
 
 #: includes/admin/settings/class-wc-settings-products.php:303
 msgid "Dimensions Unit"
-msgstr "Одиниці розміру"
+msgstr "Enhet för dimensioner"
 
 #: includes/admin/settings/class-wc-settings-products.php:304
 msgid "This controls what unit you will define lengths in."
-msgstr "Цей блок керує налаштуваннями одиниць виміру довжини."
+msgstr "Det här kontrollerar vilken längdenhet som används."
 
 #: includes/admin/settings/class-wc-settings-products.php:312
 msgid "cm"
-msgstr "см"
+msgstr "cm"
 
 #: includes/admin/settings/class-wc-settings-products.php:313
 msgid "mm"
-msgstr "мм"
+msgstr "mm"
 
 #: includes/admin/settings/class-wc-settings-products.php:314
 msgid "in"
-msgstr "дюйм"
+msgstr "i"
 
 #: includes/admin/settings/class-wc-settings-products.php:315
 msgid "yd"
-msgstr ""
+msgstr "yd"
 
 #: includes/admin/settings/class-wc-settings-products.php:321
 msgid "Product Ratings"
-msgstr "Рейтинг товару"
+msgstr "Produktbetyg"
 
 #: includes/admin/settings/class-wc-settings-products.php:322
 msgid "Enable ratings on reviews"
-msgstr "Включити рейтинг у відгуках"
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:332
 msgid "Ratings are required to leave a review"
-msgstr "Рейтинги необхідні щоб залишити відгук"
+msgstr "Betyg måste anges för att få lämna recension"
 
 #: includes/admin/settings/class-wc-settings-products.php:342
 msgid "Show \"verified owner\" label for customer reviews"
-msgstr "Показувати позначку \"Підтвержений власник\" для відгуків покупців"
+msgstr "Visa etikett för \"verifierad ägare\" i kundrecensioner"
 
 #: includes/admin/settings/class-wc-settings-products.php:352
 msgid "Only allow reviews from \"verified owners\""
@@ -4440,40 +4430,40 @@ msgid ""
 "display on the front-end will still be affected by CSS styles. After "
 "changing these settings you may need to <a href=\"%s\">regenerate your "
 "thumbnails</a>."
-msgstr "Ці налаштування впливають на актуальні розміри зображень в вашому каталозі - на те як вони відображатімуться на вітрині все ще впливатиме стиль CSS шаблону. Після внесення змін, можливо, знадобиться <a href=\"%s\">перегенерувати ескізи</a>."
+msgstr "Dessa inställningar påverkar dimensionerna på bilderna i katalogen - visningen av bilderna för kunderna kommer fortfarande påverkas av CSS-stilmallar. Efter att du ändrar detta kan du behöva <a href=\"%s\">regenerera dina miniatyrbilder</a>"
 
 #: includes/admin/settings/class-wc-settings-products.php:366
 msgid "Catalog Images"
-msgstr "Зображення каталогу"
+msgstr "Katalogbilder"
 
 #: includes/admin/settings/class-wc-settings-products.php:367
 msgid "This size is usually used in product listings"
-msgstr "Цей розмір зазвичай використовується в списку товарів"
+msgstr "Den här storleken används normalt i produktlistningar."
 
 #: includes/admin/settings/class-wc-settings-products.php:380
 msgid "Single Product Image"
-msgstr "Зображення на сторінці товару"
+msgstr "Ensam produktbild"
 
 #: includes/admin/settings/class-wc-settings-products.php:381
 msgid "This is the size used by the main image on the product page."
-msgstr "Розмір зображення, що використовується як головне зображення на сторінці товару."
+msgstr "Den här storleken används av huvudbilden på produktsidan."
 
 #: includes/admin/settings/class-wc-settings-products.php:394
 msgid "Product Thumbnails"
-msgstr "Мініатюра товару"
+msgstr "Tumnaglar för produkt"
 
 #: includes/admin/settings/class-wc-settings-products.php:395
 msgid ""
 "This size is usually used for the gallery of images on the product page."
-msgstr "Розмір зображення, що використовується як зображення в галереї на сторінці товару."
+msgstr "Den här storleken används normalt till galleribilder på produktsidan."
 
 #: includes/admin/settings/class-wc-settings-products.php:409
 msgid "Downloadable Products"
-msgstr "Товари, що завантажуються"
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:412
 msgid "File Download Method"
-msgstr "Спосіб завантаження файлу"
+msgstr "Metod för filnedladdning"
 
 #: includes/admin/settings/class-wc-settings-products.php:413
 msgid ""
@@ -4481,62 +4471,62 @@ msgid ""
 "files unreliably. If supported, <code>X-Accel-Redirect</code>/ "
 "<code>X-Sendfile</code> can be used to serve downloads instead (server "
 "requires <code>mod_xsendfile</code>)."
-msgstr ""
+msgstr "Tvingad nedladdning kommer dölja dina urler men vissa servrar kan hantera stora filer otillräckligt. Om det finns stöd för det kan <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> användas för att ladda ner filer istället (servern behöver ha <code>mod_xsendfile</code>)."
 
 #: includes/admin/settings/class-wc-settings-products.php:421
 msgid "Force Downloads"
-msgstr ""
+msgstr "Tvinga nedladdning"
 
 #: includes/admin/settings/class-wc-settings-products.php:422
 msgid "X-Accel-Redirect/X-Sendfile"
-msgstr ""
+msgstr "X-Accel-Redirect/X-Sendfile"
 
 #: includes/admin/settings/class-wc-settings-products.php:423
 msgid "Redirect only"
-msgstr ""
+msgstr "Endast omdirigering"
 
 #: includes/admin/settings/class-wc-settings-products.php:429
 msgid "Access Restriction"
-msgstr "Обмеження доступу"
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:430
 msgid "Downloads require login"
-msgstr "Закачки вимагають авторизації"
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:434
 msgid "This setting does not apply to guest purchases."
-msgstr "Це налаштування не застосовуються до замовлень гостей."
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:440
 msgid "Grant access to downloadable products after payment"
-msgstr "Надання доступу до товару, що заванатжується після оплати"
+msgstr "Tillåt åtkomst till nedladdningsbara produkter efter betalning"
 
 #: includes/admin/settings/class-wc-settings-products.php:444
 msgid ""
 "Enable this option to grant access to downloads when orders are "
 "\"processing\", rather than \"completed\"."
-msgstr "Включити цю опцію щоб надати доступ до скачування ще на етапі \"виконання\" замовлення, до того як воно \"виконане\"."
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-shipping.php:41
 #: includes/admin/settings/class-wc-settings-shipping.php:67
 msgid "Shipping Options"
-msgstr "Налаштування доставки"
+msgstr "Fraktalternativ"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:70
 msgid "Shipping Calculations"
-msgstr "Розрахунок доставки"
+msgstr "Fraktberäkningar"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:71
 msgid "Enable shipping"
-msgstr "Включити доставку"
+msgstr "Aktivera frakt"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:79
 msgid "Enable the shipping calculator on the cart page"
-msgstr "Включити калькулятор доставки на сторінці кошика"
+msgstr "Aktivera fraktkostnadskalkylator i varukorgen"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:88
 msgid "Hide shipping costs until an address is entered"
-msgstr "Приховувати вартість доставки допоки не введено адресу"
+msgstr "Dölj fraktkostnaden tills adress har angetts"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:97
 msgid "Shipping Display Mode"
@@ -4545,7 +4535,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-shipping.php:98
 msgid ""
 "This controls how multiple shipping methods are displayed on the frontend."
-msgstr "Цей блок дозволяє контролювати, як кілька методів доставки відображаються на інтерфейсі."
+msgstr "Detta kontrollerar hur flera fraktmetoder visas i butiken."
 
 #: includes/admin/settings/class-wc-settings-shipping.php:103
 msgid "Display shipping methods with \"radio\" buttons"
@@ -4557,15 +4547,15 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-shipping.php:111
 msgid "Shipping Destination"
-msgstr "Місце доставки"
+msgstr "Fraktdestination"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:112
 msgid "Ship to billing address by default"
-msgstr "Доставка на адресу для рахунків за замовчуванням"
+msgstr "Skicka till debiteringsadress som standard"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:122
 msgid "Only ship to the users billing address"
-msgstr "Доставляти лише на адресу для виставлення рахунків"
+msgstr "Leverera endast till fakturaadress"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:132
 msgid "Restrict shipping to Location(s)"
@@ -4591,7 +4581,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-shipping.php:197
 msgid "Shipping Methods"
-msgstr "Способи доставки"
+msgstr "Fraktmetoder"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:204
 msgid "ID"
@@ -4605,7 +4595,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-tax.php:40
 #: includes/admin/settings/class-wc-settings-tax.php:68
 msgid "Tax Options"
-msgstr "Налаштування податків"
+msgstr "Momsalternativ"
 
 #: includes/admin/settings/class-wc-settings-tax.php:41
 msgid "Standard Rates"
@@ -4617,100 +4607,100 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:71
 msgid "Enable Taxes"
-msgstr "Увімкнути податки"
+msgstr "Aktivera moms"
 
 #: includes/admin/settings/class-wc-settings-tax.php:72
 msgid "Enable taxes and tax calculations"
-msgstr "Увімкнути податки на розрухунок опадаткування"
+msgstr "Aktivera moms och momsberäkningar"
 
 #: includes/admin/settings/class-wc-settings-tax.php:79
 msgid "Prices Entered With Tax"
-msgstr "Ціни введені з податками"
+msgstr "Priser anges med moms/skatt"
 
 #: includes/admin/settings/class-wc-settings-tax.php:83
 msgid ""
 "This option is important as it will affect how you input prices. Changing it"
 " will not update existing products."
-msgstr "Це дуже важливе налаштування. Воно впливатиме на те як ви вводите ціну. Зміни тут не оновлюватимуть вже існуючі товари."
+msgstr "Denna inställning är viktig då den styr hur du matas in priser. Ändringar påverkar inte existerande produkter."
 
 #: includes/admin/settings/class-wc-settings-tax.php:85
 msgid "Yes, I will enter prices inclusive of tax"
-msgstr "Так, я вводитиму ціну з урахуванням податків"
+msgstr "Ja, jag vill ange priser inklusive moms/skatt"
 
 #: includes/admin/settings/class-wc-settings-tax.php:86
 msgid "No, I will enter prices exclusive of tax"
-msgstr "Ні, я буду вводити ціни без урахування податків"
+msgstr "Nej, jag vill ange priser exklusive moms/skatt"
 
 #: includes/admin/settings/class-wc-settings-tax.php:91
 msgid "Calculate Tax Based On:"
-msgstr "Розрахунок податку на основі:"
+msgstr "Beräkna skatt baserat på:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:93
 msgid "This option determines which address is used to calculate tax."
-msgstr "Ця опція задає адресу, яка використовується для підрахунку податку."
+msgstr "Denna inställningar styr vilken adress som används för att beräkna skatt."
 
 #: includes/admin/settings/class-wc-settings-tax.php:97
 msgid "Customer shipping address"
-msgstr "Адреса доставки"
+msgstr "Leveransadress för kund"
 
 #: includes/admin/settings/class-wc-settings-tax.php:98
 msgid "Customer billing address"
-msgstr "Адреса для рахунків"
+msgstr "Fakturaadress för kund"
 
 #: includes/admin/settings/class-wc-settings-tax.php:99
 #: includes/admin/settings/class-wc-settings-tax.php:111
 msgid "Shop base address"
-msgstr "Базова адреса магазин"
+msgstr "Bassida för butik"
 
 #: includes/admin/settings/class-wc-settings-tax.php:104
 msgid "Default Customer Address:"
-msgstr "Адреса клієнта за замовчуванням:"
+msgstr "Standardadress för kund:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:106
 msgid ""
 "This option determines the customers default address (before they input "
 "their own)."
-msgstr "Ця опція задає адресу клієнта за замовчуванням (поки вони не введуть свою власну)."
+msgstr "Denna inställning styr standardadress för kunder (innan de matar in sin egen)."
 
 #: includes/admin/settings/class-wc-settings-tax.php:110
 msgid "No address"
-msgstr "Немає адреси"
+msgstr "Ingen adress"
 
 #: includes/admin/settings/class-wc-settings-tax.php:116
 msgid "Shipping Tax Class:"
-msgstr "Клас податку на доставку:"
+msgstr "Fraktklass:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:117
 msgid ""
 "Optionally control which tax class shipping gets, or leave it so shipping "
 "tax is based on the cart items themselves."
-msgstr "Опціональний контроль податків на доставку, або залиште так як є щоб податок залежав від товарів які є у кошику."
+msgstr "Kan kontrollera vilken momsklass som försändelsen får eller lämna tomt för att basera moms på varukorgens artiklar."
 
 #: includes/admin/settings/class-wc-settings-tax.php:122
 msgid "Shipping tax class based on cart items"
-msgstr "Податки на доставку залежать від товарів у кошику"
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:127
 msgid "Rounding"
-msgstr "Округлення"
+msgstr "Avrundning"
 
 #: includes/admin/settings/class-wc-settings-tax.php:128
 msgid "Round tax at subtotal level, instead of rounding per line"
-msgstr "Округляти податки на рівні суми, а не порядково"
+msgstr "Avrunda moms på totalen och inte per enskild rad"
 
 #: includes/admin/settings/class-wc-settings-tax.php:135
 msgid "Additional Tax Classes"
-msgstr "Додаткові класи оподаткування"
+msgstr "Ytterligare momsgrupper"
 
 #: includes/admin/settings/class-wc-settings-tax.php:136
 msgid ""
 "List additonal tax classes below (1 per line). This is in addition to the "
 "default <code>Standard Rate</code>. Tax classes can be assigned to products."
-msgstr ""
+msgstr "Lista en klass per rad. Det här är tillägg utöver <code> Standardmoms</code>. Klasser kan knytas till produkter."
 
 #: includes/admin/settings/class-wc-settings-tax.php:140
 msgid "Reduced Rate%sZero Rate"
-msgstr ""
+msgstr "Reducerad sats%sIngen skatt"
 
 #: includes/admin/settings/class-wc-settings-tax.php:144
 msgid "Display prices in the shop:"
@@ -4719,12 +4709,12 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-tax.php:149
 #: includes/admin/settings/class-wc-settings-tax.php:168
 msgid "Including tax"
-msgstr "Включаючи податки"
+msgstr "Inklusive moms"
 
 #: includes/admin/settings/class-wc-settings-tax.php:150
 #: includes/admin/settings/class-wc-settings-tax.php:169
 msgid "Excluding tax"
-msgstr "Без податків"
+msgstr "Exklusive moms"
 
 #: includes/admin/settings/class-wc-settings-tax.php:155
 msgid "Price display suffix:"
@@ -4740,7 +4730,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:163
 msgid "Display prices during cart/checkout:"
-msgstr "Показувати ціни під час покупки/оформлення:"
+msgstr "Visa priset i varukorg och utcheckning:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:175
 msgid "Display tax totals:"
@@ -4756,122 +4746,122 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:243
 msgid "Tax Rates for the \"%s\" Class"
-msgstr "Ставки оподаткування для класу \"%s\" "
+msgstr "Momssats för klassen \"%s\""
 
 #: includes/admin/settings/class-wc-settings-tax.php:244
 msgid ""
 "Define tax rates for countries and states below. <a href=\"%s\">See here</a>"
 " for available alpha-2 country codes."
-msgstr "Визначення податкових ставок для країн і штатів нижче. <a href=\"%s\">Дивіться тут</a> доступні альфа-2 коди країн."
+msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:250
 msgid "Country&nbsp;Code"
-msgstr "Код&nbsp;країни"
+msgstr "Landskod"
 
 #: includes/admin/settings/class-wc-settings-tax.php:250
 msgid "A 2 digit country code, e.g. US. Leave blank to apply to all."
-msgstr "2-буквенний код країни, напр. US. Залиште порожнім, щоб застосувати до всіх."
+msgstr "En två tecken landskod, t.ex. SE. Lämna tomt för att applicera på samtliga."
 
 #: includes/admin/settings/class-wc-settings-tax.php:252
 msgid "State&nbsp;Code"
-msgstr "Державний&nbsp;код"
+msgstr "Statskod"
 
 #: includes/admin/settings/class-wc-settings-tax.php:252
 msgid "A 2 digit state code, e.g. AL. Leave blank to apply to all."
-msgstr "2-буквенний код штату, напр. AL. Залиште порожнім, щоб застосувати до всіх."
+msgstr "En två tecken lång statskod, t.ex. AL. Lämna tom för att applicera på samtliga."
 
 #: includes/admin/settings/class-wc-settings-tax.php:254
 #: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "ZIP/Postcode"
-msgstr "Індекс"
+msgstr "Postnummer"
 
 #: includes/admin/settings/class-wc-settings-tax.php:254
 msgid ""
 "Postcode for this rule. Semi-colon (;) separate multiple values. Leave blank"
 " to apply to all areas. Wildcards (*) can be used. Ranges for numeric "
 "postcodes (e.g. 12345-12350) will be expanded into individual postcodes."
-msgstr ""
+msgstr "Postnummer för denna regel. Avgränsa flera värden med semikolon (;). Lämna tom för att applicera på samtliga områden. Wildcard (*) kan användas. Omfång av postnummer (t.ex. 79141-79145) expanderas till individuella postnummer."
 
 #: includes/admin/settings/class-wc-settings-tax.php:256
 msgid ""
 "Cities for this rule. Semi-colon (;) separate multiple values. Leave blank "
 "to apply to all cities."
-msgstr ""
+msgstr "Städer för denna regel. Avgränsa flera värden med semikolon (;). Lämna tom för att applicera på samtliga städer."
 
 #: includes/admin/settings/class-wc-settings-tax.php:258
 msgid "Rate&nbsp;%"
-msgstr "Рейтинг&nbsp;%"
+msgstr "Sats&nbsp;%"
 
 #: includes/admin/settings/class-wc-settings-tax.php:258
 msgid "Enter a tax rate (percentage) to 4 decimal places."
-msgstr "Введіть податкову ставку (у відсотках) до 4 знаків після коми."
+msgstr "Ange momssats (procent) med upp till 4 decimaler"
 
 #: includes/admin/settings/class-wc-settings-tax.php:260
 msgid "Tax&nbsp;Name"
-msgstr "Назва&nbsp;податку"
+msgstr "Namn&nbsp;på&nbsp;taxa"
 
 #: includes/admin/settings/class-wc-settings-tax.php:260
 msgid "Enter a name for this tax rate."
-msgstr "Введіть назву для цієї ставки оподаткування."
+msgstr "Ange namn för denna skatt/momssats."
 
 #: includes/admin/settings/class-wc-settings-tax.php:262
 #: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Priority"
-msgstr "Приорітет"
+msgstr "Prioritet"
 
 #: includes/admin/settings/class-wc-settings-tax.php:262
 msgid ""
 "Choose a priority for this tax rate. Only 1 matching rate per priority will "
 "be used. To define multiple tax rates for a single area you need to specify "
 "a different priority per rate."
-msgstr "Виберіть пріоритет для даного податку. Тільки 1 значення пріоритету буде використовуватися. Для визначення декількох податкових ставок для однієї області необхідно вказати різні пріоритети."
+msgstr "Välj prioritet för denna skattesats. Endast en matchning per prioritet kommer att användas. För att definiera flera skattesatser för samma område måste du specificera olika prioritet för dessa."
 
 #: includes/admin/settings/class-wc-settings-tax.php:264
 #: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Compound"
-msgstr "Складний"
+msgstr "Sammansatt skattesats"
 
 #: includes/admin/settings/class-wc-settings-tax.php:264
 msgid ""
 "Choose whether or not this is a compound rate. Compound tax rates are "
 "applied on top of other tax rates."
-msgstr "Виберіть, чи буде ця ставка складною. Складні ставки оподаткування застосовуються поверх інших податкових ставок."
+msgstr "Ange om detta är en sammansatt skattesats. Sammansatta skattesatser appliceras ovanpå andra skattesatser."
 
 #: includes/admin/settings/class-wc-settings-tax.php:266
 msgid "Choose whether or not this tax rate also gets applied to shipping."
-msgstr "Виберіть, чи буде ця податкова ставка застосовуватися для для доставки."
+msgstr "Välj ifall denna skattesats även gäller frakten"
 
 #: includes/admin/settings/class-wc-settings-tax.php:273
 msgid "Insert row"
-msgstr "Вставити рядок"
+msgstr "Infoga rad"
 
 #: includes/admin/settings/class-wc-settings-tax.php:274
 msgid "Remove selected row(s)"
-msgstr "Прибрати обрані рядки(-ок)"
+msgstr "Radera valda rader"
 
 #: includes/admin/settings/class-wc-settings-tax.php:290
 msgid "Import CSV"
-msgstr "Імпорт CSV"
+msgstr "Importera CSV"
 
 #: includes/admin/settings/class-wc-settings-tax.php:376
 msgid "No row(s) selected"
-msgstr "Жодного рядка не вибрано"
+msgstr "Inga rader valda"
 
 #: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Country Code"
-msgstr "Код країни"
+msgstr "Landskod"
 
 #: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "State Code"
-msgstr "Код штату"
+msgstr "Kod för delstat"
 
 #: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Rate %"
-msgstr "Рейтинг %"
+msgstr "Taxa"
 
 #: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Tax Name"
-msgstr "Назва податку"
+msgstr "Namn på taxa"
 
 #: includes/admin/views/html-admin-page-addons.php:5
 msgid "Browse all extensions"
@@ -4899,7 +4889,7 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-addons.php:17
 msgid "Free"
-msgstr "Безкоштовно"
+msgstr "Gratis"
 
 #: includes/admin/views/html-admin-page-status-report.php:2
 msgid "Please include this information when requesting support:"
@@ -4915,11 +4905,11 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:17
 msgid "Home URL"
-msgstr ""
+msgstr "Hemadress"
 
 #: includes/admin/views/html-admin-page-status-report.php:21
 msgid "Site URL"
-msgstr ""
+msgstr "Sajtadress"
 
 #: includes/admin/views/html-admin-page-status-report.php:25
 msgid "WC Version"
@@ -4943,25 +4933,25 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:45
 msgid "PHP Version"
-msgstr ""
+msgstr "PHP-version"
 
 #: includes/admin/views/html-admin-page-status-report.php:49
 msgid "MySQL Version"
-msgstr "Версія MySQL"
+msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:53
 msgid "WP Memory Limit"
-msgstr ""
+msgstr "WP Memory Limit"
 
 #: includes/admin/views/html-admin-page-status-report.php:58
 msgid ""
 "%s - We recommend setting memory to at least 64MB. See: <a "
 "href=\"%s\">Increasing memory allocated to PHP</a>"
-msgstr ""
+msgstr "%s - Vi rekommenderar att minnesgränsen sätts till minst 64MB. Se: <a href=\"%s\">Increasing memory allocated to PHP</a>"
 
 #: includes/admin/views/html-admin-page-status-report.php:65
 msgid "WP Debug Mode"
-msgstr ""
+msgstr "WP Debug Mode"
 
 #: includes/admin/views/html-admin-page-status-report.php:69
 msgid "WP Language"
@@ -4969,7 +4959,7 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:73
 msgid "WP Max Upload Size"
-msgstr ""
+msgstr "WP Max Upload Size"
 
 #: includes/admin/views/html-admin-page-status-report.php:78
 msgid "PHP Post Max Size"
@@ -4989,17 +4979,17 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:95
 msgid "WC Logging"
-msgstr ""
+msgstr "WC Logging"
 
 #: includes/admin/views/html-admin-page-status-report.php:98
 msgid "Log directory is writable."
-msgstr ""
+msgstr "Katalog för logg är skrivbar."
 
 #: includes/admin/views/html-admin-page-status-report.php:100
 msgid ""
 "Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will"
 " not be possible."
-msgstr ""
+msgstr "Katalog för logg (<code>woocommerce/logs/</code>) är inte skrivbar. Loggning är inte möjlig."
 
 #: includes/admin/views/html-admin-page-status-report.php:104
 msgid "Default Timezone"
@@ -5015,40 +5005,40 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:118
 msgid "fsockopen/cURL"
-msgstr ""
+msgstr "fsockopen/cURL"
 
 #: includes/admin/views/html-admin-page-status-report.php:121
 msgid "Your server has fsockopen and cURL enabled."
-msgstr ""
+msgstr "fsockopen och cURL är aktiverat på din server."
 
 #: includes/admin/views/html-admin-page-status-report.php:123
 msgid "Your server has fsockopen enabled, cURL is disabled."
-msgstr ""
+msgstr "fsockopen är aktiverat på servern, men inte cURL."
 
 #: includes/admin/views/html-admin-page-status-report.php:125
 msgid "Your server has cURL enabled, fsockopen is disabled."
-msgstr ""
+msgstr "Servern har cURL aktiverat, men inte fsockopen."
 
 #: includes/admin/views/html-admin-page-status-report.php:129
 msgid ""
 "Your server does not have fsockopen or cURL enabled - PayPal IPN and other "
 "scripts which communicate with other servers will not work. Contact your "
 "hosting provider."
-msgstr "Ваш сервер не має включених fsockopen або cURL - PayPal IPN та інші скрипти, котрі спілкуються з іншими серверами не будуть працювати. Зверніться до вашого хостинг-провайдера."
+msgstr "Servern verkar ha varken fsockopen eller cURL aktiverat. PayPal IPN och andra skript som behöver kommunicera med servern kommer inte att fungera. Vänligen kontakta ditt webbhotell."
 
 #: includes/admin/views/html-admin-page-status-report.php:134
 msgid "SOAP Client"
-msgstr ""
+msgstr "SOAP-klient"
 
 #: includes/admin/views/html-admin-page-status-report.php:136
 msgid "Your server has the SOAP Client class enabled."
-msgstr ""
+msgstr "Servern har SOAP-klientklassen aktiverad."
 
 #: includes/admin/views/html-admin-page-status-report.php:139
 msgid ""
 "Your server does not have the <a href=\"%s\">SOAP Client</a> class enabled -"
 " some gateway plugins which use SOAP may not work as expected."
-msgstr ""
+msgstr "Din server har inte <a href=\"%s\">SOAP-klientklassen</a> aktiverad. Vissa betalningstjänster som använder SOAP kanske inte kommer att fungera."
 
 #: includes/admin/views/html-admin-page-status-report.php:144
 msgid "WP Remote Post"
@@ -5056,17 +5046,17 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:155
 msgid "wp_remote_post() was successful - PayPal IPN is working."
-msgstr ""
+msgstr "wp_remote_post() fungerarr korrekt - PayPal IPN fungerar."
 
 #: includes/admin/views/html-admin-page-status-report.php:158
 msgid ""
 "wp_remote_post() failed. PayPal IPN won't work with your server. Contact "
 "your hosting provider. Error:"
-msgstr "wp_remote_post() не доступний. PayPal IPN не може працювати з Вашим сервером. Зверніться до Вашого хостинг провайдеру. Помилка:"
+msgstr "wp_remote_post() misslyckades. PayPal IPN kommer inte att fungera på din server. Vänligen kontakt ditt webbhotell med följande felmeddelade:"
 
 #: includes/admin/views/html-admin-page-status-report.php:161
 msgid "wp_remote_post() failed. PayPal IPN may not work with your server."
-msgstr ""
+msgstr "wp_remote_post() misslyckades. PayPal IPN kanske inte fungerar korrekt på din server."
 
 #: includes/admin/views/html-admin-page-status-report.php:184
 msgid "Locale"
@@ -5074,11 +5064,11 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:200
 msgid "Plugins"
-msgstr "Додатки"
+msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:206
 msgid "Installed Plugins"
-msgstr "Встановлені додатки"
+msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:226
 msgid "Visit plugin homepage"
@@ -5087,19 +5077,19 @@ msgstr ""
 #: includes/admin/views/html-admin-page-status-report.php:250
 #: includes/admin/views/html-admin-page-status-report.php:432
 msgid "is available"
-msgstr "доступне"
+msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:253
 msgid "by"
-msgstr " "
+msgstr "av"
 
 #: includes/admin/views/html-admin-page-status-report.php:253
 msgid "version"
-msgstr "версія"
+msgstr "version"
 
 #: includes/admin/views/html-admin-page-status-report.php:275
 msgid "Force SSL"
-msgstr ""
+msgstr "Tvinga SSL"
 
 #: includes/admin/views/html-admin-page-status-report.php:282
 msgid "WC Pages"
@@ -5107,19 +5097,19 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:289
 msgid "Shop Base"
-msgstr "База магазину"
+msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:293
 msgid "Cart"
-msgstr "Кошик"
+msgstr "Varukorg"
 
 #: includes/admin/views/html-admin-page-status-report.php:301
 msgid "My Account"
-msgstr "Мій обліковий запис"
+msgstr "Mitt konto"
 
 #: includes/admin/views/html-admin-page-status-report.php:321
 msgid "Page not set"
-msgstr ""
+msgstr "Sida har inte valts"
 
 #: includes/admin/views/html-admin-page-status-report.php:331
 msgid "Page does not exist"
@@ -5127,7 +5117,7 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:336
 msgid "Page does not contain the shortcode: %s"
-msgstr ""
+msgstr "Sidan innehåller inte koden: %s"
 
 #: includes/admin/views/html-admin-page-status-report.php:355
 msgid "WC Taxonomies"
@@ -5135,11 +5125,11 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:361
 msgid "Order Statuses"
-msgstr "Статуси замовлень"
+msgstr "Orderstatusar"
 
 #: includes/admin/views/html-admin-page-status-report.php:371
 msgid "Product Types"
-msgstr "Типи товарів"
+msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:384
 msgid "Theme"
@@ -5159,7 +5149,7 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:445
 msgid "Templates"
-msgstr "Шаблони"
+msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:451
 msgid "Template Overrides"
@@ -5172,7 +5162,7 @@ msgstr ""
 #: includes/admin/views/html-admin-page-status-tools.php:7
 #: includes/admin/views/html-admin-page-status.php:6
 msgid "Tools"
-msgstr ""
+msgstr "Verktyg"
 
 #: includes/admin/views/html-admin-page-status-tools.php:23
 msgid "Template Debug Mode"
@@ -5200,7 +5190,7 @@ msgstr ""
 
 #: includes/admin/views/html-admin-settings.php:20
 msgid "Save changes"
-msgstr "Зберегти зміни"
+msgstr "Spara ändringar"
 
 #: includes/admin/views/html-bulk-edit-product.php:15
 #: includes/admin/views/html-bulk-edit-product.php:39
@@ -5215,7 +5205,7 @@ msgstr "Зберегти зміни"
 #: includes/admin/views/html-bulk-edit-product.php:231
 #: includes/admin/views/html-bulk-edit-product.php:252
 msgid "— No Change —"
-msgstr "— Не змінювати —"
+msgstr "— Ingen förändring —"
 
 #: includes/admin/views/html-bulk-edit-product.php:16
 #: includes/admin/views/html-bulk-edit-product.php:40
@@ -5223,51 +5213,51 @@ msgstr "— Не змінювати —"
 #: includes/admin/views/html-bulk-edit-product.php:133
 #: includes/admin/views/html-bulk-edit-product.php:232
 msgid "Change to:"
-msgstr "Змінити на:"
+msgstr "Ändra till:"
 
 #: includes/admin/views/html-bulk-edit-product.php:17
 #: includes/admin/views/html-bulk-edit-product.php:41
 msgid "Increase by (fixed amount or %):"
-msgstr "Збільшити на (фіксовану величину або %):"
+msgstr "Öka med (bestämt antal eller procent):"
 
 #: includes/admin/views/html-bulk-edit-product.php:18
 #: includes/admin/views/html-bulk-edit-product.php:42
 msgid "Decrease by (fixed amount or %):"
-msgstr "Зменшити на (фіксовану величину або %):"
+msgstr "Öka med (bestämt antal eller procent):"
 
 #: includes/admin/views/html-bulk-edit-product.php:28
 #: includes/admin/views/html-bulk-edit-product.php:53
 msgid "Enter price"
-msgstr "Введіть ціну"
+msgstr "Ange pris"
 
 #: includes/admin/views/html-bulk-edit-product.php:34
 #: includes/admin/views/html-quick-edit-product.php:29
 msgid "Sale"
-msgstr "Акція"
+msgstr "Rea"
 
 #: includes/admin/views/html-bulk-edit-product.php:43
 msgid "Decrease regular price by (fixed amount or %):"
-msgstr "Змешити постійну ціну на (фіксовану величину або %):"
+msgstr "Sänk standardpris med (bestämd summa eller procent):"
 
 #: includes/admin/views/html-bulk-edit-product.php:127
 #: includes/admin/views/html-quick-edit-product.php:95
 msgid "L/W/H"
-msgstr "Д/Ш/В"
+msgstr "L/B/H"
 
 #: includes/admin/views/html-bulk-edit-product.php:151
 #: includes/admin/views/html-quick-edit-product.php:109
 msgid "Visibility"
-msgstr "Видимість"
+msgstr "Synlighet"
 
 #: includes/admin/views/html-bulk-edit-product.php:157
 #: includes/admin/views/html-quick-edit-product.php:114
 msgid "Catalog &amp; search"
-msgstr "Каталог &amp; пошук"
+msgstr "Sök i katalogen"
 
 #: includes/admin/views/html-bulk-edit-product.php:188
 #: includes/admin/views/html-quick-edit-product.php:132
 msgid "In stock?"
-msgstr "На складі?"
+msgstr "I lager?"
 
 #: includes/admin/views/html-bulk-edit-product.php:247
 #: includes/admin/views/html-quick-edit-product.php:167
@@ -5278,26 +5268,26 @@ msgstr ""
 msgid ""
 "<strong>Welcome to WooCommerce</strong> &#8211; You're almost ready to start"
 " selling :)"
-msgstr "<strong>Вітаємо у WooCommerce</strong> &#8211; Майже все готово для початку продаж :)"
+msgstr "<strong>Välkommen till WooCommerce</strong> &#8211; Du är bara något steg ifrån att börja försäljningen :)"
 
 #: includes/admin/views/html-notice-install.php:6
 msgid "Skip setup"
-msgstr "Пропустити налаштування"
+msgstr "Hoppa över konfiguration"
 
 #: includes/admin/views/html-notice-theme-support.php:5
 msgid ""
 "<strong>Your theme does not declare WooCommerce support</strong> &#8211; if "
 "you encounter layout issues please read our integration guide or choose a "
 "WooCommerce theme :)"
-msgstr "<strong>Ваша тема не заявляє підтриму WooCommerce</strong> &#8211; якщо ви зіткнулися з проблемами сумісності, будь ласка, прочитайте нашу інструкцію з інтеграції або використовуйте WooCommerce тему :)"
+msgstr ""
 
 #: includes/admin/views/html-notice-theme-support.php:6
 msgid "Theme Integration Guide"
-msgstr "Інструкція з інтеграції теми"
+msgstr ""
 
 #: includes/admin/views/html-notice-theme-support.php:6
 msgid "Hide this notice"
-msgstr "Заховати цю нотатку"
+msgstr ""
 
 #: includes/admin/views/html-notice-update.php:5
 msgid ""
@@ -5307,21 +5297,21 @@ msgstr ""
 
 #: includes/admin/views/html-notice-update.php:6
 msgid "Run the updater"
-msgstr "Запустити оновлювач"
+msgstr "Starta uppdatering"
 
 #: includes/admin/views/html-notice-update.php:10
 msgid ""
 "It is strongly recommended that you backup your database before proceeding. "
 "Are you sure you wish to run the updater now?"
-msgstr "Настійливо рекомендується створити резервну копію бази даних, перш ніж продовжити. Ви впевнені, що хочете запустити програму оновлення зараз?"
+msgstr "Vi rekommenderar att du säkerhetskopierar din databas innan du fortsätter. Är du säker att du vill starta uppdateringen nu?"
 
 #: includes/admin/views/html-quick-edit-product.php:24
 msgid "Regular price"
-msgstr "Звичайна ціна"
+msgstr "Normalpris"
 
 #: includes/admin/views/html-quick-edit-product.php:31
 msgid "Sale price"
-msgstr "Акційна ціна"
+msgstr "Rea-pris"
 
 #: includes/admin/views/html-report-by-date.php:16
 msgid "Custom:"
@@ -5329,20 +5319,20 @@ msgstr ""
 
 #: includes/admin/wc-admin-functions.php:193
 msgid "Could not compile woocommerce.less:"
-msgstr ""
+msgstr "Kunde inte kompilera woocommerce.less:"
 
 #. Plugin URI of the plugin/theme
 msgid "http://www.woothemes.com/woocommerce/"
-msgstr "http://www.woothemes.com/woocommerce/"
+msgstr ""
 
 #. Description of the plugin/theme
 msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
-msgstr "Інструментарій електронної комерції, який допоможе вам продати будь-що. Красиво."
+msgstr ""
 
 #. Author of the plugin/theme
 msgid "WooThemes"
-msgstr "WooThemes"
+msgstr ""
 
 #. Author URI of the plugin/theme
 msgid "http://woothemes.com"
-msgstr "http://woothemes.com"
+msgstr ""
