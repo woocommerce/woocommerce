@@ -329,6 +329,8 @@ class WC_Meta_Box_Product_Data {
 
 				echo '</div>';
 
+				do_action( 'woocommerce_product_inventory_options' );
+
 				?>
 
 			</div>
@@ -380,6 +382,7 @@ class WC_Meta_Box_Product_Data {
 					do_action( 'woocommerce_product_options_shipping' );
 
 				echo '</div>';
+				do_action( 'woocommerce_product_shipping_options' );
 				?>
 
 			</div>
@@ -577,6 +580,7 @@ class WC_Meta_Box_Product_Data {
 
 					<button type="button" class="button save_attributes"><?php _e( 'Save attributes', 'woocommerce' ); ?></button>
 				</p>
+				<?php do_action( 'woocommerce_product_attribute_options' ); ?>
 			</div>
 			<div id="linked_product_data" class="panel woocommerce_options_panel">
 
@@ -694,6 +698,7 @@ class WC_Meta_Box_Product_Data {
 					do_action( 'woocommerce_product_options_reviews' );
 
 				echo '</div>';
+				do_action( 'woocommerce_product_advanced_options' );
 				?>
 
 			</div>
