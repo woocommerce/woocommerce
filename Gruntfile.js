@@ -18,14 +18,25 @@ module.exports = function(grunt){
             "assets/css/woocommerce.css": ["assets/css/woocommerce.css"]
         },
 
+        shell: {
+            generatemos: {
+                command: [
+                    'cd i18n/languages',
+                    'for i in *.po; do msgfmt $i -o ${i%%.*}.mo; done',
+                    'ls'
+                ].join('&&')
+            }
+        },
+
     });
 
     // Load NPM tasks to be used here
+    grunt.loadNpmTasks('grunt-shell');
     grunt.loadNpmTasks("grunt-contrib-less");
     grunt.loadNpmTasks("grunt-contrib-cssmin");
 
     // Register tasks
     grunt.registerTask( 'default', []);
-    grunt.registerTask( 'dev', ["less:compile", "cssmin"]);
+    grunt.registerTask( 'dev', ["less:compile", "cssmin", "shell:generatemos" ] );
 
 };
