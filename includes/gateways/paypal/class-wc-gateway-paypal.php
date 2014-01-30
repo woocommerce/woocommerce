@@ -670,6 +670,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 					// Check valid txn_type
 					$accepted_types = array( 'cart', 'instant', 'express_checkout', 'web_accept', 'masspay', 'send_money' );
+
 					if ( ! in_array( $posted['txn_type'], $accepted_types ) ) {
 						if ( 'yes' == $this->debug ) {
 							$this->log->add( 'paypal', 'Aborting, Invalid type:' . $posted['txn_type'] );
@@ -677,16 +678,25 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 						exit;
 					}
 
-					// Validate Amount
-					if ( $order->get_total() != $posted['mc_gross'] ) {
+					// Validate currency
+					if ( $order->get_order_currency() != $posted['mc_currency'] ) {
+						if ( 'yes' == $this->debug ) {
+							$this->log->add( 'paypal', 'Payment error: Currencies do not match (code ' . $posted['mc_currency'] . ')' );
+						}
 
+						// Put this order on-hold for manual checking
+						$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal currencies do not match (code %s).', 'woocommerce' ), $posted['mc_currency'] ) );
+						exit;
+					}
+
+					// Validate amount
+					if ( $order->get_total() != $posted['mc_gross'] ) {
 						if ( 'yes' == $this->debug ) {
 							$this->log->add( 'paypal', 'Payment error: Amounts do not match (gross ' . $posted['mc_gross'] . ')' );
 						}
 
 						// Put this order on-hold for manual checking
 						$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal amounts do not match (gross %s).', 'woocommerce' ), $posted['mc_gross'] ) );
-
 						exit;
 					}
 
