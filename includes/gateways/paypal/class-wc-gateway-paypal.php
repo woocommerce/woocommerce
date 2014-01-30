@@ -714,19 +714,19 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 					 // Store PP Details
 					if ( ! empty( $posted['payer_email'] ) ) {
-						update_post_meta( $order->id, 'Payer PayPal address', $posted['payer_email'] );
+						update_post_meta( $order->id, 'Payer PayPal address', wc_clean( $posted['payer_email'] ) );
 					}
 					if ( ! empty( $posted['txn_id'] ) ) {
-						update_post_meta( $order->id, 'Transaction ID', $posted['txn_id'] );
+						update_post_meta( $order->id, 'Transaction ID', wc_clean( $posted['txn_id'] ) );
 					}
 					if ( ! empty( $posted['first_name'] ) ) {
-						update_post_meta( $order->id, 'Payer first name', $posted['first_name'] );
+						update_post_meta( $order->id, 'Payer first name', wc_clean( $posted['first_name'] ) );
 					}
 					if ( ! empty( $posted['last_name'] ) ) {
-						update_post_meta( $order->id, 'Payer last name', $posted['last_name'] );
+						update_post_meta( $order->id, 'Payer last name', wc_clean( $posted['last_name'] ) );
 					}
 					if ( ! empty( $posted['payment_type'] ) ) {
-						update_post_meta( $order->id, 'Payment type', $posted['payment_type'] );
+						update_post_meta( $order->id, 'Payment type', wc_clean( $posted['payment_type'] ) );
 					}
 
 					if ( $posted['payment_status'] == 'completed' ) {
@@ -870,7 +870,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					} else {
 
 						// Store PP Details
-						update_post_meta( $order->id, 'Transaction ID', $posted['tx'] );
+						update_post_meta( $order->id, 'Transaction ID', wc_clean( $posted['tx'] ) );
 
 						$order->add_order_note( __( 'PDT payment completed', 'woocommerce' ) );
 						$order->payment_complete();
