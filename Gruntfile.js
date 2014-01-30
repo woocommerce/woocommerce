@@ -17,6 +17,7 @@ module.exports = function(grunt){
 
     // Load NPM tasks to be used here
     grunt.loadNpmTasks("grunt-contrib-less");
+    grunt.loadNpmTasks("grunt-contrib-cssmin");
 
     // Register tasks
     grunt.registerTask( 'default', []);
