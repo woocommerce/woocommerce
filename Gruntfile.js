@@ -13,6 +13,11 @@ module.exports = function(grunt){
                 }
             }
         },
+
+        cssmin: {
+            "assets/css/woocommerce.css": ["assets/css/woocommerce.css"]
+        },
+
     });
 
     // Load NPM tasks to be used here
@@ -21,6 +26,6 @@ module.exports = function(grunt){
 
     // Register tasks
     grunt.registerTask( 'default', []);
-    grunt.registerTask( 'dev', ["less:compile"]);
+    grunt.registerTask( 'dev', ["less:compile", "cssmin"]);
 
 };
