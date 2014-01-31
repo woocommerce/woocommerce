@@ -1,4 +1,4 @@
-jQuery(document).ready(function($) {
+jQuery(function($) {
 
 	// woocommerce_price_slider_params is required to continue, ensure the object exists
 	if (typeof woocommerce_price_slider_params === "undefined")

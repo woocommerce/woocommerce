@@ -1,5 +1,5 @@
 (function($) {
-$(document).ready(function() {
+$(function() {
 
 	// Lightbox
 	$("a.zoom").prettyPhoto({
