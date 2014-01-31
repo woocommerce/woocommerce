@@ -185,7 +185,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'tax_class'  => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
 				'name'       => $item['name'],
 				'product_id' => ( isset( $product->variation_id ) ) ? $product->variation_id : $product->id,
-				'sku'        => $product->get_sku(),
+				'sku'        => is_object( $product ) ? $product->get_sku() : null,
 			);
 		}
 
