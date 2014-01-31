@@ -275,7 +275,6 @@ class WC_Meta_Box_Coupon_Data {
 		update_post_meta( $post_id, 'minimum_amount', $minimum_amount );
 		update_post_meta( $post_id, 'customer_email', $customer_email );
 
-		/* Deprecated - same hook name as in the meta */ do_action( 'woocommerce_coupon_options' );
 		do_action( 'woocommerce_coupon_options_save' );
 	}
 }
