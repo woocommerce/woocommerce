@@ -503,7 +503,6 @@ class WC_Coupon {
 
 		} elseif ( $this->type == 'percent_product' || $this->type == 'percent' ) {
 
-			$discount = ( $discounting_amount / 100 ) * $this->amount;
 			$discount = round( ( $discounting_amount / 100 ) * $this->amount, WC()->cart->dp );
 
 		} elseif ( $this->type == 'fixed_cart' ) {
