@@ -1,4 +1,4 @@
-jQuery(document).ready(function($) {
+jQuery(function($) {
 
 	var locale_json = wc_address_i18n_params.locale.replace(/&quot;/g, '"');
 	var locale = $.parseJSON( locale_json );

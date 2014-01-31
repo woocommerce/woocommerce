@@ -685,7 +685,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 		if ( 'shop_order' == $post_type ) {
 			?>
 			<script type="text/javascript">
-			jQuery(document).ready(function() {
+			jQuery(function() {
 				jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo("select[name='action']");
 				jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo("select[name='action2']");
 
