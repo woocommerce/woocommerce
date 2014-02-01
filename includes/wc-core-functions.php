@@ -152,6 +152,7 @@ function get_woocommerce_currencies() {
 				'BRL' => __( 'Brazilian Real', 'woocommerce' ),
 				'BGN' => __( 'Bulgarian Lev', 'woocommerce' ),
 				'CAD' => __( 'Canadian Dollars', 'woocommerce' ),
+				'CLP' => __( 'Peso chileno', 'woocommerce' ),
 				'CNY' => __( 'Chinese Yuan', 'woocommerce' ),
 				'CZK' => __( 'Czech Koruna', 'woocommerce' ),
 				'DKK' => __( 'Danish Krone', 'woocommerce' ),
@@ -206,6 +207,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			break;
 		case 'AUD' :
 		case 'CAD' :
+		case 'CLP' :
 		case 'MXN' :
 		case 'NZD' :
 		case 'HKD' :
