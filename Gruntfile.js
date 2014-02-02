@@ -16,7 +16,7 @@ module.exports = function( grunt ){
 			compile: {
 				options: {
 					// These paths are searched for @imports
-					paths: ['assets/css']
+					paths: ['<%= dirs.css %>/']
 				},
 				files: {
 					'<%= dirs.css %>/woocommerce.css': '<%= dirs.css %>/woocommerce.less'
@@ -24,8 +24,15 @@ module.exports = function( grunt ){
 			}
 		},
 
+		// Minify all .css files.
 		cssmin: {
-			'<%= dirs.css %>/woocommerce.css': ['<%= dirs.css %>/woocommerce.css']
+			minify: {
+				expand: true,
+				cwd: '<%= dirs.css %>/',
+				src: ['*.css'],
+				dest: '<%= dirs.css %>/',
+				ext: '.css'
+			}
 		},
 
 		shell: {
