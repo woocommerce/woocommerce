@@ -85,22 +85,28 @@ module.exports = function( grunt ){
 		},
 
 		shell: {
+			options: {
+				stdout: true,
+				stderr: true
+			},
 			txpull: {
-				options: {
-					stdout: true
-				},
 				command: [
 					'cd i18n',
 					'tx pull -a -f',
 				].join( '&&' )
 			},
 			generatemos: {
-				options: {
-					stdout: true
-				},
 				command: [
 					'cd i18n/languages',
-					'for i in *.po; do msgfmt $i -o ${i%%.*}.mo; done',
+					'for i in *.po; do msgfmt $i -o ${i%%.*}.mo; done'
+				].join( '&&' )
+			},
+			generatepot: {
+				command: [
+					'cd i18n/makepot/',
+					'sed -i "s/exit( \'Locked\' );/\\/\\/exit( \'Locked\' );/g" index.php',
+					'php index.php generate',
+					'sed -i "s/\\/\\/exit( \'Locked\' );/exit( \'Locked\' );/g" index.php',
 				].join( '&&' )
 			}
 		}
@@ -118,6 +124,11 @@ module.exports = function( grunt ){
 		'less',
 		'cssmin',
 		'uglify'
+	]);
+
+	// Just an alias for pot file generation
+	grunt.registerTask( 'pot', [
+		'shell:generatepot'
 	]);
 
 	grunt.registerTask( 'dev', [
