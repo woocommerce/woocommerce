@@ -11,7 +11,7 @@ module.exports = function( grunt ){
 			js: 'assets/js'
 		},
 
-		// Compile specified less files
+		// Compile all .less files.
 		less: {
 			compile: {
 				options: {
@@ -19,6 +19,14 @@ module.exports = function( grunt ){
 					paths: ['<%= dirs.css %>/']
 				},
 				files: {
+					'<%= dirs.css %>/activation.css': '<%= dirs.css %>/activation.less',
+					'<%= dirs.css %>/admin.css': '<%= dirs.css %>/admin.less',
+					'<%= dirs.css %>/chosen.css': '<%= dirs.css %>/chosen.less',
+					'<%= dirs.css %>/dashboard.css': '<%= dirs.css %>/dashboard.less',
+					'<%= dirs.css %>/menu.css': '<%= dirs.css %>/menu.less',
+					'<%= dirs.css %>/prettyPhoto.css': '<%= dirs.css %>/prettyPhoto.less',
+					'<%= dirs.css %>/woocommerce-layout.css': '<%= dirs.css %>/woocommerce-layout.less',
+					'<%= dirs.css %>/woocommerce-smallscreen.css': '<%= dirs.css %>/woocommerce-smallscreen.less',
 					'<%= dirs.css %>/woocommerce.css': '<%= dirs.css %>/woocommerce.less'
 				}
 			}
