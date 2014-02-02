@@ -3,6 +3,14 @@ module.exports = function( grunt ){
 	'use strict';
 
 	grunt.initConfig({
+		// setting folder templates
+		dirs: {
+			css: 'assets/css',
+			fonts: 'assets/fonts',
+			images: 'assets/images',
+			js: 'assets/js'
+		},
+
 		// Compile specified less files
 		less: {
 			compile: {
@@ -11,13 +19,13 @@ module.exports = function( grunt ){
 					paths: ['assets/css']
 				},
 				files: {
-					'assets/css/woocommerce.css': 'assets/css/woocommerce.less'
+					'<%= dirs.css %>/woocommerce.css': '<%= dirs.css %>/woocommerce.less'
 				}
 			}
 		},
 
 		cssmin: {
-			'assets/css/woocommerce.css': ['assets/css/woocommerce.css']
+			'<%= dirs.css %>/woocommerce.css': ['<%= dirs.css %>/woocommerce.css']
 		},
 
 		shell: {
