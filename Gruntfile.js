@@ -84,6 +84,23 @@ module.exports = function( grunt ){
 			},
 		},
 
+		// Watch changes for assets
+		watch: {
+			less: {
+				files: ['<%= dirs.css %>/*.less'],
+				tasks: ['less'],
+			},
+			js: {
+				files: [
+					'<%= dirs.js %>/admin/*js',
+					'<%= dirs.js %>/frontend/*js',
+					'!<%= dirs.js %>/frontend/*.min.js',
+					'!<%= dirs.js %>/frontend/*.min.js',
+				],
+				tasks: ['uglify']
+			}
+		},
+
 		shell: {
 			options: {
 				stdout: true,
@@ -118,6 +135,7 @@ module.exports = function( grunt ){
 	grunt.loadNpmTasks( 'grunt-contrib-less' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
+	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 
 	// Register tasks
 	grunt.registerTask( 'default', [
