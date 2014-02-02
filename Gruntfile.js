@@ -43,6 +43,47 @@ module.exports = function( grunt ){
 			}
 		},
 
+		// Minify .js files.
+		uglify: {
+			options: {
+				preserveComments: 'some'
+			},
+			admin: {
+				files: [{
+					expand: true,
+					cwd: '<%= dirs.js %>/admin/',
+					src: [
+						'*.js',
+						'!*.min.js',
+						'!jquery.flot*' // !jquery.flot* prevents to join all jquery.flot files in jquery.min.js
+					],
+					dest: '<%= dirs.js %>/admin/',
+					ext: '.min.js'
+				}]
+			},
+			adminflot: { // minify correctly the jquery.flot lib
+				files: {
+					'<%= dirs.js %>/admin/jquery.flot.min.js': ['<%= dirs.js %>/admin/jquery.flot.js'],
+					'<%= dirs.js %>/admin/jquery.flot.pie.min.js': ['<%= dirs.js %>/admin/jquery.flot.pie.js'],
+					'<%= dirs.js %>/admin/jquery.flot.resize.min.js': ['<%= dirs.js %>/admin/jquery.flot.resize.js'],
+					'<%= dirs.js %>/admin/jquery.flot.stack.min.js': ['<%= dirs.js %>/admin/jquery.flot.stack.js'],
+					'<%= dirs.js %>/admin/jquery.flot.time.min.js': ['<%= dirs.js %>/admin/jquery.flot.time.js'],
+				}
+			},
+			frontend: {
+				files: [{
+					expand: true,
+					cwd: '<%= dirs.js %>/frontend/',
+					src: [
+						'*.js',
+						'!*.min.js'
+					],
+					dest: '<%= dirs.js %>/frontend/',
+					ext: '.min.js'
+				}]
+			},
+		},
+
 		shell: {
 			txpull: {
 				options: {
@@ -70,11 +111,13 @@ module.exports = function( grunt ){
 	grunt.loadNpmTasks( 'grunt-shell' );
 	grunt.loadNpmTasks( 'grunt-contrib-less' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
+	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
 
 	// Register tasks
 	grunt.registerTask( 'default', [
 		'less',
 		'cssmin',
+		'uglify'
 	]);
 
 	grunt.registerTask( 'dev', [
