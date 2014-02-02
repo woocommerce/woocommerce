@@ -44,14 +44,25 @@ module.exports = function( grunt ){
 		},
 
 		shell: {
+			txpull: {
+				options: {
+					stdout: true
+				},
+				command: [
+					'cd i18n',
+					'tx pull -a -f',
+				].join( '&&' )
+			},
 			generatemos: {
+				options: {
+					stdout: true
+				},
 				command: [
 					'cd i18n/languages',
 					'for i in *.po; do msgfmt $i -o ${i%%.*}.mo; done',
-					'ls'
 				].join( '&&' )
 			}
-		},
+		}
 
 	});
 
@@ -61,7 +72,15 @@ module.exports = function( grunt ){
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 
 	// Register tasks
-	grunt.registerTask( 'default', []);
-	grunt.registerTask( 'dev', ['less:compile', 'cssmin', 'shell:generatemos' ] );
+	grunt.registerTask( 'default', [
+		'less',
+		'cssmin',
+	]);
+
+	grunt.registerTask( 'dev', [
+		'default',
+		'shell:txpull',
+		'shell:generatemos'
+	]);
 
 };
