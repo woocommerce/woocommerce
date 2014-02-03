@@ -2040,7 +2040,7 @@ img.help_tip {
 		float: right;
 		width: 100%;
 
-		p, .wc-metaboxes, p.toolbar, fieldset.form-field {
+		.wc-metaboxes, p.toolbar {
 			padding-left: 12px !important;
 			padding-right: 20px !important;
 		}
@@ -2321,10 +2321,14 @@ img.help_tip {
 	p {
 		margin: 9px 0 9px;
 	}
+	p.form-field, fieldset.form-field {
+		padding: 5px 20px 5px 162px !important; /** Padding for aligning labels left - 12px + 150 label width **/
+	}
 	label, legend {
 		float: left;
 		width: 150px;
 		padding: 0;
+		margin: 0 0 0 -150px;
 
 		.req {
 			font-weight: bold;
@@ -2439,6 +2443,10 @@ img.help_tip {
 		}
 		&:last-child {
 			border-bottom:0;
+		}
+		.link_all_variations, .add_variation {
+			float: right;
+			margin-left: 5px;
 		}
 	}
 	p.toolbar {
