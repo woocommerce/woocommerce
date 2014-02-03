@@ -153,6 +153,7 @@ function get_woocommerce_currencies() {
 				'BGN' => __( 'Bulgarian Lev', 'woocommerce' ),
 				'CAD' => __( 'Canadian Dollars', 'woocommerce' ),
 				'CNY' => __( 'Chinese Yuan', 'woocommerce' ),
+				'COP' => __( 'Colombian Peso', 'woocommerce' ),				
 				'CZK' => __( 'Czech Koruna', 'woocommerce' ),
 				'DKK' => __( 'Danish Krone', 'woocommerce' ),
 				'EUR' => __( 'Euros', 'woocommerce' ),
