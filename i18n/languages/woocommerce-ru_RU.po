@@ -13,8 +13,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-01-23 12:27:55+00:00\n"
-"PO-Revision-Date: 2014-01-24 19:33+0000\n"
+"POT-Creation-Date: 2014-01-30 15:25:37+00:00\n"
+"PO-Revision-Date: 2014-01-31 05:53+0000\n"
 "Last-Translator: Apelsinova <any.a@mail.ru>\n"
 "Language-Team: Russian (Russia) (http://www.transifex.com/projects/p/woocommerce-core/language/ru_RU/)\n"
 "MIME-Version: 1.0\n"
@@ -185,7 +185,7 @@ msgstr "София"
 
 #: i18n/states/BG.php:33
 msgid "Sofia-Grad"
-msgstr ""
+msgstr "Городская область София"
 
 #: i18n/states/BG.php:34
 msgid "Stara Zagora"
@@ -508,8 +508,8 @@ msgid "A Coru&ntilde;a"
 msgstr "Ла-Корунья"
 
 #: i18n/states/ES.php:14
-msgid "&Aacute;lava"
-msgstr "Алава"
+msgid "Araba/&Aacute;lava"
+msgstr "Араба/Алава"
 
 #: i18n/states/ES.php:15
 msgid "Albacete"
@@ -592,7 +592,7 @@ msgid "Guadalajara"
 msgstr "Гвадалахара"
 
 #: i18n/states/ES.php:35
-msgid "Guip&uacute;zcoa"
+msgid "Gipuzkoa"
 msgstr "Гипускоа"
 
 #: i18n/states/ES.php:36
@@ -700,7 +700,7 @@ msgid "Valladolid"
 msgstr "Вальядолид"
 
 #: i18n/states/ES.php:62
-msgid "Vizcaya"
+msgid "Bizkaia"
 msgstr "Бискайя"
 
 #: i18n/states/ES.php:63
@@ -2064,7 +2064,7 @@ msgstr "Наконпатом"
 
 #: i18n/states/TH.php:41
 msgid "Nakhon Phanom (&#3609;&#3588;&#3619;&#3614;&#3609;&#3617;)"
-msgstr ""
+msgstr "Нахон Фаном (&#3609;&#3588;&#3619;&#3614;&#3609;&#3617;)"
 
 #: i18n/states/TH.php:42
 msgid ""
@@ -2096,7 +2096,7 @@ msgstr "Наратхиват"
 msgid ""
 "Nong Bua Lam Phu "
 "(&#3627;&#3609;&#3629;&#3591;&#3610;&#3633;&#3623;&#3621;&#3635;&#3616;&#3641;)"
-msgstr ""
+msgstr "Нонг Буа Лам Фу (&#3627;&#3609;&#3629;&#3591;&#3610;&#3633;&#3623;&#3621;&#3635;&#3616;&#3641;)"
 
 #: i18n/states/TH.php:48
 msgid "Nong Khai (&#3627;&#3609;&#3629;&#3591;&#3588;&#3634;&#3618;)"
@@ -2186,7 +2186,7 @@ msgstr "Сакэу"
 
 #: i18n/states/TH.php:68
 msgid "Sakon Nakhon (&#3626;&#3585;&#3621;&#3609;&#3588;&#3619;)"
-msgstr ""
+msgstr "Сакон Нахон (&#3626;&#3585;&#3621;&#3609;&#3588;&#3619;)"
 
 #: i18n/states/TH.php:69
 msgid ""
@@ -2298,7 +2298,7 @@ msgstr "Адыяман"
 
 #: i18n/states/TR.php:15
 msgid "Afyon"
-msgstr ""
+msgstr "Афьон"
 
 #: i18n/states/TR.php:16
 msgid "A&#287;r&#305;"
@@ -2918,7 +2918,7 @@ msgstr "отменен"
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:66
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:52
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:129
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:125
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:126
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:75
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:64
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:49
@@ -3052,15 +3052,15 @@ msgstr "Скрыть шаблон"
 msgid "Are you sure you want to delete this template file?"
 msgstr "Вы уверены, что хотите удалить файл шаблона?"
 
-#: includes/abstracts/abstract-wc-payment-gateway.php:204
+#: includes/abstracts/abstract-wc-payment-gateway.php:207
 msgid "Card Number"
 msgstr "Номер карты"
 
-#: includes/abstracts/abstract-wc-payment-gateway.php:208
+#: includes/abstracts/abstract-wc-payment-gateway.php:211
 msgid "Expiry (MM/YY)"
 msgstr "Истекает (MM/YY)"
 
-#: includes/abstracts/abstract-wc-payment-gateway.php:212
+#: includes/abstracts/abstract-wc-payment-gateway.php:215
 msgid "Card Code"
 msgstr "Код карты"
 
@@ -3090,12 +3090,12 @@ msgstr "%s в наличии"
 
 #: includes/abstracts/abstract-wc-product.php:589
 msgid "(backorders allowed)"
-msgstr "(отзыв заказа разрешен)"
+msgstr "(резервирование разрешено)"
 
 #: includes/abstracts/abstract-wc-product.php:596
 #: includes/abstracts/abstract-wc-product.php:609 templates/cart/cart.php:74
 msgid "Available on backorder"
-msgstr "Доступно для отмены"
+msgstr "Доступно для резервирования"
 
 #: includes/abstracts/abstract-wc-product.php:602
 #: includes/abstracts/abstract-wc-product.php:612
@@ -3144,7 +3144,7 @@ msgstr ""
 
 #: includes/api/class-wc-api-authentication.php:112
 msgid "%s parameter is missing"
-msgstr ""
+msgstr "отсутствует параметр %s"
 
 #: includes/api/class-wc-api-authentication.php:151
 msgid "Consumer Key is invalid"
@@ -3152,11 +3152,11 @@ msgstr ""
 
 #: includes/api/class-wc-api-authentication.php:192
 msgid "Invalid Signature - failed to sort parameters"
-msgstr ""
+msgstr "Неверная подпись - нет параметра сортировки"
 
 #: includes/api/class-wc-api-authentication.php:205
 msgid "Invalid Signature - signature method is invalid"
-msgstr ""
+msgstr "Неверная подпись - некорректный способ подписи"
 
 #: includes/api/class-wc-api-authentication.php:212
 msgid "Invalid Signature - provided signature does not match"
@@ -3180,96 +3180,96 @@ msgstr ""
 
 #: includes/api/class-wc-api-coupons.php:107
 msgid "Invalid coupon ID"
-msgstr ""
+msgstr "Некорректный номер купона"
 
 #: includes/api/class-wc-api-coupons.php:152
 msgid "You do not have permission to read the coupons count"
-msgstr ""
+msgstr "У вас нет прав на просмотр счётчика купонов"
 
 #: includes/api/class-wc-api-coupons.php:171
 msgid "Invalid coupon code"
-msgstr ""
+msgstr "Неверный код купона"
 
 #: includes/api/class-wc-api-customers.php:192
 msgid "You do not have permission to read the customers count"
-msgstr ""
+msgstr "У вас нет прав на просмотр счётчика покупателей"
 
 #: includes/api/class-wc-api-customers.php:208
 msgid "You do not have permission to create this customer"
-msgstr ""
+msgstr "У вас нет прав на создание этого покупателя"
 
-#: includes/api/class-wc-api-customers.php:425
+#: includes/api/class-wc-api-customers.php:455
 msgid "Invalid customer ID"
-msgstr ""
+msgstr "Неверный ID покупателя"
 
-#: includes/api/class-wc-api-customers.php:431
+#: includes/api/class-wc-api-customers.php:461
 msgid "Invalid customer"
-msgstr ""
+msgstr "Недопустимый покупатель"
 
-#: includes/api/class-wc-api-customers.php:438
+#: includes/api/class-wc-api-customers.php:468
 msgid "You do not have permission to read this customer"
-msgstr ""
+msgstr "У вас нет прав на просмотр этого покупателя"
 
-#: includes/api/class-wc-api-customers.php:443
+#: includes/api/class-wc-api-customers.php:473
 msgid "You do not have permission to edit this customer"
-msgstr ""
+msgstr "У вас нет прав на редактирование этого покупателя"
 
-#: includes/api/class-wc-api-customers.php:448
+#: includes/api/class-wc-api-customers.php:478
 msgid "You do not have permission to delete this customer"
-msgstr ""
+msgstr "У вас нет прав на удаление этого покупателя"
 
 #: includes/api/class-wc-api-json-handler.php:56
 msgid "JSONP support is disabled on this site"
-msgstr ""
+msgstr "Поддержка JSONP на этом сайте отключена"
 
 #: includes/api/class-wc-api-json-handler.php:64
 msgid "The JSONP callback function is invalid"
-msgstr ""
+msgstr "Вызываемая в JSONP функция некорректна"
 
-#: includes/api/class-wc-api-orders.php:253
+#: includes/api/class-wc-api-orders.php:255
 msgid "You do not have permission to read the orders count"
-msgstr ""
+msgstr "У вас нет прав на просмотр счётчика заказов"
 
 #: includes/api/class-wc-api-products.php:140
 msgid "You do not have permission to read the products count"
-msgstr ""
+msgstr "У вас нет прав на просмотр счётчика товаров"
 
-#: includes/api/class-wc-api-products.php:458
 #: includes/api/class-wc-api-products.php:459
+#: includes/api/class-wc-api-products.php:460
 msgid "Placeholder"
-msgstr ""
+msgstr "Заполнитель"
 
-#: includes/api/class-wc-api-reports.php:396
+#: includes/api/class-wc-api-reports.php:469
 msgid "You do not have permission to read this report"
-msgstr ""
+msgstr "У вас нет прав на просмотр этого сообщения"
 
 #: includes/api/class-wc-api-resource.php:71
 msgid "Invalid %s ID"
-msgstr ""
+msgstr "Неверный %s ID"
 
 #: includes/api/class-wc-api-resource.php:83
 msgid "Invalid %s"
-msgstr ""
+msgstr "Неверный %s"
 
 #: includes/api/class-wc-api-resource.php:90
 msgid "You do not have permission to read this %s"
-msgstr ""
+msgstr "У вас нет прав на просмотр этого %s"
 
 #: includes/api/class-wc-api-resource.php:95
 msgid "You do not have permission to edit this %s"
-msgstr ""
+msgstr "У вас нет прав на редактирование этого %s"
 
 #: includes/api/class-wc-api-resource.php:100
 msgid "You do not have permission to delete this %s"
-msgstr ""
+msgstr "У вас нет прав на удаление этого %s"
 
 #: includes/api/class-wc-api-resource.php:302
 msgid "Permanently deleted customer"
-msgstr ""
+msgstr "Покупатель удалён навсегда"
 
 #: includes/api/class-wc-api-resource.php:304
 msgid "The customer cannot be deleted"
-msgstr ""
+msgstr "Покупатель не может быть удалён"
 
 #: includes/api/class-wc-api-resource.php:313
 msgid "This %s cannot be deleted"
@@ -3277,11 +3277,11 @@ msgstr "Этот %s не может быть удалён"
 
 #: includes/api/class-wc-api-resource.php:316
 msgid "Permanently deleted %s"
-msgstr ""
+msgstr "%s удалён навсегда"
 
 #: includes/api/class-wc-api-resource.php:322
 msgid "Deleted %s"
-msgstr ""
+msgstr "%s удалён"
 
 #: includes/api/class-wc-api-server.php:165
 msgid "Invalid authentication method"
@@ -3301,7 +3301,7 @@ msgstr ""
 
 #: includes/api/class-wc-api-server.php:404
 msgid "Missing parameter %s"
-msgstr ""
+msgstr "Отсутствует параметр %s"
 
 #: includes/class-wc-ajax.php:158
 msgid "Sorry, your session has expired."
@@ -3337,7 +3337,7 @@ msgstr "Файл %d"
 #: includes/class-wc-ajax.php:982 includes/class-wc-ajax.php:983
 #: includes/class-wc-order.php:1474
 msgid "Item #%s stock reduced from %s to %s."
-msgstr "Наличие позиции #%s сокращено с %s до %s."
+msgstr "Наличие товара #%s сокращено с %s до %s."
 
 #: includes/class-wc-ajax.php:991
 msgid ""
@@ -3373,7 +3373,7 @@ msgstr "Удалить заметку"
 msgid "Guest"
 msgstr "Гость"
 
-#: includes/class-wc-cache-helper.php:99
+#: includes/class-wc-cache-helper.php:105
 msgid ""
 "In order for <strong>database caching</strong> to work with WooCommerce you "
 "must add <code>_wc_session_</code> to the \"Ignored Query Strings\" option "
@@ -3403,7 +3403,7 @@ msgid ""
 "Sorry, we do not have enough \"%s\" in stock to fulfill your order right "
 "now. Please try again in %d minutes or edit your cart and try again. We "
 "apologise for any inconvenience caused."
-msgstr ""
+msgstr "Извините, у нас не хватает \"%s\" в запасе, чтобы выполнить ваш заказ прямо сейчас. Пожалуйста, попробуйте снова через %d минут или изменить вашу корзину и попробуйте снова. Приносим извинения за доставленные неудобства."
 
 #: includes/class-wc-cart.php:465
 msgid ""
@@ -3441,7 +3441,7 @@ msgstr "Вы не можете добавить ещё &quot;%s&quot; в кор�
 msgid ""
 "You cannot add that amount to the cart &mdash; we have %s in stock and you "
 "already have %s in your cart."
-msgstr ""
+msgstr "Вы не можете добавить эту сумму к корзине &mdash; у нас на складе есть %s, а у вас уже %s в корзине."
 
 #: includes/class-wc-checkout.php:64 includes/class-wc-checkout.php:73
 #: includes/class-wc-emails.php:67 includes/class-wc-emails.php:76
@@ -3449,7 +3449,7 @@ msgstr ""
 #: includes/class-wc-payment-gateways.php:55 includes/class-wc-shipping.php:64
 #: includes/class-wc-shipping.php:73 woocommerce.php:102 woocommerce.php:111
 msgid "Cheatin&#8217; huh?"
-msgstr ""
+msgstr "Эй&#8217; хакер?"
 
 #: includes/class-wc-checkout.php:97
 msgid "Account username"
@@ -3495,7 +3495,7 @@ msgstr "Зарезервировано"
 msgid ""
 "Sorry, your session has expired. <a href=\"%s\" class=\"wc-backward\">Return"
 " to homepage</a>"
-msgstr ""
+msgstr "К сожалению, сессия истекла. <a href=\"%s\" class=\"wc-backward\">На главную</a>"
 
 #: includes/class-wc-checkout.php:484 includes/class-wc-form-handler.php:82
 msgid "is a required field."
@@ -3526,7 +3526,7 @@ msgstr "Вам необходимо принять наши условия и п
 msgid ""
 "Unfortunately <strong>we do not ship to %s</strong>. Please enter an "
 "alternative shipping address."
-msgstr ""
+msgstr "К сожалению, <strong>мы не доставляем в %s</strong>. Пожалуйста, введите другой адрес доставки."
 
 #: includes/class-wc-checkout.php:584
 msgid "Invalid shipping method."
@@ -4278,11 +4278,11 @@ msgstr "Сент-Люсия"
 
 #: includes/class-wc-countries.php:221
 msgid "Saint Martin (French part)"
-msgstr "Сен-Мартин (Французская часть)"
+msgstr "Сен-Мартен (французская часть)"
 
 #: includes/class-wc-countries.php:222
 msgid "Saint Martin (Dutch part)"
-msgstr "Сен-Мартен (Голландская часть)"
+msgstr "Сен-Мартен (голландская часть)"
 
 #: includes/class-wc-countries.php:223
 msgid "Saint Pierre and Miquelon"
@@ -4346,7 +4346,7 @@ msgstr "Южная Африка"
 
 #: includes/class-wc-countries.php:238
 msgid "South Georgia/Sandwich Islands"
-msgstr "Южная Джорджия/Сандвичевы острова"
+msgstr "Южная Георгия/Сандвичевы острова"
 
 #: includes/class-wc-countries.php:239
 msgid "South Korea"
@@ -4410,7 +4410,7 @@ msgstr "Тайланд"
 
 #: includes/class-wc-countries.php:254
 msgid "Timor-Leste"
-msgstr "Тимор-Лешти"
+msgstr "Восточный Тимор"
 
 #: includes/class-wc-countries.php:255
 msgid "Togo"
@@ -4442,7 +4442,7 @@ msgstr "Туркменистан"
 
 #: includes/class-wc-countries.php:262
 msgid "Turks and Caicos Islands"
-msgstr "Острова Теркс и Кайкос"
+msgstr "Теркс и Кайкос"
 
 #: includes/class-wc-countries.php:263
 msgid "Tuvalu"
@@ -4458,7 +4458,7 @@ msgstr "Украина"
 
 #: includes/class-wc-countries.php:266
 msgid "United Arab Emirates"
-msgstr "Объединенные Арабские Эмираты"
+msgstr "Объединённые Арабские Эмираты"
 
 #: includes/class-wc-countries.php:267
 msgid "United Kingdom (UK)"
@@ -4502,7 +4502,7 @@ msgstr "Западная Сахара"
 
 #: includes/class-wc-countries.php:277
 msgid "Western Samoa"
-msgstr "Самоа"
+msgstr "Западное Самоа"
 
 #: includes/class-wc-countries.php:278
 msgid "Yemen"
@@ -4601,7 +4601,7 @@ msgstr "Почтовый индекс"
 #: includes/class-wc-countries.php:958 includes/class-wc-countries.php:1008
 #: includes/class-wc-countries.php:1032 includes/class-wc-countries.php:1073
 msgid "Province"
-msgstr "Провинция"
+msgstr "Район"
 
 #: includes/class-wc-countries.php:847
 msgid "Canton"
@@ -4653,7 +4653,7 @@ msgstr "Код купона успешно удалён."
 
 #: includes/class-wc-coupon.php:592
 msgid "Coupon is not valid."
-msgstr "Купон является недопустимым."
+msgstr "Некорректный купон."
 
 #: includes/class-wc-coupon.php:595 includes/class-wc-coupon.php:645
 msgid "Coupon does not exist!"
@@ -4663,13 +4663,13 @@ msgstr "Такой купон не существует!"
 msgid ""
 "Sorry, it seems the coupon \"%s\" is invalid - it has now been removed from "
 "your order."
-msgstr "Извините, похоже, что купон \"%s\" некорректен - он удалён из вашего заказа."
+msgstr "Извините, похоже, купон \"%s\" некорректен - он удалён из вашего заказа."
 
 #: includes/class-wc-coupon.php:601
 msgid ""
 "Sorry, it seems the coupon \"%s\" is not yours - it has now been removed "
 "from your order."
-msgstr "Извините, похоже купон \"%s\" не ваш — он был удален из вашего заказа."
+msgstr "Извините, похоже, купон \"%s\" не ваш - он был удален из вашего заказа."
 
 #: includes/class-wc-coupon.php:604
 msgid "Coupon code already applied!"
@@ -4679,7 +4679,7 @@ msgstr "Код купона уже использован!"
 msgid ""
 "Sorry, coupon \"%s\" has already been applied and cannot be used in "
 "conjunction with other coupons."
-msgstr ""
+msgstr "Извините, купон \"%s\" уже выбран и не может быть использован в сочетании с другими купонами."
 
 #: includes/class-wc-coupon.php:610
 msgid "Coupon usage limit has been reached."
@@ -4691,7 +4691,7 @@ msgstr "Время действия купона истекло."
 
 #: includes/class-wc-coupon.php:616
 msgid "The minimum spend for this coupon is %s."
-msgstr "Минимальная сумма для этого купона %s."
+msgstr "Минимальная сумма расходов для этого купона %s."
 
 #: includes/class-wc-coupon.php:619
 msgid "Sorry, this coupon is not applicable to your cart contents."
@@ -4777,7 +4777,7 @@ msgstr "Примечание"
 
 #: includes/class-wc-emails.php:325
 msgid "Product low in stock"
-msgstr "Товара мало в наличии"
+msgstr "Товара в наличии мало."
 
 #: includes/class-wc-emails.php:330 includes/class-wc-emails.php:362
 #: includes/class-wc-emails.php:406
@@ -4803,11 +4803,11 @@ msgstr "нет в наличии."
 
 #: includes/class-wc-emails.php:401
 msgid "Product Backorder"
-msgstr "Удержание товара"
+msgstr "Товар зарезервирован"
 
 #: includes/class-wc-emails.php:411
 msgid "%s units of %s have been backordered in order %s."
-msgstr ""
+msgstr "%s единиц из %s зарезервированы в заказе % s."
 
 #: includes/class-wc-form-handler.php:119
 msgid "Address changed successfully."
@@ -4841,7 +4841,7 @@ msgstr "Профиль успешно изменён."
 
 #: includes/class-wc-form-handler.php:311
 msgid "Payment method added."
-msgstr ""
+msgstr "Способ оплаты добавлен."
 
 #: includes/class-wc-form-handler.php:344
 #: includes/class-wc-form-handler.php:395
@@ -4931,18 +4931,18 @@ msgstr "Анти-спам поле было заполнено."
 
 #: includes/class-wc-frontend-scripts.php:110
 msgid "Please select a rating"
-msgstr "Пожалуйста сделайте оценку"
+msgstr "Пожалуйста, поставьте оценку"
 
 #: includes/class-wc-frontend-scripts.php:127
 #: includes/wc-template-functions.php:1559
 msgid "required"
-msgstr "требуется"
+msgstr "обязательно"
 
 #: includes/class-wc-frontend-scripts.php:151
 msgid ""
 "Sorry, no products matched your selection. Please choose a different "
 "combination."
-msgstr "Извините, нет продуктов, соответствующих вашему выбору. Пожалуйста, выберите другую комбинацию."
+msgstr "Извините, нет товаров, соответствующих вашему выбору. Пожалуйста, выберите другую комбинацию."
 
 #: includes/class-wc-frontend-scripts.php:152
 msgid ""
@@ -5002,7 +5002,7 @@ msgstr "Что нового:"
 #: includes/class-wc-order.php:130
 msgctxt "hash before order number"
 msgid "#"
-msgstr "#"
+msgstr "№"
 
 #: includes/class-wc-order.php:795
 msgid "&nbsp;<small>%svia %s</small>"
@@ -5010,7 +5010,7 @@ msgstr "&nbsp;<small>%s через %s</small>"
 
 #: includes/class-wc-order.php:856
 msgid "Cart Subtotal:"
-msgstr "Подитог корзины:"
+msgstr "Всего в корзине:"
 
 #: includes/class-wc-order.php:862
 msgid "Cart Discount:"
@@ -5026,7 +5026,7 @@ msgstr "Скидка на заказ:"
 
 #: includes/class-wc-order.php:918
 msgid "Order Total:"
-msgstr "Итого:"
+msgstr "Итог по заказу:"
 
 #: includes/class-wc-order.php:936 includes/wc-cart-functions.php:226
 msgid "(Includes %s)"
@@ -5042,12 +5042,12 @@ msgstr "Статус заказа изменен с %s на %s."
 
 #: includes/class-wc-order.php:1486
 msgid "Order item stock reduced successfully."
-msgstr "Позиции в заказе успешно снижены."
+msgstr "Количество товаров из заказа на складе успешно уменьшено."
 
 #: includes/class-wc-post-types.php:62 includes/class-wc-post-types.php:64
 #: includes/widgets/class-wc-widget-product-categories.php:30
 msgid "Product Categories"
-msgstr "Категории товара"
+msgstr "Категории товаров"
 
 #: includes/class-wc-post-types.php:65
 msgid "Product Category"
@@ -5060,19 +5060,19 @@ msgstr "Категории"
 
 #: includes/class-wc-post-types.php:67
 msgid "Search Product Categories"
-msgstr "Поиск по категориям товара"
+msgstr "Поиск по категориям товаров"
 
 #: includes/class-wc-post-types.php:68
 msgid "All Product Categories"
-msgstr "Все категории товара"
+msgstr "Все категории товаров"
 
 #: includes/class-wc-post-types.php:69
 msgid "Parent Product Category"
-msgstr "Главная категория товара"
+msgstr "Родительская категория товара"
 
 #: includes/class-wc-post-types.php:70
 msgid "Parent Product Category:"
-msgstr "Главная категория товара:"
+msgstr "Родительская категория товара:"
 
 #: includes/class-wc-post-types.php:71
 msgid "Edit Product Category"
@@ -5080,15 +5080,15 @@ msgstr "Изменить категорию товара"
 
 #: includes/class-wc-post-types.php:72
 msgid "Update Product Category"
-msgstr "Обновить категорию товара"
+msgstr "Обновить категорию товаров"
 
 #: includes/class-wc-post-types.php:73
 msgid "Add New Product Category"
-msgstr "Добавить новую категорию товара"
+msgstr "Добавить новую категорию товаров"
 
 #: includes/class-wc-post-types.php:74
 msgid "New Product Category Name"
-msgstr "Новое имя категории товара"
+msgstr "Имя новой категории товаров"
 
 #: includes/class-wc-post-types.php:85
 #: includes/updates/woocommerce-update-2.0.php:49
@@ -5099,7 +5099,7 @@ msgstr "товарная-категория"
 #: includes/class-wc-post-types.php:97 includes/class-wc-post-types.php:99
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:27
 msgid "Product Tags"
-msgstr "Метки товара"
+msgstr "Метки товаров"
 
 #: includes/class-wc-post-types.php:100
 msgid "Product Tag"
@@ -5112,7 +5112,7 @@ msgstr "Метки"
 
 #: includes/class-wc-post-types.php:102
 msgid "Search Product Tags"
-msgstr "Поиск по меткам товара"
+msgstr "Поиск по меткам товаров"
 
 #: includes/class-wc-post-types.php:103
 msgid "All Product Tags"
@@ -5120,27 +5120,27 @@ msgstr "Все метки товаров"
 
 #: includes/class-wc-post-types.php:104
 msgid "Parent Product Tag"
-msgstr "Главный тег товара"
+msgstr "Родительская метка товаров"
 
 #: includes/class-wc-post-types.php:105
 msgid "Parent Product Tag:"
-msgstr "Главный тег товара:"
+msgstr "Родительская метка товаров:"
 
 #: includes/class-wc-post-types.php:106
 msgid "Edit Product Tag"
-msgstr "Изменить тег товара"
+msgstr "Изменить метку товаров"
 
 #: includes/class-wc-post-types.php:107
 msgid "Update Product Tag"
-msgstr "Обновить тег товара"
+msgstr "Обновить метку товаров"
 
 #: includes/class-wc-post-types.php:108
 msgid "Add New Product Tag"
-msgstr "Добавить новый тег товара"
+msgstr "Добавить новую метку товаров"
 
 #: includes/class-wc-post-types.php:109
 msgid "New Product Tag Name"
-msgstr "Новый тег товара"
+msgstr "Имя новой метки товаров"
 
 #: includes/class-wc-post-types.php:120
 #: includes/updates/woocommerce-update-2.0.php:50
@@ -5153,7 +5153,7 @@ msgid "Shipping Classes"
 msgstr "Классы доставки"
 
 #: includes/class-wc-post-types.php:134
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:522
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:521
 msgid "Shipping Class"
 msgstr "Класс доставки"
 
@@ -5164,7 +5164,7 @@ msgstr "Классы доставки"
 
 #: includes/class-wc-post-types.php:136
 msgid "Search Shipping Classes"
-msgstr "Искать по классам доставки"
+msgstr "Поиск по классам доставки"
 
 #: includes/class-wc-post-types.php:137
 msgid "All Shipping Classes"
@@ -5172,11 +5172,11 @@ msgstr "Все классы доставки"
 
 #: includes/class-wc-post-types.php:138
 msgid "Parent Shipping Class"
-msgstr "Главный класс доставки"
+msgstr "Родительский класс доставки"
 
 #: includes/class-wc-post-types.php:139
 msgid "Parent Shipping Class:"
-msgstr "Главный класс доставки:"
+msgstr "Родительский класс доставки:"
 
 #: includes/class-wc-post-types.php:140
 msgid "Edit Shipping Class"
@@ -5220,11 +5220,11 @@ msgstr "Обновить %s"
 
 #: includes/class-wc-post-types.php:197
 msgid "Add New %s"
-msgstr "Добавить %s"
+msgstr "Добавить новый %s"
 
 #: includes/class-wc-post-types.php:198
 msgid "New %s"
-msgstr "Новое %s"
+msgstr "Новый %s"
 
 #: includes/class-wc-post-types.php:234
 #: includes/updates/woocommerce-update-2.0.php:58
@@ -5289,11 +5289,11 @@ msgstr "Товары не найдены"
 
 #: includes/class-wc-post-types.php:252
 msgid "No Products found in trash"
-msgstr "Не найдено удаленных товаров"
+msgstr "Не найдено товаров в корзине"
 
 #: includes/class-wc-post-types.php:253
 msgid "Parent Product"
-msgstr "Главный товар"
+msgstr "Родительский товар"
 
 #: includes/class-wc-post-types.php:255
 msgid "This is where you can add new products to your store."
@@ -5342,15 +5342,15 @@ msgstr "Поиск по заказам"
 
 #: includes/class-wc-post-types.php:303
 msgid "No Orders found"
-msgstr "Не найдено заказов"
+msgstr "Заказов не найдено"
 
 #: includes/class-wc-post-types.php:304
 msgid "No Orders found in trash"
-msgstr "Не найдено удаленных заказов"
+msgstr "Не найдено заказов в корзине"
 
 #: includes/class-wc-post-types.php:305
 msgid "Parent Orders"
-msgstr "Главные заказы"
+msgstr "Родительский заказ"
 
 #: includes/class-wc-post-types.php:308
 msgid "This is where store orders are stored."
@@ -5399,15 +5399,15 @@ msgstr "Поиск купонов"
 
 #: includes/class-wc-post-types.php:342
 msgid "No Coupons found"
-msgstr "Не найдено купонов"
+msgstr "Купонов не найдено"
 
 #: includes/class-wc-post-types.php:343
 msgid "No Coupons found in trash"
-msgstr "Не найдено удаленных купонов"
+msgstr "В корзине купонов не найдено"
 
 #: includes/class-wc-post-types.php:344
 msgid "Parent Coupon"
-msgstr "Главный купон"
+msgstr "Родительский купон"
 
 #: includes/class-wc-post-types.php:346
 msgid ""
@@ -5444,7 +5444,7 @@ msgid ""
 "Changing status to draft."
 msgstr ""
 
-#: includes/class-wc-product-variation.php:492
+#: includes/class-wc-product-variation.php:494
 msgid "%s &ndash; %s%s"
 msgstr "%s &ndash; %s%s"
 
@@ -5474,7 +5474,7 @@ msgstr "Ваш заказ на {site_title} от {order_date} выполнен"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:39
 msgid "Your order is complete - download your files"
-msgstr "Ваш заказ выполнен - загрузить ваши файлы"
+msgstr "Ваш заказ выполнен - скачать файлы"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:40
 msgid ""
@@ -5489,7 +5489,7 @@ msgstr "Тема"
 #: includes/emails/class-wc-email-customer-completed-order.php:153
 #: includes/emails/class-wc-email-new-order.php:140
 msgid "Email Heading"
-msgstr "Заголовок электронного письма"
+msgstr "Заголовок письма"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:160
 msgid "Subject (downloadable)"
@@ -5507,7 +5507,7 @@ msgstr "Счет на оплату клиентом"
 msgid ""
 "Customer invoice emails can be sent to the user containing order info and "
 "payment links."
-msgstr ""
+msgstr "Письма со счётом-фактурой для покупателей могут быть отправлены с указанием информации о заказе и ссылки для оплаты."
 
 #: includes/emails/class-wc-email-customer-invoice.php:35
 msgid "Invoice for order {order_number} from {order_date}"
@@ -5527,21 +5527,21 @@ msgstr "Детали заказа {order_number}"
 
 #: includes/emails/class-wc-email-customer-invoice.php:160
 msgid "Email subject (paid)"
-msgstr ""
+msgstr "Тема письма (оплачено)"
 
 #: includes/emails/class-wc-email-customer-invoice.php:167
 msgid "Email heading (paid)"
-msgstr ""
+msgstr "Заголовок письма (оплачено)"
 
 #: includes/emails/class-wc-email-customer-new-account.php:33
 msgid "New account"
-msgstr "Новый аккаунт"
+msgstr "Новая учетная запись"
 
 #: includes/emails/class-wc-email-customer-new-account.php:34
 msgid ""
 "Customer new account emails are sent when a customer signs up via the "
 "checkout or My Account page."
-msgstr ""
+msgstr "Письмо для нового аккаунта отправляется при регистрации на странице оформления заказа или на странице \"Мой профиль\"."
 
 #: includes/emails/class-wc-email-customer-new-account.php:39
 msgid "Your account on {site_title}"
@@ -5557,11 +5557,11 @@ msgstr "Заметка клиента"
 
 #: includes/emails/class-wc-email-customer-note.php:32
 msgid "Customer note emails are sent when you add a note to an order."
-msgstr ""
+msgstr "Письмо с заметкой отправляется когда вы добавляете заметку к заказу."
 
 #: includes/emails/class-wc-email-customer-note.php:37
 msgid "Note added to your {site_title} order from {order_date}"
-msgstr ""
+msgstr "Добавлена заметка к вашему заказу на {site_title} от {order_date}"
 
 #: includes/emails/class-wc-email-customer-note.php:38
 msgid "A note has been added to your order"
@@ -5575,7 +5575,7 @@ msgstr "Заказ в обработке"
 msgid ""
 "This is an order notification sent to the customer after payment containing "
 "order details."
-msgstr ""
+msgstr "Это уведовление отправляется покупателю после оплаты, содержит подробности заказа."
 
 #: includes/emails/class-wc-email-customer-processing-order.php:29
 msgid "Thank you for your order"
@@ -5583,7 +5583,7 @@ msgstr "Спасибо за ваш заказ"
 
 #: includes/emails/class-wc-email-customer-processing-order.php:30
 msgid "Your {site_title} order receipt from {order_date}"
-msgstr ""
+msgstr "Чек вашего заказа на {site_title} от {order_date}"
 
 #: includes/emails/class-wc-email-customer-reset-password.php:38
 msgid "Reset password"
@@ -5609,7 +5609,7 @@ msgstr "Новый заказ"
 
 #: includes/emails/class-wc-email-new-order.php:27
 msgid "New order emails are sent when an order is received."
-msgstr ""
+msgstr "Письмо для нового заказа отправляется, когда заказ был получен."
 
 #: includes/emails/class-wc-email-new-order.php:29
 msgid "New customer order"
@@ -5617,7 +5617,7 @@ msgstr "Новый клиентский заказ"
 
 #: includes/emails/class-wc-email-new-order.php:30
 msgid "[{site_title}] New customer order ({order_number}) - {order_date}"
-msgstr ""
+msgstr "[{site_title}] Новый заказ ({order_number}) - {order_date}"
 
 #: includes/emails/class-wc-email-new-order.php:126
 msgid "Recipient(s)"
@@ -5627,19 +5627,19 @@ msgstr "Получатели"
 msgid ""
 "Enter recipients (comma separated) for this email. Defaults to "
 "<code>%s</code>."
-msgstr ""
+msgstr "Введите получателей (через запятую). По умолчанию <code>%s</code>."
 
 #: includes/emails/class-wc-email-new-order.php:135
 msgid ""
 "This controls the email subject line. Leave blank to use the default "
 "subject: <code>%s</code>."
-msgstr ""
+msgstr "Настройка темы письма. Оставьте пустым, чтобы использовать стандартное значение: <code>%s</code>."
 
 #: includes/emails/class-wc-email-new-order.php:142
 msgid ""
 "This controls the main heading contained within the email notification. "
 "Leave blank to use the default heading: <code>%s</code>."
-msgstr ""
+msgstr "Настройка основного заголовка для почтовых уведомлений. Оставьте пустым, чтобы использовать стандартное значение: <code>%s</code>."
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:25
 msgid "BACS"
@@ -5658,7 +5658,7 @@ msgstr "Активировать прямую оплату через банк"
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:58
 #: includes/gateways/cod/class-wc-gateway-cod.php:64
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:142
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:131
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:132
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:102
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:81
 #: includes/widgets/class-wc-widget-cart.php:30
@@ -5678,7 +5678,7 @@ msgstr "Заголовок."
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:74
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:60
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:144
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:133
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:134
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:83
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:72
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:57
@@ -5695,7 +5695,7 @@ msgstr "Прямой банковский перевод"
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:65
 #: includes/gateways/cod/class-wc-gateway-cod.php:71
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:149
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:138
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:139
 #: includes/wc-template-functions.php:965
 msgid "Description"
 msgstr "Описание"
@@ -5705,7 +5705,7 @@ msgstr "Описание"
 #: includes/gateways/cod/class-wc-gateway-cod.php:66
 msgid ""
 "Payment method description that the customer will see on your checkout."
-msgstr ""
+msgstr "Описание способа оплаты, которое покупатель будет видеть при оформлении заказа."
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:82
 msgid ""
@@ -5723,7 +5723,7 @@ msgstr "Инструкции"
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:88
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:74
 msgid "Instructions that will be added to the thank you page and emails."
-msgstr ""
+msgstr "Инструкции, которые будут добавлены на страницу благодарности и в письмо."
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:105
 msgid "Account Details"
@@ -5754,7 +5754,7 @@ msgstr "IBAN"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:116
 msgid "BIC / Swift"
-msgstr ""
+msgstr "БИК / СВИФТ"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:121
 msgid "+ Add Account"
@@ -5843,7 +5843,7 @@ msgstr "Включить способы доставки"
 msgid ""
 "If COD is only available for certain methods, set it up here. Leave blank to"
 " enable for all methods."
-msgstr ""
+msgstr "Если оплата курьеру доступна только для определенных способов доставки, задайте её здесь. Оставьте поле пустым, чтобы включить для всех методов."
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:94
 msgid "Select shipping methods"
@@ -5856,12 +5856,12 @@ msgstr "Оплата по факту доставки."
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:30
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:167
 msgid "Mijireh Checkout"
-msgstr ""
+msgstr "Оплата с Mijireh"
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:107
-#: includes/gateways/mijireh/class-wc-gateway-mijireh.php:293
+#: includes/gateways/mijireh/class-wc-gateway-mijireh.php:291
 msgid "Mijireh error:"
-msgstr ""
+msgstr "Ошибка Mijireh:"
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:131
 msgid "Enable Mijireh Checkout"
@@ -5873,7 +5873,7 @@ msgstr "Ключ доступа"
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:137
 msgid "The Mijireh access key for your store."
-msgstr ""
+msgstr "Ключ доступа Mijireh для вашего магазина."
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:145
 msgid "Credit Card"
@@ -5884,13 +5884,13 @@ msgid "Pay securely with your credit card."
 msgstr "Оплачивайте кредитной картой безопасно."
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:152
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:140
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:141
 msgid "This controls the description which the user sees during checkout."
 msgstr "Тут можно изменять описание, которое видит пользователь при проведении платежа."
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:171
 msgid "Get started with Mijireh Checkout"
-msgstr ""
+msgstr "Начало работы с оплатой Mijireh"
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:172
 msgid ""
@@ -5915,214 +5915,218 @@ msgid ""
 " of your site."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:33
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:134
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:31
+msgid "Proceed to PayPal"
+msgstr "Переход к PayPal"
+
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:34
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:135
 msgid "PayPal"
 msgstr "PayPal"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:97
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:98
 msgid "PayPal standard"
 msgstr "PayPal стандарт"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:98
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:99
 msgid ""
 "PayPal standard works by sending the user to PayPal to enter their payment "
 "information."
 msgstr "PayPal стандарт работает через отправку пользователя на PayPal для ввода платежной информации."
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:110
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:111
 msgid "Gateway Disabled"
 msgstr "Шлюз отключен"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:110
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:111
 msgid "PayPal does not support your store currency."
 msgstr "PayPal не поддерживает валюту вашего магазина."
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:127
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:128
 msgid "Enable PayPal standard"
 msgstr "Включи PayPal стандарт"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:141
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:142
 msgid ""
 "Pay via PayPal; you can pay with your credit card if you don't have a PayPal"
 " account"
 msgstr "Заплатить через PayPal; вы можете заплатить пластиковой картой если у вас нет PayPal аккаунта"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:144
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:145
 msgid "PayPal Email"
 msgstr "Email для PayPal"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:146
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:147
 msgid ""
 "Please enter your PayPal email address; this is needed in order to take "
 "payment."
 msgstr "Пожалуйста, введите свой PayPal email-адрес; это необходимо для получения платежа."
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:152
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:153
 msgid "Receiver Email"
-msgstr ""
+msgstr "Получатель почты"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:154
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:155
 msgid ""
 "If this differs from the email entered above, input your main receiver email"
 " for your PayPal account. This is used to validate IPN requests."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:160
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:161
 msgid "PayPal Identity Token"
 msgstr "Токен идентификации PayPal"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:162
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:163
 msgid ""
 "Optionally enable \"Payment Data Transfer\" (Profile > Website Payment "
 "Preferences) and then copy your identity token here. This will allow "
 "payments to be verified without the need for PayPal IPN."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:165
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:198
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:166
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:199
 msgid "Optional"
 msgstr "Опционально"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:168
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:169
 msgid "Invoice Prefix"
-msgstr ""
+msgstr "Префикс счёта-фактуры"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:170
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:171
 msgid ""
 "Please enter a prefix for your invoice numbers. If you use your PayPal "
 "account for multiple stores ensure this prefix is unique as PayPal will not "
 "allow orders with the same invoice number."
-msgstr ""
+msgstr "Пожалуйста, введите префикс для номеров счетов. Если вы используете ваш PayPal аккаунт для нескольких магазинов этот префикс должен быть уникальным, так как PayPal не позволит делать заказы с тем же номером счета-фактуры."
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:175
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:176
 msgid "Payment Action"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:177
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:178
 msgid ""
 "Choose whether you wish to capture funds immediately or authorize payment "
 "only."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:181
-msgid "Capture"
-msgstr ""
-
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:182
+msgid "Capture"
+msgstr "Сбор"
+
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:183
 msgid "Authorize"
 msgstr "Авторизация"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:186
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:187
 msgid "Submission method"
 msgstr "Метод отправки"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:188
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:189
 msgid "Use form submission method."
 msgstr "Используйте метод отправки формы."
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:189
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:190
 msgid ""
 "Enable this to post order data to PayPal via a form instead of using a "
 "redirect/querystring."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:193
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:194
 msgid "Page Style"
 msgstr "Стиль страницы"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:195
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:196
 msgid ""
 "Optionally enter the name of the page style you wish to use. These are "
 "defined within your PayPal account."
-msgstr ""
+msgstr "При необходимости введите имя страницы, стиль которой вы хотите использовать. Они определены в вашем аккаунте PayPal."
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:201
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:202
 msgid "Shipping options"
 msgstr "Параметры доставки"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:206
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:207
 msgid "Shipping details"
 msgstr "Детали доставки"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:208
-msgid "Send shipping details to PayPal instead of billing."
-msgstr ""
-
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:209
+msgid "Send shipping details to PayPal instead of billing."
+msgstr "Отправлять в PayPal реквизиты доставки вместо реквизитов оплаты."
+
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:210
 msgid ""
 "PayPal allows us to send 1 address. If you are using PayPal for shipping "
 "labels you may prefer to send the shipping address rather than billing."
-msgstr ""
+msgstr "PayPal позволяет нам отправлять 1 адрес. Если вы используете PayPal для оформления доставки, вы можете выбрать адрес доставки, а не оплаты."
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:213
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:214
 msgid "Address override"
 msgstr "Адрес перезаписан"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:215
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:216
 msgid ""
 "Enable \"address_override\" to prevent address information from being "
 "changed."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:216
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:217
 msgid ""
 "PayPal verifies addresses therefore this setting can cause errors (we "
 "recommend keeping it disabled)."
 msgstr "PayPal сверяет адреса, поэтому эта настройка может вызывать ошибки (рекомендуем не включать ее)."
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:220
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:221
 msgid "Gateway Testing"
 msgstr "Тестирование платежного шлюза"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:225
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:226
 msgid "PayPal sandbox"
 msgstr "PayPal «песочница»"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:227
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:228
 msgid "Enable PayPal sandbox"
 msgstr "Включить PayPal «песочницу»"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:229
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:230
 msgid ""
 "PayPal sandbox can be used to test payments. Sign up for a developer account"
 " <a href=\"%s\">here</a>."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:232
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:233
 msgid "Debug Log"
 msgstr "Протокол отладки"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:234
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:235
 msgid "Enable logging"
 msgstr "Включить протоколирование"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:236
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:237
 msgid ""
 "Log PayPal events, such as IPN requests, inside "
 "<code>woocommerce/logs/paypal-%s.txt</code>"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:348
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:349
 msgid "Order %s"
 msgstr "Заказ %s"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:357
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:414
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:358
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:415
 msgid "Shipping via"
 msgstr "Доставка"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:453
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:454
 msgid ""
 "Thank you for your order. We are now redirecting you to PayPal to make "
 "payment."
 msgstr "Спасибо за заказ. Мы перенаправляем вас на PayPal для проведения оплаты."
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:478
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:479
 msgid "Pay via PayPal"
 msgstr "Заплатить через PayPal"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:478
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:479
 msgid "Cancel order &amp; restore cart"
 msgstr "Отменить заказ &amp; восстановить корзину"
 
@@ -6130,75 +6134,79 @@ msgstr "Отменить заказ &amp; восстановить корзин�
 msgid ""
 "Thank you - your order is now pending payment. You should be automatically "
 "redirected to PayPal to make payment."
-msgstr ""
+msgstr "Спасибо, ваш заказ находится сейчас в стадии оплаты. Вы должны быть автоматически перенаправлены на сайт платежной системы PayPal для совершения платежа."
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:687
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:689
+msgid "Validation error: PayPal currencies do not match (code %s)."
+msgstr "Ошибка проверки: валюты в PayPal не совпадают (код %s)."
+
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:700
 msgid "Validation error: PayPal amounts do not match (gross %s)."
-msgstr ""
+msgstr "Ошибка проверки: в PayPal суммы не совпадают (брутто %s)."
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:699
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:711
 msgid ""
 "Validation error: PayPal IPN response from a different email address (%s)."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:722
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:734
 msgid "IPN payment completed"
 msgstr "IPN-оплата проведена"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:725
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:737
 msgid "Payment pending: %s"
-msgstr ""
+msgstr "Ожидание оплаты: %s"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:738
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:746
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:763
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:750
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:758
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:775
 msgid "Payment %s via IPN."
 msgstr "Платеж %s через IPN."
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:751
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:763
 msgid "Order refunded/reversed"
 msgstr "Заказ возмещен/отменен"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:752
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:764
 msgid "Order %s has been marked as refunded - PayPal reason code: %s"
-msgstr ""
+msgstr "Заказ %s был отмечен для возврата - код причины в PayPal: %s"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:755
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:767
 msgid "Payment for order %s refunded/reversed"
 msgstr "Оплата по заказу %s возвращена/отменена"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:768
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:780
 msgid "Order reversed"
-msgstr ""
+msgstr "Заказ отменён"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:769
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:781
 msgid ""
 "Order %s has been marked on-hold due to a reversal - PayPal reason code: %s"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:772
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:784
 msgid "Payment for order %s reversed"
-msgstr ""
+msgstr "Оплата заказа %s отменена"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:780
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:792
 msgid "Reversal Cancelled"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:781
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:793
 msgid ""
 "Order %s has had a reversal cancelled. Please check the status of payment "
 "and update the order status accordingly."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:784
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:796
 msgid "Reversal cancelled for order %s"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:856
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:868
 msgid "Validation error: PayPal amounts do not match (amt %s)."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:864
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:876
 msgid "PDT payment completed"
 msgstr "PDT-оплата проведена"
 
@@ -6278,7 +6286,7 @@ msgstr ""
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:126
 msgid "Additional Rates"
-msgstr ""
+msgstr "Добавочная цена"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:128
 msgid ""
@@ -6295,7 +6303,7 @@ msgstr ""
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:134
 msgid "Additional Costs"
-msgstr ""
+msgstr "Дополнительные затраты"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:136
 msgid ""
@@ -6325,63 +6333,63 @@ msgstr "За класс — оплата доставки осуществляе
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:152
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:118
 msgid "Minimum Handling Fee"
-msgstr ""
+msgstr "Минимальный взнос за обработку"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:155
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:120
 msgid ""
 "Enter a minimum fee amount. Fee's less than this will be increased. Leave "
 "blank to disable."
-msgstr ""
+msgstr "Введите минимальную сумму. Суммы меньше неё будут увеличены. Оставьте поле пустым, чтобы отключить."
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:516
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:515
 msgid "Costs"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:523
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:522
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:102
 msgid "Cost"
 msgstr "Цена"
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:523
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:522
 msgid "Cost, excluding tax."
 msgstr "Цена, исключая налог."
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:524
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:523
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:110
 msgid "Handling Fee"
 msgstr "Взнос за обработку"
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:524
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:523
 msgid ""
 "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%."
 msgstr "Плата за исключением налога. Введите значение, к примеру, 2.50 или укажите процент, к примеру, 5%."
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:529
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:528
 msgid "+ Add Cost"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:529
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:528
 msgid "Delete selected costs"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:535
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:534
 msgid "Any class"
 msgstr "Любой класс"
 
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:535
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:536
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:537
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:102
 #: templates/order/order-details.php:122 templates/order/order-details.php:137
 msgid "N/A"
 msgstr "Н/Д"
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:555
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:585
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:554
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:584
 msgid "Select a class&hellip;"
 msgstr "Выбрать класс&hellip;"
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:599
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:598
 msgid "Delete the selected rates?"
 msgstr "Удалить выбранные ставки?"
 
@@ -6429,7 +6437,7 @@ msgstr "Минимальный заказ"
 msgid ""
 "Users will need to spend this amount to get free shipping (if enabled "
 "above)."
-msgstr ""
+msgstr "Покупателям нужно будет потратить эту сумму, чтобы получить бесплатную доставку (если включено выше)."
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:29
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:58
@@ -6639,7 +6647,7 @@ msgstr "Неверный ключ"
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:368
 msgid "Add a new payment method."
-msgstr ""
+msgstr "Добавить новый способ оплаты."
 
 #: includes/shortcodes/class-wc-shortcode-order-tracking.php:49
 msgid "Please enter a valid order ID"
@@ -6685,139 +6693,143 @@ msgstr "[Убрать]"
 msgid "Free"
 msgstr "Бесплатно!"
 
-#: includes/wc-core-functions.php:148
+#: includes/wc-core-functions.php:151
 msgid "Australian Dollars"
 msgstr "Австралийский доллар"
 
-#: includes/wc-core-functions.php:149
+#: includes/wc-core-functions.php:152
 msgid "Brazilian Real"
 msgstr "Бразильский реал"
 
-#: includes/wc-core-functions.php:150
+#: includes/wc-core-functions.php:153
 msgid "Bulgarian Lev"
 msgstr "Болгарский лев"
 
-#: includes/wc-core-functions.php:151
+#: includes/wc-core-functions.php:154
 msgid "Canadian Dollars"
 msgstr "Канадский доллар"
 
-#: includes/wc-core-functions.php:152
+#: includes/wc-core-functions.php:155
 msgid "Chinese Yuan"
 msgstr "Китайский юань"
 
-#: includes/wc-core-functions.php:153
+#: includes/wc-core-functions.php:156
 msgid "Czech Koruna"
 msgstr "Чешская крона"
 
-#: includes/wc-core-functions.php:154
+#: includes/wc-core-functions.php:157
 msgid "Danish Krone"
 msgstr "Датская крона"
 
-#: includes/wc-core-functions.php:155
+#: includes/wc-core-functions.php:158
 msgid "Euros"
 msgstr "Евро"
 
-#: includes/wc-core-functions.php:156
+#: includes/wc-core-functions.php:159
 msgid "Hong Kong Dollar"
 msgstr "Гонконгский доллар "
 
-#: includes/wc-core-functions.php:157
+#: includes/wc-core-functions.php:160
 msgid "Hungarian Forint"
 msgstr "Венгерский форинт"
 
-#: includes/wc-core-functions.php:158
+#: includes/wc-core-functions.php:161
 msgid "Icelandic krona"
-msgstr ""
+msgstr "Исландская крона "
 
-#: includes/wc-core-functions.php:159
+#: includes/wc-core-functions.php:162
 msgid "Indonesia Rupiah"
 msgstr "Индонезийская рупия"
 
-#: includes/wc-core-functions.php:160
+#: includes/wc-core-functions.php:163
 msgid "Indian Rupee"
 msgstr "Индийская рупия"
 
-#: includes/wc-core-functions.php:161
+#: includes/wc-core-functions.php:164
 msgid "Israeli Shekel"
 msgstr "Израильский шекель"
 
-#: includes/wc-core-functions.php:162
+#: includes/wc-core-functions.php:165
 msgid "Japanese Yen"
 msgstr "Японская йена"
 
-#: includes/wc-core-functions.php:163
+#: includes/wc-core-functions.php:166
 msgid "South Korean Won"
 msgstr "Южнокорейская вона"
 
-#: includes/wc-core-functions.php:164
+#: includes/wc-core-functions.php:167
 msgid "Malaysian Ringgits"
 msgstr "Малайзийский ринггит"
 
-#: includes/wc-core-functions.php:165
+#: includes/wc-core-functions.php:168
 msgid "Mexican Peso"
 msgstr "Мексиканский песо"
 
-#: includes/wc-core-functions.php:166
+#: includes/wc-core-functions.php:169
+msgid "Nigerian Naira"
+msgstr "Нигерийская найра"
+
+#: includes/wc-core-functions.php:170
 msgid "Norwegian Krone"
 msgstr "Норвежская крона"
 
-#: includes/wc-core-functions.php:167
+#: includes/wc-core-functions.php:171
 msgid "New Zealand Dollar"
 msgstr "Новозеландский доллар"
 
-#: includes/wc-core-functions.php:168
+#: includes/wc-core-functions.php:172
 msgid "Philippine Pesos"
 msgstr "Филиппинское песо"
 
-#: includes/wc-core-functions.php:169
+#: includes/wc-core-functions.php:173
 msgid "Polish Zloty"
 msgstr "Польский злотый"
 
-#: includes/wc-core-functions.php:170
+#: includes/wc-core-functions.php:174
 msgid "Pounds Sterling"
 msgstr " Фунты стерлингов "
 
-#: includes/wc-core-functions.php:171
+#: includes/wc-core-functions.php:175
 msgid "Romanian Leu"
 msgstr "Румынский лей"
 
-#: includes/wc-core-functions.php:172
+#: includes/wc-core-functions.php:176
 msgid "Russian Ruble"
 msgstr "Российский рубль"
 
-#: includes/wc-core-functions.php:173
+#: includes/wc-core-functions.php:177
 msgid "Singapore Dollar"
 msgstr "Сингапурский доллар"
 
-#: includes/wc-core-functions.php:174
+#: includes/wc-core-functions.php:178
 msgid "South African rand"
-msgstr ""
+msgstr "Южноафриканский рэнд"
 
-#: includes/wc-core-functions.php:175
+#: includes/wc-core-functions.php:179
 msgid "Swedish Krona"
 msgstr "Шведская крона"
 
-#: includes/wc-core-functions.php:176
+#: includes/wc-core-functions.php:180
 msgid "Swiss Franc"
 msgstr " Швейцарский франк "
 
-#: includes/wc-core-functions.php:177
+#: includes/wc-core-functions.php:181
 msgid "Taiwan New Dollars"
-msgstr ""
+msgstr "Новый тайваньский доллар"
 
-#: includes/wc-core-functions.php:178
+#: includes/wc-core-functions.php:182
 msgid "Thai Baht"
-msgstr ""
+msgstr "Таиландский бат"
 
-#: includes/wc-core-functions.php:179
+#: includes/wc-core-functions.php:183
 msgid "Turkish Lira"
-msgstr ""
+msgstr "Турецкая лира"
 
-#: includes/wc-core-functions.php:180
+#: includes/wc-core-functions.php:184
 msgid "US Dollars"
 msgstr "Американский доллар"
 
-#: includes/wc-core-functions.php:181
+#: includes/wc-core-functions.php:185
 msgid "Vietnamese Dong"
 msgstr "Вьетнамский донг"
 
@@ -7100,7 +7112,7 @@ msgstr "Показывать иерархию"
 
 #: includes/widgets/class-wc-widget-product-categories.php:60
 msgid "Only show children for the current category"
-msgstr ""
+msgstr "Показывать только дочерние для текущей категории"
 
 #: includes/widgets/class-wc-widget-product-categories.php:156
 msgid "No product categories exist."
@@ -7289,6 +7301,12 @@ msgstr "Сумма в корзине"
 msgid "Cart Subtotal"
 msgstr "Стоимость товаров"
 
+#: templates/cart/cart-totals.php:27 templates/cart/cart-totals.php:67
+#: templates/checkout/review-order.php:31
+#: templates/checkout/review-order.php:71
+msgid "Coupon:"
+msgstr "Купон:"
+
 #: templates/cart/cart-totals.php:75 templates/checkout/review-order.php:79
 msgid "Order Total"
 msgstr "Сумма заказа"
@@ -7320,6 +7338,10 @@ msgstr "Итого"
 msgid "Remove this item"
 msgstr "Удалить эту позицию"
 
+#: templates/cart/cart.php:118 templates/checkout/form-coupon.php:25
+msgid "Coupon code"
+msgstr "Код купона"
+
 #: templates/cart/cart.php:118 templates/checkout/form-coupon.php:29
 msgid "Apply Coupon"
 msgstr "Использовать купон"
@@ -7342,7 +7364,7 @@ msgstr "Нет товаров в корзине."
 
 #: templates/cart/mini-cart.php:59
 msgid "Subtotal"
-msgstr "Подытог"
+msgstr "Всего"
 
 #: templates/cart/shipping-calculator.php:22
 msgid "Calculate Shipping"
@@ -7408,10 +7430,6 @@ msgstr "У вас есть купон?"
 #: templates/checkout/form-coupon.php:18
 msgid "Click here to enter your code"
 msgstr "Нажмите здесь для введения кода"
-
-#: templates/checkout/form-coupon.php:25
-msgid "Coupon code"
-msgstr "Код купона"
 
 #: templates/checkout/form-login.php:14
 msgid "Returning customer?"
@@ -7741,7 +7759,7 @@ msgstr "Кол."
 
 #: templates/loop/no-products-found.php:14
 msgid "No products were found matching your selection."
-msgstr ""
+msgstr "Продукты, соответствующие вашему выбору, не найдены."
 
 #: templates/loop/orderby.php:21
 msgid "Default sorting"
@@ -7789,11 +7807,11 @@ msgid ""
 "Sorry, it seems that there are no payment methods which support adding a new"
 " payment method. Please contact us if you require assistance or wish to make"
 " alternate arrangements."
-msgstr ""
+msgstr "Извините, нет способов оплаты, которые поддерживают добавление нового метода оплаты. Пожалуйста, свяжитесь с нами, если вам необходима помощь или вы хотели бы иметь альтернативные механизмы."
 
 #: templates/myaccount/form-add-payment-method.php:48
 msgid "Add Payment Method"
-msgstr ""
+msgstr "Добавить способ оплаты"
 
 #: templates/myaccount/form-change-password.php:20
 #: templates/myaccount/form-lost-password.php:31
@@ -7927,11 +7945,11 @@ msgstr[0] "%s за %s позицию"
 msgstr[1] "%s за %s позиции"
 msgstr[2] "%s за %s позиций"
 
-#: templates/myaccount/my-orders.php:77
+#: templates/myaccount/my-orders.php:78
 msgid "Cancel"
 msgstr "Отменить"
 
-#: templates/myaccount/my-orders.php:82
+#: templates/myaccount/my-orders.php:84
 msgid "View"
 msgstr "Просмотр"
 
@@ -8141,7 +8159,7 @@ msgstr "Ваши отзывы"
 #: templates/single-product-reviews.php:89
 msgid ""
 "Only logged in customers who have purchased this product may leave a review."
-msgstr ""
+msgstr "Только зарегистрированные покупатели, которые приобрели этот товар, могут оставить отзыв."
 
 #: woocommerce.php:182
 msgid "Docs"
