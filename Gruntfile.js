@@ -55,6 +55,7 @@ module.exports = function( grunt ){
 					src: [
 						'*.js',
 						'!*.min.js',
+						'!Gruntfile.js',
 						'!jquery.flot*' // !jquery.flot* prevents to join all jquery.flot files in jquery.min.js
 					],
 					dest: '<%= dirs.js %>/admin/',
@@ -88,7 +89,7 @@ module.exports = function( grunt ){
 		watch: {
 			less: {
 				files: ['<%= dirs.css %>/*.less'],
-				tasks: ['less'],
+				tasks: ['less', 'cssmin'],
 			},
 			js: {
 				files: [
