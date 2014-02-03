@@ -122,9 +122,9 @@ module.exports = function( grunt ){
 			generatepot: {
 				command: [
 					'cd i18n/makepot/',
-					'sed -i "s/exit( \'Locked\' );/\\/\\/exit( \'Locked\' );/g" index.php',
+					'sed -i "" "s/exit( \'Locked\' );/\\/\\/exit( \'Locked\' );/g" index.php',
 					'php index.php generate',
-					'sed -i "s/\\/\\/exit( \'Locked\' );/exit( \'Locked\' );/g" index.php',
+					'sed -i "" "s/\\/\\/exit( \'Locked\' );/exit( \'Locked\' );/g" index.php',
 				].join( '&&' )
 			}
 		}

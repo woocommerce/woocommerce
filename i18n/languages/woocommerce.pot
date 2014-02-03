@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.1-rc-1 Front-end\n"
+"Project-Id-Version: WooCommerce 2.1-RC1 Front-end\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-01-30 15:25:37+00:00\n"
+"POT-Creation-Date: 2014-02-03 16:38:55+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -6477,143 +6477,151 @@ msgstr ""
 msgid "Free"
 msgstr ""
 
-#: includes/wc-core-functions.php:151
+#: includes/wc-core-functions.php:162
 msgid "Australian Dollars"
 msgstr ""
 
-#: includes/wc-core-functions.php:152
+#: includes/wc-core-functions.php:163
 msgid "Brazilian Real"
 msgstr ""
 
-#: includes/wc-core-functions.php:153
+#: includes/wc-core-functions.php:164
 msgid "Bulgarian Lev"
 msgstr ""
 
-#: includes/wc-core-functions.php:154
+#: includes/wc-core-functions.php:165
 msgid "Canadian Dollars"
 msgstr ""
 
-#: includes/wc-core-functions.php:155
-msgid "Chinese Yuan"
-msgstr ""
-
-#: includes/wc-core-functions.php:156
-msgid "Czech Koruna"
-msgstr ""
-
-#: includes/wc-core-functions.php:157
-msgid "Danish Krone"
-msgstr ""
-
-#: includes/wc-core-functions.php:158
-msgid "Euros"
-msgstr ""
-
-#: includes/wc-core-functions.php:159
-msgid "Hong Kong Dollar"
-msgstr ""
-
-#: includes/wc-core-functions.php:160
-msgid "Hungarian Forint"
-msgstr ""
-
-#: includes/wc-core-functions.php:161
-msgid "Icelandic krona"
-msgstr ""
-
-#: includes/wc-core-functions.php:162
-msgid "Indonesia Rupiah"
-msgstr ""
-
-#: includes/wc-core-functions.php:163
-msgid "Indian Rupee"
-msgstr ""
-
-#: includes/wc-core-functions.php:164
-msgid "Israeli Shekel"
-msgstr ""
-
-#: includes/wc-core-functions.php:165
-msgid "Japanese Yen"
-msgstr ""
-
 #: includes/wc-core-functions.php:166
-msgid "South Korean Won"
+msgid "Chilean Peso"
 msgstr ""
 
 #: includes/wc-core-functions.php:167
-msgid "Malaysian Ringgits"
+msgid "Chinese Yuan"
 msgstr ""
 
 #: includes/wc-core-functions.php:168
-msgid "Mexican Peso"
+msgid "Colombian Peso"
 msgstr ""
 
 #: includes/wc-core-functions.php:169
-msgid "Nigerian Naira"
+msgid "Czech Koruna"
 msgstr ""
 
 #: includes/wc-core-functions.php:170
-msgid "Norwegian Krone"
+msgid "Danish Krone"
 msgstr ""
 
 #: includes/wc-core-functions.php:171
-msgid "New Zealand Dollar"
+msgid "Euros"
 msgstr ""
 
 #: includes/wc-core-functions.php:172
-msgid "Philippine Pesos"
+msgid "Hong Kong Dollar"
 msgstr ""
 
 #: includes/wc-core-functions.php:173
-msgid "Polish Zloty"
+msgid "Hungarian Forint"
 msgstr ""
 
 #: includes/wc-core-functions.php:174
-msgid "Pounds Sterling"
+msgid "Icelandic krona"
 msgstr ""
 
 #: includes/wc-core-functions.php:175
-msgid "Romanian Leu"
+msgid "Indonesia Rupiah"
 msgstr ""
 
 #: includes/wc-core-functions.php:176
-msgid "Russian Ruble"
+msgid "Indian Rupee"
 msgstr ""
 
 #: includes/wc-core-functions.php:177
-msgid "Singapore Dollar"
+msgid "Israeli Shekel"
 msgstr ""
 
 #: includes/wc-core-functions.php:178
-msgid "South African rand"
+msgid "Japanese Yen"
 msgstr ""
 
 #: includes/wc-core-functions.php:179
-msgid "Swedish Krona"
+msgid "South Korean Won"
 msgstr ""
 
 #: includes/wc-core-functions.php:180
-msgid "Swiss Franc"
+msgid "Malaysian Ringgits"
 msgstr ""
 
 #: includes/wc-core-functions.php:181
-msgid "Taiwan New Dollars"
+msgid "Mexican Peso"
 msgstr ""
 
 #: includes/wc-core-functions.php:182
-msgid "Thai Baht"
+msgid "Nigerian Naira"
 msgstr ""
 
 #: includes/wc-core-functions.php:183
-msgid "Turkish Lira"
+msgid "Norwegian Krone"
 msgstr ""
 
 #: includes/wc-core-functions.php:184
-msgid "US Dollars"
+msgid "New Zealand Dollar"
 msgstr ""
 
 #: includes/wc-core-functions.php:185
+msgid "Philippine Pesos"
+msgstr ""
+
+#: includes/wc-core-functions.php:186
+msgid "Polish Zloty"
+msgstr ""
+
+#: includes/wc-core-functions.php:187
+msgid "Pounds Sterling"
+msgstr ""
+
+#: includes/wc-core-functions.php:188
+msgid "Romanian Leu"
+msgstr ""
+
+#: includes/wc-core-functions.php:189
+msgid "Russian Ruble"
+msgstr ""
+
+#: includes/wc-core-functions.php:190
+msgid "Singapore Dollar"
+msgstr ""
+
+#: includes/wc-core-functions.php:191
+msgid "South African rand"
+msgstr ""
+
+#: includes/wc-core-functions.php:192
+msgid "Swedish Krona"
+msgstr ""
+
+#: includes/wc-core-functions.php:193
+msgid "Swiss Franc"
+msgstr ""
+
+#: includes/wc-core-functions.php:194
+msgid "Taiwan New Dollars"
+msgstr ""
+
+#: includes/wc-core-functions.php:195
+msgid "Thai Baht"
+msgstr ""
+
+#: includes/wc-core-functions.php:196
+msgid "Turkish Lira"
+msgstr ""
+
+#: includes/wc-core-functions.php:197
+msgid "US Dollars"
+msgstr ""
+
+#: includes/wc-core-functions.php:198
 msgid "Vietnamese Dong"
 msgstr ""
 
