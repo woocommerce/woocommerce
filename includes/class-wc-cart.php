@@ -1151,7 +1151,7 @@ class WC_Cart {
 					$line_subtotal_tax     = array_sum( $taxes );
 
 					// Now calc product rates
-					$discounted_price      = $this->get_discounted_price( $values, $base_price );
+					$discounted_price      = $this->get_discounted_price( $values, $base_price, true );
 					$discounted_taxes      = $this->tax->calc_tax( $discounted_price * $values['quantity'], $item_tax_rates );
 					$discounted_tax_amount = array_sum( $discounted_taxes );
 					$line_tax              = $discounted_tax_amount;
