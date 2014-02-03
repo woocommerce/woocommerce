@@ -1,11 +1,19 @@
 {
   "name": "woocommerce",
+  "title": "WooCommerce",
   "version": "2.1.0",
+  "homepage": "http://www.woothemes.com/woocommerce/",
+  "main": "Gruntfile.js",
   "devDependencies": {
     "grunt": "~0.4.2",
-    "grunt-contrib-uglify": "~0.2.2",
+    "grunt-contrib-uglify": "~0.3.2",
     "grunt-contrib-less": "~0.9.0",
     "grunt-contrib-cssmin": "~0.7.0",
-    "grunt-shell": "~0.6.4"
+    "grunt-shell": "~0.6.4",
+    "grunt-contrib-watch": "~0.5.3"
+  },
+  "engines": {
+    "node": ">=0.8.0",
+    "npm": ">=1.1.0"
   }
 }
