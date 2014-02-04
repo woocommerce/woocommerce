@@ -1742,8 +1742,8 @@ class WC_Cart {
 
 					if ( $coupon->is_valid() && ! $coupon->apply_before_tax() && $coupon->is_valid_for_product( $values['data'] ) ) {
 						$discount_amount       = $coupon->get_discount_amount( $price, $values );
-						$this->discount_total += $discount_amount;
-						$this->increase_coupon_discount_amount( $code, $discount_amount );
+						$this->discount_total += $discount_amount * $values['quantity'];
+						$this->increase_coupon_discount_amount( $code, $discount_amount * $values['quantity'] );
 						$this->increase_coupon_applied_count( $code, $values['quantity'] );
 					}
 				}
