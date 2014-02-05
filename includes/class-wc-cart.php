@@ -1844,7 +1844,7 @@ class WC_Cart {
 
 							// Tax rows - merge the totals we just got
 							foreach ( array_keys( $this->taxes ) as $key ) {
-							    $this->taxes[ $key ] = $fee->tax + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
+								$this->taxes[ $key ] = ( isset( $fee_taxes[ $key ] ) ? $fee_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
 							}
 						}
 					}
