@@ -1,17 +1,17 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * WooCommerce Admin.
  *
+ * @class 		WC_Admin 
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce/Admin
  * @version     2.1.0
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
-if ( ! class_exists( 'WC_Admin' ) ) :
-
 class WC_Admin {
 
 	/**
@@ -35,8 +35,8 @@ class WC_Admin {
 		include_once( 'wc-meta-box-functions.php' );
 
 		// Classes
-		include( 'class-wc-admin-post-types.php' );
-		include( 'class-wc-admin-taxonomies.php' );
+		include_once( 'class-wc-admin-post-types.php' );
+		include_once( 'class-wc-admin-taxonomies.php' );
 
 		// Classes we only need if the ajax is not-ajax
 		if ( ! is_ajax() ) {
@@ -118,7 +118,5 @@ class WC_Admin {
 		}
 	}
 }
-
-endif;
 
 return new WC_Admin();

@@ -299,7 +299,7 @@ final class WooCommerce {
 		$this->query = include( 'includes/class-wc-query.php' );				// The main query class
 
 		// Post types
-		include( 'includes/class-wc-post-types.php' );						    // Registers post types
+		include_once( 'includes/class-wc-post-types.php' );						// Registers post types
 
 		// API Class
 		include_once( 'includes/class-wc-api.php' );

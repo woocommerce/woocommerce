@@ -97,8 +97,8 @@ class WC_Install {
 		$this->create_roles();
 
 		// Register post types
-		$post_types = include( 'class-wc-post-types.php' );
-		$post_types->register_taxonomies();
+		include_once( 'class-wc-post-types.php' );
+		WC_Post_types::register_taxonomies();
 
 		$this->create_terms();
 		$this->create_cron_jobs();
