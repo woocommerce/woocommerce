@@ -8,7 +8,7 @@
  */
 global $woocommerce, $product;
 
-if ( ! defined( 'ABSPATH' ) ) 
+if ( ! defined( 'ABSPATH' ) )
 	exit; // Exit if accessed directly
 
 if ( ! comments_open() )
@@ -16,11 +16,11 @@ if ( ! comments_open() )
 ?>
 <div id="reviews">
 	<div id="comments">
-		<h2><?php 
+		<h2><?php
 			if ( get_option( 'woocommerce_enable_review_rating' ) === 'yes' && ( $count = $product->get_rating_count() ) )
 				printf( _n('%s review for %s', '%s reviews for %s', $count, 'woocommerce'), $count, get_the_title() );
 			else
-				_e( 'Reviews', 'woocommerce' ); 
+				_e( 'Reviews', 'woocommerce' );
 		?></h2>
 
 		<?php if ( have_comments() ) : ?>
@@ -29,12 +29,15 @@ if ( ! comments_open() )
 				<?php wp_list_comments( apply_filters( 'woocommerce_product_review_list_args', array( 'callback' => 'woocommerce_comments' ) ) ); ?>
 			</ol>
 
-			<?php if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) : ?>
-				<div class="navigation">
-					<div class="nav-previous wc-backward"><?php previous_comments_link( __( 'Previous', 'woocommerce' ) ); ?></div>
-					<div class="nav-next wc-forward"><?php next_comments_link( __( 'Next', 'woocommerce' ) ); ?></div>
-				</div>
-			<?php endif; ?>
+			<?php if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) :
+				echo '<nav class="woocommerce-pagination">';
+				paginate_comments_links( apply_filters( 'woocommerce_comment_pagination_args', array(
+					'prev_text' 	=> '&larr;',
+					'next_text' 	=> '&rarr;',
+					'type'			=> 'list',
+				) ) );
+				echo '</nav>';
+			endif; ?>
 
 		<?php else : ?>
 

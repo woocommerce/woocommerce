@@ -21,11 +21,19 @@ jQuery(function($) {
 	});
 
 	$('.woocommerce-tabs').each(function() {
-		var hash = window.location.hash;
+		var hash 	= window.location.hash;
+		var url		= window.location.href;
+
 		if (hash.toLowerCase().indexOf("comment-") >= 0) {
 			$('ul.tabs li.reviews_tab a', $(this)).click();
 		} else {
 			$('ul.tabs li:first a', $(this)).click();
+		}
+
+		if ( url.indexOf("comment-page-") > 0 || url.href.indexOf("cpage=") > 0 ) {
+			$( 'ul.tabs li.reviews_tab a', $( this ) ).click();
+		} else {
+			$( 'ul.tabs li:first a', $( this ) ).click();
 		}
 	});
 
