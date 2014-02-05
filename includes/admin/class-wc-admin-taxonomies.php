@@ -1,19 +1,16 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
- * Admin taxonomy functions.
+ * Handles taxonomies in admin
  *
+ * @class 		WC_Admin_Taxonomies
+ * @version		2.1.0
+ * @package		WooCommerce/Admin
+ * @category	Class
  * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin
- * @version     2.1.0
- */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
-if ( ! class_exists( 'WC_Admin_Taxonomies' ) ) :
-
-/**
- * WC_Admin_Taxonomies Class
  */
 class WC_Admin_Taxonomies {
 
@@ -329,6 +326,4 @@ class WC_Admin_Taxonomies {
 	}
 }
 
-endif;
-
-return new WC_Admin_Taxonomies();
+new WC_Admin_Taxonomies();
