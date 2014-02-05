@@ -1018,7 +1018,7 @@ class WC_Cart {
 
 						// Now add modifed taxes
 						$tax_result            = $this->tax->calc_tax( $line_subtotal, $item_tax_rates );
-						$line_subtotal_tax     = array_sum( $taxes );
+						$line_subtotal_tax     = array_sum( $tax_result );
 
 					/**
 					 * Regular tax calculation (customer inside base and the tax class is unmodified
