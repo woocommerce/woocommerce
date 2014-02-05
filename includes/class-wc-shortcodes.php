@@ -142,6 +142,16 @@ class WC_Shortcodes {
 
 		// Default ordering args
 		$ordering_args = WC()->query->get_catalog_ordering_args( $orderby, $order );
+		
+		if(stristr($category,',')){
+			$terms = array();
+			$categories = explode(',',$category);
+			foreach($categories as $c){
+				$terms[] = esc_attr($c);
+			}
+		}else{
+			$terms = array( esc_attr($category) );
+		}
 
 		$args = array(
 			'post_type'				=> 'product',
@@ -160,7 +170,7 @@ class WC_Shortcodes {
 			'tax_query' 			=> array(
 				array(
 					'taxonomy' 		=> 'product_cat',
-					'terms' 		=> array( esc_attr( $category ) ),
+					'terms' 		=> $terms,
 					'field' 		=> 'slug',
 					'operator' 		=> $operator
 				)
