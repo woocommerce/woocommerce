@@ -1286,15 +1286,13 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 	 * @return bool
 	 */
 	function woocommerce_products_will_display() {
-		global $wpdb;
+		if ( is_shop() )
+			return get_option( 'woocommerce_shop_page_display' ) != 'subcategories';
 
-		if ( ! is_product_category() && ! is_product_tag() && ! is_shop() && ! is_product_taxonomy() )
+		if ( ! is_product_taxonomy() )
 			return false;
 
 		if ( is_search() || is_filtered() || is_paged() )
-			return true;
-
-		if ( is_shop() && get_option( 'woocommerce_shop_page_display' ) != 'subcategories' )
 			return true;
 
 		$term = get_queried_object();
@@ -1312,26 +1310,42 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 			}
 		}
 
-		$parent_id 		= empty( $term->term_id ) ? 0 : $term->term_id;
-		$has_children 	= $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE parent = %d", $parent_id ) );
+		global $wpdb;
 
-		if ( $has_children ) {
-			// Check terms have products inside
-			$children = array();
-			foreach ( $has_children as $term ) {
-				$children = array_merge( $children, get_term_children( $term, 'product_cat' ) );
-				$children[] = $term;
-			}
-			$objects = get_objects_in_term( $children, 'product_cat' );
+		$parent_id             = empty( $term->term_id ) ? 0 : $term->term_id;
+		$taxonomy              = empty( $term->taxonomy ) ? '' : $term->taxonomy;
+		$products_will_display = false;
 
-			if ( sizeof( $objects ) > 0 ) {
-				return false;
-			} else {
-				return true;
-			}
-		} else {
+		if ( ! $parent_id && ! $taxonomy ) {
 			return true;
 		}
+
+		if ( false === ( $products_will_display = get_transient( 'wc_products_will_display_' . $parent_id ) ) ) {
+			$has_children = $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE parent = %d AND taxonomy = %s", $parent_id, $taxonomy ) );
+
+			if ( $has_children ) {
+				// Check terms have products inside - parents first
+				if ( sizeof( get_objects_in_term( $has_children, $taxonomy ) ) > 0 ) {
+					$products_will_display = true;
+				} else {
+					// If we get here, the parents were empty so we're forced to check children
+					foreach ( $has_children as $term ) {
+						$children = get_term_children( $term, $taxonomy );
+
+						if ( sizeof( get_objects_in_term( $children, $taxonomy ) ) > 0 ) {
+							$products_will_display = true;
+							break;
+						}
+					}
+				}
+			} else {
+				$products_will_display = true;
+			}
+		}
+
+		set_transient( 'wc_products_will_display_' . $parent_id, $products_will_display );
+
+		return $products_will_display;
 	}
 }
 
