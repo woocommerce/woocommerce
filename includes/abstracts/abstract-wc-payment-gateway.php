@@ -221,9 +221,11 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		?>
 		<fieldset id="<?php echo $this->id; ?>-cc-form">
 			<?php do_action( 'woocommerce_credit_card_form_start', $this->id ); ?>
-			<?php echo $fields['card-number-field']; ?>
-			<?php echo $fields['card-expiry-field']; ?>
-			<?php echo $fields['card-cvc-field']; ?>
+			<?php
+				foreach ( $fields as $field ) {
+					echo $field;
+				}
+			?>
 			<?php do_action( 'woocommerce_credit_card_form_end', $this->id ); ?>
 			<div class="clear"></div>
 		</fieldset>
