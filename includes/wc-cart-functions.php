@@ -103,7 +103,7 @@ function wc_add_to_cart_message( $product_id ) {
 
 	endif;
 
-	wc_add_notice( apply_filters( 'wc_add_to_cart_message', $message ) );
+	wc_add_notice( apply_filters( 'wc_add_to_cart_message', $message, $product_id ) );
 }
 
 /**
