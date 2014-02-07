@@ -290,7 +290,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 *
 	 * @since 2.1
 	 * @param array $args request arguments for filtering query
-	 * @return array
+	 * @return WP_User_Query
 	 */
 	private function query_customers( $args = array() ) {
 
