@@ -642,14 +642,14 @@ class WC_Order {
 		return apply_filters( 'woocommerce_order_shipping_method', implode( ', ', $labels ), $this );
 	}
 
-    /**
-     * Gets line subtotal - formatted for display.
-     *
-     * @access public
-     * @param array  $item
-     * @param string $tax_display
-     * @return string
-     */
+	/**
+	 * Gets line subtotal - formatted for display.
+	 *
+	 * @access public
+	 * @param array  $item
+	 * @param string $tax_display
+	 * @return string
+	 */
 	public function get_formatted_line_subtotal( $item, $tax_display = '' ) {
 		if ( ! $tax_display )
 			$tax_display = $this->tax_display_cart;
@@ -836,7 +836,7 @@ class WC_Order {
 	 */
 	public function get_product_from_item( $item ) {
 		$_product = get_product( $item['variation_id'] ? $item['variation_id'] : $item['product_id'] );
-                return apply_filters( 'woocommerce_get_product_from_item', $_product, $item, $this );
+				return apply_filters( 'woocommerce_get_product_from_item', $_product, $item, $this );
 	}
 
 
@@ -1088,10 +1088,10 @@ class WC_Order {
 
 		_deprecated_function( 'get_downloadable_file_urls', '2.1', 'get_item_downloads' );
 
-	 	$download_file = $variation_id > 0 ? $variation_id : $product_id;
+		$download_file = $variation_id > 0 ? $variation_id : $product_id;
 		$_product = get_product( $download_file );
 
-	 	$user_email = $this->billing_email;
+		$user_email = $this->billing_email;
 
 		$results = $wpdb->get_results( $wpdb->prepare("
 			SELECT download_id
@@ -1248,7 +1248,7 @@ class WC_Order {
 					$this->decrease_coupon_usage_counts();
 
 				// Update last modified
-  				wp_update_post( array( 'ID' => $this->id ) );
+				wp_update_post( array( 'ID' => $this->id ) );
 
 				$this->status = $new_status->slug;
 			}
@@ -1554,11 +1554,11 @@ class WC_Order {
 	}
 
 	/**
-     * Checks if an order needs payment, based on status and order total
-     *
-     * @access public
-     * @return bool
-     */
+	 * Checks if an order needs payment, based on status and order total
+	 *
+	 * @access public
+	 * @return bool
+	 */
 	public function needs_payment() {
 		$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $this );
 
