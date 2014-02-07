@@ -348,7 +348,7 @@ class WC_Order {
 	public function has_shipping_method( $method_id ) {
 		$shipping_methods = $this->get_shipping_methods();
 		$has_method = false;
-		
+
 		if ( !$shipping_methods )
 			return false;
 
@@ -475,7 +475,7 @@ class WC_Order {
 	 */
 	public function get_total_tax() {
 		return apply_filters( 'woocommerce_order_amount_total_tax', wc_round_tax_total( $this->get_cart_tax() + $this->get_shipping_tax() ), $this );
-	}	
+	}
 
 	/**
 	 * Gets shipping total.
@@ -642,20 +642,21 @@ class WC_Order {
 		return apply_filters( 'woocommerce_order_shipping_method', implode( ', ', $labels ), $this );
 	}
 
-	/**
-	 * Gets line subtotal - formatted for display.
-	 *
-	 * @access public
-	 * @param mixed $item
-	 * @return string
-	 */
+    /**
+     * Gets line subtotal - formatted for display.
+     *
+     * @access public
+     * @param array  $item
+     * @param string $tax_display
+     * @return string
+     */
 	public function get_formatted_line_subtotal( $item, $tax_display = '' ) {
 		if ( ! $tax_display )
 			$tax_display = $this->tax_display_cart;
 
 		$subtotal = 0;
 
-		if ( ! isset( $item['line_subtotal'] ) || ! isset( $item['line_subtotal_tax'] ) ) 
+		if ( ! isset( $item['line_subtotal'] ) || ! isset( $item['line_subtotal_tax'] ) )
 			return;
 
 		if ( $tax_display == 'excl' ) {
@@ -678,7 +679,7 @@ class WC_Order {
 	public function get_order_currency() {
 
 		$currency = $this->order_currency;
-		
+
 		return apply_filters( 'woocommerce_get_order_currency', $currency, $this );
 	}
 
@@ -712,7 +713,7 @@ class WC_Order {
 		if ( ! $compound ) {
 			foreach ( $this->get_items() as $item ) {
 
-				if ( ! isset( $item['line_subtotal'] ) || ! isset( $item['line_subtotal_tax'] ) ) 
+				if ( ! isset( $item['line_subtotal'] ) || ! isset( $item['line_subtotal_tax'] ) )
 					return;
 
 				$subtotal += $item['line_subtotal'];
