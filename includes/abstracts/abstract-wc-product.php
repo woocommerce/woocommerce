@@ -1153,11 +1153,15 @@ class WC_Product {
 
 		// Get tags
 		$terms = wp_get_post_terms($this->id, 'product_tag');
-		foreach ( $terms as $term ) $tags_array[] = $term->term_id;
+		foreach ( $terms as $term ) {
+			$tags_array[] = $term->term_id;
+		}
 
 		// Get categories
 		$terms = wp_get_post_terms($this->id, 'product_cat');
-		foreach ( $terms as $term ) $cats_array[] = $term->term_id;
+		foreach ( $terms as $term ) {
+			$cats_array[] = $term->term_id;
+		}
 
 		// Don't bother if none are set
 		if ( sizeof( $cats_array ) == 1 && sizeof( $tags_array ) == 1 ) {
@@ -1260,8 +1264,9 @@ class WC_Product {
 	public function has_attributes() {
 		if ( sizeof( $this->get_attributes() ) > 0 ) {
 			foreach ( $this->get_attributes() as $attribute ) {
-				if ( isset( $attribute['is_visible'] ) && $attribute['is_visible'] )
+				if ( isset( $attribute['is_visible'] ) && $attribute['is_visible'] ) {
 					return true;
+				}
 			}
 		}
 		return false;
