@@ -238,17 +238,18 @@ if ( ! function_exists( 'meta_is_product_attribute' ) ) {
 	/**
 	 * Returns true when the passed meta name is a product attribute.
 	 *
-	 * @param $name of the attribute
-	 * @param $product_id
+	 * @param string $name of the attribute
+	 * @param mixed $value
+	 * @param int $product_id
 	 * @return bool
 	 */
 	function meta_is_product_attribute( $name, $value, $product_id ) {
 		$product    = get_product( $product_id );
-		
+
 		if ( $product->product_type != 'variation' ) {
 			return false;
 		}
-		
+
 		$attributes = $product->get_variation_attributes();
 
 		return ( in_array( $name, array_keys( $attributes ) ) && in_array( $value, $attributes[ $name ] ) );
