@@ -23,10 +23,11 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 	if ( ! taxonomy_exists( $taxonomy ) )
 		return array();
 
-	if ( empty( $args['fields'] ) && taxonomy_is_product_attribute( $taxonomy ) ) {
-		$args['fields'] = wc_attribute_orderby( $taxonomy );
+	if ( empty( $args['orderby'] ) && taxonomy_is_product_attribute( $taxonomy ) ) {
+		$args['orderby'] = wc_attribute_orderby( $taxonomy );
 	}
 
+	// Support ordering by parent
 	if ( ! empty( $args['orderby'] ) && $args['orderby'] == 'parent' ) {
 		$fields         = isset( $args['fields'] ) ? $args['fields'] : 'all';
 		$orderby_parent = true;
@@ -315,13 +316,19 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	global $wpdb, $woocommerce;
 
 	// No sorting when menu_order is false
-	if ( isset($args['menu_order']) && $args['menu_order'] == false ) return $clauses;
+	if ( isset( $args['menu_order'] ) && $args['menu_order'] == false ) {
+		return $clauses;
+	}
 
 	// No sorting when orderby is non default
-	if ( isset($args['orderby']) && $args['orderby'] != 'name' ) return $clauses;
+	if ( isset( $args['orderby'] ) && $args['orderby'] != 'name' ) {
+		return $clauses;
+	}
 
 	// No sorting in admin when sorting by a column
-	if ( is_admin() && isset($_GET['orderby']) ) return $clauses;
+	if ( is_admin() && isset( $_GET['orderby'] ) ) {
+		return $clauses;
+	}
 
 	// wordpress should give us the taxonomies asked when calling the get_terms function. Only apply to categories and pa_ attributes
 	$found = false;
@@ -331,7 +338,9 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 			break;
 		}
 	}
-	if (!$found) return $clauses;
+	if ( ! $found ) {
+		return $clauses;
+	}
 
 	// Meta name
 	if ( ! empty( $taxonomies[0] ) && taxonomy_is_product_attribute( $taxonomies[0] ) ) {
@@ -341,13 +350,17 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	}
 
 	// query fields
-	if ( strpos('COUNT(*)', $clauses['fields']) === false ) $clauses['fields']  .= ', tm.* ';
+	if ( strpos( 'COUNT(*)', $clauses['fields'] ) === false )  {
+		$clauses['fields']  .= ', tm.* ';
+	}
 
 	//query join
 	$clauses['join'] .= " LEFT JOIN {$wpdb->woocommerce_termmeta} AS tm ON (t.term_id = tm.woocommerce_term_id AND tm.meta_key = '". $meta_name ."') ";
 
 	// default to ASC
-	if ( ! isset($args['menu_order']) || ! in_array( strtoupper($args['menu_order']), array('ASC', 'DESC')) ) $args['menu_order'] = 'ASC';
+	if ( ! isset( $args['menu_order'] ) || ! in_array( strtoupper($args['menu_order']), array('ASC', 'DESC')) ) {
+		$args['menu_order'] = 'ASC';
+	}
 
 	$order = "ORDER BY tm.meta_value+0 " . $args['menu_order'];
 
