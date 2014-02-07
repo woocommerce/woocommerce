@@ -5,7 +5,7 @@
  * The WooCommerce order class handles order data.
  *
  * @class 		WC_Order
- * @version		1.6.4
+ * @version		2.1.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
