@@ -596,11 +596,7 @@ class WC_AJAX {
 			$attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
 
 			if ( $attribute['is_taxonomy'] ) {
-				$post_terms = wp_get_post_terms( $post_id, $attribute['name'] );
-				$options = array();
-				foreach ( $post_terms as $term ) {
-					$options[] = $term->slug;
-				}
+				$options = wc_get_product_terms( $post_id, $attribute['name'], array( 'fields' => 'slugs' ) );
 			} else {
 				$options = explode( WC_DELIMITER, $attribute['value'] );
 			}
@@ -626,12 +622,12 @@ class WC_AJAX {
 
 		// Created posts will all have the following data
 		$variation_post_data = array(
-			'post_title' => 'Product #' . $post_id . ' Variation',
+			'post_title'   => 'Product #' . $post_id . ' Variation',
 			'post_content' => '',
-			'post_status' => 'publish',
-			'post_author' => get_current_user_id(),
-			'post_parent' => $post_id,
-			'post_type' => 'product_variation'
+			'post_status'  => 'publish',
+			'post_author'  => get_current_user_id(),
+			'post_parent'  => $post_id,
+			'post_type'    => 'product_variation'
 		);
 
 		// Now find all combinations and create posts
