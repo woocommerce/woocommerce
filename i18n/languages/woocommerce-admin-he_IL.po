@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-01-30 15:25:39+00:00\n"
-"PO-Revision-Date: 2014-01-30 15:29+0000\n"
+"POT-Creation-Date: 2014-02-06 15:46:00+00:00\n"
+"PO-Revision-Date: 2014-02-07 08:41+0000\n"
 "Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: Hebrew (Israel) (http://www.transifex.com/projects/p/woocommerce-core/language/he_IL/)\n"
 "MIME-Version: 1.0\n"
@@ -186,8 +186,8 @@ msgid "Last warning, are you sure?"
 msgstr "אזהרה אחרונה, אתה בטוח?"
 
 #: includes/admin/class-wc-admin-assets.php:208
-#: includes/admin/class-wc-admin-taxonomies.php:126
-#: includes/admin/class-wc-admin-taxonomies.php:213
+#: includes/admin/class-wc-admin-taxonomies.php:123
+#: includes/admin/class-wc-admin-taxonomies.php:210
 msgid "Choose an image"
 msgstr "בחר תמונה"
 
@@ -612,8 +612,8 @@ msgid "product"
 msgstr "תוצר"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:113
-#: includes/admin/class-wc-admin-taxonomies.php:91
-#: includes/admin/class-wc-admin-taxonomies.php:180
+#: includes/admin/class-wc-admin-taxonomies.php:88
+#: includes/admin/class-wc-admin-taxonomies.php:177
 #: includes/admin/settings/class-wc-settings-checkout.php:226
 #: includes/admin/settings/class-wc-settings-shipping.php:202
 #: includes/admin/views/html-admin-page-status-report.php:70
@@ -1117,50 +1117,50 @@ msgid ""
 " rates, use with caution."
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:89
-#: includes/admin/class-wc-admin-taxonomies.php:177
+#: includes/admin/class-wc-admin-taxonomies.php:86
+#: includes/admin/class-wc-admin-taxonomies.php:174
 msgid "Display type"
 msgstr "סוג התצוגה"
 
-#: includes/admin/class-wc-admin-taxonomies.php:92
-#: includes/admin/class-wc-admin-taxonomies.php:181
+#: includes/admin/class-wc-admin-taxonomies.php:89
+#: includes/admin/class-wc-admin-taxonomies.php:178
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:97
 #: includes/admin/settings/class-wc-settings-products.php:25
 #: includes/admin/views/html-admin-page-addons.php:15
 msgid "Products"
 msgstr "מוצרים"
 
-#: includes/admin/class-wc-admin-taxonomies.php:93
-#: includes/admin/class-wc-admin-taxonomies.php:182
+#: includes/admin/class-wc-admin-taxonomies.php:90
+#: includes/admin/class-wc-admin-taxonomies.php:179
 msgid "Subcategories"
 msgstr "קטגוריות משנה"
 
-#: includes/admin/class-wc-admin-taxonomies.php:94
-#: includes/admin/class-wc-admin-taxonomies.php:183
+#: includes/admin/class-wc-admin-taxonomies.php:91
+#: includes/admin/class-wc-admin-taxonomies.php:180
 msgid "Both"
 msgstr "בשתיהם"
 
-#: includes/admin/class-wc-admin-taxonomies.php:98
-#: includes/admin/class-wc-admin-taxonomies.php:188
+#: includes/admin/class-wc-admin-taxonomies.php:95
+#: includes/admin/class-wc-admin-taxonomies.php:185
 msgid "Thumbnail"
 msgstr "תמונה קטנה"
 
-#: includes/admin/class-wc-admin-taxonomies.php:102
-#: includes/admin/class-wc-admin-taxonomies.php:193
+#: includes/admin/class-wc-admin-taxonomies.php:99
+#: includes/admin/class-wc-admin-taxonomies.php:190
 msgid "Upload/Add image"
 msgstr "העלאה/הוספת תמונה"
 
-#: includes/admin/class-wc-admin-taxonomies.php:103
-#: includes/admin/class-wc-admin-taxonomies.php:194
+#: includes/admin/class-wc-admin-taxonomies.php:100
+#: includes/admin/class-wc-admin-taxonomies.php:191
 msgid "Remove image"
 msgstr "הסר את התמונה"
 
-#: includes/admin/class-wc-admin-taxonomies.php:128
-#: includes/admin/class-wc-admin-taxonomies.php:215
+#: includes/admin/class-wc-admin-taxonomies.php:125
+#: includes/admin/class-wc-admin-taxonomies.php:212
 msgid "Use image"
 msgstr "השתמש בתמונה"
 
-#: includes/admin/class-wc-admin-taxonomies.php:273
+#: includes/admin/class-wc-admin-taxonomies.php:270
 msgid ""
 "Product categories for your store can be managed here. To change the order "
 "of categories on the front-end you can drag and drop to sort them. To see "
@@ -1168,14 +1168,14 @@ msgid ""
 "page."
 msgstr "ניתן לנהל מכאן קטגוריות מוצרים עבור החנות שלך . כדי לשנות את הסדר של קטגוריות אתה יכול לגרור ולשחרר כדי למיין אותם. כדי לראות קטגוריות נוספות המפורטות לחץ על הקישור \"אפשרויות מסך \"  בחלק העליון של הדף."
 
-#: includes/admin/class-wc-admin-taxonomies.php:283
+#: includes/admin/class-wc-admin-taxonomies.php:280
 msgid ""
 "Shipping classes can be used to group products of similar type. These groups"
 " can then be used by certain shipping methods to provide different rates to "
 "different products."
 msgstr "כיתות משלוח יכולות לשמש למוצרי קבוצה מסוג דומה. קבוצות אלה לאחר מכן ניתן להשתמש בשיטות משלוח מסוימות לספק תעריפים שונים למוצרים שונים."
 
-#: includes/admin/class-wc-admin-taxonomies.php:296
+#: includes/admin/class-wc-admin-taxonomies.php:293
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:244
 msgid "Image"
 msgstr "תמונה"
@@ -3771,8 +3771,7 @@ msgid "Automatically generate customer password"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:25
-#: includes/admin/settings/class-wc-settings-checkout.php:78
-#: includes/admin/views/html-admin-page-status-report.php:297
+msgctxt "Settings tab label"
 msgid "Checkout"
 msgstr "לתשלום"
 
@@ -3795,6 +3794,11 @@ msgstr "לאפשר את השימוש בקופונים"
 #: includes/admin/settings/class-wc-settings-checkout.php:73
 msgid "Coupons can be applied from the cart and checkout pages."
 msgstr "ניתן להחיל את הקופונים מהעגלה וגם דפי התשלום."
+
+#: includes/admin/settings/class-wc-settings-checkout.php:78
+#: includes/admin/views/html-admin-page-status-report.php:297
+msgid "Checkout"
+msgstr "לתשלום"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:79
 msgid "Enable guest checkout"

@@ -1,12 +1,13 @@
 # 
 # Translators:
+# mattyza <matt@woothemes.com>, 2014
 # potgieterg <potgieterg@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-01-30 15:25:39+00:00\n"
-"PO-Revision-Date: 2014-01-30 15:29+0000\n"
+"POT-Creation-Date: 2014-02-06 15:46:00+00:00\n"
+"PO-Revision-Date: 2014-02-07 08:41+0000\n"
 "Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: Afrikaans (South Africa) (http://www.transifex.com/projects/p/woocommerce-core/language/af_ZA/)\n"
 "MIME-Version: 1.0\n"
@@ -143,11 +144,11 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:170
 #: includes/admin/views/html-quick-edit-product.php:128
 msgid "Featured"
-msgstr ""
+msgstr "Gewilde"
 
 #: includes/admin/class-wc-admin-assets.php:156
 msgid "No customer selected"
-msgstr ""
+msgstr "Geen kliënt gekies"
 
 #: includes/admin/class-wc-admin-assets.php:182
 msgid ""
@@ -169,11 +170,11 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:204
 msgid "Enter a value"
-msgstr ""
+msgstr "Gee 'n waarde"
 
 #: includes/admin/class-wc-admin-assets.php:205
 msgid "Enter a value (fixed or %)"
-msgstr ""
+msgstr "Gee 'n waarde (vaste of %)"
 
 #: includes/admin/class-wc-admin-assets.php:206
 msgid "Are you sure you want to delete all variations? This cannot be undone."
@@ -181,17 +182,17 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:207
 msgid "Last warning, are you sure?"
-msgstr ""
+msgstr "Laaste waarskuwing. Is jy seker?"
 
 #: includes/admin/class-wc-admin-assets.php:208
-#: includes/admin/class-wc-admin-taxonomies.php:126
-#: includes/admin/class-wc-admin-taxonomies.php:213
+#: includes/admin/class-wc-admin-taxonomies.php:123
+#: includes/admin/class-wc-admin-taxonomies.php:210
 msgid "Choose an image"
-msgstr ""
+msgstr "Kies 'n foto"
 
 #: includes/admin/class-wc-admin-assets.php:209
 msgid "Set variation image"
-msgstr ""
+msgstr "Stel variasie foto"
 
 #: includes/admin/class-wc-admin-assets.php:210
 msgid "variation added"
@@ -610,8 +611,8 @@ msgid "product"
 msgstr "produk"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:113
-#: includes/admin/class-wc-admin-taxonomies.php:91
-#: includes/admin/class-wc-admin-taxonomies.php:180
+#: includes/admin/class-wc-admin-taxonomies.php:88
+#: includes/admin/class-wc-admin-taxonomies.php:177
 #: includes/admin/settings/class-wc-settings-checkout.php:226
 #: includes/admin/settings/class-wc-settings-shipping.php:202
 #: includes/admin/views/html-admin-page-status-report.php:70
@@ -1115,50 +1116,50 @@ msgid ""
 " rates, use with caution."
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:89
-#: includes/admin/class-wc-admin-taxonomies.php:177
+#: includes/admin/class-wc-admin-taxonomies.php:86
+#: includes/admin/class-wc-admin-taxonomies.php:174
 msgid "Display type"
 msgstr "Vertoning tipe"
 
-#: includes/admin/class-wc-admin-taxonomies.php:92
-#: includes/admin/class-wc-admin-taxonomies.php:181
+#: includes/admin/class-wc-admin-taxonomies.php:89
+#: includes/admin/class-wc-admin-taxonomies.php:178
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:97
 #: includes/admin/settings/class-wc-settings-products.php:25
 #: includes/admin/views/html-admin-page-addons.php:15
 msgid "Products"
 msgstr "Produkte"
 
-#: includes/admin/class-wc-admin-taxonomies.php:93
-#: includes/admin/class-wc-admin-taxonomies.php:182
+#: includes/admin/class-wc-admin-taxonomies.php:90
+#: includes/admin/class-wc-admin-taxonomies.php:179
 msgid "Subcategories"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:94
-#: includes/admin/class-wc-admin-taxonomies.php:183
+#: includes/admin/class-wc-admin-taxonomies.php:91
+#: includes/admin/class-wc-admin-taxonomies.php:180
 msgid "Both"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:98
-#: includes/admin/class-wc-admin-taxonomies.php:188
+#: includes/admin/class-wc-admin-taxonomies.php:95
+#: includes/admin/class-wc-admin-taxonomies.php:185
 msgid "Thumbnail"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:102
-#: includes/admin/class-wc-admin-taxonomies.php:193
+#: includes/admin/class-wc-admin-taxonomies.php:99
+#: includes/admin/class-wc-admin-taxonomies.php:190
 msgid "Upload/Add image"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:103
-#: includes/admin/class-wc-admin-taxonomies.php:194
+#: includes/admin/class-wc-admin-taxonomies.php:100
+#: includes/admin/class-wc-admin-taxonomies.php:191
 msgid "Remove image"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:128
-#: includes/admin/class-wc-admin-taxonomies.php:215
+#: includes/admin/class-wc-admin-taxonomies.php:125
+#: includes/admin/class-wc-admin-taxonomies.php:212
 msgid "Use image"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:273
+#: includes/admin/class-wc-admin-taxonomies.php:270
 msgid ""
 "Product categories for your store can be managed here. To change the order "
 "of categories on the front-end you can drag and drop to sort them. To see "
@@ -1166,14 +1167,14 @@ msgid ""
 "page."
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:283
+#: includes/admin/class-wc-admin-taxonomies.php:280
 msgid ""
 "Shipping classes can be used to group products of similar type. These groups"
 " can then be used by certain shipping methods to provide different rates to "
 "different products."
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:296
+#: includes/admin/class-wc-admin-taxonomies.php:293
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:244
 msgid "Image"
 msgstr ""
@@ -2406,7 +2407,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-downloads.php:51
 msgid "File %d"
-msgstr ""
+msgstr "File %d"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-downloads.php:64
 msgid "Search for a downloadable product&hellip;"
@@ -3079,7 +3080,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:9
 msgid "%s: %s"
-msgstr ""
+msgstr "%s:%s"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:9
 msgid "Downloaded %s time"
@@ -3481,7 +3482,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:156
 msgid "Select categories&hellip;"
-msgstr ""
+msgstr "kies kategorieë&hellip;"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:171
 msgid "All"
@@ -3769,8 +3770,7 @@ msgid "Automatically generate customer password"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:25
-#: includes/admin/settings/class-wc-settings-checkout.php:78
-#: includes/admin/views/html-admin-page-status-report.php:297
+msgctxt "Settings tab label"
 msgid "Checkout"
 msgstr "Betaling"
 
@@ -3793,6 +3793,11 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-checkout.php:73
 msgid "Coupons can be applied from the cart and checkout pages."
 msgstr ""
+
+#: includes/admin/settings/class-wc-settings-checkout.php:78
+#: includes/admin/views/html-admin-page-status-report.php:297
+msgid "Checkout"
+msgstr "Betaling"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:79
 msgid "Enable guest checkout"
@@ -4047,11 +4052,11 @@ msgstr "Hierdie is 'n demo winkel vir toets doeleindes &mdash; geen bestellings 
 
 #: includes/admin/settings/class-wc-settings-general.php:103
 msgid "API"
-msgstr ""
+msgstr "API"
 
 #: includes/admin/settings/class-wc-settings-general.php:104
 msgid "Enable the REST API"
-msgstr ""
+msgstr "Skakel die REST API aan"
 
 #: includes/admin/settings/class-wc-settings-general.php:112
 msgid "Currency Options"
@@ -4934,23 +4939,23 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:17
 msgid "Home URL"
-msgstr ""
+msgstr "Tuisblad"
 
 #: includes/admin/views/html-admin-page-status-report.php:21
 msgid "Site URL"
-msgstr ""
+msgstr "Webwerf"
 
 #: includes/admin/views/html-admin-page-status-report.php:25
 msgid "WC Version"
-msgstr ""
+msgstr "WC Weergawe"
 
 #: includes/admin/views/html-admin-page-status-report.php:29
 msgid "WC Database Version"
-msgstr ""
+msgstr "WC Databasis Weergawe"
 
 #: includes/admin/views/html-admin-page-status-report.php:33
 msgid "WP Version"
-msgstr ""
+msgstr "WP Weergawe"
 
 #: includes/admin/views/html-admin-page-status-report.php:37
 msgid "WP Multisite Enabled"
@@ -4962,11 +4967,11 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:45
 msgid "PHP Version"
-msgstr ""
+msgstr "PHP Weergawe"
 
 #: includes/admin/views/html-admin-page-status-report.php:49
 msgid "MySQL Version"
-msgstr ""
+msgstr "MySQL Weergawe"
 
 #: includes/admin/views/html-admin-page-status-report.php:53
 msgid "WP Memory Limit"
@@ -5034,7 +5039,7 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:118
 msgid "fsockopen/cURL"
-msgstr ""
+msgstr "fsockopen/cURL"
 
 #: includes/admin/views/html-admin-page-status-report.php:121
 msgid "Your server has fsockopen and cURL enabled."
@@ -5114,7 +5119,7 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:253
 msgid "version"
-msgstr ""
+msgstr "weergawe"
 
 #: includes/admin/views/html-admin-page-status-report.php:275
 msgid "Force SSL"

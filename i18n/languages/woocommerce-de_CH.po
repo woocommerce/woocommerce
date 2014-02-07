@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-01-30 15:25:37+00:00\n"
-"PO-Revision-Date: 2014-01-30 15:30+0000\n"
+"POT-Creation-Date: 2014-02-06 15:46:00+00:00\n"
+"PO-Revision-Date: 2014-02-07 08:30+0000\n"
 "Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: German (Switzerland) (http://www.transifex.com/projects/p/woocommerce-core/language/de_CH/)\n"
 "MIME-Version: 1.0\n"
@@ -3348,7 +3348,7 @@ msgstr "Keine Produkte wurden im Lager erhöht - es kann sein, dass keine Lagerv
 
 #: includes/class-wc-ajax.php:1054
 #: includes/widgets/class-wc-widget-product-categories.php:39
-#: templates/single-product-reviews.php:59
+#: templates/single-product-reviews.php:62
 msgid "Name"
 msgstr "Name"
 
@@ -4925,7 +4925,7 @@ msgid "Please select a rating"
 msgstr "Bitte wählen Sie eine Bewertung"
 
 #: includes/class-wc-frontend-scripts.php:127
-#: includes/wc-template-functions.php:1559
+#: includes/wc-template-functions.php:1573
 msgid "required"
 msgstr "benötigt"
 
@@ -5035,200 +5035,200 @@ msgstr "Status der Bestellung von %s auf %s geändert."
 msgid "Order item stock reduced successfully."
 msgstr "Lagerbestand der bestellten Produkte erfolgreich reduziert."
 
-#: includes/class-wc-post-types.php:62 includes/class-wc-post-types.php:64
+#: includes/class-wc-post-types.php:55 includes/class-wc-post-types.php:57
 #: includes/widgets/class-wc-widget-product-categories.php:30
 msgid "Product Categories"
 msgstr "Produktkategorien"
 
-#: includes/class-wc-post-types.php:65
+#: includes/class-wc-post-types.php:58
 msgid "Product Category"
 msgstr "Produkt Kategorie"
 
-#: includes/class-wc-post-types.php:66
+#: includes/class-wc-post-types.php:59
 msgctxt "Admin menu name"
 msgid "Categories"
 msgstr "Kategorien"
 
-#: includes/class-wc-post-types.php:67
+#: includes/class-wc-post-types.php:60
 msgid "Search Product Categories"
 msgstr "Produktkategorien durchsuchen"
 
-#: includes/class-wc-post-types.php:68
+#: includes/class-wc-post-types.php:61
 msgid "All Product Categories"
 msgstr "Alle Produktkategorien"
 
-#: includes/class-wc-post-types.php:69
+#: includes/class-wc-post-types.php:62
 msgid "Parent Product Category"
 msgstr "Übergeordnete Produktkategorie"
 
-#: includes/class-wc-post-types.php:70
+#: includes/class-wc-post-types.php:63
 msgid "Parent Product Category:"
 msgstr "Übergeordnete Produktkategorie:"
 
-#: includes/class-wc-post-types.php:71
+#: includes/class-wc-post-types.php:64
 msgid "Edit Product Category"
 msgstr "Produktkategorie bearbeiten"
 
-#: includes/class-wc-post-types.php:72
+#: includes/class-wc-post-types.php:65
 msgid "Update Product Category"
 msgstr "Produktkategorie aktualisieren"
 
-#: includes/class-wc-post-types.php:73
+#: includes/class-wc-post-types.php:66
 msgid "Add New Product Category"
 msgstr "Produktkategorie hinzufügen"
 
-#: includes/class-wc-post-types.php:74
+#: includes/class-wc-post-types.php:67
 msgid "New Product Category Name"
 msgstr "Neuer Produktkategoriename"
 
-#: includes/class-wc-post-types.php:85
+#: includes/class-wc-post-types.php:78
 #: includes/updates/woocommerce-update-2.0.php:49
 msgctxt "slug"
 msgid "product-category"
 msgstr "produkt-kategorie"
 
-#: includes/class-wc-post-types.php:97 includes/class-wc-post-types.php:99
+#: includes/class-wc-post-types.php:90 includes/class-wc-post-types.php:92
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:27
 msgid "Product Tags"
 msgstr "Produkt Schlagwörter"
 
-#: includes/class-wc-post-types.php:100
+#: includes/class-wc-post-types.php:93
 msgid "Product Tag"
 msgstr "Produkt Schlüsselwort"
 
-#: includes/class-wc-post-types.php:101
+#: includes/class-wc-post-types.php:94
 msgctxt "Admin menu name"
 msgid "Tags"
 msgstr "Schlagworte"
 
-#: includes/class-wc-post-types.php:102
+#: includes/class-wc-post-types.php:95
 msgid "Search Product Tags"
 msgstr "Produktschlagwörter durchsuchen"
 
-#: includes/class-wc-post-types.php:103
+#: includes/class-wc-post-types.php:96
 msgid "All Product Tags"
 msgstr "Alle Produktschlagwörter"
 
-#: includes/class-wc-post-types.php:104
+#: includes/class-wc-post-types.php:97
 msgid "Parent Product Tag"
 msgstr "Übergeordnetes Produktschlagwort"
 
-#: includes/class-wc-post-types.php:105
+#: includes/class-wc-post-types.php:98
 msgid "Parent Product Tag:"
 msgstr "Übergeordnetes Produktschlagwort:"
 
-#: includes/class-wc-post-types.php:106
+#: includes/class-wc-post-types.php:99
 msgid "Edit Product Tag"
 msgstr "Produktschlagwort bearbeiten"
 
-#: includes/class-wc-post-types.php:107
+#: includes/class-wc-post-types.php:100
 msgid "Update Product Tag"
 msgstr "Produktschlagwort aktualisieren"
 
-#: includes/class-wc-post-types.php:108
+#: includes/class-wc-post-types.php:101
 msgid "Add New Product Tag"
 msgstr "Neues Produktschlagwort hinzufügen"
 
-#: includes/class-wc-post-types.php:109
+#: includes/class-wc-post-types.php:102
 msgid "New Product Tag Name"
 msgstr "Neuer Produktschlagwortname"
 
-#: includes/class-wc-post-types.php:120
+#: includes/class-wc-post-types.php:113
 #: includes/updates/woocommerce-update-2.0.php:50
 msgctxt "slug"
 msgid "product-tag"
 msgstr "produkt-schlagwort"
 
-#: includes/class-wc-post-types.php:131 includes/class-wc-post-types.php:133
+#: includes/class-wc-post-types.php:124 includes/class-wc-post-types.php:126
 msgid "Shipping Classes"
 msgstr "Versandklassen"
 
-#: includes/class-wc-post-types.php:134
+#: includes/class-wc-post-types.php:127
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:521
 msgid "Shipping Class"
 msgstr "Versandklasse"
 
-#: includes/class-wc-post-types.php:135
+#: includes/class-wc-post-types.php:128
 msgctxt "Admin menu name"
 msgid "Shipping Classes"
 msgstr "Versandklassen"
 
-#: includes/class-wc-post-types.php:136
+#: includes/class-wc-post-types.php:129
 msgid "Search Shipping Classes"
 msgstr "Suche Versandklassen"
 
-#: includes/class-wc-post-types.php:137
+#: includes/class-wc-post-types.php:130
 msgid "All Shipping Classes"
 msgstr "Alle Versandklassen"
 
-#: includes/class-wc-post-types.php:138
+#: includes/class-wc-post-types.php:131
 msgid "Parent Shipping Class"
 msgstr "Übergeordnete Versandklasse"
 
-#: includes/class-wc-post-types.php:139
+#: includes/class-wc-post-types.php:132
 msgid "Parent Shipping Class:"
 msgstr "Übergeordnete Versandklasse:"
 
-#: includes/class-wc-post-types.php:140
+#: includes/class-wc-post-types.php:133
 msgid "Edit Shipping Class"
 msgstr "Bearbeite Versandklasse"
 
-#: includes/class-wc-post-types.php:141
+#: includes/class-wc-post-types.php:134
 msgid "Update Shipping Class"
 msgstr "Aktualisiere Versandklasse"
 
-#: includes/class-wc-post-types.php:142
+#: includes/class-wc-post-types.php:135
 msgid "Add New Shipping Class"
 msgstr "Neue Versandklasse hinzufügen"
 
-#: includes/class-wc-post-types.php:143
+#: includes/class-wc-post-types.php:136
 msgid "New Shipping Class Name"
 msgstr "Neuer Versandklassenname"
 
-#: includes/class-wc-post-types.php:191
+#: includes/class-wc-post-types.php:184
 msgid "Search %s"
 msgstr ""
 
-#: includes/class-wc-post-types.php:192
+#: includes/class-wc-post-types.php:185
 msgid "All %s"
 msgstr ""
 
-#: includes/class-wc-post-types.php:193
+#: includes/class-wc-post-types.php:186
 msgid "Parent %s"
 msgstr ""
 
-#: includes/class-wc-post-types.php:194
+#: includes/class-wc-post-types.php:187
 msgid "Parent %s:"
 msgstr ""
 
-#: includes/class-wc-post-types.php:195
+#: includes/class-wc-post-types.php:188
 msgid "Edit %s"
 msgstr ""
 
-#: includes/class-wc-post-types.php:196
+#: includes/class-wc-post-types.php:189
 msgid "Update %s"
 msgstr ""
 
-#: includes/class-wc-post-types.php:197
+#: includes/class-wc-post-types.php:190
 msgid "Add New %s"
 msgstr ""
 
-#: includes/class-wc-post-types.php:198
+#: includes/class-wc-post-types.php:191
 msgid "New %s"
 msgstr ""
 
-#: includes/class-wc-post-types.php:234
+#: includes/class-wc-post-types.php:224
 #: includes/updates/woocommerce-update-2.0.php:58
 msgctxt "slug"
 msgid "product"
 msgstr "Produkt"
 
-#: includes/class-wc-post-types.php:240
+#: includes/class-wc-post-types.php:230
 #: includes/widgets/class-wc-widget-products.php:27
 msgid "Products"
 msgstr "Produkte"
 
-#: includes/class-wc-post-types.php:241 templates/cart/cart.php:27
+#: includes/class-wc-post-types.php:231 templates/cart/cart.php:27
 #: templates/checkout/form-pay.php:19 templates/checkout/review-order.php:18
 #: templates/emails/admin-new-order.php:22
 #: templates/emails/customer-completed-order.php:23
@@ -5239,168 +5239,168 @@ msgstr "Produkte"
 msgid "Product"
 msgstr "Produkt"
 
-#: includes/class-wc-post-types.php:242
+#: includes/class-wc-post-types.php:232
 msgctxt "Admin menu name"
 msgid "Products"
 msgstr "Produkte"
 
-#: includes/class-wc-post-types.php:243
+#: includes/class-wc-post-types.php:233
 msgid "Add Product"
 msgstr "Produkt hinzufügen"
 
-#: includes/class-wc-post-types.php:244
+#: includes/class-wc-post-types.php:234
 msgid "Add New Product"
 msgstr "Neues Produkt hinzufügen"
 
-#: includes/class-wc-post-types.php:245 includes/class-wc-post-types.php:297
-#: includes/class-wc-post-types.php:336 templates/myaccount/my-address.php:45
+#: includes/class-wc-post-types.php:235 includes/class-wc-post-types.php:287
+#: includes/class-wc-post-types.php:326 templates/myaccount/my-address.php:45
 msgid "Edit"
 msgstr "Bearbeiten"
 
-#: includes/class-wc-post-types.php:246
+#: includes/class-wc-post-types.php:236
 msgid "Edit Product"
 msgstr "Produkt bearbeiten"
 
-#: includes/class-wc-post-types.php:247
+#: includes/class-wc-post-types.php:237
 msgid "New Product"
 msgstr "Neues Produkt"
 
-#: includes/class-wc-post-types.php:248 includes/class-wc-post-types.php:249
+#: includes/class-wc-post-types.php:238 includes/class-wc-post-types.php:239
 msgid "View Product"
 msgstr "Produkt anzeigen"
 
-#: includes/class-wc-post-types.php:250
+#: includes/class-wc-post-types.php:240
 #: includes/widgets/class-wc-widget-product-search.php:27
 msgid "Search Products"
 msgstr "Produkte suchen"
 
-#: includes/class-wc-post-types.php:251
+#: includes/class-wc-post-types.php:241
 msgid "No Products found"
 msgstr "Keine Produkte gefunden"
 
-#: includes/class-wc-post-types.php:252
+#: includes/class-wc-post-types.php:242
 msgid "No Products found in trash"
 msgstr "Keine Produkte im Papierkorb gefunden"
 
-#: includes/class-wc-post-types.php:253
+#: includes/class-wc-post-types.php:243
 msgid "Parent Product"
 msgstr "Übergeordnetes Produkt"
 
-#: includes/class-wc-post-types.php:255
+#: includes/class-wc-post-types.php:245
 msgid "This is where you can add new products to your store."
 msgstr "Hier können Sie neue Produkte zu Ihrem Shop hinzufügen."
 
-#: includes/class-wc-post-types.php:275
+#: includes/class-wc-post-types.php:265
 msgid "Variations"
 msgstr "Varianten"
 
-#: includes/class-wc-post-types.php:283
+#: includes/class-wc-post-types.php:273
 msgctxt "Admin menu name"
 msgid "Orders"
 msgstr "Bestellungen"
 
-#: includes/class-wc-post-types.php:293
+#: includes/class-wc-post-types.php:283
 msgid "Orders"
 msgstr "Bestellungen"
 
-#: includes/class-wc-post-types.php:294 templates/myaccount/my-orders.php:32
+#: includes/class-wc-post-types.php:284 templates/myaccount/my-orders.php:32
 msgid "Order"
 msgstr "Bestellung"
 
-#: includes/class-wc-post-types.php:295
+#: includes/class-wc-post-types.php:285
 msgid "Add Order"
 msgstr "Bestellung hinzufügen"
 
-#: includes/class-wc-post-types.php:296
+#: includes/class-wc-post-types.php:286
 msgid "Add New Order"
 msgstr "Neue Bestellung hinzufügen"
 
-#: includes/class-wc-post-types.php:298
+#: includes/class-wc-post-types.php:288
 msgid "Edit Order"
 msgstr "Bestellung bearbeiten"
 
-#: includes/class-wc-post-types.php:299
+#: includes/class-wc-post-types.php:289
 msgid "New Order"
 msgstr "Neue Bestellung"
 
-#: includes/class-wc-post-types.php:300 includes/class-wc-post-types.php:301
+#: includes/class-wc-post-types.php:290 includes/class-wc-post-types.php:291
 msgid "View Order"
 msgstr "Bestellung ansehen"
 
-#: includes/class-wc-post-types.php:302
+#: includes/class-wc-post-types.php:292
 msgid "Search Orders"
 msgstr "Bestellungen suchen"
 
-#: includes/class-wc-post-types.php:303
+#: includes/class-wc-post-types.php:293
 msgid "No Orders found"
 msgstr "Keine Bestellungen gefunden"
 
-#: includes/class-wc-post-types.php:304
+#: includes/class-wc-post-types.php:294
 msgid "No Orders found in trash"
 msgstr "Keine Bestellungen im Papierkorb gefunden"
 
-#: includes/class-wc-post-types.php:305
+#: includes/class-wc-post-types.php:295
 msgid "Parent Orders"
 msgstr "Übergeordnete Bestellungen"
 
-#: includes/class-wc-post-types.php:308
+#: includes/class-wc-post-types.php:298
 msgid "This is where store orders are stored."
 msgstr "Hier werden die Bestellungen des Shops gespeichert."
 
-#: includes/class-wc-post-types.php:331
+#: includes/class-wc-post-types.php:321
 msgid "Coupons"
 msgstr "Gutscheine"
 
-#: includes/class-wc-post-types.php:332 templates/cart/cart.php:118
+#: includes/class-wc-post-types.php:322 templates/cart/cart.php:118
 msgid "Coupon"
 msgstr "Gutschein"
 
-#: includes/class-wc-post-types.php:333
+#: includes/class-wc-post-types.php:323
 msgctxt "Admin menu name"
 msgid "Coupons"
 msgstr "Gutscheine"
 
-#: includes/class-wc-post-types.php:334
+#: includes/class-wc-post-types.php:324
 msgid "Add Coupon"
 msgstr "Gutschein hinzufügen"
 
-#: includes/class-wc-post-types.php:335
+#: includes/class-wc-post-types.php:325
 msgid "Add New Coupon"
 msgstr "Neuen Gutschein hinzufügen"
 
-#: includes/class-wc-post-types.php:337
+#: includes/class-wc-post-types.php:327
 msgid "Edit Coupon"
 msgstr "Gutschein bearbeiten"
 
-#: includes/class-wc-post-types.php:338
+#: includes/class-wc-post-types.php:328
 msgid "New Coupon"
 msgstr "Neuer Gutschein"
 
-#: includes/class-wc-post-types.php:339
+#: includes/class-wc-post-types.php:329
 msgid "View Coupons"
 msgstr "Gutscheine anzeigen"
 
-#: includes/class-wc-post-types.php:340
+#: includes/class-wc-post-types.php:330
 msgid "View Coupon"
 msgstr "Gutschein anzeigen"
 
-#: includes/class-wc-post-types.php:341
+#: includes/class-wc-post-types.php:331
 msgid "Search Coupons"
 msgstr "Gutschein suchen"
 
-#: includes/class-wc-post-types.php:342
+#: includes/class-wc-post-types.php:332
 msgid "No Coupons found"
 msgstr "Keine Gutscheine gefunden"
 
-#: includes/class-wc-post-types.php:343
+#: includes/class-wc-post-types.php:333
 msgid "No Coupons found in trash"
 msgstr "Keine Gutscheine im Papierkorb gefunden"
 
-#: includes/class-wc-post-types.php:344
+#: includes/class-wc-post-types.php:334
 msgid "Parent Coupon"
 msgstr "Übergeordneter Gutschein"
 
-#: includes/class-wc-post-types.php:346
+#: includes/class-wc-post-types.php:336
 msgid ""
 "This is where you can add new coupons that customers can use in your store."
 msgstr "Hier können Sie neue Gutscheine hinzufügen, die Ihre Kunden in Ihrem Onlineshop verwenden können."
@@ -6684,143 +6684,151 @@ msgstr "[Entfernen]"
 msgid "Free"
 msgstr "Frei"
 
-#: includes/wc-core-functions.php:151
+#: includes/wc-core-functions.php:162
 msgid "Australian Dollars"
 msgstr "Australischer Dollar"
 
-#: includes/wc-core-functions.php:152
+#: includes/wc-core-functions.php:163
 msgid "Brazilian Real"
 msgstr "Brasilianischer Real"
 
-#: includes/wc-core-functions.php:153
+#: includes/wc-core-functions.php:164
 msgid "Bulgarian Lev"
 msgstr ""
 
-#: includes/wc-core-functions.php:154
+#: includes/wc-core-functions.php:165
 msgid "Canadian Dollars"
 msgstr "Kanadischer Dollar"
 
-#: includes/wc-core-functions.php:155
+#: includes/wc-core-functions.php:166
+msgid "Chilean Peso"
+msgstr ""
+
+#: includes/wc-core-functions.php:167
 msgid "Chinese Yuan"
 msgstr "Chinesischer Yuan"
 
-#: includes/wc-core-functions.php:156
+#: includes/wc-core-functions.php:168
+msgid "Colombian Peso"
+msgstr ""
+
+#: includes/wc-core-functions.php:169
 msgid "Czech Koruna"
 msgstr "Czeschicher Koruna"
 
-#: includes/wc-core-functions.php:157
+#: includes/wc-core-functions.php:170
 msgid "Danish Krone"
 msgstr "Dänische Kronen"
 
-#: includes/wc-core-functions.php:158
+#: includes/wc-core-functions.php:171
 msgid "Euros"
 msgstr "Euros"
 
-#: includes/wc-core-functions.php:159
+#: includes/wc-core-functions.php:172
 msgid "Hong Kong Dollar"
 msgstr "Hong Kong Dollar"
 
-#: includes/wc-core-functions.php:160
+#: includes/wc-core-functions.php:173
 msgid "Hungarian Forint"
 msgstr "Ungarische Forint"
 
-#: includes/wc-core-functions.php:161
+#: includes/wc-core-functions.php:174
 msgid "Icelandic krona"
 msgstr ""
 
-#: includes/wc-core-functions.php:162
+#: includes/wc-core-functions.php:175
 msgid "Indonesia Rupiah"
 msgstr "Indonesia Rupiah"
 
-#: includes/wc-core-functions.php:163
+#: includes/wc-core-functions.php:176
 msgid "Indian Rupee"
 msgstr "Indian Rupee"
 
-#: includes/wc-core-functions.php:164
+#: includes/wc-core-functions.php:177
 msgid "Israeli Shekel"
 msgstr "Israelische Schekel"
 
-#: includes/wc-core-functions.php:165
+#: includes/wc-core-functions.php:178
 msgid "Japanese Yen"
 msgstr "JapanischerYen"
 
-#: includes/wc-core-functions.php:166
+#: includes/wc-core-functions.php:179
 msgid "South Korean Won"
 msgstr "Südkoreanischer Won"
 
-#: includes/wc-core-functions.php:167
+#: includes/wc-core-functions.php:180
 msgid "Malaysian Ringgits"
 msgstr "Malaysische Ringgits"
 
-#: includes/wc-core-functions.php:168
+#: includes/wc-core-functions.php:181
 msgid "Mexican Peso"
 msgstr "Mexikanischer Peso"
 
-#: includes/wc-core-functions.php:169
+#: includes/wc-core-functions.php:182
 msgid "Nigerian Naira"
 msgstr ""
 
-#: includes/wc-core-functions.php:170
+#: includes/wc-core-functions.php:183
 msgid "Norwegian Krone"
 msgstr "Norwegische Kronen"
 
-#: includes/wc-core-functions.php:171
+#: includes/wc-core-functions.php:184
 msgid "New Zealand Dollar"
 msgstr "Neuseeländischer Dollar"
 
-#: includes/wc-core-functions.php:172
+#: includes/wc-core-functions.php:185
 msgid "Philippine Pesos"
 msgstr "Philippinische Peso"
 
-#: includes/wc-core-functions.php:173
+#: includes/wc-core-functions.php:186
 msgid "Polish Zloty"
 msgstr "Polnische Zloty"
 
-#: includes/wc-core-functions.php:174
+#: includes/wc-core-functions.php:187
 msgid "Pounds Sterling"
 msgstr "Pfund Sterling"
 
-#: includes/wc-core-functions.php:175
+#: includes/wc-core-functions.php:188
 msgid "Romanian Leu"
 msgstr "Romänischer Leu"
 
-#: includes/wc-core-functions.php:176
+#: includes/wc-core-functions.php:189
 msgid "Russian Ruble"
 msgstr ""
 
-#: includes/wc-core-functions.php:177
+#: includes/wc-core-functions.php:190
 msgid "Singapore Dollar"
 msgstr "Singapur Dollar"
 
-#: includes/wc-core-functions.php:178
+#: includes/wc-core-functions.php:191
 msgid "South African rand"
 msgstr "Südafrikanischer Rand"
 
-#: includes/wc-core-functions.php:179
+#: includes/wc-core-functions.php:192
 msgid "Swedish Krona"
 msgstr "Schwedische Kronen"
 
-#: includes/wc-core-functions.php:180
+#: includes/wc-core-functions.php:193
 msgid "Swiss Franc"
 msgstr "Schweizer Franken"
 
-#: includes/wc-core-functions.php:181
+#: includes/wc-core-functions.php:194
 msgid "Taiwan New Dollars"
 msgstr "Neuer Taiwan Dollar"
 
-#: includes/wc-core-functions.php:182
+#: includes/wc-core-functions.php:195
 msgid "Thai Baht"
 msgstr "Thailändische Baht"
 
-#: includes/wc-core-functions.php:183
+#: includes/wc-core-functions.php:196
 msgid "Turkish Lira"
 msgstr "Türkische Lira"
 
-#: includes/wc-core-functions.php:184
+#: includes/wc-core-functions.php:197
 msgid "US Dollars"
 msgstr "US Dollar"
 
-#: includes/wc-core-functions.php:185
+#: includes/wc-core-functions.php:198
 msgid "Vietnamese Dong"
 msgstr ""
 
@@ -6868,7 +6876,7 @@ msgstr "Konnte Sie nicht registrieren&hellip; bitte kontaktieren Sie uns, wenn S
 msgid "Unpaid order cancelled - time limit reached."
 msgstr "Unbezahlte Bestellungen abgebrochen - Zeitlimit erreicht"
 
-#: includes/wc-product-functions.php:235
+#: includes/wc-product-functions.php:236
 msgctxt "slug"
 msgid "uncategorized"
 msgstr "unkategorisiert"
@@ -6920,33 +6928,33 @@ msgctxt "breadcrumb"
 msgid "Home"
 msgstr "Startseite"
 
-#: includes/wc-template-functions.php:1515
+#: includes/wc-template-functions.php:1529
 msgid "Order Again"
 msgstr "Wieder bestellen"
 
-#: includes/wc-template-functions.php:1606
+#: includes/wc-template-functions.php:1620
 #: templates/cart/shipping-calculator.php:28
 msgid "Select a country&hellip;"
 msgstr "Land auswählen&hellip;"
 
-#: includes/wc-template-functions.php:1613
+#: includes/wc-template-functions.php:1627
 msgid "Update country"
 msgstr "Land aktualisieren"
 
-#: includes/wc-template-functions.php:1656
+#: includes/wc-template-functions.php:1670
 #: templates/cart/shipping-calculator.php:52
 msgid "Select a state&hellip;"
 msgstr "Kanton auswählen&hellip;"
 
-#: includes/wc-template-functions.php:1769
+#: includes/wc-template-functions.php:1783
 msgid "Search for:"
 msgstr "Suche nach:"
 
-#: includes/wc-template-functions.php:1770
+#: includes/wc-template-functions.php:1784
 msgid "Search for products"
 msgstr "Suche nach Produkten"
 
-#: includes/wc-template-functions.php:1771
+#: includes/wc-template-functions.php:1785
 msgid "Search"
 msgstr "Suche"
 
@@ -7884,10 +7892,10 @@ msgid "Reset Password"
 msgstr "Passwort zurücksetzen"
 
 #: templates/myaccount/my-account.php:19
-msgid "Hello <strong>%s</strong> (not %s? <a href=\"%s\">Sign out</a>)."
+msgid "Hello <strong>%1$s</strong> (not %1$s? <a href=\"%2$s\">Sign out</a>)."
 msgstr ""
 
-#: templates/myaccount/my-account.php:25
+#: templates/myaccount/my-account.php:24
 msgid ""
 "From your account dashboard you can view your recent orders, manage your "
 "shipping and billing addresses and <a href=\"%s\">edit your password and "
@@ -8077,71 +8085,63 @@ msgstr[1] "%s Bewertungen für %s"
 msgid "Reviews"
 msgstr "Bewertungen"
 
-#: templates/single-product-reviews.php:34
-msgid "Previous"
-msgstr ""
-
-#: templates/single-product-reviews.php:35
-msgid "Next"
-msgstr ""
-
-#: templates/single-product-reviews.php:41
+#: templates/single-product-reviews.php:44
 msgid "There are no reviews yet."
 msgstr ""
 
-#: templates/single-product-reviews.php:54
+#: templates/single-product-reviews.php:57
 msgid "Add a review"
 msgstr "Fügen Sie Ihre Bewertung hinzu"
 
-#: templates/single-product-reviews.php:54
+#: templates/single-product-reviews.php:57
 msgid "Be the first to review"
 msgstr "Seien Sie der erste Rezensent von"
 
-#: templates/single-product-reviews.php:55
+#: templates/single-product-reviews.php:58
 msgid "Leave a Reply to %s"
 msgstr ""
 
-#: templates/single-product-reviews.php:61
+#: templates/single-product-reviews.php:64
 msgid "Email"
 msgstr "E-Mail"
 
-#: templates/single-product-reviews.php:64
+#: templates/single-product-reviews.php:67
 msgid "Submit"
 msgstr ""
 
-#: templates/single-product-reviews.php:70
+#: templates/single-product-reviews.php:73
 msgid "Your Rating"
 msgstr ""
 
-#: templates/single-product-reviews.php:71
+#: templates/single-product-reviews.php:74
 msgid "Rate&hellip;"
 msgstr "Bewertung&hellip;"
 
-#: templates/single-product-reviews.php:72
+#: templates/single-product-reviews.php:75
 msgid "Perfect"
 msgstr "Ausgezeichnet"
 
-#: templates/single-product-reviews.php:73
+#: templates/single-product-reviews.php:76
 msgid "Good"
 msgstr "Gut"
 
-#: templates/single-product-reviews.php:74
+#: templates/single-product-reviews.php:77
 msgid "Average"
 msgstr "Durchschnittlich"
 
-#: templates/single-product-reviews.php:75
+#: templates/single-product-reviews.php:78
 msgid "Not that bad"
 msgstr "Nicht ganz schlecht"
 
-#: templates/single-product-reviews.php:76
+#: templates/single-product-reviews.php:79
 msgid "Very Poor"
 msgstr "Sehr schlecht"
 
-#: templates/single-product-reviews.php:80
+#: templates/single-product-reviews.php:83
 msgid "Your Review"
 msgstr "Ihre Bewertung"
 
-#: templates/single-product-reviews.php:89
+#: templates/single-product-reviews.php:92
 msgid ""
 "Only logged in customers who have purchased this product may leave a review."
 msgstr ""

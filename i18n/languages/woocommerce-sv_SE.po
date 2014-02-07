@@ -6,9 +6,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-01-30 15:25:37+00:00\n"
-"PO-Revision-Date: 2014-01-30 22:08+0000\n"
-"Last-Translator: sennbrink <konsult@sennbrink.se>\n"
+"POT-Creation-Date: 2014-02-06 15:46:00+00:00\n"
+"PO-Revision-Date: 2014-02-07 08:31+0000\n"
+"Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: Swedish (Sweden) (http://www.transifex.com/projects/p/woocommerce-core/language/sv_SE/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -3125,176 +3125,176 @@ msgstr "%s &ndash; %s"
 
 #: includes/api/class-wc-api-authentication.php:69
 msgid "Consumer Key is missing"
-msgstr ""
+msgstr "Kundnyckel saknas"
 
 #: includes/api/class-wc-api-authentication.php:72
 msgid "Consumer Secret is missing"
-msgstr ""
+msgstr "Hemlig kundnyckel saknas"
 
 #: includes/api/class-wc-api-authentication.php:80
 msgid "Consumer Secret is invalid"
-msgstr ""
+msgstr "Hemlig kundnyckel är ogiltig"
 
 #: includes/api/class-wc-api-authentication.php:112
 msgid "%s parameter is missing"
-msgstr ""
+msgstr "%s parameter saknas"
 
 #: includes/api/class-wc-api-authentication.php:151
 msgid "Consumer Key is invalid"
-msgstr ""
+msgstr "Kundnyckel är ogiltig"
 
 #: includes/api/class-wc-api-authentication.php:192
 msgid "Invalid Signature - failed to sort parameters"
-msgstr ""
+msgstr "Ogiltig signatur - misslyckades sortera parametrar"
 
 #: includes/api/class-wc-api-authentication.php:205
 msgid "Invalid Signature - signature method is invalid"
-msgstr ""
+msgstr "Ogiltig signatur - signaturmetod är ogiltig"
 
 #: includes/api/class-wc-api-authentication.php:212
 msgid "Invalid Signature - provided signature does not match"
-msgstr ""
+msgstr "Ogiltig signatur - inkluderad signatur matchar inte"
 
 #: includes/api/class-wc-api-authentication.php:247
 msgid "Invalid timestamp"
-msgstr ""
+msgstr "Ogiltig tidstämpel"
 
 #: includes/api/class-wc-api-authentication.php:255
 msgid "Invalid nonce - nonce has already been used"
-msgstr ""
+msgstr "Ogiltig nonce - nonce har redan använts"
 
 #: includes/api/class-wc-api-authentication.php:284
 msgid "The API key provided does not have read permissions"
-msgstr ""
+msgstr "API-nyckeln genererad har inte läsrättigheter"
 
 #: includes/api/class-wc-api-authentication.php:293
 msgid "The API key provided does not have write permissions"
-msgstr ""
+msgstr "API-nyckeln genererad har inte skrivrättigheter"
 
 #: includes/api/class-wc-api-coupons.php:107
 msgid "Invalid coupon ID"
-msgstr ""
+msgstr "Ogiltigt rabattkod ID"
 
 #: includes/api/class-wc-api-coupons.php:152
 msgid "You do not have permission to read the coupons count"
-msgstr ""
+msgstr "Du saknar behörighet att läsa antal rabattkoder"
 
 #: includes/api/class-wc-api-coupons.php:171
 msgid "Invalid coupon code"
-msgstr ""
+msgstr "Ogiltig rabattkod"
 
 #: includes/api/class-wc-api-customers.php:192
 msgid "You do not have permission to read the customers count"
-msgstr ""
+msgstr "Du saknar behörighet att läsa antal kunder"
 
 #: includes/api/class-wc-api-customers.php:208
 msgid "You do not have permission to create this customer"
-msgstr ""
+msgstr "Du saknar behörighet för att skapa den här kunden"
 
 #: includes/api/class-wc-api-customers.php:455
 msgid "Invalid customer ID"
-msgstr ""
+msgstr "Ogiltigt kund ID"
 
 #: includes/api/class-wc-api-customers.php:461
 msgid "Invalid customer"
-msgstr ""
+msgstr "Ogiltig kund"
 
 #: includes/api/class-wc-api-customers.php:468
 msgid "You do not have permission to read this customer"
-msgstr ""
+msgstr "Du saknar behörighet att läsa den här kunden"
 
 #: includes/api/class-wc-api-customers.php:473
 msgid "You do not have permission to edit this customer"
-msgstr ""
+msgstr "Du saknar behörighet att redigera den här kunden"
 
 #: includes/api/class-wc-api-customers.php:478
 msgid "You do not have permission to delete this customer"
-msgstr ""
+msgstr "Du saknar behörighet att radera den här kunden"
 
 #: includes/api/class-wc-api-json-handler.php:56
 msgid "JSONP support is disabled on this site"
-msgstr ""
+msgstr "JSONP-support är deaktiverat på den här webbplatsen"
 
 #: includes/api/class-wc-api-json-handler.php:64
 msgid "The JSONP callback function is invalid"
-msgstr ""
+msgstr "JSONP-callbackfunktionen är ogiltig"
 
 #: includes/api/class-wc-api-orders.php:255
 msgid "You do not have permission to read the orders count"
-msgstr ""
+msgstr "Du saknar behörighet för att läsa antal ordrar"
 
 #: includes/api/class-wc-api-products.php:140
 msgid "You do not have permission to read the products count"
-msgstr ""
+msgstr "Du saknar behörighet för att läsa antalet produkter"
 
 #: includes/api/class-wc-api-products.php:459
 #: includes/api/class-wc-api-products.php:460
 msgid "Placeholder"
-msgstr ""
+msgstr "Platshållare"
 
 #: includes/api/class-wc-api-reports.php:469
 msgid "You do not have permission to read this report"
-msgstr ""
+msgstr "Du har inte rätt behörighet för att läsa denna rapport"
 
 #: includes/api/class-wc-api-resource.php:71
 msgid "Invalid %s ID"
-msgstr ""
+msgstr "Ogiltig %s ID"
 
 #: includes/api/class-wc-api-resource.php:83
 msgid "Invalid %s"
-msgstr ""
+msgstr "Ogiltig %s"
 
 #: includes/api/class-wc-api-resource.php:90
 msgid "You do not have permission to read this %s"
-msgstr ""
+msgstr "Du har inte behörighet att läsa %s"
 
 #: includes/api/class-wc-api-resource.php:95
 msgid "You do not have permission to edit this %s"
-msgstr ""
+msgstr "Du har inte behörighet att redigera %s"
 
 #: includes/api/class-wc-api-resource.php:100
 msgid "You do not have permission to delete this %s"
-msgstr ""
+msgstr "Du har inte behörighet att radera %s"
 
 #: includes/api/class-wc-api-resource.php:302
 msgid "Permanently deleted customer"
-msgstr ""
+msgstr "Permanentraderade kund"
 
 #: includes/api/class-wc-api-resource.php:304
 msgid "The customer cannot be deleted"
-msgstr ""
+msgstr "Kunden kan inte raderas"
 
 #: includes/api/class-wc-api-resource.php:313
 msgid "This %s cannot be deleted"
-msgstr ""
+msgstr "Den här %s kan inte raderas"
 
 #: includes/api/class-wc-api-resource.php:316
 msgid "Permanently deleted %s"
-msgstr ""
+msgstr "Permanentraderade %s"
 
 #: includes/api/class-wc-api-resource.php:322
 msgid "Deleted %s"
-msgstr ""
+msgstr "Raderade %s"
 
 #: includes/api/class-wc-api-server.php:165
 msgid "Invalid authentication method"
-msgstr ""
+msgstr "Ogiltig autentiseringsmetod"
 
 #: includes/api/class-wc-api-server.php:316
 msgid "Unsupported request method"
-msgstr ""
+msgstr "Metod för begäran saknar stöd"
 
 #: includes/api/class-wc-api-server.php:333
 msgid "The handler for the route is invalid"
-msgstr ""
+msgstr "Hanteraren av route är ogiltig"
 
 #: includes/api/class-wc-api-server.php:369
 msgid "No route was found matching the URL and request method"
-msgstr ""
+msgstr "Ingen route hittades som matchade URL och metod för begäran"
 
 #: includes/api/class-wc-api-server.php:404
 msgid "Missing parameter %s"
-msgstr ""
+msgstr "Saknad parameter %s"
 
 #: includes/class-wc-ajax.php:158
 msgid "Sorry, your session has expired."
@@ -3350,7 +3350,7 @@ msgstr "Inga produkter fick sitt lager utökat - de har kanske inte hantering av
 
 #: includes/class-wc-ajax.php:1054
 #: includes/widgets/class-wc-widget-product-categories.php:39
-#: templates/single-product-reviews.php:59
+#: templates/single-product-reviews.php:62
 msgid "Name"
 msgstr "Namn"
 
@@ -3377,7 +3377,7 @@ msgstr "För att <strong>cache av databas</strong> ska fungera tillsammans med W
 msgid ""
 "%s has been removed from your cart because it can no longer be purchased. "
 "Please contact us if you need assistance."
-msgstr ""
+msgstr "%s har tagits bort ur din varukorg eftersom den ej längre kan köpas. Kontakta oss om du behöver hjälp."
 
 #: includes/class-wc-cart.php:358
 msgid "An item which is no longer available was removed from your cart."
@@ -3434,7 +3434,7 @@ msgstr "Du kan inte lägga till fler av &quot;%s&quot; i din varukorg."
 msgid ""
 "You cannot add that amount to the cart &mdash; we have %s in stock and you "
 "already have %s in your cart."
-msgstr ""
+msgstr "Du kan inte lägga till det antalet i din varukorg &mdash; vi har %s i lager och du har redan %s i din varukorg. "
 
 #: includes/class-wc-checkout.php:64 includes/class-wc-checkout.php:73
 #: includes/class-wc-emails.php:67 includes/class-wc-emails.php:76
@@ -4834,7 +4834,7 @@ msgstr "Dina kontoinställningar har nu ändrats."
 
 #: includes/class-wc-form-handler.php:311
 msgid "Payment method added."
-msgstr ""
+msgstr "Betalningsmetod tillagd."
 
 #: includes/class-wc-form-handler.php:344
 #: includes/class-wc-form-handler.php:395
@@ -4861,7 +4861,7 @@ msgstr "Din order är avbruten."
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
-msgstr ""
+msgstr "Din order kan inte längre avbrytas. Kontakta oss om du behöver hjälp."
 
 #: includes/class-wc-form-handler.php:525
 #: includes/class-wc-form-handler.php:583
@@ -4927,7 +4927,7 @@ msgid "Please select a rating"
 msgstr "Var god välj betyg"
 
 #: includes/class-wc-frontend-scripts.php:127
-#: includes/wc-template-functions.php:1559
+#: includes/wc-template-functions.php:1573
 msgid "required"
 msgstr "krävs"
 
@@ -5037,200 +5037,200 @@ msgstr "Orderstatus ändrad från %s till %s."
 msgid "Order item stock reduced successfully."
 msgstr "Minskning av lagersaldo lyckades."
 
-#: includes/class-wc-post-types.php:62 includes/class-wc-post-types.php:64
+#: includes/class-wc-post-types.php:55 includes/class-wc-post-types.php:57
 #: includes/widgets/class-wc-widget-product-categories.php:30
 msgid "Product Categories"
 msgstr "Produktkategorier"
 
-#: includes/class-wc-post-types.php:65
+#: includes/class-wc-post-types.php:58
 msgid "Product Category"
 msgstr "Produktkategori"
 
-#: includes/class-wc-post-types.php:66
+#: includes/class-wc-post-types.php:59
 msgctxt "Admin menu name"
 msgid "Categories"
 msgstr "Kategorier"
 
-#: includes/class-wc-post-types.php:67
+#: includes/class-wc-post-types.php:60
 msgid "Search Product Categories"
 msgstr "Sök produktkategori"
 
-#: includes/class-wc-post-types.php:68
+#: includes/class-wc-post-types.php:61
 msgid "All Product Categories"
 msgstr "Alla produktkategorier"
 
-#: includes/class-wc-post-types.php:69
+#: includes/class-wc-post-types.php:62
 msgid "Parent Product Category"
 msgstr "Förälder produktkategori"
 
-#: includes/class-wc-post-types.php:70
+#: includes/class-wc-post-types.php:63
 msgid "Parent Product Category:"
 msgstr "Förälder produktkategori:"
 
-#: includes/class-wc-post-types.php:71
+#: includes/class-wc-post-types.php:64
 msgid "Edit Product Category"
 msgstr "Redigera produktkategori"
 
-#: includes/class-wc-post-types.php:72
+#: includes/class-wc-post-types.php:65
 msgid "Update Product Category"
 msgstr "Uppdatera produktkategori"
 
-#: includes/class-wc-post-types.php:73
+#: includes/class-wc-post-types.php:66
 msgid "Add New Product Category"
 msgstr "Lägg till ny produktkategori"
 
-#: includes/class-wc-post-types.php:74
+#: includes/class-wc-post-types.php:67
 msgid "New Product Category Name"
 msgstr "Ny produktkategori"
 
-#: includes/class-wc-post-types.php:85
+#: includes/class-wc-post-types.php:78
 #: includes/updates/woocommerce-update-2.0.php:49
 msgctxt "slug"
 msgid "product-category"
 msgstr "produkt-kategori"
 
-#: includes/class-wc-post-types.php:97 includes/class-wc-post-types.php:99
+#: includes/class-wc-post-types.php:90 includes/class-wc-post-types.php:92
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:27
 msgid "Product Tags"
 msgstr "Produktetiketter"
 
-#: includes/class-wc-post-types.php:100
+#: includes/class-wc-post-types.php:93
 msgid "Product Tag"
 msgstr "Produktetikett"
 
-#: includes/class-wc-post-types.php:101
+#: includes/class-wc-post-types.php:94
 msgctxt "Admin menu name"
 msgid "Tags"
 msgstr "Etiketter"
 
-#: includes/class-wc-post-types.php:102
+#: includes/class-wc-post-types.php:95
 msgid "Search Product Tags"
 msgstr "Sök produktetikett"
 
-#: includes/class-wc-post-types.php:103
+#: includes/class-wc-post-types.php:96
 msgid "All Product Tags"
 msgstr "Alla produktetiketter"
 
-#: includes/class-wc-post-types.php:104
+#: includes/class-wc-post-types.php:97
 msgid "Parent Product Tag"
 msgstr "Förälder produktetikett"
 
-#: includes/class-wc-post-types.php:105
+#: includes/class-wc-post-types.php:98
 msgid "Parent Product Tag:"
 msgstr "Förälder produktetikett:"
 
-#: includes/class-wc-post-types.php:106
+#: includes/class-wc-post-types.php:99
 msgid "Edit Product Tag"
 msgstr "Redigera produktetikett"
 
-#: includes/class-wc-post-types.php:107
+#: includes/class-wc-post-types.php:100
 msgid "Update Product Tag"
 msgstr "Uppdatera produktetikett"
 
-#: includes/class-wc-post-types.php:108
+#: includes/class-wc-post-types.php:101
 msgid "Add New Product Tag"
 msgstr "Lägg till ny produktetikett"
 
-#: includes/class-wc-post-types.php:109
+#: includes/class-wc-post-types.php:102
 msgid "New Product Tag Name"
 msgstr "Ny produktetikett"
 
-#: includes/class-wc-post-types.php:120
+#: includes/class-wc-post-types.php:113
 #: includes/updates/woocommerce-update-2.0.php:50
 msgctxt "slug"
 msgid "product-tag"
 msgstr "produkt-etikett"
 
-#: includes/class-wc-post-types.php:131 includes/class-wc-post-types.php:133
+#: includes/class-wc-post-types.php:124 includes/class-wc-post-types.php:126
 msgid "Shipping Classes"
 msgstr "Fraktklasser"
 
-#: includes/class-wc-post-types.php:134
+#: includes/class-wc-post-types.php:127
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:521
 msgid "Shipping Class"
 msgstr "Fraktklass"
 
-#: includes/class-wc-post-types.php:135
+#: includes/class-wc-post-types.php:128
 msgctxt "Admin menu name"
 msgid "Shipping Classes"
 msgstr "Fraktklasser"
 
-#: includes/class-wc-post-types.php:136
+#: includes/class-wc-post-types.php:129
 msgid "Search Shipping Classes"
 msgstr "Sök fraktklasser"
 
-#: includes/class-wc-post-types.php:137
+#: includes/class-wc-post-types.php:130
 msgid "All Shipping Classes"
 msgstr "Alla fraktklasser"
 
-#: includes/class-wc-post-types.php:138
+#: includes/class-wc-post-types.php:131
 msgid "Parent Shipping Class"
 msgstr "Förälderklass för frakt"
 
-#: includes/class-wc-post-types.php:139
+#: includes/class-wc-post-types.php:132
 msgid "Parent Shipping Class:"
 msgstr "Förälderklass för frakt:"
 
-#: includes/class-wc-post-types.php:140
+#: includes/class-wc-post-types.php:133
 msgid "Edit Shipping Class"
 msgstr "Redigera fraktklass"
 
-#: includes/class-wc-post-types.php:141
+#: includes/class-wc-post-types.php:134
 msgid "Update Shipping Class"
 msgstr "Uppdatera fraktklass"
 
-#: includes/class-wc-post-types.php:142
+#: includes/class-wc-post-types.php:135
 msgid "Add New Shipping Class"
 msgstr "Lägg till fraktklass"
 
-#: includes/class-wc-post-types.php:143
+#: includes/class-wc-post-types.php:136
 msgid "New Shipping Class Name"
 msgstr "Ny fraktklass namn"
 
-#: includes/class-wc-post-types.php:191
+#: includes/class-wc-post-types.php:184
 msgid "Search %s"
 msgstr "Sök %s"
 
-#: includes/class-wc-post-types.php:192
+#: includes/class-wc-post-types.php:185
 msgid "All %s"
 msgstr "Alla %s"
 
-#: includes/class-wc-post-types.php:193
+#: includes/class-wc-post-types.php:186
 msgid "Parent %s"
 msgstr "Förälder %s"
 
-#: includes/class-wc-post-types.php:194
+#: includes/class-wc-post-types.php:187
 msgid "Parent %s:"
 msgstr "Förälder %s"
 
-#: includes/class-wc-post-types.php:195
+#: includes/class-wc-post-types.php:188
 msgid "Edit %s"
 msgstr "Redigera %s"
 
-#: includes/class-wc-post-types.php:196
+#: includes/class-wc-post-types.php:189
 msgid "Update %s"
 msgstr "Uppdatera %s"
 
-#: includes/class-wc-post-types.php:197
+#: includes/class-wc-post-types.php:190
 msgid "Add New %s"
 msgstr "Lägg till ny %s"
 
-#: includes/class-wc-post-types.php:198
+#: includes/class-wc-post-types.php:191
 msgid "New %s"
 msgstr "Ny %s"
 
-#: includes/class-wc-post-types.php:234
+#: includes/class-wc-post-types.php:224
 #: includes/updates/woocommerce-update-2.0.php:58
 msgctxt "slug"
 msgid "product"
 msgstr "produkt"
 
-#: includes/class-wc-post-types.php:240
+#: includes/class-wc-post-types.php:230
 #: includes/widgets/class-wc-widget-products.php:27
 msgid "Products"
 msgstr "Produkter"
 
-#: includes/class-wc-post-types.php:241 templates/cart/cart.php:27
+#: includes/class-wc-post-types.php:231 templates/cart/cart.php:27
 #: templates/checkout/form-pay.php:19 templates/checkout/review-order.php:18
 #: templates/emails/admin-new-order.php:22
 #: templates/emails/customer-completed-order.php:23
@@ -5241,168 +5241,168 @@ msgstr "Produkter"
 msgid "Product"
 msgstr "Produkt"
 
-#: includes/class-wc-post-types.php:242
+#: includes/class-wc-post-types.php:232
 msgctxt "Admin menu name"
 msgid "Products"
 msgstr "Produkter"
 
-#: includes/class-wc-post-types.php:243
+#: includes/class-wc-post-types.php:233
 msgid "Add Product"
 msgstr "Lägg till produkt"
 
-#: includes/class-wc-post-types.php:244
+#: includes/class-wc-post-types.php:234
 msgid "Add New Product"
 msgstr "Lägg till ny produkt"
 
-#: includes/class-wc-post-types.php:245 includes/class-wc-post-types.php:297
-#: includes/class-wc-post-types.php:336 templates/myaccount/my-address.php:45
+#: includes/class-wc-post-types.php:235 includes/class-wc-post-types.php:287
+#: includes/class-wc-post-types.php:326 templates/myaccount/my-address.php:45
 msgid "Edit"
 msgstr "Redigera"
 
-#: includes/class-wc-post-types.php:246
+#: includes/class-wc-post-types.php:236
 msgid "Edit Product"
 msgstr "Redigera produkt"
 
-#: includes/class-wc-post-types.php:247
+#: includes/class-wc-post-types.php:237
 msgid "New Product"
 msgstr "Ny produkt"
 
-#: includes/class-wc-post-types.php:248 includes/class-wc-post-types.php:249
+#: includes/class-wc-post-types.php:238 includes/class-wc-post-types.php:239
 msgid "View Product"
 msgstr "Visa produkt"
 
-#: includes/class-wc-post-types.php:250
+#: includes/class-wc-post-types.php:240
 #: includes/widgets/class-wc-widget-product-search.php:27
 msgid "Search Products"
 msgstr "Sök produkter"
 
-#: includes/class-wc-post-types.php:251
+#: includes/class-wc-post-types.php:241
 msgid "No Products found"
 msgstr "Inga produkter hittades"
 
-#: includes/class-wc-post-types.php:252
+#: includes/class-wc-post-types.php:242
 msgid "No Products found in trash"
 msgstr "Inga produkter hittades i papperskorgen"
 
-#: includes/class-wc-post-types.php:253
+#: includes/class-wc-post-types.php:243
 msgid "Parent Product"
 msgstr "Produktförälder"
 
-#: includes/class-wc-post-types.php:255
+#: includes/class-wc-post-types.php:245
 msgid "This is where you can add new products to your store."
 msgstr "Här kan du lägga till nya produkter i din butik"
 
-#: includes/class-wc-post-types.php:275
+#: includes/class-wc-post-types.php:265
 msgid "Variations"
 msgstr "Varianter"
 
-#: includes/class-wc-post-types.php:283
+#: includes/class-wc-post-types.php:273
 msgctxt "Admin menu name"
 msgid "Orders"
 msgstr "Ordrar"
 
-#: includes/class-wc-post-types.php:293
+#: includes/class-wc-post-types.php:283
 msgid "Orders"
 msgstr "Ordrar"
 
-#: includes/class-wc-post-types.php:294 templates/myaccount/my-orders.php:32
+#: includes/class-wc-post-types.php:284 templates/myaccount/my-orders.php:32
 msgid "Order"
 msgstr "Order"
 
-#: includes/class-wc-post-types.php:295
+#: includes/class-wc-post-types.php:285
 msgid "Add Order"
 msgstr "Lägg till order"
 
-#: includes/class-wc-post-types.php:296
+#: includes/class-wc-post-types.php:286
 msgid "Add New Order"
 msgstr "Lägg till ny order"
 
-#: includes/class-wc-post-types.php:298
+#: includes/class-wc-post-types.php:288
 msgid "Edit Order"
 msgstr "Redigera order"
 
-#: includes/class-wc-post-types.php:299
+#: includes/class-wc-post-types.php:289
 msgid "New Order"
 msgstr "Ny order"
 
-#: includes/class-wc-post-types.php:300 includes/class-wc-post-types.php:301
+#: includes/class-wc-post-types.php:290 includes/class-wc-post-types.php:291
 msgid "View Order"
 msgstr "Visa order"
 
-#: includes/class-wc-post-types.php:302
+#: includes/class-wc-post-types.php:292
 msgid "Search Orders"
 msgstr "Sök ordrar"
 
-#: includes/class-wc-post-types.php:303
+#: includes/class-wc-post-types.php:293
 msgid "No Orders found"
 msgstr "Inga ordrar hittades"
 
-#: includes/class-wc-post-types.php:304
+#: includes/class-wc-post-types.php:294
 msgid "No Orders found in trash"
 msgstr "Inga ordrar hittades i papperskorgen"
 
-#: includes/class-wc-post-types.php:305
+#: includes/class-wc-post-types.php:295
 msgid "Parent Orders"
 msgstr "Föräldraordrar"
 
-#: includes/class-wc-post-types.php:308
+#: includes/class-wc-post-types.php:298
 msgid "This is where store orders are stored."
 msgstr "Här lagras butiksordrar"
 
-#: includes/class-wc-post-types.php:331
+#: includes/class-wc-post-types.php:321
 msgid "Coupons"
 msgstr "Rabattkoder"
 
-#: includes/class-wc-post-types.php:332 templates/cart/cart.php:118
+#: includes/class-wc-post-types.php:322 templates/cart/cart.php:118
 msgid "Coupon"
 msgstr "Rabattkod"
 
-#: includes/class-wc-post-types.php:333
+#: includes/class-wc-post-types.php:323
 msgctxt "Admin menu name"
 msgid "Coupons"
 msgstr "Rabattkoder"
 
-#: includes/class-wc-post-types.php:334
+#: includes/class-wc-post-types.php:324
 msgid "Add Coupon"
 msgstr "Lägg till Rabattkod"
 
-#: includes/class-wc-post-types.php:335
+#: includes/class-wc-post-types.php:325
 msgid "Add New Coupon"
 msgstr "Lägg till ny Rabattkod"
 
-#: includes/class-wc-post-types.php:337
+#: includes/class-wc-post-types.php:327
 msgid "Edit Coupon"
 msgstr "Redigera Rabattkod"
 
-#: includes/class-wc-post-types.php:338
+#: includes/class-wc-post-types.php:328
 msgid "New Coupon"
 msgstr "Ny Rabattkod"
 
-#: includes/class-wc-post-types.php:339
+#: includes/class-wc-post-types.php:329
 msgid "View Coupons"
 msgstr "Visa Rabattkoder"
 
-#: includes/class-wc-post-types.php:340
+#: includes/class-wc-post-types.php:330
 msgid "View Coupon"
 msgstr "Visa Rabattkod"
 
-#: includes/class-wc-post-types.php:341
+#: includes/class-wc-post-types.php:331
 msgid "Search Coupons"
 msgstr "Sök efter Rabattkoder"
 
-#: includes/class-wc-post-types.php:342
+#: includes/class-wc-post-types.php:332
 msgid "No Coupons found"
 msgstr "Inga Rabattkoder hittades"
 
-#: includes/class-wc-post-types.php:343
+#: includes/class-wc-post-types.php:333
 msgid "No Coupons found in trash"
 msgstr "Inga Rabattkoder hittades i papperskorgen"
 
-#: includes/class-wc-post-types.php:344
+#: includes/class-wc-post-types.php:334
 msgid "Parent Coupon"
 msgstr "Parent Rabattkod"
 
-#: includes/class-wc-post-types.php:346
+#: includes/class-wc-post-types.php:336
 msgid ""
 "This is where you can add new coupons that customers can use in your store."
 msgstr "Här kan du lägga till nya rabattkoder som kunderna kan använda i butiken."
@@ -5420,7 +5420,7 @@ msgstr "Visa produkter"
 #: includes/class-wc-product-variable.php:256
 msgctxt "Price range: from-to"
 msgid "%1$s&ndash;%2$s"
-msgstr ""
+msgstr "%1$s&ndash;%2$s"
 
 #: includes/class-wc-product-simple.php:48
 #: includes/class-wc-product-variation.php:211
@@ -5435,7 +5435,7 @@ msgstr "Välj alternativ"
 msgid ""
 "This variable product has no active variations so cannot be published. "
 "Changing status to draft."
-msgstr ""
+msgstr "Den här variabla produkten har inga aktiva varianter så den kan inte publiceras. Ändrar status till Utkast."
 
 #: includes/class-wc-product-variation.php:494
 msgid "%s &ndash; %s%s"
@@ -5445,7 +5445,7 @@ msgstr "%s &ndash; %s%s"
 msgid ""
 "Use $args[\"posts_per_page\"] instead. Deprecated argument will be removed "
 "in WC 2.2."
-msgstr ""
+msgstr "Använd $args[\"posts_per_page\"] istället. Deprecated argument kommer att tas bort i WC 2.2."
 
 #: includes/emails/class-wc-email-customer-completed-order.php:26
 msgid "Completed order"
@@ -5512,7 +5512,7 @@ msgstr "Faktura för order {order_number}"
 
 #: includes/emails/class-wc-email-customer-invoice.php:38
 msgid "Your {site_title} order from {order_date}"
-msgstr ""
+msgstr "Din {site_title} order från {order_date}"
 
 #: includes/emails/class-wc-email-customer-invoice.php:39
 msgid "Order {order_number} details"
@@ -5554,7 +5554,7 @@ msgstr "När du lägger till en notis på en order sänds ett mail om det."
 
 #: includes/emails/class-wc-email-customer-note.php:37
 msgid "Note added to your {site_title} order from {order_date}"
-msgstr ""
+msgstr "Notering adderad till din {site_title} order från {order_date}"
 
 #: includes/emails/class-wc-email-customer-note.php:38
 msgid "A note has been added to your order"
@@ -5576,7 +5576,7 @@ msgstr "Tack för din beställning/order"
 
 #: includes/emails/class-wc-email-customer-processing-order.php:30
 msgid "Your {site_title} order receipt from {order_date}"
-msgstr ""
+msgstr "Din {site_title} orderkvitto från {order_date}"
 
 #: includes/emails/class-wc-email-customer-reset-password.php:38
 msgid "Reset password"
@@ -5610,7 +5610,7 @@ msgstr "Ny kundorder"
 
 #: includes/emails/class-wc-email-new-order.php:30
 msgid "[{site_title}] New customer order ({order_number}) - {order_date}"
-msgstr ""
+msgstr "[{site_title}] Ny kundorder ({order_number}) - {order_date}"
 
 #: includes/emails/class-wc-email-new-order.php:126
 msgid "Recipient(s)"
@@ -5705,7 +5705,7 @@ msgid ""
 "Make your payment directly into our bank account. Please use your Order ID "
 "as the payment reference. Your order won't be shipped until the funds have "
 "cleared in our account."
-msgstr ""
+msgstr "Betala direkt till vårt bankkonto. Använd ditt order-ID som betalningsreferens. Din order kommer inte att skickas innan vi ser pengarna på vårt konto."
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:86
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:72
@@ -5747,15 +5747,15 @@ msgstr "IBAN"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:116
 msgid "BIC / Swift"
-msgstr ""
+msgstr "BIC / Swift"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:121
 msgid "+ Add Account"
-msgstr ""
+msgstr "+ Lägg till konto"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:121
 msgid "Remove selected account(s)"
-msgstr ""
+msgstr "Ta bort konto(n)"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:240
 msgid "Our Bank Details"
@@ -5910,7 +5910,7 @@ msgstr "levererar en komplett PCI-medgörlig, säker metod för att samla in och
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:31
 msgid "Proceed to PayPal"
-msgstr ""
+msgstr "Fortsätt till PayPal"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:34
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:135
@@ -5974,7 +5974,7 @@ msgid ""
 "Optionally enable \"Payment Data Transfer\" (Profile > Website Payment "
 "Preferences) and then copy your identity token here. This will allow "
 "payments to be verified without the need for PayPal IPN."
-msgstr ""
+msgstr "Aktivera \"Payment Data Transfer\" (Profil > Webbplatsens betalningsinställningar) och kopiera din identity token hit. Detta gör det möjligt att att ha betalningar verifierade utan att använda PayPal IPN."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:166
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:199
@@ -5994,21 +5994,21 @@ msgstr "Var god och ange ett prefix för dina fakturanummer. Om du använder dit
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:176
 msgid "Payment Action"
-msgstr ""
+msgstr "Betalning"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:178
 msgid ""
 "Choose whether you wish to capture funds immediately or authorize payment "
 "only."
-msgstr ""
+msgstr "Välj om du vill dra pengar direkt eller enbart godkänna betalning."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:182
 msgid "Capture"
-msgstr ""
+msgstr "Dra"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:183
 msgid "Authorize"
-msgstr ""
+msgstr "Godkänn"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:187
 msgid "Submission method"
@@ -6127,11 +6127,11 @@ msgstr "Avbryt order &amp; återställ varukorgen"
 msgid ""
 "Thank you - your order is now pending payment. You should be automatically "
 "redirected to PayPal to make payment."
-msgstr ""
+msgstr "Tack - din order inväntar nu betalning. Du ska bli omdirigerad till PayPal för att betalning."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:689
 msgid "Validation error: PayPal currencies do not match (code %s)."
-msgstr ""
+msgstr "Valideringsfel: PayPal-valutor matchar inte (kod %s)."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:700
 msgid "Validation error: PayPal amounts do not match (gross %s)."
@@ -6197,7 +6197,7 @@ msgstr "Reversering avbruten för order %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:868
 msgid "Validation error: PayPal amounts do not match (amt %s)."
-msgstr ""
+msgstr "Valideringsfel: PayPal-belopp matchar inte (%s)."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:876
 msgid "PDT payment completed"
@@ -6252,7 +6252,7 @@ msgstr "Specifika länder"
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:154
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:113
 msgid "Select some countries"
-msgstr ""
+msgstr "Välj länder"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:109
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:83
@@ -6275,7 +6275,7 @@ msgstr "Kostnad per order"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:121
 msgid "Enter a cost (excluding tax) per order, e.g. 5.00. Default is 0."
-msgstr ""
+msgstr "Ange en kostnad (exkl. moms) per order, ex. 5.00. Standardvärde är 0."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:126
 msgid "Additional Rates"
@@ -6286,13 +6286,13 @@ msgid ""
 "Optional extra shipping options with additional costs (one per line): Option"
 " Name | Additional Cost [+- Percents] | Per Cost Type (order, class, or "
 "item) Example: <code>Priority Mail | 6.95 [+ 0.2%] | order</code>."
-msgstr ""
+msgstr "Valfria extra fraktalternativ med kostnader (en per rad): Namn på frakt | Kostnad [+- Procent] | Per Kostnadstyp (order, klass, eller produkt) Exempel: <code>Snabbleverans | 6.95 [+ 0.2%] | order</code>."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:131
 msgid ""
 "Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, "
 "or item)"
-msgstr ""
+msgstr "Alternativnamn | Extra kostnad [+- Procent%] | Per kostnadstyp (order, klass, eller produkt)"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:134
 msgid "Additional Costs"
@@ -6459,7 +6459,7 @@ msgstr "Kostnad adderad..."
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:105
 msgid "Cost excluding tax. Enter an amount, e.g. 2.50. Default is 0"
-msgstr ""
+msgstr "Kostnad exkl. moms. Ange ett värde ex. 2.50. Standardvärde är 0"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:112
 msgid ""
@@ -6540,7 +6540,7 @@ msgstr "Tillåt kunder att hämta själv"
 msgid ""
 "What zip/post codes are available for local pickup? Separate codes with a "
 "comma. Accepts wildcards, e.g. P* will match a postcode of PE30."
-msgstr ""
+msgstr "Vilka postnummer är tillgängliga för lokal upphämtning. Separera postnummer med ett komma. Wildcards accepteras, där t.ex. P* matchar postnumret PE30."
 
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:128
 msgid ""
@@ -6557,12 +6557,12 @@ msgstr "Fraktkostnader uppdaterades."
 msgid ""
 "This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. "
 "Please contact us if you need assistance."
-msgstr ""
+msgstr "Den här ordern&rsquo;s status är &ldquo;%s&rdquo;&mdash;kan inte betalas för. Kontakta oss om du behöver hjälp."
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:112
 #: includes/shortcodes/class-wc-shortcode-checkout.php:163
 msgid "Sorry, this order is invalid and cannot be paid for."
-msgstr ""
+msgstr "Den här ordern är ogiltig och kan inte betalas."
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:129
 #: templates/checkout/thankyou.php:40
@@ -6600,7 +6600,7 @@ msgid ""
 "Order <mark class=\"order-number\">%s</mark> was placed on <mark class"
 "=\"order-date\">%s</mark> and is currently <mark class=\"order-"
 "status\">%s</mark>."
-msgstr ""
+msgstr "Order <mark class=\"order-number\">%s</mark> lades <mark class=\"order-date\">%s</mark> och är just nu <mark class=\"order-status\">%s</mark>."
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:116
 #: templates/myaccount/view-order.php:17 templates/order/tracking.php:31
@@ -6640,7 +6640,7 @@ msgstr "Ogiltig nyckel"
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:368
 msgid "Add a new payment method."
-msgstr ""
+msgstr "La till en ny betalningsmetod."
 
 #: includes/shortcodes/class-wc-shortcode-order-tracking.php:49
 msgid "Please enter a valid order ID"
@@ -6656,7 +6656,7 @@ msgstr "Tyvärr, vi kunde inte hitta det order-ID-numret i vår databas."
 
 #: includes/wc-cart-functions.php:25
 msgid "This product is protected and cannot be purchased."
-msgstr ""
+msgstr "Den här produkten är skyddad och kan inte köpas."
 
 #: includes/wc-cart-functions.php:87
 msgid "Added &quot;%s&quot; to your cart."
@@ -6686,143 +6686,151 @@ msgstr "[Ta bort]"
 msgid "Free"
 msgstr "Gratis"
 
-#: includes/wc-core-functions.php:151
+#: includes/wc-core-functions.php:162
 msgid "Australian Dollars"
 msgstr "Australian Dollars"
 
-#: includes/wc-core-functions.php:152
+#: includes/wc-core-functions.php:163
 msgid "Brazilian Real"
 msgstr "Brazilian Real"
 
-#: includes/wc-core-functions.php:153
+#: includes/wc-core-functions.php:164
 msgid "Bulgarian Lev"
 msgstr "Bulgarisk Lev"
 
-#: includes/wc-core-functions.php:154
+#: includes/wc-core-functions.php:165
 msgid "Canadian Dollars"
 msgstr "Canadian Dollars"
 
-#: includes/wc-core-functions.php:155
+#: includes/wc-core-functions.php:166
+msgid "Chilean Peso"
+msgstr "Chileansk Peso"
+
+#: includes/wc-core-functions.php:167
 msgid "Chinese Yuan"
 msgstr "Chinese Yuan"
 
-#: includes/wc-core-functions.php:156
+#: includes/wc-core-functions.php:168
+msgid "Colombian Peso"
+msgstr "Colombiansk Peso"
+
+#: includes/wc-core-functions.php:169
 msgid "Czech Koruna"
 msgstr "Czech Koruna"
 
-#: includes/wc-core-functions.php:157
+#: includes/wc-core-functions.php:170
 msgid "Danish Krone"
 msgstr "Danska kronor"
 
-#: includes/wc-core-functions.php:158
+#: includes/wc-core-functions.php:171
 msgid "Euros"
 msgstr "Euros"
 
-#: includes/wc-core-functions.php:159
+#: includes/wc-core-functions.php:172
 msgid "Hong Kong Dollar"
 msgstr "Hong Kong Dollar"
 
-#: includes/wc-core-functions.php:160
+#: includes/wc-core-functions.php:173
 msgid "Hungarian Forint"
 msgstr "Ungerska Forinter"
 
-#: includes/wc-core-functions.php:161
+#: includes/wc-core-functions.php:174
 msgid "Icelandic krona"
-msgstr ""
+msgstr "Isländsk krona"
 
-#: includes/wc-core-functions.php:162
+#: includes/wc-core-functions.php:175
 msgid "Indonesia Rupiah"
 msgstr "Indonesia Rupiah"
 
-#: includes/wc-core-functions.php:163
+#: includes/wc-core-functions.php:176
 msgid "Indian Rupee"
 msgstr "Indian Rupee"
 
-#: includes/wc-core-functions.php:164
+#: includes/wc-core-functions.php:177
 msgid "Israeli Shekel"
 msgstr "Israeliska Shekel"
 
-#: includes/wc-core-functions.php:165
+#: includes/wc-core-functions.php:178
 msgid "Japanese Yen"
 msgstr "Japanese Yen"
 
-#: includes/wc-core-functions.php:166
+#: includes/wc-core-functions.php:179
 msgid "South Korean Won"
 msgstr "South Korean Won"
 
-#: includes/wc-core-functions.php:167
+#: includes/wc-core-functions.php:180
 msgid "Malaysian Ringgits"
 msgstr "Malaysian Ringgits"
 
-#: includes/wc-core-functions.php:168
+#: includes/wc-core-functions.php:181
 msgid "Mexican Peso"
 msgstr "Mexican Peso"
 
-#: includes/wc-core-functions.php:169
+#: includes/wc-core-functions.php:182
 msgid "Nigerian Naira"
 msgstr "Nigerian Naira"
 
-#: includes/wc-core-functions.php:170
+#: includes/wc-core-functions.php:183
 msgid "Norwegian Krone"
 msgstr "Norska kronor"
 
-#: includes/wc-core-functions.php:171
+#: includes/wc-core-functions.php:184
 msgid "New Zealand Dollar"
 msgstr "New Zealand Dollar"
 
-#: includes/wc-core-functions.php:172
+#: includes/wc-core-functions.php:185
 msgid "Philippine Pesos"
 msgstr "Philippinska Pesos"
 
-#: includes/wc-core-functions.php:173
+#: includes/wc-core-functions.php:186
 msgid "Polish Zloty"
 msgstr "Polska Zloty"
 
-#: includes/wc-core-functions.php:174
+#: includes/wc-core-functions.php:187
 msgid "Pounds Sterling"
 msgstr "Pounds Sterling"
 
-#: includes/wc-core-functions.php:175
+#: includes/wc-core-functions.php:188
 msgid "Romanian Leu"
 msgstr "Romanian Leu"
 
-#: includes/wc-core-functions.php:176
+#: includes/wc-core-functions.php:189
 msgid "Russian Ruble"
 msgstr "Ryska rubel"
 
-#: includes/wc-core-functions.php:177
+#: includes/wc-core-functions.php:190
 msgid "Singapore Dollar"
 msgstr "Singapore Dollar"
 
-#: includes/wc-core-functions.php:178
+#: includes/wc-core-functions.php:191
 msgid "South African rand"
 msgstr "South African rand"
 
-#: includes/wc-core-functions.php:179
+#: includes/wc-core-functions.php:192
 msgid "Swedish Krona"
 msgstr "Svensk krona"
 
-#: includes/wc-core-functions.php:180
+#: includes/wc-core-functions.php:193
 msgid "Swiss Franc"
 msgstr "Schweiziska Franc"
 
-#: includes/wc-core-functions.php:181
+#: includes/wc-core-functions.php:194
 msgid "Taiwan New Dollars"
 msgstr "Taiwanesiska Nya Dollar"
 
-#: includes/wc-core-functions.php:182
+#: includes/wc-core-functions.php:195
 msgid "Thai Baht"
 msgstr "Thailändska Baht"
 
-#: includes/wc-core-functions.php:183
+#: includes/wc-core-functions.php:196
 msgid "Turkish Lira"
 msgstr "Turkish Lira"
 
-#: includes/wc-core-functions.php:184
+#: includes/wc-core-functions.php:197
 msgid "US Dollars"
 msgstr "US Dollars"
 
-#: includes/wc-core-functions.php:185
+#: includes/wc-core-functions.php:198
 msgid "Vietnamese Dong"
 msgstr "Vietnamesisk Dong"
 
@@ -6849,7 +6857,7 @@ msgstr "Ett konto är redan registrerat med din e-postadress. Var vänlig logga 
 
 #: includes/wc-customer-functions.php:59
 msgid "Please enter a valid account username."
-msgstr ""
+msgstr "Ange ett giltigt användarnamn."
 
 #: includes/wc-customer-functions.php:62
 msgid ""
@@ -6870,7 +6878,7 @@ msgstr "Kunde inte registrera dig, vänligen kontakta oss om du upplever problem
 msgid "Unpaid order cancelled - time limit reached."
 msgstr "Obetald order avbruten - tidsbegränsning nådd."
 
-#: includes/wc-product-functions.php:235
+#: includes/wc-product-functions.php:236
 msgctxt "slug"
 msgid "uncategorized"
 msgstr "okategoriserad"
@@ -6915,40 +6923,40 @@ msgstr "Recensioner (%d)"
 msgid ""
 "Use $args argument as an array instead. Deprecated argument will be removed "
 "in WC 2.2."
-msgstr ""
+msgstr "Använd $args argument som en array istället. Deprecated argument kommer att tas bort i WC 2.2."
 
 #: includes/wc-template-functions.php:1242
 msgctxt "breadcrumb"
 msgid "Home"
 msgstr "Hem"
 
-#: includes/wc-template-functions.php:1515
+#: includes/wc-template-functions.php:1529
 msgid "Order Again"
 msgstr "Beställ igen"
 
-#: includes/wc-template-functions.php:1606
+#: includes/wc-template-functions.php:1620
 #: templates/cart/shipping-calculator.php:28
 msgid "Select a country&hellip;"
 msgstr "Välj land&hellip;"
 
-#: includes/wc-template-functions.php:1613
+#: includes/wc-template-functions.php:1627
 msgid "Update country"
 msgstr "Uppdatera land"
 
-#: includes/wc-template-functions.php:1656
+#: includes/wc-template-functions.php:1670
 #: templates/cart/shipping-calculator.php:52
 msgid "Select a state&hellip;"
 msgstr "Välj en status&hellip;"
 
-#: includes/wc-template-functions.php:1769
+#: includes/wc-template-functions.php:1783
 msgid "Search for:"
 msgstr "Sök efter:"
 
-#: includes/wc-template-functions.php:1770
+#: includes/wc-template-functions.php:1784
 msgid "Search for products"
 msgstr "Sök efter produkter"
 
-#: includes/wc-template-functions.php:1771
+#: includes/wc-template-functions.php:1785
 msgid "Search"
 msgstr "Sök"
 
@@ -7214,7 +7222,7 @@ msgstr "Senaste recensionerna"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:36
 msgid "Number of reviews to show"
-msgstr ""
+msgstr "Antal recensioner att visa"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:85
 msgctxt "by comment author"
@@ -7251,22 +7259,22 @@ msgstr "Din varukorg är tom."
 
 #: templates/cart/cart-empty.php:20
 msgid "Return To Shop"
-msgstr ""
+msgstr "Tillbaka till shoppen"
 
 #: templates/cart/cart-shipping.php:16
 msgid "Shipping #%d"
-msgstr ""
+msgstr "Frakt #%d"
 
 #: templates/cart/cart-shipping.php:18
 msgid "Shipping and Handling"
-msgstr ""
+msgstr "Frakt och Expediering"
 
 #: templates/cart/cart-shipping.php:55
 msgid ""
 "No shipping methods were found; please recalculate your shipping or continue"
 " to checkout and enter your full address to see if there is shipping "
 "available to your location."
-msgstr ""
+msgstr "Inga fraktmetoder hittades; gör en omberäkning av din frakt eller fortsätt till kassan och ange där din adress för att se om det går att skicka dit du vill."
 
 #: templates/cart/cart-shipping.php:59
 msgid "Please fill in your details to see available shipping methods."
@@ -7274,7 +7282,7 @@ msgstr "Var god fyll i uppgifter för att se tillgängliga fraktmetoder."
 
 #: templates/cart/cart-shipping.php:69 templates/cart/cart-shipping.php:77
 msgid "Sorry, shipping is unavailable %s."
-msgstr ""
+msgstr "Tyvärr, frakt är ej tillgänglig %s."
 
 #: templates/cart/cart-shipping.php:69 templates/cart/cart-shipping.php:77
 msgid ""
@@ -7449,7 +7457,7 @@ msgstr "Totalt"
 
 #: templates/checkout/form-pay.php:54
 msgid "Payment"
-msgstr ""
+msgstr "Betalning"
 
 #: templates/checkout/form-pay.php:79
 msgid ""
@@ -7590,14 +7598,14 @@ msgstr "Tack för att du skapat ett konto på %s. Ditt användarnamn är <strong
 
 #: templates/emails/customer-new-account.php:18
 msgid "Your password has been automatically generated: <strong>%s</strong>"
-msgstr ""
+msgstr "Ditt lösenord har genererats automatiskt: <strong>%s</strong>"
 
 #: templates/emails/customer-new-account.php:22
 #: templates/emails/plain/customer-new-account.php:18
 msgid ""
 "You can access your account area to view your orders and change your "
 "password here: %s."
-msgstr ""
+msgstr "Du kan nå ditt konto för att se dina ordrar och för att byta ditt lösenord här: %s."
 
 #: templates/emails/customer-note.php:14
 #: templates/emails/plain/customer-note.php:13
@@ -7671,7 +7679,7 @@ msgstr "Ordernummer: %s"
 
 #: templates/emails/plain/admin-new-order.php:20
 msgid "Order link: %s"
-msgstr ""
+msgstr "Orderlänk: %s"
 
 #: templates/emails/plain/admin-new-order.php:21
 #: templates/emails/plain/customer-completed-order.php:20
@@ -7743,7 +7751,7 @@ msgstr "Kom ihåg mig"
 
 #: templates/global/form-login.php:42 templates/myaccount/form-login.php:50
 msgid "Lost your password?"
-msgstr ""
+msgstr "Glömt lösenordet?"
 
 #: templates/global/quantity-input.php:12
 msgctxt "Product quantity input tooltip"
@@ -7800,11 +7808,11 @@ msgid ""
 "Sorry, it seems that there are no payment methods which support adding a new"
 " payment method. Please contact us if you require assistance or wish to make"
 " alternate arrangements."
-msgstr ""
+msgstr "Tyvärr, det verkar inte finnas några betalningsalternativ med stöd för skapande av en ny betalningsmetod. Kontakt oss om du behöver hjälp eller vill initera alternativa lösningar på detta."
 
 #: templates/myaccount/form-add-payment-method.php:48
 msgid "Add Payment Method"
-msgstr ""
+msgstr "Lägg till betalningsmetod"
 
 #: templates/myaccount/form-change-password.php:20
 #: templates/myaccount/form-lost-password.php:31
@@ -7857,7 +7865,7 @@ msgstr "Spara adress"
 
 #: templates/myaccount/form-login.php:32
 msgid "Username or email address"
-msgstr ""
+msgstr "Användarnamn eller e-postadress"
 
 #: templates/myaccount/form-login.php:63 templates/myaccount/form-login.php:96
 msgid "Register"
@@ -7886,15 +7894,15 @@ msgid "Reset Password"
 msgstr "Återställ lösenord"
 
 #: templates/myaccount/my-account.php:19
-msgid "Hello <strong>%s</strong> (not %s? <a href=\"%s\">Sign out</a>)."
+msgid "Hello <strong>%1$s</strong> (not %1$s? <a href=\"%2$s\">Sign out</a>)."
 msgstr ""
 
-#: templates/myaccount/my-account.php:25
+#: templates/myaccount/my-account.php:24
 msgid ""
 "From your account dashboard you can view your recent orders, manage your "
 "shipping and billing addresses and <a href=\"%s\">edit your password and "
 "account details</a>."
-msgstr ""
+msgstr "Från ditt konto kontrollpanel kan du se senaste ordrar, göra inställningar för fakturerings- och leveransadresser samt <a href=\"%s\">redigera ditt lösenord och kontouppgifter</a>."
 
 #: templates/myaccount/my-address.php:17
 msgid "My Addresses"
@@ -8009,7 +8017,7 @@ msgstr "Rensa"
 
 #: templates/single-product/add-to-cart/variable.php:103
 msgid "This product is currently out of stock and unavailable."
-msgstr ""
+msgstr "Den här produkten är för nuvarande slut i lager och ej tillgänglig."
 
 #: templates/single-product/meta.php:20
 msgid "SKU:"
@@ -8042,8 +8050,8 @@ msgstr "Dimensioner"
 #: templates/single-product/rating.php:28
 msgid "%s customer review"
 msgid_plural "%s customer reviews"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%s kundrecension"
+msgstr[1] "%s kundrecensioner"
 
 #: templates/single-product/related.php:36
 msgid "Related Products"
@@ -8079,74 +8087,66 @@ msgstr[1] "%s recensioner för %s"
 msgid "Reviews"
 msgstr "Recensioner"
 
-#: templates/single-product-reviews.php:34
-msgid "Previous"
-msgstr "Föregående"
-
-#: templates/single-product-reviews.php:35
-msgid "Next"
-msgstr "Nästa"
-
-#: templates/single-product-reviews.php:41
+#: templates/single-product-reviews.php:44
 msgid "There are no reviews yet."
 msgstr "Det finns inga produktrecensioner ännu."
 
-#: templates/single-product-reviews.php:54
+#: templates/single-product-reviews.php:57
 msgid "Add a review"
 msgstr "Skriv en recension"
 
-#: templates/single-product-reviews.php:54
+#: templates/single-product-reviews.php:57
 msgid "Be the first to review"
 msgstr "Bli den första att skriva en recension"
 
-#: templates/single-product-reviews.php:55
+#: templates/single-product-reviews.php:58
 msgid "Leave a Reply to %s"
-msgstr ""
+msgstr "Lämna en kommentar till %s"
 
-#: templates/single-product-reviews.php:61
+#: templates/single-product-reviews.php:64
 msgid "Email"
 msgstr "E-post"
 
-#: templates/single-product-reviews.php:64
+#: templates/single-product-reviews.php:67
 msgid "Submit"
 msgstr "Skicka"
 
-#: templates/single-product-reviews.php:70
+#: templates/single-product-reviews.php:73
 msgid "Your Rating"
 msgstr "Ditt betyg"
 
-#: templates/single-product-reviews.php:71
+#: templates/single-product-reviews.php:74
 msgid "Rate&hellip;"
 msgstr "Betygsätt&hellip;"
 
-#: templates/single-product-reviews.php:72
+#: templates/single-product-reviews.php:75
 msgid "Perfect"
 msgstr "Mycket bra"
 
-#: templates/single-product-reviews.php:73
+#: templates/single-product-reviews.php:76
 msgid "Good"
 msgstr "Bra"
 
-#: templates/single-product-reviews.php:74
+#: templates/single-product-reviews.php:77
 msgid "Average"
 msgstr "Ok"
 
-#: templates/single-product-reviews.php:75
+#: templates/single-product-reviews.php:78
 msgid "Not that bad"
 msgstr "Inte så dålig"
 
-#: templates/single-product-reviews.php:76
+#: templates/single-product-reviews.php:79
 msgid "Very Poor"
 msgstr "Mycket dålig"
 
-#: templates/single-product-reviews.php:80
+#: templates/single-product-reviews.php:83
 msgid "Your Review"
 msgstr "Din Recension"
 
-#: templates/single-product-reviews.php:89
+#: templates/single-product-reviews.php:92
 msgid ""
 "Only logged in customers who have purchased this product may leave a review."
-msgstr ""
+msgstr "Endast inloggade kunder som köpt den här produkten får lämna en recension."
 
 #: woocommerce.php:182
 msgid "Docs"

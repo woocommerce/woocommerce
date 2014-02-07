@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-01-30 15:25:39+00:00\n"
-"PO-Revision-Date: 2014-01-30 15:29+0000\n"
+"POT-Creation-Date: 2014-02-06 15:46:00+00:00\n"
+"PO-Revision-Date: 2014-02-07 08:41+0000\n"
 "Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: Croatian (http://www.transifex.com/projects/p/woocommerce-core/language/hr/)\n"
 "MIME-Version: 1.0\n"
@@ -184,8 +184,8 @@ msgid "Last warning, are you sure?"
 msgstr "Posljednje upozorenje, jeste li sigurni?"
 
 #: includes/admin/class-wc-admin-assets.php:208
-#: includes/admin/class-wc-admin-taxonomies.php:126
-#: includes/admin/class-wc-admin-taxonomies.php:213
+#: includes/admin/class-wc-admin-taxonomies.php:123
+#: includes/admin/class-wc-admin-taxonomies.php:210
 msgid "Choose an image"
 msgstr "Odaberite sliku"
 
@@ -614,8 +614,8 @@ msgid "product"
 msgstr "proizvod"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:113
-#: includes/admin/class-wc-admin-taxonomies.php:91
-#: includes/admin/class-wc-admin-taxonomies.php:180
+#: includes/admin/class-wc-admin-taxonomies.php:88
+#: includes/admin/class-wc-admin-taxonomies.php:177
 #: includes/admin/settings/class-wc-settings-checkout.php:226
 #: includes/admin/settings/class-wc-settings-shipping.php:202
 #: includes/admin/views/html-admin-page-status-report.php:70
@@ -1119,50 +1119,50 @@ msgid ""
 " rates, use with caution."
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:89
-#: includes/admin/class-wc-admin-taxonomies.php:177
+#: includes/admin/class-wc-admin-taxonomies.php:86
+#: includes/admin/class-wc-admin-taxonomies.php:174
 msgid "Display type"
 msgstr "Vrsta prikaza"
 
-#: includes/admin/class-wc-admin-taxonomies.php:92
-#: includes/admin/class-wc-admin-taxonomies.php:181
+#: includes/admin/class-wc-admin-taxonomies.php:89
+#: includes/admin/class-wc-admin-taxonomies.php:178
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:97
 #: includes/admin/settings/class-wc-settings-products.php:25
 #: includes/admin/views/html-admin-page-addons.php:15
 msgid "Products"
 msgstr "Proizvodi"
 
-#: includes/admin/class-wc-admin-taxonomies.php:93
-#: includes/admin/class-wc-admin-taxonomies.php:182
+#: includes/admin/class-wc-admin-taxonomies.php:90
+#: includes/admin/class-wc-admin-taxonomies.php:179
 msgid "Subcategories"
 msgstr "Podkategorije"
 
-#: includes/admin/class-wc-admin-taxonomies.php:94
-#: includes/admin/class-wc-admin-taxonomies.php:183
+#: includes/admin/class-wc-admin-taxonomies.php:91
+#: includes/admin/class-wc-admin-taxonomies.php:180
 msgid "Both"
 msgstr "Oboje"
 
-#: includes/admin/class-wc-admin-taxonomies.php:98
-#: includes/admin/class-wc-admin-taxonomies.php:188
+#: includes/admin/class-wc-admin-taxonomies.php:95
+#: includes/admin/class-wc-admin-taxonomies.php:185
 msgid "Thumbnail"
 msgstr "Mala slika"
 
-#: includes/admin/class-wc-admin-taxonomies.php:102
-#: includes/admin/class-wc-admin-taxonomies.php:193
+#: includes/admin/class-wc-admin-taxonomies.php:99
+#: includes/admin/class-wc-admin-taxonomies.php:190
 msgid "Upload/Add image"
 msgstr "Dodaj sliku"
 
-#: includes/admin/class-wc-admin-taxonomies.php:103
-#: includes/admin/class-wc-admin-taxonomies.php:194
+#: includes/admin/class-wc-admin-taxonomies.php:100
+#: includes/admin/class-wc-admin-taxonomies.php:191
 msgid "Remove image"
 msgstr "Ukloni sliku"
 
-#: includes/admin/class-wc-admin-taxonomies.php:128
-#: includes/admin/class-wc-admin-taxonomies.php:215
+#: includes/admin/class-wc-admin-taxonomies.php:125
+#: includes/admin/class-wc-admin-taxonomies.php:212
 msgid "Use image"
 msgstr "Koristi sliku"
 
-#: includes/admin/class-wc-admin-taxonomies.php:273
+#: includes/admin/class-wc-admin-taxonomies.php:270
 msgid ""
 "Product categories for your store can be managed here. To change the order "
 "of categories on the front-end you can drag and drop to sort them. To see "
@@ -1170,14 +1170,14 @@ msgid ""
 "page."
 msgstr "Kategorije proizvoda možete uređivati ovdje. Za izmjenu poredka kategorija na stranici možete ih povući i odvući te na taj način sortirati. Za prikaz još kategorija kliknite na link \"opcije zaslona\" na vrhu stranice."
 
-#: includes/admin/class-wc-admin-taxonomies.php:283
+#: includes/admin/class-wc-admin-taxonomies.php:280
 msgid ""
 "Shipping classes can be used to group products of similar type. These groups"
 " can then be used by certain shipping methods to provide different rates to "
 "different products."
 msgstr "Klase dostave mogu se koristiti za grupiranje proizvoda slične vrste. Te grupe možete koristiti za definiranje drugačije metode dostave za drugačije proizvode."
 
-#: includes/admin/class-wc-admin-taxonomies.php:296
+#: includes/admin/class-wc-admin-taxonomies.php:293
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:244
 msgid "Image"
 msgstr "Slika"
@@ -3780,8 +3780,7 @@ msgid "Automatically generate customer password"
 msgstr "Automatski generiraj lozinku za kupca"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:25
-#: includes/admin/settings/class-wc-settings-checkout.php:78
-#: includes/admin/views/html-admin-page-status-report.php:297
+msgctxt "Settings tab label"
 msgid "Checkout"
 msgstr "Naplata"
 
@@ -3804,6 +3803,11 @@ msgstr "Omogućite korištenje kupona"
 #: includes/admin/settings/class-wc-settings-checkout.php:73
 msgid "Coupons can be applied from the cart and checkout pages."
 msgstr "Kuponi se mogu koristiti u košarici i stranici za plaćanje."
+
+#: includes/admin/settings/class-wc-settings-checkout.php:78
+#: includes/admin/views/html-admin-page-status-report.php:297
+msgid "Checkout"
+msgstr "Naplata"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:79
 msgid "Enable guest checkout"

@@ -1,11 +1,12 @@
 # 
 # Translators:
+# sennbrink <konsult@sennbrink.se>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-01-30 15:25:39+00:00\n"
-"PO-Revision-Date: 2014-01-30 22:01+0000\n"
+"POT-Creation-Date: 2014-02-06 15:46:00+00:00\n"
+"PO-Revision-Date: 2014-02-07 08:41+0000\n"
 "Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: Swedish (Sweden) (http://www.transifex.com/projects/p/woocommerce-core/language/sv_SE/)\n"
 "MIME-Version: 1.0\n"
@@ -36,7 +37,7 @@ msgid ""
 "Are you sure you want to remove the selected items? If you have previously "
 "reduced this item's stock, or this order was submitted by a customer, you "
 "will need to manually restore the item's stock."
-msgstr "Är du säker att du vill radera denna produkt? Om du nyligen minskat produktens lagersaldo eller om ordern lades av en kund, behöver du manuellt återställa antal produkter i lager."
+msgstr "Är du säker att du vill radera markerade produkt? Om du nyligen minskat produktens lagersaldo eller om ordern lades av en kund, behöver du manuellt återställa antal produkter i lager."
 
 #: includes/admin/class-wc-admin-assets.php:137
 msgid "Please select some items."
@@ -79,7 +80,7 @@ msgstr "Ta bort"
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:7
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:7
 msgid "Click to toggle"
-msgstr "Klicka för att akttivera/avaktivera"
+msgstr "Klicka för att aktivera/avaktivera"
 
 #: includes/admin/class-wc-admin-assets.php:143
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:447
@@ -102,7 +103,7 @@ msgstr "Synlig på produktsidan"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:503
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:551
 msgid "Used for variations"
-msgstr "Använd variationer"
+msgstr "Används för variationer"
 
 #: includes/admin/class-wc-admin-assets.php:147
 msgid "Enter a name for the new attribute term:"
@@ -128,7 +129,7 @@ msgstr "Kopiera fakturauppgifterna till leveransuppgifter? Detta raderar befintl
 msgid ""
 "Load the customer's billing information? This will remove any currently "
 "entered billing information."
-msgstr "Ladda kundens debiteringsinformation? Detta kommer ersätta nuvarande angiven information."
+msgstr "Ladda kundens faktureringssinformation? Detta kommer ersätta nuvarande angiven information."
 
 #: includes/admin/class-wc-admin-assets.php:152
 msgid ""
@@ -183,8 +184,8 @@ msgid "Last warning, are you sure?"
 msgstr "Sista varningen, är du säker?"
 
 #: includes/admin/class-wc-admin-assets.php:208
-#: includes/admin/class-wc-admin-taxonomies.php:126
-#: includes/admin/class-wc-admin-taxonomies.php:213
+#: includes/admin/class-wc-admin-taxonomies.php:123
+#: includes/admin/class-wc-admin-taxonomies.php:210
 msgid "Choose an image"
 msgstr "Välj ett bild"
 
@@ -438,7 +439,7 @@ msgstr "(Kopia)"
 
 #: includes/admin/class-wc-admin-help.php:38
 msgid "Documentation"
-msgstr ""
+msgstr "Dokumentation"
 
 #: includes/admin/class-wc-admin-help.php:41
 msgid ""
@@ -448,7 +449,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:43
 msgid "WooCommerce Documentation"
-msgstr ""
+msgstr "WooCommerce Dokumentation"
 
 #: includes/admin/class-wc-admin-help.php:43
 msgid "Developer API Docs"
@@ -609,8 +610,8 @@ msgid "product"
 msgstr "produkt"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:113
-#: includes/admin/class-wc-admin-taxonomies.php:91
-#: includes/admin/class-wc-admin-taxonomies.php:180
+#: includes/admin/class-wc-admin-taxonomies.php:88
+#: includes/admin/class-wc-admin-taxonomies.php:177
 #: includes/admin/settings/class-wc-settings-checkout.php:226
 #: includes/admin/settings/class-wc-settings-shipping.php:202
 #: includes/admin/views/html-admin-page-status-report.php:70
@@ -1114,50 +1115,50 @@ msgid ""
 " rates, use with caution."
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:89
-#: includes/admin/class-wc-admin-taxonomies.php:177
+#: includes/admin/class-wc-admin-taxonomies.php:86
+#: includes/admin/class-wc-admin-taxonomies.php:174
 msgid "Display type"
 msgstr "Visningstyp"
 
-#: includes/admin/class-wc-admin-taxonomies.php:92
-#: includes/admin/class-wc-admin-taxonomies.php:181
+#: includes/admin/class-wc-admin-taxonomies.php:89
+#: includes/admin/class-wc-admin-taxonomies.php:178
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:97
 #: includes/admin/settings/class-wc-settings-products.php:25
 #: includes/admin/views/html-admin-page-addons.php:15
 msgid "Products"
 msgstr "Produkter"
 
-#: includes/admin/class-wc-admin-taxonomies.php:93
-#: includes/admin/class-wc-admin-taxonomies.php:182
+#: includes/admin/class-wc-admin-taxonomies.php:90
+#: includes/admin/class-wc-admin-taxonomies.php:179
 msgid "Subcategories"
 msgstr "Underkategorier"
 
-#: includes/admin/class-wc-admin-taxonomies.php:94
-#: includes/admin/class-wc-admin-taxonomies.php:183
+#: includes/admin/class-wc-admin-taxonomies.php:91
+#: includes/admin/class-wc-admin-taxonomies.php:180
 msgid "Both"
 msgstr "Båda"
 
-#: includes/admin/class-wc-admin-taxonomies.php:98
-#: includes/admin/class-wc-admin-taxonomies.php:188
+#: includes/admin/class-wc-admin-taxonomies.php:95
+#: includes/admin/class-wc-admin-taxonomies.php:185
 msgid "Thumbnail"
 msgstr "Tumnagel"
 
-#: includes/admin/class-wc-admin-taxonomies.php:102
-#: includes/admin/class-wc-admin-taxonomies.php:193
+#: includes/admin/class-wc-admin-taxonomies.php:99
+#: includes/admin/class-wc-admin-taxonomies.php:190
 msgid "Upload/Add image"
 msgstr "Ladda upp/lägg till bild"
 
-#: includes/admin/class-wc-admin-taxonomies.php:103
-#: includes/admin/class-wc-admin-taxonomies.php:194
+#: includes/admin/class-wc-admin-taxonomies.php:100
+#: includes/admin/class-wc-admin-taxonomies.php:191
 msgid "Remove image"
 msgstr "Ta bort bild"
 
-#: includes/admin/class-wc-admin-taxonomies.php:128
-#: includes/admin/class-wc-admin-taxonomies.php:215
+#: includes/admin/class-wc-admin-taxonomies.php:125
+#: includes/admin/class-wc-admin-taxonomies.php:212
 msgid "Use image"
 msgstr "Använd bild"
 
-#: includes/admin/class-wc-admin-taxonomies.php:273
+#: includes/admin/class-wc-admin-taxonomies.php:270
 msgid ""
 "Product categories for your store can be managed here. To change the order "
 "of categories on the front-end you can drag and drop to sort them. To see "
@@ -1165,14 +1166,14 @@ msgid ""
 "page."
 msgstr "Produktkategorier för din webbutik kan hanteras här. För att ändra ordning av visningen av kategorierna för kunden kan du dra och släppa för att sortera. För att se fler kategorier klicka på \"skärminställningar\" längst upp på sidan."
 
-#: includes/admin/class-wc-admin-taxonomies.php:283
+#: includes/admin/class-wc-admin-taxonomies.php:280
 msgid ""
 "Shipping classes can be used to group products of similar type. These groups"
 " can then be used by certain shipping methods to provide different rates to "
 "different products."
 msgstr "Fraktklasser kan användas för att gruppera liknande produkter. Dessa grupper kan sen användas av olika fraktmetoder för att ge olika lösningar/prisförlsag för frakt."
 
-#: includes/admin/class-wc-admin-taxonomies.php:296
+#: includes/admin/class-wc-admin-taxonomies.php:293
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:244
 msgid "Image"
 msgstr "Bild"
@@ -3768,8 +3769,7 @@ msgid "Automatically generate customer password"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:25
-#: includes/admin/settings/class-wc-settings-checkout.php:78
-#: includes/admin/views/html-admin-page-status-report.php:297
+msgctxt "Settings tab label"
 msgid "Checkout"
 msgstr "Till kassan"
 
@@ -3792,6 +3792,11 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-checkout.php:73
 msgid "Coupons can be applied from the cart and checkout pages."
 msgstr ""
+
+#: includes/admin/settings/class-wc-settings-checkout.php:78
+#: includes/admin/views/html-admin-page-status-report.php:297
+msgid "Checkout"
+msgstr "Till kassan"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:79
 msgid "Enable guest checkout"
@@ -3867,7 +3872,7 @@ msgstr "Order mottagen"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:168
 msgid "Add Payment Method"
-msgstr ""
+msgstr "Lägg till betalningsmetod"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:169
 msgid "Endpoint for the Checkout &rarr; Add Payment Method page"

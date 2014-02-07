@@ -1,20 +1,20 @@
 # 
 # Translators:
-# Geert De Deckere <geertdd@gmail.com>, 2013-2014
-# Ramon van Belzen <ramoonus@zeelandnet.nl>, 2013-2014
+# coenjacobs <coen@woothemes.com>, 2013
 # stgoos, 2013
+# sylvie_janssens <sylvie_janssens@yahoo.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-01-30 15:25:39+00:00\n"
-"PO-Revision-Date: 2014-01-30 15:29+0000\n"
+"POT-Creation-Date: 2014-02-06 15:46:00+00:00\n"
+"PO-Revision-Date: 2014-02-07 10:26+0000\n"
 "Last-Translator: mikejolley <mike.jolley@me.com>\n"
-"Language-Team: Dutch (http://www.transifex.com/projects/p/woocommerce-core/language/nl/)\n"
+"Language-Team: Dutch (Netherlands) (http://www.transifex.com/projects/p/woocommerce-core/language/nl_NL/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: nl\n"
+"Language: nl_NL\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: includes/admin/class-wc-admin-assets.php:65
@@ -186,8 +186,8 @@ msgid "Last warning, are you sure?"
 msgstr "Laatste waarschuwing, weet u het zeker?"
 
 #: includes/admin/class-wc-admin-assets.php:208
-#: includes/admin/class-wc-admin-taxonomies.php:126
-#: includes/admin/class-wc-admin-taxonomies.php:213
+#: includes/admin/class-wc-admin-taxonomies.php:123
+#: includes/admin/class-wc-admin-taxonomies.php:210
 msgid "Choose an image"
 msgstr "Kies een afbeelding"
 
@@ -364,7 +364,7 @@ msgstr "Weet u zeker dat u deze eigenschap wilt verwijderen?"
 
 #: includes/admin/class-wc-admin-dashboard.php:35
 msgid "WooCommerce Recent Reviews"
-msgstr "WooCommerce Recente Reviews"
+msgstr "WooCommerce recente reviews"
 
 #: includes/admin/class-wc-admin-dashboard.php:38
 #: includes/admin/class-wc-admin-menus.php:80
@@ -405,7 +405,7 @@ msgstr[1] ""
 
 #: includes/admin/class-wc-admin-dashboard.php:193
 msgid "out of 5"
-msgstr "van de 5"
+msgstr "van 5"
 
 #: includes/admin/class-wc-admin-dashboard.php:195
 msgid "reviewed by"
@@ -612,8 +612,8 @@ msgid "product"
 msgstr "product"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:113
-#: includes/admin/class-wc-admin-taxonomies.php:91
-#: includes/admin/class-wc-admin-taxonomies.php:180
+#: includes/admin/class-wc-admin-taxonomies.php:88
+#: includes/admin/class-wc-admin-taxonomies.php:177
 #: includes/admin/settings/class-wc-settings-checkout.php:226
 #: includes/admin/settings/class-wc-settings-shipping.php:202
 #: includes/admin/views/html-admin-page-status-report.php:70
@@ -789,7 +789,7 @@ msgstr "Adres 2"
 #: includes/admin/settings/class-wc-settings-tax.php:256
 #: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "City"
-msgstr "Gemeente"
+msgstr "Plaats"
 
 #: includes/admin/class-wc-admin-profile.php:72
 #: includes/admin/class-wc-admin-profile.php:121
@@ -925,7 +925,7 @@ msgstr "Lage voorraad"
 #: includes/admin/views/html-bulk-edit-product.php:195
 #: includes/admin/views/html-quick-edit-product.php:138
 msgid "Out of stock"
-msgstr "Uitverkocht"
+msgstr "Niet in voorraad"
 
 #: includes/admin/class-wc-admin-reports.php:107
 msgid "Most Stocked"
@@ -1117,50 +1117,50 @@ msgid ""
 " rates, use with caution."
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:89
-#: includes/admin/class-wc-admin-taxonomies.php:177
+#: includes/admin/class-wc-admin-taxonomies.php:86
+#: includes/admin/class-wc-admin-taxonomies.php:174
 msgid "Display type"
 msgstr "Weergavetype:"
 
-#: includes/admin/class-wc-admin-taxonomies.php:92
-#: includes/admin/class-wc-admin-taxonomies.php:181
+#: includes/admin/class-wc-admin-taxonomies.php:89
+#: includes/admin/class-wc-admin-taxonomies.php:178
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:97
 #: includes/admin/settings/class-wc-settings-products.php:25
 #: includes/admin/views/html-admin-page-addons.php:15
 msgid "Products"
 msgstr "Producten"
 
-#: includes/admin/class-wc-admin-taxonomies.php:93
-#: includes/admin/class-wc-admin-taxonomies.php:182
+#: includes/admin/class-wc-admin-taxonomies.php:90
+#: includes/admin/class-wc-admin-taxonomies.php:179
 msgid "Subcategories"
 msgstr "Subcategorieën"
 
-#: includes/admin/class-wc-admin-taxonomies.php:94
-#: includes/admin/class-wc-admin-taxonomies.php:183
+#: includes/admin/class-wc-admin-taxonomies.php:91
+#: includes/admin/class-wc-admin-taxonomies.php:180
 msgid "Both"
 msgstr "Beide"
 
-#: includes/admin/class-wc-admin-taxonomies.php:98
-#: includes/admin/class-wc-admin-taxonomies.php:188
+#: includes/admin/class-wc-admin-taxonomies.php:95
+#: includes/admin/class-wc-admin-taxonomies.php:185
 msgid "Thumbnail"
 msgstr "Previewafbeelding"
 
-#: includes/admin/class-wc-admin-taxonomies.php:102
-#: includes/admin/class-wc-admin-taxonomies.php:193
+#: includes/admin/class-wc-admin-taxonomies.php:99
+#: includes/admin/class-wc-admin-taxonomies.php:190
 msgid "Upload/Add image"
 msgstr "Upload afbeelding"
 
-#: includes/admin/class-wc-admin-taxonomies.php:103
-#: includes/admin/class-wc-admin-taxonomies.php:194
+#: includes/admin/class-wc-admin-taxonomies.php:100
+#: includes/admin/class-wc-admin-taxonomies.php:191
 msgid "Remove image"
 msgstr "Afbeelding verwijderen"
 
-#: includes/admin/class-wc-admin-taxonomies.php:128
-#: includes/admin/class-wc-admin-taxonomies.php:215
+#: includes/admin/class-wc-admin-taxonomies.php:125
+#: includes/admin/class-wc-admin-taxonomies.php:212
 msgid "Use image"
 msgstr "Gebruik afbeelding"
 
-#: includes/admin/class-wc-admin-taxonomies.php:273
+#: includes/admin/class-wc-admin-taxonomies.php:270
 msgid ""
 "Product categories for your store can be managed here. To change the order "
 "of categories on the front-end you can drag and drop to sort them. To see "
@@ -1168,14 +1168,14 @@ msgid ""
 "page."
 msgstr "U kunt hier de productcategorieën voor uw winkel beheren. Om de volgorde van de categorieën te wijzigen kunt u de categorie gewoon verplaatsen door te slepen. Om meer categorieën per pagina te zien kunt u de scherminstellingen wijzigen rechtsbovenaan."
 
-#: includes/admin/class-wc-admin-taxonomies.php:283
+#: includes/admin/class-wc-admin-taxonomies.php:280
 msgid ""
 "Shipping classes can be used to group products of similar type. These groups"
 " can then be used by certain shipping methods to provide different rates to "
 "different products."
 msgstr "Verzendingsklassen kunnen gebruikt worden om gelijkaardige producten te groeperen. Deze groepen kunnen dan gebruikt worden door bepaalde verzendmethodes om verschillende tarieven aan te rekenen voor verschillende producten."
 
-#: includes/admin/class-wc-admin-taxonomies.php:296
+#: includes/admin/class-wc-admin-taxonomies.php:293
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:244
 msgid "Image"
 msgstr "Afbeelding"
@@ -1773,7 +1773,7 @@ msgstr "Nee"
 #: includes/admin/views/html-bulk-edit-product.php:194
 #: includes/admin/views/html-quick-edit-product.php:137
 msgid "In stock"
-msgstr "Op voorraad"
+msgstr "In voorraad"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:501
 msgid "Sort Products"
@@ -1805,7 +1805,7 @@ msgstr "Simpel product"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:53
 msgid "Coupon code"
-msgstr "Code kortingsbon"
+msgstr "Coupon code"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:66
 msgid "Description (optional)"
@@ -1882,7 +1882,7 @@ msgstr "Klantbericht"
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:97
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:101
 msgid "Order Notes"
-msgstr "Opmerkingen bij bestelling"
+msgstr "Opmerkingen bij uw bestelling"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:99
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:43
@@ -1948,7 +1948,7 @@ msgstr "Tel:"
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:277
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:169
 msgid "Guest"
-msgstr "Bezoeker"
+msgstr "Gast"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:281
 msgid "%s by %s"
@@ -2302,7 +2302,7 @@ msgstr "Telefoon"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:139
 msgid "Order Details"
-msgstr "Bestellingsinfo"
+msgstr "Bestelgegevens"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:142
 msgid "Order number"
@@ -2369,7 +2369,7 @@ msgstr "Betalingsmethode:"
 #: includes/admin/post-types/meta-boxes/views/html-order-shipping.php:12
 #: includes/admin/post-types/meta-boxes/views/html-order-tax.php:8
 msgid "N/A"
-msgstr "N.B."
+msgstr "niet beschikbaar"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:245
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:247
@@ -2436,7 +2436,7 @@ msgstr "Aantal"
 #: includes/admin/settings/class-wc-settings-tax.php:550
 #: includes/admin/settings/class-wc-settings-tax.php:643
 msgid "Tax"
-msgstr "Btw"
+msgstr "Belasting"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:83
 msgid "Delete Lines"
@@ -2472,7 +2472,7 @@ msgstr "door %s"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:46
 msgid "Delete note"
-msgstr "Notitie verwijderen"
+msgstr "Verwijder opmerking"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:52
 msgid "There are no notes for this order yet."
@@ -2490,7 +2490,7 @@ msgstr "Voeg een opmerking toe voor je referentie of voeg een klanten opmerking 
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:64
 msgid "Customer note"
-msgstr "Klantbericht"
+msgstr "Klant opmerking"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:65
 msgid "Private note"
@@ -2535,7 +2535,7 @@ msgstr "Bestelling korting"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:120
 msgid "Order Total"
-msgstr "Totaal van de bestelling"
+msgstr "Bestelling totaal"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:148
 msgid "Calculate Tax"
@@ -2717,7 +2717,7 @@ msgstr "Muziek"
 #: includes/admin/views/html-bulk-edit-product.php:58
 #: includes/admin/views/html-quick-edit-product.php:38
 msgid "Tax Status"
-msgstr "Btw-status"
+msgstr "Belasting status"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:250
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:34
@@ -3128,7 +3128,7 @@ msgstr "Toevoegen&nbsp;meta"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
 msgid "Subtotal"
-msgstr "subtotaal"
+msgstr "Subtotaal"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
 msgid "Before pre-tax discounts."
@@ -3238,7 +3238,7 @@ msgstr "Verzendklasse:"
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:120
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:133
 msgid "Same as parent"
-msgstr "Zelfde als ouder"
+msgstr "Zelfde als bovenliggende"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:131
 msgid "Tax class:"
@@ -3771,8 +3771,7 @@ msgid "Automatically generate customer password"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:25
-#: includes/admin/settings/class-wc-settings-checkout.php:78
-#: includes/admin/views/html-admin-page-status-report.php:297
+msgctxt "Settings tab label"
 msgid "Checkout"
 msgstr "Afrekenen"
 
@@ -3786,7 +3785,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:68
 msgid "Coupons"
-msgstr "Kortingsbonnen"
+msgstr "Coupons"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:69
 msgid "Enable the use of coupons"
@@ -3795,6 +3794,11 @@ msgstr "Kortingsbonnen inschakelen"
 #: includes/admin/settings/class-wc-settings-checkout.php:73
 msgid "Coupons can be applied from the cart and checkout pages."
 msgstr "Coupons kunnen toegepast worden vanaf de winkelwagen en afrekenen pagina's."
+
+#: includes/admin/settings/class-wc-settings-checkout.php:78
+#: includes/admin/views/html-admin-page-status-report.php:297
+msgid "Checkout"
+msgstr "Afrekenen"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:79
 msgid "Enable guest checkout"
@@ -3857,7 +3861,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:150
 msgid "Pay"
-msgstr "Betaal"
+msgstr "Betalen"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:151
 #: includes/admin/settings/class-wc-settings-checkout.php:160
@@ -4045,7 +4049,7 @@ msgstr "Winkel melding tekst"
 msgid ""
 "This is a demo store for testing purposes &mdash; no orders shall be "
 "fulfilled."
-msgstr "Dit is een demowinkel, voor test doeleinden. Bestellingen worden niet afgehandeld."
+msgstr "Dit is een demo winkel voor testdoeleinden &mdash; bestellingen zullen niet worden voldaan."
 
 #: includes/admin/settings/class-wc-settings-general.php:103
 msgid "API"
@@ -5136,7 +5140,7 @@ msgstr "Winkelwagen"
 
 #: includes/admin/views/html-admin-page-status-report.php:301
 msgid "My Account"
-msgstr "Mijn Account"
+msgstr "Mijn account"
 
 #: includes/admin/views/html-admin-page-status-report.php:321
 msgid "Page not set"

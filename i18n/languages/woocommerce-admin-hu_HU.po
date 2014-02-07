@@ -1,13 +1,14 @@
 # 
 # Translators:
+# joesalty <joesalty77@gmail.com>, 2014
 # SzLegradi <szabolcs.legradi@gmail.com>, 2013
 # SzLegradi <szabolcs.legradi@gmail.com>, 2013
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-01-30 15:25:39+00:00\n"
-"PO-Revision-Date: 2014-01-30 15:29+0000\n"
+"POT-Creation-Date: 2014-02-06 15:46:00+00:00\n"
+"PO-Revision-Date: 2014-02-07 08:41+0000\n"
 "Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: Hungarian (Hungary) (http://www.transifex.com/projects/p/woocommerce-core/language/hu_HU/)\n"
 "MIME-Version: 1.0\n"
@@ -185,8 +186,8 @@ msgid "Last warning, are you sure?"
 msgstr "Utolsó figyelmeztetés, biztos vagy benne?"
 
 #: includes/admin/class-wc-admin-assets.php:208
-#: includes/admin/class-wc-admin-taxonomies.php:126
-#: includes/admin/class-wc-admin-taxonomies.php:213
+#: includes/admin/class-wc-admin-taxonomies.php:123
+#: includes/admin/class-wc-admin-taxonomies.php:210
 msgid "Choose an image"
 msgstr "Válassz egy képet"
 
@@ -611,8 +612,8 @@ msgid "product"
 msgstr "termek"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:113
-#: includes/admin/class-wc-admin-taxonomies.php:91
-#: includes/admin/class-wc-admin-taxonomies.php:180
+#: includes/admin/class-wc-admin-taxonomies.php:88
+#: includes/admin/class-wc-admin-taxonomies.php:177
 #: includes/admin/settings/class-wc-settings-checkout.php:226
 #: includes/admin/settings/class-wc-settings-shipping.php:202
 #: includes/admin/views/html-admin-page-status-report.php:70
@@ -1007,7 +1008,7 @@ msgstr "Minden hiányzó WooCommerce oldal sikeresen telepítve."
 
 #: includes/admin/class-wc-admin-status.php:137
 msgid "Tax rates successfully deleted"
-msgstr ""
+msgstr "Adókulcsok sikeresen törölve"
 
 #: includes/admin/class-wc-admin-status.php:146
 msgid "There was an error calling %s::%s"
@@ -1085,7 +1086,7 @@ msgstr "Munkamenetek törlése"
 msgid ""
 "<strong class=\"red\">Warning:</strong> This tool will delete all customer "
 "session data from the database, including any current live carts."
-msgstr ""
+msgstr "<strong class=\"red\">Figyelmeztetés:</strong> Ez az eszköz minden vásárlói munkamenetet törölni fog az adatbázisból, beleértve a jelenlegi, élő kosarakat is."
 
 #: includes/admin/class-wc-admin-status.php:198
 #: includes/admin/views/html-notice-install.php:6
@@ -1100,66 +1101,66 @@ msgstr "Oldalak telepítése"
 msgid ""
 "<strong class=\"red\">Note:</strong> This tool will install all the missing "
 "WooCommerce pages. Pages already defined and set up will not be replaced."
-msgstr ""
+msgstr "<strong class=\"red\">Megjegyzés:</strong> Ez az eszköz telepíteni fogja az összes hiányzó WooCommerce oldalt. A már beállított oldalak nem fognak felülíródni."
 
 #: includes/admin/class-wc-admin-status.php:203
 msgid "Delete all WooCommerce tax rates"
-msgstr ""
+msgstr "Minden WooCommerce adókulcs törlése"
 
 #: includes/admin/class-wc-admin-status.php:204
 msgid "Delete ALL tax rates"
-msgstr ""
+msgstr "MINDEN adókulcs törlése"
 
 #: includes/admin/class-wc-admin-status.php:205
 msgid ""
 "<strong class=\"red\">Note:</strong> This option will delete ALL of your tax"
 " rates, use with caution."
-msgstr ""
+msgstr "<strong class=\"red\">Megjegyzés:</strong> Ez az opció törli az ÖSSZES adókulcsot, használja óvatosan!"
 
-#: includes/admin/class-wc-admin-taxonomies.php:89
-#: includes/admin/class-wc-admin-taxonomies.php:177
+#: includes/admin/class-wc-admin-taxonomies.php:86
+#: includes/admin/class-wc-admin-taxonomies.php:174
 msgid "Display type"
 msgstr "Megjelenítési mód"
 
-#: includes/admin/class-wc-admin-taxonomies.php:92
-#: includes/admin/class-wc-admin-taxonomies.php:181
+#: includes/admin/class-wc-admin-taxonomies.php:89
+#: includes/admin/class-wc-admin-taxonomies.php:178
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:97
 #: includes/admin/settings/class-wc-settings-products.php:25
 #: includes/admin/views/html-admin-page-addons.php:15
 msgid "Products"
 msgstr "Termékek"
 
-#: includes/admin/class-wc-admin-taxonomies.php:93
-#: includes/admin/class-wc-admin-taxonomies.php:182
+#: includes/admin/class-wc-admin-taxonomies.php:90
+#: includes/admin/class-wc-admin-taxonomies.php:179
 msgid "Subcategories"
 msgstr "Alkategóriák"
 
-#: includes/admin/class-wc-admin-taxonomies.php:94
-#: includes/admin/class-wc-admin-taxonomies.php:183
+#: includes/admin/class-wc-admin-taxonomies.php:91
+#: includes/admin/class-wc-admin-taxonomies.php:180
 msgid "Both"
 msgstr "Mindkettő"
 
-#: includes/admin/class-wc-admin-taxonomies.php:98
-#: includes/admin/class-wc-admin-taxonomies.php:188
+#: includes/admin/class-wc-admin-taxonomies.php:95
+#: includes/admin/class-wc-admin-taxonomies.php:185
 msgid "Thumbnail"
 msgstr "Bélyegkép"
 
-#: includes/admin/class-wc-admin-taxonomies.php:102
-#: includes/admin/class-wc-admin-taxonomies.php:193
+#: includes/admin/class-wc-admin-taxonomies.php:99
+#: includes/admin/class-wc-admin-taxonomies.php:190
 msgid "Upload/Add image"
 msgstr "Kép feltöltése/hozzáadása"
 
-#: includes/admin/class-wc-admin-taxonomies.php:103
-#: includes/admin/class-wc-admin-taxonomies.php:194
+#: includes/admin/class-wc-admin-taxonomies.php:100
+#: includes/admin/class-wc-admin-taxonomies.php:191
 msgid "Remove image"
 msgstr "Kép eltávolítása"
 
-#: includes/admin/class-wc-admin-taxonomies.php:128
-#: includes/admin/class-wc-admin-taxonomies.php:215
+#: includes/admin/class-wc-admin-taxonomies.php:125
+#: includes/admin/class-wc-admin-taxonomies.php:212
 msgid "Use image"
 msgstr "Kép használata"
 
-#: includes/admin/class-wc-admin-taxonomies.php:273
+#: includes/admin/class-wc-admin-taxonomies.php:270
 msgid ""
 "Product categories for your store can be managed here. To change the order "
 "of categories on the front-end you can drag and drop to sort them. To see "
@@ -1167,14 +1168,14 @@ msgid ""
 "page."
 msgstr "Az üzlet termékkategóriái itt kezelhetők. A kategóriák főoldalon való megjelenítési sorrendjét fogd és vidd módszerrel tudod szabályozni. Több kategória listázásához kattints a \"Képernyő beállításai\" linkre az oldal tetején."
 
-#: includes/admin/class-wc-admin-taxonomies.php:283
+#: includes/admin/class-wc-admin-taxonomies.php:280
 msgid ""
 "Shipping classes can be used to group products of similar type. These groups"
 " can then be used by certain shipping methods to provide different rates to "
 "different products."
 msgstr "A szállítási osztályok hasonló típusú termékek csoportosítására alkalmasak. Ezek a csoportok később felhasználhatók az egyes szállítási módoknál, hogy különböző termékekhez különböző szállítási díjakat állíthass be."
 
-#: includes/admin/class-wc-admin-taxonomies.php:296
+#: includes/admin/class-wc-admin-taxonomies.php:293
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:244
 msgid "Image"
 msgstr "Kép"
@@ -1551,17 +1552,17 @@ msgstr "Fájl feltöltése és importálása"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:103
 msgid "Product Image"
-msgstr ""
+msgstr "Termék kép"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:105
 msgid "Remove product image"
-msgstr ""
+msgstr "Termék kép eltávolítása"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:107
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:121
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:122
 msgid "Set product image"
-msgstr ""
+msgstr "Termék kép beállítása"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:136
 msgid "Product name"
@@ -1932,8 +1933,8 @@ msgstr[1] "plusz %d egyéb megjegyzés"
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:206
 msgid "%d note"
 msgid_plural "%d notes"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%d megjegyzés"
+msgstr[1] "%d megjegyzések"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:228
 msgid "Billing:"
@@ -1997,11 +1998,11 @@ msgstr[1] "%s rendelés állapota megváltoztatva."
 
 #: includes/admin/post-types/class-wc-admin-cpt.php:42
 msgid "Insert into %s"
-msgstr ""
+msgstr "%sbe beillesztése"
 
 #: includes/admin/post-types/class-wc-admin-cpt.php:43
 msgid "Uploaded to this %s"
-msgstr ""
+msgstr "Feltöltve ebba a %s"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:93
 msgid "Product Short Description"
@@ -3482,7 +3483,7 @@ msgstr "%s eladás - %s"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:156
 msgid "Select categories&hellip;"
-msgstr ""
+msgstr "Válassz kategóriákat&hellip;"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:171
 msgid "All"
@@ -3617,7 +3618,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:116
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:112
 msgid "Total Tax"
-msgstr ""
+msgstr "Összes adó"
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:116
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:112
@@ -3770,8 +3771,7 @@ msgid "Automatically generate customer password"
 msgstr "Jelszó automatikus létrehozása"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:25
-#: includes/admin/settings/class-wc-settings-checkout.php:78
-#: includes/admin/views/html-admin-page-status-report.php:297
+msgctxt "Settings tab label"
 msgid "Checkout"
 msgstr "Pénztár"
 
@@ -3794,6 +3794,11 @@ msgstr "Kuponok használatának engedélyezése"
 #: includes/admin/settings/class-wc-settings-checkout.php:73
 msgid "Coupons can be applied from the cart and checkout pages."
 msgstr "A kuponok a kosár és pénztár oldalakon használhatók fel."
+
+#: includes/admin/settings/class-wc-settings-checkout.php:78
+#: includes/admin/views/html-admin-page-status-report.php:297
+msgid "Checkout"
+msgstr "Pénztár"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:79
 msgid "Enable guest checkout"

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-01-30 15:25:39+00:00\n"
-"PO-Revision-Date: 2014-01-30 15:53+0000\n"
+"POT-Creation-Date: 2014-02-06 15:46:00+00:00\n"
+"PO-Revision-Date: 2014-02-07 08:59+0000\n"
 "Last-Translator: TRFlavourart <vaporsbazar@gmail.com>\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/projects/p/woocommerce-core/language/tr_TR/)\n"
 "MIME-Version: 1.0\n"
@@ -185,8 +185,8 @@ msgid "Last warning, are you sure?"
 msgstr "Son uyarı! Emin misiniz?"
 
 #: includes/admin/class-wc-admin-assets.php:208
-#: includes/admin/class-wc-admin-taxonomies.php:126
-#: includes/admin/class-wc-admin-taxonomies.php:213
+#: includes/admin/class-wc-admin-taxonomies.php:123
+#: includes/admin/class-wc-admin-taxonomies.php:210
 msgid "Choose an image"
 msgstr "Bir resim seç"
 
@@ -221,7 +221,7 @@ msgstr "“%s” kısa ismi çok uzun (maksimum 28 karakter). Lütfen kısaltın
 #: includes/admin/class-wc-admin-attributes.php:86
 msgid ""
 "Slug “%s” is not allowed because it is a reserved term. Change it, please."
-msgstr "“%s” kısa ismine izin verilmiyor çünkü bu, rezerve edilmiş bir koşul. Lütfen değiştirin."
+msgstr "“%s” kısa ismine izin verilmiyor çünkü bu, rezerve edilmiş bir kural. Lütfen değiştirin."
 
 #: includes/admin/class-wc-admin-attributes.php:91
 #: includes/admin/class-wc-admin-attributes.php:96
@@ -273,12 +273,12 @@ msgid ""
 "products -> product data -> attributes -> values, <strong>Text</strong> "
 "allows manual entry whereas <strong>select</strong> allows pre-configured "
 "terms in a drop-down list."
-msgstr "Ürünler için nasıl seçenek seçeceğinizi belirler. Admin Paneli -> Ürünler -> Ürün Bilgisi -> Seçenekler -> Ekle -> Değerler altında açılan bir listeden önceden yapılandırılmış koşullar <strong>seçilirken</strong> <strong>Metin</strong> elle girilmesine izin verir."
+msgstr "Ürünler için nasıl seçenek seçeceğinizi belirler. Admin Paneli -> Ürünler -> Ürün Bilgisi -> Seçenekler -> Ekle -> Değerler altında açılan bir listeden önceden yapılandırılmış kurallar<strong>seçilirken</strong> <strong>Metin</strong> elle girilmesine olanak sağlar."
 
 #: includes/admin/class-wc-admin-attributes.php:270
 #: includes/admin/class-wc-admin-attributes.php:396
 msgid "Default sort order"
-msgstr "Varsayılan sıralama düzeni"
+msgstr "Varsayılan Sıralama Düzeni"
 
 #: includes/admin/class-wc-admin-attributes.php:274
 #: includes/admin/class-wc-admin-attributes.php:336
@@ -290,14 +290,14 @@ msgstr "Özel sıralama"
 #: includes/admin/class-wc-admin-attributes.php:333
 #: includes/admin/class-wc-admin-attributes.php:400
 msgid "Term ID"
-msgstr "Koşul Kimliği"
+msgstr "Kural kimliği"
 
 #: includes/admin/class-wc-admin-attributes.php:278
 #: includes/admin/class-wc-admin-attributes.php:402
 msgid ""
 "Determines the sort order of the terms on the frontend shop product pages. "
 "If using custom ordering, you can drag and drop the terms in this attribute."
-msgstr "Mağaza ürün sayfalarında koşulların sıralama düzenini belirler.Eğer özel sıralama düzeni kullanılacaksa bu seçeneğin içine koşulları sürükleyip bırakabilirsiniz."
+msgstr "Mağaza ürün sayfalarında kuralların sıralama düzenini belirler.Eğer özel sıralama düzeni kullanılacaksa bu seçeneğin içine kuralları sürükleyip bırakabilirsiniz."
 
 #: includes/admin/class-wc-admin-attributes.php:283
 msgid "Update"
@@ -315,7 +315,7 @@ msgstr "Sıralama"
 
 #: includes/admin/class-wc-admin-attributes.php:311
 msgid "Terms"
-msgstr "Koşullar"
+msgstr "Kurallar"
 
 #: includes/admin/class-wc-admin-attributes.php:323
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:171
@@ -336,7 +336,7 @@ msgstr "Sil"
 
 #: includes/admin/class-wc-admin-attributes.php:356
 msgid "Configure terms"
-msgstr "Koşulları yapılandır"
+msgstr "Kuralları yapılandır"
 
 #: includes/admin/class-wc-admin-attributes.php:360
 msgid "No attributes currently exist."
@@ -363,7 +363,7 @@ msgstr "Bu seçeneği silmek istediğinizden emin misiniz?"
 
 #: includes/admin/class-wc-admin-dashboard.php:35
 msgid "WooCommerce Recent Reviews"
-msgstr "WooCommerce- Son Yorumlar"
+msgstr "WooCommerce Son Yorumlar"
 
 #: includes/admin/class-wc-admin-dashboard.php:38
 #: includes/admin/class-wc-admin-menus.php:80
@@ -607,8 +607,8 @@ msgid "product"
 msgstr "urun"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:113
-#: includes/admin/class-wc-admin-taxonomies.php:91
-#: includes/admin/class-wc-admin-taxonomies.php:180
+#: includes/admin/class-wc-admin-taxonomies.php:88
+#: includes/admin/class-wc-admin-taxonomies.php:177
 #: includes/admin/settings/class-wc-settings-checkout.php:226
 #: includes/admin/settings/class-wc-settings-shipping.php:202
 #: includes/admin/views/html-admin-page-status-report.php:70
@@ -761,7 +761,7 @@ msgstr "Soyad"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:37
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:84
 msgid "Company"
-msgstr "Şirket"
+msgstr "Firma"
 
 #: includes/admin/class-wc-admin-profile.php:60
 #: includes/admin/class-wc-admin-profile.php:109
@@ -1023,51 +1023,51 @@ msgstr "WooCommerce Çerezler"
 
 #: includes/admin/class-wc-admin-status.php:174
 msgid "Clear transients"
-msgstr "Çerezleri temizle"
+msgstr "Çerezleri Temizle"
 
 #: includes/admin/class-wc-admin-status.php:175
 msgid "This tool will clear the product/shop transients cache."
-msgstr "Bu araç ile ürünün/dükkanın geçici çerezleri temizlenir"
+msgstr "Bu araç, ürün / mağaza çerezlerini temizler."
 
 #: includes/admin/class-wc-admin-status.php:178
 msgid "Expired Transients"
-msgstr "Süresi Biten Çerezler"
+msgstr "Süresi Dolan Çerezler"
 
 #: includes/admin/class-wc-admin-status.php:179
 msgid "Clear expired transients"
-msgstr "Süresi Biten Çerezleri temizle"
+msgstr "Süresi Dolan Çerezleri Temizle"
 
 #: includes/admin/class-wc-admin-status.php:180
 msgid "This tool will clear ALL expired transients from Wordpress."
-msgstr "Bu araç ile Wordpress'ten süresi biten çerezler temizlenir."
+msgstr "Bu araç, süresi dolan TÜM çerezleri Wordpress'ten temizler."
 
 #: includes/admin/class-wc-admin-status.php:183
 msgid "Term counts"
-msgstr "Koşul Sayımları"
+msgstr "Kural Hesaplamaları"
 
 #: includes/admin/class-wc-admin-status.php:184
 msgid "Recount terms"
-msgstr "Koşulları tekrar say"
+msgstr "Kuralları Yeniden Hesapla"
 
 #: includes/admin/class-wc-admin-status.php:185
 msgid ""
 "This tool will recount product terms - useful when changing your settings in"
 " a way which hides products from the catalog."
-msgstr "Bu araç, ürün koşullarını yeniden hesaplayacaktır - ürünleri katalogtan gizleme ayarlarınızı değiştirdiğiniz zaman bir bakıma kullanışlıdır."
+msgstr "Bu araç, ürün kurallarını yeniden hesaplayacaktır - ürünleri katalogtan gizleme ayarlarınızı değiştirdiğiniz zaman bir bakıma kullanışlıdır."
 
 #: includes/admin/class-wc-admin-status.php:188
 msgid "Capabilities"
-msgstr "Özellikler"
+msgstr "Kapasiteler"
 
 #: includes/admin/class-wc-admin-status.php:189
 msgid "Reset capabilities"
-msgstr "Özellikleri sıfırla"
+msgstr "Kapasiteleri Sıfırla"
 
 #: includes/admin/class-wc-admin-status.php:190
 msgid ""
 "This tool will reset the admin, customer and shop_manager roles to default. "
 "Use this if your users cannot access all of the WooCommerce admin pages."
-msgstr "Bu araç, müşteri, yönetici ve shop_manager rollerini varsayılana sıfırlar. Kullanıcılar WooCommerce yönetici sayfalarına erişemiyorsa bunu kullanın."
+msgstr "Bu araç, yönetici, müşteri ve mağaza_yöneticisi rollerini varsayılana sıfırlar. Kullanıcılarınız hiç bir WooCommerce yönetici sayfasına erişemiyorlarsa kullanın."
 
 #: includes/admin/class-wc-admin-status.php:193
 msgid "Customer Sessions"
@@ -1075,7 +1075,7 @@ msgstr "Müşteri Oturumları"
 
 #: includes/admin/class-wc-admin-status.php:194
 msgid "Clear all sessions"
-msgstr "Tüm oturumları temizle"
+msgstr "Tüm Oturumları Temizle"
 
 #: includes/admin/class-wc-admin-status.php:195
 msgid ""
@@ -1090,7 +1090,7 @@ msgstr "WooCommerce Sayfalarını Yükle"
 
 #: includes/admin/class-wc-admin-status.php:199
 msgid "Install pages"
-msgstr "Sayfaları yükle"
+msgstr "Sayfaları Yükle"
 
 #: includes/admin/class-wc-admin-status.php:200
 msgid ""
@@ -1100,11 +1100,11 @@ msgstr "<strong class=\"red\">Not:</strong> Bu araç, eksik tüm WooCommerce say
 
 #: includes/admin/class-wc-admin-status.php:203
 msgid "Delete all WooCommerce tax rates"
-msgstr "Tüm WooCommerce vergi oranlarını sil"
+msgstr "Tüm WooCommerce Vergi Oranlarını Sil"
 
 #: includes/admin/class-wc-admin-status.php:204
 msgid "Delete ALL tax rates"
-msgstr "Vergi oranlarının tümünü sil"
+msgstr "Tüm Vergi Oranlarını Sil"
 
 #: includes/admin/class-wc-admin-status.php:205
 msgid ""
@@ -1112,65 +1112,65 @@ msgid ""
 " rates, use with caution."
 msgstr "<strong class=\"red\">Not:</strong> Bu seçenek TÜM vergi oranlarınızı silecek, lütfen dikkatli bir şekilde kullanın."
 
-#: includes/admin/class-wc-admin-taxonomies.php:89
-#: includes/admin/class-wc-admin-taxonomies.php:177
+#: includes/admin/class-wc-admin-taxonomies.php:86
+#: includes/admin/class-wc-admin-taxonomies.php:174
 msgid "Display type"
 msgstr "Görüntüleme Türü"
 
-#: includes/admin/class-wc-admin-taxonomies.php:92
-#: includes/admin/class-wc-admin-taxonomies.php:181
+#: includes/admin/class-wc-admin-taxonomies.php:89
+#: includes/admin/class-wc-admin-taxonomies.php:178
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:97
 #: includes/admin/settings/class-wc-settings-products.php:25
 #: includes/admin/views/html-admin-page-addons.php:15
 msgid "Products"
 msgstr "Ürünler"
 
-#: includes/admin/class-wc-admin-taxonomies.php:93
-#: includes/admin/class-wc-admin-taxonomies.php:182
+#: includes/admin/class-wc-admin-taxonomies.php:90
+#: includes/admin/class-wc-admin-taxonomies.php:179
 msgid "Subcategories"
 msgstr "Alt Kategoriler"
 
-#: includes/admin/class-wc-admin-taxonomies.php:94
-#: includes/admin/class-wc-admin-taxonomies.php:183
+#: includes/admin/class-wc-admin-taxonomies.php:91
+#: includes/admin/class-wc-admin-taxonomies.php:180
 msgid "Both"
 msgstr "İkiside"
 
-#: includes/admin/class-wc-admin-taxonomies.php:98
-#: includes/admin/class-wc-admin-taxonomies.php:188
+#: includes/admin/class-wc-admin-taxonomies.php:95
+#: includes/admin/class-wc-admin-taxonomies.php:185
 msgid "Thumbnail"
 msgstr "Küçük Resim"
 
-#: includes/admin/class-wc-admin-taxonomies.php:102
-#: includes/admin/class-wc-admin-taxonomies.php:193
+#: includes/admin/class-wc-admin-taxonomies.php:99
+#: includes/admin/class-wc-admin-taxonomies.php:190
 msgid "Upload/Add image"
 msgstr "Resim Yükle / Ekle"
 
-#: includes/admin/class-wc-admin-taxonomies.php:103
-#: includes/admin/class-wc-admin-taxonomies.php:194
+#: includes/admin/class-wc-admin-taxonomies.php:100
+#: includes/admin/class-wc-admin-taxonomies.php:191
 msgid "Remove image"
 msgstr "Resmi sil"
 
-#: includes/admin/class-wc-admin-taxonomies.php:128
-#: includes/admin/class-wc-admin-taxonomies.php:215
+#: includes/admin/class-wc-admin-taxonomies.php:125
+#: includes/admin/class-wc-admin-taxonomies.php:212
 msgid "Use image"
 msgstr "Resmi kullan"
 
-#: includes/admin/class-wc-admin-taxonomies.php:273
+#: includes/admin/class-wc-admin-taxonomies.php:270
 msgid ""
 "Product categories for your store can be managed here. To change the order "
 "of categories on the front-end you can drag and drop to sort them. To see "
 "more categories listed click the \"screen options\" link at the top of the "
 "page."
-msgstr "Mağaza ürün kategorileri burada yönetilebilir. Kategorilerin sırasını değiştirmek için aşağı-yukarı sürükleyin ve bunları sıralamak için bırakın. Daha fazla kategori listelemek için sayfasının üst kısmındaki  \"screen options\" linkine tıklayın."
+msgstr "Mağazanız için ürün kategorileri burada yönetilebilir. Ön sayfada ve yönetici sayfasında kategorilerin sıralamasını değiştirmek için sürükleyip bırakabilirsiniz. Listelenmiş daha fazla kategori görmek için sayfasının üst kısmındaki  \"Ekran Tercihleri\" bağlantısına tıklayın."
 
-#: includes/admin/class-wc-admin-taxonomies.php:283
+#: includes/admin/class-wc-admin-taxonomies.php:280
 msgid ""
 "Shipping classes can be used to group products of similar type. These groups"
 " can then be used by certain shipping methods to provide different rates to "
 "different products."
 msgstr "Kargo sınıfları, benzer tipteki gruplandırılmış ürünler için kullanılabilir. Bu gruplar daha sonra belirli kargo metodları aracılığıyla farklı ürünlere farklı oranlar şart  koşmak için kullanılabilir."
 
-#: includes/admin/class-wc-admin-taxonomies.php:296
+#: includes/admin/class-wc-admin-taxonomies.php:293
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:244
 msgid "Image"
 msgstr "Resim"
@@ -1812,13 +1812,13 @@ msgstr "Kod"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:78
 msgid "Coupon type"
-msgstr "Kupon türü"
+msgstr "Kupon Türü"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:79
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:66
 #: includes/admin/reports/class-wc-report-sales-by-date.php:320
 msgid "Coupon amount"
-msgstr "Kupon miktarı"
+msgstr "Kupon Tutarı"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:80
 msgid "Description"
@@ -1834,7 +1834,7 @@ msgstr "Kullanım / Limit"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:83
 msgid "Expiry date"
-msgstr "Sok kullanma tarihi"
+msgstr "Son Kullanma Tarihi"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:102
 msgid "Edit coupon"
@@ -1864,7 +1864,7 @@ msgstr "Sipariş"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:93
 msgid "Purchased"
-msgstr "Satın alınan"
+msgstr "Satın Alınan"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:94
 msgid "Ship to"
@@ -2130,7 +2130,7 @@ msgid ""
 "Check this box if the coupon should not apply to items on sale. Per-item "
 "coupons will only work if the item is not on sale. Per-cart coupons will "
 "only work if there are no sale items in the cart."
-msgstr "Eğer kuponun, indirimdeki öğelere uygulanmaması gerekiyorsa bu kutucuğu işaretleyin. Her bir öğe kuponu, yalnızca öğe indirimde değilse çalışacaktır. Her bir sepet kuponu, yalnızca sepette indirim öğesi bulunmuyorsa çalışacaktır."
+msgstr "Eğer kuponun indirimdeki öğelere uygulanmaması gerekiyorsa bu kutucuğu işaretleyin. Her bir ürün kuponu, yalnızca ürün indirimde değilse çalışacaktır. Her bir sepet kuponu, yalnızca sepette indirim öğesi bulunmuyorsa çalışacaktır."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:98
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:95
@@ -2162,7 +2162,7 @@ msgstr "Bu kuponu kullanmak için sepette olmaması gereken ürünler veya hangi
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:137
 msgid "Product categories"
-msgstr "Ürün Kategorileri"
+msgstr "Ürün kategorileri"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:138
 msgid "Any category"
@@ -2190,7 +2190,7 @@ msgstr "Kuponun geçerli kalması için bu kategorideki bir ürün olmamalı vey
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:168
 msgid "Email restrictions"
-msgstr "E-Posta kısıtlaması"
+msgstr "E-posta kısıtlamaları"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:168
 msgid "No restrictions"
@@ -2297,7 +2297,7 @@ msgstr "Sipariş Detayları"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:142
 msgid "Order number"
-msgstr "Sipariş numarası"
+msgstr "Sipariş No:"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:145
 msgid "Customer IP:"
@@ -2309,7 +2309,7 @@ msgstr "Genel Bilgiler"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:152
 msgid "Order date:"
-msgstr "Sipariş tarihi:"
+msgstr "Sipariş Tarihi:"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:153
 msgid "h"
@@ -2322,7 +2322,7 @@ msgstr "m"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:156
 msgid "Order status:"
-msgstr "Sipariş durumu:"
+msgstr "Sipariş Durumu:"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:167
 msgid "Customer:"
@@ -2463,7 +2463,7 @@ msgstr "%s tarafından"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:46
 msgid "Delete note"
-msgstr "Notu SiL"
+msgstr "Notu Sil"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:52
 msgid "There are no notes for this order yet."
@@ -2471,7 +2471,7 @@ msgstr "Bu sipariş için henüz bir not bulunmuyor."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:58
 msgid "Add note"
-msgstr "Not ekle"
+msgstr "Not Ekle"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:58
 msgid ""
@@ -2481,7 +2481,7 @@ msgstr "Örnek olarak bir not ekleyin veya bir müşteri notu ekleyin (kullanıc
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:64
 msgid "Customer note"
-msgstr "Müşteri Notu"
+msgstr "Müşteri notu"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:65
 msgid "Private note"
@@ -2534,7 +2534,7 @@ msgstr "Vergi Hesapla"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:150
 msgid "Calculate Total"
-msgstr "Toplam Hesapla"
+msgstr "Toplamı Hesapla"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:42
 msgid "Product Type"
@@ -2617,7 +2617,7 @@ msgstr "Satış Fiyatı Tarihleri"
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:85
 msgctxt "placeholder"
 msgid "From&hellip;"
-msgstr "From&hellip;"
+msgstr "&hellip;"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:169
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:89
@@ -2753,7 +2753,7 @@ msgstr "Vergi Türü"
 #: includes/admin/views/html-bulk-edit-product.php:207
 #: includes/admin/views/html-quick-edit-product.php:153
 msgid "Manage stock?"
-msgstr "Stok yönetimi?"
+msgstr "Stok Yönetimi?"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:283
 msgid ""
@@ -2778,7 +2778,7 @@ msgstr "Stok yönetimi. Seçenekli bir ürün söz konusuysa bu değer, varyasyo
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
 #: includes/admin/reports/class-wc-report-stock.php:140
 msgid "Stock status"
-msgstr "Stok durumu"
+msgstr "Stok Durumu"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:304
 msgid ""
@@ -2870,7 +2870,7 @@ msgstr "Kargo sınıfı yok"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:378
 msgid "Shipping class"
-msgstr "Kargo sınıfı"
+msgstr "Kargo Sınıfı"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:378
 msgid ""
@@ -2890,7 +2890,7 @@ msgstr "Hepsini genişlet"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:449
 msgid "Select terms"
-msgstr "Koşul seç"
+msgstr "Kural seç"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:463
 msgid "Add new"
@@ -2898,7 +2898,7 @@ msgstr "Yeni ekle"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:476
 msgid "Pipe (|) separate terms"
-msgstr "Dik çizgi (|) koşulları ayırır"
+msgstr "Dik çizgi (|) kuralları ayırır"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:566
 msgid "Custom product attribute"
@@ -2927,7 +2927,7 @@ msgstr "Çapraz Satışlar"
 msgid ""
 "Cross-sells are products which you promote in the cart, based on the current"
 " product."
-msgstr "Çapraz satış ürünleri, mevcut ürüne dayalı olarak sepet içinde sizin teşvik etiğiniz ürünlerdir."
+msgstr "Çapraz satış ürünleri, mevcut ürüne dayalı olarak sepet içinde sizin teşvik ettiğiniz ürünlerdir."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:627
 msgid "Choose a grouped product&hellip;"
@@ -2943,7 +2943,7 @@ msgstr "Bu ürünü gruplandırılmış bir ürün parçası yapmak için bu se�
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:677
 msgid "Purchase Note"
-msgstr "Satış notu"
+msgstr "Satış Notu"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:677
 msgid "Enter an optional note to send the customer after purchase."
@@ -2951,7 +2951,7 @@ msgstr "Satış sonrasında müşteriye göndermek için isteğe bağlı bir not
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:684
 msgid "Menu order"
-msgstr "Menü düzeni"
+msgstr "Menü Düzeni"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:684
 msgid "Custom ordering position."
@@ -3397,7 +3397,7 @@ msgstr "Önceki siparişleri bağla"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:242
 msgid "Name (Last, First)"
-msgstr "Ad (Soyisim İsim)"
+msgstr "Ad (Soyad, Ad)"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:243
 msgid "Username"
@@ -3503,7 +3503,7 @@ msgstr "%s öğe satın alındı"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:102
 msgid "%s charged for shipping"
-msgstr "%s kargo için yüklendi"
+msgstr "%s kargo için ödeme yapıldı"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:107
 msgid "%s worth of coupons used"
@@ -3576,11 +3576,11 @@ msgstr "Ürün bulunamadı."
 
 #: includes/admin/reports/class-wc-report-stock.php:138
 msgid "Parent"
-msgstr "Üst"
+msgstr "Ebeveyn"
 
 #: includes/admin/reports/class-wc-report-stock.php:139
 msgid "Units in stock"
-msgstr "Stoktaki birimler"
+msgstr "Stoktaki Birimler"
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:112
 msgid "Rate"
@@ -3759,8 +3759,7 @@ msgid "Automatically generate customer password"
 msgstr "Otomatik müşteri şifresi oluştur"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:25
-#: includes/admin/settings/class-wc-settings-checkout.php:78
-#: includes/admin/views/html-admin-page-status-report.php:297
+msgctxt "Settings tab label"
 msgid "Checkout"
 msgstr "Ödeme"
 
@@ -3783,6 +3782,11 @@ msgstr "Kuponların kullanımını etkinleştir"
 #: includes/admin/settings/class-wc-settings-checkout.php:73
 msgid "Coupons can be applied from the cart and checkout pages."
 msgstr "Kuponlar sepette ve ödeme sayfalarında kullanılır."
+
+#: includes/admin/settings/class-wc-settings-checkout.php:78
+#: includes/admin/views/html-admin-page-status-report.php:297
+msgid "Checkout"
+msgstr "Ödeme"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:79
 msgid "Enable guest checkout"
@@ -3825,7 +3829,7 @@ msgstr "Sipariş Sayfası"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:134
 msgid "Terms and Conditions"
-msgstr "Koşullar ve Şartlar"
+msgstr "Şartlar ve Koşullar"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:135
 msgid ""
@@ -3876,15 +3880,15 @@ msgstr "Yüklü yöntemler aşağıda listelenmiştir. Ön sayfadaki görünüml
 
 #: includes/admin/settings/class-wc-settings-checkout.php:219
 msgid "Gateway Display"
-msgstr "Ağ Geçidi Görünümü"
+msgstr "Ödeme Yöntemi Görünümü"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:227
 msgid "Gateway"
-msgstr "Ağ Geçidi"
+msgstr "Ödeme Yöntemi"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:228
 msgid "Gateway ID"
-msgstr "Ağ Geçidi Kimliği"
+msgstr "Ödeme Yöntemi Kimliği"
 
 #: includes/admin/settings/class-wc-settings-emails.php:25
 msgid "Emails"
@@ -4134,7 +4138,7 @@ msgstr "Gelişmiş ülke arama kutusunu etkinleştir"
 #: includes/admin/settings/class-wc-settings-general.php:199
 msgid ""
 "This will enable a script allowing the country fields to be searchable."
-msgstr "Bu ülkelerin aranabilir olmasını sağlayan bir komut dosyası sağlayacaktır."
+msgstr "Ülkelerin aranabilir olmasını sağlayan bir komutu etkinleştirecektir."
 
 #: includes/admin/settings/class-wc-settings-general.php:217
 msgid "Frontend Styles"
@@ -4524,7 +4528,7 @@ msgstr "İndirmelere ödeme yapıldıktan sonra erişim izin verilsin."
 msgid ""
 "Enable this option to grant access to downloads when orders are "
 "\"processing\", rather than \"completed\"."
-msgstr "Siparişler \"tamamlandı\" yerine \"işleniyor\" olduğunda bile indirmelere izin verilir."
+msgstr "Siparişler \"Tamamlandı\" yerine \"Hazırlanıyor\" olduğunda bile indirmelere izin verilir."
 
 #: includes/admin/settings/class-wc-settings-shipping.php:41
 #: includes/admin/settings/class-wc-settings-shipping.php:67
@@ -4578,7 +4582,7 @@ msgstr "Kullanıcıların sadece fatura adreslerine kargola"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:132
 msgid "Restrict shipping to Location(s)"
-msgstr "Konum(lar) için kargoyu kısıtla"
+msgstr "Konum(lar) için Kargoyu Kısıtla"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:133
 msgid ""
@@ -4644,7 +4648,7 @@ msgstr "Bu seçenek ürün fiyatlarını etkileyecektir. Bunu değiştirdiğiniz
 
 #: includes/admin/settings/class-wc-settings-tax.php:85
 msgid "Yes, I will enter prices inclusive of tax"
-msgstr "Vergiler dahil"
+msgstr "Evet, vergi dahil fiyat gireceğim"
 
 #: includes/admin/settings/class-wc-settings-tax.php:86
 msgid "No, I will enter prices exclusive of tax"
@@ -4652,11 +4656,11 @@ msgstr "Vergiler hariç"
 
 #: includes/admin/settings/class-wc-settings-tax.php:91
 msgid "Calculate Tax Based On:"
-msgstr "Vergi Hesaplama Türü"
+msgstr "Vergi Hesaplama Dayanağı:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:93
 msgid "This option determines which address is used to calculate tax."
-msgstr "Burada vergilerin hesaplanacağı yeri seçebilirsiniz."
+msgstr "Bu seçenek, vergi hesaplaması için hangi adresin kullanıldığını belirler."
 
 #: includes/admin/settings/class-wc-settings-tax.php:97
 msgid "Customer shipping address"
@@ -4723,21 +4727,21 @@ msgstr "İndirimli Oran%sVergisiz"
 
 #: includes/admin/settings/class-wc-settings-tax.php:144
 msgid "Display prices in the shop:"
-msgstr "Mağazada fiyatları görüntüle:"
+msgstr "Mağaza Fiyat Görünümü:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:149
 #: includes/admin/settings/class-wc-settings-tax.php:168
 msgid "Including tax"
-msgstr "Vergiler dahil"
+msgstr "Vergi dahil"
 
 #: includes/admin/settings/class-wc-settings-tax.php:150
 #: includes/admin/settings/class-wc-settings-tax.php:169
 msgid "Excluding tax"
-msgstr "Vergiler ayrı"
+msgstr "Vergi hariç"
 
 #: includes/admin/settings/class-wc-settings-tax.php:155
 msgid "Price display suffix:"
-msgstr "Fiyat son ek görünümü:"
+msgstr "Fiyat Sonek Görünümü:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:159
 msgid ""
@@ -4749,11 +4753,11 @@ msgstr "Ürün fiyatlarınızdan sonra göstermek için bir metin tanımlayın. 
 
 #: includes/admin/settings/class-wc-settings-tax.php:163
 msgid "Display prices during cart/checkout:"
-msgstr "Fiyatların Sepet/Ödeme ekranında görüntülenmesi"
+msgstr "Sepet / Ödeme Sayfasında Fiyat Görünümü:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:175
 msgid "Display tax totals:"
-msgstr "Vergi toplamları görünümü:"
+msgstr "Vergi Toplamları Görünümü:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:180
 msgid "As a single total"
@@ -4792,7 +4796,7 @@ msgstr "2 Haneli eyalet kodu girin, örn. AZ. Tamamınıda boş bırakabilirsini
 #: includes/admin/settings/class-wc-settings-tax.php:254
 #: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "ZIP/Postcode"
-msgstr "ZIP/Posta Kodu"
+msgstr "Posta Kodu"
 
 #: includes/admin/settings/class-wc-settings-tax.php:254
 msgid ""
@@ -4805,7 +4809,7 @@ msgstr "Bu kural için birden çok posta kodu belirleyebilirsiniz. Bu değerleri
 msgid ""
 "Cities for this rule. Semi-colon (;) separate multiple values. Leave blank "
 "to apply to all cities."
-msgstr "Bu kural için birden çok şehir belirleyebilirsiniz. Bu değerleri noktalı virgülle (;) ayırabilirsiniz. Tüm şehirleri boşta bırakabilirsiniz."
+msgstr "Bu kural için birden çok şehir belirleyebilirsiniz. Bu değerleri noktalı virgülle (;) ayırabilirsiniz. Tüm şehirleri boş ta bırakabilirsiniz."
 
 #: includes/admin/settings/class-wc-settings-tax.php:258
 msgid "Rate&nbsp;%"
@@ -4896,7 +4900,7 @@ msgstr "Popüler"
 
 #: includes/admin/views/html-admin-page-addons.php:12
 msgid "Gateways"
-msgstr "Ağ Geçitleri"
+msgstr "Ödeme Yöntemleri"
 
 #: includes/admin/views/html-admin-page-addons.php:14
 msgid "Import/export"
@@ -5061,7 +5065,7 @@ msgstr "Sunucunuzda <a href=\"%s\">SOAP Client</a> sunucu sınıfı etkin değil
 
 #: includes/admin/views/html-admin-page-status-report.php:144
 msgid "WP Remote Post"
-msgstr "WP Mesaj Yönetimi"
+msgstr "WordPress Uzak Mesaj"
 
 #: includes/admin/views/html-admin-page-status-report.php:155
 msgid "wp_remote_post() was successful - PayPal IPN is working."
@@ -5108,7 +5112,7 @@ msgstr "sürüm"
 
 #: includes/admin/views/html-admin-page-status-report.php:275
 msgid "Force SSL"
-msgstr "SSL Kullan"
+msgstr "SSL Zorlaması"
 
 #: includes/admin/views/html-admin-page-status-report.php:282
 msgid "WC Pages"
@@ -5144,7 +5148,7 @@ msgstr "WooCommerce Sınıflandırmaları"
 
 #: includes/admin/views/html-admin-page-status-report.php:361
 msgid "Order Statuses"
-msgstr "Sipariş Durumu"
+msgstr "Sipariş Durumları"
 
 #: includes/admin/views/html-admin-page-status-report.php:371
 msgid "Product Types"
@@ -5172,11 +5176,11 @@ msgstr "Temalar"
 
 #: includes/admin/views/html-admin-page-status-report.php:451
 msgid "Template Overrides"
-msgstr "Tema Üstüne Yazmalar"
+msgstr "Tema Geçersiz Kılmaları"
 
 #: includes/admin/views/html-admin-page-status-report.php:483
 msgid "No overrides present in theme."
-msgstr "Tema içinde mevcut durumda üstüne yazma yok"
+msgstr "Tema içinde mevcut durumda geçersiz kılma yok."
 
 #: includes/admin/views/html-admin-page-status-tools.php:7
 #: includes/admin/views/html-admin-page-status.php:6
@@ -5191,11 +5195,11 @@ msgstr "Tema Hata Ayıklama Modu"
 msgid ""
 "This tool will disable template overrides for logged-in administrators for "
 "debugging purposes."
-msgstr "Bu araç hata ayıklama amacıyla oturum açmış yöneticiler için temanın üstüne yazmalarını devre dışı bırakır."
+msgstr "Bu araç, hata ayıklama amacıyla oturum açmış yöneticiler için tema geçersiz kılmalarını devre dışı bırakır."
 
 #: includes/admin/views/html-admin-page-status-tools.php:34
 msgid "Remove post types on uninstall"
-msgstr "Kaldırma işleminde veri türlerini sil"
+msgstr "Kaldırma İşlemi Esnasında Veri Türlerini Kaldır"
 
 #: includes/admin/views/html-admin-page-status-tools.php:40
 msgid ""
