@@ -804,10 +804,16 @@ class WC_Form_Handler {
 
 			wp_verify_nonce( $_POST['register'], 'woocommerce-register' );
 
+			if ( 'no' == get_option( 'woocommerce_registration_generate_username' ) ) {
+				$_username = $_POST['username'];
+			} else {
+				$_username = '';
+			}
+
 			try {
 
 				$validation_error = new WP_Error();
-				$validation_error = apply_filters( 'woocommerce_process_registration_errors', $validation_error, $_POST['username'], $_POST['password'], $_POST['email'] );
+				$validation_error = apply_filters( 'woocommerce_process_registration_errors', $validation_error, $_username, $_POST['password'], $_POST['email'] );
 
 				if ( $validation_error->get_error_code() ) {
 					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . $validation_error->get_error_message() );
@@ -820,7 +826,7 @@ class WC_Form_Handler {
 
 			}
 
-			$username   = ! empty( $_POST['username'] ) ? wc_clean( $_POST['username'] ) : '';
+			$username   = ! empty( $_username ) ? wc_clean( $_username ) : '';
 			$email      = ! empty( $_POST['email'] ) ? wc_clean( $_POST['email'] ) : '';
 			$password   = ! empty( $_POST['password'] ) ? wc_clean( $_POST['password'] ) : '';
 
