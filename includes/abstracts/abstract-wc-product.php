@@ -370,7 +370,7 @@ class WC_Product {
 	 * get_children function.
 	 *
 	 * @access public
-	 * @return bool
+	 * @return array
 	 */
 	public function get_children() {
 		return array();
