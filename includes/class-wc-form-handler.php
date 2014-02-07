@@ -371,18 +371,18 @@ class WC_Form_Handler {
 						continue;
 
 					// Update cart validation
-		    		$passed_validation 	= apply_filters( 'woocommerce_update_cart_validation', true, $cart_item_key, $values, $quantity );
+					$passed_validation 	= apply_filters( 'woocommerce_update_cart_validation', true, $cart_item_key, $values, $quantity );
 
-		    		// is_sold_individually
+					// is_sold_individually
 					if ( $_product->is_sold_individually() && $quantity > 1 ) {
 						wc_add_notice( sprintf( __( 'You can only have 1 %s in your cart.', 'woocommerce' ), $_product->get_title() ), 'error' );
 						$passed_validation = false;
 					}
 
-		    		if ( $passed_validation )
-			    		WC()->cart->set_quantity( $cart_item_key, $quantity, false );
+					if ( $passed_validation )
+						WC()->cart->set_quantity( $cart_item_key, $quantity, false );
 
-			    	$cart_updated = true;
+					$cart_updated = true;
 				}
 
 				WC()->cart->calculate_totals();
@@ -512,13 +512,13 @@ class WC_Form_Handler {
 		$adding_to_cart      = get_product( $product_id );
 		$add_to_cart_handler = apply_filters( 'woocommerce_add_to_cart_handler', $adding_to_cart->product_type, $adding_to_cart );
 
-	    // Variable product handling
-	    if ( 'variable' === $add_to_cart_handler ) {
+		// Variable product handling
+		if ( 'variable' === $add_to_cart_handler ) {
 
-	    	$variation_id       = empty( $_REQUEST['variation_id'] ) ? '' : absint( $_REQUEST['variation_id'] );
-	    	$quantity           = empty( $_REQUEST['quantity'] ) ? 1 : apply_filters( 'woocommerce_stock_amount', $_REQUEST['quantity'] );
-	    	$all_variations_set = true;
-	    	$variations         = array();
+			$variation_id       = empty( $_REQUEST['variation_id'] ) ? '' : absint( $_REQUEST['variation_id'] );
+			$quantity           = empty( $_REQUEST['quantity'] ) ? 1 : apply_filters( 'woocommerce_stock_amount', $_REQUEST['quantity'] );
+			$all_variations_set = true;
+			$variations         = array();
 
 			// Only allow integer variation ID - if its not set, redirect to the product page
 			if ( empty( $variation_id ) ) {
@@ -531,61 +531,61 @@ class WC_Form_Handler {
 
 			// Verify all attributes
 			foreach ( $attributes as $attribute ) {
-	            if ( ! $attribute['is_variation'] )
-	            	continue;
+				if ( ! $attribute['is_variation'] )
+					continue;
 
-	            $taxonomy = 'attribute_' . sanitize_title( $attribute['name'] );
+				$taxonomy = 'attribute_' . sanitize_title( $attribute['name'] );
 
-	            if ( isset( $_REQUEST[ $taxonomy ] ) ) {
+				if ( isset( $_REQUEST[ $taxonomy ] ) ) {
 
-	                // Get value from post data
-	                // Don't use wc_clean as it destroys sanitized characters
-	                $value = sanitize_title( trim( stripslashes( $_REQUEST[ $taxonomy ] ) ) );
+					// Get value from post data
+					// Don't use wc_clean as it destroys sanitized characters
+					$value = sanitize_title( trim( stripslashes( $_REQUEST[ $taxonomy ] ) ) );
 
-	                // Get valid value from variation
-	                $valid_value = $variation->variation_data[ $taxonomy ];
+					// Get valid value from variation
+					$valid_value = $variation->variation_data[ $taxonomy ];
 
-	                // Allow if valid
-	                if ( $valid_value == '' || $valid_value == $value ) {
-		                if ( $attribute['is_taxonomy'] )
-		                	$variations[ $taxonomy ] = $value;
-		                else {
-			                // For custom attributes, get the name from the slug
-			                $options = array_map( 'trim', explode( WC_DELIMITER, $attribute['value'] ) );
-			                foreach ( $options as $option ) {
-			                	if ( sanitize_title( $option ) == $value ) {
-			                		$value = $option;
-			                		break;
-			                	}
-			                }
-			                 $variations[ $taxonomy ] = $value;
-		                }
-		                continue;
-		            }
+					// Allow if valid
+					if ( $valid_value == '' || $valid_value == $value ) {
+						if ( $attribute['is_taxonomy'] )
+							$variations[ $taxonomy ] = $value;
+						else {
+							// For custom attributes, get the name from the slug
+							$options = array_map( 'trim', explode( WC_DELIMITER, $attribute['value'] ) );
+							foreach ( $options as $option ) {
+								if ( sanitize_title( $option ) == $value ) {
+									$value = $option;
+									break;
+								}
+							}
+							 $variations[ $taxonomy ] = $value;
+						}
+						continue;
+					}
 
 				}
 
-	            $all_variations_set = false;
-	        }
+				$all_variations_set = false;
+			}
 
-	        if ( $all_variations_set ) {
-	        	// Add to cart validation
-	        	$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
+			if ( $all_variations_set ) {
+				// Add to cart validation
+				$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
 
-	        	if ( $passed_validation ) {
+				if ( $passed_validation ) {
 					if ( WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) ) {
 						wc_add_to_cart_message( $product_id );
 						$was_added_to_cart = true;
 						$added_to_cart[] = $product_id;
 					}
 				}
-	        } else {
-	            wc_add_notice( __( 'Please choose product options&hellip;', 'woocommerce' ), 'error' );
-	            return;
+			} else {
+				wc_add_notice( __( 'Please choose product options&hellip;', 'woocommerce' ), 'error' );
+				return;
 			}
 
-	    // Grouped Products
-	    } elseif ( 'grouped' === $add_to_cart_handler ) {
+		// Grouped Products
+		} elseif ( 'grouped' === $add_to_cart_handler ) {
 
 			if ( ! empty( $_REQUEST['quantity'] ) && is_array( $_REQUEST['quantity'] ) ) {
 
@@ -626,7 +626,7 @@ class WC_Form_Handler {
 			}
 
 		// Simple Products
-	    } else {
+		} else {
 
 			$quantity 			= empty( $_REQUEST['quantity'] ) ? 1 : apply_filters( 'woocommerce_stock_amount', $_REQUEST['quantity'] );
 
@@ -634,18 +634,18 @@ class WC_Form_Handler {
 			$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
 			if ( $passed_validation ) {
-	    		// Add the product to the cart
-	    		if ( WC()->cart->add_to_cart( $product_id, $quantity ) ) {
-	    			wc_add_to_cart_message( $product_id );
-	    			$was_added_to_cart = true;
-	    			$added_to_cart[] = $product_id;
-	    		}
+				// Add the product to the cart
+				if ( WC()->cart->add_to_cart( $product_id, $quantity ) ) {
+					wc_add_to_cart_message( $product_id );
+					$was_added_to_cart = true;
+					$added_to_cart[] = $product_id;
+				}
 			}
 
-	    }
+		}
 
-	    // If we added the product to the cart we can now optionally do a redirect.
-	    if ( $was_added_to_cart && wc_notice_count( 'error' ) == 0 ) {
+		// If we added the product to the cart we can now optionally do a redirect.
+		if ( $was_added_to_cart && wc_notice_count( 'error' ) == 0 ) {
 
 			$url = apply_filters( 'add_to_cart_redirect', $url );
 
@@ -661,7 +661,7 @@ class WC_Form_Handler {
 				exit;
 			}
 
-	    }
+		}
 
 	}
 
