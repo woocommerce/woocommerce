@@ -170,6 +170,7 @@ function get_woocommerce_currencies() {
 				'DKK' => __( 'Danish Krone', 'woocommerce' ),
 				'EUR' => __( 'Euros', 'woocommerce' ),
 				'HKD' => __( 'Hong Kong Dollar', 'woocommerce' ),
+				'HRK' => __( 'Croatia kuna', 'woocommerce' ),
 				'HUF' => __( 'Hungarian Forint', 'woocommerce' ),
 				'ISK' => __( 'Icelandic krona', 'woocommerce' ),
 				'IDR' => __( 'Indonesia Rupiah', 'woocommerce' ),
