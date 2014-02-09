@@ -381,8 +381,8 @@ function woocommerce_product_post_type_link( $permalink, $post ) {
 function woocommerce_placeholder_img_src() {
 	return wc_placeholder_img_src();
 }
-function woocommerce_placeholder_img() {
-	return wc_placeholder_img();
+function woocommerce_placeholder_img( $size = 'shop_thumbnail' ) {
+	return wc_placeholder_img( $size );
 }
 function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
 	return wc_get_formatted_variation( $variation, $flat );
