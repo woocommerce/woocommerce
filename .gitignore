@@ -8,7 +8,7 @@ Thumbs.db
 .project
 .settings*
 sftp-config.json
-/_deploy/
+/deploy/
 
 # Ignore all log files except for .htaccess
 /logs/*

@@ -141,7 +141,7 @@ module.exports = function( grunt ){
 					'!package.json',
 					'!node_modules/**'
 				],
-				dest: '_deploy',
+				dest: 'deploy',
 				expand: true,
 				dot: true
 			},
@@ -149,7 +149,7 @@ module.exports = function( grunt ){
 
 		clean: {
 			deploy: {
-				src: [ '_deploy' ]
+				src: [ 'deploy' ]
 			},
 		},
 
@@ -157,7 +157,7 @@ module.exports = function( grunt ){
 	        deploy: { 
 	            options: {
 	                plugin_slug: 'woocommerce',   
-	                build_dir: '_deploy'
+	                build_dir: 'deploy'
 	            },
 	        }
 	    }		
