@@ -127,7 +127,37 @@ module.exports = function( grunt ){
 					'sed -i "" "s/\\/\\/exit( \'Locked\' );/exit( \'Locked\' );/g" index.php',
 				].join( '&&' )
 			}
-		}
+		},
+
+		copy: {
+			deploy: {
+				src: [
+					'**',
+					'.htaccess',
+					'!Gruntfile.js',
+					'!sftp-config.json',
+					'!package.json',
+					'!node_modules/**'
+				],
+				dest: '_deploy',
+				expand: true
+			},
+		},
+
+		clean: {
+			deploy: {
+				src: [ '_deploy' ]
+			},
+		},
+
+		wp_deploy: {
+	        deploy: { 
+	            options: {
+	                plugin_slug: 'woocommerce',   
+	                build_dir: '_deploy'
+	            },
+	        }
+	    }		
 
 	});
 
@@ -137,6 +167,9 @@ module.exports = function( grunt ){
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
+	grunt.loadNpmTasks( 'grunt-contrib-copy' );
+	grunt.loadNpmTasks( 'grunt-contrib-clean' );
+	grunt.loadNpmTasks( 'grunt-wp-deploy' );
 
 	// Register tasks
 	grunt.registerTask( 'default', [
@@ -154,6 +187,12 @@ module.exports = function( grunt ){
 		'default',
 		'shell:txpull',
 		'shell:generatemos'
+	]);
+
+	grunt.registerTask( 'deploy', [ 
+		'clean:deploy', 
+		'copy:deploy',
+		'wp_deploy'
 	]);
 
 };
