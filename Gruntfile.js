@@ -133,6 +133,8 @@ module.exports = function( grunt ){
 			deploy: {
 				src: [
 					'**',
+					'!.*',
+					'!.*/**',
 					'.htaccess',
 					'!Gruntfile.js',
 					'!sftp-config.json',
@@ -140,7 +142,8 @@ module.exports = function( grunt ){
 					'!node_modules/**'
 				],
 				dest: '_deploy',
-				expand: true
+				expand: true,
+				dot: true
 			},
 		},
 
