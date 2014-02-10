@@ -34,8 +34,6 @@ add_filter( 'woocommerce_add_to_cart_validation', 'wc_protected_product_add_to_c
  * @return void
  */
 function wc_empty_cart() {
-	global $woocommerce;
-
 	if ( ! isset( WC()->cart ) || WC()->cart == '' )
 		WC()->cart = new WC_Cart();
 
