@@ -731,6 +731,7 @@ class WC_Order {
 	 *
 	 * @access public
 	 * @param bool $compound (default: false)
+	 * @param string $tax_display (default: the tax_display_cart value)
 	 * @return string
 	 */
 	public function get_subtotal_to_display( $compound = false, $tax_display = '' ) {
