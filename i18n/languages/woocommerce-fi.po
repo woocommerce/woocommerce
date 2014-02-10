@@ -6,9 +6,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-06 15:46:00+00:00\n"
-"PO-Revision-Date: 2014-02-07 08:31+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"POT-Creation-Date: 2014-02-07 13:06:59+00:00\n"
+"PO-Revision-Date: 2014-02-09 19:35+0000\n"
+"Last-Translator: arhipaiva <info@swratkaisut.com>\n"
 "Language-Team: Finnish (http://www.transifex.com/projects/p/woocommerce-core/language/fi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -3322,47 +3322,47 @@ msgstr "Sama kuin ylemmällä tasolla"
 msgid "Standard"
 msgstr "Standardi"
 
-#: includes/class-wc-ajax.php:792 includes/class-wc-customer.php:624
+#: includes/class-wc-ajax.php:788 includes/class-wc-customer.php:624
 #: includes/class-wc-customer.php:636
 msgid "File %d"
 msgstr "Tiedosto %d"
 
-#: includes/class-wc-ajax.php:982 includes/class-wc-ajax.php:983
+#: includes/class-wc-ajax.php:978 includes/class-wc-ajax.php:979
 #: includes/class-wc-order.php:1474
 msgid "Item #%s stock reduced from %s to %s."
 msgstr "Tuotteen #%s varastoa vähennetty määrästä %s määrään %s."
 
-#: includes/class-wc-ajax.php:991
+#: includes/class-wc-ajax.php:987
 msgid ""
 "No products had their stock reduced - they may not have stock management "
 "enabled."
 msgstr "Tuotteiden varastomääriä ei vähennetty – ehkä tuotteilla ei ole käytössä varastoseurantaa."
 
-#: includes/class-wc-ajax.php:1030 includes/class-wc-ajax.php:1031
+#: includes/class-wc-ajax.php:1026 includes/class-wc-ajax.php:1027
 msgid "Item #%s stock increased from %s to %s."
 msgstr "Tuotteen #%s varastoa lisätty määrästä %s määrään %s."
 
-#: includes/class-wc-ajax.php:1038
+#: includes/class-wc-ajax.php:1034
 msgid ""
 "No products had their stock increased - they may not have stock management "
 "enabled."
 msgstr "Tuotteiden varastomääriä ei lisätty – ehkä tuotteilla ei ole käytössä varastoseurantaa."
 
-#: includes/class-wc-ajax.php:1054
+#: includes/class-wc-ajax.php:1050
 #: includes/widgets/class-wc-widget-product-categories.php:39
 #: templates/single-product-reviews.php:62
 msgid "Name"
 msgstr "Nimi"
 
-#: includes/class-wc-ajax.php:1054
+#: includes/class-wc-ajax.php:1050
 msgid "Value"
 msgstr "Arvo"
 
-#: includes/class-wc-ajax.php:1272
+#: includes/class-wc-ajax.php:1268
 msgid "Delete note"
 msgstr "Poista kommentti"
 
-#: includes/class-wc-ajax.php:1417
+#: includes/class-wc-ajax.php:1413
 msgid "Guest"
 msgstr "Vieras"
 
@@ -5219,18 +5219,18 @@ msgstr "Lisää uusi %s"
 msgid "New %s"
 msgstr "Uusi %s"
 
-#: includes/class-wc-post-types.php:224
+#: includes/class-wc-post-types.php:226
 #: includes/updates/woocommerce-update-2.0.php:58
 msgctxt "slug"
 msgid "product"
 msgstr "tuote"
 
-#: includes/class-wc-post-types.php:230
+#: includes/class-wc-post-types.php:232
 #: includes/widgets/class-wc-widget-products.php:27
 msgid "Products"
 msgstr "Tuotteet"
 
-#: includes/class-wc-post-types.php:231 templates/cart/cart.php:27
+#: includes/class-wc-post-types.php:233 templates/cart/cart.php:27
 #: templates/checkout/form-pay.php:19 templates/checkout/review-order.php:18
 #: templates/emails/admin-new-order.php:22
 #: templates/emails/customer-completed-order.php:23
@@ -5241,168 +5241,168 @@ msgstr "Tuotteet"
 msgid "Product"
 msgstr "Tuote"
 
-#: includes/class-wc-post-types.php:232
+#: includes/class-wc-post-types.php:234
 msgctxt "Admin menu name"
 msgid "Products"
 msgstr "Tuotteet"
 
-#: includes/class-wc-post-types.php:233
+#: includes/class-wc-post-types.php:235
 msgid "Add Product"
 msgstr "Lisää tuote"
 
-#: includes/class-wc-post-types.php:234
+#: includes/class-wc-post-types.php:236
 msgid "Add New Product"
 msgstr "Lisää uusi tuote"
 
-#: includes/class-wc-post-types.php:235 includes/class-wc-post-types.php:287
-#: includes/class-wc-post-types.php:326 templates/myaccount/my-address.php:45
+#: includes/class-wc-post-types.php:237 includes/class-wc-post-types.php:289
+#: includes/class-wc-post-types.php:328 templates/myaccount/my-address.php:45
 msgid "Edit"
 msgstr "Muokkaa"
 
-#: includes/class-wc-post-types.php:236
+#: includes/class-wc-post-types.php:238
 msgid "Edit Product"
 msgstr "Muokkaa tuotetta"
 
-#: includes/class-wc-post-types.php:237
+#: includes/class-wc-post-types.php:239
 msgid "New Product"
 msgstr "Uusi tuote"
 
-#: includes/class-wc-post-types.php:238 includes/class-wc-post-types.php:239
+#: includes/class-wc-post-types.php:240 includes/class-wc-post-types.php:241
 msgid "View Product"
 msgstr "Tarkastele tuotetta"
 
-#: includes/class-wc-post-types.php:240
+#: includes/class-wc-post-types.php:242
 #: includes/widgets/class-wc-widget-product-search.php:27
 msgid "Search Products"
 msgstr "Etsi tuotteita"
 
-#: includes/class-wc-post-types.php:241
+#: includes/class-wc-post-types.php:243
 msgid "No Products found"
 msgstr "Etsittyä tuotetta ei löytynyt"
 
-#: includes/class-wc-post-types.php:242
+#: includes/class-wc-post-types.php:244
 msgid "No Products found in trash"
 msgstr "Roskakorissa ei ole tuotteita"
 
-#: includes/class-wc-post-types.php:243
+#: includes/class-wc-post-types.php:245
 msgid "Parent Product"
 msgstr "Ylemmän tason tuote"
 
-#: includes/class-wc-post-types.php:245
+#: includes/class-wc-post-types.php:247
 msgid "This is where you can add new products to your store."
 msgstr "Tässä lisätään tuotteita verkkokauppaan."
 
-#: includes/class-wc-post-types.php:265
+#: includes/class-wc-post-types.php:267
 msgid "Variations"
 msgstr "Muunnelmat"
 
-#: includes/class-wc-post-types.php:273
+#: includes/class-wc-post-types.php:275
 msgctxt "Admin menu name"
 msgid "Orders"
 msgstr "Tilaukset"
 
-#: includes/class-wc-post-types.php:283
+#: includes/class-wc-post-types.php:285
 msgid "Orders"
 msgstr "Tilaukset"
 
-#: includes/class-wc-post-types.php:284 templates/myaccount/my-orders.php:32
+#: includes/class-wc-post-types.php:286 templates/myaccount/my-orders.php:32
 msgid "Order"
 msgstr "Tilaus"
 
-#: includes/class-wc-post-types.php:285
+#: includes/class-wc-post-types.php:287
 msgid "Add Order"
 msgstr "Lisää tilaus"
 
-#: includes/class-wc-post-types.php:286
+#: includes/class-wc-post-types.php:288
 msgid "Add New Order"
 msgstr "Lisää uusi tilaus"
 
-#: includes/class-wc-post-types.php:288
+#: includes/class-wc-post-types.php:290
 msgid "Edit Order"
 msgstr "Muokkaa tilausta"
 
-#: includes/class-wc-post-types.php:289
+#: includes/class-wc-post-types.php:291
 msgid "New Order"
 msgstr "Uusi tilaus"
 
-#: includes/class-wc-post-types.php:290 includes/class-wc-post-types.php:291
+#: includes/class-wc-post-types.php:292 includes/class-wc-post-types.php:293
 msgid "View Order"
 msgstr "Tarkastele tilausta"
 
-#: includes/class-wc-post-types.php:292
+#: includes/class-wc-post-types.php:294
 msgid "Search Orders"
 msgstr "Etsi tilauksia"
 
-#: includes/class-wc-post-types.php:293
+#: includes/class-wc-post-types.php:295
 msgid "No Orders found"
 msgstr "Tilauksia ei löytynyt"
 
-#: includes/class-wc-post-types.php:294
+#: includes/class-wc-post-types.php:296
 msgid "No Orders found in trash"
 msgstr "Roskakorissa ei ole tilauksia"
 
-#: includes/class-wc-post-types.php:295
+#: includes/class-wc-post-types.php:297
 msgid "Parent Orders"
 msgstr "Ylemmän tason tilaukset"
 
-#: includes/class-wc-post-types.php:298
+#: includes/class-wc-post-types.php:300
 msgid "This is where store orders are stored."
 msgstr "Täällä säilytetään kaupan tilaukset."
 
-#: includes/class-wc-post-types.php:321
+#: includes/class-wc-post-types.php:323
 msgid "Coupons"
 msgstr "Kupongit"
 
-#: includes/class-wc-post-types.php:322 templates/cart/cart.php:118
+#: includes/class-wc-post-types.php:324 templates/cart/cart.php:118
 msgid "Coupon"
 msgstr "Kuponki"
 
-#: includes/class-wc-post-types.php:323
+#: includes/class-wc-post-types.php:325
 msgctxt "Admin menu name"
 msgid "Coupons"
 msgstr "Kupongit"
 
-#: includes/class-wc-post-types.php:324
+#: includes/class-wc-post-types.php:326
 msgid "Add Coupon"
 msgstr "Lisää kuponki"
 
-#: includes/class-wc-post-types.php:325
+#: includes/class-wc-post-types.php:327
 msgid "Add New Coupon"
 msgstr "Lisää uusi kuponki"
 
-#: includes/class-wc-post-types.php:327
+#: includes/class-wc-post-types.php:329
 msgid "Edit Coupon"
 msgstr "Muokkaa kuponkia"
 
-#: includes/class-wc-post-types.php:328
+#: includes/class-wc-post-types.php:330
 msgid "New Coupon"
 msgstr "Uusi kuponki"
 
-#: includes/class-wc-post-types.php:329
+#: includes/class-wc-post-types.php:331
 msgid "View Coupons"
 msgstr "Katso kuponkeja"
 
-#: includes/class-wc-post-types.php:330
+#: includes/class-wc-post-types.php:332
 msgid "View Coupon"
 msgstr "Katso kuponkia"
 
-#: includes/class-wc-post-types.php:331
+#: includes/class-wc-post-types.php:333
 msgid "Search Coupons"
 msgstr "Etsi kuponkeja"
 
-#: includes/class-wc-post-types.php:332
+#: includes/class-wc-post-types.php:334
 msgid "No Coupons found"
 msgstr "Kuponkeja ei löytynyt"
 
-#: includes/class-wc-post-types.php:333
+#: includes/class-wc-post-types.php:335
 msgid "No Coupons found in trash"
 msgstr "Roskakorissa ei ole kuponkeja"
 
-#: includes/class-wc-post-types.php:334
+#: includes/class-wc-post-types.php:336
 msgid "Parent Coupon"
 msgstr "Ylemmän tason kuponki"
 
-#: includes/class-wc-post-types.php:336
+#: includes/class-wc-post-types.php:338
 msgid ""
 "This is where you can add new coupons that customers can use in your store."
 msgstr "Tässä tehdään uusia kuponkeja. Asiakkaat saavat niillä alennuksia/etuja tuotteista ja palveluista."
@@ -6960,11 +6960,11 @@ msgstr "Etsi tuotteita"
 msgid "Search"
 msgstr "Haku"
 
-#: includes/wc-term-functions.php:113
+#: includes/wc-term-functions.php:118
 msgid "Select a category"
 msgstr "Valitse osasto"
 
-#: includes/wc-term-functions.php:117
+#: includes/wc-term-functions.php:122
 msgid "Uncategorized"
 msgstr "Ei-luokiteltu"
 
@@ -7895,7 +7895,7 @@ msgstr "Salasanan palautus"
 
 #: templates/myaccount/my-account.php:19
 msgid "Hello <strong>%1$s</strong> (not %1$s? <a href=\"%2$s\">Sign out</a>)."
-msgstr ""
+msgstr "Hei <strong>%1$s</strong> (et ole %1$s? <a href=\"%2$s\">Kirjaudu ulos</a>)."
 
 #: templates/myaccount/my-account.php:24
 msgid ""

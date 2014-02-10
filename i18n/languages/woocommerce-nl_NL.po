@@ -1,15 +1,17 @@
 # 
 # Translators:
 # coenjacobs <coen@woothemes.com>, 2013
+# coenjacobs <coen@woothemes.com>, 2014
+# Ramon Van Belzen <ramoonus@zeelandnet.nl>, 2014
 # stgoos, 2013
 # sylvie_janssens <sylvie_janssens@yahoo.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-06 15:46:00+00:00\n"
-"PO-Revision-Date: 2014-02-07 10:26+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"POT-Creation-Date: 2014-02-07 13:06:59+00:00\n"
+"PO-Revision-Date: 2014-02-08 11:50+0000\n"
+"Last-Translator: Ramon Van Belzen <ramoonus@zeelandnet.nl>\n"
 "Language-Team: Dutch (Netherlands) (http://www.transifex.com/projects/p/woocommerce-core/language/nl_NL/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -503,7 +505,7 @@ msgstr "A Coru&ntilde;a"
 
 #: i18n/states/ES.php:14
 msgid "Araba/&Aacute;lava"
-msgstr ""
+msgstr "Araba/&Aacute;lava"
 
 #: i18n/states/ES.php:15
 msgid "Albacete"
@@ -587,7 +589,7 @@ msgstr "Guadalajara"
 
 #: i18n/states/ES.php:35
 msgid "Gipuzkoa"
-msgstr ""
+msgstr "Gipuzkoa"
 
 #: i18n/states/ES.php:36
 msgid "Huelva"
@@ -695,7 +697,7 @@ msgstr "Valladolid"
 
 #: i18n/states/ES.php:62
 msgid "Bizkaia"
-msgstr ""
+msgstr "Bizkaia"
 
 #: i18n/states/ES.php:63
 msgid "Zamora"
@@ -3323,47 +3325,47 @@ msgstr "Zelfde als bovenliggende"
 msgid "Standard"
 msgstr "Standaard"
 
-#: includes/class-wc-ajax.php:792 includes/class-wc-customer.php:624
+#: includes/class-wc-ajax.php:788 includes/class-wc-customer.php:624
 #: includes/class-wc-customer.php:636
 msgid "File %d"
 msgstr "Bestand %d"
 
-#: includes/class-wc-ajax.php:982 includes/class-wc-ajax.php:983
+#: includes/class-wc-ajax.php:978 includes/class-wc-ajax.php:979
 #: includes/class-wc-order.php:1474
 msgid "Item #%s stock reduced from %s to %s."
 msgstr "Item #%s voorraad verlaagd van %s naar %s."
 
-#: includes/class-wc-ajax.php:991
+#: includes/class-wc-ajax.php:987
 msgid ""
 "No products had their stock reduced - they may not have stock management "
 "enabled."
 msgstr "Geen producten in voorraad verlaagd - misschien is voorraadbeheer niet ingeschakeld."
 
-#: includes/class-wc-ajax.php:1030 includes/class-wc-ajax.php:1031
+#: includes/class-wc-ajax.php:1026 includes/class-wc-ajax.php:1027
 msgid "Item #%s stock increased from %s to %s."
 msgstr "Item #%s voorraad verhoogd van %s naar %s."
 
-#: includes/class-wc-ajax.php:1038
+#: includes/class-wc-ajax.php:1034
 msgid ""
 "No products had their stock increased - they may not have stock management "
 "enabled."
 msgstr "Geen producten in voorraad verhoogd - misschien is voorraadbeheer niet ingeschakeld."
 
-#: includes/class-wc-ajax.php:1054
+#: includes/class-wc-ajax.php:1050
 #: includes/widgets/class-wc-widget-product-categories.php:39
 #: templates/single-product-reviews.php:62
 msgid "Name"
 msgstr "Naam"
 
-#: includes/class-wc-ajax.php:1054
+#: includes/class-wc-ajax.php:1050
 msgid "Value"
 msgstr "Waarde"
 
-#: includes/class-wc-ajax.php:1272
+#: includes/class-wc-ajax.php:1268
 msgid "Delete note"
 msgstr "Verwijder opmerking"
 
-#: includes/class-wc-ajax.php:1417
+#: includes/class-wc-ajax.php:1413
 msgid "Guest"
 msgstr "Gast"
 
@@ -5220,18 +5222,18 @@ msgstr "Toevoegen nieuwe %s"
 msgid "New %s"
 msgstr "Nieuwe %s"
 
-#: includes/class-wc-post-types.php:224
+#: includes/class-wc-post-types.php:226
 #: includes/updates/woocommerce-update-2.0.php:58
 msgctxt "slug"
 msgid "product"
 msgstr "product"
 
-#: includes/class-wc-post-types.php:230
+#: includes/class-wc-post-types.php:232
 #: includes/widgets/class-wc-widget-products.php:27
 msgid "Products"
 msgstr "Producten"
 
-#: includes/class-wc-post-types.php:231 templates/cart/cart.php:27
+#: includes/class-wc-post-types.php:233 templates/cart/cart.php:27
 #: templates/checkout/form-pay.php:19 templates/checkout/review-order.php:18
 #: templates/emails/admin-new-order.php:22
 #: templates/emails/customer-completed-order.php:23
@@ -5242,168 +5244,168 @@ msgstr "Producten"
 msgid "Product"
 msgstr "Product"
 
-#: includes/class-wc-post-types.php:232
+#: includes/class-wc-post-types.php:234
 msgctxt "Admin menu name"
 msgid "Products"
 msgstr "Producten"
 
-#: includes/class-wc-post-types.php:233
+#: includes/class-wc-post-types.php:235
 msgid "Add Product"
 msgstr "Product toevoegen"
 
-#: includes/class-wc-post-types.php:234
+#: includes/class-wc-post-types.php:236
 msgid "Add New Product"
 msgstr "Nieuw product toevoegen"
 
-#: includes/class-wc-post-types.php:235 includes/class-wc-post-types.php:287
-#: includes/class-wc-post-types.php:326 templates/myaccount/my-address.php:45
+#: includes/class-wc-post-types.php:237 includes/class-wc-post-types.php:289
+#: includes/class-wc-post-types.php:328 templates/myaccount/my-address.php:45
 msgid "Edit"
 msgstr "Bewerken"
 
-#: includes/class-wc-post-types.php:236
+#: includes/class-wc-post-types.php:238
 msgid "Edit Product"
 msgstr "Product bewerken"
 
-#: includes/class-wc-post-types.php:237
+#: includes/class-wc-post-types.php:239
 msgid "New Product"
 msgstr "Nieuw product"
 
-#: includes/class-wc-post-types.php:238 includes/class-wc-post-types.php:239
+#: includes/class-wc-post-types.php:240 includes/class-wc-post-types.php:241
 msgid "View Product"
 msgstr "Bekijk product"
 
-#: includes/class-wc-post-types.php:240
+#: includes/class-wc-post-types.php:242
 #: includes/widgets/class-wc-widget-product-search.php:27
 msgid "Search Products"
 msgstr "Zoek producten"
 
-#: includes/class-wc-post-types.php:241
+#: includes/class-wc-post-types.php:243
 msgid "No Products found"
 msgstr "Geen producten gevonden"
 
-#: includes/class-wc-post-types.php:242
+#: includes/class-wc-post-types.php:244
 msgid "No Products found in trash"
 msgstr "Geen producten gevonden in de prullenbak"
 
-#: includes/class-wc-post-types.php:243
+#: includes/class-wc-post-types.php:245
 msgid "Parent Product"
 msgstr "Bovenliggend product"
 
-#: includes/class-wc-post-types.php:245
+#: includes/class-wc-post-types.php:247
 msgid "This is where you can add new products to your store."
 msgstr "Hier kunt u nieuwe producten toevoegen aan uw winkel."
 
-#: includes/class-wc-post-types.php:265
+#: includes/class-wc-post-types.php:267
 msgid "Variations"
 msgstr "Variaties"
 
-#: includes/class-wc-post-types.php:273
+#: includes/class-wc-post-types.php:275
 msgctxt "Admin menu name"
 msgid "Orders"
 msgstr "Bestellingen"
 
-#: includes/class-wc-post-types.php:283
+#: includes/class-wc-post-types.php:285
 msgid "Orders"
 msgstr "Bestellingen"
 
-#: includes/class-wc-post-types.php:284 templates/myaccount/my-orders.php:32
+#: includes/class-wc-post-types.php:286 templates/myaccount/my-orders.php:32
 msgid "Order"
 msgstr "Bestelling"
 
-#: includes/class-wc-post-types.php:285
+#: includes/class-wc-post-types.php:287
 msgid "Add Order"
 msgstr "Bestelling toevoegen"
 
-#: includes/class-wc-post-types.php:286
+#: includes/class-wc-post-types.php:288
 msgid "Add New Order"
 msgstr "Nieuwe bestelling toevoegen"
 
-#: includes/class-wc-post-types.php:288
+#: includes/class-wc-post-types.php:290
 msgid "Edit Order"
 msgstr "Bestelling bewerken"
 
-#: includes/class-wc-post-types.php:289
+#: includes/class-wc-post-types.php:291
 msgid "New Order"
 msgstr "Nieuwe bestelling"
 
-#: includes/class-wc-post-types.php:290 includes/class-wc-post-types.php:291
+#: includes/class-wc-post-types.php:292 includes/class-wc-post-types.php:293
 msgid "View Order"
 msgstr "Bekijk bestelling"
 
-#: includes/class-wc-post-types.php:292
+#: includes/class-wc-post-types.php:294
 msgid "Search Orders"
 msgstr "Zoek bestellingen"
 
-#: includes/class-wc-post-types.php:293
+#: includes/class-wc-post-types.php:295
 msgid "No Orders found"
 msgstr "Geen bestellingen gevonden"
 
-#: includes/class-wc-post-types.php:294
+#: includes/class-wc-post-types.php:296
 msgid "No Orders found in trash"
 msgstr "Geen bestellingen gevonden in de prullenbak"
 
-#: includes/class-wc-post-types.php:295
+#: includes/class-wc-post-types.php:297
 msgid "Parent Orders"
 msgstr "Bovenliggende bestellingen"
 
-#: includes/class-wc-post-types.php:298
+#: includes/class-wc-post-types.php:300
 msgid "This is where store orders are stored."
 msgstr "Hier worden de winkel bestellingen opgeslagen."
 
-#: includes/class-wc-post-types.php:321
+#: includes/class-wc-post-types.php:323
 msgid "Coupons"
 msgstr "Coupons"
 
-#: includes/class-wc-post-types.php:322 templates/cart/cart.php:118
+#: includes/class-wc-post-types.php:324 templates/cart/cart.php:118
 msgid "Coupon"
 msgstr "Kortingscode"
 
-#: includes/class-wc-post-types.php:323
+#: includes/class-wc-post-types.php:325
 msgctxt "Admin menu name"
 msgid "Coupons"
 msgstr "Coupons"
 
-#: includes/class-wc-post-types.php:324
+#: includes/class-wc-post-types.php:326
 msgid "Add Coupon"
 msgstr "Coupon toevoegen"
 
-#: includes/class-wc-post-types.php:325
+#: includes/class-wc-post-types.php:327
 msgid "Add New Coupon"
 msgstr "Nieuwe coupon toevoegen"
 
-#: includes/class-wc-post-types.php:327
+#: includes/class-wc-post-types.php:329
 msgid "Edit Coupon"
 msgstr "Coupon bewerken"
 
-#: includes/class-wc-post-types.php:328
+#: includes/class-wc-post-types.php:330
 msgid "New Coupon"
 msgstr "Nieuwe coupon"
 
-#: includes/class-wc-post-types.php:329
+#: includes/class-wc-post-types.php:331
 msgid "View Coupons"
 msgstr "Bekijk coupons"
 
-#: includes/class-wc-post-types.php:330
+#: includes/class-wc-post-types.php:332
 msgid "View Coupon"
 msgstr "Bekijk coupon"
 
-#: includes/class-wc-post-types.php:331
+#: includes/class-wc-post-types.php:333
 msgid "Search Coupons"
 msgstr "Coupons zoeken"
 
-#: includes/class-wc-post-types.php:332
+#: includes/class-wc-post-types.php:334
 msgid "No Coupons found"
 msgstr "Geen coupons gevonden"
 
-#: includes/class-wc-post-types.php:333
+#: includes/class-wc-post-types.php:335
 msgid "No Coupons found in trash"
 msgstr "Geen coupons gevonden in prullenbak"
 
-#: includes/class-wc-post-types.php:334
+#: includes/class-wc-post-types.php:336
 msgid "Parent Coupon"
 msgstr "Bovenliggende coupon"
 
-#: includes/class-wc-post-types.php:336
+#: includes/class-wc-post-types.php:338
 msgid ""
 "This is where you can add new coupons that customers can use in your store."
 msgstr "Hier kunt u nieuwe coupons toevoegen waar klanten gebruik van kunnen maken in uw winkel."
@@ -6132,7 +6134,7 @@ msgstr "Dank u – uw bestelling is in afwachting van betaling. U wordt automati
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:689
 msgid "Validation error: PayPal currencies do not match (code %s)."
-msgstr ""
+msgstr "Validatiefout: PayPal valuta komen niet overeen (code %s)."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:700
 msgid "Validation error: PayPal amounts do not match (gross %s)."
@@ -6293,7 +6295,7 @@ msgstr ""
 msgid ""
 "Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, "
 "or item)"
-msgstr ""
+msgstr "Optie Naam | Additionele Costen [+- percentage %] | Per Kosten Type (order, class of item)"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:134
 msgid "Additional Costs"
@@ -6705,7 +6707,7 @@ msgstr "Canadese dollar"
 
 #: includes/wc-core-functions.php:166
 msgid "Chilean Peso"
-msgstr ""
+msgstr "Chileense Peso"
 
 #: includes/wc-core-functions.php:167
 msgid "Chinese Yuan"
@@ -6713,7 +6715,7 @@ msgstr "Chinese yuan"
 
 #: includes/wc-core-functions.php:168
 msgid "Colombian Peso"
-msgstr ""
+msgstr "Colombiaanse Peso"
 
 #: includes/wc-core-functions.php:169
 msgid "Czech Koruna"
@@ -6769,7 +6771,7 @@ msgstr "Mexicaanse peso"
 
 #: includes/wc-core-functions.php:182
 msgid "Nigerian Naira"
-msgstr ""
+msgstr "Nigeriaanse Naira"
 
 #: includes/wc-core-functions.php:183
 msgid "Norwegian Krone"
@@ -6961,11 +6963,11 @@ msgstr "Zoek naar producten"
 msgid "Search"
 msgstr "Zoeken"
 
-#: includes/wc-term-functions.php:113
+#: includes/wc-term-functions.php:118
 msgid "Select a category"
 msgstr "Selecteer een categorie"
 
-#: includes/wc-term-functions.php:117
+#: includes/wc-term-functions.php:122
 msgid "Uncategorized"
 msgstr "Geen categorie"
 
@@ -7896,7 +7898,7 @@ msgstr "Wachtwoord opnieuw instellen"
 
 #: templates/myaccount/my-account.php:19
 msgid "Hello <strong>%1$s</strong> (not %1$s? <a href=\"%2$s\">Sign out</a>)."
-msgstr ""
+msgstr "Hallo <strong>%1$s</strong> (niet %1$s? <a href=\"%2$s\">Uitloggen</a>)."
 
 #: templates/myaccount/my-account.php:24
 msgid ""

@@ -1,13 +1,14 @@
 # 
 # Translators:
 # ragulka <illimar.tambek@gmail.com>, 2013-2014
+# soldier99 <janek.tuttar@gmail.com>, 2014
 # RistoNiinemets <risto.niinemets@gmail.com>, 2013
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-06 15:46:00+00:00\n"
-"PO-Revision-Date: 2014-02-07 08:41+0000\n"
+"POT-Creation-Date: 2014-02-07 13:07:00+00:00\n"
+"PO-Revision-Date: 2014-02-08 08:31+0000\n"
 "Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: Estonian (http://www.transifex.com/projects/p/woocommerce-core/language/et/)\n"
 "MIME-Version: 1.0\n"
@@ -546,7 +547,7 @@ msgid "WooCommerce Settings"
 msgstr "WooCommerce'i seaded"
 
 #: includes/admin/class-wc-admin-menus.php:63
-#: includes/admin/class-wc-admin-welcome.php:209
+#: includes/admin/class-wc-admin-welcome.php:213
 #: includes/admin/settings/class-wc-settings-checkout.php:277
 #: includes/admin/settings/class-wc-settings-shipping.php:241
 #: includes/admin/views/html-admin-page-status-report.php:269
@@ -1183,53 +1184,57 @@ msgstr "Pilt"
 msgid "Welcome to WooCommerce"
 msgstr "Tere tulemast kasutama WooCommerce'i"
 
-#: includes/admin/class-wc-admin-welcome.php:191
+#: includes/admin/class-wc-admin-welcome.php:195
 msgid "Welcome to WooCommerce %s"
 msgstr "Tere tulemast kasutama WooCommerce'i %s"
 
-#: includes/admin/class-wc-admin-welcome.php:196
+#: includes/admin/class-wc-admin-welcome.php:200
 msgid "Thanks, all done!"
 msgstr "Aitäh, kõik on tehtud!"
 
-#: includes/admin/class-wc-admin-welcome.php:198
+#: includes/admin/class-wc-admin-welcome.php:202
 msgid "Thank you for updating to the latest version!"
 msgstr "Aitäh, et uuendasid uusimale versioonile!"
 
-#: includes/admin/class-wc-admin-welcome.php:200
+#: includes/admin/class-wc-admin-welcome.php:204
 msgid "Thanks for installing!"
 msgstr "Aitäh paigaldamise eest!"
 
-#: includes/admin/class-wc-admin-welcome.php:202
+#: includes/admin/class-wc-admin-welcome.php:206
 msgid ""
 "%s WooCommerce %s is more powerful, stable, and secure than ever before. We "
 "hope you enjoy it."
 msgstr "%s WooCommerce %s on võimsam, stabiilsem ja turvalisem, kui kunagi varem. Me loodame, et sa naudid seda."
 
-#: includes/admin/class-wc-admin-welcome.php:206
+#: includes/admin/class-wc-admin-welcome.php:210
 msgid "Version %s"
 msgstr "Versioon %s"
 
-#: includes/admin/class-wc-admin-welcome.php:210
+#: includes/admin/class-wc-admin-welcome.php:214
 msgid "Docs"
 msgstr "Dokumentatsioon"
 
-#: includes/admin/class-wc-admin-welcome.php:217
+#: includes/admin/class-wc-admin-welcome.php:221
 msgid "What's New"
 msgstr "Mida on uut"
 
-#: includes/admin/class-wc-admin-welcome.php:219
+#: includes/admin/class-wc-admin-welcome.php:223
 msgid "Credits"
 msgstr "Tänud"
 
-#: includes/admin/class-wc-admin-welcome.php:240
+#: includes/admin/class-wc-admin-welcome.php:225
+msgid "Translators"
+msgstr ""
+
+#: includes/admin/class-wc-admin-welcome.php:243
 msgid "A new RESTful API developers will &#10084;"
 msgstr "Uus RESTful API, mida arendajad &#10084;"
 
-#: includes/admin/class-wc-admin-welcome.php:243
+#: includes/admin/class-wc-admin-welcome.php:246
 msgid "Access your data from 3rd party applications"
 msgstr "Saad oma andmetele ligi teistest rakendustest"
 
-#: includes/admin/class-wc-admin-welcome.php:244
+#: includes/admin/class-wc-admin-welcome.php:247
 msgid ""
 "Built on top of the WooCommerce API, and targetted directly at developers, "
 "the new REST API allows you to get data for <strong>Orders</strong>, "
@@ -1238,11 +1243,11 @@ msgid ""
 "<code>XML</code> and <code>JSON</code> formats."
 msgstr "WooCommerce'i APIl baseeruv, otseselt arendajatele suunatud uus REST API võimaldab pärida andmeid <strong>tellimuste</strong>, <strong>kupongide</strong>, <strong>klientide</strong>, <strong>toodete</strong> ja <strong>raportite</strong> kohta nii <code>XML</code> kui ka <code>JSON</code> formaadis."
 
-#: includes/admin/class-wc-admin-welcome.php:248
+#: includes/admin/class-wc-admin-welcome.php:251
 msgid "Authentication to keep data secure"
 msgstr "Autentimine hoiab andmed turvalisena"
 
-#: includes/admin/class-wc-admin-welcome.php:249
+#: includes/admin/class-wc-admin-welcome.php:252
 msgid ""
 "Authentication for the REST API is performed using HTTP Basic Auth if you "
 "have SSL enabled, or signed according to the <a "
@@ -1250,15 +1255,15 @@ msgid ""
 "you don't have SSL. Data is only available to authenticated users."
 msgstr "REST API authentimine toimib HTTP Basic Auth abil (kui sul on SSL sisse lülitatud) või <a href=\"http://tools.ietf.org/html/rfc5849\">OAuth 1.0a</a> spetsifikatsiooni alusel koostatud allkirja abil (kui sul ei ole SSLi). Andmed on ligipääsetavad vaid autenditud kasutajatele."
 
-#: includes/admin/class-wc-admin-welcome.php:254
+#: includes/admin/class-wc-admin-welcome.php:257
 msgid "UI and reporting improvements"
 msgstr "Kasutajaliidese ja raportide parendused"
 
-#: includes/admin/class-wc-admin-welcome.php:257
+#: includes/admin/class-wc-admin-welcome.php:260
 msgid "WordPress 3.8 admin UI compatibility"
 msgstr "Ühilduvus Wordpress 3.8 haldusliidesega"
 
-#: includes/admin/class-wc-admin-welcome.php:258
+#: includes/admin/class-wc-admin-welcome.php:261
 msgid ""
 "WooCommerce 2.1 has had its UI restyled to work with the new admin design in"
 " WordPress 3.8. All bitmap icons have been replaced with a custom, "
@@ -1266,197 +1271,197 @@ msgid ""
 "improved performance."
 msgstr "WooCommerce 2.1 kasutajaliides on WordPress 3.8 uue haldusliidese kujunduse jaoks ümber kujundatud. Kõik ikoonide pildid on nüüd asendatud kergekaaluliste ikoonifontidega, mis tagab üliterava tulemuse kõrge resolutsioonige seadmetel ja ka parema jõudluse."
 
-#: includes/admin/class-wc-admin-welcome.php:261
+#: includes/admin/class-wc-admin-welcome.php:264
 msgid "Simplified order UI"
 msgstr "Lihtsustatud tellimuste kasutajaliides"
 
-#: includes/admin/class-wc-admin-welcome.php:262
+#: includes/admin/class-wc-admin-welcome.php:265
 msgid ""
 "The orders panel has seen significant improvement to both the totals panel, "
 "and line item display making editing new and existing orders a breeze."
 msgstr "Tellimuse halduspaneel on saanud olulisi täiendusi tellimuse summade ja ridade osas, mis teeb uute ja olemasolevate tellimuste muutmise lihtsamaks."
 
-#: includes/admin/class-wc-admin-welcome.php:263
+#: includes/admin/class-wc-admin-welcome.php:266
 msgid ""
 "Item meta has also been optimised and can now be viewed as HTML rather than "
 "stuck in a text input."
 msgstr "Toote meta-andmeid on samuti optimeeritud ning neid saab nüüd tavalise tekstilahtri asemel vaadata HTMLina."
 
-#: includes/admin/class-wc-admin-welcome.php:266
+#: includes/admin/class-wc-admin-welcome.php:269
 msgid "Improved Reporting"
 msgstr "Paremad raportid"
 
-#: includes/admin/class-wc-admin-welcome.php:267
+#: includes/admin/class-wc-admin-welcome.php:270
 msgid ""
 "Reports have been redesigned with new <strong>filtering</strong> "
 "capabilities, a new <strong>customer report</strong> showing "
 "orders/spending, and the ability to <strong>export CSVs</strong>."
 msgstr "Raportid on läbinud uuenduskuuri, mille tulemuseks on uued <strong>filtreerimise</strong> võimalused, uus <strong>kliendiaruanne</strong>, mis näitab tellimusi/sissetulekuid ning võimalus <strong>eksportida CSV-faile</strong>."
 
-#: includes/admin/class-wc-admin-welcome.php:268
+#: includes/admin/class-wc-admin-welcome.php:271
 msgid ""
 "The dashboard also has a new widget showing you an overview of current "
 "orders complete with sparklines for quick at-a-glance stats."
 msgstr "Töölaual on uus vidin, mis näitab ülevaadet tellimuste hetkeseisust koos graafikuga."
 
-#: includes/admin/class-wc-admin-welcome.php:273
+#: includes/admin/class-wc-admin-welcome.php:276
 msgid "Separated integrations"
 msgstr "Eraldasime liidestused"
 
-#: includes/admin/class-wc-admin-welcome.php:276
+#: includes/admin/class-wc-admin-welcome.php:279
 msgid "New separate plugins"
 msgstr "Uued pluginad"
 
-#: includes/admin/class-wc-admin-welcome.php:277
+#: includes/admin/class-wc-admin-welcome.php:280
 msgid ""
 "To make core more lean, some integrations have been removed and turned into "
 "dedicated plugins which you can install as and when you need them."
 msgstr "Koodibaasi kergemaks tegemiseks on mõned liidestused eemaldatud ja tehtud eraldi pluginateks, mida saad paigaldada siis, kui sul neid vaja läheb."
 
-#: includes/admin/class-wc-admin-welcome.php:280
+#: includes/admin/class-wc-admin-welcome.php:283
 msgid "Google Analytics"
 msgstr "Google Analytics"
 
-#: includes/admin/class-wc-admin-welcome.php:281
+#: includes/admin/class-wc-admin-welcome.php:284
 msgid "Add Google Analytics eCommerce tracking to your WooCommerce store."
 msgstr "Lisa oma WooCommerce'i poele Google Analyticsi eCommerce jälgimine."
 
-#: includes/admin/class-wc-admin-welcome.php:282
-#: includes/admin/class-wc-admin-welcome.php:287
-#: includes/admin/class-wc-admin-welcome.php:292
-#: includes/admin/class-wc-admin-welcome.php:297
-#: includes/admin/class-wc-admin-welcome.php:302
+#: includes/admin/class-wc-admin-welcome.php:285
+#: includes/admin/class-wc-admin-welcome.php:290
+#: includes/admin/class-wc-admin-welcome.php:295
+#: includes/admin/class-wc-admin-welcome.php:300
+#: includes/admin/class-wc-admin-welcome.php:305
 msgid "Download"
 msgstr "Laadi alla"
 
-#: includes/admin/class-wc-admin-welcome.php:285
+#: includes/admin/class-wc-admin-welcome.php:288
 msgid "Piwik"
 msgstr "Piwik"
 
-#: includes/admin/class-wc-admin-welcome.php:286
+#: includes/admin/class-wc-admin-welcome.php:289
 msgid "Integrate WooCommerce with Piwik and the WP-Piwik plugin."
 msgstr "Liidesta WooCommerce Piwiku ja WP-Piwik pluginaga."
 
-#: includes/admin/class-wc-admin-welcome.php:290
+#: includes/admin/class-wc-admin-welcome.php:293
 msgid "ShareThis"
 msgstr "ShareThis"
 
-#: includes/admin/class-wc-admin-welcome.php:291
+#: includes/admin/class-wc-admin-welcome.php:294
 msgid "Add social network sharing buttons to products using ShareThis."
 msgstr "Lisa toodetele ShareThis abil sotsiaalvõrgustikes jagamise nupud."
 
-#: includes/admin/class-wc-admin-welcome.php:295
+#: includes/admin/class-wc-admin-welcome.php:298
 msgid "Sharedaddy"
 msgstr "Sharedaddy"
 
-#: includes/admin/class-wc-admin-welcome.php:296
+#: includes/admin/class-wc-admin-welcome.php:299
 msgid "Add social network sharing buttons to products using Sharedaddy."
 msgstr "Lisa toodetele Sharedaddy abil sotsiaalvõrgustikes jagamise nupud."
 
-#: includes/admin/class-wc-admin-welcome.php:300
+#: includes/admin/class-wc-admin-welcome.php:303
 msgid "ShareYourCart"
 msgstr "ShareYourCart"
 
-#: includes/admin/class-wc-admin-welcome.php:301
+#: includes/admin/class-wc-admin-welcome.php:304
 msgid ""
 "Let users share their carts for a discount using the ShareYourCart service."
 msgstr "Luba ShareYourCart teenuse abil kasutajatel omavahel allahindluste saamiseks ostukorve jagada."
 
-#: includes/admin/class-wc-admin-welcome.php:307
+#: includes/admin/class-wc-admin-welcome.php:310
 msgid "Under the Hood"
 msgstr "Kapoti all"
 
-#: includes/admin/class-wc-admin-welcome.php:311
+#: includes/admin/class-wc-admin-welcome.php:314
 msgid "PayPal PDT support"
 msgstr "PayPal'i PDT tugi"
 
-#: includes/admin/class-wc-admin-welcome.php:312
+#: includes/admin/class-wc-admin-welcome.php:315
 msgid ""
 "PayPal Data Transfer (PDT) is an alternative for PayPal IPN which sends back"
 " the status of an order when a customer returns from PayPal."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:316
+#: includes/admin/class-wc-admin-welcome.php:319
 msgid "Stylesheet separation"
 msgstr "Stiililehtede eraldamine"
 
-#: includes/admin/class-wc-admin-welcome.php:317
+#: includes/admin/class-wc-admin-welcome.php:320
 msgid ""
 "Frontend styles have been split into separate appearance/layout/smallscreen "
 "stylesheets to help with selective customisation."
 msgstr "Poe avaliku osa stiilid on jaotatud erinevatesse välimuse/asendi/väikse ekraani stiililehtedesse, mille tulemusena on lihtsam poodi enda maitse järgi kohandada."
 
-#: includes/admin/class-wc-admin-welcome.php:321
+#: includes/admin/class-wc-admin-welcome.php:324
 msgid "New endpoints"
 msgstr "Uued sihtpunktid"
 
-#: includes/admin/class-wc-admin-welcome.php:322
+#: includes/admin/class-wc-admin-welcome.php:325
 msgid ""
 "Certain pages such as \"Pay\", \"Order Received\" and some account pages are"
 " now endpoints rather than pages to make checkout more reliable."
 msgstr "Mõned lehed nagu \"Maksa\", \"Tellimus vastu võetud\" ning mõningad konto lehed on nüüd lehtede asemel sihtpunktid. Selle tulemusena on maksmise protsess töökindlam."
 
-#: includes/admin/class-wc-admin-welcome.php:328
+#: includes/admin/class-wc-admin-welcome.php:331
 msgid "Default credit card form for gateways"
 msgstr "Vaikimisi krediitkaardiandmete vorm makseviisidele"
 
-#: includes/admin/class-wc-admin-welcome.php:329
+#: includes/admin/class-wc-admin-welcome.php:332
 msgid ""
 "We've added a standardized, default credit card form for gateways to use if "
 "they support <code>default_credit_card_form</code>."
 msgstr "Oleme lisanud standardse, vaikimisi krediitkaardiadnmete vormi, mida makseviisid saavad kasutada, kui nad nad toetavad <code>default_credit_card_form</code>'i."
 
-#: includes/admin/class-wc-admin-welcome.php:333
+#: includes/admin/class-wc-admin-welcome.php:336
 msgid "Coupon limits per customer"
 msgstr "Kupongi kasutajapõhised limiidid"
 
-#: includes/admin/class-wc-admin-welcome.php:334
+#: includes/admin/class-wc-admin-welcome.php:337
 msgid ""
 "Coupon usage limits can now be set per user (using email + ID) rather than "
 "global."
 msgstr "Kupongi kasutamise piirmäärasid saab nüüd kehtestada igale kasutajale eraldi (kasutades selleks e-posti aadressi ja ID-d)."
 
-#: includes/admin/class-wc-admin-welcome.php:338
+#: includes/admin/class-wc-admin-welcome.php:341
 msgid "Streamlined new-account process"
 msgstr "Lihtsam konto loomise protsess"
 
-#: includes/admin/class-wc-admin-welcome.php:339
+#: includes/admin/class-wc-admin-welcome.php:342
 msgid ""
 "During checkout, username and passwords are optional and can be "
 "automatically generated by WooCommerce."
 msgstr "Kassas on kasutajanime ja parooli väljad valikulised ja neid saab WooCommerce ise automaatselt genereerida."
 
-#: includes/admin/class-wc-admin-welcome.php:346
+#: includes/admin/class-wc-admin-welcome.php:349
 msgid "Additional price display options"
 msgstr "Lisavalikud hindade kuvamiseks"
 
-#: includes/admin/class-wc-admin-welcome.php:347
+#: includes/admin/class-wc-admin-welcome.php:350
 msgid ""
 "Define whether prices should be shown incl. or excl. of tax on the frontend,"
 " and add an optional suffix."
 msgstr "Määra, kas hindasid peaks näitama koos maksudega või ilma ning lisa neile soovi korral sufiks."
 
-#: includes/admin/class-wc-admin-welcome.php:351
+#: includes/admin/class-wc-admin-welcome.php:354
 msgid "Past order linking"
 msgstr "Endiste tellimuste seostamine"
 
-#: includes/admin/class-wc-admin-welcome.php:352
+#: includes/admin/class-wc-admin-welcome.php:355
 msgid ""
 "Admins now have the ability to link past orders to a customer (before they "
 "registered) by email address."
 msgstr "Poe halduritel on nüüd võimalik e-posti aadressi alusel seostada kliendiga tema varasemaid tellimusi (neid, mis ta tegi enne, kui endal konto registreeris)."
 
-#: includes/admin/class-wc-admin-welcome.php:356
+#: includes/admin/class-wc-admin-welcome.php:359
 msgid "Review improvements"
 msgstr "Ülevaadete täiendused"
 
-#: includes/admin/class-wc-admin-welcome.php:357
+#: includes/admin/class-wc-admin-welcome.php:360
 msgid ""
 "We've added a new option to restrict reviews to logged in purchasers, and "
 "made ratings editable from the backend."
 msgstr "Oleme lisanud võimaluse piirata ülevaadete kirjutamist sisse loginud ostjatele ning teinud poe halduritele võimalikuks hinnanguid muuta."
 
-#: includes/admin/class-wc-admin-welcome.php:364
+#: includes/admin/class-wc-admin-welcome.php:367
 msgid "Go to WooCommerce Settings"
 msgstr "Mine WooCommerce'i seadetesse"
 
@@ -1469,7 +1474,15 @@ msgid ""
 " to WooCommerce</a>."
 msgstr "WooCommerce'i arendab ülemaailmne meesnaiskond kirglikke inimesi, keda toetab vägev arendajate kogukond. Tahaksid oma nime näha? <a href=\"https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md\">Anna panus WooCommerce'i</a>."
 
-#: includes/admin/class-wc-admin-welcome.php:408
+#: includes/admin/class-wc-admin-welcome.php:398
+msgid ""
+"WooCommerce has been kindly translated into several other languages thanks "
+"to our translation team. Want to see your name? <a "
+"href=\"https://www.transifex.com/projects/p/woocommerce-core/\">Translate "
+"WooCommerce</a>."
+msgstr ""
+
+#: includes/admin/class-wc-admin-welcome.php:423
 msgid "View %s"
 msgstr "Vaata %s"
 
@@ -2184,7 +2197,7 @@ msgstr "Toode peab olema kupongi kehtimiseks selles kategoorias, või \"Toote al
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:152
 msgid "Exclude categories"
-msgstr "Välista kategooriad"
+msgstr "Mitte ühtegi"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:153
 msgid "No categories"
@@ -2210,46 +2223,46 @@ msgid ""
 "is placed."
 msgstr "Nimekiri e-posti aadressidest, millele kliendi arvelduse e-posti aadress peab vastama."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:180
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:182
 msgid "Usage limit per coupon"
 msgstr "Piirmäär kupongi kohta"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:180
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:192
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:182
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:194
 msgctxt "placeholder"
 msgid "Unlimited usage"
 msgstr "Piiramatu kasutusega"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:180
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:182
 msgid "How many times this coupon can be used before it is void."
 msgstr "Kui mitu korda saab seda kupongi kasutada enne, kui see kehtivuse kaotab."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:186
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:188
 msgid "Limit usage to X items"
 msgstr "Piira kasutamine X esemele"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:186
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:188
 msgctxt "placeholder"
 msgid "Apply to all qualifying items in cart"
 msgstr "Rakenda kõikidele kvalifitseeruvatele toodetele ostukorvis"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:186
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:188
 msgid ""
 "The maximum number of individual items this coupon can apply to when using "
 "product discounts. Leave blank to apply to all qualifying items in cart."
 msgstr "Maksimaalne arv individuaalseid tooteid, millele see kupong võib rakenduda, kui kasutada toote allahindlusi. Jäta tühjaks, kui soovid, et kupong rakenduks kõikidele kvalifitseeruvatele toodetele ostukorvis."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:192
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:194
 msgid "Usage limit per user"
 msgstr "Piirmäär kasutaja kohta"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:192
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:194
 msgid ""
 "How many times this coupon can be used by an invidual user. Uses billing "
 "email for guests, and user ID for logged in users."
 msgstr "Kui mitu korda üks ja seesama klient seda kupongi saab kasutada. Klienti kontrollitakse arvelduse e-posti aadressi alusel (külaliste puhul), või kasutaja ID alusel (registreeritud kasutajad)."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:228
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:230
 msgid ""
 "Coupon code already exists - customers will use the latest coupon with this "
 "code."
@@ -3482,7 +3495,7 @@ msgstr "%s väärtuses müüdud kategoorias %s"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:156
 msgid "Select categories&hellip;"
-msgstr ""
+msgstr "Vali kategooriad&hellip;"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:171
 msgid "All"

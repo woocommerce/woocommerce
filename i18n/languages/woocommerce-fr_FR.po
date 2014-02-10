@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-06 15:46:00+00:00\n"
+"POT-Creation-Date: 2014-02-07 13:06:59+00:00\n"
 "PO-Revision-Date: 2014-02-07 08:31+0000\n"
 "Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: French (France) (http://www.transifex.com/projects/p/woocommerce-core/language/fr_FR/)\n"
@@ -3323,47 +3323,47 @@ msgstr "Identique au parent"
 msgid "Standard"
 msgstr "Standard"
 
-#: includes/class-wc-ajax.php:792 includes/class-wc-customer.php:624
+#: includes/class-wc-ajax.php:788 includes/class-wc-customer.php:624
 #: includes/class-wc-customer.php:636
 msgid "File %d"
 msgstr "Fichier %d"
 
-#: includes/class-wc-ajax.php:982 includes/class-wc-ajax.php:983
+#: includes/class-wc-ajax.php:978 includes/class-wc-ajax.php:979
 #: includes/class-wc-order.php:1474
 msgid "Item #%s stock reduced from %s to %s."
 msgstr "L'élément n&deg;%s est en stock réduit de %s jusqu'à %s"
 
-#: includes/class-wc-ajax.php:991
+#: includes/class-wc-ajax.php:987
 msgid ""
 "No products had their stock reduced - they may not have stock management "
 "enabled."
 msgstr "Aucun produit n'a eu son stock réduit - la gestion de leur stock peut ne pas être active."
 
-#: includes/class-wc-ajax.php:1030 includes/class-wc-ajax.php:1031
+#: includes/class-wc-ajax.php:1026 includes/class-wc-ajax.php:1027
 msgid "Item #%s stock increased from %s to %s."
 msgstr "Stock de l'élément n&deg;%s augmenté de %s à %s"
 
-#: includes/class-wc-ajax.php:1038
+#: includes/class-wc-ajax.php:1034
 msgid ""
 "No products had their stock increased - they may not have stock management "
 "enabled."
 msgstr "Aucun produit n'a eu son stock augmenté - la gestion de leur stock peut ne pas être active."
 
-#: includes/class-wc-ajax.php:1054
+#: includes/class-wc-ajax.php:1050
 #: includes/widgets/class-wc-widget-product-categories.php:39
 #: templates/single-product-reviews.php:62
 msgid "Name"
 msgstr "Nom"
 
-#: includes/class-wc-ajax.php:1054
+#: includes/class-wc-ajax.php:1050
 msgid "Value"
 msgstr "Valeurs"
 
-#: includes/class-wc-ajax.php:1272
+#: includes/class-wc-ajax.php:1268
 msgid "Delete note"
 msgstr "Supprimer la note"
 
-#: includes/class-wc-ajax.php:1417
+#: includes/class-wc-ajax.php:1413
 msgid "Guest"
 msgstr "Invité"
 
@@ -5220,18 +5220,18 @@ msgstr "Nouveau %s"
 msgid "New %s"
 msgstr "Nouveau %s"
 
-#: includes/class-wc-post-types.php:224
+#: includes/class-wc-post-types.php:226
 #: includes/updates/woocommerce-update-2.0.php:58
 msgctxt "slug"
 msgid "product"
 msgstr "produit"
 
-#: includes/class-wc-post-types.php:230
+#: includes/class-wc-post-types.php:232
 #: includes/widgets/class-wc-widget-products.php:27
 msgid "Products"
 msgstr "Produits"
 
-#: includes/class-wc-post-types.php:231 templates/cart/cart.php:27
+#: includes/class-wc-post-types.php:233 templates/cart/cart.php:27
 #: templates/checkout/form-pay.php:19 templates/checkout/review-order.php:18
 #: templates/emails/admin-new-order.php:22
 #: templates/emails/customer-completed-order.php:23
@@ -5242,168 +5242,168 @@ msgstr "Produits"
 msgid "Product"
 msgstr "Produit"
 
-#: includes/class-wc-post-types.php:232
+#: includes/class-wc-post-types.php:234
 msgctxt "Admin menu name"
 msgid "Products"
 msgstr "Produits"
 
-#: includes/class-wc-post-types.php:233
+#: includes/class-wc-post-types.php:235
 msgid "Add Product"
 msgstr "Ajouter produit"
 
-#: includes/class-wc-post-types.php:234
+#: includes/class-wc-post-types.php:236
 msgid "Add New Product"
 msgstr "Ajouter un nouveau produit"
 
-#: includes/class-wc-post-types.php:235 includes/class-wc-post-types.php:287
-#: includes/class-wc-post-types.php:326 templates/myaccount/my-address.php:45
+#: includes/class-wc-post-types.php:237 includes/class-wc-post-types.php:289
+#: includes/class-wc-post-types.php:328 templates/myaccount/my-address.php:45
 msgid "Edit"
 msgstr "Modifier"
 
-#: includes/class-wc-post-types.php:236
+#: includes/class-wc-post-types.php:238
 msgid "Edit Product"
 msgstr "Modifier Produit"
 
-#: includes/class-wc-post-types.php:237
+#: includes/class-wc-post-types.php:239
 msgid "New Product"
 msgstr "Nouveau Produit"
 
-#: includes/class-wc-post-types.php:238 includes/class-wc-post-types.php:239
+#: includes/class-wc-post-types.php:240 includes/class-wc-post-types.php:241
 msgid "View Product"
 msgstr "Voir Produit"
 
-#: includes/class-wc-post-types.php:240
+#: includes/class-wc-post-types.php:242
 #: includes/widgets/class-wc-widget-product-search.php:27
 msgid "Search Products"
 msgstr "Recherche produits"
 
-#: includes/class-wc-post-types.php:241
+#: includes/class-wc-post-types.php:243
 msgid "No Products found"
 msgstr "Aucun produit trouvé"
 
-#: includes/class-wc-post-types.php:242
+#: includes/class-wc-post-types.php:244
 msgid "No Products found in trash"
 msgstr "Aucun produit trouvé dans la corbeille"
 
-#: includes/class-wc-post-types.php:243
+#: includes/class-wc-post-types.php:245
 msgid "Parent Product"
 msgstr "Produit parent"
 
-#: includes/class-wc-post-types.php:245
+#: includes/class-wc-post-types.php:247
 msgid "This is where you can add new products to your store."
 msgstr "Ceci est l'endroit où vous pouvez ajouter des nouveaux produits dans votre boutique."
 
-#: includes/class-wc-post-types.php:265
+#: includes/class-wc-post-types.php:267
 msgid "Variations"
 msgstr "Variations"
 
-#: includes/class-wc-post-types.php:273
+#: includes/class-wc-post-types.php:275
 msgctxt "Admin menu name"
 msgid "Orders"
 msgstr "Commandes"
 
-#: includes/class-wc-post-types.php:283
+#: includes/class-wc-post-types.php:285
 msgid "Orders"
 msgstr "Commandes"
 
-#: includes/class-wc-post-types.php:284 templates/myaccount/my-orders.php:32
+#: includes/class-wc-post-types.php:286 templates/myaccount/my-orders.php:32
 msgid "Order"
 msgstr "Commande"
 
-#: includes/class-wc-post-types.php:285
+#: includes/class-wc-post-types.php:287
 msgid "Add Order"
 msgstr "Ajouter commande"
 
-#: includes/class-wc-post-types.php:286
+#: includes/class-wc-post-types.php:288
 msgid "Add New Order"
 msgstr "Nouvelle commande"
 
-#: includes/class-wc-post-types.php:288
+#: includes/class-wc-post-types.php:290
 msgid "Edit Order"
 msgstr "Modifier commande"
 
-#: includes/class-wc-post-types.php:289
+#: includes/class-wc-post-types.php:291
 msgid "New Order"
 msgstr "Nouvelle commande"
 
-#: includes/class-wc-post-types.php:290 includes/class-wc-post-types.php:291
+#: includes/class-wc-post-types.php:292 includes/class-wc-post-types.php:293
 msgid "View Order"
 msgstr "Voir la commande"
 
-#: includes/class-wc-post-types.php:292
+#: includes/class-wc-post-types.php:294
 msgid "Search Orders"
 msgstr "Recherche commandes"
 
-#: includes/class-wc-post-types.php:293
+#: includes/class-wc-post-types.php:295
 msgid "No Orders found"
 msgstr "Aucune commande trouvée"
 
-#: includes/class-wc-post-types.php:294
+#: includes/class-wc-post-types.php:296
 msgid "No Orders found in trash"
 msgstr "Aucune commande trouvée dans la corbeille"
 
-#: includes/class-wc-post-types.php:295
+#: includes/class-wc-post-types.php:297
 msgid "Parent Orders"
 msgstr "Commandes Parentes"
 
-#: includes/class-wc-post-types.php:298
+#: includes/class-wc-post-types.php:300
 msgid "This is where store orders are stored."
 msgstr "Voici où les produits sont stockés"
 
-#: includes/class-wc-post-types.php:321
+#: includes/class-wc-post-types.php:323
 msgid "Coupons"
 msgstr "Codes Promo"
 
-#: includes/class-wc-post-types.php:322 templates/cart/cart.php:118
+#: includes/class-wc-post-types.php:324 templates/cart/cart.php:118
 msgid "Coupon"
 msgstr "Code Promo"
 
-#: includes/class-wc-post-types.php:323
+#: includes/class-wc-post-types.php:325
 msgctxt "Admin menu name"
 msgid "Coupons"
 msgstr "Codes Promo"
 
-#: includes/class-wc-post-types.php:324
+#: includes/class-wc-post-types.php:326
 msgid "Add Coupon"
 msgstr "Ajouter un Code Promo"
 
-#: includes/class-wc-post-types.php:325
+#: includes/class-wc-post-types.php:327
 msgid "Add New Coupon"
 msgstr "Ajouter un nouveau Code Promo"
 
-#: includes/class-wc-post-types.php:327
+#: includes/class-wc-post-types.php:329
 msgid "Edit Coupon"
 msgstr "Modifier le Code Promo"
 
-#: includes/class-wc-post-types.php:328
+#: includes/class-wc-post-types.php:330
 msgid "New Coupon"
 msgstr "Nouveau Code Promo"
 
-#: includes/class-wc-post-types.php:329
+#: includes/class-wc-post-types.php:331
 msgid "View Coupons"
 msgstr "Voir les Codes Promo"
 
-#: includes/class-wc-post-types.php:330
+#: includes/class-wc-post-types.php:332
 msgid "View Coupon"
 msgstr "Voir le Code Promo"
 
-#: includes/class-wc-post-types.php:331
+#: includes/class-wc-post-types.php:333
 msgid "Search Coupons"
 msgstr "Recherche Codes Promo"
 
-#: includes/class-wc-post-types.php:332
+#: includes/class-wc-post-types.php:334
 msgid "No Coupons found"
 msgstr "Aucun Code Promo trouvé"
 
-#: includes/class-wc-post-types.php:333
+#: includes/class-wc-post-types.php:335
 msgid "No Coupons found in trash"
 msgstr "Aucun Code Promo trouvé dans la corbeille"
 
-#: includes/class-wc-post-types.php:334
+#: includes/class-wc-post-types.php:336
 msgid "Parent Coupon"
 msgstr "Code Promo parent"
 
-#: includes/class-wc-post-types.php:336
+#: includes/class-wc-post-types.php:338
 msgid ""
 "This is where you can add new coupons that customers can use in your store."
 msgstr "Voici où vous pouvez ajouter de nouveaux codes promo que vos clients peuvent utiliser dans votre boutique."
@@ -6961,11 +6961,11 @@ msgstr "Recherche des produits"
 msgid "Search"
 msgstr "Recherche"
 
-#: includes/wc-term-functions.php:113
+#: includes/wc-term-functions.php:118
 msgid "Select a category"
 msgstr "Sélectionnez une catégorie"
 
-#: includes/wc-term-functions.php:117
+#: includes/wc-term-functions.php:122
 msgid "Uncategorized"
 msgstr "Non classé"
 

@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-06 15:46:00+00:00\n"
-"PO-Revision-Date: 2014-02-07 08:41+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"POT-Creation-Date: 2014-02-07 13:07:00+00:00\n"
+"PO-Revision-Date: 2014-02-08 12:54+0000\n"
+"Last-Translator: martian36 <martian36@naver.com>\n"
 "Language-Team: Korean (Korea) (http://www.transifex.com/projects/p/woocommerce-core/language/ko_KR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -406,7 +406,7 @@ msgstr "5개 중에"
 
 #: includes/admin/class-wc-admin-dashboard.php:195
 msgid "reviewed by"
-msgstr ""
+msgstr "리뷰"
 
 #: includes/admin/class-wc-admin-dashboard.php:201
 msgid "There are no product reviews yet."
@@ -544,7 +544,7 @@ msgid "WooCommerce Settings"
 msgstr "우커머스 설정"
 
 #: includes/admin/class-wc-admin-menus.php:63
-#: includes/admin/class-wc-admin-welcome.php:209
+#: includes/admin/class-wc-admin-welcome.php:213
 #: includes/admin/settings/class-wc-settings-checkout.php:277
 #: includes/admin/settings/class-wc-settings-shipping.php:241
 #: includes/admin/views/html-admin-page-status-report.php:269
@@ -1083,7 +1083,7 @@ msgstr "모든 세션 제거하기"
 msgid ""
 "<strong class=\"red\">Warning:</strong> This tool will delete all customer "
 "session data from the database, including any current live carts."
-msgstr ""
+msgstr "<strong class=\"red\">경고</strong> 이 도구는 현재 남아있는 카트를 포함하여 데이터베이스에서 고객의 모든 세션 데이터를 제거합니다."
 
 #: includes/admin/class-wc-admin-status.php:198
 #: includes/admin/views/html-notice-install.php:6
@@ -1098,7 +1098,7 @@ msgstr "페이지 설치"
 msgid ""
 "<strong class=\"red\">Note:</strong> This tool will install all the missing "
 "WooCommerce pages. Pages already defined and set up will not be replaced."
-msgstr ""
+msgstr "<strong class=\"red\">주의</strong> 이 도구는 모든 사라진 우커머스 페이지를 설치합니다. 페이지는 이미 정의돼있고 설정은 교체되지 않습니다."
 
 #: includes/admin/class-wc-admin-status.php:203
 msgid "Delete all WooCommerce tax rates"
@@ -1112,7 +1112,7 @@ msgstr "모든 세율 삭제하기"
 msgid ""
 "<strong class=\"red\">Note:</strong> This option will delete ALL of your tax"
 " rates, use with caution."
-msgstr ""
+msgstr "<strong class=\"red\">주의</strong> 이 옵션은 모든 세율을 삭제하니 주의하세요."
 
 #: includes/admin/class-wc-admin-taxonomies.php:86
 #: includes/admin/class-wc-admin-taxonomies.php:174
@@ -1181,53 +1181,57 @@ msgstr "이미지"
 msgid "Welcome to WooCommerce"
 msgstr "우커머스에 오신 것을 환영합니다"
 
-#: includes/admin/class-wc-admin-welcome.php:191
+#: includes/admin/class-wc-admin-welcome.php:195
 msgid "Welcome to WooCommerce %s"
 msgstr "우커머스 %s에 오신 것을 환영합니다"
 
-#: includes/admin/class-wc-admin-welcome.php:196
+#: includes/admin/class-wc-admin-welcome.php:200
 msgid "Thanks, all done!"
 msgstr "감사합니다, 모두 완료됐습니다!"
 
-#: includes/admin/class-wc-admin-welcome.php:198
+#: includes/admin/class-wc-admin-welcome.php:202
 msgid "Thank you for updating to the latest version!"
 msgstr "최신 버전 업데이트를 감사드립니다!"
 
-#: includes/admin/class-wc-admin-welcome.php:200
+#: includes/admin/class-wc-admin-welcome.php:204
 msgid "Thanks for installing!"
 msgstr "설치해주셔서 감사합니다!"
 
-#: includes/admin/class-wc-admin-welcome.php:202
+#: includes/admin/class-wc-admin-welcome.php:206
 msgid ""
 "%s WooCommerce %s is more powerful, stable, and secure than ever before. We "
 "hope you enjoy it."
 msgstr "%s 우커머스 %s는 이전보다 더 강력하고 안정적이며 안전합니다. 즐길 수 있기를 바랍니다."
 
-#: includes/admin/class-wc-admin-welcome.php:206
+#: includes/admin/class-wc-admin-welcome.php:210
 msgid "Version %s"
 msgstr "버전 %s"
 
-#: includes/admin/class-wc-admin-welcome.php:210
+#: includes/admin/class-wc-admin-welcome.php:214
 msgid "Docs"
 msgstr "문서"
 
-#: includes/admin/class-wc-admin-welcome.php:217
+#: includes/admin/class-wc-admin-welcome.php:221
 msgid "What's New"
 msgstr "새로운 것"
 
-#: includes/admin/class-wc-admin-welcome.php:219
+#: includes/admin/class-wc-admin-welcome.php:223
 msgid "Credits"
 msgstr "크레딧"
 
-#: includes/admin/class-wc-admin-welcome.php:240
+#: includes/admin/class-wc-admin-welcome.php:225
+msgid "Translators"
+msgstr "번역자"
+
+#: includes/admin/class-wc-admin-welcome.php:243
 msgid "A new RESTful API developers will &#10084;"
 msgstr "새로운 RESTful API 개발자 &#10084;"
 
-#: includes/admin/class-wc-admin-welcome.php:243
+#: includes/admin/class-wc-admin-welcome.php:246
 msgid "Access your data from 3rd party applications"
 msgstr "제3자 애플리케이션으로부터 데이터 접근"
 
-#: includes/admin/class-wc-admin-welcome.php:244
+#: includes/admin/class-wc-admin-welcome.php:247
 msgid ""
 "Built on top of the WooCommerce API, and targetted directly at developers, "
 "the new REST API allows you to get data for <strong>Orders</strong>, "
@@ -1236,11 +1240,11 @@ msgid ""
 "<code>XML</code> and <code>JSON</code> formats."
 msgstr "우커머스 API 상위에 설치되어 직접 개발자를 대상으로 하며 새로운 REST API는 <code>XML</code>과 <code>JSON</code> 형식으로 <strong>주문</strong>, <strong>쿠폰</strong>, <strong>고객</strong>, <strong>상품</strong>, <strong>보고서</strong>의 데이터를 가져오도록 허용합니다. "
 
-#: includes/admin/class-wc-admin-welcome.php:248
+#: includes/admin/class-wc-admin-welcome.php:251
 msgid "Authentication to keep data secure"
 msgstr "데이터를 안전하게 유지하도록 인증"
 
-#: includes/admin/class-wc-admin-welcome.php:249
+#: includes/admin/class-wc-admin-welcome.php:252
 msgid ""
 "Authentication for the REST API is performed using HTTP Basic Auth if you "
 "have SSL enabled, or signed according to the <a "
@@ -1248,15 +1252,15 @@ msgid ""
 "you don't have SSL. Data is only available to authenticated users."
 msgstr "REST API 인증은 SSL이 활성화됐을 경우 HTTP Basic Auth를 사용해 실행되거나 또는 SSl이 없을 경우 <a href=\"http://tools.ietf.org/html/rfc5849\">OAuth 1.0a</a> 사양에 따라 서명됩니다. 데이터는 인증된 사용자만 가능합니다."
 
-#: includes/admin/class-wc-admin-welcome.php:254
+#: includes/admin/class-wc-admin-welcome.php:257
 msgid "UI and reporting improvements"
 msgstr "UI와 보고서 개선"
 
-#: includes/admin/class-wc-admin-welcome.php:257
+#: includes/admin/class-wc-admin-welcome.php:260
 msgid "WordPress 3.8 admin UI compatibility"
 msgstr "워드프레스 3.8 관리자 UI 호환성"
 
-#: includes/admin/class-wc-admin-welcome.php:258
+#: includes/admin/class-wc-admin-welcome.php:261
 msgid ""
 "WooCommerce 2.1 has had its UI restyled to work with the new admin design in"
 " WordPress 3.8. All bitmap icons have been replaced with a custom, "
@@ -1264,197 +1268,197 @@ msgid ""
 "improved performance."
 msgstr "우커머스 2.1은 워드프레스 3.8의 새로운 관리자 디자인과 작동하도록 UI를 다시 스타일 했습니다. 모든 비트맵 아이콘은 가벼운 사용자 정의 아이콘 폰트로 교체 됐습니다. 이는 레티나 기기에서 선명하고 깨끗하며 개선된 성능을 보여줍니다."
 
-#: includes/admin/class-wc-admin-welcome.php:261
+#: includes/admin/class-wc-admin-welcome.php:264
 msgid "Simplified order UI"
 msgstr "단순화된 주문 UI"
 
-#: includes/admin/class-wc-admin-welcome.php:262
+#: includes/admin/class-wc-admin-welcome.php:265
 msgid ""
 "The orders panel has seen significant improvement to both the totals panel, "
 "and line item display making editing new and existing orders a breeze."
 msgstr "주문 패널은 특별히 개선 됐으며 총계 패널과 라인 아이템은 새 주문과 기존의 주문을 산뜻하게 표시되도록 만들었습니다."
 
-#: includes/admin/class-wc-admin-welcome.php:263
+#: includes/admin/class-wc-admin-welcome.php:266
 msgid ""
 "Item meta has also been optimised and can now be viewed as HTML rather than "
 "stuck in a text input."
 msgstr "아이템 메타 또한 최적화 됐으며 텍스트 입력이 아닌 HTML로 볼 수 있도록 됐습니다."
 
-#: includes/admin/class-wc-admin-welcome.php:266
+#: includes/admin/class-wc-admin-welcome.php:269
 msgid "Improved Reporting"
 msgstr "개선된 보고 기능"
 
-#: includes/admin/class-wc-admin-welcome.php:267
+#: includes/admin/class-wc-admin-welcome.php:270
 msgid ""
 "Reports have been redesigned with new <strong>filtering</strong> "
 "capabilities, a new <strong>customer report</strong> showing "
 "orders/spending, and the ability to <strong>export CSVs</strong>."
 msgstr "보고 기능은 재디자인됐으며 새로운 <strong>필터링</strong> 기능, 새로운 <strong>고객 보고서</strong>는 주문/지출을 보여줍니다. 또한 <strong>CSV 내보내기</strong> 기능도 있습니다.  "
 
-#: includes/admin/class-wc-admin-welcome.php:268
+#: includes/admin/class-wc-admin-welcome.php:271
 msgid ""
 "The dashboard also has a new widget showing you an overview of current "
 "orders complete with sparklines for quick at-a-glance stats."
 msgstr "대시보드는 새 위젯이 설치됐으며 빠른 통계보기를 위해 스파크라인을 이용 현재 주문의 전체 보기를 보여줍니다."
 
-#: includes/admin/class-wc-admin-welcome.php:273
+#: includes/admin/class-wc-admin-welcome.php:276
 msgid "Separated integrations"
 msgstr "분리된 결합"
 
-#: includes/admin/class-wc-admin-welcome.php:276
+#: includes/admin/class-wc-admin-welcome.php:279
 msgid "New separate plugins"
 msgstr "새로운 분리된 플러그인"
 
-#: includes/admin/class-wc-admin-welcome.php:277
+#: includes/admin/class-wc-admin-welcome.php:280
 msgid ""
 "To make core more lean, some integrations have been removed and turned into "
 "dedicated plugins which you can install as and when you need them."
 msgstr "코어를 보다 가볍게 하기 위해 일부 결합은 제거되고 단일 플러그인으로 전환돼 필요에 따라 별도로 설치할 수 있습니다."
 
-#: includes/admin/class-wc-admin-welcome.php:280
+#: includes/admin/class-wc-admin-welcome.php:283
 msgid "Google Analytics"
 msgstr "구글 애널리틱스"
 
-#: includes/admin/class-wc-admin-welcome.php:281
+#: includes/admin/class-wc-admin-welcome.php:284
 msgid "Add Google Analytics eCommerce tracking to your WooCommerce store."
 msgstr "구글 애널리틱스 이커머스 추적을 우커머스 상점에 추가하세요."
 
-#: includes/admin/class-wc-admin-welcome.php:282
-#: includes/admin/class-wc-admin-welcome.php:287
-#: includes/admin/class-wc-admin-welcome.php:292
-#: includes/admin/class-wc-admin-welcome.php:297
-#: includes/admin/class-wc-admin-welcome.php:302
+#: includes/admin/class-wc-admin-welcome.php:285
+#: includes/admin/class-wc-admin-welcome.php:290
+#: includes/admin/class-wc-admin-welcome.php:295
+#: includes/admin/class-wc-admin-welcome.php:300
+#: includes/admin/class-wc-admin-welcome.php:305
 msgid "Download"
 msgstr "내려받기"
 
-#: includes/admin/class-wc-admin-welcome.php:285
+#: includes/admin/class-wc-admin-welcome.php:288
 msgid "Piwik"
 msgstr "Piwik"
 
-#: includes/admin/class-wc-admin-welcome.php:286
+#: includes/admin/class-wc-admin-welcome.php:289
 msgid "Integrate WooCommerce with Piwik and the WP-Piwik plugin."
 msgstr "Piwik와 WP-Piwik 플러그인으로 우커머스를 결합하세요."
 
-#: includes/admin/class-wc-admin-welcome.php:290
+#: includes/admin/class-wc-admin-welcome.php:293
 msgid "ShareThis"
 msgstr "ShareThis"
 
-#: includes/admin/class-wc-admin-welcome.php:291
+#: includes/admin/class-wc-admin-welcome.php:294
 msgid "Add social network sharing buttons to products using ShareThis."
 msgstr "ShareThis를 이용해 상품에 소셜 네트워크 공유 버튼을 추가하세요."
 
-#: includes/admin/class-wc-admin-welcome.php:295
+#: includes/admin/class-wc-admin-welcome.php:298
 msgid "Sharedaddy"
 msgstr "Sharedaddy"
 
-#: includes/admin/class-wc-admin-welcome.php:296
+#: includes/admin/class-wc-admin-welcome.php:299
 msgid "Add social network sharing buttons to products using Sharedaddy."
 msgstr "Sharedaddy를 이용해 상품에 소셜 네트워크 공유 버튼을 추가하세요."
 
-#: includes/admin/class-wc-admin-welcome.php:300
+#: includes/admin/class-wc-admin-welcome.php:303
 msgid "ShareYourCart"
 msgstr "ShareYourCart"
 
-#: includes/admin/class-wc-admin-welcome.php:301
+#: includes/admin/class-wc-admin-welcome.php:304
 msgid ""
 "Let users share their carts for a discount using the ShareYourCart service."
 msgstr "ShareYourCart 서비스를 이용해 사용자가 장바구니 할인을 받도록 하세요."
 
-#: includes/admin/class-wc-admin-welcome.php:307
+#: includes/admin/class-wc-admin-welcome.php:310
 msgid "Under the Hood"
 msgstr "세부 내용"
 
-#: includes/admin/class-wc-admin-welcome.php:311
+#: includes/admin/class-wc-admin-welcome.php:314
 msgid "PayPal PDT support"
 msgstr "PayPal PDT 지원"
 
-#: includes/admin/class-wc-admin-welcome.php:312
+#: includes/admin/class-wc-admin-welcome.php:315
 msgid ""
 "PayPal Data Transfer (PDT) is an alternative for PayPal IPN which sends back"
 " the status of an order when a customer returns from PayPal."
 msgstr "PayPal Data Transfer (PDT)는 PayPal IPN의 대체 수단으로 고객이 PayPal에서 되돌아올 때 주문 상태를 돌려보냅니다."
 
-#: includes/admin/class-wc-admin-welcome.php:316
+#: includes/admin/class-wc-admin-welcome.php:319
 msgid "Stylesheet separation"
 msgstr "스타일시트 분리"
 
-#: includes/admin/class-wc-admin-welcome.php:317
+#: includes/admin/class-wc-admin-welcome.php:320
 msgid ""
 "Frontend styles have been split into separate appearance/layout/smallscreen "
 "stylesheets to help with selective customisation."
 msgstr "전면 사이트 스타일시트는 모양/레이아웃/작은 화면 스타일시트로 분리돼 선택적으로 사용자 정의 할 수 있도록 돕고 있습니다."
 
-#: includes/admin/class-wc-admin-welcome.php:321
+#: includes/admin/class-wc-admin-welcome.php:324
 msgid "New endpoints"
 msgstr "새로운 최종점"
 
-#: includes/admin/class-wc-admin-welcome.php:322
+#: includes/admin/class-wc-admin-welcome.php:325
 msgid ""
 "Certain pages such as \"Pay\", \"Order Received\" and some account pages are"
 " now endpoints rather than pages to make checkout more reliable."
 msgstr "\"지불\", \"주문 접수됨\", 일부 계정 페이지와 같은 특정 페이지는 결제를 더 신뢰할 수 있도록 이제 페이지가 아닌 최종점입니다."
 
-#: includes/admin/class-wc-admin-welcome.php:328
+#: includes/admin/class-wc-admin-welcome.php:331
 msgid "Default credit card form for gateways"
 msgstr "게이트웨이 기본 신용카드 폼"
 
-#: includes/admin/class-wc-admin-welcome.php:329
+#: includes/admin/class-wc-admin-welcome.php:332
 msgid ""
 "We've added a standardized, default credit card form for gateways to use if "
 "they support <code>default_credit_card_form</code>."
 msgstr "<code>default_credit_card_form</code>을 지원할 경우 표준화된 기본 신용카드 폼을 게이트웨이에 추가했습니다."
 
-#: includes/admin/class-wc-admin-welcome.php:333
+#: includes/admin/class-wc-admin-welcome.php:336
 msgid "Coupon limits per customer"
 msgstr "고객별 쿠폰 한도"
 
-#: includes/admin/class-wc-admin-welcome.php:334
+#: includes/admin/class-wc-admin-welcome.php:337
 msgid ""
 "Coupon usage limits can now be set per user (using email + ID) rather than "
 "global."
 msgstr "쿠폰 사용 한도는 이제 전체가 아닌 사용자별로 설정될 수 있습니다(이메일 + ID 이용)."
 
-#: includes/admin/class-wc-admin-welcome.php:338
+#: includes/admin/class-wc-admin-welcome.php:341
 msgid "Streamlined new-account process"
 msgstr "유연한 새 계정 프로세스"
 
-#: includes/admin/class-wc-admin-welcome.php:339
+#: includes/admin/class-wc-admin-welcome.php:342
 msgid ""
 "During checkout, username and passwords are optional and can be "
 "automatically generated by WooCommerce."
 msgstr "결제 중 사용자명과 비밀번호는 선택적이며 우커머스에 의해 자동으로 생성될 수 있습니다."
 
-#: includes/admin/class-wc-admin-welcome.php:346
+#: includes/admin/class-wc-admin-welcome.php:349
 msgid "Additional price display options"
 msgstr "추가적인 가격 표시 옵션"
 
-#: includes/admin/class-wc-admin-welcome.php:347
+#: includes/admin/class-wc-admin-welcome.php:350
 msgid ""
 "Define whether prices should be shown incl. or excl. of tax on the frontend,"
 " and add an optional suffix."
 msgstr "사이트 전면에서 가격에 세금의 포함 또는 제외를 보여주도록 정의하고 선택적으로 접미어를 추가합니다."
 
-#: includes/admin/class-wc-admin-welcome.php:351
+#: includes/admin/class-wc-admin-welcome.php:354
 msgid "Past order linking"
 msgstr "과거 주문 링크"
 
-#: includes/admin/class-wc-admin-welcome.php:352
+#: includes/admin/class-wc-admin-welcome.php:355
 msgid ""
 "Admins now have the ability to link past orders to a customer (before they "
 "registered) by email address."
 msgstr "관리자는 이제 이메일 주소로 고객에게(회원가입하기 전에) 과거 주문을 링크할 수 있는 기능이 있습니다. "
 
-#: includes/admin/class-wc-admin-welcome.php:356
+#: includes/admin/class-wc-admin-welcome.php:359
 msgid "Review improvements"
 msgstr "리뷰 개선"
 
-#: includes/admin/class-wc-admin-welcome.php:357
+#: includes/admin/class-wc-admin-welcome.php:360
 msgid ""
 "We've added a new option to restrict reviews to logged in purchasers, and "
 "made ratings editable from the backend."
 msgstr "로그인 구매자에게 리뷰를 제한할 수 있는 새로운 옵션을 추가했으며 관리자 화면에서 평가를 편집할 수 있습니다."
 
-#: includes/admin/class-wc-admin-welcome.php:364
+#: includes/admin/class-wc-admin-welcome.php:367
 msgid "Go to WooCommerce Settings"
 msgstr "우커머스 설정으로 가기"
 
@@ -1467,7 +1471,15 @@ msgid ""
 " to WooCommerce</a>."
 msgstr "우커머스는 열정적인 개인으로 이루어진 범세계적 팀에 의해 개발되고 유지되며 굉장한 개발자 커뮤니티가 지원하고 있습니다. 당신의 이름이 보이기를 원하시나요?  <a href=\"https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md\">우커머스에 기여하기</a>."
 
-#: includes/admin/class-wc-admin-welcome.php:408
+#: includes/admin/class-wc-admin-welcome.php:398
+msgid ""
+"WooCommerce has been kindly translated into several other languages thanks "
+"to our translation team. Want to see your name? <a "
+"href=\"https://www.transifex.com/projects/p/woocommerce-core/\">Translate "
+"WooCommerce</a>."
+msgstr "우커머스는 번역 팀 덕분에 여러 가지 언어로 번역됐습니다. 당신의 이름을 보길 원하시나요? <a href=\"https://www.transifex.com/projects/p/woocommerce-core/\">우커머스 번역</a>."
+
+#: includes/admin/class-wc-admin-welcome.php:423
 msgid "View %s"
 msgstr "%s 보기"
 
@@ -1549,17 +1561,17 @@ msgstr "파일 업로드 및 가져오기"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:103
 msgid "Product Image"
-msgstr ""
+msgstr "상품 이미지"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:105
 msgid "Remove product image"
-msgstr ""
+msgstr "상품 이미지 제거"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:107
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:121
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:122
 msgid "Set product image"
-msgstr ""
+msgstr "상품 이미지 설정"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:136
 msgid "Product name"
@@ -1928,7 +1940,7 @@ msgstr[0] "플러스 %d 기타 메모"
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:206
 msgid "%d note"
 msgid_plural "%d notes"
-msgstr[0] ""
+msgstr[0] "%d 메모"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:228
 msgid "Billing:"
@@ -2204,46 +2216,46 @@ msgid ""
 "is placed."
 msgstr "주문이 실행될 경우 고객의 청구 이메일을 점검해서 제외하기 위한 이메일 목록"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:180
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:182
 msgid "Usage limit per coupon"
 msgstr "쿠폰당 사용 한도"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:180
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:192
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:182
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:194
 msgctxt "placeholder"
 msgid "Unlimited usage"
 msgstr "무제한 사용"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:180
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:182
 msgid "How many times this coupon can be used before it is void."
 msgstr "이 쿠폰이 무효로 되기까지 사용 가능한 횟수"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:186
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:188
 msgid "Limit usage to X items"
 msgstr "X 아이템에 사용 제한"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:186
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:188
 msgctxt "placeholder"
 msgid "Apply to all qualifying items in cart"
 msgstr "장바구니의 모든 합당한 아이템에 적용하기"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:186
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:188
 msgid ""
 "The maximum number of individual items this coupon can apply to when using "
 "product discounts. Leave blank to apply to all qualifying items in cart."
 msgstr "상품 할인을 이용할 때 이 쿠폰이 적용될 수 있는 개별 아이템의 최대 수. 장바구니의 모든 합당한 아이템에 적용하려면 비워두세요."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:192
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:194
 msgid "Usage limit per user"
 msgstr "사용자별 사용 한도"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:192
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:194
 msgid ""
 "How many times this coupon can be used by an invidual user. Uses billing "
 "email for guests, and user ID for logged in users."
 msgstr "이 쿠폰이 개별 사용자에게 사용될 수 있는 횟수. 비회원에 대해서는 청주 이메일을 사용하고 로그인 사용자에게는 사용자 ID를 사용합니다."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:228
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:230
 msgid ""
 "Coupon code already exists - customers will use the latest coupon with this "
 "code."
@@ -3473,7 +3485,7 @@ msgstr "%s 판매 %s에서"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:156
 msgid "Select categories&hellip;"
-msgstr ""
+msgstr "카테고리 선택&hellip;"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:171
 msgid "All"

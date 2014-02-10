@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-06 15:46:00+00:00\n"
+"POT-Creation-Date: 2014-02-07 13:06:59+00:00\n"
 "PO-Revision-Date: 2014-02-07 08:30+0000\n"
 "Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/projects/p/woocommerce-core/language/zh_TW/)\n"
@@ -3320,47 +3320,47 @@ msgstr "與父母相同"
 msgid "Standard"
 msgstr "標準"
 
-#: includes/class-wc-ajax.php:792 includes/class-wc-customer.php:624
+#: includes/class-wc-ajax.php:788 includes/class-wc-customer.php:624
 #: includes/class-wc-customer.php:636
 msgid "File %d"
 msgstr ""
 
-#: includes/class-wc-ajax.php:982 includes/class-wc-ajax.php:983
+#: includes/class-wc-ajax.php:978 includes/class-wc-ajax.php:979
 #: includes/class-wc-order.php:1474
 msgid "Item #%s stock reduced from %s to %s."
 msgstr "商品 #%s 庫存由 %s 減少到 %s。"
 
-#: includes/class-wc-ajax.php:991
+#: includes/class-wc-ajax.php:987
 msgid ""
 "No products had their stock reduced - they may not have stock management "
 "enabled."
 msgstr ""
 
-#: includes/class-wc-ajax.php:1030 includes/class-wc-ajax.php:1031
+#: includes/class-wc-ajax.php:1026 includes/class-wc-ajax.php:1027
 msgid "Item #%s stock increased from %s to %s."
 msgstr "商品 #%s 庫存由 %s 恢復到 %s。"
 
-#: includes/class-wc-ajax.php:1038
+#: includes/class-wc-ajax.php:1034
 msgid ""
 "No products had their stock increased - they may not have stock management "
 "enabled."
 msgstr ""
 
-#: includes/class-wc-ajax.php:1054
+#: includes/class-wc-ajax.php:1050
 #: includes/widgets/class-wc-widget-product-categories.php:39
 #: templates/single-product-reviews.php:62
 msgid "Name"
 msgstr "名字"
 
-#: includes/class-wc-ajax.php:1054
+#: includes/class-wc-ajax.php:1050
 msgid "Value"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1272
+#: includes/class-wc-ajax.php:1268
 msgid "Delete note"
 msgstr "刪除備註"
 
-#: includes/class-wc-ajax.php:1417
+#: includes/class-wc-ajax.php:1413
 msgid "Guest"
 msgstr "訪客"
 
@@ -5217,18 +5217,18 @@ msgstr ""
 msgid "New %s"
 msgstr ""
 
-#: includes/class-wc-post-types.php:224
+#: includes/class-wc-post-types.php:226
 #: includes/updates/woocommerce-update-2.0.php:58
 msgctxt "slug"
 msgid "product"
 msgstr "商品"
 
-#: includes/class-wc-post-types.php:230
+#: includes/class-wc-post-types.php:232
 #: includes/widgets/class-wc-widget-products.php:27
 msgid "Products"
 msgstr "商品"
 
-#: includes/class-wc-post-types.php:231 templates/cart/cart.php:27
+#: includes/class-wc-post-types.php:233 templates/cart/cart.php:27
 #: templates/checkout/form-pay.php:19 templates/checkout/review-order.php:18
 #: templates/emails/admin-new-order.php:22
 #: templates/emails/customer-completed-order.php:23
@@ -5239,168 +5239,168 @@ msgstr "商品"
 msgid "Product"
 msgstr ""
 
-#: includes/class-wc-post-types.php:232
+#: includes/class-wc-post-types.php:234
 msgctxt "Admin menu name"
 msgid "Products"
 msgstr "商品"
 
-#: includes/class-wc-post-types.php:233
+#: includes/class-wc-post-types.php:235
 msgid "Add Product"
 msgstr "添加商品"
 
-#: includes/class-wc-post-types.php:234
+#: includes/class-wc-post-types.php:236
 msgid "Add New Product"
 msgstr "新增商品"
 
-#: includes/class-wc-post-types.php:235 includes/class-wc-post-types.php:287
-#: includes/class-wc-post-types.php:326 templates/myaccount/my-address.php:45
+#: includes/class-wc-post-types.php:237 includes/class-wc-post-types.php:289
+#: includes/class-wc-post-types.php:328 templates/myaccount/my-address.php:45
 msgid "Edit"
 msgstr "編輯"
 
-#: includes/class-wc-post-types.php:236
+#: includes/class-wc-post-types.php:238
 msgid "Edit Product"
 msgstr "編輯商品"
 
-#: includes/class-wc-post-types.php:237
+#: includes/class-wc-post-types.php:239
 msgid "New Product"
 msgstr "新商品"
 
-#: includes/class-wc-post-types.php:238 includes/class-wc-post-types.php:239
+#: includes/class-wc-post-types.php:240 includes/class-wc-post-types.php:241
 msgid "View Product"
 msgstr "檢視商品"
 
-#: includes/class-wc-post-types.php:240
+#: includes/class-wc-post-types.php:242
 #: includes/widgets/class-wc-widget-product-search.php:27
 msgid "Search Products"
 msgstr "搜尋商品"
 
-#: includes/class-wc-post-types.php:241
+#: includes/class-wc-post-types.php:243
 msgid "No Products found"
 msgstr "找不到商品"
 
-#: includes/class-wc-post-types.php:242
+#: includes/class-wc-post-types.php:244
 msgid "No Products found in trash"
 msgstr "垃圾桶裡找不到商品"
 
-#: includes/class-wc-post-types.php:243
+#: includes/class-wc-post-types.php:245
 msgid "Parent Product"
 msgstr "父母商品"
 
-#: includes/class-wc-post-types.php:245
+#: includes/class-wc-post-types.php:247
 msgid "This is where you can add new products to your store."
 msgstr "在此可以新增商品到您的商店"
 
-#: includes/class-wc-post-types.php:265
+#: includes/class-wc-post-types.php:267
 msgid "Variations"
 msgstr "變化類型"
 
-#: includes/class-wc-post-types.php:273
+#: includes/class-wc-post-types.php:275
 msgctxt "Admin menu name"
 msgid "Orders"
-msgstr "訂單"
-
-#: includes/class-wc-post-types.php:283
-msgid "Orders"
-msgstr "訂單"
-
-#: includes/class-wc-post-types.php:284 templates/myaccount/my-orders.php:32
-msgid "Order"
 msgstr "訂單"
 
 #: includes/class-wc-post-types.php:285
+msgid "Orders"
+msgstr "訂單"
+
+#: includes/class-wc-post-types.php:286 templates/myaccount/my-orders.php:32
+msgid "Order"
+msgstr "訂單"
+
+#: includes/class-wc-post-types.php:287
 msgid "Add Order"
 msgstr "添加訂單"
 
-#: includes/class-wc-post-types.php:286
+#: includes/class-wc-post-types.php:288
 msgid "Add New Order"
 msgstr "新增訂單"
 
-#: includes/class-wc-post-types.php:288
+#: includes/class-wc-post-types.php:290
 msgid "Edit Order"
 msgstr "編輯訂單"
 
-#: includes/class-wc-post-types.php:289
+#: includes/class-wc-post-types.php:291
 msgid "New Order"
 msgstr "新訂單"
 
-#: includes/class-wc-post-types.php:290 includes/class-wc-post-types.php:291
+#: includes/class-wc-post-types.php:292 includes/class-wc-post-types.php:293
 msgid "View Order"
 msgstr "查看訂單"
 
-#: includes/class-wc-post-types.php:292
+#: includes/class-wc-post-types.php:294
 msgid "Search Orders"
 msgstr "搜尋訂單"
 
-#: includes/class-wc-post-types.php:293
+#: includes/class-wc-post-types.php:295
 msgid "No Orders found"
 msgstr "找不到訂單"
 
-#: includes/class-wc-post-types.php:294
+#: includes/class-wc-post-types.php:296
 msgid "No Orders found in trash"
 msgstr "垃圾桶裡找不到訂單"
 
-#: includes/class-wc-post-types.php:295
+#: includes/class-wc-post-types.php:297
 msgid "Parent Orders"
 msgstr "父母訂單"
 
-#: includes/class-wc-post-types.php:298
+#: includes/class-wc-post-types.php:300
 msgid "This is where store orders are stored."
 msgstr "商店訂單儲存在此."
 
-#: includes/class-wc-post-types.php:321
+#: includes/class-wc-post-types.php:323
 msgid "Coupons"
 msgstr "優惠券"
 
-#: includes/class-wc-post-types.php:322 templates/cart/cart.php:118
+#: includes/class-wc-post-types.php:324 templates/cart/cart.php:118
 msgid "Coupon"
 msgstr "優惠券"
 
-#: includes/class-wc-post-types.php:323
+#: includes/class-wc-post-types.php:325
 msgctxt "Admin menu name"
 msgid "Coupons"
 msgstr "優惠券"
 
-#: includes/class-wc-post-types.php:324
+#: includes/class-wc-post-types.php:326
 msgid "Add Coupon"
 msgstr "添加優惠券"
 
-#: includes/class-wc-post-types.php:325
+#: includes/class-wc-post-types.php:327
 msgid "Add New Coupon"
 msgstr "新增優惠券"
 
-#: includes/class-wc-post-types.php:327
+#: includes/class-wc-post-types.php:329
 msgid "Edit Coupon"
 msgstr "編輯優惠券"
 
-#: includes/class-wc-post-types.php:328
+#: includes/class-wc-post-types.php:330
 msgid "New Coupon"
 msgstr "新優惠券"
 
-#: includes/class-wc-post-types.php:329
+#: includes/class-wc-post-types.php:331
 msgid "View Coupons"
 msgstr "檢視優惠券"
 
-#: includes/class-wc-post-types.php:330
+#: includes/class-wc-post-types.php:332
 msgid "View Coupon"
 msgstr "檢視優惠券"
 
-#: includes/class-wc-post-types.php:331
+#: includes/class-wc-post-types.php:333
 msgid "Search Coupons"
 msgstr "搜尋優惠券"
 
-#: includes/class-wc-post-types.php:332
+#: includes/class-wc-post-types.php:334
 msgid "No Coupons found"
 msgstr "找不到優惠券"
 
-#: includes/class-wc-post-types.php:333
+#: includes/class-wc-post-types.php:335
 msgid "No Coupons found in trash"
 msgstr "垃圾桶裡找不到優惠券"
 
-#: includes/class-wc-post-types.php:334
+#: includes/class-wc-post-types.php:336
 msgid "Parent Coupon"
 msgstr "父母優惠券"
 
-#: includes/class-wc-post-types.php:336
+#: includes/class-wc-post-types.php:338
 msgid ""
 "This is where you can add new coupons that customers can use in your store."
 msgstr "在此可新增給顧客在商店用的優惠券."
@@ -6958,11 +6958,11 @@ msgstr "尋找商品"
 msgid "Search"
 msgstr "搜尋"
 
-#: includes/wc-term-functions.php:113
+#: includes/wc-term-functions.php:118
 msgid "Select a category"
 msgstr "請選擇分類"
 
-#: includes/wc-term-functions.php:117
+#: includes/wc-term-functions.php:122
 msgid "Uncategorized"
 msgstr "無類別"
 
