@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			<optgroup label="<?php _e( 'Tax Rate', 'woocommerce' ); ?>">
 				<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
 				<?php foreach( $tax_codes as $tax_id => $tax_code ) : ?>
-					<option value="<?php echo $tax_id; ?>" <?php selected( $tax_id, isset( $item['rate_id'] ) ? $item['rate_id'] : '' ); ?>><?php echo esc_html( urldecode($tax_code) ); ?></option>
+					<option value="<?php echo $tax_id; ?>" <?php selected( $tax_id, isset( $item['rate_id'] ) ? $item['rate_id'] : '' ); ?>><?php echo esc_html( urldecode( $tax_code ) ); ?></option>
 				<?php endforeach; ?>
 			</optgroup>
 		</select>
