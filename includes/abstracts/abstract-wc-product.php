@@ -121,33 +121,33 @@ class WC_Product {
 	}
 
 	/**
-     * Get SKU (Stock-keeping unit) - product unique ID.
-     *
-     * @return string
-     */
-    public function get_sku() {
-        return $this->sku;
-    }
+	 * Get SKU (Stock-keeping unit) - product unique ID.
+	 *
+	 * @return string
+	 */
+	public function get_sku() {
+		return $this->sku;
+	}
 
-    /**
-     * Returns number of items available for sale.
-     *
-     * @access public
-     * @return int
-     */
-    public function get_stock_quantity() {
-        return $this->managing_stock() ? apply_filters( 'woocommerce_stock_amount', $this->stock ) : '';
-    }
+	/**
+	 * Returns number of items available for sale.
+	 *
+	 * @access public
+	 * @return int
+	 */
+	public function get_stock_quantity() {
+		return $this->managing_stock() ? apply_filters( 'woocommerce_stock_amount', $this->stock ) : '';
+	}
 
-    /**
-     * Get total stock.
-     *
-     * @access public
-     * @return int
-     */
-    public function get_total_stock() {
+	/**
+	 * Get total stock.
+	 *
+	 * @access public
+	 * @return int
+	 */
+	public function get_total_stock() {
 		return $this->get_stock_quantity();
-    }
+	}
 
 	/**
 	 * Set stock level of the product.
@@ -370,7 +370,7 @@ class WC_Product {
 	 * get_children function.
 	 *
 	 * @access public
-	 * @return bool
+	 * @return array
 	 */
 	public function get_children() {
 		return array();
@@ -1153,11 +1153,15 @@ class WC_Product {
 
 		// Get tags
 		$terms = wp_get_post_terms($this->id, 'product_tag');
-		foreach ( $terms as $term ) $tags_array[] = $term->term_id;
+		foreach ( $terms as $term ) {
+			$tags_array[] = $term->term_id;
+		}
 
 		// Get categories
 		$terms = wp_get_post_terms($this->id, 'product_cat');
-		foreach ( $terms as $term ) $cats_array[] = $term->term_id;
+		foreach ( $terms as $term ) {
+			$cats_array[] = $term->term_id;
+		}
 
 		// Don't bother if none are set
 		if ( sizeof( $cats_array ) == 1 && sizeof( $tags_array ) == 1 ) {
@@ -1170,7 +1174,7 @@ class WC_Product {
 		$exclude_ids = array_map( 'absint', array_merge( array( 0, $this->id ), $this->get_upsells() ) );
 
 		// Generate query
-	    $query['fields'] = "SELECT ID FROM {$wpdb->posts} p";
+		$query['fields'] = "SELECT ID FROM {$wpdb->posts} p";
 		$query['join']   = " INNER JOIN {$wpdb->postmeta} pm ON ( pm.post_id = p.ID AND pm.meta_key='_visibility' )";
 		$query['join']  .= " INNER JOIN {$wpdb->term_relationships} tr ON (p.ID = tr.object_id)";
 		$query['join']  .= " INNER JOIN {$wpdb->term_taxonomy} tt ON (tr.term_taxonomy_id = tt.term_taxonomy_id)";
@@ -1260,8 +1264,9 @@ class WC_Product {
 	public function has_attributes() {
 		if ( sizeof( $this->get_attributes() ) > 0 ) {
 			foreach ( $this->get_attributes() as $attribute ) {
-				if ( isset( $attribute['is_visible'] ) && $attribute['is_visible'] )
+				if ( isset( $attribute['is_visible'] ) && $attribute['is_visible'] ) {
 					return true;
+				}
 			}
 		}
 		return false;
@@ -1341,15 +1346,15 @@ class WC_Product {
 		) );
 	}
 
-    /**
-     * Returns the main product image
-     *
-     * @access public
-     * @param string $size (default: 'shop_thumbnail')
-     * @return string
-     */
-    public function get_image( $size = 'shop_thumbnail', $attr = array() ) {
-    	$image = '';
+	/**
+	 * Returns the main product image
+	 *
+	 * @access public
+	 * @param string $size (default: 'shop_thumbnail')
+	 * @return string
+	 */
+	public function get_image( $size = 'shop_thumbnail', $attr = array() ) {
+		$image = '';
 
 		if ( has_post_thumbnail( $this->id ) ) {
 			$image = get_the_post_thumbnail( $this->id, $size, $attr );
@@ -1360,7 +1365,7 @@ class WC_Product {
 		}
 
 		return $image;
-    }
+	}
 
 	/**
 	 * Get product name with SKU or ID. Used within admin.

@@ -145,32 +145,32 @@ if ( ! function_exists( 'is_account_page' ) ) {
 
 if ( ! function_exists( 'is_order_received_page' ) ) {
 
-    /**
-    * is_order_received_page - Returns true when viewing the order received page.
-    *
-    * @access public
-    * @return bool
-    */
-    function is_order_received_page() {
-        global $wp;
+	/**
+	* is_order_received_page - Returns true when viewing the order received page.
+	*
+	* @access public
+	* @return bool
+	*/
+	function is_order_received_page() {
+		global $wp;
 
-        return ( is_page( wc_get_page_id( 'checkout' ) ) && isset( $wp->query_vars['order-received'] ) ) ? true : false;
-    }
+		return ( is_page( wc_get_page_id( 'checkout' ) ) && isset( $wp->query_vars['order-received'] ) ) ? true : false;
+	}
 }
 
 if ( ! function_exists( 'is_add_payment_method_page' ) ) {
 
-    /**
-    * is_add_payment_method_page - Returns true when viewing the add payment method page.
-    *
-    * @access public
-    * @return bool
-    */
-    function is_add_payment_method_page() {
-        global $wp;
+	/**
+	* is_add_payment_method_page - Returns true when viewing the add payment method page.
+	*
+	* @access public
+	* @return bool
+	*/
+	function is_add_payment_method_page() {
+		global $wp;
 
-        return ( is_page( wc_get_page_id( 'myaccount' ) ) && isset( $wp->query_vars['add-payment-method'] ) ) ? true : false;
-    }
+		return ( is_page( wc_get_page_id( 'myaccount' ) ) && isset( $wp->query_vars['add-payment-method'] ) ) ? true : false;
+	}
 }
 
 if ( ! function_exists( 'is_ajax' ) ) {
@@ -238,17 +238,18 @@ if ( ! function_exists( 'meta_is_product_attribute' ) ) {
 	/**
 	 * Returns true when the passed meta name is a product attribute.
 	 *
-	 * @param $name of the attribute
-	 * @param $product_id
+	 * @param string $name of the attribute
+	 * @param mixed $value
+	 * @param int $product_id
 	 * @return bool
 	 */
 	function meta_is_product_attribute( $name, $value, $product_id ) {
 		$product    = get_product( $product_id );
-		
+
 		if ( $product->product_type != 'variation' ) {
 			return false;
 		}
-		
+
 		$attributes = $product->get_variation_attributes();
 
 		return ( in_array( $name, array_keys( $attributes ) ) && in_array( $value, $attributes[ $name ] ) );
