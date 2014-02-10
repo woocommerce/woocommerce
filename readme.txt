@@ -12,46 +12,53 @@ WooCommerce is a powerful, extendable eCommerce plugin that helps you sell anyth
 
 == Description ==
 
-Transform your WordPress website into a thorough-bred eCommerce store. Delivering enterprise-level quality and features whilst backed by a name you can trust. Say "hello" to the WooCommerce eCommerce plugin.
+Transform your WordPress website into a thoroughbred eCommerce store. Delivering enterprise-level quality and features, backed by a name you can trust. Say "hello" to the WooCommerce eCommerce plugin.
 
 WooCommerce is built by the experienced folk at WooThemes who also offer premium [eCommerce themes](http://www.woothemes.com/product-category/themes/woocommerce/ "eCommerce themes from WooThemes") and [extensions](http://www.woothemes.com/product-category/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes") to further enhance your shopfront.
 
 [vimeo http://vimeo.com/60440851]
 
-= STRENGTH & FLEXIBILITY =
+= Strength & flexibility =
 WooCommerce is built using WordPress best practises both on the front and the back end. This results in an efficient, robust and intuitive plugin.
 
-= SMART DASHBOARD WIDGETS & REPORTS =
+= Smart dashboard widgets & reports =
 Keep a birds-eye view of incoming sales and reviews, stock levels and general store performance and statistics all from the WordPress dashboard or go to the reports section to view stats in more detail.
 
-= CUSTOMIZABLE =
+= Customizable =
 Your business is unique, your online store should be too. Choose one of our [eCommerce themes](http://www.woothemes.com/product-category/themes/woocommerce/ "eCommerce themes from WooThemes") or build your own and give it a personal touch using the built in shortcodes and widgets.
 
-WooCommerce works with any theme, including the default WordPress themes Twenty Ten, Twenty Eleven and Twenty Twelve. If you need help getting your theme working nicely with WooCommerce please read our [theming docs](http://docs.woothemes.com/document/third-party-custom-theme-compatibility/) to discover your options.
+WooCommerce works with any theme, including the default WordPress themes. If you need help getting your theme working nicely with WooCommerce please read our [theming docs](http://docs.woothemes.com/document/third-party-custom-theme-compatibility/) to discover your options.
 
-If you're looking for a tailored WordPress eCommerce theme designed specifically to be used with WooCommerce be sure to browse the official [WooCommerce Themes](http://www.woothemes.com/product-category/themes/woocommerce/). Also check out our free themes, [Mystile](http://www.woothemes.com/products/mystile/), [Artificer](http://www.woothemes.com/products/artificer/) and [Wootique](http://www.woothemes.com/products/wootique/).
+If you're looking for a tailored WordPress eCommerce theme designed specifically to be used with WooCommerce be sure to browse the official [WooCommerce Themes](http://www.woothemes.com/product-category/themes/woocommerce/).
 
-= FEATURES =
+= Features =
 Whether you're operating a superstore selling thousands of products, or a just a sole trader selling hand made arts and crafts WooCommerce has you covered. You can read all about WooCommerce' features on the [WooCommerce website](http://www.woothemes.com/woocommerce/ "WooCommerce: An open-source eCommerce plugin for WordPress").
 
-Payment Gateways and Shipping Methods are important to any store - WooCommerce comes bundled with the following:
+Payment Gateways and Shipping Methods are important to any store - WooCommerce comes bundled with several popular options including PayPal Standard (for accepting Credit Card and PayPal account payments), BACS, Cash on Delivery, flat rate shipping, and free shipping.
 
-* __PayPal Standard Gateway__ - Accept credit cards and PayPal payments
-* __Mijireh Checkout__ - Accept credit cards via Stripe, Authorize.net, PayPal, eWay, SagePay, Braintree, PayLeap, and more.
-* __BACS__, __Cheque__ and __Cash on Delivery__ -  Simple offline gateways
-* __Flat rate shipping__ - Ship your items using a flat cost
-* __Free shipping__ - Ship for free, or require a coupon to enable
-* __International delivery__, __Local delivery and local Pickup__
+= Premium Extensions =
 
-Need a specific payment gateway? Perhaps additional shipping methods? WooCommerce has a plethora of eCommerce extensions available to provide just that.
+Need a specific payment gateway? Perhaps additional shipping methods? WooCommerce has a [plethora of eCommerce extensions available to provide just that](http://www.woothemes.com/extensions/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes").
+
+Some of our popular extensions include **[Product Addons](http://www.woothemes.com/extension/product-addons/)**, **[Table rate shipping](http://www.woothemes.com/extension/table-rate-shipping/)**, **[Product CSV Import Suite](http://www.woothemes.com/extension/product-csv-import-suite/)**, **[WooCommerce Subscriptions](http://www.woothemes.com/products/woocommerce-subscriptions/)** and **[Dynamic Pricing](http://www.woothemes.com/extension/dynamic-pricing/)**.
+
+Want to see more?
 
 * [View Payment Gateways](http://www.woothemes.com/product-category/woocommerce-extensions/?prod_cat%5B%5D=1023&s=&post_type=product&min_price=0&max_price=129&prod_country=0 "Payment gateways for WooCommerce from WooThemes").
 * [View Shipping Methods](http://www.woothemes.com/product-category/woocommerce-extensions/?prod_cat%5B%5D=1026&s=&post_type=product&min_price=0&max_price=129&post_type=product&prod_country=0 "Shipping methods for WooCommerce from WooThemes").
 * [View all extensions](http://www.woothemes.com/product-category/woocommerce-extensions/ "View all WooCommerce extensions").
 
-= GET INVOLVED =
+= Free Extensions =
 
-Developers can checkout and contribute to the source code on the [WooCommerce GitHub Repository](https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md).
+WordPress.org is home to many cool free extensions for WooCommerce made by other developers including the **[Admin Bar Addition](http://wordpress.org/extend/plugins/woocommerce-admin-bar-addition/)**, **[Delivery Notes](http://wordpress.org/extend/plugins/woocommerce-delivery-notes/)**, **[Affiliates Integration Light](http://wordpress.org/extend/plugins/affiliates-woocommerce-light/)**, **[Custom Product Tabs Lite](http://wordpress.org/extend/plugins/woocommerce-custom-product-tabs-lite/)**, and the **[WooCommerce Customizer](http://wordpress.org/extend/plugins/woocommerce-customizer/)**.
+
+[Search WordPress.org for WooCommerce](http://wordpress.org/extend/plugins/search.php?q=woocommerce) to see everything that is available.
+
+= Get involved =
+
+Developers can contribute to the source code on the [WooCommerce GitHub Repository](https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md).
+
+Translators can contribute new languages to WooCommerce through [Transifex](https://www.transifex.com/projects/p/woocommerce-core/).
 
 == Installation ==
 
@@ -64,19 +71,15 @@ Developers can checkout and contribute to the source code on the [WooCommerce Gi
 
 = Automatic installation =
 
-Automatic installation is the easiest option as WordPress handles the file transfers itself and you don’t even need to leave your web browser. To do an automatic install of WooCommerce, log in to your WordPress admin panel, navigate to the Plugins menu and click Add New.
+Automatic installation is the easiest option as WordPress handles the file transfers itself and you don’t need to leave your web browser. To do an automatic install of WooCommerce, log in to your WordPress dashboard, navigate to the Plugins menu and click Add New.
 
-In the search field type “WooCommerce” and click Search Plugins. Once you’ve found our eCommerce plugin you can view details about it such as the the point release, rating and description. Most importantly of course, you can install it by simply clicking Install Now. After clicking that link you will be asked if you’re sure you want to install the plugin. Click yes and WordPress will automatically complete the installation.
+In the search field type “WooCommerce” and click Search Plugins. Once you’ve found our eCommerce plugin you can view details about it such as the the point release, rating and description. Most importantly of course, you can install it by simply clicking “Install Now”.
 
 = Manual installation =
 
-The manual installation method involves downloading our eCommerce plugin and uploading it to your webserver via your favourite FTP application.
+The manual installation method involves downloading our eCommerce plugin and uploading it to your webserver via your favourite FTP application. The WordPress codex contains [instructions on how to do this here](http://codex.wordpress.org/Managing_Plugins#Manual_Plugin_Installation).
 
-1. Download the plugin file to your computer and unzip it
-2. Using an FTP program, or your hosting control panel, upload the unzipped plugin folder to your WordPress installation’s wp-content/plugins/ directory.
-3. Activate the plugin from the Plugins menu within the WordPress admin.
-
-= Upgrading =
+= Updating =
 
 Automatic updates should work like a charm; as always though, ensure you backup your site just in case.
 
@@ -85,45 +88,6 @@ If on the off-chance you do encounter issues with the shop/category pages after 
 = Dummy data =
 
 WooCommerce comes with some dummy data you can use to see how products look; either import dummy_data.xml via the [WordPress importer](http://wordpress.org/extend/plugins/wordpress-importer/) or use our [CSV Import Suite plugin](http://www.woothemes.com/products/product-csv-import-suite/) to import dummy_data.csv and dummy_data_variations.csv.
-
-= Premium Extensions =
-
-[Click here to view our extensions](http://www.woothemes.com/extensions/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes"). Some of our more popular plugins are listed below.
-
-* __Functionality__
-	* [Dynamic Pricing](http://www.woothemes.com/extension/dynamic-pricing/) - Bulk discounts, role based pricing and more.
-	* [Product Addons](http://www.woothemes.com/extension/product-addons/) - Create personalised products.
-	* [Gravity Forms Addons](http://www.woothemes.com/extension/gravityforms-product-addons/) - Create personalised products using gravity forms.
-	* [Currency Converter Widget](http://www.woothemes.com/extension/currency-converter-widget/) - Dynamically switch the currency of displayed prices.
-	* [Product Enquiry Form](http://www.woothemes.com/extension/product-enquiry-form/) - Allow visitors to email you enquiries about a product.
-	* [Facebook Tab](http://www.woothemes.com/extension/facebook-tab/) - Sell your products via your Facebook page.
-	* [Google Product Feed](http://www.woothemes.com/extension/google-product-feed/) - Add your products to Google Product Search.
-	* [Newsletter Subscription](http://www.woothemes.com/extension/newsletter-subscription/) - Allow customers to subscribe to your MailChimp or CampaignMonitor mailing list.
-* __Shipping__
-	* [Shipment Tracking](http://www.woothemes.com/extension/shipment-tracking/) - Add tracking info to orders
-	* [Table rate shipping](http://www.woothemes.com/extension/table-rate-shipping/) - Create rules based on country/postcode, weight, cart items, and price.
-	* [UPS Shipping Method](http://www.woothemes.com/products/ups-shipping-method/) - Get calculated shipping rates from UPS
-	* [USPS Shipping Method](http://www.woothemes.com/products/usps-shipping-method/) - Get calculated shipping rates from USPS.
-	* [FedEx Shipping Method](http://www.woothemes.com/products/fedex-shipping-module/) - Get calculated shipping rates from FedEx.
-* __Payment__
-	* [PayPal Pro](http://www.woothemes.com/extension/paypal-pro/) - Direct gateway
-	* [PayPal Express](http://www.woothemes.com/extension/paypal-express/) - Skip the WooCommerce checkout in favour of PayPal
-	* [Authorize.net DPM](http://www.woothemes.com/extension/authorize-net-dpm/) - Form based gateway
-* __Import/Export__
-	* [Product CSV Import Suite](http://www.woothemes.com/extension/product-csv-import-suite/) - Import and Export variations and products via a CSV
-	* [Order/Customer CSV Export](http://www.woothemes.com/extension/order-customer-csv-export/) - Export your orders and customer records to a CSV
-
-= Free Extensions =
-
-WordPress.org is home to some cool free extensions too ([search WordPress.org for more](http://wordpress.org/extend/plugins/search.php?q=woocommerce&sort=popular)).
-
-* [WooCommerce Admin Bar Addition](http://wordpress.org/extend/plugins/woocommerce-admin-bar-addition/) - Adds useful admin links and resources for the WooCommerce eCommerce Plugin to the WordPress Toolbar / Admin Bar.
-* [WooCommerce Delivery Notes](http://wordpress.org/extend/plugins/woocommerce-delivery-notes/) - Print delivery Notes for orders.
-* [Affiliates WooCommerce Integration Light](http://wordpress.org/extend/plugins/affiliates-woocommerce-light/) - Integrates Affiliates with WooCommerce.
-* [WooCommerce Multilingual](http://wordpress.org/extend/plugins/woocommerce-multilingual/) - Allows running multilingual e-commerce sites using WooCommerce and WPML.
-* [WooCommerce Grid / List Toggle](http://wordpress.org/extend/plugins/woocommerce-grid-list-toggle/) - Display products in grid or list format.
-* [WooCommerce Customizer](http://wordpress.org/extend/plugins/woocommerce-customizer/) - Customise button text, labels and more from the dashboard.
-* [WooCommerce Custom Product Tabs Lite](http://wordpress.org/extend/plugins/woocommerce-custom-product-tabs-lite/) - Easily create custom tabs for your WooCommerce products.
 
 == Frequently Asked Questions ==
 
@@ -668,5 +632,5 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Upgrade Notice ==
 
-= 2.0.1 =
-This is a major update - Test extensions and your theme prior to updating and ensure that you keep backups. After updating there is no undo. See our [release post](http://www.woothemes.com/?p=165321) and our [preparation guide](http://www.woothemes.com/?p=158537) before upgrading.
+= 2.1.0 =
+2.1 is a major update. Test extensions and your theme prior to updating and ensure that you keep backups. [See our release post for more information](http://www.woothemes.com/?p=315625). Developers should catch up with [develop.woothemes.com](http://develop.woothemes.com/) to see what has been happening.
