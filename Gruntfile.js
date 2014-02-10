@@ -151,17 +151,7 @@ module.exports = function( grunt ){
 			deploy: {
 				src: [ 'deploy' ]
 			},
-		},
-
-		wp_deploy: {
-	        deploy: { 
-	            options: {
-	                plugin_slug: 'woocommerce',   
-	                build_dir: 'deploy'
-	            },
-	        }
-	    }		
-
+		}
 	});
 
 	// Load NPM tasks to be used here
@@ -172,7 +162,6 @@ module.exports = function( grunt ){
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
-	grunt.loadNpmTasks( 'grunt-wp-deploy' );
 
 	// Register tasks
 	grunt.registerTask( 'default', [
@@ -194,8 +183,7 @@ module.exports = function( grunt ){
 
 	grunt.registerTask( 'deploy', [ 
 		'clean:deploy', 
-		'copy:deploy',
-		'wp_deploy'
+		'copy:deploy'
 	]);
 
 };
