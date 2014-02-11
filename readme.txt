@@ -132,6 +132,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Fixed all language country codes to reflect WordPress standards
 * Fix - Payment gateway section links work in lower and upper caps texts
 * Tweak - Added Croatian Kuna currency
+* Refactor - Removed unused change password template and shortcode class
 
 = 2.1.0 - 10/02/2014 =
 * Feature - New REST API
