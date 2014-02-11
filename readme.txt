@@ -135,6 +135,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Prevents nonce notice when removing item from cart
 * Tweak - Added Croatian Kuna currency
 * Refactor - Removed unused change password template and shortcode class
+* Refactor - Several function dockblocks improved
+* Refactor - Stripped out some unused variables
 
 = 2.1.0 - 10/02/2014 =
 * Feature - New REST API
