@@ -134,6 +134,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Payment gateway section links work in lower and upper caps texts
 * Fix - Prevents nonce notice when removing item from cart
 * Fix - Hide empty categories in product_categories shortcode
+* Fix - Fixed Twenty Thirteen single product page layout
 * Tweak - Added Croatian Kuna currency
 * Tweak - Throw a non-fatal notice when file trying to be included as template doesn't exist
 * Refactor - Removed unused change password template and shortcode class
