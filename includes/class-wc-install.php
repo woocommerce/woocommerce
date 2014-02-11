@@ -37,6 +37,8 @@ class WC_Install {
 	public function check_version() {
 		if ( ! defined( 'IFRAME_REQUEST' ) && ( get_option( 'woocommerce_version' ) != WC()->version || get_option( 'woocommerce_db_version' ) != WC()->version ) ) {
 			$this->install();
+
+			do_action( 'woocommerce_updated' );
 		}
 	}
 
