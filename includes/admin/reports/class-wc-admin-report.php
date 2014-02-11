@@ -32,7 +32,7 @@ class WC_Admin_Report {
 	 * )
 	 *
 	 * @param  array $args
-	 * @return array of results
+	 * @return array|string depending on query_type
 	 */
 	public function get_order_report_data( $args = array() ) {
 		global $wpdb;
