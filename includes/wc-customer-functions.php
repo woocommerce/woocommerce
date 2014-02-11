@@ -92,17 +92,17 @@ function wc_create_new_customer( $email, $username = '', $password = '' ) {
 	if ( $validation_errors->get_error_code() )
 		return $validation_errors;
 
-    $new_customer_data = apply_filters( 'woocommerce_new_customer_data', array(
-    	'user_login' => $username,
-    	'user_pass'  => $password,
-    	'user_email' => $email,
-    	'role'       => 'customer'
-    ) );
+	$new_customer_data = apply_filters( 'woocommerce_new_customer_data', array(
+		'user_login' => $username,
+		'user_pass'  => $password,
+		'user_email' => $email,
+		'role'       => 'customer'
+	) );
 
-    $customer_id = wp_insert_user( $new_customer_data );
+	$customer_id = wp_insert_user( $new_customer_data );
 
-    if ( is_wp_error( $customer_id ) )
-    	return new WP_Error( "registration-error", '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
+	if ( is_wp_error( $customer_id ) )
+		return new WP_Error( "registration-error", '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
 
 	do_action( 'woocommerce_created_customer', $customer_id, $new_customer_data, $password_generated );
 
@@ -131,14 +131,14 @@ function wc_set_customer_auth_cookie( $customer_id ) {
  */
 function wc_update_new_customer_past_orders( $customer_id ) {
 
-    $customer = get_user_by( 'id', absint( $customer_id ) );
+	$customer = get_user_by( 'id', absint( $customer_id ) );
 
-    $customer_orders = get_posts( array(
-        'numberposts' => -1,
-        'post_type'   => 'shop_order',
-        'post_status' => 'publish',
-        'fields'      => 'ids',
-        'meta_query' => array(
+	$customer_orders = get_posts( array(
+		'numberposts' => -1,
+		'post_type'   => 'shop_order',
+		'post_status' => 'publish',
+		'fields'      => 'ids',
+		'meta_query' => array(
 			array(
 				'key'     => '_customer_user',
 				'value'   => array( 0, '' ),
@@ -149,16 +149,16 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 				'value'   => $customer->user_email,
 			)
 		),
-    ) );
+	) );
 
-    $linked = 0;
-    $complete = 0;
+	$linked = 0;
+	$complete = 0;
 
-    if ( $customer_orders )
-        foreach ( $customer_orders as $order_id ) {
-        	update_post_meta( $order_id, '_customer_user', $customer->ID );
+	if ( $customer_orders )
+		foreach ( $customer_orders as $order_id ) {
+			update_post_meta( $order_id, '_customer_user', $customer->ID );
 
-        	$order_status = wp_get_post_terms( $order_id, 'shop_order_status' );
+			$order_status = wp_get_post_terms( $order_id, 'shop_order_status' );
 
 			if ( $order_status ) {
 				$order_status = current( $order_status );
@@ -168,16 +168,16 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 			if ( $order_status == 'completed' )
 				$complete ++;
 
-            $linked ++;
-        }
+			$linked ++;
+		}
 
-    if ( $complete ) {
-    	update_user_meta( $customer_id, 'paying_customer', 1 );
-    	update_user_meta( $customer_id, '_order_count', '' );
-    	update_user_meta( $customer_id, '_money_spent', '' );
-    }
+	if ( $complete ) {
+		update_user_meta( $customer_id, 'paying_customer', 1 );
+		update_user_meta( $customer_id, '_order_count', '' );
+		update_user_meta( $customer_id, '_money_spent', '' );
+	}
 
-    return $linked;
+	return $linked;
 }
 
 /**
@@ -267,62 +267,62 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
  */
 function wc_customer_has_capability( $allcaps, $caps, $args ) {
   if ( isset( $caps[0] ) ) {
-    switch ( $caps[0] ) {
+	switch ( $caps[0] ) {
 
-      case 'view_order':
-        $user_id = $args[1];
-        $order = new WC_Order( $args[2] );
+	  case 'view_order':
+		$user_id = $args[1];
+		$order = new WC_Order( $args[2] );
 
-        if ( $user_id == $order->user_id )
-          $allcaps['view_order'] = true;
+		if ( $user_id == $order->user_id )
+		  $allcaps['view_order'] = true;
 
-        break;
+		break;
 
-      case 'pay_for_order':
-        $user_id = $args[1];
-        $order_id = isset($args[2]) ? $args[2] : null;
+	  case 'pay_for_order':
+		$user_id = $args[1];
+		$order_id = isset($args[2]) ? $args[2] : null;
 
-        // When no order ID, we assume it's a new order
-        // and thus, customer can pay for it
-        if (!$order_id) {
-          $allcaps['pay_for_order'] = true;
-          break;
-        }
+		// When no order ID, we assume it's a new order
+		// and thus, customer can pay for it
+		if (!$order_id) {
+		  $allcaps['pay_for_order'] = true;
+		  break;
+		}
 
-        $order = new WC_Order( $order_id );
+		$order = new WC_Order( $order_id );
 
-        if ( $user_id == $order->user_id )
-          $allcaps['pay_for_order'] = true;
+		if ( $user_id == $order->user_id )
+		  $allcaps['pay_for_order'] = true;
 
-        break;
+		break;
 
-      case 'order_again':
-        $user_id = $args[1];
-        $order = new WC_Order( $args[2] );
+	  case 'order_again':
+		$user_id = $args[1];
+		$order = new WC_Order( $args[2] );
 
-        if ( $user_id == $order->user_id )
-          $allcaps['order_again'] = true;
+		if ( $user_id == $order->user_id )
+		  $allcaps['order_again'] = true;
 
-        break;
+		break;
 
-      case 'cancel_order':
-        $user_id = $args[1];
-        $order = new WC_Order( $args[2] );
+	  case 'cancel_order':
+		$user_id = $args[1];
+		$order = new WC_Order( $args[2] );
 
-        if ( $user_id == $order->user_id )
-          $allcaps['cancel_order'] = true;
+		if ( $user_id == $order->user_id )
+		  $allcaps['cancel_order'] = true;
 
-        break;
+		break;
 
-      case 'download_file':
-        $user_id = $args[1];
-        $download = $args[2];
+	  case 'download_file':
+		$user_id = $args[1];
+		$download = $args[2];
 
-        if ( $user_id == $download->user_id )
-          $allcaps['download_file'] = true;
+		if ( $user_id == $download->user_id )
+		  $allcaps['download_file'] = true;
 
-        break;
-    }
+		break;
+	}
   }
   return $allcaps;
 }
