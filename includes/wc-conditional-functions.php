@@ -224,6 +224,7 @@ if ( ! function_exists( 'taxonomy_is_product_attribute' ) ) {
 	 *
 	 * @uses  $wc_product_attributes global which stores taxonomy names upon registration
 	 * @param $name of the attribute
+	 * @param string $name of the attribute
 	 * @return bool
 	 */
 	function taxonomy_is_product_attribute( $name ) {
