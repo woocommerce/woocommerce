@@ -128,6 +128,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 2.1.1 =
 * Fix - During install, register all post types and endpoints so that the rewrite rules are correctly generated.
+* Fix - Allow line breaks in customer addresses on order details page
 * Tweak - Added Croatian Kuna currency
 
 = 2.1.0 - 10/02/2014 =
