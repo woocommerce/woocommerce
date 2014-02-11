@@ -125,8 +125,8 @@ class WC_Admin_Settings {
 		self::get_settings_pages();
 
 		// Get current tab/section
-		$current_tab     = empty( $_GET['tab'] ) ? 'general' : sanitize_text_field( $_GET['tab'] );
-		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_text_field( $_REQUEST['section'] );
+		$current_tab     = empty( $_GET['tab'] ) ? 'general' : sanitize_title( $_GET['tab'] );
+		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( $_REQUEST['section'] );
 
 	    // Save settings if data has been posted
 	    if ( ! empty( $_POST ) )
