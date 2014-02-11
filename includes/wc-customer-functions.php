@@ -7,10 +7,12 @@
  * @author 		WooThemes
  * @category 	Core
  * @package 	WooCommerce/Functions
- * @version     2.1.0
+ * @version 	2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 /**
  * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from seeing the admin bar
@@ -22,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @return bool
  */
 function wc_disable_admin_bar( $show_admin_bar ) {
-	if ( apply_filters( 'woocommerce_disable_admin_bar', get_option( 'woocommerce_lock_down_admin', "yes" ) == "yes" ) && ! ( current_user_can('edit_posts') || current_user_can('manage_woocommerce') ) ) {
+	if ( apply_filters( 'woocommerce_disable_admin_bar', get_option( 'woocommerce_lock_down_admin', 'yes' ) == 'yes' ) && ! ( current_user_can( 'edit_posts' ) || current_user_can( 'manage_woocommerce' ) ) ) {
 		$show_admin_bar = false;
 	}
 
@@ -42,22 +44,25 @@ add_filter( 'show_admin_bar', 'wc_disable_admin_bar', 10, 1 );
 function wc_create_new_customer( $email, $username = '', $password = '' ) {
 
 	// Check the e-mail address
-	if ( empty( $email ) || ! is_email( $email ) )
-		return new WP_Error( "registration-error", __( "Please provide a valid email address.", "woocommerce" ) );
+	if ( empty( $email ) || ! is_email( $email ) ) {
+		return new WP_Error( 'registration-error', __( 'Please provide a valid email address.', 'woocommerce' ) );
+	}
 
-	if ( email_exists( $email ) )
-		return new WP_Error( "registration-error", __( "An account is already registered with your email address. Please login.", "woocommerce" ) );
+	if ( email_exists( $email ) ) {
+		return new WP_Error( 'registration-error', __( 'An account is already registered with your email address. Please login.', 'woocommerce' ) );
+	}
 
 	// Handle username creation
-	if ( get_option( 'woocommerce_registration_generate_username' ) == 'no' || ! empty( $username ) ) {
+	if ( 'no' == get_option( 'woocommerce_registration_generate_username' ) || ! empty( $username ) ) {
 
 		$username = sanitize_user( $username );
 
-		if ( empty( $username ) || ! validate_username( $username ) )
-			return new WP_Error( "registration-error", __( "Please enter a valid account username.", "woocommerce" ) );
+		if ( empty( $username ) || ! validate_username( $username ) ) {
+			return new WP_Error( 'registration-error', __( 'Please enter a valid account username.', 'woocommerce' ) );
+		}
 
 		if ( username_exists( $username ) )
-			return new WP_Error( "registration-error", __( "An account is already registered with that username. Please choose another.", "woocommerce" ) );
+			return new WP_Error( 'registration-error', __( 'An account is already registered with that username. Please choose another.', 'woocommerce' ) );
 	} else {
 
 		$username = sanitize_user( current( explode( '@', $email ) ) );
@@ -73,11 +78,11 @@ function wc_create_new_customer( $email, $username = '', $password = '' ) {
 	}
 
 	// Handle password creation
-	if ( get_option( 'woocommerce_registration_generate_password' ) == 'yes' && empty( $password ) && ! isset( $_POST['register'] ) ) {
+	if ( 'yes' == get_option( 'woocommerce_registration_generate_password' ) && empty( $password ) && ! isset( $_POST['register'] ) ) {
 		$password = wp_generate_password();
 		$password_generated = true;
 	} elseif ( empty( $password ) ) {
-		return new WP_Error( "registration-error", __( "Please enter an account password.", "woocommerce" ) );
+		return new WP_Error( 'registration-error', __( 'Please enter an account password.', 'woocommerce' ) );
 	} else {
 		$password_generated = false;
 	}
@@ -101,8 +106,9 @@ function wc_create_new_customer( $email, $username = '', $password = '' ) {
 
 	$customer_id = wp_insert_user( $new_customer_data );
 
-	if ( is_wp_error( $customer_id ) )
-		return new WP_Error( "registration-error", '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
+	if ( is_wp_error( $customer_id ) ) {
+		return new WP_Error( 'registration-error', '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
+	}
 
 	do_action( 'woocommerce_created_customer', $customer_id, $new_customer_data, $password_generated );
 
@@ -223,11 +229,13 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 		$emails[] = $user->user_email;
 	}
 
-	if ( is_email( $customer_email ) )
+	if ( is_email( $customer_email ) ) {
 		$emails[] = $customer_email;
+	}
 
-	if ( sizeof( $emails ) == 0 )
+	if ( sizeof( $emails ) == 0 ) {
 		return false;
+	}
 
 	$completed  = get_term_by( 'slug', 'completed', 'shop_order_status' );
 	$processing = get_term_by( 'slug', 'processing', 'shop_order_status' );
@@ -266,64 +274,72 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
  * @return bool
  */
 function wc_customer_has_capability( $allcaps, $caps, $args ) {
-  if ( isset( $caps[0] ) ) {
-	switch ( $caps[0] ) {
+	if ( isset( $caps[0] ) ) {
+		switch ( $caps[0] ) {
 
-	  case 'view_order':
-		$user_id = $args[1];
-		$order = new WC_Order( $args[2] );
+			case 'view_order' :
+				$user_id = $args[1];
+				$order = new WC_Order( $args[2] );
 
-		if ( $user_id == $order->user_id )
-		  $allcaps['view_order'] = true;
+				if ( $user_id == $order->user_id ) {
+					$allcaps['view_order'] = true;
+				}
 
-		break;
+				break;
 
-	  case 'pay_for_order':
-		$user_id = $args[1];
-		$order_id = isset($args[2]) ? $args[2] : null;
+			case 'pay_for_order' :
+				$user_id = $args[1];
+				$order_id = isset( $args[2] ) ? $args[2] : null;
 
-		// When no order ID, we assume it's a new order
-		// and thus, customer can pay for it
-		if (!$order_id) {
-		  $allcaps['pay_for_order'] = true;
-		  break;
+				// When no order ID, we assume it's a new order
+				// and thus, customer can pay for it
+				if ( ! $order_id ) {
+					$allcaps['pay_for_order'] = true;
+
+					break;
+				}
+
+				$order = new WC_Order( $order_id );
+
+				if ( $user_id == $order->user_id ) {
+					$allcaps['pay_for_order'] = true;
+				}
+
+				break;
+
+			case 'order_again' :
+				$user_id = $args[1];
+				$order = new WC_Order( $args[2] );
+
+				if ( $user_id == $order->user_id ) {
+					$allcaps['order_again'] = true;
+				}
+
+				break;
+
+			case 'cancel_order' :
+				$user_id = $args[1];
+				$order = new WC_Order( $args[2] );
+
+				if ( $user_id == $order->user_id ) {
+					$allcaps['cancel_order'] = true;
+				}
+
+				break;
+
+			case 'download_file' :
+				$user_id = $args[1];
+				$download = $args[2];
+
+				if ( $user_id == $download->user_id ) {
+					$allcaps['download_file'] = true;
+				}
+
+				break;
 		}
-
-		$order = new WC_Order( $order_id );
-
-		if ( $user_id == $order->user_id )
-		  $allcaps['pay_for_order'] = true;
-
-		break;
-
-	  case 'order_again':
-		$user_id = $args[1];
-		$order = new WC_Order( $args[2] );
-
-		if ( $user_id == $order->user_id )
-		  $allcaps['order_again'] = true;
-
-		break;
-
-	  case 'cancel_order':
-		$user_id = $args[1];
-		$order = new WC_Order( $args[2] );
-
-		if ( $user_id == $order->user_id )
-		  $allcaps['cancel_order'] = true;
-
-		break;
-
-	  case 'download_file':
-		$user_id = $args[1];
-		$download = $args[2];
-
-		if ( $user_id == $download->user_id )
-		  $allcaps['download_file'] = true;
-
-		break;
 	}
-  }
-  return $allcaps;
+
+	return $allcaps;
 }
-add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3);
+
+add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
