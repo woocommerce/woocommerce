@@ -50,7 +50,6 @@ add_action( 'wp_logout', 'wc_empty_cart' );
  * @return void
  */
 function wc_load_persistent_cart( $user_login, $user = 0 ) {
-	global $woocommerce;
 
 	if ( ! $user )
 		return;
@@ -68,11 +67,10 @@ add_action( 'wp_login', 'wc_load_persistent_cart', 1, 2 );
  * Add to cart messages.
  *
  * @access public
- * @param int $product_id
+ * @param int|array $product_id
  * @return void
  */
 function wc_add_to_cart_message( $product_id ) {
-	global $woocommerce;
 
 	if ( is_array( $product_id ) ) {
 
@@ -111,7 +109,7 @@ function wc_add_to_cart_message( $product_id ) {
  * @return void
  */
 function wc_clear_cart_after_payment() {
-	global $woocommerce, $wp;
+	global $wp;
 
 	if ( ! empty( $wp->query_vars['order-received'] ) ) {
 
@@ -175,7 +173,7 @@ function wc_cart_totals_shipping_html() {
  * Get a coupon value
  *
  * @access public
- * @param string $code
+ * @param string $coupon
  * @return void
  */
 function wc_cart_totals_coupon_html( $coupon ) {
