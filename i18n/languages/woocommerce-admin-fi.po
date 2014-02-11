@@ -6,9 +6,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-07 13:07:00+00:00\n"
-"PO-Revision-Date: 2014-02-08 18:48+0000\n"
-"Last-Translator: arhipaiva <info@swratkaisut.com>\n"
+"POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
+"PO-Revision-Date: 2014-02-11 10:13+0000\n"
+"Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: Finnish (http://www.transifex.com/projects/p/woocommerce-core/language/fi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1652,7 +1652,7 @@ msgstr "Avainsanat (tägit)"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:260
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:98
-#: includes/admin/reports/class-wc-report-coupon-usage.php:317
+#: includes/admin/reports/class-wc-report-coupon-usage.php:315
 #: includes/admin/reports/class-wc-report-customers.php:199
 #: includes/admin/reports/class-wc-report-sales-by-category.php:213
 #: includes/admin/reports/class-wc-report-sales-by-date.php:158
@@ -3300,7 +3300,7 @@ msgstr "%s alennukset yhteensä"
 msgid "%s coupons used in total"
 msgstr "%s kuponkia käytetty"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:91
+#: includes/admin/reports/class-wc-report-coupon-usage.php:89
 #: includes/admin/reports/class-wc-report-customers.php:138
 #: includes/admin/reports/class-wc-report-sales-by-category.php:67
 #: includes/admin/reports/class-wc-report-sales-by-date.php:122
@@ -3310,7 +3310,7 @@ msgstr "%s kuponkia käytetty"
 msgid "Year"
 msgstr "Vuosi"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:92
+#: includes/admin/reports/class-wc-report-coupon-usage.php:90
 #: includes/admin/reports/class-wc-report-customers.php:139
 #: includes/admin/reports/class-wc-report-sales-by-category.php:68
 #: includes/admin/reports/class-wc-report-sales-by-date.php:123
@@ -3320,7 +3320,7 @@ msgstr "Vuosi"
 msgid "Last Month"
 msgstr "Edell. kuukausi"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:93
+#: includes/admin/reports/class-wc-report-coupon-usage.php:91
 #: includes/admin/reports/class-wc-report-customers.php:140
 #: includes/admin/reports/class-wc-report-sales-by-category.php:69
 #: includes/admin/reports/class-wc-report-sales-by-date.php:124
@@ -3330,7 +3330,7 @@ msgstr "Edell. kuukausi"
 msgid "This Month"
 msgstr "Tämä kuukausi"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:94
+#: includes/admin/reports/class-wc-report-coupon-usage.php:92
 #: includes/admin/reports/class-wc-report-customers.php:141
 #: includes/admin/reports/class-wc-report-sales-by-category.php:70
 #: includes/admin/reports/class-wc-report-sales-by-date.php:125
@@ -3338,42 +3338,42 @@ msgstr "Tämä kuukausi"
 msgid "Last 7 Days"
 msgstr "Viim. 7 päivää"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:134
+#: includes/admin/reports/class-wc-report-coupon-usage.php:132
 msgid "Filter by coupon"
 msgstr "Lajittele kupongin mukaan "
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:162
+#: includes/admin/reports/class-wc-report-coupon-usage.php:160
 msgid "Choose coupons&hellip;"
 msgstr "Valitse kupongit..."
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:163
+#: includes/admin/reports/class-wc-report-coupon-usage.php:161
 msgid "All coupons"
 msgstr "Kaikki kupongit"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:170
+#: includes/admin/reports/class-wc-report-coupon-usage.php:168
 #: includes/admin/reports/class-wc-report-sales-by-category.php:172
 #: includes/admin/reports/class-wc-report-sales-by-product.php:178
 msgid "Show"
 msgstr "Näytä"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:183
+#: includes/admin/reports/class-wc-report-coupon-usage.php:181
 msgid "No used coupons found"
 msgstr "Käytettyjä kuponkeja ei löytynyt"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:188
+#: includes/admin/reports/class-wc-report-coupon-usage.php:186
 msgid "Most Popular"
 msgstr "Suosituimmat"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:230
-#: includes/admin/reports/class-wc-report-coupon-usage.php:277
+#: includes/admin/reports/class-wc-report-coupon-usage.php:228
+#: includes/admin/reports/class-wc-report-coupon-usage.php:275
 msgid "No coupons found in range"
 msgstr "Etsittyjä kuponkeja ei löytynyt"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:235
+#: includes/admin/reports/class-wc-report-coupon-usage.php:233
 msgid "Most Discount"
 msgstr "Suurin alennus"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:320
+#: includes/admin/reports/class-wc-report-coupon-usage.php:318
 #: includes/admin/reports/class-wc-report-customers.php:202
 #: includes/admin/reports/class-wc-report-sales-by-category.php:216
 #: includes/admin/reports/class-wc-report-sales-by-date.php:162
@@ -3384,11 +3384,11 @@ msgstr "Suurin alennus"
 msgid "Export CSV"
 msgstr "Vie CSV-tiedosto"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:411
+#: includes/admin/reports/class-wc-report-coupon-usage.php:409
 msgid "Number of coupons used"
 msgstr "Kuponkeja käytetty"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:419
+#: includes/admin/reports/class-wc-report-coupon-usage.php:417
 msgid "Discount amount"
 msgstr "Alennuksen määrä"
 

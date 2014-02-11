@@ -6,9 +6,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-07 13:07:00+00:00\n"
-"PO-Revision-Date: 2014-02-09 19:06+0000\n"
-"Last-Translator: vlinicx <toolrijeka@gmail.com>\n"
+"POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
+"PO-Revision-Date: 2014-02-11 10:15+0000\n"
+"Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: Croatian (http://www.transifex.com/projects/p/woocommerce-core/language/hr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1656,7 +1656,7 @@ msgstr "Oznake"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:260
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:98
-#: includes/admin/reports/class-wc-report-coupon-usage.php:317
+#: includes/admin/reports/class-wc-report-coupon-usage.php:315
 #: includes/admin/reports/class-wc-report-customers.php:199
 #: includes/admin/reports/class-wc-report-sales-by-category.php:213
 #: includes/admin/reports/class-wc-report-sales-by-date.php:158
@@ -3310,7 +3310,7 @@ msgstr "ukupno %s popusta"
 msgid "%s coupons used in total"
 msgstr "%s kupona ukupno iskorišteno"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:91
+#: includes/admin/reports/class-wc-report-coupon-usage.php:89
 #: includes/admin/reports/class-wc-report-customers.php:138
 #: includes/admin/reports/class-wc-report-sales-by-category.php:67
 #: includes/admin/reports/class-wc-report-sales-by-date.php:122
@@ -3320,7 +3320,7 @@ msgstr "%s kupona ukupno iskorišteno"
 msgid "Year"
 msgstr "Godina"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:92
+#: includes/admin/reports/class-wc-report-coupon-usage.php:90
 #: includes/admin/reports/class-wc-report-customers.php:139
 #: includes/admin/reports/class-wc-report-sales-by-category.php:68
 #: includes/admin/reports/class-wc-report-sales-by-date.php:123
@@ -3330,7 +3330,7 @@ msgstr "Godina"
 msgid "Last Month"
 msgstr "Prošli mjesec"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:93
+#: includes/admin/reports/class-wc-report-coupon-usage.php:91
 #: includes/admin/reports/class-wc-report-customers.php:140
 #: includes/admin/reports/class-wc-report-sales-by-category.php:69
 #: includes/admin/reports/class-wc-report-sales-by-date.php:124
@@ -3340,7 +3340,7 @@ msgstr "Prošli mjesec"
 msgid "This Month"
 msgstr "Ovaj mjesec"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:94
+#: includes/admin/reports/class-wc-report-coupon-usage.php:92
 #: includes/admin/reports/class-wc-report-customers.php:141
 #: includes/admin/reports/class-wc-report-sales-by-category.php:70
 #: includes/admin/reports/class-wc-report-sales-by-date.php:125
@@ -3348,42 +3348,42 @@ msgstr "Ovaj mjesec"
 msgid "Last 7 Days"
 msgstr "Posljednjih 7 dana"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:134
+#: includes/admin/reports/class-wc-report-coupon-usage.php:132
 msgid "Filter by coupon"
 msgstr "Flitriranje po kuponu"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:162
+#: includes/admin/reports/class-wc-report-coupon-usage.php:160
 msgid "Choose coupons&hellip;"
 msgstr "Odaberite kupon&hellip;"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:163
+#: includes/admin/reports/class-wc-report-coupon-usage.php:161
 msgid "All coupons"
 msgstr "Svi kuponi"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:170
+#: includes/admin/reports/class-wc-report-coupon-usage.php:168
 #: includes/admin/reports/class-wc-report-sales-by-category.php:172
 #: includes/admin/reports/class-wc-report-sales-by-product.php:178
 msgid "Show"
 msgstr "Prikaži"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:183
+#: includes/admin/reports/class-wc-report-coupon-usage.php:181
 msgid "No used coupons found"
 msgstr "Nisu pronađeni iskorišteni kuponi"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:188
+#: includes/admin/reports/class-wc-report-coupon-usage.php:186
 msgid "Most Popular"
 msgstr "Najpopularniji"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:230
-#: includes/admin/reports/class-wc-report-coupon-usage.php:277
+#: includes/admin/reports/class-wc-report-coupon-usage.php:228
+#: includes/admin/reports/class-wc-report-coupon-usage.php:275
 msgid "No coupons found in range"
 msgstr "Nema pronađenih kupona u rasponu"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:235
+#: includes/admin/reports/class-wc-report-coupon-usage.php:233
 msgid "Most Discount"
 msgstr "Najveći popust"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:320
+#: includes/admin/reports/class-wc-report-coupon-usage.php:318
 #: includes/admin/reports/class-wc-report-customers.php:202
 #: includes/admin/reports/class-wc-report-sales-by-category.php:216
 #: includes/admin/reports/class-wc-report-sales-by-date.php:162
@@ -3394,11 +3394,11 @@ msgstr "Najveći popust"
 msgid "Export CSV"
 msgstr "Izvoz u CSV"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:411
+#: includes/admin/reports/class-wc-report-coupon-usage.php:409
 msgid "Number of coupons used"
 msgstr "Broj iskorištenih kupona"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:419
+#: includes/admin/reports/class-wc-report-coupon-usage.php:417
 msgid "Discount amount"
 msgstr "Iznos popusta"
 

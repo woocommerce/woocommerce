@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-07 13:07:00+00:00\n"
+"POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
 "PO-Revision-Date: 2014-02-09 17:26+0000\n"
 "Last-Translator: Shohei Tanaka <shohei.tanaka@artisanworkshop.biz>\n"
 "Language-Team: Japanese (http://www.transifex.com/projects/p/woocommerce-core/language/ja/)\n"
@@ -1649,7 +1649,7 @@ msgstr "タグ"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:260
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:98
-#: includes/admin/reports/class-wc-report-coupon-usage.php:317
+#: includes/admin/reports/class-wc-report-coupon-usage.php:315
 #: includes/admin/reports/class-wc-report-customers.php:199
 #: includes/admin/reports/class-wc-report-sales-by-category.php:213
 #: includes/admin/reports/class-wc-report-sales-by-date.php:158
@@ -3291,7 +3291,7 @@ msgstr "%s 値引合計"
 msgid "%s coupons used in total"
 msgstr "%s クーポン利用合計"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:91
+#: includes/admin/reports/class-wc-report-coupon-usage.php:89
 #: includes/admin/reports/class-wc-report-customers.php:138
 #: includes/admin/reports/class-wc-report-sales-by-category.php:67
 #: includes/admin/reports/class-wc-report-sales-by-date.php:122
@@ -3301,7 +3301,7 @@ msgstr "%s クーポン利用合計"
 msgid "Year"
 msgstr "年間"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:92
+#: includes/admin/reports/class-wc-report-coupon-usage.php:90
 #: includes/admin/reports/class-wc-report-customers.php:139
 #: includes/admin/reports/class-wc-report-sales-by-category.php:68
 #: includes/admin/reports/class-wc-report-sales-by-date.php:123
@@ -3311,7 +3311,7 @@ msgstr "年間"
 msgid "Last Month"
 msgstr "先月"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:93
+#: includes/admin/reports/class-wc-report-coupon-usage.php:91
 #: includes/admin/reports/class-wc-report-customers.php:140
 #: includes/admin/reports/class-wc-report-sales-by-category.php:69
 #: includes/admin/reports/class-wc-report-sales-by-date.php:124
@@ -3321,7 +3321,7 @@ msgstr "先月"
 msgid "This Month"
 msgstr "今月"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:94
+#: includes/admin/reports/class-wc-report-coupon-usage.php:92
 #: includes/admin/reports/class-wc-report-customers.php:141
 #: includes/admin/reports/class-wc-report-sales-by-category.php:70
 #: includes/admin/reports/class-wc-report-sales-by-date.php:125
@@ -3329,42 +3329,42 @@ msgstr "今月"
 msgid "Last 7 Days"
 msgstr "過去１週間"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:134
+#: includes/admin/reports/class-wc-report-coupon-usage.php:132
 msgid "Filter by coupon"
 msgstr "クーポンによるフィルター"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:162
+#: includes/admin/reports/class-wc-report-coupon-usage.php:160
 msgid "Choose coupons&hellip;"
 msgstr "クーポンを選択&hellip;"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:163
+#: includes/admin/reports/class-wc-report-coupon-usage.php:161
 msgid "All coupons"
 msgstr "すべてのクーポン"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:170
+#: includes/admin/reports/class-wc-report-coupon-usage.php:168
 #: includes/admin/reports/class-wc-report-sales-by-category.php:172
 #: includes/admin/reports/class-wc-report-sales-by-product.php:178
 msgid "Show"
 msgstr "表示する"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:183
+#: includes/admin/reports/class-wc-report-coupon-usage.php:181
 msgid "No used coupons found"
 msgstr "クーポンが使われていません"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:188
+#: includes/admin/reports/class-wc-report-coupon-usage.php:186
 msgid "Most Popular"
 msgstr "人気順"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:230
-#: includes/admin/reports/class-wc-report-coupon-usage.php:277
+#: includes/admin/reports/class-wc-report-coupon-usage.php:228
+#: includes/admin/reports/class-wc-report-coupon-usage.php:275
 msgid "No coupons found in range"
 msgstr "この範囲ではクーポンは見つかりませんでした"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:235
+#: includes/admin/reports/class-wc-report-coupon-usage.php:233
 msgid "Most Discount"
 msgstr "値引き順"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:320
+#: includes/admin/reports/class-wc-report-coupon-usage.php:318
 #: includes/admin/reports/class-wc-report-customers.php:202
 #: includes/admin/reports/class-wc-report-sales-by-category.php:216
 #: includes/admin/reports/class-wc-report-sales-by-date.php:162
@@ -3375,11 +3375,11 @@ msgstr "値引き順"
 msgid "Export CSV"
 msgstr "CSVのエクスポート"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:411
+#: includes/admin/reports/class-wc-report-coupon-usage.php:409
 msgid "Number of coupons used"
 msgstr "クーポンの利用数"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:419
+#: includes/admin/reports/class-wc-report-coupon-usage.php:417
 msgid "Discount amount"
 msgstr "割引合計"
 

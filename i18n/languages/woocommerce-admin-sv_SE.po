@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-07 13:07:00+00:00\n"
+"POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
 "PO-Revision-Date: 2014-02-09 13:09+0000\n"
 "Last-Translator: sennbrink <konsult@sennbrink.se>\n"
 "Language-Team: Swedish (Sweden) (http://www.transifex.com/projects/p/woocommerce-core/language/sv_SE/)\n"
@@ -1651,7 +1651,7 @@ msgstr "Etiketter"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:260
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:98
-#: includes/admin/reports/class-wc-report-coupon-usage.php:317
+#: includes/admin/reports/class-wc-report-coupon-usage.php:315
 #: includes/admin/reports/class-wc-report-customers.php:199
 #: includes/admin/reports/class-wc-report-sales-by-category.php:213
 #: includes/admin/reports/class-wc-report-sales-by-date.php:158
@@ -3299,7 +3299,7 @@ msgstr "&s rabatter totalt"
 msgid "%s coupons used in total"
 msgstr "%s rabattkoder använda totalt"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:91
+#: includes/admin/reports/class-wc-report-coupon-usage.php:89
 #: includes/admin/reports/class-wc-report-customers.php:138
 #: includes/admin/reports/class-wc-report-sales-by-category.php:67
 #: includes/admin/reports/class-wc-report-sales-by-date.php:122
@@ -3309,7 +3309,7 @@ msgstr "%s rabattkoder använda totalt"
 msgid "Year"
 msgstr "År"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:92
+#: includes/admin/reports/class-wc-report-coupon-usage.php:90
 #: includes/admin/reports/class-wc-report-customers.php:139
 #: includes/admin/reports/class-wc-report-sales-by-category.php:68
 #: includes/admin/reports/class-wc-report-sales-by-date.php:123
@@ -3319,7 +3319,7 @@ msgstr "År"
 msgid "Last Month"
 msgstr "Senaste månaden"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:93
+#: includes/admin/reports/class-wc-report-coupon-usage.php:91
 #: includes/admin/reports/class-wc-report-customers.php:140
 #: includes/admin/reports/class-wc-report-sales-by-category.php:69
 #: includes/admin/reports/class-wc-report-sales-by-date.php:124
@@ -3329,7 +3329,7 @@ msgstr "Senaste månaden"
 msgid "This Month"
 msgstr "Den här månaden"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:94
+#: includes/admin/reports/class-wc-report-coupon-usage.php:92
 #: includes/admin/reports/class-wc-report-customers.php:141
 #: includes/admin/reports/class-wc-report-sales-by-category.php:70
 #: includes/admin/reports/class-wc-report-sales-by-date.php:125
@@ -3337,42 +3337,42 @@ msgstr "Den här månaden"
 msgid "Last 7 Days"
 msgstr "Senaste 7 dagarna"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:134
+#: includes/admin/reports/class-wc-report-coupon-usage.php:132
 msgid "Filter by coupon"
 msgstr "Filtrera efter rabattkod"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:162
+#: includes/admin/reports/class-wc-report-coupon-usage.php:160
 msgid "Choose coupons&hellip;"
 msgstr "Välj rabattkoder&hellip;"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:163
+#: includes/admin/reports/class-wc-report-coupon-usage.php:161
 msgid "All coupons"
 msgstr "Alla rabattkoder"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:170
+#: includes/admin/reports/class-wc-report-coupon-usage.php:168
 #: includes/admin/reports/class-wc-report-sales-by-category.php:172
 #: includes/admin/reports/class-wc-report-sales-by-product.php:178
 msgid "Show"
 msgstr "Visa"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:183
+#: includes/admin/reports/class-wc-report-coupon-usage.php:181
 msgid "No used coupons found"
 msgstr "Inga rabattkoder hittades"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:188
+#: includes/admin/reports/class-wc-report-coupon-usage.php:186
 msgid "Most Popular"
 msgstr "Mest populära"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:230
-#: includes/admin/reports/class-wc-report-coupon-usage.php:277
+#: includes/admin/reports/class-wc-report-coupon-usage.php:228
+#: includes/admin/reports/class-wc-report-coupon-usage.php:275
 msgid "No coupons found in range"
 msgstr "Inga rabattkoder funna inom spannet"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:235
+#: includes/admin/reports/class-wc-report-coupon-usage.php:233
 msgid "Most Discount"
 msgstr "Högst rabatt"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:320
+#: includes/admin/reports/class-wc-report-coupon-usage.php:318
 #: includes/admin/reports/class-wc-report-customers.php:202
 #: includes/admin/reports/class-wc-report-sales-by-category.php:216
 #: includes/admin/reports/class-wc-report-sales-by-date.php:162
@@ -3383,11 +3383,11 @@ msgstr "Högst rabatt"
 msgid "Export CSV"
 msgstr "Exportera CSV"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:411
+#: includes/admin/reports/class-wc-report-coupon-usage.php:409
 msgid "Number of coupons used"
 msgstr "Antal rabattkoder använda"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:419
+#: includes/admin/reports/class-wc-report-coupon-usage.php:417
 msgid "Discount amount"
 msgstr "Rabattkodsbelopp"
 

@@ -1,13 +1,14 @@
 # 
 # Translators:
+# Ahmad Karama <ahmad.karama@hotmail.com>, 2014
 # alaa13212 <alaa13212@gmail.com>, 2013
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-07 13:07:00+00:00\n"
-"PO-Revision-Date: 2014-02-08 08:31+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
+"PO-Revision-Date: 2014-02-10 17:25+0000\n"
+"Last-Translator: Ahmad Karama <ahmad.karama@hotmail.com>\n"
 "Language-Team: Arabic (http://www.transifex.com/projects/p/woocommerce-core/language/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -473,7 +474,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:49
 msgid "Support"
-msgstr ""
+msgstr "الدعم"
 
 #: includes/admin/class-wc-admin-help.php:52
 msgid ""
@@ -893,11 +894,11 @@ msgstr "الطلبيات"
 
 #: includes/admin/class-wc-admin-reports.php:49
 msgid "Sales by date"
-msgstr ""
+msgstr "المبيعات بالتاريخ"
 
 #: includes/admin/class-wc-admin-reports.php:55
 msgid "Sales by product"
-msgstr ""
+msgstr "المبيعات بالمنتج"
 
 #: includes/admin/class-wc-admin-reports.php:61
 msgid "Sales by category"
@@ -905,7 +906,7 @@ msgstr "مبيعات تصنيف"
 
 #: includes/admin/class-wc-admin-reports.php:67
 msgid "Coupons by date"
-msgstr ""
+msgstr "القسائم بالتاريخ"
 
 #: includes/admin/class-wc-admin-reports.php:75
 #: includes/admin/reports/class-wc-report-customer-list.php:25
@@ -918,7 +919,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-reports.php:84
 msgid "Customer List"
-msgstr ""
+msgstr "قائمة العملاء"
 
 #: includes/admin/class-wc-admin-reports.php:92
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:252
@@ -948,15 +949,15 @@ msgstr ""
 #: includes/admin/class-wc-admin-reports.php:118
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:75
 msgid "Taxes"
-msgstr ""
+msgstr "الضرائب"
 
 #: includes/admin/class-wc-admin-reports.php:121
 msgid "Taxes by code"
-msgstr ""
+msgstr "الضرائب بالرمز"
 
 #: includes/admin/class-wc-admin-reports.php:127
 msgid "Taxes by date"
-msgstr ""
+msgstr "الضرائب بالتاريخ"
 
 #: includes/admin/class-wc-admin-settings.php:54
 msgid "Action failed. Please refresh the page and retry."
@@ -1667,7 +1668,7 @@ msgstr "الوسوم"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:260
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:98
-#: includes/admin/reports/class-wc-report-coupon-usage.php:317
+#: includes/admin/reports/class-wc-report-coupon-usage.php:315
 #: includes/admin/reports/class-wc-report-customers.php:199
 #: includes/admin/reports/class-wc-report-sales-by-category.php:213
 #: includes/admin/reports/class-wc-report-sales-by-date.php:158
@@ -1835,7 +1836,7 @@ msgstr "رمز القسيمة"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:66
 msgid "Description (optional)"
-msgstr ""
+msgstr "الوصف (إختياري)"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:77
 msgid "Code"
@@ -1899,11 +1900,11 @@ msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:94
 msgid "Ship to"
-msgstr ""
+msgstr "شحن الى"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:96
 msgid "Customer Message"
-msgstr ""
+msgstr "رسالة العميل"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:97
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:101
@@ -2093,7 +2094,7 @@ msgstr "بيانات القسيمة"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:111
 msgid "Rating"
-msgstr ""
+msgstr "التقييم"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:144
 msgid "Reviews"
@@ -2396,7 +2397,7 @@ msgstr "لم تحدد بيانات الزبون."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:208
 msgid "Payment Method"
-msgstr ""
+msgstr "طريقة الدفع"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:213
 msgid "Load billing address"
@@ -3339,7 +3340,7 @@ msgstr ""
 msgid "%s coupons used in total"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:91
+#: includes/admin/reports/class-wc-report-coupon-usage.php:89
 #: includes/admin/reports/class-wc-report-customers.php:138
 #: includes/admin/reports/class-wc-report-sales-by-category.php:67
 #: includes/admin/reports/class-wc-report-sales-by-date.php:122
@@ -3349,7 +3350,7 @@ msgstr ""
 msgid "Year"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:92
+#: includes/admin/reports/class-wc-report-coupon-usage.php:90
 #: includes/admin/reports/class-wc-report-customers.php:139
 #: includes/admin/reports/class-wc-report-sales-by-category.php:68
 #: includes/admin/reports/class-wc-report-sales-by-date.php:123
@@ -3359,7 +3360,7 @@ msgstr ""
 msgid "Last Month"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:93
+#: includes/admin/reports/class-wc-report-coupon-usage.php:91
 #: includes/admin/reports/class-wc-report-customers.php:140
 #: includes/admin/reports/class-wc-report-sales-by-category.php:69
 #: includes/admin/reports/class-wc-report-sales-by-date.php:124
@@ -3369,7 +3370,7 @@ msgstr ""
 msgid "This Month"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:94
+#: includes/admin/reports/class-wc-report-coupon-usage.php:92
 #: includes/admin/reports/class-wc-report-customers.php:141
 #: includes/admin/reports/class-wc-report-sales-by-category.php:70
 #: includes/admin/reports/class-wc-report-sales-by-date.php:125
@@ -3377,42 +3378,42 @@ msgstr ""
 msgid "Last 7 Days"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:134
+#: includes/admin/reports/class-wc-report-coupon-usage.php:132
 msgid "Filter by coupon"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:162
+#: includes/admin/reports/class-wc-report-coupon-usage.php:160
 msgid "Choose coupons&hellip;"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:163
+#: includes/admin/reports/class-wc-report-coupon-usage.php:161
 msgid "All coupons"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:170
+#: includes/admin/reports/class-wc-report-coupon-usage.php:168
 #: includes/admin/reports/class-wc-report-sales-by-category.php:172
 #: includes/admin/reports/class-wc-report-sales-by-product.php:178
 msgid "Show"
 msgstr "عرض"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:183
+#: includes/admin/reports/class-wc-report-coupon-usage.php:181
 msgid "No used coupons found"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:188
+#: includes/admin/reports/class-wc-report-coupon-usage.php:186
 msgid "Most Popular"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:230
-#: includes/admin/reports/class-wc-report-coupon-usage.php:277
+#: includes/admin/reports/class-wc-report-coupon-usage.php:228
+#: includes/admin/reports/class-wc-report-coupon-usage.php:275
 msgid "No coupons found in range"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:235
+#: includes/admin/reports/class-wc-report-coupon-usage.php:233
 msgid "Most Discount"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:320
+#: includes/admin/reports/class-wc-report-coupon-usage.php:318
 #: includes/admin/reports/class-wc-report-customers.php:202
 #: includes/admin/reports/class-wc-report-sales-by-category.php:216
 #: includes/admin/reports/class-wc-report-sales-by-date.php:162
@@ -3423,11 +3424,11 @@ msgstr ""
 msgid "Export CSV"
 msgstr "تصدير كـ CSV"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:411
+#: includes/admin/reports/class-wc-report-coupon-usage.php:409
 msgid "Number of coupons used"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:419
+#: includes/admin/reports/class-wc-report-coupon-usage.php:417
 msgid "Discount amount"
 msgstr ""
 
