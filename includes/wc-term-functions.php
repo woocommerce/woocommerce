@@ -31,13 +31,18 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 		$args['orderby'] = wc_attribute_orderby( $taxonomy );
 	}
 
+	if ( isset( $args['fields'] ) ) {
+		$fields = $args['fields'];
+		unset( $args['fields'] );
+	}
+	else {
+		$fields = 'all';
+	}
+
 	// Support ordering by parent
 	if ( ! empty( $args['orderby'] ) && $args['orderby'] == 'parent' ) {
-		$fields         = isset( $args['fields'] ) ? $args['fields'] : 'all';
 		$orderby_parent = true;
-
 		unset( $args['orderby'] );
-		unset( $args['fields'] );
 	}
 
 	$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
@@ -48,10 +53,13 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 		switch ( $fields ) {
 			case 'names' :
 				$terms = wp_list_pluck( $terms, 'name' );
+				break;
 			case 'ids' :
 				$terms = wp_list_pluck( $terms, 'term_id' );
+				break;
 			case 'slugs' :
 				$terms = wp_list_pluck( $terms, 'slug' );
+				break;
 		}
 	}
 
