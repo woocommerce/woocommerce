@@ -306,15 +306,12 @@ function get_woocommerce_price_format() {
  * @return string
  */
 function wc_price( $price, $args = array() ) {
-	global $woocommerce;
-
 	extract( shortcode_atts( array(
 		'ex_tax_label' 	=> '0'
 	), $args ) );
 
 	$return          = '';
 	$num_decimals    = absint( get_option( 'woocommerce_price_num_decimals' ) );
-	$currency_pos    = get_option( 'woocommerce_currency_pos' );
 	$currency        = isset( $args['currency'] ) ? $args['currency'] : '';
 	$currency_symbol = get_woocommerce_currency_symbol($currency);
 	$decimal_sep     = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ), ENT_QUOTES );
