@@ -268,7 +268,8 @@ class WC_Admin_Report {
 	 */
 	public function prepare_chart_data( $data, $date_key, $data_key, $interval, $start_date, $group_by ) {
 		$prepared_data = array();
-
+		$time          =  '';
+		
 		// Ensure all days (or months) have values first in this range
 		for ( $i = 0; $i <= $interval; $i ++ ) {
 			switch ( $group_by ) {
