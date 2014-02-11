@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-07 13:06:59+00:00\n"
+"POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
 "PO-Revision-Date: 2014-02-07 15:16+0000\n"
 "Last-Translator: claudiosmweb <contato@claudiosmweb.com>\n"
 "Language-Team: Portuguese (Brazil) (http://www.transifex.com/projects/p/woocommerce-core/language/pt_BR/)\n"
@@ -3101,7 +3101,7 @@ msgstr "Sem estoque"
 
 #: includes/abstracts/abstract-wc-product.php:909
 #: includes/abstracts/abstract-wc-product.php:915
-#: includes/class-wc-cart.php:1403 includes/class-wc-order.php:800
+#: includes/class-wc-cart.php:1403 includes/class-wc-order.php:839
 #: includes/class-wc-product-variation.php:312
 msgid "Free!"
 msgstr "Grátis!"
@@ -3122,7 +3122,7 @@ msgstr "Avaliação %s de 5"
 msgid "out of 5"
 msgstr "de 5"
 
-#: includes/abstracts/abstract-wc-product.php:1380
+#: includes/abstracts/abstract-wc-product.php:1385
 msgid "%s &ndash; %s"
 msgstr "%s &ndash; %s"
 
@@ -3331,7 +3331,7 @@ msgid "File %d"
 msgstr "Arquivo %d"
 
 #: includes/class-wc-ajax.php:978 includes/class-wc-ajax.php:979
-#: includes/class-wc-order.php:1474
+#: includes/class-wc-order.php:1538
 msgid "Item #%s stock reduced from %s to %s."
 msgstr "O item #%s teve seu estoque reduzido de %s para %s."
 
@@ -3424,7 +3424,7 @@ msgid ""
 msgstr "Você não pode adicionar essa quantidade de &quot;%s&quot; porque a quantidade em estoque não é suficiente (restando %s)."
 
 #: includes/class-wc-cart.php:808 includes/class-wc-cart.php:827
-#: includes/class-wc-cart.php:840 includes/class-wc-frontend-scripts.php:144
+#: includes/class-wc-cart.php:840 includes/class-wc-frontend-scripts.php:151
 #: includes/wc-cart-functions.php:102 templates/cart/mini-cart.php:64
 msgid "View Cart"
 msgstr "Ver carrinho"
@@ -3493,20 +3493,20 @@ msgid ""
 " to homepage</a>"
 msgstr "Desculpe, sua sessão expirou. <a href=\"%s\">Voltar para a página inicial</a>"
 
-#: includes/class-wc-checkout.php:484 includes/class-wc-form-handler.php:82
+#: includes/class-wc-checkout.php:484 includes/class-wc-form-handler.php:88
 msgid "is a required field."
 msgstr "é um campo obrigatório."
 
-#: includes/class-wc-checkout.php:496 includes/class-wc-form-handler.php:92
+#: includes/class-wc-checkout.php:496 includes/class-wc-form-handler.php:99
 #: includes/shortcodes/class-wc-shortcode-cart.php:37
 msgid "Please enter a valid postcode/ZIP."
 msgstr "Digite um CEP válido."
 
-#: includes/class-wc-checkout.php:505 includes/class-wc-form-handler.php:101
+#: includes/class-wc-checkout.php:505 includes/class-wc-form-handler.php:108
 msgid "is not a valid phone number."
 msgstr "não é um número de telefone válido."
 
-#: includes/class-wc-checkout.php:511 includes/class-wc-form-handler.php:107
+#: includes/class-wc-checkout.php:511 includes/class-wc-form-handler.php:115
 msgid "is not a valid email address."
 msgstr "não é um endereço de e-mail válido."
 
@@ -4743,7 +4743,7 @@ msgid "Product no longer exists."
 msgstr "Este produto não existe mais."
 
 #: includes/class-wc-download-handler.php:87
-#: includes/class-wc-form-handler.php:488
+#: includes/class-wc-form-handler.php:519
 #: includes/shortcodes/class-wc-shortcode-checkout.php:86
 #: includes/shortcodes/class-wc-shortcode-checkout.php:167
 #: includes/shortcodes/class-wc-shortcode-my-account.php:106
@@ -4805,147 +4805,147 @@ msgstr "Demanda de produto"
 msgid "%s units of %s have been backordered in order %s."
 msgstr "%s unidades de %s foram encomendadas no pedido %s."
 
-#: includes/class-wc-form-handler.php:119
+#: includes/class-wc-form-handler.php:129
 msgid "Address changed successfully."
 msgstr "Endereço alterado com sucesso."
 
-#: includes/class-wc-form-handler.php:166
+#: includes/class-wc-form-handler.php:180
 msgid "Please enter your name."
 msgstr "Por favor, digite seu nome."
 
-#: includes/class-wc-form-handler.php:169
+#: includes/class-wc-form-handler.php:184
 #: includes/wc-customer-functions.php:46
 msgid "Please provide a valid email address."
 msgstr "Por favor, informe um endereço de e-mail válido."
 
-#: includes/class-wc-form-handler.php:172
+#: includes/class-wc-form-handler.php:186
 msgid "This email address is already registered."
 msgstr "Este endereço de e-mail já está registrado."
 
-#: includes/class-wc-form-handler.php:175
+#: includes/class-wc-form-handler.php:190
 msgid "Please re-enter your password."
 msgstr "Por favor, informe sua senha novamente."
 
-#: includes/class-wc-form-handler.php:178
-#: includes/class-wc-form-handler.php:773
+#: includes/class-wc-form-handler.php:192
+#: includes/class-wc-form-handler.php:809
 msgid "Passwords do not match."
 msgstr "As senhas não coincidem."
 
-#: includes/class-wc-form-handler.php:191
+#: includes/class-wc-form-handler.php:208
 msgid "Account details changed successfully."
 msgstr "Detalhes da conta modificados com sucesso."
 
-#: includes/class-wc-form-handler.php:311
+#: includes/class-wc-form-handler.php:334
 msgid "Payment method added."
 msgstr "Método de pagamento adicionado."
 
-#: includes/class-wc-form-handler.php:344
-#: includes/class-wc-form-handler.php:395
+#: includes/class-wc-form-handler.php:367
+#: includes/class-wc-form-handler.php:420
 msgid "Cart updated."
 msgstr "Carrinho atualizado."
 
-#: includes/class-wc-form-handler.php:378
+#: includes/class-wc-form-handler.php:402
 msgid "You can only have 1 %s in your cart."
 msgstr "Você pode ter apenas 1 %s em seu carrinho."
 
-#: includes/class-wc-form-handler.php:457
+#: includes/class-wc-form-handler.php:488
 msgid "The cart has been filled with the items from your previous order."
 msgstr "Os itens do seu pedido anterior foram inseridos no seu carrinho atual."
 
-#: includes/class-wc-form-handler.php:478
+#: includes/class-wc-form-handler.php:509
 msgid "Order cancelled by customer."
 msgstr "Pedido cancelado pelo cliente."
 
-#: includes/class-wc-form-handler.php:481
+#: includes/class-wc-form-handler.php:512
 msgid "Your order was cancelled."
 msgstr "Seu pedido foi cancelado."
 
-#: includes/class-wc-form-handler.php:486
+#: includes/class-wc-form-handler.php:517
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
 msgstr "O seu pedido não pode ser mais cancelado. Por favor, entre em contato conosco caso você precise de assistência."
 
-#: includes/class-wc-form-handler.php:525
-#: includes/class-wc-form-handler.php:583
+#: includes/class-wc-form-handler.php:557
+#: includes/class-wc-form-handler.php:617
 msgid "Please choose product options&hellip;"
 msgstr "Por favor, escolha as opções do produto&hellip;"
 
-#: includes/class-wc-form-handler.php:616
+#: includes/class-wc-form-handler.php:651
 msgid ""
 "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr "Por favor, selecione a quantidade de itens que você deseja adicionar ao seu carrinho&hellip;"
 
-#: includes/class-wc-form-handler.php:623
+#: includes/class-wc-form-handler.php:658
 msgid "Please choose a product to add to your cart&hellip;"
 msgstr "Por favor, selecione um produto para adicionar ao seu carrinho&hellip;"
 
-#: includes/class-wc-form-handler.php:683
-#: includes/class-wc-form-handler.php:687
-#: includes/class-wc-form-handler.php:691
-#: includes/class-wc-form-handler.php:700
-#: includes/class-wc-form-handler.php:813
+#: includes/class-wc-form-handler.php:718
+#: includes/class-wc-form-handler.php:722
+#: includes/class-wc-form-handler.php:726
+#: includes/class-wc-form-handler.php:735
+#: includes/class-wc-form-handler.php:857
 msgid "Error"
 msgstr "Erro"
 
-#: includes/class-wc-form-handler.php:687
+#: includes/class-wc-form-handler.php:722
 msgid "Username is required."
 msgstr "Nome de usuário é obrigatório."
 
-#: includes/class-wc-form-handler.php:691
+#: includes/class-wc-form-handler.php:726
 msgid "Password is required."
 msgstr "Senha é obrigatória."
 
-#: includes/class-wc-form-handler.php:700
+#: includes/class-wc-form-handler.php:735
 msgid "A user could not be found with this email address."
 msgstr "Nenhum usuário foi encontrado com este endereço de e-mail."
 
-#: includes/class-wc-form-handler.php:725
+#: includes/class-wc-form-handler.php:760
 msgid "You are now logged in as <strong>%s</strong>"
 msgstr "Agora você está logado como <strong>%s</strong>"
 
-#: includes/class-wc-form-handler.php:768
+#: includes/class-wc-form-handler.php:804
 msgid "Please enter your password."
 msgstr "Por favor, Informe sua senha."
 
-#: includes/class-wc-form-handler.php:789
+#: includes/class-wc-form-handler.php:827
 msgid "Your password has been reset."
 msgstr "Sua senha foi redefinida."
 
-#: includes/class-wc-form-handler.php:789
+#: includes/class-wc-form-handler.php:827
 msgid "Log in"
 msgstr "Acessar"
 
-#: includes/class-wc-form-handler.php:829
+#: includes/class-wc-form-handler.php:873
 #: includes/wc-customer-functions.php:107
 msgid "ERROR"
 msgstr "ERRO"
 
-#: includes/class-wc-form-handler.php:829
+#: includes/class-wc-form-handler.php:873
 msgid "Anti-spam field was filled in."
 msgstr "Campo anti spam foi preenchido."
 
-#: includes/class-wc-frontend-scripts.php:110
+#: includes/class-wc-frontend-scripts.php:117
 msgid "Please select a rating"
 msgstr "Por favor, selecione uma classificação"
 
-#: includes/class-wc-frontend-scripts.php:127
+#: includes/class-wc-frontend-scripts.php:134
 #: includes/wc-template-functions.php:1573
 msgid "required"
 msgstr "obrigatório"
 
-#: includes/class-wc-frontend-scripts.php:151
+#: includes/class-wc-frontend-scripts.php:158
 msgid ""
 "Sorry, no products matched your selection. Please choose a different "
 "combination."
 msgstr "Desculpe, nenhum produto atende sua seleção. Por favor, escolha uma combinação diferente."
 
-#: includes/class-wc-frontend-scripts.php:152
+#: includes/class-wc-frontend-scripts.php:159
 msgid ""
 "Sorry, this product is unavailable. Please choose a different combination."
 msgstr "Desculpe, este produto não está disponível. Por favor escolha uma combinação diferente."
 
-#: includes/class-wc-frontend-scripts.php:157
+#: includes/class-wc-frontend-scripts.php:164
 msgid "Select an option&hellip;"
 msgstr "Selecione uma opção&hellip;"
 
@@ -4995,48 +4995,48 @@ msgstr "Gerente de loja"
 msgid "What's new:"
 msgstr "Novidades:"
 
-#: includes/class-wc-order.php:130
+#: includes/class-wc-order.php:137
 msgctxt "hash before order number"
 msgid "#"
 msgstr "#"
 
-#: includes/class-wc-order.php:795
+#: includes/class-wc-order.php:834
 msgid "&nbsp;<small>%svia %s</small>"
 msgstr "&nbsp;<small>%svia %s</small>"
 
-#: includes/class-wc-order.php:856
+#: includes/class-wc-order.php:897
 msgid "Cart Subtotal:"
 msgstr "Subtotal:"
 
-#: includes/class-wc-order.php:862
+#: includes/class-wc-order.php:904
 msgid "Cart Discount:"
 msgstr "Desconto do carrinho:"
 
-#: includes/class-wc-order.php:868
+#: includes/class-wc-order.php:911
 msgid "Shipping:"
 msgstr "Frete:"
 
-#: includes/class-wc-order.php:913
+#: includes/class-wc-order.php:958
 msgid "Order Discount:"
 msgstr "Desconto da compra:"
 
-#: includes/class-wc-order.php:918
+#: includes/class-wc-order.php:964
 msgid "Order Total:"
 msgstr "Total da compra:"
 
-#: includes/class-wc-order.php:936 includes/wc-cart-functions.php:226
+#: includes/class-wc-order.php:982 includes/wc-cart-functions.php:226
 msgid "(Includes %s)"
 msgstr "(Inclui %s)"
 
-#: includes/class-wc-order.php:1176 includes/class-wc-order.php:1177
+#: includes/class-wc-order.php:1225 includes/class-wc-order.php:1226
 msgid "WooCommerce"
 msgstr "WooCommerce"
 
-#: includes/class-wc-order.php:1230
+#: includes/class-wc-order.php:1281
 msgid "Order status changed from %s to %s."
 msgstr "Status do pedido alterado de %s para %s."
 
-#: includes/class-wc-order.php:1486
+#: includes/class-wc-order.php:1550
 msgid "Order item stock reduced successfully."
 msgstr "O estoque dos itens do pedido foram reduzidos com sucesso."
 

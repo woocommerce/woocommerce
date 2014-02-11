@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-07 13:06:59+00:00\n"
+"POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
 "PO-Revision-Date: 2014-02-07 20:01+0000\n"
 "Last-Translator: Shohei Tanaka <shohei.tanaka@artisanworkshop.biz>\n"
 "Language-Team: Japanese (http://www.transifex.com/projects/p/woocommerce-core/language/ja/)\n"
@@ -3099,7 +3099,7 @@ msgstr "在庫切れ"
 
 #: includes/abstracts/abstract-wc-product.php:909
 #: includes/abstracts/abstract-wc-product.php:915
-#: includes/class-wc-cart.php:1403 includes/class-wc-order.php:800
+#: includes/class-wc-cart.php:1403 includes/class-wc-order.php:839
 #: includes/class-wc-product-variation.php:312
 msgid "Free!"
 msgstr "無料！"
@@ -3120,7 +3120,7 @@ msgstr "5段階で %s の評価"
 msgid "out of 5"
 msgstr "5点満点"
 
-#: includes/abstracts/abstract-wc-product.php:1380
+#: includes/abstracts/abstract-wc-product.php:1385
 msgid "%s &ndash; %s"
 msgstr "%s &ndash; %s"
 
@@ -3329,7 +3329,7 @@ msgid "File %d"
 msgstr "ファイル %d"
 
 #: includes/class-wc-ajax.php:978 includes/class-wc-ajax.php:979
-#: includes/class-wc-order.php:1474
+#: includes/class-wc-order.php:1538
 msgid "Item #%s stock reduced from %s to %s."
 msgstr "商品 #%s の在庫数は %s から %s に減少"
 
@@ -3422,7 +3422,7 @@ msgid ""
 msgstr "在庫不足の為、カートに&quot;%s&quot; を追加することができません（在庫数%s）。"
 
 #: includes/class-wc-cart.php:808 includes/class-wc-cart.php:827
-#: includes/class-wc-cart.php:840 includes/class-wc-frontend-scripts.php:144
+#: includes/class-wc-cart.php:840 includes/class-wc-frontend-scripts.php:151
 #: includes/wc-cart-functions.php:102 templates/cart/mini-cart.php:64
 msgid "View Cart"
 msgstr "カートを見る"
@@ -3491,20 +3491,20 @@ msgid ""
 " to homepage</a>"
 msgstr "申し訳ありませんが、セッションが期限切れになっています。<a href=\"%s\" class=\"wc-backward\">Homeへ戻る</a>"
 
-#: includes/class-wc-checkout.php:484 includes/class-wc-form-handler.php:82
+#: includes/class-wc-checkout.php:484 includes/class-wc-form-handler.php:88
 msgid "is a required field."
 msgstr "必須フィールドです"
 
-#: includes/class-wc-checkout.php:496 includes/class-wc-form-handler.php:92
+#: includes/class-wc-checkout.php:496 includes/class-wc-form-handler.php:99
 #: includes/shortcodes/class-wc-shortcode-cart.php:37
 msgid "Please enter a valid postcode/ZIP."
 msgstr "有効な郵便番号を入力して下さい"
 
-#: includes/class-wc-checkout.php:505 includes/class-wc-form-handler.php:101
+#: includes/class-wc-checkout.php:505 includes/class-wc-form-handler.php:108
 msgid "is not a valid phone number."
 msgstr "は電話番号として正しくありません"
 
-#: includes/class-wc-checkout.php:511 includes/class-wc-form-handler.php:107
+#: includes/class-wc-checkout.php:511 includes/class-wc-form-handler.php:115
 msgid "is not a valid email address."
 msgstr "有効なEメールアドレスではありません"
 
@@ -4741,7 +4741,7 @@ msgid "Product no longer exists."
 msgstr "該当する商品は現在ありません"
 
 #: includes/class-wc-download-handler.php:87
-#: includes/class-wc-form-handler.php:488
+#: includes/class-wc-form-handler.php:519
 #: includes/shortcodes/class-wc-shortcode-checkout.php:86
 #: includes/shortcodes/class-wc-shortcode-checkout.php:167
 #: includes/shortcodes/class-wc-shortcode-my-account.php:106
@@ -4803,147 +4803,147 @@ msgstr "商品の予約注文"
 msgid "%s units of %s have been backordered in order %s."
 msgstr "%s個（%s個中）は注文%sでは入荷待ちです。"
 
-#: includes/class-wc-form-handler.php:119
+#: includes/class-wc-form-handler.php:129
 msgid "Address changed successfully."
 msgstr "住所は正常に変更されました"
 
-#: includes/class-wc-form-handler.php:166
+#: includes/class-wc-form-handler.php:180
 msgid "Please enter your name."
 msgstr "ユーザー名を入力して下さい"
 
-#: includes/class-wc-form-handler.php:169
+#: includes/class-wc-form-handler.php:184
 #: includes/wc-customer-functions.php:46
 msgid "Please provide a valid email address."
 msgstr "正しいEメールアドレス形式で入力して下さい"
 
-#: includes/class-wc-form-handler.php:172
+#: includes/class-wc-form-handler.php:186
 msgid "This email address is already registered."
 msgstr "このEメールアドレスは既に登録されています"
 
-#: includes/class-wc-form-handler.php:175
+#: includes/class-wc-form-handler.php:190
 msgid "Please re-enter your password."
 msgstr "パスワードを再入力して下さい"
 
-#: includes/class-wc-form-handler.php:178
-#: includes/class-wc-form-handler.php:773
+#: includes/class-wc-form-handler.php:192
+#: includes/class-wc-form-handler.php:809
 msgid "Passwords do not match."
 msgstr "パスワードが一致しません"
 
-#: includes/class-wc-form-handler.php:191
+#: includes/class-wc-form-handler.php:208
 msgid "Account details changed successfully."
 msgstr "アカウント情報は正常に変更されました"
 
-#: includes/class-wc-form-handler.php:311
+#: includes/class-wc-form-handler.php:334
 msgid "Payment method added."
 msgstr "支払い方法を追加しました。"
 
-#: includes/class-wc-form-handler.php:344
-#: includes/class-wc-form-handler.php:395
+#: includes/class-wc-form-handler.php:367
+#: includes/class-wc-form-handler.php:420
 msgid "Cart updated."
 msgstr "カートが更新されました。"
 
-#: includes/class-wc-form-handler.php:378
+#: includes/class-wc-form-handler.php:402
 msgid "You can only have 1 %s in your cart."
 msgstr "%s は１つだけしかカートに入れることができません"
 
-#: includes/class-wc-form-handler.php:457
+#: includes/class-wc-form-handler.php:488
 msgid "The cart has been filled with the items from your previous order."
 msgstr "カートに以前の注文が残っています"
 
-#: includes/class-wc-form-handler.php:478
+#: includes/class-wc-form-handler.php:509
 msgid "Order cancelled by customer."
 msgstr "お客様による注文のキャンセル"
 
-#: includes/class-wc-form-handler.php:481
+#: includes/class-wc-form-handler.php:512
 msgid "Your order was cancelled."
 msgstr "注文はキャンセルされました"
 
-#: includes/class-wc-form-handler.php:486
+#: includes/class-wc-form-handler.php:517
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
 msgstr "もうご注文をキャンセルすることができません。サポートが必要な場合は、お問い合わせください。"
 
-#: includes/class-wc-form-handler.php:525
-#: includes/class-wc-form-handler.php:583
+#: includes/class-wc-form-handler.php:557
+#: includes/class-wc-form-handler.php:617
 msgid "Please choose product options&hellip;"
 msgstr "商品のオプションを選択してください&hellip;"
 
-#: includes/class-wc-form-handler.php:616
+#: includes/class-wc-form-handler.php:651
 msgid ""
 "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr "カートに追加したい商品の数量を選択してください&hellip;"
 
-#: includes/class-wc-form-handler.php:623
+#: includes/class-wc-form-handler.php:658
 msgid "Please choose a product to add to your cart&hellip;"
 msgstr "カートに追加する商品を選択してください&hellip;"
 
-#: includes/class-wc-form-handler.php:683
-#: includes/class-wc-form-handler.php:687
-#: includes/class-wc-form-handler.php:691
-#: includes/class-wc-form-handler.php:700
-#: includes/class-wc-form-handler.php:813
+#: includes/class-wc-form-handler.php:718
+#: includes/class-wc-form-handler.php:722
+#: includes/class-wc-form-handler.php:726
+#: includes/class-wc-form-handler.php:735
+#: includes/class-wc-form-handler.php:857
 msgid "Error"
 msgstr "エラー"
 
-#: includes/class-wc-form-handler.php:687
+#: includes/class-wc-form-handler.php:722
 msgid "Username is required."
 msgstr "ユーザー名が必要です"
 
-#: includes/class-wc-form-handler.php:691
+#: includes/class-wc-form-handler.php:726
 msgid "Password is required."
 msgstr "パスワードが必要です"
 
-#: includes/class-wc-form-handler.php:700
+#: includes/class-wc-form-handler.php:735
 msgid "A user could not be found with this email address."
 msgstr "このEメールアドレスのユーザーは見つかりませんでした"
 
-#: includes/class-wc-form-handler.php:725
+#: includes/class-wc-form-handler.php:760
 msgid "You are now logged in as <strong>%s</strong>"
 msgstr "あなたは現在 <strong>%s</strong> としてログインしています"
 
-#: includes/class-wc-form-handler.php:768
+#: includes/class-wc-form-handler.php:804
 msgid "Please enter your password."
 msgstr "パスワードを入力して下さい"
 
-#: includes/class-wc-form-handler.php:789
+#: includes/class-wc-form-handler.php:827
 msgid "Your password has been reset."
 msgstr "パスワードがリセットされました。"
 
-#: includes/class-wc-form-handler.php:789
+#: includes/class-wc-form-handler.php:827
 msgid "Log in"
 msgstr "ログイン"
 
-#: includes/class-wc-form-handler.php:829
+#: includes/class-wc-form-handler.php:873
 #: includes/wc-customer-functions.php:107
 msgid "ERROR"
 msgstr "エラー"
 
-#: includes/class-wc-form-handler.php:829
+#: includes/class-wc-form-handler.php:873
 msgid "Anti-spam field was filled in."
 msgstr "スパム対策フィールドが書きかえられました"
 
-#: includes/class-wc-frontend-scripts.php:110
+#: includes/class-wc-frontend-scripts.php:117
 msgid "Please select a rating"
 msgstr "評価を選択してください"
 
-#: includes/class-wc-frontend-scripts.php:127
+#: includes/class-wc-frontend-scripts.php:134
 #: includes/wc-template-functions.php:1573
 msgid "required"
 msgstr "必須"
 
-#: includes/class-wc-frontend-scripts.php:151
+#: includes/class-wc-frontend-scripts.php:158
 msgid ""
 "Sorry, no products matched your selection. Please choose a different "
 "combination."
 msgstr "申し訳ありませんが、商品の選択に一致するものがありません。別の組み合わせを選択してください。"
 
-#: includes/class-wc-frontend-scripts.php:152
+#: includes/class-wc-frontend-scripts.php:159
 msgid ""
 "Sorry, this product is unavailable. Please choose a different combination."
 msgstr "この商品は対応しておりません。異なる組み合わせを選択してください。"
 
-#: includes/class-wc-frontend-scripts.php:157
+#: includes/class-wc-frontend-scripts.php:164
 msgid "Select an option&hellip;"
 msgstr "オプションを選択&hellip;"
 
@@ -4993,48 +4993,48 @@ msgstr "ショップ運営者"
 msgid "What's new:"
 msgstr "新着情報:"
 
-#: includes/class-wc-order.php:130
+#: includes/class-wc-order.php:137
 msgctxt "hash before order number"
 msgid "#"
 msgstr "#"
 
-#: includes/class-wc-order.php:795
+#: includes/class-wc-order.php:834
 msgid "&nbsp;<small>%svia %s</small>"
 msgstr "&nbsp;<small>%s- %s</small>"
 
-#: includes/class-wc-order.php:856
+#: includes/class-wc-order.php:897
 msgid "Cart Subtotal:"
 msgstr "カート小計:"
 
-#: includes/class-wc-order.php:862
+#: includes/class-wc-order.php:904
 msgid "Cart Discount:"
 msgstr "カートでの割引:"
 
-#: includes/class-wc-order.php:868
+#: includes/class-wc-order.php:911
 msgid "Shipping:"
 msgstr "配送料:"
 
-#: includes/class-wc-order.php:913
+#: includes/class-wc-order.php:958
 msgid "Order Discount:"
 msgstr "注文の割引:"
 
-#: includes/class-wc-order.php:918
+#: includes/class-wc-order.php:964
 msgid "Order Total:"
 msgstr "注文合計:"
 
-#: includes/class-wc-order.php:936 includes/wc-cart-functions.php:226
+#: includes/class-wc-order.php:982 includes/wc-cart-functions.php:226
 msgid "(Includes %s)"
 msgstr "(%s 含む)"
 
-#: includes/class-wc-order.php:1176 includes/class-wc-order.php:1177
+#: includes/class-wc-order.php:1225 includes/class-wc-order.php:1226
 msgid "WooCommerce"
 msgstr "WooCommerce"
 
-#: includes/class-wc-order.php:1230
+#: includes/class-wc-order.php:1281
 msgid "Order status changed from %s to %s."
 msgstr "注文状況は %s から %s に変更されました。"
 
-#: includes/class-wc-order.php:1486
+#: includes/class-wc-order.php:1550
 msgid "Order item stock reduced successfully."
 msgstr "注文商品の在庫が正常に減少しました。"
 
