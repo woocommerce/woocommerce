@@ -130,6 +130,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - During install, register all post types and endpoints so that the rewrite rules are correctly generated.
 * Fix - Allow line breaks in customer addresses on order details page
 * Fix - Fixed all language country codes to reflect WordPress standards
+* Fix - Payment gateway section links work in lower and upper caps texts
 * Tweak - Added Croatian Kuna currency
 
 = 2.1.0 - 10/02/2014 =
