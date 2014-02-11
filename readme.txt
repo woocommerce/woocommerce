@@ -126,6 +126,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.1.1 =
+* Fix - During install, register all post types and endpoints so that the rewrite rules are correctly generated.
+
 = 2.1.0 - 10/02/2014 =
 * Feature - New REST API
 * Feature - Define whether prices should be shown incl. or excl. of tax, and add an optional suffix.
