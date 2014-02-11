@@ -48,8 +48,6 @@ function wc_create_new_customer( $email, $username = '', $password = '' ) {
 	if ( email_exists( $email ) )
 		return new WP_Error( "registration-error", __( "An account is already registered with your email address. Please login.", "woocommerce" ) );
 
-	wp_verify_nonce( $_POST['register'], 'woocommerce-register' );
-
 	// Handle username creation
 	if ( get_option( 'woocommerce_registration_generate_username' ) == 'no' || ! empty( $username ) ) {
 
