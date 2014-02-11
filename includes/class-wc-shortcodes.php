@@ -242,6 +242,14 @@ class WC_Shortcodes {
 			$product_categories = wp_list_filter( $product_categories, array( 'parent' => $parent ) );
 		}
 
+		if ( $hide_empty ) {
+			foreach ( $product_categories as $key => $category ) {
+				if ( $category->count == 0 ) {
+					unset( $product_categories[ $key ] );
+				}
+			}
+		}
+
 		if ( $number ) {
 			$product_categories = array_slice( $product_categories, 0, $number );
 		}
