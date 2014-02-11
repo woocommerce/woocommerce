@@ -37,7 +37,7 @@ add_filter( 'show_admin_bar', 'wc_disable_admin_bar', 10, 1 );
  * @param  string $email
  * @param  string $username
  * @param  string $password
- * @return WP_Error on failure, Int (user ID) on success
+ * @return int|WP_Error on failure, Int (user ID) on success
  */
 function wc_create_new_customer( $email, $username = '', $password = '' ) {
 
