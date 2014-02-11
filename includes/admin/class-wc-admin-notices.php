@@ -126,7 +126,9 @@ class WC_Admin_Notices {
 			}
 		}
 
-		include( 'views/html-notice-template-check.php' );
+		if ( $outdated ) {
+			include( 'views/html-notice-template-check.php' );
+		}
 	}
 }
 
