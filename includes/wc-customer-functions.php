@@ -73,7 +73,7 @@ function wc_create_new_customer( $email, $username = '', $password = '' ) {
 	}
 
 	// Handle password creation
-	if ( get_option( 'woocommerce_registration_generate_password' ) == 'yes' && empty( $password ) ) {
+	if ( get_option( 'woocommerce_registration_generate_password' ) == 'yes' && empty( $password ) && ! isset( $_POST['register'] ) ) {
 		$password = wp_generate_password();
 		$password_generated = true;
 	} elseif ( empty( $password ) ) {
