@@ -127,6 +127,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.1.1 =
+* Feature - Show notice if template files are out of date for themes including WooCommerce template files
 * Fix - During install, register all post types and endpoints so that the rewrite rules are correctly generated.
 * Fix - Allow line breaks in customer addresses on order details page
 * Fix - Fixed all language country codes to reflect WordPress standards
