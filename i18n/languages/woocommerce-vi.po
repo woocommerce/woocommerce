@@ -1,12 +1,13 @@
 # 
 # Translators:
+# Toan Vu Duy <fantasy1612@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
-"PO-Revision-Date: 2014-02-11 09:25+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-02-12 03:45+0000\n"
+"Last-Translator: Toan Vu Duy <fantasy1612@gmail.com>\n"
 "Language-Team: Vietnamese (http://www.transifex.com/projects/p/woocommerce-core/language/vi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -16,7 +17,7 @@ msgstr ""
 
 #: assets/js/admin/editor_plugin_lang.php:5
 msgid "Insert Shortcode"
-msgstr ""
+msgstr "Chèn mã"
 
 #: assets/js/admin/editor_plugin_lang.php:6
 msgid "Product price/cart button"
@@ -32,7 +33,7 @@ msgstr ""
 
 #: assets/js/admin/editor_plugin_lang.php:9
 msgid "Product categories"
-msgstr ""
+msgstr "Danh mục sản phẩm"
 
 #: assets/js/admin/editor_plugin_lang.php:10
 msgid "Products by category slug"
@@ -60,7 +61,7 @@ msgstr ""
 #: includes/shortcodes/class-wc-shortcode-view-order.php:49
 #: templates/checkout/thankyou.php:30
 msgid "My Account"
-msgstr ""
+msgstr "Tài khoản"
 
 #: i18n/states/AU.php:13
 msgid "Australian Capital Territory"
@@ -2997,7 +2998,7 @@ msgstr ""
 #: includes/abstracts/abstract-wc-integration.php:30
 #: includes/abstracts/abstract-wc-settings-api.php:39 woocommerce.php:181
 msgid "Settings"
-msgstr ""
+msgstr "Thiết lập"
 
 #: includes/abstracts/abstract-wc-email.php:709
 msgid "HTML template"
@@ -3059,7 +3060,7 @@ msgstr ""
 #: includes/class-wc-product-simple.php:48
 #: includes/class-wc-product-variation.php:211
 msgid "Add to cart"
-msgstr ""
+msgstr "Thêm vào giỏ hàng"
 
 #: includes/abstracts/abstract-wc-product.php:466
 msgid "Read more"
@@ -3069,7 +3070,7 @@ msgstr ""
 #: includes/abstracts/abstract-wc-product.php:579
 #: includes/abstracts/abstract-wc-product.php:599
 msgid "In stock"
-msgstr ""
+msgstr "Còn hàng"
 
 #: includes/abstracts/abstract-wc-product.php:579
 msgid "Only %s left in stock"
@@ -3092,7 +3093,7 @@ msgstr ""
 #: includes/abstracts/abstract-wc-product.php:612
 #: includes/abstracts/abstract-wc-product.php:616
 msgid "Out of stock"
-msgstr ""
+msgstr "Hết hàng"
 
 #: includes/abstracts/abstract-wc-product.php:909
 #: includes/abstracts/abstract-wc-product.php:915
@@ -3318,7 +3319,7 @@ msgstr ""
 
 #: includes/class-wc-ajax.php:530
 msgid "Standard"
-msgstr ""
+msgstr "Chuẩn"
 
 #: includes/class-wc-ajax.php:788 includes/class-wc-customer.php:624
 #: includes/class-wc-customer.php:636
@@ -3350,7 +3351,7 @@ msgstr ""
 #: includes/widgets/class-wc-widget-product-categories.php:39
 #: templates/single-product-reviews.php:62
 msgid "Name"
-msgstr ""
+msgstr "Tên"
 
 #: includes/class-wc-ajax.php:1050
 msgid "Value"
@@ -3358,11 +3359,11 @@ msgstr ""
 
 #: includes/class-wc-ajax.php:1268
 msgid "Delete note"
-msgstr ""
+msgstr "Xóa ghi chú"
 
 #: includes/class-wc-ajax.php:1413
 msgid "Guest"
-msgstr ""
+msgstr "Khách"
 
 #: includes/class-wc-cache-helper.php:105
 msgid ""
@@ -3449,7 +3450,7 @@ msgstr ""
 #: includes/class-wc-checkout.php:99
 msgctxt "placeholder"
 msgid "Username"
-msgstr ""
+msgstr "Tên tài khoản"
 
 #: includes/class-wc-checkout.php:106
 msgid "Account password"
@@ -3462,7 +3463,7 @@ msgstr ""
 
 #: includes/class-wc-checkout.php:116
 msgid "Order Notes"
-msgstr ""
+msgstr "Ghi chú"
 
 #: includes/class-wc-checkout.php:117
 msgctxt "placeholder"
@@ -4525,7 +4526,7 @@ msgstr ""
 
 #: includes/class-wc-countries.php:510
 msgid "Tax"
-msgstr ""
+msgstr "Thuế"
 
 #: includes/class-wc-countries.php:523
 msgid "(incl. VAT)"
@@ -4545,15 +4546,15 @@ msgstr ""
 
 #: includes/class-wc-countries.php:718
 msgid "Country"
-msgstr ""
+msgstr "Quốc gia"
 
 #: includes/class-wc-countries.php:723
 msgid "First Name"
-msgstr ""
+msgstr "Họ"
 
 #: includes/class-wc-countries.php:728
 msgid "Last Name"
-msgstr ""
+msgstr "Tên"
 
 #: includes/class-wc-countries.php:734
 msgid "Company Name"
@@ -4561,7 +4562,7 @@ msgstr ""
 
 #: includes/class-wc-countries.php:738
 msgid "Address"
-msgstr ""
+msgstr "Địa chỉ"
 
 #: includes/class-wc-countries.php:739
 msgctxt "placeholder"
@@ -4624,7 +4625,7 @@ msgstr ""
 
 #: includes/class-wc-countries.php:1045
 msgid "Postcode"
-msgstr ""
+msgstr "Mã bưu điện"
 
 #: includes/class-wc-countries.php:1153
 msgid "Email Address"
@@ -4632,7 +4633,7 @@ msgstr ""
 
 #: includes/class-wc-countries.php:1159
 msgid "Phone"
-msgstr ""
+msgstr "Số điện thoại"
 
 #: includes/class-wc-coupon.php:568
 msgid "Coupon code applied successfully."
@@ -4947,40 +4948,40 @@ msgstr ""
 #: includes/class-wc-install.php:214
 msgctxt "page_slug"
 msgid "shop"
-msgstr ""
+msgstr "sho"
 
 #: includes/class-wc-install.php:215
 msgid "Shop"
-msgstr ""
+msgstr "Shop"
 
 #: includes/class-wc-install.php:219
 msgctxt "page_slug"
 msgid "cart"
-msgstr ""
+msgstr "giỏ hàng"
 
 #: includes/class-wc-install.php:220
 #: includes/widgets/class-wc-widget-cart.php:29
 #: includes/widgets/class-wc-widget-cart.php:56
 msgid "Cart"
-msgstr ""
+msgstr "Giỏ hàng"
 
 #: includes/class-wc-install.php:224
 msgctxt "page_slug"
 msgid "checkout"
-msgstr ""
+msgstr "thanh toán"
 
 #: includes/class-wc-install.php:225 templates/cart/mini-cart.php:65
 msgid "Checkout"
-msgstr ""
+msgstr "Thanh toán"
 
 #: includes/class-wc-install.php:229
 msgctxt "page_slug"
 msgid "my-account"
-msgstr ""
+msgstr "tai-khoan"
 
 #: includes/class-wc-install.php:441
 msgid "Customer"
-msgstr ""
+msgstr "Khách hàng"
 
 #: includes/class-wc-install.php:448
 msgid "Shop Manager"
@@ -4988,7 +4989,7 @@ msgstr ""
 
 #: includes/class-wc-install.php:689
 msgid "What's new:"
-msgstr ""
+msgstr "Có gì mới:"
 
 #: includes/class-wc-order.php:137
 msgctxt "hash before order number"
@@ -5013,11 +5014,11 @@ msgstr ""
 
 #: includes/class-wc-order.php:958
 msgid "Order Discount:"
-msgstr ""
+msgstr "Giảm giá đơn hàng:"
 
 #: includes/class-wc-order.php:964
 msgid "Order Total:"
-msgstr ""
+msgstr "Tổng cộng đơn hàng:"
 
 #: includes/class-wc-order.php:982 includes/wc-cart-functions.php:226
 msgid "(Includes %s)"
@@ -5025,7 +5026,7 @@ msgstr ""
 
 #: includes/class-wc-order.php:1225 includes/class-wc-order.php:1226
 msgid "WooCommerce"
-msgstr ""
+msgstr "WooCommerce"
 
 #: includes/class-wc-order.php:1281
 msgid "Order status changed from %s to %s."
@@ -5042,7 +5043,7 @@ msgstr ""
 
 #: includes/class-wc-post-types.php:58
 msgid "Product Category"
-msgstr ""
+msgstr "Danh mục sản phẩm"
 
 #: includes/class-wc-post-types.php:59
 msgctxt "Admin menu name"
@@ -5085,7 +5086,7 @@ msgstr ""
 #: includes/updates/woocommerce-update-2.0.php:49
 msgctxt "slug"
 msgid "product-category"
-msgstr ""
+msgstr "danh-muc"
 
 #: includes/class-wc-post-types.php:90 includes/class-wc-post-types.php:92
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:27
@@ -5094,7 +5095,7 @@ msgstr ""
 
 #: includes/class-wc-post-types.php:93
 msgid "Product Tag"
-msgstr ""
+msgstr "Từ khóa sản phẩm"
 
 #: includes/class-wc-post-types.php:94
 msgctxt "Admin menu name"
@@ -5137,7 +5138,7 @@ msgstr ""
 #: includes/updates/woocommerce-update-2.0.php:50
 msgctxt "slug"
 msgid "product-tag"
-msgstr ""
+msgstr "tu-khoa"
 
 #: includes/class-wc-post-types.php:124 includes/class-wc-post-types.php:126
 msgid "Shipping Classes"
@@ -5221,12 +5222,12 @@ msgstr ""
 #: includes/updates/woocommerce-update-2.0.php:58
 msgctxt "slug"
 msgid "product"
-msgstr ""
+msgstr "sản phẩm"
 
 #: includes/class-wc-post-types.php:232
 #: includes/widgets/class-wc-widget-products.php:27
 msgid "Products"
-msgstr ""
+msgstr "Sản phẩm"
 
 #: includes/class-wc-post-types.php:233 templates/cart/cart.php:27
 #: templates/checkout/form-pay.php:19 templates/checkout/review-order.php:18
@@ -5237,12 +5238,12 @@ msgstr ""
 #: templates/emails/customer-processing-order.php:23
 #: templates/order/order-details.php:20
 msgid "Product"
-msgstr ""
+msgstr "Sản phẩm"
 
 #: includes/class-wc-post-types.php:234
 msgctxt "Admin menu name"
 msgid "Products"
-msgstr ""
+msgstr "Sản phẩm"
 
 #: includes/class-wc-post-types.php:235
 msgid "Add Product"
@@ -5255,7 +5256,7 @@ msgstr ""
 #: includes/class-wc-post-types.php:237 includes/class-wc-post-types.php:289
 #: includes/class-wc-post-types.php:328 templates/myaccount/my-address.php:45
 msgid "Edit"
-msgstr ""
+msgstr "Sửa"
 
 #: includes/class-wc-post-types.php:238
 msgid "Edit Product"
@@ -5297,15 +5298,15 @@ msgstr ""
 #: includes/class-wc-post-types.php:275
 msgctxt "Admin menu name"
 msgid "Orders"
-msgstr ""
+msgstr "Đơn hàng"
 
 #: includes/class-wc-post-types.php:285
 msgid "Orders"
-msgstr ""
+msgstr "Đơn hàng"
 
 #: includes/class-wc-post-types.php:286 templates/myaccount/my-orders.php:32
 msgid "Order"
-msgstr ""
+msgstr "Đơn hàng"
 
 #: includes/class-wc-post-types.php:287
 msgid "Add Order"
@@ -5325,7 +5326,7 @@ msgstr ""
 
 #: includes/class-wc-post-types.php:292 includes/class-wc-post-types.php:293
 msgid "View Order"
-msgstr ""
+msgstr "Xem đơn hàng"
 
 #: includes/class-wc-post-types.php:294
 msgid "Search Orders"
@@ -5349,16 +5350,16 @@ msgstr ""
 
 #: includes/class-wc-post-types.php:323
 msgid "Coupons"
-msgstr ""
+msgstr "Phiếu giảm giá"
 
 #: includes/class-wc-post-types.php:324 templates/cart/cart.php:118
 msgid "Coupon"
-msgstr ""
+msgstr "Phiếu giảm giá"
 
 #: includes/class-wc-post-types.php:325
 msgctxt "Admin menu name"
 msgid "Coupons"
-msgstr ""
+msgstr "Phiếu giảm giá"
 
 #: includes/class-wc-post-types.php:326
 msgid "Add Coupon"
@@ -5544,7 +5545,7 @@ msgstr ""
 
 #: includes/emails/class-wc-email-customer-note.php:31
 msgid "Customer note"
-msgstr ""
+msgstr "Khách hàng ghi chú"
 
 #: includes/emails/class-wc-email-customer-note.php:32
 msgid "Customer note emails are sent when you add a note to an order."
@@ -5689,7 +5690,7 @@ msgstr ""
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:139
 #: includes/wc-template-functions.php:965
 msgid "Description"
-msgstr ""
+msgstr "Mô tả"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:81
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:67
@@ -6100,7 +6101,7 @@ msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:349
 msgid "Order %s"
-msgstr ""
+msgstr "Đơn hàng %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:358
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:415
@@ -6242,7 +6243,7 @@ msgstr ""
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:102
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:106
 msgid "Specific Countries"
-msgstr ""
+msgstr "Quốc gia riêng"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:105
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:94
@@ -6255,17 +6256,17 @@ msgstr ""
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:109
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:83
 msgid "Tax Status"
-msgstr ""
+msgstr "Tình trạng thuế"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:113
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:87
 msgid "Taxable"
-msgstr ""
+msgstr "Thuế"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:114
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:88
 msgid "None"
-msgstr ""
+msgstr "Trống"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:118
 msgid "Cost per order"
@@ -6373,7 +6374,7 @@ msgstr ""
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:102
 #: templates/order/order-details.php:122 templates/order/order-details.php:137
 msgid "N/A"
-msgstr ""
+msgstr "N/A"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:554
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:584
@@ -6569,7 +6570,7 @@ msgstr ""
 #: templates/emails/customer-note.php:22
 #: templates/emails/customer-processing-order.php:18
 msgid "Order:"
-msgstr ""
+msgstr "Đơn hàng:"
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:133
 #: templates/checkout/thankyou.php:44
@@ -6579,7 +6580,7 @@ msgstr ""
 #: includes/shortcodes/class-wc-shortcode-checkout.php:137
 #: templates/checkout/thankyou.php:48
 msgid "Total:"
-msgstr ""
+msgstr "Tổng cộng:"
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:142
 #: templates/checkout/thankyou.php:53
@@ -6935,7 +6936,7 @@ msgstr ""
 #: includes/wc-template-functions.php:1620
 #: templates/cart/shipping-calculator.php:28
 msgid "Select a country&hellip;"
-msgstr ""
+msgstr "Chọn quốc gia&hellip;"
 
 #: includes/wc-template-functions.php:1627
 msgid "Update country"
@@ -6956,7 +6957,7 @@ msgstr ""
 
 #: includes/wc-template-functions.php:1785
 msgid "Search"
-msgstr ""
+msgstr "Tìm kiếm"
 
 #: includes/wc-term-functions.php:118
 msgid "Select a category"
@@ -7020,11 +7021,11 @@ msgstr ""
 
 #: includes/widgets/class-wc-widget-layered-nav.php:75
 msgid "Attribute"
-msgstr ""
+msgstr "Thuộc tính"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:81
 msgid "Display type"
-msgstr ""
+msgstr "Kiểu hiển thị"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:83
 msgid "List"
@@ -7149,7 +7150,7 @@ msgstr ""
 
 #: includes/widgets/class-wc-widget-products.php:41
 msgid "Show"
-msgstr ""
+msgstr "Hiển thị"
 
 #: includes/widgets/class-wc-widget-products.php:43
 msgid "All Products"
@@ -7166,7 +7167,7 @@ msgstr ""
 #: includes/widgets/class-wc-widget-products.php:53
 #: templates/myaccount/my-orders.php:33
 msgid "Date"
-msgstr ""
+msgstr "Ngày"
 
 #: includes/widgets/class-wc-widget-products.php:54 templates/cart/cart.php:28
 #: templates/emails/admin-new-order.php:24
@@ -7175,7 +7176,7 @@ msgstr ""
 #: templates/emails/customer-note.php:29
 #: templates/emails/customer-processing-order.php:25
 msgid "Price"
-msgstr ""
+msgstr "Giá"
 
 #: includes/widgets/class-wc-widget-products.php:55
 msgid "Random"
@@ -7183,12 +7184,12 @@ msgstr ""
 
 #: includes/widgets/class-wc-widget-products.php:56
 msgid "Sales"
-msgstr ""
+msgstr "Giảm giá"
 
 #: includes/widgets/class-wc-widget-products.php:62
 msgctxt "Sorting order"
 msgid "Order"
-msgstr ""
+msgstr "Đơn hàng"
 
 #: includes/widgets/class-wc-widget-products.php:64
 msgid "ASC"
@@ -7212,7 +7213,7 @@ msgstr ""
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:23
 msgid "WooCommerce Recent Reviews"
-msgstr ""
+msgstr "Đánh giá gần đây"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:27
 msgid "Recent Reviews"
@@ -7290,7 +7291,7 @@ msgstr ""
 
 #: templates/cart/cart-shipping.php:93
 msgid "Shipping"
-msgstr ""
+msgstr "Vận chuyển"
 
 #: templates/cart/cart-totals.php:16
 msgid "Cart Totals"
@@ -7308,7 +7309,7 @@ msgstr ""
 
 #: templates/cart/cart-totals.php:75 templates/checkout/review-order.php:79
 msgid "Order Total"
-msgstr ""
+msgstr "Tổng cộng"
 
 #: templates/cart/cart-totals.php:87
 msgid " (taxes estimated for %s)"
@@ -7326,12 +7327,12 @@ msgstr ""
 #: templates/emails/customer-note.php:28
 #: templates/emails/customer-processing-order.php:24
 msgid "Quantity"
-msgstr ""
+msgstr "Số lượng"
 
 #: templates/cart/cart.php:30 templates/checkout/review-order.php:19
 #: templates/myaccount/my-orders.php:35 templates/order/order-details.php:21
 msgid "Total"
-msgstr ""
+msgstr "Tổng cộng"
 
 #: templates/cart/cart.php:47
 msgid "Remove this item"
@@ -7339,7 +7340,7 @@ msgstr ""
 
 #: templates/cart/cart.php:118 templates/checkout/form-coupon.php:25
 msgid "Coupon code"
-msgstr ""
+msgstr "Mã giảm giá"
 
 #: templates/cart/cart.php:118 templates/checkout/form-coupon.php:29
 msgid "Apply Coupon"
@@ -7363,7 +7364,7 @@ msgstr ""
 
 #: templates/cart/mini-cart.php:59
 msgid "Subtotal"
-msgstr ""
+msgstr "Tổng phụ"
 
 #: templates/cart/shipping-calculator.php:22
 msgid "Calculate Shipping"
@@ -7377,7 +7378,7 @@ msgstr ""
 
 #: templates/cart/shipping-calculator.php:72
 msgid "City"
-msgstr ""
+msgstr "Thành phố"
 
 #: templates/cart/shipping-calculator.php:85
 msgid "Update Totals"
@@ -7402,7 +7403,7 @@ msgstr ""
 #: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
 #: templates/order/order-details.php:118
 msgid "Billing Address"
-msgstr ""
+msgstr "Địa chỉ thanh toán"
 
 #: templates/checkout/form-billing.php:40
 msgid "Create an account?"
@@ -7447,11 +7448,11 @@ msgstr ""
 
 #: templates/checkout/form-pay.php:20
 msgid "Qty"
-msgstr ""
+msgstr "SL"
 
 #: templates/checkout/form-pay.php:21
 msgid "Totals"
-msgstr ""
+msgstr "Tổng"
 
 #: templates/checkout/form-pay.php:54
 msgid "Payment"
@@ -7545,7 +7546,7 @@ msgstr ""
 #: templates/emails/plain/admin-new-order.php:39
 #: templates/order/order-details.php:97
 msgid "Customer details"
-msgstr ""
+msgstr "Chi tiết khách hàng"
 
 #: templates/emails/admin-new-order.php:53
 #: templates/emails/customer-completed-order.php:54
@@ -7557,7 +7558,7 @@ msgstr ""
 #: templates/emails/plain/customer-processing-order.php:41
 #: templates/order/order-details.php:101
 msgid "Email:"
-msgstr ""
+msgstr "Email:"
 
 #: templates/emails/admin-new-order.php:56
 #: templates/emails/customer-completed-order.php:57
@@ -7568,7 +7569,7 @@ msgstr ""
 #: templates/emails/plain/customer-note.php:52
 #: templates/emails/plain/customer-processing-order.php:44
 msgid "Tel:"
-msgstr ""
+msgstr "Điện thoại:"
 
 #: templates/emails/customer-completed-order.php:14
 #: templates/emails/plain/customer-completed-order.php:13
@@ -7650,12 +7651,12 @@ msgstr ""
 #: templates/emails/email-addresses.php:18
 #: templates/emails/plain/email-addresses.php:12
 msgid "Billing address"
-msgstr ""
+msgstr "Địa chỉ thanh toán"
 
 #: templates/emails/email-addresses.php:28
 #: templates/emails/plain/email-addresses.php:17
 msgid "Shipping address"
-msgstr ""
+msgstr "Địa chỉ giao hàng"
 
 #: templates/emails/email-order-items.php:42
 #: templates/emails/plain/email-order-items.php:43
@@ -7754,7 +7755,7 @@ msgstr ""
 #: templates/global/quantity-input.php:12
 msgctxt "Product quantity input tooltip"
 msgid "Qty"
-msgstr ""
+msgstr "SL"
 
 #: templates/loop/no-products-found.php:14
 msgid "No products were found matching your selection."
@@ -7829,16 +7830,16 @@ msgstr ""
 
 #: templates/myaccount/form-edit-account.php:20
 msgid "First name"
-msgstr ""
+msgstr "Họ"
 
 #: templates/myaccount/form-edit-account.php:24
 msgid "Last name"
-msgstr ""
+msgstr "Tên"
 
 #: templates/myaccount/form-edit-account.php:28
 #: templates/myaccount/form-login.php:79
 msgid "Email address"
-msgstr ""
+msgstr "Địa chỉ email"
 
 #: templates/myaccount/form-edit-account.php:32
 msgid "Password (leave blank to leave unchanged)"
@@ -7850,12 +7851,12 @@ msgstr ""
 
 #: templates/myaccount/form-edit-account.php:41
 msgid "Save changes"
-msgstr ""
+msgstr "Lưu thay đổi"
 
 #: templates/myaccount/form-edit-address.php:14
 #: templates/myaccount/my-address.php:20 templates/order/order-details.php:133
 msgid "Shipping Address"
-msgstr ""
+msgstr "Địa chỉ nhận hàng"
 
 #: templates/myaccount/form-edit-address.php:38
 msgid "Save Address"
@@ -7871,7 +7872,7 @@ msgstr ""
 
 #: templates/myaccount/form-login.php:72
 msgid "Username"
-msgstr ""
+msgstr "Tên tài khoản"
 
 #: templates/myaccount/form-login.php:89
 msgid "Anti-spam"
@@ -7933,7 +7934,7 @@ msgstr ""
 
 #: templates/myaccount/my-orders.php:34
 msgid "Status"
-msgstr ""
+msgstr "Tình trạng"
 
 #: templates/myaccount/my-orders.php:62
 msgid "%s for %s item"
@@ -7942,11 +7943,11 @@ msgstr[0] ""
 
 #: templates/myaccount/my-orders.php:78
 msgid "Cancel"
-msgstr ""
+msgstr "Hủy"
 
 #: templates/myaccount/my-orders.php:84
 msgid "View"
-msgstr ""
+msgstr "Xem"
 
 #: templates/order/form-tracking.php:17
 msgid ""
@@ -7977,7 +7978,7 @@ msgstr ""
 
 #: templates/order/order-details.php:16
 msgid "Order Details"
-msgstr ""
+msgstr "Chi tiết đơn hàng"
 
 #: templates/order/order-details.php:66
 msgid "Download file%s"
@@ -8021,7 +8022,7 @@ msgstr ""
 
 #: templates/single-product/meta.php:20
 msgid "n/a"
-msgstr ""
+msgstr "n/a"
 
 #: templates/single-product/meta.php:24
 msgid "Category:"
@@ -8035,11 +8036,11 @@ msgstr[0] ""
 
 #: templates/single-product/product-attributes.php:28
 msgid "Weight"
-msgstr ""
+msgstr "Trọng lượng"
 
 #: templates/single-product/product-attributes.php:37
 msgid "Dimensions"
-msgstr ""
+msgstr "Kích thước"
 
 #: templates/single-product/rating.php:28
 msgid "%s customer review"
@@ -8077,7 +8078,7 @@ msgstr[0] ""
 
 #: templates/single-product-reviews.php:23
 msgid "Reviews"
-msgstr ""
+msgstr "Đánh giá"
 
 #: templates/single-product-reviews.php:44
 msgid "There are no reviews yet."
@@ -8097,7 +8098,7 @@ msgstr ""
 
 #: templates/single-product-reviews.php:64
 msgid "Email"
-msgstr ""
+msgstr "Email"
 
 #: templates/single-product-reviews.php:67
 msgid "Submit"
@@ -8142,7 +8143,7 @@ msgstr ""
 
 #: woocommerce.php:182
 msgid "Docs"
-msgstr ""
+msgstr "Tài liệu"
 
 #: woocommerce.php:183
 msgid "Premium Support"

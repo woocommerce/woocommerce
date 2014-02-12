@@ -1,12 +1,13 @@
 # 
 # Translators:
+# didikpri <didik.priyanto@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
-"PO-Revision-Date: 2014-02-11 10:11+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-02-11 13:10+0000\n"
+"Last-Translator: didikpri <didik.priyanto@gmail.com>\n"
 "Language-Team: Indonesian (Indonesia) (http://www.transifex.com/projects/p/woocommerce-core/language/id_ID/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -4644,7 +4645,7 @@ msgstr ""
 
 #: includes/class-wc-coupon.php:592
 msgid "Coupon is not valid."
-msgstr ""
+msgstr "Kupon tidak valid"
 
 #: includes/class-wc-coupon.php:595 includes/class-wc-coupon.php:645
 msgid "Coupon does not exist!"
@@ -4664,7 +4665,7 @@ msgstr ""
 
 #: includes/class-wc-coupon.php:604
 msgid "Coupon code already applied!"
-msgstr ""
+msgstr "Kode kupon sudah digunakan sebelumnya!"
 
 #: includes/class-wc-coupon.php:607
 msgid ""
@@ -4678,7 +4679,7 @@ msgstr ""
 
 #: includes/class-wc-coupon.php:613
 msgid "This coupon has expired."
-msgstr ""
+msgstr "Kupon ini sudah kadaluarsa."
 
 #: includes/class-wc-coupon.php:616
 msgid "The minimum spend for this coupon is %s."
@@ -5099,7 +5100,7 @@ msgstr "Tag Produk"
 #: includes/class-wc-post-types.php:94
 msgctxt "Admin menu name"
 msgid "Tags"
-msgstr ""
+msgstr "Tag"
 
 #: includes/class-wc-post-types.php:95
 msgid "Search Product Tags"
@@ -5107,11 +5108,11 @@ msgstr ""
 
 #: includes/class-wc-post-types.php:96
 msgid "All Product Tags"
-msgstr ""
+msgstr "Semua Tag Produk"
 
 #: includes/class-wc-post-types.php:97
 msgid "Parent Product Tag"
-msgstr ""
+msgstr "Tag Produk Parent"
 
 #: includes/class-wc-post-types.php:98
 msgid "Parent Product Tag:"
@@ -5492,7 +5493,7 @@ msgstr "Kepala Surat (bisa diunduh)"
 
 #: includes/emails/class-wc-email-customer-invoice.php:29
 msgid "Customer invoice"
-msgstr ""
+msgstr "Invoice Pelanggan"
 
 #: includes/emails/class-wc-email-customer-invoice.php:30
 msgid ""
@@ -5526,7 +5527,7 @@ msgstr ""
 
 #: includes/emails/class-wc-email-customer-new-account.php:33
 msgid "New account"
-msgstr ""
+msgstr "Akun baru"
 
 #: includes/emails/class-wc-email-customer-new-account.php:34
 msgid ""
@@ -5560,7 +5561,7 @@ msgstr ""
 
 #: includes/emails/class-wc-email-customer-processing-order.php:26
 msgid "Processing order"
-msgstr ""
+msgstr "Pesanan sedang diproses"
 
 #: includes/emails/class-wc-email-customer-processing-order.php:27
 msgid ""
@@ -5596,7 +5597,7 @@ msgstr ""
 
 #: includes/emails/class-wc-email-new-order.php:26
 msgid "New order"
-msgstr ""
+msgstr "Pesanan baru"
 
 #: includes/emails/class-wc-email-new-order.php:27
 msgid "New order emails are sent when an order is received."
@@ -5612,7 +5613,7 @@ msgstr ""
 
 #: includes/emails/class-wc-email-new-order.php:126
 msgid "Recipient(s)"
-msgstr ""
+msgstr "Penerima"
 
 #: includes/emails/class-wc-email-new-order.php:128
 msgid ""
@@ -5718,7 +5719,7 @@ msgstr ""
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:105
 msgid "Account Details"
-msgstr ""
+msgstr "Detil Akun"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:111
 msgid "Account Name"
@@ -5847,12 +5848,12 @@ msgstr "Pembayaran harus dilakukan sebelum barang dikirim."
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:30
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:167
 msgid "Mijireh Checkout"
-msgstr ""
+msgstr "Mijireh Checkout"
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:107
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:291
 msgid "Mijireh error:"
-msgstr ""
+msgstr "Mijireh error;"
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:131
 msgid "Enable Mijireh Checkout"
@@ -5868,11 +5869,11 @@ msgstr ""
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:145
 msgid "Credit Card"
-msgstr ""
+msgstr "Kartu Kredit"
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:151
 msgid "Pay securely with your credit card."
-msgstr ""
+msgstr "Bayar dengan aman menggunakan kartu kredit."
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:152
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:141
@@ -5955,7 +5956,7 @@ msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:153
 msgid "Receiver Email"
-msgstr ""
+msgstr "Email Penerima"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:155
 msgid ""
@@ -6105,7 +6106,7 @@ msgstr "Pesanan %s"
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:358
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:415
 msgid "Shipping via"
-msgstr ""
+msgstr "Pengiriman via"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:454
 msgid ""
@@ -6834,7 +6835,7 @@ msgstr ""
 
 #: includes/wc-coupon-functions.php:22
 msgid "Cart Discount"
-msgstr ""
+msgstr "Diskon Troli"
 
 #: includes/wc-coupon-functions.php:23
 msgid "Cart % Discount"
@@ -7179,7 +7180,7 @@ msgstr "Harga"
 
 #: includes/widgets/class-wc-widget-products.php:55
 msgid "Random"
-msgstr ""
+msgstr "Acak"
 
 #: includes/widgets/class-wc-widget-products.php:56
 msgid "Sales"

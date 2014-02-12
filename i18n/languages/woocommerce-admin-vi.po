@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
-"PO-Revision-Date: 2014-02-11 09:25+0000\n"
+"PO-Revision-Date: 2014-02-12 03:50+0000\n"
 "Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: Vietnamese (http://www.transifex.com/projects/p/woocommerce-core/language/vi/)\n"
 "MIME-Version: 1.0\n"
@@ -19,7 +19,7 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:45
 #: includes/admin/wc-admin-functions.php:19
 msgid "WooCommerce"
-msgstr ""
+msgstr "WooCommerce"
 
 #: includes/admin/class-wc-admin-assets.php:108
 msgid "Please enter in decimal (%s) format without thousand separators."
@@ -64,7 +64,7 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:148
 #: includes/admin/settings/class-wc-settings-shipping.php:203
 msgid "Name"
-msgstr ""
+msgstr "Tên"
 
 #: includes/admin/class-wc-admin-assets.php:141
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:431
@@ -322,7 +322,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-customer-list.php:187
 #: includes/admin/reports/class-wc-report-stock.php:107
 msgid "Edit"
-msgstr ""
+msgstr "Sửa"
 
 #: includes/admin/class-wc-admin-attributes.php:323
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:44
@@ -361,7 +361,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-dashboard.php:35
 msgid "WooCommerce Recent Reviews"
-msgstr ""
+msgstr "Đánh giá gần đây"
 
 #: includes/admin/class-wc-admin-dashboard.php:38
 #: includes/admin/class-wc-admin-menus.php:80
@@ -545,7 +545,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-shipping.php:241
 #: includes/admin/views/html-admin-page-status-report.php:269
 msgid "Settings"
-msgstr ""
+msgstr "Thiết lập"
 
 #: includes/admin/class-wc-admin-menus.php:88
 #: includes/admin/views/html-admin-page-addons.php:4
@@ -560,7 +560,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-menus.php:128
 msgctxt "Admin menu name"
 msgid "Orders"
-msgstr ""
+msgstr "Đơn hàng"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:33
 msgid "Product permalink base"
@@ -581,12 +581,12 @@ msgstr ""
 #: includes/admin/class-wc-admin-permalink-settings.php:65
 msgctxt "slug"
 msgid "product-category"
-msgstr ""
+msgstr "danh-muc"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:75
 msgctxt "slug"
 msgid "product-tag"
-msgstr ""
+msgstr "tu-khoa"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:93
 msgid ""
@@ -597,12 +597,12 @@ msgstr ""
 #: includes/admin/class-wc-admin-permalink-settings.php:100
 msgctxt "default-slug"
 msgid "shop"
-msgstr ""
+msgstr "sho"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:101
 msgctxt "default-slug"
 msgid "product"
-msgstr ""
+msgstr "sản phẩm"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:113
 #: includes/admin/class-wc-admin-taxonomies.php:88
@@ -616,7 +616,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-permalink-settings.php:117
 #: includes/admin/reports/class-wc-report-stock.php:137
 msgid "Product"
-msgstr ""
+msgstr "Sản phẩm"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:122
 msgid "Shop base"
@@ -747,12 +747,12 @@ msgstr ""
 #: includes/admin/class-wc-admin-profile.php:48
 #: includes/admin/class-wc-admin-profile.php:97
 msgid "First name"
-msgstr ""
+msgstr "Họ"
 
 #: includes/admin/class-wc-admin-profile.php:52
 #: includes/admin/class-wc-admin-profile.php:101
 msgid "Last name"
-msgstr ""
+msgstr "Tên"
 
 #: includes/admin/class-wc-admin-profile.php:56
 #: includes/admin/class-wc-admin-profile.php:105
@@ -782,14 +782,14 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-tax.php:256
 #: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "City"
-msgstr ""
+msgstr "Thành phố"
 
 #: includes/admin/class-wc-admin-profile.php:72
 #: includes/admin/class-wc-admin-profile.php:121
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:53
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:100
 msgid "Postcode"
-msgstr ""
+msgstr "Mã bưu điện"
 
 #: includes/admin/class-wc-admin-profile.php:76
 #: includes/admin/class-wc-admin-profile.php:125
@@ -808,7 +808,7 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:57
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:104
 msgid "Country"
-msgstr ""
+msgstr "Quốc gia"
 
 #: includes/admin/class-wc-admin-profile.php:81
 #: includes/admin/class-wc-admin-profile.php:130
@@ -823,7 +823,7 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:67
 #: includes/admin/reports/class-wc-report-customer-list.php:244
 msgid "Email"
-msgstr ""
+msgstr "Email"
 
 #: includes/admin/class-wc-admin-profile.php:94
 msgid "Customer Shipping Address"
@@ -868,7 +868,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-reports.php:46
 #: includes/admin/reports/class-wc-report-customer-list.php:246
 msgid "Orders"
-msgstr ""
+msgstr "Đơn hàng"
 
 #: includes/admin/class-wc-admin-reports.php:49
 msgid "Sales by date"
@@ -918,7 +918,7 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:195
 #: includes/admin/views/html-quick-edit-product.php:138
 msgid "Out of stock"
-msgstr ""
+msgstr "Hết hàng"
 
 #: includes/admin/class-wc-admin-reports.php:107
 msgid "Most Stocked"
@@ -1113,7 +1113,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-taxonomies.php:86
 #: includes/admin/class-wc-admin-taxonomies.php:174
 msgid "Display type"
-msgstr ""
+msgstr "Kiểu hiển thị"
 
 #: includes/admin/class-wc-admin-taxonomies.php:89
 #: includes/admin/class-wc-admin-taxonomies.php:178
@@ -1121,7 +1121,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-products.php:25
 #: includes/admin/views/html-admin-page-addons.php:15
 msgid "Products"
-msgstr ""
+msgstr "Sản phẩm"
 
 #: includes/admin/class-wc-admin-taxonomies.php:90
 #: includes/admin/class-wc-admin-taxonomies.php:179
@@ -1205,7 +1205,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:214
 msgid "Docs"
-msgstr ""
+msgstr "Tài liệu"
 
 #: includes/admin/class-wc-admin-welcome.php:221
 msgid "What's New"
@@ -1587,7 +1587,7 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:159
 #: includes/admin/views/html-quick-edit-product.php:116
 msgid "Search"
-msgstr ""
+msgstr "Tìm kiếm"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:160
 #: includes/admin/views/html-bulk-edit-product.php:160
@@ -1620,7 +1620,7 @@ msgstr ""
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:191
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:170
 msgid "Cancel"
-msgstr ""
+msgstr "Hủy"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:249
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:136
@@ -1633,7 +1633,7 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:10
 #: includes/admin/views/html-quick-edit-product.php:22
 msgid "Price"
-msgstr ""
+msgstr "Giá"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:256
 #: includes/admin/reports/class-wc-report-sales-by-category.php:141
@@ -1652,7 +1652,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-sales-by-date.php:158
 #: includes/admin/reports/class-wc-report-sales-by-product.php:323
 msgid "Date"
-msgstr ""
+msgstr "Ngày"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:303
 msgid "Edit this item"
@@ -1713,7 +1713,7 @@ msgstr ""
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:316
 #: includes/admin/reports/class-wc-report-stock.php:114
 msgid "View"
-msgstr ""
+msgstr "Xem"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:369
 msgid "Grouped"
@@ -1778,7 +1778,7 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:194
 #: includes/admin/views/html-quick-edit-product.php:137
 msgid "In stock"
-msgstr ""
+msgstr "Còn hàng"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:501
 msgid "Sort Products"
@@ -1810,7 +1810,7 @@ msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:53
 msgid "Coupon code"
-msgstr ""
+msgstr "Mã giảm giá"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:66
 msgid "Description (optional)"
@@ -1832,7 +1832,7 @@ msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:80
 msgid "Description"
-msgstr ""
+msgstr "Mô tả"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:81
 msgid "Product IDs"
@@ -1866,11 +1866,11 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-checkout.php:229
 #: includes/admin/settings/class-wc-settings-shipping.php:205
 msgid "Status"
-msgstr ""
+msgstr "Tình trạng"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:92
 msgid "Order"
-msgstr ""
+msgstr "Đơn hàng"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:93
 msgid "Purchased"
@@ -1887,7 +1887,7 @@ msgstr ""
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:97
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:101
 msgid "Order Notes"
-msgstr ""
+msgstr "Ghi chú"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:99
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:43
@@ -1895,7 +1895,7 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:122
 msgid "Total"
-msgstr ""
+msgstr "Tổng cộng"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:100
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:34
@@ -1944,13 +1944,13 @@ msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:232
 msgid "Tel:"
-msgstr ""
+msgstr "Điện thoại:"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:254
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:277
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:169
 msgid "Guest"
-msgstr ""
+msgstr "Khách"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:281
 msgid "%s by %s"
@@ -2056,7 +2056,7 @@ msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:144
 msgid "Reviews"
-msgstr ""
+msgstr "Đánh giá"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:37
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:85
@@ -2172,7 +2172,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:137
 msgid "Product categories"
-msgstr ""
+msgstr "Danh mục sản phẩm"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:138
 msgid "Any category"
@@ -2285,25 +2285,25 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:29
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:76
 msgid "First Name"
-msgstr ""
+msgstr "Họ"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:33
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:80
 msgid "Last Name"
-msgstr ""
+msgstr "Tên"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:60
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:107
 msgid "Select a country&hellip;"
-msgstr ""
+msgstr "Chọn quốc gia&hellip;"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:70
 msgid "Phone"
-msgstr ""
+msgstr "Số điện thoại"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:139
 msgid "Order Details"
-msgstr ""
+msgstr "Chi tiết đơn hàng"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:142
 msgid "Order number"
@@ -2347,7 +2347,7 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:267
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:269
 msgid "Address"
-msgstr ""
+msgstr "Địa chỉ"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:190
 msgid "No billing address set."
@@ -2370,7 +2370,7 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/views/html-order-shipping.php:12
 #: includes/admin/post-types/meta-boxes/views/html-order-tax.php:8
 msgid "N/A"
-msgstr ""
+msgstr "N/A"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:245
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:247
@@ -2429,7 +2429,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:41
 msgid "Qty"
-msgstr ""
+msgstr "SL"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:46
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:111
@@ -2437,7 +2437,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-tax.php:550
 #: includes/admin/settings/class-wc-settings-tax.php:643
 msgid "Tax"
-msgstr ""
+msgstr "Thuế"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:83
 msgid "Delete Lines"
@@ -2473,7 +2473,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:46
 msgid "Delete note"
-msgstr ""
+msgstr "Xóa ghi chú"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:52
 msgid "There are no notes for this order yet."
@@ -2491,7 +2491,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:64
 msgid "Customer note"
-msgstr ""
+msgstr "Khách hàng ghi chú"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:65
 msgid "Private note"
@@ -2510,7 +2510,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-tax.php:383
 #: includes/admin/views/html-admin-page-addons.php:13
 msgid "Shipping"
-msgstr ""
+msgstr "Vận chuyển"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:66
 msgid "+ Add shipping cost"
@@ -2536,7 +2536,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:120
 msgid "Order Total"
-msgstr ""
+msgstr "Tổng cộng"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:148
 msgid "Calculate Tax"
@@ -2718,14 +2718,14 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:58
 #: includes/admin/views/html-quick-edit-product.php:38
 msgid "Tax Status"
-msgstr ""
+msgstr "Tình trạng thuế"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:250
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:34
 #: includes/admin/views/html-bulk-edit-product.php:64
 #: includes/admin/views/html-quick-edit-product.php:43
 msgid "Taxable"
-msgstr ""
+msgstr "Thuế"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:251
 #: includes/admin/views/html-bulk-edit-product.php:65
@@ -2738,7 +2738,7 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:66
 #: includes/admin/views/html-quick-edit-product.php:45
 msgid "None"
-msgstr ""
+msgstr "Trống"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:257
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:734
@@ -2750,7 +2750,7 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:83
 #: includes/admin/views/html-quick-edit-product.php:61
 msgid "Standard"
-msgstr ""
+msgstr "Chuẩn"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:262
 #: includes/admin/settings/class-wc-settings-tax.php:383
@@ -2839,7 +2839,7 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:103
 #: includes/admin/views/html-quick-edit-product.php:84
 msgid "Weight"
-msgstr ""
+msgstr "Trọng lượng"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:344
 msgid "Weight in decimal form"
@@ -2847,7 +2847,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:349
 msgid "Dimensions"
-msgstr ""
+msgstr "Kích thước"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:351
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:767
@@ -3128,7 +3128,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
 msgid "Subtotal"
-msgstr ""
+msgstr "Tổng phụ"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
 msgid "Before pre-tax discounts."
@@ -3342,7 +3342,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-sales-by-category.php:172
 #: includes/admin/reports/class-wc-report-sales-by-product.php:178
 msgid "Show"
-msgstr ""
+msgstr "Hiển thị"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:181
 msgid "No used coupons found"
@@ -3382,7 +3382,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-customer-list.php:24
 msgid "Customer"
-msgstr ""
+msgstr "Khách hàng"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:34
 msgid "No customers found."
@@ -3411,7 +3411,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-customer-list.php:243
 msgid "Username"
-msgstr ""
+msgstr "Tên tài khoản"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:245
 msgid "Location"
@@ -3658,7 +3658,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:122
 msgid "Totals"
-msgstr ""
+msgstr "Tổng"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:25
 msgid "Accounts"
@@ -3696,7 +3696,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:59
 msgid "View Order"
-msgstr ""
+msgstr "Xem đơn hàng"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:60
 msgid "Endpoint for the My Account &rarr; View Order page"
@@ -3771,7 +3771,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-checkout.php:25
 msgctxt "Settings tab label"
 msgid "Checkout"
-msgstr ""
+msgstr "Thanh toán"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:41
 msgid "Checkout Options"
@@ -3783,7 +3783,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:68
 msgid "Coupons"
-msgstr ""
+msgstr "Phiếu giảm giá"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:69
 msgid "Enable the use of coupons"
@@ -3796,7 +3796,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-checkout.php:78
 #: includes/admin/views/html-admin-page-status-report.php:297
 msgid "Checkout"
-msgstr ""
+msgstr "Thanh toán"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:79
 msgid "Enable guest checkout"
@@ -4029,7 +4029,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-general.php:76
 #: includes/admin/settings/class-wc-settings-shipping.php:147
 msgid "Specific Countries"
-msgstr ""
+msgstr "Quốc gia riêng"
 
 #: includes/admin/settings/class-wc-settings-general.php:85
 msgid "Store Notice"
@@ -4375,7 +4375,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:265
 msgid "Add to cart"
-msgstr ""
+msgstr "Thêm vào giỏ hàng"
 
 #: includes/admin/settings/class-wc-settings-products.php:266
 msgid "Redirect to the cart page after successful addition"
@@ -5134,11 +5134,11 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:293
 msgid "Cart"
-msgstr ""
+msgstr "Giỏ hàng"
 
 #: includes/admin/views/html-admin-page-status-report.php:301
 msgid "My Account"
-msgstr ""
+msgstr "Tài khoản"
 
 #: includes/admin/views/html-admin-page-status-report.php:321
 msgid "Page not set"
@@ -5223,7 +5223,7 @@ msgstr ""
 
 #: includes/admin/views/html-admin-settings.php:20
 msgid "Save changes"
-msgstr ""
+msgstr "Lưu thay đổi"
 
 #: includes/admin/views/html-bulk-edit-product.php:15
 #: includes/admin/views/html-bulk-edit-product.php:39

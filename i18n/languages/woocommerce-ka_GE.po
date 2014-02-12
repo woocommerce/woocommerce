@@ -1,13 +1,14 @@
 # 
 # Translators:
 # nodarik <nodar1983@gmail.com>, 2014
+# nodarik <nodar1983@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
-"PO-Revision-Date: 2014-02-11 10:00+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-02-12 11:19+0000\n"
+"Last-Translator: nodarik <nodar1983@gmail.com>\n"
 "Language-Team: Georgian (Georgia) (http://www.transifex.com/projects/p/woocommerce-core/language/ka_GE/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -2646,7 +2647,7 @@ msgstr ""
 
 #: i18n/states/US.php:23 includes/class-wc-countries.php:118
 msgid "Georgia"
-msgstr ""
+msgstr "საქართველო"
 
 #: i18n/states/US.php:24
 msgid "Hawaii"
@@ -3459,7 +3460,7 @@ msgstr ""
 #: includes/class-wc-checkout.php:108
 msgctxt "placeholder"
 msgid "Password"
-msgstr ""
+msgstr "პაროლი"
 
 #: includes/class-wc-checkout.php:116
 msgid "Order Notes"
@@ -3546,19 +3547,19 @@ msgstr ""
 
 #: includes/class-wc-countries.php:39
 msgid "Albania"
-msgstr ""
+msgstr "ალბანეთი"
 
 #: includes/class-wc-countries.php:40
 msgid "Algeria"
-msgstr ""
+msgstr "ალჟირი"
 
 #: includes/class-wc-countries.php:41
 msgid "Andorra"
-msgstr ""
+msgstr "ანდორა"
 
 #: includes/class-wc-countries.php:42
 msgid "Angola"
-msgstr ""
+msgstr "ანგოლა"
 
 #: includes/class-wc-countries.php:43
 msgid "Anguilla"
@@ -3566,7 +3567,7 @@ msgstr ""
 
 #: includes/class-wc-countries.php:44
 msgid "Antarctica"
-msgstr ""
+msgstr "ანტარქტიკა"
 
 #: includes/class-wc-countries.php:45
 msgid "Antigua and Barbuda"
@@ -3574,51 +3575,51 @@ msgstr ""
 
 #: includes/class-wc-countries.php:46
 msgid "Argentina"
-msgstr ""
+msgstr "არგენტინა"
 
 #: includes/class-wc-countries.php:47
 msgid "Armenia"
-msgstr ""
+msgstr "სომხეთი"
 
 #: includes/class-wc-countries.php:48
 msgid "Aruba"
-msgstr ""
+msgstr "არუბა"
 
 #: includes/class-wc-countries.php:49
 msgid "Australia"
-msgstr ""
+msgstr "ავსტრალია"
 
 #: includes/class-wc-countries.php:50
 msgid "Austria"
-msgstr ""
+msgstr "ავსტრია"
 
 #: includes/class-wc-countries.php:51
 msgid "Azerbaijan"
-msgstr ""
+msgstr "აზერბაიჯანი"
 
 #: includes/class-wc-countries.php:52
 msgid "Bahamas"
-msgstr ""
+msgstr "ბაჰამი"
 
 #: includes/class-wc-countries.php:53
 msgid "Bahrain"
-msgstr ""
+msgstr "ბაჰრეინი"
 
 #: includes/class-wc-countries.php:54
 msgid "Bangladesh"
-msgstr ""
+msgstr "ბანგლადეში"
 
 #: includes/class-wc-countries.php:55
 msgid "Barbados"
-msgstr ""
+msgstr "ბარბადოსი"
 
 #: includes/class-wc-countries.php:56
 msgid "Belarus"
-msgstr ""
+msgstr "ბელორუსია"
 
 #: includes/class-wc-countries.php:57
 msgid "Belgium"
-msgstr ""
+msgstr "ბელგია"
 
 #: includes/class-wc-countries.php:58
 msgid "Belau"
@@ -3626,23 +3627,23 @@ msgstr ""
 
 #: includes/class-wc-countries.php:59
 msgid "Belize"
-msgstr ""
+msgstr "ბელიზი"
 
 #: includes/class-wc-countries.php:60
 msgid "Benin"
-msgstr ""
+msgstr "ბენინი"
 
 #: includes/class-wc-countries.php:61
 msgid "Bermuda"
-msgstr ""
+msgstr "ბერმუდი"
 
 #: includes/class-wc-countries.php:62
 msgid "Bhutan"
-msgstr ""
+msgstr "ბუტანი"
 
 #: includes/class-wc-countries.php:63
 msgid "Bolivia"
-msgstr ""
+msgstr "ბოლივია"
 
 #: includes/class-wc-countries.php:64
 msgid "Bonaire, Saint Eustatius and Saba"
@@ -3650,11 +3651,11 @@ msgstr ""
 
 #: includes/class-wc-countries.php:65
 msgid "Bosnia and Herzegovina"
-msgstr ""
+msgstr "ბოსნია და ჰერცოგოვინა"
 
 #: includes/class-wc-countries.php:66
 msgid "Botswana"
-msgstr ""
+msgstr "ბოცვანა"
 
 #: includes/class-wc-countries.php:67
 msgid "Bouvet Island"
@@ -3854,43 +3855,43 @@ msgstr ""
 
 #: includes/class-wc-countries.php:116
 msgid "Gabon"
-msgstr ""
+msgstr "გაბონი"
 
 #: includes/class-wc-countries.php:117
 msgid "Gambia"
-msgstr ""
+msgstr "გამბია"
 
 #: includes/class-wc-countries.php:119
 msgid "Germany"
-msgstr ""
+msgstr "გერმანია"
 
 #: includes/class-wc-countries.php:120
 msgid "Ghana"
-msgstr ""
+msgstr "განა"
 
 #: includes/class-wc-countries.php:121
 msgid "Gibraltar"
-msgstr ""
+msgstr "გიბრალტარის რესპუბლიკა"
 
 #: includes/class-wc-countries.php:122
 msgid "Greece"
-msgstr ""
+msgstr "საბერძნეთი"
 
 #: includes/class-wc-countries.php:123
 msgid "Greenland"
-msgstr ""
+msgstr "გრელანდია"
 
 #: includes/class-wc-countries.php:124
 msgid "Grenada"
-msgstr ""
+msgstr "გრენადა"
 
 #: includes/class-wc-countries.php:125
 msgid "Guadeloupe"
-msgstr ""
+msgstr "გვადალუპეს რესპუბლიკა"
 
 #: includes/class-wc-countries.php:126
 msgid "Guatemala"
-msgstr ""
+msgstr "გვატემალა"
 
 #: includes/class-wc-countries.php:127
 msgid "Guernsey"
@@ -3898,7 +3899,7 @@ msgstr ""
 
 #: includes/class-wc-countries.php:128
 msgid "Guinea"
-msgstr ""
+msgstr "გვინია"
 
 #: includes/class-wc-countries.php:129
 msgid "Guinea-Bissau"
@@ -3910,7 +3911,7 @@ msgstr ""
 
 #: includes/class-wc-countries.php:131
 msgid "Haiti"
-msgstr ""
+msgstr "ჰაიტი"
 
 #: includes/class-wc-countries.php:132
 msgid "Heard Island and McDonald Islands"
@@ -3918,39 +3919,39 @@ msgstr ""
 
 #: includes/class-wc-countries.php:133
 msgid "Honduras"
-msgstr ""
+msgstr "ჰონდურასი"
 
 #: includes/class-wc-countries.php:134
 msgid "Hong Kong"
-msgstr ""
+msgstr "ჰონკონგი"
 
 #: includes/class-wc-countries.php:135
 msgid "Hungary"
-msgstr ""
+msgstr "უნგრეთი"
 
 #: includes/class-wc-countries.php:136
 msgid "Iceland"
-msgstr ""
+msgstr "ისლანდია"
 
 #: includes/class-wc-countries.php:137
 msgid "India"
-msgstr ""
+msgstr "ინდოეთი"
 
 #: includes/class-wc-countries.php:138
 msgid "Indonesia"
-msgstr ""
+msgstr "ინდონეზია"
 
 #: includes/class-wc-countries.php:139
 msgid "Iran"
-msgstr ""
+msgstr "ირანი"
 
 #: includes/class-wc-countries.php:140
 msgid "Iraq"
-msgstr ""
+msgstr "ერაყი"
 
 #: includes/class-wc-countries.php:141
 msgid "Republic of Ireland"
-msgstr ""
+msgstr "ირლანდიის რესპუბლიკა"
 
 #: includes/class-wc-countries.php:142
 msgid "Isle of Man"
@@ -3958,11 +3959,11 @@ msgstr ""
 
 #: includes/class-wc-countries.php:143
 msgid "Israel"
-msgstr ""
+msgstr "ისრაელი"
 
 #: includes/class-wc-countries.php:144
 msgid "Italy"
-msgstr ""
+msgstr "იტალია"
 
 #: includes/class-wc-countries.php:145
 msgid "Ivory Coast"
@@ -3970,11 +3971,11 @@ msgstr ""
 
 #: includes/class-wc-countries.php:146
 msgid "Jamaica"
-msgstr ""
+msgstr "იამაიკა"
 
 #: includes/class-wc-countries.php:147
 msgid "Japan"
-msgstr ""
+msgstr "იაპონია"
 
 #: includes/class-wc-countries.php:148
 msgid "Jersey"
@@ -3982,63 +3983,63 @@ msgstr ""
 
 #: includes/class-wc-countries.php:149
 msgid "Jordan"
-msgstr ""
+msgstr "იორდანია"
 
 #: includes/class-wc-countries.php:150
 msgid "Kazakhstan"
-msgstr ""
+msgstr "ყაზახეთი"
 
 #: includes/class-wc-countries.php:151
 msgid "Kenya"
-msgstr ""
+msgstr "კენია"
 
 #: includes/class-wc-countries.php:152
 msgid "Kiribati"
-msgstr ""
+msgstr "კირიბატი"
 
 #: includes/class-wc-countries.php:153
 msgid "Kuwait"
-msgstr ""
+msgstr "ქუვეითი"
 
 #: includes/class-wc-countries.php:154
 msgid "Kyrgyzstan"
-msgstr ""
+msgstr "ყირგიზეთი"
 
 #: includes/class-wc-countries.php:155
 msgid "Laos"
-msgstr ""
+msgstr "ლაოსი"
 
 #: includes/class-wc-countries.php:156
 msgid "Latvia"
-msgstr ""
+msgstr "ლატვია"
 
 #: includes/class-wc-countries.php:157
 msgid "Lebanon"
-msgstr ""
+msgstr "ლიბანი"
 
 #: includes/class-wc-countries.php:158
 msgid "Lesotho"
-msgstr ""
+msgstr "ლესოტო"
 
 #: includes/class-wc-countries.php:159
 msgid "Liberia"
-msgstr ""
+msgstr "ლიბერია"
 
 #: includes/class-wc-countries.php:160
 msgid "Libya"
-msgstr ""
+msgstr "ლიბია"
 
 #: includes/class-wc-countries.php:161
 msgid "Liechtenstein"
-msgstr ""
+msgstr "ლიხტენშტეინი"
 
 #: includes/class-wc-countries.php:162
 msgid "Lithuania"
-msgstr ""
+msgstr "ლიტვა"
 
 #: includes/class-wc-countries.php:163
 msgid "Luxembourg"
-msgstr ""
+msgstr "ლუქსემბურგი"
 
 #: includes/class-wc-countries.php:164
 msgid "Macao S.A.R., China"
@@ -4046,23 +4047,23 @@ msgstr ""
 
 #: includes/class-wc-countries.php:165
 msgid "Macedonia"
-msgstr ""
+msgstr "მაკედონია"
 
 #: includes/class-wc-countries.php:166
 msgid "Madagascar"
-msgstr ""
+msgstr "მადაგასკარი"
 
 #: includes/class-wc-countries.php:167
 msgid "Malawi"
-msgstr ""
+msgstr "მალავი"
 
 #: includes/class-wc-countries.php:168
 msgid "Malaysia"
-msgstr ""
+msgstr "მალაიზია"
 
 #: includes/class-wc-countries.php:169
 msgid "Maldives"
-msgstr ""
+msgstr "მალდივები"
 
 #: includes/class-wc-countries.php:170
 msgid "Mali"
@@ -4070,23 +4071,23 @@ msgstr ""
 
 #: includes/class-wc-countries.php:171
 msgid "Malta"
-msgstr ""
+msgstr "მალტა"
 
 #: includes/class-wc-countries.php:172
 msgid "Marshall Islands"
-msgstr ""
+msgstr "მარშალის კუნძულები"
 
 #: includes/class-wc-countries.php:173
 msgid "Martinique"
-msgstr ""
+msgstr "მარტინიკა"
 
 #: includes/class-wc-countries.php:174
 msgid "Mauritania"
-msgstr ""
+msgstr "მავრიტანია"
 
 #: includes/class-wc-countries.php:175
 msgid "Mauritius"
-msgstr ""
+msgstr "მავრიკი"
 
 #: includes/class-wc-countries.php:176
 msgid "Mayotte"
@@ -4094,59 +4095,59 @@ msgstr ""
 
 #: includes/class-wc-countries.php:177
 msgid "Mexico"
-msgstr ""
+msgstr "მექსიკა"
 
 #: includes/class-wc-countries.php:178
 msgid "Micronesia"
-msgstr ""
+msgstr "მიკრონეზია"
 
 #: includes/class-wc-countries.php:179
 msgid "Moldova"
-msgstr ""
+msgstr "მოლდავეთი"
 
 #: includes/class-wc-countries.php:180
 msgid "Monaco"
-msgstr ""
+msgstr "მონაკო"
 
 #: includes/class-wc-countries.php:181
 msgid "Mongolia"
-msgstr ""
+msgstr "მონღოლეთი"
 
 #: includes/class-wc-countries.php:182
 msgid "Montenegro"
-msgstr ""
+msgstr "მონტენეგრო"
 
 #: includes/class-wc-countries.php:183
 msgid "Montserrat"
-msgstr ""
+msgstr "მონსერატი"
 
 #: includes/class-wc-countries.php:184
 msgid "Morocco"
-msgstr ""
+msgstr "მაროკო"
 
 #: includes/class-wc-countries.php:185
 msgid "Mozambique"
-msgstr ""
+msgstr "მოზამბიკი"
 
 #: includes/class-wc-countries.php:186
 msgid "Myanmar"
-msgstr ""
+msgstr "მიანმარი"
 
 #: includes/class-wc-countries.php:187
 msgid "Namibia"
-msgstr ""
+msgstr "ნამიბია"
 
 #: includes/class-wc-countries.php:188
 msgid "Nauru"
-msgstr ""
+msgstr "ნაურუ"
 
 #: includes/class-wc-countries.php:189
 msgid "Nepal"
-msgstr ""
+msgstr "ნეპალი"
 
 #: includes/class-wc-countries.php:190
 msgid "Netherlands"
-msgstr ""
+msgstr "ჰოლანდია"
 
 #: includes/class-wc-countries.php:191
 msgid "Netherlands Antilles"
@@ -4154,23 +4155,23 @@ msgstr ""
 
 #: includes/class-wc-countries.php:192
 msgid "New Caledonia"
-msgstr ""
+msgstr "ახლი კალედონია"
 
 #: includes/class-wc-countries.php:193
 msgid "New Zealand"
-msgstr ""
+msgstr "ახლი ზელანდია"
 
 #: includes/class-wc-countries.php:194
 msgid "Nicaragua"
-msgstr ""
+msgstr "ნიკარაგუა"
 
 #: includes/class-wc-countries.php:195
 msgid "Niger"
-msgstr ""
+msgstr "ნიგერია"
 
 #: includes/class-wc-countries.php:196
 msgid "Nigeria"
-msgstr ""
+msgstr "ნიგერია"
 
 #: includes/class-wc-countries.php:197
 msgid "Niue"
@@ -4178,79 +4179,79 @@ msgstr ""
 
 #: includes/class-wc-countries.php:198
 msgid "Norfolk Island"
-msgstr ""
+msgstr "ნორფოლკის კუნძული"
 
 #: includes/class-wc-countries.php:199
 msgid "North Korea"
-msgstr ""
+msgstr "ჩრდილოეთ კორეა"
 
 #: includes/class-wc-countries.php:200
 msgid "Norway"
-msgstr ""
+msgstr "ნორვეგია"
 
 #: includes/class-wc-countries.php:201
 msgid "Oman"
-msgstr ""
+msgstr "ომანი"
 
 #: includes/class-wc-countries.php:202
 msgid "Pakistan"
-msgstr ""
+msgstr "პაკისტანი"
 
 #: includes/class-wc-countries.php:203
 msgid "Palestinian Territory"
-msgstr ""
+msgstr "პალესტინის ტერიტოტია"
 
 #: includes/class-wc-countries.php:204
 msgid "Panama"
-msgstr ""
+msgstr "პანამა"
 
 #: includes/class-wc-countries.php:205
 msgid "Papua New Guinea"
-msgstr ""
+msgstr "პაპუა ახალი გვინეა"
 
 #: includes/class-wc-countries.php:206
 msgid "Paraguay"
-msgstr ""
+msgstr "პარაგვაი"
 
 #: includes/class-wc-countries.php:207
 msgid "Peru"
-msgstr ""
+msgstr "პერუ"
 
 #: includes/class-wc-countries.php:208
 msgid "Philippines"
-msgstr ""
+msgstr "ფილიპინები"
 
 #: includes/class-wc-countries.php:209
 msgid "Pitcairn"
-msgstr ""
+msgstr "პიტკერნი"
 
 #: includes/class-wc-countries.php:210
 msgid "Poland"
-msgstr ""
+msgstr "პოლონეთი"
 
 #: includes/class-wc-countries.php:211
 msgid "Portugal"
-msgstr ""
+msgstr "პორტუგალია"
 
 #: includes/class-wc-countries.php:212
 msgid "Qatar"
-msgstr ""
+msgstr "კატარი"
 
 #: includes/class-wc-countries.php:213
 msgid "Reunion"
-msgstr ""
+msgstr "რეიუნიონი"
 
 #: includes/class-wc-countries.php:214
 msgid "Romania"
-msgstr ""
+msgstr "რუმინეთი"
 
 #: includes/class-wc-countries.php:215
 msgid "Russia"
-msgstr ""
+msgstr "რუსეთი"
 
 #: includes/class-wc-countries.php:216
 msgid "Rwanda"
-msgstr ""
+msgstr "რუანდა"
 
 #: includes/class-wc-countries.php:217
 msgid "Saint Barth&eacute;lemy"
@@ -4262,7 +4263,7 @@ msgstr ""
 
 #: includes/class-wc-countries.php:219
 msgid "Saint Kitts and Nevis"
-msgstr ""
+msgstr "სენტ კიტსი და ნევისი"
 
 #: includes/class-wc-countries.php:220
 msgid "Saint Lucia"
@@ -4278,15 +4279,15 @@ msgstr ""
 
 #: includes/class-wc-countries.php:223
 msgid "Saint Pierre and Miquelon"
-msgstr ""
+msgstr "წმინდა პიერი მიქელონი"
 
 #: includes/class-wc-countries.php:224
 msgid "Saint Vincent and the Grenadines"
-msgstr ""
+msgstr "სენტ ვინსეტი და გრენადები"
 
 #: includes/class-wc-countries.php:225
 msgid "San Marino"
-msgstr ""
+msgstr "სანმარინო"
 
 #: includes/class-wc-countries.php:226
 msgid "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
@@ -7448,7 +7449,7 @@ msgstr ""
 
 #: templates/checkout/form-pay.php:20
 msgid "Qty"
-msgstr ""
+msgstr "რაოდ"
 
 #: templates/checkout/form-pay.php:21
 msgid "Totals"
@@ -7742,7 +7743,7 @@ msgstr ""
 #: templates/global/form-login.php:26 templates/myaccount/form-login.php:36
 #: templates/myaccount/form-login.php:84
 msgid "Password"
-msgstr ""
+msgstr "პაროლი"
 
 #: templates/global/form-login.php:38 templates/myaccount/form-login.php:46
 msgid "Remember me"
@@ -7755,7 +7756,7 @@ msgstr ""
 #: templates/global/quantity-input.php:12
 msgctxt "Product quantity input tooltip"
 msgid "Qty"
-msgstr ""
+msgstr "რაოდ"
 
 #: templates/loop/no-products-found.php:14
 msgid "No products were found matching your selection."
@@ -8098,7 +8099,7 @@ msgstr ""
 
 #: templates/single-product-reviews.php:64
 msgid "Email"
-msgstr ""
+msgstr "მეილი"
 
 #: templates/single-product-reviews.php:67
 msgid "Submit"

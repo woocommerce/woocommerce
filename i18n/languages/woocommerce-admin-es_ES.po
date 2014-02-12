@@ -4,6 +4,7 @@
 # Closemarketing <david@closemarketing.es>, 2014
 # Gabriel Gil <gabriel@gabrielgil.es>, 2014
 # Gonzalo Zúñiga De-Spirito <gonzunigad@gmail.com>, 2014
+# monferro <jose.ramon.ferro@gmail.com>, 2014
 # Luis <zreedee@gmail.com>, 2013
 # Oscar Gonzalez <inactive+eldragon87@transifex.com>, 2013
 # rcovarru <rnt@rnt.cl>, 2013
@@ -12,8 +13,8 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
-"PO-Revision-Date: 2014-02-11 10:11+0000\n"
-"Last-Translator: Vaclad <hello@anderburdain.com>\n"
+"PO-Revision-Date: 2014-02-12 00:20+0000\n"
+"Last-Translator: monferro <jose.ramon.ferro@gmail.com>\n"
 "Language-Team: Spanish (Spain) (http://www.transifex.com/projects/p/woocommerce-core/language/es_ES/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -278,7 +279,7 @@ msgid ""
 "products -> product data -> attributes -> values, <strong>Text</strong> "
 "allows manual entry whereas <strong>select</strong> allows pre-configured "
 "terms in a drop-down list."
-msgstr "Determina como seleccioas atributos para los productos. Bajo el panel de administración -> productos -> datos de producto -> atributos -> valores, <strong>Text</strong> permite entrada manual mientras <strong>select</strong> permite términos pre-configurados en un menú desplegable."
+msgstr "Determina como seleccionas atributos para los productos. Bajo el panel de administración -> productos -> datos de producto -> atributos -> valores, <strong>Text</strong> permite entrada manual mientras <strong>select</strong> permite términos pre-configurados en un menú desplegable."
 
 #: includes/admin/class-wc-admin-attributes.php:270
 #: includes/admin/class-wc-admin-attributes.php:396
@@ -1306,7 +1307,7 @@ msgstr "Los informes han sido rediseñados con nuevas capacidades de <strong>fil
 msgid ""
 "The dashboard also has a new widget showing you an overview of current "
 "orders complete with sparklines for quick at-a-glance stats."
-msgstr "El tablero tiene un nuevo widget donde se muestran los pedidos actuales acompañados de gráficos con estadísticas."
+msgstr "El escritorio tiene un nuevo widget donde se muestran los pedidos actuales acompañados de gráficos con estadísticas."
 
 #: includes/admin/class-wc-admin-welcome.php:276
 msgid "Separated integrations"
@@ -3772,7 +3773,7 @@ msgstr "Permitir que los usuarios se registren desde \"Mi cuenta\""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:127
 msgid "Display returning customer login reminder on the \"Checkout\" page"
-msgstr ""
+msgstr "Mostrar recordatorio de inicio de sesión en la página de finalizar la compra."
 
 #: includes/admin/settings/class-wc-settings-accounts.php:136
 msgid "Account Creation"
