@@ -116,6 +116,14 @@ class WC_Query {
 	}
 
 	/**
+	 * Get query vars
+	 * @return array()
+	 */
+	public function get_query_vars() {
+		return $this->query_vars;
+	}
+
+	/**
 	 * Parse the request and look for query vars - endpoints may not be supported
 	 */
 	public function parse_request() {
