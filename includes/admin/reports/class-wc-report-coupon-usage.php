@@ -4,6 +4,7 @@
  */
 class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
+	public $chart_colours = array();
 	public $coupon_codes = array();
 
 	/**

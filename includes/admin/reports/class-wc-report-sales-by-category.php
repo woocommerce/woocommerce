@@ -4,6 +4,7 @@
  */
 class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
+	public $chart_colours = array();
 	public $show_categories = array();
 
 	/**
