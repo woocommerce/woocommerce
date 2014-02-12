@@ -138,7 +138,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Fixed Twenty Thirteen single product page layout
 * Fix - Fix saving of checkboxes (off state) in widgets API
 * Fix - Proper password validation in user register on the My Account page
-* Fix - Fix saving of checkboxes (off state) in widgets API
 * Fix - When add_to_cart is called, ensure the correct product_id is set for variations
 * Fix - Restored Italian translation files
 * Fix - Ensure stock status is updated. Prevents new products being hidden when the option to hide out of stock products is enabled
