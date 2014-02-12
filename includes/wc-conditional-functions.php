@@ -130,6 +130,30 @@ if ( ! function_exists( 'is_checkout_pay_page' ) ) {
 	}
 }
 
+if ( ! function_exists( 'is_wc_endpoint_url' ) ) {
+
+	/**
+	 * is_wc_endpoint_url - Check if an endpoint is showing
+	 *
+	 * @access public
+	 * @param  string $endpoint
+	 * @return bool
+	 */
+	function is_wc_endpoint_url( $endpoint ) {
+		global $wp;
+
+		$wc_endpoints = WC()->query->get_query_vars();
+
+		if ( ! isset( $wc_endpoints[ $endpoint ] ) ) {
+			return false;
+		} else {
+			$endpoint_var = $wc_endpoints[ $endpoint ];
+		}
+
+		return isset( $wp->query_vars[ $endpoint_var ] ) ? true : false;
+	}
+}
+
 if ( ! function_exists( 'is_account_page' ) ) {
 
 	/**
