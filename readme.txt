@@ -136,6 +136,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Hide empty categories in product_categories shortcode
 * Fix - Fixed Twenty Thirteen single product page layout
 * Fix - Fix saving of checkboxes (off state) in widgets API
+* Fix - Proper password validation in user register on the My Account page
+* Fix - Fix saving of checkboxes (off state) in widgets API
 * Tweak - Added Croatian Kuna currency
 * Tweak - Throw a non-fatal notice when file trying to be included as template doesn't exist
 * Tweak - Add versions to all scripts + styles to ensure browser cache is cleared
