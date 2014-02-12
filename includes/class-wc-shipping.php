@@ -102,9 +102,10 @@ class WC_Shipping {
 	 * Methods are sorted into their user-defined order after being loaded.
 	 *
 	 * @access public
+	 * @param array $package
 	 * @return array
 	 */
-	public function load_shipping_methods( $package = false ) {
+	public function load_shipping_methods( $package = array() ) {
 
 		$this->unregister_shipping_methods();
 
