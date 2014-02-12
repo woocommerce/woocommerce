@@ -126,6 +126,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.2.0 =
+
 = 2.1.1 - 12/02/2014 =
 * Feature - Show notice if template files are out of date for themes including WooCommerce template files
 * Feature - Introducing supporting is_wc_endpoint_url function
