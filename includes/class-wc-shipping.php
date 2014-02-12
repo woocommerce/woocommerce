@@ -133,6 +133,7 @@ class WC_Shipping {
 	 * Register a shipping method for use in calculations.
 	 *
 	 * @access public
+	 * @param  object|string $method Either the name of the method's class, or an instance of the method's class
 	 * @return void
 	 */
 	public function register_shipping_method( $method ) {
