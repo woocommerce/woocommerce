@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
 Tested up to: 3.8.1
-Stable tag: 2.1.0
+Stable tag: 2.1.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -126,7 +126,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.1.1 =
+= 2.1.1 12/02/2014 =
 * Feature - Show notice if template files are out of date for themes including WooCommerce template files
 * Feature - Introducing supporting is_wc_endpoint_url function
 * Fix - During install, register all post types and endpoints so that the rewrite rules are correctly generated.
