@@ -217,9 +217,7 @@ class WC_Product {
 	public function set_stock_status( $status ) {
 		$status = ( 'outofstock' === $status ) ? 'outofstock' : 'instock';
 
-		if ( $this->stock_status != $status ) {
-			update_post_meta( $this->id, '_stock_status', $status );
-
+		if ( update_post_meta( $this->id, '_stock_status', $status ) ) {
 			do_action( 'woocommerce_product_set_stock_status', $this->id, $status );
 		}
 	}
