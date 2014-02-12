@@ -128,6 +128,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 2.1.1 =
 * Feature - Show notice if template files are out of date for themes including WooCommerce template files
+* Feature - Introducing supporting is_wc_endpoint_url function
 * Fix - During install, register all post types and endpoints so that the rewrite rules are correctly generated.
 * Fix - Allow line breaks in customer addresses on order details page
 * Fix - Fixed all language country codes to reflect WordPress standards
@@ -138,6 +139,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Fix saving of checkboxes (off state) in widgets API
 * Fix - Proper password validation in user register on the My Account page
 * Fix - Fix saving of checkboxes (off state) in widgets API
+* Fix - When add_to_cart is called, ensure the correct product_id is set for variations
+* Fix - Restored Italian translation files
+* Fix - Ensure stock status is updated. Prevents new products being hidden when the option to hide out of stock products is enabled
+* Fix - Fix manual order calculation when using non-standard decimal points
 * Tweak - Added Croatian Kuna currency
 * Tweak - Throw a non-fatal notice when file trying to be included as template doesn't exist
 * Tweak - Add versions to all scripts + styles to ensure browser cache is cleared
