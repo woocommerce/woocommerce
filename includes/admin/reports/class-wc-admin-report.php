@@ -55,6 +55,8 @@ class WC_Admin_Report {
 		);
 
 		$args = wp_parse_args( $args, $defaults );
+		
+		$args = apply_filters( 'woocommerce_report_arguments', $args );
 
 		extract( $args );
 
