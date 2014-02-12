@@ -139,6 +139,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Added Croatian Kuna currency
 * Tweak - Throw a non-fatal notice when file trying to be included as template doesn't exist
 * Tweak - Add versions to all scripts + styles to ensure browser cache is cleared
+* Tweak - Added tinymce buttons relevant to the short description
 * Refactor - Removed unused change password template and shortcode class
 * Refactor - Several function dockblocks improved
 * Refactor - Stripped out some unused variables
