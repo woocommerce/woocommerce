@@ -17,6 +17,10 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 class WC_Admin_Report {
 
+	public $chart_interval;
+	public $group_by_query;
+	public $barwidth;
+	public $chart_groupby;
 	public $start_date;
 	public $end_date;
 
