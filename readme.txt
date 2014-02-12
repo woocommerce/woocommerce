@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
 Tested up to: 3.8.1
-Stable tag: 2.1.0
+Stable tag: 2.1.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -126,8 +126,29 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.1.1 =
+= 2.1.1 - 12/02/2014 =
+* Feature - Show notice if template files are out of date for themes including WooCommerce template files
+* Feature - Introducing supporting is_wc_endpoint_url function
 * Fix - During install, register all post types and endpoints so that the rewrite rules are correctly generated.
+* Fix - Allow line breaks in customer addresses on order details page
+* Fix - Fixed all language country codes to reflect WordPress standards
+* Fix - Payment gateway section links work in lower and upper caps texts
+* Fix - Prevents nonce notice when removing item from cart
+* Fix - Hide empty categories in product_categories shortcode
+* Fix - Fixed Twenty Thirteen single product page layout
+* Fix - Fix saving of checkboxes (off state) in widgets API
+* Fix - Proper password validation in user register on the My Account page
+* Fix - When add_to_cart is called, ensure the correct product_id is set for variations
+* Fix - Restored Italian translation files
+* Fix - Ensure stock status is updated. Prevents new products being hidden when the option to hide out of stock products is enabled
+* Fix - Fix manual order calculation when using non-standard decimal points
+* Tweak - Added Croatian Kuna currency
+* Tweak - Throw a non-fatal notice when file trying to be included as template doesn't exist
+* Tweak - Add versions to all scripts + styles to ensure browser cache is cleared
+* Tweak - Added tinymce buttons relevant to the short description
+* Refactor - Removed unused change password template and shortcode class
+* Refactor - Several function dockblocks improved
+* Refactor - Stripped out some unused variables
 
 = 2.1.0 - 10/02/2014 =
 * Feature - New REST API
