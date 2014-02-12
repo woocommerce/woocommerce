@@ -2,13 +2,16 @@
 # Translators:
 # ABSOLUTE_Web <woocommerce@absoluteweb.net>, 2014
 # corsonr <remicorson@gmail.com>, 2014
+# Francois-Xavier Bénard <fxb@wp-translations.org>, 2013
+# ABSOLUTE_Web <woocommerce@absoluteweb.net>, 2014
+# corsonr <remicorson@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
-"PO-Revision-Date: 2014-02-08 08:31+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-02-11 17:51+0000\n"
+"Last-Translator: ABSOLUTE_Web <woocommerce@absoluteweb.net>\n"
 "Language-Team: French (France) (http://www.transifex.com/projects/p/woocommerce-core/language/fr_FR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -408,7 +411,7 @@ msgstr "sur 5"
 
 #: includes/admin/class-wc-admin-dashboard.php:195
 msgid "reviewed by"
-msgstr ""
+msgstr "critiqué par"
 
 #: includes/admin/class-wc-admin-dashboard.php:201
 msgid "There are no product reviews yet."
@@ -1007,7 +1010,7 @@ msgstr "Toutes les pages WooCommerce ont été installées avec succès."
 
 #: includes/admin/class-wc-admin-status.php:137
 msgid "Tax rates successfully deleted"
-msgstr ""
+msgstr "Taux de taxes supprimés avec succès "
 
 #: includes/admin/class-wc-admin-status.php:146
 msgid "There was an error calling %s::%s"
@@ -1085,7 +1088,7 @@ msgstr "Vider toutes les sessions"
 msgid ""
 "<strong class=\"red\">Warning:</strong> This tool will delete all customer "
 "session data from the database, including any current live carts."
-msgstr ""
+msgstr "<strong class=\"red\">Attention :</strong> Cet outil détruira toutes les données de session client de la base de données, incluant les paniers en cours."
 
 #: includes/admin/class-wc-admin-status.php:198
 #: includes/admin/views/html-notice-install.php:6
@@ -1100,21 +1103,21 @@ msgstr "Installer les pages"
 msgid ""
 "<strong class=\"red\">Note:</strong> This tool will install all the missing "
 "WooCommerce pages. Pages already defined and set up will not be replaced."
-msgstr ""
+msgstr "<strong class=\"red\">Note :</strong>Cet outil installera toutes les pages WooCommerce manquantes. Les pages déjà définies et paramétrées ne seront pas remplacées."
 
 #: includes/admin/class-wc-admin-status.php:203
 msgid "Delete all WooCommerce tax rates"
-msgstr ""
+msgstr "Supprimer tous les taux de taxe WooCommerce"
 
 #: includes/admin/class-wc-admin-status.php:204
 msgid "Delete ALL tax rates"
-msgstr ""
+msgstr "Supprimer TOUS les taux de taxe"
 
 #: includes/admin/class-wc-admin-status.php:205
 msgid ""
 "<strong class=\"red\">Note:</strong> This option will delete ALL of your tax"
 " rates, use with caution."
-msgstr ""
+msgstr "<strong class=\"red\">Note :</strong>Cette option détruira TOUS vos taux de taxe, à utiliser avec précaution."
 
 #: includes/admin/class-wc-admin-taxonomies.php:86
 #: includes/admin/class-wc-admin-taxonomies.php:174
@@ -1223,7 +1226,7 @@ msgstr "Crédits"
 
 #: includes/admin/class-wc-admin-welcome.php:225
 msgid "Translators"
-msgstr ""
+msgstr "Traducteurs"
 
 #: includes/admin/class-wc-admin-welcome.php:243
 msgid "A new RESTful API developers will &#10084;"
@@ -1378,7 +1381,7 @@ msgstr "Support du PayPal PDT"
 msgid ""
 "PayPal Data Transfer (PDT) is an alternative for PayPal IPN which sends back"
 " the status of an order when a customer returns from PayPal."
-msgstr ""
+msgstr "Paypal Data Transfert (PDT) est une alternative de Paypal IPN qui renvoi le statut d'une commande lorsqu'un client revient de Paypal."
 
 #: includes/admin/class-wc-admin-welcome.php:319
 msgid "Stylesheet separation"
@@ -1479,7 +1482,7 @@ msgid ""
 "to our translation team. Want to see your name? <a "
 "href=\"https://www.transifex.com/projects/p/woocommerce-core/\">Translate "
 "WooCommerce</a>."
-msgstr ""
+msgstr "WooCommerce a été gentiment traduit en plusieurs autres langues, merci à notre équipe de traducteurs. Vous voules voir plus de noms ? <a href=\"https://www.transifex.com/projects/p/woocommerce-core/\">Traduction WooCommerce</a>."
 
 #: includes/admin/class-wc-admin-welcome.php:423
 msgid "View %s"
@@ -1563,17 +1566,17 @@ msgstr "Envoyer le fichier et importer"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:103
 msgid "Product Image"
-msgstr ""
+msgstr "Image produit"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:105
 msgid "Remove product image"
-msgstr ""
+msgstr "Enlever l'image produit"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:107
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:121
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:122
 msgid "Set product image"
-msgstr ""
+msgstr "Définir l'image produit"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:136
 msgid "Product name"
@@ -1944,8 +1947,8 @@ msgstr[1] "plus %d autres notes"
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:206
 msgid "%d note"
 msgid_plural "%d notes"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%d note"
+msgstr[1] "%d notes"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:228
 msgid "Billing:"
@@ -3494,7 +3497,7 @@ msgstr "%s ventes en %s"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:156
 msgid "Select categories&hellip;"
-msgstr ""
+msgstr "Sélectionner catégories&hellip;"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:171
 msgid "All"

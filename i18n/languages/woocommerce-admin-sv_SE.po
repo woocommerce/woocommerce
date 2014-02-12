@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
-"PO-Revision-Date: 2014-02-09 13:09+0000\n"
+"PO-Revision-Date: 2014-02-11 17:40+0000\n"
 "Last-Translator: sennbrink <konsult@sennbrink.se>\n"
 "Language-Team: Swedish (Sweden) (http://www.transifex.com/projects/p/woocommerce-core/language/sv_SE/)\n"
 "MIME-Version: 1.0\n"
@@ -30,7 +30,7 @@ msgstr "Vänligen mata in i decimal (%s)-format utan tusendelsavgränsare."
 msgid ""
 "Please enter in monetary decimal (%s) format without thousand separators and"
 " currency symbols."
-msgstr ""
+msgstr "Vänligen mata in i decimal (%s)-format utan tusendelsavgränsare och valutasymboler."
 
 #: includes/admin/class-wc-admin-assets.php:136
 msgid ""
@@ -335,7 +335,7 @@ msgstr "Radera"
 
 #: includes/admin/class-wc-admin-attributes.php:356
 msgid "Configure terms"
-msgstr ""
+msgstr "Konfigurera termer"
 
 #: includes/admin/class-wc-admin-attributes.php:360
 msgid "No attributes currently exist."
@@ -386,8 +386,8 @@ msgstr[1] "<strong>%s ordrar</strong> väntar på bearbetning"
 #: includes/admin/class-wc-admin-dashboard.php:150
 msgid "<strong>%s order</strong> on-hold"
 msgid_plural "<strong>%s orders</strong> on-hold"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "<strong>%s order</strong> väntande"
+msgstr[1] "<strong>%s ordrar</strong> väntande"
 
 #: includes/admin/class-wc-admin-dashboard.php:155
 msgid "<strong>%s product</strong> low in stock"
@@ -407,7 +407,7 @@ msgstr "av 5"
 
 #: includes/admin/class-wc-admin-dashboard.php:195
 msgid "reviewed by"
-msgstr ""
+msgstr "betygsatt av"
 
 #: includes/admin/class-wc-admin-dashboard.php:201
 msgid "There are no product reviews yet."
@@ -836,39 +836,39 @@ msgstr "Leveransadress för kund"
 
 #: includes/admin/class-wc-admin-profile.php:197
 msgid "Read"
-msgstr ""
+msgstr "Läs"
 
 #: includes/admin/class-wc-admin-profile.php:198
 msgid "Write"
-msgstr ""
+msgstr "Skriv"
 
 #: includes/admin/class-wc-admin-profile.php:199
 msgid "Read/Write"
-msgstr ""
+msgstr "Läs/Skriv"
 
 #: includes/admin/class-wc-admin-profile.php:207
 msgid "WooCommerce API Keys"
-msgstr ""
+msgstr "WooCommerce API-nycklar"
 
 #: includes/admin/class-wc-admin-profile.php:211
 msgid "Generate API Key"
-msgstr ""
+msgstr "Skapa API-nyckel"
 
 #: includes/admin/class-wc-admin-profile.php:213
 msgid "Consumer Key:"
-msgstr ""
+msgstr "Kundnyckel:"
 
 #: includes/admin/class-wc-admin-profile.php:214
 msgid "Consumer Secret:"
-msgstr ""
+msgstr "Kundnyckel hemlig:"
 
 #: includes/admin/class-wc-admin-profile.php:215
 msgid "Permissions:"
-msgstr ""
+msgstr "Behörigheter:"
 
 #: includes/admin/class-wc-admin-profile.php:219
 msgid "Revoke API Key"
-msgstr ""
+msgstr "Återkalla API-nyckel"
 
 #: includes/admin/class-wc-admin-reports.php:46
 #: includes/admin/reports/class-wc-report-customer-list.php:246
@@ -936,7 +936,7 @@ msgstr "Moms"
 
 #: includes/admin/class-wc-admin-reports.php:121
 msgid "Taxes by code"
-msgstr ""
+msgstr "Moms efter kod"
 
 #: includes/admin/class-wc-admin-reports.php:127
 msgid "Taxes by date"
@@ -998,15 +998,15 @@ msgstr "Termer beräknades på nytt"
 
 #: includes/admin/class-wc-admin-status.php:125
 msgid "Sessions successfully cleared"
-msgstr ""
+msgstr "Sessioner rensades med framgång"
 
 #: includes/admin/class-wc-admin-status.php:129
 msgid "All missing WooCommerce pages was installed successfully."
-msgstr ""
+msgstr "Alla WooCommerce-sidor som saknades har nu installerats."
 
 #: includes/admin/class-wc-admin-status.php:137
 msgid "Tax rates successfully deleted"
-msgstr ""
+msgstr "Momssatser raderade"
 
 #: includes/admin/class-wc-admin-status.php:146
 msgid "There was an error calling %s::%s"
@@ -1018,7 +1018,7 @@ msgstr "Ett fel uppstod när följande skulle anropas %s"
 
 #: includes/admin/class-wc-admin-status.php:159
 msgid "Your changes have been saved."
-msgstr ""
+msgstr "Dina ändringar har sparats."
 
 #: includes/admin/class-wc-admin-status.php:173
 msgid "WC Transients"
@@ -1084,7 +1084,7 @@ msgstr "Rensa alla sessioner"
 msgid ""
 "<strong class=\"red\">Warning:</strong> This tool will delete all customer "
 "session data from the database, including any current live carts."
-msgstr ""
+msgstr "<strong class=\"red\">Varning:</strong> Det här verktyget raderar all sessionsdata för kunder från databasen inklusive alla befintliga varukorgar."
 
 #: includes/admin/class-wc-admin-status.php:198
 #: includes/admin/views/html-notice-install.php:6
@@ -1093,27 +1093,27 @@ msgstr "Installera sidor för WooCommerce"
 
 #: includes/admin/class-wc-admin-status.php:199
 msgid "Install pages"
-msgstr ""
+msgstr "Installera sidor"
 
 #: includes/admin/class-wc-admin-status.php:200
 msgid ""
 "<strong class=\"red\">Note:</strong> This tool will install all the missing "
 "WooCommerce pages. Pages already defined and set up will not be replaced."
-msgstr ""
+msgstr "<strong class=\"red\">Notera:</strong> Det här verktyg installerar alla saknade WooCommerce-sidor. Befintliga sidor kommer inte att ersättas."
 
 #: includes/admin/class-wc-admin-status.php:203
 msgid "Delete all WooCommerce tax rates"
-msgstr ""
+msgstr "Radera alla WooCommerce-momssatser"
 
 #: includes/admin/class-wc-admin-status.php:204
 msgid "Delete ALL tax rates"
-msgstr ""
+msgstr "Radera ALLA momssatser"
 
 #: includes/admin/class-wc-admin-status.php:205
 msgid ""
 "<strong class=\"red\">Note:</strong> This option will delete ALL of your tax"
 " rates, use with caution."
-msgstr ""
+msgstr "<strong class=\"red\">Notera:</strong> Det här valet kommer att radera ALLA dina momssatser, använd med försiktighet."
 
 #: includes/admin/class-wc-admin-taxonomies.php:86
 #: includes/admin/class-wc-admin-taxonomies.php:174
@@ -1222,15 +1222,15 @@ msgstr "Omnämnanden"
 
 #: includes/admin/class-wc-admin-welcome.php:225
 msgid "Translators"
-msgstr ""
+msgstr "Översättare"
 
 #: includes/admin/class-wc-admin-welcome.php:243
 msgid "A new RESTful API developers will &#10084;"
-msgstr ""
+msgstr "Ett nytt RESTful API som utvecklare &#10084;"
 
 #: includes/admin/class-wc-admin-welcome.php:246
 msgid "Access your data from 3rd party applications"
-msgstr ""
+msgstr "Nå din data från tredjepartsapplikationer"
 
 #: includes/admin/class-wc-admin-welcome.php:247
 msgid ""
@@ -1239,11 +1239,11 @@ msgid ""
 "<strong>Coupons</strong>, <strong>Customers</strong>, "
 "<strong>Products</strong> and <strong>Reports</strong> in both "
 "<code>XML</code> and <code>JSON</code> formats."
-msgstr ""
+msgstr "Byggt ovanpå WooCommerce API, med utvecklare som direkt målgrupp, ger det nya REST API:et dig tillgång till data för <strong>Ordrar</strong>, <strong>Rabattkoder</strong>, <strong>Kunder</strong>, <strong>Produkter</strong> and <strong>Rapporter</strong> i både <code>XML</code> och <code>JSON</code>-format."
 
 #: includes/admin/class-wc-admin-welcome.php:251
 msgid "Authentication to keep data secure"
-msgstr ""
+msgstr "Autentisering för säker datahantering"
 
 #: includes/admin/class-wc-admin-welcome.php:252
 msgid ""
@@ -1251,15 +1251,15 @@ msgid ""
 "have SSL enabled, or signed according to the <a "
 "href=\"http://tools.ietf.org/html/rfc5849\">OAuth 1.0a</a> specification if "
 "you don't have SSL. Data is only available to authenticated users."
-msgstr ""
+msgstr "Autentisering för REST API sker genom HTTP Basic Auth om du har SSL aktiverat, eller signerat enligt specifikationen för <a href=\"http://tools.ietf.org/html/rfc5849\">OAuth 1.0a</a> om du inte har SSL. Data är endast tillgängligt för autentiserade användare."
 
 #: includes/admin/class-wc-admin-welcome.php:257
 msgid "UI and reporting improvements"
-msgstr ""
+msgstr "Gränssnitts- och rapport-förbättringar"
 
 #: includes/admin/class-wc-admin-welcome.php:260
 msgid "WordPress 3.8 admin UI compatibility"
-msgstr ""
+msgstr "Kompabilitet med admingränssnitt i WordPress 3.8"
 
 #: includes/admin/class-wc-admin-welcome.php:261
 msgid ""
@@ -1267,62 +1267,62 @@ msgid ""
 " WordPress 3.8. All bitmap icons have been replaced with a custom, "
 "lightweight icon font for razor sharp clarity on retina devices as well as "
 "improved performance."
-msgstr ""
+msgstr "WooCommerce 2.1 har fått sitt gränssnitt omdesignat för att match utseendet hos WordPress 3.8. Alla bitmapikoner har bytts ut mot ett ikontypsnitt vilket ger knivskarp skärpa på retinaskärmar samt bättre prestanda."
 
 #: includes/admin/class-wc-admin-welcome.php:264
 msgid "Simplified order UI"
-msgstr ""
+msgstr "Förenklat gränssnitt för ordrar"
 
 #: includes/admin/class-wc-admin-welcome.php:265
 msgid ""
 "The orders panel has seen significant improvement to both the totals panel, "
 "and line item display making editing new and existing orders a breeze."
-msgstr ""
+msgstr "Panel för ordrar har fått signifikanta förbättringar i såväl summapanelen som orderraderna vilket gör redigering av nya och befintliga ordrar lätt."
 
 #: includes/admin/class-wc-admin-welcome.php:266
 msgid ""
 "Item meta has also been optimised and can now be viewed as HTML rather than "
 "stuck in a text input."
-msgstr ""
+msgstr "Produktmeta har också optimerats och kan nu visas som HTML snarare än som text."
 
 #: includes/admin/class-wc-admin-welcome.php:269
 msgid "Improved Reporting"
-msgstr ""
+msgstr "Förbättrad rapportering"
 
 #: includes/admin/class-wc-admin-welcome.php:270
 msgid ""
 "Reports have been redesigned with new <strong>filtering</strong> "
 "capabilities, a new <strong>customer report</strong> showing "
 "orders/spending, and the ability to <strong>export CSVs</strong>."
-msgstr ""
+msgstr "Rapporterna har omdesignats med nya <strong>filtreringsmöjligheter</strong>. En ny <strong>kundrapport</strong> finns som visas ordrar/belopp, och möjligheten att exportera CSV-filer."
 
 #: includes/admin/class-wc-admin-welcome.php:271
 msgid ""
 "The dashboard also has a new widget showing you an overview of current "
 "orders complete with sparklines for quick at-a-glance stats."
-msgstr ""
+msgstr "Kontrollpanalen har en ny widget som visar dig en överblick av aktuella ordrar."
 
 #: includes/admin/class-wc-admin-welcome.php:276
 msgid "Separated integrations"
-msgstr ""
+msgstr "Separerade integrationer"
 
 #: includes/admin/class-wc-admin-welcome.php:279
 msgid "New separate plugins"
-msgstr ""
+msgstr "Nya separerade plugins"
 
 #: includes/admin/class-wc-admin-welcome.php:280
 msgid ""
 "To make core more lean, some integrations have been removed and turned into "
 "dedicated plugins which you can install as and when you need them."
-msgstr ""
+msgstr "För att göra kodkärnan mer följsam har vissa integrationer tagits bort och gjorts om till plugins som du kan installera när du behöver de."
 
 #: includes/admin/class-wc-admin-welcome.php:283
 msgid "Google Analytics"
-msgstr ""
+msgstr "Google Analytics"
 
 #: includes/admin/class-wc-admin-welcome.php:284
 msgid "Add Google Analytics eCommerce tracking to your WooCommerce store."
-msgstr ""
+msgstr "Lägg till Google Analytics eCommerce-spårning till din WooCommere-butik."
 
 #: includes/admin/class-wc-admin-welcome.php:285
 #: includes/admin/class-wc-admin-welcome.php:290
@@ -1334,36 +1334,36 @@ msgstr "Ladda ner"
 
 #: includes/admin/class-wc-admin-welcome.php:288
 msgid "Piwik"
-msgstr ""
+msgstr "Piwik"
 
 #: includes/admin/class-wc-admin-welcome.php:289
 msgid "Integrate WooCommerce with Piwik and the WP-Piwik plugin."
-msgstr ""
+msgstr "Integrera WooCommerce med Piwik och WP-Piwik-tillägget."
 
 #: includes/admin/class-wc-admin-welcome.php:293
 msgid "ShareThis"
-msgstr ""
+msgstr "ShareThis"
 
 #: includes/admin/class-wc-admin-welcome.php:294
 msgid "Add social network sharing buttons to products using ShareThis."
-msgstr ""
+msgstr "Lägg till knappar för delning av produkter till social media via ShareThis."
 
 #: includes/admin/class-wc-admin-welcome.php:298
 msgid "Sharedaddy"
-msgstr ""
+msgstr "Sharedaddy"
 
 #: includes/admin/class-wc-admin-welcome.php:299
 msgid "Add social network sharing buttons to products using Sharedaddy."
-msgstr ""
+msgstr "Dela dina produkter till social media genom Sharedaddy."
 
 #: includes/admin/class-wc-admin-welcome.php:303
 msgid "ShareYourCart"
-msgstr ""
+msgstr "ShareYourCart"
 
 #: includes/admin/class-wc-admin-welcome.php:304
 msgid ""
 "Let users share their carts for a discount using the ShareYourCart service."
-msgstr ""
+msgstr "Låt dina kunder dela sin varukorgar i utbyte mot rabatt via tjänsten ShareYourCart."
 
 #: includes/admin/class-wc-admin-welcome.php:310
 msgid "Under the Hood"
@@ -1371,93 +1371,93 @@ msgstr "Under skalet"
 
 #: includes/admin/class-wc-admin-welcome.php:314
 msgid "PayPal PDT support"
-msgstr ""
+msgstr "PayPal PDT-stöd"
 
 #: includes/admin/class-wc-admin-welcome.php:315
 msgid ""
 "PayPal Data Transfer (PDT) is an alternative for PayPal IPN which sends back"
 " the status of an order when a customer returns from PayPal."
-msgstr ""
+msgstr "PayPal Data Transfer (PDT) är ett alternativ till PayPal IPN som sänder tillbaka statusen på en order när kunden återvänder från PayPal."
 
 #: includes/admin/class-wc-admin-welcome.php:319
 msgid "Stylesheet separation"
-msgstr ""
+msgstr "Stilmallsuppdelning"
 
 #: includes/admin/class-wc-admin-welcome.php:320
 msgid ""
 "Frontend styles have been split into separate appearance/layout/smallscreen "
 "stylesheets to help with selective customisation."
-msgstr ""
+msgstr "Frontend-stilar har delats upp i separata utseende/layout/mobilskärm-stilmallar för att assistera vid selektiv anpassning."
 
 #: includes/admin/class-wc-admin-welcome.php:324
 msgid "New endpoints"
-msgstr ""
+msgstr "Nya endpoints"
 
 #: includes/admin/class-wc-admin-welcome.php:325
 msgid ""
 "Certain pages such as \"Pay\", \"Order Received\" and some account pages are"
 " now endpoints rather than pages to make checkout more reliable."
-msgstr ""
+msgstr "Vissa sidor såsom \"Betala\", \"Order mottagen\" och vissa andra kontosidor är nu endpoints snarare än sidor för att göra köpavslut mer tillförlitliga."
 
 #: includes/admin/class-wc-admin-welcome.php:331
 msgid "Default credit card form for gateways"
-msgstr ""
+msgstr "Standardiserat betalkortsformulär för gateways"
 
 #: includes/admin/class-wc-admin-welcome.php:332
 msgid ""
 "We've added a standardized, default credit card form for gateways to use if "
 "they support <code>default_credit_card_form</code>."
-msgstr ""
+msgstr "Vi har lagt till ett standardiserat formulär för hantering av kortdata inom betallösningar som har stöd för <code>default_credit_card_form</code>."
 
 #: includes/admin/class-wc-admin-welcome.php:336
 msgid "Coupon limits per customer"
-msgstr ""
+msgstr "Begränsning per kund i användning av rabattkod"
 
 #: includes/admin/class-wc-admin-welcome.php:337
 msgid ""
 "Coupon usage limits can now be set per user (using email + ID) rather than "
 "global."
-msgstr ""
+msgstr "Begränsningar för rabattkoder kan nu sättas på kundnivå (via e-post + ID) snarare än enbart globalt."
 
 #: includes/admin/class-wc-admin-welcome.php:341
 msgid "Streamlined new-account process"
-msgstr ""
+msgstr "Följsam process för nya konton"
 
 #: includes/admin/class-wc-admin-welcome.php:342
 msgid ""
 "During checkout, username and passwords are optional and can be "
 "automatically generated by WooCommerce."
-msgstr ""
+msgstr "I kassan kan användarnamn och lösenord vara valfritt samt kan genereras automatiskt av WooCommerce."
 
 #: includes/admin/class-wc-admin-welcome.php:349
 msgid "Additional price display options"
-msgstr ""
+msgstr "Ytterligare var för hur pris visas"
 
 #: includes/admin/class-wc-admin-welcome.php:350
 msgid ""
 "Define whether prices should be shown incl. or excl. of tax on the frontend,"
 " and add an optional suffix."
-msgstr ""
+msgstr "Bestäm om priser ska visas inkl. moms eller exkl. moms i butiken, och lägg till valfritt suffix."
 
 #: includes/admin/class-wc-admin-welcome.php:354
 msgid "Past order linking"
-msgstr ""
+msgstr "Länkning tidigare ordrar"
 
 #: includes/admin/class-wc-admin-welcome.php:355
 msgid ""
 "Admins now have the ability to link past orders to a customer (before they "
 "registered) by email address."
-msgstr ""
+msgstr "Admins har nu möjlighet att koppla ihop tidigare ordrar med en kund (innan hen registrerade sig) utifrån e-postadress."
 
 #: includes/admin/class-wc-admin-welcome.php:359
 msgid "Review improvements"
-msgstr ""
+msgstr "Rapportförbättringar"
 
 #: includes/admin/class-wc-admin-welcome.php:360
 msgid ""
 "We've added a new option to restrict reviews to logged in purchasers, and "
 "made ratings editable from the backend."
-msgstr ""
+msgstr "Vi har lagt till ett nytt val för att begränsa recensioner till köpare och har gjort redigering av betyg möjligt via backend."
 
 #: includes/admin/class-wc-admin-welcome.php:367
 msgid "Go to WooCommerce Settings"
@@ -1478,7 +1478,7 @@ msgid ""
 "to our translation team. Want to see your name? <a "
 "href=\"https://www.transifex.com/projects/p/woocommerce-core/\">Translate "
 "WooCommerce</a>."
-msgstr ""
+msgstr "WooCommerce har översatts till flera olika språk tack vare vårt översättningsteam. Vill du se ditt namn här? <a href=\"https://www.transifex.com/projects/p/woocommerce-core/\">Översätt WooCommerce</a>."
 
 #: includes/admin/class-wc-admin-welcome.php:423
 msgid "View %s"
@@ -1562,17 +1562,17 @@ msgstr "Ladda upp fil och importera"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:103
 msgid "Product Image"
-msgstr ""
+msgstr "Produktbild"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:105
 msgid "Remove product image"
-msgstr ""
+msgstr "Ta bort produktbild"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:107
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:121
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:122
 msgid "Set product image"
-msgstr ""
+msgstr "Välj produktbild"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:136
 msgid "Product name"
@@ -1937,14 +1937,14 @@ msgstr[1] "%d produkter"
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:206
 msgid "plus %d other note"
 msgid_plural "plus %d other notes"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "plus %d annan notering"
+msgstr[1] "plus %d andra noteringar"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:206
 msgid "%d note"
 msgid_plural "%d notes"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%d notering"
+msgstr[1] "%d noteringar"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:228
 msgid "Billing:"
@@ -2422,7 +2422,7 @@ msgstr "Fil %d"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-downloads.php:64
 msgid "Search for a downloadable product&hellip;"
-msgstr ""
+msgstr "Sök efter nedladdningsbar produkt&hellip;"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-downloads.php:65
 msgid "Grant Access"
@@ -2434,7 +2434,7 @@ msgstr "Artikel"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:38
 msgid "Tax&nbsp;Class"
-msgstr ""
+msgstr "Momsklass"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:41
 msgid "Qty"
@@ -2778,7 +2778,7 @@ msgstr "Hantera lager?"
 msgid ""
 "Enable stock management at product level (not needed if managing stock at "
 "variation level)"
-msgstr ""
+msgstr "Aktivera lagersaldohantering på produktnivå (ej nödvändigt om lager hanteras på variationsnivå)"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:290
 #: includes/admin/views/html-bulk-edit-product.php:226
@@ -3091,7 +3091,7 @@ msgstr "Återkalla åtkomst"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:9
 msgid "%s: %s"
-msgstr ""
+msgstr "%s: %s"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:9
 msgid "Downloaded %s time"
@@ -3142,11 +3142,11 @@ msgstr "Delsumma"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
 msgid "Before pre-tax discounts."
-msgstr ""
+msgstr "Rabatt före moms."
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
 msgid "After pre-tax discounts."
-msgstr ""
+msgstr "Rabatt efter moms."
 
 #: includes/admin/post-types/meta-boxes/views/html-order-shipping.php:6
 msgid "Label"
@@ -3283,7 +3283,7 @@ msgstr "Aktivera det här alternativet om en produkt inte kan skickas eller om d
 
 #: includes/admin/reports/class-wc-admin-report.php:390
 msgid "Sold %s worth in the last %d days"
-msgstr ""
+msgstr "Sålde till ett värde av %s de senaste %d dagarna"
 
 #: includes/admin/reports/class-wc-admin-report.php:392
 msgid "Sold 1 item in the last %d days"
@@ -3402,8 +3402,8 @@ msgstr "Inga kunder hittades."
 #: includes/admin/reports/class-wc-report-customer-list.php:48
 msgid "%s previous order linked"
 msgid_plural "%s previous orders linked"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%s tidigare order länkad"
+msgstr[1] "%s tidigare ordrar länkade"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:53
 msgid "Search customers"
@@ -3493,7 +3493,7 @@ msgstr "%s försäljningar i %s"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:156
 msgid "Select categories&hellip;"
-msgstr ""
+msgstr "Välj kategorier&hellip;"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:171
 msgid "All"
@@ -3674,17 +3674,17 @@ msgstr "Totalt"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:25
 msgid "Accounts"
-msgstr ""
+msgstr "Konton"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:41
 msgid "Account Pages"
-msgstr ""
+msgstr "Kontosidor"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:41
 msgid ""
 "These pages need to be set so that WooCommerce knows where to send users to "
 "access account related functionality."
-msgstr ""
+msgstr "De här sidorna måste bestämmas så att WooCommerce vet vart användare ska skickas för att nå relaterad kontofunktionalitet."
 
 #: includes/admin/settings/class-wc-settings-accounts.php:44
 msgid "My Account Page"
@@ -3694,17 +3694,17 @@ msgstr "Mitt konto"
 #: includes/admin/settings/class-wc-settings-checkout.php:113
 #: includes/admin/settings/class-wc-settings-checkout.php:124
 msgid "Page contents:"
-msgstr ""
+msgstr "Sidinnehåll:"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:56
 msgid "My Account Endpoints"
-msgstr ""
+msgstr "Endpoints för Mitt konto"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:56
 msgid ""
 "Endpoints are appended to your page URLs to handle specific actions on the "
 "accounts pages. They should be unique."
-msgstr ""
+msgstr "Enpoints läggs till på dina sidURLs för att hantera specifika handlingar på kontosidorna. Dessa ska vara unika."
 
 #: includes/admin/settings/class-wc-settings-accounts.php:59
 msgid "View Order"
@@ -3712,23 +3712,23 @@ msgstr "Visa order"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:60
 msgid "Endpoint for the My Account &rarr; View Order page"
-msgstr ""
+msgstr "Endpoint för Mitt konto &rarr; Visa order-sidan"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:68
 msgid "Edit Account"
-msgstr ""
+msgstr "Redigera konto"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:69
 msgid "Endpoint for the My Account &rarr; Edit Account page"
-msgstr ""
+msgstr "Endpoint för Mitt konto &rarr; Redigera konto-sidan"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:77
 msgid "Edit Address"
-msgstr ""
+msgstr "Redigera adress"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:78
 msgid "Endpoint for the My Account &rarr; Edit Address page"
-msgstr ""
+msgstr "Endpoint för Mitt konto &rarr; Redigera adress-sidan"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:86
 msgid "Lost Password"
@@ -3736,7 +3736,7 @@ msgstr "Glömt lösenordet?"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:87
 msgid "Endpoint for the My Account &rarr; Lost Password page"
-msgstr ""
+msgstr "Endpoint för Mitt konto &rarr; Glömt lösenordet-sidan"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:95
 msgid "Logout"
@@ -3746,15 +3746,15 @@ msgstr "Logga ut"
 msgid ""
 "Endpoint for the triggering logout. You can add this to your menus via a "
 "custom link: yoursite.com/?customer-logout=true"
-msgstr ""
+msgstr "Endpoint för att trigga utloggning. Du kan använda detta i dina menyer via en egen länk: dinwebbplats.com/?custom-logout=true"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:105
 msgid "Registration Options"
-msgstr ""
+msgstr "Val för registrering"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:108
 msgid "Enable Registration"
-msgstr ""
+msgstr "Aktivera registrering"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:109
 msgid "Enable registration on the \"Checkout\" page"
@@ -3766,11 +3766,11 @@ msgstr "Möjliggör registrering på Mitt Konto-sidan"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:127
 msgid "Display returning customer login reminder on the \"Checkout\" page"
-msgstr ""
+msgstr "Visa påminnelse för återkommande kund i kassan"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:136
 msgid "Account Creation"
-msgstr ""
+msgstr "Skapa konto"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:137
 msgid "Automatically generate username from customer email"
@@ -3787,11 +3787,11 @@ msgstr "Till kassan"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:41
 msgid "Checkout Options"
-msgstr ""
+msgstr "Val för utloggning"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:65
 msgid "Checkout Process"
-msgstr ""
+msgstr "Kassaprocess"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:68
 msgid "Coupons"
@@ -3833,13 +3833,13 @@ msgstr "Tvinga användaren att lämna HTTPS när kassan lämnas"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:109
 msgid "Checkout Pages"
-msgstr ""
+msgstr "Sida för kassa"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:109
 msgid ""
 "These pages need to be set so that WooCommerce knows where to send users to "
 "checkout."
-msgstr ""
+msgstr "De här sidorna måste bestämmas så att WooCommerce vet vart användare ska skickas för att genomföra köpet i kassan."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:112
 msgid "Cart Page"
@@ -3851,7 +3851,7 @@ msgstr "Kassasida"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:134
 msgid "Terms and Conditions"
-msgstr ""
+msgstr "Villkor"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:135
 msgid ""
@@ -3861,13 +3861,13 @@ msgstr "Om du definierar en sida för \"Villkor\" så måste kunden acceptera de
 
 #: includes/admin/settings/class-wc-settings-checkout.php:147
 msgid "Checkout Endpoints"
-msgstr ""
+msgstr "Endpoints för kassan"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:147
 msgid ""
 "Endpoints are appended to your page URLs to handle specific actions during "
 "the checkout process. They should be unique."
-msgstr ""
+msgstr "Enpoints läggs till på dina sidURLs för att hantera specifika handlingar i kassan. Dessa ska vara unika."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:150
 msgid "Pay"
@@ -3876,7 +3876,7 @@ msgstr "Betala"
 #: includes/admin/settings/class-wc-settings-checkout.php:151
 #: includes/admin/settings/class-wc-settings-checkout.php:160
 msgid "Endpoint for the Checkout &rarr; Pay page"
-msgstr ""
+msgstr "Endpoint för Kassa &rarr; Sida för betalning"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:159
 msgid "Order Received"
@@ -3888,7 +3888,7 @@ msgstr "Lägg till betalningsmetod"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:169
 msgid "Endpoint for the Checkout &rarr; Add Payment Method page"
-msgstr ""
+msgstr "Endpoint för Kassa &rarr; Lägg till betalmetod-sida"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:178
 msgid "Payment Gateways"
@@ -3898,11 +3898,11 @@ msgstr "Betalningsalternativ"
 msgid ""
 "Installed gateways are listed below. Drag and drop gateways to control their"
 " display order on the frontend."
-msgstr ""
+msgstr "Installerade gateways listas nedan. Dra och släpp gateways för att bestämma vad som ska visas i butiken."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:219
 msgid "Gateway Display"
-msgstr ""
+msgstr "Gateway-visning"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:227
 msgid "Gateway"
@@ -4024,19 +4024,19 @@ msgstr "Det här är basplatsen för din verksamhet. Momssatser kommer att baser
 
 #: includes/admin/settings/class-wc-settings-general.php:61
 msgid "Selling Location(s)"
-msgstr ""
+msgstr "Försäljningsplatser"
 
 #: includes/admin/settings/class-wc-settings-general.php:62
 msgid "This option lets you limit which countries you are willing to sell to."
-msgstr ""
+msgstr "Det här valet ger dig möjligheten att begränsa dig till vissa länder som du vill sälja till."
 
 #: includes/admin/settings/class-wc-settings-general.php:70
 msgid "Sell to all countries"
-msgstr ""
+msgstr "Sälj till alla länder"
 
 #: includes/admin/settings/class-wc-settings-general.php:71
 msgid "Sell to specific countries only"
-msgstr ""
+msgstr "Sälj endast till utvalda länder"
 
 #: includes/admin/settings/class-wc-settings-general.php:76
 #: includes/admin/settings/class-wc-settings-shipping.php:147
@@ -4063,15 +4063,15 @@ msgstr "Det här är en demobutik för testning &mdash; Inga beställningar kan 
 
 #: includes/admin/settings/class-wc-settings-general.php:103
 msgid "API"
-msgstr ""
+msgstr "API"
 
 #: includes/admin/settings/class-wc-settings-general.php:104
 msgid "Enable the REST API"
-msgstr ""
+msgstr "Aktivera REST API"
 
 #: includes/admin/settings/class-wc-settings-general.php:112
 msgid "Currency Options"
-msgstr ""
+msgstr "Valutainställningar"
 
 #: includes/admin/settings/class-wc-settings-general.php:112
 msgid "The following options affect how prices are displayed on the frontend."
@@ -4105,11 +4105,11 @@ msgstr "Höger"
 
 #: includes/admin/settings/class-wc-settings-general.php:137
 msgid "Left with space"
-msgstr ""
+msgstr "Vänster med mellanrum"
 
 #: includes/admin/settings/class-wc-settings-general.php:138
 msgid "Right with space"
-msgstr ""
+msgstr "Höger med mellanrum"
 
 #: includes/admin/settings/class-wc-settings-general.php:144
 msgid "Thousand Separator"
@@ -4151,7 +4151,7 @@ msgstr "Aktivera Lightbox"
 msgid ""
 "Include WooCommerce's lightbox. Product gallery images will open in a "
 "lightbox."
-msgstr ""
+msgstr "Inkludera WooCommerce's lightbox. Produktgalleribilder kommer att öppnas i en lightbox."
 
 #: includes/admin/settings/class-wc-settings-general.php:194
 msgid "Enable enhanced country select boxes"
@@ -4164,7 +4164,7 @@ msgstr "Det här aktiverar ett skrip som gör landsfälten sökbara."
 
 #: includes/admin/settings/class-wc-settings-general.php:217
 msgid "Frontend Styles"
-msgstr ""
+msgstr "Utseende i butiken, frontend"
 
 #: includes/admin/settings/class-wc-settings-general.php:237
 msgid "Primary"
@@ -4220,7 +4220,7 @@ msgstr "Integrering"
 
 #: includes/admin/settings/class-wc-settings-products.php:40
 msgid "Product Options"
-msgstr ""
+msgstr "Val för produkter"
 
 #: includes/admin/settings/class-wc-settings-products.php:79
 msgid "Inventory Options"
@@ -4304,17 +4304,17 @@ msgstr "Notera att butikssidan har undersidor. Undersidorna kommer inte att fung
 
 #: includes/admin/settings/class-wc-settings-products.php:200
 msgid "Product Listings"
-msgstr ""
+msgstr "Produktlistor"
 
 #: includes/admin/settings/class-wc-settings-products.php:203
 msgid "Product Archive / Shop Page"
-msgstr ""
+msgstr "Produktarkiv / Butikssida"
 
 #: includes/admin/settings/class-wc-settings-products.php:204
 msgid ""
 "The base page can also be used in your <a href=\"%s\">product "
 "permalinks</a>."
-msgstr ""
+msgstr "Bassidan kan även användas i dina <a href=\"%s\">produktpermalänkar</a>."
 
 #: includes/admin/settings/class-wc-settings-products.php:210
 msgid ""
@@ -4363,15 +4363,15 @@ msgstr "Dessa styr standardsorteringen i katalogen."
 
 #: includes/admin/settings/class-wc-settings-products.php:254
 msgid "Default sorting (custom ordering + name)"
-msgstr ""
+msgstr "Standardsortering (egen sortering + namn)"
 
 #: includes/admin/settings/class-wc-settings-products.php:255
 msgid "Popularity (sales)"
-msgstr ""
+msgstr "Popularitet (försäljningar)"
 
 #: includes/admin/settings/class-wc-settings-products.php:256
 msgid "Average Rating"
-msgstr ""
+msgstr "Genomsnittligt betyg"
 
 #: includes/admin/settings/class-wc-settings-products.php:257
 msgid "Sort by most recent"
@@ -4379,11 +4379,11 @@ msgstr "Sortera efter senaste"
 
 #: includes/admin/settings/class-wc-settings-products.php:258
 msgid "Sort by price (asc)"
-msgstr ""
+msgstr "Sortera efter pris (asc)"
 
 #: includes/admin/settings/class-wc-settings-products.php:259
 msgid "Sort by price (desc)"
-msgstr ""
+msgstr "Sortera efter pris (desc)"
 
 #: includes/admin/settings/class-wc-settings-products.php:265
 msgid "Add to cart"
@@ -4391,11 +4391,11 @@ msgstr "Lägg i varukorg"
 
 #: includes/admin/settings/class-wc-settings-products.php:266
 msgid "Redirect to the cart page after successful addition"
-msgstr ""
+msgstr "Omdirigera till varukorgssida efter lyckad addition"
 
 #: includes/admin/settings/class-wc-settings-products.php:274
 msgid "Enable AJAX add to cart buttons on archives"
-msgstr ""
+msgstr "Aktivera AJAX för lägg i varukorg-knappar på arkivsidor"
 
 #: includes/admin/settings/class-wc-settings-products.php:286
 msgid "Weight Unit"
@@ -4451,7 +4451,7 @@ msgstr "Produktbetyg"
 
 #: includes/admin/settings/class-wc-settings-products.php:322
 msgid "Enable ratings on reviews"
-msgstr ""
+msgstr "Aktivera betyg på recensioner"
 
 #: includes/admin/settings/class-wc-settings-products.php:332
 msgid "Ratings are required to leave a review"
@@ -4463,11 +4463,11 @@ msgstr "Visa etikett för \"verifierad ägare\" i kundrecensioner"
 
 #: includes/admin/settings/class-wc-settings-products.php:352
 msgid "Only allow reviews from \"verified owners\""
-msgstr ""
+msgstr "Tillåt bara \"verifierade ägare\" att recensera"
 
 #: includes/admin/settings/class-wc-settings-products.php:363
 msgid "Product Image Sizes"
-msgstr ""
+msgstr "Produktbildsstorlekar"
 
 #: includes/admin/settings/class-wc-settings-products.php:363
 msgid ""
@@ -4575,7 +4575,7 @@ msgstr "Dölj fraktkostnaden tills adress har angetts"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:97
 msgid "Shipping Display Mode"
-msgstr ""
+msgstr "Visning av frakt"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:98
 msgid ""
@@ -4584,11 +4584,11 @@ msgstr "Detta kontrollerar hur flera fraktmetoder visas i butiken."
 
 #: includes/admin/settings/class-wc-settings-shipping.php:103
 msgid "Display shipping methods with \"radio\" buttons"
-msgstr ""
+msgstr "Visa frakt med radioknappar"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:104
 msgid "Display shipping methods in a dropdown"
-msgstr ""
+msgstr "Visa frakt med rullgardinsmeny"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:111
 msgid "Shipping Destination"
@@ -4604,25 +4604,25 @@ msgstr "Leverera endast till fakturaadress"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:132
 msgid "Restrict shipping to Location(s)"
-msgstr ""
+msgstr "Begränsa frakt till plats(er)"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:133
 msgid ""
 "Choose which countries you want to ship to, or choose to ship to all <a "
 "href=\"%s\">locations you sell to</a>."
-msgstr ""
+msgstr "Välj vilka länder som du vill skicka till, eller välj att skicka till alla href=\"%s\">länder som du säljer till</a>."
 
 #: includes/admin/settings/class-wc-settings-shipping.php:140
 msgid "Ship to all countries you sell to"
-msgstr ""
+msgstr "Skicka till alla länder som du säljer till"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:141
 msgid "Ship to all countries"
-msgstr ""
+msgstr "Skicka till alla länder"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:142
 msgid "Ship to specific countries only"
-msgstr ""
+msgstr "Skicka endast till utvalda länder"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:197
 msgid "Shipping Methods"
@@ -4630,12 +4630,12 @@ msgstr "Fraktmetoder"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:204
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:215
 msgid ""
 "Drag and drop the above shipping methods to control their display order."
-msgstr ""
+msgstr "Dra och släpp ovanstående fraktmetoder för att bestämma deras visningsordning."
 
 #: includes/admin/settings/class-wc-settings-tax.php:40
 #: includes/admin/settings/class-wc-settings-tax.php:68
@@ -4644,11 +4644,11 @@ msgstr "Momsalternativ"
 
 #: includes/admin/settings/class-wc-settings-tax.php:41
 msgid "Standard Rates"
-msgstr ""
+msgstr "Standardsatser"
 
 #: includes/admin/settings/class-wc-settings-tax.php:49
 msgid "%s Rates"
-msgstr ""
+msgstr "%s-satser"
 
 #: includes/admin/settings/class-wc-settings-tax.php:71
 msgid "Enable Taxes"
@@ -4723,7 +4723,7 @@ msgstr "Kan kontrollera vilken momsklass som försändelsen får eller lämna to
 
 #: includes/admin/settings/class-wc-settings-tax.php:122
 msgid "Shipping tax class based on cart items"
-msgstr ""
+msgstr "Fraktmomsklass baserat på produkter i varukorg"
 
 #: includes/admin/settings/class-wc-settings-tax.php:127
 msgid "Rounding"
@@ -4749,7 +4749,7 @@ msgstr "Reducerad sats%sIngen skatt"
 
 #: includes/admin/settings/class-wc-settings-tax.php:144
 msgid "Display prices in the shop:"
-msgstr ""
+msgstr "Visa priser i butiken:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:149
 #: includes/admin/settings/class-wc-settings-tax.php:168
@@ -4763,7 +4763,7 @@ msgstr "Exklusive moms"
 
 #: includes/admin/settings/class-wc-settings-tax.php:155
 msgid "Price display suffix:"
-msgstr ""
+msgstr "Suffix för prisangivelse:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:159
 msgid ""
@@ -4771,7 +4771,7 @@ msgid ""
 "\"inc. Vat\" to explain your pricing. You can also have prices substituted "
 "here using one of the following: <code>{price_including_tax}, "
 "{price_excluding_tax}</code>."
-msgstr ""
+msgstr "Bestäm text att visa efter priset på dina produkter. Det kan till exempel vara \"inkl. moms\" för att göra det tydligt. Du kan också ersätta priser genom att välja följande: <code>{price_including_tax}, {price_excluding_tax}</code>."
 
 #: includes/admin/settings/class-wc-settings-tax.php:163
 msgid "Display prices during cart/checkout:"
@@ -4779,15 +4779,15 @@ msgstr "Visa priset i varukorg och utcheckning:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:175
 msgid "Display tax totals:"
-msgstr ""
+msgstr "Visa momstotal:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:180
 msgid "As a single total"
-msgstr ""
+msgstr "Individuell total"
 
 #: includes/admin/settings/class-wc-settings-tax.php:181
 msgid "Itemized"
-msgstr ""
+msgstr "Per produkt"
 
 #: includes/admin/settings/class-wc-settings-tax.php:243
 msgid "Tax Rates for the \"%s\" Class"
@@ -4797,7 +4797,7 @@ msgstr "Momssats för klassen \"%s\""
 msgid ""
 "Define tax rates for countries and states below. <a href=\"%s\">See here</a>"
 " for available alpha-2 country codes."
-msgstr ""
+msgstr "Bestäm momssatser för länder och stater nedan. <a href=\"%s\">Se här</a> för tillgängliga alpha-2 landskoder"
 
 #: includes/admin/settings/class-wc-settings-tax.php:250
 msgid "Country&nbsp;Code"
@@ -4910,27 +4910,27 @@ msgstr "Namn på taxa"
 
 #: includes/admin/views/html-admin-page-addons.php:5
 msgid "Browse all extensions"
-msgstr ""
+msgstr "Bläddra bland alla extensions"
 
 #: includes/admin/views/html-admin-page-addons.php:6
 msgid "Browse themes"
-msgstr ""
+msgstr "Bläddra bland teman"
 
 #: includes/admin/views/html-admin-page-addons.php:11
 msgid "Popular"
-msgstr ""
+msgstr "Populära"
 
 #: includes/admin/views/html-admin-page-addons.php:12
 msgid "Gateways"
-msgstr ""
+msgstr "Gateways"
 
 #: includes/admin/views/html-admin-page-addons.php:14
 msgid "Import/export"
-msgstr ""
+msgstr "Importera/exportera"
 
 #: includes/admin/views/html-admin-page-addons.php:16
 msgid "Marketing"
-msgstr ""
+msgstr "Marknadsföring"
 
 #: includes/admin/views/html-admin-page-addons.php:17
 msgid "Free"
@@ -4938,15 +4938,15 @@ msgstr "Gratis"
 
 #: includes/admin/views/html-admin-page-status-report.php:2
 msgid "Please include this information when requesting support:"
-msgstr ""
+msgstr "Vänligen inkludera den här informationen när du ber om support:"
 
 #: includes/admin/views/html-admin-page-status-report.php:3
 msgid "Get System Report"
-msgstr ""
+msgstr "Få en systemrapport"
 
 #: includes/admin/views/html-admin-page-status-report.php:11
 msgid "Environment"
-msgstr ""
+msgstr "Miljö"
 
 #: includes/admin/views/html-admin-page-status-report.php:17
 msgid "Home URL"
@@ -4958,23 +4958,23 @@ msgstr "Sajtadress"
 
 #: includes/admin/views/html-admin-page-status-report.php:25
 msgid "WC Version"
-msgstr ""
+msgstr "WC-version"
 
 #: includes/admin/views/html-admin-page-status-report.php:29
 msgid "WC Database Version"
-msgstr ""
+msgstr "WC-databasversion"
 
 #: includes/admin/views/html-admin-page-status-report.php:33
 msgid "WP Version"
-msgstr ""
+msgstr "WP-version"
 
 #: includes/admin/views/html-admin-page-status-report.php:37
 msgid "WP Multisite Enabled"
-msgstr ""
+msgstr "WP Multisite Aktiverat"
 
 #: includes/admin/views/html-admin-page-status-report.php:41
 msgid "Web Server Info"
-msgstr ""
+msgstr "Webserverinfo"
 
 #: includes/admin/views/html-admin-page-status-report.php:45
 msgid "PHP Version"
@@ -4982,7 +4982,7 @@ msgstr "PHP-version"
 
 #: includes/admin/views/html-admin-page-status-report.php:49
 msgid "MySQL Version"
-msgstr ""
+msgstr "MySQL-version"
 
 #: includes/admin/views/html-admin-page-status-report.php:53
 msgid "WP Memory Limit"
@@ -5000,7 +5000,7 @@ msgstr "WP Debug Mode"
 
 #: includes/admin/views/html-admin-page-status-report.php:69
 msgid "WP Language"
-msgstr ""
+msgstr "WP-språk"
 
 #: includes/admin/views/html-admin-page-status-report.php:73
 msgid "WP Max Upload Size"
@@ -5008,19 +5008,19 @@ msgstr "WP Max Upload Size"
 
 #: includes/admin/views/html-admin-page-status-report.php:78
 msgid "PHP Post Max Size"
-msgstr ""
+msgstr "PHP Post Max Size"
 
 #: includes/admin/views/html-admin-page-status-report.php:82
 msgid "PHP Time Limit"
-msgstr ""
+msgstr "PHP Time Limit"
 
 #: includes/admin/views/html-admin-page-status-report.php:86
 msgid "PHP Max Input Vars"
-msgstr ""
+msgstr "PHP Max Input Vars"
 
 #: includes/admin/views/html-admin-page-status-report.php:90
 msgid "SUHOSIN Installed"
-msgstr ""
+msgstr "SUHOSIN installerat"
 
 #: includes/admin/views/html-admin-page-status-report.php:95
 msgid "WC Logging"
@@ -5038,15 +5038,15 @@ msgstr "Katalog för logg (<code>woocommerce/logs/</code>) är inte skrivbar. Lo
 
 #: includes/admin/views/html-admin-page-status-report.php:104
 msgid "Default Timezone"
-msgstr ""
+msgstr "Tidszon"
 
 #: includes/admin/views/html-admin-page-status-report.php:108
 msgid "Default timezone is %s - it should be UTC"
-msgstr ""
+msgstr "Tidszon är %s - det ska vara UTC"
 
 #: includes/admin/views/html-admin-page-status-report.php:110
 msgid "Default timezone is %s"
-msgstr ""
+msgstr "Tidszon är %s"
 
 #: includes/admin/views/html-admin-page-status-report.php:118
 msgid "fsockopen/cURL"
@@ -5087,7 +5087,7 @@ msgstr "Din server har inte <a href=\"%s\">SOAP-klientklassen</a> aktiverad. Vis
 
 #: includes/admin/views/html-admin-page-status-report.php:144
 msgid "WP Remote Post"
-msgstr ""
+msgstr "WP Remote Post"
 
 #: includes/admin/views/html-admin-page-status-report.php:155
 msgid "wp_remote_post() was successful - PayPal IPN is working."
@@ -5105,24 +5105,24 @@ msgstr "wp_remote_post() misslyckades. PayPal IPN kanske inte fungerar korrekt p
 
 #: includes/admin/views/html-admin-page-status-report.php:184
 msgid "Locale"
-msgstr ""
+msgstr "Locale"
 
 #: includes/admin/views/html-admin-page-status-report.php:200
 msgid "Plugins"
-msgstr ""
+msgstr "Plugins"
 
 #: includes/admin/views/html-admin-page-status-report.php:206
 msgid "Installed Plugins"
-msgstr ""
+msgstr "Installerade plugins"
 
 #: includes/admin/views/html-admin-page-status-report.php:226
 msgid "Visit plugin homepage"
-msgstr ""
+msgstr "Besök tilläggets webbplats"
 
 #: includes/admin/views/html-admin-page-status-report.php:250
 #: includes/admin/views/html-admin-page-status-report.php:432
 msgid "is available"
-msgstr ""
+msgstr "är tillgänglig"
 
 #: includes/admin/views/html-admin-page-status-report.php:253
 msgid "by"
@@ -5138,11 +5138,11 @@ msgstr "Tvinga SSL"
 
 #: includes/admin/views/html-admin-page-status-report.php:282
 msgid "WC Pages"
-msgstr ""
+msgstr "WC-sidor"
 
 #: includes/admin/views/html-admin-page-status-report.php:289
 msgid "Shop Base"
-msgstr ""
+msgstr "Butiksbas"
 
 #: includes/admin/views/html-admin-page-status-report.php:293
 msgid "Cart"
@@ -5158,7 +5158,7 @@ msgstr "Sida har inte valts"
 
 #: includes/admin/views/html-admin-page-status-report.php:331
 msgid "Page does not exist"
-msgstr ""
+msgstr "Sidan existerar inte"
 
 #: includes/admin/views/html-admin-page-status-report.php:336
 msgid "Page does not contain the shortcode: %s"
@@ -5166,7 +5166,7 @@ msgstr "Sidan innehåller inte koden: %s"
 
 #: includes/admin/views/html-admin-page-status-report.php:355
 msgid "WC Taxonomies"
-msgstr ""
+msgstr "WC-taxonomier"
 
 #: includes/admin/views/html-admin-page-status-report.php:361
 msgid "Order Statuses"
@@ -5174,35 +5174,35 @@ msgstr "Orderstatusar"
 
 #: includes/admin/views/html-admin-page-status-report.php:371
 msgid "Product Types"
-msgstr ""
+msgstr "Produkttyper"
 
 #: includes/admin/views/html-admin-page-status-report.php:384
 msgid "Theme"
-msgstr ""
+msgstr "Tema"
 
 #: includes/admin/views/html-admin-page-status-report.php:421
 msgid "Theme Name"
-msgstr ""
+msgstr "Temanamn"
 
 #: includes/admin/views/html-admin-page-status-report.php:427
 msgid "Theme Version"
-msgstr ""
+msgstr "Temaversion"
 
 #: includes/admin/views/html-admin-page-status-report.php:436
 msgid "Author URL"
-msgstr ""
+msgstr "Author URL"
 
 #: includes/admin/views/html-admin-page-status-report.php:445
 msgid "Templates"
-msgstr ""
+msgstr "Mallar"
 
 #: includes/admin/views/html-admin-page-status-report.php:451
 msgid "Template Overrides"
-msgstr ""
+msgstr "Överskridande av mallar"
 
 #: includes/admin/views/html-admin-page-status-report.php:483
 msgid "No overrides present in theme."
-msgstr ""
+msgstr "Inga överskridningar i temat."
 
 #: includes/admin/views/html-admin-page-status-tools.php:7
 #: includes/admin/views/html-admin-page-status.php:6
@@ -5211,27 +5211,27 @@ msgstr "Verktyg"
 
 #: includes/admin/views/html-admin-page-status-tools.php:23
 msgid "Template Debug Mode"
-msgstr ""
+msgstr "Debug-läge för mall"
 
 #: includes/admin/views/html-admin-page-status-tools.php:29
 msgid ""
 "This tool will disable template overrides for logged-in administrators for "
 "debugging purposes."
-msgstr ""
+msgstr "Det här verktyget kommer att deaktivera mallöverskridningar för inloggade administratörer för att kunna debugga."
 
 #: includes/admin/views/html-admin-page-status-tools.php:34
 msgid "Remove post types on uninstall"
-msgstr ""
+msgstr "Ta bort posttyper vid avinstallation"
 
 #: includes/admin/views/html-admin-page-status-tools.php:40
 msgid ""
 "This tool will delete all product and order post data when uninstalling via "
 "Plugins > Delete."
-msgstr ""
+msgstr "Det här verktyget kommer att radera all data för produkter och ordrar vid avinstallation via Plugins > Radera."
 
 #: includes/admin/views/html-admin-page-status-tools.php:47
 msgid "Save Changes"
-msgstr ""
+msgstr "Spara ändringar"
 
 #: includes/admin/views/html-admin-settings.php:20
 msgid "Save changes"
@@ -5307,7 +5307,7 @@ msgstr "I lager?"
 #: includes/admin/views/html-bulk-edit-product.php:247
 #: includes/admin/views/html-quick-edit-product.php:167
 msgid "Backorders?"
-msgstr ""
+msgstr "Restordrar?"
 
 #: includes/admin/views/html-notice-install.php:5
 msgid ""
@@ -5324,21 +5324,21 @@ msgid ""
 "<strong>Your theme does not declare WooCommerce support</strong> &#8211; if "
 "you encounter layout issues please read our integration guide or choose a "
 "WooCommerce theme :)"
-msgstr ""
+msgstr "<strong>Ditt tema har inte deklarerat stöd för WooCommerce</strong> &#8211; Om du stöter på problem med layout vänligen läs vår integrationsguide eller välja ett WooCommerce-tema :)"
 
 #: includes/admin/views/html-notice-theme-support.php:6
 msgid "Theme Integration Guide"
-msgstr ""
+msgstr "Integrationsguide för tema"
 
 #: includes/admin/views/html-notice-theme-support.php:6
 msgid "Hide this notice"
-msgstr ""
+msgstr "Dölj notis"
 
 #: includes/admin/views/html-notice-update.php:5
 msgid ""
 "<strong>WooCommerce Data Update Required</strong> &#8211; We just need to "
 "update your install to the latest version"
-msgstr ""
+msgstr "<strong>WooCommerce-datauppdatering krävs</strong> &#8211; Vi behöver uppdatera din installation till den senaste versionen"
 
 #: includes/admin/views/html-notice-update.php:6
 msgid "Run the updater"
@@ -5360,7 +5360,7 @@ msgstr "Rea-pris"
 
 #: includes/admin/views/html-report-by-date.php:16
 msgid "Custom:"
-msgstr ""
+msgstr "Egna val:"
 
 #: includes/admin/wc-admin-functions.php:193
 msgid "Could not compile woocommerce.less:"
@@ -5368,16 +5368,16 @@ msgstr "Kunde inte kompilera woocommerce.less:"
 
 #. Plugin URI of the plugin/theme
 msgid "http://www.woothemes.com/woocommerce/"
-msgstr ""
+msgstr "http://www.woothemes.com/woocommerce/"
 
 #. Description of the plugin/theme
 msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
-msgstr ""
+msgstr "Ett e-butiksverktyg som hjälper dig att sälja vad som helst. Stiligt."
 
 #. Author of the plugin/theme
 msgid "WooThemes"
-msgstr ""
+msgstr "WooThemes"
 
 #. Author URI of the plugin/theme
 msgid "http://woothemes.com"
-msgstr ""
+msgstr "http://woothemes.com"

@@ -1,5 +1,7 @@
 # 
 # Translators:
+# ABSOLUTE_Web <woocommerce@absoluteweb.net>, 2014
+# Francois-Xavier Bénard <fxb@wp-translations.org>, 2013
 # Francois-Xavier Bénard <fxb@wp-translations.org>, 2013
 # ABSOLUTE_Web <woocommerce@absoluteweb.net>, 2014
 # corsonr <remicorson@gmail.com>, 2013-2014
@@ -8,8 +10,8 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
-"PO-Revision-Date: 2014-02-07 08:31+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-02-11 17:51+0000\n"
+"Last-Translator: ABSOLUTE_Web <woocommerce@absoluteweb.net>\n"
 "Language-Team: French (France) (http://www.transifex.com/projects/p/woocommerce-core/language/fr_FR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -503,7 +505,7 @@ msgstr "La Corogne"
 
 #: i18n/states/ES.php:14
 msgid "Araba/&Aacute;lava"
-msgstr ""
+msgstr "Araba/&Aacute;lava"
 
 #: i18n/states/ES.php:15
 msgid "Albacete"
@@ -587,7 +589,7 @@ msgstr "Guadalajara"
 
 #: i18n/states/ES.php:35
 msgid "Gipuzkoa"
-msgstr ""
+msgstr "Guipuscoa"
 
 #: i18n/states/ES.php:36
 msgid "Huelva"
@@ -695,7 +697,7 @@ msgstr "Valladolid"
 
 #: i18n/states/ES.php:62
 msgid "Bizkaia"
-msgstr ""
+msgstr "Biscaye"
 
 #: i18n/states/ES.php:63
 msgid "Zamora"
@@ -3435,7 +3437,7 @@ msgstr "Vous ne pouvez ajouter &quot;%s&quot; au panier."
 msgid ""
 "You cannot add that amount to the cart &mdash; we have %s in stock and you "
 "already have %s in your cart."
-msgstr ""
+msgstr "Vous ne pouvez pas ajouter cette quantité dans le panier &mdash; nous en avons %s en stock et vous en avez déjà %s dans votre panier."
 
 #: includes/class-wc-checkout.php:64 includes/class-wc-checkout.php:73
 #: includes/class-wc-emails.php:67 includes/class-wc-emails.php:76
@@ -5911,7 +5913,7 @@ msgstr "fourni une solution pleinement compatible PCI (Payment Card Industry), s
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:31
 msgid "Proceed to PayPal"
-msgstr ""
+msgstr "Procéder à PayPal"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:34
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:135
@@ -6132,7 +6134,7 @@ msgstr "Merci - votre commande est maintenant en attente de paiement. Vous allez
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:689
 msgid "Validation error: PayPal currencies do not match (code %s)."
-msgstr ""
+msgstr "Erreur de validation : les devices ne correspondent pas (code %s)."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:700
 msgid "Validation error: PayPal amounts do not match (gross %s)."
@@ -6705,7 +6707,7 @@ msgstr "Dollars Canadiens"
 
 #: includes/wc-core-functions.php:166
 msgid "Chilean Peso"
-msgstr ""
+msgstr "Peso chilien"
 
 #: includes/wc-core-functions.php:167
 msgid "Chinese Yuan"
@@ -6713,7 +6715,7 @@ msgstr "Yuan Chinois"
 
 #: includes/wc-core-functions.php:168
 msgid "Colombian Peso"
-msgstr ""
+msgstr "Peso colombien"
 
 #: includes/wc-core-functions.php:169
 msgid "Czech Koruna"
@@ -6769,7 +6771,7 @@ msgstr "Peso Mexicain"
 
 #: includes/wc-core-functions.php:182
 msgid "Nigerian Naira"
-msgstr ""
+msgstr "Naira nigérien"
 
 #: includes/wc-core-functions.php:183
 msgid "Norwegian Krone"
@@ -7307,7 +7309,7 @@ msgstr "Sous-total du panier"
 #: templates/checkout/review-order.php:31
 #: templates/checkout/review-order.php:71
 msgid "Coupon:"
-msgstr ""
+msgstr "Code promo : "
 
 #: templates/cart/cart-totals.php:75 templates/checkout/review-order.php:79
 msgid "Order Total"
@@ -7896,7 +7898,7 @@ msgstr "Réinitialisation mot de passe"
 
 #: templates/myaccount/my-account.php:19
 msgid "Hello <strong>%1$s</strong> (not %1$s? <a href=\"%2$s\">Sign out</a>)."
-msgstr ""
+msgstr "Bonjour <strong>%1$s</strong> (vous n'êtes pas %1$s ? <a href=\"%2$s\">Déconnexion</a>)."
 
 #: templates/myaccount/my-account.php:24
 msgid ""

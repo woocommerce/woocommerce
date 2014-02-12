@@ -3,6 +3,7 @@
 # Closemarketing <david@closemarketing.es>, 2013
 # Gabriel Gil <gabriel@gabrielgil.es>, 2014
 # Gonzalo Zúñiga De-Spirito <gonzunigad@gmail.com>, 2014
+# Gonzalo Zúñiga De-Spirito <gonzunigad@gmail.com>, 2014
 # Jaime Martin <mrtnprjct@gmail.com>, 2014
 # Vaclad <hello@anderburdain.com>, 2014
 msgid ""
@@ -10,8 +11,8 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
-"PO-Revision-Date: 2014-02-11 09:31+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-02-11 17:40+0000\n"
+"Last-Translator: Gonzalo Zúñiga De-Spirito <gonzunigad@gmail.com>\n"
 "Language-Team: Spanish (Spain) (http://www.transifex.com/projects/p/woocommerce-core/language/es_ES/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -37,7 +38,7 @@ msgstr "Productos por código/ID"
 
 #: assets/js/admin/editor_plugin_lang.php:9
 msgid "Product categories"
-msgstr "Categorias de los Productos"
+msgstr "Categorias de productos"
 
 #: assets/js/admin/editor_plugin_lang.php:10
 msgid "Products by category slug"
@@ -57,7 +58,7 @@ msgstr "Mensajes de Tienda"
 
 #: assets/js/admin/editor_plugin_lang.php:14
 msgid "Order tracking"
-msgstr "Seguimiento de Pedido"
+msgstr "Seguimiento de pedido"
 
 #: assets/js/admin/editor_plugin_lang.php:15 includes/class-wc-install.php:230
 #: includes/shortcodes/class-wc-shortcode-checkout.php:86
@@ -2925,12 +2926,12 @@ msgstr "Habilitar/Deshabilitar"
 #: includes/emails/class-wc-email-customer-completed-order.php:142
 #: includes/emails/class-wc-email-new-order.php:122
 msgid "Enable this email notification"
-msgstr "Habilitar esta notificación por correo electrónico"
+msgstr "Habilitar esta notificación de correo electrónico"
 
 #: includes/abstracts/abstract-wc-email.php:570
 #: includes/emails/class-wc-email-customer-invoice.php:146
 msgid "Email subject"
-msgstr "Asunto de Correo Electrónico"
+msgstr "Asunto del correo"
 
 #: includes/abstracts/abstract-wc-email.php:572
 #: includes/abstracts/abstract-wc-email.php:579
@@ -2948,14 +2949,14 @@ msgstr "Predeterminado <code>%s</code>"
 #: includes/abstracts/abstract-wc-email.php:577
 #: includes/emails/class-wc-email-customer-invoice.php:153
 msgid "Email heading"
-msgstr "Encabezado de Correo Electrónico"
+msgstr "Encabezado del correo"
 
 #: includes/abstracts/abstract-wc-email.php:584
 #: includes/emails/class-wc-email-customer-completed-order.php:174
 #: includes/emails/class-wc-email-customer-invoice.php:174
 #: includes/emails/class-wc-email-new-order.php:147
 msgid "Email type"
-msgstr "Tipo de Correo Electrónico"
+msgstr "Tipo de correo"
 
 #: includes/abstracts/abstract-wc-email.php:586
 #: includes/emails/class-wc-email-customer-completed-order.php:176
@@ -2983,7 +2984,7 @@ msgstr "HTML"
 #: includes/emails/class-wc-email-customer-invoice.php:182
 #: includes/emails/class-wc-email-new-order.php:155
 msgid "Multipart"
-msgstr "Múltiples partes"
+msgstr "Multipart"
 
 #: includes/abstracts/abstract-wc-email.php:628
 #: includes/abstracts/abstract-wc-email.php:649
@@ -3064,7 +3065,7 @@ msgstr "Código de Tarjeta"
 #: includes/class-wc-product-simple.php:48
 #: includes/class-wc-product-variation.php:211
 msgid "Add to cart"
-msgstr "Añadir al carrito"
+msgstr "Añadir al carro"
 
 #: includes/abstracts/abstract-wc-product.php:466
 msgid "Read more"
@@ -3078,11 +3079,11 @@ msgstr "En existencia"
 
 #: includes/abstracts/abstract-wc-product.php:579
 msgid "Only %s left in stock"
-msgstr "Sólo quedan %s en existencia"
+msgstr "Sólo %s en stock"
 
 #: includes/abstracts/abstract-wc-product.php:582
 msgid "%s in stock"
-msgstr "%s en existencia"
+msgstr "%s en stock"
 
 #: includes/abstracts/abstract-wc-product.php:589
 msgid "(backorders allowed)"
@@ -3421,7 +3422,7 @@ msgstr "No se puede agregar &quot;%s&quot; al carrito de compras porque este pro
 msgid ""
 "You cannot add that amount of &quot;%s&quot; to the cart because there is "
 "not enough stock (%s remaining)."
-msgstr "No se puede agragar esa cantidad de &quot;%s&quot; al carrito por que no hay suficientes en existencia (%s restantes). "
+msgstr "No se puede agragar esa cantidad de &quot;%s&quot; al carrito por que no hay suficientes en stock (%s restantes). "
 
 #: includes/class-wc-cart.php:808 includes/class-wc-cart.php:827
 #: includes/class-wc-cart.php:840 includes/class-wc-frontend-scripts.php:151
@@ -3449,7 +3450,7 @@ msgstr "Haciendo trampa?"
 
 #: includes/class-wc-checkout.php:97
 msgid "Account username"
-msgstr "Nombre de ususario"
+msgstr "Nombre de usuario"
 
 #: includes/class-wc-checkout.php:99
 msgctxt "placeholder"
@@ -3476,7 +3477,7 @@ msgstr "Notas sobre tu pedido, ej. notas especiales para el envío."
 
 #: includes/class-wc-checkout.php:176
 msgid "Order &ndash; %s"
-msgstr "Orden &ndash; %s"
+msgstr "Pedido &ndash; %s"
 
 #: includes/class-wc-checkout.php:176
 msgctxt "Order date parsed by strftime"
@@ -3508,7 +3509,7 @@ msgstr "no es un número telefónico válido."
 
 #: includes/class-wc-checkout.php:511 includes/class-wc-form-handler.php:115
 msgid "is not a valid email address."
-msgstr "no es una dirección de email válida"
+msgstr "no es una dirección de email válida."
 
 #: includes/class-wc-checkout.php:526
 msgid "is not valid. Please enter one of the following:"
@@ -3516,7 +3517,7 @@ msgstr "no es valido. Por favor ingresa uno de los siguientes:"
 
 #: includes/class-wc-checkout.php:571
 msgid "You must accept our Terms &amp; Conditions."
-msgstr "Tienes que aceptar nuestros Términos &amp; Condiciones."
+msgstr "Debes aceptar nuestros Términos &amp; Condiciones."
 
 #: includes/class-wc-checkout.php:576
 msgid ""
@@ -3542,7 +3543,7 @@ msgstr "Por favor califique el producto."
 
 #: includes/class-wc-countries.php:37
 msgid "Afghanistan"
-msgstr "Afghanistan"
+msgstr "Afganistán"
 
 #: includes/class-wc-countries.php:38
 msgid "&#197;land Islands"
@@ -3570,7 +3571,7 @@ msgstr "Anguilla"
 
 #: includes/class-wc-countries.php:44
 msgid "Antarctica"
-msgstr "Antarctica"
+msgstr "Antártida"
 
 #: includes/class-wc-countries.php:45
 msgid "Antigua and Barbuda"
@@ -3826,7 +3827,7 @@ msgstr "Etiopía"
 
 #: includes/class-wc-countries.php:108
 msgid "Falkland Islands"
-msgstr "islas Malvinas"
+msgstr "Islas Malvinas"
 
 #: includes/class-wc-countries.php:109
 msgid "Faroe Islands"
@@ -4238,7 +4239,7 @@ msgstr "Portugal"
 
 #: includes/class-wc-countries.php:212
 msgid "Qatar"
-msgstr "Catar"
+msgstr "Qatar"
 
 #: includes/class-wc-countries.php:213
 msgid "Reunion"
@@ -4390,7 +4391,7 @@ msgstr "Siria"
 
 #: includes/class-wc-countries.php:250
 msgid "Taiwan"
-msgstr "Taiwan"
+msgstr "Taiwán"
 
 #: includes/class-wc-countries.php:251
 msgid "Tajikistan"
@@ -4571,7 +4572,7 @@ msgstr "Dirección"
 #: includes/class-wc-countries.php:739
 msgctxt "placeholder"
 msgid "Street address"
-msgstr "Dirección Física"
+msgstr "Dirección"
 
 #: includes/class-wc-countries.php:744
 msgctxt "placeholder"
@@ -4580,7 +4581,7 @@ msgstr "Apartamento, habitación, unidad, etc (opcional)"
 
 #: includes/class-wc-countries.php:749 includes/class-wc-countries.php:750
 msgid "Town / City"
-msgstr "Pueblo / Ciudad"
+msgstr "Localidad / Ciudad"
 
 #: includes/class-wc-countries.php:756 includes/class-wc-countries.php:757
 msgid "State / County"
@@ -4589,7 +4590,7 @@ msgstr "Estado / País"
 #: includes/class-wc-countries.php:763 includes/class-wc-countries.php:764
 #: templates/cart/shipping-calculator.php:80
 msgid "Postcode / Zip"
-msgstr "Código Postal / Zip"
+msgstr "Código postal / Zip"
 
 #: includes/class-wc-countries.php:825 includes/class-wc-countries.php:841
 #: includes/class-wc-countries.php:861 includes/class-wc-countries.php:922
@@ -4609,7 +4610,7 @@ msgstr "Municipio"
 
 #: includes/class-wc-countries.php:909
 msgid "Town / District"
-msgstr "Pueblo / Distrito"
+msgstr "Localidad / Distrito"
 
 #: includes/class-wc-countries.php:912
 msgid "Region"
@@ -4641,7 +4642,7 @@ msgstr "Teléfono"
 
 #: includes/class-wc-coupon.php:568
 msgid "Coupon code applied successfully."
-msgstr "El codigo de cupón ha sido aplicado exitosamente."
+msgstr "El código de cupón ha sido aplicado exitosamente."
 
 #: includes/class-wc-coupon.php:571
 msgid "Coupon code removed successfully."
@@ -4659,7 +4660,7 @@ msgstr "¡El cupón no existe!"
 msgid ""
 "Sorry, it seems the coupon \"%s\" is invalid - it has now been removed from "
 "your order."
-msgstr "Lo sentimos, parece que el cupón \"%s\" es inválido - ha sido quitado de tu orden. "
+msgstr "Lo sentimos, parece que el cupón \"%s\" es inválido - ha sido eliminado de tu orden. "
 
 #: includes/class-wc-coupon.php:601
 msgid ""
@@ -4669,13 +4670,13 @@ msgstr "Lo sentimos, parece que el cupón \"%s\" no es tuyo - se ha eliminado de
 
 #: includes/class-wc-coupon.php:604
 msgid "Coupon code already applied!"
-msgstr "El codigo de cupón ya ha sido aplicado!"
+msgstr "¡El código de cupón ya ha sido aplicado!"
 
 #: includes/class-wc-coupon.php:607
 msgid ""
 "Sorry, coupon \"%s\" has already been applied and cannot be used in "
 "conjunction with other coupons."
-msgstr "Lo sentimos, el cupón \"%s\" ya ha sifo aplicado y no puede ser utilizado en conjunto con otros cupones."
+msgstr "Lo sentimos, el cupón \"%s\" ya ha sido aplicado y no puede ser utilizado en conjunto con otros cupones."
 
 #: includes/class-wc-coupon.php:610
 msgid "Coupon usage limit has been reached."
@@ -4773,7 +4774,7 @@ msgstr "Nota"
 
 #: includes/class-wc-emails.php:325
 msgid "Product low in stock"
-msgstr "Producto bajo en existencia"
+msgstr "Producto bajo en existencias"
 
 #: includes/class-wc-emails.php:330 includes/class-wc-emails.php:362
 #: includes/class-wc-emails.php:406
@@ -4787,15 +4788,15 @@ msgstr "Producto #%s - %s"
 
 #: includes/class-wc-emails.php:334
 msgid "is low in stock."
-msgstr "es bajo en existencia"
+msgstr "tiene poco stock."
 
 #: includes/class-wc-emails.php:357
 msgid "Product out of stock"
-msgstr "Producto sin existencia"
+msgstr "Producto agotado"
 
 #: includes/class-wc-emails.php:366
 msgid "is out of stock."
-msgstr "no tiene existencia."
+msgstr "está agotado."
 
 #: includes/class-wc-emails.php:401
 msgid "Product Backorder"
@@ -4932,7 +4933,7 @@ msgstr "Por favor seleccione una puntuación"
 #: includes/class-wc-frontend-scripts.php:134
 #: includes/wc-template-functions.php:1573
 msgid "required"
-msgstr "requerido"
+msgstr "obligatorio"
 
 #: includes/class-wc-frontend-scripts.php:158
 msgid ""
@@ -4961,13 +4962,13 @@ msgstr "Tienda"
 #: includes/class-wc-install.php:219
 msgctxt "page_slug"
 msgid "cart"
-msgstr "carrito"
+msgstr "carro"
 
 #: includes/class-wc-install.php:220
 #: includes/widgets/class-wc-widget-cart.php:29
 #: includes/widgets/class-wc-widget-cart.php:56
 msgid "Cart"
-msgstr "Carrito"
+msgstr "Carro"
 
 #: includes/class-wc-install.php:224
 msgctxt "page_slug"
@@ -5006,7 +5007,7 @@ msgstr "&nbsp;<small>%svia %s</small>"
 
 #: includes/class-wc-order.php:897
 msgid "Cart Subtotal:"
-msgstr "Subtotal del Carrito:"
+msgstr "Subtotal del Carro:"
 
 #: includes/class-wc-order.php:904
 msgid "Cart Discount:"
@@ -5375,7 +5376,7 @@ msgstr "Añadir Nuevo Cupón"
 
 #: includes/class-wc-post-types.php:329
 msgid "Edit Coupon"
-msgstr "Editar cupón"
+msgstr "Editar Cupón"
 
 #: includes/class-wc-post-types.php:330
 msgid "New Coupon"
@@ -5399,7 +5400,7 @@ msgstr "Ningún cupón encontrado"
 
 #: includes/class-wc-post-types.php:335
 msgid "No Coupons found in trash"
-msgstr "Ningún cupón encontrado en la basura"
+msgstr "Ningún cupón encontrado en la papelera"
 
 #: includes/class-wc-post-types.php:336
 msgid "Parent Coupon"
@@ -5452,7 +5453,7 @@ msgstr "Use $args[\"posts_per_page\"]. Argumento deprecado será eliminado en WC
 
 #: includes/emails/class-wc-email-customer-completed-order.php:26
 msgid "Completed order"
-msgstr "Orden Completada"
+msgstr "Pedido completo"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:27
 msgid ""
@@ -5497,7 +5498,7 @@ msgstr "Encabezado de Correo Electrónico (producto descargable)"
 
 #: includes/emails/class-wc-email-customer-invoice.php:29
 msgid "Customer invoice"
-msgstr "Factura del Cliente"
+msgstr "Factura del cliente"
 
 #: includes/emails/class-wc-email-customer-invoice.php:30
 msgid ""
@@ -5565,7 +5566,7 @@ msgstr "Una nota ha sido añadida a tu pedido"
 
 #: includes/emails/class-wc-email-customer-processing-order.php:26
 msgid "Processing order"
-msgstr "Procesando tu Orden"
+msgstr "Procesando tu pedido"
 
 #: includes/emails/class-wc-email-customer-processing-order.php:27
 msgid ""
@@ -6105,7 +6106,7 @@ msgstr "Registrar los eventos de PayPal, como las solicitudes IPN, en <code>wooc
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:349
 msgid "Order %s"
-msgstr "Orden %s"
+msgstr "Pedido %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:358
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:415
@@ -6856,7 +6857,7 @@ msgstr "% de descuento en el producto"
 #: includes/wc-customer-functions.php:49
 msgid ""
 "An account is already registered with your email address. Please login."
-msgstr "Ya ha sido registrada una cuenta con esta dirección de email. Por favor, regístrate."
+msgstr "Ya ha sido registrada una cuenta con tu dirección de correo. Por favor, inicia sesión."
 
 #: includes/wc-customer-functions.php:59
 msgid "Please enter a valid account username."
@@ -6902,7 +6903,7 @@ msgstr "Nuevos productos etiquetados %s"
 msgid ""
 "This is a demo store for testing purposes &mdash; no orders shall be "
 "fulfilled."
-msgstr "Esta es una tienda de demostración para propósitos de prueba &mdash; no hay pedidos que se cumplan."
+msgstr "Esta es una tienda de demostración para propósitos de prueba &mdash; ningún pedido se llevara a cabo."
 
 #: includes/wc-template-functions.php:369
 msgid "Search Results: &ldquo;%s&rdquo;"
@@ -7217,7 +7218,7 @@ msgstr "Mostrar una lista de los comentarios más recientes en su web."
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:23
 msgid "WooCommerce Recent Reviews"
-msgstr "Comentarios recientes WooCommerce"
+msgstr "Opiniones recientes de WooCommerce"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:27
 msgid "Recent Reviews"
@@ -7437,7 +7438,7 @@ msgstr "Clic aquí para ingresar su código"
 
 #: templates/checkout/form-login.php:14
 msgid "Returning customer?"
-msgstr "Cliente retornando?"
+msgstr "¿Ya eres cliente?"
 
 #: templates/checkout/form-login.php:15
 msgid "Click here to login"
@@ -7834,7 +7835,7 @@ msgstr "Guardar"
 
 #: templates/myaccount/form-edit-account.php:20
 msgid "First name"
-msgstr "Primer Nombre"
+msgstr "Nombre"
 
 #: templates/myaccount/form-edit-account.php:24
 msgid "Last name"
@@ -7843,7 +7844,7 @@ msgstr "Apellido"
 #: templates/myaccount/form-edit-account.php:28
 #: templates/myaccount/form-login.php:79
 msgid "Email address"
-msgstr "Dirección de Correo Electrónico"
+msgstr "Correo electrónico"
 
 #: templates/myaccount/form-edit-account.php:32
 msgid "Password (leave blank to leave unchanged)"
@@ -8088,7 +8089,7 @@ msgstr[1] "%s revisiones para %s"
 
 #: templates/single-product-reviews.php:23
 msgid "Reviews"
-msgstr "Comentarios"
+msgstr "Opiniones"
 
 #: templates/single-product-reviews.php:44
 msgid "There are no reviews yet."
@@ -8116,7 +8117,7 @@ msgstr "Enviar"
 
 #: templates/single-product-reviews.php:73
 msgid "Your Rating"
-msgstr "Su Puntuación"
+msgstr "Tu puntuación"
 
 #: templates/single-product-reviews.php:74
 msgid "Rate&hellip;"
@@ -8144,7 +8145,7 @@ msgstr "Muy Pobre"
 
 #: templates/single-product-reviews.php:83
 msgid "Your Review"
-msgstr "Su opinion"
+msgstr "Tu opinion"
 
 #: templates/single-product-reviews.php:92
 msgid ""

@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
-"PO-Revision-Date: 2014-02-08 11:50+0000\n"
+"PO-Revision-Date: 2014-02-11 12:01+0000\n"
 "Last-Translator: Ramon Van Belzen <ramoonus@zeelandnet.nl>\n"
 "Language-Team: Dutch (Netherlands) (http://www.transifex.com/projects/p/woocommerce-core/language/nl_NL/)\n"
 "MIME-Version: 1.0\n"
@@ -3064,7 +3064,7 @@ msgstr "Kaart Code"
 #: includes/class-wc-product-simple.php:48
 #: includes/class-wc-product-variation.php:211
 msgid "Add to cart"
-msgstr "Toevoegen aan winkelwagen"
+msgstr "Bestel"
 
 #: includes/abstracts/abstract-wc-product.php:466
 msgid "Read more"

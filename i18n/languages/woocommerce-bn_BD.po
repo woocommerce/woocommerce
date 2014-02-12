@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
-"PO-Revision-Date: 2014-02-11 10:11+0000\n"
+"PO-Revision-Date: 2014-02-11 12:11+0000\n"
 "Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: Bengali (Bangladesh) (http://www.transifex.com/projects/p/woocommerce-core/language/bn_BD/)\n"
 "MIME-Version: 1.0\n"
@@ -61,7 +61,7 @@ msgstr ""
 #: includes/shortcodes/class-wc-shortcode-view-order.php:49
 #: templates/checkout/thankyou.php:30
 msgid "My Account"
-msgstr ""
+msgstr "আমার একাউনট"
 
 #: i18n/states/AU.php:13
 msgid "Australian Capital Territory"
@@ -4948,7 +4948,7 @@ msgstr ""
 #: includes/class-wc-install.php:214
 msgctxt "page_slug"
 msgid "shop"
-msgstr ""
+msgstr "দোকান "
 
 #: includes/class-wc-install.php:215
 msgid "Shop"
@@ -4963,7 +4963,7 @@ msgstr ""
 #: includes/widgets/class-wc-widget-cart.php:29
 #: includes/widgets/class-wc-widget-cart.php:56
 msgid "Cart"
-msgstr ""
+msgstr "কার্ট "
 
 #: includes/class-wc-install.php:224
 msgctxt "page_slug"
@@ -4972,7 +4972,7 @@ msgstr ""
 
 #: includes/class-wc-install.php:225 templates/cart/mini-cart.php:65
 msgid "Checkout"
-msgstr ""
+msgstr "চেকআউট"
 
 #: includes/class-wc-install.php:229
 msgctxt "page_slug"
@@ -4981,7 +4981,7 @@ msgstr ""
 
 #: includes/class-wc-install.php:441
 msgid "Customer"
-msgstr ""
+msgstr "ক্রেতা "
 
 #: includes/class-wc-install.php:448
 msgid "Shop Manager"
@@ -5086,7 +5086,7 @@ msgstr ""
 #: includes/updates/woocommerce-update-2.0.php:49
 msgctxt "slug"
 msgid "product-category"
-msgstr ""
+msgstr "পণ্য ক্যাটাগরি"
 
 #: includes/class-wc-post-types.php:90 includes/class-wc-post-types.php:92
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:27
@@ -5138,7 +5138,7 @@ msgstr ""
 #: includes/updates/woocommerce-update-2.0.php:50
 msgctxt "slug"
 msgid "product-tag"
-msgstr ""
+msgstr "পণ্য ট্যাগ "
 
 #: includes/class-wc-post-types.php:124 includes/class-wc-post-types.php:126
 msgid "Shipping Classes"
@@ -5298,11 +5298,11 @@ msgstr ""
 #: includes/class-wc-post-types.php:275
 msgctxt "Admin menu name"
 msgid "Orders"
-msgstr ""
+msgstr "ফরমায়েশ "
 
 #: includes/class-wc-post-types.php:285
 msgid "Orders"
-msgstr ""
+msgstr "ফরমায়েশ "
 
 #: includes/class-wc-post-types.php:286 templates/myaccount/my-orders.php:32
 msgid "Order"

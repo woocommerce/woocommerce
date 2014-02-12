@@ -2,13 +2,14 @@
 # Translators:
 # adi88nugroho <adi88nugroho@gmail.com>, 2013
 # Muhammad Panji <sumodirjo@gmail.com>, 2013
+# ridhoyp <ridhoyp@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
-"PO-Revision-Date: 2014-02-11 10:11+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-02-12 09:44+0000\n"
+"Last-Translator: ridhoyp <ridhoyp@gmail.com>\n"
 "Language-Team: Indonesian (Indonesia) (http://www.transifex.com/projects/p/woocommerce-core/language/id_ID/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -25,7 +26,7 @@ msgstr "WooCommerce"
 
 #: includes/admin/class-wc-admin-assets.php:108
 msgid "Please enter in decimal (%s) format without thousand separators."
-msgstr ""
+msgstr "Ketik dalam bentuk format desimal (%s) tanpa pemisah ribuan."
 
 #: includes/admin/class-wc-admin-assets.php:109
 msgid ""
@@ -38,19 +39,19 @@ msgid ""
 "Are you sure you want to remove the selected items? If you have previously "
 "reduced this item's stock, or this order was submitted by a customer, you "
 "will need to manually restore the item's stock."
-msgstr ""
+msgstr "Anda yakin untuk menghapus  barang yang dipilih? Jika sebelumnya anda telah mengurangi stok barang ini, atau pesanan ini telah di ajukan oleh pelanggan, anda akan secara manual mengembalikan stok barang."
 
 #: includes/admin/class-wc-admin-assets.php:137
 msgid "Please select some items."
-msgstr ""
+msgstr "Pilih beberapa barang."
 
 #: includes/admin/class-wc-admin-assets.php:138
 msgid "Remove this item meta?"
-msgstr ""
+msgstr "Hapus meta barang ini?"
 
 #: includes/admin/class-wc-admin-assets.php:139
 msgid "Remove this attribute?"
-msgstr ""
+msgstr "Hapus atribut barang ini?"
 
 #: includes/admin/class-wc-admin-assets.php:140
 #: includes/admin/class-wc-admin-attributes.php:239
@@ -73,7 +74,7 @@ msgstr "Nama"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:525
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:6
 msgid "Remove"
-msgstr ""
+msgstr "Hapus"
 
 #: includes/admin/class-wc-admin-assets.php:142
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:432
@@ -81,13 +82,13 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:7
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:7
 msgid "Click to toggle"
-msgstr ""
+msgstr "Klik untuk ubah"
 
 #: includes/admin/class-wc-admin-assets.php:143
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:447
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:539
 msgid "Value(s)"
-msgstr ""
+msgstr "Nilai Kolom"
 
 #: includes/admin/class-wc-admin-assets.php:144
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:540
@@ -1644,7 +1645,7 @@ msgstr "Kategori"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:257
 msgid "Tags"
-msgstr ""
+msgstr "Tag"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:260
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:98

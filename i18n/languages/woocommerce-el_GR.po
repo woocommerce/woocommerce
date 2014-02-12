@@ -1,12 +1,13 @@
 # 
 # Translators:
+# Inceptive D. L. <inceptive@inceptive.gr>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
-"PO-Revision-Date: 2014-02-11 10:11+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-02-11 14:21+0000\n"
+"Last-Translator: Inceptive D. L. <inceptive@inceptive.gr>\n"
 "Language-Team: Greek (Greece) (http://www.transifex.com/projects/p/woocommerce-core/language/el_GR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -3179,7 +3180,7 @@ msgstr ""
 
 #: includes/api/class-wc-api-coupons.php:171
 msgid "Invalid coupon code"
-msgstr ""
+msgstr "Μη έγκυρος κωδικός κουπονιού"
 
 #: includes/api/class-wc-api-customers.php:192
 msgid "You do not have permission to read the customers count"
@@ -3187,31 +3188,31 @@ msgstr ""
 
 #: includes/api/class-wc-api-customers.php:208
 msgid "You do not have permission to create this customer"
-msgstr ""
+msgstr "Δεν έχετε δικαίωμα να δημιουργήσετε αυτόν τον πελάτη"
 
 #: includes/api/class-wc-api-customers.php:455
 msgid "Invalid customer ID"
-msgstr ""
+msgstr "Μη έγκυρο αναγνωριστικό πελάτη"
 
 #: includes/api/class-wc-api-customers.php:461
 msgid "Invalid customer"
-msgstr ""
+msgstr "Μη έγκυρος πελάτης"
 
 #: includes/api/class-wc-api-customers.php:468
 msgid "You do not have permission to read this customer"
-msgstr ""
+msgstr "Δεν έχετε δικαίωμα να δείτε αυτόν τον πελάτη"
 
 #: includes/api/class-wc-api-customers.php:473
 msgid "You do not have permission to edit this customer"
-msgstr ""
+msgstr "Δεν έχετε δικαίωμα να επεξεργαστείτε αυτόν τον πελάτη"
 
 #: includes/api/class-wc-api-customers.php:478
 msgid "You do not have permission to delete this customer"
-msgstr ""
+msgstr "Δεν έχετε δικαίωμα να διαγράψετε αυτόν τον πελάτη"
 
 #: includes/api/class-wc-api-json-handler.php:56
 msgid "JSONP support is disabled on this site"
-msgstr ""
+msgstr "Η υποστήριξη JSONP είναι απενεργοποιημένη σε αυτό τον ιστοχώρο."
 
 #: includes/api/class-wc-api-json-handler.php:64
 msgid "The JSONP callback function is invalid"
@@ -3219,11 +3220,11 @@ msgstr ""
 
 #: includes/api/class-wc-api-orders.php:255
 msgid "You do not have permission to read the orders count"
-msgstr ""
+msgstr "Δεν έχετε δικαίωμα να διαβάσετε τον αριθμό των παραγγελιών"
 
 #: includes/api/class-wc-api-products.php:140
 msgid "You do not have permission to read the products count"
-msgstr ""
+msgstr "Δεν έχετε δικαίωμα να διαβάσετε τον αριθμό των προϊόντων"
 
 #: includes/api/class-wc-api-products.php:459
 #: includes/api/class-wc-api-products.php:460
@@ -3232,7 +3233,7 @@ msgstr ""
 
 #: includes/api/class-wc-api-reports.php:469
 msgid "You do not have permission to read this report"
-msgstr ""
+msgstr "Δεν έχετε δικαίωμα να διαβάσετε αυτή την αναφορά"
 
 #: includes/api/class-wc-api-resource.php:71
 msgid "Invalid %s ID"
@@ -3256,7 +3257,7 @@ msgstr ""
 
 #: includes/api/class-wc-api-resource.php:302
 msgid "Permanently deleted customer"
-msgstr ""
+msgstr "Ο πελάτης διαγράφηκε μόνιμα"
 
 #: includes/api/class-wc-api-resource.php:304
 msgid "The customer cannot be deleted"
@@ -3268,11 +3269,11 @@ msgstr ""
 
 #: includes/api/class-wc-api-resource.php:316
 msgid "Permanently deleted %s"
-msgstr ""
+msgstr "Διαγράφηκε μόνιμα %s"
 
 #: includes/api/class-wc-api-resource.php:322
 msgid "Deleted %s"
-msgstr ""
+msgstr "Διαγράφηκε %s"
 
 #: includes/api/class-wc-api-server.php:165
 msgid "Invalid authentication method"
@@ -3432,7 +3433,7 @@ msgstr ""
 msgid ""
 "You cannot add that amount to the cart &mdash; we have %s in stock and you "
 "already have %s in your cart."
-msgstr ""
+msgstr "Δεν μπορείτε να προσθέσετε αυτή την ποσότητα στο καλάθι &mdash; Υπάρχουν %s διαθέσιμα και έχετε στο καλάθι σας ήδη %s."
 
 #: includes/class-wc-checkout.php:64 includes/class-wc-checkout.php:73
 #: includes/class-wc-emails.php:67 includes/class-wc-emails.php:76
@@ -4709,7 +4710,7 @@ msgstr "Μη έγκυρη email διεύθυνση."
 #: includes/class-wc-download-handler.php:137
 #: includes/class-wc-download-handler.php:280
 msgid "Go to homepage"
-msgstr ""
+msgstr "Πηγαίνετε στην αρχική σελίδα."
 
 #: includes/class-wc-download-handler.php:61
 msgid "Invalid download."
@@ -4832,7 +4833,7 @@ msgstr ""
 
 #: includes/class-wc-form-handler.php:334
 msgid "Payment method added."
-msgstr ""
+msgstr "Προστέθηκε μέθοδος πληρωμής."
 
 #: includes/class-wc-form-handler.php:367
 #: includes/class-wc-form-handler.php:420
@@ -4859,7 +4860,7 @@ msgstr "Η παραγγελίας σας ακυρώθηκε."
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
-msgstr ""
+msgstr "Η παραγγελία σας δεν μπορεί πλέον να ακυρωθεί. Παρακαλώ επικοινωνήστε μαζί μας αν χρειάζεστε βοήθεια."
 
 #: includes/class-wc-form-handler.php:557
 #: includes/class-wc-form-handler.php:617
@@ -5872,7 +5873,7 @@ msgstr "Πιστωτική κάρτα"
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:151
 msgid "Pay securely with your credit card."
-msgstr ""
+msgstr "Πληρώστε με ασφάλεια χρησιμοποιώντας την πιστωτική σας κάρτα."
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:152
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:141
@@ -6304,7 +6305,7 @@ msgstr ""
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:139
 msgid "Costs Added..."
-msgstr ""
+msgstr "Τα κόστη προστέθηκαν..."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:143
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:96
@@ -6453,11 +6454,11 @@ msgstr "Χώρες"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:92
 msgid "Cost Added..."
-msgstr ""
+msgstr "Το κόστος προστέθηκε..."
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:105
 msgid "Cost excluding tax. Enter an amount, e.g. 2.50. Default is 0"
-msgstr ""
+msgstr "Κόστος που δεν περιλαμβάνει φόρο. Εισάγετε ένα ποσό, π.χ. 2.50. Η προεπιλογή είναι 0"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:112
 msgid ""
@@ -6638,7 +6639,7 @@ msgstr "Μη έγκυρο κλειδί"
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:368
 msgid "Add a new payment method."
-msgstr ""
+msgstr "Προσθήκη νέας μεθόδου πληρωμής."
 
 #: includes/shortcodes/class-wc-shortcode-order-tracking.php:49
 msgid "Please enter a valid order ID"
@@ -7192,11 +7193,11 @@ msgstr "Παραγγελία"
 
 #: includes/widgets/class-wc-widget-products.php:64
 msgid "ASC"
-msgstr ""
+msgstr "ΑΥΞ"
 
 #: includes/widgets/class-wc-widget-products.php:65
 msgid "DESC"
-msgstr ""
+msgstr "ΦΘΗΝ"
 
 #: includes/widgets/class-wc-widget-products.php:71
 msgid "Hide free products"
@@ -7237,7 +7238,7 @@ msgstr ""
 
 #: includes/widgets/class-wc-widget-recently-viewed.php:27
 msgid "Recently Viewed Products"
-msgstr ""
+msgstr "Προϊόντα που είδατε πρόσφατα"
 
 #: includes/widgets/class-wc-widget-top-rated-products.php:23
 msgid "Display a list of your top rated products on your site."
@@ -7660,7 +7661,7 @@ msgstr "Διεύθυνση αποστολής"
 #: templates/emails/email-order-items.php:42
 #: templates/emails/plain/email-order-items.php:43
 msgid "Download %d"
-msgstr ""
+msgstr "Μεταφόρτωση %d"
 
 #: templates/emails/email-order-items.php:44
 #: templates/emails/plain/email-order-items.php:45
@@ -7758,7 +7759,7 @@ msgstr "Ποσότητα"
 
 #: templates/loop/no-products-found.php:14
 msgid "No products were found matching your selection."
-msgstr ""
+msgstr "Δε βρέθηκαν προϊόντα που να ταιριάζουν στις επιλογές σας."
 
 #: templates/loop/orderby.php:21
 msgid "Default sorting"
