@@ -580,10 +580,7 @@ class WC_Cart {
 		 */
 		public function get_cart_url() {
 			$cart_page_id = wc_get_page_id( 'cart' );
-			if ( $cart_page_id )
-				return apply_filters( 'woocommerce_get_cart_url', get_permalink( $cart_page_id ) );
-
-			return '';
+			return apply_filters( 'woocommerce_get_cart_url', $cart_page_id ? get_permalink( $cart_page_id ) : '' );
 		}
 
 		/**
@@ -611,8 +608,7 @@ class WC_Cart {
 		 */
 		public function get_remove_url( $cart_item_key ) {
 			$cart_page_id = wc_get_page_id('cart');
-			if ( $cart_page_id )
-				return apply_filters( 'woocommerce_get_remove_url', wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, get_permalink( $cart_page_id ) ), 'woocommerce-cart' ) );
+			return apply_filters( 'woocommerce_get_remove_url', $cart_page_id ? wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, get_permalink( $cart_page_id ) ), 'woocommerce-cart' ) : '' );
 		}
 
 		/**
