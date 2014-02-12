@@ -33,26 +33,29 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 
 	// Support ordering by parent
 	if ( ! empty( $args['orderby'] ) && $args['orderby'] == 'parent' ) {
-		$fields         = isset( $args['fields'] ) ? $args['fields'] : 'all';
-		$orderby_parent = true;
+		$fields = isset( $args['fields'] ) ? $args['fields'] : 'all';
 
+		// Unset for wp_get_post_terms
 		unset( $args['orderby'] );
 		unset( $args['fields'] );
-	}
 
-	$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
+		$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
 
-	if ( ! empty( $orderby_parent ) ) {
 		usort( $terms, '_wc_get_product_terms_parent_usort_callback' );
 
 		switch ( $fields ) {
 			case 'names' :
 				$terms = wp_list_pluck( $terms, 'name' );
+				break;
 			case 'ids' :
 				$terms = wp_list_pluck( $terms, 'term_id' );
+				break;
 			case 'slugs' :
 				$terms = wp_list_pluck( $terms, 'slug' );
+				break;
 		}
+	} else {
+		$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
 	}
 
 	return $terms;
