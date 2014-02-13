@@ -3162,6 +3162,31 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 		width: 49.5%;
 		float: right;
 	}
+	.column-wc_actions {
+		a.edit,
+		a.view {
+			.ir;
+			padding:0 !important;
+			height: 2em !important;
+			width:2em;
+			&:after {
+				.icon;
+				line-height: 1.85;
+			}
+		}
+
+		a.edit {
+			&:after {
+				content: "\e01c";
+			}
+		}
+
+		a.view {
+			&:after {
+				content: "\e010";
+			}
+		}
+	}
 }
 
 .woocommerce-wide-reports-wrap {
