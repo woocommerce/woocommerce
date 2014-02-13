@@ -689,33 +689,45 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 	 * @return int
 	 */
 	public function bulk_and_quick_edit_save_post( $post_id, $post ) {
+		// If this is an autosave, our form has not been submitted, so we don't want to do anything.
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return $post_id;
+		}
 
-		// Don't save revisions, autosaves
-		if ( is_int( wp_is_post_revision( $post_id ) ) || is_int( wp_is_post_autosave( $post_id ) ) || defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
+		// Don't save revisions and autosaves
+		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
 			return $post_id;
+		}
 
-		// Check post type
-		if ( $post->post_type != 'product' )
+		// Check post type is product
+		if ( $post->post_type != 'product' ) {
 			return $post_id;
-
-		// Check nonces
-		if ( ! isset( $_REQUEST['woocommerce_quick_edit_nonce'] ) && ! isset( $_REQUEST['woocommerce_bulk_edit_nonce'] ) )
-			return $post_id;
-		if ( isset( $_REQUEST['woocommerce_quick_edit_nonce'] ) && ! wp_verify_nonce( $_REQUEST['woocommerce_quick_edit_nonce'], 'woocommerce_quick_edit_nonce' ) )
-			return $post_id;
-		if ( isset( $_REQUEST['woocommerce_bulk_edit_nonce'] ) && ! wp_verify_nonce( $_REQUEST['woocommerce_bulk_edit_nonce'], 'woocommerce_bulk_edit_nonce' ) )
-			return $post_id;
+		}
 
 		// Check user permission
-		if ( ! current_user_can( 'edit_post', $post_id ) )
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
 			return $post_id;
+		}
 
-		$product           = get_product( $post );
+		// Check nonces
+		if ( ! isset( $_REQUEST['woocommerce_quick_edit_nonce'] ) && ! isset( $_REQUEST['woocommerce_bulk_edit_nonce'] ) ) {
+			return $post_id;
+		}
+		if ( isset( $_REQUEST['woocommerce_quick_edit_nonce'] ) && ! wp_verify_nonce( $_REQUEST['woocommerce_quick_edit_nonce'], 'woocommerce_quick_edit_nonce' ) ) {
+			return $post_id;
+		}
+		if ( isset( $_REQUEST['woocommerce_bulk_edit_nonce'] ) && ! wp_verify_nonce( $_REQUEST['woocommerce_bulk_edit_nonce'], 'woocommerce_bulk_edit_nonce' ) ) {
+			return $post_id;
+		}
 
-		if ( ! empty( $_REQUEST['woocommerce_quick_edit'] ) )
+		// Get the product and save
+		$product = get_product( $post );
+
+		if ( ! empty( $_REQUEST['woocommerce_quick_edit'] ) ) {
 			$this->quick_edit_save( $post_id, $product );
-		else
+		} else {
 			$this->bulk_edit_save( $post_id, $product );
+		}
 
 		// Clear transient
 		wc_delete_product_transients( $post_id );
