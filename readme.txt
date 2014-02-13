@@ -129,6 +129,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.1.2 =
 * Fix - Removed nl2br function from plain text email-order-items email template
 * Fix - Made static string translatable in email-order-items email template
+* Fix - Added missing third parameter to _doing_it_wrong call
+* Fix - Sidebar in reports screen does now fit big numbers (long strings)
+* Fix - Report stock icon properly set up
 
 = 2.1.1 - 12/02/2014 =
 * Feature - Show notice if template files are out of date for themes including WooCommerce template files
